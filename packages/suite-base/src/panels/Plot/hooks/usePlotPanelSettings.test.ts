@@ -20,6 +20,8 @@ import usePlotPanelSettings, {
   handleAddSeriesAction,
   HandleDeleteSeriesAction,
   handleDeleteSeriesAction,
+  HandleMoveSeriesAction,
+  handleMoveSeriesAction,
   HandleUpdateAction,
   handleUpdateAction,
 } from "./usePlotPanelSettings";
@@ -147,6 +149,68 @@ describe("handleDeleteSeriesAction", () => {
   });
 });
 
+describe("handleMoveSeriesAction", () => {
+  it("should move series up", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 1,
+      direction: "up",
+    };
+
+    handleMoveSeriesAction(input);
+
+    expect(input.draft.paths[0]).toEqual(paths[1]);
+    expect(input.draft.paths[1]).toEqual(paths[0]);
+    expect(input.draft.paths[2]).toEqual(paths[2]);
+  });
+
+  it("should move series down", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 1,
+      direction: "down",
+    };
+
+    handleMoveSeriesAction(input);
+
+    expect(input.draft.paths[0]).toEqual(paths[0]);
+    expect(input.draft.paths[1]).toEqual(paths[2]);
+    expect(input.draft.paths[2]).toEqual(paths[1]);
+  });
+
+  it("should not move series up when at first position", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 0,
+      direction: "up",
+    };
+
+    handleMoveSeriesAction(input);
+
+    expect(input.draft.paths).toEqual(paths);
+  });
+
+  it("should not move series down when at last position", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 2,
+      direction: "down",
+    };
+
+    handleMoveSeriesAction(input);
+
+    expect(input.draft.paths).toEqual(paths);
+  });
+});
+
 describe("usePlotPanelSettings", () => {
   const saveConfig = jest.fn();
   const updatePanelSettingsTree = jest.fn();
@@ -169,6 +233,14 @@ describe("usePlotPanelSettings", () => {
     {
       action: "perform-node-action",
       payload: { path: [], id: "delete-series" },
+    } as SettingsTreeActionPerformNode,
+    {
+      action: "perform-node-action",
+      payload: { path: ["paths", "1"], id: "move-series-up" },
+    } as SettingsTreeActionPerformNode,
+    {
+      action: "perform-node-action",
+      payload: { path: ["paths", "1"], id: "move-series-down" },
     } as SettingsTreeActionPerformNode,
   ])("should call saveConfig to update settings tree", (action: SettingsTreeAction) => {
     const config = PlotBuilder.config();

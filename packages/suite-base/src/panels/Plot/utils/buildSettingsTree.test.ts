@@ -49,8 +49,10 @@ describe("buildSettingsTree", () => {
     const children0: SettingsTreeNode | undefined = tree.paths?.children!["0"];
     expect(children0?.visible).toBe(config.paths[0]?.enabled);
     expect(children0?.label).toBe(config.paths[0]?.label);
-    expect(children0?.actions?.length).toBe(1);
-    expect((children0?.actions![0] as SettingsTreeNodeActionItem).id).toEqual("delete-series");
+    expect(children0?.actions?.length).toBe(3);
+    expect((children0?.actions![0] as SettingsTreeNodeActionItem).id).toEqual("move-series-up");
+    expect((children0?.actions![1] as SettingsTreeNodeActionItem).id).toEqual("move-series-down");
+    expect((children0?.actions![2] as SettingsTreeNodeActionItem).id).toEqual("delete-series");
     expect(children0?.fields!["value"]).toBeDefined();
     expect(children0?.fields!["label"]).toBeDefined();
     expect(children0?.fields!["color"]).toBeDefined();

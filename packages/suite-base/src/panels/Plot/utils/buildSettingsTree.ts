@@ -19,6 +19,7 @@ type MakeSeriesNode = {
   path: PlotPath;
   index: number;
   canDelete: boolean;
+  canReorder: boolean;
   t: TFunction<"plot">;
 };
 
@@ -28,19 +29,40 @@ type MakeRootSeriesNode = {
 };
 
 const makeSeriesNode = memoizeWeak(
-  ({ canDelete, index, path, t }: MakeSeriesNode): SettingsTreeNode => {
+  ({ canDelete, canReorder, index, path, t }: MakeSeriesNode): SettingsTreeNode => {
+    const actions = [];
+
+    if (canReorder) {
+      actions.push(
+        {
+          type: "action" as const,
+          id: "move-series-up",
+          label: t("moveSeriesUp"),
+          display: "inline" as const,
+          icon: "MoveUp" as const,
+        },
+        {
+          type: "action" as const,
+          id: "move-series-down",
+          label: t("moveSeriesDown"),
+          display: "inline" as const,
+          icon: "MoveDown" as const,
+        },
+      );
+    }
+
+    if (canDelete) {
+      actions.push({
+        type: "action" as const,
+        id: "delete-series",
+        label: t("deleteSeries"),
+        display: "inline" as const,
+        icon: "Clear" as const,
+      });
+    }
+
     return {
-      actions: canDelete
-        ? [
-            {
-              type: "action",
-              id: "delete-series",
-              label: t("deleteSeries"),
-              display: "inline",
-              icon: "Clear",
-            },
-          ]
-        : [],
+      actions,
       label: plotPathDisplayName(path, index),
       visible: path.enabled,
       fields: {
@@ -91,10 +113,21 @@ const makeSeriesNode = memoizeWeak(
 const makeRootSeriesNode = memoizeWeak(({ paths, t }: MakeRootSeriesNode): SettingsTreeNode => {
   const children = Object.fromEntries(
     paths.length === 0
-      ? [["0", makeSeriesNode({ canDelete: false, path: DEFAULT_PLOT_PATH, index: 0, t })]]
+      ? [
+          [
+            "0",
+            makeSeriesNode({
+              canDelete: false,
+              canReorder: false,
+              path: DEFAULT_PLOT_PATH,
+              index: 0,
+              t,
+            }),
+          ],
+        ]
       : paths.map((path, index) => [
           `${index}`,
-          makeSeriesNode({ canDelete: true, index, path, t }),
+          makeSeriesNode({ canDelete: true, canReorder: true, index, path, t }),
         ]),
   );
   return {

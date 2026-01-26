@@ -610,6 +610,7 @@ export const SETTINGS_ICONS = [
   "Collapse",
   "Cube",
   "Delete",
+  "DragHandle",
   "Expand",
   "Flag",
   "Folder",

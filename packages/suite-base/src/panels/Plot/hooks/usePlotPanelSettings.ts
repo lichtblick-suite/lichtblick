@@ -71,6 +71,23 @@ export function handleDeleteSeriesAction({ draft, index }: HandleDeleteSeriesAct
   draft.paths.splice(index, 1);
 }
 
+export type HandleMoveSeriesAction = HandleAction & {
+  index: number;
+  direction: "up" | "down";
+};
+
+export function handleMoveSeriesAction({ draft, index, direction }: HandleMoveSeriesAction): void {
+  if (direction === "up" && index > 0) {
+    const temp = draft.paths[index];
+    draft.paths[index] = draft.paths[index - 1]!;
+    draft.paths[index - 1] = temp!;
+  } else if (direction === "down" && index < draft.paths.length - 1) {
+    const temp = draft.paths[index];
+    draft.paths[index] = draft.paths[index + 1]!;
+    draft.paths[index + 1] = temp!;
+  }
+}
+
 export default function usePlotPanelSettings(
   config: PlotConfig,
   saveConfig: SaveConfig<PlotConfig>,
@@ -98,6 +115,18 @@ export default function usePlotPanelSettings(
         saveConfig(
           produce<PlotConfig>((draft) => {
             handleDeleteSeriesAction({ draft, index: Number(payload.path[1]) });
+          }),
+        );
+      } else if (payload.id === "move-series-up") {
+        saveConfig(
+          produce<PlotConfig>((draft) => {
+            handleMoveSeriesAction({ draft, index: Number(payload.path[1]), direction: "up" });
+          }),
+        );
+      } else if (payload.id === "move-series-down") {
+        saveConfig(
+          produce<PlotConfig>((draft) => {
+            handleMoveSeriesAction({ draft, index: Number(payload.path[1]), direction: "down" });
           }),
         );
       }
