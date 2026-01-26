@@ -88,6 +88,29 @@ export function handleMoveSeriesAction({ draft, index, direction }: HandleMoveSe
   }
 }
 
+export type HandleReorderSeriesAction = HandleAction & {
+  sourceIndex: number;
+  targetIndex: number;
+};
+
+export function handleReorderSeriesAction({
+  draft,
+  sourceIndex,
+  targetIndex,
+}: HandleReorderSeriesAction): void {
+  if (
+    sourceIndex === targetIndex ||
+    sourceIndex < 0 ||
+    targetIndex < 0 ||
+    sourceIndex >= draft.paths.length ||
+    targetIndex >= draft.paths.length
+  ) {
+    return;
+  }
+  const [removed] = draft.paths.splice(sourceIndex, 1);
+  draft.paths.splice(targetIndex, 0, removed!);
+}
+
 export default function usePlotPanelSettings(
   config: PlotConfig,
   saveConfig: SaveConfig<PlotConfig>,
@@ -103,6 +126,14 @@ export default function usePlotPanelSettings(
         saveConfig(
           produce((draft: PlotConfig) => {
             handleUpdateAction({ draft, path, value });
+          }),
+        );
+      } else if (action === "reorder-node") {
+        const sourceIndex = Number(payload.sourcePath[1]);
+        const targetIndex = Number(payload.targetPath[1]);
+        saveConfig(
+          produce<PlotConfig>((draft) => {
+            handleReorderSeriesAction({ draft, sourceIndex, targetIndex });
           }),
         );
       } else if (payload.id === "add-series") {

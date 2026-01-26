@@ -937,6 +937,11 @@ export type SettingsTreeNode = {
    * Filter Children by visibility status
    */
   enableVisibilityFilter?: boolean;
+
+  /**
+   * True if the node can be reordered via drag and drop.
+   */
+  reorderable?: boolean;
 };
 
 /**
@@ -959,11 +964,22 @@ export type SettingsTreeActionPerformNode = {
   payload: { id: string; path: readonly string[] };
 };
 
+export type SettingsTreeActionReorder = {
+  action: "reorder-node";
+  payload: {
+    sourcePath: readonly string[];
+    targetPath: readonly string[];
+  };
+};
+
 /**
  * Represents actions that can be dispatched to source of the SettingsTree to implement
  * edits and updates.
  */
-export type SettingsTreeAction = SettingsTreeActionUpdate | SettingsTreeActionPerformNode;
+export type SettingsTreeAction =
+  | SettingsTreeActionUpdate
+  | SettingsTreeActionPerformNode
+  | SettingsTreeActionReorder;
 
 export type SettingsTreeNodes = Record<string, undefined | SettingsTreeNode>;
 

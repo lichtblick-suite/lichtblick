@@ -15,6 +15,7 @@ import { TFunction } from "i18next";
 import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef } from "react";
+import { useDrag, useDrop, DropTargetMonitor, ConnectableElement } from "react-dnd";
 import { useTranslation } from "react-i18next";
 import { useImmer } from "use-immer";
 
@@ -53,6 +54,12 @@ function ExpansionArrow({ expanded }: Readonly<{ expanded: boolean }>): React.JS
 }
 
 const makeStablePath = memoizeWeak((path: readonly string[], key: string) => [...path, key]);
+
+const SETTINGS_NODE_DRAG_TYPE = "SETTINGS_NODE";
+
+type DragItem = {
+  path: readonly string[];
+};
 
 const SelectVisibilityFilterOptions: (t: TFunction<"settingsEditor">) => {
   label: string;
@@ -101,6 +108,54 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
   const allowVisibilityToggle = props.settings?.visible != undefined;
   const visible = props.settings?.visible !== false;
   const selectVisibilityFilterEnabled = props.settings?.enableVisibilityFilter === true;
+  const isReorderable = settings.reorderable === true;
+
+  // Set up drag and drop for reorderable nodes
+  const [{ isDragging }, connectDragRef] = useDrag<DragItem, void, { isDragging: boolean }>(
+    () => ({
+      type: SETTINGS_NODE_DRAG_TYPE,
+      item: { path: props.path },
+      canDrag: () => isReorderable,
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    }),
+    [props.path, isReorderable],
+  );
+
+  const [{ isOver, canDrop }, connectDropRef] = useDrop<
+    DragItem,
+    void,
+    { isOver: boolean; canDrop: boolean }
+  >(
+    () => ({
+      accept: SETTINGS_NODE_DRAG_TYPE,
+      canDrop: (item: DragItem) => {
+        // Can only drop if both source and target are reorderable and are siblings
+        return (
+          isReorderable &&
+          item.path.length === props.path.length &&
+          item.path.length >= 2 &&
+          item.path[0] === props.path[0] &&
+          !_.isEqual(item.path, props.path)
+        );
+      },
+      drop: (item: DragItem, _monitor) => {
+        actionHandler({
+          action: "reorder-node",
+          payload: {
+            sourcePath: item.path,
+            targetPath: props.path,
+          },
+        });
+      },
+      collect: (monitor: DropTargetMonitor<DragItem, void>) => ({
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop(),
+      }),
+    }),
+    [props.path, isReorderable, actionHandler],
+  );
 
   const selectVisibilityFilter = (action: SettingsTreeAction) => {
     if (action.action === "update" && action.payload.input === "select") {
@@ -294,8 +349,20 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
         className={cx(classes.nodeHeader, {
           [classes.focusedNode]: isFocused,
           [classes.nodeHeaderVisible]: visible,
+          [classes.nodeHeaderDragging]: isDragging,
+          [classes.nodeHeaderDropTarget]: isOver && canDrop,
         })}
-        ref={rootRef}
+        ref={(el: ConnectableElement) => {
+          rootRef.current = el as HTMLDivElement | typeof ReactNull;
+          if (isReorderable) {
+            connectDragRef(el);
+            connectDropRef(el);
+          }
+        }}
+        style={{
+          opacity: isDragging ? 0.5 : 1,
+          cursor: isReorderable ? "grab" : undefined,
+        }}
       >
         <div
           className={cx(classes.nodeHeaderToggle, {

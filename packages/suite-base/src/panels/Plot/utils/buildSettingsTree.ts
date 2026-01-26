@@ -32,25 +32,6 @@ const makeSeriesNode = memoizeWeak(
   ({ canDelete, canReorder, index, path, t }: MakeSeriesNode): SettingsTreeNode => {
     const actions = [];
 
-    if (canReorder) {
-      actions.push(
-        {
-          type: "action" as const,
-          id: "move-series-up",
-          label: t("moveSeriesUp"),
-          display: "inline" as const,
-          icon: "MoveUp" as const,
-        },
-        {
-          type: "action" as const,
-          id: "move-series-down",
-          label: t("moveSeriesDown"),
-          display: "inline" as const,
-          icon: "MoveDown" as const,
-        },
-      );
-    }
-
     if (canDelete) {
       actions.push({
         type: "action" as const,
@@ -65,6 +46,8 @@ const makeSeriesNode = memoizeWeak(
       actions,
       label: plotPathDisplayName(path, index),
       visible: path.enabled,
+      reorderable: canReorder,
+      icon: canReorder ? ("DragHandle" as const) : undefined,
       fields: {
         value: {
           input: "messagepath",

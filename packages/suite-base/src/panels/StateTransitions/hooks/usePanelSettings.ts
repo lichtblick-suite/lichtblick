@@ -51,7 +51,12 @@ export function setSeriesAction({ label, icon, id }: SeriesAction): SettingsTree
 export const makeSeriesNode = memoizeWeak(
   (
     index: number,
-    { path, canDelete, isArray }: PathState & { canDelete: boolean },
+    {
+      path,
+      canDelete,
+      canReorder,
+      isArray,
+    }: PathState & { canDelete: boolean; canReorder: boolean },
     t: TFunction<"stateTransitions">,
   ): SettingsTreeNode => {
     const action = setSeriesAction({
@@ -62,6 +67,8 @@ export const makeSeriesNode = memoizeWeak(
     return {
       actions: canDelete ? [action] : [],
       label: stateTransitionPathDisplayName(path, index),
+      reorderable: canReorder,
+      icon: canReorder ? ("DragHandle" as const) : undefined,
       fields: {
         value: {
           ...(isArray ? { error: t("pathErrorMessage") } : {}),
@@ -102,6 +109,7 @@ export const makeRootSeriesNode = memoizeWeak(
                   path: DEFAULT_STATE_TRANSITION_PATH,
                   isArray: false,
                   canDelete: false,
+                  canReorder: false,
                 },
                 t,
               ),
@@ -115,6 +123,7 @@ export const makeRootSeriesNode = memoizeWeak(
                 path,
                 isArray,
                 canDelete: true,
+                canReorder: paths.length > 1,
               },
               t,
             ),
@@ -133,6 +142,24 @@ export const makeRootSeriesNode = memoizeWeak(
     };
   },
 );
+
+function handleReorderSeriesAction(
+  draft: StateTransitionConfig,
+  sourceIndex: number,
+  targetIndex: number,
+): void {
+  if (
+    sourceIndex === targetIndex ||
+    sourceIndex < 0 ||
+    targetIndex < 0 ||
+    sourceIndex >= draft.paths.length ||
+    targetIndex >= draft.paths.length
+  ) {
+    return;
+  }
+  const [removed] = draft.paths.splice(sourceIndex, 1);
+  draft.paths.splice(targetIndex, 0, removed!);
+}
 
 export function buildSettingsTree(
   { isSynced, xAxisMaxValue, xAxisMinValue, xAxisRange, showPoints }: StateTransitionConfig,
@@ -190,7 +217,15 @@ export function usePanelSettings(
 
   const actionHandler = useCallback(
     ({ action, payload }: SettingsTreeAction) => {
-      if (action === "update") {
+      if (action === "reorder-node") {
+        const sourceIndex = Number(payload.sourcePath[1]);
+        const targetIndex = Number(payload.targetPath[1]);
+        saveConfig(
+          produce<StateTransitionConfig>((draft) => {
+            handleReorderSeriesAction(draft, sourceIndex, targetIndex);
+          }),
+        );
+      } else if (action === "update") {
         const { input, path, value } = payload;
 
         if (input === "boolean" && _.isEqual(path, ["general", "isSynced"])) {

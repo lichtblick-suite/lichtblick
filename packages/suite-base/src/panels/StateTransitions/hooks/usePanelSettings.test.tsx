@@ -68,14 +68,17 @@ describe("setSeriesAction", () => {
 });
 
 describe("makeSeriesNode", () => {
-  const setup = (propsOverride: Partial<PathState & { canDelete: boolean }> = {}) => {
-    const seriesNode: PathState & { canDelete: boolean } = {
+  const setup = (
+    propsOverride: Partial<PathState & { canDelete: boolean; canReorder: boolean }> = {},
+  ) => {
+    const seriesNode: PathState & { canDelete: boolean; canReorder: boolean } = {
       path: {
         value: BasicBuilder.string(),
         label: BasicBuilder.string(),
         timestampMethod: BasicBuilder.sample(["receiveTime", "headerStamp"]),
       },
       canDelete: true,
+      canReorder: true,
       isArray: false,
       ...propsOverride,
     };
@@ -89,7 +92,7 @@ describe("makeSeriesNode", () => {
   it("should return the node structure with actions when canDelete is true", () => {
     const { seriesNode, index } = setup();
 
-    const { actions, label, fields } = makeSeriesNode(
+    const { actions, label, fields, reorderable, icon } = makeSeriesNode(
       index,
       seriesNode,
       t as unknown as TFunction<"stateTransitions">,
@@ -105,6 +108,8 @@ describe("makeSeriesNode", () => {
       },
     ]);
     expect(label).toEqual(seriesNode.path.label);
+    expect(reorderable).toBe(true);
+    expect(icon).toBe("DragHandle");
     expect(fields!.value).toEqual({
       input: "messagepath",
       label: "labels.messagePath",
@@ -130,13 +135,28 @@ describe("makeSeriesNode", () => {
   it("should return the node structure with actions when canDelete is false", () => {
     const { seriesNode, index } = setup({ canDelete: false });
 
-    const { actions } = makeSeriesNode(
+    const { actions, reorderable, icon } = makeSeriesNode(
       index,
       seriesNode,
       t as unknown as TFunction<"stateTransitions">,
     );
 
     expect(actions).toEqual([]);
+    expect(reorderable).toBe(true);
+    expect(icon).toBe("DragHandle");
+  });
+
+  it("should return the node structure without reorderable when canReorder is false", () => {
+    const { seriesNode, index } = setup({ canReorder: false });
+
+    const { reorderable, icon } = makeSeriesNode(
+      index,
+      seriesNode,
+      t as unknown as TFunction<"stateTransitions">,
+    );
+
+    expect(reorderable).toBe(false);
+    expect(icon).toBeUndefined();
   });
 
   it("should return error parameter in value field when isArray is true", () => {
@@ -190,6 +210,12 @@ describe("makeRootSeriesNode", () => {
     expect(children!["0"]?.actions).toHaveLength(1);
     expect(children!["1"]?.actions).toHaveLength(1);
     expect(children!["2"]?.actions).toHaveLength(1);
+    expect(children!["0"]?.reorderable).toBe(true);
+    expect(children!["1"]?.reorderable).toBe(true);
+    expect(children!["2"]?.reorderable).toBe(true);
+    expect(children!["0"]?.icon).toBe("DragHandle");
+    expect(children!["1"]?.icon).toBe("DragHandle");
+    expect(children!["2"]?.icon).toBe("DragHandle");
   });
 
   it("should return node structure with actions when paths are not provided", () => {
@@ -201,6 +227,8 @@ describe("makeRootSeriesNode", () => {
     expect(children).toHaveProperty("0");
     expect(children).not.toHaveProperty("1");
     expect(children!["0"]?.actions).toEqual([]);
+    expect(children!["0"]?.reorderable).toBe(false);
+    expect(children!["0"]?.icon).toBeUndefined();
   });
 });
 
