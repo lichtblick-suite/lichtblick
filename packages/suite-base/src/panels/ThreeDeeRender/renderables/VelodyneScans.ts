@@ -207,8 +207,11 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
   }
 
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
+    if (action.action !== "update") {
+      return;
+    }
     const path = action.payload.path;
-    if (action.action !== "update" || path.length !== 3) {
+    if (path.length !== 3) {
       return;
     }
 

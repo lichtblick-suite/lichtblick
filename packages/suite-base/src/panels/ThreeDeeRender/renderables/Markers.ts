@@ -131,8 +131,11 @@ export class Markers extends SceneExtension<TopicMarkers> {
   }
 
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
+    if (action.action !== "update") {
+      return;
+    }
     const path = action.payload.path;
-    if (action.action !== "update" || path.length !== 3) {
+    if (path.length !== 3) {
       return;
     }
 
@@ -151,8 +154,11 @@ export class Markers extends SceneExtension<TopicMarkers> {
   };
 
   #handleSettingsActionNamespace = (action: SettingsTreeAction): void => {
+    if (action.action !== "update") {
+      return;
+    }
     const path = action.payload.path;
-    if (action.action !== "update" || path.length !== 4) {
+    if (path.length !== 4) {
       return;
     }
 

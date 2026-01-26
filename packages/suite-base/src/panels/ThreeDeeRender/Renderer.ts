@@ -1332,8 +1332,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   };
 
   #handleTopicsAction = (action: SettingsTreeAction): void => {
+    if (action.action !== "perform-node-action") {
+      return;
+    }
     const path = action.payload.path;
-    if (action.action !== "perform-node-action" || path.length !== 1 || path[0] !== "topics") {
+    if (path.length !== 1 || path[0] !== "topics") {
       return;
     }
     log.debug(`handleTopicsAction(${action.payload.id})`);
@@ -1362,8 +1365,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   };
 
   #handleCustomLayersAction = (action: SettingsTreeAction): void => {
+    if (action.action !== "perform-node-action") {
+      return;
+    }
     const path = action.payload.path;
-    if (action.action !== "perform-node-action" || path.length !== 1 || path[0] !== "layers") {
+    if (path.length !== 1 || path[0] !== "layers") {
       return;
     }
     log.debug(`handleCustomLayersAction(${action.payload.id})`);

@@ -137,6 +137,9 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
           saveConfig(produce<Config>((draft) => _.set(draft, path.slice(1), value)));
         }
       } /* perform-node-action */ else {
+        if (action.action !== "perform-node-action") {
+          return;
+        }
         if (!["show-all", "hide-all"].includes(action.payload.id)) {
           return;
         }

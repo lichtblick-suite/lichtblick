@@ -519,6 +519,9 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   };
 
   #handleLayerSettingsAction = (action: SettingsTreeAction): void => {
+    if (action.action === "reorder-node") {
+      return;
+    }
     const path = action.payload.path;
 
     // Handle menu actions (duplicate / delete)
