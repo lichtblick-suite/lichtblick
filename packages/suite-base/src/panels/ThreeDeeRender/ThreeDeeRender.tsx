@@ -12,7 +12,7 @@ import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@lichtblick/log";
-import { Time, toNanoSec } from "@lichtblick/rostime";
+import { Time, toNanoSec, compare } from "@lichtblick/rostime";
 import {
   Immutable,
   LayoutActions,
@@ -365,6 +365,76 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [interfaceMode, context, config.imageMode.imageTopic]);
 
+  // Build a list of topics to subscribe to
+  const [topicsToSubscribe, setTopicsToSubscribe] = useState<Subscription[] | undefined>(undefined);
+
+  const prevFilteredTopics = useRef<Subscription[]>([]);
+
+  const transformTopicsToPreload = useMemo(() => {
+    if (!topicsToSubscribe) {
+      return [];
+    }
+
+    const filteredTopics = topicsToSubscribe.filter((sub) => sub.preload === true);
+
+    // Compare current filtered result with previous filtered result
+    if (_.isEqual(prevFilteredTopics.current, filteredTopics)) {
+      return prevFilteredTopics.current; // Return same reference
+    }
+
+    // Store and return new reference
+    prevFilteredTopics.current = filteredTopics;
+    return filteredTopics;
+  }, [topicsToSubscribe]);
+
+  // Subscribe to eligible and enabled topics for range messages
+  useLayoutEffect(() => {
+    // console.log("ThreeDeeRender - transform preloading effect triggered", topicsToSubscribe);
+    const transformTopics = transformTopicsToPreload;
+    // Exit if preloading is disabled
+    if (!(config.scene.transforms?.enablePreloading ?? false) || transformTopics.length === 0) {
+      setAllFrames([]);
+      return;
+    }
+
+    const messageBuffer: MessageEvent[] = [];
+    const unsubscriptions: (() => void)[] = [];
+
+    const subscriptionPromises: Promise<void>[] = [];
+
+    for (const topic of transformTopics) {
+      const promise = new Promise<void>((resolve) => {
+        const unsubscribe = context.unstable_subscribeMessageRange({
+          topic: topic.topic,
+          convertTo: topic.convertTo,
+          onNewRangeIterator: async (batchIterator) => {
+            for await (const batch of batchIterator) {
+              if (batch.length > 0) {
+                messageBuffer.push(...batch);
+              }
+            }
+            resolve();
+          },
+        });
+        unsubscriptions.push(unsubscribe);
+      });
+      subscriptionPromises.push(promise);
+    }
+
+    // Wait for all to complete, then update once
+    void Promise.all(subscriptionPromises).then(() => {
+      messageBuffer.sort((a, b) => compare(a.receiveTime, b.receiveTime));
+      setAllFrames([...messageBuffer]);
+    });
+
+    return () => {
+      for (const unsubscribe of unsubscriptions) {
+        unsubscribe();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.scene.transforms?.enablePreloading, transformTopicsToPreload]);
+
   // Establish a connection to the message pipeline with context.watch and context.onRender
   useLayoutEffect(() => {
     context.onRender = (renderState: Immutable<RenderState>, done) => {
@@ -399,12 +469,8 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
       // currentFrame has messages on subscribed topics since the last render call
       setCurrentFrameMessages(renderState.currentFrame);
-
-      // allFrames has messages on preloaded topics across all frames (as they are loaded)
-      setAllFrames(renderState.allFrames);
     };
 
-    context.watch("allFrames");
     context.watch("colorScheme");
     context.watch("currentFrame");
     context.watch("currentTime");
@@ -416,8 +482,6 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     context.subscribeAppSettings([AppSetting.TIMEZONE]);
   }, [context, renderer]);
 
-  // Build a list of topics to subscribe to
-  const [topicsToSubscribe, setTopicsToSubscribe] = useState<Subscription[] | undefined>(undefined);
   useEffect(() => {
     if (!topics) {
       setTopicsToSubscribe(undefined);

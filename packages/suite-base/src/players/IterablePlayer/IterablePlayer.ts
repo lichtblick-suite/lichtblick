@@ -19,7 +19,8 @@ import {
   compare,
   fromMillis,
   fromNanoSec,
-  toRFC3339String,
+  // deprecate blockLoader
+  // toRFC3339String,
   toString,
 } from "@lichtblick/rostime";
 import { Immutable, MessageEvent, Metadata, ParameterValue } from "@lichtblick/suite";
@@ -102,7 +103,8 @@ export type IterablePlayerOptions = {
   isSampleDataSource?: boolean;
 
   // Set to _false_ to disable preloading. (default: true)
-  enablePreload?: boolean;
+  // deprecate blockLoader
+  // enablePreload?: boolean;
 
   // Max. time that messages will be buffered ahead for smoother playback. (default: 10sec)
   readAheadDuration?: Time;
@@ -137,7 +139,8 @@ export class IterablePlayer implements Player {
   #speed: number = 1.0;
   #start?: Time;
   #end?: Time;
-  #enablePreload = true;
+  // deprecate blockLoader
+  // #enablePreload = true;
 
   // next read start time indicates where to start reading for the next tick
   // after a tick read, it is set to 1nsec past the end of the read operation (preparing for the next tick)
@@ -209,7 +212,8 @@ export class IterablePlayer implements Player {
       urlParams,
       source,
       name,
-      enablePreload,
+      // deprecate blockLoader
+      // enablePreload,
       sourceId,
       readAheadDuration = { sec: 10, nsec: 0 },
     } = options;
@@ -232,7 +236,8 @@ export class IterablePlayer implements Player {
     this.#urlParams = urlParams;
     this.#metricsCollector = metricsCollector ?? new NoopMetricsCollector();
     this.#metricsCollector.playerConstructed();
-    this.#enablePreload = enablePreload ?? true;
+    // deprecate blockLoader
+    //this.#enablePreload = enablePreload ?? true;
     this.#sourceId = sourceId;
 
     this.isClosed = new Promise((resolveClose) => {
