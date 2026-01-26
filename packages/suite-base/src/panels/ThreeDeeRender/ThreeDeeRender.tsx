@@ -38,6 +38,7 @@ import { Renderer } from "./Renderer";
 import { RendererContext, useRendererEvent, useRendererProperty } from "./RendererContext";
 import { RendererOverlay } from "./RendererOverlay";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
+import { MAX_TRANSFORM_MESSAGES } from "./constants";
 import {
   PublishRos1Datatypes,
   PublishRos2Datatypes,
@@ -370,6 +371,8 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
   const prevFilteredTopics = useRef<Subscription[]>([]);
 
+  // Only update when the list of topics to preload changes
+  // Reduce amount of calls to useLayoutEffect below
   const transformTopicsToPreload = useMemo(() => {
     if (!topicsToSubscribe) {
       return [];
@@ -377,19 +380,16 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
     const filteredTopics = topicsToSubscribe.filter((sub) => sub.preload === true);
 
-    // Compare current filtered result with previous filtered result
     if (_.isEqual(prevFilteredTopics.current, filteredTopics)) {
-      return prevFilteredTopics.current; // Return same reference
+      return prevFilteredTopics.current;
     }
 
-    // Store and return new reference
     prevFilteredTopics.current = filteredTopics;
     return filteredTopics;
   }, [topicsToSubscribe]);
 
   // Subscribe to eligible and enabled topics for range messages
   useLayoutEffect(() => {
-    // console.log("ThreeDeeRender - transform preloading effect triggered", topicsToSubscribe);
     const transformTopics = transformTopicsToPreload;
     // Exit if preloading is disabled
     if (!(config.scene.transforms?.enablePreloading ?? false) || transformTopics.length === 0) {
@@ -421,10 +421,16 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       subscriptionPromises.push(promise);
     }
 
-    // Wait for all to complete, then update once
+    // Wait for every transform topic to complete since we must sort them before setting state
     void Promise.all(subscriptionPromises).then(() => {
       messageBuffer.sort((a, b) => compare(a.receiveTime, b.receiveTime));
-      setAllFrames([...messageBuffer]);
+
+      const trimmedMessages =
+        messageBuffer.length > MAX_TRANSFORM_MESSAGES
+          ? messageBuffer.slice(-MAX_TRANSFORM_MESSAGES)
+          : messageBuffer;
+
+      setAllFrames([...trimmedMessages]);
     });
 
     return () => {
