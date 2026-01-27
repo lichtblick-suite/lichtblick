@@ -11,18 +11,20 @@ import {
   SettingsTreeActionUpdate,
 } from "@lichtblick/suite";
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
+import {
+  HandleAction,
+  HandleDeleteSeriesAction,
+  HandleUpdateAction,
+} from "@lichtblick/suite-base/panels/Plot/types";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import usePlotPanelSettings, {
-  HandleAction,
   handleAddSeriesAction,
-  HandleDeleteSeriesAction,
   handleDeleteSeriesAction,
   HandleMoveSeriesAction,
   handleMoveSeriesAction,
-  HandleUpdateAction,
   handleUpdateAction,
 } from "./usePlotPanelSettings";
 

@@ -29,8 +29,11 @@ import {
 } from "@lichtblick/suite";
 import { HighlightedText } from "@lichtblick/suite-base/components/HighlightedText";
 import { useStyles } from "@lichtblick/suite-base/components/SettingsTreeEditor/NodeEditor.style";
+import { SETTINGS_NODE_DRAG_TYPE } from "@lichtblick/suite-base/components/SettingsTreeEditor/constants";
 import {
+  DragItem,
   NodeEditorProps,
+  NodeEditorState,
   SelectVisibilityFilterValue,
 } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -54,12 +57,6 @@ function ExpansionArrow({ expanded }: Readonly<{ expanded: boolean }>): React.JS
 }
 
 const makeStablePath = memoizeWeak((path: readonly string[], key: string) => [...path, key]);
-
-const SETTINGS_NODE_DRAG_TYPE = "SETTINGS_NODE";
-
-type DragItem = {
-  path: readonly string[];
-};
 
 const SelectVisibilityFilterOptions: (t: TFunction<"settingsEditor">) => {
   label: string;
@@ -85,16 +82,9 @@ const getSelectVisibilityFilterField = (t: TFunction<"settingsEditor">) =>
     options: SelectVisibilityFilterOptions(t),
   }) as const;
 
-type State = {
-  editing: boolean;
-  focusedPath: undefined | readonly string[];
-  open: boolean;
-  visibilityFilter: SelectVisibilityFilterValue;
-};
-
 function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Element {
   const { actionHandler, defaultOpen = true, filter, focusedPath, settings = {} } = props;
-  const [state, setState] = useImmer<State>({
+  const [state, setState] = useImmer<NodeEditorState>({
     editing: false,
     focusedPath: undefined,
     open: defaultOpen,

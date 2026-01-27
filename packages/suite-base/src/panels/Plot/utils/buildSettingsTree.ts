@@ -7,26 +7,10 @@ import memoizeWeak from "memoize-weak";
 
 import { SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
-import {
-  PlotConfig,
-  PlotPath,
-  plotPathDisplayName,
-} from "@lichtblick/suite-base/panels/Plot/utils/config";
+import { MakeRootSeriesNode, MakeSeriesNode } from "@lichtblick/suite-base/panels/Plot/types";
+import { PlotConfig, plotPathDisplayName } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
 import { lineColors } from "@lichtblick/suite-base/util/plotColors";
-
-type MakeSeriesNode = {
-  path: PlotPath;
-  index: number;
-  canDelete: boolean;
-  canReorder: boolean;
-  t: TFunction<"plot">;
-};
-
-type MakeRootSeriesNode = {
-  paths: PlotPath[];
-  t: TFunction<"plot">;
-};
 
 const makeSeriesNode = memoizeWeak(
   ({ canDelete, canReorder, index, path, t }: MakeSeriesNode): SettingsTreeNode => {
