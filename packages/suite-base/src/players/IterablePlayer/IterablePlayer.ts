@@ -57,7 +57,6 @@ import {
 } from "./IIterableSource";
 
 const log = Log.getLogger(__filename);
-
 // Number of bytes that we aim to keep in the cache.
 // Setting this to higher than 1.5GB caused the renderer process to crash on linux.
 // See: https://github.com/foxglove/studio/pull/1733
@@ -599,7 +598,6 @@ export class IterablePlayer implements Player {
         );
       }
 
-
       if (this.#enablePreload) {
         // --- setup block loader which loads messages for _full_ subscriptions in the "background"
         try {
@@ -646,7 +644,6 @@ export class IterablePlayer implements Player {
       // Wait a bit until panels have had the chance to subscribe to topics before we start
       // playback.
       await delay(START_DELAY_MS);
-
 
       this.#blockLoader?.setTopics(this.#preloadTopics);
 
