@@ -338,7 +338,7 @@
           "visible": true
         },
         "/roi/accumulated": {
-          "visible": true
+          "visible": false
         },
         "/planning_scene": {
           "visible": false,

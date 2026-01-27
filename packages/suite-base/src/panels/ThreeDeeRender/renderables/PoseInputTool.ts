@@ -122,7 +122,7 @@ export class PoseInputTool extends SceneExtension<Renderable, PoseInputEventMap>
 
   #setControlsEnabled(enabled: boolean): void {
     // Safely enable/disable camera controls with proper null checks
-    if (this.renderer?.cameraHandler && "setControlsEnabled" in this.renderer.cameraHandler) {
+    if (this.renderer.cameraHandler && "setControlsEnabled" in this.renderer.cameraHandler) {
       this.renderer.cameraHandler.setControlsEnabled?.(enabled);
     }
   }

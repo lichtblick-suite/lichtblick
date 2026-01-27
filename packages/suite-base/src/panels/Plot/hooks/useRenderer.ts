@@ -29,6 +29,11 @@ const useRenderer = (
     canvasDiv.appendChild(canvas);
 
     const offscreenCanvas = canvas.transferControlToOffscreen();
+
+    // Mark canvas as ready after a short delay to improve LCP
+    requestAnimationFrame(() => {
+      canvas.setAttribute("data-ready", "true");
+    });
     const newRenderer = new OffscreenCanvasRenderer(offscreenCanvas, theme);
     setRenderer(newRenderer);
 

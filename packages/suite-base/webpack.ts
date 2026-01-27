@@ -51,11 +51,25 @@ export function makeConfig(
 
   const { allowUnusedVariables = isDev && isServe, version, tsconfigPath } = options;
 
+  // Disable UserScript features in production to avoid bundling TypeScript
+  const enableUserScripts = isDev || process.env.ENABLE_USER_SCRIPTS === "true";
+
   return {
     resolve: {
       extensions: [".js", ".ts", ".jsx", ".tsx"],
       alias: {
         "@lichtblick/suite-base": path.resolve(__dirname, "src"),
+        // Exclude TypeScript and UserScriptPlayer in production builds
+        ...(enableUserScripts
+          ? {}
+          : {
+              "typescript/lib/typescript": false,
+              typescript: false,
+              "@lichtblick/suite-base/players/UserScriptPlayer": path.resolve(
+                __dirname,
+                "src/players/UserScriptPlayer/stub.ts",
+              ),
+            }),
       },
       fallback: {
         path: require.resolve("path-browserify"),
@@ -228,55 +242,62 @@ export function makeConfig(
 
       // Separate runtime chunk to reduce main bundle size
       runtimeChunk: {
-        name: 'runtime',
+        name: "runtime",
       },
 
       // Split chunks for better caching and parallel loading
       splitChunks: {
-        chunks: 'all',
+        chunks: "all",
+        maxInitialRequests: 25,
+        maxAsyncRequests: 25,
         cacheGroups: {
-          // Separate vendor code (node_modules)
-          vendor: {
+          // Separate vendor code (node_modules) but split into smaller chunks
+          defaultVendors: {
             test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
             priority: 10,
             reuseExistingChunk: true,
+            name(module: any) {
+              // Split large vendor libraries into individual chunks
+              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)?.[1];
+              return packageName ? `vendor.${packageName.replace("@", "")}` : "vendors";
+            },
+            maxSize: 200000, // 200 KB max per vendor chunk
+            minSize: 20000, // 20 KB minimum size for a chunk
           },
-          // Separate Three.js (large library)
+          // Separate Three.js (large library) - split further for async loading
           three: {
             test: /[\\/]node_modules[\\/]three[\\/]/,
-            name: 'three',
-            chunks: 'all',
+            name: "three",
+            chunks: "async", // Load three.js asynchronously
             priority: 20,
             reuseExistingChunk: true,
+            maxSize: 150000, // Split if larger than 150 KB
           },
-          // Separate MUI (Material-UI)
+          // Separate MUI (Material-UI) - already smaller, keep initial
           mui: {
             test: /[\\/]node_modules[\\/]@mui[\\/]/,
-            name: 'mui',
-            chunks: 'all',
-            priority: 20,
+            name: "mui",
+            chunks: "initial", // Load MUI with initial bundle (needed for UI)
+            priority: 30,
             reuseExistingChunk: true,
           },
-          // Separate React and React DOM
+          // Separate React and React DOM - critical for initial render
           react: {
             test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
-            name: 'react',
-            chunks: 'all',
-            priority: 20,
+            name: "react",
+            chunks: "initial", // Load React with initial bundle
+            priority: 40,
             reuseExistingChunk: true,
           },
           // Common code shared across chunks
           common: {
             minChunks: 2,
-            chunks: 'all',
+            chunks: "all",
             priority: 5,
             reuseExistingChunk: true,
+            maxSize: 100000, // 100 KB max for common chunks
           },
         },
-        // Limit chunk size to prevent huge chunks
-        maxSize: 244000, // 244 KB - matches webpack's recommended limit
       },
 
       minimizer: [
@@ -301,8 +322,24 @@ export function makeConfig(
         LICHTBLICK_SUITE_VERSION: JSON.stringify(version),
         API_URL: JSON.stringify(process.env.API_URL),
         DEV_WORKSPACE: JSON.stringify(process.env.DEV_WORKSPACE),
+        ENABLE_USER_SCRIPTS: JSON.stringify(enableUserScripts),
         ...buildEnvVars(),
       }),
+      // Ignore TypeScript and UserScriptPlayer modules in production builds
+      ...(!enableUserScripts
+        ? [
+            new webpack.IgnorePlugin({
+              resourceRegExp: /^typescript$/,
+            }),
+            new webpack.IgnorePlugin({
+              resourceRegExp: /typescript[\\/]lib[\\/]typescript/,
+            }),
+            new webpack.IgnorePlugin({
+              resourceRegExp: /UserScriptPlayer[\\/]transformerWorker/,
+              contextRegExp: /players/,
+            }),
+          ]
+        : []),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales
       new webpack.IgnorePlugin({
         resourceRegExp: /^\.[\\/]locale$/,

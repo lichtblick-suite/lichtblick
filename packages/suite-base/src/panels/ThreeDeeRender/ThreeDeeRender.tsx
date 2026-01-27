@@ -137,6 +137,14 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       : undefined;
     setRenderer(newRenderer);
     rendererRef.current = newRenderer;
+
+    // Mark canvas as ready for better LCP
+    if (canvas && newRenderer) {
+      requestAnimationFrame(() => {
+        canvas.setAttribute("data-ready", "true");
+      });
+    }
+
     return () => {
       rendererRef.current?.dispose();
       rendererRef.current = undefined;
@@ -159,7 +167,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       // Use setTimeout to ensure renderer is fully initialized
       setTimeout(() => {
         // Safely enable camera controls with proper null checks
-        if (renderer?.cameraHandler && "setControlsEnabled" in renderer.cameraHandler) {
+        if (renderer.cameraHandler && "setControlsEnabled" in renderer.cameraHandler) {
           renderer.cameraHandler.setControlsEnabled?.(true);
         }
       }, 0);
@@ -680,7 +688,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   useEffect(() => {
     if (renderer?.poseInputTool) {
       renderer.poseInputTool.stop(); // Force inactive state
-      setPoseInputActive(false);     // Reset state
+      setPoseInputActive(false); // Reset state
     }
   }, [renderer]); // Runs when renderer initializes
 

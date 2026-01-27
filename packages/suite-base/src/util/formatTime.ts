@@ -21,6 +21,7 @@ import { Time, toDate, fromDate } from "@lichtblick/rostime";
 import { TimeDisplayMethod } from "@lichtblick/suite-base/types/panels";
 
 import parseFuzzyRosTime from "./parseFuzzyRosTime";
+import { getSystemTimezone } from "./timezones";
 
 // All time functions that require `moment` should live in this file.
 
@@ -37,7 +38,13 @@ export function formatDate(stamp: Time, timezone?: string): string {
     console.error("Times are not allowed to be negative");
     return "(invalid negative time)";
   }
-  return moment.tz(toDate(stamp), timezone ?? moment.tz.guess()).format("YYYY-MM-DD");
+  const tz = timezone ?? getSystemTimezone();
+  try {
+    return moment.tz(toDate(stamp), tz).format("YYYY-MM-DD");
+  } catch {
+    // Fallback if timezone is invalid
+    return moment(toDate(stamp)).format("YYYY-MM-DD");
+  }
 }
 
 export function formatTime(stamp: Time, timezone?: string): string {
@@ -45,7 +52,13 @@ export function formatTime(stamp: Time, timezone?: string): string {
     console.error("Times are not allowed to be negative");
     return "(invalid negative time)";
   }
-  return moment.tz(toDate(stamp), timezone ?? moment.tz.guess()).format("h:mm:ss.SSS A z");
+  const tz = timezone ?? getSystemTimezone();
+  try {
+    return moment.tz(toDate(stamp), tz).format("h:mm:ss.SSS A z");
+  } catch {
+    // Fallback if timezone is invalid
+    return moment(toDate(stamp)).format("h:mm:ss.SSS A z");
+  }
 }
 
 export function formatDuration(stamp: Time): string {

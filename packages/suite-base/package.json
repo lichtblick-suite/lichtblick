@@ -183,12 +183,19 @@
     "ts-key-enum": "3.0.13",
     "ts-loader": "9.5.1",
     "tss-react": "4.9.19",
-    "typescript": "5.3.3",
     "use-debounce": "10.0.0",
     "use-immer": "0.11.0",
     "uuid": "11.1.0",
     "vm-browserify": "1.1.2",
     "webpack": "5.101.3",
     "zustand": "4.5.7"
+  },
+  "peerDependencies": {
+    "typescript": "5.3.3"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
   }
 }

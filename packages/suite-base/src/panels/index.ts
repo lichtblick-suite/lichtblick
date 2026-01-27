@@ -30,6 +30,7 @@ import teleopThumbnail from "./Teleop/thumbnail.png";
 import threeDeeRenderThumbnail from "./ThreeDeeRender/thumbnail.png";
 import topicGraphThumbnail from "./TopicGraph/thumbnail.png";
 import variableSliderThumbnail from "./VariableSlider/thumbnail.png";
+import WebRTCCameraThumbnail from "./WebRTCCamera/thumbnail.png";
 
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
   {
@@ -198,5 +199,12 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     type: "PlaybackPerformance",
     description: t("studioPlaybackPerformanceDescription"),
     module: async () => await import("./PlaybackPerformance"),
+  },
+  {
+    title: "webRTCCamera",
+    type: "WebRTCCamera",
+    description: "Display WebRTC camera stream",
+    thumbnail: WebRTCCameraThumbnail,
+    module: async () => await import("./WebRTCCamera"),
   },
 ];

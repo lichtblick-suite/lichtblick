@@ -73,9 +73,6 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
     await import("@lichtblick/suite-base");
   installDevtoolsFormatters();
   overwriteFetch();
-  // consider moving waitForFonts into App to display an app loading screen
-  await waitForFonts();
-  await initI18n();
 
   const { WebRoot } = await import("./WebRoot");
   const params = await getParams();
@@ -85,6 +82,11 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
     </WebRoot>
   );
 
+  // Initialize i18n first (fast, just sets up translation system)
+  // but don't wait for fonts (slow, loads custom fonts)
+  await initI18n();
+
+  // Render UI immediately for better LCP
   const root = createRoot(rootEl);
   root.render(
     <LogAfterRender>
@@ -92,4 +94,9 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
       {rootElement}
     </LogAfterRender>,
   );
+
+  // Load fonts asynchronously after UI is rendered (non-blocking)
+  void waitForFonts().catch((err) => {
+    console.error("Error during font initialization:", err);
+  });
 }

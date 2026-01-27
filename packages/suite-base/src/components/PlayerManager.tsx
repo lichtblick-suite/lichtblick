@@ -55,8 +55,12 @@ import {
   TopicAliasFunctions,
   TopicAliasingPlayer,
 } from "@lichtblick/suite-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
-import UserScriptPlayer from "@lichtblick/suite-base/players/UserScriptPlayer";
 import { Player } from "@lichtblick/suite-base/players/types";
+
+// Dynamic import for UserScriptPlayer to avoid bundling TypeScript in production
+let UserScriptPlayerClass:
+  | typeof import("@lichtblick/suite-base/players/UserScriptPlayer").default
+  | undefined;
 import { UserScripts } from "@lichtblick/suite-base/types/panels";
 import { mergeMultipleFileNames } from "@lichtblick/suite-base/util/mergeMultipleFileName";
 
@@ -129,22 +133,67 @@ export default function PlayerManager(
 
   const globalVariablesRef = useLatest(globalVariables);
 
-  const player = useMemo(() => {
+  const [player, setPlayer] = useState<Player | undefined>();
+
+  // Load UserScriptPlayer dynamically only if userScripts exist
+  useEffect(() => {
     if (!topicAliasPlayer) {
-      return undefined;
+      setPlayer(undefined);
+      return;
     }
 
-    const userScriptPlayer = new UserScriptPlayer(
-      topicAliasPlayer,
-      userScriptActions,
-      perfRegistry,
-    );
-    userScriptPlayer.setGlobalVariables(globalVariablesRef.current);
+    // Check if we have any user scripts - if not, skip loading UserScriptPlayer
+    const hasUserScripts = Object.keys(userScripts).length > 0;
 
-    return userScriptPlayer;
-  }, [globalVariablesRef, topicAliasPlayer, userScriptActions, perfRegistry]);
+    if (!hasUserScripts) {
+      // No user scripts - use topicAliasPlayer directly
+      setPlayer(topicAliasPlayer);
+      return;
+    }
 
-  useLayoutEffect(() => void player?.setUserScripts(userScripts), [player, userScripts]);
+    // We have user scripts - load UserScriptPlayer dynamically
+    let mounted = true;
+
+    async function loadUserScriptPlayer() {
+      if (!UserScriptPlayerClass) {
+        try {
+          const module = await import("@lichtblick/suite-base/players/UserScriptPlayer");
+          UserScriptPlayerClass = module.default;
+        } catch (error) {
+          log.error("Failed to load UserScriptPlayer:", error);
+          if (mounted) {
+            setPlayer(topicAliasPlayer);
+          }
+          return;
+        }
+      }
+
+      if (!mounted || !topicAliasPlayer) {
+        return;
+      }
+
+      const userScriptPlayer = new UserScriptPlayerClass(
+        topicAliasPlayer,
+        userScriptActions,
+        perfRegistry,
+      );
+      userScriptPlayer.setGlobalVariables(globalVariablesRef.current);
+      setPlayer(userScriptPlayer);
+    }
+
+    void loadUserScriptPlayer();
+
+    return () => {
+      mounted = false;
+    };
+  }, [topicAliasPlayer, userScriptActions, perfRegistry, globalVariablesRef, userScripts]);
+
+  // Update user scripts when they change
+  useLayoutEffect(() => {
+    if (player && "setUserScripts" in player) {
+      void (player as any).setUserScripts(userScripts);
+    }
+  }, [player, userScripts]);
 
   const { enqueueSnackbar } = useSnackbar();
 

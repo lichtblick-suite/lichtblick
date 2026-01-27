@@ -25,7 +25,6 @@ import {
   ToggleButtonGroup,
   ToggleButtonGroupProps,
 } from "@mui/material";
-import moment from "moment-timezone";
 import { MouseEvent, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
@@ -42,6 +41,11 @@ import { LaunchPreferenceValue } from "@lichtblick/suite-base/types/LaunchPrefer
 import { TimeDisplayMethod } from "@lichtblick/suite-base/types/panels";
 import { formatTime } from "@lichtblick/suite-base/util/formatTime";
 import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
+import {
+  formatTimezone,
+  getAllTimezoneNames,
+  getSystemTimezone,
+} from "@lichtblick/suite-base/util/timezones";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
 const LANGUAGE_OPTIONS: { key: Language; value: string }[] = [{ key: "en", value: "English" }];
@@ -70,17 +74,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-function formatTimezone(name: string) {
-  const tz = moment.tz(name);
-  const zoneAbbr = tz.zoneAbbr();
-  const offset = tz.utcOffset();
-  const offsetStr =
-    (offset >= 0 ? "+" : "") + moment.duration(offset, "minutes").format("hh:mm", { trim: false });
-  if (name === zoneAbbr) {
-    return `${zoneAbbr} (${offsetStr})`;
-  }
-  return `${name} (${zoneAbbr}, ${offsetStr})`;
-}
+// formatTimezone is now imported from @lichtblick/suite-base/util/timezones
 
 export function ColorSchemeSettings(): React.JSX.Element {
   const { classes } = useStyles();
@@ -133,7 +127,7 @@ export function TimezoneSettings(): React.ReactElement {
   const detectItem: Option = useMemo(
     () => ({
       key: "detect",
-      label: `Detect from system: ${formatTimezone(moment.tz.guess())}`,
+      label: `Detect from system: ${formatTimezone(getSystemTimezone())}`,
       data: undefined,
     }),
     [],
@@ -153,7 +147,7 @@ export function TimezoneSettings(): React.ReactElement {
 
   const timezoneItems: Option[] = useMemo(
     () =>
-      filterMap(moment.tz.names(), (name) => {
+      filterMap(getAllTimezoneNames(), (name) => {
         // UTC is always hoisted to the top in fixedItems
         if (name === "UTC") {
           return undefined;
