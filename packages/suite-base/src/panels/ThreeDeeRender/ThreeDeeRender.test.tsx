@@ -58,7 +58,7 @@ const createMockRenderer = (overrides?: Record<string, any>) => {
     removeListener: jest.fn((event: string, listener: (...args: any[]) => void) => {
       listeners.get(event)?.delete(listener);
     }),
-    emit: (event: string, ...args: any[]) => {
+    emit: (event: string, ...args: unknown[]) => {
       listeners.get(event)?.forEach((listener) => {
         listener(...args);
       });
