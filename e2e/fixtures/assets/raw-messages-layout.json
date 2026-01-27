@@ -1,0 +1,18 @@
+{
+  "configById": {
+    "RawMessages!2sx4yz7": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "mouse",
+      "expansion": "none"
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": "RawMessages!2sx4yz7"
+}
