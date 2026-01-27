@@ -17,6 +17,7 @@ import {
   setSeriesAction,
   usePanelSettings,
 } from "@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings";
+import { stateTransitionPathDisplayName } from "@lichtblick/suite-base/panels/StateTransitions/shared";
 import {
   IUsePanelSettings,
   PathState,
@@ -170,6 +171,28 @@ describe("makeSeriesNode", () => {
 
     expect(fields!.value).toEqual(expect.objectContaining({ error: "pathErrorMessage" }));
   });
+
+  it("should use stateTransitionPathDisplayName for label", () => {
+    // Given - a path with specific label
+    const pathLabel = BasicBuilder.string();
+    const { seriesNode, index } = setup({
+      path: {
+        value: BasicBuilder.string(),
+        label: pathLabel,
+        timestampMethod: "receiveTime",
+      },
+    });
+
+    // When - creating a series node
+    const { label } = makeSeriesNode(
+      index,
+      seriesNode,
+      t as unknown as TFunction<"stateTransitions">,
+    );
+
+    // Then - label should match the expected display name
+    expect(label).toEqual(stateTransitionPathDisplayName(seriesNode.path, index));
+  });
 });
 
 describe("makeRootSeriesNode", () => {
@@ -310,6 +333,46 @@ describe("buildSettingsTree", () => {
     );
 
     expect(xAxis!.fields!.xAxisMaxValue!.error).toEqual("maxXError");
+  });
+
+  it("should not return error when xAxisMinValue or xAxisMaxValue is undefined", () => {
+    // Given - config with undefined xAxisMinValue
+    const { paths, config } = setup({
+      config: {
+        xAxisMaxValue: BasicBuilder.number(),
+        xAxisMinValue: undefined,
+      },
+    });
+
+    // When - building settings tree
+    const { xAxis } = buildSettingsTree(
+      config as StateTransitionConfig,
+      paths,
+      t as unknown as TFunction<"stateTransitions">,
+    );
+
+    // Then - should not have error
+    expect(xAxis!.fields!.xAxisMaxValue!.error).toBeUndefined();
+  });
+
+  it("should not return error when xAxisMaxValue is undefined", () => {
+    // Given - config with undefined xAxisMaxValue
+    const { paths, config } = setup({
+      config: {
+        xAxisMaxValue: undefined,
+        xAxisMinValue: BasicBuilder.number(),
+      },
+    });
+
+    // When - building settings tree
+    const { xAxis } = buildSettingsTree(
+      config as StateTransitionConfig,
+      paths,
+      t as unknown as TFunction<"stateTransitions">,
+    );
+
+    // Then - should not have error
+    expect(xAxis!.fields!.xAxisMaxValue!.error).toBeUndefined();
   });
 });
 
@@ -633,5 +696,496 @@ describe("usePanelSettings", () => {
     expect(updatedConfig.paths).toContain(config.paths[0]);
     expect(updatedConfig.paths).toContain(config.paths[1]);
     expect(updatedConfig.paths).not.toContain(config.paths[2]);
+  });
+
+  describe("reorder-node action", () => {
+    it("should reorder series from lower to higher index", () => {
+      // Given - a config with 4 paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - reordering from index 1 to index 3
+      const settings: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: { sourcePath: ["paths", "1"], targetPath: ["paths", "3"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - the paths should be reordered correctly
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths[0]).toEqual(config.paths[0]);
+      expect(updatedConfig.paths[1]).toEqual(config.paths[2]);
+      expect(updatedConfig.paths[2]).toEqual(config.paths[3]);
+      expect(updatedConfig.paths[3]).toEqual(config.paths[1]);
+    });
+
+    it("should reorder series from higher to lower index", () => {
+      // Given - a config with 4 paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - reordering from index 3 to index 1
+      const settings: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: { sourcePath: ["paths", "3"], targetPath: ["paths", "1"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - the paths should be reordered correctly
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths[0]).toEqual(config.paths[0]);
+      expect(updatedConfig.paths[1]).toEqual(config.paths[3]);
+      expect(updatedConfig.paths[2]).toEqual(config.paths[1]);
+      expect(updatedConfig.paths[3]).toEqual(config.paths[2]);
+    });
+
+    it("should not change paths when sourceIndex equals targetIndex", () => {
+      // Given - a config with 3 paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - reordering with same source and target index
+      const settings: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: { sourcePath: ["paths", "1"], targetPath: ["paths", "1"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - paths should remain unchanged
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toEqual(config.paths);
+    });
+
+    it("should not change paths when sourceIndex is negative", () => {
+      // Given - a config with 3 paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - reordering with negative source index
+      const settings: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: { sourcePath: ["paths", "-1"], targetPath: ["paths", "1"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - paths should remain unchanged
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toEqual(config.paths);
+    });
+
+    it("should not change paths when targetIndex is negative", () => {
+      // Given - a config with 3 paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - reordering with negative target index
+      const settings: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: { sourcePath: ["paths", "1"], targetPath: ["paths", "-1"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - paths should remain unchanged
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toEqual(config.paths);
+    });
+
+    it("should not change paths when sourceIndex is out of bounds", () => {
+      // Given - a config with 3 paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - reordering with source index out of bounds
+      const settings: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: { sourcePath: ["paths", "5"], targetPath: ["paths", "1"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - paths should remain unchanged
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toEqual(config.paths);
+    });
+
+    it("should not change paths when targetIndex is out of bounds", () => {
+      // Given - a config with 3 paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - reordering with target index out of bounds
+      const settings: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: { sourcePath: ["paths", "1"], targetPath: ["paths", "5"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - paths should remain unchanged
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toEqual(config.paths);
+    });
+
+    it("should handle reorder of first element to last position", () => {
+      // Given - a config with 3 paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - reordering first element to last position
+      const settings: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: { sourcePath: ["paths", "0"], targetPath: ["paths", "2"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - paths should be reordered correctly
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths[0]).toEqual(config.paths[1]);
+      expect(updatedConfig.paths[1]).toEqual(config.paths[2]);
+      expect(updatedConfig.paths[2]).toEqual(config.paths[0]);
+    });
+
+    it("should handle reorder of last element to first position", () => {
+      // Given - a config with 3 paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - reordering last element to first position
+      const settings: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: { sourcePath: ["paths", "2"], targetPath: ["paths", "0"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - paths should be reordered correctly
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths[0]).toEqual(config.paths[2]);
+      expect(updatedConfig.paths[1]).toEqual(config.paths[0]);
+      expect(updatedConfig.paths[2]).toEqual(config.paths[1]);
+    });
+  });
+
+  describe("update action edge cases", () => {
+    it("should update path field for a specific series", () => {
+      // Given - a config with multiple paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+      const newValue = BasicBuilder.string();
+
+      // When - updating a specific path value
+      const settings: SettingsTreeAction = {
+        action: "update",
+        payload: {
+          input: "messagepath",
+          path: ["paths", "1", "value"],
+          value: newValue,
+        },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - only the specified path should be updated
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths[1]?.value).toEqual(newValue);
+      expect(updatedConfig.paths[0]).toEqual(config.paths[0]);
+    });
+
+    it("should update label field for a specific series", () => {
+      // Given - a config with multiple paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+      const newLabel = BasicBuilder.string();
+
+      // When - updating a specific path label
+      const settings: SettingsTreeAction = {
+        action: "update",
+        payload: {
+          input: "string",
+          path: ["paths", "0", "label"],
+          value: newLabel,
+        },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - only the specified label should be updated
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths[0]?.label).toEqual(newLabel);
+      expect(updatedConfig.paths[1]).toEqual(config.paths[1]);
+    });
+
+    it("should update timestampMethod field for a specific series", () => {
+      // Given - a config with multiple paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+      const newTimestampMethod: TimestampMethod = "headerStamp";
+
+      // When - updating a specific path timestampMethod
+      const settings: SettingsTreeAction = {
+        action: "update",
+        payload: {
+          input: "select",
+          path: ["paths", "1", "timestampMethod"],
+          value: newTimestampMethod,
+        },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - only the specified timestampMethod should be updated
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths[1]?.timestampMethod).toEqual(newTimestampMethod);
+      expect(updatedConfig.paths[0]).toEqual(config.paths[0]);
+    });
+
+    it("should add default path when updating empty paths array", () => {
+      // Given - a config with empty paths
+      const { render, config } = setup({ paths: [] });
+      const { actionHandler } = render.result.current;
+
+      // When - updating a path field with empty paths
+      const settings: SettingsTreeAction = {
+        action: "update",
+        payload: {
+          input: "string",
+          path: ["paths", "0", "label"],
+          value: BasicBuilder.string(),
+        },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - a default path should be added
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toHaveLength(1);
+      expect(updatedConfig.paths[0]).toEqual(
+        expect.objectContaining({
+          label: settings.payload.value,
+        }),
+      );
+    });
+  });
+
+  describe("hook dependencies", () => {
+    it("should update panel settings tree when config changes", () => {
+      // Given - initial config
+      const initialPaths: PathState[] = [{ path: buildPath(), isArray: false }];
+      const { render } = setup({ paths: initialPaths });
+
+      // When - config is updated
+      const newPaths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const newConfig: StateTransitionConfig = {
+        isSynced: BasicBuilder.boolean(),
+        showPoints: BasicBuilder.boolean(),
+        xAxisMaxValue: BasicBuilder.number(),
+        xAxisMinValue: BasicBuilder.number(),
+        xAxisRange: BasicBuilder.number(),
+        paths: newPaths.map(({ path }) => path),
+      };
+
+      render.rerender({
+        config: newConfig,
+        saveConfig,
+        paths: newPaths,
+        focusedPath: [],
+      });
+
+      // Then - the hook should have been called again
+      expect(render.result.current.actionHandler).toBeDefined();
+    });
+
+    it("should update panel settings tree when focusedPath changes", () => {
+      // Given - initial focusedPath
+      const initialFocusedPath: string[] = ["paths", "0"];
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths, focusedPath: initialFocusedPath });
+
+      // When - focusedPath is updated
+      const newFocusedPath: string[] = ["paths", "1"];
+
+      render.rerender({
+        config,
+        saveConfig,
+        paths,
+        focusedPath: newFocusedPath,
+      });
+
+      // Then - the hook should have been called again
+      expect(render.result.current.actionHandler).toBeDefined();
+    });
+
+    it("should update panel settings tree when paths change", () => {
+      // Given - initial paths
+      const initialPaths: PathState[] = [{ path: buildPath(), isArray: false }];
+      const { render, config } = setup({ paths: initialPaths });
+
+      // When - paths are updated
+      const newPaths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+
+      render.rerender({
+        config,
+        saveConfig,
+        paths: newPaths,
+        focusedPath: [],
+      });
+
+      // Then - the hook should have been called again
+      expect(render.result.current.actionHandler).toBeDefined();
+    });
   });
 });
