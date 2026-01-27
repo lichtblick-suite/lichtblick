@@ -27,7 +27,10 @@ import {
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
-import { PANEL_STYLE } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
+import {
+  DEFAULT_FOLLOW_MODE,
+  PANEL_STYLE,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import type { IRenderer, ImageModeConfig, RendererConfig, RendererSubscription } from "./IRenderer";
@@ -92,7 +95,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
     return {
       cameraState,
-      followMode: partialConfig?.followMode ?? "follow-pose",
+      followMode: partialConfig?.followMode ?? DEFAULT_FOLLOW_MODE,
       followTf: partialConfig?.followTf,
       scene: partialConfig?.scene ?? {},
       transforms,
@@ -427,10 +430,10 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
       const trimmedMessages =
         messageBuffer.length > MAX_TRANSFORM_MESSAGES
-          ? messageBuffer.slice(-MAX_TRANSFORM_MESSAGES)
+          ? messageBuffer.slice(0, MAX_TRANSFORM_MESSAGES)
           : messageBuffer;
 
-      setAllFrames([...trimmedMessages]);
+      setAllFrames(trimmedMessages);
     });
 
     return () => {
@@ -438,6 +441,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
         unsubscribe();
       }
     };
+    // in this case context is static, we're just using it to subscribe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.scene.transforms?.enablePreloading, transformTopicsToPreload]);
 
