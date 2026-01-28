@@ -1362,11 +1362,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   };
 
   #handleCustomLayersAction = (action: SettingsTreeAction): void => {
-    if (action.action !== "perform-node-action") {
-      return;
-    }
     const path = action.payload.path;
-    if (path.length !== 1 || path[0] !== "layers") {
+    if (action.action !== "perform-node-action" || path.length !== 1 || path[0] !== "layers") {
       return;
     }
     log.debug(`handleCustomLayersAction(${action.payload.id})`);

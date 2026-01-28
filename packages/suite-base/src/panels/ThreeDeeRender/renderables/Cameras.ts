@@ -172,6 +172,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     if (action.action !== "update" || path.length !== 3) {
       return;
     }
+
     this.saveSetting(path, action.payload.value);
 
     // Update the renderable

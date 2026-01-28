@@ -88,7 +88,7 @@ describe("settingsActionReducer", () => {
     const { props } = setup({ action });
 
     expect(() => settingsActionReducer(props)).toThrow(
-      `Unexpected payload.path[0]: ${(props.action.payload as any).path[0]}`,
+      `Unexpected payload.path[0]: ${props.action.payload.path[0]}`,
     );
   });
 

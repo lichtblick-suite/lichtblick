@@ -151,10 +151,10 @@ export class Markers extends SceneExtension<TopicMarkers> {
   };
 
   #handleSettingsActionNamespace = (action: SettingsTreeAction): void => {
-    if (action.action !== "update" || action.payload.path.length !== 4) {
+    const path = action.payload.path;
+    if (action.action !== "update" || path.length !== 4) {
       return;
     }
-    const path = action.payload.path;
 
     const topicName = path[1]!;
     const namespaceKey = path[2]!;
