@@ -14,6 +14,7 @@ import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants"
 import {
   HandleAction,
   HandleDeleteSeriesAction,
+  HandleMoveSeriesAction,
   HandleUpdateAction,
 } from "@lichtblick/suite-base/panels/Plot/types";
 import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
@@ -24,7 +25,6 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import usePlotPanelSettings, {
   handleAddSeriesAction,
   handleDeleteSeriesAction,
-  HandleMoveSeriesAction,
   handleMoveSeriesAction,
   handleUpdateAction,
 } from "./usePlotPanelSettings";

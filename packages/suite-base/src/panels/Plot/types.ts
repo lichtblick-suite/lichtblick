@@ -217,3 +217,8 @@ export type MakeRootSeriesNode = {
   paths: PlotPath[];
   t: TFunction<"plot">;
 };
+
+export type HandleMoveSeriesAction = HandleAction & {
+  index: number;
+  direction: "up" | "down";
+};

@@ -15,6 +15,7 @@ import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants"
 import {
   HandleAction,
   HandleDeleteSeriesAction,
+  HandleMoveSeriesAction,
   HandleUpdateAction,
 } from "@lichtblick/suite-base/panels/Plot/types";
 import { buildSettingsTree } from "@lichtblick/suite-base/panels/Plot/utils/buildSettingsTree";
@@ -64,20 +65,14 @@ export function handleDeleteSeriesAction({ draft, index }: HandleDeleteSeriesAct
   draft.paths.splice(index, 1);
 }
 
-export type HandleMoveSeriesAction = HandleAction & {
-  index: number;
-  direction: "up" | "down";
-};
-
 export function handleMoveSeriesAction({ draft, index, direction }: HandleMoveSeriesAction): void {
-  if (direction === "up" && index > 0) {
-    const temp = draft.paths[index];
-    draft.paths[index] = draft.paths[index - 1]!;
-    draft.paths[index - 1] = temp!;
-  } else if (direction === "down" && index < draft.paths.length - 1) {
-    const temp = draft.paths[index];
-    draft.paths[index] = draft.paths[index + 1]!;
-    draft.paths[index + 1] = temp!;
+  const targetIndex = direction === "up" ? index - 1 : index + 1;
+
+  if (targetIndex >= 0 && targetIndex < draft.paths.length) {
+    [draft.paths[index], draft.paths[targetIndex]] = [
+      draft.paths[targetIndex]!,
+      draft.paths[index]!,
+    ];
   }
 }
 
