@@ -144,6 +144,7 @@ const createMockContext = (
 
 describe("ThreeDeeRender", () => {
   const mockAnalytics = { logEvent: jest.fn() };
+  const mockedRenderer = jest.mocked(Renderer);
 
   const setup = (
     propsOverrides?: Partial<Omit<ThreeDeeRenderProps, "context">>,
@@ -210,7 +211,6 @@ describe("ThreeDeeRender", () => {
   it("initializes with default camera state when no initial state is provided", () => {
     // Given
     const props = setup();
-    const mockedRenderer = jest.mocked(Renderer);
 
     // When
     const { container } = render(<ThreeDeeRender {...props} />);
@@ -243,7 +243,6 @@ describe("ThreeDeeRender", () => {
       followTf: "base_link",
     };
     const props = setup({}, { initialState: customCameraState });
-    const mockedRenderer = jest.mocked(Renderer);
 
     // When
     const { container } = render(<ThreeDeeRender {...props} />);
@@ -264,7 +263,6 @@ describe("ThreeDeeRender", () => {
       interfaceMode: "image" as InterfaceMode,
     };
     const props = setup({ ...initialState });
-    const mockedRenderer = jest.mocked(Renderer);
 
     // When
     const { container } = render(<ThreeDeeRender {...props} />);
@@ -286,7 +284,6 @@ describe("ThreeDeeRender", () => {
       },
     };
     const props = setup({ customSceneExtensions });
-    const mockedRenderer = jest.mocked(Renderer);
 
     const { container } = render(<ThreeDeeRender {...props} />);
     expect(container).toBeInTheDocument();
@@ -316,7 +313,6 @@ describe("ThreeDeeRender", () => {
     ]);
 
     const props = setup({ customCameraModels });
-    const mockedRenderer = jest.mocked(Renderer);
 
     const { container } = render(<ThreeDeeRender {...props} />);
     expect(container).toBeInTheDocument();
@@ -326,11 +322,11 @@ describe("ThreeDeeRender", () => {
   });
 
   describe("transfom topic preloading", () => {
+    const mockUnsubscribe = jest.fn();
     const createPreloadingContext = (overrides?: {
       onSubscribe?: (args: any) => (() => void) | void;
       initialState?: any;
     }) => {
-      const mockUnsubscribe = jest.fn();
       return createMockContext({
         initialState: {
           scene: {
@@ -354,8 +350,6 @@ describe("ThreeDeeRender", () => {
 
     it("does not trigger if transform preloading is disabled", async () => {
       // Given
-      const mockUnsubscribe = jest.fn();
-
       const customRendererInstance = createMockRenderer({
         schemaSubscriptions: new Map([
           [
@@ -408,8 +402,6 @@ describe("ThreeDeeRender", () => {
 
     it("triggers re-subscription when preload topics change", async () => {
       // Given
-      const mockUnsubscribe = jest.fn();
-
       const customRendererInstance = createMockRenderer({
         schemaSubscriptions: new Map([
           [
@@ -482,8 +474,6 @@ describe("ThreeDeeRender", () => {
 
     it("does not trigger re-subscription when non-preload topics change", async () => {
       // Given
-      const mockUnsubscribe = jest.fn();
-
       const customRendererInstance = createMockRenderer({
         schemaSubscriptions: new Map([
           [
@@ -558,8 +548,6 @@ describe("ThreeDeeRender", () => {
     describe("cleans up subscriptions", () => {
       it("on preload setting disabled", async () => {
         // Given
-        const mockUnsubscribe = jest.fn();
-
         const customRendererInstance = createMockRenderer({
           schemaSubscriptions: new Map([
             [
@@ -625,8 +613,6 @@ describe("ThreeDeeRender", () => {
 
       it("on unmount", async () => {
         // Given
-        const mockUnsubscribe = jest.fn();
-
         const customRendererInstance = createMockRenderer({
           schemaSubscriptions: new Map([
             [

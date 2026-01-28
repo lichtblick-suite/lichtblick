@@ -394,8 +394,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   // Subscribe to eligible and enabled topics for range messages
   useLayoutEffect(() => {
     const transformTopics = transformTopicsToPreload;
+    const isPreloadingEnabled = config.scene.transforms?.enablePreloading === true;
     // Exit if preloading is disabled
-    if (!(config.scene.transforms?.enablePreloading ?? false) || transformTopics.length === 0) {
+    if (!isPreloadingEnabled || transformTopics.length === 0) {
       setAllFrames([]);
       return;
     }
