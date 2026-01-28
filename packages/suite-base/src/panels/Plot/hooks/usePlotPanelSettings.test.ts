@@ -420,7 +420,7 @@ describe("usePlotPanelSettings", () => {
     act(() => {
       actionHandler({
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "0"], targetPath: ["paths", "2"] },
+        payload: { path: ["paths", "0"], targetPath: ["paths", "2"] },
       });
     });
 
