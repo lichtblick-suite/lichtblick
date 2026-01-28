@@ -40,6 +40,7 @@ import { SELECTED_ID_VARIABLE } from "./Renderable";
 import { Renderer } from "./Renderer";
 import { RendererContext, useRendererEvent, useRendererProperty } from "./RendererContext";
 import { RendererOverlay } from "./RendererOverlay";
+import { useStyles } from "./ThreeDeeRender.style";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
 import { MAX_TRANSFORM_MESSAGES } from "./constants";
 import {
@@ -76,6 +77,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     unstable_setMessagePathDropConfig: setMessagePathDropConfig,
   } = context;
   const analytics = useAnalytics();
+  const { classes } = useStyles();
 
   // Load and save the persisted panel configuration
   const [config, setConfig] = useState<Immutable<RendererConfig>>(() => {
@@ -193,6 +195,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   const [didSeek, setDidSeek] = useState<boolean>(false);
   const [sharedPanelState, setSharedPanelState] = useState<undefined | Shared3DPanelState>();
   const [allFrames, setAllFrames] = useState<readonly MessageEvent[] | undefined>(undefined);
+  const [isLoadingTransforms, setIsLoadingTransforms] = useState<boolean>(false);
+  const [loadedTransformCount, setLoadedTransformCount] = useState<number>(0);
+  const [reloadPreloadTrigger, setReloadPreloadTrigger] = useState<number>(0);
 
   const renderRef = useRef({ needsRender: false });
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
@@ -282,6 +287,16 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     [context],
   );
   useRendererEvent("selectedRenderable", updateSelectedRenderable, renderer);
+
+  // Clear preloaded buffer when action button is clicked
+  const handleClearPreloadBuffer = useCallback(() => {
+    setAllFrames([]);
+    setLoadedTransformCount(0);
+    setIsLoadingTransforms(false);
+    // Trigger reload by incrementing the trigger
+    setReloadPreloadTrigger((prev) => prev + 1);
+  }, []);
+  useRendererEvent("clearPreloadBuffer", handleClearPreloadBuffer, renderer);
 
   // Log LayerErrors to PanelLogs
   const handleLayerErrorUpdate = useCallback(
@@ -383,7 +398,28 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
     const filteredTopics = topicsToSubscribe.filter((sub) => sub.preload === true);
 
-    if (_.isEqual(prevFilteredTopics.current, filteredTopics)) {
+    // Manual comparison for better performance than lodash.isEqual
+    const areTopicsEqual = (current: Subscription[], filtered: Subscription[]): boolean => {
+      if (current.length !== filtered.length) {
+        return false;
+      }
+      for (let i = 0; i < current.length; i++) {
+        const currentSub = current[i];
+        const filteredSub = filtered[i];
+        if (!currentSub || !filteredSub) {
+          continue;
+        }
+        if (currentSub.topic !== filteredSub.topic) {
+          return false;
+        }
+        if (currentSub.convertTo !== filteredSub.convertTo) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    if (areTopicsEqual(prevFilteredTopics.current, filteredTopics)) {
       return prevFilteredTopics.current;
     }
 
@@ -395,16 +431,42 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   useLayoutEffect(() => {
     const transformTopics = transformTopicsToPreload;
     const isPreloadingEnabled = config.scene.transforms?.enablePreloading === true;
+    const maxMessages = config.scene.transforms?.maxPreloadMessages ?? MAX_TRANSFORM_MESSAGES;
+
     // Exit if preloading is disabled
     if (!isPreloadingEnabled || transformTopics.length === 0) {
       setAllFrames([]);
+      setIsLoadingTransforms(false);
+      setLoadedTransformCount(0);
       return;
     }
 
+    setIsLoadingTransforms(true);
+    setLoadedTransformCount(0);
+
     const messageBuffer: MessageEvent[] = [];
     const unsubscriptions: (() => void)[] = [];
-
     const subscriptionPromises: Promise<void>[] = [];
+
+    // Use ref to avoid closure issues in async loop
+    const lastUpdateTimeRef = { current: 0 };
+    const UPDATE_DEBOUNCE_MS = 50; // Update UI every 50ms during loading
+
+    const updateAllFrames = (options?: { isComplete?: boolean }) => {
+      if (messageBuffer.length === 0) {
+        setIsLoadingTransforms(false);
+        return;
+      }
+
+      // Sort and trim messages
+      messageBuffer.sort((a, b) => compare(a.receiveTime, b.receiveTime));
+      const trimmedMessages =
+        messageBuffer.length > maxMessages ? messageBuffer.slice(0, maxMessages) : messageBuffer;
+
+      setAllFrames([...trimmedMessages]);
+      setLoadedTransformCount(trimmedMessages.length);
+      setIsLoadingTransforms(options?.isComplete !== true);
+    };
 
     for (const topic of transformTopics) {
       const promise = new Promise<void>((resolve) => {
@@ -415,6 +477,13 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             for await (const batch of batchIterator) {
               if (batch.length > 0) {
                 messageBuffer.push(...batch);
+
+                // Progressive update: update UI periodically during loading
+                const now = Date.now();
+                if (now - lastUpdateTimeRef.current > UPDATE_DEBOUNCE_MS) {
+                  updateAllFrames();
+                  lastUpdateTimeRef.current = now;
+                }
               }
             }
             resolve();
@@ -425,16 +494,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       subscriptionPromises.push(promise);
     }
 
-    // Wait for every transform topic to complete since we must sort them before setting state
+    // Final update after all topics complete
     void Promise.all(subscriptionPromises).then(() => {
-      messageBuffer.sort((a, b) => compare(a.receiveTime, b.receiveTime));
-
-      const trimmedMessages =
-        messageBuffer.length > MAX_TRANSFORM_MESSAGES
-          ? messageBuffer.slice(0, MAX_TRANSFORM_MESSAGES)
-          : messageBuffer;
-
-      setAllFrames(trimmedMessages);
+      updateAllFrames({ isComplete: true });
     });
 
     return () => {
@@ -444,7 +506,12 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     };
     // in this case context is static, we're just using it to subscribe
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.scene.transforms?.enablePreloading, transformTopicsToPreload]);
+  }, [
+    config.scene.transforms?.enablePreloading,
+    config.scene.transforms?.maxPreloadMessages,
+    transformTopicsToPreload,
+    reloadPreloadTrigger,
+  ]);
 
   // Establish a connection to the message pipeline with context.watch and context.onRender
   useLayoutEffect(() => {
@@ -592,10 +659,10 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
     renderer.setCurrentTime(newTimeNs);
     if (didSeek) {
-      renderer.handleSeek(oldTimeNs);
+      renderer.handleSeek(oldTimeNs, allFrames);
       setDidSeek(false);
     }
-  }, [currentTime, renderer, didSeek]);
+  }, [currentTime, renderer, didSeek, allFrames]);
 
   // Keep the renderer colorScheme and backgroundColor up to date
   useEffect(() => {
@@ -868,6 +935,15 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             ...((measureActive || publishActive) && { cursor: "crosshair" }),
           }}
         />
+        {isLoadingTransforms && config.scene.enableStats === true && (
+          <div className={classes.loadingTransforms}>
+            Loading transforms: {loadedTransformCount.toLocaleString()}{" "}
+            {loadedTransformCount >=
+            (config.scene.transforms?.maxPreloadMessages ?? MAX_TRANSFORM_MESSAGES)
+              ? `(max ${(config.scene.transforms?.maxPreloadMessages ?? MAX_TRANSFORM_MESSAGES).toLocaleString()})`
+              : "messages"}
+          </div>
+        )}
         <RendererContext.Provider value={renderer}>
           <RendererOverlay
             interfaceMode={interfaceMode}

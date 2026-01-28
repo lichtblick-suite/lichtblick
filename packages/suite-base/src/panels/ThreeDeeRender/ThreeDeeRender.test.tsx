@@ -10,10 +10,13 @@
 import "@testing-library/jest-dom";
 import { act, render, waitFor } from "@testing-library/react";
 
+import { Topic } from "@lichtblick/suite";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { DEFAULT_FOLLOW_MODE } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import type { MessageEvent } from "@lichtblick/suite-base/players/types";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+import RenderStateBuilder from "@lichtblick/suite-base/testing/builders/RenderStateBuilder";
 
 import { Renderer } from "./Renderer";
 import { ThreeDeeRender } from "./ThreeDeeRender";
@@ -363,8 +366,8 @@ describe("ThreeDeeRender", () => {
         ]),
       });
       const topics = [
-        { name: "/tf", schemaName: "tf2_msgs/TFMessage", datatype: "tf2_msgs/TFMessage" },
-        { name: "/other", schemaName: "std_msgs/String", datatype: "std_msgs/String" },
+        RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" }),
+        RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" }),
       ];
       jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
@@ -403,16 +406,7 @@ describe("ThreeDeeRender", () => {
     it("triggers re-subscription when preload topics change", async () => {
       // Given
       const customRendererInstance = createMockRenderer({
-        schemaSubscriptions: new Map([
-          [
-            "tf2_msgs/TFMessage",
-            [
-              {
-                preload: true,
-              },
-            ],
-          ],
-        ]),
+        schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
       jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
@@ -423,8 +417,8 @@ describe("ThreeDeeRender", () => {
 
       const props = setup({}, mockContext);
       const topics = [
-        { name: "/tf", schemaName: "tf2_msgs/TFMessage", datatype: "tf2_msgs/TFMessage" },
-        { name: "/other", schemaName: "std_msgs/String", datatype: "std_msgs/String" },
+        RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" }),
+        RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" }),
       ];
       const { rerender } = render(<ThreeDeeRender {...props} />);
       await waitFor(() => {
@@ -433,12 +427,7 @@ describe("ThreeDeeRender", () => {
       });
 
       act(() => {
-        mockContext.onRender!(
-          {
-            topics,
-          },
-          jest.fn(),
-        );
+        mockContext.onRender!({ topics }, jest.fn());
       });
 
       await waitFor(() => {
@@ -451,16 +440,13 @@ describe("ThreeDeeRender", () => {
       // When
       const newTopics = [
         ...topics,
-        { name: "/new_topic", schemaName: "tf2_msgs/TFMessage", datatype: "tf2_msgs/TFMessage" },
+        RenderStateBuilder.topic(
+          RenderStateBuilder.topic({ name: "/new_topic", schemaName: "tf2_msgs/TFMessage" }),
+        ),
       ];
 
       act(() => {
-        mockContext.onRender!(
-          {
-            topics: newTopics,
-          },
-          jest.fn(),
-        );
+        mockContext.onRender!({ topics: newTopics }, jest.fn());
       });
 
       rerender(<ThreeDeeRender {...props} />);
@@ -475,16 +461,7 @@ describe("ThreeDeeRender", () => {
     it("does not trigger re-subscription when non-preload topics change", async () => {
       // Given
       const customRendererInstance = createMockRenderer({
-        schemaSubscriptions: new Map([
-          [
-            "tf2_msgs/TFMessage",
-            [
-              {
-                preload: true,
-              },
-            ],
-          ],
-        ]),
+        schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
       jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
@@ -495,8 +472,8 @@ describe("ThreeDeeRender", () => {
 
       const props = setup({}, mockContext);
       const topics = [
-        { name: "/tf", schemaName: "tf2_msgs/TFMessage", datatype: "tf2_msgs/TFMessage" },
-        { name: "/other", schemaName: "std_msgs/String", datatype: "std_msgs/String" },
+        RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" }),
+        RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" }),
       ];
       const { rerender } = render(<ThreeDeeRender {...props} />);
       await waitFor(() => {
@@ -506,12 +483,7 @@ describe("ThreeDeeRender", () => {
 
       // Set initial topics to trigger subscription
       act(() => {
-        mockContext.onRender!(
-          {
-            topics,
-          },
-          jest.fn(),
-        );
+        mockContext.onRender!({ topics }, jest.fn());
       });
 
       await waitFor(() => {
@@ -523,18 +495,15 @@ describe("ThreeDeeRender", () => {
 
       // When
       // Add a non-preload topic (this shouldn't trigger the useLayoutEffect to re-run)
-      const newTopics = [
+      const newTopics: Topic[] = [
         ...topics,
-        { name: "/new_topic", schemaName: "std_msgs/String", datatype: "std_msgs/String" },
+        RenderStateBuilder.topic(
+          RenderStateBuilder.topic({ name: "/new_topic", schemaName: "std_msgs/String" }),
+        ),
       ];
 
       act(() => {
-        mockContext.onRender!(
-          {
-            topics: newTopics,
-          },
-          jest.fn(),
-        );
+        mockContext.onRender!({ topics: newTopics }, jest.fn());
       });
 
       rerender(<ThreeDeeRender {...props} />);
@@ -549,16 +518,7 @@ describe("ThreeDeeRender", () => {
       it("on preload setting disabled", async () => {
         // Given
         const customRendererInstance = createMockRenderer({
-          schemaSubscriptions: new Map([
-            [
-              "tf2_msgs/TFMessage",
-              [
-                {
-                  preload: true,
-                },
-              ],
-            ],
-          ]),
+          schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
         });
 
         jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
@@ -569,7 +529,7 @@ describe("ThreeDeeRender", () => {
 
         const props = setup({}, mockContext);
         const topics = [
-          { name: "/tf", schemaName: "tf2_msgs/TFMessage", datatype: "tf2_msgs/TFMessage" },
+          RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" }),
         ];
         render(<ThreeDeeRender {...props} />);
         await waitFor(() => {
@@ -578,12 +538,7 @@ describe("ThreeDeeRender", () => {
         });
 
         act(() => {
-          mockContext.onRender!(
-            {
-              topics,
-            },
-            jest.fn(),
-          );
+          mockContext.onRender!({ topics }, jest.fn());
         });
 
         await waitFor(() => {
@@ -594,17 +549,10 @@ describe("ThreeDeeRender", () => {
         expect(mockUnsubscribe).not.toHaveBeenCalled();
 
         // When
-        const newTopics = [
-          { name: "/new_topic", schemaName: "std_msgs/String", datatype: "std_msgs/String" },
-        ];
+        const newTopics = [RenderStateBuilder.topic({ schemaName: "std_msgs/String" })];
 
         act(() => {
-          mockContext.onRender!(
-            {
-              topics: newTopics,
-            },
-            jest.fn(),
-          );
+          mockContext.onRender!({ topics: newTopics }, jest.fn());
         });
 
         // Then
@@ -634,7 +582,7 @@ describe("ThreeDeeRender", () => {
 
         const props = setup({}, mockContext);
         const topics = [
-          { name: "/tf", schemaName: "tf2_msgs/TFMessage", datatype: "tf2_msgs/TFMessage" },
+          RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" }),
         ];
         const { unmount } = render(<ThreeDeeRender {...props} />);
         await waitFor(() => {
@@ -669,20 +617,20 @@ describe("ThreeDeeRender", () => {
 
     it("trims messages to MAX_TRANSFORM_MESSAGES and keeps oldest", async () => {
       // Given
-      const totalMessages = MAX_TRANSFORM_MESSAGES + 100;
-      const defaultMessage = {
-        topic: "/tf",
-        message: { transforms: [] },
-        schemaName: "tf2_msgs/TFMessage",
-        sizeInBytes: 100,
-      };
-      const messages: MessageEvent[] = Array.from({ length: totalMessages }, (_, i) => ({
-        ...defaultMessage,
-        receiveTime: { sec: 100, nsec: i },
-      }));
+      const topicName = "/tf";
+      const totalMessages = MAX_TRANSFORM_MESSAGES + 5;
+      const messages: MessageEvent[] = Array.from({ length: totalMessages }, (_, i) =>
+        MessageEventBuilder.messageEvent({
+          topic: topicName,
+          message: { transforms: [] },
+          schemaName: "tf2_msgs/TFMessage",
+          sizeInBytes: 100,
+          receiveTime: { sec: 100, nsec: i },
+        }),
+      );
 
       const topics = [
-        { name: "/tf", schemaName: "tf2_msgs/TFMessage", datatype: "tf2_msgs/TFMessage" },
+        RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
       ];
 
       const mockBatchIterator = {
@@ -692,16 +640,7 @@ describe("ThreeDeeRender", () => {
       };
 
       const customRendererInstance = createMockRenderer({
-        schemaSubscriptions: new Map([
-          [
-            "tf2_msgs/TFMessage",
-            [
-              {
-                preload: true,
-              },
-            ],
-          ],
-        ]),
+        schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
       jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
@@ -758,6 +697,430 @@ describe("ThreeDeeRender", () => {
       expect(trimmedMessages[MAX_TRANSFORM_MESSAGES - 1].receiveTime).toEqual({
         sec: 100,
         nsec: MAX_TRANSFORM_MESSAGES - 1,
+      });
+    });
+
+    it("respects custom maxPreloadMessages configuration", async () => {
+      // Given
+      const customMaxMessages = 10;
+      const totalMessages = customMaxMessages + 5;
+      const messages: MessageEvent[] = Array.from({ length: totalMessages }, (_, i) =>
+        MessageEventBuilder.messageEvent({
+          topic: "/tf",
+          message: { transforms: [] },
+          schemaName: "tf2_msgs/TFMessage",
+          sizeInBytes: 100,
+          receiveTime: { sec: 100, nsec: i },
+        }),
+      );
+
+      const topics = [RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" })];
+
+      const mockBatchIterator = {
+        async *[Symbol.asyncIterator]() {
+          yield messages;
+        },
+      };
+
+      const customRendererInstance = createMockRenderer({
+        schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
+      });
+
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createPreloadingContext({
+        initialState: {
+          scene: {
+            transforms: {
+              enablePreloading: true,
+              maxPreloadMessages: customMaxMessages,
+            },
+          },
+          topics: {
+            "/tf": { visible: true },
+          },
+        },
+        onSubscribe: (args: any) => {
+          void args.onNewRangeIterator?.(mockBatchIterator);
+        },
+      });
+
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.setTopics).toBeDefined();
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics,
+            currentFrame: [],
+            currentTime: { sec: 100, nsec: 0 },
+          },
+          jest.fn(),
+        );
+      });
+
+      await waitFor(
+        () => {
+          expect(customRendererInstance.handleAllFramesMessages).toHaveBeenCalled();
+          const handleAllFrames = customRendererInstance.handleAllFramesMessages.mock.calls;
+          const lastCall = handleAllFrames[handleAllFrames.length - 1];
+          const trimmedMessages = lastCall?.[0];
+          expect(trimmedMessages).toBeDefined();
+          expect(trimmedMessages.length).toBeGreaterThan(0);
+        },
+        { timeout: 2000 },
+      );
+
+      const handleAllFrames = customRendererInstance.handleAllFramesMessages.mock.calls;
+      const lastCall = handleAllFrames[handleAllFrames.length - 1];
+      const trimmedMessages = lastCall?.[0];
+
+      // Then
+      expect(trimmedMessages).toHaveLength(customMaxMessages);
+    });
+
+    it("updates loading indicator during progressive loading", async () => {
+      // Given
+      const topicName = "/tf";
+      const messages1: MessageEvent[] = Array.from({ length: 5 }, (_, i) =>
+        MessageEventBuilder.messageEvent({
+          topic: topicName,
+          message: { transforms: [] },
+          schemaName: "tf2_msgs/TFMessage",
+          sizeInBytes: 100,
+          receiveTime: { sec: 100, nsec: i },
+        }),
+      );
+
+      const messages2: MessageEvent[] = Array.from({ length: 5 }, (_, i) =>
+        MessageEventBuilder.messageEvent({
+          topic: topicName,
+          message: { transforms: [] },
+          schemaName: "tf2_msgs/TFMessage",
+          sizeInBytes: 100,
+          receiveTime: { sec: 100, nsec: 100 + i },
+        }),
+      );
+
+      const topics = [
+        RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
+      ];
+
+      const mockBatchIterator = {
+        async *[Symbol.asyncIterator]() {
+          yield messages1;
+          await new Promise((resolve) => setTimeout(resolve, 60)); // Wait for debounce
+          yield messages2;
+        },
+      };
+
+      const customRendererInstance = createMockRenderer({
+        schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
+      });
+
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createPreloadingContext({
+        initialState: {
+          scene: {
+            transforms: { enablePreloading: true },
+            enableStats: true, // Enable stats to show loading indicator
+          },
+          topics: {
+            [topicName]: { visible: true },
+          },
+        },
+        onSubscribe: (args: any) => {
+          void args.onNewRangeIterator?.(mockBatchIterator);
+        },
+      });
+
+      const props = setup({}, mockContext);
+
+      // When
+      const { container } = render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.setTopics).toBeDefined();
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics,
+            currentFrame: [],
+            currentTime: { sec: 100, nsec: 0 },
+          },
+          jest.fn(),
+        );
+      });
+
+      // Then - Loading indicator should appear
+      await waitFor(
+        () => {
+          const loadingElement = container.querySelector('[class*="loadingTransforms"]');
+          expect(loadingElement).toBeInTheDocument();
+        },
+        { timeout: 2000 },
+      );
+    });
+
+    it("clears allFrames when clearPreloadBuffer event is emitted", async () => {
+      // Given
+      const topicName = "/tf";
+      const messages: MessageEvent[] = Array.from({ length: 100 }, (_, i) =>
+        MessageEventBuilder.messageEvent({
+          topic: topicName,
+          message: { transforms: [] },
+          schemaName: "tf2_msgs/TFMessage",
+          sizeInBytes: 100,
+          receiveTime: { sec: 100, nsec: i },
+        }),
+      );
+
+      const topics = [
+        RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
+      ];
+
+      const mockBatchIterator = {
+        async *[Symbol.asyncIterator]() {
+          yield messages;
+        },
+      };
+
+      const customRendererInstance = createMockRenderer({
+        schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
+      });
+
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createPreloadingContext({
+        onSubscribe: (args: any) => {
+          void args.onNewRangeIterator?.(mockBatchIterator);
+        },
+      });
+
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.setTopics).toBeDefined();
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics,
+            currentFrame: [],
+            currentTime: { sec: 100, nsec: 0 },
+          },
+          jest.fn(),
+        );
+      });
+
+      // Wait for initial load
+      await waitFor(
+        () => {
+          expect(customRendererInstance.handleAllFramesMessages).toHaveBeenCalled();
+        },
+        { timeout: 2000 },
+      );
+
+      // Reset the mock to track new calls
+      customRendererInstance.handleAllFramesMessages.mockClear();
+      (mockContext.unstable_subscribeMessageRange as jest.Mock).mockClear();
+
+      // When - Emit clearPreloadBuffer event
+      act(() => {
+        customRendererInstance.emit("clearPreloadBuffer");
+      });
+
+      // Then - Should trigger reload
+      await waitFor(
+        () => {
+          expect(mockContext.unstable_subscribeMessageRange).toHaveBeenCalled();
+        },
+        { timeout: 2000 },
+      );
+    });
+
+    it("does not show loading indicator when render stats is disabled", async () => {
+      // Given
+      const topicName = "/tf";
+      const messages: MessageEvent[] = Array.from({ length: 100 }, (_, i) =>
+        MessageEventBuilder.messageEvent({
+          topic: topicName,
+          message: { transforms: [] },
+          schemaName: "tf2_msgs/TFMessage",
+          sizeInBytes: 100,
+          receiveTime: { sec: 100, nsec: i },
+        }),
+      );
+
+      const topics = [
+        RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
+      ];
+
+      const mockBatchIterator = {
+        async *[Symbol.asyncIterator]() {
+          yield messages;
+        },
+      };
+
+      const customRendererInstance = createMockRenderer({
+        schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
+      });
+
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createPreloadingContext({
+        initialState: {
+          scene: {
+            transforms: {
+              enablePreloading: true,
+            },
+            enableStats: false, // Stats disabled
+          },
+          topics: {
+            [topicName]: { visible: true },
+          },
+        },
+        onSubscribe: (args: any) => {
+          void args.onNewRangeIterator?.(mockBatchIterator);
+        },
+      });
+
+      const props = setup({}, mockContext);
+
+      // When
+      const { container } = render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.setTopics).toBeDefined();
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics,
+            currentFrame: [],
+            currentTime: { sec: 100, nsec: 0 },
+          },
+          jest.fn(),
+        );
+      });
+
+      // Wait for preloading to complete
+      await waitFor(
+        () => {
+          expect(customRendererInstance.handleAllFramesMessages).toHaveBeenCalled();
+        },
+        { timeout: 2000 },
+      );
+
+      // Then - Loading indicator should NOT appear (stats disabled)
+      const loadingElement = container.querySelector('[class*="loadingTransforms"]');
+      expect(loadingElement).not.toBeInTheDocument();
+    });
+
+    it("passes allFrames to handleSeek when seeking", async () => {
+      // Given
+      const topicName = "/tf";
+      const messages: MessageEvent[] = Array.from({ length: 50 }, (_, i) =>
+        MessageEventBuilder.messageEvent({
+          topic: topicName,
+          message: { transforms: [] },
+          schemaName: "tf2_msgs/TFMessage",
+          sizeInBytes: 100,
+          receiveTime: { sec: 100, nsec: i },
+        }),
+      );
+
+      const topics = [
+        RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
+      ];
+
+      const mockBatchIterator = {
+        async *[Symbol.asyncIterator]() {
+          yield messages;
+        },
+      };
+
+      const customRendererInstance = createMockRenderer({
+        schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
+        currentTime: 0n,
+      });
+
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createPreloadingContext({
+        onSubscribe: (args: any) => {
+          void args.onNewRangeIterator?.(mockBatchIterator);
+        },
+      });
+
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.setTopics).toBeDefined();
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics,
+            currentFrame: [],
+            currentTime: { sec: 100, nsec: 0 },
+          },
+          jest.fn(),
+        );
+      });
+
+      // Wait for initial load
+      await waitFor(
+        () => {
+          expect(customRendererInstance.handleAllFramesMessages).toHaveBeenCalled();
+        },
+        { timeout: 2000 },
+      );
+
+      // When - Trigger seek
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics,
+            currentFrame: [],
+            currentTime: { sec: 50, nsec: 0 },
+            didSeek: true,
+          },
+          jest.fn(),
+        );
+      });
+
+      // Then - handleSeek should be called with allFrames
+      await waitFor(() => {
+        expect(customRendererInstance.handleSeek).toHaveBeenCalledWith(
+          expect.any(BigInt),
+          expect.any(Array),
+        );
+        const seekCall = customRendererInstance.handleSeek.mock.calls[0];
+        expect(seekCall?.[1]).toHaveLength(50);
       });
     });
   });

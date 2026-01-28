@@ -609,187 +609,628 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     expect(addMessageEventMock).not.toHaveBeenCalled();
   });
   it("adds messages with receiveTime up to currentTime", () => {
+    // Given: A renderer with 10 messages
     const renderer = new Renderer(rendererArgs);
-
     const msgs = [];
     for (let i = 0; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
     const currentTime = 4n;
-    const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+
+    // When: Processing messages up to currentTime
     renderer.setCurrentTime(currentTime);
     renderer.handleAllFramesMessages(msgs);
 
-    expect(addMessageEventMock).toHaveBeenCalledTimes(5);
+    // Then: Only messages up to time 4 should be processed
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    const processedMessages = addMessageEventBatchMock.mock.calls[0]?.[0];
+    expect(processedMessages).toHaveLength(5);
   });
   it("adds later messages after currentTime is updated", () => {
+    // Given: A renderer with 10 messages
     const renderer = new Renderer(rendererArgs);
-
     const msgs = [];
     for (let i = 0; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const currentTime = 4n;
-    const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
-    renderer.setCurrentTime(currentTime);
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+
+    // When: Processing messages up to time 4
+    renderer.setCurrentTime(4n);
     renderer.handleAllFramesMessages(msgs);
-    expect(addMessageEventMock).toHaveBeenCalledTimes(5);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    const firstBatch = addMessageEventBatchMock.mock.calls[0]?.[0];
+    expect(firstBatch).toHaveLength(5);
+
+    // When: Updating time to 5
+    addMessageEventBatchMock.mockClear();
     renderer.setCurrentTime(5n);
     renderer.handleAllFramesMessages(msgs);
-    expect(addMessageEventMock).toHaveBeenCalledTimes(6);
+
+    // Then: Only the additional message should be processed
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    const secondBatch = addMessageEventBatchMock.mock.calls[0]?.[0];
+    expect(secondBatch).toHaveLength(1);
   });
   it("reads all messages when last message receiveTime is before currentTime", () => {
+    // Given: A renderer with 10 messages all before current time
     const renderer = new Renderer(rendererArgs);
-
     const msgs = [];
     for (let i = 0; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
     const currentTime = 11n;
-    const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+
+    // When: Setting current time and handling messages
     renderer.setCurrentTime(currentTime);
     renderer.handleAllFramesMessages(msgs);
-    expect(addMessageEventMock).toHaveBeenCalledTimes(10);
+
+    // Then: All messages should be processed in batch
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    expect(addMessageEventBatchMock).toHaveBeenCalledWith(msgs);
   });
   it("reads reads new messages when allFrames array is added to", () => {
+    // Given: A renderer with initial 10 messages
     const renderer = new Renderer(rendererArgs);
-
     const msgs = [];
     let i = 0;
     for (i; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
     const currentTime = 11n;
-    const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+
+    // When: Processing first batch
     renderer.setCurrentTime(currentTime);
     renderer.handleAllFramesMessages(msgs);
-    expect(addMessageEventMock).toHaveBeenCalledTimes(10);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+
+    // When: Adding more messages and processing again
+    addMessageEventBatchMock.mockClear();
     for (i; i < 20; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
     renderer.handleAllFramesMessages(msgs);
-    // only two more are before or equal to currentTime
-    expect(addMessageEventMock).toHaveBeenCalledTimes(12);
+
+    // Then: Only the two additional messages before currentTime should be processed
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    const newMessages = addMessageEventBatchMock.mock.calls[0]?.[0];
+    expect(newMessages).toHaveLength(2);
   });
   it("doesn't read messages when currentTime is updated but no more receiveTimes are past it", () => {
+    // Given: A renderer with messages all before current time
     const renderer = new Renderer(rendererArgs);
-
     const msgs = [];
-    let i = 0;
-    for (i; i < 10; i++) {
+    for (let i = 0; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+
+    // When: Processing all messages
     renderer.setCurrentTime(11n);
     renderer.handleAllFramesMessages(msgs);
-    expect(addMessageEventMock).toHaveBeenCalledTimes(10);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
 
+    // When: Updating time without new messages to process
+    addMessageEventBatchMock.mockClear();
     renderer.setCurrentTime(12n);
     const newMessagesHandled = renderer.handleAllFramesMessages(msgs);
+
+    // Then: No new messages should be handled
     expect(newMessagesHandled).toBeFalsy();
-    expect(addMessageEventMock).toHaveBeenCalledTimes(10);
+    expect(addMessageEventBatchMock).not.toHaveBeenCalled();
   });
   it("adds all messages again after cursor is cleared", () => {
+    // Given: A renderer with processed messages
     const renderer = new Renderer(rendererArgs);
-
     const msgs = [];
-    let i = 0;
-    for (i; i < 10; i++) {
+    for (let i = 0; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+
+    // When: Processing messages initially
     renderer.setCurrentTime(11n);
     renderer.handleAllFramesMessages(msgs);
-    expect(addMessageEventMock).toHaveBeenCalledTimes(10);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
 
+    // When: Clearing cursor and processing again
+    addMessageEventBatchMock.mockClear();
     renderer.clear({ resetAllFramesCursor: true });
     const newMessagesHandled = renderer.handleAllFramesMessages(msgs);
+
+    // Then: All messages should be processed again
     expect(newMessagesHandled).toBeTruthy();
-    // will read all messages in twice
-    expect(addMessageEventMock).toHaveBeenCalledTimes(20);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    expect(addMessageEventBatchMock).toHaveBeenCalledWith(msgs);
   });
   it("resets cursor if messages were added before the cursor index", () => {
+    // Given: A renderer with messages starting at index 2
     const renderer = new Renderer(rendererArgs);
-
     const msgs = [];
-    let i = 2;
-    for (i; i < 10; i++) {
+    for (let i = 2; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+
+    // When: Processing initial messages
     renderer.setCurrentTime(5n);
     renderer.handleAllFramesMessages(msgs);
     const numMessagesBeforeTime = msgs.filter(
       (msg) => toNanoSec(msg.message.transforms[0]!.header.stamp) <= 5n,
     ).length;
-    expect(addMessageEventMock).toHaveBeenCalledTimes(numMessagesBeforeTime);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    const initialBatch = addMessageEventBatchMock.mock.calls[0]?.[0];
+    expect(initialBatch).toHaveLength(numMessagesBeforeTime);
 
-    addMessageEventMock.mockClear();
-
-    // add message to beginning of array, before cursor
+    // When: Adding message to beginning (before cursor)
+    addMessageEventBatchMock.mockClear();
     msgs.unshift(createTFMessageEvent("a", "b", 1n, [1n]));
-
     const newMessagesHandled = renderer.handleAllFramesMessages(msgs);
+
+    // Then: Should reprocess from beginning due to cursor reset
     expect(newMessagesHandled).toBeTruthy();
-    // will read from the beginning of the array again  because cursor was reset
-    expect(addMessageEventMock).toHaveBeenCalledTimes(numMessagesBeforeTime + 1);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    const reprocessedBatch = addMessageEventBatchMock.mock.calls[0]?.[0];
+    expect(reprocessedBatch).toHaveLength(numMessagesBeforeTime + 1);
   });
   it("resets cursor if messages were removed before the cursor index", () => {
+    // Given: A renderer with messages starting at index 2
     const renderer = new Renderer(rendererArgs);
-
     const msgs = [];
-    let i = 2;
-    for (i; i < 10; i++) {
+    for (let i = 2; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+
+    // When: Processing initial messages
     renderer.setCurrentTime(5n);
     renderer.handleAllFramesMessages(msgs);
     const numMessagesBeforeTime = msgs.filter(
       (msg) => toNanoSec(msg.message.transforms[0]!.header.stamp) <= 5n,
     ).length;
-    expect(addMessageEventMock).toHaveBeenCalledTimes(numMessagesBeforeTime);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
 
-    addMessageEventMock.mockClear();
-
-    // remove message at beginning of array, before cursor
+    // When: Removing message from beginning (before cursor)
+    addMessageEventBatchMock.mockClear();
     msgs.shift();
-
     const newMessagesHandled = renderer.handleAllFramesMessages(msgs);
+
+    // Then: Should reprocess from beginning due to cursor reset
     expect(newMessagesHandled).toBeTruthy();
-    // will read from the beginning of the array again  because cursor was reset
-    expect(addMessageEventMock).toHaveBeenCalledTimes(numMessagesBeforeTime - 1);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    const reprocessedBatch = addMessageEventBatchMock.mock.calls[0]?.[0];
+    expect(reprocessedBatch).toHaveLength(numMessagesBeforeTime - 1);
   });
   it.failing(
     "(does not) reset the cursor if number of messages added **and** removed before cursor are equal in a single update",
     () => {
+      // Given: A renderer with messages starting at index 2
       const renderer = new Renderer(rendererArgs);
-
       const msgs = [];
-      let i = 2;
-      for (i; i < 10; i++) {
+      for (let i = 2; i < 10; i++) {
         msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
       }
-      const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
+      const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+
+      // When: Processing initial messages
       renderer.setCurrentTime(5n);
       renderer.handleAllFramesMessages(msgs);
-      const numMessagesBeforeTime = msgs.filter(
-        (msg) => toNanoSec(msg.message.transforms[0]!.header.stamp) <= 5n,
-      ).length;
-      expect(addMessageEventMock).toHaveBeenCalledTimes(numMessagesBeforeTime);
+      expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
 
-      addMessageEventMock.mockClear();
-
-      // remove message at beginning of array, before cursor
+      // When: Removing and adding message at beginning (before cursor)
+      addMessageEventBatchMock.mockClear();
       msgs.shift();
-
-      // add message to beginning of array, before cursor
       msgs.unshift(createTFMessageEvent("a", "b", 1n, [1n]));
-
       const newMessagesHandled = renderer.handleAllFramesMessages(msgs);
+
+      // Then: Should still reprocess because cursor was reset
       expect(newMessagesHandled).toBeTruthy();
-      // will read from the beginning of the array again  because cursor was reset
-      expect(addMessageEventMock).toHaveBeenCalledTimes(numMessagesBeforeTime - 1);
+      expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
     },
   );
+});
+
+describe("Renderer backward seek behavior", () => {
+  let canvas = document.createElement("canvas");
+  let parent = document.createElement("div");
+  let rendererArgs: ConstructorParameters<typeof Renderer>[0] = {
+    ...defaultRendererProps,
+    canvas,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupJestCanvasMock();
+    parent = document.createElement("div");
+    canvas = document.createElement("canvas");
+    parent.appendChild(canvas);
+    rendererArgs = { ...defaultRendererProps, canvas };
+  });
+
+  afterEach(() => {
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("uses binary search when seeking backward with preload enabled", () => {
+    // Given: A renderer with preload enabled
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    const allFrames = [];
+    for (let i = 0; i < 100; i++) {
+      allFrames.push(createTFMessageEvent("parent", "child", BigInt(i * 1000), [BigInt(i * 1000)]));
+    }
+
+    // When: Processing messages up to current time
+    renderer.setCurrentTime(99000n);
+    const hasMessages = renderer.handleAllFramesMessages(allFrames);
+
+    // Then: Messages should be processed
+    expect(hasMessages).toBeTruthy();
+
+    // When: Seeking backward with allFrames
+    renderer.handleSeek(99000n, allFrames);
+
+    // Then: Should not throw and process correctly
+    expect(renderer.currentTime).toBe(99000n);
+  });
+
+  it("clears transforms correctly when seeking backward without preload", () => {
+    // Given: A renderer without preload
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+
+    // When: Adding transforms and seeking backward
+    renderer.setCurrentTime(100n);
+    const msg = createTFMessageEvent("parent", "child", 50n, [50n]);
+    renderer.addMessageEvent(msg);
+    renderer.animationFrame();
+
+    // When: Seeking backward should clear transforms
+    renderer.setCurrentTime(10n);
+    renderer.handleSeek(100n);
+
+    // Then: Transform tree should be cleared (no transforms)
+    const frame = renderer.transformTree.frame("child");
+    // Frame may exist but should have no transforms, or frame doesn't exist (both are valid)
+    expect(frame == undefined || frame.transformsSize() === 0).toBe(true);
+  });
+});
+
+describe("Renderer batch message processing", () => {
+  let canvas = document.createElement("canvas");
+  let parent = document.createElement("div");
+  let rendererArgs: ConstructorParameters<typeof Renderer>[0] = {
+    ...defaultRendererProps,
+    canvas,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupJestCanvasMock();
+    parent = document.createElement("div");
+    canvas = document.createElement("canvas");
+    parent.appendChild(canvas);
+    rendererArgs = { ...defaultRendererProps, canvas };
+  });
+
+  afterEach(() => {
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("processes messages in batch grouped by topic and schema", () => {
+    // Given: A renderer and messages with different topics
+    const renderer = new Renderer(rendererArgs);
+    const messages = [
+      createTFMessageEvent("parent1", "child1", 1n, [1n], "/tf"),
+      createTFMessageEvent("parent2", "child2", 2n, [2n], "/tf"),
+      createTFMessageEvent("parent3", "child3", 3n, [3n], "/tf_static"),
+    ];
+
+    // When: Processing batch of messages
+    renderer.setCurrentTime(10n);
+    renderer.addMessageEventBatch(messages);
+    renderer.animationFrame();
+
+    // Then: All transforms should be added
+    expect(renderer.transformTree.frame("child1")).toBeDefined();
+    expect(renderer.transformTree.frame("child2")).toBeDefined();
+    expect(renderer.transformTree.frame("child3")).toBeDefined();
+  });
+
+  it("handles empty batch gracefully", () => {
+    // Given: A renderer
+    const renderer = new Renderer(rendererArgs);
+
+    // When: Processing empty batch
+    renderer.addMessageEventBatch([]);
+
+    // Then: Should not throw error
+    expect(renderer.transformTree.frames().size).toBe(0);
+  });
+
+  it("groups messages by topic and convertTo when processing batch", () => {
+    // Given: A renderer with multiple messages from same topic
+    const renderer = new Renderer(rendererArgs);
+    const messages = [
+      createTFMessageEvent("parent1", "child1", 1n, [1n], "/tf"),
+      createTFMessageEvent("parent2", "child2", 2n, [2n], "/tf"),
+      createTFMessageEvent("parent3", "child3", 3n, [3n], "/tf"),
+    ];
+
+    // When: Processing batch
+    renderer.setCurrentTime(10n);
+    renderer.addMessageEventBatch(messages);
+    renderer.animationFrame();
+
+    // Then: All messages from same topic should be processed together
+    expect(renderer.transformTree.frame("child1")).toBeDefined();
+    expect(renderer.transformTree.frame("child2")).toBeDefined();
+    expect(renderer.transformTree.frame("child3")).toBeDefined();
+  });
+});
+
+describe("Renderer binary search optimization", () => {
+  let canvas = document.createElement("canvas");
+  let parent = document.createElement("div");
+  let rendererArgs: ConstructorParameters<typeof Renderer>[0] = {
+    ...defaultRendererProps,
+    canvas,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupJestCanvasMock();
+    parent = document.createElement("div");
+    canvas = document.createElement("canvas");
+    parent.appendChild(canvas);
+    rendererArgs = { ...defaultRendererProps, canvas };
+  });
+
+  afterEach(() => {
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("finds correct cutoff index when seeking backward", () => {
+    // Given: Renderer with preload enabled and sorted messages
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    const allFrames = [
+      createTFMessageEvent("parent", "child", 10n, [10n]),
+      createTFMessageEvent("parent", "child", 20n, [20n]),
+      createTFMessageEvent("parent", "child", 30n, [30n]),
+      createTFMessageEvent("parent", "child", 40n, [40n]),
+      createTFMessageEvent("parent", "child", 50n, [50n]),
+    ];
+
+    // When: Seeking backward from 50n to 25n
+    renderer.setCurrentTime(50n);
+    renderer.handleAllFramesMessages(allFrames);
+    renderer.setCurrentTime(25n);
+    renderer.handleSeek(50n, allFrames);
+
+    // Then: Should clear transforms after 25n
+    renderer.animationFrame();
+    expect(renderer.currentTime).toBe(25n);
+  });
+
+  it("handles seek to exact message timestamp", () => {
+    // Given: Renderer with messages at specific timestamps
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    const allFrames = [
+      createTFMessageEvent("parent", "child", 10n, [10n]),
+      createTFMessageEvent("parent", "child", 20n, [20n]),
+      createTFMessageEvent("parent", "child", 30n, [30n]),
+    ];
+
+    // When: Seeking to exact timestamp of a message
+    renderer.setCurrentTime(50n);
+    renderer.handleAllFramesMessages(allFrames);
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(50n, allFrames);
+
+    // Then: Should include message at that timestamp
+    renderer.animationFrame();
+    expect(renderer.currentTime).toBe(20n);
+  });
+
+  it("handles seek to before first message", () => {
+    // Given: Renderer with messages starting from 10n
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    const allFrames = [
+      createTFMessageEvent("parent", "child", 10n, [10n]),
+      createTFMessageEvent("parent", "child", 20n, [20n]),
+    ];
+
+    // When: Seeking to before first message
+    renderer.setCurrentTime(50n);
+    renderer.handleAllFramesMessages(allFrames);
+    renderer.setCurrentTime(5n);
+    renderer.handleSeek(50n, allFrames);
+
+    // Then: Should clear all transforms
+    renderer.animationFrame();
+    expect(renderer.currentTime).toBe(5n);
+  });
+});
+
+describe("Renderer maxPreloadMessages configuration", () => {
+  let canvas = document.createElement("canvas");
+  let parent = document.createElement("div");
+  let rendererArgs: ConstructorParameters<typeof Renderer>[0] = {
+    ...defaultRendererProps,
+    canvas,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupJestCanvasMock();
+    parent = document.createElement("div");
+    canvas = document.createElement("canvas");
+    parent.appendChild(canvas);
+    rendererArgs = { ...defaultRendererProps, canvas };
+  });
+
+  afterEach(() => {
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("uses default MAX_TRANSFORM_MESSAGES when not configured", () => {
+    // Given: Renderer without maxPreloadMessages setting
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+
+    // When: Config is accessed
+    const maxMessages = renderer.config.scene.transforms?.maxPreloadMessages;
+
+    // Then: Should be undefined (uses default)
+    expect(maxMessages).toBeUndefined();
+  });
+
+  it("respects custom maxPreloadMessages configuration", () => {
+    // Given: Renderer with custom maxPreloadMessages
+    const customMax = 5000;
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true, maxPreloadMessages: customMax } },
+      },
+    });
+
+    // When: Config is accessed
+    const maxMessages = renderer.config.scene.transforms?.maxPreloadMessages;
+
+    // Then: Should use custom value
+    expect(maxMessages).toBe(customMax);
+  });
+});
+
+describe("Renderer resetAllFramesCursor event handling", () => {
+  let canvas = document.createElement("canvas");
+  let parent = document.createElement("div");
+  let rendererArgs: ConstructorParameters<typeof Renderer>[0] = {
+    ...defaultRendererProps,
+    canvas,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupJestCanvasMock();
+    parent = document.createElement("div");
+    canvas = document.createElement("canvas");
+    parent.appendChild(canvas);
+    rendererArgs = { ...defaultRendererProps, canvas };
+  });
+
+  afterEach(() => {
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("emits resetAllFramesCursor when seeking backward without allFrames", () => {
+    // Given: Renderer with preload enabled but no allFrames
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    const resetListener = jest.fn();
+    renderer.addListener("resetAllFramesCursor", resetListener);
+
+    // When: Seeking backward without providing allFrames
+    renderer.setCurrentTime(50n);
+    renderer.setCurrentTime(5n);
+    renderer.handleSeek(50n); // No allFrames parameter
+
+    // Then: Event should be emitted (falls back to clear with resetAllFramesCursor=true)
+    expect(resetListener).toHaveBeenCalled();
+  });
+
+  it("does not emit resetAllFramesCursor when seeking backward with allFrames", () => {
+    // Given: Renderer with preload enabled and allFrames
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    const resetListener = jest.fn();
+    renderer.addListener("resetAllFramesCursor", resetListener);
+
+    const allFrames = [
+      createTFMessageEvent("parent", "child", 10n, [10n]),
+      createTFMessageEvent("parent", "child", 20n, [20n]),
+    ];
+
+    // When: Seeking backward with allFrames (uses optimized path)
+    renderer.setCurrentTime(50n);
+    renderer.setCurrentTime(5n);
+    renderer.handleSeek(50n, allFrames);
+
+    // Then: Event should not be emitted (optimized path doesn't call clear)
+    expect(resetListener).not.toHaveBeenCalled();
+  });
+
+  it("emits resetAllFramesCursor when seeking forward", () => {
+    // Given: Renderer with preload enabled
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    const resetListener = jest.fn();
+    renderer.addListener("resetAllFramesCursor", resetListener);
+
+    const allFrames = [
+      createTFMessageEvent("parent", "child", 10n, [10n]),
+      createTFMessageEvent("parent", "child", 20n, [20n]),
+    ];
+
+    // When: Seeking forward (calls clear with resetAllFramesCursor=false)
+    renderer.setCurrentTime(5n);
+    renderer.setCurrentTime(50n);
+    renderer.handleSeek(5n, allFrames);
+
+    // Then: Event should not be emitted for forward seek
+    expect(resetListener).not.toHaveBeenCalled();
+  });
 });

@@ -71,6 +71,7 @@ export type RendererEvents = {
   resetViewChanged: (renderer: IRenderer) => void;
   resetAllFramesCursor: (renderer: IRenderer) => void;
   hudItemsChanged: (renderer: IRenderer) => void;
+  clearPreloadBuffer: (renderer: IRenderer) => void;
 };
 
 export type FollowMode = "follow-pose" | "follow-position" | "follow-none";
@@ -139,6 +140,8 @@ export type RendererConfig = {
       lineColor?: string;
       /** Enable transform preloading */
       enablePreloading?: boolean;
+      /** Maximum number of transform messages to keep when preloading (default: 10000) */
+      maxPreloadMessages?: number;
     };
     /** Sync camera with other 3d panels */
     syncCamera?: boolean;
@@ -293,7 +296,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
    * Should be called after `setCurrentTime` as been called
    * @param oldTime used to determine if seeked backwards
    */
-  handleSeek(oldTimeNs: bigint): void;
+  handleSeek(oldTimeNs: bigint, allFrames?: readonly MessageEvent[]): void;
 
   /**
    * Clears:
