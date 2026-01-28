@@ -92,7 +92,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   }
 
   public handleAction = (action: SettingsTreeAction): void => {
-    const path = action.action === "reorder-node" ? action.payload.targetPath : action.payload.path;
+    const path = action.payload.path;
 
     // Walk the settings tree down to the end of the path, firing any action
     // handlers along the way

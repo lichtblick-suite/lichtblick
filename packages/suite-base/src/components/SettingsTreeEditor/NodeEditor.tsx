@@ -134,7 +134,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
         actionHandler({
           action: "reorder-node",
           payload: {
-            sourcePath: item.path,
+            path: item.path,
             targetPath: props.path,
           },
         });

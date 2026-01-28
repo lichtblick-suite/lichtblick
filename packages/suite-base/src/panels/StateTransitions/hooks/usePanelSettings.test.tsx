@@ -713,7 +713,7 @@ describe("usePanelSettings", () => {
       // When - reordering from index 1 to index 3
       const settings: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "1"], targetPath: ["paths", "3"] },
+        payload: { path: ["paths", "1"], targetPath: ["paths", "3"] },
       };
 
       act(() => {
@@ -747,7 +747,7 @@ describe("usePanelSettings", () => {
       // When - reordering from index 3 to index 1
       const settings: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "3"], targetPath: ["paths", "1"] },
+        payload: { path: ["paths", "3"], targetPath: ["paths", "1"] },
       };
 
       act(() => {
@@ -780,7 +780,7 @@ describe("usePanelSettings", () => {
       // When - reordering with same source and target index
       const settings: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "1"], targetPath: ["paths", "1"] },
+        payload: { path: ["paths", "1"], targetPath: ["paths", "1"] },
       };
 
       act(() => {
@@ -809,7 +809,7 @@ describe("usePanelSettings", () => {
       // When - reordering with negative source index
       const settings: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "-1"], targetPath: ["paths", "1"] },
+        payload: { path: ["paths", "-1"], targetPath: ["paths", "1"] },
       };
 
       act(() => {
@@ -838,7 +838,7 @@ describe("usePanelSettings", () => {
       // When - reordering with negative target index
       const settings: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "1"], targetPath: ["paths", "-1"] },
+        payload: { path: ["paths", "1"], targetPath: ["paths", "-1"] },
       };
 
       act(() => {
@@ -867,7 +867,7 @@ describe("usePanelSettings", () => {
       // When - reordering with source index out of bounds
       const settings: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "5"], targetPath: ["paths", "1"] },
+        payload: { path: ["paths", "5"], targetPath: ["paths", "1"] },
       };
 
       act(() => {
@@ -896,7 +896,7 @@ describe("usePanelSettings", () => {
       // When - reordering with target index out of bounds
       const settings: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "1"], targetPath: ["paths", "5"] },
+        payload: { path: ["paths", "1"], targetPath: ["paths", "5"] },
       };
 
       act(() => {
@@ -925,7 +925,7 @@ describe("usePanelSettings", () => {
       // When - reordering first element to last position
       const settings: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "0"], targetPath: ["paths", "2"] },
+        payload: { path: ["paths", "0"], targetPath: ["paths", "2"] },
       };
 
       act(() => {
@@ -956,7 +956,7 @@ describe("usePanelSettings", () => {
       // When - reordering last element to first position
       const settings: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { sourcePath: ["paths", "2"], targetPath: ["paths", "0"] },
+        payload: { path: ["paths", "2"], targetPath: ["paths", "0"] },
       };
 
       act(() => {

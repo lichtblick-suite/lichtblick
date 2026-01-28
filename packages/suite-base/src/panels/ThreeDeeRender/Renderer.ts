@@ -1332,11 +1332,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   };
 
   #handleTopicsAction = (action: SettingsTreeAction): void => {
-    if (action.action !== "perform-node-action") {
-      return;
-    }
     const path = action.payload.path;
-    if (path.length !== 1 || path[0] !== "topics") {
+    if (action.action !== "perform-node-action" || path.length !== 1 || path[0] !== "topics") {
       return;
     }
     log.debug(`handleTopicsAction(${action.payload.id})`);

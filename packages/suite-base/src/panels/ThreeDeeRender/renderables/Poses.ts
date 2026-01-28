@@ -219,11 +219,8 @@ export class Poses extends SceneExtension<PoseRenderable> {
   }
 
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
-    if (action.action !== "update") {
-      return;
-    }
     const path = action.payload.path;
-    if (path.length !== 3) {
+    if (action.action !== "update" || path.length !== 3) {
       return;
     }
 

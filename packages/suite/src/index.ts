@@ -967,7 +967,7 @@ export type SettingsTreeActionPerformNode = {
 export type SettingsTreeActionReorder = {
   action: "reorder-node";
   payload: {
-    sourcePath: readonly string[];
+    path: readonly string[];
     targetPath: readonly string[];
   };
 };

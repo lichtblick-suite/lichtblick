@@ -201,7 +201,7 @@ export function usePanelSettings(
   const actionHandler = useCallback(
     ({ action, payload }: SettingsTreeAction) => {
       if (action === "reorder-node") {
-        const sourceIndex = Number(payload.sourcePath[1]);
+        const sourceIndex = Number(payload.path[1]);
         const targetIndex = Number(payload.targetPath[1]);
         saveConfig(
           produce<StateTransitionConfig>((draft) => {
