@@ -6,7 +6,6 @@ import { test, expect } from "@playwright/test";
 import { loadFiles } from "../../fixtures/load-files";
 
 const MCAP_FILENAME = "example.mcap";
-const LAYOUT = "raw-messages-layout.json";
 
 /**
  * GIVEN a .mcap file and layout are loaded
@@ -21,7 +20,7 @@ test("is able to manually edit the timestamp display on the player", async ({ pa
   const getTimeParam = () => new URL(page.url()).searchParams.get("time");
 
   await page.goto("/");
-  await loadFiles({ mainWindow: page, filenames: [MCAP_FILENAME, LAYOUT] });
+  await loadFiles({ mainWindow: page, filenames: MCAP_FILENAME });
   const urlInitialTimestamp = "2025-02-26T10:37:15.547000000Z";
 
   // When
@@ -65,7 +64,7 @@ test("is able to manually edit the timestamp display (epoch format) on the playe
   const getTimeParam = () => new URL(page.url()).searchParams.get("time");
 
   await page.goto("/");
-  await loadFiles({ mainWindow: page, filenames: [MCAP_FILENAME, LAYOUT] });
+  await loadFiles({ mainWindow: page, filenames: MCAP_FILENAME });
   const urlInitialTimestamp = "2025-02-26T10:37:15.547000000Z";
 
   // When
