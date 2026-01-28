@@ -36,6 +36,7 @@ jest.mock("three", () => {
         },
 
         setPixelRatio: jest.fn(),
+        getPixelRatio: jest.fn(() => 1),
         setSize: jest.fn(),
         render: jest.fn(),
         clear: jest.fn(),
@@ -147,6 +148,224 @@ describe("3D Renderer", () => {
   it("constructs a renderer without error", () => {
     expect(() => new Renderer({ ...defaultRendererProps, canvas })).not.toThrow();
   });
+
+  it("constructs a renderer in image interface mode", () => {
+    // Given: Props with image interface mode
+    const imageRendererProps = {
+      ...defaultRendererProps,
+      interfaceMode: "image" as const,
+    };
+
+    // When: Creating renderer in image mode
+    const renderer = new Renderer({ ...imageRendererProps, canvas });
+
+    // Then: Should be in image mode
+    expect(renderer.interfaceMode).toBe("image");
+    renderer.dispose();
+  });
+
+  it("disposes all resources correctly", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    const disposeSpy = jest.spyOn(renderer.gl, "dispose");
+    const inputDisposeSpy = jest.spyOn(renderer.input, "dispose");
+
+    // When: Disposing the renderer
+    renderer.dispose();
+
+    // Then: All resources should be disposed
+    expect(disposeSpy).toHaveBeenCalled();
+    expect(inputDisposeSpy).toHaveBeenCalled();
+  });
+
+  it("sets and retrieves camera sync error", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    expect(renderer.cameraSyncError()).toBeUndefined();
+
+    // When: Setting a camera sync error
+    renderer.setCameraSyncError("Test error message");
+
+    // Then: Error should be retrievable
+    expect(renderer.cameraSyncError()).toBe("Test error message");
+
+    // When: Clearing the error
+    renderer.setCameraSyncError(undefined);
+
+    // Then: Error should be undefined
+    expect(renderer.cameraSyncError()).toBeUndefined();
+
+    renderer.dispose();
+  });
+
+  it("returns pixel ratio from WebGL renderer", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+
+    // When: Getting pixel ratio
+    const pixelRatio = renderer.getPixelRatio();
+
+    // Then: Should return mocked pixel ratio
+    expect(pixelRatio).toBe(1);
+
+    renderer.dispose();
+  });
+
+  it("enables and disables picking mode", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+
+    // When: Enabling picking
+    renderer.setPickingEnabled(true);
+
+    // Then: Picking should be enabled (internal state)
+    expect(() => {
+      renderer.setPickingEnabled(true);
+    }).not.toThrow();
+
+    // When: Disabling picking
+    renderer.setPickingEnabled(false);
+
+    // Then: Should clear selection and disable picking
+    expect(() => {
+      renderer.setPickingEnabled(false);
+    }).not.toThrow();
+
+    renderer.dispose();
+  });
+
+  it("updates color scheme to dark", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    const setClearColorSpy = jest.spyOn(renderer.gl, "setClearColor");
+
+    // When: Setting dark color scheme
+    renderer.setColorScheme("dark", undefined);
+
+    // Then: Should update color scheme and backdrop
+    expect(renderer.colorScheme).toBe("dark");
+    expect(setClearColorSpy).toHaveBeenCalled();
+
+    renderer.dispose();
+  });
+
+  it("updates color scheme to light", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    const setClearColorSpy = jest.spyOn(renderer.gl, "setClearColor");
+
+    // When: Setting light color scheme
+    renderer.setColorScheme("light", undefined);
+
+    // Then: Should update color scheme and backdrop
+    expect(renderer.colorScheme).toBe("light");
+    expect(setClearColorSpy).toHaveBeenCalled();
+
+    renderer.dispose();
+  });
+
+  it("updates topics list and emits event", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    const emitSpy = jest.spyOn(renderer, "emit");
+    const topics = [
+      { name: "/test", schemaName: "test_schema" },
+      { name: "/other", schemaName: "other_schema" },
+    ];
+
+    // When: Setting topics
+    renderer.setTopics(topics);
+
+    // Then: Should update topics and emit event
+    expect(renderer.topics).toBe(topics);
+    expect(renderer.topicsByName?.get("/test")).toEqual(topics[0]);
+    expect(emitSpy).toHaveBeenCalledWith("topicsChanged", renderer);
+
+    renderer.dispose();
+  });
+
+  it("gets camera state from camera handler", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+
+    // When: Getting camera state
+    const cameraState = renderer.getCameraState();
+
+    // Then: Should return camera state
+    expect(cameraState).toBeDefined();
+    expect(cameraState).toHaveProperty("perspective");
+
+    renderer.dispose();
+  });
+
+  it("resets view in image mode", () => {
+    // Given: A renderer in image mode
+    const imageRendererProps = {
+      ...defaultRendererProps,
+      interfaceMode: "image" as const,
+    };
+    const renderer = new Renderer({ ...imageRendererProps, canvas });
+
+    // When: Resetting view
+    renderer.resetView();
+
+    // Then: Should not throw
+    expect(() => {
+      renderer.resetView();
+    }).not.toThrow();
+
+    renderer.dispose();
+  });
+
+  it("sets and clears selected renderable", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    const emitSpy = jest.spyOn(renderer, "emit");
+
+    // When: Calling setSelectedRenderable with undefined (no change as it starts undefined)
+    renderer.setSelectedRenderable(undefined);
+
+    // Then: Should not emit event (no change)
+    expect(emitSpy).not.toHaveBeenCalled();
+
+    renderer.dispose();
+  });
+
+  it("processes batch of message events", () => {
+    // Given: A renderer instance with TF subscription
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    const messages = [
+      createTFMessageEvent("parent1", "child1", 1n, [1n]),
+      createTFMessageEvent("parent2", "child2", 2n, [2n]),
+    ];
+
+    // When: Adding message events in batch
+    renderer.addMessageEventBatch(messages);
+
+    // Then: Should not throw and process messages
+    expect(() => {
+      renderer.addMessageEventBatch(messages);
+    }).not.toThrow();
+
+    renderer.dispose();
+  });
+
+  it("processes single message event", () => {
+    // Given: A renderer instance
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    const message = createTFMessageEvent("parent", "child", 1n, [1n]);
+
+    // When: Adding a single message event
+    renderer.addMessageEvent(message);
+
+    // Then: Should process message without error
+    expect(() => {
+      renderer.addMessageEvent(message);
+    }).not.toThrow();
+
+    renderer.dispose();
+  });
+
   it("does not set a unfollow pose snapshot  when in follow-pose mode", () => {
     const renderer = new Renderer({
       ...defaultRendererProps,
