@@ -18,6 +18,7 @@ import {
   HandleUpdateAction,
 } from "@lichtblick/suite-base/panels/Plot/types";
 import { buildSettingsTree } from "@lichtblick/suite-base/panels/Plot/utils/buildSettingsTree";
+import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -80,29 +81,6 @@ export function handleMoveSeriesAction({ draft, index, direction }: HandleMoveSe
   }
 }
 
-export type HandleReorderSeriesAction = HandleAction & {
-  sourceIndex: number;
-  targetIndex: number;
-};
-
-export function handleReorderSeriesAction({
-  draft,
-  sourceIndex,
-  targetIndex,
-}: HandleReorderSeriesAction): void {
-  if (
-    sourceIndex === targetIndex ||
-    sourceIndex < 0 ||
-    targetIndex < 0 ||
-    sourceIndex >= draft.paths.length ||
-    targetIndex >= draft.paths.length
-  ) {
-    return;
-  }
-  const [removed] = draft.paths.splice(sourceIndex, 1);
-  draft.paths.splice(targetIndex, 0, removed!);
-}
-
 export default function usePlotPanelSettings(
   config: PlotConfig,
   saveConfig: SaveConfig<PlotConfig>,
@@ -125,7 +103,7 @@ export default function usePlotPanelSettings(
         const targetIndex = Number(payload.targetPath[1]);
         saveConfig(
           produce<PlotConfig>((draft) => {
-            handleReorderSeriesAction({ draft, sourceIndex, targetIndex });
+            handleReorderSeriesAction(draft, sourceIndex, targetIndex);
           }),
         );
       } else if (payload.id === "add-series") {

@@ -21,6 +21,7 @@ import {
 } from "@lichtblick/suite";
 import { DEFAULT_STATE_TRANSITION_PATH } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
+import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -142,24 +143,6 @@ export const makeRootSeriesNode = memoizeWeak(
     };
   },
 );
-
-function handleReorderSeriesAction(
-  draft: StateTransitionConfig,
-  sourceIndex: number,
-  targetIndex: number,
-): void {
-  if (
-    sourceIndex === targetIndex ||
-    sourceIndex < 0 ||
-    targetIndex < 0 ||
-    sourceIndex >= draft.paths.length ||
-    targetIndex >= draft.paths.length
-  ) {
-    return;
-  }
-  const [removed] = draft.paths.splice(sourceIndex, 1);
-  draft.paths.splice(targetIndex, 0, removed!);
-}
 
 export function buildSettingsTree(
   { isSynced, xAxisMaxValue, xAxisMinValue, xAxisRange, showPoints }: StateTransitionConfig,

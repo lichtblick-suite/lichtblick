@@ -16,6 +16,7 @@ import {
   HandleDeleteSeriesAction,
   HandleUpdateAction,
 } from "@lichtblick/suite-base/panels/Plot/types";
+import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -25,8 +26,6 @@ import usePlotPanelSettings, {
   handleDeleteSeriesAction,
   HandleMoveSeriesAction,
   handleMoveSeriesAction,
-  HandleReorderSeriesAction,
-  handleReorderSeriesAction,
   handleUpdateAction,
 } from "./usePlotPanelSettings";
 
@@ -260,137 +259,101 @@ describe("handleReorderSeriesAction", () => {
   it("should reorder series from lower to higher index", () => {
     const paths = PlotBuilder.paths(4);
     const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleReorderSeriesAction = {
-      draft: _.cloneDeep(initialConfig),
-      sourceIndex: 1,
-      targetIndex: 3,
-    };
+    const draft = _.cloneDeep(initialConfig);
 
-    handleReorderSeriesAction(input);
+    handleReorderSeriesAction(draft, 1, 3);
 
-    expect(input.draft.paths[0]).toEqual(paths[0]);
-    expect(input.draft.paths[1]).toEqual(paths[2]);
-    expect(input.draft.paths[2]).toEqual(paths[3]);
-    expect(input.draft.paths[3]).toEqual(paths[1]);
+    expect(draft.paths[0]).toEqual(paths[0]);
+    expect(draft.paths[1]).toEqual(paths[2]);
+    expect(draft.paths[2]).toEqual(paths[3]);
+    expect(draft.paths[3]).toEqual(paths[1]);
   });
 
   it("should reorder series from higher to lower index", () => {
     const paths = PlotBuilder.paths(4);
     const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleReorderSeriesAction = {
-      draft: _.cloneDeep(initialConfig),
-      sourceIndex: 3,
-      targetIndex: 1,
-    };
+    const draft = _.cloneDeep(initialConfig);
 
-    handleReorderSeriesAction(input);
+    handleReorderSeriesAction(draft, 3, 1);
 
-    expect(input.draft.paths[0]).toEqual(paths[0]);
-    expect(input.draft.paths[1]).toEqual(paths[3]);
-    expect(input.draft.paths[2]).toEqual(paths[1]);
-    expect(input.draft.paths[3]).toEqual(paths[2]);
+    expect(draft.paths[0]).toEqual(paths[0]);
+    expect(draft.paths[1]).toEqual(paths[3]);
+    expect(draft.paths[2]).toEqual(paths[1]);
+    expect(draft.paths[3]).toEqual(paths[2]);
   });
 
   it("should not change paths when sourceIndex equals targetIndex", () => {
     const paths = PlotBuilder.paths(3);
     const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleReorderSeriesAction = {
-      draft: _.cloneDeep(initialConfig),
-      sourceIndex: 1,
-      targetIndex: 1,
-    };
+    const draft = _.cloneDeep(initialConfig);
 
-    handleReorderSeriesAction(input);
+    handleReorderSeriesAction(draft, 1, 1);
 
-    expect(input.draft.paths).toEqual(paths);
+    expect(draft.paths).toEqual(paths);
   });
 
   it("should not change paths when sourceIndex is negative", () => {
     const paths = PlotBuilder.paths(3);
     const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleReorderSeriesAction = {
-      draft: _.cloneDeep(initialConfig),
-      sourceIndex: -1,
-      targetIndex: 1,
-    };
+    const draft = _.cloneDeep(initialConfig);
 
-    handleReorderSeriesAction(input);
+    handleReorderSeriesAction(draft, -1, 1);
 
-    expect(input.draft.paths).toEqual(paths);
+    expect(draft.paths).toEqual(paths);
   });
 
   it("should not change paths when targetIndex is negative", () => {
     const paths = PlotBuilder.paths(3);
     const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleReorderSeriesAction = {
-      draft: _.cloneDeep(initialConfig),
-      sourceIndex: 1,
-      targetIndex: -1,
-    };
+    const draft = _.cloneDeep(initialConfig);
 
-    handleReorderSeriesAction(input);
+    handleReorderSeriesAction(draft, 1, -1);
 
-    expect(input.draft.paths).toEqual(paths);
+    expect(draft.paths).toEqual(paths);
   });
 
   it("should not change paths when sourceIndex is out of bounds", () => {
     const paths = PlotBuilder.paths(3);
     const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleReorderSeriesAction = {
-      draft: _.cloneDeep(initialConfig),
-      sourceIndex: 3,
-      targetIndex: 1,
-    };
+    const draft = _.cloneDeep(initialConfig);
 
-    handleReorderSeriesAction(input);
+    handleReorderSeriesAction(draft, 3, 1);
 
-    expect(input.draft.paths).toEqual(paths);
+    expect(draft.paths).toEqual(paths);
   });
 
   it("should not change paths when targetIndex is out of bounds", () => {
     const paths = PlotBuilder.paths(3);
     const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleReorderSeriesAction = {
-      draft: _.cloneDeep(initialConfig),
-      sourceIndex: 1,
-      targetIndex: 3,
-    };
+    const draft = _.cloneDeep(initialConfig);
 
-    handleReorderSeriesAction(input);
+    handleReorderSeriesAction(draft, 1, 3);
 
-    expect(input.draft.paths).toEqual(paths);
+    expect(draft.paths).toEqual(paths);
   });
 
   it("should handle reorder of first element", () => {
     const paths = PlotBuilder.paths(3);
     const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleReorderSeriesAction = {
-      draft: _.cloneDeep(initialConfig),
-      sourceIndex: 0,
-      targetIndex: 2,
-    };
+    const draft = _.cloneDeep(initialConfig);
 
-    handleReorderSeriesAction(input);
+    handleReorderSeriesAction(draft, 0, 2);
 
-    expect(input.draft.paths[0]).toEqual(paths[1]);
-    expect(input.draft.paths[1]).toEqual(paths[2]);
-    expect(input.draft.paths[2]).toEqual(paths[0]);
+    expect(draft.paths[0]).toEqual(paths[1]);
+    expect(draft.paths[1]).toEqual(paths[2]);
+    expect(draft.paths[2]).toEqual(paths[0]);
   });
 
   it("should handle reorder of last element", () => {
     const paths = PlotBuilder.paths(3);
     const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleReorderSeriesAction = {
-      draft: _.cloneDeep(initialConfig),
-      sourceIndex: 2,
-      targetIndex: 0,
-    };
+    const draft = _.cloneDeep(initialConfig);
 
-    handleReorderSeriesAction(input);
+    handleReorderSeriesAction(draft, 2, 0);
 
-    expect(input.draft.paths[0]).toEqual(paths[2]);
-    expect(input.draft.paths[1]).toEqual(paths[0]);
-    expect(input.draft.paths[2]).toEqual(paths[1]);
+    expect(draft.paths[0]).toEqual(paths[2]);
+    expect(draft.paths[1]).toEqual(paths[0]);
+    expect(draft.paths[2]).toEqual(paths[1]);
   });
 });
 
