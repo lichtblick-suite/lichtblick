@@ -10,20 +10,24 @@ import path from "path";
 export type ElectronFixtures = {
   electronApp: ElectronApplication;
   mainWindow: Page;
+  preInstalledExtensions?: string[];
 };
 
 const WEBPACK_PATH = path.resolve(__dirname, "../../desktop/.webpack");
 
 export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
   electronArgs: [],
-  electronApp: async ({ electronArgs }, use) => {
+  preInstalledExtensions: [],
+
+  electronApp: async ({ electronArgs, preInstalledExtensions }, use) => {
     checkBuild(WEBPACK_PATH);
 
-    // Create a new user data directory for each test, which bypasses the `app.requestSingleInstanceLock()`
     const userDataDir = await mkdtemp(path.join(os.tmpdir(), "e2e-test-"));
-
-    // Create a new home directory for each test, which creates a brand new .lcihtblick-suite directory for e2e testing
     const homeDir = await mkdtemp(path.join(os.tmpdir(), "home-e2e-test-"));
+
+    for (const filename of preInstalledExtensions ?? []) {
+      preInstallExtensionInUserFolder(homeDir, filename);
+    }
 
     const app = await electron.launch({
       args: [
@@ -51,6 +55,25 @@ function checkBuild(webpackPath: string): void {
   const files = fs.readdirSync(webpackPath);
   if (files.length === 0) {
     throw new Error(`Webpack path is empty: ${webpackPath}`);
+  }
+}
+
+function preInstallExtensionInUserFolder(homeDir: string, filename: string): void {
+  const source = path.join(process.cwd(), "e2e", "fixtures", "assets", filename);
+
+  if (!fs.existsSync(source)) {
+    throw new Error(`Extension asset not found: ${source}`);
+  }
+
+  const extensionsDir = path.join(homeDir, ".lichtblick-suite", "extensions");
+  fs.mkdirSync(extensionsDir, { recursive: true });
+
+  const stats = fs.statSync(source);
+  if (stats.isDirectory()) {
+    const destDir = path.join(extensionsDir, filename);
+    fs.cpSync(source, destDir, { recursive: true });
+  } else {
+    fs.copyFileSync(source, path.join(extensionsDir, filename));
   }
 }
 
