@@ -431,7 +431,8 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   useLayoutEffect(() => {
     const transformTopics = transformTopicsToPreload;
     const isPreloadingEnabled = config.scene.transforms?.enablePreloading === true;
-    const maxMessages = config.scene.transforms?.maxPreloadMessages ?? MAX_TRANSFORM_MESSAGES;
+    const maxMessages: number =
+      config.scene.transforms?.maxPreloadMessages ?? MAX_TRANSFORM_MESSAGES;
 
     // Exit if preloading is disabled
     if (!isPreloadingEnabled || transformTopics.length === 0) {

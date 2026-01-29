@@ -51,6 +51,7 @@ import {
   RendererEvents,
   RendererSubscription,
   TestOptions,
+  AddMessageEventOptions,
 } from "./IRenderer";
 import { Input } from "./Input";
 import { DEFAULT_MESH_UP_AXIS, ModelCache } from "./ModelCache";
@@ -1032,6 +1033,34 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
+  private queueByKey(
+    groups: Map<string, MessageEvent[]>,
+    subscriptions: Map<string, RendererSubscription[]>,
+  ): void {
+    for (const [key, messageEvents] of groups) {
+      const subs = subscriptions.get(key);
+      if (!subs) {
+        continue;
+      }
+
+      for (const sub of subs) {
+        sub.queue ??= [];
+        sub.queue.push(...messageEvents);
+      }
+    }
+  }
+
+  private addMessageToGroup(messageEvent: MessageEvent): Map<string, MessageEvent[]> {
+    const messages = new Map<string, MessageEvent[]>();
+
+    if (!messages.has(messageEvent.topic)) {
+      messages.set(messageEvent.topic, []);
+    }
+    messages.get(messageEvent.topic)!.push(messageEvent);
+
+    return messages;
+  }
+
   /**
    * Batch version of addMessageEvent that processes multiple messages more efficiently
    * by grouping them by topic/schema before queueing
@@ -1039,77 +1068,26 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public addMessageEventBatch(messageEvents: readonly MessageEvent[]): void {
     // Extract coordinate frames from all messages
     for (const messageEvent of messageEvents) {
-      const { message } = messageEvent;
-
-      const maybeHasHeader = message as DeepPartial<{ header: Header }>;
-      const maybeHasMarkers = message as DeepPartial<MarkerArray>;
-      const maybeHasEntities = message as DeepPartial<SceneUpdate>;
-      const maybeHasFrameId = message as DeepPartial<Header>;
-
-      // Extract coordinate frame IDs from all incoming messages
-      if (maybeHasHeader.header) {
-        const frameId = maybeHasHeader.header.frame_id ?? "";
-        this.addCoordinateFrame(frameId);
-      } else if (Array.isArray(maybeHasMarkers.markers)) {
-        for (const marker of maybeHasMarkers.markers) {
-          if (marker) {
-            const frameId = marker.header?.frame_id ?? "";
-            this.addCoordinateFrame(frameId);
-          }
-        }
-      } else if (Array.isArray(maybeHasEntities.entities)) {
-        for (const entity of maybeHasEntities.entities) {
-          if (entity) {
-            const frameId = entity.frame_id ?? "";
-            this.addCoordinateFrame(frameId);
-          }
-        }
-      } else if (typeof maybeHasFrameId.frame_id === "string") {
-        this.addCoordinateFrame(maybeHasFrameId.frame_id);
-      }
+      this.addMessageEvent(messageEvent, { inBatch: true });
     }
 
     // Group messages by topic and schema for efficient batching
-    const messagesByTopic = new Map<string, MessageEvent[]>();
-    const messagesBySchema = new Map<string, MessageEvent[]>();
-
+    let messagesByTopic = new Map<string, MessageEvent[]>();
+    let messagesBySchema = new Map<string, MessageEvent[]>();
     for (const msg of messageEvents) {
-      // Group by topic
-      if (!messagesByTopic.has(msg.topic)) {
-        messagesByTopic.set(msg.topic, []);
-      }
-      messagesByTopic.get(msg.topic)!.push(msg);
-
-      // Group by schema
-      if (!messagesBySchema.has(msg.schemaName)) {
-        messagesBySchema.set(msg.schemaName, []);
-      }
-      messagesBySchema.get(msg.schemaName)!.push(msg);
+      messagesByTopic = this.addMessageToGroup(msg);
+      messagesBySchema = this.addMessageToGroup(msg);
     }
 
     // Queue messages in batches
-    for (const [topic, messages] of messagesByTopic) {
-      const subscriptions = this.topicSubscriptions.get(topic);
-      if (subscriptions) {
-        for (const subscription of subscriptions) {
-          subscription.queue = subscription.queue ?? [];
-          subscription.queue.push(...messages);
-        }
-      }
-    }
-
-    for (const [schemaName, messages] of messagesBySchema) {
-      const subscriptions = this.schemaSubscriptions.get(schemaName);
-      if (subscriptions) {
-        for (const subscription of subscriptions) {
-          subscription.queue = subscription.queue ?? [];
-          subscription.queue.push(...messages);
-        }
-      }
-    }
+    this.queueByKey(messagesByTopic, this.topicSubscriptions);
+    this.queueByKey(messagesBySchema, this.schemaSubscriptions);
   }
 
-  public addMessageEvent(messageEvent: Readonly<MessageEvent>): void {
+  public addMessageEvent(
+    messageEvent: Readonly<MessageEvent>,
+    options?: Partial<AddMessageEventOptions>,
+  ): void {
     const { message } = messageEvent;
 
     const maybeHasHeader = message as DeepPartial<{ header: Header }>;
@@ -1141,6 +1119,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     } else if (typeof maybeHasFrameId.frame_id === "string") {
       // If this message has a top-level frame_id, scrape it
       this.addCoordinateFrame(maybeHasFrameId.frame_id);
+    }
+
+    if (options?.inBatch === true) {
+      return;
     }
 
     queueMessage(messageEvent, this.topicSubscriptions.get(messageEvent.topic));
