@@ -20,7 +20,7 @@ import { ReactElement, useCallback, useEffect, useRef } from "react";
 // By default, preventDefault() is invoked on the event. Return false to allow the default.
 type KeyHandlers = Record<string, (event: KeyboardEvent) => void | boolean | undefined>;
 
-type Props = {
+export type KeyListenerProps = {
   global?: boolean;
   keyDownHandlers?: KeyHandlers;
   keyPressHandlers?: KeyHandlers;
@@ -46,7 +46,7 @@ function callHandlers(handlers: KeyHandlers | undefined, event: KeyboardEvent): 
   }
 }
 
-export default function KeyListener(props: Props): ReactElement {
+export default function KeyListener(props: KeyListenerProps): ReactElement {
   const element = useRef<HTMLDivElement>(ReactNull);
 
   const handleEvent = useCallback(
