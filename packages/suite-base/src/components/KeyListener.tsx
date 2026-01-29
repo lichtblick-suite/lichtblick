@@ -58,7 +58,8 @@ export default function KeyListener(props: Props): ReactElement {
       if (
         target instanceof HTMLInputElement ||
         target instanceof HTMLTextAreaElement ||
-        (target instanceof HTMLElement && target.isContentEditable)
+        (target instanceof HTMLElement && target.isContentEditable) ||
+        (target instanceof HTMLElement && target.closest(".monaco-editor"))
       ) {
         // The user is typing in an editable field; ignore the event.
         return;
