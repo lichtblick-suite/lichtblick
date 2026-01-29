@@ -5,7 +5,7 @@
 
 import { act, renderHook, waitFor } from "@testing-library/react";
 
-import { Time } from "@lichtblick/rostime";
+import { Time, compare } from "@lichtblick/rostime";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
@@ -47,10 +47,21 @@ type SetupOptions = {
 function createMockBatchIterator(
   messages: Time[],
   topicName: string,
-): () => AsyncIterableIterator<Readonly<IteratorResult>> {
-  return () =>
+): (
+  topic: string,
+  opts?: { start?: Time; end?: Time },
+) => AsyncIterableIterator<Readonly<IteratorResult>> {
+  return (_topic: string, opts?: { start?: Time; end?: Time }) =>
     (async function* () {
       for (const receiveTime of messages) {
+        // Filter messages by time range if provided
+        if (opts?.start && compare(receiveTime, opts.start) < 0) {
+          continue;
+        }
+        if (opts?.end && compare(receiveTime, opts.end) >= 0) {
+          continue;
+        }
+
         yield {
           type: "message-event" as const,
           msgEvent: {
@@ -533,7 +544,7 @@ describe("useTopicMessageNavigation", () => {
           startTime,
           currentTime,
           topicStats: new Map([[topicName, { numMessages: 2 }]]),
-          messages: [t1], // Message exists but is >5s away, triggers boundary search
+          messages: [t1],
         },
       });
 
@@ -547,14 +558,14 @@ describe("useTopicMessageNavigation", () => {
       expect(seekPlayback).toHaveBeenCalledWith(t1);
     });
 
-    it("does a start to currentTime search when no message found in window", async () => {
+    it("does a fallback search from startTime when no message found in any window", async () => {
       // Given
       const startTime: Time = { sec: 0, nsec: 0 };
       const t1: Time = { sec: 1, nsec: 0 };
       const currentTime: Time = { sec: 100, nsec: 0 };
       const topicName = `/${BasicBuilder.string()}`;
 
-      const { result, pausePlayback, seekPlayback } = setup({
+      const { result, getBatchIterator } = setup({
         topicName,
         selected: false,
         pipelineData: {
@@ -571,6 +582,111 @@ describe("useTopicMessageNavigation", () => {
       });
 
       // Then
+      expect(getBatchIterator).toHaveBeenCalledWith(topicName, {
+        start: startTime,
+        end: currentTime,
+      });
+    });
+
+    it("does not seek when iterator is not found", async () => {
+      // Given
+      const topicName = `/${BasicBuilder.string()}`;
+      const seekPlayback = jest.fn();
+      const getBatchIterator = jest.fn(() => undefined);
+
+      (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
+        selector({
+          playerState: {
+            activeData: {
+              currentTime: RosTimeBuilder.time(),
+              topicStats: new Map([[topicName, { numMessages: BasicBuilder.number() }]]),
+            },
+          },
+          pausePlayback: jest.fn(),
+          seekPlayback,
+          getBatchIterator,
+        }),
+      );
+
+      const { result } = renderHook(() =>
+        useTopicMessageNavigation({
+          topicName,
+          selected: false,
+          isTopicSubscribed: false,
+        }),
+      );
+
+      // When
+      await act(async () => {
+        await result.current.handleNextMessage();
+      });
+
+      // Then
+      expect(seekPlayback).not.toHaveBeenCalled();
+      expect(result.current.isNavigating).toBe(false);
+    });
+
+    it("searches from firstMessageTime to currentTime when window reaches cached boundary", async () => {
+      // Given
+      const startTime: Time = { sec: 0, nsec: 0 };
+      const t1: Time = { sec: 2, nsec: 0 };
+      const t2: Time = { sec: 3, nsec: 0 };
+      const currentTime: Time = { sec: 10, nsec: 0 };
+      const topicName = `/${BasicBuilder.string()}`;
+
+      const { result, pausePlayback, seekPlayback, getBatchIterator } = setup({
+        topicName,
+        selected: true,
+        pipelineData: {
+          startTime,
+          currentTime,
+          topicStats: new Map([[topicName, { numMessages: 2, firstMessageTime: t1 }]]),
+          messages: [t1, t2],
+        },
+      });
+
+      // Wait for boundary discovery to complete
+      await waitFor(() => {
+        expect(getBatchIterator).toHaveBeenCalledTimes(1);
+      });
+
+      // When
+      await act(async () => {
+        await result.current.handlePreviousMessage();
+      });
+
+      // Then
+      expect(pausePlayback).toHaveBeenCalled();
+      expect(seekPlayback).toHaveBeenCalledWith(t2);
+
+      expect(getBatchIterator).toHaveBeenCalledWith(topicName, {
+        start: t1,
+        end: currentTime,
+      });
+    });
+
+    it("ignores messages at or after currentTime during window search", async () => {
+      // Given
+      const t1 = { sec: 9, nsec: 900_000_000 }; // 9.9s
+      const currentTime = { sec: 10, nsec: 0 };
+      const topicName = `/${BasicBuilder.string()}`;
+
+      const { result, pausePlayback, seekPlayback } = setup({
+        topicName,
+        selected: false,
+        pipelineData: {
+          currentTime,
+          // The iterator will yield a valid message, then one at the current time
+          messages: [t1, currentTime],
+        },
+      });
+
+      // When
+      await act(async () => {
+        await result.current.handlePreviousMessage();
+      });
+
+      // Then: It should find t1, then break the loop when it sees currentTime
       expect(pausePlayback).toHaveBeenCalled();
       expect(seekPlayback).toHaveBeenCalledWith(t1);
     });
