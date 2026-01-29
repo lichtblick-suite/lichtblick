@@ -8,15 +8,18 @@
 
 import { setupJestCanvasMock } from "jest-canvas-mock";
 
+import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { fromNanoSec, toNanoSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
-import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import { Asset, DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { Renderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/Renderer";
 import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
 import { DEFAULT_CAMERA_STATE } from "@lichtblick/suite-base/panels/ThreeDeeRender/camera";
 import { CameraStateSettings } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
 import { TFMessage } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
+import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { RendererConfig } from "./IRenderer";
 
@@ -283,11 +286,15 @@ describe("3D Renderer", () => {
   it("sets custom camera models", () => {
     // Given: A renderer instance and custom camera models
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
-    const customModels = new Map([
-      ["camera1", { width: 640, height: 480, D: [], K: [], P: [], R: [] }],
-      ["camera2", { width: 1920, height: 1080, D: [], K: [], P: [], R: [] }],
-    ]);
-
+    const customModels: CameraModelsMap = new Map();
+    customModels.set(BasicBuilder.string(), {
+      extensionId: BasicBuilder.string(),
+      modelBuilder: jest.fn(),
+    });
+    customModels.set(BasicBuilder.string(), {
+      extensionId: BasicBuilder.string(),
+      modelBuilder: jest.fn(),
+    });
     // When: Setting custom camera models
     renderer.setCustomCameraModels(customModels);
 
@@ -404,22 +411,24 @@ describe("3D Renderer", () => {
       id: "first-id",
       name: "first-name",
       layers: { set: jest.fn() },
-      traverse: jest.fn((callback) => callback(firstRenderable)),
+      traverse: jest.fn(),
     };
     const secondRenderable = {
       id: "second-id",
       name: "second-name",
       layers: { set: jest.fn() },
-      traverse: jest.fn((callback) => callback(secondRenderable)),
+      traverse: jest.fn(),
     };
     const firstSelection = { renderable: firstRenderable, instanceIndex: 0 };
     const secondSelection = { renderable: secondRenderable, instanceIndex: 1 };
 
+    // @ts-expect-error - Partial mock for testing
     renderer.setSelectedRenderable(firstSelection);
     firstRenderable.layers.set.mockClear();
     secondRenderable.layers.set.mockClear();
 
     // When: Selecting a different renderable
+    // @ts-expect-error - Partial mock for testing
     renderer.setSelectedRenderable(secondSelection);
 
     // Then: Should deselect first and select second
@@ -436,9 +445,10 @@ describe("3D Renderer", () => {
       id: "test-id",
       name: "test-name",
       layers: { set: jest.fn() },
-      traverse: jest.fn((callback) => callback(mockRenderable)),
+      traverse: jest.fn(),
     };
     const selection = { renderable: mockRenderable, instanceIndex: 0 };
+    // @ts-expect-error - Partial mock for testing
     renderer.setSelectedRenderable(selection);
     mockRenderable.layers.set.mockClear();
     const emitSpy = jest.spyOn(renderer, "emit");
@@ -464,12 +474,13 @@ describe("3D Renderer", () => {
       id: "test-id",
       name: "test-name",
       layers: { set: jest.fn() },
-      traverse: jest.fn((callback) => callback(mockRenderable)),
+      traverse: jest.fn(),
     };
     const selection = { renderable: mockRenderable, instanceIndex: 0 };
     const animationFrameSpy = jest.spyOn(renderer, "animationFrame");
 
     // When: Selecting a renderable
+    // @ts-expect-error - Partial mock for testing
     renderer.setSelectedRenderable(selection);
 
     // Then: Should not queue animation frame
@@ -600,7 +611,7 @@ describe("3D Renderer", () => {
 
     // Check that messages were queued to at least one subscription
     const hasQueuedMessages = schemaSubscriptions!.some(
-      (subscription) => subscription.queue !== undefined && subscription.queue.length >= 3,
+      (subscription) => subscription.queue != undefined && subscription.queue.length >= 3,
     );
     expect(hasQueuedMessages).toBe(true);
 
@@ -968,7 +979,6 @@ describe("3D Renderer", () => {
 
     // Instead, we'll verify that the warning would be correctly formatted IF it were to trigger
     // by checking the error constants exist and constructing what the error would look like
-    const TF_OVERFLOW = "TF_OVERFLOW";
     const testFrameId = "test_frame";
     const frame = renderer.transformTree.getOrCreateFrame(testFrameId);
     const maxCapacity = frame.maxCapacity;
@@ -1003,7 +1013,15 @@ describe("3D Renderer", () => {
   it("returns cannot drop status when no extension supports path", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
-    const paths = [{ path: "/unsupported/path", value: "test" }];
+    const paths: DraggedMessagePath[] = [
+      {
+        path: "/unsupported/path",
+        isTopic: BasicBuilder.boolean(),
+        isLeaf: BasicBuilder.boolean(),
+        topicName: BasicBuilder.string(),
+        rootSchemaName: undefined,
+      },
+    ];
 
     // When: Getting drop status for unsupported path
     const status = renderer.getDropStatus(paths);
@@ -1017,7 +1035,15 @@ describe("3D Renderer", () => {
   it("handles drop by updating config through extensions", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
-    const paths = [{ path: "/test/path", value: "test" }];
+    const paths: DraggedMessagePath[] = [
+      {
+        path: "/test/path",
+        isTopic: BasicBuilder.boolean(),
+        isLeaf: BasicBuilder.boolean(),
+        topicName: BasicBuilder.string(),
+        rootSchemaName: undefined,
+      },
+    ];
     const updateConfigSpy = jest.spyOn(renderer, "updateConfig");
 
     // When: Handling drop
