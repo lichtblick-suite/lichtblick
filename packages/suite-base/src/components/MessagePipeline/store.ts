@@ -11,6 +11,7 @@ import shallowequal from "shallowequal";
 import { createStore, StoreApi } from "zustand";
 
 import { Condvar } from "@lichtblick/den/async";
+import { Time } from "@lichtblick/rostime";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 import {
   makeSubscriptionMemoizer,
@@ -28,7 +29,6 @@ import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import { FramePromise } from "./pauseFrameForPromise";
 import { MessagePipelineContext } from "./types";
-import { Time } from "@lichtblick/rostime";
 
 export function defaultPlayerState(player?: Player): PlayerState {
   return {

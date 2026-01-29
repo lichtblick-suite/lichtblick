@@ -311,7 +311,7 @@ export function useTopicMessageNavigation({
       // accurate message density without requiring full iteration.
       let initialWindowMs = 500;
 
-      if (stats?.numMessages && stats.firstMessageTime && stats.lastMessageTime) {
+      if (stats?.numMessages != undefined && stats.firstMessageTime && stats.lastMessageTime) {
         initialWindowMs = calculateOptimalWindowMs({
           numMessages: stats.numMessages,
           firstMessageTime: stats.firstMessageTime,
@@ -347,14 +347,17 @@ export function useTopicMessageNavigation({
 
           if (iterator) {
             for await (const result of iterator) {
-              if (signal.aborted) return;
-              if (result.type !== RESULT_TYPE_MESSAGE_EVENT) continue;
+              if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
+                continue;
+              }
 
               const messageTime = result.msgEvent.receiveTime;
               firstBoundary ??= messageTime;
 
               const isBeforeCurrent = compare(messageTime, currentTime) < 0;
-              if (!isBeforeCurrent) break;
+              if (!isBeforeCurrent) {
+                break;
+              }
 
               targetTime = messageTime;
             }
@@ -375,9 +378,6 @@ export function useTopicMessageNavigation({
 
         // Iterate only messages within this window
         for await (const result of iterator) {
-          if (signal.aborted) {
-            return;
-          }
           if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
             continue;
           }
@@ -408,14 +408,20 @@ export function useTopicMessageNavigation({
 
         if (fallbackIterator) {
           for await (const result of fallbackIterator) {
-            if (signal.aborted) return;
-            if (result.type !== RESULT_TYPE_MESSAGE_EVENT) continue;
+            if (signal.aborted) {
+              return;
+            }
+            if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
+              continue;
+            }
 
             const messageTime = result.msgEvent.receiveTime;
             firstBoundary ??= messageTime;
 
             const isBeforeCurrent = compare(messageTime, currentTime) < 0;
-            if (!isBeforeCurrent) break;
+            if (!isBeforeCurrent) {
+              break;
+            }
 
             targetTime = messageTime;
           }
