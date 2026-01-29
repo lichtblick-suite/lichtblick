@@ -1069,8 +1069,9 @@ export default class UserScriptPlayer implements Player {
   }
   public getBatchIterator(
     topic: string,
+    options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
-    return this.#player.getBatchIterator(topic);
+    return this.#player.getBatchIterator(topic, options);
   }
 
   public setPublishers(publishers: AdvertiseOptions[]): void {
