@@ -34,10 +34,10 @@ describe("PanelExtensionAdapter", () => {
   it("should call initPanel", async () => {
     expect.assertions(1);
 
-    const sig = signal();
+    const sign = signal();
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
-      sig.resolve();
+      sign.resolve();
     };
 
     const config = {};
@@ -64,7 +64,7 @@ describe("PanelExtensionAdapter", () => {
 
     // force a re-render to make sure we do not call init panel again
     handle.rerender(<Wrapper />);
-    await sig;
+    await sign;
   });
 
   it("sets didSeek=true when seeking", async () => {
@@ -148,7 +148,7 @@ describe("PanelExtensionAdapter", () => {
       context.advertise?.("/some/topic", "some_datatype");
     };
 
-    const sig = signal();
+    const sign = signal();
     let passed = false;
     render(
       <ThemeProvider isDark>
@@ -175,7 +175,7 @@ describe("PanelExtensionAdapter", () => {
                   ]),
                 );
                 passed = true;
-                sig.resolve();
+                sign.resolve();
               },
             }}
           >
@@ -185,7 +185,7 @@ describe("PanelExtensionAdapter", () => {
       </ThemeProvider>,
     );
     await act(async () => undefined);
-    await sig;
+    await sign;
   });
 
   it("should support advertising on multiple topics", async () => {
@@ -195,7 +195,7 @@ describe("PanelExtensionAdapter", () => {
       context.advertise?.("/some/topic", "some_datatype");
       context.advertise?.("/another/topic", "another_datatype");
     };
-    const sig = signal();
+    const sign = signal();
 
     render(
       <ThemeProvider isDark>
@@ -240,7 +240,7 @@ describe("PanelExtensionAdapter", () => {
                       },
                     ]),
                   );
-                  sig.resolve();
+                  sign.resolve();
                 }
               },
             }}
@@ -252,7 +252,7 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => undefined);
-    await sig;
+    await sign;
   });
 
   it("should support publishing on a topic", async () => {
@@ -265,7 +265,7 @@ describe("PanelExtensionAdapter", () => {
       });
     };
 
-    const sig = signal();
+    const sign = signal();
     let passed = false;
     render(
       <ThemeProvider isDark>
@@ -298,7 +298,7 @@ describe("PanelExtensionAdapter", () => {
                 }
                 expect(request).toEqual({ topic: "/some/topic", msg: { foo: "bar" } });
                 passed = true;
-                sig.resolve();
+                sign.resolve();
               },
             }}
           >
@@ -309,7 +309,7 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => undefined);
-    await sig;
+    await sign;
   });
 
   it("should support unadvertising", async () => {
@@ -321,7 +321,7 @@ describe("PanelExtensionAdapter", () => {
       context.unadvertise?.("/some/topic");
     };
 
-    const sig = signal();
+    const sign = signal();
 
     render(
       <ThemeProvider isDark>
@@ -379,7 +379,7 @@ describe("PanelExtensionAdapter", () => {
                     ]),
                   );
 
-                  sig.resolve();
+                  sign.resolve();
                 }
               },
             }}
@@ -391,7 +391,7 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => undefined);
-    await sig;
+    await sign;
   });
 
   it("should unadvertise when unmounting", (done) => {
@@ -465,7 +465,7 @@ describe("PanelExtensionAdapter", () => {
     const config = {};
     const saveConfig = () => {};
 
-    const sig = signal();
+    const sign = signal();
 
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
@@ -488,7 +488,7 @@ describe("PanelExtensionAdapter", () => {
       expect(openSiblingPanel.mock.calls).toEqual([
         [{ panelType: "X", updateIfExists: true, siblingConfigCreator: expect.any(Function) }],
       ]);
-      sig.resolve();
+      sign.resolve();
     };
 
     const Wrapper = () => {
@@ -513,7 +513,7 @@ describe("PanelExtensionAdapter", () => {
 
     // force a re-render to make sure we call init panel once
     handle.rerender(<Wrapper />);
-    await sig;
+    await sign;
   });
 
   it("should unsubscribe from all topics when subscribing to empty topics array", async () => {
@@ -521,7 +521,7 @@ describe("PanelExtensionAdapter", () => {
       context.subscribe([] as Subscription[]);
     };
 
-    const sig = signal();
+    const sign = signal();
 
     render(
       <ThemeProvider isDark>
@@ -535,7 +535,7 @@ describe("PanelExtensionAdapter", () => {
               layout: "UnknownPanel!4co6n9d",
               setSubscriptions: (_, payload) => {
                 expect(payload).toEqual([]);
-                sig.resolve();
+                sign.resolve();
               },
             }}
           >
@@ -546,7 +546,7 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => undefined);
-    await sig;
+    await sign;
   });
 
   it("should get and set variables", async () => {
@@ -689,13 +689,13 @@ describe("PanelExtensionAdapter", () => {
   });
 
   it("ignores subscriptions after panel unmount", async () => {
-    const sig = signal();
+    const sign = signal();
     const initPanel = jest.fn((context: PanelExtensionContext) => {
       context.watch("currentFrame");
       context.subscribe([{ topic: "x", preload: true }]);
       setTimeout(() => {
         context.subscribe([{ topic: "y", preload: true }]);
-        sig.resolve();
+        sign.resolve();
       }, 10);
     });
 
@@ -725,7 +725,7 @@ describe("PanelExtensionAdapter", () => {
       [expect.any(String), []],
     ]);
     await act(async () => {
-      await sig;
+      await sign;
     });
     unmount();
     expect(mockSetSubscriptions.mock.calls).toEqual([
@@ -740,7 +740,7 @@ describe("PanelExtensionAdapter", () => {
     const config = {};
     const saveConfig = () => {};
 
-    const sig = signal();
+    const sign = signal();
 
     const initPanel = (context: PanelExtensionContext) => {
       expect(context.metadata).toBeDefined();
@@ -750,7 +750,7 @@ describe("PanelExtensionAdapter", () => {
           metadata: { key: "value" },
         },
       ]);
-      sig.resolve();
+      sign.resolve();
     };
 
     const Wrapper = () => {
@@ -774,7 +774,7 @@ describe("PanelExtensionAdapter", () => {
 
     // force a re-render to make sure we call init panel once
     handle.rerender(<Wrapper />);
-    await sig;
+    await sign;
   });
 
   it("should handle unstable_subscribeMessageRange when getBatchIterator returns undefined", async () => {
@@ -789,7 +789,7 @@ describe("PanelExtensionAdapter", () => {
       expect(typeof cleanup).toBe("function");
     };
 
-    const sig = signal();
+    const sign = signal();
 
     render(
       <ThemeProvider isDark>
@@ -802,9 +802,9 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => {
-      sig.resolve();
+      sign.resolve();
     });
-    await sig;
+    await sign;
   });
 
   it("should return cleanup function from unstable_subscribeMessageRange", async () => {
@@ -821,7 +821,7 @@ describe("PanelExtensionAdapter", () => {
       cleanupCalled = true;
     };
 
-    const sig = signal();
+    const sign = signal();
 
     render(
       <ThemeProvider isDark>
@@ -834,9 +834,9 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => {
-      sig.resolve();
+      sign.resolve();
     });
-    await sig;
+    await sign;
 
     expect(cleanupCalled).toBe(true);
   });
@@ -845,7 +845,7 @@ describe("PanelExtensionAdapter", () => {
     it("should handle reorder-node action by returning early", async () => {
       // Given - a panel with extension settings
       const saveConfig = jest.fn();
-      const sig = signal();
+      const sign = signal();
 
       const initPanel = (context: PanelExtensionContext) => {
         context.updatePanelSettingsEditor({
@@ -854,7 +854,7 @@ describe("PanelExtensionAdapter", () => {
           },
           nodes: {},
         });
-        sig.resolve();
+        sign.resolve();
       };
 
       render(
@@ -868,7 +868,7 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => undefined);
-      await sig;
+      await sign;
 
       // When - reorder-node action is triggered
       // Then - saveConfig should not be called (early return)
@@ -878,7 +878,7 @@ describe("PanelExtensionAdapter", () => {
     it("should handle update action for extension settings", async () => {
       // Given - a panel with extension settings and action handler
       const saveConfig = jest.fn();
-      const sig = signal();
+      const sign = signal();
 
       const initPanel = (context: PanelExtensionContext) => {
         context.updatePanelSettingsEditor({
@@ -887,7 +887,7 @@ describe("PanelExtensionAdapter", () => {
           },
           nodes: {},
         });
-        sig.resolve();
+        sign.resolve();
       };
 
       render(
@@ -901,7 +901,7 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => undefined);
-      await sig;
+      await sign;
 
       // Then - action handler should be set up
       expect(saveConfig).not.toHaveBeenCalled();
@@ -910,14 +910,14 @@ describe("PanelExtensionAdapter", () => {
     it("should not process extension settings when category is not topics", async () => {
       // Given - a panel with extension settings
       const saveConfig = jest.fn();
-      const sig = signal();
+      const sign = signal();
 
       const initPanel = (context: PanelExtensionContext) => {
         context.updatePanelSettingsEditor({
           actionHandler: () => {},
           nodes: {},
         });
-        sig.resolve();
+        sign.resolve();
       };
 
       render(
@@ -931,7 +931,7 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => undefined);
-      await sig;
+      await sign;
 
       // When/Then - non-topics actions should not trigger saveConfig
       expect(saveConfig).not.toHaveBeenCalled();
@@ -1452,7 +1452,7 @@ describe("PanelExtensionAdapter", () => {
         panelContext = context;
       };
 
-      const sig = signal();
+      const sign = signal();
 
       render(
         <ThemeProvider isDark>
@@ -1465,9 +1465,9 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => {
-        sig.resolve();
+        sign.resolve();
       });
-      await sig;
+      await sign;
 
       // When - setPreviewTime is called with undefined
       // Then - it should not throw
@@ -1482,7 +1482,7 @@ describe("PanelExtensionAdapter", () => {
         panelContext = context;
       };
 
-      const sig = signal();
+      const sign = signal();
 
       render(
         <ThemeProvider isDark>
@@ -1495,9 +1495,9 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => {
-        sig.resolve();
+        sign.resolve();
       });
-      await sig;
+      await sign;
 
       // When - setPreviewTime is called without startTime
       await act(async () => {
@@ -1516,7 +1516,7 @@ describe("PanelExtensionAdapter", () => {
         panelContext = context;
       };
 
-      const sig = signal();
+      const sign = signal();
 
       render(
         <ThemeProvider isDark>
@@ -1535,9 +1535,9 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => {
-        sig.resolve();
+        sign.resolve();
       });
-      await sig;
+      await sign;
 
       // When - setPreviewTime is called with valid stamp
       await act(async () => {
@@ -1559,7 +1559,7 @@ describe("PanelExtensionAdapter", () => {
         panelContext = context;
       };
 
-      const sig = signal();
+      const sign = signal();
 
       render(
         <ThemeProvider isDark>
@@ -1572,9 +1572,9 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => {
-        sig.resolve();
+        sign.resolve();
       });
-      await sig;
+      await sign;
 
       // When - subscribe is called with preload: true
       await act(async () => {
@@ -1596,7 +1596,7 @@ describe("PanelExtensionAdapter", () => {
         panelContext = context;
       };
 
-      const sig = signal();
+      const sign = signal();
 
       render(
         <ThemeProvider isDark>
@@ -1609,9 +1609,9 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => {
-        sig.resolve();
+        sign.resolve();
       });
-      await sig;
+      await sign;
 
       // When - subscribe is called with preload: false
       await act(async () => {
@@ -1633,10 +1633,10 @@ describe("PanelExtensionAdapter", () => {
         someOtherProperty: BasicBuilder.string(),
       };
 
-      const sig = signal();
+      const sign = signal();
 
       const initPanel = () => {
-        sig.resolve();
+        sign.resolve();
       };
 
       const { container } = render(
@@ -1667,10 +1667,10 @@ describe("PanelExtensionAdapter", () => {
         someOtherProperty: BasicBuilder.string(),
       };
 
-      const sig = signal();
+      const sign = signal();
 
       const initPanel = jest.fn(() => {
-        sig.resolve();
+        sign.resolve();
       });
 
       render(
@@ -1689,7 +1689,7 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => undefined);
-      await sig;
+      await sign;
 
       // When/Then - initPanel should be called
       expect(initPanel).toHaveBeenCalled();
@@ -1701,10 +1701,10 @@ describe("PanelExtensionAdapter", () => {
         someOtherProperty: BasicBuilder.string(),
       };
 
-      const sig = signal();
+      const sign = signal();
 
       const initPanel = jest.fn(() => {
-        sig.resolve();
+        sign.resolve();
       });
 
       render(
@@ -1723,7 +1723,7 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => undefined);
-      await sig;
+      await sign;
 
       // When/Then - initPanel should be called
       expect(initPanel).toHaveBeenCalled();
@@ -1740,7 +1740,7 @@ describe("PanelExtensionAdapter", () => {
         panelContext = context;
       };
 
-      const sig = signal();
+      const sign = signal();
 
       render(
         <ThemeProvider isDark>
@@ -1758,9 +1758,9 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => {
-        sig.resolve();
+        sign.resolve();
       });
-      await sig;
+      await sign;
 
       // When - advertise is called with options
       const options = { latching: true };
