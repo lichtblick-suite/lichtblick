@@ -15,6 +15,7 @@ import Circle from "@mui/icons-material/Circle";
 import Clear from "@mui/icons-material/Clear";
 import Delete from "@mui/icons-material/Delete";
 import Walk from "@mui/icons-material/DirectionsWalk";
+import DragHandle from "@mui/icons-material/DragIndicator";
 import Flag from "@mui/icons-material/Flag";
 import Folder from "@mui/icons-material/Folder";
 import FolderOpen from "@mui/icons-material/FolderOpen";
@@ -61,6 +62,7 @@ const icons: Record<SettingsIcon, typeof Add> = {
   Collapse,
   Cube,
   Delete,
+  DragHandle,
   Expand,
   Flag,
   Folder,

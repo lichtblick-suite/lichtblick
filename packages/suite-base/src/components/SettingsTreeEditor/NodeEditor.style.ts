@@ -108,4 +108,11 @@ export const useStyles = makeStyles()((theme) => ({
     maxHeight: "15vh",
     overflowY: "auto",
   },
+  nodeHeaderDragging: {
+    opacity: 0.5,
+  },
+  nodeHeaderDropTarget: {
+    backgroundColor: tinycolor(theme.palette.primary.main).setAlpha(0.2).toRgbString(),
+    borderTop: `2px solid ${theme.palette.primary.main}`,
+  },
 }));

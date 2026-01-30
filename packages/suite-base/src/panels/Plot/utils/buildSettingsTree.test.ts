@@ -49,6 +49,8 @@ describe("buildSettingsTree", () => {
     const children0: SettingsTreeNode | undefined = tree.paths?.children!["0"];
     expect(children0?.visible).toBe(config.paths[0]?.enabled);
     expect(children0?.label).toBe(config.paths[0]?.label);
+    expect(children0?.reorderable).toBe(true);
+    expect(children0?.icon).toBe("DragHandle");
     expect(children0?.actions?.length).toBe(1);
     expect((children0?.actions![0] as SettingsTreeNodeActionItem).id).toEqual("delete-series");
     expect(children0?.fields!["value"]).toBeDefined();

@@ -11,16 +11,21 @@ import {
   SettingsTreeActionUpdate,
 } from "@lichtblick/suite";
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
+import {
+  HandleAction,
+  HandleDeleteSeriesAction,
+  HandleMoveSeriesAction,
+  HandleUpdateAction,
+} from "@lichtblick/suite-base/panels/Plot/types";
+import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import usePlotPanelSettings, {
-  HandleAction,
   handleAddSeriesAction,
-  HandleDeleteSeriesAction,
   handleDeleteSeriesAction,
-  HandleUpdateAction,
+  handleMoveSeriesAction,
   handleUpdateAction,
 } from "./usePlotPanelSettings";
 
@@ -118,6 +123,47 @@ describe("handleUpdateAction", () => {
       expect(input.draft.followingViewWidth).toBeUndefined();
     },
   );
+
+  it("should update arbitrary config field", () => {
+    const initialConfig = PlotBuilder.config({ paths: [] });
+    const value = BasicBuilder.number();
+    const input: HandleUpdateAction = {
+      draft: _.cloneDeep(initialConfig),
+      path: [BasicBuilder.string(), "maxYValue"],
+      value,
+    };
+
+    handleUpdateAction(input);
+
+    expect(input.draft.maxYValue).toBe(value);
+  });
+
+  it("should update nested config field", () => {
+    const initialConfig = PlotBuilder.config({ paths: [] });
+    const input: HandleUpdateAction = {
+      draft: _.cloneDeep(initialConfig),
+      path: [BasicBuilder.string(), "showXAxisLabels"],
+      value: false,
+    };
+
+    handleUpdateAction(input);
+
+    expect(input.draft.showXAxisLabels).toBe(false);
+  });
+
+  it("should handle updating path with existing paths", () => {
+    const initialConfig = PlotBuilder.config({ paths: PlotBuilder.paths(2) });
+    const value = BasicBuilder.string();
+    const input: HandleUpdateAction = {
+      draft: _.cloneDeep(initialConfig),
+      path: ["paths", "1", "label"],
+      value,
+    };
+
+    handleUpdateAction(input);
+
+    expect(input.draft.paths[1]?.label).toBe(value);
+  });
 });
 
 describe("handleAddSeriesAction", () => {
@@ -147,6 +193,170 @@ describe("handleDeleteSeriesAction", () => {
   });
 });
 
+describe("handleMoveSeriesAction", () => {
+  it("should move series up", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 1,
+      direction: "up",
+    };
+
+    handleMoveSeriesAction(input);
+
+    expect(input.draft.paths[0]).toEqual(paths[1]);
+    expect(input.draft.paths[1]).toEqual(paths[0]);
+    expect(input.draft.paths[2]).toEqual(paths[2]);
+  });
+
+  it("should move series down", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 1,
+      direction: "down",
+    };
+
+    handleMoveSeriesAction(input);
+
+    expect(input.draft.paths[0]).toEqual(paths[0]);
+    expect(input.draft.paths[1]).toEqual(paths[2]);
+    expect(input.draft.paths[2]).toEqual(paths[1]);
+  });
+
+  it("should not move series up when at first position", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 0,
+      direction: "up",
+    };
+
+    handleMoveSeriesAction(input);
+
+    expect(input.draft.paths).toEqual(paths);
+  });
+
+  it("should not move series down when at last position", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 2,
+      direction: "down",
+    };
+
+    handleMoveSeriesAction(input);
+
+    expect(input.draft.paths).toEqual(paths);
+  });
+});
+
+describe("handleReorderSeriesAction", () => {
+  it("should reorder series from lower to higher index", () => {
+    const paths = PlotBuilder.paths(4);
+    const initialConfig = PlotBuilder.config({ paths });
+    const draft = _.cloneDeep(initialConfig);
+
+    handleReorderSeriesAction(draft, 1, 3);
+
+    expect(draft.paths[0]).toEqual(paths[0]);
+    expect(draft.paths[1]).toEqual(paths[2]);
+    expect(draft.paths[2]).toEqual(paths[3]);
+    expect(draft.paths[3]).toEqual(paths[1]);
+  });
+
+  it("should reorder series from higher to lower index", () => {
+    const paths = PlotBuilder.paths(4);
+    const initialConfig = PlotBuilder.config({ paths });
+    const draft = _.cloneDeep(initialConfig);
+
+    handleReorderSeriesAction(draft, 3, 1);
+
+    expect(draft.paths[0]).toEqual(paths[0]);
+    expect(draft.paths[1]).toEqual(paths[3]);
+    expect(draft.paths[2]).toEqual(paths[1]);
+    expect(draft.paths[3]).toEqual(paths[2]);
+  });
+
+  it("should not change paths when sourceIndex equals targetIndex", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const draft = _.cloneDeep(initialConfig);
+
+    handleReorderSeriesAction(draft, 1, 1);
+
+    expect(draft.paths).toEqual(paths);
+  });
+
+  it("should not change paths when sourceIndex is negative", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const draft = _.cloneDeep(initialConfig);
+
+    handleReorderSeriesAction(draft, -1, 1);
+
+    expect(draft.paths).toEqual(paths);
+  });
+
+  it("should not change paths when targetIndex is negative", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const draft = _.cloneDeep(initialConfig);
+
+    handleReorderSeriesAction(draft, 1, -1);
+
+    expect(draft.paths).toEqual(paths);
+  });
+
+  it("should not change paths when sourceIndex is out of bounds", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const draft = _.cloneDeep(initialConfig);
+
+    handleReorderSeriesAction(draft, 3, 1);
+
+    expect(draft.paths).toEqual(paths);
+  });
+
+  it("should not change paths when targetIndex is out of bounds", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const draft = _.cloneDeep(initialConfig);
+
+    handleReorderSeriesAction(draft, 1, 3);
+
+    expect(draft.paths).toEqual(paths);
+  });
+
+  it("should handle reorder of first element", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const draft = _.cloneDeep(initialConfig);
+
+    handleReorderSeriesAction(draft, 0, 2);
+
+    expect(draft.paths[0]).toEqual(paths[1]);
+    expect(draft.paths[1]).toEqual(paths[2]);
+    expect(draft.paths[2]).toEqual(paths[0]);
+  });
+
+  it("should handle reorder of last element", () => {
+    const paths = PlotBuilder.paths(3);
+    const initialConfig = PlotBuilder.config({ paths });
+    const draft = _.cloneDeep(initialConfig);
+
+    handleReorderSeriesAction(draft, 2, 0);
+
+    expect(draft.paths[0]).toEqual(paths[2]);
+    expect(draft.paths[1]).toEqual(paths[0]);
+    expect(draft.paths[2]).toEqual(paths[1]);
+  });
+});
+
 describe("usePlotPanelSettings", () => {
   const saveConfig = jest.fn();
   const updatePanelSettingsTree = jest.fn();
@@ -170,6 +380,14 @@ describe("usePlotPanelSettings", () => {
       action: "perform-node-action",
       payload: { path: [], id: "delete-series" },
     } as SettingsTreeActionPerformNode,
+    {
+      action: "perform-node-action",
+      payload: { path: ["paths", "1"], id: "move-series-up" },
+    } as SettingsTreeActionPerformNode,
+    {
+      action: "perform-node-action",
+      payload: { path: ["paths", "1"], id: "move-series-down" },
+    } as SettingsTreeActionPerformNode,
   ])("should call saveConfig to update settings tree", (action: SettingsTreeAction) => {
     const config = PlotBuilder.config();
     const focusedPath = undefined;
@@ -186,5 +404,68 @@ describe("usePlotPanelSettings", () => {
     });
 
     expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it("should call saveConfig with reorder-node action", () => {
+    const config = PlotBuilder.config({ paths: PlotBuilder.paths(3) });
+    const focusedPath = undefined;
+
+    renderHook(() => {
+      usePlotPanelSettings(config, saveConfig, focusedPath);
+    });
+
+    expect(usePanelSettingsTreeUpdate).toHaveBeenCalled();
+
+    const actionHandler = updatePanelSettingsTree.mock.calls[0][0].actionHandler;
+    act(() => {
+      actionHandler({
+        action: "reorder-node",
+        payload: { path: ["paths", "0"], targetPath: ["paths", "2"] },
+      });
+    });
+
+    expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it("should update panel settings tree on config change", () => {
+    const config = PlotBuilder.config();
+    const focusedPath = undefined;
+
+    const { rerender } = renderHook(
+      ({ cfg, focused }) => {
+        usePlotPanelSettings(cfg, saveConfig, focused);
+      },
+      {
+        initialProps: { cfg: config, focused: focusedPath },
+      },
+    );
+
+    expect(updatePanelSettingsTree).toHaveBeenCalledTimes(1);
+
+    const newConfig = PlotBuilder.config({ paths: PlotBuilder.paths(2) });
+    rerender({ cfg: newConfig, focused: focusedPath });
+
+    expect(updatePanelSettingsTree).toHaveBeenCalledTimes(2);
+  });
+
+  it("should update panel settings tree on focusedPath change", () => {
+    const config = PlotBuilder.config();
+    const focusedPath: string[] | undefined = [BasicBuilder.string()];
+
+    const { rerender } = renderHook(
+      ({ cfg, focused }: { cfg: typeof config; focused: string[] | undefined }) => {
+        usePlotPanelSettings(cfg, saveConfig, focused);
+      },
+      {
+        initialProps: { cfg: config, focused: focusedPath },
+      },
+    );
+
+    expect(updatePanelSettingsTree).toHaveBeenCalledTimes(1);
+
+    const newFocusedPath = [BasicBuilder.string(), BasicBuilder.string()];
+    rerender({ cfg: config, focused: newFocusedPath });
+
+    expect(updatePanelSettingsTree).toHaveBeenCalledTimes(2);
   });
 });
