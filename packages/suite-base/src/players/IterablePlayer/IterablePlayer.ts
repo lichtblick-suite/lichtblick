@@ -84,6 +84,8 @@ const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
 
 const EMPTY_ARRAY = Object.freeze([]);
 
+const FRAME_TIME = 1000 / 60; // aim for 60fps
+
 export type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
 
@@ -1124,6 +1126,7 @@ export class IterablePlayer implements Player {
     const allTopics = this.#allTopics;
 
     try {
+      let start = performance.now();
       while (this.#isPlaying && !this.#hasError && !this.#nextState) {
         if (compare(this.#currentTime, this.#end) >= 0) {
           // Playback has ended. Reset internal trackers for maintaining the playback speed.
@@ -1133,8 +1136,6 @@ export class IterablePlayer implements Player {
           this.#setState("idle");
           return;
         }
-
-        const start = Date.now();
 
         await this.#tick();
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
@@ -1164,12 +1165,14 @@ export class IterablePlayer implements Player {
           return;
         }
 
-        const time = Date.now() - start;
         // make sure we've slept at least 16 millis or so (aprox 1 frame)
         // to give the UI some time to breathe and not burn in a tight loop
-        if (time < 16) {
-          await delay(16 - time);
-        }
+        let time: number;
+        do {
+          await new Promise(requestAnimationFrame);
+          time = performance.now();
+        } while (time - start < FRAME_TIME);
+        start = time;
       }
     } catch (e: unknown) {
       const err = e as Error;
