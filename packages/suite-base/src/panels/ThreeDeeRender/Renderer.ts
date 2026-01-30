@@ -1050,17 +1050,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  private addMessageToGroup(messageEvent: MessageEvent): Map<string, MessageEvent[]> {
-    const messages = new Map<string, MessageEvent[]>();
-
-    if (!messages.has(messageEvent.topic)) {
-      messages.set(messageEvent.topic, []);
-    }
-    messages.get(messageEvent.topic)!.push(messageEvent);
-
-    return messages;
-  }
-
   /**
    * Batch version of addMessageEvent that processes multiple messages more efficiently
    * by grouping them by topic/schema before queueing
@@ -1072,11 +1061,20 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
 
     // Group messages by topic and schema for efficient batching
-    let messagesByTopic = new Map<string, MessageEvent[]>();
-    let messagesBySchema = new Map<string, MessageEvent[]>();
+    const messagesByTopic = new Map<string, MessageEvent[]>();
+    const messagesBySchema = new Map<string, MessageEvent[]>();
     for (const msg of messageEvents) {
-      messagesByTopic = this.addMessageToGroup(msg);
-      messagesBySchema = this.addMessageToGroup(msg);
+      // Group by topic
+      if (!messagesByTopic.has(msg.topic)) {
+        messagesByTopic.set(msg.topic, []);
+      }
+      messagesByTopic.get(msg.topic)!.push(msg);
+
+      // Group by schema
+      if (!messagesBySchema.has(msg.schemaName)) {
+        messagesBySchema.set(msg.schemaName, []);
+      }
+      messagesBySchema.get(msg.schemaName)!.push(msg);
     }
 
     // Queue messages in batches
