@@ -126,7 +126,13 @@ const Plot = (props: PlotProps): React.JSX.Element => {
 
   useEffect(() => {
     coordinator?.handleConfig(config, theme.palette.mode, globalVariables);
-  }, [coordinator, config, globalVariables, theme.palette.mode]);
+
+    // When config changes (e.g., series reordering) and the player is paused,
+    // we need to re-process the current player state to update the rendered data
+    if (coordinator) {
+      coordinator.handlePlayerState(getMessagePipelineState().playerState);
+    }
+  }, [coordinator, config, globalVariables, theme.palette.mode, getMessagePipelineState]);
 
   // This effect must come after the one above it so the coordinator gets the latest config before
   // the latest player state and can properly initialize if the player state already contains the

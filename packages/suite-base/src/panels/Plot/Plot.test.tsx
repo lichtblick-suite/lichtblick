@@ -123,4 +123,16 @@ describe("Plot Component", () => {
     expect(verticalBarWrapper).toBeTruthy();
     expect(verticalBars).toBeTruthy();
   });
+
+  it("should initialize with config and player state (series reordering support)", () => {
+    setup({
+      paths: [
+        { value: "/topic1", enabled: true, timestampMethod: "receiveTime" },
+        { value: "/topic2", enabled: true, timestampMethod: "receiveTime" },
+      ],
+    });
+
+    const verticalBarWrapper = screen.getByTestId("vertical-bar-wrapper");
+    expect(verticalBarWrapper).toBeTruthy();
+  });
 });
