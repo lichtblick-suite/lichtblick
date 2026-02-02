@@ -51,6 +51,7 @@ import {
   RendererEvents,
   RendererSubscription,
   TestOptions,
+  AddMessageEventOptions,
 } from "./IRenderer";
 import { Input } from "./Input";
 import { DEFAULT_MESH_UP_AXIS, ModelCache } from "./ModelCache";
@@ -470,15 +471,76 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public setCurrentTime(newTimeNs: bigint): void {
     this.currentTime = newTimeNs;
   }
+
+  /**
+   * Binary search to find the index of the last message with receiveTime <= targetTime
+   * @param messages - sorted array of messages by receiveTime
+   * @param targetTime - time to search for
+   * @returns index of the last message <= targetTime, or -1 if all messages are after targetTime
+   */
+  #binarySearchTimeIndex(messages: readonly MessageEvent[], targetTime: Time): number {
+    let left = 0;
+    let right = messages.length - 1;
+    let result = -1;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      const midMessage = messages[mid];
+      if (!midMessage) {
+        break;
+      }
+
+      if (isLessThan(midMessage.receiveTime, targetTime)) {
+        result = mid;
+        left = mid + 1;
+      } else if (isLessThan(targetTime, midMessage.receiveTime)) {
+        right = mid - 1;
+      } else {
+        // Equal times
+        result = mid;
+        break;
+      }
+    }
+
+    return result;
+  }
+
   /**
    * Updates renderer state according to seek delta. Handles clearing of future state and resetting of allFrames cursor if seeked backwards
    * Should be called after `setCurrentTime` as been called
    * @param oldTime used to determine if seeked backwards
    */
-  public handleSeek(oldTimeNs: bigint): void {
+  public handleSeek(oldTimeNs: bigint, allFrames?: readonly MessageEvent[]): void {
     const movedBack = this.currentTime < oldTimeNs;
-    // want to clear transforms and reset the cursor if we seek backwards
-    this.clear({ clearTransforms: movedBack, resetAllFramesCursor: movedBack });
+
+    if (movedBack && allFrames && allFrames.length > 0) {
+      // Optimized backward seek: use binary search to find new cursor position
+      const targetTime = fromNanoSec(this.currentTime);
+      const newCursorIndex = this.#binarySearchTimeIndex(allFrames, targetTime);
+
+      // Clear transforms after current time instead of clearing everything
+      this.transformTree.clearAfter(this.currentTime);
+
+      // Update cursor to new position
+      this.#allFramesCursor = {
+        index: newCursorIndex,
+        lastReadMessage: newCursorIndex >= 0 ? allFrames[newCursorIndex] : undefined,
+        cursorTimeReached: targetTime,
+      };
+
+      // Clear subscription queues and renderables but preserve valid transforms
+      this.#clearSubscriptionQueues();
+      this.settings.errors.clear();
+      this.hud.clear();
+
+      for (const extension of this.sceneExtensions.values()) {
+        extension.removeAllRenderables();
+      }
+      this.queueAnimationFrame();
+    } else {
+      // Forward seek or no allFrames available - use original behavior
+      this.clear({ clearTransforms: movedBack, resetAllFramesCursor: movedBack });
+    }
   }
 
   /**
@@ -598,9 +660,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     // in this case we should set the cursor to the end of allFrames
     cursor = Math.min(cursor, allFrames.length - 1);
 
+    // Collect messages to process in batch
+    const messagesToProcess: MessageEvent[] = [];
     let message;
 
-    let hasAddedMessageEvents = false;
     // load preloaded messages up to current time
     while (cursor < allFrames.length - 1) {
       cursor++;
@@ -612,15 +675,18 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         cursor--;
         break;
       }
-      if (!hasAddedMessageEvents) {
-        hasAddedMessageEvents = true;
-      }
 
-      this.addMessageEvent(message);
+      messagesToProcess.push(message);
       lastReadMessage = message;
       if (cursor === allFrames.length - 1) {
         cursorTimeReached = message.receiveTime;
       }
+    }
+
+    // Process all collected messages in batch if any were found
+    const hasAddedMessageEvents = messagesToProcess.length > 0;
+    if (hasAddedMessageEvents) {
+      this.addMessageEventBatch(messagesToProcess);
     }
 
     // want to avoid setting anything if nothing has changed
@@ -967,7 +1033,59 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  public addMessageEvent(messageEvent: Readonly<MessageEvent>): void {
+  private queueByKey(
+    groups: Map<string, MessageEvent[]>,
+    subscriptions: Map<string, RendererSubscription[]>,
+  ): void {
+    for (const [key, messageEvents] of groups) {
+      const subs = subscriptions.get(key);
+      if (!subs) {
+        continue;
+      }
+
+      for (const sub of subs) {
+        sub.queue ??= [];
+        sub.queue.push(...messageEvents);
+      }
+    }
+  }
+
+  /**
+   * Batch version of addMessageEvent that processes multiple messages more efficiently
+   * by grouping them by topic/schema before queueing
+   */
+  public addMessageEventBatch(messageEvents: readonly MessageEvent[]): void {
+    // Extract coordinate frames from all messages
+    for (const messageEvent of messageEvents) {
+      this.addMessageEvent(messageEvent, { inBatch: true });
+    }
+
+    // Group messages by topic and schema for efficient batching
+    const messagesByTopic = new Map<string, MessageEvent[]>();
+    const messagesBySchema = new Map<string, MessageEvent[]>();
+    for (const msg of messageEvents) {
+      // Group by topic
+      if (!messagesByTopic.has(msg.topic)) {
+        messagesByTopic.set(msg.topic, []);
+      }
+      messagesByTopic.get(msg.topic)!.push(msg);
+
+      // Group by schema
+      if (!messagesBySchema.has(msg.schemaName)) {
+        messagesBySchema.set(msg.schemaName, []);
+      }
+      messagesBySchema.get(msg.schemaName)!.push(msg);
+    }
+
+    // Queue messages in batches
+    this.queueByKey(messagesByTopic, this.topicSubscriptions);
+    this.queueByKey(messagesBySchema, this.schemaSubscriptions);
+  }
+
+  public addMessageEvent(
+    messageEvent: Readonly<MessageEvent>,
+    options?: Partial<AddMessageEventOptions>,
+  ): void {
     const { message } = messageEvent;
 
     const maybeHasHeader = message as DeepPartial<{ header: Header }>;
@@ -999,6 +1117,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     } else if (typeof maybeHasFrameId.frame_id === "string") {
       // If this message has a top-level frame_id, scrape it
       this.addCoordinateFrame(maybeHasFrameId.frame_id);
+    }
+
+    if (options?.inBatch === true) {
+      return;
     }
 
     queueMessage(messageEvent, this.topicSubscriptions.get(messageEvent.topic));

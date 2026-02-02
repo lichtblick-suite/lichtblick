@@ -40,5 +40,8 @@ export type MessagePipelineContext = Immutable<{
   seekPlayback?: (time: Time) => void;
   // Don't render the next frame until the returned function has been called.
   pauseFrame: (name: string) => ResumeFrame;
-  getBatchIterator: (topic: string) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
+  getBatchIterator: (
+    topic: string,
+    options?: { start?: Time; end?: Time },
+  ) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
 }>;

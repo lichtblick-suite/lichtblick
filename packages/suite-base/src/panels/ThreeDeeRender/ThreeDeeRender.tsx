@@ -12,7 +12,7 @@ import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
 
 import Logger from "@lichtblick/log";
-import { Time, toNanoSec } from "@lichtblick/rostime";
+import { Time, toNanoSec, compare } from "@lichtblick/rostime";
 import {
   Immutable,
   LayoutActions,
@@ -27,7 +27,10 @@ import {
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
-import { PANEL_STYLE } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
+import {
+  DEFAULT_FOLLOW_MODE,
+  PANEL_STYLE,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import type { IRenderer, ImageModeConfig, RendererConfig, RendererSubscription } from "./IRenderer";
@@ -37,7 +40,9 @@ import { SELECTED_ID_VARIABLE } from "./Renderable";
 import { Renderer } from "./Renderer";
 import { RendererContext, useRendererEvent, useRendererProperty } from "./RendererContext";
 import { RendererOverlay } from "./RendererOverlay";
+import { useStyles } from "./ThreeDeeRender.style";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
+import { MAX_TRANSFORM_MESSAGES } from "./constants";
 import {
   PublishRos1Datatypes,
   PublishRos2Datatypes,
@@ -72,6 +77,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     unstable_setMessagePathDropConfig: setMessagePathDropConfig,
   } = context;
   const analytics = useAnalytics();
+  const { classes } = useStyles();
 
   // Load and save the persisted panel configuration
   const [config, setConfig] = useState<Immutable<RendererConfig>>(() => {
@@ -91,7 +97,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
     return {
       cameraState,
-      followMode: partialConfig?.followMode ?? "follow-pose",
+      followMode: partialConfig?.followMode ?? DEFAULT_FOLLOW_MODE,
       followTf: partialConfig?.followTf,
       scene: partialConfig?.scene ?? {},
       transforms,
@@ -189,6 +195,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   const [didSeek, setDidSeek] = useState<boolean>(false);
   const [sharedPanelState, setSharedPanelState] = useState<undefined | Shared3DPanelState>();
   const [allFrames, setAllFrames] = useState<readonly MessageEvent[] | undefined>(undefined);
+  const [isLoadingTransforms, setIsLoadingTransforms] = useState<boolean>(false);
+  const [loadedTransformCount, setLoadedTransformCount] = useState<number>(0);
+  const [reloadPreloadTrigger, setReloadPreloadTrigger] = useState<number>(0);
 
   const renderRef = useRef({ needsRender: false });
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
@@ -279,6 +288,16 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   );
   useRendererEvent("selectedRenderable", updateSelectedRenderable, renderer);
 
+  // Clear preloaded buffer when action button is clicked
+  const handleClearPreloadBuffer = useCallback(() => {
+    setAllFrames([]);
+    setLoadedTransformCount(0);
+    setIsLoadingTransforms(false);
+    // Trigger reload by incrementing the trigger
+    setReloadPreloadTrigger((prev) => prev + 1);
+  }, []);
+  useRendererEvent("clearPreloadBuffer", handleClearPreloadBuffer, renderer);
+
   // Log LayerErrors to PanelLogs
   const handleLayerErrorUpdate = useCallback(
     (path: Path, _errorId: string, errorMessage: string) => {
@@ -365,6 +384,136 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [interfaceMode, context, config.imageMode.imageTopic]);
 
+  // Build a list of topics to subscribe to
+  const [topicsToSubscribe, setTopicsToSubscribe] = useState<Subscription[] | undefined>(undefined);
+
+  const prevFilteredTopics = useRef<Subscription[]>([]);
+
+  // Only update when the list of topics to preload changes
+  // Reduce amount of calls to useLayoutEffect below
+  const transformTopicsToPreload = useMemo(() => {
+    if (!topicsToSubscribe) {
+      return [];
+    }
+
+    const filteredTopics = topicsToSubscribe.filter((sub) => sub.preload === true);
+
+    // Manual comparison for better performance than lodash.isEqual
+    const areTopicsEqual = (current: Subscription[], filtered: Subscription[]): boolean => {
+      if (current.length !== filtered.length) {
+        return false;
+      }
+      for (let i = 0; i < current.length; i++) {
+        const currentSub = current[i];
+        const filteredSub = filtered[i];
+        if (!currentSub || !filteredSub) {
+          continue;
+        }
+        if (currentSub.topic !== filteredSub.topic) {
+          return false;
+        }
+        if (currentSub.convertTo !== filteredSub.convertTo) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    if (areTopicsEqual(prevFilteredTopics.current, filteredTopics)) {
+      return prevFilteredTopics.current;
+    }
+
+    prevFilteredTopics.current = filteredTopics;
+    return filteredTopics;
+  }, [topicsToSubscribe]);
+
+  // Subscribe to eligible and enabled topics for range messages
+  useLayoutEffect(() => {
+    const transformTopics = transformTopicsToPreload;
+    const isPreloadingEnabled = config.scene.transforms?.enablePreloading === true;
+    const maxMessages: number =
+      config.scene.transforms?.maxPreloadMessages ?? MAX_TRANSFORM_MESSAGES;
+
+    // Exit if preloading is disabled
+    if (!isPreloadingEnabled || transformTopics.length === 0) {
+      setAllFrames([]);
+      setIsLoadingTransforms(false);
+      setLoadedTransformCount(0);
+      return;
+    }
+
+    setIsLoadingTransforms(true);
+    setLoadedTransformCount(0);
+
+    const messageBuffer: MessageEvent[] = [];
+    const unsubscriptions: (() => void)[] = [];
+    const subscriptionPromises: Promise<void>[] = [];
+
+    // Use ref to avoid closure issues in async loop
+    const lastUpdateTimeRef = { current: 0 };
+    const UPDATE_DEBOUNCE_MS = 50; // Update UI every 50ms during loading
+
+    const updateAllFrames = (options?: { isComplete?: boolean }) => {
+      if (messageBuffer.length === 0) {
+        setIsLoadingTransforms(false);
+        return;
+      }
+
+      // Sort and trim messages
+      messageBuffer.sort((a, b) => compare(a.receiveTime, b.receiveTime));
+      const trimmedMessages =
+        messageBuffer.length > maxMessages ? messageBuffer.slice(0, maxMessages) : messageBuffer;
+
+      setAllFrames([...trimmedMessages]);
+      setLoadedTransformCount(trimmedMessages.length);
+      setIsLoadingTransforms(options?.isComplete !== true);
+    };
+
+    for (const topic of transformTopics) {
+      const promise = new Promise<void>((resolve) => {
+        const unsubscribe = context.unstable_subscribeMessageRange({
+          topic: topic.topic,
+          convertTo: topic.convertTo,
+          onNewRangeIterator: async (batchIterator) => {
+            for await (const batch of batchIterator) {
+              if (batch.length > 0) {
+                messageBuffer.push(...batch);
+
+                // Progressive update: update UI periodically during loading
+                const now = Date.now();
+                if (now - lastUpdateTimeRef.current > UPDATE_DEBOUNCE_MS) {
+                  updateAllFrames();
+                  lastUpdateTimeRef.current = now;
+                }
+              }
+            }
+            resolve();
+          },
+        });
+        unsubscriptions.push(unsubscribe);
+      });
+      subscriptionPromises.push(promise);
+    }
+
+    // Final update after all topics complete
+    void Promise.all(subscriptionPromises).then(() => {
+      updateAllFrames({ isComplete: true });
+    });
+
+    return () => {
+      for (const unsubscribe of unsubscriptions) {
+        unsubscribe();
+      }
+    };
+    // in this case context is static, we're just using it to subscribe
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    config.scene.transforms?.enablePreloading,
+    config.scene.transforms?.maxPreloadMessages,
+    transformTopicsToPreload,
+    reloadPreloadTrigger,
+  ]);
+
   // Establish a connection to the message pipeline with context.watch and context.onRender
   useLayoutEffect(() => {
     context.onRender = (renderState: Immutable<RenderState>, done) => {
@@ -399,12 +548,8 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
       // currentFrame has messages on subscribed topics since the last render call
       setCurrentFrameMessages(renderState.currentFrame);
-
-      // allFrames has messages on preloaded topics across all frames (as they are loaded)
-      setAllFrames(renderState.allFrames);
     };
 
-    context.watch("allFrames");
     context.watch("colorScheme");
     context.watch("currentFrame");
     context.watch("currentTime");
@@ -416,8 +561,6 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     context.subscribeAppSettings([AppSetting.TIMEZONE]);
   }, [context, renderer]);
 
-  // Build a list of topics to subscribe to
-  const [topicsToSubscribe, setTopicsToSubscribe] = useState<Subscription[] | undefined>(undefined);
   useEffect(() => {
     if (!topics) {
       setTopicsToSubscribe(undefined);
@@ -517,10 +660,10 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
     renderer.setCurrentTime(newTimeNs);
     if (didSeek) {
-      renderer.handleSeek(oldTimeNs);
+      renderer.handleSeek(oldTimeNs, allFrames);
       setDidSeek(false);
     }
-  }, [currentTime, renderer, didSeek]);
+  }, [currentTime, renderer, didSeek, allFrames]);
 
   // Keep the renderer colorScheme and backgroundColor up to date
   useEffect(() => {
@@ -793,6 +936,15 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             ...((measureActive || publishActive) && { cursor: "crosshair" }),
           }}
         />
+        {isLoadingTransforms && config.scene.enableStats === true && (
+          <div className={classes.loadingTransforms}>
+            Loading transforms: {loadedTransformCount.toLocaleString()}{" "}
+            {loadedTransformCount >=
+            (config.scene.transforms?.maxPreloadMessages ?? MAX_TRANSFORM_MESSAGES)
+              ? `(max ${(config.scene.transforms?.maxPreloadMessages ?? MAX_TRANSFORM_MESSAGES).toLocaleString()})`
+              : "messages"}
+          </div>
+        )}
         <RendererContext.Provider value={renderer}>
           <RendererOverlay
             interfaceMode={interfaceMode}

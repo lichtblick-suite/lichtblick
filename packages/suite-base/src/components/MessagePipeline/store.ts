@@ -11,6 +11,7 @@ import shallowequal from "shallowequal";
 import { createStore, StoreApi } from "zustand";
 
 import { Condvar } from "@lichtblick/den/async";
+import { Time } from "@lichtblick/rostime";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 import {
   makeSubscriptionMemoizer,
@@ -215,9 +216,9 @@ export function createMessagePipelineStore({
         const player = get().player;
         return player?.getMetadata?.() ?? Object.freeze([]);
       },
-      getBatchIterator(topic: string) {
+      getBatchIterator(topic: string, options?: { start?: Time; end?: Time }) {
         const player = get().player;
-        return player?.getBatchIterator(topic);
+        return player?.getBatchIterator(topic, options);
       },
       startPlayback: undefined,
       playUntil: undefined,
