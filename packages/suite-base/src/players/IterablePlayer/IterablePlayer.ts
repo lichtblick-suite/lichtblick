@@ -388,12 +388,15 @@ export class IterablePlayer implements Player {
 
   public getBatchIterator(
     topic: string,
+    options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
     const topicSelection = new Map([[topic, { topic }]]);
 
     return this.#messageRangeSource?.messageIterator({
       topics: topicSelection,
       consumptionType: "full",
+      start: options?.start,
+      end: options?.end,
     });
   }
 
