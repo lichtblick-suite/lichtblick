@@ -145,6 +145,35 @@ const createMockContext = (
   } as BuiltinPanelExtensionContext;
 };
 
+function buildTfMessages({
+  topic = "/tf",
+  count,
+  startSec = 100,
+  startNsec = 0,
+  schemaName = "tf2_msgs/TFMessage",
+  sizeInBytes = 100,
+}: {
+  count: number;
+  topic?: string;
+  startSec?: number;
+  startNsec?: number;
+  schemaName?: string;
+  sizeInBytes?: number;
+}): MessageEvent[] {
+  return Array.from({ length: count }, (_, i) =>
+    MessageEventBuilder.messageEvent({
+      topic,
+      message: { transforms: [] },
+      schemaName,
+      sizeInBytes,
+      receiveTime: {
+        sec: startSec,
+        nsec: startNsec + i,
+      },
+    }),
+  );
+}
+
 describe("ThreeDeeRender", () => {
   const mockAnalytics = { logEvent: jest.fn() };
   const mockedRenderer = jest.mocked(Renderer);
@@ -619,15 +648,10 @@ describe("ThreeDeeRender", () => {
       // Given
       const topicName = "/tf";
       const totalMessages = MAX_TRANSFORM_MESSAGES + 5;
-      const messages: MessageEvent[] = Array.from({ length: totalMessages }, (_, i) =>
-        MessageEventBuilder.messageEvent({
-          topic: topicName,
-          message: { transforms: [] },
-          schemaName: "tf2_msgs/TFMessage",
-          sizeInBytes: 100,
-          receiveTime: { sec: 100, nsec: i },
-        }),
-      );
+      const messages = buildTfMessages({
+        topic: topicName,
+        count: totalMessages,
+      });
 
       const topics = [
         RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
@@ -704,17 +728,15 @@ describe("ThreeDeeRender", () => {
       // Given
       const customMaxMessages = 10;
       const totalMessages = customMaxMessages + 5;
-      const messages: MessageEvent[] = Array.from({ length: totalMessages }, (_, i) =>
-        MessageEventBuilder.messageEvent({
-          topic: "/tf",
-          message: { transforms: [] },
-          schemaName: "tf2_msgs/TFMessage",
-          sizeInBytes: 100,
-          receiveTime: { sec: 100, nsec: i },
-        }),
-      );
+      const topicName = "/tf";
+      const messages = buildTfMessages({
+        topic: topicName,
+        count: totalMessages,
+      });
 
-      const topics = [RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" })];
+      const topics = [
+        RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
+      ];
 
       const mockBatchIterator = {
         async *[Symbol.asyncIterator]() {
@@ -789,25 +811,17 @@ describe("ThreeDeeRender", () => {
     it("updates loading indicator during progressive loading", async () => {
       // Given
       const topicName = "/tf";
-      const messages1: MessageEvent[] = Array.from({ length: 5 }, (_, i) =>
-        MessageEventBuilder.messageEvent({
-          topic: topicName,
-          message: { transforms: [] },
-          schemaName: "tf2_msgs/TFMessage",
-          sizeInBytes: 100,
-          receiveTime: { sec: 100, nsec: i },
-        }),
-      );
 
-      const messages2: MessageEvent[] = Array.from({ length: 5 }, (_, i) =>
-        MessageEventBuilder.messageEvent({
-          topic: topicName,
-          message: { transforms: [] },
-          schemaName: "tf2_msgs/TFMessage",
-          sizeInBytes: 100,
-          receiveTime: { sec: 100, nsec: 100 + i },
-        }),
-      );
+      const messages1 = buildTfMessages({
+        topic: topicName,
+        count: 5,
+      });
+
+      const messages2 = buildTfMessages({
+        topic: topicName,
+        count: 5,
+        startNsec: 100,
+      });
 
       const topics = [
         RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
@@ -876,15 +890,10 @@ describe("ThreeDeeRender", () => {
     it("clears allFrames when clearPreloadBuffer event is emitted", async () => {
       // Given
       const topicName = "/tf";
-      const messages: MessageEvent[] = Array.from({ length: 100 }, (_, i) =>
-        MessageEventBuilder.messageEvent({
-          topic: topicName,
-          message: { transforms: [] },
-          schemaName: "tf2_msgs/TFMessage",
-          sizeInBytes: 100,
-          receiveTime: { sec: 100, nsec: i },
-        }),
-      );
+      const messages = buildTfMessages({
+        topic: topicName,
+        count: 100,
+      });
 
       const topics = [
         RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
@@ -958,15 +967,10 @@ describe("ThreeDeeRender", () => {
     it("does not show loading indicator when render stats is disabled", async () => {
       // Given
       const topicName = "/tf";
-      const messages: MessageEvent[] = Array.from({ length: 100 }, (_, i) =>
-        MessageEventBuilder.messageEvent({
-          topic: topicName,
-          message: { transforms: [] },
-          schemaName: "tf2_msgs/TFMessage",
-          sizeInBytes: 100,
-          receiveTime: { sec: 100, nsec: i },
-        }),
-      );
+      const messages = buildTfMessages({
+        topic: topicName,
+        count: 100,
+      });
 
       const topics = [
         RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
@@ -1038,15 +1042,10 @@ describe("ThreeDeeRender", () => {
     it("passes allFrames to handleSeek when seeking", async () => {
       // Given
       const topicName = "/tf";
-      const messages: MessageEvent[] = Array.from({ length: 50 }, (_, i) =>
-        MessageEventBuilder.messageEvent({
-          topic: topicName,
-          message: { transforms: [] },
-          schemaName: "tf2_msgs/TFMessage",
-          sizeInBytes: 100,
-          receiveTime: { sec: 100, nsec: i },
-        }),
-      );
+      const messages = buildTfMessages({
+        topic: topicName,
+        count: 50,
+      });
 
       const topics = [
         RenderStateBuilder.topic({ name: topicName, schemaName: "tf2_msgs/TFMessage" }),
