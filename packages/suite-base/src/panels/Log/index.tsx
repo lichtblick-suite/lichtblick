@@ -131,30 +131,29 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
     (action: SettingsTreeAction) => {
       if (action.action === "update") {
         const { path, value } = action.payload;
-        if (path[0] === "nameFilter") {
-          saveConfig(produce<Config>((draft) => _.set(draft, path, value)));
-        } else {
-          saveConfig(produce<Config>((draft) => _.set(draft, path.slice(1), value)));
-        }
-      } /* perform-node-action */ else {
-        if (action.action !== "perform-node-action") {
-          return;
-        }
-        if (!["show-all", "hide-all"].includes(action.payload.id)) {
-          return;
-        }
-
-        const visible = action.payload.id === "show-all";
-        saveConfig(
-          produce<Config>((draft) => {
-            const newNameFilter = Object.fromEntries(
-              Object.entries(draft.nameFilter ?? {}).map(([k, _v]) => [k, { visible }]),
-            );
-            seenNodeNames.forEach((name) => (newNameFilter[name] = { visible }));
-            return _.set(draft, ["nameFilter"], newNameFilter);
-          }),
-        );
+        const adjustedPath = path[0] === "nameFilter" ? path : path.slice(1);
+        saveConfig(produce<Config>((draft) => _.set(draft, adjustedPath, value)));
+        return;
       }
+
+      if (action.action !== "perform-node-action") {
+        return;
+      }
+
+      if (!["show-all", "hide-all"].includes(action.payload.id)) {
+        return;
+      }
+
+      const visible = action.payload.id === "show-all";
+      saveConfig(
+        produce<Config>((draft) => {
+          const newNameFilter = Object.fromEntries(
+            Object.entries(draft.nameFilter ?? {}).map(([k, _v]) => [k, { visible }]),
+          );
+          seenNodeNames.forEach((name) => (newNameFilter[name] = { visible }));
+          return _.set(draft, ["nameFilter"], newNameFilter);
+        }),
+      );
     },
     [saveConfig, seenNodeNames],
   );

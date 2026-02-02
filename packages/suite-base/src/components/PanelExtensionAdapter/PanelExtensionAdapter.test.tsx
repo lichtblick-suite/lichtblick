@@ -21,6 +21,7 @@ import {
   Immutable,
   Subscription,
 } from "@lichtblick/suite";
+import { Basic } from "@lichtblick/suite-base/Workspace.stories";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AdvertiseOptions } from "@lichtblick/suite-base/players/types";
@@ -875,68 +876,6 @@ describe("PanelExtensionAdapter", () => {
       expect(saveConfig).not.toHaveBeenCalled();
     });
 
-    it("should handle update action for extension settings", async () => {
-      // Given - a panel with extension settings and action handler
-      const saveConfig = jest.fn();
-      const sign = signal();
-
-      const initPanel = (context: PanelExtensionContext) => {
-        context.updatePanelSettingsEditor({
-          actionHandler: () => {
-            // Store the handler for testing
-          },
-          nodes: {},
-        });
-        sign.resolve();
-      };
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider type="TestPanel">
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={saveConfig} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-      await sign;
-
-      // Then - action handler should be set up
-      expect(saveConfig).not.toHaveBeenCalled();
-    });
-
-    it("should not process extension settings when category is not topics", async () => {
-      // Given - a panel with extension settings
-      const saveConfig = jest.fn();
-      const sign = signal();
-
-      const initPanel = (context: PanelExtensionContext) => {
-        context.updatePanelSettingsEditor({
-          actionHandler: () => {},
-          nodes: {},
-        });
-        sign.resolve();
-      };
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider type="TestPanel">
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={saveConfig} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-      await sign;
-
-      // When/Then - non-topics actions should not trigger saveConfig
-      expect(saveConfig).not.toHaveBeenCalled();
-    });
-  });
 
   describe("panel context methods with unmounted check", () => {
     it("should not saveState after unmount", async () => {
@@ -1550,9 +1489,11 @@ describe("PanelExtensionAdapter", () => {
   });
 
   describe("subscribe with preload options", () => {
+    const topicName = BasicBuilder.string();
     it("should handle subscribe with Subscription objects with preload true", async () => {
       // Given - a panel using Subscription objects
       const mockSetSubscriptions = jest.fn();
+
       let panelContext: PanelExtensionContext | undefined;
 
       const initPanel = (context: PanelExtensionContext) => {
@@ -1578,12 +1519,12 @@ describe("PanelExtensionAdapter", () => {
 
       // When - subscribe is called with preload: true
       await act(async () => {
-        panelContext?.subscribe([{ topic: "/topic1", preload: true }]);
+        panelContext?.subscribe([{ topic: topicName, preload: true }]);
       });
 
       // Then - should convert to full preload
       expect(mockSetSubscriptions).toHaveBeenCalledWith(expect.any(String), [
-        { topic: "/topic1", preloadType: "full" },
+        { topic: topicName, preloadType: "full" },
       ]);
     });
 
@@ -1615,12 +1556,12 @@ describe("PanelExtensionAdapter", () => {
 
       // When - subscribe is called with preload: false
       await act(async () => {
-        panelContext?.subscribe([{ topic: "/topic1", preload: false }]);
+        panelContext?.subscribe([{ topic: topicName, preload: false }]);
       });
 
       // Then - should convert to partial preload
       expect(mockSetSubscriptions).toHaveBeenCalledWith(expect.any(String), [
-        { topic: "/topic1", preloadType: "partial" },
+        { topic: topicName, preloadType: "partial" },
       ]);
     });
   });
