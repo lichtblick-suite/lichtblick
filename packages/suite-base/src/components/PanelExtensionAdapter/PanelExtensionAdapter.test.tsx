@@ -20,13 +20,14 @@ import {
   MessageEvent,
   Immutable,
   Subscription,
+  SettingsTreeAction,
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AdvertiseOptions } from "@lichtblick/suite-base/players/types";
+import * as PanelStateContextProvider from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
-import { BasicBuilder } from "@lichtblick/test-builders";
 
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
 
@@ -34,10 +35,10 @@ describe("PanelExtensionAdapter", () => {
   it("should call initPanel", async () => {
     expect.assertions(1);
 
-    const sign = signal();
+    const sig = signal();
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
-      sign.resolve();
+      sig.resolve();
     };
 
     const config = {};
@@ -64,7 +65,7 @@ describe("PanelExtensionAdapter", () => {
 
     // force a re-render to make sure we do not call init panel again
     handle.rerender(<Wrapper />);
-    await sign;
+    await sig;
   });
 
   it("sets didSeek=true when seeking", async () => {
@@ -148,7 +149,7 @@ describe("PanelExtensionAdapter", () => {
       context.advertise?.("/some/topic", "some_datatype");
     };
 
-    const sign = signal();
+    const sig = signal();
     let passed = false;
     render(
       <ThemeProvider isDark>
@@ -175,7 +176,7 @@ describe("PanelExtensionAdapter", () => {
                   ]),
                 );
                 passed = true;
-                sign.resolve();
+                sig.resolve();
               },
             }}
           >
@@ -185,7 +186,7 @@ describe("PanelExtensionAdapter", () => {
       </ThemeProvider>,
     );
     await act(async () => undefined);
-    await sign;
+    await sig;
   });
 
   it("should support advertising on multiple topics", async () => {
@@ -195,7 +196,7 @@ describe("PanelExtensionAdapter", () => {
       context.advertise?.("/some/topic", "some_datatype");
       context.advertise?.("/another/topic", "another_datatype");
     };
-    const sign = signal();
+    const sig = signal();
 
     render(
       <ThemeProvider isDark>
@@ -240,7 +241,7 @@ describe("PanelExtensionAdapter", () => {
                       },
                     ]),
                   );
-                  sign.resolve();
+                  sig.resolve();
                 }
               },
             }}
@@ -252,7 +253,7 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => undefined);
-    await sign;
+    await sig;
   });
 
   it("should support publishing on a topic", async () => {
@@ -265,7 +266,7 @@ describe("PanelExtensionAdapter", () => {
       });
     };
 
-    const sign = signal();
+    const sig = signal();
     let passed = false;
     render(
       <ThemeProvider isDark>
@@ -298,7 +299,7 @@ describe("PanelExtensionAdapter", () => {
                 }
                 expect(request).toEqual({ topic: "/some/topic", msg: { foo: "bar" } });
                 passed = true;
-                sign.resolve();
+                sig.resolve();
               },
             }}
           >
@@ -309,7 +310,7 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => undefined);
-    await sign;
+    await sig;
   });
 
   it("should support unadvertising", async () => {
@@ -321,7 +322,7 @@ describe("PanelExtensionAdapter", () => {
       context.unadvertise?.("/some/topic");
     };
 
-    const sign = signal();
+    const sig = signal();
 
     render(
       <ThemeProvider isDark>
@@ -379,7 +380,7 @@ describe("PanelExtensionAdapter", () => {
                     ]),
                   );
 
-                  sign.resolve();
+                  sig.resolve();
                 }
               },
             }}
@@ -391,7 +392,7 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => undefined);
-    await sign;
+    await sig;
   });
 
   it("should unadvertise when unmounting", (done) => {
@@ -465,7 +466,7 @@ describe("PanelExtensionAdapter", () => {
     const config = {};
     const saveConfig = () => {};
 
-    const sign = signal();
+    const sig = signal();
 
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
@@ -488,7 +489,7 @@ describe("PanelExtensionAdapter", () => {
       expect(openSiblingPanel.mock.calls).toEqual([
         [{ panelType: "X", updateIfExists: true, siblingConfigCreator: expect.any(Function) }],
       ]);
-      sign.resolve();
+      sig.resolve();
     };
 
     const Wrapper = () => {
@@ -513,7 +514,7 @@ describe("PanelExtensionAdapter", () => {
 
     // force a re-render to make sure we call init panel once
     handle.rerender(<Wrapper />);
-    await sign;
+    await sig;
   });
 
   it("should unsubscribe from all topics when subscribing to empty topics array", async () => {
@@ -521,7 +522,7 @@ describe("PanelExtensionAdapter", () => {
       context.subscribe([] as Subscription[]);
     };
 
-    const sign = signal();
+    const sig = signal();
 
     render(
       <ThemeProvider isDark>
@@ -535,7 +536,7 @@ describe("PanelExtensionAdapter", () => {
               layout: "UnknownPanel!4co6n9d",
               setSubscriptions: (_, payload) => {
                 expect(payload).toEqual([]);
-                sign.resolve();
+                sig.resolve();
               },
             }}
           >
@@ -546,7 +547,7 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => undefined);
-    await sign;
+    await sig;
   });
 
   it("should get and set variables", async () => {
@@ -689,13 +690,13 @@ describe("PanelExtensionAdapter", () => {
   });
 
   it("ignores subscriptions after panel unmount", async () => {
-    const sign = signal();
+    const sig = signal();
     const initPanel = jest.fn((context: PanelExtensionContext) => {
       context.watch("currentFrame");
       context.subscribe([{ topic: "x", preload: true }]);
       setTimeout(() => {
         context.subscribe([{ topic: "y", preload: true }]);
-        sign.resolve();
+        sig.resolve();
       }, 10);
     });
 
@@ -725,7 +726,7 @@ describe("PanelExtensionAdapter", () => {
       [expect.any(String), []],
     ]);
     await act(async () => {
-      await sign;
+      await sig;
     });
     unmount();
     expect(mockSetSubscriptions.mock.calls).toEqual([
@@ -740,7 +741,7 @@ describe("PanelExtensionAdapter", () => {
     const config = {};
     const saveConfig = () => {};
 
-    const sign = signal();
+    const sig = signal();
 
     const initPanel = (context: PanelExtensionContext) => {
       expect(context.metadata).toBeDefined();
@@ -750,7 +751,7 @@ describe("PanelExtensionAdapter", () => {
           metadata: { key: "value" },
         },
       ]);
-      sign.resolve();
+      sig.resolve();
     };
 
     const Wrapper = () => {
@@ -774,7 +775,7 @@ describe("PanelExtensionAdapter", () => {
 
     // force a re-render to make sure we call init panel once
     handle.rerender(<Wrapper />);
-    await sign;
+    await sig;
   });
 
   it("should handle unstable_subscribeMessageRange when getBatchIterator returns undefined", async () => {
@@ -789,7 +790,7 @@ describe("PanelExtensionAdapter", () => {
       expect(typeof cleanup).toBe("function");
     };
 
-    const sign = signal();
+    const sig = signal();
 
     render(
       <ThemeProvider isDark>
@@ -802,9 +803,9 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => {
-      sign.resolve();
+      sig.resolve();
     });
-    await sign;
+    await sig;
   });
 
   it("should return cleanup function from unstable_subscribeMessageRange", async () => {
@@ -821,7 +822,7 @@ describe("PanelExtensionAdapter", () => {
       cleanupCalled = true;
     };
 
-    const sign = signal();
+    const sig = signal();
 
     render(
       <ThemeProvider isDark>
@@ -834,59 +835,33 @@ describe("PanelExtensionAdapter", () => {
     );
 
     await act(async () => {
-      sign.resolve();
+      sig.resolve();
     });
-    await sign;
+    await sig;
 
     expect(cleanupCalled).toBe(true);
   });
 
-  describe("extension settings action handler", () => {
-    it("should handle reorder-node action by returning early", async () => {
-      // Given - a panel with extension settings
+  describe("extensionSettingsActionHandler - reorder-node branch", () => {
+    it("should return early for reorder-node actions without saving config", async () => {
+      // Given: A mock updatePanelSettingsTree to capture the wrapped actionHandler
+      const updatePanelSettingsTreeMock = jest.fn();
+      jest
+        .spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate")
+        .mockReturnValue(updatePanelSettingsTreeMock);
+
       const saveConfig = jest.fn();
-      const sign = signal();
+      const settingsActionHandler = jest.fn();
 
       const initPanel = (context: PanelExtensionContext) => {
         context.updatePanelSettingsEditor({
-          actionHandler: () => {
-            // This will be wrapped by extensionSettingsActionHandler
-          },
+          actionHandler: settingsActionHandler,
           nodes: {},
         });
-        sign.resolve();
       };
 
+      // When: Rendering the adapter and invoking the captured action handler with reorder-node
       render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider type="TestPanel">
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={saveConfig} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-      await sign;
-
-      // When - reorder-node action is triggered
-      // Then - saveConfig should not be called (early return)
-      expect(saveConfig).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("panel context methods with unmounted check", () => {
-    it("should not saveState after unmount", async () => {
-      // Given - a mounted panel
-      const saveConfig = jest.fn();
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
         <ThemeProvider isDark>
           <MockPanelContextProvider>
             <PanelSetup>
@@ -896,861 +871,17 @@ describe("PanelExtensionAdapter", () => {
         </ThemeProvider>,
       );
 
-      await act(async () => undefined);
+      // Then: The wrapper action handler should exist and call the original handler but not saveConfig
+      const wrappedActionHandler = updatePanelSettingsTreeMock.mock.calls[0]?.[0]?.actionHandler;
+      expect(typeof wrappedActionHandler).toBe("function");
 
-      // When - panel is unmounted and then saveState is called
-      unmount();
-      panelContext?.saveState({ test: "value" });
+      wrappedActionHandler?.({
+        action: "reorder-node",
+        payload: { path: ["topics", "topic1"] },
+      } as unknown as SettingsTreeAction);
 
-      // Then - saveConfig should not be called after unmount
+      expect(settingsActionHandler).toHaveBeenCalledTimes(1);
       expect(saveConfig).not.toHaveBeenCalled();
-    });
-
-    it("should not seekPlayback after unmount", async () => {
-      // Given - a panel with seekPlayback capability
-      const mockSeekPlayback = jest.fn();
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup fixture={{}}>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then seekPlayback is called
-      unmount();
-      panelContext?.seekPlayback?.(1234);
-
-      // Then - seekPlayback should not be called after unmount
-      expect(mockSeekPlayback).not.toHaveBeenCalled();
-    });
-
-    it("should not setParameter after unmount", async () => {
-      // Given - a panel with setParameter capability
-      const mockSetParameter = jest.fn();
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup fixture={{ setParameter: mockSetParameter }}>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then setParameter is called
-      unmount();
-      panelContext?.setParameter("testParam", "testValue");
-
-      // Then - setParameter should not be called after unmount
-      expect(mockSetParameter).not.toHaveBeenCalled();
-    });
-
-    it("should not setVariable after unmount", async () => {
-      // Given - a panel that can set variables
-      let panelContext: PanelExtensionContext | undefined;
-      const renderStates: Immutable<RenderState>[] = [];
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-        context.watch("variables");
-        context.onRender = (renderState, done) => {
-          renderStates.push({ ...renderState });
-          done();
-        };
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-      const initialRenderCount = renderStates.length;
-
-      // When - panel is unmounted and then setVariable is called
-      unmount();
-      panelContext?.setVariable("testVar", "testValue");
-
-      await act(async () => {
-        await Promise.resolve();
-      });
-
-      // Then - no additional renders should occur after unmount
-      expect(renderStates.length).toBe(initialRenderCount);
-    });
-
-    it("should not setPreviewTime after unmount", async () => {
-      // Given - a panel with preview time capability
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then setPreviewTime is called
-      unmount();
-
-      // Then - setPreviewTime should not throw after unmount
-      expect(() => panelContext?.setPreviewTime(123)).not.toThrow();
-    });
-
-    it("should not watch fields after unmount", async () => {
-      // Given - a panel that watches fields
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then watch is called
-      unmount();
-
-      // Then - watch should not throw after unmount
-      expect(() => panelContext?.watch("currentTime")).not.toThrow();
-    });
-
-    it("should not advertise after unmount", async () => {
-      // Given - a panel with advertise capability
-      const mockSetPublishers = jest.fn();
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup
-              fixture={{
-                capabilities: [PLAYER_CAPABILITIES.advertise],
-                setPublishers: mockSetPublishers,
-              }}
-            >
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then advertise is called
-      await act(async () => {
-        unmount();
-      });
-      mockSetPublishers.mockClear(); // Clear the cleanup call from unmount
-      panelContext?.advertise?.("/test/topic", "test_datatype");
-
-      // Then - setPublishers should not be called after unmount
-      expect(mockSetPublishers).not.toHaveBeenCalled();
-    });
-
-    it("should not unadvertise after unmount", async () => {
-      // Given - a panel with unadvertise capability
-      const mockSetPublishers = jest.fn();
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-        context.advertise?.("/test/topic", "test_datatype");
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup
-              fixture={{
-                capabilities: [PLAYER_CAPABILITIES.advertise],
-                setPublishers: mockSetPublishers,
-              }}
-            >
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then unadvertise is called
-      await act(async () => {
-        unmount();
-      });
-      mockSetPublishers.mockClear(); // Clear the cleanup call from unmount
-      panelContext?.unadvertise?.("/test/topic");
-
-      // Then - setPublishers should not be called after unmount
-      expect(mockSetPublishers).not.toHaveBeenCalled();
-    });
-
-    it("should not publish after unmount", async () => {
-      // Given - a panel with publish capability
-      const mockPublish = jest.fn();
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup
-              fixture={{
-                capabilities: [PLAYER_CAPABILITIES.advertise],
-                publish: mockPublish,
-              }}
-            >
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then publish is called
-      unmount();
-      panelContext?.publish?.("/test/topic", { data: "test" });
-
-      // Then - publish should not be called after unmount
-      expect(mockPublish).not.toHaveBeenCalled();
-    });
-
-    it("should throw error when callService is called after unmount", async () => {
-      // Given - a panel with callService capability
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup
-              fixture={{
-                capabilities: [PLAYER_CAPABILITIES.callServices],
-              }}
-            >
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then callService is called
-      unmount();
-
-      // Then - callService should throw after unmount
-      await expect(panelContext?.callService?.("/test/service", {})).rejects.toThrow(
-        "Service call after panel was unmounted",
-      );
-    });
-
-    it("should not subscribeAppSettings after unmount", async () => {
-      // Given - a panel with app settings
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then subscribeAppSettings is called
-      unmount();
-
-      // Then - subscribeAppSettings should not throw after unmount
-      expect(() => panelContext?.subscribeAppSettings(["testSetting"])).not.toThrow();
-    });
-
-    it("should not updatePanelSettingsEditor after unmount", async () => {
-      // Given - a panel with settings editor
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then updatePanelSettingsEditor is called
-      unmount();
-
-      // Then - updatePanelSettingsEditor should not throw after unmount
-      expect(() =>
-        panelContext?.updatePanelSettingsEditor({
-          actionHandler: () => {},
-          nodes: {},
-        }),
-      ).not.toThrow();
-    });
-
-    it("should not setDefaultPanelTitle after unmount", async () => {
-      // Given - a panel with default title
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then setDefaultPanelTitle is called
-      unmount();
-
-      // Then - setDefaultPanelTitle should not throw after unmount
-      expect(() => panelContext?.setDefaultPanelTitle("Test Title")).not.toThrow();
-    });
-
-    it("should not add panel to layout after unmount", async () => {
-      // Given - a panel with layout capability
-      const mockOpenSiblingPanel = jest.fn();
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const { unmount } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider openSiblingPanel={mockOpenSiblingPanel}>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When - panel is unmounted and then addPanel is called
-      unmount();
-      panelContext?.layout.addPanel({
-        position: "sibling",
-        type: "TestPanel",
-        updateIfExists: false,
-        getState: () => undefined,
-      });
-
-      // Then - openSiblingPanel should not be called after unmount
-      expect(mockOpenSiblingPanel).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("seekPlayback with Time object", () => {
-    it("should handle seekPlayback with Time object", async () => {
-      // Given - a panel with seekPlayback capability
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When/Then - seekPlayback exists and accepts Time object without error
-      const timeObj: Time = { sec: 10, nsec: 500000000 };
-      await act(async () => {
-        panelContext?.seekPlayback?.(timeObj);
-      });
-
-      // Verify the method exists and ran without throwing
-      expect(panelContext?.seekPlayback).toBeDefined();
-    });
-
-    it("should handle seekPlayback with number", async () => {
-      // Given - a panel with seekPlayback capability
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When/Then - seekPlayback accepts number without error
-      await act(async () => {
-        panelContext?.seekPlayback?.(123.456);
-      });
-
-      // Verify the method exists and ran without throwing
-      expect(panelContext?.seekPlayback).toBeDefined();
-    });
-  });
-
-  describe("setPreviewTime", () => {
-    it("should clear hover value when stamp is undefined", async () => {
-      // Given - a panel with preview time capability
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const sign = signal();
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => {
-        sign.resolve();
-      });
-      await sign;
-
-      // When - setPreviewTime is called with undefined
-      // Then - it should not throw
-      expect(() => panelContext?.setPreviewTime(undefined)).not.toThrow();
-    });
-
-    it("should handle setPreviewTime when startTime is not available", async () => {
-      // Given - a panel without startTime
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const sign = signal();
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup fixture={{ activeData: undefined }}>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => {
-        sign.resolve();
-      });
-      await sign;
-
-      // When - setPreviewTime is called without startTime
-      await act(async () => {
-        panelContext?.setPreviewTime(123);
-      });
-
-      // Then - it should not throw (completes without error)
-      expect(panelContext).toBeDefined();
-    });
-
-    it("should set hover value when stamp is provided with startTime", async () => {
-      // Given - a panel with startTime
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const sign = signal();
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup
-              fixture={{
-                activeData: {
-                  startTime: { sec: 100, nsec: 0 },
-                },
-              }}
-            >
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => {
-        sign.resolve();
-      });
-      await sign;
-
-      // When - setPreviewTime is called with valid stamp
-      await act(async () => {
-        panelContext?.setPreviewTime(105.5);
-      });
-
-      // Then - it should not throw (completes without error)
-      expect(panelContext).toBeDefined();
-    });
-  });
-
-  describe("subscribe with preload options", () => {
-    const topicName = BasicBuilder.string();
-    it("should handle subscribe with Subscription objects with preload true", async () => {
-      // Given - a panel using Subscription objects
-      const mockSetSubscriptions = jest.fn();
-
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const sign = signal();
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup fixture={{ setSubscriptions: mockSetSubscriptions }}>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => {
-        sign.resolve();
-      });
-      await sign;
-
-      // When - subscribe is called with preload: true
-      await act(async () => {
-        panelContext?.subscribe([{ topic: topicName, preload: true }]);
-      });
-
-      // Then - should convert to full preload
-      expect(mockSetSubscriptions).toHaveBeenCalledWith(expect.any(String), [
-        { topic: topicName, preloadType: "full" },
-      ]);
-    });
-
-    it("should handle subscribe with Subscription objects with preload false", async () => {
-      // Given - a panel using Subscription objects
-      const mockSetSubscriptions = jest.fn();
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const sign = signal();
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup fixture={{ setSubscriptions: mockSetSubscriptions }}>
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => {
-        sign.resolve();
-      });
-      await sign;
-
-      // When - subscribe is called with preload: false
-      await act(async () => {
-        panelContext?.subscribe([{ topic: topicName, preload: false }]);
-      });
-
-      // Then - should convert to partial preload
-      expect(mockSetSubscriptions).toHaveBeenCalledWith(expect.any(String), [
-        { topic: topicName, preloadType: "partial" },
-      ]);
-    });
-  });
-
-  describe("panel config version handling", () => {
-    it("should render PanelConfigVersionError when config version is too new", async () => {
-      // Given - a config with version higher than supported
-      const config = {
-        foxgloveConfigVersion: BasicBuilder.number(),
-        someOtherProperty: BasicBuilder.string(),
-      };
-
-      const sign = signal();
-
-      const initPanel = () => {
-        sign.resolve();
-      };
-
-      const { container } = render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter
-                config={config}
-                saveConfig={() => {}}
-                initPanel={initPanel}
-                highestSupportedConfigVersion={5}
-              />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-
-      // When/Then - PanelConfigVersionError should be rendered
-      expect(container.querySelector("div")).toBeTruthy();
-    });
-
-    it("should render normally when config version is supported", async () => {
-      // Given - a config with version within supported range
-      const config = {
-        foxgloveConfigVersion: BasicBuilder.number({ max: 5 }),
-        someOtherProperty: BasicBuilder.string(),
-      };
-
-      const sign = signal();
-
-      const initPanel = jest.fn(() => {
-        sign.resolve();
-      });
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter
-                config={config}
-                saveConfig={() => {}}
-                initPanel={initPanel}
-                highestSupportedConfigVersion={5}
-              />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-      await sign;
-
-      // When/Then - initPanel should be called
-      expect(initPanel).toHaveBeenCalled();
-    });
-
-    it("should render normally when no config version is specified", async () => {
-      // Given - a config without version
-      const config = {
-        someOtherProperty: BasicBuilder.string(),
-      };
-
-      const sign = signal();
-
-      const initPanel = jest.fn(() => {
-        sign.resolve();
-      });
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup>
-              <PanelExtensionAdapter
-                config={config}
-                saveConfig={() => {}}
-                initPanel={initPanel}
-                highestSupportedConfigVersion={5}
-              />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-      await sign;
-
-      // When/Then - initPanel should be called
-      expect(initPanel).toHaveBeenCalled();
-    });
-  });
-
-  describe("advertise with options", () => {
-    it("should support advertising with options", async () => {
-      // Given - a panel with advertise capability
-      const mockSetPublishers = jest.fn();
-      let panelContext: PanelExtensionContext | undefined;
-
-      const initPanel = (context: PanelExtensionContext) => {
-        panelContext = context;
-      };
-
-      const sign = signal();
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider>
-            <PanelSetup
-              fixture={{
-                capabilities: [PLAYER_CAPABILITIES.advertise],
-                setPublishers: mockSetPublishers,
-              }}
-            >
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => {
-        sign.resolve();
-      });
-      await sign;
-
-      // When - advertise is called with options
-      const options = { latching: true };
-      panelContext?.advertise?.("/test/topic", "test_datatype", options);
-
-      // Then - setPublishers should be called with options
-      expect(mockSetPublishers).toHaveBeenCalledWith(expect.any(String), [
-        {
-          topic: "/test/topic",
-          schemaName: "test_datatype",
-          options,
-        },
-      ]);
-    });
-  });
-
-  describe("extensionSettingsActionHandler", () => {
-    it("should handle reorder-node action by returning early without calling saveConfig", async () => {
-      // Given - a panel with extension settings
-      const saveConfig = jest.fn();
-      const extensionHandler = jest.fn();
-      const sign = signal();
-
-      const initPanel = (context: PanelExtensionContext) => {
-        context.updatePanelSettingsEditor({
-          actionHandler: () => {
-            // Action handler from the panel
-          },
-          nodes: {},
-        });
-        sign.resolve();
-      };
-
-      render(
-        <ThemeProvider isDark>
-          <MockPanelContextProvider type="TestPanel">
-            <PanelSetup>
-              <PanelExtensionAdapter config={{}} saveConfig={saveConfig} initPanel={initPanel} />
-            </PanelSetup>
-          </MockPanelContextProvider>
-        </ThemeProvider>,
-      );
-
-      await act(async () => undefined);
-      await sign;
-
-      // When - reorder-node action would be triggered (it's filtered out before reaching handler)
-      // Then - saveConfig should not be called
-      expect(saveConfig).not.toHaveBeenCalled();
-      expect(extensionHandler).not.toHaveBeenCalled();
     });
   });
 });

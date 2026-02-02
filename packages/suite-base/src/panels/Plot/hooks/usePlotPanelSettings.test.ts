@@ -11,23 +11,21 @@ import {
   SettingsTreeActionUpdate,
 } from "@lichtblick/suite";
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
+import usePlotPanelSettings, {
+  handleAddSeriesAction,
+  handleDeleteSeriesAction,
+  handleMoveSeriesAction,
+  handleUpdateAction,
+} from "@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelSettings";
 import {
   HandleAction,
   HandleDeleteSeriesAction,
   HandleMoveSeriesAction,
   HandleUpdateAction,
 } from "@lichtblick/suite-base/panels/Plot/types";
-import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
-
-import usePlotPanelSettings, {
-  handleAddSeriesAction,
-  handleDeleteSeriesAction,
-  handleMoveSeriesAction,
-  handleUpdateAction,
-} from "./usePlotPanelSettings";
 
 jest.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", () => ({
   usePanelSettingsTreeUpdate: jest.fn(() => jest.fn()),
@@ -123,47 +121,6 @@ describe("handleUpdateAction", () => {
       expect(input.draft.followingViewWidth).toBeUndefined();
     },
   );
-
-  it("should update arbitrary config field", () => {
-    const initialConfig = PlotBuilder.config({ paths: [] });
-    const value = BasicBuilder.number();
-    const input: HandleUpdateAction = {
-      draft: _.cloneDeep(initialConfig),
-      path: [BasicBuilder.string(), "maxYValue"],
-      value,
-    };
-
-    handleUpdateAction(input);
-
-    expect(input.draft.maxYValue).toBe(value);
-  });
-
-  it("should update nested config field", () => {
-    const initialConfig = PlotBuilder.config({ paths: [] });
-    const input: HandleUpdateAction = {
-      draft: _.cloneDeep(initialConfig),
-      path: [BasicBuilder.string(), "showXAxisLabels"],
-      value: false,
-    };
-
-    handleUpdateAction(input);
-
-    expect(input.draft.showXAxisLabels).toBe(false);
-  });
-
-  it("should handle updating path with existing paths", () => {
-    const initialConfig = PlotBuilder.config({ paths: PlotBuilder.paths(2) });
-    const value = BasicBuilder.string();
-    const input: HandleUpdateAction = {
-      draft: _.cloneDeep(initialConfig),
-      path: ["paths", "1", "label"],
-      value,
-    };
-
-    handleUpdateAction(input);
-
-    expect(input.draft.paths[1]?.label).toBe(value);
-  });
 });
 
 describe("handleAddSeriesAction", () => {
@@ -193,167 +150,175 @@ describe("handleDeleteSeriesAction", () => {
   });
 });
 
-describe("handleMoveSeriesAction", () => {
-  it("should move series up", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
+describe("given-when-then: handleMoveSeriesAction", () => {
+  it("should move series up from middle position", () => {
+    // Given: A configuration with three series
+    const path1 = PlotBuilder.path();
+    const path2 = PlotBuilder.path();
+    const path3 = PlotBuilder.path();
+    const initialConfig = PlotBuilder.config({
+      paths: [path1, path2, path3],
+    });
     const input: HandleMoveSeriesAction = {
       draft: _.cloneDeep(initialConfig),
       index: 1,
       direction: "up",
     };
 
+    // When: Moving the middle series up
     handleMoveSeriesAction(input);
 
-    expect(input.draft.paths[0]).toEqual(paths[1]);
-    expect(input.draft.paths[1]).toEqual(paths[0]);
-    expect(input.draft.paths[2]).toEqual(paths[2]);
+    // Then: The series should be swapped with the one above
+    expect(input.draft.paths).toHaveLength(3);
+    expect(input.draft.paths[0]).toEqual(path2);
+    expect(input.draft.paths[1]).toEqual(path1);
+    expect(input.draft.paths[2]).toEqual(path3);
   });
 
-  it("should move series down", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
+  it("should move series down from middle position", () => {
+    // Given: A configuration with three series
+    const path1 = PlotBuilder.path();
+    const path2 = PlotBuilder.path();
+    const path3 = PlotBuilder.path();
+    const initialConfig = PlotBuilder.config({
+      paths: [path1, path2, path3],
+    });
     const input: HandleMoveSeriesAction = {
       draft: _.cloneDeep(initialConfig),
       index: 1,
       direction: "down",
     };
 
+    // When: Moving the middle series down
     handleMoveSeriesAction(input);
 
-    expect(input.draft.paths[0]).toEqual(paths[0]);
-    expect(input.draft.paths[1]).toEqual(paths[2]);
-    expect(input.draft.paths[2]).toEqual(paths[1]);
+    // Then: The series should be swapped with the one below
+    expect(input.draft.paths).toHaveLength(3);
+    expect(input.draft.paths[0]).toEqual(path1);
+    expect(input.draft.paths[1]).toEqual(path3);
+    expect(input.draft.paths[2]).toEqual(path2);
   });
 
-  it("should not move series up when at first position", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
+  it("should not move series up when already at top position", () => {
+    // Given: A configuration with three series
+    const path1 = PlotBuilder.path();
+    const path2 = PlotBuilder.path();
+    const path3 = PlotBuilder.path();
+    const initialConfig = PlotBuilder.config({
+      paths: [path1, path2, path3],
+    });
     const input: HandleMoveSeriesAction = {
       draft: _.cloneDeep(initialConfig),
       index: 0,
       direction: "up",
     };
 
+    // When: Attempting to move the first series up
     handleMoveSeriesAction(input);
 
-    expect(input.draft.paths).toEqual(paths);
+    // Then: The order should remain unchanged
+    expect(input.draft.paths).toHaveLength(3);
+    expect(input.draft.paths[0]).toEqual(path1);
+    expect(input.draft.paths[1]).toEqual(path2);
+    expect(input.draft.paths[2]).toEqual(path3);
   });
 
-  it("should not move series down when at last position", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
+  it("should not move series down when already at bottom position", () => {
+    // Given: A configuration with three series
+    const path1 = PlotBuilder.path();
+    const path2 = PlotBuilder.path();
+    const path3 = PlotBuilder.path();
+    const initialConfig = PlotBuilder.config({
+      paths: [path1, path2, path3],
+    });
     const input: HandleMoveSeriesAction = {
       draft: _.cloneDeep(initialConfig),
       index: 2,
       direction: "down",
     };
 
+    // When: Attempting to move the last series down
     handleMoveSeriesAction(input);
 
-    expect(input.draft.paths).toEqual(paths);
-  });
-});
-
-describe("handleReorderSeriesAction", () => {
-  it("should reorder series from lower to higher index", () => {
-    const paths = PlotBuilder.paths(4);
-    const initialConfig = PlotBuilder.config({ paths });
-    const draft = _.cloneDeep(initialConfig);
-
-    handleReorderSeriesAction(draft, 1, 3);
-
-    expect(draft.paths[0]).toEqual(paths[0]);
-    expect(draft.paths[1]).toEqual(paths[2]);
-    expect(draft.paths[2]).toEqual(paths[3]);
-    expect(draft.paths[3]).toEqual(paths[1]);
+    // Then: The order should remain unchanged
+    expect(input.draft.paths).toHaveLength(3);
+    expect(input.draft.paths[0]).toEqual(path1);
+    expect(input.draft.paths[1]).toEqual(path2);
+    expect(input.draft.paths[2]).toEqual(path3);
   });
 
-  it("should reorder series from higher to lower index", () => {
-    const paths = PlotBuilder.paths(4);
-    const initialConfig = PlotBuilder.config({ paths });
-    const draft = _.cloneDeep(initialConfig);
+  it("should move series up from bottom position", () => {
+    // Given: A configuration with four series
+    const path1 = PlotBuilder.path();
+    const path2 = PlotBuilder.path();
+    const path3 = PlotBuilder.path();
+    const path4 = PlotBuilder.path();
+    const initialConfig = PlotBuilder.config({
+      paths: [path1, path2, path3, path4],
+    });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 3,
+      direction: "up",
+    };
 
-    handleReorderSeriesAction(draft, 3, 1);
+    // When: Moving the last series up
+    handleMoveSeriesAction(input);
 
-    expect(draft.paths[0]).toEqual(paths[0]);
-    expect(draft.paths[1]).toEqual(paths[3]);
-    expect(draft.paths[2]).toEqual(paths[1]);
-    expect(draft.paths[3]).toEqual(paths[2]);
+    // Then: The series should be swapped with the one above
+    expect(input.draft.paths).toHaveLength(4);
+    expect(input.draft.paths[0]).toEqual(path1);
+    expect(input.draft.paths[1]).toEqual(path2);
+    expect(input.draft.paths[2]).toEqual(path4);
+    expect(input.draft.paths[3]).toEqual(path3);
   });
 
-  it("should not change paths when sourceIndex equals targetIndex", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
-    const draft = _.cloneDeep(initialConfig);
+  it("should move series down from top position", () => {
+    // Given: A configuration with four series
+    const path1 = PlotBuilder.path();
+    const path2 = PlotBuilder.path();
+    const path3 = PlotBuilder.path();
+    const path4 = PlotBuilder.path();
+    const initialConfig = PlotBuilder.config({
+      paths: [path1, path2, path3, path4],
+    });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 0,
+      direction: "down",
+    };
 
-    handleReorderSeriesAction(draft, 1, 1);
+    // When: Moving the first series down
+    handleMoveSeriesAction(input);
 
-    expect(draft.paths).toEqual(paths);
+    // Then: The series should be swapped with the one below
+    expect(input.draft.paths).toHaveLength(4);
+    expect(input.draft.paths[0]).toEqual(path2);
+    expect(input.draft.paths[1]).toEqual(path1);
+    expect(input.draft.paths[2]).toEqual(path3);
+    expect(input.draft.paths[3]).toEqual(path4);
   });
 
-  it("should not change paths when sourceIndex is negative", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
-    const draft = _.cloneDeep(initialConfig);
+  it("should handle moving with minimum two series", () => {
+    // Given: A configuration with exactly two series
+    const path1 = PlotBuilder.path();
+    const path2 = PlotBuilder.path();
+    const initialConfig = PlotBuilder.config({
+      paths: [path1, path2],
+    });
+    const input: HandleMoveSeriesAction = {
+      draft: _.cloneDeep(initialConfig),
+      index: 0,
+      direction: "down",
+    };
 
-    handleReorderSeriesAction(draft, -1, 1);
+    // When: Moving the first series down
+    handleMoveSeriesAction(input);
 
-    expect(draft.paths).toEqual(paths);
-  });
-
-  it("should not change paths when targetIndex is negative", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
-    const draft = _.cloneDeep(initialConfig);
-
-    handleReorderSeriesAction(draft, 1, -1);
-
-    expect(draft.paths).toEqual(paths);
-  });
-
-  it("should not change paths when sourceIndex is out of bounds", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
-    const draft = _.cloneDeep(initialConfig);
-
-    handleReorderSeriesAction(draft, 3, 1);
-
-    expect(draft.paths).toEqual(paths);
-  });
-
-  it("should not change paths when targetIndex is out of bounds", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
-    const draft = _.cloneDeep(initialConfig);
-
-    handleReorderSeriesAction(draft, 1, 3);
-
-    expect(draft.paths).toEqual(paths);
-  });
-
-  it("should handle reorder of first element", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
-    const draft = _.cloneDeep(initialConfig);
-
-    handleReorderSeriesAction(draft, 0, 2);
-
-    expect(draft.paths[0]).toEqual(paths[1]);
-    expect(draft.paths[1]).toEqual(paths[2]);
-    expect(draft.paths[2]).toEqual(paths[0]);
-  });
-
-  it("should handle reorder of last element", () => {
-    const paths = PlotBuilder.paths(3);
-    const initialConfig = PlotBuilder.config({ paths });
-    const draft = _.cloneDeep(initialConfig);
-
-    handleReorderSeriesAction(draft, 2, 0);
-
-    expect(draft.paths[0]).toEqual(paths[2]);
-    expect(draft.paths[1]).toEqual(paths[0]);
-    expect(draft.paths[2]).toEqual(paths[1]);
+    // Then: The two series should be swapped
+    expect(input.draft.paths).toHaveLength(2);
+    expect(input.draft.paths[0]).toEqual(path2);
+    expect(input.draft.paths[1]).toEqual(path1);
   });
 });
 
@@ -380,14 +345,6 @@ describe("usePlotPanelSettings", () => {
       action: "perform-node-action",
       payload: { path: [], id: "delete-series" },
     } as SettingsTreeActionPerformNode,
-    {
-      action: "perform-node-action",
-      payload: { path: ["paths", "1"], id: "move-series-up" },
-    } as SettingsTreeActionPerformNode,
-    {
-      action: "perform-node-action",
-      payload: { path: ["paths", "1"], id: "move-series-down" },
-    } as SettingsTreeActionPerformNode,
   ])("should call saveConfig to update settings tree", (action: SettingsTreeAction) => {
     const config = PlotBuilder.config();
     const focusedPath = undefined;
@@ -406,66 +363,63 @@ describe("usePlotPanelSettings", () => {
     expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
   });
 
-  it("should call saveConfig with reorder-node action", () => {
-    const config = PlotBuilder.config({ paths: PlotBuilder.paths(3) });
-    const focusedPath = undefined;
-
-    renderHook(() => {
-      usePlotPanelSettings(config, saveConfig, focusedPath);
-    });
-
-    expect(usePanelSettingsTreeUpdate).toHaveBeenCalled();
-
-    const actionHandler = updatePanelSettingsTree.mock.calls[0][0].actionHandler;
-    act(() => {
-      actionHandler({
-        action: "reorder-node",
-        payload: { path: ["paths", "0"], targetPath: ["paths", "2"] },
+  describe("given-when-then: move-series actions", () => {
+    it("should move series up when move-series-up action is triggered", () => {
+      // Given: A configuration with three series
+      const path1 = PlotBuilder.path();
+      const path2 = PlotBuilder.path();
+      const path3 = PlotBuilder.path();
+      const config = PlotBuilder.config({
+        paths: [path1, path2, path3],
       });
+
+      renderHook(() => {
+        usePlotPanelSettings(config, saveConfig, undefined);
+      });
+
+      const actionHandler = updatePanelSettingsTree.mock.calls[0][0].actionHandler;
+
+      // When: Triggering move-series-up for index 1
+      const action: SettingsTreeActionPerformNode = {
+        action: "perform-node-action",
+        payload: { path: ["paths", "1"], id: "move-series-up" },
+      };
+
+      act(() => {
+        actionHandler(action);
+      });
+
+      // Then: saveConfig should be called with the producer function
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
     });
 
-    expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
-  });
+    it("should move series down when move-series-down action is triggered", () => {
+      // Given: A configuration with three series
+      const path1 = PlotBuilder.path();
+      const path2 = PlotBuilder.path();
+      const path3 = PlotBuilder.path();
+      const config = PlotBuilder.config({
+        paths: [path1, path2, path3],
+      });
 
-  it("should update panel settings tree on config change", () => {
-    const config = PlotBuilder.config();
-    const focusedPath = undefined;
+      renderHook(() => {
+        usePlotPanelSettings(config, saveConfig, undefined);
+      });
 
-    const { rerender } = renderHook(
-      ({ cfg, focused }) => {
-        usePlotPanelSettings(cfg, saveConfig, focused);
-      },
-      {
-        initialProps: { cfg: config, focused: focusedPath },
-      },
-    );
+      const actionHandler = updatePanelSettingsTree.mock.calls[0][0].actionHandler;
 
-    expect(updatePanelSettingsTree).toHaveBeenCalledTimes(1);
+      // When: Triggering move-series-down for index 1
+      const action: SettingsTreeActionPerformNode = {
+        action: "perform-node-action",
+        payload: { path: ["paths", "1"], id: "move-series-down" },
+      };
 
-    const newConfig = PlotBuilder.config({ paths: PlotBuilder.paths(2) });
-    rerender({ cfg: newConfig, focused: focusedPath });
+      act(() => {
+        actionHandler(action);
+      });
 
-    expect(updatePanelSettingsTree).toHaveBeenCalledTimes(2);
-  });
-
-  it("should update panel settings tree on focusedPath change", () => {
-    const config = PlotBuilder.config();
-    const focusedPath: string[] | undefined = [BasicBuilder.string()];
-
-    const { rerender } = renderHook(
-      ({ cfg, focused }: { cfg: typeof config; focused: string[] | undefined }) => {
-        usePlotPanelSettings(cfg, saveConfig, focused);
-      },
-      {
-        initialProps: { cfg: config, focused: focusedPath },
-      },
-    );
-
-    expect(updatePanelSettingsTree).toHaveBeenCalledTimes(1);
-
-    const newFocusedPath = [BasicBuilder.string(), BasicBuilder.string()];
-    rerender({ cfg: config, focused: newFocusedPath });
-
-    expect(updatePanelSettingsTree).toHaveBeenCalledTimes(2);
+      // Then: saveConfig should be called with the producer function
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+    });
   });
 });

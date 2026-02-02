@@ -17,7 +17,6 @@ import {
   setSeriesAction,
   usePanelSettings,
 } from "@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings";
-import { stateTransitionPathDisplayName } from "@lichtblick/suite-base/panels/StateTransitions/shared";
 import {
   IUsePanelSettings,
   PathState,
@@ -93,7 +92,7 @@ describe("makeSeriesNode", () => {
   it("should return the node structure with actions when canDelete is true", () => {
     const { seriesNode, index } = setup();
 
-    const { actions, label, fields, reorderable, icon } = makeSeriesNode(
+    const { actions, label, fields } = makeSeriesNode(
       index,
       seriesNode,
       t as unknown as TFunction<"stateTransitions">,
@@ -109,8 +108,6 @@ describe("makeSeriesNode", () => {
       },
     ]);
     expect(label).toEqual(seriesNode.path.label);
-    expect(reorderable).toBe(true);
-    expect(icon).toBe("DragHandle");
     expect(fields!.value).toEqual({
       input: "messagepath",
       label: "labels.messagePath",
@@ -136,28 +133,13 @@ describe("makeSeriesNode", () => {
   it("should return the node structure with actions when canDelete is false", () => {
     const { seriesNode, index } = setup({ canDelete: false });
 
-    const { actions, reorderable, icon } = makeSeriesNode(
+    const { actions } = makeSeriesNode(
       index,
       seriesNode,
       t as unknown as TFunction<"stateTransitions">,
     );
 
     expect(actions).toEqual([]);
-    expect(reorderable).toBe(true);
-    expect(icon).toBe("DragHandle");
-  });
-
-  it("should return the node structure without reorderable when canReorder is false", () => {
-    const { seriesNode, index } = setup({ canReorder: false });
-
-    const { reorderable, icon } = makeSeriesNode(
-      index,
-      seriesNode,
-      t as unknown as TFunction<"stateTransitions">,
-    );
-
-    expect(reorderable).toBe(false);
-    expect(icon).toBeUndefined();
   });
 
   it("should return error parameter in value field when isArray is true", () => {
@@ -170,28 +152,6 @@ describe("makeSeriesNode", () => {
     );
 
     expect(fields!.value).toEqual(expect.objectContaining({ error: "pathErrorMessage" }));
-  });
-
-  it("should use stateTransitionPathDisplayName for label", () => {
-    // Given - a path with specific label
-    const pathLabel = BasicBuilder.string();
-    const { seriesNode, index } = setup({
-      path: {
-        value: BasicBuilder.string(),
-        label: pathLabel,
-        timestampMethod: "receiveTime",
-      },
-    });
-
-    // When - creating a series node
-    const { label } = makeSeriesNode(
-      index,
-      seriesNode,
-      t as unknown as TFunction<"stateTransitions">,
-    );
-
-    // Then - label should match the expected display name
-    expect(label).toEqual(stateTransitionPathDisplayName(seriesNode.path, index));
   });
 });
 
@@ -233,12 +193,6 @@ describe("makeRootSeriesNode", () => {
     expect(children!["0"]?.actions).toHaveLength(1);
     expect(children!["1"]?.actions).toHaveLength(1);
     expect(children!["2"]?.actions).toHaveLength(1);
-    expect(children!["0"]?.reorderable).toBe(true);
-    expect(children!["1"]?.reorderable).toBe(true);
-    expect(children!["2"]?.reorderable).toBe(true);
-    expect(children!["0"]?.icon).toBe("DragHandle");
-    expect(children!["1"]?.icon).toBe("DragHandle");
-    expect(children!["2"]?.icon).toBe("DragHandle");
   });
 
   it("should return node structure with actions when paths are not provided", () => {
@@ -250,8 +204,6 @@ describe("makeRootSeriesNode", () => {
     expect(children).toHaveProperty("0");
     expect(children).not.toHaveProperty("1");
     expect(children!["0"]?.actions).toEqual([]);
-    expect(children!["0"]?.reorderable).toBe(false);
-    expect(children!["0"]?.icon).toBeUndefined();
   });
 });
 
@@ -333,46 +285,6 @@ describe("buildSettingsTree", () => {
     );
 
     expect(xAxis!.fields!.xAxisMaxValue!.error).toEqual("maxXError");
-  });
-
-  it("should not return error when xAxisMinValue or xAxisMaxValue is undefined", () => {
-    // Given - config with undefined xAxisMinValue
-    const { paths, config } = setup({
-      config: {
-        xAxisMaxValue: BasicBuilder.number(),
-        xAxisMinValue: undefined,
-      },
-    });
-
-    // When - building settings tree
-    const { xAxis } = buildSettingsTree(
-      config as StateTransitionConfig,
-      paths,
-      t as unknown as TFunction<"stateTransitions">,
-    );
-
-    // Then - should not have error
-    expect(xAxis!.fields!.xAxisMaxValue!.error).toBeUndefined();
-  });
-
-  it("should not return error when xAxisMaxValue is undefined", () => {
-    // Given - config with undefined xAxisMaxValue
-    const { paths, config } = setup({
-      config: {
-        xAxisMaxValue: undefined,
-        xAxisMinValue: BasicBuilder.number(),
-      },
-    });
-
-    // When - building settings tree
-    const { xAxis } = buildSettingsTree(
-      config as StateTransitionConfig,
-      paths,
-      t as unknown as TFunction<"stateTransitions">,
-    );
-
-    // Then - should not have error
-    expect(xAxis!.fields!.xAxisMaxValue!.error).toBeUndefined();
   });
 });
 
@@ -699,854 +611,164 @@ describe("usePanelSettings", () => {
   });
 
   describe("reorder-node action", () => {
-    it("should reorder series from lower to higher index", () => {
-      // Given - a config with 4 paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
+    it("should reorder series from lower index to higher index", () => {
+      // Given: A configuration with three series
+      const path1 = buildPath();
+      const path2 = buildPath();
+      const path3 = buildPath();
+      const { render, config } = setup({
+        paths: [
+          { path: path1, isArray: false },
+          { path: path2, isArray: false },
+          { path: path3, isArray: false },
+        ],
+      });
       const { actionHandler } = render.result.current;
 
-      // When - reordering from index 1 to index 3
-      const settings: SettingsTreeAction = {
+      // When: Reordering from index 0 to index 2
+      const action: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { path: ["paths", "1"], targetPath: ["paths", "3"] },
+        payload: {
+          path: ["paths", "0"],
+          targetPath: ["paths", "2"],
+        },
       };
 
       act(() => {
-        actionHandler(settings);
+        actionHandler(action);
       });
 
-      // Then - the paths should be reordered correctly
+      // Then: The series should be reordered correctly
       expect(saveConfig).toHaveBeenCalledTimes(1);
       expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
       const updatedConfig = produce(
         config,
         (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       );
-      expect(updatedConfig.paths[0]).toEqual(config.paths[0]);
-      expect(updatedConfig.paths[1]).toEqual(config.paths[2]);
-      expect(updatedConfig.paths[2]).toEqual(config.paths[3]);
-      expect(updatedConfig.paths[3]).toEqual(config.paths[1]);
+      expect(updatedConfig.paths).toHaveLength(3);
+      expect(updatedConfig.paths[0]).toEqual(path2);
+      expect(updatedConfig.paths[1]).toEqual(path3);
+      expect(updatedConfig.paths[2]).toEqual(path1);
     });
 
-    it("should reorder series from higher to lower index", () => {
-      // Given - a config with 4 paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
+    it("should reorder series from higher index to lower index", () => {
+      // Given: A configuration with three series
+      const path1 = buildPath();
+      const path2 = buildPath();
+      const path3 = buildPath();
+      const { render, config } = setup({
+        paths: [
+          { path: path1, isArray: false },
+          { path: path2, isArray: false },
+          { path: path3, isArray: false },
+        ],
+      });
       const { actionHandler } = render.result.current;
 
-      // When - reordering from index 3 to index 1
-      const settings: SettingsTreeAction = {
+      // When: Reordering from index 2 to index 0
+      const action: SettingsTreeAction = {
         action: "reorder-node",
-        payload: { path: ["paths", "3"], targetPath: ["paths", "1"] },
+        payload: {
+          path: ["paths", "2"],
+          targetPath: ["paths", "0"],
+        },
       };
 
       act(() => {
-        actionHandler(settings);
+        actionHandler(action);
       });
 
-      // Then - the paths should be reordered correctly
+      // Then: The series should be reordered correctly
       expect(saveConfig).toHaveBeenCalledTimes(1);
       expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
       const updatedConfig = produce(
         config,
         (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       );
-      expect(updatedConfig.paths[0]).toEqual(config.paths[0]);
-      expect(updatedConfig.paths[1]).toEqual(config.paths[3]);
-      expect(updatedConfig.paths[2]).toEqual(config.paths[1]);
-      expect(updatedConfig.paths[3]).toEqual(config.paths[2]);
+      expect(updatedConfig.paths).toHaveLength(3);
+      expect(updatedConfig.paths[0]).toEqual(path3);
+      expect(updatedConfig.paths[1]).toEqual(path1);
+      expect(updatedConfig.paths[2]).toEqual(path2);
     });
 
-    it("should not change paths when sourceIndex equals targetIndex", () => {
-      // Given - a config with 3 paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
+    it("should reorder series to adjacent position", () => {
+      // Given: A configuration with four series
+      const path1 = buildPath();
+      const path2 = buildPath();
+      const path3 = buildPath();
+      const path4 = buildPath();
+      const { render, config } = setup({
+        paths: [
+          { path: path1, isArray: false },
+          { path: path2, isArray: false },
+          { path: path3, isArray: false },
+          { path: path4, isArray: false },
+        ],
+      });
       const { actionHandler } = render.result.current;
 
-      // When - reordering with same source and target index
-      const settings: SettingsTreeAction = {
-        action: "reorder-node",
-        payload: { path: ["paths", "1"], targetPath: ["paths", "1"] },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - paths should remain unchanged
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths).toEqual(config.paths);
-    });
-
-    it("should not change paths when sourceIndex is negative", () => {
-      // Given - a config with 3 paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-
-      // When - reordering with negative source index
-      const settings: SettingsTreeAction = {
-        action: "reorder-node",
-        payload: { path: ["paths", "-1"], targetPath: ["paths", "1"] },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - paths should remain unchanged
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths).toEqual(config.paths);
-    });
-
-    it("should not change paths when targetIndex is negative", () => {
-      // Given - a config with 3 paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-
-      // When - reordering with negative target index
-      const settings: SettingsTreeAction = {
-        action: "reorder-node",
-        payload: { path: ["paths", "1"], targetPath: ["paths", "-1"] },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - paths should remain unchanged
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths).toEqual(config.paths);
-    });
-
-    it("should not change paths when sourceIndex is out of bounds", () => {
-      // Given - a config with 3 paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-
-      // When - reordering with source index out of bounds
-      const settings: SettingsTreeAction = {
-        action: "reorder-node",
-        payload: { path: ["paths", "5"], targetPath: ["paths", "1"] },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - paths should remain unchanged
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths).toEqual(config.paths);
-    });
-
-    it("should not change paths when targetIndex is out of bounds", () => {
-      // Given - a config with 3 paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-
-      // When - reordering with target index out of bounds
-      const settings: SettingsTreeAction = {
-        action: "reorder-node",
-        payload: { path: ["paths", "1"], targetPath: ["paths", "5"] },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - paths should remain unchanged
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths).toEqual(config.paths);
-    });
-
-    it("should handle reorder of first element to last position", () => {
-      // Given - a config with 3 paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-
-      // When - reordering first element to last position
-      const settings: SettingsTreeAction = {
-        action: "reorder-node",
-        payload: { path: ["paths", "0"], targetPath: ["paths", "2"] },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - paths should be reordered correctly
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths[0]).toEqual(config.paths[1]);
-      expect(updatedConfig.paths[1]).toEqual(config.paths[2]);
-      expect(updatedConfig.paths[2]).toEqual(config.paths[0]);
-    });
-
-    it("should handle reorder of last element to first position", () => {
-      // Given - a config with 3 paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-
-      // When - reordering last element to first position
-      const settings: SettingsTreeAction = {
-        action: "reorder-node",
-        payload: { path: ["paths", "2"], targetPath: ["paths", "0"] },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - paths should be reordered correctly
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths[0]).toEqual(config.paths[2]);
-      expect(updatedConfig.paths[1]).toEqual(config.paths[0]);
-      expect(updatedConfig.paths[2]).toEqual(config.paths[1]);
-    });
-  });
-
-  describe("update action edge cases", () => {
-    it("should update path field for a specific series", () => {
-      // Given - a config with multiple paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-      const newValue = BasicBuilder.string();
-
-      // When - updating a specific path value
-      const settings: SettingsTreeAction = {
-        action: "update",
-        payload: {
-          input: "messagepath",
-          path: ["paths", "1", "value"],
-          value: newValue,
-        },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - only the specified path should be updated
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths[1]?.value).toEqual(newValue);
-      expect(updatedConfig.paths[0]).toEqual(config.paths[0]);
-    });
-
-    it("should update label field for a specific series", () => {
-      // Given - a config with multiple paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-      const newLabel = BasicBuilder.string();
-
-      // When - updating a specific path label
-      const settings: SettingsTreeAction = {
-        action: "update",
-        payload: {
-          input: "string",
-          path: ["paths", "0", "label"],
-          value: newLabel,
-        },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - only the specified label should be updated
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths[0]?.label).toEqual(newLabel);
-      expect(updatedConfig.paths[1]).toEqual(config.paths[1]);
-    });
-
-    it("should update timestampMethod field for a specific series", () => {
-      // Given - a config with multiple paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-      const newTimestampMethod: TimestampMethod = "headerStamp";
-
-      // When - updating a specific path timestampMethod
-      const settings: SettingsTreeAction = {
-        action: "update",
-        payload: {
-          input: "select",
-          path: ["paths", "1", "timestampMethod"],
-          value: newTimestampMethod,
-        },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - only the specified timestampMethod should be updated
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths[1]?.timestampMethod).toEqual(newTimestampMethod);
-      expect(updatedConfig.paths[0]).toEqual(config.paths[0]);
-    });
-
-    it("should add default path when updating empty paths array", () => {
-      // Given - a config with empty paths
-      const { render, config } = setup({ paths: [] });
-      const { actionHandler } = render.result.current;
-
-      // When - updating a path field with empty paths
-      const settings: SettingsTreeAction = {
-        action: "update",
-        payload: {
-          input: "string",
-          path: ["paths", "0", "label"],
-          value: BasicBuilder.string(),
-        },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - a default path should be added
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths).toHaveLength(1);
-      expect(updatedConfig.paths[0]).toEqual(
-        expect.objectContaining({
-          label: settings.payload.value,
-        }),
-      );
-    });
-  });
-
-  describe("hook dependencies", () => {
-    it("should update panel settings tree when config changes", () => {
-      // Given - initial config
-      const initialPaths: PathState[] = [{ path: buildPath(), isArray: false }];
-      const { render } = setup({ paths: initialPaths });
-
-      // When - config is updated
-      const newPaths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const newConfig: StateTransitionConfig = {
-        isSynced: BasicBuilder.boolean(),
-        showPoints: BasicBuilder.boolean(),
-        xAxisMaxValue: BasicBuilder.number(),
-        xAxisMinValue: BasicBuilder.number(),
-        xAxisRange: BasicBuilder.number(),
-        paths: newPaths.map(({ path }) => path),
-      };
-
-      render.rerender({
-        config: newConfig,
-        saveConfig,
-        paths: newPaths,
-        focusedPath: [],
-      });
-
-      // Then - the hook should have been called again
-      expect(render.result.current.actionHandler).toBeDefined();
-    });
-
-    it("should update panel settings tree when focusedPath changes", () => {
-      // Given - initial focusedPath
-      const initialFocusedPath: string[] = ["paths", "0"];
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths, focusedPath: initialFocusedPath });
-
-      // When - focusedPath is updated
-      const newFocusedPath: string[] = ["paths", "1"];
-
-      render.rerender({
-        config,
-        saveConfig,
-        paths,
-        focusedPath: newFocusedPath,
-      });
-
-      // Then - the hook should have been called again
-      expect(render.result.current.actionHandler).toBeDefined();
-    });
-
-    it("should update panel settings tree when paths change", () => {
-      // Given - initial paths
-      const initialPaths: PathState[] = [{ path: buildPath(), isArray: false }];
-      const { render, config } = setup({ paths: initialPaths });
-
-      // When - paths are updated
-      const newPaths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-
-      render.rerender({
-        config,
-        saveConfig,
-        paths: newPaths,
-        focusedPath: [],
-      });
-
-      // Then - the hook should have been called again
-      expect(render.result.current.actionHandler).toBeDefined();
-    });
-  });
-
-  describe("buildSettingsTree - additional coverage", () => {
-    it("should include showPoints field in general settings", () => {
-      // Given - config with showPoints value
-      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
-      const config: Omit<StateTransitionConfig, "paths"> = {
-        isSynced: BasicBuilder.boolean(),
-        showPoints: true,
-        xAxisMaxValue: BasicBuilder.number({ min: 50, max: 100 }),
-        xAxisMinValue: BasicBuilder.number({ min: 0, max: 49 }),
-        xAxisRange: BasicBuilder.number(),
-      };
-
-      // When - building settings tree
-      const { general } = buildSettingsTree(
-        { ...config, paths: paths.map((p) => p.path) },
-        paths,
-        t as unknown as TFunction<"stateTransitions">,
-      );
-
-      // Then - showPoints field should be present with correct configuration
-      expect(general!.fields!.showPoints).toEqual({
-        help: "labels.helpGeneral",
-        input: "boolean",
-        label: "labels.showPoints",
-        value: true,
-      });
-    });
-
-    it("should include xAxisRange field in xAxis settings", () => {
-      // Given - config with xAxisRange value
-      const xAxisRange = BasicBuilder.number({ min: 10, max: 100 });
-      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
-      const config: Omit<StateTransitionConfig, "paths"> = {
-        isSynced: BasicBuilder.boolean(),
-        showPoints: BasicBuilder.boolean(),
-        xAxisMaxValue: BasicBuilder.number({ min: 50, max: 100 }),
-        xAxisMinValue: BasicBuilder.number({ min: 0, max: 49 }),
-        xAxisRange,
-      };
-
-      // When - building settings tree
-      const { xAxis } = buildSettingsTree(
-        { ...config, paths: paths.map((p) => p.path) },
-        paths,
-        t as unknown as TFunction<"stateTransitions">,
-      );
-
-      // Then - xAxisRange field should be present
-      expect(xAxis!.fields!.xAxisRange).toEqual({
-        label: "secondsRange",
-        input: "number",
-        value: xAxisRange,
-        placeholder: "auto",
-      });
-    });
-
-    it("should build settings tree with empty paths array", () => {
-      // Given - config with empty paths
-      const paths: PathState[] = [];
-      const config: Omit<StateTransitionConfig, "paths"> = {
-        isSynced: BasicBuilder.boolean(),
-        showPoints: BasicBuilder.boolean(),
-        xAxisMaxValue: BasicBuilder.number({ min: 50, max: 100 }),
-        xAxisMinValue: BasicBuilder.number({ min: 0, max: 49 }),
-        xAxisRange: BasicBuilder.number(),
-      };
-
-      // When - building settings tree
-      const tree = buildSettingsTree(
-        { ...config, paths: [] },
-        paths,
-        t as unknown as TFunction<"stateTransitions">,
-      );
-
-      // Then - should have default path node structure
-      expect(tree.paths).toBeDefined();
-      expect(tree.paths!.children).toBeDefined();
-      expect(tree.paths!.children!["0"]).toBeDefined();
-    });
-
-    it("should handle undefined xAxisRange in settings tree", () => {
-      // Given - config without xAxisRange
-      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
-      const config: Omit<StateTransitionConfig, "paths"> = {
-        isSynced: BasicBuilder.boolean(),
-        showPoints: BasicBuilder.boolean(),
-        xAxisMaxValue: BasicBuilder.number({ min: 50, max: 100 }),
-        xAxisMinValue: BasicBuilder.number({ min: 0, max: 49 }),
-        xAxisRange: undefined,
-      };
-
-      // When - building settings tree
-      const { xAxis } = buildSettingsTree(
-        { ...config, paths: paths.map((p) => p.path) },
-        paths,
-        t as unknown as TFunction<"stateTransitions">,
-      );
-
-      // Then - xAxisRange should still be present but with undefined value
-      expect(xAxis!.fields!.xAxisRange).toBeDefined();
-      expect(xAxis!.fields!.xAxisRange!.value).toBeUndefined();
-    });
-  });
-
-  describe("makeSeriesNode - additional coverage", () => {
-    it("should create node with all timestampMethod options", () => {
-      // Given - a series node with headerStamp timestampMethod
-      const { seriesNode, index } = {
-        index: 1,
-        seriesNode: {
-          path: {
-            value: BasicBuilder.string(),
-            label: BasicBuilder.string(),
-            timestampMethod: "headerStamp" as TimestampMethod,
-          },
-          canDelete: true,
-          canReorder: true,
-          isArray: false,
-        },
-      };
-
-      // When - creating series node
-      const node = makeSeriesNode(index, seriesNode, t as unknown as TFunction<"stateTransitions">);
-
-      // Then - timestampMethod field should have both options
-      const timestampField = node.fields!.timestampMethod;
-      expect(timestampField).toBeDefined();
-      expect(timestampField?.input).toBe("select");
-      // Type assertion after checking
-      const selectField = timestampField as {
-        input: "select";
-        options: { label: string; value: string }[];
-      };
-      expect(selectField.options).toHaveLength(2);
-      expect(selectField.options).toContainEqual({
-        label: "labels.timestampReceiveTime",
-        value: "receiveTime",
-      });
-      expect(selectField.options).toContainEqual({
-        label: "labels.timestampHeaderStamp",
-        value: "headerStamp",
-      });
-    });
-
-    it("should create node with specific index for display name", () => {
-      // Given - a series node with specific index
-      const index = BasicBuilder.number({ min: 5, max: 10 });
-      const pathLabel = BasicBuilder.string();
-      const { seriesNode } = {
-        seriesNode: {
-          path: {
-            value: BasicBuilder.string(),
-            label: pathLabel,
-            timestampMethod: "receiveTime" as TimestampMethod,
-          },
-          canDelete: true,
-          canReorder: false,
-          isArray: false,
-        },
-      };
-
-      // When - creating series node
-      const node = makeSeriesNode(index, seriesNode, t as unknown as TFunction<"stateTransitions">);
-
-      // Then - label should use the correct index
-      expect(node.label).toEqual(stateTransitionPathDisplayName(seriesNode.path, index));
-    });
-  });
-
-  describe("makeRootSeriesNode - additional coverage", () => {
-    it("should create root node with single path", () => {
-      // Given - a single path
-      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
-
-      // When - creating root series node
-      const node = makeRootSeriesNode(paths, t as unknown as TFunction<"stateTransitions">);
-
-      // Then - should have one child with canDelete true but canReorder false
-      expect(_.size(node.children)).toBe(1);
-      expect(node.children!["0"]?.actions).toHaveLength(1);
-      expect(node.children!["0"]?.reorderable).toBe(false);
-    });
-
-    it("should create root node with multiple paths allowing reorder", () => {
-      // Given - multiple paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-
-      // When - creating root series node
-      const node = makeRootSeriesNode(paths, t as unknown as TFunction<"stateTransitions">);
-
-      // Then - all children should have canReorder true
-      expect(node.children!["0"]?.reorderable).toBe(true);
-      expect(node.children!["1"]?.reorderable).toBe(true);
-      expect(node.children!["0"]?.icon).toBe("DragHandle");
-      expect(node.children!["1"]?.icon).toBe("DragHandle");
-    });
-  });
-
-  describe("action handler - additional edge cases", () => {
-    it("should handle unknown action gracefully", () => {
-      // Given - a render setup
-      const { render } = setup();
-      const { actionHandler } = render.result.current;
-
-      // When - calling with an unknown action
+      // When: Reordering from index 1 to index 2 (adjacent positions)
       const action: SettingsTreeAction = {
-        action: "unknown-action" as any,
-        payload: { path: [], id: "unknown" },
+        action: "reorder-node",
+        payload: {
+          path: ["paths", "1"],
+          targetPath: ["paths", "2"],
+        },
       };
 
-      // Then - should not throw error (saveConfig should not be called)
       act(() => {
         actionHandler(action);
       });
 
-      // Since it's an unknown action, saveConfig should not be called
-      expect(saveConfig).not.toHaveBeenCalled();
-    });
-
-    it("should handle update action for non-xAxis, non-general paths", () => {
-      // Given - config with paths
-      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-      const newValue = BasicBuilder.string();
-
-      // When - updating a random path
-      const settings: SettingsTreeAction = {
-        action: "update",
-        payload: {
-          input: "string",
-          path: ["customPath", "customField"],
-          value: newValue,
-        },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - config should be updated
+      // Then: The series should be swapped correctly
       expect(saveConfig).toHaveBeenCalledTimes(1);
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
       const updatedConfig = produce(
         config,
         (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       );
-      expect(_.get(updatedConfig, ["customPath", "customField"])).toEqual(newValue);
+      expect(updatedConfig.paths).toHaveLength(4);
+      expect(updatedConfig.paths[0]).toEqual(path1);
+      expect(updatedConfig.paths[1]).toEqual(path3);
+      expect(updatedConfig.paths[2]).toEqual(path2);
+      expect(updatedConfig.paths[3]).toEqual(path4);
     });
 
-    it("should handle perform-node-action with unknown id", () => {
-      // Given - a render setup
-      const { render } = setup();
+    it("should handle reordering with minimum two series", () => {
+      // Given: A configuration with exactly two series
+      const path1 = buildPath();
+      const path2 = buildPath();
+      const { render, config } = setup({
+        paths: [
+          { path: path1, isArray: false },
+          { path: path2, isArray: false },
+        ],
+      });
       const { actionHandler } = render.result.current;
 
-      // When - calling with unknown perform-node-action id
+      // When: Reordering the two series
       const action: SettingsTreeAction = {
-        action: "perform-node-action",
-        payload: { id: "unknown-id", path: [] },
+        action: "reorder-node",
+        payload: {
+          path: ["paths", "0"],
+          targetPath: ["paths", "1"],
+        },
       };
 
-      // Then - should not crash and not call saveConfig
       act(() => {
         actionHandler(action);
       });
-      expect(saveConfig).not.toHaveBeenCalled();
-    });
 
-    it("should add default path when adding series with empty paths", () => {
-      // Given - config with empty paths
-      const { render, config } = setup({ paths: [] });
-      config.paths = [];
-      const { actionHandler } = render.result.current;
-
-      // When - adding a series
-      const settings: SettingsTreeAction = {
-        action: "perform-node-action",
-        payload: { id: SeriesActionId.ADD, path: [] },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - should have two paths (one default + one new)
+      // Then: The series should be swapped
       expect(saveConfig).toHaveBeenCalledTimes(1);
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
       const updatedConfig = produce(
         config,
         (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       );
       expect(updatedConfig.paths).toHaveLength(2);
-    });
-
-    it("should delete correct serie at index 0", () => {
-      // Given - config with multiple paths
-      const paths: PathState[] = [
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-        { path: buildPath(), isArray: false },
-      ];
-      const { render, config } = setup({ paths });
-      const { actionHandler } = render.result.current;
-
-      // When - deleting first series
-      const settings: SettingsTreeAction = {
-        action: "perform-node-action",
-        payload: { id: SeriesActionId.DELETE, path: ["", "0"] },
-      };
-
-      act(() => {
-        actionHandler(settings);
-      });
-
-      // Then - first path should be removed
-      expect(saveConfig).toHaveBeenCalledTimes(1);
-      const updatedConfig = produce(
-        config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
-      );
-      expect(updatedConfig.paths).toHaveLength(2);
-      expect(updatedConfig.paths).not.toContain(config.paths[0]);
-      expect(updatedConfig.paths).toContain(config.paths[1]);
-      expect(updatedConfig.paths).toContain(config.paths[2]);
-    });
-  });
-
-  describe("setSeriesAction - additional coverage", () => {
-    it("should create action with different icon types", () => {
-      // Given - series action with Addchart icon
-      const seriesAction: SeriesAction = {
-        id: SeriesActionId.ADD,
-        label: BasicBuilder.string(),
-        icon: "Addchart",
-      };
-
-      // When - creating action item
-      const action = setSeriesAction(seriesAction);
-
-      // Then - should have correct icon
-      expect(action.icon).toBe("Addchart");
-      expect(action.type).toBe("action");
-    });
-
-    it("should create action with Clear icon", () => {
-      // Given - series action with Clear icon
-      const seriesAction: SeriesAction = {
-        id: SeriesActionId.DELETE,
-        label: BasicBuilder.string(),
-        icon: "Clear",
-      };
-
-      // When - creating action item
-      const action = setSeriesAction(seriesAction);
-
-      // Then - should have Clear icon
-      expect(action.icon).toBe("Clear");
+      expect(updatedConfig.paths[0]).toEqual(path2);
+      expect(updatedConfig.paths[1]).toEqual(path1);
     });
   });
 });

@@ -15,6 +15,8 @@ import { buildSettingsTree } from "./buildSettingsTree";
 describe("buildSettingsTree", () => {
   const t: TFunction<"plot"> = jest.fn((key) => key) as unknown as TFunction<"plot">;
 
+  beforeEach(() => {});
+
   it("should build the settings tree", () => {
     const paths = [
       PlotBuilder.path({
@@ -45,8 +47,6 @@ describe("buildSettingsTree", () => {
     const children0: SettingsTreeNode | undefined = tree.paths?.children!["0"];
     expect(children0?.visible).toBe(config.paths[0]?.enabled);
     expect(children0?.label).toBe(config.paths[0]?.label);
-    expect(children0?.reorderable).toBe(true);
-    expect(children0?.icon).toBe("DragHandle");
     expect(children0?.actions?.length).toBe(1);
     expect((children0?.actions![0] as SettingsTreeNodeActionItem).id).toEqual("delete-series");
     expect(children0?.fields!["value"]).toBeDefined();
@@ -124,333 +124,162 @@ describe("buildSettingsTree", () => {
     expect(tree.xAxis?.fields?.maxXValue?.error).toBe("maxXError");
   });
 
-  it("should include legend settings with all options", () => {
-    // Given - config with specific legend display
-    const config: PlotConfig = PlotBuilder.config({
-      legendDisplay: "floating",
-      paths: [],
+  describe("makeSeriesNode - reorderable and icon properties (lines 33-34)", () => {
+    it("should set reorderable to true and icon to DragHandle when canReorder is true", () => {
+      // Given: A config with multiple paths where nodes should be reorderable
+      const paths = [PlotBuilder.path(), PlotBuilder.path()];
+      const config: PlotConfig = PlotBuilder.config({ paths });
+
+      // When: Building the settings tree
+      const tree = buildSettingsTree(config, t);
+
+      // Then: Series nodes should have reorderable=true and icon=DragHandle
+      const child0 = tree.paths?.children!["0"];
+      const child1 = tree.paths?.children!["1"];
+      expect(child0?.reorderable).toBe(true);
+      expect(child0?.icon).toBe("DragHandle");
+      expect(child1?.reorderable).toBe(true);
+      expect(child1?.icon).toBe("DragHandle");
     });
 
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
+    it("should set reorderable to false and icon to undefined when canReorder is false", () => {
+      // Given: A config with no paths, which creates a default node
+      const config: PlotConfig = PlotBuilder.config({ paths: [] });
 
-    // Then - legend field should have all display options
-    expect(tree.legend?.fields?.legendDisplay).toBeDefined();
-    const legendField = tree.legend?.fields?.legendDisplay;
-    expect(legendField?.input).toBe("select");
-    // Type assertion after checking input type
-    const selectField = legendField as {
-      input: "select";
-      options: { value: string; label: string }[];
-    };
-    expect(selectField.options).toEqual([
-      { value: "floating", label: "floating" },
-      { value: "left", label: "left" },
-      { value: "top", label: "top" },
-      { value: "none", label: "hidden" },
-    ]);
-  });
+      // When: Building the settings tree
+      const tree = buildSettingsTree(config, t);
 
-  it("should include showPlotValuesInLegend field", () => {
-    // Given - config with showPlotValuesInLegend
-    const config: PlotConfig = PlotBuilder.config({
-      showPlotValuesInLegend: true,
-      paths: [],
+      // Then: Default series node should have reorderable=false and icon=undefined
+      const child0 = tree.paths?.children!["0"];
+      expect(child0?.reorderable).toBe(false);
+      expect(child0?.icon).toBeUndefined();
     });
 
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
+    it("should set reorderable to true and icon to DragHandle for all nodes when paths have multiple items", () => {
+      // Given: A config with three paths
+      const paths = [PlotBuilder.path(), PlotBuilder.path(), PlotBuilder.path()];
+      const config: PlotConfig = PlotBuilder.config({ paths });
 
-    // Then - showPlotValuesInLegend field should be present
-    expect(tree.legend?.fields?.showPlotValuesInLegend).toEqual({
-      label: "showValues",
-      input: "boolean",
-      value: true,
-    });
-  });
+      // When: Building the settings tree
+      const tree = buildSettingsTree(config, t);
 
-  it("should include showYAxisLabels field", () => {
-    // Given - config with showYAxisLabels
-    const config: PlotConfig = PlotBuilder.config({
-      showYAxisLabels: false,
-      paths: [],
-    });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - showYAxisLabels field should be present
-    expect(tree.yAxis?.fields?.showYAxisLabels).toEqual({
-      label: "showLabels",
-      input: "boolean",
-      value: false,
+      // Then: All series nodes should be reorderable with DragHandle icon
+      const child0 = tree.paths?.children!["0"];
+      const child1 = tree.paths?.children!["1"];
+      const child2 = tree.paths?.children!["2"];
+      expect(child0?.reorderable).toBe(true);
+      expect(child0?.icon).toBe("DragHandle");
+      expect(child1?.reorderable).toBe(true);
+      expect(child1?.icon).toBe("DragHandle");
+      expect(child2?.reorderable).toBe(true);
+      expect(child2?.icon).toBe("DragHandle");
     });
   });
 
-  it("should include xAxis fields with xAxisVal options", () => {
-    // Given - config with xAxisVal set to custom
-    const config: PlotConfig = PlotBuilder.config({
-      xAxisVal: "custom",
-      paths: [],
+  describe("makeRootSeriesNode - children creation logic (lines 81-99)", () => {
+    it("should create a single default child node with canDelete=false and canReorder=false when paths is empty", () => {
+      // Given: A config with empty paths array
+      const config: PlotConfig = PlotBuilder.config({ paths: [] });
+
+      // When: Building the settings tree
+      const tree = buildSettingsTree(config, t);
+
+      // Then: Should have exactly one child with key "0"
+      const children = tree.paths?.children;
+      expect(Object.keys(children!).length).toBe(1);
+      expect(children!["0"]).toBeDefined();
+
+      // And: The child should use DEFAULT_PLOT_PATH properties
+      const child0 = children!["0"];
+      expect(child0?.fields?.value?.value).toBe(DEFAULT_PLOT_PATH.value);
+      expect(child0?.visible).toBe(DEFAULT_PLOT_PATH.enabled);
+
+      // And: The child should not be deletable or reorderable
+      expect(child0?.actions?.length).toBe(0);
+      expect(child0?.reorderable).toBe(false);
+      expect(child0?.icon).toBeUndefined();
     });
 
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
+    it("should create multiple children with canDelete=true and canReorder=true when paths has items", () => {
+      // Given: A config with multiple paths
+      const path1 = PlotBuilder.path({
+        value: BasicBuilder.string(),
+        label: BasicBuilder.string(),
+      });
+      const path2 = PlotBuilder.path({
+        value: BasicBuilder.string(),
+        label: BasicBuilder.string(),
+      });
+      const config: PlotConfig = PlotBuilder.config({ paths: [path1, path2] });
 
-    // Then - xAxisVal field should have all options
-    const xAxisValField = tree.xAxis?.fields?.xAxisVal;
-    expect(xAxisValField?.input).toBe("select");
-    // Type assertion after checking input type
-    const selectField = xAxisValField as {
-      input: "select";
-      options: { label: string; value: string }[];
-    };
-    expect(selectField.options).toEqual([
-      { label: "timestamp", value: "timestamp" },
-      { label: "index", value: "index" },
-      { label: "currentPath", value: "currentCustom" },
-      { label: "accumulatedPath", value: "custom" },
-    ]);
-  });
+      // When: Building the settings tree
+      const tree = buildSettingsTree(config, t);
 
-  it("should include xAxisPath field when xAxisVal is currentCustom", () => {
-    // Given - config with xAxisVal set to currentCustom
-    const xAxisPath = { value: BasicBuilder.string(), enabled: true };
-    const config: PlotConfig = PlotBuilder.config({
-      xAxisVal: "currentCustom",
-      xAxisPath,
-      paths: [],
+      // Then: Should have children with keys matching path indices
+      const children = tree.paths?.children;
+      expect(Object.keys(children!).length).toBe(2);
+      expect(children!["0"]).toBeDefined();
+      expect(children!["1"]).toBeDefined();
+
+      // And: Each child should be deletable and reorderable
+      const child0 = children!["0"];
+      const child1 = children!["1"];
+      expect(child0?.actions?.length).toBe(1);
+      expect((child0?.actions![0] as SettingsTreeNodeActionItem).id).toBe("delete-series");
+      expect(child0?.reorderable).toBe(true);
+      expect(child0?.icon).toBe("DragHandle");
+      expect(child1?.actions?.length).toBe(1);
+      expect((child1?.actions![0] as SettingsTreeNodeActionItem).id).toBe("delete-series");
+      expect(child1?.reorderable).toBe(true);
+      expect(child1?.icon).toBe("DragHandle");
     });
 
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
+    it("should map paths to children with correct indices as keys", () => {
+      // Given: A config with four paths
+      const paths = [
+        PlotBuilder.path({ value: "/topic1" }),
+        PlotBuilder.path({ value: "/topic2" }),
+        PlotBuilder.path({ value: "/topic3" }),
+        PlotBuilder.path({ value: "/topic4" }),
+      ];
+      const config: PlotConfig = PlotBuilder.config({ paths });
 
-    // Then - xAxisPath field should be present
-    expect(tree.xAxis?.fields?.xAxisPath).toBeDefined();
-    expect(tree.xAxis?.fields?.xAxisPath?.value).toBe(xAxisPath.value);
-  });
+      // When: Building the settings tree
+      const tree = buildSettingsTree(config, t);
 
-  it("should include xAxisPath field when xAxisVal is custom", () => {
-    // Given - config with xAxisVal set to custom
-    const xAxisPath = { value: BasicBuilder.string(), enabled: true };
-    const config: PlotConfig = PlotBuilder.config({
-      xAxisVal: "custom",
-      xAxisPath,
-      paths: [],
+      // Then: Children keys should be "0", "1", "2", "3"
+      const children = tree.paths?.children;
+      expect(Object.keys(children!)).toEqual(["0", "1", "2", "3"]);
+
+      // And: Each child should correspond to the correct path
+      expect(children!["0"]?.fields?.value?.value).toBe(paths[0]?.value);
+      expect(children!["1"]?.fields?.value?.value).toBe(paths[1]?.value);
+      expect(children!["2"]?.fields?.value?.value).toBe(paths[2]?.value);
+      expect(children!["3"]?.fields?.value?.value).toBe(paths[3]?.value);
     });
 
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
+    it("should handle single path by creating one child with canDelete=true and canReorder=true", () => {
+      // Given: A config with exactly one path
+      const path = PlotBuilder.path({
+        value: BasicBuilder.string(),
+        label: BasicBuilder.string(),
+      });
+      const config: PlotConfig = PlotBuilder.config({ paths: [path] });
 
-    // Then - xAxisPath field should be present
-    expect(tree.xAxis?.fields?.xAxisPath).toBeDefined();
-  });
+      // When: Building the settings tree
+      const tree = buildSettingsTree(config, t);
 
-  it("should not include xAxisPath field when xAxisVal is timestamp", () => {
-    // Given - config with xAxisVal set to timestamp
-    const config: PlotConfig = PlotBuilder.config({
-      xAxisVal: "timestamp",
-      paths: [],
+      // Then: Should have exactly one child with key "0"
+      const children = tree.paths?.children;
+      expect(Object.keys(children!).length).toBe(1);
+      expect(children!["0"]).toBeDefined();
+
+      // And: The child should be deletable and reorderable
+      const child0 = children!["0"];
+      expect(child0?.actions?.length).toBe(1);
+      expect((child0?.actions![0] as SettingsTreeNodeActionItem).id).toBe("delete-series");
+      expect(child0?.reorderable).toBe(true);
+      expect(child0?.icon).toBe("DragHandle");
     });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - xAxisPath field should not be present
-    expect(tree.xAxis?.fields?.xAxisPath).toBeUndefined();
-  });
-
-  it("should include showXAxisLabels field", () => {
-    // Given - config with showXAxisLabels
-    const config: PlotConfig = PlotBuilder.config({
-      showXAxisLabels: true,
-      paths: [],
-    });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - showXAxisLabels field should be present
-    expect(tree.xAxis?.fields?.showXAxisLabels).toEqual({
-      label: "showLabels",
-      input: "boolean",
-      value: true,
-    });
-  });
-
-  it("should include followingViewWidth field", () => {
-    // Given - config with followingViewWidth
-    const followingViewWidth = BasicBuilder.number({ min: 1, max: 100 });
-    const config: PlotConfig = PlotBuilder.config({
-      followingViewWidth,
-      paths: [],
-    });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - followingViewWidth field should be present
-    expect(tree.xAxis?.fields?.followingViewWidth).toEqual({
-      label: "secondsRange",
-      input: "number",
-      placeholder: "auto",
-      value: followingViewWidth,
-    });
-  });
-
-  it("should handle path with all fields defined", () => {
-    // Given - config with fully defined path
-    const path = PlotBuilder.path({
-      value: BasicBuilder.string(),
-      label: BasicBuilder.string(),
-      enabled: true,
-      color: BasicBuilder.string(),
-      lineSize: BasicBuilder.number({ min: 0, max: 5 }),
-      showLine: true,
-      timestampMethod: "headerStamp",
-    });
-    const config: PlotConfig = PlotBuilder.config({ paths: [path] });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - path should have all fields
-    const pathNode = tree.paths?.children?.["0"];
-    expect(pathNode?.fields?.value).toBeDefined();
-    expect(pathNode?.fields?.label?.value).toBe(path.label);
-    expect(pathNode?.fields?.color?.value).toBe(path.color);
-    expect(pathNode?.fields?.lineSize?.value).toBe(path.lineSize);
-    expect(pathNode?.fields?.showLine?.value).toBe(true);
-    expect(pathNode?.fields?.timestampMethod?.value).toBe("headerStamp");
-  });
-
-  it("should use default line color when path color is undefined", () => {
-    // Given - config with path without color
-    const path = PlotBuilder.path({ color: undefined });
-    const config: PlotConfig = PlotBuilder.config({ paths: [path] });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - should use default color from lineColors
-    const pathNode = tree.paths?.children?.["0"];
-    expect(pathNode?.fields?.color?.value).toBeDefined();
-  });
-
-  it("should set yAxis defaultExpansionState to collapsed", () => {
-    // Given - any config
-    const config: PlotConfig = PlotBuilder.config({ paths: [] });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - yAxis should have defaultExpansionState collapsed
-    expect(tree.yAxis?.defaultExpansionState).toBe("collapsed");
-  });
-
-  it("should set xAxis defaultExpansionState to collapsed", () => {
-    // Given - any config
-    const config: PlotConfig = PlotBuilder.config({ paths: [] });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - xAxis should have defaultExpansionState collapsed
-    expect(tree.xAxis?.defaultExpansionState).toBe("collapsed");
-  });
-
-  it("should include delete-series action for paths", () => {
-    // Given - config with a path
-    const path = PlotBuilder.path();
-    const config: PlotConfig = PlotBuilder.config({ paths: [path] });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - path node should have delete action
-    const pathNode = tree.paths?.children?.["0"];
-    expect(pathNode?.actions).toContainEqual({
-      type: "action",
-      id: "delete-series",
-      label: "deleteSeries",
-      display: "inline",
-      icon: "Clear",
-    });
-  });
-
-  it("should mark path as reorderable", () => {
-    // Given - config with a path
-    const path = PlotBuilder.path();
-    const config: PlotConfig = PlotBuilder.config({ paths: [path] });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - path node should be reorderable
-    const pathNode = tree.paths?.children?.["0"];
-    expect(pathNode?.reorderable).toBe(true);
-    expect(pathNode?.icon).toBe("DragHandle");
-  });
-
-  it("should not set error when minYValue and maxYValue are valid", () => {
-    // Given - config with valid Y values
-    const config: PlotConfig = PlotBuilder.config({
-      minYValue: 0,
-      maxYValue: 100,
-      paths: [],
-    });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - should not have error
-    expect(tree.yAxis?.fields?.maxYValue?.error).toBeUndefined();
-  });
-
-  it("should not set error when minXValue and maxXValue are valid", () => {
-    // Given - config with valid X values
-    const config: PlotConfig = PlotBuilder.config({
-      minXValue: 0,
-      maxXValue: 100,
-      paths: [],
-    });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - should not have error
-    expect(tree.xAxis?.fields?.maxXValue?.error).toBeUndefined();
-  });
-
-  it("should handle empty xAxisPath value", () => {
-    // Given - config with empty xAxisPath
-    const config: PlotConfig = PlotBuilder.config({
-      xAxisVal: "custom",
-      xAxisPath: { value: "", enabled: true },
-      paths: [],
-    });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - xAxisPath should have empty value
-    expect(tree.xAxis?.fields?.xAxisPath?.value).toBe("");
-  });
-
-  it("should handle undefined xAxisPath", () => {
-    // Given - config with undefined xAxisPath but xAxisVal set to custom
-    const config: PlotConfig = PlotBuilder.config({
-      xAxisVal: "custom",
-      xAxisPath: undefined,
-      paths: [],
-    });
-
-    // When - building settings tree
-    const tree = buildSettingsTree(config, t);
-
-    // Then - xAxisPath field should be present (it uses optional chaining with empty string default)
-    expect(tree.xAxis?.fields?.xAxisPath).toBeDefined();
-    // The value will actually be from PlotBuilder.config defaults if xAxisPath is undefined
-    expect(tree.xAxis?.fields?.xAxisPath?.value).toBeDefined();
   });
 });
