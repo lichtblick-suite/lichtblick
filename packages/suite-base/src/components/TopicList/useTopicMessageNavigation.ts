@@ -1,6 +1,29 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+/**
+ * Topic Message Navigation Hook
+ *
+ * PERFORMANCE OPTIMIZATION NOTES:
+ *
+ * 1. MCAP Footer Loading (Remote & Local Files)
+ *    - MCAP files load the footer FIRST, even for remote connections via HTTP range requests
+ *    - The footer contains the summary section with ChunkIndexes that include messageStartTime/messageEndTime
+ *    - This means topicStats.firstMessageTime and topicStats.lastMessageTime are available IMMEDIATELY
+ *      after initialization, without needing to iterate through all messages
+ *    - See: @mcap/core McapIndexedReader.Initialize() - reads footer from end of file before chunk data
+ *
+ * 2. Navigation Optimization Strategy
+ *    - Next message: Direct seek using getBatchIterator({ start: currentTime }) - O(1) complexity
+ *    - Previous message: Adaptive windowing strategy with progressive expansion (100ms → 60s)
+ *    - Window sizes calculated based on topic density from topicStats when available
+ *
+ * 3. Boundaries Cache
+ *    - boundariesCache serves as fallback for discovering actual message boundaries
+ *    - For MCAP files, topicStats provides accurate boundaries from footer (preferred)
+ *    - Cache is useful for non-MCAP sources or when topicStats is unavailable
+ */
+
 import { enableMapSet } from "immer";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useImmer } from "use-immer";
@@ -10,6 +33,12 @@ import { Time, compare } from "@lichtblick/rostime";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
 import { RESULT_TYPE_MESSAGE_EVENT } from "@lichtblick/suite-base/components/TopicList/constants";
+import {
+  calculateOptimalWindowMs,
+  createWindowSizes,
+  subtractMilliseconds,
+  wouldReachBoundary,
+} from "@lichtblick/suite-base/components/TopicList/timeWindowHelpers";
 import {
   TopicBoundaries,
   UseTopicMessageNavigationReturn,
@@ -76,6 +105,10 @@ export function useTopicMessageNavigation({
   // switching between topics. Merges partial boundary updates, preserving existing
   // values so first and last boundaries can be discovered independently
   // (e.g., handlePreviousMessage finds first, handleNextMessage finds last).
+  //
+  // NOTE: For MCAP files, topicStats provides accurate boundaries from the footer
+  // (loaded first via HTTP range request for remote files). The cache serves as a
+  // fallback for non-MCAP sources or when topicStats is temporarily unavailable.
   const updateBoundariesCache = useCallback(
     (topic: string, updates: Partial<TopicBoundaries>) => {
       setBoundariesCache((draft) => {
@@ -129,12 +162,16 @@ export function useTopicMessageNavigation({
   }, [topicName, selected, discoverBoundaries, boundariesCache, isTopicSubscribed]);
 
   const canNavigateNext = useMemo(() => {
-    if (!currentTime || !topicStats) {
+    if (!currentTime) {
       return false;
     }
 
     const isAtPlaybackEnd = endTime != undefined && compare(currentTime, endTime) >= 0;
-    const lastTopicMessageTime = topicStats.get(topicName)?.lastMessageTime ?? lastMessageTime;
+    // Use topicStats for per-topic boundary, fallback to cache, then to global endTime.
+    // This enables navigation immediately for MCAP files (using global time) while
+    // allowing more accurate per-topic boundaries to be discovered during navigation.
+    const lastTopicMessageTime =
+      topicStats?.get(topicName)?.lastMessageTime ?? lastMessageTime ?? endTime;
 
     if (!lastTopicMessageTime) {
       return false;
@@ -146,12 +183,16 @@ export function useTopicMessageNavigation({
   }, [currentTime, endTime, topicStats, topicName, lastMessageTime]);
 
   const canNavigatePrevious = useMemo(() => {
-    if (!currentTime || !topicStats) {
+    if (!currentTime) {
       return false;
     }
 
     const isAtPlaybackStart = startTime != undefined && compare(currentTime, startTime) <= 0;
-    const firstTopicMessageTime = topicStats.get(topicName)?.firstMessageTime ?? firstMessageTime;
+    // Use topicStats for per-topic boundary, fallback to cache, then to global startTime.
+    // This enables navigation immediately for MCAP files (using global time) while
+    // allowing more accurate per-topic boundaries to be discovered during navigation.
+    const firstTopicMessageTime =
+      topicStats?.get(topicName)?.firstMessageTime ?? firstMessageTime ?? startTime;
 
     if (!firstTopicMessageTime) {
       return false;
@@ -167,7 +208,9 @@ export function useTopicMessageNavigation({
       signal: AbortSignal,
       current: Time,
     ): Promise<{ targetTime: Time; isLastMessage: boolean } | undefined> => {
-      const iterator = getBatchIterator(topicName);
+      // OPTIMIZATION: Seek directly to currentTime instead of iterating from beginning
+      // This is O(1) for indexed MCAP files vs O(n) for full iteration
+      const iterator = getBatchIterator(topicName, { start: current });
       if (!iterator) {
         return undefined;
       }
@@ -258,35 +301,131 @@ export function useTopicMessageNavigation({
     }
 
     const signal = createNavigationSignal();
-
     setIsNavigating(true);
 
     try {
-      const iterator = getBatchIterator(topicName);
-      if (!iterator) {
-        return;
+      const stats = topicStats?.get(topicName);
+
+      // Calculate optimal initial window size based on topic statistics.
+      // For MCAP files, these stats come from the footer (loaded first), providing
+      // accurate message density without requiring full iteration.
+      let initialWindowMs = 500;
+
+      if (stats?.numMessages != undefined && stats.firstMessageTime && stats.lastMessageTime) {
+        initialWindowMs = calculateOptimalWindowMs({
+          numMessages: stats.numMessages,
+          firstMessageTime: stats.firstMessageTime,
+          lastMessageTime: stats.lastMessageTime,
+          targetMessagesInWindow: 10,
+        });
       }
 
-      let firstBoundary: Time | undefined;
-      let targetTime: Time | undefined;
+      // Create progressively larger windows for adaptive search
+      const windowSizes = createWindowSizes(initialWindowMs);
 
-      for await (const result of iterator) {
+      let targetTime: Time | undefined;
+      let firstBoundary: Time | undefined;
+
+      // Try each window size until we find a message
+      for (const windowMs of windowSizes) {
         if (signal.aborted) {
           return;
         }
-        if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
-          continue;
+
+        // Check if this window would go past the topic's first message.
+        // NOTE: We only use the cached firstMessageTime here (from actual message discovery),
+        // not stats.firstMessageTime which is the global MCAP time (not topic-specific).
+        // The global time is an approximation that may not reflect actual topic boundaries.
+        if (wouldReachBoundary(currentTime, windowMs, firstMessageTime)) {
+          // This window reaches the beginning, make it the last attempt
+          // Use startTime (global playback start) as fallback if no cached boundary exists
+          const searchStart = firstMessageTime ?? startTime;
+          const iterator = getBatchIterator(topicName, {
+            start: searchStart,
+            end: currentTime,
+          });
+
+          if (iterator) {
+            for await (const result of iterator) {
+              if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
+                continue;
+              }
+
+              const messageTime = result.msgEvent.receiveTime;
+              firstBoundary ??= messageTime;
+
+              const isBeforeCurrent = compare(messageTime, currentTime) < 0;
+              if (!isBeforeCurrent) {
+                break;
+              }
+
+              targetTime = messageTime;
+            }
+          }
+          break; // Stop searching, we've reached the beginning
         }
 
-        const messageTime = result.msgEvent.receiveTime;
-        firstBoundary ??= messageTime;
+        // OPTIMIZATION: Search only within the time window
+        const windowStart = subtractMilliseconds(currentTime, windowMs);
+        const iterator = getBatchIterator(topicName, {
+          start: windowStart,
+          end: currentTime,
+        });
 
-        const isBeforeCurrent = compare(messageTime, currentTime) < 0;
-        if (!isBeforeCurrent) {
+        if (!iterator) {
+          return;
+        }
+
+        // Iterate only messages within this window
+        for await (const result of iterator) {
+          if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
+            continue;
+          }
+
+          const messageTime = result.msgEvent.receiveTime;
+          firstBoundary ??= messageTime;
+
+          const isBeforeCurrent = compare(messageTime, currentTime) < 0;
+          if (!isBeforeCurrent) {
+            break;
+          }
+
+          targetTime = messageTime;
+        }
+
+        if (targetTime) {
           break;
         }
+      }
 
-        targetTime = messageTime;
+      // FALLBACK: If no message found in any window and we haven't done a full search yet,
+      // search from the beginning (startTime) to currentTime
+      if (!targetTime && !firstMessageTime && startTime) {
+        const fallbackIterator = getBatchIterator(topicName, {
+          start: startTime,
+          end: currentTime,
+        });
+
+        if (fallbackIterator) {
+          for await (const result of fallbackIterator) {
+            if (signal.aborted) {
+              return;
+            }
+            if (result.type !== RESULT_TYPE_MESSAGE_EVENT) {
+              continue;
+            }
+
+            const messageTime = result.msgEvent.receiveTime;
+            firstBoundary ??= messageTime;
+
+            const isBeforeCurrent = compare(messageTime, currentTime) < 0;
+            if (!isBeforeCurrent) {
+              break;
+            }
+
+            targetTime = messageTime;
+          }
+        }
       }
 
       if (signal.aborted) {
@@ -318,6 +457,8 @@ export function useTopicMessageNavigation({
     pausePlayback,
     getBatchIterator,
     firstMessageTime,
+    startTime,
+    topicStats,
     updateBoundariesCache,
     createNavigationSignal,
   ]);

@@ -76,8 +76,9 @@ export class TopicAliasingPlayer implements Player {
 
   public getBatchIterator(
     topic: string,
+    options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
-    return this.#player.getBatchIterator(topic);
+    return this.#player.getBatchIterator(topic, options);
   }
 
   public setListener(listener: (playerState: PlayerState) => Promise<void>): void {

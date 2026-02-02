@@ -78,7 +78,10 @@ export interface Player {
   setGlobalVariables(globalVariables: GlobalVariables): void;
   getMetadata?: () => ReadonlyArray<Readonly<Metadata>>;
   // Create a batch iterator for streaming messages. Available for data source players that support message iteration.
-  getBatchIterator: (topic: string) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
+  getBatchIterator: (
+    topic: string,
+    options?: { start?: Time; end?: Time },
+  ) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
 }
 
 export enum PlayerPresence {
