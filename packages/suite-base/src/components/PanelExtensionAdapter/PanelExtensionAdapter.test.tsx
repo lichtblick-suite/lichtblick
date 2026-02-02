@@ -21,7 +21,6 @@ import {
   Immutable,
   Subscription,
 } from "@lichtblick/suite";
-import { Basic } from "@lichtblick/suite-base/Workspace.stories";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AdvertiseOptions } from "@lichtblick/suite-base/players/types";
@@ -875,7 +874,7 @@ describe("PanelExtensionAdapter", () => {
       // Then - saveConfig should not be called (early return)
       expect(saveConfig).not.toHaveBeenCalled();
     });
-
+  });
 
   describe("panel context methods with unmounted check", () => {
     it("should not saveState after unmount", async () => {
