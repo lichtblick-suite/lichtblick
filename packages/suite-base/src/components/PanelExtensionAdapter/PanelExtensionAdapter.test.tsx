@@ -1716,4 +1716,41 @@ describe("PanelExtensionAdapter", () => {
       ]);
     });
   });
+
+  describe("extensionSettingsActionHandler", () => {
+    it("should handle reorder-node action by returning early without calling saveConfig", async () => {
+      // Given - a panel with extension settings
+      const saveConfig = jest.fn();
+      const extensionHandler = jest.fn();
+      const sign = signal();
+
+      const initPanel = (context: PanelExtensionContext) => {
+        context.updatePanelSettingsEditor({
+          actionHandler: () => {
+            // Action handler from the panel
+          },
+          nodes: {},
+        });
+        sign.resolve();
+      };
+
+      render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider type="TestPanel">
+            <PanelSetup>
+              <PanelExtensionAdapter config={{}} saveConfig={saveConfig} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+
+      await act(async () => undefined);
+      await sign;
+
+      // When - reorder-node action would be triggered (it's filtered out before reaching handler)
+      // Then - saveConfig should not be called
+      expect(saveConfig).not.toHaveBeenCalled();
+      expect(extensionHandler).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -717,6 +718,222 @@ describe("NodeEditor - Component Rendering", () => {
 
       // then
       expect(scrollIntoViewMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("given node with visibility filter set to visible", () => {
+    it("should show children with visible=true", async () => {
+      // given
+      const parentLabel = BasicBuilder.string();
+      const visibleChildLabel = BasicBuilder.string();
+
+      // when
+      await renderComponent({
+        defaultOpen: true,
+        settings: {
+          label: parentLabel,
+          children: {
+            visibleChild: { label: visibleChildLabel, visible: true },
+          },
+        },
+      });
+
+      // then
+      expect(screen.getByText(visibleChildLabel)).toBeInTheDocument();
+    });
+
+    it("should show children with visible=undefined", async () => {
+      // given
+      const parentLabel = BasicBuilder.string();
+      const undefinedVisibleChildLabel = BasicBuilder.string();
+
+      // when
+      await renderComponent({
+        defaultOpen: true,
+        settings: {
+          label: parentLabel,
+          children: {
+            undefinedChild: { label: undefinedVisibleChildLabel },
+          },
+        },
+      });
+
+      // then
+      expect(screen.getByText(undefinedVisibleChildLabel)).toBeInTheDocument();
+    });
+
+    it("should not filter out children with visible=false by default", async () => {
+      // given
+      const parentLabel = BasicBuilder.string();
+      const invisibleChildLabel = BasicBuilder.string();
+
+      // when
+      await renderComponent({
+        defaultOpen: true,
+        settings: {
+          label: parentLabel,
+          children: {
+            invisibleChild: { label: invisibleChildLabel, visible: false },
+          },
+        },
+      });
+
+      // then
+      expect(screen.getByText(invisibleChildLabel)).toBeInTheDocument();
+    });
+
+    it("should show all children when filter is all", async () => {
+      // given
+      const parentLabel = BasicBuilder.string();
+      const visibleChildLabel = BasicBuilder.string();
+      const invisibleChildLabel = BasicBuilder.string();
+      const undefinedChildLabel = BasicBuilder.string();
+
+      // when
+      await renderComponent({
+        defaultOpen: true,
+        settings: {
+          label: parentLabel,
+          enableVisibilityFilter: true,
+          children: {
+            visibleChild: { label: visibleChildLabel, visible: true },
+            invisibleChild: { label: invisibleChildLabel, visible: false },
+            undefinedChild: { label: undefinedChildLabel },
+          },
+        },
+      });
+
+      // Filter defaults to "all"
+      // then
+      expect(screen.getByText(visibleChildLabel)).toBeInTheDocument();
+      expect(screen.getByText(invisibleChildLabel)).toBeInTheDocument();
+      expect(screen.getByText(undefinedChildLabel)).toBeInTheDocument();
+    });
+  });
+
+  describe("given node with renamable label editing", () => {
+    it("should call actionHandler when label is changed and renamable is true", async () => {
+      // given
+      const label = BasicBuilder.string();
+      const actionHandler = jest.fn();
+      const path = [BasicBuilder.string(), BasicBuilder.string()];
+
+      // when
+      await renderComponent({
+        path,
+        actionHandler,
+        settings: { label, renamable: true },
+      });
+
+      const editButton = screen.getByRole("button", { name: /rename/i });
+      await userEvent.click(editButton);
+
+      const textField = screen.getByRole("textbox");
+      await userEvent.type(textField, "X");
+
+      // then
+      expect(actionHandler).toHaveBeenCalled();
+      const lastCall = actionHandler.mock.calls.at(-1);
+      expect(lastCall[0]).toMatchObject({
+        action: "update",
+        payload: {
+          path: [...path, "label"],
+          input: "string",
+        },
+      });
+      // Value contains the typed character
+      expect(lastCall[0].payload.value).toContain("X");
+    });
+
+    it("should not call actionHandler when renamable is false", async () => {
+      // given
+      const label = BasicBuilder.string();
+      const actionHandler = jest.fn();
+
+      // when
+      await renderComponent({
+        actionHandler,
+        settings: { label, renamable: false },
+      });
+
+      // then
+      expect(actionHandler).not.toHaveBeenCalled();
+      expect(screen.queryByRole("button", { name: /rename/i })).not.toBeInTheDocument();
+    });
+
+    it("should not call actionHandler when renamable is undefined", async () => {
+      // given
+      const label = BasicBuilder.string();
+      const actionHandler = jest.fn();
+
+      // when
+      await renderComponent({
+        actionHandler,
+        settings: { label, renamable: undefined },
+      });
+
+      // then
+      expect(actionHandler).not.toHaveBeenCalled();
+      expect(screen.queryByRole("button", { name: /rename/i })).not.toBeInTheDocument();
+    });
+
+    it("should include correct path in update action", async () => {
+      // given
+      const label = BasicBuilder.string();
+      const actionHandler = jest.fn();
+      const path = [BasicBuilder.string(), BasicBuilder.string(), BasicBuilder.string()];
+
+      // when
+      await renderComponent({
+        path,
+        actionHandler,
+        settings: { label, renamable: true },
+      });
+
+      const editButton = screen.getByRole("button", { name: /rename/i });
+      await userEvent.click(editButton);
+
+      const textField = screen.getByRole("textbox");
+      await userEvent.type(textField, "Y");
+
+      // then
+      expect(actionHandler).toHaveBeenCalled();
+      const lastCall = actionHandler.mock.calls.at(-1);
+      expect(lastCall[0]).toMatchObject({
+        action: "update",
+        payload: {
+          path: [...path, "label"],
+          input: "string",
+        },
+      });
+    });
+
+    it("should call actionHandler for each character typed", async () => {
+      // given
+      const label = "";
+      const actionHandler = jest.fn();
+      const path = [BasicBuilder.string()];
+
+      // when
+      await renderComponent({
+        path,
+        actionHandler,
+        settings: { label, renamable: true },
+      });
+
+      const editButton = screen.getByRole("button", { name: /rename/i });
+      await userEvent.click(editButton);
+
+      const textField = screen.getByRole("textbox");
+      await userEvent.type(textField, "ab");
+
+      // then
+      // userEvent.type triggers onChange for each character
+      expect(actionHandler).toHaveBeenCalledTimes(2);
+
+      // Verify incremental typing - each character is sent separately
+      expect(actionHandler.mock.calls[0][0].payload.value).toBe("a");
+      expect(actionHandler.mock.calls[1][0].payload.value).toBe("b");
     });
   });
 });

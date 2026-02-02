@@ -1188,4 +1188,365 @@ describe("usePanelSettings", () => {
       expect(render.result.current.actionHandler).toBeDefined();
     });
   });
+
+  describe("buildSettingsTree - additional coverage", () => {
+    it("should include showPoints field in general settings", () => {
+      // Given - config with showPoints value
+      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
+      const config: Omit<StateTransitionConfig, "paths"> = {
+        isSynced: BasicBuilder.boolean(),
+        showPoints: true,
+        xAxisMaxValue: BasicBuilder.number({ min: 50, max: 100 }),
+        xAxisMinValue: BasicBuilder.number({ min: 0, max: 49 }),
+        xAxisRange: BasicBuilder.number(),
+      };
+
+      // When - building settings tree
+      const { general } = buildSettingsTree(
+        { ...config, paths: paths.map((p) => p.path) },
+        paths,
+        t as unknown as TFunction<"stateTransitions">,
+      );
+
+      // Then - showPoints field should be present with correct configuration
+      expect(general!.fields!.showPoints).toEqual({
+        help: "labels.helpGeneral",
+        input: "boolean",
+        label: "labels.showPoints",
+        value: true,
+      });
+    });
+
+    it("should include xAxisRange field in xAxis settings", () => {
+      // Given - config with xAxisRange value
+      const xAxisRange = BasicBuilder.number({ min: 10, max: 100 });
+      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
+      const config: Omit<StateTransitionConfig, "paths"> = {
+        isSynced: BasicBuilder.boolean(),
+        showPoints: BasicBuilder.boolean(),
+        xAxisMaxValue: BasicBuilder.number({ min: 50, max: 100 }),
+        xAxisMinValue: BasicBuilder.number({ min: 0, max: 49 }),
+        xAxisRange,
+      };
+
+      // When - building settings tree
+      const { xAxis } = buildSettingsTree(
+        { ...config, paths: paths.map((p) => p.path) },
+        paths,
+        t as unknown as TFunction<"stateTransitions">,
+      );
+
+      // Then - xAxisRange field should be present
+      expect(xAxis!.fields!.xAxisRange).toEqual({
+        label: "secondsRange",
+        input: "number",
+        value: xAxisRange,
+        placeholder: "auto",
+      });
+    });
+
+    it("should build settings tree with empty paths array", () => {
+      // Given - config with empty paths
+      const paths: PathState[] = [];
+      const config: Omit<StateTransitionConfig, "paths"> = {
+        isSynced: BasicBuilder.boolean(),
+        showPoints: BasicBuilder.boolean(),
+        xAxisMaxValue: BasicBuilder.number({ min: 50, max: 100 }),
+        xAxisMinValue: BasicBuilder.number({ min: 0, max: 49 }),
+        xAxisRange: BasicBuilder.number(),
+      };
+
+      // When - building settings tree
+      const tree = buildSettingsTree(
+        { ...config, paths: [] },
+        paths,
+        t as unknown as TFunction<"stateTransitions">,
+      );
+
+      // Then - should have default path node structure
+      expect(tree.paths).toBeDefined();
+      expect(tree.paths!.children).toBeDefined();
+      expect(tree.paths!.children!["0"]).toBeDefined();
+    });
+
+    it("should handle undefined xAxisRange in settings tree", () => {
+      // Given - config without xAxisRange
+      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
+      const config: Omit<StateTransitionConfig, "paths"> = {
+        isSynced: BasicBuilder.boolean(),
+        showPoints: BasicBuilder.boolean(),
+        xAxisMaxValue: BasicBuilder.number({ min: 50, max: 100 }),
+        xAxisMinValue: BasicBuilder.number({ min: 0, max: 49 }),
+        xAxisRange: undefined,
+      };
+
+      // When - building settings tree
+      const { xAxis } = buildSettingsTree(
+        { ...config, paths: paths.map((p) => p.path) },
+        paths,
+        t as unknown as TFunction<"stateTransitions">,
+      );
+
+      // Then - xAxisRange should still be present but with undefined value
+      expect(xAxis!.fields!.xAxisRange).toBeDefined();
+      expect(xAxis!.fields!.xAxisRange!.value).toBeUndefined();
+    });
+  });
+
+  describe("makeSeriesNode - additional coverage", () => {
+    it("should create node with all timestampMethod options", () => {
+      // Given - a series node with headerStamp timestampMethod
+      const { seriesNode, index } = {
+        index: 1,
+        seriesNode: {
+          path: {
+            value: BasicBuilder.string(),
+            label: BasicBuilder.string(),
+            timestampMethod: "headerStamp" as TimestampMethod,
+          },
+          canDelete: true,
+          canReorder: true,
+          isArray: false,
+        },
+      };
+
+      // When - creating series node
+      const node = makeSeriesNode(index, seriesNode, t as unknown as TFunction<"stateTransitions">);
+
+      // Then - timestampMethod field should have both options
+      const timestampField = node.fields!.timestampMethod;
+      expect(timestampField).toBeDefined();
+      expect(timestampField?.input).toBe("select");
+      // Type assertion after checking
+      const selectField = timestampField as {
+        input: "select";
+        options: { label: string; value: string }[];
+      };
+      expect(selectField.options).toHaveLength(2);
+      expect(selectField.options).toContainEqual({
+        label: "labels.timestampReceiveTime",
+        value: "receiveTime",
+      });
+      expect(selectField.options).toContainEqual({
+        label: "labels.timestampHeaderStamp",
+        value: "headerStamp",
+      });
+    });
+
+    it("should create node with specific index for display name", () => {
+      // Given - a series node with specific index
+      const index = BasicBuilder.number({ min: 5, max: 10 });
+      const pathLabel = BasicBuilder.string();
+      const { seriesNode } = {
+        seriesNode: {
+          path: {
+            value: BasicBuilder.string(),
+            label: pathLabel,
+            timestampMethod: "receiveTime" as TimestampMethod,
+          },
+          canDelete: true,
+          canReorder: false,
+          isArray: false,
+        },
+      };
+
+      // When - creating series node
+      const node = makeSeriesNode(index, seriesNode, t as unknown as TFunction<"stateTransitions">);
+
+      // Then - label should use the correct index
+      expect(node.label).toEqual(stateTransitionPathDisplayName(seriesNode.path, index));
+    });
+  });
+
+  describe("makeRootSeriesNode - additional coverage", () => {
+    it("should create root node with single path", () => {
+      // Given - a single path
+      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
+
+      // When - creating root series node
+      const node = makeRootSeriesNode(paths, t as unknown as TFunction<"stateTransitions">);
+
+      // Then - should have one child with canDelete true but canReorder false
+      expect(_.size(node.children)).toBe(1);
+      expect(node.children!["0"]?.actions).toHaveLength(1);
+      expect(node.children!["0"]?.reorderable).toBe(false);
+    });
+
+    it("should create root node with multiple paths allowing reorder", () => {
+      // Given - multiple paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+
+      // When - creating root series node
+      const node = makeRootSeriesNode(paths, t as unknown as TFunction<"stateTransitions">);
+
+      // Then - all children should have canReorder true
+      expect(node.children!["0"]?.reorderable).toBe(true);
+      expect(node.children!["1"]?.reorderable).toBe(true);
+      expect(node.children!["0"]?.icon).toBe("DragHandle");
+      expect(node.children!["1"]?.icon).toBe("DragHandle");
+    });
+  });
+
+  describe("action handler - additional edge cases", () => {
+    it("should handle unknown action gracefully", () => {
+      // Given - a render setup
+      const { render } = setup();
+      const { actionHandler } = render.result.current;
+
+      // When - calling with an unknown action
+      const action: SettingsTreeAction = {
+        action: "unknown-action" as any,
+        payload: { path: [], id: "unknown" },
+      };
+
+      // Then - should not throw error (saveConfig should not be called)
+      act(() => {
+        actionHandler(action);
+      });
+
+      // Since it's an unknown action, saveConfig should not be called
+      expect(saveConfig).not.toHaveBeenCalled();
+    });
+
+    it("should handle update action for non-xAxis, non-general paths", () => {
+      // Given - config with paths
+      const paths: PathState[] = [{ path: buildPath(), isArray: false }];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+      const newValue = BasicBuilder.string();
+
+      // When - updating a random path
+      const settings: SettingsTreeAction = {
+        action: "update",
+        payload: {
+          input: "string",
+          path: ["customPath", "customField"],
+          value: newValue,
+        },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - config should be updated
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(_.get(updatedConfig, ["customPath", "customField"])).toEqual(newValue);
+    });
+
+    it("should handle perform-node-action with unknown id", () => {
+      // Given - a render setup
+      const { render } = setup();
+      const { actionHandler } = render.result.current;
+
+      // When - calling with unknown perform-node-action id
+      const action: SettingsTreeAction = {
+        action: "perform-node-action",
+        payload: { id: "unknown-id", path: [] },
+      };
+
+      // Then - should not crash and not call saveConfig
+      act(() => {
+        actionHandler(action);
+      });
+      expect(saveConfig).not.toHaveBeenCalled();
+    });
+
+    it("should add default path when adding series with empty paths", () => {
+      // Given - config with empty paths
+      const { render, config } = setup({ paths: [] });
+      config.paths = [];
+      const { actionHandler } = render.result.current;
+
+      // When - adding a series
+      const settings: SettingsTreeAction = {
+        action: "perform-node-action",
+        payload: { id: SeriesActionId.ADD, path: [] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - should have two paths (one default + one new)
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toHaveLength(2);
+    });
+
+    it("should delete correct serie at index 0", () => {
+      // Given - config with multiple paths
+      const paths: PathState[] = [
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+        { path: buildPath(), isArray: false },
+      ];
+      const { render, config } = setup({ paths });
+      const { actionHandler } = render.result.current;
+
+      // When - deleting first series
+      const settings: SettingsTreeAction = {
+        action: "perform-node-action",
+        payload: { id: SeriesActionId.DELETE, path: ["", "0"] },
+      };
+
+      act(() => {
+        actionHandler(settings);
+      });
+
+      // Then - first path should be removed
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toHaveLength(2);
+      expect(updatedConfig.paths).not.toContain(config.paths[0]);
+      expect(updatedConfig.paths).toContain(config.paths[1]);
+      expect(updatedConfig.paths).toContain(config.paths[2]);
+    });
+  });
+
+  describe("setSeriesAction - additional coverage", () => {
+    it("should create action with different icon types", () => {
+      // Given - series action with Addchart icon
+      const seriesAction: SeriesAction = {
+        id: SeriesActionId.ADD,
+        label: BasicBuilder.string(),
+        icon: "Addchart",
+      };
+
+      // When - creating action item
+      const action = setSeriesAction(seriesAction);
+
+      // Then - should have correct icon
+      expect(action.icon).toBe("Addchart");
+      expect(action.type).toBe("action");
+    });
+
+    it("should create action with Clear icon", () => {
+      // Given - series action with Clear icon
+      const seriesAction: SeriesAction = {
+        id: SeriesActionId.DELETE,
+        label: BasicBuilder.string(),
+        icon: "Clear",
+      };
+
+      // When - creating action item
+      const action = setSeriesAction(seriesAction);
+
+      // Then - should have Clear icon
+      expect(action.icon).toBe("Clear");
+    });
+  });
 });
