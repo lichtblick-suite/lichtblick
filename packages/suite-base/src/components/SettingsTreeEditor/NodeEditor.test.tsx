@@ -694,7 +694,7 @@ describe("NodeEditor - Component Rendering", () => {
       const path = ["test", "node"];
 
       // when
-      const { container } = await renderComponent({
+      await renderComponent({
         path,
         focusedPath: path,
         settings: { label },
