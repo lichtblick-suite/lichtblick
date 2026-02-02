@@ -1,19 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
-
 import { Copy20Filled } from "@fluentui/react-icons";
 import { Divider } from "@mui/material";
 import { produce } from "immer";
@@ -48,7 +35,40 @@ type FilterBarProps = {
   onFilterChange: (filter: { minLogLevel: number; searchTerms: string[] }) => void;
 };
 
-function FilterBar(props: FilterBarProps): React.JSX.Element {
+export function createActionHandler(
+  saveConfig: SaveConfig<Config>,
+  seenNodeNames: Set<string>,
+): (action: SettingsTreeAction) => void {
+  return (action: SettingsTreeAction) => {
+    if (action.action === "update") {
+      const { path, value } = action.payload;
+      const adjustedPath = path[0] === "nameFilter" ? path : path.slice(1);
+      saveConfig(produce<Config>((draft) => _.set(draft, adjustedPath, value)));
+      return;
+    }
+
+    if (action.action !== "perform-node-action") {
+      return;
+    }
+
+    if (!["show-all", "hide-all"].includes(action.payload.id)) {
+      return;
+    }
+
+    const visible = action.payload.id === "show-all";
+    saveConfig(
+      produce<Config>((draft) => {
+        const newNameFilter = Object.fromEntries(
+          Object.entries(draft.nameFilter ?? {}).map(([k, _v]) => [k, { visible }]),
+        );
+        seenNodeNames.forEach((name) => (newNameFilter[name] = { visible }));
+        return _.set(draft, ["nameFilter"], newNameFilter);
+      }),
+    );
+  };
+}
+
+function FilterBar(props: Readonly<FilterBarProps>): React.JSX.Element {
   return (
     <FilterTagInput
       items={[...props.searchTerms]}
@@ -129,31 +149,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
-      if (action.action === "update") {
-        const { path, value } = action.payload;
-        const adjustedPath = path[0] === "nameFilter" ? path : path.slice(1);
-        saveConfig(produce<Config>((draft) => _.set(draft, adjustedPath, value)));
-        return;
-      }
-
-      if (action.action !== "perform-node-action") {
-        return;
-      }
-
-      if (!["show-all", "hide-all"].includes(action.payload.id)) {
-        return;
-      }
-
-      const visible = action.payload.id === "show-all";
-      saveConfig(
-        produce<Config>((draft) => {
-          const newNameFilter = Object.fromEntries(
-            Object.entries(draft.nameFilter ?? {}).map(([k, _v]) => [k, { visible }]),
-          );
-          seenNodeNames.forEach((name) => (newNameFilter[name] = { visible }));
-          return _.set(draft, ["nameFilter"], newNameFilter);
-        }),
-      );
+      createActionHandler(saveConfig, seenNodeNames)(action);
     },
     [saveConfig, seenNodeNames],
   );
