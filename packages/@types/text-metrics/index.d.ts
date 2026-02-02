@@ -25,7 +25,5 @@ declare module "text-metrics" {
     public maxFontSize(text: string): string;
   }
 
-  function init(el?: Element | Overrides, overrides?: Overrides): TextMeasure;
-
-  export const init;
+  export function init(el?: Element | Overrides, overrides?: Overrides): TextMeasure;
 }
