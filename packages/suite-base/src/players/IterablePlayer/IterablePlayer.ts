@@ -57,7 +57,6 @@ import {
 } from "./IIterableSource";
 
 const log = Log.getLogger(__filename);
-
 // Number of bytes that we aim to keep in the cache.
 // Setting this to higher than 1.5GB caused the renderer process to crash on linux.
 // See: https://github.com/foxglove/studio/pull/1733
@@ -83,7 +82,6 @@ const SEEK_ON_START_NS = BigInt(99 * 1e6);
 const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
 
 const EMPTY_ARRAY = Object.freeze([]);
-
 export type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
 
@@ -207,6 +205,7 @@ export class IterablePlayer implements Player {
       urlParams,
       source,
       name,
+
       enablePreload,
       sourceId,
       readAheadDuration = { sec: 10, nsec: 0 },
@@ -230,6 +229,7 @@ export class IterablePlayer implements Player {
     this.#urlParams = urlParams;
     this.#metricsCollector = metricsCollector ?? new NoopMetricsCollector();
     this.#metricsCollector.playerConstructed();
+
     this.#enablePreload = enablePreload ?? true;
     this.#sourceId = sourceId;
 
@@ -359,6 +359,7 @@ export class IterablePlayer implements Player {
 
     this.#allTopics = allTopics;
     this.#preloadTopics = preloadTopics;
+
     this.#blockLoader?.setTopics(this.#preloadTopics);
 
     // If the player is playing, the playing state will detect any subscription changes and adjust
@@ -1183,6 +1184,7 @@ export class IterablePlayer implements Player {
 
   async #stateClose() {
     this.#isPlaying = false;
+
     await this.#blockLoader?.stopLoading();
     await this.#blockLoadingProcess;
     await this.#bufferImpl.terminate();
