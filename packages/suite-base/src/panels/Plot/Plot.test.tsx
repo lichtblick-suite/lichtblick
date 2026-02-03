@@ -15,6 +15,7 @@ import useSubscriptions from "@lichtblick/suite-base/panels/Plot/hooks/useSubscr
 import { PlotProps } from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import Plot from "./Plot";
 
@@ -328,5 +329,75 @@ describe("Plot Component", () => {
     expect(mockCoordinatorInstance.handlePlayerState).toHaveBeenCalledWith({ source: "getter" });
     expect(mockCoordinatorInstance.setShouldSync).toHaveBeenCalledWith({ shouldSync: true });
     expect(mockCoordinatorInstance.destroy).toHaveBeenCalled();
+  });
+
+  describe("Message pipeline subscription effect", () => {
+    it("Given no coordinator When component renders Then no subscription occurs", () => {
+      // Given
+      (useRenderer as jest.Mock).mockReturnValue(undefined);
+      const config = new PlotConfigBuilder().build();
+
+      // When
+      renderPlot(config);
+
+      // Then
+      expect(mockSubscribeMessagePipeline).not.toHaveBeenCalled();
+    });
+
+    it("Given coordinator exists When mounted Then subscribes and feeds initial state", () => {
+      // Given
+      const config = new PlotConfigBuilder().build();
+      mockGetMessagePipelineState.mockReturnValue({ playerState: { initial: true } });
+
+      // When
+      renderPlot(config);
+
+      // Then
+      expect(mockSubscribeMessagePipeline).toHaveBeenCalledTimes(1);
+      expect(mockCoordinatorInstance.handlePlayerState).toHaveBeenCalledWith({
+        source: "subscriber",
+      });
+      expect(mockCoordinatorInstance.handlePlayerState).toHaveBeenCalledWith({ initial: true });
+    });
+
+    it("Given subscription created When component unmounts Then unsubscribe is called", () => {
+      // Given
+      const mockUnsubscribe = jest.fn();
+      mockSubscribeMessagePipeline.mockImplementation((callback) => {
+        callback({ playerState: { source: "subscriber" } });
+        return mockUnsubscribe;
+      });
+      const config = new PlotConfigBuilder().build();
+      const { unmount } = renderPlot(config);
+
+      // When
+      unmount();
+
+      // Then
+      expect(mockUnsubscribe).toHaveBeenCalledTimes(1);
+    });
+
+    it("Given subscription callback When new state arrives Then coordinator receives it", () => {
+      // Given
+      let subscriptionCallback: ((state: any) => void) | undefined;
+      mockSubscribeMessagePipeline.mockImplementation((callback) => {
+        subscriptionCallback = callback;
+        return jest.fn();
+      });
+      const config = new PlotConfigBuilder().build();
+      renderPlot(config);
+      mockCoordinatorInstance.handlePlayerState.mockClear();
+      const newData = BasicBuilder.string();
+
+      // When
+      act(() => {
+        subscriptionCallback?.({ playerState: { newData } });
+      });
+
+      // Then
+      expect(mockCoordinatorInstance.handlePlayerState).toHaveBeenCalledWith({
+        newData,
+      });
+    });
   });
 });

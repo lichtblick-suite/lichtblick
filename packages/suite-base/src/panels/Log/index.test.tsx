@@ -42,8 +42,7 @@ describe("Log Panel actionHandler", () => {
       };
       const result = updateFn(initialConfig);
       expect(result).toEqual({
-        minLogLevel: 1,
-        searchTerms: [],
+        ...initialConfig,
         nameFilter: {
           node1: { visible: false },
         },
