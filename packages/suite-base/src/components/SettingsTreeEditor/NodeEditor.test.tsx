@@ -55,7 +55,7 @@ describe("NodeEditor childNodes filtering", () => {
   };
 
   const renderComponent = async (overrides: Partial<NodeEditorProps> = {}) => {
-    const defaultProps: NodeEditorProps = {
+    const props: NodeEditorProps = {
       actionHandler: jest.fn(),
       path: ["root"],
       settings: tree,
@@ -65,19 +65,14 @@ describe("NodeEditor childNodes filtering", () => {
 
     const ui: React.ReactElement = (
       <DndProvider backend={HTML5Backend}>
-        <NodeEditor
-          actionHandler={defaultProps.actionHandler}
-          path={defaultProps.path}
-          settings={defaultProps.settings}
-          focusedPath={defaultProps.focusedPath}
-        />
+        <NodeEditor {...props} />
       </DndProvider>
     );
 
     return {
       ...render(ui),
       user: userEvent.setup(),
-      props: defaultProps,
+      props,
     };
   };
 
@@ -192,412 +187,215 @@ describe("NodeEditor childNodes filtering", () => {
 });
 
 describe("NodeEditor drag and drop functionality", () => {
-  const label = BasicBuilder.string();
-  describe("useDrag hook behavior", () => {
-    it("should allow dragging when node is reorderable", async () => {
-      // Given: A reorderable node
-      const actionHandler = jest.fn();
-      const path = ["topics", "node1"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
+  function setup(propsOverride: Partial<NodeEditorProps> = {}) {
+    const props: Readonly<NodeEditorProps> = {
+      actionHandler: jest.fn(),
+      path: BasicBuilder.strings({ count: 2 }),
+      settings: {
+        label: BasicBuilder.string(),
         reorderable: true,
-      };
+      },
+      focusedPath: [],
+      ...propsOverride,
+    };
 
-      // When: The component is rendered
-      const { container } = render(
-        <DndProvider backend={HTML5Backend}>
+    const ui: React.ReactElement = (
+      <DndProvider backend={HTML5Backend}>
+        <NodeEditor {...props} />
+      </DndProvider>
+    );
+
+    return {
+      ...render(ui),
+      props,
+    };
+  }
+
+  function setupMultipleNodes(
+    nodes: Array<{ path: string[]; label: string; reorderable?: boolean }>,
+    actionHandler = jest.fn(),
+  ) {
+    const ui: React.ReactElement = (
+      <DndProvider backend={HTML5Backend}>
+        {nodes.map(({ path, label, reorderable = true }) => (
           <NodeEditor
+            key={path.join("-")}
             actionHandler={actionHandler}
             path={path}
-            settings={settings}
+            settings={{ label, reorderable }}
             focusedPath={[]}
           />
-        </DndProvider>,
-      );
+        ))}
+      </DndProvider>
+    );
 
-      // Then: The node header should have grab cursor
+    return {
+      ...render(ui),
+      actionHandler,
+    };
+  }
+
+  describe("drag behavior", () => {
+    it("should show grab cursor and default opacity when node is reorderable", () => {
+      // Given/When: A reorderable node is rendered
+      const { container } = setup({
+        settings: { label: BasicBuilder.string(), reorderable: true },
+      });
+
+      // Then: The node header should have grab cursor and opacity 1
       const nodeHeader = container.querySelector('[class*="nodeHeader"]');
       expect(nodeHeader).toHaveStyle({ cursor: "grab" });
+      expect(nodeHeader).toHaveStyle({ opacity: "1" });
     });
 
-    it("should not allow dragging when node is not reorderable", async () => {
-      // Given: A non-reorderable node
-      const actionHandler = jest.fn();
-      const path = ["topics", "node1"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: false,
-      };
-
-      // When: The component is rendered
-      const { container } = render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={path}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
+    it("should not show grab cursor when node is not reorderable", () => {
+      // Given/When: A non-reorderable node is rendered
+      const { container } = setup({
+        settings: { label: BasicBuilder.string(), reorderable: false },
+      });
 
       // Then: The node header should not have grab cursor
       const nodeHeader = container.querySelector('[class*="nodeHeader"]');
       expect(nodeHeader).not.toHaveStyle({ cursor: "grab" });
     });
+  });
 
-    it("should create drag item with correct path", async () => {
-      // Given: A reorderable node with specific path
-      const actionHandler = jest.fn();
-      const path = ["topics", "camera", "node1"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: true,
-      };
+  describe("drop behavior with sibling nodes", () => {
+    it("should render multiple sibling nodes correctly for drag and drop", () => {
+      // Given: Two sibling reorderable nodes under the same parent
+      const sourceLabel = "Source Node";
+      const targetLabel = "Target Node";
 
-      // When: The component is rendered (drag item is created internally)
-      render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={path}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
+      // When: Both nodes are rendered in the same DndProvider
+      const { container } = setupMultipleNodes([
+        { path: ["topics", "node1"], label: sourceLabel },
+        { path: ["topics", "node2"], label: targetLabel },
+      ]);
 
-      // Then: The drag functionality should be available (verified by presence of reorderable styles)
-      // Note: Direct access to useDrag internals is not possible, but we can verify the component behaves correctly
-      expect(actionHandler).not.toHaveBeenCalled(); // No action until actual drag/drop
+      // Then: Both nodes should be rendered and draggable
+      expect(screen.getByText(sourceLabel)).toBeInTheDocument();
+      expect(screen.getByText(targetLabel)).toBeInTheDocument();
+
+      const nodeHeaders = container.querySelectorAll('[draggable="true"]');
+      expect(nodeHeaders).toHaveLength(2);
+      expect(nodeHeaders[0]).toHaveStyle({ cursor: "grab" });
+      expect(nodeHeaders[1]).toHaveStyle({ cursor: "grab" });
     });
 
-    it("should apply dragging styles when node is being dragged", async () => {
-      // Given: A reorderable node
-      const actionHandler = jest.fn();
-      const path = ["topics", "node1"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: true,
-      };
+    it("should not show grab cursor when target is not reorderable", () => {
+      // Given: Source is reorderable, target is not
+      const { container } = setupMultipleNodes([
+        { path: ["topics", "node1"], label: "Draggable", reorderable: true },
+        { path: ["topics", "node2"], label: "Not Draggable", reorderable: false },
+      ]);
 
-      // When: The component is rendered in reorderable mode
-      const { container } = render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={path}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
+      // Then: Both nodes are rendered
+      expect(screen.getByText("Draggable")).toBeInTheDocument();
+      expect(screen.getByText("Not Draggable")).toBeInTheDocument();
 
-      // Then: The node should be set up for dragging (opacity 1 when not dragging)
-      const nodeHeader = container.querySelector('[class*="nodeHeader"]');
-      expect(nodeHeader).toHaveStyle({ opacity: "1" });
+      // Only the first node should be draggable
+      const draggableNodes = container.querySelectorAll('[draggable="true"]');
+      expect(draggableNodes).toHaveLength(1);
+      expect(draggableNodes[0]).toHaveStyle({ cursor: "grab" });
     });
   });
 
-  describe("useDrop hook behavior - canDrop validation", () => {
-    it("should allow drop when source and target are siblings with same parent", async () => {
-      // Given: Two sibling nodes under the same parent, both reorderable
-      const actionHandler = jest.fn();
-      const sourcePath = ["topics", "node1"];
-      const targetPath = ["topics", "node2"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: true,
-      };
+  describe("depth validation", () => {
+    it("should render top-level nodes but with grab cursor (depth validation is on canDrop)", () => {
+      // Given: Top-level reorderable nodes (depth 1)
+      const { container } = setupMultipleNodes([
+        { path: ["topics"], label: "Topics" },
+        { path: ["cameras"], label: "Cameras" },
+      ]);
 
-      // When: The target node is rendered
-      render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={targetPath}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
-
-      // Then: The component should accept drops from siblings (verified by setup)
-      // canDrop logic validates: same length, depth >= 2, same parent, different paths
-      expect(sourcePath.length).toBe(targetPath.length); // Same depth
-      expect(sourcePath[0]).toBe(targetPath[0]); // Same parent
-      expect(sourcePath).not.toEqual(targetPath); // Different nodes
-    });
-
-    it("should reject drop when nodes have different depths", async () => {
-      // Given: Two nodes with different path lengths
-      const targetPath = ["topics", "node1"];
-
-      // When: Comparing with a deeper path
-      const sourcePath = ["topics", "nested", "node2"];
-
-      // Then: They should not be valid drop targets for each other
-      expect(sourcePath.length).not.toBe(targetPath.length);
-    });
-
-    it("should reject drop when nodes have different parents", async () => {
-      // Given: Two nodes at same depth but different parents
-      const actionHandler = jest.fn();
-      const sourcePath = ["topics", "node1"];
-      const targetPath = ["cameras", "node2"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: true,
-      };
-
-      // When: The target node is rendered
-      render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={targetPath}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
-
-      // Then: They should not be valid drop targets (different parent - topics vs cameras)
-      expect(sourcePath[0]).not.toBe(targetPath[0]);
-    });
-
-    it("should reject drop when source and target are the same node", async () => {
-      // Given: A reorderable node
-      const actionHandler = jest.fn();
-      const path = ["topics", "node1"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: true,
-      };
-
-      // When: The node would be dropped on itself
-      render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={path}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
-
-      // Then: It should be the same path (invalid drop target)
-      expect(path).toEqual(path);
-    });
-
-    it("should reject drop when path depth is less than 2", async () => {
-      // Given: A top-level node (depth 1)
-      const actionHandler = jest.fn();
-      const path = ["topics"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: true,
-      };
-
-      // When: The node is rendered
-      render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={path}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
-
-      // Then: Path length should be less than 2 (invalid for reordering)
-      expect(path.length).toBeLessThan(2);
-    });
-
-    it("should reject drop when target is not reorderable", async () => {
-      // Given: A non-reorderable target node
-      const actionHandler = jest.fn();
-      const path = ["topics", "node1"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: false,
-      };
-
-      // When: The node is rendered
-      const { container } = render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={path}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
-
-      // Then: The node should not be set up for drop (no grab cursor)
-      const nodeHeader = container.querySelector('[class*="nodeHeader"]');
-      expect(nodeHeader).not.toHaveStyle({ cursor: "grab" });
-    });
-  });
-
-  describe("drop action handler", () => {
-    it("should call actionHandler with reorder-node action when drop occurs", async () => {
-      // Given: A reorderable target node with actionHandler
-      const actionHandler = jest.fn();
-      const targetPath = ["topics", "node2"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: true,
-      };
-
-      // When: The component is rendered and set up for drops
-      render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={targetPath}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
-
-      // Then: On drop, actionHandler should be called with reorder-node action
-      // Note: Actual drag-drop simulation in jest/RTL is complex, so we verify the setup
-      // The drop handler would call:
-      // actionHandler({ action: "reorder-node", payload: { path: sourcePath, targetPath } })
-      expect(actionHandler).toHaveBeenCalledTimes(0); // Not called until actual drop
-    });
-
-    it("should pass correct source and target paths to reorder-node action", async () => {
-      // Given: Valid source and target paths for reordering
-      const sourcePath = ["topics", "node1"];
-      const targetPath = ["topics", "node3"];
-
-      // When: A drop would occur between sibling nodes
-      // The expected action payload structure is validated
-      const expectedAction = {
-        action: "reorder-node",
-        payload: {
-          path: sourcePath,
-          targetPath,
-        },
-      };
-
-      // Then: The action structure should match the expected format
-      expect(expectedAction.action).toBe("reorder-node");
-      expect(expectedAction.payload.path).toEqual(sourcePath);
-      expect(expectedAction.payload.targetPath).toEqual(targetPath);
-    });
-  });
-
-  describe("drag and drop visual feedback", () => {
-    it("should apply drop target styles when node can accept drop", async () => {
-      // Given: A reorderable node that can accept drops
-      const actionHandler = jest.fn();
-      const path = ["topics", "node1"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: true,
-      };
-
-      // When: The component is rendered
-      const { container } = render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={path}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
-
-      // Then: The node should be ready to show visual feedback on hover
-      const nodeHeader = container.querySelector('[class*="nodeHeader"]');
-      expect(nodeHeader).toBeInTheDocument();
-      // Classes for nodeHeaderDropTarget and nodeHeaderDragging are applied conditionally
-    });
-
-    it("should set reduced opacity when node is being dragged", async () => {
-      // Given: A node in draggable configuration
-      const actionHandler = jest.fn();
-      const path = ["topics", "node1"];
-      const settings: Immutable<SettingsTreeNode> = {
-        label,
-        reorderable: true,
-      };
-
-      // When: The component is rendered (not actively dragging)
-      const { container } = render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={path}
-            settings={settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
-
-      // Then: Default opacity should be 1 (would become 0.5 during drag)
-      const nodeHeader = container.querySelector('[class*="nodeHeader"]');
-      expect(nodeHeader).toHaveStyle({ opacity: "1" });
-    });
-  });
-
-  describe("integration - complete drag and drop flow", () => {
-    it("should handle complete reorder workflow for valid sibling nodes", async () => {
-      // Given: Two sibling reorderable nodes
-      const actionHandler = jest.fn();
-      const node1Path = ["topics", "cameras"];
-      const node2Path = ["topics", "lidar"];
-      const node1Settings: Immutable<SettingsTreeNode> = {
-        label: "Cameras",
-        reorderable: true,
-      };
-      const node2Settings: Immutable<SettingsTreeNode> = {
-        label: "Lidar",
-        reorderable: true,
-      };
-
-      // When: Both nodes are rendered in the same parent container
-      render(
-        <DndProvider backend={HTML5Backend}>
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={node1Path}
-            settings={node1Settings}
-            focusedPath={[]}
-          />
-          <NodeEditor
-            actionHandler={actionHandler}
-            path={node2Path}
-            settings={node2Settings}
-            focusedPath={[]}
-          />
-        </DndProvider>,
-      );
-
-      // Then: Both nodes should be draggable and can be reordered
+      // Then: Nodes are rendered (canDrop will prevent actual drop between them)
+      expect(screen.getByText("Topics")).toBeInTheDocument();
       expect(screen.getByText("Cameras")).toBeInTheDocument();
-      expect(screen.getByText("Lidar")).toBeInTheDocument();
-      // Drag-drop between these nodes would trigger reorder-node action
+
+      const nodeHeaders = container.querySelectorAll('[draggable="true"]');
+      expect(nodeHeaders).toHaveLength(2);
     });
 
-    it("should maintain drag configuration across different node depths", async () => {
-      // Given: Nodes at different valid depths
-      const shallowPath = ["topics", "node1"];
-      const deepPath = ["topics", "nested", "node2"];
+    it("should render nodes at different depths", () => {
+      // Given: Nodes at different depths
+      const { container } = setupMultipleNodes([
+        { path: ["topics", "node1"], label: "Shallow Node" },
+        { path: ["topics", "nested", "node2"], label: "Deep Node" },
+      ]);
 
-      // When: Validating reorder constraints
-      // Then: Different depths should not allow reordering between them
-      expect(shallowPath.length).toBe(2);
-      expect(deepPath.length).toBe(3);
-      expect(shallowPath.length).not.toBe(deepPath.length);
+      // Then: Both nodes should be rendered
+      expect(screen.getByText("Shallow Node")).toBeInTheDocument();
+      expect(screen.getByText("Deep Node")).toBeInTheDocument();
+
+      const nodeHeaders = container.querySelectorAll('[draggable="true"]');
+      expect(nodeHeaders).toHaveLength(2);
+    });
+  });
+
+  describe("drag events simulation", () => {
+    it("should handle dragStart event on reorderable node", () => {
+      // Given: A reorderable node
+      const { container } = setup({
+        path: ["topics", "node1"],
+        settings: { label: "Draggable Node", reorderable: true },
+      });
+
+      const nodeHeader = container.querySelector('[class*="nodeHeader"]')!;
+
+      // When: dragStart event is fired
+      fireEvent.dragStart(nodeHeader, {
+        dataTransfer: { setData: jest.fn(), effectAllowed: "move" },
+      });
+
+      // Then: The node should still be in the document
+      expect(screen.getByText("Draggable Node")).toBeInTheDocument();
+    });
+
+    it("should handle dragOver and dragLeave events", () => {
+      // Given: Two sibling reorderable nodes
+      const { container } = setupMultipleNodes([
+        { path: ["topics", "node1"], label: "Source" },
+        { path: ["topics", "node2"], label: "Target" },
+      ]);
+
+      const nodeHeaders = container.querySelectorAll('[class*="nodeHeader"]');
+      const targetNode = nodeHeaders[1]!;
+
+      // When: dragOver and dragLeave events are fired
+      fireEvent.dragOver(targetNode);
+      fireEvent.dragLeave(targetNode);
+
+      // Then: Both nodes should still be in the document
+      expect(screen.getByText("Source")).toBeInTheDocument();
+      expect(screen.getByText("Target")).toBeInTheDocument();
+    });
+
+    it("should handle drop event on valid sibling target", () => {
+      // Given: Two sibling reorderable nodes with shared actionHandler
+      const actionHandler = jest.fn();
+      const { container } = setupMultipleNodes(
+        [
+          { path: ["topics", "node1"], label: "Source" },
+          { path: ["topics", "node2"], label: "Target" },
+        ],
+        actionHandler,
+      );
+
+      const nodeHeaders = container.querySelectorAll('[class*="nodeHeader"]');
+      const sourceNode = nodeHeaders[0]!;
+      const targetNode = nodeHeaders[1]!;
+
+      // When: Full drag and drop sequence is simulated
+      fireEvent.dragStart(sourceNode, {
+        dataTransfer: { setData: jest.fn(), effectAllowed: "move" },
+      });
+      fireEvent.dragOver(targetNode);
+      fireEvent.drop(targetNode);
+      fireEvent.dragEnd(sourceNode);
+
+      // Then: Nodes should still be rendered
+      expect(screen.getByText("Source")).toBeInTheDocument();
+      expect(screen.getByText("Target")).toBeInTheDocument();
     });
   });
 });
