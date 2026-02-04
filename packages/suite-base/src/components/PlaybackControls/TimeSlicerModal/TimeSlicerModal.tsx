@@ -59,6 +59,13 @@ export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.
       fullWidth
       maxWidth="xs"
       hideBackdrop
+      slotProps={{
+        paper: {
+          sx: {
+            pointerEvents: "auto",
+          },
+        },
+      }}
       className={classes.modal}
     >
       <DialogTitle>Slice Playback Range</DialogTitle>
