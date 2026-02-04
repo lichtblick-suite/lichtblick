@@ -42,6 +42,8 @@ import {
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import SyncInstanceToggle from "@lichtblick/suite-base/components/PlaybackControls/SwitchSyncInstances/SyncInstanceToggle";
+import TimeSlicerToggle from "@lichtblick/suite-base/components/PlaybackControls/TimeRangeSlicer/TimeSlicerToggle";
+import TimeSlicerModal from "@lichtblick/suite-base/components/PlaybackControls/TimeSlicerModal/TimeSlicerModal";
 import { useStyles } from "@lichtblick/suite-base/components/PlaybackControls/index.style";
 import { useDirectionalSeek } from "@lichtblick/suite-base/components/PlaybackControls/useDirectionalSeek";
 import PlaybackSpeedControls from "@lichtblick/suite-base/components/PlaybackSpeedControls";
@@ -88,6 +90,11 @@ export default function PlaybackControls({
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const { currentUserType } = useCurrentUser();
   const eventsSupported = useEvents(selectEventsSupported);
+  const [toggleTimeSlicerModal, setToggleTimeSlicerModal] = useState(false);
+
+  const handleTimeSlicerToggle = () => {
+    setToggleTimeSlicerModal(!toggleTimeSlicerModal);
+  };
 
   const {
     playbackControlActions: { setRepeat },
@@ -233,11 +240,15 @@ export default function PlaybackControls({
               onClick={toggleRepeat}
               icon={repeat ? <ArrowRepeatAll20Regular /> : <ArrowRepeatAllOff20Regular />}
             />
+            <TimeSlicerToggle onClick={handleTimeSlicerToggle} />
             <PlaybackSpeedControls />
           </Stack>
         </Stack>
         {createEventDialogOpen && eventsSupported && (
           <CreateEventDialog onClose={toggleCreateEventDialog} />
+        )}
+        {toggleTimeSlicerModal && (
+          <TimeSlicerModal open={toggleTimeSlicerModal} onClose={handleTimeSlicerToggle} />
         )}
       </div>
     </>

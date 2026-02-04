@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+import { makeStyles } from "tss-react/mui";
+
+export const useStyles = makeStyles()((theme) => ({
+  modal: {
+    pointerEvents: "none",
+  },
+  dialogContent: {
+    minWidth: theme.spacing(42),
+  },
+  helperText: {
+    color: theme.palette.text.secondary,
+  },
+  dialogActions: {
+    padding: theme.spacing(2, 3),
+  },
+}));
