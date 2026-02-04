@@ -110,15 +110,17 @@ describe("Grids", () => {
   });
 
   describe("handleSettingsAction() - reorder-node action", () => {
+    const layerGridId = "foxglove.Grid";
+    const layerGrids = "foxglove.Grids";
     it("should return early and not modify config when reorder-node action is received", () => {
       // Given: A Grids extension with an existing grid layer
-      const grids = renderer.sceneExtensions.get("foxglove.Grids") as Grids;
+      const grids = renderer.sceneExtensions.get(layerGrids) as Grids;
       const instanceId = BasicBuilder.string();
 
       // Add a grid layer to the config
       renderer.updateConfig((draft) => {
         draft.layers[instanceId] = {
-          layerId: "foxglove.Grid",
+          layerId: layerGridId,
           instanceId,
           visible: true,
           label: BasicBuilder.string(),
@@ -148,20 +150,20 @@ describe("Grids", () => {
 
     it("should not process any settings updates when reorder-node action is triggered", () => {
       // Given: A Grids extension with multiple grid layers
-      const grids = renderer.sceneExtensions.get("foxglove.Grids") as Grids;
+      const grids = renderer.sceneExtensions.get(layerGrids) as Grids;
       const instanceId1 = BasicBuilder.string();
       const instanceId2 = BasicBuilder.string();
 
       renderer.updateConfig((draft) => {
         draft.layers[instanceId1] = {
-          layerId: "foxglove.Grid",
+          layerId: layerGridId,
           instanceId: instanceId1,
           visible: true,
           label: "Grid 1",
           order: 1,
         };
         draft.layers[instanceId2] = {
-          layerId: "foxglove.Grid",
+          layerId: layerGridId,
           instanceId: instanceId2,
           visible: true,
           label: "Grid 2",
@@ -188,12 +190,12 @@ describe("Grids", () => {
 
     it("should not delete renderables when reorder-node action is triggered", () => {
       // Given: A Grids extension with an existing grid layer and renderable
-      const grids = renderer.sceneExtensions.get("foxglove.Grids") as Grids;
+      const grids = renderer.sceneExtensions.get(layerGrids) as Grids;
       const instanceId = BasicBuilder.string();
 
       renderer.updateConfig((draft) => {
         draft.layers[instanceId] = {
-          layerId: "foxglove.Grid",
+          layerId: layerGridId,
           instanceId,
           visible: true,
           label: BasicBuilder.string(),
@@ -226,12 +228,12 @@ describe("Grids", () => {
 
     it("should immediately return without processing any logic for reorder-node action", () => {
       // Given: A Grids extension with an existing grid layer
-      const grids = renderer.sceneExtensions.get("foxglove.Grids") as Grids;
+      const grids = renderer.sceneExtensions.get(layerGrids) as Grids;
       const instanceId = BasicBuilder.string();
 
       renderer.updateConfig((draft) => {
         draft.layers[instanceId] = {
-          layerId: "foxglove.Grid",
+          layerId: layerGridId,
           instanceId,
           visible: true,
           label: BasicBuilder.string(),
@@ -261,28 +263,28 @@ describe("Grids", () => {
 
     it("should preserve layer order information when reorder-node action is received", () => {
       // Given: A Grids extension with layers having specific order values
-      const grids = renderer.sceneExtensions.get("foxglove.Grids") as Grids;
+      const grids = renderer.sceneExtensions.get(layerGrids) as Grids;
       const instanceId1 = "grid-1";
       const instanceId2 = "grid-2";
       const instanceId3 = "grid-3";
 
       renderer.updateConfig((draft) => {
         draft.layers[instanceId1] = {
-          layerId: "foxglove.Grid",
+          layerId: layerGridId,
           instanceId: instanceId1,
           visible: true,
           label: "Grid 1",
           order: 1,
         };
         draft.layers[instanceId2] = {
-          layerId: "foxglove.Grid",
+          layerId: layerGridId,
           instanceId: instanceId2,
           visible: true,
           label: "Grid 2",
           order: 2,
         };
         draft.layers[instanceId3] = {
-          layerId: "foxglove.Grid",
+          layerId: layerGridId,
           instanceId: instanceId3,
           visible: true,
           label: "Grid 3",
