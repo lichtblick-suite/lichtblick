@@ -3,7 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { SettingsTreeAction } from "@lichtblick/suite";
+import {
+  SettingsTreeAction,
+  SettingsTreeActionUpdate,
+  SettingsTreeActionUpdatePayload,
+} from "@lichtblick/suite";
 import LogPanelExport, { createActionHandler } from "@lichtblick/suite-base/panels/Log";
 import { Config, LogLevel } from "@lichtblick/suite-base/panels/Log/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -45,9 +49,9 @@ describe("Log Panel actionHandler", () => {
       const saveConfigMock = jest.fn();
       const actionHandler = createActionHandler(saveConfigMock, new Set<string>());
 
-      const action: SettingsTreeAction = {
+      const action: SettingsTreeActionUpdate = {
         action: "update",
-        payload: { path, value, input },
+        payload: { path, input, value } as SettingsTreeActionUpdatePayload,
       };
       actionHandler(action);
 
