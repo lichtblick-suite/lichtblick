@@ -68,14 +68,17 @@ describe("setSeriesAction", () => {
 });
 
 describe("makeSeriesNode", () => {
-  const setup = (propsOverride: Partial<PathState & { canDelete: boolean }> = {}) => {
-    const seriesNode: PathState & { canDelete: boolean } = {
+  const setup = (
+    propsOverride: Partial<PathState & { canDelete: boolean; canReorder: boolean }> = {},
+  ) => {
+    const seriesNode: PathState & { canDelete: boolean; canReorder: boolean } = {
       path: {
         value: BasicBuilder.string(),
         label: BasicBuilder.string(),
         timestampMethod: BasicBuilder.sample(["receiveTime", "headerStamp"]),
       },
       canDelete: true,
+      canReorder: true,
       isArray: false,
       ...propsOverride,
     };
@@ -605,5 +608,167 @@ describe("usePanelSettings", () => {
     expect(updatedConfig.paths).toContain(config.paths[0]);
     expect(updatedConfig.paths).toContain(config.paths[1]);
     expect(updatedConfig.paths).not.toContain(config.paths[2]);
+  });
+
+  describe("reorder-node action", () => {
+    it("should reorder series from lower index to higher index", () => {
+      // Given: A configuration with three series
+      const path1 = buildPath();
+      const path2 = buildPath();
+      const path3 = buildPath();
+      const { render, config } = setup({
+        paths: [
+          { path: path1, isArray: false },
+          { path: path2, isArray: false },
+          { path: path3, isArray: false },
+        ],
+      });
+      const { actionHandler } = render.result.current;
+
+      // When: Reordering from index 0 to index 2
+      const action: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: {
+          path: ["paths", "0"],
+          targetPath: ["paths", "2"],
+        },
+      };
+
+      act(() => {
+        actionHandler(action);
+      });
+
+      // Then: The series should be reordered correctly
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toHaveLength(3);
+      expect(updatedConfig.paths[0]).toEqual(path2);
+      expect(updatedConfig.paths[1]).toEqual(path3);
+      expect(updatedConfig.paths[2]).toEqual(path1);
+    });
+
+    it("should reorder series from higher index to lower index", () => {
+      // Given: A configuration with three series
+      const path1 = buildPath();
+      const path2 = buildPath();
+      const path3 = buildPath();
+      const { render, config } = setup({
+        paths: [
+          { path: path1, isArray: false },
+          { path: path2, isArray: false },
+          { path: path3, isArray: false },
+        ],
+      });
+      const { actionHandler } = render.result.current;
+
+      // When: Reordering from index 2 to index 0
+      const action: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: {
+          path: ["paths", "2"],
+          targetPath: ["paths", "0"],
+        },
+      };
+
+      act(() => {
+        actionHandler(action);
+      });
+
+      // Then: The series should be reordered correctly
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toHaveLength(3);
+      expect(updatedConfig.paths[0]).toEqual(path3);
+      expect(updatedConfig.paths[1]).toEqual(path1);
+      expect(updatedConfig.paths[2]).toEqual(path2);
+    });
+
+    it("should reorder series to adjacent position", () => {
+      // Given: A configuration with four series
+      const path1 = buildPath();
+      const path2 = buildPath();
+      const path3 = buildPath();
+      const path4 = buildPath();
+      const { render, config } = setup({
+        paths: [
+          { path: path1, isArray: false },
+          { path: path2, isArray: false },
+          { path: path3, isArray: false },
+          { path: path4, isArray: false },
+        ],
+      });
+      const { actionHandler } = render.result.current;
+
+      // When: Reordering from index 1 to index 2 (adjacent positions)
+      const action: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: {
+          path: ["paths", "1"],
+          targetPath: ["paths", "2"],
+        },
+      };
+
+      act(() => {
+        actionHandler(action);
+      });
+
+      // Then: The series should be swapped correctly
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toHaveLength(4);
+      expect(updatedConfig.paths[0]).toEqual(path1);
+      expect(updatedConfig.paths[1]).toEqual(path3);
+      expect(updatedConfig.paths[2]).toEqual(path2);
+      expect(updatedConfig.paths[3]).toEqual(path4);
+    });
+
+    it("should handle reordering with minimum two series", () => {
+      // Given: A configuration with exactly two series
+      const path1 = buildPath();
+      const path2 = buildPath();
+      const { render, config } = setup({
+        paths: [
+          { path: path1, isArray: false },
+          { path: path2, isArray: false },
+        ],
+      });
+      const { actionHandler } = render.result.current;
+
+      // When: Reordering the two series
+      const action: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: {
+          path: ["paths", "0"],
+          targetPath: ["paths", "1"],
+        },
+      };
+
+      act(() => {
+        actionHandler(action);
+      });
+
+      // Then: The series should be swapped
+      expect(saveConfig).toHaveBeenCalledTimes(1);
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+      const updatedConfig = produce(
+        config,
+        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      );
+      expect(updatedConfig.paths).toHaveLength(2);
+      expect(updatedConfig.paths[0]).toEqual(path2);
+      expect(updatedConfig.paths[1]).toEqual(path1);
+    });
   });
 });

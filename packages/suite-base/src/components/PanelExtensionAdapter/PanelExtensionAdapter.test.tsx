@@ -20,10 +20,12 @@ import {
   MessageEvent,
   Immutable,
   Subscription,
+  SettingsTreeAction,
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AdvertiseOptions } from "@lichtblick/suite-base/players/types";
+import * as PanelStateContextProvider from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
@@ -838,5 +840,48 @@ describe("PanelExtensionAdapter", () => {
     await sig;
 
     expect(cleanupCalled).toBe(true);
+  });
+
+  describe("extensionSettingsActionHandler - reorder-node branch", () => {
+    it("should return early for reorder-node actions without saving config", async () => {
+      // Given: A mock updatePanelSettingsTree to capture the wrapped actionHandler
+      const updatePanelSettingsTreeMock = jest.fn();
+      jest
+        .spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate")
+        .mockReturnValue(updatePanelSettingsTreeMock);
+
+      const saveConfig = jest.fn();
+      const settingsActionHandler = jest.fn();
+
+      const initPanel = (context: PanelExtensionContext) => {
+        context.updatePanelSettingsEditor({
+          actionHandler: settingsActionHandler,
+          nodes: {},
+        });
+      };
+
+      // When: Rendering the adapter and invoking the captured action handler with reorder-node
+      render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter config={{}} saveConfig={saveConfig} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+
+      // Then: The wrapper action handler should exist and call the original handler but not saveConfig
+      const wrappedActionHandler = updatePanelSettingsTreeMock.mock.calls[0]?.[0]?.actionHandler;
+      expect(typeof wrappedActionHandler).toBe("function");
+
+      wrappedActionHandler?.({
+        action: "reorder-node",
+        payload: { path: ["topics", "topic1"] },
+      } as unknown as SettingsTreeAction);
+
+      expect(settingsActionHandler).toHaveBeenCalledTimes(1);
+      expect(saveConfig).not.toHaveBeenCalled();
+    });
   });
 });

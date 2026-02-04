@@ -160,6 +160,9 @@ export class Grids extends SceneExtension<GridRenderable> {
   }
 
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
+    if (action.action === "reorder-node") {
+      return;
+    }
     const path = action.payload.path;
 
     // Handle menu actions (delete)

@@ -48,7 +48,40 @@ type FilterBarProps = {
   onFilterChange: (filter: { minLogLevel: number; searchTerms: string[] }) => void;
 };
 
-function FilterBar(props: FilterBarProps): React.JSX.Element {
+export function createActionHandler(
+  saveConfig: SaveConfig<Config>,
+  seenNodeNames: Set<string>,
+): (action: SettingsTreeAction) => void {
+  return (action: SettingsTreeAction) => {
+    if (action.action === "update") {
+      const { path, value } = action.payload;
+      const adjustedPath = path[0] === "nameFilter" ? path : path.slice(1);
+      saveConfig(produce<Config>((draft) => _.set(draft, adjustedPath, value)));
+      return;
+    }
+
+    if (action.action !== "perform-node-action") {
+      return;
+    }
+
+    if (!["show-all", "hide-all"].includes(action.payload.id)) {
+      return;
+    }
+
+    const visible = action.payload.id === "show-all";
+    saveConfig(
+      produce<Config>((draft) => {
+        const newNameFilter = Object.fromEntries(
+          Object.entries(draft.nameFilter ?? {}).map(([k, _v]) => [k, { visible }]),
+        );
+        seenNodeNames.forEach((name) => (newNameFilter[name] = { visible }));
+        return _.set(draft, ["nameFilter"], newNameFilter);
+      }),
+    );
+  };
+}
+
+function FilterBar(props: Readonly<FilterBarProps>): React.JSX.Element {
   return (
     <FilterTagInput
       items={[...props.searchTerms]}
@@ -129,29 +162,7 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
 
   const actionHandler = useCallback(
     (action: SettingsTreeAction) => {
-      if (action.action === "update") {
-        const { path, value } = action.payload;
-        if (path[0] === "nameFilter") {
-          saveConfig(produce<Config>((draft) => _.set(draft, path, value)));
-        } else {
-          saveConfig(produce<Config>((draft) => _.set(draft, path.slice(1), value)));
-        }
-      } /* perform-node-action */ else {
-        if (!["show-all", "hide-all"].includes(action.payload.id)) {
-          return;
-        }
-
-        const visible = action.payload.id === "show-all";
-        saveConfig(
-          produce<Config>((draft) => {
-            const newNameFilter = Object.fromEntries(
-              Object.entries(draft.nameFilter ?? {}).map(([k, _v]) => [k, { visible }]),
-            );
-            seenNodeNames.forEach((name) => (newNameFilter[name] = { visible }));
-            return _.set(draft, ["nameFilter"], newNameFilter);
-          }),
-        );
-      }
+      createActionHandler(saveConfig, seenNodeNames)(action);
     },
     [saveConfig, seenNodeNames],
   );

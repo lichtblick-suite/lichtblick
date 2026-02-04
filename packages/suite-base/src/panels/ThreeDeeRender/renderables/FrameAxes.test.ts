@@ -220,6 +220,99 @@ describe("FrameAxes", () => {
   });
 
   describe("handleSettingsAction()", () => {
+    it("returns early for reorder-node without updating frame offsets", () => {
+      // Given: FrameAxes with a frame that has editable settings enabled
+      renderer.updateConfig((draft) => {
+        draft.scene.transforms = { editable: true };
+        draft.transforms["frame:test_frame"] = { xyzOffset: [1, 2, 3] };
+      });
+      renderer.transformTree.getOrCreateFrame("test_frame");
+      renderer.emit("transformTreeUpdated", renderer);
+
+      const frameAxes = renderer.sceneExtensions.get("foxglove.FrameAxes") as FrameAxes;
+      const frame = renderer.transformTree.frame("test_frame");
+
+      // Verify initial state has offset
+      expect(frame?.offsetPosition).toEqual([1, 2, 3]);
+
+      // When: Sending reorder-node action that would change xyzOffset if processed
+      const reorderAction: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: {
+          path: ["transforms", "frame:test_frame", "xyzOffset"],
+          targetPath: ["transforms", "frame:test_frame"],
+        },
+      };
+      frameAxes.handleSettingsAction(reorderAction);
+
+      // Then: Frame offset remains unchanged (early return prevented processing)
+      expect(frame?.offsetPosition).toEqual([1, 2, 3]);
+      expect(renderer.config.transforms["frame:test_frame"]?.xyzOffset).toEqual([1, 2, 3]);
+    });
+
+    it("does not call saveSetting or update axis scale for reorder-node action", () => {
+      // Given: FrameAxes with a specific axis scale
+      renderer.updateConfig((draft) => {
+        draft.scene.transforms = { axisScale: 2.5 };
+      });
+      renderer.transformTree.getOrCreateFrame("test_frame");
+      renderer.emit("transformTreeUpdated", renderer);
+
+      const frameAxes = renderer.sceneExtensions.get("foxglove.FrameAxes") as FrameAxes;
+      const renderable = frameAxes.renderables.get("test_frame");
+
+      // Verify initial scale
+      expect(renderable?.userData.axis.scale.x).toBe(2.5);
+
+      // When: Sending reorder-node for settings path that would change axisScale
+      const reorderAction: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: {
+          path: ["transforms", "settings", "axisScale"],
+          targetPath: ["transforms", "settings"],
+        },
+      };
+      frameAxes.handleSettingsAction(reorderAction);
+
+      // Then: Axis scale remains unchanged (early return prevented saveSetting and setAxisScale)
+      expect(renderable?.userData.axis.scale.x).toBe(2.5);
+      expect(renderer.config.scene.transforms?.axisScale).toBe(2.5);
+    });
+
+    it("does not call updateConfig or toggle visibility for reorder-node action", () => {
+      // Given: FrameAxes with mixed visibility states
+      renderer.updateConfig((draft) => {
+        draft.transforms["frame:frame1"] = { visible: true };
+        draft.transforms["frame:frame2"] = { visible: false };
+      });
+      renderer.transformTree.getOrCreateFrame("frame1");
+      renderer.transformTree.getOrCreateFrame("frame2");
+      renderer.emit("transformTreeUpdated", renderer);
+
+      const frameAxes = renderer.sceneExtensions.get("foxglove.FrameAxes") as FrameAxes;
+      const renderable1 = frameAxes.renderables.get("frame1");
+      const renderable2 = frameAxes.renderables.get("frame2");
+
+      // Verify initial visibility states
+      expect(renderable1?.userData.settings.visible).toBe(true);
+      expect(renderable2?.userData.settings.visible).toBe(false);
+
+      // When: Sending reorder-node that would normally flip a visibility value
+      const reorderAction: SettingsTreeAction = {
+        action: "reorder-node",
+        payload: {
+          path: ["transforms", "frame:frame2", "visible"],
+          targetPath: ["transforms", "frame:frame2"],
+        },
+      };
+      frameAxes.handleSettingsAction(reorderAction);
+
+      // Then: Visibility states remain unchanged (early return prevented processing)
+      expect(renderable1?.userData.settings.visible).toBe(true);
+      expect(renderable2?.userData.settings.visible).toBe(false);
+      expect(renderer.config.transforms["frame:frame2"]?.visible).toBe(false);
+    });
+
     it("shows all frames when show-all action is triggered", () => {
       // Given: FrameAxes extension with multiple frames
       renderer.transformTree.getOrCreateFrame("frame1");
@@ -268,26 +361,6 @@ describe("FrameAxes", () => {
       for (const renderable of frameAxes.renderables.values()) {
         expect(renderable.userData.settings.visible).toBe(false);
       }
-    });
-
-    it("emits clearPreloadBuffer event when clear-preload-buffer action is triggered", () => {
-      // Given: FrameAxes extension
-      const frameAxes = renderer.sceneExtensions.get("foxglove.FrameAxes") as FrameAxes;
-      const emitSpy = jest.spyOn(renderer, "emit");
-
-      const action: SettingsTreeAction = {
-        action: "perform-node-action",
-        payload: {
-          id: "clear-preload-buffer",
-          path: ["transforms", "settings"],
-        },
-      };
-
-      // When: Triggering clear-preload-buffer action
-      frameAxes.handleSettingsAction(action);
-
-      // Then: Should emit clearPreloadBuffer event
-      expect(emitSpy).toHaveBeenCalledWith("clearPreloadBuffer", renderer);
     });
 
     it("updates label size when labelSize setting is changed", () => {

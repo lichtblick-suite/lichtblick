@@ -374,6 +374,9 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   }
 
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
+    if (action.action === "reorder-node") {
+      return;
+    }
     const path = action.payload.path;
 
     // eslint-disable-next-line @lichtblick/no-boolean-parameters

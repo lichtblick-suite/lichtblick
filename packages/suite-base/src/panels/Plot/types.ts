@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Chart, ChartDataset, ScatterDataPoint } from "chart.js";
+import { TFunction } from "i18next";
 import { MutableRefObject } from "react";
 
-import { Immutable } from "@lichtblick/suite";
+import { Immutable, SettingsTreeActionUpdatePayload } from "@lichtblick/suite";
 import { PanelContextMenuItem } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { TimeBasedChartTooltipData } from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import { OffscreenCanvasRenderer } from "@lichtblick/suite-base/panels/Plot/OffscreenCanvasRenderer";
@@ -13,7 +14,7 @@ import { CurrentCustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot
 import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilder";
 import { IndexDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/IndexDatasetsBuilder";
 import { TimestampDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilder";
-import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
+import { PlotConfig, PlotPath } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { Bounds1D } from "@lichtblick/suite-base/types/Bounds";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -193,3 +194,31 @@ export type PlotCoordinatorEventTypes = {
 };
 
 export type ConfigBounds = { x: Partial<Bounds1D>; y: Partial<Bounds1D> };
+
+export type HandleAction = {
+  draft: PlotConfig;
+};
+
+export type HandleDeleteSeriesAction = HandleAction & {
+  index: number;
+};
+
+export type HandleUpdateAction = HandleAction & Omit<SettingsTreeActionUpdatePayload, "input">;
+
+export type MakeSeriesNode = {
+  path: PlotPath;
+  index: number;
+  canDelete: boolean;
+  canReorder: boolean;
+  t: TFunction<"plot">;
+};
+
+export type MakeRootSeriesNode = {
+  paths: PlotPath[];
+  t: TFunction<"plot">;
+};
+
+export type HandleMoveSeriesAction = HandleAction & {
+  index: number;
+  direction: "up" | "down";
+};
