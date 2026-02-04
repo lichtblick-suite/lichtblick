@@ -97,6 +97,21 @@ describe("app state url parser", () => {
         dsParams: { bar: "barValue", baz: "bazValue" },
       });
     });
+
+    it("parses start and end mark query parameters", () => {
+      const start = toRFC3339String({ sec: 1, nsec: 0 });
+      const end = toRFC3339String({ sec: 5, nsec: 0 });
+      const url = urlBuilder();
+      url.searchParams.append("ds", "rosbag");
+      url.searchParams.append("startMark", start);
+      url.searchParams.append("endMark", end);
+
+      expect(parseAppURLState(url)).toMatchObject({
+        ds: "rosbag",
+        startMark: start,
+        endMark: end,
+      });
+    });
   });
 });
 
@@ -195,5 +210,20 @@ describe("updateAppURLState", () => {
         `${baseURL.origin}/?ds=${state.ds}&ds.eventId=${eventId}&ds.url=${encodedURLFile}`,
       );
     });
+  });
+
+  it("encodes start and end marks separately", () => {
+    const startMark = toRFC3339String({ sec: 10, nsec: 0 });
+    const endMark = toRFC3339String({ sec: 20, nsec: 0 });
+    const urlState: AppURLState = {
+      startMark,
+      endMark,
+    };
+
+    const result = updateAppURLState(baseURL, urlState);
+
+    expect(result.searchParams.get("startMark")).toEqual(startMark);
+    expect(result.searchParams.get("endMark")).toEqual(endMark);
+    expect(result.searchParams.get("marks")).toBeNull();
   });
 });

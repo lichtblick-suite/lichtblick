@@ -41,15 +41,18 @@ export function useStateToURLSynchronization(): void {
   const currentTime = useMessagePipeline(selectCurrentTime);
   const [debouncedCurrentTime] = useDebounce(currentTime, 500, { maxWait: 500 });
   const selectedEventId = useEvents(selectSelectedEventId);
-  const marks = usePlayerMarksStore().marks;
+  const startMark = usePlayerMarksStore((state) => state.startMark);
+  const endMark = usePlayerMarksStore((state) => state.endMark);
 
   // Sync current time with the url.
   useEffect(() => {
     updateUrl({
       time: canSeek ? debouncedCurrentTime : undefined,
-      marks: marks.length > 0 ? marks.map((m) => toRFC3339String(m)).join(",") : undefined,
+      marks: undefined,
+      startMark: startMark ? toRFC3339String(startMark) : undefined,
+      endMark: endMark ? toRFC3339String(endMark) : undefined,
     });
-  }, [canSeek, debouncedCurrentTime, marks]);
+  }, [canSeek, debouncedCurrentTime, startMark, endMark]);
 
   // Sync player state with the url.
   useEffect(() => {
