@@ -214,7 +214,7 @@ describe("ExtensionsAPI", () => {
   });
 
   describe("loadContent", () => {
-    it("should load extension content by file id", async () => {
+    it("should load extension content by file id with 120s timeout", async () => {
       // Given
       const id = BasicBuilder.string();
       const mockContent = new ArrayBuffer(8);
@@ -230,8 +230,23 @@ describe("ExtensionsAPI", () => {
       // Then
       expect(mockGet).toHaveBeenCalledWith(`extensions/${id}/download`, undefined, {
         responseType: "arraybuffer",
+        timeout: 120000,
       });
       expect(result).toEqual(mockUint8Array);
+    });
+
+    it("should throw error when request times out", async () => {
+      // Given
+      const fileId = BasicBuilder.string();
+
+      const mockHttpService = jest.mocked(HttpService);
+      const mockGet = jest
+        .fn()
+        .mockRejectedValue(new HttpError("The operation was aborted", 0, "Network Error"));
+      mockHttpService.get = mockGet;
+
+      // When Then
+      await expect(extensionsAPI.loadContent(fileId)).rejects.toThrow("The operation was aborted");
     });
 
     it("should return undefined when content not found", async () => {
