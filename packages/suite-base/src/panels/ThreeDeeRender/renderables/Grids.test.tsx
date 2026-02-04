@@ -109,7 +109,7 @@ describe("Grids", () => {
     (console.warn as jest.Mock).mockClear();
   });
 
-  describe("handleSettingsAction() - reorder-node action (lines 163-165)", () => {
+  describe("handleSettingsAction() - reorder-node action", () => {
     it("should return early and not modify config when reorder-node action is received", () => {
       // Given: A Grids extension with an existing grid layer
       const grids = renderer.sceneExtensions.get("foxglove.Grids") as Grids;

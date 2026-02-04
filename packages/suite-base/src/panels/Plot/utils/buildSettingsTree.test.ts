@@ -124,7 +124,7 @@ describe("buildSettingsTree", () => {
     expect(tree.xAxis?.fields?.maxXValue?.error).toBe("maxXError");
   });
 
-  describe("makeSeriesNode - reorderable and icon properties (lines 33-34)", () => {
+  describe("makeSeriesNode - reorderable and icon properties", () => {
     it("should set reorderable to true and icon to DragHandle when canReorder is true", () => {
       // Given: A config with multiple paths where nodes should be reorderable
       const paths = [PlotBuilder.path(), PlotBuilder.path()];
@@ -176,7 +176,7 @@ describe("buildSettingsTree", () => {
     });
   });
 
-  describe("makeRootSeriesNode - children creation logic (lines 81-99)", () => {
+  describe("makeRootSeriesNode - children creation logic", () => {
     it("should create a single default child node with canDelete=false and canReorder=false when paths is empty", () => {
       // Given: A config with empty paths array
       const config: PlotConfig = PlotBuilder.config({ paths: [] });
