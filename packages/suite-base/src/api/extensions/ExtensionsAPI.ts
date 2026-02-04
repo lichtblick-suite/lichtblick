@@ -101,7 +101,7 @@ class ExtensionsAPI implements IExtensionAPI {
       const { data } = await HttpService.get<ArrayBuffer>(
         `${this.extensionPath}/${id}/download`,
         undefined,
-        { responseType: "arraybuffer" },
+        { responseType: "arraybuffer", timeout: 120_000 },
       );
 
       return new Uint8Array(data);
