@@ -9,23 +9,32 @@ import {
   IDataSourceFactory,
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
+import {
+  SAMPLE_NUSCENES_DATA_SOURCE_DISPLAY_NAME,
+  SAMPLE_NUSCENES_DATA_SOURCE_ICON_NAME,
+  SAMPLE_NUSCENES_DATA_SOURCE_ID,
+  SAMPLE_NUSCENES_DATA_SOURCE_NAME,
+  SAMPLE_NUSCENES_DATA_SOURCE_READ_AHEAD_DURATION,
+  SAMPLE_NUSCENES_DATA_SOURCE_TYPE,
+  SAMPLE_NUSCENES_DATA_SOURCE_URL,
+} from "@lichtblick/suite-base/dataSources/constants";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 
 import SampleNuscenesLayout from "./SampleNuscenesLayout.json";
 
 class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
-  public id = "sample-nuscenes";
-  public type: IDataSourceFactory["type"] = "sample";
-  public displayName = "Sample: Nuscenes";
-  public iconName: IDataSourceFactory["iconName"] = "FileASPX";
+  public id = SAMPLE_NUSCENES_DATA_SOURCE_ID;
+  public type: IDataSourceFactory["type"] = SAMPLE_NUSCENES_DATA_SOURCE_TYPE;
+  public displayName = SAMPLE_NUSCENES_DATA_SOURCE_DISPLAY_NAME;
+  public iconName: IDataSourceFactory["iconName"] = SAMPLE_NUSCENES_DATA_SOURCE_ICON_NAME;
   public hidden = true;
   public sampleLayout = SampleNuscenesLayout as IDataSourceFactory["sampleLayout"];
 
   public initialize(
     args: DataSourceFactoryInitializeArgs,
   ): ReturnType<IDataSourceFactory["initialize"]> {
-    const bagUrl = "https://mcap-proxy.lichtblick.workers.dev/NuScenes-v1.0-mini-scene-sample.mcap";
+    const bagUrl = SAMPLE_NUSCENES_DATA_SOURCE_URL;
 
     const source = new WorkerSerializedIterableSource({
       initWorker: () => {
@@ -43,12 +52,12 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
     return new IterablePlayer({
       source,
       isSampleDataSource: true,
-      name: "Adapted from nuScenes dataset. Copyright © 2020 nuScenes. https://www.nuscenes.org/terms-of-use",
+      name: SAMPLE_NUSCENES_DATA_SOURCE_NAME,
       metricsCollector: args.metricsCollector,
       // Use blank url params so the data source is set in the url
       urlParams: {},
       sourceId: this.id,
-      readAheadDuration: { sec: 10, nsec: 0 },
+      readAheadDuration: SAMPLE_NUSCENES_DATA_SOURCE_READ_AHEAD_DURATION,
     });
   }
 }
