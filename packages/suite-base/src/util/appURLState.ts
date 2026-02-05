@@ -18,9 +18,8 @@ export type AppURLState = {
   dsParamsArray?: Record<string, string[]>;
   layoutId?: LayoutID;
   time?: Time;
-  marks?: string;
-  startMark?: string;
-  endMark?: string;
+  from?: string;
+  to?: string;
 };
 
 /**
@@ -49,27 +48,19 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
     }
   }
 
-  if ("marks" in urlState) {
-    if (urlState.marks) {
-      newURL.searchParams.set("marks", urlState.marks);
+  if ("from" in urlState) {
+    if (urlState.from) {
+      newURL.searchParams.set("from", urlState.from);
     } else {
-      newURL.searchParams.delete("marks");
+      newURL.searchParams.delete("from");
     }
   }
 
-  if ("startMark" in urlState) {
-    if (urlState.startMark) {
-      newURL.searchParams.set("startMark", urlState.startMark);
+  if ("to" in urlState) {
+    if (urlState.to) {
+      newURL.searchParams.set("to", urlState.to);
     } else {
-      newURL.searchParams.delete("startMark");
-    }
-  }
-
-  if ("endMark" in urlState) {
-    if (urlState.endMark) {
-      newURL.searchParams.set("endMark", urlState.endMark);
-    } else {
-      newURL.searchParams.delete("endMark");
+      newURL.searchParams.delete("to");
     }
   }
 
@@ -107,9 +98,8 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
   const timeString = url.searchParams.get("time");
   const time = timeString == undefined ? undefined : fromRFC3339String(timeString);
   const dsParams: Record<string, string> = {};
-  const marks = url.searchParams.get("marks") ?? undefined;
-  const startMark = url.searchParams.get("startMark") ?? undefined;
-  const endMark = url.searchParams.get("endMark") ?? undefined;
+  const from = url.searchParams.get("from") ?? undefined;
+  const to = url.searchParams.get("to") ?? undefined;
   url.searchParams.forEach((v, k) => {
     if (k && v && k.startsWith("ds.")) {
       const cleanKey = k.replace(/^ds./, "");
@@ -127,9 +117,8 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
     {
       time,
       ds,
-      marks,
-      startMark,
-      endMark,
+      from,
+      to,
       dsParams: _.isEmpty(dsParams) ? undefined : dsParams,
     },
     _.isEmpty,

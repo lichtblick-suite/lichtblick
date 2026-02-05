@@ -9,14 +9,11 @@ import {
   DialogTitle,
   Stack,
   TextField,
-  Typography,
 } from "@mui/material";
+import { useEffect, useState } from "react";
 
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@lichtblick/suite-base/components/MessagePipeline";
-import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
+import { Time, toRFC3339String } from "@lichtblick/rostime";
+import { updateAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import { usePlayerMarksStore } from "@lichtblick/suite-base/util/usePlayerMarksStore";
 
 import { useStyles } from "./TimeSlicerModal.style";
@@ -24,32 +21,39 @@ import { useStyles } from "./TimeSlicerModal.style";
 type TimeSlicerModalProps = {
   open: boolean;
   onClose: () => void;
-  onSlice?: () => void;
+  startTime?: Time;
+  endTime?: Time;
 };
 
-const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
-
-const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
-
 export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.Element {
-  const { open, onClose, onSlice } = props;
+  const { open, onClose, startTime, endTime } = props;
   const { classes } = useStyles();
-  const startTime = useMessagePipeline(selectStartTime);
-  const endTime = useMessagePipeline(selectEndTime);
 
+  const [fromMark, setFromMark] = useState<string>();
+  const [toMark, setToMark] = useState<string>();
   const startMark = usePlayerMarksStore((state) => state.startMark);
   const endMark = usePlayerMarksStore((state) => state.endMark);
-
-  const canSlice = startMark != undefined && endMark != undefined;
 
   const handleCancel = () => {
     onClose();
   };
 
+  useEffect(() => {
+    setFromMark(startMark ? toRFC3339String(startMark) : toRFC3339String(startTime!));
+    setToMark(endMark ? toRFC3339String(endMark) : toRFC3339String(endTime!));
+  }, [startMark, endMark, startTime, endTime]);
+
   const handleSlice = () => {
-    if (onSlice) {
-      onSlice();
-    }
+    // eslint-disable-next-line no-restricted-syntax
+    console.log("Slicing range from", fromMark, "to", toMark);
+
+    // Update URL with marks
+    const newStateUrl = updateAppURLState(new URL(window.location.href), {
+      from: fromMark,
+      to: toMark,
+    });
+    window.history.replaceState(undefined, "", decodeURIComponent(newStateUrl.href));
+
     onClose();
   };
 
@@ -71,29 +75,20 @@ export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.
       <DialogTitle>Slice Playback Range</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <Stack spacing={2.5}>
-          <Typography variant="body2" className={classes.helperText}>
-            Add two marks on the scrubber to define the window you would like to keep. We will trim
-            everything outside of that time span.
-          </Typography>
           <Stack spacing={2}>
             <TextField
               label="Start Time"
-              value={startMark ? formatTimeRaw(startMark) : formatTimeRaw(startTime!)}
-              fullWidth
-              slotProps={{
-                input: {
-                  readOnly: true,
-                },
+              value={fromMark}
+              onChange={(event) => {
+                setFromMark(event.target.value);
               }}
+              fullWidth
             />
             <TextField
               label="End Time"
-              value={endMark ? formatTimeRaw(endMark) : formatTimeRaw(endTime!)}
-              fullWidth
-              slotProps={{
-                input: {
-                  readOnly: true,
-                },
+              value={toMark}
+              onChange={(event) => {
+                setToMark(event.target.value);
               }}
             />
           </Stack>
@@ -103,7 +98,7 @@ export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.
         <Button color="inherit" onClick={handleCancel}>
           Cancel
         </Button>
-        <Button variant="contained" disabled={!canSlice} onClick={handleSlice}>
+        <Button variant="contained" onClick={handleSlice}>
           Slice range
         </Button>
       </DialogActions>

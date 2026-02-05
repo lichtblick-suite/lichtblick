@@ -10,7 +10,6 @@ import { useEffect } from "react";
 import { useDebounce } from "use-debounce";
 
 import { useDeepMemo } from "@lichtblick/hooks";
-import { toRFC3339String } from "@lichtblick/rostime";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -48,9 +47,6 @@ export function useStateToURLSynchronization(): void {
   useEffect(() => {
     updateUrl({
       time: canSeek ? debouncedCurrentTime : undefined,
-      marks: undefined,
-      startMark: startMark ? toRFC3339String(startMark) : undefined,
-      endMark: endMark ? toRFC3339String(endMark) : undefined,
     });
   }, [canSeek, debouncedCurrentTime, startMark, endMark]);
 

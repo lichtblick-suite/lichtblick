@@ -65,6 +65,8 @@ import Scrubber from "./Scrubber";
 const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 const selectPlaybackRepeat = (store: WorkspaceContextStore) => store.playbackControls.repeat;
+const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
+const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
 
 type PlaybackControlsProps = Readonly<{
   play: NonNullable<Player["startPlayback"]>;
@@ -84,6 +86,8 @@ export default function PlaybackControls({
   getTimeInfo,
 }: PlaybackControlsProps): React.JSX.Element {
   const presence = useMessagePipeline(selectPresence);
+  const startTime = useMessagePipeline(selectStartTime);
+  const endTime = useMessagePipeline(selectEndTime);
 
   const { classes, cx } = useStyles();
   const repeat = useWorkspaceStore(selectPlaybackRepeat);
@@ -248,7 +252,12 @@ export default function PlaybackControls({
           <CreateEventDialog onClose={toggleCreateEventDialog} />
         )}
         {toggleTimeSlicerModal && (
-          <TimeSlicerModal open={toggleTimeSlicerModal} onClose={handleTimeSlicerToggle} />
+          <TimeSlicerModal
+            open={toggleTimeSlicerModal}
+            onClose={handleTimeSlicerToggle}
+            startTime={startTime}
+            endTime={endTime}
+          />
         )}
       </div>
     </>
