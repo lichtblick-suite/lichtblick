@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2024 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
-// SPDX-License-Identifier: MPL-2.0
-
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -13,23 +10,20 @@ import * as _ from "lodash-es";
 import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { SettingsTreeAction, SettingsTreeActionUpdatePayload } from "@lichtblick/suite";
+import { SettingsTreeAction } from "@lichtblick/suite";
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
+import {
+  HandleAction,
+  HandleDeleteSeriesAction,
+  HandleMoveSeriesAction,
+  HandleUpdateAction,
+} from "@lichtblick/suite-base/panels/Plot/types";
 import { buildSettingsTree } from "@lichtblick/suite-base/panels/Plot/utils/buildSettingsTree";
+import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import { PlotConfig, PlotLegendDisplay } from "../utils/config";
-
-export type HandleAction = {
-  draft: PlotConfig;
-};
-
-export type HandleDeleteSeriesAction = HandleAction & {
-  index: number;
-};
-
-export type HandleUpdateAction = HandleAction & Omit<SettingsTreeActionUpdatePayload, "input">;
 
 export function handleUpdateAction({ draft, path, value }: HandleUpdateAction): void {
   if (path[0] === "paths") {
@@ -71,6 +65,17 @@ export function handleDeleteSeriesAction({ draft, index }: HandleDeleteSeriesAct
   draft.paths.splice(index, 1);
 }
 
+export function handleMoveSeriesAction({ draft, index, direction }: HandleMoveSeriesAction): void {
+  const targetIndex = direction === "up" ? index - 1 : index + 1;
+
+  if (targetIndex >= 0 && targetIndex < draft.paths.length) {
+    [draft.paths[index], draft.paths[targetIndex]] = [
+      draft.paths[targetIndex]!,
+      draft.paths[index]!,
+    ];
+  }
+}
+
 export default function usePlotPanelSettings(
   config: PlotConfig,
   saveConfig: SaveConfig<PlotConfig>,
@@ -88,6 +93,14 @@ export default function usePlotPanelSettings(
             handleUpdateAction({ draft, path, value });
           }),
         );
+      } else if (action === "reorder-node") {
+        const sourceIndex = Number(payload.path[1]);
+        const targetIndex = Number(payload.targetPath[1]);
+        saveConfig(
+          produce<PlotConfig>((draft) => {
+            handleReorderSeriesAction(draft, sourceIndex, targetIndex);
+          }),
+        );
       } else if (payload.id === "add-series") {
         saveConfig(
           produce<PlotConfig>((draft: PlotConfig) => {
@@ -98,6 +111,18 @@ export default function usePlotPanelSettings(
         saveConfig(
           produce<PlotConfig>((draft) => {
             handleDeleteSeriesAction({ draft, index: Number(payload.path[1]) });
+          }),
+        );
+      } else if (payload.id === "move-series-up") {
+        saveConfig(
+          produce<PlotConfig>((draft) => {
+            handleMoveSeriesAction({ draft, index: Number(payload.path[1]), direction: "up" });
+          }),
+        );
+      } else if (payload.id === "move-series-down") {
+        saveConfig(
+          produce<PlotConfig>((draft) => {
+            handleMoveSeriesAction({ draft, index: Number(payload.path[1]), direction: "down" });
           }),
         );
       }

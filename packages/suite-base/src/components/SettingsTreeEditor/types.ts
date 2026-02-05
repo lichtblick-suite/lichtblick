@@ -36,3 +36,14 @@ export type SettingsTreeEditorProps = {
   variant: "panel" | "log";
   settings: Immutable<SettingsTree>;
 };
+
+export type DragItem = {
+  path: readonly string[];
+};
+
+export type NodeEditorState = {
+  editing: boolean;
+  focusedPath: undefined | readonly string[];
+  open: boolean;
+  visibilityFilter: SelectVisibilityFilterValue;
+};

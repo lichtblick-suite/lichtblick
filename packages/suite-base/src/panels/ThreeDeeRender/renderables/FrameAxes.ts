@@ -21,8 +21,6 @@ import {
 import type { RosValue } from "@lichtblick/suite-base/players/types";
 import { Label } from "@lichtblick/three-text";
 
-import { Axis, AXIS_LENGTH } from "./Axis";
-import { DEFAULT_LABEL_SCALE_FACTOR } from "./SceneSettings";
 import type { IRenderer, RendererConfig } from "../IRenderer";
 import { BaseUserData, Renderable } from "../Renderable";
 import { SceneExtension } from "../SceneExtension";
@@ -30,6 +28,8 @@ import { SettingsTreeEntry } from "../SettingsManager";
 import { getLuminance, stringToRgb } from "../color";
 import { BaseSettings, fieldSize, PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
 import { CoordinateFrame, Duration, makePose, MAX_DURATION, Transform } from "../transforms";
+import { Axis, AXIS_LENGTH } from "./Axis";
+import { DEFAULT_LABEL_SCALE_FACTOR } from "./SceneSettings";
 import { makeLinePickingMaterial } from "./markers/materials";
 
 export type LayerSettingsTransform = BaseSettings & {
@@ -195,7 +195,28 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
             value: config.scene.transforms?.enablePreloading ?? false,
             tooltip: t("threeDee:enablePreloadingTooltip"),
           },
+          maxPreloadMessages: {
+            label: t("threeDee:maxPreloadMessages"),
+            input: "number",
+            min: 1000,
+            max: 50000,
+            step: 1000,
+            value: config.scene.transforms?.maxPreloadMessages ?? 10000,
+            tooltip: t("threeDee:maxPreloadMessagesTooltip"),
+            disabled: !(config.scene.transforms?.enablePreloading ?? false),
+          },
         },
+        actions:
+          config.scene.transforms?.enablePreloading === true
+            ? [
+                {
+                  id: "clear-preload-buffer",
+                  type: "action",
+                  label: t("threeDee:clearPreloadBuffer"),
+                  display: "menu",
+                },
+              ]
+            : undefined,
       },
     };
 
@@ -353,6 +374,9 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
   }
 
   public override handleSettingsAction = (action: SettingsTreeAction): void => {
+    if (action.action === "reorder-node") {
+      return;
+    }
     const path = action.payload.path;
 
     // eslint-disable-next-line @lichtblick/no-boolean-parameters
@@ -381,6 +405,9 @@ export class FrameAxes extends SceneExtension<FrameAxisRenderable> {
       } else if (action.payload.id === "hide-all") {
         // Hide all frames
         toggleFrameVisibility(false);
+      } else if (action.payload.id === "clear-preload-buffer") {
+        // Clear preloaded transform messages
+        this.renderer.emit("clearPreloadBuffer", this.renderer);
       }
       return;
     }

@@ -3,7 +3,7 @@
 
 import { test, expect } from "@playwright/test";
 
-import { loadFile } from "../../fixtures/load-file";
+import { loadFiles } from "../../fixtures/load-files";
 
 /**
  * Example timestamp format: "2025-02-26 10:37:17.726 AM WET"
@@ -41,11 +41,11 @@ test("Should sync playback between multiple web instances", async ({ browser }) 
     const filename = "example.mcap";
 
     // Load file in first tab
-    await loadFile({ mainWindow: page1, filename });
+    await loadFiles({ mainWindow: page1, filenames: filename });
     await page1.waitForSelector('input[value*="2025-02-26"]', { timeout: 15000 });
 
     // Load file in second tab
-    await loadFile({ mainWindow: page2, filename });
+    await loadFiles({ mainWindow: page2, filenames: filename });
     await page2.waitForSelector('input[value*="2025-02-26"]', { timeout: 15000 });
 
     // Verify sync button is available and initially off in both tabs

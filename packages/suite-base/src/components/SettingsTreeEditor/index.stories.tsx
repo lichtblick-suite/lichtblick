@@ -819,9 +819,11 @@ function Wrapper({ nodes }: { nodes: SettingsTreeNodes }): React.JSX.Element {
         return;
       }
 
-      setSettingsNodes((previous) =>
-        updateSettingsTreeNodes(previous, action.payload.path, action.payload.value),
-      );
+      if (action.action === "update") {
+        setSettingsNodes((previous) =>
+          updateSettingsTreeNodes(previous, action.payload.path, action.payload.value),
+        );
+      }
     },
     [dynamicNodes],
   );

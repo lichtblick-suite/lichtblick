@@ -38,6 +38,7 @@ export function VisibilityToggle(
       className={cx(className, classes.checkbox, {
         [classes.checkboxSizeSmall]: props.size === "small",
       })}
+      data-testid="VisibilityToggle"
       onChange={handleChange}
       {...rest}
       title="Toggle visibility"

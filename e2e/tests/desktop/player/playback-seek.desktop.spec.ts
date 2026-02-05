@@ -5,7 +5,7 @@ import { Locator, Page } from "playwright";
 
 import { changeToEpochFormat } from "../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../fixtures/electron";
-import { loadFile } from "../../../fixtures/load-file";
+import { loadFiles } from "../../../fixtures/load-files";
 
 const MCAP_FILENAME = "example.mcap";
 
@@ -62,7 +62,7 @@ test("should advance timestamp 100ms when seek forward button is clicked", async
   mainWindow,
 }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   const button = mainWindow.getByTestId("seek-forward-button");
@@ -89,7 +89,7 @@ test("should advance timestamp 100ms when seek forward button is clicked", async
 
 test("should advance timestamp 100ms when right arrow key is pressed", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
@@ -116,7 +116,7 @@ test("should advance timestamp 500ms when alt + right arrow key is pressed", asy
   mainWindow,
 }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
@@ -145,7 +145,7 @@ test("should regress timestamp 100ms when seek forward backward is clicked", asy
   mainWindow,
 }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
   const button = mainWindow.getByTestId("seek-backward-button");
 
@@ -174,7 +174,7 @@ test("should regress timestamp 100ms when seek forward backward is clicked", asy
 
 test("should regress timestamp 100ms when left arrow key is pressed", async ({ mainWindow }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
@@ -204,7 +204,7 @@ test("should regress timestamp 500ms when alt + left arrow key is pressed", asyn
   mainWindow,
 }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
@@ -235,7 +235,7 @@ test("should foward timestamp to end of slider when alt + right arrow key is pre
   mainWindow,
 }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
@@ -267,7 +267,7 @@ test("should regress timestamp to start of slider alt + left arrow key is presse
   mainWindow,
 }) => {
   // Given
-  await loadFile({ mainWindow, filename: MCAP_FILENAME });
+  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When

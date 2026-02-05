@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { test, expect } from "../../../fixtures/electron";
-import { loadFile } from "../../../fixtures/load-file";
+import { loadFiles } from "../../../fixtures/load-files";
 
 /**
  * Given the file example.bag is loaded
@@ -16,9 +16,9 @@ import { loadFile } from "../../../fixtures/load-file";
 test("Create global variable and use it on Raw Messages Panel", async ({ mainWindow }) => {
   // Given
   const filename = "example.bag";
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename,
+    filenames: filename,
   });
 
   // When

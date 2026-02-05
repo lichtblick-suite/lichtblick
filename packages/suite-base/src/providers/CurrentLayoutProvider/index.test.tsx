@@ -27,7 +27,11 @@ import {
 } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import AppParametersProvider from "@lichtblick/suite-base/providers/AppParametersProvider";
 import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider";
-import { MAX_SUPPORTED_LAYOUT_VERSION } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
+import {
+  BUSY_POLLING_INTERVAL_MS,
+  BUSY_POLLING_TIMEOUT_MS,
+  MAX_SUPPORTED_LAYOUT_VERSION,
+} from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -159,6 +163,18 @@ describe("CurrentLayoutProvider", () => {
     };
     const condvar = new Condvar();
     const layoutStorageGetCalledWait = condvar.wait();
+
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "example",
+          name: "Example layout",
+          data: { data: expectedState },
+          permission: "CREATOR_WRITE",
+        },
+      ];
+    });
+
     mockLayoutManager.getLayout.mockImplementation(async () => {
       condvar.notifyAll();
       return {
@@ -175,7 +191,7 @@ describe("CurrentLayoutProvider", () => {
       await layoutStorageGetCalledWait;
     });
 
-    expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"], ["example"]]);
+    expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       {
@@ -201,6 +217,18 @@ describe("CurrentLayoutProvider", () => {
 
     const condvar = new Condvar();
     const layoutStorageGetCalledWait = condvar.wait();
+
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "example",
+          name: "Example layout",
+          data: { data: expectedState },
+          permission: "CREATOR_WRITE",
+        },
+      ];
+    });
+
     mockLayoutManager.getLayout.mockImplementation(async () => {
       condvar.notifyAll();
       return {
@@ -217,7 +245,7 @@ describe("CurrentLayoutProvider", () => {
       await layoutStorageGetCalledWait;
     });
 
-    expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"], ["example"]]);
+    expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
     expect(all.map((item) => (item instanceof Error ? undefined : item.layoutState))).toEqual([
       { selectedLayout: undefined },
       { selectedLayout: undefined },
@@ -225,17 +253,20 @@ describe("CurrentLayoutProvider", () => {
   });
 
   it("keeps identity of action functions when modifying layout", async () => {
-    mockLayoutManager.getLayout.mockImplementation(async () => {
-      return {
-        id: "TEST_ID",
-        name: "Test layout",
-        baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
-      };
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "example",
+          name: "Test layout",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+      ];
     });
 
     mockLayoutManager.updateLayout.mockImplementation(async () => {
       return {
-        id: "TEST_ID",
+        id: "example",
         name: "Test layout",
         baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
       };
@@ -267,11 +298,13 @@ describe("CurrentLayoutProvider", () => {
           id: "layout1",
           name: "LAYOUT 1",
           data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
         },
         {
           id: "layout2",
           name: "ABC Layout 2",
           data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
         },
       ];
     });
@@ -292,7 +325,82 @@ describe("CurrentLayoutProvider", () => {
     expect(selectedLayout).toBe("layout2");
   });
 
-  it("should select a layout though app parameters", async () => {
+  it("selects the first org layout, when current layout is not found", async () => {
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "layout1",
+          name: "LAYOUT 1",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+        {
+          id: "layout2",
+          name: "ORG Layout 2",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
+        },
+      ];
+    });
+    mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "nonexistent" });
+
+    const { result, all } = renderTest({
+      mockLayoutManager,
+      mockUserProfile,
+    });
+
+    await act(async () => {
+      await result.current.childMounted;
+    });
+
+    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+      .selectedLayout?.id;
+
+    expect(selectedLayout).toBeDefined();
+    expect(selectedLayout).toBe("layout2");
+  });
+
+  it("selects the first org layout, if any, in alphabetic order, when there is no selected layout", async () => {
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "layout1",
+          name: "ABC Layout 1",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+        {
+          id: "layout2",
+          name: "DEF Layout 2",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
+        },
+        {
+          id: "layout3",
+          name: "ABC Layout 3",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
+        },
+      ];
+    });
+
+    const { result, all } = renderTest({
+      mockLayoutManager,
+      mockUserProfile,
+    });
+
+    await act(async () => {
+      await result.current.childMounted;
+    });
+
+    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+      .selectedLayout?.id;
+
+    expect(selectedLayout).toBeDefined();
+    expect(selectedLayout).toBe("layout3");
+  });
+
+  it("select a layout through app parameters", async () => {
     const mockAppParameters = { defaultLayout: "LAYOUT 2" };
     mockLayoutManager.getLayouts.mockImplementation(async () => {
       return [
@@ -300,11 +408,19 @@ describe("CurrentLayoutProvider", () => {
           id: "layout1",
           name: "LAYOUT 1",
           data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
         },
         {
           id: "layout2",
           name: "LAYOUT 2",
           data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+        {
+          id: "layout3",
+          name: "ABC Layout 3",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
         },
       ];
     });
@@ -345,5 +461,80 @@ describe("CurrentLayoutProvider", () => {
       `The layout '${mockAppParameters.defaultLayout}' specified in the app parameters does not exist.`,
       { variant: "warning" },
     );
+  });
+
+  describe("Default layout logic", () => {
+    function mockBusyTimes(times: number) {
+      Array.from({ length: times }).forEach(() => {
+        mockLayoutManager.isBusy.mockReturnValueOnce(true);
+      });
+      mockLayoutManager.isBusy.mockReturnValue(false);
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      (console.warn as jest.Mock).mockRestore();
+    });
+
+    it("should resolve immediately if layoutManager is not busy", async () => {
+      // Given/When
+      mockLayoutManager.isBusy.mockReturnValue(false);
+
+      const { result } = renderTest({ mockLayoutManager, mockUserProfile });
+
+      await act(async () => {
+        await result.current.childMounted;
+      });
+
+      // Then
+      expect(mockLayoutManager.isBusy).toHaveBeenCalled();
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
+
+    it("should poll until layoutManager is not busy", async () => {
+      // Given/When
+      const busyCount = 3;
+      mockBusyTimes(busyCount);
+
+      const { result } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(busyCount * BUSY_POLLING_INTERVAL_MS);
+        await result.current.childMounted;
+      });
+
+      // Then
+      expect(mockLayoutManager.isBusy).toHaveBeenCalledTimes(4);
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
+
+    it("should timeout after 5 seconds, log warning and continue as normal", async () => {
+      mockLayoutManager.isBusy.mockReturnValue(true); // Always busy
+
+      const { result } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(BUSY_POLLING_TIMEOUT_MS + 100);
+        await result.current.childMounted;
+      });
+
+      expect(console.warn).toHaveBeenCalledWith(
+        `CurrentLayoutProvider: timeout after ${BUSY_POLLING_TIMEOUT_MS}ms, continuing anyway`,
+      );
+      expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
   });
 });
