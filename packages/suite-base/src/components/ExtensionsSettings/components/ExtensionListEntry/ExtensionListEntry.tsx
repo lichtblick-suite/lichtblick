@@ -20,7 +20,7 @@ export default function ExtensionListEntry({
   entry: { id, description, name, publisher, version },
   searchText,
   onClick,
-}: Props): React.JSX.Element {
+}: Readonly<Props>): React.JSX.Element {
   const { classes } = useStyles();
   return (
     <ListItem disablePadding key={id} data-testid="extension-list-entry">

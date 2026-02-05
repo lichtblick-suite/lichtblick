@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-
 import { List, ListItem, ListItemText, Typography } from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useTranslation } from "react-i18next";
 
 import { Immutable } from "@lichtblick/suite";
@@ -11,6 +11,22 @@ import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCat
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 
 import ExtensionListEntry from "../ExtensionListEntry/ExtensionListEntry";
+
+// New Table Component
+
+const columns: GridColDef[] = [
+  { field: "name", headerName: "Name", flex: 1 },
+  { field: "version", headerName: "Version", width: 100 },
+  { field: "publisher", headerName: "Publisher", flex: 1 },
+  { field: "description", headerName: "Description", flex: 2 },
+];
+
+const paginationModel = {
+  pageSize: 5,
+  page: 0,
+};
+
+// End of New Table Component
 
 export function displayNameForNamespace(namespace: string): string {
   if (namespace === "org") {
@@ -42,7 +58,7 @@ export default function ExtensionList({
   entries,
   filterText,
   selectExtension,
-}: ExtensionListProps): React.JSX.Element {
+}: Readonly<ExtensionListProps>): React.JSX.Element {
   const { t } = useTranslation("extensionsSettings");
   const installedExtensions = useExtensionCatalog((state) => state.installedExtensions);
 
@@ -54,22 +70,31 @@ export default function ExtensionList({
     }
     return (
       <>
-        {entries.map((entry) => {
-          const isInstalled = installedExtensions
-            ? installedExtensions.some((installed) => installed.id === entry.id)
-            : false;
+        <DataGrid
+          rows={entries}
+          columns={columns}
+          initialState={{ pagination: { paginationModel } }}
+          pageSizeOptions={[5, 10]}
+          checkboxSelection
+        />
+        <>
+          {entries.map((entry) => {
+            const isInstalled = installedExtensions
+              ? installedExtensions.some((installed) => installed.id === entry.id)
+              : false;
 
-          return (
-            <ExtensionListEntry
-              key={entry.id}
-              entry={entry}
-              onClick={() => {
-                selectExtension({ installed: isInstalled, entry });
-              }}
-              searchText={filterText}
-            />
-          );
-        })}
+            return (
+              <ExtensionListEntry
+                key={entry.id}
+                entry={entry}
+                onClick={() => {
+                  selectExtension({ installed: isInstalled, entry });
+                }}
+                searchText={filterText}
+              />
+            );
+          })}
+        </>
       </>
     );
   };
