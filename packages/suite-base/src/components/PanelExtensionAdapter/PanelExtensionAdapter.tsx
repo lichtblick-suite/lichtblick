@@ -65,6 +65,8 @@ import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext } from "./types";
 import { useSharedPanelState } from "./useSharedPanelState";
 
+import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
+
 const log = Logger.getLogger(__filename);
 
 type VersionedPanelConfig = Record<string, unknown> & { [VERSION_CONFIG_KEY]: number };
@@ -142,6 +144,7 @@ function PanelExtensionAdapter(
   const [panelId] = useState(() => uuid());
   const isMounted = useSynchronousMountedState();
   const [error, setError] = useState<Error | undefined>();
+  const [forceConversion, setForceConversion] = useState(new Set<string>);
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
   const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
 
@@ -254,6 +257,7 @@ function PanelExtensionAdapter(
       sortedServices,
       subscriptions: localSubscriptions,
       watchedFields,
+      forceConversion,
       config: initialState.current,
     });
 
@@ -265,6 +269,9 @@ function PanelExtensionAdapter(
       setSlowRender(true);
       return;
     }
+
+    // Clear any conversions that were forced.
+    forceConversion.clear();
 
     setSlowRender(false);
     const resumeFrame = pauseFrame(panelId);
@@ -306,6 +313,7 @@ function PanelExtensionAdapter(
     sortedServices,
     watchedFields,
     initialState,
+    forceConversion,
   ]);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
@@ -313,6 +321,8 @@ function PanelExtensionAdapter(
   const extensionsSettings = useExtensionCatalog(getExtensionPanelSettings);
 
   type PartialPanelExtensionContext = Omit<BuiltinPanelExtensionContext, "panelElement">;
+
+  const messagePipelineState = useMessagePipelineGetter();
 
   const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
     const layout: PanelExtensionContext["layout"] = {
@@ -346,8 +356,19 @@ function PanelExtensionAdapter(
       saveConfig(
         produce<{ topics: Record<string, unknown> }>((draft) => {
           const [category, topicName] = path;
+
           if (category === "topics" && topicName != undefined) {
-            extensionsSettings[panelName]?.[topicName]?.handler(action, draft.topics[topicName]);
+            const topicToSchemaNameMap = getTopicToSchemaNameMap(messagePipelineState());
+            const schemaName = topicToSchemaNameMap[topicName];
+
+            if (schemaName == undefined) {
+              return;
+            }
+
+            extensionsSettings[panelName]?.[schemaName]?.handler(action, draft.topics[topicName]);
+            setForceConversion((_old) => {
+              return new Set([ topicName ]);
+            })
           }
         }),
       );
