@@ -40,9 +40,13 @@ describe("SampleNuscenesDataSourceFactory", () => {
   }
 
   it("should create a IterablePlayer with the sample nuscenes data source", () => {
+    // Given
     const { args } = setup();
+
+    // When
     const player = factory.initialize(args);
 
+    // Then
     expect(WorkerSerializedIterableSource).toHaveBeenCalledWith({
       initWorker: expect.any(Function),
       initArgs: { url: expect.any(String) },
@@ -61,9 +65,13 @@ describe("SampleNuscenesDataSourceFactory", () => {
   });
 
   it("should use the correct sample nuscenes data source URL", () => {
+    // Given
     const { args } = setup();
+
+    // When
     factory.initialize(args);
 
+    // Then
     expect(WorkerSerializedIterableSource).toHaveBeenCalledWith(
       expect.objectContaining({
         initArgs: {
@@ -74,6 +82,7 @@ describe("SampleNuscenesDataSourceFactory", () => {
   });
 
   it("should have correct factory properties", () => {
+    //Given / When / Then
     expect(factory.id).toBe(SAMPLE_NUSCENES_DATA_SOURCE_ID);
     expect(factory.type).toBe(SAMPLE_NUSCENES_DATA_SOURCE_TYPE);
     expect(factory.displayName).toBe(SAMPLE_NUSCENES_DATA_SOURCE_DISPLAY_NAME);
