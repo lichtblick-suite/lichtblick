@@ -61,6 +61,7 @@ import BroadcastManager from "@lichtblick/suite-base/util/broadcast/BroadcastMan
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import { RepeatAdapter } from "./RepeatAdapter";
 import Scrubber from "./Scrubber";
+import SliderOverlay from "@lichtblick/suite-base/components/PlaybackControls/SliderOverlay/SliderOverlay";
 
 const selectPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
@@ -164,7 +165,7 @@ export default function PlaybackControls({
       <KeyListener global keyDownHandlers={keyDownHandlers} />
       <div className={classes.root}>
         <div className={classes.scrubberWrapper}>
-          <Scrubber onSeek={seek} />
+          <Scrubber onSeek={seek} toggleTimeSlicerModal={toggleTimeSlicerModal} />
         </div>
         <Stack direction="row" alignItems="center" flex={1} gap={1}>
           <Stack direction="row" alignItems="center" flex={1} gap={0.5}>

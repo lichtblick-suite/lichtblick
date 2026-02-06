@@ -29,8 +29,8 @@ export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.
   const { open, onClose, startTime, endTime } = props;
   const { classes } = useStyles();
 
-  const [fromMark, setFromMark] = useState<string>();
-  const [toMark, setToMark] = useState<string>();
+  const [fromMark, setFromMark] = useState<string>("");
+  const [toMark, setToMark] = useState<string>("");
   const startMark = usePlayerMarksStore((state) => state.startMark);
   const endMark = usePlayerMarksStore((state) => state.endMark);
 
