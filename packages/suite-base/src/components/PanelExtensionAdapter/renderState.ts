@@ -388,7 +388,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       updateRenderStateField("appSettings", appSettings, renderState.appSettings, shouldRender);
     }
 
-    if (forceConversion?.size) {
+    if (forceConversion.size > 0) {
       const postProcessedFrame: MessageEvent[] = [];
 
       for (const topic of forceConversion) {
@@ -396,7 +396,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
 
         if (messageEvent == undefined) {
           continue;
-        };
+        }
 
         convertMessage(
           { ...messageEvent, topicConfig: configTopics[topic] },
