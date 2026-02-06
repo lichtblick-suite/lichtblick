@@ -72,3 +72,9 @@ export type PanelLogsProps = {
   initialHeight?: number;
   onHeightChange?: (height: number) => void;
 };
+
+export enum OperationStatus {
+  IDLE = "idle",
+  INSTALLING = "installing",
+  UNINSTALLING = "uninstalling",
+}

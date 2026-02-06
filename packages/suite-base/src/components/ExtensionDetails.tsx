@@ -16,6 +16,7 @@ import { makeStyles } from "tss-react/mui";
 import { Immutable } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextContent from "@lichtblick/suite-base/components/TextContent";
+import { OperationStatus } from "@lichtblick/suite-base/components/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import {
@@ -41,12 +42,6 @@ const useStyles = makeStyles()((theme) => ({
     minWidth: 100,
   },
 }));
-
-enum OperationStatus {
-  IDLE = "idle",
-  INSTALLING = "installing",
-  UNINSTALLING = "uninstalling",
-}
 
 /**
  * ExtensionDetails component displays detailed information about a specific extension.
