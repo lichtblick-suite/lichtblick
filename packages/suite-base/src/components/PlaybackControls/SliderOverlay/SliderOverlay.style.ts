@@ -22,6 +22,7 @@ export const useStyles = makeStyles()((theme) => ({
     },
     "& .MuiSlider-track": {
       backgroundColor: theme.palette.primary.main,
+      // TO DO For some reason this is getting inherited to the time slider in the scrubber, where it causes issues. Need to fix
       opacity: 0.3,
       border: 0,
       height: 22,

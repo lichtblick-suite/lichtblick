@@ -12,7 +12,6 @@ export const useStyles = makeStyles()((theme) => ({
     backgroundColor: theme.palette.background.paper,
     borderTop: `1px solid ${theme.palette.divider}`,
     zIndex: 100000,
-    overflowX: "auto",
   },
   scrubberWrapper: {
     position: "sticky",

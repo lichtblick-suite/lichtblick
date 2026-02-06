@@ -41,7 +41,7 @@ export default function SliderOverlay(): React.JSX.Element {
       }
 
       const duration = toSec(subtractTimes(endTime, startTime));
-      const [start, end] = newValue;
+      const [start = 0, end = 100] = newValue;
 
       const startMarkTime = addTimes(startTime, fromSec((start / 100) * duration));
       const endMarkTime = addTimes(startTime, fromSec((end / 100) * duration));

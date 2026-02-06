@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { Time, toRFC3339String } from "@lichtblick/rostime";
+import ResetTimeRangeButton from "@lichtblick/suite-base/components/PlaybackControls/TimeSlicerModal/ResetTimeRangeButton";
 import { updateAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import { usePlayerMarksStore } from "@lichtblick/suite-base/util/usePlayerMarksStore";
 
@@ -28,6 +29,7 @@ type TimeSlicerModalProps = {
 export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.Element {
   const { open, onClose, startTime, endTime } = props;
   const { classes } = useStyles();
+  const { setStartMark, setEndMark } = usePlayerMarksStore();
 
   const [fromMark, setFromMark] = useState<string>("");
   const [toMark, setToMark] = useState<string>("");
@@ -44,10 +46,7 @@ export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.
   }, [startMark, endMark, startTime, endTime]);
 
   const handleSlice = () => {
-    // eslint-disable-next-line no-restricted-syntax
-    console.log("Slicing range from", fromMark, "to", toMark);
-
-    // Update URL with marks
+    // Update URL with marks - This probably should be done on useAppUrlState
     const newStateUrl = updateAppURLState(new URL(window.location.href), {
       from: fromMark,
       to: toMark,
@@ -76,21 +75,30 @@ export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.
       <DialogContent className={classes.dialogContent}>
         <Stack spacing={2.5}>
           <Stack spacing={2}>
-            <TextField
-              label="Start Time"
-              value={fromMark}
-              onChange={(event) => {
-                setFromMark(event.target.value);
-              }}
-              fullWidth
-            />
-            <TextField
-              label="End Time"
-              value={toMark}
-              onChange={(event) => {
-                setToMark(event.target.value);
-              }}
-            />
+            <Stack spacing={0.5}>
+              <ResetTimeRangeButton
+                label="Start time"
+                time={startTime}
+                setStartMark={setStartMark}
+              />
+              <TextField
+                value={fromMark}
+                onChange={(event) => {
+                  setFromMark(event.target.value);
+                }}
+                fullWidth
+              />
+            </Stack>
+            <Stack spacing={0.5}>
+              <ResetTimeRangeButton label="End time" time={endTime} setEndMark={setEndMark} />
+              <TextField
+                value={toMark}
+                onChange={(event) => {
+                  setToMark(event.target.value);
+                }}
+                fullWidth
+              />
+            </Stack>
           </Stack>
         </Stack>
       </DialogContent>
