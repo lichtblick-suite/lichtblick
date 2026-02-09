@@ -61,6 +61,8 @@ export default function ExtensionList({
   const analytics = useAnalytics();
   const [operatingExtensionId, setOperatingExtensionId] = useState<string | undefined>();
   const [operationStatus, setOperationStatus] = useState<OperationStatus>(OperationStatus.IDLE);
+  const [selectedExtensionIds, setSelectedExtensionIds] = useState<string[]>([]);
+  const [isBulkOperating, setIsBulkOperating] = useState(false);
 
   const handleInstall = useCallback(
     async (extension: Immutable<ExtensionMarketplaceDetail>) => {
@@ -120,6 +122,118 @@ export default function ExtensionList({
     },
     [analytics, enqueueSnackbar, uninstallExtension],
   );
+
+  const handleBulkInstall = useCallback(async () => {
+    if (!isDesktopApp()) {
+      enqueueSnackbar("Download the desktop app to use marketplace extensions.", {
+        variant: "error",
+      });
+      return;
+    }
+
+    const selectedExtensions = entries.filter((entry) => selectedExtensionIds.includes(entry.id));
+    const extensionsToInstall = selectedExtensions.filter((ext) => {
+      const isInstalled =
+        installedExtensions?.some((installed) => installed.id === ext.id) ?? false;
+      return !isInstalled && ext.foxe != undefined;
+    });
+
+    if (extensionsToInstall.length === 0) {
+      enqueueSnackbar("No extensions to install from selection", { variant: "info" });
+      return;
+    }
+
+    setIsBulkOperating(true);
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const extension of extensionsToInstall) {
+      try {
+        const url = extension.foxe;
+        if (url == undefined) {
+          failCount++;
+          continue;
+        }
+
+        const extensionBuffer = await downloadExtension(url);
+        await installExtensions("local", [{ buffer: extensionBuffer }]);
+        successCount++;
+        await analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
+      } catch (error) {
+        console.error("Failed to install extension:", error);
+        failCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      enqueueSnackbar(`${successCount} extension(s) installed successfully`, {
+        variant: "success",
+      });
+    }
+    if (failCount > 0) {
+      enqueueSnackbar(`${failCount} extension(s) failed to install`, { variant: "error" });
+    }
+
+    setIsBulkOperating(false);
+    setSelectedExtensionIds([]);
+  }, [
+    analytics,
+    downloadExtension,
+    enqueueSnackbar,
+    entries,
+    installExtensions,
+    installedExtensions,
+    selectedExtensionIds,
+  ]);
+
+  const handleBulkUninstall = useCallback(async () => {
+    const selectedExtensions = entries.filter((entry) => selectedExtensionIds.includes(entry.id));
+    const extensionsToUninstall = selectedExtensions.filter((ext) => {
+      return installedExtensions?.some((installed) => installed.id === ext.id) ?? false;
+    });
+
+    if (extensionsToUninstall.length === 0) {
+      enqueueSnackbar("No installed extensions to uninstall from selection", { variant: "info" });
+      return;
+    }
+
+    setIsBulkOperating(true);
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const extension of extensionsToUninstall) {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        await uninstallExtension(extension.namespace ?? "local", extension.id);
+        successCount++;
+        await analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
+      } catch (error) {
+        console.error("Failed to uninstall extension:", error);
+        failCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      enqueueSnackbar(`${successCount} extension(s) uninstalled successfully`, {
+        variant: "success",
+      });
+    }
+    if (failCount > 0) {
+      enqueueSnackbar(`${failCount} extension(s) failed to uninstall`, { variant: "error" });
+    }
+
+    setIsBulkOperating(false);
+    setSelectedExtensionIds([]);
+  }, [
+    analytics,
+    enqueueSnackbar,
+    entries,
+    installedExtensions,
+    selectedExtensionIds,
+    uninstallExtension,
+  ]);
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Name", flex: 1, sortable: true },
@@ -185,25 +299,72 @@ export default function ExtensionList({
     } else if (entries.length === 0) {
       return generatePlaceholderList(t("noExtensionsAvailable"));
     }
+
+    const selectedExtensions = entries.filter((entry) => selectedExtensionIds.includes(entry.id));
+    const selectedInstalled = selectedExtensions.filter(
+      (ext) => installedExtensions?.some((installed) => installed.id === ext.id) ?? false,
+    );
+    const selectedNotInstalled = selectedExtensions.filter(
+      (ext) =>
+        !(installedExtensions?.some((installed) => installed.id === ext.id) ?? false) &&
+        ext.foxe != undefined,
+    );
+
     return (
-      <div style={{ width: "100%" }}>
-        <DataGrid
-          rows={entries}
-          columns={columns}
-          initialState={{ pagination: { paginationModel } }}
-          pageSizeOptions={[5, 10, 20]}
-          disableRowSelectionOnClick
-          style={{ cursor: "pointer" }}
-          onRowClick={(params) => {
-            const extension = params.row as ExtensionMarketplaceDetail;
-            const isInstalled = installedExtensions
-              ? installedExtensions.some((installed) => installed.id === extension.id)
-              : false;
-            selectExtension({ installed: isInstalled, entry: extension });
-          }}
-          autoHeight
-        />
-      </div>
+      <Stack gap={1}>
+        {selectedExtensionIds.length > 0 && (
+          <Stack direction="row" gap={1} paddingX={2}>
+            <Typography variant="body2" color="text.secondary" alignSelf="center">
+              {selectedExtensionIds.length} selected
+            </Typography>
+            {selectedNotInstalled.length > 0 && (
+              <Button
+                size="small"
+                color="primary"
+                variant="contained"
+                onClick={handleBulkInstall}
+                disabled={isBulkOperating}
+              >
+                {isBulkOperating ? "Installing..." : `Install ${selectedNotInstalled.length}`}
+              </Button>
+            )}
+            {selectedInstalled.length > 0 && (
+              <Button
+                size="small"
+                color="inherit"
+                variant="outlined"
+                onClick={handleBulkUninstall}
+                disabled={isBulkOperating}
+              >
+                {isBulkOperating ? "Uninstalling..." : `Uninstall ${selectedInstalled.length}`}
+              </Button>
+            )}
+          </Stack>
+        )}
+        <div style={{ width: "100%" }}>
+          <DataGrid
+            rows={entries}
+            columns={columns}
+            initialState={{ pagination: { paginationModel } }}
+            pageSizeOptions={[5, 10, 20]}
+            checkboxSelection
+            disableRowSelectionOnClick
+            style={{ cursor: "pointer" }}
+            onRowClick={(params) => {
+              const extension = params.row as ExtensionMarketplaceDetail;
+              const isInstalled = installedExtensions
+                ? installedExtensions.some((installed) => installed.id === extension.id)
+                : false;
+              selectExtension({ installed: isInstalled, entry: extension });
+            }}
+            onRowSelectionModelChange={(newSelection) => {
+              setSelectedExtensionIds(newSelection as string[]);
+            }}
+            rowSelectionModel={selectedExtensionIds}
+            autoHeight
+          />
+        </div>
+      </Stack>
     );
   };
 
