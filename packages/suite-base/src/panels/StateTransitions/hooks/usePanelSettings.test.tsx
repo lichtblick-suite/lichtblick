@@ -44,6 +44,7 @@ interface IUsePanelSettingsSetup<T> {
 }
 
 const buildPath = (): StateTransitionPath => ({
+  color: BasicBuilder.string(),
   label: BasicBuilder.string(),
   value: BasicBuilder.string(),
   timestampMethod: BasicBuilder.sample<TimestampMethod>(["receiveTime", "headerStamp"]),

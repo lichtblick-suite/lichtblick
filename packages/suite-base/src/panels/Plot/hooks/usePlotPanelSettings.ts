@@ -22,6 +22,7 @@ import { buildSettingsTree } from "@lichtblick/suite-base/panels/Plot/utils/buil
 import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import { lineColors } from "@lichtblick/suite-base/util/plotColors";
 
 import { PlotConfig, PlotLegendDisplay } from "../utils/config";
 
@@ -58,7 +59,11 @@ export function handleAddSeriesAction({ draft }: HandleAction): void {
   if (draft.paths.length === 0) {
     draft.paths.push({ ...DEFAULT_PLOT_PATH });
   }
-  draft.paths.push({ ...DEFAULT_PLOT_PATH });
+  const newIndex = draft.paths.length;
+  draft.paths.push({
+    ...DEFAULT_PLOT_PATH,
+    color: lineColors[newIndex % lineColors.length],
+  });
 }
 
 export function handleDeleteSeriesAction({ draft, index }: HandleDeleteSeriesAction): void {
