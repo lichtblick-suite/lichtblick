@@ -68,6 +68,7 @@ const SelectVisibilityFilterOptions: (t: TFunction<"settingsEditor">) => {
 ];
 function showVisibleFilter(child: Immutable<SettingsTreeNode>): boolean {
   // want to show children with undefined visibility
+
   return child.visible !== false;
 }
 function showInvisibleFilter(child: Immutable<SettingsTreeNode>): boolean {
