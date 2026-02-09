@@ -293,8 +293,8 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
     ? renderSettingsStatusButton(settings)
     : undefined;
 
-  // Determine the item to render in the icon slot
-  // If there's an error we render the error dot, otherwise we render the provided IconComponent
+  const isDragHandleIcon = settings.icon === "DragHandle" && isReorderable;
+
   const iconItem = useMemo(() => {
     if (props.settings?.error) {
       return (
@@ -317,7 +317,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
       );
     }
 
-    if (IconComponent) {
+    if (IconComponent && !isDragHandleIcon) {
       return (
         <IconComponent
           fontSize="small"
@@ -331,7 +331,23 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
     }
 
     return <></>;
-  }, [IconComponent, classes.errorTooltip, props.settings?.error, theme]);
+  }, [IconComponent, classes.errorTooltip, props.settings?.error, theme, isDragHandleIcon]);
+
+  const dragHandleIcon = useMemo(() => {
+    if (isDragHandleIcon && IconComponent) {
+      return (
+        <IconComponent
+          fontSize="small"
+          color="inherit"
+          style={{
+            marginRight: theme.spacing(0.5),
+            opacity: 0.8,
+          }}
+        />
+      );
+    }
+    return undefined;
+  }, [IconComponent, isDragHandleIcon, theme]);
 
   return (
     <>
@@ -365,6 +381,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
           onClick={toggleOpen}
           data-testid={`settings__nodeHeaderToggle__${props.path.join("-")}`}
         >
+          {dragHandleIcon}
           {hasProperties && <ExpansionArrow expanded={state.open} />}
           {iconItem}
           {state.editing ? (
@@ -401,7 +418,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
           ) : (
             <Typography
               noWrap={true}
-              flex="auto"
+              flex="1 1 auto"
               variant="subtitle2"
               fontWeight={indent < 2 ? 600 : 400}
               color={visible ? "text.primary" : "text.disabled"}
