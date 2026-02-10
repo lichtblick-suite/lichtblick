@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import { Time, toRFC3339String } from "@lichtblick/rostime";
+import { Time, toNanoSec } from "@lichtblick/rostime";
 import ResetTimeRangeButton from "@lichtblick/suite-base/components/PlaybackControls/TimeSlicerModal/ResetTimeRangeButton";
 import { updateAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import { usePlayerMarksStore } from "@lichtblick/suite-base/util/usePlayerMarksStore";
@@ -41,15 +41,15 @@ export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.
   };
 
   useEffect(() => {
-    setFromMark(startMark ? toRFC3339String(startMark) : toRFC3339String(startTime!));
-    setToMark(endMark ? toRFC3339String(endMark) : toRFC3339String(endTime!));
+    setFromMark(startMark ? toNanoSec(startMark).toString() : toNanoSec(startTime!).toString());
+    setToMark(endMark ? toNanoSec(endMark).toString() : toNanoSec(endTime!).toString());
   }, [startMark, endMark, startTime, endTime]);
 
   const handleSlice = () => {
     // Update URL with marks - This probably should be done on useAppUrlState
     const newStateUrl = updateAppURLState(new URL(window.location.href), {
-      from: fromMark,
-      to: toMark,
+      st: fromMark,
+      et: toMark,
     });
     window.history.replaceState(undefined, "", decodeURIComponent(newStateUrl.href));
 
