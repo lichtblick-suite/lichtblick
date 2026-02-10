@@ -125,25 +125,28 @@ describe("handleUpdateAction", () => {
 });
 
 describe("handleAddSeriesAction", () => {
-  it.each([{ paths: PlotBuilder.paths() }, { paths: [] }])("should add series with explicit color", ({ paths }) => {
-    const initialConfig = PlotBuilder.config({ paths });
-    const input: HandleAction = {
-      draft: _.cloneDeep(initialConfig),
-    };
-    const initialLength = paths.length;
+  it.each([{ paths: PlotBuilder.paths() }, { paths: [] }])(
+    "should add series with explicit color",
+    ({ paths }) => {
+      const initialConfig = PlotBuilder.config({ paths });
+      const input: HandleAction = {
+        draft: _.cloneDeep(initialConfig),
+      };
+      const initialLength = paths.length;
 
-    handleAddSeriesAction(input);
+      handleAddSeriesAction(input);
 
-    // Verify a new series was added
-    expect(input.draft.paths.length).toBe(initialLength === 0 ? 2 : initialLength + 1);
+      // Verify a new series was added
+      expect(input.draft.paths.length).toBe(initialLength === 0 ? 2 : initialLength + 1);
 
-    // Verify the added series has the expected structure with explicit color
-    const addedSeries = input.draft.paths[input.draft.paths.length - 1];
-    expect(addedSeries).toMatchObject({
-      ...DEFAULT_PLOT_PATH,
-      color: expect.any(String),
-    });
-  });
+      // Verify the added series has the expected structure with explicit color
+      const addedSeries = input.draft.paths[input.draft.paths.length - 1];
+      expect(addedSeries).toMatchObject({
+        ...DEFAULT_PLOT_PATH,
+        color: expect.any(String),
+      });
+    },
+  );
 });
 
 describe("handleDeleteSeriesAction", () => {
