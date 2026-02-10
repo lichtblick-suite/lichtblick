@@ -1,4 +1,4 @@
 #!/bin/sh
 
-yarn run lint
+yarn run lint-staged
 yarn run build:packages

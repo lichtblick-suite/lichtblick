@@ -61,6 +61,12 @@
     "storybook:build": "storybook build --config-dir .storybook --webpack-stats-json",
     "version:all": "yarn workspaces foreach version"
   },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
   "workspaces": {
     "packages": [
       "desktop",
