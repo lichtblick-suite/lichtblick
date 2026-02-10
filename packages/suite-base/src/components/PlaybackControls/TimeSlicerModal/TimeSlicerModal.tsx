@@ -46,6 +46,8 @@ export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.
   }, [startMark, endMark, startTime, endTime]);
 
   const handleSlice = () => {
+    document.cookie = `mcap_st=${fromMark};path=/`;
+    document.cookie = `mcap_et=${toMark};path=/`;
     // Update URL with marks - This probably should be done on useAppUrlState
     const newStateUrl = updateAppURLState(new URL(window.location.href), {
       st: fromMark,
