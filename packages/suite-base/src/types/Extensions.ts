@@ -24,4 +24,5 @@ export type ExtensionInfo = {
   readme?: string;
   changelog?: string;
   externalId?: string;
+  inUse?: boolean;
 };

@@ -10,6 +10,7 @@ import Log from "@lichtblick/log";
 import { UseExtensionSettingsHook } from "@lichtblick/suite-base/components/ExtensionsSettings/types";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { useExtensionMarketplace } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
+import { useExtensionUsage } from "@lichtblick/suite-base/hooks/useExtensionUsage";
 
 const log = Log.getLogger(__filename);
 
@@ -44,6 +45,8 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
     }));
   }, [groupedMarketplaceEntries, debouncedFilterText]);
 
+  const { messageConverterExtensionsInUse } = useExtensionUsage();
+
   const installedEntries = useMemo(() => {
     return (installed ?? []).map((entry) => {
       const marketplaceEntry = marketplaceMap[entry.id];
@@ -66,9 +69,10 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
         qualifiedName: entry.qualifiedName,
         readme: entry.readme,
         changelog: entry.changelog,
+        inUse: messageConverterExtensionsInUse.has(entry.id),
       };
     });
-  }, [installed, marketplaceMap]);
+  }, [installed, marketplaceMap, messageConverterExtensionsInUse]);
 
   const namespacedEntries = useMemo(
     () => _.groupBy(installedEntries, (entry) => entry.namespace),

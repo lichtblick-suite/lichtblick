@@ -17,7 +17,7 @@ type Props = {
 };
 
 export default function ExtensionListEntry({
-  entry: { id, description, name, publisher, version },
+  entry: { id, description, name, publisher, version, inUse },
   searchText,
   onClick,
 }: Props): React.JSX.Element {
@@ -45,6 +45,11 @@ export default function ExtensionListEntry({
               <Typography color="text.primary" variant="body2">
                 {publisher}
               </Typography>
+              {(inUse ?? false) && (
+                <Typography variant="caption" color="success.main" fontWeight={600}>
+                  In Use
+                </Typography>
+              )}
             </Stack>
           }
         />
