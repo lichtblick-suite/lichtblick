@@ -54,6 +54,7 @@ export default function TimeSlicerModal(props: TimeSlicerModalProps): React.JSX.
       et: toMark,
     });
     window.history.replaceState(undefined, "", decodeURIComponent(newStateUrl.href));
+    location.reload();
 
     onClose();
   };
