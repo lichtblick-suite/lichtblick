@@ -399,3 +399,63 @@ describe("NodeEditor drag and drop functionality", () => {
     });
   });
 });
+
+describe("NodeEditor inline actions", () => {
+  function setup(propsOverride: Partial<NodeEditorProps> = {}) {
+    const props: Readonly<NodeEditorProps> = {
+      actionHandler: jest.fn(),
+      path: BasicBuilder.strings({ count: 2 }),
+      settings: {
+        label: BasicBuilder.string(),
+      },
+      focusedPath: [],
+      ...propsOverride,
+    };
+
+    const ui: React.ReactElement = (
+      <DndProvider backend={HTML5Backend}>
+        <NodeEditor {...props} />
+      </DndProvider>
+    );
+
+    return {
+      ...render(ui),
+      props,
+    };
+  }
+
+  describe("inline action with icon", () => {
+    it("should call actionHandler with perform-node-action when inline icon button is clicked", () => {
+      // Given: A node with an inline action that has an icon
+      const actionId = BasicBuilder.string();
+      const actionLabel = BasicBuilder.string();
+      const path = BasicBuilder.strings({ count: 2 });
+
+      const { props, container } = setup({
+        path,
+        settings: {
+          label: BasicBuilder.string(),
+          actions: [
+            {
+              type: "action",
+              id: actionId,
+              label: actionLabel,
+              icon: "Delete",
+              display: "inline",
+            },
+          ],
+        },
+      });
+
+      // When: The inline icon button is clicked
+      const iconButton = container.querySelector('button[class*="actionButton"]')!;
+      fireEvent.click(iconButton);
+
+      // Then: The actionHandler should be called with perform-node-action
+      expect(props.actionHandler).toHaveBeenCalledWith({
+        action: "perform-node-action",
+        payload: { id: actionId, path },
+      });
+    });
+  });
+});
