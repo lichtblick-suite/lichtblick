@@ -30,3 +30,4 @@ test-results/*
 .sonar_lock
 .scannerwork
 eslint-report.json
+blob-report/report.zip
