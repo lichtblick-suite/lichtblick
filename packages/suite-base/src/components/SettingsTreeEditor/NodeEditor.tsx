@@ -82,6 +82,20 @@ const getSelectVisibilityFilterField = (t: TFunction<"settingsEditor">) =>
     options: SelectVisibilityFilterOptions(t),
   }) as const;
 
+export const handleDropNode = (
+  item: DragItem,
+  targetPath: readonly string[],
+  actionHandler: (action: SettingsTreeAction) => void,
+): void => {
+  actionHandler({
+    action: "reorder-node",
+    payload: {
+      path: item.path,
+      targetPath,
+    },
+  });
+};
+
 function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Element {
   const { actionHandler, defaultOpen = true, filter, focusedPath, settings = {} } = props;
   const [state, setState] = useImmer<NodeEditorState>({
@@ -131,13 +145,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
         );
       },
       drop: (item: DragItem, _monitor) => {
-        actionHandler({
-          action: "reorder-node",
-          payload: {
-            path: item.path,
-            targetPath: props.path,
-          },
-        });
+        handleDropNode(item, props.path, actionHandler);
       },
       collect: (monitor: DropTargetMonitor<DragItem, void>) => ({
         isOver: monitor.isOver(),
@@ -403,6 +411,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
                       className={classes.actionButton}
                       title="Rename"
                       data-node-function="edit-label"
+                      data-testid="check-icon-button"
                       color="primary"
                       onClick={(event) => {
                         event.stopPropagation();
