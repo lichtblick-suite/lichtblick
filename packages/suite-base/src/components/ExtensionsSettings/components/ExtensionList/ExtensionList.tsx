@@ -173,13 +173,13 @@ export default function ExtensionList({
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Name", flex: 1, sortable: true },
-    { field: "version", headerName: "Version", width: 100 },
-    { field: "publisher", headerName: "Publisher", flex: 1 },
+    { field: "version", headerName: "Version", flex: 0.5, sortable: true },
+    { field: "publisher", headerName: "Publisher", flex: 0.5, sortable: true },
     { field: "description", headerName: "Description", flex: 2 },
     {
       field: "actions",
       headerName: "Actions",
-      width: 130,
+      flex: 1,
       sortable: false,
       renderCell: (params: GridRenderCellParams) => {
         const extension = params.row as ExtensionMarketplaceDetail;
