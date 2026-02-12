@@ -6,6 +6,8 @@ import { useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { InstallButton } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionActionButton/InstallButton";
+import { UninstallButton } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionActionButton/UninstallButton";
 import {
   ExtensionListProps,
   paginationModel,
@@ -16,7 +18,6 @@ import {
 } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/utils";
 import { useExtensionOperations } from "@lichtblick/suite-base/components/ExtensionsSettings/hooks/useExtensionOperations";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { OperationStatus } from "@lichtblick/suite-base/components/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
@@ -102,44 +103,28 @@ export default function ExtensionList({
           ? installedExtensions.some((installed) => installed.id === extension.id)
           : false;
         const isExtensionOperating = isOperating(extension.id);
-        const canInstall = extension.foxe != undefined;
 
         if (isInstalled) {
           return (
-            <Button
-              size="small"
-              color="inherit"
-              variant="outlined"
-              onClick={async (event) => {
-                event.stopPropagation();
-                await handleUninstall(extension);
-              }}
-              disabled={isExtensionOperating}
-            >
-              {isExtensionOperating && operationStatus === OperationStatus.UNINSTALLING
-                ? "Uninstalling..."
-                : "Uninstall"}
-            </Button>
+            <UninstallButton
+              extension={extension}
+              onAction={handleUninstall}
+              isOperating={isExtensionOperating}
+              operationStatus={operationStatus}
+              stopPropagation
+            />
           );
-        } else if (canInstall) {
+        } else {
           return (
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              onClick={async (event) => {
-                event.stopPropagation();
-                await handleInstall(extension);
-              }}
-              disabled={isExtensionOperating}
-            >
-              {isExtensionOperating && operationStatus === OperationStatus.INSTALLING
-                ? "Installing..."
-                : "Install"}
-            </Button>
+            <InstallButton
+              extension={extension}
+              onAction={handleInstall}
+              isOperating={isExtensionOperating}
+              operationStatus={operationStatus}
+              stopPropagation
+            />
           );
         }
-        return undefined;
       },
     },
   ];

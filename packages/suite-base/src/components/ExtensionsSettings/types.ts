@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { ButtonProps } from "@mui/material";
 import { AsyncState } from "react-use/lib/useAsyncFn";
 
 import { Immutable } from "@lichtblick/suite";
@@ -53,4 +54,15 @@ export type UseExtensionOperationsReturnHook = {
   operationStatus: OperationStatus;
   operatingExtensionId: string | undefined;
   isOperating: (extensionId: string) => boolean;
+};
+
+export type ExtensionActionButtonProps = {
+  extension: Immutable<ExtensionMarketplaceDetail>;
+  onAction: (extension: Immutable<ExtensionMarketplaceDetail>) => Promise<void>;
+  isOperating: boolean;
+  operationStatus: OperationStatus;
+  className?: string;
+  stopPropagation?: boolean;
+  color?: ButtonProps["color"];
+  variant?: ButtonProps["variant"];
 };

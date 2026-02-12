@@ -12,6 +12,8 @@ import { useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 
 import { useStylesExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails.style";
+import { InstallButton } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionActionButton/InstallButton";
+import { UninstallButton } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionActionButton/UninstallButton";
 import { useExtensionOperations } from "@lichtblick/suite-base/components/ExtensionsSettings/hooks/useExtensionOperations";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextContent from "@lichtblick/suite-base/components/TextContent";
@@ -41,7 +43,6 @@ export function ExtensionDetails({
   const marketplace = useExtensionMarketplace();
   const readme = extension.readme;
   const changelog = extension.changelog;
-  const canInstall = extension.foxe != undefined;
 
   const { handleInstall, handleUninstall, operationStatus } = useExtensionOperations({
     onInstallSuccess: () => {
@@ -115,35 +116,26 @@ export function ExtensionDetails({
           </Typography>
         </Stack>
         {isInstalled ? (
-          <Button
-            className={classes.installButton}
-            size="small"
+          <UninstallButton
             key="uninstall"
+            className={classes.installButton}
+            extension={extension}
+            onAction={handleUninstall}
+            isOperating={operationStatus !== OperationStatus.IDLE}
+            operationStatus={operationStatus}
             color="inherit"
             variant="contained"
-            onClick={async () => {
-              await handleUninstall(extension);
-            }}
-            disabled={operationStatus !== OperationStatus.IDLE}
-          >
-            {operationStatus === OperationStatus.UNINSTALLING ? "Uninstalling..." : "Uninstall"}
-          </Button>
+          />
         ) : (
-          canInstall && (
-            <Button
-              className={classes.installButton}
-              size="small"
-              key="install"
-              color="inherit"
-              variant="contained"
-              onClick={async () => {
-                await handleInstall(extension);
-              }}
-              disabled={operationStatus !== OperationStatus.IDLE}
-            >
-              {operationStatus === OperationStatus.INSTALLING ? "Installing..." : "Install"}
-            </Button>
-          )
+          <InstallButton
+            key="install"
+            className={classes.installButton}
+            extension={extension}
+            onAction={handleInstall}
+            isOperating={operationStatus !== OperationStatus.IDLE}
+            operationStatus={operationStatus}
+            color="inherit"
+          />
         )}
       </Stack>
 
