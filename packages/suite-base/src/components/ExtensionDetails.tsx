@@ -11,37 +11,17 @@ import DOMPurify from "dompurify";
 import { useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
-import { makeStyles } from "tss-react/mui";
 
-import { Immutable } from "@lichtblick/suite";
+import { useStylesExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails.style";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextContent from "@lichtblick/suite-base/components/TextContent";
-import { OperationStatus } from "@lichtblick/suite-base/components/types";
+import { ExtensionDetailsProps, OperationStatus } from "@lichtblick/suite-base/components/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import {
-  ExtensionMarketplaceDetail,
-  useExtensionMarketplace,
-} from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
+import { useExtensionMarketplace } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import { isValidUrl } from "@lichtblick/suite-base/util/isValidURL";
-
-type Props = {
-  installed: boolean;
-  extension: Immutable<ExtensionMarketplaceDetail>;
-  onClose: () => void;
-};
-
-const useStyles = makeStyles()((theme) => ({
-  backButton: {
-    marginLeft: theme.spacing(-1.5),
-    marginBottom: theme.spacing(1),
-  },
-  installButton: {
-    minWidth: 100,
-  },
-}));
 
 /**
  * ExtensionDetails component displays detailed information about a specific extension.
@@ -57,8 +37,8 @@ export function ExtensionDetails({
   extension,
   onClose,
   installed,
-}: Readonly<Props>): React.ReactElement {
-  const { classes } = useStyles();
+}: Readonly<ExtensionDetailsProps>): React.ReactElement {
+  const { classes } = useStylesExtensionDetails();
   const [isInstalled, setIsInstalled] = useState(installed);
   const [operationStatus, setOperationStatus] = useState<OperationStatus>(OperationStatus.IDLE);
   const [activeTab, setActiveTab] = useState<number>(0);

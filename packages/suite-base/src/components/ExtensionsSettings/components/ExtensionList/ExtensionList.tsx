@@ -1,13 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-import { Button, List, ListItem, ListItemText, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Immutable } from "@lichtblick/suite";
-import { FocusedExtension } from "@lichtblick/suite-base/components/ExtensionsSettings/types";
+import {
+  ExtensionListProps,
+  paginationModel,
+} from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/types";
+import {
+  displayNameForNamespace,
+  generatePlaceholderList,
+} from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/utils";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { OperationStatus } from "@lichtblick/suite-base/components/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
@@ -15,36 +22,6 @@ import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCat
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
-
-const paginationModel = {
-  pageSize: 10,
-  page: 0,
-};
-
-export function displayNameForNamespace(namespace: string): string {
-  if (namespace === "org") {
-    return "Organization";
-  } else {
-    return namespace;
-  }
-}
-
-export function generatePlaceholderList(message?: string): React.ReactElement {
-  return (
-    <List>
-      <ListItem>
-        <ListItemText primary={message} />
-      </ListItem>
-    </List>
-  );
-}
-
-type ExtensionListProps = {
-  namespace: string;
-  entries: Immutable<ExtensionMarketplaceDetail>[];
-  filterText: string;
-  selectExtension: (newFocusedExtension: FocusedExtension) => void;
-};
 
 export default function ExtensionList({
   namespace,

@@ -3,7 +3,9 @@
 
 import { ErrorInfo } from "react";
 
+import { Immutable } from "@lichtblick/suite";
 import { MessagePathDropConfig } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 export type GenericPanelProps<Config> = {
@@ -78,3 +80,10 @@ export enum OperationStatus {
   INSTALLING = "installing",
   UNINSTALLING = "uninstalling",
 }
+
+/** ExtensionDetail */
+export type ExtensionDetailsProps = {
+  installed: boolean;
+  extension: Immutable<ExtensionMarketplaceDetail>;
+  onClose: () => void;
+};

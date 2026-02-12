@@ -3,24 +3,17 @@
 
 import { ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
 
-import { Immutable } from "@lichtblick/suite";
+import { ExtensionListEntryProps } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionListEntry/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextHighlight from "@lichtblick/suite-base/components/TextHighlight";
-import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 
 import { useStyles } from "./ExtensionListEntry.style";
-
-type Props = {
-  entry: Immutable<ExtensionMarketplaceDetail>;
-  onClick: () => void;
-  searchText: string;
-};
 
 export default function ExtensionListEntry({
   entry: { id, description, name, publisher, version },
   searchText,
   onClick,
-}: Readonly<Props>): React.JSX.Element {
+}: Readonly<ExtensionListEntryProps>): React.JSX.Element {
   const { classes } = useStyles();
   return (
     <ListItem disablePadding key={id} data-testid="extension-list-entry">
