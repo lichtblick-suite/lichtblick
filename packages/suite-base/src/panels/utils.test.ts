@@ -316,10 +316,9 @@ describe("handleReorderSeriesAction", () => {
     const patt1Value = BasicBuilder.string();
     const patt2Value = BasicBuilder.string();
     const patt3Value = BasicBuilder.string();
-
+    type PathWithColor = { value: string; color: string };
     it("should preserve existing colors when reordering", () => {
       // Given: A draft with paths that already have explicit colors
-      type PathWithColor = { value: string; color: string };
       const existingColor1 = "#FF0000";
       const existingColor2 = "#00FF00";
       const existingColor3 = "#0000FF";

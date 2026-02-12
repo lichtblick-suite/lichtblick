@@ -38,6 +38,30 @@ const changeVisibilityFilter = (visibility: SelectVisibilityFilterValue) => {
   });
 };
 
+function setupFn(propsOverride: Partial<NodeEditorProps> = {}) {
+  const props: Readonly<NodeEditorProps> = {
+    actionHandler: jest.fn(),
+    path: BasicBuilder.strings({ count: 2 }),
+    settings: {
+      label: BasicBuilder.string(),
+      reorderable: true,
+    },
+    focusedPath: [],
+    ...propsOverride,
+  };
+
+  const ui: React.ReactElement = (
+    <DndProvider backend={HTML5Backend}>
+      <NodeEditor {...props} />
+    </DndProvider>
+  );
+
+  return {
+    ...render(ui),
+    props,
+  };
+}
+
 describe("handleDropNode", () => {
   it("calls actionHandler with reorder-node action", () => {
     // Given: A drop item and action handler
@@ -291,8 +315,7 @@ describe("NodeEditor childNodes filtering", () => {
     });
 
     // Then: Icon should be rendered
-    expect(screen.getByText(nodeLabel)).toBeInTheDocument();
-    // Icon is rendered as an SVG, we can verify the component rendered successfully
+    expect(screen.getByTestId("ClearIcon")).toBeInTheDocument();
   });
 
   it("renders drag handle icon for reorderable nodes", async () => {
@@ -307,31 +330,8 @@ describe("NodeEditor childNodes filtering", () => {
       },
     });
 
-    // Then: Node is rendered with drag functionality
-    expect(screen.getByText(nodeLabel)).toBeInTheDocument();
     // Drag handle icon is rendered as part of the component
-  });
-
-  it("renders fields when settings has fields", async () => {
-    // Given: A node with field settings
-    const nodeLabel = BasicBuilder.string();
-    const fieldLabel = BasicBuilder.string();
-
-    await renderComponent({
-      settings: {
-        label: nodeLabel,
-        fields: {
-          testField: {
-            label: fieldLabel,
-            input: "string",
-            value: "test value",
-          },
-        },
-      },
-    });
-
-    // Then: Fields are rendered
-    expect(screen.getByText(nodeLabel)).toBeInTheDocument();
+    expect(screen.getByTestId("DragIndicatorIcon")).toBeInTheDocument();
   });
 
   it("toggles node open state when not editing", async () => {
@@ -367,30 +367,6 @@ describe("NodeEditor childNodes filtering", () => {
 });
 
 describe("NodeEditor drag and drop functionality", () => {
-  function setup(propsOverride: Partial<NodeEditorProps> = {}) {
-    const props: Readonly<NodeEditorProps> = {
-      actionHandler: jest.fn(),
-      path: BasicBuilder.strings({ count: 2 }),
-      settings: {
-        label: BasicBuilder.string(),
-        reorderable: true,
-      },
-      focusedPath: [],
-      ...propsOverride,
-    };
-
-    const ui: React.ReactElement = (
-      <DndProvider backend={HTML5Backend}>
-        <NodeEditor {...props} />
-      </DndProvider>
-    );
-
-    return {
-      ...render(ui),
-      props,
-    };
-  }
-
   function setupMultipleNodes(
     nodes: Array<{ path: string[]; label: string; reorderable?: boolean }>,
     actionHandler = jest.fn(),
@@ -418,7 +394,7 @@ describe("NodeEditor drag and drop functionality", () => {
   describe("drag behavior", () => {
     it("should show grab cursor and default opacity when node is reorderable", () => {
       // Given/When: A reorderable node is rendered
-      const { container } = setup({
+      const { container } = setupFn({
         settings: { label: BasicBuilder.string(), reorderable: true },
       });
 
@@ -430,7 +406,7 @@ describe("NodeEditor drag and drop functionality", () => {
 
     it("should not show grab cursor when node is not reorderable", () => {
       // Given/When: A non-reorderable node is rendered
-      const { container } = setup({
+      const { container } = setupFn({
         settings: { label: BasicBuilder.string(), reorderable: false },
       });
 
@@ -515,7 +491,7 @@ describe("NodeEditor drag and drop functionality", () => {
   describe("drag events simulation", () => {
     it("should handle dragStart event on reorderable node", () => {
       // Given: A reorderable node
-      const { container } = setup({
+      const { container } = setupFn({
         path: ["topics", "node1"],
         settings: { label: "Draggable Node", reorderable: true },
       });
@@ -572,29 +548,6 @@ describe("NodeEditor drag and drop functionality", () => {
 });
 
 describe("NodeEditor inline actions", () => {
-  function setup(propsOverride: Partial<NodeEditorProps> = {}) {
-    const props: Readonly<NodeEditorProps> = {
-      actionHandler: jest.fn(),
-      path: BasicBuilder.strings({ count: 2 }),
-      settings: {
-        label: BasicBuilder.string(),
-      },
-      focusedPath: [],
-      ...propsOverride,
-    };
-
-    const ui: React.ReactElement = (
-      <DndProvider backend={HTML5Backend}>
-        <NodeEditor {...props} />
-      </DndProvider>
-    );
-
-    return {
-      ...render(ui),
-      props,
-    };
-  }
-
   describe("inline action with icon", () => {
     it("should call actionHandler with perform-node-action when inline icon button is clicked", () => {
       // Given: A node with an inline action that has an icon
@@ -602,7 +555,7 @@ describe("NodeEditor inline actions", () => {
       const actionLabel = BasicBuilder.string();
       const path = BasicBuilder.strings({ count: 2 });
 
-      const { props, container } = setup({
+      const { props, container } = setupFn({
         path,
         settings: {
           label: BasicBuilder.string(),
@@ -635,7 +588,7 @@ describe("NodeEditor inline actions", () => {
       const actionLabel = BasicBuilder.string();
       const path = BasicBuilder.strings({ count: 2 });
 
-      const { props } = setup({
+      const { props } = setupFn({
         path,
         settings: {
           label: BasicBuilder.string(),
