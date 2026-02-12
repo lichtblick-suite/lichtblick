@@ -19,7 +19,10 @@ import {
   HandleUpdateAction,
 } from "@lichtblick/suite-base/panels/Plot/types";
 import { buildSettingsTree } from "@lichtblick/suite-base/panels/Plot/utils/buildSettingsTree";
-import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
+import {
+  assignDefaultColorsToSeries,
+  handleReorderSeriesAction,
+} from "@lichtblick/suite-base/panels/utils";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { lineColors } from "@lichtblick/suite-base/util/plotColors";
@@ -103,6 +106,7 @@ export default function usePlotPanelSettings(
         const targetIndex = Number(payload.targetPath[1]);
         saveConfig(
           produce<PlotConfig>((draft) => {
+            assignDefaultColorsToSeries(draft.paths);
             handleReorderSeriesAction(draft, sourceIndex, targetIndex);
           }),
         );

@@ -21,7 +21,10 @@ import {
 } from "@lichtblick/suite";
 import { DEFAULT_STATE_TRANSITION_PATH } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
-import { handleReorderSeriesAction } from "@lichtblick/suite-base/panels/utils";
+import {
+  assignDefaultColorsToSeries,
+  handleReorderSeriesAction,
+} from "@lichtblick/suite-base/panels/utils";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -205,6 +208,7 @@ export function usePanelSettings(
         const targetIndex = Number(payload.targetPath[1]);
         saveConfig(
           produce<StateTransitionConfig>((draft) => {
+            assignDefaultColorsToSeries(draft.paths);
             handleReorderSeriesAction(draft, sourceIndex, targetIndex);
           }),
         );

@@ -4,7 +4,26 @@
 import { lineColors } from "@lichtblick/suite-base/util/plotColors";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import { handleReorderSeriesAction } from "./utils";
+import { assignDefaultColorsToSeries, handleReorderSeriesAction } from "./utils";
+
+describe("assignDefaultColorsToSeries", () => {
+  it("should assign default colors to paths without colors", () => {
+    // Given: An array of paths without color properties
+    const paths = [
+      { value: BasicBuilder.string(), color: undefined },
+      { value: BasicBuilder.string(), color: undefined },
+      { value: BasicBuilder.string(), color: undefined },
+    ];
+
+    // When: assignDefaultColorsToSeries is called
+    assignDefaultColorsToSeries(paths);
+
+    // Then: Each path should have a color assigned from lineColors based on its index
+    expect(paths[0]?.color).toBe(lineColors[0]);
+    expect(paths[1]?.color).toBe(lineColors[1]);
+    expect(paths[2]?.color).toBe(lineColors[2]);
+  });
+});
 
 describe("handleReorderSeriesAction", () => {
   describe("successful reordering", () => {
@@ -297,31 +316,6 @@ describe("handleReorderSeriesAction", () => {
     const patt1Value = BasicBuilder.string();
     const patt2Value = BasicBuilder.string();
     const patt3Value = BasicBuilder.string();
-    it("should assign colors to paths without colors before reordering", () => {
-      // Given: A draft with paths that don't have explicit colors
-      type PathWithColor = { value: string; color?: string };
-      const draft = {
-        paths: [
-          { value: patt1Value },
-          { value: patt2Value },
-          { value: patt3Value },
-        ] as PathWithColor[],
-      };
-      const sourceIndex = 0;
-      const targetIndex = 2;
-
-      // When: handleReorderSeriesAction is called
-      handleReorderSeriesAction(draft, sourceIndex, targetIndex);
-
-      // Then: All paths should have colors assigned based on their original indices
-      expect(draft.paths[0]).toHaveProperty("color");
-      expect(draft.paths[1]).toHaveProperty("color");
-      expect(draft.paths[2]).toHaveProperty("color");
-      // And: The colors should be from the lineColors array
-      expect(draft.paths[2]?.color).toBe(lineColors[0]); // Original index 0
-      expect(draft.paths[0]?.color).toBe(lineColors[1]); // Original index 1
-      expect(draft.paths[1]?.color).toBe(lineColors[2]); // Original index 2
-    });
 
     it("should preserve existing colors when reordering", () => {
       // Given: A draft with paths that already have explicit colors
