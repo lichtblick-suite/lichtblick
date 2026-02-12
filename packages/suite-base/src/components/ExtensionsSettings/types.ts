@@ -4,6 +4,7 @@
 import { AsyncState } from "react-use/lib/useAsyncFn";
 
 import { Immutable } from "@lichtblick/suite";
+import { OperationStatus } from "@lichtblick/suite-base/components/types";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 
 export type InstalledExtension = {
@@ -39,4 +40,17 @@ export type UseExtensionSettingsHook = {
   namespacedData: EntryGroupedData[];
   groupedMarketplaceData: EntryGroupedData[];
   debouncedFilterText: string;
+};
+
+export type UseExtensionOperationsOptions = {
+  onInstallSuccess?: (extensionId: string) => void;
+  onUninstallSuccess?: (extensionId: string) => void;
+};
+
+export type UseExtensionOperationsReturnHook = {
+  handleInstall: (extension: Immutable<ExtensionMarketplaceDetail>) => Promise<void>;
+  handleUninstall: (extension: Immutable<ExtensionMarketplaceDetail>) => Promise<void>;
+  operationStatus: OperationStatus;
+  operatingExtensionId: string | undefined;
+  isOperating: (extensionId: string) => boolean;
 };

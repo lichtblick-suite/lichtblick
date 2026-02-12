@@ -8,19 +8,15 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { Button, Link, Tab, Tabs, Typography, Divider } from "@mui/material";
 import DOMPurify from "dompurify";
-import { useSnackbar } from "notistack";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 
 import { useStylesExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails.style";
+import { useExtensionOperations } from "@lichtblick/suite-base/components/ExtensionsSettings/hooks/useExtensionOperations";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextContent from "@lichtblick/suite-base/components/TextContent";
 import { ExtensionDetailsProps, OperationStatus } from "@lichtblick/suite-base/components/types";
-import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
-import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { useExtensionMarketplace } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
-import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
-import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import { isValidUrl } from "@lichtblick/suite-base/util/isValidURL";
 
 /**
@@ -40,17 +36,25 @@ export function ExtensionDetails({
 }: Readonly<ExtensionDetailsProps>): React.ReactElement {
   const { classes } = useStylesExtensionDetails();
   const [isInstalled, setIsInstalled] = useState(installed);
-  const [operationStatus, setOperationStatus] = useState<OperationStatus>(OperationStatus.IDLE);
   const [activeTab, setActiveTab] = useState<number>(0);
   const isMounted = useMountedState();
-  const downloadExtension = useExtensionCatalog((state) => state.downloadExtension);
-  const installExtensions = useExtensionCatalog((state) => state.installExtensions);
-  const uninstallExtension = useExtensionCatalog((state) => state.uninstallExtension);
   const marketplace = useExtensionMarketplace();
-  const { enqueueSnackbar } = useSnackbar();
   const readme = extension.readme;
   const changelog = extension.changelog;
   const canInstall = extension.foxe != undefined;
+
+  const { handleInstall, handleUninstall, operationStatus } = useExtensionOperations({
+    onInstallSuccess: () => {
+      if (isMounted()) {
+        setIsInstalled(true);
+      }
+    },
+    onUninstallSuccess: () => {
+      if (isMounted()) {
+        setIsInstalled(false);
+      }
+    },
+  });
 
   const { value: readmeContent } = useAsync(
     async () =>
@@ -66,98 +70,6 @@ export function ExtensionDetails({
         : DOMPurify.sanitize(changelog ?? "No changelog found."),
     [marketplace, changelog],
   );
-
-  const analytics = useAnalytics();
-
-  /**
-   * Handles the download and installation of the extension.
-   *
-   * @async
-   * @function downloadAndInstall
-   * @returns {Promise<void>}
-   */
-  const downloadAndInstall = useCallback(async () => {
-    if (!isDesktopApp()) {
-      enqueueSnackbar("Download the desktop app to use marketplace extensions.", {
-        variant: "error",
-      });
-      return;
-    }
-
-    const url = extension.foxe;
-    if (url == undefined) {
-      enqueueSnackbar(`Cannot install extension ${extension.id}, "foxe" URL is missing`, {
-        variant: "error",
-      });
-      return;
-    }
-
-    setOperationStatus(OperationStatus.INSTALLING);
-
-    try {
-      const extensionBuffer = await downloadExtension(url);
-      await installExtensions("local", [{ buffer: extensionBuffer }]);
-
-      enqueueSnackbar(`${extension.name} installed successfully`, { variant: "success" });
-
-      if (isMounted()) {
-        setIsInstalled(true);
-        void analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
-      }
-    } catch (error) {
-      enqueueSnackbar(error instanceof Error ? error.message : "Failed to install extension", {
-        variant: "error",
-      });
-    } finally {
-      setOperationStatus(OperationStatus.IDLE);
-    }
-  }, [
-    analytics,
-    downloadExtension,
-    enqueueSnackbar,
-    extension.foxe,
-    extension.id,
-    extension.name,
-    installExtensions,
-    isMounted,
-  ]);
-
-  /**
-   * Handles the uninstallation of the extension.
-   *
-   * @async
-   * @function uninstall
-   * @returns {Promise<void>}
-   */
-  const uninstall = useCallback(async () => {
-    setOperationStatus(OperationStatus.UNINSTALLING);
-
-    try {
-      // UX - Avoids the button from blinking when operation completes too fast
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      await uninstallExtension(extension.namespace ?? "local", extension.id);
-      enqueueSnackbar(`${extension.name} uninstalled successfully`, { variant: "success" });
-
-      if (isMounted()) {
-        setIsInstalled(false);
-        void analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
-      }
-    } catch (error) {
-      enqueueSnackbar(error instanceof Error ? error.message : "Failed to uninstall extension", {
-        variant: "error",
-      });
-    } finally {
-      setOperationStatus(OperationStatus.IDLE);
-    }
-  }, [
-    analytics,
-    enqueueSnackbar,
-    extension.id,
-    extension.name,
-    extension.namespace,
-    isMounted,
-    uninstallExtension,
-  ]);
 
   return (
     <Stack fullHeight flex="auto" gap={1}>
@@ -209,7 +121,9 @@ export function ExtensionDetails({
             key="uninstall"
             color="inherit"
             variant="contained"
-            onClick={uninstall}
+            onClick={async () => {
+              await handleUninstall(extension);
+            }}
             disabled={operationStatus !== OperationStatus.IDLE}
           >
             {operationStatus === OperationStatus.UNINSTALLING ? "Uninstalling..." : "Uninstall"}
@@ -222,8 +136,10 @@ export function ExtensionDetails({
               key="install"
               color="inherit"
               variant="contained"
-              onClick={downloadAndInstall}
-              disabled={operationStatus !== "idle"}
+              onClick={async () => {
+                await handleInstall(extension);
+              }}
+              disabled={operationStatus !== OperationStatus.IDLE}
             >
               {operationStatus === OperationStatus.INSTALLING ? "Installing..." : "Install"}
             </Button>

@@ -6,7 +6,6 @@ import { useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Immutable } from "@lichtblick/suite";
 import {
   ExtensionListProps,
   paginationModel,
@@ -15,13 +14,13 @@ import {
   displayNameForNamespace,
   generatePlaceholderList,
 } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/utils";
+import { useExtensionOperations } from "@lichtblick/suite-base/components/ExtensionsSettings/hooks/useExtensionOperations";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { OperationStatus } from "@lichtblick/suite-base/components/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
-import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 export default function ExtensionList({
   namespace,
@@ -31,74 +30,13 @@ export default function ExtensionList({
 }: Readonly<ExtensionListProps>): React.JSX.Element {
   const { t } = useTranslation("extensionsSettings");
   const installedExtensions = useExtensionCatalog((state) => state.installedExtensions);
-  const downloadExtension = useExtensionCatalog((state) => state.downloadExtension);
-  const installExtensions = useExtensionCatalog((state) => state.installExtensions);
   const uninstallExtension = useExtensionCatalog((state) => state.uninstallExtension);
   const { enqueueSnackbar } = useSnackbar();
   const analytics = useAnalytics();
-  const [operatingExtensionId, setOperatingExtensionId] = useState<string | undefined>();
-  const [operationStatus, setOperationStatus] = useState<OperationStatus>(OperationStatus.IDLE);
   const [selectedExtensionIds, setSelectedExtensionIds] = useState<string[]>([]);
   const [isBulkOperating, setIsBulkOperating] = useState(false);
 
-  const handleInstall = useCallback(
-    async (extension: Immutable<ExtensionMarketplaceDetail>) => {
-      if (!isDesktopApp()) {
-        enqueueSnackbar("Download the desktop app to use marketplace extensions.", {
-          variant: "error",
-        });
-        return;
-      }
-
-      const url = extension.foxe;
-      if (url == undefined) {
-        enqueueSnackbar(`Cannot install extension ${extension.id}, "foxe" URL is missing`, {
-          variant: "error",
-        });
-        return;
-      }
-
-      setOperatingExtensionId(extension.id);
-      setOperationStatus(OperationStatus.INSTALLING);
-
-      try {
-        const extensionBuffer = await downloadExtension(url);
-        await installExtensions("local", [{ buffer: extensionBuffer }]);
-        enqueueSnackbar(`${extension.name} installed successfully`, { variant: "success" });
-        await analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
-      } catch (error) {
-        enqueueSnackbar(error instanceof Error ? error.message : "Failed to install extension", {
-          variant: "error",
-        });
-      } finally {
-        setOperatingExtensionId(undefined);
-        setOperationStatus(OperationStatus.IDLE);
-      }
-    },
-    [analytics, downloadExtension, enqueueSnackbar, installExtensions],
-  );
-
-  const handleUninstall = useCallback(
-    async (extension: Immutable<ExtensionMarketplaceDetail>) => {
-      setOperatingExtensionId(extension.id);
-      setOperationStatus(OperationStatus.UNINSTALLING);
-
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        await uninstallExtension(extension.namespace ?? "local", extension.id);
-        enqueueSnackbar(`${extension.name} uninstalled successfully`, { variant: "success" });
-        await analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
-      } catch (error) {
-        enqueueSnackbar(error instanceof Error ? error.message : "Failed to uninstall extension", {
-          variant: "error",
-        });
-      } finally {
-        setOperatingExtensionId(undefined);
-        setOperationStatus(OperationStatus.IDLE);
-      }
-    },
-    [analytics, enqueueSnackbar, uninstallExtension],
-  );
+  const { handleInstall, handleUninstall, operationStatus, isOperating } = useExtensionOperations();
 
   const handleBulkUninstall = useCallback(async () => {
     const selectedExtensions = entries.filter((entry) => selectedExtensionIds.includes(entry.id));
@@ -163,7 +101,7 @@ export default function ExtensionList({
         const isInstalled = installedExtensions
           ? installedExtensions.some((installed) => installed.id === extension.id)
           : false;
-        const isOperating = operatingExtensionId === extension.id;
+        const isExtensionOperating = isOperating(extension.id);
         const canInstall = extension.foxe != undefined;
 
         if (isInstalled) {
@@ -176,9 +114,9 @@ export default function ExtensionList({
                 event.stopPropagation();
                 await handleUninstall(extension);
               }}
-              disabled={isOperating}
+              disabled={isExtensionOperating}
             >
-              {isOperating && operationStatus === OperationStatus.UNINSTALLING
+              {isExtensionOperating && operationStatus === OperationStatus.UNINSTALLING
                 ? "Uninstalling..."
                 : "Uninstall"}
             </Button>
@@ -193,9 +131,9 @@ export default function ExtensionList({
                 event.stopPropagation();
                 await handleInstall(extension);
               }}
-              disabled={isOperating}
+              disabled={isExtensionOperating}
             >
-              {isOperating && operationStatus === OperationStatus.INSTALLING
+              {isExtensionOperating && operationStatus === OperationStatus.INSTALLING
                 ? "Installing..."
                 : "Install"}
             </Button>

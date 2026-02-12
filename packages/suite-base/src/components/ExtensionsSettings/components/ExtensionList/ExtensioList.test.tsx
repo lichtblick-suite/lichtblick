@@ -7,10 +7,11 @@ import { render, screen } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
 import { Immutable } from "@lichtblick/suite";
-import ExtensionList, {
+import ExtensionList from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/ExtensionList";
+import {
   displayNameForNamespace,
   generatePlaceholderList,
-} from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/ExtensionList";
+} from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/utils";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
