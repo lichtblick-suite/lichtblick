@@ -182,6 +182,7 @@ export default function ExtensionList({
             }}
             rowSelectionModel={selectedExtensionIds}
             autoHeight
+            data-testid="extension-list-entry"
           />
         </div>
       </Stack>
