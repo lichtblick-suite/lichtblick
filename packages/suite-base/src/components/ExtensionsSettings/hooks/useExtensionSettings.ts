@@ -45,7 +45,7 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
     }));
   }, [groupedMarketplaceEntries, debouncedFilterText]);
 
-  const { messageConverterExtensionsInUse } = useExtensionUsage();
+  const extensionsInUse = useExtensionUsage();
 
   const installedEntries = useMemo(() => {
     return (installed ?? []).map((entry) => {
@@ -69,10 +69,10 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
         qualifiedName: entry.qualifiedName,
         readme: entry.readme,
         changelog: entry.changelog,
-        inUse: messageConverterExtensionsInUse.has(entry.id),
+        inUse: extensionsInUse.has(entry.id),
       };
     });
-  }, [installed, marketplaceMap, messageConverterExtensionsInUse]);
+  }, [installed, marketplaceMap, extensionsInUse]);
 
   const namespacedEntries = useMemo(
     () => _.groupBy(installedEntries, (entry) => entry.namespace),
