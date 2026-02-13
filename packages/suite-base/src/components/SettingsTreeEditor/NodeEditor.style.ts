@@ -38,13 +38,9 @@ export const useStyles = makeStyles()((theme) => ({
     height: theme.spacing(0.5),
   },
   iconWrapper: {
-    position: "absolute",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    top: "50%",
-    left: 0,
-    transform: "translate(-97.5%, -50%)",
   },
 
   nodeHeader: {
@@ -89,11 +85,10 @@ export const useStyles = makeStyles()((theme) => ({
   },
 
   nodeHeaderToggle: {
-    display: "grid",
+    display: "flex",
     alignItems: "center",
-    gridTemplateColumns: "auto 1fr auto",
+    gap: 0,
     opacity: 0.6,
-    position: "relative",
     userSelect: "none",
     width: "100%",
   },
