@@ -14,10 +14,20 @@ import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/Pan
  * @param fontSize - Current font size value (undefined for "auto")
  * @param saveConfig - Function to save the font size configuration
  */
-export function useFontSizeSettings(
-  fontSize: number | undefined,
-  saveConfig: (config: { fontSize: number | undefined }) => void,
-): void {
+type UseRawMessagesPanelSettingsOptions = {
+  fontSize: number | undefined;
+  latestPerRenderTickSampling: boolean;
+  saveConfig: (config: {
+    fontSize?: number | undefined;
+    latestPerRenderTickSampling?: boolean;
+  }) => void;
+};
+
+export function useRawMessagesPanelSettings({
+  fontSize,
+  latestPerRenderTickSampling,
+  saveConfig,
+}: UseRawMessagesPanelSettingsOptions): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const actionHandler = useCallback(
@@ -30,6 +40,17 @@ export function useFontSizeSettings(
         saveConfig({
           fontSize:
             action.payload.value == undefined ? undefined : (action.payload.value as number),
+        });
+        return;
+      }
+
+      if (
+        action.action === "update" &&
+        action.payload.path[0] === "general" &&
+        action.payload.path[1] === "latestPerRenderTickSampling"
+      ) {
+        saveConfig({
+          latestPerRenderTickSampling: Boolean(action.payload.value),
         });
       }
     },
@@ -55,9 +76,14 @@ export function useFontSizeSettings(
               ],
               value: fontSize,
             },
+            latestPerRenderTickSampling: {
+              label: "Latest per render tick",
+              input: "boolean",
+              value: latestPerRenderTickSampling,
+            },
           },
         },
       },
     });
-  }, [actionHandler, fontSize, updatePanelSettingsTree]);
+  }, [actionHandler, fontSize, latestPerRenderTickSampling, updatePanelSettingsTree]);
 }

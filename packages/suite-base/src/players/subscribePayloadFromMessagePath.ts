@@ -16,6 +16,7 @@ import { SubscriptionPreloadType, SubscribePayload } from "./types";
 export function subscribePayloadFromMessagePath(
   path: string,
   preloadType?: SubscriptionPreloadType,
+  sampling?: SubscribePayload["sampling"],
 ): undefined | SubscribePayload {
   const parsedPath = parseMessagePath(path);
 
@@ -30,12 +31,23 @@ export function subscribePayloadFromMessagePath(
   );
 
   if (!firstField) {
-    return { topic: parsedPath.topicName, preloadType: preloadType ?? "partial" };
+    const payload: SubscribePayload = {
+      topic: parsedPath.topicName,
+      preloadType: preloadType ?? "partial",
+    };
+    if (sampling) {
+      payload.sampling = sampling;
+    }
+    return payload;
   }
 
-  return {
+  const payload: SubscribePayload = {
     topic: parsedPath.topicName,
     preloadType: preloadType ?? "partial",
     fields: [firstField.name],
   };
+  if (sampling) {
+    payload.sampling = sampling;
+  }
+  return payload;
 }

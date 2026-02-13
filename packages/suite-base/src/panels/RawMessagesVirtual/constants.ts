@@ -11,6 +11,7 @@ export const RAW_MESSAGES_VIRTUAL_DEFAULT_CONFIG: RawMessagesVirtualPanelConfig 
   showFullMessageForDiff: false,
   topicPath: "",
   fontSize: undefined,
+  latestPerRenderTickSampling: true,
 };
 
 export const EXPANDED_ICON = "▶";

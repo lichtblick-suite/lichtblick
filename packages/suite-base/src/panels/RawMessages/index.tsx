@@ -32,7 +32,7 @@ import {
   PropsRawMessages,
   RawMessagesPanelConfig,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
-import { useFontSizeSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useFontSizeSettings";
+import { useRawMessagesPanelSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useRawMessagesPanelSettings";
 import {
   useRenderDiffLabel,
   useValueRenderer,
@@ -53,8 +53,15 @@ function RawMessages(props: PropsRawMessages) {
   const jsonTreeTheme = useJsonTreeTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
-  const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff, fontSize } =
-    config;
+  const {
+    topicPath,
+    diffMethod,
+    diffTopicPath,
+    diffEnabled,
+    showFullMessageForDiff,
+    fontSize,
+    latestPerRenderTickSampling,
+  } = config;
   const { datatypes } = useDataSourceInfo();
 
   const {
@@ -382,7 +389,11 @@ function RawMessages(props: PropsRawMessages) {
   ]);
 
   // Setup font size settings in panel settings tree
-  useFontSizeSettings(fontSize, saveConfig);
+  useRawMessagesPanelSettings({
+    fontSize,
+    latestPerRenderTickSampling,
+    saveConfig,
+  });
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
@@ -410,6 +421,7 @@ const defaultConfig: RawMessagesPanelConfig = {
   showFullMessageForDiff: false,
   topicPath: "",
   fontSize: undefined,
+  latestPerRenderTickSampling: true,
 };
 
 export default Panel(
