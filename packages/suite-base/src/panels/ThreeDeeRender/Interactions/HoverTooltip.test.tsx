@@ -9,8 +9,8 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react";
 
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-import type { HoverEntityInfo } from "./types";
 import { HoverTooltip } from "./HoverTooltip";
+import type { HoverEntityInfo } from "./types";
 
 function makeCanvas(bounds?: Partial<DOMRect>): HTMLCanvasElement {
   const canvas = document.createElement("canvas");

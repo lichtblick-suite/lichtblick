@@ -4,12 +4,12 @@
 import { Divider, Paper, Typography } from "@mui/material";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
+import { useStyles } from "./HoverTooltip.style";
 import {
   HOVER_TOOLTIP_GRACE_PERIOD_MS,
   HOVER_TOOLTIP_LEAVE_DELAY_MS,
   HOVER_TOOLTIP_OFFSET_PX,
 } from "./constants";
-import { useStyles } from "./HoverTooltip.style";
 import type { HoverEntityInfo } from "./types";
 
 type TooltipMode = "hidden" | "following" | "grace" | "hover-pinned" | "click-pinned";
@@ -30,7 +30,7 @@ type Props = {
  */
 export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.Element | ReactNull {
   const { classes } = useStyles();
-  const paperRef = useRef<HTMLDivElement>(null);
+  const paperRef = useRef<HTMLDivElement>(ReactNull);
   const graceTimer = useRef<ReturnType<typeof setTimeout>>();
   const leaveTimer = useRef<ReturnType<typeof setTimeout>>();
 

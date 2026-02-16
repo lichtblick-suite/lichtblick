@@ -260,11 +260,11 @@ describe("3D Renderer", () => {
       jest.useRealTimers();
     });
 
-    function prepareDomForInput(canvas: HTMLCanvasElement, parent: HTMLDivElement) {
+    function prepareDomForInput(inputCanvas: HTMLCanvasElement, inputParent: HTMLDivElement) {
       // Input relies on clientWidth/clientHeight of the canvas parent.
-      Object.defineProperty(parent, "clientWidth", { configurable: true, value: 300 });
-      Object.defineProperty(parent, "clientHeight", { configurable: true, value: 300 });
-      canvas.getBoundingClientRect = jest.fn(
+      Object.defineProperty(inputParent, "clientWidth", { configurable: true, value: 300 });
+      Object.defineProperty(inputParent, "clientHeight", { configurable: true, value: 300 });
+      inputCanvas.getBoundingClientRect = jest.fn(
         () =>
           ({
             left: 0,
@@ -281,68 +281,68 @@ describe("3D Renderer", () => {
     }
 
     it("emits renderableHovered at most once per 100ms while moving the mouse", () => {
-      const parent = document.createElement("div");
-      const canvas = document.createElement("canvas");
-      parent.appendChild(canvas);
-      prepareDomForInput(canvas, parent);
+      const hoverParent = document.createElement("div");
+      const hoverCanvas = document.createElement("canvas");
+      hoverParent.appendChild(hoverCanvas);
+      prepareDomForInput(hoverCanvas, hoverParent);
 
-      const renderer = new Renderer({ ...defaultRendererProps, canvas });
+      const renderer = new Renderer({ ...defaultRendererProps, canvas: hoverCanvas });
       renderer.setPickingEnabled(true);
 
       const hoveredSpy = jest.fn();
       renderer.addListener("renderableHovered", hoveredSpy);
 
-      canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 10, clientY: 10 }));
-      canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
-      canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 12, clientY: 12 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 10, clientY: 10 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 12, clientY: 12 }));
 
       expect(hoveredSpy).toHaveBeenCalledTimes(1);
 
       jest.advanceTimersByTime(100);
-      canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 13, clientY: 13 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 13, clientY: 13 }));
       expect(hoveredSpy).toHaveBeenCalledTimes(2);
 
       renderer.dispose();
     });
 
     it("does not hover-pick while mouse is down, then resumes after mouseup", () => {
-      const parent = document.createElement("div");
-      const canvas = document.createElement("canvas");
-      parent.appendChild(canvas);
-      prepareDomForInput(canvas, parent);
+      const hoverParent = document.createElement("div");
+      const hoverCanvas = document.createElement("canvas");
+      hoverParent.appendChild(hoverCanvas);
+      prepareDomForInput(hoverCanvas, hoverParent);
 
-      const renderer = new Renderer({ ...defaultRendererProps, canvas });
+      const renderer = new Renderer({ ...defaultRendererProps, canvas: hoverCanvas });
       renderer.setPickingEnabled(true);
 
       const hoveredSpy = jest.fn();
       renderer.addListener("renderableHovered", hoveredSpy);
 
-      canvas.dispatchEvent(new MouseEvent("mousedown", { clientX: 10, clientY: 10 }));
-      canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousedown", { clientX: 10, clientY: 10 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
       expect(hoveredSpy).toHaveBeenCalledTimes(0);
 
-      canvas.dispatchEvent(new MouseEvent("mouseup", { clientX: 11, clientY: 11 }));
-      canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 12, clientY: 12 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mouseup", { clientX: 11, clientY: 11 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 12, clientY: 12 }));
       expect(hoveredSpy).toHaveBeenCalledTimes(1);
 
       renderer.dispose();
     });
 
     it("does not emit renderableHovered when picking is disabled", () => {
-      const parent = document.createElement("div");
-      const canvas = document.createElement("canvas");
-      parent.appendChild(canvas);
-      prepareDomForInput(canvas, parent);
+      const hoverParent = document.createElement("div");
+      const hoverCanvas = document.createElement("canvas");
+      hoverParent.appendChild(hoverCanvas);
+      prepareDomForInput(hoverCanvas, hoverParent);
 
-      const renderer = new Renderer({ ...defaultRendererProps, canvas });
+      const renderer = new Renderer({ ...defaultRendererProps, canvas: hoverCanvas });
       renderer.setPickingEnabled(false);
 
       const hoveredSpy = jest.fn();
       renderer.addListener("renderableHovered", hoveredSpy);
 
-      canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 10, clientY: 10 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 10, clientY: 10 }));
       jest.advanceTimersByTime(200);
-      canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
 
       expect(hoveredSpy).toHaveBeenCalledTimes(0);
 
