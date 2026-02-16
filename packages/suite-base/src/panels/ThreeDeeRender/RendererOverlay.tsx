@@ -36,7 +36,8 @@ import { HUD } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD";
 import { customTypography } from "@lichtblick/theme";
 
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
-import { HoverTooltip, HoverEntityInfo } from "./Interactions/HoverTooltip";
+import { HoverTooltip } from "./Interactions/HoverTooltip";
+import type { HoverEntityInfo } from "./Interactions/types";
 import type { PickedRenderable } from "./Picker";
 import { Renderable } from "./Renderable";
 import { useRenderer, useRendererEvent } from "./RendererContext";
@@ -176,6 +177,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
     }
     const infos: HoverEntityInfo[] = [];
     for (const sel of selections) {
+      const topic = sel.renderable.topic;
       const details: Record<string, unknown> | undefined =
         sel.instanceIndex != undefined
           ? (sel.renderable.instanceDetails(sel.instanceIndex) as
@@ -209,8 +211,14 @@ export function RendererOverlay(props: Props): React.JSX.Element {
         }
       }
 
+      // Avoid showing tooltips for non-user-facing objects when hovering empty space.
+      // If a renderable has no associated topic and no metadata, it doesn't provide useful info.
+      if (topic == undefined && metadata.length === 0) {
+        continue;
+      }
+
       infos.push({
-        topic: sel.renderable.topic ?? "unknown",
+        topic: topic ?? "unknown",
         entityId: getHoverEntityId(sel),
         metadata,
       });

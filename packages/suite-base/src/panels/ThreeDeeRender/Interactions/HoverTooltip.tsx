@@ -3,97 +3,14 @@
 
 import { Divider, Paper, Typography } from "@mui/material";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { makeStyles } from "tss-react/mui";
 
-import { customTypography } from "@lichtblick/theme";
-
-/** Grace period (ms) before tooltip hides after entities clear. */
-const GRACE_PERIOD_MS = 400;
-/** Delay (ms) before tooltip hides after mouse leaves the tooltip. */
-const LEAVE_DELAY_MS = 300;
-/** Pixel offset from cursor to tooltip edge. */
-const TOOLTIP_OFFSET = 6;
-
-const useStyles = makeStyles()((theme) => ({
-  root: {
-    position: "fixed",
-    zIndex: theme.zIndex.tooltip,
-    maxWidth: 620,
-    maxHeight: 480,
-    overflow: "auto",
-    padding: theme.spacing(1, 1.5),
-    transition: "opacity 0.15s ease",
-    scrollbarColor: `${theme.palette.action.disabled} ${theme.palette.action.hover}`,
-    "&::-webkit-scrollbar": {
-      width: 16,
-      height: 16,
-    },
-    "&::-webkit-scrollbar-track": {
-      background: theme.palette.action.hover,
-      borderRadius: theme.shape.borderRadius,
-    },
-    "&::-webkit-scrollbar-thumb": {
-      background: theme.palette.action.disabled,
-      borderRadius: theme.shape.borderRadius,
-      border: `2px solid ${theme.palette.background.paper}`,
-      "&:hover": {
-        background: theme.palette.action.active,
-      },
-    },
-  },
-  entitySection: {
-    marginBottom: theme.spacing(0.75),
-    "&:last-child": {
-      marginBottom: 0,
-    },
-  },
-  entityId: {
-    fontWeight: theme.typography.fontWeightMedium,
-    color: theme.palette.info.main,
-    fontSize: "0.75rem",
-  },
-  topicLine: {
-    color: theme.palette.text.secondary,
-    fontSize: "0.7rem",
-    marginBottom: theme.spacing(0.25),
-  },
-  divider: {
-    margin: theme.spacing(0.75, 0),
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: theme.spacing(0.25),
-  },
-  tableRow: {
-    "&:nth-of-type(odd)": {
-      backgroundColor: theme.palette.action.hover,
-    },
-  },
-  keyCell: {
-    color: theme.palette.text.secondary,
-    fontSize: "0.75rem",
-    whiteSpace: "nowrap",
-    paddingRight: theme.spacing(2),
-    paddingTop: 1,
-    paddingBottom: 1,
-    verticalAlign: "top",
-  },
-  valueCell: {
-    fontSize: "0.75rem",
-    fontFamily: customTypography.fontMonospace,
-    textAlign: "right",
-    wordBreak: "break-all",
-    paddingTop: 1,
-    paddingBottom: 1,
-  },
-}));
-
-export type HoverEntityInfo = {
-  topic: string;
-  entityId: string;
-  metadata: { key: string; value: string }[];
-};
+import {
+  HOVER_TOOLTIP_GRACE_PERIOD_MS,
+  HOVER_TOOLTIP_LEAVE_DELAY_MS,
+  HOVER_TOOLTIP_OFFSET_PX,
+} from "./constants";
+import { useStyles } from "./HoverTooltip.style";
+import type { HoverEntityInfo } from "./types";
 
 type TooltipMode = "hidden" | "following" | "grace" | "hover-pinned" | "click-pinned";
 
@@ -147,7 +64,7 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
             setMode("hidden");
             setVisibleEntities([]);
           }
-        }, GRACE_PERIOD_MS);
+        }, HOVER_TOOLTIP_GRACE_PERIOD_MS);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -180,7 +97,7 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
         setMode("hidden");
         setVisibleEntities([]);
       }
-    }, LEAVE_DELAY_MS);
+    }, HOVER_TOOLTIP_LEAVE_DELAY_MS);
   }, []);
 
   const onTooltipClick = useCallback((e: React.MouseEvent) => {
@@ -253,19 +170,19 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
     const spaceAbove = displayPos.clientY - bounds.top;
 
     let left: number;
-    if (spaceRight >= tooltipW + TOOLTIP_OFFSET) {
-      left = displayPos.clientX + TOOLTIP_OFFSET;
-    } else if (spaceLeft >= tooltipW + TOOLTIP_OFFSET) {
-      left = displayPos.clientX - tooltipW - TOOLTIP_OFFSET;
+    if (spaceRight >= tooltipW + HOVER_TOOLTIP_OFFSET_PX) {
+      left = displayPos.clientX + HOVER_TOOLTIP_OFFSET_PX;
+    } else if (spaceLeft >= tooltipW + HOVER_TOOLTIP_OFFSET_PX) {
+      left = displayPos.clientX - tooltipW - HOVER_TOOLTIP_OFFSET_PX;
     } else {
       left = Math.max(bounds.left, bounds.right - tooltipW);
     }
 
     let top: number;
-    if (spaceBelow >= tooltipH + TOOLTIP_OFFSET) {
-      top = displayPos.clientY + TOOLTIP_OFFSET;
-    } else if (spaceAbove >= tooltipH + TOOLTIP_OFFSET) {
-      top = displayPos.clientY - tooltipH - TOOLTIP_OFFSET;
+    if (spaceBelow >= tooltipH + HOVER_TOOLTIP_OFFSET_PX) {
+      top = displayPos.clientY + HOVER_TOOLTIP_OFFSET_PX;
+    } else if (spaceAbove >= tooltipH + HOVER_TOOLTIP_OFFSET_PX) {
+      top = displayPos.clientY - tooltipH - HOVER_TOOLTIP_OFFSET_PX;
     } else {
       top = Math.max(bounds.top, bounds.bottom - tooltipH);
     }

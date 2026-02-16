@@ -9,23 +9,25 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react";
 
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-import { HoverTooltip, HoverEntityInfo } from "./HoverTooltip";
+import type { HoverEntityInfo } from "./types";
+import { HoverTooltip } from "./HoverTooltip";
 
 function makeCanvas(bounds?: Partial<DOMRect>): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
-  canvas.getBoundingClientRect = jest.fn(() =>
-    ({
-      left: 0,
-      top: 0,
-      right: 300,
-      bottom: 300,
-      width: 300,
-      height: 300,
-      x: 0,
-      y: 0,
-      toJSON: () => "",
-      ...bounds,
-    }) as DOMRect,
+  canvas.getBoundingClientRect = jest.fn(
+    () =>
+      ({
+        left: 0,
+        top: 0,
+        right: 300,
+        bottom: 300,
+        width: 300,
+        height: 300,
+        x: 0,
+        y: 0,
+        toJSON: () => "",
+        ...bounds,
+      }) as DOMRect,
   );
   return canvas;
 }
@@ -137,7 +139,11 @@ describe("<HoverTooltip />", () => {
 
     view.rerender(
       <ThemeProvider isDark={false}>
-        <HoverTooltip entities={[]} position={{ clientX: 100, clientY: 100 }} canvas={makeCanvas()} />
+        <HoverTooltip
+          entities={[]}
+          position={{ clientX: 100, clientY: 100 }}
+          canvas={makeCanvas()}
+        />
       </ThemeProvider>,
     );
 
@@ -233,7 +239,11 @@ describe("<HoverTooltip />", () => {
     // Now provide new entities; content should update even while click-pinned.
     view.rerender(
       <ThemeProvider isDark={false}>
-        <HoverTooltip entities={entitiesB} position={{ clientX: 999, clientY: 999 }} canvas={canvas} />
+        <HoverTooltip
+          entities={entitiesB}
+          position={{ clientX: 999, clientY: 999 }}
+          canvas={canvas}
+        />
       </ThemeProvider>,
     );
 

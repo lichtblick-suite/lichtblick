@@ -64,6 +64,7 @@ import { SettingsManager, SettingsTreeEntry } from "./SettingsManager";
 import { SharedGeometry } from "./SharedGeometry";
 import { CameraState } from "./camera";
 import { DARK_OUTLINE, LIGHT_OUTLINE, stringToRgb } from "./color";
+import { HOVER_PICK_THROTTLE_MS } from "./constants";
 import { FRAME_TRANSFORMS_DATATYPES, FRAME_TRANSFORM_DATATYPES } from "./foxglove";
 import { DetailLevel, msaaSamples } from "./lod";
 import {
@@ -357,7 +358,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       }
       hoverThrottleTimer = setTimeout(() => {
         hoverThrottleTimer = undefined;
-      }, 100);
+      }, HOVER_PICK_THROTTLE_MS);
       this.#hoverHandler(cursorCoords);
     });
 
