@@ -13,11 +13,11 @@ type Props = {
   config: WebRTCCameraConfig;
 };
 
-export function WebRTCCamera({ config }: Props): React.JSX.Element {
+export function WebRTCCamera({ config: _config }: Props): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
 
-  const [latencyList, setLatencyList] = useState<number[]>([]);
+  const [_latencyList, setLatencyList] = useState<number[]>([]);
   const [status, setStatus] = useState<string>("Idle");
   const [latency, setLatency] = useState<number | null>(null);
 
