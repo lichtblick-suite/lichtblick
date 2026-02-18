@@ -161,7 +161,13 @@ export default function ExtensionList({
             )}
           </Stack>
         )}
-        <div style={{ width: "100%" }}>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <DataGrid
             rows={entries}
             columns={columns}
@@ -181,7 +187,6 @@ export default function ExtensionList({
               setSelectedExtensionIds(newSelection as string[]);
             }}
             rowSelectionModel={selectedExtensionIds}
-            autoHeight
             data-testid="extension-list-entry"
           />
         </div>
