@@ -16,7 +16,7 @@
 
 // No time functions that require `moment` should live in this file.
 import log from "@lichtblick/log";
-import { Time } from "@lichtblick/rostime";
+import { fromRFC3339String, fromString, Time } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 import { MarkerArray, StampedMessage } from "@lichtblick/suite-base/types/Messages";
 
@@ -66,4 +66,14 @@ export function getTimestampForMessage(message: unknown): Time | undefined {
   }
 
   return undefined;
+}
+
+export function parseTimeUrlString(timeString: string): Time | undefined {
+  const dateTime = fromRFC3339String(timeString);
+
+  if (dateTime) {
+    return dateTime;
+  }
+
+  return fromString(timeString);
 }
