@@ -5,6 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import * as THREE from "three";
+
 import type { ColorRGBA, Vector3 } from "./ros";
 import type { Pose } from "./transforms";
 
@@ -43,4 +45,35 @@ export const DEFAULT_CAMERA_STATE: CameraState = {
   fovy: 45,
   near: 0.5,
   far: 5000,
+};
+
+export type OrbitControlsConfig = {
+  screenSpacePanning: boolean;
+  mouseButtons: {
+    LEFT: number;
+    RIGHT: number;
+  };
+  touches: {
+    ONE: number;
+    TWO: number;
+  };
+  keys: {
+    LEFT: string;
+    RIGHT: string;
+    UP: string;
+    BOTTOM: string;
+  };
+};
+
+export const DEFAULT_ORBIT_CONTROLS_CONFIG: OrbitControlsConfig = {
+  screenSpacePanning: false,
+  mouseButtons: {
+    LEFT: THREE.MOUSE.PAN,
+    RIGHT: THREE.MOUSE.ROTATE,
+  },
+  touches: {
+    ONE: THREE.TOUCH.PAN,
+    TWO: THREE.TOUCH.DOLLY_ROTATE,
+  },
+  keys: { LEFT: "KeyA", RIGHT: "KeyD", UP: "KeyW", BOTTOM: "KeyS" },
 };
