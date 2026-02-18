@@ -109,20 +109,28 @@ describe("CameraStateSettings", () => {
 
   afterEach(() => {
     renderer.dispose();
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as jest.Mock).mockClear(); // Suppress warnings from the Renderer during tests, if any
   });
 
   describe("constructor", () => {
-    it("creates an instance successfully", () => {
+    it("creates an instance with correct default settings", () => {
       // Given
       const aspect = 16 / 9;
 
       // When
       const cameraStateSettings = new CameraStateSettings(renderer, canvas, aspect);
+      cameraStateSettings.setCameraState(DEFAULT_CAMERA_STATE);
 
       // Then
       expect(cameraStateSettings).toBeInstanceOf(CameraStateSettings);
-      expect(cameraStateSettings).toBeDefined();
+      expect(cameraStateSettings.getActiveCamera().type).toBe("PerspectiveCamera");
+      expect(cameraStateSettings.getCameraState()).toMatchObject({
+        ...DEFAULT_CAMERA_STATE,
+        distance: expect.closeTo(DEFAULT_CAMERA_STATE.distance), // floating point comparisons
+        phi: expect.closeTo(DEFAULT_CAMERA_STATE.phi),
+        thetaOffset: expect.closeTo(DEFAULT_CAMERA_STATE.thetaOffset),
+      });
+      expect(cameraStateSettings.settingsNodes()).toHaveLength(2);
     });
   });
 });
