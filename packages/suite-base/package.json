@@ -57,6 +57,7 @@
     "@mcap/core": "2.1.6",
     "@mui/icons-material": "5.15.5",
     "@mui/material": "7.2.0",
+    "@mui/x-data-grid": "7.24.1",
     "@popperjs/core": "^2.11.8",
     "@protobufjs/base64": "1.1.2",
     "@storybook/jest": "0.2.3",
