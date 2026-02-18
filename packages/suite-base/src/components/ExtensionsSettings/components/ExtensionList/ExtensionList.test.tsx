@@ -15,7 +15,6 @@ import {
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-// test
 jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
   useExtensionCatalog: jest.fn(),
 }));
