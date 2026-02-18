@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
 import { Immutable } from "@lichtblick/suite";
@@ -12,12 +12,22 @@ import {
   displayNameForNamespace,
   generatePlaceholderList,
 } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/utils";
+import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
   useExtensionCatalog: jest.fn(),
 }));
+
+const mockEnqueueSnackbar = jest.fn();
+jest.mock("notistack", () => ({
+  ...jest.requireActual("notistack"),
+  useSnackbar: () => ({
+    enqueueSnackbar: mockEnqueueSnackbar,
+  }),
+}));
+
 describe("ExtensionList utility functions", () => {
   describe("displayNameForNamespace", () => {
     it("returns 'Organization' for 'org'", () => {
@@ -46,7 +56,7 @@ describe("ExtensionList utility functions", () => {
 
 describe("ExtensionList Component", () => {
   const mockNamespace = "org";
-  const mockEntries = [
+  const mockEntries: Immutable<ExtensionMarketplaceDetail>[] = [
     {
       id: "1",
       name: "Extension",
@@ -54,6 +64,7 @@ describe("ExtensionList Component", () => {
       publisher: "Publisher 1",
       version: "1.0.0",
       qualifiedName: "org.extension1",
+      namespace: "org",
       homepage: BasicBuilder.string(),
       license: BasicBuilder.string(),
       displayName: "DisplayName-Extension 1",
@@ -66,6 +77,7 @@ describe("ExtensionList Component", () => {
       publisher: "Publisher 2",
       version: "1.0.0",
       qualifiedName: "org.extension2",
+      namespace: "org",
       homepage: BasicBuilder.string(),
       license: BasicBuilder.string(),
       displayName: "DisplayName-Extension 2",
@@ -76,6 +88,20 @@ describe("ExtensionList Component", () => {
   const mockSelectExtension = jest.fn();
 
   const emptyMockEntries: Immutable<ExtensionMarketplaceDetail>[] = [];
+
+  beforeEach(() => {
+    // Mock useExtensionCatalog as a Zustand selector hook
+    (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+      const mockState = {
+        installedExtensions: [],
+        uninstallExtension: jest.fn(),
+      };
+      return selector(mockState);
+    });
+
+    // Clear mock call history
+    mockEnqueueSnackbar.mockClear();
+  });
 
   it("renders the list of extensions correctly", () => {
     // Given/When
@@ -139,6 +165,165 @@ describe("ExtensionList Component", () => {
     expect(mockSelectExtension).toHaveBeenCalledWith({
       installed: false,
       entry: mockEntries[0],
+    });
+  });
+  describe("handleBulkUninstall", () => {
+    const mockUninstallExtension = jest.fn();
+
+    beforeEach(() => {
+      mockUninstallExtension.mockClear();
+
+      (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+        const mockState = {
+          installedExtensions: mockEntries,
+          uninstallExtension: mockUninstallExtension,
+        };
+        return selector(mockState);
+      });
+    });
+
+    it("uninstalls selected extensions", async () => {
+      // Given
+      render(
+        <ExtensionList
+          namespace={mockNamespace}
+          entries={mockEntries}
+          filterText={mockFilterText}
+          selectExtension={mockSelectExtension}
+        />,
+      );
+
+      // When
+      const checkboxes = screen.getAllByRole("checkbox", { name: /select row/i });
+      fireEvent.click(checkboxes[0]!); // Select first extension
+      fireEvent.click(checkboxes[1]!); // Select second extension
+
+      // Then
+      const uninstallButton = await screen.findByRole("button", { name: "Uninstall 2" });
+      expect(uninstallButton).toBeInTheDocument();
+
+      // When
+      fireEvent.click(uninstallButton);
+
+      // Then
+      await waitFor(() => {
+        expect(mockUninstallExtension).toHaveBeenCalledTimes(2);
+        expect(mockUninstallExtension).toHaveBeenCalledWith("org", "1");
+        expect(mockUninstallExtension).toHaveBeenCalledWith("org", "2");
+      });
+    });
+
+    it("does not show uninstall button when selected extensions are not installed", async () => {
+      // Given - override to have NO installed extensions
+      (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+        const mockState = {
+          installedExtensions: [], // Empty - nothing installed
+          uninstallExtension: mockUninstallExtension,
+        };
+        return selector(mockState);
+      });
+
+      render(
+        <ExtensionList
+          namespace={mockNamespace}
+          entries={mockEntries}
+          filterText={mockFilterText}
+          selectExtension={mockSelectExtension}
+        />,
+      );
+
+      // When
+      const checkboxes = screen.getAllByRole("checkbox", { name: /select row/i });
+      fireEvent.click(checkboxes[0]!); // Select first extension
+      fireEvent.click(checkboxes[1]!); // Select second extension
+
+      // Then - should show selected count but no uninstall button
+      expect(screen.getByText("2 selected")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /uninstall/i })).not.toBeInTheDocument();
+    });
+
+    it("shows snackbar when only some selected extensions are installed", async () => {
+      // Given
+      (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+        const mockState = {
+          installedExtensions: [mockEntries[0]], // Only first one installed
+          uninstallExtension: mockUninstallExtension,
+        };
+        return selector(mockState);
+      });
+
+      render(
+        <ExtensionList
+          namespace={mockNamespace}
+          entries={mockEntries}
+          filterText={mockFilterText}
+          selectExtension={mockSelectExtension}
+        />,
+      );
+
+      // When
+      const checkboxes = screen.getAllByRole("checkbox", { name: /select row/i });
+      fireEvent.click(checkboxes[0]!); // installed
+      fireEvent.click(checkboxes[1]!); // not installed
+
+      // Then
+      const uninstallButton = await screen.findByRole("button", { name: "Uninstall 1" });
+      expect(uninstallButton).toBeInTheDocument();
+
+      // When
+      fireEvent.click(uninstallButton);
+
+      // Then
+      await waitFor(() => {
+        expect(mockUninstallExtension).toHaveBeenCalledTimes(1);
+        expect(mockUninstallExtension).toHaveBeenCalledWith("org", "1");
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+          "1 extension(s) uninstalled successfully",
+          { variant: "success" },
+        );
+      });
+    });
+
+    it("shows both success and error snackbars when some uninstalls fail", async () => {
+      // Given
+      mockUninstallExtension
+        .mockResolvedValueOnce(undefined) // First call succeeds
+        .mockRejectedValueOnce(new Error("Second uninstall failed")); // Second call fails
+
+      // This is needed to supress the error log from the failed uninstall in the test output, since we are intentionally causing it to fail to test the error handling
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+
+      render(
+        <ExtensionList
+          namespace={mockNamespace}
+          entries={mockEntries}
+          filterText={mockFilterText}
+          selectExtension={mockSelectExtension}
+        />,
+      );
+
+      // When
+      const checkboxes = screen.getAllByRole("checkbox", { name: /select row/i });
+      fireEvent.click(checkboxes[0]!);
+      fireEvent.click(checkboxes[1]!);
+
+      const uninstallButton = await screen.findByRole("button", { name: "Uninstall 2" });
+      fireEvent.click(uninstallButton);
+
+      // Then
+      await waitFor(() => {
+        expect(mockUninstallExtension).toHaveBeenCalledTimes(2);
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+          "1 extension(s) uninstalled successfully",
+          { variant: "success" },
+        );
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith("1 extension(s) failed to uninstall", {
+          variant: "error",
+        });
+      });
+
+      // Restore console.error to its original implementation after the test
+      consoleErrorSpy.mockRestore();
     });
   });
 });
