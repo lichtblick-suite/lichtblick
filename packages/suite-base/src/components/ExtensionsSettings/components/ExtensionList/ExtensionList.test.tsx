@@ -78,6 +78,7 @@ describe("ExtensionList Component", () => {
   const emptyMockEntries: Immutable<ExtensionMarketplaceDetail>[] = [];
 
   it("renders the list of extensions correctly", () => {
+    // Given/When
     render(
       <ExtensionList
         namespace={mockNamespace}
@@ -86,12 +87,13 @@ describe("ExtensionList Component", () => {
         selectExtension={mockSelectExtension}
       />,
     );
+
+    // Then
     //Since namespace passed was 'org' displayNameForNamespace() transformed it to 'Organization'
     expect(screen.getByText("Organization")).toBeInTheDocument();
 
-    //finds 2 elements that represent the entries from mockEntries
-    const elements = screen.getAllByText("Extension");
-    expect(elements.length).toEqual(2);
+    expect(screen.getByText("Extension")).toBeInTheDocument();
+    expect(screen.getByText("Extension2")).toBeInTheDocument();
   });
 
   it("renders 'No extensions found' message when entries are empty and there's filterText", () => {
