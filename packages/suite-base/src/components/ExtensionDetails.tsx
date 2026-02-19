@@ -13,6 +13,7 @@ import { useCallback, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 import { makeStyles } from "tss-react/mui";
 
+import { formatByteSize } from "@lichtblick/den/format";
 import { Immutable } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextContent from "@lichtblick/suite-base/components/TextContent";
@@ -219,6 +220,11 @@ export function ExtensionDetails({
             <Typography variant="caption" color="text.secondary">
               {extension.license}
             </Typography>
+            {extension.size != undefined && (
+              <Typography variant="caption" color="text.secondary">
+                {formatByteSize(extension.size)}
+              </Typography>
+            )}
           </Stack>
           <Typography variant="subtitle2" gutterBottom>
             {extension.publisher}
