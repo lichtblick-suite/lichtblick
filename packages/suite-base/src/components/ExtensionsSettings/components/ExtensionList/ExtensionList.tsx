@@ -143,31 +143,29 @@ export default function ExtensionList({
 
     return (
       <Stack gap={1}>
-        {selectedExtensionIds.length > 0 && (
-          <Stack direction="row" gap={1} paddingX={2}>
-            <Typography variant="body2" color="text.secondary" alignSelf="center">
-              {selectedExtensionIds.length} selected
-            </Typography>
-            {selectedInstalled.length > 0 && (
-              <Button
-                size="small"
-                color="inherit"
-                variant="outlined"
-                onClick={handleBulkUninstall}
-                disabled={isBulkOperating}
-              >
-                {isBulkOperating ? "Uninstalling..." : `Uninstall ${selectedInstalled.length}`}
-              </Button>
-            )}
-          </Stack>
-        )}
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
+        <Stack direction="row" gap={1} paddingX={2}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            alignSelf="center"
+            paddingY={1}
+            style={{ visibility: selectedInstalled.length > 0 ? "visible" : "hidden" }}
+          >
+            {selectedExtensionIds.length} selected
+          </Typography>
+          {selectedInstalled.length > 0 && (
+            <Button
+              size="small"
+              color="inherit"
+              variant="outlined"
+              onClick={handleBulkUninstall}
+              disabled={isBulkOperating}
+            >
+              {isBulkOperating ? "Uninstalling..." : `Uninstall ${selectedInstalled.length}`}
+            </Button>
+          )}
+        </Stack>
+        <div style={{ width: "100%" }}>
           <DataGrid
             rows={entries}
             columns={columns}
