@@ -65,4 +65,16 @@ export type ExtensionActionButtonProps = {
   stopPropagation?: boolean;
   color?: ButtonProps["color"];
   variant?: ButtonProps["variant"];
+  label: string;
+  loadingLabel: string;
+};
+
+export const ExtensionActionsLabel = {
+  INSTALL: "Install",
+  UNINSTALL: "Uninstall",
+};
+
+export const ExtensionOperationStatusLabel = {
+  INSTALLING: "Installing...",
+  UNINSTALLING: "Uninstalling...",
 };

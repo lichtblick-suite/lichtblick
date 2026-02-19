@@ -17,6 +17,10 @@ import {
   generatePlaceholderList,
 } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/utils";
 import { useExtensionOperations } from "@lichtblick/suite-base/components/ExtensionsSettings/hooks/useExtensionOperations";
+import {
+  ExtensionActionsLabel,
+  ExtensionOperationStatusLabel,
+} from "@lichtblick/suite-base/components/ExtensionsSettings/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
@@ -112,6 +116,8 @@ export default function ExtensionList({
               isOperating={isExtensionOperating}
               operationStatus={operationStatus}
               stopPropagation
+              label={ExtensionActionsLabel.UNINSTALL}
+              loadingLabel={ExtensionOperationStatusLabel.UNINSTALLING}
             />
           );
         } else {
@@ -122,6 +128,8 @@ export default function ExtensionList({
               isOperating={isExtensionOperating}
               operationStatus={operationStatus}
               stopPropagation
+              label={ExtensionActionsLabel.INSTALL}
+              loadingLabel={ExtensionOperationStatusLabel.INSTALLING}
             />
           );
         }
@@ -161,7 +169,9 @@ export default function ExtensionList({
               onClick={handleBulkUninstall}
               disabled={isBulkOperating}
             >
-              {isBulkOperating ? "Uninstalling..." : `Uninstall ${selectedInstalled.length}`}
+              {isBulkOperating
+                ? ExtensionOperationStatusLabel.UNINSTALLING
+                : `${ExtensionActionsLabel.UNINSTALL} ${selectedInstalled.length}`}
             </Button>
           )}
         </Stack>

@@ -15,6 +15,10 @@ import { useStylesExtensionDetails } from "@lichtblick/suite-base/components/Ext
 import { InstallButton } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionActionButton/InstallButton";
 import { UninstallButton } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionActionButton/UninstallButton";
 import { useExtensionOperations } from "@lichtblick/suite-base/components/ExtensionsSettings/hooks/useExtensionOperations";
+import {
+  ExtensionActionsLabel,
+  ExtensionOperationStatusLabel,
+} from "@lichtblick/suite-base/components/ExtensionsSettings/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextContent from "@lichtblick/suite-base/components/TextContent";
 import { ExtensionDetailsProps, OperationStatus } from "@lichtblick/suite-base/components/types";
@@ -117,24 +121,23 @@ export function ExtensionDetails({
         </Stack>
         {isInstalled ? (
           <UninstallButton
-            key="uninstall"
-            className={classes.installButton}
             extension={extension}
             onAction={handleUninstall}
             isOperating={operationStatus !== OperationStatus.IDLE}
             operationStatus={operationStatus}
-            color="inherit"
-            variant="contained"
+            stopPropagation
+            label={ExtensionActionsLabel.UNINSTALL}
+            loadingLabel={ExtensionOperationStatusLabel.UNINSTALLING}
           />
         ) : (
           <InstallButton
-            key="install"
-            className={classes.installButton}
             extension={extension}
             onAction={handleInstall}
             isOperating={operationStatus !== OperationStatus.IDLE}
             operationStatus={operationStatus}
-            color="inherit"
+            stopPropagation
+            label={ExtensionActionsLabel.INSTALL}
+            loadingLabel={ExtensionOperationStatusLabel.INSTALLING}
           />
         )}
       </Stack>
