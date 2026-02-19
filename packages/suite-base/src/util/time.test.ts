@@ -84,6 +84,11 @@ describe("time.getTimestampForMessageEvent", () => {
 });
 
 describe("time.parseTimeUrlString", () => {
+  it("returns undefined for undefined input", () => {
+    const result = time.parseTimeUrlString(undefined);
+    expect(result).toBeUndefined();
+  });
+
   it("parses RFC3339 strings", () => {
     const timeString = "2023-06-01T12:34:56Z";
     const result = time.parseTimeUrlString(timeString);
