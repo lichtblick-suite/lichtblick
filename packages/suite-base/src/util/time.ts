@@ -68,7 +68,19 @@ export function getTimestampForMessage(message: unknown): Time | undefined {
   return undefined;
 }
 
-export function parseTimeUrlString(timeString: string): Time | undefined {
+/**
+ * Parses a time string into a Time object.
+ * Attempts to parse the string as RFC3339 format first.
+ * If parsing as RFC3339 fails, falls back to parsing the raw sec.nsec format.
+ *
+ * @param timeString - The time string to parse.
+ * @returns A Time object if parsing succeeds, or undefined if parsing fails.
+ */
+export function parseTimeUrlString(timeString: string | undefined): Time | undefined {
+  if (!timeString) {
+    return undefined;
+  }
+
   const dateTime = fromRFC3339String(timeString);
 
   if (dateTime) {

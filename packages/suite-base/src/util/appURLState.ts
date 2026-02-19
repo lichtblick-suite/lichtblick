@@ -79,7 +79,7 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
 export function parseAppURLState(url: URL): AppURLState | undefined {
   const ds = url.searchParams.get("ds") ?? undefined;
   const timeString = url.searchParams.get("time");
-  const time = timeString == undefined ? undefined : parseTimeUrlString(timeString);
+  const time = parseTimeUrlString(timeString ?? undefined);
   const dsParams: Record<string, string> = {};
   url.searchParams.forEach((v, k) => {
     if (k && v && k.startsWith("ds.")) {
