@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -51,10 +51,34 @@ export class RenderableModels extends RenderablePrimitive {
   #renderablesByDataCrc = new Map<number, RenderableModel[]>();
   /** Renderables loaded from URLs */
   #renderablesByUrl = new Map<string, RenderableModel[]>();
+  #pendingModelLoads = new Map<string, Promise<LoadedModel | undefined>>();
+
   #updateCount = 0;
 
   public constructor(renderer: IRenderer) {
     super("", renderer);
+  }
+
+  async #loadOrGetPending(
+    key: string,
+    loadFn: () => Promise<LoadedModel | undefined>,
+  ): Promise<LoadedModel | undefined> {
+    // Return existing pending load
+    const existing = this.#pendingModelLoads.get(key);
+    if (existing) {
+      return await existing;
+    }
+
+    // Start a new load
+    const promise = loadFn().finally(() => {
+      // Remove from map when done (success or failure)
+      this.#pendingModelLoads.delete(key);
+    });
+
+    // Store before awaiting
+    this.#pendingModelLoads.set(key, promise);
+
+    return await promise;
   }
 
   /**
@@ -69,14 +93,24 @@ export class RenderableModels extends RenderablePrimitive {
     revokeURL: (_: string) => void,
   ): Promise<RenderableModel | undefined> {
     const url = getURL(primitive);
+    const key = primitive.url.length === 0 ? crc32(primitive.data).toString() : primitive.url;
+
     let renderable: RenderableModel | undefined;
     try {
-      // Load the model if necessary
-      const cachedModel = await this.#loadCachedModel(url, {
-        overrideMediaType: primitive.media_type.length > 0 ? primitive.media_type : undefined,
-      });
+      // Load the model if necessary, otherwise get pending loaded model
+      const cachedModel = await this.#loadOrGetPending(
+        key,
+        async () =>
+          await this.#loadCachedModel(url, {
+            overrideMediaType: primitive.media_type.length > 0 ? primitive.media_type : undefined,
+          }),
+      );
       if (cachedModel) {
-        renderable = { model: cloneAndPrepareModel(cachedModel), cachedModel, primitive };
+        renderable = {
+          model: cloneAndPrepareModel(cachedModel),
+          cachedModel,
+          primitive,
+        };
       }
     } finally {
       revokeURL(url);
@@ -120,44 +154,54 @@ export class RenderableModels extends RenderablePrimitive {
 
     const modelsToLoad: ModelPrimitive[] = [];
 
-    // iterate over new primitives and update existing renderables
-    // add primitives that don't have models yet to modelsToLoad
+    // Match incoming primitives with previously-rendered models (reuse)
     for (const primitive of models) {
       let prevRenderables: RenderableModel[] | undefined;
       let newRenderables: RenderableModel[] | undefined;
-      let renderable: RenderableModel | undefined;
+      let reusedRenderable: RenderableModel | undefined;
+
       if (primitive.url.length === 0) {
         const dataCrc = crc32(primitive.data);
+
         prevRenderables = prevRenderablesByDataCrc.get(dataCrc);
         newRenderables = this.#renderablesByDataCrc.get(dataCrc);
+
+        // Create a bucket for this CRC if not already present
         if (!newRenderables) {
           newRenderables = [];
           this.#renderablesByDataCrc.set(dataCrc, newRenderables);
         }
-        renderable = this.#removeMatchFromList(prevRenderables, (model) =>
+
+        reusedRenderable = this.#removeMatchFromList(prevRenderables, (model) =>
           dataPrimitivesMatch(model, primitive),
         );
       } else {
+        // URL-based model
         prevRenderables = prevRenderablesByUrl.get(primitive.url);
         newRenderables = this.#renderablesByUrl.get(primitive.url);
+
+        // Create a bucket for this URL if not already present
         if (!newRenderables) {
           newRenderables = [];
           this.#renderablesByUrl.set(primitive.url, newRenderables);
         }
-        renderable = this.#removeMatchFromList(prevRenderables, (model) =>
+
+        reusedRenderable = this.#removeMatchFromList(prevRenderables, (model) =>
           urlPrimitivesMatch(model, primitive),
         );
       }
-      // renderable not found in prevRenderables
-      if (renderable) {
-        this.#updateModel(renderable, primitive);
-        newRenderables.push(renderable);
-        this.add(renderable.model);
+
+      // Mark renderable for reuse or add to loading backlog
+      if (reusedRenderable) {
+        this.#updateModel(reusedRenderable, primitive);
+        newRenderables.push(reusedRenderable);
+        this.add(reusedRenderable.model);
       } else {
         modelsToLoad.push(primitive);
       }
     }
 
+    // Load new renderables asynchronously
     Promise.all(
       modelsToLoad.map(async (primitive) => {
         let newRenderables: RenderableModel[] | undefined;
@@ -229,6 +273,7 @@ export class RenderableModels extends RenderablePrimitive {
         // update for new models
         this.#updateOutlineVisibility();
       });
+
     // Only unused models should be left in the `prevRenderables` lists after
     // using this.#removeMatchFromList() above
     for (const renderables of prevRenderablesByUrl.values()) {

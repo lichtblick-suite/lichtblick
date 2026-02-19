@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -126,7 +126,13 @@ const Plot = (props: PlotProps): React.JSX.Element => {
 
   useEffect(() => {
     coordinator?.handleConfig(config, theme.palette.mode, globalVariables);
-  }, [coordinator, config, globalVariables, theme.palette.mode]);
+
+    // When config changes (e.g., series reordering) and the player is paused,
+    // we need to re-process the current player state to update the rendered data
+    if (coordinator) {
+      coordinator.handlePlayerState(getMessagePipelineState().playerState);
+    }
+  }, [coordinator, config, globalVariables, theme.palette.mode, getMessagePipelineState]);
 
   // This effect must come after the one above it so the coordinator gets the latest config before
   // the latest player state and can properly initialize if the player state already contains the

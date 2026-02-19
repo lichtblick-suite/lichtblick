@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -15,6 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { useTheme } from "@mui/material";
+import { typescript } from "monaco-editor";
 // @ts-expect-error ICodeEditorService does not have type information in the monaco-editor package
 import { ICodeEditorService } from "monaco-editor/esm/vs/editor/browser/services/codeEditorService";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
@@ -98,7 +99,7 @@ const Editor = ({
   const editorTheme = useTheme().palette.mode === "dark" ? "vs-studio-dark" : "vs-studio-light";
 
   React.useEffect(() => {
-    const disposable = monacoApi.languages.typescript.typescriptDefaults.addExtraLib(
+    const disposable = typescript.typescriptDefaults.addExtraLib(
       rosLib,
       `file:///node_modules/@types/${projectConfig.rosLib.fileName}`,
     );
@@ -212,8 +213,8 @@ const Editor = ({
       }
 
       // Set eager model sync to enable intellisense between the user code and utility files
-      monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
-      monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+      typescript.typescriptDefaults.setEagerModelSync(true);
+      typescript.javascriptDefaults.setEagerModelSync(true);
 
       monaco.languages.registerDocumentFormattingEditProvider("typescript", {
         provideDocumentFormattingEdits: async (model) => {
@@ -233,7 +234,7 @@ const Editor = ({
 
       // Disable validation in screenshots to avoid flaky tests
       if (inScreenshotTests()) {
-        monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+        typescript.typescriptDefaults.setDiagnosticsOptions({
           noSyntaxValidation: true,
           noSemanticValidation: true,
         });
@@ -248,19 +249,19 @@ const Editor = ({
       // typescript language service does not expose such a method.
       projectConfig.declarations.forEach((lib) => {
         if (lib.fileName.startsWith("@foxglove/schemas")) {
-          monaco.languages.typescript.typescriptDefaults.addExtraLib(
+          typescript.typescriptDefaults.addExtraLib(
             lib.sourceCode,
             `file:///node_modules/${lib.fileName}`,
           );
         } else {
-          monaco.languages.typescript.typescriptDefaults.addExtraLib(
+          typescript.typescriptDefaults.addExtraLib(
             lib.sourceCode,
             `file:///node_modules/@types/${lib.fileName}`,
           );
         }
       });
-      monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-        ...monaco.languages.typescript.typescriptDefaults.getCompilerOptions(),
+      typescript.typescriptDefaults.setCompilerOptions({
+        ...typescript.typescriptDefaults.getCompilerOptions(),
         // This is needed for @foxglove/schemas to resolve correctly in the editor.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         moduleResolution: ModuleResolutionKind.NodeNext as any,

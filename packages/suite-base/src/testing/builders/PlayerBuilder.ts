@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
@@ -15,12 +15,11 @@ import {
   TopicSelection,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RosDatatypesBuilder from "@lichtblick/suite-base/testing/builders/RosDatatypesBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { Range } from "@lichtblick/suite-base/util/ranges";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 class PlayerBuilder {
   public static subscribePayload(props: Partial<SubscribePayload> = {}): SubscribePayload {

@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { renderHook, act } from "@testing-library/react";
@@ -11,8 +11,8 @@ import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerCo
 import { useLayoutActions } from "@lichtblick/suite-base/hooks/useLayoutActions";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
   useLayoutManager: jest.fn(),

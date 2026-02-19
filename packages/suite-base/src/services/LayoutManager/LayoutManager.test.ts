@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
@@ -9,8 +9,8 @@ import {
 } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { IRemoteLayoutStorage } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
 import LayoutManager from "@lichtblick/suite-base/services/LayoutManager/LayoutManager";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("LayoutManager", () => {
   let mockLocalStorage: jest.Mocked<ILayoutStorage>;

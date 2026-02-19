@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { Time } from "@lichtblick/rostime";
@@ -6,9 +6,9 @@ import { DiagnosticInfo } from "@lichtblick/suite-base/panels/DiagnosticStatus/t
 import { LEVELS } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import { DiagnosticsById } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 import { getDiagnosticsWithStales } from "@lichtblick/suite-base/panels/DiagnosticSummary/utils/getDiagnosticsWithStales";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("getDiagnosticsWithStales", () => {
   const staleTime = RosTimeBuilder.time({ sec: 100, nsec: 0 });

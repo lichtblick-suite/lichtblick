@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import "@testing-library/jest-dom";
@@ -15,8 +15,8 @@ import {
   DiagnosticSummaryProps,
 } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics");
 

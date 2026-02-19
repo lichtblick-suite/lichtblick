@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { Immutable } from "immer";
 
@@ -35,4 +35,15 @@ export type FieldEditorProps = {
 export type SettingsTreeEditorProps = {
   variant: "panel" | "log";
   settings: Immutable<SettingsTree>;
+};
+
+export type DragItem = {
+  path: readonly string[];
+};
+
+export type NodeEditorState = {
+  editing: boolean;
+  focusedPath: undefined | readonly string[];
+  open: boolean;
+  visibilityFilter: SelectVisibilityFilterValue;
 };

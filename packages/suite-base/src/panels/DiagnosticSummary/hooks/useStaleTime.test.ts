@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { act, renderHook } from "@testing-library/react";
@@ -8,8 +8,8 @@ import {
   useMessagePipelineGetter,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useStaleTime from "./useStaleTime";
 

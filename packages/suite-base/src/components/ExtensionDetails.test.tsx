@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import "@testing-library/jest-dom";
@@ -18,9 +18,9 @@ import {
   ExtensionMarketplaceDetail,
   useExtensionMarketplace,
 } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("notistack", () => ({
   useSnackbar: jest.fn(),

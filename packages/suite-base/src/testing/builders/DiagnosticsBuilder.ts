@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import {
@@ -9,10 +9,9 @@ import {
   KeyValue,
 } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import { DiagnosticSummaryConfig } from "@lichtblick/suite-base/panels/DiagnosticSummary/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import { Header } from "@lichtblick/suite-base/types/Messages";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 class DiagnosticsBuilder {
   public static statusConfig(props: Partial<DiagnosticStatusConfig> = {}): DiagnosticStatusConfig {

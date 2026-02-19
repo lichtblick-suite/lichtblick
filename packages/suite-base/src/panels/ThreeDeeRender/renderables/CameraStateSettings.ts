@@ -23,7 +23,7 @@ import {
 import type { FollowMode, IRenderer } from "../IRenderer";
 import { SceneExtension } from "../SceneExtension";
 import { SettingsTreeEntry } from "../SettingsManager";
-import { CameraState, DEFAULT_CAMERA_STATE } from "../camera";
+import { CameraState, DEFAULT_CAMERA_STATE, DEFAULT_ORBIT_CONTROLS_CONFIG } from "../camera";
 import { PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
 
 const DISPLAY_FRAME_NOT_FOUND = "DISPLAY_FRAME_NOT_FOUND";
@@ -87,11 +87,11 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     this.add(this.#cameraGroup);
 
     this.#controls = new OrbitControls(this.#perspectiveCamera, this.#canvas);
-    this.#controls.screenSpacePanning = false; // only allow panning in the XY plane by default
-    this.#controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
-    this.#controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
-    this.#controls.touches.ONE = THREE.TOUCH.PAN;
-    this.#controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
+    this.#controls.screenSpacePanning = DEFAULT_ORBIT_CONTROLS_CONFIG.screenSpacePanning;
+    this.#controls.mouseButtons.LEFT = DEFAULT_ORBIT_CONTROLS_CONFIG.mouseButtons.LEFT;
+    this.#controls.mouseButtons.RIGHT = DEFAULT_ORBIT_CONTROLS_CONFIG.mouseButtons.RIGHT;
+    this.#controls.touches.ONE = DEFAULT_ORBIT_CONTROLS_CONFIG.touches.ONE;
+    this.#controls.touches.TWO = DEFAULT_ORBIT_CONTROLS_CONFIG.touches.TWO;
     this.#controls.addEventListener("change", () => {
       if (!this.#isUpdatingCameraState) {
         renderer.emit("cameraMove", renderer);
@@ -113,7 +113,7 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     // Make the canvas able to receive keyboard events and setup WASD controls
     canvas.tabIndex = 1000;
     this.#aspect = aspect;
-    this.#controls.keys = { LEFT: "KeyA", RIGHT: "KeyD", UP: "KeyW", BOTTOM: "KeyS" };
+    this.#controls.keys = DEFAULT_ORBIT_CONTROLS_CONFIG.keys;
     this.#controls.listenToKeyEvents(canvas);
   }
 

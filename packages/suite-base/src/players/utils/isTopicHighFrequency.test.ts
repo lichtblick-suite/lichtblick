@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { RosTime } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
@@ -6,7 +6,7 @@ import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManage
 import { TopicStats } from "@lichtblick/suite-base/players/types";
 import { LOG_SCHEMAS } from "@lichtblick/suite-base/players/utils/constants";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("isTopicHighFrequency", () => {
   const topicName = BasicBuilder.string();

@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { renderHook } from "@testing-library/react";
@@ -10,9 +10,9 @@ import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/M
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { PlotConfig, PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useSubscriptions from "./useSubscriptions";
 import { isReferenceLinePlotPathType } from "../utils/config";

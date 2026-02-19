@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { LayoutData, LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
@@ -11,15 +11,14 @@ import {
   LayoutSyncStatus,
 } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { RemoteLayout } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
-import { defaults } from "@lichtblick/suite-base/testing/builders/utilities";
 import {
   PanelConfig,
   PlaybackConfig,
   UserScript,
   UserScripts,
 } from "@lichtblick/suite-base/types/panels";
+import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
 export default class LayoutBuilder {
   public static readonly permission: LayoutPermission = BasicBuilder.sample([

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -51,6 +51,7 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
           position: "absolute",
           inset: "-1px 0 -1px 0",
           border: `1px solid ${theme.palette.primary.main}`,
+          pointerEvents: "none",
         },
         [`& + .${classes.row}`]: {
           borderTop: `1px solid ${theme.palette.primary.main}`,
@@ -92,6 +93,9 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
     color: theme.palette.primary.main,
     display: "block",
     textAlign: "start",
+  },
+  navIconButton: {
+    padding: theme.spacing(0.25),
   },
   /* eslint-enable tss-unused-classes/unused-classes */
 }));

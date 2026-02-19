@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -20,7 +20,7 @@ import { ReactElement, useCallback, useEffect, useRef } from "react";
 // By default, preventDefault() is invoked on the event. Return false to allow the default.
 type KeyHandlers = Record<string, (event: KeyboardEvent) => void | boolean | undefined>;
 
-type Props = {
+export type KeyListenerProps = {
   global?: boolean;
   keyDownHandlers?: KeyHandlers;
   keyPressHandlers?: KeyHandlers;
@@ -46,7 +46,7 @@ function callHandlers(handlers: KeyHandlers | undefined, event: KeyboardEvent): 
   }
 }
 
-export default function KeyListener(props: Props): ReactElement {
+export default function KeyListener(props: KeyListenerProps): ReactElement {
   const element = useRef<HTMLDivElement>(ReactNull);
 
   const handleEvent = useCallback(
@@ -58,7 +58,8 @@ export default function KeyListener(props: Props): ReactElement {
       if (
         target instanceof HTMLInputElement ||
         target instanceof HTMLTextAreaElement ||
-        (target instanceof HTMLElement && target.isContentEditable)
+        (target instanceof HTMLElement && target.isContentEditable) ||
+        (target instanceof HTMLElement && target.closest(".monaco-editor"))
       ) {
         // The user is typing in an editable field; ignore the event.
         return;

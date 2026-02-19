@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -78,7 +78,10 @@ export interface Player {
   setGlobalVariables(globalVariables: GlobalVariables): void;
   getMetadata?: () => ReadonlyArray<Readonly<Metadata>>;
   // Create a batch iterator for streaming messages. Available for data source players that support message iteration.
-  getBatchIterator: (topic: string) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
+  getBatchIterator: (
+    topic: string,
+    options?: { start?: Time; end?: Time },
+  ) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
 }
 
 export enum PlayerPresence {

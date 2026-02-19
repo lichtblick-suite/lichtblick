@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -610,6 +610,7 @@ export const SETTINGS_ICONS = [
   "Collapse",
   "Cube",
   "Delete",
+  "DragHandle",
   "Expand",
   "Flag",
   "Folder",
@@ -936,6 +937,11 @@ export type SettingsTreeNode = {
    * Filter Children by visibility status
    */
   enableVisibilityFilter?: boolean;
+
+  /**
+   * True if the node can be reordered via drag and drop.
+   */
+  reorderable?: boolean;
 };
 
 /**
@@ -958,11 +964,22 @@ export type SettingsTreeActionPerformNode = {
   payload: { id: string; path: readonly string[] };
 };
 
+export type SettingsTreeActionReorder = {
+  action: "reorder-node";
+  payload: {
+    path: readonly string[];
+    targetPath: readonly string[];
+  };
+};
+
 /**
  * Represents actions that can be dispatched to source of the SettingsTree to implement
  * edits and updates.
  */
-export type SettingsTreeAction = SettingsTreeActionUpdate | SettingsTreeActionPerformNode;
+export type SettingsTreeAction =
+  | SettingsTreeActionUpdate
+  | SettingsTreeActionPerformNode
+  | SettingsTreeActionReorder;
 
 export type SettingsTreeNodes = Record<string, undefined | SettingsTreeNode>;
 

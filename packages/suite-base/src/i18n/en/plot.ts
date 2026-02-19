@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -26,8 +26,11 @@ export const plot = {
   maxYError: "Y max must be greater than Y min.",
   messagePath: "Message path",
   min: "Min",
+  moveSeriesDown: "Move series down",
+  moveSeriesUp: "Move series up",
   position: "Position",
   receiveTime: "Receive Time",
+  reorderSeries: "Reorder series",
   resetView: "Reset view",
   secondsRange: "Range (seconds)",
   series: "Series",

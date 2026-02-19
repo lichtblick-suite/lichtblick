@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -16,7 +16,7 @@
 
 // No time functions that require `moment` should live in this file.
 import log from "@lichtblick/log";
-import { Time } from "@lichtblick/rostime";
+import { fromRFC3339String, fromString, Time } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 import { MarkerArray, StampedMessage } from "@lichtblick/suite-base/types/Messages";
 
@@ -66,4 +66,26 @@ export function getTimestampForMessage(message: unknown): Time | undefined {
   }
 
   return undefined;
+}
+
+/**
+ * Parses a time string into a Time object.
+ * Attempts to parse the string as RFC3339 format first.
+ * If parsing as RFC3339 fails, falls back to parsing the raw sec.nsec format.
+ *
+ * @param timeString - The time string to parse.
+ * @returns A Time object if parsing succeeds, or undefined if parsing fails.
+ */
+export function parseTimeUrlString(timeString: string | undefined): Time | undefined {
+  if (!timeString) {
+    return undefined;
+  }
+
+  const dateTime = fromRFC3339String(timeString);
+
+  if (dateTime) {
+    return dateTime;
+  }
+
+  return fromString(timeString);
 }

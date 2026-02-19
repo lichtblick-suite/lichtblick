@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -6,13 +6,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Time, toRFC3339String } from "@lichtblick/rostime";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import {
   AppURLState,
   updateAppURLState,
   parseAppURLState,
 } from "@lichtblick/suite-base/util/appURLState";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/util/isDesktopApp", () => ({
   __esModule: true,

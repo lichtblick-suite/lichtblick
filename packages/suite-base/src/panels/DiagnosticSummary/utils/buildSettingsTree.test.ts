@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import {
   SettingsTreeField,
@@ -7,8 +7,8 @@ import {
   SettingsTreeNodes,
 } from "@lichtblick/suite";
 import { DEFAULT_SETTINGS_TREE_NODE } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { buildSettingsTree } from "./buildSettingsTree";
 

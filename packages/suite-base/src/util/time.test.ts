@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -80,5 +80,30 @@ describe("time.getTimestampForMessageEvent", () => {
         "headerStamp",
       ),
     ).toEqual(undefined);
+  });
+});
+
+describe("time.parseTimeUrlString", () => {
+  it("returns undefined for undefined input", () => {
+    const result = time.parseTimeUrlString(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it("parses RFC3339 strings", () => {
+    const timeString = "2023-06-01T12:34:56Z";
+    const result = time.parseTimeUrlString(timeString);
+    expect(result).toEqual({ sec: 1685622896, nsec: 0 });
+  });
+
+  it("parses raw sec.nsec format", () => {
+    const timeString = "12.345678901";
+    const result = time.parseTimeUrlString(timeString);
+    expect(result).toEqual({ sec: 12, nsec: 345678901 });
+  });
+
+  it("returns undefined for invalid strings", () => {
+    const timeString = "invalid";
+    const result = time.parseTimeUrlString(timeString);
+    expect(result).toBeUndefined();
   });
 });

@@ -1,8 +1,8 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { test, expect } from "../../../fixtures/electron";
-import { loadFile } from "../../../fixtures/load-file";
+import { loadFiles } from "../../../fixtures/load-files";
 
 /**
  * Given the Data Source dialog is closed
@@ -34,9 +34,9 @@ test("custom camera model", async ({ mainWindow }) => {
 
   // GIVEN
   const mcapFile = "custom-camera-model.mcap";
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename: mcapFile,
+    filenames: mcapFile,
   });
 
   // WHEN
@@ -65,9 +65,9 @@ test("custom camera model", async ({ mainWindow }) => {
 
   // WHEN
   const foxeFile = "custom-camera-model.foxe";
-  await loadFile({
+  await loadFiles({
     mainWindow,
-    filename: foxeFile,
+    filenames: foxeFile,
   });
   await mainWindow.getByTestId("play-button").click();
 

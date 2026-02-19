@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import type { Theme } from "@mui/material";
 import { EventEmitter } from "eventemitter3";
@@ -11,11 +11,11 @@ import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/M
 import { InteractionEvent, Scale } from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { MessageBlock } from "@lichtblick/suite-base/players/types";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import { PlotCoordinator } from "./PlotCoordinator";

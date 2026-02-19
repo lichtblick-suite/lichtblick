@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -19,9 +19,9 @@ import { renderHook } from "@testing-library/react";
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 import { DiagnosticStatusArrayMsg } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import { LEVELS } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
-import BasicBuilder from "@lichtblick/suite-base/testing/builders/BasicBuilder";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useDiagnostics, { addMessages, UseDiagnosticsResult } from "./useDiagnostics";
 import { computeDiagnosticInfo } from "../utils/util";

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (C) 2023-2025 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import tinycolor from "tinycolor2";
@@ -38,13 +38,9 @@ export const useStyles = makeStyles()((theme) => ({
     height: theme.spacing(0.5),
   },
   iconWrapper: {
-    position: "absolute",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    top: "50%",
-    left: 0,
-    transform: "translate(-97.5%, -50%)",
   },
 
   nodeHeader: {
@@ -89,11 +85,10 @@ export const useStyles = makeStyles()((theme) => ({
   },
 
   nodeHeaderToggle: {
-    display: "grid",
+    display: "flex",
     alignItems: "center",
-    gridTemplateColumns: "auto 1fr auto",
+    gap: 0,
     opacity: 0.6,
-    position: "relative",
     userSelect: "none",
     width: "100%",
   },
@@ -107,5 +102,12 @@ export const useStyles = makeStyles()((theme) => ({
     whiteSpace: "pre-line",
     maxHeight: "15vh",
     overflowY: "auto",
+  },
+  nodeHeaderDragging: {
+    opacity: 0.5,
+  },
+  nodeHeaderDropTarget: {
+    backgroundColor: tinycolor(theme.palette.primary.main).setAlpha(0.2).toRgbString(),
+    borderTop: `2px solid ${theme.palette.primary.main}`,
   },
 }));
