@@ -8,17 +8,57 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { setupJestCanvasMock } from "jest-canvas-mock";
+import * as THREE from "three";
 
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { Renderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/Renderer";
 import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
-import { DEFAULT_CAMERA_STATE } from "@lichtblick/suite-base/panels/ThreeDeeRender/camera";
+import {
+  DEFAULT_CAMERA_STATE,
+  DEFAULT_ORBIT_CONTROLS_CONFIG,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/camera";
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
 
 import { RendererConfig } from "../IRenderer";
 import { CameraStateSettings } from "./CameraStateSettings";
 
+let mockOrbitControls!: {
+  screenSpacePanning: boolean;
+  mouseButtons: { LEFT: number; RIGHT: number };
+  touches: { ONE: number; TWO: number };
+  keys: { LEFT: string; RIGHT: string; UP: string; BOTTOM: string };
+  addEventListener: jest.Mock;
+  listenToKeyEvents: jest.Mock;
+  getDistance: jest.Mock;
+  getPolarAngle: jest.Mock;
+  getAzimuthalAngle: jest.Mock;
+  target: THREE.Vector3;
+  update: jest.Mock;
+  minPolarAngle: number;
+  maxPolarAngle: number;
+};
+
+beforeEach(() => {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: undefined,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+});
+
 jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");
+
+jest.mock("three/examples/jsm/controls/OrbitControls", () => ({
+  OrbitControls: jest.fn().mockImplementation(() => mockOrbitControls),
+}));
 
 jest.mock("three", () => {
   const ActualTHREE = jest.requireActual("three");
@@ -47,21 +87,22 @@ jest.mock("three", () => {
   };
 });
 
-beforeEach(() => {
-  Object.defineProperty(window, "matchMedia", {
-    writable: true,
-    value: jest.fn().mockImplementation((query) => ({
-      matches: false,
-      media: query,
-      onchange: undefined,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
-  });
-});
+function setupOrbitControlsMock() {
+  mockOrbitControls = {
+    ...DEFAULT_ORBIT_CONTROLS_CONFIG,
+    addEventListener: jest.fn(),
+    listenToKeyEvents: jest.fn(),
+    getDistance: jest.fn().mockReturnValue(DEFAULT_CAMERA_STATE.distance),
+    getPolarAngle: jest.fn().mockReturnValue(THREE.MathUtils.degToRad(DEFAULT_CAMERA_STATE.phi)),
+    getAzimuthalAngle: jest
+      .fn()
+      .mockReturnValue(THREE.MathUtils.degToRad(-DEFAULT_CAMERA_STATE.thetaOffset)),
+    target: new THREE.Vector3(...DEFAULT_CAMERA_STATE.targetOffset),
+    update: jest.fn(),
+    minPolarAngle: 0,
+    maxPolarAngle: Math.PI,
+  };
+}
 
 const defaultRendererConfig: RendererConfig = {
   cameraState: DEFAULT_CAMERA_STATE,
@@ -101,6 +142,7 @@ describe("CameraStateSettings", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupJestCanvasMock();
+    setupOrbitControlsMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
     parent.appendChild(canvas);
@@ -131,6 +173,52 @@ describe("CameraStateSettings", () => {
         thetaOffset: expect.closeTo(DEFAULT_CAMERA_STATE.thetaOffset),
       });
       expect(cameraStateSettings.settingsNodes()).toHaveLength(2);
+    });
+  });
+
+  describe("screen space panning", () => {
+    const aspect = 16 / 9;
+
+    it("defaults to screen space panning disabled", () => {
+      // Given: A newly constructed CameraStateSettings instance
+      new CameraStateSettings(renderer, canvas, aspect);
+
+      // Then: Screen space panning should be disabled by default
+      expect(mockOrbitControls.screenSpacePanning).toBe(false);
+    });
+
+    it("enables screen space panning when Alt key is held", () => {
+      // Given: A CameraStateSettings instance with canvas keyboard listeners attached
+      new CameraStateSettings(renderer, canvas, aspect);
+
+      // When: A keydown event fires with the Alt key held
+      canvas.dispatchEvent(new KeyboardEvent("keydown", { altKey: true, bubbles: true }));
+
+      // Then: Screen space panning should be enabled
+      expect(mockOrbitControls.screenSpacePanning).toBe(true);
+    });
+
+    it("disables screen space panning when Alt key is released", () => {
+      // Given: A CameraStateSettings instance with Alt key already held
+      new CameraStateSettings(renderer, canvas, aspect);
+      canvas.dispatchEvent(new KeyboardEvent("keydown", { altKey: true, bubbles: true }));
+
+      // When: A keyup event fires without the Alt key
+      canvas.dispatchEvent(new KeyboardEvent("keyup", { altKey: false, bubbles: true }));
+
+      // Then: Screen space panning should be disabled again
+      expect(mockOrbitControls.screenSpacePanning).toBe(false);
+    });
+
+    it("does not enable screen space panning on keydown without Alt", () => {
+      // Given: A CameraStateSettings instance with canvas keyboard listeners attached
+      new CameraStateSettings(renderer, canvas, aspect);
+
+      // When: A keydown event fires without the Alt key
+      canvas.dispatchEvent(new KeyboardEvent("keydown", { altKey: false, bubbles: true }));
+
+      // Then: Screen space panning should remain disabled
+      expect(mockOrbitControls.screenSpacePanning).toBe(false);
     });
   });
 });
