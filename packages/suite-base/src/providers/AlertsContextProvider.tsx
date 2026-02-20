@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Immutable } from "immer";
+import * as _ from "lodash-es";
 import { ReactNode, useState } from "react";
 import { StoreApi, create } from "zustand";
 
@@ -26,6 +27,14 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
           });
         },
         setAlert: (tag: string, alert: Immutable<SessionAlert>) => {
+          const existing = get().alerts.find((al) => al.tag === tag);
+          if (existing) {
+            const { tag: _existingTag, ...existingAlert } = existing;
+            if (_.isEqual(existingAlert, alert)) {
+              return;
+            }
+          }
+
           const newAlerts = get().alerts.filter((al) => al.tag !== tag);
 
           set({
