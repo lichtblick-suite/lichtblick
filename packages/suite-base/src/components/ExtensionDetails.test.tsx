@@ -85,6 +85,7 @@ describe("ExtensionDetails Component", () => {
     expect(screen.getByText(new RegExp(mockExtension.license, "i"))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(mockExtension.publisher, "i"))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(mockExtension.description, "i"))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`${mockExtension.size}`, "i"))).toBeInTheDocument();
     expect(screen.getByText("README")).toBeInTheDocument();
     expect(screen.getByText("CHANGELOG")).toBeInTheDocument();
   });
