@@ -30,6 +30,7 @@ import { SidebarContent } from "@lichtblick/suite-base/components/SidebarContent
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { TopicList } from "@lichtblick/suite-base/components/TopicList";
 import WssErrorModal from "@lichtblick/suite-base/components/WssErrorModal";
+import { AlertsContextStore, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { EventsStore, useEvents } from "@lichtblick/suite-base/context/EventsContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
@@ -80,6 +81,7 @@ const AlertCount = muiStyled("div")(({ theme }) => ({
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerAlerts = ({ playerState }: MessagePipelineContext) => playerState.alerts;
+const selectSessionAlerts = (store: AlertsContextStore) => store.alerts;
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
 const selectEventsSupported = (store: EventsStore) => store.eventsSupported;
 
@@ -89,6 +91,8 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
   const { disableToolbar = false } = props;
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerAlerts = useMessagePipeline(selectPlayerAlerts) ?? [];
+  const sessionAlerts = useAlertsStore(selectSessionAlerts);
+  const alertCount = playerAlerts.length + sessionAlerts.length;
   const { currentUser } = useCurrentUser();
   const selectedEventId = useEvents(selectSelectedEventId);
   const [activeTab, setActiveTab] = useState<DataSourceSidebarTab>("topics");
@@ -165,9 +169,7 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
                       label={
                         <Stack direction="row" alignItems="baseline" gap={1}>
                           Alerts
-                          {playerAlerts.length > 0 && (
-                            <AlertCount>{playerAlerts.length}</AlertCount>
-                          )}
+                          {alertCount > 0 && <AlertCount>{alertCount}</AlertCount>}
                         </Stack>
                       }
                       value="alerts"

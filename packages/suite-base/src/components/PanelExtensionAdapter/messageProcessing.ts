@@ -11,6 +11,8 @@ import { Opaque } from "ts-essentials";
 import {
   Immutable,
   MessageEvent,
+  MessageConverterAlert,
+  MessageConverterContext,
   RegisterMessageConverterArgs,
   Subscription,
 } from "@lichtblick/suite";
@@ -23,9 +25,20 @@ type ConverterKey = Opaque<string, "ConverterKey">;
 
 type MessageConverter = RegisterMessageConverterArgs<unknown> & {
   extensionNamespace?: Namespace;
+  extensionId?: string;
 };
 
 type TopicSchemaConverterMap = Map<ConverterKey, MessageConverter[]>;
+
+export type MessageConverterAlertHandler = (
+  converter: MessageConverter,
+  alert: MessageConverterAlert,
+  alertId?: string,
+) => void;
+
+type ConvertMessageContext = {
+  emitAlert?: MessageConverterAlertHandler;
+};
 
 // Create a string lookup key from a message event
 //
@@ -44,14 +57,22 @@ export function convertMessage(
   converters: Immutable<TopicSchemaConverterMap>,
   convertedMessages: MessageEvent[],
   globalVariables?: Readonly<GlobalVariables>,
+  context?: ConvertMessageContext,
 ): void {
   const key = converterKey(messageEvent.topic, messageEvent.schemaName);
   const matchedConverters = converters.get(key);
   for (const converter of matchedConverters ?? []) {
+    const emitAlert: MessageConverterContext["emitAlert"] = (alert, alertId) => {
+      context?.emitAlert?.(converter, alert, alertId);
+    };
+    const converterContext: MessageConverterContext = {
+      emitAlert,
+    };
     const convertedMessage = converter.converter(
       messageEvent.message,
       messageEvent,
       globalVariables,
+      converterContext,
     );
     // If the converter returns _undefined_ or _null_ the message is skipped
     if (convertedMessage == undefined) {

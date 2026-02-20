@@ -57,6 +57,7 @@ import { TopicList } from "@lichtblick/suite-base/components/TopicList";
 import VariablesList from "@lichtblick/suite-base/components/VariablesList";
 import { WorkspaceDialogs } from "@lichtblick/suite-base/components/WorkspaceDialogs";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
+import { AlertsContextStore, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
   LayoutState,
@@ -112,6 +113,7 @@ const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => player
 const selectPlayerIsPresent = ({ playerState }: MessagePipelineContext) =>
   playerState.presence !== PlayerPresence.NOT_PRESENT;
 const selectPlayerAlerts = ({ playerState }: MessagePipelineContext) => playerState.alerts;
+const selectSessionAlerts = (store: AlertsContextStore) => store.alerts;
 const selectIsPlaying = (ctx: MessagePipelineContext) =>
   ctx.playerState.activeData?.isPlaying === true;
 const selectPause = (ctx: MessagePipelineContext) => ctx.pausePlayback;
@@ -137,6 +139,8 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const { availableSources, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerAlerts = useMessagePipeline(selectPlayerAlerts);
+  const sessionAlerts = useAlertsStore(selectSessionAlerts);
+  const alertCount = (playerAlerts?.length ?? 0) + sessionAlerts.length;
 
   const dataSourceDialog = useWorkspaceStore(selectWorkspaceDataSourceDialog);
   const leftSidebarItem = useWorkspaceStore(selectWorkspaceLeftSidebarItem);
@@ -295,8 +299,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
           iconName: "DatabaseSettings",
           title: "Data source",
           component: DataSourceSidebarItem,
-          badge:
-            playerAlerts && playerAlerts.length > 0 ? { count: playerAlerts.length } : undefined,
+          badge: alertCount > 0 ? { count: alertCount } : undefined,
         },
       ],
     ]);
@@ -364,7 +367,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     return [topItems, bottomItems];
   }, [
     DataSourceSidebarItem,
-    playerAlerts,
+    alertCount,
     enableNewTopNav,
     enableStudioLogsSidebar,
     AppContextLayoutBrowser,
@@ -385,19 +388,13 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         {
           title: "Alerts",
           component: AlertsList,
-          badge:
-            playerAlerts && playerAlerts.length > 0
-              ? {
-                  count: playerAlerts.length,
-                  color: "error",
-                }
-              : undefined,
+          badge: alertCount > 0 ? { count: alertCount, color: "error" } : undefined,
         },
       ],
       ["layouts", { title: "Layouts", component: LayoutBrowser }],
     ]);
     return items;
-  }, [PanelSettingsSidebar, playerAlerts]);
+  }, [PanelSettingsSidebar, alertCount]);
 
   const rightSidebarItems = useMemo(() => {
     const items = new Map<RightSidebarItemKey, SidebarItem>([
