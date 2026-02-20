@@ -19,6 +19,7 @@ import {
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
 import { Namespace } from "@lichtblick/suite-base/types";
+import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
 
 // Branded string to ensure that users go through the `converterKey` function to compute a lookup key
 type ConverterKey = Opaque<string, "ConverterKey">;
@@ -68,25 +69,38 @@ export function convertMessage(
     const converterContext: MessageConverterContext = {
       emitAlert,
     };
-    const convertedMessage = converter.converter(
-      messageEvent.message,
-      messageEvent,
-      globalVariables,
-      converterContext,
-    );
-    // If the converter returns _undefined_ or _null_ the message is skipped
-    if (convertedMessage == undefined) {
-      continue;
+    try {
+      const convertedMessage = converter.converter(
+        messageEvent.message,
+        messageEvent,
+        globalVariables,
+        converterContext,
+      );
+      // If the converter returns _undefined_ or _null_ the message is skipped
+      if (convertedMessage == undefined) {
+        continue;
+      }
+      convertedMessages.push({
+        topic: messageEvent.topic,
+        schemaName: converter.toSchemaName,
+        receiveTime: messageEvent.receiveTime,
+        message: convertedMessage,
+        originalMessageEvent: messageEvent,
+        sizeInBytes: messageEvent.sizeInBytes,
+        topicConfig: messageEvent.topicConfig,
+      });
+    } catch (e) {
+      const error =
+        e instanceof Error ? e : new Error(typeof e === "string" ? e : JSON.stringify(e));
+      emitAlert(
+        {
+          severity: "error",
+          message: `Uncaught error in message converter (${converter.extensionId}) at ${formatTimeRaw(messageEvent.receiveTime)}`,
+          error,
+        },
+        `messageConverterError-${converter.extensionId}`,
+      );
     }
-    convertedMessages.push({
-      topic: messageEvent.topic,
-      schemaName: converter.toSchemaName,
-      receiveTime: messageEvent.receiveTime,
-      message: convertedMessage,
-      originalMessageEvent: messageEvent,
-      sizeInBytes: messageEvent.sizeInBytes,
-      topicConfig: messageEvent.topicConfig,
-    });
   }
 }
 
