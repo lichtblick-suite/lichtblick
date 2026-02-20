@@ -22,12 +22,6 @@ export function ExtensionActionButton({
   label,
   loadingLabel,
 }: Readonly<ExtensionActionButtonProps>): React.ReactElement | undefined {
-  const canInstall = extension.foxe != undefined;
-
-  if (!canInstall) {
-    return undefined;
-  }
-
   return (
     <Button
       className={className}
