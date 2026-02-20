@@ -175,7 +175,7 @@ export default function ExtensionList({
             </Button>
           )}
         </Stack>
-        <div style={{ width: "100%" }}>
+        <div>
           <DataGrid
             rows={entries}
             columns={columns}
