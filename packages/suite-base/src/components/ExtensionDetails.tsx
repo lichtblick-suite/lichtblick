@@ -11,6 +11,7 @@ import DOMPurify from "dompurify";
 import { useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 
+import { formatByteSize } from "@lichtblick/den/format";
 import { useStylesExtensionDetails } from "@lichtblick/suite-base/components/ExtensionDetails.style";
 import { InstallButton } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionActionButton/InstallButton";
 import { UninstallButton } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionActionButton/UninstallButton";
@@ -31,7 +32,7 @@ import { isValidUrl } from "@lichtblick/suite-base/util/isValidURL";
  *
  * @param {Object} props - The component props.
  * @param {boolean} props.installed - Indicates if the extension is already installed.
- * @param {Immutable<ExtensionMarketplaceDetail>} props.extension - The extension details.
+ * @param {ExtensionMarketplaceDetail} props.extension - The extension details.
  * @param {Function} props.onClose - Callback function to close the details view.
  * @returns {React.ReactElement} The rendered component.
  */
@@ -111,6 +112,11 @@ export function ExtensionDetails({
             <Typography variant="caption" color="text.secondary">
               {extension.license}
             </Typography>
+            {extension.size != undefined && (
+              <Typography variant="caption" color="text.secondary">
+                {formatByteSize(extension.size)}
+              </Typography>
+            )}
           </Stack>
           <Typography variant="subtitle2" gutterBottom>
             {extension.publisher}

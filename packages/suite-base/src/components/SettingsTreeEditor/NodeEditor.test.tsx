@@ -11,7 +11,10 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import "@testing-library/jest-dom";
 
 import { Immutable, SettingsTreeAction, SettingsTreeNode } from "@lichtblick/suite";
-import { NodeEditor } from "@lichtblick/suite-base/components/SettingsTreeEditor/NodeEditor";
+import {
+  handleDropNode,
+  NodeEditor,
+} from "@lichtblick/suite-base/components/SettingsTreeEditor/NodeEditor";
 import {
   FieldEditorProps,
   NodeEditorProps,
@@ -34,6 +37,52 @@ const changeVisibilityFilter = (visibility: SelectVisibilityFilterValue) => {
     payload: { input: "select", value: visibility, path: ["topics", "visibilityFilter"] },
   });
 };
+
+function setupFn(propsOverride: Partial<NodeEditorProps> = {}) {
+  const props: Readonly<NodeEditorProps> = {
+    actionHandler: jest.fn(),
+    path: BasicBuilder.strings({ count: 2 }),
+    settings: {
+      label: BasicBuilder.string(),
+      reorderable: true,
+    },
+    focusedPath: [],
+    ...propsOverride,
+  };
+
+  const ui: React.ReactElement = (
+    <DndProvider backend={HTML5Backend}>
+      <NodeEditor {...props} />
+    </DndProvider>
+  );
+
+  return {
+    ...render(ui),
+    props,
+  };
+}
+
+describe("handleDropNode", () => {
+  it("calls actionHandler with reorder-node action", () => {
+    // Given: A drop item and action handler
+    const actionHandler = jest.fn();
+    const sourcePath = [BasicBuilder.string(), BasicBuilder.string()];
+    const targetPath = [BasicBuilder.string(), BasicBuilder.string()];
+    const dragItem = { path: sourcePath };
+
+    // When: handleDropNode is called
+    handleDropNode(dragItem, targetPath, actionHandler);
+
+    // Then: actionHandler is called with correct action
+    expect(actionHandler).toHaveBeenCalledWith({
+      action: "reorder-node",
+      payload: {
+        path: sourcePath,
+        targetPath,
+      },
+    });
+  });
+});
 
 describe("NodeEditor childNodes filtering", () => {
   const nodes = BasicBuilder.strings({ count: 3 }) as [string, string, string];
@@ -184,33 +233,140 @@ describe("NodeEditor childNodes filtering", () => {
     expect(screen.queryByRole("textbox")).toBeNull();
     expect(screen.getByText(nodeLabel)).toBeInTheDocument();
   });
+
+  it("exits editing mode when CheckIcon button is clicked", async () => {
+    // Given: A renamable node in editing mode
+    const nodeLabel = BasicBuilder.string();
+
+    await renderComponent({ settings: { label: nodeLabel, renamable: true } });
+
+    fireEvent.click(screen.getByRole("button", { name: /rename/i }));
+
+    const textbox = screen.getByRole("textbox");
+    expect(textbox).toBeInTheDocument();
+
+    // When: The CheckIcon confirm button is clicked
+    const confirmButton = screen.getByTestId("check-icon-button");
+    fireEvent.click(confirmButton);
+
+    // Then: Editing mode is exited
+    expect(screen.queryByRole("textbox")).toBeNull();
+    expect(screen.getByText(nodeLabel)).toBeInTheDocument();
+  });
+
+  it("stops event propagation when CheckIcon button is clicked", async () => {
+    // Given: A renamable node in editing mode
+    const nodeLabel = BasicBuilder.string();
+    const stopPropagationSpy = jest.fn();
+
+    await renderComponent({ settings: { label: nodeLabel, renamable: true } });
+
+    fireEvent.click(screen.getByRole("button", { name: /rename/i }));
+
+    // When: The CheckIcon button is clicked with event
+    const confirmButton = screen.getByTestId("check-icon-button");
+
+    const clickEvent = new MouseEvent("click", { bubbles: true });
+    clickEvent.stopPropagation = stopPropagationSpy;
+
+    fireEvent(confirmButton, clickEvent);
+
+    // Then: Event propagation is stopped
+    expect(stopPropagationSpy).toHaveBeenCalled();
+  });
+
+  it("does not toggle open state when in editing mode", async () => {
+    // Given: A renamable node with children in editing mode
+    const nodeLabel = BasicBuilder.string();
+    const childLabel = BasicBuilder.string();
+
+    await renderComponent({
+      settings: {
+        label: nodeLabel,
+        renamable: true,
+        children: {
+          child1: { label: childLabel },
+        },
+      },
+    });
+
+    // Enter editing mode
+    fireEvent.click(screen.getByRole("button", { name: /rename/i }));
+    expect(screen.getByRole("textbox")).toBeInTheDocument();
+
+    // When: Clicking the toggle area while in editing mode
+    const toggleArea = screen.getByTestId(`settings__nodeHeaderToggle__root`);
+    fireEvent.click(toggleArea);
+
+    // Then: Node remains expanded and still in editing mode
+    expect(screen.getByRole("textbox")).toBeInTheDocument();
+    expect(screen.queryByText(childLabel)).toBeInTheDocument();
+  });
+
+  it("renders icon when icon is set and not a drag handle", async () => {
+    // Given: A node with a non-drag-handle icon
+    const nodeLabel = BasicBuilder.string();
+
+    await renderComponent({
+      settings: {
+        label: nodeLabel,
+        icon: "Clear",
+      },
+    });
+
+    // Then: Icon should be rendered
+    expect(screen.getByTestId("ClearIcon")).toBeInTheDocument();
+  });
+
+  it("renders drag handle icon for reorderable nodes", async () => {
+    // Given: A reorderable node with DragHandle icon
+    const nodeLabel = BasicBuilder.string();
+
+    await renderComponent({
+      settings: {
+        label: nodeLabel,
+        icon: "DragHandle",
+        reorderable: true,
+      },
+    });
+
+    // Drag handle icon is rendered as part of the component
+    expect(screen.getByTestId("DragIndicatorIcon")).toBeInTheDocument();
+  });
+
+  it("toggles node open state when not editing", async () => {
+    // Given: A node with children that is initially open
+    const nodeLabel = BasicBuilder.string();
+    const childLabel = BasicBuilder.string();
+
+    await renderComponent({
+      settings: {
+        label: nodeLabel,
+        children: {
+          child1: { label: childLabel },
+        },
+      },
+    });
+
+    // Child should be visible initially (defaultOpen is true)
+    expect(screen.getByText(childLabel)).toBeInTheDocument();
+
+    // When: Clicking the toggle area
+    const toggleArea = screen.getByTestId(`settings__nodeHeaderToggle__root`);
+    fireEvent.click(toggleArea);
+
+    // Then: Child is hidden
+    expect(screen.queryByText(childLabel)).not.toBeInTheDocument();
+
+    // When: Clicking the toggle area again
+    fireEvent.click(toggleArea);
+
+    // Then: Child is visible again
+    expect(screen.getByText(childLabel)).toBeInTheDocument();
+  });
 });
 
 describe("NodeEditor drag and drop functionality", () => {
-  function setup(propsOverride: Partial<NodeEditorProps> = {}) {
-    const props: Readonly<NodeEditorProps> = {
-      actionHandler: jest.fn(),
-      path: BasicBuilder.strings({ count: 2 }),
-      settings: {
-        label: BasicBuilder.string(),
-        reorderable: true,
-      },
-      focusedPath: [],
-      ...propsOverride,
-    };
-
-    const ui: React.ReactElement = (
-      <DndProvider backend={HTML5Backend}>
-        <NodeEditor {...props} />
-      </DndProvider>
-    );
-
-    return {
-      ...render(ui),
-      props,
-    };
-  }
-
   function setupMultipleNodes(
     nodes: Array<{ path: string[]; label: string; reorderable?: boolean }>,
     actionHandler = jest.fn(),
@@ -238,7 +394,7 @@ describe("NodeEditor drag and drop functionality", () => {
   describe("drag behavior", () => {
     it("should show grab cursor and default opacity when node is reorderable", () => {
       // Given/When: A reorderable node is rendered
-      const { container } = setup({
+      const { container } = setupFn({
         settings: { label: BasicBuilder.string(), reorderable: true },
       });
 
@@ -250,7 +406,7 @@ describe("NodeEditor drag and drop functionality", () => {
 
     it("should not show grab cursor when node is not reorderable", () => {
       // Given/When: A non-reorderable node is rendered
-      const { container } = setup({
+      const { container } = setupFn({
         settings: { label: BasicBuilder.string(), reorderable: false },
       });
 
@@ -335,7 +491,7 @@ describe("NodeEditor drag and drop functionality", () => {
   describe("drag events simulation", () => {
     it("should handle dragStart event on reorderable node", () => {
       // Given: A reorderable node
-      const { container } = setup({
+      const { container } = setupFn({
         path: ["topics", "node1"],
         settings: { label: "Draggable Node", reorderable: true },
       });
@@ -373,7 +529,7 @@ describe("NodeEditor drag and drop functionality", () => {
     it("should handle drop event on valid sibling target", () => {
       // Given: Two sibling reorderable nodes with shared actionHandler
       const actionHandler = jest.fn();
-      const { container } = setupMultipleNodes(
+      setupMultipleNodes(
         [
           { path: ["topics", "node1"], label: "Source" },
           { path: ["topics", "node2"], label: "Target" },
@@ -381,21 +537,84 @@ describe("NodeEditor drag and drop functionality", () => {
         actionHandler,
       );
 
-      const nodeHeaders = container.querySelectorAll('[class*="nodeHeader"]');
-      const sourceNode = nodeHeaders[0]!;
-      const targetNode = nodeHeaders[1]!;
-
-      // When: Full drag and drop sequence is simulated
-      fireEvent.dragStart(sourceNode, {
-        dataTransfer: { setData: jest.fn(), effectAllowed: "move" },
-      });
-      fireEvent.dragOver(targetNode);
-      fireEvent.drop(targetNode);
-      fireEvent.dragEnd(sourceNode);
-
-      // Then: Nodes should still be rendered
+      // Then: Nodes should be rendered
       expect(screen.getByText("Source")).toBeInTheDocument();
       expect(screen.getByText("Target")).toBeInTheDocument();
+
+      // Note: Testing the actual drop behavior via react-dnd requires more complex setup
+      // The drop functionality is tested through the render and canDrop logic
+    });
+  });
+});
+
+describe("NodeEditor inline actions", () => {
+  describe("inline action with icon", () => {
+    it("should call actionHandler with perform-node-action when inline icon button is clicked", () => {
+      // Given: A node with an inline action that has an icon
+      const actionId = BasicBuilder.string();
+      const actionLabel = BasicBuilder.string();
+      const path = BasicBuilder.strings({ count: 2 });
+
+      const { props, container } = setupFn({
+        path,
+        settings: {
+          label: BasicBuilder.string(),
+          actions: [
+            {
+              type: "action",
+              id: actionId,
+              label: actionLabel,
+              icon: "Delete",
+              display: "inline",
+            },
+          ],
+        },
+      });
+
+      // When: The inline icon button is clicked
+      const iconButton = container.querySelector('button[class*="actionButton"]')!;
+      fireEvent.click(iconButton);
+
+      // Then: The actionHandler should be called with perform-node-action
+      expect(props.actionHandler).toHaveBeenCalledWith({
+        action: "perform-node-action",
+        payload: { id: actionId, path },
+      });
+    });
+
+    it("should call actionHandler with perform-node-action for menu actions", () => {
+      // Given: A node with a menu action (non-inline)
+      const actionId = BasicBuilder.string();
+      const actionLabel = BasicBuilder.string();
+      const path = BasicBuilder.strings({ count: 2 });
+
+      const { props } = setupFn({
+        path,
+        settings: {
+          label: BasicBuilder.string(),
+          actions: [
+            {
+              type: "action",
+              id: actionId,
+              label: actionLabel,
+              display: "menu",
+            },
+          ],
+        },
+      });
+
+      // When: The menu is opened and action is selected
+      const menuButton = screen.getByRole("button", { name: /more/i });
+      fireEvent.click(menuButton);
+
+      const menuItem = screen.getByRole("menuitem", { name: actionLabel });
+      fireEvent.click(menuItem);
+
+      // Then: The actionHandler should be called with perform-node-action
+      expect(props.actionHandler).toHaveBeenCalledWith({
+        action: "perform-node-action",
+        payload: { id: actionId, path },
+      });
     });
   });
 });

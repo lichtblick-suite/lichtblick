@@ -1,9 +1,29 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { lineColors } from "@lichtblick/suite-base/util/plotColors";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import { handleReorderSeriesAction } from "./utils";
+import { assignDefaultColorsToSeries, handleReorderSeriesAction } from "./utils";
+
+describe("assignDefaultColorsToSeries", () => {
+  it("should assign default colors to paths without colors", () => {
+    // Given: An array of paths without color properties
+    const paths = [
+      { value: BasicBuilder.string(), color: undefined },
+      { value: BasicBuilder.string(), color: undefined },
+      { value: BasicBuilder.string(), color: undefined },
+    ];
+
+    // When: assignDefaultColorsToSeries is called
+    assignDefaultColorsToSeries(paths);
+
+    // Then: Each path should have a color assigned from lineColors based on its index
+    expect(paths[0]?.color).toBe(lineColors[0]);
+    expect(paths[1]?.color).toBe(lineColors[1]);
+    expect(paths[2]?.color).toBe(lineColors[2]);
+  });
+});
 
 describe("handleReorderSeriesAction", () => {
   describe("successful reordering", () => {
@@ -289,6 +309,36 @@ describe("handleReorderSeriesAction", () => {
 
       // Then: The array should remain unchanged
       expect(draft.paths).toEqual([singleItem]);
+    });
+  });
+
+  describe("color assignment before reordering", () => {
+    const patt1Value = BasicBuilder.string();
+    const patt2Value = BasicBuilder.string();
+    const patt3Value = BasicBuilder.string();
+    type PathWithColor = { value: string; color: string };
+    it("should preserve existing colors when reordering", () => {
+      // Given: A draft with paths that already have explicit colors
+      const existingColor1 = "#FF0000";
+      const existingColor2 = "#00FF00";
+      const existingColor3 = "#0000FF";
+      const draft = {
+        paths: [
+          { value: patt1Value, color: existingColor1 },
+          { value: patt2Value, color: existingColor2 },
+          { value: patt3Value, color: existingColor3 },
+        ] as PathWithColor[],
+      };
+      const sourceIndex = 0;
+      const targetIndex = 2;
+
+      // When: handleReorderSeriesAction is called
+      handleReorderSeriesAction(draft, sourceIndex, targetIndex);
+
+      // Then: The colors should be preserved with their respective paths
+      expect(draft.paths[2]?.color).toBe(existingColor1); // path1 moved to index 2
+      expect(draft.paths[0]?.color).toBe(existingColor2); // path2 stayed at index 0
+      expect(draft.paths[1]?.color).toBe(existingColor3); // path3 moved to index 1
     });
   });
 

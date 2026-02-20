@@ -82,6 +82,20 @@ const getSelectVisibilityFilterField = (t: TFunction<"settingsEditor">) =>
     options: SelectVisibilityFilterOptions(t),
   }) as const;
 
+export const handleDropNode = (
+  item: DragItem,
+  targetPath: readonly string[],
+  actionHandler: (action: SettingsTreeAction) => void,
+): void => {
+  actionHandler({
+    action: "reorder-node",
+    payload: {
+      path: item.path,
+      targetPath,
+    },
+  });
+};
+
 function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Element {
   const { actionHandler, defaultOpen = true, filter, focusedPath, settings = {} } = props;
   const [state, setState] = useImmer<NodeEditorState>({
@@ -131,13 +145,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
         );
       },
       drop: (item: DragItem, _monitor) => {
-        actionHandler({
-          action: "reorder-node",
-          payload: {
-            path: item.path,
-            targetPath: props.path,
-          },
-        });
+        handleDropNode(item, props.path, actionHandler);
       },
       collect: (monitor: DropTargetMonitor<DragItem, void>) => ({
         isOver: monitor.isOver(),
@@ -293,8 +301,8 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
     ? renderSettingsStatusButton(settings)
     : undefined;
 
-  // Determine the item to render in the icon slot
-  // If there's an error we render the error dot, otherwise we render the provided IconComponent
+  const isDragHandleIcon = settings.icon === "DragHandle" && isReorderable;
+
   const iconItem = useMemo(() => {
     if (props.settings?.error) {
       return (
@@ -317,7 +325,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
       );
     }
 
-    if (IconComponent) {
+    if (IconComponent && !isDragHandleIcon) {
       return (
         <IconComponent
           fontSize="small"
@@ -331,7 +339,23 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
     }
 
     return <></>;
-  }, [IconComponent, classes.errorTooltip, props.settings?.error, theme]);
+  }, [IconComponent, classes.errorTooltip, props.settings?.error, theme, isDragHandleIcon]);
+
+  const dragHandleIcon = useMemo(() => {
+    if (isDragHandleIcon && IconComponent) {
+      return (
+        <IconComponent
+          fontSize="small"
+          color="inherit"
+          style={{
+            marginRight: theme.spacing(0.5),
+            opacity: 0.8,
+          }}
+        />
+      );
+    }
+    return undefined;
+  }, [IconComponent, isDragHandleIcon, theme]);
 
   return (
     <>
@@ -365,6 +389,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
           onClick={toggleOpen}
           data-testid={`settings__nodeHeaderToggle__${props.path.join("-")}`}
         >
+          {dragHandleIcon}
           {hasProperties && <ExpansionArrow expanded={state.open} />}
           {iconItem}
           {state.editing ? (
@@ -386,6 +411,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
                       className={classes.actionButton}
                       title="Rename"
                       data-node-function="edit-label"
+                      data-testid="check-icon-button"
                       color="primary"
                       onClick={(event) => {
                         event.stopPropagation();
@@ -401,7 +427,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
           ) : (
             <Typography
               noWrap={true}
-              flex="auto"
+              flex="1 1 auto"
               variant="subtitle2"
               fontWeight={indent < 2 ? 600 : 400}
               color={visible ? "text.primary" : "text.disabled"}

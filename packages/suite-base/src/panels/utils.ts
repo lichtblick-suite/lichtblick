@@ -1,6 +1,18 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { lineColors } from "@lichtblick/suite-base/util/plotColors";
+
+/**
+ * Assigns default colors to series paths that don't have a color set.
+ * Only applies to object paths with an optional color property.
+ */
+export function assignDefaultColorsToSeries<T extends { color?: string }>(paths: T[]): void {
+  paths.forEach((path, idx) => {
+    path.color ??= lineColors[idx % lineColors.length];
+  });
+}
+
 /**
  * Reorders an item in a paths array from sourceIndex to targetIndex.
  * Used by panels that support reordering of series/paths.
@@ -19,6 +31,7 @@ export function handleReorderSeriesAction<T extends { paths: unknown[] }>(
   ) {
     return;
   }
+
   const [removed] = draft.paths.splice(sourceIndex, 1);
   draft.paths.splice(targetIndex, 0, removed);
 }

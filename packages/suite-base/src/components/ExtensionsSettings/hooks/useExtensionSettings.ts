@@ -66,6 +66,7 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
         qualifiedName: entry.qualifiedName,
         readme: entry.readme,
         changelog: entry.changelog,
+        size: entry.size,
       };
     });
   }, [installed, marketplaceMap]);
