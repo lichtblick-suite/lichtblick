@@ -144,7 +144,7 @@
     "natsort": "2.0.3",
     "nearley": "2.20.1",
     "nearley-loader": "2.0.0",
-    "notistack": "3.0.1",
+    "notistack": "3.0.2",
     "path-browserify": "1.0.1",
     "prettier": "3.6.2",
     "ramda": "0.31.3",
