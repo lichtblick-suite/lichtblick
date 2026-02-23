@@ -83,6 +83,7 @@ class ExtensionsAPI implements IExtensionAPI {
   }
 
   public async remove(id: string): Promise<boolean> {
+    console.log(`Removing extension with id ${id} from workspace ${this.workspace}`);
     try {
       await HttpService.delete<IExtensionApiResponse>(
         `${this.workspacePath}/${this.workspace}/extension/${id}`,
