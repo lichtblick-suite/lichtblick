@@ -6,6 +6,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
+
 import { Immutable } from "@lichtblick/suite";
 import ExtensionList from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/ExtensionList";
 import {
@@ -14,6 +15,7 @@ import {
 } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/utils";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
+import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
@@ -57,32 +59,8 @@ describe("ExtensionList utility functions", () => {
 describe("ExtensionList Component", () => {
   const mockNamespace = "org";
   const mockEntries: Immutable<ExtensionMarketplaceDetail>[] = [
-    {
-      id: "1",
-      name: "Extension",
-      description: "Description of Extension 1",
-      publisher: "Publisher 1",
-      version: "1.0.0",
-      qualifiedName: "org.extension1",
-      namespace: "org",
-      homepage: BasicBuilder.string(),
-      license: BasicBuilder.string(),
-      displayName: "DisplayName-Extension 1",
-      keywords: [BasicBuilder.string()],
-    },
-    {
-      id: "2",
-      name: "Extension2",
-      description: "Description of Extension 2",
-      publisher: "Publisher 2",
-      version: "1.0.0",
-      qualifiedName: "org.extension2",
-      namespace: "org",
-      homepage: BasicBuilder.string(),
-      license: BasicBuilder.string(),
-      displayName: "DisplayName-Extension 2",
-      keywords: [BasicBuilder.string()],
-    },
+    ExtensionBuilder.extensionMarketplaceDetail({name: "Extension", id: "1", namespace: mockNamespace}),
+    ExtensionBuilder.extensionMarketplaceDetail({name: "Extension2", id: "2", namespace: mockNamespace}),
   ];
   const mockFilterText = "Extension";
   const mockSelectExtension = jest.fn();
