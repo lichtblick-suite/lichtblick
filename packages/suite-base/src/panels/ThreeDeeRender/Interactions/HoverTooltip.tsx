@@ -6,13 +6,24 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 
 import { useStyles } from "./HoverTooltip.style";
 import {
+  HOVER_TOOLTIP_DWELL_MS,
   HOVER_TOOLTIP_GRACE_PERIOD_MS,
   HOVER_TOOLTIP_LEAVE_DELAY_MS,
   HOVER_TOOLTIP_OFFSET_PX,
 } from "./constants";
 import type { HoverEntityInfo } from "./types";
 
-type TooltipMode = "hidden" | "following" | "grace" | "hover-pinned" | "click-pinned";
+/**
+ * Tooltip display modes:
+ * - `following`  – tooltip follows cursor and updates immediately (fast browsing).
+ * - `settled`    – user dwelled 700 ms on one object; tooltip still follows cursor
+ *                  but any change to hovered objects triggers a grace delay.
+ * - `grace`      – position frozen; waiting for the user to reach the tooltip or
+ *                  for the grace timer to expire and apply the pending update.
+ * - `hover-pinned` – mouse is on the tooltip; content is frozen.
+ * - `click-pinned` – user clicked to pin; fully static until explicit dismiss.
+ */
+type TooltipMode = "hidden" | "following" | "settled" | "grace" | "hover-pinned" | "click-pinned";
 
 type Props = {
   entities: HoverEntityInfo[];
@@ -32,7 +43,15 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
   const { classes } = useStyles();
   const paperRef = useRef<HTMLDivElement>(ReactNull);
   const graceTimer = useRef<ReturnType<typeof setTimeout>>();
+  const dwellTimer = useRef<ReturnType<typeof setTimeout>>();
   const leaveTimer = useRef<ReturnType<typeof setTimeout>>();
+  /** Entities queued during a grace period; applied when the timer expires. */
+  const pendingEntities = useRef<HoverEntityInfo[]>([]);
+  /**
+   * Stable key for the currently displayed set of entities. Used to detect
+   * when the hovered object actually changes vs. the same pick being re-sent.
+   */
+  const lastEntityKey = useRef<string>("");
 
   const [mode, setMode] = useState<TooltipMode>("hidden");
   const [visibleEntities, setVisibleEntities] = useState<HoverEntityInfo[]>([]);
@@ -46,33 +65,96 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
   // React to incoming entity / position changes from the 3D scene
   // ---------------------------------------------------------------------------
   useEffect(() => {
+    const currentMode = modeRef.current;
+
+    // These modes are fully frozen – the user is actively interacting with the
+    // tooltip, so we must not disturb its content or position.
+    if (currentMode === "click-pinned" || currentMode === "hover-pinned") {
+      return;
+    }
+
+    const newKey = entities.map((e) => `${e.topic ?? ""}::${e.entityId}`).join("|");
+    const keyChanged = newKey !== lastEntityKey.current;
+    lastEntityKey.current = newKey;
+
     if (entities.length > 0) {
-      setVisibleEntities(entities);
-      clearTimeout(graceTimer.current);
-      if (modeRef.current === "hidden" || modeRef.current === "grace") {
-        setMode("following");
+      if (currentMode === "hidden" || currentMode === "following") {
+        // Fast mode: update content immediately as the user browses.
+        setVisibleEntities(entities);
+        clearTimeout(graceTimer.current);
+        if (currentMode === "hidden") {
+          setMode("following");
+        }
+        // Start (or reset) the dwell timer only when the hovered object changes.
+        // Staying on the same object keeps the timer counting toward "settled".
+        if (keyChanged) {
+          clearTimeout(dwellTimer.current);
+          dwellTimer.current = setTimeout(() => {
+            if (modeRef.current === "following") {
+              setMode("settled");
+            }
+          }, HOVER_TOOLTIP_DWELL_MS);
+        }
+      } else if (currentMode === "settled") {
+        if (!keyChanged) {
+          return; // Still on the same object – stay settled.
+        }
+        // The user moved to a different object while settled.
+        // Freeze the tooltip and give them time to reach it before updating.
+        setFrozenPosition(position); // eslint-disable-line react-hooks/exhaustive-deps
+        pendingEntities.current = entities;
+        clearTimeout(dwellTimer.current);
+        clearTimeout(graceTimer.current);
+        setMode("grace");
+        graceTimer.current = setTimeout(() => {
+          if (modeRef.current !== "grace") {
+            return;
+          }
+          const pending = pendingEntities.current;
+          if (pending.length > 0) {
+            setVisibleEntities(pending);
+            setMode("following");
+            // Start dwell timer for the newly visible object.
+            dwellTimer.current = setTimeout(() => {
+              if (modeRef.current === "following") {
+                setMode("settled");
+              }
+            }, HOVER_TOOLTIP_DWELL_MS);
+          } else {
+            setMode("hidden");
+            setVisibleEntities([]);
+          }
+        }, HOVER_TOOLTIP_GRACE_PERIOD_MS);
+      } else if (currentMode === "grace") {
+        // Queue the latest entities to be shown when the grace period ends.
+        pendingEntities.current = entities;
       }
     } else {
-      // Entities became empty.
-      if (modeRef.current === "following") {
-        // Freeze position and give the user time to reach the tooltip.
-        setFrozenPosition(position);
-        setMode("grace");
+      // Entities cleared.
+      if (currentMode === "following" || currentMode === "settled") {
+        clearTimeout(dwellTimer.current);
         clearTimeout(graceTimer.current);
+        setFrozenPosition(position); // eslint-disable-line react-hooks/exhaustive-deps
+        pendingEntities.current = [];
+        setMode("grace");
         graceTimer.current = setTimeout(() => {
           if (modeRef.current === "grace") {
             setMode("hidden");
             setVisibleEntities([]);
           }
         }, HOVER_TOOLTIP_GRACE_PERIOD_MS);
+      } else if (currentMode === "grace") {
+        // Already in grace – just clear pending so the timer hides the tooltip.
+        pendingEntities.current = [];
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entities]);
 
-  // Track position while following so it's available when transitioning.
+  // Track position while following/settled so the frozen position is current
+  // when we transition into grace.
   useEffect(() => {
-    if (mode === "following") {
+    if (mode === "following" || mode === "settled") {
       setFrozenPosition(position);
     }
   }, [position, mode]);
@@ -82,8 +164,10 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
   // ---------------------------------------------------------------------------
   const onMouseEnter = useCallback(() => {
     clearTimeout(graceTimer.current);
+    clearTimeout(dwellTimer.current);
     clearTimeout(leaveTimer.current);
-    if (modeRef.current === "grace" || modeRef.current === "following") {
+    const m = modeRef.current;
+    if (m === "grace" || m === "following" || m === "settled") {
       setMode("hover-pinned");
     }
   }, []);
@@ -155,7 +239,7 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
     if (!el) {
       return;
     }
-    const displayPos = mode === "following" ? position : frozenPosition;
+    const displayPos = mode === "following" || mode === "settled" ? position : frozenPosition;
     const tooltipW = el.offsetWidth;
     const tooltipH = el.offsetHeight;
 
@@ -195,6 +279,7 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
   useEffect(() => {
     return () => {
       clearTimeout(graceTimer.current);
+      clearTimeout(dwellTimer.current);
       clearTimeout(leaveTimer.current);
     };
   }, []);
@@ -226,9 +311,11 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
           <Typography variant="caption" className={classes.entityId}>
             {entity.entityId}
           </Typography>
-          <Typography variant="caption" className={classes.topicLine}>
-            {entity.topic}
-          </Typography>
+          {entity.topic != undefined && (
+            <Typography variant="caption" className={classes.topicLine}>
+              {entity.topic}
+            </Typography>
+          )}
           <table className={classes.table}>
             <tbody>
               {entity.metadata.map((kv, rowIdx) => (
@@ -241,6 +328,11 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
           </table>
         </div>
       ))}
+      {interactive && mode !== "click-pinned" && (
+        <Typography variant="caption" className={classes.pinHint}>
+          Click to pin
+        </Typography>
+      )}
     </Paper>
   );
 }

@@ -80,4 +80,12 @@ export const useStyles = makeStyles()((theme) => ({
     paddingTop: 1,
     paddingBottom: 1,
   },
+  pinHint: {
+    fontSize: "0.65rem",
+    color: theme.palette.text.disabled,
+    textAlign: "center",
+    marginTop: theme.spacing(0.75),
+    fontStyle: "italic",
+    display: "block",
+  },
 }));

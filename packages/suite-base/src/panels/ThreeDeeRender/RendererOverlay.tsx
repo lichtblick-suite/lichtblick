@@ -218,7 +218,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
       }
 
       infos.push({
-        topic: topic ?? "unknown",
+        topic,
         entityId: getHoverEntityId(sel),
         metadata,
       });

@@ -151,7 +151,7 @@ describe("<HoverTooltip />", () => {
     expect(view.container.querySelector(".MuiPaper-root")).not.toBeNull();
 
     act(() => {
-      jest.advanceTimersByTime(399);
+      jest.advanceTimersByTime(349);
     });
     expect(view.container.querySelector(".MuiPaper-root")).not.toBeNull();
 
@@ -210,7 +210,7 @@ describe("<HoverTooltip />", () => {
     });
   });
 
-  it("click-pins the tooltip, continues updating content while pinned, and dismisses on outside click / Escape", async () => {
+  it("click-pins the tooltip with frozen content, and dismisses on outside click / Escape", async () => {
     const canvas = makeCanvas();
 
     const entitiesA: HoverEntityInfo[] = [
@@ -236,7 +236,7 @@ describe("<HoverTooltip />", () => {
     const paper = view.container.querySelector(".MuiPaper-root")!;
     fireEvent.click(paper);
 
-    // Now provide new entities; content should update even while click-pinned.
+    // Providing new entities while click-pinned must NOT update the displayed content.
     view.rerender(
       <ThemeProvider isDark={false}>
         <HoverTooltip
@@ -247,9 +247,10 @@ describe("<HoverTooltip />", () => {
       </ThemeProvider>,
     );
 
+    // Still shows eA data; eB must not appear.
     await waitFor(() => {
-      expect(view.getByText("eB")).toBeInTheDocument();
-      expect(view.getByText("vB")).toBeInTheDocument();
+      expect(view.getByText("eA")).toBeInTheDocument();
+      expect(view.queryByText("eB")).toBeNull();
     });
 
     // Leaving should not hide when click-pinned.
@@ -282,6 +283,155 @@ describe("<HoverTooltip />", () => {
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => {
       expect(view2.container.querySelector(".MuiPaper-root")).toBeNull();
+    });
+  });
+
+  it("enters settled mode after dwell and delays update to new item with grace period", async () => {
+    const canvas = makeCanvas();
+    const entitiesA: HoverEntityInfo[] = [
+      { topic: "/t", entityId: "eA", metadata: [{ key: "k", value: "vA" }] },
+    ];
+    const entitiesB: HoverEntityInfo[] = [
+      { topic: "/t", entityId: "eB", metadata: [{ key: "k", value: "vB" }] },
+    ];
+
+    const view = renderHoverTooltip({
+      entities: entitiesA,
+      position: { clientX: 100, clientY: 100 },
+      canvas,
+    });
+
+    // Dwell 700 ms → settled mode.
+    act(() => {
+      jest.advanceTimersByTime(700);
+    });
+
+    // Now switch to eB while settled – grace period (350 ms) should delay the update.
+    view.rerender(
+      <ThemeProvider isDark={false}>
+        <HoverTooltip
+          entities={entitiesB}
+          position={{ clientX: 110, clientY: 110 }}
+          canvas={canvas}
+        />
+      </ThemeProvider>,
+    );
+
+    // During grace, still showing eA.
+    expect(view.getByText("eA")).toBeInTheDocument();
+    expect(view.queryByText("eB")).toBeNull();
+
+    // 349 ms in – still in grace.
+    act(() => {
+      jest.advanceTimersByTime(349);
+    });
+    expect(view.getByText("eA")).toBeInTheDocument();
+    expect(view.queryByText("eB")).toBeNull();
+
+    // 1 ms more – grace ends, eB content appears.
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+
+    await waitFor(() => {
+      expect(view.getByText("eB")).toBeInTheDocument();
+      expect(view.queryByText("eA")).toBeNull();
+    });
+  });
+
+  it("hover-pinned mode freezes content and ignores entity changes", async () => {
+    const canvas = makeCanvas();
+    const entitiesA: HoverEntityInfo[] = [
+      { topic: "/t", entityId: "eA", metadata: [{ key: "k", value: "vA" }] },
+    ];
+    const entitiesB: HoverEntityInfo[] = [
+      { topic: "/t", entityId: "eB", metadata: [{ key: "k", value: "vB" }] },
+    ];
+
+    const view = renderHoverTooltip({
+      entities: entitiesA,
+      position: { clientX: 100, clientY: 100 },
+      canvas,
+    });
+
+    // Enter grace then hover-pin.
+    view.rerender(
+      <ThemeProvider isDark={false}>
+        <HoverTooltip entities={[]} position={{ clientX: 100, clientY: 100 }} canvas={canvas} />
+      </ThemeProvider>,
+    );
+    const paper = view.container.querySelector(".MuiPaper-root")!;
+    fireEvent.mouseEnter(paper);
+
+    // Provide different entities while hover-pinned – content must stay frozen.
+    view.rerender(
+      <ThemeProvider isDark={false}>
+        <HoverTooltip
+          entities={entitiesB}
+          position={{ clientX: 999, clientY: 999 }}
+          canvas={canvas}
+        />
+      </ThemeProvider>,
+    );
+
+    expect(view.getByText("eA")).toBeInTheDocument();
+    expect(view.queryByText("eB")).toBeNull();
+  });
+
+  it("omits topic line when topic is undefined", () => {
+    const entities: HoverEntityInfo[] = [
+      {
+        topic: undefined,
+        entityId: "frame::child",
+        metadata: [
+          { key: "child_frame_id", value: "base_link" },
+          { key: "parent_frame_id", value: "map" },
+        ],
+      },
+    ];
+
+    const { getByText, queryByText } = renderHoverTooltip({
+      entities,
+      position: { clientX: 10, clientY: 20 },
+      canvas: makeCanvas(),
+    });
+
+    expect(getByText("frame::child")).toBeInTheDocument();
+    expect(getByText("base_link")).toBeInTheDocument();
+    // No topic line should appear.
+    expect(queryByText("unknown")).toBeNull();
+  });
+
+  it("shows 'Click to pin' hint in hover-pinned mode and hides it in click-pinned mode", async () => {
+    const canvas = makeCanvas();
+    const entities: HoverEntityInfo[] = [
+      { topic: "/t", entityId: "e", metadata: [{ key: "k", value: "v" }] },
+    ];
+
+    const view = renderHoverTooltip({
+      entities,
+      position: { clientX: 100, clientY: 100 },
+      canvas,
+    });
+
+    // Enter grace so tooltip is interactive.
+    view.rerender(
+      <ThemeProvider isDark={false}>
+        <HoverTooltip entities={[]} position={{ clientX: 100, clientY: 100 }} canvas={canvas} />
+      </ThemeProvider>,
+    );
+
+    const paper = view.container.querySelector(".MuiPaper-root")!;
+    fireEvent.mouseEnter(paper);
+
+    // In hover-pinned mode, hint should be visible.
+    expect(view.getByText("Click to pin")).toBeInTheDocument();
+
+    // Click to pin — hint should disappear.
+    fireEvent.click(paper);
+
+    await waitFor(() => {
+      expect(view.queryByText("Click to pin")).toBeNull();
     });
   });
 
