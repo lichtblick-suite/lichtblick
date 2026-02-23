@@ -59,8 +59,16 @@ describe("ExtensionList utility functions", () => {
 describe("ExtensionList Component", () => {
   const mockNamespace = "org";
   const mockEntries: Immutable<ExtensionMarketplaceDetail>[] = [
-    ExtensionBuilder.extensionMarketplaceDetail({name: "Extension", id: "1", namespace: mockNamespace}),
-    ExtensionBuilder.extensionMarketplaceDetail({name: "Extension2", id: "2", namespace: mockNamespace}),
+    ExtensionBuilder.extensionMarketplaceDetail({
+      name: "Extension",
+      id: "1",
+      namespace: mockNamespace,
+    }),
+    ExtensionBuilder.extensionMarketplaceDetail({
+      name: "Extension2",
+      id: "2",
+      namespace: mockNamespace,
+    }),
   ];
   const mockFilterText = "Extension";
   const mockSelectExtension = jest.fn();
