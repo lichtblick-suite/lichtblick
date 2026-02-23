@@ -34,6 +34,7 @@ type RemoteExtension = Pick<
   | "qualifiedName"
   | "readme"
   | "version"
+  | "size"
 >;
 
 export interface IExtensionApiResponse extends GenericApiEntity, RemoteExtension {
