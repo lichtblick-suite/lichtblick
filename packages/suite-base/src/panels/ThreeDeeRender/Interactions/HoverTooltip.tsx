@@ -101,7 +101,7 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
         }
         // The user moved to a different object while settled.
         // Freeze the tooltip and give them time to reach it before updating.
-        setFrozenPosition(position); // eslint-disable-line react-hooks/exhaustive-deps
+        setFrozenPosition(position);
         pendingEntities.current = entities;
         clearTimeout(dwellTimer.current);
         clearTimeout(graceTimer.current);
@@ -125,7 +125,7 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
             setVisibleEntities([]);
           }
         }, HOVER_TOOLTIP_GRACE_PERIOD_MS);
-      } else if (currentMode === "grace") {
+      } else {
         // Queue the latest entities to be shown when the grace period ends.
         pendingEntities.current = entities;
       }
@@ -134,7 +134,7 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
       if (currentMode === "following" || currentMode === "settled") {
         clearTimeout(dwellTimer.current);
         clearTimeout(graceTimer.current);
-        setFrozenPosition(position); // eslint-disable-line react-hooks/exhaustive-deps
+        setFrozenPosition(position);
         pendingEntities.current = [];
         setMode("grace");
         graceTimer.current = setTimeout(() => {
