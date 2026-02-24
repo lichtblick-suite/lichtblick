@@ -78,9 +78,13 @@ export function useExtensionOperations(
       setOperatingExtensionId(extension.id);
       setOperationStatus(OperationStatus.UNINSTALLING);
 
+      console.debug(`Starting uninstallation of extension with id ${extension.id} from marketplace`); // Debug log
+
       try {
         await new Promise((resolve) => setTimeout(resolve, 200));
+        console.debug(`Uninstalling extension with id ${extension.id} from marketplace`); // Debug log
         await uninstallExtension(extension.namespace ?? "local", extension.id);
+        console.debug(`Extension with id ${extension.id} uninstalled successfully`); // Debug log
         enqueueSnackbar(`${extension.name} uninstalled successfully`, { variant: "success" });
         await analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
         onUninstallSuccess?.(extension.id);
