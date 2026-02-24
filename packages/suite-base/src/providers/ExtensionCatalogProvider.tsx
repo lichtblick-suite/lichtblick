@@ -330,15 +330,18 @@ function createExtensionRegistryStore(
     }
 
     const uninstallExtension = async (namespace: Namespace, id: string) => {
-      console.debug(`Attempting to uninstall extension with id ${id} from namespace ${namespace}`); // Debug log
       const namespaceLoaders = loaders.filter((loader) => loader.namespace === namespace);
       if (namespaceLoaders.length === 0) {
         throw new Error("No extension loader found for namespace " + namespace);
       }
 
+      console.debug("All loaders available", namespaceLoaders);
+
       let extension: ExtensionInfo | undefined;
       for (const loader of namespaceLoaders) {
+        console.debug(`Attempting to get extension with id ${id} from loader ${loader.type}`); // Debug log
         extension = await loader.getExtension(id);
+        console.debug("EXTENSION FOUND", extension); // Debug log
         if (extension) {
           break;
         }
@@ -350,25 +353,9 @@ function createExtensionRegistryStore(
 
       for (const loader of namespaceLoaders) {
         try {
-          console.debug(
-            `Uninstalling extension with id ${extension.id} from loader ${loader.type}`,
-          ); // Debug log
-          // Get the extension from this specific loader to ensure we have the correct id
-          const loaderExtension = await loader.getExtension(id);
-          if (!loaderExtension) {
-            console.debug(`Extension ${id} not found in loader ${loader.type}, skipping uninstall`);
-            continue;
-          }
-
-          const uninstallId =
-            loader.type === "server"
-              ? (loaderExtension.externalId ?? loaderExtension.id)
-              : loaderExtension.id;
-
-          console.debug(
-            `Uninstalling extension with uninstallId ${uninstallId} from loader ${loader.type}`,
+          await loader.uninstallExtension(
+            loader.type === "server" ? extension.externalId! : extension.id,
           );
-          await loader.uninstallExtension(uninstallId);
         } catch (error) {
           log.warn(
             `Failed to uninstall extension ${extension.id} from loader ${loader.type}:`,
