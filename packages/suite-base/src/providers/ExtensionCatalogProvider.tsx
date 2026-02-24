@@ -349,7 +349,9 @@ function createExtensionRegistryStore(
 
         try {
           // Get the extension from THIS specific loader
+          console.debug(`Getting extension with id ${id} from loader ${loader.type}`); // Debug log
           const loaderExtension = await loader.getExtension(id);
+          console.debug(`Extension retrieved from loader ${loader.type}:`, loaderExtension);
 
           if (loader.type === "server" && loaderExtension?.externalId) {
             console.debug(`Extension found in loader ${loader.type}:`, loaderExtension);

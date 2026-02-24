@@ -33,6 +33,7 @@ export class RemoteExtensionLoader implements IExtensionLoader {
   }
 
   public async getExtension(id: string): Promise<ExtensionInfo | undefined> {
+    console.debug(`[Remote] Getting extension with id ${id} from workspace ${this.workspace}`); // Debug log
     log.debug("[Remote] Get extension", id);
 
     const storedExtension = await this.#remote.get(id);
