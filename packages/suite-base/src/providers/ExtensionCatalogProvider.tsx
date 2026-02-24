@@ -335,15 +335,15 @@ function createExtensionRegistryStore(
         throw new Error("No extension loader found for namespace " + namespace);
       }
 
-      const extension = await namespaceLoaders[0]!.getExtension(id);
-      console.debug("EXTENSION TO UNINSTALL", extension); // Debug log
+      console.debug("EXTENSIONS CAtalog", get().installedExtensions );
+       const extension = get().installedExtensions?.find((ext) => ext.id === id);
+       console.debug("Found extension to uninstall:", extension);
 
       if (!extension) {
         return;
       }
 
       for (const loader of namespaceLoaders) {
-        console.debug(`Attempting to uninstall extension with id ${extension.id} using loader ${loader.type}`); // Debug log
         try {
           await loader.uninstallExtension(
             loader.type === "server" ? extension.externalId! : extension.id,
