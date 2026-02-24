@@ -330,6 +330,7 @@ function createExtensionRegistryStore(
     }
 
     const uninstallExtension = async (namespace: Namespace, id: string) => {
+      console.debug(`Attempting to uninstall extension with id ${id} from namespace ${namespace}`); // Debug log
       const namespaceLoaders = loaders.filter((loader) => loader.namespace === namespace);
       if (namespaceLoaders.length === 0) {
         throw new Error("No extension loader found for namespace " + namespace);
@@ -349,6 +350,7 @@ function createExtensionRegistryStore(
 
       for (const loader of namespaceLoaders) {
         try {
+          console.debug(`Uninstalling extension with id ${extension.id} from loader ${loader.type}`); // Debug log
           await loader.uninstallExtension(
             loader.type === "server" ? extension.externalId! : extension.id,
           );
