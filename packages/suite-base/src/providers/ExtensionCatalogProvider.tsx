@@ -350,10 +350,25 @@ function createExtensionRegistryStore(
 
       for (const loader of namespaceLoaders) {
         try {
-          console.debug(`Uninstalling extension with id ${extension.id} from loader ${loader.type}`); // Debug log
-          await loader.uninstallExtension(
-            loader.type === "server" ? extension.externalId! : extension.id,
+          console.debug(
+            `Uninstalling extension with id ${extension.id} from loader ${loader.type}`,
+          ); // Debug log
+          // Get the extension from this specific loader to ensure we have the correct id
+          const loaderExtension = await loader.getExtension(id);
+          if (!loaderExtension) {
+            console.debug(`Extension ${id} not found in loader ${loader.type}, skipping uninstall`);
+            continue;
+          }
+
+          const uninstallId =
+            loader.type === "server"
+              ? (loaderExtension.externalId ?? loaderExtension.id)
+              : loaderExtension.id;
+
+          console.debug(
+            `Uninstalling extension with uninstallId ${uninstallId} from loader ${loader.type}`,
           );
+          await loader.uninstallExtension(uninstallId);
         } catch (error) {
           log.warn(
             `Failed to uninstall extension ${extension.id} from loader ${loader.type}:`,

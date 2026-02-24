@@ -83,6 +83,9 @@ class ExtensionsAPI implements IExtensionAPI {
   }
 
   public async remove(id: string): Promise<boolean> {
+    if (!id || id === "undefined") {
+      throw new Error("Cannot remove extension: invalid or missing id");
+    }
     console.debug(`Removing extension with id ${id} from workspace ${this.workspace}`);
     try {
       await HttpService.delete<IExtensionApiResponse>(
