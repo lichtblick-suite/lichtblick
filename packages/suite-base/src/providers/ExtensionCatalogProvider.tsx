@@ -345,22 +345,30 @@ function createExtensionRegistryStore(
           `Attempting to get and uninstall extension with id ${id} from loader ${loader.type}`,
         );
 
+        console.debug("IM ENTERING LOADER TYPE", loader.type);
+
         try {
           // Get the extension from THIS specific loader
           const loaderExtension = await loader.getExtension(id);
 
-          if (loaderExtension) {
+          if (loader.type === "server" && loaderExtension?.externalId) {
             console.debug(`Extension found in loader ${loader.type}:`, loaderExtension);
             anyExtensionFound = true;
 
             // Use the correct ID for this specific loader
-            const uninstallId =
-              loader.type === "server"
-                ? (loaderExtension.externalId ?? loaderExtension.id)
-                : loaderExtension.id;
+            const uninstallId = loaderExtension.externalId;
 
             console.debug(`Uninstalling with ID: ${uninstallId}`);
             await loader.uninstallExtension(uninstallId);
+          } else if (loader.type === "browser" && loaderExtension?.id) {
+                anyExtensionFound = true;
+
+            // Use the correct ID for this specific loader
+            const uninstallId = loaderExtension.id;
+
+            console.debug(`Uninstalling with ID: ${uninstallId} from loader ${loader.type}`);
+            await loader.uninstallExtension(uninstallId);
+
           } else {
             console.debug(`Extension with id ${id} not found in loader ${loader.type}`);
           }
