@@ -26,6 +26,7 @@ import {
 } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
+import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 const log = Logger.getLogger(__filename);
 
@@ -333,18 +334,20 @@ function createExtensionRegistryStore(
     }
 
     const uninstallExtension = async (namespace: Namespace, id: string) => {
-      const type: TypeExtensionLoader = namespace === "local" ? "browser" : "server";
+      const typeOfLocalLoader = isDesktopApp() ? "filesystem" : "browser";
+      const typeOfLoader: TypeExtensionLoader =
+        namespace === "local" ? typeOfLocalLoader : "server";
 
       const namespaceLoader = loaders.find(
-        (loader) => loader.namespace === namespace && loader.type === type,
+        (loader) => loader.namespace === namespace && loader.type === typeOfLoader,
       );
       if (!namespaceLoader) {
         throw new Error("No extension loader found for namespace " + namespace);
       }
 
-      console.debug("EXTENSIONS CAtalog", get().installedExtensions);
-      const extension = get().installedExtensions?.find((ext) => ext.id === id);
-      console.debug("Found extension to uninstall:", extension);
+      const extension = get().installedExtensions?.find(
+        (ext) => ext.id === id && ext.namespace === namespace,
+      );
 
       if (!extension) {
         return;
@@ -352,7 +355,7 @@ function createExtensionRegistryStore(
 
       try {
         await namespaceLoader.uninstallExtension(
-          type === "server" ? extension.externalId! : extension.id,
+          typeOfLoader === "server" ? extension.externalId! : extension.id,
         );
       } catch (error) {
         log.warn(
