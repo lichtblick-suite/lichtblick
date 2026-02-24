@@ -41,6 +41,8 @@ export function ExtensionDetails({
   onClose,
   installed,
 }: Readonly<ExtensionDetailsProps>): React.ReactElement {
+  console.debug(`Rendering ExtensionDetails for extension with id ${extension.id}`); // Debug log
+  console.debug(`Extension details: ${JSON.stringify(extension)}`); // Debug log
   const { classes } = useStylesExtensionDetails();
   const [isInstalled, setIsInstalled] = useState(installed);
   const [activeTab, setActiveTab] = useState<number>(0);

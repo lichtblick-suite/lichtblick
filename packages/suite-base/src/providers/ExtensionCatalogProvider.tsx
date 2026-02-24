@@ -343,8 +343,10 @@ function createExtensionRegistryStore(
         extension = await loader.getExtension(id);
         console.debug("EXTENSION FOUND", extension); // Debug log
         if (extension) {
+          console.debug(`Extension with id ${id} found in loader ${loader.type}`); // Debug log
           break;
         }
+        console.debug(`Extension with id ${id} not found in loader ${loader.type}, continuing to next loader`); // Debug log
       }
 
       if (!extension) {
