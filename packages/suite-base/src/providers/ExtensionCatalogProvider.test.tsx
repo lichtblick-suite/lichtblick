@@ -26,9 +26,12 @@ import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
+import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import ExtensionCatalogProvider from "./ExtensionCatalogProvider";
+
+jest.mock("@lichtblick/suite-base/util/isDesktopApp", () => jest.fn());
 
 describe("ExtensionCatalogProvider", () => {
   beforeEach(() => {
@@ -557,6 +560,155 @@ describe("ExtensionCatalogProvider", () => {
           await result.current.uninstallExtension(invalidNamespace, "");
         }),
       ).rejects.toThrow(`No extension loader found for namespace ${invalidNamespace}`);
+    });
+
+    it("should call uninstallExtension with extension.id when using browser loader (local namespace)", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(false);
+
+      const extensionInfo = ExtensionBuilder.extensionInfo({ namespace: "local" });
+      const uninstallFn = jest.fn().mockResolvedValue(undefined);
+      const loader: IExtensionLoader = {
+        type: "browser",
+        namespace: "local",
+        getExtension: jest.fn(),
+        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
+        installExtension: jest.fn().mockResolvedValue(extensionInfo),
+        loadExtension: jest.fn(),
+        uninstallExtension: uninstallFn,
+      };
+
+      const { result } = setup({ loadersOverride: [loader] });
+
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(1);
+      });
+
+      await act(async () => {
+        await result.current.uninstallExtension("local", extensionInfo.id);
+      });
+
+      expect(uninstallFn).toHaveBeenCalledWith(extensionInfo.id);
+    });
+
+    it("should call uninstallExtension with extension.id when using filesystem loader (local namespace)", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      const extensionInfo = ExtensionBuilder.extensionInfo({ namespace: "local" });
+      const uninstallFn = jest.fn().mockResolvedValue(undefined);
+      const loader: IExtensionLoader = {
+        type: "filesystem",
+        namespace: "local",
+        getExtension: jest.fn(),
+        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
+        installExtension: jest.fn().mockResolvedValue(extensionInfo),
+        loadExtension: jest.fn(),
+        uninstallExtension: uninstallFn,
+      };
+
+      const { result } = setup({ loadersOverride: [loader] });
+
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(1);
+      });
+
+      await act(async () => {
+        await result.current.uninstallExtension("local", extensionInfo.id);
+      });
+
+      expect(uninstallFn).toHaveBeenCalledWith(extensionInfo.id);
+    });
+
+    it("should call uninstallExtension with externalId when using server loader (org namespace)", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(false);
+
+      const externalId = BasicBuilder.string();
+      const extensionInfo = ExtensionBuilder.extensionInfo({
+        namespace: "org",
+        externalId,
+      });
+      const uninstallFn = jest.fn().mockResolvedValue(undefined);
+      const loader: IExtensionLoader = {
+        type: "server",
+        namespace: "org",
+        getExtension: jest.fn(),
+        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
+        installExtension: jest.fn().mockResolvedValue(extensionInfo),
+        loadExtension: jest.fn(),
+        uninstallExtension: uninstallFn,
+      };
+
+      const { result } = setup({ loadersOverride: [loader] });
+
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(1);
+      });
+
+      await act(async () => {
+        await result.current.uninstallExtension("org", extensionInfo.id);
+      });
+
+      expect(uninstallFn).toHaveBeenCalledWith(externalId);
+    });
+
+    it("should log a warning and still remove extension data from state when uninstallExtension throws", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(false);
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+
+      const extensionInfo = ExtensionBuilder.extensionInfo({ namespace: "local" });
+      const uninstallFn = jest.fn().mockRejectedValue(new Error("Uninstall failed"));
+      const loader: IExtensionLoader = {
+        type: "browser",
+        namespace: "local",
+        getExtension: jest.fn(),
+        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
+        installExtension: jest.fn().mockResolvedValue(extensionInfo),
+        loadExtension: jest.fn(),
+        uninstallExtension: uninstallFn,
+      };
+
+      const { result } = setup({ loadersOverride: [loader] });
+
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(1);
+      });
+
+      await act(async () => {
+        await result.current.uninstallExtension("local", extensionInfo.id);
+      });
+
+      // Extension is removed from state despite the error
+      expect(result.current.installedExtensions).toHaveLength(0);
+      expect(result.current.isExtensionInstalled(extensionInfo.id)).toBe(false);
+
+      (console.warn as jest.Mock).mockRestore();
+    });
+
+    it("should not call loader.getExtension when uninstalling (uses state instead)", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(false);
+
+      const extensionInfo = ExtensionBuilder.extensionInfo({ namespace: "local" });
+      const getExtensionFn = jest.fn();
+      const loader: IExtensionLoader = {
+        type: "browser",
+        namespace: "local",
+        getExtension: getExtensionFn,
+        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
+        installExtension: jest.fn().mockResolvedValue(extensionInfo),
+        loadExtension: jest.fn(),
+        uninstallExtension: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const { result } = setup({ loadersOverride: [loader] });
+
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(1);
+      });
+
+      await act(async () => {
+        await result.current.uninstallExtension("local", extensionInfo.id);
+      });
+
+      expect(getExtensionFn).not.toHaveBeenCalled();
     });
   });
 
