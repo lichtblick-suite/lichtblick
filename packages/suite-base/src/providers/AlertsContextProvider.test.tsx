@@ -5,7 +5,11 @@
 import { act, renderHook } from "@testing-library/react";
 import { PropsWithChildren } from "react";
 
-import { AlertsContextStore, useAlertsActions, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
+import {
+  AlertsContextStore,
+  useAlertsActions,
+  useAlertsStore,
+} from "@lichtblick/suite-base/context/AlertsContext";
 import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 
 import AlertsContextProvider from "./AlertsContextProvider";
