@@ -89,6 +89,8 @@ const useExtensionSettings = (): UseExtensionSettingsHook => {
       .sort((a, b) => a.name.localeCompare(b.name)),
   }));
 
+  console.debug("NAMESPACED DATA useExtensionSettings:", namespacedData); // Debug log
+
   return {
     setUndebouncedFilterText,
     marketplaceEntries,

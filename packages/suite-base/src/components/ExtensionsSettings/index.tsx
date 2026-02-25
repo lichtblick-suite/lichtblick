@@ -34,6 +34,8 @@ export default function ExtensionsSettings(): React.ReactElement {
     debouncedFilterText,
   } = useExtensionSettings();
 
+  console.debug("NAMESPACED DATA:", namespacedData); // Debug log
+
   const onClear = () => {
     setUndebouncedFilterText("");
   };
