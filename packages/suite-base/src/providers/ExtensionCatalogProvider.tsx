@@ -335,8 +335,7 @@ function createExtensionRegistryStore(
 
     const uninstallExtension = async (namespace: Namespace, id: string) => {
       const localLoaderType = isDesktopApp() ? "filesystem" : "browser";
-      const loaderType: TypeExtensionLoader =
-        namespace === "local" ? localLoaderType : "server";
+      const loaderType: TypeExtensionLoader = namespace === "local" ? localLoaderType : "server";
 
       const namespaceLoader = loaders.find(
         (loader) => loader.namespace === namespace && loader.type === loaderType,
