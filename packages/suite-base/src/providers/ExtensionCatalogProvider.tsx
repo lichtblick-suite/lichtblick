@@ -334,12 +334,12 @@ function createExtensionRegistryStore(
     }
 
     const uninstallExtension = async (namespace: Namespace, id: string) => {
-      const typeOfLocalLoader = isDesktopApp() ? "filesystem" : "browser";
-      const typeOfLoader: TypeExtensionLoader =
-        namespace === "local" ? typeOfLocalLoader : "server";
+      const localLoaderType = isDesktopApp() ? "filesystem" : "browser";
+      const loaderType: TypeExtensionLoader =
+        namespace === "local" ? localLoaderType : "server";
 
       const namespaceLoader = loaders.find(
-        (loader) => loader.namespace === namespace && loader.type === typeOfLoader,
+        (loader) => loader.namespace === namespace && loader.type === loaderType,
       );
       if (!namespaceLoader) {
         throw new Error("No extension loader found for namespace " + namespace);
@@ -355,7 +355,7 @@ function createExtensionRegistryStore(
 
       try {
         await namespaceLoader.uninstallExtension(
-          typeOfLoader === "server" ? extension.externalId! : extension.id,
+          loaderType === "server" ? extension.externalId! : extension.id,
         );
       } catch (error) {
         log.warn(

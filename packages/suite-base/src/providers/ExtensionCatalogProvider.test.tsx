@@ -562,93 +562,62 @@ describe("ExtensionCatalogProvider", () => {
       ).rejects.toThrow(`No extension loader found for namespace ${invalidNamespace}`);
     });
 
-    it("should call uninstallExtension with extension.id when using browser loader (local namespace)", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(false);
+    it.each([
+      {
+        description: "browser loader (local namespace)",
+        isDesktop: false,
+        loaderType: "browser" as const,
+        namespace: "local" as Namespace,
+        useExternalId: false,
+      },
+      {
+        description: "filesystem loader (local namespace)",
+        isDesktop: true,
+        loaderType: "filesystem" as const,
+        namespace: "local" as Namespace,
+        useExternalId: false,
+      },
+      {
+        description: "server loader (org namespace)",
+        isDesktop: false,
+        loaderType: "server" as const,
+        namespace: "org" as Namespace,
+        useExternalId: true,
+      },
+    ])(
+      "should call uninstallExtension with correct parameter for $description",
+      async ({ isDesktop, loaderType, namespace, useExternalId }) => {
+        (isDesktopApp as jest.Mock).mockReturnValue(isDesktop);
 
-      const extensionInfo = ExtensionBuilder.extensionInfo({ namespace: "local" });
-      const uninstallFn = jest.fn().mockResolvedValue(undefined);
-      const loader: IExtensionLoader = {
-        type: "browser",
-        namespace: "local",
-        getExtension: jest.fn(),
-        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
-        installExtension: jest.fn().mockResolvedValue(extensionInfo),
-        loadExtension: jest.fn(),
-        uninstallExtension: uninstallFn,
-      };
+        const externalId = useExternalId ? BasicBuilder.string() : undefined;
+        const extensionInfo = ExtensionBuilder.extensionInfo({
+          namespace,
+          ...(externalId && { externalId }),
+        });
+        const uninstallFn = jest.fn().mockResolvedValue(undefined);
+        const loader: IExtensionLoader = {
+          type: loaderType,
+          namespace,
+          getExtension: jest.fn(),
+          getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
+          installExtension: jest.fn().mockResolvedValue(extensionInfo),
+          loadExtension: jest.fn(),
+          uninstallExtension: uninstallFn,
+        };
 
-      const { result } = setup({ loadersOverride: [loader] });
+        const { result } = setup({ loadersOverride: [loader] });
 
-      await waitFor(() => {
-        expect(result.current.installedExtensions).toHaveLength(1);
-      });
+        await waitFor(() => {
+          expect(result.current.installedExtensions).toHaveLength(1);
+        });
 
-      await act(async () => {
-        await result.current.uninstallExtension("local", extensionInfo.id);
-      });
+        await act(async () => {
+          await result.current.uninstallExtension(namespace, extensionInfo.id);
+        });
 
-      expect(uninstallFn).toHaveBeenCalledWith(extensionInfo.id);
-    });
-
-    it("should call uninstallExtension with extension.id when using filesystem loader (local namespace)", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
-
-      const extensionInfo = ExtensionBuilder.extensionInfo({ namespace: "local" });
-      const uninstallFn = jest.fn().mockResolvedValue(undefined);
-      const loader: IExtensionLoader = {
-        type: "filesystem",
-        namespace: "local",
-        getExtension: jest.fn(),
-        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
-        installExtension: jest.fn().mockResolvedValue(extensionInfo),
-        loadExtension: jest.fn(),
-        uninstallExtension: uninstallFn,
-      };
-
-      const { result } = setup({ loadersOverride: [loader] });
-
-      await waitFor(() => {
-        expect(result.current.installedExtensions).toHaveLength(1);
-      });
-
-      await act(async () => {
-        await result.current.uninstallExtension("local", extensionInfo.id);
-      });
-
-      expect(uninstallFn).toHaveBeenCalledWith(extensionInfo.id);
-    });
-
-    it("should call uninstallExtension with externalId when using server loader (org namespace)", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(false);
-
-      const externalId = BasicBuilder.string();
-      const extensionInfo = ExtensionBuilder.extensionInfo({
-        namespace: "org",
-        externalId,
-      });
-      const uninstallFn = jest.fn().mockResolvedValue(undefined);
-      const loader: IExtensionLoader = {
-        type: "server",
-        namespace: "org",
-        getExtension: jest.fn(),
-        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
-        installExtension: jest.fn().mockResolvedValue(extensionInfo),
-        loadExtension: jest.fn(),
-        uninstallExtension: uninstallFn,
-      };
-
-      const { result } = setup({ loadersOverride: [loader] });
-
-      await waitFor(() => {
-        expect(result.current.installedExtensions).toHaveLength(1);
-      });
-
-      await act(async () => {
-        await result.current.uninstallExtension("org", extensionInfo.id);
-      });
-
-      expect(uninstallFn).toHaveBeenCalledWith(externalId);
-    });
+        expect(uninstallFn).toHaveBeenCalledWith(useExternalId ? externalId : extensionInfo.id);
+      },
+    );
 
     it("should log a warning and still remove extension data from state when uninstallExtension throws", async () => {
       (isDesktopApp as jest.Mock).mockReturnValue(false);
