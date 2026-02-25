@@ -31,6 +31,7 @@ import {
   useMessagePipeline,
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
+import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import { useAppConfiguration } from "@lichtblick/suite-base/context/AppConfigurationContext";
@@ -64,8 +65,6 @@ import { createMessageRangeIterator } from "./messageRangeIterator";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext } from "./types";
 import { useSharedPanelState } from "./useSharedPanelState";
-
-import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 
 const log = Logger.getLogger(__filename);
 
@@ -144,7 +143,7 @@ function PanelExtensionAdapter(
   const [panelId] = useState(() => uuid());
   const isMounted = useSynchronousMountedState();
   const [error, setError] = useState<Error | undefined>();
-  const [forceConversion, setForceConversion] = useState(new Set<string>);
+  const [forceConversion, setForceConversion] = useState(new Set<string>());
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
   const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
 
@@ -367,8 +366,8 @@ function PanelExtensionAdapter(
 
             extensionsSettings[panelName]?.[schemaName]?.handler(action, draft.topics[topicName]);
             setForceConversion((_old) => {
-              return new Set([ topicName ]);
-            })
+              return new Set([topicName]);
+            });
           }
         }),
       );
