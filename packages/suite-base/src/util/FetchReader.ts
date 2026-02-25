@@ -97,6 +97,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
         }
 
         this.#timeoutId = setTimeout(() => {
+          this.#aborted = true;
           this.#controller.abort();
           this.emit(
             "error",
