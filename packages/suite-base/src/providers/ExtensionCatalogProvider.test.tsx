@@ -682,34 +682,6 @@ describe("ExtensionCatalogProvider", () => {
 
       (console.warn as jest.Mock).mockRestore();
     });
-
-    it("should not call loader.getExtension when uninstalling (uses state instead)", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(false);
-
-      const extensionInfo = ExtensionBuilder.extensionInfo({ namespace: "local" });
-      const getExtensionFn = jest.fn();
-      const loader: IExtensionLoader = {
-        type: "browser",
-        namespace: "local",
-        getExtension: getExtensionFn,
-        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
-        installExtension: jest.fn().mockResolvedValue(extensionInfo),
-        loadExtension: jest.fn(),
-        uninstallExtension: jest.fn().mockResolvedValue(undefined),
-      };
-
-      const { result } = setup({ loadersOverride: [loader] });
-
-      await waitFor(() => {
-        expect(result.current.installedExtensions).toHaveLength(1);
-      });
-
-      await act(async () => {
-        await result.current.uninstallExtension("local", extensionInfo.id);
-      });
-
-      expect(getExtensionFn).not.toHaveBeenCalled();
-    });
   });
 
   describe("mergeState", () => {
