@@ -108,14 +108,24 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
     const initArgs = urls.length === 1 ? { url: urls[0] } : { urls };
     const source = new WorkerSerializedIterableSource({ initWorker, initArgs });
 
-    return new IterablePlayer({
+    const player = new IterablePlayer({
       source,
       name: urls.join(),
       metricsCollector: args.metricsCollector,
       urlParams: { urls },
       sourceId: this.id,
       readAheadDuration: { sec: 10, nsec: 0 },
+      delayedStart: true,
     });
+
+    // Simple test: delay 5 seconds then allow data loading
+    setTimeout(() => {
+      player.markReady();
+      // eslint-disable-next-line no-restricted-syntax
+      console.log("markReady() called - starting data loading");
+    }, 5000);
+
+    return player;
   }
 
   #validateUrl(newValue: string): Error | undefined {
