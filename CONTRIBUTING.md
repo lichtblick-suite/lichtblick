@@ -8,18 +8,19 @@ Lichtblick is an integrated visualization and diagnosis tool for robotics, built
 
 - [Code of Conduct](#code-of-conduct)
 - [Prerequisites](#prerequisites)
-- [Getting Started](#rocket-getting-started)
-- [Project Structure](#package-project-structure)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
 - [Component Structure](#component-structure)
-- [Development Workflow](#wrench-development-workflow)
+- [Development Workflow](#development-workflow)
 - [Branching Strategy](#branching-strategy---git-flow)
-- [Code Style & Standards](#art-code-style--standards)
-- [Testing](#test_tube-testing)
+- [Code Style & Standards](#code-style--standards)
+- [Testing](#testing)
 - [Pull Request Guidelines](#pull-request-guidelines)
 - [Reporting Issues](#reporting-issues)
-- [Version Increment](#label-version-increment)
-- [Localization](#globe_with_meridians-localization)
-- [License](#pencil-license)
+- [Version Increment](#version-increment)
+- [Localization](#localization)
+- [License](#license)
+- [Credits](#credits)
 
 ---
 
@@ -244,7 +245,7 @@ yarn run tsc --noEmit       # TypeScript type checking
 ### 4. Open a Pull Request
 
 - **Community contributors:** Open a PR **from your fork** targeting the `develop` branch of the upstream repository.
-- **Internal team:** Open a PR directly in the repository targeting `develop` for features/bugfixes, or `main` for `release/` and `hotfix/` branches.
+- **Internal team:** Open a PR directly in the repository targeting `develop` for features/bugfixes, or `main` for `release/major/`, `release/minor/`, and `hotfix/` branches.
 - Fill in the [PR template](#pull-request-guidelines) completely.
 - Ensure CI checks pass.
 
@@ -266,12 +267,11 @@ Branch naming is **enforced by CI**. PRs with non-compliant branch names will be
 
 ### Targeting `main`
 
-| Prefix     | Purpose                                           | Example                 |
-| ---------- | ------------------------------------------------- | ----------------------- |
-| `release/` | Production releases (final testing & adjustments) | `release/1.2.0`         |
-| `hotfix/`  | Urgent critical fixes                             | `hotfix/security-patch` |
-
-> :warning: **Deprecated branch types:** `test`, `docs`, `wip`, and `cicd` are no longer part of the branching strategy. Use the prefixes listed above instead.
+| Prefix           | Purpose                                                            | Example                 |
+| ---------------- | ------------------------------------------------------------------ | ----------------------- |
+| `release/major/` | Major production releases (breaking changes or reworked APIs)      | `release/major/2.0.0`   |
+| `release/minor/` | Minor production releases (new functionality, no breaking changes) | `release/minor/1.3.0`   |
+| `hotfix/`        | Urgent critical fixes                                              | `hotfix/security-patch` |
 
 ---
 
@@ -456,13 +456,13 @@ When reporting a bug, please include:
 
 ## Version Increment
 
-The version format: `<major>.<minor>.<patch>`.
+The version format: `<major>.<minor>.<patch>`. Version bumps are **determined automatically** by the CI release workflow based on the branch name used:
 
-| Component | Description                                                                            |
-| --------- | -------------------------------------------------------------------------------------- |
-| **MAJOR** | Breaking changes — removed or reworked APIs. Users should expect a non-trivial update. |
-| **MINOR** | New functionality added without breaking backward compatibility.                       |
-| **PATCH** | Bug fixes, security patches, and minor improvements.                                   |
+| Component | Branch Prefix    | Description                                                                            |
+| --------- | ---------------- | -------------------------------------------------------------------------------------- |
+| **MAJOR** | `release/major/` | Breaking changes — removed or reworked APIs. Users should expect a non-trivial update. |
+| **MINOR** | `release/minor/` | New functionality added without breaking backward compatibility.                       |
+| **PATCH** | `hotfix/`        | Bug fixes, security patches, and minor improvements.                                   |
 
 ---
 
@@ -565,4 +565,4 @@ Lichtblick originally began as a fork of [Foxglove Studio](https://github.com/fo
 
 ---
 
-_Thank you for contributing to Lichtblick! Your efforts help build better tools for the robotics community._ :heart:
+_Thank you for contributing to Lichtblick! Your efforts help build better tools for the robotics community._
