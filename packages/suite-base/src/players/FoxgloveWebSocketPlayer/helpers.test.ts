@@ -10,6 +10,7 @@ import {
 } from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer/helpers";
 import { CheckForHighFrequencyTopics } from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer/types";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
+import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
@@ -137,9 +138,9 @@ describe("checkForHighFrequencyTopics", () => {
         { sec: 50, nsec: 0 }, // duration should be subtractTimes(endTime, startTime)
         input.topics![0]!.schemaName,
       );
-      expect(addAlertSpy).toHaveBeenCalledWith("high-frequency", {
-        severity: "warn",
-        message: "High frequency topics detected",
+      expect(addAlertSpy).toHaveBeenCalledWith(HIGH_FREQUENCY_ALERT.id, {
+        severity: HIGH_FREQUENCY_ALERT.severity,
+        message: HIGH_FREQUENCY_ALERT.message,
         error: expect.any(Error),
       });
 

@@ -6,6 +6,7 @@ import { StatusLevel } from "@foxglove/ws-protocol";
 import { CheckForHighFrequencyTopics } from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer/types";
 import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
 import { PlayerAlert } from "@lichtblick/suite-base/players/types";
+import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 
 export function dataTypeToFullName(dataType: string): string {
@@ -43,12 +44,10 @@ export function checkForHighFrequencyTopics({
     const highFrequency = isTopicHighFrequency(topicStats, topic.name, duration, topic.schemaName);
 
     if (highFrequency) {
-      alerts.addAlert("high-frequency", {
-        severity: "warn",
-        message: "High frequency topics detected",
-        error: new Error(
-          `The current data source has one or more topics with message frequency higher than 60Hz, which may impact performance and application memory.`,
-        ),
+      alerts.addAlert(HIGH_FREQUENCY_ALERT.id, {
+        severity: HIGH_FREQUENCY_ALERT.severity,
+        message: HIGH_FREQUENCY_ALERT.message,
+        error: new Error(HIGH_FREQUENCY_ALERT.errorMessage),
       });
 
       return;

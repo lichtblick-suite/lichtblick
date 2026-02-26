@@ -44,6 +44,7 @@ import {
   TopicSelection,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
+import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import delay from "@lichtblick/suite-base/util/delay";
@@ -582,12 +583,10 @@ export class IterablePlayer implements Player {
           );
 
           if (hasHighFrequencyTopic) {
-            this.#alertManager.addAlert("high-frequency", {
-              severity: "warn",
-              message: "High frequency topics detected",
-              error: new Error(
-                `The current data source has one or more topics with message frequency higher than 60Hz, which may impact performance and application memory.`,
-              ),
+            this.#alertManager.addAlert(HIGH_FREQUENCY_ALERT.id, {
+              severity: HIGH_FREQUENCY_ALERT.severity,
+              message: HIGH_FREQUENCY_ALERT.message,
+              error: new Error(HIGH_FREQUENCY_ALERT.errorMessage),
             });
           }
         }

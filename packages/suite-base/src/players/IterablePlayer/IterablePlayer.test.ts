@@ -12,6 +12,7 @@ import { signal } from "@lichtblick/den/async";
 import { fromSec } from "@lichtblick/rostime";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { MessageEvent, PlayerPresence, PlayerState } from "@lichtblick/suite-base/players/types";
+import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import * as highFrequencyUtils from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
 
@@ -705,8 +706,8 @@ describe("IterablePlayer", () => {
     const playerStates = await store.done;
     expect(_.last(playerStates)!.alerts).toEqual([
       {
-        severity: "warn",
-        message: "High frequency topics detected",
+        severity: HIGH_FREQUENCY_ALERT.severity,
+        message: HIGH_FREQUENCY_ALERT.message,
         error: expect.any(Error),
       },
     ]);
@@ -774,8 +775,8 @@ describe("IterablePlayer", () => {
     expect(isTopicHighFrequencySpy).toHaveBeenCalledTimes(1);
     expect(_.last(playerStates)!.alerts).toEqual([
       {
-        severity: "warn",
-        message: "High frequency topics detected",
+        severity: HIGH_FREQUENCY_ALERT.severity,
+        message: HIGH_FREQUENCY_ALERT.message,
         error: expect.any(Error),
       },
     ]);
