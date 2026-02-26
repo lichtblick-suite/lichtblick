@@ -32,8 +32,10 @@ type McapSource = { type: "file"; file: Blob } | { type: "url"; url: string };
  * Create a McapIndexedReader if it will be possible to do an indexed read. If the file is not
  * indexed or is empty, returns undefined.
  */
-async function tryCreateIndexedReader(readable: McapTypes.IReadable) {
-  const decompressHandlers = await loadDecompressHandlers();
+async function tryCreateIndexedReader(
+  readable: McapTypes.IReadable,
+  decompressHandlers: McapTypes.DecompressHandlers,
+): Promise<McapIndexedReader | undefined> {
   try {
     const reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
 
@@ -62,7 +64,7 @@ export class McapIterableSource implements ISerializedIterableSource {
 
     // Preload decompression handlers before starting any MCAP fetches
     // This ensures WASM workers download before competing with MCAP data requests
-    await loadDecompressHandlers();
+    const decompressHandlers = await loadDecompressHandlers();
 
     switch (source.type) {
       case "file": {
@@ -72,7 +74,7 @@ export class McapIterableSource implements ISerializedIterableSource {
         await source.file.slice(0, 1).arrayBuffer();
 
         const readable = new BlobReadable(source.file);
-        const reader = await tryCreateIndexedReader(readable);
+        const reader = await tryCreateIndexedReader(readable, decompressHandlers);
         if (reader) {
           this.#sourceImpl = new McapIndexedIterableSource(reader);
         } else {
@@ -86,7 +88,7 @@ export class McapIterableSource implements ISerializedIterableSource {
       case "url": {
         const readable = new RemoteFileReadable(source.url);
         await readable.open();
-        const reader = await tryCreateIndexedReader(readable);
+        const reader = await tryCreateIndexedReader(readable, decompressHandlers);
         if (reader) {
           this.#sourceImpl = new McapIndexedIterableSource(reader);
         } else {
