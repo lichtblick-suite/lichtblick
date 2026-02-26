@@ -60,6 +60,10 @@ export class McapIterableSource implements ISerializedIterableSource {
   public async initialize(): Promise<Initialization> {
     const source = this.#source;
 
+    // Preload decompression handlers before starting any MCAP fetches
+    // This ensures WASM workers download before competing with MCAP data requests
+    await loadDecompressHandlers();
+
     switch (source.type) {
       case "file": {
         // Ensure the file is readable before proceeding (will throw in the event of a permission
