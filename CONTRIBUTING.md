@@ -249,8 +249,6 @@ yarn run tsc --noEmit       # TypeScript type checking
 - Fill in the [PR template](#pull-request-guidelines) completely.
 - Ensure CI checks pass.
 
-> Only internal team members can open PRs targeting `main`. Community contributions are always merged into `develop`.
-
 ---
 
 ## Branching Strategy - Git flow
