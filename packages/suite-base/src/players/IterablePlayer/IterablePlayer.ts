@@ -559,7 +559,7 @@ export class IterablePlayer implements Player {
       const uniqueTopics = new Map<string, Topic>();
       const duration = subtractTimes(this.#end, this.#start);
       this.#providerTopicStats = topicStats;
-      let highFrequencyTopicFound = false;
+      let hasHighFrequencyTopic = false;
 
       for (const topic of topics) {
         const existingTopic = uniqueTopics.get(topic.name);
@@ -573,14 +573,23 @@ export class IterablePlayer implements Player {
         }
         uniqueTopics.set(topic.name, topic);
 
-        if (!highFrequencyTopicFound) {
-          highFrequencyTopicFound = isTopicHighFrequency(
+        if (!hasHighFrequencyTopic) {
+          hasHighFrequencyTopic = isTopicHighFrequency(
             topicStats,
             topic.name,
             duration,
             topic.schemaName,
-            this.#alertManager,
           );
+
+          if (hasHighFrequencyTopic) {
+            this.#alertManager.addAlert("high-frequency", {
+              severity: "warn",
+              message: "High frequency topics detected",
+              error: new Error(
+                `The current data source has one or more topics with message frequency higher than 60Hz, which may impact performance and application memory.`,
+              ),
+            });
+          }
         }
       }
 

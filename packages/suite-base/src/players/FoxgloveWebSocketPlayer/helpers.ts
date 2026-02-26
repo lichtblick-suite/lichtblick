@@ -40,14 +40,17 @@ export function checkForHighFrequencyTopics({
   const duration = subtractTimes(endTime, startTime);
 
   for (const topic of topics) {
-    const highFrequency = isTopicHighFrequency(
-      topicStats,
-      topic.name,
-      duration,
-      topic.schemaName,
-      alerts,
-    );
+    const highFrequency = isTopicHighFrequency(topicStats, topic.name, duration, topic.schemaName);
+
     if (highFrequency) {
+      alerts.addAlert("high-frequency", {
+        severity: "warn",
+        message: "High frequency topics detected",
+        error: new Error(
+          `The current data source has one or more topics with message frequency higher than 60Hz, which may impact performance and application memory.`,
+        ),
+      });
+
       return;
     }
   }

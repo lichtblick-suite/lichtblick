@@ -117,10 +117,12 @@ describe("checkForHighFrequencyTopics", () => {
   describe("Given valid parameters", () => {
     it("should return early when first topic is high frequency", () => {
       // Given
+      const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
       const input = buildParams({
         endTime: RosTimeBuilder.time({ sec: 60, nsec: 0 }),
         startTime: RosTimeBuilder.time({ sec: 10, nsec: 0 }),
       });
+      const addAlertSpy = jest.spyOn(input.alerts, "addAlert");
 
       mockIsTopicHighFrequency.mockReturnValueOnce(true);
 
@@ -134,8 +136,14 @@ describe("checkForHighFrequencyTopics", () => {
         input.topics![0]!.name,
         { sec: 50, nsec: 0 }, // duration should be subtractTimes(endTime, startTime)
         input.topics![0]!.schemaName,
-        input.alerts,
       );
+      expect(addAlertSpy).toHaveBeenCalledWith("high-frequency", {
+        severity: "warn",
+        message: "High frequency topics detected",
+        error: expect.any(Error),
+      });
+
+      consoleWarnSpy.mockClear();
     });
   });
 });
