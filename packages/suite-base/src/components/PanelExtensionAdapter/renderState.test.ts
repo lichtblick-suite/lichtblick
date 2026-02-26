@@ -959,6 +959,7 @@ describe("renderState", () => {
           converter,
         },
       ],
+      forceConversion: new Set(),
     };
 
     const state1 = buildRenderState(initialState);
@@ -1034,6 +1035,7 @@ describe("renderState", () => {
           converter,
         },
       ],
+      forceConversion: new Set(),
     });
 
     expect(converter).toHaveBeenCalledWith({}, expect.objectContaining({ topic: "test" }), {});
@@ -1053,6 +1055,7 @@ describe("renderState", () => {
       sortedTopics: [],
       subscriptions: [],
       messageConverters: [],
+      forceConversion: new Set(),
     });
 
     expect(state).toEqual({
