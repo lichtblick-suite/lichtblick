@@ -132,6 +132,9 @@ describe("convertMessage", () => {
       mockMessageEvent.message,
       mockMessageEvent,
       undefined,
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
     );
   });
 
@@ -154,6 +157,9 @@ describe("convertMessage", () => {
       mockMessageEvent.message,
       mockMessageEvent,
       globalVariables,
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
     );
     expect((convertedMessages[0]?.message as any).vars).toEqual(globalVariables);
   });

@@ -566,6 +566,9 @@ describe("renderState", () => {
         topic: "another",
       }),
       {},
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
     );
     expect(converter2).not.toHaveBeenCalled();
   });
@@ -978,6 +981,9 @@ describe("renderState", () => {
       { from: "currentFrame" },
       expect.objectContaining({ topic: "test" }),
       { var1: "value1" },
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
     );
 
     converter.mockClear();
@@ -1002,6 +1008,9 @@ describe("renderState", () => {
       { from: "currentFrame" },
       expect.objectContaining({ topic: "test" }),
       { var1: "value2" },
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
     );
   });
 
@@ -1038,7 +1047,14 @@ describe("renderState", () => {
       forceConversion: new Set(),
     });
 
-    expect(converter).toHaveBeenCalledWith({}, expect.objectContaining({ topic: "test" }), {});
+    expect(converter).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ topic: "test" }),
+      {},
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
+    );
   });
 
   it("should update renderState.variables when variables watch field is set", () => {
