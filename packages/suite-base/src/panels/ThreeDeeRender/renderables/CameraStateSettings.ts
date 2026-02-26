@@ -98,6 +98,18 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       }
     });
 
+    // Screen space panning when holding Alt key
+    canvas.addEventListener("keydown", (event) => {
+      if (event.altKey) {
+        this.#controls.screenSpacePanning = true;
+      }
+    });
+    canvas.addEventListener("keyup", (event) => {
+      if (!event.altKey) {
+        this.#controls.screenSpacePanning = false;
+      }
+    });
+
     // Make the canvas able to receive keyboard events and setup WASD controls
     canvas.tabIndex = 1000;
     this.#aspect = aspect;

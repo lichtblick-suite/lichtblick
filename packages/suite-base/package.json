@@ -55,8 +55,9 @@
     "@lichtblick/wasm-lz4": "1.0.0",
     "@lichtblick/xmlrpc": "1.0.0",
     "@mcap/core": "2.1.6",
-    "@mui/icons-material": "5.15.5",
+    "@mui/icons-material": "7.3.8",
     "@mui/material": "7.2.0",
+    "@mui/x-data-grid": "7.24.1",
     "@popperjs/core": "^2.11.8",
     "@protobufjs/base64": "1.1.2",
     "@storybook/jest": "0.2.3",
@@ -144,7 +145,7 @@
     "natsort": "2.0.3",
     "nearley": "2.20.1",
     "nearley-loader": "2.0.0",
-    "notistack": "3.0.1",
+    "notistack": "3.0.2",
     "path-browserify": "1.0.1",
     "prettier": "3.6.2",
     "ramda": "0.31.3",
@@ -189,7 +190,7 @@
     "use-immer": "0.11.0",
     "uuid": "11.1.0",
     "vm-browserify": "1.1.2",
-    "webpack": "5.104.1",
+    "webpack": "5.105.2",
     "zustand": "4.5.7"
   }
 }

@@ -20,9 +20,13 @@ import {
   LoadExtensionsResult,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { buildContributionPoints } from "@lichtblick/suite-base/providers/helpers/buildContributionPoints";
-import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
+import {
+  IExtensionLoader,
+  TypeExtensionLoader,
+} from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
+import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 const log = Logger.getLogger(__filename);
 
@@ -330,34 +334,33 @@ function createExtensionRegistryStore(
     }
 
     const uninstallExtension = async (namespace: Namespace, id: string) => {
-      const namespaceLoaders = loaders.filter((loader) => loader.namespace === namespace);
-      if (namespaceLoaders.length === 0) {
+      const localLoaderType = isDesktopApp() ? "filesystem" : "browser";
+      const loaderType: TypeExtensionLoader = namespace === "local" ? localLoaderType : "server";
+
+      const namespaceLoader = loaders.find(
+        (loader) => loader.namespace === namespace && loader.type === loaderType,
+      );
+      if (!namespaceLoader) {
         throw new Error("No extension loader found for namespace " + namespace);
       }
 
-      let extension: ExtensionInfo | undefined;
-      for (const loader of namespaceLoaders) {
-        extension = await loader.getExtension(id);
-        if (extension) {
-          break;
-        }
-      }
+      const extension = get().installedExtensions?.find(
+        (ext) => ext.id === id && ext.namespace === namespace,
+      );
 
       if (!extension) {
         return;
       }
 
-      for (const loader of namespaceLoaders) {
-        try {
-          await loader.uninstallExtension(
-            loader.type === "server" ? extension.externalId! : extension.id,
-          );
-        } catch (error) {
-          log.warn(
-            `Failed to uninstall extension ${extension.id} from loader ${loader.type}:`,
-            error,
-          );
-        }
+      try {
+        await namespaceLoader.uninstallExtension(
+          loaderType === "server" ? extension.externalId! : extension.id,
+        );
+      } catch (error) {
+        log.warn(
+          `Failed to uninstall extension ${extension.id} from loader ${namespaceLoader.type}:`,
+          error,
+        );
       }
 
       set((state) => removeExtensionData({ id: extension.id, state }));

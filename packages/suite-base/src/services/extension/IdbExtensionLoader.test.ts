@@ -93,10 +93,21 @@ describe("IdbExtensionLoader", () => {
 
       await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
 
-      expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, expectedExtensionInfo);
+      expect(mockPut).toHaveBeenCalledWith(
+        METADATA_STORE_NAME,
+        expect.objectContaining({
+          ...expectedExtensionInfo,
+          externalId: undefined,
+          size: expect.any(Number),
+        }),
+      );
       expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
         content: foxe,
-        info: expectedExtensionInfo,
+        info: expect.objectContaining({
+          ...expectedExtensionInfo,
+          externalId: undefined,
+          size: expect.any(Number),
+        }),
       });
     });
 
@@ -112,10 +123,21 @@ describe("IdbExtensionLoader", () => {
 
       await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });
 
-      expect(mockPut).toHaveBeenCalledWith(METADATA_STORE_NAME, info);
+      expect(mockPut).toHaveBeenCalledWith(
+        METADATA_STORE_NAME,
+        expect.objectContaining({
+          ...info,
+          externalId: undefined,
+          size: expect.any(Number),
+        }),
+      );
       expect(mockPut).toHaveBeenCalledWith(EXTENSION_STORE_NAME, {
         content: foxe,
-        info,
+        info: expect.objectContaining({
+          ...info,
+          externalId: undefined,
+          size: expect.any(Number),
+        }),
       });
       expect((await loader.getExtensions())[0]).toBe(info);
     });
