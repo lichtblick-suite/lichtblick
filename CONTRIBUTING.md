@@ -456,18 +456,13 @@ When reporting a bug, please include:
 
 ## Version Increment
 
-We use [Semantic Versioning](https://semver.org/) with the format: `<major>.<minor>.<patch>[.<build number>]`.
+The version format: `<major>.<minor>.<patch>`.
 
-| Component              | Description                                                                            |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| **MAJOR**              | Breaking changes — removed or reworked APIs. Users should expect a non-trivial update. |
-| **MINOR**              | New functionality added without breaking backward compatibility.                       |
-| **PATCH**              | Bug fixes, security patches, and minor improvements.                                   |
-| **BUILD** _(optional)_ | Build metadata (e.g., CI build number).                                                |
-
-**Examples:** `1.20.11`, `1.20.11.403`
-
-> _Note: The version increment process is currently manual. Developers must update the version number in `package.json`. An automated pipeline is under development._
+| Component | Description                                                                            |
+| --------- | -------------------------------------------------------------------------------------- |
+| **MAJOR** | Breaking changes — removed or reworked APIs. Users should expect a non-trivial update. |
+| **MINOR** | New functionality added without breaking backward compatibility.                       |
+| **PATCH** | Bug fixes, security patches, and minor improvements.                                   |
 
 ---
 
