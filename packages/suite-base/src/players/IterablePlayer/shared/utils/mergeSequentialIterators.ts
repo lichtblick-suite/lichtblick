@@ -68,24 +68,45 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
   // Activate sources whose start time is at or before the query start time.
   // When no query start is provided, activate only the first source (the earliest by startTime)
   // to avoid starting HTTP requests for all files simultaneously.
+  //
+  // When a query start IS provided (e.g. after a seek), only activate sources whose time range
+  // [startTime, endTime] actually contains the queryStart. Sources that end before queryStart
+  // are skipped entirely — they cannot contain relevant data at the seek position.
+  // This avoids activating all preceding sources when seeking to the end of the timeline.
   const queryStart = args.start;
-  while (nextSourceIndex < sourcesWithTime.length) {
-    const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-    // If a query start is specified, activate all sources that start at or before it.
-    // If no query start is specified, activate only the first source.
-    if (queryStart != undefined) {
+  if (queryStart != undefined) {
+    // Skip sources that end before queryStart (they can't contain messages at the seek point)
+    while (nextSourceIndex < sourcesWithTime.length) {
+      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
+      if (compare(sourceInfo.endTime, queryStart) >= 0) {
+        break;
+      }
+      nextSourceIndex++;
+    }
+    // Activate sources that contain queryStart (startTime <= queryStart)
+    while (nextSourceIndex < sourcesWithTime.length) {
+      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
       if (compare(sourceInfo.startTime, queryStart) > 0) {
         break;
       }
-    } else if (nextSourceIndex > 0) {
-      break;
+      const iterator = sourceInfo.source.messageIterator(args);
+      const result = await iterator.next();
+      if (!(result.done ?? false)) {
+        heap.push({ value: result.value as T, iterator });
+      }
+      nextSourceIndex++;
     }
-    const iterator = sourceInfo.source.messageIterator(args);
-    const result = await iterator.next();
-    if (!(result.done ?? false)) {
-      heap.push({ value: result.value as T, iterator });
+  } else {
+    // No query start — activate only the first source
+    if (nextSourceIndex < sourcesWithTime.length) {
+      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
+      const iterator = sourceInfo.source.messageIterator(args);
+      const result = await iterator.next();
+      if (!(result.done ?? false)) {
+        heap.push({ value: result.value as T, iterator });
+      }
+      nextSourceIndex++;
     }
-    nextSourceIndex++;
   }
 
   // If the initial source(s) were empty, advance through pending sources until
@@ -100,40 +121,48 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
     nextSourceIndex++;
   }
 
-  while (!heap.isEmpty()) {
-    const node = heap.pop()!;
-    const currentTimeMs = getTime(node.value);
+  try {
+    while (!heap.isEmpty()) {
+      const node = heap.pop()!;
+      const currentTimeMs = getTime(node.value);
 
-    // Before yielding, check if any pending sources should be activated.
-    // Activate sources whose startTime is <= the current message time.
-    while (nextSourceIndex < sourcesWithTime.length) {
-      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-      if (toMillis(sourceInfo.startTime) > currentTimeMs) {
-        break;
+      // Before yielding, check if any pending sources should be activated.
+      // Activate sources whose startTime is <= the current message time.
+      while (nextSourceIndex < sourcesWithTime.length) {
+        const sourceInfo = sourcesWithTime[nextSourceIndex]!;
+        if (toMillis(sourceInfo.startTime) > currentTimeMs) {
+          break;
+        }
+        const iterator = sourceInfo.source.messageIterator(args);
+        const result = await iterator.next();
+        if (!(result.done ?? false)) {
+          heap.push({ value: result.value as T, iterator });
+        }
+        nextSourceIndex++;
       }
-      const iterator = sourceInfo.source.messageIterator(args);
-      const result = await iterator.next();
-      if (!(result.done ?? false)) {
-        heap.push({ value: result.value as T, iterator });
+
+      yield node.value;
+
+      const nextResult = await node.iterator.next();
+      if (!(nextResult.done ?? false)) {
+        heap.push({ value: nextResult.value as T, iterator: node.iterator });
+      } else if (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
+        // Current heap is exhausted but there are still pending sources.
+        // Activate the next source to continue yielding.
+        const sourceInfo = sourcesWithTime[nextSourceIndex]!;
+        const iterator = sourceInfo.source.messageIterator(args);
+        const result = await iterator.next();
+        if (!(result.done ?? false)) {
+          heap.push({ value: result.value as T, iterator });
+        }
+        nextSourceIndex++;
       }
-      nextSourceIndex++;
     }
-
-    yield node.value;
-
-    const nextResult = await node.iterator.next();
-    if (!(nextResult.done ?? false)) {
-      heap.push({ value: nextResult.value as T, iterator: node.iterator });
-    } else if (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
-      // Current heap is exhausted but there are still pending sources.
-      // Activate the next source to continue yielding.
-      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-      const iterator = sourceInfo.source.messageIterator(args);
-      const result = await iterator.next();
-      if (!(result.done ?? false)) {
-        heap.push({ value: result.value as T, iterator });
-      }
-      nextSourceIndex++;
+  } finally {
+    // Close all active iterators to release resources (e.g. HTTP connections)
+    // when the consumer breaks early or the generator is discarded.
+    for (const node of heap.toArray()) {
+      await node.iterator.return?.();
     }
   }
 }
