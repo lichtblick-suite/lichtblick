@@ -10,17 +10,29 @@ function isLogSchema(schemaName?: string): boolean {
   return schemaName != undefined && LOG_SCHEMAS.has(schemaName);
 }
 
-export function isTopicHighFrequency(
-  topicStats: Map<string, TopicStats>,
-  topicName: string,
-  duration: Time,
-  schemaName: string | undefined,
-): boolean {
-  if (isLogSchema(schemaName)) {
+export type TopicFrequencyInfo = {
+  name: string;
+  schemaName?: string;
+};
+
+export function isTopicHighFrequency({
+  topicStats,
+  topic,
+  duration,
+}: {
+  topicStats: Map<string, TopicStats>;
+  topic: TopicFrequencyInfo;
+  duration: Time | undefined;
+}): boolean {
+  if (!duration) {
     return false;
   }
 
-  const topicStat = topicStats.get(topicName);
+  if (!topic.schemaName || isLogSchema(topic.schemaName)) {
+    return false;
+  }
+
+  const topicStat = topicStats.get(topic.name);
   const frequency = calculateStaticItemFrequency(
     topicStat?.numMessages ?? 0,
     topicStat?.firstMessageTime,

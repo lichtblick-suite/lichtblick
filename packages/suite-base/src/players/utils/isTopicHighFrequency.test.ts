@@ -20,7 +20,11 @@ describe("isTopicHighFrequency", () => {
   });
 
   it("shouldn't create an alert when there aren't topics with high message frequency and return false", () => {
-    const result = isTopicHighFrequency(topicStats, topicName, duration, schemaName);
+    const result = isTopicHighFrequency({
+      topicStats,
+      topic: { name: topicName, schemaName },
+      duration,
+    });
 
     expect(result).toBe(false);
   });
@@ -31,12 +35,11 @@ describe("isTopicHighFrequency", () => {
       [highFrequencyTopicName, { numMessages: BasicBuilder.number({ min: 2000, max: 4000 }) }],
     ]);
 
-    const result = isTopicHighFrequency(
-      topicStatsHighFrequency,
-      highFrequencyTopicName,
+    const result = isTopicHighFrequency({
+      topicStats: topicStatsHighFrequency,
+      topic: { name: highFrequencyTopicName, schemaName },
       duration,
-      schemaName,
-    );
+    });
 
     expect(result).toBe(true);
   });
@@ -44,7 +47,11 @@ describe("isTopicHighFrequency", () => {
   it.each([...LOG_SCHEMAS])(
     "should return false if the schemaName belongs to logs schemas",
     (schema: string) => {
-      const result = isTopicHighFrequency(topicStats, topicName, duration, schema);
+      const result = isTopicHighFrequency({
+        topicStats,
+        topic: { name: topicName, schemaName: schema },
+        duration,
+      });
 
       expect(result).toBe(false);
     },
