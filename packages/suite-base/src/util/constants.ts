@@ -22,3 +22,4 @@ export const JSON_TREE_THEME_COLORS = {
   },
 } as const;
 export const TAB_PANEL_TYPE = "Tab";
+export const GLOBAL_REQUEST_QUEUE_MAX_CONCURRENT = 10;
