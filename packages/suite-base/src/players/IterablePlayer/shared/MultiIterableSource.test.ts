@@ -69,10 +69,12 @@ describe("MultiIterableSource", () => {
       expect(mockSourceConstructor).toHaveBeenNthCalledWith(1, {
         type: "url",
         url: url1,
+        cacheSizeInBytes: expect.any(Number),
       });
       expect(mockSourceConstructor).toHaveBeenNthCalledWith(2, {
         type: "url",
         url: url2,
+        cacheSizeInBytes: expect.any(Number),
       });
       expect(initializations).toHaveLength(2);
     });
