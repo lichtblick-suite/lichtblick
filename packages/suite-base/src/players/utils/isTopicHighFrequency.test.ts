@@ -19,7 +19,7 @@ describe("isTopicHighFrequency", () => {
     jest.clearAllMocks();
   });
 
-  it("shouldn't create an alert when there aren't topics with high message frequency and return false", () => {
+  it("should return false when there aren't topics with high message frequency and return false", () => {
     const result = isTopicHighFrequency({
       topicStats,
       topic: { name: topicName, schemaName },
@@ -29,7 +29,18 @@ describe("isTopicHighFrequency", () => {
     expect(result).toBe(false);
   });
 
-  it("should create an alert when there are topics with high message frequency", () => {
+  it("should return false when duration is undefined", () => {
+    const undefinedDuration = undefined;
+    const result = isTopicHighFrequency({
+      topicStats,
+      topic: { name: topicName, schemaName },
+      duration: undefinedDuration,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it("should return true when there are topics with high message frequency", () => {
     const highFrequencyTopicName = BasicBuilder.string();
     const topicStatsHighFrequency = new Map<string, TopicStats>([
       [highFrequencyTopicName, { numMessages: BasicBuilder.number({ min: 2000, max: 4000 }) }],
