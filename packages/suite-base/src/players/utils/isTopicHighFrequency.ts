@@ -4,16 +4,12 @@
 import { Time } from "@lichtblick/rostime";
 import { TopicStats } from "@lichtblick/suite-base/players/types";
 import { FREQUENCY_LIMIT, LOG_SCHEMAS } from "@lichtblick/suite-base/players/utils/constants";
+import { TopicFrequencyInfo } from "@lichtblick/suite-base/players/utils/types";
 import { calculateStaticItemFrequency } from "@lichtblick/suite-base/util/calculateStaticItemFrequency";
 
 function isLogSchema(schemaName?: string): boolean {
   return schemaName != undefined && LOG_SCHEMAS.has(schemaName);
 }
-
-export type TopicFrequencyInfo = {
-  name: string;
-  schemaName?: string;
-};
 
 export function isTopicHighFrequency({
   topicStats,
