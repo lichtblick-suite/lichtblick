@@ -18,8 +18,6 @@ import { EventEmitter } from "eventemitter3";
 import Log from "@lichtblick/log";
 import { globalRequestQueue } from "@lichtblick/suite-base/util/RequestQueue";
 
-const READ_CHUNK_TIMEOUT_MS = 30000;
-
 const log = Log.getLogger(__filename);
 
 type EventTypes = {
@@ -36,7 +34,6 @@ export default class FetchReader extends EventEmitter<EventTypes> {
   #controller: AbortController;
   #aborted: boolean = false;
   #url: string;
-  #timeoutId?: ReturnType<typeof setTimeout>;
 
   public constructor(url: string, options?: RequestInit) {
     super();
@@ -99,19 +96,9 @@ export default class FetchReader extends EventEmitter<EventTypes> {
           return;
         }
 
-        this.#timeoutId = setTimeout(() => {
-          this.#aborted = true;
-          this.#controller.abort();
-          this.emit(
-            "error",
-            new Error(`GET <${this.#url}> timed out after ${READ_CHUNK_TIMEOUT_MS}ms`),
-          );
-        }, READ_CHUNK_TIMEOUT_MS);
-
         reader
           .read()
           .then(({ done, value }) => {
-            clearTimeout(this.#timeoutId);
             // no more to read, signal stream is finished
             if (done) {
               this.emit("end");
@@ -121,9 +108,6 @@ export default class FetchReader extends EventEmitter<EventTypes> {
             this.read();
           })
           .catch((unk: unknown) => {
-            if (this.#timeoutId) {
-              clearTimeout(this.#timeoutId);
-            }
             // canceling the xhr request causes the promise to reject
             if (this.#aborted) {
               this.emit("end");
@@ -134,18 +118,12 @@ export default class FetchReader extends EventEmitter<EventTypes> {
           });
       })
       .catch((unk: unknown) => {
-        if (this.#timeoutId) {
-          clearTimeout(this.#timeoutId);
-        }
         const err = unk instanceof Error ? unk : new Error(unk as string);
         this.emit("error", err);
       });
   }
 
   public destroy(): void {
-    if (this.#timeoutId) {
-      clearTimeout(this.#timeoutId);
-    }
     this.#aborted = true;
     this.#controller.abort();
   }

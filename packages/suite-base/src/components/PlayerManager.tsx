@@ -146,29 +146,6 @@ export default function PlayerManager(
 
   useLayoutEffect(() => void player?.setUserScripts(userScripts), [player, userScripts]);
 
-  // useEffect(() => {
-  //   if (!player || !basePlayer) {
-  //     return;
-  //   }
-
-  //   // The actual data-loading player is the basePlayer
-  //   if ("markReady" in basePlayer && typeof basePlayer.markReady === "function") {
-  //     // eslint-disable-next-line no-restricted-syntax
-  //     console.log("isMounted:", isMounted());
-  //     const timerId = setTimeout(() => {
-  //       if (isMounted()) {
-  //         log.debug("Calling markReady() after app initialization");
-  //         (basePlayer as any).markReady();
-  //       }
-  //     }, 2000);
-
-  //     return () => {
-  //       clearTimeout(timerId);
-  //     };
-  //   }
-  //   return;
-  // }, [player, basePlayer, isMounted]);
-
   const { enqueueSnackbar } = useSnackbar();
 
   const [selectedSource, setSelectedSource] = useState<IDataSourceFactory | undefined>();
