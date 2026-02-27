@@ -82,7 +82,11 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
 
     const resultInit: Initialization = this.mergeInitializations(initializations);
 
-    this.sourceImpl.sort((a, b) => compare(a.getStart!()!, b.getStart!()!));
+    this.sourceImpl.sort((a, b) => {
+      const aStart = a.getStart?.() ?? { sec: 0, nsec: 0 };
+      const bStart = b.getStart?.() ?? { sec: 0, nsec: 0 };
+      return compare(aStart, bStart);
+    });
 
     return resultInit;
   }
