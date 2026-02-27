@@ -103,8 +103,6 @@ export type IterablePlayerOptions = {
 
   // Max. time that messages will be buffered ahead for smoother playback. (default: 10sec)
   readAheadDuration?: Time;
-
-  delayedStart?: boolean;
 };
 
 type IterablePlayerState =
@@ -137,8 +135,6 @@ export class IterablePlayer implements Player {
   #start?: Time;
   #end?: Time;
   #enablePreload = true;
-  #readyToLoad: boolean = false;
-  #delayedStart: boolean = false;
 
   // next read start time indicates where to start reading for the next tick
   // after a tick read, it is set to 1nsec past the end of the read operation (preparing for the next tick)
@@ -212,7 +208,6 @@ export class IterablePlayer implements Player {
       enablePreload,
       sourceId,
       readAheadDuration = { sec: 10, nsec: 0 },
-      delayedStart,
     } = options;
 
     this.#iterableSource = source;
@@ -236,7 +231,6 @@ export class IterablePlayer implements Player {
 
     this.#enablePreload = enablePreload ?? true;
     this.#sourceId = sourceId;
-    this.#delayedStart = delayedStart ?? false;
 
     this.isClosed = new Promise((resolveClose) => {
       this.#resolveIsClosed = resolveClose;
@@ -252,11 +246,7 @@ export class IterablePlayer implements Player {
       throw new Error("Cannot setListener again");
     }
     this.#listener = listener;
-    // Only transition to "initialize" if not using delayed start, or if ready
-    if (!this.#delayedStart || this.#readyToLoad) {
-      this.#setState("initialize");
-    }
-    // else: stay in "preinit" until markReady() is called
+    this.#setState("initialize");
   }
 
   public startPlayback(): void {
@@ -265,17 +255,6 @@ export class IterablePlayer implements Player {
 
   public playUntil(time: Time): void {
     this.#startPlayImpl({ untilTime: time });
-  }
-
-  public markReady(): void {
-    // eslint-disable-next-line no-restricted-syntax
-    console.log("mark ready was called:");
-    this.#readyToLoad = true;
-
-    // Trigger the state transition if we were waiting
-    if (this.#state === "preinit" && this.#listener) {
-      this.#setState("initialize");
-    }
   }
 
   #startPlayImpl(opt?: { untilTime: Time }): void {
@@ -486,12 +465,6 @@ export class IterablePlayer implements Player {
 
         switch (state) {
           case "preinit":
-            if (this.#delayedStart && !this.#readyToLoad) {
-              log.debug("Waiting for markReady() before initialization");
-              // Stay in preinit, don't advance to next state
-              this.#queueEmitState();
-              return; // Exit early, stay in preinit
-            }
             this.#queueEmitState();
             break;
           case "initialize":

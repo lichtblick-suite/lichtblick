@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { GLOBAL_REQUEST_QUEUE_MAX_CONCURRENT } from "@lichtblick/suite-base/util/constants";
+
 export class RequestQueue {
   #maxConcurrent: number;
   #activeCount = 0;
   #queue: Array<() => void> = [];
 
-  public constructor(maxConcurrent: number = 2) {
+  public constructor(maxConcurrent: number = GLOBAL_REQUEST_QUEUE_MAX_CONCURRENT) {
     this.#maxConcurrent = maxConcurrent;
   }
 
@@ -29,4 +31,4 @@ export class RequestQueue {
 }
 
 // Global queue for all HTTP requests
-export const globalRequestQueue = new RequestQueue(2);
+export const globalRequestQueue = new RequestQueue(GLOBAL_REQUEST_QUEUE_MAX_CONCURRENT);

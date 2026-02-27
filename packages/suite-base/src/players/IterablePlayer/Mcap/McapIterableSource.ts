@@ -62,8 +62,10 @@ export class McapIterableSource implements ISerializedIterableSource {
   public async initialize(): Promise<Initialization> {
     const source = this.#source;
 
-    // Preload decompression handlers before starting any MCAP fetches
-    // This ensures WASM workers download before competing with MCAP data requests
+    // Preload decompression handlers before starting any MCAP operations.
+    // This ensures WASM modules are fully loaded before the reader attempts any operations
+    // that might need decompression. Under network congestion, WASM modules can be slow
+    // to download/initialize. Without preloading, message reading could fail when handlers aren't ready yet.
     const decompressHandlers = await loadDecompressHandlers();
 
     switch (source.type) {
