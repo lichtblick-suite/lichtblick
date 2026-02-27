@@ -6,7 +6,6 @@ import {
   IterableSourceConstructor,
   MultiSource,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
-import { mergeSequentialIterators } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/mergeSequentialIterators";
 import {
   accumulateMap,
   mergeMetadata,
@@ -14,6 +13,7 @@ import {
   setEndTime,
   setStartTime,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/mergeInitialization";
+import { mergeSequentialIterators } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/mergeSequentialIterators";
 import {
   filterSourcesForBackfill,
   filterSourcesByTimeRange,

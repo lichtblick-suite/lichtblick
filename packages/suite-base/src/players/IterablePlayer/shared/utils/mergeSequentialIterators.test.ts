@@ -78,13 +78,17 @@ describe("mergeSequentialIterators", () => {
     }
 
     expect(results).toHaveLength(4);
-    // Verify time ordering
+    // Verify time ordering — all results are message-events in this test
     for (let i = 1; i < results.length; i++) {
       const prev = results[i - 1]!;
       const curr = results[i]!;
-      if (prev.type === "message-event" && curr.type === "message-event") {
-        expect(prev.msgEvent.receiveTime.sec).toBeLessThanOrEqual(curr.msgEvent.receiveTime.sec);
-      }
+      expect(prev.type).toBe("message-event");
+      expect(curr.type).toBe("message-event");
+      expect(
+        (prev as IteratorResult<Uint8Array> & { type: "message-event" }).msgEvent.receiveTime.sec,
+      ).toBeLessThanOrEqual(
+        (curr as IteratorResult<Uint8Array> & { type: "message-event" }).msgEvent.receiveTime.sec,
+      );
     }
   });
 
@@ -104,12 +108,12 @@ describe("mergeSequentialIterators", () => {
     let source2IteratorCalledBeforeSource1Done = false;
     let source1Done = false;
 
-    const originalIterator = source2.messageIterator;
+    const originalIterator = source2.messageIterator.bind(source2);
     source2.messageIterator = jest.fn().mockImplementation((...args: unknown[]) => {
       if (!source1Done) {
         source2IteratorCalledBeforeSource1Done = true;
       }
-      return (originalIterator as Function).apply(source2, args);
+      return originalIterator(...(args as Parameters<typeof originalIterator>));
     });
 
     for await (const msg of mergeSequentialIterators([source1, source2], defaultArgs)) {
@@ -156,9 +160,11 @@ describe("mergeSequentialIterators", () => {
     }
 
     expect(results).toHaveLength(1);
-    if (results[0]!.type === "message-event") {
-      expect(results[0]!.msgEvent.receiveTime.sec).toBe(15);
-    }
+    expect(results[0]!.type).toBe("message-event");
+    expect(
+      (results[0] as IteratorResult<Uint8Array> & { type: "message-event" }).msgEvent.receiveTime
+        .sec,
+    ).toBe(15);
   });
 
   it("handles sources without time info (starts them immediately)", async () => {
