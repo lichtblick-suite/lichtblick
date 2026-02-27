@@ -100,8 +100,6 @@ export type PlayerAlert = {
   tip?: string;
 };
 
-export type PlayerType = "file" | "websocket";
-
 export type PlayerURLState = Immutable<{
   sourceId: string;
   parameters?: Record<string, string | string[]>;
