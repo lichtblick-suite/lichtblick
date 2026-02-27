@@ -4,7 +4,7 @@
 import { GLOBAL_REQUEST_QUEUE_MAX_CONCURRENT } from "@lichtblick/suite-base/util/constants";
 
 export class RequestQueue {
-  #maxConcurrent: number;
+  readonly #maxConcurrent: number;
   #activeCount = 0;
   #queue: Array<() => void> = [];
 
