@@ -3139,7 +3139,7 @@ __metadata:
     "@lichtblick/wasm-bz2": 1.0.0
     "@lichtblick/wasm-lz4": 1.0.0
     "@lichtblick/wasm-zstd": 1.0.0
-    "@mcap/core": 2.1.6
+    "@mcap/core": 2.2.0
     "@protobufjs/base64": 1.1.2
     "@types/protobufjs": "workspace:*"
     flatbuffers: 25.9.23
@@ -3342,7 +3342,7 @@ __metadata:
     "@lichtblick/wasm-bz2": 1.0.0
     "@lichtblick/wasm-lz4": 1.0.0
     "@lichtblick/xmlrpc": 1.0.0
-    "@mcap/core": 2.1.6
+    "@mcap/core": 2.2.0
     "@mui/icons-material": 7.3.8
     "@mui/material": 7.2.0
     "@mui/x-data-grid": 7.24.1
@@ -3498,7 +3498,7 @@ __metadata:
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": 1.0.2
-    "@mcap/core": 2.1.6
+    "@mcap/core": 2.2.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
     "@storybook/react": 9.1.9
     "@types/mock-fs": 4.13.4
@@ -3706,14 +3706,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mcap/core@npm:2.1.6":
-  version: 2.1.6
-  resolution: "@mcap/core@npm:2.1.6"
+"@mcap/core@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@mcap/core@npm:2.2.0"
   dependencies:
     "@foxglove/crc": ^0.0.3
     heap-js: ^2.2.0
     tslib: ^2.5.0
-  checksum: 1ce6813bae1f6497c7fd15ea1d4045a02ca40020a456d9c5f5085a72a8c71bc3ebd3e60bb1435625d1fa107adab86004c351ea6dead9c775ab1394e87f7a6894
+  checksum: 0e6600aec8771aa6cc0a19be9078407e31804f1b1de2f94494630549b4b9a6c7a74e1221ae7d1eba188908b581ea2c7ed40ae34da475ae82899777c0fb805fe7
   languageName: node
   linkType: hard
 
