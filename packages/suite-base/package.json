@@ -54,7 +54,7 @@
     "@lichtblick/wasm-bz2": "1.0.0",
     "@lichtblick/wasm-lz4": "1.0.0",
     "@lichtblick/xmlrpc": "1.0.0",
-    "@mcap/core": "2.1.6",
+    "@mcap/core": "2.2.0",
     "@mui/icons-material": "7.3.8",
     "@mui/material": "7.2.0",
     "@mui/x-data-grid": "7.24.1",
