@@ -206,7 +206,6 @@ export class IterablePlayer implements Player {
       urlParams,
       source,
       name,
-
       enablePreload,
       sourceId,
       readAheadDuration = { sec: 10, nsec: 0 },
