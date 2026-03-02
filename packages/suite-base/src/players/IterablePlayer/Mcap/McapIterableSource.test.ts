@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { McapWriter } from "@mcap/core";
+import { McapIndexedReader, McapWriter } from "@mcap/core";
 import { Blob } from "node:buffer";
 
-import { TempBuffer } from "@lichtblick/mcap-support";
+import { loadDecompressHandlers, TempBuffer } from "@lichtblick/mcap-support";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { McapIterableSource } from "./McapIterableSource";
@@ -18,9 +18,80 @@ jest.mock("./RemoteFileReadable");
 
 const MockRemoteFileReadable = RemoteFileReadable as jest.MockedClass<typeof RemoteFileReadable>;
 
+jest.mock("@lichtblick/mcap-support", () => ({
+  ...jest.requireActual("@lichtblick/mcap-support"),
+  loadDecompressHandlers: jest.fn(),
+}));
+
+// Helper function to add a message to the writer with customizable parameters
+async function addMessage(
+  writer: McapWriter,
+  channelId: number,
+  overrides: {
+    sequence?: number;
+    publishTime?: bigint;
+    logTime?: bigint;
+    data?: Uint8Array;
+  } = {},
+): Promise<void> {
+  await writer.addMessage({
+    channelId,
+    sequence: overrides.sequence ?? 0,
+    publishTime: overrides.publishTime ?? 0n,
+    logTime: overrides.logTime ?? 1000000000n, // 1 second in nanoseconds
+    data: overrides.data ?? new TextEncoder().encode(BasicBuilder.string()),
+  });
+}
+
+async function createMcapFile({
+  withMessage = true,
+  topic = "/test",
+  noChannels = false,
+}: {
+  withMessage?: boolean;
+  topic?: string;
+  noChannels?: boolean;
+}): Promise<globalThis.Blob> {
+  const tempBuffer = new TempBuffer();
+  const writer = new McapWriter({ writable: tempBuffer });
+  await writer.start({ library: "test", profile: "" });
+
+  if (withMessage) {
+    const schemaId = await writer.registerSchema({
+      name: "test_schema",
+      encoding: "jsonschema",
+      data: new TextEncoder().encode(JSON.stringify({ type: "object" })),
+    });
+    if (!noChannels) {
+      const channelId = await writer.registerChannel({
+        schemaId,
+        topic,
+        messageEncoding: "json",
+        metadata: new Map(),
+      });
+      await addMessage(writer, channelId);
+    }
+  }
+
+  await writer.end();
+  return new Blob([tempBuffer.get()]) as unknown as globalThis.Blob;
+}
+
 describe("McapIterableSource", () => {
+  const mockLoadDecompressHandlers = loadDecompressHandlers as jest.MockedFunction<
+    typeof loadDecompressHandlers
+  >;
+
   beforeEach(() => {
-    MockRemoteFileReadable.mockClear();
+    // Reset and setup mock to return actual decompression handlers
+    mockLoadDecompressHandlers.mockReset();
+    mockLoadDecompressHandlers.mockImplementation(() =>
+      jest.requireActual("@lichtblick/mcap-support").loadDecompressHandlers(),
+    );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it("returns an appropriate error message for an empty MCAP file", async () => {
@@ -47,7 +118,33 @@ describe("McapIterableSource", () => {
     ]);
   });
 
-  describe("url source type", () => {
+  it("loads decompression handlers before creating an indexed reader for an indexed file", async () => {
+    // Given
+    const topic = `/${BasicBuilder.string()}`;
+    const file = await createMcapFile({ withMessage: true, topic });
+    const source = new McapIterableSource({ type: "file", file });
+    const readerInitializeSpy = jest.spyOn(McapIndexedReader, "Initialize");
+
+    // When
+    const result = await source.initialize();
+
+    // Then
+    expect(mockLoadDecompressHandlers).toHaveBeenCalledTimes(1);
+    expect(readerInitializeSpy).toHaveBeenCalledTimes(1);
+
+    // Verify loadDecompressHandlers was called before McapIndexedReader.Initialize
+    const decompressHandlerCallOrder = mockLoadDecompressHandlers.mock.invocationCallOrder[0];
+    const readerInitializeCallOrder = readerInitializeSpy.mock.invocationCallOrder[0];
+    expect(decompressHandlerCallOrder).toBeLessThan(readerInitializeCallOrder!);
+
+    // Verify initialization was successful
+    expect(result.start).toBeDefined();
+    expect(result.end).toBeDefined();
+    expect(result.topics).toHaveLength(1);
+    expect(result.topics[0]?.name).toBe(topic);
+  });
+
+  describe("When source type is URL", () => {
     const urlIndexedMcap = "https://example.com/data.mcap";
     const urlUnindexedMcap = "https://example.com/unindexed.mcap";
 
@@ -189,6 +286,105 @@ describe("McapIterableSource", () => {
       // And getStart/getEnd should reflect the message time
       expect(source.getStart()).toEqual({ sec: 3, nsec: 0 });
       expect(source.getEnd()).toEqual({ sec: 3, nsec: 0 });
+    });
+  });
+
+  describe("tryCreateIndexedReader", () => {
+    it("uses preloaded decompressHandlers for indexed reader", async () => {
+      // Given
+      const file = await createMcapFile({ withMessage: true });
+      const source = new McapIterableSource({ type: "file", file });
+
+      // Spy on both loadDecompressHandlers and Initialize
+      const loadHandlersSpy = jest.spyOn(
+        await import("@lichtblick/mcap-support"),
+        "loadDecompressHandlers",
+      );
+      const initializeSpy = jest.spyOn(McapIndexedReader, "Initialize");
+
+      // When
+      await source.initialize();
+
+      // Then - verify the same handlers from loadDecompressHandlers are passed to Initialize
+      expect(loadHandlersSpy).toHaveBeenCalledTimes(1);
+      const loadedHandlers = await loadHandlersSpy.mock.results[0]!.value;
+
+      expect(initializeSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          decompressHandlers: loadedHandlers,
+        }),
+      );
+    });
+
+    it("successfully creates an indexed reader for a valid MCAP", async () => {
+      // Given
+      const topic = `/${BasicBuilder.string()}`;
+      const file = await createMcapFile({ withMessage: true, topic });
+      const source = new McapIterableSource({ type: "file", file });
+
+      const initializeSpy = jest.spyOn(McapIndexedReader, "Initialize");
+
+      // When
+      const result = await source.initialize();
+
+      // Then
+      expect(initializeSpy).toHaveBeenCalledTimes(1);
+      const reader = await initializeSpy.mock.results[0]!.value;
+
+      expect(reader).toBeDefined();
+      expect(reader.chunkIndexes.length).toBeGreaterThan(0);
+      expect(reader.channelsById.size).toBeGreaterThan(0);
+
+      expect(result).toBeDefined();
+      expect(result.topics).toHaveLength(1);
+      expect(result.topics[0]?.name).toBe(topic);
+    });
+
+    it("falls back to unindexed reader when MCAP has no chunks", async () => {
+      // Given
+      const file = await createMcapFile({ withMessage: false }); // No messages -> no chunks
+      const source = new McapIterableSource({ type: "file", file });
+
+      // When
+      const result = await source.initialize();
+
+      // Then
+      expect(result).toBeDefined();
+      expect(result.topics).toEqual([]);
+    });
+
+    it("falls back to unindexed reader when MCAP has no channels", async () => {
+      // Given
+      const file = await createMcapFile({ withMessage: true, noChannels: true });
+      const source = new McapIterableSource({ type: "file", file });
+
+      // When
+      const result = await source.initialize();
+
+      // Then
+      expect(result).toBeDefined();
+      expect(result.topics).toEqual([]);
+    });
+
+    it("falls back to unindexed reader when indexed reader initialization fails", async () => {
+      // Given
+      const file = await createMcapFile({ withMessage: true });
+      const source = new McapIterableSource({ type: "file", file });
+
+      const initializeSpy = jest
+        .spyOn(McapIndexedReader, "Initialize")
+        .mockRejectedValue(new Error("Corrupt MCAP file"));
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+
+      // When
+      const result = await source.initialize();
+
+      // Then
+      expect(result).toBeDefined();
+      expect(result.topics).toHaveLength(1);
+      expect(result.topics[0]?.name).toBe("/test");
+      expect(initializeSpy).toHaveBeenCalledTimes(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(new Error("Corrupt MCAP file"));
     });
   });
 });
