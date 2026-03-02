@@ -9,7 +9,6 @@ import { McapIndexedReader, McapWriter } from "@mcap/core";
 import { Blob } from "node:buffer";
 
 import { loadDecompressHandlers, TempBuffer } from "@lichtblick/mcap-support";
-import { Basic } from "@lichtblick/suite-base/Workspace.stories";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
