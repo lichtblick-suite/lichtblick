@@ -287,6 +287,42 @@ describe("McapIterableSource", () => {
       expect(source.getStart()).toEqual({ sec: 3, nsec: 0 });
       expect(source.getEnd()).toEqual({ sec: 3, nsec: 0 });
     });
+
+    it("should throw when fetch response has no body", async () => {
+      // Given an unindexed MCAP served via URL where fetch returns no body
+      const mcapData = await buildUnindexedMcap([{ logTime: 1_000_000_000n }]);
+      mockRemoteFileReadableWith(mcapData);
+      global.fetch = jest.fn().mockResolvedValue({
+        body: undefined,
+        headers: new Headers({ "content-length": String(mcapData.byteLength) }),
+      }) as unknown as typeof fetch;
+
+      // When initializing the source
+      const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });
+
+      // Then it should throw an error about missing body
+      await expect(source.initialize()).rejects.toThrow(
+        `Unable to stream remote file. <${urlUnindexedMcap}>`,
+      );
+    });
+
+    it("should throw when fetch response has no Content-Length header", async () => {
+      // Given an unindexed MCAP served via URL where fetch returns no Content-Length
+      const mcapData = await buildUnindexedMcap([{ logTime: 1_000_000_000n }]);
+      mockRemoteFileReadableWith(mcapData);
+      global.fetch = jest.fn().mockResolvedValue({
+        body: new Blob([mcapData]).stream(),
+        headers: new Headers(),
+      }) as unknown as typeof fetch;
+
+      // When initializing the source
+      const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });
+
+      // Then it should throw an error about missing Content-Length
+      await expect(source.initialize()).rejects.toThrow(
+        `Remote file is missing Content-Length header. <${urlUnindexedMcap}>`,
+      );
+    });
   });
 
   describe("tryCreateIndexedReader", () => {
