@@ -9,6 +9,9 @@ import { McapIndexedReader, McapWriter } from "@mcap/core";
 import { Blob } from "node:buffer";
 
 import { loadDecompressHandlers, TempBuffer } from "@lichtblick/mcap-support";
+import { Basic } from "@lichtblick/suite-base/Workspace.stories";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
+import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { McapIterableSource } from "./McapIterableSource";
@@ -421,6 +424,77 @@ describe("McapIterableSource", () => {
       expect(result.topics[0]?.name).toBe("/test");
       expect(initializeSpy).toHaveBeenCalledTimes(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith(new Error("Corrupt MCAP file"));
+    });
+  });
+
+  describe("messageIterator", () => {
+    it("should throw when source has not been initialized", () => {
+      // Given a source that has not been initialized
+      const source = new McapIterableSource({
+        type: "file",
+        file: new Blob([]) as unknown as globalThis.Blob,
+      });
+
+      // When calling messageIterator before initialize
+      // Then it should throw
+      expect(() => source.messageIterator({ topics: new Map() })).toThrow(
+        "Invariant: uninitialized",
+      );
+    });
+
+    it("should return an iterator from the underlying source after initialization", async () => {
+      // Given an initialized source with a message
+      const topic = BasicBuilder.string();
+      const file = await createMcapFile({ withMessage: true, topic });
+      const source = new McapIterableSource({ type: "file", file });
+      await source.initialize();
+
+      // When calling messageIterator with the topic
+      const iterator = source.messageIterator({
+        topics: new Map([[topic, PlayerBuilder.subscribePayload({ topic })]]),
+      });
+
+      // Then it should return an async iterator that yields message events
+      const result = await iterator.next();
+      expect(result.done).toBe(false);
+      expect(result.value).toMatchObject({ type: "message-event" });
+    });
+  });
+
+  describe("getBackfillMessages", () => {
+    it("should throw when source has not been initialized", async () => {
+      // Given a source that has not been initialized
+      const source = new McapIterableSource({
+        type: "file",
+        file: new Blob([]) as unknown as globalThis.Blob,
+      });
+
+      // When calling getBackfillMessages before initialize
+      // Then it should throw
+      await expect(
+        source.getBackfillMessages({
+          topics: new Map(),
+          time: RosTimeBuilder.time(),
+        }),
+      ).rejects.toThrow("Invariant: uninitialized");
+    });
+
+    it("should return backfill messages from the underlying source after initialization", async () => {
+      // Given an initialized source with a message at 1s
+      const topic = BasicBuilder.string();
+      const file = await createMcapFile({ withMessage: true, topic });
+      const source = new McapIterableSource({ type: "file", file });
+      await source.initialize();
+
+      // When calling getBackfillMessages at a time after the message
+      const messages = await source.getBackfillMessages({
+        topics: new Map([[topic, PlayerBuilder.subscribePayload({ topic })]]),
+        time: RosTimeBuilder.time(),
+      });
+
+      // Then it should return the backfill message
+      expect(messages).toHaveLength(1);
+      expect(messages[0]!.topic).toBe(topic);
     });
   });
 });
