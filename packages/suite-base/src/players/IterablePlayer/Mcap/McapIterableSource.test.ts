@@ -85,6 +85,10 @@ describe("McapIterableSource", () => {
     );
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("returns an appropriate error message for an empty MCAP file", async () => {
     const tempBuffer = new TempBuffer();
 
@@ -115,27 +119,23 @@ describe("McapIterableSource", () => {
     const source = new McapIterableSource({ type: "file", file });
     const readerInitializeSpy = jest.spyOn(McapIndexedReader, "Initialize");
 
-    try {
-      // When
-      const result = await source.initialize();
+    // When
+    const result = await source.initialize();
 
-      // Then
-      expect(mockLoadDecompressHandlers).toHaveBeenCalledTimes(1);
-      expect(readerInitializeSpy).toHaveBeenCalledTimes(1);
+    // Then
+    expect(mockLoadDecompressHandlers).toHaveBeenCalledTimes(1);
+    expect(readerInitializeSpy).toHaveBeenCalledTimes(1);
 
-      // Verify loadDecompressHandlers was called before McapIndexedReader.Initialize
-      const decompressHandlerCallOrder = mockLoadDecompressHandlers.mock.invocationCallOrder[0];
-      const readerInitializeCallOrder = readerInitializeSpy.mock.invocationCallOrder[0];
-      expect(decompressHandlerCallOrder).toBeLessThan(readerInitializeCallOrder!);
+    // Verify loadDecompressHandlers was called before McapIndexedReader.Initialize
+    const decompressHandlerCallOrder = mockLoadDecompressHandlers.mock.invocationCallOrder[0];
+    const readerInitializeCallOrder = readerInitializeSpy.mock.invocationCallOrder[0];
+    expect(decompressHandlerCallOrder).toBeLessThan(readerInitializeCallOrder!);
 
-      // Verify initialization was successful
-      expect(result.start).toBeDefined();
-      expect(result.end).toBeDefined();
-      expect(result.topics).toHaveLength(1);
-      expect(result.topics[0]?.name).toBe(topic);
-    } finally {
-      readerInitializeSpy.mockRestore();
-    }
+    // Verify initialization was successful
+    expect(result.start).toBeDefined();
+    expect(result.end).toBeDefined();
+    expect(result.topics).toHaveLength(1);
+    expect(result.topics[0]?.name).toBe(topic);
   });
   describe("tryCreateIndexedReader", () => {
     it("uses preloaded decompressHandlers for indexed reader", async () => {
@@ -150,23 +150,18 @@ describe("McapIterableSource", () => {
       );
       const initializeSpy = jest.spyOn(McapIndexedReader, "Initialize");
 
-      try {
-        // When
-        await source.initialize();
+      // When
+      await source.initialize();
 
-        // Then - verify the same handlers from loadDecompressHandlers are passed to Initialize
-        expect(loadHandlersSpy).toHaveBeenCalledTimes(1);
-        const loadedHandlers = await loadHandlersSpy.mock.results[0]!.value;
+      // Then - verify the same handlers from loadDecompressHandlers are passed to Initialize
+      expect(loadHandlersSpy).toHaveBeenCalledTimes(1);
+      const loadedHandlers = await loadHandlersSpy.mock.results[0]!.value;
 
-        expect(initializeSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            decompressHandlers: loadedHandlers,
-          }),
-        );
-      } finally {
-        loadHandlersSpy.mockRestore();
-        initializeSpy.mockRestore();
-      }
+      expect(initializeSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          decompressHandlers: loadedHandlers,
+        }),
+      );
     });
 
     it("successfully creates an indexed reader for a valid MCAP", async () => {
@@ -177,24 +172,20 @@ describe("McapIterableSource", () => {
 
       const initializeSpy = jest.spyOn(McapIndexedReader, "Initialize");
 
-      try {
-        // When
-        const result = await source.initialize();
+      // When
+      const result = await source.initialize();
 
-        // Then
-        expect(initializeSpy).toHaveBeenCalledTimes(1);
-        const reader = await initializeSpy.mock.results[0]!.value;
+      // Then
+      expect(initializeSpy).toHaveBeenCalledTimes(1);
+      const reader = await initializeSpy.mock.results[0]!.value;
 
-        expect(reader).toBeDefined();
-        expect(reader.chunkIndexes.length).toBeGreaterThan(0);
-        expect(reader.channelsById.size).toBeGreaterThan(0);
+      expect(reader).toBeDefined();
+      expect(reader.chunkIndexes.length).toBeGreaterThan(0);
+      expect(reader.channelsById.size).toBeGreaterThan(0);
 
-        expect(result).toBeDefined();
-        expect(result.topics).toHaveLength(1);
-        expect(result.topics[0]?.name).toBe(topic);
-      } finally {
-        initializeSpy.mockRestore();
-      }
+      expect(result).toBeDefined();
+      expect(result.topics).toHaveLength(1);
+      expect(result.topics[0]?.name).toBe(topic);
     });
 
     it("falls back to unindexed reader when MCAP has no chunks", async () => {
@@ -233,20 +224,15 @@ describe("McapIterableSource", () => {
         .mockRejectedValue(new Error("Corrupt MCAP file"));
       const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
 
-      try {
-        // When
-        const result = await source.initialize();
+      // When
+      const result = await source.initialize();
 
-        // Then
-        expect(result).toBeDefined();
-        expect(result.topics).toHaveLength(1);
-        expect(result.topics[0]?.name).toBe("/test");
-        expect(initializeSpy).toHaveBeenCalledTimes(1);
-        expect(consoleErrorSpy).toHaveBeenCalledWith(new Error("Corrupt MCAP file"));
-      } finally {
-        initializeSpy.mockRestore();
-        consoleErrorSpy.mockRestore();
-      }
+      // Then
+      expect(result).toBeDefined();
+      expect(result.topics).toHaveLength(1);
+      expect(result.topics[0]?.name).toBe("/test");
+      expect(initializeSpy).toHaveBeenCalledTimes(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(new Error("Corrupt MCAP file"));
     });
   });
 });
