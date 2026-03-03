@@ -3,18 +3,16 @@
 
 import { Heap } from "heap-js";
 
-import { Time, toMillis, compare } from "@lichtblick/rostime";
+import { compare, toMillis } from "@lichtblick/rostime";
 import {
   IIterableSource,
   IteratorResult,
   MessageIteratorArgs,
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-
-type SourceWithTime = {
-  source: IIterableSource;
-  startTime: Time;
-  endTime: Time;
-};
+import {
+  SequentialIteratorMergeOptions,
+  SourceWithTime,
+} from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
 
 /**
  * A lazy sequential iterator that only activates source iterators when the current
@@ -48,13 +46,15 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
   // Sort by start time
   sourcesWithTime.sort((a, b) => compare(a.startTime, b.startTime));
 
-  const heap = new Heap<{
-    value: T;
-    iterator: AsyncIterableIterator<Readonly<IteratorResult>>;
-  }>((a, b) => getTime(a.value) - getTime(b.value));
+  const heap = new Heap<SequentialIteratorMergeOptions<T>>(
+    (a, b) => getTime(a.value) - getTime(b.value),
+  );
 
-  // Initialize sources that don't have time info (must be started eagerly)
-  for (const source of sourcesWithoutTime) {
+  /**
+   * Activate a source's iterator and push its first value onto the heap.
+   * Returns true if the source produced a value, false if it was empty.
+   */
+  async function activateSource(source: IIterableSource): Promise<void> {
     const iterator = source.messageIterator(args);
     const result = await iterator.next();
     if (!(result.done ?? false)) {
@@ -62,8 +62,21 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
     }
   }
 
+  // Initialize sources that don't have time info (must be started eagerly)
+  for (const source of sourcesWithoutTime) {
+    await activateSource(source);
+  }
+
   // Index into the sorted sourcesWithTime array tracking the next source to potentially activate
   let nextSourceIndex = 0;
+
+  /**
+   * Activate the next pending source from sourcesWithTime and advance the index.
+   */
+  async function activateNextSource(): Promise<void> {
+    await activateSource(sourcesWithTime[nextSourceIndex]!.source);
+    nextSourceIndex++;
+  }
 
   // Activate sources whose start time is at or before the query start time.
   // When no query start is provided, activate only the first source (the earliest by startTime)
@@ -89,36 +102,19 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
       if (compare(sourceInfo.startTime, queryStart) > 0) {
         break;
       }
-      const iterator = sourceInfo.source.messageIterator(args);
-      const result = await iterator.next();
-      if (!(result.done ?? false)) {
-        heap.push({ value: result.value as T, iterator });
-      }
-      nextSourceIndex++;
+      await activateNextSource();
     }
   } else {
     // No query start — activate only the first source
     if (nextSourceIndex < sourcesWithTime.length) {
-      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-      const iterator = sourceInfo.source.messageIterator(args);
-      const result = await iterator.next();
-      if (!(result.done ?? false)) {
-        heap.push({ value: result.value as T, iterator });
-      }
-      nextSourceIndex++;
+      await activateNextSource();
     }
   }
 
   // If the initial source(s) were empty, advance through pending sources until
   // we find one with data or exhaust all sources.
   while (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
-    const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-    const iterator = sourceInfo.source.messageIterator(args);
-    const result = await iterator.next();
-    if (!(result.done ?? false)) {
-      heap.push({ value: result.value as T, iterator });
-    }
-    nextSourceIndex++;
+    await activateNextSource();
   }
 
   try {
@@ -133,12 +129,7 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
         if (toMillis(sourceInfo.startTime) > currentTimeMs) {
           break;
         }
-        const iterator = sourceInfo.source.messageIterator(args);
-        const result = await iterator.next();
-        if (!(result.done ?? false)) {
-          heap.push({ value: result.value as T, iterator });
-        }
-        nextSourceIndex++;
+        await activateNextSource();
       }
 
       yield node.value;
@@ -149,13 +140,7 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
       } else if (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
         // Current heap is exhausted but there are still pending sources.
         // Activate the next source to continue yielding.
-        const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-        const iterator = sourceInfo.source.messageIterator(args);
-        const result = await iterator.next();
-        if (!(result.done ?? false)) {
-          heap.push({ value: result.value as T, iterator });
-        }
-        nextSourceIndex++;
+        await activateNextSource();
       }
     }
   } finally {

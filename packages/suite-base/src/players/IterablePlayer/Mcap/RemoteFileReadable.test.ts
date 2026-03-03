@@ -24,6 +24,8 @@ jest.mock("@lichtblick/suite-base/util/BrowserHttpReader", () => {
 const CachedFilelike = require("@lichtblick/suite-base/util/CachedFilelike");
 
 describe("RemoteFileReadable", () => {
+  const testUrl = "https://example.com/data.mcap";
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -32,7 +34,7 @@ describe("RemoteFileReadable", () => {
     it("should use default 500MiB cache size when none provided", () => {
       // Given a URL without custom cache size
       // When creating a RemoteFileReadable
-      new RemoteFileReadable("https://example.com/data.mcap");
+      new RemoteFileReadable(testUrl);
 
       // Then CachedFilelike should be created with 500MiB default
       expect(CachedFilelike).toHaveBeenCalledWith(
@@ -45,7 +47,7 @@ describe("RemoteFileReadable", () => {
       const customSize = 1024 * 1024 * 100; // 100MiB
 
       // When creating a RemoteFileReadable
-      new RemoteFileReadable("https://example.com/data.mcap", customSize);
+      new RemoteFileReadable(testUrl, customSize);
 
       // Then CachedFilelike should be created with the custom size
       expect(CachedFilelike).toHaveBeenCalledWith(
@@ -57,7 +59,7 @@ describe("RemoteFileReadable", () => {
   describe("open", () => {
     it("should delegate to CachedFilelike.open()", async () => {
       // Given a RemoteFileReadable instance
-      const reader = new RemoteFileReadable("https://example.com/data.mcap");
+      const reader = new RemoteFileReadable(testUrl);
 
       // When calling open
       await reader.open();
@@ -70,7 +72,7 @@ describe("RemoteFileReadable", () => {
   describe("size", () => {
     it("should return file size as BigInt", async () => {
       // Given a RemoteFileReadable whose underlying CachedFilelike reports size 1024
-      const reader = new RemoteFileReadable("https://example.com/data.mcap");
+      const reader = new RemoteFileReadable(testUrl);
 
       // When getting the size
       const result = await reader.size();
@@ -83,7 +85,7 @@ describe("RemoteFileReadable", () => {
   describe("read", () => {
     it("should delegate to CachedFilelike.read() converting BigInt to Number", async () => {
       // Given a RemoteFileReadable instance
-      const reader = new RemoteFileReadable("https://example.com/data.mcap");
+      const reader = new RemoteFileReadable(testUrl);
 
       // When reading data with BigInt offset and size
       const result = await reader.read(BigInt(100), BigInt(50));
@@ -95,7 +97,7 @@ describe("RemoteFileReadable", () => {
 
     it("should throw when offset + size exceeds MAX_SAFE_INTEGER", async () => {
       // Given a RemoteFileReadable instance
-      const reader = new RemoteFileReadable("https://example.com/data.mcap");
+      const reader = new RemoteFileReadable(testUrl);
 
       // When reading with offset + size > MAX_SAFE_INTEGER
       // Then it should throw
