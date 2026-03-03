@@ -14,6 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Time } from "@lichtblick/rostime";
 import { Metadata, ParameterValue } from "@lichtblick/suite";
 import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
@@ -66,6 +67,7 @@ export default class FakePlayer implements Player {
 
   public getBatchIterator(
     _topic: string,
+    _options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
     return undefined;
   }

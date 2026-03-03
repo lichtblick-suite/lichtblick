@@ -3,8 +3,12 @@
 
 import { makeStyles } from "tss-react/mui";
 
-export const useStyles = makeStyles()((theme) => ({
-  listItemButton: {
-    "&:hover": { color: theme.palette.primary.main },
+export const useStylesExtensionDetails = makeStyles()((theme) => ({
+  backButton: {
+    marginLeft: theme.spacing(-1.5),
+    marginBottom: theme.spacing(1),
+  },
+  installButton: {
+    minWidth: 100,
   },
 }));

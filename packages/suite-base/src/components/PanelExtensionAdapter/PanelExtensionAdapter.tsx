@@ -336,6 +336,9 @@ function PanelExtensionAdapter(
     };
 
     const extensionSettingsActionHandler = (action: SettingsTreeAction) => {
+      if (action.action === "reorder-node") {
+        return; // Extensions don't support reordering
+      }
       const {
         payload: { path },
       } = action;

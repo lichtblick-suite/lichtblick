@@ -102,6 +102,7 @@ export class IdbExtensionLoader implements IExtensionLoader {
         readme,
         changelog,
         externalId,
+        size: foxeFileData.length,
       },
     };
     const storedExtension = await this.#storage.put(newExtension);

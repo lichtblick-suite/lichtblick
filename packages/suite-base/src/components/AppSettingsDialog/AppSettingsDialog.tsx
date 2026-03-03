@@ -115,7 +115,7 @@ export function AppSettingsDialog(
           />
           <Tab className={classes.tab} label={t("about")} value="about" />
         </Tabs>
-        <Stack direction="row" fullHeight overflowY="auto">
+        <Stack direction="row" fullHeight overflowY="auto" style={{ scrollbarGutter: "stable" }}>
           <section
             className={cx(classes.tabPanel, {
               [classes.tabPanelActive]: activeTab === "general",

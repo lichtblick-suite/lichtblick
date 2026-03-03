@@ -7,42 +7,31 @@ import memoizeWeak from "memoize-weak";
 
 import { SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
-import {
-  PlotConfig,
-  PlotPath,
-  plotPathDisplayName,
-} from "@lichtblick/suite-base/panels/Plot/utils/config";
+import { MakeRootSeriesNode, MakeSeriesNode } from "@lichtblick/suite-base/panels/Plot/types";
+import { PlotConfig, plotPathDisplayName } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { PLOTABLE_ROS_TYPES } from "@lichtblick/suite-base/panels/shared/constants";
 import { lineColors } from "@lichtblick/suite-base/util/plotColors";
 
-type MakeSeriesNode = {
-  path: PlotPath;
-  index: number;
-  canDelete: boolean;
-  t: TFunction<"plot">;
-};
-
-type MakeRootSeriesNode = {
-  paths: PlotPath[];
-  t: TFunction<"plot">;
-};
-
 const makeSeriesNode = memoizeWeak(
-  ({ canDelete, index, path, t }: MakeSeriesNode): SettingsTreeNode => {
+  ({ canDelete, canReorder, index, path, t }: MakeSeriesNode): SettingsTreeNode => {
+    const actions = [];
+
+    if (canDelete) {
+      actions.push({
+        type: "action" as const,
+        id: "delete-series",
+        label: t("deleteSeries"),
+        display: "inline" as const,
+        icon: "Clear" as const,
+      });
+    }
+
     return {
-      actions: canDelete
-        ? [
-            {
-              type: "action",
-              id: "delete-series",
-              label: t("deleteSeries"),
-              display: "inline",
-              icon: "Clear",
-            },
-          ]
-        : [],
+      actions,
       label: plotPathDisplayName(path, index),
       visible: path.enabled,
+      reorderable: canReorder,
+      icon: canReorder ? ("DragHandle" as const) : undefined,
       fields: {
         value: {
           input: "messagepath",
@@ -91,10 +80,21 @@ const makeSeriesNode = memoizeWeak(
 const makeRootSeriesNode = memoizeWeak(({ paths, t }: MakeRootSeriesNode): SettingsTreeNode => {
   const children = Object.fromEntries(
     paths.length === 0
-      ? [["0", makeSeriesNode({ canDelete: false, path: DEFAULT_PLOT_PATH, index: 0, t })]]
+      ? [
+          [
+            "0",
+            makeSeriesNode({
+              canDelete: false,
+              canReorder: false,
+              path: DEFAULT_PLOT_PATH,
+              index: 0,
+              t,
+            }),
+          ],
+        ]
       : paths.map((path, index) => [
           `${index}`,
-          makeSeriesNode({ canDelete: true, index, path, t }),
+          makeSeriesNode({ canDelete: true, canReorder: true, index, path, t }),
         ]),
   );
   return {

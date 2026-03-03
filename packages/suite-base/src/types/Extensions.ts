@@ -21,6 +21,7 @@ export type ExtensionInfo = {
   publisher: string;
   qualifiedName: string;
   version: string;
+  size?: number;
   readme?: string;
   changelog?: string;
   externalId?: string;

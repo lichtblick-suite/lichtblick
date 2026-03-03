@@ -44,6 +44,7 @@ import {
   TopicSelection,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
+import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import delay from "@lichtblick/suite-base/util/delay";
@@ -57,7 +58,6 @@ import {
 } from "./IIterableSource";
 
 const log = Log.getLogger(__filename);
-
 // Number of bytes that we aim to keep in the cache.
 // Setting this to higher than 1.5GB caused the renderer process to crash on linux.
 // See: https://github.com/foxglove/studio/pull/1733
@@ -83,7 +83,6 @@ const SEEK_ON_START_NS = BigInt(99 * 1e6);
 const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
 
 const EMPTY_ARRAY = Object.freeze([]);
-
 export type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
 
@@ -230,6 +229,7 @@ export class IterablePlayer implements Player {
     this.#urlParams = urlParams;
     this.#metricsCollector = metricsCollector ?? new NoopMetricsCollector();
     this.#metricsCollector.playerConstructed();
+
     this.#enablePreload = enablePreload ?? true;
     this.#sourceId = sourceId;
 
@@ -359,6 +359,7 @@ export class IterablePlayer implements Player {
 
     this.#allTopics = allTopics;
     this.#preloadTopics = preloadTopics;
+
     this.#blockLoader?.setTopics(this.#preloadTopics);
 
     // If the player is playing, the playing state will detect any subscription changes and adjust
@@ -388,12 +389,15 @@ export class IterablePlayer implements Player {
 
   public getBatchIterator(
     topic: string,
+    options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
     const topicSelection = new Map([[topic, { topic }]]);
 
     return this.#messageRangeSource?.messageIterator({
       topics: topicSelection,
       consumptionType: "full",
+      start: options?.start,
+      end: options?.end,
     });
   }
 
@@ -555,7 +559,7 @@ export class IterablePlayer implements Player {
       const uniqueTopics = new Map<string, Topic>();
       const duration = subtractTimes(this.#end, this.#start);
       this.#providerTopicStats = topicStats;
-      let highFrequencyTopicFound = false;
+      let hasHighFrequencyTopic = false;
 
       for (const topic of topics) {
         const existingTopic = uniqueTopics.get(topic.name);
@@ -569,14 +573,20 @@ export class IterablePlayer implements Player {
         }
         uniqueTopics.set(topic.name, topic);
 
-        if (!highFrequencyTopicFound) {
-          highFrequencyTopicFound = isTopicHighFrequency(
+        if (!hasHighFrequencyTopic) {
+          hasHighFrequencyTopic = isTopicHighFrequency({
             topicStats,
-            topic.name,
+            topic,
             duration,
-            topic.schemaName,
-            this.#alertManager,
-          );
+          });
+
+          if (hasHighFrequencyTopic) {
+            this.#alertManager.addAlert(HIGH_FREQUENCY_ALERT.id, {
+              severity: HIGH_FREQUENCY_ALERT.severity,
+              message: HIGH_FREQUENCY_ALERT.message,
+              error: new Error(HIGH_FREQUENCY_ALERT.errorMessage),
+            });
+          }
         }
       }
 
@@ -1180,6 +1190,7 @@ export class IterablePlayer implements Player {
 
   async #stateClose() {
     this.#isPlaying = false;
+
     await this.#blockLoader?.stopLoading();
     await this.#blockLoadingProcess;
     await this.#bufferImpl.terminate();
