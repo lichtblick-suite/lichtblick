@@ -24,24 +24,16 @@ export default function compareVersions(v1: string, v2: string): number {
   v2parts = v2parts.map(Number);
 
   for (let i = 0; i < v1parts.length; ++i) {
-    if (v2parts.length === i) {
-      return 1;
-    }
-
     const part1 = v1parts[i];
     const part2 = v2parts[i];
 
     if (part1 === part2) {
       continue;
-    } else if (part1 != undefined && part2 != undefined && part1 > part2) {
+    } else if (part1! > part2!) {
       return 1;
     } else {
       return -1;
     }
-  }
-
-  if (v1parts.length !== v2parts.length) {
-    return -1;
   }
 
   return 0;

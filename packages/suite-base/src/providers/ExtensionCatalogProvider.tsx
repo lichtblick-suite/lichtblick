@@ -212,7 +212,7 @@ function createExtensionRegistryStore(
                     extension.version,
                   );
                   // Only use cached version if it matches the remote version
-                  // Convservative approach to avoid potential issues with incompatible cached versions
+                  // Conservative approach to avoid potential issues with incompatible cached versions
                   if (versionComparison === 0) {
                     log.debug(
                       `Using cached version of extension ${extension.id} (version ${cachedExtension.version})`,
