@@ -807,8 +807,8 @@ describe("ExtensionCatalogProvider", () => {
       loadRemoteMock?: jest.Mock;
       installMock?: jest.Mock;
     }) {
-      const extensionId = overrides?.extensionId ?? "test-extension";
-      const externalId = overrides?.externalId ?? "external-123";
+      const extensionId = overrides?.extensionId ?? BasicBuilder.string();
+      const externalId = overrides?.externalId ?? BasicBuilder.string();
       const remoteVersion = overrides?.remoteVersion ?? "1.2.3";
       const cachedVersion = overrides?.cachedVersion;
 
@@ -832,11 +832,11 @@ describe("ExtensionCatalogProvider", () => {
           raw: defaultSource,
           ...(overrides?.buffer && { buffer: overrides.buffer }),
         } as LoadedExtension);
-      const installMock = overrides?.installMock ?? jest.fn();
+      const cacheInstallMock = overrides?.installMock ?? jest.fn();
 
       const cacheLoader = createOrgCacheLoader(cachedExtension, {
         loadExtensionMock: loadCachedMock,
-        installExtensionMock: installMock,
+        installExtensionMock: cacheInstallMock,
       });
 
       const serverLoader = createOrgServerLoader(remoteExtension, {
@@ -850,7 +850,7 @@ describe("ExtensionCatalogProvider", () => {
         cachedExtension,
         loadCachedMock,
         loadRemoteMock,
-        installMock,
+        cacheInstallMock,
         cacheLoader,
         serverLoader,
       };
@@ -879,7 +879,7 @@ describe("ExtensionCatalogProvider", () => {
       const version = "1.2.3";
       const {
         loadCachedMock,
-        installMock,
+        cacheInstallMock,
         loadRemoteMock,
         extensionId,
         cacheLoader,
@@ -898,7 +898,7 @@ describe("ExtensionCatalogProvider", () => {
         expect(loadCachedMock).toHaveBeenCalledWith(extensionId);
       });
       expect(loadRemoteMock).not.toHaveBeenCalled();
-      expect(installMock).not.toHaveBeenCalled();
+      expect(cacheInstallMock).not.toHaveBeenCalled();
       expect(result.current.installedExtensions).toEqual([cachedExtension]);
     });
 
@@ -909,7 +909,7 @@ describe("ExtensionCatalogProvider", () => {
       const buffer = new Uint8Array([BasicBuilder.number()]);
       const {
         loadCachedMock,
-        installMock,
+        cacheInstallMock,
         loadRemoteMock,
         externalId,
         cacheLoader,
@@ -929,7 +929,7 @@ describe("ExtensionCatalogProvider", () => {
         expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
       });
       await waitFor(() => {
-        expect(installMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer });
       });
       expect(loadCachedMock).not.toHaveBeenCalled();
       // When versions differ, use remote version regardless of which is newer
@@ -943,7 +943,7 @@ describe("ExtensionCatalogProvider", () => {
       const buffer = new Uint8Array([BasicBuilder.number()]);
       const {
         loadCachedMock,
-        installMock,
+        cacheInstallMock,
         remoteExtension,
         loadRemoteMock,
         externalId,
@@ -961,7 +961,7 @@ describe("ExtensionCatalogProvider", () => {
         expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
       });
       await waitFor(() => {
-        expect(installMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer });
       });
       expect(loadCachedMock).not.toHaveBeenCalled();
       expect(result.current.installedExtensions).toEqual([remoteExtension]);
@@ -972,7 +972,7 @@ describe("ExtensionCatalogProvider", () => {
       const buffer = new Uint8Array([BasicBuilder.number()]);
 
       const {
-        installMock,
+        cacheInstallMock,
         remoteExtension,
         loadRemoteMock,
         externalId,
@@ -991,7 +991,7 @@ describe("ExtensionCatalogProvider", () => {
         expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
       });
       await waitFor(() => {
-        expect(installMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer });
       });
       expect(result.current.installedExtensions).toEqual([remoteExtension]);
     });

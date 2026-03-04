@@ -35,6 +35,10 @@ function createExtensionRegistryStore(
   loaders: readonly IExtensionLoader[],
   mockMessageConverters: readonly RegisterMessageConverterArgs<unknown>[] | undefined,
 ): StoreApi<ExtensionCatalog> {
+  const orgCacheLoader: IExtensionLoader | undefined = loaders.find(
+    (extensionLoader) => extensionLoader.namespace === "org" && extensionLoader.type === "browser",
+  );
+
   return createStore((set, get) => {
     const isExtensionInstalled = (extensionId: string) => {
       return get().loadedExtensions.has(extensionId);
@@ -186,10 +190,31 @@ function createExtensionRegistryStore(
       installedExtensions: ExtensionInfo[];
       contributionPoints: ContributionPoints;
     }) {
-      const orgCacheLoader: IExtensionLoader | undefined = loaders.find(
-        (extensionLoader) =>
-          extensionLoader.namespace === "org" && extensionLoader.type === "browser",
-      );
+      async function tryLoadFromCache(extension: ExtensionInfo): Promise<string | undefined> {
+        if (!orgCacheLoader) {
+          return undefined;
+        }
+        const cachedExtension = await orgCacheLoader.getExtension(extension.id);
+        if (!cachedExtension) {
+          log.debug(
+            `No cached version found for extension ${extension.id}, will load from remote.`,
+          );
+          return undefined;
+        }
+        const isSameVersion = compareVersions(cachedExtension.version, extension.version) === 0;
+        if (!isSameVersion) {
+          log.debug(
+            `Cached version differs from remote (cached: ${cachedExtension.version}, remote: ${extension.version}), using remote version.`,
+          );
+          return undefined;
+        }
+        log.debug(
+          `Using cached version of extension ${extension.id} (version ${cachedExtension.version})`,
+        );
+        const { raw } = await orgCacheLoader.loadExtension(extension.id);
+        return raw;
+      }
+
       await Promise.all(
         batch.map(async (extension) => {
           try {
@@ -200,51 +225,30 @@ function createExtensionRegistryStore(
             let unwrappedExtensionSource: string = "";
 
             if (loader.namespace === "org" && loader.type === "server") {
-              try {
-                if (!orgCacheLoader) {
-                  throw new Error("Cache loader not found.");
-                }
+              const cachedSource = await tryLoadFromCache(extension).catch((err: unknown) => {
+                log.warn(`Cache lookup failed for ${extension.id}, falling back to remote`, err);
+                return undefined;
+              });
 
-                const cachedExtension = await orgCacheLoader.getExtension(extension.id);
-                if (cachedExtension) {
-                  const versionComparison = compareVersions(
-                    cachedExtension.version,
-                    extension.version,
-                  );
-                  // Only use cached version if it matches the remote version
-                  // Conservative approach to avoid potential issues with incompatible cached versions
-                  if (versionComparison === 0) {
-                    log.debug(
-                      `Using cached version of extension ${extension.id} (version ${cachedExtension.version})`,
-                    );
-                    // Replace the remote extension info with cached extension info in installedExtensions
-                    installedExtensions[installedExtensions.length - 1] = cachedExtension;
-                    const { raw } = await orgCacheLoader.loadExtension(extension.id);
-                    unwrappedExtensionSource = raw;
-                    return;
-                  } else {
-                    log.debug(
-                      `Cached version differs from remote (cached: ${cachedExtension.version}, remote: ${extension.version}), using remote version.`,
-                    );
-                    throw new Error("Cached version differs from remote"); // Force fallback to remote
-                  }
-                } else {
-                  // No cached version exists, load from remote
-                  throw new Error("No cached version found"); // Force fallback to remote
-                }
-              } catch {
-                // Fallback to remote
+              // Load from remote if cache is not available or invalid
+              if (cachedSource == undefined) {
                 const { raw, buffer } = await loader.loadExtension(extension.externalId!);
                 unwrappedExtensionSource = raw;
-                if (buffer) {
-                  await orgCacheLoader?.installExtension({ foxeFileData: buffer });
+                // Cache the extension for future use
+                if (buffer && orgCacheLoader) {
+                  await orgCacheLoader
+                    .installExtension({ foxeFileData: buffer })
+                    .catch((err: unknown) => {
+                      log.warn(`Failed to cache extension ${extension.id}`, err);
+                    });
                 }
+              } else {
+                unwrappedExtensionSource = cachedSource;
               }
             } else {
               const { raw } = await loader.loadExtension(extension.id);
               unwrappedExtensionSource = raw;
             }
-
             const newContributionPoints = buildContributionPoints(
               extension,
               unwrappedExtensionSource,
