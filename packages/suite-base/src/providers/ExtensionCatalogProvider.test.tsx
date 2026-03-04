@@ -118,7 +118,7 @@ describe("ExtensionCatalogProvider", () => {
     });
   }
 
-  function setup({ loadersOverride }: { loadersOverride?: IExtensionLoader[] } = {}) {
+  async function setup({ loadersOverride }: { loadersOverride?: IExtensionLoader[] } = {}) {
     const namespace: Namespace = "local";
     const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo({ namespace });
     const extensions: ExtensionInfo[] = [extensionInfo];
@@ -137,21 +137,36 @@ describe("ExtensionCatalogProvider", () => {
     };
     const loaders = loadersOverride ?? [loaderDefault];
 
-    return {
-      ...renderHook(() => useExtensionCatalog((state) => state), {
-        initialProps: {},
-        wrapper: ({ children }) => (
-          <ExtensionCatalogProvider loaders={loaders}>{children}</ExtensionCatalogProvider>
-        ),
-      }),
-      extensionInfo,
-      loaders,
-      loadExtension,
-    };
+    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
+      initialProps: {},
+      wrapper: ({ children }) => (
+        <ExtensionCatalogProvider loaders={loaders}>{children}</ExtensionCatalogProvider>
+      ),
+    });
+
+    // Wait for refreshAllExtensions (triggered by useEffect on mount) to complete.
+    // installedExtensions is undefined until the first refresh finishes.
+    await waitFor(() => {
+      expect(result.current.installedExtensions).toBeDefined();
+    });
+
+    return { result, extensionInfo, loadExtension };
+
+    // return {
+    //   ...renderHook(() => useExtensionCatalog((state) => state), {
+    //     initialProps: {},
+    //     wrapper: ({ children }) => (
+    //       <ExtensionCatalogProvider loaders={loaders}>{children}</ExtensionCatalogProvider>
+    //     ),
+    //   }),
+    //   extensionInfo,
+    //   loaders,
+    //   loadExtension,
+    // };
   }
 
   it("should load an extension from the loaders", async () => {
-    const { loadExtension, result, extensionInfo } = setup();
+    const { loadExtension, result, extensionInfo } = await setup();
 
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
@@ -185,7 +200,7 @@ describe("ExtensionCatalogProvider", () => {
       installExtension: jest.fn(),
       uninstallExtension: jest.fn(),
     };
-    const { result } = setup({ loadersOverride: [loader1, loader2] });
+    const { result } = await setup({ loadersOverride: [loader1, loader2] });
 
     await waitFor(() => {
       expect(loadExtension1).toHaveBeenCalledTimes(1);
@@ -220,7 +235,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result } = setup({ loadersOverride: [loader] });
+    const { result } = await setup({ loadersOverride: [loader] });
 
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
@@ -269,7 +284,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result } = setup({ loadersOverride: [loader] });
+    const { result } = await setup({ loadersOverride: [loader] });
 
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
@@ -334,7 +349,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result } = setup({ loadersOverride: [loader] });
+    const { result } = await setup({ loadersOverride: [loader] });
 
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
@@ -550,7 +565,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("isExtensionInstalled", () => {
     it("should check if an extension is installed", async () => {
-      const { loadExtension, result, extensionInfo } = setup();
+      const { loadExtension, result, extensionInfo } = await setup();
 
       await waitFor(() => {
         expect(loadExtension).toHaveBeenCalled();
@@ -562,7 +577,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("unMarkExtensionAsInstalled", () => {
     it("should unmark an extension as installed", async () => {
-      const { loadExtension, result, extensionInfo } = setup();
+      const { loadExtension, result, extensionInfo } = await setup();
 
       await waitFor(() => {
         expect(loadExtension).toHaveBeenCalled();
@@ -579,7 +594,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("installExtensions", () => {
     it("should install an extension", async () => {
-      const { result, extensionInfo } = setup();
+      const { result, extensionInfo } = await setup();
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 
       await act(async () => {
@@ -596,7 +611,7 @@ describe("ExtensionCatalogProvider", () => {
 
     it("should throw an error when install with no registered loader to the namespace", async () => {
       const invalidNamespace = BasicBuilder.string() as Namespace;
-      const { result } = setup();
+      const { result } = await setup();
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 
       await expect(
@@ -609,7 +624,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("uninstallExtension", () => {
     it("should uninstall an extension", async () => {
-      const { result, extensionInfo } = setup();
+      const { result, extensionInfo } = await setup();
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 
       const namespace: Namespace = extensionInfo.namespace!;
@@ -629,7 +644,7 @@ describe("ExtensionCatalogProvider", () => {
 
     it("should throw an error when uninstall with no registered loader to the namespace", async () => {
       const invalidNamespace = BasicBuilder.string() as Namespace;
-      const { result } = setup();
+      const { result } = await setup();
 
       await expect(
         act(async () => {
@@ -681,14 +696,14 @@ describe("ExtensionCatalogProvider", () => {
           uninstallExtension: uninstallFn,
         };
 
-        const { result } = setup({ loadersOverride: [loader] });
+        const { result } = await setup({ loadersOverride: [loader] });
 
         await waitFor(() => {
           expect(result.current.installedExtensions).toHaveLength(1);
         });
 
         await act(async () => {
-          await result.current.uninstallExtension(namespace, extensionInfo.id);
+          await result.current.uninstallExtension(namespace as Namespace, extensionInfo.id);
         });
 
         expect(uninstallFn).toHaveBeenCalledWith(useExternalId ? externalId : extensionInfo.id);
@@ -711,7 +726,7 @@ describe("ExtensionCatalogProvider", () => {
         uninstallExtension: uninstallFn,
       };
 
-      const { result } = setup({ loadersOverride: [loader] });
+      const { result } = await setup({ loadersOverride: [loader] });
 
       await waitFor(() => {
         expect(result.current.installedExtensions).toHaveLength(1);
@@ -731,7 +746,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("mergeState", () => {
     it("should merge state correctly using mergeState", async () => {
-      const { result, extensionInfo } = setup();
+      const { result, extensionInfo } = await setup();
       const panelName = BasicBuilder.string();
       const messageConverter: MessageConverter = {
         fromSchemaName: BasicBuilder.string(),
@@ -795,7 +810,8 @@ describe("ExtensionCatalogProvider", () => {
       });
     });
   });
-  describe("loadExtensionsFromLoaders", () => {
+
+  describe("loadSingleExtension", () => {
     function setupLoaders(overrides?: {
       extensionId?: string;
       externalId?: string;
@@ -865,7 +881,7 @@ describe("ExtensionCatalogProvider", () => {
       const loader = createLocalLoader(extension, { loadExtensionMock });
 
       // When
-      const { result } = setup({ loadersOverride: [loader] });
+      const { result } = await setup({ loadersOverride: [loader] });
 
       // Then
       await waitFor(() => {
@@ -891,7 +907,7 @@ describe("ExtensionCatalogProvider", () => {
       });
 
       // When
-      const { result } = setup({ loadersOverride: [cacheLoader, serverLoader] });
+      const { result } = await setup({ loadersOverride: [cacheLoader, serverLoader] });
 
       // Then
       await waitFor(() => {
@@ -922,7 +938,7 @@ describe("ExtensionCatalogProvider", () => {
       });
 
       // When
-      const { result } = setup({ loadersOverride: [cacheLoader, serverLoader] });
+      const { result } = await setup({ loadersOverride: [cacheLoader, serverLoader] });
 
       // Then
       await waitFor(() => {
@@ -955,7 +971,7 @@ describe("ExtensionCatalogProvider", () => {
         buffer,
       });
 
-      const { result } = setup({ loadersOverride: [cacheLoader, serverLoader] });
+      const { result } = await setup({ loadersOverride: [cacheLoader, serverLoader] });
 
       await waitFor(() => {
         expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
@@ -984,7 +1000,7 @@ describe("ExtensionCatalogProvider", () => {
       });
 
       // when
-      const { result } = setup({ loadersOverride: [cacheLoader, serverLoader] });
+      const { result } = await setup({ loadersOverride: [cacheLoader, serverLoader] });
 
       // Then
       await waitFor(() => {
