@@ -9,14 +9,18 @@
  * Whether the File System Access API showOpenFilePicker is available.
  */
 function isShowOpenFilePickerSupported(): boolean {
-  return typeof window !== "undefined" && "showOpenFilePicker" in window && typeof window.showOpenFilePicker === "function";
+  return (
+    typeof window !== "undefined" &&
+    "showOpenFilePicker" in window &&
+    typeof window.showOpenFilePicker === "function"
+  );
 }
 
 /**
  * Fallback for environments that don't support showOpenFilePicker (e.g. Chrome Android):
  * use a hidden <input type="file"> and return handle-like objects so callers can still use getFile().
  */
-function showOpenFilePickerFallback(
+async function showOpenFilePickerFallback(
   options?: OpenFilePickerOptions,
 ): Promise<FileSystemFileHandle[] /* foxglove-depcheck-used: @types/wicg-file-system-access */> {
   return new Promise((resolve) => {
@@ -30,7 +34,9 @@ function showOpenFilePickerFallback(
         if (type.accept) {
           for (const [mime, exts] of Object.entries(type.accept)) {
             const extList = Array.isArray(exts) ? exts : [exts];
-            acceptParts.push(...extList.map((ext: string) => (ext.startsWith(".") ? ext : `.${ext}`)));
+            acceptParts.push(
+              ...extList.map((ext: string) => (ext.startsWith(".") ? ext : `.${ext}`)),
+            );
             acceptParts.push(mime);
           }
         }
@@ -38,13 +44,15 @@ function showOpenFilePickerFallback(
       input.accept = [...new Set(acceptParts)].join(",");
     }
 
-    input.oncancel = () => resolve([]);
+    input.oncancel = () => {
+      resolve([]);
+    };
     input.onchange = () => {
       const files = input.files ? Array.from(input.files) : [];
       const handles = files.map(
         (file) =>
           ({
-            getFile: () => Promise.resolve(file),
+            getFile: async () => Promise.resolve(file),
             name: file.name,
             kind: "file" as const,
           }) as FileSystemFileHandle,
@@ -70,7 +78,7 @@ export default async function showOpenFilePicker(
   }
 
   try {
-    return await window.showOpenFilePicker(options!);
+    return await window.showOpenFilePicker(options);
   } catch (err: unknown) {
     if ((err as Error).name === "AbortError") {
       return [];
