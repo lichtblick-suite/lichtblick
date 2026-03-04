@@ -42,6 +42,82 @@ describe("ExtensionCatalogProvider", () => {
     (console.error as jest.Mock).mockRestore();
   });
 
+  // Helper functions for test initialization
+  const defaultSource = `module.exports = { activate: function() { return 1; } }`;
+
+  function createMockLoader(
+    overrides: Partial<IExtensionLoader> & {
+      namespace: Namespace;
+      type: IExtensionLoader["type"];
+    },
+  ): IExtensionLoader {
+    return {
+      getExtension: jest.fn(),
+      getExtensions: jest.fn().mockResolvedValue([]),
+      loadExtension: jest.fn().mockResolvedValue({ raw: defaultSource } as LoadedExtension),
+      installExtension: jest.fn(),
+      uninstallExtension: jest.fn(),
+      ...overrides,
+    };
+  }
+
+  function createLocalLoader(
+    extension: ExtensionInfo,
+    options?: {
+      source?: string;
+      loadExtensionMock?: jest.Mock;
+    },
+  ): IExtensionLoader {
+    return createMockLoader({
+      type: "browser",
+      namespace: "local",
+      getExtensions: jest.fn().mockResolvedValue([extension]),
+      loadExtension:
+        options?.loadExtensionMock ??
+        jest.fn().mockResolvedValue({ raw: options?.source ?? defaultSource } as LoadedExtension),
+    });
+  }
+
+  function createOrgCacheLoader(
+    cachedExtension: ExtensionInfo | undefined,
+    options?: {
+      source?: string;
+      loadExtensionMock?: jest.Mock;
+      installExtensionMock?: jest.Mock;
+    },
+  ): IExtensionLoader {
+    return createMockLoader({
+      type: "browser",
+      namespace: "org",
+      getExtension: jest.fn().mockResolvedValue(cachedExtension),
+      loadExtension:
+        options?.loadExtensionMock ??
+        jest.fn().mockResolvedValue({ raw: options?.source ?? defaultSource } as LoadedExtension),
+      installExtension: options?.installExtensionMock ?? jest.fn(),
+    });
+  }
+
+  function createOrgServerLoader(
+    remoteExtension: ExtensionInfo,
+    options?: {
+      source?: string;
+      buffer?: Uint8Array;
+      loadExtensionMock?: jest.Mock;
+    },
+  ): IExtensionLoader {
+    const loadResponse: LoadedExtension = {
+      raw: options?.source ?? defaultSource,
+      ...(options?.buffer && { buffer: options.buffer }),
+    };
+
+    return createMockLoader({
+      type: "server",
+      namespace: "org",
+      getExtensions: jest.fn().mockResolvedValue([remoteExtension]),
+      loadExtension: options?.loadExtensionMock ?? jest.fn().mockResolvedValue(loadResponse),
+    });
+  }
+
   function setup({ loadersOverride }: { loadersOverride?: IExtensionLoader[] } = {}) {
     const namespace: Namespace = "local";
     const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo({ namespace });
@@ -717,6 +793,207 @@ describe("ExtensionCatalogProvider", () => {
       expect(result.current.installedTopicAliasFunctions![0]).toMatchObject({
         extensionId: extensionInfo.id,
       });
+    });
+  });
+  describe("loadExtensionsFromLoaders", () => {
+    function setupLoaders(overrides?: {
+      extensionId?: string;
+      externalId?: string;
+      cachedVersion?: string;
+      remoteVersion?: string;
+      buffer?: Uint8Array;
+      cachedExtension?: ExtensionInfo | undefined;
+      loadCachedMock?: jest.Mock;
+      loadRemoteMock?: jest.Mock;
+      installMock?: jest.Mock;
+    }) {
+      const extensionId = overrides?.extensionId ?? "test-extension";
+      const externalId = overrides?.externalId ?? "external-123";
+      const remoteVersion = overrides?.remoteVersion ?? "1.2.3";
+      const cachedVersion = overrides?.cachedVersion;
+
+      const remoteExtension = ExtensionBuilder.extensionInfo({
+        namespace: "org",
+        id: extensionId,
+        version: remoteVersion,
+        externalId,
+      });
+
+      const cachedExtension =
+        overrides?.cachedExtension ??
+        (cachedVersion ? { ...remoteExtension, version: cachedVersion } : undefined);
+
+      const loadCachedMock =
+        overrides?.loadCachedMock ??
+        jest.fn().mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+      const loadRemoteMock =
+        overrides?.loadRemoteMock ??
+        jest.fn().mockResolvedValue({
+          raw: defaultSource,
+          ...(overrides?.buffer && { buffer: overrides.buffer }),
+        } as LoadedExtension);
+      const installMock = overrides?.installMock ?? jest.fn();
+
+      const cacheLoader = createOrgCacheLoader(cachedExtension, {
+        loadExtensionMock: loadCachedMock,
+        installExtensionMock: installMock,
+      });
+
+      const serverLoader = createOrgServerLoader(remoteExtension, {
+        loadExtensionMock: loadRemoteMock,
+      });
+
+      return {
+        extensionId,
+        externalId,
+        remoteExtension,
+        cachedExtension,
+        loadCachedMock,
+        loadRemoteMock,
+        installMock,
+        cacheLoader,
+        serverLoader,
+      };
+    }
+
+    it("should load from local loader", async () => {
+      // Given
+      const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+      const loadExtensionMock = jest
+        .fn()
+        .mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+      const loader = createLocalLoader(extension, { loadExtensionMock });
+
+      // When
+      const { result } = setup({ loadersOverride: [loader] });
+
+      // Then
+      await waitFor(() => {
+        expect(loadExtensionMock).toHaveBeenCalledWith(extension.id);
+      });
+      expect(result.current.installedExtensions).toEqual([extension]);
+    });
+
+    it("should use cached version when cache version is equal to remote", async () => {
+      // Given
+      const version = "1.2.3";
+      const {
+        loadCachedMock,
+        installMock,
+        loadRemoteMock,
+        extensionId,
+        cacheLoader,
+        serverLoader,
+        cachedExtension,
+      } = setupLoaders({
+        cachedVersion: version,
+        remoteVersion: version,
+      });
+
+      // When
+      const { result } = setup({ loadersOverride: [cacheLoader, serverLoader] });
+
+      // Then
+      await waitFor(() => {
+        expect(loadCachedMock).toHaveBeenCalledWith(extensionId);
+      });
+      expect(loadRemoteMock).not.toHaveBeenCalled();
+      expect(installMock).not.toHaveBeenCalled();
+      expect(result.current.installedExtensions).toEqual([cachedExtension]);
+    });
+
+    it("should use remote version when cache version differs from remote", async () => {
+      // Given
+      const remoteVersion = "1.2.3";
+      const cachedVersion = "1.2.4";
+      const buffer = new Uint8Array([BasicBuilder.number()]);
+      const {
+        loadCachedMock,
+        installMock,
+        loadRemoteMock,
+        externalId,
+        cacheLoader,
+        serverLoader,
+        remoteExtension,
+      } = setupLoaders({
+        cachedVersion,
+        remoteVersion,
+        buffer,
+      });
+
+      // When
+      const { result } = setup({ loadersOverride: [cacheLoader, serverLoader] });
+
+      // Then
+      await waitFor(() => {
+        expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
+      });
+      await waitFor(() => {
+        expect(installMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+      });
+      expect(loadCachedMock).not.toHaveBeenCalled();
+      // When versions differ, use remote version regardless of which is newer
+      expect(result.current.installedExtensions).toEqual([remoteExtension]);
+    });
+
+    it("should load from remote and update cache when cached version is outdated", async () => {
+      // Given
+      const remoteVersion = "1.2.4";
+      const cachedVersion = "1.2.3";
+      const buffer = new Uint8Array([BasicBuilder.number()]);
+      const {
+        loadCachedMock,
+        installMock,
+        remoteExtension,
+        loadRemoteMock,
+        externalId,
+        cacheLoader,
+        serverLoader,
+      } = setupLoaders({
+        cachedVersion,
+        remoteVersion,
+        buffer,
+      });
+
+      const { result } = setup({ loadersOverride: [cacheLoader, serverLoader] });
+
+      await waitFor(() => {
+        expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
+      });
+      await waitFor(() => {
+        expect(installMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+      });
+      expect(loadCachedMock).not.toHaveBeenCalled();
+      expect(result.current.installedExtensions).toEqual([remoteExtension]);
+    });
+
+    it("should load from remote when no cached version exists", async () => {
+      // Given
+      const buffer = new Uint8Array([BasicBuilder.number()]);
+
+      const {
+        installMock,
+        remoteExtension,
+        loadRemoteMock,
+        externalId,
+        cacheLoader,
+        serverLoader,
+      } = setupLoaders({
+        cachedExtension: undefined,
+        buffer,
+      });
+
+      // when
+      const { result } = setup({ loadersOverride: [cacheLoader, serverLoader] });
+
+      // Then
+      await waitFor(() => {
+        expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
+      });
+      await waitFor(() => {
+        expect(installMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+      });
+      expect(result.current.installedExtensions).toEqual([remoteExtension]);
     });
   });
 });

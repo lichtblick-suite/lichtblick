@@ -24,6 +24,7 @@ import {
   IExtensionLoader,
   TypeExtensionLoader,
 } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
+import compareVersions from "@lichtblick/suite-base/services/extension/utils/compareVersions";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
@@ -203,9 +204,34 @@ function createExtensionRegistryStore(
                 if (!orgCacheLoader) {
                   throw new Error("Cache loader not found.");
                 }
-                // Try to get extension from cache (IndexedDB)
-                const { raw } = await orgCacheLoader.loadExtension(extension.id);
-                unwrappedExtensionSource = raw;
+
+                const cachedExtension = await orgCacheLoader.getExtension(extension.id);
+                if (cachedExtension) {
+                  const versionComparison = compareVersions(
+                    cachedExtension.version,
+                    extension.version,
+                  );
+                  // Only use cached version if it matches the remote version
+                  // Convservative approach to avoid potential issues with incompatible cached versions
+                  if (versionComparison === 0) {
+                    log.debug(
+                      `Using cached version of extension ${extension.id} (version ${cachedExtension.version})`,
+                    );
+                    // Replace the remote extension info with cached extension info in installedExtensions
+                    installedExtensions[installedExtensions.length - 1] = cachedExtension;
+                    const { raw } = await orgCacheLoader.loadExtension(extension.id);
+                    unwrappedExtensionSource = raw;
+                    return;
+                  } else {
+                    log.debug(
+                      `Cached version differs from remote (cached: ${cachedExtension.version}, remote: ${extension.version}), using remote version.`,
+                    );
+                    throw new Error("Cached version differs from remote"); // Force fallback to remote
+                  }
+                } else {
+                  // No cached version exists, load from remote
+                  throw new Error("No cached version found"); // Force fallback to remote
+                }
               } catch {
                 // Fallback to remote
                 const { raw, buffer } = await loader.loadExtension(extension.externalId!);
