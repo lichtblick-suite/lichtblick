@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+function isValidPart(x: string | number): boolean {
+  return /^\d+$/.test(String(x));
+}
+
 export default function compareVersions(v1: string, v2: string): number {
   let v1parts: (string | number)[] = v1.split("."),
     v2parts: (string | number)[] = v2.split(".");
 
-  function isValidPart(x: string | number): boolean {
-    return /^\d+$/.test(String(x));
-  }
-
   if (!v1parts.every(isValidPart) || !v2parts.every(isValidPart)) {
-    return NaN;
+    return Number.NaN;
   }
 
   while (v1parts.length < v2parts.length) {
