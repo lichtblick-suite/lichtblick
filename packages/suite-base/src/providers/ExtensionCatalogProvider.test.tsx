@@ -42,7 +42,83 @@ describe("ExtensionCatalogProvider", () => {
     (console.error as jest.Mock).mockRestore();
   });
 
-  function setup({ loadersOverride }: { loadersOverride?: IExtensionLoader[] } = {}) {
+  // Helper functions for test initialization
+  const defaultSource = `module.exports = { activate: function() { return 1; } }`;
+
+  function createMockLoader(
+    overrides: Partial<IExtensionLoader> & {
+      namespace: Namespace;
+      type: IExtensionLoader["type"];
+    },
+  ): IExtensionLoader {
+    return {
+      getExtension: jest.fn(),
+      getExtensions: jest.fn().mockResolvedValue([]),
+      loadExtension: jest.fn().mockResolvedValue({ raw: defaultSource } as LoadedExtension),
+      installExtension: jest.fn(),
+      uninstallExtension: jest.fn(),
+      ...overrides,
+    };
+  }
+
+  function createLocalLoader(
+    extension: ExtensionInfo,
+    options?: {
+      source?: string;
+      loadExtensionMock?: jest.Mock;
+    },
+  ): IExtensionLoader {
+    return createMockLoader({
+      type: "browser",
+      namespace: "local",
+      getExtensions: jest.fn().mockResolvedValue([extension]),
+      loadExtension:
+        options?.loadExtensionMock ??
+        jest.fn().mockResolvedValue({ raw: options?.source ?? defaultSource } as LoadedExtension),
+    });
+  }
+
+  function createOrgCacheLoader(
+    cachedExtension: ExtensionInfo | undefined,
+    options?: {
+      source?: string;
+      loadExtensionMock?: jest.Mock;
+      installExtensionMock?: jest.Mock;
+    },
+  ): IExtensionLoader {
+    return createMockLoader({
+      type: "browser",
+      namespace: "org",
+      getExtension: jest.fn().mockResolvedValue(cachedExtension),
+      loadExtension:
+        options?.loadExtensionMock ??
+        jest.fn().mockResolvedValue({ raw: options?.source ?? defaultSource } as LoadedExtension),
+      installExtension: options?.installExtensionMock ?? jest.fn(),
+    });
+  }
+
+  function createOrgServerLoader(
+    remoteExtension: ExtensionInfo,
+    options?: {
+      source?: string;
+      buffer?: Uint8Array;
+      loadExtensionMock?: jest.Mock;
+    },
+  ): IExtensionLoader {
+    const loadResponse: LoadedExtension = {
+      raw: options?.source ?? defaultSource,
+      ...(options?.buffer && { buffer: options.buffer }),
+    };
+
+    return createMockLoader({
+      type: "server",
+      namespace: "org",
+      getExtensions: jest.fn().mockResolvedValue([remoteExtension]),
+      loadExtension: options?.loadExtensionMock ?? jest.fn().mockResolvedValue(loadResponse),
+    });
+  }
+
+  async function setup({ loadersOverride }: { loadersOverride?: IExtensionLoader[] } = {}) {
     const namespace: Namespace = "local";
     const extensionInfo: ExtensionInfo = ExtensionBuilder.extensionInfo({ namespace });
     const extensions: ExtensionInfo[] = [extensionInfo];
@@ -61,21 +137,24 @@ describe("ExtensionCatalogProvider", () => {
     };
     const loaders = loadersOverride ?? [loaderDefault];
 
-    return {
-      ...renderHook(() => useExtensionCatalog((state) => state), {
-        initialProps: {},
-        wrapper: ({ children }) => (
-          <ExtensionCatalogProvider loaders={loaders}>{children}</ExtensionCatalogProvider>
-        ),
-      }),
-      extensionInfo,
-      loaders,
-      loadExtension,
-    };
+    const { result } = renderHook(() => useExtensionCatalog((state) => state), {
+      initialProps: {},
+      wrapper: ({ children }) => (
+        <ExtensionCatalogProvider loaders={loaders}>{children}</ExtensionCatalogProvider>
+      ),
+    });
+
+    // Wait for refreshAllExtensions (triggered by useEffect on mount) to complete.
+    // installedExtensions is undefined until the first refresh finishes.
+    await waitFor(() => {
+      expect(result.current.installedExtensions).toBeDefined();
+    });
+
+    return { result, extensionInfo, loadExtension };
   }
 
   it("should load an extension from the loaders", async () => {
-    const { loadExtension, result, extensionInfo } = setup();
+    const { loadExtension, result, extensionInfo } = await setup();
 
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
@@ -109,7 +188,7 @@ describe("ExtensionCatalogProvider", () => {
       installExtension: jest.fn(),
       uninstallExtension: jest.fn(),
     };
-    const { result } = setup({ loadersOverride: [loader1, loader2] });
+    const { result } = await setup({ loadersOverride: [loader1, loader2] });
 
     await waitFor(() => {
       expect(loadExtension1).toHaveBeenCalledTimes(1);
@@ -144,7 +223,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result } = setup({ loadersOverride: [loader] });
+    const { result } = await setup({ loadersOverride: [loader] });
 
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
@@ -193,7 +272,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result } = setup({ loadersOverride: [loader] });
+    const { result } = await setup({ loadersOverride: [loader] });
 
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
@@ -258,7 +337,7 @@ describe("ExtensionCatalogProvider", () => {
       uninstallExtension: jest.fn(),
     };
 
-    const { result } = setup({ loadersOverride: [loader] });
+    const { result } = await setup({ loadersOverride: [loader] });
 
     await waitFor(() => {
       expect(loadExtension).toHaveBeenCalledTimes(1);
@@ -474,7 +553,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("isExtensionInstalled", () => {
     it("should check if an extension is installed", async () => {
-      const { loadExtension, result, extensionInfo } = setup();
+      const { loadExtension, result, extensionInfo } = await setup();
 
       await waitFor(() => {
         expect(loadExtension).toHaveBeenCalled();
@@ -486,7 +565,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("unMarkExtensionAsInstalled", () => {
     it("should unmark an extension as installed", async () => {
-      const { loadExtension, result, extensionInfo } = setup();
+      const { loadExtension, result, extensionInfo } = await setup();
 
       await waitFor(() => {
         expect(loadExtension).toHaveBeenCalled();
@@ -503,7 +582,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("installExtensions", () => {
     it("should install an extension", async () => {
-      const { result, extensionInfo } = setup();
+      const { result, extensionInfo } = await setup();
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 
       await act(async () => {
@@ -520,7 +599,7 @@ describe("ExtensionCatalogProvider", () => {
 
     it("should throw an error when install with no registered loader to the namespace", async () => {
       const invalidNamespace = BasicBuilder.string() as Namespace;
-      const { result } = setup();
+      const { result } = await setup();
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 
       await expect(
@@ -533,7 +612,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("uninstallExtension", () => {
     it("should uninstall an extension", async () => {
-      const { result, extensionInfo } = setup();
+      const { result, extensionInfo } = await setup();
       const extensionData: ExtensionData[] = [{ buffer: new Uint8Array() }];
 
       const namespace: Namespace = extensionInfo.namespace!;
@@ -553,7 +632,7 @@ describe("ExtensionCatalogProvider", () => {
 
     it("should throw an error when uninstall with no registered loader to the namespace", async () => {
       const invalidNamespace = BasicBuilder.string() as Namespace;
-      const { result } = setup();
+      const { result } = await setup();
 
       await expect(
         act(async () => {
@@ -605,7 +684,7 @@ describe("ExtensionCatalogProvider", () => {
           uninstallExtension: uninstallFn,
         };
 
-        const { result } = setup({ loadersOverride: [loader] });
+        const { result } = await setup({ loadersOverride: [loader] });
 
         await waitFor(() => {
           expect(result.current.installedExtensions).toHaveLength(1);
@@ -635,7 +714,7 @@ describe("ExtensionCatalogProvider", () => {
         uninstallExtension: uninstallFn,
       };
 
-      const { result } = setup({ loadersOverride: [loader] });
+      const { result } = await setup({ loadersOverride: [loader] });
 
       await waitFor(() => {
         expect(result.current.installedExtensions).toHaveLength(1);
@@ -655,7 +734,7 @@ describe("ExtensionCatalogProvider", () => {
 
   describe("mergeState", () => {
     it("should merge state correctly using mergeState", async () => {
-      const { result, extensionInfo } = setup();
+      const { result, extensionInfo } = await setup();
       const panelName = BasicBuilder.string();
       const messageConverter: MessageConverter = {
         fromSchemaName: BasicBuilder.string(),
@@ -717,6 +796,208 @@ describe("ExtensionCatalogProvider", () => {
       expect(result.current.installedTopicAliasFunctions![0]).toMatchObject({
         extensionId: extensionInfo.id,
       });
+    });
+  });
+
+  describe("loadSingleExtension", () => {
+    function setupLoaders(overrides?: {
+      extensionId?: string;
+      externalId?: string;
+      cachedVersion?: string;
+      remoteVersion?: string;
+      buffer?: Uint8Array;
+      cachedExtension?: ExtensionInfo | undefined;
+      loadCachedMock?: jest.Mock;
+      loadRemoteMock?: jest.Mock;
+      installMock?: jest.Mock;
+    }) {
+      const extensionId = overrides?.extensionId ?? BasicBuilder.string();
+      const externalId = overrides?.externalId ?? BasicBuilder.string();
+      const remoteVersion = overrides?.remoteVersion ?? "1.2.3";
+      const cachedVersion = overrides?.cachedVersion;
+
+      const remoteExtension = ExtensionBuilder.extensionInfo({
+        namespace: "org",
+        id: extensionId,
+        version: remoteVersion,
+        externalId,
+      });
+
+      const cachedExtension =
+        overrides?.cachedExtension ??
+        (cachedVersion ? { ...remoteExtension, version: cachedVersion } : undefined);
+
+      const loadCachedMock =
+        overrides?.loadCachedMock ??
+        jest.fn().mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+      const loadRemoteMock =
+        overrides?.loadRemoteMock ??
+        jest.fn().mockResolvedValue({
+          raw: defaultSource,
+          ...(overrides?.buffer && { buffer: overrides.buffer }),
+        } as LoadedExtension);
+      const cacheInstallMock = overrides?.installMock ?? jest.fn();
+
+      const cacheLoader = createOrgCacheLoader(cachedExtension, {
+        loadExtensionMock: loadCachedMock,
+        installExtensionMock: cacheInstallMock,
+      });
+
+      const serverLoader = createOrgServerLoader(remoteExtension, {
+        loadExtensionMock: loadRemoteMock,
+      });
+
+      return {
+        extensionId,
+        externalId,
+        remoteExtension,
+        cachedExtension,
+        loadCachedMock,
+        loadRemoteMock,
+        cacheInstallMock,
+        cacheLoader,
+        serverLoader,
+      };
+    }
+
+    it("should load from local loader", async () => {
+      // Given
+      const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+      const loadExtensionMock = jest
+        .fn()
+        .mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+      const loader = createLocalLoader(extension, { loadExtensionMock });
+
+      // When
+      const { result } = await setup({ loadersOverride: [loader] });
+
+      // Then
+      await waitFor(() => {
+        expect(loadExtensionMock).toHaveBeenCalledWith(extension.id);
+      });
+      expect(result.current.installedExtensions).toEqual([extension]);
+    });
+
+    it("should use cached version when cache version is equal to remote", async () => {
+      // Given
+      const version = "1.2.3";
+      const {
+        loadCachedMock,
+        cacheInstallMock,
+        loadRemoteMock,
+        extensionId,
+        cacheLoader,
+        serverLoader,
+        cachedExtension,
+      } = setupLoaders({
+        cachedVersion: version,
+        remoteVersion: version,
+      });
+
+      // When
+      const { result } = await setup({ loadersOverride: [cacheLoader, serverLoader] });
+
+      // Then
+      await waitFor(() => {
+        expect(loadCachedMock).toHaveBeenCalledWith(extensionId);
+      });
+      expect(loadRemoteMock).not.toHaveBeenCalled();
+      expect(cacheInstallMock).not.toHaveBeenCalled();
+      expect(result.current.installedExtensions).toEqual([cachedExtension]);
+    });
+
+    it("should use remote version when cache version differs from remote", async () => {
+      // Given
+      const remoteVersion = "1.2.3";
+      const cachedVersion = "1.2.4";
+      const buffer = new Uint8Array([BasicBuilder.number()]);
+      const {
+        loadCachedMock,
+        cacheInstallMock,
+        loadRemoteMock,
+        externalId,
+        cacheLoader,
+        serverLoader,
+        remoteExtension,
+      } = setupLoaders({
+        cachedVersion,
+        remoteVersion,
+        buffer,
+      });
+
+      // When
+      const { result } = await setup({ loadersOverride: [cacheLoader, serverLoader] });
+
+      // Then
+      await waitFor(() => {
+        expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
+      });
+      await waitFor(() => {
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+      });
+      expect(loadCachedMock).not.toHaveBeenCalled();
+      // When versions differ, use remote version regardless of which is newer
+      expect(result.current.installedExtensions).toEqual([remoteExtension]);
+    });
+
+    it("should load from remote and update cache when cached version is outdated", async () => {
+      // Given
+      const remoteVersion = "1.2.4";
+      const cachedVersion = "1.2.3";
+      const buffer = new Uint8Array([BasicBuilder.number()]);
+      const {
+        loadCachedMock,
+        cacheInstallMock,
+        remoteExtension,
+        loadRemoteMock,
+        externalId,
+        cacheLoader,
+        serverLoader,
+      } = setupLoaders({
+        cachedVersion,
+        remoteVersion,
+        buffer,
+      });
+
+      const { result } = await setup({ loadersOverride: [cacheLoader, serverLoader] });
+
+      await waitFor(() => {
+        expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
+      });
+      await waitFor(() => {
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+      });
+      expect(loadCachedMock).not.toHaveBeenCalled();
+      expect(result.current.installedExtensions).toEqual([remoteExtension]);
+    });
+
+    it("should load from remote when no cached version exists", async () => {
+      // Given
+      const buffer = new Uint8Array([BasicBuilder.number()]);
+
+      const {
+        cacheInstallMock,
+        remoteExtension,
+        loadRemoteMock,
+        externalId,
+        cacheLoader,
+        serverLoader,
+      } = setupLoaders({
+        cachedExtension: undefined,
+        buffer,
+      });
+
+      // when
+      const { result } = await setup({ loadersOverride: [cacheLoader, serverLoader] });
+
+      // Then
+      await waitFor(() => {
+        expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
+      });
+      await waitFor(() => {
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+      });
+      expect(result.current.installedExtensions).toEqual([remoteExtension]);
     });
   });
 });

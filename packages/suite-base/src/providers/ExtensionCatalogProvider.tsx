@@ -24,6 +24,7 @@ import {
   IExtensionLoader,
   TypeExtensionLoader,
 } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
+import compareVersions from "@lichtblick/suite-base/services/extension/utils/compareVersions";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
@@ -34,6 +35,10 @@ function createExtensionRegistryStore(
   loaders: readonly IExtensionLoader[],
   mockMessageConverters: readonly RegisterMessageConverterArgs<unknown>[] | undefined,
 ): StoreApi<ExtensionCatalog> {
+  const orgCacheLoader: IExtensionLoader | undefined = loaders.find(
+    (extensionLoader) => extensionLoader.namespace === "org" && extensionLoader.type === "browser",
+  );
+
   return createStore((set, get) => {
     const isExtensionInstalled = (extensionId: string) => {
       return get().loadedExtensions.has(extensionId);
@@ -174,6 +179,59 @@ function createExtensionRegistryStore(
       }));
     };
 
+    async function tryLoadFromCache(extension: ExtensionInfo): Promise<string | undefined> {
+      if (!orgCacheLoader) {
+        return undefined;
+      }
+      const cachedExtension = await orgCacheLoader.getExtension(extension.id);
+      if (!cachedExtension) {
+        log.debug(`No cached version found for extension ${extension.id}, will load from remote.`);
+        return undefined;
+      }
+      const isSameVersion = compareVersions(cachedExtension.version, extension.version) === 0;
+      if (!isSameVersion) {
+        log.debug(
+          `Cached version differs from remote (cached: ${cachedExtension.version}, remote: ${extension.version}), using remote version.`,
+        );
+        return undefined;
+      }
+      log.debug(
+        `Using cached version of extension ${extension.id} (version ${cachedExtension.version})`,
+      );
+      const { raw } = await orgCacheLoader.loadExtension(extension.id);
+      return raw;
+    }
+
+    async function loadSingleExtension(extension: ExtensionInfo, loader: IExtensionLoader) {
+      let unwrappedExtensionSource: string = "";
+      if (loader.namespace === "org" && loader.type === "server" && extension.externalId) {
+        const cachedSource = await tryLoadFromCache(extension).catch((err: unknown) => {
+          log.warn(`Cache lookup failed for ${extension.id}, falling back to remote`, err);
+          return undefined;
+        });
+
+        // Load from remote if cache is not available or invalid
+        if (cachedSource == undefined) {
+          const { raw, buffer } = await loader.loadExtension(extension.externalId);
+          unwrappedExtensionSource = raw;
+          // Cache the extension for future use
+          if (buffer && orgCacheLoader) {
+            await orgCacheLoader
+              .installExtension({ foxeFileData: buffer })
+              .catch((err: unknown) => {
+                log.warn(`Failed to cache extension ${extension.id}`, err);
+              });
+          }
+        } else {
+          unwrappedExtensionSource = cachedSource;
+        }
+      } else {
+        const { raw } = await loader.loadExtension(extension.id);
+        unwrappedExtensionSource = raw;
+      }
+      return unwrappedExtensionSource;
+    }
+
     async function loadInBatch({
       batch,
       loader,
@@ -185,10 +243,6 @@ function createExtensionRegistryStore(
       installedExtensions: ExtensionInfo[];
       contributionPoints: ContributionPoints;
     }) {
-      const orgCacheLoader: IExtensionLoader | undefined = loaders.find(
-        (extensionLoader) =>
-          extensionLoader.namespace === "org" && extensionLoader.type === "browser",
-      );
       await Promise.all(
         batch.map(async (extension) => {
           try {
@@ -196,29 +250,7 @@ function createExtensionRegistryStore(
 
             const { messageConverters, panelSettings, panels, topicAliasFunctions, cameraModels } =
               contributionPoints;
-            let unwrappedExtensionSource: string = "";
-
-            if (loader.namespace === "org" && loader.type === "server") {
-              try {
-                if (!orgCacheLoader) {
-                  throw new Error("Cache loader not found.");
-                }
-                // Try to get extension from cache (IndexedDB)
-                const { raw } = await orgCacheLoader.loadExtension(extension.id);
-                unwrappedExtensionSource = raw;
-              } catch {
-                // Fallback to remote
-                const { raw, buffer } = await loader.loadExtension(extension.externalId!);
-                unwrappedExtensionSource = raw;
-                if (buffer) {
-                  await orgCacheLoader?.installExtension({ foxeFileData: buffer });
-                }
-              }
-            } else {
-              const { raw } = await loader.loadExtension(extension.id);
-              unwrappedExtensionSource = raw;
-            }
-
+            const unwrappedExtensionSource = await loadSingleExtension(extension, loader);
             const newContributionPoints = buildContributionPoints(
               extension,
               unwrappedExtensionSource,
