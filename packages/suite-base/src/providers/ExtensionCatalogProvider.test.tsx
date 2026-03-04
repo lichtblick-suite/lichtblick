@@ -151,18 +151,6 @@ describe("ExtensionCatalogProvider", () => {
     });
 
     return { result, extensionInfo, loadExtension };
-
-    // return {
-    //   ...renderHook(() => useExtensionCatalog((state) => state), {
-    //     initialProps: {},
-    //     wrapper: ({ children }) => (
-    //       <ExtensionCatalogProvider loaders={loaders}>{children}</ExtensionCatalogProvider>
-    //     ),
-    //   }),
-    //   extensionInfo,
-    //   loaders,
-    //   loadExtension,
-    // };
   }
 
   it("should load an extension from the loaders", async () => {
@@ -703,7 +691,7 @@ describe("ExtensionCatalogProvider", () => {
         });
 
         await act(async () => {
-          await result.current.uninstallExtension(namespace as Namespace, extensionInfo.id);
+          await result.current.uninstallExtension(namespace, extensionInfo.id);
         });
 
         expect(uninstallFn).toHaveBeenCalledWith(useExternalId ? externalId : extensionInfo.id);
