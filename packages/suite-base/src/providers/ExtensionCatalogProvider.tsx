@@ -164,7 +164,10 @@ function createExtensionRegistryStore(
       }: ContributionPoints,
     ) => {
       set((state) => ({
-        installedExtensions: _.uniqBy([...(state.installedExtensions ?? []), info], "id"),
+        installedExtensions: _.uniqBy(
+          [...(state.installedExtensions ?? []), info],
+          (ext) => `${ext.id}-${ext.namespace}`,
+        ),
         installedPanels: { ...state.installedPanels, ...panels },
         installedMessageConverters: [...state.installedMessageConverters!, ...messageConverters],
         installedTopicAliasFunctions: [

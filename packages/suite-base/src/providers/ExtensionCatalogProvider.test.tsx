@@ -730,6 +730,82 @@ describe("ExtensionCatalogProvider", () => {
 
       (console.warn as jest.Mock).mockRestore();
     });
+
+    it("should only remove the org entry when the same extension is installed in both local and org", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(false);
+
+      const sharedId = BasicBuilder.string();
+      const localExtension = ExtensionBuilder.extensionInfo({ id: sharedId, namespace: "local" });
+      const orgExtension = ExtensionBuilder.extensionInfo({ id: sharedId, namespace: "org" });
+
+      const localLoader = createLocalLoader(localExtension, { source: "" });
+      const orgLoader = createOrgServerLoader(orgExtension, { source: "" });
+
+      const { result } = await setup({ loadersOverride: [localLoader, orgLoader] });
+
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(2);
+      });
+
+      // Uninstall only the org copy
+      await act(async () => {
+        await result.current.uninstallExtension("org", sharedId);
+      });
+
+      // Local copy must still be present
+      expect(result.current.installedExtensions).toHaveLength(1);
+      expect(result.current.installedExtensions).toContainEqual(
+        expect.objectContaining({ id: sharedId, namespace: "local" }),
+      );
+      // Extension is still considered installed (local copy remains)
+      expect(result.current.isExtensionInstalled(sharedId)).toBe(true);
+    });
+
+    it("should remove contribution points only when the last namespace copy is uninstalled", async () => {
+      (isDesktopApp as jest.Mock).mockReturnValue(false);
+
+      const sharedId = BasicBuilder.string();
+      const panelName = BasicBuilder.string();
+      const source = `
+        module.exports = {
+          activate: function(ctx) {
+            ctx.registerPanel({ name: "${panelName}", initPanel: () => ({ renderToolbar: () => null }) });
+          }
+        }
+      `;
+
+      const localExtension = ExtensionBuilder.extensionInfo({ id: sharedId, namespace: "local" });
+      const orgExtension = ExtensionBuilder.extensionInfo({ id: sharedId, namespace: "org" });
+
+      const localLoader = createLocalLoader(localExtension, { source });
+      const orgLoader = createOrgServerLoader(orgExtension, { source });
+
+      const { result } = await setup({ loadersOverride: [localLoader, orgLoader] });
+
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(2);
+      });
+
+      // Uninstall org copy — panels should still be registered (local copy remains)
+      await act(async () => {
+        await result.current.uninstallExtension("org", sharedId);
+      });
+
+      expect(result.current.installedExtensions).toHaveLength(1);
+      const panelKey = Object.keys(result.current.installedPanels ?? {}).find((k) =>
+        k.includes(panelName),
+      );
+      expect(panelKey).toBeDefined();
+
+      // Uninstall local copy — now panels must be cleaned up
+      await act(async () => {
+        await result.current.uninstallExtension("local", sharedId);
+      });
+
+      expect(result.current.installedExtensions).toHaveLength(0);
+      expect(result.current.installedPanels).toEqual({});
+      expect(result.current.isExtensionInstalled(sharedId)).toBe(false);
+    });
   });
 
   describe("mergeState", () => {
