@@ -44,7 +44,7 @@ function useStateTransitionsData(
     const outPathState: PathState[] = [];
 
     paths.forEach((path, pathIndex) => {
-      const y = (pathIndex + 1) * 6 * -1;
+      const y = (pathIndex + 1) * 6 * -2;
       outMinY = Math.min(outMinY ?? y, y - 3);
 
       const blocksForPath = decodedBlocks.map((decodedBlock) => decodedBlock[path.value]);
