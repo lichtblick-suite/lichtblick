@@ -31,6 +31,7 @@ import {
   useMessagePipeline,
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
+import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import { useAppConfiguration } from "@lichtblick/suite-base/context/AppConfigurationContext";
@@ -142,6 +143,7 @@ function PanelExtensionAdapter(
   const [panelId] = useState(() => uuid());
   const isMounted = useSynchronousMountedState();
   const [error, setError] = useState<Error | undefined>();
+  const [forceConversion, setForceConversion] = useState(new Set<string>());
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
   const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
 
@@ -254,6 +256,7 @@ function PanelExtensionAdapter(
       sortedServices,
       subscriptions: localSubscriptions,
       watchedFields,
+      forceConversion,
       config: initialState.current,
     });
 
@@ -265,6 +268,9 @@ function PanelExtensionAdapter(
       setSlowRender(true);
       return;
     }
+
+    // Clear any conversions that were forced.
+    forceConversion.clear();
 
     setSlowRender(false);
     const resumeFrame = pauseFrame(panelId);
@@ -306,6 +312,7 @@ function PanelExtensionAdapter(
     sortedServices,
     watchedFields,
     initialState,
+    forceConversion,
   ]);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
@@ -313,6 +320,8 @@ function PanelExtensionAdapter(
   const extensionsSettings = useExtensionCatalog(getExtensionPanelSettings);
 
   type PartialPanelExtensionContext = Omit<BuiltinPanelExtensionContext, "panelElement">;
+
+  const messagePipelineState = useMessagePipelineGetter();
 
   const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
     const layout: PanelExtensionContext["layout"] = {
@@ -346,8 +355,19 @@ function PanelExtensionAdapter(
       saveConfig(
         produce<{ topics: Record<string, unknown> }>((draft) => {
           const [category, topicName] = path;
+
           if (category === "topics" && topicName != undefined) {
-            extensionsSettings[panelName]?.[topicName]?.handler(action, draft.topics[topicName]);
+            const topicToSchemaNameMap = getTopicToSchemaNameMap(messagePipelineState());
+            const schemaName = topicToSchemaNameMap[topicName];
+
+            if (schemaName == undefined) {
+              return;
+            }
+
+            extensionsSettings[panelName]?.[schemaName]?.handler(action, draft.topics[topicName]);
+            setForceConversion((_old) => {
+              return new Set([topicName]);
+            });
           }
         }),
       );
