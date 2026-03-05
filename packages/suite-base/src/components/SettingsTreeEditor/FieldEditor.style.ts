@@ -28,7 +28,7 @@ export const useStyles = makeStyles<void, "error">()((theme, _params, classes) =
     minWidth: 0,
   },
   fieldWrapper: {
-    minWidth: 0, 
+    minWidth: 0,
     maxWidth: "100%",
     overflow: "hidden",
     marginRight: theme.spacing(0.5),
