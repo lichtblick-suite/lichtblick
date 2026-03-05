@@ -331,9 +331,11 @@ function createExtensionRegistryStore(
 
     function removeExtensionData({
       id, // deleted extension id
+      namespace, // deleted extension namespace
       state,
     }: {
       id: string;
+      namespace: Namespace;
       state: Pick<
         ExtensionCatalog,
         | "installedExtensions"
@@ -351,20 +353,26 @@ function createExtensionRegistryStore(
         installedCameraModels,
       } = state;
 
+      const remainingExtensions = installedExtensions?.filter(
+        (ext) => !(ext.id === id && ext.namespace === namespace),
+      );
+
+      const stillInstalledElsewhere = remainingExtensions?.some((ext) => ext.id === id) ?? false;
+
       return {
-        installedExtensions: installedExtensions?.filter(
-          ({ id: extensionId }) => extensionId !== id,
-        ),
-        installedPanels: _.pickBy(installedPanels, ({ extensionId }) => extensionId !== id),
-        installedMessageConverters: installedMessageConverters?.filter(
-          ({ extensionId }) => extensionId !== id,
-        ),
-        installedTopicAliasFunctions: installedTopicAliasFunctions?.filter(
-          ({ extensionId }) => extensionId !== id,
-        ),
-        installedCameraModels: new Map(
-          [...installedCameraModels].filter(([, { extensionId }]) => extensionId !== id),
-        ),
+        installedExtensions: remainingExtensions,
+        installedPanels: stillInstalledElsewhere
+          ? installedPanels
+          : _.pickBy(installedPanels, ({ extensionId }) => extensionId !== id),
+        installedMessageConverters: stillInstalledElsewhere
+          ? installedMessageConverters
+          : installedMessageConverters?.filter(({ extensionId }) => extensionId !== id),
+        installedTopicAliasFunctions: stillInstalledElsewhere
+          ? installedTopicAliasFunctions
+          : installedTopicAliasFunctions?.filter(({ extensionId }) => extensionId !== id),
+        installedCameraModels: stillInstalledElsewhere
+          ? installedCameraModels
+          : new Map([...installedCameraModels].filter(([, { extensionId }]) => extensionId !== id)),
       };
     }
 
@@ -398,8 +406,14 @@ function createExtensionRegistryStore(
         );
       }
 
-      set((state) => removeExtensionData({ id: extension.id, state }));
-      get().unMarkExtensionAsInstalled(id);
+      set((state) =>
+        removeExtensionData({ id: extension.id, namespace: extension.namespace!, state }),
+      );
+
+      const stillInstalled = get().installedExtensions?.some((ext) => ext.id === id) ?? false;
+      if (!stillInstalled) {
+        get().unMarkExtensionAsInstalled(id);
+      }
     };
 
     return {

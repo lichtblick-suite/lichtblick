@@ -873,6 +873,37 @@ describe("ExtensionCatalogProvider", () => {
         extensionId: extensionInfo.id,
       });
     });
+
+    it("should add an entry for the same extension id installed in a different namespace", async () => {
+      // Setup with the extension installed in "local" namespace
+      const { result, extensionInfo } = await setup();
+
+      // The same extension id, but now installed in "org" namespace
+      const orgExtensionInfo = ExtensionBuilder.extensionInfo({
+        id: extensionInfo.id,
+        namespace: "org",
+      });
+      const emptyContributionPoints: ContributionPoints = {
+        messageConverters: [],
+        cameraModels: new Map(),
+        topicAliasFunctions: [],
+        panelSettings: {},
+        panels: {},
+      };
+
+      act(() => {
+        result.current.mergeState(orgExtensionInfo, emptyContributionPoints);
+      });
+
+      // Both local and org entries must be present
+      expect(result.current.installedExtensions).toHaveLength(2);
+      expect(result.current.installedExtensions).toContainEqual(
+        expect.objectContaining({ id: extensionInfo.id, namespace: "local" }),
+      );
+      expect(result.current.installedExtensions).toContainEqual(
+        expect.objectContaining({ id: extensionInfo.id, namespace: "org" }),
+      );
+    });
   });
 
   describe("loadSingleExtension", () => {
