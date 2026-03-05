@@ -134,7 +134,12 @@ export default function PanelSettings({
   const [config, , extensionSettings] = useConfigById(selectedPanelId);
   const messagePipelineState = useMessagePipelineGetter();
 
-  const storedSettingsTrees = usePanelStateStore(({ settingsTrees }) => settingsTrees);
+  const storedSettingsTreeSelector = useCallback(
+    (store: PanelStateStore) =>
+      selectedPanelId != undefined ? store.settingsTrees[selectedPanelId] : undefined,
+    [selectedPanelId],
+  );
+  const storedSettingsTree = usePanelStateStore(storedSettingsTreeSelector);
   const settingsTree = useMemo(
     () =>
       buildSettingsTree({
@@ -143,7 +148,7 @@ export default function PanelSettings({
         messagePipelineState,
         panelType,
         selectedPanelId,
-        settingsTrees: storedSettingsTrees,
+        settingsTree: storedSettingsTree,
       }),
     [
       config,
@@ -151,13 +156,13 @@ export default function PanelSettings({
       messagePipelineState,
       panelType,
       selectedPanelId,
+      storedSettingsTree,
       /**
        * The core issue is that settingsTrees object in the PanelStateStore is being
        * mutated on each render, leading to unnecessary calls to buildSettingsTree
        * To address this, we need to ensure that settingsTrees remains
        * referentially stable unless its actual content changes.
        */
-      storedSettingsTrees,
     ],
   );
 

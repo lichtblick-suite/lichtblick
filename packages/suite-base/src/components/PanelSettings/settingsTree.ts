@@ -14,13 +14,13 @@ export const buildSettingsTree = ({
   messagePipelineState,
   panelType,
   selectedPanelId,
-  settingsTrees,
+  settingsTree,
 }: BuildSettingsTreeProps): Immutable<SettingsTree> | undefined => {
   if (selectedPanelId == undefined || panelType == undefined) {
     return undefined;
   }
 
-  const set = settingsTrees[selectedPanelId];
+  const set = settingsTree;
   if (!set) {
     return undefined;
   }

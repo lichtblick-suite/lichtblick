@@ -77,14 +77,16 @@ describe("buildSettingsTree", () => {
   ])(
     "should return undefined if selectedPanelId or panelType is undefined",
     ({ panelType, selectedPanelId }) => {
-      const { config, extensionSettings, state, messagePipelineState } = setup();
+      const { config, extensionSettings, messagePipelineState } = setup();
 
       const result = buildSettingsTree({
         config,
         extensionSettings,
         panelType,
         selectedPanelId,
-        settingsTrees: state.settingsTrees,
+        settingsTree: undefined,
+        // settingsTree:
+        //   selectedPanelId != undefined ? state.settingsTrees[selectedPanelId] : undefined,
         messagePipelineState,
       });
       expect(result).toBeUndefined();
@@ -93,13 +95,14 @@ describe("buildSettingsTree", () => {
 
   it("should return undefined if selected panel is not found in state", () => {
     const { config, extensionSettings, state, messagePipelineState } = setup();
+    const panelId = "invalidPanel";
 
     const result = buildSettingsTree({
       config,
       extensionSettings,
       panelType: "myPanelType",
-      selectedPanelId: "invalidPanel",
-      settingsTrees: state.settingsTrees,
+      selectedPanelId: panelId,
+      settingsTree: state.settingsTrees[panelId],
       messagePipelineState,
     });
 
@@ -108,13 +111,14 @@ describe("buildSettingsTree", () => {
 
   it("should return the correct settingsTree when valid panelId and panelType are provided", () => {
     const { config, extensionSettings, state, messagePipelineState, settingsTreeNodes } = setup();
+    const panelId = "panel1";
 
     const result = buildSettingsTree({
       config,
       extensionSettings,
       panelType: "myPanelType",
-      selectedPanelId: "panel1",
-      settingsTrees: state.settingsTrees,
+      selectedPanelId: panelId,
+      settingsTree: state.settingsTrees[panelId],
       messagePipelineState,
     });
 
@@ -143,7 +147,7 @@ describe("buildSettingsTree", () => {
       extensionSettings,
       panelType: "myPanelType",
       selectedPanelId: "panel1",
-      settingsTrees,
+      settingsTree: settingsTrees.panel1,
       messagePipelineState,
     });
 
@@ -153,14 +157,15 @@ describe("buildSettingsTree", () => {
   it("should merge topicsSettings with existing children in the settingsTree", () => {
     const { config, extensionSettings, state, messagePipelineState, settingsTreeNodes } = setup();
     const { children: expectedChildren } = settingsTreeNodes.topics!;
+    const panelId = "panel1";
 
     const result = buildSettingsTree({
       config,
       extensionSettings,
       messagePipelineState,
       panelType: "myPanelType",
-      selectedPanelId: "panel1",
-      settingsTrees: state.settingsTrees,
+      selectedPanelId: panelId,
+      settingsTree: state.settingsTrees[panelId],
     });
 
     expect(result?.nodes.topics?.children).toEqual(expectedChildren);
