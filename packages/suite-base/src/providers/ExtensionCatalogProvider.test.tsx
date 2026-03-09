@@ -906,6 +906,68 @@ describe("ExtensionCatalogProvider", () => {
     });
   });
 
+  describe("markExtensionAsInstalled", () => {
+    it("should mark an extension as installed", async () => {
+      // Given
+      const { result } = await setup();
+      const extensionId = BasicBuilder.string();
+      expect(result.current.isExtensionInstalled(extensionId)).toBe(false);
+
+      // When
+      act(() => {
+        result.current.markExtensionAsInstalled(extensionId);
+      });
+
+      // Then
+      expect(result.current.isExtensionInstalled(extensionId)).toBe(true);
+      expect(result.current.loadedExtensions.has(extensionId)).toBe(true);
+    });
+  });
+
+  describe("downloadExtension", () => {
+    it("should download an extension and return a Uint8Array", async () => {
+      // Given
+      const bytes = new Uint8Array([BasicBuilder.number(), BasicBuilder.number()]);
+      const url = BasicBuilder.string();
+      global.fetch = jest.fn().mockResolvedValue({
+        arrayBuffer: jest.fn().mockResolvedValue(bytes.buffer),
+      });
+      const { result } = await setup();
+
+      // When
+      let downloaded: Uint8Array | undefined;
+      await act(async () => {
+        downloaded = await result.current.downloadExtension(url);
+      });
+
+      // Then
+      expect(global.fetch).toHaveBeenCalledWith(url);
+      expect(downloaded).toEqual(bytes);
+    });
+  });
+
+  describe("refreshAllExtensions", () => {
+    it("should reload all extensions from loaders", async () => {
+      // Given
+      const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+      const loadExtensionMock = jest
+        .fn()
+        .mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+      const loader = createLocalLoader(extension, { loadExtensionMock });
+      const { result } = await setup({ loadersOverride: [loader] });
+      loadExtensionMock.mockClear();
+
+      // When
+      await act(async () => {
+        await result.current.refreshAllExtensions();
+      });
+
+      // Then
+      expect(loadExtensionMock).toHaveBeenCalledWith(extension.id);
+      expect(result.current.installedExtensions).toEqual([extension]);
+    });
+  });
+
   describe("loadSingleExtension", () => {
     function setupLoaders(overrides?: {
       extensionId?: string;

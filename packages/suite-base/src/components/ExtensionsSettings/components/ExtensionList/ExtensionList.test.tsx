@@ -153,6 +153,7 @@ describe("ExtensionList Component", () => {
       entry: mockEntries[0],
     });
   });
+
   describe("handleBulkUninstall", () => {
     const mockUninstallExtension = jest.fn();
 
@@ -194,8 +195,18 @@ describe("ExtensionList Component", () => {
       // Then
       await waitFor(() => {
         expect(mockUninstallExtension).toHaveBeenCalledTimes(2);
-        expect(mockUninstallExtension).toHaveBeenCalledWith("org", "1");
-        expect(mockUninstallExtension).toHaveBeenCalledWith("org", "2");
+        expect(mockUninstallExtension).toHaveBeenCalledWith(
+          mockEntries[0]!.namespace,
+          mockEntries[0]!.id,
+        );
+        expect(mockUninstallExtension).toHaveBeenCalledWith(
+          mockEntries[1]!.namespace,
+          mockEntries[1]!.id,
+        );
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+          "2 extension(s) uninstalled successfully",
+          { variant: "success" },
+        );
       });
     });
 
@@ -262,7 +273,10 @@ describe("ExtensionList Component", () => {
       // Then
       await waitFor(() => {
         expect(mockUninstallExtension).toHaveBeenCalledTimes(1);
-        expect(mockUninstallExtension).toHaveBeenCalledWith("org", "1");
+        expect(mockUninstallExtension).toHaveBeenCalledWith(
+          mockEntries[0]!.namespace,
+          mockEntries[0]!.id,
+        );
         expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
           "1 extension(s) uninstalled successfully",
           { variant: "success" },

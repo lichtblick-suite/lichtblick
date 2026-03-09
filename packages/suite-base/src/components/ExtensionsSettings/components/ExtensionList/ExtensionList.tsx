@@ -48,7 +48,11 @@ export default function ExtensionList({
   const handleBulkUninstall = useCallback(async () => {
     const selectedExtensions = entries.filter((entry) => selectedExtensionIds.includes(entry.id));
     const extensionsToUninstall = selectedExtensions.filter((ext) => {
-      return installedExtensions?.some((installed) => installed.id === ext.id) ?? false;
+      return (
+        installedExtensions?.some(
+          (installed) => installed.id === ext.id && installed.namespace === ext.namespace,
+        ) ?? false
+      );
     });
 
     if (extensionsToUninstall.length === 0) {
@@ -106,7 +110,10 @@ export default function ExtensionList({
       renderCell: (params: GridRenderCellParams) => {
         const extension = params.row as ExtensionMarketplaceDetail;
         const isInstalled = installedExtensions
-          ? installedExtensions.some((installed) => installed.id === extension.id)
+          ? installedExtensions.some(
+              (installed) =>
+                installed.id === extension.id && installed.namespace === extension.namespace,
+            )
           : false;
         const isExtensionOperating = isOperating(extension.id);
 
@@ -148,7 +155,10 @@ export default function ExtensionList({
 
     const selectedExtensions = entries.filter((entry) => selectedExtensionIds.includes(entry.id));
     const selectedInstalled = selectedExtensions.filter(
-      (ext) => installedExtensions?.some((installed) => installed.id === ext.id) ?? false,
+      (ext) =>
+        installedExtensions?.some(
+          (installed) => installed.id === ext.id && installed.namespace === ext.namespace,
+        ) ?? false,
     );
 
     return (
@@ -200,7 +210,10 @@ export default function ExtensionList({
             onRowClick={(params) => {
               const extension = params.row as ExtensionMarketplaceDetail;
               const isInstalled = installedExtensions
-                ? installedExtensions.some((installed) => installed.id === extension.id)
+                ? installedExtensions.some(
+                    (installed) =>
+                      installed.id === extension.id && installed.namespace === extension.namespace,
+                  )
                 : false;
               selectExtension({ installed: isInstalled, entry: extension });
             }}
