@@ -8,8 +8,8 @@ import {
   ExtensionCatalog,
   ExtensionData,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import { SingleLoaderInstallResult } from "@lichtblick/suite-base/providers/ExtensionCatalogProvider/types";
 import { buildContributionPoints } from "@lichtblick/suite-base/providers/helpers/buildContributionPoints";
-import { SingleLoaderInstallResult } from "@lichtblick/suite-base/providers/types";
 import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import compareVersions from "@lichtblick/suite-base/services/extension/utils/compareVersions";
 import { Namespace } from "@lichtblick/suite-base/types";
