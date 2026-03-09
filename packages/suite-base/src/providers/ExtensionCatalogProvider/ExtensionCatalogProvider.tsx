@@ -19,14 +19,14 @@ import {
   InstallExtensionsResult,
   LoadExtensionsResult,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import { buildContributionPoints } from "@lichtblick/suite-base/providers/helpers/buildContributionPoints";
 import {
   extensionUniqueKey,
   loadSingleExtension,
   serverLoaderFirst,
   tryInstallSingleLoader,
   removeExtensionData,
-} from "@lichtblick/suite-base/providers/utils";
+} from "@lichtblick/suite-base/providers/ExtensionCatalogProvider/utils";
+import { buildContributionPoints } from "@lichtblick/suite-base/providers/helpers/buildContributionPoints";
 import {
   IExtensionLoader,
   TypeExtensionLoader,
