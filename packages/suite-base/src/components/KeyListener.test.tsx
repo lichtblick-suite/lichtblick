@@ -107,7 +107,7 @@ describe("KeyListener", () => {
   describe("editable element detection", () => {
     it("should ignore events from input elements", () => {
       // Given
-      const key = BasicBuilder.string();
+      const key = "a";
       const keyDownHandlers = { [key]: mockHandler };
       setup({ global: true, keyDownHandlers });
       const input = document.createElement("input");
@@ -124,7 +124,7 @@ describe("KeyListener", () => {
 
     it("should ignore events from textarea elements", () => {
       // Given
-      const key = BasicBuilder.string();
+      const key = "a";
       const keyDownHandlers = { [key]: mockHandler };
       setup({ global: true, keyDownHandlers });
       const textarea = document.createElement("textarea");
@@ -141,7 +141,7 @@ describe("KeyListener", () => {
 
     it("should ignore events from contentEditable elements", () => {
       // Given
-      const key = BasicBuilder.string();
+      const key = "a";
       const keyDownHandlers = { [key]: mockHandler };
       setup({ global: true, keyDownHandlers });
       const div = document.createElement("div");
@@ -159,7 +159,7 @@ describe("KeyListener", () => {
 
     it("should ignore events from monaco-editor elements", () => {
       // Given
-      const key = BasicBuilder.string();
+      const key = "a";
       const keyDownHandlers = { [key]: mockHandler };
       setup({ global: true, keyDownHandlers });
       const monacoEditor = document.createElement("div");
