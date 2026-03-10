@@ -207,23 +207,31 @@ const usePlotInteractionHandlers = ({
     };
   }, [coordinator]);
 
+  const onDownloadCsvClick = useCallback(() => {
+    void (async () => {
+      try {
+        const data = await coordinator?.getCsvData();
+        if (!data || !isMounted()) {
+          return;
+        }
+
+        downloadCSV(customTitle ?? "plot_data", data, xAxisMode);
+      } catch (err: unknown) {
+        console.error(err);
+      }
+    })();
+  }, [coordinator, customTitle, isMounted, xAxisMode]);
+
   const getPanelContextMenuItems = useCallback(() => {
     const items: PanelContextMenuItem[] = [
       {
         type: "item",
         label: "Download plot data as CSV",
-        onclick: async () => {
-          const data = await coordinator?.getCsvData();
-          if (!data || !isMounted()) {
-            return;
-          }
-
-          downloadCSV(customTitle ?? "plot_data", data, xAxisMode);
-        },
+        onclick: onDownloadCsvClick,
       },
     ];
     return items;
-  }, [coordinator, customTitle, isMounted, xAxisMode]);
+  }, [onDownloadCsvClick]);
 
   return {
     onMouseMove,
