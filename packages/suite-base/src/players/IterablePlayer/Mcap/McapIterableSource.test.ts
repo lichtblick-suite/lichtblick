@@ -79,6 +79,65 @@ async function createMcapFile({
   return new Blob([tempBuffer.get()]) as unknown as globalThis.Blob;
 }
 
+jest.mock("@lichtblick/mcap-support", () => ({
+  ...jest.requireActual("@lichtblick/mcap-support"),
+  loadDecompressHandlers: jest.fn(),
+}));
+
+// Helper function to add a message to the writer with customizable parameters
+async function addMessage(
+  writer: McapWriter,
+  channelId: number,
+  overrides: {
+    sequence?: number;
+    publishTime?: bigint;
+    logTime?: bigint;
+    data?: Uint8Array;
+  } = {},
+): Promise<void> {
+  await writer.addMessage({
+    channelId,
+    sequence: overrides.sequence ?? 0,
+    publishTime: overrides.publishTime ?? 0n,
+    logTime: overrides.logTime ?? 1000000000n, // 1 second in nanoseconds
+    data: overrides.data ?? new TextEncoder().encode(BasicBuilder.string()),
+  });
+}
+
+async function createMcapFile({
+  withMessage = true,
+  topic = "/test",
+  noChannels = false,
+}: {
+  withMessage?: boolean;
+  topic?: string;
+  noChannels?: boolean;
+}): Promise<globalThis.Blob> {
+  const tempBuffer = new TempBuffer();
+  const writer = new McapWriter({ writable: tempBuffer });
+  await writer.start({ library: "test", profile: "" });
+
+  if (withMessage) {
+    const schemaId = await writer.registerSchema({
+      name: "test_schema",
+      encoding: "jsonschema",
+      data: new TextEncoder().encode(JSON.stringify({ type: "object" })),
+    });
+    if (!noChannels) {
+      const channelId = await writer.registerChannel({
+        schemaId,
+        topic,
+        messageEncoding: "json",
+        metadata: new Map(),
+      });
+      await addMessage(writer, channelId);
+    }
+  }
+
+  await writer.end();
+  return new Blob([tempBuffer.get()]) as unknown as globalThis.Blob;
+}
+
 describe("McapIterableSource", () => {
   const mockLoadDecompressHandlers = loadDecompressHandlers as jest.MockedFunction<
     typeof loadDecompressHandlers
@@ -119,7 +178,6 @@ describe("McapIterableSource", () => {
       },
     ]);
   });
-
   it("loads decompression handlers before creating an indexed reader for an indexed file", async () => {
     // Given
     const topic = `/${BasicBuilder.string()}`;
