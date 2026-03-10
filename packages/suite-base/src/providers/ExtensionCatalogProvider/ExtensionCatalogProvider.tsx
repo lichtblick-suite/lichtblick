@@ -19,12 +19,18 @@ import {
   InstallExtensionsResult,
   LoadExtensionsResult,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import {
+  extensionUniqueKey,
+  loadSingleExtension,
+  serverLoaderFirst,
+  tryInstallSingleLoader,
+  removeExtensionData,
+} from "@lichtblick/suite-base/providers/ExtensionCatalogProvider/utils";
 import { buildContributionPoints } from "@lichtblick/suite-base/providers/helpers/buildContributionPoints";
 import {
   IExtensionLoader,
   TypeExtensionLoader,
 } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
-import compareVersions from "@lichtblick/suite-base/services/extension/utils/compareVersions";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
@@ -62,94 +68,79 @@ function createExtensionRegistryStore(
     };
 
     const installExtensions = async (namespace: Namespace, extensions: ExtensionData[]) => {
-      const namespaceLoaders: IExtensionLoader[] = loaders.filter(
-        (loader) => loader.namespace === namespace,
-      );
+      const namespaceLoaders = loaders.filter((loader) => loader.namespace === namespace);
       if (namespaceLoaders.length === 0) {
         throw new Error(`No extension loader found for namespace ${namespace}`);
       }
-      const results = await promisesInBatch(extensions, namespaceLoaders);
-      return results;
+      return await promisesInBatch(extensions, namespaceLoaders);
     };
+
+    // Installs a single extension through all matching loaders sequentially.
+    // Extracted from the promisesInBatch map callback to keep nesting within 4 levels.
+    async function installExtensionWithLoaders(
+      extension: ExtensionData,
+      extensionLoaders: IExtensionLoader[],
+    ): Promise<InstallExtensionsResult> {
+      const loaderResults: Array<LoadExtensionsResult> = [];
+      let extensionName = extension.file?.name ?? "Unknown extension";
+      let mergedInfo: ExtensionInfo | undefined;
+      let hasAnySuccess = false;
+      let externalId: string | undefined;
+
+      // Sort loaders to prioritize server loaders first (to get externalId)
+      const sortedLoaders = _.sortBy(extensionLoaders, serverLoaderFirst);
+
+      for (const loader of sortedLoaders) {
+        const result = await tryInstallSingleLoader(loader, extension, externalId);
+
+        if (result.success) {
+          externalId = result.externalId ?? externalId;
+          extensionName = result.info.displayName || result.info.name || extensionName;
+
+          // Only merge state once for the first successful installation
+          if (!hasAnySuccess) {
+            get().mergeState(result.info, result.contributionPoints);
+            get().markExtensionAsInstalled(result.info.id);
+            mergedInfo = result.info;
+            hasAnySuccess = true;
+          }
+        }
+
+        loaderResults.push(
+          result.success
+            ? { loaderType: result.loaderType, success: true }
+            : { loaderType: result.loaderType, success: false, error: result.error },
+        );
+      }
+
+      if (hasAnySuccess) {
+        // At least one loader succeeded
+        const failedCount = loaderResults.filter((r) => !r.success).length;
+        return {
+          success: true,
+          info: mergedInfo!,
+          extensionName,
+          loaderResults,
+          error: failedCount > 0 ? new Error("Some loaders failed") : undefined,
+        };
+      }
+
+      return {
+        success: false,
+        error: new Error("All loaders failed"),
+        extensionName,
+        loaderResults,
+      };
+    }
 
     async function promisesInBatch(
       batch: ExtensionData[],
       extensionLoaders: IExtensionLoader[],
     ): Promise<InstallExtensionsResult[]> {
       return await Promise.all(
-        batch.map(async (extension: ExtensionData) => {
-          const loaderResults: Array<LoadExtensionsResult> = [];
-          let extensionName = extension.file?.name ?? "Unknown extension";
-          let mergedInfo: ExtensionInfo | undefined;
-          let hasAnySuccess = false;
-          let externalId: string | undefined;
-
-          // Sort loaders to prioritize server loaders first (to get externalId)
-          const sortedLoaders = _.sortBy(extensionLoaders, (loader) =>
-            loader.type === "server" ? 0 : 1,
-          );
-
-          for (const loader of sortedLoaders) {
-            try {
-              const info = await loader.installExtension({
-                foxeFileData: extension.buffer,
-                file: extension.file,
-                externalId: loader.type === "server" ? undefined : externalId,
-              });
-
-              // Store externalId from server loader for use in subsequent loaders
-              if (loader.type === "server" && info.externalId) {
-                externalId = info.externalId;
-              }
-
-              extensionName = info.displayName || info.name || extensionName;
-              const { raw } = await loader.loadExtension(
-                loader.namespace === "org" && loader.type === "server" ? info.externalId! : info.id,
-              );
-              const unwrappedExtensionSource = raw;
-              const contributionPoints = buildContributionPoints(info, unwrappedExtensionSource);
-
-              // Only merge state once for the first successful installation
-              if (!hasAnySuccess) {
-                get().mergeState(info, contributionPoints);
-                get().markExtensionAsInstalled(info.id);
-                mergedInfo = info;
-                hasAnySuccess = true;
-              }
-
-              loaderResults.push({
-                loaderType: loader.type,
-                success: true,
-              });
-            } catch (error) {
-              loaderResults.push({
-                loaderType: loader.type,
-                success: false,
-                error: error instanceof Error ? error : new Error(String(error)),
-              });
-            }
-          }
-
-          if (hasAnySuccess) {
-            // At least one loader succeeded
-            const failedLoaders = loaderResults.filter((result) => !result.success);
-
-            return {
-              success: true,
-              info: mergedInfo!,
-              extensionName,
-              loaderResults,
-              error: failedLoaders.length > 0 ? new Error("Some loaders failed") : undefined,
-            };
-          } else {
-            return {
-              success: false,
-              error: new Error("All loaders failed"),
-              extensionName,
-              loaderResults,
-            };
-          }
-        }),
+        batch.map(
+          async (extension) => await installExtensionWithLoaders(extension, extensionLoaders),
+        ),
       );
     }
 
@@ -164,7 +155,10 @@ function createExtensionRegistryStore(
       }: ContributionPoints,
     ) => {
       set((state) => ({
-        installedExtensions: _.uniqBy([...(state.installedExtensions ?? []), info], "id"),
+        installedExtensions: _.uniqBy(
+          [...(state.installedExtensions ?? []), info],
+          extensionUniqueKey,
+        ),
         installedPanels: { ...state.installedPanels, ...panels },
         installedMessageConverters: [...state.installedMessageConverters!, ...messageConverters],
         installedTopicAliasFunctions: [
@@ -179,57 +173,44 @@ function createExtensionRegistryStore(
       }));
     };
 
-    async function tryLoadFromCache(extension: ExtensionInfo): Promise<string | undefined> {
-      if (!orgCacheLoader) {
-        return undefined;
-      }
-      const cachedExtension = await orgCacheLoader.getExtension(extension.id);
-      if (!cachedExtension) {
-        log.debug(`No cached version found for extension ${extension.id}, will load from remote.`);
-        return undefined;
-      }
-      const isSameVersion = compareVersions(cachedExtension.version, extension.version) === 0;
-      if (!isSameVersion) {
-        log.debug(
-          `Cached version differs from remote (cached: ${cachedExtension.version}, remote: ${extension.version}), using remote version.`,
+    // Loads and registers a single extension from one loader into the shared
+    // contribution points and installed-extensions list.
+    // Extracted from the loadInBatch map callback to keep nesting within 4 levels.
+    async function loadAndRegisterExtension(
+      extension: ExtensionInfo,
+      loader: IExtensionLoader,
+      installedExtensions: ExtensionInfo[],
+      contributionPoints: ContributionPoints,
+    ): Promise<void> {
+      try {
+        installedExtensions.push(extension);
+
+        const { messageConverters, panelSettings, panels, topicAliasFunctions, cameraModels } =
+          contributionPoints;
+        const unwrappedExtensionSource = await loadSingleExtension(
+          extension,
+          loader,
+          orgCacheLoader,
         );
-        return undefined;
-      }
-      log.debug(
-        `Using cached version of extension ${extension.id} (version ${cachedExtension.version})`,
-      );
-      const { raw } = await orgCacheLoader.loadExtension(extension.id);
-      return raw;
-    }
+        const newContributionPoints = buildContributionPoints(extension, unwrappedExtensionSource);
 
-    async function loadSingleExtension(extension: ExtensionInfo, loader: IExtensionLoader) {
-      let unwrappedExtensionSource: string = "";
-      if (loader.namespace === "org" && loader.type === "server" && extension.externalId) {
-        const cachedSource = await tryLoadFromCache(extension).catch((err: unknown) => {
-          log.warn(`Cache lookup failed for ${extension.id}, falling back to remote`, err);
-          return undefined;
-        });
+        _.assign(panels, newContributionPoints.panels);
+        _.merge(panelSettings, newContributionPoints.panelSettings);
+        messageConverters.push(...newContributionPoints.messageConverters);
+        topicAliasFunctions.push(...newContributionPoints.topicAliasFunctions);
 
-        // Load from remote if cache is not available or invalid
-        if (cachedSource == undefined) {
-          const { raw, buffer } = await loader.loadExtension(extension.externalId);
-          unwrappedExtensionSource = raw;
-          // Cache the extension for future use
-          if (buffer && orgCacheLoader) {
-            await orgCacheLoader
-              .installExtension({ foxeFileData: buffer })
-              .catch((err: unknown) => {
-                log.warn(`Failed to cache extension ${extension.id}`, err);
-              });
+        for (const [name, builder] of newContributionPoints.cameraModels) {
+          if (cameraModels.has(name)) {
+            log.warn(`Camera model "${name}" already registered, skipping.`);
+            continue;
           }
-        } else {
-          unwrappedExtensionSource = cachedSource;
+          cameraModels.set(name, builder);
         }
-      } else {
-        const { raw } = await loader.loadExtension(extension.id);
-        unwrappedExtensionSource = raw;
+
+        get().markExtensionAsInstalled(extension.id);
+      } catch (err) {
+        log.error(`Error loading extension ${extension.id}`, err);
       }
-      return unwrappedExtensionSource;
     }
 
     async function loadInBatch({
@@ -245,34 +226,12 @@ function createExtensionRegistryStore(
     }) {
       await Promise.all(
         batch.map(async (extension) => {
-          try {
-            installedExtensions.push(extension);
-
-            const { messageConverters, panelSettings, panels, topicAliasFunctions, cameraModels } =
-              contributionPoints;
-            const unwrappedExtensionSource = await loadSingleExtension(extension, loader);
-            const newContributionPoints = buildContributionPoints(
-              extension,
-              unwrappedExtensionSource,
-            );
-
-            _.assign(panels, newContributionPoints.panels);
-            _.merge(panelSettings, newContributionPoints.panelSettings);
-            messageConverters.push(...newContributionPoints.messageConverters);
-            topicAliasFunctions.push(...newContributionPoints.topicAliasFunctions);
-
-            newContributionPoints.cameraModels.forEach((builder, name: string) => {
-              if (cameraModels.has(name)) {
-                log.warn(`Camera model "${name}" already registered, skipping.`);
-                return;
-              }
-              cameraModels.set(name, builder);
-            });
-
-            get().markExtensionAsInstalled(extension.id);
-          } catch (err) {
-            log.error(`Error loading extension ${extension.id}`, err);
-          }
+          await loadAndRegisterExtension(
+            extension,
+            loader,
+            installedExtensions,
+            contributionPoints,
+          );
         }),
       );
     }
@@ -326,45 +285,6 @@ function createExtensionRegistryStore(
       });
     };
 
-    function removeExtensionData({
-      id, // deleted extension id
-      state,
-    }: {
-      id: string;
-      state: Pick<
-        ExtensionCatalog,
-        | "installedExtensions"
-        | "installedPanels"
-        | "installedMessageConverters"
-        | "installedTopicAliasFunctions"
-        | "installedCameraModels"
-      >;
-    }) {
-      const {
-        installedExtensions,
-        installedPanels,
-        installedMessageConverters,
-        installedTopicAliasFunctions,
-        installedCameraModels,
-      } = state;
-
-      return {
-        installedExtensions: installedExtensions?.filter(
-          ({ id: extensionId }) => extensionId !== id,
-        ),
-        installedPanels: _.pickBy(installedPanels, ({ extensionId }) => extensionId !== id),
-        installedMessageConverters: installedMessageConverters?.filter(
-          ({ extensionId }) => extensionId !== id,
-        ),
-        installedTopicAliasFunctions: installedTopicAliasFunctions?.filter(
-          ({ extensionId }) => extensionId !== id,
-        ),
-        installedCameraModels: new Map(
-          [...installedCameraModels].filter(([, { extensionId }]) => extensionId !== id),
-        ),
-      };
-    }
-
     const uninstallExtension = async (namespace: Namespace, id: string) => {
       const localLoaderType = isDesktopApp() ? "filesystem" : "browser";
       const loaderType: TypeExtensionLoader = namespace === "local" ? localLoaderType : "server";
@@ -395,8 +315,14 @@ function createExtensionRegistryStore(
         );
       }
 
-      set((state) => removeExtensionData({ id: extension.id, state }));
-      get().unMarkExtensionAsInstalled(id);
+      set((state) =>
+        removeExtensionData({ id: extension.id, namespace: extension.namespace!, state }),
+      );
+
+      const stillInstalled = get().installedExtensions?.some((ext) => ext.id === id) ?? false;
+      if (!stillInstalled) {
+        get().unMarkExtensionAsInstalled(id);
+      }
     };
 
     return {
