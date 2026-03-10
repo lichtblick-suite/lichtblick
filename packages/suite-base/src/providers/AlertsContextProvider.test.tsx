@@ -11,6 +11,7 @@ import {
   useAlertsStore,
 } from "@lichtblick/suite-base/context/AlertsContext";
 import { PlayerAlert } from "@lichtblick/suite-base/players/types";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import AlertsContextProvider from "./AlertsContextProvider";
 
@@ -21,8 +22,31 @@ describe("AlertsContextProvider", () => {
     <AlertsContextProvider>{children}</AlertsContextProvider>
   );
 
+  it("updates alerts when setAlert is called with a new tag", () => {
+    const alert: PlayerAlert = { severity: "warn", message: "New alarm" };
+    const alertTag = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        alerts: useAlertsStore(selectAlerts),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    expect(result.current.alerts).toHaveLength(0);
+
+    act(() => {
+      result.current.actions.setAlert(alertTag, alert);
+    });
+
+    expect(result.current.alerts).toHaveLength(1);
+    expect(result.current.alerts[0]).toMatchObject({ tag: alertTag, ...alert });
+  });
+
   it("does not update alerts when setAlert is called with the same tag and identical alert", () => {
     const alert: PlayerAlert = { severity: "warn", message: "Repeated converter alert" };
+    const alertTag = BasicBuilder.string();
 
     const { result } = renderHook(
       () => ({
@@ -33,14 +57,14 @@ describe("AlertsContextProvider", () => {
     );
 
     act(() => {
-      result.current.actions.setAlert("converter:foo:id-1", alert);
+      result.current.actions.setAlert(alertTag, alert);
     });
 
     const firstAlertsRef = result.current.alerts;
     expect(firstAlertsRef).toHaveLength(1);
 
     act(() => {
-      result.current.actions.setAlert("converter:foo:id-1", alert);
+      result.current.actions.setAlert(alertTag, alert);
     });
 
     expect(result.current.alerts).toBe(firstAlertsRef);
@@ -50,6 +74,7 @@ describe("AlertsContextProvider", () => {
   it("updates alerts when setAlert is called with the same tag but different alert payload", () => {
     const originalAlert: PlayerAlert = { severity: "warn", message: "Old message" };
     const updatedAlert: PlayerAlert = { severity: "error", message: "New message" };
+    const alertTag = BasicBuilder.string();
 
     const { result } = renderHook(
       () => ({
@@ -60,17 +85,17 @@ describe("AlertsContextProvider", () => {
     );
 
     act(() => {
-      result.current.actions.setAlert("converter:foo:id-1", originalAlert);
+      result.current.actions.setAlert(alertTag, originalAlert);
     });
 
     const firstAlertsRef = result.current.alerts;
 
     act(() => {
-      result.current.actions.setAlert("converter:foo:id-1", updatedAlert);
+      result.current.actions.setAlert(alertTag, updatedAlert);
     });
 
     expect(result.current.alerts).not.toBe(firstAlertsRef);
     expect(result.current.alerts).toHaveLength(1);
-    expect(result.current.alerts[0]).toMatchObject({ tag: "converter:foo:id-1", ...updatedAlert });
+    expect(result.current.alerts[0]).toMatchObject({ tag: alertTag, ...updatedAlert });
   });
 });

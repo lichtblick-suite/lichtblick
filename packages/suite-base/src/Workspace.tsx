@@ -57,7 +57,6 @@ import { TopicList } from "@lichtblick/suite-base/components/TopicList";
 import VariablesList from "@lichtblick/suite-base/components/VariablesList";
 import { WorkspaceDialogs } from "@lichtblick/suite-base/components/WorkspaceDialogs";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
-import { AlertsContextStore, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
   LayoutState,
@@ -79,6 +78,7 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import useAddPanel from "@lichtblick/suite-base/hooks/useAddPanel";
+import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useDefaultWebLaunchPreference } from "@lichtblick/suite-base/hooks/useDefaultWebLaunchPreference";
 import useElectronFilesToOpen from "@lichtblick/suite-base/hooks/useElectronFilesToOpen";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
@@ -112,8 +112,6 @@ function isInjectedSidebarItem(
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerIsPresent = ({ playerState }: MessagePipelineContext) =>
   playerState.presence !== PlayerPresence.NOT_PRESENT;
-const selectPlayerAlerts = ({ playerState }: MessagePipelineContext) => playerState.alerts;
-const selectSessionAlerts = (store: AlertsContextStore) => store.alerts;
 const selectIsPlaying = (ctx: MessagePipelineContext) =>
   ctx.playerState.activeData?.isPlaying === true;
 const selectPause = (ctx: MessagePipelineContext) => ctx.pausePlayback;
@@ -138,9 +136,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const playerAlerts = useMessagePipeline(selectPlayerAlerts);
-  const sessionAlerts = useAlertsStore(selectSessionAlerts);
-  const alertCount = (playerAlerts?.length ?? 0) + sessionAlerts.length;
+  const { alertCount } = useAlertCount();
 
   const dataSourceDialog = useWorkspaceStore(selectWorkspaceDataSourceDialog);
   const leftSidebarItem = useWorkspaceStore(selectWorkspaceLeftSidebarItem);

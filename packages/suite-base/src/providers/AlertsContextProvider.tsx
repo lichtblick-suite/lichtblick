@@ -27,19 +27,14 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
           });
         },
         setAlert: (tag: string, alert: Immutable<SessionAlert>) => {
-          const existing = get().alerts.find((al) => al.tag === tag);
-          if (existing) {
-            const { tag: _existingTag, ...existingAlert } = existing;
-            if (_.isEqual(existingAlert, alert)) {
-              return;
-            }
+          const newAlert = { tag, ...alert };
+          const alerts = get().alerts;
+          const existing = alerts.find((al) => al.tag === tag);
+          if (existing && _.isEqual(existing, newAlert)) {
+            return;
           }
 
-          const newAlerts = get().alerts.filter((al) => al.tag !== tag);
-
-          set({
-            alerts: [{ tag, ...alert }, ...newAlerts],
-          });
+          set({ alerts: [newAlert, ...alerts.filter((al) => al.tag !== tag)] });
         },
       },
     };
