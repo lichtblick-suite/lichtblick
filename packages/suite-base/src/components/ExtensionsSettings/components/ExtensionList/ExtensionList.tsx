@@ -44,12 +44,17 @@ export default function ExtensionList({
   const [isBulkOperating, setIsBulkOperating] = useState(false);
 
   const { handleInstall, handleUninstall, operationStatus, isOperating } = useExtensionOperations();
+  const isExtensionInstalled = useCallback(
+    (id: string) =>
+      installedExtensions?.some(
+        (installed) => installed.id === id && installed.namespace === namespace,
+      ) ?? false,
+    [installedExtensions, namespace],
+  );
 
   const handleBulkUninstall = useCallback(async () => {
     const selectedExtensions = entries.filter((entry) => selectedExtensionIds.includes(entry.id));
-    const extensionsToUninstall = selectedExtensions.filter((ext) => {
-      return installedExtensions?.some((installed) => installed.id === ext.id) ?? false;
-    });
+    const extensionsToUninstall = selectedExtensions.filter((ext) => isExtensionInstalled(ext.id));
 
     if (extensionsToUninstall.length === 0) {
       enqueueSnackbar("No installed extensions to uninstall from selection", { variant: "info" });
@@ -88,7 +93,7 @@ export default function ExtensionList({
     analytics,
     enqueueSnackbar,
     entries,
-    installedExtensions,
+    isExtensionInstalled,
     selectedExtensionIds,
     uninstallExtension,
   ]);
@@ -105,9 +110,7 @@ export default function ExtensionList({
       sortable: false,
       renderCell: (params: GridRenderCellParams) => {
         const extension = params.row as ExtensionMarketplaceDetail;
-        const isInstalled = installedExtensions
-          ? installedExtensions.some((installed) => installed.id === extension.id)
-          : false;
+        const isInstalled = isExtensionInstalled(extension.id);
         const isExtensionOperating = isOperating(extension.id);
 
         if (isInstalled) {
@@ -147,9 +150,7 @@ export default function ExtensionList({
     }
 
     const selectedExtensions = entries.filter((entry) => selectedExtensionIds.includes(entry.id));
-    const selectedInstalled = selectedExtensions.filter(
-      (ext) => installedExtensions?.some((installed) => installed.id === ext.id) ?? false,
-    );
+    const selectedInstalled = selectedExtensions.filter((ext) => isExtensionInstalled(ext.id));
 
     return (
       <Stack gap={1}>
@@ -200,7 +201,10 @@ export default function ExtensionList({
             onRowClick={(params) => {
               const extension = params.row as ExtensionMarketplaceDetail;
               const isInstalled = installedExtensions
-                ? installedExtensions.some((installed) => installed.id === extension.id)
+                ? installedExtensions.some(
+                    (installed) =>
+                      installed.id === extension.id && installed.namespace === extension.namespace,
+                  )
                 : false;
               selectExtension({ installed: isInstalled, entry: extension });
             }}

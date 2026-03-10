@@ -19,7 +19,7 @@ import PanelCatalogContext, {
   PanelInfo,
 } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
-import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider";
+import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider/ExtensionCatalogProvider";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";

@@ -87,10 +87,11 @@ export const useStyles = makeStyles()((theme) => ({
   nodeHeaderToggle: {
     display: "flex",
     alignItems: "center",
-    gap: 0,
+    gridTemplateColumns: "auto auto auto 1fr",
     opacity: 0.6,
     userSelect: "none",
     width: "100%",
+    minWidth: 0,
   },
   nodeHeaderToggleHasProperties: {
     cursor: "pointer",

@@ -16,7 +16,10 @@ import {
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
+import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import { BasicBuilder } from "@lichtblick/test-builders";
+
+jest.mock("@lichtblick/suite-base/util/isDesktopApp", () => jest.fn());
 
 jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
   useExtensionCatalog: jest.fn(),
@@ -153,6 +156,36 @@ describe("ExtensionList Component", () => {
       entry: mockEntries[0],
     });
   });
+
+  it("calls selectExtension with installed true when clicking an installed extension", () => {
+    // Given
+    (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+      const mockState = {
+        installedExtensions: [mockEntries[0]],
+        uninstallExtension: jest.fn(),
+      };
+      return selector(mockState);
+    });
+
+    render(
+      <ExtensionList
+        namespace={mockNamespace}
+        entries={mockEntries}
+        filterText=""
+        selectExtension={mockSelectExtension}
+      />,
+    );
+
+    // When
+    screen.getByText("Extension").click();
+
+    // Then
+    expect(mockSelectExtension).toHaveBeenCalledWith({
+      installed: true,
+      entry: mockEntries[0],
+    });
+  });
+
   describe("handleBulkUninstall", () => {
     const mockUninstallExtension = jest.fn();
 
@@ -194,8 +227,18 @@ describe("ExtensionList Component", () => {
       // Then
       await waitFor(() => {
         expect(mockUninstallExtension).toHaveBeenCalledTimes(2);
-        expect(mockUninstallExtension).toHaveBeenCalledWith("org", "1");
-        expect(mockUninstallExtension).toHaveBeenCalledWith("org", "2");
+        expect(mockUninstallExtension).toHaveBeenCalledWith(
+          mockEntries[0]!.namespace,
+          mockEntries[0]!.id,
+        );
+        expect(mockUninstallExtension).toHaveBeenCalledWith(
+          mockEntries[1]!.namespace,
+          mockEntries[1]!.id,
+        );
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+          "2 extension(s) uninstalled successfully",
+          { variant: "success" },
+        );
       });
     });
 
@@ -262,7 +305,10 @@ describe("ExtensionList Component", () => {
       // Then
       await waitFor(() => {
         expect(mockUninstallExtension).toHaveBeenCalledTimes(1);
-        expect(mockUninstallExtension).toHaveBeenCalledWith("org", "1");
+        expect(mockUninstallExtension).toHaveBeenCalledWith(
+          mockEntries[0]!.namespace,
+          mockEntries[0]!.id,
+        );
         expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
           "1 extension(s) uninstalled successfully",
           { variant: "success" },
@@ -310,6 +356,84 @@ describe("ExtensionList Component", () => {
 
       // Restore console.error to its original implementation after the test
       consoleErrorSpy.mockRestore();
+    });
+
+    it("clears selection after bulk uninstall completes", async () => {
+      // Given
+      mockUninstallExtension.mockResolvedValue(undefined);
+
+      render(
+        <ExtensionList
+          namespace={mockNamespace}
+          entries={mockEntries}
+          filterText={mockFilterText}
+          selectExtension={mockSelectExtension}
+        />,
+      );
+
+      const checkboxes = screen.getAllByRole("checkbox", { name: /select row/i });
+      fireEvent.click(checkboxes[0]!);
+      fireEvent.click(checkboxes[1]!);
+
+      const uninstallButton = await screen.findByRole("button", { name: "Uninstall 2" });
+
+      // When
+      fireEvent.click(uninstallButton);
+
+      // Then
+      await waitFor(() => {
+        expect(screen.queryByRole("button", { name: /uninstall/i })).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Actions column renderCell", () => {
+    beforeEach(() => {
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+    });
+
+    it("renders an Install button for an extension that is not installed", () => {
+      // Given
+      const entry = ExtensionBuilder.extensionMarketplaceDetail({ namespace: "org" });
+
+      // When
+      render(
+        <ExtensionList
+          namespace="org"
+          entries={[entry]}
+          filterText=""
+          selectExtension={jest.fn()}
+        />,
+      );
+
+      // Then
+      expect(screen.getByRole("button", { name: "Install" })).toBeInTheDocument();
+    });
+
+    it("renders an Uninstall button for an extension that is installed", () => {
+      // Given
+      const entry = ExtensionBuilder.extensionMarketplaceDetail({ namespace: "org" });
+
+      (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+        const mockState = {
+          installedExtensions: [entry],
+          uninstallExtension: jest.fn(),
+        };
+        return selector(mockState);
+      });
+
+      // When
+      render(
+        <ExtensionList
+          namespace="org"
+          entries={[entry]}
+          filterText=""
+          selectExtension={jest.fn()}
+        />,
+      );
+
+      // Then
+      expect(screen.getByRole("button", { name: "Uninstall" })).toBeInTheDocument();
     });
   });
 });
