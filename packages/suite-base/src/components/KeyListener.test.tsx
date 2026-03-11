@@ -5,8 +5,6 @@
 
 import { render } from "@testing-library/react";
 
-import { BasicBuilder } from "@lichtblick/test-builders";
-
 import KeyListener, { KeyListenerProps } from "./KeyListener";
 
 describe("KeyListener", () => {
