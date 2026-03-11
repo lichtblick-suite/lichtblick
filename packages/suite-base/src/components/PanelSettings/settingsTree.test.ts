@@ -85,8 +85,6 @@ describe("buildSettingsTree", () => {
         panelType,
         selectedPanelId,
         settingsTree: undefined,
-        // settingsTree:
-        //   selectedPanelId != undefined ? state.settingsTrees[selectedPanelId] : undefined,
         messagePipelineState,
       });
       expect(result).toBeUndefined();
