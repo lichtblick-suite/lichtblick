@@ -1,10 +1,6 @@
 {
   "name": "lichtblick",
-<<<<<<< HEAD
-  "version": "1.24.1",
-=======
   "version": "1.24.2",
->>>>>>> origin/main
   "license": "MPL-2.0",
   "private": true,
   "productName": "Lichtblick",
@@ -83,11 +79,7 @@
     "dompurify": "3.3.2",
     "js-yaml": "4.1.1",
     "qs": "6.14.1",
-<<<<<<< HEAD
-    "tar": "7.5.10",
-=======
     "tar": "7.5.11",
->>>>>>> origin/main
     "undici": "6.23.0"
   },
   "devDependencies": {
