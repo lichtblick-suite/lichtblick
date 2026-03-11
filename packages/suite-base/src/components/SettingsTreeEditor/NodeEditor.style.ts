@@ -85,7 +85,7 @@ export const useStyles = makeStyles()((theme) => ({
   },
 
   nodeHeaderToggle: {
-    display: "grid",
+    display: "flex",
     alignItems: "center",
     gridTemplateColumns: "auto auto auto 1fr",
     opacity: 0.6,
