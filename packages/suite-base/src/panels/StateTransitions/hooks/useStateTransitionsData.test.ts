@@ -57,7 +57,7 @@ describe("useStateTransitionsData", () => {
 
     expect(result.current.data.datasets).toHaveLength(4);
     expect(result.current.pathState).toHaveLength(2);
-    expect(result.current.minY).toBe(-15);
+    expect(result.current.minY).toBe(-27);
 
     expect(mockMessagesToDataset).toHaveBeenCalledTimes(4);
     expect(mockDatasetContainsArray).toHaveBeenCalledTimes(2);
@@ -79,7 +79,7 @@ describe("useStateTransitionsData", () => {
 
     expect(result.current.data.datasets).toHaveLength(1);
     expect(result.current.pathState).toHaveLength(1);
-    expect(result.current.minY).toBe(-9);
+    expect(result.current.minY).toBe(-15);
 
     expect(mockMessagesToDataset).toHaveBeenCalledTimes(1);
     expect(mockDatasetContainsArray).toHaveBeenCalledTimes(1);

@@ -6,20 +6,17 @@ import { useMemo } from "react";
 import { Time } from "@lichtblick/rostime";
 import { MessageDataItemsByPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { ChartDatasets } from "@lichtblick/suite-base/components/TimeBasedChart/types";
+import {
+  ROW_MARGIN,
+  ROW_SPACING,
+} from "@lichtblick/suite-base/panels/StateTransitions/hooks/constants";
+import { UseStateTransitionsData } from "@lichtblick/suite-base/panels/StateTransitions/hooks/types";
 import { messagesToDataset } from "@lichtblick/suite-base/panels/StateTransitions/messagesToDataset";
 import { datasetContainsArray } from "@lichtblick/suite-base/panels/StateTransitions/shared";
 import {
   PathState,
   StateTransitionPath,
 } from "@lichtblick/suite-base/panels/StateTransitions/types";
-
-type UseStateTransitionsData = {
-  pathState: PathState[];
-  data: {
-    datasets: ChartDatasets;
-  };
-  minY: number | undefined;
-};
 
 function useStateTransitionsData(
   paths: StateTransitionPath[],
@@ -44,8 +41,8 @@ function useStateTransitionsData(
     const outPathState: PathState[] = [];
 
     paths.forEach((path, pathIndex) => {
-      const y = (pathIndex + 1) * 6 * -1;
-      outMinY = Math.min(outMinY ?? y, y - 3);
+      const y = -(pathIndex + 1) * ROW_SPACING;
+      outMinY = Math.min(outMinY ?? y, y - ROW_MARGIN);
 
       const blocksForPath = decodedBlocks.map((decodedBlock) => decodedBlock[path.value]);
 
