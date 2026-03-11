@@ -79,11 +79,6 @@ async function createMcapFile({
   return new Blob([tempBuffer.get()]) as unknown as globalThis.Blob;
 }
 
-jest.mock("@lichtblick/mcap-support", () => ({
-  ...jest.requireActual("@lichtblick/mcap-support"),
-  loadDecompressHandlers: jest.fn(),
-}));
-
 describe("McapIterableSource", () => {
   const mockLoadDecompressHandlers = loadDecompressHandlers as jest.MockedFunction<
     typeof loadDecompressHandlers
@@ -124,6 +119,7 @@ describe("McapIterableSource", () => {
       },
     ]);
   });
+
   it("loads decompression handlers before creating an indexed reader for an indexed file", async () => {
     // Given
     const topic = `/${BasicBuilder.string()}`;
