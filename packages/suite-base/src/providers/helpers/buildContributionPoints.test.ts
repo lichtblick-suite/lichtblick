@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { TopicAliasFunction, ExtensionPanelRegistration, PanelSettings } from "@lichtblick/suite";
-import { MessageConverter } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
+import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { buildContributionPoints } from "./buildContributionPoints";
@@ -93,7 +93,7 @@ describe("buildContributionPoints", () => {
 
   it("should register a message converter", () => {
     const extensionInfo = ExtensionBuilder.extensionInfo();
-    const messageConverter: MessageConverter = {
+    const messageConverter: InstalledMessageConverter = {
       fromSchemaName: BasicBuilder.string(),
       toSchemaName: BasicBuilder.string(),
       panelSettings: {},
@@ -134,7 +134,7 @@ describe("buildContributionPoints", () => {
       handler: jest.fn(),
       settings: jest.fn(),
     };
-    const messageConverter: MessageConverter = {
+    const messageConverter: InstalledMessageConverter = {
       fromSchemaName: BasicBuilder.string(),
       toSchemaName: BasicBuilder.string(),
       panelSettings: {

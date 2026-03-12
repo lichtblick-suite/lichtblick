@@ -8,34 +8,18 @@
 import * as _ from "lodash-es";
 import { Opaque } from "ts-essentials";
 
-import {
-  Immutable,
-  MessageEvent,
-  MessageConverterAlert,
-  MessageConverterContext,
-  RegisterMessageConverterArgs,
-  Subscription,
-} from "@lichtblick/suite";
+import { Immutable, MessageEvent, MessageConverterContext, Subscription } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
-import { Namespace } from "@lichtblick/suite-base/types";
+import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
+
+import type { MessageConverterAlertHandler } from "./types";
 
 // Branded string to ensure that users go through the `converterKey` function to compute a lookup key
 type ConverterKey = Opaque<string, "ConverterKey">;
 
-type MessageConverter = RegisterMessageConverterArgs<unknown> & {
-  extensionNamespace?: Namespace;
-  extensionId?: string;
-};
-
-type TopicSchemaConverterMap = Map<ConverterKey, MessageConverter[]>;
-
-export type MessageConverterAlertHandler = (
-  converter: MessageConverter,
-  alert: MessageConverterAlert,
-  alertId?: string,
-) => void;
+type TopicSchemaConverterMap = Map<ConverterKey, InstalledMessageConverter[]>;
 
 type ConvertMessageContext = {
   emitAlert?: MessageConverterAlertHandler;
@@ -143,7 +127,7 @@ export type TopicSchemaConversions = {
 export function collateTopicSchemaConversions(
   subscriptions: readonly Subscription[],
   sortedTopics: readonly PlayerTopic[],
-  messageConverters: undefined | readonly MessageConverter[],
+  messageConverters: undefined | readonly InstalledMessageConverter[],
 ): TopicSchemaConversions {
   const topicSchemaConverters: TopicSchemaConverterMap = new Map();
   const unconvertedSubscriptionTopics = new Set<string>();

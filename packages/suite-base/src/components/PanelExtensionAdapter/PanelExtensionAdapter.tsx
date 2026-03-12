@@ -62,10 +62,9 @@ import { assertNever } from "@lichtblick/suite-base/util/assertNever";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
-import { MessageConverterAlertHandler } from "./messageProcessing";
 import { createMessageRangeIterator } from "./messageRangeIterator";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
-import { BuiltinPanelExtensionContext } from "./types";
+import { BuiltinPanelExtensionContext, MessageConverterAlertHandler } from "./types";
 import { useSharedPanelState } from "./useSharedPanelState";
 
 const log = Logger.getLogger(__filename);

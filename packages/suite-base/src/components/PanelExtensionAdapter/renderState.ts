@@ -16,7 +16,6 @@ import {
   Immutable,
   MessageEvent,
   ParameterValue,
-  RegisterMessageConverterArgs,
   RenderState,
   Subscription,
   Topic,
@@ -31,15 +30,16 @@ import {
   Topic as PlayerTopic,
 } from "@lichtblick/suite-base/players/types";
 import { HoverValue } from "@lichtblick/suite-base/types/hoverValue";
+import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 
 import {
   collateTopicSchemaConversions,
   convertMessage,
   forEachSortedArrays,
   mapDifference,
-  MessageConverterAlertHandler,
   TopicSchemaConversions,
 } from "./messageProcessing";
+import type { MessageConverterAlertHandler } from "./types";
 
 const EmptyParameters = new Map<string, ParameterValue>();
 
@@ -54,7 +54,7 @@ export type BuilderRenderStateInput = Immutable<{
   emitAlert?: MessageConverterAlertHandler;
   globalVariables: GlobalVariables;
   hoverValue: HoverValue | undefined;
-  messageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
+  messageConverters?: readonly InstalledMessageConverter[];
   playerState: PlayerState | undefined;
   sharedPanelState: Record<string, unknown> | undefined;
   sortedTopics: readonly PlayerTopic[];
