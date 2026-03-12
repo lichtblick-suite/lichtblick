@@ -8,24 +8,22 @@
 import * as _ from "lodash-es";
 import { Opaque } from "ts-essentials";
 
-import {
-  Immutable,
-  MessageEvent,
-  RegisterMessageConverterArgs,
-  Subscription,
-} from "@lichtblick/suite";
+import { Immutable, MessageEvent, MessageConverterContext, Subscription } from "@lichtblick/suite";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
-import { Namespace } from "@lichtblick/suite-base/types";
+import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
+import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
+
+import type { MessageConverterAlertHandler } from "./types";
 
 // Branded string to ensure that users go through the `converterKey` function to compute a lookup key
 type ConverterKey = Opaque<string, "ConverterKey">;
 
-type MessageConverter = RegisterMessageConverterArgs<unknown> & {
-  extensionNamespace?: Namespace;
-};
+type TopicSchemaConverterMap = Map<ConverterKey, InstalledMessageConverter[]>;
 
-type TopicSchemaConverterMap = Map<ConverterKey, MessageConverter[]>;
+type ConvertMessageContext = {
+  emitAlert?: MessageConverterAlertHandler;
+};
 
 // Create a string lookup key from a message event
 //
@@ -44,28 +42,49 @@ export function convertMessage(
   converters: Immutable<TopicSchemaConverterMap>,
   convertedMessages: MessageEvent[],
   globalVariables?: Readonly<GlobalVariables>,
+  context?: ConvertMessageContext,
 ): void {
   const key = converterKey(messageEvent.topic, messageEvent.schemaName);
   const matchedConverters = converters.get(key);
   for (const converter of matchedConverters ?? []) {
-    const convertedMessage = converter.converter(
-      messageEvent.message,
-      messageEvent,
-      globalVariables,
-    );
-    // If the converter returns _undefined_ or _null_ the message is skipped
-    if (convertedMessage == undefined) {
-      continue;
+    const emitAlert: MessageConverterContext["emitAlert"] = (alert, alertId) => {
+      context?.emitAlert?.(converter, alert, alertId);
+    };
+    const converterContext: MessageConverterContext = {
+      emitAlert,
+    };
+    try {
+      const convertedMessage = converter.converter(
+        messageEvent.message,
+        messageEvent,
+        globalVariables,
+        converterContext,
+      );
+      // If the converter returns _undefined_ or _null_ the message is skipped
+      if (convertedMessage == undefined) {
+        continue;
+      }
+      convertedMessages.push({
+        topic: messageEvent.topic,
+        schemaName: converter.toSchemaName,
+        receiveTime: messageEvent.receiveTime,
+        message: convertedMessage,
+        originalMessageEvent: messageEvent,
+        sizeInBytes: messageEvent.sizeInBytes,
+        topicConfig: messageEvent.topicConfig,
+      });
+    } catch (e) {
+      const error =
+        e instanceof Error ? e : new Error(typeof e === "string" ? e : JSON.stringify(e));
+      emitAlert(
+        {
+          severity: "error",
+          message: `Uncaught error in message converter (${converter.extensionId}) at ${formatTimeRaw(messageEvent.receiveTime)}`,
+          error,
+        },
+        `messageConverterError-${converter.extensionId}`,
+      );
     }
-    convertedMessages.push({
-      topic: messageEvent.topic,
-      schemaName: converter.toSchemaName,
-      receiveTime: messageEvent.receiveTime,
-      message: convertedMessage,
-      originalMessageEvent: messageEvent,
-      sizeInBytes: messageEvent.sizeInBytes,
-      topicConfig: messageEvent.topicConfig,
-    });
   }
 }
 
@@ -108,7 +127,7 @@ export type TopicSchemaConversions = {
 export function collateTopicSchemaConversions(
   subscriptions: readonly Subscription[],
   sortedTopics: readonly PlayerTopic[],
-  messageConverters: undefined | readonly MessageConverter[],
+  messageConverters: undefined | readonly InstalledMessageConverter[],
 ): TopicSchemaConversions {
   const topicSchemaConverters: TopicSchemaConverterMap = new Map();
   const unconvertedSubscriptionTopics = new Set<string>();

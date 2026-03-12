@@ -15,7 +15,6 @@ import {
   ContributionPoints,
   ExtensionData,
   InstallExtensionsResult,
-  MessageConverter,
   useExtensionCatalog,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { TopicAliasFunctions } from "@lichtblick/suite-base/players/TopicAliasingPlayer/StateProcessorFactory";
@@ -27,6 +26,7 @@ import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionBuilder";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
+import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -859,7 +859,7 @@ describe("ExtensionCatalogProvider", () => {
     it("should merge state correctly using mergeState", async () => {
       const { result, extensionInfo } = await setup();
       const panelName = BasicBuilder.string();
-      const messageConverter: MessageConverter = {
+      const messageConverter: InstalledMessageConverter = {
         fromSchemaName: BasicBuilder.string(),
         toSchemaName: BasicBuilder.string(),
         converter: jest.fn(),
