@@ -23,6 +23,20 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { RendererConfig } from "./IRenderer";
 
+jest.mock("./Picker", () => {
+  const actual = jest.requireActual("./Picker");
+  return {
+    ...actual,
+    Picker: jest.fn().mockImplementation(() => {
+      return {
+        pick: jest.fn(() => -1),
+        pickInstance: jest.fn(() => -1),
+        dispose: jest.fn(),
+      };
+    }),
+  };
+});
+
 // Jest doesn't support ES module imports fully yet, so we need to mock the wasm file
 jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");
 
@@ -235,6 +249,105 @@ describe("3D Renderer", () => {
     }).not.toThrow();
 
     renderer.dispose();
+  });
+
+  describe("hover picking", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    function prepareDomForInput(inputCanvas: HTMLCanvasElement, inputParent: HTMLDivElement) {
+      // Input relies on clientWidth/clientHeight of the canvas parent.
+      Object.defineProperty(inputParent, "clientWidth", { configurable: true, value: 300 });
+      Object.defineProperty(inputParent, "clientHeight", { configurable: true, value: 300 });
+      inputCanvas.getBoundingClientRect = jest.fn(
+        () =>
+          ({
+            left: 0,
+            top: 0,
+            right: 300,
+            bottom: 300,
+            width: 300,
+            height: 300,
+            x: 0,
+            y: 0,
+            toJSON: () => "",
+          }) as DOMRect,
+      );
+    }
+
+    it("emits renderableHovered at most once per 100ms while moving the mouse", () => {
+      const hoverParent = document.createElement("div");
+      const hoverCanvas = document.createElement("canvas");
+      hoverParent.appendChild(hoverCanvas);
+      prepareDomForInput(hoverCanvas, hoverParent);
+
+      const renderer = new Renderer({ ...defaultRendererProps, canvas: hoverCanvas });
+      renderer.setPickingEnabled(true);
+
+      const hoveredSpy = jest.fn();
+      renderer.addListener("renderableHovered", hoveredSpy);
+
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 10, clientY: 10 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 12, clientY: 12 }));
+
+      expect(hoveredSpy).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(100);
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 13, clientY: 13 }));
+      expect(hoveredSpy).toHaveBeenCalledTimes(2);
+
+      renderer.dispose();
+    });
+
+    it("does not hover-pick while mouse is down, then resumes after mouseup", () => {
+      const hoverParent = document.createElement("div");
+      const hoverCanvas = document.createElement("canvas");
+      hoverParent.appendChild(hoverCanvas);
+      prepareDomForInput(hoverCanvas, hoverParent);
+
+      const renderer = new Renderer({ ...defaultRendererProps, canvas: hoverCanvas });
+      renderer.setPickingEnabled(true);
+
+      const hoveredSpy = jest.fn();
+      renderer.addListener("renderableHovered", hoveredSpy);
+
+      hoverCanvas.dispatchEvent(new MouseEvent("mousedown", { clientX: 10, clientY: 10 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
+      expect(hoveredSpy).toHaveBeenCalledTimes(0);
+
+      hoverCanvas.dispatchEvent(new MouseEvent("mouseup", { clientX: 11, clientY: 11 }));
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 12, clientY: 12 }));
+      expect(hoveredSpy).toHaveBeenCalledTimes(1);
+
+      renderer.dispose();
+    });
+
+    it("does not emit renderableHovered when picking is disabled", () => {
+      const hoverParent = document.createElement("div");
+      const hoverCanvas = document.createElement("canvas");
+      hoverParent.appendChild(hoverCanvas);
+      prepareDomForInput(hoverCanvas, hoverParent);
+
+      const renderer = new Renderer({ ...defaultRendererProps, canvas: hoverCanvas });
+      renderer.setPickingEnabled(false);
+
+      const hoveredSpy = jest.fn();
+      renderer.addListener("renderableHovered", hoveredSpy);
+
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 10, clientY: 10 }));
+      jest.advanceTimersByTime(200);
+      hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
+
+      expect(hoveredSpy).toHaveBeenCalledTimes(0);
+
+      renderer.dispose();
+    });
   });
 
   it("updates color scheme to dark", () => {

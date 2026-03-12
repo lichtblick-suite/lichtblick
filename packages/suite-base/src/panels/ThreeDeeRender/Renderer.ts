@@ -64,6 +64,7 @@ import { SettingsManager, SettingsTreeEntry } from "./SettingsManager";
 import { SharedGeometry } from "./SharedGeometry";
 import { CameraState } from "./camera";
 import { DARK_OUTLINE, LIGHT_OUTLINE, stringToRgb } from "./color";
+import { HOVER_PICK_THROTTLE_MS } from "./constants";
 import { FRAME_TRANSFORMS_DATATYPES, FRAME_TRANSFORM_DATATYPES } from "./foxglove";
 import { DetailLevel, msaaSamples } from "./lod";
 import {
@@ -340,6 +341,25 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     });
     this.input.on("click", (cursorCoords) => {
       this.#clickHandler(cursorCoords);
+    });
+
+    // Throttled hover picking: perform GPU pick on mousemove at 10 Hz
+    let hoverThrottleTimer: ReturnType<typeof setTimeout> | undefined;
+    let isMouseDown = false;
+    this.input.on("mousedown", () => {
+      isMouseDown = true;
+    });
+    this.input.on("mouseup", () => {
+      isMouseDown = false;
+    });
+    this.input.on("mousemove", (cursorCoords) => {
+      if (isMouseDown || !this.#pickingEnabled || hoverThrottleTimer != undefined) {
+        return;
+      }
+      hoverThrottleTimer = setTimeout(() => {
+        hoverThrottleTimer = undefined;
+      }, HOVER_PICK_THROTTLE_MS);
+      this.#hoverHandler(cursorCoords);
     });
 
     this.#picker = new Picker(this.gl, this.#scene);
@@ -1423,6 +1443,33 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     log.debug(`Clicked ${selections.length} renderable(s)`);
     this.emit("renderablesClicked", selections, cursorCoords, this);
+  };
+
+  #hoverHandler = (cursorCoords: THREE.Vector2): void => {
+    if (!this.#pickingEnabled) {
+      return;
+    }
+    // Disable hover picking while a tool is active
+    if (this.measurementTool.state !== "idle" || this.publishClickTool.state !== "idle") {
+      return;
+    }
+
+    const camera = this.cameraHandler.getActiveCamera();
+    const selections: PickedRenderable[] = [];
+    let curSelection: PickedRenderable | undefined;
+    while (
+      (curSelection = this.#pickSingleObject(cursorCoords)) &&
+      selections.length < MAX_SELECTIONS
+    ) {
+      selections.push(curSelection);
+      curSelection.renderable.visible = false;
+      this.gl.render(this.#scene, camera);
+    }
+    for (const selection of selections) {
+      selection.renderable.visible = true;
+    }
+    this.animationFrame();
+    this.emit("renderableHovered", selections, cursorCoords, this);
   };
 
   #handleFrameTransform = ({ message }: MessageEvent<DeepPartial<FrameTransform>>): void => {

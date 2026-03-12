@@ -25,3 +25,9 @@ export type InteractionData = {
 };
 export type Interactive<T> = T & { interactionData: InteractionData };
 export type SelectedObject = { object: Marker; instanceIndex?: number };
+
+export type HoverEntityInfo = {
+  topic?: string;
+  entityId: string;
+  metadata: { key: string; value: string }[];
+};

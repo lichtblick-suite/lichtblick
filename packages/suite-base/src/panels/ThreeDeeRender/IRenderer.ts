@@ -57,6 +57,11 @@ export type RendererEvents = {
     renderer: IRenderer,
   ) => void;
   selectedRenderable: (selection: PickedRenderable | undefined, renderer: IRenderer) => void;
+  renderableHovered: (
+    selections: PickedRenderable[],
+    cursorCoords: { x: number; y: number },
+    renderer: IRenderer,
+  ) => void;
   parametersChange: (
     parameters: ReadonlyMap<string, ParameterValue> | undefined,
     renderer: IRenderer,
