@@ -14,7 +14,6 @@ export type BuildSettingsTreeProps = {
   extensionSettings: ExtensionSettings;
   messagePipelineState: () => MessagePipelineContext;
   panelType: string | undefined;
-  selectedPanelId: string | undefined;
   settingsTree: ImmutableSettingsTree | undefined;
 };
 

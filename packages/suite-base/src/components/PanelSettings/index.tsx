@@ -147,7 +147,6 @@ export default function PanelSettings({
         extensionSettings,
         messagePipelineState,
         panelType,
-        selectedPanelId,
         settingsTree: storedSettingsTree,
       }),
     [
@@ -155,7 +154,6 @@ export default function PanelSettings({
       extensionSettings,
       messagePipelineState,
       panelType,
-      selectedPanelId,
       storedSettingsTree,
       /**
        * The core issue is that settingsTrees object in the PanelStateStore is being
