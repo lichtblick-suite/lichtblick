@@ -13,20 +13,14 @@ export const buildSettingsTree = ({
   extensionSettings,
   messagePipelineState,
   panelType,
-  selectedPanelId,
-  settingsTrees,
+  settingsTree,
 }: BuildSettingsTreeProps): Immutable<SettingsTree> | undefined => {
-  if (selectedPanelId == undefined || panelType == undefined) {
-    return undefined;
-  }
-
-  const set = settingsTrees[selectedPanelId];
-  if (!set) {
+  if (panelType == undefined || settingsTree == undefined) {
     return undefined;
   }
 
   const topicToSchemaNameMap = getTopicToSchemaNameMap(messagePipelineState());
-  const topics = Object.keys(set.nodes.topics?.children ?? {});
+  const topics = Object.keys(settingsTree.nodes.topics?.children ?? {});
   const topicsConfig = maybeCast<{ topics: Record<string, unknown> }>(config)?.topics;
   const topicsSettings = topics.reduce<Record<string, SettingsTreeNode | undefined>>(
     (acc, topic) => {
@@ -40,12 +34,12 @@ export const buildSettingsTree = ({
   );
 
   return {
-    ...set,
+    ...settingsTree,
     nodes: {
-      ...set.nodes,
+      ...settingsTree.nodes,
       topics: {
-        ...set.nodes.topics,
-        children: _.merge({}, set.nodes.topics?.children, topicsSettings),
+        ...settingsTree.nodes.topics,
+        children: _.merge({}, settingsTree.nodes.topics?.children, topicsSettings),
       },
     },
   };

@@ -104,8 +104,10 @@ export function useExtensionCatalog<T>(selector: (registry: ExtensionCatalog) =>
   return useStore(context, selector);
 }
 
+const EMPTY_PANEL_SETTINGS: ExtensionSettings = {};
+
 export function getExtensionPanelSettings(
   reg: ExtensionCatalog,
 ): Record<string, Record<string, PanelSettings<unknown>>> {
-  return reg.panelSettings ?? {};
+  return reg.panelSettings ?? EMPTY_PANEL_SETTINGS;
 }
