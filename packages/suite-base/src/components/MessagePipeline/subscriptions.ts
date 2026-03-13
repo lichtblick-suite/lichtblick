@@ -37,9 +37,13 @@ function mergeSubscription(
     R.uniq,
   )([a, b]);
 
+  const sampling =
+    a.sampling?.mode != undefined && a.sampling.mode === b.sampling?.mode ? a.sampling : undefined;
+
   return {
     ...a,
     fields: fields.length > 0 && !isAllFields ? fields : undefined,
+    sampling,
   };
 }
 

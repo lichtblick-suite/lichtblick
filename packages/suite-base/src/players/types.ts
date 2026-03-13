@@ -311,6 +311,13 @@ export type SubscribePayload = {
    * Defines the range of messages to subscribe to.
    */
   preloadType?: SubscriptionPreloadType;
+
+  /**
+   * Optional sampling policy for message delivery.
+   */
+  sampling?: {
+    mode: "latest-per-render-tick";
+  };
 };
 
 // Represents a single topic publisher, for use in `setPublishers`.

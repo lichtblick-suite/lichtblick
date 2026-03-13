@@ -17,7 +17,7 @@ import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
 import type { MessageConverterAlertHandler } from "./types";
 
 // Branded string to ensure that users go through the `converterKey` function to compute a lookup key
-type ConverterKey = Opaque<string, "ConverterKey">;
+export type ConverterKey = Opaque<string, "ConverterKey">;
 
 type TopicSchemaConverterMap = Map<ConverterKey, InstalledMessageConverter[]>;
 

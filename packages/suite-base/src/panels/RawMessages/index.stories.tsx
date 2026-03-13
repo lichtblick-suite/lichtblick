@@ -39,6 +39,7 @@ const noDiffConfig = {
   diffTopicPath: "",
   diffEnabled: false,
   showFullMessageForDiff: false,
+  latestPerRenderTickSampling: false,
 } as RawMessagesPanelConfig;
 
 const diffConfig = {
@@ -46,6 +47,7 @@ const diffConfig = {
   diffMethod: "custom",
   diffTopicPath: "/another/baz/enum_advanced",
   diffEnabled: true,
+  latestPerRenderTickSampling: false,
 } as RawMessagesPanelConfig;
 
 const scrollToBottom: StoryObj["play"] = async ({ canvasElement }) => {
@@ -308,6 +310,7 @@ export const DiffSameMessages: StoryObj = {
           diffEnabled: true,
           showFullMessageForDiff: false,
           fontSize: undefined,
+          latestPerRenderTickSampling: false,
         }}
       />
     </PanelSetup>
@@ -326,6 +329,7 @@ export const DiffConsecutiveMessages: StoryObj = {
           showFullMessageForDiff: true,
           expansion: "all",
           fontSize: undefined,
+          latestPerRenderTickSampling: false,
         }}
       />
     </PanelSetup>
@@ -344,6 +348,7 @@ export const DiffConsecutiveMessagesWithFilter: StoryObj = {
           showFullMessageForDiff: true,
           expansion: "all",
           fontSize: undefined,
+          latestPerRenderTickSampling: false,
         }}
       />
     </PanelSetup>
@@ -362,6 +367,7 @@ export const DiffConsecutiveMessagesWithBigint: StoryObj = {
           showFullMessageForDiff: true,
           expansion: "all",
           fontSize: undefined,
+          latestPerRenderTickSampling: false,
         }}
       />
     </PanelSetup>
@@ -380,6 +386,7 @@ export const DisplayCorrectMessageWhenDiffIsDisabledEvenWithDiffMethodTopicSet: 
           showFullMessageForDiff: true,
           expansion: "all",
           fontSize: undefined,
+          latestPerRenderTickSampling: false,
         }}
       />
     </PanelSetup>

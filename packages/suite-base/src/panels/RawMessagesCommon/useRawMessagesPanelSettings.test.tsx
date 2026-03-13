@@ -7,14 +7,14 @@ import { renderHook } from "@testing-library/react";
 
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { FONT_SIZE_OPTIONS } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
-import { useFontSizeSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useFontSizeSettings";
+import { useRawMessagesPanelSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useRawMessagesPanelSettings";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 
 jest.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", () => ({
   usePanelSettingsTreeUpdate: jest.fn(),
 }));
 
-describe("useFontSizeSettings", () => {
+describe("useRawMessagesPanelSettings", () => {
   const mockUpdatePanelSettingsTree = jest.fn();
   const mockSaveConfig = jest.fn();
 
@@ -27,10 +27,15 @@ describe("useFontSizeSettings", () => {
     it("should call updatePanelSettingsTree with correct structure", () => {
       // Given
       const fontSize = 14;
+      const latestPerRenderTickSampling = false;
 
       // When
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          latestPerRenderTickSampling,
+          saveConfig: mockSaveConfig,
+        });
       });
 
       // Then
@@ -52,6 +57,11 @@ describe("useFontSizeSettings", () => {
                 ],
                 value: fontSize,
               },
+              latestPerRenderTickSampling: {
+                label: "Latest per render tick",
+                input: "boolean",
+                value: latestPerRenderTickSampling,
+              },
             },
           },
         },
@@ -61,10 +71,15 @@ describe("useFontSizeSettings", () => {
     it("should handle undefined fontSize (auto)", () => {
       // Given
       const fontSize = undefined;
+      const latestPerRenderTickSampling = false;
 
       // When
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          latestPerRenderTickSampling,
+          saveConfig: mockSaveConfig,
+        });
       });
 
       // Then
@@ -76,6 +91,9 @@ describe("useFontSizeSettings", () => {
               fields: {
                 fontSize: expect.objectContaining({
                   value: undefined,
+                }),
+                latestPerRenderTickSampling: expect.objectContaining({
+                  value: latestPerRenderTickSampling,
                 }),
               },
             },
@@ -89,8 +107,13 @@ describe("useFontSizeSettings", () => {
     it("should save fontSize when update action is received", () => {
       // Given
       const fontSize = 12;
+      const latestPerRenderTickSampling = false;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          latestPerRenderTickSampling,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -115,8 +138,13 @@ describe("useFontSizeSettings", () => {
     it("should save undefined fontSize when value is undefined (auto)", () => {
       // Given
       const fontSize = 14;
+      const latestPerRenderTickSampling = false;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          latestPerRenderTickSampling,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -141,8 +169,13 @@ describe("useFontSizeSettings", () => {
     it("should not save fontSize for non-general paths", () => {
       // Given
       const fontSize = 14;
+      const latestPerRenderTickSampling = false;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          latestPerRenderTickSampling,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -167,8 +200,13 @@ describe("useFontSizeSettings", () => {
     it("should not save fontSize for non-fontSize fields", () => {
       // Given
       const fontSize = 14;
+      const latestPerRenderTickSampling = false;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          latestPerRenderTickSampling,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -193,8 +231,13 @@ describe("useFontSizeSettings", () => {
     it("should not handle non-update actions", () => {
       // Given
       const fontSize = 14;
+      const latestPerRenderTickSampling = false;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          latestPerRenderTickSampling,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -219,9 +262,14 @@ describe("useFontSizeSettings", () => {
   describe("when fontSize changes", () => {
     it("should update settings tree with new fontSize value", () => {
       // Given
+      const latestPerRenderTickSampling = false;
       const { rerender } = renderHook<void, { fontSize: number | undefined }>(
         ({ fontSize }) => {
-          useFontSizeSettings(fontSize, mockSaveConfig);
+          useRawMessagesPanelSettings({
+            fontSize,
+            latestPerRenderTickSampling,
+            saveConfig: mockSaveConfig,
+          });
         },
         {
           initialProps: { fontSize: 12 },
@@ -243,6 +291,9 @@ describe("useFontSizeSettings", () => {
               fields: {
                 fontSize: expect.objectContaining({
                   value: 16,
+                }),
+                latestPerRenderTickSampling: expect.objectContaining({
+                  value: latestPerRenderTickSampling,
                 }),
               },
             },

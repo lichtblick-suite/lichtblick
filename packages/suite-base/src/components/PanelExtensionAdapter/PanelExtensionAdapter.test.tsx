@@ -550,6 +550,139 @@ describe("PanelExtensionAdapter", () => {
     await sig;
   });
 
+  it("should apply sampling when converter supports latest-per-render-tick", async () => {
+    const sig = signal();
+    const initPanel = (context: PanelExtensionContext) => {
+      context.subscribe([
+        { topic: "/test", convertTo: "dst", sampling: { mode: "latest-per-render-tick" } },
+      ]);
+    };
+
+    render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup
+            fixture={{
+              topics: [{ name: "/test", schemaName: "src" }],
+              messageConverters: [
+                {
+                  fromSchemaName: "src",
+                  toSchemaName: "dst",
+                  supportsLatestPerRenderTick: true,
+                  converter: () => ({}),
+                },
+              ],
+              setSubscriptions: (_, payload) => {
+                if (payload.length === 0) {
+                  return;
+                }
+                expect(payload).toEqual([
+                  {
+                    topic: "/test",
+                    preloadType: "partial",
+                    sampling: { mode: "latest-per-render-tick" },
+                  },
+                ]);
+                sig.resolve();
+              },
+            }}
+          >
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+
+    await act(async () => undefined);
+    await sig;
+  });
+
+  it("should disable sampling when converter does not support latest-per-render-tick", async () => {
+    const sig = signal();
+    const initPanel = (context: PanelExtensionContext) => {
+      context.subscribe([
+        { topic: "/test", convertTo: "dst", sampling: { mode: "latest-per-render-tick" } },
+      ]);
+    };
+
+    render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup
+            fixture={{
+              topics: [{ name: "/test", schemaName: "src" }],
+              messageConverters: [
+                {
+                  fromSchemaName: "src",
+                  toSchemaName: "dst",
+                  converter: () => ({}),
+                },
+              ],
+              setSubscriptions: (_, payload) => {
+                if (payload.length === 0) {
+                  return;
+                }
+                expect(payload).toEqual([{ topic: "/test", preloadType: "partial" }]);
+                sig.resolve();
+              },
+            }}
+          >
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+
+    await act(async () => undefined);
+    await sig;
+  });
+
+  it("should disable sampling when preload is true even if converter supports it", async () => {
+    const sig = signal();
+    const initPanel = (context: PanelExtensionContext) => {
+      context.subscribe([
+        {
+          topic: "/test",
+          convertTo: "dst",
+          preload: true,
+          sampling: { mode: "latest-per-render-tick" },
+        },
+      ]);
+    };
+
+    render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup
+            fixture={{
+              topics: [{ name: "/test", schemaName: "src" }],
+              messageConverters: [
+                {
+                  fromSchemaName: "src",
+                  toSchemaName: "dst",
+                  supportsLatestPerRenderTick: true,
+                  converter: () => ({}),
+                },
+              ],
+              setSubscriptions: (_, payload) => {
+                if (payload.length === 0) {
+                  return;
+                }
+                expect(payload).toEqual([{ topic: "/test", preloadType: "full" }]);
+                sig.resolve();
+              },
+            }}
+          >
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+
+    await act(async () => undefined);
+    await sig;
+  });
+
   it("should get and set variables", async () => {
     const mockRAF = jest
       .spyOn(window, "requestAnimationFrame")

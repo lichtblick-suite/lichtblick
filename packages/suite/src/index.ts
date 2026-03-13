@@ -94,6 +94,17 @@ export type Subscription = {
    * **Only** topics with `preload: true` are available in the `allFrames` render state.
    */
   preload?: boolean;
+
+  /**
+   * Optional sampling policy for message delivery.
+   * If not specified, all messages are delivered.
+   *
+   * `latest-per-render-tick` delivers at most the latest message per topic per render tick.
+   * This can reduce decoding work for high-rate topics when only the latest value is needed.
+   */
+  sampling?: {
+    mode: "latest-per-render-tick";
+  };
 };
 
 /**
@@ -419,6 +430,10 @@ export type PanelExtensionContext = {
    * an empty array will unsubscribe from all topics.
    *
    * Calling subscribe with an empty array is analagous to unsubscribeAll.
+   *
+   * Note: sampling requests are treated as a best-effort hint. Sampling is only enabled when all
+   * consumers for a topic allow it (including any message converters), and is disabled when
+   * `preload: true` or when converters do not explicitly support latest-per-render-tick sampling.
    */
   subscribe(subscriptions: Subscription[]): void;
 
@@ -547,6 +562,12 @@ export type MessageConverterContext = {
 export type RegisterMessageConverterArgs<Src> = {
   fromSchemaName: string;
   toSchemaName: string;
+  /**
+   * Indicates whether this converter is safe to run when messages are sampled to
+   * only the latest-per-render-tick. If false or unset, the converter is treated
+   * as needing all messages.
+   */
+  supportsLatestPerRenderTick?: boolean;
   converter: (
     msg: Src,
     event: Immutable<MessageEvent<Src>>,

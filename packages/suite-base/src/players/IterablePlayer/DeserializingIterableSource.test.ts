@@ -18,6 +18,7 @@ import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemory
 import { DeserializingIterableSource } from "./DeserializingIterableSource";
 
 const textEncoder = new TextEncoder();
+const encodeJson = (value: unknown): Uint8Array => textEncoder.encode(JSON.stringify(value));
 
 async function* defaultMessageIterator(
   _args: MessageIteratorArgs,
@@ -275,5 +276,226 @@ describe("DeserializingIterableSources", () => {
     expect(messages.length).toBe(4);
     expect(console.error).toHaveBeenCalledTimes(4);
     (console.error as jest.Mock).mockClear();
+  });
+
+  it("sampling path keeps latest sampled message, preserves unsampled messages, and uses carry-over", async () => {
+    const source = new TestSource();
+    source.initialize = async () => {
+      return {
+        start: { sec: 0, nsec: 0 },
+        end: { sec: 10, nsec: 0 },
+        topics: [
+          { name: "sampled_topic", schemaName: "some_type", messageEncoding: "json" },
+          { name: "unsampled_topic", schemaName: "some_type", messageEncoding: "json" },
+        ],
+        topicStats: new Map(),
+        profile: undefined,
+        alerts: [],
+        datatypes: new Map(),
+        publishersByTopic: new Map(),
+      };
+    };
+
+    source.messageIterator = async function* messageIterator() {
+      yield {
+        type: "message-event" as const,
+        msgEvent: {
+          topic: "unsampled_topic",
+          receiveTime: { sec: 0, nsec: 100_000_000 },
+          message: encodeJson({ v: "u1" }),
+          sizeInBytes: 0,
+          schemaName: "some_type",
+        },
+      };
+      yield {
+        type: "message-event" as const,
+        msgEvent: {
+          topic: "sampled_topic",
+          receiveTime: { sec: 0, nsec: 200_000_000 },
+          message: encodeJson({ v: "s1" }),
+          sizeInBytes: 0,
+          schemaName: "some_type",
+        },
+      };
+      yield {
+        type: "message-event" as const,
+        msgEvent: {
+          topic: "sampled_topic",
+          receiveTime: { sec: 0, nsec: 300_000_000 },
+          message: encodeJson({ v: "s2" }),
+          sizeInBytes: 0,
+          schemaName: "some_type",
+        },
+      };
+      yield {
+        type: "message-event" as const,
+        msgEvent: {
+          topic: "unsampled_topic",
+          receiveTime: { sec: 0, nsec: 400_000_000 },
+          message: encodeJson({ v: "u2" }),
+          sizeInBytes: 0,
+          schemaName: "some_type",
+        },
+      };
+      yield {
+        type: "message-event" as const,
+        msgEvent: {
+          topic: "unsampled_topic",
+          receiveTime: { sec: 1, nsec: 100_000_000 },
+          message: encodeJson({ v: "u3" }),
+          sizeInBytes: 0,
+          schemaName: "some_type",
+        },
+      };
+      yield {
+        type: "message-event" as const,
+        msgEvent: {
+          topic: "sampled_topic",
+          receiveTime: { sec: 1, nsec: 200_000_000 },
+          message: encodeJson({ v: "s3" }),
+          sizeInBytes: 0,
+          schemaName: "some_type",
+        },
+      };
+    };
+
+    const deserSource = new DeserializingIterableSource(source);
+    await deserSource.initialize();
+    deserSource.setSamplingWindowEnd({ sec: 1, nsec: 0 });
+
+    const iterator = deserSource.messageIterator({
+      topics: new Map([
+        [
+          "sampled_topic",
+          { topic: "sampled_topic", sampling: { mode: "latest-per-render-tick" as const } },
+        ],
+        ["unsampled_topic", { topic: "unsampled_topic" }],
+      ]),
+    });
+
+    const first = await iterator.next();
+    const second = await iterator.next();
+    const third = await iterator.next();
+    const fourth = await iterator.next();
+
+    expect(first.value).toMatchObject({
+      type: "message-event",
+      msgEvent: { topic: "unsampled_topic", message: { v: "u1" } },
+    });
+    expect(second.value).toMatchObject({
+      type: "message-event",
+      msgEvent: { topic: "sampled_topic", message: { v: "s2" } },
+    });
+    expect(third.value).toMatchObject({
+      type: "message-event",
+      msgEvent: { topic: "unsampled_topic", message: { v: "u2" } },
+    });
+    expect(fourth.value).toEqual({ type: "stamp", stamp: { sec: 1, nsec: 0 } });
+
+    // Move to the next window; the first message after the previous window was stored as carry-over.
+    deserSource.setSamplingWindowEnd({ sec: 2, nsec: 0 });
+
+    const fifth = await iterator.next();
+    const sixth = await iterator.next();
+    const done = await iterator.next();
+
+    expect(fifth.value).toMatchObject({
+      type: "message-event",
+      msgEvent: { topic: "unsampled_topic", message: { v: "u3" } },
+    });
+    expect(sixth.value).toMatchObject({
+      type: "message-event",
+      msgEvent: { topic: "sampled_topic", message: { v: "s3" } },
+    });
+    expect(done).toEqual({ done: true, value: undefined });
+  });
+
+  it("keeps pass-through behavior when no sampled topics are present", async () => {
+    const source = new TestSource();
+    const deserSource = new DeserializingIterableSource(source);
+    await deserSource.initialize();
+
+    source.messageIterator = defaultMessageIterator;
+    deserSource.setSamplingWindowEnd({ sec: 0, nsec: 500_000_000 });
+
+    const iterator = deserSource.messageIterator({
+      topics: new Map([["json_topic", { topic: "json_topic" }]]),
+    });
+
+    const resultTypes: string[] = [];
+    for (;;) {
+      const next = await iterator.next();
+      if (next.done === true) {
+        break;
+      }
+      resultTypes.push(next.value.type);
+    }
+
+    expect(resultTypes).toHaveLength(8);
+    expect(resultTypes.every((type) => type === "message-event")).toBe(true);
+  });
+
+  it("does not apply window sampling when window end is unset", async () => {
+    const source = new TestSource();
+    source.initialize = async () => {
+      return {
+        start: { sec: 0, nsec: 0 },
+        end: { sec: 10, nsec: 0 },
+        topics: [{ name: "sampled_topic", schemaName: "some_type", messageEncoding: "json" }],
+        topicStats: new Map(),
+        profile: undefined,
+        alerts: [],
+        datatypes: new Map(),
+        publishersByTopic: new Map(),
+      };
+    };
+    source.messageIterator = async function* messageIterator() {
+      yield {
+        type: "message-event" as const,
+        msgEvent: {
+          topic: "sampled_topic",
+          receiveTime: { sec: 0, nsec: 100_000_000 },
+          message: encodeJson({ v: "s1" }),
+          sizeInBytes: 0,
+          schemaName: "some_type",
+        },
+      };
+      yield {
+        type: "message-event" as const,
+        msgEvent: {
+          topic: "sampled_topic",
+          receiveTime: { sec: 0, nsec: 200_000_000 },
+          message: encodeJson({ v: "s2" }),
+          sizeInBytes: 0,
+          schemaName: "some_type",
+        },
+      };
+    };
+
+    const deserSource = new DeserializingIterableSource(source);
+    await deserSource.initialize();
+
+    const iterator = deserSource.messageIterator({
+      topics: new Map([
+        [
+          "sampled_topic",
+          { topic: "sampled_topic", sampling: { mode: "latest-per-render-tick" as const } },
+        ],
+      ]),
+    });
+
+    const first = await iterator.next();
+    const second = await iterator.next();
+    const done = await iterator.next();
+
+    expect(first.value).toMatchObject({
+      type: "message-event",
+      msgEvent: { message: { v: "s1" } },
+    });
+    expect(second.value).toMatchObject({
+      type: "message-event",
+      msgEvent: { message: { v: "s2" } },
+    });
+    expect(done).toEqual({ done: true, value: undefined });
   });
 });

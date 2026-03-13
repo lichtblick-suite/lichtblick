@@ -27,6 +27,7 @@ const setup = (inputOverride?: {
     diffMethod: "custom",
     diffTopicPath: "some/diff/topic",
     diffEnabled: false,
+    latestPerRenderTickSampling: false,
   };
 
   const input: UseSharedRawMessagesLogicProps<SharedConfig> = {
