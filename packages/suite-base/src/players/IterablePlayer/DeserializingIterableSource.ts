@@ -129,6 +129,13 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
         samplingTopics.add(topic);
       }
     }
+    log.debug(
+      `Sampling ${
+        samplingTopics.size > 0 ? "active" : "inactive"
+      } for iterable source (${samplingTopics.size}/${
+        subscribePayloadWithHashByTopic.size
+      } sampled topics)`,
+    );
 
     return (async function* deserializedIterableGenerator() {
       try {
@@ -224,6 +231,8 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
           }
         };
 
+        // Snapshot current sampling window end and refresh only at window boundaries (stamps).
+        let samplingWindowEnd = self.#samplingWindowEnd;
         for (;;) {
           let iterResult: Readonly<IteratorResult<Uint8Array>> | undefined;
           if (carryOver) {
@@ -236,8 +245,7 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
             }
             iterResult = next.value;
           }
-
-          const samplingWindowEnd = self.#samplingWindowEnd;
+          samplingWindowEnd ??= self.#samplingWindowEnd;
 
           // Yield alerts directly.
           if (iterResult.type === "alert") {
@@ -254,6 +262,7 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
               yield* flushPending();
             }
             yield iterResult;
+            samplingWindowEnd = self.#samplingWindowEnd;
             continue;
           }
 
@@ -298,6 +307,7 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
             // Defer this message so it is processed in the next sampling window.
             carryOver = iterResult;
             yield { type: "stamp", stamp: samplingWindowEnd };
+            samplingWindowEnd = self.#samplingWindowEnd;
             continue;
           }
 
