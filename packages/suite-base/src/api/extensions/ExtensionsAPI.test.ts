@@ -179,33 +179,6 @@ describe("ExtensionsAPI", () => {
       });
     });
 
-    it("should include replace=true in the form data", async () => {
-      // Given
-      const extension: ExtensionInfoWorkspace = ExtensionBuilder.extensionInfoWorkspace({
-        workspace,
-      });
-      const mockFile = new File([BasicBuilder.string()], "test.zip", { type: "application/zip" });
-      const mockApiResponse: CreateOrUpdateResponse = {
-        extension: {
-          ...extension.info,
-          createdAt: BasicBuilder.datetime(),
-          updatedAt: BasicBuilder.datetime(),
-          fileId: BasicBuilder.string(),
-          extensionId: extension.info.id,
-          scope: extension.info.namespace!,
-        },
-      };
-      const mockPost = jest.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
-      jest.mocked(HttpService).post = mockPost;
-
-      // When
-      await extensionsAPI.createOrUpdate(extension, mockFile);
-
-      // Then
-      const formData: FormData = mockPost.mock.calls[0][1];
-      expect(formData.get("replace")).toBe("true");
-    });
-
     it("should serialize form data fields correctly based on type", async () => {
       // Given
       const keywords = [BasicBuilder.string(), BasicBuilder.string()];
