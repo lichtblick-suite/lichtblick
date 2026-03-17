@@ -951,6 +951,44 @@ describe("ExtensionCatalogProvider", () => {
         expect.objectContaining({ id: extensionInfo.id, namespace: "org" }),
       );
     });
+
+    it("should replace the existing entry when the same extension id+namespace is merged again (update takes precedence)", async () => {
+      // Given: an extension is installed and merged into state
+      const { result, extensionInfo } = await setup();
+
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(1);
+      });
+
+      const updatedExtensionInfo: ExtensionInfo = {
+        ...extensionInfo,
+        version: "999.0.0",
+        displayName: "Updated Display Name",
+      };
+      const emptyContributionPoints: ContributionPoints = {
+        messageConverters: [],
+        cameraModels: new Map(),
+        topicAliasFunctions: [],
+        panelSettings: {},
+        panels: {},
+      };
+
+      // When
+      act(() => {
+        result.current.mergeState(updatedExtensionInfo, emptyContributionPoints);
+      });
+
+      // Then: list still has exactly one entry and it reflects the new version
+      expect(result.current.installedExtensions).toHaveLength(1);
+      expect(result.current.installedExtensions).toContainEqual(
+        expect.objectContaining({
+          id: extensionInfo.id,
+          namespace: extensionInfo.namespace,
+          version: "999.0.0",
+          displayName: "Updated Display Name",
+        }),
+      );
+    });
   });
 
   describe("markExtensionAsInstalled", () => {

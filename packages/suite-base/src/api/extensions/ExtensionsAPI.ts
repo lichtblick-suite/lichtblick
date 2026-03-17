@@ -64,6 +64,7 @@ class ExtensionsAPI implements IExtensionAPI {
       // readme: extension.info.readme,
       scope: "org",
       version: extension.info.version,
+      replace: true,
     } as CreateOrUpdateBody;
 
     Object.entries(body).forEach(([key, value]) => {
@@ -71,6 +72,8 @@ class ExtensionsAPI implements IExtensionAPI {
         formData.append(key, JSON.stringify(value) ?? "");
       } else if (typeof value === "string" && value.length > 0) {
         formData.append(key, value);
+      } else if (typeof value === "boolean") {
+        formData.append(key, value.toString());
       }
     });
 
