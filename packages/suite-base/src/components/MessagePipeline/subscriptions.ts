@@ -37,13 +37,35 @@ function mergeSubscription(
     R.uniq,
   )([a, b]);
 
-  const sampling =
-    a.sampling?.mode != undefined && a.sampling.mode === b.sampling?.mode ? a.sampling : undefined;
+  const sameSamplingMode =
+    a.samplingRequest?.mode != undefined && a.samplingRequest.mode === b.samplingRequest?.mode;
+  const samplingRequest = sameSamplingMode ? a.samplingRequest : undefined;
+  const samplingAuthorized =
+    sameSamplingMode && (a.samplingAuthorized === true || b.samplingAuthorized === true)
+      ? true
+      : undefined;
 
   return {
     ...a,
     fields: fields.length > 0 && !isAllFields ? fields : undefined,
-    sampling,
+    samplingRequest,
+    samplingAuthorized,
+  };
+}
+
+function applySamplingGuard(payload: Immutable<SubscribePayload>): Immutable<SubscribePayload> {
+  if (payload.samplingRequest?.mode == undefined) {
+    return payload;
+  }
+
+  if (payload.samplingAuthorized === true) {
+    return payload;
+  }
+
+  return {
+    ...payload,
+    samplingRequest: undefined,
+    samplingAuthorized: undefined,
   };
 }
 
@@ -73,7 +95,8 @@ function denormalizeSubscriptions(
         if (payloads == undefined || first == undefined || payloads.length === 0) {
           return [];
         }
-        return [R.reduce(mergeSubscription, first, payloads)];
+        const merged = R.reduce(mergeSubscription, first, payloads.slice(1));
+        return [applySamplingGuard(merged)];
       },
     ),
   )(subscriptions);

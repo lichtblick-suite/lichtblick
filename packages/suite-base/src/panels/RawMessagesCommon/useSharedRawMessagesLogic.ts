@@ -77,12 +77,12 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
 
   const [expansion, setExpansion] = useState(config.expansion);
 
-  const sampling = latestPerRenderTickSampling ? LATEST_PER_RENDER_TICK_SAMPLING : undefined;
+  const samplingRequest = latestPerRenderTickSampling ? LATEST_PER_RENDER_TICK_SAMPLING : undefined;
   const matchedMessages = useMessageDataItem(topic ? topicPath : "", {
     historySize: 2,
-    sampling,
+    samplingRequest,
   });
-  const diffMessages = useMessageDataItem(diffEnabled ? diffTopicPath : "", { sampling });
+  const diffMessages = useMessageDataItem(diffEnabled ? diffTopicPath : "", { samplingRequest });
 
   const diffTopicObj = diffMessages[0];
   const currTickObj = matchedMessages[matchedMessages.length - 1];

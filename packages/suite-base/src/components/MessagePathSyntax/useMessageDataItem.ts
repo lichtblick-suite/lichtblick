@@ -27,7 +27,7 @@ import {
 
 type Options = {
   historySize?: number;
-  sampling?: SubscribePayload["sampling"];
+  samplingRequest?: SubscribePayload["samplingRequest"];
 };
 
 type ReducedValue = {
@@ -49,14 +49,14 @@ type ReducedValue = {
  * The `historySize` option configures how many matching messages to keep. The default is 1.
  */
 export function useMessageDataItem(path: string, options?: Options): ReducedValue["matches"] {
-  const { historySize = 1, sampling } = options ?? {};
+  const { historySize = 1, samplingRequest } = options ?? {};
   const topics: SubscribePayload[] = useMemo(() => {
-    const payload = subscribePayloadFromMessagePath(path, "partial", sampling);
+    const payload = subscribePayloadFromMessagePath(path, "partial", samplingRequest);
     if (payload) {
       return [payload];
     }
     return [];
-  }, [path, sampling]);
+  }, [path, samplingRequest]);
 
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([path]);
 

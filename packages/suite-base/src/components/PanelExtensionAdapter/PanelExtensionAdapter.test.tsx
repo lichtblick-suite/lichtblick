@@ -580,9 +580,74 @@ describe("PanelExtensionAdapter", () => {
                   {
                     topic: "/test",
                     preloadType: "partial",
-                    sampling: { mode: "latest-per-render-tick" },
+                    samplingRequest: { mode: "latest-per-render-tick" },
+                    samplingAuthorized: true,
                   },
                 ]);
+                sig.resolve();
+              },
+            }}
+          >
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+
+    await act(async () => undefined);
+    await sig;
+  });
+
+  it("should disable sampling for native subscriptions by default", async () => {
+    const sig = signal();
+    const initPanel = (context: PanelExtensionContext) => {
+      context.subscribe([{ topic: "/test", sampling: { mode: "latest-per-render-tick" } }]);
+    };
+
+    render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup
+            fixture={{
+              topics: [{ name: "/test", schemaName: "src" }],
+              setSubscriptions: (_, payload) => {
+                if (payload.length === 0) {
+                  return;
+                }
+                expect(payload).toEqual([{ topic: "/test", preloadType: "partial" }]);
+                sig.resolve();
+              },
+            }}
+          >
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+
+    await act(async () => undefined);
+    await sig;
+  });
+
+  it("should disable sampling when convertTo resolves to the native topic schema", async () => {
+    const sig = signal();
+    const initPanel = (context: PanelExtensionContext) => {
+      context.subscribe([
+        { topic: "/test", convertTo: "src", sampling: { mode: "latest-per-render-tick" } },
+      ]);
+    };
+
+    render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup
+            fixture={{
+              topics: [{ name: "/test", schemaName: "src" }],
+              setSubscriptions: (_, payload) => {
+                if (payload.length === 0) {
+                  return;
+                }
+                expect(payload).toEqual([{ topic: "/test", preloadType: "partial" }]);
                 sig.resolve();
               },
             }}

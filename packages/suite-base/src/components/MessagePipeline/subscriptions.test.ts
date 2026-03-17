@@ -81,4 +81,91 @@ describe("mergeSubscriptions", () => {
       { topic: "a", preloadType: "partial" },
     ]);
   });
+
+  it("keeps sampling when all subscribers are compatible and at least one is sampling-authorized", () => {
+    const subs: SubscribePayload[] = [
+      {
+        topic: "a",
+        preloadType: "partial",
+        samplingRequest: { mode: "latest-per-render-tick" },
+      },
+      {
+        topic: "a",
+        preloadType: "partial",
+        samplingRequest: { mode: "latest-per-render-tick" },
+        samplingAuthorized: true,
+      },
+    ];
+
+    const result = mergeSubscriptions(subs);
+
+    expect(result).toEqual([
+      {
+        topic: "a",
+        preloadType: "partial",
+        samplingRequest: { mode: "latest-per-render-tick" },
+        samplingAuthorized: true,
+      },
+    ]);
+  });
+
+  it("keeps sampling regardless of subscription order when approval is present", () => {
+    const subs: SubscribePayload[] = [
+      {
+        topic: "a",
+        preloadType: "partial",
+        samplingRequest: { mode: "latest-per-render-tick" },
+        samplingAuthorized: true,
+      },
+      {
+        topic: "a",
+        preloadType: "partial",
+        samplingRequest: { mode: "latest-per-render-tick" },
+      },
+    ];
+
+    const result = mergeSubscriptions(subs);
+
+    expect(result).toEqual([
+      {
+        topic: "a",
+        preloadType: "partial",
+        samplingRequest: { mode: "latest-per-render-tick" },
+        samplingAuthorized: true,
+      },
+    ]);
+  });
+
+  it("drops sampling when no merged subscriber is sampling-authorized", () => {
+    const subs: SubscribePayload[] = [
+      {
+        topic: "a",
+        preloadType: "partial",
+        samplingRequest: { mode: "latest-per-render-tick" },
+      },
+      {
+        topic: "a",
+        preloadType: "partial",
+        samplingRequest: { mode: "latest-per-render-tick" },
+      },
+    ];
+
+    const result = mergeSubscriptions(subs);
+
+    expect(result).toEqual([{ topic: "a", preloadType: "partial" }]);
+  });
+
+  it("drops sampling for a single unapproved sampling subscription", () => {
+    const subs: SubscribePayload[] = [
+      {
+        topic: "a",
+        preloadType: "partial",
+        samplingRequest: { mode: "latest-per-render-tick" },
+      },
+    ];
+
+    const result = mergeSubscriptions(subs);
+
+    expect(result).toEqual([{ topic: "a", preloadType: "partial" }]);
+  });
 });

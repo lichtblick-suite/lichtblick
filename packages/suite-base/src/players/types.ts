@@ -313,11 +313,18 @@ export type SubscribePayload = {
   preloadType?: SubscriptionPreloadType;
 
   /**
-   * Optional sampling policy for message delivery.
+   * Optional sampling request for message delivery.
+   * This describes subscriber compatibility only.
    */
-  sampling?: {
+  samplingRequest?: {
     mode: "latest-per-render-tick";
   };
+
+  /**
+   * Internal guard used by MessagePipeline to globally enforce sampling authorization.
+   * Sampling requests are ignored unless at least one merged subscriber sets this to `true`.
+   */
+  samplingAuthorized?: boolean;
 };
 
 // Represents a single topic publisher, for use in `setPublishers`.

@@ -125,11 +125,11 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
     // Collect all topics that will be sampled
     const samplingTopics = new Set<string>();
     for (const [topic, subscription] of subscribePayloadWithHashByTopic) {
-      if (subscription.sampling?.mode === "latest-per-render-tick") {
+      if (subscription.samplingRequest?.mode === "latest-per-render-tick") {
         samplingTopics.add(topic);
       }
     }
-    log.debug(
+    log.info(
       `Sampling ${
         samplingTopics.size > 0 ? "active" : "inactive"
       } for iterable source (${samplingTopics.size}/${

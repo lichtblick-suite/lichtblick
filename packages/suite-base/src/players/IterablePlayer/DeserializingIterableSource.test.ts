@@ -367,7 +367,7 @@ describe("DeserializingIterableSources", () => {
       topics: new Map([
         [
           "sampled_topic",
-          { topic: "sampled_topic", sampling: { mode: "latest-per-render-tick" as const } },
+          { topic: "sampled_topic", samplingRequest: { mode: "latest-per-render-tick" as const } },
         ],
         ["unsampled_topic", { topic: "unsampled_topic" }],
       ]),
@@ -479,7 +479,7 @@ describe("DeserializingIterableSources", () => {
       topics: new Map([
         [
           "sampled_topic",
-          { topic: "sampled_topic", sampling: { mode: "latest-per-render-tick" as const } },
+          { topic: "sampled_topic", samplingRequest: { mode: "latest-per-render-tick" as const } },
         ],
       ]),
     });

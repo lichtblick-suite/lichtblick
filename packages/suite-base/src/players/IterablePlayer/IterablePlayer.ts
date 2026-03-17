@@ -346,7 +346,7 @@ export class IterablePlayer implements Player {
     log.debug("set subscriptions", newSubscriptions);
     this.#subscriptions = newSubscriptions;
     this.#samplingEnabled = this.#subscriptions.some(
-      (subscription) => subscription.sampling?.mode === "latest-per-render-tick",
+      (subscription) => subscription.samplingRequest?.mode === "latest-per-render-tick",
     );
     if (!this.#samplingEnabled) {
       this.#deserializingSource?.setSamplingWindowEnd(undefined);

@@ -490,18 +490,23 @@ function PanelExtensionAdapter(
             return { topic: item.topic, preloadType };
           }
 
-          // Sampling is only allowed if conversion is unnecessary or the converter explicitly
-          // declares it supports latest-per-render-tick sampling.
+          // Sampling is only allowed if the converter explicitly declares it
+          // supports latest-per-render-tick sampling.
+          // Native/direct paths are denied by default.
           const converter = getConverterForSubscription(item);
-          const converterAllowsSampling =
+          const topicSchemaName = topicToSchemaNameMap.get(item.topic);
+          const isNativePath =
             item.convertTo == undefined ||
-            topicToSchemaNameMap.get(item.topic) === item.convertTo ||
-            converter?.supportsLatestPerRenderTick === true;
+            (topicSchemaName != undefined && topicSchemaName === item.convertTo);
+          const samplingAllowed = isNativePath
+            ? false
+            : converter?.supportsLatestPerRenderTick === true;
 
           return {
             topic: item.topic,
             preloadType,
-            sampling: converterAllowsSampling ? item.sampling : undefined,
+            samplingRequest: samplingAllowed ? item.sampling : undefined,
+            samplingAuthorized: samplingAllowed ? true : undefined,
           };
         });
 
