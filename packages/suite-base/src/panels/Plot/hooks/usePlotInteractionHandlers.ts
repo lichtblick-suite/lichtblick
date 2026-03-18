@@ -25,6 +25,8 @@ import { PANEL_TITLE_CONFIG_KEY } from "@lichtblick/suite-base/util/layout";
 
 const selectSetGlobalBounds = (store: TimelineInteractionStateStore) => store.setGlobalBounds;
 
+const DEFAULT_CSV_TITLE = "plot_data";
+
 const usePlotInteractionHandlers = ({
   config,
   coordinator,
@@ -215,7 +217,7 @@ const usePlotInteractionHandlers = ({
           return;
         }
 
-        downloadCSV(customTitle ?? "plot_data", data, xAxisMode);
+        downloadCSV(customTitle ?? DEFAULT_CSV_TITLE, data, xAxisMode);
       } catch (err: unknown) {
         console.error(err);
       }
