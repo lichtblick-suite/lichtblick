@@ -349,6 +349,14 @@ export class IterablePlayer implements Player {
     this.#samplingEnabled = this.#subscriptions.some(
       (subscription) => subscription.samplingRequest?.mode === "latest-per-render-tick",
     );
+    // Warn once when sampling is requested on a deserialized source, where it is not supported.
+    // Sampling (latest-per-render-tick) is only implemented for serialized sources via
+    // DeserializingIterableSource. For deserialized sources all messages are yielded as-is.
+    if (!this.#samplingEnabled && this.#deserializingSource == undefined) {
+      log.debug(
+        "latest-per-render-tick sampling is not supported for deserialized sources. Messages will be delivered without sampling.",
+      );
+    }
     if (!this.#samplingEnabled) {
       this.#deserializingSource?.setSamplingWindowEnd(undefined);
     }
