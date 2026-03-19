@@ -50,6 +50,15 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
     this.#source = source;
   }
 
+  /**
+   * Sets the end of the current sampling window used by active message iterators.
+   *
+   * NOTE: This mutates shared state read by all iterators created from
+   * {@link messageIterator}. It is safe to call mid-iteration — the new value
+   * takes effect on the next iteration step — but only one iterator should be
+   * active at a time. Calling this while multiple iterators are concurrently
+   * consuming will cause unpredictable window boundaries.
+   */
   public setSamplingWindowEnd(end: MessageIteratorArgs["end"]): void {
     this.#samplingWindowEnd = end;
   }
