@@ -11,7 +11,6 @@ import shallowequal from "shallowequal";
 import { createStore, StoreApi } from "zustand";
 
 import { Condvar } from "@lichtblick/den/async";
-import Logger from "@lichtblick/log";
 import { Time } from "@lichtblick/rostime";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 import {
@@ -21,7 +20,6 @@ import {
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
-  InternalSubscribePayload,
   Player,
   PlayerPresence,
   PlayerState,
@@ -31,8 +29,6 @@ import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import { FramePromise } from "./pauseFrameForPromise";
 import { MessagePipelineContext } from "./types";
-
-const log = Logger.getLogger(__filename);
 
 export function defaultPlayerState(player?: Player): PlayerState {
   return {
@@ -240,53 +236,6 @@ export function createMessagePipelineStore({
     },
   }));
 }
-
-function subscriptionPolicyKey(payload: Immutable<SubscribePayload>): string {
-  return `${payload.topic}\n${payload.preloadType ?? "partial"}`;
-}
-
-function describeSamplingPolicy(payload?: Immutable<InternalSubscribePayload>): string {
-  if (!payload) {
-    return "not-subscribed";
-  }
-
-  if (payload.samplingRequest?.mode == undefined) {
-    return "sampling-disabled";
-  }
-
-  const approval = payload.samplingAuthorized === true ? "authorized" : "unauthorized";
-  return `${payload.samplingRequest.mode} (${approval})`;
-}
-
-function logSamplingPolicySwitches({
-  previous,
-  next,
-  subscriberId,
-}: {
-  previous: readonly Immutable<InternalSubscribePayload>[];
-  next: readonly Immutable<InternalSubscribePayload>[];
-  subscriberId: string;
-}): void {
-  const prevByKey = new Map(previous.map((payload) => [subscriptionPolicyKey(payload), payload]));
-  const nextByKey = new Map(next.map((payload) => [subscriptionPolicyKey(payload), payload]));
-  const keys = new Set([...prevByKey.keys(), ...nextByKey.keys()]);
-
-  for (const key of keys) {
-    const prevPayload = prevByKey.get(key);
-    const nextPayload = nextByKey.get(key);
-    const prevPolicy = describeSamplingPolicy(prevPayload);
-    const nextPolicy = describeSamplingPolicy(nextPayload);
-
-    if (prevPolicy === nextPolicy) {
-      continue;
-    }
-
-    const [topic, preloadType] = key.split("\n");
-    log.info(
-      `Sampling policy switch for topic "${topic}" (${preloadType ?? "partial"}) by subscriber "${subscriberId}": ${prevPolicy} -> ${nextPolicy}`,
-    );
-  }
-}
 /** Update subscriptions. New topics that have already emit messages previously we emit the last message on the topic to the subscriber */
 function updateSubscriberAction(
   prevState: MessagePipelineInternalState,
@@ -326,15 +275,6 @@ function updateSubscriberAction(
 
   const prevSubsForId = previousSubscriptionsById.get(action.id);
   const prevTopics = new Set(prevSubsForId?.map((sub) => sub.topic) ?? []);
-  const prevSubscriptionKeys = new Set((prevSubsForId ?? []).map(subscriptionPolicyKey));
-  for (const payload of action.payloads) {
-    const key = subscriptionPolicyKey(payload);
-    if (!prevSubscriptionKeys.has(key)) {
-      log.info(
-        `Subscriber "${action.id}" subscribed to topic "${payload.topic}" (${payload.preloadType ?? "partial"}) with ${payload.samplingRequest?.mode ?? "no"} sampling request`,
-      );
-    }
-  }
   for (const { topic: newTopic } of action.payloads) {
     if (!prevTopics.has(newTopic)) {
       newTopicsForId.add(newTopic);
@@ -373,11 +313,6 @@ function updateSubscriberAction(
   }
 
   const subscriptions = mergeSubscriptions(Array.from(subscriptionsById.values()).flat());
-  logSamplingPolicySwitches({
-    previous: prevState.public.subscriptions,
-    next: subscriptions,
-    subscriberId: action.id,
-  });
 
   const newPublicState = {
     ...prevState.public,

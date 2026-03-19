@@ -34,7 +34,7 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
   config,
   saveConfig,
 }: UseSharedRawMessagesLogicProps<T>): UseSharedRawMessagesLogicResult {
-  const { topicPath, diffMethod, diffTopicPath, diffEnabled, latestPerRenderTickSampling } = config;
+  const { topicPath, diffMethod, diffTopicPath, diffEnabled } = config;
   const { topics, datatypes } = useDataSourceInfo();
   const { setMessagePathDropConfig } = usePanelContext();
 
@@ -77,7 +77,7 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
 
   const [expansion, setExpansion] = useState(config.expansion);
 
-  const samplingRequest = latestPerRenderTickSampling ? LATEST_PER_RENDER_TICK_SAMPLING : undefined;
+  const samplingRequest = LATEST_PER_RENDER_TICK_SAMPLING;
   const matchedMessages = useMessageDataItem(topic ? topicPath : "", {
     historySize: 2,
     samplingRequest,

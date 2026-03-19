@@ -16,16 +16,13 @@ import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/Pan
  */
 type UseRawMessagesPanelSettingsOptions = {
   fontSize: number | undefined;
-  latestPerRenderTickSampling: boolean;
   saveConfig: (config: {
     fontSize?: number | undefined;
-    latestPerRenderTickSampling?: boolean;
   }) => void;
 };
 
 export function useRawMessagesPanelSettings({
   fontSize,
-  latestPerRenderTickSampling,
   saveConfig,
 }: UseRawMessagesPanelSettingsOptions): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
@@ -44,15 +41,6 @@ export function useRawMessagesPanelSettings({
         return;
       }
 
-      if (
-        action.action === "update" &&
-        action.payload.path[0] === "general" &&
-        action.payload.path[1] === "latestPerRenderTickSampling"
-      ) {
-        saveConfig({
-          latestPerRenderTickSampling: Boolean(action.payload.value),
-        });
-      }
     },
     [saveConfig],
   );
@@ -74,16 +62,11 @@ export function useRawMessagesPanelSettings({
                   value,
                 })),
               ],
-              value: fontSize,
-            },
-            latestPerRenderTickSampling: {
-              label: "Latest per render tick",
-              input: "boolean",
-              value: latestPerRenderTickSampling,
+                value: fontSize,
             },
           },
         },
       },
     });
-  }, [actionHandler, fontSize, latestPerRenderTickSampling, updatePanelSettingsTree]);
+  }, [actionHandler, fontSize, updatePanelSettingsTree]);
 }

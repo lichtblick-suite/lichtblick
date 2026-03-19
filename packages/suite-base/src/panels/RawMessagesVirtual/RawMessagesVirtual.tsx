@@ -50,7 +50,6 @@ const RawMessagesVirtual = (props: PropsRawMessagesVirtual): React.JSX.Element =
     diffEnabled,
     showFullMessageForDiff,
     fontSize,
-    latestPerRenderTickSampling,
   } = config;
   const { datatypes } = useDataSourceInfo();
 
@@ -296,7 +295,6 @@ const RawMessagesVirtual = (props: PropsRawMessagesVirtual): React.JSX.Element =
   // Setup settings in panel settings tree
   useRawMessagesPanelSettings({
     fontSize,
-    latestPerRenderTickSampling,
     saveConfig,
   });
 

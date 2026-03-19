@@ -19,7 +19,6 @@ export type RawMessagesPanelConfig = {
   showFullMessageForDiff: boolean;
   topicPath: string;
   fontSize: number | undefined;
-  latestPerRenderTickSampling: boolean;
 };
 
 export type RawMessagesVirtualPanelConfig = {
@@ -30,7 +29,6 @@ export type RawMessagesVirtualPanelConfig = {
   showFullMessageForDiff: boolean;
   topicPath: string;
   fontSize: number | undefined;
-  latestPerRenderTickSampling: boolean;
 };
 
 // Terse to save space in layout. c = collapsed, e = expanded.
@@ -155,7 +153,6 @@ export type SharedConfig = {
   diffTopicPath: string;
   diffEnabled: boolean;
   expansion?: NodeExpansion;
-  latestPerRenderTickSampling: boolean;
 };
 
 type SharedConfigActions<T extends SharedConfig> = {

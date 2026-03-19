@@ -129,7 +129,7 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
         samplingTopics.add(topic);
       }
     }
-    log.info(
+    log.debug(
       `Sampling ${
         samplingTopics.size > 0 ? "active" : "inactive"
       } for iterable source (${samplingTopics.size}/${

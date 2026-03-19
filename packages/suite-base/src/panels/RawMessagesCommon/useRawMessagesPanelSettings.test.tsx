@@ -27,13 +27,11 @@ describe("useRawMessagesPanelSettings", () => {
     it("should call updatePanelSettingsTree with correct structure", () => {
       // Given
       const fontSize = 14;
-      const latestPerRenderTickSampling = false;
 
       // When
       renderHook(() => {
         useRawMessagesPanelSettings({
           fontSize,
-          latestPerRenderTickSampling,
           saveConfig: mockSaveConfig,
         });
       });
@@ -57,11 +55,6 @@ describe("useRawMessagesPanelSettings", () => {
                 ],
                 value: fontSize,
               },
-              latestPerRenderTickSampling: {
-                label: "Latest per render tick",
-                input: "boolean",
-                value: latestPerRenderTickSampling,
-              },
             },
           },
         },
@@ -71,13 +64,11 @@ describe("useRawMessagesPanelSettings", () => {
     it("should handle undefined fontSize (auto)", () => {
       // Given
       const fontSize = undefined;
-      const latestPerRenderTickSampling = false;
 
       // When
       renderHook(() => {
         useRawMessagesPanelSettings({
           fontSize,
-          latestPerRenderTickSampling,
           saveConfig: mockSaveConfig,
         });
       });
@@ -92,9 +83,6 @@ describe("useRawMessagesPanelSettings", () => {
                 fontSize: expect.objectContaining({
                   value: undefined,
                 }),
-                latestPerRenderTickSampling: expect.objectContaining({
-                  value: latestPerRenderTickSampling,
-                }),
               },
             },
           },
@@ -107,11 +95,9 @@ describe("useRawMessagesPanelSettings", () => {
     it("should save fontSize when update action is received", () => {
       // Given
       const fontSize = 12;
-      const latestPerRenderTickSampling = false;
       renderHook(() => {
         useRawMessagesPanelSettings({
           fontSize,
-          latestPerRenderTickSampling,
           saveConfig: mockSaveConfig,
         });
       });
@@ -138,11 +124,9 @@ describe("useRawMessagesPanelSettings", () => {
     it("should save undefined fontSize when value is undefined (auto)", () => {
       // Given
       const fontSize = 14;
-      const latestPerRenderTickSampling = false;
       renderHook(() => {
         useRawMessagesPanelSettings({
           fontSize,
-          latestPerRenderTickSampling,
           saveConfig: mockSaveConfig,
         });
       });
@@ -169,11 +153,9 @@ describe("useRawMessagesPanelSettings", () => {
     it("should not save fontSize for non-general paths", () => {
       // Given
       const fontSize = 14;
-      const latestPerRenderTickSampling = false;
       renderHook(() => {
         useRawMessagesPanelSettings({
           fontSize,
-          latestPerRenderTickSampling,
           saveConfig: mockSaveConfig,
         });
       });
@@ -200,11 +182,9 @@ describe("useRawMessagesPanelSettings", () => {
     it("should not save fontSize for non-fontSize fields", () => {
       // Given
       const fontSize = 14;
-      const latestPerRenderTickSampling = false;
       renderHook(() => {
         useRawMessagesPanelSettings({
           fontSize,
-          latestPerRenderTickSampling,
           saveConfig: mockSaveConfig,
         });
       });
@@ -231,11 +211,9 @@ describe("useRawMessagesPanelSettings", () => {
     it("should not handle non-update actions", () => {
       // Given
       const fontSize = 14;
-      const latestPerRenderTickSampling = false;
       renderHook(() => {
         useRawMessagesPanelSettings({
           fontSize,
-          latestPerRenderTickSampling,
           saveConfig: mockSaveConfig,
         });
       });
@@ -262,12 +240,10 @@ describe("useRawMessagesPanelSettings", () => {
   describe("when fontSize changes", () => {
     it("should update settings tree with new fontSize value", () => {
       // Given
-      const latestPerRenderTickSampling = false;
       const { rerender } = renderHook<void, { fontSize: number | undefined }>(
         ({ fontSize }) => {
           useRawMessagesPanelSettings({
             fontSize,
-            latestPerRenderTickSampling,
             saveConfig: mockSaveConfig,
           });
         },
@@ -291,9 +267,6 @@ describe("useRawMessagesPanelSettings", () => {
               fields: {
                 fontSize: expect.objectContaining({
                   value: 16,
-                }),
-                latestPerRenderTickSampling: expect.objectContaining({
-                  value: latestPerRenderTickSampling,
                 }),
               },
             },

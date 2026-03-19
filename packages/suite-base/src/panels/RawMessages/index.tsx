@@ -60,7 +60,6 @@ function RawMessages(props: PropsRawMessages) {
     diffEnabled,
     showFullMessageForDiff,
     fontSize,
-    latestPerRenderTickSampling,
   } = config;
   const { datatypes } = useDataSourceInfo();
 
@@ -391,7 +390,6 @@ function RawMessages(props: PropsRawMessages) {
   // Setup font size settings in panel settings tree
   useRawMessagesPanelSettings({
     fontSize,
-    latestPerRenderTickSampling,
     saveConfig,
   });
 
@@ -421,7 +419,6 @@ const defaultConfig: RawMessagesPanelConfig = {
   showFullMessageForDiff: false,
   topicPath: "",
   fontSize: undefined,
-  latestPerRenderTickSampling: true,
 };
 
 export default Panel(
