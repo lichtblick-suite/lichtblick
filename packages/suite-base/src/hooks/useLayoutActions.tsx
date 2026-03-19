@@ -1,7 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { useLayoutBrowserReducer } from "@lichtblick/suite-base/components/LayoutBrowser/reducer";
+import { Dispatch } from "react";
+
+import {
+  LayoutSelectionAction,
+  LayoutSelectionState,
+} from "@lichtblick/suite-base/components/LayoutBrowser/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import {
   LayoutState,
@@ -26,20 +31,19 @@ type UseLayoutActions = {
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
-export function useLayoutActions(): UseLayoutActions {
+export function useLayoutActions({
+  state,
+  dispatch,
+}: {
+  state: LayoutSelectionState;
+  dispatch: Dispatch<LayoutSelectionAction>;
+}): UseLayoutActions {
   const layoutManager = useLayoutManager();
   const analytics = useAnalytics();
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const { setSelectedLayoutId } = useCurrentLayoutActions();
   const { onSelectLayout } = useLayoutNavigation();
   const [confirm, confirmModal] = useConfirm();
-
-  const [state, dispatch] = useLayoutBrowserReducer({
-    lastSelectedId: currentLayoutId,
-    busy: layoutManager.isBusy(),
-    error: layoutManager.error,
-    online: layoutManager.isOnline,
-  });
 
   const onRenameLayout = useCallbackWithToast(
     async (item: Layout, newName: string) => {

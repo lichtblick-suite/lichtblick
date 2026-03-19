@@ -67,7 +67,9 @@ export default function LayoutBrowser({
   const [prompt, promptModal] = usePrompt();
   const analytics = useAnalytics();
 
+
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
+  const { onSelectLayout, state, dispatch } = useLayoutNavigation();
   const {
     onRenameLayout,
     onDuplicateLayout,
@@ -75,9 +77,8 @@ export default function LayoutBrowser({
     onRevertLayout,
     onOverwriteLayout,
     confirmModal,
-  } = useLayoutActions();
+  } = useLayoutActions({ state, dispatch });
   const { importLayout, exportLayout } = useLayoutTransfer();
-  const { onSelectLayout, state, dispatch } = useLayoutNavigation();
   const onExportLayout = exportLayout;
 
   useLayoutEffect(() => {
