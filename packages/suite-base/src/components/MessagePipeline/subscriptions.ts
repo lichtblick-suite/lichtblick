@@ -9,6 +9,7 @@ import moize from "moize";
 import * as R from "ramda";
 
 import { Immutable } from "@lichtblick/suite";
+import { applySamplingGuardToSubscription } from "@lichtblick/suite-base/players/samplingGuard";
 import { InternalSubscribePayload, SubscribePayload } from "@lichtblick/suite-base/players/types";
 
 /**
@@ -57,27 +58,6 @@ function mergeSubscription(
   };
 }
 
-function applySamplingGuard(
-  payload: Immutable<InternalSubscribePayload>,
-): Immutable<InternalSubscribePayload> {
-  // No sampling requested -> nothing to enforce.
-  if (payload.samplingRequest?.mode == undefined) {
-    return payload;
-  }
-
-  // Sampling requested and explicitly authorized by trusted pipeline code -> keep it.
-  if (payload.samplingAuthorized === true) {
-    return payload;
-  }
-
-  // Sampling requested but not authorized -> strip request before sending to players.
-  return {
-    ...payload,
-    samplingRequest: undefined,
-    samplingAuthorized: undefined,
-  };
-}
-
 /**
  * Merge subscriptions that subscribe to the same topic, paying attention to
  * the fields they need. This ignores `preloadType`.
@@ -107,7 +87,7 @@ function denormalizeSubscriptions(
           return [];
         }
         const merged = R.reduce(mergeSubscription, first, payloads.slice(1));
-        return [applySamplingGuard(merged)];
+        return [applySamplingGuardToSubscription(merged)];
       },
     ),
   )(subscriptions);

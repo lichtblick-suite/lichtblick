@@ -30,6 +30,7 @@ import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsColl
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
+import { applySamplingGuardToSubscriptions } from "@lichtblick/suite-base/players/samplingGuard";
 import {
   AdvertiseOptions,
   Player,
@@ -344,7 +345,7 @@ export class IterablePlayer implements Player {
 
   public setSubscriptions(newSubscriptions: SubscribePayload[]): void {
     log.debug("set subscriptions", newSubscriptions);
-    this.#subscriptions = newSubscriptions;
+    this.#subscriptions = applySamplingGuardToSubscriptions(newSubscriptions);
     this.#samplingEnabled = this.#subscriptions.some(
       (subscription) => subscription.samplingRequest?.mode === "latest-per-render-tick",
     );

@@ -11,7 +11,12 @@ import * as _ from "lodash-es";
 import { signal } from "@lichtblick/den/async";
 import { fromSec } from "@lichtblick/rostime";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
-import { MessageEvent, PlayerPresence, PlayerState } from "@lichtblick/suite-base/players/types";
+import {
+  InternalSubscribePayload,
+  MessageEvent,
+  PlayerPresence,
+  PlayerState,
+} from "@lichtblick/suite-base/players/types";
 import * as highFrequencyUtils from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
 
@@ -922,6 +927,71 @@ describe("IterablePlayer", () => {
         },
       ],
     ]);
+
+    player.close();
+    await player.isClosed;
+  });
+
+  it("strips unauthorized sampling requests from direct subscriptions", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+    player.setSubscriptions([
+      {
+        topic: "foo",
+        samplingRequest: { mode: "latest-per-render-tick" },
+      },
+    ]);
+
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+    await store.done;
+
+    expect(messageIteratorSpy).toHaveBeenCalledTimes(1);
+    const messageIteratorArgs = messageIteratorSpy.mock.calls[0]?.[0];
+    expect(messageIteratorArgs?.topics.get("foo")).toEqual({ topic: "foo" });
+
+    player.close();
+    await player.isClosed;
+  });
+
+  it("keeps authorized sampling requests from trusted subscriptions", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+    player.setSubscriptions([
+      {
+        topic: "foo",
+        samplingRequest: { mode: "latest-per-render-tick" },
+        samplingAuthorized: true,
+      } as InternalSubscribePayload,
+    ]);
+
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+    await store.done;
+
+    expect(messageIteratorSpy).toHaveBeenCalledTimes(1);
+    const messageIteratorArgs = messageIteratorSpy.mock.calls[0]?.[0];
+    expect(messageIteratorArgs?.topics.get("foo")).toEqual({
+      topic: "foo",
+      samplingRequest: { mode: "latest-per-render-tick" },
+      samplingAuthorized: true,
+    });
 
     player.close();
     await player.isClosed;
