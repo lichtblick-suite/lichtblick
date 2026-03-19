@@ -315,16 +315,27 @@ export type SubscribePayload = {
   /**
    * Optional sampling request for message delivery.
    * This describes subscriber compatibility only.
+   *
+   * Important: This is only a request. MessagePipeline may strip this at merge time unless
+   * the merged internal subscription is explicitly authorized.
    */
   samplingRequest?: {
     mode: "latest-per-render-tick";
   };
+};
 
-  /**
-   * Internal guard used by MessagePipeline to globally enforce sampling authorization.
-   * Sampling requests are ignored unless at least one merged subscriber sets this to `true`.
-   */
-  samplingAuthorized?: boolean;
+/**
+ * Internal MessagePipeline variant of SubscribePayload.
+ *
+ * `samplingAuthorized` is intentionally not available on public SubscribePayload.
+ * Trusted pipeline code may set this flag to indicate that at least one subscriber path is
+ * verified as safe for sampling.
+ *
+ * During merge, MessagePipeline removes sampling requests unless this flag is present on the
+ * merged subscription.
+ */
+export type InternalSubscribePayload = SubscribePayload & {
+  samplingAuthorized?: true;
 };
 
 // Represents a single topic publisher, for use in `setPublishers`.

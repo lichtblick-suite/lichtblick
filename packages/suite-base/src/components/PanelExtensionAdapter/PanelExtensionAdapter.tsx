@@ -52,8 +52,8 @@ import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables"
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
+  InternalSubscribePayload,
   PlayerPresence,
-  SubscribePayload,
 } from "@lichtblick/suite-base/players/types";
 import {
   useDefaultPanelTitle,
@@ -481,7 +481,7 @@ function PanelExtensionAdapter(
           return convertersForTopic.find((conv) => conv.toSchemaName === sub.convertTo);
         };
 
-        const subscribePayloads = localSubs.map((item): SubscribePayload => {
+        const subscribePayloads = localSubs.map((item): InternalSubscribePayload => {
           const preloadType = item.preload === true ? "full" : "partial";
 
           // Preload requires full message history, so sampling is never allowed here.
@@ -490,9 +490,11 @@ function PanelExtensionAdapter(
             return { topic: item.topic, preloadType };
           }
 
-          // Sampling is only allowed if the converter explicitly declares it
-          // supports latest-per-render-tick sampling.
+          // Sampling is only allowed if the converter explicitly declares it supports
+          // latest-per-render-tick sampling.
           // Native/direct paths are denied by default.
+          // If allowed, we set both the sampling request and the internal authorization bit.
+          // MessagePipeline merge logic strips sampling requests unless authorization is present.
           const converter = getConverterForSubscription(item);
           const topicSchemaName = topicToSchemaNameMap.get(item.topic);
           const isNativePath =

@@ -21,6 +21,7 @@ import {
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
+  InternalSubscribePayload,
   Player,
   PlayerPresence,
   PlayerState,
@@ -244,7 +245,7 @@ function subscriptionPolicyKey(payload: Immutable<SubscribePayload>): string {
   return `${payload.topic}\n${payload.preloadType ?? "partial"}`;
 }
 
-function describeSamplingPolicy(payload?: Immutable<SubscribePayload>): string {
+function describeSamplingPolicy(payload?: Immutable<InternalSubscribePayload>): string {
   if (!payload) {
     return "not-subscribed";
   }
@@ -262,8 +263,8 @@ function logSamplingPolicySwitches({
   next,
   subscriberId,
 }: {
-  previous: readonly Immutable<SubscribePayload>[];
-  next: readonly Immutable<SubscribePayload>[];
+  previous: readonly Immutable<InternalSubscribePayload>[];
+  next: readonly Immutable<InternalSubscribePayload>[];
   subscriberId: string;
 }): void {
   const prevByKey = new Map(previous.map((payload) => [subscriptionPolicyKey(payload), payload]));
