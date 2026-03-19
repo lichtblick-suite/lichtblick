@@ -15,7 +15,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { MessageEvent, Topic } from "@lichtblick/suite-base/players/types";
@@ -254,5 +254,79 @@ describe("useMessageDataItem", () => {
         queriedData: [{ path: "/topic.value", value: 2 }],
       },
     ]);
+  });
+
+  it("passes samplingRequest to subscriptions when provided", async () => {
+    const setSubscriptions = jest.fn();
+    const samplingRequest = { mode: "latest-per-render-tick" as const };
+
+    renderHook(
+      ({ sampling }) => useMessageDataItem("/topic.value", { samplingRequest: sampling }),
+      {
+        initialProps: { sampling: samplingRequest as typeof samplingRequest | undefined },
+        wrapper({ children }) {
+          return (
+            <MockCurrentLayoutProvider>
+              <MockMessagePipelineProvider
+                topics={topics}
+                datatypes={datatypes}
+                setSubscriptions={setSubscriptions}
+              >
+                {children}
+              </MockMessagePipelineProvider>
+            </MockCurrentLayoutProvider>
+          );
+        },
+      },
+    );
+
+    await waitFor(() => {
+      expect(setSubscriptions).toHaveBeenCalled();
+    });
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), [
+      {
+        topic: "/topic",
+        preloadType: "partial",
+        fields: ["value"],
+        samplingRequest,
+      },
+    ]);
+  });
+
+  it("removes samplingRequest from subscriptions when it is unset", async () => {
+    const setSubscriptions = jest.fn();
+    const samplingRequest = { mode: "latest-per-render-tick" as const };
+
+    const { rerender } = renderHook(
+      ({ sampling }) => useMessageDataItem("/topic.value", { samplingRequest: sampling }),
+      {
+        initialProps: { sampling: samplingRequest as typeof samplingRequest | undefined },
+        wrapper({ children }) {
+          return (
+            <MockCurrentLayoutProvider>
+              <MockMessagePipelineProvider
+                topics={topics}
+                datatypes={datatypes}
+                setSubscriptions={setSubscriptions}
+              >
+                {children}
+              </MockMessagePipelineProvider>
+            </MockCurrentLayoutProvider>
+          );
+        },
+      },
+    );
+
+    rerender({ sampling: undefined });
+
+    await waitFor(() => {
+      expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), [
+        {
+          topic: "/topic",
+          preloadType: "partial",
+          fields: ["value"],
+        },
+      ]);
+    });
   });
 });
