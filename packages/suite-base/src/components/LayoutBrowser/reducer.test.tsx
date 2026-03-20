@@ -106,33 +106,35 @@ describe("LayoutBrowser reducer", () => {
       }),
     );
 
-    // Set up multiAction with multiple IDs first
     const testId1 = BasicBuilder.string();
     const testId2 = BasicBuilder.string();
+
+    // When
     act(() => {
       result.current[1]({ type: "select-id", id: testId1 });
       result.current[1]({ type: "select-id", id: testId2, modKey: true });
       result.current[1]({ type: "queue-multi-action", action: "save" });
     });
 
+    // Then
     expect(result.current[0].multiAction).toBeDefined();
     expect(result.current[0].multiAction?.ids).toEqual([testId1, testId2]);
 
-    // When - shift the multi action
+    // When
     act(() => {
       result.current[1]({ type: "shift-multi-action" });
     });
 
-    // Then - the first ID should be removed from multiAction
+    // Then
     expect(result.current[0].multiAction).toBeDefined();
     expect(result.current[0].multiAction?.ids).toEqual([testId2]);
 
-    // When - shift again to remove the last ID
+    // When
     act(() => {
       result.current[1]({ type: "shift-multi-action" });
     });
 
-    // Then - multiAction should be cleared
+    // Then
     expect(result.current[0].multiAction).toBeUndefined();
   });
 
