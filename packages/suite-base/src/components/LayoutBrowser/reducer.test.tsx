@@ -95,6 +95,47 @@ describe("LayoutBrowser reducer", () => {
     });
   });
 
+  it("shift-multi-action", () => {
+    // Given
+    const { result } = renderHook(() =>
+      useLayoutBrowserReducer({
+        busy: false,
+        error: undefined,
+        online: true,
+        lastSelectedId: undefined,
+      }),
+    );
+
+    // Set up multiAction with multiple IDs first
+    const testId1 = BasicBuilder.string();
+    const testId2 = BasicBuilder.string();
+    act(() => {
+      result.current[1]({ type: "select-id", id: testId1 });
+      result.current[1]({ type: "select-id", id: testId2, modKey: true });
+      result.current[1]({ type: "queue-multi-action", action: "save" });
+    });
+
+    expect(result.current[0].multiAction).toBeDefined();
+    expect(result.current[0].multiAction?.ids).toEqual([testId1, testId2]);
+
+    // When - shift the multi action
+    act(() => {
+      result.current[1]({ type: "shift-multi-action" });
+    });
+
+    // Then - the first ID should be removed from multiAction
+    expect(result.current[0].multiAction).toBeDefined();
+    expect(result.current[0].multiAction?.ids).toEqual([testId2]);
+
+    // When - shift again to remove the last ID
+    act(() => {
+      result.current[1]({ type: "shift-multi-action" });
+    });
+
+    // Then - multiAction should be cleared
+    expect(result.current[0].multiAction).toBeUndefined();
+  });
+
   /**
    * GIVEN a state with some selected IDs
    * WHEN select-id is dispatched with modKey=true
