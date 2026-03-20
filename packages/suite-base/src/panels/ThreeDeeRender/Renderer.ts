@@ -344,6 +344,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     });
 
     // Throttled hover picking: perform GPU pick on mousemove at 10 Hz
+    // Mouse position is emitted on every move for smooth tooltip following.
     let hoverThrottleTimer: ReturnType<typeof setTimeout> | undefined;
     let isMouseDown = false;
     this.input.on("mousedown", () => {
@@ -353,7 +354,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       isMouseDown = false;
     });
     this.input.on("mousemove", (cursorCoords) => {
-      if (isMouseDown || !this.#pickingEnabled || hoverThrottleTimer != undefined) {
+      if (isMouseDown || !this.#pickingEnabled) {
+        return;
+      }
+      this.emit("hoverMoved", cursorCoords, this);
+      if (hoverThrottleTimer != undefined) {
         return;
       }
       hoverThrottleTimer = setTimeout(() => {

@@ -126,7 +126,11 @@ describe("<HoverTooltip />", () => {
 
   it("keeps tooltip visible briefly when entities clear, then hides after grace period", async () => {
     const entities: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "e", metadata: [{ key: "k", value: "v" }] },
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-1",
+        metadata: [{ key: "distance", value: "12.5m" }],
+      },
     ];
 
     const view = renderHoverTooltip({
@@ -167,7 +171,11 @@ describe("<HoverTooltip />", () => {
   it("pins on hover during grace and hides after leave delay", async () => {
     const canvas = makeCanvas();
     const entities: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "e", metadata: [{ key: "k", value: "v" }] },
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-1",
+        metadata: [{ key: "distance", value: "12.5m" }],
+      },
     ];
 
     const view = renderHoverTooltip({
@@ -210,14 +218,22 @@ describe("<HoverTooltip />", () => {
     });
   });
 
-  it("click-pins the tooltip with frozen content, and dismisses on outside click / Escape", async () => {
+  it("freezes content when click-pinned", async () => {
     const canvas = makeCanvas();
 
     const entitiesA: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "eA", metadata: [{ key: "k", value: "vA" }] },
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-front",
+        metadata: [{ key: "distance", value: "5.2m" }],
+      },
     ];
     const entitiesB: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "eB", metadata: [{ key: "k", value: "vB" }] },
+      {
+        topic: "/sensors/camera",
+        entityId: "pedestrian-1",
+        metadata: [{ key: "confidence", value: "0.95" }],
+      },
     ];
 
     const view = renderHoverTooltip({
@@ -247,11 +263,37 @@ describe("<HoverTooltip />", () => {
       </ThemeProvider>,
     );
 
-    // Still shows eA data; eB must not appear.
+    // Still shows original data; new entity must not appear.
     await waitFor(() => {
-      expect(view.getByText("eA")).toBeInTheDocument();
-      expect(view.queryByText("eB")).toBeNull();
+      expect(view.getByText("obstacle-front")).toBeInTheDocument();
+      expect(view.queryByText("pedestrian-1")).toBeNull();
     });
+  });
+
+  it("ignores mouse leave when click-pinned", async () => {
+    const canvas = makeCanvas();
+    const entities: HoverEntityInfo[] = [
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-front",
+        metadata: [{ key: "distance", value: "5.2m" }],
+      },
+    ];
+
+    const view = renderHoverTooltip({
+      entities,
+      position: { clientX: 100, clientY: 100 },
+      canvas,
+    });
+
+    // Enter grace then click-pin.
+    view.rerender(
+      <ThemeProvider isDark={false}>
+        <HoverTooltip entities={[]} position={{ clientX: 100, clientY: 100 }} canvas={canvas} />
+      </ThemeProvider>,
+    );
+    const paper = view.container.querySelector(".MuiPaper-root")!;
+    fireEvent.click(paper);
 
     // Leaving should not hide when click-pinned.
     fireEvent.mouseLeave(paper);
@@ -259,40 +301,88 @@ describe("<HoverTooltip />", () => {
       jest.advanceTimersByTime(2000);
     });
     expect(view.container.querySelector(".MuiPaper-root")).not.toBeNull();
+  });
+
+  it("dismisses click-pinned tooltip on outside click", async () => {
+    const canvas = makeCanvas();
+    const entities: HoverEntityInfo[] = [
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-front",
+        metadata: [{ key: "distance", value: "5.2m" }],
+      },
+    ];
+
+    const view = renderHoverTooltip({
+      entities,
+      position: { clientX: 100, clientY: 100 },
+      canvas,
+    });
+
+    // Enter grace then click-pin.
+    view.rerender(
+      <ThemeProvider isDark={false}>
+        <HoverTooltip entities={[]} position={{ clientX: 100, clientY: 100 }} canvas={canvas} />
+      </ThemeProvider>,
+    );
+    const paper = view.container.querySelector(".MuiPaper-root")!;
+    fireEvent.click(paper);
+    expect(view.container.querySelector(".MuiPaper-root")).not.toBeNull();
 
     // Outside click dismisses.
     fireEvent.mouseDown(document.body);
     await waitFor(() => {
       expect(view.container.querySelector(".MuiPaper-root")).toBeNull();
     });
+  });
 
-    // Re-open and ensure Escape dismisses.
-    const view2 = renderHoverTooltip({
-      entities: entitiesA,
+  it("dismisses click-pinned tooltip on Escape key", async () => {
+    const canvas = makeCanvas();
+    const entities: HoverEntityInfo[] = [
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-front",
+        metadata: [{ key: "distance", value: "5.2m" }],
+      },
+    ];
+
+    const view = renderHoverTooltip({
+      entities,
       position: { clientX: 100, clientY: 100 },
       canvas,
     });
-    view2.rerender(
+
+    // Enter grace then click-pin.
+    view.rerender(
       <ThemeProvider isDark={false}>
         <HoverTooltip entities={[]} position={{ clientX: 100, clientY: 100 }} canvas={canvas} />
       </ThemeProvider>,
     );
-    const paper2 = view2.container.querySelector(".MuiPaper-root")!;
-    fireEvent.click(paper2);
+    const paper = view.container.querySelector(".MuiPaper-root")!;
+    fireEvent.click(paper);
+    expect(view.container.querySelector(".MuiPaper-root")).not.toBeNull();
 
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => {
-      expect(view2.container.querySelector(".MuiPaper-root")).toBeNull();
+      expect(view.container.querySelector(".MuiPaper-root")).toBeNull();
     });
   });
 
   it("enters settled mode after dwell and delays update to new item with grace period", async () => {
     const canvas = makeCanvas();
     const entitiesA: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "eA", metadata: [{ key: "k", value: "vA" }] },
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-front",
+        metadata: [{ key: "distance", value: "5.2m" }],
+      },
     ];
     const entitiesB: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "eB", metadata: [{ key: "k", value: "vB" }] },
+      {
+        topic: "/sensors/camera",
+        entityId: "pedestrian-1",
+        metadata: [{ key: "confidence", value: "0.95" }],
+      },
     ];
 
     const view = renderHoverTooltip({
@@ -306,7 +396,7 @@ describe("<HoverTooltip />", () => {
       jest.advanceTimersByTime(700);
     });
 
-    // Now switch to eB while settled – grace period (350 ms) should delay the update.
+    // Now switch to pedestrian-1 while settled – grace period (350 ms) should delay the update.
     view.rerender(
       <ThemeProvider isDark={false}>
         <HoverTooltip
@@ -317,35 +407,43 @@ describe("<HoverTooltip />", () => {
       </ThemeProvider>,
     );
 
-    // During grace, still showing eA.
-    expect(view.getByText("eA")).toBeInTheDocument();
-    expect(view.queryByText("eB")).toBeNull();
+    // During grace, still showing obstacle-front.
+    expect(view.getByText("obstacle-front")).toBeInTheDocument();
+    expect(view.queryByText("pedestrian-1")).toBeNull();
 
     // 349 ms in – still in grace.
     act(() => {
       jest.advanceTimersByTime(349);
     });
-    expect(view.getByText("eA")).toBeInTheDocument();
-    expect(view.queryByText("eB")).toBeNull();
+    expect(view.getByText("obstacle-front")).toBeInTheDocument();
+    expect(view.queryByText("pedestrian-1")).toBeNull();
 
-    // 1 ms more – grace ends, eB content appears.
+    // 1 ms more – grace ends, pedestrian-1 content appears.
     act(() => {
       jest.advanceTimersByTime(1);
     });
 
     await waitFor(() => {
-      expect(view.getByText("eB")).toBeInTheDocument();
-      expect(view.queryByText("eA")).toBeNull();
+      expect(view.getByText("pedestrian-1")).toBeInTheDocument();
+      expect(view.queryByText("obstacle-front")).toBeNull();
     });
   });
 
   it("hover-pinned mode freezes content and ignores entity changes", async () => {
     const canvas = makeCanvas();
     const entitiesA: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "eA", metadata: [{ key: "k", value: "vA" }] },
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-front",
+        metadata: [{ key: "distance", value: "5.2m" }],
+      },
     ];
     const entitiesB: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "eB", metadata: [{ key: "k", value: "vB" }] },
+      {
+        topic: "/sensors/camera",
+        entityId: "pedestrian-1",
+        metadata: [{ key: "confidence", value: "0.95" }],
+      },
     ];
 
     const view = renderHoverTooltip({
@@ -374,8 +472,8 @@ describe("<HoverTooltip />", () => {
       </ThemeProvider>,
     );
 
-    expect(view.getByText("eA")).toBeInTheDocument();
-    expect(view.queryByText("eB")).toBeNull();
+    expect(view.getByText("obstacle-front")).toBeInTheDocument();
+    expect(view.queryByText("pedestrian-1")).toBeNull();
   });
 
   it("omits topic line when topic is undefined", () => {
@@ -405,7 +503,11 @@ describe("<HoverTooltip />", () => {
   it("shows 'Click to pin' hint in hover-pinned mode and hides it in click-pinned mode", async () => {
     const canvas = makeCanvas();
     const entities: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "e", metadata: [{ key: "k", value: "v" }] },
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-1",
+        metadata: [{ key: "distance", value: "12.5m" }],
+      },
     ];
 
     const view = renderHoverTooltip({
@@ -436,9 +538,21 @@ describe("<HoverTooltip />", () => {
   });
 
   it("positions the tooltip inside canvas bounds by flipping left/up when near the edge", async () => {
-    const canvas = makeCanvas({ left: 0, top: 0, right: 300, bottom: 300 });
+    // offsetWidth/offsetHeight are mocked to 200 in beforeEach.
+    const canvas = makeCanvas({
+      left: 0,
+      top: 0,
+      right: 300,
+      bottom: 300,
+      width: 300,
+      height: 300,
+    });
     const entities: HoverEntityInfo[] = [
-      { topic: "/t", entityId: "e", metadata: [{ key: "k", value: "v" }] },
+      {
+        topic: "/sensors/lidar",
+        entityId: "obstacle-1",
+        metadata: [{ key: "distance", value: "12.5m" }],
+      },
     ];
 
     const view = renderHoverTooltip({
@@ -447,9 +561,22 @@ describe("<HoverTooltip />", () => {
       canvas,
     });
 
+    // Trigger a second render so paperRef.current is populated and the
+    // measured element size (200×200) is used instead of the max constants.
+    view.rerender(
+      <ThemeProvider isDark={false}>
+        <HoverTooltip
+          entities={entities}
+          position={{ clientX: 290, clientY: 290 }}
+          canvas={canvas}
+        />
+      </ThemeProvider>,
+    );
+
     const paper = await waitFor(() => view.container.querySelector<HTMLElement>(".MuiPaper-root")!);
 
-    // With tooltip 200x200 and offset 6, at (290, 290) in 300x300 bounds it must flip left/up:
+    // Measured tooltip size is 200×200, offset is 6.
+    // At (290, 290) in 300×300 bounds there isn't space right/below so it flips:
     // left = 290 - 200 - 6 = 84, top = 290 - 200 - 6 = 84
     expect(paper.style.left).toBe("84px");
     expect(paper.style.top).toBe("84px");

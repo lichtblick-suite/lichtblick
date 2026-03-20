@@ -2,35 +2,19 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Divider, Paper, Typography } from "@mui/material";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useStyles } from "./HoverTooltip.style";
 import {
   HOVER_TOOLTIP_DWELL_MS,
   HOVER_TOOLTIP_GRACE_PERIOD_MS,
   HOVER_TOOLTIP_LEAVE_DELAY_MS,
+  HOVER_TOOLTIP_MAX_H,
+  HOVER_TOOLTIP_MAX_W,
   HOVER_TOOLTIP_OFFSET_PX,
+  clampTooltipAxis,
 } from "./constants";
-import type { HoverEntityInfo } from "./types";
-
-/**
- * Tooltip display modes:
- * - `following`  – tooltip follows cursor and updates immediately (fast browsing).
- * - `settled`    – user dwelled 700 ms on one object; tooltip still follows cursor
- *                  but any change to hovered objects triggers a grace delay.
- * - `grace`      – position frozen; waiting for the user to reach the tooltip or
- *                  for the grace timer to expire and apply the pending update.
- * - `hover-pinned` – mouse is on the tooltip; content is frozen.
- * - `click-pinned` – user clicked to pin; fully static until explicit dismiss.
- */
-type TooltipMode = "hidden" | "following" | "settled" | "grace" | "hover-pinned" | "click-pinned";
-
-type Props = {
-  entities: HoverEntityInfo[];
-  position: { clientX: number; clientY: number };
-  /** Canvas element used to constrain tooltip within the 3D panel bounds. */
-  canvas: HTMLCanvasElement | ReactNull;
-};
+import type { HoverEntityInfo, HoverTooltipProperties, TooltipMode } from "./types";
 
 /**
  * Tooltip that follows the mouse cursor and shows metadata for hovered 3D
@@ -39,7 +23,11 @@ type Props = {
  * until the mouse leaves it. Clicking on the tooltip pins it in place until
  * an outside click or the Escape key dismisses it.
  */
-export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.Element | ReactNull {
+export function HoverTooltip({
+  entities,
+  position,
+  canvas,
+}: HoverTooltipProperties): React.JSX.Element | ReactNull {
   const { classes } = useStyles();
   const paperRef = useRef<HTMLDivElement>(ReactNull);
   const graceTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -67,15 +55,17 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
   useEffect(() => {
     const currentMode = modeRef.current;
 
+    // Always keep the entity key up to date, even while pinned. This avoids
+    // stale comparisons after the tooltip is dismissed.
+    const newKey = entities.map((e) => `${e.topic ?? ""}::${e.entityId}`).join("|");
+    const keyChanged = newKey !== lastEntityKey.current;
+    lastEntityKey.current = newKey;
+
     // These modes are fully frozen – the user is actively interacting with the
     // tooltip, so we must not disturb its content or position.
     if (currentMode === "click-pinned" || currentMode === "hover-pinned") {
       return;
     }
-
-    const newKey = entities.map((e) => `${e.topic ?? ""}::${e.entityId}`).join("|");
-    const keyChanged = newKey !== lastEntityKey.current;
-    lastEntityKey.current = newKey;
 
     if (entities.length > 0) {
       if (currentMode === "hidden" || currentMode === "following") {
@@ -85,9 +75,9 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
         if (currentMode === "hidden") {
           setMode("following");
         }
-        // Start (or reset) the dwell timer only when the hovered object changes.
-        // Staying on the same object keeps the timer counting toward "settled".
-        if (keyChanged) {
+        // Start (or reset) the dwell timer when the hovered object changes or
+        // when entering from hidden (to ensure dwell always starts fresh).
+        if (keyChanged || currentMode === "hidden") {
           clearTimeout(dwellTimer.current);
           dwellTimer.current = setTimeout(() => {
             if (modeRef.current === "following") {
@@ -234,46 +224,32 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
   // ---------------------------------------------------------------------------
   // Smart positioning: keep tooltip inside the 3D panel (or viewport)
   // ---------------------------------------------------------------------------
-  useLayoutEffect(() => {
-    const el = paperRef.current;
-    if (!el) {
-      return;
-    }
-    const displayPos = mode === "following" || mode === "settled" ? position : frozenPosition;
-    const tooltipW = el.offsetWidth;
-    const tooltipH = el.offsetHeight;
-
-    // Use canvas bounds when available; fall back to viewport.
-    const bounds = canvas
+  const displayPos = mode === "following" || mode === "settled" ? position : frozenPosition;
+  const bounds =
+    canvas != undefined
       ? canvas.getBoundingClientRect()
       : { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
 
-    const spaceRight = bounds.right - displayPos.clientX;
-    const spaceLeft = displayPos.clientX - bounds.left;
-    const spaceBelow = bounds.bottom - displayPos.clientY;
-    const spaceAbove = displayPos.clientY - bounds.top;
+  // Use measured element size when available so the tooltip stays close to the
+  // cursor. Fall back to the CSS max dimensions only on the very first render.
+  const el = paperRef.current;
+  const tooltipW = el != undefined ? el.offsetWidth : HOVER_TOOLTIP_MAX_W;
+  const tooltipH = el != undefined ? el.offsetHeight : HOVER_TOOLTIP_MAX_H;
 
-    let left: number;
-    if (spaceRight >= tooltipW + HOVER_TOOLTIP_OFFSET_PX) {
-      left = displayPos.clientX + HOVER_TOOLTIP_OFFSET_PX;
-    } else if (spaceLeft >= tooltipW + HOVER_TOOLTIP_OFFSET_PX) {
-      left = displayPos.clientX - tooltipW - HOVER_TOOLTIP_OFFSET_PX;
-    } else {
-      left = Math.max(bounds.left, bounds.right - tooltipW);
-    }
-
-    let top: number;
-    if (spaceBelow >= tooltipH + HOVER_TOOLTIP_OFFSET_PX) {
-      top = displayPos.clientY + HOVER_TOOLTIP_OFFSET_PX;
-    } else if (spaceAbove >= tooltipH + HOVER_TOOLTIP_OFFSET_PX) {
-      top = displayPos.clientY - tooltipH - HOVER_TOOLTIP_OFFSET_PX;
-    } else {
-      top = Math.max(bounds.top, bounds.bottom - tooltipH);
-    }
-
-    el.style.left = `${left}px`;
-    el.style.top = `${top}px`;
-  });
+  const tooltipLeft = clampTooltipAxis(
+    displayPos.clientX,
+    tooltipW,
+    bounds.left,
+    bounds.right,
+    HOVER_TOOLTIP_OFFSET_PX,
+  );
+  const tooltipTop = clampTooltipAxis(
+    displayPos.clientY,
+    tooltipH,
+    bounds.top,
+    bounds.bottom,
+    HOVER_TOOLTIP_OFFSET_PX,
+  );
 
   // Cleanup timers on unmount.
   useEffect(() => {
@@ -296,8 +272,8 @@ export function HoverTooltip({ entities, position, canvas }: Props): React.JSX.E
       className={classes.root}
       elevation={8}
       style={{
-        left: -9999,
-        top: -9999,
+        left: tooltipLeft,
+        top: tooltipTop,
         pointerEvents: interactive ? "auto" : "none",
         cursor: mode === "click-pinned" ? "default" : undefined,
       }}

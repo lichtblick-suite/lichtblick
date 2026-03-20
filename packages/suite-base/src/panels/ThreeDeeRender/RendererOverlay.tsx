@@ -138,13 +138,13 @@ export function RendererOverlay(props: Props): React.JSX.Element {
   });
   const renderer = useRenderer();
 
-  const getHoverEntityId = useCallback((sel: PickedRenderable): string => {
-    const name = sel.renderable.name;
+  const getHoverEntityId = useCallback((pickedRenderable: PickedRenderable): string => {
+    const name = pickedRenderable.renderable.name;
     if (name.length === 0) {
-      return `object-${sel.instanceIndex ?? 0}`;
+      return `object-${pickedRenderable.instanceIndex ?? 0}`;
     }
 
-    const topic = sel.renderable.topic;
+    const topic = pickedRenderable.renderable.topic;
     if (topic != undefined && name.endsWith(` on ${topic}`)) {
       return name.slice(0, Math.max(0, name.length - ` on ${topic}`.length));
     }
@@ -170,20 +170,24 @@ export function RendererOverlay(props: Props): React.JSX.Element {
     setSelectedRenderable(selections.length === 1 ? selections[0] : undefined);
   });
 
-  useRendererEvent("renderableHovered", (selections, cursorCoords) => {
+  // Track mouse position at full framerate for smooth tooltip following.
+  useRendererEvent("hoverMoved", (cursorCoords) => {
     const rect = props.canvas?.getBoundingClientRect();
     if (rect) {
       setHoverPosition({ clientX: rect.left + cursorCoords.x, clientY: rect.top + cursorCoords.y });
     }
+  });
+
+  useRendererEvent("renderableHovered", (selections) => {
     const infos: HoverEntityInfo[] = [];
-    for (const sel of selections) {
-      const topic = sel.renderable.topic;
+    for (const pickedRenderable of selections) {
+      const topic = pickedRenderable.renderable.topic;
       const details: Record<string, unknown> | undefined =
-        sel.instanceIndex != undefined
-          ? (sel.renderable.instanceDetails(sel.instanceIndex) as
+        pickedRenderable.instanceIndex != undefined
+          ? (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex) as
               | Record<string, unknown>
               | undefined)
-          : (sel.renderable.details() as Record<string, unknown> | undefined);
+          : (pickedRenderable.renderable.details() as Record<string, unknown> | undefined);
 
       const metadata: { key: string; value: string }[] = [];
 
@@ -219,7 +223,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
 
       infos.push({
         topic,
-        entityId: getHoverEntityId(sel),
+        entityId: getHoverEntityId(pickedRenderable),
         metadata,
       });
     }

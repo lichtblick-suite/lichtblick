@@ -15,6 +15,7 @@ import { Asset, DraggedMessagePath } from "@lichtblick/suite-base/components/Pan
 import { Renderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/Renderer";
 import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
 import { DEFAULT_CAMERA_STATE } from "@lichtblick/suite-base/panels/ThreeDeeRender/camera";
+import { HOVER_PICK_THROTTLE_MS } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import { CameraStateSettings } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
 import { TFMessage } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
@@ -280,14 +281,18 @@ describe("3D Renderer", () => {
       );
     }
 
-    it("emits renderableHovered at most once per 100ms while moving the mouse", () => {
+    function createHoverRenderer(): { renderer: Renderer; hoverCanvas: HTMLCanvasElement } {
       const hoverParent = document.createElement("div");
       const hoverCanvas = document.createElement("canvas");
       hoverParent.appendChild(hoverCanvas);
       prepareDomForInput(hoverCanvas, hoverParent);
-
       const renderer = new Renderer({ ...defaultRendererProps, canvas: hoverCanvas });
       renderer.setPickingEnabled(true);
+      return { renderer, hoverCanvas };
+    }
+
+    it("emits renderableHovered at most once per HOVER_PICK_THROTTLE_MS while moving the mouse", () => {
+      const { renderer, hoverCanvas } = createHoverRenderer();
 
       const hoveredSpy = jest.fn();
       renderer.addListener("renderableHovered", hoveredSpy);
@@ -298,7 +303,7 @@ describe("3D Renderer", () => {
 
       expect(hoveredSpy).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(100);
+      jest.advanceTimersByTime(HOVER_PICK_THROTTLE_MS);
       hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 13, clientY: 13 }));
       expect(hoveredSpy).toHaveBeenCalledTimes(2);
 
@@ -306,13 +311,7 @@ describe("3D Renderer", () => {
     });
 
     it("does not hover-pick while mouse is down, then resumes after mouseup", () => {
-      const hoverParent = document.createElement("div");
-      const hoverCanvas = document.createElement("canvas");
-      hoverParent.appendChild(hoverCanvas);
-      prepareDomForInput(hoverCanvas, hoverParent);
-
-      const renderer = new Renderer({ ...defaultRendererProps, canvas: hoverCanvas });
-      renderer.setPickingEnabled(true);
+      const { renderer, hoverCanvas } = createHoverRenderer();
 
       const hoveredSpy = jest.fn();
       renderer.addListener("renderableHovered", hoveredSpy);
@@ -341,7 +340,7 @@ describe("3D Renderer", () => {
       renderer.addListener("renderableHovered", hoveredSpy);
 
       hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 10, clientY: 10 }));
-      jest.advanceTimersByTime(200);
+      jest.advanceTimersByTime(HOVER_PICK_THROTTLE_MS * 2);
       hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
 
       expect(hoveredSpy).toHaveBeenCalledTimes(0);
