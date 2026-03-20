@@ -25,22 +25,21 @@ import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/Pane
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { useStyles } from "@lichtblick/suite-base/panels/Plot/Plot.style";
+import { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
+import { PlotLegend } from "@lichtblick/suite-base/panels/Plot/PlotLegend";
 import { VerticalBars } from "@lichtblick/suite-base/panels/Plot/VerticalBars";
 import { DEFAULT_SIDEBAR_DIMENSION } from "@lichtblick/suite-base/panels/Plot/constants";
+import useGlobalSync from "@lichtblick/suite-base/panels/Plot/hooks/useGlobalSync";
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
+import usePlotDataHandlingTwo from "@lichtblick/suite-base/panels/Plot/hooks/usePlotDataHandlingTwo";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
+import usePlotPanelSettings from "@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelSettings";
+import useRenderer from "@lichtblick/suite-base/panels/Plot/hooks/useRenderer";
+import useSubscriptions from "@lichtblick/suite-base/panels/Plot/hooks/useSubscriptions";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
 
-import { useStyles } from "./Plot.style";
-import { PlotCoordinator } from "./PlotCoordinator";
-import { PlotLegend } from "./PlotLegend";
-import useGlobalSync from "./hooks/useGlobalSync";
-import usePlotDataHandling from "./hooks/usePlotDataHandling";
-import usePlotPanelSettings from "./hooks/usePlotPanelSettings";
-import useRenderer from "./hooks/useRenderer";
-import useSubscriptions from "./hooks/useSubscriptions";
-
-const Plot = (props: PlotProps): React.JSX.Element => {
+const PlotTwo = (props: PlotProps): React.JSX.Element => {
   const { saveConfig, config } = props;
   const {
     paths: series,
@@ -97,7 +96,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   useSubscriptions(config, subscriberId);
   useGlobalSync(coordinator, setCanReset, { shouldSync }, subscriberId);
   usePanning(canvasDiv, coordinator, draggingRef);
-  const { colorsByDatasetIndex, labelsByDatasetIndex, datasetsBuilder } = usePlotDataHandling(
+  const { colorsByDatasetIndex, labelsByDatasetIndex, datasetsBuilder } = usePlotDataHandlingTwo(
     config,
     globalVariables,
   );
@@ -294,4 +293,4 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   );
 };
 
-export default Plot;
+export default PlotTwo;

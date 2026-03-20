@@ -21,6 +21,7 @@ import mapThumbnail from "./Map/thumbnail.png";
 import parametersThumbnail from "./Parameters/thumbnail.png";
 import pieChartThumbnail from "./PieChart/thumbnail.png";
 import plotThumbnail from "./Plot/thumbnail.png";
+import plotTwoThumbnail from "./Plot/thumbnail.png";
 import publishThumbnail from "./Publish/thumbnail.png";
 import rawMessagesThumbnail from "./RawMessages/thumbnail.png";
 import stateTransitionsThumbnail from "./StateTransitions/thumbnail.png";
@@ -204,5 +205,12 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     type: "PlaybackPerformance",
     description: t("studioPlaybackPerformanceDescription"),
     module: async () => await import("./PlaybackPerformance"),
+  },
+  {
+    title: "Plot Two (MessageRange)",
+    type: "PlotTwo",
+    description: "Plot panel using subscribeMessageRange instead of block loader",
+    thumbnail: plotTwoThumbnail,
+    module: async () => await import("./PlotTwo"),
   },
 ];

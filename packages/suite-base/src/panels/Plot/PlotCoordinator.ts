@@ -16,6 +16,7 @@ import { Immutable, Time } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { stringifyMessagePath } from "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
 import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
@@ -50,6 +51,8 @@ const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) => datas
 export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private renderer: OffscreenCanvasRenderer;
   private datasetsBuilder: IDatasetsBuilder;
+  private subscribeMessageRange: UseSubscribeMessageRange;
+  private rangeSubscriptions = new Map<string, () => void>();
   private shouldSync: boolean = false;
   private configBounds: ConfigBounds = { x: {}, y: {} };
   private globalBounds?: Immutable<Partial<Bounds1D>>;
@@ -78,16 +81,22 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private destroyed = false;
   private latestBlocks?: Immutable<(MessageBlock | undefined)[]>;
 
-  public constructor(renderer: OffscreenCanvasRenderer, builder: IDatasetsBuilder) {
+  public constructor(
+    renderer: OffscreenCanvasRenderer,
+    builder: IDatasetsBuilder,
+    subscribeMessageRange?: UseSubscribeMessageRange,
+  ) {
     super();
 
     this.renderer = renderer;
     this.datasetsBuilder = builder;
+    this.subscribeMessageRange = subscribeMessageRange ?? (() => () => {});
   }
 
   /** Stop the coordinator from sending any future updates to the renderer. */
   public destroy(): void {
     this.destroyed = true;
+    this.cancelAllRangeSubscriptions();
   }
 
   public setShouldSync({ shouldSync }: { shouldSync: boolean }): void {
@@ -114,6 +123,12 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     if (lastSeekTime !== this.lastSeekTime) {
       this.currentValuesByConfigIndex = [];
       this.lastSeekTime = lastSeekTime;
+
+      // Resubscribe after a seek so the new iterator delivers data from the new position
+      if (this.datasetsBuilder.handleMessageRange) {
+        const topics = [...new Set(this.series.map((s) => s.parsed.topicName))];
+        this.subscribeToTopicRanges(topics, activeData.startTime);
+      }
     }
 
     for (const seriesItem of this.series) {
@@ -280,6 +295,15 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     // Dispatch since we might have series changes
     this.datasetsBuilder.setSeries(this.series);
     this.queueDispatchDownsample();
+
+    // Subscribe to topic ranges when using the message-range builder
+    if (this.datasetsBuilder.handleMessageRange) {
+      const topics = [...new Set(this.series.map((s) => s.parsed.topicName))];
+      // startTime is only known at playerState time; pass undefined here — handlePlayerState
+      // will resubscribe with the real startTime on the next seek / first state update.
+      // For config-driven resubscription we rely on the seek path.
+      this.subscribeToTopicRanges(topics, undefined);
+    }
   }
 
   public setGlobalBounds(bounds: Immutable<Bounds1D> | undefined): void {
@@ -387,6 +411,61 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       min: this.interactionBounds?.x.min ?? this.globalBounds?.min ?? resetBounds.min,
       max: this.interactionBounds?.x.max ?? this.globalBounds?.max ?? resetBounds.max,
     };
+  }
+
+  private cancelAllRangeSubscriptions(): void {
+    for (const cancel of this.rangeSubscriptions.values()) {
+      cancel();
+    }
+    this.rangeSubscriptions.clear();
+  }
+
+  /**
+   * Subscribe to message ranges for the given topics.
+   * Cancels existing subscriptions for removed topics, starts new ones for new topics.
+   * If startTime is undefined the subscription is deferred until a seek provides it.
+   */
+  private subscribeToTopicRanges(topics: string[], startTime: Immutable<Time> | undefined): void {
+    if (!this.datasetsBuilder.handleMessageRange) {
+      return;
+    }
+
+    // Cancel subscriptions for topics no longer needed
+    for (const [topic, cancel] of this.rangeSubscriptions) {
+      if (!topics.includes(topic)) {
+        cancel();
+        this.rangeSubscriptions.delete(topic);
+      }
+    }
+
+    if (!startTime) {
+      return;
+    }
+
+    const builder = this.datasetsBuilder;
+    const frozenStartTime = startTime;
+
+    for (const topic of topics) {
+      // Cancel previous subscription for this topic before starting a new one
+      this.rangeSubscriptions.get(topic)?.();
+
+      const cancel = this.subscribeMessageRange({
+        topic,
+        onNewRangeIterator: async (iterable) => {
+          let isReset = true;
+          for await (const batch of iterable) {
+            if (this.isDestroyed()) {
+              return;
+            }
+            builder.handleMessageRange!(batch, { isReset }, frozenStartTime);
+            isReset = false;
+            this.queueDispatchDownsample();
+          }
+        },
+      });
+
+      this.rangeSubscriptions.set(topic, cancel);
+    }
   }
 
   private isDestroyed(): boolean {
