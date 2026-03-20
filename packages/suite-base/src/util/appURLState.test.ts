@@ -97,6 +97,38 @@ describe("app state url parser", () => {
         dsParams: { bar: "barValue", baz: "bazValue" },
       });
     });
+
+    it("parses numeric epoch timestamp (seconds with nanoseconds)", () => {
+      const url = urlBuilder();
+      const dataSourceUrl = new URL(`http://${BasicBuilder.string()}.com`);
+      url.searchParams.append("ds", "remote-file");
+      url.searchParams.append("ds.url", dataSourceUrl.href);
+      url.searchParams.append("time", "1751378709.331000000");
+
+      const parsed = parseAppURLState(url);
+
+      expect(parsed).toMatchObject({
+        ds: "remote-file",
+        time: { sec: 1751378709, nsec: 331000000 },
+        dsParams: { url: dataSourceUrl.href },
+      });
+    });
+
+    it("parses RFC3339 timestamp format", () => {
+      const url = urlBuilder();
+      const dataSourceUrl = new URL(`http://${BasicBuilder.string()}.com`);
+      url.searchParams.append("ds", "remote-file");
+      url.searchParams.append("ds.url", dataSourceUrl.href);
+      url.searchParams.append("time", "2025-07-01T14:05:09.331293771Z");
+
+      const parsed = parseAppURLState(url);
+
+      expect(parsed).toMatchObject({
+        ds: "remote-file",
+        time: { sec: 1751378709, nsec: 331293771 },
+        dsParams: { url: dataSourceUrl.href },
+      });
+    });
   });
 });
 

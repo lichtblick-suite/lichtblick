@@ -7,8 +7,9 @@
 
 import * as _ from "lodash-es";
 
-import { Time, fromRFC3339String, toRFC3339String } from "@lichtblick/rostime";
+import { Time, toRFC3339String } from "@lichtblick/rostime";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import { parseTimeUrlString } from "@lichtblick/suite-base/util/time";
 
 import { keyMap } from "./constants";
 
@@ -78,7 +79,7 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
 export function parseAppURLState(url: URL): AppURLState | undefined {
   const ds = url.searchParams.get("ds") ?? undefined;
   const timeString = url.searchParams.get("time");
-  const time = timeString == undefined ? undefined : fromRFC3339String(timeString);
+  const time = parseTimeUrlString(timeString ?? undefined);
   const dsParams: Record<string, string> = {};
   url.searchParams.forEach((v, k) => {
     if (k && v && k.startsWith("ds.")) {

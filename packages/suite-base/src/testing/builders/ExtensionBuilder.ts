@@ -24,6 +24,7 @@ export default class ExtensionBuilder {
       version: BasicBuilder.string(),
       readme: BasicBuilder.string(),
       changelog: BasicBuilder.string(),
+      size: BasicBuilder.number(),
     });
   }
 

@@ -178,6 +178,44 @@ describe("ExtensionsAPI", () => {
         externalId: mockApiResponse.extension.id,
       });
     });
+
+    it("should serialize form data fields correctly based on type", async () => {
+      // Given
+      const keywords = [BasicBuilder.string(), BasicBuilder.string()];
+      const baseInfo = ExtensionBuilder.extensionInfo();
+      const extension: ExtensionInfoWorkspace = ExtensionBuilder.extensionInfoWorkspace({
+        workspace,
+        info: { ...baseInfo, keywords, description: "", homepage: "" },
+      });
+      const mockFile = new File([BasicBuilder.string()], "test.zip", { type: "application/zip" });
+      const mockApiResponse: CreateOrUpdateResponse = {
+        extension: {
+          ...extension.info,
+          createdAt: BasicBuilder.datetime(),
+          updatedAt: BasicBuilder.datetime(),
+          fileId: BasicBuilder.string(),
+          extensionId: extension.info.id,
+          scope: extension.info.namespace!,
+        },
+      };
+      const mockPost = jest.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
+      jest.mocked(HttpService).post = mockPost;
+
+      // When
+      await extensionsAPI.createOrUpdate(extension, mockFile);
+
+      // Then
+      const formData: FormData = mockPost.mock.calls[0][1];
+      // booleans are serialized as strings
+      expect(formData.get("replace")).toBe("true");
+      // objects/arrays are JSON-stringified
+      expect(formData.get("keywords")).toBe(JSON.stringify(keywords));
+      // non-empty strings are included as-is
+      expect(formData.get("name")).toBe(extension.info.name);
+      // empty strings are omitted
+      expect(formData.get("description")).toBeNull();
+      expect(formData.get("homepage")).toBeNull();
+    });
   });
 
   describe("remove", () => {

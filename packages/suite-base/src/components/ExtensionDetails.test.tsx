@@ -85,6 +85,7 @@ describe("ExtensionDetails Component", () => {
     expect(screen.getByText(new RegExp(mockExtension.license, "i"))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(mockExtension.publisher, "i"))).toBeInTheDocument();
     expect(screen.getByText(new RegExp(mockExtension.description, "i"))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`${mockExtension.size}`, "i"))).toBeInTheDocument();
     expect(screen.getByText("README")).toBeInTheDocument();
     expect(screen.getByText("CHANGELOG")).toBeInTheDocument();
   });
@@ -239,10 +240,21 @@ describe("ExtensionDetails Component", () => {
     });
 
     it("does not log analytics event when component is unmounted before install completes", async () => {
+      // Given
       (isDesktopApp as jest.Mock).mockReturnValue(true);
 
-      mockDownloadExtension.mockResolvedValue(new Uint8Array());
-      mockInstallExtensions.mockResolvedValue({});
+      // Add delays to ensure unmount happens during the async operation
+      mockDownloadExtension.mockImplementation(
+        async () =>
+          await new Promise((resolve) =>
+            setTimeout(() => {
+              resolve(new Uint8Array());
+            }, 100),
+          ),
+      );
+      mockInstallExtensions.mockImplementation(
+        async () => await new Promise((resolve) => setTimeout(resolve, 100)),
+      );
 
       const { unmount } = render(
         <ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />,
@@ -251,9 +263,11 @@ describe("ExtensionDetails Component", () => {
       const installButton = screen.getByText("Install");
       fireEvent.click(installButton);
 
+      // When
       // Unmount before the async operation completes
       unmount();
 
+      // Then
       await waitFor(() => {
         expect(mockDownloadExtension).toHaveBeenCalled();
         expect(mockInstallExtensions).toHaveBeenCalled();

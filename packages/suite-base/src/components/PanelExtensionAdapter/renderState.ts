@@ -16,7 +16,6 @@ import {
   Immutable,
   MessageEvent,
   ParameterValue,
-  RegisterMessageConverterArgs,
   RenderState,
   Subscription,
   Topic,
@@ -31,6 +30,7 @@ import {
   Topic as PlayerTopic,
 } from "@lichtblick/suite-base/players/types";
 import { HoverValue } from "@lichtblick/suite-base/types/hoverValue";
+import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 
 import {
   collateTopicSchemaConversions,
@@ -39,6 +39,7 @@ import {
   mapDifference,
   TopicSchemaConversions,
 } from "./messageProcessing";
+import type { MessageConverterAlertHandler } from "./types";
 
 const EmptyParameters = new Map<string, ParameterValue>();
 
@@ -50,15 +51,17 @@ export type BuilderRenderStateInput = Immutable<{
   appSettings: Map<string, AppSettingValue> | undefined;
   colorScheme: RenderState["colorScheme"] | undefined;
   currentFrame: MessageEvent[] | undefined;
+  emitAlert?: MessageConverterAlertHandler;
   globalVariables: GlobalVariables;
   hoverValue: HoverValue | undefined;
-  messageConverters?: readonly RegisterMessageConverterArgs<unknown>[];
+  messageConverters?: readonly InstalledMessageConverter[];
   playerState: PlayerState | undefined;
   sharedPanelState: Record<string, unknown> | undefined;
   sortedTopics: readonly PlayerTopic[];
   sortedServices?: readonly string[];
   subscriptions: Subscription[];
   watchedFields: Set<string>;
+  forceConversion: Set<string>;
   config?: RenderStateConfig | undefined;
 }>;
 
@@ -109,6 +112,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       appSettings,
       colorScheme,
       currentFrame,
+      emitAlert,
       globalVariables,
       hoverValue,
       messageConverters,
@@ -118,6 +122,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       sortedServices,
       subscriptions,
       watchedFields,
+      forceConversion,
       config,
     } = input;
 
@@ -247,6 +252,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               topicSchemaConverters,
               postProcessedFrame,
               { ...globalVariables } as Readonly<GlobalVariables>,
+              { emitAlert },
             );
           }
           lastMessageByTopic.set(messageEvent.topic, messageEvent);
@@ -265,6 +271,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               newConverters,
               postProcessedFrame,
               { ...globalVariables } as Readonly<GlobalVariables>,
+              { emitAlert },
             );
           }
         }
@@ -282,6 +289,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               topicSchemaConverters,
               postProcessedFrame,
               { ...globalVariables } as Readonly<GlobalVariables>,
+              { emitAlert },
             );
           }
         }
@@ -338,6 +346,8 @@ function initRenderStateBuilder(): BuildRenderStateFn {
                   { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
                   topicSchemaConverters,
                   frames,
+                  undefined,
+                  { emitAlert },
                 );
               }
             },
@@ -384,6 +394,27 @@ function initRenderStateBuilder(): BuildRenderStateFn {
 
     if (watchedFields.has("appSettings")) {
       updateRenderStateField("appSettings", appSettings, renderState.appSettings, shouldRender);
+    }
+
+    if (forceConversion.size > 0) {
+      const postProcessedFrame: MessageEvent[] = [];
+
+      for (const topic of forceConversion) {
+        const messageEvent = lastMessageByTopic.get(topic);
+
+        if (messageEvent == undefined) {
+          continue;
+        }
+
+        convertMessage(
+          { ...messageEvent, topicConfig: configTopics[topic] },
+          topicSchemaConverters,
+          postProcessedFrame,
+        );
+      }
+
+      renderState.currentFrame = postProcessedFrame;
+      shouldRender.value = true;
     }
 
     // Update the prev fields with the latest values at the end of all the watch steps

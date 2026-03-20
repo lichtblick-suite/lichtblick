@@ -10,17 +10,13 @@ import { StoreApi, useStore } from "zustand";
 
 import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { useGuaranteedContext } from "@lichtblick/hooks";
-import {
-  ExtensionPanelRegistration,
-  Immutable,
-  PanelSettings,
-  RegisterMessageConverterArgs,
-} from "@lichtblick/suite";
+import { ExtensionPanelRegistration, Immutable, PanelSettings } from "@lichtblick/suite";
 import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettings/types";
 import { TopicAliasFunctions } from "@lichtblick/suite-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
 import { TypeExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
+import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 
 export type ExtensionData = {
   buffer: Uint8Array;
@@ -85,20 +81,15 @@ export type ExtensionCatalog = Immutable<{
   loadedExtensions: Set<string>;
   installedExtensions: undefined | ExtensionInfo[];
   installedPanels: undefined | Record<string, RegisteredPanel>;
-  installedMessageConverters: undefined | Omit<MessageConverter, "panelSettings">[];
+  installedMessageConverters: undefined | InstalledMessageConverter[];
   installedTopicAliasFunctions: undefined | TopicAliasFunctions;
   installedCameraModels: CameraModelsMap;
   panelSettings: undefined | ExtensionSettings;
 }>;
 
-export type MessageConverter = RegisterMessageConverterArgs<unknown> & {
-  extensionNamespace?: Namespace;
-  extensionId?: string;
-};
-
 export type ContributionPoints = {
   panels: Record<string, RegisteredPanel>;
-  messageConverters: MessageConverter[];
+  messageConverters: InstalledMessageConverter[];
   topicAliasFunctions: TopicAliasFunctions;
   panelSettings: ExtensionSettings;
   cameraModels: CameraModelsMap;
@@ -113,8 +104,10 @@ export function useExtensionCatalog<T>(selector: (registry: ExtensionCatalog) =>
   return useStore(context, selector);
 }
 
+const EMPTY_PANEL_SETTINGS: ExtensionSettings = {};
+
 export function getExtensionPanelSettings(
   reg: ExtensionCatalog,
 ): Record<string, Record<string, PanelSettings<unknown>>> {
-  return reg.panelSettings ?? {};
+  return reg.panelSettings ?? EMPTY_PANEL_SETTINGS;
 }

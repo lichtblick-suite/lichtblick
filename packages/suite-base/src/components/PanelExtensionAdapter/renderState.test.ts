@@ -83,6 +83,7 @@ function makeInitialState(): BuilderRenderStateInput {
         },
       },
     ],
+    forceConversion: new Set(),
   };
 }
 const setup = (inputOverride: Partial<BuilderRenderStateInput> = {}) => {
@@ -99,6 +100,7 @@ const setup = (inputOverride: Partial<BuilderRenderStateInput> = {}) => {
     sortedTopics: [],
     subscriptions: [],
     ...inputOverride,
+    forceConversion: new Set(),
   };
 
   return {
@@ -193,6 +195,7 @@ describe("renderState", () => {
       sortedTopics: [{ name: "test", schemaName: "schema" }],
       subscriptions: [{ topic: "test", convertTo: "schema" }],
       sortedServices: [],
+      forceConversion: new Set(),
     };
     const firstRenderState = buildRenderState(initialState);
     expect(firstRenderState).toEqual({
@@ -238,6 +241,7 @@ describe("renderState", () => {
       sortedTopics: [{ name: "test", schemaName: "schema" }],
       subscriptions: [{ topic: "test", convertTo: "schema" }],
       messageConverters: [],
+      forceConversion: new Set(),
     });
 
     expect(state).toEqual({
@@ -286,6 +290,7 @@ describe("renderState", () => {
       ],
       subscriptions: [{ topic: "test", convertTo: "schema" }],
       messageConverters: [],
+      forceConversion: new Set(),
     });
 
     expect(state).toEqual({
@@ -350,6 +355,7 @@ describe("renderState", () => {
         { topic: "test2", preload: true },
       ],
       messageConverters: [],
+      forceConversion: new Set(),
     });
 
     expect(state).toEqual({
@@ -429,6 +435,7 @@ describe("renderState", () => {
           },
         },
       ],
+      forceConversion: new Set(),
     });
 
     expect(state).toEqual({
@@ -522,6 +529,7 @@ describe("renderState", () => {
           converter: converter2,
         },
       ],
+      forceConversion: new Set(),
     });
 
     expect(state).toMatchObject({
@@ -558,6 +566,9 @@ describe("renderState", () => {
         topic: "another",
       }),
       {},
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
     );
     expect(converter2).not.toHaveBeenCalled();
   });
@@ -631,6 +642,7 @@ describe("renderState", () => {
           },
         },
       ],
+      forceConversion: new Set(),
     });
 
     expect(state).toEqual({
@@ -775,6 +787,7 @@ describe("renderState", () => {
           converter: () => undefined,
         },
       ],
+      forceConversion: new Set(),
     });
 
     expect(state).toEqual({
@@ -795,6 +808,76 @@ describe("renderState", () => {
           schemaName: "schema",
           sizeInBytes: 1,
           topic: "test",
+        },
+      ],
+    });
+  });
+
+  it("should force conversion of the latest message when requested", () => {
+    const buildRenderState = initRenderStateBuilder();
+    const converter = jest.fn((msg, event) => ({
+      converted: event.topicConfig?.flag ?? "default",
+      original: msg,
+    }));
+
+    const baseInput: BuilderRenderStateInput = {
+      watchedFields: new Set(["currentFrame"]),
+      playerState: undefined,
+      appSettings: undefined,
+      currentFrame: [
+        {
+          topic: "test",
+          schemaName: "schema",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 1,
+          message: { from: "currentFrame" },
+        },
+      ],
+      colorScheme: undefined,
+      globalVariables: {},
+      hoverValue: undefined,
+      sharedPanelState: {},
+      sortedTopics: [{ name: "test", schemaName: "schema" }],
+      subscriptions: [{ topic: "test", convertTo: "converted", preload: true }],
+      messageConverters: [
+        {
+          fromSchemaName: "schema",
+          toSchemaName: "converted",
+          converter,
+        },
+      ],
+      forceConversion: new Set(),
+      config: { topics: { test: { flag: "initial" } } },
+    };
+
+    const state1 = buildRenderState(baseInput);
+    expect(converter).toHaveBeenCalledTimes(1);
+    expect(state1).toMatchObject({
+      currentFrame: [
+        {
+          topic: "test",
+          schemaName: "converted",
+          message: { converted: "initial" },
+        },
+      ],
+    });
+
+    converter.mockClear();
+
+    const state2 = buildRenderState({
+      ...baseInput,
+      currentFrame: undefined,
+      forceConversion: new Set(["test"]),
+      config: { topics: { test: { flag: "forced" } } },
+    });
+
+    expect(converter).toHaveBeenCalledTimes(1);
+    expect(state2).toMatchObject({
+      currentFrame: [
+        {
+          topic: "test",
+          schemaName: "converted",
+          message: { converted: "forced" },
         },
       ],
     });
@@ -879,6 +962,7 @@ describe("renderState", () => {
           converter,
         },
       ],
+      forceConversion: new Set(),
     };
 
     const state1 = buildRenderState(initialState);
@@ -897,6 +981,9 @@ describe("renderState", () => {
       { from: "currentFrame" },
       expect.objectContaining({ topic: "test" }),
       { var1: "value1" },
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
     );
 
     converter.mockClear();
@@ -921,6 +1008,9 @@ describe("renderState", () => {
       { from: "currentFrame" },
       expect.objectContaining({ topic: "test" }),
       { var1: "value2" },
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
     );
   });
 
@@ -954,9 +1044,17 @@ describe("renderState", () => {
           converter,
         },
       ],
+      forceConversion: new Set(),
     });
 
-    expect(converter).toHaveBeenCalledWith({}, expect.objectContaining({ topic: "test" }), {});
+    expect(converter).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ topic: "test" }),
+      {},
+      expect.objectContaining({
+        emitAlert: expect.any(Function),
+      }),
+    );
   });
 
   it("should update renderState.variables when variables watch field is set", () => {
@@ -973,6 +1071,7 @@ describe("renderState", () => {
       sortedTopics: [],
       subscriptions: [],
       messageConverters: [],
+      forceConversion: new Set(),
     });
 
     expect(state).toEqual({
@@ -1093,6 +1192,7 @@ describe("renderState", () => {
         hoverValue: undefined,
         sharedPanelState: {},
         ...stableConversionInputs,
+        forceConversion: new Set(),
       });
 
       expect(state).toEqual({
@@ -1120,6 +1220,7 @@ describe("renderState", () => {
         hoverValue: undefined,
         sharedPanelState: {},
         ...stableConversionInputs,
+        forceConversion: new Set(),
       });
 
       expect(state).toEqual({
@@ -1139,6 +1240,7 @@ describe("renderState", () => {
         hoverValue: undefined,
         sharedPanelState: {},
         ...stableConversionInputs,
+        forceConversion: new Set(),
       });
 
       expect(state).toEqual(undefined);
@@ -1196,6 +1298,7 @@ describe("renderState", () => {
         },
       ],
       config: { topics: { myTopic: { test: false } } },
+      forceConversion: new Set(),
     });
 
     expect(checkRenderedConfig).toHaveBeenCalled();

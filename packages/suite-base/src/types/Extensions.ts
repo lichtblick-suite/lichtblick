@@ -14,13 +14,14 @@ export type ExtensionInfo = {
   description: string;
   displayName: string;
   homepage: string;
-  keywords: string[];
+  keywords: readonly string[];
   license: string;
   name: string;
   namespace?: Namespace;
   publisher: string;
   qualifiedName: string;
   version: string;
+  size?: number;
   readme?: string;
   changelog?: string;
   externalId?: string;

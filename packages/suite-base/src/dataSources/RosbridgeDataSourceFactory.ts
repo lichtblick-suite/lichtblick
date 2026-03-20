@@ -18,7 +18,9 @@ class RosbridgeDataSourceFactory implements IDataSourceFactory {
   public displayName = "Rosbridge";
   public iconName: IDataSourceFactory["iconName"] = "Flow";
   public docsLinks = [
-    { url: "https://lichtblick-suite.github.io/docs/connecting-to-data/rosbridge.html" },
+    {
+      url: "https://lichtblick-suite.github.io/docs/docs/connecting-to-data/frameworks/rosbridge/",
+    },
   ];
   public description = "Connect to a ROS 1 or ROS 2 system using the Rosbridge WebSocket protocol.";
 

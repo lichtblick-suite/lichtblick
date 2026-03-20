@@ -710,8 +710,8 @@ describe("IterablePlayer", () => {
     const playerStates = await store.done;
     expect(_.last(playerStates)!.alerts).toEqual([
       {
-        severity: "warn",
-        message: "High frequency topics detected",
+        severity: HIGH_FREQUENCY_ALERT.severity,
+        message: HIGH_FREQUENCY_ALERT.message,
         error: expect.any(Error),
       },
     ]);
@@ -774,9 +774,16 @@ describe("IterablePlayer", () => {
       await store.add(state);
     });
 
-    await store.done;
+    const playerStates = await store.done;
 
     expect(isTopicHighFrequencySpy).toHaveBeenCalledTimes(1);
+    expect(_.last(playerStates)!.alerts).toEqual([
+      {
+        severity: HIGH_FREQUENCY_ALERT.severity,
+        message: HIGH_FREQUENCY_ALERT.message,
+        error: expect.any(Error),
+      },
+    ]);
 
     player.close();
     await player.isClosed;

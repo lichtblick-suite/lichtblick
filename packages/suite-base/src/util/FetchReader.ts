@@ -16,6 +16,7 @@
 import { EventEmitter } from "eventemitter3";
 
 import Log from "@lichtblick/log";
+import { globalRequestQueue } from "@lichtblick/suite-base/util/RequestQueue";
 
 const log = Log.getLogger(__filename);
 
@@ -38,7 +39,9 @@ export default class FetchReader extends EventEmitter<EventTypes> {
     super();
     this.#url = url;
     this.#controller = new AbortController();
-    this.#response = fetch(url, { ...options, signal: this.#controller.signal });
+    this.#response = globalRequestQueue.run(
+      async () => await fetch(url, { ...options, signal: this.#controller.signal }),
+    );
   }
 
   // you can only call getReader once on a response body
@@ -92,6 +95,7 @@ export default class FetchReader extends EventEmitter<EventTypes> {
         if (!reader) {
           return;
         }
+
         reader
           .read()
           .then(({ done, value }) => {

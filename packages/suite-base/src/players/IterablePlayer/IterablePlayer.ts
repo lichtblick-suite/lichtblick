@@ -45,6 +45,7 @@ import {
   TopicSelection,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
+import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import delay from "@lichtblick/suite-base/util/delay";
@@ -208,7 +209,6 @@ export class IterablePlayer implements Player {
       urlParams,
       source,
       name,
-
       enablePreload,
       sourceId,
       readAheadDuration = { sec: 10, nsec: 0 },
@@ -577,7 +577,7 @@ export class IterablePlayer implements Player {
       const uniqueTopics = new Map<string, Topic>();
       const duration = subtractTimes(this.#end, this.#start);
       this.#providerTopicStats = topicStats;
-      let highFrequencyTopicFound = false;
+      let hasHighFrequencyTopic = false;
 
       for (const topic of topics) {
         const existingTopic = uniqueTopics.get(topic.name);
@@ -591,14 +591,20 @@ export class IterablePlayer implements Player {
         }
         uniqueTopics.set(topic.name, topic);
 
-        if (!highFrequencyTopicFound) {
-          highFrequencyTopicFound = isTopicHighFrequency(
+        if (!hasHighFrequencyTopic) {
+          hasHighFrequencyTopic = isTopicHighFrequency({
             topicStats,
-            topic.name,
+            topic,
             duration,
-            topic.schemaName,
-            this.#alertManager,
-          );
+          });
+
+          if (hasHighFrequencyTopic) {
+            this.#alertManager.addAlert(HIGH_FREQUENCY_ALERT.id, {
+              severity: HIGH_FREQUENCY_ALERT.severity,
+              message: HIGH_FREQUENCY_ALERT.message,
+              error: new Error(HIGH_FREQUENCY_ALERT.errorMessage),
+            });
+          }
         }
       }
 

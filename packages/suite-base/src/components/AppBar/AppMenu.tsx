@@ -50,6 +50,21 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
   }, []);
 
   const { importLayout, exportLayout } = useLayoutTransfer();
+
+  const runLayoutAction = useCallback(
+    (action: () => Promise<unknown>) => {
+      void (async () => {
+        try {
+          await action();
+          handleNestedMenuClose();
+        } catch (err: unknown) {
+          console.error(err);
+        }
+      })();
+    },
+    [handleNestedMenuClose],
+  );
+
   // FILE
 
   const fileItems = useMemo(() => {
@@ -146,18 +161,16 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         type: "item",
         label: t("importLayoutFromFile"),
         key: "import-layout",
-        onClick: async () => {
-          await importLayout();
-          handleNestedMenuClose();
+        onClick: () => {
+          runLayoutAction(importLayout);
         },
       },
       {
         type: "item",
         label: t("exportLayoutToFile"),
         key: "export-layout",
-        onClick: async () => {
-          await exportLayout();
-          handleNestedMenuClose();
+        onClick: () => {
+          runLayoutAction(exportLayout);
         },
       },
     ],
@@ -167,6 +180,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
       importLayout,
       leftSidebarOpen,
       rightSidebarOpen,
+      runLayoutAction,
       sidebarActions.left,
       sidebarActions.right,
       t,

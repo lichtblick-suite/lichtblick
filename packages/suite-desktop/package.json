@@ -15,7 +15,7 @@
     "@lichtblick/suite-base": "workspace:*",
     "@lichtblick/theme": "workspace:*",
     "@lichtblick/tsconfig": "1.0.2",
-    "@mcap/core": "2.1.6",
+    "@mcap/core": "2.2.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.1",
     "@storybook/react": "9.1.9",
     "@types/mock-fs": "4.13.4",
@@ -52,7 +52,7 @@
     "tinycolor2": "1.6.0",
     "tss-react": "4.9.19",
     "utif": "3.1.0",
-    "webpack": "5.104.1",
+    "webpack": "5.105.3",
     "webpack-dev-server": "5.2.3"
   }
 }
