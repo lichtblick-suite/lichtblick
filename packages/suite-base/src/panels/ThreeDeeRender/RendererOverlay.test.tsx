@@ -130,6 +130,8 @@ describe("<RendererOverlay /> hover wiring", () => {
 
     const cb = mockRendererEventCallbacks.get("renderableHovered");
     expect(cb).toBeDefined();
+    const hoverMovedCb = mockRendererEventCallbacks.get("hoverMoved");
+    expect(hoverMovedCb).toBeDefined();
 
     const details = {
       metadata: [
@@ -150,6 +152,7 @@ describe("<RendererOverlay /> hover wiring", () => {
     };
 
     act(() => {
+      hoverMovedCb?.({ x: 10, y: 20 } as any);
       cb?.(
         [
           {
