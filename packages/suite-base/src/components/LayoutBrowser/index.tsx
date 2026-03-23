@@ -149,6 +149,7 @@ export default function LayoutBrowser({
               await layoutManager.overwriteLayout({ id: id as LayoutID });
               break;
           }
+          dispatch({ type: "shift-multi-action" });
         } catch (err: unknown) {
           enqueueSnackbar(`Error processing layouts: ${(err as Error).message}`, {
             variant: "error",
