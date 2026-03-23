@@ -57,10 +57,10 @@ export default function LayoutSection({
     selectedLayouts.forEach(onDelete);
   };
   const handleOverwriteSelected = () => {
-    selectedLayouts.forEach(onOverwrite);
+    selectedLayouts.filter((l) => l.working != undefined).forEach(onOverwrite);
   };
   const handleRevertSelected = () => {
-    selectedLayouts.forEach(onRevert);
+    selectedLayouts.filter((l) => l.working != undefined).forEach(onRevert);
   };
 
   return (
@@ -99,8 +99,20 @@ export default function LayoutSection({
             }}
             onShare={onShare}
             onExport={onExport}
-            onOverwrite={handleOverwriteSelected}
-            onRevert={handleRevertSelected}
+            onOverwrite={(clickedLayout) => {
+              if (multiSelectedIds.includes(clickedLayout.id)) {
+                handleOverwriteSelected();
+              } else {
+                onOverwrite(clickedLayout);
+              }
+            }}
+            onRevert={(clickedLayout) => {
+              if (multiSelectedIds.includes(clickedLayout.id)) {
+                handleRevertSelected();
+              } else {
+                onRevert(clickedLayout);
+              }
+            }}
             onMakePersonalCopy={onMakePersonalCopy}
           />
         ))}
