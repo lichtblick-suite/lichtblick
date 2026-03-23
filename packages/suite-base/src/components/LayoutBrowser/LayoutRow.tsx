@@ -94,21 +94,26 @@ export default React.memo(function LayoutRow({
   }, [layoutManager]);
 
   const overwriteAction = useCallback(() => {
+    console.debug(`Overwriting layout ${layout.name} (${layout.id})`);
     onOverwrite(layout);
   }, [layout, onOverwrite]);
 
   const confirmRevert = useCallback(async () => {
+    console.debug(`Confirming revert for layout ${layout.name} (${layout.id})`);
+    const count = multiSelectedIds.length;
+    const multiTitle = `Revert ${count} layout${count === 1 ? "" : "s"}?`;
     const response = await confirm({
-      title: multiSelection ? `Revert layouts` : `Revert “${layout.name}”?`,
-      prompt: "Your changes will be permantly discarded. This cannot be undone.",
+      title: multiSelection ? multiTitle : `Revert "${layout.name}"?`,
+      prompt: "Your changes will be permanently discarded. This cannot be undone.",
       ok: "Discard changes",
       variant: "danger",
     });
     if (response !== "ok") {
       return;
     }
+    console.debug(`Reverting layout ${layout.name} (${layout.id})`);
     onRevert(layout);
-  }, [confirm, layout, multiSelection, onRevert]);
+  }, [confirm, layout, multiSelectedIds.length, multiSelection, onRevert]);
 
   const renameAction = useCallback(() => {
     setNameFieldValue(layout.name);

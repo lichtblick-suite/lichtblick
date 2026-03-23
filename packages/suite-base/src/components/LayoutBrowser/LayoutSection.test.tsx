@@ -26,8 +26,8 @@ jest.mock("./LayoutRow", () => ({
     layout: Layout;
     onDuplicate: () => void;
     onDelete: (layout: Layout) => void;
-    onOverwrite: () => void;
-    onRevert: () => void;
+    onOverwrite: (layout: Layout) => void;
+    onRevert: (layout: Layout) => void;
   }) => (
     <div data-testid={`layout-row-${layout.id}`}>
       <button data-testid={`duplicate-button-${layout.id}`} onClick={onDuplicate}>
@@ -41,10 +41,20 @@ jest.mock("./LayoutRow", () => ({
       >
         Delete
       </button>
-      <button data-testid={`overwrite-button-${layout.id}`} onClick={onOverwrite}>
+      <button
+        data-testid={`overwrite-button-${layout.id}`}
+        onClick={() => {
+          onOverwrite(layout);
+        }}
+      >
         Overwrite
       </button>
-      <button data-testid={`revert-button-${layout.id}`} onClick={onRevert}>
+      <button
+        data-testid={`revert-button-${layout.id}`}
+        onClick={() => {
+          onRevert(layout);
+        }}
+      >
         Revert
       </button>
     </div>
@@ -282,7 +292,7 @@ describe("LayoutSection", () => {
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId(`overwrite-button-${layout2.id}`)); // Click on any layout's overwrite button
+    fireEvent.click(screen.getByTestId(`overwrite-button-${layout1.id}`)); // Click on a selected layout's overwrite button
 
     // THEN
     expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(2);
@@ -292,7 +302,7 @@ describe("LayoutSection", () => {
     expect(defaultProps.onOverwrite.mock.calls[1][0]).toEqual(layout3);
   });
 
-  it("doesn't call onOverwrite when no layouts are selected", () => {
+  it("calls onOverwrite for the clicked layout when clicking on an unselected layout", () => {
     // GIVEN
     const multiSelectedIds: string[] = [];
 
@@ -301,7 +311,8 @@ describe("LayoutSection", () => {
     fireEvent.click(screen.getByTestId("overwrite-button-1"));
 
     // THEN
-    expect(defaultProps.onOverwrite).not.toHaveBeenCalled();
+    expect(defaultProps.onOverwrite).toHaveBeenCalledTimes(1);
+    expect(defaultProps.onOverwrite.mock.calls[0][0]).toEqual(layout1);
   });
 
   it("only overwrites selected layouts", () => {
@@ -347,7 +358,7 @@ describe("LayoutSection", () => {
 
     // WHEN
     render(<LayoutSection {...defaultProps} multiSelectedIds={multiSelectedIds} />);
-    fireEvent.click(screen.getByTestId(`revert-button-${layout2.id}`)); // Click on any layout's revert button
+    fireEvent.click(screen.getByTestId(`revert-button-${layout1.id}`)); // Click on a selected layout's revert button
 
     // THEN
     expect(defaultProps.onRevert).toHaveBeenCalledTimes(2);
@@ -357,7 +368,7 @@ describe("LayoutSection", () => {
     expect(defaultProps.onRevert.mock.calls[1][0]).toEqual(layout3);
   });
 
-  it("doesn't call onRevert when no layouts are selected", () => {
+  it("calls onRevert for the clicked layout when clicking on an unselected layout", () => {
     // GIVEN
     const multiSelectedIds: string[] = [];
 
@@ -366,7 +377,8 @@ describe("LayoutSection", () => {
     fireEvent.click(screen.getByTestId("revert-button-1"));
 
     // THEN
-    expect(defaultProps.onRevert).not.toHaveBeenCalled();
+    expect(defaultProps.onRevert).toHaveBeenCalledTimes(1);
+    expect(defaultProps.onRevert.mock.calls[0][0]).toEqual(layout1);
   });
 
   it("only reverts selected layouts", () => {
