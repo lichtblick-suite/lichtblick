@@ -6,8 +6,10 @@ import { useCallback, useRef } from "react";
 import Logger from "@lichtblick/log";
 import { SubscribeMessageRangeArgs } from "@lichtblick/suite";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
-import { ExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import {
+  ExtensionCatalog,
+  useExtensionCatalog,
+} from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 
 import { createMessageRangeIterator } from "./messageRangeIterator";
 import { MessageConverterAlertHandler } from "./types";
