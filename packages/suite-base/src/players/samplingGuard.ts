@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { InternalSubscribePayload } from "@lichtblick/suite-base/players/types";
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-type SamplingGuardInput = {
-  samplingRequest?: {
-    mode: "latest-per-render-tick";
-  };
-  samplingAuthorized?: true;
-};
+type SamplingGuardInput = Pick<
+  InternalSubscribePayload,
+  "topic" | "samplingRequest" | "samplingAuthorized"
+>;
 
 /**
  * Shared sampling authorization guard.
