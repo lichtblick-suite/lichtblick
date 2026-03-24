@@ -47,7 +47,10 @@ jest.mock("@lichtblick/suite-base/hooks/useAppConfigurationValue", () => ({
 }));
 
 jest.mock("@lichtblick/suite-base/components/SidebarContent", () => ({
-  SidebarContent: ({ children, trailingItems }: React.PropsWithChildren<{ trailingItems?: React.ReactNode }>) => (
+  SidebarContent: ({
+    children,
+    trailingItems,
+  }: React.PropsWithChildren<{ trailingItems?: React.ReactNode }>) => (
     <div>
       {trailingItems}
       {children}
