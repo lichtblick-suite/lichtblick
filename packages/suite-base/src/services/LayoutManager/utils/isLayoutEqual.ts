@@ -14,11 +14,19 @@ import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/
  * considered "equal" then the function returns true. If the two instances are not equal it returns
  * false.
  *
- * Layout instances are considered equal if all non-configById fields are identical (extra undefined
- * fields in b are ignored), and all pre-existing configById keys in _a_ are unchanged in _b_. New
- * entries added to _b_'s configById that were not present in _a_ are ignored — panels legitimately
- * populate their own default config keys during initialization, and treating those additions as user
- * edits would create false "unsaved changes" indicators on shared/team layouts.
+ * The comparison is intentionally additive-lenient in two dimensions:
+ *
+ * 1. Top-level non-configById fields: extra undefined fields in b are ignored.
+ * 2. configById (panel configs): two levels of additive tolerance are applied.
+ *    a. New panel IDs in b that were not in a are ignored — a panel can be added to the
+ *       mosaic but its first saveConfig call is not a user edit.
+ *    b. New config keys in b's panel config that were not in a's panel config are ignored —
+ *       panels populate their own default config keys during initialization, and treating
+ *       those additions as user edits would create false "unsaved changes" indicators on
+ *       shared/team layouts.
+ *
+ * Existing keys that are present in a and have a different value in b (including removal,
+ * i.e., the key is absent in b) are always treated as real differences.
  */
 export function isLayoutEqual(a: LayoutData, b: LayoutData): boolean {
   const { configById: configByIdA, ...restA } = a;
@@ -32,11 +40,18 @@ export function isLayoutEqual(a: LayoutData, b: LayoutData): boolean {
     return false;
   }
 
-  // For configById, only check keys that existed in the baseline (a).
-  // Panel initialization may add new keys to b; those are not user edits.
-  for (const key of Object.keys(configByIdA)) {
-    if (!_.isEqual(configByIdA[key], configByIdB[key])) {
-      return false;
+  // For configById, only check panel IDs that existed in the baseline (a).
+  // New panel entries added by panel initialization are not considered user edits.
+  for (const panelId of Object.keys(configByIdA)) {
+    const panelConfigA = configByIdA[panelId] ?? {};
+    const panelConfigB = configByIdB[panelId] ?? {};
+
+    // For each key in the baseline panel config, check it still has the same value.
+    // New keys added to b's panel config are ignored (panel default initialization).
+    for (const configKey of Object.keys(panelConfigA)) {
+      if (!_.isEqual(panelConfigA[configKey], panelConfigB[configKey])) {
+        return false;
+      }
     }
   }
 
