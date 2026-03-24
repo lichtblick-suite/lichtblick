@@ -80,7 +80,7 @@ const PlotTwo = (props: PlotProps): React.JSX.Element => {
     onClickPath,
     focusedPath,
     keyDownHandlers,
-    keyUphandlers,
+    keyUpHandlers,
     getPanelContextMenuItems,
   } = usePlotInteractionHandlers({
     config,
@@ -292,7 +292,7 @@ const PlotTwo = (props: PlotProps): React.JSX.Element => {
         )}
         <PanelContextMenu getItems={getPanelContextMenuItems} />
       </Stack>
-      <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUphandlers} />
+      <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUpHandlers} />
     </Stack>
   );
 };
