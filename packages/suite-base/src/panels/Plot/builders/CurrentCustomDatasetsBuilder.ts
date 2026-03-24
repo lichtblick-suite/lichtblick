@@ -22,12 +22,8 @@ import {
   SeriesConfigKey,
   SeriesItem,
 } from "./IDatasetsBuilder";
-import {
-  CurrentFrameSeriesItem,
-  buildViewportDatasets,
-  lastMatchingTopic,
-  setSeries,
-} from "./utils";
+import { CurrentFrameSeriesItem } from "./types";
+import { buildViewportDatasets, lastMatchingTopic, setSeries } from "./utils";
 import { getChartValue, isChartValue } from "../utils/datum";
 
 /**

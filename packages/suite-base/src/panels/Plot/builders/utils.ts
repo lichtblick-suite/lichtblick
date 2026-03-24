@@ -1,30 +1,16 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { ChartDataset } from "chart.js";
-
-import { MessagePath } from "@lichtblick/message-path";
-import { Immutable, MessageEvent, Time } from "@lichtblick/suite";
+import { Immutable, MessageEvent } from "@lichtblick/suite";
 
 import { GetViewportDatasetsResult, SeriesConfigKey, SeriesItem } from "./IDatasetsBuilder";
+import { CurrentFrameSeriesItem } from "./types";
 import { Dataset } from "../types";
-import { Datum } from "../utils/datum";
-
-type DatumWithReceiveTime = Datum & {
-  receiveTime: Time;
-};
 
 /**
  * Series item type shared by builders that work only with the current frame (no accumulation).
  * Used by IndexDatasetsBuilder and CurrentCustomDatasetsBuilder.
  */
-export type CurrentFrameSeriesItem = {
-  configIndex: number;
-  enabled: boolean;
-  messagePath: string;
-  parsed: Immutable<MessagePath>;
-  dataset: ChartDataset<"scatter", DatumWithReceiveTime[]>;
-};
 
 const emptyPaths = new Set<string>();
 
