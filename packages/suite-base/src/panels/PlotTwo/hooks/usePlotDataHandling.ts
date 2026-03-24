@@ -7,7 +7,7 @@ import { parseMessagePath } from "@lichtblick/message-path";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { CurrentCustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CurrentCustomDatasetsBuilder";
-import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilder";
+import { CustomDatasetsBuilderTwo } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilderTwo";
 import { IndexDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/IndexDatasetsBuilder";
 import { TimestampDatasetsBuilderTwo } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilderTwo";
 import { UsePlotDataHandling } from "@lichtblick/suite-base/panels/Plot/types";
@@ -27,7 +27,7 @@ const usePlotDataHandling = (
       case "index":
         return new IndexDatasetsBuilder();
       case "custom":
-        return new CustomDatasetsBuilder();
+        return new CustomDatasetsBuilderTwo();
       case "currentCustom":
         return new CurrentCustomDatasetsBuilder();
       default:
@@ -38,7 +38,7 @@ const usePlotDataHandling = (
   useEffect(() => {
     if (
       datasetsBuilder instanceof CurrentCustomDatasetsBuilder ||
-      datasetsBuilder instanceof CustomDatasetsBuilder
+      datasetsBuilder instanceof CustomDatasetsBuilderTwo
     ) {
       if (!xAxisPath?.value) {
         datasetsBuilder.setXPath(undefined);

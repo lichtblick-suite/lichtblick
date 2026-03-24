@@ -131,7 +131,6 @@ const PlotTwo = (props: PlotProps): React.JSX.Element => {
     // When config changes (e.g., series reordering) and the player is paused,
     // we need to re-process the current player state to update the rendered data
     if (coordinator) {
-      console.log("plot two - in coordinator");
       coordinator.handlePlayerState(getMessagePipelineState().playerState);
     }
   }, [coordinator, config, globalVariables, theme.palette.mode, getMessagePipelineState]);
@@ -149,7 +148,6 @@ const PlotTwo = (props: PlotProps): React.JSX.Element => {
     });
 
     // Subscribing only gets us _new_ updates, so we feed the latest state into the chart
-    console.log("plot two - feeding latest player state into coordinator");
     coordinator.handlePlayerState(getMessagePipelineState().playerState);
     return unsub;
   }, [coordinator, getMessagePipelineState, subscribeMessagePipeline]);

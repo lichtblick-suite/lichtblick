@@ -13,14 +13,20 @@ import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components
 import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
 import { OffscreenCanvasRenderer } from "@lichtblick/suite-base/panels/Plot/OffscreenCanvasRenderer";
 import { PlotCoordinator as BasePlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
-import { IDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/IDatasetsBuilder";
+import {
+  IDatasetsBuilder,
+  SeriesConfigKey,
+} from "@lichtblick/suite-base/panels/Plot/builders/IDatasetsBuilder";
 import { PlayerState } from "@lichtblick/suite-base/players/types";
 
 import { pathToSubscribePayload } from "../Plot/utils/subscription";
 
 export class PlotCoordinatorTwo extends BasePlotCoordinator {
   private subscribeMessageRange: UseSubscribeMessageRange;
-  private rangeSubscriptionCancels = new Map<string, () => void>();
+  private rangeSubscriptionCancels = new Map<
+    string,
+    { cancel: () => void; seriesKeys: ReadonlySet<SeriesConfigKey> }
+  >();
   private startTime: Immutable<Time> | undefined;
 
   public constructor(
@@ -33,7 +39,7 @@ export class PlotCoordinatorTwo extends BasePlotCoordinator {
   }
 
   public override destroy(): void {
-    for (const cancel of this.rangeSubscriptionCancels.values()) {
+    for (const { cancel } of this.rangeSubscriptionCancels.values()) {
       cancel();
     }
     this.rangeSubscriptionCancels.clear();
@@ -53,19 +59,24 @@ export class PlotCoordinatorTwo extends BasePlotCoordinator {
     const { messages, lastSeekTime, currentTime, startTime } = activeData;
     this.startTime = startTime;
 
-    const currentTopics = new Set(
-      this.series
-        .filter((s) => pathToSubscribePayload(s.parsed, "full") != undefined)
-        .map((s) => s.parsed.topicName),
-    );
-
-    const topicsChanged =
-      currentTopics.size !== this.rangeSubscriptionCancels.size ||
-      [...currentTopics].some((t) => !this.rangeSubscriptionCancels.has(t));
-
-    if (topicsChanged) {
-      this.subscribeTopicRanges(currentTopics);
+    const seriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
+    for (const s of this.series) {
+      if (pathToSubscribePayload(s.parsed, "full") == undefined) {
+        continue;
+      }
+      const keys = seriesKeysByTopic.get(s.parsed.topicName) ?? new Set<SeriesConfigKey>();
+      keys.add(s.key);
+      seriesKeysByTopic.set(s.parsed.topicName, keys);
     }
+
+    // If the builder uses a separate x-axis topic (e.g. custom x-axis), subscribe to it too.
+    // The builder identifies it internally via handleMessageRange by comparing the topic name.
+    const xTopic = this.datasetsBuilder.getXTopic?.();
+    if (xTopic && !seriesKeysByTopic.has(xTopic)) {
+      seriesKeysByTopic.set(xTopic, new Set<SeriesConfigKey>());
+    }
+
+    this.subscribeTopicRanges(seriesKeysByTopic);
 
     if (this.isTimeseriesPlot) {
       const secondsSinceStart = toSec(subtractTime(currentTime, startTime));
@@ -123,24 +134,36 @@ export class PlotCoordinatorTwo extends BasePlotCoordinator {
     }
   }
 
-  private subscribeTopicRanges(currentTopics: Set<string>): void {
+  private cancelTopicSubscription(topic: string): void {
+    this.rangeSubscriptionCancels.get(topic)?.cancel();
+    this.rangeSubscriptionCancels.delete(topic);
+  }
+
+  private subscribeTopicRanges(seriesKeysByTopic: Map<string, Set<SeriesConfigKey>>): void {
     const builder = this.datasetsBuilder;
     if (!builder.handleMessageRange) {
       return;
     }
 
     // Cancel subscriptions for topics that are no longer needed
-    for (const [topic, cancel] of this.rangeSubscriptionCancels) {
-      if (!currentTopics.has(topic)) {
-        cancel();
-        this.rangeSubscriptionCancels.delete(topic);
+    for (const topic of this.rangeSubscriptionCancels.keys()) {
+      if (!seriesKeysByTopic.has(topic)) {
+        this.cancelTopicSubscription(topic);
       }
     }
 
     // Start subscriptions only for new topics that the player knows about
-    for (const topic of currentTopics) {
-      if (this.rangeSubscriptionCancels.has(topic)) {
-        continue; // already subscribed, leave it alone
+    for (const [topic, currentKeys] of seriesKeysByTopic) {
+      const existing = this.rangeSubscriptionCancels.get(topic);
+
+      if (existing) {
+        const keysChanged =
+          existing.seriesKeys.size !== currentKeys.size ||
+          [...currentKeys].some((k) => !existing.seriesKeys.has(k));
+        if (!keysChanged) {
+          continue;
+        }
+        this.cancelTopicSubscription(topic);
       }
 
       const cancel = this.subscribeMessageRange({
@@ -163,7 +186,7 @@ export class PlotCoordinatorTwo extends BasePlotCoordinator {
           }
         },
       });
-      this.rangeSubscriptionCancels.set(topic, cancel);
+      this.rangeSubscriptionCancels.set(topic, { cancel, seriesKeys: new Set(currentKeys) });
     }
   }
 }
