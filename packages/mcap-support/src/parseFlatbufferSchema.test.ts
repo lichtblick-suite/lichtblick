@@ -5,8 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ByteBuffer, Builder } from "flatbuffers";
-import { Schema, BaseType, Type } from "flatbuffers_reflection";
+import { Builder, ByteBuffer } from "flatbuffers";
+import { BaseType, Parser, Schema, Type } from "flatbuffers_reflection";
 import fs from "fs";
 
 import { ByteVector } from "./fixtures/byte-vector";
@@ -314,6 +314,11 @@ describe("parseFlatbufferSchema", () => {
     reflectionSchemaBuffer.byteOffset,
     reflectionSchemaBuffer.byteLength,
   );
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("rejects invalid schema", () => {
     expect(() => parseFlatbufferSchema("test", new Uint8Array([1]))).toThrow();
   });
@@ -399,5 +404,146 @@ describe("parseFlatbufferSchema", () => {
     );
     const { deserialize } = parseFlatbufferSchema("ByteVector", byteVectorSchemaArrayUint8);
     expect(deserialize(byteVectorBin)).toEqual({ data: new Uint8Array([1, 2, 3]) });
+  });
+
+  it("throws when simple enum field has undefined values", () => {
+    // Given
+    const fakeSchema = {
+      objects: [
+        {
+          name: "TestMsg",
+          fields: [
+            {
+              name: "status",
+              type: { baseType: BaseType.Int, index: 0, element: BaseType.None },
+            },
+          ],
+        },
+      ],
+      enums: [{ name: "StatusEnum", values: undefined }],
+      rootTable: { name: "TestMsg" },
+    };
+    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+
+    // When / Then
+    expect(() => parseFlatbufferSchema("TestMsg", new Uint8Array())).toThrow(
+      "Invalid schema, missing enum values for field type StatusEnum",
+    );
+  });
+
+  it("throws 'Invalid schema' when vector enum field has undefined values", () => {
+    // Given
+    const fakeSchema = {
+      objects: [
+        {
+          name: "TestMsg",
+          fields: [
+            {
+              name: "items",
+              type: { baseType: BaseType.Vector, element: BaseType.Int, index: 0 },
+            },
+          ],
+        },
+      ],
+      enums: [{ name: "ItemEnum", values: undefined }],
+      rootTable: { name: "TestMsg" },
+    };
+    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+
+    // When / Then
+    expect(() => parseFlatbufferSchema("TestMsg", new Uint8Array())).toThrow("Invalid schema");
+  });
+
+  it("pushes enum constants before array field for a vector enum field", () => {
+    // Given
+    const fakeSchema = {
+      objects: [
+        {
+          name: "TestMsg",
+          fields: [
+            {
+              name: "statuses",
+              type: { baseType: BaseType.Vector, element: BaseType.Int, index: 0 },
+            },
+          ],
+        },
+      ],
+      enums: [
+        {
+          name: "Status",
+          values: [
+            { name: "ACTIVE", value: 0n },
+            { name: "INACTIVE", value: 1n },
+          ],
+        },
+      ],
+      rootTable: { name: "TestMsg" },
+    };
+    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+    jest.spyOn(Parser.prototype, "toObjectLambda").mockReturnValue(jest.fn());
+
+    // When
+    const { datatypes } = parseFlatbufferSchema("TestMsg", new Uint8Array());
+
+    // Then
+    expect(datatypes.get("TestMsg")?.definitions).toEqual([
+      { name: "ACTIVE", type: "int32", isConstant: true, value: 0n },
+      { name: "INACTIVE", type: "int32", isConstant: true, value: 1n },
+      { name: "statuses", type: "int32", isArray: true },
+    ]);
+  });
+
+  it("skips objects with undefined fields without adding them to datatypes", () => {
+    // Given
+    const fakeSchema = {
+      objects: [
+        { name: "EmptyObj", fields: undefined },
+        {
+          name: "TestMsg",
+          fields: [
+            {
+              name: "value",
+              type: { baseType: BaseType.Int, index: -1, element: BaseType.None },
+            },
+          ],
+        },
+      ],
+      enums: [],
+      rootTable: { name: "TestMsg" },
+    };
+    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+    jest.spyOn(Parser.prototype, "toObjectLambda").mockReturnValue(jest.fn());
+
+    // When
+    const { datatypes } = parseFlatbufferSchema("TestMsg", new Uint8Array());
+
+    // Then
+    expect(datatypes.has("EmptyObj")).toBe(false);
+    expect(datatypes.has("TestMsg")).toBe(true);
+  });
+
+  it("throws 'Unhandled BaseType' for an unknown vector element type", () => {
+    // Given
+    const fakeSchema = {
+      objects: [
+        {
+          name: "TestMsg",
+          fields: [
+            {
+              name: "data",
+              type: { baseType: BaseType.Vector, element: 99 as BaseType, index: -1 },
+            },
+          ],
+        },
+      ],
+      enums: [],
+      rootTable: { name: "TestMsg" },
+    };
+    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+
+    // When / Then
+    expect(() => parseFlatbufferSchema("TestMsg", new Uint8Array())).toThrow(
+      "Unhandled BaseType: 99",
+    );
   });
 });
