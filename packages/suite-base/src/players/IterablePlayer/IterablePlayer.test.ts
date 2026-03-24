@@ -17,6 +17,7 @@ import {
   PlayerPresence,
   PlayerState,
 } from "@lichtblick/suite-base/players/types";
+import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import * as highFrequencyUtils from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
 

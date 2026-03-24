@@ -83,7 +83,6 @@ function renderComponent(configOverrides: Partial<RawMessagesPanelConfig> = {}) 
     diffTopicPath: "",
     showFullMessageForDiff: false,
     fontSize: undefined,
-    latestPerRenderTickSampling: false,
     ...configOverrides,
   };
 
