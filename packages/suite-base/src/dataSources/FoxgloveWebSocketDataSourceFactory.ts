@@ -22,11 +22,11 @@ export default class FoxgloveWebSocketDataSourceFactory implements IDataSourceFa
   public docsLinks = [
     {
       label: "ROS 1",
-      url: "https://lichtblick-suite.github.io/docs/connecting-to-data/ros1.html",
+      url: "https://lichtblick-suite.github.io/docs/docs/connecting-to-data/frameworks/ros1/",
     },
     {
       label: "ROS 2",
-      url: "https://lichtblick-suite.github.io/docs/connecting-to-data/ros2.html",
+      url: "https://lichtblick-suite.github.io/docs/docs/connecting-to-data/frameworks/ros2",
     },
   ];
 

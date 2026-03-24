@@ -66,11 +66,11 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
   public docsLinks = [
     {
       label: "ROS 1",
-      url: "https://lichtblick-suite.github.io/docs/connecting-to-data/ros1.html",
+      url: "https://lichtblick-suite.github.io/docs/docs/connecting-to-data/frameworks/ros1/",
     },
     {
       label: "MCAP",
-      url: "https://lichtblick-suite.github.io/docs/connecting-to-data/mcap.html",
+      url: "https://lichtblick-suite.github.io/docs/docs/connecting-to-data/frameworks/mcap/",
     },
   ];
 

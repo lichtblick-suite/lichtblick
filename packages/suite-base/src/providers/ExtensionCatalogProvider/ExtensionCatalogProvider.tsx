@@ -156,7 +156,7 @@ function createExtensionRegistryStore(
     ) => {
       set((state) => ({
         installedExtensions: _.uniqBy(
-          [...(state.installedExtensions ?? []), info],
+          [info, ...(state.installedExtensions ?? [])],
           extensionUniqueKey,
         ),
         installedPanels: { ...state.installedPanels, ...panels },

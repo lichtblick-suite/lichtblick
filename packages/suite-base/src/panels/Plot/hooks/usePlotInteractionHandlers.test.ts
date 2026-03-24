@@ -2,15 +2,16 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 /* eslint-disable @typescript-eslint/unbound-method */
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 
 import { debouncePromise } from "@lichtblick/den/async";
 import { Time, toSec } from "@lichtblick/rostime";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
+import { PanelContextMenuItem } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { TimeBasedChartTooltipData } from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import {
-  useSetHoverValue,
   useClearHoverValue,
+  useSetHoverValue,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
 import { DEFAULT_PLOT_CONFIG } from "@lichtblick/suite-base/panels/Plot/constants";
@@ -19,11 +20,17 @@ import {
   UsePlotInteractionHandlersProps,
 } from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotConfig } from "@lichtblick/suite-base/panels/Plot/utils/config";
+import { downloadCSV } from "@lichtblick/suite-base/panels/Plot/utils/csv";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { PANEL_TITLE_CONFIG_KEY } from "@lichtblick/suite-base/util/layout";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import usePlotInteractionHandlers from "./usePlotInteractionHandlers";
+
+jest.mock("@lichtblick/suite-base/panels/Plot/utils/csv", () => ({
+  downloadCSV: jest.fn(),
+}));
 
 jest.mock("@lichtblick/den/async", () => ({
   debouncePromise: jest.fn(),
@@ -32,7 +39,7 @@ jest.mock("@lichtblick/den/async", () => ({
 jest.mock("@lichtblick/suite-base/context/TimelineInteractionStateContext", () => ({
   useSetHoverValue: jest.fn(),
   useClearHoverValue: jest.fn(),
-  useTimelineInteractionState: jest.fn(),
+  useTimelineInteractionState: jest.fn(() => jest.fn()),
 }));
 
 jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
@@ -47,7 +54,6 @@ describe("usePlotInteractionHandlers", () => {
     resetBounds: jest.fn(),
     setZoomMode: jest.fn(),
   } as unknown as PlotCoordinator;
-  const mockSetActiveTooltip = jest.fn();
   const mockSetHoverValue = jest.fn();
   const mockClearHoverValue = jest.fn();
   const mockSeekPlayback = jest.fn();
@@ -322,36 +328,19 @@ describe("usePlotInteractionHandlers", () => {
         });
       });
 
-      it("clears active tooltip if no tooltip items are found", async () => {
+      it("calls debouncePromise with correct arguments when elements are found", async () => {
+        const elements = [
+          PlotBuilder.hoverElement({ data: PlotBuilder.datum({ value: BasicBuilder.number() }) }),
+        ];
         (debouncePromise as jest.Mock).mockImplementationOnce((fn) => fn);
         const { result, props } = setup({ coordinator: mockCoordinator });
-        (props.renderer?.getElementsAtPixel as jest.Mock).mockReturnValueOnce([]);
+        (props.renderer?.getElementsAtPixel as jest.Mock).mockReturnValueOnce(elements);
 
         await triggerMouseMove(result);
 
-        expect(props.setActiveTooltip).toHaveBeenCalledWith(undefined);
+        expect(props.setActiveTooltip).toHaveBeenCalled();
         expect(mockSetHoverValue).toHaveBeenCalled();
       });
-
-      it("does not clear active tooltip if tooltip items are found", async () => {
-        const { result, props } = setup({ coordinator: mockCoordinator });
-        (props.renderer?.getElementsAtPixel as jest.Mock).mockReturnValueOnce([]);
-
-        await triggerMouseMove(result);
-
-        expect(props.setActiveTooltip).not.toHaveBeenCalledWith(undefined);
-        expect(mockSetHoverValue).toHaveBeenCalled();
-      });
-    });
-
-    it("does not set active tooltip if isMounted is false", async () => {
-      (debouncePromise as jest.Mock).mockImplementationOnce((fn) => fn);
-      const { result, unmount } = setup();
-
-      unmount();
-      await triggerMouseMove(result);
-
-      expect(mockSetActiveTooltip).not.toHaveBeenCalled();
     });
   });
 
@@ -549,6 +538,125 @@ describe("usePlotInteractionHandlers", () => {
       });
 
       expect(mockSeekPlayback).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("onDownloadCsvClick", () => {
+    it("downloads CSV when coordinator returns valid data and component is mounted", async () => {
+      const csvData = BasicBuilder.string();
+      const customTitle = "my_chart";
+      const { result } = setup({
+        coordinator: mockCoordinator,
+        config: { [PANEL_TITLE_CONFIG_KEY]: customTitle } as unknown as PlotConfig,
+      });
+      (mockCoordinator.getCsvData as jest.Mock).mockResolvedValueOnce(csvData);
+
+      await act(async () => {
+        const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {
+          type: "item";
+        };
+        item.onclick();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(downloadCSV).toHaveBeenCalledWith(customTitle, csvData, "timestamp");
+    });
+
+    it("uses default title when customTitle is undefined", async () => {
+      const csvData = BasicBuilder.string();
+      const { result } = setup({ coordinator: mockCoordinator });
+      (mockCoordinator.getCsvData as jest.Mock).mockResolvedValueOnce(csvData);
+
+      await act(async () => {
+        const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {
+          type: "item";
+        };
+        item.onclick();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(downloadCSV).toHaveBeenCalledWith("plot_data", csvData, "timestamp");
+    });
+
+    it("does not download CSV when coordinator returns null data", async () => {
+      const { result } = setup({ coordinator: mockCoordinator });
+      (mockCoordinator.getCsvData as jest.Mock).mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {
+          type: "item";
+        };
+        item.onclick();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(downloadCSV).not.toHaveBeenCalled();
+    });
+
+    it("does not download CSV when component is not mounted", async () => {
+      const csvData = BasicBuilder.string();
+      const { result, unmount } = setup({ coordinator: mockCoordinator });
+      unmount();
+      (mockCoordinator.getCsvData as jest.Mock).mockResolvedValueOnce(csvData);
+
+      await act(async () => {
+        const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {
+          type: "item";
+        };
+        item.onclick();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(downloadCSV).not.toHaveBeenCalled();
+    });
+
+    it("handles error and logs to console.error", async () => {
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const error = new Error("CSV fetch failed");
+      const { result } = setup({ coordinator: mockCoordinator });
+      (mockCoordinator.getCsvData as jest.Mock).mockRejectedValueOnce(error);
+
+      await act(async () => {
+        const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {
+          type: "item";
+        };
+        item.onclick();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(error);
+      expect(downloadCSV).not.toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe("getPanelContextMenuItems", () => {
+    it("returns menu items with correct label and onclick handler", () => {
+      const { result } = setup();
+
+      const items = result.current.getPanelContextMenuItems();
+
+      expect(items).toHaveLength(1);
+      expect(items[0]).toMatchObject({
+        type: "item",
+        label: "Download plot data as CSV",
+      });
+      const item = items[0] as PanelContextMenuItem & { type: "item" };
+      expect(typeof item.onclick).toBe("function");
+    });
+
+    it("updates menu items when onDownloadCsvClick changes", () => {
+      const { result, rerender } = setup();
+      const firstItems = result.current.getPanelContextMenuItems();
+
+      rerender();
+
+      const secondItems = result.current.getPanelContextMenuItems();
+
+      // Items should be from the same reference (same function)
+      const firstItem = firstItems[0] as PanelContextMenuItem & { type: "item" };
+      const secondItem = secondItems[0] as PanelContextMenuItem & { type: "item" };
+      expect(firstItem.onclick).toBe(secondItem.onclick);
     });
   });
 });

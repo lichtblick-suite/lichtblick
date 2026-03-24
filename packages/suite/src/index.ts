@@ -531,6 +531,19 @@ export interface PanelSettings<ExtensionSettings> {
   defaultConfig?: ExtensionSettings;
 }
 
+export type MessageConverterAlert = {
+  severity: "error" | "warn" | "info";
+  message: string;
+  error?: Error;
+  tip?: string;
+};
+
+export type MessageConverterEmitAlert = (alert: MessageConverterAlert, alertId?: string) => void;
+
+export type MessageConverterContext = {
+  emitAlert: MessageConverterEmitAlert;
+};
+
 export type RegisterMessageConverterArgs<Src> = {
   fromSchemaName: string;
   toSchemaName: string;
@@ -538,6 +551,7 @@ export type RegisterMessageConverterArgs<Src> = {
     msg: Src,
     event: Immutable<MessageEvent<Src>>,
     globalVariables?: Readonly<Record<string, VariableValue>>,
+    context?: MessageConverterContext,
   ) => unknown;
   /**
    * Custom settings for the topics using the schema specified in the *toSchemaName* property

@@ -11892,10 +11892,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"flatted@npm:^3.2.9":
-  version: 3.3.4
-  resolution: "flatted@npm:3.3.4"
-  checksum: 67f1da2949782ead8cb6846b08b941c9569a8232bf43f1cd754736473400377b24b371939a251095c6df59f99a9dd667552b2008ae252d1b0a821ef5ecb5498d
+"flatted@npm:3.4.2":
+  version: 3.4.2
+  resolution: "flatted@npm:3.4.2"
+  checksum: 1b2536fccbbf75d67a823dea67819f764c19266ad5e4aca6b47f6bf84d3b5e1c15eb5862f7dec1fb87129b60741524933192051286de52baddbc97129896380d
   languageName: node
   linkType: hard
 
@@ -20918,10 +20918,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.23.0":
-  version: 6.23.0
-  resolution: "undici@npm:6.23.0"
-  checksum: f0953920330375e76d1614381af07da9d7c21ad3244d0785b3f7bd4072635c20a1f432ef3a129baa3e4a92278ce32e9ea2ca8b5f0e0554a5739222af332c08fe
+"undici@npm:6.24.1":
+  version: 6.24.1
+  resolution: "undici@npm:6.24.1"
+  checksum: 0baa81ede2b0deb9002692c4d614cdffb2c8c27bb41e4ce7380f95b4468ebb6fd9745b7a6da32b0cdf05b1554bd5e5a47a80babb0e5ca9d59401efe372d975ed
   languageName: node
   linkType: hard
 

@@ -47,6 +47,8 @@ function typeForSimpleField(type: BaseType): string {
     case BaseType.None:
     case BaseType.MaxBaseType:
       throw new Error("None is not a valid type.");
+    default:
+      throw new Error(`Unhandled BaseType: ${type}`);
   }
 }
 
