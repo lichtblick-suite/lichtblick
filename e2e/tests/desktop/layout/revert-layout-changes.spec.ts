@@ -13,9 +13,9 @@ async function splitPanel(mainWindow: Page, panelId: string): Promise<void> {
     .getByTestId(`panel-mouseenter-container ${panelId}`)
     .getByTestId("panel-menu")
     .click();
-  await mainWindow.waitForTimeout(500);
+  await mainWindow.waitForTimeout(1000);
   await mainWindow.getByRole("menuitem", { name: "Split down" }).click();
-  await mainWindow.waitForTimeout(500);
+  await mainWindow.waitForTimeout(1000);
 }
 
 /**
