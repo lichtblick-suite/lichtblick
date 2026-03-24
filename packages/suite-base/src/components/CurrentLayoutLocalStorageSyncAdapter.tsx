@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import assert from "assert";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useAsync } from "react-use";
 import { useDebounce } from "use-debounce";
 
@@ -34,19 +34,10 @@ const log = Log.getLogger(__filename);
 export function CurrentLayoutLocalStorageSyncAdapter(): React.JSX.Element {
   const { getCurrentLayoutState } = useCurrentLayoutActions();
   const currentLayoutData = useCurrentLayoutSelector(selectLayoutData);
-  const currentLayoutId = useCurrentLayoutSelector(selectLayoutId);
 
   const layoutManager = useLayoutManager();
 
   const [debouncedLayoutData] = useDebounce(currentLayoutData, 250, { maxWait: 500 });
-
-  // Track if this is the initial layout load to prevent false "edited" states
-  const isInitialLayoutLoad = useRef(true);
-
-  // Reset the flag when layout changes
-  useEffect(() => {
-    isInitialLayoutLoad.current = true;
-  }, [currentLayoutId]);
 
   useEffect(() => {
     if (!debouncedLayoutData) {
@@ -58,28 +49,20 @@ export function CurrentLayoutLocalStorageSyncAdapter(): React.JSX.Element {
     localStorage.setItem(LOCAL_STORAGE_STUDIO_LAYOUT_KEY, serializedLayoutData);
   }, [debouncedLayoutData]);
 
-  // Send new layoutData to layoutManager to be saved
+  // Send new layoutData to layoutManager to be saved, but only when the user
+  // has actually edited the layout. The `edited` flag is set exclusively by
+  // panel actions (performAction) that produce a real data change, so we avoid
+  // persisting a working copy from panel initialization side-effects.
   useAsync(async () => {
     const layoutState = getCurrentLayoutState();
 
-    if (!layoutState.selectedLayout) {
-      return;
-    }
-
-    // Skip updating layout manager during initial layout load to prevent
-    // false "edited" states from panel initialization
-    if (isInitialLayoutLoad.current) {
-      isInitialLayoutLoad.current = false;
+    if (!(layoutState.selectedLayout?.edited ?? false)) {
       return;
     }
 
     try {
-      // We only update the layout data (panels configuration) here, not the name.
-      // Name changes are handled separately via layoutManager.updateLayout in rename operations.
-      // This ensures that data modifications are saved to the 'working' copy in IDB,
-      // allowing users to see the orange dot indicator for unsaved changes.
       await layoutManager.updateLayout({
-        id: layoutState.selectedLayout.id,
+        id: layoutState.selectedLayout!.id,
         data: debouncedLayoutData,
       });
     } catch (error) {

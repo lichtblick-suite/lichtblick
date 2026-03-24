@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { diff } from "just-diff";
+import * as _ from "lodash-es";
 
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 
@@ -14,25 +14,31 @@ import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/
  * considered "equal" then the function returns true. If the two instances are not equal it returns
  * false.
  *
- * Layout instances are considered equal if they have all of the same fields and all of the same
- * values in those fields - recursively. An exception is made for where _b_ only differes from _a_
- * by introducing new fields which are _undefined_. If _b_ has an extra field with value undefined,
- * it will still be considered equal to _a_.
+ * Layout instances are considered equal if all non-configById fields are identical (extra undefined
+ * fields in b are ignored), and all pre-existing configById keys in _a_ are unchanged in _b_. New
+ * entries added to _b_'s configById that were not present in _a_ are ignored — panels legitimately
+ * populate their own default config keys during initialization, and treating those additions as user
+ * edits would create false "unsaved changes" indicators on shared/team layouts.
  */
 export function isLayoutEqual(a: LayoutData, b: LayoutData): boolean {
-  const res = diff(a, b);
-  for (const item of res) {
-    // Any replace or remove is treated as a diff
-    if (item.op === "replace" || item.op === "remove") {
-      return false;
-    }
+  const { configById: configByIdA, ...restA } = a;
+  const { configById: configByIdB, ...restB } = b;
 
-    // If a field is added but the value is anything other than undefined, the layouts are not the same
-    if (item.value != undefined) {
+  // All top-level fields other than configById must be deeply equal.
+  // Strip keys whose value is undefined in b so extra undefined entries don't
+  // register as differences (preserving the original behaviour).
+  const strippedRestB = _.omitBy(restB, _.isUndefined);
+  if (!_.isEqual(_.omitBy(restA, _.isUndefined), strippedRestB)) {
+    return false;
+  }
+
+  // For configById, only check keys that existed in the baseline (a).
+  // Panel initialization may add new keys to b; those are not user edits.
+  for (const key of Object.keys(configByIdA)) {
+    if (!_.isEqual(configByIdA[key], configByIdB[key])) {
       return false;
     }
   }
 
-  // No actual diff, so the values are the same
   return true;
 }

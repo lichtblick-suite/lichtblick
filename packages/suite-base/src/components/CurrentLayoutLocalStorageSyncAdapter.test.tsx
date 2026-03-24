@@ -94,20 +94,12 @@ describe("CurrentLayoutLocalStorageSyncAdapter", () => {
     expect(storedData).toBe(JSON.stringify(mockLayoutData));
   });
 
-  it("sends new layout data to layoutManager after initial load", async () => {
-    // Given
-    mockGetCurrentLayoutState.mockReturnValue({
-      selectedLayout: { id: mockLayoutId, data: mockLayoutData },
-    });
-
-    // When
-    const { rerender } = renderComponent();
-
-    // Verify initial call was skipped
-    expect(mockLayoutManager.updateLayout).not.toHaveBeenCalled();
-
-    // Now simulate a data change by updating the mock to return different data
+  it("sends new layout data to layoutManager when the layout has been edited", async () => {
+    // Given — layout state reports edited: true (user made a change)
     const modifiedData = { ...mockLayoutData, modified: true };
+    mockGetCurrentLayoutState.mockReturnValue({
+      selectedLayout: { id: mockLayoutId, data: modifiedData, edited: true },
+    });
 
     (useCurrentLayoutSelector as jest.Mock).mockImplementation((selector) => {
       if (selector === selectLayoutData) {
@@ -119,19 +111,34 @@ describe("CurrentLayoutLocalStorageSyncAdapter", () => {
       return undefined;
     });
 
-    // Force a re-render to trigger useAsync with new data
-    await act(async () => {
-      rerender();
-    });
+    // When
+    renderComponent();
 
     await act(async () => {
       await new Promise((r) => setTimeout(r, 300)); // Wait for debounce
     });
 
-    // Then - should be called on the second execution
+    // Then - updateLayout is called because edited: true
     expect(mockLayoutManager.updateLayout).toHaveBeenCalledWith({
       id: mockLayoutId,
       data: modifiedData,
     });
+  });
+
+  it("does not send layout data to layoutManager when the layout has not been edited", async () => {
+    // Given — layout state has no edited flag (e.g. initial load or panel init side-effects)
+    mockGetCurrentLayoutState.mockReturnValue({
+      selectedLayout: { id: mockLayoutId, data: mockLayoutData },
+    });
+
+    // When
+    renderComponent();
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 300)); // Wait for debounce
+    });
+
+    // Then - updateLayout is NOT called because edited is falsy
+    expect(mockLayoutManager.updateLayout).not.toHaveBeenCalled();
   });
 });

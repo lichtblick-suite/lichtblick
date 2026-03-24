@@ -550,13 +550,20 @@ export default class LayoutManager implements ILayoutManager {
           case "update-baseline": {
             const { localLayout, remoteLayout } = operation;
             log.debug(`Updating baseline for ${localLayout.id}`);
+            // If the new remote baseline matches the local working copy, the working copy
+            // is no longer meaningful — clear it to avoid a false "unsaved changes" indicator.
+            const newWorking =
+              localLayout.working != undefined &&
+              isLayoutEqual(remoteLayout.data, localLayout.working.data)
+                ? undefined
+                : localLayout.working;
             await local.put({
               id: remoteLayout.id,
               externalId: remoteLayout.externalId,
               name: remoteLayout.name,
               permission: remoteLayout.permission,
               baseline: { data: remoteLayout.data, savedAt: remoteLayout.savedAt },
-              working: localLayout.working,
+              working: newWorking,
               syncInfo: {
                 status: localLayout.syncInfo.status,
                 lastRemoteSavedAt: remoteLayout.savedAt,
