@@ -6,7 +6,7 @@ This directory contains all end-to-end (E2E) tests using [Playwright](https://pl
 
 ```bash
 # Build desktop packages
-yarn desktop:build:prod
+yarn desktop:build:dev
 ```
 
 ```bash
