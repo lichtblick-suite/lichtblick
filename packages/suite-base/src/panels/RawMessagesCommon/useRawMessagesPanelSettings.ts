@@ -16,9 +16,7 @@ import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/Pan
  */
 type UseRawMessagesPanelSettingsOptions = {
   fontSize: number | undefined;
-  saveConfig: (config: {
-    fontSize?: number | undefined;
-  }) => void;
+  saveConfig: (config: { fontSize?: number | undefined }) => void;
 };
 
 export function useRawMessagesPanelSettings({
@@ -40,7 +38,6 @@ export function useRawMessagesPanelSettings({
         });
         return;
       }
-
     },
     [saveConfig],
   );
@@ -62,7 +59,7 @@ export function useRawMessagesPanelSettings({
                   value,
                 })),
               ],
-                value: fontSize,
+              value: fontSize,
             },
           },
         },

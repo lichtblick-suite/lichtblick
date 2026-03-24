@@ -43,14 +43,8 @@ const RawMessagesVirtual = (props: PropsRawMessagesVirtual): React.JSX.Element =
   const { classes } = useStylesRawMessagesVirtual();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
-  const {
-    topicPath,
-    diffMethod,
-    diffTopicPath,
-    diffEnabled,
-    showFullMessageForDiff,
-    fontSize,
-  } = config;
+  const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff, fontSize } =
+    config;
   const { datatypes } = useDataSourceInfo();
 
   const {

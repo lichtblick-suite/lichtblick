@@ -53,14 +53,8 @@ function RawMessages(props: PropsRawMessages) {
   const jsonTreeTheme = useJsonTreeTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
-  const {
-    topicPath,
-    diffMethod,
-    diffTopicPath,
-    diffEnabled,
-    showFullMessageForDiff,
-    fontSize,
-  } = config;
+  const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff, fontSize } =
+    config;
   const { datatypes } = useDataSourceInfo();
 
   const {

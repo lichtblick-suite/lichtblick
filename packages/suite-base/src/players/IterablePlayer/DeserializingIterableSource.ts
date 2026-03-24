@@ -39,9 +39,9 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
   #deserializersByTopic: Record<string, (data: ArrayBufferView) => unknown> = {};
   #messageSizeEstimateBySubHash: Record<string, number> = {};
   #connectionIdByTopic: Record<string, number> = {};
-// Shared across all iterators produced by messageIterator(). Only one iterator
-// should be active at a time; calling setSamplingWindowEnd mid-iteration will
-// affect the live iterator immediately.
+  // Shared across all iterators produced by messageIterator(). Only one iterator
+  // should be active at a time; calling setSamplingWindowEnd mid-iteration will
+  // affect the live iterator immediately.
   #samplingWindowEnd: MessageIteratorArgs["end"];
 
   public readonly sourceType = "deserialized";
