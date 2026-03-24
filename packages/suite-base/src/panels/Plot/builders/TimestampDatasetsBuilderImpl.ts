@@ -62,12 +62,19 @@ type UpdateSeriesConfigAction = {
   seriesItems: SeriesItem[];
 };
 
+type RenameSeriesKeyAction = {
+  type: "rename-key";
+  oldKey: SeriesConfigKey;
+  newKey: SeriesConfigKey;
+};
+
 export type UpdateDataAction =
   | UpdateSeriesConfigAction
   | ResetSeriesFullAction
   | ResetSeriesCurrentAction
   | UpdateSeriesCurrentAction
-  | UpdateSeriesFullAction;
+  | UpdateSeriesFullAction
+  | RenameSeriesKeyAction;
 
 // When accumulating datums into the current buffer we cap each series to this number of datums so
 // we do not grow the memory for accumulated current data indefinitely
@@ -371,6 +378,14 @@ export class TimestampDatasetsBuilderImpl {
           if (idx > 0) {
             series.current.splice(0, idx);
           }
+        }
+        break;
+      }
+      case "rename-key": {
+        const series = this.#seriesByKey.get(action.oldKey);
+        if (series) {
+          this.#seriesByKey.delete(action.oldKey);
+          this.#seriesByKey.set(action.newKey, series);
         }
         break;
       }

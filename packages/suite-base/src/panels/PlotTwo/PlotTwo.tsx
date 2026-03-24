@@ -26,18 +26,18 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { useStyles } from "@lichtblick/suite-base/panels/Plot/Plot.style";
-import { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
 import { PlotLegend } from "@lichtblick/suite-base/panels/Plot/PlotLegend";
 import { VerticalBars } from "@lichtblick/suite-base/panels/Plot/VerticalBars";
 import { DEFAULT_SIDEBAR_DIMENSION } from "@lichtblick/suite-base/panels/Plot/constants";
 import useGlobalSync from "@lichtblick/suite-base/panels/Plot/hooks/useGlobalSync";
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
-import usePlotDataHandlingTwo from "@lichtblick/suite-base/panels/Plot/hooks/usePlotDataHandlingTwo";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
 import usePlotPanelSettings from "@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelSettings";
 import useRenderer from "@lichtblick/suite-base/panels/Plot/hooks/useRenderer";
 import useSubscriptions from "@lichtblick/suite-base/panels/Plot/hooks/useSubscriptions";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
+import { PlotCoordinatorTwo } from "@lichtblick/suite-base/panels/PlotTwo/PlotCoordinator";
+import usePlotDataHandling from "@lichtblick/suite-base/panels/PlotTwo/hooks/usePlotDataHandling";
 
 const PlotTwo = (props: PlotProps): React.JSX.Element => {
   const { saveConfig, config } = props;
@@ -63,7 +63,7 @@ const PlotTwo = (props: PlotProps): React.JSX.Element => {
 
   const [subscriberId] = useState(() => uuidv4());
   const [canvasDiv, setCanvasDiv] = useState<HTMLDivElement | ReactNull>(ReactNull);
-  const [coordinator, setCoordinator] = useState<PlotCoordinator | undefined>(undefined);
+  const [coordinator, setCoordinator] = useState<PlotCoordinatorTwo | undefined>(undefined);
   const shouldSync = config.isSynced;
   const renderer = useRenderer(canvasDiv, theme);
   const { globalVariables } = useGlobalVariables();
@@ -96,7 +96,7 @@ const PlotTwo = (props: PlotProps): React.JSX.Element => {
   useSubscriptions(config, subscriberId);
   useGlobalSync(coordinator, setCanReset, { shouldSync }, subscriberId);
   usePanning(canvasDiv, coordinator, draggingRef);
-  const { colorsByDatasetIndex, labelsByDatasetIndex, datasetsBuilder } = usePlotDataHandlingTwo(
+  const { colorsByDatasetIndex, labelsByDatasetIndex, datasetsBuilder } = usePlotDataHandling(
     config,
     globalVariables,
   );
@@ -131,6 +131,7 @@ const PlotTwo = (props: PlotProps): React.JSX.Element => {
     // When config changes (e.g., series reordering) and the player is paused,
     // we need to re-process the current player state to update the rendered data
     if (coordinator) {
+      console.log("plot two - in coordinator");
       coordinator.handlePlayerState(getMessagePipelineState().playerState);
     }
   }, [coordinator, config, globalVariables, theme.palette.mode, getMessagePipelineState]);
@@ -148,6 +149,7 @@ const PlotTwo = (props: PlotProps): React.JSX.Element => {
     });
 
     // Subscribing only gets us _new_ updates, so we feed the latest state into the chart
+    console.log("plot two - feeding latest player state into coordinator");
     coordinator.handlePlayerState(getMessagePipelineState().playerState);
     return unsub;
   }, [coordinator, getMessagePipelineState, subscribeMessagePipeline]);
@@ -165,7 +167,11 @@ const PlotTwo = (props: PlotProps): React.JSX.Element => {
 
     const contentRect = canvasDiv.getBoundingClientRect();
 
-    const plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange);
+    const plotCoordinator = new PlotCoordinatorTwo(
+      renderer,
+      datasetsBuilder,
+      subscribeMessageRange,
+    );
     setCoordinator(plotCoordinator);
 
     plotCoordinator.setSize({

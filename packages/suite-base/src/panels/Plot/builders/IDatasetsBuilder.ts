@@ -8,7 +8,7 @@
 import { Opaque } from "ts-essentials";
 
 import { MessagePath } from "@lichtblick/message-path";
-import type { Immutable, MessageEvent, Time } from "@lichtblick/suite";
+import type { Immutable, Time, MessageEvent } from "@lichtblick/suite";
 import type { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import type { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
 import { TimestampMethod } from "@lichtblick/suite-base/util/time";
@@ -110,15 +110,6 @@ interface IDatasetsBuilder {
     progress: () => Promise<boolean>,
   ): Promise<void>;
 
-  /**
-   * Process a batch of messages streamed from subscribeMessageRange.
-   * Called by PlotCoordinator once per batch from the async iterator.
-   *
-   * @param messages  - Batch of MessageEvents for this topic
-   * @param isReset   - True on the first batch after a new subscription or seek; signals the
-   *                    builder to clear its full (preloaded) data before appending
-   * @param startTime - Playback start time used to compute relative x-axis values
-   */
   handleMessageRange?(
     messages: Immutable<MessageEvent[]>,
     options: { isReset: boolean },

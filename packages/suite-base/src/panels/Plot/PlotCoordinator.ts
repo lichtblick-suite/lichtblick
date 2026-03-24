@@ -16,7 +16,6 @@ import { Immutable, Time } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { stringifyMessagePath } from "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
 import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
@@ -50,53 +49,45 @@ const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) => datas
  */
 export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private renderer: OffscreenCanvasRenderer;
-  private datasetsBuilder: IDatasetsBuilder;
-  private subscribeMessageRange: UseSubscribeMessageRange;
-  private rangeSubscriptions = new Map<string, () => void>();
+  protected datasetsBuilder: IDatasetsBuilder; // change back to private
   private shouldSync: boolean = false;
   private configBounds: ConfigBounds = { x: {}, y: {} };
   private globalBounds?: Immutable<Partial<Bounds1D>>;
-  private datasetRange?: Bounds1D;
+  protected datasetRange?: Bounds1D; // change back to private
   private followRange?: number;
   private interactionBounds?: Bounds;
-  private lastSeekTime = NaN;
+  protected lastSeekTime = NaN; // change back to private
   /** Normalized series from latest config */
-  private series: Immutable<SeriesItem[]> = [];
+  protected series: Immutable<SeriesItem[]> = []; // change back to private
   /** Current value for each series to show in the legend */
-  private currentValuesByConfigIndex: unknown[] = [];
+  protected currentValuesByConfigIndex: unknown[] = []; // change back to private
   /** Flag indicating that new Y bounds should be sent to the renderer because the bounds have been reset */
   private shouldResetY = false;
   private updateAction: UpdateAction = { type: "update" };
-  private isTimeseriesPlot: boolean = false;
-  private currentSeconds?: number;
+  protected isTimeseriesPlot: boolean = false; // change back to private
+  protected currentSeconds?: number; // change back to private
   private viewport: Viewport = {
     size: { width: 0, height: 0 },
     bounds: { x: undefined, y: undefined },
   };
   private latestXScale?: Scale;
-  private queueDispatchRender = debouncePromise(this.dispatchRender.bind(this));
-  private queueDispatchDownsample = debouncePromise(this.dispatchDownsample.bind(this));
+  protected queueDispatchRender = debouncePromise(this.dispatchRender.bind(this)); // change back to private
+  protected queueDispatchDownsample = debouncePromise(this.dispatchDownsample.bind(this)); // change back to private
   private queueDatasetsRender = debouncePromise(this.dispatchDatasetsRender.bind(this));
   private queueBlocks = debouncePromise(this.dispatchBlocks.bind(this));
-  private destroyed = false;
+  protected destroyed = false; // change back to private
   private latestBlocks?: Immutable<(MessageBlock | undefined)[]>;
 
-  public constructor(
-    renderer: OffscreenCanvasRenderer,
-    builder: IDatasetsBuilder,
-    subscribeMessageRange?: UseSubscribeMessageRange,
-  ) {
+  public constructor(renderer: OffscreenCanvasRenderer, builder: IDatasetsBuilder) {
     super();
 
     this.renderer = renderer;
     this.datasetsBuilder = builder;
-    this.subscribeMessageRange = subscribeMessageRange ?? (() => () => {});
   }
 
   /** Stop the coordinator from sending any future updates to the renderer. */
   public destroy(): void {
     this.destroyed = true;
-    this.cancelAllRangeSubscriptions();
   }
 
   public setShouldSync({ shouldSync }: { shouldSync: boolean }): void {
@@ -123,12 +114,6 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     if (lastSeekTime !== this.lastSeekTime) {
       this.currentValuesByConfigIndex = [];
       this.lastSeekTime = lastSeekTime;
-
-      // Resubscribe after a seek so the new iterator delivers data from the new position
-      if (this.datasetsBuilder.handleMessageRange) {
-        const topics = [...new Set(this.series.map((s) => s.parsed.topicName))];
-        this.subscribeToTopicRanges(topics, activeData.startTime);
-      }
     }
 
     for (const seriesItem of this.series) {
@@ -295,15 +280,6 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     // Dispatch since we might have series changes
     this.datasetsBuilder.setSeries(this.series);
     this.queueDispatchDownsample();
-
-    // Subscribe to topic ranges when using the message-range builder
-    if (this.datasetsBuilder.handleMessageRange) {
-      const topics = [...new Set(this.series.map((s) => s.parsed.topicName))];
-      // startTime is only known at playerState time; pass undefined here — handlePlayerState
-      // will resubscribe with the real startTime on the next seek / first state update.
-      // For config-driven resubscription we rely on the seek path.
-      this.subscribeToTopicRanges(topics, undefined);
-    }
   }
 
   public setGlobalBounds(bounds: Immutable<Bounds1D> | undefined): void {
@@ -413,62 +389,8 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     };
   }
 
-  private cancelAllRangeSubscriptions(): void {
-    for (const cancel of this.rangeSubscriptions.values()) {
-      cancel();
-    }
-    this.rangeSubscriptions.clear();
-  }
-
-  /**
-   * Subscribe to message ranges for the given topics.
-   * Cancels existing subscriptions for removed topics, starts new ones for new topics.
-   * If startTime is undefined the subscription is deferred until a seek provides it.
-   */
-  private subscribeToTopicRanges(topics: string[], startTime: Immutable<Time> | undefined): void {
-    if (!this.datasetsBuilder.handleMessageRange) {
-      return;
-    }
-
-    // Cancel subscriptions for topics no longer needed
-    for (const [topic, cancel] of this.rangeSubscriptions) {
-      if (!topics.includes(topic)) {
-        cancel();
-        this.rangeSubscriptions.delete(topic);
-      }
-    }
-
-    if (!startTime) {
-      return;
-    }
-
-    const builder = this.datasetsBuilder;
-    const frozenStartTime = startTime;
-
-    for (const topic of topics) {
-      // Cancel previous subscription for this topic before starting a new one
-      this.rangeSubscriptions.get(topic)?.();
-
-      const cancel = this.subscribeMessageRange({
-        topic,
-        onNewRangeIterator: async (iterable) => {
-          let isReset = true;
-          for await (const batch of iterable) {
-            if (this.isDestroyed()) {
-              return;
-            }
-            builder.handleMessageRange!(batch, { isReset }, frozenStartTime);
-            isReset = false;
-            this.queueDispatchDownsample();
-          }
-        },
-      });
-
-      this.rangeSubscriptions.set(topic, cancel);
-    }
-  }
-
-  private isDestroyed(): boolean {
+  // change back to private
+  protected isDestroyed(): boolean {
     return this.destroyed;
   }
 

@@ -19,6 +19,7 @@ import {
   GetViewportDatasetsResult,
   HandlePlayerStateResult,
   IDatasetsBuilder,
+  SeriesConfigKey,
   SeriesItem,
   Viewport,
 } from "./IDatasetsBuilder";
@@ -44,13 +45,13 @@ type TimestampSeriesItem = {
 };
 
 /**
- * TimestampDatasetsBuilderV2 builds timeseries datasets using the subscribeMessageRange API
- * instead of the block loader. It does not implement handleBlocks.
+ * TimestampDatasetsBuilderTwo builds timeseries datasets.
  *
- * The coordinator calls handleMessageRange() for each batch of messages streamed from
- * subscribeMessageRange, with isReset=true on the first batch after a seek or new subscription.
+ * It supports full (preload) data and current frame data. The series datums are extracted from
+ * input player states and sent to the worker. The worker accumulates the data and provides
+ * downsampled data.
  */
-export class TimestampDatasetsBuilderV2 implements IDatasetsBuilder {
+export class TimestampDatasetsBuilderTwo implements IDatasetsBuilder {
   #datasetsBuilderRemote: Comlink.Remote<Comlink.RemoteObject<TimestampDatasetsBuilderImpl>>;
 
   #pendingDispatch: Immutable<UpdateDataAction>[] = [];
@@ -58,6 +59,9 @@ export class TimestampDatasetsBuilderV2 implements IDatasetsBuilder {
   #lastSeekTime = 0;
 
   #series: Immutable<TimestampSeriesItem[]> = [];
+  // True once handleMessageRange has been called — indicates a range-capable source (file/bag).
+  // When true, handlePlayerState skips append-current since the full history comes from the range.
+  #hasRangeSource = false;
 
   public constructor() {
     const worker = new Worker(
@@ -82,7 +86,7 @@ export class TimestampDatasetsBuilderV2 implements IDatasetsBuilder {
 
     const msgEvents = activeData.messages;
     let datasetsChanged = false;
-    if (msgEvents.length > 0) {
+    if (!this.#hasRangeSource && msgEvents.length > 0) {
       for (const series of this.#series) {
         const mathFn = series.config.parsed.modifier
           ? MATH_FUNCTIONS[series.config.parsed.modifier]
@@ -118,24 +122,16 @@ export class TimestampDatasetsBuilderV2 implements IDatasetsBuilder {
     };
   }
 
-  /**
-   * Process a batch of messages from subscribeMessageRange.
-   *
-   * @param messages - Batch of MessageEvents for subscribed topics
-   * @param isReset  - When true, clears full (preloaded) data before appending. Should be true
-   *                   on the first batch after a new subscription or seek.
-   * @param startTime - The playback start time, used to compute relative x-axis values
-   */
   public handleMessageRange(
     messages: Immutable<MessageEvent[]>,
-    { isReset }: { isReset: boolean },
+    options: { isReset: boolean },
     startTime: Immutable<Time>,
   ): void {
-    if (isReset) {
-      // Identify which series keys are represented in this batch and reset their full data
-      const topicsInBatch = new Set(messages.map((m) => m.topic));
+    this.#hasRangeSource = true;
+    if (options.isReset) {
       for (const series of this.#series) {
-        if (topicsInBatch.has(series.config.parsed.topicName)) {
+        const topic = messages[0]?.topic;
+        if (series.config.parsed.topicName === topic) {
           this.#pendingDispatch.push({
             type: "reset-full",
             series: series.config.key,
@@ -150,7 +146,7 @@ export class TimestampDatasetsBuilderV2 implements IDatasetsBuilder {
         : undefined;
 
       const pathItems = readMessagePathItems(
-        messages,
+        messages, // pass the whole batch — readMessagePathItems filters by topic internally
         series.config.parsed,
         series.config.timestampMethod,
         startTime,
@@ -170,8 +166,26 @@ export class TimestampDatasetsBuilderV2 implements IDatasetsBuilder {
   }
 
   public setSeries(series: Immutable<SeriesItem[]>): void {
-    this.#series = series.map((item) => ({ config: item }));
+    // Get series id
+    const getId = (key: SeriesConfigKey) => key.slice(key.indexOf(":") + 1);
 
+    // Track which old entries have been matched already
+    const unmatched = this.#series.map((s) => ({ id: getId(s.config.key), key: s.config.key }));
+
+    for (const item of series) {
+      const id = getId(item.key);
+      const oldIdx = unmatched.findIndex((o) => o.id === id);
+      if (oldIdx !== -1) {
+        const oldKey = unmatched[oldIdx]!.key;
+        unmatched.splice(oldIdx, 1); // consume it
+        if (oldKey !== item.key) {
+          this.#pendingDispatch.push({ type: "rename-key", oldKey, newKey: item.key });
+        }
+      }
+    }
+
+    this.#series = series.map((item) => ({ config: item }));
+    // Pushed rename actions before the update-series-config
     this.#pendingDispatch.push({
       type: "update-series-config",
       seriesItems: series,
