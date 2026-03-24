@@ -423,7 +423,11 @@ describe("parseFlatbufferSchema", () => {
       enums: [{ name: "StatusEnum", values: undefined }],
       rootTable: { name: "TestMsg" },
     };
-    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+    jest
+      .spyOn(Schema, "getRootAsSchema")
+      .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
+        typeof Schema.getRootAsSchema
+      >);
 
     // When / Then
     expect(() => parseFlatbufferSchema("TestMsg", new Uint8Array())).toThrow(
@@ -448,7 +452,11 @@ describe("parseFlatbufferSchema", () => {
       enums: [{ name: "ItemEnum", values: undefined }],
       rootTable: { name: "TestMsg" },
     };
-    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+    jest
+      .spyOn(Schema, "getRootAsSchema")
+      .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
+        typeof Schema.getRootAsSchema
+      >);
 
     // When / Then
     expect(() => parseFlatbufferSchema("TestMsg", new Uint8Array())).toThrow("Invalid schema");
@@ -479,7 +487,11 @@ describe("parseFlatbufferSchema", () => {
       ],
       rootTable: { name: "TestMsg" },
     };
-    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+    jest
+      .spyOn(Schema, "getRootAsSchema")
+      .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
+        typeof Schema.getRootAsSchema
+      >);
     jest.spyOn(Parser.prototype, "toObjectLambda").mockReturnValue(jest.fn());
 
     // When
@@ -511,7 +523,11 @@ describe("parseFlatbufferSchema", () => {
       enums: [],
       rootTable: { name: "TestMsg" },
     };
-    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+    jest
+      .spyOn(Schema, "getRootAsSchema")
+      .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
+        typeof Schema.getRootAsSchema
+      >);
     jest.spyOn(Parser.prototype, "toObjectLambda").mockReturnValue(jest.fn());
 
     // When
@@ -539,7 +555,11 @@ describe("parseFlatbufferSchema", () => {
       enums: [],
       rootTable: { name: "TestMsg" },
     };
-    jest.spyOn(Schema, "getRootAsSchema").mockReturnValue({ unpack: () => fakeSchema } as any);
+    jest
+      .spyOn(Schema, "getRootAsSchema")
+      .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
+        typeof Schema.getRootAsSchema
+      >);
 
     // When / Then
     expect(() => parseFlatbufferSchema("TestMsg", new Uint8Array())).toThrow(
