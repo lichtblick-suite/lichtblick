@@ -19,7 +19,6 @@ import {
   GetViewportDatasetsResult,
   HandlePlayerStateResult,
   IDatasetsBuilder,
-  SeriesConfigKey,
   SeriesItem,
   Viewport,
 } from "./IDatasetsBuilder";
@@ -146,7 +145,7 @@ export class TimestampDatasetsBuilderTwo implements IDatasetsBuilder {
         : undefined;
 
       const pathItems = readMessagePathItems(
-        messages, // pass the whole batch — readMessagePathItems filters by topic internally
+        messages,
         series.config.parsed,
         series.config.timestampMethod,
         startTime,
@@ -166,26 +165,7 @@ export class TimestampDatasetsBuilderTwo implements IDatasetsBuilder {
   }
 
   public setSeries(series: Immutable<SeriesItem[]>): void {
-    // Get series id
-    const getId = (key: SeriesConfigKey) => key.slice(key.indexOf(":") + 1);
-
-    // Track which old entries have been matched already
-    const unmatched = this.#series.map((s) => ({ id: getId(s.config.key), key: s.config.key }));
-
-    for (const item of series) {
-      const id = getId(item.key);
-      const oldIdx = unmatched.findIndex((o) => o.id === id);
-      if (oldIdx !== -1) {
-        const oldKey = unmatched[oldIdx]!.key;
-        unmatched.splice(oldIdx, 1); // consume it
-        if (oldKey !== item.key) {
-          this.#pendingDispatch.push({ type: "rename-key", oldKey, newKey: item.key });
-        }
-      }
-    }
-
     this.#series = series.map((item) => ({ config: item }));
-    // Pushed rename actions before the update-series-config
     this.#pendingDispatch.push({
       type: "update-series-config",
       seriesItems: series,
