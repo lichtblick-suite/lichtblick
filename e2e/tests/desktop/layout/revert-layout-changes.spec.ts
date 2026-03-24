@@ -94,8 +94,7 @@ test("makes changes to multiple layouts and then reverts them", async ({ mainWin
     .click();
 
   await mainWindow.getByRole("menuitem", { name: "Revert" }).click();
-  await mainWindow.waitForTimeout(500);
-  await mainWindow.getByRole("button", { name: "Discard changes" }).click();
+  await mainWindow.getByRole("button", { name: "Discard changes" }).waitFor({ state: "visible" });
 
   // Then
   await expect(unsavedChangesIcons).toHaveCount(0);
