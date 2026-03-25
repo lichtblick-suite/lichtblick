@@ -296,7 +296,7 @@ export default React.memo(function LayoutRow({
       icon = <ErrorIcon fontSize="small" color="error" />;
     } else if (hasModifications) {
       icon = (
-        <SvgIcon fontSize="small" color="primary">
+        <SvgIcon fontSize="small" color="primary" data-testid="unsaved-changes-icon">
           <circle cx={12} cy={12} r={4} />
         </SvgIcon>
       );

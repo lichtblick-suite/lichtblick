@@ -20,7 +20,7 @@ export type LayoutSelectionAction =
   | {
       type: "select-id";
       id?: string;
-      layouts?: undefined | { personal: Layout[]; shared: Layout[] };
+      layouts?: { personal: Layout[]; shared: Layout[] };
       shiftKey?: boolean;
       modKey?: boolean;
     }
