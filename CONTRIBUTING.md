@@ -167,18 +167,19 @@ To ensure consistency, scalability, and a clear separation of concerns, all Reac
 
 ### File organization per component
 
-| File / Directory         | Purpose                                                                                   |
-| ------------------------ | ----------------------------------------------------------------------------------------- |
-| `index.tsx`              | Entry point — manages exports and provides a simplified integration interface             |
-| `ComponentName.tsx`      | Primary logic and rendering of the component                                              |
-| `ComponentName.test.tsx` | Unit tests for the component                                                              |
-| `ComponentName.style.ts` | Styles specific to the component (using [tss-react](https://www.tss-react.dev/))          |
-| `types.ts`               | TypeScript type definitions, interfaces, and enums for the component                      |
-| `constants.ts`           | Constants specific to the component (avoids magic numbers and scattered hardcoded values) |
-| `hooks/`                 | Custom hooks related to the component (e.g., `useComponentData.ts`)                       |
-| `builders/`              | Builder classes for creating mock data, test props, and reusable configurations           |
-| `utils/`                 | Utility functions specific to the component                                               |
-| `shared/`                | Shared functionalities reusable across sibling components                                 |
+| File / Directory         | Purpose                                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`              | Entry point — manages exports and provides a simplified integration interface                                                                     |
+| `ComponentName.tsx`      | Primary logic and rendering of the component                                                                                                      |
+| `ComponentName.test.tsx` | Unit tests for the component                                                                                                                      |
+| `ComponentName.style.ts` | Styles specific to the component (using [tss-react](https://www.tss-react.dev/))                                                                  |
+| `<name>.types.ts`        | Type definitions scoped exclusively to a single file — applicable to components, hooks, utils, etc (e.g. `Plot.types.ts`, `usePlotData.types.ts`) |
+| `types.ts`               | TypeScript type definitions, interfaces, and enums shared across the component and its sub-files                                                  |
+| `constants.ts`           | Constants specific to the component (avoids magic numbers and scattered hardcoded values)                                                         |
+| `hooks/`                 | Custom hooks related to the component (e.g., `useComponentData.ts`)                                                                               |
+| `builders/`              | Builder classes for creating mock data, test props, and reusable configurations                                                                   |
+| `utils/`                 | Utility functions specific to the component                                                                                                       |
+| `shared/`                | Shared functionalities reusable across sibling components                                                                                         |
 
 ### Example directory tree
 
@@ -189,29 +190,32 @@ panels/
 │   ├── Plot.tsx                         # Primary logic and rendering
 │   ├── Plot.style.ts                    # Styles specific to the Plot component
 │   ├── Plot.test.tsx                    # Unit tests for the Plot component
+│   ├── Plot.types.ts                    # Types scoped only to Plot.tsx
 │   ├── PlotLegend.tsx                   # Sub-component: logic and rendering
-│   ├── PlotLegend.style.ts             # Styles for the PlotLegend sub-component
-│   ├── PlotLegend.test.tsx             # Unit tests for the PlotLegend sub-component
+│   ├── PlotLegend.style.ts              # Styles for the PlotLegend sub-component
+│   ├── PlotLegend.test.tsx              # Unit tests for the PlotLegend sub-component
 │   ├── types.ts                         # Contracts/Schemas for Plot components
 │   ├── constants.ts                     # Constants specific to Plot components
 │   ├── hooks/
-│   │   ├── usePlotData.ts              # Custom hook for the Plot component
-│   │   └── usePlotData.test.ts         # Unit tests for the hook
+│   │   ├── usePlotData.ts               # Custom hook for the Plot component
+│   │   ├── usePlotData.types.ts         # Types scoped only to usePlotData.ts
+│   │   └── usePlotData.test.ts          # Unit tests for the hook
 │   ├── builders/
-│   │   ├── PlotBuilder.ts              # Builder for mock data and test props
-│   │   └── PlotBuilder.test.ts         # Unit tests for the builder
+│   │   ├── PlotBuilder.ts               # Builder for mock data and test props
+│   │   └── PlotBuilder.test.ts          # Unit tests for the builder
 │   └── utils/
 │       ├── formatPlotValues.ts          # Utility function for the Plot component
 │       └── formatPlotValues.test.ts     # Unit tests for the utility
 └── shared/
     ├── formatDate.ts                    # Shared function across panel components
-    └── formatDate.test.ts              # Unit tests for the shared function
+    └── formatDate.test.ts               # Unit tests for the shared function
 ```
 
 ### Key principles
 
 - **`index.tsx`** should focus exclusively on managing exports. Primary component logic belongs in `ComponentName.tsx`.
-- **`types.ts`** centralizes type definitions, making them easily accessible and reusable.
+- **`types.ts`** centralizes type definitions shared across a component and its sub-files, making them easily accessible and reusable.
+- **`<name>.types.ts`** holds type definitions scoped exclusively to a single file — this pattern applies to components, hooks, and utils alike (e.g., `Plot.types.ts`, `usePlotData.types.ts`, `formatPlotValues.types.ts`). Use it when types are internal implementation details not intended to be shared or re-exported outside that file.
 - **`constants.ts`** and **`*.style.ts`** files can be excluded from code coverage tools (e.g., SonarQube) to focus metrics on relevant files.
 - **Builders** follow the [Builder pattern](https://refactoring.guru/design-patterns/builder) to simplify creation of complex objects step-by-step — especially useful for test setups.
 - **`shared/`** promotes reusability across sibling components and reduces duplication of common logic.
