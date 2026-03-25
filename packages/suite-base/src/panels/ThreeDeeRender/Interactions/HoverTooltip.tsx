@@ -12,8 +12,8 @@ import {
   HOVER_TOOLTIP_MAX_H,
   HOVER_TOOLTIP_MAX_W,
   HOVER_TOOLTIP_OFFSET_PX,
-  clampTooltipAxis,
 } from "./constants";
+import { clampTooltipAxis } from "./helpers";
 import type { HoverEntityInfo, HoverTooltipProperties, TooltipMode } from "./types";
 
 /**

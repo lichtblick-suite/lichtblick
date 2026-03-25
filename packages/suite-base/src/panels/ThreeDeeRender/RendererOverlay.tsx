@@ -158,77 +158,98 @@ export function RendererOverlay(props: Props): React.JSX.Element {
     }
   }, [interactionsTabType, renderer]);
 
-  useRendererEvent("renderablesClicked", (selections, cursorCoords) => {
-    const rect = props.canvas?.getBoundingClientRect();
-    if (rect) {
-      setClickedPosition({
-        clientX: rect.left + cursorCoords.x,
-        clientY: rect.top + cursorCoords.y,
-      });
-    }
-    setSelectedRenderables(selections);
-    setSelectedRenderable(selections.length === 1 ? selections[0] : undefined);
-  });
+  useRendererEvent(
+    "renderablesClicked",
+    useCallback(
+      (selections, cursorCoords) => {
+        const rect = props.canvas?.getBoundingClientRect();
+        if (rect) {
+          setClickedPosition({
+            clientX: rect.left + cursorCoords.x,
+            clientY: rect.top + cursorCoords.y,
+          });
+        }
+        setSelectedRenderables(selections);
+        setSelectedRenderable(selections.length === 1 ? selections[0] : undefined);
+      },
+      [props.canvas],
+    ),
+  );
 
   // Track mouse position at full framerate for smooth tooltip following.
-  useRendererEvent("hoverMoved", (cursorCoords) => {
-    const rect = props.canvas?.getBoundingClientRect();
-    if (rect) {
-      setHoverPosition({ clientX: rect.left + cursorCoords.x, clientY: rect.top + cursorCoords.y });
-    }
-  });
+  useRendererEvent(
+    "hoverMoved",
+    useCallback(
+      (cursorCoords) => {
+        const rect = props.canvas?.getBoundingClientRect();
+        if (rect) {
+          setHoverPosition({
+            clientX: rect.left + cursorCoords.x,
+            clientY: rect.top + cursorCoords.y,
+          });
+        }
+      },
+      [props.canvas],
+    ),
+  );
 
-  useRendererEvent("renderableHovered", (selections) => {
-    const infos: HoverEntityInfo[] = [];
-    for (const pickedRenderable of selections) {
-      const topic = pickedRenderable.renderable.topic;
-      const details: Record<string, unknown> | undefined =
-        pickedRenderable.instanceIndex != undefined
-          ? (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex) as
-              | Record<string, unknown>
-              | undefined)
-          : (pickedRenderable.renderable.details() as Record<string, unknown> | undefined);
+  useRendererEvent(
+    "renderableHovered",
+    useCallback(
+      (selections) => {
+        const infos: HoverEntityInfo[] = [];
+        for (const pickedRenderable of selections) {
+          const topic = pickedRenderable.renderable.topic;
+          const details: Record<string, unknown> | undefined =
+            pickedRenderable.instanceIndex != undefined
+              ? (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex) as
+                  | Record<string, unknown>
+                  | undefined)
+              : (pickedRenderable.renderable.details() as Record<string, unknown> | undefined);
 
-      const metadata: { key: string; value: string }[] = [];
+          const metadata: { key: string; value: string }[] = [];
 
-      if (details != undefined) {
-        const entityMeta = details.metadata;
-        if (Array.isArray(entityMeta)) {
-          for (const kv of entityMeta) {
-            if (kv != undefined && typeof kv === "object" && "key" in kv && "value" in kv) {
-              metadata.push({
-                key: String((kv as { key: unknown }).key),
-                value: String((kv as { value: unknown }).value),
-              });
+          if (details != undefined) {
+            const entityMeta = details.metadata;
+            if (Array.isArray(entityMeta)) {
+              for (const kv of entityMeta) {
+                if (kv != undefined && typeof kv === "object" && "key" in kv && "value" in kv) {
+                  metadata.push({
+                    key: String((kv as { key: unknown }).key),
+                    value: String((kv as { value: unknown }).value),
+                  });
+                }
+              }
+            }
+            // Then add any remaining top-level primitive fields (id, frame_id, etc.)
+            for (const [k, v] of Object.entries(details)) {
+              if (
+                k !== "metadata" &&
+                v != undefined &&
+                (typeof v === "string" || typeof v === "number" || typeof v === "boolean")
+              ) {
+                metadata.push({ key: k, value: String(v) });
+              }
             }
           }
-        }
-        // Then add any remaining top-level primitive fields (id, frame_id, etc.)
-        for (const [k, v] of Object.entries(details)) {
-          if (
-            k !== "metadata" &&
-            v != undefined &&
-            (typeof v === "string" || typeof v === "number" || typeof v === "boolean")
-          ) {
-            metadata.push({ key: k, value: String(v) });
+
+          // Avoid showing tooltips for non-user-facing objects when hovering empty space.
+          // If a renderable has no associated topic and no metadata, it doesn't provide useful info.
+          if (topic == undefined && metadata.length === 0) {
+            continue;
           }
+
+          infos.push({
+            topic,
+            entityId: getHoverEntityId(pickedRenderable),
+            metadata,
+          });
         }
-      }
-
-      // Avoid showing tooltips for non-user-facing objects when hovering empty space.
-      // If a renderable has no associated topic and no metadata, it doesn't provide useful info.
-      if (topic == undefined && metadata.length === 0) {
-        continue;
-      }
-
-      infos.push({
-        topic,
-        entityId: getHoverEntityId(pickedRenderable),
-        metadata,
-      });
-    }
-    setHoveredEntities(infos);
-  });
+        setHoveredEntities(infos);
+      },
+      [getHoverEntityId],
+    ),
+  );
 
   const [showResetViewButton, setShowResetViewButton] = useState(renderer?.canResetView() ?? false);
   useRendererEvent(
