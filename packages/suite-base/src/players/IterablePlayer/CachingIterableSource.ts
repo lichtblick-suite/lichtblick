@@ -100,6 +100,12 @@ class CachingIterableSource<MessageType = unknown>
   // The current read head, used for determining which blocks are evictable
   #currentReadHead: Time = { sec: 0, nsec: 0 };
 
+  // The furthest point that has been consumed from the cache across all iterator calls.
+  // Advances as blocks are fully read and never decreases (not reset on seek).
+  // Used by the selective-eviction strategy so that blocks the user has already
+  // played past are preserved even when new topics are added.
+  #highWaterMark: Time = { sec: 0, nsec: 0 };
+
   #nextBlockId: bigint = BigInt(0);
   #evictableBlockCandidates: CacheBlock<MessageType>["id"][] = [];
 
@@ -119,6 +125,7 @@ class CachingIterableSource<MessageType = unknown>
   public async terminate(): Promise<void> {
     this.#cache.length = 0;
     this.#cachedTopics.clear();
+    this.#highWaterMark = { sec: 0, nsec: 0 };
   }
 
   public loadedRanges(): Range[] {
@@ -139,15 +146,64 @@ class CachingIterableSource<MessageType = unknown>
     const maxEnd = args.end ?? this.#initResult.end;
     const maxEndNanos = toNanoSec(maxEnd);
 
-    // When the list of topics we want changes we purge the entire cache and start again.
+    // When the topic subscription changes, apply a surgical eviction strategy rather than
+    // wiping the entire cache (which could be hundreds of MB of useful data):
     //
-    // This is heavy-handed but avoids dealing with how to handle disjoint cached ranges across topics.
+    // - Topic REMOVALS: no eviction needed — the downstream iterator will simply stop receiving
+    //   messages for unsubscribed topics, so stale cached messages are harmlessly skipped.
+    //
+    // - Topic ADDITIONS: only blocks whose time range is *ahead of* the current read head need
+    //   to be evicted, because those blocks were written without the new topic and will be
+    //   missing its messages when replayed.  Blocks already behind the read head have been
+    //   consumed and won't be re-read during normal forward playback, so they can be kept.
     if (!_.isEqual(args.topics, this.#cachedTopics)) {
-      log.debug("topics changed - clearing cache, resetting range");
+      const prevTopics = this.#cachedTopics;
       this.#cachedTopics = args.topics;
-      this.#cache.length = 0;
-      this.#totalSizeBytes = 0;
-      this.#recomputeLoadedRangeCache();
+
+      let hasNewTopics = false;
+      for (const [topic] of args.topics) {
+        if (!prevTopics.has(topic)) {
+          hasNewTopics = true;
+          break;
+        }
+      }
+
+      if (args.topics.size === 0) {
+        // Switching to an empty subscription: clear the entire cache — there is nothing
+        // meaningful to keep and a future re-subscription will need a fresh read.
+        log.debug("topics changed (empty subscription) - clearing cache");
+        this.#cache.length = 0;
+        this.#totalSizeBytes = 0;
+        this.#highWaterMark = { sec: 0, nsec: 0 };
+        this.#recomputeLoadedRangeCache();
+      } else if (hasNewTopics) {
+        // New topics were added: existing blocks don't contain those topics.
+        // Evict only blocks that START at or after the high-water mark (furthest consumed point).
+        // Blocks already consumed (behind the high-water mark) are preserved — they won't be
+        // re-read during normal forward playback and their existing-topic data is still valid.
+        // Use #highWaterMark (not #currentReadHead) because readHead is reset to args.start
+        // at the top of each iterator call and doesn't reflect playback progress.
+        const hwmNs = toNanoSec(this.#highWaterMark);
+        let i = this.#cache.length - 1;
+        while (i >= 0) {
+          const block = this.#cache[i]!;
+          if (toNanoSec(block.start) >= hwmNs) {
+            this.#totalSizeBytes -= block.size;
+            this.#cache.splice(i, 1);
+            log.debug(
+              `topics changed (addition) - evicting future block [${block.start.sec}, ${block.end.sec}]`,
+            );
+          }
+          i--;
+        }
+        this.#recomputeLoadedRangeCache();
+      } else {
+        // Only topic removals with remaining non-empty subscription: keep cache intact.
+        // The iterator will simply not yield messages for removed topics; the downstream
+        // player/panel already filters by subscription, so no stale data escapes.
+        log.debug("topics changed (removal only) - cache kept");
+        this.#recomputeLoadedRangeCache();
+      }
     }
 
     // Where we want to read messages from. As we move through blocks and messages, the read head
@@ -216,6 +272,12 @@ class CachingIterableSource<MessageType = unknown>
         // at 1 nanosecond after the end of the block because we know that block.end is inclusive
         // of all the messages our block represents.
         readHead = add(block.end, { sec: 0, nsec: 1 });
+
+        // Advance the high-water mark so the selective-eviction logic knows this block
+        // has been consumed and should be preserved on a topic addition.
+        if (compare(block.end, this.#highWaterMark) > 0) {
+          this.#highWaterMark = block.end;
+        }
         continue;
       }
 
@@ -393,6 +455,11 @@ class CachingIterableSource<MessageType = unknown>
       // We've read everything there was to read for this source, so our next read will be after
       // the end of this source
       readHead = add(sourceReadEnd, { sec: 0, nsec: 1 });
+
+      // Advance the high-water mark when reading from source completes a time range.
+      if (compare(sourceReadEnd, this.#highWaterMark) > 0) {
+        this.#highWaterMark = sourceReadEnd;
+      }
     }
   }
 
