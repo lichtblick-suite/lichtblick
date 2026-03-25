@@ -182,10 +182,9 @@ describe("LayoutBrowser", () => {
 
       // THEN
       await waitFor(() => {
-        expect(mockLayoutManager.revertLayout).toHaveBeenCalledTimes(2);
+        expect(mockLayoutManager.revertLayout).toHaveBeenCalledTimes(1);
       });
       expect(mockLayoutManager.revertLayout).toHaveBeenCalledWith({ id: ids[0] });
-      expect(mockLayoutManager.revertLayout).toHaveBeenCalledWith({ id: ids[1] });
       expect(dispatchMock).toHaveBeenCalledWith({ type: "shift-multi-action" });
     });
 
@@ -195,10 +194,9 @@ describe("LayoutBrowser", () => {
 
       // THEN
       await waitFor(() => {
-        expect(mockLayoutManager.deleteLayout).toHaveBeenCalledTimes(2);
+        expect(mockLayoutManager.deleteLayout).toHaveBeenCalledTimes(1);
       });
       expect(mockLayoutManager.deleteLayout).toHaveBeenCalledWith({ id: ids[0] });
-      expect(mockLayoutManager.deleteLayout).toHaveBeenCalledWith({ id: ids[1] });
       expect(dispatchMock).toHaveBeenCalledWith({ type: "shift-multi-action" });
     });
 
@@ -208,10 +206,9 @@ describe("LayoutBrowser", () => {
 
       // THEN
       await waitFor(() => {
-        expect(mockLayoutManager.overwriteLayout).toHaveBeenCalledTimes(2);
+        expect(mockLayoutManager.overwriteLayout).toHaveBeenCalledTimes(1);
       });
       expect(mockLayoutManager.overwriteLayout).toHaveBeenCalledWith({ id: ids[0] });
-      expect(mockLayoutManager.overwriteLayout).toHaveBeenCalledWith({ id: ids[1] });
       expect(dispatchMock).toHaveBeenCalledWith({ type: "shift-multi-action" });
     });
 

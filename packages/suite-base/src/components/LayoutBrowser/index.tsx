@@ -125,33 +125,36 @@ export default function LayoutBrowser({
       }
 
       const { ids, action } = state.multiAction;
+      
+      const id = ids[0];
+      if (!id) {
+        return;
+      }
 
       try {
-        for (const id of ids) {
-          switch (action) {
-            case "delete":
-              await layoutManager.deleteLayout({ id: id as LayoutID });
-              break;
-            case "duplicate": {
-              const layout = await layoutManager.getLayout(id as LayoutID);
-              if (layout) {
-                await layoutManager.saveNewLayout({
-                  name: `${layout.name} copy`,
-                  data: layout.working?.data ?? layout.baseline.data,
-                  permission: "CREATOR_WRITE",
-                });
-              }
-              break;
+        switch (action) {
+          case "delete":
+            await layoutManager.deleteLayout({ id: id as LayoutID });
+            break;
+          case "duplicate": {
+            const layout = await layoutManager.getLayout(id as LayoutID);
+            if (layout) {
+              await layoutManager.saveNewLayout({
+                name: `${layout.name} copy`,
+                data: layout.working?.data ?? layout.baseline.data,
+                permission: "CREATOR_WRITE",
+              });
             }
-            case "revert":
-              await layoutManager.revertLayout({ id: id as LayoutID });
-              break;
-            case "save":
-              await layoutManager.overwriteLayout({ id: id as LayoutID });
-              break;
+            break;
           }
-          dispatch({ type: "shift-multi-action" });
+          case "revert":
+            await layoutManager.revertLayout({ id: id as LayoutID });
+            break;
+          case "save":
+            await layoutManager.overwriteLayout({ id: id as LayoutID });
+            break;
         }
+        dispatch({ type: "shift-multi-action" });
       } catch (err: unknown) {
         enqueueSnackbar(`Error processing layouts: ${(err as Error).message}`, {
           variant: "error",

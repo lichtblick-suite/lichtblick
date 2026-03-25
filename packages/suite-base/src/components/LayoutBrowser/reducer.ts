@@ -26,6 +26,7 @@ function reducer(draft: LayoutSelectionState, action: LayoutSelectionAction) {
 
     case "shift-multi-action":
       if (draft.multiAction) {
+        // console.log("shifting multi action ids", draft.multiAction.ids);
         draft.multiAction.ids = draft.multiAction.ids.slice(1);
         if (draft.multiAction.ids.length === 0) {
           draft.multiAction = undefined;
