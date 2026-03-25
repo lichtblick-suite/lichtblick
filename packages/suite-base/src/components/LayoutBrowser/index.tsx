@@ -125,7 +125,7 @@ export default function LayoutBrowser({
       }
 
       const { ids, action } = state.multiAction;
-      
+
       const id = ids[0];
       if (!id) {
         return;
