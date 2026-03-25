@@ -131,6 +131,18 @@ export function RendererOverlay(props: Props): React.JSX.Element {
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
   const renderer = useRenderer();
 
+  // Increment a token on each rendered frame so that selectedObject recomputes
+  // with fresh renderable data when timestamp changes.
+  const [frameToken, setFrameToken] = useState(0);
+  useRendererEvent(
+    "endFrame",
+    useCallback(() => {
+      if (selectedRenderable != undefined) {
+        setFrameToken((prev) => prev + 1);
+      }
+    }, [selectedRenderable]),
+  );
+
   // Toggle object selection mode on/off in the renderer
   useEffect(() => {
     if (renderer) {
@@ -206,7 +218,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
             instanceIndex: selectedRenderable.instanceIndex,
           }
         : undefined,
-    [selectedRenderable],
+    [selectedRenderable, frameToken],
   );
 
   // Inform the Renderer when a renderable is selected
