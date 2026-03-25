@@ -1,12 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { Dispatch } from "react";
-
-import {
-  LayoutSelectionAction,
-  LayoutSelectionState,
-} from "@lichtblick/suite-base/components/LayoutBrowser/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import {
   LayoutState,
@@ -14,6 +8,7 @@ import {
   useCurrentLayoutSelector,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
+import { LayoutSetupOptions } from "@lichtblick/suite-base/hooks/types";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
@@ -31,13 +26,7 @@ type UseLayoutActions = {
 
 const selectedLayoutIdSelector = (state: LayoutState) => state.selectedLayout?.id;
 
-export function useLayoutActions({
-  state,
-  dispatch,
-}: {
-  state: LayoutSelectionState;
-  dispatch: Dispatch<LayoutSelectionAction>;
-}): UseLayoutActions {
+export function useLayoutActions({ state, dispatch }: LayoutSetupOptions): UseLayoutActions {
   const layoutManager = useLayoutManager();
   const analytics = useAnalytics();
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);

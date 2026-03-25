@@ -161,6 +161,8 @@ describe("useLayoutActions", () => {
         action: "duplicate",
       });
       expect(mockLayoutManager.saveNewLayout).not.toHaveBeenCalled();
+      expect(onSelectLayoutMock).not.toHaveBeenCalled();
+      expect(analyticsMock.logEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -197,6 +199,8 @@ describe("useLayoutActions", () => {
 
       expect(dispatch).toHaveBeenCalledWith({ type: "queue-multi-action", action: "delete" });
       expect(mockLayoutManager.deleteLayout).not.toHaveBeenCalled();
+      expect(onSelectLayoutMock).not.toHaveBeenCalled();
+      expect(analyticsMock.logEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -233,6 +237,8 @@ describe("useLayoutActions", () => {
 
       expect(dispatch).toHaveBeenCalledWith({ type: "queue-multi-action", action: "revert" });
       expect(mockLayoutManager.revertLayout).not.toHaveBeenCalled();
+      expect(onSelectLayoutMock).not.toHaveBeenCalled();
+      expect(analyticsMock.logEvent).not.toHaveBeenCalled();
     });
   });
 
