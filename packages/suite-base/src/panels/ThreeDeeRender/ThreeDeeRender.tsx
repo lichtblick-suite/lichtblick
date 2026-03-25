@@ -199,8 +199,21 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   const [loadedTransformCount, setLoadedTransformCount] = useState<number>(0);
   const [reloadPreloadTrigger, setReloadPreloadTrigger] = useState<number>(0);
 
-  const renderRef = useRef({ needsRender: false });
+  // Incremented whenever a WebGL frame needs to be rendered.
+  // Using a counter (vs. a boolean ref) makes the dependency trackable by React's effect system,
+  // so the animationFrame() call only fires when genuinely needed rather than after every commit.
+  const [renderToken, setRenderToken] = useState(0);
+  const requestRender = useCallback(() => setRenderToken((t) => t + 1), []);
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
+
+  // Refs for values that are set inside onRender to avoid redundant setState calls.
+  // onRender is called by the pipeline on every tick; guarding with previous-value refs
+  // prevents unnecessary re-renders for slowly changing values.
+  const prevColorSchemeRef = useRef<typeof renderDone>(undefined);
+  const prevTopicsRef = useRef<Immutable<RenderState>["topics"]>(undefined);
+  const prevParametersRef = useRef<Immutable<RenderState>["parameters"]>(undefined);
+  const prevSharedPanelStateRef = useRef<Immutable<RenderState>["sharedPanelState"]>(undefined);
+  const prevTimezoneRef = useRef<string | undefined>(undefined);
 
   const schemaSubscriptions = useRendererProperty(
     "schemaSubscriptions",
@@ -345,7 +358,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   useEffect(() => {
     if (renderer) {
       renderer.config = config;
-      renderRef.current.needsRender = true;
+      requestRender();
     }
   }, [config, renderer]);
 
@@ -353,7 +366,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   useEffect(() => {
     if (renderer) {
       renderer.setTopics(topics);
-      renderRef.current.needsRender = true;
+      requestRender();
     }
   }, [topics, renderer]);
 
@@ -530,21 +543,41 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       // Set the done callback into a state variable to trigger a re-render
       setRenderDone(() => done);
 
-      // Keep UI elements and the renderer aware of the current color scheme
-      setColorScheme(renderState.colorScheme);
+      // Guard slowly-changing values with previous-value refs to avoid unnecessary re-renders.
+      // colorScheme, topics, parameters, and sharedPanelState rarely change; calling setState
+      // unconditionally on each pipeline tick was causing the 3D panel to re-render at full
+      // playback rate even when none of these values had changed.
+      if (!Object.is(renderState.colorScheme, prevColorSchemeRef.current)) {
+        prevColorSchemeRef.current = renderState.colorScheme as unknown as typeof renderDone;
+        setColorScheme(renderState.colorScheme);
+      }
+
       if (renderState.appSettings) {
         const tz = renderState.appSettings.get(AppSetting.TIMEZONE);
-        setTimezone(typeof tz === "string" ? tz : undefined);
+        const nextTz = typeof tz === "string" ? tz : undefined;
+        if (nextTz !== prevTimezoneRef.current) {
+          prevTimezoneRef.current = nextTz;
+          setTimezone(nextTz);
+        }
       }
 
       // We may have new topics - since we are also watching for messages in
       // the current frame, topics may not have changed
-      setTopics(renderState.topics);
+      if (!Object.is(renderState.topics, prevTopicsRef.current)) {
+        prevTopicsRef.current = renderState.topics;
+        setTopics(renderState.topics);
+      }
 
-      setSharedPanelState(renderState.sharedPanelState as Shared3DPanelState);
+      if (!Object.is(renderState.sharedPanelState, prevSharedPanelStateRef.current)) {
+        prevSharedPanelStateRef.current = renderState.sharedPanelState;
+        setSharedPanelState(renderState.sharedPanelState as Shared3DPanelState);
+      }
 
       // Watch for any changes in the map of observed parameters
-      setParameters(renderState.parameters);
+      if (!Object.is(renderState.parameters, prevParametersRef.current)) {
+        prevParametersRef.current = renderState.parameters;
+        setParameters(renderState.parameters);
+      }
 
       // currentFrame has messages on subscribed topics since the last render call
       setCurrentFrameMessages(renderState.currentFrame);
@@ -669,7 +702,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   useEffect(() => {
     if (colorScheme && renderer) {
       renderer.setColorScheme(colorScheme, backgroundColor);
-      renderRef.current.needsRender = true;
+      requestRender();
     }
   }, [backgroundColor, colorScheme, renderer]);
 
@@ -682,7 +715,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
     const newMessagesHandled = renderer.handleAllFramesMessages(allFrames);
     if (newMessagesHandled) {
-      renderRef.current.needsRender = true;
+      requestRender();
     }
   }, [renderer, currentTime, allFrames]);
 
@@ -696,14 +729,14 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       renderer.addMessageEvent(message);
     }
 
-    renderRef.current.needsRender = true;
+    requestRender();
   }, [currentFrameMessages, renderer]);
 
   // Update the renderer when the camera moves
   useEffect(() => {
     if (!_.isEqual(cameraState, renderer?.getCameraState())) {
       renderer?.setCameraState(cameraState);
-      renderRef.current.needsRender = true;
+      requestRender();
     }
   }, [cameraState, renderer]);
 
@@ -724,7 +757,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     } else {
       const newCameraState = sharedPanelState.cameraState;
       renderer.setCameraState(newCameraState);
-      renderRef.current.needsRender = true;
+      requestRender();
       setConfig((prevConfig) => ({
         ...prevConfig,
         cameraState: newCameraState,
@@ -739,13 +772,13 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     sharedPanelState,
   ]);
 
-  // Render a new frame if requested
+  // Render a new frame whenever renderToken is incremented.
+  // Using a state-based token instead of a ref means this effect only fires when a render
+  // is explicitly requested, not after every React commit.
   useEffect(() => {
-    if (renderer && renderRef.current.needsRender) {
-      renderer.animationFrame();
-      renderRef.current.needsRender = false;
-    }
-  });
+    renderer?.animationFrame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renderer, renderToken]);
 
   // Invoke the done callback once the render is complete
   useEffect(() => {

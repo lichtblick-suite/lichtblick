@@ -250,23 +250,24 @@ export default class UserScriptPlayer implements Player {
 
     const identity = <T>(item: T) => item;
 
-    const outputMessages: MessageEvent[] = [];
+    // Dispatch all (message × script) pairs concurrently rather than sequentially awaiting
+    // after each individual message.  This eliminates serial RPC round-trip latency when
+    // processing large message batches — with N messages and M scripts the old code incurred
+    // N sequential await barriers; the new code incurs just one.
+    const tasks: Promise<MessageEvent | undefined>[] = [];
     for (const message of inputMessages) {
-      const messagePromises = [];
       for (const scriptRegistration of scriptRegistrations) {
         if (
           this.#scriptSubscriptions[scriptRegistration.output.name] &&
           scriptRegistration.inputs.includes(message.topic)
         ) {
-          const messagePromise = scriptRegistration.processMessage(message, globalVariables);
-          messagePromises.push(messagePromise);
+          tasks.push(scriptRegistration.processMessage(message, globalVariables));
         }
       }
-      const output = await Promise.all(messagePromises);
-      outputMessages.push(...filterMap(output, identity));
     }
 
-    return outputMessages;
+    const results = await Promise.all(tasks);
+    return filterMap(results, identity);
   }
 
   async #getBlocks(
@@ -446,78 +447,99 @@ export default class UserScriptPlayer implements Player {
       registration: ScriptRegistration["processMessage"];
       terminate: () => void;
     } => {
-      // rpc channel for this processor. Lazily created on each message if an unused
-      // channel isn't available.
+      // rpc channel for this processor. Lazily created on the first message.
       let rpc: undefined | Rpc;
 
+      // Single initialization promise shared across concurrent callers so that parallel
+      // processMessage() calls (from the batched #getMessages loop) don't each race to
+      // spin up a worker and register the script.
+      let initPromise: Promise<void> | undefined;
+
+      const ensureInitialized = async (): Promise<Rpc> => {
+        if (rpc) {
+          return rpc;
+        }
+        if (!initPromise) {
+          initPromise = (async () => {
+            const candidateRpc = this.#unusedRuntimeWorkers.pop();
+
+            if (candidateRpc) {
+              rpc = candidateRpc;
+            } else {
+              const worker = UserScriptPlayer.CreateRuntimeWorker();
+
+              worker.onerror = (event) => {
+                log.error(event);
+
+                this.#alertStore.set(alertKey, {
+                  message: `User script runtime error: ${event.message}`,
+                  severity: "error",
+                });
+
+                void this.#queueEmitState();
+              };
+
+              const port: MessagePort = worker.port;
+              port.onmessageerror = (event) => {
+                log.error(event);
+
+                this.#alertStore.set(alertKey, {
+                  severity: "error",
+                  message: `User script runtime error: ${String(event.data)}`,
+                });
+
+                void this.#queueEmitState();
+              };
+              port.start();
+              rpc = new Rpc(port);
+
+              rpc.receive("error", (msg) => {
+                log.error(msg);
+
+                this.#alertStore.set(alertKey, {
+                  severity: "error",
+                  message: `User script runtime error: ${msg}`,
+                });
+
+                void this.#queueEmitState();
+              });
+            }
+
+            const { error, userScriptDiagnostics, userScriptLogs } =
+              await rpc.send<RegistrationOutput>("registerScript", {
+                projectCode,
+                scriptCode: transpiledCode,
+              });
+            if (error != undefined) {
+              this.#setUserScriptDiagnostics(scriptId, [
+                ...userScriptDiagnostics,
+                {
+                  source: SOURCES.Runtime,
+                  severity: DIAGNOSTIC_SEVERITY.Error,
+                  message: error,
+                  code: ERROR_CODES.RUNTIME,
+                },
+              ]);
+              rpc = undefined;
+              initPromise = undefined;
+              throw new Error(error);
+            }
+            this.#addUserScriptLogs(scriptId, userScriptLogs);
+          })();
+        }
+        await initPromise;
+        return rpc!;
+      };
+
       const registration = async (msgEvent: MessageEvent, globalVariables: GlobalVariables) => {
-        // Register the script within a web worker to be executed.
-        if (!rpc) {
-          rpc = this.#unusedRuntimeWorkers.pop();
-
-          // initialize a new worker since no unused one is available
-          if (!rpc) {
-            const worker = UserScriptPlayer.CreateRuntimeWorker();
-
-            worker.onerror = (event) => {
-              log.error(event);
-
-              this.#alertStore.set(alertKey, {
-                message: `User script runtime error: ${event.message}`,
-                severity: "error",
-              });
-
-              // trigger listener updates
-              void this.#queueEmitState();
-            };
-
-            const port: MessagePort = worker.port;
-            port.onmessageerror = (event) => {
-              log.error(event);
-
-              this.#alertStore.set(alertKey, {
-                severity: "error",
-                message: `User script runtime error: ${String(event.data)}`,
-              });
-
-              void this.#queueEmitState();
-            };
-            port.start();
-            rpc = new Rpc(port);
-
-            rpc.receive("error", (msg) => {
-              log.error(msg);
-
-              this.#alertStore.set(alertKey, {
-                severity: "error",
-                message: `User script runtime error: ${msg}`,
-              });
-
-              void this.#queueEmitState();
-            });
-          }
-
-          const { error, userScriptDiagnostics, userScriptLogs } =
-            await rpc.send<RegistrationOutput>("registerScript", {
-              projectCode,
-              scriptCode: transpiledCode,
-            });
-          if (error != undefined) {
-            this.#setUserScriptDiagnostics(scriptId, [
-              ...userScriptDiagnostics,
-              {
-                source: SOURCES.Runtime,
-                severity: DIAGNOSTIC_SEVERITY.Error,
-                message: error,
-                code: ERROR_CODES.RUNTIME,
-              },
-            ]);
-            return;
-          }
-          this.#addUserScriptLogs(scriptId, userScriptLogs);
+        let currentRpc: Rpc;
+        try {
+          currentRpc = await ensureInitialized();
+        } catch {
+          return;
         }
 
-        const result = await rpc.send<ProcessMessageOutput>("processMessage", {
+        const result = await currentRpc.send<ProcessMessageOutput>("processMessage", {
           message: {
             topic: msgEvent.topic,
             receiveTime: msgEvent.receiveTime,
@@ -579,6 +601,7 @@ export default class UserScriptPlayer implements Player {
           this.#unusedRuntimeWorkers.push(rpc);
           rpc = undefined;
         }
+        initPromise = undefined;
       };
 
       return { registration, terminate };
