@@ -3,7 +3,7 @@
 import { test, expect } from "../../../fixtures/electron";
 import { loadFromFilePicker } from "../../../fixtures/load-from-file-picker";
 
-const LAYOUT_FILE = "default-layout.json";
+const LAYOUT_FILE = "imported-layout.json";
 
 test("Import a layout via layout tab > import layout", async ({ mainWindow }) => {
   // Given
@@ -16,7 +16,7 @@ test("Import a layout via layout tab > import layout", async ({ mainWindow }) =>
 
   // Then
   await expect(
-    mainWindow.getByTestId("layout-list-item").getByText("default-layout", { exact: true }),
+    mainWindow.getByTestId("layout-list-item").getByText("imported-layout", { exact: true }),
   ).toBeVisible();
 });
 
@@ -33,6 +33,6 @@ test("Import a layout via menu > view > import layout", async ({ mainWindow }) =
 
   // Then
   await expect(
-    mainWindow.getByTestId("layout-list-item").getByText("default-layout", { exact: true }),
+    mainWindow.getByTestId("layout-list-item").getByText("imported-layout", { exact: true }),
   ).toBeVisible();
 });

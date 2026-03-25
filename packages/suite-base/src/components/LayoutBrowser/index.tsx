@@ -68,6 +68,7 @@ export default function LayoutBrowser({
   const analytics = useAnalytics();
 
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
+  const { onSelectLayout, state, dispatch } = useLayoutNavigation();
   const {
     onRenameLayout,
     onDuplicateLayout,
@@ -75,9 +76,8 @@ export default function LayoutBrowser({
     onRevertLayout,
     onOverwriteLayout,
     confirmModal,
-  } = useLayoutActions();
+  } = useLayoutActions({ state, dispatch });
   const { importLayout, exportLayout } = useLayoutTransfer();
-  const { onSelectLayout, state, dispatch } = useLayoutNavigation();
   const onExportLayout = exportLayout;
 
   useLayoutEffect(() => {
@@ -124,10 +124,11 @@ export default function LayoutBrowser({
         return;
       }
 
-      const id = state.multiAction.ids[0];
-      if (id) {
-        try {
-          switch (state.multiAction.action) {
+      const { ids, action } = state.multiAction;
+
+      try {
+        for (const id of ids) {
+          switch (action) {
             case "delete":
               await layoutManager.deleteLayout({ id: id as LayoutID });
               break;
@@ -150,12 +151,12 @@ export default function LayoutBrowser({
               break;
           }
           dispatch({ type: "shift-multi-action" });
-        } catch (err: unknown) {
-          enqueueSnackbar(`Error processing layouts: ${(err as Error).message}`, {
-            variant: "error",
-          });
-          dispatch({ type: "clear-multi-action" });
         }
+      } catch (err: unknown) {
+        enqueueSnackbar(`Error processing layouts: ${(err as Error).message}`, {
+          variant: "error",
+        });
+        dispatch({ type: "clear-multi-action" });
       }
     };
 

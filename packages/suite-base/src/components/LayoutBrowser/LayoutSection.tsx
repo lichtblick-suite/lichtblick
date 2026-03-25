@@ -50,12 +50,6 @@ export default function LayoutSection({
 }>): React.JSX.Element {
   // Get multiple selected layouts and handle bulk actions
   const selectedLayouts = items?.filter((layout) => multiSelectedIds.includes(layout.id)) ?? [];
-  const handleDuplicateSelected = () => {
-    selectedLayouts.forEach(onDuplicate);
-  };
-  const handleDeleteSelected = () => {
-    selectedLayouts.forEach(onDelete);
-  };
   const handleOverwriteSelected = () => {
     selectedLayouts.filter((l) => l.working != undefined).forEach(onOverwrite);
   };
@@ -89,14 +83,8 @@ export default function LayoutSection({
             selected={selectedId === layout.id}
             onSelect={onSelect}
             onRename={onRename}
-            onDuplicate={handleDuplicateSelected}
-            onDelete={(clickedLayout) => {
-              if (multiSelectedIds.includes(clickedLayout.id)) {
-                handleDeleteSelected();
-              } else {
-                onDelete(clickedLayout);
-              }
-            }}
+            onDuplicate={onDuplicate}
+            onDelete={onDelete}
             onShare={onShare}
             onExport={onExport}
             onOverwrite={(clickedLayout) => {
