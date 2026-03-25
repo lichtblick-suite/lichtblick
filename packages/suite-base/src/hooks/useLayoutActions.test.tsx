@@ -5,10 +5,10 @@
 
 import { renderHook, act } from "@testing-library/react";
 
-import { LayoutSelectionState } from "@lichtblick/suite-base/components/LayoutBrowser/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
+import { LayoutSetupOptions } from "@lichtblick/suite-base/hooks/types";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { useLayoutActions } from "@lichtblick/suite-base/hooks/useLayoutActions";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
@@ -16,11 +16,6 @@ import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
-
-type SetupOptions = {
-  state?: LayoutSelectionState;
-  dispatch?: jest.Mock;
-};
 
 jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
   useLayoutManager: jest.fn(),
@@ -45,7 +40,7 @@ jest.mock("@lichtblick/suite-base/hooks/useConfirm", () => ({
   useConfirm: jest.fn().mockReturnValue([jest.fn().mockResolvedValue("ok"), undefined]),
 }));
 
-function setup(options: SetupOptions = {}) {
+function setup(options: Partial<LayoutSetupOptions> = {}) {
   const {
     state = {
       busy: false,
@@ -59,7 +54,6 @@ function setup(options: SetupOptions = {}) {
   } = options;
 
   const { result } = renderHook(() => useLayoutActions({ state, dispatch }));
-
   return { result, dispatch };
 }
 
