@@ -226,8 +226,6 @@ describe("CustomDatasetsBuilder", () => {
       ]),
     );
 
-    const startTime = { sec: 0, nsec: 0 };
-
     // First range batch: x(0,1), bar(0)
     builder.handleMessageRange(
       [
@@ -247,7 +245,6 @@ describe("CustomDatasetsBuilder", () => {
         },
       ],
       { isReset: false },
-      startTime,
     );
     builder.handleMessageRange(
       [
@@ -260,7 +257,6 @@ describe("CustomDatasetsBuilder", () => {
         },
       ],
       { isReset: false },
-      startTime,
     );
 
     // Second range batch: x(2), bar(1,2), baz(4)
@@ -275,7 +271,6 @@ describe("CustomDatasetsBuilder", () => {
         },
       ],
       { isReset: false },
-      startTime,
     );
     builder.handleMessageRange(
       [
@@ -295,7 +290,6 @@ describe("CustomDatasetsBuilder", () => {
         },
       ],
       { isReset: false },
-      startTime,
     );
     builder.handleMessageRange(
       [
@@ -308,7 +302,6 @@ describe("CustomDatasetsBuilder", () => {
         },
       ],
       { isReset: false },
-      startTime,
     );
 
     const result = await builder.getViewportDatasets({
@@ -360,14 +353,13 @@ describe("CustomDatasetsBuilder", () => {
         ]),
       );
 
-      const startTime = { sec: 0, nsec: 0 };
       const sendMessages = (messages: MessageEvent[]) => {
         if (type === "current") {
           builder.handlePlayerState(buildPlayerState({ messages }));
         } else {
           const byTopic = _.groupBy(messages, (item) => item.topic);
           for (const topicMessages of Object.values(byTopic)) {
-            builder.handleMessageRange(topicMessages, { isReset: false }, startTime);
+            builder.handleMessageRange(topicMessages, { isReset: false });
           }
         }
       };
