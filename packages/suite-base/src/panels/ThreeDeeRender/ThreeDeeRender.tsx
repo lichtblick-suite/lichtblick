@@ -203,7 +203,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   // Using a counter (vs. a boolean ref) makes the dependency trackable by React's effect system,
   // so the animationFrame() call only fires when genuinely needed rather than after every commit.
   const [renderToken, setRenderToken] = useState(0);
-  const requestRender = useCallback(() => setRenderToken((t) => t + 1), []);
+  const requestRender = useCallback(() => { setRenderToken((t) => t + 1); }, []);
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
   // Refs for values that are set inside onRender to avoid redundant setState calls.
@@ -360,7 +360,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       renderer.config = config;
       requestRender();
     }
-  }, [config, renderer]);
+  }, [config, renderer, requestRender]);
 
   // Update the renderer's reference to `topics` when it changes
   useEffect(() => {
@@ -368,14 +368,14 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       renderer.setTopics(topics);
       requestRender();
     }
-  }, [topics, renderer]);
+  }, [topics, renderer, requestRender]);
 
   // Tell the renderer if we are connected to a ROS data source
   useEffect(() => {
     if (renderer) {
       renderer.ros = context.dataSourceProfile === "ros1" || context.dataSourceProfile === "ros2";
     }
-  }, [context.dataSourceProfile, renderer]);
+  }, [context.dataSourceProfile, renderer, requestRender]);
 
   // Save panel settings whenever they change
   const throttledSave = useDebouncedCallback(
@@ -704,7 +704,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       renderer.setColorScheme(colorScheme, backgroundColor);
       requestRender();
     }
-  }, [backgroundColor, colorScheme, renderer]);
+  }, [backgroundColor, colorScheme, renderer, requestRender]);
 
   // Handle preloaded messages and render a frame if new messages are available
   // Should be called before `messages` is handled
@@ -717,7 +717,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     if (newMessagesHandled) {
       requestRender();
     }
-  }, [renderer, currentTime, allFrames]);
+  }, [renderer, currentTime, allFrames, requestRender]);
 
   // Handle messages and render a frame if new messages are available
   useEffect(() => {
@@ -730,7 +730,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
 
     requestRender();
-  }, [currentFrameMessages, renderer]);
+  }, [currentFrameMessages, renderer, requestRender]);
 
   // Update the renderer when the camera moves
   useEffect(() => {
@@ -738,7 +738,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       renderer?.setCameraState(cameraState);
       requestRender();
     }
-  }, [cameraState, renderer]);
+  }, [cameraState, renderer, requestRender]);
 
   // Sync camera with shared state, if enabled.
   useEffect(() => {
@@ -770,6 +770,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     renderer,
     renderer?.followFrameId,
     sharedPanelState,
+    requestRender
   ]);
 
   // Render a new frame whenever renderToken is incremented.
@@ -777,7 +778,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   // is explicitly requested, not after every React commit.
   useEffect(() => {
     renderer?.animationFrame();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [renderer, renderToken]);
 
   // Invoke the done callback once the render is complete

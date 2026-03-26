@@ -917,16 +917,8 @@ describe("IterablePlayer", () => {
         {
           start: { sec: 0, nsec: 0 },
           end: { sec: 1, nsec: 0 },
-          topics: mockTopicSelection("foo"),
           consumptionType: "partial",
-        },
-      ],
-      [
-        {
-          start: { sec: 0, nsec: 99000001 },
-          end: { sec: 1, nsec: 0 },
-          topics: mockTopicSelection("bar", "foo"),
-          consumptionType: "partial",
+          topics: new Map([["foo", { topic: "foo" }]]),
         },
       ],
     ]);

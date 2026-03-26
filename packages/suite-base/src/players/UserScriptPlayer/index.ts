@@ -459,74 +459,74 @@ export default class UserScriptPlayer implements Player {
         if (rpc) {
           return rpc;
         }
-        if (!initPromise) {
-          initPromise = (async () => {
-            const candidateRpc = this.#unusedRuntimeWorkers.pop();
+        // Use nullish coalescing assignment (??=) to satisfy lint rules
+        initPromise ??= (async () => {
+          const candidateRpc = this.#unusedRuntimeWorkers.pop();
 
-            if (candidateRpc) {
-              rpc = candidateRpc;
-            } else {
-              const worker = UserScriptPlayer.CreateRuntimeWorker();
+          if (candidateRpc) {
+            rpc = candidateRpc;
+          } else {
+            const worker = UserScriptPlayer.CreateRuntimeWorker();
 
-              worker.onerror = (event) => {
-                log.error(event);
+            worker.onerror = (event) => {
+              log.error(event);
 
-                this.#alertStore.set(alertKey, {
-                  message: `User script runtime error: ${event.message}`,
-                  severity: "error",
-                });
-
-                void this.#queueEmitState();
-              };
-
-              const port: MessagePort = worker.port;
-              port.onmessageerror = (event) => {
-                log.error(event);
-
-                this.#alertStore.set(alertKey, {
-                  severity: "error",
-                  message: `User script runtime error: ${String(event.data)}`,
-                });
-
-                void this.#queueEmitState();
-              };
-              port.start();
-              rpc = new Rpc(port);
-
-              rpc.receive("error", (msg) => {
-                log.error(msg);
-
-                this.#alertStore.set(alertKey, {
-                  severity: "error",
-                  message: `User script runtime error: ${msg}`,
-                });
-
-                void this.#queueEmitState();
+              this.#alertStore.set(alertKey, {
+                message: `User script runtime error: ${event.message}`,
+                severity: "error",
               });
-            }
 
-            const { error, userScriptDiagnostics, userScriptLogs } =
-              await rpc.send<RegistrationOutput>("registerScript", {
-                projectCode,
-                scriptCode: transpiledCode,
+              void this.#queueEmitState();
+            };
+
+            const port: MessagePort = worker.port;
+            port.onmessageerror = (event) => {
+              log.error(event);
+
+              this.#alertStore.set(alertKey, {
+                severity: "error",
+                message: `User script runtime error: ${String(event.data)}`,
               });
-            if (error != undefined) {
-              this.#setUserScriptDiagnostics(scriptId, [
-                ...userScriptDiagnostics,
-                {
-                  source: SOURCES.Runtime,
-                  severity: DIAGNOSTIC_SEVERITY.Error,
-                  message: error,
-                  code: ERROR_CODES.RUNTIME,
-                },
-              ]);
-              rpc = undefined;
-              initPromise = undefined;
-              throw new Error(error);
-            }
-            this.#addUserScriptLogs(scriptId, userScriptLogs);
-          })();
-        }
+
+              void this.#queueEmitState();
+            };
+            port.start();
+            rpc = new Rpc(port);
+
+            rpc.receive("error", (msg) => {
+              log.error(msg);
+
+              this.#alertStore.set(alertKey, {
+                severity: "error",
+                message: `User script runtime error: ${msg}`,
+              });
+
+              void this.#queueEmitState();
+            });
+          }
+
+          const { error, userScriptDiagnostics, userScriptLogs } =
+            await rpc.send<RegistrationOutput>("registerScript", {
+              projectCode,
+              scriptCode: transpiledCode,
+            });
+          if (error != undefined) {
+            this.#setUserScriptDiagnostics(scriptId, [
+              ...userScriptDiagnostics,
+              {
+                source: SOURCES.Runtime,
+                severity: DIAGNOSTIC_SEVERITY.Error,
+                message: error,
+                code: ERROR_CODES.RUNTIME,
+              },
+            ]);
+            rpc = undefined;
+            initPromise = undefined;
+            throw new Error(error);
+          }
+          this.#addUserScriptLogs(scriptId, userScriptLogs);
+        })();
+
         await initPromise;
         return rpc!;
       };
