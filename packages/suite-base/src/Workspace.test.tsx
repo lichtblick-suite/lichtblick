@@ -12,6 +12,7 @@ import {
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import Sidebars from "@lichtblick/suite-base/components/Sidebars";
 import { SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
+import { useAlertsActions } from "@lichtblick/suite-base/context/AlertsContext";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
   useCurrentUser,
@@ -153,6 +154,9 @@ jest.mock("@lichtblick/suite-base/context/CurrentUserContext", () => ({
   useCurrentUser: jest.fn(),
   useCurrentUserType: jest.fn(),
 }));
+jest.mock("@lichtblick/suite-base/context/AlertsContext", () => ({
+  useAlertsActions: jest.fn(),
+}));
 jest.mock("@lichtblick/suite-base/context/EventsContext", () => ({
   useEvents: jest.fn(),
 }));
@@ -274,6 +278,7 @@ describe("Workspace - alerts badge in leftSidebarItems", () => {
     (useAppConfigurationValue as jest.Mock).mockReturnValue([false]);
     (useCurrentUser as jest.Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
     (useCurrentUserType as jest.Mock).mockReturnValue("unauthenticated");
+    (useAlertsActions as jest.Mock).mockReturnValue({ clearAlerts: jest.fn() });
     (useEvents as jest.Mock).mockImplementation(
       (selector: (store: { eventsSupported: boolean; selectEvent: jest.Mock }) => unknown) =>
         selector({ eventsSupported: false, selectEvent: jest.fn() }),
