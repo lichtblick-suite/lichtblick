@@ -205,11 +205,4 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     description: t("studioPlaybackPerformanceDescription"),
     module: async () => await import("./PlaybackPerformance"),
   },
-  {
-    title: "Plot Two (MessageRange)",
-    type: "PlotTwo",
-    description: "Plot panel using subscribeMessageRange instead of block loader",
-    thumbnail: plotThumbnail,
-    module: async () => await import("./PlotTwo"),
-  },
 ];

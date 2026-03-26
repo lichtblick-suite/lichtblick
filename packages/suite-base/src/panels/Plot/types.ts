@@ -12,10 +12,8 @@ import { OffscreenCanvasRenderer } from "@lichtblick/suite-base/panels/Plot/Offs
 import type { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
 import { CurrentCustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CurrentCustomDatasetsBuilder";
 import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilder";
-import { CustomDatasetsBuilderTwo } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilderTwo";
 import { IndexDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/IndexDatasetsBuilder";
 import { TimestampDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilder";
-import { TimestampDatasetsBuilderTwo } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilderTwo";
 import { PlotConfig, PlotPath } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { Bounds1D } from "@lichtblick/suite-base/types/Bounds";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
@@ -164,10 +162,8 @@ export type UsePlotDataHandling = {
   labelsByDatasetIndex: Record<string, string>;
   datasetsBuilder:
     | TimestampDatasetsBuilder
-    | TimestampDatasetsBuilderTwo // to be removed
     | IndexDatasetsBuilder
     | CustomDatasetsBuilder
-    | CustomDatasetsBuilderTwo // to be removed
     | CurrentCustomDatasetsBuilder;
 };
 

@@ -8,13 +8,12 @@
 import * as Comlink from "@lichtblick/comlink";
 import { ComlinkWrap } from "@lichtblick/den/worker";
 import { MessagePath } from "@lichtblick/message-path";
-import { Immutable, MessageEvent } from "@lichtblick/suite";
+import { Immutable, MessageEvent, Time } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { PlayerState } from "@lichtblick/suite-base/players/types";
 import { extendBounds1D, unionBounds1D } from "@lichtblick/suite-base/types/Bounds";
 
-import { BlockTopicCursor } from "./BlockTopicCursor";
 import {
   CustomDatasetsBuilderImpl,
   UpdateDataAction,
@@ -28,12 +27,12 @@ import {
   SeriesItem,
   Viewport,
 } from "./IDatasetsBuilder";
+import { buildCurrentSeriesActions } from "./utils";
 import { getChartValue, isChartValue } from "../utils/datum";
 import { MathFunction, mathFunctions } from "../utils/mathFunctions";
 
 type CustomDatasetsSeriesItem = {
   config: Immutable<SeriesItem>;
-  blockCursor: BlockTopicCursor;
 };
 
 // If the datasets builder is garbage collected we also need to cleanup the worker
@@ -43,10 +42,8 @@ const registry = new FinalizationRegistry<() => void>((dispose) => {
 });
 
 export class CustomDatasetsBuilder implements IDatasetsBuilder {
+  readonly #datasetsBuilderRemote: Comlink.Remote<Comlink.RemoteObject<CustomDatasetsBuilderImpl>>;
   #xParsedPath?: Immutable<MessagePath>;
-  #xValuesCursor?: BlockTopicCursor;
-
-  #datasetsBuilderRemote: Comlink.Remote<Comlink.RemoteObject<CustomDatasetsBuilderImpl>>;
 
   #pendingDispatch: Immutable<UpdateDataAction>[] = [];
 
@@ -56,6 +53,12 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
 
   #xCurrentBounds?: Bounds1D;
   #xFullBounds?: Bounds1D;
+
+  #hasRangeSource: boolean = false;
+
+  public getXTopic(): string | undefined {
+    return this.#xParsedPath?.topicName;
+  }
 
   public constructor() {
     const worker = new Worker(
@@ -81,7 +84,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
     let datasetsChanged = false;
 
     const msgEvents = activeData.messages;
-    if (msgEvents.length > 0) {
+    if (!this.#hasRangeSource && msgEvents.length > 0) {
       if (didSeek) {
         this.#pendingDispatch.push({
           type: "reset-current-x",
@@ -91,10 +94,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
 
       // Read the x-axis values
       if (this.#xParsedPath) {
-        const mathFn = this.#xParsedPath.modifier
-          ? mathFunctions[this.#xParsedPath.modifier]
-          : undefined;
-        const pathItems = readMessagePathItems(msgEvents, this.#xParsedPath, mathFn);
+        const pathItems = parseXPathItems(msgEvents, this.#xParsedPath);
 
         this.#pendingDispatch.push({
           type: "append-current-x",
@@ -107,80 +107,16 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
         }
       }
 
-      for (const series of this.#series) {
-        const mathFn = series.config.parsed.modifier
-          ? mathFunctions[series.config.parsed.modifier]
-          : undefined;
-        if (didSeek) {
-          this.#pendingDispatch.push({
-            type: "reset-current",
-            series: series.config.key,
-          });
-        }
-
-        const pathItems = readMessagePathItems(msgEvents, series.config.parsed, mathFn);
-        datasetsChanged ||= pathItems.length > 0;
-        this.#pendingDispatch.push({
-          type: "append-current",
-          series: series.config.key,
-          items: pathItems,
-        });
-      }
-    }
-
-    const blocks = state.progress.messageCache?.blocks;
-    if (blocks) {
-      if (this.#xValuesCursor && this.#xParsedPath) {
-        const mathFn = this.#xParsedPath.modifier
-          ? mathFunctions[this.#xParsedPath.modifier]
-          : undefined;
-
-        if (this.#xValuesCursor.nextWillReset(blocks)) {
-          this.#pendingDispatch.push({
-            type: "reset-full-x",
-          });
-        }
-
-        let messageEvents = undefined;
-        while ((messageEvents = this.#xValuesCursor.next(blocks)) != undefined) {
-          const pathItems = readMessagePathItems(messageEvents, this.#xParsedPath, mathFn);
-
-          this.#pendingDispatch.push({
-            type: "append-full-x",
-            items: pathItems,
-          });
-
-          if (pathItems.length > 0) {
-            datasetsChanged = true;
-            this.#xFullBounds = computeBounds(this.#xFullBounds, pathItems);
-          }
-        }
-      }
-
-      for (const series of this.#series) {
-        const mathFn = series.config.parsed.modifier
-          ? mathFunctions[series.config.parsed.modifier]
-          : undefined;
-
-        if (series.blockCursor.nextWillReset(blocks)) {
-          this.#pendingDispatch.push({
-            type: "reset-full",
-            series: series.config.key,
-          });
-        }
-
-        let messageEvents = undefined;
-        while ((messageEvents = series.blockCursor.next(blocks)) != undefined) {
-          const pathItems = readMessagePathItems(messageEvents, series.config.parsed, mathFn);
-
-          datasetsChanged ||= pathItems.length > 0;
-          this.#pendingDispatch.push({
-            type: "append-full",
-            series: series.config.key,
-            items: pathItems,
-          });
-        }
-      }
+      const { actions: seriesActions, datasetsChanged: seriesChanged } = buildCurrentSeriesActions(
+        this.#series,
+        { didSeek },
+        (config) => {
+          const mathFn = config.parsed.modifier ? mathFunctions[config.parsed.modifier] : undefined;
+          return readMessagePathItems(msgEvents, config.parsed, mathFn);
+        },
+      );
+      this.#pendingDispatch.push(...(seriesActions as UpdateDataAction[]));
+      datasetsChanged ||= seriesChanged;
     }
 
     if (!this.#xCurrentBounds) {
@@ -203,17 +139,64 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
     };
   }
 
+  public handleMessageRange(
+    messages: Immutable<MessageEvent[]>,
+    options: { isReset: boolean },
+    startTime: Immutable<Time>,
+  ): void {
+    this.#hasRangeSource = true;
+    void startTime; // x-axis is a custom value, not time-derived
+    const topic = messages[0]?.topic;
+    if (!topic) {
+      return;
+    }
+
+    const isXBatch = topic === this.#xParsedPath?.topicName;
+
+    if (isXBatch) {
+      if (options.isReset) {
+        this.#pendingDispatch.push({ type: "reset-full-x" });
+        this.#xFullBounds = undefined;
+      }
+      if (this.#xParsedPath) {
+        const pathItems = parseXPathItems(messages, this.#xParsedPath);
+        if (pathItems.length > 0) {
+          this.#xFullBounds = computeBounds(this.#xFullBounds, pathItems);
+          this.#pendingDispatch.push({ type: "append-full-x", items: pathItems });
+        }
+      }
+      return;
+    }
+
+    for (const series of this.#series) {
+      if (series.config.parsed.topicName !== topic) {
+        continue;
+      }
+      if (options.isReset) {
+        this.#pendingDispatch.push({ type: "reset-full", series: series.config.key });
+      }
+      const mathFn = series.config.parsed.modifier
+        ? mathFunctions[series.config.parsed.modifier]
+        : undefined;
+      const pathItems = readMessagePathItems(messages, series.config.parsed, mathFn);
+      if (pathItems.length > 0) {
+        this.#pendingDispatch.push({
+          type: "append-full",
+          series: series.config.key,
+          items: pathItems,
+        });
+      }
+    }
+  }
+
   public setXPath(path: Immutable<MessagePath> | undefined): void {
     if (JSON.stringify(path) === JSON.stringify(this.#xParsedPath)) {
       return;
     }
 
     this.#xParsedPath = path;
-    if (this.#xParsedPath) {
-      this.#xValuesCursor = new BlockTopicCursor(this.#xParsedPath.topicName);
-    } else {
-      this.#xValuesCursor = undefined;
-    }
+    this.#xFullBounds = undefined;
+    this.#xCurrentBounds = undefined;
 
     this.#pendingDispatch.push({
       type: "reset-current-x",
@@ -225,13 +208,7 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
   }
 
   public setSeries(series: Immutable<SeriesItem[]>): void {
-    this.#series = series.map((item) => {
-      const existing = this.#series.find((existingItem) => existingItem.config.key === item.key);
-      return {
-        config: item,
-        blockCursor: existing?.blockCursor ?? new BlockTopicCursor(item.parsed.topicName),
-      };
-    });
+    this.#series = series.map((item) => ({ config: item }));
 
     this.#pendingDispatch.push({
       type: "update-series-config",
@@ -254,6 +231,14 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
   public async getCsvData(): Promise<CsvDataset[]> {
     return await this.#datasetsBuilderRemote.getCsvData();
   }
+}
+
+function parseXPathItems(
+  messages: Immutable<MessageEvent[]>,
+  xParsedPath: Immutable<MessagePath>,
+): ValueItem[] {
+  const mathFn = xParsedPath.modifier ? mathFunctions[xParsedPath.modifier] : undefined;
+  return readMessagePathItems(messages, xParsedPath, mathFn);
 }
 
 function readMessagePathItems(

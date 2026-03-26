@@ -19,6 +19,7 @@ import {
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { PanelContextMenu } from "@lichtblick/suite-base/components/PanelContextMenu";
+import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -69,6 +70,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   const { globalVariables } = useGlobalVariables();
   const getMessagePipelineState = useMessagePipelineGetter();
   const subscribeMessagePipeline = useMessagePipelineSubscribe();
+  const subscribeMessageRange = useSubscribeMessageRange();
 
   const {
     onMouseMove,
@@ -164,7 +166,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
 
     const contentRect = canvasDiv.getBoundingClientRect();
 
-    const plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder);
+    const plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange);
     setCoordinator(plotCoordinator);
 
     plotCoordinator.setSize({
@@ -188,7 +190,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       resizeObserver.disconnect();
       plotCoordinator.destroy();
     };
-  }, [canvasDiv, datasetsBuilder, renderer]);
+  }, [canvasDiv, datasetsBuilder, renderer, subscribeMessageRange]);
 
   const numSeries = config.paths.length;
   const tooltipContent = useMemo(() => {
