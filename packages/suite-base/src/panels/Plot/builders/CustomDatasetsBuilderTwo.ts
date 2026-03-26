@@ -27,6 +27,7 @@ import {
   SeriesItem,
   Viewport,
 } from "./IDatasetsBuilder";
+import { buildCurrentSeriesActions } from "./utils";
 import { getChartValue, isChartValue } from "../utils/datum";
 import { MathFunction, mathFunctions } from "../utils/mathFunctions";
 
@@ -41,9 +42,8 @@ const registry = new FinalizationRegistry<() => void>((dispose) => {
 });
 
 export class CustomDatasetsBuilderTwo implements IDatasetsBuilder {
+  readonly #datasetsBuilderRemote: Comlink.Remote<Comlink.RemoteObject<CustomDatasetsBuilderImpl>>;
   #xParsedPath?: Immutable<MessagePath>;
-
-  #datasetsBuilderRemote: Comlink.Remote<Comlink.RemoteObject<CustomDatasetsBuilderImpl>>;
 
   #pendingDispatch: Immutable<UpdateDataAction>[] = [];
 
@@ -94,10 +94,7 @@ export class CustomDatasetsBuilderTwo implements IDatasetsBuilder {
 
       // Read the x-axis values
       if (this.#xParsedPath) {
-        const mathFn = this.#xParsedPath.modifier
-          ? mathFunctions[this.#xParsedPath.modifier]
-          : undefined;
-        const pathItems = readMessagePathItems(msgEvents, this.#xParsedPath, mathFn);
+        const pathItems = parseXPathItems(msgEvents, this.#xParsedPath);
 
         this.#pendingDispatch.push({
           type: "append-current-x",
@@ -110,25 +107,16 @@ export class CustomDatasetsBuilderTwo implements IDatasetsBuilder {
         }
       }
 
-      for (const series of this.#series) {
-        const mathFn = series.config.parsed.modifier
-          ? mathFunctions[series.config.parsed.modifier]
-          : undefined;
-        if (didSeek) {
-          this.#pendingDispatch.push({
-            type: "reset-current",
-            series: series.config.key,
-          });
-        }
-
-        const pathItems = readMessagePathItems(msgEvents, series.config.parsed, mathFn);
-        datasetsChanged ||= pathItems.length > 0;
-        this.#pendingDispatch.push({
-          type: "append-current",
-          series: series.config.key,
-          items: pathItems,
-        });
-      }
+      const { actions: seriesActions, datasetsChanged: seriesChanged } = buildCurrentSeriesActions(
+        this.#series,
+        { didSeek },
+        (config) => {
+          const mathFn = config.parsed.modifier ? mathFunctions[config.parsed.modifier] : undefined;
+          return readMessagePathItems(msgEvents, config.parsed, mathFn);
+        },
+      );
+      this.#pendingDispatch.push(...(seriesActions as UpdateDataAction[]));
+      datasetsChanged ||= seriesChanged;
     }
 
     if (!this.#xCurrentBounds) {
@@ -171,10 +159,7 @@ export class CustomDatasetsBuilderTwo implements IDatasetsBuilder {
         this.#xFullBounds = undefined;
       }
       if (this.#xParsedPath) {
-        const mathFn = this.#xParsedPath.modifier
-          ? mathFunctions[this.#xParsedPath.modifier]
-          : undefined;
-        const pathItems = readMessagePathItems(messages, this.#xParsedPath, mathFn);
+        const pathItems = parseXPathItems(messages, this.#xParsedPath);
         if (pathItems.length > 0) {
           this.#xFullBounds = computeBounds(this.#xFullBounds, pathItems);
           this.#pendingDispatch.push({ type: "append-full-x", items: pathItems });
@@ -246,6 +231,14 @@ export class CustomDatasetsBuilderTwo implements IDatasetsBuilder {
   public async getCsvData(): Promise<CsvDataset[]> {
     return await this.#datasetsBuilderRemote.getCsvData();
   }
+}
+
+function parseXPathItems(
+  messages: Immutable<MessageEvent[]>,
+  xParsedPath: Immutable<MessagePath>,
+): ValueItem[] {
+  const mathFn = xParsedPath.modifier ? mathFunctions[xParsedPath.modifier] : undefined;
+  return readMessagePathItems(messages, xParsedPath, mathFn);
 }
 
 function readMessagePathItems(

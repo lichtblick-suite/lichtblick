@@ -84,3 +84,32 @@ export function lastMatchingTopic(
 
   return undefined;
 }
+
+type SeriesCurrentAction<T> =
+  | { type: "reset-current"; series: SeriesConfigKey }
+  | { type: "append-current"; series: SeriesConfigKey; items: T[] };
+
+/**
+ * Iterates over each series, optionally pushing a reset-current action when a seek occurred,
+ * then appending the items returned by `getItems`. Returns whether any series produced items.
+ *
+ * Shared by TimestampDatasetsBuilderTwo and CustomDatasetsBuilderTwo for current-frame y-series
+ * processing.
+ */
+export function buildCurrentSeriesActions<TItem>(
+  series: Immutable<Array<{ config: Immutable<SeriesItem> }>>,
+  options: { didSeek: boolean },
+  getItems: (config: Immutable<SeriesItem>) => TItem[],
+): { actions: SeriesCurrentAction<TItem>[]; datasetsChanged: boolean } {
+  let datasetsChanged = false;
+  const actions: SeriesCurrentAction<TItem>[] = [];
+  for (const s of series) {
+    if (options.didSeek) {
+      actions.push({ type: "reset-current", series: s.config.key });
+    }
+    const items = getItems(s.config);
+    datasetsChanged ||= items.length > 0;
+    actions.push({ type: "append-current", series: s.config.key, items });
+  }
+  return { actions, datasetsChanged };
+}

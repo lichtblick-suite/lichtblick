@@ -27,6 +27,7 @@ import type {
   TimestampDatasetsBuilderImpl,
   UpdateDataAction,
 } from "./TimestampDatasetsBuilderImpl";
+import { buildCurrentSeriesActions } from "./utils";
 import { MATH_FUNCTIONS } from "../constants";
 import { getChartValue, isChartValue } from "../utils/datum";
 import { MathFunction } from "../utils/mathFunctions";
@@ -86,33 +87,24 @@ export class TimestampDatasetsBuilderTwo implements IDatasetsBuilder {
     const msgEvents = activeData.messages;
     let datasetsChanged = false;
     if (!this.#hasRangeSource && msgEvents.length > 0) {
-      for (const series of this.#series) {
-        const mathFn = series.config.parsed.modifier
-          ? MATH_FUNCTIONS[series.config.parsed.modifier]
-          : undefined;
-
-        if (didSeek) {
-          this.#pendingDispatch.push({
-            type: "reset-current",
-            series: series.config.key,
-          });
-        }
-
-        const pathItems = readMessagePathItems(
-          msgEvents,
-          series.config.parsed,
-          series.config.timestampMethod,
-          activeData.startTime,
-          mathFn,
-        );
-
-        datasetsChanged ||= pathItems.length > 0;
-        this.#pendingDispatch.push({
-          type: "append-current",
-          series: series.config.key,
-          items: pathItems,
-        });
-      }
+      const { actions: seriesActions, datasetsChanged: seriesChanged } = buildCurrentSeriesActions(
+        this.#series,
+        { didSeek },
+        (config) => {
+          const mathFn = config.parsed.modifier
+            ? MATH_FUNCTIONS[config.parsed.modifier]
+            : undefined;
+          return readMessagePathItems(
+            msgEvents,
+            config.parsed,
+            config.timestampMethod,
+            activeData.startTime,
+            mathFn,
+          );
+        },
+      );
+      this.#pendingDispatch.push(...(seriesActions as UpdateDataAction[]));
+      datasetsChanged ||= seriesChanged;
     }
 
     return {
