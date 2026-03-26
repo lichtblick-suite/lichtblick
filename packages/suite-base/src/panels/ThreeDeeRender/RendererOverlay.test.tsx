@@ -147,6 +147,7 @@ describe("<RendererOverlay /> hover wiring", () => {
     const renderable = {
       topic: "/my_topic",
       name: "my_entity on /my_topic",
+      userData: { entityId: "my_entity" },
       details: jest.fn(() => details),
       instanceDetails: jest.fn(),
     };
@@ -222,6 +223,7 @@ describe("<RendererOverlay /> hover wiring", () => {
     const renderable = {
       topic: "/t",
       name: "n",
+      userData: { entityId: "n" },
       details: jest.fn(() => ({ metadata: [{ key: "wrong", value: "wrong" }] })),
       instanceDetails: jest.fn(() => ({ metadata: [{ key: "ok", value: "yes" }], id: 9 })),
     };
@@ -306,6 +308,7 @@ describe("<RendererOverlay /> hover wiring", () => {
     const renderable = {
       topic: undefined,
       name: "af949d5a-8243-4e53-8b39-dfb05aac50ba",
+      userData: {},
       details: jest.fn(() => undefined),
       instanceDetails: jest.fn(() => undefined),
     };

@@ -139,14 +139,13 @@ export function RendererOverlay(props: Props): React.JSX.Element {
   const renderer = useRenderer();
 
   const getHoverEntityId = useCallback((pickedRenderable: PickedRenderable): string => {
+    const entityId = (pickedRenderable.renderable.userData as { entityId?: string }).entityId;
+    if (entityId != undefined) {
+      return entityId;
+    }
     const name = pickedRenderable.renderable.name;
     if (name.length === 0) {
       return `object-${pickedRenderable.instanceIndex ?? 0}`;
-    }
-
-    const topic = pickedRenderable.renderable.topic;
-    if (topic != undefined && name.endsWith(` on ${topic}`)) {
-      return name.slice(0, Math.max(0, name.length - ` on ${topic}`.length));
     }
     return name;
   }, []);
