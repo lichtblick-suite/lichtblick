@@ -30,7 +30,7 @@ export type UseSubscribeMessageRange = (args: SubscribeMessageRangeArgs) => () =
 export function useSubscribeMessageRange(
   emitAlert?: MessageConverterAlertHandler,
 ): UseSubscribeMessageRange {
-  // useMessagePipelineGetter returns a stable getter — calling it does not subscribe to changes.
+  // useMessagePipelineGetter returns a stable getter, so it's safe to call it inside the callback without adding it to dependencies.
   const getMessagePipelineContext = useMessagePipelineGetter();
 
   // Keep messageConverters in a ref so changing converters don't invalidate the callback.
