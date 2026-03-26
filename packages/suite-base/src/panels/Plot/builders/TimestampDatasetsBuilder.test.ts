@@ -5,12 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-
 import { unwrap } from "@lichtblick/den/monads";
 import { makeComlinkWorkerMock } from "@lichtblick/den/testing";
 import { parseMessagePath } from "@lichtblick/message-path";
-import { MessageEvent } from "@lichtblick/suite";
 import {
   MessageBlock,
   PlayerPresence,
@@ -27,10 +24,6 @@ Object.defineProperty(global, "Worker", {
   writable: true,
   value: makeComlinkWorkerMock(() => new TimestampDatasetsBuilderImpl()),
 });
-
-function groupByTopic(events: MessageEvent[]): Record<string, MessageEvent[]> {
-  return _.groupBy(events, (item) => item.topic);
-}
 
 function buildSeriesItems(
   paths: (Partial<PlotPath> & { key?: string; value: string })[],
@@ -177,61 +170,49 @@ describe("TimestampDatasetsBuilder", () => {
       ]),
     );
 
-    const block = {
-      sizeInBytes: 0,
-      messagesByTopic: groupByTopic([
+    const playerState = buildPlayerState({
+      messages: [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 1, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            val: 1.5,
+          },
+        },
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 2, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            val: 2.5,
+          },
+        },
+      ],
+    });
+
+    builder.handlePlayerState(playerState);
+    builder.handleMessageRange(
+      [
         {
           topic: "/foo",
           schemaName: "foo",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 0,
-          },
+          message: { val: 0 },
         },
         {
           topic: "/foo",
           schemaName: "foo",
           receiveTime: { sec: 0.5, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 1,
-          },
+          message: { val: 1 },
         },
-      ]),
-    };
-
-    const playerState = buildPlayerState(
-      {
-        messages: [
-          {
-            topic: "/foo",
-            schemaName: "foo",
-            receiveTime: { sec: 1, nsec: 0 },
-            sizeInBytes: 0,
-            message: {
-              val: 1.5,
-            },
-          },
-          {
-            topic: "/foo",
-            schemaName: "foo",
-            receiveTime: { sec: 2, nsec: 0 },
-            sizeInBytes: 0,
-            message: {
-              val: 2.5,
-            },
-          },
-        ],
-      },
-      [block],
-    );
-
-    builder.handlePlayerState(playerState);
-    await builder.handleBlocks(
-      unwrap(playerState.activeData?.startTime),
-      unwrap(playerState.progress.messageCache?.blocks),
-      async () => await Promise.resolve(false),
+      ],
+      { isReset: false },
+      { sec: 0, nsec: 0 },
     );
 
     await expect(

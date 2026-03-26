@@ -8,9 +8,9 @@ import { parseMessagePath } from "@lichtblick/message-path";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { stringifyMessagePath } from "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
 import { InteractionEvent, Scale } from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
-import { MessageBlock } from "@lichtblick/suite-base/players/types";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
@@ -60,10 +60,20 @@ jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath"
   stringifyMessagePath: jest.fn(),
 }));
 
+jest.mock("./utils/subscription", () => ({
+  pathToSubscribePayload: jest.fn().mockReturnValue(undefined),
+}));
+
+const mockSubscribeMessageRange = jest.fn();
+jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", () => ({
+  useSubscribeMessageRange: () => mockSubscribeMessageRange,
+}));
+
 describe("PlotCoordinator", () => {
   let renderer: jest.Mocked<OffscreenCanvasRenderer>;
   let datasetsBuilder: jest.Mocked<IDatasetsBuilder>;
   let plotCoordinator: PlotCoordinator;
+  let subscribeMessageRange: UseSubscribeMessageRange;
 
   beforeEach(() => {
     const canvas = new OffscreenCanvas(500, 500);
@@ -77,10 +87,10 @@ describe("PlotCoordinator", () => {
       pathsWithMismatchedDataLengths: [],
     });
     datasetsBuilder.setSeries = jest.fn();
-    datasetsBuilder.handleBlocks = jest.fn().mockResolvedValue(undefined);
     datasetsBuilder.getCsvData = jest.fn().mockResolvedValue([]);
 
-    plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder);
+    subscribeMessageRange = mockSubscribeMessageRange;
+    plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange);
   });
 
   afterEach(() => {
@@ -277,19 +287,6 @@ describe("PlotCoordinator", () => {
 
       expect(plotCoordinator["interactionBounds"]).toBeUndefined();
       expect(plotCoordinator["globalBounds"]).toBeUndefined();
-    });
-  });
-
-  describe("dispatchBlocks", () => {
-    it("should process and store message blocks correctly", async () => {
-      datasetsBuilder.handleBlocks = jest.fn().mockResolvedValue(undefined);
-      const blocks = [{}] as MessageBlock[];
-      const startTime = RosTimeBuilder.time();
-
-      await plotCoordinator["dispatchBlocks"](startTime, blocks);
-
-      const handleBlocksSpyOn = jest.spyOn(datasetsBuilder, "handleBlocks");
-      expect(handleBlocksSpyOn).toHaveBeenCalled();
     });
   });
 
