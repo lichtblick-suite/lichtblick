@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { InternalSubscribePayload, SubscribePayload } from "@lichtblick/suite-base/players/types";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import {
   applySamplingGuardToSubscription,
@@ -13,35 +14,52 @@ import {
 } from "./samplingGuard";
 
 describe("samplingGuard", () => {
+  const topic = `/${BasicBuilder.string()}`;
+
   it("applySamplingGuardToSubscription removes unapproved sampling request", () => {
-    expect(
-      applySamplingGuardToSubscription({
-        topic: "/foo",
-        samplingRequest: { mode: "latest-per-render-tick" },
-      }),
-    ).toEqual({ topic: "/foo", samplingAuthorized: undefined, samplingRequest: undefined });
+    // Given
+    const subscription: SubscribePayload = {
+      topic,
+      samplingRequest: { mode: "latest-per-render-tick" },
+    };
+
+    // When
+    const result = applySamplingGuardToSubscription(subscription);
+
+    // Then
+    expect(result).toEqual({ topic, samplingAuthorized: undefined, samplingRequest: undefined });
   });
 
   it("drops sampling requests without internal authorization", () => {
+    // Given
     const input: SubscribePayload[] = [
       {
-        topic: "/foo",
+        topic,
         samplingRequest: { mode: "latest-per-render-tick" },
       },
     ];
 
-    expect(applySamplingGuardToSubscriptions(input)).toEqual([{ topic: "/foo" }]);
+    // When
+    const result = applySamplingGuardToSubscriptions(input);
+
+    // Then
+    expect(result).toEqual([{ topic }]);
   });
 
   it("keeps sampling requests with internal authorization", () => {
+    // Given
     const input: InternalSubscribePayload[] = [
       {
-        topic: "/foo",
+        topic,
         samplingRequest: { mode: "latest-per-render-tick" },
         samplingAuthorized: true,
       },
     ];
 
-    expect(applySamplingGuardToSubscriptions(input)).toEqual(input);
+    // When
+    const result = applySamplingGuardToSubscriptions(input);
+
+    // Then
+    expect(result).toEqual(input);
   });
 });

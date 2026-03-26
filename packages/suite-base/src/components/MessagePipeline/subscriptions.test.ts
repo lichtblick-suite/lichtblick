@@ -83,6 +83,7 @@ describe("mergeSubscriptions", () => {
   });
 
   it("keeps sampling when all subscribers are compatible and at least one is sampling-authorized", () => {
+    // Given
     const subs: InternalSubscribePayload[] = [
       {
         topic: "a",
@@ -97,8 +98,10 @@ describe("mergeSubscriptions", () => {
       },
     ];
 
+    // When
     const result = mergeSubscriptions(subs);
 
+    // Then
     expect(result).toEqual([
       {
         topic: "a",
@@ -110,6 +113,7 @@ describe("mergeSubscriptions", () => {
   });
 
   it("keeps sampling regardless of subscription order when approval is present", () => {
+    // Given
     const subs: InternalSubscribePayload[] = [
       {
         topic: "a",
@@ -124,8 +128,10 @@ describe("mergeSubscriptions", () => {
       },
     ];
 
+    // When
     const result = mergeSubscriptions(subs);
 
+    // Then
     expect(result).toEqual([
       {
         topic: "a",
@@ -137,6 +143,7 @@ describe("mergeSubscriptions", () => {
   });
 
   it("drops sampling when no merged subscriber is sampling-authorized", () => {
+    // Given
     const subs: InternalSubscribePayload[] = [
       {
         topic: "a",
@@ -150,12 +157,15 @@ describe("mergeSubscriptions", () => {
       },
     ];
 
+    // When
     const result = mergeSubscriptions(subs);
 
+    // Then
     expect(result).toEqual([{ topic: "a", preloadType: "partial" }]);
   });
 
   it("drops sampling for a single unapproved sampling subscription", () => {
+    // Given
     const subs: InternalSubscribePayload[] = [
       {
         topic: "a",
@@ -164,8 +174,10 @@ describe("mergeSubscriptions", () => {
       },
     ];
 
+    // When
     const result = mergeSubscriptions(subs);
 
+    // Then
     expect(result).toEqual([{ topic: "a", preloadType: "partial" }]);
   });
 });

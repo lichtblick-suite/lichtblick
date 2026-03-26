@@ -20,26 +20,11 @@ import { useMessageReducer } from "@lichtblick/suite-base/PanelAPI";
 import { subscribePayloadFromMessagePath } from "@lichtblick/suite-base/players/subscribePayloadFromMessagePath";
 import { MessageEvent, SubscribePayload } from "@lichtblick/suite-base/players/types";
 
+import type { Options, ReducedValue } from "./types";
 import {
   MessageAndData,
   useCachedGetMessagePathDataItems,
 } from "./useCachedGetMessagePathDataItems";
-
-type Options = {
-  historySize?: number;
-  samplingRequest?: SubscribePayload["samplingRequest"];
-};
-
-type ReducedValue = {
-  // Matched message (events) oldest message first
-  matches: MessageAndData[];
-
-  // The latest set of message events recevied to addMessages
-  messageEvents: readonly Readonly<MessageEvent>[];
-
-  // The path used to match these messages.
-  path: string;
-};
 
 /**
  * Return an array of MessageAndData[] for matching messages on @param path.
