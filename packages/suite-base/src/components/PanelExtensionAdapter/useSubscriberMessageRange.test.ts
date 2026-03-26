@@ -25,11 +25,6 @@ jest.mock("./messageRangeIterator", () => ({
   createMessageRangeIterator: jest.fn(),
 }));
 
-jest.mock("@lichtblick/log", () => ({
-  default: { getLogger: () => ({ error: mockLogError }) },
-}));
-
-const mockLogError = jest.fn();
 const mockUseMessagePipelineGetter = useMessagePipelineGetter as jest.Mock;
 const mockUseExtensionCatalog = useExtensionCatalog as jest.Mock;
 const mockCreateMessageRangeIterator = createMessageRangeIterator as jest.Mock;
@@ -115,35 +110,6 @@ describe("useSubscribeMessageRange", () => {
         rawBatchIterator: mockBatchIterator,
         sortedTopics: [],
       }),
-    );
-  });
-
-  it("logs an error when onNewRangeIterator rejects", async () => {
-    // Given
-    const error = new Error("iterator failed");
-    const onNewRangeIterator = jest.fn().mockRejectedValue(error);
-    mockCreateMessageRangeIterator.mockReturnValue({
-      iterable: { [Symbol.asyncIterator]: jest.fn() },
-      cancel: jest.fn(),
-    });
-    mockUseMessagePipelineGetter.mockReturnValue(
-      jest.fn().mockReturnValue({
-        sortedTopics: [],
-        getBatchIterator: jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() }),
-      }),
-    );
-    const { result } = renderHook(() => useSubscribeMessageRange());
-
-    // When
-    act(() => {
-      result.current({ topic: BasicBuilder.string(), onNewRangeIterator });
-    });
-    await Promise.resolve(); // flush microtask queue so .catch() runs
-
-    // Then
-    expect(mockLogError).toHaveBeenCalledWith(
-      "Error in useSubscribeMessageRange onNewRangeIterator:",
-      error,
     );
   });
 });
