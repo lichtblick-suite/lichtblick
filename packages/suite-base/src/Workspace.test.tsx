@@ -254,6 +254,7 @@ const mockWorkspaceActions = {
   },
   openLayoutBrowser: jest.fn(),
 };
+const mockClearAlerts = jest.fn();
 
 describe("Workspace - alerts badge in leftSidebarItems", () => {
   beforeEach(() => {
@@ -278,7 +279,7 @@ describe("Workspace - alerts badge in leftSidebarItems", () => {
     (useAppConfigurationValue as jest.Mock).mockReturnValue([false]);
     (useCurrentUser as jest.Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
     (useCurrentUserType as jest.Mock).mockReturnValue("unauthenticated");
-    (useAlertsActions as jest.Mock).mockReturnValue({ clearAlerts: jest.fn() });
+    (useAlertsActions as jest.Mock).mockReturnValue({ clearAlerts: mockClearAlerts });
     (useEvents as jest.Mock).mockImplementation(
       (selector: (store: { eventsSupported: boolean; selectEvent: jest.Mock }) => unknown) =>
         selector({ eventsSupported: false, selectEvent: jest.fn() }),
@@ -292,7 +293,9 @@ describe("Workspace - alerts badge in leftSidebarItems", () => {
   });
 
   afterEach(() => {
+    mockClearAlerts.mockClear();
     MockedSidebars.mockClear();
+    mockPipelineContext.playerState.playerId = "";
   });
 
   it("should not set badge on alerts sidebar item when alertCount is 0", () => {
@@ -341,5 +344,76 @@ describe("Workspace - alerts badge in leftSidebarItems", () => {
     // Then
     const leftItems = MockedSidebars.mock.lastCall?.[0]?.leftItems as Map<string, SidebarItem>;
     expect(leftItems.get("alerts")?.badge?.count).toBe(5);
+  });
+});
+
+describe("Workspace - session alerts reset on player change", () => {
+  beforeEach(() => {
+    (useMessagePipeline as jest.Mock).mockImplementation(
+      (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
+    );
+    (useMessagePipelineGetter as jest.Mock).mockReturnValue(() => mockPipelineContext);
+    (useWorkspaceStore as jest.Mock).mockImplementation(
+      (selector: (store: typeof mockWorkspaceStore) => unknown) => selector(mockWorkspaceStore),
+    );
+    (useWorkspaceActions as jest.Mock).mockReturnValue(mockWorkspaceActions);
+    (usePlayerSelection as jest.Mock).mockReturnValue({
+      availableSources: [],
+      selectSource: jest.fn(),
+    });
+    (useAlertCount as jest.Mock).mockReturnValue({
+      playerAlerts: [],
+      sessionAlerts: [],
+      alertCount: 0,
+    });
+    (useHandleFiles as jest.Mock).mockReturnValue({ handleFiles: jest.fn() });
+    (useAppConfigurationValue as jest.Mock).mockReturnValue([false]);
+    (useCurrentUser as jest.Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
+    (useCurrentUserType as jest.Mock).mockReturnValue("unauthenticated");
+    (useAlertsActions as jest.Mock).mockReturnValue({ clearAlerts: mockClearAlerts });
+    (useEvents as jest.Mock).mockImplementation(
+      (selector: (store: { eventsSupported: boolean; selectEvent: jest.Mock }) => unknown) =>
+        selector({ eventsSupported: false, selectEvent: jest.fn() }),
+    );
+    (useAppContext as jest.Mock).mockReturnValue({
+      PerformanceSidebarComponent: undefined,
+      sidebarItems: [],
+      layoutBrowser: undefined,
+      workspaceStoreCreator: undefined,
+    });
+  });
+
+  afterEach(() => {
+    mockClearAlerts.mockClear();
+    MockedSidebars.mockClear();
+    mockPipelineContext.playerState.playerId = "";
+  });
+
+  it("clears session alerts when playerId changes", () => {
+    // Given
+    mockPipelineContext.playerState.playerId = "player-1";
+
+    const { rerender } = render(<Workspace />);
+    expect(mockClearAlerts).not.toHaveBeenCalled();
+
+    // When
+    mockPipelineContext.playerState.playerId = "player-2";
+    rerender(<Workspace />);
+
+    // Then
+    expect(mockClearAlerts).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not clear session alerts when playerId stays the same", () => {
+    // Given
+    mockPipelineContext.playerState.playerId = "player-1";
+    const { rerender } = render(<Workspace />);
+    mockClearAlerts.mockClear();
+
+    // When
+    rerender(<Workspace />);
+
+    // Then
+    expect(mockClearAlerts).not.toHaveBeenCalled();
   });
 });
