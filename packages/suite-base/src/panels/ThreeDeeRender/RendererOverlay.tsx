@@ -131,6 +131,18 @@ export function RendererOverlay(props: Props): React.JSX.Element {
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
   const renderer = useRenderer();
 
+  // Increment a token on each rendered frame so that selectedObject recomputes
+  // with fresh renderable data when timestamp changes.
+  const [, forceSelectedObjectRefresh] = useState(0);
+  useRendererEvent(
+    "endFrame",
+    useCallback(() => {
+      if (selectedRenderable != undefined) {
+        forceSelectedObjectRefresh((prev) => prev + 1);
+      }
+    }, [selectedRenderable]),
+  );
+
   // Toggle object selection mode on/off in the renderer
   useEffect(() => {
     if (renderer) {
@@ -185,29 +197,23 @@ export function RendererOverlay(props: Props): React.JSX.Element {
 
   // Once a single renderable is selected, convert it to the SelectionObject
   // format to populate the object inspection dialog (<Interactions>)
-  const selectedObject = useMemo<SelectionObject | undefined>(
-    () =>
-      selectedRenderable
-        ? {
-            object: {
-              pose: selectedRenderable.renderable.pose,
-              interactionData: {
-                topic: selectedRenderable.renderable.topic,
-                highlighted: true,
-                originalMessage: selectedRenderable.renderable.details(),
-                instanceDetails:
-                  selectedRenderable.instanceIndex != undefined
-                    ? selectedRenderable.renderable.instanceDetails(
-                        selectedRenderable.instanceIndex,
-                      )
-                    : undefined,
-              },
-            },
-            instanceIndex: selectedRenderable.instanceIndex,
-          }
-        : undefined,
-    [selectedRenderable],
-  );
+  const selectedObject: SelectionObject | undefined = selectedRenderable
+    ? {
+        object: {
+          pose: selectedRenderable.renderable.pose,
+          interactionData: {
+            topic: selectedRenderable.renderable.topic,
+            highlighted: true,
+            originalMessage: selectedRenderable.renderable.details(),
+            instanceDetails:
+              selectedRenderable.instanceIndex != undefined
+                ? selectedRenderable.renderable.instanceDetails(selectedRenderable.instanceIndex)
+                : undefined,
+          },
+        },
+        instanceIndex: selectedRenderable.instanceIndex,
+      }
+    : undefined;
 
   // Inform the Renderer when a renderable is selected
   useEffect(() => {
