@@ -77,8 +77,8 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private queueDatasetsRender = debouncePromise(this.dispatchDatasetsRender.bind(this));
   private destroyed = false;
 
-  private subscribeMessageRange: UseSubscribeMessageRange;
-  private rangeSubscriptionCancels = new Map<
+  private readonly subscribeMessageRange: UseSubscribeMessageRange;
+  private readonly rangeSubscriptionCancels = new Map<
     string,
     { cancel: () => void; seriesKeys: ReadonlySet<SeriesConfigKey> }
   >();

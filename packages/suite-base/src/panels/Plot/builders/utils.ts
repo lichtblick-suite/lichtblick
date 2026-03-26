@@ -93,7 +93,7 @@ type SeriesCurrentAction<T> =
  * Iterates over each series, optionally pushing a reset-current action when a seek occurred,
  * then appending the items returned by `getItems`. Returns whether any series produced items.
  *
- * Shared by TimestampDatasetsBuilderTwo and CustomDatasetsBuilderTwo for current-frame y-series
+ * Shared by TimestampDatasetsBuilder and CustomDatasetsBuilder for current-frame y-series
  * processing.
  */
 export function buildCurrentSeriesActions<TItem>(
@@ -112,4 +112,36 @@ export function buildCurrentSeriesActions<TItem>(
     actions.push({ type: "append-current", series: s.config.key, items });
   }
   return { actions, datasetsChanged };
+}
+
+type SeriesFullAction<T> =
+  | { type: "reset-full"; series: SeriesConfigKey }
+  | { type: "append-full"; series: SeriesConfigKey; items: T[] };
+
+/**
+ * Iterates over each series whose topic matches `topic`, optionally pushing a reset-full action
+ * when isReset is true, then appending non-empty items returned by `getItems`.
+ *
+ * Shared by TimestampDatasetsBuilder and CustomDatasetsBuilder for range y-series processing.
+ */
+export function buildFullSeriesActions<TItem>(
+  series: Immutable<Array<{ config: Immutable<SeriesItem> }>>,
+  topic: string,
+  options: { isReset: boolean },
+  getItems: (config: Immutable<SeriesItem>) => TItem[],
+): SeriesFullAction<TItem>[] {
+  const actions: SeriesFullAction<TItem>[] = [];
+  for (const s of series) {
+    if (s.config.parsed.topicName !== topic) {
+      continue;
+    }
+    if (options.isReset) {
+      actions.push({ type: "reset-full", series: s.config.key });
+    }
+    const items = getItems(s.config);
+    if (items.length > 0) {
+      actions.push({ type: "append-full", series: s.config.key, items });
+    }
+  }
+  return actions;
 }

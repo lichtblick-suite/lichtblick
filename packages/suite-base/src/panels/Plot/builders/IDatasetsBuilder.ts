@@ -113,7 +113,7 @@ interface IDatasetsBuilder {
   handleMessageRange?(
     messages: Immutable<MessageEvent[]>,
     options: { isReset: boolean },
-    startTime: Immutable<Time>,
+    startTime?: Immutable<Time>,
   ): void;
 
   setSeries(series: Immutable<SeriesItem[]>): void;

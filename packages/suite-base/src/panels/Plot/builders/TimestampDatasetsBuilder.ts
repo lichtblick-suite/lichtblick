@@ -27,7 +27,7 @@ import type {
   TimestampDatasetsBuilderImpl,
   UpdateDataAction,
 } from "./TimestampDatasetsBuilderImpl";
-import { buildCurrentSeriesActions } from "./utils";
+import { buildCurrentSeriesActions, buildFullSeriesActions } from "./utils";
 import { MATH_FUNCTIONS } from "../constants";
 import { getChartValue, isChartValue } from "../utils/datum";
 import { MathFunction } from "../utils/mathFunctions";
@@ -119,41 +119,22 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
     startTime: Immutable<Time>,
   ): void {
     this.#hasRangeSource = true;
-    if (options.isReset) {
-      for (const series of this.#series) {
-        const topic = messages[0]?.topic;
-        if (series.config.parsed.topicName === topic) {
-          this.#pendingDispatch.push({
-            type: "reset-full",
-            series: series.config.key,
-          });
-        }
-      }
+    const topic = messages[0]?.topic;
+    if (!topic) {
+      return;
     }
 
-    for (const series of this.#series) {
-      const mathFn = series.config.parsed.modifier
-        ? MATH_FUNCTIONS[series.config.parsed.modifier]
-        : undefined;
-
-      const pathItems = readMessagePathItems(
+    const actions = buildFullSeriesActions(this.#series, topic, options, (config) => {
+      const mathFn = config.parsed.modifier ? MATH_FUNCTIONS[config.parsed.modifier] : undefined;
+      return readMessagePathItems(
         messages,
-        series.config.parsed,
-        series.config.timestampMethod,
+        config.parsed,
+        config.timestampMethod,
         startTime,
         mathFn,
       );
-
-      if (pathItems.length === 0) {
-        continue;
-      }
-
-      this.#pendingDispatch.push({
-        type: "append-full",
-        series: series.config.key,
-        items: pathItems,
-      });
-    }
+    });
+    this.#pendingDispatch.push(...(actions as UpdateDataAction[]));
   }
 
   public setSeries(series: Immutable<SeriesItem[]>): void {

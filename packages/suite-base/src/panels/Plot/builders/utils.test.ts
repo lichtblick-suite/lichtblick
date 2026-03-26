@@ -11,7 +11,7 @@ import { Immutable, MessageEvent } from "@lichtblick/suite";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { SeriesConfigKey, SeriesItem } from "./IDatasetsBuilder";
-import { buildCurrentSeriesActions, lastMatchingTopic } from "./utils";
+import { buildCurrentSeriesActions, buildFullSeriesActions, lastMatchingTopic } from "./utils";
 
 function makeSeriesItem({
   key,
@@ -143,5 +143,56 @@ describe("buildCurrentSeriesActions", () => {
       { type: "reset-current", series: "b" },
       { type: "append-current", series: "b", items: [] },
     ]);
+  });
+});
+
+describe("buildFullSeriesActions", () => {
+  const topic = `/${BasicBuilder.string()}`;
+  const otherTopic = `/${BasicBuilder.string()}`;
+  const seriesA = makeSeriesItem({ key: "a" as SeriesConfigKey, value: `${topic}.field` });
+  const seriesB = makeSeriesItem({ key: "b" as SeriesConfigKey, value: `${otherTopic}.field` });
+
+  it("returns empty actions when there are no series", () => {
+    const result = buildFullSeriesActions([], topic, { isReset: false }, () => [1]);
+    expect(result).toEqual([]);
+  });
+
+  it("emits only append-full for a matching topic with items", () => {
+    const items = [42];
+    const result = buildFullSeriesActions([seriesA], topic, { isReset: false }, () => items);
+    expect(result).toEqual([{ type: "append-full", series: "a", items }]);
+  });
+
+  it("emits reset-full before append-full when isReset is true", () => {
+    const items = [1, 2];
+    const result = buildFullSeriesActions([seriesA], topic, { isReset: true }, () => items);
+    expect(result).toEqual([
+      { type: "reset-full", series: "a" },
+      { type: "append-full", series: "a", items },
+    ]);
+  });
+
+  it("emits only reset-full when isReset is true and getItems returns empty", () => {
+    const result = buildFullSeriesActions([seriesA], topic, { isReset: true }, () => []);
+    expect(result).toEqual([{ type: "reset-full", series: "a" }]);
+  });
+
+  it("skips series whose topic does not match", () => {
+    const result = buildFullSeriesActions([seriesB], topic, { isReset: false }, () => [1]);
+    expect(result).toEqual([]);
+  });
+
+  it("passes the series config to getItems", () => {
+    const captured: Immutable<SeriesItem>[] = [];
+    buildFullSeriesActions([seriesA, seriesB], topic, { isReset: false }, (config) => {
+      captured.push(config);
+      return [];
+    });
+    expect(captured).toEqual([seriesA.config]);
+  });
+
+  it("emits no append-full when getItems returns empty and isReset is false", () => {
+    const result = buildFullSeriesActions([seriesA], topic, { isReset: false }, () => []);
+    expect(result).toEqual([]);
   });
 });

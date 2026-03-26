@@ -8,7 +8,7 @@
 import * as Comlink from "@lichtblick/comlink";
 import { ComlinkWrap } from "@lichtblick/den/worker";
 import { MessagePath } from "@lichtblick/message-path";
-import { Immutable, MessageEvent, Time } from "@lichtblick/suite";
+import { Immutable, MessageEvent } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { PlayerState } from "@lichtblick/suite-base/players/types";
@@ -27,7 +27,7 @@ import {
   SeriesItem,
   Viewport,
 } from "./IDatasetsBuilder";
-import { buildCurrentSeriesActions } from "./utils";
+import { buildCurrentSeriesActions, buildFullSeriesActions } from "./utils";
 import { getChartValue, isChartValue } from "../utils/datum";
 import { MathFunction, mathFunctions } from "../utils/mathFunctions";
 
@@ -142,10 +142,8 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
   public handleMessageRange(
     messages: Immutable<MessageEvent[]>,
     options: { isReset: boolean },
-    startTime: Immutable<Time>,
   ): void {
     this.#hasRangeSource = true;
-    void startTime; // x-axis is a custom value, not time-derived
     const topic = messages[0]?.topic;
     if (!topic) {
       return;
@@ -168,25 +166,11 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
       return;
     }
 
-    for (const series of this.#series) {
-      if (series.config.parsed.topicName !== topic) {
-        continue;
-      }
-      if (options.isReset) {
-        this.#pendingDispatch.push({ type: "reset-full", series: series.config.key });
-      }
-      const mathFn = series.config.parsed.modifier
-        ? mathFunctions[series.config.parsed.modifier]
-        : undefined;
-      const pathItems = readMessagePathItems(messages, series.config.parsed, mathFn);
-      if (pathItems.length > 0) {
-        this.#pendingDispatch.push({
-          type: "append-full",
-          series: series.config.key,
-          items: pathItems,
-        });
-      }
-    }
+    const actions = buildFullSeriesActions(this.#series, topic, options, (config) => {
+      const mathFn = config.parsed.modifier ? mathFunctions[config.parsed.modifier] : undefined;
+      return readMessagePathItems(messages, config.parsed, mathFn);
+    });
+    this.#pendingDispatch.push(...(actions as UpdateDataAction[]));
   }
 
   public setXPath(path: Immutable<MessagePath> | undefined): void {

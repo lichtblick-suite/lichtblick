@@ -19,7 +19,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import { PlotCoordinator } from "./PlotCoordinator";
-import { IDatasetsBuilder, SeriesItem } from "./builders/IDatasetsBuilder";
+import { IDatasetsBuilder, SeriesConfigKey, SeriesItem } from "./builders/IDatasetsBuilder";
+import { pathToSubscribePayload } from "./utils/subscription";
 
 jest.mock("./OffscreenCanvasRenderer");
 jest.mock("./builders/IDatasetsBuilder");
@@ -128,7 +129,7 @@ describe("PlotCoordinator", () => {
 
     it("should return immediately if plotCoordinator is destroyed", () => {
       const state = PlayerBuilder.playerState();
-      jest.spyOn(plotCoordinator as any, "isDestroyed").mockReturnValue(true);
+      plotCoordinator.destroy();
       const handlePlayerStateSpy = jest.spyOn(datasetsBuilder, "handlePlayerState");
       const updateSpy = jest.spyOn(renderer, "update");
 
@@ -203,6 +204,96 @@ describe("PlotCoordinator", () => {
 
       expect(simpleGetMessagePathDataItems).not.toHaveBeenCalled();
       expect(plotCoordinator["currentValuesByConfigIndex"]).toEqual([]);
+    });
+  });
+
+  describe("topic range subscriptions", () => {
+    beforeEach(() => {
+      (pathToSubscribePayload as jest.Mock).mockReturnValue({ topic: "/foo", preloadType: "full" });
+      datasetsBuilder.handleMessageRange = jest.fn();
+      mockSubscribeMessageRange.mockReturnValue(jest.fn());
+    });
+
+    it("groups multiple series with the same topic into a single subscription", () => {
+      // Given
+      const topic = "/foo";
+      plotCoordinator["series"] = [
+        {
+          parsed: { topicName: topic, messagePath: [] },
+          key: "0:receiveTime:/foo.x" as SeriesConfigKey,
+          configIndex: 0,
+          timestampMethod: "receiveTime",
+        },
+        {
+          parsed: { topicName: topic, messagePath: [] },
+          key: "1:receiveTime:/foo.y" as SeriesConfigKey,
+          configIndex: 1,
+          timestampMethod: "receiveTime",
+        },
+      ] as unknown as SeriesItem[];
+      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+
+      // When
+      plotCoordinator.handlePlayerState(state);
+
+      // Then
+      expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(expect.objectContaining({ topic }));
+    });
+
+    it("cancels subscription for a topic removed from series", () => {
+      // Given — first call subscribes /foo
+      const cancelFoo = jest.fn();
+      mockSubscribeMessageRange.mockReturnValue(cancelFoo);
+      plotCoordinator["series"] = [
+        {
+          parsed: { topicName: "/foo", messagePath: [] },
+          key: "0:receiveTime:/foo.val" as SeriesConfigKey,
+          configIndex: 0,
+          timestampMethod: "receiveTime",
+        },
+      ] as unknown as SeriesItem[];
+      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      plotCoordinator.handlePlayerState(state);
+
+      // When — second call with /bar only
+      mockSubscribeMessageRange.mockClear();
+      plotCoordinator["series"] = [
+        {
+          parsed: { topicName: "/bar", messagePath: [] },
+          key: "0:receiveTime:/bar.val" as SeriesConfigKey,
+          configIndex: 0,
+          timestampMethod: "receiveTime",
+        },
+      ] as unknown as SeriesItem[];
+      plotCoordinator.handlePlayerState(state);
+
+      // Then
+      expect(cancelFoo).toHaveBeenCalled();
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
+        expect.objectContaining({ topic: "/bar" }),
+      );
+    });
+
+    it("does not re-subscribe when the same topic and keys are unchanged", () => {
+      // Given
+      plotCoordinator["series"] = [
+        {
+          parsed: { topicName: "/foo", messagePath: [] },
+          key: "0:receiveTime:/foo.val" as SeriesConfigKey,
+          configIndex: 0,
+          timestampMethod: "receiveTime",
+        },
+      ] as unknown as SeriesItem[];
+      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      plotCoordinator.handlePlayerState(state);
+      mockSubscribeMessageRange.mockClear();
+
+      // When — same series, same state
+      plotCoordinator.handlePlayerState(state);
+
+      // Then — no new subscription opened
+      expect(mockSubscribeMessageRange).not.toHaveBeenCalled();
     });
   });
 
