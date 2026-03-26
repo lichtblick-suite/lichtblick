@@ -306,6 +306,15 @@ describe("PlotCoordinator", () => {
   });
 
   describe("dispatchRender", () => {
+    it("should return immediately if plotCoordinator is destroyed", async () => {
+      plotCoordinator.destroy();
+
+      await plotCoordinator["dispatchRender"]();
+
+      const updateSpy = jest.spyOn(renderer, "update");
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
     it("should call 'update' on the renderer when dispatching render", async () => {
       renderer.update.mockResolvedValue({ x: { min: 0, max: 10 }, y: { min: 0, max: 10 } });
 
@@ -382,6 +391,18 @@ describe("PlotCoordinator", () => {
   });
 
   describe("handleConfig", () => {
+    it("should return immediately if plotCoordinator is destroyed", () => {
+      const config = PlotBuilder.config({
+        xAxisVal: "timestamp",
+        followingViewWidth: 10,
+        paths: [],
+      });
+
+      plotCoordinator.destroy();
+
+      plotCoordinator.handleConfig(config, "light", {});
+      expect(plotCoordinator["isTimeseriesPlot"]).toBe(false);
+    });
     it("should set isTimeseriesPlot to true when xAxisVal is 'timestamp'", () => {
       const config = PlotBuilder.config({
         xAxisVal: "timestamp",

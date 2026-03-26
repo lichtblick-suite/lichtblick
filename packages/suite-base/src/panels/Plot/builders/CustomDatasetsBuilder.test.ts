@@ -332,6 +332,81 @@ describe("CustomDatasetsBuilder", () => {
     });
   });
 
+  it("should reset full data when isReset is true", async () => {
+    const builder = new CustomDatasetsBuilder();
+
+    builder.setXPath(parseMessagePath("/foo.val"));
+    builder.setSeries(
+      buildSeriesItems([{ enabled: true, timestampMethod: "receiveTime", value: "/bar.val" }]),
+    );
+
+    // Initial data
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 0 },
+        },
+      ],
+      { isReset: false },
+    );
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/bar",
+          schemaName: "bar",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 10 },
+        },
+      ],
+      { isReset: false },
+    );
+
+    // Reset replaces all previous data
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 1 },
+        },
+      ],
+      { isReset: true },
+    );
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/bar",
+          schemaName: "bar",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 99 },
+        },
+      ],
+      { isReset: true },
+    );
+
+    const result = await builder.getViewportDatasets({
+      size: { width: 1_000, height: 1_000 },
+      bounds: {},
+    });
+
+    expect(result).toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          data: [{ x: 1, y: 99, value: 99 }],
+        }),
+      ],
+    });
+  });
+
   it.each(["current", "message range"] as const)(
     "combines all values from arrays (%s)",
     async (type) => {

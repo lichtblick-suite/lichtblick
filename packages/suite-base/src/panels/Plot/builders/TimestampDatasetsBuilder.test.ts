@@ -236,6 +236,65 @@ describe("TimestampDatasetsBuilder", () => {
     });
   });
 
+  it("should reset full data when isReset is true", async () => {
+    const builder = new TimestampDatasetsBuilder();
+
+    builder.setSeries(
+      buildSeriesItems([{ enabled: true, timestampMethod: "receiveTime", value: "/foo.val" }]),
+    );
+
+    // Initial full data
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 0 },
+        },
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 1, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 1 },
+        },
+      ],
+      { isReset: false },
+      { sec: 0, nsec: 0 },
+    );
+
+    // Reset replaces all previous full data
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 2, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 99 },
+        },
+      ],
+      { isReset: true },
+      { sec: 0, nsec: 0 },
+    );
+
+    await expect(
+      builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      }),
+    ).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          data: [{ x: 2, y: 99, value: 99 }],
+        }),
+      ],
+    });
+  });
+
   it("computes derivative inside and outside of viewport", async () => {
     const builder = new TimestampDatasetsBuilder();
 
