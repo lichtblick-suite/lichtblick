@@ -11,7 +11,6 @@ import { Dataset } from "../types";
  * Series item type shared by builders that work only with the current frame (no accumulation).
  * Used by IndexDatasetsBuilder and CurrentCustomDatasetsBuilder.
  */
-
 const emptyPaths = new Set<string>();
 
 /**
