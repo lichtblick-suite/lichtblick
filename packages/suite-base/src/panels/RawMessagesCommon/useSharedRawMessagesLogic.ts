@@ -22,6 +22,10 @@ import type {
 } from "./types";
 import { dataWithoutWrappingArray, generateDeepKeyPaths, toggleExpansion } from "./utils";
 
+const LATEST_PER_RENDER_TICK_SAMPLING = Object.freeze({
+  mode: "latest-per-render-tick" as const,
+});
+
 /**
  * Shared hook that contains all the common logic for both RawMessages and RawMessagesVirtual panels.
  * This includes state management, message subscriptions, expansion logic, and common callbacks.
@@ -73,8 +77,12 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
 
   const [expansion, setExpansion] = useState(config.expansion);
 
-  const matchedMessages = useMessageDataItem(topic ? topicPath : "", { historySize: 2 });
-  const diffMessages = useMessageDataItem(diffEnabled ? diffTopicPath : "");
+  const samplingRequest = LATEST_PER_RENDER_TICK_SAMPLING;
+  const matchedMessages = useMessageDataItem(topic ? topicPath : "", {
+    historySize: 2,
+    samplingRequest,
+  });
+  const diffMessages = useMessageDataItem(diffEnabled ? diffTopicPath : "", { samplingRequest });
 
   const diffTopicObj = diffMessages[0];
   const currTickObj = matchedMessages[matchedMessages.length - 1];

@@ -7,14 +7,14 @@ import { renderHook } from "@testing-library/react";
 
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { FONT_SIZE_OPTIONS } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
-import { useFontSizeSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useFontSizeSettings";
+import { useRawMessagesPanelSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useRawMessagesPanelSettings";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 
 jest.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", () => ({
   usePanelSettingsTreeUpdate: jest.fn(),
 }));
 
-describe("useFontSizeSettings", () => {
+describe("useRawMessagesPanelSettings", () => {
   const mockUpdatePanelSettingsTree = jest.fn();
   const mockSaveConfig = jest.fn();
 
@@ -30,7 +30,10 @@ describe("useFontSizeSettings", () => {
 
       // When
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          saveConfig: mockSaveConfig,
+        });
       });
 
       // Then
@@ -64,7 +67,10 @@ describe("useFontSizeSettings", () => {
 
       // When
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          saveConfig: mockSaveConfig,
+        });
       });
 
       // Then
@@ -90,7 +96,10 @@ describe("useFontSizeSettings", () => {
       // Given
       const fontSize = 12;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -116,7 +125,10 @@ describe("useFontSizeSettings", () => {
       // Given
       const fontSize = 14;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -142,7 +154,10 @@ describe("useFontSizeSettings", () => {
       // Given
       const fontSize = 14;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -168,7 +183,10 @@ describe("useFontSizeSettings", () => {
       // Given
       const fontSize = 14;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -194,7 +212,10 @@ describe("useFontSizeSettings", () => {
       // Given
       const fontSize = 14;
       renderHook(() => {
-        useFontSizeSettings(fontSize, mockSaveConfig);
+        useRawMessagesPanelSettings({
+          fontSize,
+          saveConfig: mockSaveConfig,
+        });
       });
       const actionHandler = mockUpdatePanelSettingsTree.mock.calls[0]?.[0]?.actionHandler as (
         action: SettingsTreeAction,
@@ -221,7 +242,10 @@ describe("useFontSizeSettings", () => {
       // Given
       const { rerender } = renderHook<void, { fontSize: number | undefined }>(
         ({ fontSize }) => {
-          useFontSizeSettings(fontSize, mockSaveConfig);
+          useRawMessagesPanelSettings({
+            fontSize,
+            saveConfig: mockSaveConfig,
+          });
         },
         {
           initialProps: { fontSize: 12 },

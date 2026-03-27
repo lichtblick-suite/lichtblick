@@ -8,6 +8,7 @@
 import { pickFields } from "@lichtblick/den/records";
 import Logger from "@lichtblick/log";
 import { parseChannel } from "@lichtblick/mcap-support";
+import { compare } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 import {
   MessageIteratorArgs,
@@ -38,11 +39,28 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
   #deserializersByTopic: Record<string, (data: ArrayBufferView) => unknown> = {};
   #messageSizeEstimateBySubHash: Record<string, number> = {};
   #connectionIdByTopic: Record<string, number> = {};
+  // Shared across all iterators produced by messageIterator(). Only one iterator
+  // should be active at a time; calling setSamplingWindowEnd mid-iteration will
+  // affect the live iterator immediately.
+  #samplingWindowEnd: MessageIteratorArgs["end"];
 
   public readonly sourceType = "deserialized";
 
   public constructor(source: IIterableSource<Uint8Array>) {
     this.#source = source;
+  }
+
+  /**
+   * Sets the end of the current sampling window used by active message iterators.
+   *
+   * NOTE: This mutates shared state read by all iterators created from
+   * {@link messageIterator}. It is safe to call mid-iteration — the new value
+   * takes effect on the next iteration step — but only one iterator should be
+   * active at a time. Calling this while multiple iterators are concurrently
+   * consuming will cause unpredictable window boundaries.
+   */
+  public setSamplingWindowEnd(end: MessageIteratorArgs["end"]): void {
+    this.#samplingWindowEnd = end;
   }
 
   public async initialize(): Promise<Initialization> {
@@ -115,14 +133,206 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     const rawIterator = self.#source.messageIterator(args);
+
+    // Collect all topics that will be sampled
+    const samplingTopics = new Set<string>();
+    for (const [topic, subscription] of subscribePayloadWithHashByTopic) {
+      if (subscription.samplingRequest?.mode === "latest-per-render-tick") {
+        samplingTopics.add(topic);
+      }
+    }
+    log.debug(
+      `Sampling ${
+        samplingTopics.size > 0 ? "active" : "inactive"
+      } for iterable source (${samplingTopics.size}/${
+        subscribePayloadWithHashByTopic.size
+      } sampled topics)`,
+    );
+
     return (async function* deserializedIterableGenerator() {
       try {
-        for await (const iterResult of rawIterator) {
-          if (iterResult.type !== "message-event") {
+        // If not a single sampling topic, just use pass-through deserialization path
+        if (samplingTopics.size === 0) {
+          for await (const iterResult of rawIterator) {
+            if (iterResult.type !== "message-event") {
+              yield iterResult;
+              continue;
+            }
+
+            try {
+              const subscription = subscribePayloadWithHashByTopic.get(iterResult.msgEvent.topic);
+              if (!subscription) {
+                throw new Error(
+                  `Received message on topic ${iterResult.msgEvent.topic} which was not subscribed to.`,
+                );
+              }
+              const deserializedMsgEvent = self.#deserializeMessage(
+                iterResult.msgEvent,
+                subscription,
+              );
+              yield {
+                type: iterResult.type,
+                msgEvent: deserializedMsgEvent,
+              };
+            } catch (err) {
+              const connectionId = self.#connectionIdByTopic[iterResult.msgEvent.topic] ?? 0;
+              yield {
+                type: "alert" as const,
+                connectionId,
+                alert: {
+                  severity: "error",
+                  message: `Failed to deserialize message on topic ${
+                    iterResult.msgEvent.topic
+                  }. ${err.toString()}`,
+                  tip: `Check that your input file is not corrupted.`,
+                },
+              };
+            }
+          }
+          return;
+        }
+
+        // If at least one sampling topic, use sampling path which handles mixed topics in one pass.
+        // Holds only the latest raw message per sampled topic for the current window.
+        const pendingSampledByTopic = new Map<string, MessageEvent<Uint8Array>>();
+        const bufferedDecoded: MessageEvent[] = []; // non-sampling topic messages
+        // One-item lookahead: result already read but belonging to the next sampling window.
+        let carryOver: Readonly<IteratorResult<Uint8Array>> | undefined;
+
+        // Flush buffered decoded messages and the latest sampled raw messages.
+        // Deserializes pending sampled topics (emitting alerts on failure), clears buffers,
+        // sorts all decoded messages by receive time, and yields them as message-events.
+        const flushPending = async function* () {
+          if (bufferedDecoded.length === 0 && pendingSampledByTopic.size === 0) {
+            return;
+          }
+
+          const decoded: MessageEvent[] = [];
+          if (bufferedDecoded.length > 0) {
+            decoded.push(...bufferedDecoded);
+            bufferedDecoded.length = 0;
+          }
+
+          for (const [topic, rawMsgEvent] of pendingSampledByTopic) {
+            try {
+              const subscription = subscribePayloadWithHashByTopic.get(topic);
+              if (!subscription) {
+                throw new Error(`Received message on topic ${topic} which was not subscribed to.`);
+              }
+              decoded.push(self.#deserializeMessage(rawMsgEvent, subscription));
+            } catch (err) {
+              const connectionId = self.#connectionIdByTopic[topic] ?? 0;
+              yield {
+                type: "alert" as const,
+                connectionId,
+                alert: {
+                  severity: "error",
+                  message: `Failed to deserialize message on topic ${topic}. ${err.toString()}`,
+                  tip: `Check that your input file is not corrupted.`,
+                },
+              } as const;
+            }
+          }
+          pendingSampledByTopic.clear();
+
+          // Flush combines unsampled buffered messages with sampled latest-per-topic messages.
+          // Sort to preserve log-time order before yielding downstream.
+          decoded.sort((a, b) => compare(a.receiveTime, b.receiveTime));
+          for (const msgEvent of decoded) {
+            yield { type: "message-event" as const, msgEvent };
+          }
+        };
+
+        // Snapshot current sampling window end and refresh only at window boundaries (stamps).
+        let samplingWindowEnd = self.#samplingWindowEnd;
+        for (;;) {
+          let iterResult: Readonly<IteratorResult<Uint8Array>> | undefined;
+          if (carryOver) {
+            iterResult = carryOver;
+            carryOver = undefined;
+          } else {
+            const next = await rawIterator.next();
+            if (next.done === true) {
+              break;
+            }
+            iterResult = next.value;
+          }
+          samplingWindowEnd ??= self.#samplingWindowEnd;
+
+          // Yield alerts directly.
+          if (iterResult.type === "alert") {
             yield iterResult;
             continue;
           }
 
+          // Yield stamp results directly.
+          if (iterResult.type === "stamp") {
+            if (
+              samplingWindowEnd != undefined &&
+              compare(iterResult.stamp, samplingWindowEnd) >= 0
+            ) {
+              yield* flushPending();
+            }
+            yield iterResult;
+            samplingWindowEnd = self.#samplingWindowEnd;
+            continue;
+          }
+
+          // No sampling window end defined, just deserialize and yield.
+          if (!samplingWindowEnd) {
+            try {
+              const subscription = subscribePayloadWithHashByTopic.get(iterResult.msgEvent.topic);
+              if (!subscription) {
+                throw new Error(
+                  `Received message on topic ${iterResult.msgEvent.topic} which was not subscribed to.`,
+                );
+              }
+              const deserializedMsgEvent = self.#deserializeMessage(
+                iterResult.msgEvent,
+                subscription,
+              );
+              yield {
+                type: "message-event" as const,
+                msgEvent: deserializedMsgEvent,
+              };
+            } catch (err) {
+              const connectionId = self.#connectionIdByTopic[iterResult.msgEvent.topic] ?? 0;
+              yield {
+                type: "alert",
+                connectionId,
+                alert: {
+                  severity: "error",
+                  message: `Failed to deserialize message on topic ${
+                    iterResult.msgEvent.topic
+                  }. ${err.toString()}`,
+                  tip: `Check that your input file is not corrupted.`,
+                },
+              };
+            }
+            continue;
+          }
+
+          // If we have reached beyond the sampling window end, flush pending and yield a stamp.
+          const samplingWindowCompare = compare(iterResult.msgEvent.receiveTime, samplingWindowEnd);
+          if (samplingWindowCompare > 0) {
+            yield* flushPending();
+            // Defer this message so it is processed in the next sampling window.
+            carryOver = iterResult;
+            yield { type: "stamp", stamp: samplingWindowEnd };
+            samplingWindowEnd = self.#samplingWindowEnd;
+            continue;
+          }
+
+          // Drop pending sampled message if a newer one is available
+          if (samplingTopics.has(iterResult.msgEvent.topic)) {
+            const existing = pendingSampledByTopic.get(iterResult.msgEvent.topic);
+            if (!existing || compare(existing.receiveTime, iterResult.msgEvent.receiveTime) < 0) {
+              pendingSampledByTopic.set(iterResult.msgEvent.topic, iterResult.msgEvent);
+            }
+            continue;
+          }
+
+          // Deserialize all buffered decoded non-sampled message immediately just like in the non-sampling case.
           try {
             const subscription = subscribePayloadWithHashByTopic.get(iterResult.msgEvent.topic);
             if (!subscription) {
@@ -130,15 +340,7 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
                 `Received message on topic ${iterResult.msgEvent.topic} which was not subscribed to.`,
               );
             }
-
-            const deserializedMsgEvent = self.#deserializeMessage(
-              iterResult.msgEvent,
-              subscription,
-            );
-            yield {
-              type: iterResult.type,
-              msgEvent: deserializedMsgEvent,
-            };
+            bufferedDecoded.push(self.#deserializeMessage(iterResult.msgEvent, subscription));
           } catch (err) {
             const connectionId = self.#connectionIdByTopic[iterResult.msgEvent.topic] ?? 0;
             yield {
@@ -154,6 +356,8 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
             };
           }
         }
+
+        yield* flushPending();
       } finally {
         await rawIterator.return?.();
       }

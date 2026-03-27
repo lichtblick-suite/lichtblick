@@ -15,13 +15,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { MessageEvent, Topic } from "@lichtblick/suite-base/players/types";
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
+import type { Options } from "./types";
 import { useMessageDataItem } from "./useMessageDataItem";
 
 const topics: Topic[] = [{ name: "/topic", schemaName: "datatype" }];
@@ -254,5 +256,90 @@ describe("useMessageDataItem", () => {
         queriedData: [{ path: "/topic.value", value: 2 }],
       },
     ]);
+  });
+});
+
+describe("samplingMode", () => {
+  // Given
+  const samplingRequest = { mode: "latest-per-render-tick" as const };
+  const setSubscriptions: jest.Mock = jest.fn();
+  const topic = `/${BasicBuilder.string()}`;
+  const field = BasicBuilder.string();
+  const path = `${topic}.${field}`;
+  const samplingTopics: Topic[] = [{ name: topic, schemaName: "datatype" }];
+  const samplingDatatypes: RosDatatypes = new Map(
+    Object.entries({
+      datatype: {
+        definitions: [{ name: field, type: "uint32", isArray: false, isComplex: false }],
+      },
+    }),
+  );
+
+  beforeEach(() => {
+    setSubscriptions.mockClear();
+  });
+
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <MockCurrentLayoutProvider>
+        <MockMessagePipelineProvider
+          topics={samplingTopics}
+          datatypes={samplingDatatypes}
+          setSubscriptions={setSubscriptions}
+        >
+          {children}
+        </MockMessagePipelineProvider>
+      </MockCurrentLayoutProvider>
+    );
+  }
+  it("passes samplingRequest to subscriptions when provided", async () => {
+    // When
+    renderHook(
+      ({ sampling }) => {
+        const options: Options = { samplingRequest: sampling };
+        return useMessageDataItem(path, options);
+      },
+      {
+        initialProps: { sampling: samplingRequest as Options["samplingRequest"] | undefined },
+        wrapper: Wrapper,
+      },
+    );
+    // Then
+    await waitFor(() => {
+      expect(setSubscriptions).toHaveBeenCalled();
+    });
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), [
+      {
+        topic,
+        preloadType: "partial",
+        fields: [field],
+        samplingRequest,
+      },
+    ]);
+  });
+
+  it("removes samplingRequest from subscriptions when it is unset", async () => {
+    // When
+    const { rerender } = renderHook(
+      ({ sampling }) => {
+        const options: Options = { samplingRequest: sampling };
+        return useMessageDataItem(path, options);
+      },
+      {
+        initialProps: { sampling: samplingRequest as Options["samplingRequest"] | undefined },
+        wrapper: Wrapper,
+      },
+    );
+    rerender({ sampling: undefined });
+    // Then
+    await waitFor(() => {
+      expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), [
+        {
+          topic,
+          preloadType: "partial",
+          fields: [field],
+        },
+      ]);
+    });
   });
 });
