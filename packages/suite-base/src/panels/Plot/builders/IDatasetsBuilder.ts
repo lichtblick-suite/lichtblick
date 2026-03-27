@@ -10,7 +10,7 @@ import { Opaque } from "ts-essentials";
 import { MessagePath } from "@lichtblick/message-path";
 import type { Immutable, Time, MessageEvent } from "@lichtblick/suite";
 import type { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
-import type { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
+import type { PlayerState } from "@lichtblick/suite-base/players/types";
 import { TimestampMethod } from "@lichtblick/suite-base/util/time";
 
 import type { Dataset } from "../types";
