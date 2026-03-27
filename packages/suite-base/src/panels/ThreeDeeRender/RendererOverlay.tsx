@@ -36,6 +36,8 @@ import { HUD } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUD";
 import { customTypography } from "@lichtblick/theme";
 
 import { InteractionContextMenu, Interactions, SelectionObject, TabType } from "./Interactions";
+import { HoverTooltip } from "./Interactions/HoverTooltip";
+import type { HoverEntityInfo } from "./Interactions/types";
 import type { PickedRenderable } from "./Picker";
 import { Renderable } from "./Renderable";
 import { useRenderer, useRendererEvent } from "./RendererContext";
@@ -129,7 +131,24 @@ export function RendererOverlay(props: Props): React.JSX.Element {
     undefined,
   );
   const [interactionsTabType, setInteractionsTabType] = useState<TabType | undefined>(undefined);
+  const [hoveredEntities, setHoveredEntities] = useState<HoverEntityInfo[]>([]);
+  const [hoverPosition, setHoverPosition] = useState<{ clientX: number; clientY: number }>({
+    clientX: 0,
+    clientY: 0,
+  });
   const renderer = useRenderer();
+
+  const getHoverEntityId = useCallback((pickedRenderable: PickedRenderable): string => {
+    const entityId = (pickedRenderable.renderable.userData as { entityId?: string }).entityId;
+    if (entityId != undefined) {
+      return entityId;
+    }
+    const name = pickedRenderable.renderable.name;
+    if (name.length === 0) {
+      return `object-${pickedRenderable.instanceIndex ?? 0}`;
+    }
+    return name;
+  }, []);
 
   // Toggle object selection mode on/off in the renderer
   useEffect(() => {
@@ -138,12 +157,98 @@ export function RendererOverlay(props: Props): React.JSX.Element {
     }
   }, [interactionsTabType, renderer]);
 
-  useRendererEvent("renderablesClicked", (selections, cursorCoords) => {
-    const rect = props.canvas!.getBoundingClientRect();
-    setClickedPosition({ clientX: rect.left + cursorCoords.x, clientY: rect.top + cursorCoords.y });
-    setSelectedRenderables(selections);
-    setSelectedRenderable(selections.length === 1 ? selections[0] : undefined);
-  });
+  useRendererEvent(
+    "renderablesClicked",
+    useCallback(
+      (selections, cursorCoords) => {
+        const rect = props.canvas?.getBoundingClientRect();
+        if (rect) {
+          setClickedPosition({
+            clientX: rect.left + cursorCoords.x,
+            clientY: rect.top + cursorCoords.y,
+          });
+        }
+        setSelectedRenderables(selections);
+        setSelectedRenderable(selections.length === 1 ? selections[0] : undefined);
+      },
+      [props.canvas],
+    ),
+  );
+
+  // Track mouse position at full framerate for smooth tooltip following.
+  useRendererEvent(
+    "hoverMoved",
+    useCallback(
+      (cursorCoords) => {
+        const rect = props.canvas?.getBoundingClientRect();
+        if (rect) {
+          setHoverPosition({
+            clientX: rect.left + cursorCoords.x,
+            clientY: rect.top + cursorCoords.y,
+          });
+        }
+      },
+      [props.canvas],
+    ),
+  );
+
+  useRendererEvent(
+    "renderableHovered",
+    useCallback(
+      (selections) => {
+        const infos: HoverEntityInfo[] = [];
+        for (const pickedRenderable of selections) {
+          const topic = pickedRenderable.renderable.topic;
+          const details: Record<string, unknown> | undefined =
+            pickedRenderable.instanceIndex != undefined
+              ? (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex) as
+                  | Record<string, unknown>
+                  | undefined)
+              : (pickedRenderable.renderable.details() as Record<string, unknown> | undefined);
+
+          const metadata: { key: string; value: string }[] = [];
+
+          if (details != undefined) {
+            const entityMeta = details.metadata;
+            if (Array.isArray(entityMeta)) {
+              for (const kv of entityMeta) {
+                if (kv != undefined && typeof kv === "object" && "key" in kv && "value" in kv) {
+                  metadata.push({
+                    key: String((kv as { key: unknown }).key),
+                    value: String((kv as { value: unknown }).value),
+                  });
+                }
+              }
+            }
+            // Then add any remaining top-level primitive fields (id, frame_id, etc.)
+            for (const [k, v] of Object.entries(details)) {
+              if (
+                k !== "metadata" &&
+                v != undefined &&
+                (typeof v === "string" || typeof v === "number" || typeof v === "boolean")
+              ) {
+                metadata.push({ key: k, value: String(v) });
+              }
+            }
+          }
+
+          // Avoid showing tooltips for non-user-facing objects when hovering empty space.
+          // If a renderable has no associated topic and no metadata, it doesn't provide useful info.
+          if (topic == undefined && metadata.length === 0) {
+            continue;
+          }
+
+          infos.push({
+            topic,
+            entityId: getHoverEntityId(pickedRenderable),
+            metadata,
+          });
+        }
+        setHoveredEntities(infos);
+      },
+      [getHoverEntityId],
+    ),
+  );
 
   const [showResetViewButton, setShowResetViewButton] = useState(renderer?.canResetView() ?? false);
   useRendererEvent(
@@ -400,6 +505,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
         />
       )}
       <HUD renderer={renderer} />
+      <HoverTooltip entities={hoveredEntities} position={hoverPosition} canvas={props.canvas} />
       {stats}
       {resetViewButton}
     </>

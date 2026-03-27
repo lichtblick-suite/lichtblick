@@ -25,3 +25,34 @@ export type InteractionData = {
 };
 export type Interactive<T> = T & { interactionData: InteractionData };
 export type SelectedObject = { object: Marker; instanceIndex?: number };
+
+export type HoverEntityInfo = {
+  topic?: string;
+  entityId: string;
+  metadata: { key: string; value: string }[];
+};
+
+/**
+ * Tooltip display modes:
+ * - `following`  – tooltip follows cursor and updates immediately (fast browsing).
+ * - `settled`    – user dwelled 700 ms on one object; tooltip still follows cursor
+ *                  but any change to hovered objects triggers a grace delay.
+ * - `grace`      – position frozen; waiting for the user to reach the tooltip or
+ *                  for the grace timer to expire and apply the pending update.
+ * - `hover-pinned` – mouse is on the tooltip; content is frozen.
+ * - `click-pinned` – user clicked to pin; fully static until explicit dismiss.
+ */
+export type TooltipMode =
+  | "hidden"
+  | "following"
+  | "settled"
+  | "grace"
+  | "hover-pinned"
+  | "click-pinned";
+
+export type HoverTooltipProperties = {
+  entities: HoverEntityInfo[];
+  position: { clientX: number; clientY: number };
+  /** Canvas element used to constrain tooltip within the 3D panel bounds. */
+  canvas: HTMLCanvasElement | ReactNull;
+};
