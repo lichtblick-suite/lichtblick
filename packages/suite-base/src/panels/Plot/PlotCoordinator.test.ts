@@ -8,9 +8,9 @@ import { parseMessagePath } from "@lichtblick/message-path";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { stringifyMessagePath } from "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
 import { InteractionEvent, Scale } from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
-import { MessageBlock } from "@lichtblick/suite-base/players/types";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
@@ -19,7 +19,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import { PlotCoordinator } from "./PlotCoordinator";
-import { IDatasetsBuilder, SeriesItem } from "./builders/IDatasetsBuilder";
+import { IDatasetsBuilder, SeriesConfigKey, SeriesItem } from "./builders/IDatasetsBuilder";
+import { pathToSubscribePayload } from "./utils/subscription";
 
 jest.mock("./OffscreenCanvasRenderer");
 jest.mock("./builders/IDatasetsBuilder");
@@ -60,10 +61,20 @@ jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath"
   stringifyMessagePath: jest.fn(),
 }));
 
+jest.mock("./utils/subscription", () => ({
+  pathToSubscribePayload: jest.fn().mockReturnValue(undefined),
+}));
+
+const mockSubscribeMessageRange = jest.fn();
+jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", () => ({
+  useSubscribeMessageRange: () => mockSubscribeMessageRange,
+}));
+
 describe("PlotCoordinator", () => {
   let renderer: jest.Mocked<OffscreenCanvasRenderer>;
   let datasetsBuilder: jest.Mocked<IDatasetsBuilder>;
   let plotCoordinator: PlotCoordinator;
+  let subscribeMessageRange: UseSubscribeMessageRange;
 
   beforeEach(() => {
     const canvas = new OffscreenCanvas(500, 500);
@@ -77,10 +88,10 @@ describe("PlotCoordinator", () => {
       pathsWithMismatchedDataLengths: [],
     });
     datasetsBuilder.setSeries = jest.fn();
-    datasetsBuilder.handleBlocks = jest.fn().mockResolvedValue(undefined);
     datasetsBuilder.getCsvData = jest.fn().mockResolvedValue([]);
 
-    plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder);
+    subscribeMessageRange = mockSubscribeMessageRange;
+    plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange);
   });
 
   afterEach(() => {
@@ -118,7 +129,7 @@ describe("PlotCoordinator", () => {
 
     it("should return immediately if plotCoordinator is destroyed", () => {
       const state = PlayerBuilder.playerState();
-      jest.spyOn(plotCoordinator as any, "isDestroyed").mockReturnValue(true);
+      plotCoordinator.destroy();
       const handlePlayerStateSpy = jest.spyOn(datasetsBuilder, "handlePlayerState");
       const updateSpy = jest.spyOn(renderer, "update");
 
@@ -196,6 +207,96 @@ describe("PlotCoordinator", () => {
     });
   });
 
+  describe("topic range subscriptions", () => {
+    beforeEach(() => {
+      (pathToSubscribePayload as jest.Mock).mockReturnValue({ topic: "/foo", preloadType: "full" });
+      datasetsBuilder.handleMessageRange = jest.fn();
+      mockSubscribeMessageRange.mockReturnValue(jest.fn());
+    });
+
+    it("groups multiple series with the same topic into a single subscription", () => {
+      // Given
+      const topic = "/foo";
+      plotCoordinator["series"] = [
+        {
+          parsed: { topicName: topic, messagePath: [] },
+          key: "0:receiveTime:/foo.x" as SeriesConfigKey,
+          configIndex: 0,
+          timestampMethod: "receiveTime",
+        },
+        {
+          parsed: { topicName: topic, messagePath: [] },
+          key: "1:receiveTime:/foo.y" as SeriesConfigKey,
+          configIndex: 1,
+          timestampMethod: "receiveTime",
+        },
+      ] as unknown as SeriesItem[];
+      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+
+      // When
+      plotCoordinator.handlePlayerState(state);
+
+      // Then
+      expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(expect.objectContaining({ topic }));
+    });
+
+    it("cancels subscription for a topic removed from series", () => {
+      // Given — first call subscribes /foo
+      const cancelFoo = jest.fn();
+      mockSubscribeMessageRange.mockReturnValue(cancelFoo);
+      plotCoordinator["series"] = [
+        {
+          parsed: { topicName: "/foo", messagePath: [] },
+          key: "0:receiveTime:/foo.val" as SeriesConfigKey,
+          configIndex: 0,
+          timestampMethod: "receiveTime",
+        },
+      ] as unknown as SeriesItem[];
+      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      plotCoordinator.handlePlayerState(state);
+
+      // When — second call with /bar only
+      mockSubscribeMessageRange.mockClear();
+      plotCoordinator["series"] = [
+        {
+          parsed: { topicName: "/bar", messagePath: [] },
+          key: "0:receiveTime:/bar.val" as SeriesConfigKey,
+          configIndex: 0,
+          timestampMethod: "receiveTime",
+        },
+      ] as unknown as SeriesItem[];
+      plotCoordinator.handlePlayerState(state);
+
+      // Then
+      expect(cancelFoo).toHaveBeenCalled();
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
+        expect.objectContaining({ topic: "/bar" }),
+      );
+    });
+
+    it("does not re-subscribe when the same topic and keys are unchanged", () => {
+      // Given
+      plotCoordinator["series"] = [
+        {
+          parsed: { topicName: "/foo", messagePath: [] },
+          key: "0:receiveTime:/foo.val" as SeriesConfigKey,
+          configIndex: 0,
+          timestampMethod: "receiveTime",
+        },
+      ] as unknown as SeriesItem[];
+      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      plotCoordinator.handlePlayerState(state);
+      mockSubscribeMessageRange.mockClear();
+
+      // When — same series, same state
+      plotCoordinator.handlePlayerState(state);
+
+      // Then — no new subscription opened
+      expect(mockSubscribeMessageRange).not.toHaveBeenCalled();
+    });
+  });
+
   describe("destroy", () => {
     it("should set 'destroyed' to true when calling destroy", () => {
       plotCoordinator.destroy();
@@ -205,6 +306,15 @@ describe("PlotCoordinator", () => {
   });
 
   describe("dispatchRender", () => {
+    it("should return immediately if plotCoordinator is destroyed", async () => {
+      plotCoordinator.destroy();
+
+      await plotCoordinator["dispatchRender"]();
+
+      const updateSpy = jest.spyOn(renderer, "update");
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
     it("should call 'update' on the renderer when dispatching render", async () => {
       renderer.update.mockResolvedValue({ x: { min: 0, max: 10 }, y: { min: 0, max: 10 } });
 
@@ -280,20 +390,19 @@ describe("PlotCoordinator", () => {
     });
   });
 
-  describe("dispatchBlocks", () => {
-    it("should process and store message blocks correctly", async () => {
-      datasetsBuilder.handleBlocks = jest.fn().mockResolvedValue(undefined);
-      const blocks = [{}] as MessageBlock[];
-      const startTime = RosTimeBuilder.time();
-
-      await plotCoordinator["dispatchBlocks"](startTime, blocks);
-
-      const handleBlocksSpyOn = jest.spyOn(datasetsBuilder, "handleBlocks");
-      expect(handleBlocksSpyOn).toHaveBeenCalled();
-    });
-  });
-
   describe("handleConfig", () => {
+    it("should return immediately if plotCoordinator is destroyed", () => {
+      const config = PlotBuilder.config({
+        xAxisVal: "timestamp",
+        followingViewWidth: 10,
+        paths: [],
+      });
+
+      plotCoordinator.destroy();
+
+      plotCoordinator.handleConfig(config, "light", {});
+      expect(plotCoordinator["isTimeseriesPlot"]).toBe(false);
+    });
     it("should set isTimeseriesPlot to true when xAxisVal is 'timestamp'", () => {
       const config = PlotBuilder.config({
         xAxisVal: "timestamp",

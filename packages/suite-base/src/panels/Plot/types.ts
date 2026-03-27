@@ -129,7 +129,7 @@ export type UseHoverHandlersHook = {
     v: () => void;
     b: () => void;
   };
-  keyUphandlers: {
+  keyUpHandlers: {
     v: () => void;
     b: () => void;
   };

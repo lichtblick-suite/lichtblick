@@ -11,10 +11,9 @@ import { MessagePath } from "@lichtblick/message-path";
 import { toSec, subtract as subtractTime } from "@lichtblick/rostime";
 import { Immutable, MessageEvent, Time } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
-import { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
+import { PlayerState } from "@lichtblick/suite-base/players/types";
 import { TimestampMethod, getTimestampForMessage } from "@lichtblick/suite-base/util/time";
 
-import { BlockTopicCursor } from "./BlockTopicCursor";
 import {
   CsvDataset,
   GetViewportDatasetsResult,
@@ -28,6 +27,7 @@ import type {
   TimestampDatasetsBuilderImpl,
   UpdateDataAction,
 } from "./TimestampDatasetsBuilderImpl";
+import { buildCurrentSeriesActions, buildFullSeriesActions } from "./utils";
 import { MATH_FUNCTIONS } from "../constants";
 import { getChartValue, isChartValue } from "../utils/datum";
 import { MathFunction } from "../utils/mathFunctions";
@@ -42,7 +42,6 @@ const emptyPaths = new Set<string>();
 
 type TimestampSeriesItem = {
   config: Immutable<SeriesItem>;
-  blockCursor: BlockTopicCursor;
 };
 
 /**
@@ -60,6 +59,9 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
   #lastSeekTime = 0;
 
   #series: Immutable<TimestampSeriesItem[]> = [];
+  // True once handleMessageRange has been called — indicates a range-capable source (file/bag).
+  // When true, handlePlayerState skips append-current since the full history comes from the range.
+  #hasRangeSource = false;
 
   public constructor() {
     const worker = new Worker(
@@ -84,34 +86,25 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
 
     const msgEvents = activeData.messages;
     let datasetsChanged = false;
-    if (msgEvents.length > 0) {
-      for (const series of this.#series) {
-        const mathFn = series.config.parsed.modifier
-          ? MATH_FUNCTIONS[series.config.parsed.modifier]
-          : undefined;
-
-        if (didSeek) {
-          this.#pendingDispatch.push({
-            type: "reset-current",
-            series: series.config.key,
-          });
-        }
-
-        const pathItems = readMessagePathItems(
-          msgEvents,
-          series.config.parsed,
-          series.config.timestampMethod,
-          activeData.startTime,
-          mathFn,
-        );
-
-        datasetsChanged ||= pathItems.length > 0;
-        this.#pendingDispatch.push({
-          type: "append-current",
-          series: series.config.key,
-          items: pathItems,
-        });
-      }
+    if (!this.#hasRangeSource && msgEvents.length > 0) {
+      const { actions: seriesActions, datasetsChanged: seriesChanged } = buildCurrentSeriesActions(
+        this.#series,
+        { didSeek },
+        (config) => {
+          const mathFn = config.parsed.modifier
+            ? MATH_FUNCTIONS[config.parsed.modifier]
+            : undefined;
+          return readMessagePathItems(
+            msgEvents,
+            config.parsed,
+            config.timestampMethod,
+            activeData.startTime,
+            mathFn,
+          );
+        },
+      );
+      this.#pendingDispatch.push(...(seriesActions as UpdateDataAction[]));
+      datasetsChanged ||= seriesChanged;
     }
 
     return {
@@ -120,76 +113,32 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
     };
   }
 
-  public async handleBlocks(
+  public handleMessageRange(
+    messages: Immutable<MessageEvent[]>,
+    options: { isReset: boolean },
     startTime: Immutable<Time>,
-    blocks: Immutable<(MessageBlock | undefined)[]>,
-    progress: () => Promise<boolean>,
-  ): Promise<void> {
-    // identify if series need resetting because
-    for (const series of this.#series) {
-      if (series.blockCursor.nextWillReset(blocks)) {
-        this.#pendingDispatch.push({
-          type: "reset-full",
-          series: series.config.key,
-        });
-      }
+  ): void {
+    this.#hasRangeSource = true;
+    const topic = messages[0]?.topic;
+    if (!topic) {
+      return;
     }
 
-    const seriesArr = this.#series;
-
-    // We loop through the series and only process one next block and keep doing this until
-    // there are no more updates. This processes the series "in parallel" so that all of them appear
-    // to be loading blocks at the same time.
-    let done = 0;
-    do {
-      done = 0;
-
-      for (const series of seriesArr) {
-        const mathFn = series.config.parsed.modifier
-          ? MATH_FUNCTIONS[series.config.parsed.modifier]
-          : undefined;
-
-        const messageEvents = series.blockCursor.next(blocks);
-        if (!messageEvents) {
-          done += 1;
-          continue;
-        }
-
-        const pathItems = readMessagePathItems(
-          messageEvents,
-          series.config.parsed,
-          series.config.timestampMethod,
-          startTime,
-          mathFn,
-        );
-
-        if (pathItems.length === 0) {
-          continue;
-        }
-
-        this.#pendingDispatch.push({
-          type: "append-full",
-          series: series.config.key,
-          items: pathItems,
-        });
-
-        const abort = await progress();
-        if (abort) {
-          return;
-        }
-      }
-    } while (done < seriesArr.length);
+    const actions = buildFullSeriesActions(this.#series, topic, options, (config) => {
+      const mathFn = config.parsed.modifier ? MATH_FUNCTIONS[config.parsed.modifier] : undefined;
+      return readMessagePathItems(
+        messages,
+        config.parsed,
+        config.timestampMethod,
+        startTime,
+        mathFn,
+      );
+    });
+    this.#pendingDispatch.push(...(actions as UpdateDataAction[]));
   }
 
   public setSeries(series: Immutable<SeriesItem[]>): void {
-    this.#series = series.map((item) => {
-      const existing = this.#series.find((existingItem) => existingItem.config.key === item.key);
-      return {
-        config: item,
-        blockCursor: existing?.blockCursor ?? new BlockTopicCursor(item.parsed.topicName),
-      };
-    });
-
+    this.#series = series.map((item) => ({ config: item }));
     this.#pendingDispatch.push({
       type: "update-series-config",
       seriesItems: series,

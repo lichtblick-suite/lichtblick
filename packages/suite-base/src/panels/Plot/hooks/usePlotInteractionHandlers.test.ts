@@ -451,7 +451,7 @@ describe("usePlotInteractionHandlers", () => {
       const { result, props } = setup({ coordinator: mockCoordinator });
 
       act(() => {
-        result.current.keyUphandlers.v();
+        result.current.keyUpHandlers.v();
       });
 
       expect(props.coordinator?.setZoomMode).toHaveBeenCalledWith("x");
@@ -461,7 +461,7 @@ describe("usePlotInteractionHandlers", () => {
       const { result, props } = setup({ coordinator: mockCoordinator });
 
       act(() => {
-        result.current.keyUphandlers.b();
+        result.current.keyUpHandlers.b();
       });
 
       expect(props.coordinator?.setZoomMode).toHaveBeenCalledWith("x");

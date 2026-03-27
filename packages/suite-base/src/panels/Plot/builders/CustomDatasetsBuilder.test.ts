@@ -28,10 +28,6 @@ Object.defineProperty(global, "Worker", {
   value: makeComlinkWorkerMock(() => new CustomDatasetsBuilderImpl()),
 });
 
-function groupByTopic(events: MessageEvent[]): Record<string, MessageEvent[]> {
-  return _.groupBy(events, (item) => item.topic);
-}
-
 function buildSeriesItems(
   paths: (Partial<PlotPath> & { key?: string; value: string })[],
 ): SeriesItem[] {
@@ -209,7 +205,7 @@ describe("CustomDatasetsBuilder", () => {
     });
   });
 
-  it("should build updates from blocks", async () => {
+  it("should build updates from message ranges", async () => {
     const builder = new CustomDatasetsBuilder();
 
     builder.setXPath(parseMessagePath("/foo.val"));
@@ -230,86 +226,83 @@ describe("CustomDatasetsBuilder", () => {
       ]),
     );
 
-    const block0 = {
-      sizeInBytes: 0,
-      messagesByTopic: groupByTopic([
+    // First range batch: x(0,1), bar(0)
+    builder.handleMessageRange(
+      [
         {
           topic: "/foo",
           schemaName: "foo",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 0,
-          },
+          message: { val: 0 },
         },
         {
           topic: "/foo",
           schemaName: "foo",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 1,
-          },
+          message: { val: 1 },
         },
+      ],
+      { isReset: false },
+    );
+    builder.handleMessageRange(
+      [
         {
           topic: "/bar",
           schemaName: "bar",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 0,
-          },
+          message: { val: 0 },
         },
-      ]),
-    };
+      ],
+      { isReset: false },
+    );
 
-    // Baz is empty in the first block
-    block0.messagesByTopic["/baz"] = [];
-
-    const block1 = {
-      sizeInBytes: 0,
-      messagesByTopic: groupByTopic([
+    // Second range batch: x(2), bar(1,2), baz(4)
+    builder.handleMessageRange(
+      [
         {
           topic: "/foo",
           schemaName: "foo",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 2,
-          },
+          message: { val: 2 },
+        },
+      ],
+      { isReset: false },
+    );
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/bar",
+          schemaName: "bar",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 1 },
         },
         {
           topic: "/bar",
           schemaName: "bar",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 1,
-          },
+          message: { val: 2 },
         },
-        {
-          topic: "/bar",
-          schemaName: "bar",
-          receiveTime: { sec: 0, nsec: 0 },
-          sizeInBytes: 0,
-          message: {
-            val: 2,
-          },
-        },
+      ],
+      { isReset: false },
+    );
+    builder.handleMessageRange(
+      [
         {
           topic: "/baz",
           schemaName: "baz",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 4,
-          },
+          message: { val: 4 },
         },
-      ]),
-    };
-
-    builder.handlePlayerState(buildPlayerState({}, [block0]));
-    builder.handlePlayerState(buildPlayerState({}, [block0, block1]));
+      ],
+      { isReset: false },
+    );
 
     const result = await builder.getViewportDatasets({
       size: { width: 1_000, height: 1_000 },
@@ -339,103 +332,65 @@ describe("CustomDatasetsBuilder", () => {
     });
   });
 
-  it.each(["current", "blocks"] as const)("combines all values from arrays (%s)", async (type) => {
+  it("should reset full data when isReset is true", async () => {
     const builder = new CustomDatasetsBuilder();
 
-    builder.setXPath(parseMessagePath("/foo.values[:].val"));
+    builder.setXPath(parseMessagePath("/foo.val"));
     builder.setSeries(
-      buildSeriesItems([
-        {
-          enabled: true,
-          timestampMethod: "receiveTime",
-          value: "/bar.values[:].val",
-        },
-        {
-          enabled: true,
-          timestampMethod: "receiveTime",
-          value: "/baz.values[:].val",
-        },
-      ]),
+      buildSeriesItems([{ enabled: true, timestampMethod: "receiveTime", value: "/bar.val" }]),
     );
 
-    let latestBlocks: MessageBlock[] = [];
-    const sendMessages = (messages: MessageEvent[]) => {
-      if (type === "current") {
-        builder.handlePlayerState(buildPlayerState({ messages }));
-      } else {
-        latestBlocks = [
-          ...latestBlocks,
-          {
-            sizeInBytes: 0,
-            messagesByTopic: {
-              "/baz": [],
-              ...groupByTopic(messages),
-            },
-          },
-        ];
-        builder.handlePlayerState(buildPlayerState({}, latestBlocks));
-      }
-    };
+    // Initial data
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 0 },
+        },
+      ],
+      { isReset: false },
+    );
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/bar",
+          schemaName: "bar",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 10 },
+        },
+      ],
+      { isReset: false },
+    );
 
-    sendMessages([
-      {
-        topic: "/foo",
-        schemaName: "foo",
-        receiveTime: { sec: 0, nsec: 0 },
-        sizeInBytes: 0,
-        message: {
-          values: [{ val: 0 }, { val: 1 }, { val: 2 }],
+    // Reset replaces all previous data
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 1 },
         },
-      },
-      {
-        topic: "/foo",
-        schemaName: "foo",
-        receiveTime: { sec: 0, nsec: 0 },
-        sizeInBytes: 0,
-        message: {
-          values: [{ val: 3 }],
+      ],
+      { isReset: true },
+    );
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/bar",
+          schemaName: "bar",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 99 },
         },
-      },
-      {
-        topic: "/bar",
-        schemaName: "bar",
-        receiveTime: { sec: 0, nsec: 0 },
-        sizeInBytes: 0,
-        message: {
-          values: [{ val: 10 }, { val: 11 }],
-        },
-      },
-    ]);
-
-    sendMessages([
-      {
-        topic: "/foo",
-        schemaName: "foo",
-        receiveTime: { sec: 0, nsec: 0 },
-        sizeInBytes: 0,
-        message: {
-          values: [{ val: 4 }],
-        },
-      },
-      {
-        topic: "/bar",
-        schemaName: "bar",
-        receiveTime: { sec: 0, nsec: 0 },
-        sizeInBytes: 0,
-        message: {
-          values: [{ val: 12 }, { val: 13 }, { val: 14 }],
-        },
-      },
-      {
-        topic: "/baz",
-        schemaName: "baz",
-        receiveTime: { sec: 0, nsec: 0 },
-        sizeInBytes: 0,
-        message: {
-          values: [{ val: 20 }, { val: 21 }],
-        },
-      },
-    ]);
+      ],
+      { isReset: true },
+    );
 
     const result = await builder.getViewportDatasets({
       size: { width: 1_000, height: 1_000 },
@@ -443,29 +398,137 @@ describe("CustomDatasetsBuilder", () => {
     });
 
     expect(result).toEqual({
-      pathsWithMismatchedDataLengths: new Set(["/baz.values[:].val"]),
+      pathsWithMismatchedDataLengths: new Set(),
       datasetsByConfigIndex: [
         expect.objectContaining({
-          data: [
-            { x: 0, y: 10, value: 10 },
-            { x: 1, y: 11, value: 11 },
-            { x: 2, y: 12, value: 12 },
-            { x: 3, y: 13, value: 13 },
-            { x: 4, y: 14, value: 14 },
-          ],
-          showLine: true,
-          pointRadius: 1.2,
-          fill: false,
-        }),
-        expect.objectContaining({
-          data: [
-            { x: 0, y: 20, value: 20 },
-            { x: 1, y: 21, value: 21 },
-          ],
+          data: [{ x: 1, y: 99, value: 99 }],
         }),
       ],
     });
   });
+
+  it.each(["current", "message range"] as const)(
+    "combines all values from arrays (%s)",
+    async (type) => {
+      const builder = new CustomDatasetsBuilder();
+
+      builder.setXPath(parseMessagePath("/foo.values[:].val"));
+      builder.setSeries(
+        buildSeriesItems([
+          {
+            enabled: true,
+            timestampMethod: "receiveTime",
+            value: "/bar.values[:].val",
+          },
+          {
+            enabled: true,
+            timestampMethod: "receiveTime",
+            value: "/baz.values[:].val",
+          },
+        ]),
+      );
+
+      const sendMessages = (messages: MessageEvent[]) => {
+        if (type === "current") {
+          builder.handlePlayerState(buildPlayerState({ messages }));
+        } else {
+          const byTopic = _.groupBy(messages, (item) => item.topic);
+          for (const topicMessages of Object.values(byTopic)) {
+            builder.handleMessageRange(topicMessages, { isReset: false });
+          }
+        }
+      };
+
+      sendMessages([
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            values: [{ val: 0 }, { val: 1 }, { val: 2 }],
+          },
+        },
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            values: [{ val: 3 }],
+          },
+        },
+        {
+          topic: "/bar",
+          schemaName: "bar",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            values: [{ val: 10 }, { val: 11 }],
+          },
+        },
+      ]);
+
+      sendMessages([
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            values: [{ val: 4 }],
+          },
+        },
+        {
+          topic: "/bar",
+          schemaName: "bar",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            values: [{ val: 12 }, { val: 13 }, { val: 14 }],
+          },
+        },
+        {
+          topic: "/baz",
+          schemaName: "baz",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            values: [{ val: 20 }, { val: 21 }],
+          },
+        },
+      ]);
+
+      const result = await builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      });
+
+      expect(result).toEqual({
+        pathsWithMismatchedDataLengths: new Set(["/baz.values[:].val"]),
+        datasetsByConfigIndex: [
+          expect.objectContaining({
+            data: [
+              { x: 0, y: 10, value: 10 },
+              { x: 1, y: 11, value: 11 },
+              { x: 2, y: 12, value: 12 },
+              { x: 3, y: 13, value: 13 },
+              { x: 4, y: 14, value: 14 },
+            ],
+            showLine: true,
+            pointRadius: 1.2,
+            fill: false,
+          }),
+          expect.objectContaining({
+            data: [
+              { x: 0, y: 20, value: 20 },
+              { x: 1, y: 21, value: 21 },
+            ],
+          }),
+        ],
+      });
+    },
+  );
 
   it("supports toggling series enabled state", async () => {
     const builder = new CustomDatasetsBuilder();

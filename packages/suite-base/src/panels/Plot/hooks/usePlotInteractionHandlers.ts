@@ -188,7 +188,7 @@ const usePlotInteractionHandlers = ({
     setFocusedPath(["paths", String(index)]);
   }, []);
 
-  const { keyDownHandlers, keyUphandlers } = useMemo(() => {
+  const { keyDownHandlers, keyUpHandlers } = useMemo(() => {
     return {
       keyDownHandlers: {
         v: () => {
@@ -198,7 +198,7 @@ const usePlotInteractionHandlers = ({
           coordinator?.setZoomMode("xy");
         },
       },
-      keyUphandlers: {
+      keyUpHandlers: {
         v: () => {
           coordinator?.setZoomMode("x");
         },
@@ -244,7 +244,7 @@ const usePlotInteractionHandlers = ({
     onClickPath,
     focusedPath,
     keyDownHandlers,
-    keyUphandlers,
+    keyUpHandlers,
     getPanelContextMenuItems,
   };
 };

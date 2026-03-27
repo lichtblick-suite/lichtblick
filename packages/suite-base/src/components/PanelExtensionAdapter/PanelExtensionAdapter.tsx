@@ -66,10 +66,10 @@ import { assertNever } from "@lichtblick/suite-base/util/assertNever";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
-import { createMessageRangeIterator } from "./messageRangeIterator";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext, MessageConverterAlertHandler } from "./types";
 import { useSharedPanelState } from "./useSharedPanelState";
+import { useSubscribeMessageRange } from "./useSubscribeMessageRange";
 
 const log = Logger.getLogger(__filename);
 
@@ -138,7 +138,6 @@ function PanelExtensionAdapter(
     getMetadata,
     sortedTopics,
     sortedServices,
-    getBatchIterator,
   } = messagePipelineContext;
 
   const { capabilities, profile: dataSourceProfile, presence: playerPresence } = playerState;
@@ -205,6 +204,8 @@ function PanelExtensionAdapter(
     },
     [setAlert],
   );
+
+  const subscribeMessageRange = useSubscribeMessageRange(emitMessageConverterAlert);
 
   // Register handlers to update the app settings we subscribe to
   useEffect(() => {
@@ -657,32 +658,11 @@ function PanelExtensionAdapter(
        * - Error handling is still being refined
        * - API surface may change based on testing feedback
        */
-      unstable_subscribeMessageRange({ topic, convertTo, onNewRangeIterator }) {
+      unstable_subscribeMessageRange(args) {
         if (!isMounted()) {
           return () => {};
         }
-
-        const rawBatchIterator = getBatchIterator(topic);
-        if (!rawBatchIterator) {
-          // If no batch iterator is available, just return an empty cleanup function
-          return () => {};
-        }
-
-        const { iterable: messageEventIterable, cancel } = createMessageRangeIterator({
-          topic,
-          convertTo,
-          rawBatchIterator,
-          sortedTopics,
-          messageConverters: messageConverters ?? [],
-          emitAlert: emitMessageConverterAlert,
-        });
-
-        // Call the callback with the processed iterable
-        onNewRangeIterator(messageEventIterable).catch((err: unknown) => {
-          log.error("Error in onNewRangeIterator callback:", err);
-        });
-
-        return cancel;
+        return subscribeMessageRange(args);
       },
 
       unstable_setMessagePathDropConfig(dropConfig) {
@@ -711,7 +691,7 @@ function PanelExtensionAdapter(
     updatePanelSettingsTree,
     setDefaultPanelTitle,
     setMessagePathDropConfig,
-    emitMessageConverterAlert,
+    subscribeMessageRange,
   ]);
 
   const panelContainerRef = useRef<HTMLDivElement>(ReactNull);

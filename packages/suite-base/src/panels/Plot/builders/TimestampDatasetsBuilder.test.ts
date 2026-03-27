@@ -5,12 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import * as _ from "lodash-es";
-
 import { unwrap } from "@lichtblick/den/monads";
 import { makeComlinkWorkerMock } from "@lichtblick/den/testing";
 import { parseMessagePath } from "@lichtblick/message-path";
-import { MessageEvent } from "@lichtblick/suite";
 import {
   MessageBlock,
   PlayerPresence,
@@ -27,10 +24,6 @@ Object.defineProperty(global, "Worker", {
   writable: true,
   value: makeComlinkWorkerMock(() => new TimestampDatasetsBuilderImpl()),
 });
-
-function groupByTopic(events: MessageEvent[]): Record<string, MessageEvent[]> {
-  return _.groupBy(events, (item) => item.topic);
-}
 
 function buildSeriesItems(
   paths: (Partial<PlotPath> & { key?: string; value: string })[],
@@ -177,61 +170,49 @@ describe("TimestampDatasetsBuilder", () => {
       ]),
     );
 
-    const block = {
-      sizeInBytes: 0,
-      messagesByTopic: groupByTopic([
+    const playerState = buildPlayerState({
+      messages: [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 1, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            val: 1.5,
+          },
+        },
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 2, nsec: 0 },
+          sizeInBytes: 0,
+          message: {
+            val: 2.5,
+          },
+        },
+      ],
+    });
+
+    builder.handlePlayerState(playerState);
+    builder.handleMessageRange(
+      [
         {
           topic: "/foo",
           schemaName: "foo",
           receiveTime: { sec: 0, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 0,
-          },
+          message: { val: 0 },
         },
         {
           topic: "/foo",
           schemaName: "foo",
           receiveTime: { sec: 0.5, nsec: 0 },
           sizeInBytes: 0,
-          message: {
-            val: 1,
-          },
+          message: { val: 1 },
         },
-      ]),
-    };
-
-    const playerState = buildPlayerState(
-      {
-        messages: [
-          {
-            topic: "/foo",
-            schemaName: "foo",
-            receiveTime: { sec: 1, nsec: 0 },
-            sizeInBytes: 0,
-            message: {
-              val: 1.5,
-            },
-          },
-          {
-            topic: "/foo",
-            schemaName: "foo",
-            receiveTime: { sec: 2, nsec: 0 },
-            sizeInBytes: 0,
-            message: {
-              val: 2.5,
-            },
-          },
-        ],
-      },
-      [block],
-    );
-
-    builder.handlePlayerState(playerState);
-    await builder.handleBlocks(
-      unwrap(playerState.activeData?.startTime),
-      unwrap(playerState.progress.messageCache?.blocks),
-      async () => await Promise.resolve(false),
+      ],
+      { isReset: false },
+      { sec: 0, nsec: 0 },
     );
 
     await expect(
@@ -250,6 +231,65 @@ describe("TimestampDatasetsBuilder", () => {
             { x: 1, y: 1.5, value: 1.5 },
             { x: 2, y: 2.5, value: 2.5 },
           ],
+        }),
+      ],
+    });
+  });
+
+  it("should reset full data when isReset is true", async () => {
+    const builder = new TimestampDatasetsBuilder();
+
+    builder.setSeries(
+      buildSeriesItems([{ enabled: true, timestampMethod: "receiveTime", value: "/foo.val" }]),
+    );
+
+    // Initial full data
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 0, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 0 },
+        },
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 1, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 1 },
+        },
+      ],
+      { isReset: false },
+      { sec: 0, nsec: 0 },
+    );
+
+    // Reset replaces all previous full data
+    builder.handleMessageRange(
+      [
+        {
+          topic: "/foo",
+          schemaName: "foo",
+          receiveTime: { sec: 2, nsec: 0 },
+          sizeInBytes: 0,
+          message: { val: 99 },
+        },
+      ],
+      { isReset: true },
+      { sec: 0, nsec: 0 },
+    );
+
+    await expect(
+      builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      }),
+    ).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          data: [{ x: 2, y: 99, value: 99 }],
         }),
       ],
     });
