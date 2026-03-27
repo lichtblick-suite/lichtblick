@@ -3435,7 +3435,6 @@ __metadata:
     intervals-fn: 3.0.3
     jest-canvas-mock: 2.5.2
     jszip: 3.10.1
-    just-diff: 6.0.2
     leaflet: 1.9.4
     leaflet-ellipse: 0.9.1
     lodash-es: 4.17.23
@@ -14820,13 +14819,6 @@ __metadata:
     readable-stream: ~2.3.6
     setimmediate: ^1.0.5
   checksum: abc77bfbe33e691d4d1ac9c74c8851b5761fba6a6986630864f98d876f3fcc2d36817dfc183779f32c00157b5d53a016796677298272a714ae096dfe6b1c8b60
-  languageName: node
-  linkType: hard
-
-"just-diff@npm:6.0.2":
-  version: 6.0.2
-  resolution: "just-diff@npm:6.0.2"
-  checksum: 1a0c7524f640cb88ab013862733e710f840927834208fd3b85cbc5da2ced97acc75e7dcfe493268ac6a6514c51dd8624d2fd9d057050efba3c02b81a6dcb7ff9
   languageName: node
   linkType: hard
 
