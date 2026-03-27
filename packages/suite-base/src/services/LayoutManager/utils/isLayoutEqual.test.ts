@@ -40,15 +40,15 @@ describe("isLayoutEqual", () => {
   describe("when comparing layouts with differences", () => {
     it("should return false when panel configuration changes", () => {
       // Given
-      const painelId = BasicBuilder.string();
+      const panelId = BasicBuilder.string();
       const layoutA = LayoutBuilder.data({
         configById: {
-          [painelId]: { id: "panel1", type: "3DPanel" },
+          [panelId]: { id: "panel1", type: "3DPanel" },
         },
       });
       const layoutB = LayoutBuilder.data({
         configById: {
-          [painelId]: { id: "panel1", type: "MapPanel" }, // different type
+          [panelId]: { id: "panel1", type: "MapPanel" },
         },
       });
 
@@ -57,6 +57,76 @@ describe("isLayoutEqual", () => {
 
       // Then
       expect(result).toBe(false);
+    });
+
+    it("should return false when a config key present in a is absent in b", () => {
+      // Given
+      const panelId = BasicBuilder.string();
+      const layoutA = LayoutBuilder.data({
+        configById: {
+          [panelId]: { topic: "/markers" },
+        },
+      });
+      const layoutB = LayoutBuilder.data({
+        configById: {
+          [panelId]: {},
+        },
+      });
+
+      // When
+      const result = isLayoutEqual(layoutA, layoutB);
+
+      // Then
+      expect(result).toBe(false);
+    });
+
+    it("should return false when a top-level field differs", () => {
+      // Given
+      const layoutA = LayoutBuilder.data({ globalVariables: { speed: 10 } });
+      const layoutB = LayoutBuilder.data({ globalVariables: { speed: 99 } });
+
+      // When
+      const result = isLayoutEqual(layoutA, layoutB);
+
+      // Then
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("when b has additional entries not present in a (additive tolerance)", () => {
+    it("should return true when b has a new panel ID not present in a", () => {
+      // Given
+      const panelId = BasicBuilder.string();
+      const newPanelId = BasicBuilder.string();
+      const base = LayoutBuilder.data({ configById: { [panelId]: { topic: "/markers" } } });
+      const layoutA = base;
+      const layoutB = {
+        ...base,
+        configById: { [panelId]: { topic: "/markers" }, [newPanelId]: { topic: "/new" } },
+      };
+
+      // When
+      const result = isLayoutEqual(layoutA, layoutB);
+
+      // Then
+      expect(result).toBe(true);
+    });
+
+    it("should return true when b's panel config has a new key not present in a", () => {
+      // Given
+      const panelId = BasicBuilder.string();
+      const base = LayoutBuilder.data({ configById: { [panelId]: { topic: "/markers" } } });
+      const layoutA = base;
+      const layoutB = {
+        ...base,
+        configById: { [panelId]: { topic: "/markers", newKey: "defaultValue" } },
+      };
+
+      // When
+      const result = isLayoutEqual(layoutA, layoutB);
+
+      // Then
+      expect(result).toBe(true);
     });
   });
 
