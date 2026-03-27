@@ -73,7 +73,6 @@ describe("useSubscribeMessageRange", () => {
     });
 
     // Then
-    expect(typeof cancel).toBe("function");
     expect(() => {
       cancel();
     }).not.toThrow();

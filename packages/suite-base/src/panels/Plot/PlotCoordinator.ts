@@ -113,7 +113,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   }
 
   public handlePlayerState(state: Immutable<PlayerState>): void {
-    if (this.destroyed) {
+    if (this.isDestroyed()) {
       return;
     }
 
@@ -202,7 +202,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     colorScheme: "light" | "dark",
     globalVariables: GlobalVariables,
   ): void {
-    if (this.destroyed) {
+    if (this.isDestroyed()) {
       return;
     }
     this.isTimeseriesPlot = config.xAxisVal === "timestamp";
@@ -367,7 +367,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
   /** Get the entire data for all series */
   public async getCsvData(): Promise<CsvDataset[]> {
-    if (this.destroyed) {
+    if (this.isDestroyed()) {
       return [];
     }
     return await this.datasetsBuilder.getCsvData();
@@ -411,7 +411,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   }
 
   private async dispatchRender(): Promise<void> {
-    if (this.destroyed) {
+    if (this.isDestroyed()) {
       return;
     }
     this.updateAction.xBounds = this.getXBounds();
@@ -455,7 +455,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
   /** Dispatch getting the latest downsampled datasets and then queue rendering them */
   private async dispatchDownsample(): Promise<void> {
-    if (this.destroyed) {
+    if (this.isDestroyed()) {
       return;
     }
 
@@ -473,7 +473,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
   /** Render the provided datasets */
   private async dispatchDatasetsRender(datasets: Dataset[]): Promise<void> {
-    if (this.destroyed) {
+    if (this.isDestroyed()) {
       return;
     }
 
@@ -520,7 +520,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
         onNewRangeIterator: async (batchIterator) => {
           let isReset = true;
           for await (const batch of batchIterator) {
-            if (this.destroyed) {
+            if (this.isDestroyed()) {
               return;
             }
             const startTime = this.startTime;

@@ -97,19 +97,14 @@ interface IDatasetsBuilder {
   handlePlayerState(state: Immutable<PlayerState>): HandlePlayerStateResult | undefined;
 
   /**
-   * The builder can provide an implementation of this method to handle block data separately from
-   * current frame player state data.
+   * The builder can provide an implementation of this method to incrementally accumulate full
+   * message history delivered via `subscribeMessageRange`. Each call provides a batch of messages
+   * for a single topic, together with a `startTime` used to compute relative x-axis offsets.
    *
-   * The method is provided a _progress_ callback to call when there is an opportunity to render
-   * some of the processed block data to provide feedback to the caller that work has happened. The
-   * progress callback returns false when further processing should stop.
+   * When `options.isReset` is true the builder should discard any previously accumulated data for
+   * that topic before processing the new batch, signalling the start of a fresh range subscription
+   * (e.g. after a seek). Subsequent calls with `isReset: false` append to the existing data.
    */
-  handleBlocks?(
-    startTime: Immutable<Time>,
-    blocks: Immutable<(MessageBlock | undefined)[]>,
-    progress: () => Promise<boolean>,
-  ): Promise<void>;
-
   handleMessageRange?(
     messages: Immutable<MessageEvent[]>,
     options: { isReset: boolean },
