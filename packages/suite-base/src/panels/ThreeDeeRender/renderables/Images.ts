@@ -146,7 +146,6 @@ export class Images extends SceneExtension<ImageRenderable> {
         schemaNames: COMPRESSED_VIDEO_DATATYPES,
         subscription: {
           handler: this.#handleCompressedVideo,
-          filterQueue: onlyLastByTopicMessage,
         },
       },
     ];
