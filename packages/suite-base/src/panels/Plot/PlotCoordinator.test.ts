@@ -13,6 +13,7 @@ import { InteractionEvent, Scale } from "@lichtblick/suite-base/panels/Plot/type
 import { PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
+import { PlotCoordinatorBuilder } from "@lichtblick/suite-base/testing/builders/PlotCoordinatorBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -217,8 +218,8 @@ describe("PlotCoordinator", () => {
     it("groups multiple series with the same topic into a single subscription", () => {
       // Given
       const topic = "/foo";
-      plotCoordinator["seriesKeysByTopic"] = new Map([
-        [topic, new Set(["0:receiveTime:/foo.x", "1:receiveTime:/foo.y"] as SeriesConfigKey[])],
+      plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
+        [topic, ["/foo.x", "/foo.y"]],
       ]);
       const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
 
@@ -242,8 +243,8 @@ describe("PlotCoordinator", () => {
 
       // When — second call with /bar only
       mockSubscribeMessageRange.mockClear();
-      plotCoordinator["seriesKeysByTopic"] = new Map([
-        ["/bar", new Set(["0:receiveTime:/bar.val"] as SeriesConfigKey[])],
+      plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
+        ["/bar", ["/bar.val"]],
       ]);
       plotCoordinator.handlePlayerState(state);
 
@@ -256,8 +257,8 @@ describe("PlotCoordinator", () => {
 
     it("does not re-subscribe when the same topic and keys are unchanged", () => {
       // Given
-      plotCoordinator["seriesKeysByTopic"] = new Map([
-        ["/foo", new Set(["0:receiveTime:/foo.val"] as SeriesConfigKey[])],
+      plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
+        ["/foo", ["/foo.val"]],
       ]);
       const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
       plotCoordinator.handlePlayerState(state);
