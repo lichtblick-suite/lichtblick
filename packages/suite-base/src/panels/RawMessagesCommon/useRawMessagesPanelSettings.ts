@@ -14,10 +14,15 @@ import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/Pan
  * @param fontSize - Current font size value (undefined for "auto")
  * @param saveConfig - Function to save the font size configuration
  */
-export function useFontSizeSettings(
-  fontSize: number | undefined,
-  saveConfig: (config: { fontSize: number | undefined }) => void,
-): void {
+type UseRawMessagesPanelSettingsOptions = {
+  fontSize: number | undefined;
+  saveConfig: (config: { fontSize?: number | undefined }) => void;
+};
+
+export function useRawMessagesPanelSettings({
+  fontSize,
+  saveConfig,
+}: UseRawMessagesPanelSettingsOptions): void {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const actionHandler = useCallback(
@@ -31,6 +36,7 @@ export function useFontSizeSettings(
           fontSize:
             action.payload.value == undefined ? undefined : (action.payload.value as number),
         });
+        return;
       }
     },
     [saveConfig],

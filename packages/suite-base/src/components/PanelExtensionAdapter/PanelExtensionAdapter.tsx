@@ -33,6 +33,10 @@ import {
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
+import {
+  collateTopicSchemaConversions,
+  ConverterKey,
+} from "@lichtblick/suite-base/components/PanelExtensionAdapter/messageProcessing";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import { useAlertsActions } from "@lichtblick/suite-base/context/AlertsContext";
 import { useAppConfiguration } from "@lichtblick/suite-base/context/AppConfigurationContext";
@@ -50,8 +54,8 @@ import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables"
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
+  InternalSubscribePayload,
   PlayerPresence,
-  SubscribePayload,
 } from "@lichtblick/suite-base/players/types";
 import {
   useDefaultPanelTitle,
@@ -473,19 +477,6 @@ function PanelExtensionAdapter(
         if (!isMounted()) {
           return;
         }
-        const subscribePayloads = topics.map((item): SubscribePayload => {
-          if (typeof item === "string") {
-            // For backwards compatability with the topic-string-array api `subscribe(["/topic"])`
-            // results in a topic subscription with full preloading
-            return { topic: item, preloadType: "full" };
-          }
-
-          return {
-            topic: item.topic,
-            preloadType: item.preload === true ? "full" : "partial",
-          };
-        });
-
         // ExtensionPanel-Facing subscription type
         const localSubs = topics.map((item): Subscription => {
           if (typeof item === "string") {
@@ -493,6 +484,66 @@ function PanelExtensionAdapter(
           }
 
           return item;
+        });
+
+        // Resolve topic -> schemaName for converter lookup. If we don't know the schema yet,
+        // we default to no sampling (safe "needs all" behavior).
+        const topicToSchemaNameMap = new Map(
+          sortedTopics.map((topic) => [topic.name, topic.schemaName]),
+        );
+
+        // Use the same conversion resolution as renderState to identify converters that apply.
+        const { topicSchemaConverters } = collateTopicSchemaConversions(
+          localSubs,
+          sortedTopics,
+          messageConverters,
+        );
+
+        // Find the converter (if any) that would be used for a given convertTo subscription.
+        const getConverterForSubscription = (sub: Subscription) => {
+          if (!sub.convertTo) {
+            return undefined;
+          }
+
+          const topicSchemaName = topicToSchemaNameMap.get(sub.topic);
+          if (topicSchemaName && topicSchemaName === sub.convertTo) {
+            return undefined;
+          }
+
+          const key = `${sub.topic}\n${topicSchemaName ?? "<no-schema>"}` as ConverterKey;
+          const convertersForTopic = topicSchemaConverters.get(key) ?? [];
+          return convertersForTopic.find((conv) => conv.toSchemaName === sub.convertTo);
+        };
+
+        const subscribePayloads = localSubs.map((item): InternalSubscribePayload => {
+          const preloadType = item.preload === true ? "full" : "partial";
+
+          // Preload requires full message history, so sampling is never allowed here.
+          // Also, if the panel didn't request sampling, default to "needs all".
+          if (item.preload === true || item.sampling?.mode !== "latest-per-render-tick") {
+            return { topic: item.topic, preloadType };
+          }
+
+          // Sampling is only allowed if the converter explicitly declares it supports
+          // latest-per-render-tick sampling.
+          // Native/direct paths are denied by default.
+          // If allowed, we set both the sampling request and the internal authorization bit.
+          // MessagePipeline merge logic strips sampling requests unless authorization is present.
+          const converter = getConverterForSubscription(item);
+          const topicSchemaName = topicToSchemaNameMap.get(item.topic);
+          const isNativePath =
+            item.convertTo == undefined ||
+            (topicSchemaName != undefined && topicSchemaName === item.convertTo);
+          const samplingAllowed = isNativePath
+            ? false
+            : converter?.supportsLatestPerRenderTick === true;
+
+          return {
+            topic: item.topic,
+            preloadType,
+            samplingRequest: samplingAllowed ? item.sampling : undefined,
+            samplingAuthorized: samplingAllowed ? true : undefined,
+          };
         });
 
         setLocalSubscriptions(localSubs);

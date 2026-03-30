@@ -9,7 +9,8 @@ import moize from "moize";
 import * as R from "ramda";
 
 import { Immutable } from "@lichtblick/suite";
-import { SubscribePayload } from "@lichtblick/suite-base/players/types";
+import { applySamplingGuardToSubscription } from "@lichtblick/suite-base/players/samplingGuard";
+import { InternalSubscribePayload, SubscribePayload } from "@lichtblick/suite-base/players/types";
 
 /**
  * Create a deep equal memoized identify function. Used for stabilizing the subscription payloads we
@@ -24,11 +25,15 @@ export function makeSubscriptionMemoizer(): (val: SubscribePayload) => Subscribe
 /**
  * Merge two SubscribePayloads, using either all of the fields or the union of
  * the specific fields requested.
+ *
+ * Sampling note:
+ * - We keep sampling only when both payloads request the same sampling mode.
+ * - Authorization is OR'ed so one trusted subscriber can authorize sampling for the merged output.
  */
 function mergeSubscription(
-  a: Immutable<SubscribePayload>,
-  b: Immutable<SubscribePayload>,
-): Immutable<SubscribePayload> {
+  a: Immutable<InternalSubscribePayload>,
+  b: Immutable<InternalSubscribePayload>,
+): Immutable<InternalSubscribePayload> {
   const isAllFields = a.fields == undefined || b.fields == undefined;
   const fields = R.pipe(
     R.chain((payload: Immutable<SubscribePayload>): readonly string[] => payload.fields ?? []),
@@ -37,9 +42,19 @@ function mergeSubscription(
     R.uniq,
   )([a, b]);
 
+  const sameSamplingMode =
+    a.samplingRequest?.mode != undefined && a.samplingRequest.mode === b.samplingRequest?.mode;
+  const samplingRequest = sameSamplingMode ? a.samplingRequest : undefined;
+  const samplingAuthorized =
+    sameSamplingMode && (a.samplingAuthorized === true || b.samplingAuthorized === true)
+      ? true
+      : undefined;
+
   return {
     ...a,
     fields: fields.length > 0 && !isAllFields ? fields : undefined,
+    samplingRequest,
+    samplingAuthorized,
   };
 }
 
@@ -48,28 +63,31 @@ function mergeSubscription(
  * the fields they need. This ignores `preloadType`.
  */
 function denormalizeSubscriptions(
-  subscriptions: Immutable<SubscribePayload[]>,
-): Immutable<SubscribePayload[]> {
+  subscriptions: Immutable<InternalSubscribePayload[]>,
+): Immutable<InternalSubscribePayload[]> {
   return R.pipe(
-    R.groupBy((v: Immutable<SubscribePayload>) => v.topic),
+    R.groupBy((v: Immutable<InternalSubscribePayload>) => v.topic),
     R.values,
     // Filter out any set of payloads that contains _only_ empty `fields`
-    R.filter((payloads: Immutable<SubscribePayload[]> | undefined) => {
+    R.filter((payloads: Immutable<InternalSubscribePayload[]> | undefined) => {
       // Handle this later
       if (payloads == undefined) {
         return true;
       }
 
-      return !payloads.every((v: Immutable<SubscribePayload>) => v.fields?.length === 0);
+      return !payloads.every((v: Immutable<InternalSubscribePayload>) => v.fields?.length === 0);
     }),
     // Now reduce them down to a single payload for each topic
     R.chain(
-      (payloads: Immutable<SubscribePayload[]> | undefined): Immutable<SubscribePayload>[] => {
+      (
+        payloads: Immutable<InternalSubscribePayload[]> | undefined,
+      ): Immutable<InternalSubscribePayload>[] => {
         const first = payloads?.[0];
         if (payloads == undefined || first == undefined || payloads.length === 0) {
           return [];
         }
-        return [R.reduce(mergeSubscription, first, payloads)];
+        const merged = R.reduce(mergeSubscription, first, payloads.slice(1));
+        return [applySamplingGuardToSubscription(merged)];
       },
     ),
   )(subscriptions);
@@ -83,10 +101,10 @@ function denormalizeSubscriptions(
  * requested slices.
  */
 export function mergeSubscriptions(
-  subscriptions: Immutable<SubscribePayload[]>,
-): Immutable<SubscribePayload[]> {
+  subscriptions: Immutable<InternalSubscribePayload[]>,
+): Immutable<InternalSubscribePayload[]> {
   return R.pipe(
-    R.chain((v: Immutable<SubscribePayload>): Immutable<SubscribePayload>[] => {
+    R.chain((v: Immutable<InternalSubscribePayload>): Immutable<InternalSubscribePayload>[] => {
       const { preloadType } = v;
       if (preloadType !== "full") {
         return [v];
@@ -96,7 +114,7 @@ export function mergeSubscriptions(
       // to those fields, too
       return [v, { ...v, preloadType: "partial" }];
     }),
-    R.partition((v: Immutable<SubscribePayload>) => v.preloadType === "full"),
+    R.partition((v: Immutable<InternalSubscribePayload>) => v.preloadType === "full"),
     ([full, partial]) => [...denormalizeSubscriptions(full), ...denormalizeSubscriptions(partial)],
   )(subscriptions);
 }

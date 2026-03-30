@@ -32,7 +32,7 @@ import {
   PropsRawMessages,
   RawMessagesPanelConfig,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
-import { useFontSizeSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useFontSizeSettings";
+import { useRawMessagesPanelSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useRawMessagesPanelSettings";
 import {
   useRenderDiffLabel,
   useValueRenderer,
@@ -382,7 +382,10 @@ function RawMessages(props: PropsRawMessages) {
   ]);
 
   // Setup font size settings in panel settings tree
-  useFontSizeSettings(fontSize, saveConfig);
+  useRawMessagesPanelSettings({
+    fontSize,
+    saveConfig,
+  });
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">

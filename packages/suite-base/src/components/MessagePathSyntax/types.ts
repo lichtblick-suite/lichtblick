@@ -9,7 +9,25 @@ import {
   MessagePathStructureItem,
   MessagePathStructureItemMessage,
 } from "@lichtblick/message-path/src/types";
-import { Topic } from "@lichtblick/suite-base/players/types";
+import { MessageEvent, SubscribePayload, Topic } from "@lichtblick/suite-base/players/types";
+
+import { MessageAndData } from "./useCachedGetMessagePathDataItems";
+
+export type Options = {
+  historySize?: number;
+  samplingRequest?: SubscribePayload["samplingRequest"];
+};
+
+export type ReducedValue = {
+  // Matched message (events) oldest message first
+  matches: MessageAndData[];
+
+  // The latest set of message events recevied to addMessages
+  messageEvents: readonly Readonly<MessageEvent>[];
+
+  // The path used to match these messages.
+  path: string;
+};
 
 export type MessagePathsForStructureArgs = {
   validTypes?: readonly string[];
