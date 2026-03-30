@@ -26,11 +26,11 @@ describe("isLayoutEqual", () => {
 
     it("should return true for layouts with identical content", () => {
       // Given
-      const layoutA = LayoutBuilder.data();
-      const layoutB = layoutA;
+      const layoutBaseline = LayoutBuilder.data();
+      const layoutCurrent = layoutBaseline;
 
       // When
-      const result = isLayoutEqual(layoutA, layoutB);
+      const result = isLayoutEqual(layoutBaseline, layoutCurrent);
 
       // Then
       expect(result).toBe(true);
@@ -41,121 +41,125 @@ describe("isLayoutEqual", () => {
     it("should return false when panel configuration changes", () => {
       // Given
       const panelId = BasicBuilder.string();
-      const layoutA = LayoutBuilder.data({
+      const layoutBaseline = LayoutBuilder.data({
         configById: {
           [panelId]: { id: "panel1", type: "3DPanel" },
         },
       });
-      const layoutB = LayoutBuilder.data({
+      const layoutCurrent = LayoutBuilder.data({
         configById: {
           [panelId]: { id: "panel1", type: "MapPanel" },
         },
       });
 
       // When
-      const result = isLayoutEqual(layoutA, layoutB);
+      const result = isLayoutEqual(layoutBaseline, layoutCurrent);
 
       // Then
       expect(result).toBe(false);
     });
 
-    it("should return false when a config key present in a is absent in b", () => {
+    it("should return false when a config key present in baseline is absent in current layout", () => {
       // Given
       const panelId = BasicBuilder.string();
-      const layoutA = LayoutBuilder.data({
+      const layoutBaseline = LayoutBuilder.data({
         configById: {
-          [panelId]: { topic: "/markers" },
+          [panelId]: { topic: BasicBuilder.string() },
         },
       });
-      const layoutB = LayoutBuilder.data({
+      const layoutCurrent = LayoutBuilder.data({
         configById: {
           [panelId]: {},
         },
       });
 
       // When
-      const result = isLayoutEqual(layoutA, layoutB);
+      const result = isLayoutEqual(layoutBaseline, layoutCurrent);
 
       // Then
       expect(result).toBe(false);
     });
 
-    it("should return false when a top-level field differs", () => {
+    it("should return false when baseline top-level field differs", () => {
+      const speedA = BasicBuilder.number();
+      const speedB = speedA + BasicBuilder.number();
       // Given
-      const layoutA = LayoutBuilder.data({ globalVariables: { speed: 10 } });
-      const layoutB = LayoutBuilder.data({ globalVariables: { speed: 99 } });
+      const layoutBaseline = LayoutBuilder.data({ globalVariables: { speed: speedA } });
+      const layoutCurrent = LayoutBuilder.data({ globalVariables: { speed: speedB } });
 
       // When
-      const result = isLayoutEqual(layoutA, layoutB);
+      const result = isLayoutEqual(layoutBaseline, layoutCurrent);
 
       // Then
       expect(result).toBe(false);
     });
   });
 
-  describe("when b has additional entries not present in a (additive tolerance)", () => {
-    it("should return true when b has a new panel ID not present in a", () => {
+  describe("when current layout has additional entries not present in baseline (additive tolerance)", () => {
+    const topicA = BasicBuilder.string();
+    const topicB = BasicBuilder.string();
+    it("should return true when current layout has a new panel ID not present in baseline", () => {
       // Given
       const panelId = BasicBuilder.string();
       const newPanelId = BasicBuilder.string();
-      const base = LayoutBuilder.data({ configById: { [panelId]: { topic: "/markers" } } });
-      const layoutA = base;
-      const layoutB = {
+      const base = LayoutBuilder.data({ configById: { [panelId]: { topic: topicA } } });
+      const layoutBaseline = base;
+      const layoutCurrent = {
         ...base,
-        configById: { [panelId]: { topic: "/markers" }, [newPanelId]: { topic: "/new" } },
+        configById: { [panelId]: { topic: topicA }, [newPanelId]: { topic: topicB } },
       };
 
       // When
-      const result = isLayoutEqual(layoutA, layoutB);
+      const result = isLayoutEqual(layoutBaseline, layoutCurrent);
 
       // Then
       expect(result).toBe(true);
     });
 
-    it("should return true when b's panel config has a new key not present in a", () => {
+    it("should return true when current layout's panel config has a new key not present in baseline", () => {
       // Given
       const panelId = BasicBuilder.string();
-      const base = LayoutBuilder.data({ configById: { [panelId]: { topic: "/markers" } } });
-      const layoutA = base;
-      const layoutB = {
+      const base = LayoutBuilder.data({ configById: { [panelId]: { topic: topicA } } });
+      const layoutBaseline = base;
+      const layoutCurrent = {
         ...base,
-        configById: { [panelId]: { topic: "/markers", newKey: "defaultValue" } },
+        configById: { [panelId]: { topic: topicA, newKey: BasicBuilder.string() } },
       };
 
       // When
-      const result = isLayoutEqual(layoutA, layoutB);
+      const result = isLayoutEqual(layoutBaseline, layoutCurrent);
 
       // Then
       expect(result).toBe(true);
     });
   });
 
-  describe("when second layout has additional undefined fields", () => {
-    it("should return true when layout B has extra undefined fields", () => {
+  describe("when current layout has additional undefined fields", () => {
+    it("should return true when current layout has extra undefined fields", () => {
       // Given
-      const layoutA = LayoutBuilder.data();
-      const layoutB = {
-        ...layoutA,
+      const layoutBaseline = LayoutBuilder.data();
+      const layoutCurrent = {
+        ...layoutBaseline,
         extraField: undefined,
       } as LayoutData & { extraField: undefined };
 
       // When
-      const result = isLayoutEqual(layoutA, layoutB);
+      const result = isLayoutEqual(layoutBaseline, layoutCurrent);
 
       // Then
       expect(result).toBe(true);
     });
 
-    it("should return false when layout B has extra defined fields", () => {
+    it("should return false when current layout has extra defined fields", () => {
       // Given
-      const layoutA = LayoutBuilder.data();
-      const layoutB = {
-        ...layoutA,
+      const layoutBaseline = LayoutBuilder.data();
+      const layoutCurrent = {
+        ...layoutBaseline,
         extraField: BasicBuilder.string(),
       } as LayoutData & { extraField: string };
 
       // When
-      const result = isLayoutEqual(layoutA, layoutB);
+      const result = isLayoutEqual(layoutBaseline, layoutCurrent);
 
       // Then
       expect(result).toBe(false);

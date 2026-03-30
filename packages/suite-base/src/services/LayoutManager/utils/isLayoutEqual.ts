@@ -28,28 +28,28 @@ import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/
  * Existing keys that are present in a and have a different value in b (including removal,
  * i.e., the key is absent in b) are always treated as real differences.
  */
-export function isLayoutEqual(a: LayoutData, b: LayoutData): boolean {
-  const { configById: configByIdA, ...restA } = a;
-  const { configById: configByIdB, ...restB } = b;
+export function isLayoutEqual(baseline: LayoutData, current: LayoutData): boolean {
+  const { configById: configByIdBaseline, ...restBaseline } = baseline;
+  const { configById: configByIdCurrent, ...restCurrent } = current;
 
   // All top-level fields other than configById must be deeply equal.
-  // Strip keys whose value is undefined in b so extra undefined entries don't
+  // Strip keys whose value is undefined in current so extra undefined entries don't
   // register as differences (preserving the original behaviour).
-  const strippedRestB = _.omitBy(restB, _.isUndefined);
-  if (!_.isEqual(_.omitBy(restA, _.isUndefined), strippedRestB)) {
+  const strippedRestCurrent = _.omitBy(restCurrent, _.isUndefined);
+  if (!_.isEqual(_.omitBy(restBaseline, _.isUndefined), strippedRestCurrent)) {
     return false;
   }
 
   // For configById, only check panel IDs that existed in the baseline (a).
   // New panel entries added by panel initialization are not considered user edits.
-  for (const panelId of Object.keys(configByIdA)) {
-    const panelConfigA = configByIdA[panelId] ?? {};
-    const panelConfigB = configByIdB[panelId] ?? {};
+  for (const panelId of Object.keys(configByIdBaseline)) {
+    const panelConfigBaseline = configByIdBaseline[panelId] ?? {};
+    const panelConfigCurrent = configByIdCurrent[panelId] ?? {};
 
     // For each key in the baseline panel config, check it still has the same value.
-    // New keys added to b's panel config are ignored (panel default initialization).
-    for (const configKey of Object.keys(panelConfigA)) {
-      if (!_.isEqual(panelConfigA[configKey], panelConfigB[configKey])) {
+    // New keys added to current's panel config are ignored (panel default initialization).
+    for (const configKey of Object.keys(panelConfigBaseline)) {
+      if (!_.isEqual(panelConfigBaseline[configKey], panelConfigCurrent[configKey])) {
         return false;
       }
     }
