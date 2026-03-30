@@ -235,7 +235,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       // Config changes to yBounds always takes precedence over user interaction changes like pan/zoom
       this.updateAction.yBounds = this.configBounds.y;
     }
-
+    const newSeriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
     const newCurrentValuesByConfigIndex: unknown[] = [];
     this.series = filterMap(config.paths, (path, idx): Immutable<SeriesItem> | undefined => {
       if (isReferenceLinePlotPathType(path)) {
@@ -273,10 +273,9 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       const color = getLineColor(path.color, idx);
 
       if (pathToSubscribePayload(filledParsed, "full") != undefined) {
-        const keys =
-          this.seriesKeysByTopic.get(filledParsed.topicName) ?? new Set<SeriesConfigKey>();
+        const keys = newSeriesKeysByTopic.get(filledParsed.topicName) ?? new Set<SeriesConfigKey>();
         keys.add(key);
-        this.seriesKeysByTopic.set(filledParsed.topicName, keys);
+        newSeriesKeysByTopic.set(filledParsed.topicName, keys);
       }
 
       return {
@@ -295,9 +294,11 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     // If the builder uses a separate x-axis topic (e.g. custom x-axis), subscribe to it too.
     const xTopic = this.datasetsBuilder.getXTopic?.();
-    if (xTopic && !this.seriesKeysByTopic.has(xTopic)) {
-      this.seriesKeysByTopic.set(xTopic, new Set<SeriesConfigKey>());
+    if (xTopic && !newSeriesKeysByTopic.has(xTopic)) {
+      newSeriesKeysByTopic.set(xTopic, new Set<SeriesConfigKey>());
     }
+
+    this.seriesKeysByTopic = newSeriesKeysByTopic;
 
     this.currentValuesByConfigIndex = newCurrentValuesByConfigIndex;
     this.emit("currentValuesChanged", this.currentValuesByConfigIndex);

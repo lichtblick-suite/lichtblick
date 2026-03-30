@@ -217,20 +217,9 @@ describe("PlotCoordinator", () => {
     it("groups multiple series with the same topic into a single subscription", () => {
       // Given
       const topic = "/foo";
-      plotCoordinator["series"] = [
-        {
-          parsed: { topicName: topic, messagePath: [] },
-          key: "0:receiveTime:/foo.x" as SeriesConfigKey,
-          configIndex: 0,
-          timestampMethod: "receiveTime",
-        },
-        {
-          parsed: { topicName: topic, messagePath: [] },
-          key: "1:receiveTime:/foo.y" as SeriesConfigKey,
-          configIndex: 1,
-          timestampMethod: "receiveTime",
-        },
-      ] as unknown as SeriesItem[];
+      plotCoordinator["seriesKeysByTopic"] = new Map([
+        [topic, new Set(["0:receiveTime:/foo.x", "1:receiveTime:/foo.y"] as SeriesConfigKey[])],
+      ]);
       const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
 
       // When
@@ -245,27 +234,17 @@ describe("PlotCoordinator", () => {
       // Given — first call subscribes /foo
       const cancelFoo = jest.fn();
       mockSubscribeMessageRange.mockReturnValue(cancelFoo);
-      plotCoordinator["series"] = [
-        {
-          parsed: { topicName: "/foo", messagePath: [] },
-          key: "0:receiveTime:/foo.val" as SeriesConfigKey,
-          configIndex: 0,
-          timestampMethod: "receiveTime",
-        },
-      ] as unknown as SeriesItem[];
+      plotCoordinator["seriesKeysByTopic"] = new Map([
+        ["/foo", new Set(["0:receiveTime:/foo.val"] as SeriesConfigKey[])],
+      ]);
       const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
       plotCoordinator.handlePlayerState(state);
 
       // When — second call with /bar only
       mockSubscribeMessageRange.mockClear();
-      plotCoordinator["series"] = [
-        {
-          parsed: { topicName: "/bar", messagePath: [] },
-          key: "0:receiveTime:/bar.val" as SeriesConfigKey,
-          configIndex: 0,
-          timestampMethod: "receiveTime",
-        },
-      ] as unknown as SeriesItem[];
+      plotCoordinator["seriesKeysByTopic"] = new Map([
+        ["/bar", new Set(["0:receiveTime:/bar.val"] as SeriesConfigKey[])],
+      ]);
       plotCoordinator.handlePlayerState(state);
 
       // Then
@@ -277,14 +256,9 @@ describe("PlotCoordinator", () => {
 
     it("does not re-subscribe when the same topic and keys are unchanged", () => {
       // Given
-      plotCoordinator["series"] = [
-        {
-          parsed: { topicName: "/foo", messagePath: [] },
-          key: "0:receiveTime:/foo.val" as SeriesConfigKey,
-          configIndex: 0,
-          timestampMethod: "receiveTime",
-        },
-      ] as unknown as SeriesItem[];
+      plotCoordinator["seriesKeysByTopic"] = new Map([
+        ["/foo", new Set(["0:receiveTime:/foo.val"] as SeriesConfigKey[])],
+      ]);
       const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
       plotCoordinator.handlePlayerState(state);
       mockSubscribeMessageRange.mockClear();
@@ -391,6 +365,9 @@ describe("PlotCoordinator", () => {
   });
 
   describe("handleConfig", () => {
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
     it("should return immediately if plotCoordinator is destroyed", () => {
       const config = PlotBuilder.config({
         xAxisVal: "timestamp",
