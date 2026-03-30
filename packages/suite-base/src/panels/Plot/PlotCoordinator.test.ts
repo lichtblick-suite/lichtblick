@@ -483,6 +483,143 @@ describe("PlotCoordinator", () => {
       expect(queueDispatchRender).toHaveBeenCalled();
       expect(queueDispatchDownsample).toHaveBeenCalled();
     });
+
+    describe("seriesKeysByTopic", () => {
+      beforeEach(() => {
+        (pathToSubscribePayload as jest.Mock).mockReturnValue({
+          topic: "/foo",
+          preloadType: "full",
+        });
+        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
+        (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
+        (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
+      });
+
+      it("populates seriesKeysByTopic from paths with a valid subscribe payload", () => {
+        // Given
+        const path = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [path] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        const map = plotCoordinator["seriesKeysByTopic"];
+        expect(map.has("/foo")).toBe(true);
+        expect(map.get("/foo")!.size).toBe(1);
+      });
+
+      it("excludes series whose pathToSubscribePayload returns undefined", () => {
+        // Given
+        (pathToSubscribePayload as jest.Mock).mockReturnValue(undefined);
+        const path = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [path] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        expect(plotCoordinator["seriesKeysByTopic"].size).toBe(0);
+      });
+
+      it("groups multiple series with the same topic into one entry", () => {
+        // Given
+        const pathA = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const pathB = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [pathA, pathB] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        const map = plotCoordinator["seriesKeysByTopic"];
+        expect(map.size).toBe(1);
+        expect(map.get("/foo")!.size).toBe(2);
+      });
+
+      it("replaces the map on each call, removing topics no longer in config", () => {
+        // Given
+        const fooPath = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const barPath = PlotBuilder.path({
+          value: "/bar",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
+
+        // When
+        plotCoordinator.handleConfig(PlotBuilder.config({ paths: [fooPath] }), "light", {});
+
+        // Then
+        expect(plotCoordinator["seriesKeysByTopic"].has("/foo")).toBe(true);
+
+        // When
+        plotCoordinator.handleConfig(PlotBuilder.config({ paths: [barPath] }), "light", {});
+
+        // Then
+        const map = plotCoordinator["seriesKeysByTopic"];
+        expect(map.has("/foo")).toBe(false);
+        expect(map.has("/bar")).toBe(true);
+      });
+
+      it("includes the xTopic from getXTopic when not already present", () => {
+        // Given
+        datasetsBuilder.getXTopic = jest.fn().mockReturnValue("/xtopic");
+        const path = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [path] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        expect(plotCoordinator["seriesKeysByTopic"].has("/xtopic")).toBe(true);
+        // X-topic is added with an empty set of keys since it is not directly associated with any series
+        expect(plotCoordinator["seriesKeysByTopic"].get("/xtopic")!.size).toBe(0);
+      });
+
+      it("does not add xTopic if it is already covered by a series", () => {
+        // Given
+        datasetsBuilder.getXTopic = jest.fn().mockReturnValue("/foo");
+        const path = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [path] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        const keys = plotCoordinator["seriesKeysByTopic"].get("/foo")!;
+        // If this key was not skipped, its size would be 0
+        expect(keys.size).toBe(1);
+      });
+    });
   });
 
   describe("setGlobalBounds", () => {
