@@ -8,9 +8,9 @@ import { parseMessagePath } from "@lichtblick/message-path";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { stringifyMessagePath } from "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
 import { InteractionEvent, Scale } from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
-import { MessageBlock } from "@lichtblick/suite-base/players/types";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
@@ -19,7 +19,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import { PlotCoordinator } from "./PlotCoordinator";
-import { IDatasetsBuilder, SeriesItem } from "./builders/IDatasetsBuilder";
+import { IDatasetsBuilder, SeriesConfigKey, SeriesItem } from "./builders/IDatasetsBuilder";
+import { pathToSubscribePayload } from "./utils/subscription";
 
 jest.mock("./OffscreenCanvasRenderer");
 jest.mock("./builders/IDatasetsBuilder");
@@ -60,10 +61,20 @@ jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath"
   stringifyMessagePath: jest.fn(),
 }));
 
+jest.mock("./utils/subscription", () => ({
+  pathToSubscribePayload: jest.fn().mockReturnValue(undefined),
+}));
+
+const mockSubscribeMessageRange = jest.fn();
+jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", () => ({
+  useSubscribeMessageRange: () => mockSubscribeMessageRange,
+}));
+
 describe("PlotCoordinator", () => {
   let renderer: jest.Mocked<OffscreenCanvasRenderer>;
   let datasetsBuilder: jest.Mocked<IDatasetsBuilder>;
   let plotCoordinator: PlotCoordinator;
+  let subscribeMessageRange: UseSubscribeMessageRange;
 
   beforeEach(() => {
     const canvas = new OffscreenCanvas(500, 500);
@@ -77,10 +88,10 @@ describe("PlotCoordinator", () => {
       pathsWithMismatchedDataLengths: [],
     });
     datasetsBuilder.setSeries = jest.fn();
-    datasetsBuilder.handleBlocks = jest.fn().mockResolvedValue(undefined);
     datasetsBuilder.getCsvData = jest.fn().mockResolvedValue([]);
 
-    plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder);
+    subscribeMessageRange = mockSubscribeMessageRange;
+    plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange);
   });
 
   afterEach(() => {
@@ -118,7 +129,7 @@ describe("PlotCoordinator", () => {
 
     it("should return immediately if plotCoordinator is destroyed", () => {
       const state = PlayerBuilder.playerState();
-      jest.spyOn(plotCoordinator as any, "isDestroyed").mockReturnValue(true);
+      plotCoordinator.destroy();
       const handlePlayerStateSpy = jest.spyOn(datasetsBuilder, "handlePlayerState");
       const updateSpy = jest.spyOn(renderer, "update");
 
@@ -196,6 +207,70 @@ describe("PlotCoordinator", () => {
     });
   });
 
+  describe("topic range subscriptions", () => {
+    beforeEach(() => {
+      (pathToSubscribePayload as jest.Mock).mockReturnValue({ topic: "/foo", preloadType: "full" });
+      datasetsBuilder.handleMessageRange = jest.fn();
+      mockSubscribeMessageRange.mockReturnValue(jest.fn());
+    });
+
+    it("groups multiple series with the same topic into a single subscription", () => {
+      // Given
+      const topic = "/foo";
+      plotCoordinator["seriesKeysByTopic"] = new Map([
+        [topic, new Set(["0:receiveTime:/foo.x", "1:receiveTime:/foo.y"] as SeriesConfigKey[])],
+      ]);
+      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+
+      // When
+      plotCoordinator.handlePlayerState(state);
+
+      // Then
+      expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(expect.objectContaining({ topic }));
+    });
+
+    it("cancels subscription for a topic removed from series", () => {
+      // Given — first call subscribes /foo
+      const cancelFoo = jest.fn();
+      mockSubscribeMessageRange.mockReturnValue(cancelFoo);
+      plotCoordinator["seriesKeysByTopic"] = new Map([
+        ["/foo", new Set(["0:receiveTime:/foo.val"] as SeriesConfigKey[])],
+      ]);
+      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      plotCoordinator.handlePlayerState(state);
+
+      // When — second call with /bar only
+      mockSubscribeMessageRange.mockClear();
+      plotCoordinator["seriesKeysByTopic"] = new Map([
+        ["/bar", new Set(["0:receiveTime:/bar.val"] as SeriesConfigKey[])],
+      ]);
+      plotCoordinator.handlePlayerState(state);
+
+      // Then
+      expect(cancelFoo).toHaveBeenCalled();
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
+        expect.objectContaining({ topic: "/bar" }),
+      );
+    });
+
+    it("does not re-subscribe when the same topic and keys are unchanged", () => {
+      // Given
+      plotCoordinator["seriesKeysByTopic"] = new Map([
+        ["/foo", new Set(["0:receiveTime:/foo.val"] as SeriesConfigKey[])],
+      ]);
+      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      plotCoordinator.handlePlayerState(state);
+      mockSubscribeMessageRange.mockClear();
+
+      // When — same series, same state
+      plotCoordinator.handlePlayerState(state);
+
+      // Then — no new subscription opened
+      expect(mockSubscribeMessageRange).not.toHaveBeenCalled();
+    });
+  });
+
   describe("destroy", () => {
     it("should set 'destroyed' to true when calling destroy", () => {
       plotCoordinator.destroy();
@@ -205,6 +280,15 @@ describe("PlotCoordinator", () => {
   });
 
   describe("dispatchRender", () => {
+    it("should return immediately if plotCoordinator is destroyed", async () => {
+      plotCoordinator.destroy();
+
+      await plotCoordinator["dispatchRender"]();
+
+      const updateSpy = jest.spyOn(renderer, "update");
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
     it("should call 'update' on the renderer when dispatching render", async () => {
       renderer.update.mockResolvedValue({ x: { min: 0, max: 10 }, y: { min: 0, max: 10 } });
 
@@ -280,20 +364,22 @@ describe("PlotCoordinator", () => {
     });
   });
 
-  describe("dispatchBlocks", () => {
-    it("should process and store message blocks correctly", async () => {
-      datasetsBuilder.handleBlocks = jest.fn().mockResolvedValue(undefined);
-      const blocks = [{}] as MessageBlock[];
-      const startTime = RosTimeBuilder.time();
-
-      await plotCoordinator["dispatchBlocks"](startTime, blocks);
-
-      const handleBlocksSpyOn = jest.spyOn(datasetsBuilder, "handleBlocks");
-      expect(handleBlocksSpyOn).toHaveBeenCalled();
-    });
-  });
-
   describe("handleConfig", () => {
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+    it("should return immediately if plotCoordinator is destroyed", () => {
+      const config = PlotBuilder.config({
+        xAxisVal: "timestamp",
+        followingViewWidth: 10,
+        paths: [],
+      });
+
+      plotCoordinator.destroy();
+
+      plotCoordinator.handleConfig(config, "light", {});
+      expect(plotCoordinator["isTimeseriesPlot"]).toBe(false);
+    });
     it("should set isTimeseriesPlot to true when xAxisVal is 'timestamp'", () => {
       const config = PlotBuilder.config({
         xAxisVal: "timestamp",
@@ -396,6 +482,143 @@ describe("PlotCoordinator", () => {
 
       expect(queueDispatchRender).toHaveBeenCalled();
       expect(queueDispatchDownsample).toHaveBeenCalled();
+    });
+
+    describe("seriesKeysByTopic", () => {
+      beforeEach(() => {
+        (pathToSubscribePayload as jest.Mock).mockReturnValue({
+          topic: "/foo",
+          preloadType: "full",
+        });
+        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
+        (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
+        (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
+      });
+
+      it("populates seriesKeysByTopic from paths with a valid subscribe payload", () => {
+        // Given
+        const path = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [path] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        const map = plotCoordinator["seriesKeysByTopic"];
+        expect(map.has("/foo")).toBe(true);
+        expect(map.get("/foo")!.size).toBe(1);
+      });
+
+      it("excludes series whose pathToSubscribePayload returns undefined", () => {
+        // Given
+        (pathToSubscribePayload as jest.Mock).mockReturnValue(undefined);
+        const path = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [path] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        expect(plotCoordinator["seriesKeysByTopic"].size).toBe(0);
+      });
+
+      it("groups multiple series with the same topic into one entry", () => {
+        // Given
+        const pathA = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const pathB = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [pathA, pathB] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        const map = plotCoordinator["seriesKeysByTopic"];
+        expect(map.size).toBe(1);
+        expect(map.get("/foo")!.size).toBe(2);
+      });
+
+      it("replaces the map on each call, removing topics no longer in config", () => {
+        // Given
+        const fooPath = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const barPath = PlotBuilder.path({
+          value: "/bar",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
+
+        // When
+        plotCoordinator.handleConfig(PlotBuilder.config({ paths: [fooPath] }), "light", {});
+
+        // Then
+        expect(plotCoordinator["seriesKeysByTopic"].has("/foo")).toBe(true);
+
+        // When
+        plotCoordinator.handleConfig(PlotBuilder.config({ paths: [barPath] }), "light", {});
+
+        // Then
+        const map = plotCoordinator["seriesKeysByTopic"];
+        expect(map.has("/foo")).toBe(false);
+        expect(map.has("/bar")).toBe(true);
+      });
+
+      it("includes the xTopic from getXTopic when not already present", () => {
+        // Given
+        datasetsBuilder.getXTopic = jest.fn().mockReturnValue("/xtopic");
+        const path = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [path] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        expect(plotCoordinator["seriesKeysByTopic"].has("/xtopic")).toBe(true);
+        // X-topic is added with an empty set of keys since it is not directly associated with any series
+        expect(plotCoordinator["seriesKeysByTopic"].get("/xtopic")!.size).toBe(0);
+      });
+
+      it("does not add xTopic if it is already covered by a series", () => {
+        // Given
+        datasetsBuilder.getXTopic = jest.fn().mockReturnValue("/foo");
+        const path = PlotBuilder.path({
+          value: "/foo",
+          timestampMethod: "receiveTime",
+          enabled: true,
+        });
+        const config = PlotBuilder.config({ paths: [path] });
+
+        // When
+        plotCoordinator.handleConfig(config, "light", {});
+
+        // Then
+        const keys = plotCoordinator["seriesKeysByTopic"].get("/foo")!;
+        // If this key was not skipped, its size would be 0
+        expect(keys.size).toBe(1);
+      });
     });
   });
 

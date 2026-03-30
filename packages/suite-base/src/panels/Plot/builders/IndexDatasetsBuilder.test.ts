@@ -8,7 +8,6 @@
 import { unwrap } from "@lichtblick/den/monads";
 import { parseMessagePath } from "@lichtblick/message-path";
 import {
-  MessageBlock,
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
@@ -40,10 +39,7 @@ function buildSeriesItems(
   });
 }
 
-function buildPlayerState(
-  activeDataOverride?: Partial<PlayerStateActiveData>,
-  blocks?: readonly (MessageBlock | undefined)[],
-): PlayerState {
+function buildPlayerState(activeDataOverride?: Partial<PlayerStateActiveData>): PlayerState {
   return {
     activeData: {
       messages: [],
@@ -65,10 +61,6 @@ function buildPlayerState(
     playerId: "1",
     progress: {
       fullyLoadedFractionRanges: [],
-      messageCache: {
-        blocks: blocks ?? [],
-        startTime: { sec: 0, nsec: 0 },
-      },
     },
   };
 }

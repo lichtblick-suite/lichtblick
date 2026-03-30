@@ -16,11 +16,11 @@ import { Immutable, Time } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { stringifyMessagePath } from "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
 import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
+import { PlayerState } from "@lichtblick/suite-base/players/types";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
-import delay from "@lichtblick/suite-base/util/delay";
 import { getContrastColor, getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
@@ -40,12 +40,13 @@ import {
   UpdateAction,
 } from "./types";
 import { isReferenceLinePlotPathType, PlotConfig } from "./utils/config";
+import { pathToSubscribePayload } from "./utils/subscription";
 
 const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) => dataset ?? { data: [] };
 
 /**
  * PlotCoordinator interfaces commands and updates between the dataset builder and the chart
- * renderer.
+ * renderer. Uses subscribeMessageRange for full dataset history.
  */
 export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private renderer: OffscreenCanvasRenderer;
@@ -74,20 +75,38 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private queueDispatchRender = debouncePromise(this.dispatchRender.bind(this));
   private queueDispatchDownsample = debouncePromise(this.dispatchDownsample.bind(this));
   private queueDatasetsRender = debouncePromise(this.dispatchDatasetsRender.bind(this));
-  private queueBlocks = debouncePromise(this.dispatchBlocks.bind(this));
   private destroyed = false;
-  private latestBlocks?: Immutable<(MessageBlock | undefined)[]>;
 
-  public constructor(renderer: OffscreenCanvasRenderer, builder: IDatasetsBuilder) {
+  private readonly subscribeMessageRange: UseSubscribeMessageRange;
+  private readonly rangeSubscriptionCancels = new Map<
+    string,
+    { cancel: () => void; seriesKeys: ReadonlySet<SeriesConfigKey> }
+  >();
+  private startTime: Immutable<Time> | undefined;
+  private seriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
+
+  public constructor(
+    renderer: OffscreenCanvasRenderer,
+    builder: IDatasetsBuilder,
+    subscribeMessageRange: UseSubscribeMessageRange,
+  ) {
     super();
-
     this.renderer = renderer;
     this.datasetsBuilder = builder;
+    this.subscribeMessageRange = subscribeMessageRange;
   }
 
   /** Stop the coordinator from sending any future updates to the renderer. */
   public destroy(): void {
+    for (const { cancel } of this.rangeSubscriptionCancels.values()) {
+      cancel();
+    }
+    this.rangeSubscriptionCancels.clear();
     this.destroyed = true;
+  }
+
+  private isDestroyed(): boolean {
+    return this.destroyed;
   }
 
   public setShouldSync({ shouldSync }: { shouldSync: boolean }): void {
@@ -105,6 +124,9 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     }
 
     const { messages, lastSeekTime, currentTime, startTime } = activeData;
+    this.startTime = startTime;
+
+    this.subscribeTopicRanges(this.seriesKeysByTopic);
 
     if (this.isTimeseriesPlot) {
       const secondsSinceStart = toSec(subtractTime(currentTime, startTime));
@@ -140,14 +162,6 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     const handlePlayerStateResult = this.datasetsBuilder.handlePlayerState(state);
 
-    const blocks = state.progress.messageCache?.blocks;
-    if (blocks && this.datasetsBuilder.handleBlocks) {
-      this.latestBlocks = blocks;
-      this.queueBlocks(activeData.startTime, blocks);
-    }
-
-    // There's no result from the builder so we clear dataset range and trigger a render so
-    // we can fall back to other ranges
     if (!handlePlayerStateResult) {
       this.datasetRange = undefined;
       this.queueDispatchRender();
@@ -221,7 +235,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       // Config changes to yBounds always takes precedence over user interaction changes like pan/zoom
       this.updateAction.yBounds = this.configBounds.y;
     }
-
+    const newSeriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
     const newCurrentValuesByConfigIndex: unknown[] = [];
     this.series = filterMap(config.paths, (path, idx): Immutable<SeriesItem> | undefined => {
       if (isReferenceLinePlotPathType(path)) {
@@ -257,6 +271,13 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       }
 
       const color = getLineColor(path.color, idx);
+
+      if (pathToSubscribePayload(filledParsed, "full") != undefined) {
+        const keys = newSeriesKeysByTopic.get(filledParsed.topicName) ?? new Set<SeriesConfigKey>();
+        keys.add(key);
+        newSeriesKeysByTopic.set(filledParsed.topicName, keys);
+      }
+
       return {
         key,
         configIndex: idx,
@@ -270,6 +291,14 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
         enabled: path.enabled,
       };
     });
+
+    // If the builder uses a separate x-axis topic (e.g. custom x-axis), subscribe to it too.
+    const xTopic = this.datasetsBuilder.getXTopic?.();
+    if (xTopic && !newSeriesKeysByTopic.has(xTopic)) {
+      newSeriesKeysByTopic.set(xTopic, new Set<SeriesConfigKey>());
+    }
+
+    this.seriesKeysByTopic = newSeriesKeysByTopic;
 
     this.currentValuesByConfigIndex = newCurrentValuesByConfigIndex;
     this.emit("currentValuesChanged", this.currentValuesByConfigIndex);
@@ -344,9 +373,6 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     return await this.datasetsBuilder.getCsvData();
   }
 
-  /**
-   * Return true if the plot viewport has deviated from the config or dataset bounds and can reset
-   */
   private canReset(): boolean {
     if (this.interactionBounds) {
       return true;
@@ -360,10 +386,6 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     return false;
   }
 
-  /**
-   * Get the xBounds if we cleared the interaction and global bounds (i.e) reset
-   * back to the config or dataset bounds
-   */
   private getXResetBounds(): Partial<Bounds1D> {
     const currentSecondsIfFollowMode =
       this.isTimeseriesPlot && this.followRange != undefined && this.currentSeconds != undefined
@@ -381,16 +403,11 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   }
 
   private getXBounds(): Partial<Bounds1D> {
-    // Interaction, synced global bounds override the config and data source bounds in precedence
     const resetBounds = this.getXResetBounds();
     return {
       min: this.interactionBounds?.x.min ?? this.globalBounds?.min ?? resetBounds.min,
       max: this.interactionBounds?.x.max ?? this.globalBounds?.max ?? resetBounds.max,
     };
-  }
-
-  private isDestroyed(): boolean {
-    return this.destroyed;
   }
 
   private async dispatchRender(): Promise<void> {
@@ -409,9 +426,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     const haveInteractionEvents = (this.updateAction.interactionEvents?.length ?? 0) > 0;
 
     const action = this.updateAction;
-    this.updateAction = {
-      type: "update",
-    };
+    this.updateAction = { type: "update" };
 
     const bounds = await this.renderer.update(action);
     if (this.isDestroyed()) {
@@ -469,33 +484,68 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     this.emit("xScaleChanged", this.latestXScale);
   }
 
-  private async dispatchBlocks(
-    startTime: Immutable<Time>,
-    blocks: Immutable<(MessageBlock | undefined)[]>,
-  ): Promise<void> {
-    if (!this.datasetsBuilder.handleBlocks) {
+  private cancelTopicSubscription(topic: string): void {
+    this.rangeSubscriptionCancels.get(topic)?.cancel();
+    this.rangeSubscriptionCancels.delete(topic);
+  }
+
+  private seriesKeysChanged(
+    previousKeys: ReadonlySet<SeriesConfigKey>,
+    currentKeys: ReadonlySet<SeriesConfigKey>,
+  ): boolean {
+    if (previousKeys.size !== currentKeys.size) {
+      return true;
+    }
+    for (const key of currentKeys) {
+      if (!previousKeys.has(key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private subscribeTopicRanges(seriesKeysByTopic: Map<string, Set<SeriesConfigKey>>): void {
+    if (!this.datasetsBuilder.handleMessageRange) {
       return;
     }
+    const builder = this.datasetsBuilder;
 
-    await this.datasetsBuilder.handleBlocks(startTime, blocks, async () => {
-      this.queueDispatchDownsample();
-      // When blocks are fully loaded and a user splits the panel, we are able to process all of the
-      // blocks synchronously. However this creates a poor UX experience for large datasets by
-      // showing nothing on the plot for many seconds while the postMessage prepares a massive send.
-      // This send also hangs the main thread.
-      //
-      // Instead of doing this all synchronously and stalling main thread, we artificially break up
-      // block loading to periodically dispatch the loaded data and render it. This avoids stalling
-      // the main thread and provides visual feedabck to the user that data is loading on the plot.
-      //
-      // await Promise.resolve() does not work as it does not yield enough to the main thread to
-      // dispatch and render.
-      await delay(0);
+    // Cancel subscriptions for topics that are no longer needed
+    for (const topic of this.rangeSubscriptionCancels.keys()) {
+      if (!seriesKeysByTopic.has(topic)) {
+        this.cancelTopicSubscription(topic);
+      }
+    }
 
-      // Bail processing if the coordinator has been destroyed or if our input blocks have changed
-      // This lets us start processing new input blocks instead of continuing to work on stale
-      // blocks.
-      return this.isDestroyed() || this.latestBlocks !== blocks;
-    });
+    // Start subscriptions only for new or changed topics
+    for (const [topic, currentKeys] of seriesKeysByTopic) {
+      const existing = this.rangeSubscriptionCancels.get(topic)?.seriesKeys;
+      if (existing) {
+        if (!this.seriesKeysChanged(existing, currentKeys)) {
+          continue;
+        }
+        this.cancelTopicSubscription(topic);
+      }
+
+      const cancel = this.subscribeMessageRange({
+        topic,
+        onNewRangeIterator: async (batchIterator) => {
+          let isReset = true;
+          for await (const batch of batchIterator) {
+            if (this.isDestroyed()) {
+              return;
+            }
+            const startTime = this.startTime;
+            if (!startTime) {
+              continue;
+            }
+            builder.handleMessageRange!(batch, { isReset }, startTime);
+            isReset = false;
+            this.queueDispatchDownsample();
+          }
+        },
+      });
+      this.rangeSubscriptionCancels.set(topic, { cancel, seriesKeys: new Set(currentKeys) });
+    }
   }
 }
