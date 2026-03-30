@@ -83,6 +83,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     { cancel: () => void; seriesKeys: ReadonlySet<SeriesConfigKey> }
   >();
   private startTime: Immutable<Time> | undefined;
+  private seriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
 
   public constructor(
     renderer: OffscreenCanvasRenderer,
@@ -125,23 +126,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     const { messages, lastSeekTime, currentTime, startTime } = activeData;
     this.startTime = startTime;
 
-    const seriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
-    for (const s of this.series) {
-      if (pathToSubscribePayload(s.parsed, "full") == undefined) {
-        continue;
-      }
-      const keys = seriesKeysByTopic.get(s.parsed.topicName) ?? new Set<SeriesConfigKey>();
-      keys.add(s.key);
-      seriesKeysByTopic.set(s.parsed.topicName, keys);
-    }
-
-    // If the builder uses a separate x-axis topic (e.g. custom x-axis), subscribe to it too.
-    const xTopic = this.datasetsBuilder.getXTopic?.();
-    if (xTopic && !seriesKeysByTopic.has(xTopic)) {
-      seriesKeysByTopic.set(xTopic, new Set<SeriesConfigKey>());
-    }
-
-    this.subscribeTopicRanges(seriesKeysByTopic);
+    this.subscribeTopicRanges(this.seriesKeysByTopic);
 
     if (this.isTimeseriesPlot) {
       const secondsSinceStart = toSec(subtractTime(currentTime, startTime));
@@ -286,6 +271,14 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       }
 
       const color = getLineColor(path.color, idx);
+
+      if (pathToSubscribePayload(filledParsed, "full") != undefined) {
+        const keys =
+          this.seriesKeysByTopic.get(filledParsed.topicName) ?? new Set<SeriesConfigKey>();
+        keys.add(key);
+        this.seriesKeysByTopic.set(filledParsed.topicName, keys);
+      }
+
       return {
         key,
         configIndex: idx,
@@ -299,6 +292,12 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
         enabled: path.enabled,
       };
     });
+
+    // If the builder uses a separate x-axis topic (e.g. custom x-axis), subscribe to it too.
+    const xTopic = this.datasetsBuilder.getXTopic?.();
+    if (xTopic && !this.seriesKeysByTopic.has(xTopic)) {
+      this.seriesKeysByTopic.set(xTopic, new Set<SeriesConfigKey>());
+    }
 
     this.currentValuesByConfigIndex = newCurrentValuesByConfigIndex;
     this.emit("currentValuesChanged", this.currentValuesByConfigIndex);
@@ -506,9 +505,15 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     for (const [topic, currentKeys] of seriesKeysByTopic) {
       const existing = this.rangeSubscriptionCancels.get(topic);
       if (existing) {
-        const keysChanged =
-          existing.seriesKeys.size !== currentKeys.size ||
-          [...currentKeys].some((k) => !existing.seriesKeys.has(k));
+        let keysChanged = existing.seriesKeys.size !== currentKeys.size;
+        if (!keysChanged) {
+          for (const key of currentKeys) {
+            if (!existing.seriesKeys.has(key)) {
+              keysChanged = true;
+              break;
+            }
+          }
+        }
         if (!keysChanged) {
           continue;
         }
