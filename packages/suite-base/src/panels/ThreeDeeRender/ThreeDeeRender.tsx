@@ -203,7 +203,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   // Using a counter (vs. a boolean ref) makes the dependency trackable by React's effect system,
   // so the animationFrame() call only fires when genuinely needed rather than after every commit.
   const [renderToken, setRenderToken] = useState(0);
-  const requestRender = useCallback(() => { setRenderToken((t) => t + 1); }, []);
+  const requestRender = useCallback(() => {
+    setRenderToken((t) => t + 1);
+  }, []);
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
   // Refs for values that are set inside onRender to avoid redundant setState calls.
@@ -775,7 +777,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     renderer,
     renderer?.followFrameId,
     sharedPanelState,
-    requestRender
+    requestRender,
   ]);
 
   // Render a new frame whenever renderToken is incremented.
@@ -783,7 +785,6 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   // is explicitly requested, not after every React commit.
   useEffect(() => {
     renderer?.animationFrame();
-
   }, [renderer, renderToken]);
 
   // Invoke the done callback once the render is complete

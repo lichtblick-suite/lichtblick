@@ -612,9 +612,7 @@ export default function Panel<
           }
         }}
       >
-        <PanelContext.Provider
-          value={panelContextValue}
-        >
+        <PanelContext.Provider value={panelContextValue}>
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
           {fullscreen && <KeyListener global keyDownHandlers={fullScreenKeyHandlers} />}
           <Transition
