@@ -489,6 +489,21 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     this.rangeSubscriptionCancels.delete(topic);
   }
 
+  private seriesKeysChanged(
+    previousKeys: ReadonlySet<SeriesConfigKey>,
+    currentKeys: ReadonlySet<SeriesConfigKey>,
+  ): boolean {
+    if (previousKeys.size !== currentKeys.size) {
+      return true;
+    }
+    for (const key of currentKeys) {
+      if (!previousKeys.has(key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private subscribeTopicRanges(seriesKeysByTopic: Map<string, Set<SeriesConfigKey>>): void {
     if (!this.datasetsBuilder.handleMessageRange) {
       return;
@@ -504,18 +519,9 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     // Start subscriptions only for new or changed topics
     for (const [topic, currentKeys] of seriesKeysByTopic) {
-      const existing = this.rangeSubscriptionCancels.get(topic);
+      const existing = this.rangeSubscriptionCancels.get(topic)?.seriesKeys;
       if (existing) {
-        let keysChanged = existing.seriesKeys.size !== currentKeys.size;
-        if (!keysChanged) {
-          for (const key of currentKeys) {
-            if (!existing.seriesKeys.has(key)) {
-              keysChanged = true;
-              break;
-            }
-          }
-        }
-        if (!keysChanged) {
+        if (!this.seriesKeysChanged(existing, currentKeys)) {
           continue;
         }
         this.cancelTopicSubscription(topic);
