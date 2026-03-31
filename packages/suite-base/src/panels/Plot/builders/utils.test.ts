@@ -7,7 +7,8 @@
 
 import { unwrap } from "@lichtblick/den/monads";
 import { parseMessagePath } from "@lichtblick/message-path";
-import { Immutable, MessageEvent } from "@lichtblick/suite";
+import { Immutable } from "@lichtblick/suite";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { SeriesConfigKey, SeriesItem } from "./IDatasetsBuilder";
@@ -36,16 +37,6 @@ function makeSeriesItem({
   };
 }
 
-function makeMessageEvent(topic: string, receiveTimeSec = 0): MessageEvent {
-  return {
-    topic,
-    receiveTime: { sec: receiveTimeSec, nsec: 0 },
-    message: {},
-    schemaName: "",
-    sizeInBytes: 0,
-  };
-}
-
 describe("lastMatchingTopic", () => {
   const matchTopic = BasicBuilder.string();
   const otherTopic = BasicBuilder.string();
@@ -54,20 +45,23 @@ describe("lastMatchingTopic", () => {
   });
 
   it("returns undefined when no event matches the topic", () => {
-    const events = [makeMessageEvent(otherTopic), makeMessageEvent(otherTopic)];
+    const events = [
+      MessageEventBuilder.messageEvent({ topic: otherTopic }),
+      MessageEventBuilder.messageEvent({ topic: otherTopic }),
+    ];
     expect(lastMatchingTopic(events, matchTopic)).toBeUndefined();
   });
 
   it("returns the last matching event", () => {
-    const first = makeMessageEvent(matchTopic, 1);
-    const second = makeMessageEvent(matchTopic, 2);
-    const other = makeMessageEvent(otherTopic, 3);
+    const first = MessageEventBuilder.messageEvent({ topic: matchTopic, message: 1 });
+    const second = MessageEventBuilder.messageEvent({ topic: matchTopic, message: 2 });
+    const other = MessageEventBuilder.messageEvent({ topic: otherTopic, message: 3 });
     expect(lastMatchingTopic([first, second, other], matchTopic)).toBe(second);
   });
 
   it("ignores non-matching events that appear after the match", () => {
-    const match = makeMessageEvent(matchTopic, 1);
-    const after = makeMessageEvent(otherTopic, 2);
+    const match = MessageEventBuilder.messageEvent({ topic: matchTopic, message: 1 });
+    const after = MessageEventBuilder.messageEvent({ topic: otherTopic, message: 2 });
     expect(lastMatchingTopic([match, after], matchTopic)).toBe(match);
   });
 });
