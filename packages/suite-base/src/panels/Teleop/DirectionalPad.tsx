@@ -23,7 +23,7 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
 
   const { classes, cx } = useStyles();
 
-  const handleMouseDown = useCallback(
+  const handlePointerDown = useCallback(
     (action: DirectionalPadAction) => {
       setCurrentAction(action);
       onAction?.(action);
@@ -31,7 +31,7 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
     [onAction],
   );
 
-  const handleMouseUp = useCallback(() => {
+  const handlePointerUp = useCallback(() => {
     if (currentAction == undefined) {
       return;
     }
@@ -39,18 +39,21 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
     onAction?.();
   }, [onAction, currentAction]);
 
-  const makeMouseHandlers = (action: DirectionalPadAction) =>
+  const makePointerHandlers = (action: DirectionalPadAction) =>
     disabled
       ? undefined
       : {
-          onMouseDown: () => {
-            handleMouseDown(action);
+          onPointerDown: () => {
+            handlePointerDown(action);
           },
-          onMouseUp: () => {
-            handleMouseUp();
+          onPointerUp: () => {
+            handlePointerUp();
           },
-          onMouseLeave: () => {
-            handleMouseUp();
+          onPointerLeave: () => {
+            handlePointerUp();
+          },
+          onPointerCancel: () => {
+            handlePointerUp();
           },
         };
 
@@ -65,7 +68,7 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
       <svg className={classes.svg} viewBox="0 0 256 256">
         <g opacity={1}>
           {/* UP button */}
-          <g {...makeMouseHandlers(DirectionalPadAction.UP)} role="button">
+          <g {...makePointerHandlers(DirectionalPadAction.UP)} role="button">
             <path
               className={cx(classes.button, {
                 active: currentAction === DirectionalPadAction.UP,
@@ -77,7 +80,7 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
           </g>
 
           {/* DOWN button */}
-          <g {...makeMouseHandlers(DirectionalPadAction.DOWN)} role="button">
+          <g {...makePointerHandlers(DirectionalPadAction.DOWN)} role="button">
             <path
               className={cx(classes.button, {
                 active: currentAction === DirectionalPadAction.DOWN,
@@ -91,7 +94,7 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
 
         <g opacity={1}>
           {/* LEFT button */}
-          <g {...makeMouseHandlers(DirectionalPadAction.LEFT)} role="button">
+          <g {...makePointerHandlers(DirectionalPadAction.LEFT)} role="button">
             <path
               className={cx(classes.button, {
                 active: currentAction === DirectionalPadAction.LEFT,
@@ -103,7 +106,7 @@ function DirectionalPad(props: Readonly<DirectionalPadProps>): React.JSX.Element
           </g>
 
           {/* RIGHT button */}
-          <g {...makeMouseHandlers(DirectionalPadAction.RIGHT)} role="button">
+          <g {...makePointerHandlers(DirectionalPadAction.RIGHT)} role="button">
             <path
               className={cx(classes.button, {
                 active: currentAction === DirectionalPadAction.RIGHT,
