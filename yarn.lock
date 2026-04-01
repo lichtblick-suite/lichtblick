@@ -2231,12 +2231,12 @@ __metadata:
   linkType: hard
 
 "@foxglove/schemas@npm:^1.3.1":
-  version: 1.12.0
-  resolution: "@foxglove/schemas@npm:1.12.0"
+  version: 1.13.0
+  resolution: "@foxglove/schemas@npm:1.13.0"
   dependencies:
     "@foxglove/rosmsg-msgs-common": ^3.2.2
     tslib: ^2
-  checksum: 30ab3599c2473dc8dfa8fd160995f8306853f1851f5c54a619b9ac6f88b9f7b200eb8de6913585b1a2096a46aacf4e757f150a5c90f2347d847f1e497af80c57
+  checksum: 5f90f3331012203e95ecc08765359f514fa18b3981b1418c9aca51d907c7acd7d315ff3bfa34229a053ca12af442e20e390898f0ea153cfcbb07735efb06f9d0
   languageName: node
   linkType: hard
 
@@ -7946,11 +7946,11 @@ __metadata:
   linkType: hard
 
 "baseline-browser-mapping@npm:^2.10.12":
-  version: 2.10.12
-  resolution: "baseline-browser-mapping@npm:2.10.12"
+  version: 2.10.13
+  resolution: "baseline-browser-mapping@npm:2.10.13"
   bin:
     baseline-browser-mapping: dist/cli.cjs
-  checksum: 1004b87052c8c06578bc7057aa654fe445dd9c3ca1299fdc8665972899ec1c1717e6e2ab7b62218042d494ae4a7e052d58c224052c0aa58d39925943350d18c9
+  checksum: 9c99324a3c06ed2d54093e17c2683491db38f84b50df773aad1058d002d98f4b90ad98302929fdf0bcadb0cbd0f2acc7df0d1d226051b5aed4bf4de60d8e14cf
   languageName: node
   linkType: hard
 
@@ -8510,9 +8510,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001782":
-  version: 1.0.30001782
-  resolution: "caniuse-lite@npm:1.0.30001782"
-  checksum: ac73fb7b1e06b0f3798095d1843b9a480d580091286e813032883744ce1826dbf1bab3c67a5a1bfb97eab8839e264f834b200dcf25c5bf4dae0a6287b3d5328d
+  version: 1.0.30001784
+  resolution: "caniuse-lite@npm:1.0.30001784"
+  checksum: 7e1625572bf2e2aff3052bccbd93bd3548c0f9ca5d8387c2b5805c7648e3e50c96e8319e73341ac09f3089d00199bbd887453e5e1298497e46a0a13713fc9576
   languageName: node
   linkType: hard
 
@@ -10379,9 +10379,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.328":
-  version: 1.5.329
-  resolution: "electron-to-chromium@npm:1.5.329"
-  checksum: c14439e2a17027f5458791cfc87f9576171d134d642d10759fb58d7210b50bd978bc04f791f5ebcd5e514101b079a5292d27ecc800e00e9cbe499083f98dbb46
+  version: 1.5.330
+  resolution: "electron-to-chromium@npm:1.5.330"
+  checksum: 9f8692b01c43feb1927ac4231be336f000f1c7dc98a898f8a9b8b32542e6bcdb3b1d5b6d0774da833897babca8b945e29d281f4c7dd4c72ad2504b38b50c0108
   languageName: node
   linkType: hard
 
@@ -15942,12 +15942,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:3.1.2":
-  version: 3.1.2
-  resolution: "minimatch@npm:3.1.2"
+"minimatch@npm:3.1.5, minimatch@npm:^3.0.4, minimatch@npm:^3.0.5, minimatch@npm:^3.1.1, minimatch@npm:^3.1.2":
+  version: 3.1.5
+  resolution: "minimatch@npm:3.1.5"
   dependencies:
     brace-expansion: ^1.1.7
-  checksum: c154e566406683e7bcb746e000b84d74465b3a832c45d59912b9b55cd50dee66e5c4b1e5566dba26154040e51672f9aa450a9aef0c97cfc7336b78b7afb9540a
+  checksum: 47ef6f412c08be045a7291d11b1c40777925accf7252dc6d3caa39b1bfbb3a7ea390ba7aba464d762d783265c644143d2c8a204e6b5763145024d52ee65a1941
   languageName: node
   linkType: hard
 
@@ -15966,15 +15966,6 @@ __metadata:
   dependencies:
     brace-expansion: ^5.0.5
   checksum: 000423875fecbc7da1d74bf63c9081363a71291ef2588c376c45647ac004582cb5bc8cc09ef84420b26bfb490f4d0818d328e78569c6228e20d90271283f73ba
-  languageName: node
-  linkType: hard
-
-"minimatch@npm:^3.0.4, minimatch@npm:^3.0.5, minimatch@npm:^3.1.1, minimatch@npm:^3.1.2":
-  version: 3.1.5
-  resolution: "minimatch@npm:3.1.5"
-  dependencies:
-    brace-expansion: ^1.1.7
-  checksum: 47ef6f412c08be045a7291d11b1c40777925accf7252dc6d3caa39b1bfbb3a7ea390ba7aba464d762d783265c644143d2c8a204e6b5763145024d52ee65a1941
   languageName: node
   linkType: hard
 
@@ -19172,18 +19163,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"serve-handler@npm:6.1.6":
-  version: 6.1.6
-  resolution: "serve-handler@npm:6.1.6"
+"serve-handler@npm:6.1.7":
+  version: 6.1.7
+  resolution: "serve-handler@npm:6.1.7"
   dependencies:
     bytes: 3.0.0
     content-disposition: 0.5.2
     mime-types: 2.1.18
-    minimatch: 3.1.2
+    minimatch: 3.1.5
     path-is-inside: 1.0.2
     path-to-regexp: 3.3.0
     range-parser: 1.2.0
-  checksum: eb26201e699ac4694fb16f9aaf932330f6b1159e9d9496261baa23caf1e81322afcfd2b5f5f2b306b133298c03a8395a3c13b56fde5d70b331014b3a5ab7217f
+  checksum: eb03d807336f8186257a28cb48fd03b3ddb2dda918896fbe190e8f721354d276c3ff35506f20728aa89f6962f73fb721b3e1e4fe92847a4e758b95980d5c3daa
   languageName: node
   linkType: hard
 
@@ -21403,7 +21394,7 @@ __metadata:
     "@lichtblick/tsconfig": 1.0.2
     "@types/serve-handler": ^6
     playwright: 1.55.1
-    serve-handler: 6.1.6
+    serve-handler: 6.1.7
     webpack: 5.105.4
     webpack-dev-server: 5.2.3
   languageName: unknown
