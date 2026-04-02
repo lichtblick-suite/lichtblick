@@ -26,6 +26,9 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
             alerts: get().alerts.filter((al) => al.tag !== tag),
           });
         },
+        clearAlerts: () => {
+          set({ alerts: [] });
+        },
         setAlert: (tag: string, alert: Immutable<SessionAlert>) => {
           const newAlert = { tag, ...alert };
           const alerts = get().alerts;

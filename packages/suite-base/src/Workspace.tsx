@@ -57,6 +57,7 @@ import { TopicList } from "@lichtblick/suite-base/components/TopicList";
 import VariablesList from "@lichtblick/suite-base/components/VariablesList";
 import { WorkspaceDialogs } from "@lichtblick/suite-base/components/WorkspaceDialogs";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
+import { useAlertsActions } from "@lichtblick/suite-base/context/AlertsContext";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
   LayoutState,
@@ -186,6 +187,8 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   // We use playerId to detect when a player changes for RemountOnValueChange below
   // see comment below above the RemountOnValueChange component
   const playerId = useMessagePipeline(selectPlayerId);
+  const { clearAlerts } = useAlertsActions();
+  const previousPlayerIdRef = useRef<string | undefined>();
 
   const currentUserType = useCurrentUserType();
 
@@ -223,6 +226,14 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       dialogActions.dataSource.close();
     }
   }, [dialogActions.dataSource, playerPresence]);
+
+  // Session alerts from message converters should not carry over when switching to a new player.
+  useEffect(() => {
+    if (previousPlayerIdRef.current != undefined && previousPlayerIdRef.current !== playerId) {
+      clearAlerts();
+    }
+    previousPlayerIdRef.current = playerId;
+  }, [clearAlerts, playerId]);
 
   useEffect(() => {
     // Focus on page load to enable keyboard interaction.

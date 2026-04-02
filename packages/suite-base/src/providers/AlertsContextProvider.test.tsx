@@ -7,6 +7,7 @@ import { PropsWithChildren } from "react";
 
 import {
   AlertsContextStore,
+  SessionAlert,
   useAlertsActions,
   useAlertsStore,
 } from "@lichtblick/suite-base/context/AlertsContext";
@@ -97,5 +98,36 @@ describe("AlertsContextProvider", () => {
     expect(result.current.alerts).not.toBe(firstAlertsRef);
     expect(result.current.alerts).toHaveLength(1);
     expect(result.current.alerts[0]).toMatchObject({ tag: alertTag, ...updatedAlert });
+  });
+
+  it("clears all alerts when clearAlerts is called", () => {
+    // Given
+    const firstAlert: SessionAlert = { severity: "warn", message: "first" };
+    const secondAlert: SessionAlert = { severity: "error", message: "second" };
+    const firstTag = BasicBuilder.string();
+    const secondTag = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        alerts: useAlertsStore(selectAlerts),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.actions.setAlert(firstTag, firstAlert);
+      result.current.actions.setAlert(secondTag, secondAlert);
+    });
+
+    expect(result.current.alerts).toHaveLength(2);
+
+    // When
+    act(() => {
+      result.current.actions.clearAlerts();
+    });
+
+    // Then
+    expect(result.current.alerts).toHaveLength(0);
   });
 });
