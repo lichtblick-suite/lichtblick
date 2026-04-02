@@ -9,14 +9,14 @@ import DirectionalPad from "@lichtblick/suite-base/panels/Teleop/DirectionalPad"
 import { DirectionalPadAction } from "@lichtblick/suite-base/panels/Teleop/types";
 
 describe("DirectionalPad", () => {
-  it("should call onAction and update state when UP button is clicked", () => {
+  it("should call onAction and update state when UP button is pressed", () => {
     // given
     const onAction = jest.fn();
     const { container } = render(<DirectionalPad onAction={onAction} />);
     const upButton = container.querySelector('g[role="button"]');
 
     // when
-    fireEvent.mouseDown(upButton!);
+    fireEvent.pointerDown(upButton!);
 
     // then
     expect(onAction).toHaveBeenCalledWith(DirectionalPadAction.UP);
@@ -30,7 +30,7 @@ describe("DirectionalPad", () => {
     const upButton = container.querySelector('g[role="button"]');
 
     // when
-    fireEvent.mouseDown(upButton!);
+    fireEvent.pointerDown(upButton!);
 
     // then
     expect(onAction).not.toHaveBeenCalled();
@@ -43,7 +43,7 @@ describe("DirectionalPad", () => {
     const upButton = container.querySelector('g[role="button"]');
 
     // when
-    fireEvent.mouseDown(upButton!);
+    fireEvent.pointerDown(upButton!);
 
     // then
     expect(upButton?.parentElement?.querySelector(".active")).toBeTruthy();
@@ -65,10 +65,40 @@ describe("DirectionalPad", () => {
     ];
 
     buttons.forEach((button, index) => {
-      fireEvent.mouseDown(button);
+      fireEvent.pointerDown(button);
       expect(onAction).toHaveBeenCalledWith(actions[index]);
       expect(button.parentElement?.querySelector(".active")).toBeTruthy();
-      fireEvent.mouseUp(button);
+      fireEvent.pointerUp(button);
     });
+  });
+
+  it("should stop action on pointerCancel", () => {
+    // given
+    const onAction = jest.fn();
+    const { container } = render(<DirectionalPad onAction={onAction} />);
+    const upButton = container.querySelector('g[role="button"]');
+
+    // when
+    fireEvent.pointerDown(upButton!);
+    onAction.mockClear();
+    fireEvent.pointerCancel(upButton!);
+
+    // then
+    expect(onAction).toHaveBeenCalledWith();
+  });
+
+  it("should stop action on pointerLeave", () => {
+    // given
+    const onAction = jest.fn();
+    const { container } = render(<DirectionalPad onAction={onAction} />);
+    const upButton = container.querySelector('g[role="button"]');
+
+    // when
+    fireEvent.pointerDown(upButton!);
+    onAction.mockClear();
+    fireEvent.pointerLeave(upButton!);
+
+    // then
+    expect(onAction).toHaveBeenCalledWith();
   });
 });

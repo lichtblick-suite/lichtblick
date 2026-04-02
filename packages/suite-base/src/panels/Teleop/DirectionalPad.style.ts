@@ -9,6 +9,7 @@ export const useStyles = makeStyles<void, "buttonIcon">()((theme, _params, class
     label: "DirectionalPad-svg",
     maxHeight: "100%",
     maxWidth: "100%",
+    touchAction: "none",
   },
   button: {
     label: "DirectionalPad-button",
