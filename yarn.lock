@@ -3526,7 +3526,7 @@ __metadata:
     builder-util: "*"
     clean-webpack-plugin: 4.0.0
     dotenv: 17.2.2
-    electron: 39.8.3
+    electron: 39.8.5
     electron-builder: 26.0.12
     electron-devtools-installer: 4.0.0
     electron-squirrel-startup: 1.0.1
@@ -10401,16 +10401,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:39.8.3":
-  version: 39.8.3
-  resolution: "electron@npm:39.8.3"
+"electron@npm:39.8.5":
+  version: 39.8.5
+  resolution: "electron@npm:39.8.5"
   dependencies:
     "@electron/get": ^2.0.0
     "@types/node": ^22.7.7
     extract-zip: ^2.0.1
   bin:
     electron: cli.js
-  checksum: a5fe8114a4d10c38b7d618a74e4d642853d8e8b1b46655d4317c5533bf3156c96270610c6c467227cc68114e547d2a5e645a07b2d03bf375b46b03e8be87f506
+  checksum: 3963f76cc4afd80ebe35e6a0f0ef5dafee912122de05ce4ee1d36e788deade7e1962259dadce90ff557cb988852a5389011932eb3f6783d0ecf8850121d042b8
   languageName: node
   linkType: hard
 
@@ -14891,7 +14891,7 @@ __metadata:
     babel-plugin-transform-import-meta: 2.2.1
     cross-env: 10.0.0
     depcheck: 1.4.7
-    electron: 39.8.3
+    electron: 39.8.5
     electron-builder: 26.0.12
     eslint: 8.57
     eslint-config-prettier: 9.1.0
