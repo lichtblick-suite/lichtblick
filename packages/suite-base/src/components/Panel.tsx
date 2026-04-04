@@ -553,6 +553,56 @@ export default function Panel<
       type,
     ]);
 
+    const handleSetShowLogs = useCallback(({ show }: { show: boolean }) => {
+      setShowLogs(show);
+    }, []);
+
+    const panelContextValue = useMemo(
+      () => ({
+        type,
+        id: childId,
+        title,
+        config: panelComponentConfig,
+        saveConfig: saveConfig as SaveConfig<PanelConfig>,
+        updatePanelConfigs,
+        openSiblingPanel,
+        replacePanel,
+        enterFullscreen,
+        exitFullscreen,
+        setHasFullscreenDescendant,
+        isFullscreen: fullscreen,
+        tabId,
+        connectToolbarDragHandle: isTopLevelPanel ? undefined : connectToolbarDragHandle,
+        setMessagePathDropConfig,
+        showLogs,
+        setShowLogs: handleSetShowLogs,
+        logError: addLog,
+        logCount: logs.length,
+      }),
+      [
+        type,
+        childId,
+        title,
+        panelComponentConfig,
+        saveConfig,
+        updatePanelConfigs,
+        openSiblingPanel,
+        replacePanel,
+        enterFullscreen,
+        exitFullscreen,
+        setHasFullscreenDescendant,
+        fullscreen,
+        tabId,
+        isTopLevelPanel,
+        connectToolbarDragHandle,
+        setMessagePathDropConfig,
+        showLogs,
+        handleSetShowLogs,
+        addLog,
+        logs.length,
+      ],
+    );
+
     return (
       <Profiler
         id={childId}
@@ -562,32 +612,7 @@ export default function Panel<
           }
         }}
       >
-        <PanelContext.Provider
-          value={{
-            type,
-            id: childId,
-            title,
-            config: panelComponentConfig,
-            saveConfig: saveConfig as SaveConfig<PanelConfig>,
-            updatePanelConfigs,
-            openSiblingPanel,
-            replacePanel,
-            enterFullscreen,
-            exitFullscreen,
-            setHasFullscreenDescendant,
-            isFullscreen: fullscreen,
-            tabId,
-            // disallow dragging the root panel in a layout
-            connectToolbarDragHandle: isTopLevelPanel ? undefined : connectToolbarDragHandle,
-            setMessagePathDropConfig,
-            showLogs,
-            setShowLogs: ({ show }) => {
-              setShowLogs(show);
-            },
-            logError: addLog,
-            logCount: logs.length,
-          }}
-        >
+        <PanelContext.Provider value={panelContextValue}>
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
           {fullscreen && <KeyListener global keyDownHandlers={fullScreenKeyHandlers} />}
           <Transition

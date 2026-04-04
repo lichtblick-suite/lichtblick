@@ -250,23 +250,24 @@ export default class UserScriptPlayer implements Player {
 
     const identity = <T>(item: T) => item;
 
-    const outputMessages: MessageEvent[] = [];
+    // Dispatch all (message × script) pairs concurrently rather than sequentially awaiting
+    // after each individual message.  This eliminates serial RPC round-trip latency when
+    // processing large message batches — with N messages and M scripts the old code incurred
+    // N sequential await barriers; the new code incurs just one.
+    const tasks: Promise<MessageEvent | undefined>[] = [];
     for (const message of inputMessages) {
-      const messagePromises = [];
       for (const scriptRegistration of scriptRegistrations) {
         if (
           this.#scriptSubscriptions[scriptRegistration.output.name] &&
           scriptRegistration.inputs.includes(message.topic)
         ) {
-          const messagePromise = scriptRegistration.processMessage(message, globalVariables);
-          messagePromises.push(messagePromise);
+          tasks.push(scriptRegistration.processMessage(message, globalVariables));
         }
       }
-      const output = await Promise.all(messagePromises);
-      outputMessages.push(...filterMap(output, identity));
     }
 
-    return outputMessages;
+    const results = await Promise.all(tasks);
+    return filterMap(results, identity);
   }
 
   async #getBlocks(
@@ -446,17 +447,25 @@ export default class UserScriptPlayer implements Player {
       registration: ScriptRegistration["processMessage"];
       terminate: () => void;
     } => {
-      // rpc channel for this processor. Lazily created on each message if an unused
-      // channel isn't available.
+      // rpc channel for this processor. Lazily created on the first message.
       let rpc: undefined | Rpc;
 
-      const registration = async (msgEvent: MessageEvent, globalVariables: GlobalVariables) => {
-        // Register the script within a web worker to be executed.
-        if (!rpc) {
-          rpc = this.#unusedRuntimeWorkers.pop();
+      // Single initialization promise shared across concurrent callers so that parallel
+      // processMessage() calls (from the batched #getMessages loop) don't each race to
+      // spin up a worker and register the script.
+      let initPromise: Promise<void> | undefined;
 
-          // initialize a new worker since no unused one is available
-          if (!rpc) {
+      const ensureInitialized = async (): Promise<Rpc> => {
+        if (rpc) {
+          return rpc;
+        }
+        // Use nullish coalescing assignment (??=) to satisfy lint rules
+        initPromise ??= (async () => {
+          const candidateRpc = this.#unusedRuntimeWorkers.pop();
+
+          if (candidateRpc) {
+            rpc = candidateRpc;
+          } else {
             const worker = UserScriptPlayer.CreateRuntimeWorker();
 
             worker.onerror = (event) => {
@@ -467,7 +476,6 @@ export default class UserScriptPlayer implements Player {
                 severity: "error",
               });
 
-              // trigger listener updates
               void this.#queueEmitState();
             };
 
@@ -512,12 +520,26 @@ export default class UserScriptPlayer implements Player {
                 code: ERROR_CODES.RUNTIME,
               },
             ]);
-            return;
+            rpc = undefined;
+            initPromise = undefined;
+            throw new Error(error);
           }
           this.#addUserScriptLogs(scriptId, userScriptLogs);
+        })();
+
+        await initPromise;
+        return rpc!;
+      };
+
+      const registration = async (msgEvent: MessageEvent, globalVariables: GlobalVariables) => {
+        let currentRpc: Rpc;
+        try {
+          currentRpc = await ensureInitialized();
+        } catch {
+          return;
         }
 
-        const result = await rpc.send<ProcessMessageOutput>("processMessage", {
+        const result = await currentRpc.send<ProcessMessageOutput>("processMessage", {
           message: {
             topic: msgEvent.topic,
             receiveTime: msgEvent.receiveTime,
@@ -579,6 +601,7 @@ export default class UserScriptPlayer implements Player {
           this.#unusedRuntimeWorkers.push(rpc);
           rpc = undefined;
         }
+        initPromise = undefined;
       };
 
       return { registration, terminate };

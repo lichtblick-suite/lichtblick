@@ -760,7 +760,10 @@ describe("CachingIterableSource", () => {
     }
   });
 
-  it("should clear the cache when topics change", async () => {
+  it("should preserve cache blocks behind the high-water mark when a topic is added", async () => {
+    // C-1 fix: when a new topic is added, only future blocks (ahead of the high-water mark) are
+    // evicted. Blocks the user has already consumed are kept so we don't lose the entire
+    // 600 MB cache every time a panel is opened.
     const source = new TestSource();
     const bufferedSource = new CachingIterableSource(source, {
       maxBlockSize: 1000,
@@ -801,13 +804,20 @@ describe("CachingIterableSource", () => {
     }
 
     {
+      // Add topic "b" — this is a new topic addition (not a removal).
+      // The selective-eviction strategy keeps all blocks that are behind the high-water mark
+      // (the furthest point we've consumed). Since we read the entire recording above,
+      // the high-water mark is at the end, and the cached block starts at t=0 which is
+      // before the high-water mark — so the block is KEPT.
       const messageIterator = bufferedSource.messageIterator({
         topics: mockTopicSelection("a", "b"),
       });
 
       await messageIterator.next();
 
-      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 0 }]);
+      // The loaded range must be preserved: blocks behind the high-water mark survive.
+      // (Old behaviour was [{start:0,end:0}] — a full wipe; new behaviour keeps the cache.)
+      expect(bufferedSource.loadedRanges()).toEqual([{ start: 0, end: 1 }]);
     }
   });
 
