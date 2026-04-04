@@ -244,12 +244,23 @@ function RawMessages(props: PropsRawMessages) {
                 if (rawVal == undefined) {
                   return rawVal;
                 }
-                const idValue = (rawVal as Record<string, unknown>)[diffLabels.ID.labelText];
-                const addedValue = (rawVal as Record<string, unknown>)[diffLabels.ADDED.labelText];
-                const changedValue = (rawVal as Record<string, unknown>)[
+
+                // react-json-tree treats typed arrays as opaque objects; convert them
+                // to regular arrays so users can expand and inspect element values.
+                const toDisplayValue =
+                  ArrayBuffer.isView(rawVal) && !(rawVal instanceof DataView)
+                    ? Array.from(rawVal as unknown as ArrayLike<unknown>)
+                    : rawVal;
+                const idValue = (toDisplayValue as Record<string, unknown>)[
+                  diffLabels.ID.labelText
+                ];
+                const addedValue = (toDisplayValue as Record<string, unknown>)[
+                  diffLabels.ADDED.labelText
+                ];
+                const changedValue = (toDisplayValue as Record<string, unknown>)[
                   diffLabels.CHANGED.labelText
                 ];
-                const deletedValue = (rawVal as Record<string, unknown>)[
+                const deletedValue = (toDisplayValue as Record<string, unknown>)[
                   diffLabels.DELETED.labelText
                 ];
                 if (
@@ -259,9 +270,12 @@ function RawMessages(props: PropsRawMessages) {
                     1 &&
                   idValue == undefined
                 ) {
-                  return addedValue ?? changedValue ?? deletedValue;
+                  const unwrappedValue = addedValue ?? changedValue ?? deletedValue;
+                  return ArrayBuffer.isView(unwrappedValue) && !(unwrappedValue instanceof DataView)
+                    ? Array.from(unwrappedValue as unknown as ArrayLike<unknown>)
+                    : unwrappedValue;
                 }
-                return rawVal;
+                return toDisplayValue;
               }}
               theme={{
                 ...jsonTreeTheme,
