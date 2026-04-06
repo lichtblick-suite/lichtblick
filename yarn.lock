@@ -2103,7 +2103,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/compat@npm:^1":
+"@eslint/compat@npm:1.4.1, @eslint/compat@npm:^1":
   version: 1.4.1
   resolution: "@eslint/compat@npm:1.4.1"
   dependencies:
@@ -15020,6 +15020,7 @@ __metadata:
     "@babel/preset-env": 7.29.2
     "@babel/preset-react": 7.28.5
     "@babel/preset-typescript": 7.28.5
+    "@eslint/compat": 1.4.1
     "@lichtblick/eslint-plugin": 2.0.7
     "@lichtblick/eslint-plugin-suite": "workspace:*"
     "@lichtblick/hooks": "workspace:*"

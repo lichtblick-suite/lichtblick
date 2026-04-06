@@ -85,7 +85,6 @@
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
-    "@eslint/compat": "1.4.1",
     "@actions/exec": "1.1.1",
     "@actions/tool-cache": "2.0.2",
     "@babel/core": "7.29.0",
@@ -94,6 +93,7 @@
     "@babel/preset-env": "7.29.2",
     "@babel/preset-react": "7.28.5",
     "@babel/preset-typescript": "7.28.5",
+    "@eslint/compat": "1.4.1",
     "@lichtblick/eslint-plugin": "2.0.7",
     "@lichtblick/eslint-plugin-suite": "workspace:*",
     "@lichtblick/tsconfig": "1.0.2",
