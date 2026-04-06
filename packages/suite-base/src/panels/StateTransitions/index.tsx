@@ -14,7 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as _ from "lodash-es";
 import { useCallback, useMemo, useState } from "react";
 
 import { add as addTimes, fromSec } from "@lichtblick/rostime";
@@ -31,7 +30,7 @@ import {
   STATE_TRANSITION_PLUGINS,
 } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import useChartScalesAndBounds from "@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAndBounds";
-import { useDecodedBlocks } from "@lichtblick/suite-base/panels/StateTransitions/hooks/useDecodedBlocks";
+import { useDecodedMessageRange } from "@lichtblick/suite-base/panels/StateTransitions/hooks/useDecodedMessageRange";
 import useMessagePathDropConfig from "@lichtblick/suite-base/panels/StateTransitions/hooks/useMessagePathDropConfig";
 import { usePanelSettings } from "@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings";
 import useStateTransitionsData from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsData";
@@ -53,9 +52,19 @@ function StateTransitions(props: StateTransitionPanelProps) {
 
   const { startTime, currentTimeSinceStart, endTimeSinceStart } = useStateTransitionsTime();
 
-  const itemsByPath = useMessagesByPath(pathStrings);
+  const decodedBlocks = useDecodedMessageRange(paths);
 
-  const decodedBlocks = useDecodedBlocks(paths);
+  // When range data is active, skip useMessagesByPath subscriptions entirely
+  // to avoid wasteful current-frame processing and decoding.
+  const hasRangeData = useMemo(
+    () =>
+      decodedBlocks.some((block) =>
+        pathStrings.some((pathStr) => (block[pathStr]?.length ?? 0) > 0),
+      ),
+    [decodedBlocks, pathStrings],
+  );
+
+  const itemsByPath = useMessagesByPath(hasRangeData ? [] : pathStrings);
 
   const { height, heightPerTopic } = useMemo(() => {
     const onlyTopicsHeight = paths.length * 64;
@@ -66,16 +75,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
     };
   }, [paths.length]);
 
-  // If our blocks data covers all paths in the chart then ignore the data in itemsByPath
-  // since it's not needed to render the chart and would just cause unnecessary re-renders
-  // if included in the dataset.
-  const newItemsByPath = useMemo(() => {
-    const newItemsNotInBlocks = _.pickBy(
-      itemsByPath,
-      (_items, path) => !decodedBlocks.some((block) => block[path]),
-    );
-    return _.isEmpty(newItemsNotInBlocks) ? EMPTY_ITEMS_BY_PATH : newItemsNotInBlocks;
-  }, [decodedBlocks, itemsByPath]);
+  const newItemsByPath = hasRangeData ? EMPTY_ITEMS_BY_PATH : itemsByPath;
 
   const showPoints = config.showPoints === true;
 
