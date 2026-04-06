@@ -52,16 +52,16 @@ function StateTransitions(props: StateTransitionPanelProps) {
 
   const { startTime, currentTimeSinceStart, endTimeSinceStart } = useStateTransitionsTime();
 
-  const decodedBlocks = useDecodedMessageRange(paths);
+  const decodedMessages = useDecodedMessageRange(paths);
 
   // When range data is active, skip useMessagesByPath subscriptions entirely
   // to avoid wasteful current-frame processing and decoding.
   const hasRangeData = useMemo(
     () =>
-      decodedBlocks.some((block) =>
+      decodedMessages.some((block) =>
         pathStrings.some((pathStr) => (block[pathStr]?.length ?? 0) > 0),
       ),
-    [decodedBlocks, pathStrings],
+    [decodedMessages, pathStrings],
   );
 
   const itemsByPath = useMessagesByPath(hasRangeData ? [] : pathStrings);
@@ -83,7 +83,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
     paths,
     startTime,
     newItemsByPath,
-    decodedBlocks,
+    decodedMessages,
     showPoints,
   );
 
