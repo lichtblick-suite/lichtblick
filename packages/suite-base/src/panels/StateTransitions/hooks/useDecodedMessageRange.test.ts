@@ -10,7 +10,7 @@ import { useDecodeMessagePathsForMessagesByTopic } from "@lichtblick/suite-base/
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
-import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useDecodedMessageRange } from "./useDecodedMessageRange";
@@ -44,16 +44,6 @@ describe("useDecodedMessageRange", () => {
     jest.useRealTimers();
   });
 
-  function buildMessageEvent(topic: string): MessageEvent {
-    return {
-      message: BasicBuilder.string(),
-      receiveTime: RosTimeBuilder.time(),
-      schemaName: BasicBuilder.string(),
-      sizeInBytes: BasicBuilder.number(),
-      topic,
-    };
-  }
-
   function buildStateTransitionPath(
     overrideProps: Partial<StateTransitionPath> = {},
   ): StateTransitionPath {
@@ -85,38 +75,40 @@ describe("useDecodedMessageRange", () => {
   }
 
   it("should subscribe to topics parsed from paths", () => {
+    const topicA = BasicBuilder.string();
+    const topicB = BasicBuilder.string();
     const paths: StateTransitionPath[] = [
-      buildStateTransitionPath({ value: "/topic_a.field" }),
-      buildStateTransitionPath({ value: "/topic_b.field" }),
+      buildStateTransitionPath({ value: topicA }),
+      buildStateTransitionPath({ value: topicB }),
     ];
 
     renderHook(() => useDecodedMessageRange(paths));
 
     expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(2);
     expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
-      expect.objectContaining({ topic: "/topic_a" }),
+      expect.objectContaining({ topic: topicA }),
     );
     expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
-      expect.objectContaining({ topic: "/topic_b" }),
+      expect.objectContaining({ topic: topicB }),
     );
   });
 
   it("should deduplicate topics from multiple paths", () => {
+    const topic = BasicBuilder.string();
     const paths: StateTransitionPath[] = [
-      buildStateTransitionPath({ value: "/topic_a.field1" }),
-      buildStateTransitionPath({ value: "/topic_a.field2" }),
+      buildStateTransitionPath({ value: `${topic}.field1` }),
+      buildStateTransitionPath({ value: `${topic}.field2` }),
     ];
 
     renderHook(() => useDecodedMessageRange(paths));
 
     expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
-    expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
-      expect.objectContaining({ topic: "/topic_a" }),
-    );
+    expect(mockSubscribeMessageRange).toHaveBeenCalledWith(expect.objectContaining({ topic }));
   });
 
   it("should cancel subscriptions on unmount", () => {
-    const paths: StateTransitionPath[] = [buildStateTransitionPath({ value: "/topic_a.field" })];
+    const topic = BasicBuilder.string();
+    const paths: StateTransitionPath[] = [buildStateTransitionPath({ value: topic })];
 
     const { unmount } = renderHook(() => useDecodedMessageRange(paths));
 
@@ -126,20 +118,23 @@ describe("useDecodedMessageRange", () => {
   });
 
   it("should accumulate messages and decode after flush", async () => {
-    const paths: StateTransitionPath[] = [buildStateTransitionPath({ value: "/topic_a.field" })];
+    const topic = BasicBuilder.string();
+    const paths: StateTransitionPath[] = [buildStateTransitionPath({ value: `${topic}.field` })];
 
     const { result } = renderHook(() => useDecodedMessageRange(paths));
 
-    const msgs = [buildMessageEvent("/topic_a"), buildMessageEvent("/topic_a")];
+    const msgs = [
+      MessageEventBuilder.messageEvent({ topic }),
+      MessageEventBuilder.messageEvent({ topic }),
+    ];
 
     await act(async () => {
-      await simulateBatches("/topic_a", [msgs]);
+      await simulateBatches(topic, [msgs]);
     });
 
-    // After iterator completes, final flush is called synchronously
     expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        "/topic_a": expect.arrayContaining(msgs),
+        [topic]: expect.arrayContaining(msgs),
       }),
     );
     expect(result.current).toEqual([{}]);
@@ -157,21 +152,20 @@ describe("useDecodedMessageRange", () => {
   });
 
   it("should reset accumulated data when a new range iterator is provided", async () => {
-    const paths: StateTransitionPath[] = [buildStateTransitionPath({ value: "/topic_a.field" })];
+    const topic = BasicBuilder.string();
+    const paths: StateTransitionPath[] = [buildStateTransitionPath({ value: `${topic}.field` })];
 
     renderHook(() => useDecodedMessageRange(paths));
 
-    const firstBatch = [buildMessageEvent("/topic_a")];
-    const secondBatch = [buildMessageEvent("/topic_a")];
+    const firstBatch = [MessageEventBuilder.messageEvent({ topic })];
+    const secondBatch = [MessageEventBuilder.messageEvent({ topic })];
 
-    // First iterator delivers messages
     await act(async () => {
-      await simulateBatches("/topic_a", [firstBatch]);
+      await simulateBatches(topic, [firstBatch]);
     });
 
-    // Simulate a new range iterator (e.g., seek) — call onNewRangeIterator again
     const call = mockSubscribeMessageRange.mock.calls.find(
-      ([args]: [SubscribeMessageRangeArgs]) => args.topic === "/topic_a",
+      ([args]: [SubscribeMessageRangeArgs]) => args.topic === topic,
     );
     const args: SubscribeMessageRangeArgs = call![0];
 
@@ -182,10 +176,9 @@ describe("useDecodedMessageRange", () => {
       await args.onNewRangeIterator(newIterator);
     });
 
-    // Should only have second batch data, not first + second
     expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        "/topic_a": secondBatch,
+        [topic]: secondBatch,
       }),
     );
   });
