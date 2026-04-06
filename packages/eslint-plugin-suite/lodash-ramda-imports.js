@@ -73,7 +73,7 @@ module.exports = {
             messageId: "useNamespaceImport",
             data: { package: config.package, name: config.preferNamespaceImport },
             *fix(fixer) {
-              const variables = context.getDeclaredVariables(node);
+              const variables = context.sourceCode.getDeclaredVariables(node);
               const defaultImportName = node.specifiers.find(
                 (specifier) => specifier.type === "ImportDefaultSpecifier",
               )?.local.name;

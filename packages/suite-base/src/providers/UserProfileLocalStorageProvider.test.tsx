@@ -217,7 +217,7 @@ describe("UserProfileLocalStorageProvider", () => {
     beforeEach(() => {
       // Mock Date.now() to return a consistent timestamp
       jest.useFakeTimers();
-      jest.setSystemTime(sysTime);
+      jest.setSystemTime(sysTime.getTime());
     });
 
     afterEach(() => {
