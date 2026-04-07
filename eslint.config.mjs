@@ -31,6 +31,9 @@ export default [
   // Global ignores (replaces ignorePatterns)
   {
     ignores: [
+      "**/.webpack/**",
+      "**/.yarn/**",
+      "**/.storybook/**",
       "**/dist/**",
       "**/out/**",
       "**/template/**",
@@ -47,6 +50,21 @@ export default [
     ...config,
     files: ["**/*.ts", "**/*.tsx"],
   })),
+
+  // The plugin sets `projectService: true` which auto-discovers all tsconfig.json files,
+  // creating a separate TypeScript Language Service per package — causing OOM in monorepos.
+  // Override with a single consolidated tsconfig (same behaviour as the pre-v9 migration).
+  // See tsconfig.eslint.json for fuller explanation.
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: "./tsconfig.eslint.json",
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   ...lichtblickPlugin.configs.react,
   // Jest config scoped to test/spec files
   ...lichtblickPlugin.configs.jest.map((config) => ({
