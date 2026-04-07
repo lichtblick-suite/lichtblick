@@ -161,7 +161,7 @@ describe("getValueString", () => {
 
     it("should return 'null' for null values", () => {
       // Given
-       
+
       const value = null;
 
       // When

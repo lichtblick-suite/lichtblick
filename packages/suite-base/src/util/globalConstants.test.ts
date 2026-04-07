@@ -35,7 +35,6 @@ describe("getValueColor", () => {
   });
 
   it("should return null color for null", () => {
-     
     const color = getValueColor(null, "light");
     expect(color).toBe("#808080");
   });

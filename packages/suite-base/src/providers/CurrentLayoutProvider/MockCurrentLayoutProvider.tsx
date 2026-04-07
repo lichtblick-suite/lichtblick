@@ -18,9 +18,9 @@ import {
   LayoutData,
   PanelsActions,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
-import { defaultPlaybackConfig } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
-
-import panelsReducer from "./reducers";
+import panelsReducer, {
+  defaultPlaybackConfig,
+} from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
 
 /**
  * An alternative implementation of CurrentLayoutProvider, for use in tests, which performs actions

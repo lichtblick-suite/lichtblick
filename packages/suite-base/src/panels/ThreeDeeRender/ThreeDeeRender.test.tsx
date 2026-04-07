@@ -13,7 +13,10 @@ import { act, render, waitFor } from "@testing-library/react";
 import { Topic } from "@lichtblick/suite";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
-import { DEFAULT_FOLLOW_MODE } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
+import {
+  DEFAULT_FOLLOW_MODE,
+  MAX_TRANSFORM_MESSAGES,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import type { MessageEvent } from "@lichtblick/suite-base/players/types";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RenderStateBuilder from "@lichtblick/suite-base/testing/builders/RenderStateBuilder";
@@ -21,7 +24,6 @@ import RenderStateBuilder from "@lichtblick/suite-base/testing/builders/RenderSt
 import { Renderer } from "./Renderer";
 import { ThreeDeeRender } from "./ThreeDeeRender";
 import { DEFAULT_CAMERA_STATE } from "./camera";
-import { MAX_TRANSFORM_MESSAGES } from "./constants";
 import type { InterfaceMode, ThreeDeeRenderProps } from "./types";
 
 // three.js modules

@@ -138,7 +138,6 @@ describe("memoryEstimationByObject", () => {
   });
 
   it("estimates size of null object to be greater than 0", () => {
-     
     const sizeInBytes = estimateObjectSize(null);
     expect(sizeInBytes).toBeGreaterThan(0);
   });

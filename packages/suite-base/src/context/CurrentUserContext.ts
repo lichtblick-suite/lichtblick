@@ -9,12 +9,12 @@ import { createContext, useContext } from "react";
 
 export type User = {
   id: string;
-  avatarImageUrl?: string | null;  
+  avatarImageUrl?: string | null;
   email: string;
   orgId: string;
-  orgDisplayName: string | null;  
+  orgDisplayName: string | null;
   orgSlug: string;
-  orgPaid: boolean | null;  
+  orgPaid: boolean | null;
   org: {
     id: string;
     slug: string;

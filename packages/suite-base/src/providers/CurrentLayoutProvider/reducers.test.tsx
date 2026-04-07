@@ -874,7 +874,7 @@ describe("layout reducers", () => {
         ...emptyLayout,
         layout: panelState.layout,
       };
-       
+
       const leaves = getLeaves(panelState.layout ?? null);
       expect(leaves).toHaveLength(4);
       expect(leaves).toContain("FirstPanel!34otwwt");
@@ -941,7 +941,7 @@ describe("layout reducers", () => {
         ...emptyLayout,
         layout: tabPanelState.layout,
       };
-       
+
       const leaves = getLeaves(tabPanelState.layout ?? null);
       expect(leaves).toHaveLength(4);
       expect(leaves).toContain("FirstPanel!34otwwt");

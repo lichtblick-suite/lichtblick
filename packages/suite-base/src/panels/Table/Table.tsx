@@ -226,10 +226,8 @@ export default function Table({
 
   const columns = React.useMemo(() => {
     if (
-       
       value == null ||
       typeof value !== "object" ||
-       
       (Array.isArray(value) && typeof value[0] !== "object" && value[0] != null)
     ) {
       return [];
@@ -280,7 +278,6 @@ export default function Table({
 
   if (
     typeof value !== "object" ||
-     
     value == null ||
     (!isNested && Array.isArray(value) && typeof value[0] !== "object")
   ) {
@@ -387,7 +384,6 @@ export default function Table({
               value={pageSize}
               size="small"
               onChange={(e) => {
-                 
                 table.setPageSize(Number(e.target.value));
               }}
               MenuProps={{ MenuListProps: { dense: true } }}

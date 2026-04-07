@@ -250,7 +250,6 @@ class BenchmarkPlayer implements Player {
       `Frame time (filtered) average: ${frameMsStats.avgFrameMs}, median: ${frameMsStats.medianFrameMs}, P90: ${frameMsStats.p90FrameMs}`,
     );
 
-     
     console.log(frameMs);
 
     const tries = 20;

@@ -33,7 +33,6 @@ describe("startup", () => {
     const port = (server.address() as any).port;
     const url = `http://localhost:${port}`;
 
-     
     console.info(`Running at ${url}`);
 
     const browser = await chromium.launch();

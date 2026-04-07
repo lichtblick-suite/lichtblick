@@ -15,7 +15,6 @@ describe("unwrap", () => {
     expect(() => unwrap(undefined)).toThrow("Invariant: unexpected undefined value");
   });
   it("throws for null value", () => {
-     
     expect(() => unwrap(null)).toThrow("Invariant: unexpected undefined value");
   });
 });

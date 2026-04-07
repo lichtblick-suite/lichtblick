@@ -6,7 +6,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
 
 // We extend the type definition of JSON.stringify because in some cases
 // it can return undefined. This isn't strictly correct but it at least

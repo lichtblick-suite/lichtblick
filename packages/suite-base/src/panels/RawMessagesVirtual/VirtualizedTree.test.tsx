@@ -50,7 +50,6 @@ describe("VirtualizedTree", () => {
 
   describe("when rendering with empty data", () => {
     it.each([
-       
       ["null data", null],
       ["undefined data", undefined],
       ["empty object", {}],

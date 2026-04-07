@@ -140,7 +140,6 @@ describe("flattenTreeData", () => {
     it("should mark null values as not expandable", () => {
       // Given
       const data = {
-         
         nullValue: null,
         undefinedValue: undefined,
       };

@@ -34,9 +34,7 @@ export function parseProtobufSchema(
   // deserialized as a bigint by default.
   //
   // protobufDefinitionsToDatatypes also has matching logic to rename the fields.
-  const fixTimeType = (
-    type: protobufjs.ReflectionObject | null  ,
-  ) => {
+  const fixTimeType = (type: protobufjs.ReflectionObject | null) => {
     if (!type || !(type instanceof protobufjs.Type)) {
       return;
     }

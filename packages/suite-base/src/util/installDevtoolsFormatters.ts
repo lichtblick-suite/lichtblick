@@ -39,7 +39,6 @@ declare global {
   }
 }
 
- 
 const USE_DEFAULT_FORMATTER = null;
 
 const timeFormatter: DevtoolFormatter = (() => {

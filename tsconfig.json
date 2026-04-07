@@ -3,13 +3,7 @@
 // Do not "include" files here if they are already included by another tsconfig.json.
 {
   "extends": "@lichtblick/tsconfig/base",
-  "include": [
-    "./*.ts",
-    "./*.js",
-    "./**/jest.config.ts",
-    "./ci/**/*.ts",
-    "./package.json"
-  ],
+  "include": ["./*.ts", "./*.js", "./**/jest.config.ts", "./ci/**/*.ts", "./package.json"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "module": "commonjs",

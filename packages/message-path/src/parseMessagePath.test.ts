@@ -20,7 +20,7 @@ import { parseMessagePath } from "./parseMessagePath";
 import { OperatorType } from "./types";
 
 // Nearley parser returns nulls
- 
+
 const MISSING = null;
 
 describe("parseRosPath", () => {

@@ -30,6 +30,7 @@ import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/Th
 import {
   DEFAULT_FOLLOW_MODE,
   PANEL_STYLE,
+  MAX_TRANSFORM_MESSAGES,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
@@ -42,7 +43,6 @@ import { RendererContext, useRendererEvent, useRendererProperty } from "./Render
 import { RendererOverlay } from "./RendererOverlay";
 import { useStyles } from "./ThreeDeeRender.style";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
-import { MAX_TRANSFORM_MESSAGES } from "./constants";
 import {
   PublishRos1Datatypes,
   PublishRos2Datatypes,

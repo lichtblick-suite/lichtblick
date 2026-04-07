@@ -31,7 +31,7 @@ jobs:
           git fetch origin develop
           BRANCH_NAME="sync/main-to-develop-${{ env.version }}"
           git checkout -b $BRANCH_NAME origin/develop
-          
+
           # Try to merge, but don't fail on conflicts
           if git merge origin/main --no-ff -m "chore: sync main into develop after release"; then
             echo "has_conflicts=false" >> $GITHUB_OUTPUT
@@ -41,7 +41,7 @@ jobs:
             git add .
             git commit -m "chore: sync main into develop after release (with conflicts)"
           fi
-          
+
           git push origin $BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
@@ -54,7 +54,7 @@ jobs:
           else
             CONFLICT_NOTE=""
           fi
-          
+
           gh pr create \
             -B develop \
             -H ${{ env.BRANCH_NAME }} \

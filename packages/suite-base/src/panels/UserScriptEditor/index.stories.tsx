@@ -87,7 +87,7 @@ const logs: UserScriptLog[] = [
   { source: "registerScript", value: 100 },
   { source: "registerScript", value: false },
   { source: "registerScript", value: "abc" },
-  { source: "registerScript", value: null },  
+  { source: "registerScript", value: null },
   { source: "registerScript", value: undefined },
   {
     source: "processMessage",

@@ -29,7 +29,6 @@ export const VirtualizedTree = memo(function VirtualizedTree({
 }: PropsVirtualizedTree) {
   const { classes } = useStyles();
 
-   
   const parentRef = useRef<HTMLDivElement>(null);
 
   const flatData = useMemo(() => {

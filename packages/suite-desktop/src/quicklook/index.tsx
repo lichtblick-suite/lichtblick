@@ -79,7 +79,6 @@ export function main(): void {
       }
     }, [state.error]);
 
-     
     const progressRef = useRef<HTMLProgressElement>(null);
 
     const loadMoreInfo = state.value?.fileInfo?.loadMoreInfo;

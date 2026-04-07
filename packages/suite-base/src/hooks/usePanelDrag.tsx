@@ -58,7 +58,6 @@ export default function usePanelDrag(props: {
 
       const { selectedLayout } = getCurrentLayout();
       if (!selectedLayout?.data) {
-         
         return null;
       }
 

@@ -247,12 +247,7 @@ type RosTypedArray =
   | Float64Array;
 
 type RosSingularField = number | string | boolean | RosObject | undefined; // No time -- consider it a message.
-export type RosValue =
-  | RosSingularField
-  | readonly RosSingularField[]
-  | RosTypedArray
-   
-  | null;
+export type RosValue = RosSingularField | readonly RosSingularField[] | RosTypedArray | null;
 
 export type RosObject = Readonly<{
   [property: string]: RosValue;

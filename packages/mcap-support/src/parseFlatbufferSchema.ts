@@ -52,7 +52,6 @@ function typeForSimpleField(type: BaseType): string {
   }
 }
 
- 
 function flatbufferString(unchecked: string | Uint8Array | null | undefined): string {
   if (typeof unchecked === "string") {
     return unchecked;
