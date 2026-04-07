@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { fixupPluginRules } from "@eslint/compat";
+import fileProgressPlugin from "eslint-plugin-file-progress";
+import storybookPlugin from "eslint-plugin-storybook";
+import tssUnusedClassesPlugin from "eslint-plugin-tss-unused-classes";
 import globals from "globals";
 
 import lichtblickPlugin from "@lichtblick/eslint-plugin";
 import suitePlugin from "@lichtblick/eslint-plugin-suite";
-import fileProgressPlugin from "eslint-plugin-file-progress";
-import storybookPlugin from "eslint-plugin-storybook";
-import tssUnusedClassesPlugin from "eslint-plugin-tss-unused-classes";
 
 const storyFiles = [
   "**/*.stories.ts",
@@ -65,6 +65,58 @@ export default [
       },
     },
   },
+
+  // TypeScript-specific rule overrides — ported from .eslintrc.yaml `overrides` section.
+  // These rules were explicitly configured before the ESLint v9 migration; omitting them
+  // would enable strict rules that the codebase was never intended to comply with.
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        { "ts-expect-error": "allow-with-description" },
+      ],
+      "@typescript-eslint/explicit-member-accessibility": "error",
+      "@typescript-eslint/no-inferrable-types": "off",
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/no-unnecessary-type-parameters": "off",
+      "@typescript-eslint/switch-exhaustiveness-check": "off",
+      "@typescript-eslint/no-unsafe-enum-comparison": "off",
+
+      // These are related to `any` types, which we generally don't have except from imports.
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+
+      // Often used with e.g. useCallback(async () => {})
+      "@typescript-eslint/no-misused-promises": "off",
+      "@typescript-eslint/restrict-template-expressions": "off",
+
+      "@typescript-eslint/prefer-regexp-exec": "off",
+      "@typescript-eslint/no-unnecessary-condition": "error",
+      "@typescript-eslint/unbound-method": ["error", { ignoreStatic: true }],
+
+      "no-loop-func": "error",
+
+      // Unused vars must have `_` prefix, but `_` alone is not ignored.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          vars: "all",
+          args: "after-used",
+          varsIgnorePattern: "^_.",
+          argsIgnorePattern: "^_.",
+        },
+      ],
+
+      // TypeScript already validates named imports at compile time via its type system.
+      // The import/named rule is redundant for TypeScript files and generates false
+      // positives for packages with non-standard export patterns (e.g. webpack's
+      // `export = exports`, or packages without a `types` field).
+      "import/named": "off",
+    },
+  },
   ...lichtblickPlugin.configs.react,
   // Jest config scoped to test/spec files
   ...lichtblickPlugin.configs.jest.map((config) => ({
@@ -77,6 +129,14 @@ export default [
       "**/*.spec.tsx",
       "**/*.spec.js",
     ],
+    rules: {
+      ...config.rules,
+      // Custom assertFunctionNames so that tests using sendNotification assertions don't fail.
+      "jest/expect-expect": [
+        "error",
+        { assertFunctionNames: ["expect*", "sendNotification.expectCalledDuringTest"] },
+      ],
+    },
   })),
 
   // Project-wide config
@@ -95,6 +155,22 @@ export default [
     },
     settings: {
       "import/internal-regex": "^@lichtblick",
+      // Use TypeScript parser to resolve named exports from .ts/.tsx/.d.ts files.
+      // eslint-import-resolver-typescript uses TypeScript's module resolution, which
+      // correctly handles type-only exports and TypeScript path aliases.
+      "import/parsers": {
+        "@typescript-eslint/parser": [".ts", ".tsx", ".d.ts"],
+      },
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          project: "./tsconfig.eslint.json",
+        },
+      },
+      // Packages that use non-standard export patterns (e.g. `export = exports`) or lack
+      // proper type declaration roots that the resolver can statically analyse.
+      // TypeScript already validates named imports for these packages at compile time.
+      // (kept as a placeholder for non-TypeScript files that may still need it)
     },
     rules: {
       "@lichtblick/license-header": ["error", { licenseType: "MPL-2.0" }],
@@ -198,6 +274,46 @@ export default [
     },
   },
 
+  // `any` is acceptable in test and story files where strict typing is impractical.
+  {
+    files: [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.test.js",
+      "**/*.spec.ts",
+      "**/*.spec.tsx",
+      "**/*.spec.js",
+      ...storyFiles,
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+
+  // Story files: sx prop is sometimes used intentionally in stories.
+  {
+    files: storyFiles,
+    rules: {
+      "react/forbid-component-props": "off",
+    },
+  },
+
+  // Builder pattern files use static-only classes intentionally.
+  {
+    files: ["packages/suite-base/src/testing/**"],
+    rules: {
+      "@typescript-eslint/no-extraneous-class": "off",
+    },
+  },
+
+  // Style files: tss classes are consumed indirectly, not always referenced directly.
+  {
+    files: ["**/*.style.ts"],
+    rules: {
+      "tss-unused-classes/unused-classes": "off",
+    },
+  },
+
   // Storybook rules — scoped to story files
   {
     files: storyFiles,
@@ -230,22 +346,6 @@ export default [
     },
     rules: {
       "storybook/no-uninstalled-addons": "error",
-    },
-  },
-
-  // packages/suite-base: add webpack import resolver for `?raw` imports
-  {
-    files: ["packages/suite-base/**"],
-    settings: {
-      "import/resolver": {
-        webpack: {
-          config: {
-            resolve: {
-              extensions: [".ts", ".tsx"],
-            },
-          },
-        },
-      },
     },
   },
 
