@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { parseMessagePath } from "@lichtblick/message-path/src/parseMessagePath";
+import { parseMessagePath } from "@lichtblick/message-path";
 import { MessageEvent } from "@lichtblick/suite";
 import {
   MessageDataItemsByPath,
@@ -28,16 +28,22 @@ export function useDecodedMessageRange(
   const [messagesByTopic, setMessagesByTopic] = useState<Record<string, MessageEvent[]>>({});
   const accumulatedRef = useRef<Record<string, MessageEvent[]>>({});
   const flushRef = useRef<number | undefined>();
-
+  const prevTopicsRef = useRef<string[]>([]);
   const topics = useMemo(() => {
-    const set = new Set<string>();
+    const uniqueTopics = new Set<string>();
     for (const path of paths) {
       const parsed = parseMessagePath(path.value);
       if (parsed) {
-        set.add(parsed.topicName);
+        uniqueTopics.add(parsed.topicName);
       }
     }
-    return [...set];
+    const newTopics = [...uniqueTopics];
+    const prev = prevTopicsRef.current;
+    if (prev.length === newTopics.length && prev.every((topic) => uniqueTopics.has(topic))) {
+      return prev;
+    }
+    prevTopicsRef.current = newTopics;
+    return newTopics;
   }, [paths]);
 
   useEffect(() => {
@@ -51,8 +57,7 @@ export function useDecodedMessageRange(
           setMessagesByTopic((prev) => ({ ...prev, [topic]: [] }));
 
           for await (const batch of batchIterator) {
-            const messages = [...batch];
-            (accumulatedRef.current[topic] ??= []).push(...messages);
+            (accumulatedRef.current[topic] ??= []).push(...batch);
 
             flushRef.current ??= window.setTimeout(() => {
               flushRef.current = undefined;
