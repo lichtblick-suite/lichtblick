@@ -35,7 +35,7 @@ export function parseProtobufSchema(
   //
   // protobufDefinitionsToDatatypes also has matching logic to rename the fields.
   const fixTimeType = (
-    type: protobufjs.ReflectionObject | null /* eslint-disable-line no-restricted-syntax */,
+    type: protobufjs.ReflectionObject | null  ,
   ) => {
     if (!type || !(type instanceof protobufjs.Type)) {
       return;

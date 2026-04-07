@@ -9,7 +9,7 @@ import Cytoscape from "cytoscape";
 import CytoscapeDagre from "cytoscape-dagre";
 import { MutableRefObject, useEffect, useRef } from "react";
 
-Cytoscape.use(CytoscapeDagre);
+Cytoscape.use(CytoscapeDagre); // eslint-disable-line react-hooks/rules-of-hooks -- Cytoscape plugin registration, not a React hook
 Cytoscape.warnings(false);
 
 const DAG_LAYOUT = {

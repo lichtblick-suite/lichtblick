@@ -251,7 +251,7 @@ export type RosValue =
   | RosSingularField
   | readonly RosSingularField[]
   | RosTypedArray
-  // eslint-disable-next-line no-restricted-syntax
+   
   | null;
 
 export type RosObject = Readonly<{

@@ -1535,7 +1535,7 @@ describe("UserScriptPlayer", () => {
           [
             { source: "registerScript", value: 50 },
             { source: "registerScript", value: "ABC" },
-            { source: "registerScript", value: null }, // eslint-disable-line no-restricted-syntax
+            { source: "registerScript", value: null },  
             { source: "registerScript", value: undefined },
             { source: "registerScript", value: 10 },
             { source: "registerScript", value: { abc: 2, def: false } },

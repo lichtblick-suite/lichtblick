@@ -125,7 +125,7 @@ function savePanelConfigs(state: LayoutData, payload: SaveConfigsPayload): Layou
   );
   const tabPanelConfigSaved = configs.find(({ id }) => getPanelTypeFromId(id) === TAB_PANEL_TYPE);
   if (tabPanelConfigSaved) {
-    // eslint-disable-next-line no-restricted-syntax
+     
     const panelIds = getLeaves(state.layout ?? null);
     const panelIdsInsideTabPanels = getPanelIdsInsideTabPanels(panelIds, newConfigById);
     // Filter savedProps in case a panel was removed from a Tab layout

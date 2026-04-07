@@ -242,7 +242,7 @@ export function makeConfig(
       }),
       new webpack.DefinePlugin({
         // Should match webpack-defines.d.ts
-        ReactNull: null, // eslint-disable-line no-restricted-syntax
+        ReactNull: null,  
         LICHTBLICK_SUITE_VERSION: JSON.stringify(version),
         API_URL: JSON.stringify(process.env.API_URL),
         DEV_WORKSPACE: JSON.stringify(process.env.DEV_WORKSPACE),

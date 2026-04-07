@@ -39,7 +39,7 @@ declare global {
   }
 }
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 const USE_DEFAULT_FORMATTER = null;
 
 const timeFormatter: DevtoolFormatter = (() => {

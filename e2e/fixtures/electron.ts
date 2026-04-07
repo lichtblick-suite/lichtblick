@@ -38,12 +38,14 @@ export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
       ],
       executablePath: electronPath as unknown as string,
     });
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture `use`, not React hook
     await use(app);
     await app.close();
   },
 
   mainWindow: async ({ electronApp }, use) => {
     const mainAppWindow = await electronApp.firstWindow();
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture `use`, not React hook
     await use(mainAppWindow);
   },
 });

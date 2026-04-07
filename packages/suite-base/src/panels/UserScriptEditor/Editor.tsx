@@ -130,9 +130,9 @@ const Editor = ({
       async (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         input: any,
-        // eslint-disable-next-line no-restricted-syntax
+         
         editor: monacoApi.editor.ICodeEditor | null,
-        // eslint-disable-next-line no-restricted-syntax
+         
       ): Promise<monacoApi.editor.ICodeEditor | null> => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const requestedModel = monacoApi.editor.getModel(input.resource);
@@ -150,7 +150,7 @@ const Editor = ({
         ) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           gotoSelection(editor, input.options.selection);
-          // eslint-disable-next-line no-restricted-syntax
+           
           return null;
         }
 

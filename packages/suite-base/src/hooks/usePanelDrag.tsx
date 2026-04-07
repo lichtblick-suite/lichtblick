@@ -58,7 +58,7 @@ export default function usePanelDrag(props: {
 
       const { selectedLayout } = getCurrentLayout();
       if (!selectedLayout?.data) {
-        // eslint-disable-next-line no-restricted-syntax
+         
         return null;
       }
 

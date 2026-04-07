@@ -140,7 +140,7 @@ describe("flattenTreeData", () => {
     it("should mark null values as not expandable", () => {
       // Given
       const data = {
-        // eslint-disable-next-line no-restricted-syntax
+         
         nullValue: null,
         undefinedValue: undefined,
       };

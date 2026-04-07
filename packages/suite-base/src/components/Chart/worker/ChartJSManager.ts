@@ -433,7 +433,7 @@ export default class ChartJSManager {
       datalabelsOptions.formatter = (value: { label?: string }, _context: unknown) => {
         // Return "null" if we don't want this label to be displayed.
         // Returning "undefined" falls back to the default formatting and will display
-        // eslint-disable-next-line no-restricted-syntax
+         
         return value.label ?? null;
       };
 

@@ -874,7 +874,7 @@ describe("layout reducers", () => {
         ...emptyLayout,
         layout: panelState.layout,
       };
-      // eslint-disable-next-line no-restricted-syntax
+       
       const leaves = getLeaves(panelState.layout ?? null);
       expect(leaves).toHaveLength(4);
       expect(leaves).toContain("FirstPanel!34otwwt");
@@ -941,7 +941,7 @@ describe("layout reducers", () => {
         ...emptyLayout,
         layout: tabPanelState.layout,
       };
-      // eslint-disable-next-line no-restricted-syntax
+       
       const leaves = getLeaves(tabPanelState.layout ?? null);
       expect(leaves).toHaveLength(4);
       expect(leaves).toContain("FirstPanel!34otwwt");

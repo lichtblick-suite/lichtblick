@@ -52,7 +52,7 @@ function typeForSimpleField(type: BaseType): string {
   }
 }
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 function flatbufferString(unchecked: string | Uint8Array | null | undefined): string {
   if (typeof unchecked === "string") {
     return unchecked;

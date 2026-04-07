@@ -161,7 +161,7 @@ describe("getValueString", () => {
 
     it("should return 'null' for null values", () => {
       // Given
-      // eslint-disable-next-line no-restricted-syntax
+       
       const value = null;
 
       // When
