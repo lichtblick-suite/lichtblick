@@ -27,7 +27,7 @@ export function useDecodedMessageRange(
 
   const [messagesByTopic, setMessagesByTopic] = useState<Record<string, MessageEvent[]>>({});
   const accumulatedRef = useRef<Record<string, MessageEvent[]>>({});
-  const flushRef = useRef<number | undefined>();
+  const flushRef = useRef<ReturnType<typeof setTimeout> | undefined>();
   const prevTopicsRef = useRef<string[]>([]);
   const topics = useMemo(() => {
     const uniqueTopics = new Set<string>();
@@ -57,9 +57,10 @@ export function useDecodedMessageRange(
           setMessagesByTopic((prev) => ({ ...prev, [topic]: [] }));
 
           for await (const batch of batchIterator) {
-            (accumulatedRef.current[topic] ??= []).push(...batch);
+            accumulatedRef.current[topic] ??= [];
+            accumulatedRef.current[topic].push(...batch);
 
-            flushRef.current ??= window.setTimeout(() => {
+            flushRef.current ??= globalThis.setTimeout(() => {
               flushRef.current = undefined;
               setMessagesByTopic({ ...accumulatedRef.current });
             }, 250);
