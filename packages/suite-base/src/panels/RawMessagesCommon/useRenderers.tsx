@@ -113,9 +113,8 @@ export function useRenderDiffLabel({
 }): RenderDiffLabelFunction {
   const renderDiffLabel = useCallback(
     (label: string, itemValue: unknown) => {
-      let constantName: string | undefined;
       const { arrLabel, itemLabel } = getValueLabels({
-        constantName,
+        constantName: undefined,
         label,
         itemValue,
         keyPath: [],

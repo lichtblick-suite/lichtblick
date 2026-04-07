@@ -186,6 +186,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
         prevSharedPanelState,
         shouldRender,
       );
+      prevSharedPanelState = sharedPanelState;
     }
 
     if (watchedFields.has("variables")) {
