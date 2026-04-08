@@ -2230,7 +2230,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/schemas@npm:^1.3.1":
+"@foxglove/schemas@npm:^1.9.0":
   version: 1.13.0
   resolution: "@foxglove/schemas@npm:1.13.0"
   dependencies:
@@ -3229,28 +3229,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lichtblick/rosbag2-web@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@lichtblick/rosbag2-web@npm:1.0.0"
+"@lichtblick/rosbag2-web@npm:1.0.4":
+  version: 1.0.4
+  resolution: "@lichtblick/rosbag2-web@npm:1.0.4"
   dependencies:
     "@foxglove/sql.js": ^0.0.4
     "@lichtblick/cdr": ^1.0.1
-    "@lichtblick/rosbag2": 1.0.0
+    "@lichtblick/rosbag2": ^1.0.6
     "@lichtblick/rostime": ^1.0.0
-  checksum: bde486540e0039b2f7348c5b806ded3b92e2238ea426d2a2ec008f3b8c57b1d9b2fb544b836dd988902e6258fa8c36ceb90d256a568d26f5c16c0790d2f8f757
+  checksum: 17ab3bd9f113e5369cda7357197642c17b61c9e8edb3dc7d96d9e7576d178dd0e0aa644cdf5c115160f2d7bf3b7070d3e30bb09b678d82e0c9417513d084d966
   languageName: node
   linkType: hard
 
-"@lichtblick/rosbag2@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@lichtblick/rosbag2@npm:1.0.0"
+"@lichtblick/rosbag2@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "@lichtblick/rosbag2@npm:1.0.6"
   dependencies:
-    "@foxglove/schemas": ^1.3.1
+    "@foxglove/schemas": ^1.9.0
     "@lichtblick/rosmsg-msgs-common": 1.0.1
     "@lichtblick/rosmsg2-serialization": 1.0.0
     "@lichtblick/rostime": 1.0.0
     js-yaml: ^4.1.0
-  checksum: 981a10b36c8d3da2b3b4b20c6adacf649e98397af6efb13b0e47e3a3d62aa5ffc41592704787b110c5ee3c867ba0277f3628b8647bdd716990d9aad6bfaaca66
+  checksum: b0fd2e2410f3058880001f08050c42d3bfbf484476c2363c32b82cc6bb2afdb1c08500d4e0099e1c0d83fa60884cd9799fbe56b8c83a5830a1d423ce7cd4121e
   languageName: node
   linkType: hard
 
@@ -3339,7 +3339,7 @@ __metadata:
     "@lichtblick/message-path": "workspace:*"
     "@lichtblick/ros1": 1.0.0
     "@lichtblick/rosbag": 1.0.0
-    "@lichtblick/rosbag2-web": 1.0.0
+    "@lichtblick/rosbag2-web": 1.0.4
     "@lichtblick/roslibjs": 1.0.0
     "@lichtblick/rosmsg": 1.0.0
     "@lichtblick/rosmsg-msgs-common": 1.0.1
