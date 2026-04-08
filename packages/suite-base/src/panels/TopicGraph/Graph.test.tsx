@@ -7,6 +7,8 @@ import { render } from "@testing-library/react";
 
 import GraphBuilder from "@lichtblick/suite-base/testing/builders/GraphBuilder";
 
+import Graph from "./Graph";
+
 // Variables starting with "mock" can be used inside jest.mock factory due to babel-jest hoisting rules
 const mockRun = jest.fn();
 const mockMakeLayout = jest.fn(() => ({ run: mockRun }));
@@ -15,7 +17,7 @@ const mockElementsObj = {
   makeLayout: mockMakeLayout,
 };
 const mockOn = jest.fn();
-const mockBatch = jest.fn((fn: () => void) => fn());
+const mockBatch = jest.fn((fn: () => void) => { fn(); });
 const mockElementsFn = jest.fn(() => mockElementsObj);
 const mockAdd = jest.fn();
 const mockSetStyle = jest.fn();
@@ -43,12 +45,10 @@ jest.mock("cytoscape", () =>
 
 jest.mock("cytoscape-dagre", () => ({}));
 
-import Graph from "./Graph";
-
 describe("Graph", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockBatch.mockImplementation((fn: () => void) => fn());
+    mockBatch.mockImplementation((fn: () => void) => { fn(); });
     mockElementsFn.mockReturnValue(mockElementsObj);
     mockMakeLayout.mockReturnValue({ run: mockRun });
   });

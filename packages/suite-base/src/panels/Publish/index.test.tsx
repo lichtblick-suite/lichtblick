@@ -6,12 +6,14 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import PublishBuilder from "@lichtblick/suite-base/testing/builders/PublishBuilder";
-import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 
 import Publish from "./index";
 import { PublishConfig } from "./types";
+
 
 const mockPublish = jest.fn();
 
@@ -54,8 +56,6 @@ jest.mock("./settings", () => ({
     value: "{}",
   },
 }));
-
-import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 
 describe("Publish", () => {
   beforeEach(() => {
