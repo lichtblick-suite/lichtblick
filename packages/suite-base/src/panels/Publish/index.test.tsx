@@ -14,7 +14,6 @@ import PublishBuilder from "@lichtblick/suite-base/testing/builders/PublishBuild
 import Publish from "./index";
 import { PublishConfig } from "./types";
 
-
 const mockPublish = jest.fn();
 
 jest.mock("@lichtblick/suite-base/PanelAPI", () => ({

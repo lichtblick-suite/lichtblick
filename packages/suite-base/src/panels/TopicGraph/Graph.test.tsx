@@ -17,7 +17,9 @@ const mockElementsObj = {
   makeLayout: mockMakeLayout,
 };
 const mockOn = jest.fn();
-const mockBatch = jest.fn((fn: () => void) => { fn(); });
+const mockBatch = jest.fn((fn: () => void) => {
+  fn();
+});
 const mockElementsFn = jest.fn(() => mockElementsObj);
 const mockAdd = jest.fn();
 const mockSetStyle = jest.fn();
@@ -48,7 +50,9 @@ jest.mock("cytoscape-dagre", () => ({}));
 describe("Graph", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockBatch.mockImplementation((fn: () => void) => { fn(); });
+    mockBatch.mockImplementation((fn: () => void) => {
+      fn();
+    });
     mockElementsFn.mockReturnValue(mockElementsObj);
     mockMakeLayout.mockReturnValue({ run: mockRun });
   });
