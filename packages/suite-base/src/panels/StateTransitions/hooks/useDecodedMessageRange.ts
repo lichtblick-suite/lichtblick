@@ -3,7 +3,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { parseMessagePath } from "@lichtblick/message-path";
 import { MessageEvent } from "@lichtblick/suite";
 import {
   MessageDataItemsByPath,
@@ -13,14 +12,12 @@ import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePip
 import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 
-import { StateTransitionConfig } from "../types";
-
 const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 
 export function useDecodedMessageRange(
-  paths: StateTransitionConfig["paths"],
+  topics: string[],
+  pathStrings: string[],
 ): MessageDataItemsByPath[] {
-  const pathStrings = useMemo(() => paths.map(({ value }) => value), [paths]);
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(pathStrings);
   const subscribeMessageRange = useSubscribeMessageRange();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
@@ -28,23 +25,6 @@ export function useDecodedMessageRange(
   const [messagesByTopic, setMessagesByTopic] = useState<Record<string, MessageEvent[]>>({});
   const accumulatedRef = useRef<Record<string, MessageEvent[]>>({});
   const flushRef = useRef<ReturnType<typeof setTimeout> | undefined>();
-  const prevTopicsRef = useRef<string[]>([]);
-  const topics = useMemo(() => {
-    const uniqueTopics = new Set<string>();
-    for (const path of paths) {
-      const parsed = parseMessagePath(path.value);
-      if (parsed) {
-        uniqueTopics.add(parsed.topicName);
-      }
-    }
-    const newTopics = [...uniqueTopics];
-    const prev = prevTopicsRef.current;
-    if (prev.length === newTopics.length && prev.every((topic) => uniqueTopics.has(topic))) {
-      return prev;
-    }
-    prevTopicsRef.current = newTopics;
-    return newTopics;
-  }, [paths]);
 
   useEffect(() => {
     const cancels: (() => void)[] = [];

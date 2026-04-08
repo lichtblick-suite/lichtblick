@@ -14,7 +14,6 @@ import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/Message
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useDecodedMessageRange } from "./useDecodedMessageRange";
-import { StateTransitionPath } from "../types";
 
 jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems");
 jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter");
@@ -44,18 +43,6 @@ describe("useDecodedMessageRange", () => {
     jest.useRealTimers();
   });
 
-  function buildStateTransitionPath(
-    overrideProps: Partial<StateTransitionPath> = {},
-  ): StateTransitionPath {
-    return {
-      timestampMethod: BasicBuilder.sample(["receiveTime", "headerStamp"]),
-      value: BasicBuilder.string(),
-      enabled: true,
-      label: BasicBuilder.string(),
-      ...overrideProps,
-    };
-  }
-
   async function simulateBatches(topic: string, batches: MessageEvent[][]): Promise<void> {
     const call = mockSubscribeMessageRange.mock.calls.find(
       ([args]: [SubscribeMessageRangeArgs]) => args.topic === topic,
@@ -74,15 +61,13 @@ describe("useDecodedMessageRange", () => {
     await args.onNewRangeIterator(batchIterator);
   }
 
-  it("should subscribe to topics parsed from paths", () => {
+  it("should subscribe to each topic", () => {
     const topicA = BasicBuilder.string();
     const topicB = BasicBuilder.string();
-    const paths: StateTransitionPath[] = [
-      buildStateTransitionPath({ value: topicA }),
-      buildStateTransitionPath({ value: topicB }),
-    ];
 
-    renderHook(() => useDecodedMessageRange(paths));
+    renderHook(() =>
+      useDecodedMessageRange([topicA, topicB], [`${topicA}.field`, `${topicB}.field`]),
+    );
 
     expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(2);
     expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
@@ -93,24 +78,10 @@ describe("useDecodedMessageRange", () => {
     );
   });
 
-  it("should deduplicate topics from multiple paths", () => {
-    const topic = BasicBuilder.string();
-    const paths: StateTransitionPath[] = [
-      buildStateTransitionPath({ value: `${topic}.field1` }),
-      buildStateTransitionPath({ value: `${topic}.field2` }),
-    ];
-
-    renderHook(() => useDecodedMessageRange(paths));
-
-    expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
-    expect(mockSubscribeMessageRange).toHaveBeenCalledWith(expect.objectContaining({ topic }));
-  });
-
   it("should cancel subscriptions on unmount", () => {
     const topic = BasicBuilder.string();
-    const paths: StateTransitionPath[] = [buildStateTransitionPath({ value: topic })];
 
-    const { unmount } = renderHook(() => useDecodedMessageRange(paths));
+    const { unmount } = renderHook(() => useDecodedMessageRange([topic], [`${topic}.field`]));
 
     unmount();
 
@@ -119,9 +90,8 @@ describe("useDecodedMessageRange", () => {
 
   it("should accumulate messages and decode after flush", async () => {
     const topic = BasicBuilder.string();
-    const paths: StateTransitionPath[] = [buildStateTransitionPath({ value: `${topic}.field` })];
 
-    const { result } = renderHook(() => useDecodedMessageRange(paths));
+    const { result } = renderHook(() => useDecodedMessageRange([topic], [`${topic}.field`]));
 
     const msgs = [
       MessageEventBuilder.messageEvent({ topic }),
@@ -140,12 +110,12 @@ describe("useDecodedMessageRange", () => {
     expect(result.current).toEqual([{}]);
   });
 
-  it("should handle empty paths", () => {
+  it("should handle empty topics", () => {
     (useDecodeMessagePathsForMessagesByTopic as jest.Mock).mockReturnValue(
       jest.fn().mockReturnValue({}),
     );
 
-    const { result } = renderHook(() => useDecodedMessageRange([]));
+    const { result } = renderHook(() => useDecodedMessageRange([], []));
 
     expect(result.current).toEqual([{}]);
     expect(mockSubscribeMessageRange).not.toHaveBeenCalled();
@@ -153,9 +123,8 @@ describe("useDecodedMessageRange", () => {
 
   it("should reset accumulated data when a new range iterator is provided", async () => {
     const topic = BasicBuilder.string();
-    const paths: StateTransitionPath[] = [buildStateTransitionPath({ value: `${topic}.field` })];
 
-    renderHook(() => useDecodedMessageRange(paths));
+    renderHook(() => useDecodedMessageRange([topic], [`${topic}.field`]));
 
     const firstBatch = [MessageEventBuilder.messageEvent({ topic })];
     const secondBatch = [MessageEventBuilder.messageEvent({ topic })];

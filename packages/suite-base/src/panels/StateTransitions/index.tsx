@@ -16,6 +16,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 
+import { parseMessagePath } from "@lichtblick/message-path";
 import { add as addTimes, fromSec } from "@lichtblick/rostime";
 import useMessagesByPath from "@lichtblick/suite-base/components/MessagePathSyntax/useMessagesByPath";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
@@ -44,15 +45,30 @@ function StateTransitions(props: StateTransitionPanelProps) {
   const { paths } = config;
   const { classes } = useStateTransitionsStyles();
 
-  const pathStrings = useMemo(() => paths.map(({ value }) => value), [paths]);
-
   const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
 
   useMessagePathDropConfig(saveConfig);
 
   const { startTime, currentTimeSinceStart, endTimeSinceStart } = useStateTransitionsTime();
 
-  const decodedMessages = useDecodedMessageRange(paths);
+  const { topics, pathStrings } = useMemo(() => {
+    const newPathStrings = paths.map(({ value }) => value);
+    const uniqueTopics = new Set<string>();
+
+    for (const pathString of newPathStrings) {
+      const parsed = parseMessagePath(pathString);
+      if (parsed) {
+        uniqueTopics.add(parsed.topicName);
+      }
+    }
+
+    return {
+      topics: [...uniqueTopics],
+      pathStrings: newPathStrings,
+    };
+  }, [paths]);
+
+  const decodedMessages = useDecodedMessageRange(topics, pathStrings);
 
   // When range data is active, skip useMessagesByPath subscriptions entirely
   // to avoid wasteful current-frame processing and decoding.
