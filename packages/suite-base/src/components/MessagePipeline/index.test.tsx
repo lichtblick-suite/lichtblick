@@ -22,6 +22,7 @@ import { act, renderHook } from "@testing-library/react";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { DeepPartial } from "ts-essentials";
 
+import { AlertsContext } from "@lichtblick/suite-base/context/AlertsContext";
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { Player, PlayerPresence, TopicStats } from "@lichtblick/suite-base/players/types";
@@ -34,9 +35,9 @@ import FakePlayer from "./FakePlayer";
 import { MAX_PROMISE_TIMEOUT_TIME_MS } from "./pauseFrameForPromise";
 
 const mockClearAlerts = jest.fn();
-jest.mock("@lichtblick/suite-base/context/AlertsContext", () => ({
-  useAlertsActions: () => ({ clearAlerts: mockClearAlerts }),
-}));
+const alertsStore = {
+  getState: () => ({ actions: { clearAlerts: mockClearAlerts } }),
+};
 
 jest.setTimeout(MAX_PROMISE_TIMEOUT_TIME_MS * 3);
 
@@ -59,9 +60,11 @@ function makeTestHook({ player }: { player?: Player }) {
     const [config] = useState(() => makeMockAppConfiguration());
     return (
       <AppConfigurationContext.Provider value={config}>
-        <MockCurrentLayoutProvider>
-          <MessagePipelineProvider player={currentPlayer}>{children}</MessagePipelineProvider>
-        </MockCurrentLayoutProvider>
+        <AlertsContext.Provider value={alertsStore as never}>
+          <MockCurrentLayoutProvider>
+            <MessagePipelineProvider player={currentPlayer}>{children}</MessagePipelineProvider>
+          </MockCurrentLayoutProvider>
+        </AlertsContext.Provider>
       </AppConfigurationContext.Provider>
     );
   }

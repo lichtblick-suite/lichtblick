@@ -20,7 +20,7 @@ import { StoreApi, useStore } from "zustand";
 import { useGuaranteedContext } from "@lichtblick/hooks";
 import { Immutable } from "@lichtblick/suite";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
-import { useAlertsActions } from "@lichtblick/suite-base/context/AlertsContext";
+import { AlertsContext } from "@lichtblick/suite-base/context/AlertsContext";
 import CurrentLayoutContext, {
   LayoutState,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
@@ -102,7 +102,10 @@ const selectSubscriptions = (state: MessagePipelineInternalState) => state.publi
 export function MessagePipelineProvider({ children, player }: ProviderProps): React.ReactElement {
   const promisesToWaitForRef = useRef<FramePromise[]>([]);
   const previousPlayerRef = useRef<Player | undefined>();
-  const { clearAlerts } = useAlertsActions();
+  const alertsStore = useContext(AlertsContext);
+  const clearAlerts = useCallback(() => {
+    alertsStore?.getState().actions.clearAlerts();
+  }, [alertsStore]);
 
   // We make a new store when the player changes. This throws away any state from the previous store
   // and re-creates the pipeline functions and references. We make a new store to avoid holding onto
