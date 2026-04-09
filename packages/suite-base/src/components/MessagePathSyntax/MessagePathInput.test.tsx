@@ -32,6 +32,11 @@ import MessagePathInput, {
   getFirstInvalidVariableFromRosPath,
 } from "./MessagePathInput";
 import { MessagePathInputBaseProps } from "./types";
+import { BasicBuilder } from "@lichtblick/test-builders";
+
+// Re-assignable mocks for tests
+let mockDatatypes = new Map();
+let mockTopics: Array<{ name: string; schemaName?: string }> = [];
 
 jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
 jest.mock("@lichtblick/suite-base/components/MessagePipeline");
@@ -39,8 +44,8 @@ jest.mock("@lichtblick/suite-base/context/UserProfileStorageContext");
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext");
 jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
   useDataSourceInfo: () => ({
-    datatypes: new Map(),
-    topics: [],
+    datatypes: mockDatatypes,
+    topics: mockTopics,
   }),
 }));
 jest.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", () =>
@@ -144,5 +149,90 @@ describe("MessagePathInput Component", () => {
     await user.type(input, "{{");
 
     expect(mockOnChange).toHaveBeenCalledWith("{}", 0);
+  });
+
+  describe("autoComplete logic", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (useGlobalVariables as jest.Mock).mockReturnValue({
+        globalVariables: {},
+        setGlobalVariables: jest.fn(),
+      });
+    });
+
+    it("should resolve to 'topicName' when path is empty (rosPath is null)", async () => {
+      // Given
+      const topic1 = { name: `/${BasicBuilder.string()}`, schemaName: "std_msgs/String" };
+      const topic2 = { name: `/${BasicBuilder.number()}`, schemaName: "std_msgs/Int32" };
+      mockTopics = [topic1, topic2];
+      mockDatatypes = new Map();
+
+      // When
+      renderComponent({ path: "" });
+      const input = screen.getByRole("combobox");
+      fireEvent.click(input);
+      fireEvent.focus(input);
+
+      // Then
+      // Wait for autocomplete options to appear
+      const options = await screen.findAllByRole("option");
+      expect(options).toHaveLength(2);
+      expect(options[0]!.textContent).toBe(topic1.name);
+      expect(options[1]!.textContent).toBe(topic2.name);
+    });
+
+    it("should resolve to 'topicName' when typing partial topic name", async () => {
+      const topic1 = { name: `/camera/${BasicBuilder.string()}`, schemaName: "std_msgs/String" };
+      const topic2 = { name: `/camera/${BasicBuilder.string()}`, schemaName: "std_msgs/String" };
+      mockTopics = [topic1, topic2];
+      mockDatatypes = new Map();
+
+      renderComponent({ path: "/cam" });
+      const input = screen.getByRole("combobox");
+
+      fireEvent.click(input);
+      fireEvent.focus(input);
+
+      // Wait for options to appear, then verify them by text content
+      const options = await screen.findAllByRole("option");
+      expect(options).toHaveLength(2);
+      expect(options[0]!.textContent).toBe(topic1.name);
+      expect(options[1]!.textContent).toBe(topic2.name);
+    });
+
+    it("should show field options after selecting a topic from autocomplete", async () => {
+      // Given
+      mockTopics = [{ name: `/topic1`, schemaName: "custom/Type" }];
+      mockDatatypes = new Map([
+        [
+          "custom/Type",
+          {
+            definitions: [
+              { name: "value1", type: "float64", isArray: false, isComplex: false },
+              { name: "value2", type: "string", isArray: false, isComplex: false },
+            ],
+          },
+        ],
+      ]);
+
+      renderComponent({ path: "/top", validTypes: ["primitive"] });
+      const input = screen.getByRole("combobox");
+      // When/Then
+      fireEvent.click(input);
+      fireEvent.focus(input);
+      const topicOptions = await screen.findAllByRole("option");
+      expect(topicOptions.length).toBeGreaterThanOrEqual(1);
+      expect(topicOptions[0]?.textContent).toBe("/topic1");
+
+      // When
+      // This triggers onSelect which adds "." and shows field options
+      fireEvent.click(topicOptions[0]!);
+      // Then
+      const options = await screen.findAllByRole("option");
+      expect(options).toHaveLength(3);
+      expect(options[0]!.textContent).toBe("/topic1");
+      expect(options[1]!.textContent).toBe("/topic1.value1");
+      expect(options[2]!.textContent).toBe("/topic1.value2");
+    });
   });
 });
