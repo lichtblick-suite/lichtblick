@@ -33,6 +33,11 @@ import { MessagePipelineContext, MessagePipelineProvider, useMessagePipeline } f
 import FakePlayer from "./FakePlayer";
 import { MAX_PROMISE_TIMEOUT_TIME_MS } from "./pauseFrameForPromise";
 
+const mockClearAlerts = jest.fn();
+jest.mock("@lichtblick/suite-base/context/AlertsContext", () => ({
+  useAlertsActions: () => ({ clearAlerts: mockClearAlerts }),
+}));
+
 jest.setTimeout(MAX_PROMISE_TIMEOUT_TIME_MS * 3);
 
 // We require two state updates for each player emit() to take effect, for unknown reasons
@@ -68,6 +73,10 @@ function makeTestHook({ player }: { player?: Player }) {
 }
 
 describe("MessagePipelineProvider/useMessagePipeline", () => {
+  beforeEach(() => {
+    mockClearAlerts.mockClear();
+  });
+
   it("returns empty data when no player is given", () => {
     const { Hook, Wrapper, all } = makeTestHook({});
     renderHook(Hook, { wrapper: Wrapper });
@@ -626,6 +635,61 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
     expect(result.current.playerState.playerId).toEqual("player2");
     expect(result.current.messageEventsBySubscriberId.get("custom-id")).toBeUndefined();
+  });
+
+  it("clears session alerts when player id changes", async () => {
+    // Given
+    const player = new FakePlayer();
+    const { Hook, Wrapper } = makeTestHook({ player });
+    renderHook(Hook, { wrapper: Wrapper });
+
+    await doubleAct(async () => {
+      await player.emit({ playerId: "player-1" });
+    });
+    expect(mockClearAlerts).not.toHaveBeenCalled();
+
+    // When
+    await doubleAct(async () => {
+      await player.emit({ playerId: "player-2" });
+    });
+
+    // Then
+    expect(mockClearAlerts).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not clear session alerts when player id stays the same", async () => {
+    // Given
+    const player = new FakePlayer();
+    const { Hook, Wrapper } = makeTestHook({ player });
+    renderHook(Hook, { wrapper: Wrapper });
+
+    await doubleAct(async () => {
+      await player.emit({ playerId: "player-1" });
+    });
+    mockClearAlerts.mockClear();
+
+    // When
+    await doubleAct(async () => {
+      await player.emit({ playerId: "player-1" });
+    });
+
+    // Then
+    expect(mockClearAlerts).not.toHaveBeenCalled();
+  });
+
+  it("clears session alerts when player changes", async () => {
+    // Given
+    const player = new FakePlayer();
+    const { Hook, Wrapper, setPlayer } = makeTestHook({ player });
+    const { rerender } = renderHook(Hook, { wrapper: Wrapper });
+    expect(mockClearAlerts).not.toHaveBeenCalled();
+
+    // When
+    setPlayer(new FakePlayer());
+    rerender();
+
+    // Then
+    expect(mockClearAlerts).toHaveBeenCalledTimes(1);
   });
 
   it("sets publishers", async () => {
