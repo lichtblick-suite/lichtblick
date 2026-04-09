@@ -83,6 +83,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
   let prevSeekTime: number | undefined;
   let prevSortedTopics: BuilderRenderStateInput["sortedTopics"] | undefined;
   let prevMessageConverters: BuilderRenderStateInput["messageConverters"] | undefined;
+  // eslint-disable-next-line no-unassigned-vars
   let prevSharedPanelState: BuilderRenderStateInput["sharedPanelState"];
   let prevCurrentFrame: Immutable<RenderState["currentFrame"]>;
   let prevCollatedConversions: undefined | TopicSchemaConversions;
