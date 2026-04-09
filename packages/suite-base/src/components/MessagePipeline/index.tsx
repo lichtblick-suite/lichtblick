@@ -191,7 +191,7 @@ export function MessagePipelineProvider({ children, player }: ProviderProps): Re
       clearAlerts();
     }
     previousPlayerRef.current = player;
-  }, [player, store, clearAlerts]);
+  }, [player, clearAlerts]);
 
   useEffect(() => {
     const dispatch = store.getState().dispatch;
