@@ -26,13 +26,13 @@ import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPane
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import MessagePathInput, {
   tryToSetDefaultGlobalVar,
   getFirstInvalidVariableFromRosPath,
 } from "./MessagePathInput";
 import { MessagePathInputBaseProps } from "./types";
-import { BasicBuilder } from "@lichtblick/test-builders";
 
 // Re-assignable mocks for tests
 let mockDatatypes = new Map();
