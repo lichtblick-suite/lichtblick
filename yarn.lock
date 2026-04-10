@@ -1461,7 +1461,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.23.9, @babel/runtime@npm:^7.25.7, @babel/runtime@npm:^7.26.0, @babel/runtime@npm:^7.27.6, @babel/runtime@npm:^7.28.6, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.23.9, @babel/runtime@npm:^7.25.7, @babel/runtime@npm:^7.26.0, @babel/runtime@npm:^7.26.10, @babel/runtime@npm:^7.27.6, @babel/runtime@npm:^7.28.6, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.29.2
   resolution: "@babel/runtime@npm:7.29.2"
   checksum: d5548d1165de8995f8afc93a5694b8625409be16cd1f2250ac13e331335858ddac3cb9fd278e6c43956a130101a2203f09417938a1a96f9fb70f02b4b4172e1d
@@ -3515,7 +3515,7 @@ __metadata:
     leaflet: 1.9.4
     leaflet-ellipse: 0.9.1
     lodash-es: 4.18.1
-    mathjs: 11.12.0
+    mathjs: 15.2.0
     memoize-weak: 1.0.2
     meshoptimizer: 0.19.0
     moize: 6.1.6
@@ -8054,7 +8054,7 @@ __metadata:
     "@types/react-dom": 18.3.0
     clean-webpack-plugin: 4.0.0
     html-webpack-plugin: 5.6.0
-    mathjs: 11.12.0
+    mathjs: 15.2.0
     react: 18.3.1
     react-dom: 18.2.0
     webpack: 5.105.4
@@ -9086,7 +9086,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"complex.js@npm:^2.1.1":
+"complex.js@npm:^2.2.5":
   version: 2.4.3
   resolution: "complex.js@npm:2.4.3"
   checksum: 8f5ffcce4b02c62c4116c09140ba46afbeec5913ac9451259efeb7de2549a4d5b191c6adb74768ac34d3c57cba33cc4efce4e21a08d2ac320ae9fae928df77a1
@@ -12154,10 +12154,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fraction.js@npm:4.3.4":
-  version: 4.3.4
-  resolution: "fraction.js@npm:4.3.4"
-  checksum: 26fdecf114e3b693c760d3b2d5447f8ba9e815991ca7c7cdb930156780793b87f10936979a890b389676d960d7cd026273da9a44a6e20c12e3c4fd282a026ed3
+"fraction.js@npm:^5.2.1":
+  version: 5.3.4
+  resolution: "fraction.js@npm:5.3.4"
+  checksum: 6ac88ecfdb5fabe3566ae30f79828d448288efbb852cd43ad83afc961fb6923e1d77bc65fbcba8ccda10894114edd419581a050c73d61e368fdd4c3ff416a65a
   languageName: node
   linkType: hard
 
@@ -15496,22 +15496,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathjs@npm:11.12.0":
-  version: 11.12.0
-  resolution: "mathjs@npm:11.12.0"
+"mathjs@npm:15.2.0":
+  version: 15.2.0
+  resolution: "mathjs@npm:15.2.0"
   dependencies:
-    "@babel/runtime": ^7.23.2
-    complex.js: ^2.1.1
+    "@babel/runtime": ^7.26.10
+    complex.js: ^2.2.5
     decimal.js: ^10.4.3
     escape-latex: ^1.2.0
-    fraction.js: 4.3.4
+    fraction.js: ^5.2.1
     javascript-natural-sort: ^0.7.1
     seedrandom: ^3.0.5
     tiny-emitter: ^2.1.0
-    typed-function: ^4.1.1
+    typed-function: ^4.2.1
   bin:
     mathjs: bin/cli.js
-  checksum: 69d9ba52435bfebf50d0169939d6c6a0293f4b0e63683c4b95004574863a312503baab826680aa3963e21dc409628493ee333ed9d6a3e45cd4003d430a1ef0ef
+  checksum: 0cdb352b21a7ecdbd474e2175d19a2ffa241d5bdbcefd08dde22d435b1825dc81381d5482e3a9e7d271148060c5c6b5410b0b5124469cb5bfc4c74778182d8cc
   languageName: node
   linkType: hard
 
@@ -20946,7 +20946,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typed-function@npm:^4.1.1":
+"typed-function@npm:^4.2.1":
   version: 4.2.2
   resolution: "typed-function@npm:4.2.2"
   checksum: dcc9a2d91b060f051c474aff4f9de0c387c51766badc85c4e4d8bd970739faa47a1c3e6243124533fe08ef95b8647c81a0ca460fefb9202e5a0b598ce4d567a0
