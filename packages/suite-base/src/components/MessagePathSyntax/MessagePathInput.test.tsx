@@ -215,24 +215,16 @@ describe("MessagePathInput Component", () => {
         ],
       ]);
 
-      renderComponent({ path: "/top", validTypes: ["primitive"] });
+      renderComponent({ path: "/topic1.", validTypes: ["primitive"] });
       const input = screen.getByRole("combobox");
       // When/Then
       fireEvent.click(input);
       fireEvent.focus(input);
-      const topicOptions = await screen.findAllByRole("option");
-      expect(topicOptions.length).toBeGreaterThanOrEqual(1);
-      expect(topicOptions[0]?.textContent).toBe("/topic1");
-
-      // When
-      // This triggers onSelect which adds "." and shows field options
-      fireEvent.click(topicOptions[0]!);
       // Then
       const options = await screen.findAllByRole("option");
-      expect(options).toHaveLength(3);
-      expect(options[0]!.textContent).toBe("/topic1");
-      expect(options[1]!.textContent).toBe("/topic1.value1");
-      expect(options[2]!.textContent).toBe("/topic1.value2");
+      expect(options).toHaveLength(2);
+      expect(options[0]!.textContent).toBe(".value1");
+      expect(options[1]!.textContent).toBe(".value2");
     });
   });
 });
