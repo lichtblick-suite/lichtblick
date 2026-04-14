@@ -151,6 +151,10 @@ export const getValueActionForValue = (
       // Unexpected path/value/schema combinations can happen for synthetic keys
       // (e.g. array internals). This path is only used for optional hover actions,
       // so fail gracefully instead of crashing the panel.
+      console.warn(
+        "getValueActionForValue: unexpected structureType",
+        state.structureItem?.structureType,
+      );
       return undefined;
     }
   }

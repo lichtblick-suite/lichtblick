@@ -3,7 +3,7 @@
 
 import { Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material";
 import * as _ from "lodash-es";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import Tree from "react-json-tree";
 
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
@@ -42,6 +42,7 @@ import {
   dataWithoutWrappingArray,
   getSingleValue,
   isSingleElemArray,
+  typedArrayToArray,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
 
@@ -86,6 +87,11 @@ function RawMessages(props: PropsRawMessages) {
     onTopicPathChange,
     openSiblingPanel,
   });
+
+  // Cache typed-array → regular-array conversions so Array.from() is called at most
+  // once per unique typed array object. The WeakMap lets the cached arrays be GC'd
+  // whenever the originals are released (e.g. when a new message arrives).
+  const typedArrayCache = useRef(new WeakMap<object, unknown[]>());
 
   const defaultGetItemString = useGetItemStringWithTimezone();
   const getItemString = useMemo(
@@ -247,10 +253,9 @@ function RawMessages(props: PropsRawMessages) {
 
                 // react-json-tree treats typed arrays as opaque objects; convert them
                 // to regular arrays so users can expand and inspect element values.
-                const toDisplayValue =
-                  ArrayBuffer.isView(rawVal) && !(rawVal instanceof DataView)
-                    ? Array.from(rawVal as unknown as ArrayLike<unknown>)
-                    : rawVal;
+                // Results are cached in a WeakMap so Array.from() runs at most once per
+                // unique typed array instance instead of on every render call.
+                const toDisplayValue = typedArrayToArray(rawVal, typedArrayCache.current);
                 const idValue = (toDisplayValue as Record<string, unknown>)[
                   diffLabels.ID.labelText
                 ];
@@ -270,10 +275,10 @@ function RawMessages(props: PropsRawMessages) {
                     1 &&
                   idValue == undefined
                 ) {
-                  const unwrappedValue = addedValue ?? changedValue ?? deletedValue;
-                  return ArrayBuffer.isView(unwrappedValue) && !(unwrappedValue instanceof DataView)
-                    ? Array.from(unwrappedValue as unknown as ArrayLike<unknown>)
-                    : unwrappedValue;
+                  return typedArrayToArray(
+                    addedValue ?? changedValue ?? deletedValue,
+                    typedArrayCache.current,
+                  );
                 }
                 return toDisplayValue;
               }}
