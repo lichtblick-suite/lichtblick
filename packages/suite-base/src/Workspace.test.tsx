@@ -148,6 +148,9 @@ jest.mock("@lichtblick/suite-base/context/AppContext", () => ({
 }));
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
   useCurrentLayoutSelector: jest.fn().mockReturnValue(undefined),
+  useCurrentLayoutActions: jest.fn().mockReturnValue({
+    setSelectedLayoutId: jest.fn(),
+  }),
 }));
 jest.mock("@lichtblick/suite-base/context/CurrentUserContext", () => ({
   useCurrentUser: jest.fn(),
@@ -155,6 +158,13 @@ jest.mock("@lichtblick/suite-base/context/CurrentUserContext", () => ({
 }));
 jest.mock("@lichtblick/suite-base/context/EventsContext", () => ({
   useEvents: jest.fn(),
+}));
+jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
+  useLayoutManager: jest.fn().mockReturnValue({
+    getLayouts: jest.fn().mockResolvedValue([]),
+    deleteLayout: jest.fn().mockResolvedValue(undefined),
+    saveNewLayout: jest.fn().mockResolvedValue({ id: "test-layout-id" }),
+  }),
 }));
 jest.mock("@lichtblick/suite-base/context/PlayerSelectionContext", () => ({
   usePlayerSelection: jest.fn(),

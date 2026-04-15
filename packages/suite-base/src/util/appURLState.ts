@@ -49,9 +49,11 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
   }
 
   if ("layoutUrl" in urlState) {
-    urlState.layoutUrl
-      ? newURL.searchParams.set("layoutUrl", urlState.layoutUrl)
-      : newURL.searchParams.delete("layoutUrl");
+    if (urlState.layoutUrl) {
+      newURL.searchParams.set("layoutUrl", urlState.layoutUrl);
+    } else {
+      newURL.searchParams.delete("layoutUrl");
+    }
   }
 
   if (urlState.dsParams || urlState.dsParamsArray) {

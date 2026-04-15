@@ -60,10 +60,8 @@ import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedF
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
   LayoutData,
-  useCurrentLayoutActions,
-} from "@lichtblick/suite-base/context/CurrentLayoutContext";
-import {
   LayoutState,
+  useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
@@ -71,6 +69,7 @@ import {
   useCurrentUserType,
 } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { EventsStore, useEvents } from "@lichtblick/suite-base/context/EventsContext";
+import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import {
   LeftSidebarItemKey,
@@ -162,7 +161,8 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     [getMessagePipeline],
   );
 
-  const { setCurrentLayout } = useCurrentLayoutActions();
+  const { setSelectedLayoutId } = useCurrentLayoutActions();
+  const layoutManager = useLayoutManager();
 
   const { dialogActions, sidebarActions } = useWorkspaceActions();
   const { handleFiles } = useHandleFiles({
@@ -506,29 +506,52 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
   const selectEvent = useEvents(selectSelectEvent);
 
-  const fetchLayoutFromUrl = async (layoutUrl: string) => {
-    if (!layoutUrl) {
-      return;
-    }
-    let res;
-    try {
-      res = await fetch(layoutUrl);
-    } catch {
-      log.debug(`Could not load the layout from ${layoutUrl}`);
-      return;
-    }
-    const parsedState: unknown = JSON.parse(await res.text());
+  const fetchLayoutFromUrl = useCallback(
+    async (layoutUrl: string) => {
+      if (layoutUrl === "") {
+        return;
+      }
 
-    if (typeof parsedState !== "object" || !parsedState) {
-      log.debug(`${layoutUrl} does not contain valid layout JSON`);
-      return;
-    }
+      try {
+        const response = await fetch(layoutUrl);
+        if (!response.ok) {
+          log.debug(`Failed to fetch layout: ${layoutUrl} (status ${response.status})`);
+          return;
+        }
 
-    const layoutData = parsedState as LayoutData;
-    setCurrentLayout({
-      data: layoutData,
-    });
-  };
+        const parsed: unknown = JSON.parse(await response.text());
+
+        if (parsed == undefined || typeof parsed !== "object") {
+          log.debug(`${layoutUrl} does not contain valid layout JSON`);
+          return;
+        }
+
+        const layoutData = parsed as LayoutData;
+        const layoutName = `Layout from ${layoutUrl}`;
+
+        // Remove any existing layouts with this name and create a fresh one
+        // This ensures we always use the latest version from the URL and avoid duplicates
+        const existingLayouts = await layoutManager.getLayouts();
+        const matchingLayouts = existingLayouts.filter((layout) => layout.name === layoutName);
+
+        // Delete all existing layouts with this name
+        for (const layout of matchingLayouts) {
+          await layoutManager.deleteLayout({ id: layout.id });
+        }
+
+        // Create a fresh layout with the new data
+        const newLayout = await layoutManager.saveNewLayout({
+          name: layoutName,
+          data: layoutData,
+          permission: "CREATOR_WRITE",
+        });
+        setSelectedLayoutId(newLayout.id);
+      } catch (error) {
+        log.debug(`Could not load the layout from ${layoutUrl}`, error);
+      }
+    },
+    [layoutManager, setSelectedLayoutId],
+  );
 
   // Load data source from URL.
   useEffect(() => {
@@ -536,7 +559,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       return;
     }
 
-    let shouldUpdate;
+    let shouldUpdate = false;
 
     // Apply any available data source args
     if (unappliedSourceArgs.ds) {
@@ -548,15 +571,15 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       selectEvent(unappliedSourceArgs.dsParams?.eventId);
       shouldUpdate = true;
     }
-    // Apply any available datasource args
+    // Apply any available layout URL
     if (unappliedSourceArgs.layoutUrl) {
-      fetchLayoutFromUrl(unappliedSourceArgs.layoutUrl);
+      void fetchLayoutFromUrl(unappliedSourceArgs.layoutUrl);
       shouldUpdate = true;
     }
     if (shouldUpdate) {
       setUnappliedSourceArgs({ ds: undefined, dsParams: undefined, layoutUrl: undefined });
     }
-  }, [selectEvent, selectSource, unappliedSourceArgs, setUnappliedSourceArgs]);
+  }, [fetchLayoutFromUrl, selectEvent, selectSource, unappliedSourceArgs, setUnappliedSourceArgs]);
 
   const [unappliedTime, setUnappliedTime] = useState(
     targetUrlState ? { time: targetUrlState.time } : undefined,
