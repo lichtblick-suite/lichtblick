@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { H264, VideoPlayer } from "@lichtblick/den/video";
+import { H264, H265, VideoPlayer } from "@lichtblick/den/video";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 
 import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
@@ -56,6 +56,15 @@ describe("isVideoKeyframe", () => {
     jest.spyOn(H264, "IsKeyframe").mockReturnValue(false);
     expect(isVideoKeyframe(mockVideoFrame)).toBe(false);
   });
+
+  it("should use H265 keyframe detection for h265 format", () => {
+    const mockVideoFrame = createMockVideoFrame({
+      data: new Uint8Array([0x26]),
+      format: "h265",
+    });
+    jest.spyOn(H265, "IsKeyframe").mockReturnValue(true);
+    expect(isVideoKeyframe(mockVideoFrame)).toBe(true);
+  });
 });
 
 describe("getVideoDecoderConfig", () => {
@@ -73,6 +82,16 @@ describe("getVideoDecoderConfig", () => {
       data: new Uint8Array([0x00]),
     });
     expect(getVideoDecoderConfig(mockVideoFrame)).toBeUndefined();
+  });
+
+  it("should return a VideoDecoderConfig for h265 format", () => {
+    const mockVideoFrame = createMockVideoFrame({
+      data: new Uint8Array([0x00]),
+      format: "h265",
+    });
+    const mockConfig = { codec: "hev1.1.6.L153.B0" };
+    jest.spyOn(H265, "ParseDecoderConfig").mockReturnValue(mockConfig);
+    expect(getVideoDecoderConfig(mockVideoFrame)).toEqual(mockConfig);
   });
 });
 

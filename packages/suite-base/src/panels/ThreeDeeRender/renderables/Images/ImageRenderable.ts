@@ -67,7 +67,7 @@ export const IMAGE_RENDERABLE_DEFAULT_SETTINGS: ImageRenderableSettings = {
   contrast: INITIAL_CONTRAST,
 };
 
-const VIDEO_FORMATS = new Set(["h264"]);
+const VIDEO_FORMATS = new Set(["h264", "h265", "hevc"]);
 
 export type ImageUserData = BaseUserData & {
   topic: string;
@@ -284,6 +284,9 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         }
 
         if (!this.videoPlayer) {
+          if (!VideoPlayer.IsSupported()) {
+            throw new Error("WebCodecs VideoDecoder is not available in this browser");
+          }
           this.videoPlayer = new VideoPlayer();
           this.videoPlayer.on("error", (err) => {
             log.error(err);
