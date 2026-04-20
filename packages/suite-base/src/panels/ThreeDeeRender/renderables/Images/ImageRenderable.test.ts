@@ -59,6 +59,15 @@ const sampleImage = {
   header: { frame_id: "camera", stamp: { sec: 0, nsec: 1 } },
 };
 
+function createH265Frame(data: Uint8Array) {
+  return {
+    format: "h265",
+    data,
+    frame_id: "camera",
+    timestamp: { sec: 0, nsec: 1 },
+  };
+}
+
 describe("ImageRenderable", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -191,5 +200,102 @@ describe("ImageRenderable error handling", () => {
     renderable.removeError("decode");
     expect(mockRemove).toHaveBeenCalledWith(["imageMode", "imageTopic"], "decode");
     expect(mockRemoveFromTopic).toHaveBeenCalledWith(mockUserData.topic, "decode");
+  });
+
+  it("should reuse cached h265 decoder config for later keyframes", async () => {
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    const init = jest.fn().mockResolvedValue(undefined);
+    const decode = jest.fn().mockResolvedValue(undefined);
+    renderable.videoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(false),
+      init,
+      decode,
+      codedSize: jest.fn(),
+    } as unknown as ImageRenderable["videoPlayer"];
+
+    const keyframeWithParameterSet = createH265Frame(
+      new Uint8Array([
+        0x00,
+        0x00,
+        0x00,
+        0x02,
+        (32 << 1) | 1,
+        0x01,
+        0x00,
+        0x00,
+        0x00,
+        0x02,
+        (19 << 1) | 1,
+        0x01,
+      ]),
+    );
+    const keyframeWithoutParameterSet = createH265Frame(
+      new Uint8Array([0x00, 0x00, 0x00, 0x02, (19 << 1) | 1, 0x01]),
+    );
+
+    // @ts-expect-error decodeImage is protected, but ok to use on tests
+    await renderable.decodeImage(keyframeWithParameterSet, 100);
+    // @ts-expect-error decodeImage is protected, but ok to use on tests
+    await renderable.decodeImage(keyframeWithoutParameterSet, 100);
+
+    expect(init).toHaveBeenNthCalledWith(1, { codec: "hev1.1.6.L153.B0" });
+    expect(init).toHaveBeenNthCalledWith(2, { codec: "hev1.1.6.L153.B0" });
+  });
+
+  it("should report detailed h265 diagnostics before decoder init", async () => {
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    renderable.videoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(false),
+      init: jest.fn(),
+      decode: jest.fn(),
+      codedSize: jest.fn(),
+    } as unknown as ImageRenderable["videoPlayer"];
+
+    // @ts-expect-error decodeImage is protected, but ok to use on tests
+    await expect(renderable.decodeImage(createH265Frame(new Uint8Array([0x01, 0x02, 0x03])), 100)).rejects.toThrow(
+      "Waiting for keyframe (unsupported H.265 bitstream format)",
+    );
+  });
+
+  it("should wait silently on h265 delta frames before decoder init", async () => {
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    const init = jest.fn().mockResolvedValue(undefined);
+    renderable.videoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(false),
+      init,
+      decode: jest.fn(),
+      codedSize: jest.fn(),
+      lastImageBitmap: undefined,
+    } as unknown as ImageRenderable["videoPlayer"];
+
+    // @ts-expect-error decodeImage is protected, but ok to use on tests
+    await renderable.decodeImage(
+      createH265Frame(
+        new Uint8Array([
+          0x00,
+          0x00,
+          0x00,
+          0x02,
+          (32 << 1) | 1,
+          0x01,
+          0x00,
+          0x00,
+          0x00,
+          0x02,
+          (19 << 1) | 1,
+          0x01,
+        ]),
+      ),
+      100,
+    );
+    const bitmap =
+      // @ts-expect-error decodeImage is protected, but ok to use on tests
+      await renderable.decodeImage(
+        createH265Frame(new Uint8Array([0x00, 0x00, 0x00, 0x02, (1 << 1) | 1, 0x01])),
+        100,
+      );
+
+    expect(bitmap).toBeInstanceOf(ImageBitmap);
+    expect(init).toHaveBeenCalledTimes(1);
   });
 });

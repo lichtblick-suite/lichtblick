@@ -11,6 +11,7 @@ import {
   decodeCompressedImageToBitmap,
   isVideoKeyframe,
   getVideoDecoderConfig,
+  prepareVideoFrame,
   decodeCompressedVideoToBitmap,
   decodeRawImage,
   emptyVideoFrame,
@@ -98,25 +99,86 @@ describe("getVideoDecoderConfig", () => {
 describe("decodeCompressedVideoToBitmap", () => {
   it("should decode a compressed video frame to an ImageBitmap", async () => {
     const mockVideoFrame = createMockVideoFrame();
+    const preparedFrame = {
+      data: mockVideoFrame.data,
+      type: "delta" as const,
+    };
     const mockVideoPlayer = {
       isInitialized: jest.fn().mockReturnValue(true),
       decode: jest.fn().mockResolvedValue(new ImageBitmap()),
     } as unknown as VideoPlayer;
-    const bitmap = await decodeCompressedVideoToBitmap(mockVideoFrame, mockVideoPlayer, BigInt(0));
+    const bitmap = await decodeCompressedVideoToBitmap(
+      mockVideoFrame,
+      preparedFrame,
+      mockVideoPlayer,
+      BigInt(0),
+    );
     expect(bitmap).toBeInstanceOf(ImageBitmap);
     expect(mockVideoPlayer.lastImageBitmap).toBeDefined();
   });
 
   it("should return an empty video frame if the video player is not initialized", async () => {
     const mockVideoFrame = createMockVideoFrame();
+    const preparedFrame = {
+      data: mockVideoFrame.data,
+      type: "delta" as const,
+    };
     const mockVideoPlayer = {
       isInitialized: jest.fn().mockReturnValue(false),
       codedSize: jest.fn(),
     } as unknown as VideoPlayer;
 
-    const bitmap = await decodeCompressedVideoToBitmap(mockVideoFrame, mockVideoPlayer, BigInt(0));
+    const bitmap = await decodeCompressedVideoToBitmap(
+      mockVideoFrame,
+      preparedFrame,
+      mockVideoPlayer,
+      BigInt(0),
+    );
     expect(bitmap).toBeInstanceOf(ImageBitmap);
     expect(mockVideoPlayer.lastImageBitmap).toBeUndefined();
+  });
+});
+
+describe("prepareVideoFrame", () => {
+  it("should normalize length-prefixed h265 keyframes", () => {
+    const parameterSet = [(32 << 1) | 1, 0x01];
+    const keyframe = [(19 << 1) | 1, 0x01];
+    const mockVideoFrame = createMockVideoFrame({
+      format: "h265",
+      data: new Uint8Array([
+        0x00,
+        0x00,
+        0x00,
+        parameterSet.length,
+        ...parameterSet,
+        0x00,
+        0x00,
+        0x00,
+        keyframe.length,
+        ...keyframe,
+      ]),
+    });
+
+    const preparedFrame = prepareVideoFrame(mockVideoFrame);
+
+    expect(preparedFrame.type).toBe("key");
+    expect(preparedFrame.decoderConfig).toEqual({ codec: "hev1.1.6.L153.B0" });
+    expect(preparedFrame.data).toEqual(
+      new Uint8Array([0x00, 0x00, 0x00, 0x01, ...parameterSet, 0x00, 0x00, 0x00, 0x01, ...keyframe]),
+    );
+  });
+
+  it("should return detailed diagnostics for unsupported h265 bitstreams", () => {
+    const mockVideoFrame = createMockVideoFrame({
+      format: "h265",
+      data: new Uint8Array([0x01, 0x02, 0x03, 0x04]),
+    });
+
+    const preparedFrame = prepareVideoFrame(mockVideoFrame);
+
+    expect(preparedFrame.type).toBe("delta");
+    expect(preparedFrame.decoderConfig).toBeUndefined();
+    expect(preparedFrame.diagnostics).toBe("unsupported H.265 bitstream format");
   });
 });
 
