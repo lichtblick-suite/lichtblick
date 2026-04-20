@@ -52,6 +52,13 @@ export function isVideoKeyframe(frameMsg: CompressedVideo): boolean {
   return false;
 }
 
+export type PreparedVideoFrame = {
+  data: Uint8Array;
+  decoderConfig?: VideoDecoderConfig;
+  diagnostics?: string;
+  type: "key" | "delta";
+};
+
 export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
   switch (frameMsg.format) {
     case "h264": {
@@ -67,8 +74,38 @@ export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderCo
   return undefined;
 }
 
+export function prepareVideoFrame(frameMsg: CompressedVideo): PreparedVideoFrame {
+  switch (frameMsg.format) {
+    case "h265":
+    case "hevc": {
+      const frameInfo = H265.InspectFrame(frameMsg.data);
+      if (frameInfo.bitstreamFormat === "unknown" || frameInfo.normalizedData == undefined) {
+        return {
+          data: frameMsg.data,
+          diagnostics: "unsupported H.265 bitstream format",
+          type: "delta",
+        };
+      }
+
+      return {
+        data: frameInfo.normalizedData,
+        decoderConfig: frameInfo.hasParameterSet ? { codec: "hev1.1.6.L153.B0" } : undefined,
+        diagnostics: frameInfo.hasParameterSet ? undefined : "no VPS/SPS/PPS found",
+        type: frameInfo.isKeyframe ? "key" : "delta",
+      };
+    }
+    default:
+      return {
+        data: frameMsg.data,
+        decoderConfig: getVideoDecoderConfig(frameMsg),
+        type: isVideoKeyframe(frameMsg) ? "key" : "delta",
+      };
+  }
+}
+
 export async function decodeCompressedVideoToBitmap(
-  frameMsg: CompressedVideo,
+  frameMsg: Pick<CompressedVideo, "timestamp">,
+  preparedFrame: PreparedVideoFrame,
   videoPlayer: VideoPlayer,
   firstMessageTime: bigint,
   resizeWidth?: number,
@@ -81,11 +118,7 @@ export async function decodeCompressedVideoToBitmap(
   const firstTimestampMicros = Number(firstMessageTime / 1000n);
   const timestampMicros = toMicroSec(frameMsg.timestamp) - firstTimestampMicros;
 
-  const videoFrame = await videoPlayer.decode(
-    frameMsg.data,
-    timestampMicros,
-    isVideoKeyframe(frameMsg) ? "key" : "delta",
-  );
+  const videoFrame = await videoPlayer.decode(preparedFrame.data, timestampMicros, preparedFrame.type);
   if (videoFrame) {
     const imageBitmap = await self.createImageBitmap(videoFrame, { resizeWidth });
     videoPlayer.lastImageBitmap = imageBitmap;

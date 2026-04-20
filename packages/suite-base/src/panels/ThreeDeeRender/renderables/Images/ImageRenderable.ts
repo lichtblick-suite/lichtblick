@@ -29,7 +29,7 @@ import {
   decodeCompressedImageToBitmap,
   decodeCompressedVideoToBitmap,
   emptyVideoFrame,
-  getVideoDecoderConfig,
+  prepareVideoFrame,
 } from "./decodeImage";
 import { CameraInfo } from "../../ros";
 import {
@@ -106,6 +106,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   #receivedImageSequenceNumber = 0;
   #displayedImageSequenceNumber = 0;
   #showingErrorImage = false;
+  #cachedVideoDecoderConfig: VideoDecoderConfig | undefined;
 
   #disposed = false;
 
@@ -297,15 +298,22 @@ export class ImageRenderable extends Renderable<ImageUserData> {
           });
         }
         const videoPlayer = this.videoPlayer;
+        const preparedFrame = prepareVideoFrame(frameMsg);
+        if (preparedFrame.decoderConfig != undefined) {
+          this.#cachedVideoDecoderConfig = preparedFrame.decoderConfig;
+        }
 
         // Initialize the video player if needed
         if (!videoPlayer.isInitialized()) {
-          const decoderConfig = getVideoDecoderConfig(frameMsg);
+          const decoderConfig = preparedFrame.decoderConfig ?? this.#cachedVideoDecoderConfig;
           if (decoderConfig != undefined) {
+            if (preparedFrame.type !== "key") {
+              return await emptyVideoFrame(videoPlayer, resizeWidth);
+            }
             await videoPlayer.init(decoderConfig);
           } else {
-            // Raise error so the caller can catch it
-            throw new Error("Waiting for keyframe");
+            const detail = preparedFrame.diagnostics ?? "no decoder configuration available";
+            throw new Error(`Waiting for keyframe (${detail})`);
           }
         }
 
@@ -313,6 +321,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
         return await decodeCompressedVideoToBitmap(
           frameMsg,
+          preparedFrame,
           videoPlayer,
           this.userData.firstMessageTime,
           resizeWidth,
