@@ -130,7 +130,7 @@ describe("McapLocalDataSourceFactory", () => {
 
     expect(WorkerSerializedIterableSource).toHaveBeenCalledWith({
       initWorker: expect.any(Function),
-      initArgs: { files: [file, files[0]] },
+      initArgs: { files: [files[0], file] },
     });
     expect(IterablePlayer).toHaveBeenCalledWith({
       metricsCollector: args.metricsCollector,
