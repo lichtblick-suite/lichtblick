@@ -3,6 +3,9 @@ name: Cloudflare Pages
 on:
   pull_request: {}
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -23,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 16.17
+          node-version: 24
 
       - run: corepack enable
 
