@@ -5,6 +5,9 @@ on:
     branches: [develop, main]
   pull_request:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -53,7 +56,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
       - run: corepack enable yarn
 
       - name: Restore cache
@@ -93,7 +96,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
       - run: corepack enable yarn
 
       - name: Restore cache
@@ -144,7 +147,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
       - run: corepack enable yarn
 
       - name: Restore cache
@@ -186,7 +189,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
       - run: corepack enable yarn
 
       - name: Restore cache
