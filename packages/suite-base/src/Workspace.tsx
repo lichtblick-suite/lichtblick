@@ -593,13 +593,13 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         >
           {/* To ensure no stale player state remains, we unmount all panels when players change */}
           <RemountOnValueChange value={playerId}>
-            <Stack>
+            <Stack data-testid="workspace-panels">
               <PanelLayout />
             </Stack>
           </RemountOnValueChange>
         </Sidebars>
         {play && pause && seek && (
-          <div style={{ flexShrink: 0 }}>
+          <div style={{ flexShrink: 0 }} data-testid="playback-controls">
             <PlaybackControls
               play={play}
               pause={pause}
