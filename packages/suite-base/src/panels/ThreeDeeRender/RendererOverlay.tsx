@@ -117,6 +117,48 @@ type Props = {
 };
 
 /**
+ * Extracts metadata key-value pairs from a renderable's details object for hover tooltip display.
+ */
+function extractHoverMetadata(
+  details: Record<string, unknown> | undefined,
+): { key: string; value: string }[] {
+  if (details == undefined) {
+    return [];
+  }
+
+  const metadata: { key: string; value: string }[] = [];
+  const entityMeta = details.metadata;
+  if (Array.isArray(entityMeta)) {
+    for (const metadataEntry of entityMeta) {
+      if (
+        metadataEntry != undefined &&
+        typeof metadataEntry === "object" &&
+        "key" in metadataEntry &&
+        "value" in metadataEntry
+      ) {
+        metadata.push({
+          key: String((metadataEntry as { key: unknown }).key),
+          value: String((metadataEntry as { value: unknown }).value),
+        });
+      }
+    }
+  }
+  // Then add any remaining top-level primitive fields (id, frame_id, etc.)
+  for (const [fieldName, fieldValue] of Object.entries(details)) {
+    if (
+      fieldName !== "metadata" &&
+      fieldValue != undefined &&
+      (typeof fieldValue === "string" ||
+        typeof fieldValue === "number" ||
+        typeof fieldValue === "boolean")
+    ) {
+      metadata.push({ key: fieldName, value: String(fieldValue) });
+    }
+  }
+  return metadata;
+}
+
+/**
  * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
  */
 export function RendererOverlay(props: Props): React.JSX.Element {
@@ -200,37 +242,13 @@ export function RendererOverlay(props: Props): React.JSX.Element {
         for (const pickedRenderable of selections) {
           const topic = pickedRenderable.renderable.topic;
           const details: Record<string, unknown> | undefined =
-            pickedRenderable.instanceIndex != undefined
-              ? (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex) as
+            pickedRenderable.instanceIndex == undefined
+              ? (pickedRenderable.renderable.details() as Record<string, unknown> | undefined)
+              : (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex) as
                   | Record<string, unknown>
-                  | undefined)
-              : (pickedRenderable.renderable.details() as Record<string, unknown> | undefined);
+                  | undefined);
 
-          const metadata: { key: string; value: string }[] = [];
-
-          if (details != undefined) {
-            const entityMeta = details.metadata;
-            if (Array.isArray(entityMeta)) {
-              for (const kv of entityMeta) {
-                if (kv != undefined && typeof kv === "object" && "key" in kv && "value" in kv) {
-                  metadata.push({
-                    key: String((kv as { key: unknown }).key),
-                    value: String((kv as { value: unknown }).value),
-                  });
-                }
-              }
-            }
-            // Then add any remaining top-level primitive fields (id, frame_id, etc.)
-            for (const [k, v] of Object.entries(details)) {
-              if (
-                k !== "metadata" &&
-                v != undefined &&
-                (typeof v === "string" || typeof v === "number" || typeof v === "boolean")
-              ) {
-                metadata.push({ key: k, value: String(v) });
-              }
-            }
-          }
+          const metadata = extractHoverMetadata(details);
 
           // Avoid showing tooltips for non-user-facing objects when hovering empty space.
           // If a renderable has no associated topic and no metadata, it doesn't provide useful info.

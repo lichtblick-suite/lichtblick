@@ -16,7 +16,7 @@ import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/Pan
  */
 type UseRawMessagesPanelSettingsOptions = {
   fontSize: number | undefined;
-  saveConfig: (config: { fontSize?: number | undefined }) => void;
+  saveConfig: (config: { fontSize?: number }) => void;
 };
 
 export function useRawMessagesPanelSettings({
@@ -36,7 +36,6 @@ export function useRawMessagesPanelSettings({
           fontSize:
             action.payload.value == undefined ? undefined : (action.payload.value as number),
         });
-        return;
       }
     },
     [saveConfig],

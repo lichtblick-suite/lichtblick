@@ -73,6 +73,29 @@ import { useSubscribeMessageRange } from "./useSubscribeMessageRange";
 
 const log = Logger.getLogger(__filename);
 
+/**
+ * Find the converter (if any) that would be used for a given convertTo subscription.
+ * Extracted to module level to avoid deeply nested function declarations (SonarCloud S2004).
+ */
+function getConverterForSubscription(
+  sub: Subscription,
+  topicToSchemaNameMap: Map<string, string | undefined>,
+  topicSchemaConverters: Map<ConverterKey, { toSchemaName: string }[]>,
+): { toSchemaName: string; supportsLatestPerRenderTick?: boolean } | undefined {
+  if (!sub.convertTo) {
+    return undefined;
+  }
+
+  const topicSchemaName = topicToSchemaNameMap.get(sub.topic);
+  if (topicSchemaName && topicSchemaName === sub.convertTo) {
+    return undefined;
+  }
+
+  const key = `${sub.topic}\n${String(topicSchemaName ?? "<no-schema>")}` as ConverterKey;
+  const convertersForTopic = topicSchemaConverters.get(key) ?? [];
+  return convertersForTopic.find((conv) => conv.toSchemaName === sub.convertTo);
+}
+
 type VersionedPanelConfig = Record<string, unknown> & { [VERSION_CONFIG_KEY]: number };
 
 export const VERSION_CONFIG_KEY = "foxgloveConfigVersion";
@@ -500,22 +523,6 @@ function PanelExtensionAdapter(
           messageConverters,
         );
 
-        // Find the converter (if any) that would be used for a given convertTo subscription.
-        const getConverterForSubscription = (sub: Subscription) => {
-          if (!sub.convertTo) {
-            return undefined;
-          }
-
-          const topicSchemaName = topicToSchemaNameMap.get(sub.topic);
-          if (topicSchemaName && topicSchemaName === sub.convertTo) {
-            return undefined;
-          }
-
-          const key = `${sub.topic}\n${topicSchemaName ?? "<no-schema>"}` as ConverterKey;
-          const convertersForTopic = topicSchemaConverters.get(key) ?? [];
-          return convertersForTopic.find((conv) => conv.toSchemaName === sub.convertTo);
-        };
-
         const subscribePayloads = localSubs.map((item): InternalSubscribePayload => {
           const preloadType = item.preload === true ? "full" : "partial";
 
@@ -530,7 +537,11 @@ function PanelExtensionAdapter(
           // Native/direct paths are denied by default.
           // If allowed, we set both the sampling request and the internal authorization bit.
           // MessagePipeline merge logic strips sampling requests unless authorization is present.
-          const converter = getConverterForSubscription(item);
+          const converter = getConverterForSubscription(
+            item,
+            topicToSchemaNameMap,
+            topicSchemaConverters,
+          );
           const topicSchemaName = topicToSchemaNameMap.get(item.topic);
           const isNativePath =
             item.convertTo == undefined ||
