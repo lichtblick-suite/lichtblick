@@ -43,7 +43,6 @@ import { RendererContext, useRendererEvent, useRendererProperty } from "./Render
 import { RendererOverlay } from "./RendererOverlay";
 import { useStyles } from "./ThreeDeeRender.style";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
-import { MAX_TRANSFORM_MESSAGES } from "./constants";
 import {
   PublishRos1Datatypes,
   PublishRos2Datatypes,
