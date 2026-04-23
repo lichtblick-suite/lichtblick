@@ -243,7 +243,7 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
             bufferedDecoded.length = 0;
           }
 
-          for (const [topic, rawMsgEvent] of pendingSampledByTopic) {
+          for (const [_topic, rawMsgEvent] of pendingSampledByTopic) {
             const result = tryDeserializeMessage(
               rawMsgEvent,
               subscribePayloadWithHashByTopic,
