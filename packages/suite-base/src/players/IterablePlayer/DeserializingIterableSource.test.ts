@@ -245,6 +245,45 @@ describe("DeserializingIterableSources", () => {
     }
   });
 
+  it("yields alert when message arrives on unsubscribed topic", async () => {
+    const source = new TestSource();
+    const deserSource = new DeserializingIterableSource(source);
+
+    await deserSource.initialize();
+
+    source.messageIterator = async function* messageIterator(
+      _args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult<Uint8Array>>> {
+      yield {
+        type: "message-event",
+        msgEvent: {
+          topic: "unknown_topic",
+          receiveTime: { sec: 0, nsec: 0 },
+          message: textEncoder.encode("{}"),
+          sizeInBytes: 0,
+          schemaName: "some_type",
+        },
+      };
+    };
+
+    // Subscribe only to json_topic — unknown_topic is NOT in the subscription map
+    const messageIterator = deserSource.messageIterator({
+      topics: new Map([["json_topic", { topic: "json_topic" }]]),
+    });
+
+    const iterResult = await messageIterator.next();
+    expect(iterResult).toMatchObject({
+      done: false,
+      value: {
+        type: "alert",
+        alert: {
+          severity: "error",
+          message: expect.stringContaining("unknown_topic"),
+        },
+      },
+    });
+  });
+
   it("handles deserialization errors for backfill messages", async () => {
     const source = new TestSource();
     const deserSource = new DeserializingIterableSource(source);
