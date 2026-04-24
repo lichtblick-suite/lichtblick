@@ -88,7 +88,7 @@ export function HoverTooltip({
     (
       currentMode: TooltipMode,
       currentEntities: HoverEntityInfo[],
-      keyChanged: boolean,
+      { keyChanged }: { keyChanged: boolean },
     ) => {
       if (currentMode === "hidden" || currentMode === "following") {
         // Fast mode: update content immediately as the user browses.
@@ -160,7 +160,7 @@ export function HoverTooltip({
     }
 
     if (entities.length > 0) {
-      handleEntitiesPresent(currentMode, entities, keyChanged);
+      handleEntitiesPresent(currentMode, entities, { keyChanged });
     } else {
       handleEntitiesCleared(currentMode);
     }
