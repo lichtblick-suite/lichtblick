@@ -303,12 +303,16 @@ export default function LayoutBrowser({
             <List className={classes.actionList} disablePadding>
               <ListItem disablePadding>
                 <ListItemButton onClick={createNewLayout}>
-                  <ListItemText disableTypography>Create new layout</ListItemText>
+                  <ListItemText data-testid="create-new-layout" disableTypography>
+                    Create new layout
+                  </ListItemText>
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
                 <ListItemButton onClick={importLayout}>
-                  <ListItemText disableTypography>Import from file…</ListItemText>
+                  <ListItemText data-testid="import-layout" disableTypography>
+                    Import from file…
+                  </ListItemText>
                 </ListItemButton>
               </ListItem>
             </List>

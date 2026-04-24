@@ -12,6 +12,9 @@ name: Dependabot
 on:
   - pull_request_target
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   fix:
     runs-on: ubuntu-latest
@@ -35,7 +38,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 16.17
+          node-version: 24
 
       - run: corepack enable
 
