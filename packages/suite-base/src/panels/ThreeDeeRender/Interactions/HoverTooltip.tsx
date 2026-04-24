@@ -84,6 +84,63 @@ export function HoverTooltip({
     }, HOVER_TOOLTIP_GRACE_PERIOD_MS);
   }, [startDwellTimer]);
 
+  const handleEntitiesPresent = useCallback(
+    (
+      currentMode: TooltipMode,
+      currentEntities: HoverEntityInfo[],
+      keyChanged: boolean,
+    ) => {
+      if (currentMode === "hidden" || currentMode === "following") {
+        // Fast mode: update content immediately as the user browses.
+        setVisibleEntities(currentEntities);
+        clearTimeout(graceTimer.current);
+        if (currentMode === "hidden") {
+          setMode("following");
+        }
+        if (keyChanged || currentMode === "hidden") {
+          startDwellTimer();
+        }
+        return;
+      }
+      if (currentMode === "settled") {
+        if (!keyChanged) {
+          return; // Still on the same object – stay settled.
+        }
+        // The user moved to a different object while settled.
+        setFrozenPosition(position);
+        pendingEntities.current = currentEntities;
+        clearTimeout(dwellTimer.current);
+        clearTimeout(graceTimer.current);
+        setMode("grace");
+        startGraceTransitionTimer();
+        return;
+      }
+      // Queue the latest entities to be shown when the grace period ends.
+      pendingEntities.current = currentEntities;
+    },
+    [position, startDwellTimer, startGraceTransitionTimer],
+  );
+
+  const handleEntitiesCleared = useCallback(
+    (currentMode: TooltipMode) => {
+      if (currentMode === "following" || currentMode === "settled") {
+        // Entities cleared.
+        clearTimeout(dwellTimer.current);
+        clearTimeout(graceTimer.current);
+        setFrozenPosition(position);
+        pendingEntities.current = [];
+        setMode("grace");
+        startGraceHideTimer();
+        return;
+      }
+      if (currentMode === "grace") {
+        // Already in grace – just clear pending so the timer hides the tooltip.
+        pendingEntities.current = [];
+      }
+    },
+    [position, startGraceHideTimer],
+  );
+
   // ---------------------------------------------------------------------------
   // React to incoming entity / position changes from the 3D scene
   // ---------------------------------------------------------------------------
@@ -103,42 +160,9 @@ export function HoverTooltip({
     }
 
     if (entities.length > 0) {
-      if (currentMode === "hidden" || currentMode === "following") {
-        // Fast mode: update content immediately as the user browses.
-        setVisibleEntities(entities);
-        clearTimeout(graceTimer.current);
-        if (currentMode === "hidden") {
-          setMode("following");
-        }
-        if (keyChanged || currentMode === "hidden") {
-          startDwellTimer();
-        }
-      } else if (currentMode === "settled") {
-        if (!keyChanged) {
-          return; // Still on the same object – stay settled.
-        }
-        // The user moved to a different object while settled.
-        setFrozenPosition(position);
-        pendingEntities.current = entities;
-        clearTimeout(dwellTimer.current);
-        clearTimeout(graceTimer.current);
-        setMode("grace");
-        startGraceTransitionTimer();
-      } else {
-        // Queue the latest entities to be shown when the grace period ends.
-        pendingEntities.current = entities;
-      }
-    } else if (currentMode === "following" || currentMode === "settled") {
-      // Entities cleared.
-      clearTimeout(dwellTimer.current);
-      clearTimeout(graceTimer.current);
-      setFrozenPosition(position);
-      pendingEntities.current = [];
-      setMode("grace");
-      startGraceHideTimer();
-    } else if (currentMode === "grace") {
-      // Already in grace – just clear pending so the timer hides the tooltip.
-      pendingEntities.current = [];
+      handleEntitiesPresent(currentMode, entities, keyChanged);
+    } else {
+      handleEntitiesCleared(currentMode);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entities]);
