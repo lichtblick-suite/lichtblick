@@ -5,8 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Bitstream } from "../h264/Bitstream";
-
 import { DEFAULT_HEVC_CODEC, H265_RANDOM_ACCESS_TYPES } from "./constants";
 import {
   H265FrameInfo,
@@ -15,6 +13,7 @@ import {
   H265ParserContext,
   H265SliceType,
 } from "./types";
+import { Bitstream } from "../h264/Bitstream";
 
 type H265PpsInfo = {
   ppsId: number;
@@ -24,6 +23,7 @@ type H265PpsInfo = {
   numExtraSliceHeaderBits: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class H265 {
   public static AnnexBBoxSize(data: Uint8Array): number | undefined {
     if (data.length < 4) {

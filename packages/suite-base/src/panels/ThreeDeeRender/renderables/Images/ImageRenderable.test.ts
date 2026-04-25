@@ -7,7 +7,6 @@ import * as THREE from "three";
 
 import { PinholeCameraModel } from "@lichtblick/den/image";
 import { H265SliceType } from "@lichtblick/den/video";
-import { toNanoSec } from "@lichtblick/rostime";
 import { IRenderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import H265FrameBuilder from "@lichtblick/suite-base/testing/builders/H265FrameBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -111,8 +110,9 @@ describe("ImageRenderable", () => {
     renderable.userData.texture = new THREE.Texture();
     renderable.userData.material = new THREE.ShaderMaterial();
     renderable.userData.geometry = new THREE.PlaneGeometry();
+    const close = jest.fn();
     renderable.videoPlayer = {
-      close: jest.fn(),
+      close,
     } as unknown as ImageRenderable["videoPlayer"];
 
     // @ts-expect-error isDisposed is protected, but ok to use on tests
@@ -120,7 +120,7 @@ describe("ImageRenderable", () => {
 
     renderable.dispose();
 
-    expect(renderable.videoPlayer?.close).toHaveBeenCalled();
+    expect(close).toHaveBeenCalled();
     // @ts-expect-error isDisposed is protected, but ok to use on tests
     expect(renderable.isDisposed()).toBe(true);
   });
@@ -287,10 +287,7 @@ describe("ImageRenderable error handling", () => {
 
     const bitmap =
       // @ts-expect-error decodeImage is protected, but ok to use on tests
-      await renderable.decodeImage(
-        createH265Frame(h265DeltaFrame),
-        100,
-      );
+      await renderable.decodeImage(createH265Frame(h265DeltaFrame), 100);
 
     expect(bitmap).not.toBe(lastImageBitmap);
   });
@@ -322,10 +319,7 @@ describe("ImageRenderable error handling", () => {
     await renderable.decodeImage(createH265Frame(h265Keyframe), 100);
     const bitmap =
       // @ts-expect-error decodeImage is protected, but ok to use on tests
-      await renderable.decodeImage(
-        createH265Frame(h265DeltaFrame),
-        100,
-      );
+      await renderable.decodeImage(createH265Frame(h265DeltaFrame), 100);
 
     expect(bitmap).toBeInstanceOf(ImageBitmap);
     expect(init).toHaveBeenCalledTimes(1);
@@ -421,25 +415,36 @@ describe("ImageRenderable error handling", () => {
     jest
       // @ts-expect-error decodeImage is protected, but ok to use on tests
       .spyOn(renderable, "decodeImage")
-      .mockImplementation(async (image: (typeof mockUserData)["image"] & { timestamp: { sec: number; nsec: number } }) => {
-        const timestampMicros = Number(
-          (BigInt(image.timestamp.sec) * 1000000000n + BigInt(image.timestamp.nsec)) / 1000n,
-        );
-        decodeOrder.push(timestampMicros);
-        if (timestampMicros === 33333) {
-          resolveLatestDecodeStarted();
-        }
-        await new Promise<void>((resolve) => {
-          decodeResolvers.set(timestampMicros, resolve);
-        });
-        return {} as ImageData;
-      });
+      .mockImplementation(
+        async (
+          image: (typeof mockUserData)["image"] & { timestamp: { sec: number; nsec: number } },
+        ) => {
+          const timestampMicros = Number(
+            (BigInt(image.timestamp.sec) * 1000000000n + BigInt(image.timestamp.nsec)) / 1000n,
+          );
+          decodeOrder.push(timestampMicros);
+          if (timestampMicros === 33333) {
+            resolveLatestDecodeStarted();
+          }
+          await new Promise<void>((resolve) => {
+            decodeResolvers.set(timestampMicros, resolve);
+          });
+          return {} as ImageData;
+        },
+      );
 
     renderable.setImage({ ...createH265Frame(keyframe, { sec: 0, nsec: 0 }), format: "h264" });
-    renderable.setImage({ ...createH265Frame(keyframe, { sec: 0, nsec: 16666666 }), format: "h264" });
-    renderable.setImage({ ...createH265Frame(keyframe, { sec: 0, nsec: 33333333 }), format: "h264" }, undefined, () => {
-      resolveLatestDecoded();
+    renderable.setImage({
+      ...createH265Frame(keyframe, { sec: 0, nsec: 16666666 }),
+      format: "h264",
     });
+    renderable.setImage(
+      { ...createH265Frame(keyframe, { sec: 0, nsec: 33333333 }), format: "h264" },
+      undefined,
+      () => {
+        resolveLatestDecoded();
+      },
+    );
     await Promise.resolve();
 
     expect(decodeOrder).toEqual([0]);
@@ -489,8 +494,8 @@ describe("ImageRenderable error handling", () => {
     jest
       // @ts-expect-error decodeImage is protected, but ok to use on tests
       .spyOn(renderable, "decodeImage")
-      .mockImplementation(async (image, resizeWidth) => {
-        if (toNanoSec((image as CompressedVideo).timestamp) === 0n) {
+      .mockImplementation(async (image: CompressedVideo, resizeWidth?: number) => {
+        if (image.timestamp.sec === 0 && image.timestamp.nsec === 0) {
           await firstDecodeBlocked;
         }
         return await ImageRenderable.prototype.decodeImage.call(renderable, image, resizeWidth);
@@ -498,9 +503,13 @@ describe("ImageRenderable error handling", () => {
 
     renderable.setImage(createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }));
     renderable.setImage(createH265Frame(h265DeltaFrame, { sec: 0, nsec: 16666666 }));
-    renderable.setImage(createH265Frame(h265DeltaFrame, { sec: 0, nsec: 33333333 }), undefined, () => {
-      latestDecoded();
-    });
+    renderable.setImage(
+      createH265Frame(h265DeltaFrame, { sec: 0, nsec: 33333333 }),
+      undefined,
+      () => {
+        latestDecoded();
+      },
+    );
     await Promise.resolve();
 
     releaseFirstDecode();
@@ -543,9 +552,13 @@ describe("ImageRenderable error handling", () => {
 
     renderable.setImage(createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }));
     renderable.setImage(createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }));
-    renderable.setImage(createH265Frame(h265DeltaFrame, { sec: 0, nsec: 16666666 }), undefined, () => {
-      latestDecoded();
-    });
+    renderable.setImage(
+      createH265Frame(h265DeltaFrame, { sec: 0, nsec: 16666666 }),
+      undefined,
+      () => {
+        latestDecoded();
+      },
+    );
     await latestDecodedPromise;
 
     expect(decode).toHaveBeenCalledTimes(2);
@@ -570,7 +583,10 @@ describe("ImageRenderable error handling", () => {
     } as unknown as ImageRenderable["videoPlayer"];
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
-    const bitmap = await renderable.decodeImage(createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }), 100);
+    const bitmap = await renderable.decodeImage(
+      createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }),
+      100,
+    );
 
     expect(bitmap).toBe(lastImageBitmap);
   });
@@ -610,7 +626,10 @@ describe("ImageRenderable error handling", () => {
     } as unknown as ImageRenderable["videoPlayer"];
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
-    const bitmap = await renderable.decodeImage(createH265Frame(h265BFrame, { sec: 0, nsec: 33333333 }), 100);
+    const bitmap = await renderable.decodeImage(
+      createH265Frame(h265BFrame, { sec: 0, nsec: 33333333 }),
+      100,
+    );
 
     expect(bitmap).toBe(lastImageBitmap);
     expect(decode).not.toHaveBeenCalled();
@@ -698,11 +717,20 @@ describe("ImageRenderable error handling", () => {
     // @ts-expect-error decodeImage is protected, but ok to use on tests
     await renderable.decodeImage(createH265Frame(h265Keyframe.slice(), { sec: 0, nsec: 0 }), 100);
     // @ts-expect-error decodeImage is protected, but ok to use on tests
-    await renderable.decodeImage(createH265Frame(h265DeltaFrame.slice(), { sec: 0, nsec: 33333333 }), 100);
+    await renderable.decodeImage(
+      createH265Frame(h265DeltaFrame.slice(), { sec: 0, nsec: 33333333 }),
+      100,
+    );
     // @ts-expect-error decodeImage is protected, but ok to use on tests
-    await renderable.decodeImage(createH265Frame(h265DeltaFrame.slice(), { sec: 0, nsec: 66666666 }), 100);
+    await renderable.decodeImage(
+      createH265Frame(h265DeltaFrame.slice(), { sec: 0, nsec: 66666666 }),
+      100,
+    );
     // @ts-expect-error decodeImage is protected, but ok to use on tests
-    const bitmap = await renderable.decodeImage(createH265Frame(h265DeltaFrame.slice(), { sec: 0, nsec: 33333333 }), 100);
+    const bitmap = await renderable.decodeImage(
+      createH265Frame(h265DeltaFrame.slice(), { sec: 0, nsec: 33333333 }),
+      100,
+    );
 
     expect(bitmap).toBe(replayBitmap);
     expect(resetForSeek).toHaveBeenCalled();
@@ -757,7 +785,10 @@ describe("ImageRenderable error handling", () => {
     (console.error as jest.Mock).mockClear();
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
-    const skipped = await renderable.decodeImage(createH265Frame(h265DeltaFrame, { sec: 0, nsec: 66666666 }), 100);
+    const skipped = await renderable.decodeImage(
+      createH265Frame(h265DeltaFrame, { sec: 0, nsec: 66666666 }),
+      100,
+    );
     // @ts-expect-error decodeImage is protected, but ok to use on tests
     await renderable.decodeImage(createH265Frame(h265Keyframe, { sec: 0, nsec: 83333333 }), 100);
 

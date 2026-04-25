@@ -92,12 +92,9 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
           this.#currentDecodeTimestampMicros != undefined
             ? ` @ frame timestamp: ${this.#currentDecodeTimestampMicros / 1_000_000}s`
             : "";
-        const decodeError = new DOMException(
-          `${error.message}${timestampSec}`,
-          error.name,
-        );
-        const abortedFrame = this.#dequeueNewestFrame();
-        this.#pendingDecode?.resolve({ type: "aborted", frame: abortedFrame });
+        const decodeError = new DOMException(`${error.message}${timestampSec}`, error.name);
+        const newestFrame = this.#dequeueNewestFrame();
+        this.#pendingDecode?.resolve({ type: "aborted", frame: newestFrame });
         this.#pendingDecode = undefined;
         this.#targetWaiter?.reject(decodeError);
         this.#targetWaiter = undefined;
@@ -307,11 +304,11 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
     return await new Promise<VideoFrame>((resolve, reject) => {
       this.#targetWaiter = {
         targetTimestampMicros,
-        resolve: (frame) => {
+        resolve: (targetFrame) => {
           if (this.#targetWaiter?.resolve === resolve) {
             this.#targetWaiter = undefined;
           }
-          resolve(frame);
+          resolve(targetFrame);
         },
         reject: (error) => {
           if (this.#targetWaiter?.reject === reject) {
@@ -359,14 +356,12 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   }
 
   #waitForDecodeQueueDrain(timeoutMs: number, onDrain: () => void): void {
-    if (this.#decoder.decodeQueueSize == undefined || this.#decoder.decodeQueueSize === 0) {
+    if (this.#decoder.decodeQueueSize === 0) {
       onDrain();
       return;
     }
 
     const previousOndequeue = this.#decoder.ondequeue;
-    let timeoutId: ReturnType<typeof setTimeout>;
-
     const handleDequeue = (event: Event) => {
       previousOndequeue?.call(this.#decoder, event);
       if (this.#decoder.decodeQueueSize > 0) {
@@ -379,7 +374,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       onDrain();
     };
 
-    timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (this.#decoder.ondequeue === handleDequeue) {
         this.#decoder.ondequeue = previousOndequeue;
       }

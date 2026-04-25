@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 import { H265 } from "./H265";
 import { H265NaluType, H265SliceType } from "./types";
 
@@ -68,10 +71,7 @@ describe("H265", () => {
     ]);
 
     expect(H265.ToAnnexB(frame)).toEqual(
-      frameData([
-        annexBNalu(H265NaluType.IDR_W_RADL, []),
-        annexBNalu(1, []),
-      ]),
+      frameData([annexBNalu(H265NaluType.IDR_W_RADL, []), annexBNalu(1, [])]),
     );
   });
 
@@ -88,9 +88,7 @@ describe("H265", () => {
     ]);
 
     const frameInfo = H265.InspectFrame(frame);
-    expect(frameInfo.parameterSets).toEqual(
-      new Uint8Array(annexBNalu(H265NaluType.VPS_NUT, [])),
-    );
+    expect(frameInfo.parameterSets).toEqual(new Uint8Array(annexBNalu(H265NaluType.VPS_NUT, [])));
     expect(frameInfo.hasParameterSets).toBe(true);
     expect(frameInfo.hasRequiredParameterSets).toBe(false);
   });
@@ -112,10 +110,7 @@ describe("H265", () => {
       annexBNalu(H265NaluType.SPS_NUT, [0x02]),
       annexBNalu(H265NaluType.PPS_NUT, [0x03]),
     ];
-    const frame = frameData([
-      ...parameterSets,
-      annexBNalu(H265NaluType.IDR_W_RADL, [0x04]),
-    ]);
+    const frame = frameData([...parameterSets, annexBNalu(H265NaluType.IDR_W_RADL, [0x04])]);
 
     const frameInfo = H265.InspectFrame(frame);
     expect(frameInfo.hasParameterSets).toBe(true);
@@ -146,9 +141,7 @@ describe("H265", () => {
 
   it("should use cached parameter sets to parse slice types", () => {
     const frameInfo = H265.InspectFrame(deltaFrame(H265SliceType.P), {
-      parameterSets: frameData([
-        annexBNalu(H265NaluType.PPS_NUT, [0xc0]),
-      ]),
+      parameterSets: frameData([annexBNalu(H265NaluType.PPS_NUT, [0xc0])]),
     });
 
     expect(frameInfo.frameType).toBe("P");

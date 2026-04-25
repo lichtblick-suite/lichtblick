@@ -42,7 +42,10 @@ export default class H265FrameBuilder {
   }
 
   public static slice(naluType: number, sliceType: H265SliceType): number[] {
-    return H265FrameBuilder.annexBNalu(naluType, H265FrameBuilder.slicePayload(naluType, sliceType));
+    return H265FrameBuilder.annexBNalu(
+      naluType,
+      H265FrameBuilder.slicePayload(naluType, sliceType),
+    );
   }
 
   public static keyframeWithParameterSets(): Uint8Array {

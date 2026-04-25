@@ -895,7 +895,9 @@ export class IterablePlayer implements Player {
   }
 
   async #expandVideoSeekBackfill(messages: MessageEvent[]): Promise<MessageEvent[]> {
-    const expandedMessages = new Map(messages.map((message) => [this.#messageKey(message), message]));
+    const expandedMessages = new Map(
+      messages.map((message) => [this.#messageKey(message), message]),
+    );
 
     for (const message of messages) {
       if (!this.#isHevcCompressedVideoMessage(message)) {
@@ -912,7 +914,9 @@ export class IterablePlayer implements Player {
       }
     }
 
-    return Array.from(expandedMessages.values()).sort((a, b) => compare(a.receiveTime, b.receiveTime));
+    return Array.from(expandedMessages.values()).sort((a, b) =>
+      compare(a.receiveTime, b.receiveTime),
+    );
   }
 
   async #readHevcGopForSeekTarget(targetMessage: MessageEvent): Promise<MessageEvent[]> {
@@ -933,7 +937,9 @@ export class IterablePlayer implements Player {
       if (candidate == undefined || !this.#isHevcCompressedVideoMessage(candidate)) {
         return [];
       }
-      if (reversedGop.some((message) => this.#messageKey(message) === this.#messageKey(candidate))) {
+      if (
+        reversedGop.some((message) => this.#messageKey(message) === this.#messageKey(candidate))
+      ) {
         return [];
       }
 

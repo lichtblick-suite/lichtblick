@@ -265,7 +265,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       return;
     }
 
-    this.#startDecode(image, seq, resizeWidth, onDecoded);
+    void this.#startDecode(image, seq, resizeWidth, onDecoded);
   }
 
   async #drainPendingVideoDecodes(): Promise<void> {
@@ -367,7 +367,6 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     if (preparedFrame.decoderConfig != undefined) {
       this.#cachedVideoDecoderConfig = preparedFrame.decoderConfig;
     }
-    assert(this.#videoFirstMessageTime != undefined, "firstMessageTime must be set");
     const timestampMicros = Number((messageTime - this.#videoFirstMessageTime) / 1000n);
     this.#rememberVideoFrame(frameMsg, preparedFrame, timestampMicros);
 
@@ -449,11 +448,13 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.videoPlayer.resetForSeek();
     await this.videoPlayer.init(decoderConfig);
     const result = await this.videoPlayer.decodeFrames(
-      gop.map<EncodedVideoFrame>((entry) => ({
-        data: entry.preparedFrame.data.slice(),
-        timestampMicros: entry.timestampMicros,
-        type: entry.preparedFrame.type,
-      })),
+      gop.map(
+        (entry): EncodedVideoFrame => ({
+          data: entry.preparedFrame.data.slice(),
+          timestampMicros: entry.timestampMicros,
+          type: entry.preparedFrame.type,
+        }),
+      ),
     );
     if (result.type !== "target") {
       return undefined;
