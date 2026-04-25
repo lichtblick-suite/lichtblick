@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { debouncePromise } from "@lichtblick/den/async";
 import { filterMap } from "@lichtblick/den/collection";
+import { H265 } from "@lichtblick/den/video";
 import Log from "@lichtblick/log";
 import {
   Time,
@@ -19,6 +20,7 @@ import {
   compare,
   fromMillis,
   fromNanoSec,
+  toNanoSec,
   toRFC3339String,
   toString,
 } from "@lichtblick/rostime";
@@ -82,6 +84,13 @@ const MAX_BLOCKS = 100;
 const SEEK_ON_START_NS = BigInt(99 * 1e6);
 
 const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
+const FOXGLOVE_COMPRESSED_VIDEO_SCHEMA = "foxglove.CompressedVideo";
+const MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES = 2000;
+
+type CompressedVideoLike = {
+  data?: Uint8Array;
+  format?: string;
+};
 
 const EMPTY_ARRAY = Object.freeze([]);
 export type IterablePlayerOptions = {
@@ -847,11 +856,12 @@ export class IterablePlayer implements Player {
 
     try {
       this.#abort = new AbortController();
-      const messages = await this.#bufferedSource.getBackfillMessages({
+      const backfillMessages = await this.#bufferedSource.getBackfillMessages({
         topics: this.#allTopics,
         time: targetTime,
         abortSignal: this.#abort.signal,
       });
+      const messages = await this.#expandVideoSeekBackfill(backfillMessages);
 
       // We've successfully loaded the messages and will emit those, no longer need the ackTimeout
       clearTimeout(seekAckTimeout);
@@ -882,6 +892,75 @@ export class IterablePlayer implements Player {
       clearTimeout(seekAckTimeout);
       this.#abort = undefined;
     }
+  }
+
+  async #expandVideoSeekBackfill(messages: MessageEvent[]): Promise<MessageEvent[]> {
+    const expandedMessages = new Map(messages.map((message) => [this.#messageKey(message), message]));
+
+    for (const message of messages) {
+      if (!this.#isHevcCompressedVideoMessage(message)) {
+        continue;
+      }
+      const video = message.message as CompressedVideoLike;
+      if (H265.IsKeyframe(video.data!)) {
+        continue;
+      }
+
+      const gopMessages = await this.#readHevcGopForSeekTarget(message);
+      for (const gopMessage of gopMessages) {
+        expandedMessages.set(this.#messageKey(gopMessage), gopMessage);
+      }
+    }
+
+    return Array.from(expandedMessages.values()).sort((a, b) => compare(a.receiveTime, b.receiveTime));
+  }
+
+  async #readHevcGopForSeekTarget(targetMessage: MessageEvent): Promise<MessageEvent[]> {
+    const topicSelection = new Map([[targetMessage.topic, { topic: targetMessage.topic }]]);
+    const reversedGop: MessageEvent[] = [];
+    let searchTime = targetMessage.receiveTime;
+
+    for (;;) {
+      if (reversedGop.length >= MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES) {
+        return [];
+      }
+
+      const [candidate] = await this.#bufferedSource.getBackfillMessages({
+        topics: topicSelection,
+        time: searchTime,
+        abortSignal: this.#abort?.signal,
+      });
+      if (candidate == undefined || !this.#isHevcCompressedVideoMessage(candidate)) {
+        return [];
+      }
+      if (reversedGop.some((message) => this.#messageKey(message) === this.#messageKey(candidate))) {
+        return [];
+      }
+
+      reversedGop.push(candidate);
+      const video = candidate.message as CompressedVideoLike;
+      if (H265.IsKeyframe(video.data!)) {
+        return reversedGop.reverse();
+      }
+
+      const previousTimeNs = toNanoSec(candidate.receiveTime) - 1n;
+      if (previousTimeNs < 0n) {
+        return [];
+      }
+      searchTime = fromNanoSec(previousTimeNs);
+    }
+  }
+
+  #isHevcCompressedVideoMessage(message: MessageEvent): boolean {
+    if (message.schemaName !== FOXGLOVE_COMPRESSED_VIDEO_SCHEMA) {
+      return false;
+    }
+    const video = message.message as CompressedVideoLike;
+    return (video.format === "h265" || video.format === "hevc") && video.data instanceof Uint8Array;
+  }
+
+  #messageKey(message: MessageEvent): string {
+    return `${message.topic}:${message.receiveTime.sec}:${message.receiveTime.nsec}`;
   }
 
   /** Emit the player state to the registered listener */

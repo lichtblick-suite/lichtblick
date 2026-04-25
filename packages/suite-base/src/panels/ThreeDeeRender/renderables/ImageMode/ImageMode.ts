@@ -275,7 +275,6 @@ export class ImageMode
         subscription: {
           handler: this.messageHandler.handleCompressedVideo,
           shouldSubscribe: this.imageShouldSubscribe,
-          filterQueue: this.#filterMessageQueue.bind(this),
         },
       },
     ];
@@ -304,6 +303,7 @@ export class ImageMode
     // To avoid flickering while seeking or changing subscriptions, we avoid clearing the
     // ImageRenderable for a short timeout. When a new image message arrives, we cancel the timeout,
     // so the old image will continue displaying until the new one has been decoded.
+    this.imageRenderable?.videoPlayer?.resetForSeek();
     if (this.#removeImageTimeout == undefined) {
       this.#removeImageTimeout = setTimeout(() => {
         this.#removeImageTimeout = undefined;
