@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { H264, H265, VideoPlayer } from "@lichtblick/den/video";
+import { H264, H265, H265NaluType, H265SliceType, VideoPlayer } from "@lichtblick/den/video";
+import H265FrameBuilder from "@lichtblick/suite-base/testing/builders/H265FrameBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 
 import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
@@ -18,6 +19,10 @@ import {
 } from "./decodeImage";
 import { Image as RosImage } from "../../ros";
 
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
 function createMockVideoFrame(override?: Partial<CompressedVideo>): CompressedVideo {
   return {
     data: new Uint8Array([]),
@@ -27,6 +32,7 @@ function createMockVideoFrame(override?: Partial<CompressedVideo>): CompressedVi
     ...override,
   };
 }
+
 
 describe("decodeCompressedImageToBitmap", () => {
   it("should decode a compressed image to an ImageBitmap", async () => {
@@ -90,7 +96,7 @@ describe("getVideoDecoderConfig", () => {
       data: new Uint8Array([0x00]),
       format: "h265",
     });
-    const mockConfig = { codec: "hev1.1.6.L153.B0" };
+    const mockConfig = { codec: "hvc1.1.6.L93.B0" };
     jest.spyOn(H265, "ParseDecoderConfig").mockReturnValue(mockConfig);
     expect(getVideoDecoderConfig(mockVideoFrame)).toEqual(mockConfig);
   });
@@ -117,6 +123,24 @@ describe("decodeCompressedVideoToBitmap", () => {
     expect(mockVideoPlayer.lastImageBitmap).toBeDefined();
   });
 
+  it("should use integer microsecond timestamps for video decode", async () => {
+    const mockVideoFrame = createMockVideoFrame({
+      timestamp: { sec: 0, nsec: 1500 },
+    });
+    const preparedFrame = {
+      data: mockVideoFrame.data,
+      type: "delta" as const,
+    };
+    const mockVideoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(true),
+      decode: jest.fn().mockResolvedValue(new ImageBitmap()),
+    } as unknown as VideoPlayer;
+
+    await decodeCompressedVideoToBitmap(mockVideoFrame, preparedFrame, mockVideoPlayer, 1000n);
+
+    expect(mockVideoPlayer.decode).toHaveBeenCalledWith(mockVideoFrame.data, 0, "delta");
+  });
+
   it("should return an empty video frame if the video player is not initialized", async () => {
     const mockVideoFrame = createMockVideoFrame();
     const preparedFrame = {
@@ -137,35 +161,68 @@ describe("decodeCompressedVideoToBitmap", () => {
     expect(bitmap).toBeInstanceOf(ImageBitmap);
     expect(mockVideoPlayer.lastImageBitmap).toBeUndefined();
   });
+
+  it("should reuse the last decoded frame when decode returns undefined", async () => {
+    const mockVideoFrame = createMockVideoFrame();
+    const lastVideoFrame = {
+      codedWidth: 2,
+      codedHeight: 2,
+      timestamp: 10,
+      close: jest.fn(),
+    } as unknown as VideoFrame;
+    const originalCreateImageBitmap = self.createImageBitmap;
+    const createImageBitmapSpy = jest.fn().mockResolvedValue(new ImageBitmap());
+    // @ts-expect-error test override
+    self.createImageBitmap = createImageBitmapSpy;
+    const preparedFrame = {
+      data: mockVideoFrame.data,
+      type: "delta" as const,
+    };
+    const mockVideoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(true),
+      decode: jest.fn().mockResolvedValue(undefined),
+      lastVideoFrame,
+    } as unknown as VideoPlayer;
+
+    const bitmap = await decodeCompressedVideoToBitmap(
+      mockVideoFrame,
+      preparedFrame,
+      mockVideoPlayer,
+      BigInt(0),
+    );
+    expect(bitmap).toBeInstanceOf(ImageBitmap);
+    expect(mockVideoPlayer.lastImageBitmap).toBeDefined();
+    expect(createImageBitmapSpy).toHaveBeenCalledWith(lastVideoFrame, { resizeWidth: undefined });
+    self.createImageBitmap = originalCreateImageBitmap;
+  });
 });
 
 describe("prepareVideoFrame", () => {
   it("should normalize length-prefixed h265 keyframes", () => {
-    const parameterSet = [(32 << 1) | 1, 0x01];
-    const keyframe = [(19 << 1) | 1, 0x01];
-    const mockVideoFrame = createMockVideoFrame({
-      format: "h265",
-      data: new Uint8Array([
-        0x00,
-        0x00,
-        0x00,
-        parameterSet.length,
-        ...parameterSet,
-        0x00,
-        0x00,
-        0x00,
-        keyframe.length,
-        ...keyframe,
-      ]),
-    });
+    const data = H265FrameBuilder.lengthPrefixedKeyframeWithParameterSets();
+    const mockVideoFrame = createMockVideoFrame({ format: "h265", data });
 
     const preparedFrame = prepareVideoFrame(mockVideoFrame);
 
     expect(preparedFrame.type).toBe("key");
-    expect(preparedFrame.decoderConfig).toEqual({ codec: "hev1.1.6.L153.B0" });
-    expect(preparedFrame.data).toEqual(
-      new Uint8Array([0x00, 0x00, 0x00, 0x01, ...parameterSet, 0x00, 0x00, 0x00, 0x01, ...keyframe]),
-    );
+    expect(preparedFrame.decoderConfig).toEqual({ codec: "hvc1.1.6.L93.B0" });
+    expect(preparedFrame.data).toEqual(H265FrameBuilder.keyframeWithParameterSets());
+  });
+
+  it("should strip parameter sets from h265 delta frames", () => {
+    const data = H265FrameBuilder.frameData([
+      H265FrameBuilder.annexBNalu(H265NaluType.VPS_NUT),
+      H265FrameBuilder.annexBNalu(H265NaluType.SPS_NUT),
+      H265FrameBuilder.annexBNalu(H265NaluType.PPS_NUT, [0xc0]),
+      H265FrameBuilder.slice(1, H265SliceType.P),
+    ]);
+    const mockVideoFrame = createMockVideoFrame({ format: "h265", data });
+
+    const preparedFrame = prepareVideoFrame(mockVideoFrame);
+
+    expect(preparedFrame.type).toBe("delta");
+    expect(preparedFrame.data).toEqual(new Uint8Array(H265FrameBuilder.slice(1, H265SliceType.P)));
+    expect(preparedFrame.parameterSets).toBeDefined();
   });
 
   it("should return detailed diagnostics for unsupported h265 bitstreams", () => {
@@ -179,6 +236,19 @@ describe("prepareVideoFrame", () => {
     expect(preparedFrame.type).toBe("delta");
     expect(preparedFrame.decoderConfig).toBeUndefined();
     expect(preparedFrame.diagnostics).toBe("unsupported H.265 bitstream format");
+  });
+
+  it("should skip unsupported h265 B frames", () => {
+    const mockVideoFrame = createMockVideoFrame({
+      format: "h265",
+      data: H265FrameBuilder.deltaFrameWithPps(H265SliceType.B),
+    });
+
+    const preparedFrame = prepareVideoFrame(mockVideoFrame);
+
+    expect(preparedFrame.type).toBe("delta");
+    expect(preparedFrame.decoderConfig).toBeUndefined();
+    expect(preparedFrame.diagnostics).toBe("H.265 B frames are not supported");
   });
 });
 

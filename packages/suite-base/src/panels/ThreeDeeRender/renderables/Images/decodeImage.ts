@@ -24,9 +24,10 @@ import {
   decodeYUYV,
 } from "@lichtblick/den/image";
 import { H264, H265, VideoPlayer } from "@lichtblick/den/video";
-import { toMicroSec } from "@lichtblick/rostime";
+import { toNanoSec } from "@lichtblick/rostime";
 
 import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
+import { PreparedVideoFrame, PrepareVideoFrameContext } from "./types";
 import { Image as RosImage } from "../../ros";
 import { ColorModeSettings, getColorConverter } from "../colorMode";
 
@@ -52,13 +53,6 @@ export function isVideoKeyframe(frameMsg: CompressedVideo): boolean {
   return false;
 }
 
-export type PreparedVideoFrame = {
-  data: Uint8Array;
-  decoderConfig?: VideoDecoderConfig;
-  diagnostics?: string;
-  type: "key" | "delta";
-};
-
 export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
   switch (frameMsg.format) {
     case "h264": {
@@ -74,11 +68,14 @@ export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderCo
   return undefined;
 }
 
-export function prepareVideoFrame(frameMsg: CompressedVideo): PreparedVideoFrame {
+export function prepareVideoFrame(
+  frameMsg: CompressedVideo,
+  context?: PrepareVideoFrameContext,
+): PreparedVideoFrame {
   switch (frameMsg.format) {
     case "h265":
     case "hevc": {
-      const frameInfo = H265.InspectFrame(frameMsg.data);
+      const frameInfo = H265.InspectFrame(frameMsg.data, context?.h265);
       if (frameInfo.bitstreamFormat === "unknown" || frameInfo.normalizedData == undefined) {
         return {
           data: frameMsg.data,
@@ -86,12 +83,22 @@ export function prepareVideoFrame(frameMsg: CompressedVideo): PreparedVideoFrame
           type: "delta",
         };
       }
+      if (frameInfo.frameType === "B") {
+        return {
+          data: frameInfo.normalizedData,
+          diagnostics: "H.265 B frames are not supported",
+          type: "delta",
+        };
+      }
 
+      const type = frameInfo.isKeyframe ? "key" : "delta";
       return {
-        data: frameInfo.normalizedData,
-        decoderConfig: frameInfo.hasParameterSet ? { codec: "hev1.1.6.L153.B0" } : undefined,
-        diagnostics: frameInfo.hasParameterSet ? undefined : "no VPS/SPS/PPS found",
-        type: frameInfo.isKeyframe ? "key" : "delta",
+        data: type === "key" ? frameInfo.normalizedData : (H265.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
+        decoderConfig: H265.ParseDecoderConfig(frameInfo.normalizedData),
+        parameterSets: frameInfo.parameterSets,
+        hasParameterSets: frameInfo.hasParameterSets,
+        hasRequiredParameterSets: frameInfo.hasRequiredParameterSets,
+        type,
       };
     }
     default:
@@ -114,18 +121,22 @@ export async function decodeCompressedVideoToBitmap(
     return await emptyVideoFrame(videoPlayer, resizeWidth);
   }
 
-  // Get the timestamp of this frame as microseconds relative to the first frame
-  const firstTimestampMicros = Number(firstMessageTime / 1000n);
-  const timestampMicros = toMicroSec(frameMsg.timestamp) - firstTimestampMicros;
+  // Match Foxglove/WebCodecs behavior by using integer microseconds relative to the first frame.
+  const timestampMicros = Number((toNanoSec(frameMsg.timestamp) - firstMessageTime) / 1000n);
 
-  const videoFrame = await videoPlayer.decode(preparedFrame.data, timestampMicros, preparedFrame.type);
-  if (videoFrame) {
-    const imageBitmap = await self.createImageBitmap(videoFrame, { resizeWidth });
+  const videoFrame = await videoPlayer.decode(
+    preparedFrame.data,
+    timestampMicros,
+    preparedFrame.type,
+  );
+  const frameToRender = videoFrame ?? videoPlayer.lastVideoFrame;
+  if (frameToRender) {
+    const imageBitmap = await self.createImageBitmap(frameToRender, { resizeWidth });
     videoPlayer.lastImageBitmap = imageBitmap;
-    videoFrame.close();
+    videoFrame?.close();
     return imageBitmap;
   }
-  return await emptyVideoFrame(videoPlayer, resizeWidth);
+  return videoPlayer.lastImageBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
 }
 
 export const IMAGE_DEFAULT_COLOR_MODE_SETTINGS: Required<
