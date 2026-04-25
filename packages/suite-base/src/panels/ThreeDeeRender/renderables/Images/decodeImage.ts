@@ -93,7 +93,10 @@ export function prepareVideoFrame(
 
       const type = frameInfo.isKeyframe ? "key" : "delta";
       return {
-        data: type === "key" ? frameInfo.normalizedData : (H265.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
+        data:
+          type === "key"
+            ? frameInfo.normalizedData
+            : (H265.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
         decoderConfig: H265.ParseDecoderConfig(frameInfo.normalizedData),
         parameterSets: frameInfo.parameterSets,
         hasParameterSets: frameInfo.hasParameterSets,

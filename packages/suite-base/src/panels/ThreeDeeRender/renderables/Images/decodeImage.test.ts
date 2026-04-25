@@ -33,7 +33,6 @@ function createMockVideoFrame(override?: Partial<CompressedVideo>): CompressedVi
   };
 }
 
-
 describe("decodeCompressedImageToBitmap", () => {
   it("should decode a compressed image to an ImageBitmap", async () => {
     const mockImage: CompressedImageTypes = {
@@ -131,14 +130,15 @@ describe("decodeCompressedVideoToBitmap", () => {
       data: mockVideoFrame.data,
       type: "delta" as const,
     };
+    const decode = jest.fn().mockResolvedValue(new ImageBitmap());
     const mockVideoPlayer = {
       isInitialized: jest.fn().mockReturnValue(true),
-      decode: jest.fn().mockResolvedValue(new ImageBitmap()),
+      decode,
     } as unknown as VideoPlayer;
 
     await decodeCompressedVideoToBitmap(mockVideoFrame, preparedFrame, mockVideoPlayer, 1000n);
 
-    expect(mockVideoPlayer.decode).toHaveBeenCalledWith(mockVideoFrame.data, 0, "delta");
+    expect(decode).toHaveBeenCalledWith(mockVideoFrame.data, 0, "delta");
   });
 
   it("should return an empty video frame if the video player is not initialized", async () => {

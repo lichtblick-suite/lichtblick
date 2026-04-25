@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 /** @jest-environment jsdom */
 
 import { DecodeFramesResult, VideoPlayer } from "./VideoPlayer";
@@ -46,6 +49,8 @@ describe("VideoPlayer", () => {
 
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
+      public decodeQueueSize = 0;
+      public ondequeue: ((event: Event) => void) | null = null;
       readonly #init: VideoDecoderInit;
 
       public constructor(init: VideoDecoderInit) {
@@ -57,15 +62,22 @@ describe("VideoPlayer", () => {
       }
 
       public decode(chunk: MockEncodedVideoChunk): void {
-        outputFrames.set(chunk.timestamp, this.#init.output);
+        this.decodeQueueSize++;
+        outputFrames.set(chunk.timestamp, (frame) => {
+          this.#init.output(frame);
+          this.decodeQueueSize--;
+          this.ondequeue?.(new Event("dequeue"));
+        });
       }
 
       public reset(): void {
+        this.decodeQueueSize = 0;
         outputFrames.clear();
       }
 
       public close(): void {
         this.state = "closed";
+        this.decodeQueueSize = 0;
         outputFrames.clear();
       }
     }
@@ -76,7 +88,9 @@ describe("VideoPlayer", () => {
     const player = new VideoPlayer();
     await player.init({ codec: "hvc1.1.6.L93.B0" });
 
-    const decodePromise = player.decodeFrames([{ data: new Uint8Array([1]), timestampMicros: 1000, type: "key" }]);
+    const decodePromise = player.decodeFrames([
+      { data: new Uint8Array([1]), timestampMicros: 1000, type: "key" },
+    ]);
     await Promise.resolve();
 
     const targetFrame = createFrame(1000);
@@ -144,6 +158,8 @@ describe("VideoPlayer", () => {
 
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
+      public decodeQueueSize = 0;
+      public ondequeue: ((event: Event) => void) | null = null;
       readonly #init: VideoDecoderInit;
 
       public constructor(init: VideoDecoderInit) {
@@ -155,15 +171,22 @@ describe("VideoPlayer", () => {
       }
 
       public decode(chunk: MockEncodedVideoChunk): void {
-        outputFrames.set(chunk.timestamp, this.#init.output);
+        this.decodeQueueSize++;
+        outputFrames.set(chunk.timestamp, (frame) => {
+          this.#init.output(frame);
+          this.decodeQueueSize--;
+          this.ondequeue?.(new Event("dequeue"));
+        });
       }
 
       public reset(): void {
+        this.decodeQueueSize = 0;
         outputFrames.clear();
       }
 
       public close(): void {
         this.state = "closed";
+        this.decodeQueueSize = 0;
         outputFrames.clear();
       }
     }
@@ -182,7 +205,9 @@ describe("VideoPlayer", () => {
     await jest.advanceTimersByTimeAsync(30);
 
     outputFrames.get(0)?.(createFrame(0));
-    await expect(Promise.race([decodePromise, Promise.resolve("pending")])).resolves.toBe("pending");
+    await expect(Promise.race([decodePromise, Promise.resolve("pending")])).resolves.toBe(
+      "pending",
+    );
 
     const targetFrame = createFrame(33333);
     outputFrames.get(33333)?.(targetFrame);
@@ -198,8 +223,6 @@ describe("VideoPlayer", () => {
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
 
-      public constructor(_: VideoDecoderInit) {}
-
       public configure(): void {
         this.state = "configured";
       }
@@ -217,7 +240,9 @@ describe("VideoPlayer", () => {
     const player = new VideoPlayer();
     await player.init({ codec: "hvc1.1.6.L93.B0" });
 
-    const decodePromise = player.decodeFrames([{ data: new Uint8Array([1]), timestampMicros: 0, type: "key" }]);
+    const decodePromise = player.decodeFrames([
+      { data: new Uint8Array([1]), timestampMicros: 0, type: "key" },
+    ]);
     await jest.advanceTimersByTimeAsync(2000);
 
     await expect(decodePromise).resolves.toEqual({ type: "timeout" });
@@ -227,8 +252,6 @@ describe("VideoPlayer", () => {
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
 
-      public constructor(_: VideoDecoderInit) {}
-
       public configure(): void {
         this.state = "configured";
       }
@@ -246,21 +269,19 @@ describe("VideoPlayer", () => {
     const player = new VideoPlayer();
     await player.init({ codec: "hvc1.1.6.L93.B0" });
 
-    const decodePromise = player.decodeFrames([{ data: new Uint8Array([1]), timestampMicros: 0, type: "key" }]);
+    const decodePromise = player.decodeFrames([
+      { data: new Uint8Array([1]), timestampMicros: 0, type: "key" },
+    ]);
     await Promise.resolve();
     player.resetForSeek();
 
     await expect(decodePromise).resolves.toEqual({ type: "aborted", frame: undefined });
-    expect(player.decoderConfig()).toEqual(
-      expect.objectContaining({ codec: "hvc1.1.6.L93.B0" }),
-    );
+    expect(player.decoderConfig()).toEqual(expect.objectContaining({ codec: "hvc1.1.6.L93.B0" }));
   });
 
   it("should clear decoder config on close", async () => {
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
-
-      public constructor(_: VideoDecoderInit) {}
 
       public configure(): void {
         this.state = "configured";
@@ -284,17 +305,17 @@ describe("VideoPlayer", () => {
   });
 
   it("should wait for decode queue drain", async () => {
-    let decoder: MockVideoDecoder | undefined;
+    const decoders: MockVideoDecoder[] = [];
+    let output: VideoDecoderInit["output"] | undefined;
 
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
       public decodeQueueSize = 0;
       public ondequeue: ((event: Event) => void) | null = null;
-      readonly #init: VideoDecoderInit;
 
       public constructor(init: VideoDecoderInit) {
-        this.#init = init;
-        decoder = this;
+        output = init.output;
+        decoders.push(this);
       }
 
       public configure(): void {
@@ -304,9 +325,12 @@ describe("VideoPlayer", () => {
       public decode(chunk: MockEncodedVideoChunk): void {
         this.decodeQueueSize++;
         setTimeout(() => {
-          this.#init.output(createFrame(chunk.timestamp));
-          this.decodeQueueSize--;
-          this.ondequeue?.(new Event("dequeue"));
+          output?.(createFrame(chunk.timestamp));
+          const decoder = decoders[0];
+          if (decoder) {
+            decoder.decodeQueueSize--;
+            decoder.ondequeue?.(new Event("dequeue"));
+          }
         }, 40);
       }
 
@@ -331,11 +355,11 @@ describe("VideoPlayer", () => {
     ]);
     await Promise.resolve();
 
-    expect(decoder?.ondequeue).toBeDefined();
+    expect(decoders[0]?.ondequeue).toBeDefined();
     await jest.advanceTimersByTimeAsync(40);
 
     await expect(decodePromise).resolves.toMatchObject({ type: "target" });
-    expect(decoder?.ondequeue).toBeNull();
+    expect(decoders[0]?.ondequeue).toBeNull();
   });
 
   it("should reject non-increasing timestamps until reset", async () => {
@@ -435,8 +459,6 @@ describe("VideoPlayer", () => {
 
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
-
-      public constructor(_: VideoDecoderInit) {}
 
       public configure(config: VideoDecoderConfig): void {
         configure(config);
