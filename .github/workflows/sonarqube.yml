@@ -3,9 +3,14 @@ name: SonarCloud
 on:
   push:
     branches: ["develop"]
+<<<<<<< HEAD
   workflow_run:
     workflows: ["Sonar Prep"]
     types: [completed]
+=======
+  pull_request:
+    types: [opened, synchronize, reopened]
+>>>>>>> origin/main
   workflow_dispatch:
 
 env:
@@ -15,7 +20,11 @@ jobs:
   push-and-manual-scan:
     name: SonarCloud (push/manual)
     runs-on: ubuntu-latest
+<<<<<<< HEAD
     if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+=======
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+>>>>>>> origin/main
     steps:
       - uses: actions/checkout@v6
         with:
@@ -53,6 +62,7 @@ jobs:
 
       - name: ScanCloud Scan
         uses: sonarsource/sonarqube-scan-action@v7.1.0
+<<<<<<< HEAD
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
@@ -112,6 +122,8 @@ jobs:
             -Dsonar.pullrequest.key=${{ steps.metadata.outputs.number }}
             -Dsonar.pullrequest.branch=${{ steps.metadata.outputs.head_ref }}
             -Dsonar.pullrequest.base=${{ steps.metadata.outputs.base_ref }}
+=======
+>>>>>>> origin/main
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}

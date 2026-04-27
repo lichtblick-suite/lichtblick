@@ -50,9 +50,17 @@ export type TooltipMode =
   | "hover-pinned"
   | "click-pinned";
 
+<<<<<<< HEAD
 export type HoverTooltipProperties = {
+=======
+export type HoverTooltipProperties = Readonly<{
+>>>>>>> origin/main
   entities: HoverEntityInfo[];
   position: { clientX: number; clientY: number };
   /** Canvas element used to constrain tooltip within the 3D panel bounds. */
   canvas: HTMLCanvasElement | ReactNull;
+<<<<<<< HEAD
 };
+=======
+}>;
+>>>>>>> origin/main
