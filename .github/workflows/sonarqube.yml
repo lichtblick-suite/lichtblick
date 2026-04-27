@@ -83,6 +83,28 @@ jobs:
           echo "head_sha=$(jq -r '.head_sha' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
           echo "base_ref=$(jq -r '.base_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
 
+      - name: Create in-progress PR check run
+        id: check
+        uses: actions/github-script@v7
+        env:
+          HEAD_SHA: ${{ steps.metadata.outputs.head_sha }}
+        with:
+          result-encoding: string
+          script: |
+            const { data } = await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: "SonarCloud (workflow_run PR)",
+              head_sha: process.env.HEAD_SHA,
+              status: "in_progress",
+              details_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              output: {
+                title: "SonarCloud PR scan",
+                summary: "SonarCloud analysis is running…",
+              },
+            });
+            return String(data.id);
+
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -118,25 +140,24 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
 
-      - name: Publish PR check run
+      - name: Complete PR check run
         if: always()
         uses: actions/github-script@v7
         env:
           JOB_STATUS: ${{ job.status }}
-          HEAD_SHA: ${{ steps.metadata.outputs.head_sha }}
+          CHECK_RUN_ID: ${{ steps.check.outputs.result }}
         with:
           script: |
             const conclusion = process.env.JOB_STATUS === "success" ? "success" : "failure";
-            await github.rest.checks.create({
+            await github.rest.checks.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: "SonarCloud (workflow_run PR)",
-              head_sha: process.env.HEAD_SHA,
+              check_run_id: parseInt(process.env.CHECK_RUN_ID, 10),
               status: "completed",
               conclusion,
               details_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               output: {
                 title: "SonarCloud PR scan",
-                summary: `SonarCloud workflow_run scan completed with status: ${conclusion}.`,
+                summary: `SonarCloud analysis completed with status: ${conclusion}.`,
               },
             });
