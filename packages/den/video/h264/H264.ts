@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { findNextStartCode } from "../startCode";
 import { SPS as SPSNALU } from "./SPS";
 
 export enum H264NaluType {
@@ -139,24 +140,7 @@ export class H264 {
    * given buffer, starting at the given offset.
    */
   public static FindNextStartCode(data: Uint8Array, start: number): number {
-    let i = start;
-    while (i < data.length - 3) {
-      const isStartCode3Bytes = data[i + 0] === 0 && data[i + 1] === 0 && data[i + 2] === 1;
-      if (isStartCode3Bytes) {
-        return i;
-      }
-      const isStartCode4Bytes =
-        i + 3 < data.length &&
-        data[i + 0] === 0 &&
-        data[i + 1] === 0 &&
-        data[i + 2] === 0 &&
-        data[i + 3] === 1;
-      if (isStartCode4Bytes) {
-        return i;
-      }
-      i++;
-    }
-    return data.length;
+    return findNextStartCode(data, start);
   }
 
   /**

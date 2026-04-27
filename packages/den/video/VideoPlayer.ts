@@ -477,36 +477,25 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
     if (this.#decoder.state === "configured") {
       this.#decoder.reset();
     }
-    const abortedFrame = this.#dequeueNewestFrame();
-    this.#pendingDecode?.resolve({ type: "aborted", frame: abortedFrame });
-    this.#pendingDecode = undefined;
-    this.#pendingTargetTimestampMicros = undefined;
-    this.#lastSubmittedTimestampMicros = undefined;
-    this.#currentDecodeTimestampMicros = undefined;
-    this.#targetWaiter?.reject(new Error("Decoder reset"));
-    this.#targetWaiter = undefined;
-    for (const frame of this.#pendingFrames.values()) {
-      frame.close();
-    }
-    this.#pendingFrames.clear();
-    this.#pendingFrameOrder.length = 0;
-    this.lastVideoFrame?.close();
-    this.lastVideoFrame = undefined;
-    this.lastImageBitmap?.close();
-    this.lastImageBitmap = undefined;
+    this.#disposePendingState("Decoder reset");
   }
 
   public close(): void {
     if (this.#decoder.state !== "closed") {
       this.#decoder.close();
     }
+    this.#disposePendingState("Decoder closed");
+    this.#decoderConfig = undefined;
+  }
+
+  #disposePendingState(waiterRejectReason: string): void {
     const abortedFrame = this.#dequeueNewestFrame();
     this.#pendingDecode?.resolve({ type: "aborted", frame: abortedFrame });
     this.#pendingDecode = undefined;
     this.#pendingTargetTimestampMicros = undefined;
     this.#lastSubmittedTimestampMicros = undefined;
     this.#currentDecodeTimestampMicros = undefined;
-    this.#targetWaiter?.reject(new Error("Decoder closed"));
+    this.#targetWaiter?.reject(new Error(waiterRejectReason));
     this.#targetWaiter = undefined;
     for (const frame of this.#pendingFrames.values()) {
       frame.close();
@@ -517,6 +506,5 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
     this.lastVideoFrame = undefined;
     this.lastImageBitmap?.close();
     this.lastImageBitmap = undefined;
-    this.#decoderConfig = undefined;
   }
 }

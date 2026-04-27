@@ -249,6 +249,20 @@ describe("prepareVideoFrame", () => {
     expect(preparedFrame.decoderConfig).toBeUndefined();
     expect(preparedFrame.diagnostics).toBe("H.265 B frames are not supported");
   });
+
+  it("should pass through h264 frames using getVideoDecoderConfig", () => {
+    const data = new Uint8Array([0x00, 0x00, 0x00, 0x01, 0x65]);
+    const decoderConfig = { codec: "avc1.42E01E" } as VideoDecoderConfig;
+    const mockVideoFrame = createMockVideoFrame({ format: "h264", data });
+    jest.spyOn(H264, "ParseDecoderConfig").mockReturnValue(decoderConfig);
+    jest.spyOn(H264, "IsKeyframe").mockReturnValue(true);
+
+    const preparedFrame = prepareVideoFrame(mockVideoFrame);
+
+    expect(preparedFrame.data).toBe(data);
+    expect(preparedFrame.decoderConfig).toBe(decoderConfig);
+    expect(preparedFrame.type).toBe("key");
+  });
 });
 
 describe("decodeRawImage", () => {

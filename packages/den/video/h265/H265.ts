@@ -14,6 +14,7 @@ import {
   H265SliceType,
 } from "./types";
 import { Bitstream } from "../h264/Bitstream";
+import { findNextStartCode } from "../startCode";
 
 type H265PpsInfo = {
   ppsId: number;
@@ -172,24 +173,7 @@ export class H265 {
   }
 
   public static FindNextStartCode(data: Uint8Array, start: number): number {
-    let i = start;
-    while (i < data.length - 3) {
-      const isStartCode3Bytes = data[i + 0] === 0 && data[i + 1] === 0 && data[i + 2] === 1;
-      if (isStartCode3Bytes) {
-        return i;
-      }
-      const isStartCode4Bytes =
-        i + 3 < data.length &&
-        data[i + 0] === 0 &&
-        data[i + 1] === 0 &&
-        data[i + 2] === 0 &&
-        data[i + 3] === 1;
-      if (isStartCode4Bytes) {
-        return i;
-      }
-      i++;
-    }
-    return data.length;
+    return findNextStartCode(data, start);
   }
 
   public static FindNextStartCodeEnd(data: Uint8Array, start: number): number {
