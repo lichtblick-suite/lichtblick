@@ -40,8 +40,9 @@ jobs:
           jq -n \
             --arg number "${{ github.event.pull_request.number }}" \
             --arg head_ref "${{ github.event.pull_request.head.ref }}" \
+            --arg head_sha "${{ github.event.pull_request.head.sha }}" \
             --arg base_ref "${{ github.event.pull_request.base.ref }}" \
-            '{number: $number, head_ref: $head_ref, base_ref: $base_ref}' > pr-metadata.json
+            '{number: $number, head_ref: $head_ref, head_sha: $head_sha, base_ref: $base_ref}' > pr-metadata.json
 
       - name: Generate lint report and normalize file paths
         run: |

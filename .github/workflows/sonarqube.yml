@@ -63,6 +63,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
     permissions:
       actions: read
+      checks: write
       contents: read
       pull-requests: read
     steps:
@@ -79,6 +80,7 @@ jobs:
         run: |
           echo "number=$(jq -r '.number' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
           echo "head_ref=$(jq -r '.head_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$(jq -r '.head_sha' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
           echo "base_ref=$(jq -r '.base_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v6
@@ -115,3 +117,26 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+      - name: Publish PR check run
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          JOB_STATUS: ${{ job.status }}
+          HEAD_SHA: ${{ steps.metadata.outputs.head_sha }}
+        with:
+          script: |
+            const conclusion = process.env.JOB_STATUS === "success" ? "success" : "failure";
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: "SonarCloud (workflow_run PR)",
+              head_sha: process.env.HEAD_SHA,
+              status: "completed",
+              conclusion,
+              details_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              output: {
+                title: "SonarCloud PR scan",
+                summary: `SonarCloud workflow_run scan completed with status: ${conclusion}.`,
+              },
+            });
