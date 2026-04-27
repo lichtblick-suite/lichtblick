@@ -3,18 +3,19 @@ name: SonarCloud
 on:
   push:
     branches: ["develop"]
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["Sonar Prep"]
+    types: [completed]
   workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build:
-    name: SonarCloud
+  push-and-manual-scan:
+    name: SonarCloud (push/manual)
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -52,6 +53,65 @@ jobs:
 
       - name: ScanCloud Scan
         uses: sonarsource/sonarqube-scan-action@v7.1.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+  pr-scan:
+    name: SonarCloud (workflow_run PR)
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Download PR metadata artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+          name: sonar-pr-metadata
+          path: ./.sonar-pr
+
+      - name: Read PR metadata
+        id: metadata
+        run: |
+          echo "number=$(jq -r '.number' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
+          echo "head_ref=$(jq -r '.head_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
+          echo "base_ref=$(jq -r '.base_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: refs/pull/${{ steps.metadata.outputs.number }}/head
+
+      - name: Download ESLint report artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+          name: sonar-eslint-report
+          path: .
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+          name: sonar-coverage-lcov
+          path: ./coverage
+
+      - name: Fetch PR base branch
+        run: git fetch origin ${{ steps.metadata.outputs.base_ref }}:${{ steps.metadata.outputs.base_ref }}
+
+      - name: ScanCloud PR Scan
+        uses: sonarsource/sonarqube-scan-action@v7.1.0
+        with:
+          args: >
+            -Dsonar.pullrequest.key=${{ steps.metadata.outputs.number }}
+            -Dsonar.pullrequest.branch=${{ steps.metadata.outputs.head_ref }}
+            -Dsonar.pullrequest.base=${{ steps.metadata.outputs.base_ref }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
