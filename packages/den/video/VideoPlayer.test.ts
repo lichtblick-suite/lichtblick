@@ -38,7 +38,7 @@ describe("VideoPlayer", () => {
       codedWidth: 640,
       codedHeight: 480,
       close: jest.fn(),
-      clone: jest.fn().mockImplementation(function () {
+      clone: jest.fn().mockImplementation(function (this: VideoFrame) {
         return this;
       }),
     } as unknown as VideoFrame;

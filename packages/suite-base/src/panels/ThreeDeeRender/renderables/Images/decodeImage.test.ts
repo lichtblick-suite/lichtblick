@@ -172,7 +172,6 @@ describe("decodeCompressedVideoToBitmap", () => {
     } as unknown as VideoFrame;
     const originalCreateImageBitmap = self.createImageBitmap;
     const createImageBitmapSpy = jest.fn().mockResolvedValue(new ImageBitmap());
-    // @ts-expect-error test override
     self.createImageBitmap = createImageBitmapSpy;
     const preparedFrame = {
       data: mockVideoFrame.data,

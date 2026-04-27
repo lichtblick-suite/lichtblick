@@ -16,6 +16,7 @@ import {
   IMAGE_RENDERABLE_DEFAULT_SETTINGS,
   ImageUserData,
 } from "./ImageRenderable";
+import { CompressedVideo } from "./ImageTypes";
 
 const mockAdd = jest.fn();
 const mockAddToTopic = jest.fn();
@@ -75,7 +76,7 @@ function createDecodedVideoFrame(timestamp = 0): VideoFrame {
     codedWidth: 640,
     codedHeight: 480,
     close: jest.fn(),
-    clone: jest.fn().mockImplementation(function () {
+    clone: jest.fn().mockImplementation(function (this: VideoFrame) {
       return this;
     }),
   } as unknown as VideoFrame;
@@ -241,7 +242,6 @@ describe("ImageRenderable error handling", () => {
 
     const originalCreateImageBitmap = self.createImageBitmap;
     const createImageBitmapSpy = jest.fn().mockResolvedValue(new ImageBitmap());
-    // @ts-expect-error test override
     self.createImageBitmap = createImageBitmapSpy;
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
@@ -263,8 +263,8 @@ describe("ImageRenderable error handling", () => {
       resetForSeek: jest.fn(),
     } as unknown as ImageRenderable["videoPlayer"];
 
-    // @ts-expect-error decodeImage is protected, but ok to use on tests
     await expect(
+      // @ts-expect-error decodeImage is protected, but ok to use on tests
       renderable.decodeImage(createH265Frame(new Uint8Array([0x01, 0x02, 0x03])), 100),
     ).rejects.toThrow("Waiting for keyframe (unsupported H.265 bitstream format)");
   });
@@ -312,7 +312,6 @@ describe("ImageRenderable error handling", () => {
 
     const originalCreateImageBitmap = self.createImageBitmap;
     const createImageBitmapSpy = jest.fn().mockResolvedValue(new ImageBitmap());
-    // @ts-expect-error test override
     self.createImageBitmap = createImageBitmapSpy;
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
@@ -348,7 +347,6 @@ describe("ImageRenderable error handling", () => {
 
     const originalCreateImageBitmap = self.createImageBitmap;
     const createImageBitmapSpy = jest.fn().mockResolvedValue(new ImageBitmap());
-    // @ts-expect-error test override
     self.createImageBitmap = createImageBitmapSpy;
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
@@ -380,7 +378,6 @@ describe("ImageRenderable error handling", () => {
 
     const originalCreateImageBitmap = self.createImageBitmap;
     const createImageBitmapSpy = jest.fn().mockResolvedValue(new ImageBitmap());
-    // @ts-expect-error test override
     self.createImageBitmap = createImageBitmapSpy;
 
     const keyframe = h265Keyframe;
@@ -413,8 +410,7 @@ describe("ImageRenderable error handling", () => {
     });
 
     jest
-      // @ts-expect-error decodeImage is protected, but ok to use on tests
-      .spyOn(renderable, "decodeImage")
+      .spyOn(renderable as unknown as { decodeImage: jest.Mock }, "decodeImage")
       .mockImplementation(
         async (
           image: (typeof mockUserData)["image"] & { timestamp: { sec: number; nsec: number } },
@@ -479,7 +475,6 @@ describe("ImageRenderable error handling", () => {
 
     const originalCreateImageBitmap = self.createImageBitmap;
     const createImageBitmapSpy = jest.fn().mockResolvedValue(new ImageBitmap());
-    // @ts-expect-error test override
     self.createImageBitmap = createImageBitmapSpy;
 
     let releaseFirstDecode!: () => void;
@@ -492,13 +487,19 @@ describe("ImageRenderable error handling", () => {
     });
 
     jest
-      // @ts-expect-error decodeImage is protected, but ok to use on tests
-      .spyOn(renderable, "decodeImage")
+      .spyOn(renderable as unknown as { decodeImage: jest.Mock }, "decodeImage")
       .mockImplementation(async (image: CompressedVideo, resizeWidth?: number) => {
         if (image.timestamp.sec === 0 && image.timestamp.nsec === 0) {
           await firstDecodeBlocked;
         }
-        return await ImageRenderable.prototype.decodeImage.call(renderable, image, resizeWidth);
+        return await (
+          ImageRenderable.prototype as unknown as {
+            decodeImage: (
+              image: CompressedVideo,
+              resizeWidth?: number,
+            ) => Promise<ImageBitmap | ImageData>;
+          }
+        ).decodeImage.call(renderable, image, resizeWidth);
       });
 
     renderable.setImage(createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }));
@@ -542,7 +543,6 @@ describe("ImageRenderable error handling", () => {
     } as unknown as ImageRenderable["videoPlayer"];
 
     const originalCreateImageBitmap = self.createImageBitmap;
-    // @ts-expect-error test override
     self.createImageBitmap = jest.fn().mockResolvedValue(new ImageBitmap());
 
     let latestDecoded!: () => void;
@@ -656,7 +656,6 @@ describe("ImageRenderable error handling", () => {
 
     const originalCreateImageBitmap = self.createImageBitmap;
     const createImageBitmapSpy = jest.fn().mockResolvedValue(new ImageBitmap());
-    // @ts-expect-error test override
     self.createImageBitmap = createImageBitmapSpy;
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
@@ -711,7 +710,6 @@ describe("ImageRenderable error handling", () => {
 
     const originalCreateImageBitmap = self.createImageBitmap;
     const replayBitmap = new ImageBitmap();
-    // @ts-expect-error test override
     self.createImageBitmap = jest.fn().mockResolvedValue(replayBitmap);
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
@@ -770,7 +768,6 @@ describe("ImageRenderable error handling", () => {
 
     const originalCreateImageBitmap = self.createImageBitmap;
     const createImageBitmapSpy = jest.fn().mockImplementation(async () => new ImageBitmap());
-    // @ts-expect-error test override
     self.createImageBitmap = createImageBitmapSpy;
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
@@ -778,7 +775,7 @@ describe("ImageRenderable error handling", () => {
     // @ts-expect-error decodeImage is protected, but ok to use on tests
     await renderable.decodeImage(createH265Frame(h265DeltaFrame, { sec: 0, nsec: 33333333 }), 100);
 
-    const bitmapBeforeError = renderable.videoPlayer.lastImageBitmap;
+    const bitmapBeforeError = renderable.videoPlayer?.lastImageBitmap;
 
     // @ts-expect-error handleVideoPlayerError is protected, but ok to use on tests
     renderable.handleVideoPlayerError(new Error("Decoding error"));
