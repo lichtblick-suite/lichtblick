@@ -3,6 +3,8 @@ name: SonarCloud
 on:
   push:
     branches: ["develop"]
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_run:
     workflows: ["Sonar Prep"]
     types: [completed]
@@ -12,10 +14,10 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  push-and-manual-scan:
-    name: SonarCloud (push/manual)
+  internal-scan:
+    name: SonarCloud (internal)
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -57,8 +59,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
 
-  pr-scan:
-    name: SonarCloud (workflow_run PR)
+  external-fork-scan:
+    name: SonarCloud (external fork PR)
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
     permissions:
