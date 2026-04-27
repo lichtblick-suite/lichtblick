@@ -26,6 +26,49 @@ export default function Start(): React.JSX.Element {
   const { t } = useTranslation("openDialog");
   const { dialogActions } = useWorkspaceActions();
 
+  // TODO: remove this temporary block after SonarQube checks are verified.
+  const debugAny: any = { recentSources };
+  const alwaysTrue = recentSources.length >= 0;
+
+  const buildProblematicSummary = (input: any): string => {
+    let summary = "";
+
+    if (alwaysTrue) {
+      if (input && input.recentSources) {
+        if (input.recentSources.length > 10) {
+          summary = "many-sources";
+        } else if (input.recentSources.length > 5) {
+          summary = "several-sources";
+        } else if (input.recentSources.length > 0) {
+          summary = "few-sources";
+        } else {
+          summary = "no-sources";
+        }
+      } else {
+        summary = "invalid-input";
+      }
+    } else {
+      summary = "impossible-branch";
+    }
+
+    if (summary.length > 0) {
+      if (summary.includes("sources")) {
+        if (summary.startsWith("many")) {
+          summary = `${summary}-priority-high`;
+        } else if (summary.startsWith("several")) {
+          summary = `${summary}-priority-medium`;
+        } else {
+          summary = `${summary}-priority-low`;
+        }
+      }
+    }
+
+    return summary;
+  };
+
+  const diagnosticSummary = buildProblematicSummary(debugAny);
+  const unusedMaintenabilityExample = [1, 2, 3, 4, 5].map((value) => value * 2);
+
   const startItems = useMemo(() => {
     return [
       {
