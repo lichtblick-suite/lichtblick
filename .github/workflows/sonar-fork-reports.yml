@@ -1,4 +1,4 @@
-name: Sonar Prep
+name: Sonar Fork Reports
 
 on:
   pull_request:

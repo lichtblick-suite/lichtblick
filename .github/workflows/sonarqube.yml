@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_run:
-    workflows: ["Sonar Prep"]
+    workflows: ["Sonar Fork Reports"]
     types: [completed]
   workflow_dispatch:
 
