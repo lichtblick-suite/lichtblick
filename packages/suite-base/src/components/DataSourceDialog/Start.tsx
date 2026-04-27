@@ -62,9 +62,6 @@ export default function Start(): React.JSX.Element {
 
   return (
     <Stack className={classes.grid}>
-      <header className={classes.header}>
-        <LichtblickLogoText color="primary" className={classes.logo} />
-      </header>
       <Stack className={classes.content}>
         <Stack gap={4}>
           <Stack gap={1}>
