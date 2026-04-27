@@ -172,4 +172,55 @@ describe("H265", () => {
     expect(H265.FindNextStartCodeEnd(data, 0)).toBe(4);
     expect(H265.FindNextStartCodeEnd(new Uint8Array([0xff, 0xff]), 0)).toBe(2);
   });
+
+  it("IsKeyframe returns false for unrecognized bitstream formats", () => {
+    expect(H265.IsKeyframe(new Uint8Array([0x01, 0x02, 0x03]))).toBe(false);
+  });
+
+  it("IsKeyframe returns false when no random-access NAL unit is present", () => {
+    expect(H265.IsKeyframe(deltaFrame())).toBe(false);
+  });
+
+  it("StripParameterSets returns undefined for unrecognized bitstream formats", () => {
+    expect(H265.StripParameterSets(new Uint8Array([0x01, 0x02, 0x03]))).toBeUndefined();
+  });
+
+  it("StripParameterSets returns undefined when only parameter sets are present", () => {
+    const frame = frameData([
+      annexBNalu(H265NaluType.VPS_NUT),
+      annexBNalu(H265NaluType.SPS_NUT),
+      annexBNalu(H265NaluType.PPS_NUT, [0xc0]),
+    ]);
+    expect(H265.StripParameterSets(frame)).toBeUndefined();
+  });
+
+  it("InspectFrame ignores unparseable PPS context input", () => {
+    const frame = frameData([slice(1, H265SliceType.P)]);
+    const frameInfo = H265.InspectFrame(frame, { parameterSets: new Uint8Array([0x42]) });
+    expect(frameInfo.bitstreamFormat).toBe("annex-b");
+    expect(frameInfo.frameType).toBe("unknown");
+  });
+
+  it("InspectFrame tolerates a PPS NAL unit that is too short to parse", () => {
+    const ppsContext = frameData([
+      // PPS_NUT NALU header (2 bytes) but no body — triggers ParsePps short-circuit
+      [0x00, 0x00, 0x00, 0x01, (H265NaluType.PPS_NUT << 1) | 1, 0x01],
+    ]);
+    const frame = frameData([slice(1, H265SliceType.P)]);
+    expect(() => H265.InspectFrame(frame, { parameterSets: ppsContext })).not.toThrow();
+  });
+
+  it("ToAnnexB returns undefined when length-prefixed payload reports an invalid NAL length", () => {
+    const data = new Uint8Array([0x00, 0x00, 0x00, 0x00, 0x01, 0x02]);
+    expect(H265.ToAnnexB(data)).toBeUndefined();
+  });
+
+  it("ToAnnexB returns undefined when length-prefixed payload runs past its buffer", () => {
+    const data = new Uint8Array([0x00, 0x00, 0x00, 0x10, 0x42, 0x00]);
+    expect(H265.ToAnnexB(data)).toBeUndefined();
+  });
+
+  it("ToAnnexB returns undefined when length-prefixed payload has no complete NAL units", () => {
+    expect(H265.ToAnnexB(new Uint8Array([0x00, 0x00, 0x00]))).toBeUndefined();
+  });
 });

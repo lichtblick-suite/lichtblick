@@ -6,7 +6,7 @@
 import * as THREE from "three";
 
 import { PinholeCameraModel } from "@lichtblick/den/image";
-import { H265SliceType } from "@lichtblick/den/video";
+import { H265SliceType, VideoPlayer } from "@lichtblick/den/video";
 import { IRenderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import H265FrameBuilder from "@lichtblick/suite-base/testing/builders/H265FrameBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -633,6 +633,43 @@ describe("ImageRenderable error handling", () => {
 
     expect(bitmap).toBe(lastImageBitmap);
     expect(decode).not.toHaveBeenCalled();
+  });
+
+  it("should fall back to an empty bitmap when an h265 B frame arrives without a prior bitmap", async () => {
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    renderable.videoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(true),
+      init: jest.fn().mockResolvedValue(undefined),
+      decode: jest.fn(),
+      codedSize: jest.fn(),
+      decoderConfig: jest.fn().mockReturnValue({ codec: "hvc1.1.6.L93.B0" }),
+      resetForSeek: jest.fn(),
+      lastImageBitmap: undefined,
+      lastVideoFrame: undefined,
+    } as unknown as ImageRenderable["videoPlayer"];
+
+    const originalCreateImageBitmap = self.createImageBitmap;
+    const fallbackBitmap = new ImageBitmap();
+    self.createImageBitmap = jest.fn().mockResolvedValue(fallbackBitmap);
+
+    // @ts-expect-error decodeImage is protected, but ok to use on tests
+    const bitmap = await renderable.decodeImage(
+      createH265Frame(h265BFrame, { sec: 0, nsec: 33333333 }),
+      100,
+    );
+
+    expect(bitmap).toBe(fallbackBitmap);
+    self.createImageBitmap = originalCreateImageBitmap;
+  });
+
+  it("should throw when WebCodecs VideoDecoder is not supported by the browser", async () => {
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    jest.spyOn(VideoPlayer, "IsSupported").mockReturnValue(false);
+
+    await expect(
+      // @ts-expect-error decodeImage is protected, but ok to use on tests
+      renderable.decodeImage(createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }), 100),
+    ).rejects.toThrow("WebCodecs VideoDecoder is not available in this browser");
   });
 
   it("should decode continuous h265 frames one-by-one after the nearest keyframe", async () => {
