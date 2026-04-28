@@ -93,19 +93,8 @@ jobs:
         with:
           result-encoding: string
           script: |
-            const { data } = await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: "SonarCloud (workflow_run PR)",
-              head_sha: process.env.HEAD_SHA,
-              status: "in_progress",
-              details_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
-              output: {
-                title: "SonarCloud PR scan",
-                summary: "SonarCloud analysis is running…",
-              },
-            });
-            return String(data.id);
+            const script = require('./.github/workflows/scripts/create-check-run.ts');
+            return await script({ github, context });
 
       - uses: actions/checkout@v6
         with:
@@ -150,16 +139,5 @@ jobs:
           CHECK_RUN_ID: ${{ steps.check.outputs.result }}
         with:
           script: |
-            const conclusion = process.env.JOB_STATUS === "success" ? "success" : "failure";
-            await github.rest.checks.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              check_run_id: parseInt(process.env.CHECK_RUN_ID, 10),
-              status: "completed",
-              conclusion,
-              details_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
-              output: {
-                title: "SonarCloud PR scan",
-                summary: `SonarCloud analysis completed with status: ${conclusion}.`,
-              },
-            });
+            const script = require('./.github/workflows/scripts/update-check-run-status.js');
+            await script({ github, context });
