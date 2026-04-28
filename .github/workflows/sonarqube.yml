@@ -67,7 +67,7 @@ jobs:
       pull-requests: read
     steps:
       - name: Download PR metadata artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           github-token: ${{ github.token }}
           run-id: ${{ github.event.workflow_run.id }}
@@ -87,7 +87,7 @@ jobs:
           ref: refs/pull/${{ steps.metadata.outputs.number }}/head
 
       - name: Download ESLint report artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           github-token: ${{ github.token }}
           run-id: ${{ github.event.workflow_run.id }}
@@ -95,7 +95,7 @@ jobs:
           path: .
 
       - name: Download coverage artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           github-token: ${{ github.token }}
           run-id: ${{ github.event.workflow_run.id }}
