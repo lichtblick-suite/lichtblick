@@ -242,39 +242,6 @@ export function RendererOverlay(props: Props): React.JSX.Element {
         for (const pickedRenderable of selections) {
           const topic = pickedRenderable.renderable.topic;
           const details: Record<string, unknown> | undefined =
-<<<<<<< HEAD
-            pickedRenderable.instanceIndex != undefined
-              ? (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex) as
-                  | Record<string, unknown>
-                  | undefined)
-              : (pickedRenderable.renderable.details() as Record<string, unknown> | undefined);
-
-          const metadata: { key: string; value: string }[] = [];
-
-          if (details != undefined) {
-            const entityMeta = details.metadata;
-            if (Array.isArray(entityMeta)) {
-              for (const kv of entityMeta) {
-                if (kv != undefined && typeof kv === "object" && "key" in kv && "value" in kv) {
-                  metadata.push({
-                    key: String((kv as { key: unknown }).key),
-                    value: String((kv as { value: unknown }).value),
-                  });
-                }
-              }
-            }
-            // Then add any remaining top-level primitive fields (id, frame_id, etc.)
-            for (const [k, v] of Object.entries(details)) {
-              if (
-                k !== "metadata" &&
-                v != undefined &&
-                (typeof v === "string" || typeof v === "number" || typeof v === "boolean")
-              ) {
-                metadata.push({ key: k, value: String(v) });
-              }
-            }
-          }
-=======
             pickedRenderable.instanceIndex == undefined
               ? (pickedRenderable.renderable.details() as Record<string, unknown> | undefined)
               : (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex) as
@@ -282,7 +249,6 @@ export function RendererOverlay(props: Props): React.JSX.Element {
                   | undefined);
 
           const metadata = extractHoverMetadata(details);
->>>>>>> origin/main
 
           // Avoid showing tooltips for non-user-facing objects when hovering empty space.
           // If a renderable has no associated topic and no metadata, it doesn't provide useful info.

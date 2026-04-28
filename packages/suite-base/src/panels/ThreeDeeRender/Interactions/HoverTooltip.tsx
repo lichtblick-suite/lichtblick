@@ -49,8 +49,6 @@ export function HoverTooltip({
   const modeRef = useRef(mode);
   modeRef.current = mode;
 
-<<<<<<< HEAD
-=======
   const startDwellTimer = useCallback(() => {
     clearTimeout(dwellTimer.current);
     dwellTimer.current = setTimeout(() => {
@@ -143,7 +141,6 @@ export function HoverTooltip({
     [position, startGraceHideTimer],
   );
 
->>>>>>> origin/main
   // ---------------------------------------------------------------------------
   // React to incoming entity / position changes from the 3D scene
   // ---------------------------------------------------------------------------
@@ -152,11 +149,7 @@ export function HoverTooltip({
 
     // Always keep the entity key up to date, even while pinned. This avoids
     // stale comparisons after the tooltip is dismissed.
-<<<<<<< HEAD
-    const newKey = entities.map((e) => `${e.topic ?? ""}::${e.entityId}`).join("|");
-=======
     const newKey = entities.map((entity) => `${entity.topic ?? ""}::${entity.entityId}`).join("|");
->>>>>>> origin/main
     const keyChanged = newKey !== lastEntityKey.current;
     lastEntityKey.current = newKey;
 
@@ -167,81 +160,9 @@ export function HoverTooltip({
     }
 
     if (entities.length > 0) {
-<<<<<<< HEAD
-      if (currentMode === "hidden" || currentMode === "following") {
-        // Fast mode: update content immediately as the user browses.
-        setVisibleEntities(entities);
-        clearTimeout(graceTimer.current);
-        if (currentMode === "hidden") {
-          setMode("following");
-        }
-        // Start (or reset) the dwell timer when the hovered object changes or
-        // when entering from hidden (to ensure dwell always starts fresh).
-        if (keyChanged || currentMode === "hidden") {
-          clearTimeout(dwellTimer.current);
-          dwellTimer.current = setTimeout(() => {
-            if (modeRef.current === "following") {
-              setMode("settled");
-            }
-          }, HOVER_TOOLTIP_DWELL_MS);
-        }
-      } else if (currentMode === "settled") {
-        if (!keyChanged) {
-          return; // Still on the same object – stay settled.
-        }
-        // The user moved to a different object while settled.
-        // Freeze the tooltip and give them time to reach it before updating.
-        setFrozenPosition(position);
-        pendingEntities.current = entities;
-        clearTimeout(dwellTimer.current);
-        clearTimeout(graceTimer.current);
-        setMode("grace");
-        graceTimer.current = setTimeout(() => {
-          if (modeRef.current !== "grace") {
-            return;
-          }
-          const pending = pendingEntities.current;
-          if (pending.length > 0) {
-            setVisibleEntities(pending);
-            setMode("following");
-            // Start dwell timer for the newly visible object.
-            dwellTimer.current = setTimeout(() => {
-              if (modeRef.current === "following") {
-                setMode("settled");
-              }
-            }, HOVER_TOOLTIP_DWELL_MS);
-          } else {
-            setMode("hidden");
-            setVisibleEntities([]);
-          }
-        }, HOVER_TOOLTIP_GRACE_PERIOD_MS);
-      } else {
-        // Queue the latest entities to be shown when the grace period ends.
-        pendingEntities.current = entities;
-      }
-    } else {
-      // Entities cleared.
-      if (currentMode === "following" || currentMode === "settled") {
-        clearTimeout(dwellTimer.current);
-        clearTimeout(graceTimer.current);
-        setFrozenPosition(position);
-        pendingEntities.current = [];
-        setMode("grace");
-        graceTimer.current = setTimeout(() => {
-          if (modeRef.current === "grace") {
-            setMode("hidden");
-            setVisibleEntities([]);
-          }
-        }, HOVER_TOOLTIP_GRACE_PERIOD_MS);
-      } else if (currentMode === "grace") {
-        // Already in grace – just clear pending so the timer hides the tooltip.
-        pendingEntities.current = [];
-      }
-=======
       handleEntitiesPresent(currentMode, entities, { keyChanged });
     } else {
       handleEntitiesCleared(currentMode);
->>>>>>> origin/main
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entities]);
@@ -261,13 +182,8 @@ export function HoverTooltip({
     clearTimeout(graceTimer.current);
     clearTimeout(dwellTimer.current);
     clearTimeout(leaveTimer.current);
-<<<<<<< HEAD
-    const m = modeRef.current;
-    if (m === "grace" || m === "following" || m === "settled") {
-=======
     const currentMode = modeRef.current;
     if (currentMode === "grace" || currentMode === "following" || currentMode === "settled") {
->>>>>>> origin/main
       setMode("hover-pinned");
     }
   }, []);
@@ -336,17 +252,6 @@ export function HoverTooltip({
   // ---------------------------------------------------------------------------
   const displayPos = mode === "following" || mode === "settled" ? position : frozenPosition;
   const bounds =
-<<<<<<< HEAD
-    canvas != undefined
-      ? canvas.getBoundingClientRect()
-      : { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
-
-  // Use measured element size when available so the tooltip stays close to the
-  // cursor. Fall back to the CSS max dimensions only on the very first render.
-  const el = paperRef.current;
-  const tooltipW = el != undefined ? el.offsetWidth : HOVER_TOOLTIP_MAX_W;
-  const tooltipH = el != undefined ? el.offsetHeight : HOVER_TOOLTIP_MAX_H;
-=======
     canvas == undefined
       ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
       : canvas.getBoundingClientRect();
@@ -356,7 +261,6 @@ export function HoverTooltip({
   const tooltipElement = paperRef.current;
   const tooltipW = tooltipElement == undefined ? HOVER_TOOLTIP_MAX_W : tooltipElement.offsetWidth;
   const tooltipH = tooltipElement == undefined ? HOVER_TOOLTIP_MAX_H : tooltipElement.offsetHeight;
->>>>>>> origin/main
 
   const tooltipLeft = clampTooltipAxis(
     displayPos.clientX,
@@ -403,18 +307,12 @@ export function HoverTooltip({
       onMouseLeave={onMouseLeave}
       onClick={onTooltipClick}
     >
-<<<<<<< HEAD
-      {visibleEntities.map((entity, idx) => (
-        <div key={`${entity.topic}::${entity.entityId}::${idx}`} className={classes.entitySection}>
-          {idx > 0 && <Divider className={classes.divider} />}
-=======
       {visibleEntities.map((entity, entityIndex) => (
         <div
           key={`${entity.topic}::${entity.entityId}::${entityIndex}`}
           className={classes.entitySection}
         >
           {entityIndex > 0 && <Divider className={classes.divider} />}
->>>>>>> origin/main
           <Typography variant="caption" className={classes.entityId}>
             {entity.entityId}
           </Typography>
@@ -425,12 +323,6 @@ export function HoverTooltip({
           )}
           <table className={classes.table}>
             <tbody>
-<<<<<<< HEAD
-              {entity.metadata.map((kv, rowIdx) => (
-                <tr key={`${entity.entityId}::${kv.key}::${rowIdx}`} className={classes.tableRow}>
-                  <td className={classes.keyCell}>{kv.key}</td>
-                  <td className={classes.valueCell}>{kv.value}</td>
-=======
               {entity.metadata.map((metadataEntry, rowIndex) => (
                 <tr
                   key={`${entity.entityId}::${metadataEntry.key}::${rowIndex}`}
@@ -438,7 +330,6 @@ export function HoverTooltip({
                 >
                   <td className={classes.keyCell}>{metadataEntry.key}</td>
                   <td className={classes.valueCell}>{metadataEntry.value}</td>
->>>>>>> origin/main
                 </tr>
               ))}
             </tbody>

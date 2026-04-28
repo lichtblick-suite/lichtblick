@@ -177,11 +177,7 @@ export class IterablePlayer implements Player {
   #bufferedSource: IDeserializedIterableSource;
   // Buffering source implementation. We store a reference to it here so we can access buffer information such as loaded ranges & memory size.
   #bufferImpl: BufferedIterableSource;
-<<<<<<< HEAD
-  #deserializingSource?: DeserializingIterableSource;
-=======
   readonly #deserializingSource?: DeserializingIterableSource;
->>>>>>> origin/main
 
   // Some states register an abort controller to signal they should abort
   #abort?: AbortController;

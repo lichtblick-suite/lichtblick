@@ -523,25 +523,6 @@ function PanelExtensionAdapter(
           messageConverters,
         );
 
-<<<<<<< HEAD
-        // Find the converter (if any) that would be used for a given convertTo subscription.
-        const getConverterForSubscription = (sub: Subscription) => {
-          if (!sub.convertTo) {
-            return undefined;
-          }
-
-          const topicSchemaName = topicToSchemaNameMap.get(sub.topic);
-          if (topicSchemaName && topicSchemaName === sub.convertTo) {
-            return undefined;
-          }
-
-          const key = `${sub.topic}\n${topicSchemaName ?? "<no-schema>"}` as ConverterKey;
-          const convertersForTopic = topicSchemaConverters.get(key) ?? [];
-          return convertersForTopic.find((conv) => conv.toSchemaName === sub.convertTo);
-        };
-
-=======
->>>>>>> origin/main
         const subscribePayloads = localSubs.map((item): InternalSubscribePayload => {
           const preloadType = item.preload === true ? "full" : "partial";
 
@@ -556,15 +537,11 @@ function PanelExtensionAdapter(
           // Native/direct paths are denied by default.
           // If allowed, we set both the sampling request and the internal authorization bit.
           // MessagePipeline merge logic strips sampling requests unless authorization is present.
-<<<<<<< HEAD
-          const converter = getConverterForSubscription(item);
-=======
           const converter = getConverterForSubscription(
             item,
             topicToSchemaNameMap,
             topicSchemaConverters,
           );
->>>>>>> origin/main
           const topicSchemaName = topicToSchemaNameMap.get(item.topic);
           const isNativePath =
             item.convertTo == undefined ||
