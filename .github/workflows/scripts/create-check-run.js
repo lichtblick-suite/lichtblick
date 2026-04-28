@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
 /** @param {import("@actions/github/lib/utils").GitHub} github */
 /** @param {import("@actions/github").context} context */
 module.exports = async ({ github, context }) => {
