@@ -112,5 +112,7 @@ export async function expandHevcSeekBackfill(
     }
   }
 
-  return Array.from(expandedMessages.values()).sort((a, b) => compare(a.receiveTime, b.receiveTime));
+  return Array.from(expandedMessages.values()).sort((a, b) =>
+    compare(a.receiveTime, b.receiveTime),
+  );
 }

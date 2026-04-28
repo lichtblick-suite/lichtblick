@@ -77,10 +77,14 @@ describe("readHevcGopForSeekTarget", () => {
     const keyframe = makeMessage({ sec: 0, nsec: 10 });
 
     const sequence = [target, delta1, keyframe];
-    const getBackfillMessages = jest.fn(async () => [sequence.shift()].filter((m) => m) as MessageEvent[]);
+    const getBackfillMessages = jest.fn(
+      async () => [sequence.shift()].filter((m) => m) as MessageEvent[],
+    );
     jest
       .spyOn(H265, "IsKeyframe")
-      .mockImplementation((data: Uint8Array) => data === keyframe.message.data);
+      .mockImplementation(
+        (data: Uint8Array) => data === (keyframe.message as { data: Uint8Array }).data,
+      );
 
     const result = await readHevcGopForSeekTarget(target, getBackfillMessages, () => undefined);
 
@@ -130,9 +134,9 @@ describe("readHevcGopForSeekTarget", () => {
 
   it("aborts after MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES iterations", async () => {
     let counter = 0;
-    const getBackfillMessages = jest.fn(
-      async () => [makeMessage({ sec: 1, nsec: ++counter * 1000 })],
-    );
+    const getBackfillMessages = jest.fn(async () => [
+      makeMessage({ sec: 1, nsec: ++counter * 1000 }),
+    ]);
     jest.spyOn(H265, "IsKeyframe").mockReturnValue(false);
 
     const target = makeMessage({ sec: 1, nsec: (MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES + 5) * 1000 });
@@ -182,10 +186,14 @@ describe("expandHevcSeekBackfill", () => {
     const target = makeMessage({ sec: 0, nsec: 30 });
     const sequence = [target, delta1, keyframe];
 
-    const getBackfillMessages = jest.fn(async () => [sequence.shift()].filter((m) => m) as MessageEvent[]);
+    const getBackfillMessages = jest.fn(
+      async () => [sequence.shift()].filter((m) => m) as MessageEvent[],
+    );
     jest
       .spyOn(H265, "IsKeyframe")
-      .mockImplementation((data: Uint8Array) => data === keyframe.message.data);
+      .mockImplementation(
+        (data: Uint8Array) => data === (keyframe.message as { data: Uint8Array }).data,
+      );
 
     const result = await expandHevcSeekBackfill([target], getBackfillMessages, () => undefined);
 
@@ -206,7 +214,9 @@ describe("expandHevcSeekBackfill", () => {
     });
     jest
       .spyOn(H265, "IsKeyframe")
-      .mockImplementation((data: Uint8Array) => data === keyframe.message.data);
+      .mockImplementation(
+        (data: Uint8Array) => data === (keyframe.message as { data: Uint8Array }).data,
+      );
 
     const result = await expandHevcSeekBackfill([target], getBackfillMessages, () => undefined);
 
