@@ -36,6 +36,7 @@ import {
 
 export class ChartRenderer {
   #chartInstance: ChartType;
+  #titleColor: string;
   #fakeNodeEvents = new EventEmitter();
   #fakeDocumentEvents = new EventEmitter();
 
@@ -49,10 +50,13 @@ export class ChartRenderer {
       },
     };
 
+    this.#titleColor = args.titleColor;
+
     const chartOptions = getChartOptions({
       devicePixelRatio: args.devicePixelRatio,
       gridColor: args.gridColor,
       tickColor: args.tickColor,
+      titleColor: args.titleColor,
     });
 
     const origZoomStart = ZoomPlugin.start?.bind(ZoomPlugin);
@@ -133,6 +137,7 @@ export class ChartRenderer {
         yScale.title = {
           display: action.yAxisLabel.length > 0,
           text: action.yAxisLabel,
+          color: this.#titleColor,
         };
       }
     }
@@ -143,6 +148,7 @@ export class ChartRenderer {
         xScale.title = {
           display: action.xAxisLabel.length > 0,
           text: action.xAxisLabel,
+          color: this.#titleColor,
         };
       }
     }

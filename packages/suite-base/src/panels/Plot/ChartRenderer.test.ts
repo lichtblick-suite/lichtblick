@@ -26,6 +26,7 @@ const OPTIONS_CHART: ChartOptionsPlot = {
   devicePixelRatio: 2,
   gridColor: "#ccc",
   tickColor: "#000",
+  titleColor: "#111",
 };
 
 const SCALES_CHART: Record<string, Partial<Scale>> = {
@@ -149,6 +150,7 @@ describe("ChartRenderer", () => {
         devicePixelRatio: props.devicePixelRatio,
         gridColor: props.gridColor,
         tickColor: props.tickColor,
+        titleColor: props.titleColor,
       });
     });
   });

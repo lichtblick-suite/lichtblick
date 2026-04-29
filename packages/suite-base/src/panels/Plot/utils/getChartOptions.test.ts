@@ -11,12 +11,14 @@ describe("getChartOptions", () => {
   const mockDevicePixelRatio = 2;
   const mockGridColor = "#cccccc";
   const mockTickColor = "#666666";
+  const mockTitleColor = "#333333";
 
   it("should return correct ChartOptions for scatter chart", () => {
     const options = getChartOptions({
       devicePixelRatio: mockDevicePixelRatio,
       gridColor: mockGridColor,
       tickColor: mockTickColor,
+      titleColor: mockTitleColor,
     });
 
     expect(options).toEqual<ChartOptions<"scatter">>({
@@ -97,6 +99,7 @@ describe("getChartOptions", () => {
       devicePixelRatio,
       gridColor: mockGridColor,
       tickColor: mockTickColor,
+      titleColor: mockTitleColor,
     });
 
     expect(options.devicePixelRatio).toBe(devicePixelRatio);
@@ -109,6 +112,7 @@ describe("getChartOptions", () => {
       devicePixelRatio: mockDevicePixelRatio,
       gridColor,
       tickColor,
+      titleColor: mockTitleColor,
     });
 
     expect(options.scales?.x?.grid?.color).toBe(gridColor);
@@ -122,6 +126,7 @@ describe("getChartOptions", () => {
       devicePixelRatio: mockDevicePixelRatio,
       gridColor: mockGridColor,
       tickColor: mockTickColor,
+      titleColor: mockTitleColor,
     });
 
     expect(options.plugins?.decimation?.enabled).toBe(false);

@@ -47,6 +47,7 @@ export class OffscreenCanvasRenderer {
           devicePixelRatio: window.devicePixelRatio,
           gridColor: this.#theme.palette.divider,
           tickColor: this.#theme.palette.text.secondary,
+          titleColor: this.#theme.palette.text.primary,
         },
         [this.#canvas],
       ),

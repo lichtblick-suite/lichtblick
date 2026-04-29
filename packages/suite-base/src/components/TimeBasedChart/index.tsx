@@ -540,6 +540,10 @@ export default function TimeBasedChart(props: Props): React.JSX.Element {
         ...defaultXTicksSettings,
         ...xAxes?.ticks,
       },
+      title: {
+        ...xAxes?.title,
+        color: theme.palette.text.primary,
+      },
     };
 
     return scale;

@@ -149,6 +149,7 @@ export type ChartRendererProps = {
   devicePixelRatio: number;
   gridColor: string;
   tickColor: string;
+  titleColor: string;
 };
 
 export type ChartOptionsPlot = Omit<ChartRendererProps, "canvas">;
