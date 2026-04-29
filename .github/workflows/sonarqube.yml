@@ -15,7 +15,7 @@ env:
 
 jobs:
   internal-scan:
-    name: SonarCloud (internal)
+    name: Internal scan
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
     steps:
@@ -60,7 +60,7 @@ jobs:
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
 
   external-fork-scan:
-    name: SonarCloud (external fork PR)
+    name: External fork scan
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' && github.event.pull_request.labels.name == 'quality-check' }}
     permissions:
@@ -142,8 +142,8 @@ jobs:
             const script = require('./.github/workflows/scripts/update-check-run-status.js');
             await script({ github, context });
 
-  sonar-gate:
-    name: SonarCloud
+  sonar-result-check:
+    name: Analysis result check
     runs-on: ubuntu-latest
     if: always()
     needs: [internal-scan, external-fork-scan]
