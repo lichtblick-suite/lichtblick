@@ -75,6 +75,8 @@ export type UpdateAction = {
   size?: { width: number; height: number };
   showXAxisLabels?: boolean;
   showYAxisLabels?: boolean;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
   xBounds?: Partial<Bounds1D>;
   yBounds?: Partial<Bounds1D>;
   zoomMode?: "x" | "y" | "xy";

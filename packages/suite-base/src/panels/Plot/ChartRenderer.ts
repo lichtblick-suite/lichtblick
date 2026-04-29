@@ -127,6 +127,26 @@ export class ChartRenderer {
       }
     }
 
+    if (action.yAxisLabel != undefined) {
+      const yScale = this.#chartInstance.options.scales?.y;
+      if (yScale) {
+        yScale.title = {
+          display: action.yAxisLabel.length > 0,
+          text: action.yAxisLabel,
+        };
+      }
+    }
+
+    if (action.xAxisLabel != undefined) {
+      const xScale = this.#chartInstance.options.scales?.x;
+      if (xScale) {
+        xScale.title = {
+          display: action.xAxisLabel.length > 0,
+          text: action.xAxisLabel,
+        };
+      }
+    }
+
     if (action.interactionEvents) {
       for (const event of action.interactionEvents) {
         this.#applyInteractionEvent(event);

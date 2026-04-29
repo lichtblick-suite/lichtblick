@@ -229,6 +229,8 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     this.updateAction.showXAxisLabels = config.showXAxisLabels;
     this.updateAction.showYAxisLabels = config.showYAxisLabels;
+    this.updateAction.xAxisLabel = config.xAxisLabel;
+    this.updateAction.yAxisLabel = config.yAxisLabel;
     this.updateAction.referenceLines = referenceLines;
 
     if (configYBoundsChanged) {

@@ -433,6 +433,38 @@ describe("PlotCoordinator", () => {
       });
     });
 
+    it("should pass xAxisLabel through to updateAction", () => {
+      const config = PlotBuilder.config({ xAxisLabel: "Time (s)", paths: [] });
+      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+
+      plotCoordinator.handleConfig(config, "light", {});
+
+      expect(plotCoordinator["updateAction"].xAxisLabel).toBe("Time (s)");
+    });
+
+    it("should pass yAxisLabel through to updateAction", () => {
+      const config = PlotBuilder.config({ yAxisLabel: "Velocity", paths: [] });
+      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+
+      plotCoordinator.handleConfig(config, "light", {});
+
+      expect(plotCoordinator["updateAction"].yAxisLabel).toBe("Velocity");
+    });
+
+    it("should pass undefined axis labels when not configured", () => {
+      const config = PlotBuilder.config({
+        xAxisLabel: undefined,
+        yAxisLabel: undefined,
+        paths: [],
+      });
+      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+
+      plotCoordinator.handleConfig(config, "light", {});
+
+      expect(plotCoordinator["updateAction"].xAxisLabel).toBeUndefined();
+      expect(plotCoordinator["updateAction"].yAxisLabel).toBeUndefined();
+    });
+
     it("should correctly process paths and generate series", () => {
       const config = PlotBuilder.config();
       (parseMessagePath as jest.Mock).mockReturnValue(BasicBuilder.string());

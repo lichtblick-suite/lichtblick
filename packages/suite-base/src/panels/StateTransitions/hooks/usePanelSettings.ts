@@ -148,7 +148,14 @@ export const makeRootSeriesNode = memoizeWeak(
 );
 
 export function buildSettingsTree(
-  { isSynced, xAxisMaxValue, xAxisMinValue, xAxisRange, showPoints }: StateTransitionConfig,
+  {
+    isSynced,
+    xAxisMaxValue,
+    xAxisMinValue,
+    xAxisRange,
+    xAxisLabel,
+    showPoints,
+  }: StateTransitionConfig,
   paths: PathState[],
   t: TFunction<"stateTransitions">,
 ): SettingsTreeNodes {
@@ -183,6 +190,11 @@ export function buildSettingsTree(
     xAxis: {
       label: t("xAxis"),
       fields: {
+        xAxisLabel: {
+          label: t("labels.axisLabel"),
+          input: "string",
+          value: xAxisLabel,
+        },
         xAxisMaxValue: setAxis({ label: t("max"), value: xAxisMaxValue, error: maxXError }),
         xAxisMinValue: setAxis({ label: t("min"), value: xAxisMinValue }),
         xAxisRange: setAxis({ label: t("secondsRange"), value: xAxisRange }),

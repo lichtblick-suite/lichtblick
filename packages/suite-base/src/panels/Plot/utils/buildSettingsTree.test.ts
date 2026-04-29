@@ -124,6 +124,54 @@ describe("buildSettingsTree", () => {
     expect(tree.xAxis?.fields?.maxXValue?.error).toBe("maxXError");
   });
 
+  it("should include xAxisLabel field with provided value", () => {
+    const config: PlotConfig = PlotBuilder.config({ xAxisLabel: "Time (s)", paths: [] });
+
+    const tree = buildSettingsTree(config, t);
+
+    expect(tree.xAxis?.fields?.xAxisLabel).toEqual({
+      label: "axisLabel",
+      input: "string",
+      value: "Time (s)",
+    });
+  });
+
+  it("should include xAxisLabel field with undefined value when not set", () => {
+    const config: PlotConfig = PlotBuilder.config({ xAxisLabel: undefined, paths: [] });
+
+    const tree = buildSettingsTree(config, t);
+
+    expect(tree.xAxis?.fields?.xAxisLabel).toEqual({
+      label: "axisLabel",
+      input: "string",
+      value: undefined,
+    });
+  });
+
+  it("should include yAxisLabel field with provided value", () => {
+    const config: PlotConfig = PlotBuilder.config({ yAxisLabel: "Velocity", paths: [] });
+
+    const tree = buildSettingsTree(config, t);
+
+    expect(tree.yAxis?.fields?.yAxisLabel).toEqual({
+      label: "axisLabel",
+      input: "string",
+      value: "Velocity",
+    });
+  });
+
+  it("should include yAxisLabel field with undefined value when not set", () => {
+    const config: PlotConfig = PlotBuilder.config({ yAxisLabel: undefined, paths: [] });
+
+    const tree = buildSettingsTree(config, t);
+
+    expect(tree.yAxis?.fields?.yAxisLabel).toEqual({
+      label: "axisLabel",
+      input: "string",
+      value: undefined,
+    });
+  });
+
   describe("makeSeriesNode - reorderable and icon properties", () => {
     it("should set reorderable to true and icon to DragHandle when canReorder is true", () => {
       // Given: A config with multiple paths where nodes should be reorderable

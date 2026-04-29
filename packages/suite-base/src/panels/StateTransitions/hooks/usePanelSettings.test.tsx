@@ -228,6 +228,7 @@ describe("buildSettingsTree", () => {
       xAxisMaxValue: BasicBuilder.number({ min: 50, max: 100 }),
       xAxisMinValue: BasicBuilder.number({ min: 0, max: 49 }),
       xAxisRange: BasicBuilder.number(),
+      xAxisLabel: BasicBuilder.string(),
       ...config,
     };
 
@@ -262,6 +263,11 @@ describe("buildSettingsTree", () => {
     // X axis settings
     expect(xAxis).toBeDefined();
     expect(xAxis!.label).toEqual("xAxis");
+    expect(xAxis!.fields!.xAxisLabel).toEqual({
+      label: "labels.axisLabel",
+      input: "string",
+      value: config.xAxisLabel,
+    });
     expect(xAxis!.fields!.xAxisMaxValue!.label).toEqual("max");
     expect(xAxis!.fields!.xAxisMaxValue!.value).toEqual(config.xAxisMaxValue);
     expect(xAxis!.fields!.xAxisMinValue!.label).toEqual("min");
@@ -286,6 +292,39 @@ describe("buildSettingsTree", () => {
     );
 
     expect(xAxis!.fields!.xAxisMaxValue!.error).toEqual("maxXError");
+  });
+
+  it("should include xAxisLabel field with provided value", () => {
+    const label = "My Custom Label";
+    const { paths, config } = setup({ config: { xAxisLabel: label } });
+
+    const { xAxis } = buildSettingsTree(
+      config as StateTransitionConfig,
+      paths,
+      t as unknown as TFunction<"stateTransitions">,
+    );
+
+    expect(xAxis!.fields!.xAxisLabel).toEqual({
+      label: "labels.axisLabel",
+      input: "string",
+      value: label,
+    });
+  });
+
+  it("should include xAxisLabel field with undefined value when not set", () => {
+    const { paths, config } = setup({ config: { xAxisLabel: undefined } });
+
+    const { xAxis } = buildSettingsTree(
+      config as StateTransitionConfig,
+      paths,
+      t as unknown as TFunction<"stateTransitions">,
+    );
+
+    expect(xAxis!.fields!.xAxisLabel).toEqual({
+      label: "labels.axisLabel",
+      input: "string",
+      value: undefined,
+    });
   });
 });
 

@@ -36,6 +36,19 @@ describe("useChartScalesAndBounds", () => {
     expect(result.current.xScale).toEqual({
       type: "linear",
       border: { display: false },
+      title: { display: false, text: undefined },
+    });
+  });
+
+  it("should return xScale with title when xAxisLabel is set", () => {
+    const customConfig = { ...config, xAxisLabel: "Time (s)" };
+    const { result } = renderHook(() =>
+      useChartScalesAndBounds(undefined, undefined, undefined, customConfig),
+    );
+    expect(result.current.xScale).toEqual({
+      type: "linear",
+      border: { display: false },
+      title: { display: true, text: "Time (s)" },
     });
   });
 
