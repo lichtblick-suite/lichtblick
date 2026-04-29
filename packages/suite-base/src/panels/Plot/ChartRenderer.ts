@@ -36,9 +36,9 @@ import {
 
 export class ChartRenderer {
   #chartInstance: ChartType;
-  #titleColor: string;
   #fakeNodeEvents = new EventEmitter();
   #fakeDocumentEvents = new EventEmitter();
+  readonly #titleColor: string;
 
   public constructor(args: ChartRendererProps) {
     const fakeNode = {
