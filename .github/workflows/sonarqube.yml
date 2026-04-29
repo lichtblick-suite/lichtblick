@@ -4,7 +4,7 @@ on:
   push:
     branches: ["develop"]
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
   workflow_run:
     workflows: ["Sonar Fork Reports"]
     types: [completed]
@@ -62,7 +62,7 @@ jobs:
   external-fork-scan:
     name: SonarCloud (external fork PR)
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' && github.event.pull_request.labels.name == 'quality-check' }}
     permissions:
       actions: read
       checks: write
@@ -141,3 +141,14 @@ jobs:
           script: |
             const script = require('./.github/workflows/scripts/update-check-run-status.js');
             await script({ github, context });
+
+  sonar-gate:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [internal-scan, external-fork-scan]
+    steps:
+      - run: |
+          if [[ "${{ needs.internal-scan.result }}" == "failure" || "${{ needs.external-fork-scan.result }}" == "failure" ]]; then
+            exit 1
+          fi
