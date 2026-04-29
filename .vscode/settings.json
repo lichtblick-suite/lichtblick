@@ -24,9 +24,9 @@
     ".yarn/**": true,
     "yarn.lock": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.preferences.importModuleSpecifier": "non-relative",
-  "jest.autoRun": { "watch": false, "onSave": "test-file" },
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "jest.runMode": "on-save",
   "jest.jestCommandLine": "yarn test",
   "eslint.lintTask.enable": true,
   "[shellscript]": {

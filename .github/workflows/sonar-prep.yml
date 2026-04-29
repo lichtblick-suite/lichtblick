@@ -1,0 +1,86 @@
+name: Sonar Prep
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  prepare-sonar-artifacts:
+    name: Prepare Sonar artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable corepack
+        run: corepack enable yarn
+
+      - name: Restore cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Save PR metadata
+        run: |
+          jq -n \
+            --arg number "${{ github.event.pull_request.number }}" \
+            --arg head_ref "${{ github.event.pull_request.head.ref }}" \
+            --arg base_ref "${{ github.event.pull_request.base.ref }}" \
+            '{number: $number, head_ref: $head_ref, base_ref: $base_ref}' > pr-metadata.json
+
+      - name: Generate lint report and normalize file paths
+        run: |
+          yarn lint:ci:report
+          sed -i 's|/home/runner/work/lichtblick/lichtblick/|./|g' eslint-report.json
+        continue-on-error: true
+
+      - name: Test and coverage
+        run: yarn test:coverage
+        continue-on-error: true
+
+      - name: Ensure Sonar artifacts exist
+        run: |
+          [[ -f eslint-report.json ]] || echo "[]" > eslint-report.json
+          mkdir -p coverage
+          [[ -f coverage/lcov.info ]] || : > coverage/lcov.info
+
+      - name: Upload PR metadata
+        uses: actions/upload-artifact@v7
+        with:
+          name: sonar-pr-metadata
+          path: pr-metadata.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload ESLint report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sonar-eslint-report
+          path: eslint-report.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload coverage lcov
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sonar-coverage-lcov
+          path: coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 1

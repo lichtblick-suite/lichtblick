@@ -1,6 +1,6 @@
 {
   "name": "lichtblick",
-  "version": "1.24.3",
+  "version": "1.25.0",
   "license": "MPL-2.0",
   "private": true,
   "productName": "Lichtblick",
@@ -82,9 +82,13 @@
     "tar": "7.5.11",
     "undici": "6.24.1",
     "flatted": "3.4.2",
-    "@xmldom/xmldom@npm:^0.8.8": "0.8.13",
+    "@xmldom/xmldom": "0.9.10",
     "postcss": "8.5.10",
-    "uuid": "14.0.0"
+    "uuid": "14.0.0",
+    "plist@3.1.0": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",
+    "plist@^3.0.4": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",
+    "plist@^3.0.5": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",
+    "plist@^3.1.0": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch"
   },
   "devDependencies": {
     "@actions/core": "1.11.1",

@@ -1452,7 +1452,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.emit("renderablesClicked", selections, cursorCoords, this);
   };
 
-  #hoverHandler = (cursorCoords: THREE.Vector2): void => {
+  readonly #hoverHandler = (cursorCoords: THREE.Vector2): void => {
     if (!this.#pickingEnabled) {
       return;
     }
@@ -1463,14 +1463,12 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     const camera = this.cameraHandler.getActiveCamera();
     const selections: PickedRenderable[] = [];
-    let curSelection: PickedRenderable | undefined;
-    while (
-      (curSelection = this.#pickSingleObject(cursorCoords)) &&
-      selections.length < MAX_SELECTIONS
-    ) {
+    let curSelection: PickedRenderable | undefined = this.#pickSingleObject(cursorCoords);
+    while (curSelection && selections.length < MAX_SELECTIONS) {
       selections.push(curSelection);
       curSelection.renderable.visible = false;
       this.gl.render(this.#scene, camera);
+      curSelection = this.#pickSingleObject(cursorCoords);
     }
     for (const selection of selections) {
       selection.renderable.visible = true;

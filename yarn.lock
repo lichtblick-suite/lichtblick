@@ -7156,13 +7156,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xmldom/xmldom@npm:^0.8.8":
-  version: 0.8.13
-  resolution: "@xmldom/xmldom@npm:0.8.13"
-  checksum: b5568a3dee6306c4c6256c94f27d74f904d7cc923607f0dcaa37998e370361ce37a6e99aa55e8e725f07079e619a6f8b3a7de218e76b522ba2b1aca3ada5265c
-  languageName: node
-  linkType: hard
-
 "@xobotyi/scrollbar-width@npm:^1.9.5":
   version: 1.9.5
   resolution: "@xobotyi/scrollbar-width@npm:1.9.5"
@@ -17343,7 +17336,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"plist@npm:3.1.0, plist@npm:^3.0.4, plist@npm:^3.0.5, plist@npm:^3.1.0":
+"plist@npm:3.1.0":
   version: 3.1.0
   resolution: "plist@npm:3.1.0"
   dependencies:
@@ -17351,6 +17344,17 @@ __metadata:
     base64-js: ^1.5.1
     xmlbuilder: ^15.1.1
   checksum: c8ea013da8646d4c50dff82f9be39488054621cc229957621bb00add42b5d4ce3657cf58d4b10c50f7dea1a81118f825838f838baeb4e6f17fab453ecf91d424
+  languageName: node
+  linkType: hard
+
+"plist@patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch::locator=lichtblick%40workspace%3A.":
+  version: 3.1.0
+  resolution: "plist@patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch::version=3.1.0&hash=f176ea&locator=lichtblick%40workspace%3A."
+  dependencies:
+    "@xmldom/xmldom": ^0.8.8
+    base64-js: ^1.5.1
+    xmlbuilder: ^15.1.1
+  checksum: 926b78276357ac173bb6d10b2e351d0b29bd1316ef132828ff12bc24f2cfee60af17e207c48c19ad83d07c2eb6b25e89a9015981dac8b778235a1ba902b3e23b
   languageName: node
   linkType: hard
 
