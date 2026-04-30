@@ -10,7 +10,11 @@
   // enable intellisense in custom snippets (see snippets.code-snippets)
   "editor.suggest.snippetsPreventQuickSuggestions": false,
   "eslint.options": {
-    "reportUnusedDisableDirectives": "error"
+    "overrideConfig": {
+      "linterOptions": {
+        "reportUnusedDisableDirectives": "error"
+      }
+    }
   },
   "files.eol": "\n",
   "files.insertFinalNewline": true,
