@@ -62,7 +62,7 @@ jobs:
   external-fork-scan:
     name: External fork scan
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' && github.event.pull_request.labels.name == 'quality-check' }}
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
     permissions:
       actions: read
       checks: write
@@ -149,6 +149,19 @@ jobs:
     needs: [internal-scan, external-fork-scan]
     steps:
       - run: |
-          if [[ "${{ needs.internal-scan.result }}" == "failure" || "${{ needs.external-fork-scan.result }}" == "failure" ]]; then
+          INTERNAL="${{ needs.internal-scan.result }}"
+          EXTERNAL="${{ needs.external-fork-scan.result }}"
+
+          # Fail if any scan failed
+          if [[ "$INTERNAL" == "failure" || "$EXTERNAL" == "failure" ]]; then
+            echo "::error::A Sonar scan failed (internal=$INTERNAL, external=$EXTERNAL)"
             exit 1
           fi
+
+          # Fail if both were skipped (no scan ran at all)
+          if [[ "$INTERNAL" == "skipped" && "$EXTERNAL" == "skipped" ]]; then
+            echo "::error::No Sonar scan ran (both jobs skipped)"
+            exit 1
+          fi
+
+          echo "Sonar scan completed (internal=$INTERNAL, external=$EXTERNAL)"
