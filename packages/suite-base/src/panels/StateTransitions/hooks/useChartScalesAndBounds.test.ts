@@ -71,11 +71,14 @@ describe("useChartScalesAndBounds", () => {
     });
   });
 
-  it("should return undefined databounds when endTimeSinceStart is undefined", () => {
+  it("should default to safe databounds when endTimeSinceStart is undefined", () => {
     const { result } = renderHook(() =>
       useChartScalesAndBounds(undefined, undefined, undefined, config),
     );
-    expect(result.current.databounds).toBeUndefined();
+    expect(result.current.databounds).toEqual({
+      x: { min: 0, max: 1 },
+      y: { min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER },
+    });
   });
 
   it("should return correct width and sizeRef", () => {
