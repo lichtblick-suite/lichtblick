@@ -62,6 +62,28 @@ describe("useChartScalesAndBounds", () => {
     });
   });
 
+  it("should return correct databounds when only xAxisMinValue is defined", () => {
+    const customConfig = { ...config, xAxisMinValue: 50 };
+    const { result } = renderHook(() =>
+      useChartScalesAndBounds(undefined, undefined, 1000, customConfig),
+    );
+    expect(result.current.databounds).toEqual({
+      x: { min: 50, max: 1000 },
+      y: { min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER },
+    });
+  });
+
+  it("should return correct databounds when only xAxisMaxValue is defined", () => {
+    const customConfig = { ...config, xAxisMaxValue: 500 };
+    const { result } = renderHook(() =>
+      useChartScalesAndBounds(undefined, undefined, 1000, customConfig),
+    );
+    expect(result.current.databounds).toEqual({
+      x: { min: 0, max: 500 },
+      y: { min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER },
+    });
+  });
+
   it("should return correct databounds when endTimeSinceStart is defined", () => {
     const { result } = renderHook(() =>
       useChartScalesAndBounds(undefined, undefined, 1000, config),
