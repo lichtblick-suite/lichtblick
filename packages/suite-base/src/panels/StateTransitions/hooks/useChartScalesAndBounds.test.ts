@@ -8,6 +8,7 @@ import { renderHook } from "@testing-library/react";
 import { StateTransitionConfig } from "@lichtblick/suite-base/panels/StateTransitions/types";
 
 import useChartScalesAndBounds from "./useChartScalesAndBounds";
+import { DEFAULT_X_END_TIME } from "@lichtblick/suite-base/panels/StateTransitions/hooks/constants";
 
 describe("useChartScalesAndBounds", () => {
   const config: StateTransitionConfig = {
@@ -76,7 +77,7 @@ describe("useChartScalesAndBounds", () => {
       useChartScalesAndBounds(undefined, undefined, undefined, config),
     );
     expect(result.current.databounds).toEqual({
-      x: { min: 0, max: 1 },
+      x: { min: 0, max: DEFAULT_X_END_TIME },
       y: { min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER },
     });
   });
