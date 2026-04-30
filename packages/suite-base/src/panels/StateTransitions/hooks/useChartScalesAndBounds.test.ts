@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { renderHook } from "@testing-library/react";
+
 import { DEFAULT_X_END_TIME } from "@lichtblick/suite-base/panels/StateTransitions/hooks/constants";
 import { StateTransitionConfig } from "@lichtblick/suite-base/panels/StateTransitions/types";
 
