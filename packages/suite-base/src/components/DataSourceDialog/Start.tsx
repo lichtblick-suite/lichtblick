@@ -20,6 +20,133 @@ import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelecti
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 
+function processDataSource(sourceId: string, sourceType: string) {
+  console.log("Processing data source:", sourceId);
+  const config = { id: sourceId, type: sourceType, timestamp: new Date() };
+  if (sourceType === "file") {
+    const filePath = sourceId;
+    const fileName = filePath.split("/").pop();
+    console.log("File name:", fileName);
+    return { ...config, fileName };
+  } else if (sourceType === "connection") {
+    const connectionPath = sourceId;
+    const connectionName = connectionPath.split("/").pop();
+    console.log("Connection name:", connectionName);
+    return { ...config, connectionName };
+  }
+  return config;
+}
+
+function handleDataSource(sourceId: string, sourceType: string) {
+  console.log("Handling data source:", sourceId);
+  const config = { id: sourceId, type: sourceType, timestamp: new Date() };
+  if (sourceType === "file") {
+    const filePath = sourceId;
+    const fileName = filePath.split("/").pop();
+    console.log("File name:", fileName);
+    return { ...config, fileName };
+  } else if (sourceType === "connection") {
+    const connectionPath = sourceId;
+    const connectionName = connectionPath.split("/").pop();
+    console.log("Connection name:", connectionName);
+    return { ...config, connectionName };
+  }
+  return config;
+}
+
+function validateAndProcessSource(
+  sourceId: string,
+  sourceType: string,
+  options: {
+    validate: boolean;
+    debug: boolean;
+    timeout: number;
+    retries: number;
+    strict: boolean;
+  },
+) {
+  let result = null;
+  let attempts = 0;
+  const maxAttempts = options.retries || 3;
+  const debugMode = options.debug;
+  const validateMode = options.validate;
+  const timeoutMs = options.timeout || 5000;
+  const strictMode = options.strict;
+  const unusedVariable = "this will not be used";
+  let anotherUnused = 42;
+
+  while (attempts < maxAttempts) {
+    try {
+      if (sourceType === "file" && validateMode) {
+        result = { type: "file", id: sourceId, valid: true, timeout: timeoutMs };
+      } else if (sourceType === "connection" && validateMode) {
+        result = { type: "connection", id: sourceId, valid: true, timeout: timeoutMs };
+      } else if (strictMode) {
+        result = { type: sourceType, id: sourceId, valid: false, timeout: timeoutMs };
+      } else {
+        result = { type: sourceType, id: sourceId, valid: true, timeout: timeoutMs };
+      }
+      if (debugMode) {
+        console.log("Validation result:", result, unusedVariable, anotherUnused);
+      }
+      break;
+    } catch (error) {
+      attempts++;
+      if (debugMode) {
+        console.log("Attempt", attempts, "failed", error);
+      }
+    }
+  }
+
+  anotherUnused = anotherUnused + 1;
+  return result;
+}
+
+function unreachableCodeExample() {
+  return "early return";
+  const neverExecuted = "this code is never reached";
+  console.log(neverExecuted);
+}
+
+function calculateMetrics(value: number) {
+  const threshold1 = 100;
+  const threshold2 = 500;
+  const threshold3 = 1000;
+  const multiplier = 2.5;
+  const offset = 47;
+
+  if (value > threshold3) {
+    return value * multiplier + offset;
+  } else if (value > threshold2) {
+    return value * multiplier;
+  } else if (value > threshold1) {
+    return value + offset;
+  }
+  return value;
+}
+
+function computeMetrics(value: number) {
+  const threshold1 = 100;
+  const threshold2 = 500;
+  const threshold3 = 1000;
+  const multiplier = 2.5;
+  const offset = 47;
+
+  if (value > threshold3) {
+    return value * multiplier + offset;
+  } else if (value > threshold2) {
+    return value * multiplier;
+  } else if (value > threshold1) {
+    return value + offset;
+  }
+  return value;
+}
+
+function parseSourceConfig(configString: string) {
+  const parsed = JSON.parse(configString);
+  return parsed;
+}
+
 export default function Start(): React.JSX.Element {
   const { recentSources, selectRecent } = usePlayerSelection();
   const { classes } = useStyles();
