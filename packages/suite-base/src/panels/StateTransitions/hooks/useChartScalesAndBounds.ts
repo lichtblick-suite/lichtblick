@@ -5,9 +5,9 @@ import { ScaleOptions } from "chart.js";
 import { RefCallback, useEffect, useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
+import { DEFAULT_X_END_TIME } from "@lichtblick/suite-base/panels/StateTransitions/hooks/constants";
 import { StateTransitionConfig } from "@lichtblick/suite-base/panels/StateTransitions/types";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
-import { DEFAULT_X_END_TIME } from "@lichtblick/suite-base/panels/StateTransitions/hooks/constants";
 
 type UseChartScalesAndBounds = {
   yScale: ScaleOptions<"linear">;
