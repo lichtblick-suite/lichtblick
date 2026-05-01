@@ -96,7 +96,7 @@
     "@babel/core": "7.29.0",
     "@babel/plugin-proposal-decorators": "7.29.0",
     "@babel/plugin-proposal-explicit-resource-management": "7.27.4",
-    "@babel/preset-env": "7.29.2",
+    "@babel/preset-env": "7.29.3",
     "@babel/preset-react": "7.28.5",
     "@babel/preset-typescript": "7.28.5",
     "@eslint/compat": "1.4.1",
