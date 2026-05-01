@@ -87,7 +87,7 @@ jobs:
 
       - name: Create in-progress PR check run
         id: check
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           HEAD_SHA: ${{ steps.metadata.outputs.head_sha }}
         with:
@@ -133,7 +133,7 @@ jobs:
 
       - name: Complete PR check run
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           JOB_STATUS: ${{ job.status }}
           CHECK_RUN_ID: ${{ steps.check.outputs.result }}
