@@ -369,12 +369,12 @@ export default function TimeBasedChart(props: Props): React.JSX.Element {
       });
     }
 
-    if (tooltipItems.length === 0) {
+    const element = tooltipItems[0]?.element;
+
+    if (!element) {
       setActiveTooltip(undefined);
       return;
     }
-
-    const element = tooltipItems[0]!.element;
 
     const canvasRect = canvasContainer.current?.getBoundingClientRect();
     if (canvasRect) {
