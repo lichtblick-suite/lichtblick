@@ -12,6 +12,7 @@ import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { RendererOverlay } from "./RendererOverlay";
 
 let mockLastHoverTooltipProps: any = undefined;
+let mockLastInteractionsProps: any = undefined;
 
 jest.mock("./Interactions/HoverTooltip", () => {
   return {
@@ -27,7 +28,10 @@ jest.mock("./Interactions", () => {
   return {
     __esModule: true,
     InteractionContextMenu: () => undefined,
-    Interactions: () => undefined,
+    Interactions: (props: any) => {
+      mockLastInteractionsProps = props;
+      return undefined;
+    },
   };
 });
 
@@ -82,6 +86,7 @@ describe("<RendererOverlay /> hover wiring", () => {
   beforeEach(() => {
     mockRendererEventCallbacks.clear();
     mockLastHoverTooltipProps = undefined;
+    mockLastInteractionsProps = undefined;
     jest.clearAllMocks();
   });
 
@@ -328,6 +333,280 @@ describe("<RendererOverlay /> hover wiring", () => {
     await waitFor(() => {
       expect(mockLastHoverTooltipProps).toBeDefined();
       expect(mockLastHoverTooltipProps.entities).toEqual([]);
+    });
+  });
+});
+
+function makeCanvas(): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.getBoundingClientRect = jest.fn(
+    () =>
+      ({
+        left: 0,
+        top: 0,
+        right: 100,
+        bottom: 100,
+        width: 100,
+        height: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => "",
+      }) as DOMRect,
+  );
+  return canvas;
+}
+
+function makeRenderable(
+  overrides: Partial<{
+    topic: string;
+    details: () => unknown;
+    instanceDetails: (idx: number) => unknown;
+  }> = {},
+) {
+  return {
+    topic: "/topic",
+    name: "entity on /topic",
+    pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 1 } },
+    userData: { entityId: "entity" },
+    details: jest.fn(() => ({ msg: "initial" })),
+    instanceDetails: jest.fn(() => undefined),
+    ...overrides,
+  };
+}
+
+function renderOverlayForSelection(canvas: HTMLCanvasElement | ReactNull) {
+  return render(
+    <ThemeProvider isDark={false}>
+      <RendererOverlay
+        addPanel={jest.fn() as any}
+        canPublish={false}
+        canvas={canvas}
+        enableStats={false}
+        interfaceMode="3d"
+        measureActive={false}
+        onChangePublishClickType={jest.fn()}
+        onClickMeasure={jest.fn()}
+        onClickPublish={jest.fn()}
+        onShowTopicSettings={jest.fn()}
+        onTogglePerspective={jest.fn()}
+        perspective={false}
+        publishActive={false}
+        publishClickType="point"
+        timezone={undefined}
+      />
+    </ThemeProvider>,
+  );
+}
+
+describe("<RendererOverlay /> endFrame refresh", () => {
+  beforeEach(() => {
+    mockRendererEventCallbacks.clear();
+    mockLastInteractionsProps = undefined;
+    jest.clearAllMocks();
+  });
+
+  it("registers an endFrame event handler", () => {
+    renderOverlayForSelection(makeCanvas());
+    expect(mockRendererEventCallbacks.has("endFrame")).toBe(true);
+  });
+
+  it("re-evaluates selectedObject.details() on endFrame when a renderable is selected", async () => {
+    renderOverlayForSelection(makeCanvas());
+
+    const renderable = makeRenderable();
+
+    act(() => {
+      mockRendererEventCallbacks.get("renderablesClicked")?.(
+        [{ renderable, instanceIndex: undefined }] as any,
+        { x: 0, y: 0 } as any,
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps?.selectedObject).toBeDefined();
+    });
+
+    const callsAfterSelect = renderable.details.mock.calls.length;
+    expect(callsAfterSelect).toBeGreaterThan(0);
+
+    // Re-read the callback after the re-render so we get the closure that
+    // captures the updated selectedRenderable state.
+    const endFrameCb = mockRendererEventCallbacks.get("endFrame");
+
+    act(() => {
+      endFrameCb?.();
+    });
+
+    await waitFor(() => {
+      expect(renderable.details.mock.calls.length).toBeGreaterThan(callsAfterSelect);
+    });
+  });
+
+  it("does not increment the refresh counter on endFrame when nothing is selected", async () => {
+    renderOverlayForSelection(makeCanvas());
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps).toBeDefined();
+    });
+
+    expect(mockLastInteractionsProps.selectedObject).toBeUndefined();
+
+    const endFrameCb = mockRendererEventCallbacks.get("endFrame");
+
+    act(() => {
+      endFrameCb?.();
+      endFrameCb?.();
+      endFrameCb?.();
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps.selectedObject).toBeUndefined();
+    });
+  });
+
+  it("stops refreshing after the selected renderable is cleared", async () => {
+    renderOverlayForSelection(makeCanvas());
+
+    const renderable = makeRenderable();
+
+    act(() => {
+      mockRendererEventCallbacks.get("renderablesClicked")?.(
+        [{ renderable, instanceIndex: undefined }] as any,
+        { x: 0, y: 0 } as any,
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps?.selectedObject).toBeDefined();
+    });
+
+    // Clear the selection
+    act(() => {
+      mockRendererEventCallbacks.get("renderablesClicked")?.([] as any, { x: 0, y: 0 } as any);
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps?.selectedObject).toBeUndefined();
+    });
+
+    const callsBeforeEndFrame = renderable.details.mock.calls.length;
+
+    const endFrameCb = mockRendererEventCallbacks.get("endFrame");
+    act(() => {
+      endFrameCb?.();
+      endFrameCb?.();
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps.selectedObject).toBeUndefined();
+    });
+
+    expect(renderable.details.mock.calls.length).toBe(callsBeforeEndFrame);
+  });
+});
+
+describe("<RendererOverlay /> selectedObject construction", () => {
+  beforeEach(() => {
+    mockRendererEventCallbacks.clear();
+    mockLastInteractionsProps = undefined;
+    jest.clearAllMocks();
+  });
+
+  it("builds selectedObject from renderable.details() when no instanceIndex", async () => {
+    renderOverlayForSelection(makeCanvas());
+
+    const detailsData = { stamp: { sec: 1, nsec: 0 }, frame_id: "base_link" };
+    const renderable = makeRenderable({ details: jest.fn(() => detailsData) });
+
+    act(() => {
+      mockRendererEventCallbacks.get("renderablesClicked")?.(
+        [{ renderable, instanceIndex: undefined }] as any,
+        { x: 0, y: 0 } as any,
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps?.selectedObject).toBeDefined();
+    });
+
+    const { selectedObject } = mockLastInteractionsProps;
+    expect(selectedObject.object.interactionData.topic).toBe("/topic");
+    expect(selectedObject.object.interactionData.highlighted).toBe(true);
+    expect(selectedObject.object.interactionData.originalMessage).toEqual(detailsData);
+    expect(selectedObject.object.interactionData.instanceDetails).toBeUndefined();
+    expect(selectedObject.instanceIndex).toBeUndefined();
+  });
+
+  it("builds selectedObject from renderable.instanceDetails() when instanceIndex is provided", async () => {
+    renderOverlayForSelection(makeCanvas());
+
+    const instanceDetailsData = { per_instance: "value" };
+    const renderable = makeRenderable({
+      instanceDetails: jest.fn(() => instanceDetailsData),
+    });
+
+    act(() => {
+      mockRendererEventCallbacks.get("renderablesClicked")?.(
+        [{ renderable, instanceIndex: 5 }] as any,
+        { x: 0, y: 0 } as any,
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps?.selectedObject).toBeDefined();
+    });
+
+    const { selectedObject } = mockLastInteractionsProps;
+    expect(renderable.instanceDetails).toHaveBeenCalledWith(5);
+    expect(selectedObject.object.interactionData.instanceDetails).toEqual(instanceDetailsData);
+    expect(selectedObject.instanceIndex).toBe(5);
+  });
+
+  it("sets selectedObject to undefined when multiple renderables are selected", async () => {
+    renderOverlayForSelection(makeCanvas());
+
+    const renderableA = makeRenderable();
+    const renderableB = makeRenderable();
+
+    act(() => {
+      mockRendererEventCallbacks.get("renderablesClicked")?.(
+        [
+          { renderable: renderableA, instanceIndex: undefined },
+          { renderable: renderableB, instanceIndex: undefined },
+        ] as any,
+        { x: 0, y: 0 } as any,
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps).toBeDefined();
+    });
+
+    expect(mockLastInteractionsProps.selectedObject).toBeUndefined();
+  });
+
+  it("sets selectedObject to undefined when selection is cleared", async () => {
+    renderOverlayForSelection(makeCanvas());
+
+    const renderable = makeRenderable();
+
+    act(() => {
+      mockRendererEventCallbacks.get("renderablesClicked")?.(
+        [{ renderable, instanceIndex: undefined }] as any,
+        { x: 0, y: 0 } as any,
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps?.selectedObject).toBeDefined();
+    });
+
+    act(() => {
+      mockRendererEventCallbacks.get("renderablesClicked")?.([] as any, { x: 0, y: 0 } as any);
+    });
+
+    await waitFor(() => {
+      expect(mockLastInteractionsProps.selectedObject).toBeUndefined();
     });
   });
 });
