@@ -8,7 +8,8 @@ jobs:
   prepare-sonar-artifacts:
     name: Prepare Sonar artifacts
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+    # need to change to != github.repository, just for testing purposes right now
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     permissions:
       contents: read
     steps:

@@ -43,6 +43,16 @@ jobs:
           echo "head_sha=$(jq -r '.head_sha' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
           echo "base_ref=$(jq -r '.base_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
 
+      - name: Checkout default branch (for workflow scripts only)
+        uses: actions/checkout@v6
+        with:
+          ref: develop
+          sparse-checkout: .github/workflows/scripts
+          path: ./.default-branch
+
+      - name: Copy workflow scripts to safe location
+        run: cp -r ./.default-branch/.github/workflows/scripts /tmp/workflow-scripts
+
       - name: Create in-progress PR check run
         id: check
         uses: actions/github-script@v9
@@ -51,7 +61,7 @@ jobs:
         with:
           result-encoding: string
           script: |
-            const script = require('./.github/workflows/scripts/create-check-run.js');
+            const script = require('/tmp/workflow-scripts/create-check-run.js');
             return await script({ github, context });
 
       - uses: actions/checkout@v6
@@ -91,11 +101,11 @@ jobs:
 
       - name: Complete PR check run
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           JOB_STATUS: ${{ job.status }}
           CHECK_RUN_ID: ${{ steps.check.outputs.result }}
         with:
           script: |
-            const script = require('./.github/workflows/scripts/update-check-run-status.js');
+            const script = require('/tmp/workflow-scripts/update-check-run-status.js');
             await script({ github, context });
