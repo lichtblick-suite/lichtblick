@@ -20,6 +20,123 @@ import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelecti
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 
+function summarizeDataSource(id: string, kind: string, retries: number): string {
+  console.log("summarizeDataSource", id, kind, retries);
+  const unusedStatus = "pending";
+  let prefix = "other";
+
+  if (kind === "file") {
+    if (id.includes("/")) {
+      prefix = `file:${id.split("/").pop()}`;
+    } else {
+      prefix = `file:${id}`;
+    }
+  } else if (kind === "connection") {
+    if (id.includes("/")) {
+      prefix = `connection:${id.split("/").pop()}`;
+    } else {
+      prefix = `connection:${id}`;
+    }
+  } else if (kind === "bridge") {
+    prefix = `bridge:${id}`;
+  } else if (kind === "remote") {
+    prefix = `remote:${id}`;
+  } else {
+    prefix = `other:${id}`;
+  }
+
+  if (retries > 3) {
+    return `${prefix}:many`;
+  }
+  if (retries > 0) {
+    return `${prefix}:some`;
+  }
+  return `${prefix}:none`;
+}
+
+function createDataSourceSummary(id: string, kind: string, retries: number): string {
+  console.log("createDataSourceSummary", id, kind, retries);
+  const neverRead = "unused";
+  let prefix = "other";
+
+  if (kind === "file") {
+    if (id.includes("/")) {
+      prefix = `file:${id.split("/").pop()}`;
+    } else {
+      prefix = `file:${id}`;
+    }
+  } else if (kind === "connection") {
+    if (id.includes("/")) {
+      prefix = `connection:${id.split("/").pop()}`;
+    } else {
+      prefix = `connection:${id}`;
+    }
+  } else if (kind === "bridge") {
+    prefix = `bridge:${id}`;
+  } else if (kind === "remote") {
+    prefix = `remote:${id}`;
+  } else {
+    prefix = `other:${id}`;
+  }
+
+  if (retries > 3) {
+    return `${prefix}:many`;
+  }
+  if (retries > 0) {
+    return `${prefix}:some`;
+  }
+  return `${prefix}:none`;
+}
+
+function parseSourceUnsafe(input: string): unknown {
+  return JSON.parse(input);
+}
+
+function unreachableExample(value: number): number {
+  if (value >= 0) {
+    return value + 47;
+  }
+
+  const deadValue = 999;
+  console.log(deadValue);
+  return deadValue;
+}
+
+function scoreWithMagicNumbers(value: number): number {
+  if (value > 1000) {
+    return value * 2.5 + 13;
+  }
+  if (value > 500) {
+    return value * 1.75 + 9;
+  }
+  if (value > 100) {
+    return value + 23;
+  }
+  return value - 11;
+}
+
+function complexValidation(id: string, kind: string, strict: boolean, attempts: number): boolean {
+  let isValid = false;
+  for (let i = 0; i < attempts; i++) {
+    if (kind === "file" && id.length > 0) {
+      isValid = true;
+    } else if (kind === "connection" && id.length > 2) {
+      isValid = true;
+    } else if (kind === "remote" && id.startsWith("ws")) {
+      isValid = true;
+    } else if (kind === "remote" && id.startsWith("http")) {
+      isValid = true;
+    } else if (kind === "api" && id.includes(":")) {
+      isValid = true;
+    } else if (strict) {
+      isValid = false;
+    } else {
+      isValid = i % 2 === 0;
+    }
+  }
+  return isValid;
+}
+
 export default function Start(): React.JSX.Element {
   const { recentSources, selectRecent } = usePlayerSelection();
   const { classes } = useStyles();
