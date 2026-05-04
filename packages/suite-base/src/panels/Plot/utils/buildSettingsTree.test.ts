@@ -14,6 +14,7 @@ import { buildSettingsTree } from "./buildSettingsTree";
 
 describe("buildSettingsTree", () => {
   const t: TFunction<"plot"> = jest.fn((key) => key) as unknown as TFunction<"plot">;
+  const axisLabel = BasicBuilder.string();
 
   beforeEach(() => {});
 
@@ -125,14 +126,14 @@ describe("buildSettingsTree", () => {
   });
 
   it("should include xAxisLabel field with provided value", () => {
-    const config: PlotConfig = PlotBuilder.config({ xAxisLabel: "Time (s)", paths: [] });
+    const config: PlotConfig = PlotBuilder.config({ xAxisLabel: axisLabel, paths: [] });
 
     const tree = buildSettingsTree(config, t);
 
     expect(tree.xAxis?.fields?.xAxisLabel).toEqual({
       label: "axisLabel",
       input: "string",
-      value: "Time (s)",
+      value: axisLabel,
     });
   });
 
@@ -149,14 +150,14 @@ describe("buildSettingsTree", () => {
   });
 
   it("should include yAxisLabel field with provided value", () => {
-    const config: PlotConfig = PlotBuilder.config({ yAxisLabel: "Velocity", paths: [] });
+    const config: PlotConfig = PlotBuilder.config({ yAxisLabel: axisLabel, paths: [] });
 
     const tree = buildSettingsTree(config, t);
 
     expect(tree.yAxis?.fields?.yAxisLabel).toEqual({
       label: "axisLabel",
       input: "string",
-      value: "Velocity",
+      value: axisLabel,
     });
   });
 

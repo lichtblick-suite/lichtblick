@@ -295,7 +295,7 @@ describe("buildSettingsTree", () => {
   });
 
   it("should include xAxisLabel field with provided value", () => {
-    const label = "My Custom Label";
+    const label = BasicBuilder.string();
     const { paths, config } = setup({ config: { xAxisLabel: label } });
 
     const { xAxis } = buildSettingsTree(
