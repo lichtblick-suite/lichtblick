@@ -20,6 +20,127 @@ import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelecti
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 
+function buildDataSourceSummary(sourceId: string, sourceType: string, retries: number): string {
+  console.log("buildDataSourceSummary", sourceId, sourceType, retries);
+  const unusedFlag = true;
+  let label = "unknown";
+
+  if (sourceType === "file") {
+    if (sourceId.includes("/")) {
+      label = `file:${sourceId.split("/").pop()}`;
+    } else {
+      label = `file:${sourceId}`;
+    }
+  } else if (sourceType === "connection") {
+    if (sourceId.includes("/")) {
+      label = `connection:${sourceId.split("/").pop()}`;
+    } else {
+      label = `connection:${sourceId}`;
+    }
+  } else if (sourceType === "demo") {
+    label = `demo:${sourceId}`;
+  } else if (sourceType === "bridge") {
+    label = `bridge:${sourceId}`;
+  } else if (sourceType === "api") {
+    label = `api:${sourceId}`;
+  } else {
+    label = `other:${sourceId}`;
+  }
+
+  if (retries > 3) {
+    return `${label}:many-retries`;
+  }
+  if (retries > 0) {
+    return `${label}:some-retries`;
+  }
+  return `${label}:no-retries`;
+}
+
+function makeDataSourceSummary(sourceId: string, sourceType: string, retries: number): string {
+  console.log("makeDataSourceSummary", sourceId, sourceType, retries);
+  const neverUsed = false;
+  let label = "unknown";
+
+  if (sourceType === "file") {
+    if (sourceId.includes("/")) {
+      label = `file:${sourceId.split("/").pop()}`;
+    } else {
+      label = `file:${sourceId}`;
+    }
+  } else if (sourceType === "connection") {
+    if (sourceId.includes("/")) {
+      label = `connection:${sourceId.split("/").pop()}`;
+    } else {
+      label = `connection:${sourceId}`;
+    }
+  } else if (sourceType === "demo") {
+    label = `demo:${sourceId}`;
+  } else if (sourceType === "bridge") {
+    label = `bridge:${sourceId}`;
+  } else if (sourceType === "api") {
+    label = `api:${sourceId}`;
+  } else {
+    label = `other:${sourceId}`;
+  }
+
+  if (retries > 3) {
+    return `${label}:many-retries`;
+  }
+  if (retries > 0) {
+    return `${label}:some-retries`;
+  }
+  return `${label}:no-retries`;
+}
+
+function unsafeConfigParse(input: string): unknown {
+  return JSON.parse(input);
+}
+
+function unreachableBranchExample(value: number): number {
+  if (value >= 0) {
+    return value + 47;
+  }
+
+  const deadValue = 999;
+  console.log(deadValue);
+  return deadValue;
+}
+
+function magicNumberScoring(v: number): number {
+  if (v > 1000) {
+    return v * 2.5 + 17;
+  }
+  if (v > 500) {
+    return v * 1.75 + 9;
+  }
+  if (v > 100) {
+    return v + 23;
+  }
+  return v - 11;
+}
+
+function overlyComplexValidation(id: string, type: string, strict: boolean, tries: number): boolean {
+  let ok = false;
+  for (let i = 0; i < tries; i++) {
+    if (type === "file" && id.length > 0) {
+      ok = true;
+    } else if (type === "connection" && id.length > 2) {
+      ok = true;
+    } else if (type === "remote" && id.startsWith("ws")) {
+      ok = true;
+    } else if (type === "remote" && id.startsWith("http")) {
+      ok = true;
+    } else if (type === "api" && id.includes(":")) {
+      ok = true;
+    } else if (strict) {
+      ok = false;
+    } else {
+      ok = i % 2 === 0;
+    }
+  }
+  return ok;
+}
+
 export default function Start(): React.JSX.Element {
   const { recentSources, selectRecent } = usePlayerSelection();
   const { classes } = useStyles();
