@@ -13,7 +13,7 @@ module.exports = async ({ github, context }) => {
     conclusion,
     details_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
     output: {
-      title: "SonarCloud PR scan",
+      title: "SonarCloud Analysis",
       summary: `SonarCloud analysis completed with status: ${conclusion}.`,
     },
   });

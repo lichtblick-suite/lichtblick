@@ -7,7 +7,7 @@ module.exports = async ({ github, context }) => {
   const { data } = await github.rest.checks.create({
     owner: context.repo.owner,
     repo: context.repo.repo,
-    name: "SonarCloud (workflow_run PR)",
+    name: "SonarCloud Analysis",
     head_sha: process.env.HEAD_SHA,
     status: "in_progress",
     details_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,

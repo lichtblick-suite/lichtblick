@@ -4,10 +4,7 @@ on:
   push:
     branches: ["develop"]
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
-  workflow_run:
-    workflows: ["Sonar Fork Reports"]
-    types: [completed]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 env:
@@ -15,7 +12,7 @@ env:
 
 jobs:
   internal-scan:
-    name: Internal scan
+    name: SonarCloud Analysis
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
     steps:
@@ -58,110 +55,3 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
-
-  external-fork-scan:
-    name: External fork scan
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
-    permissions:
-      actions: read
-      checks: write
-      contents: read
-      pull-requests: read
-    steps:
-      - name: Download PR metadata artifact
-        uses: actions/download-artifact@v8
-        with:
-          github-token: ${{ github.token }}
-          run-id: ${{ github.event.workflow_run.id }}
-          name: sonar-pr-metadata
-          path: ./.sonar-pr
-
-      - name: Read PR metadata
-        id: metadata
-        run: |
-          echo "number=$(jq -r '.number' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
-          echo "head_ref=$(jq -r '.head_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
-          echo "head_sha=$(jq -r '.head_sha' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
-          echo "base_ref=$(jq -r '.base_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
-
-      - name: Create in-progress PR check run
-        id: check
-        uses: actions/github-script@v7
-        env:
-          HEAD_SHA: ${{ steps.metadata.outputs.head_sha }}
-        with:
-          result-encoding: string
-          script: |
-            const script = require('./.github/workflows/scripts/create-check-run.ts');
-            return await script({ github, context });
-
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          ref: refs/pull/${{ steps.metadata.outputs.number }}/head
-
-      - name: Download ESLint report artifact
-        uses: actions/download-artifact@v8
-        with:
-          github-token: ${{ github.token }}
-          run-id: ${{ github.event.workflow_run.id }}
-          name: sonar-eslint-report
-          path: .
-
-      - name: Download coverage artifact
-        uses: actions/download-artifact@v8
-        with:
-          github-token: ${{ github.token }}
-          run-id: ${{ github.event.workflow_run.id }}
-          name: sonar-coverage-lcov
-          path: ./coverage
-
-      - name: Fetch PR base branch
-        run: git fetch origin ${{ steps.metadata.outputs.base_ref }}:${{ steps.metadata.outputs.base_ref }}
-
-      - name: ScanCloud PR Scan
-        uses: sonarsource/sonarqube-scan-action@v8.0.0
-        with:
-          args: >
-            -Dsonar.pullrequest.key=${{ steps.metadata.outputs.number }}
-            -Dsonar.pullrequest.branch=${{ steps.metadata.outputs.head_ref }}
-            -Dsonar.pullrequest.base=${{ steps.metadata.outputs.base_ref }}
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
-
-      - name: Complete PR check run
-        if: always()
-        uses: actions/github-script@v7
-        env:
-          JOB_STATUS: ${{ job.status }}
-          CHECK_RUN_ID: ${{ steps.check.outputs.result }}
-        with:
-          script: |
-            const script = require('./.github/workflows/scripts/update-check-run-status.js');
-            await script({ github, context });
-
-  sonar-result-check:
-    name: Analysis result check
-    runs-on: ubuntu-latest
-    if: always()
-    needs: [internal-scan, external-fork-scan]
-    steps:
-      - run: |
-          INTERNAL="${{ needs.internal-scan.result }}"
-          EXTERNAL="${{ needs.external-fork-scan.result }}"
-
-          # Fail if any scan failed
-          if [[ "$INTERNAL" == "failure" || "$EXTERNAL" == "failure" ]]; then
-            echo "::error::A Sonar scan failed (internal=$INTERNAL, external=$EXTERNAL)"
-            exit 1
-          fi
-
-          # Fail if both were skipped (no scan ran at all)
-          if [[ "$INTERNAL" == "skipped" && "$EXTERNAL" == "skipped" ]]; then
-            echo "::error::No Sonar scan ran (both jobs skipped)"
-            exit 1
-          fi
-
-          echo "Sonar scan completed (internal=$INTERNAL, external=$EXTERNAL)"
