@@ -426,7 +426,7 @@ describe("<RendererOverlay /> endFrame refresh", () => {
       expect(mockLastInteractionsProps?.selectedObject).toBeDefined();
     });
 
-    const callsAfterSelect = renderable.details.mock.calls.length as number;
+    const callsAfterSelect = (renderable.details as jest.Mock).mock.calls.length;
     expect(callsAfterSelect).toBeGreaterThan(0);
 
     // Re-read the callback after the re-render so we get the closure that
