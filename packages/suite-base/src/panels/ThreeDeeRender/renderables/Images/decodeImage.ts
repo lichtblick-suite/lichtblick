@@ -23,12 +23,40 @@ import {
   decodeUYVY,
   decodeYUYV,
 } from "@lichtblick/den/image";
-import { H264, VideoPlayer } from "@lichtblick/den/video";
-import { toMicroSec } from "@lichtblick/rostime";
+import { H264, H265, VideoPlayer } from "@lichtblick/den/video";
+import { toNanoSec } from "@lichtblick/rostime";
 
 import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
+import { PreparedVideoFrame, PreparedVideoFrameStatus, PrepareVideoFrameContext } from "./types";
 import { Image as RosImage } from "../../ros";
 import { ColorModeSettings, getColorConverter } from "../colorMode";
+
+/**
+ * Canonical codec identifier used internally so the rest of the renderer does not need to know
+ * that some recordings tag H.265 streams as "hevc" while others tag them as "h265".
+ */
+export enum VideoCodec {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  H264 = "h264",
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  H265 = "h265",
+}
+
+/**
+ * Maps an external `CompressedVideo.format` string to the canonical {@link VideoCodec}, or returns
+ * undefined if the format is not a recognized video codec. This is the single boundary where the
+ * "hevc" alias is normalized to {@link VideoCodec.H265}.
+ */
+export function canonicalVideoCodec(format: string): VideoCodec | undefined {
+  switch (format) {
+    case "h264":
+      return VideoCodec.H264;
+    case "h265":
+    case "hevc":
+      return VideoCodec.H265;
+  }
+  return undefined;
+}
 
 export async function decodeCompressedImageToBitmap(
   image: CompressedImageTypes,
@@ -39,28 +67,79 @@ export async function decodeCompressedImageToBitmap(
 }
 
 export function isVideoKeyframe(frameMsg: CompressedVideo): boolean {
-  switch (frameMsg.format) {
-    case "h264": {
-      // Search for an IDR NAL unit to determine if this is a keyframe
+  switch (canonicalVideoCodec(frameMsg.format)) {
+    case VideoCodec.H264:
+      // Search for an IDR NAL unit to determine if this is a keyframe.
       return H264.IsKeyframe(frameMsg.data);
-    }
+    case VideoCodec.H265:
+      return H265.IsKeyframe(frameMsg.data);
   }
   return false;
 }
 
 export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
-  switch (frameMsg.format) {
-    case "h264": {
-      // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe
+  switch (canonicalVideoCodec(frameMsg.format)) {
+    case VideoCodec.H264:
+      // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe.
       return H264.ParseDecoderConfig(frameMsg.data);
-    }
+    case VideoCodec.H265:
+      return H265.ParseDecoderConfig(frameMsg.data);
   }
-
   return undefined;
 }
 
-export async function decodeCompressedVideoToBitmap(
+export function prepareVideoFrame(
   frameMsg: CompressedVideo,
+  context?: PrepareVideoFrameContext,
+): PreparedVideoFrame {
+  switch (canonicalVideoCodec(frameMsg.format)) {
+    case VideoCodec.H265: {
+      const frameInfo = H265.InspectFrame(frameMsg.data, context?.h265);
+      if (frameInfo.bitstreamFormat === "unknown" || frameInfo.normalizedData == undefined) {
+        return {
+          data: frameMsg.data,
+          status: PreparedVideoFrameStatus.UnsupportedBitstream,
+          diagnostics: "unsupported H.265 bitstream format",
+          type: "delta",
+        };
+      }
+      if (frameInfo.frameType === "B") {
+        return {
+          data: frameInfo.normalizedData,
+          status: PreparedVideoFrameStatus.UnsupportedBFrame,
+          diagnostics: "H.265 B frames are not supported",
+          type: "delta",
+        };
+      }
+
+      const type = frameInfo.isKeyframe ? "key" : "delta";
+      return {
+        data:
+          type === "key"
+            ? frameInfo.normalizedData
+            : (H265.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
+        decoderConfig: H265.ParseDecoderConfig(frameInfo.normalizedData),
+        parameterSets: frameInfo.parameterSets,
+        hasParameterSets: frameInfo.hasParameterSets,
+        hasRequiredParameterSets: frameInfo.hasRequiredParameterSets,
+        status: PreparedVideoFrameStatus.Ok,
+        type,
+      };
+    }
+    case VideoCodec.H264:
+    default:
+      return {
+        data: frameMsg.data,
+        decoderConfig: getVideoDecoderConfig(frameMsg),
+        status: PreparedVideoFrameStatus.Ok,
+        type: isVideoKeyframe(frameMsg) ? "key" : "delta",
+      };
+  }
+}
+
+export async function decodeCompressedVideoToBitmap(
+  frameMsg: Pick<CompressedVideo, "timestamp">,
+  preparedFrame: PreparedVideoFrame,
   videoPlayer: VideoPlayer,
   firstMessageTime: bigint,
   resizeWidth?: number,
@@ -69,22 +148,22 @@ export async function decodeCompressedVideoToBitmap(
     return await emptyVideoFrame(videoPlayer, resizeWidth);
   }
 
-  // Get the timestamp of this frame as microseconds relative to the first frame
-  const firstTimestampMicros = Number(firstMessageTime / 1000n);
-  const timestampMicros = toMicroSec(frameMsg.timestamp) - firstTimestampMicros;
+  // Match Foxglove/WebCodecs behavior by using integer microseconds relative to the first frame.
+  const timestampMicros = Number((toNanoSec(frameMsg.timestamp) - firstMessageTime) / 1000n);
 
   const videoFrame = await videoPlayer.decode(
-    frameMsg.data,
+    preparedFrame.data,
     timestampMicros,
-    isVideoKeyframe(frameMsg) ? "key" : "delta",
+    preparedFrame.type,
   );
-  if (videoFrame) {
-    const imageBitmap = await self.createImageBitmap(videoFrame, { resizeWidth });
+  const frameToRender = videoFrame ?? videoPlayer.lastVideoFrame;
+  if (frameToRender) {
+    const imageBitmap = await self.createImageBitmap(frameToRender, { resizeWidth });
     videoPlayer.lastImageBitmap = imageBitmap;
-    videoFrame.close();
+    videoFrame?.close();
     return imageBitmap;
   }
-  return await emptyVideoFrame(videoPlayer, resizeWidth);
+  return videoPlayer.lastImageBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
 }
 
 export const IMAGE_DEFAULT_COLOR_MODE_SETTINGS: Required<
