@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Bitstream } from "./Bitstream";
+import { Bitstream } from "../Bitstream";
 
 const H264_PROFILE_NAMES = new Map<number, string>([
   [66, "BASELINE"],
