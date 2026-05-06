@@ -26,6 +26,7 @@ import { Immutable, MessageEvent, Metadata, ParameterValue } from "@lichtblick/s
 import { DeserializedSourceWrapper } from "@lichtblick/suite-base/players/IterablePlayer/DeserializedSourceWrapper";
 import { DeserializingIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/DeserializingIterableSource";
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
+import { expandH265SeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/h265SeekBackfill";
 import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsCollector";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
@@ -847,11 +848,16 @@ export class IterablePlayer implements Player {
 
     try {
       this.#abort = new AbortController();
-      const messages = await this.#bufferedSource.getBackfillMessages({
+      const backfillMessages = await this.#bufferedSource.getBackfillMessages({
         topics: this.#allTopics,
         time: targetTime,
         abortSignal: this.#abort.signal,
       });
+      const messages = await expandH265SeekBackfill(
+        backfillMessages,
+        this.#bufferedSource.getBackfillMessages.bind(this.#bufferedSource),
+        () => this.#abort?.signal,
+      );
 
       // We've successfully loaded the messages and will emit those, no longer need the ackTimeout
       clearTimeout(seekAckTimeout);
