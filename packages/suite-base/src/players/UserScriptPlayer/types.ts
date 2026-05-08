@@ -17,6 +17,7 @@
 import type { SourceFile, TypeChecker } from "typescript";
 
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { IteratorResult as IIterableSourceIteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { MessageEvent, Topic } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
@@ -64,6 +65,13 @@ export type ScriptRegistration = {
     messageEvent: MessageEvent,
     globalVariables: GlobalVariables,
   ) => Promise<MessageEvent | undefined>;
+  buildMessageProcessor: () => {
+    processMessage: (
+      messageEvent: MessageEvent,
+      globalVariables: GlobalVariables,
+    ) => Promise<MessageEvent | undefined>;
+    terminate: () => void;
+  };
   terminate: () => void;
 };
 
@@ -85,4 +93,12 @@ export type ProcessMessageOutput = {
   error?: string;
   userScriptLogs: UserScriptLog[];
   userScriptDiagnostics: Diagnostic[];
+};
+
+export type SharedIteratorCache = {
+  results: IIterableSourceIteratorResult[];
+  done: boolean;
+  error?: Error;
+  notify: () => void; // resolves current wait promise
+  wait: () => Promise<void>; // awaitable, resolves on next append or done
 };

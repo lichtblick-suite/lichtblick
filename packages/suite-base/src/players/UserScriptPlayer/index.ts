@@ -17,7 +17,6 @@
 import { Mutex } from "async-mutex";
 import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
-import shallowequal from "shallowequal";
 import { v4 as uuidv4 } from "uuid";
 
 import { MutexLocked } from "@lichtblick/den/async";
@@ -37,24 +36,23 @@ import { generateTypesLib } from "@lichtblick/suite-base/players/UserScriptPlaye
 import { TransformArgs } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/types";
 import {
   Diagnostic,
-  ScriptData,
-  ScriptRegistration,
   ProcessMessageOutput,
   RegistrationOutput,
+  ScriptData,
+  ScriptRegistration,
   UserScriptLog,
 } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import { hasTransformerErrors } from "@lichtblick/suite-base/players/UserScriptPlayer/utils";
 import {
   AdvertiseOptions,
+  MessageEvent,
   Player,
+  PlayerAlert,
   PlayerState,
   PlayerStateActiveData,
   PublishPayload,
   SubscribePayload,
   Topic,
-  MessageEvent,
-  PlayerAlert,
-  MessageBlock,
 } from "@lichtblick/suite-base/players/types";
 import { reportError } from "@lichtblick/suite-base/reportError";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
@@ -62,8 +60,8 @@ import { UserScript, UserScripts } from "@lichtblick/suite-base/types/panels";
 import Rpc from "@lichtblick/suite-base/util/Rpc";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 
-import { DIAGNOSTIC_SEVERITY, SOURCES, ERROR_CODES } from "./constants";
-import { remapVirtualSubscriptions, getPreloadTypes } from "./subscriptions";
+import { DIAGNOSTIC_SEVERITY, ERROR_CODES, SOURCES } from "./constants";
+import { getPreloadTypes, remapVirtualSubscriptions } from "./subscriptions";
 
 const log = Log.getLogger(__filename);
 
@@ -101,6 +99,15 @@ type ProtectedState = {
    * subscribes to the underlying input topics.
    */
   inputsByOutputTopic: Map<string, readonly string[]>;
+};
+
+type BatchIteratorCacheEntry = {
+  results: Readonly<IIterableSourceIteratorResult>[];
+  done: boolean;
+  error?: Error;
+  resolve: () => void;
+  promise: Promise<void>;
+  processor: { terminate: () => void };
 };
 
 export default class UserScriptPlayer implements Player {
@@ -152,6 +159,10 @@ export default class UserScriptPlayer implements Player {
   // in getBatchIterator (which can't use the async MutexLocked).
   // Updated in #resetWorkersUnlocked.
   #outputTopicRegistrations = new Map<string, ScriptRegistration>();
+
+  // Shared cache for virtual topic batch iterators. One source consumer per topic processes
+  // messages through its own worker; multiple panels replay from the shared results array.
+  #batchIteratorCache = new Map<string, BatchIteratorCacheEntry>();
 
   readonly #emitLock = new Mutex();
 
@@ -233,15 +244,6 @@ export default class UserScriptPlayer implements Player {
     },
   );
 
-  #lastBlockRequest: {
-    input?: {
-      blocks: readonly (MessageBlock | undefined)[];
-      globalVariables: GlobalVariables;
-      scriptRegistrations: readonly ScriptRegistration[];
-    };
-    result: (MessageBlock | undefined)[];
-  } = { result: [] };
-
   // Processes input messages through scripts to create messages on output topics
   async #getMessages(
     inputMessages: readonly MessageEvent[],
@@ -274,88 +276,6 @@ export default class UserScriptPlayer implements Player {
     return outputMessages;
   }
 
-  async #getBlocks(
-    blocks: readonly (MessageBlock | undefined)[],
-    globalVariables: GlobalVariables,
-    scriptRegistrations: readonly ScriptRegistration[],
-  ): Promise<readonly (MessageBlock | undefined)[]> {
-    if (
-      shallowequal(this.#lastBlockRequest.input, {
-        blocks,
-        globalVariables,
-        scriptRegistrations,
-      })
-    ) {
-      return this.#lastBlockRequest.result;
-    }
-
-    // If no downstream subscriptions want blocks for our output topics we can just pass through
-    // the blocks from the underlying player.
-    const fullRegistrations = scriptRegistrations.filter(
-      (reg) => this.#scriptSubscriptions[reg.output.name]?.preloadType === "full",
-    );
-    if (fullRegistrations.length === 0) {
-      return blocks;
-    }
-
-    const allInputTopics = _.uniq(fullRegistrations.flatMap((reg) => reg.inputs));
-
-    const outputBlocks: (MessageBlock | undefined)[] = [];
-    for (const block of blocks) {
-      if (!block) {
-        outputBlocks.push(block);
-        continue;
-      }
-
-      // Flatten and re-sort block messages so that scripts see them in the same order
-      // as the non-block scripts.
-      const messagesByTopic = { ...block.messagesByTopic };
-      const blockMessages = allInputTopics
-        .flatMap((topic) => messagesByTopic[topic] ?? [])
-        .sort((a, b) => compare(a.receiveTime, b.receiveTime));
-      for (const scriptRegistration of fullRegistrations) {
-        const outTopic = scriptRegistration.output.name;
-        // Clear out any previously processed messages that were previously in the output topic.
-        // otherwise it will contain duplicates.
-        if (messagesByTopic[outTopic] != undefined) {
-          messagesByTopic[outTopic] = [];
-        }
-
-        for (const message of blockMessages) {
-          if (scriptRegistration.inputs.includes(message.topic)) {
-            const outputMessage = await scriptRegistration.processBlockMessage(
-              message,
-              globalVariables,
-            );
-            if (outputMessage) {
-              // https://github.com/typescript-eslint/typescript-eslint/issues/6632
-              let messages = messagesByTopic[outTopic];
-              messages ??= [];
-              messages.push(outputMessage);
-              messagesByTopic[outTopic] = messages;
-            }
-          }
-        }
-      }
-
-      // Note that this size doesn't include the new processed messqges. We may need
-      // to recalculate this if it turns out to be important for good cache eviction
-      // behavior.
-      outputBlocks.push({
-        messagesByTopic,
-        needTopics: block.needTopics,
-        sizeInBytes: block.sizeInBytes,
-      });
-    }
-
-    this.#lastBlockRequest = {
-      input: { blocks, globalVariables, scriptRegistrations },
-      result: outputBlocks,
-    };
-
-    return outputBlocks;
-  }
-
   public setGlobalVariables(globalVariables: GlobalVariables): void {
     this.#globalVariables = globalVariables;
     this.#player.setGlobalVariables(globalVariables);
@@ -364,6 +284,13 @@ export default class UserScriptPlayer implements Player {
   // Called when userScript state is updated (i.e. scripts are saved)
   public async setUserScripts(userScripts: UserScripts): Promise<void> {
     const newPlayerState = await this.#protectedState.runExclusive(async (state) => {
+      // Skip expensive teardown/rebuild if scripts haven't actually changed.
+      // Layout switches can cause this to be called repeatedly with identical content.
+      // Don't tear down registrations for transient empty scripts (e.g., layout switch loading state).
+      // The real scripts will arrive shortly and trigger a proper rebuild if needed.
+      if (Object.keys(userScripts).length === 0 && state.scriptRegistrations.length > 0) {
+        return undefined;
+      }
       for (const scriptId of Object.keys(userScripts)) {
         const prevScript = state.userScripts[scriptId];
         const newScript = userScripts[scriptId];
@@ -379,6 +306,7 @@ export default class UserScriptPlayer implements Player {
       const maxScriptRegistrationCacheCount = Object.keys(userScripts).length + 1;
       state.scriptRegistrationCache.splice(maxScriptRegistrationCacheCount);
       // This code causes us to reset workers twice because the seeking resets the workers too
+      this.#invalidateBatchIteratorCache();
       await this.#resetWorkersUnlocked(state);
       this.#setSubscriptionsUnlocked(this.#subscriptions, state);
 
@@ -599,6 +527,10 @@ export default class UserScriptPlayer implements Player {
       output: { name: outputTopic, schemaName: outputDatatype },
       processMessage: messageProcessor.registration,
       processBlockMessage: blockProcessor.registration,
+      buildMessageProcessor: () => {
+        const proc = buildMessageProcessor();
+        return { processMessage: proc.registration, terminate: proc.terminate };
+      },
       terminate: () => {
         messageProcessor.terminate();
         blockProcessor.terminate();
@@ -658,6 +590,17 @@ export default class UserScriptPlayer implements Player {
 
   // We need to reset workers in a variety of circumstances:
   // - When a user script is updated, added or deleted
+  // Invalidate shared batch iterator cache. Called when scripts or topics/datatypes change
+  // (NOT on seek — seek doesn't affect preloaded block data and PlotCoordinator won't re-subscribe).
+  #invalidateBatchIteratorCache() {
+    for (const cache of this.#batchIteratorCache.values()) {
+      cache.done = true;
+      cache.resolve();
+      cache.processor.terminate();
+    }
+    this.#batchIteratorCache.clear();
+  }
+
   // - When we seek (in order to reset state)
   // - When a new child player is added
   async #resetWorkersUnlocked(state: ProtectedState): Promise<void> {
@@ -677,7 +620,6 @@ export default class UserScriptPlayer implements Player {
       scriptRegistration.terminate();
     }
     state.scriptRegistrations = [];
-    this.#outputTopicRegistrations.clear();
 
     const rosLib = await this.#getRosLib(state);
     const typesLib = await this.#getTypesLib(state);
@@ -766,10 +708,15 @@ export default class UserScriptPlayer implements Player {
     let changedTopicsRequireEmitState = false;
     state.scriptRegistrations = validScriptRegistrations;
 
-    // Populate shadow registry for synchronous access in getBatchIterator
+    // Atomically replace shadow registry for synchronous access in getBatchIterator.
+    // We avoid clearing the old map earlier because getBatchIterator is synchronous and
+    // could be called during the async gap above — stale-but-functional registrations
+    // are better than an empty map that causes panels to get no iterator.
+    const newOutputTopicRegistrations = new Map<string, ScriptRegistration>();
     for (const reg of validScriptRegistrations) {
-      this.#outputTopicRegistrations.set(reg.output.name, reg);
+      newOutputTopicRegistrations.set(reg.output.name, reg);
     }
+    this.#outputTopicRegistrations = newOutputTopicRegistrations;
 
     const scriptTopics = state.scriptRegistrations.map(({ output }) => output);
     if (!_.isEqual(scriptTopics, this.#memoizedScriptTopics)) {
@@ -870,6 +817,7 @@ export default class UserScriptPlayer implements Player {
       // player just spun up, meaning we should re-run our user scripts in case
       // they have inputs that now exist in the current player context.
       const newPlayerState = await this.#protectedState.runExclusive(async (state) => {
+        console.log("new player state");
         if (!state.lastPlayerStateActiveData) {
           state.lastPlayerStateActiveData = activeData;
           await this.#resetWorkersUnlocked(state);
@@ -886,6 +834,7 @@ export default class UserScriptPlayer implements Player {
           ) {
             shouldReset = true;
             state.scriptRegistrationCache = [];
+            this.#invalidateBatchIteratorCache();
           }
 
           state.lastPlayerStateActiveData = activeData;
@@ -961,19 +910,6 @@ export default class UserScriptPlayer implements Player {
         const playerProgress = {
           ...playerState.progress,
         };
-
-        if (playerProgress.messageCache) {
-          const newBlocks = await this.#getBlocks(
-            playerProgress.messageCache.blocks,
-            globalVariables,
-            state.scriptRegistrations,
-          );
-
-          playerProgress.messageCache = {
-            startTime: playerProgress.messageCache.startTime,
-            blocks: newBlocks,
-          };
-        }
 
         return {
           ...playerState,
@@ -1084,50 +1020,284 @@ export default class UserScriptPlayer implements Player {
     options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
     const registration = this.#outputTopicRegistrations.get(topic);
+    console.log("getBatchIterator for topic", topic, "registration", registration);
     if (!registration) {
       return this.#player.getBatchIterator(topic, options);
     }
 
-    // For UserScript output topics, get the iterator for the first input topic
-    // and transform each message through the script's processBlockMessage worker.
+    return this.#getVirtualBatchIterator(registration, options);
+  }
+
+  #getVirtualBatchIterator(
+    registration: ScriptRegistration,
+    options?: { start?: Time; end?: Time },
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
     const inputTopics = registration.inputs;
     if (inputTopics.length === 0) {
       return undefined;
     }
 
-    const inputTopic = inputTopics[0]!;
-    const inputIterator = this.#player.getBatchIterator(inputTopic, options);
-    if (!inputIterator) {
+    // For full-range (no options), use shared cache so multiple panels
+    // subscribing to the same virtual topic only process messages once.
+    if (!options) {
+      const topic = registration.output.name;
+      const existingCache = this.#batchIteratorCache.get(topic);
+      if (existingCache) {
+        return this.#createReplayIterator(existingCache);
+      }
+
+      // Get iterators for ALL input topics
+      const inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] = [];
+      for (const inputTopic of inputTopics) {
+        const iter = this.#player.getBatchIterator(inputTopic);
+        if (iter) {
+          inputIterators.push(iter);
+        }
+      }
+      if (inputIterators.length === 0) {
+        return undefined;
+      }
+
+      const cache = this.#startSharedConsumer(registration, inputIterators);
+      this.#batchIteratorCache.set(topic, cache);
+      return this.#createReplayIterator(cache);
+    }
+
+    // With range options, create an independent iterator (no cache)
+    const inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] = [];
+    for (const inputTopic of inputTopics) {
+      const iter = this.#player.getBatchIterator(inputTopic, options);
+      if (iter) {
+        inputIterators.push(iter);
+      }
+    }
+    if (inputIterators.length === 0) {
       return undefined;
     }
 
+    return this.#createIndependentIterator(registration, inputIterators);
+  }
+
+  #startSharedConsumer(
+    registration: ScriptRegistration,
+    inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+  ) {
+    const processor = registration.buildMessageProcessor();
     const globalVariables = this.#globalVariables;
-    const reg = registration;
-    const iter = inputIterator;
+
+    let resolve: () => void = () => {};
+    const cache: BatchIteratorCacheEntry = {
+      results: [],
+      done: false,
+      error: undefined,
+      resolve,
+      promise: new Promise<void>((r) => {
+        resolve = r;
+      }),
+      processor,
+    };
+    // The executor runs synchronously, so `resolve` is now set.
+    cache.resolve = resolve;
+
+    const notify = () => {
+      cache.resolve();
+      cache.promise = new Promise<void>((r) => {
+        cache.resolve = r;
+      });
+    };
+
+    // Source consumer — processes messages once, populates shared results
+    void (async () => {
+      try {
+        if (inputIterators.length === 1) {
+          const iter = inputIterators[0]!;
+          for await (const result of iter) {
+            if (cache.done) {
+              break;
+            }
+            if (result.type !== "message-event") {
+              cache.results.push(result);
+              notify();
+              continue;
+            }
+            const outputMessage = await processor.processMessage(result.msgEvent, globalVariables);
+            if (outputMessage) {
+              cache.results.push({ type: "message-event" as const, msgEvent: outputMessage });
+              notify();
+            }
+          }
+        } else {
+          // Merge multiple input iterators by receiveTime
+          const heads: {
+            iter: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>;
+            current: Readonly<IIterableSourceIteratorResult>;
+          }[] = [];
+
+          for (const iter of inputIterators) {
+            const next = await iter.next();
+            if (next.done !== true) {
+              heads.push({ iter, current: next.value });
+            }
+          }
+
+          while (heads.length > 0 && !cache.done) {
+            let minIdx = 0;
+            for (let i = 1; i < heads.length; i++) {
+              const a = heads[minIdx]!;
+              const b = heads[i]!;
+              if (a.current.type !== "message-event") {
+                // keep a
+              } else if (b.current.type !== "message-event") {
+                minIdx = i;
+              } else if (
+                compare(b.current.msgEvent.receiveTime, a.current.msgEvent.receiveTime) < 0
+              ) {
+                minIdx = i;
+              }
+            }
+
+            const head = heads[minIdx]!;
+            const result = head.current;
+
+            if (result.type !== "message-event") {
+              cache.results.push(result);
+              notify();
+            } else {
+              const outputMessage = await processor.processMessage(
+                result.msgEvent,
+                globalVariables,
+              );
+              if (outputMessage) {
+                cache.results.push({ type: "message-event" as const, msgEvent: outputMessage });
+                notify();
+              }
+            }
+
+            const next = await head.iter.next();
+            if (next.done === true) {
+              heads.splice(minIdx, 1);
+            } else {
+              head.current = next.value;
+            }
+          }
+        }
+      } catch (err) {
+        cache.error = err as Error;
+      } finally {
+        cache.done = true;
+        notify();
+        for (const iter of inputIterators) {
+          await iter.return?.();
+        }
+        processor.terminate();
+      }
+    })();
+
+    return cache;
+  }
+
+  async *#createReplayIterator(
+    cache: BatchIteratorCacheEntry,
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> {
+    let index = 0;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    while (true) {
+      if (index < cache.results.length) {
+        yield cache.results[index++]!;
+      } else if (cache.done) {
+        if (cache.error) {
+          throw cache.error;
+        }
+        return;
+      } else {
+        await cache.promise;
+      }
+    }
+  }
+
+  #createIndependentIterator(
+    registration: ScriptRegistration,
+    inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> {
+    const globalVariables = this.#globalVariables;
+    const processor = registration.buildMessageProcessor();
 
     async function* transformIterator(): AsyncIterableIterator<
       Readonly<IIterableSourceIteratorResult>
     > {
+      if (inputIterators.length === 1) {
+        const iter = inputIterators[0]!;
+        try {
+          for await (const result of iter) {
+            if (result.type !== "message-event") {
+              yield result;
+              continue;
+            }
+            const outputMessage = await processor.processMessage(result.msgEvent, globalVariables);
+            if (outputMessage) {
+              yield { type: "message-event" as const, msgEvent: outputMessage };
+            }
+          }
+        } finally {
+          await iter.return?.();
+          processor.terminate();
+        }
+        return;
+      }
+
+      const heads: {
+        iter: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>;
+        current: Readonly<IIterableSourceIteratorResult>;
+      }[] = [];
+
       try {
-        for await (const result of iter) {
-          if (result.type !== "message-event") {
-            yield result;
-            continue;
+        for (const iter of inputIterators) {
+          const next = await iter.next();
+          if (next.done !== true) {
+            heads.push({ iter, current: next.value });
+          }
+        }
+
+        while (heads.length > 0) {
+          let minIdx = 0;
+          for (let i = 1; i < heads.length; i++) {
+            const a = heads[minIdx]!;
+            const b = heads[i]!;
+            if (a.current.type !== "message-event") {
+              // keep a
+            } else if (b.current.type !== "message-event") {
+              minIdx = i;
+            } else if (
+              compare(b.current.msgEvent.receiveTime, a.current.msgEvent.receiveTime) < 0
+            ) {
+              minIdx = i;
+            }
           }
 
-          const outputMessage = await reg.processBlockMessage(
-            result.msgEvent,
-            globalVariables,
-          );
-          if (outputMessage) {
-            yield {
-              type: "message-event" as const,
-              msgEvent: outputMessage,
-            };
+          const head = heads[minIdx]!;
+          const result = head.current;
+
+          if (result.type !== "message-event") {
+            yield result;
+          } else {
+            const outputMessage = await processor.processMessage(result.msgEvent, globalVariables);
+            if (outputMessage) {
+              yield { type: "message-event" as const, msgEvent: outputMessage };
+            }
+          }
+
+          const next = await head.iter.next();
+          if (next.done === true) {
+            heads.splice(minIdx, 1);
+          } else {
+            head.current = next.value;
           }
         }
       } finally {
-        await iter.return?.();
+        for (const iter of inputIterators) {
+          await iter.return?.();
+        }
+        processor.terminate();
       }
     }
 
