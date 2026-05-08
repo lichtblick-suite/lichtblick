@@ -817,7 +817,6 @@ export default class UserScriptPlayer implements Player {
       // player just spun up, meaning we should re-run our user scripts in case
       // they have inputs that now exist in the current player context.
       const newPlayerState = await this.#protectedState.runExclusive(async (state) => {
-        console.log("new player state");
         if (!state.lastPlayerStateActiveData) {
           state.lastPlayerStateActiveData = activeData;
           await this.#resetWorkersUnlocked(state);
@@ -1020,7 +1019,6 @@ export default class UserScriptPlayer implements Player {
     options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
     const registration = this.#outputTopicRegistrations.get(topic);
-    console.log("getBatchIterator for topic", topic, "registration", registration);
     if (!registration) {
       return this.#player.getBatchIterator(topic, options);
     }
