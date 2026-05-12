@@ -19,11 +19,13 @@ const log = Logger.getLogger(__filename);
 export function createMessageRangeIterator(params: CreateMessageRangeIteratorParams): {
   iterable: AsyncIterable<MessageEvent[]>;
   cancel: () => void;
+  isInvalidated: () => boolean;
 } {
   const { topic, convertTo, rawBatchIterator, sortedTopics, messageConverters, emitAlert } = params;
 
   // Create a cancellation token
   let cancelled = false;
+  let invalidated = false;
 
   // Create a wrapper async iterable that converts IteratorResult to MessageEvent
   const messageEventIterable = {
@@ -89,6 +91,9 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
         if (!cancelled && batchMessages.length > 0) {
           yield batchMessages; // No copy needed - array will be garbage collected
         }
+
+        // Capture invalidation state from the raw iterator after it completes
+        invalidated = rawBatchIterator.invalidated === true;
       } catch (err: unknown) {
         if (!cancelled) {
           log.error("Error in createMessageRangeIterator:", err);
@@ -103,5 +108,6 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
     cancel: () => {
       cancelled = true;
     },
+    isInvalidated: () => invalidated,
   };
 }

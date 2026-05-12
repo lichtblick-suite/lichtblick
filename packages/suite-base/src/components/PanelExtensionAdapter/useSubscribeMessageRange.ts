@@ -44,27 +44,50 @@ export function useSubscribeMessageRange(
 
   return useCallback(
     ({ topic, convertTo, onNewRangeIterator }: SubscribeMessageRangeArgs) => {
-      const { sortedTopics, getBatchIterator } = getMessagePipelineContext();
+      let outerCancel: (() => void) | undefined;
+      // Use an object property so TypeScript doesn't narrow it to `true` inside the IIFE.
+      const state = { active: true };
 
-      const rawBatchIterator = getBatchIterator(topic);
-      if (!rawBatchIterator) {
-        return () => {};
-      }
+      void (async () => {
+        while (state.active) {
+          const { sortedTopics, getBatchIterator } = getMessagePipelineContext();
 
-      const { iterable: messageEventIterable, cancel } = createMessageRangeIterator({
-        topic,
-        convertTo,
-        rawBatchIterator,
-        sortedTopics,
-        messageConverters: messageConvertersRef.current ?? [],
-        emitAlert: emitAlertRef.current,
-      });
+          const rawBatchIterator = getBatchIterator(topic);
+          if (!rawBatchIterator) {
+            return;
+          }
 
-      onNewRangeIterator(messageEventIterable).catch((err: unknown) => {
-        log.error("Error in useSubscribeMessageRange onNewRangeIterator:", err);
-      });
+          const {
+            iterable: messageEventIterable,
+            cancel,
+            isInvalidated,
+          } = createMessageRangeIterator({
+            topic,
+            convertTo,
+            rawBatchIterator,
+            sortedTopics,
+            messageConverters: messageConvertersRef.current ?? [],
+            emitAlert: emitAlertRef.current,
+          });
 
-      return cancel;
+          outerCancel = cancel;
+
+          await onNewRangeIterator(messageEventIterable).catch((err: unknown) => {
+            log.error("Error in useSubscribeMessageRange onNewRangeIterator:", err);
+          });
+
+          if (!isInvalidated()) {
+            // Iterator exhausted naturally — no re-subscription needed.
+            break;
+          }
+          // Upstream data was invalidated (e.g. user script changed); loop to re-subscribe.
+        }
+      })();
+
+      return () => {
+        state.active = false;
+        outerCancel?.();
+      };
     },
     [getMessagePipelineContext], // getMessagePipelineContext is already stable, but listed for clarity
   );

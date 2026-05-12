@@ -2147,5 +2147,141 @@ describe("UserScriptPlayer", () => {
       const iterator = userScriptPlayer.getBatchIterator(outputTopic);
       expect(iterator).toBeUndefined();
     });
+
+    it("emits a reset result and terminates when setUserScripts invalidates the cache", async () => {
+      const fakePlayer = new FakePlayer();
+
+      // Never-ending input so the shared cache consumer stays alive until invalidated.
+      jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
+        if (topic === "/np_input") {
+          return (async function* () {
+            yield { type: "message-event" as const, msgEvent: upstreamFirst };
+            await new Promise<void>(() => {}); // hangs until terminated by invalidation
+          })();
+        }
+        return undefined;
+      });
+
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+      await userScriptPlayer.setUserScripts({
+        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [done] = setListenerHelper(userScriptPlayer);
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [upstreamFirst],
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+          datatypes: new Map(Object.entries(exampleDatatypes)),
+        },
+      });
+      await done;
+
+      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
+
+      const iterator = userScriptPlayer.getBatchIterator(outputTopic)!;
+      expect(iterator).toBeDefined();
+
+      // Drain in the background; the loop terminates once the cache is invalidated.
+      const resultTypes: string[] = [];
+      const consumerDone = (async () => {
+        for await (const result of iterator) {
+          resultTypes.push(result.type);
+        }
+      })();
+
+      // Saving a changed script invalidates the cache. The iterator must terminate
+      // so that PlotCoordinator's for-await loop ends and active is set to false,
+      // enabling re-subscription on the next handlePlayerState call.
+      const nodeUserCodeChanged = nodeUserCode.replace("abc", "xyz");
+      await userScriptPlayer.setUserScripts({
+        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCodeChanged },
+      });
+
+      // The consumer must have terminated (consumerDone resolved).
+      await consumerDone;
+
+      // The iterator must not have emitted reset — it just terminates cleanly.
+      expect(resultTypes).not.toContain("reset");
+    });
+
+    it("re-subscribing after cache invalidation yields output from the updated script", async () => {
+      const fakePlayer = new FakePlayer();
+
+      // First subscription: never-ending (stays alive until invalidated).
+      // Second subscription (after re-subscribe): finite, so the new consumer terminates.
+      let inputCallCount = 0;
+      jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
+        if (topic === "/np_input") {
+          inputCallCount++;
+          if (inputCallCount === 1) {
+            return (async function* () {
+              yield { type: "message-event" as const, msgEvent: upstreamFirst };
+              await new Promise<void>(() => {}); // hangs until terminated by invalidation
+            })();
+          }
+          // Second subscription — finite so the new consumer terminates cleanly.
+          return (async function* () {
+            yield { type: "message-event" as const, msgEvent: upstreamFirst };
+          })();
+        }
+        return undefined;
+      });
+
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+      await userScriptPlayer.setUserScripts({
+        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [done] = setListenerHelper(userScriptPlayer);
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [upstreamFirst],
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+          datatypes: new Map(Object.entries(exampleDatatypes)),
+        },
+      });
+      await done;
+
+      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
+
+      // First subscription — drain until the iterator ends after cache invalidation.
+      const firstIterator = userScriptPlayer.getBatchIterator(outputTopic)!;
+      const drainFirst = (async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _ of firstIterator) {
+          /* drain */
+        }
+      })();
+
+      // Saving the changed script invalidates the cache; the first iterator terminates.
+      const nodeUserCodeChanged = nodeUserCode.replace('"abc"', '"CHANGED"');
+      await userScriptPlayer.setUserScripts({
+        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCodeChanged },
+      });
+      await drainFirst;
+
+      // Re-subscribe — a new getBatchIterator call after invalidation must return a fresh
+      // iterator that reflects the updated script.
+      const secondIterator = userScriptPlayer.getBatchIterator(outputTopic)!;
+      expect(secondIterator).toBeDefined();
+
+      const outputValues: string[] = [];
+      for await (const result of secondIterator) {
+        if (result.type === "message-event") {
+          outputValues.push(
+            (result.msgEvent.message as { custom_np_field: string }).custom_np_field,
+          );
+        }
+      }
+
+      expect(outputValues).toContain("CHANGED");
+    });
   });
 });

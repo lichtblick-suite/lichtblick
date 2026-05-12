@@ -98,7 +98,9 @@ export type MessageConverterAlertHandler = (
 export type CreateMessageRangeIteratorParams = {
   topic: string;
   convertTo?: string;
-  rawBatchIterator: AsyncIterableIterator<Readonly<IteratorResult>>;
+  rawBatchIterator: AsyncIterableIterator<Readonly<IteratorResult>> & {
+    readonly invalidated?: boolean;
+  };
   sortedTopics: readonly Topic[];
   messageConverters: readonly InstalledMessageConverter[];
   emitAlert?: MessageConverterAlertHandler;

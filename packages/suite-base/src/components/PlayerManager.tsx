@@ -16,13 +16,13 @@
 
 import { useSnackbar } from "notistack";
 import {
-  PropsWithChildren,
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
+    PropsWithChildren,
+    useCallback,
+    useContext,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useState,
 } from "react";
 import { useLatest, useMountedState } from "react-use";
 
@@ -32,28 +32,28 @@ import { Immutable } from "@lichtblick/suite";
 import { MessagePipelineProvider } from "@lichtblick/suite-base/components/MessagePipeline";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import {
-  LayoutState,
-  useCurrentLayoutSelector,
+    LayoutState,
+    useCurrentLayoutSelector,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ExtensionCatalogContext } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { usePerformance } from "@lichtblick/suite-base/context/PerformanceContext";
 import PlayerSelectionContext, {
-  DataSourceArgs,
-  IDataSourceFactory,
-  PlayerSelection,
+    DataSourceArgs,
+    IDataSourceFactory,
+    PlayerSelection,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import {
-  UserScriptStore,
-  useUserScriptState,
+    UserScriptStore,
+    useUserScriptState,
 } from "@lichtblick/suite-base/context/UserScriptStateContext";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import useIndexedDbRecents, {
-  RecentRecord,
+    RecentRecord,
 } from "@lichtblick/suite-base/hooks/useIndexedDbRecents";
 import AnalyticsMetricsCollector from "@lichtblick/suite-base/players/AnalyticsMetricsCollector";
 import {
-  TopicAliasFunctions,
-  TopicAliasingPlayer,
+    TopicAliasFunctions,
+    TopicAliasingPlayer,
 } from "@lichtblick/suite-base/players/TopicAliasingPlayer/TopicAliasingPlayer";
 import UserScriptPlayer from "@lichtblick/suite-base/players/UserScriptPlayer";
 import { Player } from "@lichtblick/suite-base/players/types";
@@ -73,6 +73,7 @@ const userScriptsSelector = (state: LayoutState) =>
   state.selectedLayout?.data?.userNodes ?? EMPTY_USER_NODES;
 const globalVariablesSelector = (state: LayoutState) =>
   state.selectedLayout?.data?.globalVariables ?? EMPTY_GLOBAL_VARIABLES;
+const isLayoutLoadingSelector = (state: LayoutState) => state.selectedLayout?.loading ?? false;
 
 const selectUserScriptActions = (store: UserScriptStore) => store.actions;
 
@@ -98,6 +99,7 @@ export default function PlayerManager(
 
   const userScripts = useCurrentLayoutSelector(userScriptsSelector);
   const globalVariables = useCurrentLayoutSelector(globalVariablesSelector);
+  const isLayoutLoading = useCurrentLayoutSelector(isLayoutLoadingSelector);
 
   const topicAliasPlayer = useMemo(() => {
     if (!basePlayer) {
@@ -144,7 +146,15 @@ export default function PlayerManager(
     return userScriptPlayer;
   }, [globalVariablesRef, topicAliasPlayer, userScriptActions, perfRegistry]);
 
-  useLayoutEffect(() => void player?.setUserScripts(userScripts), [player, userScripts]);
+  useLayoutEffect(() => {    // During layout switches, selectedLayout.data is briefly undefined (loading: true)
+    // which causes userScripts to become {}. Don't forward that transient empty state
+    // to the player — it would tear down registrations and kill active batch iterators.
+    if (isLayoutLoading) {
+      return;
+    }
+
+    void player?.setUserScripts(userScripts);
+  }, [player, userScripts, isLayoutLoading]);
 
   const { enqueueSnackbar } = useSnackbar();
 

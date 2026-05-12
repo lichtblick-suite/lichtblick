@@ -104,6 +104,7 @@ type ProtectedState = {
 type BatchIteratorCacheEntry = {
   results: Readonly<IIterableSourceIteratorResult>[];
   done: boolean;
+  invalidated: boolean;
   error?: Error;
   resolve: () => void;
   promise: Promise<void>;
@@ -284,13 +285,6 @@ export default class UserScriptPlayer implements Player {
   // Called when userScript state is updated (i.e. scripts are saved)
   public async setUserScripts(userScripts: UserScripts): Promise<void> {
     const newPlayerState = await this.#protectedState.runExclusive(async (state) => {
-      // Skip expensive teardown/rebuild if scripts haven't actually changed.
-      // Layout switches can cause this to be called repeatedly with identical content.
-      // Don't tear down registrations for transient empty scripts (e.g., layout switch loading state).
-      // The real scripts will arrive shortly and trigger a proper rebuild if needed.
-      if (Object.keys(userScripts).length === 0 && state.scriptRegistrations.length > 0) {
-        return undefined;
-      }
       for (const scriptId of Object.keys(userScripts)) {
         const prevScript = state.userScripts[scriptId];
         const newScript = userScripts[scriptId];
@@ -307,6 +301,9 @@ export default class UserScriptPlayer implements Player {
       state.scriptRegistrationCache.splice(maxScriptRegistrationCacheCount);
       // This code causes us to reset workers twice because the seeking resets the workers too
       this.#invalidateBatchIteratorCache();
+      // Create new Topic objects so downstream consumers (e.g. PlotCoordinator) can detect
+      // which specific topics had their preloaded data invalidated via reference comparison.
+      this.#memoizedScriptTopics = this.#memoizedScriptTopics.map((t) => ({ ...t }));
       await this.#resetWorkersUnlocked(state);
       this.#setSubscriptionsUnlocked(this.#subscriptions, state);
 
@@ -594,6 +591,7 @@ export default class UserScriptPlayer implements Player {
   // (NOT on seek — seek doesn't affect preloaded block data and PlotCoordinator won't re-subscribe).
   #invalidateBatchIteratorCache() {
     for (const cache of this.#batchIteratorCache.values()) {
+      cache.invalidated = true;
       cache.done = true;
       cache.resolve();
       cache.processor.terminate();
@@ -1093,6 +1091,7 @@ export default class UserScriptPlayer implements Player {
         resolve = r;
       }),
       processor,
+      invalidated: false,
     };
     // The executor runs synchronously, so `resolve` is now set.
     cache.resolve = resolve;
@@ -1194,9 +1193,24 @@ export default class UserScriptPlayer implements Player {
     return cache;
   }
 
-  async *#createReplayIterator(
+  #createReplayIterator(cache: BatchIteratorCacheEntry): AsyncIterableIterator<
+    Readonly<IIterableSourceIteratorResult>
+  > & {
+    readonly invalidated: boolean;
+  } {
+    const gen = this.#createReplayIteratorGen(cache);
+    const result = gen as typeof gen & { readonly invalidated: boolean };
+    Object.defineProperty(result, "invalidated", {
+      get: () => cache.invalidated,
+      enumerable: true,
+      configurable: true,
+    });
+    return result;
+  }
+
+  async *#createReplayIteratorGen(
     cache: BatchIteratorCacheEntry,
-  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> {
+  ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
     let index = 0;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
