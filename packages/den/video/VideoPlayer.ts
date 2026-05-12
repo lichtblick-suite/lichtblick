@@ -122,9 +122,9 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       },
       error: (error) => {
         const timestampSec =
-          this.#currentDecodeTimestampMicros != undefined
-            ? ` @ frame timestamp: ${this.#currentDecodeTimestampMicros / 1_000_000}s`
-            : "";
+          this.#currentDecodeTimestampMicros == undefined
+            ? ""
+            : ` @ frame timestamp: ${this.#currentDecodeTimestampMicros / 1_000_000}s`;
         const decodeError = new DOMException(`${error.message}${timestampSec}`, error.name);
         const newestFrame = this.#dequeueNewestFrame();
         this.#pendingDecode?.resolve({ type: "aborted", frame: newestFrame });
@@ -277,7 +277,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       this.#decoderConfig?.codec.startsWith("hvc1") === true;
     const targetFrameWaitMs = isHevc ? HEVC_TARGET_FRAME_WAIT_MS : DEFAULT_TARGET_FRAME_WAIT_MS;
     const maxDecodeWaitMs = isHevc ? HEVC_MAX_DECODE_WAIT_MS : DEFAULT_MAX_DECODE_WAIT_MS;
-    const targetFrame = frames[frames.length - 1]!;
+    const targetFrame = frames.at(-1)!;
 
     this.#pendingTargetTimestampMicros = targetFrame.timestampMicros;
 
@@ -487,7 +487,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       (timestampMicros != undefined || this.#pendingFrameOrder.length > 0)
     ) {
       const frame =
-        (timestampMicros != undefined ? this.#dequeueFrame(timestampMicros) : undefined) ??
+        (timestampMicros == undefined ? undefined : this.#dequeueFrame(timestampMicros)) ??
         this.#dequeueNewestFrame();
       if (frame) {
         this.#resolvePendingDecodeWhenReady({ type: "intermediate", frame });
@@ -509,7 +509,9 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
 
   #dequeueFrame(targetTimestampMicros?: number): VideoFrame | undefined {
     let timestampMicros: number | undefined;
-    if (targetTimestampMicros != undefined) {
+    if (targetTimestampMicros == undefined) {
+      timestampMicros = this.#pendingFrameOrder.shift();
+    } else {
       if (!this.#pendingFrames.has(targetTimestampMicros)) {
         return undefined;
       }
@@ -518,8 +520,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       if (index >= 0) {
         this.#pendingFrameOrder.splice(index, 1);
       }
-    } else {
-      timestampMicros = this.#pendingFrameOrder.shift();
     }
 
     return this.#takePendingFrame(timestampMicros);
@@ -531,11 +531,11 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   }
 
   #takePendingFrame(timestampMicros: number | undefined): VideoFrame | undefined {
-    const maybeVideoFrame =
-      timestampMicros != undefined ? this.#pendingFrames.get(timestampMicros) : undefined;
-    if (timestampMicros != undefined) {
-      this.#pendingFrames.delete(timestampMicros);
+    if (timestampMicros == undefined) {
+      return undefined;
     }
+    const maybeVideoFrame = this.#pendingFrames.get(timestampMicros);
+    this.#pendingFrames.delete(timestampMicros);
 
     if (maybeVideoFrame) {
       if (!this.#codedSize) {

@@ -89,7 +89,7 @@ export class H264 {
       const curNaluType = data[i]! & 0x1f;
       if (curNaluType === naluType) {
         // Find the end of this NALU
-        const end = H264.FindNextStartCode(data, i + 1);
+        const end = findNextStartCode(data, i + 1);
 
         // Return the NALU
         return data.subarray(i, end);
@@ -133,14 +133,6 @@ export class H264 {
     }
 
     return config;
-  }
-
-  /**
-   * Find the index of the next start code (0x000001 or 0x00000001) in the
-   * given buffer, starting at the given offset.
-   */
-  public static FindNextStartCode(data: Uint8Array, start: number): number {
-    return findNextStartCode(data, start);
   }
 
   /**

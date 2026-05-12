@@ -24,6 +24,17 @@ type H265PpsInfo = {
   numExtraSliceHeaderBits: number;
 };
 
+type InspectFrameState = {
+  ppsById: Map<number, H265PpsInfo>;
+  parameterSetParts: number[];
+  sliceTypes: H265SliceType[];
+  hasRandomAccessNaluType: boolean;
+  hasUnparsedVclSlice: boolean;
+  hasVps: boolean;
+  hasSps: boolean;
+  hasPps: boolean;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class H265 {
   public static AnnexBBoxSize(data: Uint8Array): number | undefined {
@@ -58,7 +69,7 @@ export class H265 {
   }
 
   public static ParseDecoderConfig(data: Uint8Array): VideoDecoderConfig | undefined {
-    return H265.ToAnnexB(data) != undefined ? { codec: DEFAULT_HEVC_CODEC } : undefined;
+    return H265.ToAnnexB(data) == undefined ? undefined : { codec: DEFAULT_HEVC_CODEC };
   }
 
   public static InspectFrame(data: Uint8Array, context?: H265ParserContext): H265FrameInfo {
@@ -76,69 +87,79 @@ export class H265 {
       };
     }
 
-    const ppsById = H265.ParsePpsMap(context?.parameterSets);
-    const parameterSetParts: number[] = [];
-    const sliceTypes: H265SliceType[] = [];
-    let hasRandomAccessNaluType = false;
-    let hasUnparsedVclSlice = false;
-    let hasVps = false;
-    let hasSps = false;
-    let hasPps = false;
+    const state: InspectFrameState = {
+      ppsById: H265.ParsePpsMap(context?.parameterSets),
+      parameterSetParts: [],
+      sliceTypes: [],
+      hasRandomAccessNaluType: false,
+      hasUnparsedVclSlice: false,
+      hasVps: false,
+      hasSps: false,
+      hasPps: false,
+    };
 
     for (const nalu of H265.Nalus(annexBData)) {
-      if (H265_RANDOM_ACCESS_TYPES.has(nalu.type)) {
-        hasRandomAccessNaluType = true;
-      }
-      if (
-        nalu.type === H265NaluType.VPS_NUT ||
-        nalu.type === H265NaluType.SPS_NUT ||
-        nalu.type === H265NaluType.PPS_NUT
-      ) {
-        hasVps ||= nalu.type === H265NaluType.VPS_NUT;
-        hasSps ||= nalu.type === H265NaluType.SPS_NUT;
-        hasPps ||= nalu.type === H265NaluType.PPS_NUT;
-        for (let index = nalu.startCodeStart; index < nalu.end; index++) {
-          parameterSetParts.push(annexBData[index]!);
-        }
-        if (nalu.type === H265NaluType.PPS_NUT) {
-          const pps = H265.ParsePps(nalu.data);
-          if (pps != undefined) {
-            ppsById.set(pps.ppsId, pps);
-          }
-        }
-      }
+      H265.InspectNalu(annexBData, nalu, state);
     }
 
-    for (const nalu of H265.Nalus(annexBData)) {
-      if (!H265.IsVclNaluType(nalu.type)) {
-        continue;
-      }
-      const sliceType = H265.ParseSliceType(nalu.data, nalu.type, ppsById);
-      if (sliceType == undefined) {
-        hasUnparsedVclSlice = true;
-        continue;
-      }
-      sliceTypes.push(sliceType);
-    }
-
-    const frameType = H265.FrameType(sliceTypes);
-    const isRandomAccess = hasRandomAccessNaluType;
-    const hasParameterSets = parameterSetParts.length > 0;
-    const hasRequiredParameterSets = hasVps && hasSps && hasPps;
+    const hasParameterSets = state.parameterSetParts.length > 0;
     const annexBBoxSize = H265.AnnexBBoxSize(data);
 
     return {
-      bitstreamFormat: annexBBoxSize != undefined ? "annex-b" : "length-prefixed",
-      isKeyframe: isRandomAccess,
-      isRandomAccess,
-      frameType,
-      sliceTypes,
-      hasUnparsedVclSlice,
+      bitstreamFormat: annexBBoxSize == undefined ? "length-prefixed" : "annex-b",
+      isKeyframe: state.hasRandomAccessNaluType,
+      isRandomAccess: state.hasRandomAccessNaluType,
+      frameType: H265.FrameType(state.sliceTypes),
+      sliceTypes: state.sliceTypes,
+      hasUnparsedVclSlice: state.hasUnparsedVclSlice,
       normalizedData: annexBData,
-      parameterSets: hasParameterSets ? new Uint8Array(parameterSetParts) : undefined,
+      parameterSets: hasParameterSets ? new Uint8Array(state.parameterSetParts) : undefined,
       hasParameterSets,
-      hasRequiredParameterSets,
+      hasRequiredParameterSets: state.hasVps && state.hasSps && state.hasPps,
     };
+  }
+
+  private static InspectNalu(
+    annexBData: Uint8Array,
+    nalu: { type: number; data: Uint8Array; startCodeStart: number; end: number },
+    state: InspectFrameState,
+  ): void {
+    if (H265_RANDOM_ACCESS_TYPES.has(nalu.type)) {
+      state.hasRandomAccessNaluType = true;
+    }
+
+    if (H265.IsParameterSetNaluType(nalu.type)) {
+      state.hasVps ||= nalu.type === H265NaluType.VPS_NUT;
+      state.hasSps ||= nalu.type === H265NaluType.SPS_NUT;
+      state.hasPps ||= nalu.type === H265NaluType.PPS_NUT;
+      for (let index = nalu.startCodeStart; index < nalu.end; index++) {
+        state.parameterSetParts.push(annexBData[index]!);
+      }
+      if (nalu.type === H265NaluType.PPS_NUT) {
+        const pps = H265.ParsePps(nalu.data);
+        if (pps != undefined) {
+          state.ppsById.set(pps.ppsId, pps);
+        }
+      }
+      return;
+    }
+
+    if (H265.IsVclNaluType(nalu.type)) {
+      const sliceType = H265.ParseSliceType(nalu.data, nalu.type, state.ppsById);
+      if (sliceType == undefined) {
+        state.hasUnparsedVclSlice = true;
+      } else {
+        state.sliceTypes.push(sliceType);
+      }
+    }
+  }
+
+  private static IsParameterSetNaluType(naluType: number): boolean {
+    return (
+      naluType === H265NaluType.VPS_NUT ||
+      naluType === H265NaluType.SPS_NUT ||
+      naluType === H265NaluType.PPS_NUT
+    );
   }
 
   public static ToAnnexB(data: Uint8Array): Uint8Array | undefined {
@@ -172,12 +193,8 @@ export class H265 {
     return parts.length > 0 ? new Uint8Array(parts) : undefined;
   }
 
-  public static FindNextStartCode(data: Uint8Array, start: number): number {
-    return findNextStartCode(data, start);
-  }
-
   public static FindNextStartCodeEnd(data: Uint8Array, start: number): number {
-    const nextStartCode = H265.FindNextStartCode(data, start);
+    const nextStartCode = findNextStartCode(data, start);
     return nextStartCode === data.length
       ? data.length
       : nextStartCode + (H265.AnnexBBoxSize(data.subarray(nextStartCode)) ?? 0);
@@ -190,11 +207,11 @@ export class H265 {
     start: number;
     end: number;
   }> {
-    let startCodeStart = H265.FindNextStartCode(data, 0);
+    let startCodeStart = findNextStartCode(data, 0);
     while (startCodeStart !== data.length) {
       const startCodeLength = H265.AnnexBBoxSize(data.subarray(startCodeStart)) ?? 0;
       const start = startCodeStart + startCodeLength;
-      const nextStartCode = H265.FindNextStartCode(data, start + 1);
+      const nextStartCode = findNextStartCode(data, start + 1);
       if (start + 2 <= nextStartCode) {
         yield {
           type: (data[start]! >> 1) & 0x3f,
@@ -301,10 +318,10 @@ export class H265 {
     if (sliceTypes.every((sliceType) => sliceType === H265SliceType.I)) {
       return "I";
     }
-    if (sliceTypes.some((sliceType) => sliceType === H265SliceType.B)) {
+    if (sliceTypes.includes(H265SliceType.B)) {
       return "B";
     }
-    if (sliceTypes.some((sliceType) => sliceType === H265SliceType.P)) {
+    if (sliceTypes.includes(H265SliceType.P)) {
       return "P";
     }
     return "unknown";

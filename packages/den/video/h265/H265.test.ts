@@ -6,8 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { H265 } from "./H265";
-import H265FrameBuilder from "./H265FrameBuilder";
 import { H265NaluType, H265SliceType } from "./types";
+import H265FrameBuilder from "../../testing/builders/H265FrameBuilder";
 
 describe("H265", () => {
   it("should detect IRAP I slices as keyframes", () => {
@@ -124,13 +124,6 @@ describe("H265", () => {
 
   it("should return undefined for unsupported h265 bitstreams", () => {
     expect(H265.ParseDecoderConfig(new Uint8Array([0x01, 0x02, 0x03]))).toBeUndefined();
-  });
-
-  it("FindNextStartCode locates 3- and 4-byte Annex B start codes", () => {
-    const data = new Uint8Array([0xff, 0xff, 0x00, 0x00, 0x01, 0x42, 0x00, 0x00, 0x00, 0x01, 0x43]);
-    expect(H265.FindNextStartCode(data, 0)).toBe(2);
-    expect(H265.FindNextStartCode(data, 5)).toBe(6);
-    expect(H265.FindNextStartCode(new Uint8Array([0x00, 0x00, 0x02]), 0)).toBe(3);
   });
 
   it("FindNextStartCodeEnd returns index past the matched start code", () => {

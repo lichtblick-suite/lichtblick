@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { H265NaluType, H265SliceType } from "./types";
+import { H265NaluType, H265SliceType } from "../../video/h265/types";
 
 /**
  * Synthesizes minimal H.265 NAL units, slice payloads, and full-frame byte sequences for use in
@@ -16,9 +16,29 @@ import { H265NaluType, H265SliceType } from "./types";
 export default class H265FrameBuilder {
   private static slicePayload(naluType: number, sliceType: H265SliceType): number[] {
     if (naluType >= H265NaluType.BLA_W_LP && naluType <= H265NaluType.RSV_IRAP_VCL23) {
-      return [sliceType === H265SliceType.B ? 0xb0 : sliceType === H265SliceType.P ? 0xa8 : 0xac];
+      return [H265FrameBuilder.irapSliceFirstByte(sliceType)];
     }
-    return [sliceType === H265SliceType.B ? 0xe0 : sliceType === H265SliceType.P ? 0xd0 : 0xd8];
+    return [H265FrameBuilder.nonIrapSliceFirstByte(sliceType)];
+  }
+
+  private static irapSliceFirstByte(sliceType: H265SliceType): number {
+    if (sliceType === H265SliceType.B) {
+      return 0xb0;
+    }
+    if (sliceType === H265SliceType.P) {
+      return 0xa8;
+    }
+    return 0xac;
+  }
+
+  private static nonIrapSliceFirstByte(sliceType: H265SliceType): number {
+    if (sliceType === H265SliceType.B) {
+      return 0xe0;
+    }
+    if (sliceType === H265SliceType.P) {
+      return 0xd0;
+    }
+    return 0xd8;
   }
 
   public static lengthPrefixedNalu(naluType: number, payload: number[] = [0x01]): number[] {
