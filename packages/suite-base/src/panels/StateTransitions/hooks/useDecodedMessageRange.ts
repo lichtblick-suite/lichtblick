@@ -49,6 +49,10 @@ export function useDecodedMessageRange(
           accumulatedRef.current[topic] ??= [];
           accumulatedRef.current[topic].push(...batch);
 
+          // Wait 250ms before updating state so that batches arriving in quick
+          // succession are grouped into one update instead of re-rendering the
+          // chart for each batch individually.
+          // Less batches means faster updates and better performance
           flushRef.current ??= globalThis.setTimeout(() => {
             flushRef.current = undefined;
             setMessagesByTopic({ ...accumulatedRef.current });
