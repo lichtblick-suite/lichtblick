@@ -1789,20 +1789,22 @@ describe("UserScriptPlayer", () => {
           msgEvent: upstreamFirst,
         };
       })();
-      jest.spyOn(fakePlayer, "getBatchIterator").mockReturnValue(mockIterator);
+      const getBatchIteratorSpy = jest
+        .spyOn(fakePlayer, "getBatchIterator")
+        .mockReturnValue(mockIterator);
 
       const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-      setListenerHelper(userScriptPlayer);
+      void setListenerHelper(userScriptPlayer);
 
       const result = userScriptPlayer.getBatchIterator("/np_input");
-      expect(fakePlayer.getBatchIterator).toHaveBeenCalledWith("/np_input", undefined);
+      expect(getBatchIteratorSpy).toHaveBeenCalledWith("/np_input", undefined);
       expect(result).toBe(mockIterator);
     });
 
     it("returns undefined for unknown topics when underlying player returns undefined", () => {
       const fakePlayer = new FakePlayer();
       const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-      setListenerHelper(userScriptPlayer);
+      void setListenerHelper(userScriptPlayer);
 
       const result = userScriptPlayer.getBatchIterator("/unknown_topic");
       expect(result).toBeUndefined();
