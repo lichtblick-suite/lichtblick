@@ -151,4 +151,167 @@ describe("useDecodedMessageRange", () => {
       }),
     );
   });
+
+  describe("incremental topic diffing", () => {
+    it("should preserve existing topic data when a new topic is added", async () => {
+      const topicA = BasicBuilder.string();
+      const topicB = BasicBuilder.string();
+
+      const initialTopics = [topicA];
+      const initialPaths = [`${topicA}.field`];
+
+      const { rerender } = renderHook(
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
+        { initialProps: { topics: initialTopics, paths: initialPaths } },
+      );
+
+      const msgsA = [
+        MessageEventBuilder.messageEvent({ topic: topicA }),
+        MessageEventBuilder.messageEvent({ topic: topicA }),
+      ];
+
+      await act(async () => {
+        await simulateBatches(topicA, [msgsA]);
+      });
+
+      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
+        expect.objectContaining({ [topicA]: expect.arrayContaining(msgsA) }),
+      );
+
+      mockSubscribeMessageRange.mockClear();
+
+      rerender({
+        topics: [topicA, topicB],
+        paths: [`${topicA}.field`, `${topicB}.field`],
+      });
+
+      expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
+        expect.objectContaining({ topic: topicB }),
+      );
+
+      const msgsB = [MessageEventBuilder.messageEvent({ topic: topicB })];
+
+      await act(async () => {
+        await simulateBatches(topicB, [msgsB]);
+      });
+
+      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          [topicA]: expect.arrayContaining(msgsA),
+          [topicB]: expect.arrayContaining(msgsB),
+        }),
+      );
+    });
+
+    it("should only cancel the removed topic and preserve remaining topic data", async () => {
+      const topicA = BasicBuilder.string();
+      const topicB = BasicBuilder.string();
+
+      const cancelA = jest.fn();
+      const cancelB = jest.fn();
+      mockSubscribeMessageRange.mockReturnValueOnce(cancelA).mockReturnValueOnce(cancelB);
+
+      const { rerender } = renderHook(
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
+        {
+          initialProps: {
+            topics: [topicA, topicB],
+            paths: [`${topicA}.field`, `${topicB}.field`],
+          },
+        },
+      );
+
+      const msgsA = [MessageEventBuilder.messageEvent({ topic: topicA })];
+      const msgsB = [MessageEventBuilder.messageEvent({ topic: topicB })];
+
+      await act(async () => {
+        await simulateBatches(topicA, [msgsA]);
+        await simulateBatches(topicB, [msgsB]);
+      });
+
+      rerender({
+        topics: [topicA],
+        paths: [`${topicA}.field`],
+      });
+
+      expect(cancelA).not.toHaveBeenCalled();
+      expect(cancelB).toHaveBeenCalledTimes(1);
+
+      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          [topicA]: expect.arrayContaining(msgsA),
+        }),
+      );
+      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
+        expect.not.objectContaining({
+          [topicB]: expect.anything(),
+        }),
+      );
+    });
+
+    it("should not resubscribe to topics that remain unchanged", async () => {
+      const topicA = BasicBuilder.string();
+      const topicB = BasicBuilder.string();
+      const topicC = BasicBuilder.string();
+
+      const { rerender } = renderHook(
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
+        {
+          initialProps: {
+            topics: [topicA, topicB],
+            paths: [`${topicA}.field`, `${topicB}.field`],
+          },
+        },
+      );
+
+      await act(async () => {
+        await simulateBatches(topicA, [[MessageEventBuilder.messageEvent({ topic: topicA })]]);
+        await simulateBatches(topicB, [[MessageEventBuilder.messageEvent({ topic: topicB })]]);
+      });
+
+      expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(2);
+      mockSubscribeMessageRange.mockClear();
+
+      rerender({
+        topics: [topicA, topicC],
+        paths: [`${topicA}.field`, `${topicC}.field`],
+      });
+
+      expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
+        expect.objectContaining({ topic: topicC }),
+      );
+    });
+
+    it("should handle adding a topic that shares data with existing subscriptions", async () => {
+      const topicA = BasicBuilder.string();
+
+      const { rerender } = renderHook(
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
+        { initialProps: { topics: [topicA], paths: [`${topicA}.field`] } },
+      );
+
+      const msgsA = [
+        MessageEventBuilder.messageEvent({ topic: topicA }),
+        MessageEventBuilder.messageEvent({ topic: topicA }),
+        MessageEventBuilder.messageEvent({ topic: topicA }),
+      ];
+
+      await act(async () => {
+        await simulateBatches(topicA, [msgsA]);
+      });
+
+      mockSubscribeMessageRange.mockClear();
+      rerender({ topics: [topicA], paths: [`${topicA}.field`] });
+
+      expect(mockSubscribeMessageRange).not.toHaveBeenCalled();
+
+      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          [topicA]: expect.arrayContaining(msgsA),
+        }),
+      );
+    });
+  });
 });
