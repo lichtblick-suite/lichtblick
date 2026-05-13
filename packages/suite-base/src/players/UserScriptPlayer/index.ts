@@ -162,7 +162,7 @@ export default class UserScriptPlayer implements Player {
 
   // Shared cache for virtual topic batch iterators. One source consumer per topic processes
   // messages through its own worker; multiple panels replay from the shared results array.
-  #batchIteratorCache = new Map<string, BatchIteratorCacheEntry>();
+  readonly #batchIteratorCache = new Map<string, BatchIteratorCacheEntry>();
 
   readonly #emitLock = new Mutex();
 
