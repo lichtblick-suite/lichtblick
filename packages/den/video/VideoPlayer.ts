@@ -252,7 +252,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
    * await the prior result before submitting another batch.
    */
   public async decodeFrames(frames: EncodedVideoFrame[]): Promise<DecodeFramesResult> {
-    const targetFrame = frames[frames.length - 1];
+    const targetFrame = frames.at(-1);
     if (targetFrame == undefined) {
       return { type: "timeout" };
     }
