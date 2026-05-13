@@ -50,7 +50,7 @@ type PendingDecode = {
   resolve: (result: DecodeFramesResult) => void;
   reject: (error: Error) => void;
   targetTimeoutId?: ReturnType<typeof setTimeout>;
-  overallTimeoutId: ReturnType<typeof setTimeout>;
+  overallTimeoutId?: ReturnType<typeof setTimeout>;
 };
 
 export type VideoPlayerEventTypes = {
@@ -252,7 +252,8 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
    * await the prior result before submitting another batch.
    */
   public async decodeFrames(frames: EncodedVideoFrame[]): Promise<DecodeFramesResult> {
-    if (frames.length === 0) {
+    const targetFrame = frames[frames.length - 1];
+    if (targetFrame == undefined) {
       return { type: "timeout" };
     }
     if (this.#pendingDecode) {
@@ -277,7 +278,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       this.#decoderConfig?.codec.startsWith("hvc1") === true;
     const targetFrameWaitMs = isHevc ? HEVC_TARGET_FRAME_WAIT_MS : DEFAULT_TARGET_FRAME_WAIT_MS;
     const maxDecodeWaitMs = isHevc ? HEVC_MAX_DECODE_WAIT_MS : DEFAULT_MAX_DECODE_WAIT_MS;
-    const targetFrame = frames.at(-1)!;
 
     this.#pendingTargetTimestampMicros = targetFrame.timestampMicros;
 
@@ -307,7 +307,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
           }
           reject(error);
         },
-        overallTimeoutId: undefined as unknown as ReturnType<typeof setTimeout>,
       };
 
       pendingDecode.targetTimeoutId = setTimeout(() => {

@@ -59,7 +59,11 @@ export class H264 {
     while (i < data.length) {
       // Annex B NALU type is the 5 least significant bits of the first byte following the start
       // code
-      const naluType = data[i]! & 0x1f;
+      const byte = data[i];
+      if (byte == undefined) {
+        break;
+      }
+      const naluType = byte & 0x1f;
       if (naluType === H264NaluType.IDR) {
         return true;
       }
@@ -86,7 +90,11 @@ export class H264 {
     while (i < data.length) {
       // Annex B NALU type is the 5 least significant bits of the first byte following the start
       // code
-      const curNaluType = data[i]! & 0x1f;
+      const byte = data[i];
+      if (byte == undefined) {
+        break;
+      }
+      const curNaluType = byte & 0x1f;
       if (curNaluType === naluType) {
         // Find the end of this NALU
         const end = findNextStartCode(data, i + 1);

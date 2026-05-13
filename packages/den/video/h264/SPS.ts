@@ -305,9 +305,11 @@ export class SPS {
           this.sar_width = bitstream.u(16);
           this.sar_height = bitstream.u(16);
         } else if (this.aspect_ratio_idc > 0 && this.aspect_ratio_idc <= 16) {
-          const sar = ASPECT_RATIO_IDC_VALUES[this.aspect_ratio_idc]!;
-          this.sar_width = sar[0];
-          this.sar_height = sar[1];
+          const sar = ASPECT_RATIO_IDC_VALUES[this.aspect_ratio_idc];
+          if (sar) {
+            this.sar_width = sar[0];
+            this.sar_height = sar[1];
+          }
         }
       }
 

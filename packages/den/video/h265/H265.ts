@@ -132,8 +132,8 @@ export class H265 {
       state.hasVps ||= nalu.type === H265NaluType.VPS_NUT;
       state.hasSps ||= nalu.type === H265NaluType.SPS_NUT;
       state.hasPps ||= nalu.type === H265NaluType.PPS_NUT;
-      for (let index = nalu.startCodeStart; index < nalu.end; index++) {
-        state.parameterSetParts.push(annexBData[index]!);
+      for (const byte of annexBData.subarray(nalu.startCodeStart, nalu.end)) {
+        state.parameterSetParts.push(byte);
       }
       if (nalu.type === H265NaluType.PPS_NUT) {
         const pps = H265.ParsePps(nalu.data);
@@ -185,8 +185,8 @@ export class H265 {
       ) {
         continue;
       }
-      for (let index = nalu.startCodeStart; index < nalu.end; index++) {
-        parts.push(annexBData[index]!);
+      for (const byte of annexBData.subarray(nalu.startCodeStart, nalu.end)) {
+        parts.push(byte);
       }
     }
 
@@ -212,9 +212,10 @@ export class H265 {
       const startCodeLength = H265.AnnexBBoxSize(data.subarray(startCodeStart)) ?? 0;
       const start = startCodeStart + startCodeLength;
       const nextStartCode = findNextStartCode(data, start + 1);
-      if (start + 2 <= nextStartCode) {
+      const headerByte = data[start];
+      if (start + 2 <= nextStartCode && headerByte != undefined) {
         yield {
-          type: (data[start]! >> 1) & 0x3f,
+          type: (headerByte >> 1) & 0x3f,
           data: data.subarray(start, nextStartCode),
           startCodeStart,
           start,
@@ -337,17 +338,13 @@ export class H265 {
     }
 
     const result = new Uint8Array(data.length);
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
     let writeOffset = 0;
     let foundNalu = false;
 
     while (offset + 4 <= data.length) {
-      const naluLength =
-        (((data[offset]! << 24) >>> 0) |
-          (data[offset + 1]! << 16) |
-          (data[offset + 2]! << 8) |
-          data[offset + 3]!) >>>
-        0;
+      const naluLength = view.getUint32(offset);
       offset += 4;
 
       if (naluLength <= 0 || offset + naluLength > data.length) {
