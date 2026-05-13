@@ -34,11 +34,9 @@ export function useDecodedMessageRange(
   const accumulatedRef = useRef<Record<string, MessageEvent[]>>({});
   const flushRef = useRef<ReturnType<typeof setTimeout> | undefined>();
 
-  // Track per-topic cancel functions so we can diff instead of full teardown/rebuild.
   const cancelsByTopicRef = useRef<Map<string, () => void>>(new Map());
   const prevTopicsRef = useRef<string[]>([]);
 
-  // Keep the subscribe callback in a ref so it always captures the latest subscribeMessageRange.
   const subscribeTopicRef = useRef<(topic: string) => void>(() => {});
   subscribeTopicRef.current = (topic: string) => {
     const cancel = subscribeMessageRange({
@@ -76,7 +74,6 @@ export function useDecodedMessageRange(
     const prevSet = new Set(prevTopicsRef.current);
     const nextSet = new Set(topics);
 
-    // Unsubscribe removed topics and clean up their accumulated data.
     for (const topic of prevSet) {
       if (!nextSet.has(topic)) {
         cancelsByTopicRef.current.get(topic)?.();
@@ -90,7 +87,6 @@ export function useDecodedMessageRange(
       }
     }
 
-    // Subscribe to newly added topics only.
     for (const topic of nextSet) {
       if (!prevSet.has(topic)) {
         subscribeTopicRef.current(topic);
