@@ -239,6 +239,128 @@ describe("UserScriptPlayer", () => {
     });
   });
 
+  describe("resetWorkers", () => {
+    function setup(overrides?: Partial<typeof defaultUserScriptActions>) {
+      const fakePlayer = new FakePlayer();
+      const mockSetRosLib = jest.fn();
+      const mockSetTypesLib = jest.fn();
+      const actions = {
+        ...defaultUserScriptActions,
+        setUserScriptRosLib: mockSetRosLib,
+        setUserScriptTypesLib: mockSetTypesLib,
+        ...overrides,
+      };
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, actions);
+      return { fakePlayer, userScriptPlayer, actions, mockSetRosLib, mockSetTypesLib };
+    }
+
+    const activeDataWithInput = {
+      ...basicPlayerState,
+      messages: [] as MessageEvent[],
+      topics: [{ name: "/np_input", schemaName: "foo" }],
+      datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+    };
+
+    it("calls setUserScriptRosLib and setUserScriptTypesLib when scripts are initialized", async () => {
+      // Given
+      const { fakePlayer, userScriptPlayer, mockSetRosLib, mockSetTypesLib } = setup();
+
+      void userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [done] = setListenerHelper(userScriptPlayer);
+
+      // When
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+      await done;
+
+      // Then
+      expect(mockSetRosLib).toHaveBeenCalledWith(expect.any(String));
+      expect(mockSetTypesLib).toHaveBeenCalledWith(expect.any(String));
+    });
+
+    it("does not call lib setters when no player state is available yet", async () => {
+      // Given
+      const { userScriptPlayer, mockSetRosLib, mockSetTypesLib } = setup();
+
+      // When
+      await userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      // Then
+      expect(mockSetRosLib).not.toHaveBeenCalled();
+      expect(mockSetTypesLib).not.toHaveBeenCalled();
+    });
+
+    it("skips reset when no scripts are registered and none are provided", async () => {
+      // Given
+      const { fakePlayer, userScriptPlayer, mockSetRosLib } = setup();
+
+      const [done] = setListenerHelper(userScriptPlayer);
+
+      // When
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+      await done;
+
+      // Then
+      expect(mockSetRosLib).not.toHaveBeenCalled();
+    });
+
+    it("terminates previous registrations when scripts change", async () => {
+      // Given
+      const { fakePlayer, userScriptPlayer } = setup();
+
+      void userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [first, second] = setListenerHelper(userScriptPlayer, 2);
+
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+      await first;
+
+      // When
+      const updatedCode = nodeUserCode.replace("abc", "xyz");
+      await userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: updatedCode },
+      });
+
+      await fakePlayer.emit({
+        activeData: { ...activeDataWithInput, messages: [upstreamFirst] },
+      });
+
+      const result = await second;
+
+      // Then
+      expect(result?.messages.length).toBeGreaterThan(0);
+    });
+
+    it("emits state with new topics when a script is added after initial emit", async () => {
+      // Given
+      const { fakePlayer, userScriptPlayer } = setup();
+
+      const [first, second] = setListenerHelper(userScriptPlayer, 2);
+
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+
+      const initialResult = await first;
+
+      // When
+      expect(initialResult?.topicNames).not.toContain(`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`);
+
+      await userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const updatedResult = await second;
+
+      // Then
+      expect(updatedResult?.topicNames).toContain(`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`);
+    });
+  });
+
   describe("user node behavior", () => {
     it("exposes user node topics when available", async () => {
       const fakePlayer = new FakePlayer();
@@ -1949,16 +2071,13 @@ describe("UserScriptPlayer", () => {
       const iterator = userScriptPlayer.getBatchIterator(outputTopic);
       expect(iterator).toBeUndefined();
     });
-
-    it("emits a reset result and terminates when setUserScripts invalidates the cache", async () => {
+    it("returns an independent iterator when range options are provided", async () => {
       const fakePlayer = new FakePlayer();
 
-      // Never-ending input so the shared cache consumer stays alive until invalidated.
       jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
         if (topic === "/np_input") {
           return (async function* () {
             yield { type: "message-event" as const, msgEvent: upstreamFirst };
-            await new Promise<void>(() => {}); // hangs until terminated by invalidation
           })();
         }
         return undefined;
@@ -1966,7 +2085,7 @@ describe("UserScriptPlayer", () => {
 
       const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
 
-      await userScriptPlayer.setUserScripts({
+      void userScriptPlayer.setUserScripts({
         [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
@@ -1982,108 +2101,258 @@ describe("UserScriptPlayer", () => {
       });
       await done;
 
+      // When range options are provided, an independent (non-cached) iterator is returned
       const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
-
-      const iterator = userScriptPlayer.getBatchIterator(outputTopic)!;
+      const iterator = userScriptPlayer.getBatchIterator(outputTopic, {
+        start: { sec: 0, nsec: 0 },
+        end: { sec: 1, nsec: 0 },
+      });
       expect(iterator).toBeDefined();
 
-      // Drain in the background; the loop terminates once the cache is invalidated.
-      const resultTypes: string[] = [];
-      const consumerDone = (async () => {
-        for await (const result of iterator) {
-          resultTypes.push(result.type);
-        }
-      })();
-
-      // Saving a changed script invalidates the cache. The iterator must terminate
-      // so that PlotCoordinator's for-await loop ends and active is set to false,
-      // enabling re-subscription on the next handlePlayerState call.
-      const nodeUserCodeChanged = nodeUserCode.replace("abc", "xyz");
-      await userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCodeChanged },
-      });
-
-      // The consumer must have terminated (consumerDone resolved).
-      await consumerDone;
-
-      // The iterator must not have emitted reset — it just terminates cleanly.
-      expect(resultTypes).not.toContain("reset");
-    });
-
-    it("re-subscribing after cache invalidation yields output from the updated script", async () => {
-      const fakePlayer = new FakePlayer();
-
-      // First subscription: never-ending (stays alive until invalidated).
-      // Second subscription (after re-subscribe): finite, so the new consumer terminates.
-      let inputCallCount = 0;
-      jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
-        if (topic === "/np_input") {
-          inputCallCount++;
-          if (inputCallCount === 1) {
-            return (async function* () {
-              yield { type: "message-event" as const, msgEvent: upstreamFirst };
-              await new Promise<void>(() => {}); // hangs until terminated by invalidation
-            })();
-          }
-          // Second subscription — finite so the new consumer terminates cleanly.
-          return (async function* () {
-            yield { type: "message-event" as const, msgEvent: upstreamFirst };
-          })();
-        }
-        return undefined;
-      });
-
-      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-
-      await userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
-      });
-
-      const [done] = setListenerHelper(userScriptPlayer);
-      await fakePlayer.emit({
-        activeData: {
-          ...basicPlayerState,
-          messages: [upstreamFirst],
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
-          datatypes: new Map(Object.entries(exampleDatatypes)),
-        },
-      });
-      await done;
-
-      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
-
-      // First subscription — drain until the iterator ends after cache invalidation.
-      const firstIterator = userScriptPlayer.getBatchIterator(outputTopic)!;
-      const drainFirst = (async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for await (const _ of firstIterator) {
-          /* drain */
-        }
-      })();
-
-      // Saving the changed script invalidates the cache; the first iterator terminates.
-      const nodeUserCodeChanged = nodeUserCode.replace('"abc"', '"CHANGED"');
-      await userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCodeChanged },
-      });
-      await drainFirst;
-
-      // Re-subscribe — a new getBatchIterator call after invalidation must return a fresh
-      // iterator that reflects the updated script.
-      const secondIterator = userScriptPlayer.getBatchIterator(outputTopic)!;
-      expect(secondIterator).toBeDefined();
-
-      const outputValues: string[] = [];
-      for await (const result of secondIterator) {
+      const results: MessageEvent[] = [];
+      for await (const result of iterator!) {
         if (result.type === "message-event") {
-          outputValues.push(
-            (result.msgEvent.message as { custom_np_field: string }).custom_np_field,
-          );
+          results.push(result.msgEvent);
         }
       }
 
-      expect(outputValues).toContain("CHANGED");
+      expect(results).toHaveLength(1);
+      expect(results[0]!.topic).toBe(outputTopic);
+    });
+
+    it("returns undefined when range options are provided but input has no iterator", async () => {
+      const fakePlayer = new FakePlayer();
+
+      // Return undefined for all topics
+      jest.spyOn(fakePlayer, "getBatchIterator").mockReturnValue(undefined);
+
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+      void userScriptPlayer.setUserScripts({
+        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [done] = setListenerHelper(userScriptPlayer);
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [upstreamFirst],
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+          datatypes: new Map(Object.entries(exampleDatatypes)),
+        },
+      });
+      await done;
+
+      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
+      const result = userScriptPlayer.getBatchIterator(outputTopic, {
+        start: { sec: 0, nsec: 0 },
+        end: { sec: 1, nsec: 0 },
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it("reuses the shared cache when getBatchIterator is called twice without options", async () => {
+      const fakePlayer = new FakePlayer();
+
+      let callCount = 0;
+      jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
+        if (topic === "/np_input") {
+          callCount++;
+          return (async function* () {
+            yield { type: "message-event" as const, msgEvent: upstreamFirst };
+          })();
+        }
+        return undefined;
+      });
+
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+      void userScriptPlayer.setUserScripts({
+        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [done] = setListenerHelper(userScriptPlayer);
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [upstreamFirst],
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+          datatypes: new Map(Object.entries(exampleDatatypes)),
+        },
+      });
+      await done;
+
+      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
+      const iter1 = userScriptPlayer.getBatchIterator(outputTopic);
+      const iter2 = userScriptPlayer.getBatchIterator(outputTopic);
+      expect(iter1).toBeDefined();
+      expect(iter2).toBeDefined();
+
+      // The underlying player's getBatchIterator should only be called once for the shared cache
+      expect(callCount).toBe(1);
+
+      // Both iterators should yield the same result
+      const results1: MessageEvent[] = [];
+      for await (const r of iter1!) {
+        if (r.type === "message-event") {
+          results1.push(r.msgEvent);
+        }
+      }
+      const results2: MessageEvent[] = [];
+      for await (const r of iter2!) {
+        if (r.type === "message-event") {
+          results2.push(r.msgEvent);
+        }
+      }
+
+      expect(results1).toHaveLength(1);
+      expect(results2).toHaveLength(1);
+      expect(results1[0]!.topic).toBe(outputTopic);
+      expect(results2[0]!.topic).toBe(outputTopic);
+    });
+
+    describe("mergeIteratorsByTime", () => {
+      const multiInputCode = `
+        export const inputs = ["/topicA", "/topicB"];
+        export const output = "${DEFAULT_STUDIO_SCRIPT_PREFIX}merged";
+        export default (message: { message: { value: number } }): { value: number } => {
+          return { value: message.message.value };
+        };
+      `;
+
+      const multiInputTopics: Topic[] = [
+        { name: "/topicA", schemaName: "pkg/A" },
+        { name: "/topicB", schemaName: "pkg/B" },
+      ];
+
+      const multiInputDatatypes = new Map(
+        Object.entries({
+          ...Object.fromEntries(exampleDatatypes),
+          "pkg/A": { definitions: [{ name: "value", type: "int32" }] },
+          "pkg/B": { definitions: [{ name: "value", type: "int32" }] },
+        }),
+      );
+
+      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}merged`;
+
+      function msg(topic: string, nsec: number, value: number): MessageEvent {
+        return {
+          topic,
+          receiveTime: { sec: 0, nsec },
+          message: { value },
+          schemaName: topic === "/topicA" ? "pkg/A" : "pkg/B",
+          sizeInBytes: 0,
+        };
+      }
+
+      async function setupMerge(mockIterators: Record<string, AsyncGenerator>) {
+        const fakePlayer = new FakePlayer();
+
+        jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
+          const iter = mockIterators[topic];
+          return iter as AsyncIterableIterator<any>;
+        });
+
+        const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+        void userScriptPlayer.setUserScripts({
+          merged: { name: outputTopic, sourceCode: multiInputCode },
+        });
+
+        const [done] = setListenerHelper(userScriptPlayer);
+        await fakePlayer.emit({
+          activeData: {
+            ...basicPlayerState,
+            messages: [],
+            currentTime: { sec: 0, nsec: 0 },
+            topics: multiInputTopics,
+            datatypes: multiInputDatatypes,
+          },
+        });
+        await done;
+
+        return userScriptPlayer.getBatchIterator(outputTopic)!;
+      }
+
+      async function drain(iterator: AsyncIterableIterator<any>) {
+        const results = [];
+        for await (const r of iterator) {
+          results.push(r);
+        }
+        return results;
+      }
+
+      it("merges messages from multiple input topics ordered by receiveTime", async () => {
+        const iterator = await setupMerge({
+          "/topicA": (async function* () {
+            yield { type: "message-event" as const, msgEvent: msg("/topicA", 10, 1) };
+            yield { type: "message-event" as const, msgEvent: msg("/topicA", 20, 3) };
+          })(),
+          "/topicB": (async function* () {
+            yield { type: "message-event" as const, msgEvent: msg("/topicB", 5, 2) };
+          })(),
+        });
+
+        const results = (await drain(iterator)).filter((r) => r.type === "message-event");
+
+        // B1(5ns) < A1(10ns) < A2(20ns)
+        expect(results).toHaveLength(3);
+        expect(results[0]!.msgEvent.receiveTime).toEqual({ sec: 0, nsec: 5 });
+        expect(results[1]!.msgEvent.receiveTime).toEqual({ sec: 0, nsec: 10 });
+        expect(results[2]!.msgEvent.receiveTime).toEqual({ sec: 0, nsec: 20 });
+      });
+
+      it("yields non-message-event results before message events", async () => {
+        const stamp = { sec: 5, nsec: 0 };
+
+        const iterator = await setupMerge({
+          "/topicA": (async function* () {
+            yield { type: "message-event" as const, msgEvent: msg("/topicA", 1, 1) };
+          })(),
+          "/topicB": (async function* () {
+            yield { type: "stamp" as const, stamp };
+          })(),
+        });
+
+        const results = await drain(iterator);
+
+        expect(results).toHaveLength(2);
+        expect(results[0]).toEqual({ type: "stamp", stamp });
+        expect(results[1]!.type).toBe("message-event");
+      });
+
+      it("keeps non-message-event priority when it is already the earliest head", async () => {
+        const stamp = { sec: 0, nsec: 0 };
+
+        // topicA yields a stamp (non-message at heads[0]), topicB yields a message (heads[1])
+        // findEarliestHeadIndex should `continue` past comparison when a is non-message
+        const iterator = await setupMerge({
+          "/topicA": (async function* () {
+            yield { type: "stamp" as const, stamp };
+          })(),
+          "/topicB": (async function* () {
+            yield { type: "message-event" as const, msgEvent: msg("/topicB", 1, 99) };
+          })(),
+        });
+
+        const results = await drain(iterator);
+
+        expect(results).toHaveLength(2);
+        expect(results[0]).toEqual({ type: "stamp", stamp });
+        expect(results[1]!.type).toBe("message-event");
+      });
+
+      it("handles iterators that are immediately done", async () => {
+        const iterator = await setupMerge({
+          "/topicA": (async function* () {})(),
+          "/topicB": (async function* () {})(),
+        });
+
+        const results = await drain(iterator);
+        expect(results).toHaveLength(0);
+      });
     });
   });
 });
