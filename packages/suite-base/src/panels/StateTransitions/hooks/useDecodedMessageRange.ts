@@ -34,50 +34,87 @@ export function useDecodedMessageRange(
   const accumulatedRef = useRef<Record<string, MessageEvent[]>>({});
   const flushRef = useRef<ReturnType<typeof setTimeout> | undefined>();
 
+  // Track per-topic cancel functions so we can diff instead of full teardown/rebuild.
+  const cancelsByTopicRef = useRef<Map<string, () => void>>(new Map());
+  const prevTopicsRef = useRef<string[]>([]);
+
+  // Keep the subscribe callback in a ref so it always captures the latest subscribeMessageRange.
+  const subscribeTopicRef = useRef<(topic: string) => void>(() => {});
+  subscribeTopicRef.current = (topic: string) => {
+    const cancel = subscribeMessageRange({
+      topic,
+      onNewRangeIterator: async (batchIterator) => {
+        accumulatedRef.current[topic] = [];
+        setMessagesByTopic((prev) => ({ ...prev, [topic]: [] }));
+
+        for await (const batch of batchIterator) {
+          accumulatedRef.current[topic] ??= [];
+          accumulatedRef.current[topic].push(...batch);
+
+          flushRef.current ??= globalThis.setTimeout(() => {
+            flushRef.current = undefined;
+            setMessagesByTopic({ ...accumulatedRef.current });
+          }, 250);
+        }
+
+        // Final flush after iterator completes
+        if (flushRef.current != undefined) {
+          clearTimeout(flushRef.current);
+          flushRef.current = undefined;
+        }
+        setMessagesByTopic({ ...accumulatedRef.current });
+      },
+    });
+    cancelsByTopicRef.current.set(topic, cancel);
+  };
+
   useEffect(() => {
     if (!initialized) {
       return;
     }
-    const cancels: (() => void)[] = [];
 
-    for (const topic of topics) {
-      const cancel = subscribeMessageRange({
-        topic,
-        onNewRangeIterator: async (batchIterator) => {
-          accumulatedRef.current[topic] = [];
-          setMessagesByTopic((prev) => ({ ...prev, [topic]: [] }));
+    const prevSet = new Set(prevTopicsRef.current);
+    const nextSet = new Set(topics);
 
-          for await (const batch of batchIterator) {
-            accumulatedRef.current[topic] ??= [];
-            accumulatedRef.current[topic].push(...batch);
-
-            flushRef.current ??= globalThis.setTimeout(() => {
-              flushRef.current = undefined;
-              setMessagesByTopic({ ...accumulatedRef.current });
-            }, 250);
-          }
-
-          // Final flush after iterator completes
-          if (flushRef.current != undefined) {
-            clearTimeout(flushRef.current);
-            flushRef.current = undefined;
-          }
-          setMessagesByTopic({ ...accumulatedRef.current });
-        },
-      });
-      cancels.push(cancel);
+    // Unsubscribe removed topics and clean up their accumulated data.
+    for (const topic of prevSet) {
+      if (!nextSet.has(topic)) {
+        cancelsByTopicRef.current.get(topic)?.();
+        cancelsByTopicRef.current.delete(topic);
+        delete accumulatedRef.current[topic];
+        setMessagesByTopic((prev) => {
+          const next = { ...prev };
+          delete next[topic];
+          return next;
+        });
+      }
     }
 
-    return () => {
-      if (flushRef.current != undefined) {
-        clearTimeout(flushRef.current);
-        flushRef.current = undefined;
+    // Subscribe to newly added topics only.
+    for (const topic of nextSet) {
+      if (!prevSet.has(topic)) {
+        subscribeTopicRef.current(topic);
       }
-      for (const cancel of cancels) {
+    }
+
+    prevTopicsRef.current = topics;
+  }, [topics, initialized]);
+
+  // Clean up all subscriptions on unmount.
+  useEffect(() => {
+    const cancels = cancelsByTopicRef.current;
+    const flush = flushRef;
+    return () => {
+      if (flush.current != undefined) {
+        clearTimeout(flush.current);
+        flush.current = undefined;
+      }
+      for (const cancel of cancels.values()) {
         cancel();
       }
+      cancels.clear();
     };
-  }, [topics, subscribeMessageRange, initialized]);
+  }, []);
 
   const decoded = useMemo(
     () => decodeMessagePathsForMessagesByTopic(messagesByTopic),
