@@ -1159,7 +1159,7 @@ export default class UserScriptPlayer implements Player {
     const processor = registration.buildMessageProcessor();
     const globalVariables = this.#globalVariables;
 
-    let resolve: () => void = () => {};
+    let resolve = () => {};
     const cache: BatchIteratorCacheEntry = {
       results: [],
       done: false,
