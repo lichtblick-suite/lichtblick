@@ -85,7 +85,9 @@ export class CustomDatasetsBuilder implements IDatasetsBuilder {
 
     const msgEvents = activeData.messages;
     if (!this.#hasRangeSource && msgEvents.length > 0) {
-      // Read the x-axis values
+      // Read the x-axis values.
+      // No reset on seek: without a range source, accumulated x-axis data is irrecoverable
+      // (same reasoning as y-axis series in buildCurrentSeriesActions).
       if (this.#xParsedPath) {
         const pathItems = parseXPathItems(msgEvents, this.#xParsedPath);
 
