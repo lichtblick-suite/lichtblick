@@ -154,7 +154,9 @@ export default function PlayerManager(
       return;
     }
 
-    void player?.setUserScripts(userScripts);
+    player?.setUserScripts(userScripts).catch((error: unknown) => {
+      log.error(error);
+    });
   }, [player, userScripts, isLayoutLoading]);
 
   const { enqueueSnackbar } = useSnackbar();

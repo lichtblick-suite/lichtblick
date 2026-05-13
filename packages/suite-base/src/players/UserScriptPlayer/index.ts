@@ -1082,66 +1082,20 @@ export default class UserScriptPlayer implements Player {
     processor: { processMessage: ScriptRegistration["processMessage"]; terminate: () => void },
     globalVariables: GlobalVariables,
   ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
+    const source =
+      inputIterators.length === 1
+        ? inputIterators[0]!
+        : UserScriptPlayer.#mergeIteratorsByTime(inputIterators);
+
     try {
-      if (inputIterators.length === 1) {
-        const iter = inputIterators[0]!;
-        for await (const result of iter) {
-          if (result.type !== "message-event") {
-            yield result;
-            continue;
-          }
+      for await (const result of source) {
+        if (result.type === "message-event") {
           const outputMessage = await processor.processMessage(result.msgEvent, globalVariables);
           if (outputMessage) {
             yield { type: "message-event" as const, msgEvent: outputMessage };
           }
-        }
-      } else {
-        const heads: {
-          iter: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>;
-          current: Readonly<IIterableSourceIteratorResult>;
-        }[] = [];
-
-        for (const iter of inputIterators) {
-          const next = await iter.next();
-          if (next.done !== true) {
-            heads.push({ iter, current: next.value });
-          }
-        }
-
-        while (heads.length > 0) {
-          let minIdx = 0;
-          for (let i = 1; i < heads.length; i++) {
-            const a = heads[minIdx]!;
-            const b = heads[i]!;
-            if (a.current.type !== "message-event") {
-              // keep a
-            } else if (b.current.type !== "message-event") {
-              minIdx = i;
-            } else if (
-              compare(b.current.msgEvent.receiveTime, a.current.msgEvent.receiveTime) < 0
-            ) {
-              minIdx = i;
-            }
-          }
-
-          const head = heads[minIdx]!;
-          const result = head.current;
-
-          if (result.type !== "message-event") {
-            yield result;
-          } else {
-            const outputMessage = await processor.processMessage(result.msgEvent, globalVariables);
-            if (outputMessage) {
-              yield { type: "message-event" as const, msgEvent: outputMessage };
-            }
-          }
-
-          const next = await head.iter.next();
-          if (next.done === true) {
-            heads.splice(minIdx, 1);
-          } else {
-            head.current = next.value;
-          }
+        } else {
+          yield result;
         }
       }
     } finally {
@@ -1150,6 +1104,63 @@ export default class UserScriptPlayer implements Player {
       }
       processor.terminate();
     }
+  }
+
+  /**
+   * Merges multiple async iterators into a single stream ordered by receiveTime.
+   * Non-message-event results (e.g. stamps) are yielded before message events.
+   */
+  static async *#mergeIteratorsByTime(
+    iterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+  ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
+    const heads: {
+      iter: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>;
+      current: Readonly<IIterableSourceIteratorResult>;
+    }[] = [];
+
+    for (const iter of iterators) {
+      const next = await iter.next();
+      if (next.done !== true) {
+        heads.push({ iter, current: next.value });
+      }
+    }
+
+    while (heads.length > 0) {
+      const minIdx = UserScriptPlayer.#findEarliestHeadIndex(heads);
+      const head = heads[minIdx]!;
+      yield head.current;
+
+      const next = await head.iter.next();
+      if (next.done === true) {
+        heads.splice(minIdx, 1);
+      } else {
+        head.current = next.value;
+      }
+    }
+  }
+
+  /**
+   * Finds the index of the head with the earliest receiveTime.
+   * Non-message-event results are treated as earlier than any message event.
+   */
+  static #findEarliestHeadIndex(
+    heads: { current: Readonly<IIterableSourceIteratorResult> }[],
+  ): number {
+    let minIdx = 0;
+    for (let i = 1; i < heads.length; i++) {
+      const a = heads[minIdx]!.current;
+      const b = heads[i]!.current;
+
+      if (a.type !== "message-event") {
+        continue; // a is non-message → already earliest priority
+      }
+      if (b.type !== "message-event") {
+        minIdx = i; // b is non-message → takes priority
+      } else if (compare(b.msgEvent.receiveTime, a.msgEvent.receiveTime) < 0) {
+        minIdx = i;
+      }
+    }
+    return minIdx;
   }
 
   #startSharedConsumer(
