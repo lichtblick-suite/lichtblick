@@ -104,7 +104,6 @@ type ProtectedState = {
 type BatchIteratorCacheEntry = {
   results: Readonly<IIterableSourceIteratorResult>[];
   done: boolean;
-  invalidated: boolean;
   error?: Error;
   resolve: () => void;
   promise: Promise<void>;
@@ -591,7 +590,6 @@ export default class UserScriptPlayer implements Player {
   // (NOT on seek — seek doesn't affect preloaded block data and PlotCoordinator won't re-subscribe).
   #invalidateBatchIteratorCache() {
     for (const cache of this.#batchIteratorCache.values()) {
-      cache.invalidated = true;
       cache.done = true;
       cache.resolve();
       cache.processor.terminate();
@@ -1074,195 +1072,35 @@ export default class UserScriptPlayer implements Player {
     return this.#createIndependentIterator(registration, inputIterators);
   }
 
-  #startSharedConsumer(
-    registration: ScriptRegistration,
+  /**
+   * Merges multiple input iterators by receiveTime, processes each message through
+   * the given processor, and yields transformed results. Handles cleanup of iterators
+   * and processor on completion.
+   */
+  static async *#mergeAndTransformIterators(
     inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
-  ) {
-    const processor = registration.buildMessageProcessor();
-    const globalVariables = this.#globalVariables;
-
-    let resolve: () => void = () => {};
-    const cache: BatchIteratorCacheEntry = {
-      results: [],
-      done: false,
-      error: undefined,
-      resolve,
-      promise: new Promise<void>((r) => {
-        resolve = r;
-      }),
-      processor,
-      invalidated: false,
-    };
-    // The executor runs synchronously, so `resolve` is now set.
-    cache.resolve = resolve;
-
-    const notify = () => {
-      cache.resolve();
-      cache.promise = new Promise<void>((r) => {
-        cache.resolve = r;
-      });
-    };
-
-    // Source consumer — processes messages once, populates shared results
-    void (async () => {
-      try {
-        if (inputIterators.length === 1) {
-          const iter = inputIterators[0]!;
-          for await (const result of iter) {
-            if (cache.done) {
-              break;
-            }
-            if (result.type !== "message-event") {
-              cache.results.push(result);
-              notify();
-              continue;
-            }
-            const outputMessage = await processor.processMessage(result.msgEvent, globalVariables);
-            if (outputMessage) {
-              cache.results.push({ type: "message-event" as const, msgEvent: outputMessage });
-              notify();
-            }
-          }
-        } else {
-          // Merge multiple input iterators by receiveTime
-          const heads: {
-            iter: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>;
-            current: Readonly<IIterableSourceIteratorResult>;
-          }[] = [];
-
-          for (const iter of inputIterators) {
-            const next = await iter.next();
-            if (next.done !== true) {
-              heads.push({ iter, current: next.value });
-            }
-          }
-
-          while (heads.length > 0 && !cache.done) {
-            let minIdx = 0;
-            for (let i = 1; i < heads.length; i++) {
-              const a = heads[minIdx]!;
-              const b = heads[i]!;
-              if (a.current.type !== "message-event") {
-                // keep a
-              } else if (b.current.type !== "message-event") {
-                minIdx = i;
-              } else if (
-                compare(b.current.msgEvent.receiveTime, a.current.msgEvent.receiveTime) < 0
-              ) {
-                minIdx = i;
-              }
-            }
-
-            const head = heads[minIdx]!;
-            const result = head.current;
-
-            if (result.type !== "message-event") {
-              cache.results.push(result);
-              notify();
-            } else {
-              const outputMessage = await processor.processMessage(
-                result.msgEvent,
-                globalVariables,
-              );
-              if (outputMessage) {
-                cache.results.push({ type: "message-event" as const, msgEvent: outputMessage });
-                notify();
-              }
-            }
-
-            const next = await head.iter.next();
-            if (next.done === true) {
-              heads.splice(minIdx, 1);
-            } else {
-              head.current = next.value;
-            }
-          }
-        }
-      } catch (err) {
-        cache.error = err as Error;
-      } finally {
-        cache.done = true;
-        notify();
-        for (const iter of inputIterators) {
-          await iter.return?.();
-        }
-        processor.terminate();
-      }
-    })();
-
-    return cache;
-  }
-
-  #createReplayIterator(cache: BatchIteratorCacheEntry): AsyncIterableIterator<
-    Readonly<IIterableSourceIteratorResult>
-  > & {
-    readonly invalidated: boolean;
-  } {
-    const gen = this.#createReplayIteratorGen(cache);
-    const result = gen as typeof gen & { readonly invalidated: boolean };
-    Object.defineProperty(result, "invalidated", {
-      get: () => cache.invalidated,
-      enumerable: true,
-      configurable: true,
-    });
-    return result;
-  }
-
-  async *#createReplayIteratorGen(
-    cache: BatchIteratorCacheEntry,
+    processor: { processMessage: ScriptRegistration["processMessage"]; terminate: () => void },
+    globalVariables: GlobalVariables,
   ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
-    let index = 0;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (true) {
-      if (index < cache.results.length) {
-        yield cache.results[index++]!;
-      } else if (cache.done) {
-        if (cache.error) {
-          throw cache.error;
-        }
-        return;
-      } else {
-        await cache.promise;
-      }
-    }
-  }
-
-  #createIndependentIterator(
-    registration: ScriptRegistration,
-    inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
-  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> {
-    const globalVariables = this.#globalVariables;
-    const processor = registration.buildMessageProcessor();
-
-    async function* transformIterator(): AsyncIterableIterator<
-      Readonly<IIterableSourceIteratorResult>
-    > {
+    try {
       if (inputIterators.length === 1) {
         const iter = inputIterators[0]!;
-        try {
-          for await (const result of iter) {
-            if (result.type !== "message-event") {
-              yield result;
-              continue;
-            }
-            const outputMessage = await processor.processMessage(result.msgEvent, globalVariables);
-            if (outputMessage) {
-              yield { type: "message-event" as const, msgEvent: outputMessage };
-            }
+        for await (const result of iter) {
+          if (result.type !== "message-event") {
+            yield result;
+            continue;
           }
-        } finally {
-          await iter.return?.();
-          processor.terminate();
+          const outputMessage = await processor.processMessage(result.msgEvent, globalVariables);
+          if (outputMessage) {
+            yield { type: "message-event" as const, msgEvent: outputMessage };
+          }
         }
-        return;
-      }
+      } else {
+        const heads: {
+          iter: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>;
+          current: Readonly<IIterableSourceIteratorResult>;
+        }[] = [];
 
-      const heads: {
-        iter: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>;
-        current: Readonly<IIterableSourceIteratorResult>;
-      }[] = [];
-
-      try {
         for (const iter of inputIterators) {
           const next = await iter.next();
           if (next.done !== true) {
@@ -1305,15 +1143,99 @@ export default class UserScriptPlayer implements Player {
             head.current = next.value;
           }
         }
-      } finally {
-        for (const iter of inputIterators) {
-          await iter.return?.();
+      }
+    } finally {
+      for (const iter of inputIterators) {
+        await iter.return?.();
+      }
+      processor.terminate();
+    }
+  }
+
+  #startSharedConsumer(
+    registration: ScriptRegistration,
+    inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+  ) {
+    const processor = registration.buildMessageProcessor();
+    const globalVariables = this.#globalVariables;
+
+    let resolve: () => void = () => {};
+    const cache: BatchIteratorCacheEntry = {
+      results: [],
+      done: false,
+      error: undefined,
+      resolve,
+      promise: new Promise<void>((r) => {
+        resolve = r;
+      }),
+      processor,
+    };
+
+    // The executor runs synchronously, so `resolve` is now set.
+    cache.resolve = resolve;
+
+    const notify = () => {
+      cache.resolve();
+      cache.promise = new Promise<void>((r) => {
+        cache.resolve = r;
+      });
+    };
+
+    // Source consumer — processes messages once, populates shared results
+    void (async () => {
+      try {
+        const source = UserScriptPlayer.#mergeAndTransformIterators(
+          inputIterators,
+          processor,
+          globalVariables,
+        );
+        for await (const result of source) {
+          if (cache.done) {
+            break;
+          }
+          cache.results.push(result);
+          notify();
         }
-        processor.terminate();
+      } catch (err) {
+        cache.error = err as Error;
+      } finally {
+        cache.done = true;
+        notify();
+      }
+    })();
+
+    return cache;
+  }
+
+  async *#createReplayIterator(
+    cache: BatchIteratorCacheEntry,
+  ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
+    let index = 0;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    while (true) {
+      if (index < cache.results.length) {
+        yield cache.results[index++]!;
+      } else if (cache.done) {
+        if (cache.error) {
+          throw cache.error;
+        }
+        return;
+      } else {
+        await cache.promise;
       }
     }
+  }
 
-    return transformIterator();
+  #createIndependentIterator(
+    registration: ScriptRegistration,
+    inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> {
+    const processor = registration.buildMessageProcessor();
+    return UserScriptPlayer.#mergeAndTransformIterators(
+      inputIterators,
+      processor,
+      this.#globalVariables,
+    );
   }
 
   public setPublishers(publishers: AdvertiseOptions[]): void {
