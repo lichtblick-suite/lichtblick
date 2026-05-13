@@ -257,11 +257,21 @@ describe("PlotCoordinator", () => {
 
     it("does not re-subscribe when the same topic and keys are unchanged", () => {
       // Given — simulate an active subscription (onNewRangeIterator is called)
-      mockSubscribeMessageRange.mockImplementation(({ onNewRangeIterator }: { onNewRangeIterator: (iter: AsyncIterable<unknown>) => Promise<void> }) => {
-        // Simulate a real subscription that calls onNewRangeIterator
-        void onNewRangeIterator((async function* () { /* empty */ })());
-        return jest.fn();
-      });
+      mockSubscribeMessageRange.mockImplementation(
+        ({
+          onNewRangeIterator,
+        }: {
+          onNewRangeIterator: (iter: AsyncIterable<unknown>) => Promise<void>;
+        }) => {
+          // Simulate a real subscription that calls onNewRangeIterator
+          void onNewRangeIterator(
+            (async function* () {
+              /* empty */
+            })(),
+          );
+          return jest.fn();
+        },
+      );
       plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
         ["/foo", ["/foo.val"]],
       ]);
@@ -293,6 +303,106 @@ describe("PlotCoordinator", () => {
       expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
         expect.objectContaining({ topic: "/foo" }),
       );
+    });
+
+    describe("handling topic object reference changes", () => {
+      beforeEach(() => {
+        mockSubscribeMessageRange.mockImplementation(
+          ({
+            onNewRangeIterator,
+          }: {
+            onNewRangeIterator: (iter: AsyncIterable<unknown>) => Promise<void>;
+          }) => {
+            void onNewRangeIterator(
+              (async function* () {
+                /* empty */
+              })(),
+            );
+            return jest.fn();
+          },
+        );
+      });
+
+      afterEach(() => {
+        mockSubscribeMessageRange.mockClear();
+      });
+
+      function buildTopic(name = BasicBuilder.string()) {
+        return { name, schemaName: `std_msgs/${BasicBuilder.string()}` };
+      }
+
+      function subscribeToTopics(topics: Array<{ name: string; schemaName: string }>) {
+        plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic(
+          topics.map((t) => [t.name, [`${t.name}.${BasicBuilder.string()}`]]),
+        );
+        const state = PlayerBuilder.playerState({
+          activeData: PlayerBuilder.activeData({ topics }),
+        });
+        plotCoordinator.handlePlayerState(state);
+      }
+
+      function emitTopics(topics: Array<{ name: string; schemaName: string }>) {
+        const state = PlayerBuilder.playerState({
+          activeData: PlayerBuilder.activeData({ topics }),
+        });
+        plotCoordinator.handlePlayerState(state);
+      }
+
+      it("does not re-subscribe when topics array reference is unchanged", () => {
+        const topic = buildTopic();
+        const topics = [topic];
+        subscribeToTopics(topics);
+
+        // When — same topics array reference (no change detected)
+        emitTopics(topics);
+
+        // Then — only the initial subscription, no additional calls
+        expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
+      });
+
+      it("re-subscribes when topic object reference changes", () => {
+        const topic = buildTopic();
+        subscribeToTopics([topic]);
+
+        // When — new topic object (different reference)
+        emitTopics([{ ...topic }]);
+
+        // Then
+        expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(2);
+      });
+
+      it("only invalidates subscriptions for topics whose object reference changed", () => {
+        const topic1 = buildTopic();
+        const topic2 = buildTopic();
+        subscribeToTopics([topic1, topic2]);
+
+        // When
+        emitTopics([{ ...topic1 }, topic2]);
+
+        // Then — only topic1 is re-subscribed
+        expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
+          expect.objectContaining({ topic: topic1.name }),
+        );
+      });
+
+      it("marks subscription inactive when topic is newly added to topics list", () => {
+        const topic1 = buildTopic();
+        const topic2 = buildTopic();
+
+        plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
+          [topic1.name, [`${topic1.name}.${BasicBuilder.string()}`]],
+        ]);
+        emitTopics([topic2]);
+
+        // When — topics array changes and now includes topic1
+        emitTopics([topic2, topic1]);
+
+        // Then — topic1 subscription is retried because oldTopic was undefined
+        expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(2);
+        expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
+          expect.objectContaining({ topic: topic1.name }),
+        );
+      });
     });
   });
 
