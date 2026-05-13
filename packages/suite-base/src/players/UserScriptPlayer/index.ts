@@ -617,8 +617,16 @@ export default class UserScriptPlayer implements Player {
     }
     state.scriptRegistrations = [];
 
-    const rosLib = await this.#getRosLib(state);
-    const typesLib = await this.#getTypesLib(state);
+    const rosLib = await this.#getLib(
+      state,
+      this.#rosLibGenerator,
+      this.#userScriptActions.setUserScriptRosLib,
+    );
+    const typesLib = await this.#getLib(
+      state,
+      this.#typesLibGenerator,
+      this.#userScriptActions.setUserScriptTypesLib,
+    );
 
     const allScriptRegistrations = await Promise.all(
       Object.entries(state.userScripts).map(
@@ -757,29 +765,19 @@ export default class UserScriptPlayer implements Player {
     }
   }
 
-  async #getRosLib(state: ProtectedState): Promise<string> {
+  async #getLib(
+    state: ProtectedState,
+    generator: MemoizedLibGenerator,
+    setter: (lib: string) => void,
+  ): Promise<string> {
     if (!state.lastPlayerStateActiveData) {
-      throw new Error("_getRosLib was called before `_lastPlayerStateActiveData` set");
+      throw new Error("getLib was called before `lastPlayerStateActiveData` set");
     }
 
     const { topics, datatypes } = state.lastPlayerStateActiveData;
-    const { didUpdate, lib } = await this.#rosLibGenerator.update({ topics, datatypes });
+    const { didUpdate, lib } = await generator.update({ topics, datatypes });
     if (didUpdate) {
-      this.#userScriptActions.setUserScriptRosLib(lib);
-    }
-
-    return lib;
-  }
-
-  async #getTypesLib(state: ProtectedState): Promise<string> {
-    if (!state.lastPlayerStateActiveData) {
-      throw new Error("_getTypesLib was called before `_lastPlayerStateActiveData` set");
-    }
-
-    const { topics, datatypes } = state.lastPlayerStateActiveData;
-    const { didUpdate, lib } = await this.#typesLibGenerator.update({ topics, datatypes });
-    if (didUpdate) {
-      this.#userScriptActions.setUserScriptTypesLib(lib);
+      setter(lib);
     }
 
     return lib;
@@ -1022,6 +1020,20 @@ export default class UserScriptPlayer implements Player {
     return this.#getVirtualBatchIterator(registration, options);
   }
 
+  #collectInputIterators(
+    inputTopics: readonly string[],
+    options?: { start?: Time; end?: Time },
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] | undefined {
+    const iterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] = [];
+    for (const inputTopic of inputTopics) {
+      const iter = this.#player.getBatchIterator(inputTopic, options);
+      if (iter) {
+        iterators.push(iter);
+      }
+    }
+    return iterators.length > 0 ? iterators : undefined;
+  }
+
   #getVirtualBatchIterator(
     registration: ScriptRegistration,
     options?: { start?: Time; end?: Time },
@@ -1040,15 +1052,8 @@ export default class UserScriptPlayer implements Player {
         return this.#createReplayIterator(existingCache);
       }
 
-      // Get iterators for ALL input topics
-      const inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] = [];
-      for (const inputTopic of inputTopics) {
-        const iter = this.#player.getBatchIterator(inputTopic);
-        if (iter) {
-          inputIterators.push(iter);
-        }
-      }
-      if (inputIterators.length === 0) {
+      const inputIterators = this.#collectInputIterators(inputTopics);
+      if (!inputIterators) {
         return undefined;
       }
 
@@ -1058,14 +1063,8 @@ export default class UserScriptPlayer implements Player {
     }
 
     // With range options, create an independent iterator (no cache)
-    const inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] = [];
-    for (const inputTopic of inputTopics) {
-      const iter = this.#player.getBatchIterator(inputTopic, options);
-      if (iter) {
-        inputIterators.push(iter);
-      }
-    }
-    if (inputIterators.length === 0) {
+    const inputIterators = this.#collectInputIterators(inputTopics, options);
+    if (!inputIterators) {
       return undefined;
     }
 
@@ -1154,10 +1153,11 @@ export default class UserScriptPlayer implements Player {
       if (a.type !== "message-event") {
         continue; // a is non-message → already earliest priority
       }
-      if (b.type !== "message-event") {
+      if (
+        b.type !== "message-event" ||
+        compare(b.msgEvent.receiveTime, a.msgEvent.receiveTime) < 0
+      ) {
         minIdx = i; // b is non-message → takes priority
-      } else if (compare(b.msgEvent.receiveTime, a.msgEvent.receiveTime) < 0) {
-        minIdx = i;
       }
     }
     return minIdx;
