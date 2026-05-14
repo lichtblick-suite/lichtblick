@@ -47,6 +47,8 @@ jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAn
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useMessagePathDropConfig");
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings");
 jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
+  useMessagePipeline: (selector: (ctx: unknown) => unknown) =>
+    selector({ playerState: { presence: "PRESENT" } }),
   useMessagePipelineGetter: () => () => ({
     seekPlayback: jest.fn(),
     playerState: { activeData: { startTime: { sec: 0, nsec: 0 } } },

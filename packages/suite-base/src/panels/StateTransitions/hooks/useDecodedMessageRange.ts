@@ -8,34 +8,21 @@ import {
   MessageDataItemsByPath,
   useDecodeMessagePathsForMessagesByTopic,
 } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
-import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import { PlayerPresence } from "@lichtblick/suite-base/players/types";
-
-const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 
 export function useDecodedMessageRange(
   topics: string[],
   pathStrings: string[],
+  { playerStateStatus: _playerStatus }: { playerStateStatus: boolean },
 ): MessageDataItemsByPath[] {
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(pathStrings);
   const subscribeMessageRange = useSubscribeMessageRange();
-  const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    if (!initialized && playerPresence === PlayerPresence.PRESENT) {
-      setInitialized(true);
-    }
-  }, [playerPresence, initialized]);
 
   const [messagesByTopic, setMessagesByTopic] = useState<Record<string, MessageEvent[]>>({});
   const accumulatedRef = useRef<Record<string, MessageEvent[]>>({});
   const flushRef = useRef<ReturnType<typeof setTimeout> | undefined>();
 
   const cancelsByTopicRef = useRef<Map<string, () => void>>(new Map());
-  const prevTopicsRef = useRef<string[]>([]);
 
   const subscribeTopicRef = useRef<(topic: string) => void>(() => {});
   subscribeTopicRef.current = (topic: string) => {
@@ -71,16 +58,16 @@ export function useDecodedMessageRange(
   };
 
   useEffect(() => {
-    if (!initialized) {
+    if (!_playerStatus) {
       return;
     }
 
-    const prevSet = new Set(prevTopicsRef.current);
     const nextSet = new Set(topics);
 
-    for (const topic of prevSet) {
+    // Unsubscribe topics that are no longer needed.
+    for (const [topic, cancel] of cancelsByTopicRef.current) {
       if (!nextSet.has(topic)) {
-        cancelsByTopicRef.current.get(topic)?.();
+        cancel();
         cancelsByTopicRef.current.delete(topic);
         delete accumulatedRef.current[topic];
         setMessagesByTopic((prev) => {
@@ -92,13 +79,11 @@ export function useDecodedMessageRange(
     }
 
     for (const topic of nextSet) {
-      if (!prevSet.has(topic)) {
+      if (!cancelsByTopicRef.current.has(topic)) {
         subscribeTopicRef.current(topic);
       }
     }
-
-    prevTopicsRef.current = topics;
-  }, [topics, initialized]);
+  }, [topics, _playerStatus]);
 
   // Clean up all subscriptions on unmount.
   useEffect(() => {

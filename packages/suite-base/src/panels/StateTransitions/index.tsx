@@ -14,12 +14,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { add as addTimes, fromSec } from "@lichtblick/rostime";
 import useMessagesByPath from "@lichtblick/suite-base/components/MessagePathSyntax/useMessagesByPath";
-import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+  useMessagePipelineGetter,
+} from "@lichtblick/suite-base/components/MessagePipeline";
 import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -36,14 +40,25 @@ import useMessagePathDropConfig from "@lichtblick/suite-base/panels/StateTransit
 import { usePanelSettings } from "@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings";
 import useStateTransitionsData from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsData";
 import useStateTransitionsTime from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsTime";
+import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
 
 import { StateTransitionConfig, StateTransitionPanelProps } from "./types";
+
+const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 
 function StateTransitions(props: StateTransitionPanelProps) {
   const { config, saveConfig } = props;
   const { paths } = config;
   const { classes } = useStateTransitionsStyles();
+  const playerPresence = useMessagePipeline(selectPlayerPresence);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!initialized && playerPresence === PlayerPresence.PRESENT) {
+      setInitialized(true);
+    }
+  }, [playerPresence, initialized]);
 
   const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
 
@@ -68,7 +83,9 @@ function StateTransitions(props: StateTransitionPanelProps) {
     };
   }, [paths]);
 
-  const decodedMessages = useDecodedMessageRange(topics, pathStrings);
+  const decodedMessages = useDecodedMessageRange(topics, pathStrings, {
+    playerStateStatus: initialized,
+  });
 
   // When range data is active, skip useMessagesByPath subscriptions entirely
   // to avoid wasteful current-frame processing and decoding.
