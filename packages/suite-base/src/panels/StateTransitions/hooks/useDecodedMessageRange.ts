@@ -13,7 +13,7 @@ import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/Pane
 export function useDecodedMessageRange(
   topics: string[],
   pathStrings: string[],
-  { playerStateStatus: _playerStatus }: { playerStateStatus: boolean },
+  { playerStateStatus: playerStatus }: { playerStateStatus: boolean },
 ): MessageDataItemsByPath[] {
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(pathStrings);
   const subscribeMessageRange = useSubscribeMessageRange();
@@ -58,7 +58,7 @@ export function useDecodedMessageRange(
   };
 
   useEffect(() => {
-    if (!_playerStatus) {
+    if (!playerStatus) {
       return;
     }
 
@@ -83,7 +83,7 @@ export function useDecodedMessageRange(
         subscribeTopicRef.current(topic);
       }
     }
-  }, [topics, _playerStatus]);
+  }, [topics, playerStatus]);
 
   // Clean up all subscriptions on unmount.
   useEffect(() => {
