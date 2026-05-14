@@ -27,6 +27,7 @@ import {
   Topic,
 } from "@lichtblick/suite-base/players/types";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { UserScript } from "@lichtblick/suite-base/types/panels";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
@@ -1903,6 +1904,39 @@ describe("UserScriptPlayer", () => {
   });
 
   describe("getBatchIterator", () => {
+    const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
+
+    async function setupScriptPlayer(
+      mockBatchIterator?: (topic: string) => AsyncIterableIterator<any> | undefined,
+    ) {
+      const fakePlayer = new FakePlayer();
+
+      if (mockBatchIterator) {
+        jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation(mockBatchIterator);
+      }
+
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+      void userScriptPlayer.setUserScripts({
+        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [done] = setListenerHelper(userScriptPlayer);
+
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [upstreamFirst],
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+          datatypes: new Map(Object.entries(exampleDatatypes)),
+        },
+      });
+      await done;
+
+      return { fakePlayer, userScriptPlayer };
+    }
+
     it("delegates to underlying player for non-script topics", async () => {
       const fakePlayer = new FakePlayer();
       const mockIterator = (async function* () {
@@ -1934,24 +1968,15 @@ describe("UserScriptPlayer", () => {
 
     it("returns a transforming iterator for script output topics", async () => {
       const fakePlayer = new FakePlayer();
-      const inputMessages: MessageEvent[] = [
-        {
-          topic: "/np_input",
-          receiveTime: { sec: 0, nsec: 1 },
-          message: { payload: "hello" },
-          schemaName: "foo",
-          sizeInBytes: 0,
-        },
-        {
+
+      const inputMessages = [
+        MessageEventBuilder.messageEvent({ topic: "/np_input", receiveTime: { sec: 0, nsec: 1 } }),
+        MessageEventBuilder.messageEvent({
           topic: "/np_input",
           receiveTime: { sec: 0, nsec: 2 },
-          message: { payload: "world" },
-          schemaName: "foo",
-          sizeInBytes: 0,
-        },
+        }),
       ];
 
-      // Mock the underlying player to return an iterator for the input topic
       jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
         if (topic === "/np_input") {
           return (async function* () {
@@ -1982,12 +2007,9 @@ describe("UserScriptPlayer", () => {
       });
       await done;
 
-      // Now getBatchIterator should return a transforming iterator for the output topic
-      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
       const iterator = userScriptPlayer.getBatchIterator(outputTopic);
       expect(iterator).toBeDefined();
 
-      // Consume the iterator and verify messages are transformed
       const results: MessageEvent[] = [];
       for await (const result of iterator!) {
         if (result.type === "message-event") {
@@ -2001,10 +2023,9 @@ describe("UserScriptPlayer", () => {
     });
 
     it("passes through stamp results from the underlying iterator", async () => {
-      const fakePlayer = new FakePlayer();
       const stamp = { sec: 1, nsec: 0 };
 
-      jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
+      const { userScriptPlayer } = await setupScriptPlayer((topic) => {
         if (topic === "/np_input") {
           return (async function* () {
             yield { type: "stamp" as const, stamp };
@@ -2013,26 +2034,6 @@ describe("UserScriptPlayer", () => {
         return undefined;
       });
 
-      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-
-      void userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
-      });
-
-      const [done] = setListenerHelper(userScriptPlayer);
-
-      await fakePlayer.emit({
-        activeData: {
-          ...basicPlayerState,
-          messages: [upstreamFirst],
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
-          datatypes: new Map(Object.entries(exampleDatatypes)),
-        },
-      });
-      await done;
-
-      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
       const iterator = userScriptPlayer.getBatchIterator(outputTopic);
       expect(iterator).toBeDefined();
 
@@ -2046,35 +2047,13 @@ describe("UserScriptPlayer", () => {
     });
 
     it("returns undefined for output topics when input topic has no iterator", async () => {
-      const fakePlayer = new FakePlayer();
+      const { userScriptPlayer } = await setupScriptPlayer();
 
-      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-
-      void userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
-      });
-
-      const [done] = setListenerHelper(userScriptPlayer);
-
-      await fakePlayer.emit({
-        activeData: {
-          ...basicPlayerState,
-          messages: [upstreamFirst],
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
-          datatypes: new Map(Object.entries(exampleDatatypes)),
-        },
-      });
-      await done;
-
-      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
       const iterator = userScriptPlayer.getBatchIterator(outputTopic);
       expect(iterator).toBeUndefined();
     });
     it("returns an independent iterator when range options are provided", async () => {
-      const fakePlayer = new FakePlayer();
-
-      jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
+      const { userScriptPlayer } = await setupScriptPlayer((topic) => {
         if (topic === "/np_input") {
           return (async function* () {
             yield { type: "message-event" as const, msgEvent: upstreamFirst };
@@ -2083,26 +2062,6 @@ describe("UserScriptPlayer", () => {
         return undefined;
       });
 
-      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-
-      void userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
-      });
-
-      const [done] = setListenerHelper(userScriptPlayer);
-      await fakePlayer.emit({
-        activeData: {
-          ...basicPlayerState,
-          messages: [upstreamFirst],
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
-          datatypes: new Map(Object.entries(exampleDatatypes)),
-        },
-      });
-      await done;
-
-      // When range options are provided, an independent (non-cached) iterator is returned
-      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
       const iterator = userScriptPlayer.getBatchIterator(outputTopic, {
         start: { sec: 0, nsec: 0 },
         end: { sec: 1, nsec: 0 },
@@ -2121,30 +2080,8 @@ describe("UserScriptPlayer", () => {
     });
 
     it("returns undefined when range options are provided but input has no iterator", async () => {
-      const fakePlayer = new FakePlayer();
+      const { userScriptPlayer } = await setupScriptPlayer(() => undefined);
 
-      // Return undefined for all topics
-      jest.spyOn(fakePlayer, "getBatchIterator").mockReturnValue(undefined);
-
-      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-
-      void userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
-      });
-
-      const [done] = setListenerHelper(userScriptPlayer);
-      await fakePlayer.emit({
-        activeData: {
-          ...basicPlayerState,
-          messages: [upstreamFirst],
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
-          datatypes: new Map(Object.entries(exampleDatatypes)),
-        },
-      });
-      await done;
-
-      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
       const result = userScriptPlayer.getBatchIterator(outputTopic, {
         start: { sec: 0, nsec: 0 },
         end: { sec: 1, nsec: 0 },
@@ -2153,10 +2090,9 @@ describe("UserScriptPlayer", () => {
     });
 
     it("reuses the shared cache when getBatchIterator is called twice without options", async () => {
-      const fakePlayer = new FakePlayer();
-
       let callCount = 0;
-      jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
+
+      const { userScriptPlayer } = await setupScriptPlayer((topic) => {
         if (topic === "/np_input") {
           callCount++;
           return (async function* () {
@@ -2166,25 +2102,6 @@ describe("UserScriptPlayer", () => {
         return undefined;
       });
 
-      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-
-      void userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
-      });
-
-      const [done] = setListenerHelper(userScriptPlayer);
-      await fakePlayer.emit({
-        activeData: {
-          ...basicPlayerState,
-          messages: [upstreamFirst],
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
-          datatypes: new Map(Object.entries(exampleDatatypes)),
-        },
-      });
-      await done;
-
-      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
       const iter1 = userScriptPlayer.getBatchIterator(outputTopic);
       const iter2 = userScriptPlayer.getBatchIterator(outputTopic);
       expect(iter1).toBeDefined();

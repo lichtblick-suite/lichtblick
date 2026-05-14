@@ -134,8 +134,8 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     if (activeData.topics !== this.lastTopicsRef) {
       const oldTopicsByName = new Map<string, Topic>();
       if (this.lastTopicsRef) {
-        for (const t of this.lastTopicsRef) {
-          oldTopicsByName.set(t.name, t);
+        for (const topic of this.lastTopicsRef) {
+          oldTopicsByName.set(topic.name, topic);
         }
       }
       this.lastTopicsRef = activeData.topics;

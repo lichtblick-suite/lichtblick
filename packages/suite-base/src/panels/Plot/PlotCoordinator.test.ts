@@ -11,6 +11,7 @@ import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/M
 import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
 import { InteractionEvent, Scale } from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
+import { Topic } from "@lichtblick/suite-base/players/types";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import { PlotCoordinatorBuilder } from "@lichtblick/suite-base/testing/builders/PlotCoordinatorBuilder";
@@ -264,11 +265,7 @@ describe("PlotCoordinator", () => {
           onNewRangeIterator: (iter: AsyncIterable<unknown>) => Promise<void>;
         }) => {
           // Simulate a real subscription that calls onNewRangeIterator
-          void onNewRangeIterator(
-            (async function* () {
-              /* empty */
-            })(),
-          );
+          void onNewRangeIterator((async function* () {})());
           return jest.fn();
         },
       );
@@ -313,11 +310,7 @@ describe("PlotCoordinator", () => {
           }: {
             onNewRangeIterator: (iter: AsyncIterable<unknown>) => Promise<void>;
           }) => {
-            void onNewRangeIterator(
-              (async function* () {
-                /* empty */
-              })(),
-            );
+            void onNewRangeIterator((async function* () {})());
             return jest.fn();
           },
         );
@@ -327,11 +320,7 @@ describe("PlotCoordinator", () => {
         mockSubscribeMessageRange.mockClear();
       });
 
-      function buildTopic(name = BasicBuilder.string()) {
-        return { name, schemaName: `std_msgs/${BasicBuilder.string()}` };
-      }
-
-      function subscribeToTopics(topics: Array<{ name: string; schemaName: string }>) {
+      function subscribeToTopics(topics: Array<Topic>) {
         plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic(
           topics.map((t) => [t.name, [`${t.name}.${BasicBuilder.string()}`]]),
         );
@@ -341,7 +330,7 @@ describe("PlotCoordinator", () => {
         plotCoordinator.handlePlayerState(state);
       }
 
-      function emitTopics(topics: Array<{ name: string; schemaName: string }>) {
+      function emitTopics(topics: Array<Topic>) {
         const state = PlayerBuilder.playerState({
           activeData: PlayerBuilder.activeData({ topics }),
         });
@@ -349,7 +338,7 @@ describe("PlotCoordinator", () => {
       }
 
       it("does not re-subscribe when topics array reference is unchanged", () => {
-        const topic = buildTopic();
+        const topic = PlayerBuilder.topic();
         const topics = [topic];
         subscribeToTopics(topics);
 
@@ -361,7 +350,7 @@ describe("PlotCoordinator", () => {
       });
 
       it("re-subscribes when topic object reference changes", () => {
-        const topic = buildTopic();
+        const topic = PlayerBuilder.topic();
         subscribeToTopics([topic]);
 
         // When — new topic object (different reference)
@@ -372,8 +361,8 @@ describe("PlotCoordinator", () => {
       });
 
       it("only invalidates subscriptions for topics whose object reference changed", () => {
-        const topic1 = buildTopic();
-        const topic2 = buildTopic();
+        const topic1 = PlayerBuilder.topic();
+        const topic2 = PlayerBuilder.topic();
         subscribeToTopics([topic1, topic2]);
 
         // When
@@ -386,8 +375,8 @@ describe("PlotCoordinator", () => {
       });
 
       it("marks subscription inactive when topic is newly added to topics list", () => {
-        const topic1 = buildTopic();
-        const topic2 = buildTopic();
+        const topic1 = PlayerBuilder.topic();
+        const topic2 = PlayerBuilder.topic();
 
         plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
           [topic1.name, [`${topic1.name}.${BasicBuilder.string()}`]],

@@ -107,9 +107,6 @@ export function buildCurrentSeriesActions<TItem>(
 ): { actions: SeriesCurrentAction<TItem>[]; datasetsChanged: boolean } {
   let datasetsChanged = false;
   const actions: SeriesCurrentAction<TItem>[] = [];
-  // Only reset when a range source exists — it will reload the full history after the seek.
-  // Without a range source (e.g. UserScript topics), accumulated data is irrecoverable,
-  // so we preserve it across seeks in both directions.
   const shouldReset = options.didSeek && options.hasRangeSource;
   for (const s of series) {
     if (shouldReset) {
