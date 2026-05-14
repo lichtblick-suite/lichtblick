@@ -28,6 +28,7 @@ import {
 } from "@lichtblick/suite-base/players/types";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { UserScript } from "@lichtblick/suite-base/types/panels";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
@@ -2131,6 +2132,7 @@ describe("UserScriptPlayer", () => {
     });
 
     describe("mergeIteratorsByTime", () => {
+      const mergedOutputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}merged`;
       const multiInputCode = `
         export const inputs = ["/topicA", "/topicB"];
         export const output = "${DEFAULT_STUDIO_SCRIPT_PREFIX}merged";
@@ -2139,9 +2141,9 @@ describe("UserScriptPlayer", () => {
         };
       `;
 
-      const multiInputTopics: Topic[] = [
-        { name: "/topicA", schemaName: "pkg/A" },
-        { name: "/topicB", schemaName: "pkg/B" },
+      const multiInputTopics = [
+        PlayerBuilder.topic({ name: "/topicA", schemaName: "pkg/A" }),
+        PlayerBuilder.topic({ name: "/topicB", schemaName: "pkg/B" }),
       ];
 
       const multiInputDatatypes = new Map(
@@ -2151,18 +2153,6 @@ describe("UserScriptPlayer", () => {
           "pkg/B": { definitions: [{ name: "value", type: "int32" }] },
         }),
       );
-
-      const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}merged`;
-
-      function msg(topic: string, nsec: number, value: number): MessageEvent {
-        return {
-          topic,
-          receiveTime: { sec: 0, nsec },
-          message: { value },
-          schemaName: topic === "/topicA" ? "pkg/A" : "pkg/B",
-          sizeInBytes: 0,
-        };
-      }
 
       async function setupMerge(mockIterators: Record<string, AsyncGenerator>) {
         const fakePlayer = new FakePlayer();
@@ -2175,7 +2165,7 @@ describe("UserScriptPlayer", () => {
         const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
 
         void userScriptPlayer.setUserScripts({
-          merged: { name: outputTopic, sourceCode: multiInputCode },
+          merged: { name: mergedOutputTopic, sourceCode: multiInputCode },
         });
 
         const [done] = setListenerHelper(userScriptPlayer);
@@ -2190,7 +2180,7 @@ describe("UserScriptPlayer", () => {
         });
         await done;
 
-        return userScriptPlayer.getBatchIterator(outputTopic)!;
+        return userScriptPlayer.getBatchIterator(mergedOutputTopic)!;
       }
 
       async function drain(iterator: AsyncIterableIterator<any>) {
@@ -2204,11 +2194,35 @@ describe("UserScriptPlayer", () => {
       it("merges messages from multiple input topics ordered by receiveTime", async () => {
         const iterator = await setupMerge({
           "/topicA": (async function* () {
-            yield { type: "message-event" as const, msgEvent: msg("/topicA", 10, 1) };
-            yield { type: "message-event" as const, msgEvent: msg("/topicA", 20, 3) };
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicA",
+                receiveTime: { sec: 0, nsec: 10 },
+                message: { value: 1 },
+                schemaName: "pkg/A",
+              }),
+            };
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicA",
+                receiveTime: { sec: 0, nsec: 20 },
+                message: { value: 3 },
+                schemaName: "pkg/A",
+              }),
+            };
           })(),
           "/topicB": (async function* () {
-            yield { type: "message-event" as const, msgEvent: msg("/topicB", 5, 2) };
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicB",
+                receiveTime: { sec: 0, nsec: 5 },
+                message: { value: 2 },
+                schemaName: "pkg/B",
+              }),
+            };
           })(),
         });
 
@@ -2226,7 +2240,15 @@ describe("UserScriptPlayer", () => {
 
         const iterator = await setupMerge({
           "/topicA": (async function* () {
-            yield { type: "message-event" as const, msgEvent: msg("/topicA", 1, 1) };
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicA",
+                receiveTime: { sec: 0, nsec: 1 },
+                message: { value: 1 },
+                schemaName: "pkg/A",
+              }),
+            };
           })(),
           "/topicB": (async function* () {
             yield { type: "stamp" as const, stamp };
@@ -2250,7 +2272,15 @@ describe("UserScriptPlayer", () => {
             yield { type: "stamp" as const, stamp };
           })(),
           "/topicB": (async function* () {
-            yield { type: "message-event" as const, msgEvent: msg("/topicB", 1, 99) };
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicB",
+                receiveTime: { sec: 0, nsec: 1 },
+                message: { value: 99 },
+                schemaName: "pkg/B",
+              }),
+            };
           })(),
         });
 
