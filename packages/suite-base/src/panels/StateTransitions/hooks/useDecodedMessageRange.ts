@@ -13,7 +13,6 @@ import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/Pane
 export function useDecodedMessageRange(
   topics: string[],
   pathStrings: string[],
-  { playerStateStatus: playerStatus }: { playerStateStatus: boolean },
 ): MessageDataItemsByPath[] {
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(pathStrings);
   const subscribeMessageRange = useSubscribeMessageRange();
@@ -22,8 +21,9 @@ export function useDecodedMessageRange(
   const accumulatedRef = useRef<Record<string, MessageEvent[]>>({});
   const flushRef = useRef<ReturnType<typeof setTimeout> | undefined>();
 
+  // Never replace .current — only mutate in place. The unmount cleanup captures
+  // this reference at mount time and relies on it remaining the same object.
   const cancelsByTopicRef = useRef<Map<string, () => void>>(new Map());
-
   const subscribeTopicRef = useRef<(topic: string) => void>(() => {});
   subscribeTopicRef.current = (topic: string) => {
     const cancel = subscribeMessageRange({
@@ -58,10 +58,6 @@ export function useDecodedMessageRange(
   };
 
   useEffect(() => {
-    if (!playerStatus) {
-      return;
-    }
-
     const nextSet = new Set(topics);
 
     // Unsubscribe topics that are no longer needed.
@@ -83,7 +79,7 @@ export function useDecodedMessageRange(
         subscribeTopicRef.current(topic);
       }
     }
-  }, [topics, playerStatus]);
+  }, [topics]);
 
   // Clean up all subscriptions on unmount.
   useEffect(() => {

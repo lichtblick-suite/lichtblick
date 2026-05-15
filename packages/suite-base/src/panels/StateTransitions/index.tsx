@@ -83,9 +83,10 @@ function StateTransitions(props: StateTransitionPanelProps) {
     };
   }, [paths]);
 
-  const decodedMessages = useDecodedMessageRange(topics, pathStrings, {
-    playerStateStatus: initialized,
-  });
+  const decodedMessages = useDecodedMessageRange(
+    initialized ? topics : [],
+    initialized ? pathStrings : [],
+  );
 
   // When range data is active, skip useMessagesByPath subscriptions entirely
   // to avoid wasteful current-frame processing and decoding.

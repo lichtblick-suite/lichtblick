@@ -9,7 +9,7 @@ import { MessageEvent, SubscribeMessageRangeArgs } from "@lichtblick/suite";
 import { useDecodeMessagePathsForMessagesByTopic } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
-import { BasicBuilder } from "@lichtblick/test-builders";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 
 import { useDecodedMessageRange } from "./useDecodedMessageRange";
 
@@ -58,13 +58,11 @@ describe("useDecodedMessageRange", () => {
   }
 
   it("should subscribe to each topic", () => {
-    const topicA = BasicBuilder.string();
-    const topicB = BasicBuilder.string();
+    const topicA = PlayerBuilder.topic().name;
+    const topicB = PlayerBuilder.topic().name;
 
     renderHook(() =>
-      useDecodedMessageRange([topicA, topicB], [`${topicA}.field`, `${topicB}.field`], {
-        playerStateStatus: true,
-      }),
+      useDecodedMessageRange([topicA, topicB], [`${topicA}.field`, `${topicB}.field`]),
     );
 
     expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(2);
@@ -77,11 +75,9 @@ describe("useDecodedMessageRange", () => {
   });
 
   it("should cancel subscriptions on unmount", () => {
-    const topic = BasicBuilder.string();
+    const topic = PlayerBuilder.topic().name;
 
-    const { unmount } = renderHook(() =>
-      useDecodedMessageRange([topic], [`${topic}.field`], { playerStateStatus: true }),
-    );
+    const { unmount } = renderHook(() => useDecodedMessageRange([topic], [`${topic}.field`]));
 
     unmount();
 
@@ -89,11 +85,9 @@ describe("useDecodedMessageRange", () => {
   });
 
   it("should accumulate messages and decode after flush", async () => {
-    const topic = BasicBuilder.string();
+    const topic = PlayerBuilder.topic().name;
 
-    const { result } = renderHook(() =>
-      useDecodedMessageRange([topic], [`${topic}.field`], { playerStateStatus: true }),
-    );
+    const { result } = renderHook(() => useDecodedMessageRange([topic], [`${topic}.field`]));
 
     const msgs = [
       MessageEventBuilder.messageEvent({ topic }),
@@ -117,20 +111,16 @@ describe("useDecodedMessageRange", () => {
       jest.fn().mockReturnValue({}),
     );
 
-    const { result } = renderHook(() =>
-      useDecodedMessageRange([], [], { playerStateStatus: true }),
-    );
+    const { result } = renderHook(() => useDecodedMessageRange([], []));
 
     expect(result.current).toEqual([{}]);
     expect(mockSubscribeMessageRange).not.toHaveBeenCalled();
   });
 
   it("should reset accumulated data when a new range iterator is provided", async () => {
-    const topic = BasicBuilder.string();
+    const topic = PlayerBuilder.topic().name;
 
-    renderHook(() =>
-      useDecodedMessageRange([topic], [`${topic}.field`], { playerStateStatus: true }),
-    );
+    renderHook(() => useDecodedMessageRange([topic], [`${topic}.field`]));
 
     const firstBatch = [MessageEventBuilder.messageEvent({ topic })];
     const secondBatch = [MessageEventBuilder.messageEvent({ topic })];
@@ -160,14 +150,14 @@ describe("useDecodedMessageRange", () => {
 
   describe("incremental topic diffing", () => {
     it("should preserve existing topic data when a new topic is added", async () => {
-      const topicA = BasicBuilder.string();
-      const topicB = BasicBuilder.string();
+      const topicA = PlayerBuilder.topic().name;
+      const topicB = PlayerBuilder.topic().name;
 
       const initialTopics = [topicA];
       const initialPaths = [`${topicA}.field`];
 
       const { rerender } = renderHook(
-        ({ topics, paths }) => useDecodedMessageRange(topics, paths, { playerStateStatus: true }),
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
         { initialProps: { topics: initialTopics, paths: initialPaths } },
       );
 
@@ -211,15 +201,15 @@ describe("useDecodedMessageRange", () => {
     });
 
     it("should only cancel the removed topic and preserve remaining topic data", async () => {
-      const topicA = BasicBuilder.string();
-      const topicB = BasicBuilder.string();
+      const topicA = PlayerBuilder.topic().name;
+      const topicB = PlayerBuilder.topic().name;
 
       const cancelA = jest.fn();
       const cancelB = jest.fn();
       mockSubscribeMessageRange.mockReturnValueOnce(cancelA).mockReturnValueOnce(cancelB);
 
       const { rerender } = renderHook(
-        ({ topics, paths }) => useDecodedMessageRange(topics, paths, { playerStateStatus: true }),
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
         {
           initialProps: {
             topics: [topicA, topicB],
@@ -257,12 +247,12 @@ describe("useDecodedMessageRange", () => {
     });
 
     it("should not resubscribe to topics that remain unchanged", async () => {
-      const topicA = BasicBuilder.string();
-      const topicB = BasicBuilder.string();
-      const topicC = BasicBuilder.string();
+      const topicA = PlayerBuilder.topic().name;
+      const topicB = PlayerBuilder.topic().name;
+      const topicC = PlayerBuilder.topic().name;
 
       const { rerender } = renderHook(
-        ({ topics, paths }) => useDecodedMessageRange(topics, paths, { playerStateStatus: true }),
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
         {
           initialProps: {
             topics: [topicA, topicB],
@@ -291,10 +281,10 @@ describe("useDecodedMessageRange", () => {
     });
 
     it("should handle adding a topic that shares data with existing subscriptions", async () => {
-      const topicA = BasicBuilder.string();
+      const topicA = PlayerBuilder.topic().name;
 
       const { rerender } = renderHook(
-        ({ topics, paths }) => useDecodedMessageRange(topics, paths, { playerStateStatus: true }),
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
         { initialProps: { topics: [topicA], paths: [`${topicA}.field`] } },
       );
 
@@ -318,6 +308,81 @@ describe("useDecodedMessageRange", () => {
           [topicA]: expect.arrayContaining(msgsA),
         }),
       );
+    });
+  });
+
+  describe("player readiness (empty arrays until ready)", () => {
+    it("should not subscribe when topics and pathStrings are empty", () => {
+      renderHook(() => useDecodedMessageRange([], []));
+
+      expect(mockSubscribeMessageRange).not.toHaveBeenCalled();
+    });
+
+    it("should subscribe when transitioning from empty to non-empty arrays", () => {
+      const topicA = PlayerBuilder.topic().name;
+
+      const { rerender } = renderHook(
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
+        { initialProps: { topics: [] as string[], paths: [] as string[] } },
+      );
+
+      expect(mockSubscribeMessageRange).not.toHaveBeenCalled();
+
+      rerender({
+        topics: [topicA],
+        paths: [`${topicA}.field`],
+      });
+
+      expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
+        expect.objectContaining({ topic: topicA }),
+      );
+    });
+
+    it("should receive and decode data after transitioning from empty to non-empty", async () => {
+      const topicA = PlayerBuilder.topic().name;
+
+      const { rerender } = renderHook(
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
+        { initialProps: { topics: [] as string[], paths: [] as string[] } },
+      );
+
+      rerender({
+        topics: [topicA],
+        paths: [`${topicA}.field`],
+      });
+
+      const msgs = [
+        MessageEventBuilder.messageEvent({ topic: topicA }),
+        MessageEventBuilder.messageEvent({ topic: topicA }),
+      ];
+
+      await act(async () => {
+        await simulateBatches(topicA, [msgs]);
+      });
+
+      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          [topicA]: expect.arrayContaining(msgs),
+        }),
+      );
+    });
+
+    it("should not create duplicate subscriptions on multiple rerenders with same topics", () => {
+      const topicA = PlayerBuilder.topic().name;
+
+      const { rerender } = renderHook(
+        ({ topics, paths }) => useDecodedMessageRange(topics, paths),
+        { initialProps: { topics: [] as string[], paths: [] as string[] } },
+      );
+
+      const props = { topics: [topicA], paths: [`${topicA}.field`] };
+
+      rerender(props);
+      rerender(props);
+      rerender(props);
+
+      expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
     });
   });
 });
