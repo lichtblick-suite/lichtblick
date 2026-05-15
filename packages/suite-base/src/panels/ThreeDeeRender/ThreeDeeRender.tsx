@@ -418,7 +418,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     if (renderer) {
       renderer.ros = context.dataSourceProfile === "ros1" || context.dataSourceProfile === "ros2";
     }
-  }, [context.dataSourceProfile, renderer, requestRender]);
+  }, [context.dataSourceProfile, renderer]);
 
   // Save panel settings whenever they change
   const throttledSave = useDebouncedCallback(
