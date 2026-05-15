@@ -53,6 +53,9 @@ type CacheBlock<MessageType> = {
 
   // The size of this block in bytes
   size: number;
+
+  // The topics that were subscribed when this block was created
+  topics: TopicSelection;
 };
 
 type Options = {
@@ -117,6 +120,16 @@ class CachingIterableSource<MessageType = unknown>
     this.#maxBlockSizeBytes = opt?.maxBlockSize ?? 52428800; // 50MB
   }
 
+  // Helper to check if any topics in the new selection are missing from a previous set
+  #hasNewTopics(argsTopics: TopicSelection, prevTopics: TopicSelection): boolean {
+    for (const topicName of argsTopics.keys()) {
+      if (!prevTopics.has(topicName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public async initialize(): Promise<Initialization> {
     this.#initResult = await this.#source.initialize();
     return this.#initResult;
@@ -160,13 +173,8 @@ class CachingIterableSource<MessageType = unknown>
       const prevTopics = this.#cachedTopics;
       this.#cachedTopics = args.topics;
 
-      let hasNewTopics = false;
-      for (const [topic] of args.topics) {
-        if (!prevTopics.has(topic)) {
-          hasNewTopics = true;
-          break;
-        }
-      }
+      // REPLACED: Manual loop replaced with helper call
+      const hasNewTopics = this.#hasNewTopics(args.topics, prevTopics);
 
       if (args.topics.size === 0) {
         // Switching to an empty subscription: clear the entire cache — there is nothing
@@ -184,10 +192,18 @@ class CachingIterableSource<MessageType = unknown>
         // Use #highWaterMark (not #currentReadHead) because readHead is reset to args.start
         // at the top of each iterator call and doesn't reflect playback progress.
         const hwmNs = toNanoSec(this.#highWaterMark);
+        const currentTopicNames = new Set(args.topics.keys());
+
         let i = this.#cache.length - 1;
         while (i >= 0) {
           const block = this.#cache[i]!;
-          if (toNanoSec(block.start) >= hwmNs) {
+
+          // UPDATED: Surgical eviction logic
+          // Evict if the block is "in the future" (ahead of HWM)
+          // OR if it doesn't contain the newly added topics.
+          const isBlockMissingTopics = [...currentTopicNames].some(t => !block.topics.has(t));
+
+          if (toNanoSec(block.start) >= hwmNs || isBlockMissingTopics) {
             this.#totalSizeBytes -= block.size;
             this.#cache.splice(i, 1);
             log.debug(
@@ -331,6 +347,7 @@ class CachingIterableSource<MessageType = unknown>
             items: [],
             size: 0,
             lastAccess: Date.now(),
+            topics: this.#cachedTopics,
           };
 
           // Find where we need to insert our new block.
@@ -436,6 +453,7 @@ class CachingIterableSource<MessageType = unknown>
           items: pendingIterResults,
           size: 0,
           lastAccess: Date.now(),
+          topics: this.#cachedTopics,
         };
 
         for (const pendingIterResult of pendingIterResults) {
