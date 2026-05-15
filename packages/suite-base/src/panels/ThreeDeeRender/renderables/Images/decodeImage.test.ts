@@ -108,6 +108,7 @@ describe("decodeCompressedVideoToBitmap", () => {
     const preparedFrame = {
       data: mockVideoFrame.data,
       type: "delta" as const,
+      status: PreparedVideoFrameStatus.Ok,
     };
     const mockVideoPlayer = {
       isInitialized: jest.fn().mockReturnValue(true),
@@ -130,6 +131,7 @@ describe("decodeCompressedVideoToBitmap", () => {
     const preparedFrame = {
       data: mockVideoFrame.data,
       type: "delta" as const,
+      status: PreparedVideoFrameStatus.Ok,
     };
     const decode = jest.fn().mockResolvedValue(new ImageBitmap());
     const mockVideoPlayer = {
@@ -147,6 +149,7 @@ describe("decodeCompressedVideoToBitmap", () => {
     const preparedFrame = {
       data: mockVideoFrame.data,
       type: "delta" as const,
+      status: PreparedVideoFrameStatus.Ok,
     };
     const mockVideoPlayer = {
       isInitialized: jest.fn().mockReturnValue(false),
@@ -177,6 +180,7 @@ describe("decodeCompressedVideoToBitmap", () => {
     const preparedFrame = {
       data: mockVideoFrame.data,
       type: "delta" as const,
+      status: PreparedVideoFrameStatus.Ok,
     };
     const mockVideoPlayer = {
       isInitialized: jest.fn().mockReturnValue(true),
