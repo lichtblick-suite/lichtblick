@@ -192,22 +192,25 @@ class CachingIterableSource<MessageType = unknown>
         // Use #highWaterMark (not #currentReadHead) because readHead is reset to args.start
         // at the top of each iterator call and doesn't reflect playback progress.
         const hwmNs = toNanoSec(this.#highWaterMark);
-        const currentTopicNames = new Set(args.topics.keys());
+        const currentTopicNames = [...args.topics.keys()];
 
         let i = this.#cache.length - 1;
         while (i >= 0) {
           const block = this.#cache[i]!;
 
-          // UPDATED: Surgical eviction logic
-          // Evict if the block is "in the future" (ahead of HWM)
-          // OR if it doesn't contain the newly added topics.
-          const isBlockMissingTopics = [...currentTopicNames].some(t => !block.topics.has(t));
+          // Check if the block is missing at least one of the currently requested topics
+          const isBlockIncomplete = currentTopicNames.some(t => !block.topics.has(t));
 
-          if (toNanoSec(block.start) >= hwmNs || isBlockMissingTopics) {
+          // Check if the block is "in the future" relative to playback
+          const isFutureBlock = toNanoSec(block.start) >= hwmNs;
+
+          // ONLY evict if it is a future block AND it is missing the new data.
+          // Preserves historical data for the old topics.
+          if (isFutureBlock && isBlockIncomplete) {
             this.#totalSizeBytes -= block.size;
             this.#cache.splice(i, 1);
             log.debug(
-              `topics changed (addition) - evicting future block [${block.start.sec}, ${block.end.sec}]`,
+              `topics changed (addition) - evicting incomplete future block [${block.start.sec}, ${block.end.sec}]`,
             );
           }
           i--;
@@ -347,7 +350,7 @@ class CachingIterableSource<MessageType = unknown>
             items: [],
             size: 0,
             lastAccess: Date.now(),
-            topics: this.#cachedTopics,
+            topics: new Map(this.#cachedTopics),
           };
 
           // Find where we need to insert our new block.
@@ -453,7 +456,9 @@ class CachingIterableSource<MessageType = unknown>
           items: pendingIterResults,
           size: 0,
           lastAccess: Date.now(),
-          topics: this.#cachedTopics,
+          // Use a clone to ensure this block's topic list doesn't change
+          // when the global #cachedTopics is updated later.
+          topics: new Map(this.#cachedTopics),
         };
 
         for (const pendingIterResult of pendingIterResults) {
