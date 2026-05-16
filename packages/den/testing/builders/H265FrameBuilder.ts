@@ -21,6 +21,22 @@ export default class H265FrameBuilder {
     return [H265FrameBuilder.nonIrapSliceFirstByte(sliceType)];
   }
 
+  /**
+   * Returns the first byte of an IRAP slice header (slice_segment_header), encoded
+   * such that {@link H265.InspectFrame} extracts the requested slice_type via
+   * `bitstream.ue_v()` after stepping past `first_slice_segment_in_pic_flag = 1`
+   * and the IRAP-only `no_output_of_prior_pics_flag` bit.
+   *
+   * The bit layout consumed by the parser is:
+   *   1 (first_slice_segment_in_pic_flag)
+   * + 1 (no_output_of_prior_pics_flag, IRAP only)
+   * + ue_v(slice_pic_parameter_set_id)
+   * + ue_v(slice_type)
+   *
+   * With `slice_pic_parameter_set_id = 0` (encoded as a single 1 bit) and the
+   * Exp-Golomb encodings: I = 2 → "011", P = 1 → "010", B = 0 → "1", the resulting
+   * bytes are 0xAC (I), 0xA8 (P), 0xB0 (B). Trailing zero bits are RBSP padding.
+   */
   private static irapSliceFirstByte(sliceType: H265SliceType): number {
     if (sliceType === H265SliceType.B) {
       return 0xb0;
@@ -31,6 +47,11 @@ export default class H265FrameBuilder {
     return 0xac;
   }
 
+  /**
+   * Non-IRAP variant of {@link irapSliceFirstByte}. The bit layout is the same minus the IRAP-only
+   * `no_output_of_prior_pics_flag`, so each value is shifted one bit left compared with the IRAP
+   * encoding: 0xD8 (I), 0xD0 (P), 0xE0 (B).
+   */
   private static nonIrapSliceFirstByte(sliceType: H265SliceType): number {
     if (sliceType === H265SliceType.B) {
       return 0xe0;

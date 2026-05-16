@@ -19,3 +19,14 @@ export const H265_RANDOM_ACCESS_TYPES = new Set<number>([
   H265NaluType.RSV_IRAP_VCL22,
   H265NaluType.RSV_IRAP_VCL23,
 ]);
+
+/**
+ * H.265 (HEVC) decoders, especially when running through the software fallback, can stall for
+ * hundreds of milliseconds before producing output and may need to consume an entire GOP before
+ * emitting the target frame. The 2000 ms ceiling reflects the worst case observed on real-world
+ * recordings; lowering it causes seek-to-P-frame playback to surface as decode timeouts instead
+ * of correct frames. The "target wait" is equal to the overall max because HEVC decoders rarely
+ * produce an intermediate frame within the H.264 budget.
+ */
+export const H265_MAX_DECODE_WAIT_MS = 2000;
+export const H265_TARGET_FRAME_WAIT_MS = H265_MAX_DECODE_WAIT_MS;

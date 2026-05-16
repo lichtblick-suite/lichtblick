@@ -14,7 +14,7 @@ import {
   H265SliceType,
 } from "./types";
 import { Bitstream } from "../Bitstream";
-import { findNextStartCode } from "../utils";
+import { findNextStartCode, findNextStartCodeEnd } from "../utils";
 
 type H265PpsInfo = {
   ppsId: number;
@@ -78,7 +78,6 @@ export class H265 {
       return {
         bitstreamFormat: "unknown",
         isKeyframe: false,
-        isRandomAccess: false,
         frameType: "unknown",
         sliceTypes: [],
         hasUnparsedVclSlice: false,
@@ -108,7 +107,6 @@ export class H265 {
     return {
       bitstreamFormat: annexBBoxSize == undefined ? "length-prefixed" : "annex-b",
       isKeyframe: state.hasRandomAccessNaluType,
-      isRandomAccess: state.hasRandomAccessNaluType,
       frameType: H265.FrameType(state.sliceTypes),
       sliceTypes: state.sliceTypes,
       hasUnparsedVclSlice: state.hasUnparsedVclSlice,
@@ -193,13 +191,6 @@ export class H265 {
     return parts.length > 0 ? new Uint8Array(parts) : undefined;
   }
 
-  public static FindNextStartCodeEnd(data: Uint8Array, start: number): number {
-    const nextStartCode = findNextStartCode(data, start);
-    return nextStartCode === data.length
-      ? data.length
-      : nextStartCode + (H265.AnnexBBoxSize(data.subarray(nextStartCode)) ?? 0);
-  }
-
   private static *Nalus(data: Uint8Array): Generator<{
     type: number;
     data: Uint8Array;
@@ -209,8 +200,12 @@ export class H265 {
   }> {
     let startCodeStart = findNextStartCode(data, 0);
     while (startCodeStart !== data.length) {
-      const startCodeLength = H265.AnnexBBoxSize(data.subarray(startCodeStart)) ?? 0;
-      const start = startCodeStart + startCodeLength;
+      // `start` is the index of the first byte of the NALU header (immediately after the start
+      // code). The H.265 NALU header is 2 bytes per ISO/IEC 23008-2 §7.3.1.2, so a NALU with a
+      // body needs at least `start + 2` bytes before the next start code. The high bit of byte 0
+      // is `forbidden_zero_bit`; the next 6 bits are `nal_unit_type`, hence `(headerByte >> 1) &
+      // 0x3F` extracts the NALU type.
+      const start = findNextStartCodeEnd(data, startCodeStart);
       const nextStartCode = findNextStartCode(data, start + 1);
       const headerByte = data[start];
       if (start + 2 <= nextStartCode && headerByte != undefined) {

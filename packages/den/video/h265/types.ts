@@ -34,8 +34,13 @@ export type H265ParserContext = {
 
 export type H265FrameInfo = {
   bitstreamFormat: H265BitstreamFormat;
+  /**
+   * True when the frame contains a NAL unit whose type is in
+   * `H265_RANDOM_ACCESS_TYPES` (IDR/CRA/BLA/reserved IRAP). For H.265, IRAP
+   * pictures are the only points where decoding can start without dependencies,
+   * so they are exactly what the WebCodecs VideoDecoder treats as "key" chunks.
+   */
   isKeyframe: boolean;
-  isRandomAccess: boolean;
   frameType: H265FrameType;
   sliceTypes: H265SliceType[];
   hasUnparsedVclSlice: boolean;

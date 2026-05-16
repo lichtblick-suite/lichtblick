@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { findNextStartCode } from "../utils";
+import { findNextStartCode, findNextStartCodeEnd } from "../utils";
 import { SPS as SPSNALU } from "./SPS";
 
 export enum H264NaluType {
@@ -69,7 +69,7 @@ export class H264 {
       }
 
       // Scan for another start code, signifying the beginning of the next NAL unit
-      i = H264.FindNextStartCodeEnd(data, i + 1);
+      i = findNextStartCodeEnd(data, i + 1);
     }
 
     return false;
@@ -104,7 +104,7 @@ export class H264 {
       }
 
       // Scan for another start code, signifying the beginning of the next NAL unit
-      i = H264.FindNextStartCodeEnd(data, i + 1);
+      i = findNextStartCodeEnd(data, i + 1);
     }
 
     return undefined;
@@ -141,30 +141,5 @@ export class H264 {
     }
 
     return config;
-  }
-
-  /**
-   * Find the index of the end of the next start code (0x000001 or 0x00000001) in the
-   * given buffer, starting at the given offset.
-   */
-  public static FindNextStartCodeEnd(data: Uint8Array, start: number): number {
-    let i = start;
-    while (i < data.length - 3) {
-      const isStartCode3Bytes = data[i + 0] === 0 && data[i + 1] === 0 && data[i + 2] === 1;
-      if (isStartCode3Bytes) {
-        return i + 3;
-      }
-      const isStartCode4Bytes =
-        i + 3 < data.length &&
-        data[i + 0] === 0 &&
-        data[i + 1] === 0 &&
-        data[i + 2] === 0 &&
-        data[i + 3] === 1;
-      if (isStartCode4Bytes) {
-        return i + 4;
-      }
-      i++;
-    }
-    return data.length;
   }
 }

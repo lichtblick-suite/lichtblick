@@ -8,19 +8,17 @@
 import { Mutex } from "async-mutex";
 import EventEmitter from "eventemitter3";
 
+import { H265_MAX_DECODE_WAIT_MS, H265_TARGET_FRAME_WAIT_MS } from "./h265/constants";
+
 // foxglove-depcheck-used: @types/dom-webcodecs
 
 // H.264 typically emits a decoded VideoFrame within a couple of milliseconds of submitting an
 // EncodedVideoChunk, so a tight 30 ms ceiling lets us return quickly when decoding is healthy and
-// fail fast when the decoder is stuck. H.265 (HEVC) decoders, especially when running through the
-// software fallback, can stall for hundreds of milliseconds before producing output and may need
-// to consume an entire GOP before emitting the target frame. The 2000 ms HEVC ceiling reflects the
-// worst case observed on real-world recordings; lowering it causes seek-to-P-frame playback to
-// surface as decode timeouts instead of correct frames.
+// fail fast when the decoder is stuck. The H.265 budgets live in `./h265/constants.ts` and are
+// much larger because HEVC decoders may need to consume an entire GOP before emitting the target
+// frame.
 const DEFAULT_TARGET_FRAME_WAIT_MS = 10;
 const DEFAULT_MAX_DECODE_WAIT_MS = 30;
-const HEVC_MAX_DECODE_WAIT_MS = 2000;
-const HEVC_TARGET_FRAME_WAIT_MS = HEVC_MAX_DECODE_WAIT_MS;
 
 /** A single chunk of encoded video bitstream representing one frame. */
 export type EncodedVideoFrame = {
@@ -109,7 +107,8 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
     super();
     this.#decoderInit = {
       output: (videoFrame: VideoFrame) => {
-        const timestampMicros = Number(videoFrame.timestamp);
+        const timestampMicros = videoFrame.timestamp;
+        // Check for duplicate timestamp
         const previousFrame = this.#pendingFrames.get(timestampMicros);
         if (previousFrame) {
           previousFrame.close();
@@ -273,11 +272,11 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       return { type: "timeout" };
     }
 
-    const isHevc =
+    const isH265 =
       this.#decoderConfig?.codec.startsWith("hev1") === true ||
       this.#decoderConfig?.codec.startsWith("hvc1") === true;
-    const targetFrameWaitMs = isHevc ? HEVC_TARGET_FRAME_WAIT_MS : DEFAULT_TARGET_FRAME_WAIT_MS;
-    const maxDecodeWaitMs = isHevc ? HEVC_MAX_DECODE_WAIT_MS : DEFAULT_MAX_DECODE_WAIT_MS;
+    const targetFrameWaitMs = isH265 ? H265_TARGET_FRAME_WAIT_MS : DEFAULT_TARGET_FRAME_WAIT_MS;
+    const maxDecodeWaitMs = isH265 ? H265_MAX_DECODE_WAIT_MS : DEFAULT_MAX_DECODE_WAIT_MS;
 
     this.#pendingTargetTimestampMicros = targetFrame.timestampMicros;
 
@@ -285,8 +284,8 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       const pendingDecode: PendingDecode = {
         targetTimestampMicros: targetFrame.timestampMicros,
         targetDeadlineMs: performance.now() + targetFrameWaitMs,
-        waitForQueueDrain: isHevc,
-        drained: !isHevc,
+        waitForQueueDrain: isH265,
+        drained: !isH265,
         resolve: (result) => {
           if (pendingDecode.targetTimeoutId != undefined) {
             clearTimeout(pendingDecode.targetTimeoutId);
@@ -553,10 +552,17 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
    * Reset the VideoDecoder and clear any pending frames, but keep the decoder configuration so
    * the next `decodeFrames()` call can submit chunks immediately. Call this when seeking to a
    * new position in the stream.
+   *
+   * Per the WebCodecs spec, `VideoDecoder.reset()` returns the decoder to the unconfigured state,
+   * so we re-apply the cached `VideoDecoderConfig` here. Without this, the next `decodeFrames()`
+   * call would observe `state === "unconfigured"` and bail out with a timeout result.
    */
   public resetForSeek(): void {
     if (this.#decoder.state === "configured") {
       this.#decoder.reset();
+      if (this.#decoderConfig != undefined) {
+        this.#decoder.configure(this.#decoderConfig);
+      }
     }
     this.#disposePendingState("Decoder reset");
   }

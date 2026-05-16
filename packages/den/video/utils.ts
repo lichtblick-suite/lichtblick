@@ -32,3 +32,23 @@ export function findNextStartCode(data: Uint8Array, start: number): number {
   }
   return data.length;
 }
+
+/**
+ * Find the index immediately after the next Annex B start code, i.e. the index
+ * of the first byte of the NAL unit that follows. Returns `data.length` if no
+ * start code is found.
+ */
+export function findNextStartCodeEnd(data: Uint8Array, start: number): number {
+  const startCodeStart = findNextStartCode(data, start);
+  if (startCodeStart === data.length) {
+    return data.length;
+  }
+  // 4-byte start code is 0x00000001; otherwise it must be the 3-byte 0x000001.
+  const is4Byte =
+    startCodeStart + 3 < data.length &&
+    data[startCodeStart] === 0 &&
+    data[startCodeStart + 1] === 0 &&
+    data[startCodeStart + 2] === 0 &&
+    data[startCodeStart + 3] === 1;
+  return startCodeStart + (is4Byte ? 4 : 3);
+}

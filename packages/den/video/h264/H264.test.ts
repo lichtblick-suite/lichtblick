@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { H264 } from "./H264";
-import { findNextStartCode } from "../utils";
+import { findNextStartCode, findNextStartCodeEnd } from "../utils";
 
 describe("H264", () => {
   it("findNextStartCode", () => {
@@ -42,37 +42,37 @@ describe("H264", () => {
     expect(findNextStartCode(NALU2, 15)).toBe(14);
   });
 
-  it("FindNextStartCodeEnd", () => {
+  it("findNextStartCodeEnd", () => {
     const NALU1 = new Uint8Array([0x00, 0x00, 0x00, 0x01, 0x02, 0x03]);
 
-    expect(H264.FindNextStartCodeEnd(NALU1, 0)).toBe(0 + 4);
-    expect(H264.FindNextStartCodeEnd(NALU1, 1)).toBe(1 + 3);
-    expect(H264.FindNextStartCodeEnd(NALU1, 2)).toBe(6);
-    expect(H264.FindNextStartCodeEnd(NALU1, 3)).toBe(6);
-    expect(H264.FindNextStartCodeEnd(NALU1, 4)).toBe(6);
-    expect(H264.FindNextStartCodeEnd(NALU1, 5)).toBe(6);
-    expect(H264.FindNextStartCodeEnd(NALU1, 6)).toBe(6);
-    expect(H264.FindNextStartCodeEnd(NALU1, 7)).toBe(6);
+    expect(findNextStartCodeEnd(NALU1, 0)).toBe(0 + 4);
+    expect(findNextStartCodeEnd(NALU1, 1)).toBe(1 + 3);
+    expect(findNextStartCodeEnd(NALU1, 2)).toBe(6);
+    expect(findNextStartCodeEnd(NALU1, 3)).toBe(6);
+    expect(findNextStartCodeEnd(NALU1, 4)).toBe(6);
+    expect(findNextStartCodeEnd(NALU1, 5)).toBe(6);
+    expect(findNextStartCodeEnd(NALU1, 6)).toBe(6);
+    expect(findNextStartCodeEnd(NALU1, 7)).toBe(6);
 
     const NALU2 = new Uint8Array([
       0x00, 0x01, 0x03, 0x0a, 0x00, 0x00, 0x01, 0x0b, 0x0c, 0x00, 0x00, 0x00, 0x01, 0x0d,
     ]);
-    expect(H264.FindNextStartCodeEnd(NALU2, 0)).toBe(4 + 3);
-    expect(H264.FindNextStartCodeEnd(NALU2, 1)).toBe(4 + 3);
-    expect(H264.FindNextStartCodeEnd(NALU2, 2)).toBe(4 + 3);
-    expect(H264.FindNextStartCodeEnd(NALU2, 3)).toBe(4 + 3);
-    expect(H264.FindNextStartCodeEnd(NALU2, 4)).toBe(4 + 3);
-    expect(H264.FindNextStartCodeEnd(NALU2, 5)).toBe(9 + 4);
-    expect(H264.FindNextStartCodeEnd(NALU2, 6)).toBe(9 + 4);
-    expect(H264.FindNextStartCodeEnd(NALU2, 7)).toBe(9 + 4);
-    expect(H264.FindNextStartCodeEnd(NALU2, 8)).toBe(9 + 4);
-    expect(H264.FindNextStartCodeEnd(NALU2, 9)).toBe(9 + 4);
-    expect(H264.FindNextStartCodeEnd(NALU2, 10)).toBe(10 + 3);
-    expect(H264.FindNextStartCodeEnd(NALU2, 11)).toBe(14);
-    expect(H264.FindNextStartCodeEnd(NALU2, 12)).toBe(14);
-    expect(H264.FindNextStartCodeEnd(NALU2, 13)).toBe(14);
-    expect(H264.FindNextStartCodeEnd(NALU2, 14)).toBe(14);
-    expect(H264.FindNextStartCodeEnd(NALU2, 15)).toBe(14);
+    expect(findNextStartCodeEnd(NALU2, 0)).toBe(4 + 3);
+    expect(findNextStartCodeEnd(NALU2, 1)).toBe(4 + 3);
+    expect(findNextStartCodeEnd(NALU2, 2)).toBe(4 + 3);
+    expect(findNextStartCodeEnd(NALU2, 3)).toBe(4 + 3);
+    expect(findNextStartCodeEnd(NALU2, 4)).toBe(4 + 3);
+    expect(findNextStartCodeEnd(NALU2, 5)).toBe(9 + 4);
+    expect(findNextStartCodeEnd(NALU2, 6)).toBe(9 + 4);
+    expect(findNextStartCodeEnd(NALU2, 7)).toBe(9 + 4);
+    expect(findNextStartCodeEnd(NALU2, 8)).toBe(9 + 4);
+    expect(findNextStartCodeEnd(NALU2, 9)).toBe(9 + 4);
+    expect(findNextStartCodeEnd(NALU2, 10)).toBe(10 + 3);
+    expect(findNextStartCodeEnd(NALU2, 11)).toBe(14);
+    expect(findNextStartCodeEnd(NALU2, 12)).toBe(14);
+    expect(findNextStartCodeEnd(NALU2, 13)).toBe(14);
+    expect(findNextStartCodeEnd(NALU2, 14)).toBe(14);
+    expect(findNextStartCodeEnd(NALU2, 15)).toBe(14);
   });
 
   it("GetFirstNALUOfType", () => {
