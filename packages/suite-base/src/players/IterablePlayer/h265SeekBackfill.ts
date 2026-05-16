@@ -68,8 +68,8 @@ export async function readH265GopForSeekTarget(
     }
 
     reversedGop.push(candidate);
-    const video = candidate.message as CompressedVideoLike;
-    if (H265.IsKeyframe(video.data!)) {
+    const { data } = candidate.message as CompressedVideoLike;
+    if (data != undefined && H265.IsKeyframe(data)) {
       return reversedGop.reverse();
     }
 
@@ -97,8 +97,8 @@ export async function expandH265SeekBackfill(
     if (!isH265CompressedVideoMessage(message)) {
       continue;
     }
-    const video = message.message as CompressedVideoLike;
-    if (H265.IsKeyframe(video.data!)) {
+    const { data } = message.message as CompressedVideoLike;
+    if (data == undefined || H265.IsKeyframe(data)) {
       continue;
     }
 
