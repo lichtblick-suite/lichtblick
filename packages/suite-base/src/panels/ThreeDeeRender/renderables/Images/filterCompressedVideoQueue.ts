@@ -38,32 +38,39 @@ export function filterCompressedVideoQueue(
   msgs.forEach((msg, index) => originalIndex.set(msg, index));
 
   const msgsByTopic = _.groupBy(msgs, (msg) => msg.topic);
-  const kept: MessageEvent<CompressedVideo>[] = [];
-
-  for (const topicMsgs of Object.values(msgsByTopic)) {
-    if (topicMsgs.length === 0) {
-      continue;
-    }
-    const latest = topicMsgs[topicMsgs.length - 1]!;
-    const codec = canonicalVideoCodec(latest.message.format);
-    if (codec === VideoCodec.H265) {
-      // Walk backward for the most recent keyframe; everything from there on must survive so the
-      // GOP can be replayed. If we never find one in the queue, keep the entire topic queue —
-      // the next keyframe will arrive eventually and we want the intervening frames available.
-      let keyIndex = -1;
-      for (let i = topicMsgs.length - 1; i >= 0; i--) {
-        if (isVideoKeyframe(topicMsgs[i]!.message)) {
-          keyIndex = i;
-          break;
-        }
-      }
-      kept.push(...topicMsgs.slice(keyIndex >= 0 ? keyIndex : 0));
-    } else {
-      // H.264 (or unrecognized) — only the most recent message is needed downstream.
-      kept.push(latest);
-    }
-  }
+  const kept: MessageEvent<CompressedVideo>[] = Object.values(msgsByTopic).flatMap(filterTopic);
 
   kept.sort((a, b) => (originalIndex.get(a) ?? 0) - (originalIndex.get(b) ?? 0));
   return kept;
+}
+
+function filterTopic(topicMsgs: MessageEvent<CompressedVideo>[]): MessageEvent<CompressedVideo>[] {
+  if (topicMsgs.length === 0) {
+    return [];
+  }
+  const latest = topicMsgs[topicMsgs.length - 1]!;
+  const codec = canonicalVideoCodec(latest.message.format);
+  if (codec === VideoCodec.H265) {
+    return keepFromLatestKeyframe(topicMsgs);
+  }
+  // H.264 (or unrecognized) — only the most recent message is needed downstream.
+  return [latest];
+}
+
+/**
+ * Walk backward for the most recent keyframe; everything from there on must survive so the GOP
+ * can be replayed. If we never find one in the queue, keep the entire topic queue — the next
+ * keyframe will arrive eventually and we want the intervening frames available.
+ */
+function keepFromLatestKeyframe(
+  topicMsgs: MessageEvent<CompressedVideo>[],
+): MessageEvent<CompressedVideo>[] {
+  let keyIndex = -1;
+  for (let i = topicMsgs.length - 1; i >= 0; i--) {
+    if (isVideoKeyframe(topicMsgs[i]!.message)) {
+      keyIndex = i;
+      break;
+    }
+  }
+  return topicMsgs.slice(Math.max(keyIndex, 0));
 }

@@ -142,7 +142,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   #canReplayVideoGop = false;
   #isDrainingVideoDecodes = false;
   #pendingVideoDecode: PendingVideoDecode | undefined;
-  #pendingVideoDecodeQueue: PendingVideoDecode[] = [];
+  readonly #pendingVideoDecodeQueue: PendingVideoDecode[] = [];
   #videoFrameHistory: VideoFrameHistoryEntry[] = [];
 
   #disposed = false;
@@ -422,7 +422,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       return undefined;
     }
     for (let index = targetIndex; index >= 0; index--) {
-      const entry = this.#videoFrameHistory[index]!;
+      const entry = this.#videoFrameHistory[index];
       if (entry.preparedFrame.type === "key") {
         return this.#videoFrameHistory.slice(index, targetIndex + 1);
       }
@@ -456,7 +456,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     if (gop == undefined || gop.length === 0) {
       return undefined;
     }
-    const decoderConfig = gop[0]!.preparedFrame.decoderConfig ?? this.#cachedVideoDecoderConfig;
+    const decoderConfig = gop[0].preparedFrame.decoderConfig ?? this.#cachedVideoDecoderConfig;
     if (decoderConfig == undefined) {
       return undefined;
     }
@@ -476,7 +476,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       return undefined;
     }
 
-    const imageBitmap = await self.createImageBitmap(result.frame, { resizeWidth });
+    const imageBitmap = await globalThis.createImageBitmap(result.frame, { resizeWidth });
     this.videoPlayer.lastImageBitmap = imageBitmap;
     result.frame.close();
     this.#waitingForVideoKeyframe = false;

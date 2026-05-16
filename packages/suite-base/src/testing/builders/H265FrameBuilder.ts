@@ -18,16 +18,16 @@ import { BasicBuilder, defaults } from "@lichtblick/test-builders";
  * full `CompressedVideo` message with sensible defaults.
  */
 export default class H265FrameBuilder {
-  public static lengthPrefixedNalu = DenH265FrameBuilder.lengthPrefixedNalu;
-  public static annexBNalu = DenH265FrameBuilder.annexBNalu;
-  public static frameData = DenH265FrameBuilder.frameData;
-  public static slice = DenH265FrameBuilder.slice;
-  public static keyframeWithParameterSets = DenH265FrameBuilder.keyframeWithParameterSets;
-  public static lengthPrefixedKeyframeWithParameterSets =
+  public static readonly lengthPrefixedNalu = DenH265FrameBuilder.lengthPrefixedNalu;
+  public static readonly annexBNalu = DenH265FrameBuilder.annexBNalu;
+  public static readonly frameData = DenH265FrameBuilder.frameData;
+  public static readonly slice = DenH265FrameBuilder.slice;
+  public static readonly keyframeWithParameterSets = DenH265FrameBuilder.keyframeWithParameterSets;
+  public static readonly lengthPrefixedKeyframeWithParameterSets =
     DenH265FrameBuilder.lengthPrefixedKeyframeWithParameterSets;
-  public static keyframeOnly = DenH265FrameBuilder.keyframeOnly;
-  public static deltaFrame = DenH265FrameBuilder.deltaFrame;
-  public static deltaFrameWithPps = DenH265FrameBuilder.deltaFrameWithPps;
+  public static readonly keyframeOnly = DenH265FrameBuilder.keyframeOnly;
+  public static readonly deltaFrame = DenH265FrameBuilder.deltaFrame;
+  public static readonly deltaFrameWithPps = DenH265FrameBuilder.deltaFrameWithPps;
 
   public static frame(props: Partial<CompressedVideo> = {}): CompressedVideo {
     return defaults<CompressedVideo>(props, {
@@ -40,5 +40,5 @@ export default class H265FrameBuilder {
 
   // Re-exported for convenience so tests can use `H265FrameBuilder.SliceType.B` etc. without an
   // additional import.
-  public static SliceType = H265SliceType;
+  public static readonly SliceType = H265SliceType;
 }
