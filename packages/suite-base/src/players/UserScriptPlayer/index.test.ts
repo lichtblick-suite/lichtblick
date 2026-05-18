@@ -2295,6 +2295,7 @@ describe("UserScriptPlayer", () => {
         });
 
         const iter = userScriptPlayer.getBatchIterator(outputTopic)!;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _ of iter) {
           // consume all
         }
@@ -2346,6 +2347,7 @@ describe("UserScriptPlayer", () => {
         await done;
 
         const iter = userScriptPlayer.getBatchIterator(outputTopic)!;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _ of iter) {
           // consume all
         }
