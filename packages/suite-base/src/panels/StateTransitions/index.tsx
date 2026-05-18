@@ -80,7 +80,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
     };
   }, [paths]);
 
- const decodedMessages = useDecodedMessageRange(
+  const decodedMessages = useDecodedMessageRange(
     isPlayerPresent ? topics : EMPTY_TOPICS,
     isPlayerPresent ? pathStrings : EMPTY_PATHS,
   );
