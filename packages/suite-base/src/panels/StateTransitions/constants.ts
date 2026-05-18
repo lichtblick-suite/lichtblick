@@ -8,6 +8,8 @@ import { StateTransitionPath } from "@lichtblick/suite-base/panels/StateTransiti
 import { fontMonospace } from "@lichtblick/theme";
 
 export const EMPTY_ITEMS_BY_PATH: MessageDataItemsByPath = {};
+export const EMPTY_TOPICS: string[] = [];
+export const EMPTY_PATHS: string[] = [];
 
 export const DEFAULT_STATE_TRANSITION_PATH: StateTransitionPath = Object.freeze({
   value: "",

@@ -14,7 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { add as addTimes, fromSec } from "@lichtblick/rostime";
@@ -32,6 +32,8 @@ import { PathLegend } from "@lichtblick/suite-base/panels/StateTransitions/PathL
 import { useStateTransitionsStyles } from "@lichtblick/suite-base/panels/StateTransitions/StateTransitions.style";
 import {
   EMPTY_ITEMS_BY_PATH,
+  EMPTY_PATHS,
+  EMPTY_TOPICS,
   STATE_TRANSITION_PLUGINS,
 } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import useChartScalesAndBounds from "@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAndBounds";
@@ -52,13 +54,8 @@ function StateTransitions(props: StateTransitionPanelProps) {
   const { paths } = config;
   const { classes } = useStateTransitionsStyles();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    if (!initialized && playerPresence === PlayerPresence.PRESENT) {
-      setInitialized(true);
-    }
-  }, [playerPresence, initialized]);
+  const isPlayerPresent =
+    playerPresence === PlayerPresence.PRESENT || playerPresence === PlayerPresence.BUFFERING;
 
   const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
 
@@ -83,9 +80,9 @@ function StateTransitions(props: StateTransitionPanelProps) {
     };
   }, [paths]);
 
-  const decodedMessages = useDecodedMessageRange(
-    initialized ? topics : [],
-    initialized ? pathStrings : [],
+ const decodedMessages = useDecodedMessageRange(
+    isPlayerPresent ? topics : EMPTY_TOPICS,
+    isPlayerPresent ? pathStrings : EMPTY_PATHS,
   );
 
   // When range data is active, skip useMessagesByPath subscriptions entirely
@@ -98,7 +95,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
     [decodedMessages, pathStrings],
   );
 
-  const itemsByPath = useMessagesByPath(hasRangeData ? [] : pathStrings);
+  const itemsByPath = useMessagesByPath(hasRangeData ? EMPTY_PATHS : pathStrings);
 
   const { height, heightPerTopic } = useMemo(() => {
     const onlyTopicsHeight = paths.length * 64;
