@@ -60,7 +60,7 @@ import { UserScript, UserScripts } from "@lichtblick/suite-base/types/panels";
 import Rpc from "@lichtblick/suite-base/util/Rpc";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 
-import { DIAGNOSTIC_SEVERITY, ERROR_CODES, SOURCES } from "./constants";
+import { DIAGNOSTIC_SEVERITY, ERROR_CODES, MAX_GLOBAL_BUFFER_SIZE, SOURCES } from "./constants";
 import { getPreloadTypes, remapVirtualSubscriptions } from "./subscriptions";
 
 const log = Log.getLogger(__filename);
@@ -101,6 +101,8 @@ type ProtectedState = {
   inputsByOutputTopic: Map<string, readonly string[]>;
 };
 
+type CacheConsumerHandle = { index: number };
+
 type BatchIteratorCacheEntry = {
   results: Readonly<IIterableSourceIteratorResult>[];
   done: boolean;
@@ -108,6 +110,8 @@ type BatchIteratorCacheEntry = {
   resolve: () => void;
   promise: Promise<void>;
   processor: { terminate: () => void };
+  consumers: Set<CacheConsumerHandle>;
+  pruneOffset: number;
 };
 
 export default class UserScriptPlayer implements Player {
@@ -163,6 +167,8 @@ export default class UserScriptPlayer implements Player {
   // Shared cache for virtual topic batch iterators. One source consumer per topic processes
   // messages through its own worker; multiple panels replay from the shared results array.
   readonly #batchIteratorCache = new Map<string, BatchIteratorCacheEntry>();
+
+  #totalCachedResults: number = 0;
 
   readonly #emitLock = new Mutex();
 
@@ -590,11 +596,13 @@ export default class UserScriptPlayer implements Player {
   // (NOT on seek — seek doesn't affect preloaded block data and PlotCoordinator won't re-subscribe).
   #invalidateBatchIteratorCache() {
     for (const cache of this.#batchIteratorCache.values()) {
+      this.#totalCachedResults -= cache.results.length;
       cache.done = true;
       cache.resolve();
       cache.processor.terminate();
     }
     this.#batchIteratorCache.clear();
+    this.#alertStore.delete("batch-iterator-buffer-overflow");
   }
 
   // - When we seek (in order to reset state)
@@ -705,7 +713,6 @@ export default class UserScriptPlayer implements Player {
           throw new Error(`Input "${input}" cannot equal another script's output`);
         }
       }
-
       validScriptRegistrations.push(scriptRegistration);
     }
 
@@ -1008,6 +1015,7 @@ export default class UserScriptPlayer implements Player {
   public getMetadata(): ReadonlyArray<Readonly<Metadata>> {
     return this.#player.getMetadata?.() ?? Object.freeze([]);
   }
+
   public getBatchIterator(
     topic: string,
     options?: { start?: Time; end?: Time },
@@ -1056,7 +1064,6 @@ export default class UserScriptPlayer implements Player {
       if (!inputIterators) {
         return undefined;
       }
-
       const cache = this.#startSharedConsumer(registration, inputIterators);
       this.#batchIteratorCache.set(topic, cache);
       return this.#createReplayIterator(cache);
@@ -1180,6 +1187,8 @@ export default class UserScriptPlayer implements Player {
         resolve = r;
       }),
       processor,
+      consumers: new Set(),
+      pruneOffset: 0,
     };
 
     // The executor runs synchronously, so `resolve` is now set.
@@ -1205,6 +1214,7 @@ export default class UserScriptPlayer implements Player {
             break;
           }
           cache.results.push(result);
+          this.#totalCachedResults++;
           notify();
         }
       } catch (err) {
@@ -1218,22 +1228,58 @@ export default class UserScriptPlayer implements Player {
     return cache;
   }
 
-  async *#createReplayIterator(
+  #createReplayIterator(cache: BatchIteratorCacheEntry) {
+    const consumer: CacheConsumerHandle = { index: cache.pruneOffset };
+    cache.consumers.add(consumer);
+    return this.#replayIteratorImpl(cache, consumer);
+  }
+
+  async *#replayIteratorImpl(
     cache: BatchIteratorCacheEntry,
+    consumer: CacheConsumerHandle,
   ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
-    let index = 0;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (true) {
-      if (index < cache.results.length) {
-        yield cache.results[index++]!;
-      } else if (cache.done) {
-        if (cache.error) {
-          throw cache.error;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      while (true) {
+        if (this.#totalCachedResults > MAX_GLOBAL_BUFFER_SIZE) {
+          this.#alertStore.set("batch-iterator-buffer-overflow", {
+            severity: "warn",
+            message: "User script output buffer exceeded",
+            tip: `Maximum ${MAX_GLOBAL_BUFFER_SIZE} cached results reached. Late-joining panels may show incomplete data for user script topics.`,
+          });
+          this.#pruneCache(cache);
         }
-        return;
-      } else {
-        await cache.promise;
+        const localIndex = consumer.index - cache.pruneOffset;
+        if (localIndex < cache.results.length) {
+          yield cache.results[localIndex]!;
+          consumer.index++;
+        } else if (cache.done) {
+          if (cache.error) {
+            throw cache.error;
+          }
+          return;
+        } else {
+          await cache.promise;
+        }
       }
+    } finally {
+      cache.consumers.delete(consumer);
+    }
+  }
+
+  #pruneCache(cache: BatchIteratorCacheEntry) {
+    let min = Infinity;
+    for (const consumer of cache.consumers) {
+      if (consumer.index < min) {
+        min = consumer.index;
+      }
+    }
+    // Prune entries all consumers have passed
+    const prunable = min - cache.pruneOffset;
+    if (prunable > 0) {
+      cache.results.splice(0, prunable);
+      this.#totalCachedResults -= prunable;
+      cache.pruneOffset += prunable;
     }
   }
 
