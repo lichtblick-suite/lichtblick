@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Fragment, Suspense, useEffect, useMemo } from "react";
+import { Fragment, Suspense, useEffect, useLayoutEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -23,6 +23,8 @@ import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManage
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 import UserProfileLocalStorageProvider from "@lichtblick/suite-base/providers/UserProfileLocalStorageProvider";
+import HttpService from "@lichtblick/suite-base/services/http/HttpService";
+import { PostMessageAuthProvider } from "@lichtblick/suite-base/services/http/PostMessageAuthProvider";
 
 import Workspace from "./Workspace";
 import DocumentTitleAdapter from "./components/DocumentTitleAdapter";
@@ -47,6 +49,18 @@ function contextMenuHandler(event: MouseEvent) {
   return false;
 }
 
+function getParentOriginFromReferrer(): string | undefined {
+  if (document.referrer === "") {
+    return undefined;
+  }
+
+  try {
+    return new URL(document.referrer).origin;
+  } catch {
+    return undefined;
+  }
+}
+
 export function StudioApp(): React.JSX.Element {
   const {
     dataSources,
@@ -60,6 +74,7 @@ export function StudioApp(): React.JSX.Element {
     customWindowControlProps,
     onAppBarDoubleClick,
     AppBarComponent,
+    remoteLayoutsAuthProvider,
   } = useSharedRootContext();
 
   const providers = [
@@ -110,9 +125,44 @@ export function StudioApp(): React.JSX.Element {
     return undefined;
   }, [workspace]);
 
+  const defaultRemoteLayoutsAuthProvider = useMemo(() => {
+    if (remoteLayoutStorage == undefined || remoteLayoutsAuthProvider != undefined) {
+      return undefined;
+    }
+
+    if (window.parent === window) {
+      return undefined;
+    }
+
+    const parentOrigin = getParentOriginFromReferrer();
+    if (parentOrigin == undefined) {
+      return undefined;
+    }
+
+    return new PostMessageAuthProvider({
+      allowedOrigins: [parentOrigin],
+      sourceWindow: window.parent,
+    });
+  }, [remoteLayoutStorage, remoteLayoutsAuthProvider]);
+
+  const activeRemoteLayoutsAuthProvider =
+    remoteLayoutsAuthProvider ?? defaultRemoteLayoutsAuthProvider;
+
   if (remoteLayoutStorage) {
     providers.unshift(<RemoteLayoutStorageContext.Provider value={remoteLayoutStorage} />);
   }
+
+  useLayoutEffect(() => {
+    if (!remoteLayoutStorage) {
+      return;
+    }
+
+    HttpService.setAuthProvider(activeRemoteLayoutsAuthProvider);
+    return () => {
+      HttpService.setAuthProvider(undefined);
+      defaultRemoteLayoutsAuthProvider?.dispose();
+    };
+  }, [remoteLayoutStorage, activeRemoteLayoutsAuthProvider, defaultRemoteLayoutsAuthProvider]);
 
   useEffect(() => {
     document.addEventListener("contextmenu", contextMenuHandler);
