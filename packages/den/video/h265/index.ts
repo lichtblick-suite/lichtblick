@@ -5,6 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-export * from "./h264";
-export * from "./h265";
-export * from "./VideoPlayer";
+export * from "./constants";
+export * from "./H265";
+export * from "./types";

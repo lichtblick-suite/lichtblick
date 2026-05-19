@@ -179,8 +179,12 @@ export class Bitstream {
       this.#lastTwoBytes = (this.#lastTwoBytes << 8) & 0xffff; // Shift in a zero to the last two bytes
     }
 
+    const byte = this.#buffer[this.#bytePtr++];
+    if (byte == undefined) {
+      throw new Error("Attempted to read past end of buffer");
+    }
     // Update the last two bytes and return the current byte
-    this.#lastTwoBytes = ((this.#lastTwoBytes << 8) | this.#buffer[this.#bytePtr]!) & 0xffff;
-    return this.#buffer[this.#bytePtr++]!;
+    this.#lastTwoBytes = ((this.#lastTwoBytes << 8) | byte) & 0xffff;
+    return byte;
   }
 }

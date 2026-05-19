@@ -3175,7 +3175,6 @@ __metadata:
   resolution: "@lichtblick/den@workspace:packages/den"
   dependencies:
     "@lichtblick/comlink": 1.0.3
-    "@lichtblick/log": "workspace:*"
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/tsconfig": 1.0.2
     "@types/dom-webcodecs": 0.1.14
