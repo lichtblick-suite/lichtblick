@@ -84,6 +84,8 @@
     "flatted": "3.4.2",
     "@xmldom/xmldom": "0.9.10",
     "uuid": "14.0.0",
+    "brace-expansion@^5.0.5": "5.0.6",
+    "ws@^8.18.0": "8.20.1",
     "plist@3.1.0": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",
     "plist@^3.0.4": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",
     "plist@^3.0.5": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",

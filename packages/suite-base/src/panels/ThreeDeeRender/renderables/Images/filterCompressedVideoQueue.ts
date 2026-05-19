@@ -45,10 +45,10 @@ export function filterCompressedVideoQueue(
 }
 
 function filterTopic(topicMsgs: MessageEvent<CompressedVideo>[]): MessageEvent<CompressedVideo>[] {
-  if (topicMsgs.length === 0) {
+  const latest = topicMsgs.at(-1);
+  if (latest == undefined) {
     return [];
   }
-  const latest = topicMsgs[topicMsgs.length - 1]!;
   const codec = canonicalVideoCodec(latest.message.format);
   if (codec === VideoCodec.H265) {
     return keepFromLatestKeyframe(topicMsgs);
