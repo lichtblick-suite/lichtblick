@@ -23,7 +23,7 @@ import {
   decodeUYVY,
   decodeYUYV,
 } from "@lichtblick/den/image";
-import { H264, H265, VideoPlayer } from "@lichtblick/den/video";
+import { H264 as H264Parser, H265 as H265Parser, VideoPlayer } from "@lichtblick/den/video";
 import { toNanoSec } from "@lichtblick/rostime";
 
 import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
@@ -36,9 +36,7 @@ import { ColorModeSettings, getColorConverter } from "../colorMode";
  * that some recordings tag H.265 streams as "hevc" while others tag them as "h265".
  */
 export enum VideoCodec {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
   H264 = "h264",
-  // eslint-disable-next-line @typescript-eslint/no-shadow
   H265 = "h265",
 }
 
@@ -70,9 +68,9 @@ export function isVideoKeyframe(frameMsg: CompressedVideo): boolean {
   switch (canonicalVideoCodec(frameMsg.format)) {
     case VideoCodec.H264:
       // Search for an IDR NAL unit to determine if this is a keyframe.
-      return H264.IsKeyframe(frameMsg.data);
+      return H264Parser.IsKeyframe(frameMsg.data);
     case VideoCodec.H265:
-      return H265.IsKeyframe(frameMsg.data);
+      return H265Parser.IsKeyframe(frameMsg.data);
   }
   return false;
 }
@@ -81,9 +79,9 @@ export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderCo
   switch (canonicalVideoCodec(frameMsg.format)) {
     case VideoCodec.H264:
       // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe.
-      return H264.ParseDecoderConfig(frameMsg.data);
+      return H264Parser.ParseDecoderConfig(frameMsg.data);
     case VideoCodec.H265:
-      return H265.ParseDecoderConfig(frameMsg.data);
+      return H265Parser.ParseDecoderConfig(frameMsg.data);
   }
   return undefined;
 }
@@ -94,7 +92,7 @@ export function prepareVideoFrame(
 ): PreparedVideoFrame {
   switch (canonicalVideoCodec(frameMsg.format)) {
     case VideoCodec.H265: {
-      const frameInfo = H265.InspectFrame(frameMsg.data, context?.h265);
+      const frameInfo = H265Parser.InspectFrame(frameMsg.data, context?.h265);
       if (frameInfo.bitstreamFormat === "unknown" || frameInfo.normalizedData == undefined) {
         return {
           data: frameMsg.data,
@@ -117,8 +115,8 @@ export function prepareVideoFrame(
         data:
           type === "key"
             ? frameInfo.normalizedData
-            : (H265.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
-        decoderConfig: H265.ParseDecoderConfig(frameInfo.normalizedData),
+            : (H265Parser.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
+        decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
         parameterSets: frameInfo.parameterSets,
         hasParameterSets: frameInfo.hasParameterSets,
         hasRequiredParameterSets: frameInfo.hasRequiredParameterSets,

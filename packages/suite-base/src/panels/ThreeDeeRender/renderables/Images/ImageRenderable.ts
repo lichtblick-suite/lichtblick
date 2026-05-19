@@ -76,6 +76,22 @@ function needsDependencyChain(codec: VideoCodec | undefined): boolean {
 }
 
 const VIDEO_TIMESTAMP_JITTER_NS = 5_000_000n;
+
+/**
+ * Per-renderable cap on the GOP backfill cache (`#videoFrameHistory`).
+ *
+ * The cache lets us reconstruct a frame on a backward seek by replaying the most recent keyframe
+ * plus all P-frames up to the seek target. To keep that replay possible without unbounded growth
+ * we need to hold at least one full GOP plus some slack for codec implementations that emit
+ * longer-than-typical key-to-key distances.
+ *
+ * Real-world H.265 recordings encountered so far use keyframe intervals on the order of 1–10 s
+ * (≈30–600 frames at 30–60 fps). 2000 frames is roughly 30–60 s of history, which covers several
+ * GOPs of slack while bounding the memory footprint of the cached encoded payloads to the order
+ * of tens of MB per topic even on high-bitrate streams. If a recording ever needs a deeper cache,
+ * this is the single knob to raise — but increasing it linearly increases per-renderable memory
+ * use, so prefer fixing pathological GOP cadence at the source first.
+ */
 const MAX_VIDEO_FRAME_HISTORY = 2000;
 
 type PendingVideoDecode = {
@@ -370,6 +386,22 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       this.#canReplayVideoGop = true;
       this.#lastQueuedVideoMessageTime = messageTime;
       this.#pendingVideoDecodeQueue.length = 0;
+      // The cached frames newer than the new playback position are from the abandoned forward
+      // portion of playback — they cannot participate in a GOP replay to a target at or before
+      // `messageTime`. Drop them now so the cache footprint tracks the actual replay window
+      // instead of waiting for the MAX_VIDEO_FRAME_HISTORY cap to evict them. The frames at or
+      // before the seek target are still useful: `#decodeVideoGopToTarget` walks backward from
+      // the target to find the keyframe that anchors the replay chain.
+      if (this.#videoFirstMessageTime != undefined && this.#videoFrameHistory.length > 0) {
+        const seekTargetMicros = Number((messageTime - this.#videoFirstMessageTime) / 1000n);
+        let writeIndex = 0;
+        for (const entry of this.#videoFrameHistory) {
+          if (entry.timestampMicros <= seekTargetMicros) {
+            this.#videoFrameHistory[writeIndex++] = entry;
+          }
+        }
+        this.#videoFrameHistory.length = writeIndex;
+      }
     }
     this.#lastVideoMessageTime = messageTime;
     this.#videoFirstMessageTime ??= messageTime;

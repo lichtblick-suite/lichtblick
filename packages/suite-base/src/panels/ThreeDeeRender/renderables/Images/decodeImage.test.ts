@@ -3,7 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { H264, H265, H265NaluType, H265SliceType, VideoPlayer } from "@lichtblick/den/video";
+import {
+  H264 as H264Parser,
+  H265 as H265Parser,
+  H265NaluType,
+  H265SliceType,
+  VideoPlayer,
+} from "@lichtblick/den/video";
 import H265FrameBuilder from "@lichtblick/suite-base/testing/builders/H265FrameBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 
@@ -52,7 +58,7 @@ describe("isVideoKeyframe", () => {
     const mockVideoFrame = createMockVideoFrame({
       data: new Uint8Array([0x65]), // Mock IDR NAL unit
     });
-    jest.spyOn(H264, "IsKeyframe").mockReturnValue(true);
+    jest.spyOn(H264Parser, "IsKeyframe").mockReturnValue(true);
     expect(isVideoKeyframe(mockVideoFrame)).toBe(true);
   });
 
@@ -60,7 +66,7 @@ describe("isVideoKeyframe", () => {
     const mockVideoFrame = createMockVideoFrame({
       data: new Uint8Array([0x41]), // Mock non-IDR NAL unit
     });
-    jest.spyOn(H264, "IsKeyframe").mockReturnValue(false);
+    jest.spyOn(H264Parser, "IsKeyframe").mockReturnValue(false);
     expect(isVideoKeyframe(mockVideoFrame)).toBe(false);
   });
 
@@ -69,7 +75,7 @@ describe("isVideoKeyframe", () => {
       data: new Uint8Array([0x26]),
       format: "h265",
     });
-    jest.spyOn(H265, "IsKeyframe").mockReturnValue(true);
+    jest.spyOn(H265Parser, "IsKeyframe").mockReturnValue(true);
     expect(isVideoKeyframe(mockVideoFrame)).toBe(true);
   });
 });
@@ -80,7 +86,7 @@ describe("getVideoDecoderConfig", () => {
       data: new Uint8Array([0x67]), // Mock SPS NAL unit
     });
     const mockConfig = { codec: "avc1.42E01E" };
-    jest.spyOn(H264, "ParseDecoderConfig").mockReturnValue(mockConfig);
+    jest.spyOn(H264Parser, "ParseDecoderConfig").mockReturnValue(mockConfig);
     expect(getVideoDecoderConfig(mockVideoFrame)).toEqual(mockConfig);
   });
 
@@ -97,7 +103,7 @@ describe("getVideoDecoderConfig", () => {
       format: "h265",
     });
     const mockConfig = { codec: "hvc1.1.6.L93.B0" };
-    jest.spyOn(H265, "ParseDecoderConfig").mockReturnValue(mockConfig);
+    jest.spyOn(H265Parser, "ParseDecoderConfig").mockReturnValue(mockConfig);
     expect(getVideoDecoderConfig(mockVideoFrame)).toEqual(mockConfig);
   });
 });
@@ -260,8 +266,8 @@ describe("prepareVideoFrame", () => {
     const data = new Uint8Array([0x00, 0x00, 0x00, 0x01, 0x65]);
     const decoderConfig = { codec: "avc1.42E01E" } as VideoDecoderConfig;
     const mockVideoFrame = createMockVideoFrame({ format: "h264", data });
-    jest.spyOn(H264, "ParseDecoderConfig").mockReturnValue(decoderConfig);
-    jest.spyOn(H264, "IsKeyframe").mockReturnValue(true);
+    jest.spyOn(H264Parser, "ParseDecoderConfig").mockReturnValue(decoderConfig);
+    jest.spyOn(H264Parser, "IsKeyframe").mockReturnValue(true);
 
     const preparedFrame = prepareVideoFrame(mockVideoFrame);
 
