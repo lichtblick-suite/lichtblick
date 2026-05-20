@@ -986,7 +986,7 @@ export default class UserScriptPlayer implements Player {
       })
       .catch((err: unknown) => {
         log.error(err);
-        reportError(err as Error);
+        reportError(err instanceof Error ? err : new Error(String(err)));
       });
   }
 
