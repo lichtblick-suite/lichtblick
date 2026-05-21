@@ -541,26 +541,28 @@ describe("PanelToolbarControls", () => {
             }}
           >
             <PanelContext.Provider
-              value={{
-                id: "test-panel-id",
-                type: "TestPanel",
-                title: "Test Panel",
-                showLogs: false,
-                setShowLogs: jest.fn(),
-                logError: jest.fn(),
-                logCount: 0,
-                config: {},
-                saveConfig: jest.fn(),
-                updatePanelConfigs: jest.fn(),
-                openSiblingPanel: jest.fn(),
-                replacePanel: jest.fn(),
-                enterFullscreen: jest.fn(),
-                exitFullscreen: jest.fn(),
-                isFullscreen: false,
-                setHasFullscreenDescendant: jest.fn(),
-                connectToolbarDragHandle: jest.fn(),
-                setMessagePathDropConfig: jest.fn(),
-              }}
+              value={
+                {
+                  id: "test-panel-id",
+                  type: "TestPanel",
+                  title: "Test Panel",
+                  showLogs: false,
+                  setShowLogs: jest.fn(),
+                  logError: jest.fn(),
+                  getLogCount: jest.fn(() => 0),
+                  config: {},
+                  saveConfig: jest.fn(),
+                  updatePanelConfigs: jest.fn(),
+                  openSiblingPanel: jest.fn(),
+                  replacePanel: jest.fn(),
+                  enterFullscreen: jest.fn(),
+                  exitFullscreen: jest.fn(),
+                  isFullscreen: false,
+                  setHasFullscreenDescendant: jest.fn(),
+                  connectToolbarDragHandle: jest.fn(),
+                  setMessagePathDropConfig: jest.fn(),
+                } as any
+              }
             >
               <PanelToolbarControls {...props} />
             </PanelContext.Provider>
@@ -604,6 +606,7 @@ describe("PanelToolbarControls", () => {
             }}
           >
             <PanelContext.Provider
+<<<<<<< HEAD
               value={{
                 id: "test-panel-id",
                 type: "TestPanel",
@@ -624,6 +627,30 @@ describe("PanelToolbarControls", () => {
                 connectToolbarDragHandle: jest.fn(),
                 setMessagePathDropConfig: jest.fn(),
               }}
+=======
+              value={
+                {
+                  id: "test-panel-id",
+                  type: "TestPanel",
+                  title: "Test Panel",
+                  showLogs: false,
+                  setShowLogs: jest.fn(),
+                  logError: jest.fn(),
+                  getLogCount: jest.fn(() => 3),
+                  config: {},
+                  saveConfig: jest.fn(),
+                  updatePanelConfigs: jest.fn(),
+                  openSiblingPanel: jest.fn(),
+                  replacePanel: jest.fn(),
+                  enterFullscreen: jest.fn(),
+                  exitFullscreen: jest.fn(),
+                  isFullscreen: false,
+                  setHasFullscreenDescendant: jest.fn(),
+                  connectToolbarDragHandle: jest.fn(),
+                  setMessagePathDropConfig: jest.fn(),
+                } as any
+              }
+>>>>>>> 7e113902b (FIX: update log count handling and related tests)
             >
               <PanelToolbarControls isUnknownPanel={false} />
             </PanelContext.Provider>
