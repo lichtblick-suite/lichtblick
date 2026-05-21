@@ -23,7 +23,7 @@ const useStyles = makeStyles()((theme) => {
       boxShadow: "none",
       backgroundColor: theme.palette.appBar.main,
       borderBottom: "none",
-      color: theme.palette.common.white,
+      color: theme.palette.appBar.text,
       height: APP_BAR_HEIGHT,
 
       paddingRight: "calc(100% - env(titlebar-area-x) - env(titlebar-area-width))",

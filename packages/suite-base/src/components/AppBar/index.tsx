@@ -69,11 +69,11 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()(
           fontSize: "1em",
         },
         "&:hover": {
-          backgroundColor: tc(theme.palette.common.white).setAlpha(0.08).toRgbString(),
+          backgroundColor: tc(theme.palette.appBar.text).setAlpha(0.08).toRgbString(),
         },
         "&.Mui-selected": {
           backgroundColor: theme.palette.appBar.primary,
-          color: theme.palette.common.white,
+          color: theme.palette.appBar.text,
         },
         "&.Mui-disabled": {
           color: "currentColor",
@@ -114,7 +114,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()(
       },
       keyEquivalent: {
         fontFamily: customTypography.fontMonospace,
-        background: tc(theme.palette.common.white).darken(45).toString(),
+        background: tc(theme.palette.appBar.text).darken(45).toString(),
         padding: theme.spacing(0, 0.5),
         aspectRatio: 1,
         borderRadius: theme.shape.borderRadius,
@@ -124,7 +124,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()(
         marginTop: `${theme.spacing(0.5)} !important`,
       },
       avatar: {
-        color: theme.palette.common.white,
+        color: theme.palette.appBar.text,
         backgroundColor: tc(theme.palette.appBar.main).lighten().toString(),
         height: theme.spacing(3.5),
         width: theme.spacing(3.5),
@@ -134,7 +134,7 @@ const useStyles = makeStyles<{ debugDragRegion?: boolean }, "avatar">()(
         borderRadius: 0,
 
         "&:hover": {
-          backgroundColor: tc(theme.palette.common.white).setAlpha(0.08).toString(),
+          backgroundColor: tc(theme.palette.appBar.text).setAlpha(0.08).toString(),
 
           [`.${classes.avatar}`]: {
             backgroundColor: tc(theme.palette.appBar.main).lighten(20).toString(),
@@ -220,7 +220,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                 <LichtblickLogo fontSize="inherit" color="inherit" />
                 <ChevronDown12Regular
                   className={classes.dropDownIcon}
-                  primaryFill={theme.palette.common.white}
+                  primaryFill={theme.palette.appBar.text}
                 />
               </IconButton>
               <AppMenu
