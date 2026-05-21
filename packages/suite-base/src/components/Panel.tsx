@@ -557,6 +557,8 @@ export default function Panel<
       setShowLogs(show);
     }, []);
 
+    const getLogCount = useCallback(() => logs.length, [logs.length]);
+
     const panelContextValue = useMemo(
       () => ({
         type,
@@ -577,7 +579,7 @@ export default function Panel<
         showLogs,
         setShowLogs: handleSetShowLogs,
         logError: addLog,
-        logCount: logs.length,
+        getLogCount,
       }),
       [
         type,
@@ -599,7 +601,7 @@ export default function Panel<
         showLogs,
         handleSetShowLogs,
         addLog,
-        logs.length,
+        getLogCount,
       ],
     );
 

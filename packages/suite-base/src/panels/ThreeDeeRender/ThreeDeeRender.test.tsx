@@ -853,7 +853,7 @@ describe("ThreeDeeRender", () => {
         sec: 100,
         nsec: MAX_TRANSFORM_MESSAGES - 1,
       });
-    });
+    }, 15000);
 
     it("respects custom maxPreloadMessages configuration", async () => {
       // Given

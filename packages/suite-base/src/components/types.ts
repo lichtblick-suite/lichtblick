@@ -27,7 +27,7 @@ export type PanelContextType<T> = {
   showLogs?: boolean;
   setShowLogs?: (options: SetVisibleLogs) => void;
   logError?: (message: string, error?: Error) => void;
-  logCount?: number;
+  getLogCount?: () => number;
   type: string;
   id: string;
   title: string;
