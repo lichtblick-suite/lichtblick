@@ -232,7 +232,6 @@ describe("prepareVideoFrame", () => {
 
     expect(preparedFrame.type).toBe("delta");
     expect(preparedFrame.data).toEqual(new Uint8Array(H265FrameBuilder.slice(1, H265SliceType.P)));
-    expect(preparedFrame.parameterSets).toBeDefined();
   });
 
   it("should return detailed diagnostics for unsupported h265 bitstreams", () => {

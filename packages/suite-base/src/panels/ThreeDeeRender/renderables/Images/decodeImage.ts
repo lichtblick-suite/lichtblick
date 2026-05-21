@@ -81,6 +81,8 @@ export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderCo
       // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe.
       return H264Parser.ParseDecoderConfig(frameMsg.data);
     case VideoCodec.H265:
+      // For now this returns a default H.265 codec config (codec string only); profile/level/tier
+      // are not derived from the SPS yet. A future SPS parser will fill in those fields here.
       return H265Parser.ParseDecoderConfig(frameMsg.data);
   }
   return undefined;
@@ -117,9 +119,6 @@ export function prepareVideoFrame(
             ? frameInfo.normalizedData
             : (H265Parser.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
         decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
-        parameterSets: frameInfo.parameterSets,
-        hasParameterSets: frameInfo.hasParameterSets,
-        hasRequiredParameterSets: frameInfo.hasRequiredParameterSets,
         status: PreparedVideoFrameStatus.Ok,
         type,
       };
@@ -154,14 +153,22 @@ export async function decodeCompressedVideoToBitmap(
     timestampMicros,
     preparedFrame.type,
   );
-  const frameToRender = videoFrame ?? videoPlayer.lastVideoFrame;
-  if (frameToRender) {
+  try {
+    const frameToRender = videoFrame ?? videoPlayer.lastVideoFrame;
+    if (!frameToRender) {
+      return videoPlayer.lastImageBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
+    }
+    // Skip re-encoding the same frame when the decoder produced nothing new.
+    if (!videoFrame && videoPlayer.lastImageBitmap) {
+      return videoPlayer.lastImageBitmap;
+    }
     const imageBitmap = await globalThis.createImageBitmap(frameToRender, { resizeWidth });
+    videoPlayer.lastImageBitmap?.close();
     videoPlayer.lastImageBitmap = imageBitmap;
-    videoFrame?.close();
     return imageBitmap;
+  } finally {
+    videoFrame?.close();
   }
-  return videoPlayer.lastImageBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
 }
 
 export const IMAGE_DEFAULT_COLOR_MODE_SETTINGS: Required<

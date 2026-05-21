@@ -25,9 +25,6 @@ export type PreparedVideoFrame = {
   decoderConfig?: VideoDecoderConfig;
   /** Human-readable detail about the parse outcome — for logs and error UI only. */
   diagnostics?: string;
-  parameterSets?: Uint8Array;
-  hasParameterSets?: boolean;
-  hasRequiredParameterSets?: boolean;
   status: PreparedVideoFrameStatus;
   type: "key" | "delta";
 };

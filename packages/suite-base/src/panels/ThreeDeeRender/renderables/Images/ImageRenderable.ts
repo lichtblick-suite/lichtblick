@@ -296,9 +296,13 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     void this.#startDecode(image, seq, resizeWidth, onDecoded);
   }
 
+  #hasPendingVideoDecode(): boolean {
+    return this.#pendingVideoDecodeQueue.length > 0 || this.#pendingVideoDecode != undefined;
+  }
+
   async #drainPendingVideoDecodes(): Promise<void> {
     try {
-      for (;;) {
+      while (this.#hasPendingVideoDecode()) {
         const pendingDecode = this.#pendingVideoDecodeQueue.shift() ?? this.#pendingVideoDecode;
         if (pendingDecode == undefined) {
           break;
@@ -315,7 +319,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       }
     } finally {
       this.#isDrainingVideoDecodes = false;
-      if (this.#pendingVideoDecodeQueue.length > 0 || this.#pendingVideoDecode != undefined) {
+      if (this.#hasPendingVideoDecode()) {
         this.#isDrainingVideoDecodes = true;
         void this.#drainPendingVideoDecodes();
       }
