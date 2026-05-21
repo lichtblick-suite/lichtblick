@@ -7,6 +7,7 @@
 
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 
 // We use "brand" tags to prevent confusion between string types with distinct meanings
 // https://github.com/microsoft/TypeScript/issues/4895
@@ -83,6 +84,18 @@ export function layoutIsShared(
   layout: Layout,
 ): layout is Layout & { permission: Exclude<LayoutPermission, "CREATOR_WRITE"> } {
   return layoutPermissionIsShared(layout.permission);
+}
+
+export function shouldSyncPersonalLayouts(): boolean {
+  return APP_CONFIG.syncLocalLayouts;
+}
+
+export function shouldSyncLayoutPermission(permission: LayoutPermission): boolean {
+  return shouldSyncPersonalLayouts() || layoutPermissionIsShared(permission);
+}
+
+export function shouldSyncLayout(layout: Layout): boolean {
+  return shouldSyncPersonalLayouts() || layoutIsShared(layout);
 }
 
 export function layoutAppearsDeleted(layout: Layout): boolean {
