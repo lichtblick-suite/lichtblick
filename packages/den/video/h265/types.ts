@@ -46,7 +46,6 @@ export type H265FrameInfo = {
   hasUnparsedVclSlice: boolean;
   normalizedData?: Uint8Array;
   parameterSets?: Uint8Array;
-  hasParameterSets: boolean;
   hasRequiredParameterSets: boolean;
   diagnostics?: string;
 };

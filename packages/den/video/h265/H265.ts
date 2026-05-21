@@ -81,7 +81,6 @@ export class H265 {
         frameType: "unknown",
         sliceTypes: [],
         hasUnparsedVclSlice: false,
-        hasParameterSets: false,
         hasRequiredParameterSets: false,
       };
     }
@@ -101,7 +100,6 @@ export class H265 {
       H265.InspectNalu(annexBData, nalu, state);
     }
 
-    const hasParameterSets = state.parameterSetParts.length > 0;
     const annexBBoxSize = H265.AnnexBBoxSize(data);
 
     return {
@@ -111,8 +109,10 @@ export class H265 {
       sliceTypes: state.sliceTypes,
       hasUnparsedVclSlice: state.hasUnparsedVclSlice,
       normalizedData: annexBData,
-      parameterSets: hasParameterSets ? new Uint8Array(state.parameterSetParts) : undefined,
-      hasParameterSets,
+      parameterSets:
+        state.parameterSetParts.length > 0
+          ? new Uint8Array(state.parameterSetParts)
+          : undefined,
       hasRequiredParameterSets: state.hasVps && state.hasSps && state.hasPps,
     };
   }

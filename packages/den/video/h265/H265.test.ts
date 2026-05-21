@@ -62,7 +62,6 @@ describe("H265", () => {
     expect(frameInfo.parameterSets).toEqual(
       new Uint8Array(H265FrameBuilder.annexBNalu(H265NaluType.VPS_NUT, [])),
     );
-    expect(frameInfo.hasParameterSets).toBe(true);
     expect(frameInfo.hasRequiredParameterSets).toBe(false);
   });
 
@@ -98,9 +97,8 @@ describe("H265", () => {
     const frameInfo = H265.InspectFrame(frame);
 
     // Then it reports the parameter sets and flags them as required-set complete
-    expect(frameInfo.hasParameterSets).toBe(true);
-    expect(frameInfo.hasRequiredParameterSets).toBe(true);
     expect(frameInfo.parameterSets).toEqual(H265FrameBuilder.frameData(parameterSets));
+    expect(frameInfo.hasRequiredParameterSets).toBe(true);
   });
 
   it("should detect I, P, and B slice types from slice headers", () => {
