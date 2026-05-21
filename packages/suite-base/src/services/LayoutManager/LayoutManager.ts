@@ -25,8 +25,9 @@ import {
   Layout,
   LayoutPermission,
   layoutAppearsDeleted,
-  layoutIsShared,
-  layoutPermissionIsShared,
+  shouldSyncPersonalLayouts,
+  shouldSyncLayout,
+  shouldSyncLayoutPermission,
 } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { IRemoteLayoutStorage } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
 import computeLayoutSyncOperations, {
@@ -170,7 +171,7 @@ export default class LayoutManager implements ILayoutManager {
         permission: remoteLayout.permission,
         baseline: { data: remoteLayout.data, savedAt: remoteLayout.savedAt },
         working: undefined,
-        syncInfo: layoutPermissionIsShared(remoteLayout.permission)
+        syncInfo: shouldSyncLayoutPermission(remoteLayout.permission)
           ? { status: "tracked", lastRemoteSavedAt: remoteLayout.savedAt }
           : undefined,
       });
@@ -185,7 +186,7 @@ export default class LayoutManager implements ILayoutManager {
     from,
   }: SaveNewLayout): Promise<Layout> {
     const data = migratePanelsState(unmigratedData);
-    if (layoutPermissionIsShared(permission)) {
+    if (shouldSyncLayoutPermission(permission)) {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
@@ -257,7 +258,7 @@ export default class LayoutManager implements ILayoutManager {
           : { data, savedAt: now };
 
     // Renames of shared layouts go directly to the server
-    if (name != undefined && layoutIsShared(localLayout)) {
+    if (name != undefined && shouldSyncLayout(localLayout)) {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
@@ -291,7 +292,7 @@ export default class LayoutManager implements ILayoutManager {
       const isRename =
         this.remote != undefined &&
         name != undefined &&
-        layoutIsShared(localLayout) &&
+        shouldSyncLayout(localLayout) &&
         localLayout.syncInfo != undefined &&
         localLayout.syncInfo.status !== "new";
 
@@ -304,7 +305,7 @@ export default class LayoutManager implements ILayoutManager {
 
             // If the name is being changed, we will need to upload to the server with a new savedAt
             baseline: isRename ? { ...localLayout.baseline, savedAt: now } : localLayout.baseline,
-            syncInfo: layoutIsShared(localLayout)
+            syncInfo: shouldSyncLayout(localLayout)
               ? isRename
                 ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
                 : localLayout.syncInfo
@@ -323,7 +324,7 @@ export default class LayoutManager implements ILayoutManager {
       throw new Error(`Cannot delete layout ${id} because it does not exist`);
     }
 
-    if (layoutIsShared(localLayout)) {
+    if (shouldSyncLayout(localLayout)) {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
@@ -338,7 +339,7 @@ export default class LayoutManager implements ILayoutManager {
       }
     }
     await this.local.runExclusive(async (local) => {
-      if (this.remote && !layoutIsShared(localLayout)) {
+      if (this.remote && !shouldSyncLayout(localLayout)) {
         await local.put({
           ...localLayout,
           working: {
@@ -364,7 +365,7 @@ export default class LayoutManager implements ILayoutManager {
       throw new Error(`Cannot overwrite layout ${id} because it does not exist`);
     }
     const now = new Date().toISOString() as ISO8601Timestamp;
-    if (layoutIsShared(localLayout)) {
+    if (shouldSyncLayout(localLayout)) {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
@@ -427,21 +428,57 @@ export default class LayoutManager implements ILayoutManager {
 
   @emitBusyStatus
   public async makePersonalCopy({ id, name }: { id: LayoutID; name: string }): Promise<Layout> {
+    const localLayout = await this.local.runExclusive(async (local) => await local.get(id));
+    if (!localLayout) {
+      throw new Error(`Cannot make a personal copy of layout id ${id} because it does not exist`);
+    }
+
     const now = new Date().toISOString() as ISO8601Timestamp;
-    const result = await this.local.runExclusive(async (local) => {
-      const layout = await local.get(id);
-      if (!layout) {
-        throw new Error(`Cannot make a personal copy of layout id ${id} because it does not exist`);
+    if (shouldSyncPersonalLayouts()) {
+      if (!this.remote) {
+        throw new Error("Shared layouts are not supported without remote layout storage");
       }
+      if (!this.isOnline) {
+        throw new Error("Cannot save a shared layout while offline");
+      }
+      if (!localLayout.externalId) {
+        throw new Error("Local layout does not have externalId");
+      }
+
+      const newLayout = await this.remote.saveNewLayout({
+        id: uuidv4() as LayoutID,
+        name,
+        data: localLayout.working?.data ?? localLayout.baseline.data,
+        permission: "CREATOR_WRITE",
+      });
+
+      const localLayoutData = {
+        id: newLayout.id,
+        name: newLayout.name,
+        externalId: newLayout.externalId,
+        permission: newLayout.permission,
+        baseline: { data: newLayout.data, savedAt: newLayout.savedAt },
+        working: undefined,
+        syncInfo: { status: "tracked" as const, lastRemoteSavedAt: newLayout.savedAt },
+      };
+
+      const result = await this.local.runExclusive(
+        async (local) => await local.put(localLayoutData),
+      );
+
+      this.notifyChangeListeners({ type: "change", updatedLayout: result });
+      return result;
+    }
+    const result = await this.local.runExclusive(async (local) => {
       const newLayout = await local.put({
         id: uuidv4() as LayoutID,
         name,
         permission: "CREATOR_WRITE",
-        baseline: { data: layout.working?.data ?? layout.baseline.data, savedAt: now },
+        baseline: { data: localLayout.working?.data ?? localLayout.baseline.data, savedAt: now },
         working: undefined,
         syncInfo: { status: "new", lastRemoteSavedAt: now },
       });
-      await local.put({ ...layout, working: undefined });
+      await local.put({ ...localLayout, working: undefined });
       return newLayout;
     });
     this.notifyChangeListeners({ type: "change", updatedLayout: undefined });
@@ -542,7 +579,7 @@ export default class LayoutManager implements ILayoutManager {
               permission: remoteLayout.permission,
               baseline: { data: remoteLayout.data, savedAt: remoteLayout.savedAt },
               working: undefined,
-              syncInfo: layoutPermissionIsShared(remoteLayout.permission)
+              syncInfo: shouldSyncLayoutPermission(remoteLayout.permission)
                 ? { status: "tracked", lastRemoteSavedAt: remoteLayout.savedAt }
                 : undefined,
             });
