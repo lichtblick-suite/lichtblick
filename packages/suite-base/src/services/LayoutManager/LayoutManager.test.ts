@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
   ILayoutStorage,
@@ -15,9 +16,15 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 describe("LayoutManager", () => {
   let mockLocalStorage: jest.Mocked<ILayoutStorage>;
   let mockRemoteStorage: jest.Mocked<IRemoteLayoutStorage>;
+  const originalSyncLocalLayouts = APP_CONFIG.syncLocalLayouts;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    Object.defineProperty(APP_CONFIG, "syncLocalLayouts", {
+      value: originalSyncLocalLayouts,
+      configurable: true,
+    });
 
     mockLocalStorage = {
       list: jest.fn().mockResolvedValue([]),
@@ -36,6 +43,13 @@ describe("LayoutManager", () => {
       updateLayout: jest.fn(),
       deleteLayout: jest.fn().mockResolvedValue(true),
     };
+  });
+
+  afterAll(() => {
+    Object.defineProperty(APP_CONFIG, "syncLocalLayouts", {
+      value: originalSyncLocalLayouts,
+      configurable: true,
+    });
   });
 
   describe("constructor", () => {
@@ -806,7 +820,7 @@ describe("LayoutManager", () => {
           data: sharedLayout.working!.data,
         }),
       );
-      expect(result.working).toBe(undefined);
+      expect(result.working).toBeUndefined();
       expect(result.baseline.data).toEqual(remoteLayout.data);
       expect(result.syncInfo?.status).toBe("tracked");
     });
@@ -1108,6 +1122,252 @@ describe("LayoutManager", () => {
 
       // Then
       expect(mockListener).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("with syncLocalLayouts enabled", () => {
+    beforeEach(() => {
+      Object.defineProperty(APP_CONFIG, "syncLocalLayouts", {
+        value: true,
+        configurable: true,
+      });
+    });
+
+    it("should save CREATOR_WRITE layouts to remote storage", async () => {
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+      layoutManager.setOnline({ online: true });
+
+      const layoutName = BasicBuilder.string();
+      const layoutData = LayoutBuilder.data();
+      const savedRemoteLayout = LayoutBuilder.remoteLayout({
+        name: layoutName,
+        permission: "CREATOR_WRITE",
+      });
+
+      mockRemoteStorage.saveNewLayout.mockResolvedValue(savedRemoteLayout);
+      jest.spyOn(mockLocalStorage, "put").mockResolvedValue(
+        LayoutBuilder.layout({
+          id: savedRemoteLayout.id,
+          name: savedRemoteLayout.name,
+          permission: savedRemoteLayout.permission,
+        }),
+      );
+
+      await layoutManager.saveNewLayout({
+        name: layoutName,
+        data: layoutData,
+        permission: "CREATOR_WRITE",
+      });
+
+      expect(mockRemoteStorage.saveNewLayout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: layoutName,
+          permission: "CREATOR_WRITE",
+        }),
+      );
+    });
+
+    it("should update CREATOR_WRITE layout remotely when renaming", async () => {
+      const layoutId = LayoutBuilder.layoutId();
+      const newName = BasicBuilder.string();
+      const localLayout = LayoutBuilder.layout({
+        id: layoutId,
+        permission: "CREATOR_WRITE",
+      });
+      localLayout.externalId = BasicBuilder.string();
+
+      mockLocalStorage.list.mockResolvedValue([localLayout]);
+      mockRemoteStorage.updateLayout.mockResolvedValue({
+        status: "success",
+        newLayout: LayoutBuilder.remoteLayout({
+          id: layoutId,
+          externalId: localLayout.externalId,
+          name: newName,
+          permission: "CREATOR_WRITE",
+        }),
+      });
+
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+      layoutManager.setOnline({ online: true });
+
+      await layoutManager.updateLayout({
+        id: layoutId,
+        name: newName,
+        data: undefined,
+      });
+
+      expect(mockRemoteStorage.updateLayout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: layoutId,
+          name: newName,
+        }),
+      );
+    });
+
+    it("should delete CREATOR_WRITE layout remotely", async () => {
+      const layoutId = LayoutBuilder.layoutId();
+      const localLayout = LayoutBuilder.layout({
+        id: layoutId,
+        permission: "CREATOR_WRITE",
+        syncInfo: {
+          status: "tracked",
+          lastRemoteSavedAt: "2023-01-01T00:00:00Z" as ISO8601Timestamp,
+        },
+      });
+      localLayout.externalId = BasicBuilder.string();
+
+      mockLocalStorage.list.mockResolvedValue([localLayout]);
+
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+      layoutManager.setOnline({ online: true });
+
+      await layoutManager.deleteLayout({ id: layoutId });
+
+      expect(mockRemoteStorage.deleteLayout).toHaveBeenCalledWith(localLayout.externalId);
+      expect(jest.spyOn(mockLocalStorage, "delete")).toHaveBeenCalledWith(
+        expect.any(String),
+        layoutId,
+      );
+    });
+
+    it("should overwrite CREATOR_WRITE layout remotely", async () => {
+      const layoutId = LayoutBuilder.layoutId();
+      const localLayout = LayoutBuilder.layout({
+        id: layoutId,
+        permission: "CREATOR_WRITE",
+        working: {
+          data: LayoutBuilder.data(),
+          savedAt: "2023-01-01T00:00:00Z" as ISO8601Timestamp,
+        },
+      });
+      localLayout.externalId = BasicBuilder.string();
+
+      mockLocalStorage.list.mockResolvedValue([localLayout]);
+      mockRemoteStorage.updateLayout.mockResolvedValue({
+        status: "success",
+        newLayout: LayoutBuilder.remoteLayout({
+          id: layoutId,
+          externalId: localLayout.externalId,
+          permission: "CREATOR_WRITE",
+          data: localLayout.working!.data,
+        }),
+      });
+
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+      layoutManager.setOnline({ online: true });
+
+      await layoutManager.overwriteLayout({ id: layoutId });
+
+      expect(mockRemoteStorage.updateLayout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: layoutId,
+          data: localLayout.working!.data,
+        }),
+      );
+    });
+
+    it("should overwrite shared layout when online", async () => {
+      // Given
+      const layoutId = LayoutBuilder.layoutId();
+      const sharedLayout = LayoutBuilder.layout({
+        id: layoutId,
+        permission: "ORG_WRITE",
+        working: {
+          data: LayoutBuilder.data(),
+          savedAt: "2023-01-01T00:00:00Z" as ISO8601Timestamp,
+        },
+      });
+      const remoteLayout = LayoutBuilder.remoteLayout({
+        id: layoutId,
+        permission: "ORG_WRITE",
+        data: sharedLayout.working!.data,
+      });
+
+      // Include the shared layout in the list results for the cache
+      mockLocalStorage.list.mockResolvedValue([sharedLayout]);
+      mockRemoteStorage.updateLayout.mockResolvedValue({
+        status: "success",
+        newLayout: remoteLayout,
+      });
+
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+      layoutManager.setOnline({ online: true });
+
+      // When
+      const result = await layoutManager.overwriteLayout({ id: layoutId });
+
+      // Then
+      expect(mockRemoteStorage.updateLayout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: layoutId,
+          data: sharedLayout.working!.data,
+        }),
+      );
+      expect(result.working).toBe(undefined);
+      expect(result.baseline.data).toEqual(remoteLayout.data);
+      expect(result.syncInfo?.status).toBe("tracked");
+    });
+
+    it("should sync makePersonalCopy to remote storage", async () => {
+      // Given
+      const originalLayout = LayoutBuilder.layout({
+        name: "Original Shared Layout",
+        permission: "ORG_WRITE",
+      });
+      originalLayout.externalId = BasicBuilder.string();
+
+      const copyName = "My Personal Copy";
+      const remotePersonalLayout = LayoutBuilder.remoteLayout({
+        name: copyName,
+        permission: "CREATOR_WRITE",
+        data: originalLayout.baseline.data,
+      });
+
+      mockLocalStorage.list.mockResolvedValue([originalLayout]);
+      mockRemoteStorage.saveNewLayout.mockResolvedValue(remotePersonalLayout);
+      jest.spyOn(mockLocalStorage, "put").mockResolvedValue(
+        LayoutBuilder.layout({
+          id: remotePersonalLayout.id,
+          name: copyName,
+          permission: "CREATOR_WRITE",
+        }),
+      );
+
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+      layoutManager.setOnline({ online: true });
+
+      // When
+      await layoutManager.makePersonalCopy({
+        id: originalLayout.id,
+        name: copyName,
+      });
+
+      // Then
+      expect(mockRemoteStorage.saveNewLayout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: copyName,
+          permission: "CREATOR_WRITE",
+          data: originalLayout.working?.data ?? originalLayout.baseline.data,
+        }),
+      );
     });
   });
 });
