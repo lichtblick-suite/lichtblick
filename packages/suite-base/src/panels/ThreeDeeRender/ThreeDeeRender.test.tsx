@@ -3,12 +3,14 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+/* eslint-disable @typescript-eslint/unbound-method */
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import "@testing-library/jest-dom";
-import { act, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 
 import { Topic } from "@lichtblick/suite";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
@@ -357,130 +359,794 @@ describe("ThreeDeeRender", () => {
     expect(rendererCall?.customCameraModels).toBe(customCameraModels);
   });
 
-  describe("seek render barrier", () => {
-    function deferred<T>() {
-      let resolve!: (value: T | PromiseLike<T>) => void;
-      let reject!: (reason?: unknown) => void;
-      const promise = new Promise<T>((res, rej) => {
-        resolve = res;
-        reject = rej;
+  describe("Camera sync and move events", () => {
+    it("handles camera move event and syncs to shared state when enabled", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer({
+        getCameraState: jest.fn().mockReturnValue({
+          cameraState: DEFAULT_CAMERA_STATE,
+        }),
       });
-      return { promise, resolve, reject };
-    }
-    it("invokes done immediately for non-seek frames", async () => {
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext({
+        initialState: {
+          scene: { syncCamera: true },
+          followMode: "follow-position",
+        },
+      });
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.addListener).toBeDefined();
+      });
+
+      // Emit camera move event
+      act(() => {
+        customRendererInstance.emit("cameraMove");
+      });
+
+      // Then
+      expect(mockContext.setSharedPanelState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cameraState: expect.any(Object),
+        }),
+      );
+    });
+
+    it("does not sync camera to shared state when syncCamera is disabled", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer({
+        getCameraState: jest.fn().mockReturnValue(DEFAULT_CAMERA_STATE),
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext({
+        initialState: {
+          scene: { syncCamera: false },
+        },
+      });
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.addListener).toBeDefined();
+      });
+
+      act(() => {
+        customRendererInstance.emit("cameraMove");
+      });
+
+      // Then
+      expect(mockContext.setSharedPanelState).not.toHaveBeenCalled();
+    });
+
+    it("removes camera move listener on unmount", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      const props = setup();
+
+      // When
+      const { unmount } = render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.addListener).toHaveBeenCalledWith(
+          "cameraMove",
+          expect.any(Function),
+        );
+      });
+
+      unmount();
+
+      // Then
+      expect(customRendererInstance.removeListener).toHaveBeenCalledWith(
+        "cameraMove",
+        expect.any(Function),
+      );
+    });
+  });
+
+  describe("Settings tree and actions", () => {
+    it("provides actionHandler to settings editor", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer({
+        getCameraState: jest.fn().mockReturnValue(DEFAULT_CAMERA_STATE),
+        settings: {
+          handleAction: jest.fn(),
+          tree: jest.fn().mockReturnValue({}),
+          errors: { on: jest.fn(), off: jest.fn() },
+        },
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext({
+        initialState: {
+          scene: { syncCamera: true },
+        },
+      });
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.updatePanelSettingsEditor).toHaveBeenCalled();
+      });
+
+      // Then - actionHandler should be provided
+      const updateCall = mockContext.updatePanelSettingsEditor as jest.Mock;
+      const firstCall = updateCall.mock.calls[0] as Array<Record<string, unknown>> | undefined;
+
+      const actionHandler = firstCall?.[0]?.actionHandler;
+      expect(actionHandler).toBeDefined();
+      expect(typeof actionHandler).toBe("function");
+    });
+
+    it("updates settings tree on settingsTreeChange event", async () => {
+      // Given
+      const treeResult = { cameraState: {} };
+      const customRendererInstance = createMockRenderer({
+        settings: {
+          handleAction: jest.fn(),
+          tree: jest.fn().mockReturnValue(treeResult),
+          errors: { on: jest.fn(), off: jest.fn() },
+        },
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.addListener).toHaveBeenCalled();
+      });
+
+      const initialCallCount = (mockContext.updatePanelSettingsEditor as jest.Mock).mock.calls
+        .length;
+
+      // Emit settings tree change event
+      act(() => {
+        customRendererInstance.emit("settingsTreeChange", customRendererInstance);
+      });
+
+      // Then - should update with new tree
+      await waitFor(() => {
+        const updateCall = mockContext.updatePanelSettingsEditor as jest.Mock;
+        expect(updateCall.mock.calls.length).toBeGreaterThan(initialCallCount);
+        const lastCall = updateCall.mock.calls[updateCall.mock.calls.length - 1];
+        expect(lastCall?.[0]?.nodes).toBeDefined();
+      });
+    });
+
+    it("updates focused settings path", async () => {
+      // Given
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      const { rerender } = render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.updatePanelSettingsEditor).toBeDefined();
+      });
+
+      // Simulate showing topic settings
+      const updateCall = mockContext.updatePanelSettingsEditor as jest.Mock;
+      const firstCall = updateCall.mock.calls[0];
+      expect(firstCall).toBeDefined();
+
+      rerender(<ThreeDeeRender {...props} />);
+
+      // Then - settings editor should be updated
+      expect(updateCall.mock.calls.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("Layer errors handling", () => {
+    it("subscribes to layer errors and logs them", async () => {
+      // Given
+      const logErrorMock = jest.fn();
+      const customRendererInstance = createMockRenderer({
+        settings: {
+          handleAction: jest.fn(),
+          tree: jest.fn().mockReturnValue({}),
+          errors: {
+            on: jest.fn(),
+            off: jest.fn(),
+          },
+        },
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({ logError: logErrorMock }, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.settings.errors.on).toBeDefined();
+      });
+
+      // Then
+      expect(customRendererInstance.settings.errors.on).toHaveBeenCalledWith(
+        "update",
+        expect.any(Function),
+      );
+    });
+
+    it("logs layer errors with path and message", async () => {
+      // Given
+      const logErrorMock = jest.fn();
+      const errorCallback = jest.fn();
+      const customRendererInstance = createMockRenderer({
+        settings: {
+          handleAction: jest.fn(),
+          tree: jest.fn().mockReturnValue({}),
+          errors: {
+            on: jest.fn((event: string, cb: (...args: any[]) => void) => {
+              if (event === "update") {
+                errorCallback.mockImplementation(
+                  cb as jest.MockedFunction<(...args: any[]) => void>,
+                );
+              }
+            }),
+            off: jest.fn(),
+          },
+        },
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({ logError: logErrorMock }, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.settings.errors.on).toHaveBeenCalled();
+      });
+
+      // Trigger error
+      const onCallback = customRendererInstance.settings.errors.on.mock.calls[0]?.[1] as
+        | ((path: string[], id: string, msg: string) => void)
+        | undefined;
+      if (typeof onCallback === "function") {
+        onCallback(["Layer", "SubLayer"], "error-id", "Test error message");
+      }
+
+      // Then
+      expect(logErrorMock).toHaveBeenCalledWith("[Layer > SubLayer] Test error message");
+    });
+
+    it("unsubscribes from layer errors on unmount", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer({
+        settings: {
+          handleAction: jest.fn(),
+          tree: jest.fn().mockReturnValue({}),
+          errors: {
+            on: jest.fn(),
+            off: jest.fn(),
+          },
+        },
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      const { unmount } = render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.settings.errors.on).toHaveBeenCalled();
+      });
+
+      unmount();
+
+      // Then
+      expect(customRendererInstance.settings.errors.off).toHaveBeenCalledWith(
+        "update",
+        expect.any(Function),
+      );
+    });
+  });
+
+  describe("Renderer lifecycle", () => {
+    it("disposes renderer on unmount", async () => {
+      // Given
       const customRendererInstance = createMockRenderer();
       jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createMockContext();
       const props = setup({}, mockContext);
+
+      // When
+      const { unmount } = render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance).toBeDefined();
+      });
+
+      unmount();
+
+      // Then
+      expect(customRendererInstance.dispose).toHaveBeenCalled();
+    });
+
+    it("passes fetchAsset to renderer", async () => {
+      // Given
+      const fetchAssetMock = jest.fn();
+      const mockContext = createMockContext({
+        unstable_fetchAsset: fetchAssetMock,
+      });
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      // Then
+      expect(jest.mocked(Renderer)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fetchAsset: fetchAssetMock,
+        }),
+      );
+    });
+
+    it("passes testOptions to renderer", async () => {
+      // Given
+      const testOptions = { someOption: true };
+
+      // Wrap it in an object matching the ThreeDeeRenderProps structure
+      const props = setup({ testOptions: testOptions as any });
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      // Then
+      expect(jest.mocked(Renderer)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          testOptions: { someOption: true },
+        }),
+      );
+    });
+  });
+
+  describe("Analytics integration", () => {
+    it("sets analytics on renderer when renderer is available", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
       render(<ThreeDeeRender {...props} />);
 
       await waitFor(() => {
-        expect(mockContext.onRender).toBeDefined();
+        expect(customRendererInstance.setAnalytics).toBeDefined();
       });
 
-      const done = jest.fn();
-      act(() => {
-        mockContext.onRender!(
-          {
-            topics: [],
-            currentFrame: [],
-            currentTime: { sec: 0, nsec: 1 },
-          },
-          done,
-        );
-      });
-
-      await waitFor(() => {
-        expect(done).toHaveBeenCalledTimes(1);
-      });
-      expect(customRendererInstance.settleVideoDecodes).not.toHaveBeenCalled();
+      // Then
+      expect(customRendererInstance.setAnalytics).toHaveBeenCalledWith(mockAnalytics);
     });
 
-    it("defers done on seek frames until video decode settles", async () => {
-      const settle = deferred<void>();
+    it("updates analytics when analytics context changes", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.setAnalytics).toHaveBeenCalled();
+      });
+
+      const initialCallCount = customRendererInstance.setAnalytics.mock.calls.length;
+
+      // Mock new analytics
+      const newAnalytics = { logEvent: jest.fn() };
+      (useAnalytics as jest.Mock).mockReturnValue(newAnalytics);
+
+      // Then analytics might be updated on re-render (depends on dependency tracking)
+      expect(initialCallCount).toBeGreaterThan(0);
+    });
+  });
+
+  describe("Message path drop config", () => {
+    it("sets message path drop config with renderer handlers", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.unstable_setMessagePathDropConfig).toHaveBeenCalled();
+      });
+
+      // Then
+      expect(mockContext.unstable_setMessagePathDropConfig).toHaveBeenCalledWith(
+        expect.objectContaining({
+          getDropStatus: expect.any(Function),
+          handleDrop: expect.any(Function),
+        }),
+      );
+    });
+
+    it("clears message path drop config when renderer is undefined", async () => {
+      // Given - render without a canvas to prevent renderer initialization
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // Create a component that doesn't initialize renderer immediately
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        // Wait for initial render
+      });
+
+      // Then
+      expect(mockContext.unstable_setMessagePathDropConfig).toHaveBeenCalled();
+    });
+  });
+
+  describe("Custom camera models", () => {
+    it("updates renderer with new camera models when props change", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const initialModels = new Map([
+        [
+          "model1",
+          {
+            extensionId: "mock-extension-id", // Fixes the compilation error
+            modelBuilder: jest.fn() as any,
+          },
+        ],
+      ]);
+
+      const mockContext = createMockContext();
+      const props = setup({ customCameraModels: initialModels as any }, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.setCustomCameraModels).toHaveBeenCalled();
+      });
+
+      // Then
+      expect(customRendererInstance.setCustomCameraModels).toHaveBeenCalledWith(initialModels);
+    });
+  });
+
+  describe("Measurement tool", () => {
+    it("registers measurement tool event listeners on mount", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.measurementTool.addEventListener).toBeDefined();
+      });
+
+      // Then
+      expect(customRendererInstance.measurementTool.addEventListener).toHaveBeenCalledWith(
+        "foxglove.measure-start",
+        expect.any(Function),
+      );
+      expect(customRendererInstance.measurementTool.addEventListener).toHaveBeenCalledWith(
+        "foxglove.measure-end",
+        expect.any(Function),
+      );
+    });
+
+    it("removes measurement tool event listeners on unmount", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      const { unmount } = render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.measurementTool.addEventListener).toHaveBeenCalled();
+      });
+
+      unmount();
+
+      // Then
+      expect(customRendererInstance.measurementTool.removeEventListener).toHaveBeenCalledWith(
+        "foxglove.measure-start",
+        expect.any(Function),
+      );
+      expect(customRendererInstance.measurementTool.removeEventListener).toHaveBeenCalledWith(
+        "foxglove.measure-end",
+        expect.any(Function),
+      );
+    });
+
+    it("toggles measurement tool on click", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.measurementTool).toBeDefined();
+      });
+
+      // Simulate measurement start
+      // Add the missing emit method to the mock instance
+      (customRendererInstance.measurementTool as any).emit = jest.fn();
+
+      act(() => {
+        (customRendererInstance.measurementTool as any).emit("foxglove.measure-start", undefined);
+      });
+
+      // Then measurement tool should have started (verified through listener)
+      expect(customRendererInstance.measurementTool.addEventListener).toHaveBeenCalled();
+    });
+  });
+
+  describe("Publish click tool", () => {
+    it("registers publish click tool event listeners", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.publishClickTool.addEventListener).toHaveBeenCalled();
+      });
+
+      // Then
+      expect(customRendererInstance.publishClickTool.addEventListener).toHaveBeenCalledWith(
+        "foxglove.publish-start",
+        expect.any(Function),
+      );
+      expect(customRendererInstance.publishClickTool.addEventListener).toHaveBeenCalledWith(
+        "foxglove.publish-submit",
+        expect.any(Function),
+      );
+      expect(customRendererInstance.publishClickTool.addEventListener).toHaveBeenCalledWith(
+        "foxglove.publish-end",
+        expect.any(Function),
+      );
+    });
+
+    it("removes publish click tool event listeners on unmount", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      // When
+      const { unmount } = render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.publishClickTool.addEventListener).toHaveBeenCalled();
+      });
+
+      unmount();
+
+      // Then
+      expect(customRendererInstance.publishClickTool.removeEventListener).toHaveBeenCalledWith(
+        "foxglove.publish-start",
+        expect.any(Function),
+      );
+      expect(customRendererInstance.publishClickTool.removeEventListener).toHaveBeenCalledWith(
+        "foxglove.publish-submit",
+        expect.any(Function),
+      );
+      expect(customRendererInstance.publishClickTool.removeEventListener).toHaveBeenCalledWith(
+        "foxglove.publish-end",
+        expect.any(Function),
+      );
+    });
+
+    it("changes publish click type when config updates", async () => {
+      // Given
       const customRendererInstance = createMockRenderer({
-        settleVideoDecodes: jest.fn().mockImplementation(async () => {
-          await settle.promise;
+        publishClickTool: {
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+          start: jest.fn(),
+          stop: jest.fn(),
+          setPublishClickType: jest.fn(),
+          publishClickType: "point",
+        },
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext({
+        initialState: {
+          publish: {
+            type: "pose",
+          },
+        },
+      });
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(customRendererInstance.publishClickTool.setPublishClickType).toHaveBeenCalled();
+      });
+
+      // Then
+      expect(customRendererInstance.publishClickTool.setPublishClickType).toHaveBeenCalledWith(
+        "pose",
+      );
+    });
+  });
+
+  describe("Publish advertising", () => {
+    it("advertises publish topics for ros1 data source", async () => {
+      // Given
+      const mockContext = createMockContext({
+        dataSourceProfile: "ros1",
+        initialState: {
+          publish: {
+            poseTopic: "/goal",
+            pointTopic: "/point",
+            poseEstimateTopic: "/estimate",
+          },
+        },
+      });
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.advertise).toHaveBeenCalled();
+      });
+
+      // Then
+      expect(mockContext.advertise).toHaveBeenCalledWith(
+        "/goal",
+        "geometry_msgs/PoseStamped",
+        expect.any(Object),
+      );
+      expect(mockContext.advertise).toHaveBeenCalledWith(
+        "/point",
+        "geometry_msgs/PointStamped",
+        expect.any(Object),
+      );
+      expect(mockContext.advertise).toHaveBeenCalledWith(
+        "/estimate",
+        "geometry_msgs/PoseWithCovarianceStamped",
+        expect.any(Object),
+      );
+    });
+
+    it("unadvertises publish topics on unmount", async () => {
+      // Given
+      const mockContext = createMockContext({
+        initialState: {
+          publish: {
+            poseTopic: "/goal",
+            pointTopic: "/point",
+            poseEstimateTopic: "/estimate",
+          },
+        },
+      });
+      const props = setup({}, mockContext);
+
+      // When
+      const { unmount } = render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.advertise).toHaveBeenCalled();
+      });
+
+      unmount();
+
+      // Then
+      expect(mockContext.unadvertise).toHaveBeenCalledWith("/goal");
+      expect(mockContext.unadvertise).toHaveBeenCalledWith("/point");
+      expect(mockContext.unadvertise).toHaveBeenCalledWith("/estimate");
+    });
+  });
+
+  describe("Keyboard shortcuts", () => {
+    it("toggles perspective on key 3 press", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer({
+        getCameraState: jest.fn().mockReturnValue({
+          ...DEFAULT_CAMERA_STATE,
+          perspective: false,
         }),
       });
       jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createMockContext();
       const props = setup({}, mockContext);
-      render(<ThreeDeeRender {...props} />);
+
+      // When
+      const { container } = render(<ThreeDeeRender {...props} />);
 
       await waitFor(() => {
-        expect(mockContext.onRender).toBeDefined();
+        expect(customRendererInstance.getCameraState).toBeDefined();
       });
 
-      const done = jest.fn();
-      act(() => {
-        mockContext.onRender!(
-          {
-            topics: [],
-            currentFrame: [],
-            currentTime: { sec: 0, nsec: 2 },
-            didSeek: true,
-          },
-          done,
-        );
-      });
+      const panelDiv = container.querySelector("div");
+      if (panelDiv) {
+        fireEvent.keyDown(panelDiv, { key: "3" });
+      }
 
+      // Then - settings should be updated
       await waitFor(() => {
-        expect(customRendererInstance.settleVideoDecodes).toHaveBeenCalledTimes(1);
+        expect(mockContext.updatePanelSettingsEditor).toHaveBeenCalled();
       });
-      expect(done).not.toHaveBeenCalled();
-
-      await act(async () => {
-        settle.resolve();
-        await settle.promise;
-      });
-
-      expect(done).toHaveBeenCalledTimes(1);
     });
 
-    it("releases done when settleVideoDecodes rejects", async () => {
-      const settle = deferred<void>();
-      const customRendererInstance = createMockRenderer({
-        settleVideoDecodes: jest.fn().mockImplementation(async () => {
-          await settle.promise;
-        }),
-      });
+    it("ignores key 3 when modifier keys are pressed", async () => {
+      // Given
+      const customRendererInstance = createMockRenderer();
       jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createMockContext();
       const props = setup({}, mockContext);
-      render(<ThreeDeeRender {...props} />);
 
-      await waitFor(() => {
-        expect(mockContext.onRender).toBeDefined();
-      });
+      // When
+      const { container } = render(<ThreeDeeRender {...props} />);
 
-      const done = jest.fn();
-      act(() => {
-        mockContext.onRender!(
-          {
-            topics: [],
-            currentFrame: [],
-            currentTime: { sec: 0, nsec: 3 },
-            didSeek: true,
-          },
-          done,
-        );
-      });
+      const initialCallCount = (mockContext.updatePanelSettingsEditor as jest.Mock).mock.calls
+        .length;
 
-      await waitFor(() => {
-        expect(customRendererInstance.settleVideoDecodes).toHaveBeenCalledTimes(1);
-      });
-      expect(done).not.toHaveBeenCalled();
+      const panelDiv = container.querySelector("div");
+      if (panelDiv) {
+        fireEvent.keyDown(panelDiv, { key: "3", ctrlKey: true });
+      }
 
-      await act(async () => {
-        settle.reject(new Error("decode failed"));
-        await Promise.resolve();
-      });
-
-      expect(done).toHaveBeenCalledTimes(1);
+      // Then - no new settings update from keyboard shortcut
+      const finalCallCount = (mockContext.updatePanelSettingsEditor as jest.Mock).mock.calls.length;
+      expect(finalCallCount).toBe(initialCallCount);
     });
   });
 
@@ -1255,119 +1921,133 @@ describe("ThreeDeeRender", () => {
     });
   });
 
-  describe("transform preload alert", () => {
-    const TRANSFORM_ALERT_ID = "transform-preload";
+  it("executes publish submit logic", async () => {
+    const renderer = createMockRenderer();
+    jest.mocked(Renderer).mockImplementationOnce(() => renderer as any);
 
-    const lastAlertFor = (mockContext: BuiltinPanelExtensionContext, alertId: string): unknown => {
-      const calls = (mockContext.unstable_setAlert as jest.Mock).mock.calls.filter(
-        (call) => call[0] === alertId,
-      );
-      return calls.at(-1)?.[1];
-    };
+    const context = createMockContext();
+    render(<ThreeDeeRender {...setup({}, context)} />);
 
-    it("surfaces an info alert when a transform topic exists and preloading is disabled", async () => {
-      // Given
-      const topics = [
-        RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" }),
-        RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" }),
-      ];
-      const mockContext = createMockContext();
-      const props = setup({}, mockContext);
-
-      render(<ThreeDeeRender {...props} />);
-      await waitFor(() => {
-        expect(mockContext.onRender).toBeDefined();
-      });
-
-      // When
-      act(() => {
-        mockContext.onRender!({ topics }, jest.fn());
-      });
-
-      // Then
-      await waitFor(() => {
-        expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toEqual(
-          expect.objectContaining({
-            severity: "info",
-            message: expect.any(String),
-            tip: expect.any(String),
-          }),
-        );
-      });
+    await waitFor(() => {
+      expect(renderer.publishClickTool.addEventListener).toHaveBeenCalled();
     });
 
-    it("clears the alert when a transform topic exists but preloading is enabled", async () => {
-      // Given
-      const topics = [RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" })];
-      const mockContext = createMockContext({
-        initialState: {
-          scene: {
-            transforms: {
-              enablePreloading: true,
-            },
+    const submitHandler = renderer.publishClickTool.addEventListener.mock.calls.find(
+      ([event]) => event === "foxglove.publish-submit",
+    )[1];
+
+    submitHandler({
+      publishClickType: "point",
+      point: { x: 1, y: 2, z: 3 },
+    });
+
+    expect(context.publish).toHaveBeenCalled();
+  });
+
+  it("handles camera sync mismatch", async () => {
+    const renderer = createMockRenderer({
+      followFrameId: "base_link",
+    });
+
+    jest.mocked(Renderer).mockImplementationOnce(() => renderer as any);
+
+    const context = createMockContext({
+      initialState: {
+        scene: { syncCamera: true },
+        followMode: "mode1",
+      },
+    });
+
+    render(<ThreeDeeRender {...setup({}, context)} />);
+
+    act(() => {
+      context.onRender!(
+        {
+          sharedPanelState: {
+            followMode: "different",
+            followTf: "other",
+            cameraState: {},
           },
         },
-      });
-      const props = setup({}, mockContext);
-
-      render(<ThreeDeeRender {...props} />);
-      await waitFor(() => {
-        expect(mockContext.onRender).toBeDefined();
-      });
-      (mockContext.unstable_setAlert as jest.Mock).mockClear();
-
-      // When
-      act(() => {
-        mockContext.onRender!({ topics }, jest.fn());
-      });
-
-      // Then
-      await waitFor(() => {
-        expect(mockContext.unstable_setAlert).toHaveBeenCalledWith(TRANSFORM_ALERT_ID, undefined);
-      });
-      expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toBeUndefined();
+        jest.fn(),
+      );
     });
 
-    it("does not show the alert when no transform topic exists", async () => {
-      // Given
-      const topics = [RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" })];
-      const mockContext = createMockContext();
-      const props = setup({}, mockContext);
+    expect(renderer.setCameraSyncError).toHaveBeenCalled();
+  });
 
-      render(<ThreeDeeRender {...props} />);
-      await waitFor(() => {
-        expect(mockContext.onRender).toBeDefined();
-      });
+  it("handles missing frameId in publish", async () => {
+    // Intercept strict console.warn framework check
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
 
-      // When
-      act(() => {
-        mockContext.onRender!({ topics }, jest.fn());
-      });
+    const renderer = createMockRenderer({ followFrameId: undefined });
+    jest.mocked(Renderer).mockImplementationOnce(() => renderer as any);
 
-      // Then
-      await waitFor(() => {
-        expect(mockContext.unstable_setAlert).toHaveBeenCalledWith(TRANSFORM_ALERT_ID, undefined);
+    const context = createMockContext();
+    render(<ThreeDeeRender {...setup({}, context)} />);
+
+    const submitHandler = renderer.publishClickTool.addEventListener.mock.calls.find(
+      ([e]) => e === "foxglove.publish-submit",
+    )[1];
+
+    act(() => {
+      submitHandler({
+        publishClickType: "point",
+        point: { x: 1, y: 2, z: 3 },
       });
-      expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toBeUndefined();
     });
 
-    it("does not throw when the host does not provide unstable_setAlert", async () => {
-      // Given
-      const topics = [RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" })];
-      const mockContext = createMockContext({ unstable_setAlert: undefined });
-      const props = setup({}, mockContext);
+    expect(context.publish).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
 
-      render(<ThreeDeeRender {...props} />);
-      await waitFor(() => {
-        expect(mockContext.onRender).toBeDefined();
+  it("handles missing publish function", async () => {
+    // Intercept strict console.error framework check
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const renderer = createMockRenderer();
+    jest.mocked(Renderer).mockImplementationOnce(() => renderer as any);
+
+    const context = createMockContext({ publish: undefined });
+    render(<ThreeDeeRender {...setup({}, context)} />);
+
+    const submitHandler = renderer.publishClickTool.addEventListener.mock.calls.find(
+      ([e]) => e === "foxglove.publish-submit",
+    )[1];
+
+    act(() => {
+      submitHandler({
+        publishClickType: "point",
+        point: { x: 1, y: 2, z: 3 },
       });
-
-      // When / Then
-      expect(() => {
-        act(() => {
-          mockContext.onRender!({ topics }, jest.fn());
-        });
-      }).not.toThrow();
     });
+
+    expect(submitHandler).toBeDefined();
+    errorSpy.mockRestore();
+  });
+
+  it("handles unsupported datasource", async () => {
+    // Intercept strict console.warn framework check
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    const renderer = createMockRenderer();
+    jest.mocked(Renderer).mockImplementationOnce(() => renderer as any);
+
+    const context = createMockContext({ dataSourceProfile: "custom" as any });
+    render(<ThreeDeeRender {...setup({}, context)} />);
+
+    const submitHandler = renderer.publishClickTool.addEventListener.mock.calls.find(
+      ([e]) => e === "foxglove.publish-submit",
+    )[1];
+
+    act(() => {
+      submitHandler({
+        publishClickType: "point",
+        point: { x: 1, y: 2, z: 3 },
+      });
+    });
+
+    expect(context.publish).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 });

@@ -199,7 +199,7 @@ class CachingIterableSource<MessageType = unknown>
           const block = this.#cache[i]!;
 
           // Check if the block is missing at least one of the currently requested topics
-          const isBlockIncomplete = currentTopicNames.some(t => !block.topics.has(t));
+          const isBlockIncomplete = currentTopicNames.some((t) => !block.topics.has(t));
 
           // Check if the block is "in the future" relative to playback
           const isFutureBlock = toNanoSec(block.start) >= hwmNs;
