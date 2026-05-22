@@ -110,9 +110,7 @@ export class H265 {
       hasUnparsedVclSlice: state.hasUnparsedVclSlice,
       normalizedData: annexBData,
       parameterSets:
-        state.parameterSetParts.length > 0
-          ? new Uint8Array(state.parameterSetParts)
-          : undefined,
+        state.parameterSetParts.length > 0 ? new Uint8Array(state.parameterSetParts) : undefined,
       hasRequiredParameterSets: state.hasVps && state.hasSps && state.hasPps,
     };
   }
