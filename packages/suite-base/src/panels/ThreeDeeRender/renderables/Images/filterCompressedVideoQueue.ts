@@ -7,10 +7,11 @@
 
 import * as _ from "lodash-es";
 
+import { canonicalVideoCodec, videoCodecNeedsKeyframeReplay } from "@lichtblick/den/video";
 import { MessageEvent } from "@lichtblick/suite";
 
 import { CompressedVideo } from "./ImageTypes";
-import { VideoCodec, canonicalVideoCodec, isVideoKeyframe } from "./decodeImage";
+import { isVideoKeyframe } from "./decodeImage";
 
 /**
  * Filters the per-frame queue for the `CompressedVideo` subscription.
@@ -50,7 +51,7 @@ function filterTopic(topicMsgs: MessageEvent<CompressedVideo>[]): MessageEvent<C
     return [];
   }
   const codec = canonicalVideoCodec(latest.message.format);
-  if (codec === VideoCodec.H265) {
+  if (videoCodecNeedsKeyframeReplay(codec)) {
     return keepFromLatestKeyframe(topicMsgs);
   }
   // H.264 (or unrecognized) — only the most recent message is needed downstream.

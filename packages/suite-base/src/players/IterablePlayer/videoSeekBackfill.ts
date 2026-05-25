@@ -5,7 +5,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { H265 } from "@lichtblick/den/video";
+import {
+  canonicalVideoCodec,
+  isVideoKeyframe,
+  videoCodecNeedsKeyframeReplay,
+} from "@lichtblick/den/video";
 import { compare, fromNanoSec, toNanoSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
 
@@ -21,12 +25,21 @@ type CompressedVideoLike = {
 
 export type GetBackfillMessages = (args: GetBackfillMessagesArgs) => Promise<MessageEvent[]>;
 
-export function isH265CompressedVideoMessage(message: MessageEvent): boolean {
+/**
+ * Returns true for a `foxglove.CompressedVideo` message whose codec can only be decoded by
+ * replaying the full GOP (the keyframe and every frame after it) — currently just H.265. These are
+ * the messages a backward seek must expand, since a P/B-frame alone is not decodable. The codec
+ * decision is delegated to {@link videoCodecNeedsKeyframeReplay} so this stays codec-agnostic.
+ */
+export function needsGopBackfill(message: MessageEvent): boolean {
   if (message.schemaName !== FOXGLOVE_COMPRESSED_VIDEO_SCHEMA) {
     return false;
   }
   const video = message.message as CompressedVideoLike;
-  return (video.format === "h265" || video.format === "hevc") && video.data instanceof Uint8Array;
+  return (
+    video.data instanceof Uint8Array &&
+    videoCodecNeedsKeyframeReplay(canonicalVideoCodec(video.format ?? ""))
+  );
 }
 
 export function messageKey(message: MessageEvent): string {
@@ -34,14 +47,14 @@ export function messageKey(message: MessageEvent): string {
 }
 
 /**
- * Walk backwards from `targetMessage` until the closest preceding H.265 keyframe
- * is found. Returns the GOP slice in receive-time order (keyframe first).
+ * Walk backwards from `targetMessage` until the closest preceding keyframe is found. Returns the
+ * GOP slice in receive-time order (keyframe first).
  *
- * Returns an empty array if no keyframe is found within
- * MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES, if the source returns a non-H.265 message,
- * or if a duplicate is encountered (which would otherwise cause an infinite loop).
+ * Returns an empty array if no keyframe is found within MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES, if
+ * the source returns a message that does not need GOP backfill, or if a duplicate is encountered
+ * (which would otherwise cause an unbounded walk).
  */
-export async function readH265GopForSeekTarget(
+export async function readVideoGopForSeekTarget(
   targetMessage: MessageEvent,
   getBackfillMessages: GetBackfillMessages,
   getAbortSignal: () => AbortSignal | undefined,
@@ -50,17 +63,13 @@ export async function readH265GopForSeekTarget(
   const reversedGop: MessageEvent[] = [];
   let searchTime = targetMessage.receiveTime;
 
-  for (;;) {
-    if (reversedGop.length >= MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES) {
-      return [];
-    }
-
+  for (let step = 0; step < MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES; step++) {
     const [candidate] = await getBackfillMessages({
       topics: topicSelection,
       time: searchTime,
       abortSignal: getAbortSignal(),
     });
-    if (candidate == undefined || !isH265CompressedVideoMessage(candidate)) {
+    if (candidate == undefined || !needsGopBackfill(candidate)) {
       return [];
     }
     if (reversedGop.some((message) => messageKey(message) === messageKey(candidate))) {
@@ -68,8 +77,8 @@ export async function readH265GopForSeekTarget(
     }
 
     reversedGop.push(candidate);
-    const { data } = candidate.message as CompressedVideoLike;
-    if (data != undefined && H265.IsKeyframe(data)) {
+    const { data, format } = candidate.message as CompressedVideoLike;
+    if (data != undefined && isVideoKeyframe(format ?? "", data)) {
       return reversedGop.reverse();
     }
 
@@ -79,14 +88,18 @@ export async function readH265GopForSeekTarget(
     }
     searchTime = fromNanoSec(previousTimeNs);
   }
+
+  // Exhausted the budget without reaching a keyframe; give up rather than expand a partial GOP.
+  return [];
 }
 
 /**
- * For each H.265 P/B-frame in `messages`, fetch the preceding GOP from the source
- * so the decoder can replay from the most recent keyframe. Non-H.265 messages and
- * keyframes are passed through unchanged. Output is sorted by receive time.
+ * For each non-keyframe in `messages` that belongs to a codec needing GOP replay, fetch the
+ * preceding GOP from the source so the decoder can replay from the most recent keyframe. Messages
+ * that do not need backfill (other schemas, keyframes, codecs decodable from the latest frame) are
+ * passed through unchanged. Output is sorted by receive time.
  */
-export async function expandH265SeekBackfill(
+export async function expandVideoSeekBackfill(
   messages: MessageEvent[],
   getBackfillMessages: GetBackfillMessages,
   getAbortSignal: () => AbortSignal | undefined,
@@ -94,15 +107,15 @@ export async function expandH265SeekBackfill(
   const expandedMessages = new Map(messages.map((message) => [messageKey(message), message]));
 
   for (const message of messages) {
-    if (!isH265CompressedVideoMessage(message)) {
+    if (!needsGopBackfill(message)) {
       continue;
     }
-    const { data } = message.message as CompressedVideoLike;
-    if (data == undefined || H265.IsKeyframe(data)) {
+    const { data, format } = message.message as CompressedVideoLike;
+    if (data == undefined || isVideoKeyframe(format ?? "", data)) {
       continue;
     }
 
-    const gopMessages = await readH265GopForSeekTarget(
+    const gopMessages = await readVideoGopForSeekTarget(
       message,
       getBackfillMessages,
       getAbortSignal,

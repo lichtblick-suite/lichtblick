@@ -9,7 +9,12 @@ import * as _ from "lodash-es";
 import * as THREE from "three";
 import { assert } from "ts-essentials";
 
-import { EncodedVideoFrame, VideoPlayer } from "@lichtblick/den/video";
+import {
+  EncodedVideoFrame,
+  VideoPlayer,
+  canonicalVideoCodec,
+  videoCodecNeedsKeyframeReplay,
+} from "@lichtblick/den/video";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { ICameraModel } from "@lichtblick/suite";
@@ -26,8 +31,6 @@ import { RosValue } from "@lichtblick/suite-base/players/types";
 
 import { AnyImage, CompressedVideo } from "./ImageTypes";
 import {
-  VideoCodec,
-  canonicalVideoCodec,
   decodeCompressedImageToBitmap,
   decodeCompressedVideoToBitmap,
   emptyVideoFrame,
@@ -69,11 +72,6 @@ export const IMAGE_RENDERABLE_DEFAULT_SETTINGS: ImageRenderableSettings = {
   brightness: INITIAL_BRIGHTNESS,
   contrast: INITIAL_CONTRAST,
 };
-
-/** Codecs that need a GOP replay (keyframe + intervening P-frames) to decode any non-keyframe. */
-function needsDependencyChain(codec: VideoCodec | undefined): boolean {
-  return codec === VideoCodec.H265;
-}
 
 const VIDEO_TIMESTAMP_JITTER_NS = 5_000_000n;
 
@@ -275,7 +273,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     const codec = "format" in image ? canonicalVideoCodec(image.format) : undefined;
     if (codec != undefined) {
       const pendingDecode = { image, resizeWidth, onDecoded, seq };
-      if (needsDependencyChain(codec)) {
+      if (videoCodecNeedsKeyframeReplay(codec)) {
         const videoImage = image as CompressedVideo;
         const messageTime = toNanoSec(videoImage.timestamp);
         if (messageTime === this.#lastQueuedVideoMessageTime) {
@@ -426,7 +424,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     preparedFrame: PreparedVideoFrame,
     timestampMicros: number,
   ): void {
-    if (!needsDependencyChain(canonicalVideoCodec(frame.format))) {
+    if (!videoCodecNeedsKeyframeReplay(canonicalVideoCodec(frame.format))) {
       return;
     }
     const historyPreparedFrame: PreparedVideoFrame = {

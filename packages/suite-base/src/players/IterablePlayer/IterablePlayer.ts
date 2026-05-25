@@ -26,7 +26,7 @@ import { Immutable, MessageEvent, Metadata, ParameterValue } from "@lichtblick/s
 import { DeserializedSourceWrapper } from "@lichtblick/suite-base/players/IterablePlayer/DeserializedSourceWrapper";
 import { DeserializingIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/DeserializingIterableSource";
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
-import { expandH265SeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/h265SeekBackfill";
+import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsCollector";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
@@ -853,7 +853,10 @@ export class IterablePlayer implements Player {
         time: targetTime,
         abortSignal: this.#abort.signal,
       });
-      const messages = await expandH265SeekBackfill(
+      // Some video codecs (e.g. H.265) cannot decode a P/B-frame in isolation, so on a backward
+      // seek we expand the backfill to include the preceding GOP. This is a no-op for codecs and
+      // schemas that don't need it, keeping the player itself codec-agnostic.
+      const messages = await expandVideoSeekBackfill(
         backfillMessages,
         this.#bufferedSource.getBackfillMessages.bind(this.#bufferedSource),
         () => this.#abort?.signal,

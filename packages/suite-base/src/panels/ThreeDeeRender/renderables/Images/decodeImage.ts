@@ -23,7 +23,14 @@ import {
   decodeUYVY,
   decodeYUYV,
 } from "@lichtblick/den/image";
-import { H264 as H264Parser, H265 as H265Parser, VideoPlayer } from "@lichtblick/den/video";
+import {
+  H264 as H264Parser,
+  H265 as H265Parser,
+  VideoCodec,
+  VideoPlayer,
+  canonicalVideoCodec,
+  isVideoKeyframe as isVideoKeyframeData,
+} from "@lichtblick/den/video";
 import { toNanoSec } from "@lichtblick/rostime";
 
 import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
@@ -31,30 +38,9 @@ import { PreparedVideoFrame, PreparedVideoFrameStatus, PrepareVideoFrameContext 
 import { Image as RosImage } from "../../ros";
 import { ColorModeSettings, getColorConverter } from "../colorMode";
 
-/**
- * Canonical codec identifier used internally so the rest of the renderer does not need to know
- * that some recordings tag H.265 streams as "hevc" while others tag them as "h265".
- */
-export enum VideoCodec {
-  H264 = "h264",
-  H265 = "h265",
-}
-
-/**
- * Maps an external `CompressedVideo.format` string to the canonical {@link VideoCodec}, or returns
- * undefined if the format is not a recognized video codec. This is the single boundary where the
- * "hevc" alias is normalized to {@link VideoCodec.H265}.
- */
-export function canonicalVideoCodec(format: string): VideoCodec | undefined {
-  switch (format) {
-    case "h264":
-      return VideoCodec.H264;
-    case "h265":
-    case "hevc":
-      return VideoCodec.H265;
-  }
-  return undefined;
-}
+// Codec normalization (`VideoCodec`, `canonicalVideoCodec`, `isVideoKeyframe`) lives in
+// `@lichtblick/den/video` so both the renderer and the player-side seek backfill share a single
+// source of truth.
 
 export async function decodeCompressedImageToBitmap(
   image: CompressedImageTypes,
@@ -65,14 +51,7 @@ export async function decodeCompressedImageToBitmap(
 }
 
 export function isVideoKeyframe(frameMsg: CompressedVideo): boolean {
-  switch (canonicalVideoCodec(frameMsg.format)) {
-    case VideoCodec.H264:
-      // Search for an IDR NAL unit to determine if this is a keyframe.
-      return H264Parser.IsKeyframe(frameMsg.data);
-    case VideoCodec.H265:
-      return H265Parser.IsKeyframe(frameMsg.data);
-  }
-  return false;
+  return isVideoKeyframeData(frameMsg.format, frameMsg.data);
 }
 
 export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
