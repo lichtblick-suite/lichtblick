@@ -66,8 +66,10 @@ import {
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Images/ImageRenderable";
 import {
   AnyImage,
+  CompressedVideo,
   getFrameIdFromImage,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Images/ImageTypes";
+import { filterCompressedVideoQueue } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/Images/filterCompressedVideoQueue";
 import {
   cameraInfosEqual,
   normalizeCameraInfo,
@@ -275,7 +277,7 @@ export class ImageMode
         subscription: {
           handler: this.messageHandler.handleCompressedVideo,
           shouldSubscribe: this.imageShouldSubscribe,
-          filterQueue: this.#filterMessageQueue.bind(this),
+          filterQueue: this.#filterCompressedVideoMessageQueue.bind(this),
         },
       },
     ];
@@ -288,6 +290,22 @@ export class ImageMode
       return msgs.slice(msgs.length - 1);
     }
     return msgs;
+  }
+
+  /**
+   * Compressed video filter: same shape as `#filterMessageQueue` but aware that HEVC P-frames
+   * cannot be dropped without losing decodability. When synchronization is on we keep every
+   * message (sync needs the full timeline); when it is off we delegate to
+   * {@link filterCompressedVideoQueue}, which trims to the latest frame for non-HEVC topics and
+   * to the active GOP for HEVC topics.
+   */
+  #filterCompressedVideoMessageQueue(
+    msgs: MessageEvent<CompressedVideo>[],
+  ): MessageEvent<CompressedVideo>[] {
+    if (this.getImageModeSettings().synchronize) {
+      return msgs;
+    }
+    return filterCompressedVideoQueue(msgs);
   }
 
   public override dispose(): void {
@@ -304,6 +322,7 @@ export class ImageMode
     // To avoid flickering while seeking or changing subscriptions, we avoid clearing the
     // ImageRenderable for a short timeout. When a new image message arrives, we cancel the timeout,
     // so the old image will continue displaying until the new one has been decoded.
+    this.imageRenderable?.videoPlayer?.resetForSeek();
     if (this.#removeImageTimeout == undefined) {
       this.#removeImageTimeout = setTimeout(() => {
         this.#removeImageTimeout = undefined;

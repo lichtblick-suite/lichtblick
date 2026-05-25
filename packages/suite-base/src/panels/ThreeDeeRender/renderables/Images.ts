@@ -23,6 +23,7 @@ import {
   ImageUserData,
 } from "./Images/ImageRenderable";
 import { ALL_CAMERA_INFO_SCHEMAS, AnyImage, CompressedVideo } from "./Images/ImageTypes";
+import { filterCompressedVideoQueue } from "./Images/filterCompressedVideoQueue";
 import {
   normalizeCompressedImage,
   normalizeCompressedVideo,
@@ -146,7 +147,9 @@ export class Images extends SceneExtension<ImageRenderable> {
         schemaNames: COMPRESSED_VIDEO_DATATYPES,
         subscription: {
           handler: this.#handleCompressedVideo,
-          filterQueue: onlyLastByTopicMessage,
+          // For non-HEVC streams this collapses to the original onlyLastByTopicMessage behavior.
+          // For HEVC, the filter preserves the active GOP so P-frames are still decodable.
+          filterQueue: filterCompressedVideoQueue,
         },
       },
     ];

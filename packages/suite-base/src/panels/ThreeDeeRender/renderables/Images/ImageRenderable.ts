@@ -9,7 +9,7 @@ import * as _ from "lodash-es";
 import * as THREE from "three";
 import { assert } from "ts-essentials";
 
-import { VideoPlayer } from "@lichtblick/den/video";
+import { EncodedVideoFrame, VideoPlayer } from "@lichtblick/den/video";
 import Logger from "@lichtblick/log";
 import { toNanoSec } from "@lichtblick/rostime";
 import { ICameraModel } from "@lichtblick/suite";
@@ -26,11 +26,14 @@ import { RosValue } from "@lichtblick/suite-base/players/types";
 
 import { AnyImage, CompressedVideo } from "./ImageTypes";
 import {
+  VideoCodec,
+  canonicalVideoCodec,
   decodeCompressedImageToBitmap,
   decodeCompressedVideoToBitmap,
   emptyVideoFrame,
-  getVideoDecoderConfig,
+  prepareVideoFrame,
 } from "./decodeImage";
+import { PreparedVideoFrame, PreparedVideoFrameStatus } from "./types";
 import { CameraInfo } from "../../ros";
 import {
   DECODE_IMAGE_ERR_KEY,
@@ -67,7 +70,48 @@ export const IMAGE_RENDERABLE_DEFAULT_SETTINGS: ImageRenderableSettings = {
   contrast: INITIAL_CONTRAST,
 };
 
-const VIDEO_FORMATS = new Set(["h264"]);
+/** Codecs that need a GOP replay (keyframe + intervening P-frames) to decode any non-keyframe. */
+function needsDependencyChain(codec: VideoCodec | undefined): boolean {
+  return codec === VideoCodec.H265;
+}
+
+const VIDEO_TIMESTAMP_JITTER_NS = 5_000_000n;
+
+/**
+ * Per-renderable cap on the GOP backfill cache (`#videoFrameHistory`).
+ *
+ * The cache lets us reconstruct a frame on a backward seek by replaying the most recent keyframe
+ * plus all P-frames up to the seek target. To keep that replay possible without unbounded growth
+ * we need to hold at least one full GOP plus some slack for codec implementations that emit
+ * longer-than-typical key-to-key distances.
+ *
+ * Real-world H.265 recordings encountered so far use keyframe intervals on the order of 1–10 s
+ * (≈30–600 frames at 30–60 fps). 2000 frames is roughly 30–60 s of history, which covers several
+ * GOPs of slack while bounding the memory footprint of the cached encoded payloads to the order
+ * of tens of MB per topic even on high-bitrate streams. If a recording ever needs a deeper cache,
+ * this is the single knob to raise — but increasing it linearly increases per-renderable memory
+ * use, so prefer fixing pathological GOP cadence at the source first.
+ */
+const MAX_VIDEO_FRAME_HISTORY = 2000;
+
+type PendingVideoDecode = {
+  image: AnyImage;
+  resizeWidth?: number;
+  onDecoded?: () => void;
+  seq: number;
+};
+
+type PreparedIncomingVideoFrame = {
+  preparedFrame: PreparedVideoFrame;
+  messageTime: bigint;
+  timestampMicros: number;
+};
+
+type VideoFrameHistoryEntry = {
+  frame: CompressedVideo;
+  preparedFrame: PreparedVideoFrame;
+  timestampMicros: number;
+};
 
 export type ImageUserData = BaseUserData & {
   topic: string;
@@ -106,6 +150,16 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   #receivedImageSequenceNumber = 0;
   #displayedImageSequenceNumber = 0;
   #showingErrorImage = false;
+  #cachedVideoDecoderConfig: VideoDecoderConfig | undefined;
+  #videoFirstMessageTime: bigint | undefined;
+  #lastVideoMessageTime: bigint | undefined;
+  #lastQueuedVideoMessageTime: bigint | undefined;
+  #waitingForVideoKeyframe = false;
+  #canReplayVideoGop = false;
+  #isDrainingVideoDecodes = false;
+  #pendingVideoDecode: PendingVideoDecode | undefined;
+  readonly #pendingVideoDecodeQueue: PendingVideoDecode[] = [];
+  #videoFrameHistory: VideoFrameHistoryEntry[] = [];
 
   #disposed = false;
 
@@ -126,7 +180,14 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.userData.texture?.dispose();
     this.userData.material?.dispose();
     this.userData.geometry?.dispose();
+    this.videoPlayer?.close();
     this.decoder?.terminate();
+    // Release the GOP backfill cache. Each entry holds a copy of the encoded frame bytes; under
+    // a high-bitrate stream the cache can hold up to MAX_VIDEO_FRAME_HISTORY entries, so failing
+    // to clear it here leaks tens of megabytes per disposed renderable.
+    this.#videoFrameHistory.length = 0;
+    this.#pendingVideoDecodeQueue.length = 0;
+    this.#pendingVideoDecode = undefined;
     super.dispose();
   }
 
@@ -211,38 +272,93 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.userData.image = image;
 
     const seq = ++this.#receivedImageSequenceNumber;
-    const decodePromise = this.decodeImage(image, resizeWidth);
+    const codec = "format" in image ? canonicalVideoCodec(image.format) : undefined;
+    if (codec != undefined) {
+      const pendingDecode = { image, resizeWidth, onDecoded, seq };
+      if (needsDependencyChain(codec)) {
+        const videoImage = image as CompressedVideo;
+        const messageTime = toNanoSec(videoImage.timestamp);
+        if (messageTime === this.#lastQueuedVideoMessageTime) {
+          return;
+        }
+        this.#lastQueuedVideoMessageTime = messageTime;
+        this.#pendingVideoDecodeQueue.push(pendingDecode);
+      } else {
+        this.#pendingVideoDecode = pendingDecode;
+      }
+      if (!this.#isDrainingVideoDecodes) {
+        this.#isDrainingVideoDecodes = true;
+        void this.#drainPendingVideoDecodes();
+      }
+      return;
+    }
 
-    decodePromise
-      .then((result) => {
-        if (this.isDisposed()) {
-          return;
-        }
-        // prevent displaying an image older than the one currently displayed
-        if (this.#displayedImageSequenceNumber > seq) {
-          return;
-        }
-        this.#displayedImageSequenceNumber = seq;
-        this.#decodedImage = result;
-        this.#textureNeedsUpdate = true;
-        this.update();
-        this.#showingErrorImage = false;
+    void this.#startDecode(image, seq, resizeWidth, onDecoded);
+  }
 
-        onDecoded?.();
-        this.removeError(DECODE_IMAGE_ERR_KEY);
-        this.renderer.queueAnimationFrame();
-      })
-      .catch((err: unknown) => {
-        log.error(err);
-        if (this.isDisposed()) {
-          return;
+  #hasPendingVideoDecode(): boolean {
+    return this.#pendingVideoDecodeQueue.length > 0 || this.#pendingVideoDecode != undefined;
+  }
+
+  async #drainPendingVideoDecodes(): Promise<void> {
+    try {
+      while (this.#hasPendingVideoDecode()) {
+        const pendingDecode = this.#pendingVideoDecodeQueue.shift() ?? this.#pendingVideoDecode;
+        if (pendingDecode == undefined) {
+          break;
         }
-        // avoid needing to recreate error image if it already shown
-        if (!this.#showingErrorImage) {
-          void this.#setErrorImage(seq, onDecoded);
+        if (pendingDecode === this.#pendingVideoDecode) {
+          this.#pendingVideoDecode = undefined;
         }
-        this.addError(DECODE_IMAGE_ERR_KEY, `Error decoding image: ${(err as Error).message}`);
-      });
+        await this.#startDecode(
+          pendingDecode.image,
+          pendingDecode.seq,
+          pendingDecode.resizeWidth,
+          pendingDecode.onDecoded,
+        );
+      }
+    } finally {
+      this.#isDrainingVideoDecodes = false;
+      if (this.#hasPendingVideoDecode()) {
+        this.#isDrainingVideoDecodes = true;
+        void this.#drainPendingVideoDecodes();
+      }
+    }
+  }
+
+  async #startDecode(
+    image: AnyImage,
+    seq: number,
+    resizeWidth?: number,
+    onDecoded?: () => void,
+  ): Promise<void> {
+    try {
+      const result = await this.decodeImage(image, resizeWidth);
+      if (this.isDisposed()) {
+        return;
+      }
+      if (this.#displayedImageSequenceNumber > seq) {
+        return;
+      }
+      this.#displayedImageSequenceNumber = seq;
+      this.#decodedImage = result;
+      this.#textureNeedsUpdate = true;
+      this.update();
+      this.#showingErrorImage = false;
+
+      onDecoded?.();
+      this.removeError(DECODE_IMAGE_ERR_KEY);
+      this.renderer.queueAnimationFrame();
+    } catch (err) {
+      log.error(err);
+      if (this.isDisposed()) {
+        return;
+      }
+      if (!this.#showingErrorImage) {
+        await this.#setErrorImage(seq, onDecoded);
+      }
+      this.addError(DECODE_IMAGE_ERR_KEY, `Error decoding image: ${(err as Error).message}`);
+    }
   }
 
   async #setErrorImage(seq: number, onDecoded?: () => void): Promise<void> {
@@ -262,12 +378,154 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.renderer.queueAnimationFrame();
   }
 
+  #prepareIncomingVideoFrame(frameMsg: CompressedVideo): PreparedIncomingVideoFrame {
+    const messageTime = toNanoSec(frameMsg.timestamp);
+    if (
+      this.#lastVideoMessageTime != undefined &&
+      messageTime < this.#lastVideoMessageTime &&
+      this.#lastVideoMessageTime - messageTime > VIDEO_TIMESTAMP_JITTER_NS
+    ) {
+      this.videoPlayer?.resetForSeek();
+      this.#waitingForVideoKeyframe = true;
+      this.#canReplayVideoGop = true;
+      this.#lastQueuedVideoMessageTime = messageTime;
+      this.#pendingVideoDecodeQueue.length = 0;
+      // The cached frames newer than the new playback position are from the abandoned forward
+      // portion of playback — they cannot participate in a GOP replay to a target at or before
+      // `messageTime`. Drop them now so the cache footprint tracks the actual replay window
+      // instead of waiting for the MAX_VIDEO_FRAME_HISTORY cap to evict them. The frames at or
+      // before the seek target are still useful: `#decodeVideoGopToTarget` walks backward from
+      // the target to find the keyframe that anchors the replay chain.
+      if (this.#videoFirstMessageTime != undefined && this.#videoFrameHistory.length > 0) {
+        const seekTargetMicros = Number((messageTime - this.#videoFirstMessageTime) / 1000n);
+        let writeIndex = 0;
+        for (const entry of this.#videoFrameHistory) {
+          if (entry.timestampMicros <= seekTargetMicros) {
+            this.#videoFrameHistory[writeIndex++] = entry;
+          }
+        }
+        this.#videoFrameHistory.length = writeIndex;
+      }
+    }
+    this.#lastVideoMessageTime = messageTime;
+    this.#videoFirstMessageTime ??= messageTime;
+
+    const preparedFrame = prepareVideoFrame(frameMsg);
+
+    if (preparedFrame.decoderConfig != undefined) {
+      this.#cachedVideoDecoderConfig = preparedFrame.decoderConfig;
+    }
+    const timestampMicros = Number((messageTime - this.#videoFirstMessageTime) / 1000n);
+    this.#rememberVideoFrame(frameMsg, preparedFrame, timestampMicros);
+
+    return { preparedFrame, messageTime, timestampMicros };
+  }
+
+  #rememberVideoFrame(
+    frame: CompressedVideo,
+    preparedFrame: PreparedVideoFrame,
+    timestampMicros: number,
+  ): void {
+    if (!needsDependencyChain(canonicalVideoCodec(frame.format))) {
+      return;
+    }
+    const historyPreparedFrame: PreparedVideoFrame = {
+      ...preparedFrame,
+      data: preparedFrame.data.slice(),
+    };
+    const existingIndex = this.#videoFrameHistory.findIndex(
+      (entry) => entry.timestampMicros === timestampMicros,
+    );
+    if (existingIndex >= 0) {
+      this.#videoFrameHistory[existingIndex] = {
+        frame,
+        preparedFrame: historyPreparedFrame,
+        timestampMicros,
+      };
+      return;
+    }
+    this.#videoFrameHistory.push({ frame, preparedFrame: historyPreparedFrame, timestampMicros });
+    if (this.#videoFrameHistory.length > MAX_VIDEO_FRAME_HISTORY) {
+      this.#videoFrameHistory.splice(0, this.#videoFrameHistory.length - MAX_VIDEO_FRAME_HISTORY);
+    }
+  }
+
+  #gopForTargetFrame(targetTimestampMicros: number): VideoFrameHistoryEntry[] | undefined {
+    const targetIndex = this.#videoFrameHistory.findIndex(
+      (entry) => entry.timestampMicros === targetTimestampMicros,
+    );
+    if (targetIndex < 0) {
+      return undefined;
+    }
+    for (let index = targetIndex; index >= 0; index--) {
+      const entry = this.#videoFrameHistory[index];
+      if (entry?.preparedFrame.type === "key") {
+        return this.#videoFrameHistory.slice(index, targetIndex + 1);
+      }
+    }
+    return undefined;
+  }
+
+  protected handleVideoPlayerError(err: Error): void {
+    this.#waitingForVideoKeyframe = true;
+    this.#canReplayVideoGop = false;
+    this.videoPlayer?.resetForSeek();
+    // The cached GOP cannot be replayed after a player error: the prior decoder state is gone,
+    // and re-feeding the same chain will hit the same failure. Clear the history so the next
+    // keyframe starts a fresh cache instead of accumulating on top of poisoned entries.
+    this.#videoFrameHistory.length = 0;
+    log.error(err);
+    this.addError(DECODE_IMAGE_ERR_KEY, `Error decoding video: ${err.message}`);
+  }
+
+  async #decodeVideoGopToTarget(
+    targetFrame: CompressedVideo,
+    resizeWidth?: number,
+  ): Promise<ImageBitmap | undefined> {
+    if (!this.videoPlayer || this.#videoFirstMessageTime == undefined) {
+      return undefined;
+    }
+    const targetTimestampMicros = Number(
+      (toNanoSec(targetFrame.timestamp) - this.#videoFirstMessageTime) / 1000n,
+    );
+    const gop = this.#gopForTargetFrame(targetTimestampMicros);
+    if (gop == undefined || gop.length === 0) {
+      return undefined;
+    }
+    const decoderConfig = gop[0]?.preparedFrame.decoderConfig ?? this.#cachedVideoDecoderConfig;
+    if (decoderConfig == undefined) {
+      return undefined;
+    }
+
+    this.videoPlayer.resetForSeek();
+    await this.videoPlayer.init(decoderConfig);
+    const result = await this.videoPlayer.decodeFrames(
+      gop.map(
+        (entry): EncodedVideoFrame => ({
+          data: entry.preparedFrame.data.slice(),
+          timestampMicros: entry.timestampMicros,
+          type: entry.preparedFrame.type,
+        }),
+      ),
+    );
+    if (result.type !== "target") {
+      return undefined;
+    }
+
+    const imageBitmap = await globalThis.createImageBitmap(result.frame, { resizeWidth });
+    this.videoPlayer.lastImageBitmap = imageBitmap;
+    result.frame.close();
+    this.#waitingForVideoKeyframe = false;
+    this.#canReplayVideoGop = false;
+    return imageBitmap;
+  }
+
   protected async decodeImage(
     image: AnyImage,
     resizeWidth?: number,
   ): Promise<ImageBitmap | ImageData> {
     if ("format" in image) {
-      if (!VIDEO_FORMATS.has(image.format)) {
+      if (canonicalVideoCodec(image.format) == undefined) {
         return await decodeCompressedImageToBitmap(image, resizeWidth);
       } else {
         const frameMsg = image as CompressedVideo;
@@ -284,34 +542,56 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         }
 
         if (!this.videoPlayer) {
+          if (!VideoPlayer.IsSupported()) {
+            throw new Error("WebCodecs VideoDecoder is not available in this browser");
+          }
           this.videoPlayer = new VideoPlayer();
           this.videoPlayer.on("error", (err) => {
-            log.error(err);
-            this.addError(DECODE_IMAGE_ERR_KEY, `Error decoding video: ${err.message}`);
+            this.handleVideoPlayerError(err);
           });
           this.videoPlayer.on("warn", (msg) => {
             log.warn(msg);
           });
         }
         const videoPlayer = this.videoPlayer;
+        const { preparedFrame } = this.#prepareIncomingVideoFrame(frameMsg);
+
+        if (preparedFrame.status === PreparedVideoFrameStatus.UnsupportedBFrame) {
+          return videoPlayer.lastImageBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
+        }
+        if (this.#waitingForVideoKeyframe && preparedFrame.type !== "key") {
+          const replayBitmap = this.#canReplayVideoGop
+            ? await this.#decodeVideoGopToTarget(frameMsg, resizeWidth)
+            : undefined;
+          return replayBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
+        }
 
         // Initialize the video player if needed
-        if (!videoPlayer.isInitialized()) {
-          const decoderConfig = getVideoDecoderConfig(frameMsg);
+        if (!videoPlayer.isInitialized() || this.#waitingForVideoKeyframe) {
+          const decoderConfig = preparedFrame.decoderConfig ?? this.#cachedVideoDecoderConfig;
           if (decoderConfig != undefined) {
+            if (preparedFrame.type !== "key") {
+              const replayBitmap = this.#canReplayVideoGop
+                ? await this.#decodeVideoGopToTarget(frameMsg, resizeWidth)
+                : undefined;
+              return replayBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
+            }
             await videoPlayer.init(decoderConfig);
+            this.#waitingForVideoKeyframe = false;
+            this.#canReplayVideoGop = false;
           } else {
-            // Raise error so the caller can catch it
-            throw new Error("Waiting for keyframe");
+            const detail = preparedFrame.diagnostics ?? "no decoder configuration available";
+            throw new Error(`Waiting for keyframe (${detail})`);
           }
         }
 
-        assert(this.userData.firstMessageTime != undefined, "firstMessageTime must be set");
+        assert(this.#videoFirstMessageTime != undefined, "firstMessageTime must be set");
 
         return await decodeCompressedVideoToBitmap(
           frameMsg,
+          preparedFrame,
           videoPlayer,
-          this.userData.firstMessageTime,
+          this.#videoFirstMessageTime,
           resizeWidth,
         );
       }
