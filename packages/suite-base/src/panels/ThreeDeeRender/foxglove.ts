@@ -5,14 +5,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  COMPRESSED_VIDEO_DATATYPES,
-  addFoxgloveSchema,
-} from "@lichtblick/suite-base/util/foxgloveSchemas";
+import { addFoxgloveSchema } from "@lichtblick/suite-base/util/foxgloveSchemas";
 
 // Re-exported so existing consumers keep importing it from here; the single source of truth lives
 // in `util/foxgloveSchemas` so the player layer can share it without importing a panel module.
-export { COMPRESSED_VIDEO_DATATYPES };
+export { COMPRESSED_VIDEO_DATATYPES } from "@lichtblick/suite-base/util/foxgloveSchemas";
 
 export const FRAME_TRANSFORM_DATATYPES = new Set<string>();
 addFoxgloveSchema(FRAME_TRANSFORM_DATATYPES, "foxglove.FrameTransform");
