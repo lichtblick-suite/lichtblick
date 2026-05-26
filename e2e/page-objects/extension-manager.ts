@@ -16,9 +16,7 @@ export class ExtensionManager {
   }
 
   public findExtension(name: string, version?: string): Locator {
-    let entry = this.page
-      .locator('[data-testid="extension-list-entry"]')
-      .filter({ hasText: name });
+    let entry = this.page.locator('[data-testid="extension-list-entry"]').filter({ hasText: name });
 
     if (version) {
       entry = entry.filter({ hasText: version });

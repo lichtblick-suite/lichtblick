@@ -7,10 +7,7 @@ export class LayoutManager {
   public constructor(private readonly page: Page) {}
 
   public async openDefaultLayout(): Promise<void> {
-    await this.page
-      .getByTestId("layout-list-item")
-      .getByText("Default", { exact: true })
-      .click();
+    await this.page.getByTestId("layout-list-item").getByText("Default", { exact: true }).click();
   }
 
   public async createNewLayout(): Promise<void> {
@@ -18,10 +15,7 @@ export class LayoutManager {
   }
 
   public async selectLayout(name: string): Promise<void> {
-    await this.page
-      .getByTestId("layout-list-item")
-      .getByText(name, { exact: true })
-      .click();
+    await this.page.getByTestId("layout-list-item").getByText(name, { exact: true }).click();
   }
 
   public async selectPanel(panelName: string): Promise<void> {
