@@ -91,8 +91,11 @@ const EMPTY_ARRAY = Object.freeze([]);
  * function to fetch further backfill from the source, and a getter for the current abort signal,
  * and returns the (possibly expanded) message set. Kept generic so the player carries no
  * codec-specific knowledge; the data-source layer decides whether to supply one.
+ *
+ * Not exported: it is referenced only by `IterablePlayerOptions` below; consumers supply a
+ * structurally-compatible function (e.g. `expandVideoSeekBackfill`) without naming the type.
  */
-export type ExpandBackfill = (
+type ExpandBackfill = (
   messages: MessageEvent[],
   getBackfillMessages: (args: GetBackfillMessagesArgs) => Promise<MessageEvent[]>,
   getAbortSignal: () => AbortSignal | undefined,
