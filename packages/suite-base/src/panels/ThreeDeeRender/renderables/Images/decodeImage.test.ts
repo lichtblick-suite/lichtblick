@@ -16,7 +16,7 @@ import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuild
 import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
 import {
   decodeCompressedImageToBitmap,
-  isVideoKeyframe,
+  isCompressedVideoKeyframe,
   getVideoDecoderConfig,
   prepareVideoFrame,
   decodeCompressedVideoToBitmap,
@@ -53,13 +53,13 @@ describe("decodeCompressedImageToBitmap", () => {
   });
 });
 
-describe("isVideoKeyframe", () => {
+describe("isCompressedVideoKeyframe", () => {
   it("should return true for a keyframe", () => {
     const mockVideoFrame = createMockVideoFrame({
       data: new Uint8Array([0x65]), // Mock IDR NAL unit
     });
     jest.spyOn(H264Parser, "IsKeyframe").mockReturnValue(true);
-    expect(isVideoKeyframe(mockVideoFrame)).toBe(true);
+    expect(isCompressedVideoKeyframe(mockVideoFrame)).toBe(true);
   });
 
   it("should return false for a non-keyframe", () => {
@@ -67,7 +67,7 @@ describe("isVideoKeyframe", () => {
       data: new Uint8Array([0x41]), // Mock non-IDR NAL unit
     });
     jest.spyOn(H264Parser, "IsKeyframe").mockReturnValue(false);
-    expect(isVideoKeyframe(mockVideoFrame)).toBe(false);
+    expect(isCompressedVideoKeyframe(mockVideoFrame)).toBe(false);
   });
 
   it("should use H265 keyframe detection for h265 format", () => {
@@ -76,7 +76,7 @@ describe("isVideoKeyframe", () => {
       format: "h265",
     });
     jest.spyOn(H265Parser, "IsKeyframe").mockReturnValue(true);
-    expect(isVideoKeyframe(mockVideoFrame)).toBe(true);
+    expect(isCompressedVideoKeyframe(mockVideoFrame)).toBe(true);
   });
 });
 

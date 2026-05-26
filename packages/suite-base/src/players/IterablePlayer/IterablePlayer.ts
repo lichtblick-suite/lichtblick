@@ -26,7 +26,6 @@ import { Immutable, MessageEvent, Metadata, ParameterValue } from "@lichtblick/s
 import { DeserializedSourceWrapper } from "@lichtblick/suite-base/players/IterablePlayer/DeserializedSourceWrapper";
 import { DeserializingIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/DeserializingIterableSource";
 import { freezeMetadata } from "@lichtblick/suite-base/players/IterablePlayer/freezeMetadata";
-import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsCollector";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
@@ -54,6 +53,7 @@ import delay from "@lichtblick/suite-base/util/delay";
 import { BlockLoader } from "./BlockLoader";
 import { BufferedIterableSource } from "./BufferedIterableSource";
 import {
+  GetBackfillMessagesArgs,
   IDeserializedIterableSource,
   ISerializedIterableSource,
   IteratorResult,
@@ -85,6 +85,19 @@ const SEEK_ON_START_NS = BigInt(99 * 1e6);
 const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
 
 const EMPTY_ARRAY = Object.freeze([]);
+/**
+ * Hook invoked on a seek to optionally expand the backfill messages before they are emitted, e.g.
+ * to replay a video GOP so a P/B-frame is decodable. It receives the raw backfill messages, a
+ * function to fetch further backfill from the source, and a getter for the current abort signal,
+ * and returns the (possibly expanded) message set. Kept generic so the player carries no
+ * codec-specific knowledge; the data-source layer decides whether to supply one.
+ */
+export type ExpandBackfill = (
+  messages: MessageEvent[],
+  getBackfillMessages: (args: GetBackfillMessagesArgs) => Promise<MessageEvent[]>,
+  getAbortSignal: () => AbortSignal | undefined,
+) => Promise<MessageEvent[]>;
+
 export type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
 
@@ -106,6 +119,10 @@ export type IterablePlayerOptions = {
 
   // Max. time that messages will be buffered ahead for smoother playback. (default: 10sec)
   readAheadDuration?: Time;
+
+  // Optional hook to expand the seek backfill (e.g. replay a video GOP). No-op when omitted,
+  // keeping the player free of codec-specific knowledge.
+  expandBackfill?: ExpandBackfill;
 };
 
 type IterablePlayerState =
@@ -138,6 +155,7 @@ export class IterablePlayer implements Player {
   #start?: Time;
   #end?: Time;
   #enablePreload = true;
+  readonly #expandBackfill?: ExpandBackfill;
 
   // next read start time indicates where to start reading for the next tick
   // after a tick read, it is set to 1nsec past the end of the read operation (preparing for the next tick)
@@ -213,6 +231,7 @@ export class IterablePlayer implements Player {
       enablePreload,
       sourceId,
       readAheadDuration = { sec: 10, nsec: 0 },
+      expandBackfill,
     } = options;
 
     this.#iterableSource = source;
@@ -237,6 +256,7 @@ export class IterablePlayer implements Player {
 
     this.#enablePreload = enablePreload ?? true;
     this.#sourceId = sourceId;
+    this.#expandBackfill = expandBackfill;
 
     this.isClosed = new Promise((resolveClose) => {
       this.#resolveIsClosed = resolveClose;
@@ -853,14 +873,16 @@ export class IterablePlayer implements Player {
         time: targetTime,
         abortSignal: this.#abort.signal,
       });
-      // Some video codecs (e.g. H.265) cannot decode a P/B-frame in isolation, so on a backward
-      // seek we expand the backfill to include the preceding GOP. This is a no-op for codecs and
-      // schemas that don't need it, keeping the player itself codec-agnostic.
-      const messages = await expandVideoSeekBackfill(
-        backfillMessages,
-        this.#bufferedSource.getBackfillMessages.bind(this.#bufferedSource),
-        () => this.#abort?.signal,
-      );
+      // An optional, source-supplied hook may expand the backfill before emit (e.g. replaying a
+      // video GOP so a P/B-frame is decodable). When no hook is supplied the raw backfill is used
+      // unchanged, keeping the player itself free of codec-specific knowledge.
+      const messages = this.#expandBackfill
+        ? await this.#expandBackfill(
+            backfillMessages,
+            this.#bufferedSource.getBackfillMessages.bind(this.#bufferedSource),
+            () => this.#abort?.signal,
+          )
+        : backfillMessages;
 
       // We've successfully loaded the messages and will emit those, no longer need the ackTimeout
       clearTimeout(seekAckTimeout);

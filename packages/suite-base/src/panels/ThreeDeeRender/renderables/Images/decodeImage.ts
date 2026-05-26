@@ -29,7 +29,7 @@ import {
   VideoCodec,
   VideoPlayer,
   canonicalVideoCodec,
-  isVideoKeyframe as isVideoKeyframeData,
+  isVideoKeyframe,
 } from "@lichtblick/den/video";
 import { toNanoSec } from "@lichtblick/rostime";
 
@@ -50,8 +50,8 @@ export async function decodeCompressedImageToBitmap(
   return await createImageBitmap(bitmapData, { resizeWidth });
 }
 
-export function isVideoKeyframe(frameMsg: CompressedVideo): boolean {
-  return isVideoKeyframeData(frameMsg.format, frameMsg.data);
+export function isCompressedVideoKeyframe(frameMsg: CompressedVideo): boolean {
+  return isVideoKeyframe(frameMsg.format, frameMsg.data);
 }
 
 export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
@@ -108,7 +108,7 @@ export function prepareVideoFrame(
         data: frameMsg.data,
         decoderConfig: getVideoDecoderConfig(frameMsg),
         status: PreparedVideoFrameStatus.Ok,
-        type: isVideoKeyframe(frameMsg) ? "key" : "delta",
+        type: isCompressedVideoKeyframe(frameMsg) ? "key" : "delta",
       };
   }
 }

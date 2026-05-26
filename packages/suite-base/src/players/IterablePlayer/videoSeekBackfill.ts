@@ -12,10 +12,10 @@ import {
 } from "@lichtblick/den/video";
 import { compare, fromNanoSec, toNanoSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
+import { COMPRESSED_VIDEO_DATATYPES } from "@lichtblick/suite-base/util/foxgloveSchemas";
 
 import { GetBackfillMessagesArgs } from "./IIterableSource";
 
-export const FOXGLOVE_COMPRESSED_VIDEO_SCHEMA = "foxglove.CompressedVideo";
 export const MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES = 2000;
 
 type CompressedVideoLike = {
@@ -32,7 +32,7 @@ export type GetBackfillMessages = (args: GetBackfillMessagesArgs) => Promise<Mes
  * decision is delegated to {@link videoCodecNeedsKeyframeReplay} so this stays codec-agnostic.
  */
 export function needsGopBackfill(message: MessageEvent): boolean {
-  if (message.schemaName !== FOXGLOVE_COMPRESSED_VIDEO_SCHEMA) {
+  if (!COMPRESSED_VIDEO_DATATYPES.has(message.schemaName)) {
     return false;
   }
   const video = message.message as CompressedVideoLike;
@@ -42,6 +42,13 @@ export function needsGopBackfill(message: MessageEvent): boolean {
   );
 }
 
+/**
+ * Identity used to merge the fetched GOP back into the backfill set, deduplicating the seek-target
+ * frame that legitimately appears in both. Keyed on topic + receive time: within a single video
+ * topic, compressed-video frames are emitted at strictly increasing, distinct receive times, so two
+ * entries sharing this key are necessarily the same logical frame. (A genuine topic + exact-time
+ * collision with differing content would imply a malformed stream and is not a case we support.)
+ */
 export function messageKey(message: MessageEvent): string {
   return `${message.topic}:${message.receiveTime.sec}:${message.receiveTime.nsec}`;
 }

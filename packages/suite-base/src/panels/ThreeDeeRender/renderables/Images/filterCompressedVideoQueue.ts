@@ -11,7 +11,7 @@ import { canonicalVideoCodec, videoCodecNeedsKeyframeReplay } from "@lichtblick/
 import { MessageEvent } from "@lichtblick/suite";
 
 import { CompressedVideo } from "./ImageTypes";
-import { isVideoKeyframe } from "./decodeImage";
+import { isCompressedVideoKeyframe } from "./decodeImage";
 
 /**
  * Filters the per-frame queue for the `CompressedVideo` subscription.
@@ -68,7 +68,7 @@ function keepFromLatestKeyframe(
 ): MessageEvent<CompressedVideo>[] {
   let keyIndex = -1;
   for (let i = topicMsgs.length - 1; i >= 0; i--) {
-    if (isVideoKeyframe(topicMsgs[i]!.message)) {
+    if (isCompressedVideoKeyframe(topicMsgs[i]!.message)) {
       keyIndex = i;
       break;
     }

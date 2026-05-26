@@ -8,7 +8,6 @@ import { MessageEvent } from "@lichtblick/suite";
 
 import { GetBackfillMessagesArgs } from "./IIterableSource";
 import {
-  FOXGLOVE_COMPRESSED_VIDEO_SCHEMA,
   MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES,
   expandVideoSeekBackfill,
   needsGopBackfill,
@@ -22,7 +21,7 @@ function makeMessage(
   const { sec = 0, nsec = 0, topic = "video", ...rest } = override;
   return {
     topic,
-    schemaName: FOXGLOVE_COMPRESSED_VIDEO_SCHEMA,
+    schemaName: "foxglove.CompressedVideo",
     receiveTime: { sec, nsec },
     message: { format: "h265", data: new Uint8Array([0x01]) },
     sizeInBytes: 1,
