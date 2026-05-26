@@ -283,6 +283,10 @@ export function makeConfig(
         module: /node_modules\/typescript\/lib\/typescript\.js$/,
         message: /Critical dependency: the request of a dependency is an expression/,
       },
+      {
+        module: /node_modules\/@protobufjs\/inquire\/index\.js$/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
     ],
   };
 }
