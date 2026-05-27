@@ -49,6 +49,29 @@ yarn test:e2e:summary
 yarn test:e2e:desktop:debug uninstall-extens
 ```
 
+## 🏷️ Test Categories
+
+All E2E tests are labeled with one of two tags that control which CI pipeline executes them:
+
+| Tag | When it runs | Criteria |
+|-----|-------------|----------|
+| `@smoke` | Every PR / every push | Critical user-path tests: opening files, basic player controls, primary layout and menu actions |
+| `@regression` | Nightly (02:00 UTC) + `develop` / `main` merges | Edge cases, keyboard shortcuts, extended scenarios, slower workflows (extensions, remote data) |
+
+### Run by category locally
+
+```bash
+# Smoke only
+yarn test:e2e:desktop:smoke
+yarn test:e2e:web:smoke
+
+# All tests (smoke + regression)
+yarn test:e2e:desktop
+yarn test:e2e:web
+```
+
+---
+
 ## 📊 Test Performance Analysis
 
 After running tests, you can generate a summary report showing test execution times:

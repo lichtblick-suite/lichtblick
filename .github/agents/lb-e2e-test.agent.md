@@ -16,7 +16,8 @@ You create Playwright E2E tests for the Lichtblick desktop (Electron) and web ap
 3. Read the **e2e-playwright-mcp** skill — `read_file(".github/skills/e2e-playwright-mcp/SKILL.md")`
 4. Read at least one **existing sibling spec file** in the same `e2e/tests/desktop/` subdirectory to match the exact style
 
-> **Critical Selector Rules:**
+> **Critical Rules:**
+> - **Tagging (mandatory)**: Every test **must** include `{ tag: "@smoke" }` or `{ tag: "@regression" }` as the second argument. Use `@smoke` for tests that cover the primary happy-path a user encounters immediately (opening files, basic player controls, primary layout and menu actions). Use `@regression` for edge cases, secondary interactions (e.g., keyboard shortcut variants), extended scenarios (e.g., speed changes, timestamp switching), or slower workflows (e.g., extensions, remote data). **Never emit a test without a tag.**
 > - **Menu items**: ALWAYS use `getByRole("menuitem", { name: "..." })`, NEVER `getByTestId(...)` for menu items — even if `data-testid` exists on the `<MenuItem>` in source code. This is a codebase convention.
 > - **Hidden action buttons**: Some UI elements have `visibility: hidden` and only appear on hover (e.g., layout row action buttons). You MUST `hover()` the parent element before clicking. Read the source component's `.style.ts` file to check for CSS visibility rules.
 
@@ -94,7 +95,7 @@ import { loadFiles } from "../../../fixtures/load-files";
  * WHEN <action>
  * THEN <expected outcome>
  */
-test("should <outcome> when <condition>", async ({ mainWindow }) => {
+test("should <outcome> when <condition>", { tag: "@smoke" }, async ({ mainWindow }) => {
     // Given
     await loadFiles({ mainWindow, filenames: "example.mcap" });
 
@@ -119,7 +120,7 @@ import { test, expect } from "@playwright/test";
  * WHEN <action>
  * THEN <expected outcome>
  */
-test("should <outcome> when <condition>", async ({ page }) => {
+test("should <outcome> when <condition>", { tag: "@smoke" }, async ({ page }) => {
     // Given
     await page.goto("http://localhost:8080");
     await page.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();

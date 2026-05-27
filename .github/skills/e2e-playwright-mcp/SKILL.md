@@ -55,6 +55,27 @@ Examples: `loop-playback.desktop.spec.ts`, `sync-playback.web.spec.ts`
 
 ---
 
+## Test Tagging
+
+Every test **must** carry exactly one tag. This controls which CI pipeline executes it.
+
+| Tag | CI trigger | Criteria |
+|---|---|---|
+| `@smoke` | Every PR push | Primary happy-path a user encounters immediately: opening files, basic player controls (play/pause), primary layout actions (create, open), and main menu navigation. Must be fast (<30 s). |
+| `@regression` | Nightly (02:00 UTC) + push to `develop` / `main` | Edge cases, secondary interactions (keyboard shortcuts, speed variants), extended scenarios (timestamp switching, topic filtering), or slower workflows (extensions, remote data, WebSocket). |
+
+### Syntax
+
+```typescript
+// Single test
+test("should open a file", { tag: "@smoke" }, async ({ mainWindow }) => { ... });
+
+// All tests in a describe block
+test.describe("extension lifecycle", { tag: "@regression" }, () => { ... });
+```
+
+---
+
 ## Fixtures Reference
 
 ### Desktop (`e2e/fixtures/electron.ts`)

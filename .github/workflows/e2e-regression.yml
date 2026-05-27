@@ -1,88 +1,29 @@
-name: CI
+name: E2E Regression
+
+# Runs the full E2E test suite (all @smoke + @regression tests).
+# Triggered nightly and on every push to the long-lived branches.
+# PR CI only runs @smoke tests (see ci.yml).
 
 on:
+  schedule:
+    - cron: "0 2 * * *" # Daily at 02:00 UTC
   push:
     branches: [develop, main]
-  pull_request:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-
-    # Run each command in parallel with the same setup steps.
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-        config:
-          # Specify names so that the GitHub branch protection settings for
-          # required checks don't need to change if we ever change the commands used.
-          - name: npm audit
-            command: yarn npm audit --all --recursive --severity moderate
-          - name: lint
-            command: |
-              # lint steps
-              set -x
-              yarn license-check
-              yarn dedupe --check
-              yarn run tsc --noEmit # typecheck files that are not included by webpack or package builds
-              yarn run lint:ci
-              yarn run lint:unused-exports
-              yarn run lint:dependencies
-          - name: packages
-            command: yarn run build:packages
-          - name: web
-            command: yarn run web:build:prod
-          - name: desktop
-            command: yarn run desktop:build:prod
-          - name: build benchmark
-            command: yarn run benchmark:build:prod
-          - name: test
-            command: yarn run test --maxWorkers=100%
-        include:
-          - os: windows-latest
-            config:
-              name: packages
-              command: echo complete
-
-    name: ${{ matrix.config.name }} (${{ matrix.os }})
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - run: corepack enable yarn
-
-      - name: Restore cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            .yarn/cache
-            **/node_modules
-          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: v5-${{ runner.os }}-yarn-
-
-      - run: yarn install --immutable
-
-      - run: ${{ matrix.config.command }}
-
-  e2e-desktop:
+  e2e-desktop-regression:
     runs-on: ubuntu-latest
 
-    # Run smoke tests in parallel across 2 shards
-    # Full regression runs separately in e2e-regression.yml (nightly + develop/main)
+    # Run all tests in parallel across 4 shards
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2]
+        shard: [1, 2, 3, 4]
 
-    name: e2e-desktop (ubuntu-latest) [${{ matrix.shard }}/2]
+    name: e2e-desktop-regression (ubuntu-latest) [${{ matrix.shard }}/4]
 
     # Set a fixed timezone to ensure consistent test results.
     # Lichtblick uses the system's local timezone, which can cause test assertions
@@ -114,29 +55,29 @@ jobs:
         # See: https://github.com/microsoft/playwright/issues/34251
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      # It must be dev build, otherwise playwright wont't have all data-testid avaiable for icons
+      # It must be dev build, otherwise playwright won't have all data-testid available for icons
       # https://mui.com/material-ui/migration/upgrade-to-v7/#svgicons-data-testid-removed
       - name: Build desktop app
         run: yarn desktop:build:dev
 
-      - name: Run E2E Desktop smoke tests - Shard ${{ matrix.shard }}/2
+      - name: Run E2E Desktop regression tests - Shard ${{ matrix.shard }}/4
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
-          run: yarn test:e2e:desktop:smoke:ci --shard=${{ matrix.shard }}/2
+          run: yarn test:e2e:desktop:ci --shard=${{ matrix.shard }}/4
 
       - name: Upload Desktop E2E Test Reports (Shard ${{ matrix.shard }})
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: blob-report-desktop-${{ matrix.shard }}
+          name: blob-report-regression-desktop-${{ matrix.shard }}
           path: blob-report
           retention-days: 1
 
-  e2e-web:
+  e2e-web-regression:
     runs-on: ubuntu-latest
 
-    name: e2e-web (ubuntu-latest)
+    name: e2e-web-regression (ubuntu-latest)
 
     env:
       TZ: Europe/Lisbon
@@ -163,25 +104,25 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run E2E Web smoke tests
-        run: yarn test:e2e:web:smoke:ci
+      - name: Run E2E Web regression tests
+        run: yarn test:e2e:web:ci
 
       - name: Upload Web E2E Test Reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: e2e-web-reports
+          name: e2e-regression-web-reports
           path: e2e/reports/web/
           retention-days: 7
           if-no-files-found: warn
 
   # Merge reports from all shards and generate summary
-  e2e-report:
+  e2e-regression-report:
     if: always()
-    needs: [e2e-desktop, e2e-web]
+    needs: [e2e-desktop-regression, e2e-web-regression]
     runs-on: ubuntu-latest
 
-    name: e2e-report (merge all reports)
+    name: e2e-regression-report (merge all reports)
 
     steps:
       - uses: actions/checkout@v6
@@ -205,14 +146,14 @@ jobs:
       - name: Download all desktop blob reports
         uses: actions/download-artifact@v8
         with:
-          pattern: blob-report-desktop-*
+          pattern: blob-report-regression-desktop-*
           path: all-blob-reports-desktop
           merge-multiple: true
 
       - name: Download web reports
         uses: actions/download-artifact@v8
         with:
-          name: e2e-web-reports
+          name: e2e-regression-web-reports
           path: e2e/reports/web
         continue-on-error: true
 
@@ -234,14 +175,14 @@ jobs:
 
       - name: Generate E2E Test Summary
         run: |
-          echo "Generating E2E test summary from merged reports..."
+          echo "Generating E2E regression test summary from merged reports..."
           yarn ts-node e2e/ci-helpers/generate-test-summary.ts >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Merged E2E Test Reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: e2e-test-reports-merged
+          name: e2e-regression-reports-merged
           path: |
             e2e/reports/
             playwright-report/
