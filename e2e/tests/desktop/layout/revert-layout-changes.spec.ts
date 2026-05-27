@@ -25,7 +25,7 @@ async function splitPanel(mainWindow: Page, panelId: string): Promise<void> {
  * THEN the unsaved changes icon should be visible after making changes
  * AND should disappear after reverting them
  */
-test("makes changes to layout and then reverts them", async ({ mainWindow }) => {
+test("makes changes to layout and then reverts them", { tag: "@regression" }, async ({ mainWindow }) => {
   // Given
   await loadFiles({
     mainWindow,

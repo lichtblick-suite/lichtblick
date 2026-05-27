@@ -24,7 +24,7 @@ import { DataSourceDialog, PlayerControls, Sidebar } from "../../../page-objects
  * And the user clicks on play
  * Then no error icons should appear on the sidebar
  */
-test("custom camera model", async ({ mainWindow }) => {
+test("custom camera model", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
   const player = new PlayerControls(mainWindow);

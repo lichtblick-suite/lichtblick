@@ -16,7 +16,7 @@ import { PlayerControls } from "../../../page-objects";
  * WHEN the user clicks on the seek backward button
  * THEN the player time should go back to 2025-02-26 10:37:15.547 AM WET
  */
-test("Should update the step size value via settings and verify that change being applied on the player by moving forward and backward", async ({
+test("Should update the step size value via settings and verify that change being applied on the player by moving forward and backward", { tag: "@regression" }, async ({
   mainWindow,
 }) => {
   const player = new PlayerControls(mainWindow);

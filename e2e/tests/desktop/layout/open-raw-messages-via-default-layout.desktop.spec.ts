@@ -8,7 +8,7 @@ import { DataSourceDialog, LayoutManager, Sidebar } from "../../../page-objects"
  * WHEN the user clicks on the Raw Messages panel
  * THEN the Raw Messages panel settings should be displayed
  */
-test("open Raw Messages panel when clicking on Layouts > layout", async ({ mainWindow }) => {
+test("open Raw Messages panel when clicking on Layouts > layout", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
   const layout = new LayoutManager(mainWindow);

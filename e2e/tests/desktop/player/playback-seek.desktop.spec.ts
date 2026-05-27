@@ -57,7 +57,7 @@ async function waitTimestamp(timestamp: Locator): Promise<void> {
  * THEN the playback time should advance
  */
 
-test("should advance timestamp 100ms when seek forward button is clicked", async ({
+test("should advance timestamp 100ms when seek forward button is clicked", { tag: "@regression" }, async ({
   mainWindow,
 }) => {
   const player = new PlayerControls(mainWindow);
@@ -86,7 +86,7 @@ test("should advance timestamp 100ms when seek forward button is clicked", async
  * THEN the playback time should advance 100ms
  */
 
-test("should advance timestamp 100ms when right arrow key is pressed", async ({ mainWindow }) => {
+test("should advance timestamp 100ms when right arrow key is pressed", { tag: "@regression" }, async ({ mainWindow }) => {
   const player = new PlayerControls(mainWindow);
 
   // Given
@@ -112,7 +112,7 @@ test("should advance timestamp 100ms when right arrow key is pressed", async ({ 
  * THEN the playback time should advance 500ms
  */
 
-test("should advance timestamp 500ms when alt + right arrow key is pressed", async ({
+test("should advance timestamp 500ms when alt + right arrow key is pressed", { tag: "@regression" }, async ({
   mainWindow,
 }) => {
   const player = new PlayerControls(mainWindow);
@@ -142,7 +142,7 @@ test("should advance timestamp 500ms when alt + right arrow key is pressed", asy
  * THEN the playback time should regress 100ms
  */
 
-test("should regress timestamp 100ms when seek forward backward is clicked", async ({
+test("should regress timestamp 100ms when seek forward backward is clicked", { tag: "@regression" }, async ({
   mainWindow,
 }) => {
   const player = new PlayerControls(mainWindow);
@@ -173,7 +173,7 @@ test("should regress timestamp 100ms when seek forward backward is clicked", asy
  * THEN the playback time should regress 100ms
  */
 
-test("should regress timestamp 100ms when left arrow key is pressed", async ({ mainWindow }) => {
+test("should regress timestamp 100ms when left arrow key is pressed", { tag: "@regression" }, async ({ mainWindow }) => {
   const player = new PlayerControls(mainWindow);
 
   // Given
@@ -202,7 +202,7 @@ test("should regress timestamp 100ms when left arrow key is pressed", async ({ m
  * THEN the playback time should regress 500ms
  */
 
-test("should regress timestamp 500ms when alt + left arrow key is pressed", async ({
+test("should regress timestamp 500ms when alt + left arrow key is pressed", { tag: "@regression" }, async ({
   mainWindow,
 }) => {
   const player = new PlayerControls(mainWindow);
@@ -234,7 +234,7 @@ test("should regress timestamp 500ms when alt + left arrow key is pressed", asyn
  * THEN the playback time should go to start
  */
 
-test("should foward timestamp to end of slider when alt + right arrow key is pressed less than 500ms from the end", async ({
+test("should foward timestamp to end of slider when alt + right arrow key is pressed less than 500ms from the end", { tag: "@regression" }, async ({
   mainWindow,
 }) => {
   const player = new PlayerControls(mainWindow);
@@ -267,7 +267,7 @@ test("should foward timestamp to end of slider when alt + right arrow key is pre
  * THEN the playback time should go to start
  */
 
-test("should regress timestamp to start of slider alt + left arrow key is pressed less than 500ms from the start", async ({
+test("should regress timestamp to start of slider alt + left arrow key is pressed less than 500ms from the start", { tag: "@regression" }, async ({
   mainWindow,
 }) => {
   const player = new PlayerControls(mainWindow);

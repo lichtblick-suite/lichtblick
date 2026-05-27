@@ -9,7 +9,7 @@ import { Sidebar } from "../../../page-objects";
  * WHEN the user toggles topic visibility
  * THEN the filters "List all", "List visible", and "List invisible" should work as expected
  */
-test("toggle topics visibility", async ({ mainWindow }) => {
+test("toggle topics visibility", { tag: "@regression" }, async ({ mainWindow }) => {
   const sidebar = new Sidebar(mainWindow);
 
   // Given

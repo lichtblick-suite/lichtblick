@@ -20,7 +20,7 @@ function parseTimestamp(timestamp: string): number {
  * AND sync is turned on and play is clicked
  * THEN both instances should have the same timestamp
  */
-test("Should sync playback between multiple web instances", async ({ browser }) => {
+test("Should sync playback between multiple web instances", { tag: "@regression" }, async ({ browser }) => {
   // Create a browser context - this enables BroadcastChannel communication between tabs
   const context = await browser.newContext();
 

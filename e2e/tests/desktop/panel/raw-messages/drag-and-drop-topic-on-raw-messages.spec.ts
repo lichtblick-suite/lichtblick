@@ -10,7 +10,7 @@ import { Panels, Sidebar } from "../../../../page-objects";
  * WHEN the user opens the Topics sidebar and drags a topic onto the panel
  * THEN the topic message data is displayed in the Raw Messages panel
  */
-test("open Raw Messages panel when clicking on Layouts > layout", async ({ mainWindow }) => {
+test("open Raw Messages panel when clicking on Layouts > layout", { tag: "@regression" }, async ({ mainWindow }) => {
   const sidebar = new Sidebar(mainWindow);
   const panels = new Panels(mainWindow);
 

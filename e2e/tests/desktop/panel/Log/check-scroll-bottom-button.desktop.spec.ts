@@ -14,7 +14,7 @@ const MCAP_FILENAME = "example_logs.mcap";
  * AND the user clicks on the "Log" panel settings
  * THEN the "Log panel" settings should be visible
  */
-test("open log panel after loading an mcap file", async ({ mainWindow }) => {
+test("open log panel after loading an mcap file", { tag: "@regression" }, async ({ mainWindow }) => {
   const panels = new Panels(mainWindow);
 
   /// Given

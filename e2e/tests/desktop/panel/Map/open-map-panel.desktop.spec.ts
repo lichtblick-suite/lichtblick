@@ -10,7 +10,7 @@ import { Panels, Sidebar } from "../../../../page-objects";
  * AND the user clicks on the "Map" panel
  * THEN the "Map panel" settings should be visible
  */
-test("open map panel after loading a bag file", async ({ mainWindow }) => {
+test("open map panel after loading a bag file", { tag: "@regression" }, async ({ mainWindow }) => {
   const panels = new Panels(mainWindow);
   const sidebar = new Sidebar(mainWindow);
 

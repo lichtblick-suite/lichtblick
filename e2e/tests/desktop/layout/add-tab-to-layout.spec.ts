@@ -17,7 +17,7 @@ const LAYOUT_FILE = "tab-layout.json";
  * WHEN the parent tab is removed
  * THEN the layout should display zero tabs
  */
-test("create a new layout and add a tab", async ({ mainWindow }) => {
+test("create a new layout and add a tab", { tag: "@regression" }, async ({ mainWindow }) => {
   test.setTimeout(45_000);
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);

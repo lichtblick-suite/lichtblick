@@ -11,7 +11,7 @@ import { DataSourceDialog, ExtensionManager } from "../../../page-objects";
  * WHEN the user confirms the uninstall
  * THEN a toast indicating "Uninstalling..." should appear
  */
-test("should uninstall an extension", async ({ mainWindow }) => {
+test("should uninstall an extension", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const extensions = new ExtensionManager(mainWindow);
 

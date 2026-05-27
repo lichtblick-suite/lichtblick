@@ -16,7 +16,7 @@ test.use({
   preInstalledExtensions: [extensionSourceFolder],
 });
 
-test("should install an extension (user folder)", async ({ mainWindow }) => {
+test("should install an extension (user folder)", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const extensions = new ExtensionManager(mainWindow);
 

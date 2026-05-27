@@ -17,7 +17,7 @@ const MCAP_FILENAME = "example_logs.mcap";
  * WHEN raw messages settings are open and font size is changed to 30px
  * THEN messages on the panel should have CSS attribute font size as 30px
  */
-test("create a new layout with raw messages panel, select a topic and change the font size", async ({
+test("create a new layout with raw messages panel, select a topic and change the font size", { tag: "@regression" }, async ({
   mainWindow,
 }) => {
   const sidebar = new Sidebar(mainWindow);

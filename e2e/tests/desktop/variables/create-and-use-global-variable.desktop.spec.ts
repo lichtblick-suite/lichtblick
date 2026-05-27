@@ -14,7 +14,7 @@ import { PlayerControls, Sidebar } from "../../../page-objects";
  * When Raw Messages is filtered for `/tf.transforms[:]{child_frame_id==$globalVariable}`
  * Then a message with `child_frame_id` equal to "turtle1" should be visible
  */
-test("Create global variable and use it on Raw Messages Panel", async ({ mainWindow }) => {
+test("Create global variable and use it on Raw Messages Panel", { tag: "@regression" }, async ({ mainWindow }) => {
   const player = new PlayerControls(mainWindow);
   const sidebar = new Sidebar(mainWindow);
 

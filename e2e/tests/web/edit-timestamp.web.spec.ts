@@ -16,7 +16,7 @@ const MCAP_FILENAME = "example.mcap";
  * THEN the URL time parameter should update to the new ISO timestamp
  */
 
-test("is able to manually edit the timestamp display on the player", async ({ page }) => {
+test("is able to manually edit the timestamp display on the player", { tag: "@regression" }, async ({ page }) => {
   const player = new PlayerControls(page);
 
   // Given
@@ -60,7 +60,7 @@ test("is able to manually edit the timestamp display on the player", async ({ pa
  * THEN the URL time parameter should update to the corresponding ISO timestamp
  */
 
-test("is able to manually edit the timestamp display (epoch format) on the player", async ({
+test("is able to manually edit the timestamp display (epoch format) on the player", { tag: "@regression" }, async ({
   page,
 }) => {
   const player = new PlayerControls(page);

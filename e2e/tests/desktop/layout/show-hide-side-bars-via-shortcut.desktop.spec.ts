@@ -10,7 +10,7 @@ import { DataSourceDialog, Sidebar } from "../../../page-objects";
  * When the user presses [ again
  * Then the left‐sidebar tabs are all visible
  */
-test("show/hide left side bar via shortcut", async ({ mainWindow }) => {
+test("show/hide left side bar via shortcut", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
 
@@ -43,7 +43,7 @@ test("show/hide left side bar via shortcut", async ({ mainWindow }) => {
  * When the user presses ] again
  * Then the right‐sidebar panels are all hidden
  */
-test("hide/show right side bar via shortcut", async ({ mainWindow }) => {
+test("hide/show right side bar via shortcut", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
 

@@ -12,7 +12,7 @@ import { PlayerControls } from "../../../page-objects";
  * And playback time epoch format is selected
  * THEN the player time displayed should change to 1740566235.547000000 (epoch format)
  */
-test("should switch playback time to epoch format next to the player", async ({ mainWindow }) => {
+test("should switch playback time to epoch format next to the player", { tag: "@regression" }, async ({ mainWindow }) => {
   const player = new PlayerControls(mainWindow);
 
   // Given

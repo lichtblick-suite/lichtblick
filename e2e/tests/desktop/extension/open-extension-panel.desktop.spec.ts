@@ -9,7 +9,7 @@ import { DataSourceDialog } from "../../../page-objects";
  * WHEN the user adds the "Turtle" panel
  * THEN the "Turtle" panel should be visible on the screen
  */
-test("open extension panel", async ({ mainWindow }) => {
+test("open extension panel", { tag: "@regression" }, async ({ mainWindow }) => {
   // Given
   const filename = "lichtblick.suite-extension-turtlesim-0.0.1.foxe";
   await loadFiles({

@@ -9,7 +9,7 @@ import { Sidebar } from "../../../page-objects";
  * WHEN the user opens a Plot panel and adds a series with "mouse.clientX"
  * THEN "mouse.clientX" should appear in the Plot panel as the path of the added series
  */
-test("open Plot panel when clicking on Layouts > layout", async ({ mainWindow }) => {
+test("open Plot panel when clicking on Layouts > layout", { tag: "@regression" }, async ({ mainWindow }) => {
   // Given a file is loaded and a new layout is created with a Plot panel
   const filename = "example-2.mcap";
   await loadFiles({

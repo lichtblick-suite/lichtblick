@@ -14,7 +14,7 @@ const EXTENSION_FILE = "lichtblickteamctw.message-converter-extension-0.0.2.foxe
  * AND the user clicks on the "3D" panel
  * THEN the topics should be visible on the settings tree
  */
-test("open 3D panel after loading a mcap file", async ({ mainWindow }) => {
+test("open 3D panel after loading a mcap file", { tag: "@regression" }, async ({ mainWindow }) => {
   const panels = new Panels(mainWindow);
   const sidebar = new Sidebar(mainWindow);
 

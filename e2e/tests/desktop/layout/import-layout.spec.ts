@@ -6,7 +6,7 @@ import { AppMenu, DataSourceDialog, LayoutManager, Sidebar } from "../../../page
 
 const LAYOUT_FILE = "imported-layout.json";
 
-test("Import a layout via layout tab > import layout", async ({ mainWindow }) => {
+test("Import a layout via layout tab > import layout", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
   const layout = new LayoutManager(mainWindow);
@@ -25,7 +25,7 @@ test("Import a layout via layout tab > import layout", async ({ mainWindow }) =>
   ).toBeVisible();
 });
 
-test("Import a layout via menu > view > import layout", async ({ mainWindow }) => {
+test("Import a layout via menu > view > import layout", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
   const layout = new LayoutManager(mainWindow);

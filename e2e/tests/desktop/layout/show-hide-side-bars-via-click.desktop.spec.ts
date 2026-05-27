@@ -10,7 +10,7 @@ import { DataSourceDialog, Sidebar } from "../../../page-objects";
  * When the user clicks on the "Show left sidebar" button
  * Then the left‐sidebar tabs are all visible
  */
-test("show/hide left side bar via click", async ({ mainWindow }) => {
+test("show/hide left side bar via click", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
 
@@ -43,7 +43,7 @@ test("show/hide left side bar via click", async ({ mainWindow }) => {
  * When the user clicks on the "Hide right sidebar" button
  * Then the right‐sidebar tabs are all visible
  */
-test("hide/show right side bar via click", async ({ mainWindow }) => {
+test("hide/show right side bar via click", { tag: "@regression" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
 
