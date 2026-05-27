@@ -16,24 +16,28 @@ const MCAP_FILENAME = "example.mcap";
  * And playback time should advance
  */
 
-test("should start playing when clicking on Play button", { tag: "@smoke" }, async ({ mainWindow }) => {
-  const player = new PlayerControls(mainWindow);
+test(
+  "should start playing when clicking on Play button",
+  { tag: "@smoke" },
+  async ({ mainWindow }) => {
+    const player = new PlayerControls(mainWindow);
 
-  // Given
-  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
-  await changeToEpochFormat(mainWindow);
+    // Given
+    await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
+    await changeToEpochFormat(mainWindow);
 
-  const startTime = await player.getTimestampValue();
+    const startTime = await player.getTimestampValue();
 
-  // When
-  await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
-  await player.play();
+    // When
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
+    await player.play();
 
-  // Then
-  await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
-  const elapsedTimestamp = await player.getTimestampValue();
-  expect(elapsedTimestamp).toBeGreaterThan(startTime);
-});
+    // Then
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
+    const elapsedTimestamp = await player.getTimestampValue();
+    expect(elapsedTimestamp).toBeGreaterThan(startTime);
+  },
+);
 
 /**
  * GIVEN a .mcap file is loaded
@@ -42,23 +46,27 @@ test("should start playing when clicking on Play button", { tag: "@smoke" }, asy
  * And playback time should advance
  */
 
-test("should start playing when clicking on Spacebar key", { tag: "@smoke" }, async ({ mainWindow }) => {
-  const player = new PlayerControls(mainWindow);
+test(
+  "should start playing when clicking on Spacebar key",
+  { tag: "@smoke" },
+  async ({ mainWindow }) => {
+    const player = new PlayerControls(mainWindow);
 
-  // Given
-  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
-  await changeToEpochFormat(mainWindow);
-  const startTime = await player.getTimestampValue();
+    // Given
+    await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
+    await changeToEpochFormat(mainWindow);
+    const startTime = await player.getTimestampValue();
 
-  // When
-  await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
-  await player.togglePlayback();
+    // When
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
+    await player.togglePlayback();
 
-  // Then
-  await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
-  const elapsedTimestamp = await player.getTimestampValue();
-  expect(elapsedTimestamp).toBeGreaterThan(startTime);
-});
+    // Then
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
+    const elapsedTimestamp = await player.getTimestampValue();
+    expect(elapsedTimestamp).toBeGreaterThan(startTime);
+  },
+);
 
 /**
  * GIVEN a .mcap file is loaded
@@ -68,27 +76,31 @@ test("should start playing when clicking on Spacebar key", { tag: "@smoke" }, as
  * And playback time should stop
  */
 
-test("should stop playing when clicking on Play button", { tag: "@smoke" }, async ({ mainWindow }) => {
-  const player = new PlayerControls(mainWindow);
+test(
+  "should stop playing when clicking on Play button",
+  { tag: "@smoke" },
+  async ({ mainWindow }) => {
+    const player = new PlayerControls(mainWindow);
 
-  // Given
-  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
-  await changeToEpochFormat(mainWindow);
+    // Given
+    await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
+    await changeToEpochFormat(mainWindow);
 
-  await player.play();
+    await player.play();
 
-  // When
-  await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
-  await player.pause();
+    // When
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
+    await player.pause();
 
-  // Then
-  await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
-  const startTime = await player.getTimestampValue();
+    // Then
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
+    const startTime = await player.getTimestampValue();
 
-  await mainWindow.waitForTimeout(1000);
-  const elapsedTimestamp = await player.getTimestampValue();
-  expect(elapsedTimestamp).toEqual(startTime);
-});
+    await mainWindow.waitForTimeout(1000);
+    const elapsedTimestamp = await player.getTimestampValue();
+    expect(elapsedTimestamp).toEqual(startTime);
+  },
+);
 
 /**
  * GIVEN a .mcap file is loaded
@@ -98,24 +110,28 @@ test("should stop playing when clicking on Play button", { tag: "@smoke" }, asyn
  * And playback time should stop
  */
 
-test("should stop playing when clicking on Spacebar key", { tag: "@smoke" }, async ({ mainWindow }) => {
-  const player = new PlayerControls(mainWindow);
+test(
+  "should stop playing when clicking on Spacebar key",
+  { tag: "@smoke" },
+  async ({ mainWindow }) => {
+    const player = new PlayerControls(mainWindow);
 
-  // Given
-  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
-  await changeToEpochFormat(mainWindow);
+    // Given
+    await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
+    await changeToEpochFormat(mainWindow);
 
-  await player.togglePlayback();
+    await player.togglePlayback();
 
-  // When
-  await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
-  await player.togglePlayback();
+    // When
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
+    await player.togglePlayback();
 
-  // Then
-  await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
-  const startTime = await player.getTimestampValue();
+    // Then
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
+    const startTime = await player.getTimestampValue();
 
-  await mainWindow.waitForTimeout(1000);
-  const elapsedTimestamp = await player.getTimestampValue();
-  expect(elapsedTimestamp).toEqual(startTime);
-});
+    await mainWindow.waitForTimeout(1000);
+    const elapsedTimestamp = await player.getTimestampValue();
+    expect(elapsedTimestamp).toEqual(startTime);
+  },
+);
