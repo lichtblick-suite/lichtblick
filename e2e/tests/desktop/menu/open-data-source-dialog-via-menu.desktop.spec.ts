@@ -8,7 +8,7 @@ import { AppMenu, DataSourceDialog } from "../../../page-objects";
  * WHEN the user opens the File > Open... menu
  * THEN the Data Source dialog should appear
  */
-test("Display the data source dialog when clicking File > Open...", async ({ mainWindow }) => {
+test("Display the data source dialog when clicking File > Open...", { tag: "@smoke" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const appMenu = new AppMenu(mainWindow);
 

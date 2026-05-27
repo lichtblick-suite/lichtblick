@@ -8,7 +8,7 @@ import { DataSourceDialog, LayoutManager, Sidebar } from "../../../page-objects"
  * WHEN the user clicks on the Images panel
  * THEN the Images panel settings should be displayed
  */
-test("open Image panel when clicking on Layouts > layout", async ({ mainWindow }) => {
+test("open Image panel when clicking on Layouts > layout", { tag: "@smoke" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
   const layout = new LayoutManager(mainWindow);

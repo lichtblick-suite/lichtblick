@@ -10,7 +10,7 @@ const LAYOUT_FILENAME = "imported-layout.json";
  * WHEN the user clicks on the Layouts sidebar button
  * THEN the "imported-layout" layout should be displayed in the layout list
  */
-test("open layout via drag and drop", async ({ mainWindow }) => {
+test("open layout via drag and drop", { tag: "@smoke" }, async ({ mainWindow }) => {
   // Given
   await loadFiles({
     mainWindow,

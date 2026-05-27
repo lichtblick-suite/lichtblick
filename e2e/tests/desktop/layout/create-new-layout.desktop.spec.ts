@@ -8,7 +8,7 @@ import { DataSourceDialog, LayoutManager, Sidebar } from "../../../page-objects"
  * WHEN they create a new layout and add a panel (e.g., Diagnostics - Details)
  * THEN the new layout should appear with the name "Unnamed layout"
  */
-test("create a new layout by accessing Layouts > Create new layout", async ({ mainWindow }) => {
+test("create a new layout by accessing Layouts > Create new layout", { tag: "@smoke" }, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
   const layout = new LayoutManager(mainWindow);

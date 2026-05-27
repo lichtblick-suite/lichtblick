@@ -11,7 +11,7 @@ const MCAP_TWO = "example-2.mcap";
  * GIVEN 2 .mcap files are loaded via file picker
  * THEN the filenames should be visible and the "Play" button enabled
  */
-test("should open multiple MCAP files via file picker", async ({ mainWindow }) => {
+test("should open multiple MCAP files via file picker", { tag: "@smoke" }, async ({ mainWindow }) => {
   // Given
   const filenames = [MCAP_ONE, MCAP_TWO];
   await loadFiles({

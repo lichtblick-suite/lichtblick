@@ -16,7 +16,7 @@ const MCAP_FILENAME = "example.mcap";
  * And playback time should advance
  */
 
-test("should start playing when clicking on Play button", async ({ mainWindow }) => {
+test("should start playing when clicking on Play button", { tag: "@smoke" }, async ({ mainWindow }) => {
   const player = new PlayerControls(mainWindow);
 
   // Given
@@ -42,7 +42,7 @@ test("should start playing when clicking on Play button", async ({ mainWindow })
  * And playback time should advance
  */
 
-test("should start playing when clicking on Spacebar key", async ({ mainWindow }) => {
+test("should start playing when clicking on Spacebar key", { tag: "@smoke" }, async ({ mainWindow }) => {
   const player = new PlayerControls(mainWindow);
 
   // Given
@@ -68,7 +68,7 @@ test("should start playing when clicking on Spacebar key", async ({ mainWindow }
  * And playback time should stop
  */
 
-test("should stop playing when clicking on Play button", async ({ mainWindow }) => {
+test("should stop playing when clicking on Play button", { tag: "@smoke" }, async ({ mainWindow }) => {
   const player = new PlayerControls(mainWindow);
 
   // Given
@@ -98,7 +98,7 @@ test("should stop playing when clicking on Play button", async ({ mainWindow }) 
  * And playback time should stop
  */
 
-test("should stop playing when clicking on Spacebar key", async ({ mainWindow }) => {
+test("should stop playing when clicking on Spacebar key", { tag: "@smoke" }, async ({ mainWindow }) => {
   const player = new PlayerControls(mainWindow);
 
   // Given

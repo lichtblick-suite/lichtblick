@@ -6,7 +6,7 @@ import { test, expect } from "@playwright/test";
 import { TEST_MCAP_URL } from "../../../fixtures/urls";
 import { PlayerControls } from "../../../page-objects";
 
-test("should open an MCAP file via URL", async ({ page }) => {
+test("should open an MCAP file via URL", { tag: "@smoke" }, async ({ page }) => {
   const player = new PlayerControls(page);
 
   // Given

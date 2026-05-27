@@ -9,7 +9,7 @@ import { AppMenu, DataSourceDialog } from "../../../page-objects";
  * AND the user clicks on the "Open connection" button
  * THEN the "Open a new connection" dialog should appear
  */
-test("Display the open a new connection dialog when clicking File > Open... > Open connection", async ({
+test("Display the open a new connection dialog when clicking File > Open... > Open connection", { tag: "@smoke" }, async ({
   mainWindow,
 }) => {
   const dialog = new DataSourceDialog(mainWindow);
