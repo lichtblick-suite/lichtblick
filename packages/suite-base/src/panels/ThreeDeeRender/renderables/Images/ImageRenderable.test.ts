@@ -568,6 +568,73 @@ describe("ImageRenderable error handling", () => {
     self.createImageBitmap = originalCreateImageBitmap;
   });
 
+  it("should preserve the GOP when seek backfill delivers messages with a backward timestamp jump", async () => {
+    // Regression: IterablePlayer's expandVideoSeekBackfill packs the keyframe + intervening
+    // P-frames + the seek-target frame into a single emit. Renderer dispatches them
+    // synchronously via setImage, so the GOP lands in #pendingVideoDecodeQueue back-to-back.
+    // A previous version of #prepareIncomingVideoFrame wiped the queue when it saw the
+    // keyframe's backward timestamp, dropping the P-frames the decoder needs. The fix moves
+    // that wipe to enqueue time in setImage; this test guards the new flow.
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    jest.spyOn(renderable, "update").mockImplementation(() => undefined);
+
+    const decode = jest
+      .fn<Promise<VideoFrame | undefined>, [Uint8Array, number, "key" | "delta"]>()
+      .mockImplementation(async (_data, timestampMicros) =>
+        createDecodedVideoFrame(timestampMicros),
+      );
+    renderable.videoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(true),
+      init: jest.fn().mockResolvedValue(undefined),
+      decode,
+      codedSize: jest.fn(),
+      decoderConfig: jest.fn().mockReturnValue({ codec: "hvc1.1.6.L93.B0" }),
+      resetForSeek: jest.fn(),
+      lastImageBitmap: undefined,
+      lastVideoFrame: undefined,
+    } as unknown as ImageRenderable["videoPlayer"];
+
+    const originalCreateImageBitmap = self.createImageBitmap;
+    self.createImageBitmap = jest.fn().mockResolvedValue(new ImageBitmap());
+
+    // Prime #videoFirstMessageTime at T = 0 so the GOP timestamps stay positive, then advance
+    // playback to T = 5s so the seek that follows is unambiguously backward.
+    await new Promise<void>((resolve) => {
+      renderable.setImage(createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }), undefined, resolve);
+    });
+    await new Promise<void>((resolve) => {
+      renderable.setImage(createH265Frame(h265DeltaFrame, { sec: 5, nsec: 0 }), undefined, resolve);
+    });
+
+    // Backward seek: the full GOP (K, P1, P2, target) arrives in one render tick. The four
+    // setImage calls happen synchronously, mirroring Renderer.#handleSubscriptionQueues
+    // iterating the filtered queue.
+    let lastDecoded!: () => void;
+    const lastDecodedPromise = new Promise<void>((resolve) => {
+      lastDecoded = resolve;
+    });
+    renderable.setImage(createH265Frame(h265Keyframe, { sec: 2, nsec: 0 }));
+    renderable.setImage(createH265Frame(h265DeltaFrame, { sec: 2, nsec: 33_333_333 }));
+    renderable.setImage(createH265Frame(h265DeltaFrame, { sec: 2, nsec: 66_666_666 }));
+    renderable.setImage(
+      createH265Frame(h265DeltaFrame, { sec: 2, nsec: 100_000_000 }),
+      undefined,
+      () => {
+        lastDecoded();
+      },
+    );
+    await lastDecodedPromise;
+
+    // Two primers + the full four-frame GOP all reach the decoder.
+    expect(decode).toHaveBeenCalledTimes(6);
+    expect(decode).toHaveBeenNthCalledWith(3, expect.any(Uint8Array), 2_000_000, "key");
+    expect(decode).toHaveBeenNthCalledWith(4, expect.any(Uint8Array), 2_033_333, "delta");
+    expect(decode).toHaveBeenNthCalledWith(5, expect.any(Uint8Array), 2_066_666, "delta");
+    expect(decode).toHaveBeenNthCalledWith(6, expect.any(Uint8Array), 2_100_000, "delta");
+
+    self.createImageBitmap = originalCreateImageBitmap;
+  });
+
   it("should reuse the last image bitmap when h265 decode times out", async () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
     const lastImageBitmap = new ImageBitmap();

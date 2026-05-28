@@ -279,6 +279,17 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         if (messageTime === this.#lastQueuedVideoMessageTime) {
           return;
         }
+        // A backward jump detected at enqueue time means anything still in the queue is a
+        // pre-seek leftover that must be dropped before this frame's GOP arrives. Doing it here
+        // (instead of inside the keyframe's `#prepareIncomingVideoFrame`) is what protects the
+        // GOP messages that follow this enqueue from being wiped mid-drain.
+        if (
+          this.#lastQueuedVideoMessageTime != undefined &&
+          messageTime < this.#lastQueuedVideoMessageTime &&
+          this.#lastQueuedVideoMessageTime - messageTime > VIDEO_TIMESTAMP_JITTER_NS
+        ) {
+          this.#pendingVideoDecodeQueue.length = 0;
+        }
         this.#lastQueuedVideoMessageTime = messageTime;
         this.#pendingVideoDecodeQueue.push(pendingDecode);
       } else {
@@ -387,7 +398,9 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       this.#waitingForVideoKeyframe = true;
       this.#canReplayVideoGop = true;
       this.#lastQueuedVideoMessageTime = messageTime;
-      this.#pendingVideoDecodeQueue.length = 0;
+      // Pre-seek leftovers in `#pendingVideoDecodeQueue` are dropped at enqueue time in
+      // `setImage`; doing it again here would also wipe the GOP that `expandVideoSeekBackfill`
+      // packs alongside this keyframe.
       // The cached frames newer than the new playback position are from the abandoned forward
       // portion of playback — they cannot participate in a GOP replay to a target at or before
       // `messageTime`. Drop them now so the cache footprint tracks the actual replay window
