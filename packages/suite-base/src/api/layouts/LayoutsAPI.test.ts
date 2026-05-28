@@ -49,7 +49,7 @@ describe("LayoutsAPI", () => {
             userNodes: {},
           },
           permission: "CREATOR_WRITE" as any,
-          updatedBy: "2023-01-01T00:00:00.000Z",
+          updatedAt: "2023-01-01T00:00:00.000Z",
         },
       ];
 
@@ -105,8 +105,8 @@ describe("LayoutsAPI", () => {
         permission: mockSaveRequest.permission,
         from: BasicBuilder.string(),
         workspace: mockWorkspace,
-        createdBy: "2023-01-01T00:00:00.000Z",
-        updatedBy: "2023-01-01T00:00:00.000Z",
+        createdAt: "2023-01-01T00:00:00.000Z",
+        updatedAt: "2023-01-01T00:00:00.000Z",
       };
 
       const mockApiResponse: WorkspaceLayoutResponse = {
@@ -154,7 +154,7 @@ describe("LayoutsAPI", () => {
         name: "Updated Layout",
         data: mockUpdateRequest.data,
         permission: "ORG_READ" as any,
-        updatedBy: "2023-01-01T00:00:00.000Z",
+        updatedAt: "2023-01-01T00:00:00.000Z",
       };
 
       const mockHttpService = jest.mocked(HttpService);
