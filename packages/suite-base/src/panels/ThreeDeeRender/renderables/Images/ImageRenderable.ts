@@ -155,7 +155,6 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   #waitingForVideoKeyframe = false;
   #canReplayVideoGop = false;
   #isDrainingVideoDecodes = false;
-  #pendingVideoDecode: PendingVideoDecode | undefined;
   readonly #pendingVideoDecodeQueue: PendingVideoDecode[] = [];
   #videoFrameHistory: VideoFrameHistoryEntry[] = [];
 
@@ -185,7 +184,6 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     // to clear it here leaks tens of megabytes per disposed renderable.
     this.#videoFrameHistory.length = 0;
     this.#pendingVideoDecodeQueue.length = 0;
-    this.#pendingVideoDecode = undefined;
     super.dispose();
   }
 
@@ -271,30 +269,25 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
     const seq = ++this.#receivedImageSequenceNumber;
     const codec = "format" in image ? canonicalVideoCodec(image.format) : undefined;
-    if (codec != undefined) {
-      const pendingDecode = { image, resizeWidth, onDecoded, seq };
-      if (videoCodecNeedsKeyframeReplay(codec)) {
-        const videoImage = image as CompressedVideo;
-        const messageTime = toNanoSec(videoImage.timestamp);
-        if (messageTime === this.#lastQueuedVideoMessageTime) {
-          return;
-        }
-        // A backward jump detected at enqueue time means anything still in the queue is a
-        // pre-seek leftover that must be dropped before this frame's GOP arrives. Doing it here
-        // (instead of inside the keyframe's `#prepareIncomingVideoFrame`) is what protects the
-        // GOP messages that follow this enqueue from being wiped mid-drain.
-        if (
-          this.#lastQueuedVideoMessageTime != undefined &&
-          messageTime < this.#lastQueuedVideoMessageTime &&
-          this.#lastQueuedVideoMessageTime - messageTime > VIDEO_TIMESTAMP_JITTER_NS
-        ) {
-          this.#pendingVideoDecodeQueue.length = 0;
-        }
-        this.#lastQueuedVideoMessageTime = messageTime;
-        this.#pendingVideoDecodeQueue.push(pendingDecode);
-      } else {
-        this.#pendingVideoDecode = pendingDecode;
+    if (codec != undefined && videoCodecNeedsKeyframeReplay(codec)) {
+      const videoImage = image as CompressedVideo;
+      const messageTime = toNanoSec(videoImage.timestamp);
+      if (messageTime === this.#lastQueuedVideoMessageTime) {
+        return;
       }
+      // A backward jump detected at enqueue time means anything still in the queue is a
+      // pre-seek leftover that must be dropped before this frame's GOP arrives. Doing it here
+      // (instead of inside the keyframe's `#prepareIncomingVideoFrame`) is what protects the
+      // GOP messages that follow this enqueue from being wiped mid-drain.
+      if (
+        this.#lastQueuedVideoMessageTime != undefined &&
+        messageTime < this.#lastQueuedVideoMessageTime &&
+        this.#lastQueuedVideoMessageTime - messageTime > VIDEO_TIMESTAMP_JITTER_NS
+      ) {
+        this.#pendingVideoDecodeQueue.length = 0;
+      }
+      this.#lastQueuedVideoMessageTime = messageTime;
+      this.#pendingVideoDecodeQueue.push({ image, resizeWidth, onDecoded, seq });
       if (!this.#isDrainingVideoDecodes) {
         this.#isDrainingVideoDecodes = true;
         void this.#drainPendingVideoDecodes();
@@ -302,22 +295,25 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       return;
     }
 
+    // Non-replay codecs (H.264, AV1, ...) and raw images decode in parallel; the
+    // `#displayedImageSequenceNumber > seq` guard inside `#startDecode` drops late results.
+    // Serializing them through the drain queue (as the original H.265 rework did) adds per-frame
+    // latency that shows up as visible jank at 30fps.
+    // If the stream switches from a replay codec mid-playback, abandon any queued H.265 frames —
+    // the decoder will re-initialize for the new codec anyway.
+    if (this.#pendingVideoDecodeQueue.length > 0) {
+      this.#pendingVideoDecodeQueue.length = 0;
+      this.#lastQueuedVideoMessageTime = undefined;
+    }
     void this.#startDecode(image, seq, resizeWidth, onDecoded);
-  }
-
-  #hasPendingVideoDecode(): boolean {
-    return this.#pendingVideoDecodeQueue.length > 0 || this.#pendingVideoDecode != undefined;
   }
 
   async #drainPendingVideoDecodes(): Promise<void> {
     try {
-      while (this.#hasPendingVideoDecode()) {
-        const pendingDecode = this.#pendingVideoDecodeQueue.shift() ?? this.#pendingVideoDecode;
+      while (this.#pendingVideoDecodeQueue.length > 0) {
+        const pendingDecode = this.#pendingVideoDecodeQueue.shift();
         if (pendingDecode == undefined) {
           break;
-        }
-        if (pendingDecode === this.#pendingVideoDecode) {
-          this.#pendingVideoDecode = undefined;
         }
         await this.#startDecode(
           pendingDecode.image,
@@ -328,7 +324,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       }
     } finally {
       this.#isDrainingVideoDecodes = false;
-      if (this.#hasPendingVideoDecode()) {
+      if (this.#pendingVideoDecodeQueue.length > 0) {
         this.#isDrainingVideoDecodes = true;
         void this.#drainPendingVideoDecodes();
       }

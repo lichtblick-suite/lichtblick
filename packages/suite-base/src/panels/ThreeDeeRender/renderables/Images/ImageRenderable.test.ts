@@ -391,23 +391,19 @@ describe("ImageRenderable error handling", () => {
     self.createImageBitmap = originalCreateImageBitmap;
   });
 
-  it("should serialize h264 video decoding and keep only the latest pending frame", async () => {
+  it("should decode H.264 frames in parallel without queuing", async () => {
+    // Regression guard: an earlier rewrite funnelled every video codec through a single-slot
+    // queue + await-drain loop, which serialized H.264 decodes and caused visible 30fps jank.
+    // H.264 does not need GOP replay, so each frame's decodeImage call must be kicked off
+    // synchronously alongside its peers; #displayedImageSequenceNumber > seq handles late results.
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
     const decodeResolvers = new Map<number, () => void>();
     const decodeOrder: number[] = [];
+    const decodedTimestamps: number[] = [];
 
     jest.spyOn(renderable, "update").mockImplementation(() => undefined);
 
     const keyframe = h265Keyframe;
-
-    let resolveLatestDecoded!: () => void;
-    const latestDecoded = new Promise<void>((resolve) => {
-      resolveLatestDecoded = resolve;
-    });
-    let resolveLatestDecodeStarted!: () => void;
-    const latestDecodeStarted = new Promise<void>((resolve) => {
-      resolveLatestDecodeStarted = resolve;
-    });
 
     jest
       .spyOn(renderable as unknown as { decodeImage: jest.Mock }, "decodeImage")
@@ -419,9 +415,6 @@ describe("ImageRenderable error handling", () => {
             (BigInt(image.timestamp.sec) * 1000000000n + BigInt(image.timestamp.nsec)) / 1000n,
           );
           decodeOrder.push(timestampMicros);
-          if (timestampMicros === 33333) {
-            resolveLatestDecodeStarted();
-          }
           await new Promise<void>((resolve) => {
             decodeResolvers.set(timestampMicros, resolve);
           });
@@ -429,28 +422,39 @@ describe("ImageRenderable error handling", () => {
         },
       );
 
-    renderable.setImage({ ...createH265Frame(keyframe, { sec: 0, nsec: 0 }), format: "h264" });
-    renderable.setImage({
-      ...createH265Frame(keyframe, { sec: 0, nsec: 16666666 }),
-      format: "h264",
-    });
+    const onDecoded = (timestampMicros: number) => () => {
+      decodedTimestamps.push(timestampMicros);
+    };
+
+    renderable.setImage(
+      { ...createH265Frame(keyframe, { sec: 0, nsec: 0 }), format: "h264" },
+      undefined,
+      onDecoded(0),
+    );
+    renderable.setImage(
+      { ...createH265Frame(keyframe, { sec: 0, nsec: 16666666 }), format: "h264" },
+      undefined,
+      onDecoded(16666),
+    );
     renderable.setImage(
       { ...createH265Frame(keyframe, { sec: 0, nsec: 33333333 }), format: "h264" },
       undefined,
-      () => {
-        resolveLatestDecoded();
-      },
+      onDecoded(33333),
     );
     await Promise.resolve();
 
-    expect(decodeOrder).toEqual([0]);
+    // All three decodes must start concurrently — not one-at-a-time through a drain queue.
+    expect(decodeOrder).toEqual([0, 16666, 33333]);
 
     decodeResolvers.get(0)?.();
-    await latestDecodeStarted;
-    expect(decodeOrder).toEqual([0, 33333]);
-
+    decodeResolvers.get(16666)?.();
     decodeResolvers.get(33333)?.();
-    await latestDecoded;
+    // Flush the microtask queue so each decode's resolution propagates through #startDecode.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // #displayedImageSequenceNumber > seq drops earlier results once a later seq is displayed.
+    // Whichever frame finishes last wins; under our synchronous resolve order that's 33333.
+    expect(decodedTimestamps).toContain(33333);
   });
 
   it("should decode every pending h265 frame in order", async () => {
