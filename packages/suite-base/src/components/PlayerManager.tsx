@@ -201,6 +201,7 @@ export default function PlayerManager(
             const newPlayer = foundSource.initialize({
               metricsCollector,
               params: args.params,
+              sourceMetadata: args.sourceMetadata,
             });
             setBasePlayer(newPlayer);
 

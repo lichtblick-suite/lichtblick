@@ -82,4 +82,41 @@ describe("useStateToURLSynchronization", () => {
       "http://localhost/?ds=test-source2&ds.b=two&ds.c=three&time=1970-01-01T00:00:01.000000001Z",
     );
   });
+
+  it("suppresses ds param writeback when sessionid is present in the URL", () => {
+    const spy = jest.spyOn(window.history, "replaceState");
+
+    // Set the URL to include sessionid
+    Object.defineProperty(window, "location", {
+      value: new URL("http://localhost/?sessionid=test-session-123"),
+      writable: true,
+    });
+
+    (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
+      selector({
+        playerState: {
+          activeData: {
+            currentTime: { sec: 5, nsec: 0 },
+          },
+          capabilities: ["playbackControl"],
+          urlState: {
+            sourceId: "remote-file",
+            parameters: { url: "http://example.com/file.mcap" },
+          },
+        },
+      }),
+    );
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <EventsProvider>{children}</EventsProvider>
+    );
+
+    renderHook(useStateToURLSynchronization, { wrapper });
+
+    // Should only write time, not ds params
+    const calls = spy.mock.calls;
+    const lastCallUrl = calls[calls.length - 1]?.[2] as string | undefined;
+    expect(lastCallUrl).not.toContain("ds=remote-file");
+    expect(lastCallUrl).not.toContain("ds.url=");
+  });
 });
