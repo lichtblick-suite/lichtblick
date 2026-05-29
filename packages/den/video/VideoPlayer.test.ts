@@ -477,6 +477,66 @@ describe("VideoPlayer", () => {
     );
   });
 
+  it("should serialize concurrent decodeFrames calls in FIFO order", async () => {
+    // Regression guard: H.264 `setImage` in ImageRenderable fires `#startDecode` calls in
+    // parallel during steady-state playback. Without an internal mutex, two concurrent
+    // `decodeFrames` calls would either throw (the old behavior) or interleave chunk submissions
+    // in non-deterministic order, garbling the decoder. The mutex must hand off ownership in
+    // acquisition (call) order so chunks reach the decoder in the same order the caller intended.
+    const submissionOrder: number[] = [];
+
+    class MockVideoDecoder {
+      public state: "configured" | "closed" | "unconfigured" = "unconfigured";
+      public decodeQueueSize = 0;
+      public ondequeue: ((event: Event) => void) | null = null;
+      readonly #init: VideoDecoderInit;
+
+      public constructor(init: VideoDecoderInit) {
+        this.#init = init;
+      }
+
+      public configure(): void {
+        this.state = "configured";
+      }
+
+      public decode(chunk: MockEncodedVideoChunk): void {
+        submissionOrder.push(chunk.timestamp);
+        // Emit the frame synchronously so each decodeFrames call resolves before releasing the
+        // mutex — keeps the test focused on submission ordering rather than decoder timing.
+        this.#init.output(createFrame(chunk.timestamp));
+      }
+
+      public reset(): void {}
+      public close(): void {
+        this.state = "closed";
+      }
+    }
+
+    globalThis.VideoDecoder = MockVideoDecoder as unknown as typeof VideoDecoder;
+    globalThis.EncodedVideoChunk = MockEncodedVideoChunk as unknown as typeof EncodedVideoChunk;
+
+    const player = new VideoPlayer();
+    await player.init({ codec: "avc1.64001f" });
+
+    // Three concurrent calls submitted without awaiting between them. Submission order to the
+    // underlying decoder must match the call order.
+    const first = player.decodeFrames([
+      { data: new Uint8Array([1]), timestampMicros: 1000, type: "key" },
+    ]);
+    const second = player.decodeFrames([
+      { data: new Uint8Array([2]), timestampMicros: 2000, type: "delta" },
+    ]);
+    const third = player.decodeFrames([
+      { data: new Uint8Array([3]), timestampMicros: 3000, type: "delta" },
+    ]);
+
+    await expect(first).resolves.toMatchObject({ type: "target" });
+    await expect(second).resolves.toMatchObject({ type: "target" });
+    await expect(third).resolves.toMatchObject({ type: "target" });
+
+    expect(submissionOrder).toEqual([1000, 2000, 3000]);
+  });
+
   it("should reconfigure the decoder after resetForSeek", async () => {
     // Given a tracking decoder so we can observe configure() calls
     const { player, decoders } = setup({ trackDecodes: true });

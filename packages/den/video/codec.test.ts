@@ -10,6 +10,7 @@ import {
   canonicalVideoCodec,
   isVideoKeyframe,
   videoCodecNeedsKeyframeReplay,
+  videoCodecNeedsSeekBackfill,
 } from "./codec";
 import { H264 } from "./h264";
 import { H265 } from "./h265";
@@ -63,5 +64,16 @@ describe("videoCodecNeedsKeyframeReplay", () => {
     expect(videoCodecNeedsKeyframeReplay(VideoCodec.H265)).toBe(true);
     expect(videoCodecNeedsKeyframeReplay(VideoCodec.H264)).toBe(false);
     expect(videoCodecNeedsKeyframeReplay(undefined)).toBe(false);
+  });
+});
+
+describe("videoCodecNeedsSeekBackfill", () => {
+  it("is true for every inter-frame-dependent codec", () => {
+    // H.264 belongs here too even though it does not need the renderable's queue at playback time:
+    // a seek that lands on a P-frame still needs the preceding GOP for the decoder to produce a
+    // picture, so backfill is required at the player/source boundary.
+    expect(videoCodecNeedsSeekBackfill(VideoCodec.H264)).toBe(true);
+    expect(videoCodecNeedsSeekBackfill(VideoCodec.H265)).toBe(true);
+    expect(videoCodecNeedsSeekBackfill(undefined)).toBe(false);
   });
 });

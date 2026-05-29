@@ -247,16 +247,19 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
    * codec-specific deadline (`intermediate`), nothing decoded in time (`timeout`), or the decoder
    * was reset/errored mid-flight (`aborted`).
    *
-   * Throws if called while a previous decode is still in progress — the caller is expected to
-   * await the prior result before submitting another batch.
+   * Concurrent calls are safe: a shared mutex serializes the body in FIFO acquisition order, which
+   * also matches the order in which chunks are submitted to the underlying VideoDecoder. This is
+   * what lets `ImageRenderable` fire H.264 `#startDecode` calls in parallel without losing the
+   * keyframe-first ordering that the decoder needs to produce non-garbled output after a seek.
    */
   public async decodeFrames(frames: EncodedVideoFrame[]): Promise<DecodeFramesResult> {
+    return await this.#mutex.runExclusive(async () => await this.#decodeFramesLocked(frames));
+  }
+
+  async #decodeFramesLocked(frames: EncodedVideoFrame[]): Promise<DecodeFramesResult> {
     const targetFrame = frames.at(-1);
     if (targetFrame == undefined) {
       return { type: "timeout" };
-    }
-    if (this.#pendingDecode) {
-      throw new Error("decodeFrames called while a previous decode is still in progress");
     }
 
     if (this.#decoder.state === "closed") {

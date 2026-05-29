@@ -38,7 +38,13 @@ describe("needsGopBackfill", () => {
     expect(needsGopBackfill(makeMessage({ schemaName: "something.else" }))).toBe(false);
   });
 
-  it("accepts H.265 messages tagged as either 'h265' or 'hevc'", () => {
+  it("accepts inter-frame-dependent video codecs (H.264 and H.265, including the 'hevc' alias)", () => {
+    // H.264 belongs here too: a seek that lands on a P-frame is not decodable without the
+    // preceding GOP, so backfill is required at the player/source boundary even though the
+    // renderable doesn't serialize its decoder submissions for H.264 during normal playback.
+    expect(
+      needsGopBackfill(makeMessage({ message: { format: "h264", data: new Uint8Array([0x01]) } })),
+    ).toBe(true);
     expect(
       needsGopBackfill(makeMessage({ message: { format: "h265", data: new Uint8Array([0x01]) } })),
     ).toBe(true);
@@ -47,9 +53,9 @@ describe("needsGopBackfill", () => {
     ).toBe(true);
   });
 
-  it("rejects codecs that decode from the latest frame and non-Uint8Array payloads", () => {
+  it("rejects unrecognized codecs and non-Uint8Array payloads", () => {
     expect(
-      needsGopBackfill(makeMessage({ message: { format: "h264", data: new Uint8Array([0x01]) } })),
+      needsGopBackfill(makeMessage({ message: { format: "vp9", data: new Uint8Array() } })),
     ).toBe(false);
     expect(needsGopBackfill(makeMessage({ message: { format: "h265", data: "nope" } }))).toBe(
       false,
@@ -153,11 +159,11 @@ describe("readVideoGopForSeekTarget", () => {
 });
 
 describe("expandVideoSeekBackfill", () => {
-  it("passes through non-H.265 messages and keyframes unchanged", async () => {
+  it("passes through unrecognized formats and keyframes unchanged", async () => {
     const otherFormat = makeMessage({
       sec: 0,
       nsec: 1,
-      message: { format: "h264", data: new Uint8Array([0x01]) },
+      message: { format: "vp9", data: new Uint8Array([0x01]) },
     });
     const keyframe = makeMessage({ sec: 0, nsec: 2 });
     jest.spyOn(H265, "IsKeyframe").mockReturnValue(true);

@@ -25,6 +25,8 @@ function videoMessageEvent(
   };
 }
 
+// H.264 NAL: the 5th byte is the NAL unit header. 0x41 → type 0x01 (non-IDR slice / delta);
+// 0x65 → type 0x05 (IDR slice / keyframe).
 function h264Frame(data: number[] = [0x00, 0x00, 0x00, 0x01, 0x41]): CompressedVideo {
   return {
     format: "h264",
@@ -32,6 +34,10 @@ function h264Frame(data: number[] = [0x00, 0x00, 0x00, 0x01, 0x41]): CompressedV
     frame_id: "camera",
     timestamp: { sec: 0, nsec: 0 },
   };
+}
+
+function h264Keyframe(): CompressedVideo {
+  return h264Frame([0x00, 0x00, 0x00, 0x01, 0x65]);
 }
 
 function h265Keyframe(): CompressedVideo {
@@ -61,14 +67,28 @@ describe("filterCompressedVideoQueue", () => {
     expect(filterCompressedVideoQueue(single)).toEqual(single);
   });
 
-  it("keeps only the latest H.264 message per topic", () => {
-    const first = videoMessageEvent("/h264", h264Frame(), 1);
-    const second = videoMessageEvent("/h264", h264Frame(), 2);
-    const third = videoMessageEvent("/h264", h264Frame(), 3);
+  it("keeps the H.264 GOP starting from the most recent keyframe", () => {
+    // H.264 delta frames depend on the preceding GOP; dropping older queued frames here would
+    // leave the decoder unable to produce a picture for the latest delta until the next keyframe,
+    // which is exactly the post-seek black-screen symptom we want to avoid.
+    const olderDelta = videoMessageEvent("/h264", h264Frame(), 1);
+    const key = videoMessageEvent("/h264", h264Keyframe(), 2);
+    const deltaA = videoMessageEvent("/h264", h264Frame(), 3);
+    const deltaB = videoMessageEvent("/h264", h264Frame(), 4);
 
-    const result = filterCompressedVideoQueue([first, second, third]);
+    const result = filterCompressedVideoQueue([olderDelta, key, deltaA, deltaB]);
 
-    expect(result).toEqual([third]);
+    expect(result).toEqual([key, deltaA, deltaB]);
+  });
+
+  it("keeps the full H.264 queue when no keyframe is present yet", () => {
+    const deltaA = videoMessageEvent("/h264", h264Frame(), 1);
+    const deltaB = videoMessageEvent("/h264", h264Frame(), 2);
+    const deltaC = videoMessageEvent("/h264", h264Frame(), 3);
+
+    const result = filterCompressedVideoQueue([deltaA, deltaB, deltaC]);
+
+    expect(result).toEqual([deltaA, deltaB, deltaC]);
   });
 
   it("falls back to keep-latest for unrecognized codecs", () => {
@@ -127,26 +147,25 @@ describe("filterCompressedVideoQueue", () => {
 
   it("preserves arrival order across interleaved H.264 and H.265 topics", () => {
     // Interleaved queue: H264 and H265 alternate, simulating multi-topic delivery.
-    const h264_1 = videoMessageEvent("/h264", h264Frame(), 1);
+    const h264Delta1 = videoMessageEvent("/h264", h264Frame(), 1);
     const h265Key = videoMessageEvent("/h265", h265Keyframe(), 2);
-    const h264_2 = videoMessageEvent("/h264", h264Frame(), 3);
+    const h264Key = videoMessageEvent("/h264", h264Keyframe(), 3);
     const h265Delta1 = videoMessageEvent("/h265", h265DeltaFrame(), 4);
-    const h264_3 = videoMessageEvent("/h264", h264Frame(), 5);
+    const h264Delta2 = videoMessageEvent("/h264", h264Frame(), 5);
     const h265Delta2 = videoMessageEvent("/h265", h265DeltaFrame(), 6);
 
     const result = filterCompressedVideoQueue([
-      h264_1,
+      h264Delta1,
       h265Key,
-      h264_2,
+      h264Key,
       h265Delta1,
-      h264_3,
+      h264Delta2,
       h265Delta2,
     ]);
 
-    // /h264 collapses to the latest (h264_3). /h265 keeps key + both deltas. Output is sorted
-    // by the original arrival order, so the kept H.265 messages must remain in the positions
-    // they originally occupied relative to the H.264 stream.
-    expect(result).toEqual([h265Key, h265Delta1, h264_3, h265Delta2]);
+    // Both /h264 and /h265 keep from their latest keyframe onward. The pre-keyframe h264Delta1
+    // is dropped; everything else survives. Output stays sorted by original arrival order.
+    expect(result).toEqual([h265Key, h264Key, h265Delta1, h264Delta2, h265Delta2]);
   });
 
   it("does not mutate the input array", () => {

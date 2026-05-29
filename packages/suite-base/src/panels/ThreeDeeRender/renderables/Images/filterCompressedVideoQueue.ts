@@ -7,7 +7,7 @@
 
 import * as _ from "lodash-es";
 
-import { canonicalVideoCodec, videoCodecNeedsKeyframeReplay } from "@lichtblick/den/video";
+import { canonicalVideoCodec, videoCodecNeedsSeekBackfill } from "@lichtblick/den/video";
 import { MessageEvent } from "@lichtblick/suite";
 
 import { CompressedVideo } from "./ImageTypes";
@@ -16,14 +16,13 @@ import { isCompressedVideoKeyframe } from "./decodeImage";
 /**
  * Filters the per-frame queue for the `CompressedVideo` subscription.
  *
- * H.264-style streams can be decoded from the latest frame alone, so for those topics we keep
- * only the newest message — matching the long-standing `onlyLastByTopicMessage` behavior. Naively
- * applying the same rule to H.265 breaks playback: HEVC P-frames depend on the keyframe and the
- * P-frames between it and themselves, so dropping older queued frames leaves the decoder unable
- * to produce a picture until the next keyframe (which can be several seconds later for typical
- * recordings). For HEVC topics we therefore preserve the full GOP — the most recent keyframe and
- * every frame after it — and discard only the frames that precede that keyframe, since their
- * dependency chain has already been superseded.
+ * Codecs whose delta frames depend on a preceding GOP (H.264 and H.265) need the entire chain
+ * from the most recent keyframe through the latest delta preserved — dropping older queued frames
+ * leaves the decoder unable to produce a picture for the new latest frame until the next
+ * keyframe arrives (which can be several seconds away for typical recordings, and is exactly the
+ * post-seek "black screen / garbled image" symptom the GOP backfill in `videoSeekBackfill.ts`
+ * also addresses). For codecs without inter-frame dependencies (or unrecognized formats), only
+ * the newest message is needed — matching the long-standing `onlyLastByTopicMessage` behavior.
  *
  * The relative order of the kept messages is preserved so downstream handlers see the stream in
  * the same order it arrived.
@@ -51,10 +50,10 @@ function filterTopic(topicMsgs: MessageEvent<CompressedVideo>[]): MessageEvent<C
     return [];
   }
   const codec = canonicalVideoCodec(latest.message.format);
-  if (videoCodecNeedsKeyframeReplay(codec)) {
+  if (videoCodecNeedsSeekBackfill(codec)) {
     return keepFromLatestKeyframe(topicMsgs);
   }
-  // H.264 (or unrecognized) — only the most recent message is needed downstream.
+  // Unrecognized format — only the most recent message is needed downstream.
   return [latest];
 }
 

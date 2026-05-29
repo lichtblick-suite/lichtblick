@@ -8,7 +8,7 @@
 import {
   canonicalVideoCodec,
   isVideoKeyframe,
-  videoCodecNeedsKeyframeReplay,
+  videoCodecNeedsSeekBackfill,
 } from "@lichtblick/den/video";
 import { compare, fromNanoSec, toNanoSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
@@ -27,9 +27,11 @@ export type GetBackfillMessages = (args: GetBackfillMessagesArgs) => Promise<Mes
 
 /**
  * Returns true for a `foxglove.CompressedVideo` message whose codec can only be decoded by
- * replaying the full GOP (the keyframe and every frame after it) — currently just H.265. These are
- * the messages a backward seek must expand, since a P/B-frame alone is not decodable. The codec
- * decision is delegated to {@link videoCodecNeedsKeyframeReplay} so this stays codec-agnostic.
+ * replaying the full GOP (the keyframe and every frame after it). H.264 and H.265 both qualify:
+ * a seek that lands on a P/B-frame is not decodable without the preceding keyframe and every
+ * intervening delta frame, regardless of whether the renderable serializes its decoder
+ * submissions at playback time. The codec decision is delegated to
+ * {@link videoCodecNeedsSeekBackfill} so this stays codec-agnostic.
  */
 export function needsGopBackfill(message: MessageEvent): boolean {
   if (!COMPRESSED_VIDEO_DATATYPES.has(message.schemaName)) {
@@ -38,7 +40,7 @@ export function needsGopBackfill(message: MessageEvent): boolean {
   const video = message.message as CompressedVideoLike;
   return (
     video.data instanceof Uint8Array &&
-    videoCodecNeedsKeyframeReplay(canonicalVideoCodec(video.format ?? ""))
+    videoCodecNeedsSeekBackfill(canonicalVideoCodec(video.format ?? ""))
   );
 }
 

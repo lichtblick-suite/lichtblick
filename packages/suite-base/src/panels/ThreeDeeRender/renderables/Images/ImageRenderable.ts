@@ -269,42 +269,51 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
     const seq = ++this.#receivedImageSequenceNumber;
     const codec = "format" in image ? canonicalVideoCodec(image.format) : undefined;
-    if (codec != undefined && videoCodecNeedsKeyframeReplay(codec)) {
+
+    if (codec != undefined) {
       const videoImage = image as CompressedVideo;
       const messageTime = toNanoSec(videoImage.timestamp);
+      // Duplicate exact-timestamp resubmission — `expandVideoSeekBackfill` can include the
+      // already-delivered target frame alongside its preceding GOP. Suppress the redundant decode.
       if (messageTime === this.#lastQueuedVideoMessageTime) {
         return;
       }
-      // A backward jump detected at enqueue time means anything still in the queue is a
-      // pre-seek leftover that must be dropped before this frame's GOP arrives. Doing it here
-      // (instead of inside the keyframe's `#prepareIncomingVideoFrame`) is what protects the
-      // GOP messages that follow this enqueue from being wiped mid-drain.
-      if (
+      // A backward jump detected at enqueue time means anything still queued is a pre-seek
+      // leftover that must be dropped before this frame's GOP arrives. For non-replay codecs the
+      // same signal also flips us from parallel decode into the queue + drain path so the
+      // keyframe in the incoming GOP fully processes — and clears `#waitingForVideoKeyframe` —
+      // before any P-frame in that GOP evaluates that gate inside `decodeImage`.
+      const backwardSeekDetected =
         this.#lastQueuedVideoMessageTime != undefined &&
         messageTime < this.#lastQueuedVideoMessageTime &&
-        this.#lastQueuedVideoMessageTime - messageTime > VIDEO_TIMESTAMP_JITTER_NS
-      ) {
+        this.#lastQueuedVideoMessageTime - messageTime > VIDEO_TIMESTAMP_JITTER_NS;
+      if (backwardSeekDetected) {
         this.#pendingVideoDecodeQueue.length = 0;
       }
       this.#lastQueuedVideoMessageTime = messageTime;
-      this.#pendingVideoDecodeQueue.push({ image, resizeWidth, onDecoded, seq });
-      if (!this.#isDrainingVideoDecodes) {
-        this.#isDrainingVideoDecodes = true;
-        void this.#drainPendingVideoDecodes();
+
+      // Replay codecs (H.265) always take the drain queue — their decoder pipeline holds many
+      // chunks before emitting output, so the renderable must drive submission in order.
+      // Non-replay codecs (H.264) default to parallel decode for steady-state perf, but join the
+      // queue while a seek burst is being processed: a freshly detected backward seek, or any
+      // in-progress drain. Once the drain empties they return to parallel.
+      const useDrainQueue =
+        videoCodecNeedsKeyframeReplay(codec) ||
+        backwardSeekDetected ||
+        this.#isDrainingVideoDecodes ||
+        this.#pendingVideoDecodeQueue.length > 0;
+      if (useDrainQueue) {
+        this.#pendingVideoDecodeQueue.push({ image, resizeWidth, onDecoded, seq });
+        if (!this.#isDrainingVideoDecodes) {
+          this.#isDrainingVideoDecodes = true;
+          void this.#drainPendingVideoDecodes();
+        }
+        return;
       }
-      return;
     }
 
-    // Non-replay codecs (H.264, AV1, ...) and raw images decode in parallel; the
+    // Steady-state non-replay-codec video, or raw images — decode in parallel; the
     // `#displayedImageSequenceNumber > seq` guard inside `#startDecode` drops late results.
-    // Serializing them through the drain queue (as the original H.265 rework did) adds per-frame
-    // latency that shows up as visible jank at 30fps.
-    // If the stream switches from a replay codec mid-playback, abandon any queued H.265 frames —
-    // the decoder will re-initialize for the new codec anyway.
-    if (this.#pendingVideoDecodeQueue.length > 0) {
-      this.#pendingVideoDecodeQueue.length = 0;
-      this.#lastQueuedVideoMessageTime = undefined;
-    }
     void this.#startDecode(image, seq, resizeWidth, onDecoded);
   }
 

@@ -51,7 +51,32 @@ export function isVideoKeyframe(format: string, data: Uint8Array): boolean {
 /**
  * Codecs whose non-keyframes can only be decoded by replaying the full GOP (the most recent
  * keyframe plus every frame after it). For these we cannot decode from the latest frame alone.
+ *
+ * This gates the in-renderable queue + drain serialization. H.265 needs it because the decoder
+ * holds many submitted chunks in its pipeline before emitting the target frame, so the renderable
+ * must drive submission in order. H.264, by contrast, emits a decoded VideoFrame within ~2 ms and
+ * can run its `#startDecode` calls in parallel — serializing it through the drain queue adds
+ * per-frame latency that surfaces as 30 fps jank. Use {@link videoCodecNeedsSeekBackfill} (not
+ * this predicate) when deciding whether a seek target needs its preceding GOP attached: both
+ * H.264 and H.265 P-frames require the GOP for a correct seek, but only H.265 needs the
+ * renderable's queue to drive submission order during normal playback.
  */
 export function videoCodecNeedsKeyframeReplay(codec: VideoCodec | undefined): boolean {
   return codec === VideoCodec.H265;
+}
+
+/**
+ * Codecs whose seek target may be a P-frame that cannot be decoded without first replaying the
+ * preceding GOP (most recent keyframe → target). Both H.264 and H.265 have inter-frame
+ * dependencies, so for either codec a seek that lands on a non-keyframe needs the keyframe and
+ * every intervening P-frame attached. Without this, a forward seek to a P-frame produces garbled
+ * decoder output (stale reference state) and a backward seek waits seconds for the next IDR
+ * before any picture appears.
+ *
+ * This is intentionally separate from {@link videoCodecNeedsKeyframeReplay}: backfill is a
+ * correctness requirement at the player/source boundary, whereas keyframe-replay queueing is a
+ * codec-specific performance trade-off inside the renderable.
+ */
+export function videoCodecNeedsSeekBackfill(codec: VideoCodec | undefined): boolean {
+  return codec === VideoCodec.H264 || codec === VideoCodec.H265;
 }

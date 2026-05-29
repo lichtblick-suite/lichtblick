@@ -457,6 +457,69 @@ describe("ImageRenderable error handling", () => {
     expect(decodedTimestamps).toContain(33333);
   });
 
+  it("should queue and serialize H.264 frames after a backward seek", async () => {
+    // Regression guard for the post-seek "garbled image / black screen" symptom: when a backward
+    // seek delivers a GOP for H.264, the keyframe must fully process — clearing
+    // `#waitingForVideoKeyframe` — before subsequent P-frames evaluate that gate inside
+    // decodeImage. Parallel `#startDecode` calls would race; the renderable must flip to the
+    // queue + drain path so each `#startDecode` is awaited in order.
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    const decodeOrder: number[] = [];
+    const decodeResolvers = new Map<number, () => void>();
+
+    jest.spyOn(renderable, "update").mockImplementation(() => undefined);
+    jest
+      .spyOn(renderable as unknown as { decodeImage: jest.Mock }, "decodeImage")
+      .mockImplementation(
+        async (
+          image: (typeof mockUserData)["image"] & { timestamp: { sec: number; nsec: number } },
+        ) => {
+          const timestampMicros = Number(
+            (BigInt(image.timestamp.sec) * 1000000000n + BigInt(image.timestamp.nsec)) / 1000n,
+          );
+          decodeOrder.push(timestampMicros);
+          await new Promise<void>((resolve) => {
+            decodeResolvers.set(timestampMicros, resolve);
+          });
+          return {} as ImageData;
+        },
+      );
+
+    // Establish a pre-seek baseline at t=5s so the next batch is unambiguously a backward jump.
+    renderable.setImage({ ...createH265Frame(h265Keyframe, { sec: 5, nsec: 0 }), format: "h264" });
+    await Promise.resolve();
+    expect(decodeOrder).toEqual([5_000_000]);
+    decodeResolvers.get(5_000_000)?.();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Seek backward to t=0 and deliver the GOP (keyframe + two P-frames) in one burst.
+    renderable.setImage({ ...createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }), format: "h264" });
+    renderable.setImage({
+      ...createH265Frame(h265DeltaFrame, { sec: 0, nsec: 16666666 }),
+      format: "h264",
+    });
+    renderable.setImage({
+      ...createH265Frame(h265DeltaFrame, { sec: 0, nsec: 33333333 }),
+      format: "h264",
+    });
+    await Promise.resolve();
+
+    // Only the keyframe has started decoding — drain awaits its completion before the P-frames.
+    // If this asserts all three timestamps, the H.264 backward seek is back on the parallel path
+    // and we've reintroduced the race that produces post-seek garbled output.
+    expect(decodeOrder).toEqual([5_000_000, 0]);
+
+    decodeResolvers.get(0)?.();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(decodeOrder).toEqual([5_000_000, 0, 16666]);
+
+    decodeResolvers.get(16666)?.();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(decodeOrder).toEqual([5_000_000, 0, 16666, 33333]);
+
+    decodeResolvers.get(33333)?.();
+  });
+
   it("should decode every pending h265 frame in order", async () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
     jest.spyOn(renderable, "update").mockImplementation(() => undefined);
