@@ -506,13 +506,14 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
   // Resolve session-based MCAP URLs when sessionId is present.
   useEffect(() => {
-    if (!targetUrlState?.sessionId) {
+    const sessionId = targetUrlState?.sessionId;
+    if (!sessionId) {
       return;
     }
 
     void (async () => {
       try {
-        const mcaps = await SessionAPI.getSession(targetUrlState.sessionId!);
+        const mcaps = await SessionAPI.getSession(sessionId);
         const urls = mcaps.map((mcap) => mcap.url);
         setUnappliedSourceArgs({
           ds: "remote-file",

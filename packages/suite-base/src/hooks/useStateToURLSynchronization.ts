@@ -54,7 +54,7 @@ export function useStateToURLSynchronization(): void {
       return;
     }
 
-    const currentUrl = new URL(window.location.href);
+    const currentUrl = new URL(globalThis.location.href);
     if (currentUrl.searchParams.has("sessionid")) {
       return;
     }

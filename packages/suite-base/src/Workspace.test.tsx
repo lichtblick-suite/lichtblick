@@ -439,7 +439,10 @@ describe("Workspace - session-based MCAP resolution", () => {
 
   it("should not fetch session when sessionId is not present", () => {
     // Given
-    (parseAppURLState as jest.Mock).mockReturnValue({ ds: "remote-file", dsParams: { url: "https://example.com/file.mcap" } });
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      ds: "remote-file",
+      dsParams: { url: "https://example.com/file.mcap" },
+    });
 
     // When
     render(<Workspace deepLinks={["https://app.example.com/?ds=remote-file"]} />);
