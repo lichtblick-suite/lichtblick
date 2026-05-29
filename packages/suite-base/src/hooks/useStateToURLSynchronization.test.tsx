@@ -87,10 +87,7 @@ describe("useStateToURLSynchronization", () => {
     const spy = jest.spyOn(window.history, "replaceState");
 
     // Set the URL to include sessionid
-    Object.defineProperty(window, "location", {
-      value: new URL("http://localhost/?sessionid=test-session-123"),
-      writable: true,
-    });
+    window.history.pushState({}, "", "http://localhost/?sessionid=test-session-123");
 
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
       selector({
