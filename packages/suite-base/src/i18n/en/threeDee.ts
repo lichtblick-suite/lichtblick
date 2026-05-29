@@ -69,6 +69,19 @@ export const threeDee = {
   YUp: "Y-up",
   ZUp: "Z-up",
 
+  // Lighting
+  mainLightMode: "Main light",
+  mainLightModeHelp:
+    "Fixed uses a world-space directional light. Headlight attaches the light to the camera so the scene is always lit from the viewer's perspective (similar to RViz).",
+  mainLightFixed: "Fixed (scene)",
+  mainLightHeadlight: "Headlight (camera)",
+  directionalLightIntensity: "Directional light intensity",
+  hemisphereLightIntensity: "Hemisphere light intensity",
+  shadowsEnabled: "Enable shadows",
+  toneMapping: "Tone mapping",
+  toneMappingNone: "None",
+  toneMappingACES: "ACES filmic",
+
   // Camera
   distance: "Distance",
   far: "Far",

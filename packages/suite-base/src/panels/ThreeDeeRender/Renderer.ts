@@ -197,6 +197,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   #customLayerActions = new Map<string, CustomLayerAction>();
   #scene: THREE.Scene;
   #dirLight: THREE.DirectionalLight;
+  /** Camera-attached directional light used when `scene.mainLightMode` is `"headlight"` */
+  #headLight: THREE.DirectionalLight;
   #hemiLight: THREE.HemisphereLight;
   public input: Input;
   public readonly outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
@@ -295,10 +297,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     if (!this.gl.capabilities.isWebGL2) {
       throw new Error("WebGL2 is not supported");
     }
-    this.gl.toneMapping = THREE.NoToneMapping;
     this.gl.autoClear = false;
     this.gl.info.autoReset = false;
-    this.gl.shadowMap.enabled = false;
     this.gl.shadowMap.type = THREE.VSMShadowMap;
     this.gl.sortObjects = true;
     this.gl.setPixelRatio(window.devicePixelRatio);
@@ -331,11 +331,21 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.#dirLight.shadow.camera.far = 500;
     this.#dirLight.shadow.bias = -0.00001;
 
+    this.#headLight = new THREE.DirectionalLight(0xffffff, Math.PI);
+    this.#headLight.layers.enableAll();
+    this.#headLight.castShadow = true;
+    this.#headLight.shadow.mapSize.width = 2048;
+    this.#headLight.shadow.mapSize.height = 2048;
+    this.#headLight.shadow.camera.near = 0.5;
+    this.#headLight.shadow.camera.far = 500;
+    this.#headLight.shadow.bias = -0.00001;
+
     this.#hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5 * Math.PI);
     this.#hemiLight.layers.enableAll();
 
     this.#scene.add(this.#dirLight);
     this.#scene.add(this.#hemiLight);
+    this.updateSceneRenderSettings();
 
     this.input = new Input(canvas, () => this.cameraHandler.getActiveCamera());
     this.input.on("resize", (size) => {
@@ -469,6 +479,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.sharedGeometry.dispose();
     this.modelCache.dispose();
 
+    this.#headLight.removeFromParent();
+    this.#headLight.target.removeFromParent();
+    this.#headLight.dispose();
     this.labelPool.dispose();
     this.markerPool.dispose();
     this.#transformPool.clear();
@@ -980,6 +993,55 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
+  public updateSceneRenderSettings(): void {
+    const toneMapping = this.config.scene.toneMapping ?? "none";
+    this.gl.toneMapping = toneMapping === "aces" ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
+
+    this.gl.shadowMap.enabled = this.config.scene.shadowsEnabled ?? false;
+
+    const mainLightMode = this.config.scene.mainLightMode ?? "fixed";
+    const dirIntensity = this.config.scene.directionalLightIntensity ?? Math.PI;
+
+    if (mainLightMode === "headlight") {
+      if (this.#dirLight.parent != undefined) {
+        this.#dirLight.removeFromParent();
+      }
+      this.#dirLight.castShadow = false;
+
+      this.#headLight.intensity = dirIntensity;
+      this.#headLight.castShadow = this.gl.shadowMap.enabled;
+    } else {
+      if (this.#headLight.parent != undefined) {
+        this.#headLight.removeFromParent();
+        this.#headLight.target.removeFromParent();
+      }
+      this.#headLight.castShadow = false;
+
+      if (this.#dirLight.parent !== this.#scene) {
+        this.#scene.add(this.#dirLight);
+      }
+      this.#dirLight.intensity = dirIntensity;
+      this.#dirLight.castShadow = this.gl.shadowMap.enabled;
+    }
+
+    this.#hemiLight.intensity = this.config.scene.hemisphereLightIntensity ?? 0.5 * Math.PI;
+  }
+
+  /** Attach the headlight to the active camera each frame (Perspective vs Orthographic can swap). */
+  #syncMainLightToCamera(camera: THREE.PerspectiveCamera | THREE.OrthographicCamera): void {
+    if ((this.config.scene.mainLightMode ?? "fixed") !== "headlight") {
+      return;
+    }
+    if (this.#headLight.parent !== camera) {
+      this.#headLight.removeFromParent();
+      this.#headLight.target.removeFromParent();
+      camera.add(this.#headLight);
+      camera.add(this.#headLight.target);
+      this.#headLight.position.set(0, 0, 0);
+      this.#headLight.target.position.set(0, 0, -1);
+    }
+  }
+
   /** Update the list of topics and rebuild all settings nodes when the identity
    * of the topics list changes */
   public setTopics(topics: ReadonlyArray<Topic> | undefined): void {
@@ -1320,6 +1382,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.emit("startFrame", currentTime, this);
 
     const camera = this.cameraHandler.getActiveCamera();
+    this.#syncMainLightToCamera(camera);
     camera.layers.set(LAYER_DEFAULT);
 
     // use the FALLBACK_FRAME_ID if renderFrame is undefined and there are no options for transforms
