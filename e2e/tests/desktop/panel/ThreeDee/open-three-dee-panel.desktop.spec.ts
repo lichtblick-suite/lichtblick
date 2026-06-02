@@ -5,7 +5,7 @@ import { loadFiles } from "../../../../fixtures/load-files";
 import { Panels, Sidebar } from "../../../../page-objects";
 
 const MCAP_FILE = "example-converter.mcap";
-const EXTENSION_FILE = "lichtblickteamctw.message-converter-extension-0.0.2.foxe";
+const EXTENSION_FILE = "lichtblickteam.message-converter-extension-0.0.2.foxe";
 
 /**
  * GIVEN an .mcap file is loaded
