@@ -36,7 +36,7 @@ describe("SessionAPI", () => {
 
       const result = await sessionApi.getSession(sessionId);
 
-      expect(mockGet).toHaveBeenCalledWith(`session/${sessionId}`);
+      expect(mockGet).toHaveBeenCalledWith(`session/${sessionId}`, {}, { signal: undefined });
       expect(result).toEqual(mockMcaps);
     });
 

@@ -511,9 +511,17 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       return;
     }
 
+    const controller = new AbortController();
+    const { signal } = controller;
+
     void (async () => {
       try {
-        const mcaps = await SessionAPI.getSession(sessionId);
+        const mcaps = await SessionAPI.getSession(sessionId, signal);
+        if (mcaps.length === 0) {
+          enqueueSnackbar("Session contains no data sources", { variant: "error" });
+          return;
+        }
+
         const urls = mcaps.map((mcap) => mcap.url);
         setUnappliedSourceArgs({
           ds: "remote-file",
@@ -521,10 +529,17 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
           sourceMetadata: mcaps.map((mcap) => mcap.metadata),
         });
       } catch (error) {
+        if (signal.aborted) {
+          return;
+        }
         log.error("Failed to fetch session MCAP URLs:", error);
         enqueueSnackbar("Failed to load session data sources", { variant: "error" });
       }
     })();
+
+    return () => {
+      controller.abort();
+    };
   }, [targetUrlState?.sessionId, enqueueSnackbar]);
 
   const selectEvent = useEvents(selectSelectEvent);

@@ -406,7 +406,7 @@ describe("Workspace - session-based MCAP resolution", () => {
 
     // Then
     await waitFor(() => {
-      expect(mockGetSession).toHaveBeenCalledWith(sessionId);
+      expect(mockGetSession).toHaveBeenCalledWith(sessionId, expect.any(AbortSignal));
     });
     await waitFor(() => {
       expect(mockSelectSource).toHaveBeenCalledWith("remote-file", {
@@ -428,7 +428,7 @@ describe("Workspace - session-based MCAP resolution", () => {
 
     // Then
     await waitFor(() => {
-      expect(mockGetSession).toHaveBeenCalledWith(sessionId);
+      expect(mockGetSession).toHaveBeenCalledWith(sessionId, expect.any(AbortSignal));
     });
     await waitFor(() => {
       expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Failed to load session data sources", {
