@@ -8,9 +8,13 @@ import { SessionMcap, SessionResponse } from "./types";
 export class SessionAPI {
   public readonly sessionPath = "session";
   public async getSession(sessionId: string, signal?: AbortSignal): Promise<SessionMcap[]> {
-    const { data } = await HttpService.get<SessionResponse>(`${this.sessionPath}/${sessionId}`, {}, {
-      signal,
-    });
+    const { data } = await HttpService.get<SessionResponse>(
+      `${this.sessionPath}/${sessionId}`,
+      {},
+      {
+        signal,
+      },
+    );
     return data.mcaps;
   }
 }
