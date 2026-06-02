@@ -13,6 +13,7 @@ import { render } from "@testing-library/react";
 import { act } from "react";
 
 import { Condvar, signal } from "@lichtblick/den/async";
+import { MessageDefinition } from "@lichtblick/message-definition";
 import { Time } from "@lichtblick/rostime";
 import {
   PanelExtensionContext,
@@ -1079,6 +1080,111 @@ describe("PanelExtensionAdapter", () => {
 
       expect(settingsActionHandler).toHaveBeenCalledTimes(1);
       expect(saveConfig).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("getTopicSchema", () => {
+    it("returns the schema definition for a known topic", async () => {
+      const sig = signal<MessageDefinition | undefined>();
+
+      const initPanel = (context: PanelExtensionContext) => {
+        const schema = context.getTopicSchema("/some/topic");
+        sig.resolve(schema);
+      };
+
+      render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup
+              fixture={{
+                topics: [{ name: "/some/topic", schemaName: "some_msgs/Data" }],
+                datatypes: new Map([
+                  [
+                    "some_msgs/Data",
+                    {
+                      name: "some_msgs/Data",
+                      definitions: [{ name: "value", type: "uint32", isArray: false, isComplex: false }],
+                    },
+                  ],
+                ]),
+                frame: {},
+              }}
+            >
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+
+      await act(async () => undefined);
+      const schema = await sig;
+
+      expect(schema).toEqual({
+        name: "some_msgs/Data",
+        definitions: [{ name: "value", type: "uint32", isArray: false, isComplex: false }],
+      });
+    });
+
+    it("returns undefined for an unknown topic", async () => {
+      const sig = signal<MessageDefinition | undefined>();
+
+      const initPanel = (context: PanelExtensionContext) => {
+        const schema = context.getTopicSchema("/nonexistent/topic");
+        sig.resolve(schema);
+      };
+
+      render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup
+              fixture={{
+                topics: [{ name: "/some/topic", schemaName: "some_msgs/Data" }],
+                datatypes: new Map([
+                  [
+                    "some_msgs/Data",
+                    {
+                      name: "some_msgs/Data",
+                      definitions: [{ name: "value", type: "uint32", isArray: false, isComplex: false }],
+                    },
+                  ],
+                ]),
+                frame: {},
+              }}
+            >
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+
+      await act(async () => undefined);
+      const schema = await sig;
+
+      expect(schema).toBeUndefined();
+    });
+
+    it("returns undefined when no active data source is available", async () => {
+      const sig = signal<MessageDefinition | undefined>();
+
+      const initPanel = (context: PanelExtensionContext) => {
+        const schema = context.getTopicSchema("/some/topic");
+        sig.resolve(schema);
+      };
+
+      render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+
+      await act(async () => undefined);
+      const schema = await sig;
+
+      expect(schema).toBeUndefined();
     });
   });
 });

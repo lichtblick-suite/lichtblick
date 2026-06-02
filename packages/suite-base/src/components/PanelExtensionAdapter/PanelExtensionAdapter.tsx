@@ -679,6 +679,21 @@ function PanelExtensionAdapter(
       unstable_setMessagePathDropConfig(dropConfig) {
         setMessagePathDropConfig(dropConfig);
       },
+
+      getTopicSchema(topic) {
+        const ctx = getMessagePipelineContext();
+        const datatypes = ctx.playerState.activeData?.datatypes;
+        if (datatypes == undefined) {
+          return undefined;
+        }
+        const schemaName = ctx.playerState.activeData?.topics?.find(
+          (t) => t.name === topic,
+        )?.schemaName;
+        if (schemaName == undefined) {
+          return undefined;
+        }
+        return datatypes.get(schemaName);
+      },
     };
     // Disable this rule because the metadata function. If used, it will break.
     // eslint-disable-next-line react-hooks/exhaustive-deps
