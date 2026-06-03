@@ -1103,7 +1103,9 @@ describe("PanelExtensionAdapter", () => {
                     "some_msgs/Data",
                     {
                       name: "some_msgs/Data",
-                      definitions: [{ name: "value", type: "uint32", isArray: false, isComplex: false }],
+                      definitions: [
+                        { name: "value", type: "uint32", isArray: false, isComplex: false },
+                      ],
                     },
                   ],
                 ]),
@@ -1144,7 +1146,9 @@ describe("PanelExtensionAdapter", () => {
                     "some_msgs/Data",
                     {
                       name: "some_msgs/Data",
-                      definitions: [{ name: "value", type: "uint32", isArray: false, isComplex: false }],
+                      definitions: [
+                        { name: "value", type: "uint32", isArray: false, isComplex: false },
+                      ],
                     },
                   ],
                 ]),

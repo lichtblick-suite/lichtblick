@@ -3661,6 +3661,9 @@ __metadata:
   dependencies:
     "@lichtblick/tsconfig": "npm:1.1.2"
     typescript: "npm:6.0.3"
+    "@lichtblick/message-definition": 1.0.0
+    "@lichtblick/tsconfig": 1.0.2
+    typescript: 5.9.3
   languageName: unknown
   linkType: soft
 
