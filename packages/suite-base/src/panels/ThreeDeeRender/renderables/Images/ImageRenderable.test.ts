@@ -282,7 +282,6 @@ describe("ImageRenderable error handling", () => {
       resetForSeek: jest.fn(),
       lastImageBitmap,
       lastVideoFrame: undefined,
-      awaitTargetFrame: jest.fn(),
     } as unknown as ImageRenderable["videoPlayer"];
 
     const bitmap =
@@ -307,7 +306,6 @@ describe("ImageRenderable error handling", () => {
       lastImageBitmap: undefined,
       decoderConfig: jest.fn().mockReturnValue(undefined),
       resetForSeek: jest.fn(),
-      awaitTargetFrame: jest.fn(),
     } as unknown as ImageRenderable["videoPlayer"];
 
     const originalCreateImageBitmap = self.createImageBitmap;
@@ -340,7 +338,6 @@ describe("ImageRenderable error handling", () => {
       decoderConfig: jest.fn().mockReturnValue(undefined),
       resetForSeek,
       lastImageBitmap: undefined,
-      awaitTargetFrame: jest.fn(),
     } as unknown as ImageRenderable["videoPlayer"];
 
     const keyframe = h265Keyframe;
@@ -373,7 +370,6 @@ describe("ImageRenderable error handling", () => {
       decoderConfig: jest.fn().mockReturnValue(undefined),
       resetForSeek,
       lastImageBitmap: undefined,
-      awaitTargetFrame: jest.fn(),
     } as unknown as ImageRenderable["videoPlayer"];
 
     const originalCreateImageBitmap = self.createImageBitmap;

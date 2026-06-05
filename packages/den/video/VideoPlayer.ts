@@ -80,7 +80,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   readonly #pendingFrames = new Map<number, VideoFrame>();
   readonly #pendingFrameOrder: number[] = [];
   #pendingDecode: PendingDecode | undefined;
-  #pendingTargetTimestampMicros: number | undefined;
+  #decodeGeneration: number = 0;
   #lastSubmittedTimestampMicros: number | undefined;
   #currentDecodeTimestampMicros: number | undefined;
   // Lets a caller park on the still-decoding target frame after `decodeFrames()` resolves with an
@@ -253,12 +253,22 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
    * keyframe-first ordering that the decoder needs to produce non-garbled output after a seek.
    */
   public async decodeFrames(frames: EncodedVideoFrame[]): Promise<DecodeFramesResult> {
-    return await this.#mutex.runExclusive(async () => await this.#decodeFramesLocked(frames));
+    const generation = this.#decodeGeneration;
+    return await this.#mutex.runExclusive(
+      async () => await this.#decodeFramesLocked(frames, generation),
+    );
   }
 
-  async #decodeFramesLocked(frames: EncodedVideoFrame[]): Promise<DecodeFramesResult> {
+  async #decodeFramesLocked(
+    frames: EncodedVideoFrame[],
+    generation: number,
+  ): Promise<DecodeFramesResult> {
     const targetFrame = frames.at(-1);
     if (targetFrame == undefined) {
+      return { type: "timeout" };
+    }
+
+    if (generation !== this.#decodeGeneration) {
       return { type: "timeout" };
     }
 
@@ -281,8 +291,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
     const targetFrameWaitMs = isH265 ? H265_TARGET_FRAME_WAIT_MS : DEFAULT_TARGET_FRAME_WAIT_MS;
     const maxDecodeWaitMs = isH265 ? H265_MAX_DECODE_WAIT_MS : DEFAULT_MAX_DECODE_WAIT_MS;
 
-    this.#pendingTargetTimestampMicros = targetFrame.timestampMicros;
-
     return await new Promise<DecodeFramesResult>((resolve, reject) => {
       const pendingDecode: PendingDecode = {
         targetTimestampMicros: targetFrame.timestampMicros,
@@ -297,6 +305,13 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
           if (this.#pendingDecode === pendingDecode) {
             this.#pendingDecode = undefined;
           }
+          // The returned frame was already dequeued before resolve() was called;
+          // every remaining #pendingFrames entry is an unclaimed orphan — close them.
+          for (const frame of this.#pendingFrames.values()) {
+            frame.close();
+          }
+          this.#pendingFrames.clear();
+          this.#pendingFrameOrder.length = 0;
           resolve(result);
         },
         reject: (error) => {
@@ -319,6 +334,17 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
         if (this.#pendingDecode !== pendingDecode) {
           return;
         }
+        // The target frame may have already arrived and been dequeued from #pendingFrames into
+        // resolvedResult while still waiting for the decode-queue drain signal. The drain and
+        // overall timeouts share the same maxDecodeWaitMs deadline; because the overall timeout
+        // is registered first it fires first, so without this check we would find nothing in
+        // #pendingFrames, emit a spurious "Timed out" warning, and leak the VideoFrame parked
+        // in resolvedResult — which then triggers the "VideoFrame GC without close" stall warning.
+        if (pendingDecode.resolvedResult != undefined) {
+          pendingDecode.resolve(pendingDecode.resolvedResult);
+          return;
+        }
+
         const frame = this.#dequeueNewestFrame();
         if (frame) {
           pendingDecode.resolve({ type: "intermediate", frame });
@@ -353,48 +379,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
         }
         this.#handleDecodedFrame();
       });
-      this.#handleDecodedFrame();
-    });
-  }
-
-  /**
-   * Waits for the target frame from the most recent `decodeFrames()` call to arrive, even if
-   * `decodeFrames()` already resolved with an `intermediate` or `timeout` result. Useful when the
-   * caller needs to display a placeholder while the slow target still works its way through the
-   * decoder pipeline. Throws if called without a pending target or if a previous wait is still
-   * outstanding.
-   */
-  public async awaitTargetFrame(): Promise<VideoFrame> {
-    const targetTimestampMicros =
-      this.#pendingDecode?.targetTimestampMicros ?? this.#pendingTargetTimestampMicros;
-    if (targetTimestampMicros == undefined) {
-      throw new Error("awaitTargetFrame called without a pending target");
-    }
-
-    const frame = this.#dequeueFrame(targetTimestampMicros);
-    if (frame) {
-      return frame;
-    }
-    if (this.#targetWaiter) {
-      throw new Error("awaitTargetFrame called while a previous target wait is still in progress");
-    }
-
-    return await new Promise<VideoFrame>((resolve, reject) => {
-      this.#targetWaiter = {
-        targetTimestampMicros,
-        resolve: (targetFrame) => {
-          if (this.#targetWaiter?.resolve === resolve) {
-            this.#targetWaiter = undefined;
-          }
-          resolve(targetFrame);
-        },
-        reject: (error) => {
-          if (this.#targetWaiter?.reject === reject) {
-            this.#targetWaiter = undefined;
-          }
-          reject(error);
-        },
-      };
       this.#handleDecodedFrame();
     });
   }
@@ -466,7 +450,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
     if (this.#targetWaiter) {
       const frame = this.#dequeueFrame(this.#targetWaiter.targetTimestampMicros);
       if (frame) {
-        this.#pendingTargetTimestampMicros = undefined;
         this.#targetWaiter.resolve(frame);
         return;
       }
@@ -478,7 +461,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
 
     const targetFrame = this.#dequeueFrame(this.#pendingDecode.targetTimestampMicros);
     if (targetFrame) {
-      this.#pendingTargetTimestampMicros = undefined;
       this.#resolvePendingDecodeWhenReady({ type: "target", frame: targetFrame });
       return;
     }
@@ -561,6 +543,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
    * call would observe `state === "unconfigured"` and bail out with a timeout result.
    */
   public resetForSeek(): void {
+    this.#decodeGeneration++;
     if (this.#decoder.state === "configured") {
       this.#decoder.reset();
       if (this.#decoderConfig != undefined) {
@@ -575,6 +558,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
    * configuration; a subsequent `init()` is required before more decoding.
    */
   public close(): void {
+    this.#decodeGeneration++;
     if (this.#decoder.state !== "closed") {
       this.#decoder.close();
     }
@@ -583,10 +567,17 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   }
 
   #disposePendingState(waiterRejectReason: string): void {
+    // If the target frame arrived and was dequeued into resolvedResult while the code was still
+    // waiting for the drain signal, it is no longer in #pendingFrames and won't be reached by
+    // #dequeueNewestFrame() or the loop below. Close it explicitly to avoid a VideoFrame leak.
+    const resolvedFrame = this.#pendingDecode?.resolvedResult;
+    if (resolvedFrame && "frame" in resolvedFrame) {
+      resolvedFrame.frame?.close();
+    }
+
     const abortedFrame = this.#dequeueNewestFrame();
     this.#pendingDecode?.resolve({ type: "aborted", frame: abortedFrame });
     this.#pendingDecode = undefined;
-    this.#pendingTargetTimestampMicros = undefined;
     this.#lastSubmittedTimestampMicros = undefined;
     this.#currentDecodeTimestampMicros = undefined;
     this.#targetWaiter?.reject(new Error(waiterRejectReason));

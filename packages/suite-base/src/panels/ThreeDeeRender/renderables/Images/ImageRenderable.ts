@@ -524,7 +524,11 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         }),
       ),
     );
+
     if (result.type !== "target") {
+      if ("frame" in result) {
+        result.frame?.close();
+      }
       return undefined;
     }
 
