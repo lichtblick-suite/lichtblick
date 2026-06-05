@@ -31,6 +31,7 @@ describe("LayoutManager", () => {
     mockRemoteStorage = {
       workspace: BasicBuilder.string(),
       getLayouts: jest.fn().mockResolvedValue([]),
+      getDefaultLayoutData: jest.fn().mockResolvedValue(undefined),
       getLayout: jest.fn().mockResolvedValue(undefined),
       saveNewLayout: jest.fn(),
       updateLayout: jest.fn(),

@@ -69,6 +69,7 @@ export function ScriptsList({
                   });
                 }
               }}
+              readOnly={scripts[scriptId]?.mode === "readOnly"}
             />
           );
         })}
