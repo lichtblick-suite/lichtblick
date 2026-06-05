@@ -118,6 +118,13 @@ export default class LayoutManager implements ILayoutManager {
     queueMicrotask(() => this.emitter.emit("change", event));
   }
 
+  public async getDefaultLayoutData(): Promise<Partial<LayoutData> | undefined> {
+    if (!this.remote) {
+      return undefined;
+    }
+    return await this.remote.getDefaultLayoutData();
+  }
+
   public async getLayouts(): Promise<readonly Layout[]> {
     return await this.local.runExclusive(async (local) => {
       const layouts = await local.list();

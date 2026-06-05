@@ -187,12 +187,16 @@ export default function LayoutBrowser({
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
     ).format("LT")}`;
-    const layoutData: Omit<LayoutData, "name" | "id"> = {
+    const templateData = await layoutManager.getDefaultLayoutData();
+    const baseLayoutData: Omit<LayoutData, "name" | "id"> = {
       configById: {},
       globalVariables: {},
       userNodes: {},
       playbackConfig: defaultPlaybackConfig,
     };
+    const layoutData = templateData
+      ? (_.merge({}, baseLayoutData, templateData) as Omit<LayoutData, "name" | "id">)
+      : baseLayoutData;
     const newLayout = await layoutManager.saveNewLayout({
       name,
       data: layoutData,

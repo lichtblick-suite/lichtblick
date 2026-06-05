@@ -25,7 +25,15 @@ import {
   Link,
   Typography,
 } from "@mui/material";
-import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ImperativePanelHandle,
   PanelGroup,
@@ -182,8 +190,7 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
 
 const EMPTY_USER_NODES: UserScripts = Object.freeze({});
 
-const selectUserScripts = (state: LayoutState) =>
-  state.selectedLayout?.data?.userNodes ?? EMPTY_USER_NODES;
+const selectRawUserNodes = (state: LayoutState) => state.selectedLayout?.data?.userNodes;
 
 const selectState = (store: UserScriptStore) => store.state;
 
@@ -193,14 +200,27 @@ function UserScriptEditor(props: Props) {
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
-  const userScripts = useCurrentLayoutSelector(selectUserScripts);
+  const allUserScripts = useCurrentLayoutSelector(selectRawUserNodes);
+  const visibleUserScripts = useMemo(() => {
+    if (allUserScripts == null) {
+      return EMPTY_USER_NODES;
+    }
+    const nonHidden: UserScripts = {};
+    for (const [scriptId, userScript] of Object.entries(allUserScripts)) {
+      if (userScript.mode == null || userScript.mode !== "hidden") {
+        nonHidden[scriptId] = userScript;
+      }
+    }
+    return Object.keys(nonHidden).length > 0 ? nonHidden : EMPTY_USER_NODES;
+  }, [allUserScripts]);
   const { scriptStates: userScriptStates, rosLib, typesLib } = useUserScriptState(selectState);
 
   const { setUserScripts } = useCurrentLayoutActions();
 
   const selectedNodeDiagnostics =
     (selectedNodeId != undefined ? userScriptStates[selectedNodeId]?.diagnostics : undefined) ?? [];
-  const selectedScript = selectedNodeId != undefined ? userScripts[selectedNodeId] : undefined;
+  const selectedScript =
+    selectedNodeId != undefined ? visibleUserScripts[selectedNodeId] : undefined;
   const [scriptBackStack, setScriptBackStack] = useState<Script[]>([]);
   // Holds the currently active script
   const currentScript =
@@ -250,7 +270,11 @@ function UserScriptEditor(props: Props) {
     if (selectedScript) {
       const testItems = props.config.additionalBackStackItems ?? [];
       setScriptBackStack([
-        { filePath: selectedScript.name, code: selectedScript.sourceCode, readOnly: false },
+        {
+          filePath: selectedScript.name,
+          code: selectedScript.sourceCode,
+          readOnly: selectedScript.mode != null ? selectedScript.mode === "readOnly" : false,
+        },
         ...testItems,
       ]);
     }
@@ -368,14 +392,16 @@ function UserScriptEditor(props: Props) {
             saveConfig({ selectedNodeId: scriptId });
           }}
           deleteScript={(scriptId) => {
-            setUserScripts({ ...userScripts, [scriptId]: undefined });
+            setUserScripts({ ...visibleUserScripts, [scriptId]: undefined });
             saveConfig({
               selectedNodeId:
-                Object.keys(userScripts).length > 1 ? Object.keys(userScripts)[0] : undefined,
+                Object.keys(visibleUserScripts).length > 1
+                  ? Object.keys(visibleUserScripts)[0]
+                  : undefined,
             });
           }}
           selectedScriptId={selectedNodeId}
-          userScripts={userScripts}
+          userScripts={visibleUserScripts}
           script={currentScript}
           setScriptOverride={setScriptOverride}
           setUserScripts={setUserScripts}
