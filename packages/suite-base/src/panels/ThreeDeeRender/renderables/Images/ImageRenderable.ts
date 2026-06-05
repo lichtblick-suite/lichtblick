@@ -583,7 +583,11 @@ export class ImageRenderable extends Renderable<ImageUserData> {
           const replayBitmap = this.#canReplayVideoGop
             ? await this.#decodeVideoGopToTarget(frameMsg, resizeWidth)
             : undefined;
-          return replayBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
+          return (
+            replayBitmap ??
+            videoPlayer.lastImageBitmap ??
+            (await emptyVideoFrame(videoPlayer, resizeWidth))
+          );
         }
 
         // Initialize the video player if needed
@@ -594,7 +598,11 @@ export class ImageRenderable extends Renderable<ImageUserData> {
               const replayBitmap = this.#canReplayVideoGop
                 ? await this.#decodeVideoGopToTarget(frameMsg, resizeWidth)
                 : undefined;
-              return replayBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
+              return (
+                replayBitmap ??
+                videoPlayer.lastImageBitmap ??
+                (await emptyVideoFrame(videoPlayer, resizeWidth))
+              );
             }
             await videoPlayer.init(decoderConfig);
             this.#waitingForVideoKeyframe = false;

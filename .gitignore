@@ -30,3 +30,7 @@ test-results/*
 .sonar_lock
 .scannerwork
 eslint-report.json
+
+# Agents
+.agents
+skills-lock.json

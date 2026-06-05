@@ -534,21 +534,16 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   }
 
   /**
-   * Reset the VideoDecoder and clear any pending frames, but keep the decoder configuration so
-   * the next `decodeFrames()` call can submit chunks immediately. Call this when seeking to a
-   * new position in the stream.
+   * Reset the VideoDecoder and clear any pending frames when seeking.
    *
-   * Per the WebCodecs spec, `VideoDecoder.reset()` returns the decoder to the unconfigured state,
-   * so we re-apply the cached `VideoDecoderConfig` here. Without this, the next `decodeFrames()`
-   * call would observe `state === "unconfigured"` and bail out with a timeout result.
+   * We intentionally do not re-configure here. Callers already transition to
+   * keyframe-gated decode after a seek and call `init()` on that keyframe, so
+   * re-configuring in `resetForSeek()` would do duplicate work and add latency.
    */
   public resetForSeek(): void {
     this.#decodeGeneration++;
     if (this.#decoder.state === "configured") {
       this.#decoder.reset();
-      if (this.#decoderConfig != undefined) {
-        this.#decoder.configure(this.#decoderConfig);
-      }
     }
     this.#disposePendingState("Decoder reset");
   }
