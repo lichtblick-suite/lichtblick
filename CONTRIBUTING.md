@@ -15,6 +15,7 @@ Lichtblick is an integrated visualization and diagnosis tool for robotics, built
 - [Branching Strategy](#branching-strategy---git-flow)
 - [Code Style & Standards](#code-style--standards)
 - [Testing](#testing)
+- [AI-Assisted Development](#ai-assisted-development)
 - [Pull Request Guidelines](#pull-request-guidelines)
 - [Reporting Issues](#reporting-issues)
 - [Version Increment](#version-increment)
@@ -410,6 +411,37 @@ The following checks run automatically on every PR:
 | **e2e-web**     | Web E2E tests                                                                                   |
 
 > All CI checks must pass before a PR can be merged.
+
+---
+
+## AI-Assisted Development
+
+The project uses **GitHub Copilot agent mode** (VS Code 1.99+) with project-specific agents and skills to accelerate development workflows. AI agents are configured via Markdown files in `.github/` and operate within clearly defined conventions.
+
+### Available Agents
+
+| Agent | Invocation | Purpose |
+| --- | --- | --- |
+| `Lichtblick E2E Test` | `@lb-e2e-test` | Creates Playwright E2E tests for desktop (Electron) and web, using the Playwright MCP browser for web UI exploration |
+
+### Skills
+
+Skills are reusable domain knowledge files loaded by agents before performing tasks:
+
+| Skill | Location | Scope |
+| --- | --- | --- |
+| `test-conventions` | `.github/skills/test-conventions/SKILL.md` | GWT pattern, quality rules, and test-writing workflow for all test types |
+| `e2e-playwright-mcp` | `.github/skills/e2e-playwright-mcp/SKILL.md` | E2E-specific: fixture reference, selector strategy, MCP usage, and source instrumentation |
+
+### Global Context
+
+`.github/copilot-instructions.md` is auto-loaded at the start of every Copilot Chat session. It defines project-wide rules for code style, testing, and available agents.
+
+### Playwright MCP Server
+
+The Playwright MCP server (configured in `.vscode/mcp.json`) enables AI agents to explore the running web app via accessibility snapshots, discover stable selectors, and generate test scaffolds interactively.
+
+> **Note**: The MCP server drives Chrome (web) only — it cannot automate the Electron desktop app. See `e2e/README.md` for detailed workflow documentation.
 
 ---
 

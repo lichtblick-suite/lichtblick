@@ -75,15 +75,14 @@ jobs:
   e2e-desktop:
     runs-on: ubuntu-latest
 
-    # Run tests in parallel across multiple shards
-    # This distributes tests across multiple GitHub Action jobs
-    # Each shard runs independently, reducing total CI time
+    # Run smoke tests in parallel across 2 shards
+    # Full regression runs separately in e2e-regression.yml (nightly + develop/main)
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2]
 
-    name: e2e-desktop (ubuntu-latest) [${{ matrix.shard }}/4]
+    name: e2e-desktop (ubuntu-latest) [${{ matrix.shard }}/2]
 
     # Set a fixed timezone to ensure consistent test results.
     # Lichtblick uses the system's local timezone, which can cause test assertions
@@ -120,11 +119,11 @@ jobs:
       - name: Build desktop app
         run: yarn desktop:build:dev
 
-      - name: Run E2E Desktop tests - Shard ${{ matrix.shard }}/4
+      - name: Run E2E Desktop smoke tests - Shard ${{ matrix.shard }}/2
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
-          run: yarn test:e2e:desktop:ci --shard=${{ matrix.shard }}/4
+          run: yarn test:e2e:desktop:smoke:ci --shard=${{ matrix.shard }}/2
 
       - name: Upload Desktop E2E Test Reports (Shard ${{ matrix.shard }})
         if: always()
@@ -164,8 +163,8 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run E2E Web tests
-        run: yarn test:e2e:web:ci
+      - name: Run E2E Web smoke tests
+        run: yarn test:e2e:web:smoke:ci
 
       - name: Upload Web E2E Test Reports
         if: always()

@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp",
+        "--browser",
+        "chrome",
+        "--codegen",
+        "typescript",
+        "--isolated",
+        "--caps",
+        "testing"
+      ]
+    }
+  }
+}
