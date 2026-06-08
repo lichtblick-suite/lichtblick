@@ -52,7 +52,7 @@ import {
 } from "../ros";
 import { BaseSettings, PRECISION_DISTANCE } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
-import { makePose } from "../transforms";
+import { makePose, AnyFrameId } from "../transforms";
 
 const log = Logger.getLogger(__filename);
 void log;
@@ -101,6 +101,21 @@ export class Images extends SceneExtension<ImageRenderable> {
   public override dispose(): void {
     this.renderer.off("topicsChanged", this.#handleTopicsChanged);
     super.dispose();
+  }
+
+  public override startFrame(
+    currentTime: bigint,
+    renderFrameId: AnyFrameId,
+    fixedFrameId: AnyFrameId,
+  ): void {
+    // All setImage() calls for this frame have been made by the time startFrame() fires (they
+    // happen inside #handleSubscriptionQueues(), which runs before startFrame()). Flushing here
+    // means the full GOP batch is already in each queue, so skipRender correctly suppresses every
+    // intermediate frame and only the last one triggers a GPU upload.
+    for (const renderable of this.renderables.values()) {
+      renderable.flushPendingDecodes();
+    }
+    super.startFrame(currentTime, renderFrameId, fixedFrameId);
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {

@@ -275,7 +275,15 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       const messageTime = toNanoSec(videoImage.timestamp);
       // Duplicate exact-timestamp resubmission — `expandVideoSeekBackfill` can include the
       // already-delivered target frame alongside its preceding GOP. Suppress the redundant decode.
-      if (messageTime === this.#lastQueuedVideoMessageTime) {
+      // Only apply this dedupe when the decoder is in a healthy initialized state; after a seek
+      // reset (decoder uninitialized) we must allow the keyframe through even if its timestamp
+      // matches the last queued one from the previous epoch.
+      const isVideoPlayerHealthy = this.videoPlayer?.isInitialized() === true;
+      if (
+        isVideoPlayerHealthy &&
+        !this.#waitingForVideoKeyframe &&
+        messageTime === this.#lastQueuedVideoMessageTime
+      ) {
         return;
       }
       // A backward jump detected at enqueue time means anything still queued is a pre-seek
@@ -287,6 +295,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         this.#lastQueuedVideoMessageTime != undefined &&
         messageTime < this.#lastQueuedVideoMessageTime &&
         this.#lastQueuedVideoMessageTime - messageTime > VIDEO_TIMESTAMP_JITTER_NS;
+
       if (backwardSeekDetected) {
         this.#pendingVideoDecodeQueue.length = 0;
       }
@@ -301,13 +310,12 @@ export class ImageRenderable extends Renderable<ImageUserData> {
         videoCodecNeedsKeyframeReplay(codec) ||
         backwardSeekDetected ||
         this.#isDrainingVideoDecodes ||
+        // videoPlayer not initialized means it's the first frame, but also a seek happened
+        !isVideoPlayerHealthy ||
         this.#pendingVideoDecodeQueue.length > 0;
+
       if (useDrainQueue) {
         this.#pendingVideoDecodeQueue.push({ image, resizeWidth, onDecoded, seq });
-        if (!this.#isDrainingVideoDecodes) {
-          this.#isDrainingVideoDecodes = true;
-          void this.#drainPendingVideoDecodes();
-        }
         return;
       }
     }
@@ -317,9 +325,37 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     void this.#startDecode(image, seq, resizeWidth, onDecoded);
   }
 
+  /**
+   * Start draining the pending video decode queue if it is non-empty and not already draining.
+   *
+   * Call this after all `setImage` calls for the current render frame have been made (i.e. from
+   * the scene extension's `startFrame()` hook). At that point the queue contains the full batch of
+   * frames for this frame, so `skipRender` correctly identifies every frame except the last one as
+   * an intermediate that does not need a GPU upload.
+   */
+  public flushPendingDecodes(): void {
+    if (this.#pendingVideoDecodeQueue.length > 0 && !this.#isDrainingVideoDecodes) {
+      this.#isDrainingVideoDecodes = true;
+      void this.#drainPendingVideoDecodes();
+    }
+  }
+
+  /**
+   * Reset decoder state for an external seek and force keyframe-gated decode on next frames.
+   */
+  public resetVideoForSeek(): void {
+    this.videoPlayer?.resetForSeek();
+    this.#waitingForVideoKeyframe = true;
+    this.#canReplayVideoGop = true;
+    this.#pendingVideoDecodeQueue.length = 0;
+    this.#lastQueuedVideoMessageTime = undefined;
+  }
+
   async #drainPendingVideoDecodes(): Promise<void> {
     try {
       while (this.#pendingVideoDecodeQueue.length > 0) {
+        // only render the last frame in the queue
+        const skipRender = this.#pendingVideoDecodeQueue.length > 1;
         const pendingDecode = this.#pendingVideoDecodeQueue.shift();
         if (pendingDecode == undefined) {
           break;
@@ -329,6 +365,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
           pendingDecode.seq,
           pendingDecode.resizeWidth,
           pendingDecode.onDecoded,
+          { skipRender },
         );
       }
     } finally {
@@ -345,6 +382,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     seq: number,
     resizeWidth?: number,
     onDecoded?: () => void,
+    { skipRender }: { skipRender?: boolean } = { skipRender: false },
   ): Promise<void> {
     try {
       const result = await this.decodeImage(image, resizeWidth);
@@ -357,12 +395,16 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       this.#displayedImageSequenceNumber = seq;
       this.#decodedImage = result;
       this.#textureNeedsUpdate = true;
-      this.update();
+      if (skipRender === false) {
+        this.update();
+      }
       this.#showingErrorImage = false;
 
       onDecoded?.();
       this.removeError(DECODE_IMAGE_ERR_KEY);
-      this.renderer.queueAnimationFrame();
+      if (skipRender === false) {
+        this.renderer.queueAnimationFrame();
+      }
     } catch (err) {
       log.error(err);
       if (this.isDisposed()) {
@@ -583,11 +625,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
           const replayBitmap = this.#canReplayVideoGop
             ? await this.#decodeVideoGopToTarget(frameMsg, resizeWidth)
             : undefined;
-          return (
-            replayBitmap ??
-            videoPlayer.lastImageBitmap ??
-            (await emptyVideoFrame(videoPlayer, resizeWidth))
-          );
+          return replayBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
         }
 
         // Initialize the video player if needed
@@ -598,11 +636,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
               const replayBitmap = this.#canReplayVideoGop
                 ? await this.#decodeVideoGopToTarget(frameMsg, resizeWidth)
                 : undefined;
-              return (
-                replayBitmap ??
-                videoPlayer.lastImageBitmap ??
-                (await emptyVideoFrame(videoPlayer, resizeWidth))
-              );
+              return replayBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
             }
             await videoPlayer.init(decoderConfig);
             this.#waitingForVideoKeyframe = false;
