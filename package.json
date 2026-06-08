@@ -106,7 +106,7 @@
     "@babel/preset-env": "7.29.7",
     "@babel/preset-react": "7.29.7",
     "@babel/preset-typescript": "7.29.7",
-    "@eslint/compat": "2.0.5",
+    "@eslint/compat": "2.1.0",
     "@lichtblick/eslint-plugin": "2.0.7",
     "@lichtblick/eslint-plugin-suite": "workspace:*",
     "@lichtblick/tsconfig": "1.0.2",
