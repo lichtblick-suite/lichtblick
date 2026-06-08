@@ -382,9 +382,10 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     seq: number,
     resizeWidth?: number,
     onDecoded?: () => void,
-    { skipRender }: { skipRender?: boolean } = { skipRender: false },
+    options?: { skipRender?: boolean },
   ): Promise<void> {
     try {
+      const skipRender = options?.skipRender ?? false;
       const result = await this.decodeImage(image, resizeWidth);
       if (this.isDisposed()) {
         return;
@@ -395,14 +396,14 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       this.#displayedImageSequenceNumber = seq;
       this.#decodedImage = result;
       this.#textureNeedsUpdate = true;
-      if (skipRender === false) {
+      if (!skipRender) {
         this.update();
       }
       this.#showingErrorImage = false;
 
       onDecoded?.();
       this.removeError(DECODE_IMAGE_ERR_KEY);
-      if (skipRender === false) {
+      if (!skipRender) {
         this.renderer.queueAnimationFrame();
       }
     } catch (err) {
