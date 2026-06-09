@@ -13,21 +13,51 @@ import { useShallowMemo } from "@lichtblick/hooks";
 import { SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/suite";
 
 import { useStyles } from "./Audio.style";
-import { AudioConfig, AudioEncoding, AudioProps } from "./types";
+import {
+  describePlaybackParams,
+  ENCODING_LABELS,
+  parseAudioMessage,
+  AudioPlaybackParams,
+} from "./parseAudioMessage";
+import { AudioConfig, AudioEncoding, AudioProps, ResolvedAudioEncoding } from "./types";
 import { WebMStreamPlayer } from "./webmPlayback";
 
 const DEFAULT_CONFIG: AudioConfig = {
   topic: "",
-  encoding: "wav",
+  encoding: "auto",
   sampleRate: 44100,
   numChannels: 1,
   volume: 1,
 };
 
-const IS_PCM_ENCODING = (enc: AudioEncoding): enc is "pcm-float32le" | "pcm-int16le" =>
+const IS_AUTO_ENCODING = (enc: AudioEncoding): enc is "auto" => enc === "auto";
+
+const IS_PCM_ENCODING = (enc: ResolvedAudioEncoding): enc is "pcm-float32le" | "pcm-int16le" =>
   enc === "pcm-float32le" || enc === "pcm-int16le";
 
-const IS_WEBM_ENCODING = (enc: AudioEncoding): enc is "webm" => enc === "webm";
+const IS_WEBM_ENCODING = (enc: ResolvedAudioEncoding): enc is "webm" => enc === "webm";
+
+const MANUAL_ENCODING_OPTIONS: { label: string; value: ResolvedAudioEncoding }[] = [
+  { label: ENCODING_LABELS.wav, value: "wav" },
+  { label: ENCODING_LABELS.mp3, value: "mp3" },
+  { label: ENCODING_LABELS.ogg, value: "ogg" },
+  { label: ENCODING_LABELS.aac, value: "aac" },
+  { label: ENCODING_LABELS.flac, value: "flac" },
+  { label: ENCODING_LABELS.webm, value: "webm" },
+  { label: ENCODING_LABELS["pcm-float32le"], value: "pcm-float32le" },
+  { label: ENCODING_LABELS["pcm-int16le"], value: "pcm-int16le" },
+];
+
+function describeManualEncoding(config: AudioConfig): string {
+  const encoding = config.encoding;
+  if (encoding === "auto") {
+    return "Auto-detect";
+  }
+  if (IS_PCM_ENCODING(encoding)) {
+    return `${ENCODING_LABELS[encoding]} @ ${config.sampleRate.toLocaleString()} Hz, ${config.numChannels} ch`;
+  }
+  return ENCODING_LABELS[encoding];
+}
 
 /**
  * Decode raw PCM bytes into an AudioBuffer.
@@ -72,7 +102,7 @@ function buildSettingsTree(
   config: AudioConfig,
   topics: readonly string[],
 ): SettingsTreeNodes {
-  const isPCM = IS_PCM_ENCODING(config.encoding);
+  const isManualPCM = !IS_AUTO_ENCODING(config.encoding) && IS_PCM_ENCODING(config.encoding);
 
   return {
     general: {
@@ -89,14 +119,8 @@ function buildSettingsTree(
           input: "select",
           value: config.encoding,
           options: [
-            { label: "WAV", value: "wav" },
-            { label: "MP3", value: "mp3" },
-            { label: "OGG", value: "ogg" },
-            { label: "AAC", value: "aac" },
-            { label: "FLAC", value: "flac" },
-            { label: "WebM", value: "webm" },
-            { label: "PCM Float32 LE", value: "pcm-float32le" },
-            { label: "PCM Int16 LE", value: "pcm-int16le" },
+            { label: "Auto-detect", value: "auto" },
+            ...MANUAL_ENCODING_OPTIONS,
           ],
         },
         volume: {
@@ -107,7 +131,7 @@ function buildSettingsTree(
           max: 1,
           step: 0.05,
         },
-        ...(isPCM && {
+        ...(isManualPCM && {
           sampleRate: {
             label: "Sample Rate (Hz)",
             input: "number",
@@ -151,6 +175,7 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
   const [availableTopics, setAvailableTopics] = useState<string[]>([]);
   const [error, setError] = useState<string | undefined>();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [detectedPlayback, setDetectedPlayback] = useState<AudioPlaybackParams | undefined>();
 
   const audioCtxRef = useRef<AudioContext | undefined>();
   const gainNodeRef = useRef<GainNode | undefined>();
@@ -190,23 +215,28 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
     };
   }, []);
 
-  // Reset WebM streaming when switching away from WebM encoding.
+  // Reset WebM streaming when switching to a non-WebM manual encoding.
   useEffect(() => {
-    if (!IS_WEBM_ENCODING(config.encoding)) {
+    if (!IS_AUTO_ENCODING(config.encoding) && !IS_WEBM_ENCODING(config.encoding)) {
       webmPlayerRef.current?.reset();
       webmPlayerRef.current = undefined;
     }
   }, [config.encoding]);
 
+  // Clear detected format when topic or encoding mode changes.
+  useEffect(() => {
+    setDetectedPlayback(undefined);
+  }, [config.encoding, config.topic]);
+
   const playAudioData = useCallback(
-    async (data: Uint8Array): Promise<void> => {
+    async ({ bytes, encoding, sampleRate, numChannels }: AudioPlaybackParams): Promise<void> => {
       const ctx = getOrCreateCtx();
 
       if (ctx.state === "suspended") {
         await ctx.resume();
       }
 
-      if (IS_WEBM_ENCODING(config.encoding)) {
+      if (IS_WEBM_ENCODING(encoding)) {
         const gainNode = gainNodeRef.current;
         if (gainNode == undefined) {
           throw new Error("Audio output is not initialized");
@@ -216,19 +246,22 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
           webmPlayerRef.current = new WebMStreamPlayer(ctx, gainNode);
         }
 
-        webmPlayerRef.current.append(data);
+        webmPlayerRef.current.append(bytes);
         setIsPlaying(true);
         return;
       }
 
+      webmPlayerRef.current?.reset();
+      webmPlayerRef.current = undefined;
+
       let audioBuffer: AudioBuffer;
 
-      if (IS_PCM_ENCODING(config.encoding)) {
-        audioBuffer = decodePCM(ctx, data, config.encoding, config.sampleRate, config.numChannels);
+      if (IS_PCM_ENCODING(encoding)) {
+        audioBuffer = decodePCM(ctx, bytes, encoding, sampleRate, numChannels);
       } else {
         // decodeAudioData takes ownership of the ArrayBuffer so we must copy.
-        const copy = new ArrayBuffer(data.byteLength);
-        new Uint8Array(copy).set(data);
+        const copy = new ArrayBuffer(bytes.byteLength);
+        new Uint8Array(copy).set(bytes);
         audioBuffer = await ctx.decodeAudioData(copy);
       }
 
@@ -248,7 +281,7 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
         }
       };
     },
-    [config.encoding, config.numChannels, config.sampleRate, getOrCreateCtx],
+    [getOrCreateCtx],
   );
 
   useEffect(() => {
@@ -268,26 +301,29 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
         gainNodeRef.current = undefined;
         nextStartTimeRef.current = 0;
         setIsPlaying(false);
+        setDetectedPlayback(undefined);
       }
 
       if (renderState.currentFrame && renderState.currentFrame.length > 0) {
         for (const msg of renderState.currentFrame) {
-          const raw = (msg.message as Record<string, unknown>)["data"];
-          const bytes =
-            raw instanceof Uint8Array
-              ? raw
-              : ArrayBuffer.isView(raw)
-                ? new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength)
-                : undefined;
-
-          if (bytes != undefined && bytes.byteLength > 0) {
-            playAudioData(bytes).catch((err: unknown) => {
-              setError(String(err));
+          const result = parseAudioMessage(msg.message as Record<string, unknown>, config);
+          switch (result.status) {
+            case "empty":
+              break;
+            case "error":
+              setError(result.message);
               setIsPlaying(false);
-            });
+              break;
+            case "ok":
+              setDetectedPlayback(result.params);
+              setError(undefined);
+              playAudioData(result.params).catch((err: unknown) => {
+                setError(String(err));
+                setIsPlaying(false);
+              });
+              break;
           }
         }
-        setError(undefined);
       }
     };
 
@@ -298,7 +334,7 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
     return () => {
       context.onRender = undefined;
     };
-  }, [context, playAudioData]);
+  }, [config, context, playAudioData]);
 
   useEffect(() => {
     context.saveState(config);
@@ -340,6 +376,15 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
 
   const noTopic = config.topic === "";
 
+  const encodingText = useMemo(() => {
+    if (IS_AUTO_ENCODING(config.encoding)) {
+      return detectedPlayback != undefined
+        ? `Auto-detect: ${describePlaybackParams(detectedPlayback)}`
+        : "Auto-detect — waiting for format…";
+    }
+    return describeManualEncoding(config);
+  }, [config, detectedPlayback]);
+
   return (
     <div className={classes.root}>
       {error != undefined ? (
@@ -361,6 +406,7 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
             className={cx(classes.icon, { [classes.iconPlaying]: isPlaying })}
           />
           <Typography className={classes.topicText}>{config.topic}</Typography>
+          <Typography className={classes.encodingText}>{encodingText}</Typography>
           <Typography className={classes.statusText}>
             {isPlaying ? "Playing" : "Waiting for data…"}
           </Typography>

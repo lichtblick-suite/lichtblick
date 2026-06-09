@@ -18,8 +18,12 @@ import { PanelExtensionContext } from "@lichtblick/suite";
  *
  * Raw PCM formats (pcm-float32le, pcm-int16le) are decoded manually and do not
  * depend on browser codec support.
+ *
+ * "auto" reads encoding (and PCM sample rate/channels when available) from message
+ * metadata such as foxglove.RawAudio `format`, `sample_rate`, and `number_of_channels`.
  */
 export type AudioEncoding =
+  | "auto"
   | "wav"
   | "mp3"
   | "ogg"
@@ -28,6 +32,9 @@ export type AudioEncoding =
   | "webm"
   | "pcm-float32le"
   | "pcm-int16le";
+
+/** Encoding used for playback after resolving "auto" from message metadata. */
+export type ResolvedAudioEncoding = Exclude<AudioEncoding, "auto">;
 
 export type AudioConfig = {
   topic: string;

@@ -52,6 +52,108 @@ describe("getSupportedWebmMimeType", () => {
 });
 
 describe("WebMStreamPlayer", () => {
+  it("ignores stale SourceBuffer callbacks after reset", async () => {
+    // given... a player with a SourceBuffer that fires updateend after reset
+    const updateEndListeners: Array<() => void> = [];
+    const sourceBuffer = {
+      mode: "sequence",
+      updating: false,
+      buffered: { length: 1 },
+      addEventListener: jest.fn((event: string, listener: () => void) => {
+        if (event === "updateend") {
+          updateEndListeners.push(listener);
+        }
+      }),
+      removeEventListener: jest.fn((event: string, listener: () => void) => {
+        if (event === "updateend") {
+          const index = updateEndListeners.indexOf(listener);
+          if (index >= 0) {
+            updateEndListeners.splice(index, 1);
+          }
+        }
+      }),
+      appendBuffer: jest.fn(() => {
+        sourceBuffer.updating = true;
+        queueMicrotask(() => {
+          sourceBuffer.updating = false;
+          for (const listener of [...updateEndListeners]) {
+            listener();
+          }
+        });
+      }),
+    };
+    const mediaSource = {
+      readyState: "open",
+      addSourceBuffer: jest.fn(() => sourceBuffer),
+      addEventListener: jest.fn((event: string, listener: () => void) => {
+        if (event === "sourceopen") {
+          queueMicrotask(listener);
+        }
+      }),
+      endOfStream: jest.fn(),
+    };
+    class MockMediaSource {
+      public static isTypeSupported(): boolean {
+        return true;
+      }
+      public constructor() {
+        return mediaSource;
+      }
+    }
+    Object.defineProperty(globalThis, "MediaSource", {
+      value: MockMediaSource,
+      writable: true,
+      configurable: true,
+    });
+    const audio = {
+      paused: true,
+      src: "",
+      pause: jest.fn(),
+      load: jest.fn(),
+      removeAttribute: jest.fn(),
+      play: jest.fn(async () => undefined),
+    };
+    const originalCreateElement = document.createElement.bind(document);
+    jest.spyOn(document, "createElement").mockImplementation((tagName: string) => {
+      if (tagName === "audio") {
+        return audio as unknown as HTMLAudioElement;
+      }
+      return originalCreateElement(tagName);
+    });
+
+    const audioContext = {
+      state: "running",
+      resume: jest.fn(async () => undefined),
+      createMediaElementSource: jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn() })),
+    } as unknown as AudioContext;
+    const gainNode = { connect: jest.fn() } as unknown as GainNode;
+    const player = new WebMStreamPlayer(audioContext, gainNode);
+
+    // when... appending a chunk, waiting for initialization, then resetting
+    player.append(new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]));
+    await Promise.resolve();
+    const staleListeners = [...updateEndListeners];
+    Object.defineProperty(sourceBuffer, "buffered", {
+      get() {
+        throw new DOMException(
+          "Failed to read the 'buffered' property from 'SourceBuffer': This SourceBuffer has been removed from the parent media source.",
+          "InvalidStateError",
+        );
+      },
+    });
+    player.reset();
+
+    // then... a delayed updateend callback does not throw
+    expect(() => {
+      for (const listener of staleListeners) {
+        listener();
+      }
+    }).not.toThrow();
+    expect(sourceBuffer.removeEventListener).toHaveBeenCalledWith("updateend", expect.any(Function));
+
+    jest.restoreAllMocks();
+  });
+
   it("throws when WebM playback is not supported", () => {
     // given... MediaSource is unavailable
     const originalMediaSource = globalThis.MediaSource;
@@ -61,7 +163,7 @@ describe("WebMStreamPlayer", () => {
       configurable: true,
     });
     const audioContext = {
-      createMediaElementSource: jest.fn(() => ({ connect: jest.fn() })),
+      createMediaElementSource: jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn() })),
     } as unknown as AudioContext;
     const gainNode = { connect: jest.fn() } as unknown as GainNode;
     const player = new WebMStreamPlayer(audioContext, gainNode);
