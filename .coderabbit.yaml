@@ -72,9 +72,8 @@ reviews:
     base_branches:
       - "develop"
       - "main"
-    labels: [!dependabot ] # ignore dependabot PRs
-    ignore_usernames:
-      - ["lichtblick-bot", "dependabot"] # ignore bot PRs
+    labels: ["!dependabot"]
+    ignore_usernames: ["lichtblick-bot", "dependabot"] # ignore bot PRs
 
 chat:
   auto_reply: true
