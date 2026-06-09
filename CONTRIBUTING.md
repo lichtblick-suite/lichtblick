@@ -468,7 +468,7 @@ When opening a PR, fill in the template provided:
 
 ### Automated Code Review with CodeRabbit
 
-[CodeRabbit](https://coderabbit.ai) provides automated AI-powered code reviews on all PRs targeting `develop` and `main` branches. It runs automatically and complements human reviews.
+[CodeRabbit](https://coderabbit.ai) provides automated AI-powered code reviews on PRs targeting `develop` and `main` branches, except for draft PRs or those with titles containing `WIP`, `Draft`, or `[SKIP CI]`. It runs automatically and complements human reviews.
 
 **What CodeRabbit checks:**
 - Code style and best practices
@@ -485,7 +485,7 @@ When opening a PR, fill in the template provided:
 
 **Manual review requests:**
 If you want a fresh review of an existing PR, comment:
-```
+```text
 @coderabbitai review
 ```
 
