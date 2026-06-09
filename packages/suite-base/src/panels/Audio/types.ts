@@ -13,6 +13,9 @@ import { PanelExtensionContext } from "@lichtblick/suite";
  * Compressed formats (wav, mp3, ogg, aac, flac) are decoded via the browser's
  * built-in AudioContext.decodeAudioData API, so browser/platform support applies.
  *
+ * WebM is streamed via Media Source Extensions because topic data is usually emitted
+ * as incremental fragments rather than complete files.
+ *
  * Raw PCM formats (pcm-float32le, pcm-int16le) are decoded manually and do not
  * depend on browser codec support.
  */
@@ -22,6 +25,7 @@ export type AudioEncoding =
   | "ogg"
   | "aac"
   | "flac"
+  | "webm"
   | "pcm-float32le"
   | "pcm-int16le";
 
