@@ -3634,7 +3634,7 @@ __metadata:
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": 1.0.2
     "@mcap/core": 2.2.0
-    "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
+    "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
     "@storybook/react": 9.1.9
     "@types/mock-fs": 4.13.4
     "@types/plist": ^3.0.3
@@ -3685,7 +3685,7 @@ __metadata:
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": 1.0.2
     "@mui/material": 7.2.0
-    "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
+    "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
     "@storybook/react": 9.1.9
     clean-webpack-plugin: 4.0.0
     copy-webpack-plugin: 14.0.0
@@ -4657,9 +4657,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pmmmwh/react-refresh-webpack-plugin@npm:0.6.1":
-  version: 0.6.1
-  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.6.1"
+"@pmmmwh/react-refresh-webpack-plugin@npm:0.6.2":
+  version: 0.6.2
+  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.6.2"
   dependencies:
     anser: ^2.1.1
     core-js-pure: ^3.23.3
@@ -4671,7 +4671,7 @@ __metadata:
     "@types/webpack": 5.x
     react-refresh: ">=0.10.0 <1.0.0"
     sockjs-client: ^1.4.0
-    type-fest: ">=0.17.0 <5.0.0"
+    type-fest: ">=0.17.0 <6.0.0"
     webpack: ^5.0.0
     webpack-dev-server: ^4.8.0 || 5.x
     webpack-hot-middleware: 2.x
@@ -4689,7 +4689,7 @@ __metadata:
       optional: true
     webpack-plugin-serve:
       optional: true
-  checksum: 2eb0234ce418b5aba57a9db88d93e9bf9cc0cfdeb2d4fee8c4bb145c9ad2784c149ba1dc0747d191edb6e5c8a9236fb661bedb1bfde74bf87cd745ddebbd49ee
+  checksum: ab5012a575549d032ce986993344669545a37cbd6deaf5ed5c685c367bf16d02c968189be79617f4df547c72818f6303f76de609cc3d97686debc24951cafa2d
   languageName: node
   linkType: hard
 
@@ -8084,7 +8084,7 @@ __metadata:
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/tsconfig": 1.0.2
-    "@pmmmwh/react-refresh-webpack-plugin": 0.6.1
+    "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
     "@types/react": 18.3.12
     "@types/react-dom": 18.3.0
     clean-webpack-plugin: 4.0.0
