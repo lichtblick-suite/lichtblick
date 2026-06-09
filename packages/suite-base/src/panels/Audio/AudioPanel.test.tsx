@@ -7,7 +7,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { render, screen, act } from "@testing-library/react";
-import React from "react";
 
 import { PanelExtensionContext, RenderState } from "@lichtblick/suite";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";

@@ -14,6 +14,7 @@ import { SettingsTreeAction, SettingsTreeNodes } from "@lichtblick/suite";
 
 import { useStyles } from "./Audio.style";
 import { AudioConfig, AudioEncoding, AudioProps } from "./types";
+import { WebMStreamPlayer } from "./webmPlayback";
 
 const DEFAULT_CONFIG: AudioConfig = {
   topic: "",
@@ -25,6 +26,8 @@ const DEFAULT_CONFIG: AudioConfig = {
 
 const IS_PCM_ENCODING = (enc: AudioEncoding): enc is "pcm-float32le" | "pcm-int16le" =>
   enc === "pcm-float32le" || enc === "pcm-int16le";
+
+const IS_WEBM_ENCODING = (enc: AudioEncoding): enc is "webm" => enc === "webm";
 
 /**
  * Decode raw PCM bytes into an AudioBuffer.
@@ -78,7 +81,7 @@ function buildSettingsTree(
           label: "Topic",
           input: "autocomplete",
           value: config.topic,
-          items: topics,
+          items: [...topics],
           placeholder: "Select a topic…",
         },
         encoding: {
@@ -91,6 +94,7 @@ function buildSettingsTree(
             { label: "OGG", value: "ogg" },
             { label: "AAC", value: "aac" },
             { label: "FLAC", value: "flac" },
+            { label: "WebM", value: "webm" },
             { label: "PCM Float32 LE", value: "pcm-float32le" },
             { label: "PCM Int16 LE", value: "pcm-int16le" },
           ],
@@ -150,6 +154,7 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
 
   const audioCtxRef = useRef<AudioContext | undefined>();
   const gainNodeRef = useRef<GainNode | undefined>();
+  const webmPlayerRef = useRef<WebMStreamPlayer | undefined>();
   // Tracks the scheduled end time (in AudioContext seconds) of the last queued chunk.
   const nextStartTimeRef = useRef<number>(0);
 
@@ -177,11 +182,21 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
   // Tear down AudioContext when the panel unmounts.
   useEffect(() => {
     return () => {
+      webmPlayerRef.current?.reset();
+      webmPlayerRef.current = undefined;
       audioCtxRef.current?.close().catch(() => {});
       audioCtxRef.current = undefined;
       gainNodeRef.current = undefined;
     };
   }, []);
+
+  // Reset WebM streaming when switching away from WebM encoding.
+  useEffect(() => {
+    if (!IS_WEBM_ENCODING(config.encoding)) {
+      webmPlayerRef.current?.reset();
+      webmPlayerRef.current = undefined;
+    }
+  }, [config.encoding]);
 
   const playAudioData = useCallback(
     async (data: Uint8Array): Promise<void> => {
@@ -191,13 +206,29 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
         await ctx.resume();
       }
 
+      if (IS_WEBM_ENCODING(config.encoding)) {
+        const gainNode = gainNodeRef.current;
+        if (gainNode == undefined) {
+          throw new Error("Audio output is not initialized");
+        }
+
+        if (webmPlayerRef.current == undefined) {
+          webmPlayerRef.current = new WebMStreamPlayer(ctx, gainNode);
+        }
+
+        webmPlayerRef.current.append(data);
+        setIsPlaying(true);
+        return;
+      }
+
       let audioBuffer: AudioBuffer;
 
       if (IS_PCM_ENCODING(config.encoding)) {
         audioBuffer = decodePCM(ctx, data, config.encoding, config.sampleRate, config.numChannels);
       } else {
         // decodeAudioData takes ownership of the ArrayBuffer so we must copy.
-        const copy = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+        const copy = new ArrayBuffer(data.byteLength);
+        new Uint8Array(copy).set(data);
         audioBuffer = await ctx.decodeAudioData(copy);
       }
 
@@ -230,6 +261,8 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
 
       if (renderState.didSeek === true) {
         // Reset audio queue on seek; close and recreate the context on next message.
+        webmPlayerRef.current?.reset();
+        webmPlayerRef.current = undefined;
         audioCtxRef.current?.close().catch(() => {});
         audioCtxRef.current = undefined;
         gainNodeRef.current = undefined;
