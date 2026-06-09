@@ -466,6 +466,31 @@ When opening a PR, fill in the template provided:
 - **Size:** Keep PRs focused. Smaller PRs are reviewed faster and have fewer merge conflicts.
 - **Reviewers:** PRs require at least one approving review before merging.
 
+### Automated Code Review with CodeRabbit
+
+[CodeRabbit](https://coderabbit.ai) provides automated AI-powered code reviews on all PRs targeting `develop` and `main` branches. It runs automatically and complements human reviews.
+
+**What CodeRabbit checks:**
+- Code style and best practices
+- Security issues (especially in Electron/IPC and web code)
+- TypeScript type safety and unused code
+- Test quality and coverage
+- Platform-specific concerns (web vs. desktop compatibility)
+- Performance and accessibility
+
+**How it works:**
+- CodeRabbit automatically comments with a summary and detailed findings on each PR
+- Comments include line-by-line suggestions and context-aware recommendations
+- It respects the project's `.coderabbit.yaml` configuration with domain-specific instructions
+
+**Manual review requests:**
+If you want a fresh review of an existing PR, comment:
+```
+@coderabbitai review
+```
+
+**Important:** CodeRabbit is a supplementary tool — human reviews are still required for approval before merging. CodeRabbit cannot approve or merge PRs.
+
 ---
 
 ## Reporting Issues
