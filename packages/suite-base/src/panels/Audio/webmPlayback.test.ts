@@ -157,27 +157,86 @@ describe("WebMStreamPlayer", () => {
   it("throws when WebM playback is not supported", () => {
     // given... MediaSource is unavailable
     const originalMediaSource = globalThis.MediaSource;
+    try {
+      Object.defineProperty(globalThis, "MediaSource", {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+      const audioContext = {
+        createMediaElementSource: jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn() })),
+      } as unknown as AudioContext;
+      const gainNode = { connect: jest.fn() } as unknown as GainNode;
+      const player = new WebMStreamPlayer(audioContext, gainNode);
+
+      // when... appending a WebM chunk
+      const append = () => player.append(new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]));
+
+      // then... initialization fails with a clear error
+      expect(append).toThrow("WebM playback is not supported in this browser");
+    } finally {
+      Object.defineProperty(globalThis, "MediaSource", {
+        value: originalMediaSource,
+        writable: true,
+        configurable: true,
+      });
+    }
+  });
+
+  it("initializes only once when multiple chunks arrive before sourceopen", async () => {
+    // given... a player receiving chunks before MediaSource opens
+    const sourceOpenListeners: Array<() => void> = [];
+    const mediaSource = {
+      readyState: "open",
+      addSourceBuffer: jest.fn(() => ({
+        mode: "sequence",
+        updating: false,
+        buffered: { length: 0 },
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        appendBuffer: jest.fn(),
+      })),
+      addEventListener: jest.fn((event: string, listener: () => void) => {
+        if (event === "sourceopen") {
+          sourceOpenListeners.push(listener);
+        }
+      }),
+      endOfStream: jest.fn(),
+    };
+    class MockMediaSource {
+      public static isTypeSupported(): boolean {
+        return true;
+      }
+      public constructor() {
+        return mediaSource;
+      }
+    }
     Object.defineProperty(globalThis, "MediaSource", {
-      value: undefined,
+      value: MockMediaSource,
       writable: true,
       configurable: true,
     });
+
+    const createMediaElementSource = jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn() }));
     const audioContext = {
-      createMediaElementSource: jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn() })),
+      state: "running",
+      resume: jest.fn(async () => undefined),
+      createMediaElementSource,
     } as unknown as AudioContext;
     const gainNode = { connect: jest.fn() } as unknown as GainNode;
     const player = new WebMStreamPlayer(audioContext, gainNode);
 
-    // when... appending a WebM chunk
-    const append = () => player.append(new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]));
+    // when... appending multiple chunks before sourceopen fires
+    player.append(new Uint8Array([0x1a]));
+    player.append(new Uint8Array([0x45]));
 
-    // then... initialization fails with a clear error
-    expect(append).toThrow("WebM playback is not supported in this browser");
+    // then... only one MediaElementSource is created
+    expect(createMediaElementSource).toHaveBeenCalledTimes(1);
 
-    Object.defineProperty(globalThis, "MediaSource", {
-      value: originalMediaSource,
-      writable: true,
-      configurable: true,
-    });
+    for (const listener of sourceOpenListeners) {
+      listener();
+    }
+    await Promise.resolve();
+    expect(mediaSource.addSourceBuffer).toHaveBeenCalledTimes(1);
   });
 });

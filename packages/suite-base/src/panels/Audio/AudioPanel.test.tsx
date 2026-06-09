@@ -113,10 +113,9 @@ function buildContext(configOverride: Partial<AudioConfig> = {}): TestContext {
 }
 
 function toExtensionContext(ctx: TestContext): PanelExtensionContext {
-  return {
-    ...ctx,
+  return Object.assign(ctx, {
     subscribe: ctx.subscribeMock,
-  } as unknown as PanelExtensionContext;
+  }) as unknown as PanelExtensionContext;
 }
 
 function renderPanel(context: PanelExtensionContext) {
@@ -179,21 +178,41 @@ describe("AudioPanel", () => {
     };
 
     act(() => {
-      ctx.onRender?.(renderState as RenderState, () => {});
+      context.onRender?.(renderState as RenderState, () => {});
     });
 
     expect(ctx.updatePanelSettingsEditor).toHaveBeenCalled();
   });
 
-  it("resets playback state on seek", () => {
-    const ctx = buildContext({ topic: "/audio/data" });
+  it("resets playback state on seek", async () => {
+    // given... audio is playing from a PCM message
+    const ctx = buildContext({ topic: "/audio/data", encoding: "pcm-int16le" });
     const context = toExtensionContext(ctx);
     renderPanel(context);
 
+    await act(async () => {
+      context.onRender?.(
+        {
+          currentFrame: [
+            {
+              topic: "/audio/data",
+              message: {
+                data: new Uint8Array([0, 0, 0, 0]),
+              },
+            },
+          ],
+        } as unknown as RenderState,
+        () => {},
+      );
+    });
+    expect(screen.getByText("Playing")).toBeTruthy();
+
+    // when... a seek occurs
     act(() => {
-      ctx.onRender?.({ didSeek: true, currentFrame: [] } as unknown as RenderState, () => {});
+      context.onRender?.({ didSeek: true, currentFrame: [] } as unknown as RenderState, () => {});
     });
 
+    // then... playback state is reset
     expect(screen.queryByText("Playing")).toBeNull();
   });
 });

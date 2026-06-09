@@ -35,6 +35,7 @@ export class WebMStreamPlayer {
   #objectUrl?: string;
   #pendingChunks: Uint8Array[] = [];
   #initialized = false;
+  #initializing = false;
   #active = true;
 
   #onSourceBufferUpdateEnd = (): void => {
@@ -66,7 +67,7 @@ export class WebMStreamPlayer {
   }
 
   #ensureInitialized(): void {
-    if (this.#initialized) {
+    if (this.#initialized || this.#initializing) {
       return;
     }
 
@@ -75,24 +76,31 @@ export class WebMStreamPlayer {
       throw new Error("WebM playback is not supported in this browser");
     }
 
-    this.#mediaSource = new MediaSource();
-    this.#objectUrl = URL.createObjectURL(this.#mediaSource);
+    this.#initializing = true;
+
+    const mediaSource = new MediaSource();
+    this.#mediaSource = mediaSource;
+    this.#objectUrl = URL.createObjectURL(mediaSource);
     this.#audio.src = this.#objectUrl;
 
-    this.#mediaElementSource = this.#audioContext.createMediaElementSource(this.#audio);
-    this.#mediaElementSource.connect(this.#gainNode);
+    if (this.#mediaElementSource == undefined) {
+      this.#mediaElementSource = this.#audioContext.createMediaElementSource(this.#audio);
+      this.#mediaElementSource.connect(this.#gainNode);
+    }
 
-    this.#mediaSource.addEventListener(
+    mediaSource.addEventListener(
       "sourceopen",
       () => {
-        if (!this.#active || !this.#mediaSource || this.#initialized) {
+        if (!this.#active || this.#mediaSource !== mediaSource || this.#initialized) {
+          this.#initializing = false;
           return;
         }
 
-        this.#sourceBuffer = this.#mediaSource.addSourceBuffer(mimeType);
+        this.#sourceBuffer = mediaSource.addSourceBuffer(mimeType);
         this.#sourceBuffer.mode = "sequence";
         this.#sourceBuffer.addEventListener("updateend", this.#onSourceBufferUpdateEnd);
         this.#initialized = true;
+        this.#initializing = false;
         this.#drainPending();
       },
       { once: true },
@@ -205,6 +213,7 @@ export class WebMStreamPlayer {
     }
 
     this.#initialized = false;
+    this.#initializing = false;
     this.#audio = document.createElement("audio");
   }
 }
