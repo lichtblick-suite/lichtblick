@@ -47,10 +47,20 @@ reviews:
       instructions: |
         Jest unit tests. Ensure tests are meaningful, not just coverage padding.
         Avoid mocking internals — prefer testing behavior over implementation.
+        Ensure tests follow the GWT pattern and use descriptive test names.
 
     - path: "**/*.style.ts"
       instructions: |
         Style files using MUI/emotion. Verify no hardcoded colors that bypass the theme system.
+
+    - path: "**/*.constants.ts"
+      instructions: |
+        Constants files. Ensure no sensitive information (API keys, secrets) is hardcoded.
+
+    - path: "**/*.types.ts"
+      instructions: |
+        Type definition files. Check for accurate and comprehensive type definitions.
+        Ensure no `any` types are used without justification.
 
   auto_review:
     enabled: true
@@ -62,6 +72,9 @@ reviews:
     base_branches:
       - "develop"
       - "main"
+    labels: [!dependabot ] # ignore dependabot PRs
+    ignore_usernames:
+      - ["lichtblick-bot", "dependabot"] # ignore bot PRs
 
 chat:
   auto_reply: true
