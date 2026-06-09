@@ -30,6 +30,11 @@ export const useStyles = makeStyles()((theme) => ({
     textAlign: "center",
     wordBreak: "break-all",
   },
+  encodingText: {
+    color: theme.palette.text.secondary,
+    textAlign: "center",
+    fontSize: "0.8rem",
+  },
   errorText: {
     color: theme.palette.error.main,
     textAlign: "center",

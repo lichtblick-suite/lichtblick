@@ -54,7 +54,7 @@ export default Panel(
     panelType: "Audio",
     defaultConfig: {
       topic: "",
-      encoding: "wav",
+      encoding: "auto",
       sampleRate: 44100,
       numChannels: 1,
       volume: 1,

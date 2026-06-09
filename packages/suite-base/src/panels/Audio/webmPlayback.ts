@@ -35,6 +35,15 @@ export class WebMStreamPlayer {
   #objectUrl?: string;
   #pendingChunks: Uint8Array[] = [];
   #initialized = false;
+  #active = true;
+
+  #onSourceBufferUpdateEnd = (): void => {
+    if (!this.#active) {
+      return;
+    }
+    void this.#startPlaybackIfNeeded();
+    this.#drainPending();
+  };
 
   public constructor(audioContext: AudioContext, gainNode: GainNode) {
     this.#audioContext = audioContext;
@@ -76,16 +85,13 @@ export class WebMStreamPlayer {
     this.#mediaSource.addEventListener(
       "sourceopen",
       () => {
-        if (!this.#mediaSource || this.#initialized) {
+        if (!this.#active || !this.#mediaSource || this.#initialized) {
           return;
         }
 
         this.#sourceBuffer = this.#mediaSource.addSourceBuffer(mimeType);
         this.#sourceBuffer.mode = "sequence";
-        this.#sourceBuffer.addEventListener("updateend", () => {
-          void this.#startPlaybackIfNeeded();
-          this.#drainPending();
-        });
+        this.#sourceBuffer.addEventListener("updateend", this.#onSourceBufferUpdateEnd);
         this.#initialized = true;
         this.#drainPending();
       },
@@ -93,12 +99,45 @@ export class WebMStreamPlayer {
     );
   }
 
+  #hasBufferedData(): boolean {
+    if (!this.#active || this.#sourceBuffer == undefined) {
+      return false;
+    }
+
+    try {
+      return this.#sourceBuffer.buffered.length > 0;
+    } catch {
+      // SourceBuffer may already be detached during reset/seek.
+      return false;
+    }
+  }
+
+  #isSourceBufferReady(): boolean {
+    if (!this.#active || this.#sourceBuffer == undefined) {
+      return false;
+    }
+
+    try {
+      return !this.#sourceBuffer.updating;
+    } catch {
+      return false;
+    }
+  }
+
   async #startPlaybackIfNeeded(): Promise<void> {
+    if (!this.#active) {
+      return;
+    }
+
     if (this.#audioContext.state === "suspended") {
       await this.#audioContext.resume();
     }
 
-    if (this.#audio.paused && this.#sourceBuffer != undefined && this.#sourceBuffer.buffered.length > 0) {
+    if (!this.#active) {
+      return;
+    }
+
+    if (this.#audio.paused && this.#hasBufferedData()) {
       try {
         await this.#audio.play();
       } catch {
@@ -108,7 +147,7 @@ export class WebMStreamPlayer {
   }
 
   #drainPending(): void {
-    if (!this.#sourceBuffer || this.#sourceBuffer.updating || this.#pendingChunks.length === 0) {
+    if (!this.#isSourceBufferReady() || this.#pendingChunks.length === 0) {
       return;
     }
 
@@ -117,17 +156,32 @@ export class WebMStreamPlayer {
       return;
     }
 
+    const sourceBuffer = this.#sourceBuffer;
+    if (sourceBuffer == undefined) {
+      return;
+    }
+
     try {
       const buffer = new ArrayBuffer(chunk.byteLength);
       new Uint8Array(buffer).set(chunk);
-      this.#sourceBuffer.appendBuffer(buffer);
+      sourceBuffer.appendBuffer(buffer);
     } catch (err: unknown) {
-      throw new Error(`Failed to append WebM audio chunk: ${String(err)}`);
+      if (!this.#active) {
+        return;
+      }
+      throw new Error(
+        `Failed to append WebM audio chunk. The topic data may not be WebM — use PCM for RawAudio topics or match the message format. (${String(err)})`,
+      );
     }
   }
 
   #cleanup(): void {
+    this.#active = false;
     this.#pendingChunks = [];
+
+    const sourceBuffer = this.#sourceBuffer;
+    this.#sourceBuffer = undefined;
+    sourceBuffer?.removeEventListener("updateend", this.#onSourceBufferUpdateEnd);
 
     try {
       if (this.#mediaSource?.readyState === "open") {
@@ -139,7 +193,6 @@ export class WebMStreamPlayer {
 
     this.#mediaElementSource?.disconnect();
     this.#mediaElementSource = undefined;
-    this.#sourceBuffer = undefined;
     this.#mediaSource = undefined;
 
     this.#audio.pause();
