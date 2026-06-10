@@ -182,6 +182,7 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
   const webmPlayerRef = useRef<WebMStreamPlayer | undefined>();
   // Tracks the scheduled end time (in AudioContext seconds) of the last queued chunk.
   const nextStartTimeRef = useRef<number>(0);
+  const playbackChainRef = useRef<Promise<void>>(Promise.resolve());
 
   // Lazily create the AudioContext and GainNode on first use.
   const getOrCreateCtx = useCallback((): AudioContext => {
@@ -223,9 +224,12 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
     }
   }, [config.encoding]);
 
-  // Clear detected format when topic or encoding mode changes.
+  // Clear playback state when topic or encoding mode changes.
   useEffect(() => {
     setDetectedPlayback(undefined);
+    setIsPlaying(false);
+    setError(undefined);
+    playbackChainRef.current = Promise.resolve();
   }, [config.encoding, config.topic]);
 
   const playAudioData = useCallback(
@@ -300,6 +304,7 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
         audioCtxRef.current = undefined;
         gainNodeRef.current = undefined;
         nextStartTimeRef.current = 0;
+        playbackChainRef.current = Promise.resolve();
         setIsPlaying(false);
         setDetectedPlayback(undefined);
       }
@@ -317,10 +322,12 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
             case "ok":
               setDetectedPlayback(result.params);
               setError(undefined);
-              playAudioData(result.params).catch((err: unknown) => {
-                setError(String(err));
-                setIsPlaying(false);
-              });
+              playbackChainRef.current = playbackChainRef.current
+                .then(() => playAudioData(result.params))
+                .catch((err: unknown) => {
+                  setError(String(err));
+                  setIsPlaying(false);
+                });
               break;
           }
         }
