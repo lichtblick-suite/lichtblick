@@ -12,7 +12,7 @@ import { PanelExtensionContext, RenderState } from "@lichtblick/suite";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import { AudioPanel } from "./Audio";
-import { AudioConfig } from "./types";
+import AudioPanelContextBuilder from "./builders/AudioPanelContextBuilder";
 
 // ---------------------------------------------------------------------------
 // AudioContext mock
@@ -73,51 +73,6 @@ afterAll(() => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Test helpers
-// ---------------------------------------------------------------------------
-type TestContext = {
-  initialState: AudioConfig;
-  panelElement: HTMLElement;
-  saveState: jest.Mock;
-  setDefaultPanelTitle: jest.Mock;
-  /** Separate reference to the subscribe mock to avoid the deprecated overload. */
-  subscribeMock: jest.Mock;
-  unsubscribeAll: jest.Mock;
-  watch: jest.Mock;
-  updatePanelSettingsEditor: jest.Mock;
-  onRender: PanelExtensionContext["onRender"];
-};
-
-function buildContext(configOverride: Partial<AudioConfig> = {}): TestContext {
-  const config: AudioConfig = {
-    topic: "",
-    encoding: "wav",
-    sampleRate: 44100,
-    numChannels: 1,
-    volume: 1,
-    ...configOverride,
-  };
-
-  return {
-    initialState: config,
-    panelElement: document.createElement("div"),
-    saveState: jest.fn(),
-    setDefaultPanelTitle: jest.fn(),
-    subscribeMock: jest.fn(),
-    unsubscribeAll: jest.fn(),
-    watch: jest.fn(),
-    updatePanelSettingsEditor: jest.fn(),
-    onRender: undefined,
-  };
-}
-
-function toExtensionContext(ctx: TestContext): PanelExtensionContext {
-  return Object.assign(ctx, {
-    subscribe: ctx.subscribeMock,
-  }) as unknown as PanelExtensionContext;
-}
-
 function renderPanel(context: PanelExtensionContext) {
   return render(
     <ThemeProvider isDark>
@@ -135,42 +90,41 @@ describe("AudioPanel", () => {
   });
 
   it("shows a prompt to select a topic when no topic is configured", () => {
-    const ctx = buildContext({ topic: "" });
-    renderPanel(toExtensionContext(ctx));
+    const ctx = AudioPanelContextBuilder.context({ topic: "" });
+    renderPanel(ctx);
     expect(screen.getByText("No topic selected")).toBeTruthy();
   });
 
   it("shows the topic name and waiting state when a topic is configured", () => {
-    const ctx = buildContext({ topic: "/audio/data" });
-    renderPanel(toExtensionContext(ctx));
+    const ctx = AudioPanelContextBuilder.context({ topic: "/audio/data", encoding: "wav" });
+    renderPanel(ctx);
     expect(screen.getByText("/audio/data")).toBeTruthy();
     expect(screen.getByText("Waiting for data…")).toBeTruthy();
   });
 
   it("subscribes to the configured topic", () => {
-    const ctx = buildContext({ topic: "/audio/data" });
-    renderPanel(toExtensionContext(ctx));
+    const ctx = AudioPanelContextBuilder.context({ topic: "/audio/data", encoding: "wav" });
+    renderPanel(ctx);
     expect(ctx.subscribeMock).toHaveBeenCalledWith([{ topic: "/audio/data", preload: false }]);
   });
 
   it("does not subscribe when no topic is configured", () => {
-    const ctx = buildContext({ topic: "" });
-    renderPanel(toExtensionContext(ctx));
+    const ctx = AudioPanelContextBuilder.context({ topic: "" });
+    renderPanel(ctx);
     expect(ctx.subscribeMock).not.toHaveBeenCalled();
   });
 
   it("calls context.watch for required render state fields", () => {
-    const ctx = buildContext({ topic: "/audio/data" });
-    renderPanel(toExtensionContext(ctx));
+    const ctx = AudioPanelContextBuilder.context({ topic: "/audio/data", encoding: "wav" });
+    renderPanel(ctx);
     expect(ctx.watch).toHaveBeenCalledWith("currentFrame");
     expect(ctx.watch).toHaveBeenCalledWith("didSeek");
     expect(ctx.watch).toHaveBeenCalledWith("topics");
   });
 
   it("populates available topics from render state", () => {
-    const ctx = buildContext({ topic: "" });
-    const context = toExtensionContext(ctx);
-    renderPanel(context);
+    const ctx = AudioPanelContextBuilder.context({ topic: "" });
+    renderPanel(ctx);
 
     const renderState: Partial<RenderState> = {
       topics: [{ name: "/audio/data", schemaName: "audio_common_msgs/AudioData" }],
@@ -178,7 +132,7 @@ describe("AudioPanel", () => {
     };
 
     act(() => {
-      context.onRender?.(renderState as RenderState, () => {});
+      ctx.onRender?.(renderState as RenderState, () => {});
     });
 
     expect(ctx.updatePanelSettingsEditor).toHaveBeenCalled();
@@ -186,12 +140,11 @@ describe("AudioPanel", () => {
 
   it("resets playback state on seek", async () => {
     // given... audio is playing from a PCM message
-    const ctx = buildContext({ topic: "/audio/data", encoding: "pcm-int16le" });
-    const context = toExtensionContext(ctx);
-    renderPanel(context);
+    const ctx = AudioPanelContextBuilder.context({ topic: "/audio/data", encoding: "pcm-int16le" });
+    renderPanel(ctx);
 
     await act(async () => {
-      context.onRender?.(
+      ctx.onRender?.(
         {
           currentFrame: [
             {
@@ -209,7 +162,7 @@ describe("AudioPanel", () => {
 
     // when... a seek occurs
     act(() => {
-      context.onRender?.({ didSeek: true, currentFrame: [] } as unknown as RenderState, () => {});
+      ctx.onRender?.({ didSeek: true, currentFrame: [] } as unknown as RenderState, () => {});
     });
 
     // then... playback state is reset

@@ -2,29 +2,17 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { describePlaybackParams, parseAudioMessage } from "./parseAudioMessage";
-import { AudioConfig } from "./types";
+import AudioBuilder from "@lichtblick/suite-base/testing/builders/AudioBuilder";
 
-const AUTO_CONFIG: AudioConfig = {
-  topic: "/audio/raw",
-  encoding: "auto",
-  sampleRate: 44100,
-  numChannels: 1,
-  volume: 1,
-};
+import { describePlaybackParams, parseAudioMessage } from "./parseAudioMessage";
 
 describe("parseAudioMessage", () => {
   it("maps foxglove RawAudio pcm-s16 metadata when auto-detect is enabled", () => {
     // given... a RawAudio-style message with pcm-s16 metadata
-    const message = {
-      data: new Uint8Array([0, 1, 2, 3]),
-      format: "pcm-s16",
-      sample_rate: 48000,
-      number_of_channels: 2,
-    };
+    const message = AudioBuilder.rawAudioMessage();
 
     // when... parsing the message with auto-detect enabled
-    const result = parseAudioMessage(message, AUTO_CONFIG);
+    const result = parseAudioMessage(message, AudioBuilder.config({ encoding: "auto" }));
 
     // then... message metadata determines playback settings
     expect(result).toEqual({
@@ -40,12 +28,10 @@ describe("parseAudioMessage", () => {
 
   it("returns an error when auto-detect cannot determine encoding", () => {
     // given... a message with only raw bytes
-    const message = {
-      data: new Uint8Array([0xff, 0x00]),
-    };
+    const message = AudioBuilder.rawBytesMessage();
 
     // when... parsing the message with auto-detect enabled
-    const result = parseAudioMessage(message, AUTO_CONFIG);
+    const result = parseAudioMessage(message, AudioBuilder.config({ encoding: "auto" }));
 
     // then... the caller is prompted to choose a manual encoding
     expect(result).toEqual({
@@ -57,13 +43,10 @@ describe("parseAudioMessage", () => {
 
   it("uses the manual panel encoding when auto-detect is disabled", () => {
     // given... a message with only raw bytes and manual WebM selected
-    const message = {
-      data: new Uint8Array([0xff, 0x00]),
-    };
-    const config: AudioConfig = { ...AUTO_CONFIG, encoding: "webm" };
+    const message = AudioBuilder.rawBytesMessage();
 
     // when... parsing the message
-    const result = parseAudioMessage(message, config);
+    const result = parseAudioMessage(message, AudioBuilder.config({ encoding: "webm" }));
 
     // then... panel encoding settings are used
     expect(result).toEqual({

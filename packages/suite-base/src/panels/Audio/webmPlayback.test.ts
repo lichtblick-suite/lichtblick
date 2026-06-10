@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import WebMPlaybackMocksBuilder from "./builders/WebMPlaybackMocksBuilder";
 import { getSupportedWebmMimeType, WebMStreamPlayer } from "./webmPlayback";
 
 describe("getSupportedWebmMimeType", () => {
@@ -52,59 +53,22 @@ describe("getSupportedWebmMimeType", () => {
 });
 
 describe("WebMStreamPlayer", () => {
-  it("ignores stale SourceBuffer callbacks after reset", async () => {
-    // given... a player with a SourceBuffer that fires updateend after reset
-    const updateEndListeners: Array<() => void> = [];
-    const sourceBuffer = {
-      mode: "sequence",
-      updating: false,
-      buffered: { length: 1 },
-      addEventListener: jest.fn((event: string, listener: () => void) => {
-        if (event === "updateend") {
-          updateEndListeners.push(listener);
-        }
-      }),
-      removeEventListener: jest.fn((event: string, listener: () => void) => {
-        if (event === "updateend") {
-          const index = updateEndListeners.indexOf(listener);
-          if (index >= 0) {
-            updateEndListeners.splice(index, 1);
-          }
-        }
-      }),
-      appendBuffer: jest.fn(() => {
-        sourceBuffer.updating = true;
-        queueMicrotask(() => {
-          sourceBuffer.updating = false;
-          for (const listener of [...updateEndListeners]) {
-            listener();
-          }
-        });
-      }),
-    };
-    const mediaSource = {
-      readyState: "open",
-      addSourceBuffer: jest.fn(() => sourceBuffer),
-      addEventListener: jest.fn((event: string, listener: () => void) => {
-        if (event === "sourceopen") {
-          queueMicrotask(listener);
-        }
-      }),
-      endOfStream: jest.fn(),
-    };
-    class MockMediaSource {
-      public static isTypeSupported(): boolean {
-        return true;
-      }
-      public constructor() {
-        return mediaSource;
-      }
-    }
+  const originalMediaSource = globalThis.MediaSource;
+
+  afterEach(() => {
     Object.defineProperty(globalThis, "MediaSource", {
-      value: MockMediaSource,
+      value: originalMediaSource,
       writable: true,
       configurable: true,
     });
+    jest.restoreAllMocks();
+  });
+
+  it("ignores stale SourceBuffer callbacks after reset", async () => {
+    // given... a player with a SourceBuffer that fires updateend after reset
+    const { sourceBuffer, updateEndListeners } = WebMPlaybackMocksBuilder.sourceBuffer();
+    WebMPlaybackMocksBuilder.installMockMediaSource({ sourceBuffer });
+
     const audio = {
       paused: true,
       src: "",
@@ -150,71 +114,33 @@ describe("WebMStreamPlayer", () => {
       }
     }).not.toThrow();
     expect(sourceBuffer.removeEventListener).toHaveBeenCalledWith("updateend", expect.any(Function));
-
-    jest.restoreAllMocks();
   });
 
   it("throws when WebM playback is not supported", () => {
     // given... MediaSource is unavailable
-    const originalMediaSource = globalThis.MediaSource;
-    try {
-      Object.defineProperty(globalThis, "MediaSource", {
-        value: undefined,
-        writable: true,
-        configurable: true,
-      });
-      const audioContext = {
-        createMediaElementSource: jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn() })),
-      } as unknown as AudioContext;
-      const gainNode = { connect: jest.fn() } as unknown as GainNode;
-      const player = new WebMStreamPlayer(audioContext, gainNode);
+    Object.defineProperty(globalThis, "MediaSource", {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+    const audioContext = {
+      createMediaElementSource: jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn() })),
+    } as unknown as AudioContext;
+    const gainNode = { connect: jest.fn() } as unknown as GainNode;
+    const player = new WebMStreamPlayer(audioContext, gainNode);
 
-      // when... appending a WebM chunk
-      const append = () => player.append(new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]));
+    // when... appending a WebM chunk
+    const append = () => player.append(new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]));
 
-      // then... initialization fails with a clear error
-      expect(append).toThrow("WebM playback is not supported in this browser");
-    } finally {
-      Object.defineProperty(globalThis, "MediaSource", {
-        value: originalMediaSource,
-        writable: true,
-        configurable: true,
-      });
-    }
+    // then... initialization fails with a clear error
+    expect(append).toThrow("WebM playback is not supported in this browser");
   });
 
   it("initializes only once when multiple chunks arrive before sourceopen", async () => {
     // given... a player receiving chunks before MediaSource opens
-    const sourceOpenListeners: Array<() => void> = [];
-    const mediaSource = {
-      readyState: "open",
-      addSourceBuffer: jest.fn(() => ({
-        mode: "sequence",
-        updating: false,
-        buffered: { length: 0 },
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        appendBuffer: jest.fn(),
-      })),
-      addEventListener: jest.fn((event: string, listener: () => void) => {
-        if (event === "sourceopen") {
-          sourceOpenListeners.push(listener);
-        }
-      }),
-      endOfStream: jest.fn(),
-    };
-    class MockMediaSource {
-      public static isTypeSupported(): boolean {
-        return true;
-      }
-      public constructor() {
-        return mediaSource;
-      }
-    }
-    Object.defineProperty(globalThis, "MediaSource", {
-      value: MockMediaSource,
-      writable: true,
-      configurable: true,
+    const { mediaSource, sourceOpenListeners } = WebMPlaybackMocksBuilder.installMockMediaSource({
+      deferSourceOpen: true,
+      sourceBufferOptions: { bufferedLength: 0 },
     });
 
     const createMediaElementSource = jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn() }));
