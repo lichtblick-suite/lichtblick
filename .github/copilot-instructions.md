@@ -114,11 +114,16 @@ All tests follow the **Given-When-Then (GWT)** pattern. See the
 
 ## Available Agents
 
-Use these agents in Copilot Chat for specialized tasks:
+Use these agents in Copilot Chat for specialized tasks. For the full catalog see [docs/ai-agents/README.md](../docs/ai-agents/README.md).
 
 | Agent name | Purpose |
 | --- | --- |
-| `@lb-e2e-test` | Create Playwright E2E tests using the Playwright MCP browser |
+| `@lb-orchestrator` | Routes tasks to the right specialist when unsure which agent to use |
+| `@lb-e2e-test` | Create Playwright E2E tests (Electron desktop + web) |
+| `@lb-player` | IterablePlayer state machine, data source lifecycle, playback logic |
+| `@lb-panels-general` | PanelExtensionAdapter, renderState, panel lifecycle, pauseFrame |
+| `@lb-frontend-dev` | React/TypeScript components, hooks, state management, styling |
+| `@lb-unit-test` | Unit test creation, mocking patterns, builder usage |
 
 Agents are defined in `.github/agents/`.
 Skills are defined in `.github/skills/`.

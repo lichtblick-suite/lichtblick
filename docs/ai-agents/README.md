@@ -13,72 +13,73 @@ This document describes the AI agent architecture used in the Lichtblick monorep
 
 ### How It Works
 
-- **Agents** are invoked by name (e.g., `@player`) to handle tasks in a specific domain. Each agent has a description, allowed tools, and domain knowledge embedded in its markdown body.
+- **Agents** are invoked by name (e.g., `@lb-player`) to handle tasks in a specific domain. Each agent has a description, allowed tools, and domain knowledge embedded in its markdown body.
 - **Skills** are loaded on-demand by agents when they need deeper implementation knowledge. An agent's body references skills by name (e.g., "load `player-internals` skill").
 - **Instructions** are applied automatically to every file matching their `applyTo` glob pattern. They enforce coding conventions without explicit invocation.
 
 ---
 
-## Agents (23)
+## Agents (24)
 
 Located in `.github/agents/`. Each file uses YAML frontmatter with `description` and `tools` fields.
 
 ### Orchestrator
 
-| Agent          | Description                                                                                                                                                                          |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `orchestrator` | Top-level orchestrator that routes tasks to specialized sub-agents based on domain expertise. Use when unsure which specialist to invoke, or for tasks spanning multiple subsystems. |
+| Agent             | Description                                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `lb-orchestrator` | Top-level orchestrator that routes tasks to specialized sub-agents based on domain expertise. Use when unsure which specialist to invoke, or for tasks spanning multiple subsystems. |
 
 ### Platform
 
-| Agent     | Description                                                                                                                                                                                               |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `desktop` | Desktop/Electron platform specialist covering the main process, preload scripts, IPC communication, BrowserWindow management, native menus, and file system access.                                       |
-| `web`     | Web platform specialist covering the browser-based Lichtblick build: webpack configuration, COOP/COEP headers, browser compatibility, SharedArrayBuffer requirements, and web-specific data source setup. |
+| Agent        | Description                                                                                                                                                                                               |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lb-desktop` | Desktop/Electron platform specialist covering the main process, preload scripts, IPC communication, BrowserWindow management, native menus, and file system access.                                       |
+| `lb-web`     | Web platform specialist covering the browser-based Lichtblick build: webpack configuration, COOP/COEP headers, browser compatibility, SharedArrayBuffer requirements, and web-specific data source setup. |
 
 ### Core Infrastructure
 
-| Agent              | Description                                                                                                                                  |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `player`           | Player layer specialist covering IterablePlayer state machine, FoxgloveWebSocketPlayer, UserScriptPlayer, and data source lifecycle.         |
-| `message-pipeline` | MessagePipeline specialist covering the React context, zustand store, subscription management, and render state building.                    |
-| `preload`          | Preloading and caching specialist covering BlockLoader, CachingIterableSource, BufferedIterableSource, and `unstable_subscribeMessageRange`. |
-| `deserialization`  | Deserialization specialist covering schema parsing, message decoding, protobuf/flatbuffer/ROS/JSON schemas, and WASM-based decoders.         |
-| `extensions`       | Extension system specialist covering extension loading, registration, the extension API, contribution points, and the .foxe file format.     |
-| `layouts`          | Layout system specialist covering layout storage, sync, conflict resolution, permissions, and the CurrentLayoutProvider state machine.       |
+| Agent                 | Description                                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lb-player`           | Player layer specialist covering IterablePlayer state machine, FoxgloveWebSocketPlayer, UserScriptPlayer, and data source lifecycle.         |
+| `lb-message-pipeline` | MessagePipeline specialist covering the React context, zustand store, subscription management, and render state building.                    |
+| `lb-preload`          | Preloading and caching specialist covering BlockLoader, CachingIterableSource, BufferedIterableSource, and `unstable_subscribeMessageRange`. |
+| `lb-deserialization`  | Deserialization specialist covering schema parsing, message decoding, protobuf/flatbuffer/ROS/JSON schemas, and WASM-based decoders.         |
+| `lb-extensions`       | Extension system specialist covering extension loading, registration, the extension API, contribution points, and the .foxe file format.     |
+| `lb-layouts`          | Layout system specialist covering layout storage, sync, conflict resolution, permissions, and the CurrentLayoutProvider state machine.       |
 
 ### Connections
 
-| Agent                  | Description                                                                                                                                                                                    |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `remote-connection`    | Remote file connection specialist covering HTTP range requests, MCAP remote reading, CachedFilelike caching, MultiIterableSource multi-file orchestration, and file-based data source loading. |
-| `websocket-connection` | WebSocket connection specialist covering FoxgloveWebSocketPlayer, WorkerSocketAdapter, and the Foxglove WebSocket protocol.                                                                    |
+| Agent                     | Description                                                                                                                                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lb-remote-connection`    | Remote file connection specialist covering HTTP range requests, MCAP remote reading, CachedFilelike caching, MultiIterableSource multi-file orchestration, and file-based data source loading. |
+| `lb-websocket-connection` | WebSocket connection specialist covering FoxgloveWebSocketPlayer, WorkerSocketAdapter, and the Foxglove WebSocket protocol.                                                                    |
 
 ### Panels
 
-| Agent                     | Description                                                                                                                                                                         |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `panels-general`          | General panel infrastructure specialist covering PanelExtensionAdapter, renderState building, panel lifecycle, pauseFrame, and the extension API contract.                          |
-| `panel-3d`                | 3D panel specialist covering THREE.js rendering, SceneExtensions, TransformTree, point clouds, GPU buffer management, camera handling, picking, and the ImageMode.                  |
-| `panel-image`             | Image panel specialist covering camera image visualization within the 3D rendering context (ImageMode).                                                                             |
-| `panel-plot`              | Plot panel specialist covering PlotCoordinator, TimestampDatasetsBuilder, Chart.js Worker rendering, OffscreenCanvas, and time-series data extraction.                              |
-| `panel-log`               | Log panel specialist covering virtualized log display, react-window VariableSizeList, dynamic row heights, autoscroll behavior, and log level filtering.                            |
-| `panel-map`               | Map panel specialist covering Leaflet integration, GeoJSON rendering, NavSatFix message handling, and the FilteredPointLayer pixel-deduplication system.                            |
-| `panel-raw-messages`      | RawMessages panel specialist covering JSON message tree display, virtualized tree rendering with @tanstack/react-virtual, message inspection, diff mode, and field path navigation. |
-| `panel-state-transitions` | StateTransitions panel specialist covering discrete state visualization using TimeBasedChart, message-path extraction, and preloaded data range subscriptions.                      |
-| `panel-user-scripts`      | UserScripts panel specialist covering the Monaco editor integration, TypeScript compilation, script execution in SharedWorkers, diagnostics, and the user script API.               |
+| Agent                        | Description                                                                                                                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lb-panels-general`          | General panel infrastructure specialist covering PanelExtensionAdapter, renderState building, panel lifecycle, pauseFrame, and the extension API contract.                          |
+| `lb-panel-3d`                | 3D panel specialist covering THREE.js rendering, SceneExtensions, TransformTree, point clouds, GPU buffer management, camera handling, picking, and the ImageMode.                  |
+| `lb-panel-image`             | Image panel specialist covering camera image visualization within the 3D rendering context (ImageMode).                                                                             |
+| `lb-panel-plot`              | Plot panel specialist covering PlotCoordinator, TimestampDatasetsBuilder, Chart.js Worker rendering, OffscreenCanvas, and time-series data extraction.                              |
+| `lb-panel-log`               | Log panel specialist covering virtualized log display, react-window VariableSizeList, dynamic row heights, autoscroll behavior, and log level filtering.                            |
+| `lb-panel-map`               | Map panel specialist covering Leaflet integration, GeoJSON rendering, NavSatFix message handling, and the FilteredPointLayer pixel-deduplication system.                            |
+| `lb-panel-raw-messages`      | RawMessages panel specialist covering JSON message tree display, virtualized tree rendering with @tanstack/react-virtual, message inspection, diff mode, and field path navigation. |
+| `lb-panel-state-transitions` | StateTransitions panel specialist covering discrete state visualization using TimeBasedChart, message-path extraction, and preloaded data range subscriptions.                      |
+| `lb-panel-user-scripts`      | UserScripts panel specialist covering the Monaco editor integration, TypeScript compilation, script execution in SharedWorkers, diagnostics, and the user script API.               |
 
 ### Development
 
-| Agent          | Description                                                                                                                                                                          |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `frontend-dev` | General React and TypeScript development specialist for the Lichtblick monorepo. Use for component creation, hooks, state management, styling with tss-react/MUI, and code patterns. |
-| `unit-test`    | Unit test creation and maintenance specialist. Use for writing new tests, fixing broken tests, improving coverage, and understanding mocking patterns.                               |
-| `theme`        | Theme system specialist covering the MUI theme configuration, palette definitions, typography, and the dark/light color scheme implementation.                                       |
+| Agent             | Description                                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `lb-frontend-dev` | General React and TypeScript development specialist for the Lichtblick monorepo. Use for component creation, hooks, state management, styling with tss-react/MUI, and code patterns. |
+| `lb-unit-test`    | Unit test creation and maintenance specialist. Use for writing new tests, fixing broken tests, improving coverage, and understanding mocking patterns.                               |
+| `lb-theme`        | Theme system specialist covering the MUI theme configuration, palette definitions, typography, and the dark/light color scheme implementation.                                       |
+| `lb-e2e-test`     | Creates Playwright E2E tests for the Lichtblick desktop (Electron) and web apps. Uses MCP browser for web tests; reads source code to discover selectors for desktop tests.          |
 
 ---
 
-## Skills (13)
+## Skills (15)
 
 Located in `.github/skills/<name>/SKILL.md`. Each file uses YAML frontmatter with a `description` field. Skills provide deep implementation knowledge that agents load on demand.
 
@@ -97,34 +98,38 @@ Located in `.github/skills/<name>/SKILL.md`. Each file uses YAML frontmatter wit
 | `remote-caching`       | HTTP-layer caching for remote file access: CachedFilelike, VirtualLRUBuffer, connection management algorithm, BrowserHttpReader, FetchReader streaming, and RequestQueue concurrency.   |
 | `unit-testing`         | Unit testing patterns, mock builder usage, and test data construction strategies.                                                                                                       |
 | `web-workers`          | Web Worker patterns: Comlink integration, ComlinkWrap lifecycle, transfer handlers, OffscreenCanvas, SharedWorker isolation, and testing utilities.                                     |
+| `test-conventions`     | Shared test conventions for all testing agents: GWT pattern, core quality rules, and the standard test-writing workflow.                                                                |
+| `e2e-playwright-mcp`   | Playwright MCP-assisted E2E test development: test architecture, fixture reference, selector strategy, page objects, MCP usage, and source instrumentation patterns.                    |
 
 ### Agent → Skill Relationships
 
 ```mermaid
 graph LR
-    panel-3d --> 3d-rendering
-    panel-3d --> web-workers
-    panel-plot --> plot-internals
-    panel-plot --> web-workers
-    player --> player-internals
-    player --> mcap-format
-    player --> web-workers
-    player --> caching-internals
-    preload --> caching-internals
-    preload --> player-internals
-    remote-connection --> remote-caching
-    remote-connection --> mcap-format
-    remote-connection --> web-workers
-    remote-connection --> caching-internals
-    websocket-connection --> web-workers
-    desktop --> electron-internals
-    extensions --> extensions-internals
-    layouts --> layouts-internals
-    frontend-dev --> performance
-    unit-test --> unit-testing
-    panels-general --> message-path
-    panel-raw-messages --> message-path
-    panel-state-transitions --> message-path
+    lb-panel-3d --> 3d-rendering
+    lb-panel-3d --> web-workers
+    lb-panel-plot --> plot-internals
+    lb-panel-plot --> web-workers
+    lb-player --> player-internals
+    lb-player --> mcap-format
+    lb-player --> web-workers
+    lb-player --> caching-internals
+    lb-preload --> caching-internals
+    lb-preload --> player-internals
+    lb-remote-connection --> remote-caching
+    lb-remote-connection --> mcap-format
+    lb-remote-connection --> web-workers
+    lb-remote-connection --> caching-internals
+    lb-websocket-connection --> web-workers
+    lb-desktop --> electron-internals
+    lb-extensions --> extensions-internals
+    lb-layouts --> layouts-internals
+    lb-frontend-dev --> performance
+    lb-unit-test --> unit-testing
+    lb-panels-general --> message-path
+    lb-panel-raw-messages --> message-path
+    lb-panel-state-transitions --> message-path
+    lb-e2e-test --> e2e-playwright-mcp
+    lb-e2e-test --> test-conventions
 ```
 
 ---
