@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { MultiSource } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
-import InitilizationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitilizationSourceBuilder";
+import InitializationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitializationSourceBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -16,7 +16,7 @@ describe("MultiIterableSource", () => {
     mockSourceConstructor = jest.fn().mockImplementation(
       () =>
         ({
-          initialize: jest.fn().mockResolvedValue(InitilizationSourceBuilder.initialization()),
+          initialize: jest.fn().mockResolvedValue(InitializationSourceBuilder.initialization()),
           messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
           getBackfillMessages: jest.fn().mockResolvedValue([]),
           getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
@@ -100,7 +100,7 @@ describe("MultiIterableSource", () => {
       const dataType = { definitions: [{ name: "field1", type: "int64" }] };
       const topicName = BasicBuilder.string();
       const topic = { name: topicName, schemaName: BasicBuilder.string() };
-      const init1 = InitilizationSourceBuilder.initialization({
+      const init1 = InitializationSourceBuilder.initialization({
         start: RosTimeBuilder.time({ sec: 0 }),
         end: RosTimeBuilder.time({ sec: 20, nsec: 0 }),
         datatypes: new Map([[dataTypeName, dataType]]),
@@ -108,7 +108,7 @@ describe("MultiIterableSource", () => {
         topicStats: new Map([[topicName, { numMessages: 10 }]]),
         metadata: [{ name: "key", metadata: { key: "value" } }],
       });
-      const init2 = InitilizationSourceBuilder.initialization({
+      const init2 = InitializationSourceBuilder.initialization({
         start: RosTimeBuilder.time({ sec: 20, nsec: 0 }),
         end: RosTimeBuilder.time({ sec: 40 }),
         datatypes: new Map([[dataTypeName, dataType]]),
@@ -143,13 +143,13 @@ describe("MultiIterableSource", () => {
       const dataTypeName = BasicBuilder.string();
       const topicName = BasicBuilder.string();
 
-      const init1 = InitilizationSourceBuilder.initialization({
+      const init1 = InitializationSourceBuilder.initialization({
         start: RosTimeBuilder.time({ sec: 0 }),
         end: RosTimeBuilder.time({ sec: 20 }),
         datatypes: new Map([[dataTypeName, { definitions: [{ name: "field1", type: "int64" }] }]]),
         topics: [{ name: topicName, schemaName: BasicBuilder.string() }],
       });
-      const init2 = InitilizationSourceBuilder.initialization({
+      const init2 = InitializationSourceBuilder.initialization({
         start: RosTimeBuilder.time({ sec: 10 }),
         end: RosTimeBuilder.time({ sec: 30 }),
         datatypes: new Map([[dataTypeName, { definitions: [{ name: "field1", type: "string" }] }]]),
@@ -183,7 +183,7 @@ describe("MultiIterableSource", () => {
       // Given two sources: one with getStart returning a time, one without getStart
       const sourceWithStart = {
         initialize: jest.fn().mockResolvedValue(
-          InitilizationSourceBuilder.initialization({
+          InitializationSourceBuilder.initialization({
             start: RosTimeBuilder.time({ sec: 5, nsec: 0 }),
             end: RosTimeBuilder.time({ sec: 10, nsec: 0 }),
           }),
@@ -196,7 +196,7 @@ describe("MultiIterableSource", () => {
 
       const sourceWithoutStart = {
         initialize: jest.fn().mockResolvedValue(
-          InitilizationSourceBuilder.initialization({
+          InitializationSourceBuilder.initialization({
             start: RosTimeBuilder.time({ sec: 0, nsec: 0 }),
             end: RosTimeBuilder.time({ sec: 5, nsec: 0 }),
           }),
