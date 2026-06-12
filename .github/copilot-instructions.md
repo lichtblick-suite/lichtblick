@@ -130,6 +130,21 @@ Skills are defined in `.github/skills/`.
 
 ---
 
+## Available Prompts
+
+Reusable workflow prompts live in `.github/prompts/`.
+
+| Prompt | Purpose |
+| --- | --- |
+| `sdd-feature-develop.prompt.md` | Specify -> Plan -> Tasks -> Implement workflow for feature work |
+| `sdd-bug-fix.prompt.md` | Reproduce -> Diagnose -> Plan -> Implement workflow for bug fixes |
+| `sdd-lichtblick-upstream-sync.prompt.md` | Structured upstream sync analysis and execution workflow |
+| `sdd-lichtblick-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature safely |
+| `open-pr.prompt.md` | Build a complete PR title/body with validation evidence |
+| `review-pr.prompt.md` | Perform a structured PR review with severity-ordered findings |
+
+---
+
 ## Ask Before Acting When
 
 - Making architectural changes to `packages/suite-base/`

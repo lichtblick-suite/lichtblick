@@ -8,6 +8,7 @@ This document describes the AI agent architecture used in the Lichtblick monorep
 .github/
 ├── agents/          # Domain-specific agent definitions (.agent.md)
 ├── skills/          # Deep-dive knowledge modules (SKILL.md)
+├── prompts/         # Reusable workflow prompts (.prompt.md)
 └── instructions/    # Auto-applied coding conventions (.instructions.md)
 ```
 
@@ -145,7 +146,22 @@ Located in `.github/instructions/`. Each file uses YAML frontmatter with an `app
 
 ---
 
-## Adding New Agents, Skills, or Instructions
+## Prompts (6)
+
+Located in `.github/prompts/`. Prompt files provide reusable workflows for multi-step development and review tasks.
+
+| Prompt                                   | Purpose                                                                              |
+| ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| `sdd-feature-develop.prompt.md`          | Structured feature workflow: Specify -> Plan -> Tasks -> Implement -> Verify.        |
+| `sdd-bug-fix.prompt.md`                  | Structured bug-fix workflow: Reproduce -> Diagnose -> Plan -> Implement -> Verify.   |
+| `sdd-lichtblick-upstream-sync.prompt.md` | Evaluate and execute upstream synchronization with compatibility/risk analysis.      |
+| `sdd-lichtblick-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature with an explicit decision matrix.     |
+| `open-pr.prompt.md`                      | Create a complete PR description with testing evidence and risk notes.               |
+| `review-pr.prompt.md`                    | Run a structured PR review focused on correctness, performance, security, and tests. |
+
+---
+
+## Adding New Agents, Skills, Instructions, or Prompts
 
 ### New Agent
 
@@ -199,4 +215,28 @@ applyTo: "**/*.ts,**/*.tsx"
 
 - Rule 1
 - Rule 2
+```
+
+### New Prompt
+
+Create `.github/prompts/<name>.prompt.md`:
+
+```markdown
+---
+name: "Prompt Name"
+description: "What this prompt does and when to use it."
+---
+
+## Inputs
+
+- Input 1
+
+## Workflow
+
+1. Step 1
+2. Step 2
+
+## Output format
+
+- Item 1
 ```
