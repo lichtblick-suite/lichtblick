@@ -29,7 +29,7 @@ function LogAfterRender(props: React.PropsWithChildren): React.JSX.Element {
 export type MainParams = {
   dataSources?: IDataSourceFactory[];
   extraProviders?: React.JSX.Element[];
-  remoteLayoutsAuthProvider?: AuthProvider;
+  authProvider?: AuthProvider;
   rootElement?: React.JSX.Element;
 };
 
@@ -84,7 +84,7 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
     <WebRoot
       extraProviders={params.extraProviders}
       dataSources={params.dataSources}
-      authProvider={params.remoteLayoutsAuthProvider}
+      authProvider={params.authProvider}
     >
       <StudioApp />
     </WebRoot>
