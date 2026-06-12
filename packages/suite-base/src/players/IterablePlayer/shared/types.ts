@@ -10,7 +10,12 @@ import {
 
 export type MultiSource =
   | { type: "files"; files: Blob[] }
-  | { type: "urls"; urls: string[]; totalCacheSizeInBytes?: number };
+  | {
+      type: "urls";
+      urls: string[];
+      totalCacheSizeInBytes?: number;
+      minCachePerSourceBytes?: number;
+    };
 
 export type IterableSourceConstructor<T extends IIterableSource, P> = new (args: P) => T;
 

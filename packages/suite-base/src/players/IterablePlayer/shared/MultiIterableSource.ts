@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import Logger from "@lichtblick/log";
 import { compare } from "@lichtblick/rostime";
 import {
   IterableSourceConstructor,
@@ -33,6 +34,14 @@ import {
   ISerializedIterableSource,
 } from "../IIterableSource";
 
+const log = Logger.getLogger(__filename);
+
+// Minimum cache allocated per remote source to prevent crashes when reading MCAP metadata.
+// The MCAP summary section (chunk indexes, schema records, etc.) can be several MiB in size.
+// Without a floor, a linear split across 300+ files produces cache slices smaller than a
+// single metadata read, causing CachedFilelike to throw "Requested more data than cache size".
+const MIN_CACHE_PER_SOURCE_BYTES = 1024 * 1024 * 10; // 10 MiB
+
 export class MultiIterableSource<T extends ISerializedIterableSource, P>
   implements ISerializedIterableSource
 {
@@ -54,10 +63,22 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
         (file) => new this.SourceConstructor({ type: "file", file } as P),
       );
     } else {
-      // Distribute total cache budget evenly across remote sources.
-      // Default total budget: 500MiB (same as single-file default).
+      // Distribute total cache budget across remote sources with a minimum floor per source.
+      // A pure linear split (totalCache / n) can produce a per-source budget smaller than a
+      // single MCAP metadata read when n > ~300, causing a crash in CachedFilelike.
       const totalCache = this.dataSource.totalCacheSizeInBytes ?? 1024 * 1024 * 500;
-      const perSourceCache = Math.floor(totalCache / this.dataSource.urls.length);
+      const minPerSource = this.dataSource.minCachePerSourceBytes ?? MIN_CACHE_PER_SOURCE_BYTES;
+      const numSources = this.dataSource.urls.length;
+      const perSourceCache = Math.max(minPerSource, Math.floor(totalCache / numSources));
+
+      if (perSourceCache * numSources > totalCache) {
+        log.warn(
+          `Cache budget (${totalCache} bytes) is less than minimum per-source cache ` +
+            `(${minPerSource} bytes) × ${numSources} sources. ` +
+            `Each source will use ${perSourceCache} bytes; total may exceed budget.`,
+        );
+      }
+
       sources = this.dataSource.urls.map(
         (url) =>
           new this.SourceConstructor({
