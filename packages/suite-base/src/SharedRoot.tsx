@@ -36,7 +36,7 @@ export function SharedRoot(
     enableLaunchPreferenceScreen,
     extensionLoaders,
     extraProviders,
-    remoteLayoutsAuthProvider,
+    authProvider,
   } = props;
 
   const contextValue = useMemo(
@@ -52,7 +52,7 @@ export function SharedRoot(
       extensionLoaders,
       extraProviders,
       onAppBarDoubleClick,
-      remoteLayoutsAuthProvider,
+      authProvider,
     }),
     [
       appBarLeftInset,
@@ -66,7 +66,7 @@ export function SharedRoot(
       extensionLoaders,
       extraProviders,
       onAppBarDoubleClick,
-      remoteLayoutsAuthProvider,
+      authProvider,
     ],
   );
 

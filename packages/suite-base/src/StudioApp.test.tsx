@@ -337,7 +337,7 @@ describe("StudioApp", () => {
 
     renderWithContext({
       ...mockSharedRootContext,
-      remoteLayoutsAuthProvider: authProvider,
+      authProvider: authProvider,
     });
 
     expect(setAuthProviderSpy).toHaveBeenCalledWith(authProvider);

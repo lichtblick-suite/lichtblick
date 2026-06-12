@@ -32,7 +32,7 @@ interface ISharedRootContext {
   customWindowControlProps?: CustomWindowControlsProps;
   onAppBarDoubleClick?: () => void;
   AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
-  remoteLayoutsAuthProvider?: AuthProvider;
+  authProvider?: AuthProvider;
 }
 
 const SharedRootContext = createContext<ISharedRootContext>({
