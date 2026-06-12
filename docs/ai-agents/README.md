@@ -150,14 +150,31 @@ Located in `.github/instructions/`. Each file uses YAML frontmatter with an `app
 
 Located in `.github/prompts/`. Prompt files provide reusable workflows for multi-step development and review tasks.
 
-| Prompt                                   | Purpose                                                                              |
-| ---------------------------------------- | ------------------------------------------------------------------------------------ |
-| `sdd-feature-develop.prompt.md`          | Structured feature workflow: Specify -> Plan -> Tasks -> Implement -> Verify.        |
-| `sdd-bug-fix.prompt.md`                  | Structured bug-fix workflow: Reproduce -> Diagnose -> Plan -> Implement -> Verify.   |
-| `sdd-lichtblick-upstream-sync.prompt.md` | Evaluate and execute upstream synchronization with compatibility/risk analysis.      |
-| `sdd-lichtblick-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature with an explicit decision matrix.     |
-| `open-pr.prompt.md`                      | Create a complete PR description with testing evidence and risk notes.               |
-| `review-pr.prompt.md`                    | Run a structured PR review focused on correctness, performance, security, and tests. |
+| Prompt                                   | Purpose                                                                                                                 |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `sdd-feature-develop.prompt.md`          | Structured feature workflow: Specify -> Plan -> Tasks -> Implement -> Verify.                                           |
+| `sdd-bug-fix.prompt.md`                  | Structured bug-fix workflow: Reproduce -> Diagnose -> Plan -> Implement -> Verify.                                      |
+| `sdd-lichtblick-upstream-sync.prompt.md` | Evaluate and execute upstream synchronization with compatibility/risk analysis.                                         |
+| `sdd-lichtblick-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature with an explicit decision matrix.                                        |
+| `open-pr.prompt.md`                      | Create a complete PR description with testing evidence and risk notes. Uses `github` MCP server.                        |
+| `review-pr.prompt.md`                    | Two-phase PR review: structured analysis integrating CodeRabbit, then implement CodeRabbit AI agent prompt suggestions. |
+
+---
+
+## MCP Servers
+
+Configured in `.mcp.json` at the repo root. Placing the config at the root (rather than inside `.vscode/`) makes it recognized by any MCP-compatible tool — VS Code Copilot, Claude Code, Cursor, and others. MCP (Model Context Protocol) servers expose external tools to AI agents without embedding credentials in agent files.
+
+| Server       | Type                  | Purpose                                                                                                         |
+| ------------ | --------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `github`     | HTTP (Copilot-native) | Read/create GitHub Issues and Pull Requests. Used by `open-pr` and `review-pr` prompts.                         |
+| `playwright` | stdio (npx)           | Drive Chrome for web app exploration. Used by `@lb-e2e-test` to discover selectors and generate test scaffolds. |
+
+### Usage
+
+Agents reference MCP tools using the server name as a namespace prefix (e.g., `github/get_issue`, `github/create_pull_request`). The GitHub MCP server is authenticated automatically via GitHub Copilot — no additional credentials are required.
+
+The Playwright MCP server drives Chrome (web app) only. It cannot automate the Electron desktop app; desktop tests use source reading to discover selectors instead.
 
 ---
 

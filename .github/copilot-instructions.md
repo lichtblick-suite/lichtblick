@@ -130,6 +130,17 @@ Skills are defined in `.github/skills/`.
 
 ---
 
+## MCP Servers
+
+Configured in `.mcp.json` (repo root). Recognized by VS Code Copilot, Claude Code, Cursor, and other MCP-compatible tools. Agents reference these using the server name as prefix.
+
+| Server | Type | Purpose |
+| --- | --- | --- |
+| `github` | HTTP (Copilot-native) | Read/create GitHub Issues and PRs. No extra credentials needed. |
+| `playwright` | stdio | Drive Chrome for web app exploration. Used by `@lb-e2e-test`. |
+
+---
+
 ## Available Prompts
 
 Reusable workflow prompts live in `.github/prompts/`.
@@ -141,7 +152,7 @@ Reusable workflow prompts live in `.github/prompts/`.
 | `sdd-lichtblick-upstream-sync.prompt.md` | Structured upstream sync analysis and execution workflow |
 | `sdd-lichtblick-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature safely |
 | `open-pr.prompt.md` | Build a complete PR title/body with validation evidence |
-| `review-pr.prompt.md` | Perform a structured PR review with severity-ordered findings |
+| `review-pr.prompt.md` | Two-phase PR review: structured analysis integrating CodeRabbit findings, then implement CodeRabbit's AI agent prompt |
 
 ---
 

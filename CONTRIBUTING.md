@@ -424,6 +424,30 @@ The project uses **GitHub Copilot agent mode** (VS Code 1.99+) with project-spec
 | --------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `Lichtblick E2E Test` | `@lb-e2e-test` | Creates Playwright E2E tests for desktop (Electron) and web, using the Playwright MCP browser for web UI exploration |
 
+For the full agent catalog see [docs/ai-agents/README.md](docs/ai-agents/README.md).
+
+### SDD Workflow Prompts
+
+Reusable prompts in `.github/prompts/` implement a Specify → Plan → Tasks → Implement cycle:
+
+| Prompt                                   | Purpose                                      |
+| ---------------------------------------- | -------------------------------------------- |
+| `sdd-feature-develop.prompt.md`          | Feature development end-to-end               |
+| `sdd-bug-fix.prompt.md`                  | Root-cause-driven bug fixes                  |
+| `sdd-lichtblick-upstream-sync.prompt.md` | Upstream merge with risk analysis            |
+| `sdd-lichtblick-feature-adopt.prompt.md` | Adopt a specific upstream feature            |
+| `open-pr.prompt.md`                      | Create a well-structured PR via `github` MCP |
+| `review-pr.prompt.md`                    | Structured review integrating CodeRabbit     |
+
+### MCP Servers
+
+Configured in `.mcp.json` at the repo root. Placing the config at the root makes it recognized by any MCP-compatible tool — VS Code Copilot, Claude Code, Cursor, and others. Two servers are available:
+
+| Server       | Purpose                                                                            |
+| ------------ | ---------------------------------------------------------------------------------- |
+| `github`     | Read/create GitHub Issues and PRs. Authenticated automatically via GitHub Copilot. |
+| `playwright` | Drive Chrome for web app exploration and E2E test scaffold generation.             |
+
 ### Skills
 
 Skills are reusable domain knowledge files loaded by agents before performing tasks:
@@ -435,11 +459,11 @@ Skills are reusable domain knowledge files loaded by agents before performing ta
 
 ### Global Context
 
-`.github/copilot-instructions.md` is auto-loaded at the start of every Copilot Chat session. It defines project-wide rules for code style, testing, and available agents.
+`.github/copilot-instructions.md` is auto-loaded at the start of every Copilot Chat session. It defines project-wide rules for code style, testing, available agents, and MCP servers.
 
 ### Playwright MCP Server
 
-The Playwright MCP server (configured in `.vscode/mcp.json`) enables AI agents to explore the running web app via accessibility snapshots, discover stable selectors, and generate test scaffolds interactively.
+The Playwright MCP server (configured in `.mcp.json`) enables AI agents to explore the running web app via accessibility snapshots, discover stable selectors, and generate test scaffolds interactively.
 
 > **Note**: The MCP server drives Chrome (web) only — it cannot automate the Electron desktop app. See `e2e/README.md` for detailed workflow documentation.
 

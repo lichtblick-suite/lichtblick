@@ -7,8 +7,15 @@ Use this workflow when implementing a feature from a GitHub issue.
 
 ## Inputs
 
-- GitHub issue number or URL
+- GitHub issue number or URL (use `github` MCP server to read issue fields)
 - Optional constraints (target files, non-goals, timeline)
+
+## MCP servers available
+
+| Server | Purpose |
+|--------|--------|
+| `github` | Read/create GitHub Issues and PRs (`github/get_issue`, `github/create_pull_request`) |
+| `playwright` | Explore running web app for E2E test discovery (Chrome only; `@lb-e2e-test` agent) |
 
 ## Phase 1: Specify
 
