@@ -138,10 +138,12 @@ describe("MultiIterableSource", () => {
       // WHEN
       await multiSource["loadMultipleSources"]();
 
-      // THEN: every source gets the 10 MiB minimum, not the 5 MiB linear value
+      // THEN: every source gets the 10 MiB minimum, not the 5 MiB linear value,
+      // and log.warn is emitted because 100 × 10 MiB = 1000 MiB exceeds the 500 MiB budget
       const min10Mib = 1024 * 1024 * 10;
       expect(mockSourceConstructor.mock.calls[0]![0].cacheSizeInBytes).toBe(min10Mib);
       expect(mockSourceConstructor.mock.calls[99]![0].cacheSizeInBytes).toBe(min10Mib);
+      expect(mockLogWarn).toHaveBeenCalledTimes(1);
     });
     it("should respect custom minCachePerSourceBytes and warn when the total budget is exceeded", async () => {
       // GIVEN: 3 URL sources, totalCacheSizeInBytes = 6 MiB, minCachePerSourceBytes = 4 MiB.
