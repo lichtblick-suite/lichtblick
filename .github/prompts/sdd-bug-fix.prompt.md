@@ -20,13 +20,26 @@ Use this workflow for bug reports and regressions.
    - User impact
    - Severity
 
-## Phase 2: Diagnose
+## Phase 2: Setup
+
+Determine the contributor's git context:
+
+1. Run `git remote get-url origin` to detect **fork** vs. **direct clone**.
+   - URL contains `lichtblick-suite/lichtblick` → direct clone (core team).
+   - Otherwise → fork (community contributor).
+2. Ensure the working branch uses the `bugfix/` prefix and targets `develop`.
+3. For fork contributors, rebase on upstream `develop`:
+   ```sh
+   git fetch upstream && git rebase upstream/develop
+   ```
+
+## Phase 3: Diagnose
 
 1. Identify likely root cause.
 2. Confirm root cause with code evidence or instrumentation.
 3. Identify related code paths and potential side effects.
 
-## Phase 3: Plan
+## Phase 4: Plan
 
 1. Propose the smallest safe fix.
 2. Define regression tests:
@@ -37,7 +50,7 @@ Use this workflow for bug reports and regressions.
 Human checkpoint:
 - Wait for approval of diagnosis and fix strategy before editing files.
 
-## Phase 4: Implement and verify
+## Phase 5: Implement and verify
 
 1. Implement the fix.
 2. Add or update regression tests.

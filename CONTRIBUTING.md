@@ -250,6 +250,21 @@ yarn run tsc --noEmit       # TypeScript type checking
 - Fill in the [PR template](#pull-request-guidelines) completely.
 - Ensure CI checks pass.
 
+#### Keeping your fork in sync (community contributors)
+
+Before opening a PR, rebase your feature branch on upstream `develop` to avoid merge conflicts:
+
+```sh
+git fetch upstream
+git checkout develop
+git rebase upstream/develop
+git push origin develop
+
+git checkout feature/my-feature
+git rebase develop
+git push origin feature/my-feature --force-with-lease
+```
+
 ---
 
 ## Branching Strategy - Git flow
@@ -428,16 +443,18 @@ For the full agent catalog see [docs/ai-agents/README.md](docs/ai-agents/README.
 
 ### SDD Workflow Prompts
 
-Reusable prompts in `.github/prompts/` implement a Specify → Plan → Tasks → Implement cycle:
+Reusable prompts in `.github/prompts/` implement a Specify → Setup → Plan → Tasks → Implement cycle:
 
-| Prompt                                   | Purpose                                      |
-| ---------------------------------------- | -------------------------------------------- |
-| `sdd-feature-develop.prompt.md`          | Feature development end-to-end               |
-| `sdd-bug-fix.prompt.md`                  | Root-cause-driven bug fixes                  |
-| `sdd-lichtblick-upstream-sync.prompt.md` | Upstream merge with risk analysis            |
-| `sdd-lichtblick-feature-adopt.prompt.md` | Adopt a specific upstream feature            |
-| `open-pr.prompt.md`                      | Create a well-structured PR via `github` MCP |
-| `review-pr.prompt.md`                    | Structured review integrating CodeRabbit     |
+| Prompt                                   | Purpose                                                   |
+| ---------------------------------------- | --------------------------------------------------------- |
+| `sdd-feature-develop.prompt.md`          | Feature development end-to-end                            |
+| `sdd-bug-fix.prompt.md`                  | Root-cause-driven bug fixes                               |
+| `sdd-lichtblick-upstream-sync.prompt.md` | Upstream merge with risk analysis                         |
+| `sdd-lichtblick-feature-adopt.prompt.md` | Adopt a specific upstream feature                         |
+| `open-pr.prompt.md`                      | Create a well-structured PR via `github` MCP (fork-aware) |
+| `review-pr.prompt.md`                    | Structured review integrating CodeRabbit                  |
+
+> **Fork-aware PR creation:** The `open-pr` and SDD prompts auto-detect whether the contributor is working from a fork or a direct clone. The correct `head` parameter (`owner:branch` for forks, `branch` for direct) is set automatically when calling `github/create_pull_request`.
 
 ### MCP Servers
 

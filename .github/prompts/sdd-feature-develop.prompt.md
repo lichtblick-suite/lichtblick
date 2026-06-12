@@ -27,7 +27,24 @@ Use this workflow when implementing a feature from a GitHub issue.
 2. If criteria are ambiguous, ask clarifying questions before coding.
 3. Produce a concise specification summary.
 
-## Phase 2: Plan
+## Phase 2: Setup
+
+Determine the contributor's git context to ensure correct branching and PR mechanics:
+
+1. Run `git remote get-url origin` to detect whether the workspace is a **fork** or **direct clone**.
+   - URL contains `lichtblick-suite/lichtblick` → **direct clone** (core team).
+   - Otherwise → **fork** (community contributor).
+2. Ensure the working branch follows the [branching strategy](../../CONTRIBUTING.md):
+   - Features/bugfixes: `feature/` or `bugfix/` prefix, targeting `develop`.
+   - Releases/hotfixes (core team only): `release/major/`, `release/minor/`, or `hotfix/` prefix, targeting `main`.
+3. For fork contributors, ensure the branch is rebased on upstream `develop`:
+   ```sh
+   git fetch upstream && git rebase upstream/develop
+   ```
+
+This context is carried forward to Phase 5 (PR creation via `open-pr.prompt.md`).
+
+## Phase 3: Plan
 
 1. Analyze impacted areas in the codebase.
 2. Propose implementation steps and testing strategy.
@@ -37,7 +54,7 @@ Use this workflow when implementing a feature from a GitHub issue.
 Human checkpoint:
 - Wait for approval of the plan before editing files.
 
-## Phase 3: Tasks
+## Phase 4: Tasks
 
 1. Convert the plan into ordered, verifiable tasks.
 2. For each task, include:
@@ -45,7 +62,7 @@ Human checkpoint:
    - Expected behavior change
    - Required tests
 
-## Phase 4: Implement
+## Phase 5: Implement
 
 1. Execute tasks in order with minimal, focused changes.
 2. Run targeted tests first, then broader validation.
