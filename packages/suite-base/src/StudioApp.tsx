@@ -74,7 +74,7 @@ export function StudioApp(): React.JSX.Element {
     customWindowControlProps,
     onAppBarDoubleClick,
     AppBarComponent,
-    remoteLayoutsAuthProvider,
+    authProvider,
   } = useSharedRootContext();
 
   const providers = [
@@ -117,6 +117,7 @@ export function StudioApp(): React.JSX.Element {
 
   const url = new URL(window.location.href);
   const workspace = url.searchParams.get("workspace");
+  const sessionId = url.searchParams.get("sessionid");
 
   const remoteLayoutStorage = useMemo(() => {
     if (workspace && APP_CONFIG.apiUrl) {
@@ -125,8 +126,8 @@ export function StudioApp(): React.JSX.Element {
     return undefined;
   }, [workspace]);
 
-  const defaultRemoteLayoutsAuthProvider = useMemo(() => {
-    if (remoteLayoutStorage == undefined || remoteLayoutsAuthProvider != undefined) {
+  const defaultAuthProvider = useMemo(() => {
+    if (!(workspace || sessionId) || authProvider != undefined) {
       return undefined;
     }
 
@@ -143,26 +144,25 @@ export function StudioApp(): React.JSX.Element {
       allowedOrigins: [parentOrigin],
       sourceWindow: window.parent,
     });
-  }, [remoteLayoutStorage, remoteLayoutsAuthProvider]);
+  }, [workspace, sessionId, authProvider]);
 
-  const activeRemoteLayoutsAuthProvider =
-    remoteLayoutsAuthProvider ?? defaultRemoteLayoutsAuthProvider;
+  const activeAuthProvider = authProvider ?? defaultAuthProvider;
 
   if (remoteLayoutStorage) {
     providers.unshift(<RemoteLayoutStorageContext.Provider value={remoteLayoutStorage} />);
   }
 
   useLayoutEffect(() => {
-    if (!remoteLayoutStorage) {
+    if (!activeAuthProvider) {
       return;
     }
 
-    HttpService.setAuthProvider(activeRemoteLayoutsAuthProvider);
+    HttpService.setAuthProvider(activeAuthProvider);
     return () => {
       HttpService.setAuthProvider(undefined);
-      defaultRemoteLayoutsAuthProvider?.dispose();
+      defaultAuthProvider?.dispose();
     };
-  }, [remoteLayoutStorage, activeRemoteLayoutsAuthProvider, defaultRemoteLayoutsAuthProvider]);
+  }, [activeAuthProvider, defaultAuthProvider]);
 
   useEffect(() => {
     document.addEventListener("contextmenu", contextMenuHandler);

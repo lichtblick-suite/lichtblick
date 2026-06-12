@@ -33,7 +33,7 @@ export function SharedRoot(
     enableLaunchPreferenceScreen,
     extensionLoaders,
     extraProviders,
-    remoteLayoutsAuthProvider,
+    authProvider,
   } = props;
 
   return (
@@ -55,7 +55,7 @@ export function SharedRoot(
                   extensionLoaders,
                   extraProviders,
                   onAppBarDoubleClick,
-                  remoteLayoutsAuthProvider,
+                  authProvider,
                 }}
               >
                 {children}

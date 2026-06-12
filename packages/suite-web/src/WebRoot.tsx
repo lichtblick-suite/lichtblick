@@ -34,7 +34,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 export function WebRoot(props: {
   extraProviders: React.JSX.Element[] | undefined;
   dataSources: IDataSourceFactory[] | undefined;
-  remoteLayoutsAuthProvider?: AuthProvider;
+  authProvider?: AuthProvider;
   AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
   children: React.JSX.Element;
 }): React.JSX.Element {
@@ -84,7 +84,7 @@ export function WebRoot(props: {
       extensionLoaders={extensionLoaders}
       enableGlobalCss
       extraProviders={props.extraProviders}
-      remoteLayoutsAuthProvider={props.remoteLayoutsAuthProvider}
+      authProvider={props.authProvider}
       AppBarComponent={props.AppBarComponent}
     >
       {props.children}

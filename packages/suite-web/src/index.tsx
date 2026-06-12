@@ -84,7 +84,7 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
     <WebRoot
       extraProviders={params.extraProviders}
       dataSources={params.dataSources}
-      remoteLayoutsAuthProvider={params.remoteLayoutsAuthProvider}
+      authProvider={params.remoteLayoutsAuthProvider}
     >
       <StudioApp />
     </WebRoot>
