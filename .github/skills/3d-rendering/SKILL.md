@@ -54,7 +54,7 @@ class DynamicBufferGeometry extends THREE.BufferGeometry {
 ## Point Cloud Rendering
 
 ### Data Flow
-```
+```text
 Raw message (PointCloud2)
     │
     ▼
@@ -85,7 +85,7 @@ Render with THREE.Points or InstancedMesh
 ## Transform Resolution
 
 ### TF Tree Structure
-```
+```text
 world (root)
 ├── base_link
 │   ├── lidar_link

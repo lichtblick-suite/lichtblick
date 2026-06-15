@@ -6,7 +6,7 @@ description: "Deep implementation details of HTTP-layer caching for remote file 
 
 ## Full Pipeline (Remote MCAP)
 
-```
+```text
 BrowserHttpReader (fetch + Range headers)
      │
      ▼
@@ -46,12 +46,14 @@ IterablePlayer (tick loop, state machine)
 Provides in-memory LRU caching for streaming file reads. Sits between `BrowserHttpReader` (network) and `RemoteFileReadable` (MCAP reader). Manages a single HTTP connection at a time and intelligently decides when to open new connections.
 
 ### Constants
+
 | Constant | Value | Purpose |
 |----------|-------|---------|
 | `CACHE_BLOCK_SIZE` | 10 MiB | VirtualLRUBuffer block granularity |
 | `CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION` | 5 MiB | Don't interrupt current download if it's within 5MB of the needed byte |
 | `LOGGING_INTERVAL_IN_BYTES` | 300 MiB | Progress log frequency |
 | Default `cacheSizeInBytes` (RemoteFileReadable) | 500 MiB | Total in-memory cache budget |
+
 
 ### Architecture
 ```typescript
@@ -146,14 +148,16 @@ Represents an entire file in memory using fixed-size blocks, but only keeps `num
 Determines whether CachedFilelike should open a new HTTP connection and what byte range to request. Called every time state changes (data received, read resolved, connection closed).
 
 ### Constants
+
 | Constant | Value | Purpose |
 |----------|-------|---------|
 | `READ_AHEAD_BUFFER_SIZE` | 50 MiB | How far ahead to proactively download |
 
+
 ### Decision Logic
 
 #### Case 1: Active read request exists
-```
+```text
 1. Compute notDownloadedRanges = missingRanges(readRequest, downloadedRanges)
 2. Start new connection if:
    a. No current connection exists, OR
@@ -165,7 +169,7 @@ Determines whether CachedFilelike should open a new HTTP connection and what byt
 ```
 
 #### Case 2: No read request, no connection (proactive read-ahead)
-```
+```text
 1. If cache ≥ fileSize: try to download entire file (prefer after lastResolvedCallbackEnd)
 2. If cache < fileSize: download 50MB starting from lastResolvedCallbackEnd
 3. Only download ranges not already cached (via missingRanges)
@@ -226,7 +230,7 @@ class FetchReader extends EventEmitter<{ data, error, end }> {
 ```
 
 ### Read Loop
-```
+```text
 read() → getReader() → reader.read() → emit("data", chunk) → read() [recursive]
                                       → if done: emit("end")
                                       → on error: emit("error") unless aborted
@@ -308,6 +312,7 @@ This means:
 ---
 
 ## Key Files Reference
+
 | File | Role |
 |------|------|
 | `packages/suite-base/src/util/CachedFilelike.ts` | LRU-cached streaming file reader |
@@ -317,3 +322,4 @@ This means:
 | `packages/suite-base/src/util/FetchReader.ts` | Streams API EventEmitter adapter |
 | `packages/suite-base/src/util/RequestQueue.ts` | Global concurrency limiter (10 max) |
 | `packages/suite-base/src/players/IterablePlayer/Mcap/RemoteFileReadable.ts` | IReadable adapter (500MB default) |
+

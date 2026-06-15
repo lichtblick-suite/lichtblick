@@ -48,7 +48,7 @@ interface RenderState {
 - Only changed fields are rebuilt (e.g. if only `currentTime` changed, `topics` is reused)
 - Reference equality on unchanged fields enables React memo optimizations in panels
 
-## PanelExtensionContext (API for extension panels)
+## PanelExtensionContext (Core API Introduction)
 
 ```typescript
 interface PanelExtensionContext {
@@ -59,6 +59,11 @@ interface PanelExtensionContext {
   setParameter(key: string, value: unknown): void;
 }
 ```
+
+This snippet is a core API introduction, not the full type surface. For the complete
+`PanelExtensionContext` definition (including read-only properties, watch/subscription APIs,
+publish/service methods, settings APIs, and range subscriptions), see:
+`packages/suite/src/index.ts`.
 
 > The render callback is `onRender(renderState, done)`. The panel **must** call `done()` when it has
 > finished processing the frame — this drives `pauseFrame` backpressure.

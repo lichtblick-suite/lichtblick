@@ -19,7 +19,7 @@ MCAP is an open-source container format for heterogeneous timestamped data, desi
 
 ## Binary Structure
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │ Magic bytes (8 bytes)                   │
 ├─────────────────────────────────────────┤

@@ -1,4 +1,5 @@
 ---
+name: "websocket-connection"
 description: "Deep WebSocket connection knowledge: FoxgloveWebSocketPlayer state machine, WorkerSocketAdapter postMessage protocol, the Foxglove WebSocket protocol handshake, RAF-based state emission, and reconnection."
 ---
 
@@ -8,7 +9,7 @@ The real-time data path from a robot/simulation/bridge to visualization.
 
 ## Architecture
 
-```
+```text
 Foxglove WebSocket Server (robot/bridge)
     │  WebSocket protocol
     ▼

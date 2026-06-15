@@ -9,7 +9,7 @@ You are an expert on the Lichtblick desktop application built with Electron.
 
 ## Architecture
 
-```
+```text
 Main Process (Node.js)
     │
     ├── App lifecycle (single instance, deep links)

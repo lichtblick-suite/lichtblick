@@ -26,7 +26,7 @@ Before starting a manual review:
 4. Focus manual review on areas CodeRabbit cannot reason about: domain correctness, architecture decisions, and acceptance-criteria coverage.
 
 To request a fresh CodeRabbit pass on an existing PR, comment:
-```
+```sh
 @coderabbitai review
 ```
 
@@ -80,7 +80,7 @@ and suggested fixes — ready to be given directly to a coding agent.
 ### Workflow
 
 1. Use the `github` MCP server to fetch PR review comments:
-   ```
+   ```text
    github/list_pull_request_review_comments  (PR number)
    github/list_issue_comments                (PR number — for top-level review summaries)
    ```

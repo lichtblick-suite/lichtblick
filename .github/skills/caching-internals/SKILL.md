@@ -29,7 +29,7 @@ class CachingIterableSource {
 4. If no blocks behind read position exist, evict oldest block regardless
 
 ### Block Lifecycle
-```
+```typescript
 EMPTY → LOADING → CACHED → EVICTED
                      │
                      └──► ACCESSED (moves to front of LRU)
@@ -48,7 +48,7 @@ const DEFAULT_READ_AHEAD_DURATION = { sec: 10, nsec: 0 };
 > The only default is `{ sec: 10, nsec: 0 }`, applied uniformly regardless of source format.
 
 ### Producer-Consumer Coordination
-```
+```text
 Producer Thread (may be Worker):
   while (not at end && buffer not full) {
     message = await source.next();

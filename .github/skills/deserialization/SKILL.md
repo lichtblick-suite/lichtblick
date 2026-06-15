@@ -8,7 +8,7 @@ Converts raw binary message data into structured JavaScript objects.
 
 ## Flow
 
-```
+```text
 Raw bytes (from source)
     │
     ▼

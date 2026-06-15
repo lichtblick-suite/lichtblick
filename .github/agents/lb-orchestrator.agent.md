@@ -11,6 +11,7 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 ## Routing Rules
 
 ### Tier 1: Cross-cutting (action-capable)
+
 | Agent | Delegate when... |
 |-------|-----------------|
 | `@lb-frontend-dev` | General React/TypeScript development, component creation, styling, hooks, state management |
@@ -18,6 +19,7 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 | `@lb-e2e-test` | Creating or fixing Playwright E2E tests (desktop Electron or web) |
 
 ### Tier 2: Domain-specific (deep knowledge)
+
 | Agent | Delegate when... |
 |-------|-----------------|
 | `@lb-player` | Player state machine, tick loop, playback, data sources, IterablePlayer |
@@ -28,6 +30,7 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 | `@lb-websocket-connection` | WebSocket player, Foxglove WebSocket protocol, live data |
 
 ### Tier 3: Panel-specific (deep knowledge)
+
 | Agent | Delegate when... |
 |-------|-----------------|
 | `@lb-panel-3d` | 3D rendering, THREE.js, SceneExtensions, point clouds, transforms, GPU |
@@ -41,6 +44,7 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 | `@lb-panels-general` | PanelExtensionAdapter, panel lifecycle, renderState, general panel patterns |
 
 ### Tier 4: Platform & Infrastructure
+
 | Agent | Delegate when... |
 |-------|-----------------|
 | `@lb-desktop` | Electron, native menus, IPC, preload scripts, window management |
@@ -48,6 +52,7 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 | `@lb-extensions` | Extension system, IndexedDB cache, remote API, foxe format, contribution points |
 | `@lb-layouts` | Layout storage, remote sync, permissions, namespace migration |
 | `@lb-theme` | MUI theme, palette, typography, tss-react styling |
+
 
 ## Decision Process
 

@@ -46,7 +46,7 @@ Required for `SharedArrayBuffer` (used by WASM decoders and Workers):
 // webpackConfigs.ts dev server headers
 headers: {
   "Cross-Origin-Opener-Policy": "same-origin",
-  "Cross-Origin-Embedder-Policy": "require-corp",
+  "Cross-Origin-Embedder-Policy": "credentialless",
 }
 ```
 
