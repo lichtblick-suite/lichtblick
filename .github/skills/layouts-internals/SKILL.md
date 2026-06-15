@@ -1,259 +1,189 @@
 ---
-description: "Deep layout system implementation knowledge: ILayoutStorage contracts, IndexedDB schema, sync operation computation, mutex-locked LayoutManager, conflict resolution, exponential backoff, WriteThroughLayoutCache, and CurrentLayoutProvider reducers."
+description: "Deep layout system implementation knowledge: ILayoutStorage contracts, IndexedDB schema, sync operation computation, mutex-locked LayoutManager, conflict resolution, WriteThroughLayoutCache, NamespacedLayoutStorage, and CurrentLayoutProvider reducers."
 ---
 
 # Layouts Internals Skill
 
 ## ILayoutStorage Interface
 
-```typescript
-interface ILayoutStorage {
-  // CRUD
-  getLayouts(): Promise<Layout[]>;
-  getLayout(id: LayoutID): Promise<Layout | undefined>;
-  saveLayout(layout: Layout): Promise<void>;
-  deleteLayout(id: LayoutID): Promise<void>;
+Defined in `packages/suite-base/src/services/ILayoutStorage.ts`. **Every** CRUD method takes a
+`namespace` argument — there are no sync-time methods like `getLastSyncTime`.
 
-  // Sync metadata
-  getLastSyncTime(): Promise<Date | undefined>;
-  setLastSyncTime(time: Date): Promise<void>;
+```typescript
+export interface ILayoutStorage {
+  list(namespace: string): Promise<readonly Layout[]>;
+  get(namespace: string, id: LayoutID): Promise<Layout | undefined>;
+  put(namespace: string, layout: Layout): Promise<Layout>;
+  delete(namespace: string, id: LayoutID): Promise<void>;
+
+  // Optional one-time migration of pre-namespace local layouts
+  migrateUnnamespacedLayouts?(namespace: string): Promise<void>;
+
+  // Convert local layouts to personal layouts on login
+  importLayouts(params: { fromNamespace: string; toNamespace: string }): Promise<void>;
 }
 ```
+
+The `Layout` type tracks `baseline` (last explicit save), `working` (unsaved edits, or `undefined`),
+and `syncInfo` (remote status). `LayoutSyncStatus` is
+`"new" | "updated" | "tracked" | "locally-deleted" | "remotely-deleted"`.
 
 ## IdbLayoutStorage (IndexedDB Detail)
 
-### Database Schema
-```typescript
-// DB name: "layouts" (version 1)
-// Object store: "layouts"
-// keyPath: ["namespace", "id"]
-// Indexes:
-//   - "by-namespace": keyPath "namespace" (non-unique)
+`packages/suite-base/src/IdbLayoutStorage.ts`:
 
-interface StoredLayout {
-  namespace: string;    // "local" | "org"
-  id: LayoutID;        // UUID string
-  name: string;
-  data: LayoutData;    // Full panel tree + configs
-  permission: LayoutPermission;
-  savedAt: string;     // ISO 8601
-  syncStatus: LayoutSyncStatus;
-  baseline?: LayoutData; // Last synced version (for conflict detection)
+```typescript
+// DB name: `${KEY_WORKSPACE_PREFIX}lichtblick-layouts` (version 1)
+// Object store: "layouts"
+//   keyPath: ["namespace", "layout.id"]   (composite primary key)
+//   index "namespace": keyPath "namespace" (non-unique)
+
+interface LayoutsDB extends DBSchema {
+  layouts: {
+    key: [namespace: string, id: LayoutID];
+    value: { namespace: string; layout: Layout };
+    indexes: { namespace: string };
+  };
 }
 ```
 
-### Baseline Tracking
-- `baseline` stores the last known synced state
-- When user edits: `data` changes, `baseline` stays
-- On sync: if remote unchanged and local modified → upload local `data`, update baseline
-- On conflict: show diff between local `data` and remote (both diverged from baseline)
+- `list()` uses `getAllFromIndex("layouts", "namespace", namespace)`
+- Every read passes the record through `migrateLayout()` before returning
+- The stored value wraps the layout: `{ namespace, layout }` — the primary key reaches into
+  `layout.id` via the `"layout.id"` keyPath segment
 
 ## NamespacedLayoutStorage
 
-Wrapper that scopes all operations to a specific namespace:
+`packages/suite-base/src/services/LayoutManager/NamespacedLayoutStorage.ts` — wraps an
+`ILayoutStorage` and binds a namespace so callers omit it. It is **not** itself an `ILayoutStorage`
+(its methods drop the namespace argument). The constructor kicks off an async migration/import:
 
 ```typescript
-class NamespacedLayoutStorage implements ILayoutStorage {
+export class NamespacedLayoutStorage {
+  #migration: Promise<void>;
   constructor(
-    private inner: IdbLayoutStorage,
+    private storage: ILayoutStorage,
     private namespace: string,
-  ) {}
-
-  async getLayouts(): Promise<Layout[]> {
-    return this.inner.getLayoutsByNamespace(this.namespace);
+    opts: { migrateUnnamespacedLayouts: boolean; importFromNamespace: string | undefined },
+  ) {
+    // runs migrateUnnamespacedLayouts?() and/or importLayouts() once
   }
-  // All operations automatically scoped
+
+  async list(): Promise<readonly Layout[]>   { await this.#migration; return this.storage.list(this.namespace); }
+  async get(id: LayoutID)                     { await this.#migration; return this.storage.get(this.namespace, id); }
+  async put(layout: Layout)                   { await this.#migration; return this.storage.put(this.namespace, layout); }
+  async delete(id: LayoutID)                  { await this.#migration; return this.storage.delete(this.namespace, id); }
 }
 ```
 
 ## WriteThroughLayoutCache
 
+`packages/suite-base/src/services/LayoutManager/WriteThroughLayoutCache.ts` — an `ILayoutStorage`
+that calls the underlying `list()` once per namespace (via `LazilyInitialized`) and serves
+subsequent reads from an in-memory `Map`, writing through to the inner storage on `put`/`delete`.
+Assumes nothing else mutates the underlying storage.
+
 ```typescript
-class WriteThroughLayoutCache implements ILayoutStorage {
-  #cache: Map<LayoutID, Layout> = new Map();
-  #inner: ILayoutStorage;
+export default class WriteThroughLayoutCache implements ILayoutStorage {
+  #cacheByNamespace = new Map<string, LazilyInitialized<Map<string, Layout>>>();
+  constructor(private storage: ILayoutStorage) {}
 
-  async getLayout(id: LayoutID): Promise<Layout | undefined> {
-    // Fast path: return from cache
-    if (this.#cache.has(id)) return this.#cache.get(id);
-    // Slow path: fetch from IDB, populate cache
-    const layout = await this.#inner.getLayout(id);
-    if (layout) this.#cache.set(id, layout);
-    return layout;
+  async put(namespace: string, layout: Layout): Promise<Layout> {
+    const result = await this.storage.put(namespace, layout);
+    (await this.#getOrCreateCache(namespace).get()).set(result.id, result);
+    return result;
   }
-
-  async saveLayout(layout: Layout): Promise<void> {
-    // Write-through: update both simultaneously
-    this.#cache.set(layout.id, layout);
-    await this.#inner.saveLayout(layout);
-  }
+  // get/list/delete read/write the per-namespace cache map
 }
 ```
 
 ## LayoutManager (Sync Orchestrator)
 
+`packages/suite-base/src/services/LayoutManager/LayoutManager.ts`.
+
 ### Mutex Pattern
+All local storage access is wrapped in a `MutexLocked` (from `@lichtblick/den/async`) so multi-step
+operations are atomic. A single in-flight sync is tracked by `currentSync?: Promise<void>`.
+
 ```typescript
 class LayoutManager {
-  #syncMutex = new Mutex();
+  private local: MutexLocked<NamespacedLayoutStorage>;
+  private currentSync?: Promise<void>;
 
-  async syncLayouts(): Promise<void> {
-    await this.#syncMutex.runExclusive(async () => {
-      // Only one sync at a time
-      await this.#performSync();
-    });
+  async getLayouts(): Promise<readonly Layout[]> {
+    return await this.local.runExclusive(async (local) => await local.list());
   }
 }
 ```
 
-### Exponential Backoff Implementation
-```typescript
-class LayoutManager {
-  #baseInterval = 30_000;      // 30 seconds
-  #maxInterval = 180_000;      // 3 minutes
-  #currentInterval: number;
-  #syncTimer: ReturnType<typeof setTimeout>;
-
-  #scheduleNextSync(): void {
-    // Add jitter (±15%)
-    const jitter = this.#currentInterval * (0.85 + Math.random() * 0.3);
-    this.#syncTimer = setTimeout(() => this.syncLayouts(), jitter);
-
-    // Exponential increase (capped)
-    this.#currentInterval = Math.min(
-      this.#currentInterval * 2,
-      this.#maxInterval,
-    );
-  }
-
-  #resetBackoff(): void {
-    this.#currentInterval = this.#baseInterval;
-  }
-}
-```
-
-### User actions that reset backoff:
-- Save layout
-- Create new layout
-- Delete layout
-- Import layout
-- Manual sync trigger
+> ⚠️ `LayoutManager` does **not** implement exponential backoff / jitter / `#baseInterval` /
+> `#maxInterval`. Sync scheduling (and any retry/online-trigger behavior) lives in the provider
+> layer, not in `LayoutManager`. Do not assume a built-in backoff timer here.
 
 ## computeLayoutSyncOperations() (Detail)
 
+`packages/suite-base/src/services/LayoutManager/utils/computeLayoutSyncOperations.ts`. The real
+`SyncOperation` is a tagged union carrying a `local` boolean and the operation `type`:
+
 ```typescript
-interface SyncOperation {
-  type: "upload" | "download" | "delete-local" | "delete-remote" | "conflict";
-  layoutId: LayoutID;
-  local?: Layout;
-  remote?: Layout;
-}
-
-function computeLayoutSyncOperations(
-  localLayouts: Layout[],
-  remoteLayouts: RemoteLayout[],
-): SyncOperation[] {
-  const operations: SyncOperation[] = [];
-
-  // Build lookup maps
-  const localMap = new Map(localLayouts.map(l => [l.id, l]));
-  const remoteMap = new Map(remoteLayouts.map(l => [l.id, l]));
-
-  // Process all known IDs
-  const allIds = new Set([...localMap.keys(), ...remoteMap.keys()]);
-
-  for (const id of allIds) {
-    const local = localMap.get(id);
-    const remote = remoteMap.get(id);
-
-    if (local && !remote) {
-      // Local only
-      if (local.syncStatus === "new") {
-        operations.push({ type: "upload", layoutId: id, local });
-      } else if (local.syncStatus === "deleted") {
-        operations.push({ type: "delete-local", layoutId: id, local });
-      }
-    } else if (!local && remote) {
-      // Remote only → download
-      operations.push({ type: "download", layoutId: id, remote });
-    } else if (local && remote) {
-      // Both exist → compare timestamps
-      if (local.syncStatus === "locally-modified") {
-        if (remote.savedAt === local.baseline?.savedAt) {
-          // Remote unchanged → safe to upload
-          operations.push({ type: "upload", layoutId: id, local });
-        } else {
-          // Both changed → conflict
-          operations.push({ type: "conflict", layoutId: id, local, remote });
-        }
-      } else if (remote.savedAt !== local.savedAt) {
-        // Remote newer, local unmodified → download
-        operations.push({ type: "download", layoutId: id, remote });
-      }
-      // else: same version, no action needed
-    }
-  }
-
-  return operations;
-}
+export type SyncOperation =
+  | { local: true;  type: "add-to-cache";   remoteLayout: RemoteLayout }
+  | { local: true;  type: "delete-local";   localLayout: Layout }
+  | { local: true;  type: "mark-deleted";   localLayout: Layout }
+  | { local: false; type: "delete-remote";  localLayout: Layout }
+  | { local: false; type: "upload-new";     localLayout: Layout }
+  | { local: false; type: "upload-updated"; localLayout: Layout }
+  | {
+      local: true;
+      type: "update-baseline";
+      localLayout: Layout & { syncInfo: NonNullable<Layout["syncInfo"]> };
+      remoteLayout: RemoteLayout;
+    };
 ```
+
+> ⚠️ There is no `"upload" | "download" | "conflict"` union, no `layoutId` field, and no
+> `syncStatus`/`baseline.savedAt` comparison as shown previously. Operations are keyed by
+> `localLayout` / `remoteLayout`, and the `local` flag indicates whether the op mutates local
+> (cache) or remote storage.
+
+The function iterates local layouts (matching against a `remoteLayoutsById` map) and then any
+remaining remote-only layouts, pushing the appropriate operation for each.
 
 ## CurrentLayoutProvider Reducers
 
-### Panel Tree Operations
+`packages/suite-base/src/providers/CurrentLayoutProvider/reducers.ts`. The actual action `type`
+values handled are:
 
-**ADD_PANEL**:
-```
-Find insertion point → split existing node → create new leaf
-```
+`CHANGE_PANEL_LAYOUT`, `SAVE_PANEL_CONFIGS`, `SAVE_FULL_PANEL_CONFIG`, `CREATE_TAB_PANEL`,
+`OVERWRITE_GLOBAL_DATA`, `SET_GLOBAL_DATA`, `SET_USER_NODES`, `SET_PLAYBACK_CONFIG`, `CLOSE_PANEL`,
+`SPLIT_PANEL`, `SWAP_PANEL`, `MOVE_TAB`, `ADD_PANEL`, `DROP_PANEL`, `START_DRAG`, `END_DRAG`.
 
-**REMOVE_PANEL**:
-```
-Remove leaf → if parent has single child → collapse parent
-```
+> ⚠️ There are no `REMOVE_PANEL`, `MOVE_PANEL`, or `UPDATE_PANEL_CONFIG` actions. Panel removal is
+> `CLOSE_PANEL`; config writes go through `SAVE_PANEL_CONFIGS` / `SAVE_FULL_PANEL_CONFIG`.
 
-**MOVE_PANEL**:
-```
-Remove from source → add to destination → recompute sizes
-```
+### Panel Tree Operations (examples)
+
+**ADD_PANEL** — find insertion point → add new leaf to the mosaic tree.
+
+**CLOSE_PANEL** — remove leaf → if parent collapses to a single child, hoist it.
 
 **SPLIT_PANEL**:
 ```
-Replace leaf with { direction, children: [existingLeaf, newLeaf], sizes: [0.5, 0.5] }
+Replace leaf with { direction, first: existingLeaf, second: newLeaf, splitPercentage: 50 }
 ```
 
-### Config Update Pattern
+### Config Update Pattern (SAVE_PANEL_CONFIGS)
 ```typescript
-case "UPDATE_PANEL_CONFIG": {
-  const { path, config } = action;
-  const panelId = getPanelIdFromPath(state.layout, path);
-  return {
-    ...state,
-    configById: {
-      ...state.configById,
-      [panelId]: { ...state.configById[panelId], ...config },
-    },
-  };
-}
+case "SAVE_PANEL_CONFIGS":
+  // merges each { id, config } entry into state's configById,
+  // optionally via a per-panel override function
 ```
 
 ## DesktopLayoutLoader
 
-Desktop-specific loader that reads layouts from filesystem via IPC:
-
-```typescript
-class DesktopLayoutLoader {
-  async getLayouts(): Promise<Layout[]> {
-    // IPC to main process → read layout directory
-    return desktopBridge.fetchLayouts();
-  }
-
-  async saveLayout(layout: Layout): Promise<void> {
-    // IPC to main process → write JSON file
-    await desktopBridge.saveLayout(layout.id, JSON.stringify(layout));
-  }
-}
-```
+`packages/suite-desktop/src/renderer/services/DesktopLayoutLoader.ts` — `namespace = "local"`. Reads
+layouts from the desktop file system through the preload `storageBridge` (`list` / `get` / `put` /
+`delete`), not a `desktopBridge.fetchLayouts()` call.
 
 ## Common Issues
 

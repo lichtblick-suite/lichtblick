@@ -8,6 +8,11 @@ description: "Deep knowledge about the message-path package: path syntax, parsin
 
 The `message-path` package (`packages/message-path/`) provides a DSL for addressing fields within ROS/Foxglove messages. It's the foundation for user-defined data extraction in multiple panels.
 
+> ⚠️ Code is split across two locations: **parsing/grammar** lives in `packages/message-path/src/`
+> (e.g. `parseMessagePath.ts`), but the **data-extraction** helpers
+> (`simpleGetMessagePathDataItems.ts`, `useCachedGetMessagePathDataItems.ts`) live in
+> `packages/suite-base/src/components/MessagePathSyntax/`.
+
 ## Path Syntax
 
 ```
@@ -49,7 +54,7 @@ type MessagePathPart =
 
 ## Data Extraction
 
-`packages/message-path/src/simpleGetMessagePathDataItems.ts`:
+`packages/suite-base/src/components/MessagePathSyntax/simpleGetMessagePathDataItems.ts`:
 
 ```typescript
 function simpleGetMessagePathDataItems(
@@ -70,7 +75,7 @@ function simpleGetMessagePathDataItems(
 
 ## React Integration
 
-`packages/message-path/src/useCachedGetMessagePathDataItems.ts`:
+`packages/suite-base/src/components/MessagePathSyntax/useCachedGetMessagePathDataItems.ts`:
 
 ```typescript
 function useCachedGetMessagePathDataItems(paths: string[]): CachedGetMessagePathDataItems;

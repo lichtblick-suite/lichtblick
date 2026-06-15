@@ -24,23 +24,34 @@ description: "Deep Electron implementation knowledge: main/renderer process comm
 
 ## contextBridge Pattern
 
-```typescript
-// preload/index.ts
-contextBridge.exposeInMainWorld("desktopBridge", {
-  updateNativeColorScheme: () => ipcRenderer.send("updateNativeColorScheme"),
-  fetchLayouts: () => ipcRenderer.invoke("fetchLayouts"),
-  // ...typed API surface
-});
-```
+The preload script (`packages/suite-desktop/src/preload/index.ts`) exposes **four** separate
+bridges to the renderer — not a single `desktopBridge`:
 
 ```typescript
-// renderer/Root.tsx — consuming the bridge
+// packages/suite-desktop/src/preload/index.ts
+contextBridge.exposeInMainWorld("ctxbridge", ctx);            // main app/context API (Desktop)
+contextBridge.exposeInMainWorld("menuBridge", menuBridge);    // native menu event subscription
+contextBridge.exposeInMainWorld("storageBridge", storageBridge); // local file storage CRUD
+contextBridge.exposeInMainWorld("desktopBridge", desktopBridge); // desktop-specific operations
+```
+
+| Bridge | Type | Purpose |
+|--------|------|---------|
+| `ctxbridge` | `Desktop` | Core context API consumed by the renderer app shell |
+| `menuBridge` | `NativeMenuBridge` | Subscribe to forwarded native menu events (`addIpcEventListener`) |
+| `storageBridge` | `Storage` | Local file storage: `list`, `all`, `get`, `put`, `delete` |
+| `desktopBridge` | `Desktop` | Desktop-specific operations (deep links, color scheme, etc.) |
+
+```typescript
+// renderer — consuming a bridge
 const desktopBridge = (global as { desktopBridge: Desktop }).desktopBridge;
-await desktopBridge.fetchLayouts();
+const storageBridge = (global as { storageBridge: Storage }).storageBridge;
+await storageBridge.list("layouts");
 ```
 
 ### Security Rules
 - Never expose `ipcRenderer` directly
+- Class instances do not survive the bridge — only plain functions/objects are exposed (prototypes are lost), which is why storage methods are `.bind()`-attached in preload
 - Each bridge method is a typed, scoped function
 - No `eval()`, no `remote` module usage
 - CSP headers prevent inline scripts
@@ -91,9 +102,9 @@ menuBridge.on("menu-event", (event: ForwardedMenuEvent) => {
 
 ## File System Access
 
-### Layout Loading
-- Layouts stored as `.json` files in app data directory
-- `desktopBridge.fetchLayouts()` → main process reads directory → returns array
+### Layout / Storage Loading
+- Local storage entries are read/written via `storageBridge` (`list`, `all`, `get`, `put`, `delete`)
+- The renderer's `DesktopLayoutLoader` (`packages/suite-desktop/src/renderer/services/DesktopLayoutLoader.ts`) wraps these calls
 
 ### Extension Loading
 - `.foxe` files in extension directory
@@ -106,9 +117,16 @@ menuBridge.on("menu-event", (event: ForwardedMenuEvent) => {
 lichtblick://open?url=https://example.com/recording.mcap
 ```
 
-- Registered via `app.setAsDefaultProtocolClient("lichtblick")`
-- Second-instance handler forwards to existing window
-- Parsed in renderer to open appropriate data source
+- **OS protocol registration** uses the legacy `foxglove` scheme:
+  `app.setAsDefaultProtocolClient("foxglove")` (`packages/suite-desktop/src/main/index.ts`)
+- **Handled deep-link URLs** use the `lichtblick://` scheme — the `open-url` handler and
+  second-instance argv filter both match `arg.startsWith("lichtblick://")`
+- Recognized links include `lichtblick://open?...` and `lichtblick://signin-complete`
+- Second-instance handler re-emits `open-url` and forwards to the existing window
+- Parsed in renderer to open the appropriate data source
+
+> ⚠️ The protocol-client registration argument (`"foxglove"`) differs from the URL scheme the app
+> actually parses (`lichtblick://`). Do not assume they are the same string.
 
 ## Build & Packaging
 

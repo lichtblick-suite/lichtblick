@@ -59,24 +59,30 @@ async #statePlay() {
 
 ## Iterator Architecture
 
+There is no concrete `DataSource` type in this layering. Sources implement one of two interfaces:
+`ISerializedIterableSource` (yields raw bytes) or `IDeserializedIterableSource` (yields decoded
+`MessageEvent`s). A serialized source must be wrapped by `DeserializingIterableSource`; an
+already-deserialized source skips that wrapper.
+
 ```
-DataSource (file/network)
+Concrete source (e.g. McapIndexedIterableSource, RemoteFileReadable-backed, WebSocket, …)
+    │  implements ISerializedIterableSource  OR  IDeserializedIterableSource
+    ▼
+DeserializingIterableSource (ONLY for serialized sources — applies parseChannel-based decode)
+    │  packages/suite-base/src/players/IterablePlayer/DeserializingIterableSource.ts
+    ▼
+CachingIterableSource (LRU block cache, ~600MB budget)
     │
     ▼
-IIterableSource (serialized or deserialized)
-    │
-    ▼
-DeserializingIterableSource (applies schema-based decode)
-    │
-    ▼
-CachingIterableSource (LRU block cache, 600MB)
-    │
-    ▼
-BufferedIterableSource (producer-consumer, read-ahead)
+BufferedIterableSource (producer-consumer, read-ahead, default { sec: 10 })
     │
     ▼
 IterablePlayer (tick loop consumes messages)
 ```
+
+> ⚠️ `DeserializingIterableSource` is **optional** — it is only inserted when the underlying source
+> is serialized (`ISerializedIterableSource`). Sources that already return `IDeserializedIterableSource`
+> bypass it.
 
 ## Backfill Strategy
 

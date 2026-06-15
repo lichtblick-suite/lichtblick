@@ -39,9 +39,13 @@ EMPTY → LOADING → CACHED → EVICTED
 
 ### Read-Ahead Configuration
 ```typescript
-const DEFAULT_READ_AHEAD_DURATION_SEC = 10;
-const MCAP_READ_AHEAD_DURATION_SEC = 120;  // MCAP benefits from sequential reads
+// packages/suite-base/src/players/IterablePlayer/BufferedIterableSource.ts
+const DEFAULT_READ_AHEAD_DURATION = { sec: 10, nsec: 0 };
+// Overridable per-instance via opt.readAheadDuration; defaults to 10 s.
 ```
+
+> ⚠️ There is no `MCAP_READ_AHEAD_DURATION_SEC = 120` (or any 120-second MCAP-specific read-ahead).
+> The only default is `{ sec: 10, nsec: 0 }`, applied uniformly regardless of source format.
 
 ### Producer-Consumer Coordination
 ```

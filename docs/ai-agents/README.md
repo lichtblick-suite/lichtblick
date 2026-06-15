@@ -80,27 +80,38 @@ Located in `.github/agents/`. Each file uses YAML frontmatter with `description`
 
 ---
 
-## Skills (15)
+## Skills (26)
 
 Located in `.github/skills/<name>/SKILL.md`. Each file uses YAML frontmatter with a `description` field. Skills provide deep implementation knowledge that agents load on demand.
 
-| Skill                  | Description                                                                                                                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `3d-rendering`         | Deep THREE.js rendering knowledge: WebGL pipeline, buffer management, instanced rendering, shader considerations, and scene optimization techniques.                                    |
-| `caching-internals`    | Caching strategies, memory budgets, block eviction, and buffered reading in the preloading subsystem.                                                                                   |
-| `electron-internals`   | Electron implementation: main/renderer process communication, contextBridge patterns, BrowserWindow lifecycle, native menu integration, and security.                                   |
-| `extensions-internals` | Extension system internals: IExtensionLoader contracts, IndexedDB storage schema, version-compare cache strategy, contribution point registration, extension sandbox, and .foxe format. |
-| `layouts-internals`    | Layout system internals: ILayoutStorage contracts, IndexedDB schema, sync operation computation, mutex-locked LayoutManager, conflict resolution, exponential backoff.                  |
-| `mcap-format`          | MCAP file format specification: binary structure, record types, indexing strategies, compression options, and best practices for optimizing Lichtblick reading performance.             |
-| `message-path`         | Message-path package: path syntax, parsing grammar, data extraction from nested messages, and React hook integration.                                                                   |
-| `performance`          | Performance optimization: profiling techniques, common bottlenecks, memory management patterns, and strategies for real-time data visualization.                                        |
-| `player-internals`     | IterablePlayer state machine internals, tick loop, and data source iteration patterns.                                                                                                  |
-| `plot-internals`       | Chart.js integration for the Plot panel: Worker-based rendering, dataset management, downsampling strategies, scale handling, and interaction patterns.                                 |
-| `remote-caching`       | HTTP-layer caching for remote file access: CachedFilelike, VirtualLRUBuffer, connection management algorithm, BrowserHttpReader, FetchReader streaming, and RequestQueue concurrency.   |
-| `unit-testing`         | Unit testing patterns, mock builder usage, and test data construction strategies.                                                                                                       |
-| `web-workers`          | Web Worker patterns: Comlink integration, ComlinkWrap lifecycle, transfer handlers, OffscreenCanvas, SharedWorker isolation, and testing utilities.                                     |
-| `test-conventions`     | Shared test conventions for all testing agents: GWT pattern, core quality rules, and the standard test-writing workflow.                                                                |
-| `e2e-playwright-mcp`   | Playwright MCP-assisted E2E test development: test architecture, fixture reference, selector strategy, page objects, MCP usage, and source instrumentation patterns.                    |
+| Skill                       | Description                                                                                                                                                                             |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `3d-rendering`              | Deep THREE.js rendering knowledge: WebGL pipeline, buffer management, instanced rendering, shader considerations, and scene optimization techniques.                                    |
+| `caching-internals`         | Caching strategies, memory budgets, block eviction, and buffered reading in the preloading subsystem.                                                                                   |
+| `deserialization`           | Schema parsing and message decoding: parseChannel dispatch, encoding→deserializer mapping, DeserializingIterableSource wrapping, and WASM decompression handlers.                       |
+| `electron-internals`        | Electron implementation: main/renderer process communication, contextBridge patterns, BrowserWindow lifecycle, native menu integration, and security.                                   |
+| `extensions-internals`      | Extension system internals: IExtensionLoader contracts, IndexedDB storage schema, version-compare cache strategy, contribution point registration, extension sandbox, and .foxe format. |
+| `layouts-internals`         | Layout system internals: ILayoutStorage contracts, IndexedDB schema, sync operation computation, mutex-locked LayoutManager, and conflict resolution.                                   |
+| `mcap-format`               | MCAP file format specification: binary structure, record types, indexing strategies, compression options, and best practices for optimizing Lichtblick reading performance.             |
+| `message-path`              | Message-path package: path syntax, parsing grammar, data extraction from nested messages, and React hook integration.                                                                   |
+| `message-pipeline`          | MessagePipeline internals: zustand store, subscription merging/memoization, render-state building, and the MessagePipelineContext contract.                                             |
+| `panel-extension-api`       | Panel framework: PanelExtensionAdapter, incremental RenderState building, PanelExtensionContext, pauseFrame backpressure, and panel lifecycle.                                          |
+| `panel-image`               | Image panel as ThreeDeeRender ImageMode: WorkerImageDecoder pipeline, camera-model projection, and annotation overlays.                                                                 |
+| `panel-log`                 | Log panel: react-window VariableSizeList virtualization, dynamic measured row heights, autoscroll, log normalization, and filtering.                                                    |
+| `panel-map`                 | Map panel: Leaflet lifecycle, NavSatFix/GeoJSON handling, tile layers, and the FilteredPointLayer pixel-deduplication grid.                                                             |
+| `panel-raw-messages`        | RawMessages panels: legacy vs virtual (@tanstack/react-virtual) trees, flattenTreeData, expansion state, and diff mode.                                                                 |
+| `panel-state-transitions`   | StateTransitions panel: TimeBasedChart segments, message-path extraction, 250ms batch flush, and block+currentFrame merge.                                                              |
+| `panel-user-scripts`        | UserScripts panel: Monaco editor, UserScriptPlayer, transformer/runtime Workers, diagnostics, and the script API.                                                                       |
+| `performance`               | Performance optimization: profiling techniques, common bottlenecks, memory management patterns, and strategies for real-time data visualization.                                        |
+| `player-internals`          | IterablePlayer state machine internals, tick loop, and data source iteration patterns.                                                                                                  |
+| `plot-internals`            | Chart.js integration for the Plot panel: Worker-based rendering, dataset management, downsampling strategies, scale handling, and interaction patterns.                                 |
+| `remote-caching`            | HTTP-layer caching for remote file access: CachedFilelike, VirtualLRUBuffer, connection management algorithm, BrowserHttpReader, FetchReader streaming, and RequestQueue concurrency.   |
+| `theme`                     | Theme system: createMuiTheme factory, dark/light palette tokens, typography scale, ThemeProvider application, and tss-react/mui styling.                                                |
+| `unit-testing`              | Unit testing patterns, mock builder usage, and test data construction strategies.                                                                                                       |
+| `web-workers`               | Web Worker patterns: Comlink integration, ComlinkWrap lifecycle, transfer handlers, OffscreenCanvas, SharedWorker isolation, and testing utilities.                                     |
+| `websocket-connection`      | WebSocket data path: FoxgloveWebSocketPlayer, WorkerSocketAdapter postMessage protocol, Foxglove protocol handshake, and RAF-based emission.                                            |
+| `test-conventions`          | Shared test conventions for all testing agents: GWT pattern, core quality rules, and the standard test-writing workflow.                                                                |
+| `e2e-playwright-mcp`        | Playwright MCP-assisted E2E test development: test architecture, fixture reference, selector strategy, page objects, MCP usage, and source instrumentation patterns.                    |
 
 ### Agent → Skill Relationships
 
@@ -121,14 +132,29 @@ graph LR
     lb-remote-connection --> web-workers
     lb-remote-connection --> caching-internals
     lb-websocket-connection --> web-workers
+    lb-websocket-connection --> websocket-connection
+    lb-websocket-connection --> deserialization
     lb-desktop --> electron-internals
     lb-extensions --> extensions-internals
     lb-layouts --> layouts-internals
     lb-frontend-dev --> performance
+    lb-theme --> theme
     lb-unit-test --> unit-testing
+    lb-message-pipeline --> message-pipeline
+    lb-deserialization --> deserialization
     lb-panels-general --> message-path
+    lb-panels-general --> panel-extension-api
+    lb-panel-image --> panel-image
+    lb-panel-image --> 3d-rendering
+    lb-panel-image --> web-workers
+    lb-panel-log --> panel-log
+    lb-panel-map --> panel-map
     lb-panel-raw-messages --> message-path
+    lb-panel-raw-messages --> panel-raw-messages
     lb-panel-state-transitions --> message-path
+    lb-panel-state-transitions --> panel-state-transitions
+    lb-panel-user-scripts --> panel-user-scripts
+    lb-panel-user-scripts --> web-workers
     lb-e2e-test --> e2e-playwright-mcp
     lb-e2e-test --> test-conventions
 ```

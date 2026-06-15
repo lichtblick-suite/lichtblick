@@ -18,7 +18,7 @@ The project follows [ADR-0002: Reusable Mock Builders for Testing](https://githu
 ### Architecture
 
 ```
-@lichtblick/test-builders          (shared package)
+@lichtblick/test-builders          (external published npm dependency, not a workspace package)
 ├── BasicBuilder                    (primitives: string, number, boolean, date, lists, etc.)
 └── defaults<T>(overrides, defaults) (utility to merge partial overrides with defaults)
 
@@ -125,7 +125,7 @@ The `BasicBuilder` class (from `@lichtblick/test-builders`) provides:
 
 ## Test Structure Reference
 
-See the Unit Test Agent (`.github/agents/unit-test.agent.md`) for:
+See the Unit Test Agent (`.github/agents/lb-unit-test.agent.md`) for:
 - Given-When-Then (GWT) pattern
 - Naming conventions
 - Mocking patterns (modules, workers, timers)

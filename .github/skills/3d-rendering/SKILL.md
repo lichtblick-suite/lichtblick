@@ -24,24 +24,32 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 ## DynamicBufferGeometry Details
 
+`packages/suite-base/src/panels/ThreeDeeRender/DynamicBufferGeometry.ts`:
+
 ```typescript
 class DynamicBufferGeometry extends THREE.BufferGeometry {
-  // Geometric growth: doubles capacity when full
-  resize(newCount: number) {
-    if (newCount <= this.#capacity) return;
-    const newCapacity = Math.max(newCount, this.#capacity * 2);
-    // Allocate new buffer, copy old data, set on geometry
+  // Grows to EXACTLY itemCount when capacity is exceeded — no geometric doubling.
+  resize(itemCount: number): void {
+    this.setDrawRange(0, itemCount);
+    if (itemCount <= this.#itemCapacity) {
+      return; // capacity sufficient — only the draw range changed
+    }
+    // For each attribute, allocate a NEW typed array of exactly itemCount * itemSize
+    // (old data is NOT copied; callers refill the buffer after resize)
+    this.#itemCapacity = itemCount;
   }
-
-  // Update only the changed portion
-  setDrawRange(start: number, count: number);
 }
 ```
 
-### Why Geometric Growth?
-- Avoids O(n²) copy cost of linear growth
-- GPU buffer upload is expensive — minimize frequency
-- `setDrawRange` renders only valid portion (no wasted draw calls)
+### Growth Behavior (Important)
+- `resize(itemCount)` always calls `setDrawRange(0, itemCount)` first
+- If `itemCount <= itemCapacity`, it returns early — buffers are reused, only the draw range moves
+- If `itemCount > itemCapacity`, each attribute is reallocated to **exactly** `itemCount * itemSize`
+  (no `* 2` over-allocation, no copy of existing data)
+- Capacity only ever grows; it is never shrunk below a previous high-water mark
+
+> ⚠️ Do not assume geometric/amortized doubling here. Repeatedly increasing the count by small
+> increments reallocates every time, so callers that know a target size should resize to it once.
 
 ## Point Cloud Rendering
 
@@ -90,16 +98,22 @@ world (root)
 
 ### Time-based Lookup
 ```typescript
-// Get transform from camera_link to world at specific time
-const tf = transformTree.apply(
-  "camera_link",  // source frame
-  "world",        // target frame
-  timestamp,      // interpolation time
+// TransformTree.apply has an 8-argument signature:
+const pose = transformTree.apply(
+  output,       // Pose written in place (returned, or undefined on failure)
+  input,        // Readonly<Pose> source pose
+  frameId,      // destination/target frame
+  rootFrameId,  // optional explicit root frame (defaults to frame.root())
+  srcFrameId,   // source frame
+  dstTime,      // Time to evaluate the destination frame at
+  srcTime,      // Time to evaluate the source frame at
+  maxDelta,     // optional Duration cap on extrapolation
 );
 ```
 
-- Interpolates between stored transforms at query time
-- Extrapolation capped to prevent wild transforms from stale data
+- Defined in `packages/suite-base/src/panels/ThreeDeeRender/transforms/TransformTree.ts`
+- Writes into the provided `output` Pose and returns it (or `undefined` if a frame is missing)
+- Interpolates between stored transforms at query time; `maxDelta` caps extrapolation from stale data
 
 ## Instanced Rendering
 

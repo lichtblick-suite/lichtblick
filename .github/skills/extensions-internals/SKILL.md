@@ -6,66 +6,90 @@ description: "Deep extension system implementation knowledge: IExtensionLoader i
 
 ## IExtensionLoader Interface
 
-```typescript
-interface IExtensionLoader {
-  readonly namespace: string;        // "org" | "local"
-  readonly type: string;             // "filesystem" | "indexeddb" | "remote"
+Defined in `packages/suite-base/src/services/extension/IExtensionLoader.ts`:
 
+```typescript
+export type TypeExtensionLoader = "browser" | "server" | "filesystem";
+
+export type LoadedExtension = {
+  buffer?: Uint8Array;
+  raw: string;
+};
+
+export type InstallExtensionProps = {
+  foxeFileData: Uint8Array;
+  file?: File;
+  externalId?: string;
+};
+
+export interface IExtensionLoader {
+  readonly namespace: Namespace;          // "org" | "local"
+  readonly type: TypeExtensionLoader;     // "browser" | "server" | "filesystem"
+
+  getExtension(id: string): Promise<ExtensionInfo | undefined>;
   getExtensions(): Promise<ExtensionInfo[]>;
-  loadExtension(id: string): Promise<ExtensionContent>;
-  installExtension(foxeUrl: string): Promise<ExtensionInfo>;
+  loadExtension(id: string): Promise<LoadedExtension>;
+  installExtension(data: InstallExtensionProps): Promise<ExtensionInfo>;
   uninstallExtension(id: string): Promise<void>;
 }
 ```
 
+> ⚠️ `installExtension` takes an `InstallExtensionProps` object (with `foxeFileData`), **not** a
+> URL string. The type union is `"browser" | "server" | "filesystem"` — there is no `"indexeddb"`
+> or `"remote"` value.
+
+Implementations:
+
+| Class | File | namespace | type |
+|-------|------|-----------|------|
+| `IdbExtensionLoader` | `services/extension/IdbExtensionLoader.ts` | constructor arg | `"browser"` |
+| `RemoteExtensionLoader` | `services/extension/RemoteExtensionLoader.ts` | constructor arg | `"server"` |
+| `DesktopExtensionLoader` | `suite-desktop/src/renderer/services/DesktopExtensionLoader.ts` | `"local"` | `"filesystem"` |
+
 All loaders implement this interface — the catalog provider doesn't know the backing store.
 
-## IdbExtensionLoader (IndexedDB)
+## IdbExtensionLoader + IdbExtensionStorage (IndexedDB)
+
+`IdbExtensionLoader` delegates persistence to `IdbExtensionStorage`
+(`packages/suite-base/src/services/extension/IdbExtensionStorage.ts`).
 
 ### Storage Schema
-- Database name: `"extensions"`
-- Object store: `"extensions"`
-- Key: composite `[namespace, extensionId]`
-- Value: `{ info: ExtensionInfo, content: ExtensionContent }`
+- Database name: `` `${KEY_WORKSPACE_PREFIX}lichtblick-extensions-${namespace}` `` (one DB per namespace)
+- Database version: `1`
+- Object store `metadata` — keyPath `"id"`, value `ExtensionInfo`
+- Object store `extensions` — keyPath `"info.id"`, value `StoredExtension`
 
-### Cache Strategy (loadSingleExtension)
+### Install Flow (installExtension)
 ```
-1. Check IndexedDB for cached entry
-2. If cached version === available version → return cached
-3. If no cache OR version mismatch → download .foxe → unzip → store → return
+1. Receive InstallExtensionProps { foxeFileData, file?, externalId? }
+2. Decompress + extract package.json / dist entry from the .foxe
+3. validatePackageInfo() builds ExtensionInfo
+4. Persist ExtensionInfo to `metadata` + StoredExtension to `extensions`
 ```
 
-Version comparison uses semver:
-- Same version → skip download (cache hit)
-- Different version → re-download (cache invalidation)
+### Load Flow (loadExtension)
+```
+1. storage.get(id) → StoredExtension (throws "Extension not found" if missing)
+2. decompressFile(content) → extractFoxeFileContent(ALLOWED_FILES.EXTENSION)
+3. Return LoadedExtension { buffer?, raw }
+```
 
 ### Namespace Isolation
 - `"org"` extensions: managed by organization, auto-synced
 - `"local"` extensions: user-installed, never auto-removed
-- Same extension ID can exist in both namespaces (org wins in conflicts)
+- Each namespace gets its **own** IndexedDB database (suffix `-{namespace}`)
+
+## DesktopExtensionLoader
+
+`packages/suite-desktop/src/renderer/services/DesktopExtensionLoader.ts` \u2014 `namespace = "local"`,
+`type = "filesystem"`. Reads installed extensions from the desktop file system (via the preload
+bridge) rather than IndexedDB. Same `IExtensionLoader` contract.
 
 ## RemoteExtensionLoader
 
-```typescript
-class RemoteExtensionLoader implements IExtensionLoader {
-  readonly namespace = "org";
-  readonly type = "remote";
-
-  constructor(private apiUrl: string, private workspace: string) {}
-
-  async getExtensions(): Promise<ExtensionInfo[]> {
-    // GET /api/workspaces/{workspace}/extensions
-    const response = await fetch(`${this.apiUrl}/workspaces/${this.workspace}/extensions`);
-    return response.json();
-  }
-
-  async loadExtension(id: string): Promise<ExtensionContent> {
-    // GET /api/workspaces/{workspace}/extensions/{id}/content
-    const foxeBlob = await fetch(...);
-    return unpackFoxe(foxeBlob);
-  }
-}
-```
+`packages/suite-base/src/services/extension/RemoteExtensionLoader.ts` \u2014 `type = "server"` (the
+remote/org loader). The `type` value is **`"server"`, not `"remote"`** \u2014 the only valid `type`
+values are `"browser"`, `"server"`, and `"filesystem"`.
 
 ## .foxe Package Format (Detail)
 
@@ -86,32 +110,36 @@ class RemoteExtensionLoader implements IExtensionLoader {
   "displayName": "Human Readable Name",
   "description": "What this extension does",
   "publisher": "publisher-name",
-  "main": "dist/index.js",
-  "lichtblick": {
-    // Contribution declarations
-  }
+  "main": "dist/index.js"
 }
 ```
 
-### Contribution Declarations
-```json
-{
-  "lichtblick": {
-    "panels": [{
-      "name": "MyPanel",
-      "title": "My Custom Panel"
-    }],
-    "messageConverters": [{
-      "fromSchemaName": "custom_msgs/MyType",
-      "toSchemaName": "foxglove.ImageAnnotations"
-    }],
-    "topicAliasFunctions": [{
-      "name": "myAlias",
-      "title": "My Topic Alias"
-    }]
-  }
-}
+> The `package.json` carries metadata only. Contributions (panels, converters, aliases, camera
+> models) are registered at runtime in `activate(ctx)` \u2014 see "Contribution Registration" below.
+
+## Contribution Registration (Dynamic)
+
+> ⚠️ Contributions are **not** declared statically in `package.json`. There is no
+> `lichtblick.panels` / `messageConverters` contributions key. Instead the extension's bundled
+> source is executed and registers contributions at runtime via the `activate(ctx)` callback.
+
+`buildContributionPoints.ts`
+(`packages/suite-base/src/providers/helpers/buildContributionPoints.ts`) executes the extension
+source with `new Function("module", "require", source)`, then calls
+`module.exports.activate(ctx)`. The `ExtensionContext` (`ctx`) exposes:
+
+```typescript
+const ctx: ExtensionContext = {
+  mode,                          // "production" | "test" | "development"
+  registerPanel(registration),   // panelId = `${qualifiedName}.${registration.name}`
+  registerMessageConverter(args), // collects InstalledMessageConverter + panelSettings
+  registerTopicAliases(aliasFn),  // note: registerTopicAliases (plural), not ...Function
+  registerCameraModel({ name, modelBuilder }),
+};
 ```
+
+`buildContributionPoints` returns the accumulated
+`{ panels, messageConverters, topicAliasFunctions, panelSettings, cameraModels }`.
 
 ## ExtensionCatalogProvider (Zustand Store)
 
@@ -144,15 +172,18 @@ refreshExtensions() called
 
 ## Extension Sandbox
 
-Extensions run in a restricted context:
-- No direct DOM access (panels render via React component)
-- No `fetch` access (unless explicitly granted)
-- Limited to the extension API surface:
+Extensions run in a restricted context built by `buildContributionPoints.ts`:
+- Source executed via `new Function("module", "require", source)` — `require` only resolves
+  `react` and `react-dom`
+- No direct DOM access (panels render via a React component)
+- Limited to the `ExtensionContext` API surface:
   ```typescript
   interface ExtensionContext {
-    registerPanel(config: PanelConfig): void;
-    registerMessageConverter(config: ConverterConfig): void;
-    registerTopicAliasFunction(config: AliasConfig): void;
+    mode: "production" | "test" | "development";
+    registerPanel(registration: ExtensionPanelRegistration): void;
+    registerMessageConverter<Src>(args: RegisterMessageConverterArgs<Src>): void;
+    registerTopicAliases(aliasFunction: TopicAliasFunction): void;
+    registerCameraModel(args: RegisterCameraModelArgs): void;
   }
   ```
 

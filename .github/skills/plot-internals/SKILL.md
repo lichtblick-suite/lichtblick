@@ -37,7 +37,7 @@ class TimestampDatasetsBuilderImpl {
   handleMessages(messages: MessageEvent[]): void {
     // Extract numeric values using message-path logic
     // Append to per-series arrays
-    // Enforce 50k cap with downsampling
+    // Enforce the 50,000-datum accumulation cap (MAX_CURRENT_DATUMS_PER_SERIES)
   }
 
   // Returns current datasets for rendering
@@ -49,13 +49,34 @@ class TimestampDatasetsBuilderImpl {
 }
 ```
 
-### 50k Point Downsampling
+### Two Distinct Point Caps
 
-When a series exceeds 50,000 points:
-1. **LTTB (Largest-Triangle-Three-Buckets)**: Visually-preserving downsampling
-2. Preserves peaks and valleys (important for sensor data)
-3. Applied incrementally as new data arrives
-4. Re-triggered when zoom level changes (fewer visible points = less downsampling needed)
+There are **two separate** constants — don't conflate them:
+
+| Constant | Value | File | Purpose |
+|----------|-------|------|---------|
+| `MAX_CURRENT_DATUMS_PER_SERIES` | `50_000` | `panels/Plot/builders/TimestampDatasetsBuilderImpl.ts` (also `CustomDatasetsBuilderImpl.ts`) | Accumulation cap for live/current data per series |
+| `MAX_POINTS` | `5_000` | `components/TimeBasedChart/downsample.ts` | Target rendered points across **all** series combined |
+
+- When current data exceeds `MAX_CURRENT_DATUMS_PER_SERIES`, the builder culls the oldest data via
+  `splice`, dropping the overflow **plus an extra `MAX_CURRENT_DATUMS_PER_SERIES * 0.25`** so culling
+  isn't triggered every single append.
+- The per-series render budget is `MAX_POINTS / numSeries` — the 5,000 is shared across all signals.
+
+### Downsampling Algorithm (NOT LTTB)
+
+Downsampling (`components/TimeBasedChart/downsample.ts`) is a **custom stateful pixel-interval
+min/max bucketing**, not LTTB:
+
+1. The viewport is divided into intervals sized by `MINIMUM_PIXEL_DISTANCE = 3` pixels
+2. Each interval emits up to `POINTS_PER_INTERVAL = 4` points: first, last, min, and max
+   (`intFirst`, `intLast`, `intMin`, `intMax`)
+3. State (`DownsampleState`) is carried across batches via a `cursor` so streaming data downsamples
+   incrementally without reprocessing consumed points
+4. Re-triggered when the viewport/zoom changes (interval sizing depends on pixel bounds)
+
+> ⚠️ Do not describe this as LTTB / "Largest-Triangle-Three-Buckets". It is interval min/max
+> decimation keyed on pixel distance.
 
 ### Range Source Flag
 ```typescript
