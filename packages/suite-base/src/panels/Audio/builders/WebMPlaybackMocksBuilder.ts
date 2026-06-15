@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+/* eslint-disable @typescript-eslint/no-extraneous-class */
+
 export type SourceBufferMock = {
   mode: string;
   updating: boolean;
@@ -63,7 +65,7 @@ export default class WebMPlaybackMocksBuilder {
         sourceBuffer.updating = true;
         queueMicrotask(() => {
           sourceBuffer.updating = false;
-          for (const listener of [...updateEndListeners]) {
+          for (const listener of updateEndListeners) {
             listener();
           }
         });
@@ -80,9 +82,8 @@ export default class WebMPlaybackMocksBuilder {
       deferSourceOpen = false,
       sourceBufferOptions,
     } = options;
-    const { sourceBuffer: defaultSourceBuffer } = WebMPlaybackMocksBuilder.sourceBuffer(
-      sourceBufferOptions,
-    );
+    const { sourceBuffer: defaultSourceBuffer } =
+      WebMPlaybackMocksBuilder.sourceBuffer(sourceBufferOptions);
     const sourceBuffer = providedSourceBuffer ?? defaultSourceBuffer;
 
     const mediaSource: MediaSourceMock = {
@@ -111,7 +112,9 @@ export default class WebMPlaybackMocksBuilder {
     return { mediaSource, sourceOpenListeners, MockMediaSource };
   }
 
-  public static installMockMediaSource(options: MediaSourceMockOptions = {}): MediaSourceMockResult {
+  public static installMockMediaSource(
+    options: MediaSourceMockOptions = {},
+  ): MediaSourceMockResult {
     const mocks = WebMPlaybackMocksBuilder.mediaSource(options);
     Object.defineProperty(globalThis, "MediaSource", {
       value: mocks.MockMediaSource,

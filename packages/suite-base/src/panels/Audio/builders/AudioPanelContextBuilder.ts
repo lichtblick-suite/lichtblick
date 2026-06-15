@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+/* eslint-disable @typescript-eslint/no-extraneous-class */
+
 import { PanelExtensionContext } from "@lichtblick/suite";
 import AudioBuilder from "@lichtblick/suite-base/testing/builders/AudioBuilder";
 

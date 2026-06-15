@@ -26,8 +26,8 @@ export function getSupportedWebmMimeType(): string | undefined {
  * This player appends each chunk to a SourceBuffer in sequence mode.
  */
 export class WebMStreamPlayer {
-  #audioContext: AudioContext;
-  #gainNode: GainNode;
+  readonly #audioContext: AudioContext;
+  readonly #gainNode: GainNode;
   #audio: HTMLAudioElement;
   #mediaSource?: MediaSource;
   #sourceBuffer?: SourceBuffer;
@@ -38,7 +38,7 @@ export class WebMStreamPlayer {
   #initializing = false;
   #active = true;
 
-  #onSourceBufferUpdateEnd = (): void => {
+  readonly #onSourceBufferUpdateEnd = (): void => {
     if (!this.#active) {
       return;
     }
@@ -62,7 +62,7 @@ export class WebMStreamPlayer {
     this.#cleanup();
   }
 
-  public get isPlaying(): boolean {
+  public isPlaying(): boolean {
     return !this.#audio.paused;
   }
 
@@ -137,10 +137,13 @@ export class WebMStreamPlayer {
       return;
     }
 
-    if (this.#audioContext.state === "suspended") {
+    const shouldResume = this.#audioContext.state === "suspended";
+    if (shouldResume) {
       await this.#audioContext.resume();
     }
 
+    // Reset may run while awaiting resume().
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- #active can flip during await
     if (!this.#active) {
       return;
     }
@@ -177,8 +180,9 @@ export class WebMStreamPlayer {
       if (!this.#active) {
         return;
       }
+      const detail = err instanceof Error ? err.message : String(err);
       throw new Error(
-        `Failed to append WebM audio chunk. The topic data may not be WebM — use PCM for RawAudio topics or match the message format. (${String(err)})`,
+        `Failed to append WebM audio chunk. The topic data may not be WebM — use PCM for RawAudio topics or match the message format. (${detail})`,
       );
     }
   }
