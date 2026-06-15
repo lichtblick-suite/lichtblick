@@ -11,6 +11,7 @@ import {
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
+import { PlayerStateActiveData } from "@lichtblick/suite-base/players/types";
 
 import useStateTransitionsTime from "./useStateTransitionsTime";
 
@@ -24,13 +25,12 @@ describe("useStateTransitionsTime", () => {
   const mockUseMessagePipeline = useMessagePipeline as jest.Mock;
   const mockToSec = toSec as jest.Mock;
   const mockSubtractTimes = subtractTimes as jest.Mock;
-  type ActiveData = MessagePipelineContext["playerState"]["activeData"];
-  type MockActiveData = Partial<NonNullable<ActiveData>> | undefined;
+  const activeDataCases: Array<Partial<PlayerStateActiveData> | undefined> = [{}, undefined];
 
-  const mockActiveData = (activeData: MockActiveData) => {
+  const mockActiveData = (activeData: Partial<PlayerStateActiveData> | undefined) => {
     const mockContext = {
-      playerState: { activeData: activeData as ActiveData },
-    } as MessagePipelineContext;
+      playerState: { activeData: activeData as PlayerStateActiveData },
+    } as unknown as MessagePipelineContext;
     mockUseMessagePipeline.mockImplementation((selector) => selector(mockContext));
   };
 
@@ -38,10 +38,10 @@ describe("useStateTransitionsTime", () => {
     jest.clearAllMocks();
   });
 
-  it.each([{}, undefined])(
+  it.each(activeDataCases)(
     "should return undefined values when there is no active data or it is undefined. (testing with %s)",
-    (activeDataValue) => {
-      mockActiveData(activeDataValue as MockActiveData);
+    (activeDataValue: Partial<PlayerStateActiveData> | undefined) => {
+      mockActiveData(activeDataValue);
 
       const { result } = renderHook(() => useStateTransitionsTime());
 
