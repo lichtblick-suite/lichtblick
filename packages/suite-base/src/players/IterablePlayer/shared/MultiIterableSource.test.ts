@@ -134,6 +134,44 @@ describe("MultiIterableSource", () => {
       // THEN: the constructed source keeps legacy read-ahead behavior.
       expect(mockSourceConstructor.mock.calls[0]![0].readAheadEnabled).toBe(true);
     });
+    it("should respect an explicit readAheadEnabled override for multi-url sources", async () => {
+      // GIVEN: a multi-url source that explicitly opts into read-ahead.
+      const urls = [BasicBuilder.string(), BasicBuilder.string(), BasicBuilder.string()];
+      const multiSource = new MultiIterableSource(
+        {
+          type: "urls",
+          urls,
+          readAheadEnabled: true,
+        },
+        mockSourceConstructor,
+      );
+
+      // WHEN
+      await multiSource["loadMultipleSources"]();
+
+      // THEN: the explicit value overrides the multi-url default of false.
+      expect(mockSourceConstructor.mock.calls[0]![0].readAheadEnabled).toBe(true);
+      expect(mockSourceConstructor.mock.calls[1]![0].readAheadEnabled).toBe(true);
+      expect(mockSourceConstructor.mock.calls[2]![0].readAheadEnabled).toBe(true);
+    });
+    it("should respect an explicit readAheadEnabled override for a single-url source", async () => {
+      // GIVEN: a single-url source that explicitly opts out of read-ahead.
+      const urls = [BasicBuilder.string()];
+      const multiSource = new MultiIterableSource(
+        {
+          type: "urls",
+          urls,
+          readAheadEnabled: false,
+        },
+        mockSourceConstructor,
+      );
+
+      // WHEN
+      await multiSource["loadMultipleSources"]();
+
+      // THEN: the explicit value overrides the single-url default of true.
+      expect(mockSourceConstructor.mock.calls[0]![0].readAheadEnabled).toBe(false);
+    });
     it("should allocate equal cache split when few sources do not trigger the minimum floor", async () => {
       // GIVEN: 2 URL sources with the default 500 MiB total cache budget.
       // floor(500 MiB / 2) = 250 MiB, which is well above the 10 MiB minimum floor,
