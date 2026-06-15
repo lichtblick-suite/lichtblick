@@ -36,6 +36,9 @@ import {
 
 const log = Logger.getLogger(__filename);
 
+// Default total cache budget for remote sources (500 MiB — same as single-file default).
+const DEFAULT_CACHE_TOTAL_BYTES = 1024 * 1024 * 500; // 500 MiB
+
 // Minimum cache allocated per remote source to prevent crashes when reading MCAP metadata.
 // The MCAP summary section (chunk indexes, schema records, etc.) can be several MiB in size.
 // Without a floor, a linear split across 300+ files produces cache slices smaller than a
@@ -49,6 +52,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   private SourceConstructor: IterableSourceConstructor<T, P>;
   private dataSource: MultiSource;
   private sourceImpl: IIterableSource<Uint8Array>[] = [];
+
   public constructor(dataSource: MultiSource, SourceConstructor: IterableSourceConstructor<T, P>) {
     this.dataSource = dataSource;
     this.SourceConstructor = SourceConstructor;
@@ -66,10 +70,11 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
       // Distribute total cache budget across remote sources with a minimum floor per source.
       // A pure linear split (totalCache / n) can produce a per-source budget smaller than a
       // single MCAP metadata read when n > ~300, causing a crash in CachedFilelike.
-      const totalCache = this.dataSource.totalCacheSizeInBytes ?? 1024 * 1024 * 500;
-      const minPerSource = this.dataSource.minCachePerSourceBytes ?? MIN_CACHE_PER_SOURCE_BYTES;
-      const numSources = this.dataSource.urls.length;
-      const perSourceCache = Math.max(minPerSource, Math.floor(totalCache / numSources));
+      const totalCache: number = this.dataSource.totalCacheSizeInBytes ?? DEFAULT_CACHE_TOTAL_BYTES;
+      const minPerSource: number =
+        this.dataSource.minCachePerSourceBytes ?? MIN_CACHE_PER_SOURCE_BYTES;
+      const numSources: number = this.dataSource.urls.length;
+      const perSourceCache: number = Math.max(minPerSource, Math.floor(totalCache / numSources));
 
       if (perSourceCache * numSources > totalCache) {
         log.warn(
