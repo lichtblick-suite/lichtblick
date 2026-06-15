@@ -50,9 +50,6 @@ const MANUAL_ENCODING_OPTIONS: { label: string; value: ResolvedAudioEncoding }[]
 
 function describeManualEncoding(config: AudioConfig): string {
   const encoding = config.encoding;
-  if (encoding === "auto") {
-    return "Auto-detect";
-  }
   if (IS_PCM_ENCODING(encoding)) {
     return `${ENCODING_LABELS[encoding]} @ ${config.sampleRate.toLocaleString()} Hz, ${config.numChannels} ch`;
   }
@@ -98,10 +95,7 @@ function decodePCM(
   return buffer;
 }
 
-function buildSettingsTree(
-  config: AudioConfig,
-  topics: readonly string[],
-): SettingsTreeNodes {
+function buildSettingsTree(config: AudioConfig, topics: readonly string[]): SettingsTreeNodes {
   const isManualPCM = !IS_AUTO_ENCODING(config.encoding) && IS_PCM_ENCODING(config.encoding);
 
   return {
@@ -118,10 +112,7 @@ function buildSettingsTree(
           label: "Encoding",
           input: "select",
           value: config.encoding,
-          options: [
-            { label: "Auto-detect", value: "auto" },
-            ...MANUAL_ENCODING_OPTIONS,
-          ],
+          options: [{ label: "Auto-detect", value: "auto" }, ...MANUAL_ENCODING_OPTIONS],
         },
         volume: {
           label: "Volume",
@@ -164,7 +155,7 @@ function settingsActionReducer(prevConfig: AudioConfig, action: SettingsTreeActi
   return { ...prevConfig, [key]: action.payload.value };
 }
 
-export function AudioPanel({ context }: AudioProps): React.JSX.Element {
+export function AudioPanel({ context }: Readonly<AudioProps>): React.JSX.Element {
   const { classes, cx } = useStyles();
 
   const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
@@ -246,9 +237,7 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
           throw new Error("Audio output is not initialized");
         }
 
-        if (webmPlayerRef.current == undefined) {
-          webmPlayerRef.current = new WebMStreamPlayer(ctx, gainNode);
-        }
+        webmPlayerRef.current ??= new WebMStreamPlayer(ctx, gainNode);
 
         webmPlayerRef.current.append(bytes);
         setIsPlaying(true);
@@ -323,9 +312,12 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
               setDetectedPlayback(result.params);
               setError(undefined);
               playbackChainRef.current = playbackChainRef.current
-                .then(() => playAudioData(result.params))
+                .then(async () => {
+                  await playAudioData(result.params);
+                })
                 .catch((err: unknown) => {
-                  setError(String(err));
+                  const message = err instanceof Error ? err.message : String(err);
+                  setError(message);
                   setIsPlaying(false);
                 });
               break;
@@ -345,7 +337,7 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
 
   useEffect(() => {
     context.saveState(config);
-    context.setDefaultPanelTitle(config.topic !== "" ? config.topic : undefined);
+    context.setDefaultPanelTitle(config.topic === "" ? undefined : config.topic);
   }, [config, context]);
 
   useEffect(() => {
@@ -357,18 +349,12 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
     };
   }, [context, config.topic]);
 
-  const settingsActionHandler = useCallback(
-    (action: SettingsTreeAction) => {
-      setConfig((prev) => settingsActionReducer(prev, action));
-    },
-    [],
-  );
+  const settingsActionHandler = useCallback((action: SettingsTreeAction) => {
+    setConfig((prev) => settingsActionReducer(prev, action));
+  }, []);
 
   const topicsMemo = useShallowMemo(availableTopics);
-  const settingsTree = useMemo(
-    () => buildSettingsTree(config, topicsMemo),
-    [config, topicsMemo],
-  );
+  const settingsTree = useMemo(() => buildSettingsTree(config, topicsMemo), [config, topicsMemo]);
 
   useEffect(() => {
     context.updatePanelSettingsEditor({
@@ -385,40 +371,44 @@ export function AudioPanel({ context }: AudioProps): React.JSX.Element {
 
   const encodingText = useMemo(() => {
     if (IS_AUTO_ENCODING(config.encoding)) {
-      return detectedPlayback != undefined
-        ? `Auto-detect: ${describePlaybackParams(detectedPlayback)}`
-        : "Auto-detect — waiting for format…";
+      if (detectedPlayback == undefined) {
+        return "Auto-detect — waiting for format…";
+      }
+      return `Auto-detect: ${describePlaybackParams(detectedPlayback)}`;
     }
     return describeManualEncoding(config);
   }, [config, detectedPlayback]);
 
-  return (
-    <div className={classes.root}>
-      {error != undefined ? (
-        <>
-          <ErrorOutline className={classes.icon} color="error" />
-          <Typography className={classes.errorText}>{error}</Typography>
-        </>
-      ) : noTopic ? (
-        <>
-          <VolumeOff className={classes.icon} />
-          <Typography className={classes.statusText}>No topic selected</Typography>
-          <Typography className={classes.statusText}>
-            Open the panel settings to choose an audio topic.
-          </Typography>
-        </>
-      ) : (
-        <>
-          <VolumeUp
-            className={cx(classes.icon, { [classes.iconPlaying]: isPlaying })}
-          />
-          <Typography className={classes.topicText}>{config.topic}</Typography>
-          <Typography className={classes.encodingText}>{encodingText}</Typography>
-          <Typography className={classes.statusText}>
-            {isPlaying ? "Playing" : "Waiting for data…"}
-          </Typography>
-        </>
-      )}
-    </div>
-  );
+  let panelBody: React.JSX.Element;
+  if (error != undefined) {
+    panelBody = (
+      <>
+        <ErrorOutline className={classes.icon} color="error" />
+        <Typography className={classes.errorText}>{error}</Typography>
+      </>
+    );
+  } else if (noTopic) {
+    panelBody = (
+      <>
+        <VolumeOff className={classes.icon} />
+        <Typography className={classes.statusText}>No topic selected</Typography>
+        <Typography className={classes.statusText}>
+          Open the panel settings to choose an audio topic.
+        </Typography>
+      </>
+    );
+  } else {
+    panelBody = (
+      <>
+        <VolumeUp className={cx(classes.icon, { [classes.iconPlaying]: isPlaying })} />
+        <Typography className={classes.topicText}>{config.topic}</Typography>
+        <Typography className={classes.encodingText}>{encodingText}</Typography>
+        <Typography className={classes.statusText}>
+          {isPlaying ? "Playing" : "Waiting for data…"}
+        </Typography>
+      </>
+    );
+  }
+
+  return <div className={classes.root}>{panelBody}</div>;
 }

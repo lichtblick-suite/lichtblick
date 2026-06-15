@@ -99,7 +99,8 @@ export function parseAudioMessage(
     return { status: "empty" };
   }
 
-  const format = typeof message["format"] === "string" ? message["format"].toLowerCase() : undefined;
+  const format =
+    typeof message["format"] === "string" ? message["format"].toLowerCase() : undefined;
   const encoding = resolveEncoding(config.encoding, format);
 
   if (encoding == undefined) {

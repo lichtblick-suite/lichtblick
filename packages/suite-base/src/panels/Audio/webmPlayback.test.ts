@@ -33,13 +33,9 @@ describe("getSupportedWebmMimeType", () => {
 
   it("returns the first supported WebM mime type", () => {
     // given... MediaSource reports opus support
-    class MockMediaSource {
-      public static isTypeSupported(type: string): boolean {
-        return type === 'audio/webm; codecs="opus"';
-      }
-    }
-    Object.defineProperty(globalThis, "MediaSource", {
-      value: MockMediaSource,
+    WebMPlaybackMocksBuilder.installMockMediaSource();
+    Object.defineProperty(globalThis.MediaSource, "isTypeSupported", {
+      value: (type: string) => type === 'audio/webm; codecs="opus"',
       writable: true,
       configurable: true,
     });
@@ -77,13 +73,16 @@ describe("WebMStreamPlayer", () => {
       removeAttribute: jest.fn(),
       play: jest.fn(async () => undefined),
     };
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     const originalCreateElement = document.createElement.bind(document);
-    jest.spyOn(document, "createElement").mockImplementation((tagName: string) => {
-      if (tagName === "audio") {
-        return audio as unknown as HTMLAudioElement;
-      }
-      return originalCreateElement(tagName);
-    });
+    jest
+      .spyOn(document, "createElement")
+      .mockImplementation((tagName: string, options?: ElementCreationOptions) => {
+        if (tagName === "audio") {
+          return audio as unknown as HTMLAudioElement;
+        }
+        return originalCreateElement(tagName, options);
+      });
 
     const audioContext = {
       state: "running",
@@ -113,7 +112,10 @@ describe("WebMStreamPlayer", () => {
         listener();
       }
     }).not.toThrow();
-    expect(sourceBuffer.removeEventListener).toHaveBeenCalledWith("updateend", expect.any(Function));
+    expect(sourceBuffer.removeEventListener).toHaveBeenCalledWith(
+      "updateend",
+      expect.any(Function),
+    );
   });
 
   it("throws when WebM playback is not supported", () => {
@@ -130,7 +132,9 @@ describe("WebMStreamPlayer", () => {
     const player = new WebMStreamPlayer(audioContext, gainNode);
 
     // when... appending a WebM chunk
-    const append = () => player.append(new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]));
+    const append = () => {
+      player.append(new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]));
+    };
 
     // then... initialization fails with a clear error
     expect(append).toThrow("WebM playback is not supported in this browser");
@@ -164,5 +168,42 @@ describe("WebMStreamPlayer", () => {
     }
     await Promise.resolve();
     expect(mediaSource.addSourceBuffer).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports playing state from the underlying audio element", () => {
+    // given... a player with a paused audio element
+    WebMPlaybackMocksBuilder.installMockMediaSource();
+    const audio = {
+      paused: true,
+      src: "",
+      pause: jest.fn(),
+      load: jest.fn(),
+      removeAttribute: jest.fn(),
+      play: jest.fn(async () => undefined),
+    };
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    const originalCreateElement = document.createElement.bind(document);
+    jest
+      .spyOn(document, "createElement")
+      .mockImplementation((tagName: string, options?: ElementCreationOptions) => {
+        if (tagName === "audio") {
+          return audio as unknown as HTMLAudioElement;
+        }
+        return originalCreateElement(tagName, options);
+      });
+
+    const audioContext = {
+      state: "running",
+      resume: jest.fn(async () => undefined),
+      createMediaElementSource: jest.fn(() => ({ connect: jest.fn(), disconnect: jest.fn() })),
+    } as unknown as AudioContext;
+    const gainNode = { connect: jest.fn() } as unknown as GainNode;
+    const player = new WebMStreamPlayer(audioContext, gainNode);
+
+    // when... checking playback state
+    const playing = player.isPlaying();
+
+    // then... playback reflects the audio element
+    expect(playing).toBe(false);
   });
 });

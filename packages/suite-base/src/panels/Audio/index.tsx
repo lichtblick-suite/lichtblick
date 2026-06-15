@@ -35,7 +35,7 @@ type AudioPanelAdapterProps = {
   saveConfig: SaveConfig<AudioConfig>;
 };
 
-function AudioPanelAdapter({ config, saveConfig }: AudioPanelAdapterProps) {
+function AudioPanelAdapter({ config, saveConfig }: Readonly<AudioPanelAdapterProps>) {
   const crash = useCrash();
   const boundInitPanel = useMemo(() => initPanel.bind(undefined, crash), [crash]);
 
@@ -58,6 +58,6 @@ export default Panel(
       sampleRate: 44100,
       numChannels: 1,
       volume: 1,
-    } as AudioConfig,
+    },
   }),
 );

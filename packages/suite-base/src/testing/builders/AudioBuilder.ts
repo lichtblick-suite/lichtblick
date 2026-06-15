@@ -31,7 +31,9 @@ export default class AudioBuilder {
     });
   }
 
-  public static rawBytesMessage(data: Uint8Array = new Uint8Array([0xff, 0x00])): Record<string, unknown> {
+  public static rawBytesMessage(
+    data: Uint8Array = new Uint8Array([0xff, 0x00]),
+  ): Record<string, unknown> {
     return { data };
   }
 }

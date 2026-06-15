@@ -77,4 +77,53 @@ describe("describePlaybackParams", () => {
     // then... PCM details are included
     expect(description).toBe("PCM Int16 LE @ 48,000 Hz, 2 ch");
   });
+
+  it("returns the encoding label for compressed formats", () => {
+    // given... WebM playback parameters
+    const params = {
+      bytes: new Uint8Array(),
+      encoding: "webm" as const,
+      sampleRate: 44100,
+      numChannels: 1,
+    };
+
+    // when... describing the playback parameters
+    const description = describePlaybackParams(params);
+
+    // then... only the encoding label is shown
+    expect(description).toBe("WebM");
+  });
+});
+
+describe("parseAudioMessage edge cases", () => {
+  it("accepts typed array views as audio data", () => {
+    // given... a message with an Int16Array payload
+    const data = new Int16Array([1, 2, 3, 4]);
+    const message = { data, format: "pcm-s16", sample_rate: 16000, number_of_channels: 1 };
+
+    // when... parsing the message
+    const result = parseAudioMessage(message, AudioBuilder.config({ encoding: "auto" }));
+
+    // then... bytes are normalized from the typed array view
+    expect(result).toEqual({
+      status: "ok",
+      params: {
+        bytes: new Uint8Array(data.buffer, data.byteOffset, data.byteLength),
+        encoding: "pcm-int16le",
+        sampleRate: 16000,
+        numChannels: 1,
+      },
+    });
+  });
+
+  it("returns empty when audio data has zero length", () => {
+    // given... a message with an empty payload
+    const message = { data: new Uint8Array() };
+
+    // when... parsing the message
+    const result = parseAudioMessage(message, AudioBuilder.config({ encoding: "webm" }));
+
+    // then... the message is ignored
+    expect(result).toEqual({ status: "empty" });
+  });
 });
