@@ -84,12 +84,19 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
         );
       }
 
+      // Default to lazy loading for multi-file remote sessions: with many small MCAPs the
+      // speculative whole-file read-ahead would download every file up-front. A single-file
+      // session keeps the legacy read-ahead behaviour. Callers may override explicitly.
+      const readAheadEnabled: boolean =
+        this.dataSource.readAheadEnabled ?? this.dataSource.urls.length === 1;
+
       sources = this.dataSource.urls.map(
         (url) =>
           new this.SourceConstructor({
             type: "url",
             url,
             cacheSizeInBytes: perSourceCache,
+            readAheadEnabled,
           } as P),
       );
     }

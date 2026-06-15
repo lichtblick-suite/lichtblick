@@ -28,7 +28,7 @@ const log = Log.getLogger(__filename);
 
 type McapSource =
   | { type: "file"; file: Blob }
-  | { type: "url"; url: string; cacheSizeInBytes?: number };
+  | { type: "url"; url: string; cacheSizeInBytes?: number; readAheadEnabled?: boolean };
 
 /**
  * Create a McapIndexedReader if it will be possible to do an indexed read. If the file is not
@@ -90,7 +90,11 @@ export class McapIterableSource implements ISerializedIterableSource {
         break;
       }
       case "url": {
-        const readable = new RemoteFileReadable(source.url, source.cacheSizeInBytes);
+        const readable = new RemoteFileReadable(
+          source.url,
+          source.cacheSizeInBytes,
+          source.readAheadEnabled,
+        );
         await readable.open();
         const reader = await tryCreateIndexedReader(readable, decompressHandlers);
         if (reader) {

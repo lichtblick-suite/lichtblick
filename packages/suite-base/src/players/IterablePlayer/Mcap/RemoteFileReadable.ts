@@ -13,11 +13,17 @@ const DEFAULT_CACHE_SIZE_BYTES = 1024 * 1024 * 500; // 500MiB
 export class RemoteFileReadable {
   #remoteReader: CachedFilelike;
 
-  public constructor(url: string, cacheSizeInBytes?: number) {
+  public constructor(
+    url: string,
+    cacheSizeInBytes?: number,
+    // eslint-disable-next-line @lichtblick/no-boolean-parameters
+    readAheadEnabled?: boolean,
+  ) {
     const fileReader = new BrowserHttpReader(url);
     this.#remoteReader = new CachedFilelike({
       fileReader,
       cacheSizeInBytes: cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
+      readAheadEnabled,
     });
   }
 
