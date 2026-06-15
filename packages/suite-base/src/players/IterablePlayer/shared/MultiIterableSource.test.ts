@@ -351,10 +351,7 @@ describe("MultiIterableSource", () => {
   });
 
   describe("getBackfillMessages", () => {
-    const makeSource = (
-      startSec: number,
-      backfill: jest.Mock,
-    ): IIterableSource<Uint8Array> =>
+    const makeSource = (startSec: number, backfill: jest.Mock): IIterableSource<Uint8Array> =>
       ({
         initialize: jest.fn(),
         messageIterator: jest.fn(),
@@ -380,9 +377,7 @@ describe("MultiIterableSource", () => {
       // GIVEN: three time-sequential sources; the nearest (latest start) already has every topic.
       const farBackfill = jest.fn().mockResolvedValue([]);
       const midBackfill = jest.fn().mockResolvedValue([]);
-      const nearBackfill = jest
-        .fn()
-        .mockResolvedValue([messageOnTopic("a"), messageOnTopic("b")]);
+      const nearBackfill = jest.fn().mockResolvedValue([messageOnTopic("a"), messageOnTopic("b")]);
 
       const multiSource = new MultiIterableSource(dataSource, mockSourceConstructor);
       multiSource["sourceImpl"] = [
