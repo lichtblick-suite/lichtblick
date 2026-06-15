@@ -140,15 +140,42 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   public async getBackfillMessages(
     args: GetBackfillMessagesArgs,
   ): Promise<MessageEvent<Uint8Array>[]> {
-    // Only query sources that could contain messages at or before the backfill time.
+    // Only consider sources that could contain messages at or before the backfill time.
     // This avoids triggering HTTP requests to MCAP files that start after the requested time.
     const relevantSources = filterSourcesForBackfill(this.sourceImpl, args.time);
 
-    const backfillMessages = await Promise.all(
-      relevantSources.map(async (source) => await source.getBackfillMessages(args)),
-    );
+    // Query sources nearest to the backfill time first and stop as soon as every requested topic
+    // has a value. `sourceImpl` (and therefore `relevantSources`) is sorted ascending by start
+    // time, so we iterate in reverse to begin with the source covering the seek target.
+    //
+    // Without this short-circuit, every preceding source would independently read its last chunk
+    // for the requested topics — a large redundant download. For example, a forward seek across
+    // many small remote MCAPs fetched ~one chunk per preceding file even though only the
+    // nearest source(s) hold the winning "latest message before time" values.
+    const backfillMessages: MessageEvent<Uint8Array>[] = [];
+    const missingTopics = new Map(args.topics);
 
-    return backfillMessages.flat();
+    for (let index = relevantSources.length - 1; index >= 0; index--) {
+      if (missingTopics.size === 0) {
+        break;
+      }
+
+      const source = relevantSources[index]!;
+      // Pass a snapshot of the still-missing topics so later mutation of `missingTopics` cannot
+      // alias the map handed to the source.
+      const topicsForSource = new Map(missingTopics);
+      const messages = await source.getBackfillMessages({ ...args, topics: topicsForSource });
+      if (messages.length === 0) {
+        continue;
+      }
+
+      backfillMessages.push(...messages);
+      for (const message of messages) {
+        missingTopics.delete(message.topic);
+      }
+    }
+
+    return backfillMessages;
   }
 
   private mergeInitializations(initializations: Initialization[]): Initialization {
