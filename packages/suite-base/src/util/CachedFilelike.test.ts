@@ -101,6 +101,19 @@ describe("CachedFilelike", () => {
       expect(fetch).toHaveBeenCalledWith(0, 10);
     });
 
+    it("throws a clear error when a single read exceeds the cache size", () => {
+      // GIVEN: a source allocated a small cache (mirrors a many-file remote session where each
+      // source receives only the 10 MiB minimum floor) backed by a larger file.
+      const fileReader = new InMemoryFileReader(new Uint8Array(100));
+      const cachedFileReader = new CachedFilelike({ fileReader, cacheSizeInBytes: 10, log });
+
+      // WHEN/THEN: a chunk read larger than the cache fails fast with an explicit, actionable
+      // message instead of silently truncating or mis-reading.
+      expect(() => {
+        void cachedFileReader.read(0, 20);
+      }).toThrow("Requested more data than cache size: 20 > 10");
+    });
+
     it("returns an error in the callback if the FileReader keeps returning errors", async () => {
       const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
       let interval: any;
