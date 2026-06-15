@@ -331,6 +331,10 @@ export class ImageMode
     super.startFrame(currentTime, renderFrameId, fixedFrameId);
   }
 
+  public override async settleVideoDecodes(): Promise<void> {
+    await this.imageRenderable?.settleVideoDecodes();
+  }
+
   public override removeAllRenderables(): void {
     // To avoid flickering while seeking or changing subscriptions, we avoid clearing the
     // ImageRenderable for a short timeout. When a new image message arrives, we cancel the timeout,

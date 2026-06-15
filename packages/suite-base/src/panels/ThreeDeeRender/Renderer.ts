@@ -1294,6 +1294,14 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
+  public async settleVideoDecodes(): Promise<void> {
+    await Promise.all(
+      Array.from(this.sceneExtensions.values(), async (ext) => {
+        await ext.settleVideoDecodes();
+      }),
+    );
+  }
+
   public setFollowFrameId(frameId: string | undefined): void {
     if (this.followFrameId !== frameId) {
       log.debug(`Setting followFrameId to ${frameId}`);

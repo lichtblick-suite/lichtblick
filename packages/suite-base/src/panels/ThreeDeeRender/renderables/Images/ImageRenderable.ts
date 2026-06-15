@@ -154,7 +154,10 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   #lastQueuedVideoMessageTime: bigint | undefined;
   #waitingForVideoKeyframe = false;
   #canReplayVideoGop = false;
-  #isDrainingVideoDecodes = false;
+  // Resolves when the in-flight video decode drain (started by `flushPendingDecodes`) settles.
+  // Used to gate the panel's frame barrier on a seek so the cursor parks until the seek frame
+  // is actually decoded and painted, instead of resuming play before the image is ready.
+  #activeVideoDecode: Promise<void> | undefined;
   readonly #pendingVideoDecodeQueue: PendingVideoDecode[] = [];
   #videoFrameHistory: VideoFrameHistoryEntry[] = [];
 
@@ -309,7 +312,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       const useDrainQueue =
         videoCodecNeedsKeyframeReplay(codec) ||
         backwardSeekDetected ||
-        this.#isDrainingVideoDecodes ||
+        this.#activeVideoDecode != undefined ||
         // videoPlayer not initialized means it's the first frame, but also a seek happened
         !isVideoPlayerHealthy ||
         this.#pendingVideoDecodeQueue.length > 0;
@@ -334,10 +337,20 @@ export class ImageRenderable extends Renderable<ImageUserData> {
    * an intermediate that does not need a GPU upload.
    */
   public flushPendingDecodes(): void {
-    if (this.#pendingVideoDecodeQueue.length > 0 && !this.#isDrainingVideoDecodes) {
-      this.#isDrainingVideoDecodes = true;
-      void this.#drainPendingVideoDecodes();
+    if (this.#pendingVideoDecodeQueue.length > 0 && this.#activeVideoDecode == undefined) {
+      this.#activeVideoDecode = this.#drainPendingVideoDecodes().finally(() => {
+        this.#activeVideoDecode = undefined;
+      });
     }
+  }
+
+  /**
+   * Resolves once any in-flight video decode drain has fully settled (all queued frames decoded
+   * and the latest painted). Used to gate the panel frame barrier on a seek so the cursor parks
+   * on the target until the seek frame is rendered. Resolves immediately when nothing is decoding.
+   */
+  public async settleVideoDecodes(): Promise<void> {
+    await this.#activeVideoDecode;
   }
 
   /**
@@ -352,28 +365,27 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   }
 
   async #drainPendingVideoDecodes(): Promise<void> {
-    try {
-      while (this.#pendingVideoDecodeQueue.length > 0) {
-        // only render the last frame in the queue
-        const skipRender = this.#pendingVideoDecodeQueue.length > 1;
-        const pendingDecode = this.#pendingVideoDecodeQueue.shift();
-        if (pendingDecode == undefined) {
-          break;
-        }
-        await this.#startDecode(
-          pendingDecode.image,
-          pendingDecode.seq,
-          pendingDecode.resizeWidth,
-          pendingDecode.onDecoded,
-          { skipRender },
-        );
+    while (this.#pendingVideoDecodeQueue.length > 0) {
+      const pendingDecode = this.#pendingVideoDecodeQueue.shift();
+      if (pendingDecode == undefined) {
+        break;
       }
-    } finally {
-      this.#isDrainingVideoDecodes = false;
-      if (this.#pendingVideoDecodeQueue.length > 0) {
-        this.#isDrainingVideoDecodes = true;
-        void this.#drainPendingVideoDecodes();
-      }
+      // Decode every frame so the P-frame reference chain stays intact, but only paint a frame
+      // when no newer frame has been received. During a seek-while-playing catch-up the decoder
+      // works off a backlog (the replayed GOP plus frames that arrived while decoding) faster
+      // than realtime; painting each one would fast-forward the video. Skipping all but the
+      // latest-received frame collapses the burst into a single jump to the current frame.
+      // Using the received sequence number (not the momentary queue length) is robust to frames
+      // being fed incrementally across multiple drain passes during playback.
+      const skipRender = pendingDecode.seq < this.#receivedImageSequenceNumber;
+
+      await this.#startDecode(
+        pendingDecode.image,
+        pendingDecode.seq,
+        pendingDecode.resizeWidth,
+        pendingDecode.onDecoded,
+        { skipRender },
+      );
     }
   }
 
@@ -397,6 +409,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       this.#decodedImage = result;
       this.#textureNeedsUpdate = true;
       if (!skipRender) {
+        console.debug(`Decoded image seq ${seq} `);
         this.update();
       }
       this.#showingErrorImage = false;

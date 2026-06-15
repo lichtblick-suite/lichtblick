@@ -118,6 +118,14 @@ export class Images extends SceneExtension<ImageRenderable> {
     super.startFrame(currentTime, renderFrameId, fixedFrameId);
   }
 
+  public override async settleVideoDecodes(): Promise<void> {
+    await Promise.all(
+      Array.from(this.renderables.values(), async (renderable) => {
+        await renderable.settleVideoDecodes();
+      }),
+    );
+  }
+
   public override getSubscriptions(): readonly AnyRendererSubscription[] {
     return [
       {
