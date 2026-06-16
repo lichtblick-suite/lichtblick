@@ -153,7 +153,7 @@ export function ScriptListItem({
       }
     >
       {editMode ? (
-        <ListItemText slotProps={{ primary: { variant: "body2" } }}>
+        <ListItemText disableTypography>
           <InputBase
             autoFocus
             fullWidth
