@@ -128,7 +128,7 @@ export function ScriptListItem({
           {!readOnly && !editMode && (
             <IconButton
               size="small"
-              aria-title="rename"
+              aria-label="rename"
               title="Rename"
               onClick={() => {
                 setEditMode(true);
@@ -141,7 +141,7 @@ export function ScriptListItem({
           {!readOnly && (
             <IconButton
               size="small"
-              aria-title="delete"
+              aria-label="delete"
               title="Delete"
               color="error"
               onClick={onDelete}
