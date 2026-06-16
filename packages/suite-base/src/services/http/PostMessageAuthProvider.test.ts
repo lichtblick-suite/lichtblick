@@ -200,7 +200,7 @@ describe("PostMessageAuthProvider", () => {
     jest.useFakeTimers();
     const provider = new PostMessageAuthProvider({ allowedOrigins: [allowedOrigin] });
     const headersPromise = provider.getAuthHeaders();
-    // When - advance time past the 3-second timeout without dispatching a token
+    // When - advance time past the 5-second timeout without dispatching a token
     jest.advanceTimersByTime(5001);
     // Then
     await expect(headersPromise).rejects.toThrow(
