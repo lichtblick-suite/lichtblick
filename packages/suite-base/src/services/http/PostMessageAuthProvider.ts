@@ -17,6 +17,7 @@ type TokenMessage = {
 
 const DEFAULT_TOKEN_MESSAGE_TYPE = "auth-token";
 const DEFAULT_REQUEST_AUTH_MESSAGE_TYPE = "auth-request";
+const FIRST_TOKEN_TIMEOUT_MS = 5000;
 
 // ts-prune-ignore-next
 export class PostMessageAuthProvider implements AuthProvider {
@@ -27,8 +28,10 @@ export class PostMessageAuthProvider implements AuthProvider {
   private readonly firstTokenPromise: Promise<void>;
 
   private resolveFirstToken?: () => void;
+  private rejectFirstToken?: (error: Error) => void;
   private firstTokenReceived = false;
   private token?: string;
+  private tokenTimeoutId?: ReturnType<typeof setTimeout>;
 
   public constructor(options: PostMessageAuthProviderOptions) {
     this.allowedOrigins = new Set(options.allowedOrigins);
@@ -37,9 +40,25 @@ export class PostMessageAuthProvider implements AuthProvider {
     this.requestAuthMessageType =
       options.requestAuthMessageType ?? DEFAULT_REQUEST_AUTH_MESSAGE_TYPE;
 
-    this.firstTokenPromise = new Promise<void>((resolve) => {
+    this.firstTokenPromise = new Promise<void>((resolve, reject) => {
       this.resolveFirstToken = resolve;
+      this.rejectFirstToken = reject;
     });
+
+    if (this.allowedOrigins.size === 0) {
+      this.rejectFirstToken?.(
+        new Error("No allowed origins found. Please check your embedding configuration."),
+      );
+    } else {
+      this.tokenTimeoutId = setTimeout(() => {
+        this.rejectFirstToken?.(
+          new Error(
+            "Authentication timed out: no auth token was received from the parent window. " +
+              "Please check your embedding configuration.",
+          ),
+        );
+      }, FIRST_TOKEN_TIMEOUT_MS);
+    }
 
     window.addEventListener("message", this.handleMessage);
     this.requestAuthToken();
@@ -64,7 +83,12 @@ export class PostMessageAuthProvider implements AuthProvider {
   }
 
   public dispose(): void {
+    clearTimeout(this.tokenTimeoutId);
     window.removeEventListener("message", this.handleMessage);
+    if (!this.firstTokenReceived) {
+      this.firstTokenReceived = true;
+      this.resolveFirstToken?.();
+    }
   }
 
   private readonly handleMessage = (event: MessageEvent): void => {
@@ -94,6 +118,7 @@ export class PostMessageAuthProvider implements AuthProvider {
 
     if (!this.firstTokenReceived) {
       this.firstTokenReceived = true;
+      clearTimeout(this.tokenTimeoutId);
       this.resolveFirstToken?.();
     }
   };
