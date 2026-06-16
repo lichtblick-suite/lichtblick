@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
-import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 
 // We use "brand" tags to prevent confusion between string types with distinct meanings
 // https://github.com/microsoft/TypeScript/issues/4895
