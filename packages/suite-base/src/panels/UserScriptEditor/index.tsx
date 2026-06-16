@@ -189,7 +189,6 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
   );
 };
 
-
 const selectRawUserNodes = (state: LayoutState) => state.selectedLayout?.data?.userNodes;
 
 const selectState = (store: UserScriptStore) => store.state;

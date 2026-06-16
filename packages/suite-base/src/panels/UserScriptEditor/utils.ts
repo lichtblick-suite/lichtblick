@@ -12,9 +12,7 @@ const EMPTY_USER_NODES: UserScripts = Object.freeze({});
  * @returns A new `UserScripts` map without hidden scripts. Returns the shared empty object
  *          when the input is nullish or all scripts are hidden.
  */
-export function filterVisibleUserScripts(
-  allUserScripts: UserScripts | undefined,
-): UserScripts {
+export function filterVisibleUserScripts(allUserScripts: UserScripts | undefined): UserScripts {
   if (allUserScripts == null) {
     return EMPTY_USER_NODES;
   }
@@ -26,4 +24,3 @@ export function filterVisibleUserScripts(
   }
   return Object.keys(nonHidden).length > 0 ? nonHidden : EMPTY_USER_NODES;
 }
-
