@@ -4,6 +4,7 @@
 import { MultiSource } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
 import { MessageEvent, TopicSelection } from "@lichtblick/suite-base/players/types";
 import InitilizationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitilizationSourceBuilder";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -361,14 +362,7 @@ describe("MultiIterableSource", () => {
       }) as unknown as IIterableSource<Uint8Array>;
 
     const messageOnTopic = (topic: string): MessageEvent<Uint8Array> =>
-      ({
-        topic,
-        receiveTime: { sec: 0, nsec: 0 },
-        publishTime: { sec: 0, nsec: 0 },
-        message: new Uint8Array(),
-        sizeInBytes: 0,
-        schemaName: "",
-      }) as MessageEvent<Uint8Array>;
+      MessageEventBuilder.messageEvent<Uint8Array>({ topic, message: new Uint8Array() });
 
     const topicSelection = (...topics: string[]): TopicSelection =>
       new Map(topics.map((topic) => [topic, { topic }]));
