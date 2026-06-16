@@ -5,6 +5,7 @@
 
 import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import userEvent, { UserEvent } from "@testing-library/user-event";
 
 import { LayoutSelectionState } from "@lichtblick/suite-base/components/LayoutBrowser/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
@@ -102,6 +103,7 @@ jest.mock("@lichtblick/suite-base/components/SidebarContent", () => ({
 describe("LayoutBrowser", () => {
   const mockLayoutManager = new MockLayoutManager();
   let dispatchMock: jest.Mock;
+  let user: UserEvent;
 
   const ids = [BasicBuilder.string(), BasicBuilder.string()];
 
@@ -127,6 +129,7 @@ describe("LayoutBrowser", () => {
       },
       dispatch: dispatchMock,
     });
+    user = userEvent.setup();
   });
 
   afterEach(() => {
@@ -136,6 +139,86 @@ describe("LayoutBrowser", () => {
   it("renders without crashing", () => {
     render(<LayoutBrowser />);
     expect(screen.getByTestId("sidebar-content")).toBeInTheDocument();
+  });
+
+  describe("createNewLayout", () => {
+    beforeEach(() => {
+      mockLayoutManager.saveNewLayout = jest.fn().mockResolvedValue(LayoutBuilder.layout());
+      (useLayoutNavigation as jest.Mock).mockReturnValue({
+        onSelectLayout: jest.fn().mockResolvedValue(undefined),
+        state: {
+          busy: false,
+          error: undefined,
+          online: true,
+          lastSelectedId: undefined,
+          multiAction: undefined,
+          selectedIds: [],
+        },
+        dispatch: dispatchMock,
+      });
+    });
+
+    it("should create a new layout using only base data when getDefaultLayoutData returns undefined", async () => {
+      // Given
+      mockLayoutManager.getDefaultLayoutData = jest.fn().mockResolvedValue(undefined);
+      render(<LayoutBrowser />);
+      const createButton = screen.getByRole("button", { name: "Create new layout" });
+
+      // When
+      await user.click(createButton);
+
+      // Then
+      expect(mockLayoutManager.saveNewLayout).toHaveBeenCalledTimes(1);
+
+      const callArgs = mockLayoutManager.saveNewLayout.mock.calls[0]![0];
+      expect(callArgs.data).toMatchObject({
+        configById: {},
+        globalVariables: {},
+        userNodes: {},
+        playbackConfig: expect.objectContaining({ speed: expect.any(Number) }),
+      });
+    });
+
+    it("should merge template data with base layout data when getDefaultLayoutData returns data", async () => {
+      // Given
+      const templateData = {
+        globalVariables: { myVar: 99 },
+        userNodes: {
+          scriptA: { name: "scriptA", sourceCode: "// from template", mode: "readOnly" as const },
+        },
+      };
+      mockLayoutManager.getDefaultLayoutData = jest.fn().mockResolvedValue(templateData);
+      render(<LayoutBrowser />);
+      const createButton = screen.getByRole("button", { name: "Create new layout" });
+
+      // When
+      await user.click(createButton);
+
+      // Then
+      expect(mockLayoutManager.saveNewLayout).toHaveBeenCalledTimes(1);
+      const callArgs = mockLayoutManager.saveNewLayout.mock.calls[0]![0];
+      expect(callArgs.data).toMatchObject({
+        configById: {},
+        globalVariables: { myVar: 99 },
+        userNodes: {
+          scriptA: { name: "scriptA", sourceCode: "// from template", mode: "readOnly" },
+        },
+        playbackConfig: expect.objectContaining({ speed: expect.any(Number) }),
+      });
+    });
+
+    it("should call getDefaultLayoutData before saving the new layout", async () => {
+      // Given
+      mockLayoutManager.getDefaultLayoutData = jest.fn().mockResolvedValue(undefined);
+      render(<LayoutBrowser />);
+      const createButton = screen.getByRole("button", { name: "Create new layout" });
+
+      // When
+      await user.click(createButton);
+
+      // Then
+      expect(mockLayoutManager.getDefaultLayoutData).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("processAction useEffect", () => {

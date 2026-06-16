@@ -61,10 +61,11 @@ import {
 import BottomBar from "@lichtblick/suite-base/panels/UserScriptEditor/BottomBar";
 import { Sidebar } from "@lichtblick/suite-base/panels/UserScriptEditor/Sidebar";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig, UserScripts } from "@lichtblick/suite-base/types/panels";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
 import Config from "./Config";
 import { Script } from "./script";
+import { filterVisibleUserScripts } from "./utils";
 
 const Editor = React.lazy(
   async () => await import("@lichtblick/suite-base/panels/UserScriptEditor/Editor"),
@@ -188,7 +189,6 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
   );
 };
 
-const EMPTY_USER_NODES: UserScripts = Object.freeze({});
 
 const selectRawUserNodes = (state: LayoutState) => state.selectedLayout?.data?.userNodes;
 
@@ -201,18 +201,10 @@ function UserScriptEditor(props: Props) {
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
   const allUserScripts = useCurrentLayoutSelector(selectRawUserNodes);
-  const visibleUserScripts = useMemo(() => {
-    if (allUserScripts == null) {
-      return EMPTY_USER_NODES;
-    }
-    const nonHidden: UserScripts = {};
-    for (const [scriptId, userScript] of Object.entries(allUserScripts)) {
-      if (userScript.mode == null || userScript.mode !== "hidden") {
-        nonHidden[scriptId] = userScript;
-      }
-    }
-    return Object.keys(nonHidden).length > 0 ? nonHidden : EMPTY_USER_NODES;
-  }, [allUserScripts]);
+  const visibleUserScripts = useMemo(
+    () => filterVisibleUserScripts(allUserScripts),
+    [allUserScripts],
+  );
   const { scriptStates: userScriptStates, rosLib, typesLib } = useUserScriptState(selectState);
 
   const { setUserScripts } = useCurrentLayoutActions();
