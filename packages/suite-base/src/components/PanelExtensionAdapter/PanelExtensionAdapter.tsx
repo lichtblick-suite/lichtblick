@@ -785,9 +785,9 @@ function PanelExtensionAdapter(
 
   const style: CSSProperties = {};
   if (slowRender) {
-    style.borderColor = "orange";
-    style.borderWidth = "1px";
-    style.borderStyle = "solid";
+    // Use an inset box-shadow rather than a border so the indicator doesn't shrink the content box.
+    // A border would change this element's content size, triggering a panel ResizeObserver/relayout
+    style.boxShadow = "inset 0 0 0 1px orange";
   }
 
   if (error) {

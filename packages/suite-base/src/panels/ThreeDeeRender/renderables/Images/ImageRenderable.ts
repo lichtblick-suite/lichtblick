@@ -409,7 +409,6 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       this.#decodedImage = result;
       this.#textureNeedsUpdate = true;
       if (!skipRender) {
-        console.debug(`Decoded image seq ${seq} `);
         this.update();
       }
       this.#showingErrorImage = false;
@@ -629,6 +628,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
             log.warn(msg);
           });
         }
+
         const videoPlayer = this.videoPlayer;
         const { preparedFrame } = this.#prepareIncomingVideoFrame(frameMsg);
 
