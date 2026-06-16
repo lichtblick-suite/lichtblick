@@ -376,6 +376,34 @@ describe("StudioApp", () => {
     );
   });
 
+  it("should clear the auth provider and dispose it when unmounted", () => {
+    const setAuthProviderSpy = jest.spyOn(HttpService, "setAuthProvider");
+    const parentWindow = { postMessage: jest.fn() } as unknown as Window;
+
+    global.URL = OriginalURL;
+    window.history.pushState({}, "", "http://localhost/?workspace=test-workspace");
+
+    Object.defineProperty(document, "referrer", {
+      configurable: true,
+      value: "https://host.example.com/embed",
+    });
+
+    Object.defineProperty(window, "parent", {
+      configurable: true,
+      get: () => parentWindow,
+    });
+
+    const { unmount } = renderWithContext();
+    const mockProviderInstance = (PostMessageAuthProvider as jest.Mock).mock.results[0]?.value as {
+      dispose: jest.Mock;
+    };
+
+    unmount();
+
+    expect(setAuthProviderSpy).toHaveBeenCalledWith(undefined);
+    expect(mockProviderInstance.dispose).toHaveBeenCalled();
+  });
+
   it("should not create remote layout storage when no workspace is provided", () => {
     // Clear previous calls
     jest.mocked(LayoutsAPI).mockClear();
