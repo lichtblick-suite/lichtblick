@@ -90,11 +90,10 @@ export class McapIterableSource implements ISerializedIterableSource {
         break;
       }
       case "url": {
-        const readable = new RemoteFileReadable(
-          source.url,
-          source.cacheSizeInBytes,
-          source.readAheadEnabled,
-        );
+        const readable = new RemoteFileReadable(source.url, {
+          cacheSizeInBytes: source.cacheSizeInBytes,
+          readAheadEnabled: source.readAheadEnabled,
+        });
         await readable.open();
         const reader = await tryCreateIndexedReader(readable, decompressHandlers);
         if (reader) {

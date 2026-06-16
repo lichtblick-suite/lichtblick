@@ -47,7 +47,7 @@ describe("RemoteFileReadable", () => {
       const customSize = 1024 * 1024 * 100; // 100MiB
 
       // When creating a RemoteFileReadable
-      new RemoteFileReadable(testUrl, customSize);
+      new RemoteFileReadable(testUrl, { cacheSizeInBytes: customSize });
 
       // Then CachedFilelike should be created with the custom size
       expect(CachedFilelike).toHaveBeenCalledWith(

@@ -242,11 +242,10 @@ describe("McapIterableSource", () => {
       await source.initialize();
 
       // Then RemoteFileReadable should be constructed with the URL options
-      expect(MockRemoteFileReadable).toHaveBeenCalledWith(
-        urlIndexedMcap,
+      expect(MockRemoteFileReadable).toHaveBeenCalledWith(urlIndexedMcap, {
         cacheSizeInBytes,
         readAheadEnabled,
-      );
+      });
     });
 
     it("should delegate getStart and getEnd to the underlying indexed source", async () => {
