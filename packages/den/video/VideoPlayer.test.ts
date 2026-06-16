@@ -484,6 +484,7 @@ describe("VideoPlayer", () => {
     // in non-deterministic order, garbling the decoder. The mutex must hand off ownership in
     // acquisition (call) order so chunks reach the decoder in the same order the caller intended.
     const submissionOrder: number[] = [];
+    let releaseFirstDecode: (() => void) | undefined;
 
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
@@ -501,8 +502,12 @@ describe("VideoPlayer", () => {
 
       public decode(chunk: MockEncodedVideoChunk): void {
         submissionOrder.push(chunk.timestamp);
-        // Emit the frame synchronously so each decodeFrames call resolves before releasing the
-        // mutex — keeps the test focused on submission ordering rather than decoder timing.
+        if (chunk.timestamp === 1000) {
+          releaseFirstDecode = () => {
+            this.#init.output(createFrame(chunk.timestamp));
+          };
+          return;
+        }
         this.#init.output(createFrame(chunk.timestamp));
       }
 
@@ -529,6 +534,12 @@ describe("VideoPlayer", () => {
     const third = player.decodeFrames([
       { data: new Uint8Array([3]), timestampMicros: 3000, type: "delta" },
     ]);
+
+    await Promise.resolve();
+    expect(submissionOrder).toEqual([1000]);
+    expect(releaseFirstDecode).toBeDefined();
+
+    releaseFirstDecode?.();
 
     await expect(first).resolves.toMatchObject({ type: "target" });
     await expect(second).resolves.toMatchObject({ type: "target" });
