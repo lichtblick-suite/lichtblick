@@ -113,7 +113,7 @@ export function ScriptListItem({
   const icon = [];
   if (readOnly) {
     icon.push(
-      <ListItemIcon>
+      <ListItemIcon key="lock-icon" data-testid="lock-icon">
         <LockClosed20Regular />
       </ListItemIcon>,
     );

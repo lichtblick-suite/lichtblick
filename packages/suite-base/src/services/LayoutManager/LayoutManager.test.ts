@@ -136,6 +136,59 @@ describe("LayoutManager", () => {
     });
   });
 
+  describe("getDefaultLayoutData", () => {
+    it("should return undefined when there is no remote storage", async () => {
+      // Given
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: undefined,
+      });
+
+      // When
+      const result = await layoutManager.getDefaultLayoutData();
+
+      // Then
+      expect(result).toBeUndefined();
+    });
+
+    it("should delegate to remote storage and return its result", async () => {
+      // Given
+      const templateData = {
+        configById: {},
+        globalVariables: { speed: 1 },
+        userNodes: { scriptA: { name: "scriptA", sourceCode: "// hello" } },
+        playbackConfig: { speed: 1 },
+      };
+      mockRemoteStorage.getDefaultLayoutData = jest.fn().mockResolvedValue(templateData);
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+
+      // When
+      const result = await layoutManager.getDefaultLayoutData();
+
+      // Then
+      expect(mockRemoteStorage.getDefaultLayoutData).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(templateData);
+    });
+
+    it("should return undefined when remote storage returns undefined", async () => {
+      // Given
+      mockRemoteStorage.getDefaultLayoutData = jest.fn().mockResolvedValue(undefined);
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+
+      // When
+      const result = await layoutManager.getDefaultLayoutData();
+
+      // Then
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe("getLayouts", () => {
     it("should return layouts that are not deleted", async () => {
       // Given

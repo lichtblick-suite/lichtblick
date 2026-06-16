@@ -5,6 +5,7 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import userEvent, { UserEvent } from "@testing-library/user-event";
 
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -27,6 +28,7 @@ function renderScriptListItem(props: Partial<Props> = {}) {
         onRename={onRename}
         title={title}
         selected={props.selected}
+        readOnly={props.readOnly}
       />
     </ThemeProvider>,
   );
@@ -218,5 +220,100 @@ describe("ScriptListItem", () => {
 
     // Then
     expect(selectSpy).toHaveBeenCalled();
+  });
+
+  it("should show the delete button", () => {
+    // Given
+    renderScriptListItem();
+
+    // Then
+    expect(screen.getByTitle("Delete")).toBeEnabled();
+  });
+
+  it("should show the rename button", () => {
+    // Given
+    renderScriptListItem();
+
+    // Then
+    expect(screen.getByTitle("Rename")).toBeEnabled();
+  });
+
+  it("should not show the lock icon", () => {
+    // Given
+    renderScriptListItem();
+
+    // Then
+    expect(screen.queryByTestId("lock-icon")).not.toBeInTheDocument();
+  });
+
+
+  describe("readOnly=true", () => {
+    it("should show the lock icon", () => {
+      // Given
+      renderScriptListItem({ readOnly: true });
+
+      // Then
+      expect(screen.getByTestId("lock-icon")).toBeVisible();
+    });
+
+    it("should render the script title", () => {
+      // Given
+      const title = BasicBuilder.string();
+
+      // When
+      renderScriptListItem({ readOnly: true, title });
+
+      // Then
+      expect(screen.getByText(title)).toBeEnabled();
+    });
+
+    it("should not show the delete button", () => {
+      // Given
+      renderScriptListItem({ readOnly: true });
+
+      // Then
+      expect(screen.queryByTitle("Delete")).not.toBeInTheDocument();
+    });
+
+    it("should not show the rename button", () => {
+      // Given
+      renderScriptListItem({ readOnly: true });
+
+      // Then
+      expect(screen.queryByTitle("Rename")).not.toBeInTheDocument();
+    });
+
+    it("should not enter edit mode on double-click", async () => {
+      // Given
+      const { title } = renderScriptListItem({ readOnly: true });
+
+      // When
+      fireEvent.doubleClick(screen.getByText(title));
+
+      // Then
+      expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    });
+
+    it("should not enter edit mode when Enter key is pressed", async () => {
+      // Given
+      const { title } = renderScriptListItem({ readOnly: true });
+
+      // When
+      fireEvent.keyDown(screen.getByText(title), { key: "Enter" });
+
+      // Then
+      expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    });
+
+    it("should still call onClick when the list item is clicked", async () => {
+      // Given
+      const { onClick, title } = renderScriptListItem({ readOnly: true });
+
+      // When
+      fireEvent.click(screen.getByText(title));
+
+      // Then
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
   });
 });
