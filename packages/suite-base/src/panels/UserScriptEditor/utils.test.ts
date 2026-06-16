@@ -56,7 +56,11 @@ describe("filterVisibleUserScripts", () => {
   it("should exclude hidden scripts and keep visible ones", () => {
     // Given
     const visibleScript = { name: "visible", sourceCode: "// visible" };
-    const readOnlyScript = { name: "readOnly", sourceCode: "// readOnly", mode: "readOnly" as const };
+    const readOnlyScript = {
+      name: "readOnly",
+      sourceCode: "// readOnly",
+      mode: "readOnly" as const,
+    };
     const hiddenScript = { name: "hidden", sourceCode: "// hidden", mode: "hidden" as const };
     const scripts: UserScripts = {
       visible: visibleScript,
@@ -100,4 +104,3 @@ describe("filterVisibleUserScripts", () => {
     expect(Object.keys(result2)).toHaveLength(0);
   });
 });
-
