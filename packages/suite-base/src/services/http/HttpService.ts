@@ -46,11 +46,10 @@ export class HttpService {
     const url = this.baseURL ? `${this.baseURL}/${endpoint}` : endpoint;
     const shouldUseDefaultHeaders = !(fetchOptions.body instanceof FormData);
     const authHeaders = await this.authProvider?.getAuthHeaders();
-    const hasAuthHeaders = Boolean(authHeaders && Object.keys(authHeaders).length > 0);
 
     const requestOptions: RequestInit = {
       ...fetchOptions,
-      credentials: hasAuthHeaders ? "omit" : "same-origin",
+      credentials: this.authProvider != undefined ? "omit" : "same-origin",
       headers: shouldUseDefaultHeaders
         ? {
             ...(this.defaultOptions.headers as Record<string, string>),
