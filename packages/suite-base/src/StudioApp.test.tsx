@@ -324,9 +324,9 @@ describe("StudioApp", () => {
 
       return {
         searchParams: {
-          get: jest.fn().mockImplementation((key) =>
-            key === "workspace" ? "test-workspace" : undefined,
-          ),
+          get: jest
+            .fn()
+            .mockImplementation((key) => (key === "workspace" ? "test-workspace" : undefined)),
         },
       };
     }) as any;
@@ -337,7 +337,7 @@ describe("StudioApp", () => {
 
     renderWithContext({
       ...mockSharedRootContext,
-      authProvider: authProvider,
+      authProvider,
     });
 
     expect(setAuthProviderSpy).toHaveBeenCalledWith(authProvider);

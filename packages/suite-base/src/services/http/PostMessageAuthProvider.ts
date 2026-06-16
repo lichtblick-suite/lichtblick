@@ -106,4 +106,3 @@ export class PostMessageAuthProvider implements AuthProvider {
 }
 
 export type { PostMessageAuthProviderOptions };
-
