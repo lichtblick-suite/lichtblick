@@ -116,7 +116,9 @@ export class SceneExtension<
    * Overridden by image extensions to gate the panel frame barrier on a seek; the default is a
    * no-op for extensions that do not decode video.
    */
-  public async settleVideoDecodes(): Promise<void> {}
+  public async settleVideoDecodes(): Promise<void> {
+    await Promise.resolve();
+  }
 
   /** Allows SceneExtensions to add options to the context menu. */
   public getContextMenuItems(): readonly PanelContextMenuItem[] {

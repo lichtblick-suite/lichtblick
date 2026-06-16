@@ -781,7 +781,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
         invoke = undefined;
       }
     };
-    void renderer.settleVideoDecodes().then(callOnce, callOnce);
+    renderer.settleVideoDecodes().then(callOnce, callOnce);
     // If a newer frame supersedes this one before the decode settles, release the barrier so the
     // pipeline is never left waiting on a stale frame.
     return callOnce;
