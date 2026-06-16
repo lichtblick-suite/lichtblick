@@ -77,6 +77,7 @@ function makeMockLayoutManager() {
     overwriteLayout: jest.fn().mockImplementation(mockThrow("overwriteLayout")),
     revertLayout: jest.fn().mockImplementation(mockThrow("revertLayout")),
     makePersonalCopy: jest.fn().mockImplementation(mockThrow("makePersonalCopy")),
+    getDefaultLayoutData: jest.fn().mockResolvedValue(undefined),
   };
 }
 function makeMockUserProfile() {
