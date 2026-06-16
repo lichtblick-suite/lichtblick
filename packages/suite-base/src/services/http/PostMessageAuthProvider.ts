@@ -76,7 +76,12 @@ export class PostMessageAuthProvider implements AuthProvider {
       return;
     }
 
-    const data = event.data as TokenMessage;
+    const rawData: unknown = event.data;
+    if (rawData == undefined || typeof rawData !== "object" || !("type" in rawData)) {
+      return;
+    }
+
+    const data = rawData as TokenMessage;
     if (data.type !== this.tokenMessageType) {
       return;
     }
