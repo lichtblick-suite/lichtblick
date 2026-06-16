@@ -399,6 +399,12 @@ describe("ImageRenderable error handling", () => {
 
     jest.spyOn(renderable, "update").mockImplementation(() => undefined);
 
+    // Keep the player in a healthy initialized state so H.264 stays on the parallel path.
+    renderable.videoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(true),
+      resetForSeek: jest.fn(),
+    } as unknown as ImageRenderable["videoPlayer"];
+
     const keyframe = h265Keyframe;
 
     jest
@@ -483,6 +489,7 @@ describe("ImageRenderable error handling", () => {
 
     // Establish a pre-seek baseline at t=5s so the next batch is unambiguously a backward jump.
     renderable.setImage({ ...createH265Frame(h265Keyframe, { sec: 5, nsec: 0 }), format: "h264" });
+    renderable.flushPendingDecodes();
     await Promise.resolve();
     expect(decodeOrder).toEqual([5_000_000]);
     decodeResolvers.get(5_000_000)?.();
@@ -498,6 +505,7 @@ describe("ImageRenderable error handling", () => {
       ...createH265Frame(h265DeltaFrame, { sec: 0, nsec: 33333333 }),
       format: "h264",
     });
+    renderable.flushPendingDecodes();
     await Promise.resolve();
 
     // Only the keyframe has started decoding — drain awaits its completion before the P-frames.
@@ -574,6 +582,7 @@ describe("ImageRenderable error handling", () => {
         latestDecoded();
       },
     );
+    renderable.flushPendingDecodes();
     await Promise.resolve();
 
     releaseFirstDecode();
@@ -622,6 +631,7 @@ describe("ImageRenderable error handling", () => {
         latestDecoded();
       },
     );
+    renderable.flushPendingDecodes();
     await latestDecodedPromise;
 
     expect(decode).toHaveBeenCalledTimes(2);
@@ -664,9 +674,11 @@ describe("ImageRenderable error handling", () => {
     // playback to T = 5s so the seek that follows is unambiguously backward.
     await new Promise<void>((resolve) => {
       renderable.setImage(createH265Frame(h265Keyframe, { sec: 0, nsec: 0 }), undefined, resolve);
+      renderable.flushPendingDecodes();
     });
     await new Promise<void>((resolve) => {
       renderable.setImage(createH265Frame(h265DeltaFrame, { sec: 5, nsec: 0 }), undefined, resolve);
+      renderable.flushPendingDecodes();
     });
 
     // Backward seek: the full GOP (K, P1, P2, target) arrives in one render tick. The four
@@ -686,6 +698,7 @@ describe("ImageRenderable error handling", () => {
         lastDecoded();
       },
     );
+    renderable.flushPendingDecodes();
     await lastDecodedPromise;
 
     // Two primers + the full four-frame GOP all reach the decoder.

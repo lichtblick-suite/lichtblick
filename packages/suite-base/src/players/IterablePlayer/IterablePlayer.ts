@@ -469,7 +469,7 @@ export class IterablePlayer implements Player {
 
   /** Whether a state transition has been requested. Used to re-check after awaiting; reading
    * through a method avoids the type checker narrowing `#nextState` to a constant across `await`
-   * boundaries (it cannot see that an awaited operation may have requested a new state). */
+   * boundaries */
   #hasPendingState(): boolean {
     return this.#nextState != undefined;
   }
@@ -911,9 +911,7 @@ export class IterablePlayer implements Player {
       // When seeking while playing, park the cursor on the seek target until the emitted frame is
       // actually rendered. The render barrier (the panel `done` callback) now waits for in-flight
       // video decode, so awaiting the emit blocks here until the seek frame is painted instead of
-      // resuming playback and racing the video forward to catch up. Resetting the tick pacing
-      // trackers prevents the wall-clock time spent decoding/loading from being attributed to the
-      // first play tick, which would otherwise inflate its range and sprint past the target.
+      // resuming playback and racing the video forward to catch up.
       if (this.#isPlaying) {
         await this.#queueEmitState.currentPromise;
         if (this.#hasPendingState()) {

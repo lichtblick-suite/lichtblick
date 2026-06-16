@@ -295,6 +295,86 @@ describe("IterablePlayer", () => {
     await player.isClosed;
   });
 
+  it("while playing, seek keeps the cursor parked until the seek emit is released", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    player.setSubscriptions([{ topic: "foo" }]);
+
+    const initialStore = new PlayerStateStore(4);
+    const playingStarted = signal();
+    const seekEmitEntered = signal();
+    const releaseSeekEmit = signal();
+    const resumedAfterSeekEmit = signal();
+
+    let initialized = false;
+    let inSeekEmit = false;
+    let postInitStateCount = 0;
+    let resumedCurrentNs: number | undefined;
+
+    source.getBackfillMessages = async (args: GetBackfillMessagesArgs): Promise<MessageEvent[]> => {
+      return [
+        {
+          topic: "foo",
+          receiveTime: args.time,
+          message: undefined,
+          sizeInBytes: 0,
+          schemaName: "foo",
+        },
+      ];
+    };
+
+    player.setListener(async (state) => {
+      if (!initialized) {
+        await initialStore.add(state);
+        return;
+      }
+
+      postInitStateCount += 1;
+
+      if (state.activeData?.isPlaying === true) {
+        playingStarted.resolve();
+      }
+
+      const messageNs = state.activeData?.messages[0]?.receiveTime.nsec;
+      if (!inSeekEmit && messageNs === 1) {
+        inSeekEmit = true;
+        seekEmitEntered.resolve();
+        await releaseSeekEmit;
+      }
+
+      if (inSeekEmit && messageNs !== 1 && state.activeData?.currentTime.nsec != undefined) {
+        resumedCurrentNs = state.activeData.currentTime.nsec;
+        resumedAfterSeekEmit.resolve();
+      }
+    });
+
+    await initialStore.done;
+    initialized = true;
+
+    player.startPlayback();
+    await playingStarted;
+
+    player.seekPlayback({ sec: 0, nsec: 1 });
+    await seekEmitEntered;
+
+    const stateCountWhileParked = postInitStateCount;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(postInitStateCount).toBe(stateCountWhileParked);
+
+    releaseSeekEmit.resolve();
+    await resumedAfterSeekEmit;
+    expect(resumedCurrentNs).toBeDefined();
+    expect(resumedCurrentNs!).toBeGreaterThan(1);
+
+    player.close();
+    await player.isClosed;
+  });
+
   describe("expandBackfill hook", () => {
     const raw: MessageEvent = {
       topic: "foo",

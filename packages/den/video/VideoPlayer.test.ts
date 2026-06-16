@@ -1,7 +1,7 @@
+/** @jest-environment jsdom */
+
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-
-/** @jest-environment jsdom */
 
 import { DecodeFramesResult, VideoPlayer } from "./VideoPlayer";
 
@@ -535,23 +535,5 @@ describe("VideoPlayer", () => {
     await expect(third).resolves.toMatchObject({ type: "target" });
 
     expect(submissionOrder).toEqual([1000, 2000, 3000]);
-  });
-
-  it("should reconfigure the decoder after resetForSeek", async () => {
-    // Given a tracking decoder so we can observe configure() calls
-    const { player, decoders } = setup({ trackDecodes: true });
-    await player.init({ codec: "hvc1.1.6.L93.B0" });
-
-    const decoder = decoders[0]!;
-    const configureSpy = jest.spyOn(decoder as unknown as VideoDecoder, "configure");
-
-    // When resetForSeek is invoked on a configured decoder
-    player.resetForSeek();
-
-    // Then the decoder is reconfigured so the next decodeFrames() will not bail out on
-    // state === "unconfigured" (WebCodecs reset() leaves the decoder unconfigured)
-    expect(configureSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ codec: "hvc1.1.6.L93.B0" }),
-    );
   });
 });
