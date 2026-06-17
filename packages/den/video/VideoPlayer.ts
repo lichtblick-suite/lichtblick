@@ -83,15 +83,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   #decodeGeneration: number = 0;
   #lastSubmittedTimestampMicros: number | undefined;
   #currentDecodeTimestampMicros: number | undefined;
-  // Lets a caller park on the still-decoding target frame after `decodeFrames()` resolves with an
-  // intermediate or timeout, so the eventual on-time decode can still be surfaced.
-  #targetWaiter:
-    | {
-        targetTimestampMicros: number;
-        resolve: (frame: VideoFrame) => void;
-        reject: (error: Error) => void;
-      }
-    | undefined;
   #codedSize: { width: number; height: number } | undefined;
   /** Last decoded frame as an ImageBitmap; populated by callers after they paint a frame. */
   public lastImageBitmap: ImageBitmap | undefined;
@@ -128,8 +119,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
         const newestFrame = this.#dequeueNewestFrame();
         this.#pendingDecode?.resolve({ type: "aborted", frame: newestFrame });
         this.#pendingDecode = undefined;
-        this.#targetWaiter?.reject(decodeError);
-        this.#targetWaiter = undefined;
         this.emit("error", decodeError);
       },
     };
@@ -447,14 +436,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   }
 
   #handleDecodedFrame(timestampMicros?: number): void {
-    if (this.#targetWaiter) {
-      const frame = this.#dequeueFrame(this.#targetWaiter.targetTimestampMicros);
-      if (frame) {
-        this.#targetWaiter.resolve(frame);
-        return;
-      }
-    }
-
     if (!this.#pendingDecode) {
       return;
     }
@@ -539,13 +520,14 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
    * We intentionally do not re-configure here. Callers already transition to
    * keyframe-gated decode after a seek and call `init()` on that keyframe, so
    * re-configuring in `resetForSeek()` would do duplicate work and add latency.
+   *
    */
   public resetForSeek(): void {
     this.#decodeGeneration++;
     if (this.#decoder.state === "configured") {
       this.#decoder.reset();
     }
-    this.#disposePendingState("Decoder reset");
+    this.#disposePendingState();
   }
 
   /**
@@ -557,11 +539,16 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
     if (this.#decoder.state !== "closed") {
       this.#decoder.close();
     }
-    this.#disposePendingState("Decoder closed");
+    this.#disposePendingState();
+    // The player is being torn down, so the display cache is freed here
+    this.lastVideoFrame?.close();
+    this.lastVideoFrame = undefined;
+    this.lastImageBitmap?.close();
+    this.lastImageBitmap = undefined;
     this.#decoderConfig = undefined;
   }
 
-  #disposePendingState(waiterRejectReason: string): void {
+  #disposePendingState(): void {
     // If the target frame arrived and was dequeued into resolvedResult while the code was still
     // waiting for the drain signal, it is no longer in #pendingFrames and won't be reached by
     // #dequeueNewestFrame() or the loop below. Close it explicitly to avoid a VideoFrame leak.
@@ -575,16 +562,12 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
     this.#pendingDecode = undefined;
     this.#lastSubmittedTimestampMicros = undefined;
     this.#currentDecodeTimestampMicros = undefined;
-    this.#targetWaiter?.reject(new Error(waiterRejectReason));
-    this.#targetWaiter = undefined;
     for (const frame of this.#pendingFrames.values()) {
       frame.close();
     }
     this.#pendingFrames.clear();
     this.#pendingFrameOrder.length = 0;
-    this.lastVideoFrame?.close();
-    this.lastVideoFrame = undefined;
-    this.lastImageBitmap?.close();
-    this.lastImageBitmap = undefined;
+    // lastVideoFrame/lastImageBitmap are intentionally NOT closed here. This runs on every
+    // seek/loop reset, and discarding the cached frame forces the renderer into emptyVideoFrame()
   }
 }

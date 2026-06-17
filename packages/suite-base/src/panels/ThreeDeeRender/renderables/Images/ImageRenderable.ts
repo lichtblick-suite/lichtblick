@@ -304,27 +304,19 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       }
       this.#lastQueuedVideoMessageTime = messageTime;
 
-      // Replay codecs (H.265) always take the drain queue — their decoder pipeline holds many
-      // chunks before emitting output, so the renderable must drive submission in order.
-      // Non-replay codecs (H.264) default to parallel decode for steady-state perf, but join the
-      // queue while a seek burst is being processed: a freshly detected backward seek, or any
-      // in-progress drain. Once the drain empties they return to parallel.
-      const useDrainQueue =
-        videoCodecNeedsKeyframeReplay(codec) ||
-        backwardSeekDetected ||
-        this.#activeVideoDecode != undefined ||
-        // videoPlayer not initialized means it's the first frame, but also a seek happened
-        !isVideoPlayerHealthy ||
-        this.#pendingVideoDecodeQueue.length > 0;
-
-      if (useDrainQueue) {
-        this.#pendingVideoDecodeQueue.push({ image, resizeWidth, onDecoded, seq });
-        return;
-      }
+      // All video codecs go through the single drain pipeline. The drain decodes serially (which
+      // every codec needs after a seek so the keyframe clears `#waitingForVideoKeyframe` before
+      // its P-frames evaluate that gate) and collapses a burst to a single GPU upload via
+      // `skipRender`, so a high-speed catch-up paints only the latest frame instead of one bitmap
+      // per frame. It also makes the in-flight work awaitable through `#activeVideoDecode`, so a
+      // pause stops painting at the current frame instead of letting orphaned parallel decodes
+      // keep drawing for a second after stop.
+      this.#pendingVideoDecodeQueue.push({ image, resizeWidth, onDecoded, seq });
+      return;
     }
 
-    // Steady-state non-replay-codec video, or raw images — decode in parallel; the
-    // `#displayedImageSequenceNumber > seq` guard inside `#startDecode` drops late results.
+    // Raw (non-video) images decode in parallel; the `#displayedImageSequenceNumber > seq` guard
+    // inside `#startDecode` drops late results.
     void this.#startDecode(image, seq, resizeWidth, onDecoded);
   }
 
