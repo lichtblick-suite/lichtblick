@@ -26,7 +26,7 @@ import { Time } from "@lichtblick/rostime";
  * A topic contributed by an additional source, carrying everything the standard deserialization
  * pipeline needs to decode the topic's messages.
  */
-export type AdditionalSourceTopic = {
+type AdditionalSourceTopic = {
   name: string;
   schemaName: string;
   /** Well-known message encoding, e.g. "json", "cdr", "protobuf", "ros1". */
@@ -38,7 +38,7 @@ export type AdditionalSourceTopic = {
 };
 
 /** A single, already-serialized message produced by the additional source side. */
-export type AdditionalSourceMessage = {
+type AdditionalSourceMessage = {
   topic: string;
   /** Log/receive time. */
   receiveTime: Time;
