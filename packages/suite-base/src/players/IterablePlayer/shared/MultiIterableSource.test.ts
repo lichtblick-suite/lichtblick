@@ -366,8 +366,8 @@ describe("MultiIterableSource", () => {
     const topicSelection = (...topics: string[]): TopicSelection =>
       new Map(topics.map((topic) => [topic, { topic }]));
 
-    it("should stop querying earlier sources once all requested topics are satisfied", async () => {
-      // GIVEN: three time-sequential sources; the nearest (latest start) already has every topic.
+    it("should query all relevant sources and aggregate requested topics", async () => {
+      // GIVEN: three time-sequential sources; only the nearest has messages for both topics.
       const farBackfill = jest.fn().mockResolvedValue([]);
       const midBackfill = jest.fn().mockResolvedValue([]);
       const nearBackfill = jest.fn().mockResolvedValue([messageOnTopic("a"), messageOnTopic("b")]);
@@ -385,17 +385,17 @@ describe("MultiIterableSource", () => {
         time: { sec: 25, nsec: 0 },
       });
 
-      // THEN: only the nearest source is queried; the redundant earlier sources are skipped.
+      // THEN: all relevant sources are queried and the requested topics are returned.
       expect(nearBackfill).toHaveBeenCalledTimes(1);
-      expect(midBackfill).not.toHaveBeenCalled();
-      expect(farBackfill).not.toHaveBeenCalled();
+      expect(midBackfill).toHaveBeenCalledTimes(1);
+      expect(farBackfill).toHaveBeenCalledTimes(1);
       expect(result.map((message) => message.topic).sort((a, b) => a.localeCompare(b))).toEqual([
         "a",
         "b",
       ]);
     });
 
-    it("should fall back to earlier sources only for topics missing from nearer ones", async () => {
+    it("should keep querying earlier relevant sources and merge topic results", async () => {
       // GIVEN: the nearest source has only topic "a"; the middle source has "b".
       const farBackfill = jest.fn().mockResolvedValue([]);
       const midBackfill = jest.fn().mockResolvedValue([messageOnTopic("b")]);
@@ -414,15 +414,16 @@ describe("MultiIterableSource", () => {
         time: { sec: 25, nsec: 0 },
       });
 
-      // THEN: the nearest source is asked for both topics, the middle source is asked only for the
-      // still-missing "b", and the farthest source is never reached.
+      // THEN: all relevant sources are queried with requested topics and merged into the result.
       expect(
         [...nearBackfill.mock.calls[0]![0].topics.keys()].sort((a, b) => a.localeCompare(b)),
       ).toEqual(["a", "b"]);
       expect(
         [...midBackfill.mock.calls[0]![0].topics.keys()].sort((a, b) => a.localeCompare(b)),
-      ).toEqual(["b"]);
-      expect(farBackfill).not.toHaveBeenCalled();
+      ).toEqual(["a", "b"]);
+      expect(
+        [...farBackfill.mock.calls[0]![0].topics.keys()].sort((a, b) => a.localeCompare(b)),
+      ).toEqual(["a", "b"]);
       expect(result.map((message) => message.topic).sort((a, b) => a.localeCompare(b))).toEqual([
         "a",
         "b",

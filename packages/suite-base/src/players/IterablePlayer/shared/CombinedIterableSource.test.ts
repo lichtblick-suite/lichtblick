@@ -75,9 +75,13 @@ class FakeSource implements ISerializedIterableSource {
   }
 
   public async getBackfillMessages(
-    _args: GetBackfillMessagesArgs,
+    args: GetBackfillMessagesArgs,
   ): Promise<MessageEvent<Uint8Array>[]> {
-    const lastSec = this.#opts.messageSeconds.at(-1);
+    if (!args.topics.has(this.#opts.topic)) {
+      return [];
+    }
+
+    const lastSec = this.#opts.messageSeconds.filter((sec) => sec <= args.time.sec).at(-1);
     if (lastSec == undefined) {
       return [];
     }

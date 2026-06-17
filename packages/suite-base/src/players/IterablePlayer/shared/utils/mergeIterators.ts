@@ -29,17 +29,17 @@ export async function* mergeMessageIterators(
 ): AsyncIterableIterator<Readonly<IteratorResult<Uint8Array>>> {
   const heap = new Heap<MergeNode>((a, b) => getTime(a.value) - getTime(b.value));
 
-  // Prime the heap with the first value from each iterator.
-  await Promise.all(
-    iterators.map(async (iterator) => {
-      const result = await iterator.next();
-      if (!(result.done ?? false)) {
-        heap.push({ value: result.value, iterator });
-      }
-    }),
-  );
-
   try {
+    // Prime the heap with the first value from each iterator.
+    await Promise.all(
+      iterators.map(async (iterator) => {
+        const result = await iterator.next();
+        if (!(result.done ?? false)) {
+          heap.push({ value: result.value, iterator });
+        }
+      }),
+    );
+
     while (!heap.isEmpty()) {
       const node = heap.pop()!;
       yield node.value;

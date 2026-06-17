@@ -55,7 +55,7 @@ export function initialize(
   }
 
   if (!source) {
-    throw new Error("file or url required");
+    throw new Error("file, files, url, or urls required");
   }
 
   const wrapped = new WorkerSerializedIterableSourceWorker(withAdditionalSources(source, args));
