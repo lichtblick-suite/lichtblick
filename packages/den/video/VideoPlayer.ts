@@ -66,7 +66,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   // remain owned by this class until they are dequeued (returned to the caller) or disposed.
   readonly #pendingFrames = new Map<number, VideoFrame>();
   readonly #pendingFrameOrder: number[] = [];
-  #frameWaiters = new Map<
+  readonly #frameWaiters = new Map<
     number,
     {
       promise: Promise<DecodeFramesResult>;
@@ -300,7 +300,8 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
         }
       })
       .catch((error: unknown) => {
-        this.emit("error", error as Error);
+        const err = error instanceof Error ? error : new Error(String(error));
+        this.emit("error", err);
         waiterPromise = Promise.resolve({ type: "aborted" });
       });
 
