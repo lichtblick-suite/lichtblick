@@ -9,4 +9,3 @@
 // module (it is worker-only and pulls in @lichtblick/mcap-support); re-exporting it here would risk
 // dragging those deps into the main bundle via type-only consumers (session API, contexts).
 export * from "./types";
-

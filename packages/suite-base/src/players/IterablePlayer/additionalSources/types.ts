@@ -60,4 +60,3 @@ export type AdditionalSourceDescriptor = {
   topics: AdditionalSourceTopic[];
   messages: AdditionalSourceMessage[];
 };
-

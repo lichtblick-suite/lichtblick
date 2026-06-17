@@ -75,7 +75,13 @@ describe("AdditionalIterableSource", () => {
 
       // Then
       expect(init.topics).toEqual([
-        { name: TOPIC, schemaName: SCHEMA, messageEncoding: "json", schemaEncoding: undefined, schemaData: undefined },
+        {
+          name: TOPIC,
+          schemaName: SCHEMA,
+          messageEncoding: "json",
+          schemaEncoding: undefined,
+          schemaData: undefined,
+        },
       ]);
       expect(init.start).toEqual({ sec: 1, nsec: 0 });
       expect(init.end).toEqual({ sec: 2, nsec: 0 });
@@ -229,4 +235,3 @@ describe("AdditionalIterableSource", () => {
     });
   });
 });
-

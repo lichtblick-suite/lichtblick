@@ -8,10 +8,7 @@ import {
   InitTopicStatsMap,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
 
-import {
-  validateAndAddNewDatatypes,
-  validateAndAddNewTopics,
-} from "./validateInitialization";
+import { validateAndAddNewDatatypes, validateAndAddNewTopics } from "./validateInitialization";
 
 export const setStartTime = (accumulated: Time, current: Time): Time => {
   return compare(current, accumulated) < 0 ? current : accumulated;
@@ -103,4 +100,3 @@ export const mergeInitializations = (initializations: Initialization[]): Initial
 
   return resultInit;
 };
-

@@ -68,4 +68,3 @@ function getTime(event: Readonly<IteratorResult<Uint8Array>>): number {
   }
   return Number.MAX_SAFE_INTEGER;
 }
-

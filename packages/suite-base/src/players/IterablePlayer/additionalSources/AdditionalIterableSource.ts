@@ -44,7 +44,6 @@ function cloneMessageEvent(msgEvent: DecodedMessage): DecodedMessage {
   return { ...msgEvent, message: new Uint8Array(msgEvent.message) };
 }
 
-
 /**
  * A generic serialized source built from a self-describing {@link AdditionalSourceDescriptor}.
  *
