@@ -68,11 +68,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   #decoder: VideoDecoder;
   #decoderConfig: VideoDecoderConfig | undefined;
   readonly #mutex = new Mutex();
-  // Decoded frames keyed by their EncodedVideoChunk timestamp. The order array tracks insertion
-  // order so we can return the newest decoded frame on timeout without scanning the map. Frames
-  // remain owned by this class until they are dequeued (returned to the caller) or disposed.
-  readonly #pendingFrames = new Map<number, VideoFrame>();
-  readonly #pendingFrameOrder: number[] = [];
   readonly #frameWaiters = new Map<number, FrameWaiter>();
   #lastSubmittedTimestampMicros: number | undefined;
   #currentDecodeTimestampMicros: number | undefined;
@@ -420,11 +415,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
 
     this.#lastSubmittedTimestampMicros = undefined;
     this.#currentDecodeTimestampMicros = undefined;
-    for (const frame of this.#pendingFrames.values()) {
-      frame.close();
-    }
-    this.#pendingFrames.clear();
-    this.#pendingFrameOrder.length = 0;
     // lastVideoFrame/lastImageBitmap are intentionally NOT closed here. This runs on every
     // seek/loop reset, and discarding the cached frame forces the renderer into emptyVideoFrame()
   }
