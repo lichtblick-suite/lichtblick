@@ -38,6 +38,13 @@ export type DecodeFramesResult =
   | { type: "timeout" }
   | { type: "aborted"; frame?: VideoFrame };
 
+type FrameWaiter = {
+  promise: Promise<DecodeFramesResult>;
+  resolve: (result: DecodeFramesResult) => void;
+  reject: (error: Error) => void;
+  timeoutId: ReturnType<typeof setTimeout>;
+};
+
 export type VideoPlayerEventTypes = {
   frame: (frame: VideoFrame) => void;
   debug: (message: string) => void;
@@ -66,15 +73,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   // remain owned by this class until they are dequeued (returned to the caller) or disposed.
   readonly #pendingFrames = new Map<number, VideoFrame>();
   readonly #pendingFrameOrder: number[] = [];
-  readonly #frameWaiters = new Map<
-    number,
-    {
-      promise: Promise<DecodeFramesResult>;
-      resolve: (result: DecodeFramesResult) => void;
-      reject: (error: Error) => void;
-      timeoutId: ReturnType<typeof setTimeout>;
-    }
-  >();
+  readonly #frameWaiters = new Map<number, FrameWaiter>();
   #lastSubmittedTimestampMicros: number | undefined;
   #currentDecodeTimestampMicros: number | undefined;
   #codedSize: { width: number; height: number } | undefined;
@@ -299,9 +298,9 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
           }
         }
       })
-      .catch((error: unknown) => {
-        const err = error instanceof Error ? error : new Error(String(error));
-        this.emit("error", err);
+      .catch((unk: unknown) => {
+        const error = new Error(`Failed to submit decode chain: ${(unk as Error).message}`);
+        this.emit("error", error);
         waiterPromise = Promise.resolve({ type: "aborted" });
       });
 
