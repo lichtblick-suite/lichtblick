@@ -77,7 +77,7 @@ interface ILogger {
 export default class CachedFilelike implements Filelike {
   #fileReader: FileReader;
   #cacheSizeInBytes: number = Infinity;
-  #readAheadEnabled: boolean = true;
+  readonly #readAheadEnabled: boolean = true;
   #fileSize?: number;
   #virtualBuffer: VirtualLRUBuffer;
   #log: ILogger;
