@@ -25,7 +25,6 @@ type MockDecoderHandle = {
 type MockDecoderInstance = {
   state: "configured" | "closed" | "unconfigured";
   decodeQueueSize: number;
-  ondequeue: ((event: Event) => void) | null;
 };
 
 type SetupOptions = {
@@ -51,7 +50,6 @@ function setup(options: SetupOptions = {}): MockDecoderHandle & {
   class MockVideoDecoder implements MockDecoderInstance {
     public state: MockDecoderInstance["state"] = "unconfigured";
     public decodeQueueSize = 0;
-    public ondequeue: MockDecoderInstance["ondequeue"] = null;
     readonly #init: VideoDecoderInit;
 
     public constructor(init: VideoDecoderInit) {
@@ -71,7 +69,6 @@ function setup(options: SetupOptions = {}): MockDecoderHandle & {
       handle.outputFrames.set(chunk.timestamp, (frame) => {
         this.#init.output(frame);
         this.decodeQueueSize--;
-        this.ondequeue?.(new Event("dequeue"));
       });
     }
 
@@ -275,7 +272,6 @@ describe("VideoPlayer", () => {
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
       public decodeQueueSize = 0;
-      public ondequeue: ((event: Event) => void) | null = null;
 
       public constructor(init: VideoDecoderInit) {
         output = init.output;
@@ -293,7 +289,6 @@ describe("VideoPlayer", () => {
           const decoder = decoders[0];
           if (decoder) {
             decoder.decodeQueueSize--;
-            decoder.ondequeue?.(new Event("dequeue"));
           }
         }, 40);
       }
@@ -319,12 +314,10 @@ describe("VideoPlayer", () => {
       { data: new Uint8Array([1]), timestampMicros: 1000, type: "key" },
     ]);
     await Promise.resolve();
-    expect(decoders[0]?.ondequeue).toBeDefined();
     await jest.advanceTimersByTimeAsync(40);
 
-    // Then decodeFrames resolves with the target frame and the ondequeue handler is detached
+    // Then decodeFrames resolves with the target frame
     await expect(decodePromise).resolves.toMatchObject({ type: "target" });
-    expect(decoders[0]?.ondequeue).toBeNull();
   });
 
   it("should reject non-increasing timestamps until reset", async () => {
@@ -334,7 +327,6 @@ describe("VideoPlayer", () => {
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
       public decodeQueueSize = 0;
-      public ondequeue: ((event: Event) => void) | null = null;
       readonly #init: VideoDecoderInit;
 
       public constructor(init: VideoDecoderInit) {
@@ -385,7 +377,6 @@ describe("VideoPlayer", () => {
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
       public decodeQueueSize = 1;
-      public ondequeue: ((event: Event) => void) | null = null;
       readonly #init: VideoDecoderInit;
 
       public constructor(init: VideoDecoderInit) {
@@ -485,7 +476,6 @@ describe("VideoPlayer", () => {
     class MockVideoDecoder {
       public state: "configured" | "closed" | "unconfigured" = "unconfigured";
       public decodeQueueSize = 0;
-      public ondequeue: ((event: Event) => void) | null = null;
       readonly #init: VideoDecoderInit;
 
       public constructor(init: VideoDecoderInit) {

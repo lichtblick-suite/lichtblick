@@ -41,7 +41,6 @@ export type DecodeFramesResult =
 type FrameWaiter = {
   promise: Promise<DecodeFramesResult>;
   resolve: (result: DecodeFramesResult) => void;
-  reject: (error: Error) => void;
   timeoutId: ReturnType<typeof setTimeout>;
 };
 
@@ -302,21 +301,11 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
     return (await waiterPromise) ?? { type: "timeout" };
   }
 
-  #registerFrameWaiter(
-    timestampMicros: number,
-    timeoutMs: number,
-  ): {
-    promise: Promise<DecodeFramesResult>;
-    resolve: (result: DecodeFramesResult) => void;
-    reject: (error: Error) => void;
-    timeoutId: ReturnType<typeof setTimeout>;
-  } {
+  #registerFrameWaiter(timestampMicros: number, timeoutMs: number): FrameWaiter {
     let resolve!: (result: DecodeFramesResult) => void;
-    let reject!: (error: Error) => void;
 
-    const promise = new Promise<DecodeFramesResult>((res, rej) => {
+    const promise = new Promise<DecodeFramesResult>((res) => {
       resolve = res;
-      reject = rej;
     });
 
     const timeoutId = setTimeout(() => {
@@ -324,7 +313,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       resolve({ type: "timeout" });
     }, timeoutMs);
 
-    return { promise, resolve, reject, timeoutId };
+    return { promise, resolve, timeoutId };
   }
 
   #cacheDisplayFrame(videoFrame: VideoFrame): void {
