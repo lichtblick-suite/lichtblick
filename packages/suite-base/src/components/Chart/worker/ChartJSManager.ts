@@ -43,6 +43,7 @@ import {
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 import { fontMonospace } from "@lichtblick/theme";
 
+import { hasGapMarkerBetweenSelectionAndCursor } from "./lastX";
 import { lineSegmentLabelColor } from "./lineSegments";
 import { proxyTyped } from "./proxy";
 
@@ -91,15 +92,28 @@ const lastX: InteractionModeFunction = (chart, event, _options, useFinalPosition
   const position = getRelativePosition(event, chart);
 
   // Create a sparse array to track the last datum for each dataset
-  const datasetIndexToLastItem: InteractionItem[] = [];
+  const datasetIndexToLastItem: Array<InteractionItem | undefined> = [];
   Interaction.evaluateInteractionItems(chart, "x", position, (element, datasetIndex, index) => {
     const center = element.getCenterPoint(useFinalPosition);
     if (center.x <= position.x) {
       datasetIndexToLastItem[datasetIndex] = { element, datasetIndex, index };
     }
   });
-  // Filter unused entries from the sparse array
-  return datasetIndexToLastItem.filter(Boolean);
+
+  const cursorXValue = chart.scales.x?.getValueForPixel(position.x);
+
+  const items = datasetIndexToLastItem.filter((item): item is InteractionItem => item != undefined);
+
+  if (typeof cursorXValue !== "number" || !Number.isFinite(cursorXValue)) {
+    return items;
+  }
+
+  return items.filter((item) => {
+    const dataset = chart.data.datasets[item.datasetIndex];
+    const datasetData = Array.isArray(dataset?.data) ? dataset.data : undefined;
+
+    return !hasGapMarkerBetweenSelectionAndCursor(datasetData, item.index, cursorXValue);
+  });
 };
 
 Interaction.modes.lastX = lastX;

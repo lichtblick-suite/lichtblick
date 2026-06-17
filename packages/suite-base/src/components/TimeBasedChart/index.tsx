@@ -355,6 +355,11 @@ export default function TimeBasedChart(props: Props): React.JSX.Element {
       }
 
       const { value, constantName, states } = datum;
+      const isGapValue = typeof value === "number" && Number.isNaN(value);
+      if (isGapValue) {
+        continue;
+      }
+
       if (value == undefined && states == undefined) {
         continue;
       }

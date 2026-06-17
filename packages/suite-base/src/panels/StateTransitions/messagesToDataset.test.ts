@@ -496,4 +496,123 @@ describe("messagesToDataset", () => {
 
     expect(result.data.length).toBe(2);
   });
+
+  it("should add a gap (NaN point) when null/undefined value is encountered after valid data", () => {
+    const validMessageData = {
+      messageEvent,
+      queriedData: [{ value: queriedDataValue, path: queriedDataPath }],
+    };
+
+    const nullMessageData = {
+      messageEvent: { ...messageEvent, receiveTime: { sec: 2, nsec: 0 } },
+      queriedData: [{ value: undefined, path: queriedDataPath }],
+    };
+
+    const anotherValidMessageData = {
+      messageEvent: { ...messageEvent, receiveTime: { sec: 3, nsec: 0 } },
+      queriedData: [{ value: queriedDataValue, path: queriedDataPath }],
+    };
+
+    const blocks = [[validMessageData, nullMessageData, anotherValidMessageData]];
+
+    const result = messagesToDataset({
+      ...args,
+      blocks,
+      path: { ...args.path, timestampMethod: "receiveTime" },
+    });
+
+    // Should have: valid point, gap (NaN), valid point
+    expect(result.data.length).toBe(3);
+    expect(result.data[0]).toEqual(expect.objectContaining({ value: queriedDataValue }));
+    expect(result.data[1]).toEqual(
+      expect.objectContaining({
+        x: expect.any(Number),
+        y: Number.NaN,
+        value: Number.NaN,
+      }),
+    );
+    expect(result.data[2]).toEqual(expect.objectContaining({ value: queriedDataValue }));
+  });
+
+  it("should create one gap for consecutive nulls and resume with a new state", () => {
+    const firstValidValue = 3;
+    const resumedValidValue = 4;
+
+    const firstValidMessage = {
+      messageEvent,
+      queriedData: [{ value: firstValidValue, path: queriedDataPath }],
+    };
+
+    const nullMessageA = {
+      messageEvent: { ...messageEvent, receiveTime: { sec: 2, nsec: 0 } },
+      queriedData: [{ value: null, path: queriedDataPath }],
+    };
+
+    const nullMessageB = {
+      messageEvent: { ...messageEvent, receiveTime: { sec: 3, nsec: 0 } },
+      queriedData: [{ value: null, path: queriedDataPath }],
+    };
+
+    const resumedValidMessage = {
+      messageEvent: { ...messageEvent, receiveTime: { sec: 4, nsec: 0 } },
+      queriedData: [{ value: resumedValidValue, path: queriedDataPath }],
+    };
+
+    const blocks = [[firstValidMessage, nullMessageA, nullMessageB, resumedValidMessage]];
+
+    const result = messagesToDataset({
+      ...args,
+      blocks,
+      path: { ...args.path, timestampMethod: "receiveTime" },
+    });
+
+    expect(result.data.length).toBe(3);
+    expect(result.data[0]).toEqual(expect.objectContaining({ value: firstValidValue }));
+    expect(result.data[1]).toEqual(
+      expect.objectContaining({
+        x: expect.any(Number),
+        y: Number.NaN,
+        value: Number.NaN,
+      }),
+    );
+    expect(result.data[2]).toEqual(
+      expect.objectContaining({
+        value: resumedValidValue,
+        label: expect.stringContaining(String(resumedValidValue)),
+      }),
+    );
+  });
+
+  it("should preserve a full-duration segment before a null gap", () => {
+    const startTime = { sec: 1_539_869_067, nsec: 0 };
+
+    const activeMessageA = {
+      messageEvent: { ...messageEvent, receiveTime: { sec: 1_539_869_067, nsec: 0 } },
+      queriedData: [{ value: true, path: queriedDataPath }],
+    };
+
+    const activeMessageB = {
+      messageEvent: { ...messageEvent, receiveTime: { sec: 1_539_869_067, nsec: 999_999_000 } },
+      queriedData: [{ value: true, path: queriedDataPath }],
+    };
+
+    const nullMessage = {
+      messageEvent: { ...messageEvent, receiveTime: { sec: 1_539_869_068, nsec: 0 } },
+      queriedData: [{ value: null, path: queriedDataPath }],
+    };
+
+    const result = messagesToDataset({
+      ...args,
+      startTime,
+      blocks: [[activeMessageA, activeMessageB, nullMessage]],
+      path: { ...args.path, timestampMethod: "receiveTime" },
+      showPoints: false,
+    });
+
+    expect(result.data).toHaveLength(3);
+    expect(result.data[0]).toEqual(expect.objectContaining({ x: 0, value: true }));
+    expect(result.data[1]).toEqual(expect.objectContaining({ value: true }));
+    expect(result.data[1]?.x).toBeCloseTo(0.999999, 6);
+    expect(result.data[2]).toEqual(expect.objectContaining({ x: 1, value: Number.NaN }));
+  });
 });

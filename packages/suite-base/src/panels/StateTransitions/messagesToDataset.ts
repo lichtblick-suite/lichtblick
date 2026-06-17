@@ -43,6 +43,7 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
 
   let lastValue: string | number | bigint | boolean | undefined = undefined;
   let lastDatum: ChartDataset["data"][0] | undefined = undefined;
+  let lastValidDataAdded = false;
 
   for (const messages of blocks) {
     if (!messages) {
@@ -63,6 +64,21 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
       const { constantName, value } = queriedData;
 
       if (!isValidValue(value)) {
+        // Add a gap point if we previously added valid data. Use NaN instead of
+        // undefined so the gap survives the downsampling pipeline.
+        if (lastValidDataAdded && lastValue != undefined) {
+          // Flush a pending repeated-value endpoint before the gap so the
+          // previous state segment keeps its full duration up to this timestamp.
+          if (lastDatum != undefined) {
+            dataset.data.push(lastDatum);
+          }
+
+          const x = toSec(subtractTimes(timestamp, startTime));
+          dataset.data.push({ x, y: Number.NaN, value: Number.NaN });
+          lastValue = undefined;
+          lastDatum = undefined;
+          lastValidDataAdded = false;
+        }
         continue;
       }
 
@@ -84,6 +100,7 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
 
       if (isNewSegment || showPoints) {
         dataset.data.push(lastDatum);
+        lastValidDataAdded = true;
 
         // after we add a datum we clear the last datum so we don't try to add it again at the end
         lastDatum = undefined;
