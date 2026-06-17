@@ -75,9 +75,37 @@ export async function getBackfillMessagesFromSources(
   args: GetBackfillMessagesArgs,
 ): Promise<MessageEvent<Uint8Array>[]> {
   const relevantSources = filterSourcesForBackfill(sources, args.time);
-  const backfillMessages = await Promise.all(
-    relevantSources.map(async (source) => await source.getBackfillMessages(args)),
-  );
-  return backfillMessages.flat();
-}
+  const missingTopics = new Map(args.topics);
 
+  if (missingTopics.size === 0) {
+    return [];
+  }
+
+  // Query sources nearest to the backfill time first and stop as soon as every requested topic
+  // has a value. `sourceImpl` (and therefore `relevantSources`) is sorted ascending by start
+  // time, so we iterate in reverse to begin with the source covering the seek target.
+  //
+  // Without this short-circuit, every preceding source would independently read its last chunk
+  // for the requested topics — a large redundant download. For example, a forward seek across
+  const backfillMessages: MessageEvent<Uint8Array>[] = [];
+  for (let index = relevantSources.length - 1; index >= 0; index--) {
+    if (missingTopics.size === 0) {
+      break;
+    }
+
+    const source = relevantSources[index]!;
+    const topicsForSource = new Map(missingTopics);
+    const messages = await source.getBackfillMessages({ ...args, topics: topicsForSource });
+
+    if (messages.length === 0) {
+      continue;
+    }
+
+    backfillMessages.push(...messages);
+    for (const message of messages) {
+      missingTopics.delete(message.topic);
+    }
+  }
+
+  return backfillMessages;
+}
