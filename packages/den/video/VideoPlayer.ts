@@ -292,8 +292,8 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
           }
         }
       })
-      .catch((unk: unknown) => {
-        const error = new Error(`Failed to submit decode chain: ${(unk as Error).message}`);
+      .catch((error_: unknown) => {
+        const error = new Error(`Failed to submit decode chain: ${(error_ as Error).message}`);
         this.emit("error", error);
         waiterPromise = Promise.resolve({ type: "aborted" });
       });
