@@ -38,18 +38,6 @@ export type DecodeFramesResult =
   | { type: "timeout" }
   | { type: "aborted"; frame?: VideoFrame };
 
-type PendingDecode = {
-  targetTimestampMicros: number;
-  targetDeadlineMs: number;
-  waitForQueueDrain: boolean;
-  drained: boolean;
-  resolvedResult?: DecodeFramesResult;
-  resolve: (result: DecodeFramesResult) => void;
-  reject: (error: Error) => void;
-  targetTimeoutId?: ReturnType<typeof setTimeout>;
-  overallTimeoutId?: ReturnType<typeof setTimeout>;
-};
-
 export type VideoPlayerEventTypes = {
   frame: (frame: VideoFrame) => void;
   debug: (message: string) => void;
@@ -87,7 +75,6 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       timeoutId: ReturnType<typeof setTimeout>;
     }
   >();
-  // #decodeGeneration: number = 0;
   #lastSubmittedTimestampMicros: number | undefined;
   #currentDecodeTimestampMicros: number | undefined;
   #codedSize: { width: number; height: number } | undefined;
