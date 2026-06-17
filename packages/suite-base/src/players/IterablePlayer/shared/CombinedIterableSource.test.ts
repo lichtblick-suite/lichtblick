@@ -241,7 +241,7 @@ describe("CombinedIterableSource", () => {
 
       // When
       const messages = await combined.getBackfillMessages({
-        topics: new Map(),
+        topics: new Map(["/mcap", "/tags"].map((topic) => [topic, { topic }])),
         time: { sec: 4, nsec: 0 },
       } as GetBackfillMessagesArgs);
 
