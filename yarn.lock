@@ -2827,10 +2827,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discoveryjs/json-ext@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@discoveryjs/json-ext@npm:1.0.0"
-  checksum: 62dda0c101df5c866c84e633f68aac6e23de5b24f98c1b8a9750a827afc31fb959faddeba1f4224eb053cfab152c4bf3c2d1bfa16bcab37e047888420529321c
+"@discoveryjs/json-ext@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@discoveryjs/json-ext@npm:1.1.0"
+  checksum: f16d3732629095cbe37d42d504a80c44261dd5ad703ec5963729dab0786b2b8a2b86f81cf9d1dd593ad914d50146ecd281eeac60bfe9cf246257f84c57b72204
   languageName: node
   linkType: hard
 
@@ -4928,18 +4928,18 @@ __metadata:
     style-loader: 4.0.0
     text-metrics: 3.0.0
     three: "patch:three@0.156.1#../../patches/three.patch"
-    tinycolor2: "npm:1.6.0"
-    ts-essentials: "npm:9.4.0"
-    ts-key-enum: "npm:3.0.13"
-    ts-loader: "npm:9.5.4"
-    tss-react: "npm:4.9.19"
-    typescript: "npm:6.0.3"
-    use-debounce: "npm:10.0.0"
-    use-immer: "npm:0.11.0"
-    uuid: "npm:14.0.0"
-    vm-browserify: "npm:1.1.2"
-    webpack: "npm:5.108.3"
-    zustand: "npm:4.5.7"
+    tinycolor2: 1.6.0
+    ts-essentials: 9.4.0
+    ts-key-enum: 3.0.13
+    ts-loader: 9.5.4
+    tss-react: 4.9.19
+    typescript: 5.9.3
+    use-debounce: 10.0.0
+    use-immer: 0.11.0
+    uuid: 14.0.0
+    vm-browserify: 1.1.2
+    webpack: 5.107.2
+    zustand: 4.5.7
   languageName: unknown
   linkType: soft
 
@@ -4957,46 +4957,46 @@ __metadata:
     "@lichtblick/rostime": "npm:1.0.0"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
-    "@lichtblick/tsconfig": "npm:1.1.2"
-    "@mcap/core": "npm:2.2.0"
-    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
-    "@storybook/react-webpack5": "npm:10.4.6"
-    "@types/mock-fs": "npm:4.13.4"
-    "@types/plist": "npm:^3.0.3"
-    "@types/pngjs": "npm:^6.0.2"
-    "@types/randomstring": "npm:1.3.0"
-    "@types/tinycolor2": "npm:1.4.4"
-    "@types/utif": "npm:^3.0.6"
-    "@xmldom/xmldom": "npm:0.9.10"
-    async-mutex: "npm:0.5.0"
-    builder-util: "npm:*"
-    clean-webpack-plugin: "npm:4.0.0"
-    dotenv: "npm:17.2.2"
-    electron: "npm:43.0.0"
-    electron-builder: "npm:26.15.3"
-    electron-devtools-installer: "npm:4.0.0"
-    electron-squirrel-startup: "npm:1.0.1"
-    electron-updater: "npm:6.8.9"
-    esbuild-loader: "npm:4.3.0"
-    eventemitter3: "npm:5.0.1"
-    fork-ts-checker-webpack-plugin: "npm:9.0.2"
-    html-webpack-plugin: "npm:5.5.3"
-    jszip: "npm:3.10.1"
-    mock-fs: "npm:5.5.0"
-    path-browserify: "npm:1.0.1"
-    plist: "npm:4.0.0"
-    pngjs: "npm:7.0.0"
-    quicklookjs: "npm:1.0.1"
-    randomstring: "npm:1.3.1"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.3.1"
-    react-refresh-typescript: "npm:2.0.10"
-    react-use: "npm:17.6.0"
-    tinycolor2: "npm:1.6.0"
-    tss-react: "npm:4.9.19"
-    utif: "npm:3.1.0"
-    webpack: "npm:5.108.3"
-    webpack-dev-server: "npm:5.2.6"
+    "@lichtblick/tsconfig": 1.0.2
+    "@mcap/core": 2.2.0
+    "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
+    "@storybook/react": 9.1.9
+    "@types/mock-fs": 4.13.4
+    "@types/plist": ^3.0.3
+    "@types/pngjs": ^6.0.2
+    "@types/randomstring": 1.3.0
+    "@types/tinycolor2": 1.4.4
+    "@types/utif": ^3.0.6
+    "@xmldom/xmldom": 0.9.10
+    async-mutex: 0.5.0
+    builder-util: "*"
+    clean-webpack-plugin: 4.0.0
+    dotenv: 17.2.2
+    electron: 39.8.5
+    electron-builder: 26.0.12
+    electron-devtools-installer: 4.0.0
+    electron-squirrel-startup: 1.0.1
+    electron-updater: 6.6.2
+    esbuild-loader: 4.3.0
+    eventemitter3: 5.0.1
+    fork-ts-checker-webpack-plugin: 9.0.2
+    html-webpack-plugin: 5.5.3
+    jszip: 3.10.1
+    mock-fs: 5.5.0
+    path-browserify: 1.0.1
+    plist: 4.0.0
+    pngjs: 7.0.0
+    quicklookjs: 1.0.1
+    randomstring: 1.3.1
+    react: 18.3.1
+    react-dom: 18.3.1
+    react-refresh-typescript: 2.0.10
+    react-use: 17.6.0
+    tinycolor2: 1.6.0
+    tss-react: 4.9.19
+    utif: 3.1.0
+    webpack: 5.107.2
+    webpack-dev-server: 5.2.5
   languageName: unknown
   linkType: soft
 
@@ -5009,19 +5009,18 @@ __metadata:
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/test-builders": "npm:1.0.1"
     "@lichtblick/theme": "workspace:*"
-    "@lichtblick/tsconfig": "npm:1.1.2"
-    "@mui/material": "npm:7.2.0"
-    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
-    "@storybook/react-webpack5": "npm:10.4.6"
-    "@testing-library/react": "npm:16.0.0"
-    clean-webpack-plugin: "npm:4.0.0"
-    copy-webpack-plugin: "npm:14.0.0"
-    html-webpack-plugin: "npm:5.6.0"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.3.1"
-    tss-react: "npm:4.9.19"
-    webpack: "npm:5.108.3"
-    webpack-dev-server: "npm:5.2.6"
+    "@lichtblick/tsconfig": 1.0.2
+    "@mui/material": 7.2.0
+    "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
+    "@storybook/react": 9.1.9
+    clean-webpack-plugin: 4.0.0
+    copy-webpack-plugin: 14.0.0
+    html-webpack-plugin: 5.6.0
+    react: 18.3.1
+    react-dom: 18.3.1
+    tss-react: 4.9.19
+    webpack: 5.107.2
+    webpack-dev-server: 5.2.5
   languageName: unknown
   linkType: soft
 
@@ -6875,7 +6874,7 @@ __metadata:
 "@types/dom-webcodecs@npm:0.1.14":
   version: 0.1.14
   resolution: "@types/dom-webcodecs@npm:0.1.14"
-  checksum: 10/175789a9613202380d28391710b6d5867a76d024135b3ba86297ad49ac5bad8d76f69ca84252db9da260b83ca8f86180fdfd74a8d6eb6a2e47856d3b3edcbac2
+  checksum: 3670184fcec5f13c551d2e6af6638ace8515a2c1bc6f54df10a70ac2feacf49ef59f3518e10243c80abd12909f71ce3d9ac457bc85ce583c894d3a20e9619af9
   languageName: node
   linkType: hard
 
@@ -9296,17 +9295,17 @@ __metadata:
     "@lichtblick/rostime": "npm:1.0.0"
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
-    "@lichtblick/tsconfig": "npm:1.1.2"
-    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
-    "@types/react": "npm:18.3.12"
-    "@types/react-dom": "npm:18.3.0"
-    clean-webpack-plugin: "npm:4.0.0"
-    html-webpack-plugin: "npm:5.6.0"
-    mathjs: "npm:15.2.0"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.2.0"
-    webpack: "npm:5.108.3"
-    webpack-dev-server: "npm:5.2.6"
+    "@lichtblick/tsconfig": 1.0.2
+    "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
+    "@types/react": 18.3.12
+    "@types/react-dom": 18.3.0
+    clean-webpack-plugin: 4.0.0
+    html-webpack-plugin: 5.6.0
+    mathjs: 15.2.0
+    react: 18.3.1
+    react-dom: 18.2.0
+    webpack: 5.107.2
+    webpack-dev-server: 5.2.5
   languageName: unknown
   linkType: soft
 
@@ -11724,7 +11723,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enhanced-resolve@npm:^5.0.0, enhanced-resolve@npm:^5.20.0, enhanced-resolve@npm:^5.22.0":
+"enhanced-resolve@npm:^5.0.0, enhanced-resolve@npm:^5.22.0":
   version: 5.24.0
   resolution: "enhanced-resolve@npm:5.24.0"
   dependencies:
@@ -11965,10 +11964,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es-module-lexer@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "es-module-lexer@npm:2.0.0"
-  checksum: 6290c43cc9bf6c9f9167b4be8c0105137401fbbd9d503d89880f7e811286cd33ab628407e7dea3c14d41cf9e634e580e5d9952907003a88c7fb2461de6f1b2c1
+"es-module-lexer@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "es-module-lexer@npm:2.1.0"
+  checksum: 65538cfb7bfc48c80cf827764132137c22bb41d1dd2921a9767bcb9763342d87ed844994f59a267b05a79a36b7ebb3ad892894db69889bf3e0af6bd7d5291223
   languageName: node
   linkType: hard
 
@@ -12962,13 +12961,6 @@ __metadata:
   version: 3.1.2
   resolution: "fast-uri@npm:3.1.2"
   checksum: 73a6e1b04e6fcf7a09ed93316e72d643ef177d26969973784690708612141f2c2f74657120bab75bf5bbc26bfd535a32c90a8c3bc50aca50584cf01f98815afe
-  languageName: node
-  linkType: hard
-
-"fastest-levenshtein@npm:^1.0.12":
-  version: 1.0.16
-  resolution: "fastest-levenshtein@npm:1.0.16"
-  checksum: a78d44285c9e2ae2c25f3ef0f8a73f332c1247b7ea7fb4a191e6bb51aa6ee1ef0dfb3ed113616dcdc7023e18e35a8db41f61c8d88988e877cf510df8edafbc71
   languageName: node
   linkType: hard
 
@@ -16229,9 +16221,9 @@ __metadata:
     tslib: 2.8.1
     typescript: 5.9.3
     vm-browserify: 1.1.2
-    webpack: 5.106.2
-    webpack-cli: 7.0.2
-    webpack-dev-server: 5.2.4
+    webpack: 5.107.2
+    webpack-cli: 7.0.3
+    webpack-dev-server: 5.2.5
     webpack-hot-middleware: 2.26.0
   languageName: unknown
   linkType: soft
@@ -16252,10 +16244,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-runner@npm:^4.3.1":
-  version: 4.3.1
-  resolution: "loader-runner@npm:4.3.1"
-  checksum: 14689a39a79b286d3d15f2199384d6132d62ea707abd6c7e50dc8a1f80c20cbfdd5344f7e6b4a7346974696689ab1a96f8ec7d1e8bf206c5264561502658bd3c
+"loader-runner@npm:^4.3.2":
+  version: 4.3.2
+  resolution: "loader-runner@npm:4.3.2"
+  checksum: 92906b3d187999f49f6b22c4ee49261f9a38cd8ce00051e511b804fbac7d4533a48c7c5c1e051818c44e6bbfb11e6fbc3941f1d245155fd5debc50b2b5867215
   languageName: node
   linkType: hard
 
@@ -21388,9 +21380,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser-webpack-plugin@npm:^5.3.1, terser-webpack-plugin@npm:^5.3.17":
-  version: 5.4.0
-  resolution: "terser-webpack-plugin@npm:5.4.0"
+"terser-webpack-plugin@npm:^5.3.1, terser-webpack-plugin@npm:^5.5.0":
+  version: 5.6.1
+  resolution: "terser-webpack-plugin@npm:5.6.1"
   dependencies:
     "@jridgewell/trace-mapping": ^0.3.25
     jest-worker: ^27.4.5
@@ -22612,8 +22604,8 @@ __metadata:
     "@types/serve-handler": ^6
     playwright: 1.60.0
     serve-handler: 6.1.7
-    webpack: 5.106.2
-    webpack-dev-server: 5.2.4
+    webpack: 5.107.2
+    webpack-dev-server: 5.2.5
   languageName: unknown
   linkType: soft
 
@@ -22651,18 +22643,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-cli@npm:7.1.0":
-  version: 7.1.0
-  resolution: "webpack-cli@npm:7.1.0"
+"webpack-cli@npm:7.0.3":
+  version: 7.0.3
+  resolution: "webpack-cli@npm:7.0.3"
   dependencies:
-    "@discoveryjs/json-ext": "npm:^1.1.0"
-    commander: "npm:^14.0.3"
-    cross-spawn: "npm:^7.0.6"
-    envinfo: "npm:^7.21.0"
-    import-local: "npm:^3.2.0"
-    interpret: "npm:^3.1.1"
-    rechoir: "npm:^0.8.0"
-    webpack-merge: "npm:^6.0.1"
+    "@discoveryjs/json-ext": ^1.1.0
+    commander: ^14.0.3
+    cross-spawn: ^7.0.6
+    envinfo: ^7.14.0
+    import-local: ^3.0.2
+    interpret: ^3.1.1
+    rechoir: ^0.8.0
+    webpack-merge: ^6.0.1
   peerDependencies:
     js-yaml: ^4.0.0 || ^5.0.0
     json5: ^2.2.3
@@ -22683,7 +22675,7 @@ __metadata:
       optional: true
   bin:
     webpack-cli: bin/cli.js
-  checksum: 10/74d404728b057e5887a822dc5abb41b825e2a819da26891ecb7eb125282d5041b99c8d0f90f3e910c128813ddfe5d5d946ce0106aab1fb7bbb236a94223f897a
+  checksum: bf3f9ef77c305945a4033b7b08b52ac2fd3c0373aeb8e06abc158d4568e60ecc0f42ddf932fef42bbaf10835b1a34c61ef2a0920ab187822123b907d10b5bf5d
   languageName: node
   linkType: hard
 
@@ -22724,9 +22716,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-dev-server@npm:^5.2.4":
-  version: 5.2.4
-  resolution: "webpack-dev-server@npm:5.2.4"
+"webpack-dev-server@npm:5.2.5":
+  version: 5.2.5
+  resolution: "webpack-dev-server@npm:5.2.5"
   dependencies:
     "@types/bonjour": "npm:^3.5.13"
     "@types/connect-history-api-fallback": "npm:^1.5.4"
@@ -22765,7 +22757,7 @@ __metadata:
       optional: true
   bin:
     webpack-dev-server: bin/webpack-dev-server.js
-  checksum: 10/19c107cff555dbe2bda044f6faa45cd1f4d6779c6961b05a475b856709aa4d35cafb1c9a7ec2cb6463a7ca28a308d6e6bbc66b38ce8e1afeec5cd70e326a12ce
+  checksum: 349719d0487a5672f65a7427d54afc9f8ddc6b695042641ed9f468cb5a3c90866e16a236ecdb2ac62d2a922712f9c1296b8805b7ec0880f6a3f5c4280785f200
   languageName: node
   linkType: hard
 
@@ -22812,10 +22804,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-sources@npm:^3.3.4":
-  version: 3.3.4
-  resolution: "webpack-sources@npm:3.3.4"
-  checksum: 7a4862fc876417bdcefb21015f936ce645acd82e528433302f0c1d912e5f84f8cc051846c377935c98fd46131c342bb45a820e2a45af8eda4703bace46358dad
+"webpack-sources@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "webpack-sources@npm:3.5.0"
+  checksum: 748e288620d0731be0f89efaf9cce752d245e224b4d74361d1150ebe680338946ced1bbcc0a67b887cf0a86e1ed4d6c68770b7b7c46f83975c0bc30eb8c64ff6
   languageName: node
   linkType: hard
 
@@ -22826,11 +22818,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:5, webpack@npm:5.106.2":
-  version: 5.106.2
-  resolution: "webpack@npm:5.106.2"
+"webpack@npm:5, webpack@npm:5.107.2":
+  version: 5.107.2
+  resolution: "webpack@npm:5.107.2"
   dependencies:
-    "@types/eslint-scope": ^3.7.7
     "@types/estree": ^1.0.8
     "@types/json-schema": ^7.0.15
     "@webassemblyjs/ast": ^1.14.1
@@ -22840,26 +22831,26 @@ __metadata:
     acorn-import-phases: ^1.0.3
     browserslist: ^4.28.1
     chrome-trace-event: ^1.0.2
-    enhanced-resolve: ^5.20.0
-    es-module-lexer: ^2.0.0
+    enhanced-resolve: ^5.22.0
+    es-module-lexer: ^2.1.0
     eslint-scope: 5.1.1
     events: ^3.2.0
     glob-to-regexp: ^0.4.1
     graceful-fs: ^4.2.11
-    loader-runner: ^4.3.1
+    loader-runner: ^4.3.2
     mime-db: ^1.54.0
     neo-async: ^2.6.2
     schema-utils: ^4.3.3
     tapable: ^2.3.0
-    terser-webpack-plugin: ^5.3.17
+    terser-webpack-plugin: ^5.5.0
     watchpack: ^2.5.1
-    webpack-sources: ^3.3.4
+    webpack-sources: ^3.5.0
   peerDependenciesMeta:
     webpack-cli:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: fd44725871b6777b62cdcbb32492b48740bbd575811c2c45e1c9c9413d0cbf4de7aa9931b3ccfd072d155f811de3584951264bfa30164a5e2f5db66cbf52b260
+  checksum: b56e6c28fa238e1f185ffbcff9a28d02d12c195e07c174ba770b3e84bf969e0c41cb237123e9bfec3fc0b76b08c641fed8eb3468c141443707ff8aaaf579425e
   languageName: node
   linkType: hard
 
