@@ -532,16 +532,27 @@ First-class support is provided in **English only**. Translations into other lan
 Translation support is implemented using [`react-i18next`](https://react.i18next.com).
 
 ### Translation guidelines
+### Translation guidelines
 
+- We value **high-quality** translations over complete coverage. Every PR must have up-to-date **English** translations, but updating other languages is optional.
+- If you update an English translation and cannot provide accurate non-English translations, **delete the outdated non-English versions** in your PR. Optionally, open follow-up PRs with accurate translations.
 - We value **high-quality** translations over complete coverage. Every PR must have up-to-date **English** translations, but updating other languages is optional.
 - If you update an English translation and cannot provide accurate non-English translations, **delete the outdated non-English versions** in your PR. Optionally, open follow-up PRs with accurate translations.
 
 ### Translation files
+### Translation files
 
+The [`i18n` directory](packages/suite-base/src/i18n) contains translated strings organized by **namespaces** — e.g., [`i18n/en/appSettings.ts`](packages/suite-base/src/i18n/en/appSettings.ts) contains translations for the Settings tab.
 The [`i18n` directory](packages/suite-base/src/i18n) contains translated strings organized by **namespaces** — e.g., [`i18n/en/appSettings.ts`](packages/suite-base/src/i18n/en/appSettings.ts) contains translations for the Settings tab.
 
 ### Using translations in components
+### Using translations in components
 
+1. Call the [`useTranslation(namespace)`](https://react.i18next.com/latest/usetranslation-hook) hook to get the `t` function.
+2. Use `t("key")` to render translated strings.
+3. Use `camelCase` for all new localization keys.
+
+### Adding localization to a component
 1. Call the [`useTranslation(namespace)`](https://react.i18next.com/latest/usetranslation-hook) hook to get the `t` function.
 2. Use `t("key")` to render translated strings.
 3. Use `camelCase` for all new localization keys.
@@ -609,6 +620,22 @@ export * from "./myComponent";
 | English         | Chinese         |
 | --------------- | --------------- |
 | `<p>Hello!</p>` | `<p>你好！</p>` |
+
+---
+
+## License
+
+Lichtblick is licensed under the [Mozilla Public License v2.0](LICENSE). All contributions must comply with this license.
+
+---
+
+## Credits
+
+Lichtblick originally began as a fork of [Foxglove Studio](https://github.com/foxglove/studio), an open-source project developed by [Foxglove](https://foxglove.dev/).
+
+---
+
+_Thank you for contributing to Lichtblick! Your efforts help build better tools for the robotics community._
 
 ---
 
