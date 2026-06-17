@@ -141,8 +141,8 @@ describe("VideoPlayer", () => {
     });
   });
 
-  it("should return an intermediate frame when target is late", async () => {
-    // Given an H.264-configured player and a slow mock decoder (no ondequeue wiring)
+  it("should time out when the target frame does not arrive before the deadline", async () => {
+    // Given an H.264-configured player and a slow mock decoder that stores but never delivers
     const outputFrames = new Map<number, (frame: VideoFrame) => void>();
 
     class MockVideoDecoder {
@@ -177,21 +177,18 @@ describe("VideoPlayer", () => {
     const player = new VideoPlayer();
     await player.init({ codec: "avc1.64001f" });
 
-    // When the H.264 target-frame deadline elapses with only the earlier frame produced
+    // When the H.264 target-frame deadline elapses with only the earlier (reference) frame produced
     const decodePromise = player.decodeFrames([
       { data: new Uint8Array([1]), timestampMicros: 0, type: "key" },
       { data: new Uint8Array([2]), timestampMicros: 33333, type: "delta" },
     ]);
     await Promise.resolve();
     await jest.advanceTimersByTimeAsync(10);
-    const intermediateFrame = createFrame(0);
-    outputFrames.get(0)?.(intermediateFrame);
+    // The reference frame arrives after the deadline; it has no waiter and is dropped.
+    outputFrames.get(0)?.(createFrame(0));
 
-    // Then decodeFrames resolves with the intermediate frame
-    await expect(decodePromise).resolves.toEqual<DecodeFramesResult>({
-      type: "intermediate",
-      frame: intermediateFrame,
-    });
+    // Then decodeFrames resolves with a timeout (the de-serialized path has no intermediate result)
+    await expect(decodePromise).resolves.toEqual<DecodeFramesResult>({ type: "timeout" });
   });
 
   it("should not return an intermediate HEVC frame before decode queue drain", async () => {
@@ -479,10 +476,9 @@ describe("VideoPlayer", () => {
 
   it("should serialize concurrent decodeFrames calls in FIFO order", async () => {
     // Regression guard: H.264 `setImage` in ImageRenderable fires `#startDecode` calls in
-    // parallel during steady-state playback. Without an internal mutex, two concurrent
-    // `decodeFrames` calls would either throw (the old behavior) or interleave chunk submissions
-    // in non-deterministic order, garbling the decoder. The mutex must hand off ownership in
-    // acquisition (call) order so chunks reach the decoder in the same order the caller intended.
+    // parallel during steady-state playback. The mutex holds only for the in-order chunk submit
+    // (the await on the decoded frame happens outside the lock), so concurrent `decodeFrames`
+    // calls must still submit chunks to the decoder in acquisition (call) order.
     const submissionOrder: number[] = [];
     let releaseFirstDecode: (() => void) | undefined;
 
@@ -535,16 +531,16 @@ describe("VideoPlayer", () => {
       { data: new Uint8Array([3]), timestampMicros: 3000, type: "delta" },
     ]);
 
-    await Promise.resolve();
-    expect(submissionOrder).toEqual([1000]);
+    // Flush the serialized mutex hand-offs so all three submit in order.
+    await jest.advanceTimersByTimeAsync(0);
+    expect(submissionOrder).toEqual([1000, 2000, 3000]);
     expect(releaseFirstDecode).toBeDefined();
 
+    // Release the first decode's frame; all three resolve to their target frames.
     releaseFirstDecode?.();
 
     await expect(first).resolves.toMatchObject({ type: "target" });
     await expect(second).resolves.toMatchObject({ type: "target" });
     await expect(third).resolves.toMatchObject({ type: "target" });
-
-    expect(submissionOrder).toEqual([1000, 2000, 3000]);
   });
 });
