@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Time, compare } from "@lichtblick/rostime";
-import { IIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import {
+  GetBackfillMessagesArgs,
+  IIterableSource,
+} from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 /**
  * Returns true if the source's time range [getStart(), getEnd()] overlaps with
@@ -61,3 +65,19 @@ export function filterSourcesForBackfill<T>(
     return compare(sourceStart, time) <= 0;
   });
 }
+
+/**
+ * Collects backfill messages from every source that could contain a message at or before the
+ * requested time. Shared by the aggregate sources (MultiIterableSource, CombinedIterableSource).
+ */
+export async function getBackfillMessagesFromSources(
+  sources: IIterableSource<Uint8Array>[],
+  args: GetBackfillMessagesArgs,
+): Promise<MessageEvent<Uint8Array>[]> {
+  const relevantSources = filterSourcesForBackfill(sources, args.time);
+  const backfillMessages = await Promise.all(
+    relevantSources.map(async (source) => await source.getBackfillMessages(args)),
+  );
+  return backfillMessages.flat();
+}
+

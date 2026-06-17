@@ -26,6 +26,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
+import { AdditionalSourceDescriptor } from "@lichtblick/suite-base/players/IterablePlayer/additionalSources";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 
@@ -417,7 +418,20 @@ describe("Workspace - session-based MCAP resolution", () => {
       { url: "https://example.com/file1.mcap", metadata: { robot: "r1" } },
       { url: "https://example.com/file2.mcap", metadata: { robot: "r2" } },
     ];
-    mockGetSession.mockResolvedValue(mockMcaps);
+    const additionalSources: AdditionalSourceDescriptor[] = [
+      {
+        id: "additionalSourcesId",
+        topics: [{ name: "testTopic", messageEncoding: "json", schemaName: "testSchema" }],
+        messages: [
+          {
+            topic: "testTopic",
+            data: "eyJrZXkiOiJ2YWx1ZSJ9",
+            receiveTime: { sec: 123, nsec: 123456789 },
+          },
+        ],
+      },
+    ];
+    mockGetSession.mockResolvedValue({ mcaps: mockMcaps, additionalSources });
     (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
 
     // When
@@ -432,6 +446,7 @@ describe("Workspace - session-based MCAP resolution", () => {
         type: "connection",
         params: { url: "https://example.com/file1.mcap,https://example.com/file2.mcap" },
         sourceMetadata: [{ robot: "r1" }, { robot: "r2" }],
+        additionalSources,
       });
     });
   });

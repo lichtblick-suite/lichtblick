@@ -88,6 +88,7 @@ import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
 import useSeekTimeFromCLI from "@lichtblick/suite-base/hooks/useSeekTimeFromCLI";
 import { useStructureItemsStoreManager } from "@lichtblick/suite-base/panels/Plot/hooks/useStructureItemsStoreManager";
+import { AdditionalSourceDescriptor } from "@lichtblick/suite-base/players/IterablePlayer/additionalSources/types";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
@@ -502,6 +503,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         dsParams: Record<string, string> | undefined;
         sourceMetadata?: Record<string, unknown>[];
         layoutUrl?: string;
+        additionalSources?: AdditionalSourceDescriptor[];
       }
     | undefined
   >(
@@ -526,7 +528,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
     void (async () => {
       try {
-        const mcaps = await SessionAPI.getSession(sessionId, signal);
+        const { mcaps, additionalSources } = await SessionAPI.getSession(sessionId, signal);
         if (mcaps.length === 0) {
           enqueueSnackbar("Session contains no data sources", { variant: "error" });
           return;
@@ -537,6 +539,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
           ds: "remote-file",
           dsParams: { url: urls.join(",") },
           sourceMetadata: mcaps.map((mcap) => mcap.metadata),
+          additionalSources,
         });
       } catch (error) {
         if (signal.aborted) {
@@ -630,6 +633,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         type: "connection",
         params: unappliedSourceArgs.dsParams,
         sourceMetadata: unappliedSourceArgs.sourceMetadata,
+        additionalSources: unappliedSourceArgs.additionalSources,
       });
       selectEvent(unappliedSourceArgs.dsParams?.eventId);
       shouldUpdate = true;

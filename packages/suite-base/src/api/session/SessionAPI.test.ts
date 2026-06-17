@@ -37,7 +37,29 @@ describe("SessionAPI", () => {
       const result = await sessionApi.getSession(sessionId);
 
       expect(mockGet).toHaveBeenCalledWith(`session/${sessionId}`, {}, { signal: undefined });
-      expect(result).toEqual(mockMcaps);
+      expect(result).toEqual({ mcaps: mockMcaps, additionalSources: [] });
+    });
+
+    it("should return additional sources when present", async () => {
+      const sessionId = BasicBuilder.string();
+      const mockMcaps = [{ url: `https://${BasicBuilder.string()}.com/file.mcap`, metadata: {} }];
+      const additionalSources = [
+        {
+          id: "tags",
+          topics: [{ name: "Tags", schemaName: "external.tags", messageEncoding: "json" }],
+          messages: [],
+        },
+      ];
+
+      const mockHttpService = jest.mocked(HttpService);
+      const mockGet = jest
+        .fn()
+        .mockResolvedValue(createMockHttpResponse({ mcaps: mockMcaps, additionalSources }));
+      mockHttpService.get = mockGet;
+
+      const result = await sessionApi.getSession(sessionId);
+
+      expect(result).toEqual({ mcaps: mockMcaps, additionalSources });
     });
 
     it("should handle empty mcaps list", async () => {
@@ -49,7 +71,7 @@ describe("SessionAPI", () => {
 
       const result = await sessionApi.getSession(sessionId);
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ mcaps: [], additionalSources: [] });
     });
   });
 
