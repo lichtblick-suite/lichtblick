@@ -48,8 +48,10 @@ const MANUAL_ENCODING_OPTIONS: { label: string; value: ResolvedAudioEncoding }[]
   { label: ENCODING_LABELS["pcm-int16le"], value: "pcm-int16le" },
 ];
 
-function describeManualEncoding(config: AudioConfig): string {
-  const encoding = config.encoding;
+function describeManualEncoding(
+  encoding: ResolvedAudioEncoding,
+  config: Pick<AudioConfig, "sampleRate" | "numChannels">,
+): string {
   if (IS_PCM_ENCODING(encoding)) {
     return `${ENCODING_LABELS[encoding]} @ ${config.sampleRate.toLocaleString()} Hz, ${config.numChannels} ch`;
   }
@@ -376,7 +378,7 @@ export function AudioPanel({ context }: Readonly<AudioProps>): React.JSX.Element
       }
       return `Auto-detect: ${describePlaybackParams(detectedPlayback)}`;
     }
-    return describeManualEncoding(config);
+    return describeManualEncoding(config.encoding, config);
   }, [config, detectedPlayback]);
 
   let panelBody: React.JSX.Element;

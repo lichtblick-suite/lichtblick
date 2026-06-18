@@ -35,7 +35,7 @@ type AudioPanelAdapterProps = {
   saveConfig: SaveConfig<AudioConfig>;
 };
 
-function AudioPanelAdapter({ config, saveConfig }: Readonly<AudioPanelAdapterProps>) {
+function AudioPanelAdapter({ config, saveConfig }: AudioPanelAdapterProps) {
   const crash = useCrash();
   const boundInitPanel = useMemo(() => initPanel.bind(undefined, crash), [crash]);
 
@@ -49,15 +49,15 @@ function AudioPanelAdapter({ config, saveConfig }: Readonly<AudioPanelAdapterPro
   );
 }
 
-export default Panel(
-  Object.assign(AudioPanelAdapter, {
-    panelType: "Audio",
-    defaultConfig: {
-      topic: "",
-      encoding: "auto",
-      sampleRate: 44100,
-      numChannels: 1,
-      volume: 1,
-    },
-  }),
-);
+const defaultConfig: AudioConfig = {
+  topic: "",
+  encoding: "auto",
+  sampleRate: 44100,
+  numChannels: 1,
+  volume: 1,
+};
+
+AudioPanelAdapter.panelType = "Audio";
+AudioPanelAdapter.defaultConfig = defaultConfig;
+
+export default Panel(AudioPanelAdapter);
