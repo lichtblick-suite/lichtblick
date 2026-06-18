@@ -272,11 +272,13 @@ describe("AudioPanel", () => {
     const ctx = AudioPanelContextBuilder.context({ topic: "/audio/data", encoding: "wav" });
     renderPanel(ctx);
 
-    const settingsCall = ctx.updatePanelSettingsEditor.mock.calls.at(-1)?.[0];
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const updatePanelSettingsEditor = jest.mocked(ctx.updatePanelSettingsEditor);
+    const settingsCall = updatePanelSettingsEditor.mock.calls.at(-1)?.[0];
     act(() => {
       settingsCall?.actionHandler({
         action: "update",
-        payload: { path: ["general", "volume"], value: 0.5 },
+        payload: { path: ["general", "volume"], value: 0.5, input: "slider" },
       });
     });
 

@@ -109,7 +109,11 @@ export default class WebMPlaybackMocksBuilder {
       }
     }
 
-    return { mediaSource, sourceOpenListeners, MockMediaSource };
+    return {
+      mediaSource,
+      sourceOpenListeners,
+      MockMediaSource: MockMediaSource as unknown as new () => MediaSourceMock,
+    };
   }
 
   public static installMockMediaSource(
