@@ -434,15 +434,14 @@ export default class LayoutManager implements ILayoutManager {
     }
 
     const now = new Date().toISOString() as ISO8601Timestamp;
+
+    // if the APP_CONFIG.syncLocalLayouts is set to true, we will save the personal copy to remote storage as well
     if (shouldSyncPersonalLayouts()) {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
       if (!this.isOnline) {
         throw new Error("Cannot save a shared layout while offline");
-      }
-      if (!localLayout.externalId) {
-        throw new Error("Local layout does not have externalId");
       }
 
       const newLayout = await this.remote.saveNewLayout({
@@ -462,9 +461,11 @@ export default class LayoutManager implements ILayoutManager {
         syncInfo: { status: "tracked" as const, lastRemoteSavedAt: newLayout.savedAt },
       };
 
-      const result = await this.local.runExclusive(
-        async (local) => await local.put(localLayoutData),
-      );
+      const result = await this.local.runExclusive(async (local) => {
+        const newLayout = await local.put(localLayoutData);
+        await local.put({ ...localLayout, working: undefined });
+        return newLayout;
+      });
 
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
       return result;
