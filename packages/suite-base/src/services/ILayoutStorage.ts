@@ -34,7 +34,7 @@ export type LayoutSyncInfo = {
 
 export type Layout = {
   id: LayoutID;
-  externalId?: string; // Only for remote
+  externalId?: string; // Only for remote layouts or for local layouts that have been synced to remote storage when syncLocalLayouts is enabled.
   name: string;
   from?: string;
   permission: LayoutPermission;
@@ -86,16 +86,25 @@ export function layoutIsShared(
   return layoutPermissionIsShared(layout.permission);
 }
 
+/**
+ * Global switch to sync personal (CREATOR_WRITE) layouts in addition to shared layouts.
+ */
 export function shouldSyncPersonalLayouts(): boolean {
   return APP_CONFIG.syncLocalLayouts;
 }
 
+/**
+ * Returns whether a layout with the given permission should be synchronized remotely regarding the syncLocalLayouts setting.
+ */
 export function shouldSyncLayoutPermission(permission: LayoutPermission): boolean {
   return shouldSyncPersonalLayouts() || layoutPermissionIsShared(permission);
 }
 
+/**
+ * Returns whether this specific layout should be synchronized remotely regarding the syncLocalLayouts setting.
+ */
 export function shouldSyncLayout(layout: Layout): boolean {
-  return shouldSyncPersonalLayouts() || layoutIsShared(layout);
+  return layoutIsShared(layout) || (shouldSyncPersonalLayouts() && layout.externalId != undefined);
 }
 
 export function layoutAppearsDeleted(layout: Layout): boolean {
