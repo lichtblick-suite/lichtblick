@@ -258,17 +258,19 @@ function UserScriptEditor(props: Props) {
   }, [actionHandler, config, updatePanelSettingsTree]);
 
   useLayoutEffect(() => {
+    const testItems = props.config.additionalBackStackItems ?? [];
     if (selectedScript) {
-      const testItems = props.config.additionalBackStackItems ?? [];
       setScriptBackStack([
         {
           filePath: selectedScript.name,
           code: selectedScript.sourceCode,
-          readOnly: selectedScript.mode != null ? selectedScript.mode === "readOnly" : false,
+          readOnly: selectedScript.mode === "readOnly",
         },
         ...testItems,
       ]);
+      return;
     }
+    setScriptBackStack(testItems);
   }, [props.config.additionalBackStackItems, selectedScript]);
 
   useLayoutEffect(() => {
@@ -384,11 +386,11 @@ function UserScriptEditor(props: Props) {
           }}
           deleteScript={(scriptId) => {
             setUserScripts({ ...visibleUserScripts, [scriptId]: undefined });
+            const remainingScriptIds = Object.keys(visibleUserScripts).filter(
+              (id) => id !== scriptId,
+            );
             saveConfig({
-              selectedNodeId:
-                Object.keys(visibleUserScripts).length > 1
-                  ? Object.keys(visibleUserScripts)[0]
-                  : undefined,
+              selectedNodeId: remainingScriptIds.length > 0 ? remainingScriptIds[0] : undefined,
             });
           }}
           selectedScriptId={selectedNodeId}

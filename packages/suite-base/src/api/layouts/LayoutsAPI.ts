@@ -47,9 +47,9 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
     throw new Error("Method not implemented.");
   }
 
-  public async getDefaultLayoutData(): Promise<LayoutData | undefined> {
+  public async getDefaultLayoutData(): Promise<Partial<LayoutData> | undefined> {
     try {
-      const { data: layoutData } = await HttpService.get<LayoutData>(
+      const { data: layoutData } = await HttpService.get<Partial<LayoutData>>(
         `${this.workspacePath}/${this.workspace}/${this.layoutPath}/default_data`,
       );
       return layoutData;

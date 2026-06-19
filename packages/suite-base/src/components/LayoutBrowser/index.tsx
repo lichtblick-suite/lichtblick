@@ -187,7 +187,12 @@ export default function LayoutBrowser({
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
     ).format("LT")}`;
-    const templateData = await layoutManager.getDefaultLayoutData();
+    let templateData: Partial<LayoutData> | undefined;
+    try {
+      templateData = await layoutManager.getDefaultLayoutData();
+    } catch (err: unknown) {
+      log.warn("Failed to fetch default layout data, using base layout instead", err);
+    }
     const baseLayoutData: Omit<LayoutData, "name" | "id"> = {
       configById: {},
       globalVariables: {},

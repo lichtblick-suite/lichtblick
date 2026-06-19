@@ -99,8 +99,9 @@ describe("filterVisibleUserScripts", () => {
     const result1 = filterVisibleUserScripts(undefined);
     const result2 = filterVisibleUserScripts(allHidden);
 
-    // Then – both are empty (referential equality is an implementation detail, value equality is the contract)
+    // Then – both are empty and reference the same stable empty object
     expect(Object.keys(result1)).toHaveLength(0);
     expect(Object.keys(result2)).toHaveLength(0);
+    expect(result1).toBe(result2);
   });
 });
