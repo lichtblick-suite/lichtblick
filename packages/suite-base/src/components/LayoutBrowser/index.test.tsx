@@ -239,6 +239,9 @@ describe("LayoutBrowser", () => {
 
       // Then
       expect(mockLayoutManager.getDefaultLayoutData).toHaveBeenCalledTimes(1);
+      const getDefaultOrder = mockLayoutManager.getDefaultLayoutData.mock.invocationCallOrder[0];
+      const saveNewLayoutOrder = mockLayoutManager.saveNewLayout.mock.invocationCallOrder[0];
+      expect(getDefaultOrder).toBeLessThan(saveNewLayoutOrder!);
     });
   });
 

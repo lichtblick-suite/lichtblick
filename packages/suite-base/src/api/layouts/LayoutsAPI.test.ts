@@ -232,6 +232,21 @@ describe("LayoutsAPI", () => {
       expect(result).toEqual(mockLayoutData);
     });
 
+    it("should return partial layout data when the server responds with sparse defaults", async () => {
+      // Given
+      const partialLayoutData = {
+        playbackConfig: { speed: 2 },
+      };
+      const mockHttpService = jest.mocked(HttpService);
+      mockHttpService.get = jest.fn().mockResolvedValue(createMockHttpResponse(partialLayoutData));
+
+      // When
+      const result = await layoutsAPI.getDefaultLayoutData();
+
+      // Then
+      expect(result).toEqual(partialLayoutData);
+    });
+
     it("should return undefined when the server responds with 404", async () => {
       const { HttpError } = await import("@lichtblick/suite-base/services/http/HttpError");
       const notFoundError = new HttpError("Not Found", 404, "Not Found");
