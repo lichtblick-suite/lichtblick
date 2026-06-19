@@ -460,9 +460,9 @@ export default class LayoutManager implements ILayoutManager {
       };
 
       const result = await this.local.runExclusive(async (local) => {
-        const newLayout = await local.put(localLayoutData);
+        const newLocalLayout = await local.put(localLayoutData);
         await local.put({ ...localLayout, working: undefined });
-        return newLayout;
+        return newLocalLayout;
       });
 
       this.notifyChangeListeners({ type: "change", updatedLayout: result });
