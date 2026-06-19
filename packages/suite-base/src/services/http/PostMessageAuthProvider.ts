@@ -46,13 +46,11 @@ export class PostMessageAuthProvider implements AuthProvider {
     });
 
     if (this.allowedOrigins.size === 0) {
-      this.firstTokenReceived = true;
       this.rejectFirstToken?.(
         new Error("No allowed origins found. Please check your embedding configuration."),
       );
     } else {
       this.tokenTimeoutId = setTimeout(() => {
-        this.firstTokenReceived = true;
         this.rejectFirstToken?.(
           new Error(
             "Authentication timed out: no auth token was received from the parent window. " +
@@ -88,7 +86,6 @@ export class PostMessageAuthProvider implements AuthProvider {
     clearTimeout(this.tokenTimeoutId);
     window.removeEventListener("message", this.handleMessage);
     if (!this.firstTokenReceived) {
-      this.firstTokenReceived = true;
       this.resolveFirstToken?.();
     }
   }
