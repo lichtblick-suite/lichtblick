@@ -187,7 +187,7 @@ The `Value.tsx` component provides interactive actions on tree values:
 - `packages/suite-base/src/panels/RawMessagesCommon/useSharedRawMessagesLogic.ts` (expansion, subscriptions)
 - `packages/suite-base/src/panels/RawMessagesCommon/useRenderers.tsx` (useValueRenderer, useRenderDiffLabel)
 - `packages/suite-base/src/panels/RawMessagesCommon/getDiff.ts` (deep diff computation)
-- `packages/suite-base/src/panels/RawMessagesCommon/utils.ts` (dataWithoutWrappingArray, formatValueForFilter)
+- `packages/suite-base/src/panels/RawMessagesCommon/utils.tsx` (dataWithoutWrappingArray, formatValueForFilter)
 - `packages/suite-base/src/panels/RawMessagesCommon/Value.tsx` (value actions: plot, transitions, copy)
 - `packages/suite-base/src/panels/RawMessagesCommon/getValueActionForValue.ts` (path building for actions)
 - `packages/suite-base/src/panels/RawMessagesCommon/ObjectSummary.tsx` (array/object summary display)
