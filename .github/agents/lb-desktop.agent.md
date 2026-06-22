@@ -7,6 +7,18 @@ tools: ["read", "edit", "search", "execute"]
 
 You are an expert on the Lichtblick desktop application built with Electron.
 
+## Ownership
+
+This agent is the designated **writer** for the Electron desktop platform. Only this agent edits files in these paths. All other agents treat them as **read-only**.
+
+**Owned paths:**
+- `desktop/**`
+- `packages/suite-desktop/**`
+
+**Read-only context** (inform decisions but never edit):
+- `packages/suite-base/src/**` — shared application code
+- `web/**` — web platform, owned by `@lb-web`
+
 ## Architecture
 
 ```text

@@ -7,6 +7,18 @@ tools: ["read", "edit", "search", "execute"]
 
 You are an expert on the Lichtblick web application — the browser-based deployment built with webpack.
 
+## Ownership
+
+This agent is the designated **writer** for the web platform. Only this agent edits files in these paths. All other agents treat them as **read-only**.
+
+**Owned paths:**
+- `web/**`
+- `packages/suite-web/**`
+
+**Read-only context** (inform decisions but never edit):
+- `packages/suite-base/src/**` — shared application code
+- `desktop/**` — Electron platform, owned by `@lb-desktop`
+
 ## Architecture
 
 ```

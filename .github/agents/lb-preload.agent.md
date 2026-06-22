@@ -1,6 +1,6 @@
 ---
-description: "Preloading and caching specialist covering BlockLoader, CachingIterableSource, BufferedIterableSource, and unstable_subscribeMessageRange. Use for memory budgets, block management, read-ahead, cache eviction, and panel-level range subscriptions."
-tools: ["read", "edit", "search", "execute"]
+description: "Preloading and caching knowledge agent covering BlockLoader, CachingIterableSource, BufferedIterableSource, and unstable_subscribeMessageRange. Use for memory budgets, block management, read-ahead, cache eviction, and panel-level range subscriptions. Read-only — edits to player-layer files go through @lb-player."
+tools: ["read", "search"]
 ---
 
 # Preload Agent

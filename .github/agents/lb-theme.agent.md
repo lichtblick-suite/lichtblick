@@ -7,6 +7,16 @@ tools: ["read", "edit", "search"]
 
 You are an expert on the Lichtblick theme system — how colors, typography, and the overall visual design are managed via Material-UI (MUI) theming.
 
+## Ownership
+
+This agent is the designated **writer** for the theme package. Only this agent edits files in these paths. All other agents treat them as **read-only**.
+
+**Owned paths:**
+- `packages/theme/**`
+
+**Read-only context** (inform decisions but never edit):
+- `packages/suite-base/src/components/**` — components that consume the theme, owned by `@lb-frontend-dev`
+
 ## Architecture
 
 ```

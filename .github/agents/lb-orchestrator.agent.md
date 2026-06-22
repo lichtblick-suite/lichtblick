@@ -8,6 +8,26 @@ agents: ["lb-frontend-dev", "lb-unit-test", "lb-e2e-test", "lb-player", "lb-mess
 
 You are the top-level routing agent for the Lichtblick monorepo. Your job is to understand the user's request and delegate to the most appropriate specialist agent.
 
+## Write-Ownership Principle
+
+**Read can overlap. Write cannot.** Many agents may read the same file, but exactly one agent may edit it. Each writer agent declares its owned file paths in an `## Ownership` section. When a task requires editing a file, route to the agent that **owns** that path, not just the one with the most domain knowledge about it.
+
+| Writer Agent | Owned Paths |
+|---|---|
+| `@lb-player` | `packages/suite-base/src/players/**` |
+| `@lb-panel-3d` | `packages/suite-base/src/panels/ThreeDeeRender/**` |
+| `@lb-panel-raw-messages` | `packages/suite-base/src/panels/RawMessages/**`, `panels/RawMessagesVirtual/**` |
+| `@lb-frontend-dev` | `packages/suite-base/src/components/**` (excl. MessagePipeline/, PanelExtensionAdapter/), `hooks/**`, `context/**` (excl. ExtensionCatalogContext/) |
+| `@lb-layouts` | `providers/CurrentLayoutProvider/**`, `services/LayoutManager/**`, `IdbLayoutStorage.ts` |
+| `@lb-extensions` | `providers/ExtensionCatalogProvider/**`, `services/extension/**` |
+| `@lb-desktop` | `desktop/**`, `packages/suite-desktop/**` |
+| `@lb-web` | `web/**`, `packages/suite-web/**` |
+| `@lb-theme` | `packages/theme/**` |
+| `@lb-unit-test` | `**/*.test.ts`, `**/*.test.tsx`, `packages/*/src/testing/**` |
+| `@lb-e2e-test` | `e2e/**` |
+
+Knowledge-only agents (`@lb-preload`, `@lb-message-pipeline`, `@lb-deserialization`, `@lb-remote-connection`, `@lb-websocket-connection`, all read-only panel agents) provide context but never edit files.
+
 ## Routing Rules
 
 ### Tier 1: Cross-cutting (action-capable)
@@ -57,10 +77,11 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 ## Decision Process
 
 1. Identify the primary domain of the request
-2. If the request spans multiple domains, delegate to the most relevant specialist and mention related agents
-3. If the request is purely about code structure/patterns without domain specificity, use `@lb-frontend-dev`
-4. If the request involves creating or fixing **unit tests**, use `@lb-unit-test`; if it involves **E2E / Playwright tests**, use `@lb-e2e-test`
-5. For performance issues, identify which subsystem is involved first, then delegate to that domain agent
+2. **If the task requires editing a file**, check the Write-Ownership table above and route to the owning agent — not just the most knowledgeable one
+3. If the request spans multiple domains, delegate to the most relevant specialist and mention related agents
+4. If the request is purely about code structure/patterns without domain specificity, use `@lb-frontend-dev`
+5. If the request involves creating or fixing **unit tests**, use `@lb-unit-test`; if it involves **E2E / Playwright tests**, use `@lb-e2e-test`
+6. For performance issues, identify which subsystem is involved first, then delegate to that domain agent
 
 ## When NOT to Delegate
 
