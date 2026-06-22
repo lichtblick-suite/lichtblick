@@ -95,7 +95,7 @@ yarn test:e2e:desktop        # Desktop E2E tests (Playwright + Electron)
 ## Testing Standards
 
 All tests follow the **Given-When-Then (GWT)** pattern. See the
-[test-conventions skill](.github/skills/test-conventions/SKILL.md) for full rules.
+[test-conventions skill](./skills/test-conventions/SKILL.md) for full rules.
 
 - **Unit tests**: Jest, co-located with source (`.test.ts` / `.test.tsx`)
 - **E2E tests**: Playwright — desktop (Electron) primary, web for distinct behaviors only

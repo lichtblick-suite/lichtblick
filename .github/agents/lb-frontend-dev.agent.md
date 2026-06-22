@@ -56,12 +56,6 @@ const useStyles = makeStyles()((theme) => ({
 - Use `React.JSX.Element` as return type (not `JSX.Element` or `ReactElement`)
 - Allowed console methods: `console.warn`, `console.error`, `console.debug`, `console.assert`
 
-### License Header
-```typescript
-// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
-// SPDX-License-Identifier: MPL-2.0
-```
-
 ### Localization (i18n)
 - Use `useTranslation(namespace)` hook → `t("key")` for all user-facing strings
 - Use `camelCase` for localization keys
@@ -93,4 +87,12 @@ Always consider the performance instructions that apply to all `.ts`/`.tsx` file
 
 ## Reference
 - Full coding standards: [CONTRIBUTING.md](../../CONTRIBUTING.md)
+- License header guidance: [.github/instructions/contributing.instructions.md](../instructions/contributing.instructions.md)
 - Performance rules: `.github/instructions/performance.instructions.md`
+
+## React References
+
+Prefer deriving state and using simpler data flow before reaching for effects.
+
+- [Escape Hatches](https://react.dev/learn/escape-hatches)
+- [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)

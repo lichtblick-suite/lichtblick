@@ -69,10 +69,6 @@ This is the single function that resolves any channel's schema into a deserializ
 
 Handlers are loaded once (singleton promise) and shared across all readers.
 
-### Other WASM packages
-- `packages/wasm-pointcloud/` — point cloud processing
-- `packages/wasm-image/` — image format decoding (JPEG, PNG, etc.)
-
 ## Performance Notes
 
 - Deserialization is CPU-bound — runs in a Worker via `WorkerIterableSource`

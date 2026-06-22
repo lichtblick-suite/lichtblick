@@ -101,11 +101,14 @@ const topic = { name: "/camera/image", schemaName: "sensor_msgs/Image", aliasedF
 - **Basic primitives**: `BasicBuilder` from `@lichtblick/test-builders`
 - **Component-specific**: colocated `builders/` directory within the component folder
 - For full builder API and patterns: load `unit-testing` skill
+- License header requirements: [.github/instructions/contributing.instructions.md](../instructions/contributing.instructions.md)
 
-## License Header
+## Test Examples
 
-All new test files must include:
-```typescript
-// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
-// SPDX-License-Identifier: MPL-2.0
-```
+Refer to these files for good practices by test category — they demonstrate GWT structure, builder usage, and correct assertion style.
+
+| Category | Example file | Why it's a good reference |
+|----------|-------------|---------------------------|
+| React component | `packages/suite-base/src/panels/Publish/index.test.tsx` | Builder pattern (`PublishBuilder`), jest module mocking, behavior-focused assertions |
+| Custom hook | `packages/suite-base/src/PanelAPI/useMessageReducer.test.tsx` | `renderHook` + `act()`, provider wrappers, hook state transition testing |
+| Pure logic / utility | `packages/den/format/formatByteSize.test.ts` | `it.each()` for parameterized edge cases, pure function testing without React |

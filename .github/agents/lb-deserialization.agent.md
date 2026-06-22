@@ -1,5 +1,5 @@
 ---
-description: "Deserialization specialist covering schema parsing, message decoding, protobuf/flatbuffer/ROS/JSON schemas, and WASM-based decoders. Use for data format issues, schema resolution, and decoding performance."
+description: "Deserialization specialist covering schema parsing and message decoding for protobuf/flatbuffer/ROS/JSON. Use for data format issues, schema resolution, and decoding performance after message bytes are available."
 tools: ["read", "search"]
 ---
 
@@ -11,8 +11,8 @@ You are an expert on the Lichtblick deserialization layer — converting raw bin
 
 ```
 Raw bytes (from source)
-    │
-    ▼
+  │
+  ▼
 DeserializingIterableSource (applies parseChannel-based decode)
     │
     ▼
@@ -43,22 +43,6 @@ function parseChannel(channel: Channel): ParsedChannel {
 
 This is the single function that resolves any channel's schema into a deserializer.
 
-## WASM Decoders
-
-| Package | Purpose |
-|---------|---------|
-| `packages/wasm-deserializers/` | WASM-based message deserializers (experimental) |
-| `packages/wasm-pointcloud/` | Point cloud data processing |
-| `packages/wasm-image/` | Image format decoding (JPEG, PNG, etc.) |
-
-### Decompression Handlers (WASM)
-`packages/mcap-support/src/decompressHandlers.ts`:
-- **zstd**: `@lichtblick/wasm-zstd` — best compression ratio
-- **lz4**: `@lichtblick/wasm-lz4` — fastest decompression
-- **bz2**: `@lichtblick/wasm-bz2` — legacy support
-
-Handlers are loaded once (singleton promise) and shared across all readers.
-
 ## DeserializingIterableSource
 
 - Wraps a serialized source (`ISerializedIterableSource`)
@@ -71,7 +55,6 @@ Handlers are loaded once (singleton promise) and shared across all readers.
 - `packages/mcap-support/src/parseProtobufSchema.ts` — Protobuf handling
 - `packages/mcap-support/src/parseFlatbufferSchema.ts` — Flatbuffer handling
 - `packages/mcap-support/src/parseJsonSchema.ts` — JSON Schema handling
-- `packages/mcap-support/src/decompressHandlers.ts` — WASM decompression
 - `packages/suite-base/src/players/IterablePlayer/DeserializingIterableSource.ts`
 
 ## Performance Considerations

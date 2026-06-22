@@ -1,5 +1,5 @@
 ---
-description: "Image panel specialist covering camera image visualization within the 3D rendering context (ImageMode). Use for image display, camera models, image decoding, and annotation overlays."
+description: "Image panel specialist covering camera image visualization within the 3D rendering context (ImageMode). Use for image display, camera models, still image and H.264 video decoding, and annotation overlays."
 tools: ["read", "search"]
 ---
 
@@ -20,7 +20,8 @@ ThreeDeeRender (Renderer.ts)
     ▼
 ImageMode SceneExtension
     │
-    ├── WorkerImageDecoder (JPEG/PNG/etc in Worker)
+    ├── WorkerImageDecoder (JPEG/PNG/raw — in Worker)
+    ├── VideoPlayer + H264 NALU parser (H.264 — main thread, WebCodecs API)
     ├── Camera model projection (pinhole, fisheye, etc.)
     └── Annotation overlays (bounding boxes, segments)
 ```
@@ -41,6 +42,53 @@ ImageMode SceneExtension
 3. Decoded to `ImageBitmap` or raw pixel buffer
 4. Applied as THREE.js texture on a plane geometry
 5. Camera model determines UV mapping (handles distortion)
+
+## Video Decoding (Compressed Video)
+
+Video frames arrive as `foxglove.CompressedVideo` messages with `format: "h264"`. H.264 is the only codec with a first-class implementation; other codecs are only supported if the browser's WebCodecs API supports them natively.
+
+**Supported message types:** `foxglove.CompressedVideo`, `sensor_msgs/CompressedImage` (when `format` is `"h264"`)
+
+**Key difference from still images:** video frames are decoded on the **main thread** via the W3C `VideoDecoder` Web API — they do NOT go through `WorkerImageDecoder` (which handles only raw/uncompressed images).
+
+### Decoding pipeline
+
+```
+foxglove.CompressedVideo (format: "h264")
+    │
+    ▼
+isVideoKeyframe() → H264.IsKeyframe(data)     [NALU IDR scan]
+    │
+    ▼ (first keyframe only)
+getVideoDecoderConfig() → H264.ParseDecoderConfig(data)  [SPS extraction]
+    │
+    ▼
+VideoPlayer.decode(data, timestamp, "key"|"delta")
+    │
+    ▼
+Browser VideoDecoder → VideoFrame
+    │
+    ▼
+createImageBitmap(videoFrame) → ImageBitmap → THREE.js texture
+```
+
+### Key files
+
+| File | Role |
+|------|------|
+| `renderables/Images/decodeImage.ts` | `isVideoKeyframe()`, `getVideoDecoderConfig()`, `decodeCompressedVideoToBitmap()` |
+| `packages/den/video/VideoPlayer.ts` | Wraps `VideoDecoder` with mutex, frame buffering, event emitters |
+| `packages/den/video/h264/H264.ts` | NALU parsing: keyframe detection, SPS extraction, Annex B support |
+| `packages/den/video/h264/SPS.ts` | SPS parser — extracts coded dimensions and aspect ratio |
+| `renderables/Images/ImageRenderable.ts` | Owns the `VideoPlayer` instance; routes video vs still image messages |
+
+### H.264 implementation details
+
+- Supports Annex B bitstream format (3- and 4-byte start codes)
+- Keyframes identified by IDR NALU (type 5)
+- Decoder config derived from SPS NALU — codec string, coded width/height, display aspect ratio
+- `VideoPlayer` must be initialized from a keyframe; delta frames before first keyframe are skipped
+- Only one `VideoPlayer` instance per `ImageRenderable` — no parallel decode streams
 
 ## Camera Models
 
