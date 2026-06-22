@@ -82,7 +82,7 @@ preinit → initialize → start-play → idle ↔ play / seek-backfill → clos
 
 | State | Responsibility |
 |-------|---------------|
-| `#stateInitialize()` | Calls `#bufferedSource.initialize()`, sets up topics/datatypes/metadata, creates BlockLoader, starts block loading process, then → `start-play` |
+| `#stateInitialize()` | Calls `#bufferedSource.initialize()`, sets up topics/datatypes/metadata, creates BlockLoader *(deprecated — see `subscribeMessageRange`)*, starts block loading process, then → `start-play` |
 | `#stateStartPlay()` | Reads initial chunk (up to `SEEK_ON_START_NS`) to populate the first frame, then → `idle` |
 | `#stateIdle()` | Waits for abort signal; listens to `loadedRangesChange` events to update progress |
 | `#statePlay()` | Runs tick loop via `#tick()`, detects subscription changes → `reset-playback-iterator` |
@@ -122,12 +122,46 @@ IterablePlayer (playback iterator)
 - `CachingIterableSource`: underlying caching layer for block-level access
 - `DeserializingIterableSource`: handles per-message deserialization, supports `setSamplingWindowEnd()` for latest-per-render-tick mode
 
-### BlockLoader (Preloading)
+### BlockLoader (Preloading) *(deprecated)*
 - Loaded in `#stateInitialize()` when `enablePreload` is true
 - Topics set via `#blockLoader.setTopics(preloadTopics)` — only `preloadType: "full"` subscriptions
 - Runs continuously in `#startBlockLoading()`, reports progress via callback
 - `DEFAULT_CACHE_SIZE_BYTES`, `MAX_BLOCKS`, `MIN_MEM_CACHE_BLOCK_SIZE_NS` control memory budget
 - Emits `messageCache` in progress for panels using `useMessageReducer` with `preloadType: "full"`
+- Being replaced by the `subscribeMessageRange` pattern — prefer that for new panel work
+
+### subscribeMessageRange (Preferred Preloading Pattern)
+
+The `useSubscribeMessageRange` hook (`packages/suite-base/src/components/PanelExtensionAdapter/useSubscribeMessageRange.ts`) is the modern replacement for BlockLoader-based preloading. It is used directly by built-in panels (Plot, StateTransitions) and is also exposed to extension panels via `context.unstable_subscribeMessageRange`.
+
+```typescript
+const subscribeMessageRange = useSubscribeMessageRange();
+
+const cancel = subscribeMessageRange({
+  topic: "/my/topic",
+  convertTo: "my/OutputSchema",     // optional: run through a message converter
+  onNewRangeIterator: async (iterable) => {
+    for await (const msgEvent of iterable) {
+      // process historical + live messages in order
+    }
+  },
+});
+
+// Call cancel() to unsubscribe
+```
+
+**How it works:**
+1. Calls `getBatchIterator(topic)` from the MessagePipeline context — returns an `AsyncIterableIterator` over the full time range
+2. Wraps the raw iterator in `createMessageRangeIterator` which applies installed message converters and alert emission
+3. Calls `onNewRangeIterator(iterable)` so the panel can consume the stream
+4. Returns a `cancel` function — the panel must call it on cleanup to stop iteration
+
+**Key properties:**
+- Stable callback reference — safe to use in `useEffect` dependencies
+- Returns `() => {}` immediately (no-op cancel) if `getBatchIterator` returns `undefined` for the topic
+- Message converters are read from a ref — updating converters does not invalidate the callback
+- Used by Plot panel: `new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange)`
+- Used by StateTransitions panel: `useDecodedMessageRange` wraps it
 
 ### Emit State (`#queueEmitState`)
 - Wrapped in `debouncePromise` to prevent concurrent emissions
@@ -196,6 +230,8 @@ type IteratorResult =
 ---
 
 ## UserScriptPlayer
+
+> `UserScriptPlayer` is the backing player for the **User Scripts panel** (`packages/suite-base/src/panels/UserScriptEditor/`). The panel provides the UI for writing, editing, and debugging scripts; `UserScriptPlayer` is what actually compiles and executes them at runtime.
 
 ### Architecture
 - **Decorator pattern**: wraps any `Player` implementation, intercepts `setListener`

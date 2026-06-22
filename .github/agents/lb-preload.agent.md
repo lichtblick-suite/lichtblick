@@ -36,14 +36,14 @@ Player (serves to MessagePipeline)
 - Panels subscribe with `preload: true` → Player's BlockLoader loads data
 - Data exposed via `PlayerState.progress.messageCache` (block array)
 - Fixed-duration blocks, memory-bounded by `cacheSizeBytes`
-- Used by: Plot panel (full time range), StateTransitions
+- Used by: no panels currently — being superseded by `unstable_subscribeMessageRange`
 
 ### 2. unstable_subscribeMessageRange (Panel-Level)
 - Panels call `context.unstable_subscribeMessageRange({ topic, convertTo, onNewRangeIterator })`
 - Returns an unsubscribe function for cleanup
 - Data streamed via `AsyncIterable<MessageEvent[]>` batches
 - Panel controls its own buffering/accumulation
-- Used by: ThreeDeeRender (transform preloading), Map panel (all frame messages)
+- Used by: ThreeDeeRender (transform preloading), Map panel (all frame messages), Plot panel (full time range), StateTransitions panel
 
 ## Core Components
 
