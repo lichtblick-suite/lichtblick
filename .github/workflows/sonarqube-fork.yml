@@ -44,7 +44,7 @@ jobs:
           echo "base_ref=$(jq -r '.base_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
 
       - name: Checkout default branch (for workflow scripts only)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: develop
           sparse-checkout: .github/workflows/scripts
@@ -64,7 +64,7 @@ jobs:
             const script = require('/tmp/workflow-scripts/create-check-run.js');
             return await script({ github, context });
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: refs/pull/${{ steps.metadata.outputs.number }}/head

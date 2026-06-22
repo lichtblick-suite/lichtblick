@@ -225,22 +225,27 @@ describe("McapIterableSource", () => {
       return tempBuffer.get();
     }
 
-    it("should create RemoteFileReadable with url and cacheSizeInBytes", async () => {
+    it("should create RemoteFileReadable with url, cacheSizeInBytes, and readAheadEnabled", async () => {
       // Given an indexed MCAP served via URL with a custom cache size
       const mcapData = await buildIndexedMcap([{ logTime: 1_000_000_000n }]);
       mockRemoteFileReadableWith(mcapData);
       const cacheSizeInBytes = 1024 * 1024 * 100;
+      const readAheadEnabled = false;
 
       // When initializing a McapIterableSource with URL type
       const source = new McapIterableSource({
         type: "url",
         url: urlIndexedMcap,
         cacheSizeInBytes,
+        readAheadEnabled,
       });
       await source.initialize();
 
-      // Then RemoteFileReadable should be constructed with the url and cache size
-      expect(MockRemoteFileReadable).toHaveBeenCalledWith(urlIndexedMcap, cacheSizeInBytes);
+      // Then RemoteFileReadable should be constructed with the URL options
+      expect(MockRemoteFileReadable).toHaveBeenCalledWith(urlIndexedMcap, {
+        cacheSizeInBytes,
+        readAheadEnabled,
+      });
     });
 
     it("should delegate getStart and getEnd to the underlying indexed source", async () => {
