@@ -20,7 +20,7 @@ any ──► close
 ```
 
 ### State Transitions
-- `preinit → initialize`: First call to `setPlaybackSource()`
+- `preinit → initialize`: triggered the first time playback starts after construction (source supplied via constructor).
 - `initialize → start-play`: Source `initialize()` resolved, topics/schemas available
 - `start-play → idle`: Initial backfill complete, first state emitted
 - `idle → play`: User presses play or `setPlaybackSpeed(speed > 0)`

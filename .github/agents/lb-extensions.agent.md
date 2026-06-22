@@ -130,7 +130,9 @@ interface ExtensionCatalogState {
 ## Key Files
 - `packages/suite-base/src/services/IExtensionLoader.ts`
 - `packages/suite-base/src/services/IdbExtensionLoader.ts`
-- `packages/suite-base/src/providers/ExtensionCatalogProvider.tsx`
+- `packages/suite-base/src/services/extension/IExtensionLoader.ts`
+- `packages/suite-base/src/services/extension/IdbExtensionLoader.ts`
+- `packages/suite-base/src/providers/ExtensionCatalogProvider/ExtensionCatalogProvider.tsx`
 - `packages/suite-desktop/src/renderer/services/DesktopExtensionLoader.ts`
 - `packages/suite-web/src/WebRoot.tsx` (extension loader setup)
 

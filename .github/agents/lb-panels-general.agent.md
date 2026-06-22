@@ -124,7 +124,7 @@ panels/MyPanel/
 ## Key Files
 - `packages/suite-base/src/components/PanelExtensionAdapter/PanelExtensionAdapter.tsx`
 - `packages/suite-base/src/components/PanelExtensionAdapter/renderState.ts`
-- `packages/suite-base/src/context/PanelExtensionContext.ts`
+- `packages/suite/src/index.ts` (PanelExtensionContext exported via `@lichtblick/suite`)
 - `packages/suite-base/src/PanelAPI/` (internal hooks)
 
 ## PanelAPI (Internal Hooks)

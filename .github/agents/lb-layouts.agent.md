@@ -173,7 +173,7 @@ In-memory cache for fast reads:
 ## Key Files
 - `packages/suite-base/src/providers/CurrentLayoutProvider/`
 - `packages/suite-base/src/services/ILayoutStorage.ts`
-- `packages/suite-base/src/services/IdbLayoutStorage.ts`
+- `packages/suite-base/src/IdbLayoutStorage.ts`
 - `packages/suite-base/src/services/LayoutManager/`
 
 ## Skills Reference
