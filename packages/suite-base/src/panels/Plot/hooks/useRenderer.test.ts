@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -11,17 +11,17 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import useRenderer from "./useRenderer";
 import { OffscreenCanvasRenderer } from "../OffscreenCanvasRenderer";
 
-jest.mock("../OffscreenCanvasRenderer", () => {
+vi.mock("../OffscreenCanvasRenderer", async () => {
   return {
-    OffscreenCanvasRenderer: jest.fn().mockImplementation(function (this: any) {
-      this.setSize = jest.fn();
-      this.destroy = jest.fn();
+    OffscreenCanvasRenderer: vi.fn().mockImplementation(function (this: any) {
+      this.setSize = vi.fn();
+      this.destroy = vi.fn();
     }),
   };
 });
 
 Object.defineProperty(HTMLCanvasElement.prototype, "transferControlToOffscreen", {
-  value: jest.fn().mockImplementation(() => ({
+  value: vi.fn().mockImplementation(() => ({
     width: BasicBuilder.number(),
     height: BasicBuilder.number(),
   })),

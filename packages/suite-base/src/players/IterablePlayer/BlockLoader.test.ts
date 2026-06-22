@@ -43,7 +43,7 @@ class TestSource implements IDeserializedIterableSource {
   }
 }
 
-const consoleErrorMock = console.error as ReturnType<typeof jest.fn>;
+const consoleErrorMock = console.error as ReturnType<typeof vi.fn>;
 
 describe("BlockLoader", () => {
   it("should make an empty block loader", async () => {
@@ -299,7 +299,7 @@ describe("BlockLoader", () => {
       progress: async (progress) => {
         count++;
         if (count === 2) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vi/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {
@@ -343,7 +343,7 @@ describe("BlockLoader", () => {
       progress: async (progress) => {
         count += 1;
         if (count === 2) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vi/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {
@@ -426,7 +426,7 @@ describe("BlockLoader", () => {
         }
 
         if (count === 2) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vi/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {
@@ -557,7 +557,7 @@ describe("BlockLoader", () => {
         }
 
         if (count === maxBlockCount) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vi/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mocked, MockedClass } from "vitest";
 import JSZip from "jszip";
 
 import ExtensionsAPI from "@lichtblick/suite-base/api/extensions/ExtensionsAPI";
@@ -11,28 +12,28 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { RemoteExtensionLoader } from "./RemoteExtensionLoader";
 
-jest.mock("@lichtblick/suite-base/api/extensions/ExtensionsAPI");
-jest.mock("@lichtblick/log", () => ({
-  getLogger: jest.fn(() => ({
-    debug: jest.fn(),
+vi.mock("@lichtblick/suite-base/api/extensions/ExtensionsAPI");
+vi.mock("@lichtblick/log", async () => ({
+  getLogger: vi.fn(() => ({
+    debug: vi.fn(),
   })),
 }));
 
-const MockedExtensionsAPI = ExtensionsAPI as jest.MockedClass<typeof ExtensionsAPI>;
+const MockedExtensionsAPI = ExtensionsAPI as MockedClass<typeof ExtensionsAPI>;
 
 describe("RemoteExtensionLoader", () => {
-  let mockExtensionsAPI: jest.Mocked<ExtensionsAPI>;
+  let mockExtensionsAPI: Mocked<ExtensionsAPI>;
   let loader: RemoteExtensionLoader;
   const mockNamespace: Namespace = "org";
   const workspace = BasicBuilder.string();
 
   beforeEach(() => {
     mockExtensionsAPI = {
-      list: jest.fn(),
-      get: jest.fn(),
-      loadContent: jest.fn(),
-      createOrUpdate: jest.fn(),
-      remove: jest.fn(),
+      list: vi.fn(),
+      get: vi.fn(),
+      loadContent: vi.fn(),
+      createOrUpdate: vi.fn(),
+      remove: vi.fn(),
       workspace,
     } as any;
 
@@ -41,7 +42,7 @@ describe("RemoteExtensionLoader", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Given a RemoteExtensionLoader instance", () => {
@@ -61,7 +62,7 @@ describe("RemoteExtensionLoader", () => {
       const extensionId = BasicBuilder.string();
       const mockExtensionInfo = ExtensionBuilder.extensionInfo({ id: extensionId });
       const mockStoredExtension = ExtensionBuilder.storedExtension({ info: mockExtensionInfo });
-      const getSpy = jest.spyOn(mockExtensionsAPI, "get");
+      const getSpy = vi.spyOn(mockExtensionsAPI, "get");
       mockExtensionsAPI.get.mockResolvedValue(mockStoredExtension);
 
       // When
@@ -75,7 +76,7 @@ describe("RemoteExtensionLoader", () => {
     it("When getting a non-existent extension, Then should return undefined", async () => {
       // Given
       const extensionId = BasicBuilder.string();
-      const getSpy = jest.spyOn(mockExtensionsAPI, "get");
+      const getSpy = vi.spyOn(mockExtensionsAPI, "get");
       getSpy.mockResolvedValue(undefined);
 
       // When
@@ -91,7 +92,7 @@ describe("RemoteExtensionLoader", () => {
     it("When listing extensions, Then should return array of extension info", async () => {
       // Given
       const mockExtensions = ExtensionBuilder.extensionsInfo(3);
-      const listSpy = jest.spyOn(mockExtensionsAPI, "list");
+      const listSpy = vi.spyOn(mockExtensionsAPI, "list");
       listSpy.mockResolvedValue(mockExtensions);
 
       // When
@@ -114,7 +115,7 @@ describe("RemoteExtensionLoader", () => {
       zip.file(ALLOWED_FILES.EXTENSION, extensionContent);
       const mockFoxeData = await zip.generateAsync({ type: "uint8array" });
 
-      const loadSpy = jest.spyOn(mockExtensionsAPI, "loadContent");
+      const loadSpy = vi.spyOn(mockExtensionsAPI, "loadContent");
       loadSpy.mockResolvedValue(mockFoxeData);
 
       // When
@@ -174,7 +175,7 @@ describe("RemoteExtensionLoader", () => {
 
       const mockFile = {} as File;
       const mockStoredExtension = ExtensionBuilder.storedExtension();
-      const createOrUpdateSpy = jest.spyOn(mockExtensionsAPI, "createOrUpdate");
+      const createOrUpdateSpy = vi.spyOn(mockExtensionsAPI, "createOrUpdate");
       createOrUpdateSpy.mockResolvedValue(mockStoredExtension);
 
       // When
@@ -242,7 +243,7 @@ describe("RemoteExtensionLoader", () => {
       const mockFile = {} as File;
 
       const mockStoredExtension = ExtensionBuilder.storedExtension();
-      const createOrUpdateSpy = jest.spyOn(mockExtensionsAPI, "createOrUpdate");
+      const createOrUpdateSpy = vi.spyOn(mockExtensionsAPI, "createOrUpdate");
       createOrUpdateSpy.mockResolvedValue(mockStoredExtension);
 
       // When
@@ -265,7 +266,7 @@ describe("RemoteExtensionLoader", () => {
     it("When uninstalling an extension, Then should remove it from remote", async () => {
       // Given
       const extensionId = BasicBuilder.string();
-      const removeSpy = jest.spyOn(mockExtensionsAPI, "remove");
+      const removeSpy = vi.spyOn(mockExtensionsAPI, "remove");
       removeSpy.mockResolvedValue(true);
 
       // When

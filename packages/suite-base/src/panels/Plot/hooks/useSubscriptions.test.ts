@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 
 import { parseMessagePath } from "@lichtblick/message-path";
@@ -21,43 +22,41 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import useSubscriptions from "./useSubscriptions";
 import { pathToSubscribePayload } from "../utils/subscription";
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
-  useMessagePipeline: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
+  useMessagePipeline: vi.fn(),
 }));
 
-jest.mock("@lichtblick/message-path", () => ({
-  parseMessagePath: jest.fn(),
+vi.mock("@lichtblick/message-path", async () => ({
+  parseMessagePath: vi.fn(),
 }));
 
-jest.mock(
-  "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems",
-  () => ({
-    fillInGlobalVariablesInPath: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems", async () => ({
+    fillInGlobalVariablesInPath: vi.fn(),
   }),
 );
 
-jest.mock("../utils/config", () => ({
-  isReferenceLinePlotPathType: jest.fn(),
+vi.mock("../utils/config", async () => ({
+  isReferenceLinePlotPathType: vi.fn(),
 }));
 
-jest.mock("../utils/subscription", () => ({
-  pathToSubscribePayload: jest.fn(),
+vi.mock("../utils/subscription", async () => ({
+  pathToSubscribePayload: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useGlobalVariables", async () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: vi.fn(),
 }));
 
 describe("useSubscriptions", () => {
-  const setSubscriptions = jest.fn();
+  const setSubscriptions = vi.fn();
   const globalVariables = GlobalVariableBuilder.globalVariables();
 
-  (useMessagePipeline as jest.Mock).mockReturnValue(setSubscriptions);
-  (useGlobalVariables as jest.Mock).mockReturnValue({ globalVariables });
+  (useMessagePipeline as Mock).mockReturnValue(setSubscriptions);
+  (useGlobalVariables as Mock).mockReturnValue({ globalVariables });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const setup = (
@@ -88,10 +87,10 @@ describe("useSubscriptions", () => {
     it("should set subscriptions when preload type is full", () => {
       const parsedPath = BasicBuilder.string();
       const filledInGlobalVarsPath = BasicBuilder.string();
-      (isReferenceLinePlotPathType as jest.Mock).mockImplementation(() => false);
-      (parseMessagePath as jest.Mock).mockImplementation(() => parsedPath);
-      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation(() => filledInGlobalVarsPath);
-      (pathToSubscribePayload as jest.Mock).mockImplementation(() => "");
+      (isReferenceLinePlotPathType as Mock).mockImplementation(() => false);
+      (parseMessagePath as Mock).mockImplementation(() => parsedPath);
+      (fillInGlobalVariablesInPath as Mock).mockImplementation(() => filledInGlobalVarsPath);
+      (pathToSubscribePayload as Mock).mockImplementation(() => "");
       const { subscriberId, config } = setup({
         config: {
           xAxisVal: "timestamp",
@@ -116,10 +115,10 @@ describe("useSubscriptions", () => {
     it("should set subscriptions when preload type is partial", () => {
       const parsedPath = BasicBuilder.string();
       const filledInGlobalVarsPath = BasicBuilder.string();
-      (isReferenceLinePlotPathType as jest.Mock).mockImplementation(() => false);
-      (parseMessagePath as jest.Mock).mockImplementation(() => parsedPath);
-      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation(() => filledInGlobalVarsPath);
-      (pathToSubscribePayload as jest.Mock).mockImplementation(() => "");
+      (isReferenceLinePlotPathType as Mock).mockImplementation(() => false);
+      (parseMessagePath as Mock).mockImplementation(() => parsedPath);
+      (fillInGlobalVariablesInPath as Mock).mockImplementation(() => filledInGlobalVarsPath);
+      (pathToSubscribePayload as Mock).mockImplementation(() => "");
       const { subscriberId, config } = setup({
         config: {
           xAxisVal: "index",
@@ -142,10 +141,10 @@ describe("useSubscriptions", () => {
     it("should set subscriptions when xAxisVal is custom", () => {
       const parsedPath = BasicBuilder.string();
       const filledInGlobalVarsPath = BasicBuilder.string();
-      (isReferenceLinePlotPathType as jest.Mock).mockImplementation(() => false);
-      (parseMessagePath as jest.Mock).mockImplementation(() => parsedPath);
-      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation(() => filledInGlobalVarsPath);
-      (pathToSubscribePayload as jest.Mock).mockImplementation(() => "");
+      (isReferenceLinePlotPathType as Mock).mockImplementation(() => false);
+      (parseMessagePath as Mock).mockImplementation(() => parsedPath);
+      (fillInGlobalVariablesInPath as Mock).mockImplementation(() => filledInGlobalVarsPath);
+      (pathToSubscribePayload as Mock).mockImplementation(() => "");
 
       const { subscriberId, config } = setup({
         config: {
@@ -166,10 +165,10 @@ describe("useSubscriptions", () => {
     it("should set subscriptions when xAxisVal is currentCustom", () => {
       const parsedPath = BasicBuilder.string();
       const filledInGlobalVarsPath = BasicBuilder.string();
-      (isReferenceLinePlotPathType as jest.Mock).mockImplementation(() => false);
-      (parseMessagePath as jest.Mock).mockImplementation(() => parsedPath);
-      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation(() => filledInGlobalVarsPath);
-      (pathToSubscribePayload as jest.Mock).mockImplementation(() => "");
+      (isReferenceLinePlotPathType as Mock).mockImplementation(() => false);
+      (parseMessagePath as Mock).mockImplementation(() => parsedPath);
+      (fillInGlobalVariablesInPath as Mock).mockImplementation(() => filledInGlobalVarsPath);
+      (pathToSubscribePayload as Mock).mockImplementation(() => "");
 
       const { subscriberId, config } = setup({
         config: {
@@ -190,10 +189,10 @@ describe("useSubscriptions", () => {
     it("should set subscriptions when xAxisVal is currentCustom and parsedPath is undefined", () => {
       const parsedPath = undefined;
       const filledInGlobalVarsPath = BasicBuilder.string();
-      (isReferenceLinePlotPathType as jest.Mock).mockImplementation(() => false);
-      (parseMessagePath as jest.Mock).mockImplementation(() => parsedPath);
-      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation(() => filledInGlobalVarsPath);
-      (pathToSubscribePayload as jest.Mock).mockImplementation(() => "");
+      (isReferenceLinePlotPathType as Mock).mockImplementation(() => false);
+      (parseMessagePath as Mock).mockImplementation(() => parsedPath);
+      (fillInGlobalVariablesInPath as Mock).mockImplementation(() => filledInGlobalVarsPath);
+      (pathToSubscribePayload as Mock).mockImplementation(() => "");
 
       const { subscriberId, config } = setup({
         config: {
@@ -232,7 +231,7 @@ describe("useSubscriptions", () => {
     });
 
     it("should not handle paths when isReferenceLinePlotPathType is true", () => {
-      (isReferenceLinePlotPathType as jest.Mock).mockImplementation(() => true);
+      (isReferenceLinePlotPathType as Mock).mockImplementation(() => true);
       const { subscriberId } = setup({
         config: {
           paths: PlotBuilder.paths(1),
@@ -248,8 +247,8 @@ describe("useSubscriptions", () => {
     });
 
     it("should not handle paths when parsedPath is undefined", () => {
-      (isReferenceLinePlotPathType as jest.Mock).mockImplementation(() => false);
-      (parseMessagePath as jest.Mock).mockImplementation(() => undefined);
+      (isReferenceLinePlotPathType as Mock).mockImplementation(() => false);
+      (parseMessagePath as Mock).mockImplementation(() => undefined);
       const { subscriberId } = setup({
         config: {
           paths: PlotBuilder.paths(1),

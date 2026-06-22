@@ -1,10 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
@@ -13,7 +13,7 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import LayoutSection from "./LayoutSection";
 
-jest.mock("./LayoutRow", () => ({
+vi.mock("./LayoutRow", async () => ({
   __esModule: true,
   default: ({ layout, selected }: { layout: Layout; selected: boolean }) => (
     <div data-testid={`layout-row-${layout.id}`} data-selected={selected}>
@@ -36,15 +36,15 @@ describe("LayoutSection", () => {
     anySelectedModifiedLayouts: false,
     multiSelectedIds: [] as string[],
     selectedId: undefined,
-    onSelect: jest.fn(),
-    onRename: jest.fn(),
-    onDuplicate: jest.fn(),
-    onDelete: jest.fn(),
-    onShare: jest.fn(),
-    onExport: jest.fn(),
-    onOverwrite: jest.fn(),
-    onRevert: jest.fn(),
-    onMakePersonalCopy: jest.fn(),
+    onSelect: vi.fn(),
+    onRename: vi.fn(),
+    onDuplicate: vi.fn(),
+    onDelete: vi.fn(),
+    onShare: vi.fn(),
+    onExport: vi.fn(),
+    onOverwrite: vi.fn(),
+    onRevert: vi.fn(),
+    onMakePersonalCopy: vi.fn(),
   };
 
   it("renders title when provided", () => {

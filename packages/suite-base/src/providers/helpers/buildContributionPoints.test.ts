@@ -10,11 +10,11 @@ import { buildContributionPoints } from "./buildContributionPoints";
 
 describe("buildContributionPoints", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should initialize contribution objects", () => {
-    const consoleErrorMock = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
     const extensionInfo = ExtensionBuilder.extensionInfo();
 
     const result = buildContributionPoints(extensionInfo, "");
@@ -32,7 +32,7 @@ describe("buildContributionPoints", () => {
     const panelId = `${extensionInfo.qualifiedName}.${panelName}`;
     const registration: ExtensionPanelRegistration = {
       name: panelName,
-      initPanel: jest.fn(),
+      initPanel: vi.fn(),
     };
 
     (globalThis as any).panel = registration;
@@ -62,13 +62,13 @@ describe("buildContributionPoints", () => {
   });
 
   it("should warn when trying to register a duplicate panel", () => {
-    const logWarnMock = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const logWarnMock = vi.spyOn(console, "warn").mockImplementation(() => {});
     const extensionInfo = ExtensionBuilder.extensionInfo();
     const panelName = BasicBuilder.string();
     const panelId = `${extensionInfo.qualifiedName}.${panelName}`;
     const registration: ExtensionPanelRegistration = {
       name: panelName,
-      initPanel: jest.fn(),
+      initPanel: vi.fn(),
     };
 
     (globalThis as any).panel = registration;
@@ -98,7 +98,7 @@ describe("buildContributionPoints", () => {
       toSchemaName: BasicBuilder.string(),
       panelSettings: {},
       extensionId: extensionInfo.id,
-      converter: jest.fn(),
+      converter: vi.fn(),
     };
 
     (globalThis as any).messageConverter = messageConverter;
@@ -126,13 +126,13 @@ describe("buildContributionPoints", () => {
     const extensionInfo = ExtensionBuilder.extensionInfo();
     const panelSettingsA: PanelSettings<unknown> = {
       defaultConfig: BasicBuilder.genericDictionary(String),
-      handler: jest.fn(),
-      settings: jest.fn(),
+      handler: vi.fn(),
+      settings: vi.fn(),
     };
     const panelSettingsB: PanelSettings<unknown> = {
       defaultConfig: BasicBuilder.genericDictionary(String),
-      handler: jest.fn(),
-      settings: jest.fn(),
+      handler: vi.fn(),
+      settings: vi.fn(),
     };
     const messageConverter: InstalledMessageConverter = {
       fromSchemaName: BasicBuilder.string(),
@@ -141,7 +141,7 @@ describe("buildContributionPoints", () => {
         panelSettingsA,
         panelSettingsB,
       },
-      converter: jest.fn(),
+      converter: vi.fn(),
     };
 
     (globalThis as any).messageConverter = messageConverter;
@@ -172,7 +172,7 @@ describe("buildContributionPoints", () => {
 
   it("registers topic aliases correctly", () => {
     const extensionInfo = ExtensionBuilder.extensionInfo();
-    const aliasFunction: TopicAliasFunction = jest.fn();
+    const aliasFunction: TopicAliasFunction = vi.fn();
 
     (globalThis as any).topicAliasFunction = aliasFunction;
     const extensionSource = `

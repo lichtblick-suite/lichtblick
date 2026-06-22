@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 
 import { MessageEvent } from "@lichtblick/suite";
@@ -13,37 +14,37 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { createMessageRangeIterator } from "./messageRangeIterator";
 import { useSubscribeMessageRange } from "./useSubscribeMessageRange";
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
-  useMessagePipelineGetter: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
+  useMessagePipelineGetter: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
-  useExtensionCatalog: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", async () => ({
+  useExtensionCatalog: vi.fn(),
 }));
 
-jest.mock("./messageRangeIterator", () => ({
-  createMessageRangeIterator: jest.fn(),
+vi.mock("./messageRangeIterator", async () => ({
+  createMessageRangeIterator: vi.fn(),
 }));
 
-const mockUseMessagePipelineGetter = useMessagePipelineGetter as jest.Mock;
-const mockUseExtensionCatalog = useExtensionCatalog as jest.Mock;
-const mockCreateMessageRangeIterator = createMessageRangeIterator as jest.Mock;
+const mockUseMessagePipelineGetter = useMessagePipelineGetter as Mock;
+const mockUseExtensionCatalog = useExtensionCatalog as Mock;
+const mockCreateMessageRangeIterator = createMessageRangeIterator as Mock;
 
 describe("useSubscribeMessageRange", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseExtensionCatalog.mockReturnValue([]);
   });
 
   it("does not call onNewRangeIterator when batch iterator is unavailable", () => {
     // Given
     mockUseMessagePipelineGetter.mockReturnValue(
-      jest.fn().mockReturnValue({
+      vi.fn().mockReturnValue({
         sortedTopics: [],
-        getBatchIterator: jest.fn().mockReturnValue(undefined),
+        getBatchIterator: vi.fn().mockReturnValue(undefined),
       }),
     );
-    const onNewRangeIterator = jest.fn().mockResolvedValue(undefined);
+    const onNewRangeIterator = vi.fn().mockResolvedValue(undefined);
     const { result } = renderHook(() => useSubscribeMessageRange());
 
     // When
@@ -58,12 +59,12 @@ describe("useSubscribeMessageRange", () => {
   it("returns a callable cancel function when batch iterator is unavailable", () => {
     // Given
     mockUseMessagePipelineGetter.mockReturnValue(
-      jest.fn().mockReturnValue({
+      vi.fn().mockReturnValue({
         sortedTopics: [],
-        getBatchIterator: jest.fn().mockReturnValue(undefined),
+        getBatchIterator: vi.fn().mockReturnValue(undefined),
       }),
     );
-    const onNewRangeIterator = jest.fn().mockResolvedValue(async () => {});
+    const onNewRangeIterator = vi.fn().mockResolvedValue(async () => {});
     const { result } = renderHook(() => useSubscribeMessageRange());
     let cancel!: () => void;
 
@@ -81,15 +82,15 @@ describe("useSubscribeMessageRange", () => {
   it("calls onNewRangeIterator with the iterable when batch iterator is available", () => {
     // Given
     const topic = BasicBuilder.string();
-    const mockIterable: AsyncIterable<MessageEvent[]> = { [Symbol.asyncIterator]: jest.fn() };
-    const mockCancel = jest.fn();
+    const mockIterable: AsyncIterable<MessageEvent[]> = { [Symbol.asyncIterator]: vi.fn() };
+    const mockCancel = vi.fn();
     let cancel!: () => void;
-    const mockBatchIterator = { [Symbol.asyncIterator]: jest.fn() };
-    const onNewRangeIterator = jest.fn().mockResolvedValue(async () => {});
+    const mockBatchIterator = { [Symbol.asyncIterator]: vi.fn() };
+    const onNewRangeIterator = vi.fn().mockResolvedValue(async () => {});
     mockCreateMessageRangeIterator.mockReturnValue({ iterable: mockIterable, cancel: mockCancel });
-    const mockGetBatchIterator = jest.fn().mockReturnValue(mockBatchIterator);
+    const mockGetBatchIterator = vi.fn().mockReturnValue(mockBatchIterator);
     mockUseMessagePipelineGetter.mockReturnValue(
-      jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator: mockGetBatchIterator }),
+      vi.fn().mockReturnValue({ sortedTopics: [], getBatchIterator: mockGetBatchIterator }),
     );
 
     const { result } = renderHook(() => useSubscribeMessageRange());

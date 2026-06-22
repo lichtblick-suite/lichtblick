@@ -1,9 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mocked, MockedFunction, Mock } from "vitest";
 import { act, render, renderHook } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { PropsWithChildren, useContext } from "react";
 import { useLocalStorage } from "react-use";
 
@@ -18,40 +19,40 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { StudioLogsSettingsProvider } from "./StudioLogsSettingsProvider";
 import { createStudioLogsSettingsStore } from "./store";
 
-jest.mock("react-use", () => ({
-  useLocalStorage: jest.fn(),
+vi.mock("react-use", async () => ({
+  useLocalStorage: vi.fn(),
 }));
 
-jest.mock("@lichtblick/log");
+vi.mock("@lichtblick/log");
 
-jest.mock("./store", () => ({
-  createStudioLogsSettingsStore: jest.fn(),
+vi.mock("./store", async () => ({
+  createStudioLogsSettingsStore: vi.fn(),
 }));
 
-const mockUseLocalStorage = useLocalStorage as jest.MockedFunction<typeof useLocalStorage>;
-const mockLog = Log as jest.Mocked<typeof Log>;
-const mockCreateStudioLogsSettingsStore = createStudioLogsSettingsStore as jest.MockedFunction<
+const mockUseLocalStorage = useLocalStorage as MockedFunction<typeof useLocalStorage>;
+const mockLog = Log as Mocked<typeof Log>;
+const mockCreateStudioLogsSettingsStore = createStudioLogsSettingsStore as MockedFunction<
   typeof createStudioLogsSettingsStore
 >;
 
 describe("StudioLogsSettingsProvider", () => {
   const mockStore = {
-    getState: jest.fn<IStudioLogsSettings, []>(),
-    setState: jest.fn(),
-    subscribe: jest.fn<() => void, [(state: IStudioLogsSettings) => void]>(),
-    destroy: jest.fn(),
-    getInitialState: jest.fn<IStudioLogsSettings, []>(),
+    getState: vi.fn<IStudioLogsSettings, []>(),
+    setState: vi.fn(),
+    subscribe: vi.fn<() => void, [(state: IStudioLogsSettings) => void]>(),
+    destroy: vi.fn(),
+    getInitialState: vi.fn<IStudioLogsSettings, []>(),
   };
 
   const createMockLogger = (): Partial<any> => ({
-    name: jest.fn().mockReturnValue("test-logger"),
-    setLevel: jest.fn(),
-    isLevelOn: jest.fn().mockReturnValue(true),
-    getLevel: jest.fn().mockReturnValue("info"),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    name: vi.fn().mockReturnValue("test-logger"),
+    setLevel: vi.fn(),
+    isLevelOn: vi.fn().mockReturnValue(true),
+    getLevel: vi.fn().mockReturnValue("info"),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   });
 
   const mockLogger = createMockLogger();
@@ -59,33 +60,33 @@ describe("StudioLogsSettingsProvider", () => {
   const defaultMockState: IStudioLogsSettings = {
     channels: [{ name: BasicBuilder.string(), enabled: true }],
     globalLevel: "info",
-    setGlobalLevel: jest.fn(),
-    enableChannel: jest.fn(),
-    disableChannel: jest.fn(),
-    enablePrefix: jest.fn(),
-    disablePrefix: jest.fn(),
+    setGlobalLevel: vi.fn(),
+    enableChannel: vi.fn(),
+    disableChannel: vi.fn(),
+    enablePrefix: vi.fn(),
+    disablePrefix: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
-    mockUseLocalStorage.mockReturnValue([{}, jest.fn(), jest.fn()]);
-    (mockLog.channels as jest.Mock).mockReturnValue([mockLogger]);
-    (mockCreateStudioLogsSettingsStore as jest.Mock).mockReturnValue(mockStore);
+    mockUseLocalStorage.mockReturnValue([{}, vi.fn(), vi.fn()]);
+    (mockLog.channels as Mock).mockReturnValue([mockLogger]);
+    (mockCreateStudioLogsSettingsStore as Mock).mockReturnValue(mockStore);
     mockStore.getState.mockReturnValue(defaultMockState);
-    mockStore.subscribe.mockReturnValue(jest.fn());
+    mockStore.subscribe.mockReturnValue(vi.fn());
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe("Component Initialization", () => {
     it("should initialize with empty local storage state", () => {
       // Given
-      const setSavedState = jest.fn();
-      const removeSavedState = jest.fn();
+      const setSavedState = vi.fn();
+      const removeSavedState = vi.fn();
       mockUseLocalStorage.mockReturnValue([{}, setSavedState, removeSavedState]);
 
       // When
@@ -105,8 +106,8 @@ describe("StudioLogsSettingsProvider", () => {
         globalLevel: "debug",
         disabledChannels: [BasicBuilder.string(), BasicBuilder.string()],
       };
-      const setSavedState = jest.fn();
-      const removeSavedState = jest.fn();
+      const setSavedState = vi.fn();
+      const removeSavedState = vi.fn();
       mockUseLocalStorage.mockReturnValue([savedState, setSavedState, removeSavedState]);
 
       // When
@@ -172,7 +173,7 @@ describe("StudioLogsSettingsProvider", () => {
   describe("Channel Count Monitoring", () => {
     it("should recreate store when channel count changes", () => {
       // Given
-      (mockLog.channels as jest.Mock).mockReturnValue([mockLogger]);
+      (mockLog.channels as Mock).mockReturnValue([mockLogger]);
       mockStore.getState.mockReturnValue({
         ...defaultMockState,
         channels: [{ name: BasicBuilder.string(), enabled: true }],
@@ -186,10 +187,10 @@ describe("StudioLogsSettingsProvider", () => {
 
       // When
       const newLogger = createMockLogger();
-      (mockLog.channels as jest.Mock).mockReturnValue([mockLogger, newLogger]);
+      (mockLog.channels as Mock).mockReturnValue([mockLogger, newLogger]);
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       // Then
@@ -198,7 +199,7 @@ describe("StudioLogsSettingsProvider", () => {
 
     it("should not recreate store when channel count remains same", () => {
       // Given
-      (mockLog.channels as jest.Mock).mockReturnValue([mockLogger]);
+      (mockLog.channels as Mock).mockReturnValue([mockLogger]);
       mockStore.getState.mockReturnValue({
         ...defaultMockState,
         channels: [{ name: BasicBuilder.string(), enabled: true }],
@@ -212,7 +213,7 @@ describe("StudioLogsSettingsProvider", () => {
 
       // When
       act(() => {
-        jest.advanceTimersByTime(2000);
+        vi.advanceTimersByTime(2000);
       });
 
       // Then
@@ -221,7 +222,7 @@ describe("StudioLogsSettingsProvider", () => {
 
     it("should clean up interval on unmount", () => {
       // Given
-      const clearIntervalSpy = jest.spyOn(global, "clearInterval");
+      const clearIntervalSpy = vi.spyOn(global, "clearInterval");
       const { unmount } = render(
         <StudioLogsSettingsProvider>
           <div>Test</div>
@@ -240,12 +241,12 @@ describe("StudioLogsSettingsProvider", () => {
     it("should save state to local storage when store changes", () => {
       // Given
       let subscriptionCallback: ((value: IStudioLogsSettings) => void) | undefined;
-      const setSavedState = jest.fn();
-      const removeSavedState = jest.fn();
+      const setSavedState = vi.fn();
+      const removeSavedState = vi.fn();
       mockUseLocalStorage.mockReturnValue([{}, setSavedState, removeSavedState]);
       mockStore.subscribe.mockImplementation((callback: (state: IStudioLogsSettings) => void) => {
         subscriptionCallback = callback;
-        return jest.fn(); // unsubscribe function
+        return vi.fn(); // unsubscribe function
       });
 
       render(
@@ -262,11 +263,11 @@ describe("StudioLogsSettingsProvider", () => {
           { name: BasicBuilder.string(), enabled: true },
           { name: BasicBuilder.string(), enabled: false },
         ],
-        setGlobalLevel: jest.fn(),
-        enableChannel: jest.fn(),
-        disableChannel: jest.fn(),
-        enablePrefix: jest.fn(),
-        disablePrefix: jest.fn(),
+        setGlobalLevel: vi.fn(),
+        enableChannel: vi.fn(),
+        disableChannel: vi.fn(),
+        enablePrefix: vi.fn(),
+        disablePrefix: vi.fn(),
       };
 
       act(() => {
@@ -283,12 +284,12 @@ describe("StudioLogsSettingsProvider", () => {
     it("should save empty disabled channels when all channels are enabled", () => {
       // Given
       let subscriptionCallback: ((value: IStudioLogsSettings) => void) | undefined;
-      const setSavedState = jest.fn();
-      const removeSavedState = jest.fn();
+      const setSavedState = vi.fn();
+      const removeSavedState = vi.fn();
       mockUseLocalStorage.mockReturnValue([{}, setSavedState, removeSavedState]);
       mockStore.subscribe.mockImplementation((callback: (state: IStudioLogsSettings) => void) => {
         subscriptionCallback = callback;
-        return jest.fn();
+        return vi.fn();
       });
 
       render(
@@ -304,11 +305,11 @@ describe("StudioLogsSettingsProvider", () => {
           { name: BasicBuilder.string(), enabled: true },
           { name: BasicBuilder.string(), enabled: true },
         ],
-        setGlobalLevel: jest.fn(),
-        enableChannel: jest.fn(),
-        disableChannel: jest.fn(),
-        enablePrefix: jest.fn(),
-        disablePrefix: jest.fn(),
+        setGlobalLevel: vi.fn(),
+        enableChannel: vi.fn(),
+        disableChannel: vi.fn(),
+        enablePrefix: vi.fn(),
+        disablePrefix: vi.fn(),
       };
 
       act(() => {
@@ -324,7 +325,7 @@ describe("StudioLogsSettingsProvider", () => {
 
     it("should unsubscribe on unmount", () => {
       // Given
-      const unsubscribe = jest.fn();
+      const unsubscribe = vi.fn();
       mockStore.subscribe.mockReturnValue(unsubscribe);
 
       const { unmount } = render(
@@ -345,13 +346,13 @@ describe("StudioLogsSettingsProvider", () => {
     it("should use saved state reference when recreating store", () => {
       // Given
       const initialState = { globalLevel: "debug", disabledChannels: ["test"] };
-      const setSavedState = jest.fn();
-      const removeSavedState = jest.fn();
+      const setSavedState = vi.fn();
+      const removeSavedState = vi.fn();
 
       // Mock useLocalStorage to return consistent value
       mockUseLocalStorage.mockReturnValue([initialState, setSavedState, removeSavedState]);
 
-      (mockLog.channels as jest.Mock).mockReturnValue([mockLogger]);
+      (mockLog.channels as Mock).mockReturnValue([mockLogger]);
       mockStore.getState.mockReturnValue({
         ...defaultMockState,
         channels: [{ name: BasicBuilder.string(), enabled: true }],
@@ -366,10 +367,10 @@ describe("StudioLogsSettingsProvider", () => {
 
       // Simulate channel count change
       const newLogger = createMockLogger();
-      (mockLog.channels as jest.Mock).mockReturnValue([mockLogger, newLogger]);
+      (mockLog.channels as Mock).mockReturnValue([mockLogger, newLogger]);
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       // Then

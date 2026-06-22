@@ -493,8 +493,8 @@ describe("renderState", () => {
   // for two different converters.
   it("should run the correct converter", () => {
     const buildRenderState = initRenderStateBuilder();
-    const converter1 = jest.fn().mockImplementation(() => "srcschema-destschema");
-    const converter2 = jest.fn().mockImplementation(() => "srcschemade-stschema");
+    const converter1 = vi.fn().mockImplementation(() => "srcschema-destschema");
+    const converter2 = vi.fn().mockImplementation(() => "srcschemade-stschema");
     const state = buildRenderState({
       watchedFields: new Set(["topics", "currentFrame"]),
       playerState: undefined,
@@ -815,7 +815,7 @@ describe("renderState", () => {
 
   it("should force conversion of the latest message when requested", () => {
     const buildRenderState = initRenderStateBuilder();
-    const converter = jest.fn((msg, event) => ({
+    const converter = vi.fn((msg, event) => ({
       converted: event.topicConfig?.flag ?? "default",
       original: msg,
     }));
@@ -935,7 +935,7 @@ describe("renderState", () => {
 
   it("should run converter when globalvariables changed", () => {
     const buildRenderState = initRenderStateBuilder();
-    const converter = jest.fn().mockImplementation(() => 1);
+    const converter = vi.fn().mockImplementation(() => 1);
     const initialState: BuilderRenderStateInput = {
       watchedFields: new Set(["topics", "currentFrame"]),
       playerState: undefined,
@@ -1016,7 +1016,7 @@ describe("renderState", () => {
 
   it("should pass undefined to converter when no global variables are set", () => {
     const buildRenderState = initRenderStateBuilder();
-    const converter = jest.fn().mockImplementation(() => 1);
+    const converter = vi.fn().mockImplementation(() => 1);
 
     buildRenderState({
       watchedFields: new Set(["currentFrame"]),
@@ -1249,7 +1249,7 @@ describe("renderState", () => {
 
   it("should add extension settings to converter method", async () => {
     const generatePanelSettings = <T>(obj: PanelSettings<T>) => obj as PanelSettings<unknown>;
-    const checkRenderedConfig = jest.fn();
+    const checkRenderedConfig = vi.fn();
     const buildRenderState = initRenderStateBuilder();
     buildRenderState({
       appSettings: undefined,

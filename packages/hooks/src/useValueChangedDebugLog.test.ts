@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -14,7 +14,7 @@ import { default as useValueChangedDebugLog } from "./useValueChangedDebugLog";
 
 describe("useValueChangeDebugLog", () => {
   it("should log an error when value changes", () => {
-    const debugMock = jest.fn();
+    const debugMock = vi.fn();
     Logger.channels().forEach((channel) => {
       if (channel.name().endsWith("useValueChangedDebugLog.ts")) {
         channel.debug = debugMock;

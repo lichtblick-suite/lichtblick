@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { DataSourceFactoryInitializeArgs } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
@@ -10,18 +11,18 @@ import { PlayerMetricsCollectorInterface } from "@lichtblick/suite-base/players/
 
 import RemoteDataSourceFactory, { checkExtensionMatch } from "./RemoteDataSourceFactory";
 
-jest.mock("@lichtblick/suite-base/players/IterablePlayer", () => ({
-  IterablePlayer: jest.fn(),
+vi.mock("@lichtblick/suite-base/players/IterablePlayer", async () => ({
+  IterablePlayer: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource", () => ({
-  WorkerSerializedIterableSource: jest.fn(),
+vi.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource", async () => ({
+  WorkerSerializedIterableSource: vi.fn(),
 }));
 
 function setupArgs(params?: Record<string, string | undefined>): DataSourceFactoryInitializeArgs {
   const mockArgs: DataSourceFactoryInitializeArgs = {
     params,
-    metricsCollector: jest.fn() as unknown as PlayerMetricsCollectorInterface,
+    metricsCollector: vi.fn() as unknown as PlayerMetricsCollectorInterface,
   };
   return mockArgs;
 }
@@ -60,13 +61,13 @@ describe("RemoteDataSourceFactory", () => {
   let factory: RemoteDataSourceFactory;
 
   const mockSource = { mock: "workerSource" };
-  (WorkerSerializedIterableSource as jest.Mock).mockImplementation(() => mockSource);
+  (WorkerSerializedIterableSource as Mock).mockImplementation(() => mockSource);
 
   const mockPlayer = { mock: "playerInstance" };
-  (IterablePlayer as jest.Mock).mockImplementation(() => mockPlayer);
+  (IterablePlayer as Mock).mockImplementation(() => mockPlayer);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     factory = new RemoteDataSourceFactory();
   });
   it("should initialize and return a player with a single remote .mcap file", () => {

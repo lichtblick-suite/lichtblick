@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 
 import { MessageEvent, SubscribeMessageRangeArgs } from "@lichtblick/suite";
@@ -13,30 +14,30 @@ import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder
 
 import { useDecodedMessageRange } from "./useDecodedMessageRange";
 
-jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems");
-jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter");
+vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems");
+vi.mock("@lichtblick/suite-base/components/PanelExtensionAdapter");
 
 describe("useDecodedMessageRange", () => {
-  let mockSubscribeMessageRange: jest.Mock;
-  let mockDecodeMessagePathsForMessagesByTopic: jest.Mock;
-  let mockCancel: jest.Mock;
+  let mockSubscribeMessageRange: Mock;
+  let mockDecodeMessagePathsForMessagesByTopic: Mock;
+  let mockCancel: Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
-    mockCancel = jest.fn();
-    mockSubscribeMessageRange = jest.fn().mockReturnValue(mockCancel);
-    mockDecodeMessagePathsForMessagesByTopic = jest.fn().mockReturnValue({});
+    mockCancel = vi.fn();
+    mockSubscribeMessageRange = vi.fn().mockReturnValue(mockCancel);
+    mockDecodeMessagePathsForMessagesByTopic = vi.fn().mockReturnValue({});
 
-    (useSubscribeMessageRange as jest.Mock).mockReturnValue(mockSubscribeMessageRange);
-    (useDecodeMessagePathsForMessagesByTopic as jest.Mock).mockReturnValue(
+    (useSubscribeMessageRange as Mock).mockReturnValue(mockSubscribeMessageRange);
+    (useDecodeMessagePathsForMessagesByTopic as Mock).mockReturnValue(
       mockDecodeMessagePathsForMessagesByTopic,
     );
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   async function simulateBatches(topic: string, batches: MessageEvent[][]): Promise<void> {
@@ -107,8 +108,8 @@ describe("useDecodedMessageRange", () => {
   });
 
   it("should handle empty topics", () => {
-    (useDecodeMessagePathsForMessagesByTopic as jest.Mock).mockReturnValue(
-      jest.fn().mockReturnValue({}),
+    (useDecodeMessagePathsForMessagesByTopic as Mock).mockReturnValue(
+      vi.fn().mockReturnValue({}),
     );
 
     const { result } = renderHook(() => useDecodedMessageRange([], []));
@@ -204,8 +205,8 @@ describe("useDecodedMessageRange", () => {
       const topicA = PlayerBuilder.topic().name;
       const topicB = PlayerBuilder.topic().name;
 
-      const cancelA = jest.fn();
-      const cancelB = jest.fn();
+      const cancelA = vi.fn();
+      const cancelB = vi.fn();
       mockSubscribeMessageRange.mockReturnValueOnce(cancelA).mockReturnValueOnce(cancelB);
 
       const { rerender } = renderHook(

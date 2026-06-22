@@ -14,7 +14,7 @@ describe("EventHandler", () => {
 
   describe("addEventListener", () => {
     it("should add an event listener if it doesn't already exist", () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const addListener = addEventListener(emitter);
 
       addListener("testEvent", handler);
@@ -24,7 +24,7 @@ describe("EventHandler", () => {
     });
 
     it("should not add the same event listener multiple times", () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const addListener = addEventListener(emitter);
 
       addListener("testEvent", handler);
@@ -44,7 +44,7 @@ describe("EventHandler", () => {
 
   describe("removeEventListener", () => {
     it("should remove an existing event listener", () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const addListener = addEventListener(emitter);
       const removeListener = removeEventListener(emitter);
 
@@ -56,7 +56,7 @@ describe("EventHandler", () => {
     });
 
     it("should not throw if removing a listener that doesn't exist", () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const removeListener = removeEventListener(emitter);
 
       expect(() => {
@@ -65,7 +65,7 @@ describe("EventHandler", () => {
     });
 
     it("should not remove listeners if the function is undefined", () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       const addListener = addEventListener(emitter);
       const removeListener = removeEventListener(emitter);
 

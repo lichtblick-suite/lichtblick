@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -6,6 +6,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mock } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { DndProvider } from "react-dnd";
@@ -39,28 +40,28 @@ class MockPanelCatalog implements PanelCatalog {
 describe("UnconnectedPanelLayout", () => {
   beforeEach(() => {
     // jsdom can't parse our @container CSS so we have to silence console.error for this test.
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    (console.error as jest.Mock).mockRestore();
+    (console.error as Mock).mockRestore();
   });
 
   it("does not remount panels when changing split percentage", async () => {
-    // jest.spyOn(console, "error").mockImplementation(() => undefined);
+    // vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    const renderA = jest.fn().mockReturnValue(<>A</>);
-    const moduleA = jest.fn().mockResolvedValue({
+    const renderA = vi.fn().mockReturnValue(<>A</>);
+    const moduleA = vi.fn().mockResolvedValue({
       default: Panel(Object.assign(renderA, { panelType: "a", defaultConfig: {} })),
     });
 
-    const renderB = jest.fn().mockReturnValue(<>B</>);
-    const moduleB = jest.fn().mockResolvedValue({
+    const renderB = vi.fn().mockReturnValue(<>B</>);
+    const moduleB = vi.fn().mockResolvedValue({
       default: Panel(Object.assign(renderB, { panelType: "b", defaultConfig: {} })),
     });
 
-    const renderC = jest.fn().mockReturnValue(<>C</>);
-    const moduleC = jest.fn().mockResolvedValue({
+    const renderC = vi.fn().mockReturnValue(<>C</>);
+    const moduleC = vi.fn().mockResolvedValue({
       default: Panel(Object.assign(renderC, { panelType: "c", defaultConfig: {} })),
     });
 

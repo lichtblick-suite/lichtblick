@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -11,7 +11,7 @@ import { DirectionalPadAction } from "@lichtblick/suite-base/panels/Teleop/types
 describe("DirectionalPad", () => {
   it("should call onAction and update state when UP button is clicked", () => {
     // given
-    const onAction = jest.fn();
+    const onAction = vi.fn();
     const { container } = render(<DirectionalPad onAction={onAction} />);
     const upButton = container.querySelector('g[role="button"]');
 
@@ -25,7 +25,7 @@ describe("DirectionalPad", () => {
 
   it("should not call onAction when disabled", () => {
     // given
-    const onAction = jest.fn();
+    const onAction = vi.fn();
     const { container } = render(<DirectionalPad onAction={onAction} disabled={true} />);
     const upButton = container.querySelector('g[role="button"]');
 
@@ -52,7 +52,7 @@ describe("DirectionalPad", () => {
 
   it("should update state for different directional actions", () => {
     // given
-    const onAction = jest.fn();
+    const onAction = vi.fn();
     const { container } = render(<DirectionalPad onAction={onAction} />);
     const buttons = container.querySelectorAll('g[role="button"]');
 

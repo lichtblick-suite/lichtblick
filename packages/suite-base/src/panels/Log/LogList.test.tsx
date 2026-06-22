@@ -1,10 +1,11 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { userEvent } from "@storybook/testing-library";
 import { render, screen, cleanup } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
@@ -26,39 +27,40 @@ function createMockLogMessage(
 }
 
 // Mock the hooks
-jest.mock("@lichtblick/suite-base/hooks", () => ({
-  useAppTimeFormat: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks", async () => ({
+  useAppTimeFormat: vi.fn(),
 }));
 
 // Mock AutoSizer to avoid layout issues in tests
-jest.mock("react-virtualized-auto-sizer", () => {
-  return ({
+vi.mock("react-virtualized-auto-sizer", async () => ({
+  __esModule: true,
+  default: ({
     children,
   }: {
     children: (props: { width: number; height: number }) => React.ReactNode;
-  }) => children({ width: 800, height: 600 });
-});
+  }) => children({ width: 800, height: 600 }),
+}));
 
 // Mock react-resize-detector
-jest.mock("react-resize-detector", () => ({
+vi.mock("react-resize-detector", async () => ({
   useResizeDetector: () => ({
     width: 800,
     height: 600,
-    ref: jest.fn(),
+    ref: vi.fn(),
   }),
 }));
 
 describe("LogList Component", () => {
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
-    (useAppTimeFormat as jest.Mock).mockReturnValue({
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    (useAppTimeFormat as Mock).mockReturnValue({
       timeFormat: "SEC",
       timeZone: "UTC",
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cleanup();
   });
 

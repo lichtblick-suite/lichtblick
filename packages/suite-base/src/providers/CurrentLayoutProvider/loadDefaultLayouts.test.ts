@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+import type { Mocked } from "vitest";
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
 import { LayoutLoader } from "@lichtblick/suite-base/services/ILayoutLoader";
@@ -8,20 +9,20 @@ import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/Moc
 // Mock layout manager
 const mockLayoutManager = new MockLayoutManager();
 
-jest.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", () =>
-  jest.fn(() => mockLayoutManager),
+vi.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", async () =>
+  vi.fn(() => mockLayoutManager),
 );
 
 describe("loadDefaultLayouts", () => {
-  const mockLayoutLoader: jest.Mocked<LayoutLoader> = {
-    fetchLayouts: jest.fn(),
+  const mockLayoutLoader: Mocked<LayoutLoader> = {
+    fetchLayouts: vi.fn(),
     namespace: "local",
   };
 
-  const consoleErrorMock = console.error as ReturnType<typeof jest.fn>;
+  const consoleErrorMock = console.error as ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should not proceed if loaders array is empty", async () => {
@@ -100,13 +101,13 @@ describe("loadDefaultLayouts", () => {
       { from: "layout4.json", name: "layout4", data: {} as LayoutData },
     ];
 
-    const loader1: jest.Mocked<LayoutLoader> = {
-      fetchLayouts: jest.fn().mockResolvedValueOnce(loader1Layouts),
+    const loader1: Mocked<LayoutLoader> = {
+      fetchLayouts: vi.fn().mockResolvedValueOnce(loader1Layouts),
       namespace: "loader1",
     } as any;
 
-    const loader2: jest.Mocked<LayoutLoader> = {
-      fetchLayouts: jest.fn().mockResolvedValueOnce(loader2Layouts),
+    const loader2: Mocked<LayoutLoader> = {
+      fetchLayouts: vi.fn().mockResolvedValueOnce(loader2Layouts),
       namespace: "loader2",
     } as any;
 

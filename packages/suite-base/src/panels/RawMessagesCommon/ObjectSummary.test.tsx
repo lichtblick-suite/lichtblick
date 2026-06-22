@@ -1,9 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { render } from "@testing-library/react";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
@@ -20,9 +20,9 @@ function renderComponent(value: unknown) {
       }
       return undefined;
     },
-    set: jest.fn(),
-    addChangeListener: jest.fn(),
-    removeChangeListener: jest.fn(),
+    set: vi.fn(),
+    addChangeListener: vi.fn(),
+    removeChangeListener: vi.fn(),
   };
 
   return render(

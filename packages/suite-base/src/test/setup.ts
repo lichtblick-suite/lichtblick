@@ -21,6 +21,13 @@ import setImmediate from "@lichtblick/suite-base/util/setImmediate";
 
 process.env.WASM_LZ4_ENVIRONMENT = "NODE";
 
+// Webpack DefinePlugin globals, injected as real globals for tests (formerly Jest `globals`).
+const globalDefines = global as Record<string, unknown>;
+globalDefines.ReactNull ??= null;
+globalDefines.LICHTBLICK_SUITE_VERSION ??= "TEST";
+globalDefines.API_URL ??= "/";
+globalDefines.DEV_WORKSPACE ??= "";
+
 function noOp() {
   // no-op
 }

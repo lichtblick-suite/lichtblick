@@ -4,20 +4,20 @@
 import { RemoteFileReadable } from "./RemoteFileReadable";
 
 // Mock BrowserHttpReader and CachedFilelike so we never make real HTTP requests
-const mockOpen = jest.fn().mockResolvedValue(undefined);
-const mockSize = jest.fn().mockReturnValue(1024);
-const mockRead = jest.fn().mockResolvedValue(new Uint8Array([1, 2, 3]));
+const mockOpen = vi.fn().mockResolvedValue(undefined);
+const mockSize = vi.fn().mockReturnValue(1024);
+const mockRead = vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3]));
 
-jest.mock("@lichtblick/suite-base/util/CachedFilelike", () => {
-  return jest.fn().mockImplementation(() => ({
+vi.mock("@lichtblick/suite-base/util/CachedFilelike", async () => {
+  return vi.fn().mockImplementation(() => ({
     open: mockOpen,
     size: mockSize,
     read: mockRead,
   }));
 });
 
-jest.mock("@lichtblick/suite-base/util/BrowserHttpReader", () => {
-  return jest.fn();
+vi.mock("@lichtblick/suite-base/util/BrowserHttpReader", async () => {
+  return vi.fn();
 });
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -27,7 +27,7 @@ describe("RemoteFileReadable", () => {
   const testUrl = "https://example.com/data.mcap";
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("constructor", () => {

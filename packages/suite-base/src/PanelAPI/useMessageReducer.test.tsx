@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -15,6 +15,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { Mock } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { PropsWithChildren, useState } from "react";
 
@@ -38,8 +39,8 @@ const initialRestoreCallArguments = [[undefined], [undefined]];
 
 describe("useMessageReducer", () => {
   it("calls restore to initialize without messages", async () => {
-    const addMessage = jest.fn();
-    const restore = jest.fn().mockReturnValue(1);
+    const addMessage = vi.fn();
+    const restore = vi.fn().mockReturnValue(1);
     const { result } = renderHook(
       () =>
         PanelAPI.useMessageReducer({
@@ -60,9 +61,9 @@ describe("useMessageReducer", () => {
   });
 
   it("requires exactly one 'add' callback", () => {
-    const restore = jest.fn().mockReturnValue(1);
-    const addMessage = jest.fn();
-    const addMessages = jest.fn();
+    const restore = vi.fn().mockReturnValue(1);
+    const addMessage = vi.fn();
+    const addMessages = vi.fn();
     expect(() =>
       renderHook(() => PanelAPI.useMessageReducer({ topics: ["/foo"], restore })),
     ).toThrow(
@@ -75,7 +76,7 @@ describe("useMessageReducer", () => {
     ).toThrow(
       new Error("useMessageReducer must be provided with exactly one of addMessage or addMessages"),
     );
-    (console.error as jest.Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 
   it("calls restore to initialize and addMessage for initial messages", async () => {
@@ -87,8 +88,8 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const restore = jest.fn().mockReturnValue(1);
-    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+    const restore = vi.fn().mockReturnValue(1);
+    const addMessage = vi.fn().mockImplementation((_, msg) => msg.message.value);
     const { result } = renderHook(
       () =>
         PanelAPI.useMessageReducer({
@@ -117,8 +118,8 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const restore = jest.fn().mockReturnValue(1);
-    const addMessages = jest
+    const restore = vi.fn().mockReturnValue(1);
+    const addMessages = vi
       .fn()
       .mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
     const { result } = renderHook(
@@ -156,8 +157,8 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const restore = jest.fn().mockReturnValue(1);
-    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+    const restore = vi.fn().mockReturnValue(1);
+    const addMessage = vi.fn().mockImplementation((_, msg) => msg.message.value);
 
     let messages: (typeof messageFoo)[] = [];
     const { result, rerender } = renderHook(
@@ -223,8 +224,8 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const restore = jest.fn().mockReturnValue(1);
-    const addMessages = jest
+    const restore = vi.fn().mockReturnValue(1);
+    const addMessages = vi
       .fn()
       .mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
 
@@ -271,10 +272,10 @@ describe("useMessageReducer", () => {
 
   it("does not filter out non-existing topics", () => {
     // Initial mount. Note that we haven't received any topics yet.
-    const setSubscriptions = jest.fn();
+    const setSubscriptions = vi.fn();
 
-    const restore = jest.fn().mockReturnValue(1);
-    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+    const restore = vi.fn().mockReturnValue(1);
+    const addMessage = vi.fn().mockImplementation((_, msg) => msg.message.value);
 
     const { rerender, unmount } = renderHook(
       ({ topics }) =>
@@ -322,8 +323,8 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const restore = jest.fn().mockReturnValue(1);
-    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+    const restore = vi.fn().mockReturnValue(1);
+    const addMessage = vi.fn().mockImplementation((_, msg) => msg.message.value);
 
     let messages: (typeof message1)[] = [];
     let activeData: Partial<PlayerStateActiveData> = {};
@@ -369,8 +370,8 @@ describe("useMessageReducer", () => {
   }
 
   it("calls add message for messages from newly subscribed topic, given that topic has emitted messages previously", async () => {
-    const restore = jest.fn();
-    const addMessage = jest.fn();
+    const restore = vi.fn();
+    const addMessage = vi.fn();
 
     restore.mockReturnValue(0);
     addMessage.mockImplementation((_, msg) => msg.message.value);
@@ -465,8 +466,8 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const restore = jest.fn().mockReturnValue(1);
-    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+    const restore = vi.fn().mockReturnValue(1);
+    const addMessage = vi.fn().mockImplementation((_, msg) => msg.message.value);
 
     const messages = [message];
     let topics: Topic[] = [];
@@ -501,8 +502,8 @@ describe("useMessageReducer", () => {
   });
 
   it("doesn't re-render when activeData is empty", async () => {
-    const restore = jest.fn().mockReturnValue(1);
-    const addMessage = jest.fn().mockImplementation((_, msg) => msg.message.value);
+    const restore = vi.fn().mockReturnValue(1);
+    const addMessage = vi.fn().mockImplementation((_, msg) => msg.message.value);
 
     let capabilities: string[] | undefined = undefined;
     const { result, rerender } = renderHook(
@@ -537,8 +538,8 @@ describe("useMessageReducer", () => {
       sizeInBytes: 0,
     };
 
-    const restore = jest.fn().mockReturnValue(1);
-    const initialAddMessages = jest
+    const restore = vi.fn().mockReturnValue(1);
+    const initialAddMessages = vi
       .fn()
       .mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
 
@@ -555,7 +556,7 @@ describe("useMessageReducer", () => {
 
     expect(restore.mock.calls).toEqual(initialRestoreCallArguments);
     expect(result.current).toEqual(2);
-    rerender({ addMessages: jest.fn() });
+    rerender({ addMessages: vi.fn() });
     expect(restore.mock.calls).toEqual([...initialRestoreCallArguments, [2]]);
   });
 });

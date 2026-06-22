@@ -1,8 +1,11 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
+
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+
 import { setupJestCanvasMock } from "jest-canvas-mock";
+import type { Mock } from "vitest";
 
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
@@ -15,10 +18,10 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { RendererConfig } from "../IRenderer";
 import { Grids } from "./Grids";
 
-jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");
+vi.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => ({ default: "" }));
 
-jest.mock("three", () => {
-  const ActualTHREE = jest.requireActual("three");
+vi.mock("three", async () => {
+  const ActualTHREE = await vi.importActual("three");
   return {
     ...ActualTHREE,
     WebGLRenderer: function WebGLRenderer() {
@@ -26,18 +29,18 @@ jest.mock("three", () => {
         capabilities: {
           isWebGL2: true,
         },
-        setPixelRatio: jest.fn(),
-        setSize: jest.fn(),
-        render: jest.fn(),
-        clear: jest.fn(),
-        setClearColor: jest.fn(),
-        readRenderTargetPixels: jest.fn(),
+        setPixelRatio: vi.fn(),
+        setSize: vi.fn(),
+        render: vi.fn(),
+        clear: vi.fn(),
+        setClearColor: vi.fn(),
+        readRenderTargetPixels: vi.fn(),
         info: {
-          reset: jest.fn(),
+          reset: vi.fn(),
         },
         shadowMap: {},
-        dispose: jest.fn(),
-        clearDepth: jest.fn(),
+        dispose: vi.fn(),
+        clearDepth: vi.fn(),
         getDrawingBufferSize: () => ({ width: 100, height: 100 }),
       };
     },
@@ -47,15 +50,15 @@ jest.mock("three", () => {
 beforeEach(() => {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: jest.fn().mockImplementation((query) => ({
+    value: vi.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
       onchange: undefined,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
     })),
   });
 });
@@ -96,7 +99,7 @@ describe("Grids", () => {
   let renderer: Renderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
@@ -106,7 +109,7 @@ describe("Grids", () => {
 
   afterEach(() => {
     renderer.dispose();
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   describe("handleSettingsAction() - reorder-node action", () => {
@@ -128,8 +131,8 @@ describe("Grids", () => {
         };
       });
 
-      const updateConfigSpy = jest.spyOn(renderer, "updateConfig");
-      const updateSettingsTreeSpy = jest.spyOn(grids, "updateSettingsTree");
+      const updateConfigSpy = vi.spyOn(renderer, "updateConfig");
+      const updateSettingsTreeSpy = vi.spyOn(grids, "updateSettingsTree");
 
       const action: SettingsTreeAction = {
         action: "reorder-node",
@@ -171,7 +174,7 @@ describe("Grids", () => {
         };
       });
 
-      const saveSettingSpy = jest.spyOn(grids as any, "saveSetting");
+      const saveSettingSpy = vi.spyOn(grids as any, "saveSetting");
 
       const action: SettingsTreeAction = {
         action: "reorder-node",
@@ -241,8 +244,8 @@ describe("Grids", () => {
         };
       });
 
-      const saveSettingSpy = jest.spyOn(grids as any, "saveSetting");
-      const updateConfigSpy = jest.spyOn(renderer, "updateConfig");
+      const saveSettingSpy = vi.spyOn(grids as any, "saveSetting");
+      const updateConfigSpy = vi.spyOn(renderer, "updateConfig");
 
       const action: SettingsTreeAction = {
         action: "reorder-node",

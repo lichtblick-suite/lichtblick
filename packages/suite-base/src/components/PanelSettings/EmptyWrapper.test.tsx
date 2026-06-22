@@ -1,14 +1,14 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen } from "@testing-library/react";
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { EmptyWrapper, EmptyWrapperProps } from "./EmptyWrapper";
 
-jest.mock("react-i18next", () => ({
+vi.mock("react-i18next", async () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),

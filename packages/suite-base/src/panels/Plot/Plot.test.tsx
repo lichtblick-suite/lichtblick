@@ -1,6 +1,7 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+import type { Mock } from "vitest";
 import { userEvent } from "@storybook/testing-library";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
@@ -18,51 +19,51 @@ import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import Plot from "./Plot";
 
-const mockSetMessagePathDropConfig = jest.fn();
-jest.mock("@lichtblick/suite-base/components/PanelContext", () => ({
+const mockSetMessagePathDropConfig = vi.fn();
+vi.mock("@lichtblick/suite-base/components/PanelContext", async () => ({
   usePanelContext: () => ({ setMessagePathDropConfig: mockSetMessagePathDropConfig }),
 }));
 
-const mockGetMessagePipelineState = jest.fn();
-const mockSubscribeMessagePipeline = jest.fn();
-const mockSubscribeMessageRange = jest.fn();
-jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", () => ({
+const mockGetMessagePipelineState = vi.fn();
+const mockSubscribeMessagePipeline = vi.fn();
+const mockSubscribeMessageRange = vi.fn();
+vi.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", async () => ({
   useSubscribeMessageRange: () => mockSubscribeMessageRange,
 }));
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
+vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
   useMessagePipelineGetter: () => mockGetMessagePipelineState,
   useMessagePipelineSubscribe: () => mockSubscribeMessagePipeline,
 }));
 
-jest.mock("@lichtblick/suite-base/components/PanelContextMenu", () => ({
-  PanelContextMenu: jest.fn(() => <div data-testid="panel-context-menu" />),
+vi.mock("@lichtblick/suite-base/components/PanelContextMenu", async () => ({
+  PanelContextMenu: vi.fn(() => <div data-testid="panel-context-menu" />),
 }));
-jest.mock("@lichtblick/suite-base/components/PanelToolbar", () => ({
+vi.mock("@lichtblick/suite-base/components/PanelToolbar", async () => ({
   __esModule: true,
   default: () => <div data-testid="panel-toolbar" />,
 }));
 
 let mockLatestLegendProps: any;
-jest.mock("@lichtblick/suite-base/panels/Plot/PlotLegend", () => ({
-  PlotLegend: jest.fn((props) => {
+vi.mock("@lichtblick/suite-base/panels/Plot/PlotLegend", async () => ({
+  PlotLegend: vi.fn((props) => {
     mockLatestLegendProps = props;
     return <div data-testid="plot-legend" />;
   }),
 }));
 
-jest.mock("@lichtblick/suite-base/panels/Plot/VerticalBars", () => ({
-  VerticalBars: jest.fn(() => <div data-testid="vertical-bars" />),
+vi.mock("@lichtblick/suite-base/panels/Plot/VerticalBars", async () => ({
+  VerticalBars: vi.fn(() => <div data-testid="vertical-bars" />),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
-jest.mock("@lichtblick/suite-base/panels/Plot/hooks/usePlotDataHandling");
-jest.mock("@lichtblick/suite-base/panels/Plot/hooks/useRenderer");
-jest.mock("@lichtblick/suite-base/panels/Plot/hooks/useGlobalSync");
-jest.mock("@lichtblick/suite-base/panels/Plot/hooks/usePanning");
-jest.mock("@lichtblick/suite-base/panels/Plot/hooks/useSubscriptions");
-jest.mock("@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelSettings");
-jest.mock("react-i18next", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
+vi.mock("@lichtblick/suite-base/panels/Plot/hooks/usePlotDataHandling");
+vi.mock("@lichtblick/suite-base/panels/Plot/hooks/useRenderer");
+vi.mock("@lichtblick/suite-base/panels/Plot/hooks/useGlobalSync");
+vi.mock("@lichtblick/suite-base/panels/Plot/hooks/usePanning");
+vi.mock("@lichtblick/suite-base/panels/Plot/hooks/useSubscriptions");
+vi.mock("@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelSettings");
+vi.mock("react-i18next", async () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
@@ -70,30 +71,30 @@ jest.mock("react-i18next", () => ({
 
 let mockLatestSetActiveTooltip: ((data: any) => void) | undefined;
 const mockInteractionHandlers = {
-  onMouseMove: jest.fn(),
-  onMouseOut: jest.fn(),
-  onResetView: jest.fn(),
-  onWheel: jest.fn(),
-  onClick: jest.fn(),
-  onClickPath: jest.fn(),
+  onMouseMove: vi.fn(),
+  onMouseOut: vi.fn(),
+  onResetView: vi.fn(),
+  onWheel: vi.fn(),
+  onClick: vi.fn(),
+  onClickPath: vi.fn(),
   focusedPath: undefined,
-  keyDownHandlers: { v: jest.fn(), b: jest.fn() },
-  keyUphandlers: { v: jest.fn(), b: jest.fn() },
-  getPanelContextMenuItems: jest.fn(() => []),
+  keyDownHandlers: { v: vi.fn(), b: vi.fn() },
+  keyUphandlers: { v: vi.fn(), b: vi.fn() },
+  getPanelContextMenuItems: vi.fn(() => []),
 };
 
-jest.mock("./hooks/usePlotInteractionHandlers", () => ({
+vi.mock("./hooks/usePlotInteractionHandlers", async () => ({
   __esModule: true,
-  default: jest.fn((args) => {
+  default: vi.fn((args) => {
     mockLatestSetActiveTooltip = args.setActiveTooltip;
     return mockInteractionHandlers;
   }),
 }));
 
 let mockCoordinatorInstance: any;
-const mockPlotCoordinatorCtor = jest.fn();
-jest.mock("./PlotCoordinator", () => ({
-  PlotCoordinator: jest.fn((renderer, builder, subscribeMessageRange) =>
+const mockPlotCoordinatorCtor = vi.fn();
+vi.mock("./PlotCoordinator", async () => ({
+  PlotCoordinator: vi.fn((renderer, builder, subscribeMessageRange) =>
     mockPlotCoordinatorCtor(renderer, builder, subscribeMessageRange),
   ),
 }));
@@ -127,34 +128,34 @@ class PlotConfigBuilder {
 
 describe("Plot Component", () => {
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     mockCoordinatorInstance = {
-      handleConfig: jest.fn(),
-      handlePlayerState: jest.fn(),
-      setShouldSync: jest.fn(),
-      setSize: jest.fn(),
-      destroy: jest.fn(),
-      resetBounds: jest.fn(),
-      setZoomMode: jest.fn(),
-      getXValueAtPixel: jest.fn(),
+      handleConfig: vi.fn(),
+      handlePlayerState: vi.fn(),
+      setShouldSync: vi.fn(),
+      setSize: vi.fn(),
+      destroy: vi.fn(),
+      resetBounds: vi.fn(),
+      setZoomMode: vi.fn(),
+      getXValueAtPixel: vi.fn(),
     };
     mockPlotCoordinatorCtor.mockImplementation(() => mockCoordinatorInstance);
-    (usePlotDataHandling as jest.Mock).mockReturnValue({
+    (usePlotDataHandling as Mock).mockReturnValue({
       colorsByDatasetIndex: { 0: "red", 1: "blue" },
       labelsByDatasetIndex: { 0: "first", 1: "second" },
       datasetsBuilder: datasetsBuilderStub,
     });
-    (useRenderer as jest.Mock).mockReturnValue(rendererStub);
-    (useGlobalVariables as jest.Mock).mockReturnValue({
+    (useRenderer as Mock).mockReturnValue(rendererStub);
+    (useGlobalVariables as Mock).mockReturnValue({
       globalVariables: {},
-      setGlobalVariables: jest.fn(),
+      setGlobalVariables: vi.fn(),
     });
-    (useGlobalSync as jest.Mock).mockImplementation((_coord, setCanReset) => {
+    (useGlobalSync as Mock).mockImplementation((_coord, setCanReset) => {
       mockSetCanReset = setCanReset;
     });
-    (usePanning as jest.Mock).mockReturnValue(undefined);
-    (useSubscriptions as jest.Mock).mockReturnValue(undefined);
-    (usePlotPanelSettings as jest.Mock).mockReturnValue(undefined);
+    (usePanning as Mock).mockReturnValue(undefined);
+    (useSubscriptions as Mock).mockReturnValue(undefined);
+    (usePlotPanelSettings as Mock).mockReturnValue(undefined);
     mockLatestSetActiveTooltip = undefined;
     mockLatestLegendProps = undefined;
     Object.values(mockInteractionHandlers).forEach((handler) => {
@@ -169,16 +170,16 @@ describe("Plot Component", () => {
     mockGetMessagePipelineState.mockReturnValue({ playerState: { source: "getter" } });
     mockSubscribeMessagePipeline.mockImplementation((callback) => {
       callback({ playerState: { source: "subscriber" } });
-      return jest.fn();
+      return vi.fn();
     });
     (globalThis as any).ResizeObserver = class {
-      public disconnect = jest.fn();
-      public observe = jest.fn();
+      public disconnect = vi.fn();
+      public observe = vi.fn();
     };
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const defaultBoundingRect = {
@@ -193,9 +194,9 @@ describe("Plot Component", () => {
     toJSON: () => ({}) as any,
   } as DOMRect;
 
-  jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue(defaultBoundingRect);
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue(defaultBoundingRect);
 
-  function renderPlot(config: PlotConfig, saveConfig: jest.Mock = jest.fn()) {
+  function renderPlot(config: PlotConfig, saveConfig: Mock = vi.fn()) {
     const props: PlotProps = { config, saveConfig };
     const ui = (
       <ThemeProvider isDark>
@@ -286,7 +287,7 @@ describe("Plot Component", () => {
 
   it("Given drop config When handleDrop invoked Then saveConfig receives new paths", () => {
     // Given
-    const saveConfig = jest.fn();
+    const saveConfig = vi.fn();
     const config = new PlotConfigBuilder().build();
     renderPlot(config, saveConfig);
     const dropConfig = mockSetMessagePathDropConfig.mock.calls[0][0];

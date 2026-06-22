@@ -1,17 +1,18 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { render } from "@testing-library/react";
 
 import KeyListener, { KeyListenerProps } from "./KeyListener";
 
 describe("KeyListener", () => {
-  let mockHandler: jest.Mock;
+  let mockHandler: Mock;
 
   beforeEach(() => {
-    mockHandler = jest.fn();
+    mockHandler = vi.fn();
   });
 
   function setup(propsOverride: Partial<KeyListenerProps> = {}) {
@@ -214,8 +215,8 @@ describe("KeyListener", () => {
       // Given
       const key1 = "a";
       const key2 = "b";
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
       const keyDownHandlers = { [key1]: handler1, [key2]: handler2 };
       setup({ global: true, keyDownHandlers });
 
@@ -233,8 +234,8 @@ describe("KeyListener", () => {
     it("should handle keydown and keyup handlers separately", () => {
       // Given
       const key = "a";
-      const keyDownHandler = jest.fn();
-      const keyUpHandler = jest.fn();
+      const keyDownHandler = vi.fn();
+      const keyUpHandler = vi.fn();
       setup({
         global: true,
         keyDownHandlers: { [key]: keyDownHandler },

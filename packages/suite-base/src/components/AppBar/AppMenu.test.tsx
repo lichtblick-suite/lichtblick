@@ -1,9 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import type { Mock } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useTranslation } from "react-i18next";
 
@@ -16,70 +17,70 @@ import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfe
 
 import { AppMenu } from "./AppMenu";
 
-jest.mock("react-i18next", () => ({
-  useTranslation: jest.fn(),
+vi.mock("react-i18next", async () => ({
+  useTranslation: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/PlayerSelectionContext", () => ({
-  usePlayerSelection: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/PlayerSelectionContext", async () => ({
+  usePlayerSelection: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/Workspace/WorkspaceContext", () => ({
-  useWorkspaceStore: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/Workspace/WorkspaceContext", async () => ({
+  useWorkspaceStore: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", () => ({
-  useWorkspaceActions: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", async () => ({
+  useWorkspaceActions: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", () => ({
-  useLayoutTransfer: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", async () => ({
+  useLayoutTransfer: vi.fn(),
 }));
 
 describe("AppMenu", () => {
-  const mockHandleClose = jest.fn();
+  const mockHandleClose = vi.fn();
   const mockDialogActions = {
-    dataSource: { open: jest.fn() },
-    openFile: { open: jest.fn() },
-    preferences: { open: jest.fn() },
+    dataSource: { open: vi.fn() },
+    openFile: { open: vi.fn() },
+    preferences: { open: vi.fn() },
   };
   const mockSidebarActions = {
-    left: { setOpen: jest.fn() },
-    right: { setOpen: jest.fn() },
+    left: { setOpen: vi.fn() },
+    right: { setOpen: vi.fn() },
   };
-  const mockImportLayout = jest.fn();
-  const mockExportLayout = jest.fn();
-  const mockSelectRecent = jest.fn();
+  const mockImportLayout = vi.fn();
+  const mockExportLayout = vi.fn();
+  const mockSelectRecent = vi.fn();
 
   beforeEach(() => {
-    (useTranslation as jest.Mock).mockReturnValue({
+    (useTranslation as Mock).mockReturnValue({
       t: (key: string) => key,
     });
 
-    (usePlayerSelection as jest.Mock).mockReturnValue({
+    (usePlayerSelection as Mock).mockReturnValue({
       recentSources: [{ id: "1", title: "Recent Source 1" }],
       selectRecent: mockSelectRecent,
     });
 
-    (useWorkspaceStore as jest.Mock).mockImplementation((selector) =>
+    (useWorkspaceStore as Mock).mockImplementation((selector) =>
       selector({
         sidebars: { left: { open: false }, right: { open: true } },
       }),
     );
 
-    (useWorkspaceActions as jest.Mock).mockReturnValue({
+    (useWorkspaceActions as Mock).mockReturnValue({
       sidebarActions: mockSidebarActions,
       dialogActions: mockDialogActions,
     });
 
-    (useLayoutTransfer as jest.Mock).mockReturnValue({
+    (useLayoutTransfer as Mock).mockReturnValue({
       importLayout: mockImportLayout,
       exportLayout: mockExportLayout,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderAppMenu = (props: Partial<AppMenuProps> = {}) =>
@@ -152,7 +153,7 @@ describe("AppMenu", () => {
 
   it("opens documentation link in Help menu", () => {
     const originalOpen = window.open;
-    window.open = jest.fn();
+    window.open = vi.fn();
 
     renderAppMenu();
 

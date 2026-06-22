@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -6,13 +6,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { MockInstance } from "vitest";
 import { formatKeyboardShortcut } from "./formatKeyboardShortcut";
 
 describe("formatKeyboardShortcut", () => {
-  let userAgent: jest.SpyInstance<string, []>;
+  let userAgent: MockInstance<string, []>;
 
   beforeEach(() => {
-    userAgent = jest.spyOn(window.navigator, "userAgent", "get");
+    userAgent = vi.spyOn(window.navigator, "userAgent", "get");
   });
 
   it("formats shortcuts correctly for Windows", () => {

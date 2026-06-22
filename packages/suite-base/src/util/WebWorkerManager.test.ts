@@ -18,7 +18,7 @@ import { Channel } from "@lichtblick/suite-base/util/Rpc";
 
 import WebWorkerManager from "./WebWorkerManager";
 
-jest.mock("@lichtblick/suite-base/util/Rpc", () => {
+vi.mock("@lichtblick/suite-base/util/Rpc", async () => {
   return class FakeRpc {
     public terminate() {}
     public receive() {

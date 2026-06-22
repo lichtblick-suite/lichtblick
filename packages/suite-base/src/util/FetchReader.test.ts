@@ -1,27 +1,28 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mocked, MockInstance } from "vitest";
 import { globalRequestQueue } from "@lichtblick/suite-base/util/RequestQueue";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import FetchReader from "./FetchReader";
 
 // Mock the global request queue
-jest.mock("@lichtblick/suite-base/util/RequestQueue", () => ({
+vi.mock("@lichtblick/suite-base/util/RequestQueue", async () => ({
   globalRequestQueue: {
-    run: jest.fn(),
+    run: vi.fn(),
   },
 }));
 
-const mockGlobalRequestQueue = globalRequestQueue as jest.Mocked<typeof globalRequestQueue>;
+const mockGlobalRequestQueue = globalRequestQueue as Mocked<typeof globalRequestQueue>;
 const url = "https://example.com/data.mcap";
 
 describe("FetchReader", () => {
-  let mockFetch: jest.SpyInstance;
+  let mockFetch: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockFetch = jest.spyOn(global, "fetch");
+    vi.clearAllMocks();
+    mockFetch = vi.spyOn(global, "fetch");
 
     // Default: globalRequestQueue.run passes through the function
     mockGlobalRequestQueue.run.mockImplementation(async (fn) => fn as any);

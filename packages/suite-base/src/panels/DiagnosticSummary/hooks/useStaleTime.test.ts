@@ -1,7 +1,8 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 
 import {
@@ -13,17 +14,17 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useStaleTime from "./useStaleTime";
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
-  useMessagePipelineGetter: jest.fn(),
-  useMessagePipeline: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
+  useMessagePipelineGetter: vi.fn(),
+  useMessagePipeline: vi.fn(),
 }));
 
 describe("useStaleTime", () => {
-  const mockUseMessagePipelineGetter = useMessagePipelineGetter as jest.Mock;
-  const mockUseMessagePipeline = useMessagePipeline as jest.Mock;
+  const mockUseMessagePipelineGetter = useMessagePipelineGetter as Mock;
+  const mockUseMessagePipeline = useMessagePipeline as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return undefined when currentTime is undefined", () => {
@@ -59,7 +60,7 @@ describe("useStaleTime", () => {
 
   it("should update stale time at the specified interval", () => {
     // Given
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     let currentTime = RosTimeBuilder.time();
     mockUseMessagePipelineGetter.mockReturnValue(() => ({
       playerState: { activeData: { currentTime } },
@@ -72,7 +73,7 @@ describe("useStaleTime", () => {
     // When
     act(() => {
       currentTime = RosTimeBuilder.time({ sec: currentTime.sec + 1, nsec: currentTime.nsec });
-      jest.advanceTimersByTime(updateIntervalMillis);
+      vi.advanceTimersByTime(updateIntervalMillis);
     });
 
     // Then
@@ -81,7 +82,7 @@ describe("useStaleTime", () => {
       nsec: currentTime.nsec,
     });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("should recalculate stale time when lastSeekTime changes", () => {

@@ -1,11 +1,12 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useTranslation } from "react-i18next";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { LICHTBLICK_DOCUMENTATION_LINK } from "@lichtblick/suite-base/constants/documentation";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
@@ -14,42 +15,42 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 
 import SidebarItems from "./SidebarItems";
 
-jest.mock("react-i18next", () => ({
-  useTranslation: jest.fn(),
+vi.mock("react-i18next", async () => ({
+  useTranslation: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/AnalyticsContext", () => ({
-  useAnalytics: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/AnalyticsContext", async () => ({
+  useAnalytics: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/BaseUserContext", () => ({
-  useCurrentUser: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/BaseUserContext", async () => ({
+  useCurrentUser: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", () => ({
+vi.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", async () => ({
   useStyles: () => ({ classes: { button: "mock-button-class" } }),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks", () => ({
-  useAppConfigurationValue: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks", async () => ({
+  useAppConfigurationValue: vi.fn(),
 }));
 
 describe("SidebarItems", () => {
-  const mockOnSelectView = jest.fn();
-  const mockLogEvent = jest.fn();
+  const mockOnSelectView = vi.fn();
+  const mockLogEvent = vi.fn();
   const mockTranslation = {
     t: (key: string) => key,
   };
 
   beforeEach(() => {
-    (useTranslation as jest.Mock).mockReturnValue(mockTranslation);
-    (useAnalytics as jest.Mock).mockReturnValue({ logEvent: mockLogEvent });
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([true, jest.fn()]);
-    jest.clearAllMocks();
+    (useTranslation as Mock).mockReturnValue(mockTranslation);
+    (useAnalytics as Mock).mockReturnValue({ logEvent: mockLogEvent });
+    (useAppConfigurationValue as Mock).mockReturnValue([true, vi.fn()]);
+    vi.clearAllMocks();
   });
 
   it("renders items for unauthenticated users", () => {
-    (useCurrentUser as jest.Mock).mockReturnValue({ currentUserType: "unauthenticated" });
+    (useCurrentUser as Mock).mockReturnValue({ currentUserType: "unauthenticated" });
 
     render(<SidebarItems onSelectView={mockOnSelectView} />);
 
@@ -61,7 +62,7 @@ describe("SidebarItems", () => {
   });
 
   it("renders items for authenticated-free users", () => {
-    (useCurrentUser as jest.Mock).mockReturnValue({ currentUserType: "authenticated-free" });
+    (useCurrentUser as Mock).mockReturnValue({ currentUserType: "authenticated-free" });
 
     render(<SidebarItems onSelectView={mockOnSelectView} />);
 
@@ -73,7 +74,7 @@ describe("SidebarItems", () => {
   });
 
   it("renders items for authenticated-team users", () => {
-    (useCurrentUser as jest.Mock).mockReturnValue({ currentUserType: "authenticated-team" });
+    (useCurrentUser as Mock).mockReturnValue({ currentUserType: "authenticated-team" });
 
     render(<SidebarItems onSelectView={mockOnSelectView} />);
 
@@ -85,7 +86,7 @@ describe("SidebarItems", () => {
   });
 
   it("handles button clicks correctly", () => {
-    (useCurrentUser as jest.Mock).mockReturnValue({ currentUserType: "unauthenticated" });
+    (useCurrentUser as Mock).mockReturnValue({ currentUserType: "unauthenticated" });
 
     render(<SidebarItems onSelectView={mockOnSelectView} />);
 
@@ -96,9 +97,9 @@ describe("SidebarItems", () => {
   });
 
   it("opens external links correctly", () => {
-    (useCurrentUser as jest.Mock).mockReturnValue({ currentUserType: "unauthenticated" });
+    (useCurrentUser as Mock).mockReturnValue({ currentUserType: "unauthenticated" });
 
-    const windowOpenSpy = jest.spyOn(window, "open").mockImplementation(() => window);
+    const windowOpenSpy = vi.spyOn(window, "open").mockImplementation(() => window);
     render(<SidebarItems onSelectView={mockOnSelectView} />);
 
     const documentationButton = screen.getByText("viewDocumentation");

@@ -1,9 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import type { Mock } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { render } from "@testing-library/react";
 
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
@@ -17,30 +18,28 @@ import { useMultiSelection } from "./useMultiSelection";
 import { TopicListItem, useTopicListSearch } from "./useTopicListSearch";
 
 // Mock dependencies
-jest.mock("@lichtblick/suite-base/components/MessagePipeline");
-jest.mock("./useTopicListSearch");
-jest.mock("./useMultiSelection", () => ({
-  useMultiSelection: jest.fn().mockReturnValue({
+vi.mock("@lichtblick/suite-base/components/MessagePipeline");
+vi.mock("./useTopicListSearch");
+vi.mock("./useMultiSelection", async () => ({
+  useMultiSelection: vi.fn().mockReturnValue({
     selectedIndexes: new Set(),
-    onSelect: jest.fn(),
-    getSelectedIndexes: jest.fn().mockReturnValue(new Set()),
+    onSelect: vi.fn(),
+    getSelectedIndexes: vi.fn().mockReturnValue(new Set()),
   }),
 }));
-jest.mock("@lichtblick/suite-base/components/TopicList/getDraggedMessagePath");
-jest.mock(
-  "@lichtblick/suite-base/services/messagePathDragging/MessagePathSelectionProvider",
-  () => ({
-    MessagePathSelectionProvider: jest.fn(({ children }: { children: React.ReactNode }) => (
+vi.mock("@lichtblick/suite-base/components/TopicList/getDraggedMessagePath");
+vi.mock("@lichtblick/suite-base/services/messagePathDragging/MessagePathSelectionProvider", async () => ({
+    MessagePathSelectionProvider: vi.fn(({ children }: { children: React.ReactNode }) => (
       <>{children}</>
     )),
   }),
 );
-jest.mock("@lichtblick/suite-base/components/DirectTopicStatsUpdater", () => ({
+vi.mock("@lichtblick/suite-base/components/DirectTopicStatsUpdater", async () => ({
   DirectTopicStatsUpdater: () => undefined,
 }));
 
 const mockUseMessagePipeline = (playerPresence: PlayerPresence) => {
-  (useMessagePipeline as jest.Mock).mockReturnValue(playerPresence);
+  (useMessagePipeline as Mock).mockReturnValue(playerPresence);
 };
 
 const setup = (playerPresence: PlayerPresence) => {
@@ -50,7 +49,7 @@ const setup = (playerPresence: PlayerPresence) => {
 
 describe("TopicList Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders EmptyState when playerPresence is NOT_PRESENT", () => {
@@ -91,7 +90,7 @@ describe("getSelectedItemsAsDraggedMessagePaths", () => {
   });
 
   const getCapturedGetSelectedItems = (): (() => DraggedMessagePath[]) => {
-    const mockCalls = (MessagePathSelectionProvider as unknown as jest.Mock).mock.calls;
+    const mockCalls = (MessagePathSelectionProvider as unknown as Mock).mock.calls;
     const lastCallProps = mockCalls[mockCalls.length - 1]![0] as {
       getSelectedItems: () => DraggedMessagePath[];
     };
@@ -105,18 +104,18 @@ describe("getSelectedItemsAsDraggedMessagePaths", () => {
     treeItems: TopicListItem[];
     selectedIndexes: Set<number>;
   }) => {
-    (useTopicListSearch as jest.Mock).mockReturnValue(treeItems);
-    (useMultiSelection as jest.Mock).mockReturnValue({
+    (useTopicListSearch as Mock).mockReturnValue(treeItems);
+    (useMultiSelection as Mock).mockReturnValue({
       selectedIndexes,
-      onSelect: jest.fn(),
-      getSelectedIndexes: jest.fn().mockReturnValue(selectedIndexes),
+      onSelect: vi.fn(),
+      getSelectedIndexes: vi.fn().mockReturnValue(selectedIndexes),
     });
     setup(PlayerPresence.PRESENT);
     return getCapturedGetSelectedItems();
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("returns empty array when no indexes are selected", () => {
@@ -139,7 +138,7 @@ describe("getSelectedItemsAsDraggedMessagePaths", () => {
     const draggedPath0 = createDraggedPath("/topic1");
     const draggedPath2 = createDraggedPath("/topic3");
 
-    (getDraggedMessagePath as jest.Mock).mockImplementation((item: TopicListItem) => {
+    (getDraggedMessagePath as Mock).mockImplementation((item: TopicListItem) => {
       if (item === treeItems[0]) {
         return draggedPath0;
       }
@@ -162,7 +161,7 @@ describe("getSelectedItemsAsDraggedMessagePaths", () => {
     const treeItems: TopicListItem[] = [createTopicItem("/topic1", "Schema1")];
     const draggedPath0 = createDraggedPath("/topic1");
 
-    (getDraggedMessagePath as jest.Mock).mockReturnValue(draggedPath0);
+    (getDraggedMessagePath as Mock).mockReturnValue(draggedPath0);
 
     const getSelectedItems = setupSelectedItems({
       treeItems,

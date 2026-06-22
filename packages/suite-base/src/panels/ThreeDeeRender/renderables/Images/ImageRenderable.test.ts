@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -15,15 +15,15 @@ import {
   ImageUserData,
 } from "./ImageRenderable";
 
-const mockAdd = jest.fn();
-const mockAddToTopic = jest.fn();
-const mockRemove = jest.fn();
-const mockRemoveFromTopic = jest.fn();
+const mockAdd = vi.fn();
+const mockAddToTopic = vi.fn();
+const mockRemove = vi.fn();
+const mockRemoveFromTopic = vi.fn();
 
 // Mocked dependencies
 const mockRenderer: IRenderer = {
-  queueAnimationFrame: jest.fn(),
-  normalizeFrameId: jest.fn((id) => id),
+  queueAnimationFrame: vi.fn(),
+  normalizeFrameId: vi.fn((id) => id),
   settings: {
     errors: {
       add: mockAdd,
@@ -61,7 +61,7 @@ const sampleImage = {
 
 describe("ImageRenderable", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it("should instantiate and set settings", () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
@@ -149,7 +149,7 @@ describe("ImageRenderable", () => {
 
 describe("ImageRenderable error handling", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   it("should call renderer error methods on addError", () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, {

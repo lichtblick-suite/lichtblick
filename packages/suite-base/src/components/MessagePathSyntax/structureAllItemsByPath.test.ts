@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { MessagePathStructureItemMessage } from "@lichtblick/message-path/src/types";
 import { messagePathsForStructure } from "@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype";
 import { MessagePathsForStructure } from "@lichtblick/suite-base/components/MessagePathSyntax/types";
@@ -10,8 +11,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { structureAllItemsByPath } from "./structureAllItemsByPath";
 
-jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype", () => ({
-  messagePathsForStructure: jest.fn(() => []),
+vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype", async () => ({
+  messagePathsForStructure: vi.fn(() => []),
 }));
 
 describe("structureAllItemsByPath", () => {
@@ -81,7 +82,7 @@ describe("structureAllItemsByPath", () => {
   it("should return correct structure with valid input", () => {
     populateMockMessagePathStructuresForDataype();
 
-    (messagePathsForStructure as jest.Mock).mockImplementation(
+    (messagePathsForStructure as Mock).mockImplementation(
       (): MessagePathsForStructure => [
         {
           path: ".property",
@@ -108,7 +109,7 @@ describe("structureAllItemsByPath", () => {
   it("should return correct structure removing duplicated and empty item.paths", () => {
     populateMockMessagePathStructuresForDataype();
 
-    (messagePathsForStructure as jest.Mock).mockImplementation(
+    (messagePathsForStructure as Mock).mockImplementation(
       (): MessagePathsForStructure => [
         {
           path: ".property",

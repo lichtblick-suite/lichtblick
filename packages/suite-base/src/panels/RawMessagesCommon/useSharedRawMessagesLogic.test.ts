@@ -1,20 +1,21 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 
 import type { SharedConfig, UseSharedRawMessagesLogicProps } from "./types";
 import { useSharedRawMessagesLogic } from "./useSharedRawMessagesLogic";
 
 // Minimal mocks for deps the hook uses
-jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
+vi.mock("@lichtblick/suite-base/PanelAPI", async () => ({
   useDataSourceInfo: () => ({ topics: [], datatypes: new Map() }),
 }));
-jest.mock("@lichtblick/suite-base/components/PanelContext", () => ({
-  usePanelContext: () => ({ setMessagePathDropConfig: jest.fn() }),
+vi.mock("@lichtblick/suite-base/components/PanelContext", async () => ({
+  usePanelContext: () => ({ setMessagePathDropConfig: vi.fn() }),
 }));
-jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/useMessageDataItem", () => ({
+vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/useMessageDataItem", async () => ({
   useMessageDataItem: () => [],
 }));
 
@@ -34,18 +35,18 @@ const setup = (inputOverride?: {
       ...defaultConfig,
       ...inputOverride?.config,
     },
-    saveConfig: inputOverride?.saveConfig ?? jest.fn(),
+    saveConfig: inputOverride?.saveConfig ?? vi.fn(),
   };
 
   return {
     ...renderHook(() => useSharedRawMessagesLogic(input)),
     input,
-    saveConfig: input.saveConfig as jest.Mock,
+    saveConfig: input.saveConfig as Mock,
   };
 };
 describe("given useSharedRawMessagesLogic", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe("when toggling diff", () => {
     it("then enables diff when currently disabled", () => {

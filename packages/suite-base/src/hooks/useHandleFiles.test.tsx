@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
@@ -17,33 +18,33 @@ import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfe
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
-  useExtensionCatalog: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", async () => ({
+  useExtensionCatalog: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", () => ({
-  useLayoutTransfer: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", async () => ({
+  useLayoutTransfer: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
-  useLayoutManager: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/LayoutManagerContext", async () => ({
+  useLayoutManager: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
-  useCurrentLayoutActions: jest.fn(() => ({})),
-  useCurrentLayoutSelector: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => ({
+  useCurrentLayoutActions: vi.fn(() => ({})),
+  useCurrentLayoutSelector: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useInstallingExtensionsState", () => ({
-  useInstallingExtensionsState: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks/useInstallingExtensionsState", async () => ({
+  useInstallingExtensionsState: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useInstallingExtensionsStore", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useInstallingExtensionsStore", async () => ({
   useInstallingExtensionsStore: (selector: any) =>
     selector({
-      setInstallingProgress: jest.fn(),
-      startInstallingProgress: jest.fn(),
-      resetInstallingProgress: jest.fn(),
+      setInstallingProgress: vi.fn(),
+      startInstallingProgress: vi.fn(),
+      resetInstallingProgress: vi.fn(),
       installingProgress: { installed: 0, total: 0, inProgress: false },
     }),
 }));
@@ -55,23 +56,23 @@ type Setup = {
 
 describe("useHandleFiles", () => {
   const mockLayoutManager = new MockLayoutManager();
-  const installFoxeExtensionsMock = jest.fn();
-  const parseAndInstallLayoutMock = jest.fn();
+  const installFoxeExtensionsMock = vi.fn();
+  const parseAndInstallLayoutMock = vi.fn();
   const availableSources: IDataSourceFactory[] = [
     {
       id: BasicBuilder.string(),
       displayName: BasicBuilder.string(),
       type: "file",
-      initialize: jest.fn(),
+      initialize: vi.fn(),
       supportedFileTypes: [".mcap"],
     },
   ];
 
-  const selectSource = jest.fn();
+  const selectSource = vi.fn();
   const isPlaying = BasicBuilder.boolean();
   const playerEvents = {
-    play: jest.fn(),
-    pause: jest.fn(),
+    play: vi.fn(),
+    pause: vi.fn(),
   };
 
   const useHandleFilesProps = {
@@ -110,17 +111,17 @@ describe("useHandleFiles", () => {
   }
 
   beforeEach(() => {
-    (useLayoutManager as jest.Mock).mockReturnValue(mockLayoutManager);
-    (useInstallingExtensionsState as jest.Mock).mockReturnValue({
+    (useLayoutManager as Mock).mockReturnValue(mockLayoutManager);
+    (useInstallingExtensionsState as Mock).mockReturnValue({
       installFoxeExtensions: installFoxeExtensionsMock,
     });
-    (useLayoutTransfer as jest.Mock).mockReturnValue({
+    (useLayoutTransfer as Mock).mockReturnValue({
       parseAndInstallLayout: parseAndInstallLayoutMock,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should call pause and install .foxe extension", async () => {
@@ -178,7 +179,7 @@ describe("useHandleFiles", () => {
       };
     });
 
-    const logSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     await act(async () => {
       await handleFiles(files);

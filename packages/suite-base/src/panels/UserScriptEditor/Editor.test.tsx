@@ -1,15 +1,16 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { act, render, waitFor } from "@testing-library/react";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import Editor from "./Editor";
 import { Script } from "./script";
@@ -21,37 +22,37 @@ let mockOpenHandler:
     ) => Promise<unknown>)
   | undefined = undefined;
 
-jest.mock("monaco-editor", () => ({
+vi.mock("monaco-editor", async () => ({
   typescript: {
     typescriptDefaults: {
-      addExtraLib: jest.fn(() => ({ dispose: jest.fn() })),
-      setEagerModelSync: jest.fn(),
-      setDiagnosticsOptions: jest.fn(),
-      setCompilerOptions: jest.fn(),
-      getCompilerOptions: jest.fn(() => ({})),
+      addExtraLib: vi.fn(() => ({ dispose: vi.fn() })),
+      setEagerModelSync: vi.fn(),
+      setDiagnosticsOptions: vi.fn(),
+      setCompilerOptions: vi.fn(),
+      getCompilerOptions: vi.fn(() => ({})),
     },
     javascriptDefaults: {
-      setEagerModelSync: jest.fn(),
+      setEagerModelSync: vi.fn(),
     },
   },
   KeyMod: { CtrlCmd: 1 },
   KeyCode: { KeyS: 55 },
 }));
 
-jest.mock("@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode", () =>
-  jest.fn(async (code: string) => code),
+vi.mock("@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode", async () =>
+  vi.fn(async (code: string) => code),
 );
 
 type MockModel = {
   uri: { path: string; toString: () => string };
   value: string;
   options: Record<string, unknown>;
-  getValue: jest.Mock<string, []>;
-  setValue: jest.Mock<void, [string]>;
-  updateOptions: jest.Mock<void, [Record<string, unknown>]>;
-  getFullModelRange: jest.Mock<Record<string, never>, []>;
+  getValue: Mock<string, []>;
+  setValue: Mock<void, [string]>;
+  updateOptions: Mock<void, [Record<string, unknown>]>;
+  getFullModelRange: Mock<Record<string, never>, []>;
 };
-jest.mock("monaco-editor/esm/vs/editor/editor.api", () => {
+vi.mock("monaco-editor/esm/vs/editor/editor.api", async () => {
   const models = new Map<string, MockModel>();
 
   const createModel = (
@@ -63,14 +64,14 @@ jest.mock("monaco-editor/esm/vs/editor/editor.api", () => {
       uri,
       value,
       options: {},
-      getValue: jest.fn(() => model.value),
-      setValue: jest.fn((next) => {
+      getValue: vi.fn(() => model.value),
+      setValue: vi.fn((next) => {
         model.value = next;
       }),
-      updateOptions: jest.fn((opts) => {
+      updateOptions: vi.fn((opts) => {
         model.options = { ...model.options, ...opts };
       }),
-      getFullModelRange: jest.fn(() => ({})),
+      getFullModelRange: vi.fn(() => ({})),
     };
     models.set(uri.path, model);
     return model;
@@ -80,18 +81,18 @@ jest.mock("monaco-editor/esm/vs/editor/editor.api", () => {
 
   return {
     editor: {
-      defineTheme: jest.fn(),
-      createModel: jest.fn(
+      defineTheme: vi.fn(),
+      createModel: vi.fn(
         (value: string, language: string, uri: { path: string; toString: () => string }) =>
           createModel(value, language, uri),
       ),
-      getModel: jest.fn((uri: { path: string; toString: () => string }) => getModel(uri)),
+      getModel: vi.fn((uri: { path: string; toString: () => string }) => getModel(uri)),
     },
     languages: {
-      registerDocumentFormattingEditProvider: jest.fn(),
+      registerDocumentFormattingEditProvider: vi.fn(),
     },
     Uri: {
-      parse: jest.fn((value: string) => ({
+      parse: vi.fn((value: string) => ({
         path: new URL(value).pathname,
         toString: () => value,
       })),
@@ -105,16 +106,16 @@ jest.mock("monaco-editor/esm/vs/editor/editor.api", () => {
   };
 });
 
-jest.mock("monaco-editor/esm/vs/editor/browser/services/codeEditorService", () => ({
+vi.mock("monaco-editor/esm/vs/editor/browser/services/codeEditorService", async () => ({
   ICodeEditorService: Symbol("ICodeEditorService"),
 }));
 
-jest.mock("monaco-editor/esm/vs/editor/standalone/browser/standaloneServices", () => ({
+vi.mock("monaco-editor/esm/vs/editor/standalone/browser/standaloneServices", async () => ({
   StandaloneServices: {
-    get: jest.fn(() => ({
-      registerCodeEditorOpenHandler: jest.fn((handler) => {
+    get: vi.fn(() => ({
+      registerCodeEditorOpenHandler: vi.fn((handler) => {
         mockOpenHandler = handler;
-        return { dispose: jest.fn() };
+        return { dispose: vi.fn() };
       }),
     })),
   },
@@ -124,35 +125,35 @@ let mockOnChange: ((code: string) => void) | undefined;
 let mockEditor: ReturnType<typeof createMockEditor> | undefined;
 
 const createMockEditor = () => {
-  const actions = new Map<string, { run: jest.Mock }>();
-  const formatAction = { run: jest.fn(async () => {}) };
+  const actions = new Map<string, { run: Mock }>();
+  const formatAction = { run: vi.fn(async () => {}) };
   actions.set("editor.action.formatDocument", formatAction);
   let currentModel: MockModel | undefined;
 
   return {
-    setModel: jest.fn((model: MockModel) => {
+    setModel: vi.fn((model: MockModel) => {
       currentModel = model;
     }),
-    getModel: jest.fn(() => currentModel),
-    addAction: jest.fn(({ id, run }: { id: string; run: () => Promise<void> | void }) => {
-      actions.set(id, { run: jest.fn(run) });
+    getModel: vi.fn(() => currentModel),
+    addAction: vi.fn(({ id, run }: { id: string; run: () => Promise<void> | void }) => {
+      actions.set(id, { run: vi.fn(run) });
     }),
-    getAction: jest.fn((id: string) => actions.get(id)),
-    setSelection: jest.fn(),
-    revealRangeInCenter: jest.fn(),
-    setPosition: jest.fn(),
-    revealPositionInCenter: jest.fn(),
-    layout: jest.fn(),
+    getAction: vi.fn((id: string) => actions.get(id)),
+    setSelection: vi.fn(),
+    revealRangeInCenter: vi.fn(),
+    setPosition: vi.fn(),
+    revealPositionInCenter: vi.fn(),
+    layout: vi.fn(),
   };
 };
 
-jest.mock("react-monaco-editor", () => {
+vi.mock("react-monaco-editor", async () => {
   return function MockMonacoEditor(props: {
     editorWillMount?: (monaco: unknown) => unknown;
     editorDidMount?: (editor: unknown, monaco: unknown) => void;
     onChange?: (code: string) => void;
   }) {
-    const mockMonacoApi = jest.requireMock("monaco-editor/esm/vs/editor/editor.api");
+    const mockMonacoApi = await vi.importMock("monaco-editor/esm/vs/editor/editor.api");
     mockOnChange = props.onChange;
     mockEditor = createMockEditor();
     props.editorWillMount?.(mockMonacoApi);
@@ -161,16 +162,16 @@ jest.mock("react-monaco-editor", () => {
   };
 });
 
-jest.mock("@mui/material", () => ({
+vi.mock("@mui/material", async () => ({
   useTheme: () => ({ palette: { mode: "dark" } }),
 }));
 
-jest.mock("react-resize-detector", () => ({
-  useResizeDetector: jest.fn((opts?: unknown) => {
+vi.mock("react-resize-detector", async () => ({
+  useResizeDetector: vi.fn((opts?: unknown) => {
     resizeDetectorOptions = opts as {
       onResize?: (payload: { width?: number; height?: number }) => void;
     };
-    return { ref: jest.fn() };
+    return { ref: vi.fn() };
   }),
 }));
 
@@ -184,16 +185,14 @@ const userScriptProjectConfig = {
   utilityFiles: [{ filePath: "/utility.ts", sourceCode: "export const util = 1;" }],
 };
 
-jest.mock(
-  "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig",
-  () => ({
+vi.mock("@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig", async () => ({
     __esModule: true,
-    getUserScriptProjectConfig: jest.fn(() => userScriptProjectConfig),
+    getUserScriptProjectConfig: vi.fn(() => userScriptProjectConfig),
     __userScriptProjectConfig: userScriptProjectConfig,
   }),
 );
 
-jest.mock("@lichtblick/suite-base/stories/inScreenshotTests", () => jest.fn(() => false));
+vi.mock("@lichtblick/suite-base/stories/inScreenshotTests", async () => vi.fn(() => false));
 
 // Tests
 
@@ -210,9 +209,9 @@ describe("Editor", () => {
     const {
       autoFormatOnSave = false,
       script = baseScript,
-      setScriptCode = jest.fn(),
-      save = jest.fn(),
-      setScriptOverride = jest.fn(),
+      setScriptCode = vi.fn(),
+      save = vi.fn(),
+      setScriptOverride = vi.fn(),
       rosLib = BasicBuilder.string(),
       typesLib = BasicBuilder.string(),
     } = props;
@@ -231,7 +230,7 @@ describe("Editor", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     (monacoApi as unknown as { clearModels?: () => void }).clearModels?.();
     mockOnChange = undefined;
     mockEditor = undefined;
@@ -247,7 +246,7 @@ describe("Editor", () => {
   });
 
   it("Given auto-format is enabled When the save shortcut runs Then the editor formats and saves the script", async () => {
-    const save = jest.fn();
+    const save = vi.fn();
 
     await act(async () => {
       renderEditor({ autoFormatOnSave: true, save });
@@ -270,7 +269,7 @@ describe("Editor", () => {
   });
 
   it("Given a read-only script When the save shortcut runs Then saving and formatting are skipped", async () => {
-    const save = jest.fn();
+    const save = vi.fn();
     const readOnlyScript = buildScript({ readOnly: true });
 
     await act(async () => {
@@ -291,7 +290,7 @@ describe("Editor", () => {
   });
 
   it("Given a request to open another model When the open handler runs Then the script override is populated", async () => {
-    const setScriptOverride = jest.fn();
+    const setScriptOverride = vi.fn();
     const typesLib = BasicBuilder.string();
 
     await act(async () => {
@@ -333,7 +332,7 @@ describe("Editor", () => {
   });
 
   it("Given a jump inside the current script When the open handler runs Then it navigates without overriding", async () => {
-    const setScriptOverride = jest.fn();
+    const setScriptOverride = vi.fn();
     const selection = {
       startLineNumber: BasicBuilder.number(),
       startColumn: BasicBuilder.number(),
@@ -363,7 +362,7 @@ describe("Editor", () => {
   });
 
   it("Given a position-only selection When the open handler runs Then it sets the position instead of a range", async () => {
-    const setScriptOverride = jest.fn();
+    const setScriptOverride = vi.fn();
     const selection = {
       startLineNumber: BasicBuilder.number(),
       startColumn: BasicBuilder.number(),
@@ -426,9 +425,9 @@ describe("Editor", () => {
       <Editor
         autoFormatOnSave={false}
         script={undefined}
-        setScriptCode={jest.fn()}
-        save={jest.fn()}
-        setScriptOverride={jest.fn()}
+        setScriptCode={vi.fn()}
+        save={vi.fn()}
+        setScriptOverride={vi.fn()}
         rosLib={BasicBuilder.string()}
         typesLib={BasicBuilder.string()}
       />,
@@ -438,9 +437,9 @@ describe("Editor", () => {
   });
 
   it("Given a formatting failure When the provider runs Then it returns an empty edit set", async () => {
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    const getPrettifiedCode = jest.requireMock(
+    const getPrettifiedCode = await vi.importMock(
       "@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode",
     );
     getPrettifiedCode.mockRejectedValueOnce(new Error("formatting failure"));
@@ -449,7 +448,7 @@ describe("Editor", () => {
       renderEditor();
     });
 
-    const provider = (monacoApi.languages.registerDocumentFormattingEditProvider as jest.Mock).mock
+    const provider = (monacoApi.languages.registerDocumentFormattingEditProvider as Mock).mock
       .calls[0][1];
     const model = monacoApi.editor.createModel(
       "code",
@@ -474,7 +473,7 @@ describe("Editor", () => {
   });
 
   it("Given the editor receives source changes When the onChange handler fires Then the latest setter is called with new code", async () => {
-    const setScriptCode = jest.fn();
+    const setScriptCode = vi.fn();
 
     await act(async () => {
       renderEditor({ setScriptCode });

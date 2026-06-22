@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -8,7 +8,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import HoverableIconButton, {
   HoverableIconButtonProps,
@@ -142,7 +142,7 @@ describe("Given HoverableIconButton", () => {
 
   it("When clicked Then calls onClick handler", () => {
     // Given
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
 
     const props: Partial<HoverableIconButtonProps> = {
       onClick: handleClick,

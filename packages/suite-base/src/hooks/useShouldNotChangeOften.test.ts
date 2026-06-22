@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -21,7 +21,7 @@ import useShouldNotChangeOften from "@lichtblick/suite-base/hooks/useShouldNotCh
 
 describe("useShouldNotChangeOften", () => {
   it("logs when value changes twice in a row", () => {
-    const warn = jest.fn();
+    const warn = vi.fn();
     const { result, rerender } = renderHook((val) => useShouldNotChangeOften(val, warn), {
       initialProps: "a",
     });

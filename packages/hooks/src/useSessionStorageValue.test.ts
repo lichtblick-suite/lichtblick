@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -14,13 +14,13 @@ import { useSessionStorageValue } from "./useSessionStorageValue";
 describe("useSessionStorageValue", () => {
   beforeEach(() => {
     sessionStorage.clear();
-    jest.clearAllMocks();
-    jest.resetModules();
+    vi.clearAllMocks();
+    vi.resetModules();
   });
 
   afterEach(() => {
     sessionStorage.clear();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("should remove value from session storage when setting undefined", () => {
@@ -28,7 +28,7 @@ describe("useSessionStorageValue", () => {
     const testKey = "remove-test-key";
     const testValue = "initial-value";
     sessionStorage.setItem(testKey, testValue);
-    const storageEventSpy = jest.fn();
+    const storageEventSpy = vi.fn();
     window.addEventListener("storage", storageEventSpy);
 
     // When
@@ -116,7 +116,7 @@ describe("useSessionStorageValue", () => {
   it("should remove event listener when component unmounts", () => {
     // Given
     const testKey = "unmount-test-key";
-    const removeEventListenerSpy = jest.spyOn(window, "removeEventListener");
+    const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
     const { unmount } = renderHook(() => useSessionStorageValue(testKey));
 
     // When

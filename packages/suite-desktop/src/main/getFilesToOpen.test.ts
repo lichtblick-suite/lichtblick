@@ -9,17 +9,17 @@ import { parseCLIFlags } from "./parseCLIFlags";
 import { resolveSourcePaths } from "./resolveSourcePaths";
 
 // Mock all dependencies
-jest.mock("./fileUtils");
-jest.mock("./parseCLIFlags");
-jest.mock("./resolveSourcePaths");
+vi.mock("./fileUtils");
+vi.mock("./parseCLIFlags");
+vi.mock("./resolveSourcePaths");
 
-const mockIsFileToOpen = jest.mocked(isFileToOpen);
-const mockParseCLIFlags = jest.mocked(parseCLIFlags);
-const mockResolveSourcePaths = jest.mocked(resolveSourcePaths);
+const mockIsFileToOpen = vi.mocked(isFileToOpen);
+const mockParseCLIFlags = vi.mocked(parseCLIFlags);
+const mockResolveSourcePaths = vi.mocked(resolveSourcePaths);
 
 describe("getFilesToOpen", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Default mock implementations
     mockIsFileToOpen.mockImplementation((filePath: string) => {
       // Mock files that should be considered valid

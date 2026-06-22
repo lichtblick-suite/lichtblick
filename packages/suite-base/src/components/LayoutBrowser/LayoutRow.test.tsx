@@ -1,11 +1,12 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import * as LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
 import * as useConfirmModule from "@lichtblick/suite-base/hooks/useConfirm";
@@ -15,13 +16,13 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import LayoutRow from "./LayoutRow";
 
 // Mocks
-jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
-  useLayoutManager: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/LayoutManagerContext", async () => ({
+  useLayoutManager: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/hooks/useConfirm", () => ({
-  useConfirm: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks/useConfirm", async () => ({
+  useConfirm: vi.fn(),
 }));
-jest.mock("./LayoutRow.style", () => ({
+vi.mock("./LayoutRow.style", async () => ({
   StyledListItem: ({ children, secondaryAction }: any) => (
     <div data-testid="styled-list-item">
       {children}
@@ -43,13 +44,13 @@ jest.mock("./LayoutRow.style", () => ({
 const mockLayoutManager = {
   isOnline: true,
   supportsSharing: true,
-  on: jest.fn(),
-  off: jest.fn(),
+  on: vi.fn(),
+  off: vi.fn(),
 };
-const mockConfirm = jest.fn();
+const mockConfirm = vi.fn();
 const mockConfirmModal = <div data-testid="confirm-modal" />;
-(LayoutManagerContext.useLayoutManager as jest.Mock).mockReturnValue(mockLayoutManager);
-(useConfirmModule.useConfirm as jest.Mock).mockReturnValue([mockConfirm, mockConfirmModal]);
+(LayoutManagerContext.useLayoutManager as Mock).mockReturnValue(mockLayoutManager);
+(useConfirmModule.useConfirm as Mock).mockReturnValue([mockConfirm, mockConfirmModal]);
 
 const layoutId = BasicBuilder.string();
 const layoutName = BasicBuilder.string();
@@ -65,22 +66,22 @@ const renderComponent = (props = {}) =>
       anySelectedModifiedLayouts={false}
       multiSelectedIds={[]}
       selected={false}
-      onSelect={jest.fn()}
-      onRename={jest.fn()}
-      onDuplicate={jest.fn()}
-      onDelete={jest.fn()}
-      onShare={jest.fn()}
-      onExport={jest.fn()}
-      onOverwrite={jest.fn()}
-      onRevert={jest.fn()}
-      onMakePersonalCopy={jest.fn()}
+      onSelect={vi.fn()}
+      onRename={vi.fn()}
+      onDuplicate={vi.fn()}
+      onDelete={vi.fn()}
+      onShare={vi.fn()}
+      onExport={vi.fn()}
+      onOverwrite={vi.fn()}
+      onRevert={vi.fn()}
+      onMakePersonalCopy={vi.fn()}
       {...props}
     />,
   );
 
 describe("LayoutRow rendering", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("Given default props, when rendered, then displays the layout name", () => {
@@ -123,7 +124,7 @@ describe("LayoutRow rendering", () => {
 
   it("when delete menu item is clicked then confirm modal is triggered", async () => {
     mockConfirm.mockResolvedValue("ok");
-    const onDelete = jest.fn();
+    const onDelete = vi.fn();
     renderComponent({ onDelete });
     fireEvent.click(screen.getByTestId("layout-actions"));
     fireEvent.click(screen.getByTestId("delete-layout"));
@@ -149,7 +150,7 @@ describe("LayoutRow rendering", () => {
   });
 
   it("Given a layout with modifications, when Revert is clicked and confirmed, then onRevert is called", async () => {
-    const onRevert = jest.fn();
+    const onRevert = vi.fn();
     // Simulate confirm dialog returning "ok"
     mockConfirm.mockResolvedValue("ok");
     renderComponent({ layout: { ...defaultLayout, working: {}, syncInfo: undefined }, onRevert });
@@ -168,7 +169,7 @@ describe("LayoutRow rendering", () => {
   });
 
   it("Given a layout with modifications, when Revert is clicked and cancelled, then onRevert is not called", async () => {
-    const onRevert = jest.fn();
+    const onRevert = vi.fn();
     // Simulate confirm dialog returning "cancel"
     mockConfirm.mockResolvedValue("cancel");
     renderComponent({ layout: { ...defaultLayout, working: {}, syncInfo: undefined }, onRevert });
@@ -187,7 +188,7 @@ describe("LayoutRow rendering", () => {
   });
 
   it("Given a layout, when Rename is clicked and input is blurred, then onRename is called with the new name", async () => {
-    const onRename = jest.fn();
+    const onRename = vi.fn();
     renderComponent({ onRename });
 
     fireEvent.click(screen.getByTestId("layout-actions"));
@@ -208,7 +209,7 @@ describe("LayoutRow rendering", () => {
   });
 
   it("Given a shared layout, when Duplicate is clicked, then onMakePersonalCopy is called", () => {
-    const onMakePersonalCopy = jest.fn();
+    const onMakePersonalCopy = vi.fn();
     const sharedLayout = { ...defaultLayout, permission: "ORG_READ" as const };
     renderComponent({ layout: sharedLayout, onMakePersonalCopy });
 
@@ -219,7 +220,7 @@ describe("LayoutRow rendering", () => {
   });
 
   it("Given a personal layout, when Duplicate is clicked, then onDuplicate is called", () => {
-    const onDuplicate = jest.fn();
+    const onDuplicate = vi.fn();
     const personalLayout = {
       ...defaultLayout,
       working: undefined,

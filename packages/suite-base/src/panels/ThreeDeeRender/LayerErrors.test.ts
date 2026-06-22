@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { LayerErrors } from "./LayerErrors";
@@ -13,16 +14,16 @@ describe("LayerErrors", () => {
 
   beforeEach(() => {
     layerErrors = new LayerErrors();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   describe("Error Management", () => {
     it("should emit update event when error is added", () => {
-      const updateHandler = jest.fn();
+      const updateHandler = vi.fn();
       layerErrors.on("update", updateHandler);
 
       const path = ["topics", topicId];
@@ -36,7 +37,7 @@ describe("LayerErrors", () => {
     });
 
     it("should emit remove event when error is removed", () => {
-      const removeHandler = jest.fn();
+      const removeHandler = vi.fn();
       layerErrors.on("remove", removeHandler);
 
       const path = ["topics", topicId];
@@ -51,7 +52,7 @@ describe("LayerErrors", () => {
     });
 
     it("should emit clear event when path is cleared", () => {
-      const clearHandler = jest.fn();
+      const clearHandler = vi.fn();
       layerErrors.on("clear", clearHandler);
 
       const path = ["topics", topicId];
@@ -64,7 +65,7 @@ describe("LayerErrors", () => {
     });
 
     it("should handle topic-specific errors", () => {
-      const updateHandler = jest.fn();
+      const updateHandler = vi.fn();
       layerErrors.on("update", updateHandler);
 
       layerErrors.addToTopic(topicId, errorId, errorMessage);
@@ -110,7 +111,7 @@ describe("LayerErrors", () => {
 
   describe("errorIfFalse utility", () => {
     it("should add error when value is false", () => {
-      const updateHandler = jest.fn();
+      const updateHandler = vi.fn();
       layerErrors.on("update", updateHandler);
 
       const path = ["test", "path"];
@@ -121,7 +122,7 @@ describe("LayerErrors", () => {
     });
 
     it("should remove error when value is true", () => {
-      const removeHandler = jest.fn();
+      const removeHandler = vi.fn();
       layerErrors.on("remove", removeHandler);
 
       const path = ["test", "path"];

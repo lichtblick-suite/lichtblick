@@ -7,9 +7,9 @@ import {
 } from "./pointClouds"; // Adjust the import path as needed
 import { Point } from "./types"; // Adjust the import path as needed
 
-jest.mock("./readers", () => ({
-  getReader: jest.fn().mockImplementation(() => ({
-    read: jest.fn((data: Uint8Array, dataStart: number) => data[dataStart]),
+vi.mock("./readers", async () => ({
+  getReader: vi.fn().mockImplementation(() => ({
+    read: vi.fn((data: Uint8Array, dataStart: number) => data[dataStart]),
   })),
 }));
 

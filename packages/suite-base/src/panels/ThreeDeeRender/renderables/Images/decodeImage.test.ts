@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -45,7 +45,7 @@ describe("isVideoKeyframe", () => {
     const mockVideoFrame = createMockVideoFrame({
       data: new Uint8Array([0x65]), // Mock IDR NAL unit
     });
-    jest.spyOn(H264, "IsKeyframe").mockReturnValue(true);
+    vi.spyOn(H264, "IsKeyframe").mockReturnValue(true);
     expect(isVideoKeyframe(mockVideoFrame)).toBe(true);
   });
 
@@ -53,7 +53,7 @@ describe("isVideoKeyframe", () => {
     const mockVideoFrame = createMockVideoFrame({
       data: new Uint8Array([0x41]), // Mock non-IDR NAL unit
     });
-    jest.spyOn(H264, "IsKeyframe").mockReturnValue(false);
+    vi.spyOn(H264, "IsKeyframe").mockReturnValue(false);
     expect(isVideoKeyframe(mockVideoFrame)).toBe(false);
   });
 });
@@ -64,7 +64,7 @@ describe("getVideoDecoderConfig", () => {
       data: new Uint8Array([0x67]), // Mock SPS NAL unit
     });
     const mockConfig = { codec: "avc1.42E01E" };
-    jest.spyOn(H264, "ParseDecoderConfig").mockReturnValue(mockConfig);
+    vi.spyOn(H264, "ParseDecoderConfig").mockReturnValue(mockConfig);
     expect(getVideoDecoderConfig(mockVideoFrame)).toEqual(mockConfig);
   });
 
@@ -80,8 +80,8 @@ describe("decodeCompressedVideoToBitmap", () => {
   it("should decode a compressed video frame to an ImageBitmap", async () => {
     const mockVideoFrame = createMockVideoFrame();
     const mockVideoPlayer = {
-      isInitialized: jest.fn().mockReturnValue(true),
-      decode: jest.fn().mockResolvedValue(new ImageBitmap()),
+      isInitialized: vi.fn().mockReturnValue(true),
+      decode: vi.fn().mockResolvedValue(new ImageBitmap()),
     } as unknown as VideoPlayer;
     const bitmap = await decodeCompressedVideoToBitmap(mockVideoFrame, mockVideoPlayer, BigInt(0));
     expect(bitmap).toBeInstanceOf(ImageBitmap);
@@ -91,8 +91,8 @@ describe("decodeCompressedVideoToBitmap", () => {
   it("should return an empty video frame if the video player is not initialized", async () => {
     const mockVideoFrame = createMockVideoFrame();
     const mockVideoPlayer = {
-      isInitialized: jest.fn().mockReturnValue(false),
-      codedSize: jest.fn(),
+      isInitialized: vi.fn().mockReturnValue(false),
+      codedSize: vi.fn(),
     } as unknown as VideoPlayer;
 
     const bitmap = await decodeCompressedVideoToBitmap(mockVideoFrame, mockVideoPlayer, BigInt(0));

@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -7,7 +7,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import "@testing-library/jest-dom";
+import type { Mock } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { act, render, waitFor } from "@testing-library/react";
 
 import { Topic } from "@lichtblick/suite";
@@ -27,40 +28,40 @@ import { DEFAULT_CAMERA_STATE } from "./camera";
 import type { InterfaceMode, ThreeDeeRenderProps } from "./types";
 
 // three.js modules
-jest.mock("./ModelCache", () => ({
-  ModelCache: jest.fn(),
+vi.mock("./ModelCache", async () => ({
+  ModelCache: vi.fn(),
 }));
 
-jest.mock("./SceneExtensionConfig", () => ({
+vi.mock("./SceneExtensionConfig", async () => ({
   DEFAULT_SCENE_EXTENSION_CONFIG: {},
 }));
 
-jest.mock("@lichtblick/suite-base/context/AnalyticsContext", () => ({
-  useAnalytics: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/AnalyticsContext", async () => ({
+  useAnalytics: vi.fn(),
 }));
 
 const createMockRenderer = (overrides?: Record<string, any>) => {
   const listeners = new Map<string, Set<(...args: any[]) => void>>();
   const defaultRenderer = {
-    dispose: jest.fn(),
+    dispose: vi.fn(),
     config: {},
-    setTopics: jest.fn(),
-    setParameters: jest.fn(),
-    setCurrentTime: jest.fn(),
-    handleSeek: jest.fn(),
-    setColorScheme: jest.fn(),
-    handleAllFramesMessages: jest.fn(),
-    addMessageEvent: jest.fn(),
-    setCameraState: jest.fn(),
-    getCameraState: jest.fn().mockReturnValue(undefined),
-    animationFrame: jest.fn(),
-    addListener: jest.fn((event: string, listener: (...args: any[]) => void) => {
+    setTopics: vi.fn(),
+    setParameters: vi.fn(),
+    setCurrentTime: vi.fn(),
+    handleSeek: vi.fn(),
+    setColorScheme: vi.fn(),
+    handleAllFramesMessages: vi.fn(),
+    addMessageEvent: vi.fn(),
+    setCameraState: vi.fn(),
+    getCameraState: vi.fn().mockReturnValue(undefined),
+    animationFrame: vi.fn(),
+    addListener: vi.fn((event: string, listener: (...args: any[]) => void) => {
       if (!listeners.has(event)) {
         listeners.set(event, new Set());
       }
       listeners.get(event)!.add(listener);
     }),
-    removeListener: jest.fn((event: string, listener: (...args: any[]) => void) => {
+    removeListener: vi.fn((event: string, listener: (...args: any[]) => void) => {
       listeners.get(event)?.delete(listener);
     }),
     emit: (event: string, ...args: unknown[]) => {
@@ -71,33 +72,33 @@ const createMockRenderer = (overrides?: Record<string, any>) => {
     topicSubscriptions: new Map(),
     schemaSubscriptions: new Map(),
     settings: {
-      handleAction: jest.fn(),
-      tree: jest.fn().mockReturnValue({}),
+      handleAction: vi.fn(),
+      tree: vi.fn().mockReturnValue({}),
       errors: {
-        on: jest.fn(),
-        off: jest.fn(),
+        on: vi.fn(),
+        off: vi.fn(),
       },
     },
-    getDropStatus: jest.fn(),
-    handleDrop: jest.fn(),
-    setAnalytics: jest.fn(),
-    setCustomCameraModels: jest.fn(),
-    setCameraSyncError: jest.fn(),
+    getDropStatus: vi.fn(),
+    handleDrop: vi.fn(),
+    setAnalytics: vi.fn(),
+    setCustomCameraModels: vi.fn(),
+    setCameraSyncError: vi.fn(),
     followFrameId: "base_link",
     ros: false,
     currentTime: undefined,
     measurementTool: {
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      startMeasuring: jest.fn(),
-      stopMeasuring: jest.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      startMeasuring: vi.fn(),
+      stopMeasuring: vi.fn(),
     },
     publishClickTool: {
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      start: jest.fn(),
-      stop: jest.fn(),
-      setPublishClickType: jest.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      start: vi.fn(),
+      stop: vi.fn(),
+      setPublishClickType: vi.fn(),
       publishClickType: "point",
     },
   };
@@ -105,16 +106,16 @@ const createMockRenderer = (overrides?: Record<string, any>) => {
   return { ...defaultRenderer, ...overrides };
 };
 
-jest.mock("./Renderer", () => ({
-  Renderer: jest.fn().mockImplementation(() => createMockRenderer()),
+vi.mock("./Renderer", async () => ({
+  Renderer: vi.fn().mockImplementation(() => createMockRenderer()),
 }));
 
-jest.mock("@lichtblick/suite-base/theme/ThemeProvider", () => ({
+vi.mock("@lichtblick/suite-base/theme/ThemeProvider", async () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-jest.mock("./RendererOverlay", () => ({
+vi.mock("./RendererOverlay", async () => ({
   RendererOverlay: () => <div data-testid="renderer-overlay">Renderer Overlay</div>,
 }));
 
@@ -123,26 +124,26 @@ const createMockContext = (
 ): BuiltinPanelExtensionContext => {
   return {
     initialState: {},
-    saveState: jest.fn(),
-    watch: jest.fn(),
+    saveState: vi.fn(),
+    watch: vi.fn(),
     onRender: undefined,
-    subscribe: jest.fn(),
-    unsubscribeAll: jest.fn(),
-    updatePanelSettingsEditor: jest.fn(),
-    setDefaultPanelTitle: jest.fn(),
-    unstable_fetchAsset: jest.fn(),
-    unstable_setMessagePathDropConfig: jest.fn(),
-    unstable_subscribeMessageRange: jest.fn(),
+    subscribe: vi.fn(),
+    unsubscribeAll: vi.fn(),
+    updatePanelSettingsEditor: vi.fn(),
+    setDefaultPanelTitle: vi.fn(),
+    unstable_fetchAsset: vi.fn(),
+    unstable_setMessagePathDropConfig: vi.fn(),
+    unstable_subscribeMessageRange: vi.fn(),
     dataSourceProfile: "ros1",
     layout: {
-      addPanel: jest.fn(),
+      addPanel: vi.fn(),
     },
-    setVariable: jest.fn(),
-    setSharedPanelState: jest.fn(),
-    advertise: jest.fn(),
-    unadvertise: jest.fn(),
-    publish: jest.fn(),
-    subscribeAppSettings: jest.fn(),
+    setVariable: vi.fn(),
+    setSharedPanelState: vi.fn(),
+    advertise: vi.fn(),
+    unadvertise: vi.fn(),
+    publish: vi.fn(),
+    subscribeAppSettings: vi.fn(),
     ...overrides,
   } as BuiltinPanelExtensionContext;
 };
@@ -177,8 +178,8 @@ function buildTfMessages({
 }
 
 describe("ThreeDeeRender", () => {
-  const mockAnalytics = { logEvent: jest.fn() };
-  const mockedRenderer = jest.mocked(Renderer);
+  const mockAnalytics = { logEvent: vi.fn() };
+  const mockedRenderer = vi.mocked(Renderer);
 
   const setup = (
     propsOverrides?: Partial<Omit<ThreeDeeRenderProps, "context">>,
@@ -199,16 +200,16 @@ describe("ThreeDeeRender", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useAnalytics as jest.Mock).mockReturnValue(mockAnalytics);
+    vi.clearAllMocks();
+    (useAnalytics as Mock).mockReturnValue(mockAnalytics);
 
     // WebGL context
-    HTMLCanvasElement.prototype.getContext = jest.fn().mockReturnValue({
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
       canvas: document.createElement("canvas"),
-      drawArrays: jest.fn(),
-      clearColor: jest.fn(),
-      clear: jest.fn(),
-      viewport: jest.fn(),
+      drawArrays: vi.fn(),
+      clearColor: vi.fn(),
+      clear: vi.fn(),
+      viewport: vi.fn(),
     });
   });
 
@@ -335,8 +336,8 @@ describe("ThreeDeeRender", () => {
       fy: 100,
       cx: 50,
       cy: 50,
-      projectPixelTo3dPlane: jest.fn(),
-      projectPixelTo3dRay: jest.fn(),
+      projectPixelTo3dPlane: vi.fn(),
+      projectPixelTo3dRay: vi.fn(),
     });
 
     const customCameraModels = new Map([
@@ -356,7 +357,7 @@ describe("ThreeDeeRender", () => {
   });
 
   describe("transfom topic preloading", () => {
-    const mockUnsubscribe = jest.fn();
+    const mockUnsubscribe = vi.fn();
     const createPreloadingContext = (overrides?: {
       onSubscribe?: (args: any) => (() => void) | void;
       initialState?: any;
@@ -375,7 +376,7 @@ describe("ThreeDeeRender", () => {
           },
           ...overrides?.initialState,
         },
-        unstable_subscribeMessageRange: jest.fn((args: any) => {
+        unstable_subscribeMessageRange: vi.fn((args: any) => {
           const customUnsubscribe = overrides?.onSubscribe?.(args);
           return customUnsubscribe ?? mockUnsubscribe;
         }),
@@ -400,7 +401,7 @@ describe("ThreeDeeRender", () => {
         RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" }),
         RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" }),
       ];
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createPreloadingContext({
         onSubscribe: () => mockUnsubscribe,
@@ -421,7 +422,7 @@ describe("ThreeDeeRender", () => {
           {
             topics,
           },
-          jest.fn(),
+          vi.fn(),
         );
       });
 
@@ -440,7 +441,7 @@ describe("ThreeDeeRender", () => {
         schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createPreloadingContext({
         onSubscribe: () => mockUnsubscribe,
@@ -458,7 +459,7 @@ describe("ThreeDeeRender", () => {
       });
 
       act(() => {
-        mockContext.onRender!({ topics }, jest.fn());
+        mockContext.onRender!({ topics }, vi.fn());
       });
 
       await waitFor(() => {
@@ -477,7 +478,7 @@ describe("ThreeDeeRender", () => {
       ];
 
       act(() => {
-        mockContext.onRender!({ topics: newTopics }, jest.fn());
+        mockContext.onRender!({ topics: newTopics }, vi.fn());
       });
 
       rerender(<ThreeDeeRender {...props} />);
@@ -495,7 +496,7 @@ describe("ThreeDeeRender", () => {
         schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createPreloadingContext({
         onSubscribe: () => mockUnsubscribe,
@@ -514,7 +515,7 @@ describe("ThreeDeeRender", () => {
 
       // Set initial topics to trigger subscription
       act(() => {
-        mockContext.onRender!({ topics }, jest.fn());
+        mockContext.onRender!({ topics }, vi.fn());
       });
 
       await waitFor(() => {
@@ -534,7 +535,7 @@ describe("ThreeDeeRender", () => {
       ];
 
       act(() => {
-        mockContext.onRender!({ topics: newTopics }, jest.fn());
+        mockContext.onRender!({ topics: newTopics }, vi.fn());
       });
 
       rerender(<ThreeDeeRender {...props} />);
@@ -552,7 +553,7 @@ describe("ThreeDeeRender", () => {
           schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
         });
 
-        jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+        vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
         const mockContext = createPreloadingContext({
           onSubscribe: () => mockUnsubscribe,
@@ -569,7 +570,7 @@ describe("ThreeDeeRender", () => {
         });
 
         act(() => {
-          mockContext.onRender!({ topics }, jest.fn());
+          mockContext.onRender!({ topics }, vi.fn());
         });
 
         await waitFor(() => {
@@ -583,7 +584,7 @@ describe("ThreeDeeRender", () => {
         const newTopics = [RenderStateBuilder.topic({ schemaName: "std_msgs/String" })];
 
         act(() => {
-          mockContext.onRender!({ topics: newTopics }, jest.fn());
+          mockContext.onRender!({ topics: newTopics }, vi.fn());
         });
 
         // Then
@@ -605,7 +606,7 @@ describe("ThreeDeeRender", () => {
           ]),
         });
 
-        jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+        vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
         const mockContext = createPreloadingContext({
           onSubscribe: () => mockUnsubscribe,
@@ -627,7 +628,7 @@ describe("ThreeDeeRender", () => {
             {
               topics,
             },
-            jest.fn(),
+            vi.fn(),
           );
         });
 
@@ -669,7 +670,7 @@ describe("ThreeDeeRender", () => {
         schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createPreloadingContext({
         onSubscribe: (args: any) => {
@@ -694,7 +695,7 @@ describe("ThreeDeeRender", () => {
             currentFrame: [],
             currentTime: { sec: 100, nsec: 0 },
           },
-          jest.fn(),
+          vi.fn(),
         );
       });
 
@@ -750,7 +751,7 @@ describe("ThreeDeeRender", () => {
         schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createPreloadingContext({
         initialState: {
@@ -786,7 +787,7 @@ describe("ThreeDeeRender", () => {
             currentFrame: [],
             currentTime: { sec: 100, nsec: 0 },
           },
-          jest.fn(),
+          vi.fn(),
         );
       });
 
@@ -841,7 +842,7 @@ describe("ThreeDeeRender", () => {
         schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createPreloadingContext({
         initialState: {
@@ -875,7 +876,7 @@ describe("ThreeDeeRender", () => {
             currentFrame: [],
             currentTime: { sec: 100, nsec: 0 },
           },
-          jest.fn(),
+          vi.fn(),
         );
       });
 
@@ -911,7 +912,7 @@ describe("ThreeDeeRender", () => {
         schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createPreloadingContext({
         onSubscribe: (args: any) => {
@@ -936,7 +937,7 @@ describe("ThreeDeeRender", () => {
             currentFrame: [],
             currentTime: { sec: 100, nsec: 0 },
           },
-          jest.fn(),
+          vi.fn(),
         );
       });
 
@@ -950,7 +951,7 @@ describe("ThreeDeeRender", () => {
 
       // Reset the mock to track new calls
       customRendererInstance.handleAllFramesMessages.mockClear();
-      (mockContext.unstable_subscribeMessageRange as jest.Mock).mockClear();
+      (mockContext.unstable_subscribeMessageRange as Mock).mockClear();
 
       // When - Emit clearPreloadBuffer event
       act(() => {
@@ -988,7 +989,7 @@ describe("ThreeDeeRender", () => {
         schemaSubscriptions: new Map([["tf2_msgs/TFMessage", [{ preload: true }]]]),
       });
 
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createPreloadingContext({
         initialState: {
@@ -1024,7 +1025,7 @@ describe("ThreeDeeRender", () => {
             currentFrame: [],
             currentTime: { sec: 100, nsec: 0 },
           },
-          jest.fn(),
+          vi.fn(),
         );
       });
 
@@ -1064,7 +1065,7 @@ describe("ThreeDeeRender", () => {
         currentTime: 0n,
       });
 
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createPreloadingContext({
         onSubscribe: (args: any) => {
@@ -1089,7 +1090,7 @@ describe("ThreeDeeRender", () => {
             currentFrame: [],
             currentTime: { sec: 100, nsec: 0 },
           },
-          jest.fn(),
+          vi.fn(),
         );
       });
 
@@ -1110,7 +1111,7 @@ describe("ThreeDeeRender", () => {
             currentTime: { sec: 50, nsec: 0 },
             didSeek: true,
           },
-          jest.fn(),
+          vi.fn(),
         );
       });
 

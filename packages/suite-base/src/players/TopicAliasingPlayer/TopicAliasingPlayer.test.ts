@@ -82,7 +82,7 @@ describe("TopicAliasingPlayer", () => {
     ];
     const player = new TopicAliasingPlayer(fakePlayer);
     player.setAliasFunctions(mappers);
-    const listener = jest.fn();
+    const listener = vi.fn();
     player.setListener(listener);
     await fakePlayer.emit(
       mockPlayerState(undefined, {
@@ -172,7 +172,7 @@ describe("TopicAliasingPlayer", () => {
 
     const player = new TopicAliasingPlayer(fakePlayer);
     player.setAliasFunctions(mappers);
-    const listener = jest.fn();
+    const listener = vi.fn();
     player.setListener(listener);
 
     const topics: Topic[] = [
@@ -238,7 +238,7 @@ describe("TopicAliasingPlayer", () => {
     player.setGlobalVariables({
       foo: "/bar",
     });
-    const listener = jest.fn();
+    const listener = vi.fn();
     player.setListener(listener);
     await fakePlayer.emit(
       mockPlayerState(undefined, {
@@ -280,7 +280,7 @@ describe("TopicAliasingPlayer", () => {
     ];
     const player = new TopicAliasingPlayer(fakePlayer);
     player.setAliasFunctions(mappers);
-    const listener = jest.fn();
+    const listener = vi.fn();
     player.setListener(listener);
     await fakePlayer.emit(
       mockPlayerState(undefined, {

@@ -213,7 +213,7 @@ describe("MessageHandler: synchronized = false", () => {
       annotations: { annotations: { visible: true } },
     };
     const messageHandler = new MessageHandler(initConfig, hud);
-    const listener = jest.fn();
+    const listener = vi.fn();
 
     messageHandler.addListener(listener);
 
@@ -244,7 +244,7 @@ describe("MessageHandler: synchronized = false", () => {
     const hud = new HUDItemManager(() => {});
     const initConfig = { synchronize: false, imageTopic: "image", calibrationTopic: "calib" };
     const messageHandler = new MessageHandler(initConfig, hud);
-    const listener = jest.fn();
+    const listener = vi.fn();
 
     messageHandler.addListener(listener);
     const image = wrapInMessageEvent<RawImage>("image", "foxglove.RawImage", 0n);
@@ -657,7 +657,7 @@ describe("MessageHandler: synchronized = true", () => {
       annotations: { annotations: { visible: true } },
     };
     const messageHandler = new MessageHandler(initConfig, hud);
-    const listener = jest.fn();
+    const listener = vi.fn();
 
     messageHandler.addListener(listener);
 

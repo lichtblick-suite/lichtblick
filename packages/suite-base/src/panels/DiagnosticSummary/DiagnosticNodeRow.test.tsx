@@ -1,9 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import { DiagnosticInfo } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
@@ -13,8 +13,8 @@ import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/Diagnost
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("DiagnosticNodeRow", () => {
-  const onClick = jest.fn();
-  const onClickPin = jest.fn();
+  const onClick = vi.fn();
+  const onClickPin = vi.fn();
   let info: DiagnosticInfo;
   let isPinned: boolean;
   let mockProps: NodeRowProps;

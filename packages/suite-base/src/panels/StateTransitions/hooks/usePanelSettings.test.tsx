@@ -1,6 +1,7 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+import type { Mock } from "vitest";
 import { act, renderHook, RenderHookResult } from "@testing-library/react";
 import { t, TFunction } from "i18next";
 import { produce } from "immer";
@@ -31,9 +32,9 @@ import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { TimestampMethod } from "@lichtblick/suite-base/util/time";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("react-i18next", () => ({
+vi.mock("react-i18next", async () => ({
   useTranslation: () => ({
-    t: jest.fn().mockImplementation((key) => key),
+    t: vi.fn().mockImplementation((key) => key),
   }),
 }));
 
@@ -329,12 +330,12 @@ describe("buildSettingsTree", () => {
 });
 
 describe("usePanelSettings", () => {
-  let saveConfig: SaveConfig<StateTransitionConfig> = jest.fn();
+  let saveConfig: SaveConfig<StateTransitionConfig> = vi.fn();
 
   beforeEach(() => {
-    saveConfig = jest.fn();
-    jest.clearAllMocks();
-    console.error = jest.fn();
+    saveConfig = vi.fn();
+    vi.clearAllMocks();
+    console.error = vi.fn();
   });
 
   const setup = ({
@@ -472,7 +473,7 @@ describe("usePanelSettings", () => {
     expect(
       produce(
         config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+        (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       ),
     ).toEqual(
       expect.objectContaining({
@@ -504,7 +505,7 @@ describe("usePanelSettings", () => {
     expect(
       produce(
         config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+        (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       ),
     ).toEqual(
       expect.objectContaining({
@@ -536,7 +537,7 @@ describe("usePanelSettings", () => {
     expect(
       produce(
         config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+        (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       ),
     ).toEqual(
       expect.objectContaining({
@@ -565,7 +566,7 @@ describe("usePanelSettings", () => {
 
     const updatedConfig = produce(
       config,
-      (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
     );
     expect(saveConfig).toHaveBeenCalledTimes(1);
     expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
@@ -590,7 +591,7 @@ describe("usePanelSettings", () => {
 
     const updatedConfig = produce(
       config,
-      (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
     );
     expect(saveConfig).toHaveBeenCalledTimes(1);
     expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
@@ -617,7 +618,7 @@ describe("usePanelSettings", () => {
     expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
     const updatedConfig = produce(
       config,
-      (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
     );
     expect(updatedConfig.paths).toHaveLength(2);
     expect(updatedConfig.paths).toEqual([
@@ -642,7 +643,7 @@ describe("usePanelSettings", () => {
     expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
     const updatedConfig = produce(
       config,
-      (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+      (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
     );
     expect(updatedConfig.paths).toHaveLength(2);
     expect(updatedConfig.paths).toContain(config.paths[0]);
@@ -683,7 +684,7 @@ describe("usePanelSettings", () => {
       expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
       const updatedConfig = produce(
         config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+        (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       );
       expect(updatedConfig.paths).toHaveLength(3);
       expect(updatedConfig.paths[0]).toEqual(path2);
@@ -723,7 +724,7 @@ describe("usePanelSettings", () => {
       expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
       const updatedConfig = produce(
         config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+        (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       );
       expect(updatedConfig.paths).toHaveLength(3);
       expect(updatedConfig.paths[0]).toEqual(path3);
@@ -765,7 +766,7 @@ describe("usePanelSettings", () => {
       expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
       const updatedConfig = produce(
         config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+        (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       );
       expect(updatedConfig.paths).toHaveLength(4);
       expect(updatedConfig.paths[0]).toEqual(path1);
@@ -804,7 +805,7 @@ describe("usePanelSettings", () => {
       expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
       const updatedConfig = produce(
         config,
-        (saveConfig as jest.Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
+        (saveConfig as Mock).mock.calls[0][0] as (draft: StateTransitionConfig) => void,
       );
       expect(updatedConfig.paths).toHaveLength(2);
       expect(updatedConfig.paths[0]).toEqual(path2);

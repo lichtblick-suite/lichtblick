@@ -1,10 +1,11 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 /* eslint-disable @typescript-eslint/unbound-method */
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 
 import { useTimelineInteractionState } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
@@ -13,12 +14,12 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useGlobalSync from "./useGlobalSync";
 
-jest.mock("@lichtblick/suite-base/context/TimelineInteractionStateContext");
+vi.mock("@lichtblick/suite-base/context/TimelineInteractionStateContext");
 
 describe("useGlobalSync", () => {
   let coordinator: PlotCoordinator | undefined;
-  let setCanReset: jest.Mock;
-  let setGlobalBounds: jest.Mock;
+  let setCanReset: Mock;
+  let setGlobalBounds: Mock;
   let globalBounds: any;
   const renderUseGlobalSync = (options: { shouldSync: boolean }, subscriberId: string) => {
     return renderHook(() => {
@@ -29,16 +30,16 @@ describe("useGlobalSync", () => {
 
   beforeEach(() => {
     coordinator = {
-      setGlobalBounds: jest.fn(),
-      on: jest.fn(),
-      off: jest.fn(),
+      setGlobalBounds: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
     } as unknown as PlotCoordinator;
 
-    setCanReset = jest.fn();
-    setGlobalBounds = jest.fn();
+    setCanReset = vi.fn();
+    setGlobalBounds = vi.fn();
     globalBounds = {};
 
-    (useTimelineInteractionState as jest.Mock).mockImplementation((selector) => {
+    (useTimelineInteractionState as Mock).mockImplementation((selector) => {
       if (selector.name === "selectGlobalBounds") {
         return globalBounds;
       }
@@ -47,7 +48,7 @@ describe("useGlobalSync", () => {
       }
     });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should set global bounds on coordinator if shouldSync is true and sourceId is different", () => {
@@ -85,7 +86,7 @@ describe("useGlobalSync", () => {
     const newBounds = { min: 10, max: 90 };
 
     renderUseGlobalSync({ shouldSync: true }, subscriberId);
-    const timeseriesBoundsHandler = (coordinator!.on as jest.Mock).mock.calls.find(
+    const timeseriesBoundsHandler = (coordinator!.on as Mock).mock.calls.find(
       ([event]) => event === "timeseriesBounds",
     )[1];
 

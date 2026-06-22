@@ -16,7 +16,7 @@ describe("isTopicHighFrequency", () => {
   const duration: RosTime = { sec: 30, nsec: 15 };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return false when there aren't topics with high message frequency and return false", () => {

@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
 // SPDX-License-Identifier: MPL-2.0
 
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 import { PieChartAction } from "@lichtblick/suite-base/panels/PieChart/types";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";

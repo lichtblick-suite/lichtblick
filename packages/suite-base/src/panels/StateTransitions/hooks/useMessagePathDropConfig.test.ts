@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
@@ -10,18 +11,18 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import useMessagePathDropConfig from "./useMessagePathDropConfig";
 import { StateTransitionConfig } from "../types";
 
-jest.mock("@lichtblick/suite-base/components/PanelContext");
+vi.mock("@lichtblick/suite-base/components/PanelContext");
 
 describe("useMessagePathDropConfig", () => {
-  const setMessagePathDropConfig = jest.fn();
-  const saveConfig = jest.fn();
+  const setMessagePathDropConfig = vi.fn();
+  const saveConfig = vi.fn();
 
   beforeEach(() => {
-    (usePanelContext as jest.Mock).mockReturnValue({ setMessagePathDropConfig });
+    (usePanelContext as Mock).mockReturnValue({ setMessagePathDropConfig });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should set the drop config on mount", () => {

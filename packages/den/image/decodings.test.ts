@@ -63,7 +63,7 @@ describe("decodeBGR8", () => {
     expect(() => {
       decodeBGR8(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
     }).toThrowErrorMatchingInlineSnapshot(
-      `"BGR8 image row step (11) must be at least 3*width (12)"`,
+      `[Error: BGR8 image row step (11) must be at least 3*width (12)]`,
     );
     expect(() => {
       decodeBGR8(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
@@ -101,7 +101,7 @@ describe("decodeBGRA8", () => {
     expect(() => {
       decodeBGRA8(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
     }).toThrowErrorMatchingInlineSnapshot(
-      `"BGRA8 image row step (15) must be at least 4*width (16)"`,
+      `[Error: BGRA8 image row step (15) must be at least 4*width (16)]`,
     );
     expect(() => {
       decodeBGRA8(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
@@ -139,7 +139,7 @@ describe("decodeRGB8", () => {
     expect(() => {
       decodeRGB8(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
     }).toThrowErrorMatchingInlineSnapshot(
-      `"RGB8 image row step (11) must be at least 3*width (12)"`,
+      `[Error: RGB8 image row step (11) must be at least 3*width (12)]`,
     );
     expect(() => {
       decodeRGB8(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
@@ -177,7 +177,7 @@ describe("decodeRGBA8", () => {
     expect(() => {
       decodeRGBA8(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
     }).toThrowErrorMatchingInlineSnapshot(
-      `"RGBA8 image row step (15) must be at least 4*width (16)"`,
+      `[Error: RGBA8 image row step (15) must be at least 4*width (16)]`,
     );
     expect(() => {
       decodeRGBA8(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
@@ -211,7 +211,7 @@ describe("decodeMono8", () => {
     const step = width - 1;
     expect(() => {
       decodeMono8(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
-    }).toThrowErrorMatchingInlineSnapshot(`"Uint8 image row step (3) must be at least width (4)"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: Uint8 image row step (3) must be at least width (4)]`);
     expect(() => {
       decodeMono8(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
     }).not.toThrow();
@@ -301,7 +301,7 @@ describe("decodeMono16", () => {
         new Uint8ClampedArray([]),
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Uint16 image row step (7) must be at least 2*width (8)"`,
+      `[Error: Uint16 image row step (7) must be at least 2*width (8)]`,
     );
     expect(() => {
       decodeMono16(
@@ -366,7 +366,7 @@ describe("decodeFloat1c", () => {
         new Uint8ClampedArray([]),
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Float image row step (15) must be at least 4*width (16)"`,
+      `[Error: Float image row step (15) must be at least 4*width (16)]`,
     );
     expect(() => {
       decodeFloat1c(
@@ -410,7 +410,7 @@ describe("decodeUYVY", () => {
     const step = 2 * width - 1;
     expect(() => {
       decodeUYVY(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
-    }).toThrowErrorMatchingInlineSnapshot(`"UYVY image row step (7) must be at least 2*width (8)"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: UYVY image row step (7) must be at least 2*width (8)]`);
 
     expect(() => {
       decodeUYVY(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
@@ -447,7 +447,7 @@ describe("decodeYUYV", () => {
     const step = 2 * width - 1;
     expect(() => {
       decodeYUYV(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
-    }).toThrowErrorMatchingInlineSnapshot(`"YUYV image row step (7) must be at least 2*width (8)"`);
+    }).toThrowErrorMatchingInlineSnapshot(`[Error: YUYV image row step (7) must be at least 2*width (8)]`);
     expect(() => {
       decodeYUYV(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
     }).not.toThrow();
@@ -490,7 +490,7 @@ describe("decodeBayer*()", () => {
       expect(() => {
         decodeBayerBGGR8(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Bayer image row step (3) must be at least width (4)"`,
+        `[Error: Bayer image row step (3) must be at least width (4)]`,
       );
       expect(() => {
         decodeBayerBGGR8(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
@@ -525,7 +525,7 @@ describe("decodeBayer*()", () => {
       expect(() => {
         decodeBayerGBRG8(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Bayer image row step (3) must be at least width (4)"`,
+        `[Error: Bayer image row step (3) must be at least width (4)]`,
       );
       expect(() => {
         decodeBayerGBRG8(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
@@ -560,7 +560,7 @@ describe("decodeBayer*()", () => {
       expect(() => {
         decodeBayerGRBG8(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Bayer image row step (3) must be at least width (4)"`,
+        `[Error: Bayer image row step (3) must be at least width (4)]`,
       );
       expect(() => {
         decodeBayerGRBG8(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
@@ -595,7 +595,7 @@ describe("decodeBayer*()", () => {
       expect(() => {
         decodeBayerRGGB8(new Uint8Array([]), width, height, step, new Uint8ClampedArray([]));
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Bayer image row step (3) must be at least width (4)"`,
+        `[Error: Bayer image row step (3) must be at least width (4)]`,
       );
       expect(() => {
         decodeBayerRGGB8(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));

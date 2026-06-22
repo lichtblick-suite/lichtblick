@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mock } from "vitest";
 import fs from "fs";
 import { openDB } from "idb/with-async-ittr";
 import JSZip from "jszip";
@@ -20,8 +21,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { IdbExtensionLoader } from "./IdbExtensionLoader";
 
-jest.mock("idb/with-async-ittr", () => ({
-  openDB: jest.fn(),
+vi.mock("idb/with-async-ittr", async () => ({
+  openDB: vi.fn(),
 }));
 
 const packageJson: Record<string, unknown> = {
@@ -61,21 +62,21 @@ const expectedExtensionInfo: ExtensionInfo = {
 
 const EXT_FILE_TURTLESIM = `${__dirname}/../../test/fixtures/lichtblick.suite-extension-turtlesim-0.0.1.foxe`;
 
-jest.mock("@lichtblick/log", () => ({
-  getLogger: jest.fn(() => ({
-    debug: jest.fn(),
+vi.mock("@lichtblick/log", async () => ({
+  getLogger: vi.fn(() => ({
+    debug: vi.fn(),
   })),
 }));
 
 describe("IdbExtensionLoader", () => {
-  const mockGet = jest.fn();
-  const mockGetAll = jest.fn();
-  const mockPut = jest.fn();
-  const mockDelete = jest.fn();
+  const mockGet = vi.fn();
+  const mockGetAll = vi.fn();
+  const mockPut = vi.fn();
+  const mockDelete = vi.fn();
 
   beforeEach(() => {
-    (openDB as jest.Mock).mockReturnValue({
-      transaction: jest.fn().mockReturnValue({ db: { put: mockPut, delete: mockDelete } }),
+    (openDB as Mock).mockReturnValue({
+      transaction: vi.fn().mockReturnValue({ db: { put: mockPut, delete: mockDelete } }),
       getAll: mockGetAll,
       get: mockGet,
       delete: mockDelete,
@@ -84,7 +85,7 @@ describe("IdbExtensionLoader", () => {
 
   describe("installExtension", () => {
     afterEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it("should install local extensions", async () => {
@@ -210,7 +211,7 @@ describe("IdbExtensionLoader", () => {
       const rawContent = "console.log('valid extension');";
       const jsZip = new JSZip();
       jsZip.file(ALLOWED_FILES.EXTENSION, rawContent);
-      jest.spyOn(JSZip.prototype, "loadAsync").mockResolvedValue(jsZip);
+      vi.spyOn(JSZip.prototype, "loadAsync").mockResolvedValue(jsZip);
       const extension: StoredExtension = {
         info: {
           id: BasicBuilder.string(),
@@ -252,7 +253,7 @@ describe("IdbExtensionLoader", () => {
       const rawContent = "console.log('valid extension');";
       const jsZip = new JSZip();
       jsZip.file(BasicBuilder.string(), rawContent);
-      jest.spyOn(JSZip.prototype, "loadAsync").mockResolvedValue(jsZip);
+      vi.spyOn(JSZip.prototype, "loadAsync").mockResolvedValue(jsZip);
       const extension: StoredExtension = {
         info: {
           id: BasicBuilder.string(),

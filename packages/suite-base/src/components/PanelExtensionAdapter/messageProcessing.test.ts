@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mock } from "vitest";
 import { MessageEvent } from "@lichtblick/suite";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
@@ -13,7 +14,7 @@ import { convertMessage, forEachSortedArrays } from "./messageProcessing";
 
 describe("forEachSortedArrays", () => {
   it("should not call forEach for empty arrays", () => {
-    const forEach = jest.fn();
+    const forEach = vi.fn();
     const arr: number[] = [];
     forEachSortedArrays([arr, arr], (a, b) => a - b, forEach);
     expect(forEach).not.toHaveBeenCalled();
@@ -94,11 +95,11 @@ describe("convertMessage", () => {
   const createMockConverter = (overrides?: {
     fromSchemaName?: string;
     toSchemaName?: string;
-    converter?: jest.Mock;
+    converter?: Mock;
   }) => ({
     fromSchemaName: overrides?.fromSchemaName ?? "TestSchema",
     toSchemaName: overrides?.toSchemaName ?? "ConvertedSchema",
-    converter: overrides?.converter ?? jest.fn((_msg: unknown) => ({ converted: 42 })),
+    converter: overrides?.converter ?? vi.fn((_msg: unknown) => ({ converted: 42 })),
   });
 
   it("should not convert when no converters match", () => {
@@ -141,7 +142,7 @@ describe("convertMessage", () => {
   it("should pass globalVariables to converter", () => {
     const globalVariables = GlobalVariableBuilder.globalVariables();
     const converter = createMockConverter({
-      converter: jest.fn((_msg: unknown, _event: unknown, vars: unknown) => ({
+      converter: vi.fn((_msg: unknown, _event: unknown, vars: unknown) => ({
         value: 42,
         vars,
       })),
@@ -167,11 +168,11 @@ describe("convertMessage", () => {
   it("should apply multiple converters to same message", () => {
     const converter1 = createMockConverter({
       toSchemaName: "Schema1",
-      converter: jest.fn(() => ({ output: 1 })),
+      converter: vi.fn(() => ({ output: 1 })),
     });
     const converter2 = createMockConverter({
       toSchemaName: "Schema2",
-      converter: jest.fn(() => ({ output: 2 })),
+      converter: vi.fn(() => ({ output: 2 })),
     });
 
     const converters = new Map([
@@ -191,7 +192,7 @@ describe("convertMessage", () => {
 
   it("should skip conversion when converter returns undefined", () => {
     const converter = createMockConverter({
-      converter: jest.fn(() => undefined),
+      converter: vi.fn(() => undefined),
     });
 
     const converters = new Map([
@@ -207,7 +208,7 @@ describe("convertMessage", () => {
 
   it("should skip conversion when converter returns null", () => {
     const converter = createMockConverter({
-      converter: jest.fn(() => undefined),
+      converter: vi.fn(() => undefined),
     });
 
     const converters = new Map([
@@ -222,7 +223,7 @@ describe("convertMessage", () => {
 
   it("should preserve originalMessageEvent in converted message", () => {
     const converter = createMockConverter({
-      converter: jest.fn(() => ({ converted: true })),
+      converter: vi.fn(() => ({ converted: true })),
     });
 
     const converters = new Map([
@@ -242,7 +243,7 @@ describe("convertMessage", () => {
     };
 
     const converter = createMockConverter({
-      converter: jest.fn(() => ({ converted: true })),
+      converter: vi.fn(() => ({ converted: true })),
     });
 
     const converters = new Map([

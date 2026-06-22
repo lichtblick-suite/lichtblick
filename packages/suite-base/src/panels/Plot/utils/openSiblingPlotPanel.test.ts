@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { MockedFunction } from "vitest";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import type { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -8,10 +9,10 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { openSiblingPlotPanel } from "./openSiblingPlotPanel";
 
 describe("openSiblingPlotPanel", () => {
-  let openSiblingPanel: jest.MockedFunction<OpenSiblingPanel>;
+  let openSiblingPanel: MockedFunction<OpenSiblingPanel>;
 
   beforeEach(() => {
-    openSiblingPanel = jest.fn();
+    openSiblingPanel = vi.fn();
   });
 
   it("should call openSiblingPanel with correct parameters", () => {

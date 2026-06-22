@@ -18,7 +18,7 @@ describe("APP_CONFIG", () => {
     delete (globalThis as any).DEV_WORKSPACE;
 
     // Clear module cache to ensure fresh imports
-    jest.resetModules();
+    vi.resetModules();
   });
 
   afterEach(() => {

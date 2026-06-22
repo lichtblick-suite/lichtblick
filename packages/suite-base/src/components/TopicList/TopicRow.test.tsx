@@ -1,9 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import type { Mock } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { FzfResultItem } from "fzf";
 
@@ -13,22 +14,22 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { TopicRow } from "./TopicRow";
 import { useTopicMessageNavigation } from "./useTopicMessageNavigation";
 
-const mockUseMessagePipeline = jest.fn();
-jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
+const mockUseMessagePipeline = vi.fn();
+vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
   useMessagePipeline: (selector: unknown) => mockUseMessagePipeline(selector),
 }));
 
-jest.mock("@lichtblick/suite-base/services/messagePathDragging", () => ({
-  useMessagePathDrag: jest.fn().mockReturnValue({
-    connectDragSource: jest.fn(),
-    connectDragPreview: jest.fn(),
+vi.mock("@lichtblick/suite-base/services/messagePathDragging", async () => ({
+  useMessagePathDrag: vi.fn().mockReturnValue({
+    connectDragSource: vi.fn(),
+    connectDragPreview: vi.fn(),
     cursor: "default",
     isDragging: false,
     draggedItemCount: 0,
   }),
 }));
 
-jest.mock("./useTopicMessageNavigation");
+vi.mock("./useTopicMessageNavigation");
 
 interface SetupOptions {
   topicName?: string;
@@ -45,12 +46,12 @@ function setup(options: SetupOptions = {}) {
     canNavigatePrevious = true,
   } = options;
 
-  const handleNextMessage = jest.fn().mockResolvedValue(undefined);
-  const handlePreviousMessage = jest.fn().mockResolvedValue(undefined);
+  const handleNextMessage = vi.fn().mockResolvedValue(undefined);
+  const handlePreviousMessage = vi.fn().mockResolvedValue(undefined);
 
   mockUseMessagePipeline.mockReturnValue([{ topic: topicName }]);
 
-  (useTopicMessageNavigation as jest.Mock).mockReturnValue({
+  (useTopicMessageNavigation as Mock).mockReturnValue({
     handleNextMessage,
     handlePreviousMessage,
     isNavigating,
@@ -71,8 +72,8 @@ function setup(options: SetupOptions = {}) {
       topicResult={topicResult}
       style={{}}
       selected={true}
-      onClick={jest.fn()}
-      onContextMenu={jest.fn()}
+      onClick={vi.fn()}
+      onContextMenu={vi.fn()}
     />,
   );
 
@@ -81,7 +82,7 @@ function setup(options: SetupOptions = {}) {
 
 describe("TopicRow navigation buttons", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders navigation buttons", () => {

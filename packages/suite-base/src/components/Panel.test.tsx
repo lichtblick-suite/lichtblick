@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -15,8 +15,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { Mock } from "vitest";
 import { render, renderHook, act, fireEvent, screen, waitFor } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { useEffect, useCallback, useContext } from "react";
 
 import Panel from "@lichtblick/suite-base/components/Panel";
@@ -30,7 +31,7 @@ type DummyConfig = { someString: string };
 // eslint-disable-next-line react/no-unused-prop-types
 type DummyProps = { config: DummyConfig; saveConfig: (arg0: Partial<DummyConfig>) => void };
 
-function getDummyPanel(renderFn: jest.Mock) {
+function getDummyPanel(renderFn: Mock) {
   function DummyComponent(props: DummyProps): ReactNull {
     // Call the mock function in an effect rather than during render, since render may happen more
     // than once due to React.StrictMode.
@@ -49,15 +50,15 @@ function getDummyPanel(renderFn: jest.Mock) {
 
 describe("Panel", () => {
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    (console.error as jest.Mock).mockRestore();
+    (console.error as Mock).mockRestore();
   });
 
   it("saves defaultConfig when there is no saved config", async () => {
-    const renderFn = jest.fn();
+    const renderFn = vi.fn();
     const DummyPanel = getDummyPanel(renderFn);
     const childId = "Dummy!1my2ydk";
 
@@ -83,7 +84,7 @@ describe("Panel", () => {
   });
 
   it("gets the config from the store", () => {
-    const renderFn = jest.fn();
+    const renderFn = vi.fn();
     const DummyPanel = getDummyPanel(renderFn);
 
     const childId = "Dummy!1my2ydk";
@@ -113,7 +114,7 @@ describe("Panel", () => {
   });
 
   it("merges saved config with defaultConfig when defaultConfig has new keys", async () => {
-    const renderFn = jest.fn();
+    const renderFn = vi.fn();
     const DummyPanel = getDummyPanel(renderFn);
     const childId = "Dummy!1my2ydk";
 
@@ -148,7 +149,7 @@ describe("Panel", () => {
   });
 
   it("does not re-save configs when defaultConfig has fewer keys than saved config", async () => {
-    const renderFn = jest.fn();
+    const renderFn = vi.fn();
     const DummyPanel = getDummyPanel(renderFn);
     const childId = "Dummy!1my2ydk";
     const someString = "someNewString";
@@ -178,7 +179,7 @@ describe("Panel", () => {
   });
 
   it("does not rerender when another panel changes", () => {
-    const renderFn = jest.fn();
+    const renderFn = vi.fn();
     const DummyPanel = getDummyPanel(renderFn);
     const childId = "Dummy!1my2ydk";
 
@@ -213,7 +214,7 @@ describe("Panel", () => {
       });
     }
 
-    function getLoggingPanel(renderFn: jest.Mock) {
+    function getLoggingPanel(renderFn: Mock) {
       function LoggingComponent(props: DummyProps): React.JSX.Element {
         const panelContext = useContext(PanelContext);
 
@@ -248,7 +249,7 @@ describe("Panel", () => {
 
     it("When logging messages Then log count increases", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test1";
 
@@ -274,7 +275,7 @@ describe("Panel", () => {
 
     it("When toggling logs Then logs panel visibility changes", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test2";
 
@@ -319,7 +320,7 @@ describe("Panel", () => {
 
     it("When closing logs from panel Then logs are hidden", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test3";
 
@@ -351,7 +352,7 @@ describe("Panel", () => {
 
     it("When clearing logs from PanelLogs Then log count resets to zero", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test4";
 
@@ -389,7 +390,7 @@ describe("Panel", () => {
 
     it("When no logs exist Then clear logs button is disabled", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test5";
 
@@ -411,7 +412,7 @@ describe("Panel", () => {
 
     it("When logs exist Then clear logs button is enabled", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test6";
 
@@ -434,7 +435,7 @@ describe("Panel", () => {
 
     it("When logging info message Then PanelLogs displays message with INFO prefix", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test7";
 
@@ -457,7 +458,7 @@ describe("Panel", () => {
 
     it("When logging error message Then PanelLogs displays message with ERROR prefix", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test8";
 
@@ -480,7 +481,7 @@ describe("Panel", () => {
 
     it("When error is logged Then PanelLogs displays error stack trace", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test9";
 
@@ -507,7 +508,7 @@ describe("Panel", () => {
 
     it("When multiple messages are logged Then all messages appear in chronological order", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test10";
 
@@ -547,7 +548,7 @@ describe("Panel", () => {
 
     it("When PanelLogs is shown Then it displays timestamps for each log entry", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test11";
 
@@ -573,7 +574,7 @@ describe("Panel", () => {
 
     it("When PanelLogs is initially hidden Then no logs content is rendered in DOM", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test12";
 
@@ -602,7 +603,7 @@ describe("Panel", () => {
 
     it("When showLogs is toggled multiple times Then panel visibility changes accordingly", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const LoggingPanel = getLoggingPanel(renderFn);
       const childId = "LoggingDummy!test13";
 
@@ -654,7 +655,7 @@ describe("Panel", () => {
   });
 
   describe("Given a panel with fullscreen functionality", () => {
-    function getFullscreenPanel(renderFn: jest.Mock) {
+    function getFullscreenPanel(renderFn: Mock) {
       function FullscreenComponent(props: DummyProps): React.JSX.Element {
         const panelContext = useContext(PanelContext);
 
@@ -686,7 +687,7 @@ describe("Panel", () => {
 
     it("When entering fullscreen Then panel becomes fullscreen", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const FullscreenPanel = getFullscreenPanel(renderFn);
       const childId = "FullscreenDummy!test1";
 
@@ -709,7 +710,7 @@ describe("Panel", () => {
 
     it("When exiting fullscreen Then panel returns to normal", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const FullscreenPanel = getFullscreenPanel(renderFn);
       const childId = "FullscreenDummy!test2";
 
@@ -739,7 +740,7 @@ describe("Panel", () => {
 
     it("When pressing Escape in fullscreen Then exits fullscreen", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const FullscreenPanel = getFullscreenPanel(renderFn);
       const childId = "FullscreenDummy!test3";
 
@@ -768,7 +769,7 @@ describe("Panel", () => {
   });
 
   describe("Given a panel with keyboard shortcuts", () => {
-    function getKeyboardPanel(renderFn: jest.Mock) {
+    function getKeyboardPanel(renderFn: Mock) {
       function KeyboardComponent(props: DummyProps): React.JSX.Element {
         const panelContext = useContext(PanelContext);
 
@@ -795,7 +796,7 @@ describe("Panel", () => {
 
     it("When pressing backtick Then keyboard event is handled without errors", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const KeyboardPanel = getKeyboardPanel(renderFn);
       const childId = "KeyboardDummy!test1";
 
@@ -820,7 +821,7 @@ describe("Panel", () => {
 
     it("When releasing backtick Then quick actions overlay disappears", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const KeyboardPanel = getKeyboardPanel(renderFn);
       const childId = "KeyboardDummy!test2";
 
@@ -849,7 +850,7 @@ describe("Panel", () => {
 
     it("When pressing Cmd+A Then select all panels is triggered", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const KeyboardPanel = getKeyboardPanel(renderFn);
       const childId = "KeyboardDummy!test3";
 
@@ -873,7 +874,7 @@ describe("Panel", () => {
   });
 
   describe("Given a panel with selection functionality", () => {
-    function getSelectablePanel(renderFn: jest.Mock) {
+    function getSelectablePanel(renderFn: Mock) {
       function SelectableComponent(props: DummyProps): React.JSX.Element {
         const panelContext = useContext(PanelContext);
 
@@ -901,7 +902,7 @@ describe("Panel", () => {
 
     it("When clicking panel with meta key Then panel gets selected", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const SelectablePanel = getSelectablePanel(renderFn);
       const childId = "SelectableDummy!test1";
 
@@ -924,7 +925,7 @@ describe("Panel", () => {
 
     it("When pressing Escape with multiple panels selected Then deselects panels", async () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const SelectablePanel = getSelectablePanel(renderFn);
       const childId = "SelectableDummy!test2";
 
@@ -944,7 +945,7 @@ describe("Panel", () => {
   });
 
   describe("Given a panel with error handling", () => {
-    function getErrorPanel(renderFn: jest.Mock) {
+    function getErrorPanel(renderFn: Mock) {
       function ErrorComponent(props: DummyProps): React.JSX.Element {
         const panelContext = useContext(PanelContext);
 
@@ -974,7 +975,7 @@ describe("Panel", () => {
 
     it("When panel throws error Then error boundary catches it", () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const ErrorPanel = getErrorPanel(renderFn);
       const childId = "ErrorDummy!test1";
 
@@ -993,7 +994,7 @@ describe("Panel", () => {
   describe("Given a panel with config override", () => {
     it("When override config is provided Then it merges with default and saved config", () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const DummyPanel = getDummyPanel(renderFn);
       const childId = "Dummy!override1";
       const overrideConfig = { someString: "overridden", newProp: "added" };
@@ -1022,7 +1023,7 @@ describe("Panel", () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = "production";
 
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const DummyPanel = getDummyPanel(renderFn);
       const childId = "Dummy!prod1";
 
@@ -1041,7 +1042,7 @@ describe("Panel", () => {
 
     it("When rendered in development Then profiler tracks render performance", () => {
       // Given
-      const renderFn = jest.fn();
+      const renderFn = vi.fn();
       const DummyPanel = getDummyPanel(renderFn);
       const childId = "Dummy!dev1";
 

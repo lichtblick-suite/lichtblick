@@ -1,10 +1,11 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import PanelLogs from "@lichtblick/suite-base/components/PanelLogs";
 import { PanelLog } from "@lichtblick/suite-base/components/types";
@@ -13,8 +14,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 function renderPanelLogs(
   logs: PanelLog[],
-  onClose: () => void = jest.fn(),
-  onClear: () => void = jest.fn(),
+  onClose: () => void = vi.fn(),
+  onClear: () => void = vi.fn(),
 ) {
   return render(<PanelLogs logs={logs} onClose={onClose} onClear={onClear} />);
 }
@@ -30,11 +31,11 @@ function getLogCountText(count: number) {
 
 describe("PanelLogs", () => {
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    (console.error as jest.Mock).mockRestore();
+    (console.error as Mock).mockRestore();
   });
 
   describe("Given no logs", () => {
@@ -54,7 +55,7 @@ describe("PanelLogs", () => {
     it("When close button is clicked Then onClose is called", () => {
       // Given
       const logs: PanelLog[] = [];
-      const onClose = jest.fn();
+      const onClose = vi.fn();
 
       // When
       renderPanelLogs(logs, onClose);
@@ -234,9 +235,9 @@ describe("PanelLogs", () => {
         <ThemeProvider isDark={false}>
           <PanelLogs
             logs={logs}
-            onClose={jest.fn()}
+            onClose={vi.fn()}
             initialHeight={initialHeight}
-            onClear={jest.fn()}
+            onClear={vi.fn()}
           />
         </ThemeProvider>,
       );
@@ -253,7 +254,7 @@ describe("PanelLogs", () => {
 
       render(
         <ThemeProvider isDark={false}>
-          <PanelLogs logs={logs} onClose={jest.fn()} onClear={jest.fn()} initialHeight={400} />
+          <PanelLogs logs={logs} onClose={vi.fn()} onClear={vi.fn()} initialHeight={400} />
         </ThemeProvider>,
       );
 
@@ -290,15 +291,15 @@ describe("PanelLogs", () => {
     it("When onHeightChange is provided and drag ends Then calls onHeightChange with new height", () => {
       // Given
       const logs: PanelLog[] = [];
-      const onHeightChange = jest.fn();
+      const onHeightChange = vi.fn();
       const initialHeight = 400;
 
       render(
         <ThemeProvider isDark={false}>
           <PanelLogs
             logs={logs}
-            onClose={jest.fn()}
-            onClear={jest.fn()}
+            onClose={vi.fn()}
+            onClear={vi.fn()}
             initialHeight={initialHeight}
             onHeightChange={onHeightChange}
           />
@@ -322,7 +323,7 @@ describe("PanelLogs", () => {
 
       render(
         <ThemeProvider isDark={false}>
-          <PanelLogs logs={logs} onClose={jest.fn()} onClear={jest.fn()} initialHeight={400} />
+          <PanelLogs logs={logs} onClose={vi.fn()} onClear={vi.fn()} initialHeight={400} />
         </ThemeProvider>,
       );
 
@@ -376,10 +377,10 @@ describe("PanelLogs", () => {
           message: logMessage,
         },
       ];
-      const onClear = jest.fn();
+      const onClear = vi.fn();
 
       // When
-      renderPanelLogs(logs, jest.fn(), onClear);
+      renderPanelLogs(logs, vi.fn(), onClear);
       const clearButton = screen.getByRole("button", { name: "Clear logs" });
       fireEvent.click(clearButton);
 
@@ -396,10 +397,10 @@ describe("PanelLogs", () => {
           message: logMessage,
         },
       ];
-      const onClear = jest.fn();
+      const onClear = vi.fn();
 
       // When
-      renderPanelLogs(logs, jest.fn(), onClear);
+      renderPanelLogs(logs, vi.fn(), onClear);
       const clearButton = screen.getByRole("button", { name: "Clear logs" });
       fireEvent.click(clearButton);
       fireEvent.click(clearButton);

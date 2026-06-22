@@ -5,11 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mock } from "vitest";
 import NativeStorageAppConfiguration from "./NativeStorageAppConfiguration";
 import { Storage } from "../../common/types";
 
 type MockStorage = {
-  [K in keyof Storage]: jest.Mock<ReturnType<Storage[K]>, Parameters<Storage[K]>>;
+  [K in keyof Storage]: Mock<ReturnType<Storage[K]>, Parameters<Storage[K]>>;
 };
 
 function makeMockContext(): Storage & MockStorage {
@@ -18,19 +19,19 @@ function makeMockContext(): Storage & MockStorage {
   }
 
   return {
-    list: jest.fn().mockImplementation(() => {
+    list: vi.fn().mockImplementation(() => {
       raise("list");
     }),
-    all: jest.fn().mockImplementation(() => {
+    all: vi.fn().mockImplementation(() => {
       raise("all");
     }),
-    get: jest.fn().mockImplementation(() => {
+    get: vi.fn().mockImplementation(() => {
       raise("get");
     }),
-    put: jest.fn().mockImplementation(() => {
+    put: vi.fn().mockImplementation(() => {
       raise("put");
     }),
-    delete: jest.fn().mockImplementation(() => {
+    delete: vi.fn().mockImplementation(() => {
       raise("delete");
     }),
   };
@@ -122,7 +123,7 @@ describe("NativeStorageAppConfiguration", () => {
 
     const config = await NativeStorageAppConfiguration.Initialize(ctx);
 
-    const listener = jest.fn();
+    const listener = vi.fn();
     config.addChangeListener("abc", listener);
 
     expect(config.get("abc")).toEqual(123);
@@ -150,8 +151,8 @@ describe("NativeStorageAppConfiguration", () => {
 
     const config = await NativeStorageAppConfiguration.Initialize(ctx);
 
-    const listener1 = jest.fn();
-    const listener2 = jest.fn();
+    const listener1 = vi.fn();
+    const listener2 = vi.fn();
     listener1.mockImplementation(() => {
       config.removeChangeListener("abc", listener1);
       config.addChangeListener("abc", listener2);

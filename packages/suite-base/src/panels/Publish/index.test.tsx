@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import type { Mock } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -14,40 +15,40 @@ import PublishBuilder from "@lichtblick/suite-base/testing/builders/PublishBuild
 import Publish from "./index";
 import { PublishConfig } from "./types";
 
-const mockPublish = jest.fn();
+const mockPublish = vi.fn();
 
-jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
-  useDataSourceInfo: jest.fn(() => ({
+vi.mock("@lichtblick/suite-base/PanelAPI", async () => ({
+  useDataSourceInfo: vi.fn(() => ({
     topics: [],
     datatypes: new Map(),
     capabilities: [],
   })),
-  useConfigById: jest.fn(() => [undefined, jest.fn()]),
+  useConfigById: vi.fn(() => [undefined, vi.fn()]),
 }));
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
-  ...jest.requireActual("@lichtblick/suite-base/components/MessagePipeline"),
-  useMessagePipeline: jest.fn(() => undefined),
+vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
+  ...await vi.importActual("@lichtblick/suite-base/components/MessagePipeline"),
+  useMessagePipeline: vi.fn(() => undefined),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/usePublisher", () => ({
+vi.mock("@lichtblick/suite-base/hooks/usePublisher", async () => ({
   __esModule: true,
-  default: jest.fn(() => mockPublish),
+  default: vi.fn(() => mockPublish),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useCallbackWithToast", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useCallbackWithToast", async () => ({
   __esModule: true,
   default: (fn: unknown) => fn,
 }));
 
-jest.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", () => ({
-  ...jest.requireActual("@lichtblick/suite-base/providers/PanelStateContextProvider"),
-  usePanelSettingsTreeUpdate: jest.fn(),
-  useDefaultPanelTitle: jest.fn(() => ["Publish", jest.fn()]),
+vi.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", async () => ({
+  ...await vi.importActual("@lichtblick/suite-base/providers/PanelStateContextProvider"),
+  usePanelSettingsTreeUpdate: vi.fn(),
+  useDefaultPanelTitle: vi.fn(() => ["Publish", vi.fn()]),
 }));
 
-jest.mock("./settings", () => ({
-  usePublishPanelSettings: jest.fn(),
+vi.mock("./settings", async () => ({
+  usePublishPanelSettings: vi.fn(),
   defaultConfig: {
     buttonText: "Publish",
     buttonTooltip: "",
@@ -58,12 +59,12 @@ jest.mock("./settings", () => ({
 
 describe("Publish", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function setup(configOverride: Partial<PublishConfig> = {}, capabilities: string[] = []) {
     const config = PublishBuilder.config(configOverride);
-    (useDataSourceInfo as jest.Mock).mockReturnValue({
+    (useDataSourceInfo as Mock).mockReturnValue({
       topics: [],
       datatypes: new Map(),
       capabilities,

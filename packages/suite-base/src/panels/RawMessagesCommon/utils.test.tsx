@@ -813,7 +813,7 @@ describe("getValueString", () => {
 describe("getCopyAction", () => {
   describe("given a value and copy handler", () => {
     const itemValue = { foo: BasicBuilder.string(), num: BasicBuilder.number() };
-    const handleCopy = jest.fn();
+    const handleCopy = vi.fn();
     describe("when copied is false", () => {
       const resultFalse = getCopyAction({ copied: false }, itemValue, handleCopy);
       it("then should return copy action with CopyAllIcon", () => {
@@ -854,7 +854,7 @@ describe("getCopyAction", () => {
 
 describe("getFilterAction", () => {
   describe("given a filter handler", () => {
-    const onFilter = jest.fn();
+    const onFilter = vi.fn();
     describe("when creating filter action", () => {
       const result = getFilterAction(onFilter);
       it("then should return filter action with correct properties", () => {
@@ -878,8 +878,8 @@ describe("getFilterAction", () => {
 describe("getLineChartAction", () => {
   describe("given a single slice path and plot panel opener", () => {
     const singleSlicePath = BasicBuilder.string("/topic.field");
-    const mockHandler = jest.fn();
-    const openPlotPanel = jest.fn(() => mockHandler);
+    const mockHandler = vi.fn();
+    const openPlotPanel = vi.fn(() => mockHandler);
     describe("when creating line chart action", () => {
       const result = getLineChartAction(singleSlicePath, openPlotPanel);
       it("then should return line chart action with correct properties", () => {
@@ -904,8 +904,8 @@ describe("getLineChartAction", () => {
 describe("getScatterPlotAction", () => {
   describe("given a multi slice path and plot panel opener", () => {
     const multiSlicePath = BasicBuilder.string("/topic.array[:]");
-    const mockHandler = jest.fn();
-    const openPlotPanel = jest.fn(() => mockHandler);
+    const mockHandler = vi.fn();
+    const openPlotPanel = vi.fn(() => mockHandler);
     describe("when creating scatter plot action", () => {
       const result = getScatterPlotAction(multiSlicePath, openPlotPanel);
       it("then should return scatter plot action with correct properties", () => {
@@ -930,8 +930,8 @@ describe("getScatterPlotAction", () => {
 describe("getStateTransitionsAction", () => {
   describe("given a single slice path and state transitions panel opener", () => {
     const singleSlicePath = BasicBuilder.string("/topic.state");
-    const mockHandler = jest.fn();
-    const openStateTransitionsPanel = jest.fn(() => mockHandler);
+    const mockHandler = vi.fn();
+    const openStateTransitionsPanel = vi.fn(() => mockHandler);
     describe("when creating state transitions action", () => {
       const result = getStateTransitionsAction(singleSlicePath, openStateTransitionsPanel);
       it("then should return state transitions action with correct properties", () => {

@@ -3,12 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { RequestQueue } from "./RequestQueue";
 
 function createMocksWithPromises(count: number): Array<{
-  mock: jest.Mock<Promise<void>>;
+  mock: Mock<Promise<void>>;
   resolve: () => void;
   promise: Promise<void>;
 }> {
@@ -17,7 +18,7 @@ function createMocksWithPromises(count: number): Array<{
     const promise = new Promise<void>((r) => {
       resolve = r;
     });
-    const mock = jest.fn(async () => {
+    const mock = vi.fn(async () => {
       await promise;
     });
 
@@ -30,7 +31,7 @@ describe("RequestQueue", () => {
     // Given
     const value = BasicBuilder.string();
     const queue = new RequestQueue(2);
-    const mockFn = jest.fn(async () => value);
+    const mockFn = vi.fn(async () => value);
 
     // When
     const result = await queue.run(mockFn);

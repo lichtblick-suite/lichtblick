@@ -6,7 +6,7 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { SessionAPI } from "./SessionAPI";
 
-jest.mock("@lichtblick/suite-base/services/http/HttpService");
+vi.mock("@lichtblick/suite-base/services/http/HttpService");
 
 describe("SessionAPI", () => {
   let sessionApi: SessionAPI;
@@ -19,7 +19,7 @@ describe("SessionAPI", () => {
 
   beforeEach(() => {
     sessionApi = new SessionAPI();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getSession", () => {
@@ -30,8 +30,8 @@ describe("SessionAPI", () => {
         { url: `https://${BasicBuilder.string()}.com/file2.mcap`, metadata: { size: 1024 } },
       ];
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse({ mcaps: mockMcaps }));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockResolvedValue(createMockHttpResponse({ mcaps: mockMcaps }));
       mockHttpService.get = mockGet;
 
       const result = await sessionApi.getSession(sessionId);
@@ -43,8 +43,8 @@ describe("SessionAPI", () => {
     it("should handle empty mcaps list", async () => {
       const sessionId = BasicBuilder.string();
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse({ mcaps: [] }));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockResolvedValue(createMockHttpResponse({ mcaps: [] }));
       mockHttpService.get = mockGet;
 
       const result = await sessionApi.getSession(sessionId);
@@ -58,8 +58,8 @@ describe("SessionAPI", () => {
       const sessionId = BasicBuilder.string();
       const mockError = new Error("HTTP Error: 404 Not Found");
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockRejectedValue(mockError);
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockRejectedValue(mockError);
       mockHttpService.get = mockGet;
 
       await expect(sessionApi.getSession(sessionId)).rejects.toThrow("HTTP Error: 404 Not Found");

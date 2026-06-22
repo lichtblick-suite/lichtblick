@@ -1,28 +1,29 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { isTime, toSec } from "@lichtblick/rostime";
 import { Time } from "@lichtblick/suite";
 import { getChartValue, isChartValue } from "@lichtblick/suite-base/panels/Plot/utils/datum";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/rostime", () => ({
-  isTime: jest.fn(),
-  toSec: jest.fn(),
+vi.mock("@lichtblick/rostime", async () => ({
+  isTime: vi.fn(),
+  toSec: vi.fn(),
 }));
 
 describe("Chart Value Utilities", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const setupMocks = (options: {
     isTimeMockReturnValue: boolean;
     toSecMockReturnValue?: number;
   }) => {
-    (isTime as unknown as jest.Mock).mockReturnValue(options.isTimeMockReturnValue);
+    (isTime as unknown as Mock).mockReturnValue(options.isTimeMockReturnValue);
     if (options.toSecMockReturnValue != undefined) {
-      (toSec as jest.Mock).mockReturnValue(options.toSecMockReturnValue);
+      (toSec as Mock).mockReturnValue(options.toSecMockReturnValue);
     }
   };
 

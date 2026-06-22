@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -15,6 +15,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { Mock } from "vitest";
 import { SnackbarProvider } from "notistack";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
@@ -22,7 +23,7 @@ import { createRoot } from "react-dom/client";
 import DocumentDropListener from "@lichtblick/suite-base/components/DocumentDropListener";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-jest.mock("@lichtblick/suite-base/constants/config", () => ({
+vi.mock("@lichtblick/suite-base/constants/config", async () => ({
   APP_CONFIG: {
     apiUrl: "https://api.example.com",
   },
@@ -30,10 +31,10 @@ jest.mock("@lichtblick/suite-base/constants/config", () => ({
 
 describe("<DocumentDropListener>", () => {
   let wrapper: HTMLDivElement;
-  let windowDragoverHandler: typeof jest.fn;
+  let windowDragoverHandler: typeof vi.fn;
 
   beforeEach(() => {
-    windowDragoverHandler = jest.fn();
+    windowDragoverHandler = vi.fn();
     window.addEventListener("dragover", windowDragoverHandler);
 
     wrapper = document.createElement("div");
@@ -50,7 +51,7 @@ describe("<DocumentDropListener>", () => {
       </div>,
     );
 
-    (console.error as jest.Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 
   it("allows the event to bubble if the dataTransfer has no files", async () => {
@@ -83,7 +84,7 @@ describe("<DocumentDropListener>", () => {
 
 describe("<DocumentDropListener> enhanced functionality", () => {
   it("should render without crashing with enhanced features", () => {
-    const onDrop = jest.fn();
+    const onDrop = vi.fn();
 
     const wrapper = document.createElement("div");
     document.body.appendChild(wrapper);
@@ -110,17 +111,17 @@ describe("<DocumentDropListener> enhanced functionality", () => {
 
 describe("<DocumentDropListener> onDrop useCallback", () => {
   let wrapper: HTMLDivElement;
-  let onDropSpy: jest.Mock;
+  let onDropSpy: Mock;
 
   beforeEach(() => {
-    onDropSpy = jest.fn();
+    onDropSpy = vi.fn();
     wrapper = document.createElement("div");
     document.body.appendChild(wrapper);
   });
 
   afterEach(() => {
     wrapper.remove();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should not call onDrop when no dataTransfer is present", async () => {

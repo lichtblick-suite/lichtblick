@@ -1,25 +1,26 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mocked } from "vitest";
 import { ILayoutStorage } from "@lichtblick/suite-base/services/ILayoutStorage";
 import WriteThroughLayoutCache from "@lichtblick/suite-base/services/LayoutManager/WriteThroughLayoutCache";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 describe("WriteThroughLayoutCache", () => {
-  let mockStorage: jest.Mocked<ILayoutStorage>;
+  let mockStorage: Mocked<ILayoutStorage>;
   let cache: WriteThroughLayoutCache;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockStorage = {
-      list: jest.fn().mockResolvedValue([]),
-      get: jest.fn().mockResolvedValue(undefined),
-      put: jest.fn().mockImplementation(async (_namespace: string, layout) => layout),
-      delete: jest.fn().mockResolvedValue(undefined),
-      importLayouts: jest.fn().mockResolvedValue(undefined),
-      migrateUnnamespacedLayouts: jest.fn().mockResolvedValue(undefined),
+      list: vi.fn().mockResolvedValue([]),
+      get: vi.fn().mockResolvedValue(undefined),
+      put: vi.fn().mockImplementation(async (_namespace: string, layout) => layout),
+      delete: vi.fn().mockResolvedValue(undefined),
+      importLayouts: vi.fn().mockResolvedValue(undefined),
+      migrateUnnamespacedLayouts: vi.fn().mockResolvedValue(undefined),
     };
 
     cache = new WriteThroughLayoutCache(mockStorage);
@@ -30,7 +31,7 @@ describe("WriteThroughLayoutCache", () => {
       // Given
       const namespace = BasicBuilder.string();
       const layouts = LayoutBuilder.layouts(2);
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValue(layouts);
 
       // When
@@ -46,7 +47,7 @@ describe("WriteThroughLayoutCache", () => {
       // Given
       const namespace = BasicBuilder.string();
       const layouts = LayoutBuilder.layouts(1);
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValue(layouts);
 
       // When
@@ -65,7 +66,7 @@ describe("WriteThroughLayoutCache", () => {
       const layouts1 = LayoutBuilder.layouts(1);
       const layouts2 = LayoutBuilder.layouts(1);
 
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValueOnce(layouts1).mockResolvedValueOnce(layouts2);
 
       // When
@@ -86,7 +87,7 @@ describe("WriteThroughLayoutCache", () => {
       // Given
       const namespace = BasicBuilder.string();
       const layout = LayoutBuilder.layout();
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValue([layout]);
 
       // When
@@ -114,7 +115,7 @@ describe("WriteThroughLayoutCache", () => {
       // Given
       const namespace = BasicBuilder.string();
       const layout = LayoutBuilder.layout();
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValue([layout]);
 
       // When
@@ -134,7 +135,7 @@ describe("WriteThroughLayoutCache", () => {
       const layout = LayoutBuilder.layout();
       const updatedLayout = LayoutBuilder.layout({ ...layout, name: BasicBuilder.string() });
       mockStorage.list.mockResolvedValue([]);
-      const putSpy = jest.spyOn(mockStorage, "put");
+      const putSpy = vi.spyOn(mockStorage, "put");
       putSpy.mockResolvedValue(updatedLayout);
 
       // When
@@ -151,7 +152,7 @@ describe("WriteThroughLayoutCache", () => {
       const layout = LayoutBuilder.layout();
       const updatedLayout = LayoutBuilder.layout({ ...layout, name: BasicBuilder.string() });
 
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValue([]);
       mockStorage.put.mockResolvedValue(updatedLayout);
 
@@ -194,14 +195,14 @@ describe("WriteThroughLayoutCache", () => {
       await cache.delete(namespace, layout.id);
 
       // Then
-      expect(jest.spyOn(mockStorage, "delete")).toHaveBeenCalledWith(namespace, layout.id);
+      expect(vi.spyOn(mockStorage, "delete")).toHaveBeenCalledWith(namespace, layout.id);
     });
 
     it("should remove layout from cache after deletion", async () => {
       // Given
       const namespace = BasicBuilder.string();
       const layout = LayoutBuilder.layout();
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValue([layout]);
 
       // When
@@ -218,7 +219,7 @@ describe("WriteThroughLayoutCache", () => {
       const namespace = BasicBuilder.string();
       const layoutToDelete = LayoutBuilder.layout();
       const layoutToKeep = LayoutBuilder.layout();
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValue([layoutToDelete, layoutToKeep]);
 
       // When
@@ -242,7 +243,7 @@ describe("WriteThroughLayoutCache", () => {
       await cache.importLayouts(params);
 
       // Then
-      expect(jest.spyOn(mockStorage, "importLayouts")).toHaveBeenCalledWith(params);
+      expect(vi.spyOn(mockStorage, "importLayouts")).toHaveBeenCalledWith(params);
     });
   });
 
@@ -255,7 +256,7 @@ describe("WriteThroughLayoutCache", () => {
       await cache.migrateUnnamespacedLayouts(namespace);
 
       // Then
-      expect(jest.spyOn(mockStorage, "migrateUnnamespacedLayouts")).toHaveBeenCalledWith(namespace);
+      expect(vi.spyOn(mockStorage, "migrateUnnamespacedLayouts")).toHaveBeenCalledWith(namespace);
     });
 
     it("should handle when underlying storage does not implement method", async () => {
@@ -276,7 +277,7 @@ describe("WriteThroughLayoutCache", () => {
       const layout1 = LayoutBuilder.layout();
       const layout2 = LayoutBuilder.layout();
 
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValueOnce([layout1]).mockResolvedValueOnce([layout2]);
 
       // When
@@ -299,7 +300,7 @@ describe("WriteThroughLayoutCache", () => {
         ...originalLayout,
         name: BasicBuilder.string(),
       });
-      const listSpy = jest.spyOn(mockStorage, "list");
+      const listSpy = vi.spyOn(mockStorage, "list");
       listSpy.mockResolvedValue([originalLayout]);
       mockStorage.put.mockResolvedValue(updatedLayout);
 

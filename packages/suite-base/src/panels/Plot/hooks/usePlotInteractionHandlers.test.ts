@@ -1,7 +1,8 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 /* eslint-disable @typescript-eslint/unbound-method */
+import type { Mock } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 
 import { debouncePromise } from "@lichtblick/den/async";
@@ -28,50 +29,50 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import usePlotInteractionHandlers from "./usePlotInteractionHandlers";
 
-jest.mock("@lichtblick/suite-base/panels/Plot/utils/csv", () => ({
-  downloadCSV: jest.fn(),
+vi.mock("@lichtblick/suite-base/panels/Plot/utils/csv", async () => ({
+  downloadCSV: vi.fn(),
 }));
 
-jest.mock("@lichtblick/den/async", () => ({
-  debouncePromise: jest.fn(),
+vi.mock("@lichtblick/den/async", async () => ({
+  debouncePromise: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/TimelineInteractionStateContext", () => ({
-  useSetHoverValue: jest.fn(),
-  useClearHoverValue: jest.fn(),
-  useTimelineInteractionState: jest.fn(() => jest.fn()),
+vi.mock("@lichtblick/suite-base/context/TimelineInteractionStateContext", async () => ({
+  useSetHoverValue: vi.fn(),
+  useClearHoverValue: vi.fn(),
+  useTimelineInteractionState: vi.fn(() => vi.fn()),
 }));
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
-  useMessagePipelineGetter: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
+  useMessagePipelineGetter: vi.fn(),
 }));
 
 describe("usePlotInteractionHandlers", () => {
   const mockCoordinator = {
-    addInteractionEvent: jest.fn(),
-    getCsvData: jest.fn(),
-    getXValueAtPixel: jest.fn(() => BasicBuilder.number()),
-    resetBounds: jest.fn(),
-    setZoomMode: jest.fn(),
+    addInteractionEvent: vi.fn(),
+    getCsvData: vi.fn(),
+    getXValueAtPixel: vi.fn(() => BasicBuilder.number()),
+    resetBounds: vi.fn(),
+    setZoomMode: vi.fn(),
   } as unknown as PlotCoordinator;
-  const mockSetHoverValue = jest.fn();
-  const mockClearHoverValue = jest.fn();
-  const mockSeekPlayback = jest.fn();
-  const mockBuildTooltip = jest.fn();
+  const mockSetHoverValue = vi.fn();
+  const mockClearHoverValue = vi.fn();
+  const mockSeekPlayback = vi.fn();
+  const mockBuildTooltip = vi.fn();
 
   const setup = ({
     config,
     coordinator = undefined,
     draggingRef,
     renderer,
-    setActiveTooltip = jest.fn(),
+    setActiveTooltip = vi.fn(),
     shouldSync,
     subscriberId,
   }: Partial<UsePlotInteractionHandlersProps> = {}) => {
-    (useSetHoverValue as jest.Mock).mockReturnValue(mockSetHoverValue);
-    (useClearHoverValue as jest.Mock).mockReturnValue(mockClearHoverValue);
-    (useMessagePipelineGetter as jest.Mock).mockReturnValueOnce(
-      jest.fn(() => ({
+    (useSetHoverValue as Mock).mockReturnValue(mockSetHoverValue);
+    (useClearHoverValue as Mock).mockReturnValue(mockClearHoverValue);
+    (useMessagePipelineGetter as Mock).mockReturnValueOnce(
+      vi.fn(() => ({
         seekPlayback: mockSeekPlayback,
         playerState: { activeData: { startTime: RosTimeBuilder.time() } },
       })),
@@ -85,7 +86,7 @@ describe("usePlotInteractionHandlers", () => {
       coordinator,
       draggingRef: { current: false, ...draggingRef },
       renderer: {
-        getElementsAtPixel: jest.fn(),
+        getElementsAtPixel: vi.fn(),
         // eslint-disable-next-line @typescript-eslint/no-misused-spread
         ...renderer,
       },
@@ -113,7 +114,7 @@ describe("usePlotInteractionHandlers", () => {
       clientX: BasicBuilder.number(),
       clientY: BasicBuilder.number(),
       currentTarget: {
-        getBoundingClientRect: jest.fn(() => ({
+        getBoundingClientRect: vi.fn(() => ({
           left: boundingClientRect.left,
           top: boundingClientRect.top,
         })),
@@ -144,7 +145,7 @@ describe("usePlotInteractionHandlers", () => {
       clientX: BasicBuilder.number(),
       clientY: BasicBuilder.number(),
       currentTarget: {
-        getBoundingClientRect: jest.fn(() => boundingRect),
+        getBoundingClientRect: vi.fn(() => boundingRect),
       } as unknown as EventTarget & HTMLElement,
     };
 
@@ -156,15 +157,15 @@ describe("usePlotInteractionHandlers", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (debouncePromise as jest.Mock).mockReturnValue(mockBuildTooltip);
+    vi.clearAllMocks();
+    (debouncePromise as Mock).mockReturnValue(mockBuildTooltip);
   });
 
   describe("setActiveTooltip", () => {
     it("clears active tooltip if no tooltip items are found", async () => {
-      (debouncePromise as jest.Mock).mockImplementationOnce((fn) => fn);
+      (debouncePromise as Mock).mockImplementationOnce((fn) => fn);
       const { result, props } = setup();
-      (props.renderer?.getElementsAtPixel as jest.Mock).mockReturnValueOnce([]);
+      (props.renderer?.getElementsAtPixel as Mock).mockReturnValueOnce([]);
 
       await triggerMouseMove(result);
 
@@ -176,9 +177,9 @@ describe("usePlotInteractionHandlers", () => {
       const elements = [
         PlotBuilder.hoverElement({ data: PlotBuilder.datum({ value: BasicBuilder.number() }) }),
       ];
-      (debouncePromise as jest.Mock).mockImplementationOnce((fn) => fn);
+      (debouncePromise as Mock).mockImplementationOnce((fn) => fn);
       const { result, props } = setup();
-      (props.renderer?.getElementsAtPixel as jest.Mock).mockReturnValueOnce(elements);
+      (props.renderer?.getElementsAtPixel as Mock).mockReturnValueOnce(elements);
 
       const mouseMoved = await triggerMouseMove(result);
 
@@ -200,9 +201,9 @@ describe("usePlotInteractionHandlers", () => {
       const elements = [
         PlotBuilder.hoverElement({ data: PlotBuilder.datum({ value: RosTimeBuilder.time() }) }),
       ];
-      (debouncePromise as jest.Mock).mockImplementationOnce((fn) => fn);
+      (debouncePromise as Mock).mockImplementationOnce((fn) => fn);
       const { result, props } = setup();
-      (props.renderer?.getElementsAtPixel as jest.Mock).mockReturnValueOnce(elements);
+      (props.renderer?.getElementsAtPixel as Mock).mockReturnValueOnce(elements);
 
       const mouseMoved = await triggerMouseMove(result);
 
@@ -219,9 +220,9 @@ describe("usePlotInteractionHandlers", () => {
 
     it("set active tooltip if tooltip items are found when value is undefined", async () => {
       const elements = PlotBuilder.hoverElements(1);
-      (debouncePromise as jest.Mock).mockImplementationOnce((fn) => fn);
+      (debouncePromise as Mock).mockImplementationOnce((fn) => fn);
       const { result, props } = setup();
-      (props.renderer?.getElementsAtPixel as jest.Mock).mockReturnValueOnce(elements);
+      (props.renderer?.getElementsAtPixel as Mock).mockReturnValueOnce(elements);
 
       const mouseMoved = await triggerMouseMove(result);
 
@@ -240,9 +241,9 @@ describe("usePlotInteractionHandlers", () => {
         PlotBuilder.hoverElement({ data: PlotBuilder.datum({ value: BasicBuilder.number() }) }),
         PlotBuilder.hoverElement({ data: PlotBuilder.datum({ value: BasicBuilder.number() }) }),
       ];
-      (debouncePromise as jest.Mock).mockImplementationOnce((fn) => fn);
+      (debouncePromise as Mock).mockImplementationOnce((fn) => fn);
       const { result, props } = setup();
-      (props.renderer?.getElementsAtPixel as jest.Mock).mockReturnValueOnce(elements);
+      (props.renderer?.getElementsAtPixel as Mock).mockReturnValueOnce(elements);
 
       const mouseMoved = await triggerMouseMove(result);
 
@@ -332,9 +333,9 @@ describe("usePlotInteractionHandlers", () => {
         const elements = [
           PlotBuilder.hoverElement({ data: PlotBuilder.datum({ value: BasicBuilder.number() }) }),
         ];
-        (debouncePromise as jest.Mock).mockImplementationOnce((fn) => fn);
+        (debouncePromise as Mock).mockImplementationOnce((fn) => fn);
         const { result, props } = setup({ coordinator: mockCoordinator });
-        (props.renderer?.getElementsAtPixel as jest.Mock).mockReturnValueOnce(elements);
+        (props.renderer?.getElementsAtPixel as Mock).mockReturnValueOnce(elements);
 
         await triggerMouseMove(result);
 
@@ -373,7 +374,7 @@ describe("usePlotInteractionHandlers", () => {
       const boundingRect = {
         left: BasicBuilder.number(),
         top: BasicBuilder.number(),
-        toJSON: jest.fn().mockReturnValue({
+        toJSON: vi.fn().mockReturnValue({
           left: BasicBuilder.number(),
           top: BasicBuilder.number(),
         }),
@@ -473,7 +474,7 @@ describe("usePlotInteractionHandlers", () => {
       return {
         clientX: BasicBuilder.number(),
         currentTarget: {
-          getBoundingClientRect: jest.fn(() => ({ left: BasicBuilder.number() })),
+          getBoundingClientRect: vi.fn(() => ({ left: BasicBuilder.number() })),
         } as unknown as EventTarget & HTMLElement,
       } as unknown as React.MouseEvent<HTMLElement>;
     }
@@ -503,8 +504,8 @@ describe("usePlotInteractionHandlers", () => {
     });
 
     it("should return early if seekPlayback or startTime is undefined", () => {
-      (useMessagePipelineGetter as jest.Mock).mockReturnValueOnce({
-        seekPlayback: jest.fn(),
+      (useMessagePipelineGetter as Mock).mockReturnValueOnce({
+        seekPlayback: vi.fn(),
         playerState: { activeData: { startTime: RosTimeBuilder.time() } },
       });
       const { result } = setup();
@@ -519,7 +520,7 @@ describe("usePlotInteractionHandlers", () => {
     it("should call seekPlayback when seekSeconds greater than 0", () => {
       const { result, props } = setup({ coordinator: mockCoordinator });
       const seekSeconds = BasicBuilder.number();
-      (props.coordinator?.getXValueAtPixel as jest.Mock).mockReturnValueOnce(seekSeconds);
+      (props.coordinator?.getXValueAtPixel as Mock).mockReturnValueOnce(seekSeconds);
 
       act(() => {
         result.current.onClick(buildClickEvent());
@@ -531,7 +532,7 @@ describe("usePlotInteractionHandlers", () => {
     it("should not normalize time if seekSeconds is negative", () => {
       const { result, props } = setup({ coordinator: mockCoordinator });
       const seekSeconds = -1;
-      (props.coordinator?.getXValueAtPixel as jest.Mock).mockReturnValue(seekSeconds);
+      (props.coordinator?.getXValueAtPixel as Mock).mockReturnValue(seekSeconds);
 
       act(() => {
         result.current.onClick(buildClickEvent());
@@ -549,7 +550,7 @@ describe("usePlotInteractionHandlers", () => {
         coordinator: mockCoordinator,
         config: { [PANEL_TITLE_CONFIG_KEY]: customTitle } as unknown as PlotConfig,
       });
-      (mockCoordinator.getCsvData as jest.Mock).mockResolvedValueOnce(csvData);
+      (mockCoordinator.getCsvData as Mock).mockResolvedValueOnce(csvData);
 
       await act(async () => {
         const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {
@@ -565,7 +566,7 @@ describe("usePlotInteractionHandlers", () => {
     it("uses default title when customTitle is undefined", async () => {
       const csvData = BasicBuilder.string();
       const { result } = setup({ coordinator: mockCoordinator });
-      (mockCoordinator.getCsvData as jest.Mock).mockResolvedValueOnce(csvData);
+      (mockCoordinator.getCsvData as Mock).mockResolvedValueOnce(csvData);
 
       await act(async () => {
         const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {
@@ -580,7 +581,7 @@ describe("usePlotInteractionHandlers", () => {
 
     it("does not download CSV when coordinator returns null data", async () => {
       const { result } = setup({ coordinator: mockCoordinator });
-      (mockCoordinator.getCsvData as jest.Mock).mockResolvedValueOnce(undefined);
+      (mockCoordinator.getCsvData as Mock).mockResolvedValueOnce(undefined);
 
       await act(async () => {
         const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {
@@ -597,7 +598,7 @@ describe("usePlotInteractionHandlers", () => {
       const csvData = BasicBuilder.string();
       const { result, unmount } = setup({ coordinator: mockCoordinator });
       unmount();
-      (mockCoordinator.getCsvData as jest.Mock).mockResolvedValueOnce(csvData);
+      (mockCoordinator.getCsvData as Mock).mockResolvedValueOnce(csvData);
 
       await act(async () => {
         const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {
@@ -611,10 +612,10 @@ describe("usePlotInteractionHandlers", () => {
     });
 
     it("handles error and logs to console.error", async () => {
-      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const error = new Error("CSV fetch failed");
       const { result } = setup({ coordinator: mockCoordinator });
-      (mockCoordinator.getCsvData as jest.Mock).mockRejectedValueOnce(error);
+      (mockCoordinator.getCsvData as Mock).mockRejectedValueOnce(error);
 
       await act(async () => {
         const item = result.current.getPanelContextMenuItems()[0] as PanelContextMenuItem & {

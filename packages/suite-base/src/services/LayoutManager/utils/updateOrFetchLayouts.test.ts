@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mocked } from "vitest";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ISO8601Timestamp } from "@lichtblick/suite-base/services/ILayoutStorage";
 import {
@@ -12,25 +13,25 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { updateOrFetchLayout } from "./updateOrFetchLayouts";
 
-jest.mock("@lichtblick/log", () => ({
-  getLogger: jest.fn(() => ({
-    info: jest.fn(),
+vi.mock("@lichtblick/log", async () => ({
+  getLogger: vi.fn(() => ({
+    info: vi.fn(),
   })),
 }));
 
 describe("updateOrFetchLayout", () => {
-  let mockRemoteStorage: jest.Mocked<IRemoteLayoutStorage>;
+  let mockRemoteStorage: Mocked<IRemoteLayoutStorage>;
   let updateParams: Parameters<IRemoteLayoutStorage["updateLayout"]>[0];
   let remoteLayout: RemoteLayout;
 
   beforeEach(() => {
     mockRemoteStorage = {
       workspace: BasicBuilder.string(),
-      getLayouts: jest.fn(),
-      getLayout: jest.fn(),
-      saveNewLayout: jest.fn(),
-      updateLayout: jest.fn(),
-      deleteLayout: jest.fn(),
+      getLayouts: vi.fn(),
+      getLayout: vi.fn(),
+      saveNewLayout: vi.fn(),
+      updateLayout: vi.fn(),
+      deleteLayout: vi.fn(),
     };
 
     updateParams = {

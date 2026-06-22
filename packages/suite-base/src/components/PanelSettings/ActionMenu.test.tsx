@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -10,7 +10,7 @@ import { ActionMenuProps } from "@lichtblick/suite-base/components/PanelSettings
 
 import { ActionMenu } from "./ActionMenu";
 
-jest.mock("react-i18next", () => ({
+vi.mock("react-i18next", async () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
@@ -18,18 +18,18 @@ jest.mock("react-i18next", () => ({
 
 describe("ActionMenu", () => {
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (propsOverride: Partial<ActionMenuProps> = {}) => {
     const props: ActionMenuProps = {
       allowShare: true,
-      onReset: jest.fn(),
-      onShare: jest.fn(),
+      onReset: vi.fn(),
+      onShare: vi.fn(),
       ...propsOverride,
     };
 

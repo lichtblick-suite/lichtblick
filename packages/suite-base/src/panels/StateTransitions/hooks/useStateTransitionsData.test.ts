@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 
 import { Time } from "@lichtblick/rostime";
@@ -14,12 +15,12 @@ import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuild
 
 import useStateTransitionsData from "./useStateTransitionsData";
 
-jest.mock("@lichtblick/suite-base/panels/StateTransitions/messagesToDataset");
-jest.mock("@lichtblick/suite-base/panels/StateTransitions/shared");
+vi.mock("@lichtblick/suite-base/panels/StateTransitions/messagesToDataset");
+vi.mock("@lichtblick/suite-base/panels/StateTransitions/shared");
 
 describe("useStateTransitionsData", () => {
-  const mockMessagesToDataset = messagesToDataset as jest.Mock;
-  const mockDatasetContainsArray = datasetContainsArray as jest.Mock;
+  const mockMessagesToDataset = messagesToDataset as Mock;
+  const mockDatasetContainsArray = datasetContainsArray as Mock;
 
   beforeEach(() => {
     mockMessagesToDataset.mockClear();

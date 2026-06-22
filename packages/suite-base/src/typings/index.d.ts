@@ -7,6 +7,8 @@
 
 // Custom types available globally and required when using app components as dependencies
 
+/// <reference types="vitest/globals" />
+
 import "./extensions";
 import "./react";
 import "./overrides";

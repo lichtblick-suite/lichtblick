@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 
 import { Time, compare } from "@lichtblick/rostime";
@@ -13,12 +14,12 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useTopicMessageNavigation } from "./useTopicMessageNavigation";
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline");
-jest.mock("@lichtblick/log", () => ({
+vi.mock("@lichtblick/suite-base/components/MessagePipeline");
+vi.mock("@lichtblick/log", async () => ({
   __esModule: true,
   default: {
     getLogger: () => ({
-      warn: jest.fn(),
+      warn: vi.fn(),
     }),
   },
 }));
@@ -31,8 +32,8 @@ type MessagePipelineMockData = {
     string,
     { numMessages: number; firstMessageTime?: Time; lastMessageTime?: Time }
   >;
-  pausePlayback?: jest.Mock;
-  seekPlayback?: jest.Mock;
+  pausePlayback?: Mock;
+  seekPlayback?: Mock;
   messages?: Time[];
   customIterator?: () => AsyncIterableIterator<Readonly<IteratorResult>>;
 };
@@ -114,17 +115,17 @@ function setup(options: SetupOptions = {}) {
   const {
     startTime,
     endTime,
-    pausePlayback = jest.fn(),
-    seekPlayback = jest.fn(),
+    pausePlayback = vi.fn(),
+    seekPlayback = vi.fn(),
     messages = [],
     customIterator,
   } = pipelineData;
 
   const getBatchIterator = customIterator
-    ? jest.fn(customIterator)
-    : jest.fn(createMockBatchIterator(messages, topicName));
+    ? vi.fn(customIterator)
+    : vi.fn(createMockBatchIterator(messages, topicName));
 
-  (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
+  (useMessagePipeline as Mock).mockImplementation((selector) =>
     selector({
       playerState: {
         activeData: {
@@ -159,7 +160,7 @@ function setup(options: SetupOptions = {}) {
 
 describe("useTopicMessageNavigation", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("canNavigateNext", () => {
@@ -391,10 +392,10 @@ describe("useTopicMessageNavigation", () => {
     it("does not seek when iterator is not found", async () => {
       // Given
       const topicName = `/${BasicBuilder.string()}`;
-      const seekPlayback = jest.fn();
-      const getBatchIterator = jest.fn(() => undefined);
+      const seekPlayback = vi.fn();
+      const getBatchIterator = vi.fn(() => undefined);
 
-      (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
+      (useMessagePipeline as Mock).mockImplementation((selector) =>
         selector({
           playerState: {
             activeData: {
@@ -402,7 +403,7 @@ describe("useTopicMessageNavigation", () => {
               topicStats: new Map([[topicName, { numMessages: BasicBuilder.number() }]]),
             },
           },
-          pausePlayback: jest.fn(),
+          pausePlayback: vi.fn(),
           seekPlayback,
           getBatchIterator, // ← Use the custom mock
         }),
@@ -591,10 +592,10 @@ describe("useTopicMessageNavigation", () => {
     it("does not seek when iterator is not found", async () => {
       // Given
       const topicName = `/${BasicBuilder.string()}`;
-      const seekPlayback = jest.fn();
-      const getBatchIterator = jest.fn(() => undefined);
+      const seekPlayback = vi.fn();
+      const getBatchIterator = vi.fn(() => undefined);
 
-      (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
+      (useMessagePipeline as Mock).mockImplementation((selector) =>
         selector({
           playerState: {
             activeData: {
@@ -602,7 +603,7 @@ describe("useTopicMessageNavigation", () => {
               topicStats: new Map([[topicName, { numMessages: BasicBuilder.number() }]]),
             },
           },
-          pausePlayback: jest.fn(),
+          pausePlayback: vi.fn(),
           seekPlayback,
           getBatchIterator,
         }),
@@ -835,7 +836,7 @@ describe("useTopicMessageNavigation", () => {
       const t2: Time = { sec: 2, nsec: 0 };
       const topicName = `/${BasicBuilder.string()}`;
 
-      const pausePlayback = jest.fn(() => {
+      const pausePlayback = vi.fn(() => {
         throw new Error("Pause playback error");
       });
 
@@ -865,7 +866,7 @@ describe("useTopicMessageNavigation", () => {
       const t2: Time = { sec: 2, nsec: 0 };
       const topicName = `/${BasicBuilder.string()}`;
 
-      const seekPlayback = jest.fn(() => {
+      const seekPlayback = vi.fn(() => {
         throw new Error("Seek playback error");
       });
 
@@ -895,7 +896,7 @@ describe("useTopicMessageNavigation", () => {
       const t2: Time = { sec: 2, nsec: 0 };
       const topicName = `/${BasicBuilder.string()}`;
 
-      const pausePlayback = jest.fn(() => {
+      const pausePlayback = vi.fn(() => {
         throw new Error("Pause playback error");
       });
 
@@ -925,7 +926,7 @@ describe("useTopicMessageNavigation", () => {
       const t2: Time = { sec: 2, nsec: 0 };
       const topicName = `/${BasicBuilder.string()}`;
 
-      const seekPlayback = jest.fn(() => {
+      const seekPlayback = vi.fn(() => {
         throw new Error("Seek playback error");
       });
 

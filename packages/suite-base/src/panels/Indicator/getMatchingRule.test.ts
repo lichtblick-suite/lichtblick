@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mock } from "vitest";
 import { getMatchingRule } from "./getMatchingRule";
 import { IndicatorRule } from "./types";
 
@@ -56,7 +57,7 @@ describe("getMatchingRule", () => {
     expect(getMatchingRule(value, rules)?.label).toEqual(expectedLabel);
 
     // It expects to log conversion errors
-    (console.error as jest.Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 
   it("implements operators", () => {

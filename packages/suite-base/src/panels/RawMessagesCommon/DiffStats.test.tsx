@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -7,15 +7,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
 
 import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import DiffStats from "./DiffStats";
+import { getChangeCounts } from "./utils";
 
-jest.mock("./index.style", () => ({
+vi.mock("./index.style", async () => ({
   useStylesDiffStats: () => ({
     classes: {
       diff: "mock-diff-class",
@@ -25,15 +26,15 @@ jest.mock("./index.style", () => ({
   }),
 }));
 
-jest.mock("./utils", () => ({
-  getChangeCounts: jest.fn(),
+vi.mock("./utils", () => ({
+  getChangeCounts: vi.fn(),
 }));
 
-const mockGetChangeCounts = jest.requireMock("./utils").getChangeCounts;
+const mockGetChangeCounts = vi.mocked(getChangeCounts);
 
 describe("DiffStats", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("without ID label", () => {

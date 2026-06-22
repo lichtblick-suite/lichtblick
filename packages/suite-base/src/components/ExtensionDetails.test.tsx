@@ -1,9 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import type { Mock } from "vitest";
+import "@testing-library/jest-dom/vitest";
 
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useSnackbar } from "notistack";
@@ -22,45 +23,45 @@ import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionB
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("notistack", () => ({
-  useSnackbar: jest.fn(),
+vi.mock("notistack", async () => ({
+  useSnackbar: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/AnalyticsContext", () => ({
-  useAnalytics: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/AnalyticsContext", async () => ({
+  useAnalytics: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
-  useExtensionCatalog: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", async () => ({
+  useExtensionCatalog: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/ExtensionMarketplaceContext", () => ({
-  useExtensionMarketplace: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/ExtensionMarketplaceContext", async () => ({
+  useExtensionMarketplace: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/util/isDesktopApp", () => jest.fn());
+vi.mock("@lichtblick/suite-base/util/isDesktopApp", async () => vi.fn());
 
 describe("ExtensionDetails Component", () => {
-  const mockEnqueueSnackbar = jest.fn();
-  const mockLogEvent = jest.fn();
-  const mockDownloadExtension = jest.fn();
-  const mockInstallExtensions = jest.fn();
-  const mockUninstallExtension = jest.fn();
-  const mockGetMarkdown = jest.fn();
+  const mockEnqueueSnackbar = vi.fn();
+  const mockLogEvent = vi.fn();
+  const mockDownloadExtension = vi.fn();
+  const mockInstallExtensions = vi.fn();
+  const mockUninstallExtension = vi.fn();
+  const mockGetMarkdown = vi.fn();
 
   const mockExtension: ExtensionMarketplaceDetail = ExtensionBuilder.extensionMarketplaceDetail({
     namespace: "local",
   });
 
   beforeEach(() => {
-    (useSnackbar as jest.Mock).mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
-    (useAnalytics as jest.Mock).mockReturnValue({ logEvent: mockLogEvent });
-    (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+    (useSnackbar as Mock).mockReturnValue({ enqueueSnackbar: mockEnqueueSnackbar });
+    (useAnalytics as Mock).mockReturnValue({ logEvent: mockLogEvent });
+    (useExtensionCatalog as Mock).mockImplementation((selector) => {
       const mockExtensionCatalog = {
         downloadExtension: mockDownloadExtension,
         installExtensions: mockInstallExtensions,
         uninstallExtension: mockUninstallExtension,
-        refreshExtensions: jest.fn(),
+        refreshExtensions: vi.fn(),
         installedExtensions: [],
         installedPanels: {},
         installedMessageConverters: [],
@@ -69,13 +70,13 @@ describe("ExtensionDetails Component", () => {
       };
       return selector(mockExtensionCatalog);
     });
-    (useExtensionMarketplace as jest.Mock).mockReturnValue({
+    (useExtensionMarketplace as Mock).mockReturnValue({
       getMarkdown: mockGetMarkdown,
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the extension details correctly", () => {
@@ -91,7 +92,7 @@ describe("ExtensionDetails Component", () => {
   });
 
   it("calls onClose when the back button is clicked", () => {
-    const mockOnClose = jest.fn();
+    const mockOnClose = vi.fn();
     render(<ExtensionDetails extension={mockExtension} onClose={mockOnClose} installed={false} />);
 
     const backButton = screen.getByText("Back");
@@ -102,7 +103,7 @@ describe("ExtensionDetails Component", () => {
 
   describe("download and install process", () => {
     it("handles the download and install process successfully on desktop app", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
+      (isDesktopApp as Mock).mockReturnValue(true);
 
       mockDownloadExtension.mockResolvedValue(new Uint8Array());
       mockInstallExtensions.mockResolvedValue({});
@@ -128,7 +129,7 @@ describe("ExtensionDetails Component", () => {
     });
 
     it("displays an error message when not on desktop app", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(false);
+      (isDesktopApp as Mock).mockReturnValue(false);
 
       render(<ExtensionDetails extension={mockExtension} onClose={() => {}} installed={false} />);
 
@@ -146,7 +147,7 @@ describe("ExtensionDetails Component", () => {
     });
 
     it("displays readme correctly", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
+      (isDesktopApp as Mock).mockReturnValue(true);
 
       const readmeContent = BasicBuilder.string();
       mockExtension.readme = readmeContent;
@@ -163,7 +164,7 @@ describe("ExtensionDetails Component", () => {
     });
 
     it("displays message indicating readme is not found when readme is undefined", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
+      (isDesktopApp as Mock).mockReturnValue(true);
 
       mockExtension.readme = undefined;
 
@@ -179,7 +180,7 @@ describe("ExtensionDetails Component", () => {
     });
 
     it("displays changelog correctly", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
+      (isDesktopApp as Mock).mockReturnValue(true);
 
       const changelogContent = BasicBuilder.string();
       mockExtension.changelog = changelogContent;
@@ -196,7 +197,7 @@ describe("ExtensionDetails Component", () => {
     });
 
     it("displays message indicating changelog is not found when changelog is undefined", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
+      (isDesktopApp as Mock).mockReturnValue(true);
 
       mockExtension.changelog = undefined;
 
@@ -212,7 +213,7 @@ describe("ExtensionDetails Component", () => {
     });
 
     it("displays an error message when the download and install process fails on desktop app", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
+      (isDesktopApp as Mock).mockReturnValue(true);
 
       mockDownloadExtension.mockRejectedValue(new Error("Download failed"));
 
@@ -227,7 +228,7 @@ describe("ExtensionDetails Component", () => {
     });
 
     it("hides install button when foxe URL is undefined", async () => {
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
+      (isDesktopApp as Mock).mockReturnValue(true);
 
       const extensionWithoutFoxe = { ...mockExtension, foxe: undefined };
 
@@ -241,7 +242,7 @@ describe("ExtensionDetails Component", () => {
 
     it("does not log analytics event when component is unmounted before install completes", async () => {
       // Given
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
+      (isDesktopApp as Mock).mockReturnValue(true);
 
       // Add delays to ensure unmount happens during the async operation
       mockDownloadExtension.mockImplementation(

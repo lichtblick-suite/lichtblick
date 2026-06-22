@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { useSnackbar } from "notistack";
 
@@ -15,10 +16,10 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useInstallingExtensionsState } from "./useInstallingExtensionsState";
 
-const mockStartInstallingProgress = jest.fn();
-const mockSetInstallingProgress = jest.fn();
-const mockResetInstallingProgress = jest.fn();
-const mockInstallExtensions = jest.fn();
+const mockStartInstallingProgress = vi.fn();
+const mockSetInstallingProgress = vi.fn();
+const mockResetInstallingProgress = vi.fn();
+const mockInstallExtensions = vi.fn();
 const mockStore = {
   setInstallingProgress: mockSetInstallingProgress,
   startInstallingProgress: mockStartInstallingProgress,
@@ -26,31 +27,31 @@ const mockStore = {
   installingProgress: { installed: 0, total: 0, inProgress: false },
 };
 
-jest.mock("@lichtblick/suite-base/hooks/useInstallingExtensionsStore", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useInstallingExtensionsStore", async () => ({
   useInstallingExtensionsStore: (selector: any) => selector(mockStore),
 }));
 
-jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
-  ...jest.requireActual("@lichtblick/suite-base/context/ExtensionCatalogContext"),
+vi.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", async () => ({
+  ...await vi.importActual("@lichtblick/suite-base/context/ExtensionCatalogContext"),
   useExtensionCatalog: (selector: any) =>
     selector({
       installExtensions: mockInstallExtensions,
     }),
 }));
 
-jest.mock("notistack", () => ({
-  useSnackbar: jest.fn(),
+vi.mock("notistack", async () => ({
+  useSnackbar: vi.fn(),
 }));
 
 describe("useInstallingExtensionsState", () => {
-  const playMock = jest.fn();
-  const enqueueSnackbar = jest.fn();
-  const closeSnackbar = jest.fn();
+  const playMock = vi.fn();
+  const enqueueSnackbar = vi.fn();
+  const closeSnackbar = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockStore.installingProgress = { installed: 0, total: 0, inProgress: false };
-    (useSnackbar as jest.Mock).mockReturnValue({
+    (useSnackbar as Mock).mockReturnValue({
       enqueueSnackbar,
       closeSnackbar,
     });

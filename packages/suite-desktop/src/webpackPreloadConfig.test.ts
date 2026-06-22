@@ -34,8 +34,8 @@ function createTestParams(overrides: Partial<WebpackConfigParams> = {}): Webpack
   };
 }
 
-jest.mock("./webpackCommonConfig", () => ({
-  createCommonWebpackConfig: jest.fn().mockImplementation((_params, { isDev }) => ({
+vi.mock("./webpackCommonConfig", async () => ({
+  createCommonWebpackConfig: vi.fn().mockImplementation((_params, { isDev }) => ({
     devtool: (isDev as boolean) ? "eval-cheap-module-source-map" : "source-map",
     plugins: [{ pluginName: "MockPlugin" }],
   })),

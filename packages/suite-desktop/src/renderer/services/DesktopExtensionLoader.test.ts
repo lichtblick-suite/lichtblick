@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+import type { Mocked } from "vitest";
 import randomString from "randomstring";
 
 import { ExtensionInfo } from "@lichtblick/suite-base";
@@ -7,9 +8,9 @@ import { ExtensionInfo } from "@lichtblick/suite-base";
 import { DesktopExtensionLoader } from "./DesktopExtensionLoader";
 import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
-jest.mock("@lichtblick/log", () => ({
-  getLogger: jest.fn(() => ({
-    debug: jest.fn(),
+vi.mock("@lichtblick/log", async () => ({
+  getLogger: vi.fn(() => ({
+    debug: vi.fn(),
   })),
 }));
 
@@ -17,16 +18,16 @@ const genericString = (): string =>
   randomString.generate({ length: 6, charset: "alphanumeric", capitalization: "lowercase" });
 
 describe("DesktopExtensionLoader", () => {
-  let mockBridge: jest.Mocked<Desktop>;
+  let mockBridge: Mocked<Desktop>;
   let loader: DesktopExtensionLoader;
 
   beforeEach(() => {
     mockBridge = {
-      getExtensions: jest.fn(),
-      loadExtension: jest.fn(),
-      installExtension: jest.fn(),
-      uninstallExtension: jest.fn(),
-    } as unknown as jest.Mocked<Desktop>;
+      getExtensions: vi.fn(),
+      loadExtension: vi.fn(),
+      installExtension: vi.fn(),
+      uninstallExtension: vi.fn(),
+    } as unknown as Mocked<Desktop>;
 
     loader = new DesktopExtensionLoader(mockBridge);
   });

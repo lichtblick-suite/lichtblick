@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
@@ -13,10 +14,10 @@ import { useStructuredItemsByPath } from "@lichtblick/suite-base/components/Mess
 import { useStructureItemsByPathStore } from "./useStructureItemsByPathStore";
 
 // Mock helpers
-jest.mock("@lichtblick/suite-base/PanelAPI");
-jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype");
-jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/structureAllItemsByPath");
-jest.mock("./useStructureItemsByPathStore");
+vi.mock("@lichtblick/suite-base/PanelAPI");
+vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype");
+vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/structureAllItemsByPath");
+vi.mock("./useStructureItemsByPathStore");
 
 describe("useStructuredItemsByPath", () => {
   const mockAllStructureItems = new Map([["/foo", { path: "/foo" }]]);
@@ -24,20 +25,20 @@ describe("useStructuredItemsByPath", () => {
   const mockDatatypes = { "foo_msgs/Bar": { fields: [] } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useStructureItemsByPathStore as unknown as jest.Mock).mockReturnValue(mockAllStructureItems);
+    (useStructureItemsByPathStore as unknown as Mock).mockReturnValue(mockAllStructureItems);
 
-    (PanelAPI.useDataSourceInfo as jest.Mock).mockReturnValue({
+    (PanelAPI.useDataSourceInfo as Mock).mockReturnValue({
       datatypes: mockDatatypes,
       topics: mockTopics,
     });
 
-    (MessagePathSyntax.messagePathStructures as jest.Mock).mockImplementation(() => ({
+    (MessagePathSyntax.messagePathStructures as Mock).mockImplementation(() => ({
       "foo_msgs/Bar": [],
     }));
 
-    (StructureAllItems.structureAllItemsByPath as jest.Mock).mockReturnValue(
+    (StructureAllItems.structureAllItemsByPath as Mock).mockReturnValue(
       new Map([["/computed", { path: "/computed" }]]),
     );
   });

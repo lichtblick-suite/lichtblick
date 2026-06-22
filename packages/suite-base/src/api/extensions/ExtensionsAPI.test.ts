@@ -13,8 +13,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import ExtensionsAPI from "./ExtensionsAPI";
 
-jest.mock("@lichtblick/suite-base/services/http/HttpService");
-jest.mock("@lichtblick/suite-base/constants/config", () => ({
+vi.mock("@lichtblick/suite-base/services/http/HttpService");
+vi.mock("@lichtblick/suite-base/constants/config", async () => ({
   APP_CONFIG: {
     apiUrl: undefined, // Test without base URL for simplicity
   },
@@ -32,7 +32,7 @@ describe("ExtensionsAPI", () => {
 
   beforeEach(() => {
     extensionsAPI = new ExtensionsAPI(workspace);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should initialize with correct workspace", () => {
@@ -44,8 +44,8 @@ describe("ExtensionsAPI", () => {
       // Given
       const extensions = ExtensionBuilder.extensionsInfo();
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse(extensions));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockResolvedValue(createMockHttpResponse(extensions));
       mockHttpService.get = mockGet;
 
       // When
@@ -58,8 +58,8 @@ describe("ExtensionsAPI", () => {
 
     it("should handle empty list", async () => {
       // Given
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse([]));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockResolvedValue(createMockHttpResponse([]));
       mockHttpService.get = mockGet;
 
       // When
@@ -98,8 +98,8 @@ describe("ExtensionsAPI", () => {
         readme: extension.info.readme,
       };
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse(apiResponse));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockResolvedValue(createMockHttpResponse(apiResponse));
       mockHttpService.get = mockGet;
 
       // When
@@ -123,8 +123,8 @@ describe("ExtensionsAPI", () => {
 
     it("should return undefined when extension not found", async () => {
       // Given
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse(undefined));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockResolvedValue(createMockHttpResponse(undefined));
       mockHttpService.get = mockGet;
 
       // When
@@ -153,8 +153,8 @@ describe("ExtensionsAPI", () => {
           scope: extension.info.namespace!,
         },
       };
-      const mockHttpService = jest.mocked(HttpService);
-      const mockPost = jest.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockPost = vi.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
       mockHttpService.post = mockPost;
 
       // When
@@ -198,8 +198,8 @@ describe("ExtensionsAPI", () => {
           scope: extension.info.namespace!,
         },
       };
-      const mockPost = jest.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
-      jest.mocked(HttpService).post = mockPost;
+      const mockPost = vi.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
+      vi.mocked(HttpService).post = mockPost;
 
       // When
       await extensionsAPI.createOrUpdate(extension, mockFile);
@@ -223,8 +223,8 @@ describe("ExtensionsAPI", () => {
       // Given
       const extensionId = BasicBuilder.string();
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockDelete = jest.fn().mockResolvedValue(createMockHttpResponse(true));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockDelete = vi.fn().mockResolvedValue(createMockHttpResponse(true));
       mockHttpService.delete = mockDelete;
 
       // When
@@ -239,8 +239,8 @@ describe("ExtensionsAPI", () => {
       // Given
       const extensionId = BasicBuilder.string();
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockDelete = jest.fn().mockRejectedValue(new HttpError("Not Found", 404, "Not Found"));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockDelete = vi.fn().mockRejectedValue(new HttpError("Not Found", 404, "Not Found"));
       mockHttpService.delete = mockDelete;
 
       // When
@@ -258,8 +258,8 @@ describe("ExtensionsAPI", () => {
       const mockContent = new ArrayBuffer(8);
       const mockUint8Array = new Uint8Array(mockContent);
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse(mockContent));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockResolvedValue(createMockHttpResponse(mockContent));
       mockHttpService.get = mockGet;
 
       // When
@@ -276,8 +276,8 @@ describe("ExtensionsAPI", () => {
       // Given
       const fileId = BasicBuilder.string();
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockRejectedValue(new HttpError("Not Found", 404, "Not Found"));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockRejectedValue(new HttpError("Not Found", 404, "Not Found"));
       mockHttpService.get = mockGet;
 
       // When
@@ -291,8 +291,8 @@ describe("ExtensionsAPI", () => {
       // Given
       const fileId = BasicBuilder.string();
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi
         .fn()
         .mockRejectedValue(new HttpError("Internal Server Error", 500, "Internal Server Error"));
       mockHttpService.get = mockGet;
@@ -306,8 +306,8 @@ describe("ExtensionsAPI", () => {
     it("should propagate HTTP errors", async () => {
       // Given
       const mockError = new Error("Network error");
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockRejectedValue(mockError);
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockRejectedValue(mockError);
       mockHttpService.get = mockGet;
 
       // When Then

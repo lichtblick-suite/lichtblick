@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -7,6 +7,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mock } from "vitest";
 import { setupJestCanvasMock } from "jest-canvas-mock";
 import * as THREE from "three";
 
@@ -20,10 +21,10 @@ import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDee
 import { RendererConfig } from "../IRenderer";
 import { FrameAxes } from "./FrameAxes";
 
-jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");
+vi.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => ({ default: "" }));
 
-jest.mock("three", () => {
-  const ActualTHREE = jest.requireActual("three");
+vi.mock("three", async () => {
+  const ActualTHREE = await vi.importActual("three");
   return {
     ...ActualTHREE,
     WebGLRenderer: function WebGLRenderer() {
@@ -31,18 +32,18 @@ jest.mock("three", () => {
         capabilities: {
           isWebGL2: true,
         },
-        setPixelRatio: jest.fn(),
-        setSize: jest.fn(),
-        render: jest.fn(),
-        clear: jest.fn(),
-        setClearColor: jest.fn(),
-        readRenderTargetPixels: jest.fn(),
+        setPixelRatio: vi.fn(),
+        setSize: vi.fn(),
+        render: vi.fn(),
+        clear: vi.fn(),
+        setClearColor: vi.fn(),
+        readRenderTargetPixels: vi.fn(),
         info: {
-          reset: jest.fn(),
+          reset: vi.fn(),
         },
         shadowMap: {},
-        dispose: jest.fn(),
-        clearDepth: jest.fn(),
+        dispose: vi.fn(),
+        clearDepth: vi.fn(),
         getDrawingBufferSize: () => ({ width: 100, height: 100 }),
       };
     },
@@ -52,15 +53,15 @@ jest.mock("three", () => {
 beforeEach(() => {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: jest.fn().mockImplementation((query) => ({
+    value: vi.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
       onchange: undefined,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
     })),
   });
 });
@@ -101,7 +102,7 @@ describe("FrameAxes", () => {
   let renderer: Renderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
@@ -111,7 +112,7 @@ describe("FrameAxes", () => {
 
   afterEach(() => {
     renderer.dispose();
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   describe("details()", () => {
@@ -148,7 +149,7 @@ describe("FrameAxes", () => {
       const renderable = frameAxes.renderables.get("test_frame");
       const label = renderable?.userData.label;
 
-      const releaseSpy = jest.spyOn(renderer.labelPool, "release");
+      const releaseSpy = vi.spyOn(renderer.labelPool, "release");
 
       // When: Disposing the renderable
       renderable?.dispose();
@@ -168,8 +169,8 @@ describe("FrameAxes", () => {
       const renderable = frameAxes.renderables.get("test_frame");
       const label = renderable?.userData.label;
 
-      const setColorSpy = jest.spyOn(label!, "setColor");
-      const setBackgroundSpy = jest.spyOn(label!, "setBackgroundColor");
+      const setColorSpy = vi.spyOn(label!, "setColor");
+      const setBackgroundSpy = vi.spyOn(label!, "setBackgroundColor");
 
       // When: Setting dark color scheme
       frameAxes.setColorScheme("dark", undefined);
@@ -188,8 +189,8 @@ describe("FrameAxes", () => {
       const renderable = frameAxes.renderables.get("test_frame");
       const label = renderable?.userData.label;
 
-      const setColorSpy = jest.spyOn(label!, "setColor");
-      const setBackgroundSpy = jest.spyOn(label!, "setBackgroundColor");
+      const setColorSpy = vi.spyOn(label!, "setColor");
+      const setBackgroundSpy = vi.spyOn(label!, "setBackgroundColor");
 
       // When: Setting light color scheme
       frameAxes.setColorScheme("light", undefined);
@@ -208,7 +209,7 @@ describe("FrameAxes", () => {
       const renderable = frameAxes.renderables.get("test_frame");
       const label = renderable?.userData.label;
 
-      const setColorSpy = jest.spyOn(label!, "setColor");
+      const setColorSpy = vi.spyOn(label!, "setColor");
       const darkBackground = new THREE.Color(0.1, 0.1, 0.1); // Dark background
 
       // When: Setting color scheme with dark custom background
@@ -372,7 +373,7 @@ describe("FrameAxes", () => {
       const renderable = frameAxes.renderables.get("test_frame");
       const label = renderable?.userData.label;
 
-      const setLineHeightSpy = jest.spyOn(label!, "setLineHeight");
+      const setLineHeightSpy = vi.spyOn(label!, "setLineHeight");
 
       const action: SettingsTreeAction = {
         action: "update",
@@ -398,7 +399,7 @@ describe("FrameAxes", () => {
       const frameAxes = renderer.sceneExtensions.get("foxglove.FrameAxes") as FrameAxes;
       const renderable = frameAxes.renderables.get("test_frame");
       const axis = renderable?.userData.axis;
-      const scaleSpy = jest.spyOn(axis!.scale, "set");
+      const scaleSpy = vi.spyOn(axis!.scale, "set");
 
       const action: SettingsTreeAction = {
         action: "update",

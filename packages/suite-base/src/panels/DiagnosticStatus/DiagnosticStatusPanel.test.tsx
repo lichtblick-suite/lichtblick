@@ -1,9 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { DEFAULT_CONFIG } from "@lichtblick/suite-base/panels/DiagnosticStatus/constants";
@@ -20,30 +21,30 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import DiagnosticStatusPanel from "./DiagnosticStatusPanel";
 
-jest.mock("@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics");
+vi.mock("@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics");
 
 describe("DiagnosticStatusPanel", () => {
-  const mockSaveConfig = jest.fn();
-  const mockUseDataSourceInfo = jest.fn(() => ({
+  const mockSaveConfig = vi.fn();
+  const mockUseDataSourceInfo = vi.fn(() => ({
     topics: [],
   }));
-  const mockUsePanelContext = jest.fn(() => ({
-    openSiblingPanel: jest.fn(),
+  const mockUsePanelContext = vi.fn(() => ({
+    openSiblingPanel: vi.fn(),
   }));
-  const mockUseAvailableDiagnostics = jest.fn();
+  const mockUseAvailableDiagnostics = vi.fn();
 
-  jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
+  vi.mock("@lichtblick/suite-base/PanelAPI", async () => ({
     useDataSourceInfo: mockUseDataSourceInfo,
   }));
-  jest.mock("@lichtblick/suite-base/components/PanelContext", () => ({
+  vi.mock("@lichtblick/suite-base/components/PanelContext", async () => ({
     usePanelContext: mockUsePanelContext,
   }));
 
-  jest.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", () => ({
-    usePanelSettingsTreeUpdate: jest.fn(),
+  vi.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", async () => ({
+    usePanelSettingsTreeUpdate: vi.fn(),
   }));
 
-  jest.mock("@lichtblick/suite-base/panels/DiagnosticStatus/hooks/useAvailableDiagnostics", () => ({
+  vi.mock("@lichtblick/suite-base/panels/DiagnosticStatus/hooks/useAvailableDiagnostics", async () => ({
     __esModule: true,
     default: mockUseAvailableDiagnostics,
   }));
@@ -74,12 +75,12 @@ describe("DiagnosticStatusPanel", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should render the empty state when no diagnostics are available", () => {
     const diagnosticResult: UseDiagnosticsResult = new Map();
-    (useDiagnostics as jest.Mock).mockReturnValue(diagnosticResult);
+    (useDiagnostics as Mock).mockReturnValue(diagnosticResult);
 
     setup();
 
@@ -88,7 +89,7 @@ describe("DiagnosticStatusPanel", () => {
 
   it("should render the empty state when there is a selected display name", () => {
     const diagnosticResult: UseDiagnosticsResult = new Map();
-    (useDiagnostics as jest.Mock).mockReturnValue(diagnosticResult);
+    (useDiagnostics as Mock).mockReturnValue(diagnosticResult);
 
     const { config } = setup({
       selectedHardwareId: BasicBuilder.string(),
@@ -114,7 +115,7 @@ describe("DiagnosticStatusPanel", () => {
         new Map([[BasicBuilder.string(), DiagnosticsBuilder.info({ status: statusMessage })]]),
       ],
     ]);
-    (useDiagnostics as jest.Mock).mockReturnValue(diagnosticResult);
+    (useDiagnostics as Mock).mockReturnValue(diagnosticResult);
 
     setup({
       selectedHardwareId: hardwareId,

@@ -1,12 +1,12 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { Chart } from "chart.js";
 
-jest.mock("chart.js", () => ({
+vi.mock("chart.js", async () => ({
   Chart: {
-    register: jest.fn(),
+    register: vi.fn(),
   },
   Interaction: {
     modes: {},
@@ -15,13 +15,13 @@ jest.mock("chart.js", () => ({
 
 describe("ChartJSManager", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should register required Chart.js components", async () => {
     await import("@lichtblick/suite-base/components/Chart/worker/ChartJSManager");
 
-    const registerSpy = jest.spyOn(Chart, "register");
+    const registerSpy = vi.spyOn(Chart, "register");
     expect(registerSpy).toHaveBeenCalled();
   });
 });

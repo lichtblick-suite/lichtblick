@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -15,6 +15,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { Mock } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
@@ -262,7 +263,7 @@ describe("useMessageDataItem", () => {
 describe("samplingMode", () => {
   // Given
   const samplingRequest = { mode: "latest-per-render-tick" as const };
-  const setSubscriptions: jest.Mock = jest.fn();
+  const setSubscriptions: Mock = vi.fn();
   const topic = `/${BasicBuilder.string()}`;
   const field = BasicBuilder.string();
   const path = `${topic}.${field}`;
