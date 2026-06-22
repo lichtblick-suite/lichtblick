@@ -107,7 +107,8 @@ type PreparedIncomingVideoFrame = {
 
 type VideoFrameHistoryEntry = {
   frame: CompressedVideo;
-  preparedFrame: PreparedVideoFrame;
+  type: "key" | "delta";
+  decoderConfig?: VideoDecoderConfig;
   timestampMicros: number;
 };
 
@@ -182,9 +183,8 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.userData.geometry?.dispose();
     this.videoPlayer?.close();
     this.decoder?.terminate();
-    // Release the GOP backfill cache. Each entry holds a copy of the encoded frame bytes; under
-    // a high-bitrate stream the cache can hold up to MAX_VIDEO_FRAME_HISTORY entries, so failing
-    // to clear it here leaks tens of megabytes per disposed renderable.
+    // Release the GOP backfill cache. Entries hold frame references and replay metadata for up to
+    // MAX_VIDEO_FRAME_HISTORY timestamps; clearing on dispose keeps per-renderable memory bounded.
     this.#videoFrameHistory.length = 0;
     this.#pendingVideoDecodeQueue.length = 0;
     super.dispose();
@@ -492,22 +492,20 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     if (!videoCodecNeedsKeyframeReplay(canonicalVideoCodec(frame.format))) {
       return;
     }
-    const historyPreparedFrame: PreparedVideoFrame = {
-      ...preparedFrame,
-      data: preparedFrame.data.slice(),
-    };
     const existingIndex = this.#videoFrameHistory.findIndex(
       (entry) => entry.timestampMicros === timestampMicros,
     );
+    const historyEntry: VideoFrameHistoryEntry = {
+      frame,
+      type: preparedFrame.type,
+      decoderConfig: preparedFrame.decoderConfig,
+      timestampMicros,
+    };
     if (existingIndex >= 0) {
-      this.#videoFrameHistory[existingIndex] = {
-        frame,
-        preparedFrame: historyPreparedFrame,
-        timestampMicros,
-      };
+      this.#videoFrameHistory[existingIndex] = historyEntry;
       return;
     }
-    this.#videoFrameHistory.push({ frame, preparedFrame: historyPreparedFrame, timestampMicros });
+    this.#videoFrameHistory.push(historyEntry);
     if (this.#videoFrameHistory.length > MAX_VIDEO_FRAME_HISTORY) {
       this.#videoFrameHistory.splice(0, this.#videoFrameHistory.length - MAX_VIDEO_FRAME_HISTORY);
     }
@@ -522,7 +520,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     }
     for (let index = targetIndex; index >= 0; index--) {
       const entry = this.#videoFrameHistory[index];
-      if (entry?.preparedFrame.type === "key") {
+      if (entry?.type === "key") {
         return this.#videoFrameHistory.slice(index, targetIndex + 1);
       }
     }
@@ -555,7 +553,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     if (gop == undefined || gop.length === 0) {
       return undefined;
     }
-    const decoderConfig = gop[0]?.preparedFrame.decoderConfig ?? this.#cachedVideoDecoderConfig;
+    const decoderConfig = gop[0]?.decoderConfig ?? this.#cachedVideoDecoderConfig;
     if (decoderConfig == undefined) {
       return undefined;
     }
@@ -563,13 +561,14 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.videoPlayer.resetForSeek();
     await this.videoPlayer.init(decoderConfig);
     const result = await this.videoPlayer.decodeFrames(
-      gop.map(
-        (entry): EncodedVideoFrame => ({
-          data: entry.preparedFrame.data.slice(),
+      gop.map((entry): EncodedVideoFrame => {
+        const preparedFrame = prepareVideoFrame(entry.frame);
+        return {
+          data: preparedFrame.data,
           timestampMicros: entry.timestampMicros,
-          type: entry.preparedFrame.type,
-        }),
-      ),
+          type: entry.type,
+        };
+      }),
     );
 
     if (result.type !== "target") {
