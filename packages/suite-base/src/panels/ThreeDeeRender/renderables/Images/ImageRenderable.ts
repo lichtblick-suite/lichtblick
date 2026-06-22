@@ -496,7 +496,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       (entry) => entry.timestampMicros === timestampMicros,
     );
     const historyEntry: VideoFrameHistoryEntry = {
-      frame,
+      frame: { ...frame, data: frame.data.slice() },
       type: preparedFrame.type,
       decoderConfig: preparedFrame.decoderConfig,
       timestampMicros,
