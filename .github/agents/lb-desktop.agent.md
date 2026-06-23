@@ -114,4 +114,4 @@ app.on("second-instance", (_, argv) => {
 - `packages/suite-desktop/src/renderer/services/DesktopLayoutLoader.ts`
 
 ## Skills Reference
-- For deep Electron patterns: load `electron-internals` skill
+- Deep Electron IPC, preload scripts, BrowserWindow, or native API patterns: `read_file(".github/skills/electron-internals/SKILL.md")`

@@ -154,3 +154,7 @@ class LocalStorageAppConfiguration implements IAppConfiguration {
 - `packages/suite-web/src/canRenderApp.ts`
 - `web/webpack.config.ts`
 - `vercel.json`
+
+## Skills Reference
+- Worker/Comlink patterns (SharedArrayBuffer, COOP/COEP context): `read_file(".github/skills/web-workers/SKILL.md")`
+- Bundle or rendering performance optimization: `read_file(".github/skills/performance/SKILL.md")`

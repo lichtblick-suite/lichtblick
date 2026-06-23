@@ -304,7 +304,7 @@ type IteratorResult =
 - UserScriptPlayer: emitting upstream messages twice when scripts change (use empty messages array)
 
 ## Skills Reference
-- For deep IterablePlayer internals: load `player-internals` skill
-- For MCAP format knowledge: load `mcap-format` skill
-- For Worker patterns: load `web-workers` skill
-- For caching/preloading details: load `caching-internals` skill
+- Deep IterablePlayer state machine, tick loop, or data source contract: `read_file(".github/skills/player-internals/SKILL.md")`
+- MCAP format, chunk structure, or indexed reading: `read_file(".github/skills/mcap-format/SKILL.md")`
+- Worker/Comlink patterns used by iterators: `read_file(".github/skills/web-workers/SKILL.md")`
+- Block caching, memory budgets, or BufferedIterableSource: `read_file(".github/skills/caching-internals/SKILL.md")`

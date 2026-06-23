@@ -112,7 +112,7 @@ const topic = { name: "/camera/image", schemaName: "sensor_msgs/Image", aliasedF
 - **Shared builders**: `@lichtblick/suite-base/testing/builders/` (PlayerBuilder, MessageEventBuilder, RosTimeBuilder, etc.)
 - **Basic primitives**: `BasicBuilder` from `@lichtblick/test-builders`
 - **Component-specific**: colocated `builders/` directory within the component folder
-- For full builder API and patterns: load `unit-testing` skill
+- Full builder API and patterns: `read_file(".github/skills/unit-testing/SKILL.md")`
 - License header requirements: [.github/instructions/contributing.instructions.md](../instructions/contributing.instructions.md)
 
 ## Test Examples
@@ -124,3 +124,7 @@ Refer to these files for good practices by test category — they demonstrate GW
 | React component | `packages/suite-base/src/panels/Publish/index.test.tsx` | Builder pattern (`PublishBuilder`), jest module mocking, behavior-focused assertions |
 | Custom hook | `packages/suite-base/src/PanelAPI/useMessageReducer.test.tsx` | `renderHook` + `act()`, provider wrappers, hook state transition testing |
 | Pure logic / utility | `packages/den/format/formatByteSize.test.ts` | `it.each()` for parameterized edge cases, pure function testing without React |
+
+## Skills Reference
+- Mock builder patterns, GWT structure, or test data construction: `read_file(".github/skills/unit-testing/SKILL.md")`
+- Test naming conventions, file placement, or quality rules: `read_file(".github/skills/test-conventions/SKILL.md")`

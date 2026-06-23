@@ -158,3 +158,6 @@ MUI components are customized globally in `createMuiTheme`:
 - `packages/theme/src/typography.ts`
 - `packages/theme/src/index.ts`
 - `packages/theme/package.json`
+
+## Skills Reference
+- MUI theme configuration, palette structure, or typography scale: `read_file(".github/skills/theme/SKILL.md")`

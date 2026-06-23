@@ -85,4 +85,5 @@ MessagePipeline → Panels
 - `packages/suite-base/src/players/FoxgloveWebSocketPlayer/worker.ts`
 
 ## Skills Reference
-- For Worker patterns: load `web-workers` skill.
+- Foxglove WebSocket protocol, message framing, or server capabilities: `read_file(".github/skills/websocket-connection/SKILL.md")`
+- Worker/Comlink patterns for WebSocket processing: `read_file(".github/skills/web-workers/SKILL.md")`

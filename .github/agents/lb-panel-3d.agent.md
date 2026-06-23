@@ -293,6 +293,6 @@ class DynamicBufferGeometry extends THREE.BufferGeometry {
 - `packages/suite-base/src/panels/ThreeDeeRender/renderables/Images/WorkerImageDecoder.ts`
 
 ## Skills Reference
-- For deep THREE.js rendering internals and shader patterns: load `3d-rendering` skill
-- For Worker-based image decoding and Comlink patterns: load `web-workers` skill
-- For performance optimization patterns: load `performance` skill
+- THREE.js internals, shader patterns, or SceneExtension rendering: `read_file(".github/skills/3d-rendering/SKILL.md")`
+- Worker/Comlink patterns for image decode offloading: `read_file(".github/skills/web-workers/SKILL.md")`
+- Performance profiling or GPU/CPU optimization: `read_file(".github/skills/performance/SKILL.md")`

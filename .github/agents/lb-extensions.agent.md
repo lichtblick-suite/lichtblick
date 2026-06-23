@@ -152,4 +152,4 @@ interface ExtensionCatalogState {
 - `packages/suite-web/src/WebRoot.tsx` (extension loader setup)
 
 ## Skills Reference
-- For deep extension internals: load `extensions-internals` skill
+- Deep extension loading, `.foxe` format, or contribution point patterns: `read_file(".github/skills/extensions-internals/SKILL.md")`

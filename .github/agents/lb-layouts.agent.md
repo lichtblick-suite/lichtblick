@@ -190,4 +190,4 @@ In-memory cache for fast reads:
 - `packages/suite-base/src/services/LayoutManager/`
 
 ## Skills Reference
-- For deep layout sync internals: load `layouts-internals` skill
+- Deep layout sync, conflict resolution, or remote API patterns: `read_file(".github/skills/layouts-internals/SKILL.md")`

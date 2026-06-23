@@ -172,6 +172,6 @@ await renderer.updateDatasets(ds); // Push new data
 - `packages/suite-base/src/panels/Plot/ChartRenderer.worker.ts`
 
 ## Skills Reference
-- For data extraction from messages: load `message-path` skill
-- For Worker + Comlink patterns: load `web-workers` skill
-- For deep Chart.js optimization: load `plot-internals` skill
+- Deep plot builder internals, downsampling, or dataset accumulation: `read_file(".github/skills/plot-internals/SKILL.md")`
+- Message-path syntax and topic data extraction: `read_file(".github/skills/message-path/SKILL.md")`
+- Worker/Comlink patterns (OffscreenCanvas, datasetsWorker): `read_file(".github/skills/web-workers/SKILL.md")`

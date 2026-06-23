@@ -119,5 +119,6 @@ Overlaid on the image plane:
 - `packages/suite-base/src/panels/Image/` (re-export wrapper)
 
 ## Skills Reference
-- For 3D rendering fundamentals: load `3d-rendering` skill
-- For Worker patterns (image decode): load `web-workers` skill
+- Image panel architecture, camera models, or VideoDecoder pipeline: `read_file(".github/skills/panel-image/SKILL.md")`
+- THREE.js fundamentals or ImageMode rendering internals: `read_file(".github/skills/3d-rendering/SKILL.md")`
+- Worker/Comlink patterns for image decode offloading: `read_file(".github/skills/web-workers/SKILL.md")`

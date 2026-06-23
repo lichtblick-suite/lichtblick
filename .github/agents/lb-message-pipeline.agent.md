@@ -79,3 +79,6 @@ Key fields panels can access:
 - `messagesByTopic` is rebuilt only when new messages arrive (not on every frame)
 - Subscription merging prevents redundant data iteration in the Player
 - `renderState.ts` builds panel render state incrementally — only changed fields are recomputed
+
+## Skills Reference
+- Deep MessagePipeline internals, subscription merging, or renderState building: `read_file(".github/skills/message-pipeline/SKILL.md")`

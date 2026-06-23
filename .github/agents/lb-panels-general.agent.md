@@ -165,4 +165,5 @@ Access and update panel configuration by panel ID.
 | Read topic list / datatypes | `PanelAPI.useDataSourceInfo()` |
 
 ## Skills Reference
-- For message-path used by panel data extraction: load `message-path` skill
+- PanelExtensionAdapter lifecycle, renderState building, or panel API contracts: `read_file(".github/skills/panel-extension-api/SKILL.md")`
+- Message-path syntax and panel data extraction: `read_file(".github/skills/message-path/SKILL.md")`

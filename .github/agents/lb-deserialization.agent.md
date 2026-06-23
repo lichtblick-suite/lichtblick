@@ -66,5 +66,5 @@ This is the single function that resolves any channel's schema into a deserializ
 - ROS: `MessageReader` pre-compiles field offsets at schema parse time
 
 ## Skills Reference
-- For MCAP format and chunk structure: load `mcap-format` skill
-- For Worker patterns: load `web-workers` skill
+- MCAP format, chunk structure, and indexed reading: `read_file(".github/skills/mcap-format/SKILL.md")`
+- Worker/Comlink patterns (offloading decode to SharedWorker): `read_file(".github/skills/web-workers/SKILL.md")`

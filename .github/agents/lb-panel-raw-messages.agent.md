@@ -208,5 +208,6 @@ The `Value.tsx` component provides interactive actions on tree values:
 - `packages/suite-base/src/panels/RawMessagesCommon/Metadata.tsx` (message timestamp/topic info)
 
 ## Skills Reference
-- For message-path syntax and extraction: load `message-path` skill
-- For performance optimization patterns: load `performance` skill
+- RawMessages/RawMessagesVirtual architecture, tree rendering, or diff mode: `read_file(".github/skills/panel-raw-messages/SKILL.md")`
+- Message-path syntax and field path navigation: `read_file(".github/skills/message-path/SKILL.md")`
+- Virtualization or rendering performance: `read_file(".github/skills/performance/SKILL.md")`

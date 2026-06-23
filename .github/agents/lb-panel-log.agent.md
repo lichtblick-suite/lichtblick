@@ -102,3 +102,6 @@ function filterMessages(
 - `packages/suite-base/src/panels/Log/LogList.tsx`
 - `packages/suite-base/src/panels/Log/filterMessages.ts`
 - `packages/suite-base/src/panels/Log/conversion.tsx`
+
+## Skills Reference
+- Log panel architecture, filtering logic, or virtualized list patterns: `read_file(".github/skills/panel-log/SKILL.md")`

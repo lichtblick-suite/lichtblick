@@ -315,7 +315,7 @@ WorkerSerializedIterableSource       McapIterableSourceWorker.worker.ts
 - S3 presigned URLs with non-GET method → `BrowserHttpReader.open()` requires GET
 
 ## Skills Reference
-- For deep HTTP caching internals (CachedFilelike, VirtualLRUBuffer, getNewConnection): load `remote-caching` skill
-- For MCAP format structure (why indexed reading works): load `mcap-format` skill
-- For Worker/Comlink patterns: load `web-workers` skill
-- For BufferedIterableSource/BlockLoader details: load `caching-internals` skill
+- Deep HTTP caching internals (CachedFilelike, VirtualLRUBuffer): `read_file(".github/skills/remote-caching/SKILL.md")`
+- MCAP format structure and indexed reading: `read_file(".github/skills/mcap-format/SKILL.md")`
+- Worker/Comlink patterns: `read_file(".github/skills/web-workers/SKILL.md")`
+- BufferedIterableSource or BlockLoader details: `read_file(".github/skills/caching-internals/SKILL.md")`

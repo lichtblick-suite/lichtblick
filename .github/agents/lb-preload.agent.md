@@ -203,6 +203,6 @@ const unsubscribe = context.unstable_subscribeMessageRange({
 - `packages/suite/src/index.ts` (SubscribeMessageRangeArgs type)
 
 ## Skills Reference
-- For MCAP chunk-level understanding: load `mcap-format` skill
-- For Worker-based source patterns: load `web-workers` skill
-- For player state machine and tick loop: load `player-internals` skill
+- MCAP chunk-level format and indexed reads: `read_file(".github/skills/mcap-format/SKILL.md")`
+- Worker-based source patterns and Comlink: `read_file(".github/skills/web-workers/SKILL.md")`
+- Player state machine and tick loop context: `read_file(".github/skills/player-internals/SKILL.md")`

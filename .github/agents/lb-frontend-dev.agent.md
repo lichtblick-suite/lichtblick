@@ -113,3 +113,7 @@ Prefer deriving state and using simpler data flow before reaching for effects.
 
 - [Escape Hatches](https://react.dev/learn/escape-hatches)
 - [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)
+
+## Skills Reference
+- Component performance profiling or render optimization: `read_file(".github/skills/performance/SKILL.md")`
+- Writing or fixing unit tests for components: `read_file(".github/skills/unit-testing/SKILL.md")`

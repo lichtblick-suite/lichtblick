@@ -90,4 +90,5 @@ export default function transform(event: MessageEvent): OutputMessage {
 - `packages/suite-base/src/players/UserScriptPlayer/runtimeWorker/`
 
 ## Skills Reference
-- For SharedWorker patterns: load `web-workers` skill
+- UserScripts panel internals, Monaco editor, or script execution sandbox: `read_file(".github/skills/panel-user-scripts/SKILL.md")`
+- SharedWorker patterns for script execution: `read_file(".github/skills/web-workers/SKILL.md")`

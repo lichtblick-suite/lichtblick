@@ -22,6 +22,8 @@ This agent is the designated **writer** for E2E test files. Only this agent edit
 - `packages/suite-web/**` — web entry points
 **Before writing any test**, always:
 
+## Skills Reference
+
 1. **Ask the user to start the application** before proceeding. For web tests, confirm that `yarn web:serve` is running at `http://localhost:8080`. For desktop tests, confirm that the desktop build exists (`yarn desktop:build:dev`). Do not proceed until the user confirms the app is running.
 2. Read the **test-conventions** skill — `read_file(".github/skills/test-conventions/SKILL.md")`
 3. Read the **e2e-playwright-mcp** skill — `read_file(".github/skills/e2e-playwright-mcp/SKILL.md")`

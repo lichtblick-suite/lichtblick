@@ -83,4 +83,5 @@ Shared chart component (also used by other panels):
 - `packages/suite-base/src/panels/StateTransitions/hooks/useStateTransitionsData.ts`
 
 ## Skills Reference
-- For message-path syntax and extraction: load `message-path` skill
+- StateTransitions panel internals, discrete state rendering, or TimeBasedChart: `read_file(".github/skills/panel-state-transitions/SKILL.md")`
+- Message-path syntax and topic data extraction: `read_file(".github/skills/message-path/SKILL.md")`

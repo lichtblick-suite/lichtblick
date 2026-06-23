@@ -81,3 +81,6 @@ On zoom change → grid recalculated
 - `packages/suite-base/src/panels/Map/FilteredPointLayer.ts`
 - `packages/suite-base/src/panels/Map/support.ts`
 - `packages/suite-base/src/panels/Map/config.ts`
+
+## Skills Reference
+- Map panel internals, Leaflet integration, or GeoJSON/GPS data handling: `read_file(".github/skills/panel-map/SKILL.md")`
