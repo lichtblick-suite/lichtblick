@@ -3544,7 +3544,7 @@ __metadata:
     gl-matrix: 3.4.3
     hammerjs: 2.0.8
     heap-js: 2.7.1
-    i18next: 25.4.2
+    i18next: 26.3.1
     i18next-browser-languagedetector: 8.2.0
     idb: 7.1.1
     idb-keyval: 6.2.1
@@ -13356,17 +13356,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:25.4.2":
-  version: 25.4.2
-  resolution: "i18next@npm:25.4.2"
-  dependencies:
-    "@babel/runtime": ^7.27.6
+"i18next@npm:26.3.1":
+  version: 26.3.1
+  resolution: "i18next@npm:26.3.1"
   peerDependencies:
-    typescript: ^5
+    typescript: ^5 || ^6
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: c00853eb874f2b9a536d2cc4a3f41d10aed304c2025f787d8c0119154c8b145e7411d39edbfffc84d6666588b764b829d309cc7316dfd9fe60d5d6098438f768
+  checksum: 950b3876ae6cc0a2ca18f9866ec4156cfeb808f2bc43c89b29706bfc7f7ea71cc5b2438ffc89070115cf3f2805fa65a69f01abf8dfbb731b7a9f00fa1cc88eb7
   languageName: node
   linkType: hard
 
