@@ -3532,7 +3532,7 @@ __metadata:
     css-loader: 6.8.1
     cytoscape: 3.31.1
     cytoscape-dagre: 2.5.0
-    dompurify: 3.4.9
+    dompurify: 3.4.11
     dotenv: 17.2.2
     esbuild-loader: 4.3.0
     eventemitter3: 5.0.1
@@ -13247,8 +13247,8 @@ __metadata:
   linkType: hard
 
 "http-proxy-middleware@npm:^2.0.9":
-  version: 2.0.9
-  resolution: "http-proxy-middleware@npm:2.0.9"
+  version: 2.0.10
+  resolution: "http-proxy-middleware@npm:2.0.10"
   dependencies:
     "@types/http-proxy": ^1.17.8
     http-proxy: ^1.18.1
@@ -13260,7 +13260,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/express":
       optional: true
-  checksum: 0ea88609b9c13fa03b89f8e6b85bd5c537027ec6990005dd81a7fbb3e73fcf8d6a6e3db2b57b1c6cddbcda80965704584dc6291d0e721b2700198c4e59ee0d0b
+  checksum: 94dd3289f888021089ae6beb96c492ecfc0d2ea78fccf97f861ac1772c8ba471cf5f8cb17911d66d6084a9943db4deec841cc0b097b5dec21955e94e7c16dc64
   languageName: node
   linkType: hard
 
