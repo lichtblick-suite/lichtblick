@@ -198,7 +198,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   #scene: THREE.Scene;
   #dirLight: THREE.DirectionalLight;
   /** Camera-attached directional light used when `scene.mainLightMode` is `"headlight"` */
-  #headLight: THREE.DirectionalLight;
+  readonly #headLight: THREE.DirectionalLight;
   #hemiLight: THREE.HemisphereLight;
   public input: Input;
   public readonly outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
@@ -829,7 +829,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         handlers = [];
         this.schemaSubscriptions.set(schemaName, handlers);
       }
-      handlers.push(subscription as RendererSubscription);
+      handlers.push(subscription);
     }
     this.emit("schemaSubscriptionsChanged", this);
   }
@@ -840,7 +840,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       handlers = [];
       this.topicSubscriptions.set(topic, handlers);
     }
-    handlers.push(subscription as RendererSubscription);
+    handlers.push(subscription);
     this.emit("topicSubscriptionsChanged", this);
   }
 
@@ -885,12 +885,12 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     if (path[0] === "topics") {
       if (node.visible === true) {
         errors.addToTopic(
-          path[1]!,
+          path[1],
           "IMAGE_ONLY_TOPIC",
           "Camera calibration information is required to display 3D topics",
         );
       } else {
-        errors.removeFromTopic(path[1]!, "IMAGE_ONLY_TOPIC");
+        errors.removeFromTopic(path[1], "IMAGE_ONLY_TOPIC");
       }
     }
   };
@@ -995,7 +995,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
   public updateSceneRenderSettings(): void {
     const toneMapping = this.config.scene.toneMapping ?? "none";
-    this.gl.toneMapping = toneMapping === "aces" ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
+    this.gl.toneMapping =
+      toneMapping === "none" ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
 
     this.gl.shadowMap.enabled = this.config.scene.shadowsEnabled ?? false;
 
@@ -1157,13 +1158,13 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       if (!messagesByTopic.has(msg.topic)) {
         messagesByTopic.set(msg.topic, []);
       }
-      messagesByTopic.get(msg.topic)!.push(msg);
+      messagesByTopic.get(msg.topic).push(msg);
 
       // Group by schema
       if (!messagesBySchema.has(msg.schemaName)) {
         messagesBySchema.set(msg.schemaName, []);
       }
-      messagesBySchema.get(msg.schemaName)!.push(msg);
+      messagesBySchema.get(msg.schemaName).push(msg);
     }
 
     // Queue messages in batches
