@@ -6,7 +6,7 @@
   "productName": "Lichtblick",
   "description": "Core components of Lichtblick",
   "productDescription": "Lichtblick Suite",
-  "packageManager": "yarn@3.6.3",
+  "packageManager": "yarn@4.17.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/lichtblick-suite/lichtblick.git"
