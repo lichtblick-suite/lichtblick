@@ -3114,7 +3114,7 @@ __metadata:
   resolution: "@lichtblick/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
   dependencies:
     "@lichtblick/comlink": 1.0.3
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     typescript: 6.0.3
   languageName: unknown
   linkType: soft
@@ -3140,7 +3140,7 @@ __metadata:
     "@lichtblick/comlink": 1.0.3
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@types/dom-webcodecs": 0.1.14
     async-mutex: 0.5.0
     eventemitter3: 5.0.1
@@ -3164,7 +3164,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/eslint-plugin-suite@workspace:packages/eslint-plugin-suite"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@typescript-eslint/rule-tester": 8.46.2
     "@typescript-eslint/utils": 8.46.2
   languageName: unknown
@@ -3200,7 +3200,7 @@ __metadata:
   resolution: "@lichtblick/hooks@workspace:packages/hooks"
   dependencies:
     "@lichtblick/log": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@testing-library/react": 16.0.0
     "@types/foxglove__web": "workspace:*"
     "@types/lodash-es": ^4
@@ -3216,7 +3216,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/log@workspace:packages/log"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     typescript: 6.0.3
   languageName: unknown
   linkType: soft
@@ -3233,7 +3233,7 @@ __metadata:
     "@lichtblick/rosmsg": 1.0.0
     "@lichtblick/rosmsg-serialization": 1.0.0
     "@lichtblick/rosmsg2-serialization": 1.0.0
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@lichtblick/wasm-bz2": 1.0.0
     "@lichtblick/wasm-lz4": 1.0.0
     "@lichtblick/wasm-zstd": 1.0.0
@@ -3258,7 +3258,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/message-path@workspace:packages/message-path"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@types/nearley": 2.11.5
     babel-jest: 30.4.1
     nearley: 2.20.1
@@ -3433,7 +3433,7 @@ __metadata:
     "@lichtblick/test-builders": 1.0.1
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/three-text": 1.0.0
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@lichtblick/typescript-transformers": "workspace:*"
     "@lichtblick/ulog": 1.0.0
     "@lichtblick/velodyne-cloud": 1.0.0
@@ -3594,7 +3594,7 @@ __metadata:
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@mcap/core": 2.2.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
     "@storybook/react": 9.1.9
@@ -3645,7 +3645,7 @@ __metadata:
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@mui/material": 7.2.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
     "@storybook/react": 9.1.9
@@ -3664,7 +3664,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/suite@workspace:packages/suite"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     typescript: 6.0.3
   languageName: unknown
   linkType: soft
@@ -3687,7 +3687,7 @@ __metadata:
     "@emotion/react": 11.14.0
     "@emotion/styled": 11.14.1
     "@fluentui/react-icons": 2.0.308
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@mui/icons-material": 7.3.8
     "@mui/lab": 5.0.0-alpha.177
     "@mui/material": 7.2.0
@@ -3709,10 +3709,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lichtblick/tsconfig@npm:1.0.2":
-  version: 1.0.2
-  resolution: "@lichtblick/tsconfig@npm:1.0.2"
-  checksum: 67278b0d2089be3f488a5514d6d26af0f20f1597ca679ca323f153e4b093eec3f69a3094484cd4e448429a8a6d13cb690ab9054fab8655b61b65a8ee60f36a69
+"@lichtblick/tsconfig@npm:1.1.2":
+  version: 1.1.2
+  resolution: "@lichtblick/tsconfig@npm:1.1.2"
+  checksum: 12a944c22014cffb98be24e923e47a41a21057b9982bb0c35012179ae12781023a8db867b8d47178e839d391cb73a7f6028dcda43017129435b7abb9a2092ee4
   languageName: node
   linkType: hard
 
@@ -3720,7 +3720,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/typescript-transformers@workspace:packages/typescript-transformers"
   dependencies:
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     typescript: 6.0.3
   languageName: unknown
   linkType: soft
@@ -7984,7 +7984,7 @@ __metadata:
     "@lichtblick/rostime": 1.0.0
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
     "@types/react": 18.3.12
     "@types/react-dom": 18.3.0
@@ -9828,7 +9828,7 @@ __metadata:
   dependencies:
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/suite-desktop": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
   languageName: unknown
   linkType: soft
 
@@ -14754,7 +14754,7 @@ __metadata:
     "@lichtblick/omgidl-serialization": 1.0.0
     "@lichtblick/ros2idl-parser": 1.0.0
     "@lichtblick/suite": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@mui/material": 7.2.0
     "@octokit/rest": 22.0.1
     "@playwright/mcp": 0.0.75
@@ -21101,7 +21101,7 @@ __metadata:
   dependencies:
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-web": "workspace:*"
-    "@lichtblick/tsconfig": 1.0.2
+    "@lichtblick/tsconfig": 1.1.2
     "@types/serve-handler": ^6
     playwright: 1.60.0
     serve-handler: 6.1.7
