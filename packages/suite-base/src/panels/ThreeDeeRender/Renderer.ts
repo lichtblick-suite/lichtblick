@@ -829,7 +829,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         handlers = [];
         this.schemaSubscriptions.set(schemaName, handlers);
       }
-      handlers.push(subscription);
+      handlers.push(subscription as RendererSubscription);
     }
     this.emit("schemaSubscriptionsChanged", this);
   }
@@ -840,7 +840,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       handlers = [];
       this.topicSubscriptions.set(topic, handlers);
     }
-    handlers.push(subscription);
+    handlers.push(subscription as RendererSubscription);
     this.emit("topicSubscriptionsChanged", this);
   }
 
@@ -882,15 +882,16 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   /** Adds errors to visible topic nodes when calibration is undefined */
   #imageOnlyModeTopicSettingsValidator = (entry: SettingsTreeEntry, errors: LayerErrors) => {
     const { path, node } = entry;
-    if (path[0] === "topics") {
+    const topicName = path[1];
+    if (path[0] === "topics" && topicName != undefined) {
       if (node.visible === true) {
         errors.addToTopic(
-          path[1],
+          topicName,
           "IMAGE_ONLY_TOPIC",
           "Camera calibration information is required to display 3D topics",
         );
       } else {
-        errors.removeFromTopic(path[1], "IMAGE_ONLY_TOPIC");
+        errors.removeFromTopic(topicName, "IMAGE_ONLY_TOPIC");
       }
     }
   };
@@ -1155,16 +1156,20 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const messagesBySchema = new Map<string, MessageEvent[]>();
     for (const msg of messageEvents) {
       // Group by topic
-      if (!messagesByTopic.has(msg.topic)) {
-        messagesByTopic.set(msg.topic, []);
+      let topicMessages = messagesByTopic.get(msg.topic);
+      if (topicMessages == undefined) {
+        topicMessages = [];
+        messagesByTopic.set(msg.topic, topicMessages);
       }
-      messagesByTopic.get(msg.topic).push(msg);
+      topicMessages.push(msg);
 
       // Group by schema
-      if (!messagesBySchema.has(msg.schemaName)) {
-        messagesBySchema.set(msg.schemaName, []);
+      let schemaMessages = messagesBySchema.get(msg.schemaName);
+      if (schemaMessages == undefined) {
+        schemaMessages = [];
+        messagesBySchema.set(msg.schemaName, schemaMessages);
       }
-      messagesBySchema.get(msg.schemaName).push(msg);
+      schemaMessages.push(msg);
     }
 
     // Queue messages in batches
