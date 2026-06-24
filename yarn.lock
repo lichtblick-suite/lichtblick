@@ -244,10 +244,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/helper-plugin-utils@npm:^7.0.0, @babel/helper-plugin-utils@npm:^7.10.4, @babel/helper-plugin-utils@npm:^7.12.13, @babel/helper-plugin-utils@npm:^7.14.5, @babel/helper-plugin-utils@npm:^7.18.6, @babel/helper-plugin-utils@npm:^7.27.1, @babel/helper-plugin-utils@npm:^7.28.6, @babel/helper-plugin-utils@npm:^7.29.7, @babel/helper-plugin-utils@npm:^7.8.0":
+"@babel/helper-plugin-utils@npm:^7.0.0, @babel/helper-plugin-utils@npm:^7.10.4, @babel/helper-plugin-utils@npm:^7.12.13, @babel/helper-plugin-utils@npm:^7.14.5, @babel/helper-plugin-utils@npm:^7.18.6, @babel/helper-plugin-utils@npm:^7.28.6, @babel/helper-plugin-utils@npm:^7.29.7, @babel/helper-plugin-utils@npm:^7.8.0":
   version: 7.29.7
   resolution: "@babel/helper-plugin-utils@npm:7.29.7"
   checksum: 10/6d16929fe5c792bbc8e4d67e18d7c1be69d2f18992deaa3d94dc26541fec662e83cbeeaf7553c6867d068eb7aed4e0d5e3e137c1dd4d5bcfa286f8d772f1f457
+  languageName: node
+  linkType: hard
+
+"@babel/helper-plugin-utils@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "@babel/helper-plugin-utils@npm:8.0.1"
+  peerDependencies:
+    "@babel/core": ^8.0.0
+  checksum: 10/d9c8b9dc626640233a52d4fec0e31766a5dbcd5c9b799bd6e3c9efa6e73f0f8e389395fea33f00bce395482c2a4b99fa73d74c59720f3c8cbd019ba9ea82ad6a
   languageName: node
   linkType: hard
 
@@ -421,18 +430,6 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: 10/396b108c349e8ce6511be4218089f9142bae235307c3cff7a985d9391b8d84f2421668d604f109344101ce65078101bf29b9e52ec2e242e242c7bbf3efc56cad
-  languageName: node
-  linkType: hard
-
-"@babel/plugin-proposal-explicit-resource-management@npm:7.27.4":
-  version: 7.27.4
-  resolution: "@babel/plugin-proposal-explicit-resource-management@npm:7.27.4"
-  dependencies:
-    "@babel/helper-plugin-utils": "npm:^7.27.1"
-    "@babel/plugin-transform-destructuring": "npm:^7.27.3"
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-  checksum: 10/777339ceb9df216929d9d1bf25b845dc91944059ee72b213af38e7a3fe156d7252d51d67fec18942e788f58f90a23b7da9bcd0f45f1b0bed47dcfe105fda39d3
   languageName: node
   linkType: hard
 
@@ -777,7 +774,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-destructuring@npm:^7.27.3, @babel/plugin-transform-destructuring@npm:^7.29.7":
+"@babel/plugin-transform-destructuring@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/plugin-transform-destructuring@npm:7.29.7"
   dependencies:
@@ -786,6 +783,17 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: 10/e53caad0c2d523367724aefcc6b8c8df24fcb1a3f53e9899cb4bb5dc39ccf61e30df0a761d74485a895d9bcaaad49644879cbd3a9fc20c90501a5e831caaac5b
+  languageName: node
+  linkType: hard
+
+"@babel/plugin-transform-destructuring@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "@babel/plugin-transform-destructuring@npm:8.0.1"
+  dependencies:
+    "@babel/helper-plugin-utils": "npm:^8.0.1"
+  peerDependencies:
+    "@babel/core": ^8.0.0
+  checksum: 10/0943cf0b04d532576b865f75dc96dc24474550f554bdf43d2f9d6406eae99b76c6a70cdfdeac2f206d1e42cce26a4378679e2828c5d4c5e0155fef064152612e
   languageName: node
   linkType: hard
 
@@ -832,6 +840,18 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: 10/58c035e6b9103c225f3d181671d9b3dec140351c3ecf12bc3a66b8653be41161f20135ada00a703244c2bfc9dd57b62fc54f77f2f6fe43df6c598358f377e6fa
+  languageName: node
+  linkType: hard
+
+"@babel/plugin-transform-explicit-resource-management@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@babel/plugin-transform-explicit-resource-management@npm:8.0.1"
+  dependencies:
+    "@babel/helper-plugin-utils": "npm:^8.0.1"
+    "@babel/plugin-transform-destructuring": "npm:^8.0.1"
+  peerDependencies:
+    "@babel/core": ^8.0.0
+  checksum: 10/45f849f44927ffc0e57fb2723173a0717f1458584d51f3b94f8bd6cab73d7e73e60613bf704c2358ceb4eeee9c54bb93a7bd8ca4ce064469be58f90c88d7b3d8
   languageName: node
   linkType: hard
 
@@ -14468,14 +14488,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:4.1.1":
-  version: 4.1.1
-  resolution: "js-yaml@npm:4.1.1"
+"js-yaml@npm:4.2.0":
+  version: 4.2.0
+  resolution: "js-yaml@npm:4.2.0"
   dependencies:
     argparse: "npm:^2.0.1"
   bin:
     js-yaml: bin/js-yaml.js
-  checksum: 10/a52d0519f0f4ef5b4adc1cde466cb54c50d56e2b4a983b9d5c9c0f2f99462047007a6274d7e95617a21d3c91fde3ee6115536ed70991cd645ba8521058b78f77
+  checksum: 10/51de2067a2b44b07ba5206132e56005f8b568ff279bb4d2f645068958c56fa4827d40a6841c983234671fa0a134bf094d0b0717873c2a3d319185297af145a6d
   languageName: node
   linkType: hard
 
@@ -14741,7 +14761,7 @@ __metadata:
     "@actions/tool-cache": "npm:2.0.2"
     "@babel/core": "npm:7.29.7"
     "@babel/plugin-proposal-decorators": "npm:7.29.7"
-    "@babel/plugin-proposal-explicit-resource-management": "npm:7.27.4"
+    "@babel/plugin-transform-explicit-resource-management": "npm:8.0.1"
     "@babel/preset-env": "npm:7.29.7"
     "@babel/preset-react": "npm:7.29.7"
     "@babel/preset-typescript": "npm:7.29.7"
@@ -19831,16 +19851,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:7.5.11":
-  version: 7.5.11
-  resolution: "tar@npm:7.5.11"
+"tar@npm:7.5.16":
+  version: 7.5.16
+  resolution: "tar@npm:7.5.16"
   dependencies:
     "@isaacs/fs-minipass": "npm:^4.0.0"
     chownr: "npm:^3.0.0"
     minipass: "npm:^7.1.2"
     minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
-  checksum: 10/fb2e77ee858a73936c68e066f4a602d428d6f812e6da0cc1e14a41f99498e4f7fd3535e355fa15157240a5538aa416026cfa6306bb0d1d1c1abf314b1f878e9a
+  checksum: 10/fafa22efceb9f056bf29ddc47d9bd90bb82fe3ce57b8d1242fc45771251741964cebba69d4e14a24fd1643f3c7f68478e945a19def534703cf370c2d9dca2e09
   languageName: node
   linkType: hard
 
@@ -20551,10 +20571,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.24.1":
-  version: 6.24.1
-  resolution: "undici@npm:6.24.1"
-  checksum: 10/4f84e6045520eef9ba8eabb96360b50c759f59905c1703b12187c2dbcc6d1584c5d7ecddeb45b0ed6cac84ca2d132b21bfd8a38f77fa30378b1ac5d2ae390fd9
+"undici@npm:6.27.0":
+  version: 6.27.0
+  resolution: "undici@npm:6.27.0"
+  checksum: 10/30c18cdb235edf4dd36f8aa3ace1ffaf44060289a7d62ad44c33180d2d74a224015d25574812f62ce9c625b5beb1b0b766495b650fedf356aca11eed7ce2c816
   languageName: node
   linkType: hard
 
