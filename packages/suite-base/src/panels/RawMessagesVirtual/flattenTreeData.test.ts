@@ -11,6 +11,9 @@ import { flattenTreeData } from "./flattenTreeData";
 
 describe("flattenTreeData", () => {
   let expandedNodes = new Set<string>();
+  beforeEach(() => {
+    expandedNodes = new Set<string>();
+  });
   describe("when data is null or undefined", () => {
     it("should return empty array given undefined data", () => {
       // Given
