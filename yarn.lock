@@ -3101,9 +3101,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/comlink-transfer-handlers@workspace:packages/comlink-transfer-handlers"
   dependencies:
-    "@lichtblick/comlink": 1.0.3
-    "@lichtblick/tsconfig": 1.1.2
-    typescript: 6.0.3
+    "@lichtblick/comlink": "npm:1.0.3"
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -3128,11 +3128,11 @@ __metadata:
     "@lichtblick/comlink": "npm:1.0.3"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite": "workspace:*"
-    "@lichtblick/tsconfig": 1.1.2
-    "@types/dom-webcodecs": 0.1.14
-    async-mutex: 0.5.0
-    eventemitter3: 5.0.1
-    xacro-parser: 0.3.11
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@types/dom-webcodecs": "npm:0.1.14"
+    async-mutex: "npm:0.5.0"
+    eventemitter3: "npm:5.0.1"
+    xacro-parser: "npm:0.3.11"
   languageName: unknown
   linkType: soft
 
@@ -3152,9 +3152,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/eslint-plugin-suite@workspace:packages/eslint-plugin-suite"
   dependencies:
-    "@lichtblick/tsconfig": 1.1.2
-    "@typescript-eslint/rule-tester": 8.46.2
-    "@typescript-eslint/utils": 8.46.2
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@typescript-eslint/rule-tester": "npm:8.46.2"
+    "@typescript-eslint/utils": "npm:8.46.2"
   languageName: unknown
   linkType: soft
 
@@ -3188,13 +3188,13 @@ __metadata:
   resolution: "@lichtblick/hooks@workspace:packages/hooks"
   dependencies:
     "@lichtblick/log": "workspace:*"
-    "@lichtblick/tsconfig": 1.1.2
-    "@testing-library/react": 16.0.0
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@testing-library/react": "npm:16.0.0"
     "@types/foxglove__web": "workspace:*"
-    "@types/lodash-es": ^4
-    lodash-es: 4.18.1
-    shallowequal: 1.1.0
-    typescript: 6.0.3
+    "@types/lodash-es": "npm:^4"
+    lodash-es: "npm:4.18.1"
+    shallowequal: "npm:1.1.0"
+    typescript: "npm:6.0.3"
   peerDependencies:
     react: ^18.3.1
   languageName: unknown
@@ -3204,8 +3204,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/log@workspace:packages/log"
   dependencies:
-    "@lichtblick/tsconfig": 1.1.2
-    typescript: 6.0.3
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -3213,25 +3213,25 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/schemas": 1.9.0
-    "@lichtblick/message-definition": 1.0.0
-    "@lichtblick/omgidl-parser": 1.0.0
-    "@lichtblick/omgidl-serialization": 1.0.0
-    "@lichtblick/ros2idl-parser": 1.0.0
-    "@lichtblick/rosmsg": 1.0.0
-    "@lichtblick/rosmsg-serialization": 1.0.0
-    "@lichtblick/rosmsg2-serialization": 1.0.0
-    "@lichtblick/tsconfig": 1.1.2
-    "@lichtblick/wasm-bz2": 1.0.0
-    "@lichtblick/wasm-lz4": 1.0.0
-    "@lichtblick/wasm-zstd": 1.0.0
-    "@mcap/core": 2.2.0
-    "@protobufjs/base64": 1.1.2
+    "@foxglove/schemas": "npm:1.9.0"
+    "@lichtblick/message-definition": "npm:1.0.0"
+    "@lichtblick/omgidl-parser": "npm:1.0.0"
+    "@lichtblick/omgidl-serialization": "npm:1.0.0"
+    "@lichtblick/ros2idl-parser": "npm:1.0.0"
+    "@lichtblick/rosmsg": "npm:1.0.0"
+    "@lichtblick/rosmsg-serialization": "npm:1.0.0"
+    "@lichtblick/rosmsg2-serialization": "npm:1.0.0"
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@lichtblick/wasm-bz2": "npm:1.0.0"
+    "@lichtblick/wasm-lz4": "npm:1.0.0"
+    "@lichtblick/wasm-zstd": "npm:1.0.0"
+    "@mcap/core": "npm:2.2.0"
+    "@protobufjs/base64": "npm:1.1.2"
     "@types/protobufjs": "workspace:*"
     flatbuffers: "npm:25.9.23"
     flatbuffers_reflection: "npm:0.0.7"
     protobufjs: "patch:protobufjs@7.2.5#../../patches/protobufjs.patch"
-    typescript: 6.0.3
+    typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -3246,11 +3246,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/message-path@workspace:packages/message-path"
   dependencies:
-    "@lichtblick/tsconfig": 1.1.2
-    "@types/nearley": 2.11.5
-    babel-jest: 30.4.1
-    nearley: 2.20.1
-    typescript: 6.0.3
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@types/nearley": "npm:2.11.5"
+    babel-jest: "npm:30.4.1"
+    nearley: "npm:2.20.1"
+    typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -3420,8 +3420,8 @@ __metadata:
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/test-builders": "npm:1.0.1"
     "@lichtblick/theme": "workspace:*"
-    "@lichtblick/three-text": 1.0.0
-    "@lichtblick/tsconfig": 1.1.2
+    "@lichtblick/three-text": "npm:1.0.0"
+    "@lichtblick/tsconfig": "npm:1.1.2"
     "@lichtblick/typescript-transformers": "workspace:*"
     "@lichtblick/ulog": "npm:1.0.0"
     "@lichtblick/velodyne-cloud": "npm:1.0.0"
@@ -3553,18 +3553,18 @@ __metadata:
     style-loader: "npm:4.0.0"
     text-metrics: "npm:3.0.0"
     three: "patch:three@0.156.1#../../patches/three.patch"
-    tinycolor2: 1.6.0
-    ts-essentials: 9.4.0
-    ts-key-enum: 3.0.13
-    ts-loader: 9.5.4
-    tss-react: 4.9.19
-    typescript: 6.0.3
-    use-debounce: 10.0.0
-    use-immer: 0.11.0
-    uuid: 14.0.0
-    vm-browserify: 1.1.2
-    webpack: 5.107.2
-    zustand: 4.5.7
+    tinycolor2: "npm:1.6.0"
+    ts-essentials: "npm:9.4.0"
+    ts-key-enum: "npm:3.0.13"
+    ts-loader: "npm:9.5.4"
+    tss-react: "npm:4.9.19"
+    typescript: "npm:6.0.3"
+    use-debounce: "npm:10.0.0"
+    use-immer: "npm:0.11.0"
+    uuid: "npm:14.0.0"
+    vm-browserify: "npm:1.1.2"
+    webpack: "npm:5.107.2"
+    zustand: "npm:4.5.7"
   languageName: unknown
   linkType: soft
 
@@ -3582,46 +3582,46 @@ __metadata:
     "@lichtblick/rostime": "npm:1.0.0"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
-    "@lichtblick/tsconfig": 1.1.2
-    "@mcap/core": 2.2.0
-    "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
-    "@storybook/react": 9.1.9
-    "@types/mock-fs": 4.13.4
-    "@types/plist": ^3.0.3
-    "@types/pngjs": ^6.0.2
-    "@types/randomstring": 1.3.0
-    "@types/tinycolor2": 1.4.4
-    "@types/utif": ^3.0.6
-    "@xmldom/xmldom": 0.9.10
-    async-mutex: 0.5.0
-    builder-util: "*"
-    clean-webpack-plugin: 4.0.0
-    dotenv: 17.2.2
-    electron: 42.4.1
-    electron-builder: 26.15.3
-    electron-devtools-installer: 4.0.0
-    electron-squirrel-startup: 1.0.1
-    electron-updater: 6.8.9
-    esbuild-loader: 4.3.0
-    eventemitter3: 5.0.1
-    fork-ts-checker-webpack-plugin: 9.0.2
-    html-webpack-plugin: 5.5.3
-    jszip: 3.10.1
-    mock-fs: 5.5.0
-    path-browserify: 1.0.1
-    plist: 4.0.0
-    pngjs: 7.0.0
-    quicklookjs: 1.0.1
-    randomstring: 1.3.1
-    react: 18.3.1
-    react-dom: 18.3.1
-    react-refresh-typescript: 2.0.10
-    react-use: 17.6.0
-    tinycolor2: 1.6.0
-    tss-react: 4.9.19
-    utif: 3.1.0
-    webpack: 5.107.2
-    webpack-dev-server: 5.2.5
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@mcap/core": "npm:2.2.0"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
+    "@storybook/react": "npm:9.1.9"
+    "@types/mock-fs": "npm:4.13.4"
+    "@types/plist": "npm:^3.0.3"
+    "@types/pngjs": "npm:^6.0.2"
+    "@types/randomstring": "npm:1.3.0"
+    "@types/tinycolor2": "npm:1.4.4"
+    "@types/utif": "npm:^3.0.6"
+    "@xmldom/xmldom": "npm:0.9.10"
+    async-mutex: "npm:0.5.0"
+    builder-util: "npm:*"
+    clean-webpack-plugin: "npm:4.0.0"
+    dotenv: "npm:17.2.2"
+    electron: "npm:42.4.1"
+    electron-builder: "npm:26.15.3"
+    electron-devtools-installer: "npm:4.0.0"
+    electron-squirrel-startup: "npm:1.0.1"
+    electron-updater: "npm:6.8.9"
+    esbuild-loader: "npm:4.3.0"
+    eventemitter3: "npm:5.0.1"
+    fork-ts-checker-webpack-plugin: "npm:9.0.2"
+    html-webpack-plugin: "npm:5.5.3"
+    jszip: "npm:3.10.1"
+    mock-fs: "npm:5.5.0"
+    path-browserify: "npm:1.0.1"
+    plist: "npm:4.0.0"
+    pngjs: "npm:7.0.0"
+    quicklookjs: "npm:1.0.1"
+    randomstring: "npm:1.3.1"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    react-refresh-typescript: "npm:2.0.10"
+    react-use: "npm:17.6.0"
+    tinycolor2: "npm:1.6.0"
+    tss-react: "npm:4.9.19"
+    utif: "npm:3.1.0"
+    webpack: "npm:5.107.2"
+    webpack-dev-server: "npm:5.2.5"
   languageName: unknown
   linkType: soft
 
@@ -3633,18 +3633,18 @@ __metadata:
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
-    "@lichtblick/tsconfig": 1.1.2
-    "@mui/material": 7.2.0
-    "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
-    "@storybook/react": 9.1.9
-    clean-webpack-plugin: 4.0.0
-    copy-webpack-plugin: 14.0.0
-    html-webpack-plugin: 5.6.0
-    react: 18.3.1
-    react-dom: 18.3.1
-    tss-react: 4.9.19
-    webpack: 5.107.2
-    webpack-dev-server: 5.2.5
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@mui/material": "npm:7.2.0"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
+    "@storybook/react": "npm:9.1.9"
+    clean-webpack-plugin: "npm:4.0.0"
+    copy-webpack-plugin: "npm:14.0.0"
+    html-webpack-plugin: "npm:5.6.0"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    tss-react: "npm:4.9.19"
+    webpack: "npm:5.107.2"
+    webpack-dev-server: "npm:5.2.5"
   languageName: unknown
   linkType: soft
 
@@ -3652,8 +3652,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/suite@workspace:packages/suite"
   dependencies:
-    "@lichtblick/tsconfig": 1.1.2
-    typescript: 6.0.3
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -3672,17 +3672,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/theme@workspace:packages/theme"
   dependencies:
-    "@emotion/react": 11.14.0
-    "@emotion/styled": 11.14.1
-    "@fluentui/react-icons": 2.0.308
-    "@lichtblick/tsconfig": 1.1.2
-    "@mui/icons-material": 7.3.8
-    "@mui/lab": 5.0.0-alpha.177
-    "@mui/material": 7.2.0
-    "@mui/x-data-grid": 6.18.7
-    "@storybook/react": 9.1.9
-    "@types/react": 18.3.12
-    react: 18.3.1
+    "@emotion/react": "npm:11.14.0"
+    "@emotion/styled": "npm:11.14.1"
+    "@fluentui/react-icons": "npm:2.0.308"
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@mui/icons-material": "npm:7.3.8"
+    "@mui/lab": "npm:5.0.0-alpha.177"
+    "@mui/material": "npm:7.2.0"
+    "@mui/x-data-grid": "npm:6.18.7"
+    "@storybook/react": "npm:9.1.9"
+    "@types/react": "npm:18.3.12"
+    react: "npm:18.3.1"
   languageName: unknown
   linkType: soft
 
@@ -3700,7 +3700,7 @@ __metadata:
 "@lichtblick/tsconfig@npm:1.1.2":
   version: 1.1.2
   resolution: "@lichtblick/tsconfig@npm:1.1.2"
-  checksum: 12a944c22014cffb98be24e923e47a41a21057b9982bb0c35012179ae12781023a8db867b8d47178e839d391cb73a7f6028dcda43017129435b7abb9a2092ee4
+  checksum: 10/12a944c22014cffb98be24e923e47a41a21057b9982bb0c35012179ae12781023a8db867b8d47178e839d391cb73a7f6028dcda43017129435b7abb9a2092ee4
   languageName: node
   linkType: hard
 
@@ -3708,8 +3708,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/typescript-transformers@workspace:packages/typescript-transformers"
   dependencies:
-    "@lichtblick/tsconfig": 1.1.2
-    typescript: 6.0.3
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -7972,17 +7972,17 @@ __metadata:
     "@lichtblick/rostime": "npm:1.0.0"
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
-    "@lichtblick/tsconfig": 1.1.2
-    "@pmmmwh/react-refresh-webpack-plugin": 0.6.2
-    "@types/react": 18.3.12
-    "@types/react-dom": 18.3.0
-    clean-webpack-plugin: 4.0.0
-    html-webpack-plugin: 5.6.0
-    mathjs: 15.2.0
-    react: 18.3.1
-    react-dom: 18.2.0
-    webpack: 5.107.2
-    webpack-dev-server: 5.2.5
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
+    "@types/react": "npm:18.3.12"
+    "@types/react-dom": "npm:18.3.0"
+    clean-webpack-plugin: "npm:4.0.0"
+    html-webpack-plugin: "npm:5.6.0"
+    mathjs: "npm:15.2.0"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.2.0"
+    webpack: "npm:5.107.2"
+    webpack-dev-server: "npm:5.2.5"
   languageName: unknown
   linkType: soft
 
@@ -9816,7 +9816,7 @@ __metadata:
   dependencies:
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/suite-desktop": "workspace:*"
-    "@lichtblick/tsconfig": 1.1.2
+    "@lichtblick/tsconfig": "npm:1.1.2"
   languageName: unknown
   linkType: soft
 
@@ -14742,67 +14742,67 @@ __metadata:
     "@lichtblick/omgidl-serialization": "npm:1.0.0"
     "@lichtblick/ros2idl-parser": "npm:1.0.0"
     "@lichtblick/suite": "workspace:*"
-    "@lichtblick/tsconfig": 1.1.2
-    "@mui/material": 7.2.0
-    "@octokit/rest": 22.0.1
-    "@playwright/mcp": 0.0.75
-    "@playwright/test": 1.60.0
-    "@storybook/react": 9.1.9
-    "@storybook/react-webpack5": 9.1.9
-    "@types/babel__core": ^7.20.3
-    "@types/babel__preset-env": ^7.10.0
-    "@types/case-sensitive-paths-webpack-plugin": 2.1.9
-    "@types/jest": 30.0.0
-    "@types/license-checker": ^25.0.6
-    "@types/node": 22.9.3
-    "@types/react-refresh": ^0
-    "@types/semver": ^7.7.0
-    "@typescript-eslint/eslint-plugin": 8.46.2
-    "@typescript-eslint/parser": 8.46.2
-    "@typescript-eslint/rule-tester": 8.46.2
-    "@typescript-eslint/utils": 8.46.2
-    assert: 2.1.0
-    babel-plugin-transform-import-meta: 2.2.1
-    cross-env: 10.0.0
-    depcheck: 1.4.7
-    electron: 42.4.1
-    electron-builder: 26.15.3
-    eslint: 9.38.0
-    eslint-config-prettier: 9.1.0
-    eslint-import-resolver-typescript: 4.4.4
-    eslint-import-resolver-webpack: 0.13.11
-    eslint-plugin-es: 4.1.0
-    eslint-plugin-file-progress: 1.4.0
-    eslint-plugin-filenames: 1.3.2
-    eslint-plugin-import: 2.31.0
-    eslint-plugin-jest: 29.0.1
-    eslint-plugin-prettier: 5.5.4
-    eslint-plugin-react: 7.37.5
-    eslint-plugin-react-hooks: 4.6.0
-    eslint-plugin-storybook: 0.6.15
-    eslint-plugin-tss-unused-classes: 1.0.3
-    globals: 16.3.0
-    jest: 30.4.2
-    jest-environment-jsdom: 30.4.1
-    license-checker: 25.0.1
-    playwright: 1.60.0
-    prettier: 3.6.2
-    react-refresh: 0.18.0
-    react-use: 17.6.0
-    rehype-raw: 7.0.0
-    rimraf: 6.0.1
-    semver: 7.7.2
-    storybook: 9.1.19
-    ts-loader: 9.5.4
-    ts-node: 10.9.2
-    ts-unused-exports: 11.0.1
-    tslib: 2.8.1
-    typescript: 6.0.3
-    vm-browserify: 1.1.2
-    webpack: 5.107.2
-    webpack-cli: 7.0.3
-    webpack-dev-server: 5.2.5
-    webpack-hot-middleware: 2.26.0
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@mui/material": "npm:7.2.0"
+    "@octokit/rest": "npm:22.0.1"
+    "@playwright/mcp": "npm:0.0.75"
+    "@playwright/test": "npm:1.60.0"
+    "@storybook/react": "npm:9.1.9"
+    "@storybook/react-webpack5": "npm:9.1.9"
+    "@types/babel__core": "npm:^7.20.3"
+    "@types/babel__preset-env": "npm:^7.10.0"
+    "@types/case-sensitive-paths-webpack-plugin": "npm:2.1.9"
+    "@types/jest": "npm:30.0.0"
+    "@types/license-checker": "npm:^25.0.6"
+    "@types/node": "npm:22.9.3"
+    "@types/react-refresh": "npm:^0"
+    "@types/semver": "npm:^7.7.0"
+    "@typescript-eslint/eslint-plugin": "npm:8.46.2"
+    "@typescript-eslint/parser": "npm:8.46.2"
+    "@typescript-eslint/rule-tester": "npm:8.46.2"
+    "@typescript-eslint/utils": "npm:8.46.2"
+    assert: "npm:2.1.0"
+    babel-plugin-transform-import-meta: "npm:2.2.1"
+    cross-env: "npm:10.0.0"
+    depcheck: "npm:1.4.7"
+    electron: "npm:42.4.1"
+    electron-builder: "npm:26.15.3"
+    eslint: "npm:9.38.0"
+    eslint-config-prettier: "npm:9.1.0"
+    eslint-import-resolver-typescript: "npm:4.4.4"
+    eslint-import-resolver-webpack: "npm:0.13.11"
+    eslint-plugin-es: "npm:4.1.0"
+    eslint-plugin-file-progress: "npm:1.4.0"
+    eslint-plugin-filenames: "npm:1.3.2"
+    eslint-plugin-import: "npm:2.31.0"
+    eslint-plugin-jest: "npm:29.0.1"
+    eslint-plugin-prettier: "npm:5.5.4"
+    eslint-plugin-react: "npm:7.37.5"
+    eslint-plugin-react-hooks: "npm:4.6.0"
+    eslint-plugin-storybook: "npm:0.6.15"
+    eslint-plugin-tss-unused-classes: "npm:1.0.3"
+    globals: "npm:16.3.0"
+    jest: "npm:30.4.2"
+    jest-environment-jsdom: "npm:30.4.1"
+    license-checker: "npm:25.0.1"
+    playwright: "npm:1.60.0"
+    prettier: "npm:3.6.2"
+    react-refresh: "npm:0.18.0"
+    react-use: "npm:17.6.0"
+    rehype-raw: "npm:7.0.0"
+    rimraf: "npm:6.0.1"
+    semver: "npm:7.7.2"
+    storybook: "npm:9.1.19"
+    ts-loader: "npm:9.5.4"
+    ts-node: "npm:10.9.2"
+    ts-unused-exports: "npm:11.0.1"
+    tslib: "npm:2.8.1"
+    typescript: "npm:6.0.3"
+    vm-browserify: "npm:1.1.2"
+    webpack: "npm:5.107.2"
+    webpack-cli: "npm:7.0.3"
+    webpack-dev-server: "npm:5.2.5"
+    webpack-hot-middleware: "npm:2.26.0"
   languageName: unknown
   linkType: soft
 
@@ -20488,7 +20488,7 @@ __metadata:
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: c1182dfadf8a8cb22a4e32442715afef1af1b950ae635b1c52c27e0d7fb7a5e2607ed7c7c4079bba4163579250e02445fd8d46b09cbceda71ff72a5b7d69db61
+  checksum: 10/c1182dfadf8a8cb22a4e32442715afef1af1b950ae635b1c52c27e0d7fb7a5e2607ed7c7c4079bba4163579250e02445fd8d46b09cbceda71ff72a5b7d69db61
   languageName: node
   linkType: hard
 
@@ -20502,17 +20502,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@6.0.3#~builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>":
   version: 6.0.3
-  resolution: "typescript@patch:typescript@npm%3A6.0.3#~builtin<compat/typescript>::version=6.0.3&hash=f3b441"
+  resolution: "typescript@patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 8ed159a81ab4901a620c19fda539632cee610f8ec34dde57a3acc6b6df72894ad0b50bdd1946b763313d9b73dedb019d2e81c03eff06c0f2c785cde30a537d15
+  checksum: 10/22b67a18dafedf9b1468b64ca20d9aa02ea61d449b65413d8aa6552aeb63f52ef369e86beb25b6b4c91a803d9726ee5c196f391a9b64201263263410a4223ee6
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4 || ^5#~builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^4 || ^5#optional!builtin<compat/typescript>":
   version: 5.9.3
   resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"
   bin:
@@ -21089,12 +21089,12 @@ __metadata:
   dependencies:
     "@lichtblick/log": "workspace:*"
     "@lichtblick/suite-web": "workspace:*"
-    "@lichtblick/tsconfig": 1.1.2
-    "@types/serve-handler": ^6
-    playwright: 1.60.0
-    serve-handler: 6.1.7
-    webpack: 5.107.2
-    webpack-dev-server: 5.2.5
+    "@lichtblick/tsconfig": "npm:1.1.2"
+    "@types/serve-handler": "npm:^6"
+    playwright: "npm:1.60.0"
+    serve-handler: "npm:6.1.7"
+    webpack: "npm:5.107.2"
+    webpack-dev-server: "npm:5.2.5"
   languageName: unknown
   linkType: soft
 
