@@ -38,12 +38,22 @@ git fetch upstream
 
 ## Create the worktree
 
-Use the path convention `../{repository-name}-worktree/{short-name}/`:
+Use the path convention `../{repository-name}-worktree/{short-name}/`. The `{short-name}` subfolder is intentional: it lets multiple worktrees (e.g. parallel SDD subagent tasks) live side by side under one parent folder.
 
 ```bash
 git worktree add -b {type}/{short-name} \
   ../lichtblick-worktree/{short-name} \
   {base-branch}
+```
+
+> **Notes for parallel work:**
+> - Git will not allow two worktrees to check out the **same** branch — each task needs a distinct branch.
+> - Each worktree gets its **own full `node_modules`**, so expect significant disk usage per worktree.
+
+To create a worktree from an **existing** branch instead (e.g. to resume work), omit `-b`:
+
+```bash
+git worktree add ../lichtblick-worktree/{short-name} {existing-branch}
 ```
 
 ## Install dependencies
@@ -53,7 +63,16 @@ cd ../lichtblick-worktree/{short-name}
 yarn install
 ```
 
-`yarn install` is fast because `.yarn/cache` is shared across worktrees — it only links packages.
+`yarn install` performs a full install in this worktree. Worktrees do **not** share `.yarn/cache` (it is gitignored, and `.yarnrc.yml` sets `enableGlobalCache: false`), and `nodeLinker: node-modules` means a real `node_modules` is created. Expect a complete install rather than a quick link step.
+
+## Copy local config (if any)
+
+Git worktrees only include git-tracked files. Untracked local state (e.g. a gitignored `.env`, local settings, caches) is **not** copied into the new worktree. If you rely on any such files, copy them manually:
+
+```bash
+# Only if you have a local .env or similar untracked config
+cp .env ../lichtblick-worktree/{short-name}/.env
+```
 
 ## Open in VS Code
 
