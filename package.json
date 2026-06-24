@@ -102,7 +102,7 @@
     "@actions/tool-cache": "2.0.2",
     "@babel/core": "7.29.7",
     "@babel/plugin-proposal-decorators": "7.29.7",
-    "@babel/plugin-transform-explicit-resource-management": "8.0.1",
+    "@babel/plugin-transform-explicit-resource-management": "7.29.7",
     "@babel/preset-env": "7.29.7",
     "@babel/preset-react": "7.29.7",
     "@babel/preset-typescript": "7.29.7",

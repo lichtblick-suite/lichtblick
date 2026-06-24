@@ -251,15 +251,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/helper-plugin-utils@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "@babel/helper-plugin-utils@npm:8.0.1"
-  peerDependencies:
-    "@babel/core": ^8.0.0
-  checksum: 10/d9c8b9dc626640233a52d4fec0e31766a5dbcd5c9b799bd6e3c9efa6e73f0f8e389395fea33f00bce395482c2a4b99fa73d74c59720f3c8cbd019ba9ea82ad6a
-  languageName: node
-  linkType: hard
-
 "@babel/helper-remap-async-to-generator@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/helper-remap-async-to-generator@npm:7.29.7"
@@ -786,17 +777,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-destructuring@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "@babel/plugin-transform-destructuring@npm:8.0.1"
-  dependencies:
-    "@babel/helper-plugin-utils": "npm:^8.0.1"
-  peerDependencies:
-    "@babel/core": ^8.0.0
-  checksum: 10/0943cf0b04d532576b865f75dc96dc24474550f554bdf43d2f9d6406eae99b76c6a70cdfdeac2f206d1e42cce26a4378679e2828c5d4c5e0155fef064152612e
-  languageName: node
-  linkType: hard
-
 "@babel/plugin-transform-dotall-regex@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/plugin-transform-dotall-regex@npm:7.29.7"
@@ -843,19 +823,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-explicit-resource-management@npm:8.0.1":
-  version: 8.0.1
-  resolution: "@babel/plugin-transform-explicit-resource-management@npm:8.0.1"
-  dependencies:
-    "@babel/helper-plugin-utils": "npm:^8.0.1"
-    "@babel/plugin-transform-destructuring": "npm:^8.0.1"
-  peerDependencies:
-    "@babel/core": ^8.0.0
-  checksum: 10/45f849f44927ffc0e57fb2723173a0717f1458584d51f3b94f8bd6cab73d7e73e60613bf704c2358ceb4eeee9c54bb93a7bd8ca4ce064469be58f90c88d7b3d8
-  languageName: node
-  linkType: hard
-
-"@babel/plugin-transform-explicit-resource-management@npm:^7.29.7":
+"@babel/plugin-transform-explicit-resource-management@npm:7.29.7, @babel/plugin-transform-explicit-resource-management@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/plugin-transform-explicit-resource-management@npm:7.29.7"
   dependencies:
@@ -14761,7 +14729,7 @@ __metadata:
     "@actions/tool-cache": "npm:2.0.2"
     "@babel/core": "npm:7.29.7"
     "@babel/plugin-proposal-decorators": "npm:7.29.7"
-    "@babel/plugin-transform-explicit-resource-management": "npm:8.0.1"
+    "@babel/plugin-transform-explicit-resource-management": "npm:7.29.7"
     "@babel/preset-env": "npm:7.29.7"
     "@babel/preset-react": "npm:7.29.7"
     "@babel/preset-typescript": "npm:7.29.7"
