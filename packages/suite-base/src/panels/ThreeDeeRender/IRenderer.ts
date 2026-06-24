@@ -142,10 +142,6 @@ export type RendererConfig = {
     directionalLightIntensity?: number;
     /** Intensity of the ambient hemisphere light (default: 0.5 * Math.PI) */
     hemisphereLightIntensity?: number;
-    /** Enable renderer shadow maps (default: false) */
-    shadowsEnabled?: boolean;
-    /** Tone mapping mode applied by the WebGL renderer (default: "none") */
-    toneMapping?: "none" | "aces";
     transforms?: {
       /** Toggles translation and rotation offset controls for frames */
       editable?: boolean;

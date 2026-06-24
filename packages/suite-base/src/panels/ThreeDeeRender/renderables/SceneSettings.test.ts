@@ -182,7 +182,7 @@ describe("SceneSettings — settingsNodes", () => {
     (console.warn as jest.Mock).mockClear();
   });
 
-  it("includes the five new lighting fields in the settings tree", () => {
+  it("includes the three new lighting fields in the settings tree", () => {
     const renderer = makeRenderer();
     const sceneSettings = new SceneSettings(renderer);
 
@@ -192,8 +192,6 @@ describe("SceneSettings — settingsNodes", () => {
     expect(fieldKeys).toContain("mainLightMode");
     expect(fieldKeys).toContain("directionalLightIntensity");
     expect(fieldKeys).toContain("hemisphereLightIntensity");
-    expect(fieldKeys).toContain("shadowsEnabled");
-    expect(fieldKeys).toContain("toneMapping");
 
     renderer.dispose();
   });
@@ -208,17 +206,6 @@ describe("SceneSettings — settingsNodes", () => {
     expect(field).toMatchObject({ input: "select", value: "fixed" });
     renderer.dispose();
   });
-
-  it("reflects the configured toneMapping value", () => {
-    const renderer = makeRenderer(makeDefaultConfig({ toneMapping: "aces" }));
-    const sceneSettings = new SceneSettings(renderer);
-
-    const [entry] = sceneSettings.settingsNodes();
-    const field = entry?.node.fields?.toneMapping;
-
-    expect(field).toMatchObject({ input: "select", value: "aces" });
-    renderer.dispose();
-  });
 });
 
 describe("SceneSettings — handleSettingsAction", () => {
@@ -226,22 +213,19 @@ describe("SceneSettings — handleSettingsAction", () => {
     (console.warn as jest.Mock).mockClear();
   });
 
-  it.each(["mainLightMode", "toneMapping"] as const)(
-    "calls updateSceneRenderSettings when select field '%s' changes",
-    (settingKey) => {
-      const renderer = makeRenderer();
-      const sceneSettings = new SceneSettings(renderer);
-      const spy = jest.spyOn(renderer, "updateSceneRenderSettings");
+  it("calls updateSceneRenderSettings when mainLightMode changes", () => {
+    const renderer = makeRenderer();
+    const sceneSettings = new SceneSettings(renderer);
+    const spy = jest.spyOn(renderer, "updateSceneRenderSettings");
 
-      sceneSettings.handleSettingsAction({
-        action: "update",
-        payload: { path: ["scene", settingKey], value: "headlight", input: "select" },
-      });
+    sceneSettings.handleSettingsAction({
+      action: "update",
+      payload: { path: ["scene", "mainLightMode"], value: "headlight", input: "select" },
+    });
 
-      expect(spy).toHaveBeenCalledTimes(1);
-      renderer.dispose();
-    },
-  );
+    expect(spy).toHaveBeenCalledTimes(1);
+    renderer.dispose();
+  });
 
   it.each(["directionalLightIntensity", "hemisphereLightIntensity"] as const)(
     "calls updateSceneRenderSettings when number field '%s' changes",
@@ -259,20 +243,6 @@ describe("SceneSettings — handleSettingsAction", () => {
       renderer.dispose();
     },
   );
-
-  it("calls updateSceneRenderSettings when shadowsEnabled changes", () => {
-    const renderer = makeRenderer();
-    const sceneSettings = new SceneSettings(renderer);
-    const spy = jest.spyOn(renderer, "updateSceneRenderSettings");
-
-    sceneSettings.handleSettingsAction({
-      action: "update",
-      payload: { path: ["scene", "shadowsEnabled"], value: true, input: "boolean" },
-    });
-
-    expect(spy).toHaveBeenCalledTimes(1);
-    renderer.dispose();
-  });
 
   it("calls updateSceneRenderSettings on reset-scene action", () => {
     const renderer = makeRenderer();
@@ -299,56 +269,6 @@ describe("SceneSettings — handleSettingsAction", () => {
     });
 
     expect(setScaleSpy).toHaveBeenCalledWith(DEFAULT_LABEL_SCALE_FACTOR);
-    renderer.dispose();
-  });
-});
-
-describe("Renderer.updateSceneRenderSettings", () => {
-  afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
-  });
-
-  it("defaults to NoToneMapping when toneMapping is not configured", () => {
-    const renderer = makeRenderer();
-    expect(renderer.gl.toneMapping).toBe(THREE.NoToneMapping);
-    renderer.dispose();
-  });
-
-  it("applies ACESFilmicToneMapping when toneMapping is 'aces'", () => {
-    const renderer = makeRenderer(makeDefaultConfig({ toneMapping: "aces" }));
-    expect(renderer.gl.toneMapping).toBe(THREE.ACESFilmicToneMapping);
-    renderer.dispose();
-  });
-
-  it("reverts to NoToneMapping when updateSceneRenderSettings is called after changing toneMapping to 'none'", () => {
-    const renderer = makeRenderer(makeDefaultConfig({ toneMapping: "aces" }));
-    renderer.updateConfig((draft) => {
-      draft.scene.toneMapping = "none";
-    });
-    renderer.updateSceneRenderSettings();
-    expect(renderer.gl.toneMapping).toBe(THREE.NoToneMapping);
-    renderer.dispose();
-  });
-
-  it("defaults shadows to disabled", () => {
-    const renderer = makeRenderer();
-    expect(renderer.gl.shadowMap.enabled).toBe(false);
-    renderer.dispose();
-  });
-
-  it("enables shadow map when shadowsEnabled is true", () => {
-    const renderer = makeRenderer(makeDefaultConfig({ shadowsEnabled: true }));
-    expect(renderer.gl.shadowMap.enabled).toBe(true);
-    renderer.dispose();
-  });
-
-  it("disables shadow map after updateSceneRenderSettings is called with shadowsEnabled false", () => {
-    const renderer = makeRenderer(makeDefaultConfig({ shadowsEnabled: true }));
-    renderer.updateConfig((draft) => {
-      draft.scene.shadowsEnabled = false;
-    });
-    renderer.updateSceneRenderSettings();
-    expect(renderer.gl.shadowMap.enabled).toBe(false);
     renderer.dispose();
   });
 });

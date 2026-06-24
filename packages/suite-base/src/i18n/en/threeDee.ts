@@ -77,10 +77,6 @@ export const threeDee = {
   mainLightHeadlight: "Headlight (camera)",
   directionalLightIntensity: "Directional light intensity",
   hemisphereLightIntensity: "Hemisphere light intensity",
-  shadowsEnabled: "Enable shadows",
-  toneMapping: "Tone mapping",
-  toneMappingNone: "None",
-  toneMappingACES: "ACES filmic",
 
   // Camera
   distance: "Distance",

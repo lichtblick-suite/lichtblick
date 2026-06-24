@@ -114,20 +114,6 @@ export class SceneSettings extends SceneExtension {
         value: config.scene.hemisphereLightIntensity,
         placeholder: String(0.5 * Math.PI),
       },
-      shadowsEnabled: {
-        label: t("threeDee:shadowsEnabled"),
-        input: "boolean",
-        value: config.scene.shadowsEnabled,
-      },
-      toneMapping: {
-        label: t("threeDee:toneMapping"),
-        input: "select",
-        value: config.scene.toneMapping ?? "none",
-        options: [
-          { label: t("threeDee:toneMappingNone"), value: "none" },
-          { label: t("threeDee:toneMappingACES"), value: "aces" },
-        ],
-      },
     };
 
     if (process.env.NODE_ENV === "production") {
@@ -183,9 +169,7 @@ export class SceneSettings extends SceneExtension {
       } else if (
         path[1] === "mainLightMode" ||
         path[1] === "directionalLightIntensity" ||
-        path[1] === "hemisphereLightIntensity" ||
-        path[1] === "shadowsEnabled" ||
-        path[1] === "toneMapping"
+        path[1] === "hemisphereLightIntensity"
       ) {
         this.renderer.updateSceneRenderSettings();
       }

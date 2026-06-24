@@ -995,12 +995,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   }
 
   public updateSceneRenderSettings(): void {
-    const toneMapping = this.config.scene.toneMapping ?? "none";
-    this.gl.toneMapping =
-      toneMapping === "none" ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
-
-    this.gl.shadowMap.enabled = this.config.scene.shadowsEnabled ?? false;
-
     const mainLightMode = this.config.scene.mainLightMode ?? "fixed";
     const dirIntensity = this.config.scene.directionalLightIntensity ?? Math.PI;
 
@@ -1011,7 +1005,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.#dirLight.castShadow = false;
 
       this.#headLight.intensity = dirIntensity;
-      this.#headLight.castShadow = this.gl.shadowMap.enabled;
+      this.#headLight.castShadow = false;
     } else {
       if (this.#headLight.parent != undefined) {
         this.#headLight.removeFromParent();
@@ -1023,7 +1017,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         this.#scene.add(this.#dirLight);
       }
       this.#dirLight.intensity = dirIntensity;
-      this.#dirLight.castShadow = this.gl.shadowMap.enabled;
+      this.#dirLight.castShadow = false;
     }
 
     this.#hemiLight.intensity = this.config.scene.hemisphereLightIntensity ?? 0.5 * Math.PI;
