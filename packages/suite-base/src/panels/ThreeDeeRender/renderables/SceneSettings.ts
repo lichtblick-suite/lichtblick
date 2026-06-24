@@ -139,6 +139,7 @@ export class SceneSettings extends SceneExtension {
         draft.scene = {};
       });
       this.renderer.labelPool.setScaleFactor(DEFAULT_LABEL_SCALE_FACTOR);
+      this.renderer.setColorScheme(this.renderer.colorScheme, undefined);
       this.renderer.updateSceneRenderSettings();
       this.updateSettingsTree();
       return;
