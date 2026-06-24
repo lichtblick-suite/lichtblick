@@ -10,14 +10,20 @@ import CachedFilelike from "@lichtblick/suite-base/util/CachedFilelike";
 
 const DEFAULT_CACHE_SIZE_BYTES = 1024 * 1024 * 500; // 500MiB
 
+type RemoteFileReadableOptions = {
+  cacheSizeInBytes?: number;
+  readAheadEnabled?: boolean;
+};
+
 export class RemoteFileReadable {
   #remoteReader: CachedFilelike;
 
-  public constructor(url: string, cacheSizeInBytes?: number) {
+  public constructor(url: string, options?: RemoteFileReadableOptions) {
     const fileReader = new BrowserHttpReader(url);
     this.#remoteReader = new CachedFilelike({
       fileReader,
-      cacheSizeInBytes: cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
+      cacheSizeInBytes: options?.cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
+      readAheadEnabled: options?.readAheadEnabled,
     });
   }
 

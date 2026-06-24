@@ -2,37 +2,53 @@
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../fixtures/electron";
 import { loadFromFilePicker } from "../../../fixtures/load-from-file-picker";
+import { AppMenu, DataSourceDialog, LayoutManager, Sidebar } from "../../../page-objects";
 
 const LAYOUT_FILE = "imported-layout.json";
 
-test("Import a layout via layout tab > import layout", async ({ mainWindow }) => {
-  // Given
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  await mainWindow.getByTestId("layouts-left").click();
-  await loadFromFilePicker(mainWindow, LAYOUT_FILE);
+test(
+  "Import a layout via layout tab > import layout",
+  { tag: "@regression" },
+  async ({ mainWindow }) => {
+    const dialog = new DataSourceDialog(mainWindow);
+    const sidebar = new Sidebar(mainWindow);
+    const layout = new LayoutManager(mainWindow);
 
-  // When
-  await mainWindow.getByRole("button", { name: "Import from file…" }).click();
+    // Given
+    await dialog.close();
+    await sidebar.openLayoutsTab();
+    await loadFromFilePicker(mainWindow, LAYOUT_FILE);
 
-  // Then
-  await expect(
-    mainWindow.getByTestId("layout-list-item").getByText("imported-layout", { exact: true }),
-  ).toBeVisible();
-});
+    // When
+    await layout.importLayout();
 
-test("Import a layout via menu > view > import layout", async ({ mainWindow }) => {
-  // Given
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  await mainWindow.getByTestId("layouts-left").click();
-  await loadFromFilePicker(mainWindow, LAYOUT_FILE);
+    // Then
+    await expect(
+      layout.getLayoutListItem().getByText("imported-layout", { exact: true }),
+    ).toBeVisible();
+  },
+);
 
-  // When
-  await mainWindow.getByTestId("AppMenuButton").click();
-  await mainWindow.getByTestId("app-menu-view").click();
-  await mainWindow.getByText("Import layout from file…").click();
+test(
+  "Import a layout via menu > view > import layout",
+  { tag: "@regression" },
+  async ({ mainWindow }) => {
+    const dialog = new DataSourceDialog(mainWindow);
+    const sidebar = new Sidebar(mainWindow);
+    const layout = new LayoutManager(mainWindow);
+    const appMenu = new AppMenu(mainWindow);
 
-  // Then
-  await expect(
-    mainWindow.getByTestId("layout-list-item").getByText("imported-layout", { exact: true }),
-  ).toBeVisible();
-});
+    // Given
+    await dialog.close();
+    await sidebar.openLayoutsTab();
+    await loadFromFilePicker(mainWindow, LAYOUT_FILE);
+
+    // When
+    await appMenu.importLayoutFromMenu();
+
+    // Then
+    await expect(
+      layout.getLayoutListItem().getByText("imported-layout", { exact: true }),
+    ).toBeVisible();
+  },
+);

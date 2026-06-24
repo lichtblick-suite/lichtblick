@@ -18,6 +18,7 @@ export type AppURLState = {
   dsParams?: Record<string, string>;
   dsParamsArray?: Record<string, string[]>;
   layoutId?: LayoutID;
+  sessionId?: string;
   time?: Time;
 };
 
@@ -78,6 +79,7 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
  */
 export function parseAppURLState(url: URL): AppURLState | undefined {
   const ds = url.searchParams.get("ds") ?? undefined;
+  const sessionId = url.searchParams.get("sessionid") ?? undefined;
   const timeString = url.searchParams.get("time");
   const time = parseTimeUrlString(timeString ?? undefined);
   const dsParams: Record<string, string> = {};
@@ -98,6 +100,7 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
     {
       time,
       ds,
+      sessionId,
       dsParams: _.isEmpty(dsParams) ? undefined : dsParams,
     },
     _.isEmpty,

@@ -15,6 +15,7 @@ Lichtblick is an integrated visualization and diagnosis tool for robotics, built
 - [Branching Strategy](#branching-strategy---git-flow)
 - [Code Style & Standards](#code-style--standards)
 - [Testing](#testing)
+- [AI-Assisted Development](#ai-assisted-development)
 - [Pull Request Guidelines](#pull-request-guidelines)
 - [Reporting Issues](#reporting-issues)
 - [Version Increment](#version-increment)
@@ -167,18 +168,19 @@ To ensure consistency, scalability, and a clear separation of concerns, all Reac
 
 ### File organization per component
 
-| File / Directory         | Purpose                                                                                   |
-| ------------------------ | ----------------------------------------------------------------------------------------- |
-| `index.tsx`              | Entry point — manages exports and provides a simplified integration interface             |
-| `ComponentName.tsx`      | Primary logic and rendering of the component                                              |
-| `ComponentName.test.tsx` | Unit tests for the component                                                              |
-| `ComponentName.style.ts` | Styles specific to the component (using [tss-react](https://www.tss-react.dev/))          |
-| `types.ts`               | TypeScript type definitions, interfaces, and enums for the component                      |
-| `constants.ts`           | Constants specific to the component (avoids magic numbers and scattered hardcoded values) |
-| `hooks/`                 | Custom hooks related to the component (e.g., `useComponentData.ts`)                       |
-| `builders/`              | Builder classes for creating mock data, test props, and reusable configurations           |
-| `utils/`                 | Utility functions specific to the component                                               |
-| `shared/`                | Shared functionalities reusable across sibling components                                 |
+| File / Directory         | Purpose                                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.tsx`              | Entry point — manages exports and provides a simplified integration interface                                                                     |
+| `ComponentName.tsx`      | Primary logic and rendering of the component                                                                                                      |
+| `ComponentName.test.tsx` | Unit tests for the component                                                                                                                      |
+| `ComponentName.style.ts` | Styles specific to the component (using [tss-react](https://www.tss-react.dev/))                                                                  |
+| `<name>.types.ts`        | Type definitions scoped exclusively to a single file — applicable to components, hooks, utils, etc (e.g. `Plot.types.ts`, `usePlotData.types.ts`) |
+| `types.ts`               | TypeScript type definitions, interfaces, and enums shared across the component and its sub-files                                                  |
+| `constants.ts`           | Constants specific to the component (avoids magic numbers and scattered hardcoded values)                                                         |
+| `hooks/`                 | Custom hooks related to the component (e.g., `useComponentData.ts`)                                                                               |
+| `builders/`              | Builder classes for creating mock data, test props, and reusable configurations                                                                   |
+| `utils/`                 | Utility functions specific to the component                                                                                                       |
+| `shared/`                | Shared functionalities reusable across sibling components                                                                                         |
 
 ### Example directory tree
 
@@ -189,29 +191,32 @@ panels/
 │   ├── Plot.tsx                         # Primary logic and rendering
 │   ├── Plot.style.ts                    # Styles specific to the Plot component
 │   ├── Plot.test.tsx                    # Unit tests for the Plot component
+│   ├── Plot.types.ts                    # Types scoped only to Plot.tsx
 │   ├── PlotLegend.tsx                   # Sub-component: logic and rendering
-│   ├── PlotLegend.style.ts             # Styles for the PlotLegend sub-component
-│   ├── PlotLegend.test.tsx             # Unit tests for the PlotLegend sub-component
+│   ├── PlotLegend.style.ts              # Styles for the PlotLegend sub-component
+│   ├── PlotLegend.test.tsx              # Unit tests for the PlotLegend sub-component
 │   ├── types.ts                         # Contracts/Schemas for Plot components
 │   ├── constants.ts                     # Constants specific to Plot components
 │   ├── hooks/
-│   │   ├── usePlotData.ts              # Custom hook for the Plot component
-│   │   └── usePlotData.test.ts         # Unit tests for the hook
+│   │   ├── usePlotData.ts               # Custom hook for the Plot component
+│   │   ├── usePlotData.types.ts         # Types scoped only to usePlotData.ts
+│   │   └── usePlotData.test.ts          # Unit tests for the hook
 │   ├── builders/
-│   │   ├── PlotBuilder.ts              # Builder for mock data and test props
-│   │   └── PlotBuilder.test.ts         # Unit tests for the builder
+│   │   ├── PlotBuilder.ts               # Builder for mock data and test props
+│   │   └── PlotBuilder.test.ts          # Unit tests for the builder
 │   └── utils/
 │       ├── formatPlotValues.ts          # Utility function for the Plot component
 │       └── formatPlotValues.test.ts     # Unit tests for the utility
 └── shared/
     ├── formatDate.ts                    # Shared function across panel components
-    └── formatDate.test.ts              # Unit tests for the shared function
+    └── formatDate.test.ts               # Unit tests for the shared function
 ```
 
 ### Key principles
 
 - **`index.tsx`** should focus exclusively on managing exports. Primary component logic belongs in `ComponentName.tsx`.
-- **`types.ts`** centralizes type definitions, making them easily accessible and reusable.
+- **`types.ts`** centralizes type definitions shared across a component and its sub-files, making them easily accessible and reusable.
+- **`<name>.types.ts`** holds type definitions scoped exclusively to a single file — this pattern applies to components, hooks, and utils alike (e.g., `Plot.types.ts`, `usePlotData.types.ts`, `formatPlotValues.types.ts`). Use it when types are internal implementation details not intended to be shared or re-exported outside that file.
 - **`constants.ts`** and **`*.style.ts`** files can be excluded from code coverage tools (e.g., SonarQube) to focus metrics on relevant files.
 - **Builders** follow the [Builder pattern](https://refactoring.guru/design-patterns/builder) to simplify creation of complex objects step-by-step — especially useful for test setups.
 - **`shared/`** promotes reusability across sibling components and reduces duplication of common logic.
@@ -413,6 +418,37 @@ The following checks run automatically on every PR:
 
 ---
 
+## AI-Assisted Development
+
+The project uses **GitHub Copilot agent mode** (VS Code 1.99+) with project-specific agents and skills to accelerate development workflows. AI agents are configured via Markdown files in `.github/` and operate within clearly defined conventions.
+
+### Available Agents
+
+| Agent | Invocation | Purpose |
+| --- | --- | --- |
+| `Lichtblick E2E Test` | `@lb-e2e-test` | Creates Playwright E2E tests for desktop (Electron) and web, using the Playwright MCP browser for web UI exploration |
+
+### Skills
+
+Skills are reusable domain knowledge files loaded by agents before performing tasks:
+
+| Skill | Location | Scope |
+| --- | --- | --- |
+| `test-conventions` | `.github/skills/test-conventions/SKILL.md` | GWT pattern, quality rules, and test-writing workflow for all test types |
+| `e2e-playwright-mcp` | `.github/skills/e2e-playwright-mcp/SKILL.md` | E2E-specific: fixture reference, selector strategy, MCP usage, and source instrumentation |
+
+### Global Context
+
+`.github/copilot-instructions.md` is auto-loaded at the start of every Copilot Chat session. It defines project-wide rules for code style, testing, and available agents.
+
+### Playwright MCP Server
+
+The Playwright MCP server (configured in `.vscode/mcp.json`) enables AI agents to explore the running web app via accessibility snapshots, discover stable selectors, and generate test scaffolds interactively.
+
+> **Note**: The MCP server drives Chrome (web) only — it cannot automate the Electron desktop app. See `e2e/README.md` for detailed workflow documentation.
+
+---
+
 ## Pull Request Guidelines
 
 > :lock: **Direct PRs to the repository** are restricted to the internal development team. Community contributors must submit PRs **from a fork** of the repository. All contributions — internal and external — follow the same review and CI requirements.
@@ -433,6 +469,31 @@ When opening a PR, fill in the template provided:
 - **Description:** Link relevant GitHub issues. Add the `docs` label if documentation updates are needed.
 - **Size:** Keep PRs focused. Smaller PRs are reviewed faster and have fewer merge conflicts.
 - **Reviewers:** PRs require at least one approving review before merging.
+
+### Automated Code Review with CodeRabbit
+
+[CodeRabbit](https://coderabbit.ai) provides automated AI-powered code reviews on PRs targeting `develop` and `main` branches, except for draft PRs or those with titles containing `WIP`, `Draft`, or `[SKIP CI]`. It runs automatically and complements human reviews.
+
+**What CodeRabbit checks:**
+- Code style and best practices
+- Security issues (especially in Electron/IPC and web code)
+- TypeScript type safety and unused code
+- Test quality and coverage
+- Platform-specific concerns (web vs. desktop compatibility)
+- Performance and accessibility
+
+**How it works:**
+- CodeRabbit automatically comments with a summary and detailed findings on each PR
+- Comments include line-by-line suggestions and context-aware recommendations
+- It respects the project's `.coderabbit.yaml` configuration with domain-specific instructions
+
+**Manual review requests:**
+If you want a fresh review of an existing PR, comment:
+```text
+@coderabbitai review
+```
+
+**Important:** CodeRabbit is a supplementary tool — human reviews are still required for approval before merging. CodeRabbit cannot approve or merge PRs.
 
 ---
 

@@ -82,6 +82,38 @@ describe("CachedFilelike", () => {
       await expect(cachedFileReader.read(2, 2)).resolves.toEqual(new Uint8Array([2, 3]));
     });
 
+    it("requests only the exact range when read-ahead is disabled", async () => {
+      // GIVEN: a file that fits entirely in the cache.
+      const fileReader = new InMemoryFileReader(new Uint8Array(100));
+      const fetch = jest.spyOn(fileReader, "fetch");
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 100,
+        readAheadEnabled: false,
+        log,
+      });
+
+      // WHEN: reading a small range.
+      await expect(cachedFileReader.read(0, 10)).resolves.toEqual(new Uint8Array(10));
+
+      // THEN: no speculative whole-file or look-ahead fetch is made.
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(0, 10);
+    });
+
+    it("throws a clear error when a single read exceeds the cache size", () => {
+      // GIVEN: a source allocated a small cache (mirrors a many-file remote session where each
+      // source receives only the 10 MiB minimum floor) backed by a larger file.
+      const fileReader = new InMemoryFileReader(new Uint8Array(100));
+      const cachedFileReader = new CachedFilelike({ fileReader, cacheSizeInBytes: 10, log });
+
+      // WHEN/THEN: a chunk read larger than the cache fails fast with an explicit, actionable
+      // message instead of silently truncating or mis-reading.
+      expect(() => {
+        void cachedFileReader.read(0, 20);
+      }).toThrow("Requested more data than cache size: 20 > 10");
+    });
+
     it("returns an error in the callback if the FileReader keeps returning errors", async () => {
       const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
       let interval: any;
