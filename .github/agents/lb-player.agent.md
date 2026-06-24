@@ -12,7 +12,7 @@ You are an expert on the Lichtblick Player layer — the core abstraction that m
 This agent is the designated **writer** for the player subsystem. Only this agent edits files in these paths. All other agents treat them as **read-only**.
 
 **Owned paths:**
-- `packages/suite-base/src/players/**`
+- `packages/suite-base/src/players/**` — excluding `FoxgloveWebSocketPlayer/` (owned by `@lb-websocket-connection`)
 
 **Read-only context** (inform decisions but never edit):
 - `packages/suite-base/src/components/MessagePipeline/**` — pipeline consumer, owned by `@lb-message-pipeline`

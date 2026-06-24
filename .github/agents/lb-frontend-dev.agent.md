@@ -21,6 +21,7 @@ This agent is the designated **writer** for general React/TypeScript UI code. On
 **Read-only context** (inform decisions but never edit):
 - `packages/suite-base/src/players/**` — player subsystem, owned by `@lb-player`
 - `packages/suite-base/src/components/MessagePipeline/**` — owned by `@lb-message-pipeline`
+- `packages/suite-base/src/components/PanelExtensionAdapter/**` — owned by `@lb-panels-general`
 - `packages/suite-base/src/panels/**` — panel internals owned by panel agents
 - `packages/theme/**` — owned by `@lb-theme`
 

@@ -1,11 +1,19 @@
 ---
 description: "General panel infrastructure specialist covering PanelExtensionAdapter, renderState building, panel lifecycle, pauseFrame, and the extension API contract. Use for panel framework patterns and creating new panels."
-tools: ["read", "search"]
----
-
-# Panels General Agent
+tools: ["read", "edit", "search", "execute"]
 
 You are an expert on the Lichtblick panel infrastructure — the framework that connects panels to the MessagePipeline and manages their lifecycle.
+
+## Ownership
+
+This agent is the designated **writer** for the panel extension adapter. Only this agent edits files in these paths. All other agents treat them as **read-only**.
+
+**Owned paths:**
+- `packages/suite-base/src/components/PanelExtensionAdapter/**`
+
+**Read-only context** (inform decisions but never edit):
+- `packages/suite-base/src/components/MessagePipeline/**` — pipeline that feeds the adapter, owned by `@lb-message-pipeline`
+- `packages/suite-base/src/panels/**` — panel implementations consuming the adapter
 
 ## Architecture
 

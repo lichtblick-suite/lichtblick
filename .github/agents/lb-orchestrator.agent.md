@@ -12,13 +12,24 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 
 **Read can overlap. Write cannot.** Many agents may read the same file, but exactly one agent may edit it. Each writer agent declares its owned file paths in an `## Ownership` section. When a task requires editing a file, route to the agent that **owns** that path, not just the one with the most domain knowledge about it.
 
+**Consistent rule**: an agent is a writer if and only if its domain maps to a bounded, non-overlapping directory it can own. Agents whose subject matter spans files owned by other writers are knowledge-only.
+
 | Writer Agent | Owned Paths |
 |---|---|
-| `@lb-player` | `packages/suite-base/src/players/**` |
-| `@lb-panel-3d` | `packages/suite-base/src/panels/ThreeDeeRender/**` |
-| `@lb-panel-raw-messages` | `packages/suite-base/src/panels/RawMessages/**`, `panels/RawMessagesVirtual/**` |
-| `@lb-frontend-dev` | `packages/suite-base/src/components/**` (excl. MessagePipeline/, PanelExtensionAdapter/), `hooks/**`, `context/**` (excl. ExtensionCatalogContext/) |
-| `@lb-layouts` | `providers/CurrentLayoutProvider/**`, `services/LayoutManager/**`, `IdbLayoutStorage.ts` |
+| `@lb-player` | `players/**` (excl. `FoxgloveWebSocketPlayer/`) |
+| `@lb-websocket-connection` | `players/FoxgloveWebSocketPlayer/**` |
+| `@lb-message-pipeline` | `components/MessagePipeline/**` |
+| `@lb-panels-general` | `components/PanelExtensionAdapter/**` |
+| `@lb-panel-3d` | `panels/ThreeDeeRender/**`, `panels/Image/**` (ImageMode entry) |
+| `@lb-panel-raw-messages` | `panels/RawMessages/**`, `panels/RawMessagesVirtual/**` |
+| `@lb-panel-plot` | `panels/Plot/**` |
+| `@lb-panel-image` | `panels/Image/**` |
+| `@lb-panel-log` | `panels/Log/**` |
+| `@lb-panel-map` | `panels/Map/**` |
+| `@lb-panel-state-transitions` | `panels/StateTransitions/**` |
+| `@lb-panel-user-scripts` | `panels/UserScriptEditor/**` |
+| `@lb-frontend-dev` | `components/**` (excl. MessagePipeline/, PanelExtensionAdapter/), `hooks/**`, `context/**` |
+| `@lb-layouts` | `providers/CurrentLayoutProvider/**`, `services/LayoutManager/**` |
 | `@lb-extensions` | `providers/ExtensionCatalogProvider/**`, `services/extension/**` |
 | `@lb-desktop` | `desktop/**`, `packages/suite-desktop/**` |
 | `@lb-web` | `web/**`, `packages/suite-web/**` |
@@ -26,7 +37,7 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 | `@lb-unit-test` | `**/*.test.ts`, `**/*.test.tsx`, `packages/*/src/testing/**` |
 | `@lb-e2e-test` | `e2e/**` |
 
-Knowledge-only agents (`@lb-preload`, `@lb-message-pipeline`, `@lb-deserialization`, `@lb-remote-connection`, `@lb-websocket-connection`, all read-only panel agents) provide context but never edit files.
+**Knowledge-only agents** (`@lb-preload`, `@lb-deserialization`, `@lb-remote-connection`) provide deep cross-cutting expertise but do not own a distinct directory — their subject matter lives inside paths owned by `@lb-player`. They advise; they never edit.
 
 ## Routing Rules
 
