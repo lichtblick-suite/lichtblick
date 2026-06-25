@@ -5,6 +5,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// The local `@types/protobufjs` augmentation adds `Root.fromDescriptor` (installed at runtime by
+// `protobufjs/ext/descriptor`). TypeScript 6.0 no longer auto-discovers this global-only types
+// package, so reference it explicitly to keep the module augmentation in scope. A triple-slash
+// reference is required here (rather than an `import`) because this is a module augmentation, not a
+// value import.
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference types="protobufjs" />
+
 import protobufjs from "protobufjs";
 import { FileDescriptorSet } from "protobufjs/ext/descriptor";
 
