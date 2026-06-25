@@ -32,7 +32,7 @@ type Props = {
 };
 
 export default function TextHighlight({
-  targetStr,
+  targetStr = "",
   searchText = "",
 }: Props): React.JSX.Element {
   const { classes } = useStyles();

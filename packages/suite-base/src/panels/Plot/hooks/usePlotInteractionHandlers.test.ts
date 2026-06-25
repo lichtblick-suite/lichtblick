@@ -61,7 +61,7 @@ describe("usePlotInteractionHandlers", () => {
 
   const setup = ({
     config,
-    coordinator,
+    coordinator = undefined,
     draggingRef,
     renderer,
     setActiveTooltip = jest.fn(),

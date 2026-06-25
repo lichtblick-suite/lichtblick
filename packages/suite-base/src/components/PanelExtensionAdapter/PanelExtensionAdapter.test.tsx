@@ -1076,7 +1076,7 @@ describe("PanelExtensionAdapter", () => {
       wrappedActionHandler?.({
         action: "reorder-node",
         payload: { path: ["topics", "topic1"] },
-      });
+      } as unknown as SettingsTreeAction);
 
       expect(settingsActionHandler).toHaveBeenCalledTimes(1);
       expect(saveConfig).not.toHaveBeenCalled();

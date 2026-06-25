@@ -13,7 +13,7 @@ describe("ExtensionAdapter", () => {
     id: BasicBuilder.string(),
     createdAt: "2023-01-01T00:00:00.000Z",
     updatedAt: "2023-01-01T00:00:00.000Z",
-    scope: "org",
+    scope: "org" as Namespace,
     changelog: BasicBuilder.string(),
     description: BasicBuilder.string(),
     displayName: BasicBuilder.string(),
@@ -68,7 +68,7 @@ describe("ExtensionAdapter", () => {
         workspace,
         fileId: apiResponse.fileId,
         externalId: apiResponse.id,
-      });
+      } as StoredExtension);
     });
 
     it("should convert IExtensionApiResponse to StoredExtension with custom content", () => {

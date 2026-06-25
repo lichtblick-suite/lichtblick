@@ -18,7 +18,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher });
+      expect(result).toEqual({ name, publisher } as PackageName);
     });
 
     it("When parsing a scoped package with hyphens, Then should handle hyphens correctly", () => {
@@ -31,7 +31,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher });
+      expect(result).toEqual({ name, publisher } as PackageName);
     });
 
     it("When parsing a scoped package with underscores, Then should handle underscores correctly", () => {
@@ -44,7 +44,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher });
+      expect(result).toEqual({ name, publisher } as PackageName);
     });
 
     it("When parsing a scoped package with numbers, Then should handle numbers correctly", () => {
@@ -57,7 +57,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher });
+      expect(result).toEqual({ name, publisher } as PackageName);
     });
 
     it("When parsing a scoped package with dots, Then should handle dots correctly", () => {
@@ -70,7 +70,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher });
+      expect(result).toEqual({ name, publisher } as PackageName);
     });
   });
 
@@ -83,7 +83,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(name);
 
       // Then
-      expect(result).toEqual({ name });
+      expect(result).toEqual({ name } as PackageName);
     });
   });
 });

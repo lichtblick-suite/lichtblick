@@ -243,8 +243,10 @@ export function RendererOverlay(props: Props): React.JSX.Element {
           const topic = pickedRenderable.renderable.topic;
           const details: Record<string, unknown> | undefined =
             pickedRenderable.instanceIndex == undefined
-              ? (pickedRenderable.renderable.details())
-              : (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex));
+              ? (pickedRenderable.renderable.details() as Record<string, unknown> | undefined)
+              : (pickedRenderable.renderable.instanceDetails(pickedRenderable.instanceIndex) as
+                  | Record<string, unknown>
+                  | undefined);
 
           const metadata = extractHoverMetadata(details);
 

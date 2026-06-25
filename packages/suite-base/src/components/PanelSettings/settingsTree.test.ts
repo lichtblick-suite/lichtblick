@@ -56,7 +56,7 @@ describe("buildSettingsTree", () => {
 
     const messagePipelineState = jest.fn().mockReturnValue({
       sortedTopics: PlayerBuilder.topics(),
-    });
+    } as Pick<MessagePipelineContext, "sortedTopics">);
 
     return {
       settingsTree,
@@ -74,7 +74,7 @@ describe("buildSettingsTree", () => {
   it.each([
     {
       panelType: undefined,
-      settingsTree: { nodes: {}, actionHandler: jest.fn() },
+      settingsTree: { nodes: {}, actionHandler: jest.fn() } as ImmutableSettingsTree,
     },
     { panelType: "value", settingsTree: undefined },
   ])(

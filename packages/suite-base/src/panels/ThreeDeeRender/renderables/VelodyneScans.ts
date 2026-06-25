@@ -162,7 +162,9 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
     const finalQueue: MessageEvent<T>[] = [];
     for (const topic in msgsByTopic) {
       const topicMsgs = msgsByTopic[topic]!;
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.config.topics[topic] as
+        | Partial<LayerSettingsVelodyneScans>
+        | undefined;
       // if the topic has a decaytime add all messages to queue for topic
       if ((userSettings?.decayTime ?? DEFAULT_SETTINGS.decayTime) > 0) {
         finalQueue.push(...topicMsgs);
@@ -216,7 +218,9 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const prevSettings = this.renderer.config.topics[topicName];
+      const prevSettings = this.renderer.config.topics[topicName] as
+        | Partial<LayerSettingsVelodyneScans>
+        | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...prevSettings };
       renderable.updatePointCloud(
         renderable.userData.latestPointCloud,
@@ -253,7 +257,7 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
     // Update the mapping of topic to point cloud field names if necessary
     let fields = this.#pointCloudFieldsByTopic.get(messageEvent.topic);
     let fieldsUpdated = false;
-    if (fields?.length !== pointCloud.fields.length) {
+    if (!fields || fields.length !== pointCloud.fields.length) {
       fields = pointCloud.fields.map((field) => field.name);
       this.#pointCloudFieldsByTopic.set(messageEvent.topic, fields);
       fieldsUpdated = true;
@@ -263,7 +267,9 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.config.topics[topic] as
+        | Partial<LayerSettingsVelodyneScans>
+        | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       if (settings.colorField == undefined && fieldsUpdated) {
         autoSelectColorSettings(settings, fields, { supportsPackedRgbModes: false });
@@ -293,7 +299,7 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
         settings,
         topic,
         latestPointCloud: pointCloud,
-        latestOriginalMessage: messageEvent.message,
+        latestOriginalMessage: messageEvent.message as RosObject,
         material,
         pickingMaterial,
         instancePickingMaterial,
@@ -305,7 +311,7 @@ export class VelodyneScans extends SceneExtension<PointCloudHistoryRenderable> {
     }
     renderable.updatePointCloud(
       pointCloud,
-      messageEvent.message,
+      messageEvent.message as RosObject,
       renderable.userData.settings,
       receiveTime,
     );

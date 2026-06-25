@@ -240,7 +240,8 @@ export default function CurrentLayoutProvider({
       if (
         event.type === "revert" &&
         updatedLayout &&
-        updatedLayout.id === layoutStateRef.current.selectedLayout?.id
+        layoutStateRef.current.selectedLayout &&
+        updatedLayout.id === layoutStateRef.current.selectedLayout.id
       ) {
         setLayoutState({
           selectedLayout: {

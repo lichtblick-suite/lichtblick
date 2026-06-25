@@ -250,7 +250,9 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName];
+      const settings = this.renderer.config.topics[topicName] as
+        | Partial<LayerSettingsPoseArray>
+        | undefined;
       const defaultType = { type: getDefaultType(this.renderer.topicsByName?.get(topicName)) };
       this.#updatePoseArrayRenderable(
         renderable,
@@ -293,7 +295,9 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.config.topics[topic] as
+        | Partial<LayerSettingsPoseArray>
+        | undefined;
       const defaultType = { type: getDefaultType(this.renderer.topicsByName?.get(topic)) };
       const settings = { ...DEFAULT_SETTINGS, ...defaultType, ...userSettings };
 

@@ -64,7 +64,7 @@ export function buildViewportDatasets(
   const datasets: Dataset[] = [];
   for (const series of seriesByKey.values()) {
     if (series.enabled) {
-      datasets[series.configIndex] = series.dataset;
+      datasets[series.configIndex] = series.dataset as Dataset;
     }
   }
   return { datasetsByConfigIndex: datasets, pathsWithMismatchedDataLengths };

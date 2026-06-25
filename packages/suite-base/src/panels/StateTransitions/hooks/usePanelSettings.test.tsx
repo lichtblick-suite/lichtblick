@@ -211,7 +211,7 @@ describe("makeRootSeriesNode", () => {
 describe("buildSettingsTree", () => {
   const setup = ({
     config = {},
-    paths,
+    paths = undefined,
   }: Partial<{
     config: Partial<Omit<StateTransitionConfig, "paths">>;
     paths: PathState[] | undefined;
@@ -339,8 +339,8 @@ describe("usePanelSettings", () => {
 
   const setup = ({
     config = {},
-    focusedPath,
-    paths,
+    focusedPath = undefined,
+    paths = undefined,
   }: Partial<{
     config: Partial<StateTransitionConfig>;
     paths: PathState[] | undefined;

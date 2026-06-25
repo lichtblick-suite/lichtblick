@@ -117,7 +117,9 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
 
   #renderMarker(marker: Marker): Marker {
     const topicName = this.userData.topic;
-    const settings = this.renderer.config.topics[topicName];
+    const settings = this.renderer.config.topics[topicName] as
+      | Partial<LayerSettingsMarker>
+      | undefined;
     const colorStr = settings?.color;
 
     if (colorStr == undefined) {

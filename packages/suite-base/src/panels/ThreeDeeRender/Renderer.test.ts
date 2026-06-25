@@ -277,7 +277,7 @@ describe("3D Renderer", () => {
             x: 0,
             y: 0,
             toJSON: () => "",
-          }),
+          }) as DOMRect,
       );
     }
 

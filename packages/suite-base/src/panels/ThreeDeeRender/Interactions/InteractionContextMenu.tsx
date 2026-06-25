@@ -59,8 +59,8 @@ function InteractionContextMenuItem({
 }
 
 export function InteractionContextMenu({
-  clickedObjects,
-  clickedPosition,
+  clickedObjects = [],
+  clickedPosition = { clientX: 0, clientY: 0 },
   onClose,
   selectObject,
 }: Props): React.JSX.Element {

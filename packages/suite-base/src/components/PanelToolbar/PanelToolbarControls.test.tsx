@@ -537,7 +537,7 @@ describe("PanelToolbarControls", () => {
                   module: jest.fn(),
                   hasCustomToolbar: false,
                 }),
-              }
+              } as any
             }
           >
             <PanelContext.Provider
@@ -561,7 +561,7 @@ describe("PanelToolbarControls", () => {
                   setHasFullscreenDescendant: jest.fn(),
                   connectToolbarDragHandle: jest.fn(),
                   setMessagePathDropConfig: jest.fn(),
-                }
+                } as any
               }
             >
               <PanelToolbarControls {...props} />
@@ -604,7 +604,7 @@ describe("PanelToolbarControls", () => {
                   module: jest.fn(),
                   hasCustomToolbar: false,
                 }),
-              }
+              } as any
             }
           >
             <PanelContext.Provider
@@ -628,7 +628,7 @@ describe("PanelToolbarControls", () => {
                   setHasFullscreenDescendant: jest.fn(),
                   connectToolbarDragHandle: jest.fn(),
                   setMessagePathDropConfig: jest.fn(),
-                }
+                } as any
               }
             >
               <PanelToolbarControls isUnknownPanel={false} />

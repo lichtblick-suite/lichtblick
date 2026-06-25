@@ -230,7 +230,9 @@ export class Poses extends SceneExtension<PoseRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName];
+      const settings = this.renderer.config.topics[topicName] as
+        | Partial<LayerSettingsPose>
+        | undefined;
       this.#updatePoseRenderable(
         renderable,
         renderable.userData.poseMessage,
@@ -270,7 +272,9 @@ export class Poses extends SceneExtension<PoseRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.config.topics[topic] as
+        | Partial<LayerSettingsPose>
+        | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
       renderable = new PoseRenderable(topic, this.renderer, {

@@ -210,7 +210,7 @@ class TransformPreloadingPlayer implements Player {
           Math.min(start150HzIndex + numMessagesPerBlock150Hz, msgs150Hz.length),
         ),
       };
-      blocks.push(block);
+      blocks.push(block as MessageBlock);
     }
 
     const progressForListener = {

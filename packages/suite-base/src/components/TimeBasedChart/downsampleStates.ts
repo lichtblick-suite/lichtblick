@@ -37,7 +37,7 @@ type Label = {
  */
 function addLabel(label: Label, labels: Immutable<Label[]>): Immutable<Label[]> {
   const last = labels.at(-1);
-  if (label.value === last?.value) {
+  if (last != undefined && label.value === last.value) {
     return labels;
   }
 

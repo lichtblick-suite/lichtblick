@@ -13,7 +13,7 @@ import { canInstallExtension } from "@lichtblick/suite-base/util/canInstallExten
 export function InstallButton(
   props: Readonly<ExtensionActionButtonProps>,
 ): React.ReactElement | undefined {
-  if (!canInstallExtension(props.extension)) {
+  if (!canInstallExtension(props.extension as ExtensionMarketplaceDetail)) {
     return undefined;
   }
 

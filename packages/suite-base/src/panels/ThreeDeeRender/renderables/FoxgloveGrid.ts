@@ -133,7 +133,7 @@ const tempRgbaFieldReaders: RgbaFieldReaders = {
 };
 
 function numericTypeName(type: NumericType): string {
-  return NumericType[type] ?? `${type}`;
+  return NumericType[type as number] ?? `${type}`;
 }
 
 function getTextureColorSpace(settings: GridColorModeSettings): THREE.ColorSpace {
@@ -461,7 +461,9 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName];
+      const settings = this.renderer.config.topics[topicName] as
+        | Partial<LayerSettingsFoxgloveGrid>
+        | undefined;
       renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
 
       renderable.updateMaterial(renderable.userData.settings);
@@ -495,7 +497,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
 
     let fields = this.#fieldsByTopic.get(topic);
     let fieldsUpdated = false;
-    if (fields?.length !== foxgloveGrid.fields.length) {
+    if (!fields || fields.length !== foxgloveGrid.fields.length) {
       fields = foxgloveGrid.fields.map((field) => field.name);
       this.#fieldsByTopic.set(topic, fields);
       this.updateSettingsTree();
@@ -506,7 +508,9 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       renderable.visible = true;
     } else {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.config.topics[topic] as
+        | Partial<LayerSettingsFoxgloveGrid>
+        | undefined;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       // only want to autoselect if it's in flatcolor mode (without colorfield) and previously didn't have fields
       if (settings.colorField == undefined && fieldsUpdated) {

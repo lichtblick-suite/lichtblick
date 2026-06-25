@@ -280,7 +280,7 @@ export const DisplayDiffWithIDFields: StoryObj = {
             diffTopicPath: "/another/baz/enum_advanced_array.value",
             showFullMessageForDiff: false,
             expansion: "all",
-          }
+          } as RawMessagesPanelConfig
         }
       />
     </PanelSetup>
@@ -291,7 +291,7 @@ export const EmptyDiffMessage: StoryObj = {
   render: () => (
     <PanelSetup fixture={{ topics: [], frame: {} }}>
       <RawMessages
-        overrideConfig={{ ...diffConfig, showFullMessageForDiff: false }}
+        overrideConfig={{ ...diffConfig, showFullMessageForDiff: false } as RawMessagesPanelConfig}
       />
     </PanelSetup>
   ),

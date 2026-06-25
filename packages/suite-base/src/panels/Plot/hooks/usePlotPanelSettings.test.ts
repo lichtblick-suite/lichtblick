@@ -266,15 +266,15 @@ describe("usePlotPanelSettings", () => {
     {
       action: "update",
       payload: { path: [], value: "", input: "string" },
-    },
+    } as SettingsTreeActionUpdate,
     {
       action: "perform-node-action",
       payload: { path: [], id: "add-series" },
-    },
+    } as SettingsTreeActionPerformNode,
     {
       action: "perform-node-action",
       payload: { path: [], id: "delete-series" },
-    },
+    } as SettingsTreeActionPerformNode,
   ])("should call saveConfig to update settings tree", (action: SettingsTreeAction) => {
     const config = PlotBuilder.config();
     const focusedPath = undefined;

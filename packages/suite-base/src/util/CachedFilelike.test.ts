@@ -154,10 +154,10 @@ describe("CachedFilelike", () => {
             callback: ((_: Uint8Array) => void) & ((_: Error) => void),
           ) => {
             if (type === "data") {
-              dataCallback = callback;
+              dataCallback = callback as (_: Uint8Array) => void;
             }
             if (type === "error") {
-              errorCallback = callback;
+              errorCallback = callback as (_: Error) => void;
             }
           },
           destroy() {
