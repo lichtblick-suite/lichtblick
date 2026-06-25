@@ -4,13 +4,12 @@
   "compilerOptions": {
     "noEmit": true,
     "rootDir": "./src",
-    "baseUrl": "./src",
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "es2022", "webworker", "ESNext.Disposable"],
     "declarationMap": false,
     "sourceMap": false,
     "paths": {
-      "@lichtblick/suite-base/*": ["./*"]
+      "@lichtblick/suite-base/*": ["./src/*"]
     },
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

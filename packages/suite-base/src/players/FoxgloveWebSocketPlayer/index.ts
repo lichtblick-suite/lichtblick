@@ -17,6 +17,7 @@ import {
   FetchAssetStatus,
   FetchAssetResponse,
   BinaryOpcode,
+  IWebSocket,
 } from "@foxglove/ws-protocol";
 import * as base64 from "@protobufjs/base64";
 import * as _ from "lodash-es";
@@ -192,7 +193,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       ws:
         typeof Worker !== "undefined"
           ? new WorkerSocketAdapter(this.#url, subprotocols)
-          : new WebSocket(this.#url, subprotocols),
+          : (new WebSocket(this.#url, subprotocols) as IWebSocket),
     });
 
     this.#client.on("open", () => {
