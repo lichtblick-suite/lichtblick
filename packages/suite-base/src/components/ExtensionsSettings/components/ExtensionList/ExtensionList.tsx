@@ -186,11 +186,7 @@ export default function ExtensionList({
               pagination: { paginationModel },
               columns: {
                 columnVisibilityModel: {
-                  actions:
-                    isDesktopApp() ||
-                    !entries.some((entry) =>
-                      canInstallExtension(entry as ExtensionMarketplaceDetail),
-                    ),
+                  actions: isDesktopApp() || !entries.some((entry) => canInstallExtension(entry)),
                 },
               },
             }}

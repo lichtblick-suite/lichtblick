@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
-import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
 import { buildSettingsTree } from "@lichtblick/suite-base/components/PanelSettings/settingsTree";
 import { BuildSettingsTreeProps } from "@lichtblick/suite-base/components/PanelSettings/types";
 import {
@@ -56,7 +55,7 @@ describe("buildSettingsTree", () => {
 
     const messagePipelineState = jest.fn().mockReturnValue({
       sortedTopics: PlayerBuilder.topics(),
-    } as Pick<MessagePipelineContext, "sortedTopics">);
+    });
 
     return {
       settingsTree,
@@ -74,7 +73,7 @@ describe("buildSettingsTree", () => {
   it.each([
     {
       panelType: undefined,
-      settingsTree: { nodes: {}, actionHandler: jest.fn() } as ImmutableSettingsTree,
+      settingsTree: { nodes: {}, actionHandler: jest.fn() },
     },
     { panelType: "value", settingsTree: undefined },
   ])(

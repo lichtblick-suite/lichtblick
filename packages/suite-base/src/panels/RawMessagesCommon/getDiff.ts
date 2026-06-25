@@ -154,7 +154,7 @@ function diffArraysByIdField(
       showFullMessageForDiff,
     });
     if (!_.isEmpty(innerDiff)) {
-      diff.push(innerDiff as DiffObject);
+      diff.push(innerDiff);
     }
   }
 

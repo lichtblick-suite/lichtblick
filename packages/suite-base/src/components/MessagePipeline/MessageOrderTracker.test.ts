@@ -56,8 +56,7 @@ const message = (
   receiveTimeSeconds: number | undefined,
 ): MessageEvent => ({
   topic: "/foo",
-  receiveTime:
-    receiveTimeSeconds == undefined ? undefined : ({ sec: receiveTimeSeconds, nsec: 1 } as any),
+  receiveTime: receiveTimeSeconds == undefined ? undefined : { sec: receiveTimeSeconds, nsec: 1 },
   message: {
     header:
       headerStampSeconds == undefined ? undefined : { stamp: { sec: headerStampSeconds, nsec: 1 } },

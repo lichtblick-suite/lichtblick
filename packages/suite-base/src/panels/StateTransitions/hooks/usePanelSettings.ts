@@ -164,7 +164,7 @@ export function buildSettingsTree(
       ? t("maxXError")
       : undefined;
 
-  function setAxis({ value, label, error = undefined }: AxisTreeField): SettingsTreeField {
+  function setAxis({ value, label, error }: AxisTreeField): SettingsTreeField {
     return {
       label,
       input: "number",

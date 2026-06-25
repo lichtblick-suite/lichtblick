@@ -20,6 +20,7 @@ import {
 import { useStyles } from "./VirtualizedTree.style";
 import { flattenTreeData } from "./flattenTreeData";
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 export const VirtualizedTree = memo(function VirtualizedTree({
   data,
   expandedNodes,

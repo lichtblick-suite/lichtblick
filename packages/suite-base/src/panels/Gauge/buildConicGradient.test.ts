@@ -33,7 +33,7 @@ describe("buildConicGradient", () => {
       height: 100,
       width: 200,
       gaugeAngle: Math.PI / 4,
-      config: config as GaugeConfig,
+      config,
       ...propsOverride,
     };
     return { props };

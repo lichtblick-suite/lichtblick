@@ -109,6 +109,7 @@ const useStyles = makeStyles<Omit<PanelRootProps, "fullscreenState" | "selected"
 });
 
 export const PanelRoot = forwardRef<HTMLDivElement, PropsWithChildren<PanelRootProps>>(
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function PanelRoot(props, ref): React.JSX.Element {
     const { className, fullscreenState, hasFullscreenDescendant, selected, sourceRect, ...rest } =
       props;

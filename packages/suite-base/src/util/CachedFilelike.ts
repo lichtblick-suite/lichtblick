@@ -180,7 +180,7 @@ export default class CachedFilelike implements Filelike {
           this.#updateState();
         })
         .catch((err: unknown) => {
-          reject(err as Error);
+          reject(err instanceof Error ? err : new Error(String(err)));
         });
     });
   }

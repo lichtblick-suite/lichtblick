@@ -300,7 +300,7 @@ describe("samplingMode", () => {
         return useMessageDataItem(path, options);
       },
       {
-        initialProps: { sampling: samplingRequest as Options["samplingRequest"] | undefined },
+        initialProps: { sampling: samplingRequest },
         wrapper: Wrapper,
       },
     );
@@ -326,7 +326,7 @@ describe("samplingMode", () => {
         return useMessageDataItem(path, options);
       },
       {
-        initialProps: { sampling: samplingRequest as Options["samplingRequest"] | undefined },
+        initialProps: { sampling: samplingRequest },
         wrapper: Wrapper,
       },
     );
