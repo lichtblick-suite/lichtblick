@@ -117,8 +117,6 @@ describe("flattenTreeData", () => {
       // Then
       expect(result).toHaveLength(3);
       expect(result[0]).toEqual(expect.objectContaining({ key: "0", value: 10 }));
-        expect.objectContaining({ key: "0", value: 10 }),
-      );
     });
 
     it("should return empty array given an empty typed array", () => {
