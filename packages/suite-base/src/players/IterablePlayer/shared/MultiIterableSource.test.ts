@@ -359,7 +359,7 @@ describe("MultiIterableSource", () => {
         getBackfillMessages: backfill,
         getStart: jest.fn().mockReturnValue({ sec: startSec, nsec: 0 }),
         getEnd: jest.fn().mockReturnValue({ sec: startSec + 10, nsec: 0 }),
-      }) as unknown as IIterableSource<Uint8Array>;
+      });
 
     const messageOnTopic = (topic: string): MessageEvent<Uint8Array> =>
       MessageEventBuilder.messageEvent<Uint8Array>({ topic, message: new Uint8Array() });

@@ -189,7 +189,7 @@ export default function ExtensionList({
                   actions:
                     isDesktopApp() ||
                     !entries.some((entry) =>
-                      canInstallExtension(entry as ExtensionMarketplaceDetail),
+                      canInstallExtension(entry),
                     ),
                 },
               },

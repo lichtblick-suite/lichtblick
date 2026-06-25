@@ -51,7 +51,7 @@ export class MarkersNamespace {
     this.namespace = namespace;
 
     // Set the initial settings from default values merged with any user settings
-    const topicSettings = renderer.config.topics[topic] as PartialMarkerSettings;
+    const topicSettings = renderer.config.topics[topic];
     const userSettings = topicSettings?.namespaces?.[namespace];
     this.settings = { ...DEFAULT_NAMESPACE_SETTINGS, ...userSettings };
   }

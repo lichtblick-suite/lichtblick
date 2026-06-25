@@ -209,7 +209,7 @@ describe("Log Panel actionHandler", () => {
         action: {
           action: "perform-node-action",
           payload: { id: "unknown-id", path: [] },
-        } as SettingsTreeAction,
+        },
       },
     ])("should not call saveConfig for $description", ({ action }) => {
       const saveConfigMock = jest.fn();

@@ -48,8 +48,8 @@ describe("LayoutManagerProvider", () => {
 
     await waitFor(() => {
       expect(mockLayoutManager.setOnline).toHaveBeenCalledTimes(2);
-      expect(mockLayoutManager.setOnline).toHaveBeenCalledWith({ online: true } as SetOnlineProps);
-      expect(mockLayoutManager.setOnline).toHaveBeenCalledWith({ online: false } as SetOnlineProps);
+      expect(mockLayoutManager.setOnline).toHaveBeenCalledWith({ online: true });
+      expect(mockLayoutManager.setOnline).toHaveBeenCalledWith({ online: false });
     });
   });
 

@@ -235,16 +235,12 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
 
     const imageTopic = path[1]!;
-    const prevSettings = this.renderer.config.topics[imageTopic] as
-      | Partial<LayerSettingsImage>
-      | undefined;
+    const prevSettings = this.renderer.config.topics[imageTopic];
     const prevCameraInfoTopic = prevSettings?.cameraInfoTopic;
 
     this.saveSetting(path, action.payload.value);
 
-    const settings = this.renderer.config.topics[imageTopic] as
-      | Partial<LayerSettingsImage>
-      | undefined;
+    const settings = this.renderer.config.topics[imageTopic];
     const cameraInfoTopic = settings?.cameraInfoTopic;
 
     // Add this camera_info_topic -> image_topic mapping
@@ -451,9 +447,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
 
     // Look up any existing settings for the image topic to save as user data with the renderable
-    const userSettings = this.renderer.config.topics[imageTopic] as
-      | Partial<LayerSettingsImage>
-      | undefined;
+    const userSettings = this.renderer.config.topics[imageTopic];
     const messageTime = image
       ? toNanoSec("header" in image ? image.header.stamp : image.timestamp)
       : 0n;

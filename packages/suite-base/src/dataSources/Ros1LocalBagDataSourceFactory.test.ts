@@ -86,6 +86,6 @@ describe("Ros1LocalBagDataSourceFactory", () => {
       name: expectedInitArgs.file?.name,
       sourceId: expect.any(String),
       readAheadDuration: { sec: 120, nsec: 0 },
-    } as IterablePlayerOptions);
+    });
   });
 });

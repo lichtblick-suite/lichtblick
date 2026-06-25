@@ -87,7 +87,7 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
             selectedName: info.status.name,
             topicToRender,
             collapsedSections: [],
-          }) as DiagnosticStatusConfig,
+          }),
         updateIfExists: true,
       });
     },

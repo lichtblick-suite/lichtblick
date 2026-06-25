@@ -126,9 +126,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsPolygon>
-        | undefined;
+      const settings = this.renderer.config.topics[topicName];
       renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
       this.#updatePolygonRenderable(
         renderable,
@@ -146,9 +144,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic] as
-        | Partial<LayerSettingsPolygon>
-        | undefined;
+      const userSettings = this.renderer.config.topics[topic];
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
       renderable = new PolygonRenderable(topic, this.renderer, {

@@ -123,7 +123,7 @@ describe("<RendererOverlay /> hover wiring", () => {
           x: 100,
           y: 200,
           toJSON: () => "",
-        }) as DOMRect,
+        }),
     );
 
     renderOverlay(canvas);
@@ -212,7 +212,7 @@ describe("<RendererOverlay /> hover wiring", () => {
           x: 0,
           y: 0,
           toJSON: () => "",
-        }) as DOMRect,
+        }),
     );
 
     renderOverlay(canvas);
@@ -266,7 +266,7 @@ describe("<RendererOverlay /> hover wiring", () => {
           x: 0,
           y: 0,
           toJSON: () => "",
-        }) as DOMRect,
+        }),
     );
 
     renderOverlay(canvas);
@@ -297,7 +297,7 @@ describe("<RendererOverlay /> hover wiring", () => {
           x: 0,
           y: 0,
           toJSON: () => "",
-        }) as DOMRect,
+        }),
     );
 
     renderOverlay(canvas);

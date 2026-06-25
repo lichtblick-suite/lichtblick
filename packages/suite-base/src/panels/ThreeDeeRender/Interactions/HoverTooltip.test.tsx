@@ -27,7 +27,7 @@ function makeCanvas(bounds?: Partial<DOMRect>): HTMLCanvasElement {
         y: 0,
         toJSON: () => "",
         ...bounds,
-      }) as DOMRect,
+      }),
   );
   return canvas;
 }

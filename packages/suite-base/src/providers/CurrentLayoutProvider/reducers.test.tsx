@@ -1451,7 +1451,7 @@ describe("layout reducers", () => {
           panelId: "Audio!a",
           sourceTabId: undefined,
           targetTabId: undefined,
-          position: undefined as unknown as MosaicDropTargetPosition,
+          position: undefined,
           destinationPath: ["second"],
           ownPath: ["first"],
         },

@@ -46,8 +46,8 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     paths: series,
     showLegend,
     xAxisVal: xAxisMode,
-    legendDisplay = config.showSidebar === true ? "left" : "floating",
-    sidebarDimension = config.sidebarWidth ?? DEFAULT_SIDEBAR_DIMENSION,
+    legendDisplay,
+    sidebarDimension,
   } = config;
 
   const { classes } = useStyles();
