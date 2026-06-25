@@ -6492,7 +6492,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/tsconfig-utils@npm:8.61.1, @typescript-eslint/tsconfig-utils@npm:^8.61.1":
+"@typescript-eslint/tsconfig-utils@npm:8.61.1":
   version: 8.61.1
   resolution: "@typescript-eslint/tsconfig-utils@npm:8.61.1"
   peerDependencies:
@@ -6501,7 +6501,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/tsconfig-utils@npm:8.62.0, @typescript-eslint/tsconfig-utils@npm:^8.62.0":
+"@typescript-eslint/tsconfig-utils@npm:8.62.0, @typescript-eslint/tsconfig-utils@npm:^8.61.1, @typescript-eslint/tsconfig-utils@npm:^8.62.0":
   version: 8.62.0
   resolution: "@typescript-eslint/tsconfig-utils@npm:8.62.0"
   peerDependencies:
@@ -6549,14 +6549,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/types@npm:8.61.1, @typescript-eslint/types@npm:^8.61.1":
+"@typescript-eslint/types@npm:8.61.1":
   version: 8.61.1
   resolution: "@typescript-eslint/types@npm:8.61.1"
   checksum: 10/9aa036b27d1874533bf1b931151adaaebb4380cfd14cc71395ab8d2c00c7420218e42811c2b5a68c9fa54cd048e1ab47085afd8b44cd5d736fb5cb8edd300d64
   languageName: node
   linkType: hard
 
-"@typescript-eslint/types@npm:8.62.0, @typescript-eslint/types@npm:^8.62.0":
+"@typescript-eslint/types@npm:8.62.0, @typescript-eslint/types@npm:^8.61.1, @typescript-eslint/types@npm:^8.62.0":
   version: 8.62.0
   resolution: "@typescript-eslint/types@npm:8.62.0"
   checksum: 10/459f5834dedbb73fc80c8eb92de693faef0f0f341d3b4d65426dbf43640f98a50104f6e15108808aed2c3c66d518db15a648c72c40831f498d36bfb62be564cb
@@ -6619,7 +6619,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.61.1, @typescript-eslint/utils@npm:^6.0.0 || ^7.0.0 || ^8.0.0, @typescript-eslint/utils@npm:^8.0.0":
+"@typescript-eslint/utils@npm:8.61.1":
   version: 8.61.1
   resolution: "@typescript-eslint/utils@npm:8.61.1"
   dependencies:
@@ -6634,7 +6634,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.62.0":
+"@typescript-eslint/utils@npm:8.62.0, @typescript-eslint/utils@npm:^6.0.0 || ^7.0.0 || ^8.0.0, @typescript-eslint/utils@npm:^8.0.0":
   version: 8.62.0
   resolution: "@typescript-eslint/utils@npm:8.62.0"
   dependencies:
