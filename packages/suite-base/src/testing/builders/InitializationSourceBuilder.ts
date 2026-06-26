@@ -6,7 +6,7 @@ import { Initialization } from "@lichtblick/suite-base/players/IterablePlayer/II
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder, defaults } from "@lichtblick/test-builders";
 
-export default class InitilizationSourceBuilder {
+export default class InitializationSourceBuilder {
   public static initialization(props: Partial<Initialization> = {}): Initialization {
     return defaults<Initialization>(props, {
       start: RosTimeBuilder.time(),
@@ -29,6 +29,6 @@ export default class InitilizationSourceBuilder {
   }
 
   public static metadataList(count = 3): Metadata[] {
-    return BasicBuilder.multiple(InitilizationSourceBuilder.metadata, count);
+    return BasicBuilder.multiple(InitializationSourceBuilder.metadata, count);
   }
 }
