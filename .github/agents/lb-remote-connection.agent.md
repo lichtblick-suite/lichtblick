@@ -23,9 +23,6 @@ FetchReader (Streams API → EventEmitter: data/error/end)
 CachedFilelike (VirtualLRUBuffer LRU cache, 500MB default, 10MB blocks)
     │
     ▼
-BatchingReadable (coalesces reads <64KiB apart within a microtask tick, ≤4MiB span)
-    │
-    ▼
 RemoteFileReadable (IReadable adapter: size(), read(offset, size))
     │
     ├─────────────────── Worker boundary ────────────────────┐
@@ -79,8 +76,7 @@ WorkerSerializedIterableSource → BufferedIterableSource → Player
 | `util/VirtualLRUBuffer.ts` | Block-level LRU memory management |
 | `util/getNewConnection.ts` | HTTP connection decision algorithm |
 | `util/RequestQueue.ts` | Global concurrency limiter (10 max) |
-| `IterablePlayer/Mcap/RemoteFileReadable.ts` | `IReadable` adapter wrapping CachedFilelike (reads pass through BatchingReadable) |
-| `IterablePlayer/Mcap/BatchingReadable.ts` | Coalesces nearby `IReadable.read()` calls into fewer, larger reads |
+| `IterablePlayer/Mcap/RemoteFileReadable.ts` | `IReadable` adapter wrapping CachedFilelike |
 | `IterablePlayer/Mcap/McapIterableSource.ts` | Factory: indexed vs streaming decision |
 | `IterablePlayer/Mcap/McapIndexedIterableSource.ts` | Random access via chunk indexes |
 | `IterablePlayer/shared/MultiIterableSource.ts` | Multi-file orchestration |
@@ -310,7 +306,6 @@ WorkerSerializedIterableSource       McapIterableSourceWorker.worker.ts
 8. **WASM decompression preload** prevents initialization failures under slow network
 9. **Cache budget division** for multi-file: consider fewer large files over many small ones
 10. **BufferedIterableSource** (10s, 300MB) smooths network latency for playback
-11. **Read coalescing** (`BatchingReadable`): merges `read()` calls arriving in the same microtask tick (gap <64KiB, ≤4MiB span) before they reach `CachedFilelike`
 
 ## Common Pitfalls
 - Server missing `Accept-Ranges: bytes` header → fails at open
@@ -324,4 +319,3 @@ WorkerSerializedIterableSource       McapIterableSourceWorker.worker.ts
 - MCAP format structure and indexed reading: `read_file(".github/skills/mcap-format/SKILL.md")`
 - Worker/Comlink patterns: `read_file(".github/skills/web-workers/SKILL.md")`
 - BufferedIterableSource or BlockLoader details: `read_file(".github/skills/caching-internals/SKILL.md")`
-- Network/read latency profiling and buffering performance: `read_file(".github/skills/performance/SKILL.md")`
