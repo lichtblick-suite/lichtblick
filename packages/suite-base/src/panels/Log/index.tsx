@@ -257,7 +257,7 @@ LogPanel.displayName = "Log";
 
 export default Panel(
   Object.assign(LogPanel, {
-    defaultConfig: { searchTerms: [], minLogLevel: 1 },
+    defaultConfig: { searchTerms: [] as string[], minLogLevel: 1 },
     panelType: "RosOut", // The legacy RosOut name is used for backwards compatibility
   }),
 );

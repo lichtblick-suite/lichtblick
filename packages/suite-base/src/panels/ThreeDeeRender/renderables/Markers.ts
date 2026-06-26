@@ -11,7 +11,7 @@ import * as _ from "lodash-es";
 import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction } from "@lichtblick/suite";
 
-import { LayerSettingsMarker, LayerSettingsMarkerNamespace, TopicMarkers } from "./TopicMarkers";
+import { LayerSettingsMarker, TopicMarkers } from "./TopicMarkers";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { SELECTED_ID_VARIABLE } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -171,12 +171,11 @@ export class Markers extends SceneExtension<TopicMarkers> {
     // Update the MarkersNamespace settings
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName];
+      const settings = (this.renderer.config.topics[topicName] ??
+        {}) as Partial<LayerSettingsMarker>;
       const ns = renderable.namespaces.get(namespace);
       if (ns) {
-        const nsSettings = settings?.namespaces?.[namespace] as
-          | Partial<LayerSettingsMarkerNamespace>
-          | undefined;
+        const nsSettings = settings.namespaces?.[namespace];
         ns.settings = { ...ns.settings, ...nsSettings };
       }
     }
