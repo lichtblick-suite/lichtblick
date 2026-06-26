@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    # Run each command in parallel with the same setup steps.
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        config:
+          # Specify names so that the GitHub branch protection settings for
+          # required checks don't need to change if we ever change the commands used.
+          - name: npm audit
+            command: yarn npm audit --all --recursive --severity moderate
