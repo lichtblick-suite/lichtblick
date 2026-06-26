@@ -4,12 +4,18 @@ on:
   push:
     branches: [develop, main]
   pull_request:
+  schedule:
+    - cron: "0 8 * * 1-5" # Mon–Fri at 08:00 UTC (GMT)
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   test:
+    # Push/PR check: behaves exactly as before. Skipped on the scheduled and
+    # manual runs, which are handled by the audit-report job below.
+    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
     runs-on: ${{ matrix.os }}
 
     # Run each command in parallel with the same setup steps.
@@ -46,3 +52,70 @@ jobs:
       - run: yarn install --immutable
 
       - run: ${{ matrix.config.command }}
+
+  audit-report:
+    # Scheduled (and manually dispatched) run: produce an HTML report, email it,
+    # then fail the job if any vulnerabilities were found.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    name: audit report
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: corepack enable yarn
+
+      - name: Restore cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+
+      - run: yarn install --immutable
+
+      - name: Run npm audit (capture JSON, do not fail yet)
+        id: audit
+        run: |
+          set +e
+          yarn npm audit --all --recursive --json > audit.json
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Generate HTML report
+        run: yarn audit:report
+
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: audit-report
+          path: |
+            audit.json
+            audit-report.html
+          retention-days: 30
+
+      - name: Send report email
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: ${{ secrets.MAIL_FROM }}
+          to: ${{ secrets.MAIL_TO }}
+          subject: "Dependency Audit Report — ${{ github.repository }} (${{ github.run_id }})"
+          html_body: file://audit-report.html
+          attachments: audit-report.html
+
+      - name: Fail if vulnerabilities were found
+        if: ${{ steps.audit.outputs.exit_code != '0' }}
+        run: |
+          echo "npm audit reported vulnerabilities (exit code ${{ steps.audit.outputs.exit_code }})."
+          exit 1
