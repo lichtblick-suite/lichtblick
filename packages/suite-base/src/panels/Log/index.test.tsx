@@ -199,7 +199,7 @@ describe("Log Panel actionHandler", () => {
   });
 
   describe("early returns", () => {
-    it.each([
+    it.each<{ description: string; action: SettingsTreeAction }>([
       {
         description: "unknown action type",
         action: { action: "unknown-action", payload: {} } as unknown as SettingsTreeAction,
