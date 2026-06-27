@@ -85,22 +85,6 @@ const SEEK_ON_START_NS = BigInt(99 * 1e6);
 const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
 
 const EMPTY_ARRAY = Object.freeze([]);
-/**
- * Hook invoked on a seek to optionally expand the backfill messages before they are emitted, e.g.
- * to replay a video GOP so a P/B-frame is decodable. It receives the raw backfill messages, a
- * function to fetch further backfill from the source, and a getter for the current abort signal,
- * and returns the (possibly expanded) message set. Kept generic so the player carries no
- * codec-specific knowledge; the data-source layer decides whether to supply one.
- *
- * Not exported: it is referenced only by `IterablePlayerOptions` below; consumers supply a
- * structurally-compatible function (e.g. `expandVideoSeekBackfill`) without naming the type.
- */
-type ExpandBackfill = (
-  messages: MessageEvent[],
-  getBackfillMessages: (args: GetBackfillMessagesArgs) => Promise<MessageEvent[]>,
-  getAbortSignal: () => AbortSignal | undefined,
-) => Promise<MessageEvent[]>;
-
 type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
 
