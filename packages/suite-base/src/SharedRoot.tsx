@@ -23,6 +23,7 @@ export function SharedRoot(
   const {
     appBarLeftInset,
     appConfiguration,
+    appParameters,
     onAppBarDoubleClick,
     AppBarComponent,
     children,
@@ -37,7 +38,7 @@ export function SharedRoot(
 
   return (
     <AppConfigurationContext.Provider value={appConfiguration}>
-      <AppParametersProvider>
+      <AppParametersProvider appParameters={appParameters}>
         <ColorSchemeThemeProvider>
           {enableGlobalCss && <GlobalCss />}
           <CssBaseline>
@@ -47,6 +48,7 @@ export function SharedRoot(
                   appBarLeftInset,
                   AppBarComponent,
                   appConfiguration,
+                  appParameters,
                   customWindowControlProps,
                   dataSources,
                   deepLinks,

@@ -315,8 +315,12 @@ export default function CurrentLayoutProvider({
 
     const layouts = await layoutManager.getLayouts();
 
-    // Check if there's a layout specified by app parameter
-    const defaultLayoutFromParameters = layouts.find((l) => l.name === appParameters.defaultLayout);
+    // Check if there's a layout specified by app parameter. When multiple layouts share the
+    // name, prefer the organizational (shared) layout over a local one.
+    const matchingLayouts = layouts.filter((l) => l.name === appParameters.defaultLayout);
+    const defaultLayoutFromParameters =
+      matchingLayouts.find((l) => l.permission.startsWith(ORG_PERMISSION_PREFIX)) ??
+      matchingLayouts[0];
     if (defaultLayoutFromParameters) {
       await setSelectedLayoutId(defaultLayoutFromParameters.id, { saveToProfile: true });
       return;
