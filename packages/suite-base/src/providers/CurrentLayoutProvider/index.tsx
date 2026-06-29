@@ -322,7 +322,9 @@ export default function CurrentLayoutProvider({
       matchingLayouts.find((l) => l.permission.startsWith(ORG_PERMISSION_PREFIX)) ??
       matchingLayouts[0];
     if (defaultLayoutFromParameters) {
-      await setSelectedLayoutId(defaultLayoutFromParameters.id, { saveToProfile: true });
+      // Apply the URL-selected layout for the current session only, without persisting it to the
+      // user's profile, so a one-off ?layout= override does not become sticky on later visits.
+      await setSelectedLayoutId(defaultLayoutFromParameters.id, { saveToProfile: false });
       return;
     }
 
