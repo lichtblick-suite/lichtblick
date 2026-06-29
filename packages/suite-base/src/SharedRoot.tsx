@@ -5,6 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useMemo } from "react";
+
 import GlobalCss from "@lichtblick/suite-base/components/GlobalCss";
 import {
   ISharedRootContext,
@@ -36,6 +38,35 @@ export function SharedRoot(
     extraProviders,
   } = props;
 
+  const contextValue = useMemo(
+    () => ({
+      appBarLeftInset,
+      AppBarComponent,
+      appConfiguration,
+      appParameters,
+      customWindowControlProps,
+      dataSources,
+      deepLinks,
+      enableLaunchPreferenceScreen,
+      extensionLoaders,
+      extraProviders,
+      onAppBarDoubleClick,
+    }),
+    [
+      appBarLeftInset,
+      AppBarComponent,
+      appConfiguration,
+      appParameters,
+      customWindowControlProps,
+      dataSources,
+      deepLinks,
+      enableLaunchPreferenceScreen,
+      extensionLoaders,
+      extraProviders,
+      onAppBarDoubleClick,
+    ],
+  );
+
   return (
     <AppConfigurationContext.Provider value={appConfiguration}>
       <AppParametersProvider appParameters={appParameters}>
@@ -43,21 +74,7 @@ export function SharedRoot(
           {enableGlobalCss && <GlobalCss />}
           <CssBaseline>
             <ErrorBoundary>
-              <SharedRootContext.Provider
-                value={{
-                  appBarLeftInset,
-                  AppBarComponent,
-                  appConfiguration,
-                  appParameters,
-                  customWindowControlProps,
-                  dataSources,
-                  deepLinks,
-                  enableLaunchPreferenceScreen,
-                  extensionLoaders,
-                  extraProviders,
-                  onAppBarDoubleClick,
-                }}
-              >
+              <SharedRootContext.Provider value={contextValue}>
                 {children}
               </SharedRootContext.Provider>
             </ErrorBoundary>
