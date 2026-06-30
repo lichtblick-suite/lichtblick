@@ -69,7 +69,7 @@ describe("useSubscriptions", () => {
     const config: PlotConfig = {
       ...PlotBuilder.config(),
       ...override.config,
-    } as unknown as PlotConfig;
+    };
 
     const subscriberId = Object.hasOwn(override, "subscriberId")
       ? override.subscriberId!

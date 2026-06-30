@@ -265,20 +265,17 @@ describe("3D Renderer", () => {
       // Input relies on clientWidth/clientHeight of the canvas parent.
       Object.defineProperty(inputParent, "clientWidth", { configurable: true, value: 300 });
       Object.defineProperty(inputParent, "clientHeight", { configurable: true, value: 300 });
-      inputCanvas.getBoundingClientRect = jest.fn(
-        () =>
-          ({
-            left: 0,
-            top: 0,
-            right: 300,
-            bottom: 300,
-            width: 300,
-            height: 300,
-            x: 0,
-            y: 0,
-            toJSON: () => "",
-          }) as DOMRect,
-      );
+      inputCanvas.getBoundingClientRect = jest.fn(() => ({
+        left: 0,
+        top: 0,
+        right: 300,
+        bottom: 300,
+        width: 300,
+        height: 300,
+        x: 0,
+        y: 0,
+        toJSON: () => "",
+      }));
     }
 
     function createHoverRenderer(): { renderer: Renderer; hoverCanvas: HTMLCanvasElement } {

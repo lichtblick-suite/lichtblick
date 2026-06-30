@@ -55,7 +55,7 @@ describe("ExtensionCatalogProvider", () => {
     return {
       getExtension: jest.fn(),
       getExtensions: jest.fn().mockResolvedValue([]),
-      loadExtension: jest.fn().mockResolvedValue({ raw: defaultSource } as LoadedExtension),
+      loadExtension: jest.fn().mockResolvedValue({ raw: defaultSource }),
       installExtension: jest.fn(),
       uninstallExtension: jest.fn(),
       ...overrides,
@@ -75,7 +75,7 @@ describe("ExtensionCatalogProvider", () => {
       getExtensions: jest.fn().mockResolvedValue([extension]),
       loadExtension:
         options?.loadExtensionMock ??
-        jest.fn().mockResolvedValue({ raw: options?.source ?? defaultSource } as LoadedExtension),
+        jest.fn().mockResolvedValue({ raw: options?.source ?? defaultSource }),
     });
   }
 
@@ -93,7 +93,7 @@ describe("ExtensionCatalogProvider", () => {
       getExtension: jest.fn().mockResolvedValue(cachedExtension),
       loadExtension:
         options?.loadExtensionMock ??
-        jest.fn().mockResolvedValue({ raw: options?.source ?? defaultSource } as LoadedExtension),
+        jest.fn().mockResolvedValue({ raw: options?.source ?? defaultSource }),
       installExtension: options?.installExtensionMock ?? jest.fn(),
     });
   }
@@ -126,7 +126,7 @@ describe("ExtensionCatalogProvider", () => {
 
     const loadExtension = jest.fn().mockResolvedValue({
       raw: `module.exports = { activate: function() { return 1; } }`,
-    } as LoadedExtension);
+    });
     const loaderDefault: IExtensionLoader = {
       type: extensionInfo.namespace === "local" ? "browser" : "server",
       namespace: extensionInfo.namespace!,
@@ -168,8 +168,8 @@ describe("ExtensionCatalogProvider", () => {
     const source2 = `module.exports = { activate: function() { return 2; } }`;
     const extension1 = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const extension2 = ExtensionBuilder.extensionInfo({ namespace: "local" });
-    const loadExtension1 = jest.fn().mockResolvedValue({ raw: source1 } as LoadedExtension);
-    const loadExtension2 = jest.fn().mockResolvedValue({ raw: source2 } as LoadedExtension);
+    const loadExtension1 = jest.fn().mockResolvedValue({ raw: source1 });
+    const loadExtension2 = jest.fn().mockResolvedValue({ raw: source2 });
 
     const loader1: IExtensionLoader = {
       type: "browser",
@@ -212,7 +212,7 @@ describe("ExtensionCatalogProvider", () => {
             }
         }
     `;
-    const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = jest.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -261,7 +261,7 @@ describe("ExtensionCatalogProvider", () => {
       };
     `;
 
-    const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = jest.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -327,7 +327,7 @@ describe("ExtensionCatalogProvider", () => {
         }
     `;
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
-    const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = jest.fn().mockResolvedValue({ raw: source });
     const loader: IExtensionLoader = {
       type: "browser",
       namespace: extension.namespace!,
@@ -364,7 +364,7 @@ describe("ExtensionCatalogProvider", () => {
             }
         }
     `;
-    const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = jest.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -406,7 +406,7 @@ describe("ExtensionCatalogProvider", () => {
       };
     `;
 
-    const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = jest.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -453,7 +453,7 @@ describe("ExtensionCatalogProvider", () => {
             }
         }
     `;
-    const loadExtension = jest.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = jest.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -1035,9 +1035,7 @@ describe("ExtensionCatalogProvider", () => {
     it("should reload all extensions from loaders", async () => {
       // Given
       const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
-      const loadExtensionMock = jest
-        .fn()
-        .mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+      const loadExtensionMock = jest.fn().mockResolvedValue({ raw: defaultSource });
       const loader = createLocalLoader(extension, { loadExtensionMock });
       const { result } = await setup({ loadersOverride: [loader] });
       loadExtensionMock.mockClear();
@@ -1072,7 +1070,7 @@ describe("ExtensionCatalogProvider", () => {
         namespace: "local",
         type: "browser",
         getExtensions: jest.fn().mockResolvedValue([extension1, extension2]),
-        loadExtension: jest.fn().mockResolvedValue({ raw: source } as LoadedExtension),
+        loadExtension: jest.fn().mockResolvedValue({ raw: source }),
       });
 
       // When: mount triggers refreshAllExtensions
@@ -1130,14 +1128,13 @@ describe("ExtensionCatalogProvider", () => {
         (cachedVersion ? { ...remoteExtension, version: cachedVersion } : undefined);
 
       const loadCachedMock =
-        overrides?.loadCachedMock ??
-        jest.fn().mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+        overrides?.loadCachedMock ?? jest.fn().mockResolvedValue({ raw: defaultSource });
       const loadRemoteMock =
         overrides?.loadRemoteMock ??
         jest.fn().mockResolvedValue({
           raw: defaultSource,
           ...(overrides?.buffer && { buffer: overrides.buffer }),
-        } as LoadedExtension);
+        });
       const cacheInstallMock = overrides?.installMock ?? jest.fn();
 
       const cacheLoader = createOrgCacheLoader(cachedExtension, {
@@ -1165,9 +1162,7 @@ describe("ExtensionCatalogProvider", () => {
     it("should load from local loader", async () => {
       // Given
       const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
-      const loadExtensionMock = jest
-        .fn()
-        .mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+      const loadExtensionMock = jest.fn().mockResolvedValue({ raw: defaultSource });
       const loader = createLocalLoader(extension, { loadExtensionMock });
 
       // When

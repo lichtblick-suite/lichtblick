@@ -4,8 +4,11 @@
 import { test, expect } from "@playwright/test";
 
 import { TEST_MCAP_URL } from "../../../fixtures/urls";
+import { PlayerControls } from "../../../page-objects";
 
-test("should open an MCAP file via URL", async ({ page }) => {
+test("should open an MCAP file via URL", { tag: "@smoke" }, async ({ page }) => {
+  const player = new PlayerControls(page);
+
   // Given
   await page.goto(`/?ds=remote-file&ds.url=${TEST_MCAP_URL}`);
 
@@ -19,7 +22,7 @@ test("should open an MCAP file via URL", async ({ page }) => {
   await expect(playButton).toBeEnabled();
 
   // When
-  await page.getByTestId("progress-plot").waitFor({ state: "hidden" });
+  await player.getProgressPlot().waitFor({ state: "hidden" });
   await playButton.click();
 
   // Then

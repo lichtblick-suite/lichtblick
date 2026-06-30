@@ -84,7 +84,7 @@ const SEEK_ON_START_NS = BigInt(99 * 1e6);
 const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
 
 const EMPTY_ARRAY = Object.freeze([]);
-export type IterablePlayerOptions = {
+type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
 
   source: IDeserializedIterableSource | ISerializedIterableSource;
@@ -177,7 +177,7 @@ export class IterablePlayer implements Player {
   #bufferedSource: IDeserializedIterableSource;
   // Buffering source implementation. We store a reference to it here so we can access buffer information such as loaded ranges & memory size.
   #bufferImpl: BufferedIterableSource;
-  #deserializingSource?: DeserializingIterableSource;
+  readonly #deserializingSource?: DeserializingIterableSource;
 
   // Some states register an abort controller to signal they should abort
   #abort?: AbortController;

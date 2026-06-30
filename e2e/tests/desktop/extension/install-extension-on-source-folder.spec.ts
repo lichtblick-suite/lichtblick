@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { test, expect } from "../../../fixtures/electron";
+import { DataSourceDialog, ExtensionManager } from "../../../page-objects";
 
 const extensionSourceFolder = "lichtblick.suite-extension-turtlesim-0.0.1";
 
@@ -15,19 +16,21 @@ test.use({
   preInstalledExtensions: [extensionSourceFolder],
 });
 
-test("should install an extension (user folder)", async ({ mainWindow }) => {
-  // When
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
+test(
+  "should install an extension (user folder)",
+  { tag: "@regression" },
+  async ({ mainWindow }) => {
+    const dialog = new DataSourceDialog(mainWindow);
+    const extensions = new ExtensionManager(mainWindow);
 
-  await mainWindow.getByTestId("user-button").click();
-  await mainWindow.getByRole("menuitem", { name: "Extensions" }).click();
-  const searchBar = mainWindow.getByPlaceholder("Search Extensions...");
-  await searchBar.fill("turtlesim");
-  const turtlesimExtension = mainWindow
-    .locator('[data-testid="extension-list-entry"]')
-    .filter({ hasText: "turtlesim" })
-    .filter({ hasText: "0.0.1" });
+    // When
+    await dialog.close();
 
-  // Then
-  await expect(turtlesimExtension).toBeVisible();
-});
+    await extensions.open();
+    await extensions.search("turtlesim");
+    const turtlesimExtension = extensions.findExtension("turtlesim", "0.0.1");
+
+    // Then
+    await expect(turtlesimExtension).toBeVisible();
+  },
+);

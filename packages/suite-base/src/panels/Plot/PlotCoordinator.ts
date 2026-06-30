@@ -11,7 +11,7 @@ import * as _ from "lodash-es";
 import { debouncePromise } from "@lichtblick/den/async";
 import { filterMap } from "@lichtblick/den/collection";
 import { parseMessagePath } from "@lichtblick/message-path";
-import { toSec, subtract as subtractTime } from "@lichtblick/rostime";
+import { subtract as subtractTime, toSec } from "@lichtblick/rostime";
 import { Immutable, Time } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { stringifyMessagePath } from "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath";
@@ -19,7 +19,7 @@ import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/M
 import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
 import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { PlayerState } from "@lichtblick/suite-base/players/types";
+import { PlayerState, Topic } from "@lichtblick/suite-base/players/types";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 import { getContrastColor, getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
@@ -80,10 +80,12 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private readonly subscribeMessageRange: UseSubscribeMessageRange;
   private readonly rangeSubscriptionCancels = new Map<
     string,
-    { cancel: () => void; seriesKeys: ReadonlySet<SeriesConfigKey> }
+    { cancel: () => void; seriesKeys: ReadonlySet<SeriesConfigKey>; active: boolean }
   >();
   private startTime: Immutable<Time> | undefined;
   private seriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
+  /** Tracks activeData.topics reference to detect when topics change (e.g. user script update).*/
+  private lastTopicsRef: readonly Topic[] | undefined;
 
   public constructor(
     renderer: OffscreenCanvasRenderer,
@@ -125,6 +127,28 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     const { messages, lastSeekTime, currentTime, startTime } = activeData;
     this.startTime = startTime;
+
+    // When individual topic object references change (e.g. user script source code updated),
+    // mark only the affected subscriptions as inactive so subscribeTopicRanges re-creates
+    // them with fresh batch iterators, leaving unaffected topics untouched.
+    if (activeData.topics !== this.lastTopicsRef) {
+      const oldTopicsByName = new Map<string, Topic>();
+      if (this.lastTopicsRef) {
+        for (const topic of this.lastTopicsRef) {
+          oldTopicsByName.set(topic.name, topic);
+        }
+      }
+      this.lastTopicsRef = activeData.topics;
+
+      for (const [topicName, entry] of this.rangeSubscriptionCancels) {
+        const oldTopic = oldTopicsByName.get(topicName);
+        const newTopic = activeData.topics.find((t) => t.name === topicName);
+        // Invalidate if the topic is new or its object reference changed
+        if (oldTopic == undefined || oldTopic !== newTopic) {
+          entry.active = false;
+        }
+      }
+    }
 
     this.subscribeTopicRanges(this.seriesKeysByTopic);
 
@@ -229,6 +253,8 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     this.updateAction.showXAxisLabels = config.showXAxisLabels;
     this.updateAction.showYAxisLabels = config.showYAxisLabels;
+    this.updateAction.xAxisLabel = config.xAxisLabel;
+    this.updateAction.yAxisLabel = config.yAxisLabel;
     this.updateAction.referenceLines = referenceLines;
 
     if (configYBoundsChanged) {
@@ -505,10 +531,11 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   }
 
   private subscribeTopicRanges(seriesKeysByTopic: Map<string, Set<SeriesConfigKey>>): void {
-    if (!this.datasetsBuilder.handleMessageRange) {
+    const handleMessageRange = this.datasetsBuilder.handleMessageRange?.bind(this.datasetsBuilder);
+
+    if (!handleMessageRange) {
       return;
     }
-    const builder = this.datasetsBuilder;
 
     // Cancel subscriptions for topics that are no longer needed
     for (const topic of this.rangeSubscriptionCancels.keys()) {
@@ -519,17 +546,33 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     // Start subscriptions only for new or changed topics
     for (const [topic, currentKeys] of seriesKeysByTopic) {
-      const existing = this.rangeSubscriptionCancels.get(topic)?.seriesKeys;
-      if (existing) {
-        if (!this.seriesKeysChanged(existing, currentKeys)) {
+      const existing = this.rangeSubscriptionCancels.get(topic);
+      if (existing?.seriesKeys) {
+        // Retry if previous subscription was inactive (no-op cancel from missing getBatchIterator)
+        if (!this.seriesKeysChanged(existing.seriesKeys, currentKeys) && existing.active) {
           continue;
         }
         this.cancelTopicSubscription(topic);
       }
 
+      // Use a mutable container so the async onNewRangeIterator callback can update `active`
+      // after it fires. Without this, `active` would always be `false` because it's captured
+      // synchronously before the async callback runs, causing every frame to cancel and
+      // recreate all subscriptions.
+      const entry: {
+        cancel: () => void;
+        seriesKeys: ReadonlySet<SeriesConfigKey>;
+        active: boolean;
+      } = {
+        cancel: () => {},
+        seriesKeys: new Set(currentKeys),
+        active: false,
+      };
+
       const cancel = this.subscribeMessageRange({
         topic,
         onNewRangeIterator: async (batchIterator) => {
+          entry.active = true;
           let isReset = true;
           for await (const batch of batchIterator) {
             if (this.isDestroyed()) {
@@ -539,13 +582,15 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
             if (!startTime) {
               continue;
             }
-            builder.handleMessageRange!(batch, { isReset }, startTime);
+            handleMessageRange(batch, { isReset }, startTime);
             isReset = false;
             this.queueDispatchDownsample();
           }
         },
       });
-      this.rangeSubscriptionCancels.set(topic, { cancel, seriesKeys: new Set(currentKeys) });
+
+      entry.cancel = cancel;
+      this.rangeSubscriptionCancels.set(topic, entry);
     }
   }
 }

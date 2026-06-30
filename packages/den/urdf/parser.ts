@@ -27,8 +27,7 @@ const JOINT_TYPES = ["fixed", "continuous", "revolute", "planar", "prismatic", "
 
 export function parseUrdf(xml: XMLDocument | string): UrdfRobot {
   const parser = new DOMParser();
-  const urdf =
-    xml instanceof XMLDocument ? xml : (parser.parseFromString(xml, "text/xml") as XMLDocument);
+  const urdf = xml instanceof XMLDocument ? xml : parser.parseFromString(xml, "text/xml");
 
   for (let i = 0; i < urdf.children.length; i++) {
     const child = urdf.children[i]!;

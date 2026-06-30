@@ -159,6 +159,11 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
       label: t("yAxis"),
       defaultExpansionState: "collapsed",
       fields: {
+        yAxisLabel: {
+          label: t("axisLabel"),
+          input: "string",
+          value: config.yAxisLabel,
+        },
         showYAxisLabels: {
           label: t("showLabels"),
           input: "boolean",
@@ -183,6 +188,11 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
       label: t("xAxis"),
       defaultExpansionState: "collapsed",
       fields: {
+        xAxisLabel: {
+          label: t("axisLabel"),
+          input: "string",
+          value: config.xAxisLabel,
+        },
         xAxisVal: {
           label: t("value"),
           input: "select",
@@ -203,6 +213,7 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
                 validTypes: PLOTABLE_ROS_TYPES,
               }
             : undefined,
+
         showXAxisLabels: {
           label: t("showLabels"),
           input: "boolean",

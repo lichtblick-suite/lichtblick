@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../fixtures/electron";
 import { loadFiles } from "../../../fixtures/load-files";
+import { DataSourceDialog, Sidebar } from "../../../page-objects";
 
 const LAYOUT_FILENAME = "imported-layout.json";
 /**
@@ -9,7 +10,7 @@ const LAYOUT_FILENAME = "imported-layout.json";
  * WHEN the user clicks on the Layouts sidebar button
  * THEN the "imported-layout" layout should be displayed in the layout list
  */
-test("open layout via drag and drop", async ({ mainWindow }) => {
+test("open layout via drag and drop", { tag: "@smoke" }, async ({ mainWindow }) => {
   // Given
   await loadFiles({
     mainWindow,
@@ -17,8 +18,8 @@ test("open layout via drag and drop", async ({ mainWindow }) => {
   });
 
   // When
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  await mainWindow.getByTestId("layouts-left").click();
+  await new DataSourceDialog(mainWindow).close();
+  await new Sidebar(mainWindow).openLayoutsTab();
 
   // Then
   await expect(mainWindow.getByText("imported-layout", { exact: true })).toHaveCount(1);

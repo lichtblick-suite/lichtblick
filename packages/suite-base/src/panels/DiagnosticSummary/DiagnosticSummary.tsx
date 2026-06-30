@@ -28,10 +28,7 @@ import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import {
-  DiagnosticInfo,
-  DiagnosticStatusConfig,
-} from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import { DiagnosticInfo } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import DiagnosticNodeRow from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticNodeRow";
 import { useStyles } from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticSummary.style";
 import {
@@ -81,13 +78,12 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
     (info: DiagnosticInfo) => {
       openSiblingPanel({
         panelType: "DiagnosticStatusPanel",
-        siblingConfigCreator: () =>
-          ({
-            selectedHardwareId: info.status.hardware_id,
-            selectedName: info.status.name,
-            topicToRender,
-            collapsedSections: [],
-          }) as DiagnosticStatusConfig,
+        siblingConfigCreator: () => ({
+          selectedHardwareId: info.status.hardware_id,
+          selectedName: info.status.name,
+          topicToRender,
+          collapsedSections: [],
+        }),
         updateIfExists: true,
       });
     },

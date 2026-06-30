@@ -6,8 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as THREE from "three";
-import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2";
-import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry";
+import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 
 import { RenderableMarker } from "./RenderableMarker";
 import {

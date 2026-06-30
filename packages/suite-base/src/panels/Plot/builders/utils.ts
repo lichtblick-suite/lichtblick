@@ -64,7 +64,7 @@ export function buildViewportDatasets(
   const datasets: Dataset[] = [];
   for (const series of seriesByKey.values()) {
     if (series.enabled) {
-      datasets[series.configIndex] = series.dataset as Dataset;
+      datasets[series.configIndex] = series.dataset;
     }
   }
   return { datasetsByConfigIndex: datasets, pathsWithMismatchedDataLengths };
@@ -92,18 +92,24 @@ type SeriesCurrentAction<T> =
  * Iterates over each series, optionally pushing a reset-current action when a seek occurred,
  * then appending the items returned by `getItems`. Returns whether any series produced items.
  *
+ * When a range source is available (e.g. file/bag topics), a seek always triggers a reset because
+ * the range subscription will reload the full history. When no range source exists (e.g. UserScript
+ * output topics), the reset is skipped entirely because the accumulated data cannot be reloaded
+ * and the existing points remain valid regardless of seek direction.
+ *
  * Shared by TimestampDatasetsBuilder and CustomDatasetsBuilder for current-frame y-series
  * processing.
  */
 export function buildCurrentSeriesActions<TItem>(
   series: Immutable<Array<{ config: Immutable<SeriesItem> }>>,
-  options: { didSeek: boolean },
+  options: { didSeek: boolean; hasRangeSource: boolean },
   getItems: (config: Immutable<SeriesItem>) => TItem[],
 ): { actions: SeriesCurrentAction<TItem>[]; datasetsChanged: boolean } {
   let datasetsChanged = false;
   const actions: SeriesCurrentAction<TItem>[] = [];
+  const shouldReset = options.didSeek && options.hasRangeSource;
   for (const s of series) {
-    if (options.didSeek) {
+    if (shouldReset) {
       actions.push({ type: "reset-current", series: s.config.key });
     }
     const items = getItems(s.config);

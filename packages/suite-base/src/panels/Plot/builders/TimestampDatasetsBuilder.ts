@@ -89,7 +89,7 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
     if (!this.#hasRangeSource && msgEvents.length > 0) {
       const { actions: seriesActions, datasetsChanged: seriesChanged } = buildCurrentSeriesActions(
         this.#series,
-        { didSeek },
+        { didSeek, hasRangeSource: this.#hasRangeSource },
         (config) => {
           const mathFn = config.parsed.modifier
             ? MATH_FUNCTIONS[config.parsed.modifier]

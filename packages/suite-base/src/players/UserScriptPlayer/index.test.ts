@@ -27,6 +27,8 @@ import {
   Topic,
 } from "@lichtblick/suite-base/players/types";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { UserScript } from "@lichtblick/suite-base/types/panels";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
@@ -37,6 +39,11 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import UserScriptPlayer from ".";
 import { DIAGNOSTIC_SEVERITY, ERROR_CODES, SOURCES } from "./constants";
 import exampleDatatypes from "./transformerWorker/fixtures/example-datatypes";
+
+jest.mock("./constants", () => ({
+  ...jest.requireActual("./constants"),
+  MAX_GLOBAL_BUFFER_SIZE: 5,
+}));
 
 const nodeId = "nodeId";
 
@@ -236,6 +243,128 @@ describe("UserScriptPlayer", () => {
       const publishPayload = { topic: "/foo", msg: {} };
       userScriptPlayer.publish(publishPayload);
       expect(fakePlayer.publish).toHaveBeenCalledWith(publishPayload);
+    });
+  });
+
+  describe("resetWorkers", () => {
+    function setup(overrides?: Partial<typeof defaultUserScriptActions>) {
+      const fakePlayer = new FakePlayer();
+      const mockSetRosLib = jest.fn();
+      const mockSetTypesLib = jest.fn();
+      const actions = {
+        ...defaultUserScriptActions,
+        setUserScriptRosLib: mockSetRosLib,
+        setUserScriptTypesLib: mockSetTypesLib,
+        ...overrides,
+      };
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, actions);
+      return { fakePlayer, userScriptPlayer, actions, mockSetRosLib, mockSetTypesLib };
+    }
+
+    const activeDataWithInput = {
+      ...basicPlayerState,
+      messages: [] as MessageEvent[],
+      topics: [{ name: "/np_input", schemaName: "foo" }],
+      datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+    };
+
+    it("calls setUserScriptRosLib and setUserScriptTypesLib when scripts are initialized", async () => {
+      // Given
+      const { fakePlayer, userScriptPlayer, mockSetRosLib, mockSetTypesLib } = setup();
+
+      void userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [done] = setListenerHelper(userScriptPlayer);
+
+      // When
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+      await done;
+
+      // Then
+      expect(mockSetRosLib).toHaveBeenCalledWith(expect.any(String));
+      expect(mockSetTypesLib).toHaveBeenCalledWith(expect.any(String));
+    });
+
+    it("does not call lib setters when no player state is available yet", async () => {
+      // Given
+      const { userScriptPlayer, mockSetRosLib, mockSetTypesLib } = setup();
+
+      // When
+      await userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      // Then
+      expect(mockSetRosLib).not.toHaveBeenCalled();
+      expect(mockSetTypesLib).not.toHaveBeenCalled();
+    });
+
+    it("skips reset when no scripts are registered and none are provided", async () => {
+      // Given
+      const { fakePlayer, userScriptPlayer, mockSetRosLib } = setup();
+
+      const [done] = setListenerHelper(userScriptPlayer);
+
+      // When
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+      await done;
+
+      // Then
+      expect(mockSetRosLib).not.toHaveBeenCalled();
+    });
+
+    it("terminates previous registrations when scripts change", async () => {
+      // Given
+      const { fakePlayer, userScriptPlayer } = setup();
+
+      void userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [first, second] = setListenerHelper(userScriptPlayer, 2);
+
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+      await first;
+
+      // When
+      const updatedCode = nodeUserCode.replace("abc", "xyz");
+      await userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: updatedCode },
+      });
+
+      await fakePlayer.emit({
+        activeData: { ...activeDataWithInput, messages: [upstreamFirst] },
+      });
+
+      const result = await second;
+
+      // Then
+      expect(result?.messages.length).toBeGreaterThan(0);
+    });
+
+    it("emits state with new topics when a script is added after initial emit", async () => {
+      // Given
+      const { fakePlayer, userScriptPlayer } = setup();
+
+      const [first, second] = setListenerHelper(userScriptPlayer, 2);
+
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+
+      const initialResult = await first;
+
+      // When
+      expect(initialResult?.topicNames).not.toContain(`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`);
+
+      await userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const updatedResult = await second;
+
+      // Then
+      expect(updatedResult?.topicNames).toContain(`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`);
     });
   });
 
@@ -738,206 +867,6 @@ describe("UserScriptPlayer", () => {
           sizeInBytes: 0,
         },
       ]);
-    });
-
-    it("produces blocks for full subscriptions", async () => {
-      const fakePlayer = new FakePlayer();
-      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-      const spy = jest.spyOn(UserScriptPlayer, "CreateRuntimeWorker");
-
-      const [done] = setListenerHelper(userScriptPlayer);
-
-      userScriptPlayer.setSubscriptions([
-        { topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, preloadType: "full" },
-      ]);
-      await userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
-      });
-
-      await fakePlayer.emit({
-        activeData: {
-          ...basicPlayerState,
-          messages: [upstreamFirst],
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
-          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
-        },
-        progress: {
-          fullyLoadedFractionRanges: [{ start: 0, end: 1 }],
-          messageCache: {
-            blocks: [
-              { messagesByTopic: { [upstreamFirst.topic]: [upstreamFirst] }, sizeInBytes: 1 },
-            ],
-            startTime: upstreamFirst.receiveTime,
-          },
-        },
-      });
-
-      const { messages, progress } = (await done)!;
-
-      expect(messages).toEqual([
-        upstreamFirst,
-        {
-          topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`,
-          receiveTime: upstreamFirst.receiveTime,
-          message: { custom_np_field: "abc", value: "bar", stamp: expect.any(Number) },
-          schemaName: "/studio_script/1",
-          sizeInBytes: 0,
-        },
-      ]);
-
-      expect(progress).toEqual({
-        fullyLoadedFractionRanges: [{ start: 0, end: 1 }],
-        messageCache: {
-          startTime: { sec: 0, nsec: 1 },
-          blocks: [
-            {
-              messagesByTopic: {
-                "/np_input": [upstreamFirst],
-                [`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`]: [
-                  {
-                    topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`,
-                    receiveTime: {
-                      sec: 0,
-                      nsec: 1,
-                    },
-                    message: {
-                      custom_np_field: "abc",
-                      value: "bar",
-                      stamp: expect.any(Number),
-                    },
-                    schemaName: "/studio_script/1",
-                    sizeInBytes: 0,
-                  },
-                ],
-              },
-              sizeInBytes: 1,
-            },
-          ],
-        },
-      });
-
-      // CreateRuntimeWorker should have been called once for the message processing
-      // worker and once for the block processing worker,
-      expect(spy).toHaveBeenCalledTimes(2);
-
-      // The block and message workers should have different stamps.
-      const messageWorkerStamp = (messages[1] as MessageEvent<{ stamp: number }>).message.stamp;
-      const blockWorkerStamp = (
-        progress?.messageCache?.blocks[0]?.messagesByTopic[
-          `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`
-        ]?.[0] as MessageEvent<{ stamp: number }>
-      ).message.stamp;
-
-      expect(messageWorkerStamp).not.toEqual(blockWorkerStamp);
-    });
-
-    it("does not duplicate output messages in blocks after multiple readings", async () => {
-      const fakePlayer = new FakePlayer();
-      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
-
-      const [done1, done2] = setListenerHelper(userScriptPlayer, 2);
-
-      userScriptPlayer.setSubscriptions([
-        { topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, preloadType: "full" },
-      ]);
-      await userScriptPlayer.setUserScripts({
-        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
-      });
-
-      await fakePlayer.emit({
-        activeData: {
-          ...basicPlayerState,
-          messages: [upstreamFirst],
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
-          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
-        },
-        progress: {
-          fullyLoadedFractionRanges: [{ start: 0, end: 1 }],
-          messageCache: {
-            blocks: [
-              { messagesByTopic: { [upstreamFirst.topic]: [upstreamFirst] }, sizeInBytes: 1 },
-              undefined,
-            ],
-            startTime: upstreamFirst.receiveTime,
-          },
-        },
-      });
-
-      const { progress: prevProgress } = (await done1)!;
-
-      // Current behavior dictates that it could be passed previous blocks that have already received user script output messages
-      prevProgress!.messageCache!.blocks = [
-        prevProgress!.messageCache!.blocks[0],
-        { messagesByTopic: { [upstreamFirst.topic]: [upstreamFirst] }, sizeInBytes: 1 },
-      ];
-
-      await fakePlayer.emit({
-        activeData: {
-          ...basicPlayerState,
-          messages: [upstreamFirst],
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
-          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
-        },
-        progress: prevProgress,
-      });
-
-      const { progress } = (await done2)!;
-
-      expect(progress).toEqual({
-        fullyLoadedFractionRanges: [{ start: 0, end: 1 }],
-        messageCache: {
-          startTime: { sec: 0, nsec: 1 },
-          blocks: [
-            {
-              messagesByTopic: {
-                "/np_input": [upstreamFirst],
-                [`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`]: [
-                  {
-                    topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`,
-                    receiveTime: {
-                      sec: 0,
-                      nsec: 1,
-                    },
-                    message: {
-                      custom_np_field: "abc",
-                      value: "bar",
-                      stamp: expect.any(Number),
-                    },
-                    schemaName: "/studio_script/1",
-                    sizeInBytes: 0,
-                  },
-                ],
-              },
-              sizeInBytes: 1,
-            },
-            {
-              messagesByTopic: {
-                "/np_input": [upstreamFirst],
-                [`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`]: [
-                  {
-                    topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`,
-                    receiveTime: {
-                      sec: 0,
-                      nsec: 1,
-                    },
-                    message: {
-                      custom_np_field: "abc",
-                      value: "bar",
-                      stamp: expect.any(Number),
-                    },
-                    schemaName: "/studio_script/1",
-                    sizeInBytes: 0,
-                  },
-                ],
-              },
-              sizeInBytes: 1,
-            },
-          ],
-        },
-      });
     });
 
     it("does not add to logs when there is no 'log' invocation in the user code", async () => {
@@ -1977,6 +1906,646 @@ describe("UserScriptPlayer", () => {
         },
       });
       expect(callCount("transform")).toBe(2);
+    });
+  });
+
+  describe("getBatchIterator", () => {
+    const outputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`;
+
+    async function setupScriptPlayer(
+      mockBatchIterator?: (topic: string) => AsyncIterableIterator<any> | undefined,
+    ) {
+      const fakePlayer = new FakePlayer();
+
+      if (mockBatchIterator) {
+        jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation(mockBatchIterator);
+      }
+
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+      void userScriptPlayer.setUserScripts({
+        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [done] = setListenerHelper(userScriptPlayer);
+
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [upstreamFirst],
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+          datatypes: new Map(Object.entries(exampleDatatypes)),
+        },
+      });
+      await done;
+
+      return { fakePlayer, userScriptPlayer };
+    }
+
+    it("delegates to underlying player for non-script topics", async () => {
+      const fakePlayer = new FakePlayer();
+      const mockIterator = (async function* () {
+        yield {
+          type: "message-event" as const,
+          msgEvent: upstreamFirst,
+        };
+      })();
+      const getBatchIteratorSpy = jest
+        .spyOn(fakePlayer, "getBatchIterator")
+        .mockReturnValue(mockIterator);
+
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+      void setListenerHelper(userScriptPlayer);
+
+      const result = userScriptPlayer.getBatchIterator("/np_input");
+      expect(getBatchIteratorSpy).toHaveBeenCalledWith("/np_input", undefined);
+      expect(result).toBe(mockIterator);
+    });
+
+    it("returns undefined for unknown topics when underlying player returns undefined", () => {
+      const fakePlayer = new FakePlayer();
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+      void setListenerHelper(userScriptPlayer);
+
+      const result = userScriptPlayer.getBatchIterator("/unknown_topic");
+      expect(result).toBeUndefined();
+    });
+
+    it("returns a transforming iterator for script output topics", async () => {
+      const fakePlayer = new FakePlayer();
+
+      const inputMessages = [
+        MessageEventBuilder.messageEvent({ topic: "/np_input", receiveTime: { sec: 0, nsec: 1 } }),
+        MessageEventBuilder.messageEvent({
+          topic: "/np_input",
+          receiveTime: { sec: 0, nsec: 2 },
+        }),
+      ];
+
+      jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
+        if (topic === "/np_input") {
+          return (async function* () {
+            for (const msg of inputMessages) {
+              yield { type: "message-event" as const, msgEvent: msg };
+            }
+          })();
+        }
+        return undefined;
+      });
+
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+      void userScriptPlayer.setUserScripts({
+        [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      const [done] = setListenerHelper(userScriptPlayer);
+
+      await fakePlayer.emit({
+        activeData: {
+          ...basicPlayerState,
+          messages: [upstreamFirst],
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+          datatypes: new Map(Object.entries(exampleDatatypes)),
+        },
+      });
+      await done;
+
+      const iterator = userScriptPlayer.getBatchIterator(outputTopic);
+      expect(iterator).toBeDefined();
+
+      const results: MessageEvent[] = [];
+      for await (const result of iterator!) {
+        if (result.type === "message-event") {
+          results.push(result.msgEvent);
+        }
+      }
+
+      expect(results).toHaveLength(2);
+      expect(results[0]!.topic).toBe(outputTopic);
+      expect(results[1]!.topic).toBe(outputTopic);
+    });
+
+    it("passes through stamp results from the underlying iterator", async () => {
+      const stamp = { sec: 1, nsec: 0 };
+
+      const { userScriptPlayer } = await setupScriptPlayer((topic) => {
+        if (topic === "/np_input") {
+          return (async function* () {
+            yield { type: "stamp" as const, stamp };
+          })();
+        }
+        return undefined;
+      });
+
+      const iterator = userScriptPlayer.getBatchIterator(outputTopic);
+      expect(iterator).toBeDefined();
+
+      const results = [];
+      for await (const result of iterator!) {
+        results.push(result);
+      }
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toEqual({ type: "stamp", stamp });
+    });
+
+    it("returns undefined for output topics when input topic has no iterator", async () => {
+      const { userScriptPlayer } = await setupScriptPlayer();
+
+      const iterator = userScriptPlayer.getBatchIterator(outputTopic);
+      expect(iterator).toBeUndefined();
+    });
+    it("returns an independent iterator when range options are provided", async () => {
+      const { userScriptPlayer } = await setupScriptPlayer((topic) => {
+        if (topic === "/np_input") {
+          return (async function* () {
+            yield { type: "message-event" as const, msgEvent: upstreamFirst };
+          })();
+        }
+        return undefined;
+      });
+
+      const iterator = userScriptPlayer.getBatchIterator(outputTopic, {
+        start: { sec: 0, nsec: 0 },
+        end: { sec: 1, nsec: 0 },
+      });
+      expect(iterator).toBeDefined();
+
+      const results: MessageEvent[] = [];
+      for await (const result of iterator!) {
+        if (result.type === "message-event") {
+          results.push(result.msgEvent);
+        }
+      }
+
+      expect(results).toHaveLength(1);
+      expect(results[0]!.topic).toBe(outputTopic);
+    });
+
+    it("returns undefined when range options are provided but input has no iterator", async () => {
+      const { userScriptPlayer } = await setupScriptPlayer(() => undefined);
+
+      const result = userScriptPlayer.getBatchIterator(outputTopic, {
+        start: { sec: 0, nsec: 0 },
+        end: { sec: 1, nsec: 0 },
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it("reuses the shared cache when getBatchIterator is called twice without options", async () => {
+      let callCount = 0;
+
+      const { userScriptPlayer } = await setupScriptPlayer((topic) => {
+        if (topic === "/np_input") {
+          callCount++;
+          return (async function* () {
+            yield { type: "message-event" as const, msgEvent: upstreamFirst };
+          })();
+        }
+        return undefined;
+      });
+
+      const iter1 = userScriptPlayer.getBatchIterator(outputTopic);
+      const iter2 = userScriptPlayer.getBatchIterator(outputTopic);
+      expect(iter1).toBeDefined();
+      expect(iter2).toBeDefined();
+
+      // The underlying player's getBatchIterator should only be called once for the shared cache
+      expect(callCount).toBe(1);
+
+      // Both iterators should yield the same result
+      const results1: MessageEvent[] = [];
+      for await (const r of iter1!) {
+        if (r.type === "message-event") {
+          results1.push(r.msgEvent);
+        }
+      }
+      const results2: MessageEvent[] = [];
+      for await (const r of iter2!) {
+        if (r.type === "message-event") {
+          results2.push(r.msgEvent);
+        }
+      }
+
+      expect(results1).toHaveLength(1);
+      expect(results2).toHaveLength(1);
+      expect(results1[0]!.topic).toBe(outputTopic);
+      expect(results2[0]!.topic).toBe(outputTopic);
+    });
+
+    describe("cache pruning", () => {
+      // MAX_GLOBAL_BUFFER_SIZE is mocked to 5 for these tests
+
+      function createInputIterator(messageCount: number) {
+        return (topic: string) => {
+          if (topic === "/np_input") {
+            return (async function* () {
+              for (let i = 0; i < messageCount; i++) {
+                yield {
+                  type: "message-event" as const,
+                  msgEvent: MessageEventBuilder.messageEvent({
+                    topic: "/np_input",
+                    receiveTime: { sec: 0, nsec: i + 1 },
+                    message: { payload: `msg_${i}` },
+                    schemaName: "std_msgs/Header",
+                  }),
+                };
+              }
+            })();
+          }
+          return undefined;
+        };
+      }
+
+      it("prunes cache when global buffer exceeds MAX_GLOBAL_BUFFER_SIZE", async () => {
+        // Given
+        const messageCount = 10; // exceeds mocked MAX_GLOBAL_BUFFER_SIZE of 5
+        const { userScriptPlayer } = await setupScriptPlayer(createInputIterator(messageCount));
+
+        const iter1 = userScriptPlayer.getBatchIterator(outputTopic);
+        expect(iter1).toBeDefined();
+
+        // Drain the first consumer fully - should prune after exceeding buffer size
+        const results1: MessageEvent[] = [];
+        for await (const r of iter1!) {
+          if (r.type === "message-event") {
+            results1.push(r.msgEvent);
+          }
+        }
+        expect(results1).toHaveLength(messageCount);
+
+        // A late joiner
+        const iter2 = userScriptPlayer.getBatchIterator(outputTopic);
+        expect(iter2).toBeDefined();
+
+        // When
+        const results2: MessageEvent[] = [];
+        for await (const r of iter2!) {
+          if (r.type === "message-event") {
+            results2.push(r.msgEvent);
+          }
+        }
+
+        // Then
+        expect(results2).toHaveLength(messageCount - 5);
+      });
+
+      it("uses min consumer index for pruning with multiple concurrent consumers", async () => {
+        // Given
+        const messageCount = 10;
+        const { userScriptPlayer } = await setupScriptPlayer(createInputIterator(messageCount));
+
+        const iter1 = userScriptPlayer.getBatchIterator(outputTopic);
+        const iter2 = userScriptPlayer.getBatchIterator(outputTopic);
+        expect(iter1).toBeDefined();
+        expect(iter2).toBeDefined();
+
+        const results1: MessageEvent[] = [];
+        const results2: MessageEvent[] = [];
+
+        // When
+        for await (const r of iter1!) {
+          if (r.type === "message-event") {
+            results1.push(r.msgEvent);
+          }
+        }
+        for await (const r of iter2!) {
+          if (r.type === "message-event") {
+            results2.push(r.msgEvent);
+          }
+        }
+
+        // Then
+        expect(results1).toHaveLength(messageCount);
+        expect(results2).toHaveLength(messageCount);
+      });
+
+      it("slow consumer prevents pruning beyond its position", async () => {
+        // Given
+        const messageCount = 10;
+        const { userScriptPlayer } = await setupScriptPlayer(createInputIterator(messageCount));
+
+        const iter1 = userScriptPlayer.getBatchIterator(outputTopic)!;
+        const iter2 = userScriptPlayer.getBatchIterator(outputTopic)!;
+
+        // When
+        const slowResults: MessageEvent[] = [];
+        for (let i = 0; i < 2; i++) {
+          const { value, done } = await iter2.next();
+          if (done === true) {
+            break;
+          }
+          if (value.type === "message-event") {
+            slowResults.push(value.msgEvent);
+          }
+        }
+        expect(slowResults).toHaveLength(2);
+
+        const fastResults: MessageEvent[] = [];
+        for await (const r of iter1) {
+          if (r.type === "message-event") {
+            fastResults.push(r.msgEvent);
+          }
+        }
+        expect(fastResults).toHaveLength(messageCount);
+
+        // Then
+        for await (const r of iter2) {
+          if (r.type === "message-event") {
+            slowResults.push(r.msgEvent);
+          }
+        }
+        expect(slowResults).toHaveLength(messageCount);
+      });
+
+      it("sets alert when buffer overflow is detected", async () => {
+        // Given
+        const messageCount = 10;
+        const fakePlayer = new FakePlayer();
+
+        jest
+          .spyOn(fakePlayer, "getBatchIterator")
+          .mockImplementation(createInputIterator(messageCount));
+        const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+        void userScriptPlayer.setUserScripts({
+          [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+        });
+
+        const topics = [PlayerBuilder.topic({ name: "/np_input", schemaName: "std_msgs/Header" })];
+        const datatypes = new Map(Object.entries(exampleDatatypes));
+
+        let capturedAlerts: any[] | undefined;
+        userScriptPlayer.setListener(async (playerState) => {
+          capturedAlerts = playerState.alerts;
+        });
+
+        // When
+        await fakePlayer.emit({
+          activeData: {
+            ...basicPlayerState,
+            messages: [upstreamFirst],
+            currentTime: upstreamFirst.receiveTime,
+            topics,
+            datatypes,
+          },
+        });
+
+        const iter = userScriptPlayer.getBatchIterator(outputTopic)!;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _ of iter) {
+          // consume all
+        }
+
+        await fakePlayer.emit({
+          activeData: {
+            ...basicPlayerState,
+            messages: [],
+            currentTime: { sec: 1, nsec: 0 },
+            topics,
+            datatypes,
+          },
+        });
+
+        // Then
+        expect(capturedAlerts).toBeDefined();
+        expect(
+          capturedAlerts!.some((a: any) => a.message === "User script output buffer exceeded"),
+        ).toBe(true);
+      });
+
+      it("clears alert when cache is invalidated", async () => {
+        // Given
+        const messageCount = 10;
+        const fakePlayer = new FakePlayer();
+
+        jest
+          .spyOn(fakePlayer, "getBatchIterator")
+          .mockImplementation(createInputIterator(messageCount));
+
+        const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+        void userScriptPlayer.setUserScripts({
+          [nodeId]: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+        });
+
+        const [done] = setListenerHelper(userScriptPlayer);
+
+        // When
+        await fakePlayer.emit({
+          activeData: {
+            ...basicPlayerState,
+            messages: [upstreamFirst],
+            currentTime: upstreamFirst.receiveTime,
+            topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+            datatypes: new Map(Object.entries(exampleDatatypes)),
+          },
+        });
+        await done;
+
+        const iter = userScriptPlayer.getBatchIterator(outputTopic)!;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _ of iter) {
+          // consume all
+        }
+
+        // Invalidate cache by changing scripts
+        void userScriptPlayer.setUserScripts({});
+
+        let capturedAlerts: any[] | undefined;
+        userScriptPlayer.setListener(async (playerState) => {
+          capturedAlerts = playerState.alerts;
+        });
+        await fakePlayer.emit({
+          activeData: {
+            ...basicPlayerState,
+            messages: [],
+            currentTime: { sec: 1, nsec: 0 },
+            topics: [{ name: "/np_input", schemaName: "std_msgs/Header" }],
+            datatypes: new Map(Object.entries(exampleDatatypes)),
+          },
+        });
+
+        // Then
+        const hasBufferAlert = capturedAlerts?.some(
+          (a: any) => a.message === "User script output buffer exceeded",
+        );
+        expect(hasBufferAlert ?? false).toBe(false);
+      });
+    });
+
+    describe("mergeIteratorsByTime", () => {
+      const mergedOutputTopic = `${DEFAULT_STUDIO_SCRIPT_PREFIX}merged`;
+      const multiInputCode = `
+        export const inputs = ["/topicA", "/topicB"];
+        export const output = "${DEFAULT_STUDIO_SCRIPT_PREFIX}merged";
+        export default (message: { message: { value: number } }): { value: number } => {
+          return { value: message.message.value };
+        };
+      `;
+
+      const multiInputTopics = [
+        PlayerBuilder.topic({ name: "/topicA", schemaName: "pkg/A" }),
+        PlayerBuilder.topic({ name: "/topicB", schemaName: "pkg/B" }),
+      ];
+
+      const multiInputDatatypes = new Map(
+        Object.entries({
+          ...Object.fromEntries(exampleDatatypes),
+          "pkg/A": { definitions: [{ name: "value", type: "int32" }] },
+          "pkg/B": { definitions: [{ name: "value", type: "int32" }] },
+        }),
+      );
+
+      async function setupMerge(mockIterators: Record<string, AsyncGenerator>) {
+        const fakePlayer = new FakePlayer();
+
+        jest.spyOn(fakePlayer, "getBatchIterator").mockImplementation((topic) => {
+          const iter = mockIterators[topic];
+          return iter as AsyncIterableIterator<any>;
+        });
+
+        const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+
+        void userScriptPlayer.setUserScripts({
+          merged: { name: mergedOutputTopic, sourceCode: multiInputCode },
+        });
+
+        const [done] = setListenerHelper(userScriptPlayer);
+        await fakePlayer.emit({
+          activeData: {
+            ...basicPlayerState,
+            messages: [],
+            currentTime: { sec: 0, nsec: 0 },
+            topics: multiInputTopics,
+            datatypes: multiInputDatatypes,
+          },
+        });
+        await done;
+
+        return userScriptPlayer.getBatchIterator(mergedOutputTopic)!;
+      }
+
+      async function drain(iterator: AsyncIterableIterator<any>) {
+        const results = [];
+        for await (const r of iterator) {
+          results.push(r);
+        }
+        return results;
+      }
+
+      it("merges messages from multiple input topics ordered by receiveTime", async () => {
+        const iterator = await setupMerge({
+          "/topicA": (async function* () {
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicA",
+                receiveTime: { sec: 0, nsec: 10 },
+                message: { value: 1 },
+                schemaName: "pkg/A",
+              }),
+            };
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicA",
+                receiveTime: { sec: 0, nsec: 20 },
+                message: { value: 3 },
+                schemaName: "pkg/A",
+              }),
+            };
+          })(),
+          "/topicB": (async function* () {
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicB",
+                receiveTime: { sec: 0, nsec: 5 },
+                message: { value: 2 },
+                schemaName: "pkg/B",
+              }),
+            };
+          })(),
+        });
+
+        const results = (await drain(iterator)).filter((r) => r.type === "message-event");
+
+        // B1(5ns) < A1(10ns) < A2(20ns)
+        expect(results).toHaveLength(3);
+        expect(results[0]!.msgEvent.receiveTime).toEqual({ sec: 0, nsec: 5 });
+        expect(results[1]!.msgEvent.receiveTime).toEqual({ sec: 0, nsec: 10 });
+        expect(results[2]!.msgEvent.receiveTime).toEqual({ sec: 0, nsec: 20 });
+      });
+
+      it("yields non-message-event results before message events", async () => {
+        const stamp = { sec: 5, nsec: 0 };
+
+        const iterator = await setupMerge({
+          "/topicA": (async function* () {
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicA",
+                receiveTime: { sec: 0, nsec: 1 },
+                message: { value: 1 },
+                schemaName: "pkg/A",
+              }),
+            };
+          })(),
+          "/topicB": (async function* () {
+            yield { type: "stamp" as const, stamp };
+          })(),
+        });
+
+        const results = await drain(iterator);
+
+        expect(results).toHaveLength(2);
+        expect(results[0]).toEqual({ type: "stamp", stamp });
+        expect(results[1]!.type).toBe("message-event");
+      });
+
+      it("keeps non-message-event priority when it is already the earliest head", async () => {
+        const stamp = { sec: 0, nsec: 0 };
+
+        // topicA yields a stamp (non-message at heads[0]), topicB yields a message (heads[1])
+        // findEarliestHeadIndex should `continue` past comparison when a is non-message
+        const iterator = await setupMerge({
+          "/topicA": (async function* () {
+            yield { type: "stamp" as const, stamp };
+          })(),
+          "/topicB": (async function* () {
+            yield {
+              type: "message-event" as const,
+              msgEvent: MessageEventBuilder.messageEvent({
+                topic: "/topicB",
+                receiveTime: { sec: 0, nsec: 1 },
+                message: { value: 99 },
+                schemaName: "pkg/B",
+              }),
+            };
+          })(),
+        });
+
+        const results = await drain(iterator);
+
+        expect(results).toHaveLength(2);
+        expect(results[0]).toEqual({ type: "stamp", stamp });
+        expect(results[1]!.type).toBe("message-event");
+      });
+
+      it("handles iterators that are immediately done", async () => {
+        const iterator = await setupMerge({
+          "/topicA": (async function* () {})(),
+          "/topicB": (async function* () {})(),
+        });
+
+        const results = await drain(iterator);
+        expect(results).toHaveLength(0);
+      });
     });
   });
 });

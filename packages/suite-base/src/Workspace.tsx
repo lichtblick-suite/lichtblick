@@ -15,12 +15,14 @@
 
 import { Link, Typography } from "@mui/material";
 import { t } from "i18next";
+import { useSnackbar } from "notistack";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useStyles } from "@lichtblick/suite-base/Workspace.style";
+import SessionAPI from "@lichtblick/suite-base/api/session/SessionAPI";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
 import { AlertsList } from "@lichtblick/suite-base/components/AlertsList";
 import { AppBar } from "@lichtblick/suite-base/components/AppBar";
@@ -164,6 +166,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const { setSelectedLayoutId } = useCurrentLayoutActions();
   const layoutManager = useLayoutManager();
 
+  const { enqueueSnackbar } = useSnackbar();
   const { dialogActions, sidebarActions } = useWorkspaceActions();
   const { handleFiles } = useHandleFiles({
     availableSources,
@@ -494,8 +497,16 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     return deepLinks[0] ? parseAppURLState(new URL(deepLinks[0])) : undefined;
   }, [props.deepLinks]);
 
-  const [unappliedSourceArgs, setUnappliedSourceArgs] = useState(
-    targetUrlState
+  const [unappliedSourceArgs, setUnappliedSourceArgs] = useState<
+    | {
+        ds: string | undefined;
+        dsParams: Record<string, string> | undefined;
+        sourceMetadata?: Record<string, unknown>[];
+        layoutUrl?: string;
+      }
+    | undefined
+  >(
+    targetUrlState && !targetUrlState.sessionId
       ? {
           ds: targetUrlState.ds,
           dsParams: targetUrlState.dsParams,
@@ -503,6 +514,44 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         }
       : undefined,
   );
+
+  // Resolve session-based MCAP URLs when sessionId is present.
+  useEffect(() => {
+    const sessionId = targetUrlState?.sessionId;
+    if (!sessionId) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    void (async () => {
+      try {
+        const mcaps = await SessionAPI.getSession(sessionId, signal);
+        if (mcaps.length === 0) {
+          enqueueSnackbar("Session contains no data sources", { variant: "error" });
+          return;
+        }
+
+        const urls = mcaps.map((mcap) => mcap.url);
+        setUnappliedSourceArgs({
+          ds: "remote-file",
+          dsParams: { url: urls.join(",") },
+          sourceMetadata: mcaps.map((mcap) => mcap.metadata),
+        });
+      } catch (error) {
+        if (signal.aborted) {
+          return;
+        }
+        log.error("Failed to fetch session MCAP URLs:", error);
+        enqueueSnackbar("Failed to load session data sources", { variant: "error" });
+      }
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, [targetUrlState?.sessionId, enqueueSnackbar]);
 
   const selectEvent = useEvents(selectSelectEvent);
 
@@ -567,6 +616,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       selectSource(unappliedSourceArgs.ds, {
         type: "connection",
         params: unappliedSourceArgs.dsParams,
+        sourceMetadata: unappliedSourceArgs.sourceMetadata,
       });
       selectEvent(unappliedSourceArgs.dsParams?.eventId);
       shouldUpdate = true;

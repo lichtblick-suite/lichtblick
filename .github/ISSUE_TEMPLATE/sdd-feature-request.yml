@@ -1,0 +1,80 @@
+name: SDD Feature Request
+description: Propose a feature with explicit specification, acceptance criteria, and definition of done.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to define the feature specification before implementation.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user or developer problem should be solved?
+      placeholder: Describe the current pain point.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution
+      description: What behavior or capability should be added?
+      placeholder: Describe the desired solution at a high level.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Provide measurable criteria that must be true for completion.
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: definition-of-done
+    attributes:
+      label: Definition of done
+      description: Provide completion checks for implementation quality.
+      placeholder: |
+        - [ ] Required tests added/updated
+        - [ ] Documentation updated
+        - [ ] Lint/type-check/tests pass
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and non-goals
+      description: Clarify what is in scope and explicitly out of scope.
+      placeholder: |
+        In scope:
+        -
+
+        Out of scope:
+        -
+    validations:
+      required: true
+
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risks and dependencies
+      description: List technical risks, migration concerns, and dependencies.
+      placeholder: |
+        Risks:
+        -
+
+        Dependencies:
+        -
+    validations:
+      required: false

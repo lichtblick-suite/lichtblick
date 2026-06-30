@@ -32,6 +32,52 @@ function computeSubscriptionHash(topic: string, subscribePayload: SubscribePaylo
 }
 
 /**
+ * Attempts to deserialize a message event. Returns the deserialized MessageEvent on success,
+ * or an alert IteratorResult on failure.
+ */
+function tryDeserializeMessage(
+  msgEvent: MessageEvent<Uint8Array>,
+  subscribePayloadWithHashByTopic: Map<string, SubscribePayload & { subscriptionHash: string }>,
+  connectionIdByTopic: Record<string, number>,
+  deserializeMessage: (
+    msgEvent: MessageEvent<Uint8Array>,
+    subscription: SubscribePayload & { subscriptionHash: string },
+  ) => MessageEvent,
+): { ok: true; msgEvent: MessageEvent } | { ok: false; alert: Readonly<IteratorResult> } {
+  const subscription = subscribePayloadWithHashByTopic.get(msgEvent.topic);
+  if (!subscription) {
+    return {
+      ok: false,
+      alert: {
+        type: "alert",
+        connectionId: connectionIdByTopic[msgEvent.topic] ?? 0,
+        alert: {
+          severity: "error",
+          message: `Received message on topic ${msgEvent.topic} which was not subscribed to.`,
+          tip: "Check that your input file is not corrupted.",
+        },
+      },
+    };
+  }
+  try {
+    return { ok: true, msgEvent: deserializeMessage(msgEvent, subscription) };
+  } catch (err) {
+    return {
+      ok: false,
+      alert: {
+        type: "alert",
+        connectionId: connectionIdByTopic[msgEvent.topic] ?? 0,
+        alert: {
+          severity: "error",
+          message: `Failed to deserialize message on topic ${msgEvent.topic}. ${err}`,
+          tip: "Check that your input file is not corrupted.",
+        },
+      },
+    };
+  }
+}
+
+/**
  * Iterable source that deserializes messages from a raw iterable source (messages are Uint8Arrays).
  */
 export class DeserializingIterableSource implements IDeserializedIterableSource {
@@ -133,6 +179,8 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     const rawIterator = self.#source.messageIterator(args);
+    const deserializeMsg = self.#deserializeMessage.bind(self);
+    const connectionIdByTopic = self.#connectionIdByTopic;
 
     // Collect all topics that will be sampled
     const samplingTopics = new Set<string>();
@@ -159,34 +207,16 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
               continue;
             }
 
-            try {
-              const subscription = subscribePayloadWithHashByTopic.get(iterResult.msgEvent.topic);
-              if (!subscription) {
-                throw new Error(
-                  `Received message on topic ${iterResult.msgEvent.topic} which was not subscribed to.`,
-                );
-              }
-              const deserializedMsgEvent = self.#deserializeMessage(
-                iterResult.msgEvent,
-                subscription,
-              );
-              yield {
-                type: iterResult.type,
-                msgEvent: deserializedMsgEvent,
-              };
-            } catch (err) {
-              const connectionId = self.#connectionIdByTopic[iterResult.msgEvent.topic] ?? 0;
-              yield {
-                type: "alert" as const,
-                connectionId,
-                alert: {
-                  severity: "error",
-                  message: `Failed to deserialize message on topic ${
-                    iterResult.msgEvent.topic
-                  }. ${err.toString()}`,
-                  tip: `Check that your input file is not corrupted.`,
-                },
-              };
+            const result = tryDeserializeMessage(
+              iterResult.msgEvent,
+              subscribePayloadWithHashByTopic,
+              connectionIdByTopic,
+              deserializeMsg,
+            );
+            if (result.ok) {
+              yield { type: iterResult.type, msgEvent: result.msgEvent };
+            } else {
+              yield result.alert;
             }
           }
           return;
@@ -213,24 +243,17 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
             bufferedDecoded.length = 0;
           }
 
-          for (const [topic, rawMsgEvent] of pendingSampledByTopic) {
-            try {
-              const subscription = subscribePayloadWithHashByTopic.get(topic);
-              if (!subscription) {
-                throw new Error(`Received message on topic ${topic} which was not subscribed to.`);
-              }
-              decoded.push(self.#deserializeMessage(rawMsgEvent, subscription));
-            } catch (err) {
-              const connectionId = self.#connectionIdByTopic[topic] ?? 0;
-              yield {
-                type: "alert" as const,
-                connectionId,
-                alert: {
-                  severity: "error",
-                  message: `Failed to deserialize message on topic ${topic}. ${err.toString()}`,
-                  tip: `Check that your input file is not corrupted.`,
-                },
-              } as const;
+          for (const [_topic, rawMsgEvent] of pendingSampledByTopic) {
+            const result = tryDeserializeMessage(
+              rawMsgEvent,
+              subscribePayloadWithHashByTopic,
+              connectionIdByTopic,
+              deserializeMsg,
+            );
+            if (result.ok) {
+              decoded.push(result.msgEvent);
+            } else {
+              yield result.alert;
             }
           }
           pendingSampledByTopic.clear();
@@ -280,34 +303,16 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
 
           // No sampling window end defined, just deserialize and yield.
           if (!samplingWindowEnd) {
-            try {
-              const subscription = subscribePayloadWithHashByTopic.get(iterResult.msgEvent.topic);
-              if (!subscription) {
-                throw new Error(
-                  `Received message on topic ${iterResult.msgEvent.topic} which was not subscribed to.`,
-                );
-              }
-              const deserializedMsgEvent = self.#deserializeMessage(
-                iterResult.msgEvent,
-                subscription,
-              );
-              yield {
-                type: "message-event" as const,
-                msgEvent: deserializedMsgEvent,
-              };
-            } catch (err) {
-              const connectionId = self.#connectionIdByTopic[iterResult.msgEvent.topic] ?? 0;
-              yield {
-                type: "alert",
-                connectionId,
-                alert: {
-                  severity: "error",
-                  message: `Failed to deserialize message on topic ${
-                    iterResult.msgEvent.topic
-                  }. ${err.toString()}`,
-                  tip: `Check that your input file is not corrupted.`,
-                },
-              };
+            const result = tryDeserializeMessage(
+              iterResult.msgEvent,
+              subscribePayloadWithHashByTopic,
+              connectionIdByTopic,
+              deserializeMsg,
+            );
+            if (result.ok) {
+              yield { type: "message-event" as const, msgEvent: result.msgEvent };
+            } else {
+              yield result.alert;
             }
             continue;
           }
@@ -333,27 +338,16 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
           }
 
           // Deserialize all buffered decoded non-sampled message immediately just like in the non-sampling case.
-          try {
-            const subscription = subscribePayloadWithHashByTopic.get(iterResult.msgEvent.topic);
-            if (!subscription) {
-              throw new Error(
-                `Received message on topic ${iterResult.msgEvent.topic} which was not subscribed to.`,
-              );
-            }
-            bufferedDecoded.push(self.#deserializeMessage(iterResult.msgEvent, subscription));
-          } catch (err) {
-            const connectionId = self.#connectionIdByTopic[iterResult.msgEvent.topic] ?? 0;
-            yield {
-              type: "alert",
-              connectionId,
-              alert: {
-                severity: "error",
-                message: `Failed to deserialize message on topic ${
-                  iterResult.msgEvent.topic
-                }. ${err.toString()}`,
-                tip: `Check that your input file is not corrupted.`,
-              },
-            };
+          const result = tryDeserializeMessage(
+            iterResult.msgEvent,
+            subscribePayloadWithHashByTopic,
+            connectionIdByTopic,
+            deserializeMsg,
+          );
+          if (result.ok) {
+            bufferedDecoded.push(result.msgEvent);
+          } else {
+            yield result.alert;
           }
         }
 
