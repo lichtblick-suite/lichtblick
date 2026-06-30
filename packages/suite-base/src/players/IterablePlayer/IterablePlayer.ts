@@ -101,7 +101,7 @@ type ExpandBackfill = (
   getAbortSignal: () => AbortSignal | undefined,
 ) => Promise<MessageEvent[]>;
 
-export type IterablePlayerOptions = {
+type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
 
   source: IDeserializedIterableSource | ISerializedIterableSource;
