@@ -3133,7 +3133,6 @@ __metadata:
   resolution: "@lichtblick/den@workspace:packages/den"
   dependencies:
     "@lichtblick/comlink": "npm:1.0.3"
-    "@lichtblick/log": "workspace:*"
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@types/dom-webcodecs": "npm:0.1.14"
