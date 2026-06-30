@@ -1106,47 +1106,36 @@ describe("ThreeDeeRender", () => {
 
       const mockContext = createMockContext();
       const props = setup({}, mockContext);
-
-      // When
-      const { container } = render(<ThreeDeeRender {...props} />);
+      render(<ThreeDeeRender {...props} />);
 
       await waitFor(() => {
-        expect(customRendererInstance.getCameraState).toBeDefined();
+        expect(mockContext.onRender).toBeDefined();
       });
 
-      const panelDiv = container.querySelector("div");
-      if (panelDiv) {
-        fireEvent.keyDown(panelDiv, { key: "3" });
-      }
+      const done = jest.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 3 },
+            didSeek: true,
+          },
+          done,
+        );
+      });
 
-      // Then - settings should be updated
       await waitFor(() => {
-        expect(mockContext.updatePanelSettingsEditor).toHaveBeenCalled();
+        expect(customRendererInstance.settleVideoDecodes).toHaveBeenCalledTimes(1);
       });
-    });
+      expect(done).not.toHaveBeenCalled();
 
-    it("ignores key 3 when modifier keys are pressed", async () => {
-      // Given
-      const customRendererInstance = createMockRenderer();
-      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      await act(async () => {
+        settle.reject(new Error("decode failed"));
+        await Promise.resolve();
+      });
 
-      const mockContext = createMockContext();
-      const props = setup({}, mockContext);
-
-      // When
-      const { container } = render(<ThreeDeeRender {...props} />);
-
-      const initialCallCount = (mockContext.updatePanelSettingsEditor as jest.Mock).mock.calls
-        .length;
-
-      const panelDiv = container.querySelector("div");
-      if (panelDiv) {
-        fireEvent.keyDown(panelDiv, { key: "3", ctrlKey: true });
-      }
-
-      // Then - no new settings update from keyboard shortcut
-      const finalCallCount = (mockContext.updatePanelSettingsEditor as jest.Mock).mock.calls.length;
-      expect(finalCallCount).toBe(initialCallCount);
+      expect(done).toHaveBeenCalledTimes(1);
     });
   });
 

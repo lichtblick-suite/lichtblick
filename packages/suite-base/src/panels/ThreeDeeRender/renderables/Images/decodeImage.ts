@@ -50,19 +50,18 @@ export async function decodeCompressedImageToBitmap(
   return await createImageBitmap(bitmapData, { resizeWidth });
 }
 
-export function isCompressedVideoKeyframe(
-  frameMsg: CompressedVideo,
-  resolvedCodec?: VideoCodec,
-): boolean {
-  return isVideoKeyframe(frameMsg.format, frameMsg.data, resolvedCodec);
+export function isCompressedVideoKeyframe(frameMsg: CompressedVideo): boolean {
+  return isVideoKeyframe(frameMsg.format, frameMsg.data);
 }
 
 export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
   switch (canonicalVideoCodec(frameMsg.format)) {
-    // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe.
     case VideoCodec.H264:
+      // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe.
       return H264Parser.ParseDecoderConfig(frameMsg.data);
     case VideoCodec.H265:
+      // For now this returns a default H.265 codec config (codec string only); profile/level/tier
+      // are not derived from the SPS yet. A future SPS parser will fill in those fields here.
       return H265Parser.ParseDecoderConfig(frameMsg.data);
   }
   return undefined;
@@ -71,9 +70,8 @@ export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderCo
 export function prepareVideoFrame(
   frameMsg: CompressedVideo,
   context?: PrepareVideoFrameContext,
-  resolvedCodec?: VideoCodec,
 ): PreparedVideoFrame {
-  switch (resolvedCodec ?? canonicalVideoCodec(frameMsg.format)) {
+  switch (canonicalVideoCodec(frameMsg.format)) {
     case VideoCodec.H265: {
       const frameInfo = H265Parser.InspectFrame(frameMsg.data, context?.h265);
       if (frameInfo.bitstreamFormat === "unknown" || frameInfo.normalizedData == undefined) {
@@ -98,24 +96,20 @@ export function prepareVideoFrame(
         data:
           type === "key"
             ? frameInfo.normalizedData
-            : (frameInfo.strippedData ?? frameInfo.normalizedData),
+            : (H265Parser.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
         decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
         status: PreparedVideoFrameStatus.Ok,
         type,
       };
     }
     case VideoCodec.H264:
-    default: {
-      const frameData = frameMsg.data;
-      const type = H264Parser.IsKeyframe(frameData) ? "key" : "delta";
+    default:
       return {
-        data: frameData,
-        // Only keyframes carry an SPS; delta frames have nothing to parse.
-        decoderConfig: type === "key" ? H264Parser.ParseDecoderConfig(frameData) : undefined,
+        data: frameMsg.data,
+        decoderConfig: getVideoDecoderConfig(frameMsg),
         status: PreparedVideoFrameStatus.Ok,
-        type,
+        type: isCompressedVideoKeyframe(frameMsg) ? "key" : "delta",
       };
-    }
   }
 }
 

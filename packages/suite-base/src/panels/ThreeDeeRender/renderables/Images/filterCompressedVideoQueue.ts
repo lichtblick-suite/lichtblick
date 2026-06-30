@@ -7,7 +7,7 @@
 
 import * as _ from "lodash-es";
 
-import { canonicalVideoCodec, VideoCodec } from "@lichtblick/den/video";
+import { canonicalVideoCodec, videoCodecNeedsSeekBackfill } from "@lichtblick/den/video";
 import { MessageEvent } from "@lichtblick/suite";
 
 import { CompressedVideo } from "./ImageTypes";
@@ -49,12 +49,12 @@ function filterTopic(topicMsgs: MessageEvent<CompressedVideo>[]): MessageEvent<C
   if (latest == undefined) {
     return [];
   }
-  // Format is constant per topic — resolve once for the whole group
   const codec = canonicalVideoCodec(latest.message.format);
-  if (codec == undefined) {
-    return [latest];
+  if (videoCodecNeedsSeekBackfill(codec)) {
+    return keepFromLatestKeyframe(topicMsgs);
   }
-  return keepFromLatestKeyframe(topicMsgs, codec);
+  // Unrecognized format — only the most recent message is needed downstream.
+  return [latest];
 }
 
 /**
@@ -64,11 +64,10 @@ function filterTopic(topicMsgs: MessageEvent<CompressedVideo>[]): MessageEvent<C
  */
 function keepFromLatestKeyframe(
   topicMsgs: MessageEvent<CompressedVideo>[],
-  codec: VideoCodec,
 ): MessageEvent<CompressedVideo>[] {
   let keyIndex = -1;
   for (let i = topicMsgs.length - 1; i >= 0; i--) {
-    if (isCompressedVideoKeyframe(topicMsgs[i]!.message, codec)) {
+    if (isCompressedVideoKeyframe(topicMsgs[i]!.message)) {
       keyIndex = i;
       break;
     }
