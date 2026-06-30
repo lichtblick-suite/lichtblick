@@ -72,6 +72,12 @@ describe("WebRoot", () => {
     expect(mockSharedRootProps[0]!.appParameters).toEqual({});
   });
 
+  it("treats an empty ?layout= value the same as a missing layout parameter", () => {
+    globalThis.history.replaceState({}, "", "/?layout=");
+    renderWebRoot();
+    expect(mockSharedRootProps[0]!.appParameters).toEqual({});
+  });
+
   it("ignores unrelated query parameters when building appParameters", () => {
     const workspace = BasicBuilder.string();
     globalThis.history.replaceState({}, "", `/?workspace=${workspace}`);

@@ -62,7 +62,7 @@ export function WebRoot(props: {
   const layout = url.searchParams.get("layout");
   const [appParameters] = useState<AppParametersInput>(() => {
     const params: Record<string, string> = {};
-    if (layout != undefined) {
+    if (layout != undefined && layout !== "") {
       params.defaultLayout = layout;
     }
     return params;
