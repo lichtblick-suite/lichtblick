@@ -118,7 +118,7 @@ describe("ExtensionsAPI", () => {
         workspace,
         fileId: apiResponse.fileId,
         externalId: apiResponse.id,
-      } as StoredExtension);
+      });
     });
 
     it("should return undefined when extension not found", async () => {

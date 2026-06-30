@@ -225,22 +225,27 @@ describe("McapIterableSource", () => {
       return tempBuffer.get();
     }
 
-    it("should create RemoteFileReadable with url and cacheSizeInBytes", async () => {
+    it("should create RemoteFileReadable with url, cacheSizeInBytes, and readAheadEnabled", async () => {
       // Given an indexed MCAP served via URL with a custom cache size
       const mcapData = await buildIndexedMcap([{ logTime: 1_000_000_000n }]);
       mockRemoteFileReadableWith(mcapData);
       const cacheSizeInBytes = 1024 * 1024 * 100;
+      const readAheadEnabled = false;
 
       // When initializing a McapIterableSource with URL type
       const source = new McapIterableSource({
         type: "url",
         url: urlIndexedMcap,
         cacheSizeInBytes,
+        readAheadEnabled,
       });
       await source.initialize();
 
-      // Then RemoteFileReadable should be constructed with the url and cache size
-      expect(MockRemoteFileReadable).toHaveBeenCalledWith(urlIndexedMcap, cacheSizeInBytes);
+      // Then RemoteFileReadable should be constructed with the URL options
+      expect(MockRemoteFileReadable).toHaveBeenCalledWith(urlIndexedMcap, {
+        cacheSizeInBytes,
+        readAheadEnabled,
+      });
     });
 
     it("should delegate getStart and getEnd to the underlying indexed source", async () => {
@@ -268,7 +273,7 @@ describe("McapIterableSource", () => {
         body: new Blob([mcapData]).stream(),
         headers: new Headers({ "content-length": String(mcapData.byteLength) }),
       });
-      global.fetch = mockFetch as unknown as typeof fetch;
+      global.fetch = mockFetch;
 
       // When initializing the source
       const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });
@@ -297,7 +302,7 @@ describe("McapIterableSource", () => {
       global.fetch = jest.fn().mockResolvedValue({
         body: undefined,
         headers: new Headers({ "content-length": String(mcapData.byteLength) }),
-      }) as unknown as typeof fetch;
+      });
 
       // When initializing the source
       const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });
@@ -315,7 +320,7 @@ describe("McapIterableSource", () => {
       global.fetch = jest.fn().mockResolvedValue({
         body: new Blob([mcapData]).stream(),
         headers: new Headers(),
-      }) as unknown as typeof fetch;
+      });
 
       // When initializing the source
       const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });

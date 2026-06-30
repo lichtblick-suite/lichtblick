@@ -5,6 +5,7 @@
     "rootDir": "../../",
     "noEmit": true,
     "jsx": "react-jsx",
+    "types": ["node", "jest"],
     "lib": ["dom", "dom.iterable", "es2022"]
   }
 }

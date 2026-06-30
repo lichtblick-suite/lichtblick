@@ -3,3 +3,4 @@
 
 export const ROW_SPACING = 9;
 export const ROW_MARGIN = ROW_SPACING / 4;
+export const DEFAULT_X_END_TIME = 1;

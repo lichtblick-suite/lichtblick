@@ -4,7 +4,10 @@
 import { useMemo } from "react";
 
 import { Time, toSec } from "@lichtblick/rostime";
-import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/suite-base/components/MessagePipeline";
 import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
 
 type UseStateTransitionsTime = {
@@ -13,12 +16,14 @@ type UseStateTransitionsTime = {
   endTimeSinceStart: number | undefined;
 };
 
-const useStateTransitionsTime = (): UseStateTransitionsTime => {
-  const getMessagePipelineState = useMessagePipelineGetter();
+const selectStartTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.startTime;
+const selectCurrentTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.currentTime;
+const selectEndTime = (ctx: MessagePipelineContext) => ctx.playerState.activeData?.endTime;
 
-  const {
-    playerState: { activeData: { startTime, currentTime, endTime } = {} },
-  } = getMessagePipelineState();
+const useStateTransitionsTime = (): UseStateTransitionsTime => {
+  const startTime = useMessagePipeline(selectStartTime);
+  const currentTime = useMessagePipeline(selectCurrentTime);
+  const endTime = useMessagePipeline(selectEndTime);
 
   const currentTimeSinceStart = useMemo(
     () => (currentTime && startTime ? toSec(subtractTimes(currentTime, startTime)) : undefined),

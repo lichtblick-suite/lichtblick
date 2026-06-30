@@ -6,8 +6,12 @@
 import { renderHook } from "@testing-library/react";
 
 import { Time, toSec } from "@lichtblick/rostime";
-import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@lichtblick/suite-base/components/MessagePipeline";
 import { subtractTimes } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/userUtils/time";
+import { PlayerStateActiveData } from "@lichtblick/suite-base/players/types";
 
 import useStateTransitionsTime from "./useStateTransitionsTime";
 
@@ -18,20 +22,26 @@ jest.mock(
 );
 
 describe("useStateTransitionsTime", () => {
-  const mockUseMessagePipelineGetter = useMessagePipelineGetter as jest.Mock;
+  const mockUseMessagePipeline = useMessagePipeline as jest.Mock;
   const mockToSec = toSec as jest.Mock;
   const mockSubtractTimes = subtractTimes as jest.Mock;
+  const activeDataCases: Array<Partial<PlayerStateActiveData> | undefined> = [{}, undefined];
+
+  const mockActiveData = (activeData: Partial<PlayerStateActiveData> | undefined) => {
+    const mockContext = {
+      playerState: { activeData: activeData as PlayerStateActiveData },
+    } as unknown as MessagePipelineContext;
+    mockUseMessagePipeline.mockImplementation((selector) => selector(mockContext));
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it.each([{}, undefined])(
+  it.each(activeDataCases)(
     "should return undefined values when there is no active data or it is undefined. (testing with %s)",
-    () => {
-      mockUseMessagePipelineGetter.mockReturnValue((activeDataValue: string | object) => ({
-        playerState: { activeData: activeDataValue },
-      }));
+    (activeDataValue: Partial<PlayerStateActiveData> | undefined) => {
+      mockActiveData(activeDataValue);
 
       const { result } = renderHook(() => useStateTransitionsTime());
 
@@ -45,9 +55,7 @@ describe("useStateTransitionsTime", () => {
     const startTime: Time = { sec: 1, nsec: 0 };
     const currentTime: Time = { sec: 3, nsec: 0 };
 
-    mockUseMessagePipelineGetter.mockReturnValue(() => ({
-      playerState: { activeData: { startTime, currentTime } },
-    }));
+    mockActiveData({ startTime, currentTime });
 
     mockSubtractTimes.mockReturnValue({ sec: 2, nsec: 0 });
     mockToSec.mockReturnValue(2);
@@ -63,9 +71,7 @@ describe("useStateTransitionsTime", () => {
     const startTime: Time = { sec: 1, nsec: 0 };
     const endTime: Time = { sec: 5, nsec: 0 };
 
-    mockUseMessagePipelineGetter.mockReturnValue(() => ({
-      playerState: { activeData: { startTime, endTime } },
-    }));
+    mockActiveData({ startTime, endTime });
 
     mockSubtractTimes.mockReturnValue({ sec: 4, nsec: 0 });
 
@@ -83,9 +89,7 @@ describe("useStateTransitionsTime", () => {
     const currentTime: Time = { sec: 3, nsec: 0 };
     const endTime: Time = { sec: 5, nsec: 0 };
 
-    mockUseMessagePipelineGetter.mockReturnValue(() => ({
-      playerState: { activeData: { startTime, currentTime, endTime } },
-    }));
+    mockActiveData({ startTime, currentTime, endTime });
 
     mockSubtractTimes
       .mockReturnValueOnce({ sec: 2, nsec: 0 })

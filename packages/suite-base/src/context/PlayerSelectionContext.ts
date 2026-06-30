@@ -16,6 +16,7 @@ export type DataSourceFactoryInitializeArgs = {
   file?: File;
   files?: File[];
   params?: Record<string, string | undefined>;
+  sourceMetadata?: Record<string, unknown>[];
 };
 
 export type DataSourceFactoryType = "file" | "connection" | "sample";
@@ -91,6 +92,7 @@ type FileDataSourceArgs = {
 type ConnectionDataSourceArgs = {
   type: "connection";
   params?: Record<string, string | undefined>;
+  sourceMetadata?: Record<string, unknown>[];
 };
 
 export type DataSourceArgs = FileDataSourceArgs | ConnectionDataSourceArgs;

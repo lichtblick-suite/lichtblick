@@ -3,6 +3,7 @@
 
 import { test, expect } from "../../../../fixtures/electron";
 import { loadFiles } from "../../../../fixtures/load-files";
+import { LayoutManager, Sidebar } from "../../../../page-objects";
 
 const MCAP_FILENAME = "example_logs.mcap";
 
@@ -16,44 +17,51 @@ const MCAP_FILENAME = "example_logs.mcap";
  * WHEN raw messages settings are open and font size is changed to 30px
  * THEN messages on the panel should have CSS attribute font size as 30px
  */
-test("create a new layout with raw messages panel, select a topic and change the font size", async ({
-  mainWindow,
-}) => {
-  // Given
-  await loadFiles({
-    mainWindow,
-    filenames: MCAP_FILENAME,
-  });
-  await mainWindow.getByTestId("layouts-left").click();
+test(
+  "create a new layout with raw messages panel, select a topic and change the font size",
+  { tag: "@regression" },
+  async ({ mainWindow }) => {
+    const sidebar = new Sidebar(mainWindow);
+    const layout = new LayoutManager(mainWindow);
 
-  // When
-  await mainWindow.getByTestId("layout-list-item").getByText("Default", { exact: true }).click();
-  await mainWindow.getByText("Create new layout").click();
+    // Given
+    await loadFiles({
+      mainWindow,
+      filenames: MCAP_FILENAME,
+    });
+    await sidebar.openLayoutsTab();
 
-  const panelSearch = mainWindow.getByTestId("panel-list-textfield").locator("input");
-  await panelSearch.fill("Raw Messages");
-  await mainWindow.getByText("Raw Messages").nth(0).click();
+    // When
+    await layout.openDefaultLayout();
+    await layout.createNewLayout();
 
-  // Then
-  const playButton = mainWindow.getByRole("button", { name: "Play", exact: true });
-  await expect(playButton).toBeEnabled();
-  await expect(mainWindow.getByText("No topic selected")).toBeVisible();
+    const panelSearch = mainWindow.getByTestId("panel-list-textfield").locator("input");
+    await panelSearch.fill("Raw Messages");
+    await mainWindow.getByText("Raw Messages").nth(0).click();
 
-  // When
-  const topicPathInput = mainWindow.getByPlaceholder("/some/topic.msgs[0].field", { exact: true });
-  await topicPathInput.fill("/rosout");
+    // Then
+    const playButton = mainWindow.getByRole("button", { name: "Play", exact: true });
+    await expect(playButton).toBeEnabled();
+    await expect(mainWindow.getByText("No topic selected")).toBeVisible();
 
-  // Then
-  await expect(mainWindow.getByText("No topic selected")).not.toBeVisible();
-  const topicMessage = mainWindow.getByText("level 1");
-  await expect(topicMessage).toBeVisible();
-  await expect(topicMessage).toHaveCSS("font-size", "12px");
+    // When
+    const topicPathInput = mainWindow.getByPlaceholder("/some/topic.msgs[0].field", {
+      exact: true,
+    });
+    await topicPathInput.fill("/rosout");
 
-  // When
-  await mainWindow.getByTestId("panel-settings-left").click();
-  await mainWindow.getByTestId("FieldEditor-Select").click();
-  await mainWindow.getByText("30 px").click();
+    // Then
+    await expect(mainWindow.getByText("No topic selected")).not.toBeVisible();
+    const topicMessage = mainWindow.getByText("level 1");
+    await expect(topicMessage).toBeVisible();
+    await expect(topicMessage).toHaveCSS("font-size", "12px");
 
-  // Then
-  await expect(topicMessage).toHaveCSS("font-size", "30px");
-});
+    // When
+    await sidebar.openPanelSettingsTab();
+    await mainWindow.getByTestId("FieldEditor-Select").click();
+    await mainWindow.getByText("30 px").click();
+
+    // Then
+    await expect(topicMessage).toHaveCSS("font-size", "30px");
+  },
+);

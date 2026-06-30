@@ -17,7 +17,6 @@
 import { Mutex } from "async-mutex";
 import * as _ from "lodash-es";
 import memoizeWeak from "memoize-weak";
-import shallowequal from "shallowequal";
 import { v4 as uuidv4 } from "uuid";
 
 import { MutexLocked } from "@lichtblick/den/async";
@@ -37,24 +36,23 @@ import { generateTypesLib } from "@lichtblick/suite-base/players/UserScriptPlaye
 import { TransformArgs } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/types";
 import {
   Diagnostic,
-  ScriptData,
-  ScriptRegistration,
   ProcessMessageOutput,
   RegistrationOutput,
+  ScriptData,
+  ScriptRegistration,
   UserScriptLog,
 } from "@lichtblick/suite-base/players/UserScriptPlayer/types";
 import { hasTransformerErrors } from "@lichtblick/suite-base/players/UserScriptPlayer/utils";
 import {
   AdvertiseOptions,
+  MessageEvent,
   Player,
+  PlayerAlert,
   PlayerState,
   PlayerStateActiveData,
   PublishPayload,
   SubscribePayload,
   Topic,
-  MessageEvent,
-  PlayerAlert,
-  MessageBlock,
 } from "@lichtblick/suite-base/players/types";
 import { reportError } from "@lichtblick/suite-base/reportError";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
@@ -62,8 +60,8 @@ import { UserScript, UserScripts } from "@lichtblick/suite-base/types/panels";
 import Rpc from "@lichtblick/suite-base/util/Rpc";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 
-import { DIAGNOSTIC_SEVERITY, SOURCES, ERROR_CODES } from "./constants";
-import { remapVirtualSubscriptions, getPreloadTypes } from "./subscriptions";
+import { DIAGNOSTIC_SEVERITY, ERROR_CODES, MAX_GLOBAL_BUFFER_SIZE, SOURCES } from "./constants";
+import { getPreloadTypes, remapVirtualSubscriptions } from "./subscriptions";
 
 const log = Log.getLogger(__filename);
 
@@ -101,6 +99,19 @@ type ProtectedState = {
    * subscribes to the underlying input topics.
    */
   inputsByOutputTopic: Map<string, readonly string[]>;
+};
+
+type CacheConsumerHandle = { index: number };
+
+type BatchIteratorCacheEntry = {
+  results: Readonly<IIterableSourceIteratorResult>[];
+  done: boolean;
+  error?: Error;
+  resolve: () => void;
+  promise: Promise<void>;
+  processor: { terminate: () => void };
+  consumers: Set<CacheConsumerHandle>;
+  pruneOffset: number;
 };
 
 export default class UserScriptPlayer implements Player {
@@ -147,6 +158,17 @@ export default class UserScriptPlayer implements Player {
     lastPlayerStateActiveData: undefined,
     inputsByOutputTopic: new Map(),
   });
+
+  // Shadow copy of script registrations keyed by output topic for synchronous access
+  // in getBatchIterator (which can't use the async MutexLocked).
+  // Updated in #resetWorkersUnlocked.
+  #outputTopicRegistrations = new Map<string, ScriptRegistration>();
+
+  // Shared cache for virtual topic batch iterators. One source consumer per topic processes
+  // messages through its own worker; multiple panels replay from the shared results array.
+  readonly #batchIteratorCache = new Map<string, BatchIteratorCacheEntry>();
+
+  #totalCachedResults: number = 0;
 
   readonly #emitLock = new Mutex();
 
@@ -228,15 +250,6 @@ export default class UserScriptPlayer implements Player {
     },
   );
 
-  #lastBlockRequest: {
-    input?: {
-      blocks: readonly (MessageBlock | undefined)[];
-      globalVariables: GlobalVariables;
-      scriptRegistrations: readonly ScriptRegistration[];
-    };
-    result: (MessageBlock | undefined)[];
-  } = { result: [] };
-
   // Processes input messages through scripts to create messages on output topics
   async #getMessages(
     inputMessages: readonly MessageEvent[],
@@ -269,88 +282,6 @@ export default class UserScriptPlayer implements Player {
     return outputMessages;
   }
 
-  async #getBlocks(
-    blocks: readonly (MessageBlock | undefined)[],
-    globalVariables: GlobalVariables,
-    scriptRegistrations: readonly ScriptRegistration[],
-  ): Promise<readonly (MessageBlock | undefined)[]> {
-    if (
-      shallowequal(this.#lastBlockRequest.input, {
-        blocks,
-        globalVariables,
-        scriptRegistrations,
-      })
-    ) {
-      return this.#lastBlockRequest.result;
-    }
-
-    // If no downstream subscriptions want blocks for our output topics we can just pass through
-    // the blocks from the underlying player.
-    const fullRegistrations = scriptRegistrations.filter(
-      (reg) => this.#scriptSubscriptions[reg.output.name]?.preloadType === "full",
-    );
-    if (fullRegistrations.length === 0) {
-      return blocks;
-    }
-
-    const allInputTopics = _.uniq(fullRegistrations.flatMap((reg) => reg.inputs));
-
-    const outputBlocks: (MessageBlock | undefined)[] = [];
-    for (const block of blocks) {
-      if (!block) {
-        outputBlocks.push(block);
-        continue;
-      }
-
-      // Flatten and re-sort block messages so that scripts see them in the same order
-      // as the non-block scripts.
-      const messagesByTopic = { ...block.messagesByTopic };
-      const blockMessages = allInputTopics
-        .flatMap((topic) => messagesByTopic[topic] ?? [])
-        .sort((a, b) => compare(a.receiveTime, b.receiveTime));
-      for (const scriptRegistration of fullRegistrations) {
-        const outTopic = scriptRegistration.output.name;
-        // Clear out any previously processed messages that were previously in the output topic.
-        // otherwise it will contain duplicates.
-        if (messagesByTopic[outTopic] != undefined) {
-          messagesByTopic[outTopic] = [];
-        }
-
-        for (const message of blockMessages) {
-          if (scriptRegistration.inputs.includes(message.topic)) {
-            const outputMessage = await scriptRegistration.processBlockMessage(
-              message,
-              globalVariables,
-            );
-            if (outputMessage) {
-              // https://github.com/typescript-eslint/typescript-eslint/issues/6632
-              let messages = messagesByTopic[outTopic];
-              messages ??= [];
-              messages.push(outputMessage);
-              messagesByTopic[outTopic] = messages;
-            }
-          }
-        }
-      }
-
-      // Note that this size doesn't include the new processed messqges. We may need
-      // to recalculate this if it turns out to be important for good cache eviction
-      // behavior.
-      outputBlocks.push({
-        messagesByTopic,
-        needTopics: block.needTopics,
-        sizeInBytes: block.sizeInBytes,
-      });
-    }
-
-    this.#lastBlockRequest = {
-      input: { blocks, globalVariables, scriptRegistrations },
-      result: outputBlocks,
-    };
-
-    return outputBlocks;
-  }
-
   public setGlobalVariables(globalVariables: GlobalVariables): void {
     this.#globalVariables = globalVariables;
     this.#player.setGlobalVariables(globalVariables);
@@ -374,6 +305,10 @@ export default class UserScriptPlayer implements Player {
       const maxScriptRegistrationCacheCount = Object.keys(userScripts).length + 1;
       state.scriptRegistrationCache.splice(maxScriptRegistrationCacheCount);
       // This code causes us to reset workers twice because the seeking resets the workers too
+      this.#invalidateBatchIteratorCache();
+      // Create new Topic objects so downstream consumers (e.g. PlotCoordinator) can detect
+      // which specific topics had their preloaded data invalidated via reference comparison.
+      this.#memoizedScriptTopics = this.#memoizedScriptTopics.map((t) => ({ ...t }));
       await this.#resetWorkersUnlocked(state);
       this.#setSubscriptionsUnlocked(this.#subscriptions, state);
 
@@ -594,6 +529,10 @@ export default class UserScriptPlayer implements Player {
       output: { name: outputTopic, schemaName: outputDatatype },
       processMessage: messageProcessor.registration,
       processBlockMessage: blockProcessor.registration,
+      buildMessageProcessor: () => {
+        const proc = buildMessageProcessor();
+        return { processMessage: proc.registration, terminate: proc.terminate };
+      },
       terminate: () => {
         messageProcessor.terminate();
         blockProcessor.terminate();
@@ -653,6 +592,19 @@ export default class UserScriptPlayer implements Player {
 
   // We need to reset workers in a variety of circumstances:
   // - When a user script is updated, added or deleted
+  // Invalidate shared batch iterator cache. Called when scripts or topics/datatypes change
+  // (NOT on seek — seek doesn't affect preloaded block data and PlotCoordinator won't re-subscribe).
+  #invalidateBatchIteratorCache() {
+    for (const cache of this.#batchIteratorCache.values()) {
+      this.#totalCachedResults -= cache.results.length;
+      cache.done = true;
+      cache.resolve();
+      cache.processor.terminate();
+    }
+    this.#batchIteratorCache.clear();
+    this.#alertStore.delete("batch-iterator-buffer-overflow");
+  }
+
   // - When we seek (in order to reset state)
   // - When a new child player is added
   async #resetWorkersUnlocked(state: ProtectedState): Promise<void> {
@@ -673,8 +625,16 @@ export default class UserScriptPlayer implements Player {
     }
     state.scriptRegistrations = [];
 
-    const rosLib = await this.#getRosLib(state);
-    const typesLib = await this.#getTypesLib(state);
+    const rosLib = await this.#getLib(
+      state,
+      this.#rosLibGenerator,
+      this.#userScriptActions.setUserScriptRosLib,
+    );
+    const typesLib = await this.#getLib(
+      state,
+      this.#typesLibGenerator,
+      this.#userScriptActions.setUserScriptTypesLib,
+    );
 
     const allScriptRegistrations = await Promise.all(
       Object.entries(state.userScripts).map(
@@ -753,12 +713,22 @@ export default class UserScriptPlayer implements Player {
           throw new Error(`Input "${input}" cannot equal another script's output`);
         }
       }
-
       validScriptRegistrations.push(scriptRegistration);
     }
 
     let changedTopicsRequireEmitState = false;
     state.scriptRegistrations = validScriptRegistrations;
+
+    // Atomically replace shadow registry for synchronous access in getBatchIterator.
+    // We avoid clearing the old map earlier because getBatchIterator is synchronous and
+    // could be called during the async gap above — stale-but-functional registrations
+    // are better than an empty map that causes panels to get no iterator.
+    const newOutputTopicRegistrations = new Map<string, ScriptRegistration>();
+    for (const reg of validScriptRegistrations) {
+      newOutputTopicRegistrations.set(reg.output.name, reg);
+    }
+    this.#outputTopicRegistrations = newOutputTopicRegistrations;
+
     const scriptTopics = state.scriptRegistrations.map(({ output }) => output);
     if (!_.isEqual(scriptTopics, this.#memoizedScriptTopics)) {
       this.#memoizedScriptTopics = scriptTopics;
@@ -802,29 +772,19 @@ export default class UserScriptPlayer implements Player {
     }
   }
 
-  async #getRosLib(state: ProtectedState): Promise<string> {
+  async #getLib(
+    state: ProtectedState,
+    generator: MemoizedLibGenerator,
+    setter: (lib: string) => void,
+  ): Promise<string> {
     if (!state.lastPlayerStateActiveData) {
-      throw new Error("_getRosLib was called before `_lastPlayerStateActiveData` set");
+      throw new Error("getLib was called before `lastPlayerStateActiveData` set");
     }
 
     const { topics, datatypes } = state.lastPlayerStateActiveData;
-    const { didUpdate, lib } = await this.#rosLibGenerator.update({ topics, datatypes });
+    const { didUpdate, lib } = await generator.update({ topics, datatypes });
     if (didUpdate) {
-      this.#userScriptActions.setUserScriptRosLib(lib);
-    }
-
-    return lib;
-  }
-
-  async #getTypesLib(state: ProtectedState): Promise<string> {
-    if (!state.lastPlayerStateActiveData) {
-      throw new Error("_getTypesLib was called before `_lastPlayerStateActiveData` set");
-    }
-
-    const { topics, datatypes } = state.lastPlayerStateActiveData;
-    const { didUpdate, lib } = await this.#typesLibGenerator.update({ topics, datatypes });
-    if (didUpdate) {
-      this.#userScriptActions.setUserScriptTypesLib(lib);
+      setter(lib);
     }
 
     return lib;
@@ -874,6 +834,7 @@ export default class UserScriptPlayer implements Player {
           ) {
             shouldReset = true;
             state.scriptRegistrationCache = [];
+            this.#invalidateBatchIteratorCache();
           }
 
           state.lastPlayerStateActiveData = activeData;
@@ -950,19 +911,6 @@ export default class UserScriptPlayer implements Player {
           ...playerState.progress,
         };
 
-        if (playerProgress.messageCache) {
-          const newBlocks = await this.#getBlocks(
-            playerProgress.messageCache.blocks,
-            globalVariables,
-            state.scriptRegistrations,
-          );
-
-          playerProgress.messageCache = {
-            startTime: playerProgress.messageCache.startTime,
-            blocks: newBlocks,
-          };
-        }
-
         return {
           ...playerState,
           progress: playerProgress,
@@ -1038,7 +986,7 @@ export default class UserScriptPlayer implements Player {
       })
       .catch((err: unknown) => {
         log.error(err);
-        reportError(err as Error);
+        reportError(err instanceof Error ? err : new Error(String(err)));
       });
   }
 
@@ -1067,11 +1015,284 @@ export default class UserScriptPlayer implements Player {
   public getMetadata(): ReadonlyArray<Readonly<Metadata>> {
     return this.#player.getMetadata?.() ?? Object.freeze([]);
   }
+
   public getBatchIterator(
     topic: string,
     options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
-    return this.#player.getBatchIterator(topic, options);
+    const registration = this.#outputTopicRegistrations.get(topic);
+    if (!registration) {
+      return this.#player.getBatchIterator(topic, options);
+    }
+
+    return this.#getVirtualBatchIterator(registration, options);
+  }
+
+  #collectInputIterators(
+    inputTopics: readonly string[],
+    options?: { start?: Time; end?: Time },
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] | undefined {
+    const iterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] = [];
+    for (const inputTopic of inputTopics) {
+      const iter = this.#player.getBatchIterator(inputTopic, options);
+      if (iter) {
+        iterators.push(iter);
+      }
+    }
+    return iterators.length > 0 ? iterators : undefined;
+  }
+
+  #getVirtualBatchIterator(
+    registration: ScriptRegistration,
+    options?: { start?: Time; end?: Time },
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
+    const inputTopics = registration.inputs;
+    if (inputTopics.length === 0) {
+      return undefined;
+    }
+
+    // For full-range (no options), use shared cache so multiple panels
+    // subscribing to the same virtual topic only process messages once.
+    if (!options) {
+      const topic = registration.output.name;
+      const existingCache = this.#batchIteratorCache.get(topic);
+      if (existingCache) {
+        return this.#createReplayIterator(existingCache);
+      }
+
+      const inputIterators = this.#collectInputIterators(inputTopics);
+      if (!inputIterators) {
+        return undefined;
+      }
+      const cache = this.#startSharedConsumer(registration, inputIterators);
+      this.#batchIteratorCache.set(topic, cache);
+      return this.#createReplayIterator(cache);
+    }
+
+    // With range options, create an independent iterator (no cache)
+    const inputIterators = this.#collectInputIterators(inputTopics, options);
+    if (!inputIterators) {
+      return undefined;
+    }
+
+    return this.#createIndependentIterator(registration, inputIterators);
+  }
+
+  /**
+   * Merges multiple input iterators by receiveTime, processes each message through
+   * the given processor, and yields transformed results. Handles cleanup of iterators
+   * and processor on completion.
+   */
+  static async *#mergeAndTransformIterators(
+    inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+    processor: { processMessage: ScriptRegistration["processMessage"]; terminate: () => void },
+    globalVariables: GlobalVariables,
+  ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
+    const source =
+      inputIterators.length === 1
+        ? inputIterators[0]!
+        : UserScriptPlayer.#mergeIteratorsByTime(inputIterators);
+
+    try {
+      for await (const result of source) {
+        if (result.type === "message-event") {
+          const outputMessage = await processor.processMessage(result.msgEvent, globalVariables);
+          if (outputMessage) {
+            yield { type: "message-event" as const, msgEvent: outputMessage };
+          }
+        } else {
+          yield result;
+        }
+      }
+    } finally {
+      for (const iter of inputIterators) {
+        await iter.return?.();
+      }
+      processor.terminate();
+    }
+  }
+
+  /**
+   * Merges multiple async iterators into a single stream ordered by receiveTime.
+   * Non-message-event results (e.g. stamps) are yielded before message events.
+   */
+  static async *#mergeIteratorsByTime(
+    iterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+  ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
+    const heads: {
+      iter: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>;
+      current: Readonly<IIterableSourceIteratorResult>;
+    }[] = [];
+
+    for (const iter of iterators) {
+      const next = await iter.next();
+      if (next.done !== true) {
+        heads.push({ iter, current: next.value });
+      }
+    }
+
+    while (heads.length > 0) {
+      const minIdx = UserScriptPlayer.#findEarliestHeadIndex(heads);
+      const head = heads[minIdx]!;
+      yield head.current;
+
+      const next = await head.iter.next();
+      if (next.done === true) {
+        heads.splice(minIdx, 1);
+      } else {
+        head.current = next.value;
+      }
+    }
+  }
+
+  /**
+   * Finds the index of the head with the earliest receiveTime.
+   * Non-message-event results are treated as earlier than any message event.
+   */
+  static #findEarliestHeadIndex(
+    heads: { current: Readonly<IIterableSourceIteratorResult> }[],
+  ): number {
+    let minIdx = 0;
+    for (let i = 1; i < heads.length; i++) {
+      const a = heads[minIdx]!.current;
+      const b = heads[i]!.current;
+
+      if (a.type !== "message-event") {
+        continue; // a is non-message → already earliest priority
+      }
+      if (
+        b.type !== "message-event" ||
+        compare(b.msgEvent.receiveTime, a.msgEvent.receiveTime) < 0
+      ) {
+        minIdx = i; // b is non-message → takes priority
+      }
+    }
+    return minIdx;
+  }
+
+  #startSharedConsumer(
+    registration: ScriptRegistration,
+    inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+  ) {
+    const processor = registration.buildMessageProcessor();
+    const globalVariables = this.#globalVariables;
+
+    let resolve = () => {};
+    const cache: BatchIteratorCacheEntry = {
+      results: [],
+      done: false,
+      error: undefined,
+      resolve,
+      promise: new Promise<void>((r) => {
+        resolve = r;
+      }),
+      processor,
+      consumers: new Set(),
+      pruneOffset: 0,
+    };
+
+    // The executor runs synchronously, so `resolve` is now set.
+    cache.resolve = resolve;
+
+    const notify = () => {
+      cache.resolve();
+      cache.promise = new Promise<void>((r) => {
+        cache.resolve = r;
+      });
+    };
+
+    // Source consumer — processes messages once, populates shared results
+    void (async () => {
+      try {
+        const source = UserScriptPlayer.#mergeAndTransformIterators(
+          inputIterators,
+          processor,
+          globalVariables,
+        );
+        for await (const result of source) {
+          if (cache.done) {
+            break;
+          }
+          cache.results.push(result);
+          this.#totalCachedResults++;
+          notify();
+        }
+      } catch (err) {
+        cache.error = err as Error;
+      } finally {
+        cache.done = true;
+        notify();
+      }
+    })();
+
+    return cache;
+  }
+
+  #createReplayIterator(cache: BatchIteratorCacheEntry) {
+    const consumer: CacheConsumerHandle = { index: cache.pruneOffset };
+    cache.consumers.add(consumer);
+    return this.#replayIteratorImpl(cache, consumer);
+  }
+
+  async *#replayIteratorImpl(
+    cache: BatchIteratorCacheEntry,
+    consumer: CacheConsumerHandle,
+  ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      while (true) {
+        if (this.#totalCachedResults > MAX_GLOBAL_BUFFER_SIZE) {
+          this.#alertStore.set("batch-iterator-buffer-overflow", {
+            severity: "warn",
+            message: "User script output buffer exceeded",
+            tip: `Maximum ${MAX_GLOBAL_BUFFER_SIZE} cached results reached. Late-joining panels may show incomplete data for user script topics.`,
+          });
+          this.#pruneCache(cache);
+        }
+        const localIndex = consumer.index - cache.pruneOffset;
+        if (localIndex < cache.results.length) {
+          yield cache.results[localIndex]!;
+          consumer.index++;
+        } else if (cache.done) {
+          if (cache.error) {
+            throw cache.error;
+          }
+          return;
+        } else {
+          await cache.promise;
+        }
+      }
+    } finally {
+      cache.consumers.delete(consumer);
+    }
+  }
+
+  #pruneCache(cache: BatchIteratorCacheEntry) {
+    let min = Infinity;
+    for (const consumer of cache.consumers) {
+      if (consumer.index < min) {
+        min = consumer.index;
+      }
+    }
+    // Prune entries all consumers have passed
+    const prunable = min - cache.pruneOffset;
+    if (prunable > 0) {
+      cache.results.splice(0, prunable);
+      this.#totalCachedResults -= prunable;
+      cache.pruneOffset += prunable;
+    }
+  }
+
+  #createIndependentIterator(
+    registration: ScriptRegistration,
+    inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> {
+    const processor = registration.buildMessageProcessor();
+    return UserScriptPlayer.#mergeAndTransformIterators(
+      inputIterators,
+      processor,
+      this.#globalVariables,
+    );
   }
 
   public setPublishers(publishers: AdvertiseOptions[]): void {

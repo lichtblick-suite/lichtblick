@@ -64,6 +64,13 @@ export type ScriptRegistration = {
     messageEvent: MessageEvent,
     globalVariables: GlobalVariables,
   ) => Promise<MessageEvent | undefined>;
+  buildMessageProcessor: () => {
+    processMessage: (
+      messageEvent: MessageEvent,
+      globalVariables: GlobalVariables,
+    ) => Promise<MessageEvent | undefined>;
+    terminate: () => void;
+  };
   terminate: () => void;
 };
 

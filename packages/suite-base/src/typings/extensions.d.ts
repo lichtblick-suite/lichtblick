@@ -8,6 +8,11 @@
 // Tells TypeScript how to treat file types that we import specially with WebPack loaders
 // (see webpack.renderer.ts for details)
 
+declare module "*.css" {
+  const content: { [className: string]: string };
+  export default content;
+}
+
 declare module "*.svg" {
   import type { FunctionComponent, SVGProps } from "react";
 

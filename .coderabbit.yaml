@@ -1,0 +1,79 @@
+# CodeRabbit configuration for Lichtblick
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: "en-US"
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  auto_title_placeholder: "@coderabbitai"
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  sequence_diagrams: true
+
+  path_filters:
+    - "!node_modules/**"
+    - "!yarn.lock"
+    - "!blob-report/**"
+    - "!test-results/**"
+    - "!**/*.snap"
+    - "!patches/**"
+
+  path_instructions:
+    - path: "packages/**"
+      instructions: |
+        This is a shared package used by both the desktop (Electron) and web app.
+        Ensure changes are compatible with both targets and do not introduce platform-specific APIs.
+        Pay attention to exports — breaking changes affect all consumers.
+
+    - path: "desktop/**"
+      instructions: |
+        Electron desktop app code. Check for security issues common in Electron (contextIsolation,
+        nodeIntegration, remote module usage). Ensure IPC communication is properly validated.
+
+    - path: "web/**"
+      instructions: |
+        Web app code. Flag any Node.js-only APIs or Electron-specific imports.
+
+    - path: "e2e/**"
+      instructions: |
+        Playwright end-to-end tests. Ensure tests follow the GWT (Given/When/Then) pattern,
+        use stable selectors (data-testid or accessible roles), and avoid arbitrary timeouts.
+
+    - path: "**/*.test.ts"
+      instructions: |
+        Jest unit tests. Ensure tests are meaningful, not just coverage padding.
+        Avoid mocking internals — prefer testing behavior over implementation.
+        Ensure tests follow the GWT pattern and use descriptive test names.
+
+    - path: "**/*.style.ts"
+      instructions: |
+        Style files using MUI/emotion. Verify no hardcoded colors that bypass the theme system.
+
+    - path: "**/*.constants.ts"
+      instructions: |
+        Constants files. Ensure no sensitive information (API keys, secrets) is hardcoded.
+
+    - path: "**/*.types.ts"
+      instructions: |
+        Type definition files. Check for accurate and comprehensive type definitions.
+        Ensure no `any` types are used without justification.
+
+  auto_review:
+    enabled: true
+    ignore_title_keywords:
+      - "WIP"
+      - "Draft"
+      - "[SKIP CI]"
+    drafts: false
+    base_branches:
+      - "develop"
+      - "main"
+    labels: ["!dependabot"]
+    ignore_usernames: ["lichtblick-bot", "dependabot"] # ignore bot PRs
+
+chat:
+  auto_reply: true

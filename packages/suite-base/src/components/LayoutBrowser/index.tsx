@@ -195,7 +195,7 @@ export default function LayoutBrowser({
     };
     const newLayout = await layoutManager.saveNewLayout({
       name,
-      data: layoutData as LayoutData,
+      data: layoutData,
       permission: "CREATOR_WRITE",
     });
     void onSelectLayout(newLayout);

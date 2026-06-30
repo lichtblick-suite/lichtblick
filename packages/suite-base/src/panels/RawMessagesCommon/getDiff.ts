@@ -126,7 +126,7 @@ function diffArraysByIdField(
   { showFullMessageForDiff }: { showFullMessageForDiff: boolean },
 ): DiffObject[] {
   const unmatchedAfterById = _.keyBy(after, idToCompareWith);
-  const diff = [];
+  const diff: DiffObject[] = [];
 
   for (const beforeItem of before) {
     if (beforeItem == undefined || typeof beforeItem !== "object") {

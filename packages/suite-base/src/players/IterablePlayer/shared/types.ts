@@ -10,7 +10,15 @@ import {
 
 export type MultiSource =
   | { type: "files"; files: Blob[] }
-  | { type: "urls"; urls: string[]; totalCacheSizeInBytes?: number };
+  | {
+      type: "urls";
+      urls: string[];
+      totalCacheSizeInBytes?: number;
+      minCachePerSourceBytes?: number;
+      // When false (default for multi-file), each remote source downloads lazily without
+      // speculative read-ahead. When true, legacy whole-file read-ahead is used.
+      readAheadEnabled?: boolean;
+    };
 
 export type IterableSourceConstructor<T extends IIterableSource, P> = new (args: P) => T;
 
