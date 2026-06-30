@@ -22,7 +22,6 @@
   },
   "devDependencies": {
     "@lichtblick/tsconfig": "1.1.2",
-    "@types/protobufjs": "workspace:*",
     "typescript": "6.0.3"
   },
   "dependencies": {
@@ -41,6 +40,6 @@
     "@protobufjs/base64": "1.1.2",
     "flatbuffers": "25.9.23",
     "flatbuffers_reflection": "0.0.7",
-    "protobufjs": "patch:protobufjs@7.2.5#../../patches/protobufjs.patch"
+    "protobufjs": "8.6.5"
   }
 }
