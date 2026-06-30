@@ -111,20 +111,17 @@ describe("<RendererOverlay /> hover wiring", () => {
 
   it("maps hovered selections into HoverTooltip entities and absolute client position", async () => {
     const canvas = document.createElement("canvas");
-    canvas.getBoundingClientRect = jest.fn(
-      () =>
-        ({
-          left: 100,
-          top: 200,
-          right: 500,
-          bottom: 600,
-          width: 400,
-          height: 400,
-          x: 100,
-          y: 200,
-          toJSON: () => "",
-        }) as DOMRect,
-    );
+    canvas.getBoundingClientRect = jest.fn(() => ({
+      left: 100,
+      top: 200,
+      right: 500,
+      bottom: 600,
+      width: 400,
+      height: 400,
+      x: 100,
+      y: 200,
+      toJSON: () => "",
+    }));
 
     renderOverlay(canvas);
 
@@ -200,20 +197,17 @@ describe("<RendererOverlay /> hover wiring", () => {
 
   it("uses instanceDetails when instanceIndex is provided", async () => {
     const canvas = document.createElement("canvas");
-    canvas.getBoundingClientRect = jest.fn(
-      () =>
-        ({
-          left: 0,
-          top: 0,
-          right: 100,
-          bottom: 100,
-          width: 100,
-          height: 100,
-          x: 0,
-          y: 0,
-          toJSON: () => "",
-        }) as DOMRect,
-    );
+    canvas.getBoundingClientRect = jest.fn(() => ({
+      left: 0,
+      top: 0,
+      right: 100,
+      bottom: 100,
+      width: 100,
+      height: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => "",
+    }));
 
     renderOverlay(canvas);
 
@@ -254,20 +248,17 @@ describe("<RendererOverlay /> hover wiring", () => {
 
   it("clears hovered entities when selections are empty", async () => {
     const canvas = document.createElement("canvas");
-    canvas.getBoundingClientRect = jest.fn(
-      () =>
-        ({
-          left: 0,
-          top: 0,
-          right: 100,
-          bottom: 100,
-          width: 100,
-          height: 100,
-          x: 0,
-          y: 0,
-          toJSON: () => "",
-        }) as DOMRect,
-    );
+    canvas.getBoundingClientRect = jest.fn(() => ({
+      left: 0,
+      top: 0,
+      right: 100,
+      bottom: 100,
+      width: 100,
+      height: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => "",
+    }));
 
     renderOverlay(canvas);
 
@@ -285,20 +276,17 @@ describe("<RendererOverlay /> hover wiring", () => {
 
   it("does not create tooltip entries for selections with no topic and no metadata", async () => {
     const canvas = document.createElement("canvas");
-    canvas.getBoundingClientRect = jest.fn(
-      () =>
-        ({
-          left: 0,
-          top: 0,
-          right: 100,
-          bottom: 100,
-          width: 100,
-          height: 100,
-          x: 0,
-          y: 0,
-          toJSON: () => "",
-        }) as DOMRect,
-    );
+    canvas.getBoundingClientRect = jest.fn(() => ({
+      left: 0,
+      top: 0,
+      right: 100,
+      bottom: 100,
+      width: 100,
+      height: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => "",
+    }));
 
     renderOverlay(canvas);
 

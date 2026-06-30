@@ -95,7 +95,7 @@ yarn test:e2e:desktop        # Desktop E2E tests (Playwright + Electron)
 ## Testing Standards
 
 All tests follow the **Given-When-Then (GWT)** pattern. See the
-[test-conventions skill](.github/skills/test-conventions/SKILL.md) for full rules.
+[test-conventions skill](./skills/test-conventions/SKILL.md) for full rules.
 
 - **Unit tests**: Jest, co-located with source (`.test.ts` / `.test.tsx`)
 - **E2E tests**: Playwright — desktop (Electron) primary, web for distinct behaviors only
@@ -114,14 +114,45 @@ All tests follow the **Given-When-Then (GWT)** pattern. See the
 
 ## Available Agents
 
-Use these agents in Copilot Chat for specialized tasks:
+Use these agents in Copilot Chat for specialized tasks. For the full catalog see [docs/ai-agents/README.md](../docs/ai-agents/README.md).
 
 | Agent name | Purpose |
 | --- | --- |
-| `@lb-e2e-test` | Create Playwright E2E tests using the Playwright MCP browser |
+| `@lb-orchestrator` | Routes tasks to the right specialist when unsure which agent to use |
+| `@lb-e2e-test` | Create Playwright E2E tests (Electron desktop + web) |
+| `@lb-player` | IterablePlayer state machine, data source lifecycle, playback logic |
+| `@lb-panels-general` | PanelExtensionAdapter, renderState, panel lifecycle, pauseFrame |
+| `@lb-frontend-dev` | React/TypeScript components, hooks, state management, styling |
+| `@lb-unit-test` | Unit test creation, mocking patterns, builder usage |
 
 Agents are defined in `.github/agents/`.
 Skills are defined in `.github/skills/`.
+
+---
+
+## MCP Servers
+
+Configured in `.mcp.json` (repo root). Recognized by VS Code Copilot, Claude Code, Cursor, and other MCP-compatible tools. Agents reference these using the server name as prefix.
+
+| Server | Type | Purpose |
+| --- | --- | --- |
+| `github` | HTTP (Copilot-native) | Read/create GitHub Issues and PRs. No extra credentials needed. |
+| `playwright` | stdio | Drive Chrome for web app exploration. Used by `@lb-e2e-test`. |
+
+---
+
+## Available Prompts
+
+Reusable workflow prompts live in `.github/prompts/`.
+
+| Prompt | Purpose |
+| --- | --- |
+| `sdd-feature-develop.prompt.md` | Specify -> Plan -> Tasks -> Implement workflow for feature work |
+| `sdd-bug-fix.prompt.md` | Reproduce -> Diagnose -> Plan -> Implement workflow for bug fixes |
+| `sdd-lichtblick-upstream-sync.prompt.md` | Structured upstream sync analysis and execution workflow |
+| `sdd-lichtblick-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature safely |
+| `open-pr.prompt.md` | Build a complete PR title/body with validation evidence |
+| `review-pr.prompt.md` | Two-phase PR review: structured analysis integrating CodeRabbit findings, then implement CodeRabbit's AI agent prompt |
 
 ---
 

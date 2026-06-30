@@ -76,7 +76,7 @@ function proxyDataset(dataset: TypedDataSet): NormalDataSet {
         return point;
       },
     }),
-  } as NormalDataSet;
+  };
 }
 
 export function proxyTyped(data: TypedChartData): ChartData<"scatter"> {

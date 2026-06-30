@@ -254,6 +254,21 @@ yarn run tsc --noEmit       # TypeScript type checking
 - Fill in the [PR template](#pull-request-guidelines) completely.
 - Ensure CI checks pass.
 
+#### Keeping your fork in sync (community contributors)
+
+Before opening a PR, rebase your feature branch on upstream `develop` to avoid merge conflicts:
+
+```sh
+git fetch upstream
+git checkout develop
+git rebase upstream/develop
+git push origin develop
+
+git checkout feature/my-feature
+git rebase develop
+git push origin feature/my-feature --force-with-lease
+```
+
 ---
 
 ## Branching Strategy - Git flow
@@ -424,26 +439,52 @@ The project uses **GitHub Copilot agent mode** (VS Code 1.99+) with project-spec
 
 ### Available Agents
 
-| Agent | Invocation | Purpose |
-| --- | --- | --- |
+| Agent                 | Invocation     | Purpose                                                                                                              |
+| --------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `Lichtblick E2E Test` | `@lb-e2e-test` | Creates Playwright E2E tests for desktop (Electron) and web, using the Playwright MCP browser for web UI exploration |
+
+For the full agent catalog see [docs/ai-agents/README.md](docs/ai-agents/README.md).
+
+### SDD Workflow Prompts
+
+Reusable prompts in `.github/prompts/` implement a Specify → Setup → Plan → Tasks → Implement cycle:
+
+| Prompt                                   | Purpose                                                   |
+| ---------------------------------------- | --------------------------------------------------------- |
+| `sdd-feature-develop.prompt.md`          | Feature development end-to-end                            |
+| `sdd-bug-fix.prompt.md`                  | Root-cause-driven bug fixes                               |
+| `sdd-lichtblick-upstream-sync.prompt.md` | Upstream merge with risk analysis                         |
+| `sdd-lichtblick-feature-adopt.prompt.md` | Adopt a specific upstream feature                         |
+| `open-pr.prompt.md`                      | Create a well-structured PR via `github` MCP (fork-aware) |
+| `review-pr.prompt.md`                    | Structured review integrating CodeRabbit                  |
+
+> **Fork-aware PR creation:** The `open-pr` and SDD prompts auto-detect whether the contributor is working from a fork or a direct clone. The correct `head` parameter (`owner:branch` for forks, `branch` for direct) is set automatically when calling `github/create_pull_request`.
+
+### MCP Servers
+
+Configured in `.mcp.json` at the repo root. Placing the config at the root makes it recognized by any MCP-compatible tool — VS Code Copilot, Claude Code, Cursor, and others. Two servers are available:
+
+| Server       | Purpose                                                                            |
+| ------------ | ---------------------------------------------------------------------------------- |
+| `github`     | Read/create GitHub Issues and PRs. Authenticated automatically via GitHub Copilot. |
+| `playwright` | Drive Chrome for web app exploration and E2E test scaffold generation.             |
 
 ### Skills
 
 Skills are reusable domain knowledge files loaded by agents before performing tasks:
 
-| Skill | Location | Scope |
-| --- | --- | --- |
-| `test-conventions` | `.github/skills/test-conventions/SKILL.md` | GWT pattern, quality rules, and test-writing workflow for all test types |
+| Skill                | Location                                     | Scope                                                                                     |
+| -------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `test-conventions`   | `.github/skills/test-conventions/SKILL.md`   | GWT pattern, quality rules, and test-writing workflow for all test types                  |
 | `e2e-playwright-mcp` | `.github/skills/e2e-playwright-mcp/SKILL.md` | E2E-specific: fixture reference, selector strategy, MCP usage, and source instrumentation |
 
 ### Global Context
 
-`.github/copilot-instructions.md` is auto-loaded at the start of every Copilot Chat session. It defines project-wide rules for code style, testing, and available agents.
+`.github/copilot-instructions.md` is auto-loaded at the start of every Copilot Chat session. It defines project-wide rules for code style, testing, available agents, and MCP servers.
 
 ### Playwright MCP Server
 
-The Playwright MCP server (configured in `.vscode/mcp.json`) enables AI agents to explore the running web app via accessibility snapshots, discover stable selectors, and generate test scaffolds interactively.
+The Playwright MCP server (configured in `.mcp.json`) enables AI agents to explore the running web app via accessibility snapshots, discover stable selectors, and generate test scaffolds interactively.
 
 > **Note**: The MCP server drives Chrome (web) only — it cannot automate the Electron desktop app. See `e2e/README.md` for detailed workflow documentation.
 
@@ -475,6 +516,7 @@ When opening a PR, fill in the template provided:
 [CodeRabbit](https://coderabbit.ai) provides automated AI-powered code reviews on PRs targeting `develop` and `main` branches, except for draft PRs or those with titles containing `WIP`, `Draft`, or `[SKIP CI]`. It runs automatically and complements human reviews.
 
 **What CodeRabbit checks:**
+
 - Code style and best practices
 - Security issues (especially in Electron/IPC and web code)
 - TypeScript type safety and unused code
@@ -483,12 +525,14 @@ When opening a PR, fill in the template provided:
 - Performance and accessibility
 
 **How it works:**
+
 - CodeRabbit automatically comments with a summary and detailed findings on each PR
 - Comments include line-by-line suggestions and context-aware recommendations
 - It respects the project's `.coderabbit.yaml` configuration with domain-specific instructions
 
 **Manual review requests:**
 If you want a fresh review of an existing PR, comment:
+
 ```text
 @coderabbitai review
 ```
@@ -500,8 +544,26 @@ If you want a fresh review of an existing PR, comment:
 ## Reporting Issues
 
 - **Bug reports:** Use the [Bug Report template](https://github.com/lichtblick-suite/lichtblick/issues/new?template=bug.md) on GitHub.
-- **Feature requests:** Start a [Discussion](https://github.com/lichtblick-suite/lichtblick/discussions/new/choose) in the repository.
+- **Feature requests (recommended):** Use the [SDD Feature Request template](https://github.com/lichtblick-suite/lichtblick/issues/new?template=sdd-feature-request.yml) on GitHub.
+- **Feature ideas (early-stage):** Start a [Discussion](https://github.com/lichtblick-suite/lichtblick/discussions/new/choose) when the request is still exploratory.
 - **Questions:** Search existing [Discussions](https://github.com/lichtblick-suite/lichtblick/discussions) or ask on [Robotics Stack Exchange](https://robotics.stackexchange.com/questions/ask).
+
+### SDD Feature Request Template: Why and How
+
+The SDD Feature Request template adds a lightweight **spec-first** workflow so contributors define the request before implementation starts.
+
+Why this is necessary:
+
+- It makes scope explicit early (`Problem statement`, `Proposed solution`, `Scope and non-goals`).
+- It improves review quality by requiring clear `Acceptance criteria` and `Definition of done`.
+- It reduces rework by documenting risks and dependencies up front.
+
+How to use it:
+
+1. Open the template from the feature request link above.
+2. Fill all required fields (`Problem statement`, `Proposed solution`, `Acceptance criteria`, `Definition of done`, `Scope and non-goals`).
+3. Add `Risks and dependencies` when relevant.
+4. Submit the issue before opening an implementation PR, and link the issue in your PR description.
 
 When reporting a bug, please include:
 

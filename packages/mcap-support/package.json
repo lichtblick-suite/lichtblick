@@ -21,9 +21,9 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "@lichtblick/tsconfig": "1.0.2",
+    "@lichtblick/tsconfig": "1.1.2",
     "@types/protobufjs": "workspace:*",
-    "typescript": "5.9.3"
+    "typescript": "6.0.3"
   },
   "dependencies": {
     "@foxglove/schemas": "1.9.0",

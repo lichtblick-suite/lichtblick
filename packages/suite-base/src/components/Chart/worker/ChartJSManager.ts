@@ -87,8 +87,8 @@ const lastX: InteractionModeFunction = (chart, event, _options, useFinalPosition
   // `getRelativePosition` function which seems to use a different declaration of the Chart type
   // than what is exported from chart.js.
   //
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-  const position = getRelativePosition(event, chart as any);
+
+  const position = getRelativePosition(event, chart);
 
   // Create a sparse array to track the last datum for each dataset
   const datasetIndexToLastItem: InteractionItem[] = [];

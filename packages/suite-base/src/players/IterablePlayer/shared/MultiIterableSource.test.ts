@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { MultiSource } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
 import { MessageEvent, TopicSelection } from "@lichtblick/suite-base/players/types";
-import InitilizationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitilizationSourceBuilder";
+import InitializationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitializationSourceBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import { MultiIterableSource } from "./MultiIterableSource";
 import { IIterableSource, Initialization } from "../IIterableSource";
+import { MultiIterableSource } from "./MultiIterableSource";
+import { MultiSource } from "./types";
 
 // Capture log.warn so individual tests can assert on it.
 // Variables whose names start with "mock" are hoisted by babel-jest alongside jest.mock(),
@@ -35,7 +35,7 @@ describe("MultiIterableSource", () => {
     mockSourceConstructor = jest.fn().mockImplementation(
       () =>
         ({
-          initialize: jest.fn().mockResolvedValue(InitilizationSourceBuilder.initialization()),
+          initialize: jest.fn().mockResolvedValue(InitializationSourceBuilder.initialization()),
           messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
           getBackfillMessages: jest.fn().mockResolvedValue([]),
           getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
@@ -273,7 +273,7 @@ describe("MultiIterableSource", () => {
       const dataType = { definitions: [{ name: "field1", type: "int64" }] };
       const topicName = BasicBuilder.string();
       const topic = { name: topicName, schemaName: BasicBuilder.string() };
-      const init1 = InitilizationSourceBuilder.initialization({
+      const init1 = InitializationSourceBuilder.initialization({
         start: RosTimeBuilder.time({ sec: 0 }),
         end: RosTimeBuilder.time({ sec: 20, nsec: 0 }),
         datatypes: new Map([[dataTypeName, dataType]]),
@@ -281,7 +281,7 @@ describe("MultiIterableSource", () => {
         topicStats: new Map([[topicName, { numMessages: 10 }]]),
         metadata: [{ name: "key", metadata: { key: "value" } }],
       });
-      const init2 = InitilizationSourceBuilder.initialization({
+      const init2 = InitializationSourceBuilder.initialization({
         start: RosTimeBuilder.time({ sec: 20, nsec: 0 }),
         end: RosTimeBuilder.time({ sec: 40 }),
         datatypes: new Map([[dataTypeName, dataType]]),
@@ -316,13 +316,13 @@ describe("MultiIterableSource", () => {
       const dataTypeName = BasicBuilder.string();
       const topicName = BasicBuilder.string();
 
-      const init1 = InitilizationSourceBuilder.initialization({
+      const init1 = InitializationSourceBuilder.initialization({
         start: RosTimeBuilder.time({ sec: 0 }),
         end: RosTimeBuilder.time({ sec: 20 }),
         datatypes: new Map([[dataTypeName, { definitions: [{ name: "field1", type: "int64" }] }]]),
         topics: [{ name: topicName, schemaName: BasicBuilder.string() }],
       });
-      const init2 = InitilizationSourceBuilder.initialization({
+      const init2 = InitializationSourceBuilder.initialization({
         start: RosTimeBuilder.time({ sec: 10 }),
         end: RosTimeBuilder.time({ sec: 30 }),
         datatypes: new Map([[dataTypeName, { definitions: [{ name: "field1", type: "string" }] }]]),
@@ -352,14 +352,13 @@ describe("MultiIterableSource", () => {
   });
 
   describe("getBackfillMessages", () => {
-    const makeSource = (startSec: number, backfill: jest.Mock): IIterableSource<Uint8Array> =>
-      ({
-        initialize: jest.fn(),
-        messageIterator: jest.fn(),
-        getBackfillMessages: backfill,
-        getStart: jest.fn().mockReturnValue({ sec: startSec, nsec: 0 }),
-        getEnd: jest.fn().mockReturnValue({ sec: startSec + 10, nsec: 0 }),
-      }) as unknown as IIterableSource<Uint8Array>;
+    const makeSource = (startSec: number, backfill: jest.Mock): IIterableSource<Uint8Array> => ({
+      initialize: jest.fn(),
+      messageIterator: jest.fn(),
+      getBackfillMessages: backfill,
+      getStart: jest.fn().mockReturnValue({ sec: startSec, nsec: 0 }),
+      getEnd: jest.fn().mockReturnValue({ sec: startSec + 10, nsec: 0 }),
+    });
 
     const messageOnTopic = (topic: string): MessageEvent<Uint8Array> =>
       MessageEventBuilder.messageEvent<Uint8Array>({ topic, message: new Uint8Array() });
@@ -390,7 +389,10 @@ describe("MultiIterableSource", () => {
       expect(nearBackfill).toHaveBeenCalledTimes(1);
       expect(midBackfill).not.toHaveBeenCalled();
       expect(farBackfill).not.toHaveBeenCalled();
-      expect(result.map((message) => message.topic).sort()).toEqual(["a", "b"]);
+      expect(result.map((message) => message.topic).sort((a, b) => a.localeCompare(b))).toEqual([
+        "a",
+        "b",
+      ]);
     });
 
     it("should fall back to earlier sources only for topics missing from nearer ones", async () => {
@@ -414,10 +416,17 @@ describe("MultiIterableSource", () => {
 
       // THEN: the nearest source is asked for both topics, the middle source is asked only for the
       // still-missing "b", and the farthest source is never reached.
-      expect([...nearBackfill.mock.calls[0]![0].topics.keys()].sort()).toEqual(["a", "b"]);
-      expect([...midBackfill.mock.calls[0]![0].topics.keys()]).toEqual(["b"]);
+      expect(
+        [...nearBackfill.mock.calls[0]![0].topics.keys()].sort((a, b) => a.localeCompare(b)),
+      ).toEqual(["a", "b"]);
+      expect(
+        [...midBackfill.mock.calls[0]![0].topics.keys()].sort((a, b) => a.localeCompare(b)),
+      ).toEqual(["b"]);
       expect(farBackfill).not.toHaveBeenCalled();
-      expect(result.map((message) => message.topic).sort()).toEqual(["a", "b"]);
+      expect(result.map((message) => message.topic).sort((a, b) => a.localeCompare(b))).toEqual([
+        "a",
+        "b",
+      ]);
     });
 
     it("should not query any source when there are no topics to backfill", async () => {
@@ -443,7 +452,7 @@ describe("MultiIterableSource", () => {
       // Given two sources: one with getStart returning a time, one without getStart
       const sourceWithStart = {
         initialize: jest.fn().mockResolvedValue(
-          InitilizationSourceBuilder.initialization({
+          InitializationSourceBuilder.initialization({
             start: RosTimeBuilder.time({ sec: 5, nsec: 0 }),
             end: RosTimeBuilder.time({ sec: 10, nsec: 0 }),
           }),
@@ -456,7 +465,7 @@ describe("MultiIterableSource", () => {
 
       const sourceWithoutStart = {
         initialize: jest.fn().mockResolvedValue(
-          InitilizationSourceBuilder.initialization({
+          InitializationSourceBuilder.initialization({
             start: RosTimeBuilder.time({ sec: 0, nsec: 0 }),
             end: RosTimeBuilder.time({ sec: 5, nsec: 0 }),
           }),
