@@ -70,6 +70,7 @@ export async function readVideoGopForSeekTarget(
 ): Promise<MessageEvent[]> {
   const topicSelection = new Map([[targetMessage.topic, { topic: targetMessage.topic }]]);
   const reversedGop: MessageEvent[] = [];
+  const seenKeys = new Set<string>();
   let searchTime = targetMessage.receiveTime;
 
   for (let step = 0; step < MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES; step++) {
@@ -81,9 +82,11 @@ export async function readVideoGopForSeekTarget(
     if (candidate == undefined || !needsGopBackfill(candidate)) {
       return [];
     }
-    if (reversedGop.some((message) => messageKey(message) === messageKey(candidate))) {
+    const candidateKey = messageKey(candidate);
+    if (seenKeys.has(candidateKey)) {
       return [];
     }
+    seenKeys.add(candidateKey);
 
     reversedGop.push(candidate);
     const { data, format } = candidate.message as CompressedVideoLike;
