@@ -5,6 +5,7 @@
 
 import { H265 } from "@lichtblick/den/video";
 import { MessageEvent } from "@lichtblick/suite";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 
 import { GetBackfillMessagesArgs } from "./IIterableSource";
 import {
@@ -15,65 +16,136 @@ import {
   readVideoGopForSeekTarget,
 } from "./videoSeekBackfill";
 
-function makeMessage(
-  override: Partial<MessageEvent> & { topic?: string; sec?: number; nsec?: number } = {},
-): MessageEvent {
-  const { sec = 0, nsec = 0, topic = "video", ...rest } = override;
-  return {
-    topic,
-    schemaName: "foxglove.CompressedVideo",
-    receiveTime: { sec, nsec },
-    message: { format: "h265", data: new Uint8Array([0x01]) },
-    sizeInBytes: 1,
-    ...rest,
-  } as MessageEvent;
-}
-
 afterEach(() => {
   jest.restoreAllMocks();
 });
 
 describe("needsGopBackfill", () => {
   it("rejects messages with the wrong schema name", () => {
-    expect(needsGopBackfill(makeMessage({ schemaName: "something.else" }))).toBe(false);
+    // Given
+    const message = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "something.else",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+
+    // When
+    const result = needsGopBackfill(message);
+
+    // Then
+    expect(result).toBe(false);
   });
 
   it("accepts inter-frame-dependent video codecs (H.264 and H.265, including the 'hevc' alias)", () => {
     // H.264 belongs here too: a seek that lands on a P-frame is not decodable without the
     // preceding GOP, so backfill is required at the player/source boundary even though the
     // renderable doesn't serialize its decoder submissions for H.264 during normal playback.
-    expect(
-      needsGopBackfill(makeMessage({ message: { format: "h264", data: new Uint8Array([0x01]) } })),
-    ).toBe(true);
-    expect(
-      needsGopBackfill(makeMessage({ message: { format: "h265", data: new Uint8Array([0x01]) } })),
-    ).toBe(true);
-    expect(
-      needsGopBackfill(makeMessage({ message: { format: "hevc", data: new Uint8Array([0x02]) } })),
-    ).toBe(true);
+    // Given
+    const h264 = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "h264", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+    const h265 = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+    const hevc = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "hevc", data: new Uint8Array([0x02]) },
+      sizeInBytes: 1,
+    });
+
+    // When
+    const h264Result = needsGopBackfill(h264);
+    const h265Result = needsGopBackfill(h265);
+    const hevcResult = needsGopBackfill(hevc);
+
+    // Then
+    expect(h264Result).toBe(true);
+    expect(h265Result).toBe(true);
+    expect(hevcResult).toBe(true);
   });
 
   it("rejects unrecognized codecs and non-Uint8Array payloads", () => {
-    expect(
-      needsGopBackfill(makeMessage({ message: { format: "vp9", data: new Uint8Array() } })),
-    ).toBe(false);
-    expect(needsGopBackfill(makeMessage({ message: { format: "h265", data: "nope" } }))).toBe(
-      false,
-    );
+    // Given
+    const vp9 = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "vp9", data: new Uint8Array() },
+      sizeInBytes: 1,
+    });
+    const invalidData = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "h265", data: "nope" },
+      sizeInBytes: 1,
+    });
+
+    // When
+    const vp9Result = needsGopBackfill(vp9);
+    const invalidDataResult = needsGopBackfill(invalidData);
+
+    // Then
+    expect(vp9Result).toBe(false);
+    expect(invalidDataResult).toBe(false);
   });
 });
 
 describe("messageKey", () => {
   it("encodes topic and receive time", () => {
-    expect(messageKey(makeMessage({ topic: "/cam", sec: 5, nsec: 123 }))).toBe("/cam:5:123");
+    // Given
+    const message = MessageEventBuilder.messageEvent({
+      topic: "/cam",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 5, nsec: 123 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+
+    // When
+    const key = messageKey(message);
+
+    // Then
+    expect(key).toBe("/cam:5:123");
   });
 });
 
 describe("readVideoGopForSeekTarget", () => {
   it("returns the GOP from the closest preceding keyframe to the target, in order", async () => {
-    const target = makeMessage({ sec: 0, nsec: 30 });
-    const delta1 = makeMessage({ sec: 0, nsec: 20 });
-    const keyframe = makeMessage({ sec: 0, nsec: 10 });
+    // Given
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 30 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+    const delta1 = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 20 },
+      message: { format: "h265", data: new Uint8Array([0x02]) },
+      sizeInBytes: 1,
+    });
+    const keyframe = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 10 },
+      message: { format: "h265", data: new Uint8Array([0x03]) },
+      sizeInBytes: 1,
+    });
 
     const sequence = [target, delta1, keyframe];
     const getBackfillMessages = jest.fn(
@@ -85,104 +157,227 @@ describe("readVideoGopForSeekTarget", () => {
         (data: Uint8Array) => data === (keyframe.message as { data: Uint8Array }).data,
       );
 
+    // When
     const result = await readVideoGopForSeekTarget(target, getBackfillMessages, () => undefined);
 
+    // Then
     expect(result.map((m) => m.receiveTime.nsec)).toEqual([10, 20, 30]);
     expect(getBackfillMessages).toHaveBeenCalledTimes(3);
   });
 
   it("returns empty when the source returns no candidate", async () => {
-    const target = makeMessage();
+    // Given
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
     const getBackfillMessages = jest.fn(async () => []);
     jest.spyOn(H265, "IsKeyframe").mockReturnValue(false);
 
+    // When
     const result = await readVideoGopForSeekTarget(target, getBackfillMessages, () => undefined);
 
+    // Then
     expect(result).toEqual([]);
   });
 
   it("returns empty when the source returns a non-H.265 candidate", async () => {
-    const target = makeMessage();
-    const getBackfillMessages = jest.fn(async () => [makeMessage({ schemaName: "other" })]);
+    // Given
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+    const getBackfillMessages = jest.fn(async () => [
+      MessageEventBuilder.messageEvent({
+        topic: "video",
+        schemaName: "other",
+        receiveTime: { sec: 0, nsec: 0 },
+        message: { format: "h265", data: new Uint8Array([0x01]) },
+        sizeInBytes: 1,
+      }),
+    ]);
     jest.spyOn(H265, "IsKeyframe").mockReturnValue(false);
 
+    // When
     const result = await readVideoGopForSeekTarget(target, getBackfillMessages, () => undefined);
 
+    // Then
     expect(result).toEqual([]);
   });
 
   it("returns empty if the same candidate is seen twice (would loop)", async () => {
-    const target = makeMessage({ sec: 5, nsec: 100 });
-    const getBackfillMessages = jest.fn(async () => [makeMessage({ sec: 5, nsec: 100 })]);
+    // Given
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 5, nsec: 100 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+    const getBackfillMessages = jest.fn(async () => [
+      MessageEventBuilder.messageEvent({
+        topic: "video",
+        schemaName: "foxglove.CompressedVideo",
+        receiveTime: { sec: 5, nsec: 100 },
+        message: { format: "h265", data: new Uint8Array([0x02]) },
+        sizeInBytes: 1,
+      }),
+    ]);
     jest.spyOn(H265, "IsKeyframe").mockReturnValue(false);
 
+    // When
     const result = await readVideoGopForSeekTarget(target, getBackfillMessages, () => undefined);
 
+    // Then
     expect(result).toEqual([]);
   });
 
   it("returns empty when stepping back below time zero", async () => {
-    const target = makeMessage({ sec: 0, nsec: 0 });
-    const getBackfillMessages = jest.fn(async () => [makeMessage({ sec: 0, nsec: 0 })]);
+    // Given
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+    const getBackfillMessages = jest.fn(async () => [
+      MessageEventBuilder.messageEvent({
+        topic: "video",
+        schemaName: "foxglove.CompressedVideo",
+        receiveTime: { sec: 0, nsec: 0 },
+        message: { format: "h265", data: new Uint8Array([0x02]) },
+        sizeInBytes: 1,
+      }),
+    ]);
     jest.spyOn(H265, "IsKeyframe").mockReturnValue(false);
 
+    // When
     const result = await readVideoGopForSeekTarget(target, getBackfillMessages, () => undefined);
 
+    // Then
     expect(result).toEqual([]);
   });
 
   it("aborts after MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES iterations", async () => {
+    // Given
     let counter = 0;
     const getBackfillMessages = jest.fn(async () => [
-      makeMessage({ sec: 1, nsec: ++counter * 1000 }),
+      MessageEventBuilder.messageEvent({
+        topic: "video",
+        schemaName: "foxglove.CompressedVideo",
+        receiveTime: { sec: 1, nsec: ++counter * 1000 },
+        message: { format: "h265", data: new Uint8Array([0x01]) },
+        sizeInBytes: 1,
+      }),
     ]);
     jest.spyOn(H265, "IsKeyframe").mockReturnValue(false);
 
-    const target = makeMessage({ sec: 1, nsec: (MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES + 5) * 1000 });
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 1, nsec: (MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES + 5) * 1000 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+
+    // When
     const result = await readVideoGopForSeekTarget(target, getBackfillMessages, () => undefined);
 
+    // Then
     expect(result).toEqual([]);
     expect(getBackfillMessages).toHaveBeenCalledTimes(MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES);
   });
 
   it("forwards the abort signal from the getter on each call", async () => {
-    const target = makeMessage();
-    const keyframe = makeMessage({ sec: 0, nsec: 10 });
+    // Given
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
+    const keyframe = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 10 },
+      message: { format: "h265", data: new Uint8Array([0x02]) },
+      sizeInBytes: 1,
+    });
     const getBackfillMessages = jest.fn(async (_args: GetBackfillMessagesArgs) => [keyframe]);
     jest.spyOn(H265, "IsKeyframe").mockReturnValue(true);
     const controller = new AbortController();
 
+    // When
     await readVideoGopForSeekTarget(target, getBackfillMessages, () => controller.signal);
 
+    // Then
     expect(getBackfillMessages.mock.calls[0]?.[0].abortSignal).toBe(controller.signal);
   });
 });
 
 describe("expandVideoSeekBackfill", () => {
   it("passes through unrecognized formats and keyframes unchanged", async () => {
-    const otherFormat = makeMessage({
-      sec: 0,
-      nsec: 1,
+    // Given
+    const otherFormat = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 1 },
       message: { format: "vp9", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
     });
-    const keyframe = makeMessage({ sec: 0, nsec: 2 });
+    const keyframe = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 2 },
+      message: { format: "h265", data: new Uint8Array([0x02]) },
+      sizeInBytes: 1,
+    });
     jest.spyOn(H265, "IsKeyframe").mockReturnValue(true);
     const getBackfillMessages = jest.fn(async () => []);
 
+    // When
     const result = await expandVideoSeekBackfill(
       [otherFormat, keyframe],
       getBackfillMessages,
       () => undefined,
     );
 
+    // Then
     expect(result.map((m) => m.receiveTime.nsec)).toEqual([1, 2]);
     expect(getBackfillMessages).not.toHaveBeenCalled();
   });
 
   it("expands a P frame with its preceding GOP and dedupes by message key", async () => {
-    const keyframe = makeMessage({ sec: 0, nsec: 10 });
-    const delta1 = makeMessage({ sec: 0, nsec: 20 });
-    const target = makeMessage({ sec: 0, nsec: 30 });
+    // Given
+    const keyframe = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 10 },
+      message: { format: "h265", data: new Uint8Array([0x03]) },
+      sizeInBytes: 1,
+    });
+    const delta1 = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 20 },
+      message: { format: "h265", data: new Uint8Array([0x02]) },
+      sizeInBytes: 1,
+    });
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 30 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
     const sequence = [target, delta1, keyframe];
 
     const getBackfillMessages = jest.fn(
@@ -194,14 +389,29 @@ describe("expandVideoSeekBackfill", () => {
         (data: Uint8Array) => data === (keyframe.message as { data: Uint8Array }).data,
       );
 
+    // When
     const result = await expandVideoSeekBackfill([target], getBackfillMessages, () => undefined);
 
+    // Then
     expect(result.map((m) => m.receiveTime.nsec)).toEqual([10, 20, 30]);
   });
 
   it("returns sorted output when expansion mixes new and original messages", async () => {
-    const keyframe = makeMessage({ sec: 0, nsec: 5 });
-    const target = makeMessage({ sec: 0, nsec: 30 });
+    // Given
+    const keyframe = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 5 },
+      message: { format: "h265", data: new Uint8Array([0x02]) },
+      sizeInBytes: 1,
+    });
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 30 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+      sizeInBytes: 1,
+    });
 
     let firstCall = true;
     const getBackfillMessages = jest.fn(async () => {
@@ -217,8 +427,10 @@ describe("expandVideoSeekBackfill", () => {
         (data: Uint8Array) => data === (keyframe.message as { data: Uint8Array }).data,
       );
 
+    // When
     const result = await expandVideoSeekBackfill([target], getBackfillMessages, () => undefined);
 
+    // Then
     expect(result.map((m) => m.receiveTime.nsec)).toEqual([5, 30]);
   });
 });
