@@ -5,6 +5,7 @@ import { Page } from "playwright";
 
 import { test, expect } from "../../../fixtures/electron";
 import { loadFiles } from "../../../fixtures/load-files";
+import { DataSourceDialog, Sidebar } from "../../../page-objects";
 
 const LAYOUT_FILE = "imported-layout.json";
 
@@ -24,35 +25,39 @@ async function splitPanel(mainWindow: Page, panelId: string): Promise<void> {
  * THEN the unsaved changes icon should be visible after making changes
  * AND should disappear after reverting them
  */
-test("makes changes to layout and then reverts them", async ({ mainWindow }) => {
-  // Given
-  await loadFiles({
-    mainWindow,
-    filenames: LAYOUT_FILE,
-  });
+test(
+  "makes changes to layout and then reverts them",
+  { tag: "@regression" },
+  async ({ mainWindow }) => {
+    // Given
+    await loadFiles({
+      mainWindow,
+      filenames: LAYOUT_FILE,
+    });
 
-  // When
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  await mainWindow.getByTestId("layouts-left").click();
+    // When
+    await new DataSourceDialog(mainWindow).close();
+    await new Sidebar(mainWindow).openLayoutsTab();
 
-  // Then
-  const importedLayout = mainWindow.getByRole("button", { name: "imported-layout" });
-  await expect(importedLayout).toHaveCount(1);
+    // Then
+    const importedLayout = mainWindow.getByRole("button", { name: "imported-layout" });
+    await expect(importedLayout).toHaveCount(1);
 
-  // When
-  await splitPanel(mainWindow, "3D!18i6zy7");
+    // When
+    await splitPanel(mainWindow, "3D!18i6zy7");
 
-  // Then
-  const unsavedChangesIcon = mainWindow
-    .getByRole("listitem")
-    .filter({ hasText: "imported-layout" })
-    .getByTestId("unsaved-changes-icon");
-  await expect(unsavedChangesIcon).toBeVisible();
+    // Then
+    const unsavedChangesIcon = mainWindow
+      .getByRole("listitem")
+      .filter({ hasText: "imported-layout" })
+      .getByTestId("unsaved-changes-icon");
+    await expect(unsavedChangesIcon).toBeVisible();
 
-  // When
-  await unsavedChangesIcon.click();
-  await mainWindow.getByRole("menuitem", { name: "Revert" }).click();
+    // When
+    await unsavedChangesIcon.click();
+    await mainWindow.getByRole("menuitem", { name: "Revert" }).click();
 
-  // Then
-  await expect(unsavedChangesIcon).not.toBeVisible();
-});
+    // Then
+    await expect(unsavedChangesIcon).not.toBeVisible();
+  },
+);

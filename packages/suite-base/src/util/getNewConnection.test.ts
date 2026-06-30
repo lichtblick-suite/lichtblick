@@ -315,6 +315,80 @@ describe("getNewConnection", () => {
     });
   });
 
+  describe("when read-ahead is disabled (readAheadEnabled: false)", () => {
+    it("returns only the exact requested range instead of the whole file when cache spans the file", () => {
+      // GIVEN: a read request on a file that fits in the cache.
+      // WHEN: read-ahead is disabled.
+      const result = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 10, end: 20 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 100, // >= fileSize -> would normally download whole file
+        fileSize: 100,
+        continueDownloadingThreshold: 5,
+        readAheadEnabled: false,
+      });
+
+      // THEN: only the requested range is downloaded.
+      expect(result).toEqual({ start: 10, end: 20 });
+    });
+
+    it("keeps legacy whole-file read-ahead when readAheadEnabled is true", () => {
+      // GIVEN: the same inputs as the lazy-loading case above.
+      // WHEN: read-ahead is enabled.
+      const result = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 10, end: 20 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 100, // >= fileSize -> download to the end of the file
+        fileSize: 100,
+        continueDownloadingThreshold: 5,
+        readAheadEnabled: true,
+      });
+
+      // THEN: the legacy whole-file read-ahead range is returned.
+      expect(result).toEqual({ start: 10, end: 100 });
+    });
+
+    it("does not extend the range by the 50 MiB read-ahead buffer when finishing at the request end", () => {
+      // GIVEN: a cache smaller than the file where read-ahead would normally extend the request.
+      // WHEN: read-ahead is disabled.
+      const result = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 0, end: 10 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 100 * 1024 * 1024, // < fileSize
+        fileSize: 200 * 1024 * 1024,
+        continueDownloadingThreshold: 5,
+        readAheadEnabled: false,
+      });
+
+      // THEN: the request is not extended.
+      expect(result).toEqual({ start: 0, end: 10 });
+    });
+
+    it("returns undefined when idle (no read request) and read-ahead is disabled", () => {
+      // GIVEN: no active read request or connection.
+      // WHEN: read-ahead is disabled.
+      const result = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: undefined,
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: 20,
+        maxRequestSize: 100,
+        fileSize: 100,
+        continueDownloadingThreshold: 5,
+        readAheadEnabled: false,
+      });
+
+      // THEN: no speculative connection is created.
+      expect(result).toBeUndefined();
+    });
+  });
+
   // Tests specific to READ_AHEAD_BUFFER_SIZE behavior
   describe("READ_AHEAD_BUFFER_SIZE constraints", () => {
     it("limits read-ahead to READ_AHEAD_BUFFER_SIZE even with large maxRequestSize", () => {

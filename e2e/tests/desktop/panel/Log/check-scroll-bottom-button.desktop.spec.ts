@@ -4,6 +4,7 @@
 import { changeToEpochFormat } from "../../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../../fixtures/electron";
 import { loadFiles } from "../../../../fixtures/load-files";
+import { Panels, PlayerControls } from "../../../../page-objects";
 
 const MCAP_FILENAME = "example_logs.mcap";
 
@@ -13,21 +14,26 @@ const MCAP_FILENAME = "example_logs.mcap";
  * AND the user clicks on the "Log" panel settings
  * THEN the "Log panel" settings should be visible
  */
-test("open log panel after loading an mcap file", async ({ mainWindow }) => {
-  /// Given
-  await loadFiles({
-    mainWindow,
-    filenames: MCAP_FILENAME,
-  });
+test(
+  "open log panel after loading an mcap file",
+  { tag: "@regression" },
+  async ({ mainWindow }) => {
+    const panels = new Panels(mainWindow);
 
-  // When
-  await mainWindow.getByTestId("AddPanelButton").click();
-  await mainWindow.getByRole("button", { name: "Log" }).click();
-  await mainWindow.getByTestId("log-panel-root").getByRole("button", { name: "Settings" }).click();
+    /// Given
+    await loadFiles({
+      mainWindow,
+      filenames: MCAP_FILENAME,
+    });
 
-  // Then
-  await expect(mainWindow.getByText("Log panel", { exact: true }).count()).resolves.toBe(1);
-});
+    // When
+    await panels.addPanel("Log");
+    await panels.getLogPanelRoot().getByRole("button", { name: "Settings" }).click();
+
+    // Then
+    await expect(mainWindow.getByText("Log panel", { exact: true }).count()).resolves.toBe(1);
+  },
+);
 
 /**
  * GIVEN a .mcap file is loaded
@@ -41,6 +47,9 @@ test('should show "scroll to bottom" button when there is a scroll up in the log
 }) => {
   // This test usually takes slightly longer than the default 30s timeout
   test.setTimeout(60_000);
+  const panels = new Panels(mainWindow);
+  const player = new PlayerControls(mainWindow);
+
   /// Given
   await loadFiles({
     mainWindow,
@@ -48,19 +57,17 @@ test('should show "scroll to bottom" button when there is a scroll up in the log
   });
 
   // When
-  await mainWindow.getByTestId("AddPanelButton").click();
-  await mainWindow.getByRole("button", { name: "Log" }).click();
+  await panels.addPanel("Log");
 
-  const playButton = mainWindow.getByTestId("play-button");
   // Change to epoch time format to make calculations easier
   await changeToEpochFormat(mainWindow);
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
+  const timestamp = player.getTimestampInput();
 
   const initialValue: string = await timestamp.inputValue();
   const initialTimestamp: number = Number(initialValue);
 
-  await expect(playButton).toHaveAttribute("title", "Play");
-  await playButton.click();
+  await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
+  await player.play();
 
   // Verify timestamp actually moves.
   await expect(async () => {
@@ -72,10 +79,10 @@ test('should show "scroll to bottom" button when there is a scroll up in the log
     timeout: 5000,
     intervals: [100],
   });
-  await expect(playButton).toHaveAttribute("title", "Pause", { timeout: 5_000 });
+  await expect(player.getPlayButton()).toHaveAttribute("title", "Pause", { timeout: 5_000 });
 
-  const logPanel = mainWindow.getByTestId("log-panel-root");
-  const scrollToBottomBtn = mainWindow.getByTestId("scroll-to-bottom-button");
+  const logPanel = panels.getLogPanelRoot();
+  const scrollToBottomBtn = panels.getScrollToBottomButton();
 
   await logPanel.hover();
   // Scroll up until the button shows up. More resiliant than a single scroll which can be flaky.

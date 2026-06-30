@@ -77,6 +77,7 @@ interface ILogger {
 export default class CachedFilelike implements Filelike {
   #fileReader: FileReader;
   #cacheSizeInBytes: number = Infinity;
+  readonly #readAheadEnabled: boolean = true;
   #fileSize?: number;
   #virtualBuffer: VirtualLRUBuffer;
   #log: ILogger;
@@ -105,12 +106,14 @@ export default class CachedFilelike implements Filelike {
   public constructor(options: {
     fileReader: FileReader;
     cacheSizeInBytes?: number;
+    readAheadEnabled?: boolean;
     log?: ILogger;
     // eslint-disable-next-line @lichtblick/no-boolean-parameters
     keepReconnectingCallback?: (reconnecting: boolean) => void;
   }) {
     this.#fileReader = options.fileReader;
     this.#cacheSizeInBytes = options.cacheSizeInBytes ?? this.#cacheSizeInBytes;
+    this.#readAheadEnabled = options.readAheadEnabled ?? this.#readAheadEnabled;
     this.#keepReconnectingCallback = options.keepReconnectingCallback;
     this.#log = options.log ?? log;
     this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
@@ -177,7 +180,7 @@ export default class CachedFilelike implements Filelike {
           this.#updateState();
         })
         .catch((err: unknown) => {
-          reject(err as Error);
+          reject(err instanceof Error ? err : new Error(String(err)));
         });
     });
   }
@@ -214,6 +217,7 @@ export default class CachedFilelike implements Filelike {
       maxRequestSize: this.#cacheSizeInBytes,
       fileSize: size,
       continueDownloadingThreshold: CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION,
+      readAheadEnabled: this.#readAheadEnabled,
     });
     if (newConnection) {
       this.#setConnection(newConnection);

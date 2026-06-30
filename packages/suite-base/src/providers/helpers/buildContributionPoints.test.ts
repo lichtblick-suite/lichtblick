@@ -55,7 +55,7 @@ describe("buildContributionPoints", () => {
         registration: expect.objectContaining({
           name: panelName,
           initPanel: expect.any(Function),
-        } as ExtensionPanelRegistration),
+        }),
       }),
     );
     delete (globalThis as any).panel;

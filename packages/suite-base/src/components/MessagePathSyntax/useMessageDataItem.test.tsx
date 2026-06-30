@@ -300,7 +300,7 @@ describe("samplingMode", () => {
         return useMessageDataItem(path, options);
       },
       {
-        initialProps: { sampling: samplingRequest as Options["samplingRequest"] | undefined },
+        initialProps: { sampling: samplingRequest },
         wrapper: Wrapper,
       },
     );
@@ -320,13 +320,13 @@ describe("samplingMode", () => {
 
   it("removes samplingRequest from subscriptions when it is unset", async () => {
     // When
-    const { rerender } = renderHook(
+    const { rerender } = renderHook<unknown, { sampling: typeof samplingRequest | undefined }>(
       ({ sampling }) => {
         const options: Options = { samplingRequest: sampling };
         return useMessageDataItem(path, options);
       },
       {
-        initialProps: { sampling: samplingRequest as Options["samplingRequest"] | undefined },
+        initialProps: { sampling: samplingRequest },
         wrapper: Wrapper,
       },
     );

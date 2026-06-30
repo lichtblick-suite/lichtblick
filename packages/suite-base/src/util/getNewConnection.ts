@@ -29,15 +29,25 @@ export function getNewConnection(options: {
   maxRequestSize: number; // The cache size. If equal to or larger than `fileSize` we will attempt to download the whole file.
   fileSize: number; // Size of the file.
   continueDownloadingThreshold: number; // Amount we're willing to wait downloading before opening a new connection.
+  // When false, only the exact requested byte ranges are downloaded and no speculative
+  // read-ahead is performed. Used for many-small-file remote sessions to avoid fetching
+  // whole files up-front. Defaults to true (legacy behaviour).
+  readAheadEnabled?: boolean;
 }): Range | undefined {
-  const { readRequestRange, currentRemainingRange, ...otherOptions } = options;
+  const {
+    readRequestRange,
+    currentRemainingRange,
+    readAheadEnabled = true,
+    ...otherOptions
+  } = options;
   if (readRequestRange) {
     return getNewConnectionWithExistingReadRequest({
       readRequestRange,
       currentRemainingRange,
+      readAheadEnabled,
       ...otherOptions,
     });
-  } else if (!currentRemainingRange) {
+  } else if (!currentRemainingRange && readAheadEnabled) {
     return getNewConnectionWithoutExistingConnection(otherOptions);
   }
   return undefined;
@@ -50,6 +60,7 @@ function getNewConnectionWithExistingReadRequest({
   maxRequestSize,
   fileSize,
   continueDownloadingThreshold,
+  readAheadEnabled,
 }: {
   currentRemainingRange?: Range;
   readRequestRange: Range;
@@ -58,6 +69,7 @@ function getNewConnectionWithExistingReadRequest({
   maxRequestSize: number;
   fileSize: number;
   continueDownloadingThreshold: number;
+  readAheadEnabled: boolean;
 }): Range | undefined {
   // We have a requested range that we're trying to download.
   if (readRequestRange.end - readRequestRange.start > maxRequestSize) {
@@ -85,6 +97,12 @@ function getNewConnectionWithExistingReadRequest({
 
   if (!startNewConnection) {
     return;
+  }
+  // When read-ahead is disabled, only download exactly the missing portion of the requested
+  // range. This skips both the "download the whole file" path (maxRequestSize >= fileSize) and
+  // the 50 MiB look-ahead extension below, keeping multi-file remote sessions lazy.
+  if (!readAheadEnabled) {
+    return notDownloadedRanges[0];
   }
   if (maxRequestSize >= fileSize) {
     // If we're trying to download the whole file, read all the way up to the next range that we have already downloaded.

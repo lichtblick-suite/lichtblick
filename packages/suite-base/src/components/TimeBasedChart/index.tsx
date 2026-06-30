@@ -579,7 +579,7 @@ export default function TimeBasedChart(props: Props): React.JSX.Element {
         ...defaultYTicksSettings,
         ...yAxes.ticks,
       },
-    } as ScaleOptions;
+    };
   }, [bounds.y, yAxes, theme.palette]);
 
   const options = useMemo<ChartOptions>(() => {

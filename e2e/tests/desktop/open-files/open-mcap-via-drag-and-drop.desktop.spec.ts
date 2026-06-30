@@ -7,7 +7,7 @@ import { loadFiles } from "../../../fixtures/load-files";
  * GIVEN a .mcap file is loaded via drag and drop
  * THEN the filename should be visible and the "Play" button enabled
  */
-test("should open an MCAP file via drag and drop", async ({ mainWindow }) => {
+test("should open an MCAP file via drag and drop", { tag: "@smoke" }, async ({ mainWindow }) => {
   // Given
   const filename = "example.mcap";
   await loadFiles({

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import "@testing-library/jest-dom";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 
 import {
   useMessagePipeline,
@@ -25,6 +25,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
+import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 
 import Workspace from "./Workspace";
 
@@ -41,7 +42,19 @@ jest.mock("react-i18next", () => ({
 }));
 jest.mock("@lichtblick/log", () => ({
   __esModule: true,
-  default: { getLogger: () => ({ debug: jest.fn() }) },
+  default: { getLogger: () => ({ debug: jest.fn(), error: jest.fn() }) },
+}));
+
+const mockEnqueueSnackbar = jest.fn();
+jest.mock("notistack", () => ({
+  useSnackbar: () => ({ enqueueSnackbar: mockEnqueueSnackbar }),
+}));
+
+// ── api ───────────────────────────────────────────────────────────────────────
+const mockGetSession = jest.fn();
+jest.mock("@lichtblick/suite-base/api/session/SessionAPI", () => ({
+  __esModule: true,
+  default: { getSession: (...args: unknown[]) => mockGetSession(...args) },
 }));
 
 // ── components (rendered as null — Sidebars is the exception below) ────────────
@@ -336,5 +349,105 @@ describe("Workspace - alerts badge in leftSidebarItems", () => {
     // Then
     const leftItems = MockedSidebars.mock.lastCall?.[0]?.leftItems as Map<string, SidebarItem>;
     expect(leftItems.get("alerts")?.badge?.count).toBe(5);
+  });
+});
+
+describe("Workspace - session-based MCAP resolution", () => {
+  const mockSelectSource = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useMessagePipeline as jest.Mock).mockImplementation(
+      (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
+    );
+    (useMessagePipelineGetter as jest.Mock).mockReturnValue(() => mockPipelineContext);
+    (useWorkspaceStore as jest.Mock).mockImplementation(
+      (selector: (store: typeof mockWorkspaceStore) => unknown) => selector(mockWorkspaceStore),
+    );
+    (useWorkspaceActions as jest.Mock).mockReturnValue(mockWorkspaceActions);
+    (usePlayerSelection as jest.Mock).mockReturnValue({
+      availableSources: [],
+      selectSource: mockSelectSource,
+    });
+    (useAlertCount as jest.Mock).mockReturnValue({
+      playerAlerts: [],
+      sessionAlerts: [],
+      alertCount: 0,
+    });
+    (useHandleFiles as jest.Mock).mockReturnValue({ handleFiles: jest.fn() });
+    (useAppConfigurationValue as jest.Mock).mockReturnValue([false]);
+    (useCurrentUser as jest.Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
+    (useCurrentUserType as jest.Mock).mockReturnValue("unauthenticated");
+    (useEvents as jest.Mock).mockImplementation(
+      (selector: (store: { eventsSupported: boolean; selectEvent: jest.Mock }) => unknown) =>
+        selector({ eventsSupported: false, selectEvent: jest.fn() }),
+    );
+    (useAppContext as jest.Mock).mockReturnValue({
+      PerformanceSidebarComponent: undefined,
+      sidebarItems: [],
+      layoutBrowser: undefined,
+      workspaceStoreCreator: undefined,
+    });
+  });
+
+  it("should fetch session and call selectSource with resolved URLs and metadata", async () => {
+    // Given
+    const sessionId = "test-session-123";
+    const mockMcaps = [
+      { url: "https://example.com/file1.mcap", metadata: { robot: "r1" } },
+      { url: "https://example.com/file2.mcap", metadata: { robot: "r2" } },
+    ];
+    mockGetSession.mockResolvedValue(mockMcaps);
+    (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
+
+    // When
+    render(<Workspace deepLinks={["https://app.example.com/?sessionid=test-session-123"]} />);
+
+    // Then
+    await waitFor(() => {
+      expect(mockGetSession).toHaveBeenCalledWith(sessionId, expect.any(AbortSignal));
+    });
+    await waitFor(() => {
+      expect(mockSelectSource).toHaveBeenCalledWith("remote-file", {
+        type: "connection",
+        params: { url: "https://example.com/file1.mcap,https://example.com/file2.mcap" },
+        sourceMetadata: [{ robot: "r1" }, { robot: "r2" }],
+      });
+    });
+  });
+
+  it("should show error snackbar when session fetch fails", async () => {
+    // Given
+    const sessionId = "failing-session";
+    mockGetSession.mockRejectedValue(new Error("Network error"));
+    (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
+
+    // When
+    render(<Workspace deepLinks={["https://app.example.com/?sessionid=failing-session"]} />);
+
+    // Then
+    await waitFor(() => {
+      expect(mockGetSession).toHaveBeenCalledWith(sessionId, expect.any(AbortSignal));
+    });
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Failed to load session data sources", {
+        variant: "error",
+      });
+    });
+  });
+
+  it("should not fetch session when sessionId is not present", () => {
+    // Given
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      ds: "remote-file",
+      dsParams: { url: "https://example.com/file.mcap" },
+    });
+
+    // When
+    render(<Workspace deepLinks={["https://app.example.com/?ds=remote-file"]} />);
+
+    // Then
+    expect(mockGetSession).not.toHaveBeenCalled();
   });
 });

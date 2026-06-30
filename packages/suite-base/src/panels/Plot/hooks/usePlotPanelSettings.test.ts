@@ -8,7 +8,6 @@ import * as _ from "lodash-es";
 import {
   SettingsTreeAction,
   SettingsTreeActionPerformNode,
-  SettingsTreeActionUpdate,
   SettingsTreeActionReorder,
 } from "@lichtblick/suite";
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
@@ -262,19 +261,19 @@ describe("usePlotPanelSettings", () => {
     (usePanelSettingsTreeUpdate as jest.Mock).mockReturnValue(updatePanelSettingsTree);
   });
 
-  it.each([
+  it.each<SettingsTreeAction>([
     {
       action: "update",
       payload: { path: [], value: "", input: "string" },
-    } as SettingsTreeActionUpdate,
+    },
     {
       action: "perform-node-action",
       payload: { path: [], id: "add-series" },
-    } as SettingsTreeActionPerformNode,
+    },
     {
       action: "perform-node-action",
       payload: { path: [], id: "delete-series" },
-    } as SettingsTreeActionPerformNode,
+    },
   ])("should call saveConfig to update settings tree", (action: SettingsTreeAction) => {
     const config = PlotBuilder.config();
     const focusedPath = undefined;

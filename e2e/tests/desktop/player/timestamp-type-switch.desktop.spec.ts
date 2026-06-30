@@ -3,6 +3,7 @@
 
 import { test, expect } from "../../../fixtures/electron";
 import { loadFiles } from "../../../fixtures/load-files";
+import { PlayerControls } from "../../../page-objects";
 
 /**
  * GIVEN a .mcap file is loaded
@@ -11,29 +12,27 @@ import { loadFiles } from "../../../fixtures/load-files";
  * And playback time epoch format is selected
  * THEN the player time displayed should change to 1740566235.547000000 (epoch format)
  */
-test("should switch playback time to epoch format next to the player", async ({ mainWindow }) => {
-  // Given
-  const initialTimeInUTC = "2025-02-26 10:37:15.547 AM WET";
-  const intialTimeInEpoch = "1740566235.547000000";
+test(
+  "should switch playback time to epoch format next to the player",
+  { tag: "@regression" },
+  async ({ mainWindow }) => {
+    const player = new PlayerControls(mainWindow);
 
-  const filename = "example.mcap";
-  await loadFiles({
-    mainWindow,
-    filenames: filename,
-  });
+    // Given
+    const initialTimeInUTC = "2025-02-26 10:37:15.547 AM WET";
+    const intialTimeInEpoch = "1740566235.547000000";
 
-  // When
-  const playerStartingTime = mainWindow.locator(`input[value="${initialTimeInUTC}"]`);
-  // Playback time display needs to be hovered first so clicking on it is possible
-  await playerStartingTime.hover();
+    const filename = "example.mcap";
+    await loadFiles({
+      mainWindow,
+      filenames: filename,
+    });
 
-  const timestampDropdown = mainWindow.getByTestId("playback-time-display-toggle-button");
-  await timestampDropdown.click();
+    // When
+    await player.switchToEpochFormat(initialTimeInUTC);
 
-  const newTimestampOption = mainWindow.getByTestId("playback-time-display-option-SEC");
-  await newTimestampOption.click();
-
-  // Then
-  const playerStartingTimeInEpoch = mainWindow.locator(`input[value="${intialTimeInEpoch}"]`);
-  await expect(playerStartingTimeInEpoch).toBeVisible();
-});
+    // Then
+    const playerStartingTimeInEpoch = mainWindow.locator(`input[value="${intialTimeInEpoch}"]`);
+    await expect(playerStartingTimeInEpoch).toBeVisible();
+  },
+);
