@@ -1281,7 +1281,14 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   // Callback handlers
 
   public animationFrame = (): void => {
-    this.#animationFrame = undefined;
+    // Cancel any requestAnimationFrame (rAF) that `queueAnimationFrame()` scheduled. When this runs synchronously (e.g. a
+    // seek's `handleSeek`/`clear` queued a frame and the render-if-requested effect then calls us
+    // directly in the same tick) the queued rAF would otherwise fire on the next tick and paint a
+    // redundant second frame.
+    if (this.#animationFrame != undefined) {
+      cancelAnimationFrame(this.#animationFrame);
+      this.#animationFrame = undefined;
+    }
     if (!this.#rendering) {
       this.#frameHandler(this.currentTime);
       this.#rendering = false;
@@ -1292,6 +1299,14 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     if (this.#animationFrame == undefined) {
       this.#animationFrame = requestAnimationFrame(this.animationFrame);
     }
+  }
+
+  public async settleVideoDecodes(): Promise<void> {
+    await Promise.all(
+      Array.from(this.sceneExtensions.values(), async (ext) => {
+        await ext.settleVideoDecodes();
+      }),
+    );
   }
 
   public setFollowFrameId(frameId: string | undefined): void {

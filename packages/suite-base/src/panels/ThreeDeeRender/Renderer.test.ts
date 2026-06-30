@@ -229,6 +229,34 @@ describe("3D Renderer", () => {
     renderer.dispose();
   });
 
+  it("cancels a queued animation frame when animationFrame runs synchronously", () => {
+    // Given
+    const mockResult = BasicBuilder.number();
+    const requestAnimationFrameSpy = jest
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation(() => mockResult);
+    const cancelAnimationFrameSpy = jest
+      .spyOn(window, "cancelAnimationFrame")
+      .mockImplementation(() => undefined);
+
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+
+    // Renderer init may schedule internal frames; focus this test on the explicit queue+sync path.
+    requestAnimationFrameSpy.mockClear();
+    cancelAnimationFrameSpy.mockClear();
+
+    // When
+    // Simulate seek/clear code path that queues a frame, then immediately renders synchronously.
+    renderer.queueAnimationFrame();
+    renderer.animationFrame();
+
+    // Then
+    expect(requestAnimationFrameSpy).toHaveBeenCalledTimes(1);
+    expect(cancelAnimationFrameSpy).toHaveBeenCalledWith(mockResult);
+
+    renderer.dispose();
+  });
+
   it("enables and disables picking mode", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
