@@ -149,7 +149,9 @@ export class ImageRenderable extends Renderable<ImageUserData> {
   #receivedImageSequenceNumber = 0;
   #displayedImageSequenceNumber = 0;
   #showingErrorImage = false;
-  #cachedVideoDecoderConfig: VideoDecoderConfig | undefined;
+  // Decoder config parsed from the most recent keyframe. Delta frames carry no parameter sets, so
+  // they reuse this instead of reparsing the SPS.
+  #cachedVideoDecoderConfig?: VideoDecoderConfig;
   #videoFirstMessageTime: bigint | undefined;
   #lastVideoMessageTime: bigint | undefined;
   #lastQueuedVideoMessageTime: bigint | undefined;
@@ -475,9 +477,11 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
     const preparedFrame = prepareVideoFrame(frameMsg);
 
+    // Keyframes are the only frames that produce a decoder config; remember it for delta frames.
     if (preparedFrame.decoderConfig != undefined) {
       this.#cachedVideoDecoderConfig = preparedFrame.decoderConfig;
     }
+
     const timestampMicros = Number((messageTime - this.#videoFirstMessageTime) / 1000n);
     this.#rememberVideoFrame(frameMsg, preparedFrame, timestampMicros);
 
@@ -578,12 +582,16 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       return undefined;
     }
 
-    const imageBitmap = await globalThis.createImageBitmap(result.frame, { resizeWidth });
-    this.videoPlayer.lastImageBitmap = imageBitmap;
-    result.frame.close();
-    this.#waitingForVideoKeyframe = false;
-    this.#canReplayVideoGop = false;
-    return imageBitmap;
+    try {
+      const imageBitmap = await globalThis.createImageBitmap(result.frame, { resizeWidth });
+      this.videoPlayer.lastImageBitmap?.close();
+      this.videoPlayer.lastImageBitmap = imageBitmap;
+      this.#waitingForVideoKeyframe = false;
+      this.#canReplayVideoGop = false;
+      return imageBitmap;
+    } finally {
+      result.frame.close();
+    }
   }
 
   protected async decodeImage(

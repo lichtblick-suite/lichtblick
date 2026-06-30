@@ -56,12 +56,10 @@ export function isCompressedVideoKeyframe(frameMsg: CompressedVideo): boolean {
 
 export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
   switch (canonicalVideoCodec(frameMsg.format)) {
+    // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe.
     case VideoCodec.H264:
-      // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe.
       return H264Parser.ParseDecoderConfig(frameMsg.data);
     case VideoCodec.H265:
-      // For now this returns a default H.265 codec config (codec string only); profile/level/tier
-      // are not derived from the SPS yet. A future SPS parser will fill in those fields here.
       return H265Parser.ParseDecoderConfig(frameMsg.data);
   }
   return undefined;
@@ -92,24 +90,29 @@ export function prepareVideoFrame(
       }
 
       const type = frameInfo.isKeyframe ? "key" : "delta";
+      const normalizedData = frameInfo.normalizedData;
       return {
         data:
           type === "key"
-            ? frameInfo.normalizedData
-            : (H265Parser.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
-        decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
+            ? normalizedData
+            : (H265Parser.StripParameterSets(normalizedData) ?? normalizedData),
+        // Only keyframes carry parameter sets (SPS/VPS/PPS); delta frames have nothing to parse.
+        decoderConfig: type === "key" ? H265Parser.ParseDecoderConfig(normalizedData) : undefined,
         status: PreparedVideoFrameStatus.Ok,
         type,
       };
     }
     case VideoCodec.H264:
-    default:
+    default: {
+      const type = isCompressedVideoKeyframe(frameMsg) ? "key" : "delta";
       return {
         data: frameMsg.data,
-        decoderConfig: getVideoDecoderConfig(frameMsg),
+        // Only keyframes carry an SPS; delta frames have nothing to parse.
+        decoderConfig: type === "key" ? getVideoDecoderConfig(frameMsg) : undefined,
         status: PreparedVideoFrameStatus.Ok,
-        type: isCompressedVideoKeyframe(frameMsg) ? "key" : "delta",
+        type,
       };
+    }
   }
 }
 
