@@ -51,7 +51,7 @@ export function WebRoot(props: {
     new IdbExtensionLoader("org"),
     new IdbExtensionLoader("local"),
   ];
-  const url = new URL(window.location.href);
+  const url = new URL(globalThis.location.href);
   const workspace = url.searchParams.get("workspace");
 
   if (workspace && APP_CONFIG.apiUrl) {
@@ -86,7 +86,7 @@ export function WebRoot(props: {
   return (
     <SharedRoot
       enableLaunchPreferenceScreen
-      deepLinks={[window.location.href]}
+      deepLinks={[globalThis.location.href]}
       dataSources={dataSources}
       appConfiguration={appConfiguration}
       appParameters={appParameters}

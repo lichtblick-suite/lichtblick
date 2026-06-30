@@ -440,6 +440,8 @@ describe("CurrentLayoutProvider", () => {
 
     expect(selectedLayout).toBeDefined();
     expect(selectedLayout).toBe("layout2");
+    // A ?layout= override is session-only and must not be persisted to the user profile.
+    expect(mockUserProfile.setUserProfile).not.toHaveBeenCalled();
   });
 
   it("prefers the organizational layout when the app parameter name matches multiple layouts", async () => {
