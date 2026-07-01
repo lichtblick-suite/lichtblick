@@ -105,7 +105,7 @@ export class H265 {
     };
 
     for (const nalu of H265.Nalus(annexBData)) {
-      H265.InspectNalu(annexBData, nalu, state);
+      H265.InspectNalu(nalu, state);
     }
 
     const annexBBoxSize = H265.AnnexBBoxSize(data);
@@ -135,7 +135,6 @@ export class H265 {
   }
 
   private static InspectNalu(
-    annexBData: Uint8Array,
     nalu: { type: number; data: Uint8Array; startCodeStart: number; end: number },
     state: InspectFrameState,
   ): void {
