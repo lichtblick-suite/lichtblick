@@ -11,6 +11,7 @@ import { assert } from "ts-essentials";
 
 import {
   EncodedVideoFrame,
+  VideoCodec,
   VideoPlayer,
   canonicalVideoCodec,
   videoCodecNeedsKeyframeReplay,
@@ -166,6 +167,8 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
   #disposed = false;
 
+  #codec: VideoCodec | undefined;
+
   public constructor(topicName: string, renderer: IRenderer, userData: ImageUserData) {
     super(topicName, renderer, userData);
   }
@@ -273,7 +276,8 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.userData.image = image;
 
     const seq = ++this.#receivedImageSequenceNumber;
-    const codec = "format" in image ? canonicalVideoCodec(image.format) : undefined;
+    this.#codec ??= "format" in image ? canonicalVideoCodec(image.format) : undefined;
+    const codec = this.#codec;
 
     if (codec != undefined) {
       const videoImage = image as CompressedVideo;
@@ -475,7 +479,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.#lastVideoMessageTime = messageTime;
     this.#videoFirstMessageTime ??= messageTime;
 
-    const preparedFrame = prepareVideoFrame(frameMsg);
+    const preparedFrame = prepareVideoFrame(frameMsg, undefined, this.#codec);
 
     // Keyframes are the only frames that produce a decoder config; remember it for delta frames.
     if (preparedFrame.decoderConfig != undefined) {
@@ -493,7 +497,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     preparedFrame: PreparedVideoFrame,
     timestampMicros: number,
   ): void {
-    if (!videoCodecNeedsKeyframeReplay(canonicalVideoCodec(frame.format))) {
+    if (!videoCodecNeedsKeyframeReplay(this.#codec)) {
       return;
     }
     const existingIndex = this.#videoFrameHistory.findIndex(
@@ -566,7 +570,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     await this.videoPlayer.init(decoderConfig);
     const result = await this.videoPlayer.decodeFrames(
       gop.map((entry): EncodedVideoFrame => {
-        const preparedFrame = prepareVideoFrame(entry.frame);
+        const preparedFrame = prepareVideoFrame(entry.frame, undefined, this.#codec);
         return {
           data: preparedFrame.data,
           timestampMicros: entry.timestampMicros,
@@ -599,7 +603,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     resizeWidth?: number,
   ): Promise<ImageBitmap | ImageData> {
     if ("format" in image) {
-      if (canonicalVideoCodec(image.format) == undefined) {
+      if (this.#codec == undefined) {
         return await decodeCompressedImageToBitmap(image, resizeWidth);
       } else {
         const frameMsg = image as CompressedVideo;

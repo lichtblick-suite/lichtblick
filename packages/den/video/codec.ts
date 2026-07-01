@@ -23,7 +23,7 @@ export enum VideoCodec {
  * undefined if the format is not a recognized video codec.
  */
 export function canonicalVideoCodec(format: string): VideoCodec | undefined {
-  if (H265_CODEC_FORMAT_STRINGS.includes(format)) {
+  if (H265_CODEC_FORMAT_STRINGS.some((substr) => format.startsWith(substr))) {
     return VideoCodec.H265;
   }
 
@@ -38,8 +38,12 @@ export function canonicalVideoCodec(format: string): VideoCodec | undefined {
  * Returns whether the given frame is a keyframe, dispatching to the parser for its (normalized)
  * codec. Non-video formats always return false.
  */
-export function isVideoKeyframe(format: string, data: Uint8Array): boolean {
-  switch (canonicalVideoCodec(format)) {
+export function isVideoKeyframe(
+  format: string,
+  data: Uint8Array,
+  resolvedCodec?: VideoCodec,
+): boolean {
+  switch (resolvedCodec ?? canonicalVideoCodec(format)) {
     case VideoCodec.H264:
       // Search for an IDR NAL unit to determine if this is a keyframe.
       return H264Parser.IsKeyframe(data);

@@ -50,8 +50,11 @@ export async function decodeCompressedImageToBitmap(
   return await createImageBitmap(bitmapData, { resizeWidth });
 }
 
-export function isCompressedVideoKeyframe(frameMsg: CompressedVideo): boolean {
-  return isVideoKeyframe(frameMsg.format, frameMsg.data);
+export function isCompressedVideoKeyframe(
+  frameMsg: CompressedVideo,
+  resolvedCodec?: VideoCodec,
+): boolean {
+  return isVideoKeyframe(frameMsg.format, frameMsg.data, resolvedCodec);
 }
 
 export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
@@ -68,8 +71,9 @@ export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderCo
 export function prepareVideoFrame(
   frameMsg: CompressedVideo,
   context?: PrepareVideoFrameContext,
+  resolvedCodec?: VideoCodec,
 ): PreparedVideoFrame {
-  switch (canonicalVideoCodec(frameMsg.format)) {
+  switch (resolvedCodec ?? canonicalVideoCodec(frameMsg.format)) {
     case VideoCodec.H265: {
       const frameInfo = H265Parser.InspectFrame(frameMsg.data, context?.h265);
       if (frameInfo.bitstreamFormat === "unknown" || frameInfo.normalizedData == undefined) {
@@ -104,11 +108,12 @@ export function prepareVideoFrame(
     }
     case VideoCodec.H264:
     default: {
-      const type = isCompressedVideoKeyframe(frameMsg) ? "key" : "delta";
+      const frameData = frameMsg.data;
+      const type = H264Parser.IsKeyframe(frameData) ? "key" : "delta";
       return {
-        data: frameMsg.data,
+        data: frameData,
         // Only keyframes carry an SPS; delta frames have nothing to parse.
-        decoderConfig: type === "key" ? getVideoDecoderConfig(frameMsg) : undefined,
+        decoderConfig: type === "key" ? H264Parser.ParseDecoderConfig(frameData) : undefined,
         status: PreparedVideoFrameStatus.Ok,
         type,
       };
