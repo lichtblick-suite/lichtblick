@@ -153,7 +153,7 @@
     "jest-environment-jsdom": "30.4.1",
     "license-checker": "25.0.1",
     "playwright": "1.60.0",
-    "prettier": "3.6.2",
+    "prettier": "3.9.4",
     "react-refresh": "0.18.0",
     "rimraf": "6.0.1",
     "semver": "7.7.2",

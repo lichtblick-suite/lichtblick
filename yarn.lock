@@ -3525,7 +3525,7 @@ __metadata:
     nearley-loader: "npm:2.0.0"
     notistack: "npm:3.0.2"
     path-browserify: "npm:1.0.1"
-    prettier: "npm:3.6.2"
+    prettier: "npm:3.9.4"
     ramda: "npm:0.32.0"
     react: "npm:18.3.1"
     react-colorful: "npm:5.6.1"
@@ -14719,7 +14719,7 @@ __metadata:
     jest-environment-jsdom: "npm:30.4.1"
     license-checker: "npm:25.0.1"
     playwright: "npm:1.60.0"
-    prettier: "npm:3.6.2"
+    prettier: "npm:3.9.4"
     react-refresh: "npm:0.18.0"
     react-use: "npm:17.6.0"
     rehype-raw: "npm:7.0.0"
@@ -17099,12 +17099,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:3.6.2":
-  version: 3.6.2
-  resolution: "prettier@npm:3.6.2"
+"prettier@npm:3.9.4":
+  version: 3.9.4
+  resolution: "prettier@npm:3.9.4"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10/1213691706bcef1371d16ef72773c8111106c3533b660b1cc8ec158bd109cdf1462804125f87f981f23c4a3dba053b6efafda30ab0114cc5b4a725606bb9ff26
+  checksum: 10/4a0dc4389d442f5aca0beb12778c90b6ceb9831940b01a1df5eba9150b5ce96fa52eda9074a10a370e732adc03e2f645597dfd8b7e3f1e94dee28df01004a0fd
   languageName: node
   linkType: hard
 
