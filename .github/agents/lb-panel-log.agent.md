@@ -112,3 +112,4 @@ function filterMessages(
 
 ## Skills Reference
 - Log panel architecture, filtering logic, or virtualized list patterns: `read_file(".github/skills/panel-log/SKILL.md")`
+- Virtualized list rendering and scroll performance: `read_file(".github/skills/performance/SKILL.md")`
