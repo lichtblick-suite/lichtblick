@@ -426,7 +426,6 @@ function buildDecoderConfig(spsData: Uint8Array | undefined): VideoDecoderConfig
       codedHeight: sps.picHeight,
     };
   } catch {
-    console.warn("Failed to parse H.265 SPS NAL unit; falling back to generic codec string");
     return { codec: DEFAULT_HEVC_CODEC };
   }
 }
