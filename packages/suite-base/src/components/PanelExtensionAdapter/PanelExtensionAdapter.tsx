@@ -680,16 +680,25 @@ function PanelExtensionAdapter(
         setMessagePathDropConfig(dropConfig);
       },
 
-      getTopicSchema(topic) {
+      getTopicSchema(topic: string) {
         const ctx = getMessagePipelineContext();
         const datatypes = ctx.playerState.activeData?.datatypes;
         if (datatypes == undefined) {
           return undefined;
         }
-        const schemaName = ctx.playerState.activeData?.topics?.find(
+        const schemaName = ctx.playerState.activeData?.topics.find(
           (t) => t.name === topic,
         )?.schemaName;
         if (schemaName == undefined) {
+          return undefined;
+        }
+        return datatypes.get(schemaName);
+      },
+
+      getSchemaDefinition(schemaName: string) {
+        const ctx = getMessagePipelineContext();
+        const datatypes = ctx.playerState.activeData?.datatypes;
+        if (datatypes == undefined) {
           return undefined;
         }
         return datatypes.get(schemaName);
