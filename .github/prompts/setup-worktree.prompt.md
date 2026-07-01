@@ -59,10 +59,10 @@ To create a worktree from an **existing** branch instead (e.g. to resume work), 
 git worktree add ../lichtblick.worktree/{short-name} {existing-branch}
 ```
 
-To create a worktree for **reviewing a PR**, fetch the PR's head branch and check it out into a `pr-{id}` folder:
+To create a worktree for **reviewing a PR**, fetch the PR's head branch into a local `pr-{id}` ref first, then add a worktree that checks out that ref. Fetching before `git worktree add` guarantees the `pr-{id}` ref exists (unlike `gh pr checkout --detach`, which leaves HEAD detached in the current worktree without creating the ref):
 
 ```bash
-gh pr checkout {id} --detach 2>/dev/null || git fetch origin pull/{id}/head:pr-{id}
+git fetch origin pull/{id}/head:pr-{id}
 git worktree add ../lichtblick.worktree/pr-{id} pr-{id}
 ```
 
