@@ -16,6 +16,7 @@
 import { Link, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useSnackbar } from "notistack";
+import path from "path";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -61,9 +62,7 @@ import { WorkspaceDialogs } from "@lichtblick/suite-base/components/WorkspaceDia
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
-  LayoutData,
   LayoutState,
-  useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
@@ -87,6 +86,7 @@ import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useDefaultWebLaunchPreference } from "@lichtblick/suite-base/hooks/useDefaultWebLaunchPreference";
 import useElectronFilesToOpen from "@lichtblick/suite-base/hooks/useElectronFilesToOpen";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
+import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
 import useSeekTimeFromCLI from "@lichtblick/suite-base/hooks/useSeekTimeFromCLI";
 import { useStructureItemsStoreManager } from "@lichtblick/suite-base/panels/Plot/hooks/useStructureItemsStoreManager";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
@@ -163,8 +163,8 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     [getMessagePipeline],
   );
 
-  const { setSelectedLayoutId } = useCurrentLayoutActions();
   const layoutManager = useLayoutManager();
+  const { parseAndInstallLayout } = useLayoutTransfer();
 
   const { enqueueSnackbar } = useSnackbar();
   const { dialogActions, sidebarActions } = useWorkspaceActions();
@@ -561,45 +561,57 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         return;
       }
 
+      // Validate URL protocol - only http/https are allowed for security
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(layoutUrl);
+      } catch {
+        enqueueSnackbar("Invalid layout URL", { variant: "error" });
+        return;
+      }
+
+      if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+        enqueueSnackbar("Layout URL must use http or https protocol", { variant: "error" });
+        return;
+      }
+
+      // Use origin+pathname for logging/naming to avoid leaking credentials from query params
+      const safeUrlLabel = `${parsedUrl.origin}${parsedUrl.pathname}`;
+
       try {
         const response = await fetch(layoutUrl);
         if (!response.ok) {
-          log.debug(`Failed to fetch layout: ${layoutUrl} (status ${response.status})`);
+          log.error(`Failed to fetch layout: ${safeUrlLabel} (status ${response.status})`);
+          enqueueSnackbar(`Failed to load layout (HTTP ${response.status})`, { variant: "error" });
           return;
         }
 
-        const parsed: unknown = JSON.parse(await response.text());
+        // Derive filename from sanitized pathname (no credentials in name)
+        const rawFilename = parsedUrl.pathname.split("/").pop();
+        const filename = rawFilename != undefined && rawFilename !== "" ? rawFilename : "layout.json";
+        const layoutName = path.basename(filename, path.extname(filename));
 
-        if (parsed == undefined || typeof parsed !== "object") {
-          log.debug(`${layoutUrl} does not contain valid layout JSON`);
-          return;
-        }
-
-        const layoutData = parsed as LayoutData;
-        const layoutName = `Layout from ${layoutUrl}`;
-
-        // Remove any existing layouts with this name and create a fresh one
-        // This ensures we always use the latest version from the URL and avoid duplicates
+        // Find existing layouts with the same name before saving (safe deduplication)
         const existingLayouts = await layoutManager.getLayouts();
         const matchingLayouts = existingLayouts.filter((layout) => layout.name === layoutName);
 
-        // Delete all existing layouts with this name
-        for (const layout of matchingLayouts) {
-          await layoutManager.deleteLayout({ id: layout.id });
-        }
+        // Delegate JSON parsing, saving, and selection to parseAndInstallLayout
+        const text = await response.text();
+        const file = new File([text], filename, { type: "application/json" });
+        const newLayout = await parseAndInstallLayout(file, "local");
 
-        // Create a fresh layout with the new data
-        const newLayout = await layoutManager.saveNewLayout({
-          name: layoutName,
-          data: layoutData,
-          permission: "CREATOR_WRITE",
-        });
-        setSelectedLayoutId(newLayout.id);
+        // Only delete old layouts after successful save to avoid data loss
+        if (newLayout) {
+          for (const layout of matchingLayouts) {
+            await layoutManager.deleteLayout({ id: layout.id });
+          }
+        }
       } catch (error) {
-        log.debug(`Could not load the layout from ${layoutUrl}`, error);
+        log.error(`Could not load layout from ${safeUrlLabel}`, error);
+        enqueueSnackbar("Failed to load layout from URL", { variant: "error" });
       }
     },
-    [layoutManager, setSelectedLayoutId],
+    [layoutManager, parseAndInstallLayout, enqueueSnackbar],
   );
 
   // Load data source from URL.
