@@ -16,7 +16,6 @@
 import { Link, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useSnackbar } from "notistack";
-import path from "path";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -590,7 +589,8 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         const rawFilename = parsedUrl.pathname.split("/").pop();
         const filename =
           rawFilename != undefined && rawFilename !== "" ? rawFilename : "layout.json";
-        const layoutName = path.basename(filename, path.extname(filename));
+        const dotIndex = filename.lastIndexOf(".");
+        const layoutName = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
 
         // Find existing layouts with the same name before saving (safe deduplication)
         const existingLayouts = await layoutManager.getLayouts();
@@ -636,7 +636,9 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     }
     // Apply any available layout URL
     if (unappliedSourceArgs.layoutUrl) {
-      void fetchLayoutFromUrl(unappliedSourceArgs.layoutUrl);
+      fetchLayoutFromUrl(unappliedSourceArgs.layoutUrl).catch((error: unknown) => {
+        log.error("Failed to fetch layout from URL", error);
+      });
       shouldUpdate = true;
     }
     if (shouldUpdate) {
