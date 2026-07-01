@@ -34,7 +34,18 @@ To request a fresh CodeRabbit pass on an existing PR, comment:
 
 1. Correctness and regressions
 2. API and behavior compatibility
-3. Performance risks
+3. Performance risks — pay special attention here. Check hot paths against
+   `.github/instructions/performance.instructions.md`, and load
+   `.github/skills/performance/SKILL.md` for deep analysis. Focus on:
+   - Allocations inside render loops, `requestAnimationFrame`, or player `tick()` paths
+   - Lost reference stability or missing memoization causing avoidable re-renders
+   - Main-thread work >16ms that should move to a Web Worker
+   - Large buffers copied instead of zero-copy `Comlink.transfer`
+   - Cache/memory budgets exceeded (player message cache, block caps)
+
+   CodeRabbit now applies per-path performance checks (see `.coderabbit.yaml`); use its
+   findings as the baseline and focus manual review on non-obvious regressions. Apply
+   "measure before you optimize" — raise concerns only with concrete impact.
 4. Security risks
 5. Test coverage gaps
 6. Acceptance criteria coverage (cross-check against linked GitHub issue)

@@ -183,3 +183,4 @@ await renderer.updateDatasets(ds); // Push new data
 - Deep plot builder internals, downsampling, or dataset accumulation: `read_file(".github/skills/plot-internals/SKILL.md")`
 - Message-path syntax and topic data extraction: `read_file(".github/skills/message-path/SKILL.md")`
 - Worker/Comlink patterns (OffscreenCanvas, datasetsWorker): `read_file(".github/skills/web-workers/SKILL.md")`
+- Chart rendering throughput and dataset-size profiling: `read_file(".github/skills/performance/SKILL.md")`
