@@ -4598,15 +4598,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/mcp@npm:0.0.75":
-  version: 0.0.75
-  resolution: "@playwright/mcp@npm:0.0.75"
+"@playwright/mcp@npm:0.0.77":
+  version: 0.0.77
+  resolution: "@playwright/mcp@npm:0.0.77"
   dependencies:
-    playwright: "npm:1.61.0-alpha-1778188671000"
-    playwright-core: "npm:1.61.0-alpha-1778188671000"
+    playwright: "npm:1.62.0-alpha-2026-06-29"
+    playwright-core: "npm:1.62.0-alpha-2026-06-29"
   bin:
     playwright-mcp: cli.js
-  checksum: 10/4e774354de8c63f1ce6862a10875aa6a6ff8d0f5d506abc1fe76af676ce90b7db8ba58125e7f6f923e0c380e92fdcb99ddc0e6c7dd87d0065a5058ec22cf4cbd
+  checksum: 10/cf4ab2f40ec421ee63ad3d288f185f6d1c5458f72cf95b0af87a3b57989da8a958d8261b32463264d902b178612c0d4fb3b0df36a0993ec495e99a2cbd3d0c7b
   languageName: node
   linkType: hard
 
@@ -14550,7 +14550,7 @@ __metadata:
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@mui/material": "npm:7.2.0"
     "@octokit/rest": "npm:22.0.1"
-    "@playwright/mcp": "npm:0.0.75"
+    "@playwright/mcp": "npm:0.0.77"
     "@playwright/test": "npm:1.60.0"
     "@storybook/react": "npm:9.1.9"
     "@storybook/react-webpack5": "npm:9.1.9"
@@ -16750,12 +16750,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.61.0-alpha-1778188671000":
-  version: 1.61.0-alpha-1778188671000
-  resolution: "playwright-core@npm:1.61.0-alpha-1778188671000"
+"playwright-core@npm:1.62.0-alpha-2026-06-29":
+  version: 1.62.0-alpha-2026-06-29
+  resolution: "playwright-core@npm:1.62.0-alpha-2026-06-29"
   bin:
     playwright-core: cli.js
-  checksum: 10/203b62a1f9b3242b2b4b1f3a2e325a2b43ff5734fe22b93f622268e40568a16581e4dc6e4aa13315b6ef276199c0c3b7397787d5988a23809bab6b1f60ced02e
+  checksum: 10/474cc325cbb08a41de55cb0a6404ebe6a7e0e1dcd09071378d68dadd1ddb0fe34b744fe435c8ce978d611b4eb80f2b36461bd3f76a4eb79bc8a5490e57cc1887
   languageName: node
   linkType: hard
 
@@ -16774,18 +16774,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright@npm:1.61.0-alpha-1778188671000":
-  version: 1.61.0-alpha-1778188671000
-  resolution: "playwright@npm:1.61.0-alpha-1778188671000"
+"playwright@npm:1.62.0-alpha-2026-06-29":
+  version: 1.62.0-alpha-2026-06-29
+  resolution: "playwright@npm:1.62.0-alpha-2026-06-29"
   dependencies:
     fsevents: "npm:2.3.2"
-    playwright-core: "npm:1.61.0-alpha-1778188671000"
+    playwright-core: "npm:1.62.0-alpha-2026-06-29"
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: 10/453866dc88b53701c568c80514c77bb24a7362626c31668c8790e8105cc23cf0c4c484e99e9970032c733d8ebf4267c9c290ddadcbab40ae525ea81b8761f70b
+  checksum: 10/858331c5652f755ee9806348b6ddb69e1e9e10419e8d9eb8cc50ff6958a253eb7e19491f2e5fa86d809ad4719b4e03ad797a701dbd58472b2b6b8fc6f96ce6e6
   languageName: node
   linkType: hard
 

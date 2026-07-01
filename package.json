@@ -112,7 +112,7 @@
     "@lichtblick/tsconfig": "1.1.2",
     "@mui/material": "7.2.0",
     "@octokit/rest": "22.0.1",
-    "@playwright/mcp": "0.0.75",
+    "@playwright/mcp": "0.0.77",
     "@playwright/test": "1.60.0",
     "@storybook/react": "9.1.9",
     "@storybook/react-webpack5": "9.1.9",
