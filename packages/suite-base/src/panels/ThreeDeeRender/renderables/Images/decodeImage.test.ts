@@ -379,6 +379,9 @@ describe("decodeRawImage", () => {
     ["mono8", 6],
     ["8UC1", 6],
   ])("should not throw for supported encoding: %s", (encoding, step) => {
+    // GIVEN a raw ROS image with a supported encoding and matching row step
+    // WHEN it is decoded into an output buffer
+    // THEN decoding completes without throwing
     expect(() => {
       const mockImage = createMockROSImage({
         step,
@@ -391,10 +394,14 @@ describe("decodeRawImage", () => {
   });
 
   it("should throw an error for unsupported encoding", () => {
+    // GIVEN a raw ROS image with an unsupported encoding
     const mockImage = createMockROSImage({
       encoding: "unsupported",
     });
     const output = new Uint8ClampedArray(12);
+
+    // WHEN it is decoded
+    // THEN decoding throws an unsupported-encoding error
     expect(() => {
       decodeRawImage(mockImage, {}, output);
     }).toThrow("Unsupported encoding unsupported");
@@ -418,6 +425,9 @@ describe("decodeRawImage", () => {
     ["mono8", 6],
     ["8UC1", 6],
   ])("should not throw for supported encoding: %s", (encoding, step) => {
+    // GIVEN a raw ROS image with a supported encoding and matching row step
+    // WHEN it is decoded into an output buffer
+    // THEN decoding completes without throwing
     expect(() => {
       const mockImage = createMockROSImage({
         step,
@@ -432,14 +442,22 @@ describe("decodeRawImage", () => {
 
 describe("emptyVideoFrame", () => {
   it("should return an empty ImageBitmap", async () => {
+    // GIVEN no explicit size
+    // WHEN an empty video frame is requested
     const bitmap = await emptyVideoFrame();
+
+    // THEN a 32x32 placeholder ImageBitmap is returned
     expect(bitmap).toBeInstanceOf(ImageBitmap);
     expect(bitmap.width).toEqual(32); // default 32x32
     expect(bitmap.height).toEqual(32); // default 32x32
   });
 
   it("should return an empty ImageBitmap with specified resizeWidth", async () => {
+    // GIVEN an explicit resize width of 100
+    // WHEN an empty video frame is requested
     const bitmap = await emptyVideoFrame(undefined, 100);
+
+    // THEN a 100x100 placeholder ImageBitmap is returned
     expect(bitmap).toBeInstanceOf(ImageBitmap);
     expect(bitmap.width).toEqual(100);
     expect(bitmap.height).toEqual(100);
