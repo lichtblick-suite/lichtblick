@@ -45,6 +45,12 @@ export type H265FrameInfo = {
   sliceTypes: H265SliceType[];
   hasUnparsedVclSlice: boolean;
   normalizedData?: Uint8Array;
+  /**
+   * `normalizedData` with VPS/SPS/PPS parameter-set NAL units removed, materialized only when such
+   * NAL units are present. Undefined when nothing was stripped — callers should fall back to
+   * `normalizedData` to avoid an extra per-frame copy.
+   */
+  strippedData?: Uint8Array;
   parameterSets?: Uint8Array;
   hasRequiredParameterSets: boolean;
   diagnostics?: string;
