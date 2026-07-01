@@ -27,7 +27,9 @@ type H265PpsInfo = {
 
 type InspectFrameState = {
   ppsById: Map<number, H265PpsInfo>;
-  parameterSetParts: number[];
+  parameterSetParts: Uint8Array[];
+  strippedParts: Uint8Array[];
+  spsData: Uint8Array | undefined;
   sliceTypes: H265SliceType[];
   hasRandomAccessNaluType: boolean;
   hasUnparsedVclSlice: boolean;
@@ -78,22 +80,7 @@ export class H265 {
     // Search for an SPS NAL unit to derive the codec string and coded dimensions. If it is absent
     // or cannot be parsed, fall back to the generic HEVC codec string (no dimensions).
     const spsData = H265.GetFirstNaluOfType(annexBData, H265NaluType.SPS_NUT);
-    if (spsData == undefined) {
-      return { codec: DEFAULT_HEVC_CODEC };
-    }
-
-    try {
-      const sps = new SPS(spsData);
-      const codecData = {
-        codec: sps.MIME(),
-        codedWidth: sps.picWidth,
-        codedHeight: sps.picHeight,
-      };
-      return { ...codecData };
-    } catch {
-      console.warn("Failed to parse H.265 SPS NAL unit; falling back to generic codec string");
-      return { codec: DEFAULT_HEVC_CODEC };
-    }
+    return buildDecoderConfig(spsData);
   }
 
   private static GetFirstNaluOfType(
@@ -124,6 +111,8 @@ export class H265 {
     const state: InspectFrameState = {
       ppsById: H265.ParsePpsMap(context?.parameterSets),
       parameterSetParts: [],
+      strippedParts: [],
+      spsData: undefined,
       sliceTypes: [],
       hasRandomAccessNaluType: false,
       hasUnparsedVclSlice: false,
@@ -137,16 +126,25 @@ export class H265 {
     }
 
     const annexBBoxSize = H265.AnnexBBoxSize(data);
+    const isKeyframe = state.hasRandomAccessNaluType;
 
     return {
       bitstreamFormat: annexBBoxSize == undefined ? "length-prefixed" : "annex-b",
-      isKeyframe: state.hasRandomAccessNaluType,
+      isKeyframe,
       frameType: H265.FrameType(state.sliceTypes),
       sliceTypes: state.sliceTypes,
       hasUnparsedVclSlice: state.hasUnparsedVclSlice,
       normalizedData: annexBData,
       parameterSets:
-        state.parameterSetParts.length > 0 ? new Uint8Array(state.parameterSetParts) : undefined,
+        state.parameterSetParts.length > 0 ? concatChunks(state.parameterSetParts) : undefined,
+      // Keyframes are decoded whole, so the parameter-set-stripped bytes are only materialized for
+      // delta frames. This mirrors `StripParameterSets` but reuses this single NAL-unit pass.
+      strippedData:
+        !isKeyframe && state.strippedParts.length > 0
+          ? concatChunks(state.strippedParts)
+          : undefined,
+      // Only keyframes carry an SPS, so the decoder config is derived here for keyframes only.
+      decoderConfig: isKeyframe ? buildDecoderConfig(state.spsData) : undefined,
       hasRequiredParameterSets: state.hasVps && state.hasSps && state.hasPps,
     };
   }
@@ -164,8 +162,9 @@ export class H265 {
       state.hasVps ||= nalu.type === H265NaluType.VPS_NUT;
       state.hasSps ||= nalu.type === H265NaluType.SPS_NUT;
       state.hasPps ||= nalu.type === H265NaluType.PPS_NUT;
-      for (const byte of annexBData.subarray(nalu.startCodeStart, nalu.end)) {
-        state.parameterSetParts.push(byte);
+      state.parameterSetParts.push(annexBData.subarray(nalu.startCodeStart, nalu.end));
+      if (nalu.type === H265NaluType.SPS_NUT) {
+        state.spsData ??= nalu.data;
       }
       if (nalu.type === H265NaluType.PPS_NUT) {
         const pps = H265.ParsePps(nalu.data);
@@ -175,6 +174,9 @@ export class H265 {
       }
       return;
     }
+
+    // Non-parameter-set NAL units make up the parameter-set-stripped frame used for delta decoding.
+    state.strippedParts.push(annexBData.subarray(nalu.startCodeStart, nalu.end));
 
     if (H265.IsVclNaluType(nalu.type)) {
       const sliceType = H265.ParseSliceType(nalu.data, nalu.type, state.ppsById);
@@ -208,7 +210,7 @@ export class H265 {
       return undefined;
     }
 
-    const parts: number[] = [];
+    const parts: Uint8Array[] = [];
     for (const nalu of H265.Nalus(annexBData)) {
       if (
         nalu.type === H265NaluType.VPS_NUT ||
@@ -217,12 +219,10 @@ export class H265 {
       ) {
         continue;
       }
-      for (const byte of annexBData.subarray(nalu.startCodeStart, nalu.end)) {
-        parts.push(byte);
-      }
+      parts.push(annexBData.subarray(nalu.startCodeStart, nalu.end));
     }
 
-    return parts.length > 0 ? new Uint8Array(parts) : undefined;
+    return parts.length > 0 ? concatChunks(parts) : undefined;
   }
 
   private static *Nalus(data: Uint8Array): Generator<{
@@ -396,5 +396,37 @@ export class H265 {
     }
 
     return result;
+  }
+}
+
+function concatChunks(chunks: Uint8Array[]): Uint8Array {
+  let totalLength = 0;
+  for (const chunk of chunks) {
+    totalLength += chunk.length;
+  }
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return result;
+}
+
+function buildDecoderConfig(spsData: Uint8Array | undefined): VideoDecoderConfig {
+  if (spsData == undefined) {
+    return { codec: DEFAULT_HEVC_CODEC };
+  }
+
+  try {
+    const sps = new SPS(spsData);
+    return {
+      codec: sps.MIME(),
+      codedWidth: sps.picWidth,
+      codedHeight: sps.picHeight,
+    };
+  } catch {
+    console.warn("Failed to parse H.265 SPS NAL unit; falling back to generic codec string");
+    return { codec: DEFAULT_HEVC_CODEC };
   }
 }

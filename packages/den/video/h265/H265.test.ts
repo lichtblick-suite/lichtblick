@@ -39,12 +39,12 @@ describe("H265", () => {
     );
   });
 
-  it("should return a generic decoder config for supported h265 frames", () => {
-    // Given a P-slice frame
+  it("should fall back to the default HEVC codec when the frame has no SPS", () => {
+    // Given a P-slice frame with no SPS NAL unit
     const frame = H265FrameBuilder.frameData([H265FrameBuilder.slice(1, H265SliceType.P)]);
 
     // When ParseDecoderConfig is called
-    // Then it returns the default HEVC codec string
+    // Then it falls back to the generic HEVC codec string (no dimensions)
     expect(H265.ParseDecoderConfig(frame)).toEqual({ codec: DEFAULT_HEVC_CODEC });
   });
 
@@ -79,6 +79,40 @@ describe("H265", () => {
     expect(H265.StripParameterSets(frame)).toEqual(
       new Uint8Array(H265FrameBuilder.slice(1, H265SliceType.P)),
     );
+  });
+
+  it("should expose parameter-set-stripped bytes for delta frames via InspectFrame", () => {
+    // Given a delta frame with VPS/SPS/PPS plus a P-slice
+    const frame = H265FrameBuilder.frameData([
+      H265FrameBuilder.annexBNalu(H265NaluType.VPS_NUT),
+      H265FrameBuilder.annexBNalu(H265NaluType.SPS_NUT),
+      H265FrameBuilder.annexBNalu(H265NaluType.PPS_NUT, [0xc0]),
+      H265FrameBuilder.slice(1, H265SliceType.P),
+    ]);
+
+    // When InspectFrame inspects it
+    const frameInfo = H265.InspectFrame(frame);
+
+    // Then strippedData matches StripParameterSets and no keyframe decoder config is derived
+    expect(frameInfo.isKeyframe).toBe(false);
+    expect(frameInfo.strippedData).toEqual(H265.StripParameterSets(frame));
+    expect(frameInfo.strippedData).toEqual(
+      new Uint8Array(H265FrameBuilder.slice(1, H265SliceType.P)),
+    );
+    expect(frameInfo.decoderConfig).toBeUndefined();
+  });
+
+  it("should derive a decoder config for keyframes via InspectFrame", () => {
+    // Given a keyframe with parameter sets
+    const frame = H265FrameBuilder.keyframeWithParameterSets();
+
+    // When InspectFrame inspects it
+    const frameInfo = H265.InspectFrame(frame);
+
+    // Then the decoder config matches ParseDecoderConfig and stripped bytes are omitted
+    expect(frameInfo.isKeyframe).toBe(true);
+    expect(frameInfo.decoderConfig).toEqual(H265.ParseDecoderConfig(frame));
+    expect(frameInfo.strippedData).toBeUndefined();
   });
 
   it("should detect complete VPS SPS PPS parameter sets", () => {
