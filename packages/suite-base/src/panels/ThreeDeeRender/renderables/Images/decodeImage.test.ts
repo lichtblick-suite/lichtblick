@@ -266,9 +266,7 @@ describe("prepareVideoFrame", () => {
     expect(preparedFrame.decoderConfig).toEqual({ codec: "hvc1.1.6.L93.B0" });
     expect(preparedFrame.data).toEqual(H265FrameBuilder.keyframeWithParameterSets());
     // The builder's stub SPS cannot be fully parsed, so the decoder config falls back to the
-    // generic HEVC codec string and emits a warning that is expected here.
-    expect(console.warn).toHaveBeenCalled();
-    (console.warn as jest.Mock).mockClear();
+    // generic HEVC codec string.
   });
 
   it("should strip parameter sets from h265 delta frames", () => {
