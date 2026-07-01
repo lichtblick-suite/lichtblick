@@ -619,13 +619,18 @@ describe("Workspace - fetchLayoutFromUrl", () => {
     });
 
     // When
-    render(<Workspace deepLinks={["https://app.example.com/?layoutUrl=file:///local/layout.json"]} />);
+    render(
+      <Workspace deepLinks={["https://app.example.com/?layoutUrl=file:///local/layout.json"]} />,
+    );
 
     // Then
     await waitFor(() => {
-      expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Layout URL must use http or https protocol", {
-        variant: "error",
-      });
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+        "Layout URL must use http or https protocol",
+        {
+          variant: "error",
+        },
+      );
     });
   });
 

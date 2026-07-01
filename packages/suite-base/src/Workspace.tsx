@@ -588,7 +588,8 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
         // Derive filename from sanitized pathname (no credentials in name)
         const rawFilename = parsedUrl.pathname.split("/").pop();
-        const filename = rawFilename != undefined && rawFilename !== "" ? rawFilename : "layout.json";
+        const filename =
+          rawFilename != undefined && rawFilename !== "" ? rawFilename : "layout.json";
         const layoutName = path.basename(filename, path.extname(filename));
 
         // Find existing layouts with the same name before saving (safe deduplication)
