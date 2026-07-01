@@ -167,6 +167,9 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
   #disposed = false;
 
+  // Cache canonical codec normalization by incoming format string to avoid repeated prefix checks
+  // while still handling format changes on a reused renderable instance.
+  readonly #codecByFormat = new Map<string, VideoCodec | undefined>();
   #codec: VideoCodec | undefined;
 
   public constructor(topicName: string, renderer: IRenderer, userData: ImageUserData) {
@@ -276,7 +279,10 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.userData.image = image;
 
     const seq = ++this.#receivedImageSequenceNumber;
-    this.#codec ??= "format" in image ? canonicalVideoCodec(image.format) : undefined;
+    const incomingCodec = "format" in image ? this.#cachedCanonicalCodec(image.format) : undefined;
+    if (incomingCodec !== this.#codec) {
+      this.#resetCodecStateForFormatChange(incomingCodec);
+    }
     const codec = this.#codec;
 
     if (codec != undefined) {
@@ -324,6 +330,29 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     // Raw (non-video) images decode in parallel; the `#displayedImageSequenceNumber > seq` guard
     // inside `#startDecode` drops late results.
     void this.#startDecode(image, seq, resizeWidth, onDecoded);
+  }
+
+  #cachedCanonicalCodec(format: string): VideoCodec | undefined {
+    if (this.#codecByFormat.has(format)) {
+      return this.#codecByFormat.get(format);
+    }
+
+    const codec = canonicalVideoCodec(format);
+    this.#codecByFormat.set(format, codec);
+    return codec;
+  }
+
+  #resetCodecStateForFormatChange(nextCodec: VideoCodec | undefined): void {
+    this.#codec = nextCodec;
+    this.#cachedVideoDecoderConfig = undefined;
+    this.#videoFirstMessageTime = undefined;
+    this.#lastVideoMessageTime = undefined;
+    this.#lastQueuedVideoMessageTime = undefined;
+    this.#waitingForVideoKeyframe = nextCodec != undefined;
+    this.#canReplayVideoGop = false;
+    this.#pendingVideoDecodeQueue.length = 0;
+    this.#videoFrameHistory.length = 0;
+    this.videoPlayer?.resetForSeek();
   }
 
   /**
