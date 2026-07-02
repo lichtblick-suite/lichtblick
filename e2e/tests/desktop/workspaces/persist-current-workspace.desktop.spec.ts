@@ -11,10 +11,12 @@ import { DataSourceDialog, WorkspaceSwitcher } from "../../../page-objects";
  * And the seeded workspace is listed alongside the other workspaces
  */
 test.use({
-  preSeededWorkspaces: [
-    { id: "ws-alpha", name: "Alpha", namespace: "local", current: true },
-    { id: "ws-beta", name: "Beta", namespace: "org" },
-  ],
+  preSeededWorkspaces: {
+    workspaces: [
+      { id: "ws-alpha", name: "Alpha", namespace: "local", current: true },
+      { id: "ws-beta", name: "Beta", namespace: "org" },
+    ],
+  },
 });
 
 test(

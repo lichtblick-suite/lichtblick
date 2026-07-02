@@ -26,7 +26,11 @@ export type ElectronFixtures = {
   electronApp: ElectronApplication;
   mainWindow: Page;
   preInstalledExtensions?: string[];
-  preSeededWorkspaces?: PreSeededWorkspace[];
+  // Playwright treats an option value that is an array whose second element is an object as a
+  // `[value, options]` fixture tuple (see `isFixtureTuple`), which silently collapses a bare
+  // `PreSeededWorkspace[]` down to its first entry and crashes the fixture with
+  // "object is not iterable". Wrapping the list in an object keeps it passed through intact.
+  preSeededWorkspaces?: { workspaces: PreSeededWorkspace[] };
 };
 
 const WEBPACK_PATH = path.resolve(__dirname, "../../desktop/.webpack");
@@ -34,7 +38,7 @@ const WEBPACK_PATH = path.resolve(__dirname, "../../desktop/.webpack");
 export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
   electronArgs: [[], { option: true }],
   preInstalledExtensions: [[], { option: true }],
-  preSeededWorkspaces: [[], { option: true }],
+  preSeededWorkspaces: [{ workspaces: [] }, { option: true }],
 
   electronApp: async ({ electronArgs, preInstalledExtensions, preSeededWorkspaces }, use) => {
     checkBuild(WEBPACK_PATH);
@@ -46,7 +50,7 @@ export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
       preInstallExtensionInUserFolder(homeDir, filename);
     }
 
-    for (const workspace of preSeededWorkspaces ?? []) {
+    for (const workspace of preSeededWorkspaces?.workspaces ?? []) {
       preSeedWorkspace(homeDir, workspace);
     }
 
