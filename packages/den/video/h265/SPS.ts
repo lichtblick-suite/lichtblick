@@ -133,7 +133,6 @@ export class SPS {
     } else if (this.chroma_format_idc === 2) {
       // 4:2:2
       subWidthC = 2;
-      subHeightC = 1;
     }
 
     const leftPixelCrop = this.conf_win_left_offset * subWidthC;
@@ -180,16 +179,7 @@ export class SPS {
     this.general_profile_space = bitstream.u_2();
     this.general_tier_flag = bitstream.u_1();
     this.general_profile_idc = bitstream.u(5);
-
-    // The 32 compatibility flags are stored in reverse bit order for the codec string: flag[i] is
-    // read MSB-first but placed at bit position i, matching ISO/IEC 14496-15 Annex E.
-    let compatibilityReversed = 0;
-    for (let i = 0; i < PROFILE_COMPATIBILITY_FLAG_COUNT; i++) {
-      if (bitstream.u_1() === 1) {
-        compatibilityReversed |= 1 << i;
-      }
-    }
-    this.general_profile_compatibility_flags = compatibilityReversed >>> 0;
+    this.general_profile_compatibility_flags = readReversedCompatibilityFlags(bitstream);
 
     for (let i = 0; i < CONSTRAINT_INDICATOR_BYTE_COUNT; i++) {
       this.general_constraint_indicator_bytes.push(bitstream.u_8());
@@ -197,35 +187,61 @@ export class SPS {
 
     this.general_level_idc = bitstream.u_8();
 
-    const subLayerProfilePresentFlag: number[] = [];
-    const subLayerLevelPresentFlag: number[] = [];
+    // Read per-sub-layer presence flags (ISO/IEC 23008-2 §7.3.3)
+    const subLayerProfilePresent: number[] = [];
+    const subLayerLevelPresent: number[] = [];
     for (let i = 0; i < maxNumSubLayersMinus1; i++) {
-      subLayerProfilePresentFlag.push(bitstream.u_1());
-      subLayerLevelPresentFlag.push(bitstream.u_1());
+      subLayerProfilePresent.push(bitstream.u_1());
+      subLayerLevelPresent.push(bitstream.u_1());
     }
 
+    // Padding: reserved_zero_2bits to align remaining slots up to 8 sub-layers
     if (maxNumSubLayersMinus1 > 0) {
       for (let i = maxNumSubLayersMinus1; i < 8; i++) {
         bitstream.u_2(); // reserved_zero_2bits
       }
     }
 
+    // Skip optional sub-layer profile/level data
     for (let i = 0; i < maxNumSubLayersMinus1; i++) {
-      if (subLayerProfilePresentFlag[i] === 1) {
-        bitstream.u_2(); // sub_layer_profile_space
-        bitstream.u_1(); // sub_layer_tier_flag
-        bitstream.u(5); // sub_layer_profile_idc
-        for (let j = 0; j < PROFILE_COMPATIBILITY_FLAG_COUNT; j++) {
-          bitstream.u_1(); // sub_layer_profile_compatibility_flag
-        }
-        for (let j = 0; j < CONSTRAINT_INDICATOR_BYTE_COUNT; j++) {
-          bitstream.u_8(); // sub_layer constraint indicator flags
-        }
+      if (subLayerProfilePresent[i] === 1) {
+        skipSubLayerProfile(bitstream);
       }
-      if (subLayerLevelPresentFlag[i] === 1) {
+      if (subLayerLevelPresent[i] === 1) {
         bitstream.u_8(); // sub_layer_level_idc
       }
     }
+  }
+}
+
+/**
+ * Reads the 32 `general_profile_compatibility_flag` bits (ISO/IEC 23008-2 §7.3.3) from the
+ * bitstream and returns them with reversed bit order, as required for the codec string
+ * (ISO/IEC 14496-15 Annex E): flag[i] is read MSB-first but placed at bit position i.
+ */
+function readReversedCompatibilityFlags(bitstream: Bitstream): number {
+  let flags = 0;
+  for (let i = 0; i < PROFILE_COMPATIBILITY_FLAG_COUNT; i++) {
+    if (bitstream.u_1() === 1) {
+      flags |= 1 << i;
+    }
+  }
+  return flags >>> 0;
+}
+
+/**
+ * Skips all bits belonging to a single sub-layer profile block (ISO/IEC 23008-2 §7.3.3):
+ * profile_space, tier_flag, profile_idc, 32 compatibility flags, and 6 constraint bytes.
+ */
+function skipSubLayerProfile(bitstream: Bitstream): void {
+  bitstream.u_2(); // sub_layer_profile_space
+  bitstream.u_1(); // sub_layer_tier_flag
+  bitstream.u(5); // sub_layer_profile_idc
+  for (let i = 0; i < PROFILE_COMPATIBILITY_FLAG_COUNT; i++) {
+    bitstream.u_1(); // sub_layer_profile_compatibility_flag
+  }
+  for (let i = 0; i < CONSTRAINT_INDICATOR_BYTE_COUNT; i++) {
+    bitstream.u_8(); // sub_layer_constraint_indicator_flags
   }
 }
 

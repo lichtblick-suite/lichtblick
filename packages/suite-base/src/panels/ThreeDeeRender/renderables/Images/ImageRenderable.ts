@@ -282,7 +282,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     const seq = ++this.#receivedImageSequenceNumber;
     const incomingFormat = "format" in image ? image.format : undefined;
     const incomingCodec =
-      incomingFormat != undefined ? this.#cachedCanonicalCodec(incomingFormat) : undefined;
+      incomingFormat == undefined ? undefined : this.#cachedCanonicalCodec(incomingFormat);
     const incomingVideoFormat = incomingCodec == undefined ? undefined : incomingFormat;
     if (incomingCodec !== this.#codec || incomingVideoFormat !== this.#videoFormat) {
       this.#resetCodecStateForFormatChange(incomingCodec, incomingVideoFormat);

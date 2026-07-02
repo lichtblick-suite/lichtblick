@@ -417,7 +417,7 @@ describe("ImageRenderable error handling", () => {
     await decodeAndSettle(renderable, h265Keyframe, { sec: 2, nsec: 8_000_000 });
 
     // THEN — no additional resetForSeek beyond what the prime triggered
-    expect(resetForSeek.mock.calls.length).toBe(resetCountAfterPrime);
+    expect(resetForSeek.mock.calls).toHaveLength(resetCountAfterPrime);
     self.createImageBitmap = originalCreateImageBitmap;
   });
 
