@@ -1,11 +1,11 @@
-/** @vitest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { Mock } from "vitest";
+/** @vitest-environment jsdom */
+
 import { act, render, waitFor } from "@testing-library/react";
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
+import type { Mock } from "vitest";
 
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -39,18 +39,18 @@ vi.mock("monaco-editor", async () => ({
   KeyCode: { KeyS: 55 },
 }));
 
-vi.mock("@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode", async () =>
-  vi.fn(async (code: string) => code),
-);
+vi.mock("@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode", async () => ({
+  default: vi.fn(async (code: string) => code),
+}));
 
 type MockModel = {
   uri: { path: string; toString: () => string };
   value: string;
   options: Record<string, unknown>;
-  getValue: Mock<string, []>;
-  setValue: Mock<void, [string]>;
-  updateOptions: Mock<void, [Record<string, unknown>]>;
-  getFullModelRange: Mock<Record<string, never>, []>;
+  getValue: Mock<() => string>;
+  setValue: Mock<(next: string) => void>;
+  updateOptions: Mock<(opts: Record<string, unknown>) => void>;
+  getFullModelRange: Mock<() => Record<string, never>>;
 };
 vi.mock("monaco-editor/esm/vs/editor/editor.api", async () => {
   const models = new Map<string, MockModel>();
@@ -148,17 +148,19 @@ const createMockEditor = () => {
 };
 
 vi.mock("react-monaco-editor", async () => {
-  return function MockMonacoEditor(props: {
-    editorWillMount?: (monaco: unknown) => unknown;
-    editorDidMount?: (editor: unknown, monaco: unknown) => void;
-    onChange?: (code: string) => void;
-  }) {
-    const mockMonacoApi = await vi.importMock("monaco-editor/esm/vs/editor/editor.api");
-    mockOnChange = props.onChange;
-    mockEditor = createMockEditor();
-    props.editorWillMount?.(mockMonacoApi);
-    props.editorDidMount?.(mockEditor, mockMonacoApi);
-    return undefined;
+  const mockMonacoApi = (await import("monaco-editor/esm/vs/editor/editor.api")) as any;
+  return {
+    default: function MockMonacoEditor(props: {
+      editorWillMount?: (monaco: unknown) => unknown;
+      editorDidMount?: (editor: unknown, monaco: unknown) => void;
+      onChange?: (code: string) => void;
+    }) {
+      mockOnChange = props.onChange;
+      mockEditor = createMockEditor();
+      props.editorWillMount?.(mockMonacoApi);
+      props.editorDidMount?.(mockEditor, mockMonacoApi);
+      return undefined;
+    },
   };
 });
 
@@ -179,20 +181,24 @@ let resizeDetectorOptions:
   | { onResize?: (payload: { width?: number; height?: number }) => void }
   | undefined;
 
-const userScriptProjectConfig = {
+const userScriptProjectConfig = vi.hoisted(() => ({
   rosLib: { fileName: "ros-lib.d.ts" },
   declarations: [{ fileName: "types.d.ts", sourceCode: "// declarations" }],
   utilityFiles: [{ filePath: "/utility.ts", sourceCode: "export const util = 1;" }],
-};
+}));
 
-vi.mock("@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig", async () => ({
+vi.mock(
+  "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/typescript/projectConfig",
+  async () => ({
     __esModule: true,
     getUserScriptProjectConfig: vi.fn(() => userScriptProjectConfig),
     __userScriptProjectConfig: userScriptProjectConfig,
   }),
 );
 
-vi.mock("@lichtblick/suite-base/stories/inScreenshotTests", async () => vi.fn(() => false));
+vi.mock("@lichtblick/suite-base/stories/inScreenshotTests", async () => ({
+  default: vi.fn(() => false),
+}));
 
 // Tests
 
@@ -439,17 +445,17 @@ describe("Editor", () => {
   it("Given a formatting failure When the provider runs Then it returns an empty edit set", async () => {
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    const getPrettifiedCode = await vi.importMock(
-      "@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode",
-    );
-    getPrettifiedCode.mockRejectedValueOnce(new Error("formatting failure"));
+    const getPrettifiedCode = (await import(
+      "@lichtblick/suite-base/panels/UserScriptEditor/getPrettifiedCode"
+    )) as any;
+    getPrettifiedCode.default.mockRejectedValueOnce(new Error("formatting failure"));
 
     await act(async () => {
       renderEditor();
     });
 
     const provider = (monacoApi.languages.registerDocumentFormattingEditProvider as Mock).mock
-      .calls[0][1];
+      .calls[0]![1];
     const model = monacoApi.editor.createModel(
       "code",
       "typescript",

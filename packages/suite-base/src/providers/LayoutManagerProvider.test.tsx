@@ -25,9 +25,9 @@ vi.mock("@lichtblick/suite-base/context/RemoteLayoutStorageContext");
 
 const mockLayoutManager = new MockLayoutManager();
 
-vi.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", async () =>
-  vi.fn(() => mockLayoutManager),
-);
+vi.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", async () => ({
+  default: vi.fn(() => mockLayoutManager),
+}));
 
 describe("LayoutManagerProvider", () => {
   // Mock necessary hooks to render <LayoutManagerProvider /> component, otherwise it will fail

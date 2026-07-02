@@ -149,7 +149,7 @@ describe("LayoutManager", () => {
       const deletedLayout = LayoutBuilder.layout({
         syncInfo: { status: "locally-deleted", lastRemoteSavedAt: undefined },
       });
-      const listSpy = vi.spyOn(mockLocalStorage, "list");
+      const listSpy = mockLocalStorage.list;
       listSpy.mockResolvedValue([activeLayout, deletedLayout]);
 
       // When
@@ -284,7 +284,7 @@ describe("LayoutManager", () => {
       expect(result?.id).toBe(layoutId);
       expect(result?.name).toBe("Remote Layout");
       expect(mockRemoteStorage.getLayout).toHaveBeenCalledWith(layoutId);
-      expect(vi.spyOn(mockLocalStorage, "put")).toHaveBeenCalled();
+      expect(mockLocalStorage.put).toHaveBeenCalled();
     });
 
     it("should return undefined when layout does not exist locally or remotely", async () => {
@@ -305,7 +305,7 @@ describe("LayoutManager", () => {
       // Then
       expect(result).toBe(undefined);
       expect(mockRemoteStorage.getLayout).toHaveBeenCalledWith(layoutId);
-      expect(vi.spyOn(mockLocalStorage, "put")).not.toHaveBeenCalled();
+      expect(mockLocalStorage.put).not.toHaveBeenCalled();
     });
   });
 
@@ -344,7 +344,7 @@ describe("LayoutManager", () => {
         permission,
       });
 
-      const putSpy = vi.spyOn(mockLocalStorage, "put");
+      const putSpy = mockLocalStorage.put;
       putSpy.mockResolvedValue(savedLayout);
       putSpy.mockResolvedValue(savedLayout);
 
@@ -389,7 +389,7 @@ describe("LayoutManager", () => {
       });
 
       mockRemoteStorage.saveNewLayout.mockResolvedValue(savedRemoteLayout);
-      const putSpy = vi.spyOn(mockLocalStorage, "put");
+      const putSpy = mockLocalStorage.put;
       putSpy.mockResolvedValue(savedLocalLayout);
       layoutManager.setOnline({ online: true });
 
@@ -563,7 +563,7 @@ describe("LayoutManager", () => {
       });
 
       // Then
-      expect(vi.spyOn(mockLocalStorage, "put")).toHaveBeenCalledWith(
+      expect(mockLocalStorage.put).toHaveBeenCalledWith(
         "local",
         expect.objectContaining({
           id: layoutId,
@@ -719,7 +719,7 @@ describe("LayoutManager", () => {
       await layoutManager.deleteLayout({ id: layoutId });
 
       // Then
-      expect(vi.spyOn(mockLocalStorage, "put")).toHaveBeenCalledWith(
+      expect(mockLocalStorage.put).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           id: layoutId,
@@ -836,7 +836,7 @@ describe("LayoutManager", () => {
       const result = await layoutManager.overwriteLayout({ id: layoutId });
 
       // Then
-      expect(vi.spyOn(mockLocalStorage, "put")).toHaveBeenCalledWith(
+      expect(mockLocalStorage.put).toHaveBeenCalledWith(
         "local",
         expect.objectContaining({
           id: layoutId,
@@ -879,7 +879,7 @@ describe("LayoutManager", () => {
       const result = await layoutManager.overwriteLayout({ id: layoutId });
 
       // Then
-      expect(vi.spyOn(mockLocalStorage, "put")).toHaveBeenCalledWith(
+      expect(mockLocalStorage.put).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           id: layoutId,
@@ -938,7 +938,7 @@ describe("LayoutManager", () => {
       expect(result.id).toBe(layoutId);
       expect(result.working).toBe(undefined);
       expect(result.baseline).toEqual(existingLayout.baseline);
-      expect(vi.spyOn(mockLocalStorage, "put")).toHaveBeenCalledWith(
+      expect(mockLocalStorage.put).toHaveBeenCalledWith(
         "local",
         expect.objectContaining({
           id: layoutId,
@@ -1001,7 +1001,7 @@ describe("LayoutManager", () => {
       expect(result.working).toBe(undefined);
       expect(result.syncInfo?.status).toBe("new");
       expect(result.syncInfo?.lastRemoteSavedAt).toBeDefined();
-      expect(vi.spyOn(mockLocalStorage, "put")).toHaveBeenCalledTimes(2);
+      expect(mockLocalStorage.put).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -1018,7 +1018,7 @@ describe("LayoutManager", () => {
       await manager.syncWithRemote(abortController.signal);
 
       // Then
-      expect(vi.spyOn(mockLocalStorage, "list")).not.toHaveBeenCalled();
+      expect(mockLocalStorage.list).not.toHaveBeenCalled();
     });
 
     it("should do nothing when there is an ongoing sync", async () => {
@@ -1034,7 +1034,7 @@ describe("LayoutManager", () => {
       await layoutManager.syncWithRemote(abortController.signal);
 
       // Then
-      expect(vi.spyOn(mockLocalStorage, "list")).not.toHaveBeenCalled();
+      expect(mockLocalStorage.list).not.toHaveBeenCalled();
       expect(mockRemoteStorage.getLayouts).not.toHaveBeenCalled();
     });
 
@@ -1066,7 +1066,7 @@ describe("LayoutManager", () => {
       const testError = new Error("Previous error");
       const abortController = new AbortController();
 
-      vi.spyOn(mockLocalStorage, "list").mockResolvedValue([]);
+      mockLocalStorage.list.mockResolvedValue([]);
       vi.spyOn(mockRemoteStorage, "getLayouts").mockResolvedValue([]);
       layoutManager.setOnline({ online: true });
       layoutManager.setError(testError);

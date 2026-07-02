@@ -23,31 +23,59 @@ import DiagnosticStatusPanel from "./DiagnosticStatusPanel";
 
 vi.mock("@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics");
 
-describe("DiagnosticStatusPanel", () => {
-  const mockSaveConfig = vi.fn();
-  const mockUseDataSourceInfo = vi.fn(() => ({
+const mockSaveConfig = vi.hoisted(() => vi.fn());
+const mockUseDataSourceInfo = vi.hoisted(() =>
+  vi.fn(() => ({
     topics: [],
-  }));
-  const mockUsePanelContext = vi.fn(() => ({
+  })),
+);
+const mockUsePanelContext = vi.hoisted(() =>
+  vi.fn(() => ({
     openSiblingPanel: vi.fn(),
-  }));
-  const mockUseAvailableDiagnostics = vi.fn();
+  })),
+);
+const mockUseAvailableDiagnostics = vi.hoisted(() => vi.fn());
 
-  vi.mock("@lichtblick/suite-base/PanelAPI", async () => ({
+vi.mock("@lichtblick/suite-base/PanelAPI", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@lichtblick/suite-base/PanelAPI")>();
+  return {
+    ...actual,
     useDataSourceInfo: mockUseDataSourceInfo,
-  }));
-  vi.mock("@lichtblick/suite-base/components/PanelContext", async () => ({
+  };
+});
+vi.mock("@lichtblick/suite-base/components/PanelContext", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@lichtblick/suite-base/components/PanelContext")>();
+  return {
+    ...actual,
     usePanelContext: mockUsePanelContext,
-  }));
+  };
+});
 
-  vi.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", async () => ({
+vi.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("@lichtblick/suite-base/providers/PanelStateContextProvider")
+    >();
+  return {
+    ...actual,
     usePanelSettingsTreeUpdate: vi.fn(),
-  }));
+  };
+});
 
-  vi.mock("@lichtblick/suite-base/panels/DiagnosticStatus/hooks/useAvailableDiagnostics", async () => ({
+vi.mock(
+  "@lichtblick/suite-base/panels/DiagnosticStatus/hooks/useAvailableDiagnostics",
+  async () => ({
     __esModule: true,
     default: mockUseAvailableDiagnostics,
-  }));
+  }),
+);
+
+describe("DiagnosticStatusPanel", () => {
+  afterEach(() => {
+    (console.error as Mock).mockClear();
+    (console.warn as Mock).mockClear();
+  });
 
   const setup = (configOverride: Partial<DiagnosticStatusConfig> = {}) => {
     const config = DiagnosticsBuilder.statusConfig({

@@ -63,9 +63,11 @@ const expectedExtensionInfo: ExtensionInfo = {
 const EXT_FILE_TURTLESIM = `${__dirname}/../../test/fixtures/lichtblick.suite-extension-turtlesim-0.0.1.foxe`;
 
 vi.mock("@lichtblick/log", async () => ({
-  getLogger: vi.fn(() => ({
-    debug: vi.fn(),
-  })),
+  default: {
+    getLogger: vi.fn(() => ({
+      debug: vi.fn(),
+    })),
+  },
 }));
 
 describe("IdbExtensionLoader", () => {
@@ -253,7 +255,7 @@ describe("IdbExtensionLoader", () => {
       const rawContent = "console.log('valid extension');";
       const jsZip = new JSZip();
       jsZip.file(BasicBuilder.string(), rawContent);
-      vi.spyOn(JSZip.prototype, "loadAsync").mockResolvedValue(jsZip);
+      const loadAsyncSpy = vi.spyOn(JSZip.prototype, "loadAsync").mockResolvedValue(jsZip);
       const extension: StoredExtension = {
         info: {
           id: BasicBuilder.string(),
@@ -265,6 +267,7 @@ describe("IdbExtensionLoader", () => {
       await expect(loader.loadExtension(extension.info.id)).rejects.toThrow(
         `Extension is corrupted: missing ${ALLOWED_FILES.EXTENSION}`,
       );
+      loadAsyncSpy.mockRestore();
     });
   });
 

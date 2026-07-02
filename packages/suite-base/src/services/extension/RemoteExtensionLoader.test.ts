@@ -14,9 +14,11 @@ import { RemoteExtensionLoader } from "./RemoteExtensionLoader";
 
 vi.mock("@lichtblick/suite-base/api/extensions/ExtensionsAPI");
 vi.mock("@lichtblick/log", async () => ({
-  getLogger: vi.fn(() => ({
-    debug: vi.fn(),
-  })),
+  default: {
+    getLogger: vi.fn(() => ({
+      debug: vi.fn(),
+    })),
+  },
 }));
 
 const MockedExtensionsAPI = ExtensionsAPI as MockedClass<typeof ExtensionsAPI>;

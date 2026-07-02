@@ -9,9 +9,11 @@ import { DesktopExtensionLoader } from "./DesktopExtensionLoader";
 import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
 vi.mock("@lichtblick/log", async () => ({
-  getLogger: vi.fn(() => ({
-    debug: vi.fn(),
-  })),
+  default: {
+    getLogger: vi.fn(() => ({
+      debug: vi.fn(),
+    })),
+  },
 }));
 
 const genericString = (): string =>

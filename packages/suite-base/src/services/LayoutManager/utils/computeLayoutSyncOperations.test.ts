@@ -7,9 +7,11 @@ import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder
 import computeLayoutSyncOperations from "./computeLayoutSyncOperations";
 
 vi.mock("@lichtblick/log", async () => ({
-  getLogger: vi.fn(() => ({
-    warn: vi.fn(),
-  })),
+  default: {
+    getLogger: vi.fn(() => ({
+      warn: vi.fn(),
+    })),
+  },
 }));
 
 describe("computeLayoutSyncOperations", () => {

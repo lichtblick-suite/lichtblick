@@ -17,15 +17,17 @@ import { IIterableSource, Initialization } from "../IIterableSource";
 // so mockLogWarn is guaranteed to be defined before the factory executes.
 const mockLogWarn = vi.fn();
 vi.mock("@lichtblick/log", async () => ({
-  getLogger: vi.fn(() => ({
-    debug: vi.fn(),
-    info: vi.fn(),
-    // Wrap in an arrow function so mockLogWarn is only read when log.warn() is actually
-    // invoked during a test (after the `const mockLogWarn = vi.fn()` line has executed),
-    // not at module-import time when vi.mock factories are evaluated.
-    warn: (...args: unknown[]) => mockLogWarn(...args),
-    error: vi.fn(),
-  })),
+  default: {
+    getLogger: vi.fn(() => ({
+      debug: vi.fn(),
+      info: vi.fn(),
+      // Wrap in an arrow function so mockLogWarn is only read when log.warn() is actually
+      // invoked during a test (after the `const mockLogWarn = vi.fn()` line has executed),
+      // not at module-import time when vi.mock factories are evaluated.
+      warn: (...args: unknown[]) => mockLogWarn(...args),
+      error: vi.fn(),
+    })),
+  },
 }));
 
 describe("MultiIterableSource", () => {

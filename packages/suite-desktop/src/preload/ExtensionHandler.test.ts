@@ -1,16 +1,31 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { Mock } from "vitest";
 import { existsSync } from "fs";
 import { readdir, readFile, mkdir, rm, writeFile } from "fs/promises";
 import JSZip from "jszip";
 import { join } from "path";
 import randomString from "randomstring";
+import type { Mock } from "vitest";
 
 import { ExtensionsHandler } from "./ExtensionHandler";
 import type { ExtensionPackageJson } from "./types";
 import { DesktopExtension } from "../common/types";
+
+const { mockLogError, mockLogDebug, mockLogWarn } = vi.hoisted(() => ({
+  mockLogError: vi.fn(),
+  mockLogDebug: vi.fn(),
+  mockLogWarn: vi.fn(),
+}));
+vi.mock("@lichtblick/log", () => ({
+  default: {
+    getLogger: () => ({
+      error: mockLogError,
+      debug: mockLogDebug,
+      warn: mockLogWarn,
+    }),
+  },
+}));
 
 vi.mock("fs", async () => ({
   existsSync: vi.fn(),
@@ -24,9 +39,13 @@ vi.mock("fs/promises", async () => ({
   writeFile: vi.fn(),
 }));
 
-vi.mock("jszip", async () => ({
-  loadAsync: vi.fn(),
-}));
+vi.mock("jszip", async () => {
+  const loadAsync = vi.fn();
+  return {
+    default: { loadAsync },
+    loadAsync,
+  };
+});
 
 const genericString = (options: Randomstring.GenerateOptions = {}): string =>
   randomString.generate({
@@ -525,7 +544,6 @@ describe("ExtensionsHandler", () => {
 
       const result = await extensionsHandler.list();
 
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         id: `${mockPackageJson.publisher}.${mockPackageJson.name}`,
@@ -535,10 +553,12 @@ describe("ExtensionsHandler", () => {
         changelog: mockChangelogContent,
       });
 
-      expect(consoleErrorSpy.mock.calls[0]![0]).toBe("[extension]");
-      expect(consoleErrorSpy.mock.calls[0]![1]?.message).toBe("Failed to read package.json");
-
-      consoleErrorSpy.mockRestore();
+      expect(mockLogError).toHaveBeenCalledWith(
+        "[extension]",
+        expect.objectContaining({
+          message: expect.stringContaining("Failed to read package.json"),
+        }),
+      );
     });
   });
 
@@ -660,8 +680,6 @@ describe("ExtensionsHandler", () => {
   });
 
   describe("load", () => {
-    const getByIdSpy = vi.spyOn(extensionsHandler, "get");
-
     it("should throw an error when extension is not found", async () => {
       // Given
       const extensionId = genericString();
@@ -678,8 +696,10 @@ describe("ExtensionsHandler", () => {
       const extensionId = genericString();
       const desktopExtension = generateDesktopExtension();
 
-      getByIdSpy.mockResolvedValue(desktopExtension);
-      (readFile as Mock).mockReturnValueOnce(JSON.stringify(desktopExtension.packageJson));
+      const getByIdSpy = vi.spyOn(extensionsHandler, "get").mockResolvedValue(desktopExtension);
+      (readFile as Mock)
+        .mockResolvedValueOnce(JSON.stringify(desktopExtension.packageJson))
+        .mockResolvedValueOnce("source-code");
 
       // When
       await extensionsHandler.load(extensionId);

@@ -14,7 +14,8 @@ describe("buildContributionPoints", () => {
   });
 
   it("should initialize contribution objects", () => {
-    const consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorMock = console.error as ReturnType<typeof vi.fn>;
+    consoleErrorMock.mockClear();
     const extensionInfo = ExtensionBuilder.extensionInfo();
 
     const result = buildContributionPoints(extensionInfo, "");
@@ -23,7 +24,7 @@ describe("buildContributionPoints", () => {
     expect(result).toHaveProperty("messageConverters", []);
     expect(result).toHaveProperty("topicAliasFunctions", []);
     expect(result).toHaveProperty("panelSettings", {});
-    consoleErrorMock.mockRestore();
+    consoleErrorMock.mockClear();
   });
 
   it("should register a panel", () => {
@@ -62,7 +63,8 @@ describe("buildContributionPoints", () => {
   });
 
   it("should warn when trying to register a duplicate panel", () => {
-    const logWarnMock = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const consoleWarnMock = console.warn as ReturnType<typeof vi.fn>;
+    consoleWarnMock.mockClear();
     const extensionInfo = ExtensionBuilder.extensionInfo();
     const panelName = BasicBuilder.string();
     const panelId = `${extensionInfo.qualifiedName}.${panelName}`;
@@ -84,11 +86,11 @@ describe("buildContributionPoints", () => {
     const result = buildContributionPoints(extensionInfo, extensionSource);
 
     expect(result.panels[panelId]).toBeDefined();
-    expect(logWarnMock).toHaveBeenCalledWith(
+    expect(consoleWarnMock).toHaveBeenCalledWith(
       expect.stringContaining(`Panel ${panelId} is already registered`),
     );
     delete (globalThis as any).panel;
-    logWarnMock.mockRestore();
+    consoleWarnMock.mockClear();
   });
 
   it("should register a message converter", () => {

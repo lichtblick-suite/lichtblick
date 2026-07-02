@@ -36,7 +36,7 @@ function renderVirtualizedTree(props: Partial<React.ComponentProps<typeof Virtua
 
 describe("VirtualizedTree", () => {
   const mockOnToggleExpand = vi.fn();
-  const { useVirtualizer } = await vi.importMock("@tanstack/react-virtual");
+  const { useVirtualizer } = (await import("@tanstack/react-virtual")) as any;
 
   beforeEach(() => {
     vi.clearAllMocks();

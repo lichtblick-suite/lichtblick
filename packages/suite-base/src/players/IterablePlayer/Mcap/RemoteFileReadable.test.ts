@@ -16,9 +16,9 @@ vi.mock("@lichtblick/suite-base/util/CachedFilelike", async () => {
   }));
 });
 
-vi.mock("@lichtblick/suite-base/util/BrowserHttpReader", async () => {
-  return vi.fn();
-});
+vi.mock("@lichtblick/suite-base/util/BrowserHttpReader", async () => ({
+  default: vi.fn(),
+}));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const CachedFilelike = require("@lichtblick/suite-base/util/CachedFilelike");

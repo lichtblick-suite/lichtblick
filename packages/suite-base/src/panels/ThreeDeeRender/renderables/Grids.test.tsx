@@ -1,8 +1,7 @@
-/** @vitest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+/** @vitest-environment jsdom */
 
 import { setupJestCanvasMock } from "jest-canvas-mock";
 import type { Mock } from "vitest";

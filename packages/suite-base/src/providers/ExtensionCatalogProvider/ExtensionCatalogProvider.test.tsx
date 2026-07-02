@@ -1,13 +1,14 @@
-/** @vitest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+/** @vitest-environment jsdom */
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import type { Mock } from "vitest";
 import { act, render, renderHook, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
+import type { Mock } from "vitest";
 
 import { ExtensionPanelRegistration, PanelSettings } from "@lichtblick/suite";
 import { useConfigById } from "@lichtblick/suite-base/PanelAPI";
@@ -33,15 +34,12 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import ExtensionCatalogProvider from "./ExtensionCatalogProvider";
 
-vi.mock("@lichtblick/suite-base/util/isDesktopApp", async () => vi.fn());
+vi.mock("@lichtblick/suite-base/util/isDesktopApp", async () => ({ default: vi.fn() }));
 
 describe("ExtensionCatalogProvider", () => {
-  beforeEach(() => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-  });
-
   afterEach(() => {
-    (console.error as Mock).mockRestore();
+    (console.error as Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   // Helper functions for test initialization
@@ -489,8 +487,6 @@ describe("ExtensionCatalogProvider", () => {
   });
 
   it("should register a default config", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-
     function getDummyPanel(updatedConfig: Mock, childId: string) {
       function DummyComponent(): ReactNull {
         const [config] = useConfigById(childId);
@@ -549,8 +545,6 @@ describe("ExtensionCatalogProvider", () => {
     expect(updatedConfig.mock.calls.at(-1)).toEqual([
       { someString: "hello world", topics: { myTopic: { test: true } } },
     ]);
-
-    (console.error as Mock).mockRestore();
   });
 
   describe("isExtensionInstalled", () => {
@@ -725,7 +719,6 @@ describe("ExtensionCatalogProvider", () => {
 
     it("should log a warning and still remove extension data from state when uninstallExtension throws", async () => {
       (isDesktopApp as Mock).mockReturnValue(false);
-      vi.spyOn(console, "warn").mockImplementation(() => {});
 
       const extensionInfo = ExtensionBuilder.extensionInfo({ namespace: "local" });
       const uninstallFn = vi.fn().mockRejectedValue(new Error("Uninstall failed"));
@@ -752,8 +745,6 @@ describe("ExtensionCatalogProvider", () => {
       // Extension is removed from state despite the error
       expect(result.current.installedExtensions).toHaveLength(0);
       expect(result.current.isExtensionInstalled(extensionInfo.id)).toBe(false);
-
-      (console.warn as Mock).mockRestore();
     });
 
     it("should only remove the org entry when the same extension is installed in both local and org", async () => {
@@ -1055,7 +1046,6 @@ describe("ExtensionCatalogProvider", () => {
 
     it("should skip a duplicate camera model and log a warning when the same name is already registered", async () => {
       // Given: two extensions that both register a camera model with the same name
-      vi.spyOn(console, "warn").mockImplementation(() => {});
       const cameraModelName = BasicBuilder.string();
       const source = `
         module.exports = {
@@ -1082,8 +1072,6 @@ describe("ExtensionCatalogProvider", () => {
       // Then: only one camera model registered (second duplicate was skipped)
       expect(result.current.installedCameraModels.size).toBe(1);
       expect(result.current.installedCameraModels.has(cameraModelName)).toBe(true);
-
-      (console.warn as Mock).mockRestore();
     });
 
     it("should continue loading other extensions when a loader getExtensions throws", async () => {

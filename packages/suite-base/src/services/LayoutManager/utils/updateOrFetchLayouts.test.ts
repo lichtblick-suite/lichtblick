@@ -14,9 +14,11 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { updateOrFetchLayout } from "./updateOrFetchLayouts";
 
 vi.mock("@lichtblick/log", async () => ({
-  getLogger: vi.fn(() => ({
-    info: vi.fn(),
-  })),
+  default: {
+    getLogger: vi.fn(() => ({
+      info: vi.fn(),
+    })),
+  },
 }));
 
 describe("updateOrFetchLayout", () => {

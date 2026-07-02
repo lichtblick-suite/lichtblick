@@ -39,7 +39,7 @@ vi.mock("@lichtblick/suite-base/context/ExtensionMarketplaceContext", async () =
   useExtensionMarketplace: vi.fn(),
 }));
 
-vi.mock("@lichtblick/suite-base/util/isDesktopApp", async () => vi.fn());
+vi.mock("@lichtblick/suite-base/util/isDesktopApp", async () => ({ default: vi.fn() }));
 
 describe("ExtensionDetails Component", () => {
   const mockEnqueueSnackbar = vi.fn();

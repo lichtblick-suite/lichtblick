@@ -23,28 +23,37 @@ vi.mock("@lichtblick/suite-base/components/Panel", async () => ({
 
 vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/useMessagesByPath");
 vi.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useDecodedMessageRange");
-vi.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsTime", async () => ({
-  __esModule: true,
-  default: () => ({
-    startTime: { sec: 0, nsec: 0 },
-    currentTimeSinceStart: 0,
-    endTimeSinceStart: 10,
+vi.mock(
+  "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsTime",
+  async () => ({
+    __esModule: true,
+    default: () => ({
+      startTime: { sec: 0, nsec: 0 },
+      currentTimeSinceStart: 0,
+      endTimeSinceStart: 10,
+    }),
   }),
-}));
-vi.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsData", async () => ({
-  __esModule: true,
-  default: () => ({ pathState: [], data: { datasets: [] }, minY: 0 }),
-}));
-vi.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAndBounds", async () => ({
-  __esModule: true,
-  default: () => ({
-    yScale: {},
-    xScale: {},
-    databounds: { x: { min: 0, max: 10 }, y: { min: 0, max: 1 } },
-    width: 800,
-    sizeRef: { current: undefined },
+);
+vi.mock(
+  "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsData",
+  async () => ({
+    __esModule: true,
+    default: () => ({ pathState: [], data: { datasets: [] }, minY: 0 }),
   }),
-}));
+);
+vi.mock(
+  "@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAndBounds",
+  async () => ({
+    __esModule: true,
+    default: () => ({
+      yScale: {},
+      xScale: {},
+      databounds: { x: { min: 0, max: 10 }, y: { min: 0, max: 1 } },
+      width: 800,
+      sizeRef: { current: undefined },
+    }),
+  }),
+);
 vi.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useMessagePathDropConfig");
 vi.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings");
 vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
@@ -93,27 +102,26 @@ describe("StateTransitions", () => {
     mockUseMessagesByPath.mockReturnValue({});
   });
 
-  function renderPanel(config: Partial<StateTransitionConfig> = {}) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const StateTransitionsPanel = require("./index").default;
+  async function renderPanel(config: Partial<StateTransitionConfig> = {}) {
+    const { default: StateTransitionsPanel } = await import("./index");
     const saveConfig = vi.fn();
     return render(
       <StateTransitionsPanel config={{ ...defaultConfig, ...config }} saveConfig={saveConfig} />,
     );
   }
 
-  it("should render the panel", () => {
-    const { getByTestId } = renderPanel();
+  it("should render the panel", async () => {
+    const { getByTestId } = await renderPanel();
     expect(getByTestId("time-based-chart")).toBeDefined();
     expect(getByTestId("path-legend")).toBeDefined();
   });
 
-  it("should pass pathStrings to useMessagesByPath when no range data", () => {
+  it("should pass pathStrings to useMessagesByPath when no range data", async () => {
     mockUseDecodedMessageRange.mockReturnValue([{}]);
     const topicA = BasicBuilder.string();
     const topicB = BasicBuilder.string();
 
-    renderPanel({
+    await renderPanel({
       paths: [
         { value: topicA, timestampMethod: "receiveTime" },
         { value: topicB, timestampMethod: "receiveTime" },
@@ -123,31 +131,31 @@ describe("StateTransitions", () => {
     expect(mockUseMessagesByPath).toHaveBeenCalledWith([topicA, topicB]);
   });
 
-  it("should pass empty array to useMessagesByPath when range data is active", () => {
+  it("should pass empty array to useMessagesByPath when range data is active", async () => {
     const topic = BasicBuilder.string();
     const decodedMessages: MessageDataItemsByPath[] = [{ [topic]: [buildMessageAndData(topic)] }];
     mockUseDecodedMessageRange.mockReturnValue(decodedMessages);
 
-    renderPanel({
+    await renderPanel({
       paths: [{ value: topic, timestampMethod: "receiveTime" }],
     });
 
     expect(mockUseMessagesByPath).toHaveBeenCalledWith([]);
   });
 
-  it("should pass pathStrings when decodedMessages has matching paths but empty arrays", () => {
+  it("should pass pathStrings when decodedMessages has matching paths but empty arrays", async () => {
     const topic = BasicBuilder.string();
     const decodedMessages: MessageDataItemsByPath[] = [{ [topic]: [] }];
     mockUseDecodedMessageRange.mockReturnValue(decodedMessages);
 
-    renderPanel({
+    await renderPanel({
       paths: [{ value: topic, timestampMethod: "receiveTime" }],
     });
 
     expect(mockUseMessagesByPath).toHaveBeenCalledWith([topic]);
   });
 
-  it("should skip useMessagesByPath when any path has range data", () => {
+  it("should skip useMessagesByPath when any path has range data", async () => {
     const topicA = BasicBuilder.string();
     const topicB = BasicBuilder.string();
     const decodedMessages: MessageDataItemsByPath[] = [
@@ -158,7 +166,7 @@ describe("StateTransitions", () => {
     ];
     mockUseDecodedMessageRange.mockReturnValue(decodedMessages);
 
-    renderPanel({
+    await renderPanel({
       paths: [
         { value: topicA, timestampMethod: "receiveTime" },
         { value: topicB, timestampMethod: "receiveTime" },

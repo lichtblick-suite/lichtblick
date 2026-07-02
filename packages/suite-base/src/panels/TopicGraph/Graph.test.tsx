@@ -1,6 +1,7 @@
-/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+/** @vitest-environment jsdom */
 
 import "@testing-library/jest-dom/vitest";
 import { render } from "@testing-library/react";
@@ -35,15 +36,15 @@ const mockCyInstance = {
   destroy: mockDestroy,
 };
 
-vi.mock("cytoscape", async () =>
-  Object.assign(
+vi.mock("cytoscape", async () => ({
+  default: Object.assign(
     vi.fn(() => mockCyInstance),
     {
       use: vi.fn(),
       warnings: vi.fn(),
     },
   ),
-);
+}));
 
 vi.mock("cytoscape-dagre", async () => ({}));
 

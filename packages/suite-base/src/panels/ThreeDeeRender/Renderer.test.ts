@@ -1825,7 +1825,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     const reprocessedBatch = addMessageEventBatchMock.mock.calls[0]?.[0];
     expect(reprocessedBatch).toHaveLength(numMessagesBeforeTime - 1);
   });
-  it.failing(
+  it.fails(
     "(does not) reset the cursor if number of messages added **and** removed before cursor are equal in a single update",
     () => {
       // Given: A renderer with messages starting at index 2

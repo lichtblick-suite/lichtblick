@@ -12,9 +12,11 @@ const mockFs = fs as Mocked<typeof fs>;
 
 // Mock the logger to avoid actual logging during tests
 vi.mock("@lichtblick/log", async () => ({
-  getLogger: () => ({
-    error: vi.fn(),
-  }),
+  default: {
+    getLogger: () => ({
+      error: vi.fn(),
+    }),
+  },
 }));
 
 describe("isFileToOpen", () => {

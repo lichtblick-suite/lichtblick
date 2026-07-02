@@ -1,12 +1,14 @@
-/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { Mock } from "vitest";
-import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
+/** @vitest-environment jsdom */
 
-import DiagnosticSummary from "@lichtblick/suite-base/panels/DiagnosticSummary";
+import { render, screen } from "@testing-library/react";
+import type { Mock } from "vitest";
+
+import "@testing-library/jest-dom/vitest";
+
+import DiagnosticSummary from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticSummary";
 import { DEFAULT_CONFIG } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import useDiagnostics, {
   UseDiagnosticsResult,
@@ -30,28 +32,29 @@ vi.mock("react-virtualized-auto-sizer", async () => ({
   }) => children({ height: 500, width: 500 }),
 }));
 
-describe("DiagnosticSummary", () => {
-  const mockSaveConfig = vi.fn();
-  const mockOpenSiblingPanel = vi.fn();
+const mockOpenSiblingPanel = vi.hoisted(() => vi.fn());
 
-  vi.mock("@lichtblick/suite-base/PanelAPI", async () => ({
-    useDataSourceInfo: vi.fn(() => ({
-      topics: [],
-    })),
-  }));
-
-  vi.mock("@lichtblick/suite-base/components/PanelContext", async () => ({
+vi.mock("@lichtblick/suite-base/components/PanelContext", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@lichtblick/suite-base/components/PanelContext")>();
+  return {
+    ...actual,
     usePanelContext: vi.fn(() => ({
       openSiblingPanel: mockOpenSiblingPanel,
     })),
-  }));
+  };
+});
 
-  vi.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", async () => ({
-    usePanelSettingsTreeUpdate: vi.fn(),
-  }));
+describe("DiagnosticSummary", () => {
+  const mockSaveConfig = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    (console.error as Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   function setup(overrideConfig: Partial<DiagnosticSummaryConfig> = {}) {

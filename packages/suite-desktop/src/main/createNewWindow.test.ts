@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { MockedFunction, MockedClass } from "vitest";
 import * as path from "path";
+import type { MockedFunction, MockedClass } from "vitest";
 
 // Mock all dependencies before any imports
 vi.mock("@lichtblick/log", async () => ({
@@ -15,18 +15,18 @@ vi.mock("./fileUtils", async () => ({
   isFileToOpen: vi.fn(),
 }));
 
-vi.mock("./injectFilesToOpen", async () => vi.fn());
+vi.mock("./injectFilesToOpen", async () => ({ default: vi.fn() }));
 
 // Mock StudioWindow completely to avoid React dependencies
 const mockLoad = vi.fn();
 const mockGetBrowserWindow = vi.fn();
 
-vi.mock("./StudioWindow", async () => {
-  return vi.fn().mockImplementation(() => ({
+vi.mock("./StudioWindow", async () => ({
+  default: vi.fn().mockImplementation(() => ({
     load: mockLoad,
     getBrowserWindow: mockGetBrowserWindow,
-  }));
-});
+  })),
+}));
 
 // Import after mocks
 // eslint-disable-next-line import/first

@@ -42,25 +42,35 @@ function mockProvider(testId: string) {
 }
 
 // Mocking shared providers and components
-vi.mock("./providers/LayoutManagerProvider", async () => mockProvider("layout-manager-provider"));
-vi.mock("./providers/PanelCatalogProvider", async () => mockProvider("panel-catalog-provider"));
-vi.mock("./providers/AppParametersProvider", async () => mockProvider("app-parameters-provider"));
-vi.mock("./components/MultiProvider", async () => mockProvider("multi-provider"));
-vi.mock("./components/StudioToastProvider", async () => mockProvider("studio-toast-provider"));
-vi.mock("./components/GlobalCss", async () => mockProvider("global-css"));
-vi.mock("./components/DocumentTitleAdapter", async () => mockProvider("document-title-adapter"));
-vi.mock("./components/ErrorBoundary", async () => mockProvider("error-boundary"));
+vi.mock("./providers/LayoutManagerProvider", async () => ({
+  default: mockProvider("layout-manager-provider"),
+}));
+vi.mock("./providers/PanelCatalogProvider", async () => ({
+  default: mockProvider("panel-catalog-provider"),
+}));
+vi.mock("./providers/AppParametersProvider", async () => ({
+  default: mockProvider("app-parameters-provider"),
+}));
+vi.mock("./components/MultiProvider", async () => ({ default: mockProvider("multi-provider") }));
+vi.mock("./components/StudioToastProvider", async () => ({
+  default: mockProvider("studio-toast-provider"),
+}));
+vi.mock("./components/GlobalCss", async () => ({ default: mockProvider("global-css") }));
+vi.mock("./components/DocumentTitleAdapter", async () => ({
+  default: mockProvider("document-title-adapter"),
+}));
+vi.mock("./components/ErrorBoundary", async () => ({ default: mockProvider("error-boundary") }));
 vi.mock("./components/ColorSchemeThemeProvider", async () => ({
   ColorSchemeThemeProvider: mockProvider("color-scheme-theme"),
 }));
-vi.mock("./components/CssBaseline", async () => mockProvider("css-baseline"));
-vi.mock("./components/SendNotificationToastAdapter", async () =>
-  mockProvider("send-notification-toast-adapter"),
-);
+vi.mock("./components/CssBaseline", async () => ({ default: mockProvider("css-baseline") }));
+vi.mock("./components/SendNotificationToastAdapter", async () => ({
+  default: mockProvider("send-notification-toast-adapter"),
+}));
 vi.mock("./context/NativeAppMenuContext", async () => ({
   Provider: mockProvider("native-app-component"),
 }));
-vi.mock("./Workspace", async () => mockProvider("workspace-component"));
+vi.mock("./Workspace", async () => ({ default: mockProvider("workspace-component") }));
 vi.mock("./screens/LaunchPreference", async () => ({
   LaunchPreference: mockProvider("launch-preference"),
 }));
@@ -183,6 +193,11 @@ describe("App Component MultiProvider Tests", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    (console.error as Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("verifies that MultiProvider is called with correct providers", () => {

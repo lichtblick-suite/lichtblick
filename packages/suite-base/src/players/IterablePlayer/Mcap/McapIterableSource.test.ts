@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { MockedFunction, MockedClass } from "vitest";
 import { McapIndexedReader, McapWriter } from "@mcap/core";
 import { Blob } from "node:buffer";
+import type { MockedFunction, MockedClass, MockInstance } from "vitest";
 
 import { loadDecompressHandlers, TempBuffer } from "@lichtblick/mcap-support";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
@@ -20,6 +20,18 @@ import { RemoteFileReadable } from "./RemoteFileReadable";
 vi.mock("./RemoteFileReadable");
 
 const MockRemoteFileReadable = RemoteFileReadable as MockedClass<typeof RemoteFileReadable>;
+
+const { mockLogError } = vi.hoisted(() => ({
+  mockLogError: vi.fn(),
+}));
+vi.mock("@lichtblick/log", async () => ({
+  ...(await vi.importActual("@lichtblick/log")),
+  default: {
+    getLogger: () => ({
+      error: mockLogError,
+    }),
+  },
+}));
 
 vi.mock("@lichtblick/mcap-support", async () => ({
   ...(await vi.importActual("@lichtblick/mcap-support")),
@@ -131,7 +143,7 @@ describe("McapIterableSource", () => {
     const topic = `/${BasicBuilder.string()}`;
     const file = await createMcapFile({ withMessage: true, topic });
     const source = new McapIterableSource({ type: "file", file });
-    const readerInitializeSpy = vi.spyOn(McapIndexedReader, "Initialize");
+    const readerInitializeSpy: MockInstance = vi.spyOn(McapIndexedReader, "Initialize");
 
     // When
     const result = await source.initialize();
@@ -141,9 +153,9 @@ describe("McapIterableSource", () => {
     expect(readerInitializeSpy).toHaveBeenCalledTimes(1);
 
     // Verify loadDecompressHandlers was called before McapIndexedReader.Initialize
-    const decompressHandlerCallOrder = mockLoadDecompressHandlers.mock.invocationCallOrder[0];
-    const readerInitializeCallOrder = readerInitializeSpy.mock.invocationCallOrder[0];
-    expect(decompressHandlerCallOrder).toBeLessThan(readerInitializeCallOrder!);
+    const decompressHandlerCallOrder = mockLoadDecompressHandlers.mock.invocationCallOrder[0]!;
+    const readerInitializeCallOrder = readerInitializeSpy.mock.invocationCallOrder[0]!;
+    expect(decompressHandlerCallOrder).toBeLessThan(readerInitializeCallOrder);
 
     // Verify initialization was successful
     expect(result.start).toBeDefined();
@@ -279,7 +291,7 @@ describe("McapIterableSource", () => {
         body: new Blob([mcapData]).stream(),
         headers: new Headers({ "content-length": String(mcapData.byteLength) }),
       });
-      global.fetch = mockFetch as unknown as typeof fetch;
+      global.fetch = mockFetch;
 
       // When initializing the source
       const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });
@@ -308,7 +320,7 @@ describe("McapIterableSource", () => {
       global.fetch = vi.fn().mockResolvedValue({
         body: undefined,
         headers: new Headers({ "content-length": String(mcapData.byteLength) }),
-      }) as unknown as typeof fetch;
+      });
 
       // When initializing the source
       const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });
@@ -326,7 +338,7 @@ describe("McapIterableSource", () => {
       global.fetch = vi.fn().mockResolvedValue({
         body: new Blob([mcapData]).stream(),
         headers: new Headers(),
-      }) as unknown as typeof fetch;
+      });
 
       // When initializing the source
       const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });
@@ -423,7 +435,6 @@ describe("McapIterableSource", () => {
       const initializeSpy = vi
         .spyOn(McapIndexedReader, "Initialize")
         .mockRejectedValue(new Error("Corrupt MCAP file"));
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation();
 
       // When
       const result = await source.initialize();
@@ -433,7 +444,7 @@ describe("McapIterableSource", () => {
       expect(result.topics).toHaveLength(1);
       expect(result.topics[0]?.name).toBe("/test");
       expect(initializeSpy).toHaveBeenCalledTimes(1);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(new Error("Corrupt MCAP file"));
+      expect(mockLogError).toHaveBeenCalledWith(new Error("Corrupt MCAP file"));
     });
   });
 

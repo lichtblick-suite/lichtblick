@@ -33,8 +33,6 @@ function noOp() {
 }
 
 if (typeof window !== "undefined") {
-  global.TextDecoder = util.TextDecoder as typeof TextDecoder;
-
   if (typeof window.URL.createObjectURL === "undefined") {
     Object.defineProperty(window.URL, "createObjectURL", { value: noOp });
   }
@@ -44,6 +42,7 @@ if (typeof window !== "undefined") {
   (window as { setImmediate?: typeof setImmediate }).setImmediate ??= setImmediate;
 }
 
+global.TextDecoder = util.TextDecoder as typeof TextDecoder;
 global.TextEncoder = util.TextEncoder as unknown as typeof TextEncoder;
 
 // React available everywhere (matches webpack config)

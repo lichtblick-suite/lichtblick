@@ -39,7 +39,7 @@ const alertsStore = {
   getState: () => ({ actions: { clearAlerts: mockClearAlerts } }),
 };
 
-vi.setTimeout(MAX_PROMISE_TIMEOUT_TIME_MS * 3);
+vi.setConfig({ testTimeout: MAX_PROMISE_TIMEOUT_TIME_MS * 3 });
 
 // We require two state updates for each player emit() to take effect, for unknown reasons
 async function doubleAct(fn: () => Promise<void>) {

@@ -30,8 +30,7 @@
   },
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "js/ts.preferences.importModuleSpecifier": "non-relative",
-  "jest.runMode": "on-save",
-  "jest.jestCommandLine": "yarn test",
+  "testing.automaticallyOpenTestResults": "openOnTestFailure",
   "eslint.lintTask.enable": true,
   "[shellscript]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"

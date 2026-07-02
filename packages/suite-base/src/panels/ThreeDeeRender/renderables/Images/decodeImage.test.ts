@@ -1,7 +1,7 @@
-/** @vitest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+/** @vitest-environment jsdom */
 
 import { H264, VideoPlayer } from "@lichtblick/den/video";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
@@ -70,6 +70,7 @@ describe("getVideoDecoderConfig", () => {
 
   it("should return undefined for unsupported formats", () => {
     const mockVideoFrame = createMockVideoFrame({
+      format: "unsupported" as any,
       data: new Uint8Array([0x00]),
     });
     expect(getVideoDecoderConfig(mockVideoFrame)).toBeUndefined();

@@ -7,6 +7,17 @@ import { NamespacedLayoutStorage } from "@lichtblick/suite-base/services/LayoutM
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
+const { mockLogError } = vi.hoisted(() => ({
+  mockLogError: vi.fn(),
+}));
+vi.mock("@lichtblick/log", () => ({
+  default: {
+    getLogger: () => ({
+      error: mockLogError,
+    }),
+  },
+}));
+
 describe("NamespacedLayoutStorage", () => {
   let mockStorage: Mocked<Required<ILayoutStorage>>;
   const testNamespace = BasicBuilder.string();
@@ -131,9 +142,6 @@ describe("NamespacedLayoutStorage", () => {
       mockStorage.migrateUnnamespacedLayouts.mockRejectedValue(migrationError);
       mockStorage.list.mockResolvedValue([]);
 
-      // Mock console.error to avoid test framework issues
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation();
-
       // When
       const storage = new NamespacedLayoutStorage(mockStorage, testNamespace, options);
       const result = await storage.list(); // Should not throw
@@ -141,10 +149,7 @@ describe("NamespacedLayoutStorage", () => {
       // Then
       expect(result).toEqual([]);
       expect(mockStorage.migrateUnnamespacedLayouts).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith(expect.any(String), migrationError);
-
-      // Cleanup
-      consoleSpy.mockRestore();
+      expect(mockLogError).toHaveBeenCalledWith(expect.any(String), migrationError);
     });
 
     it("should handle import errors gracefully", async () => {
@@ -158,8 +163,6 @@ describe("NamespacedLayoutStorage", () => {
       mockStorage.importLayouts.mockRejectedValue(importError);
       mockStorage.list.mockResolvedValue([]);
 
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation();
-
       // When
       const storage = new NamespacedLayoutStorage(mockStorage, testNamespace, options);
       const result = await storage.list(); // Should not throw
@@ -167,10 +170,7 @@ describe("NamespacedLayoutStorage", () => {
       // Then
       expect(result).toEqual([]);
       expect(mockStorage.importLayouts).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith(expect.any(String), importError);
-
-      // Cleanup
-      consoleSpy.mockRestore();
+      expect(mockLogError).toHaveBeenCalledWith(expect.any(String), importError);
     });
   });
 

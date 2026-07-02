@@ -37,7 +37,7 @@ import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 vi.mock("notistack", async () => ({
-  ...await vi.importActual("notistack"),
+  ...(await vi.importActual("notistack")),
   useSnackbar: vi.fn().mockReturnValue({
     enqueueSnackbar: vi.fn(),
   }),
@@ -150,7 +150,6 @@ describe("CurrentLayoutProvider", () => {
   });
 
   afterEach(() => {
-    (console.warn as Mock).mockClear();
     vi.clearAllMocks();
   });
 

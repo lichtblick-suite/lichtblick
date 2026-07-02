@@ -20,7 +20,7 @@ import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionB
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-vi.mock("@lichtblick/suite-base/util/isDesktopApp", async () => vi.fn());
+vi.mock("@lichtblick/suite-base/util/isDesktopApp", async () => ({ default: vi.fn() }));
 
 vi.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", async () => ({
   useExtensionCatalog: vi.fn(),
@@ -28,7 +28,7 @@ vi.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", async () => ({
 
 const mockEnqueueSnackbar = vi.fn();
 vi.mock("notistack", async () => ({
-  ...await vi.importActual("notistack"),
+  ...(await vi.importActual("notistack")),
   useSnackbar: () => ({
     enqueueSnackbar: mockEnqueueSnackbar,
   }),
@@ -399,12 +399,7 @@ describe("ExtensionList Component", () => {
 
       // When
       render(
-        <ExtensionList
-          namespace="org"
-          entries={[entry]}
-          filterText=""
-          selectExtension={vi.fn()}
-        />,
+        <ExtensionList namespace="org" entries={[entry]} filterText="" selectExtension={vi.fn()} />,
       );
 
       // Then
@@ -425,12 +420,7 @@ describe("ExtensionList Component", () => {
 
       // When
       render(
-        <ExtensionList
-          namespace="org"
-          entries={[entry]}
-          filterText=""
-          selectExtension={vi.fn()}
-        />,
+        <ExtensionList namespace="org" entries={[entry]} filterText="" selectExtension={vi.fn()} />,
       );
 
       // Then

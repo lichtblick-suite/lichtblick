@@ -18,14 +18,14 @@ import { Channel } from "@lichtblick/suite-base/util/Rpc";
 
 import WebWorkerManager from "./WebWorkerManager";
 
-vi.mock("@lichtblick/suite-base/util/Rpc", async () => {
-  return class FakeRpc {
+vi.mock("@lichtblick/suite-base/util/Rpc", async () => ({
+  default: class FakeRpc {
     public terminate() {}
     public receive() {
       // no-op
     }
-  };
-});
+  },
+}));
 class FakeWorker implements Channel {
   public terminated = false;
   public terminate() {

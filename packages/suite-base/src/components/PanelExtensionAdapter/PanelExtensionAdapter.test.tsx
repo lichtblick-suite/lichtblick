@@ -395,9 +395,10 @@ describe("PanelExtensionAdapter", () => {
     await sig;
   });
 
-  it("should unadvertise when unmounting", (done) => {
+  it("should unadvertise when unmounting", async () => {
     expect.assertions(5);
     let count = 0;
+    const doneSignal = signal();
 
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
@@ -429,7 +430,7 @@ describe("PanelExtensionAdapter", () => {
         } else if (count === 2) {
           // eslint-disable-next-line vi/no-conditional-expect
           expect(advertisements).toEqual(expect.arrayContaining([]));
-          done();
+          doneSignal.resolve();
         }
       },
     };
@@ -456,7 +457,10 @@ describe("PanelExtensionAdapter", () => {
     };
 
     const handle = render(<Wrapper mounted />);
-    handle.rerender(<Wrapper mounted={false} />);
+    await act(async () => {
+      handle.rerender(<Wrapper mounted={false} />);
+    });
+    await doneSignal;
   });
 
   it("supports adding new panels to the layout", async () => {
@@ -1044,9 +1048,9 @@ describe("PanelExtensionAdapter", () => {
     it("should return early for reorder-node actions without saving config", async () => {
       // Given: A mock updatePanelSettingsTree to capture the wrapped actionHandler
       const updatePanelSettingsTreeMock = vi.fn();
-      vi
-        .spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate")
-        .mockReturnValue(updatePanelSettingsTreeMock);
+      vi.spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate").mockReturnValue(
+        updatePanelSettingsTreeMock,
+      );
 
       const saveConfig = vi.fn();
       const settingsActionHandler = vi.fn();

@@ -42,7 +42,9 @@ global.OffscreenCanvas = class {
   }
 } as unknown as typeof OffscreenCanvas;
 
-vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems", async () => ({
+vi.mock(
+  "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems",
+  async () => ({
     simpleGetMessagePathDataItems: vi.fn(),
   }),
 );
@@ -51,7 +53,9 @@ vi.mock("@lichtblick/message-path", async () => ({
   parseMessagePath: vi.fn(),
 }));
 
-vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems", async () => ({
+vi.mock(
+  "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems",
+  async () => ({
     fillInGlobalVariablesInPath: vi.fn(),
   }),
 );
@@ -402,20 +406,20 @@ describe("PlotCoordinator", () => {
 
   describe("dispatchRender", () => {
     it("should return immediately if plotCoordinator is destroyed", async () => {
+      const updateSpy = vi.spyOn(renderer, "update");
       plotCoordinator.destroy();
 
       await plotCoordinator["dispatchRender"]();
 
-      const updateSpy = vi.spyOn(renderer, "update");
       expect(updateSpy).not.toHaveBeenCalled();
     });
 
     it("should call 'update' on the renderer when dispatching render", async () => {
       renderer.update.mockResolvedValue({ x: { min: 0, max: 10 }, y: { min: 0, max: 10 } });
+      const updateSpyOn = vi.spyOn(renderer, "update");
 
       await plotCoordinator["dispatchRender"]();
 
-      const updateSpyOn = vi.spyOn(renderer, "update");
       expect(updateSpyOn).toHaveBeenCalled();
     });
 
@@ -468,10 +472,10 @@ describe("PlotCoordinator", () => {
         datasetsByConfigIndex: [],
         pathsWithMismatchedDataLengths: [],
       });
+      const getViewportDatasetsSpyOn = vi.spyOn(datasetsBuilder, "getViewportDatasets");
 
       await plotCoordinator["dispatchDownsample"]();
 
-      const getViewportDatasetsSpyOn = vi.spyOn(datasetsBuilder, "getViewportDatasets");
       expect(getViewportDatasetsSpyOn).toHaveBeenCalled();
     });
   });
@@ -591,13 +595,13 @@ describe("PlotCoordinator", () => {
       (fillInGlobalVariablesInPath as Mock).mockReturnValue(undefined);
       (stringifyMessagePath as Mock).mockReturnValue("");
 
+      const setSeriesSpy = vi.spyOn(datasetsBuilder, "setSeries");
       plotCoordinator.handleConfig(config, "light", {});
 
       expect(plotCoordinator["series"].length).toBe(config.paths.length);
       expect(plotCoordinator["series"][0]?.messagePath).toBe(config.paths[0]?.value);
       expect(plotCoordinator["series"][1]?.messagePath).toBe(config.paths[1]?.value);
       expect(plotCoordinator["series"][2]?.messagePath).toBe(config.paths[2]?.value);
-      const setSeriesSpy = vi.spyOn(datasetsBuilder, "setSeries");
       expect(setSeriesSpy).toHaveBeenCalledWith(plotCoordinator["series"]);
     });
 
@@ -612,9 +616,9 @@ describe("PlotCoordinator", () => {
       (fillInGlobalVariablesInPath as Mock).mockImplementation((parsed) => parsed);
       (stringifyMessagePath as Mock).mockImplementation((parsed) => parsed.topicName ?? "");
 
+      const setSeriesSpy = vi.spyOn(datasetsBuilder, "setSeries");
       plotCoordinator.handleConfig(plotConfig, "light", {});
 
-      const setSeriesSpy = vi.spyOn(datasetsBuilder, "setSeries");
       expect(setSeriesSpy).toHaveBeenCalled();
       const series = (datasetsBuilder.setSeries as Mock).mock.calls[0]?.[0];
 
@@ -905,11 +909,10 @@ describe("PlotCoordinator", () => {
         { name: "dataset1", data: [1, 2, 3] },
         { name: "dataset2", data: [4, 5, 6] },
       ];
-      datasetsBuilder.getCsvData = vi.fn().mockResolvedValue(mockData);
+      const getCsvDataSpy = vi.spyOn(datasetsBuilder, "getCsvData").mockResolvedValue(mockData);
 
       const result = await plotCoordinator.getCsvData();
 
-      const getCsvDataSpy = vi.spyOn(datasetsBuilder, "getCsvData");
       expect(result).toEqual(mockData);
       expect(getCsvDataSpy).toHaveBeenCalled();
     });

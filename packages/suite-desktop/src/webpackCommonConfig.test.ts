@@ -49,11 +49,11 @@ vi.mock("esbuild-loader", async () => ({
   })),
 }));
 
-vi.mock("fork-ts-checker-webpack-plugin", async () =>
-  vi.fn().mockImplementation(() => ({
+vi.mock("fork-ts-checker-webpack-plugin", async () => ({
+  default: vi.fn().mockImplementation(() => ({
     pluginName: "ForkTsCheckerWebpackPlugin",
   })),
-);
+}));
 
 describe("createCommonWebpackConfig", () => {
   it("should configure development mode with source maps", () => {

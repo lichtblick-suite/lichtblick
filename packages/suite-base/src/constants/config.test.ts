@@ -6,11 +6,17 @@
  */
 
 describe("APP_CONFIG", () => {
-  let originalGlobalThis: typeof globalThis;
+  const globalsToRestore: Record<string, { had: boolean; value: unknown }> = {};
+  const trackedKeys = ["API_URL", "LICHTBLICK_SUITE_VERSION", "DEV_WORKSPACE"];
 
   beforeEach(() => {
-    // Store original globalThis to restore later
-    originalGlobalThis = { ...globalThis };
+    // Store original state for tracked keys only
+    for (const key of trackedKeys) {
+      globalsToRestore[key] = {
+        had: key in globalThis,
+        value: (globalThis as any)[key],
+      };
+    }
 
     // Clear any existing global variables
     delete (globalThis as any).API_URL;
@@ -22,8 +28,15 @@ describe("APP_CONFIG", () => {
   });
 
   afterEach(() => {
-    // Restore original globalThis
-    Object.assign(globalThis, originalGlobalThis);
+    // Restore original state
+    for (const key of trackedKeys) {
+      const saved = globalsToRestore[key]!;
+      if (saved.had) {
+        (globalThis as any)[key] = saved.value;
+      } else {
+        delete (globalThis as any)[key];
+      }
+    }
   });
 
   it("should use default values when global variables are not defined", async () => {

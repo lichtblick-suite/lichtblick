@@ -9,4 +9,11 @@
 // run in the default `node` environment have no `window` and do not need canvas support.
 if (typeof window !== "undefined") {
   await import("vitest-canvas-mock");
+
+  // jest-canvas-mock / vitest-canvas-mock resets jsdom globals; restore TextDecoder/TextEncoder
+  // which are not natively provided by jsdom but are available in Node.
+  const util = await import("node:util");
+  global.TextDecoder = util.TextDecoder as typeof TextDecoder;
+  global.TextEncoder = util.TextEncoder as unknown as typeof TextEncoder;
 }
+export { };

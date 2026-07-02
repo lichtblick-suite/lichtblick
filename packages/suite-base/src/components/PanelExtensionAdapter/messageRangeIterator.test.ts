@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { Mock } from "vitest";
+
 import { MessageEvent } from "@lichtblick/suite";
 import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/contants";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
@@ -29,10 +30,10 @@ describe("createMessageRangeIterator", () => {
   const mockSortedTopics = [PlayerBuilder.topic({ name: mockTopic })];
   const mockMessageConverters: never[] = [];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     // Update the mock to include our test topic in unconvertedSubscriptionTopics
-    const { collateTopicSchemaConversions } = await vi.importMock("./messageProcessing");
+    const { collateTopicSchemaConversions } = (await import("./messageProcessing")) as any;
     collateTopicSchemaConversions.mockReturnValue({
       topicSchemaConverters: new Map(),
       unconvertedSubscriptionTopics: new Set([mockTopic]),
@@ -293,8 +294,9 @@ describe("createMessageRangeIterator", () => {
   it("should handle message conversion when converters are available", async () => {
     const mockMessage: MessageEvent = MessageEventBuilder.messageEvent({ topic: mockTopic });
 
-    const { convertMessage, collateTopicSchemaConversions } =
-      await vi.importMock("./messageProcessing");
+    const { convertMessage, collateTopicSchemaConversions } = (await import(
+      "./messageProcessing"
+    )) as any;
 
     // Mock to include topic schema converters
     collateTopicSchemaConversions.mockReturnValue({

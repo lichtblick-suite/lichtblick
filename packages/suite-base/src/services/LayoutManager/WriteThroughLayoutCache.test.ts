@@ -190,12 +190,13 @@ describe("WriteThroughLayoutCache", () => {
       const namespace = BasicBuilder.string();
       const layout = LayoutBuilder.layout();
       mockStorage.list.mockResolvedValue([layout]);
+      const deleteSpy = vi.spyOn(mockStorage, "delete");
 
       // When
       await cache.delete(namespace, layout.id);
 
       // Then
-      expect(vi.spyOn(mockStorage, "delete")).toHaveBeenCalledWith(namespace, layout.id);
+      expect(deleteSpy).toHaveBeenCalledWith(namespace, layout.id);
     });
 
     it("should remove layout from cache after deletion", async () => {
@@ -238,12 +239,13 @@ describe("WriteThroughLayoutCache", () => {
       const fromNamespace = BasicBuilder.string();
       const toNamespace = BasicBuilder.string();
       const params = { fromNamespace, toNamespace };
+      const importSpy = vi.spyOn(mockStorage, "importLayouts");
 
       // When
       await cache.importLayouts(params);
 
       // Then
-      expect(vi.spyOn(mockStorage, "importLayouts")).toHaveBeenCalledWith(params);
+      expect(importSpy).toHaveBeenCalledWith(params);
     });
   });
 
@@ -251,12 +253,13 @@ describe("WriteThroughLayoutCache", () => {
     it("should delegate to underlying storage when method exists", async () => {
       // Given
       const namespace = BasicBuilder.string();
+      const migrateSpy = vi.spyOn(mockStorage, "migrateUnnamespacedLayouts");
 
       // When
       await cache.migrateUnnamespacedLayouts(namespace);
 
       // Then
-      expect(vi.spyOn(mockStorage, "migrateUnnamespacedLayouts")).toHaveBeenCalledWith(namespace);
+      expect(migrateSpy).toHaveBeenCalledWith(namespace);
     });
 
     it("should handle when underlying storage does not implement method", async () => {
