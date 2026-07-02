@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
@@ -125,5 +126,48 @@ describe("LayoutSection", () => {
     expect(screen.getByTestId("layout-row-1").dataset.selected).toBe("false");
     expect(screen.getByTestId("layout-row-2").dataset.selected).toBe("false");
     expect(screen.getByTestId("layout-row-3").dataset.selected).toBe("false");
+  });
+
+  it("collapses the list when the section header is clicked", async () => {
+    // GIVEN
+    const title = BasicBuilder.string();
+    const user = userEvent.setup();
+    render(<LayoutSection {...defaultProps} title={title} />);
+
+    // WHEN
+    await user.click(screen.getByTestId(`layout-section-header-${title}`));
+
+    // THEN
+    await waitFor(() => {
+      expect(screen.queryByTestId("layout-row-1")).not.toBeInTheDocument();
+    });
+    expect(screen.queryByTestId("layout-row-2")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("layout-row-3")).not.toBeInTheDocument();
+  });
+
+  it("expands the list when the collapsed section header is clicked again", async () => {
+    // GIVEN
+    const title = BasicBuilder.string();
+    const user = userEvent.setup();
+    render(<LayoutSection {...defaultProps} title={title} />);
+
+    // WHEN - collapse then expand
+    await user.click(screen.getByTestId(`layout-section-header-${title}`));
+    await user.click(screen.getByTestId(`layout-section-header-${title}`));
+
+    // THEN
+    expect(screen.getByTestId("layout-row-1")).toBeInTheDocument();
+    expect(screen.getByTestId("layout-row-2")).toBeInTheDocument();
+    expect(screen.getByTestId("layout-row-3")).toBeInTheDocument();
+  });
+
+  it("always shows items when title is undefined (not collapsible)", () => {
+    // WHEN
+    render(<LayoutSection {...defaultProps} title={undefined} />);
+
+    // THEN
+    expect(screen.getByTestId("layout-row-1")).toBeInTheDocument();
+    expect(screen.getByTestId("layout-row-2")).toBeInTheDocument();
+    expect(screen.getByTestId("layout-row-3")).toBeInTheDocument();
   });
 });
