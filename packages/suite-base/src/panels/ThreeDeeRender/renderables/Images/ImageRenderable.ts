@@ -167,6 +167,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
 
   #disposed = false;
 
+  #videoFormat: string | undefined;
   // Cache canonical codec normalization by incoming format string to avoid repeated prefix checks
   // while still handling format changes on a reused renderable instance.
   readonly #codecByFormat = new Map<string, VideoCodec | undefined>();
@@ -279,9 +280,12 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.userData.image = image;
 
     const seq = ++this.#receivedImageSequenceNumber;
-    const incomingCodec = "format" in image ? this.#cachedCanonicalCodec(image.format) : undefined;
-    if (incomingCodec !== this.#codec) {
-      this.#resetCodecStateForFormatChange(incomingCodec);
+    const incomingFormat = "format" in image ? image.format : undefined;
+    const incomingCodec =
+      incomingFormat != undefined ? this.#cachedCanonicalCodec(incomingFormat) : undefined;
+    const incomingVideoFormat = incomingCodec == undefined ? undefined : incomingFormat;
+    if (incomingCodec !== this.#codec || incomingVideoFormat !== this.#videoFormat) {
+      this.#resetCodecStateForFormatChange(incomingCodec, incomingVideoFormat);
     }
     const codec = this.#codec;
 
@@ -342,8 +346,12 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     return codec;
   }
 
-  #resetCodecStateForFormatChange(nextCodec: VideoCodec | undefined): void {
+  #resetCodecStateForFormatChange(
+    nextCodec: VideoCodec | undefined,
+    nextVideoFormat: string | undefined,
+  ): void {
     this.#codec = nextCodec;
+    this.#videoFormat = nextVideoFormat;
     this.#cachedVideoDecoderConfig = undefined;
     this.#videoFirstMessageTime = undefined;
     this.#lastVideoMessageTime = undefined;

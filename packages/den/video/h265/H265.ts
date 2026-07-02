@@ -138,9 +138,10 @@ export class H265 {
       parameterSets:
         state.parameterSetParts.length > 0 ? concatChunks(state.parameterSetParts) : undefined,
       // Keyframes are decoded whole, so the parameter-set-stripped bytes are only materialized for
-      // delta frames. This mirrors `StripParameterSets` but reuses this single NAL-unit pass.
+      // delta frames when parameter sets were actually removed. This mirrors `StripParameterSets`
+      // but reuses this single NAL-unit pass.
       strippedData:
-        !isKeyframe && state.strippedParts.length > 0
+        !isKeyframe && state.parameterSetParts.length > 0 && state.strippedParts.length > 0
           ? concatChunks(state.strippedParts)
           : undefined,
       // Only keyframes carry an SPS, so the decoder config is derived here for keyframes only.

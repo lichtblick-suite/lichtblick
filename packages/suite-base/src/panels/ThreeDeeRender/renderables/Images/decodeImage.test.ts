@@ -112,9 +112,10 @@ describe("getVideoDecoderConfig", () => {
   });
 
   it("should return undefined for unsupported formats", () => {
-    // GIVEN a frame with an unsupported (default) format
+    // GIVEN a frame with an unsupported format
     const mockVideoFrame = createMockVideoFrame({
       data: new Uint8Array([0x00]),
+      format: "unsupported",
     });
 
     // WHEN the decoder config is requested
@@ -320,7 +321,7 @@ describe("prepareVideoFrame", () => {
     expect(preparedFrame.diagnostics).toBe("H.265 B frames are not supported");
   });
 
-  it("should pass through h264 frames using getVideoDecoderConfig", () => {
+  it("should pass through h264 keyframes with decoder config", () => {
     // GIVEN an H.264 keyframe and a stubbed decoder config
     const data = new Uint8Array([0x00, 0x00, 0x00, 0x01, 0x65]);
     const decoderConfig = { codec: "avc1.42E01E" } as VideoDecoderConfig;

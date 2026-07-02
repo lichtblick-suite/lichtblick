@@ -77,6 +77,9 @@ export class SPS {
     }
     this.nuh_layer_id = bitstream.u(6);
     this.nuh_temporal_id_plus1 = bitstream.u_3();
+    if (this.nuh_temporal_id_plus1 === 0) {
+      throw new Error("NALU error: invalid NALU header");
+    }
 
     this.sps_video_parameter_set_id = bitstream.u(4);
     this.sps_max_sub_layers_minus1 = bitstream.u_3();
