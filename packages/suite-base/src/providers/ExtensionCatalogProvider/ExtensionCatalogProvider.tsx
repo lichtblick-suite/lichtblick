@@ -268,9 +268,7 @@ function createExtensionRegistryStore(
 
       const localAndRemoteLoaders = loaders.filter(
         (loader) =>
-          loader.namespace === "local" ||
-          loader.type === "server" ||
-          loader.type === "filesystem",
+          loader.namespace === "local" || loader.type === "server" || loader.type === "filesystem",
       );
       await Promise.all(localAndRemoteLoaders.map(processLoader));
 

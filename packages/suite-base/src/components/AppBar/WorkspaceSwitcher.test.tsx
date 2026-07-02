@@ -97,7 +97,9 @@ describe("WorkspaceSwitcher", () => {
 
   it("should show the legacy label on the button when no workspace is active", () => {
     // GIVEN a desktop context with no current workspace
-    (useWorkspaces as jest.Mock).mockReturnValue(createContextValue({ currentWorkspace: undefined }));
+    (useWorkspaces as jest.Mock).mockReturnValue(
+      createContextValue({ currentWorkspace: undefined }),
+    );
 
     // WHEN rendering the switcher
     render(<WorkspaceSwitcher />);
@@ -212,7 +214,9 @@ describe("WorkspaceSwitcher", () => {
 
   it("should hide the rename and delete items when no workspace is active", () => {
     // GIVEN a desktop context with no current workspace
-    (useWorkspaces as jest.Mock).mockReturnValue(createContextValue({ currentWorkspace: undefined }));
+    (useWorkspaces as jest.Mock).mockReturnValue(
+      createContextValue({ currentWorkspace: undefined }),
+    );
 
     render(<WorkspaceSwitcher />);
     fireEvent.click(screen.getByTestId("workspace-switcher-button"));

@@ -144,13 +144,8 @@ export function WorkspaceSwitcher(): React.JSX.Element | ReactNull {
             handleSwitch(undefined);
           }}
         >
-          <ListItemIcon>
-            {currentWorkspace == undefined && <Checkmark16Regular />}
-          </ListItemIcon>
-          <ListItemText
-            classes={{ primary: classes.menuText }}
-            primary={t("legacyWorkspace")}
-          />
+          <ListItemIcon>{currentWorkspace == undefined && <Checkmark16Regular />}</ListItemIcon>
+          <ListItemText classes={{ primary: classes.menuText }} primary={t("legacyWorkspace")} />
         </MenuItem>
 
         {workspaces.length > 0 && <Divider />}
@@ -167,10 +162,7 @@ export function WorkspaceSwitcher(): React.JSX.Element | ReactNull {
               }}
             >
               <ListItemIcon>{selected && <Checkmark16Regular />}</ListItemIcon>
-              <ListItemText
-                classes={{ primary: classes.menuText }}
-                primary={workspace.name}
-              />
+              <ListItemText classes={{ primary: classes.menuText }} primary={workspace.name} />
             </MenuItem>
           );
         })}

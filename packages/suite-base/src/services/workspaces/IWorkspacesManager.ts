@@ -36,4 +36,3 @@ export interface IWorkspacesManager {
   /** Select the active workspace (persisted). Pass undefined to select none. */
   setCurrent: (id: string | undefined) => Promise<void>;
 }
-
