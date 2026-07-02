@@ -94,7 +94,6 @@ export function prepareVideoFrame(
       }
 
       const type = frameInfo.isKeyframe ? "key" : "delta";
-      const normalizedData = frameInfo.normalizedData;
       return {
         data:
           type === "key"
