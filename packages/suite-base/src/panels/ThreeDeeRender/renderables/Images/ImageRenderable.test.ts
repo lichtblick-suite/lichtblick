@@ -82,6 +82,16 @@ function createDecodedVideoFrame(timestamp = 0): VideoFrame {
   } as unknown as VideoFrame;
 }
 
+async function decodeAndSettle(
+  renderable: ImageRenderable,
+  data: Uint8Array,
+  timestamp?: { sec: number; nsec: number },
+): Promise<void> {
+  renderable.setImage(createH265Frame(data, timestamp));
+  renderable.flushPendingDecodes();
+  await renderable.settleVideoDecodes();
+}
+
 describe("ImageRenderable", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -245,9 +255,7 @@ describe("ImageRenderable error handling", () => {
     const createImageBitmapSpy = jest.fn().mockResolvedValue(new ImageBitmap());
     self.createImageBitmap = createImageBitmapSpy;
 
-    renderable.setImage(createH265Frame(h265Keyframe));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, h265Keyframe);
 
     expect(init).toHaveBeenCalledWith({ codec: "hvc1.1.6.L93.B0" });
     self.createImageBitmap = originalCreateImageBitmap;
@@ -274,9 +282,7 @@ describe("ImageRenderable error handling", () => {
     const emptyBitmap = new ImageBitmap();
     self.createImageBitmap = jest.fn().mockResolvedValue(emptyBitmap);
 
-    renderable.setImage(createH265Frame(new Uint8Array([0x01, 0x02, 0x03])));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, new Uint8Array([0x01, 0x02, 0x03]));
 
     // Unrecognizable data is treated as a delta while waiting for a keyframe — silently skipped
     expect(decode).not.toHaveBeenCalled();
@@ -330,18 +336,14 @@ describe("ImageRenderable error handling", () => {
     self.createImageBitmap = jest.fn().mockResolvedValue(new ImageBitmap());
 
     // GIVEN — a delta frame arrives before the decoder is initialized
-    renderable.setImage(createH265Frame(h265DeltaFrame));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, h265DeltaFrame);
 
     // THEN — the delta is silently skipped (no decode, no init)
     expect(decode).not.toHaveBeenCalled();
     expect(init).not.toHaveBeenCalled();
 
     // WHEN — a keyframe arrives and initializes the decoder
-    renderable.setImage(createH265Frame(h265Keyframe));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, h265Keyframe);
 
     // THEN — the decoder initializes from the keyframe
     expect(init).toHaveBeenCalledTimes(1);
@@ -372,16 +374,12 @@ describe("ImageRenderable error handling", () => {
     self.createImageBitmap = jest.fn().mockResolvedValue(new ImageBitmap());
 
     // GIVEN — a frame has been decoded at t=2s
-    renderable.setImage(createH265Frame(h265Keyframe, { sec: 2, nsec: 0 }));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, h265Keyframe, { sec: 2, nsec: 0 });
 
     const resetCountAfterPrime = resetForSeek.mock.calls.length;
 
     // WHEN — a frame arrives at t=1s (significant backward jump)
-    renderable.setImage(createH265Frame(h265Keyframe, { sec: 1, nsec: 0 }));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, h265Keyframe, { sec: 1, nsec: 0 });
 
     // THEN — resetForSeek is called again for the backward timestamp
     expect(resetForSeek.mock.calls.length).toBeGreaterThan(resetCountAfterPrime);
@@ -411,16 +409,12 @@ describe("ImageRenderable error handling", () => {
     self.createImageBitmap = jest.fn().mockResolvedValue(new ImageBitmap());
 
     // GIVEN — a frame has been decoded at t=2.010s
-    renderable.setImage(createH265Frame(h265Keyframe, { sec: 2, nsec: 10_000_000 }));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, h265Keyframe, { sec: 2, nsec: 10_000_000 });
 
     const resetCountAfterPrime = resetForSeek.mock.calls.length;
 
     // WHEN — a frame arrives at t=2.008s (only 2ms backward — within jitter threshold)
-    renderable.setImage(createH265Frame(h265Keyframe, { sec: 2, nsec: 8_000_000 }));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, h265Keyframe, { sec: 2, nsec: 8_000_000 });
 
     // THEN — no additional resetForSeek beyond what the prime triggered
     expect(resetForSeek.mock.calls.length).toBe(resetCountAfterPrime);
@@ -587,9 +581,7 @@ describe("ImageRenderable error handling", () => {
     self.createImageBitmap = jest.fn().mockResolvedValue(new ImageBitmap());
 
     // GIVEN — codec is primed so #waitingForVideoKeyframe is cleared
-    renderable.setImage(createH265Frame(h265Keyframe));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, h265Keyframe);
 
     let latestDecoded!: () => void;
     const latestDecodedPromise = new Promise<void>((resolve) => {
@@ -944,9 +936,7 @@ describe("ImageRenderable error handling", () => {
     self.createImageBitmap = createImageBitmapSpy;
 
     // GIVEN — codec is primed via setImage so #codec is initialized
-    renderable.setImage(createH265Frame(h265Keyframe));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    await decodeAndSettle(renderable, h265Keyframe);
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
     await renderable.decodeImage(createH265Frame(h265DeltaFrame, { sec: 0, nsec: 33333333 }), 100);
