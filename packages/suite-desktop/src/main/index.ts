@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { app, BrowserWindow, ipcMain, Menu, nativeTheme, session } from "electron";
+import { join as pathJoin } from "path";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/src/AppSetting";
@@ -25,11 +26,14 @@ import {
   registerRosPackageProtocolSchemes,
 } from "./rosPackageResources";
 import { getAppSetting } from "./settings";
+import { WorkspacesManager } from "./workspaces/WorkspacesManager";
+import { WorkspaceNamespace } from "../common/types";
 import {
   LICHTBLICK_PRODUCT_HOMEPAGE,
   LICHTBLICK_PRODUCT_NAME,
   LICHTBLICK_PRODUCT_VERSION,
 } from "../common/webpackDefines";
+import { SUITE_ROOT_FOLDER, WORKSPACES_FOLDER } from "../common/workspaces";
 
 const log = Logger.getLogger(__filename);
 
@@ -222,6 +226,29 @@ export async function main(): Promise<void> {
   ipcMain.handle("getHomePath", () => app.getPath("home"));
 
   ipcMain.handle("getCLIFlags", () => parsedCLIFlags);
+
+  // Workspace management. Each workspace groups the extensions and layouts loaded by the app; when
+  // no workspace is selected the app falls back to the legacy global folders.
+  const workspacesManager = new WorkspacesManager(
+    pathJoin(app.getPath("home"), SUITE_ROOT_FOLDER, WORKSPACES_FOLDER),
+  );
+  ipcMain.handle("workspaces:list", async () => await workspacesManager.list());
+  ipcMain.handle(
+    "workspaces:create",
+    async (_ev, name: string, namespace: WorkspaceNamespace) =>
+      await workspacesManager.create(name, namespace),
+  );
+  ipcMain.handle(
+    "workspaces:rename",
+    async (_ev, id: string, name: string) => await workspacesManager.rename(id, name),
+  );
+  ipcMain.handle("workspaces:delete", async (_ev, id: string) => {
+    await workspacesManager.delete(id);
+  });
+  ipcMain.handle("workspaces:getCurrent", async () => await workspacesManager.getCurrent());
+  ipcMain.handle("workspaces:setCurrent", async (_ev, id: string | undefined) => {
+    await workspacesManager.setCurrent(id);
+  });
 
   // Must be called before app.ready event
   registerRosPackageProtocolSchemes();

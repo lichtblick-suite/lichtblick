@@ -190,4 +190,52 @@ describe("DesktopExtensionLoader", () => {
       expect(mockBridge.uninstallExtension).toHaveBeenCalledWith(extensionId);
     });
   });
+
+  describe("namespace", () => {
+    it("should default the namespace to 'local' when none is provided", () => {
+      // GIVEN a loader constructed without an explicit namespace
+      const defaultLoader = new DesktopExtensionLoader(mockBridge);
+
+      // THEN the namespace defaults to local
+      expect(defaultLoader.namespace).toBe("local");
+    });
+
+    it("should use the 'org' namespace when constructed with it", () => {
+      // GIVEN a loader constructed with the org namespace
+      const orgLoader = new DesktopExtensionLoader(mockBridge, "org");
+
+      // THEN the namespace field reflects org
+      expect(orgLoader.namespace).toBe("org");
+    });
+
+    it("should always expose the filesystem loader type", () => {
+      // GIVEN loaders in either namespace
+      const localLoader = new DesktopExtensionLoader(mockBridge, "local");
+      const orgLoader = new DesktopExtensionLoader(mockBridge, "org");
+
+      // THEN both are filesystem loaders
+      expect(localLoader.type).toBe("filesystem");
+      expect(orgLoader.type).toBe("filesystem");
+    });
+
+    it("should stamp loaded extensions with the configured namespace", async () => {
+      // GIVEN an org-scoped loader and a bridge extension
+      const orgLoader = new DesktopExtensionLoader(mockBridge, "org");
+      const displayName = genericString();
+      const extension: DesktopExtension = {
+        id: genericString(),
+        packageJson: { displayName },
+        readme: genericString(),
+        changelog: genericString(),
+        directory: genericString(),
+      };
+      mockBridge.getExtensions.mockResolvedValueOnce([extension]);
+
+      // WHEN loading the extensions
+      const [result] = await orgLoader.getExtensions();
+
+      // THEN the extension inherits the org namespace
+      expect(result?.namespace).toBe("org");
+    });
+  });
 });

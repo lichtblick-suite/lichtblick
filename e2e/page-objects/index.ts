@@ -8,3 +8,4 @@ export { LayoutManager } from "./layout-manager";
 export { Panels } from "./panels";
 export { PlayerControls } from "./player-controls";
 export { Sidebar } from "./sidebar";
+export { WorkspaceSwitcher } from "./WorkspaceSwitcher";

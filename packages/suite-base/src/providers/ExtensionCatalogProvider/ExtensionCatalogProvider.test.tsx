@@ -1099,6 +1099,80 @@ describe("ExtensionCatalogProvider", () => {
       // Then: refreshAllExtensions completed gracefully with an empty list
       expect(result.current.installedExtensions).toEqual([]);
     });
+
+    it("should refresh an org-namespace filesystem loader (desktop workspace extensions)", async () => {
+      // Given: an org-namespace filesystem loader (a desktop organization workspace)
+      const orgExtension = ExtensionBuilder.extensionInfo({ namespace: "org" });
+      const loadExtensionMock = jest.fn().mockResolvedValue({ raw: defaultSource });
+      const loader = createMockLoader({
+        namespace: "org",
+        type: "filesystem",
+        getExtensions: jest.fn().mockResolvedValue([orgExtension]),
+        loadExtension: loadExtensionMock,
+      });
+
+      // When: mount triggers refreshAllExtensions
+      const { result } = await setup({ loadersOverride: [loader] });
+
+      // Then: the org filesystem loader's extension is loaded and installed
+      expect(loadExtensionMock).toHaveBeenCalledWith(orgExtension.id);
+      expect(result.current.installedExtensions).toEqual([orgExtension]);
+    });
+
+    it("should refresh org filesystem loaders alongside local browser and org server loaders", async () => {
+      // Given: a web browser loader, an org server loader, and an org filesystem loader
+      const localExtension = ExtensionBuilder.extensionInfo({ namespace: "local" });
+      const orgServerExtension = ExtensionBuilder.extensionInfo({
+        namespace: "org",
+        externalId: BasicBuilder.string(),
+      });
+      const orgFsExtension = ExtensionBuilder.extensionInfo({ namespace: "org" });
+
+      const localLoader = createMockLoader({
+        namespace: "local",
+        type: "browser",
+        getExtensions: jest.fn().mockResolvedValue([localExtension]),
+      });
+      const orgServerLoader = createMockLoader({
+        namespace: "org",
+        type: "server",
+        getExtensions: jest.fn().mockResolvedValue([orgServerExtension]),
+      });
+      const orgFilesystemLoader = createMockLoader({
+        namespace: "org",
+        type: "filesystem",
+        getExtensions: jest.fn().mockResolvedValue([orgFsExtension]),
+      });
+
+      // When: mount triggers refreshAllExtensions
+      const { result } = await setup({
+        loadersOverride: [localLoader, orgServerLoader, orgFilesystemLoader],
+      });
+
+      // Then: every loader's extension is installed (order is not guaranteed)
+      expect(result.current.installedExtensions).toHaveLength(3);
+      expect(result.current.installedExtensions).toEqual(
+        expect.arrayContaining([localExtension, orgServerExtension, orgFsExtension]),
+      );
+    });
+
+    it("should exclude an org-namespace browser (cache) loader from refresh", async () => {
+      // Given: only an org browser loader, which acts as a cache and is not refreshed directly
+      const cachedExtension = ExtensionBuilder.extensionInfo({ namespace: "org" });
+      const getExtensions = jest.fn().mockResolvedValue([cachedExtension]);
+      const loader = createMockLoader({
+        namespace: "org",
+        type: "browser",
+        getExtensions,
+      });
+
+      // When: mount triggers refreshAllExtensions
+      const { result } = await setup({ loadersOverride: [loader] });
+
+      // Then: the org browser loader is skipped and no extensions are installed
+      expect(getExtensions).not.toHaveBeenCalled();
+      expect(result.current.installedExtensions).toEqual([]);
+    });
   });
 
   describe("loadSingleExtension", () => {

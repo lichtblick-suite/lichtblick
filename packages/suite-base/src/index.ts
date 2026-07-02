@@ -39,6 +39,13 @@ export type {
   InstallExtensionProps,
 } from "./services/extension/IExtensionLoader";
 export type { LayoutLoader } from "./services/ILayoutLoader";
+export type {
+  IWorkspacesManager,
+  Workspace,
+} from "./services/workspaces/IWorkspacesManager";
+export type { WorkspacesContextValue } from "./context/WorkspacesContext";
+export { useWorkspaces } from "./context/WorkspacesContext";
+export { default as WorkspacesProvider } from "./providers/WorkspacesProvider";
 export type { LayoutInfo } from "./types/layouts";
 export type { LayoutData } from "./context/CurrentLayoutContext";
 export type { ExtensionInfo } from "./types/Extensions";
