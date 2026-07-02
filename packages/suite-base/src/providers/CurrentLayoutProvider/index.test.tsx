@@ -440,6 +440,43 @@ describe("CurrentLayoutProvider", () => {
 
     expect(selectedLayout).toBeDefined();
     expect(selectedLayout).toBe("layout2");
+    // A ?layout= override is session-only and must not be persisted to the user profile.
+    expect(mockUserProfile.setUserProfile).not.toHaveBeenCalled();
+  });
+
+  it("prefers the organizational layout when the app parameter name matches multiple layouts", async () => {
+    const mockAppParameters = { defaultLayout: "SHARED LAYOUT" };
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "personal",
+          name: "SHARED LAYOUT",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+        {
+          id: "org",
+          name: "SHARED LAYOUT",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
+        },
+      ];
+    });
+
+    const { result, all } = renderTest({
+      mockLayoutManager,
+      mockUserProfile,
+      mockAppParameters,
+    });
+
+    await act(async () => {
+      await result.current.childMounted;
+    });
+
+    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+      .selectedLayout?.id;
+
+    expect(selectedLayout).toBe("org");
   });
 
   it("should show a message to the user if the defaultLayout from app parameter is not found", async () => {

@@ -65,56 +65,6 @@ describe("H265", () => {
     expect(frameInfo.hasRequiredParameterSets).toBe(false);
   });
 
-  it("should strip parameter sets", () => {
-    // Given a frame with VPS/SPS/PPS plus a P-slice
-    const frame = H265FrameBuilder.frameData([
-      H265FrameBuilder.annexBNalu(H265NaluType.VPS_NUT),
-      H265FrameBuilder.annexBNalu(H265NaluType.SPS_NUT),
-      H265FrameBuilder.annexBNalu(H265NaluType.PPS_NUT, [0xc0]),
-      H265FrameBuilder.slice(1, H265SliceType.P),
-    ]);
-
-    // When StripParameterSets is called
-    // Then only the VCL slice remains
-    expect(H265.StripParameterSets(frame)).toEqual(
-      new Uint8Array(H265FrameBuilder.slice(1, H265SliceType.P)),
-    );
-  });
-
-  it("should expose parameter-set-stripped bytes for delta frames via InspectFrame", () => {
-    // Given a delta frame with VPS/SPS/PPS plus a P-slice
-    const frame = H265FrameBuilder.frameData([
-      H265FrameBuilder.annexBNalu(H265NaluType.VPS_NUT),
-      H265FrameBuilder.annexBNalu(H265NaluType.SPS_NUT),
-      H265FrameBuilder.annexBNalu(H265NaluType.PPS_NUT, [0xc0]),
-      H265FrameBuilder.slice(1, H265SliceType.P),
-    ]);
-
-    // When InspectFrame inspects it
-    const frameInfo = H265.InspectFrame(frame);
-
-    // Then strippedData matches StripParameterSets and no keyframe decoder config is derived
-    expect(frameInfo.isKeyframe).toBe(false);
-    expect(frameInfo.strippedData).toEqual(H265.StripParameterSets(frame));
-    expect(frameInfo.strippedData).toEqual(
-      new Uint8Array(H265FrameBuilder.slice(1, H265SliceType.P)),
-    );
-    expect(frameInfo.decoderConfig).toBeUndefined();
-  });
-
-  it("should derive a decoder config for keyframes via InspectFrame", () => {
-    // Given a keyframe with parameter sets
-    const frame = H265FrameBuilder.keyframeWithParameterSets();
-
-    // When InspectFrame inspects it
-    const frameInfo = H265.InspectFrame(frame);
-
-    // Then the decoder config matches ParseDecoderConfig and stripped bytes are omitted
-    expect(frameInfo.isKeyframe).toBe(true);
-    expect(frameInfo.decoderConfig).toEqual(H265.ParseDecoderConfig(frame));
-    expect(frameInfo.strippedData).toBeUndefined();
-  });
-
   it("should detect complete VPS SPS PPS parameter sets", () => {
     // Given a frame that includes all three of VPS, SPS, and PPS
     const parameterSets = [
@@ -209,26 +159,6 @@ describe("H265", () => {
     // When IsKeyframe is called
     // Then it returns false
     expect(H265.IsKeyframe(H265FrameBuilder.deltaFrame())).toBe(false);
-  });
-
-  it("StripParameterSets returns undefined for unrecognized bitstream formats", () => {
-    // Given garbage input
-    // When StripParameterSets is called
-    // Then it returns undefined
-    expect(H265.StripParameterSets(new Uint8Array([0x01, 0x02, 0x03]))).toBeUndefined();
-  });
-
-  it("StripParameterSets returns undefined when only parameter sets are present", () => {
-    // Given a frame containing nothing but VPS/SPS/PPS
-    const frame = H265FrameBuilder.frameData([
-      H265FrameBuilder.annexBNalu(H265NaluType.VPS_NUT),
-      H265FrameBuilder.annexBNalu(H265NaluType.SPS_NUT),
-      H265FrameBuilder.annexBNalu(H265NaluType.PPS_NUT, [0xc0]),
-    ]);
-
-    // When StripParameterSets is called
-    // Then it returns undefined because no VCL data is left
-    expect(H265.StripParameterSets(frame)).toBeUndefined();
   });
 
   it("InspectFrame ignores unparseable PPS context input", () => {

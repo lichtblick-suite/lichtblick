@@ -1,0 +1,15 @@
+{
+  "testMatch": ["<rootDir>/src/**/*.test.ts(x)?"],
+  "transform": {
+    "\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]
+  },
+  "//": "Enable transpilation of node_modules to support ESM-only packages (e.g. @lichtblick/test-builders -> lodash-es)",
+  "transformIgnorePatterns": [],
+  "//": "Native find is slow because it does not exclude files: https://github.com/facebook/jest/pull/11264#issuecomment-825377579",
+  "haste": { "forceNodeFilesystemAPI": true },
+  "moduleNameMapper": {
+    "@lichtblick/suite-base/(.*)": "<rootDir>/../suite-base/src/$1"
+  },
+  "setupFiles": ["<rootDir>/../suite-base/src/test/setup.ts"],
+  "restoreMocks": true
+}

@@ -96,12 +96,11 @@ export function prepareVideoFrame(
       const type = frameInfo.isKeyframe ? "key" : "delta";
       const normalizedData = frameInfo.normalizedData;
       return {
-        // Keyframes are decoded whole (with their parameter sets); delta frames use the
-        // parameter-set-stripped bytes computed during InspectFrame's single NAL-unit pass.
-        data: type === "key" ? normalizedData : (frameInfo.strippedData ?? normalizedData),
-        // Only keyframes carry parameter sets (SPS/VPS/PPS); InspectFrame derives the decoder
-        // config for keyframes and leaves it undefined for delta frames.
-        decoderConfig: frameInfo.decoderConfig,
+        data:
+          type === "key"
+            ? frameInfo.normalizedData
+            : (frameInfo.strippedData ?? frameInfo.normalizedData),
+        decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
         status: PreparedVideoFrameStatus.Ok,
         type,
       };

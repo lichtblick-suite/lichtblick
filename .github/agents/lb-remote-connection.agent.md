@@ -319,3 +319,4 @@ WorkerSerializedIterableSource       McapIterableSourceWorker.worker.ts
 - MCAP format structure and indexed reading: `read_file(".github/skills/mcap-format/SKILL.md")`
 - Worker/Comlink patterns: `read_file(".github/skills/web-workers/SKILL.md")`
 - BufferedIterableSource or BlockLoader details: `read_file(".github/skills/caching-internals/SKILL.md")`
+- Network/read latency profiling and buffering performance: `read_file(".github/skills/performance/SKILL.md")`
