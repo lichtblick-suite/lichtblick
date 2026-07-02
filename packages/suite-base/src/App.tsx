@@ -125,6 +125,11 @@ export function App(props: AppProps): React.JSX.Element {
     () => new IdbLayoutStorage(layoutDatabaseName(workspaceId)),
     [workspaceId],
   );
+  useEffect(() => {
+    return () => {
+      void layoutStorage.close();
+    };
+  }, [layoutStorage]);
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
 
   // The toast and logs provider comes first so they are available to all downstream providers

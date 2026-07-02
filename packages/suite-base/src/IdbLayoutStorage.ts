@@ -62,6 +62,15 @@ export class IdbLayoutStorage implements ILayoutStorage {
     });
   }
 
+  /**
+   * Close the underlying IndexedDB connection. Call when discarding a storage instance (for example
+   * when switching workspaces) so stale database connections are released and the database can be
+   * deleted cleanly.
+   */
+  public async close(): Promise<void> {
+    (await this.#db).close();
+  }
+
   public async list(namespace: string): Promise<readonly Layout[]> {
     const results: Layout[] = [];
     const records = await (await this.#db).getAllFromIndex(
