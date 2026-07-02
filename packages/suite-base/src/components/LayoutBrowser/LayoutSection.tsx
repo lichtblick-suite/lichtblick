@@ -50,7 +50,7 @@ export default function LayoutSection({
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
 }>): React.JSX.Element {
-  const { classes } = useLayoutSectionStyles();
+  const { classes, cx } = useLayoutSectionStyles();
   const [expanded, setExpanded] = useState(true);
 
   const toggleExpanded = useCallback(() => {
@@ -69,8 +69,7 @@ export default function LayoutSection({
           data-testid={`layout-section-header-${title}`}
         >
           <ArrowDropDownIcon
-            className={classes.arrow}
-            style={{ transform: expanded ? undefined : "rotate(-90deg)" }}
+            className={cx(classes.arrow, { [classes.arrowCollapsed]: !expanded })}
           />
           <Typography variant="overline" color="text.secondary">
             {title}

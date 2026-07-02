@@ -25,4 +25,7 @@ export const useLayoutSectionStyles = makeStyles()((theme) => ({
       duration: theme.transitions.duration.shortest,
     }),
   },
+  arrowCollapsed: {
+    transform: "rotate(-90deg)",
+  },
 }));
