@@ -17,22 +17,25 @@ test.use({
   ],
 });
 
-test("loads the persisted current workspace on startup", { tag: "@smoke" }, async ({
-  mainWindow,
-}) => {
-  const dialog = new DataSourceDialog(mainWindow);
-  const switcher = new WorkspaceSwitcher(mainWindow);
+test(
+  "loads the persisted current workspace on startup",
+  { tag: "@smoke" },
+  async ({ mainWindow }) => {
+    const dialog = new DataSourceDialog(mainWindow);
+    const switcher = new WorkspaceSwitcher(mainWindow);
 
-  // GIVEN / WHEN
-  await dialog.close();
+    // GIVEN / WHEN
+    await dialog.close();
+    await expect(dialog.getLocator()).toBeHidden();
 
-  // THEN
-  await expect(switcher.button()).toContainText("Alpha");
+    // THEN
+    await expect(switcher.button()).toContainText("Alpha");
 
-  // WHEN
-  await switcher.open();
+    // WHEN
+    await switcher.open();
 
-  // THEN
-  await expect(switcher.workspaceItem("Alpha")).toBeVisible();
-  await expect(switcher.workspaceItem("Beta")).toBeVisible();
-});
+    // THEN
+    await expect(switcher.workspaceItem("Alpha")).toBeVisible();
+    await expect(switcher.workspaceItem("Beta")).toBeVisible();
+  },
+);

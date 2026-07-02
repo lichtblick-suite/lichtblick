@@ -32,9 +32,9 @@ export type ElectronFixtures = {
 const WEBPACK_PATH = path.resolve(__dirname, "../../desktop/.webpack");
 
 export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
-  electronArgs: [],
-  preInstalledExtensions: [],
-  preSeededWorkspaces: [],
+  electronArgs: [[], { option: true }],
+  preInstalledExtensions: [[], { option: true }],
+  preSeededWorkspaces: [[], { option: true }],
 
   electronApp: async ({ electronArgs, preInstalledExtensions, preSeededWorkspaces }, use) => {
     checkBuild(WEBPACK_PATH);

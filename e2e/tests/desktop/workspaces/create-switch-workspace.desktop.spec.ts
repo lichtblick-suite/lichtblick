@@ -20,6 +20,7 @@ test("create and switch workspace", { tag: "@smoke" }, async ({ mainWindow }) =>
 
   // GIVEN
   await dialog.close();
+  await expect(dialog.getLocator()).toBeHidden();
   await expect(switcher.button()).toContainText("Default (no workspace)");
 
   // WHEN
@@ -27,6 +28,9 @@ test("create and switch workspace", { tag: "@smoke" }, async ({ mainWindow }) =>
 
   // THEN
   await expect(switcher.button()).toContainText("My Workspace");
+
+  // Switching workspaces remounts the app subtree, reopening the start dialog.
+  await dialog.closeIfVisible();
 
   // WHEN
   await switcher.switchToLegacy();
