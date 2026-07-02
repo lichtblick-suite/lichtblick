@@ -142,12 +142,14 @@ export class H265 {
       state.hasRandomAccessNaluType = true;
     }
 
+    const rangeSize = nalu.end - nalu.startCodeStart;
+
     if (H265.IsParameterSetNaluType(nalu.type)) {
       state.hasVps ||= nalu.type === H265NaluType.VPS_NUT;
       state.hasSps ||= nalu.type === H265NaluType.SPS_NUT;
       state.hasPps ||= nalu.type === H265NaluType.PPS_NUT;
       state.parameterSetRanges.push({ start: nalu.startCodeStart, end: nalu.end });
-      state.parameterSetSize += nalu.end - nalu.startCodeStart;
+      state.parameterSetSize += rangeSize;
       if (nalu.type === H265NaluType.PPS_NUT) {
         const pps = H265.ParsePps(nalu.data);
         if (pps != undefined) {
@@ -158,7 +160,7 @@ export class H265 {
     }
 
     state.keptRanges.push({ start: nalu.startCodeStart, end: nalu.end });
-    state.keptSize += nalu.end - nalu.startCodeStart;
+    state.keptSize += rangeSize;
 
     if (H265.IsVclNaluType(nalu.type)) {
       const sliceType = H265.ParseSliceType(nalu.data, nalu.type, state.ppsById);
@@ -184,29 +186,6 @@ export class H265 {
     }
 
     return H265.LengthPrefixedToAnnexB(data);
-  }
-
-  public static StripParameterSets(data: Uint8Array): Uint8Array | undefined {
-    const annexBData = H265.ToAnnexB(data);
-    if (annexBData == undefined) {
-      return undefined;
-    }
-
-    const keptRanges: Array<{ start: number; end: number }> = [];
-    let keptSize = 0;
-    for (const nalu of H265.Nalus(annexBData)) {
-      if (
-        nalu.type === H265NaluType.VPS_NUT ||
-        nalu.type === H265NaluType.SPS_NUT ||
-        nalu.type === H265NaluType.PPS_NUT
-      ) {
-        continue;
-      }
-      keptRanges.push({ start: nalu.startCodeStart, end: nalu.end });
-      keptSize += nalu.end - nalu.startCodeStart;
-    }
-
-    return keptSize > 0 ? H265.AssembleRanges(annexBData, keptRanges, keptSize) : undefined;
   }
 
   private static AssembleRanges(
