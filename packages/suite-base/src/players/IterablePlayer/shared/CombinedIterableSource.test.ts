@@ -170,9 +170,7 @@ describe("CombinedIterableSource", () => {
       expect(init.alerts[0]?.severity).toBe("warn");
 
       // And the failed source is excluded from iteration
-      const order = await collect(
-        combined.messageIterator({ topics: new Map() }),
-      );
+      const order = await collect(combined.messageIterator({ topics: new Map() }));
       expect(order).toEqual([0, 2, 4]);
     });
 
@@ -214,9 +212,7 @@ describe("CombinedIterableSource", () => {
       await combined.initialize();
 
       // When
-      const order = await collect(
-        combined.messageIterator({ topics: new Map() }),
-      );
+      const order = await collect(combined.messageIterator({ topics: new Map() }));
 
       // Then
       expect(order).toEqual([0, 1, 2, 3, 4]);
