@@ -400,6 +400,13 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   animationFrame: () => void;
   queueAnimationFrame: () => void;
 
+  /**
+   * Resolves once all scene extensions have finished any in-flight asynchronous video decoding.
+   * Used by the panel to gate the frame barrier on a seek so the cursor parks on the target until
+   * the seek frame is actually rendered.
+   */
+  settleVideoDecodes(): Promise<void>;
+
   // Function to fetch an asset from Studio's asset manager.
   fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];
 

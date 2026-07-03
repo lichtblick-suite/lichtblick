@@ -12,6 +12,7 @@ import {
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
+import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import { Player } from "@lichtblick/suite-base/players/types";
 import { mergeMultipleFileNames } from "@lichtblick/suite-base/util/mergeMultipleFileName";
 
@@ -52,6 +53,9 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
       name: mergeMultipleFileNames(files.map((file) => file.name)),
       sourceId: this.id,
       readAheadDuration: { sec: 120, nsec: 0 },
+      // MCAP can carry foxglove.CompressedVideo. Some codecs (e.g. H.265) cannot decode a P/B-frame
+      // in isolation, so on a backward seek the backfill is expanded to include the preceding GOP.
+      expandBackfill: expandVideoSeekBackfill,
     });
   }
 }

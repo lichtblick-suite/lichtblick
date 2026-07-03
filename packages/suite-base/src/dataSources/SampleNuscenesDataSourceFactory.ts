@@ -20,6 +20,7 @@ import {
 } from "@lichtblick/suite-base/dataSources/constants";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
+import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 
 import SampleNuscenesLayout from "./SampleNuscenesLayout.json";
 
@@ -58,6 +59,10 @@ class SampleNuscenesDataSourceFactory implements IDataSourceFactory {
       urlParams: {},
       sourceId: this.id,
       readAheadDuration: SAMPLE_NUSCENES_DATA_SOURCE_READ_AHEAD_DURATION,
+      // The sample is an MCAP that can carry foxglove.CompressedVideo. Some codecs (e.g. H.265)
+      // cannot decode a P/B-frame in isolation, so on a backward seek the backfill is expanded to
+      // include the preceding GOP.
+      expandBackfill: expandVideoSeekBackfill,
     });
   }
 }

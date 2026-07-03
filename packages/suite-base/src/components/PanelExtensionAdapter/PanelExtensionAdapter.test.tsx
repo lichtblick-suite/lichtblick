@@ -20,7 +20,6 @@ import {
   MessageEvent,
   Immutable,
   Subscription,
-  SettingsTreeAction,
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
@@ -1076,7 +1075,7 @@ describe("PanelExtensionAdapter", () => {
       wrappedActionHandler?.({
         action: "reorder-node",
         payload: { path: ["topics", "topic1"] },
-      } as unknown as SettingsTreeAction);
+      });
 
       expect(settingsActionHandler).toHaveBeenCalledTimes(1);
       expect(saveConfig).not.toHaveBeenCalled();

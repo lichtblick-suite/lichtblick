@@ -5,8 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// Importing `protobufjs/ext/descriptor` installs `Root.fromDescriptor` at runtime and brings its
+// type augmentation (shipped with protobufjs v8) into scope.
 import protobufjs from "protobufjs";
-import { FileDescriptorSet } from "protobufjs/ext/descriptor";
+import "protobufjs/ext/descriptor";
 
 import { protobufDefinitionsToDatatypes, stripLeadingDot } from "./protobufDefinitionsToDatatypes";
 import { MessageDefinitionMap } from "./types";
@@ -22,9 +24,8 @@ export function parseProtobufSchema(
   datatypes: MessageDefinitionMap;
   deserialize: (buffer: ArrayBufferView) => unknown;
 } {
-  const descriptorSet = FileDescriptorSet.decode(schemaData);
-
-  const root = protobufjs.Root.fromDescriptor(descriptorSet);
+  // `Root.fromDescriptor` accepts the raw FileDescriptorSet bytes and decodes them internally.
+  const root = protobufjs.Root.fromDescriptor(schemaData);
   root.resolveAll();
   const rootType = root.lookupType(schemaName);
 
@@ -62,7 +63,10 @@ export function parseProtobufSchema(
   const deserialize = (data: ArrayBufferView) => {
     return rootType.toObject(
       rootType.decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength)),
-      { defaults: true },
+      // `longs: BigInt` makes 64-bit integer fields (int64/uint64/etc.) decode as native `bigint`
+      // values. protobufjs v8.4+ supports this natively, replacing the previous local patch that
+      // globally swapped the `long` library for BigInt.
+      { defaults: true, longs: BigInt },
     );
   };
 

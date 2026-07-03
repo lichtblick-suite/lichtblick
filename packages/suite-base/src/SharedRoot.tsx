@@ -5,6 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useMemo } from "react";
+
 import GlobalCss from "@lichtblick/suite-base/components/GlobalCss";
 import {
   ISharedRootContext,
@@ -23,6 +25,7 @@ export function SharedRoot(
   const {
     appBarLeftInset,
     appConfiguration,
+    appParameters,
     onAppBarDoubleClick,
     AppBarComponent,
     children,
@@ -36,28 +39,45 @@ export function SharedRoot(
     authProvider,
   } = props;
 
+  const contextValue = useMemo(
+    () => ({
+      appBarLeftInset,
+      AppBarComponent,
+      appConfiguration,
+      appParameters,
+      customWindowControlProps,
+      dataSources,
+      deepLinks,
+      enableLaunchPreferenceScreen,
+      extensionLoaders,
+      extraProviders,
+      onAppBarDoubleClick,
+      authProvider,
+    }),
+    [
+      appBarLeftInset,
+      AppBarComponent,
+      appConfiguration,
+      appParameters,
+      customWindowControlProps,
+      dataSources,
+      deepLinks,
+      enableLaunchPreferenceScreen,
+      extensionLoaders,
+      extraProviders,
+      onAppBarDoubleClick,
+      authProvider,
+    ],
+  );
+
   return (
     <AppConfigurationContext.Provider value={appConfiguration}>
-      <AppParametersProvider>
+      <AppParametersProvider appParameters={appParameters}>
         <ColorSchemeThemeProvider>
           {enableGlobalCss && <GlobalCss />}
           <CssBaseline>
             <ErrorBoundary>
-              <SharedRootContext.Provider
-                value={{
-                  appBarLeftInset,
-                  AppBarComponent,
-                  appConfiguration,
-                  customWindowControlProps,
-                  dataSources,
-                  deepLinks,
-                  enableLaunchPreferenceScreen,
-                  extensionLoaders,
-                  extraProviders,
-                  onAppBarDoubleClick,
-                  authProvider,
-                }}
-              >
+              <SharedRootContext.Provider value={contextValue}>
                 {children}
               </SharedRootContext.Provider>
             </ErrorBoundary>

@@ -19,7 +19,7 @@
     "prepack": "tsc -b tsconfig.json"
   },
   "devDependencies": {
-    "@lichtblick/tsconfig": "1.0.2",
-    "typescript": "5.9.3"
+    "@lichtblick/tsconfig": "1.1.2",
+    "typescript": "6.0.3"
   }
 }

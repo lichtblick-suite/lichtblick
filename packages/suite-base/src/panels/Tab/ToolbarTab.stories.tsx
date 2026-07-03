@@ -37,6 +37,7 @@ const baseProps = {
   tabTitle: "Tab Title",
 };
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 const Container = React.forwardRef<HTMLDivElement, { children?: ReactNode }>(function Container(
   { children }: any,
   ref,

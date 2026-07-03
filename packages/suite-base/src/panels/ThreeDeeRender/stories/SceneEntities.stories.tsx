@@ -9,8 +9,8 @@ import { FrameTransform, LineType, SceneEntity, SceneUpdate } from "@foxglove/sc
 import { StoryObj } from "@storybook/react";
 import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
-import { STLExporter } from "three/examples/jsm/exporters/STLExporter";
-import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry";
+import { STLExporter } from "three/examples/jsm/exporters/STLExporter.js";
+import { TeapotGeometry } from "three/examples/jsm/geometries/TeapotGeometry.js";
 import tinycolor from "tinycolor2";
 
 import { MessageEvent } from "@lichtblick/suite";

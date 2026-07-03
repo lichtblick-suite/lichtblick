@@ -100,6 +100,7 @@ const createMockRenderer = (overrides?: Record<string, any>) => {
       setPublishClickType: jest.fn(),
       publishClickType: "point",
     },
+    settleVideoDecodes: jest.fn().mockResolvedValue(undefined),
   };
 
   return { ...defaultRenderer, ...overrides };
@@ -353,6 +354,133 @@ describe("ThreeDeeRender", () => {
     expect(mockedRenderer).toHaveBeenCalled();
     const rendererCall = mockedRenderer.mock.calls[0]?.[0];
     expect(rendererCall?.customCameraModels).toBe(customCameraModels);
+  });
+
+  describe("seek render barrier", () => {
+    function deferred<T>() {
+      let resolve!: (value: T | PromiseLike<T>) => void;
+      let reject!: (reason?: unknown) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    }
+    it("invokes done immediately for non-seek frames", async () => {
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      const done = jest.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 1 },
+          },
+          done,
+        );
+      });
+
+      await waitFor(() => {
+        expect(done).toHaveBeenCalledTimes(1);
+      });
+      expect(customRendererInstance.settleVideoDecodes).not.toHaveBeenCalled();
+    });
+
+    it("defers done on seek frames until video decode settles", async () => {
+      const settle = deferred<void>();
+      const customRendererInstance = createMockRenderer({
+        settleVideoDecodes: jest.fn().mockImplementation(async () => {
+          await settle.promise;
+        }),
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      const done = jest.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 2 },
+            didSeek: true,
+          },
+          done,
+        );
+      });
+
+      await waitFor(() => {
+        expect(customRendererInstance.settleVideoDecodes).toHaveBeenCalledTimes(1);
+      });
+      expect(done).not.toHaveBeenCalled();
+
+      await act(async () => {
+        settle.resolve();
+        await settle.promise;
+      });
+
+      expect(done).toHaveBeenCalledTimes(1);
+    });
+
+    it("releases done when settleVideoDecodes rejects", async () => {
+      const settle = deferred<void>();
+      const customRendererInstance = createMockRenderer({
+        settleVideoDecodes: jest.fn().mockImplementation(async () => {
+          await settle.promise;
+        }),
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      const done = jest.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 3 },
+            didSeek: true,
+          },
+          done,
+        );
+      });
+
+      await waitFor(() => {
+        expect(customRendererInstance.settleVideoDecodes).toHaveBeenCalledTimes(1);
+      });
+      expect(done).not.toHaveBeenCalled();
+
+      await act(async () => {
+        settle.reject(new Error("decode failed"));
+        await Promise.resolve();
+      });
+
+      expect(done).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("transfom topic preloading", () => {

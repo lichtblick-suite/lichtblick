@@ -18,12 +18,14 @@ import {
   useCurrentUserType,
 } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { useEvents } from "@lichtblick/suite-base/context/EventsContext";
+import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
+import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 
@@ -161,6 +163,9 @@ jest.mock("@lichtblick/suite-base/context/AppContext", () => ({
 }));
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
   useCurrentLayoutSelector: jest.fn().mockReturnValue(undefined),
+  useCurrentLayoutActions: jest.fn().mockReturnValue({
+    setSelectedLayoutId: jest.fn(),
+  }),
 }));
 jest.mock("@lichtblick/suite-base/context/CurrentUserContext", () => ({
   useCurrentUser: jest.fn(),
@@ -168,6 +173,13 @@ jest.mock("@lichtblick/suite-base/context/CurrentUserContext", () => ({
 }));
 jest.mock("@lichtblick/suite-base/context/EventsContext", () => ({
   useEvents: jest.fn(),
+}));
+jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
+  useLayoutManager: jest.fn().mockReturnValue({
+    getLayouts: jest.fn().mockResolvedValue([]),
+    deleteLayout: jest.fn().mockResolvedValue(undefined),
+    saveNewLayout: jest.fn().mockResolvedValue({ id: "test-layout-id" }),
+  }),
 }));
 jest.mock("@lichtblick/suite-base/context/PlayerSelectionContext", () => ({
   usePlayerSelection: jest.fn(),
@@ -199,6 +211,13 @@ jest.mock("@lichtblick/suite-base/hooks/useElectronFilesToOpen", () => ({
 }));
 jest.mock("@lichtblick/suite-base/hooks/useHandleFiles", () => ({
   useHandleFiles: jest.fn(),
+}));
+jest.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", () => ({
+  useLayoutTransfer: jest.fn().mockReturnValue({
+    parseAndInstallLayout: jest.fn().mockResolvedValue({ id: "default-layout-id" }),
+    importLayout: jest.fn(),
+    exportLayout: jest.fn(),
+  }),
 }));
 jest.mock("@lichtblick/suite-base/hooks/useSeekTimeFromCLI", () => ({
   __esModule: true,
@@ -449,5 +468,243 @@ describe("Workspace - session-based MCAP resolution", () => {
 
     // Then
     expect(mockGetSession).not.toHaveBeenCalled();
+  });
+});
+
+describe("Workspace - fetchLayoutFromUrl", () => {
+  const mockParseAndInstallLayout = jest.fn();
+  const mockGetLayouts = jest.fn();
+  const mockDeleteLayout = jest.fn();
+  const originalFetch = global.fetch;
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  const setupWorkspaceMocks = () => {
+    (useMessagePipeline as jest.Mock).mockImplementation(
+      (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
+    );
+    (useMessagePipelineGetter as jest.Mock).mockReturnValue(() => mockPipelineContext);
+    (useWorkspaceStore as jest.Mock).mockImplementation(
+      (selector: (store: typeof mockWorkspaceStore) => unknown) => selector(mockWorkspaceStore),
+    );
+    (useWorkspaceActions as jest.Mock).mockReturnValue(mockWorkspaceActions);
+    (usePlayerSelection as jest.Mock).mockReturnValue({
+      availableSources: [],
+      selectSource: jest.fn(),
+    });
+    (useAlertCount as jest.Mock).mockReturnValue({
+      playerAlerts: [],
+      sessionAlerts: [],
+      alertCount: 0,
+    });
+    (useHandleFiles as jest.Mock).mockReturnValue({ handleFiles: jest.fn() });
+    (useAppConfigurationValue as jest.Mock).mockReturnValue([false]);
+    (useCurrentUser as jest.Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
+    (useCurrentUserType as jest.Mock).mockReturnValue("unauthenticated");
+    (useEvents as jest.Mock).mockImplementation(
+      (selector: (store: { eventsSupported: boolean; selectEvent: jest.Mock }) => unknown) =>
+        selector({ eventsSupported: false, selectEvent: jest.fn() }),
+    );
+    (useAppContext as jest.Mock).mockReturnValue({
+      PerformanceSidebarComponent: undefined,
+      sidebarItems: [],
+      layoutBrowser: undefined,
+      workspaceStoreCreator: undefined,
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetLayouts.mockResolvedValue([]);
+    mockDeleteLayout.mockResolvedValue(undefined);
+    mockParseAndInstallLayout.mockResolvedValue({ id: "new-layout-id" });
+    (useLayoutManager as jest.Mock).mockReturnValue({
+      getLayouts: mockGetLayouts,
+      deleteLayout: mockDeleteLayout,
+      saveNewLayout: jest.fn().mockResolvedValue({ id: "test-layout-id" }),
+    });
+    (useLayoutTransfer as jest.Mock).mockReturnValue({
+      parseAndInstallLayout: mockParseAndInstallLayout,
+      importLayout: jest.fn(),
+      exportLayout: jest.fn(),
+    });
+    setupWorkspaceMocks();
+  });
+
+  it("should fetch and install layout from valid https URL", async () => {
+    // Given
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: jest.fn().mockResolvedValue('{"configById":{}}'),
+    });
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      layoutUrl: "https://example.com/my-layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/my-layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith("https://example.com/my-layout.json");
+    });
+    await waitFor(() => {
+      expect(mockParseAndInstallLayout).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "my-layout.json" }),
+        "local",
+      );
+    });
+  });
+
+  it("should delete existing layouts with same name after successful install", async () => {
+    // Given
+    mockGetLayouts.mockResolvedValue([{ id: "old-id", name: "my-layout" }]);
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: jest.fn().mockResolvedValue("{}"),
+    });
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      layoutUrl: "https://example.com/my-layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/my-layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockDeleteLayout).toHaveBeenCalledWith({ id: "old-id" });
+    });
+  });
+
+  it("should not delete existing layouts if parseAndInstallLayout returns undefined", async () => {
+    // Given
+    mockGetLayouts.mockResolvedValue([{ id: "old-id", name: "my-layout" }]);
+    mockParseAndInstallLayout.mockResolvedValue(undefined);
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: jest.fn().mockResolvedValue("{}"),
+    });
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      layoutUrl: "https://example.com/my-layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/my-layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockParseAndInstallLayout).toHaveBeenCalled();
+    });
+    expect(mockDeleteLayout).not.toHaveBeenCalled();
+  });
+
+  it("should show error snackbar for non-http(s) URL", async () => {
+    // Given
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      layoutUrl: "file:///local/layout.json",
+    });
+
+    // When
+    render(
+      <Workspace deepLinks={["https://app.example.com/?layoutUrl=file:///local/layout.json"]} />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+        "Layout URL must use http or https protocol",
+        {
+          variant: "error",
+        },
+      );
+    });
+  });
+
+  it("should show error snackbar on HTTP error response", async () => {
+    // Given
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 404 });
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      layoutUrl: "https://example.com/layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Failed to load layout (HTTP 404)", {
+        variant: "error",
+      });
+    });
+  });
+
+  it("should show error snackbar on network error", async () => {
+    // Given
+    global.fetch = jest.fn().mockRejectedValue(new Error("Network error"));
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      layoutUrl: "https://example.com/layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Failed to load layout from URL", {
+        variant: "error",
+      });
+    });
+  });
+
+  it("should not fetch layout when layoutUrl is absent from URL state", () => {
+    // Given
+    global.fetch = jest.fn();
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      ds: "remote-file",
+      dsParams: { url: "https://example.com/file.mcap" },
+    });
+
+    // When
+    render(<Workspace deepLinks={["https://app.example.com/?ds=remote-file"]} />);
+
+    // Then
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("should show error snackbar for malformed URL that cannot be parsed", async () => {
+    // Given
+    (parseAppURLState as jest.Mock).mockReturnValue({
+      layoutUrl: "not a valid url ://",
+    });
+
+    // When
+    render(<Workspace deepLinks={["https://app.example.com/?layoutUrl=not+a+valid+url"]} />);
+
+    // Then
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Invalid layout URL", { variant: "error" });
+    });
   });
 });

@@ -273,7 +273,7 @@ describe("McapIterableSource", () => {
         body: new Blob([mcapData]).stream(),
         headers: new Headers({ "content-length": String(mcapData.byteLength) }),
       });
-      global.fetch = mockFetch as unknown as typeof fetch;
+      global.fetch = mockFetch;
 
       // When initializing the source
       const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });
@@ -302,7 +302,7 @@ describe("McapIterableSource", () => {
       global.fetch = jest.fn().mockResolvedValue({
         body: undefined,
         headers: new Headers({ "content-length": String(mcapData.byteLength) }),
-      }) as unknown as typeof fetch;
+      });
 
       // When initializing the source
       const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });
@@ -320,7 +320,7 @@ describe("McapIterableSource", () => {
       global.fetch = jest.fn().mockResolvedValue({
         body: new Blob([mcapData]).stream(),
         headers: new Headers(),
-      }) as unknown as typeof fetch;
+      });
 
       // When initializing the source
       const source = new McapIterableSource({ type: "url", url: urlUnindexedMcap });

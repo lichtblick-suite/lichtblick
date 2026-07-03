@@ -14,7 +14,7 @@
     "@lichtblick/rostime": "1.0.0",
     "@lichtblick/suite-base": "workspace:*",
     "@lichtblick/theme": "workspace:*",
-    "@lichtblick/tsconfig": "1.0.2",
+    "@lichtblick/tsconfig": "1.1.2",
     "@mcap/core": "2.2.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
     "@storybook/react": "9.1.9",
@@ -29,7 +29,7 @@
     "builder-util": "*",
     "clean-webpack-plugin": "4.0.0",
     "dotenv": "17.2.2",
-    "electron": "42.4.1",
+    "electron": "43.0.0",
     "electron-builder": "26.15.3",
     "electron-devtools-installer": "4.0.0",
     "electron-squirrel-startup": "1.0.1",
@@ -52,7 +52,7 @@
     "tinycolor2": "1.6.0",
     "tss-react": "4.9.19",
     "utif": "3.1.0",
-    "webpack": "5.107.2",
+    "webpack": "5.108.3",
     "webpack-dev-server": "5.2.5"
   }
 }

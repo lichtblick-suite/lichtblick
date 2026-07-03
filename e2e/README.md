@@ -53,10 +53,10 @@ yarn test:e2e:desktop:debug uninstall-extens
 
 All E2E tests are labeled with one of two tags that control which CI pipeline executes them:
 
-| Tag | When it runs | Criteria |
-|-----|-------------|----------|
-| `@smoke` | Every PR / every push | Critical user-path tests: opening files, basic player controls, primary layout and menu actions |
-| `@regression` | Nightly (02:00 UTC) + `develop` / `main` merges | Edge cases, keyboard shortcuts, extended scenarios, slower workflows (extensions, remote data) |
+| Tag           | When it runs                                    | Criteria                                                                                        |
+| ------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `@smoke`      | Every PR / every push                           | Critical user-path tests: opening files, basic player controls, primary layout and menu actions |
+| `@regression` | Nightly (02:00 UTC) + `develop` / `main` merges | Edge cases, keyboard shortcuts, extended scenarios, slower workflows (extensions, remote data)  |
 
 ### Run by category locally
 
@@ -158,7 +158,7 @@ The Playwright MCP server exposes browser automation as MCP tools that AI agents
 
 - VS Code with [GitHub Copilot](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot) extension
 - Copilot agent mode enabled (VS Code 1.99+)
-- The `.vscode/mcp.json` file (already included) configures the Playwright MCP server
+- The `.mcp.json` file at the repo root configures the Playwright MCP server. It is recognized by VS Code Copilot, Claude Code, Cursor, and other MCP-compatible tools.
 
 ### Workflow
 
@@ -182,15 +182,15 @@ Reusable UI abstractions live in `e2e/page-objects/`. They encapsulate common in
 
 ### Available POMs
 
-| POM | Purpose | Key Methods |
-|-----|---------|-------------|
-| `DataSourceDialog` | Data source dialog interactions | `close()`, `openConnection()`, `isVisible()`, `getLocator()` |
-| `Sidebar` | Left/right sidebar tabs | `openLayoutsTab()`, `openTopicsTab()`, `toggleLeftSidebar()`, `getLeftSidebar()`, `getPanelSettingsTab()` |
-| `PlayerControls` | Playback controls | `play()`, `pause()`, `seekForward()`, `setSpeed()`, `getTimestampValue()`, `getPlayButton()`, `getSlider()` |
-| `LayoutManager` | Layout CRUD | `openDefaultLayout()`, `createNewLayout()`, `selectPanel()`, `revertLayout()`, `getLayoutListItem()` |
-| `ExtensionManager` | Extension workflows | `open()`, `search()`, `findExtension()`, `uninstall()`, `getSearchBar()` |
-| `AppMenu` | App menu navigation | `openFile()`, `openViewMenu()`, `importLayoutFromMenu()`, `getMenuButton()` |
-| `Panels` | Panel operations | `addPanel()`, `addPanelFromSearch()`, `setTopicPath()`, `splitPanelDown()`, `getAddPanelButton()`, `getLogPanelRoot()` |
+| POM                | Purpose                         | Key Methods                                                                                                            |
+| ------------------ | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `DataSourceDialog` | Data source dialog interactions | `close()`, `openConnection()`, `isVisible()`, `getLocator()`                                                           |
+| `Sidebar`          | Left/right sidebar tabs         | `openLayoutsTab()`, `openTopicsTab()`, `toggleLeftSidebar()`, `getLeftSidebar()`, `getPanelSettingsTab()`              |
+| `PlayerControls`   | Playback controls               | `play()`, `pause()`, `seekForward()`, `setSpeed()`, `getTimestampValue()`, `getPlayButton()`, `getSlider()`            |
+| `LayoutManager`    | Layout CRUD                     | `openDefaultLayout()`, `createNewLayout()`, `selectPanel()`, `revertLayout()`, `getLayoutListItem()`                   |
+| `ExtensionManager` | Extension workflows             | `open()`, `search()`, `findExtension()`, `uninstall()`, `getSearchBar()`                                               |
+| `AppMenu`          | App menu navigation             | `openFile()`, `openViewMenu()`, `importLayoutFromMenu()`, `getMenuButton()`                                            |
+| `Panels`           | Panel operations                | `addPanel()`, `addPanelFromSearch()`, `setTopicPath()`, `splitPanelDown()`, `getAddPanelButton()`, `getLogPanelRoot()` |
 
 ### Usage Example
 

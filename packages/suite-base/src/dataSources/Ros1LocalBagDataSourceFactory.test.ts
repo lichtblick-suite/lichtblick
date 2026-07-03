@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { DataSourceFactoryInitializeArgs } from "@lichtblick/suite-base/context/PlayerSelectionContext";
-import {
-  IterablePlayer,
-  IterablePlayerOptions,
-} from "@lichtblick/suite-base/players/IterablePlayer";
+import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 import NoopMetricsCollector from "@lichtblick/suite-base/players/NoopMetricsCollector";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -86,6 +83,6 @@ describe("Ros1LocalBagDataSourceFactory", () => {
       name: expectedInitArgs.file?.name,
       sourceId: expect.any(String),
       readAheadDuration: { sec: 120, nsec: 0 },
-    } as IterablePlayerOptions);
+    });
   });
 });

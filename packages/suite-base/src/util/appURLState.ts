@@ -15,6 +15,7 @@ import { keyMap } from "./constants";
 
 export type AppURLState = {
   ds?: string;
+  layoutUrl?: string;
   dsParams?: Record<string, string>;
   dsParamsArray?: Record<string, string[]>;
   layoutId?: LayoutID;
@@ -45,6 +46,14 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
       newURL.searchParams.set("ds", urlState.ds);
     } else {
       newURL.searchParams.delete("ds");
+    }
+  }
+
+  if ("layoutUrl" in urlState) {
+    if (urlState.layoutUrl) {
+      newURL.searchParams.set("layoutUrl", urlState.layoutUrl);
+    } else {
+      newURL.searchParams.delete("layoutUrl");
     }
   }
 
@@ -79,6 +88,7 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
  */
 export function parseAppURLState(url: URL): AppURLState | undefined {
   const ds = url.searchParams.get("ds") ?? undefined;
+  const layoutUrl = url.searchParams.get("layoutUrl");
   const sessionId = url.searchParams.get("sessionid") ?? undefined;
   const timeString = url.searchParams.get("time");
   const time = parseTimeUrlString(timeString ?? undefined);
@@ -100,6 +110,7 @@ export function parseAppURLState(url: URL): AppURLState | undefined {
     {
       time,
       ds,
+      layoutUrl,
       sessionId,
       dsParams: _.isEmpty(dsParams) ? undefined : dsParams,
     },
