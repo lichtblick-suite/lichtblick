@@ -7,10 +7,7 @@
 
 import * as base64 from "@protobufjs/base64";
 
-import {
-  GetBackfillMessagesArgs,
-  MessageIteratorArgs,
-} from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import { MessageIteratorArgs } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 
 import { AdditionalIterableSource } from "./AdditionalIterableSource";
 import { AdditionalSourceDescriptor } from "./types";
@@ -53,7 +50,7 @@ async function collect(
   for await (const result of source.messageIterator({
     ...subscribed,
     ...args,
-  } as MessageIteratorArgs)) {
+  })) {
     if (result.type === "message-event") {
       out.push({
         sec: result.msgEvent.receiveTime.sec,
@@ -181,7 +178,7 @@ describe("AdditionalIterableSource", () => {
       // When the first pass' buffers are transferred across the worker boundary (simulated by
       // detaching the ArrayBuffer, as Comlink.transfer does)
       const detachedByteLengths: number[] = [];
-      for await (const result of source.messageIterator(subscribed as MessageIteratorArgs)) {
+      for await (const result of source.messageIterator(subscribed)) {
         if (result.type !== "message-event") {
           continue;
         }
@@ -211,7 +208,7 @@ describe("AdditionalIterableSource", () => {
       const messages = await source.getBackfillMessages({
         ...subscribed,
         time: { sec: 1, nsec: 500_000_000 },
-      } as GetBackfillMessagesArgs);
+      });
 
       // Then
       expect(messages).toHaveLength(1);
@@ -228,7 +225,7 @@ describe("AdditionalIterableSource", () => {
       const messages = await source.getBackfillMessages({
         ...subscribed,
         time: { sec: 0, nsec: 0 },
-      } as GetBackfillMessagesArgs);
+      });
 
       // Then
       expect(messages).toEqual([]);

@@ -171,7 +171,7 @@ describe("CombinedIterableSource", () => {
 
       // And the failed source is excluded from iteration
       const order = await collect(
-        combined.messageIterator({ topics: new Map() } as MessageIteratorArgs),
+        combined.messageIterator({ topics: new Map() }),
       );
       expect(order).toEqual([0, 2, 4]);
     });
@@ -215,7 +215,7 @@ describe("CombinedIterableSource", () => {
 
       // When
       const order = await collect(
-        combined.messageIterator({ topics: new Map() } as MessageIteratorArgs),
+        combined.messageIterator({ topics: new Map() }),
       );
 
       // Then
@@ -247,7 +247,7 @@ describe("CombinedIterableSource", () => {
       const messages = await combined.getBackfillMessages({
         topics: new Map(["/mcap", "/tags"].map((topic) => [topic, { topic }])),
         time: { sec: 4, nsec: 0 },
-      } as GetBackfillMessagesArgs);
+      });
 
       // Then
       expect(messages.map((m) => m.topic).sort()).toEqual(["/mcap", "/tags"]);
