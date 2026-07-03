@@ -24,9 +24,14 @@ type H265PpsInfo = {
   numExtraSliceHeaderBits: number;
 };
 
+type ByteRange = { start: number; end: number };
+
 type InspectFrameState = {
   ppsById: Map<number, H265PpsInfo>;
-  parameterSetParts: number[];
+  parameterSetRanges: ByteRange[];
+  parameterSetSize: number;
+  keptRanges: ByteRange[];
+  keptSize: number;
   sliceTypes: H265SliceType[];
   hasRandomAccessNaluType: boolean;
   hasUnparsedVclSlice: boolean;
@@ -87,7 +92,10 @@ export class H265 {
 
     const state: InspectFrameState = {
       ppsById: H265.ParsePpsMap(context?.parameterSets),
-      parameterSetParts: [],
+      parameterSetRanges: [],
+      parameterSetSize: 0,
+      keptRanges: [],
+      keptSize: 0,
       sliceTypes: [],
       hasRandomAccessNaluType: false,
       hasUnparsedVclSlice: false,
@@ -97,10 +105,18 @@ export class H265 {
     };
 
     for (const nalu of H265.Nalus(annexBData)) {
-      H265.InspectNalu(annexBData, nalu, state);
+      H265.InspectNalu(nalu, state);
     }
 
     const annexBBoxSize = H265.AnnexBBoxSize(data);
+
+    // Only materialize a stripped buffer when parameter sets are actually present (rare for delta
+    // frames). When nothing is stripped, leave `strippedData` undefined so callers reuse
+    // `normalizedData` without an extra per-frame allocation/copy.
+    const strippedData =
+      state.parameterSetSize > 0 && state.keptSize > 0
+        ? H265.AssembleRanges(annexBData, state.keptRanges, state.keptSize)
+        : undefined;
 
     return {
       bitstreamFormat: annexBBoxSize == undefined ? "length-prefixed" : "annex-b",
@@ -109,14 +125,16 @@ export class H265 {
       sliceTypes: state.sliceTypes,
       hasUnparsedVclSlice: state.hasUnparsedVclSlice,
       normalizedData: annexBData,
+      strippedData,
       parameterSets:
-        state.parameterSetParts.length > 0 ? new Uint8Array(state.parameterSetParts) : undefined,
+        state.parameterSetSize > 0
+          ? H265.AssembleRanges(annexBData, state.parameterSetRanges, state.parameterSetSize)
+          : undefined,
       hasRequiredParameterSets: state.hasVps && state.hasSps && state.hasPps,
     };
   }
 
   private static InspectNalu(
-    annexBData: Uint8Array,
     nalu: { type: number; data: Uint8Array; startCodeStart: number; end: number },
     state: InspectFrameState,
   ): void {
@@ -124,13 +142,14 @@ export class H265 {
       state.hasRandomAccessNaluType = true;
     }
 
+    const rangeSize = nalu.end - nalu.startCodeStart;
+
     if (H265.IsParameterSetNaluType(nalu.type)) {
       state.hasVps ||= nalu.type === H265NaluType.VPS_NUT;
       state.hasSps ||= nalu.type === H265NaluType.SPS_NUT;
       state.hasPps ||= nalu.type === H265NaluType.PPS_NUT;
-      for (const byte of annexBData.subarray(nalu.startCodeStart, nalu.end)) {
-        state.parameterSetParts.push(byte);
-      }
+      state.parameterSetRanges.push({ start: nalu.startCodeStart, end: nalu.end });
+      state.parameterSetSize += rangeSize;
       if (nalu.type === H265NaluType.PPS_NUT) {
         const pps = H265.ParsePps(nalu.data);
         if (pps != undefined) {
@@ -139,6 +158,9 @@ export class H265 {
       }
       return;
     }
+
+    state.keptRanges.push({ start: nalu.startCodeStart, end: nalu.end });
+    state.keptSize += rangeSize;
 
     if (H265.IsVclNaluType(nalu.type)) {
       const sliceType = H265.ParseSliceType(nalu.data, nalu.type, state.ppsById);
@@ -166,27 +188,18 @@ export class H265 {
     return H265.LengthPrefixedToAnnexB(data);
   }
 
-  public static StripParameterSets(data: Uint8Array): Uint8Array | undefined {
-    const annexBData = H265.ToAnnexB(data);
-    if (annexBData == undefined) {
-      return undefined;
+  private static AssembleRanges(
+    data: Uint8Array,
+    ranges: ReadonlyArray<{ start: number; end: number }>,
+    size: number,
+  ): Uint8Array {
+    const out = new Uint8Array(size);
+    let offset = 0;
+    for (const { start, end } of ranges) {
+      out.set(data.subarray(start, end), offset);
+      offset += end - start;
     }
-
-    const parts: number[] = [];
-    for (const nalu of H265.Nalus(annexBData)) {
-      if (
-        nalu.type === H265NaluType.VPS_NUT ||
-        nalu.type === H265NaluType.SPS_NUT ||
-        nalu.type === H265NaluType.PPS_NUT
-      ) {
-        continue;
-      }
-      for (const byte of annexBData.subarray(nalu.startCodeStart, nalu.end)) {
-        parts.push(byte);
-      }
-    }
-
-    return parts.length > 0 ? new Uint8Array(parts) : undefined;
+    return out;
   }
 
   private static *Nalus(data: Uint8Array): Generator<{

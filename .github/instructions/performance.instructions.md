@@ -11,6 +11,7 @@ These rules apply to ALL TypeScript and TSX code in the Lichtblick monorepo. Vio
 - Never allocate inside render loops, `requestAnimationFrame`, or `tick()` callbacks
 - Reuse typed arrays and buffers — prefer `.set()` over creating new instances
 - Prefer `for` loops over `.map()` / `.filter()` / `.reduce()` in hot paths (avoids intermediate allocations)
+- Avoid lodash chains and per-element iteratees (`_.chain`, `_.map`, `_.filter`, `_.cloneDeep`) in hot paths — native loops avoid the extra function-call and allocation overhead; reserve lodash for non-critical code (e.g., `memoize` for settings).
 - Use object pools for frequently created/destroyed objects (e.g., `THREE.Vector3`)
 
 ## React Performance

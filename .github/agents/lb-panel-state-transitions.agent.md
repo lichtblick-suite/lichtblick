@@ -92,3 +92,4 @@ Shared chart component (also used by other panels):
 ## Skills Reference
 - StateTransitions panel internals, discrete state rendering, or TimeBasedChart: `read_file(".github/skills/panel-state-transitions/SKILL.md")`
 - Message-path syntax and topic data extraction: `read_file(".github/skills/message-path/SKILL.md")`
+- Dataset building and large-range rendering performance: `read_file(".github/skills/performance/SKILL.md")`

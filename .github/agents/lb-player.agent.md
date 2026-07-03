@@ -308,3 +308,4 @@ type IteratorResult =
 - MCAP format, chunk structure, or indexed reading: `read_file(".github/skills/mcap-format/SKILL.md")`
 - Worker/Comlink patterns used by iterators: `read_file(".github/skills/web-workers/SKILL.md")`
 - Block caching, memory budgets, or BufferedIterableSource: `read_file(".github/skills/caching-internals/SKILL.md")`
+- Playback throughput, tick-loop cost, or memory-budget profiling: `read_file(".github/skills/performance/SKILL.md")`

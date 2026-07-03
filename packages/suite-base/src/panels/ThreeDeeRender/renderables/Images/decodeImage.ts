@@ -96,7 +96,7 @@ export function prepareVideoFrame(
         data:
           type === "key"
             ? frameInfo.normalizedData
-            : (H265Parser.StripParameterSets(frameInfo.normalizedData) ?? frameInfo.normalizedData),
+            : (frameInfo.strippedData ?? frameInfo.normalizedData),
         decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
         status: PreparedVideoFrameStatus.Ok,
         type,

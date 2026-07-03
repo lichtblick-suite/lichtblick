@@ -90,3 +90,4 @@ Key fields panels can access:
 
 ## Skills Reference
 - Deep MessagePipeline internals, subscription merging, or renderState building: `read_file(".github/skills/message-pipeline/SKILL.md")`
+- Render-state reference stability or subscription performance: `read_file(".github/skills/performance/SKILL.md")`
