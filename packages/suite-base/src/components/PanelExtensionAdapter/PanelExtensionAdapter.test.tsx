@@ -13,7 +13,7 @@ import { render } from "@testing-library/react";
 import { act } from "react";
 
 import { Condvar, signal } from "@lichtblick/den/async";
-import { MessageDefinition } from "@lichtblick/message-definition";
+import type { MessageDefinition } from "@lichtblick/message-definition";
 import { Time } from "@lichtblick/rostime";
 import {
   PanelExtensionContext,
@@ -1085,8 +1085,10 @@ describe("PanelExtensionAdapter", () => {
 
   describe("getTopicSchema", () => {
     it("returns the schema definition for a known topic", async () => {
-      const sig = signal<MessageDefinition | undefined>();
+      // GIVEN a panel with a topic whose schema is registered in the datatypes
+      const sig = signal<Immutable<MessageDefinition> | undefined>();
 
+      // WHEN the panel requests the schema for that topic
       const initPanel = (context: PanelExtensionContext) => {
         const schema = context.getTopicSchema("/some/topic");
         sig.resolve(schema);
@@ -1121,6 +1123,7 @@ describe("PanelExtensionAdapter", () => {
       await act(async () => undefined);
       const schema = await sig;
 
+      // THEN the matching message definition is returned
       expect(schema).toEqual({
         name: "some_msgs/Data",
         definitions: [{ name: "value", type: "uint32", isArray: false, isComplex: false }],
@@ -1128,8 +1131,10 @@ describe("PanelExtensionAdapter", () => {
     });
 
     it("returns undefined for an unknown topic", async () => {
-      const sig = signal<MessageDefinition | undefined>();
+      // GIVEN a panel whose fixture does not contain the requested topic
+      const sig = signal<Immutable<MessageDefinition> | undefined>();
 
+      // WHEN the panel requests the schema for a nonexistent topic
       const initPanel = (context: PanelExtensionContext) => {
         const schema = context.getTopicSchema("/nonexistent/topic");
         sig.resolve(schema);
@@ -1164,12 +1169,15 @@ describe("PanelExtensionAdapter", () => {
       await act(async () => undefined);
       const schema = await sig;
 
+      // THEN no schema is returned
       expect(schema).toBeUndefined();
     });
 
     it("returns undefined when no active data source is available", async () => {
-      const sig = signal<MessageDefinition | undefined>();
+      // GIVEN a panel with no active data source (empty fixture)
+      const sig = signal<Immutable<MessageDefinition> | undefined>();
 
+      // WHEN the panel requests a topic schema
       const initPanel = (context: PanelExtensionContext) => {
         const schema = context.getTopicSchema("/some/topic");
         sig.resolve(schema);
@@ -1188,19 +1196,19 @@ describe("PanelExtensionAdapter", () => {
       await act(async () => undefined);
       const schema = await sig;
 
+      // THEN no schema is returned
       expect(schema).toBeUndefined();
     });
-  });
-  describe("getSchemaDefinition", () => {
-    it("returns the schema definition for a known topic", async () => {
-      const sig = signal<MessageDefinition | undefined>();
+
+    it("returns undefined when called after the panel is unmounted", async () => {
+      // GIVEN a panel context captured while the panel is mounted
+      const sig = signal<PanelExtensionContext>();
 
       const initPanel = (context: PanelExtensionContext) => {
-        const schema = context.getSchemaDefinition("some_msgs/Data");
-        sig.resolve(schema);
+        sig.resolve(context);
       };
 
-      render(
+      const { unmount } = render(
         <ThemeProvider isDark>
           <MockPanelContextProvider>
             <PanelSetup
@@ -1227,19 +1235,70 @@ describe("PanelExtensionAdapter", () => {
       );
 
       await act(async () => undefined);
+      const context = await sig;
+
+      // WHEN the panel is unmounted and the schema is requested afterwards
+      unmount();
+
+      // THEN no schema is returned
+      expect(context.getTopicSchema("/some/topic")).toBeUndefined();
+    });
+  });
+
+  describe("getSchema", () => {
+    it("returns the schema definition for a known schemaName", async () => {
+      // GIVEN a panel with a schema registered in the datatypes
+      const sig = signal<Immutable<MessageDefinition> | undefined>();
+
+      // WHEN the panel requests the schema by its name
+      const initPanel = (context: PanelExtensionContext) => {
+        const schema = context.getSchema("known_schema/Data");
+        sig.resolve(schema);
+      };
+
+      render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup
+              fixture={{
+                topics: [{ name: "/some/topic", schemaName: "known_schema/Data" }],
+                datatypes: new Map([
+                  [
+                    "known_schema/Data",
+                    {
+                      name: "known_schema/Data",
+                      definitions: [
+                        { name: "value", type: "uint32", isArray: false, isComplex: false },
+                      ],
+                    },
+                  ],
+                ]),
+                frame: {},
+              }}
+            >
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+
+      await act(async () => undefined);
       const schema = await sig;
 
+      // THEN the matching message definition is returned
       expect(schema).toEqual({
-        name: "some_msgs/Data",
+        name: "known_schema/Data",
         definitions: [{ name: "value", type: "uint32", isArray: false, isComplex: false }],
       });
     });
 
-    it("returns undefined for an unknown topic", async () => {
-      const sig = signal<MessageDefinition | undefined>();
+    it("returns undefined for an unknown schemaName", async () => {
+      // GIVEN a panel whose datatypes do not contain the requested schema
+      const sig = signal<Immutable<MessageDefinition> | undefined>();
 
+      // WHEN the panel requests a nonexistent schema by name
       const initPanel = (context: PanelExtensionContext) => {
-        const schema = context.getSchemaDefinition("nonexistent_msgs/Data");
+        const schema = context.getSchema("nonexistent_schema/Data");
         sig.resolve(schema);
       };
 
@@ -1248,12 +1307,12 @@ describe("PanelExtensionAdapter", () => {
           <MockPanelContextProvider>
             <PanelSetup
               fixture={{
-                topics: [{ name: "/some/topic", schemaName: "some_msgs/Data" }],
+                topics: [{ name: "/some/topic", schemaName: "known_schema/Data" }],
                 datatypes: new Map([
                   [
-                    "some_msgs/Data",
+                    "known_schema/Data",
                     {
-                      name: "some_msgs/Data",
+                      name: "known_schema/Data",
                       definitions: [
                         { name: "value", type: "uint32", isArray: false, isComplex: false },
                       ],
@@ -1272,14 +1331,17 @@ describe("PanelExtensionAdapter", () => {
       await act(async () => undefined);
       const schema = await sig;
 
+      // THEN no schema is returned
       expect(schema).toBeUndefined();
     });
 
     it("returns undefined when no active data source is available", async () => {
-      const sig = signal<MessageDefinition | undefined>();
+      // GIVEN a panel with no active data source (empty fixture)
+      const sig = signal<Immutable<MessageDefinition> | undefined>();
 
+      // WHEN the panel requests a schema by name
       const initPanel = (context: PanelExtensionContext) => {
-        const schema = context.getSchemaDefinition("some_msgs/Data");
+        const schema = context.getSchema("some_msgs/Data");
         sig.resolve(schema);
       };
 
@@ -1296,7 +1358,52 @@ describe("PanelExtensionAdapter", () => {
       await act(async () => undefined);
       const schema = await sig;
 
+      // THEN no schema is returned
       expect(schema).toBeUndefined();
+    });
+
+    it("returns undefined when called after the panel is unmounted", async () => {
+      // GIVEN a panel context captured while the panel is mounted
+      const sig = signal<PanelExtensionContext>();
+
+      const initPanel = (context: PanelExtensionContext) => {
+        sig.resolve(context);
+      };
+
+      const { unmount } = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup
+              fixture={{
+                topics: [{ name: "/some/topic", schemaName: "known_schema/Data" }],
+                datatypes: new Map([
+                  [
+                    "known_schema/Data",
+                    {
+                      name: "known_schema/Data",
+                      definitions: [
+                        { name: "value", type: "uint32", isArray: false, isComplex: false },
+                      ],
+                    },
+                  ],
+                ]),
+                frame: {},
+              }}
+            >
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+
+      await act(async () => undefined);
+      const context = await sig;
+
+      // WHEN the panel is unmounted and the schema is requested afterwards
+      unmount();
+
+      // THEN no schema is returned
+      expect(context.getSchema("known_schema/Data")).toBeUndefined();
     });
   });
 });

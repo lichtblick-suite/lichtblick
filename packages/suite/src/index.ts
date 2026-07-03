@@ -528,11 +528,14 @@ export type PanelExtensionContext = {
   getTopicSchema: (topic: string) => Immutable<MessageDefinition> | undefined;
 
   /**
+   * Returns the schema definition for a given schemaName, without requiring a subscription or reading
+   * any message data.
    *
    * @param schemaName The name of the schema whose definition should be returned.
-   * @returns The `MessageDefinition` for the schema, or `undefined` if the schema is unknown or no active data source is available.
+   * @returns The `MessageDefinition` for the schema, or `undefined`
+   *   if the schema is unknown or no active data source is available.
    */
-  getSchemaDefinition: (schemaName: string) => Immutable<MessageDefinition> | undefined;
+  getSchema: (schemaName: string) => Immutable<MessageDefinition> | undefined;
 };
 
 export type ExtensionPanelRegistration = {
