@@ -92,7 +92,7 @@ describe("PostMessageAuthProvider", () => {
       new MessageEvent("message", {
         origin: allowedOrigin,
         data: { type: "auth-token", token: "spoofed-token" },
-        source: untrustedWindow as unknown as WindowProxy,
+        source: untrustedWindow,
       }),
     );
     // Also dispatch from the correct source to unblock the promise
@@ -100,7 +100,7 @@ describe("PostMessageAuthProvider", () => {
       new MessageEvent("message", {
         origin: allowedOrigin,
         data: { type: "auth-token", token: "valid-token" },
-        source: trustedWindow as unknown as WindowProxy,
+        source: trustedWindow,
       }),
     );
     // Then - only the valid token is used
