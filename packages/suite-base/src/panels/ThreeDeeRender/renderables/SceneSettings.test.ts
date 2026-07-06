@@ -206,6 +206,23 @@ describe("SceneSettings — settingsNodes", () => {
     expect(field).toMatchObject({ input: "select", value: "fixed" });
     renderer.dispose();
   });
+
+  it("omits the debugPicking field in production", () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      const renderer = makeRenderer();
+      const sceneSettings = new SceneSettings(renderer);
+
+      const [entry] = sceneSettings.settingsNodes();
+      const fieldKeys = Object.keys(entry?.node.fields ?? {});
+
+      expect(fieldKeys).not.toContain("debugPicking");
+      renderer.dispose();
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
+  });
 });
 
 describe("SceneSettings — handleSettingsAction", () => {
@@ -266,6 +283,105 @@ describe("SceneSettings — handleSettingsAction", () => {
     sceneSettings.handleSettingsAction({
       action: "perform-node-action",
       payload: { id: "reset-scene", path: ["scene"] },
+    });
+
+    expect(setScaleSpy).toHaveBeenCalledWith(DEFAULT_LABEL_SCALE_FACTOR);
+    renderer.dispose();
+  });
+
+  it("ignores actions that are not 'update' and not the reset-scene node-action", () => {
+    const renderer = makeRenderer();
+    const sceneSettings = new SceneSettings(renderer);
+    const updateConfigSpy = jest.spyOn(renderer, "updateConfig");
+
+    sceneSettings.handleSettingsAction({
+      action: "perform-node-action",
+      payload: { id: "some-other-action", path: ["scene"] },
+    });
+
+    expect(updateConfigSpy).not.toHaveBeenCalled();
+    renderer.dispose();
+  });
+
+  it("ignores update actions with an empty path", () => {
+    const renderer = makeRenderer();
+    const sceneSettings = new SceneSettings(renderer);
+    const updateConfigSpy = jest.spyOn(renderer, "updateConfig");
+
+    sceneSettings.handleSettingsAction({
+      action: "update",
+      payload: { path: [], value: "anything", input: "string" },
+    });
+
+    expect(updateConfigSpy).not.toHaveBeenCalled();
+    renderer.dispose();
+  });
+
+  it("ignores update actions outside the 'scene' category", () => {
+    const renderer = makeRenderer();
+    const sceneSettings = new SceneSettings(renderer);
+    const updateConfigSpy = jest.spyOn(renderer, "updateConfig");
+
+    sceneSettings.handleSettingsAction({
+      action: "update",
+      payload: { path: ["transforms", "someField"], value: "anything", input: "string" },
+    });
+
+    expect(updateConfigSpy).not.toHaveBeenCalled();
+    renderer.dispose();
+  });
+
+  it("updates debugPicking directly without touching the renderer config", () => {
+    const renderer = makeRenderer();
+    const sceneSettings = new SceneSettings(renderer);
+    const updateConfigSpy = jest.spyOn(renderer, "updateConfig");
+
+    sceneSettings.handleSettingsAction({
+      action: "update",
+      payload: { path: ["scene", "debugPicking"], value: true, input: "boolean" },
+    });
+
+    expect(renderer.debugPicking).toBe(true);
+    expect(updateConfigSpy).not.toHaveBeenCalled();
+    renderer.dispose();
+  });
+
+  it("updates the background color scheme when backgroundColor changes", () => {
+    const renderer = makeRenderer();
+    const sceneSettings = new SceneSettings(renderer);
+    const setColorSchemeSpy = jest.spyOn(renderer, "setColorScheme");
+
+    sceneSettings.handleSettingsAction({
+      action: "update",
+      payload: { path: ["scene", "backgroundColor"], value: "#123456", input: "rgb" },
+    });
+
+    expect(setColorSchemeSpy).toHaveBeenCalledWith(renderer.colorScheme, "#123456");
+    renderer.dispose();
+  });
+
+  it("updates the label pool scale factor when labelScaleFactor changes", () => {
+    const renderer = makeRenderer();
+    const sceneSettings = new SceneSettings(renderer);
+    const setScaleSpy = jest.spyOn(renderer.labelPool, "setScaleFactor");
+
+    sceneSettings.handleSettingsAction({
+      action: "update",
+      payload: { path: ["scene", "labelScaleFactor"], value: 2.5, input: "number" },
+    });
+
+    expect(setScaleSpy).toHaveBeenCalledWith(2.5);
+    renderer.dispose();
+  });
+
+  it("falls back to the default label scale factor when labelScaleFactor is cleared", () => {
+    const renderer = makeRenderer();
+    const sceneSettings = new SceneSettings(renderer);
+    const setScaleSpy = jest.spyOn(renderer.labelPool, "setScaleFactor");
+
+    sceneSettings.handleSettingsAction({
+      action: "update",
+      payload: { path: ["scene", "labelScaleFactor"], value: undefined, input: "number" },
     });
 
     expect(setScaleSpy).toHaveBeenCalledWith(DEFAULT_LABEL_SCALE_FACTOR);
