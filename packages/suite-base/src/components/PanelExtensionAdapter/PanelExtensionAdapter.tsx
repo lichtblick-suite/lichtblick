@@ -688,12 +688,12 @@ function PanelExtensionAdapter(
         const ctx = getMessagePipelineContext();
         const datatypes = ctx.playerState.activeData?.datatypes;
         if (datatypes == undefined) {
-          return undefined;
+          return;
         }
-        const schemaMap = getTopicToSchemaNameMap(messagePipelineState());
+        const schemaMap = getTopicToSchemaNameMap(ctx);
         const schemaName = schemaMap[topic];
         if (schemaName == undefined) {
-          return undefined;
+          return;
         }
         return datatypes.get(schemaName);
       },
@@ -705,7 +705,7 @@ function PanelExtensionAdapter(
         const ctx = getMessagePipelineContext();
         const datatypes = ctx.playerState.activeData?.datatypes;
         if (datatypes == undefined) {
-          return undefined;
+          return;
         }
         return datatypes.get(schemaName);
       },
