@@ -7,7 +7,7 @@
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { ButtonBase, Collapse, Typography, List } from "@mui/material";
-import { MouseEvent, useCallback, useState } from "react";
+import { MouseEvent } from "react";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
@@ -18,11 +18,13 @@ import { useLayoutSectionStyles } from "./LayoutSection.style";
 export default function LayoutSection({
   title,
   disablePadding = false,
+  expanded = true,
   emptyText,
   items,
   anySelectedModifiedLayouts,
   multiSelectedIds,
   selectedId,
+  onToggleExpanded,
   onSelect,
   onRename,
   onDuplicate,
@@ -35,11 +37,13 @@ export default function LayoutSection({
 }: Readonly<{
   title: string | undefined;
   disablePadding?: boolean;
+  expanded?: boolean;
   emptyText: string | undefined;
   items: readonly Layout[] | undefined;
   anySelectedModifiedLayouts: boolean;
   multiSelectedIds: readonly string[];
   selectedId?: string;
+  onToggleExpanded?: () => void;
   onSelect: (item: Layout, params?: { selectedViaClick?: boolean; event?: MouseEvent }) => void;
   onRename: (item: Layout, newName: string) => void;
   onDuplicate: (item: Layout) => void;
@@ -51,11 +55,6 @@ export default function LayoutSection({
   onMakePersonalCopy: (item: Layout) => void;
 }>): React.JSX.Element {
   const { classes, cx } = useLayoutSectionStyles();
-  const [expanded, setExpanded] = useState(true);
-
-  const toggleExpanded = useCallback(() => {
-    setExpanded((prev) => !prev);
-  }, []);
 
   const isCollapsible = title != undefined;
 
@@ -64,7 +63,7 @@ export default function LayoutSection({
       {title != undefined && (
         <ButtonBase
           className={classes.sectionHeader}
-          onClick={toggleExpanded}
+          onClick={onToggleExpanded}
           disableRipple
           data-testid={`layout-section-header-${title}`}
         >

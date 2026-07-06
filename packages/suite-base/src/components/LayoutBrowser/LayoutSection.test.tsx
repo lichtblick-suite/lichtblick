@@ -128,14 +128,12 @@ describe("LayoutSection", () => {
     expect(screen.getByTestId("layout-row-3").dataset.selected).toBe("false");
   });
 
-  it("collapses the list when the section header is clicked", async () => {
+  it("collapses the list when expanded is false", async () => {
     // GIVEN
     const title = BasicBuilder.string();
-    const user = userEvent.setup();
-    render(<LayoutSection {...defaultProps} title={title} />);
 
     // WHEN
-    await user.click(screen.getByTestId(`layout-section-header-${title}`));
+    render(<LayoutSection {...defaultProps} title={title} expanded={false} />);
 
     // THEN
     await waitFor(() => {
@@ -145,15 +143,26 @@ describe("LayoutSection", () => {
     expect(screen.queryByTestId("layout-row-3")).not.toBeInTheDocument();
   });
 
-  it("expands the list when the collapsed section header is clicked again", async () => {
+  it("calls onToggleExpanded when the section header is clicked", async () => {
     // GIVEN
     const title = BasicBuilder.string();
+    const onToggleExpanded = jest.fn();
     const user = userEvent.setup();
-    render(<LayoutSection {...defaultProps} title={title} />);
+    render(<LayoutSection {...defaultProps} title={title} onToggleExpanded={onToggleExpanded} />);
 
-    // WHEN - collapse then expand
+    // WHEN
     await user.click(screen.getByTestId(`layout-section-header-${title}`));
-    await user.click(screen.getByTestId(`layout-section-header-${title}`));
+
+    // THEN
+    expect(onToggleExpanded).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows items when expanded is true", () => {
+    // GIVEN
+    const title = BasicBuilder.string();
+
+    // WHEN
+    render(<LayoutSection {...defaultProps} title={title} expanded={true} />);
 
     // THEN
     expect(screen.getByTestId("layout-row-1")).toBeInTheDocument();

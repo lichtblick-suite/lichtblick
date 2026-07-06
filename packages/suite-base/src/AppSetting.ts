@@ -31,6 +31,8 @@ export enum AppSetting {
   LAUNCH_PREFERENCE = "launchPreference",
   SHOW_OPEN_DIALOG_ON_STARTUP = "ui.open-dialog-startup",
   ENABLE_UNIFIED_NAVIGATION = "ui.new-app-menu",
+  LAYOUT_SECTION_PERSONAL_EXPANDED = "ui.layout-section-personal-expanded",
+  LAYOUT_SECTION_SHARED_EXPANDED = "ui.layout-section-shared-expanded",
 
   // Dev only
   ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",

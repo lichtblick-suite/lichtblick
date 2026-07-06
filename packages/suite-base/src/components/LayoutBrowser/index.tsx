@@ -20,7 +20,7 @@ import {
 import * as _ from "lodash-es";
 import moment from "moment";
 import { useSnackbar } from "notistack";
-import { useEffect, useLayoutEffect, useMemo } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo } from "react";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 
 import Logger from "@lichtblick/log";
@@ -183,6 +183,23 @@ export default function LayoutBrowser({
     });
   }, [reloadLayouts]);
 
+  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+  const [hideSignInPrompt = false, setHideSignInPrompt] = useAppConfigurationValue<boolean>(
+    AppSetting.HIDE_SIGN_IN_PROMPT,
+  );
+  const [personalExpanded = true, setPersonalExpanded] = useAppConfigurationValue<boolean>(
+    AppSetting.LAYOUT_SECTION_PERSONAL_EXPANDED,
+  );
+  const [sharedExpanded = true, setSharedExpanded] = useAppConfigurationValue<boolean>(
+    AppSetting.LAYOUT_SECTION_SHARED_EXPANDED,
+  );
+  const togglePersonalExpanded = useCallback(() => {
+    void setPersonalExpanded(!personalExpanded);
+  }, [personalExpanded, setPersonalExpanded]);
+  const toggleSharedExpanded = useCallback(() => {
+    void setSharedExpanded(!sharedExpanded);
+  }, [sharedExpanded, setSharedExpanded]);
+
   const createNewLayout = useCallbackWithToast(async () => {
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
@@ -199,9 +216,10 @@ export default function LayoutBrowser({
       permission: "CREATOR_WRITE",
     });
     void onSelectLayout(newLayout);
+    void setPersonalExpanded(true);
 
     void analytics.logEvent(AppEvent.LAYOUT_CREATE);
-  }, [currentDateForStorybook, layoutManager, onSelectLayout, analytics]);
+  }, [currentDateForStorybook, layoutManager, onSelectLayout, setPersonalExpanded, analytics]);
 
   const onShareLayout = useCallbackWithToast(
     async (item: Layout) => {
@@ -218,10 +236,11 @@ export default function LayoutBrowser({
           permission: "ORG_WRITE",
         });
         void analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
+        void setSharedExpanded(true);
         await onSelectLayout(newLayout);
       }
     },
-    [analytics, layoutManager, onSelectLayout, prompt],
+    [analytics, layoutManager, onSelectLayout, prompt, setSharedExpanded],
   );
 
   const onMakePersonalCopy = useCallbackWithToast(
@@ -230,19 +249,16 @@ export default function LayoutBrowser({
         id: item.id,
         name: `${item.name} copy`,
       });
+      void setPersonalExpanded(true);
       await onSelectLayout(newLayout);
       void analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
         permission: item.permission,
         syncStatus: item.syncInfo?.status,
       });
     },
-    [analytics, layoutManager, onSelectLayout],
+    [analytics, layoutManager, onSelectLayout, setPersonalExpanded],
   );
 
-  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
-  const [hideSignInPrompt = false, setHideSignInPrompt] = useAppConfigurationValue<boolean>(
-    AppSetting.HIDE_SIGN_IN_PROMPT,
-  );
   const showSignInPrompt =
     signIn != undefined && !layoutManager.supportsSharing && !hideSignInPrompt;
 
@@ -322,6 +338,8 @@ export default function LayoutBrowser({
         <LayoutSection
           disablePadding={enableNewTopNav}
           title={layoutManager.supportsSharing ? "Personal" : undefined}
+          expanded={personalExpanded}
+          onToggleExpanded={togglePersonalExpanded}
           emptyText="Add a new layout to get started with Lichtblick!"
           items={layouts.value?.personal}
           anySelectedModifiedLayouts={anySelectedModifiedLayouts}
@@ -341,6 +359,8 @@ export default function LayoutBrowser({
           <LayoutSection
             disablePadding={enableNewTopNav}
             title="Organization"
+            expanded={sharedExpanded}
+            onToggleExpanded={toggleSharedExpanded}
             emptyText="Your organization doesn’t have any shared layouts yet. Share a layout to collaborate with others."
             items={layouts.value?.shared}
             anySelectedModifiedLayouts={anySelectedModifiedLayouts}
