@@ -74,7 +74,7 @@ export function isTabPanelConfig(config: PanelConfig | undefined): config is Tab
 // Traverses `tree` to find the path to the specified `node`
 export function getPathFromNode<T extends MosaicKey>(
   node: T | undefined,
-  tree: MosaicNode<T> | null, // eslint-disable-line no-restricted-syntax
+  tree: MosaicNode<T> | null,
   path: MosaicPath = [],
 ): MosaicPath {
   if (tree === node) {

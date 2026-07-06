@@ -250,7 +250,6 @@ class BenchmarkPlayer implements Player {
       `Frame time (filtered) average: ${frameMsStats.avgFrameMs}, median: ${frameMsStats.medianFrameMs}, P90: ${frameMsStats.p90FrameMs}`,
     );
 
-    // eslint-disable-next-line no-restricted-syntax
     console.log(frameMs);
 
     const tries = 20;

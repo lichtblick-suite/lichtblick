@@ -331,4 +331,12 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
     }
     return [...msgEventsByTopic.values()];
   }
+
+  public getStart(): Time | undefined {
+    return this.#start;
+  }
+
+  public getEnd(): Time | undefined {
+    return this.#end;
+  }
 }

@@ -31,7 +31,11 @@ import EventEmitter from "eventemitter3";
 
 import { Zoom as ZoomPlugin } from "@lichtblick/chartjs-plugin-zoom";
 import Logger from "@lichtblick/log";
-import { RpcElement, RpcScales } from "@lichtblick/suite-base/components/Chart/types";
+import {
+  RpcElement,
+  RpcScales,
+  TypedChartData,
+} from "@lichtblick/suite-base/components/Chart/types";
 import {
   addEventListener,
   removeEventListener,
@@ -41,7 +45,6 @@ import { fontMonospace } from "@lichtblick/theme";
 
 import { lineSegmentLabelColor } from "./lineSegments";
 import { proxyTyped } from "./proxy";
-import { TypedChartData } from "../types";
 
 const log = Logger.getLogger(__filename);
 
@@ -84,8 +87,8 @@ const lastX: InteractionModeFunction = (chart, event, _options, useFinalPosition
   // `getRelativePosition` function which seems to use a different declaration of the Chart type
   // than what is exported from chart.js.
   //
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-  const position = getRelativePosition(event, chart as any);
+
+  const position = getRelativePosition(event, chart);
 
   // Create a sparse array to track the last datum for each dataset
   const datasetIndexToLastItem: InteractionItem[] = [];
@@ -433,7 +436,7 @@ export default class ChartJSManager {
       datalabelsOptions.formatter = (value: { label?: string }, _context: unknown) => {
         // Return "null" if we don't want this label to be displayed.
         // Returning "undefined" falls back to the default formatting and will display
-        // eslint-disable-next-line no-restricted-syntax
+
         return value.label ?? null;
       };
 

@@ -12,6 +12,9 @@ name: Dependabot
 on:
   - pull_request_target
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   fix:
     runs-on: ubuntu-latest
@@ -25,7 +28,7 @@ jobs:
       YARN_ENABLE_SCRIPTS: false
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Using a Personal Access Token here is required to trigger workflows on our new commit.
           # The default GitHub token doesn't trigger any workflows.
@@ -35,7 +38,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 16.17
+          node-version: 24
 
       - run: corepack enable
 
@@ -55,7 +58,7 @@ jobs:
           git commit -m '[dependabot skip] Fix yarn.lock' --allow-empty
           git push
 
-      - uses: octokit/request-action@v2.4.0
+      - uses: octokit/request-action@v3.0.0
         if: contains(fromJSON('["opened", "reopened"]'), github.event.action)
         env:
           GITHUB_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
@@ -65,7 +68,7 @@ jobs:
           pull_number: ${{ github.event.pull_request.number }}
           event: "APPROVE"
 
-      - uses: octokit/request-action@v2.4.0
+      - uses: octokit/request-action@v3.0.0
         if: contains(fromJSON('["opened", "reopened"]'), github.event.action)
         env:
           GITHUB_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}

@@ -25,6 +25,11 @@ jest.mock("@lichtblick/suite-base/components/PanelContext", () => ({
 
 const mockGetMessagePipelineState = jest.fn();
 const mockSubscribeMessagePipeline = jest.fn();
+const mockSubscribeMessageRange = jest.fn();
+jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", () => ({
+  useSubscribeMessageRange: () => mockSubscribeMessageRange,
+}));
+
 jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
   useMessagePipelineGetter: () => mockGetMessagePipelineState,
   useMessagePipelineSubscribe: () => mockSubscribeMessagePipeline,
@@ -88,7 +93,9 @@ jest.mock("./hooks/usePlotInteractionHandlers", () => ({
 let mockCoordinatorInstance: any;
 const mockPlotCoordinatorCtor = jest.fn();
 jest.mock("./PlotCoordinator", () => ({
-  PlotCoordinator: jest.fn((renderer, builder) => mockPlotCoordinatorCtor(renderer, builder)),
+  PlotCoordinator: jest.fn((renderer, builder, subscribeMessageRange) =>
+    mockPlotCoordinatorCtor(renderer, builder, subscribeMessageRange),
+  ),
 }));
 
 const rendererStub = { id: "renderer" } as any;
@@ -312,7 +319,11 @@ describe("Plot Component", () => {
     unmount();
 
     // Then
-    expect(mockPlotCoordinatorCtor).toHaveBeenCalledWith(rendererStub, datasetsBuilderStub);
+    expect(mockPlotCoordinatorCtor).toHaveBeenCalledWith(
+      rendererStub,
+      datasetsBuilderStub,
+      mockSubscribeMessageRange,
+    );
     expect(mockCoordinatorInstance.setSize).toHaveBeenCalledWith({
       width: expect.any(Number),
       height: expect.any(Number),

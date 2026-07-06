@@ -8,9 +8,9 @@
 import { Opaque } from "ts-essentials";
 
 import { MessagePath } from "@lichtblick/message-path";
-import type { Immutable, Time } from "@lichtblick/suite";
+import type { Immutable, Time, MessageEvent } from "@lichtblick/suite";
 import type { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types";
-import type { MessageBlock, PlayerState } from "@lichtblick/suite-base/players/types";
+import type { PlayerState } from "@lichtblick/suite-base/players/types";
 import { TimestampMethod } from "@lichtblick/suite-base/util/time";
 
 import type { Dataset } from "../types";
@@ -97,20 +97,28 @@ interface IDatasetsBuilder {
   handlePlayerState(state: Immutable<PlayerState>): HandlePlayerStateResult | undefined;
 
   /**
-   * The builder can provide an implementation of this method to handle block data separately from
-   * current frame player state data.
+   * The builder can provide an implementation of this method to incrementally accumulate full
+   * message history delivered via `subscribeMessageRange`. Each call provides a batch of messages
+   * for a single topic, together with a `startTime` used to compute relative x-axis offsets.
    *
-   * The method is provided a _progress_ callback to call when there is an opportunity to render
-   * some of the processed block data to provide feedback to the caller that work has happened. The
-   * progress callback returns false when further processing should stop.
+   * When `options.isReset` is true the builder should discard any previously accumulated data for
+   * that topic before processing the new batch, signalling the start of a fresh range subscription
+   * (e.g. after a seek). Subsequent calls with `isReset: false` append to the existing data.
    */
-  handleBlocks?(
-    startTime: Immutable<Time>,
-    blocks: Immutable<(MessageBlock | undefined)[]>,
-    progress: () => Promise<boolean>,
-  ): Promise<void>;
+  handleMessageRange?(
+    messages: Immutable<MessageEvent[]>,
+    options: { isReset: boolean },
+    startTime?: Immutable<Time>,
+  ): void;
 
   setSeries(series: Immutable<SeriesItem[]>): void;
+
+  /**
+   * Optional: return the x-axis topic name if this builder uses a separate x-axis topic
+   * (e.g. custom x-axis mode). The coordinator will subscribe to this topic in addition to
+   * the y-series topics so that handleMessageRange receives batches for it.
+   */
+  getXTopic?(): string | undefined;
 
   getViewportDatasets(viewport: Immutable<Viewport>): Promise<GetViewportDatasetsResult>;
 

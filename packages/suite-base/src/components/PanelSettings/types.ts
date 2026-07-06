@@ -5,7 +5,7 @@ import { SvgIconProps } from "@mui/material";
 
 import { PanelSettings } from "@lichtblick/suite";
 import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline";
-import { PanelStateStore } from "@lichtblick/suite-base/context/PanelStateContext";
+import { ImmutableSettingsTree } from "@lichtblick/suite-base/context/PanelStateContext";
 
 export type ExtensionSettings = Record<string, Record<string, PanelSettings<unknown>>>;
 
@@ -14,8 +14,8 @@ export type BuildSettingsTreeProps = {
   extensionSettings: ExtensionSettings;
   messagePipelineState: () => MessagePipelineContext;
   panelType: string | undefined;
-  selectedPanelId: string | undefined;
-} & Pick<PanelStateStore, "settingsTrees">;
+  settingsTree: ImmutableSettingsTree | undefined;
+};
 
 export type ActionMenuProps = {
   allowShare: boolean;

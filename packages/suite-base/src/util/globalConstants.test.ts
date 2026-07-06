@@ -35,7 +35,6 @@ describe("getValueColor", () => {
   });
 
   it("should return null color for null", () => {
-    // eslint-disable-next-line no-restricted-syntax
     const color = getValueColor(null, "light");
     expect(color).toBe("#808080");
   });

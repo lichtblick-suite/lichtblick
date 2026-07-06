@@ -20,6 +20,7 @@ import { StoreApi, useStore } from "zustand";
 import { useGuaranteedContext } from "@lichtblick/hooks";
 import { Immutable } from "@lichtblick/suite";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import { AlertsContext } from "@lichtblick/suite-base/context/AlertsContext";
 import CurrentLayoutContext, {
   LayoutState,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
@@ -100,6 +101,11 @@ const selectSubscriptions = (state: MessagePipelineInternalState) => state.publi
 
 export function MessagePipelineProvider({ children, player }: ProviderProps): React.ReactElement {
   const promisesToWaitForRef = useRef<FramePromise[]>([]);
+  const previousPlayerRef = useRef<Player | undefined>();
+  const alertsStore = useContext(AlertsContext);
+  const clearAlerts = useCallback(() => {
+    alertsStore?.getState().actions.clearAlerts();
+  }, [alertsStore]);
 
   // We make a new store when the player changes. This throws away any state from the previous store
   // and re-creates the pipeline functions and references. We make a new store to avoid holding onto
@@ -179,6 +185,14 @@ export function MessagePipelineProvider({ children, player }: ProviderProps): Re
     };
   }, [currentLayoutContext, player]);
 
+  // Session alerts from message converters should not carry over when switching to a new player.
+  useEffect(() => {
+    if (previousPlayerRef.current != undefined && previousPlayerRef.current !== player) {
+      clearAlerts();
+    }
+    previousPlayerRef.current = player;
+  }, [player, clearAlerts]);
+
   useEffect(() => {
     const dispatch = store.getState().dispatch;
     if (!player) {
@@ -196,6 +210,7 @@ export function MessagePipelineProvider({ children, player }: ProviderProps): Re
       msPerFrameRef,
       promisesToWaitForRef,
       store,
+      clearAlerts,
     });
     player.setListener(listener);
     return () => {
@@ -207,7 +222,7 @@ export function MessagePipelineProvider({ children, player }: ProviderProps): Re
         renderDone: undefined,
       });
     };
-  }, [player, store]);
+  }, [player, store, clearAlerts]);
 
   return <ContextInternal.Provider value={store}>{children}</ContextInternal.Provider>;
 }
@@ -251,11 +266,12 @@ function createPlayerListener(args: {
   msPerFrameRef: React.MutableRefObject<number>;
   promisesToWaitForRef: React.MutableRefObject<FramePromise[]>;
   store: StoreApi<MessagePipelineInternalState>;
+  clearAlerts: () => void;
 }): {
   listener: (state: PlayerState) => Promise<void>;
   cleanupListener: () => void;
 } {
-  const { msPerFrameRef, promisesToWaitForRef, store } = args;
+  const { msPerFrameRef, promisesToWaitForRef, store, clearAlerts } = args;
   const updateState = store.getState().dispatch;
   const messageOrderTracker = new MessageOrderTracker();
   let closed = false;
@@ -318,6 +334,7 @@ function createPlayerListener(args: {
     }
 
     if (prevPlayerId != undefined && listenerPlayerState.playerId !== prevPlayerId) {
+      clearAlerts();
       store.getState().reset();
     }
     prevPlayerId = listenerPlayerState.playerId;

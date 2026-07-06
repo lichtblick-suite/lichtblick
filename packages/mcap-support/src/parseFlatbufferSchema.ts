@@ -47,10 +47,11 @@ function typeForSimpleField(type: BaseType): string {
     case BaseType.None:
     case BaseType.MaxBaseType:
       throw new Error("None is not a valid type.");
+    default:
+      throw new Error(`Unhandled BaseType: ${type}`);
   }
 }
 
-// eslint-disable-next-line no-restricted-syntax
 function flatbufferString(unchecked: string | Uint8Array | null | undefined): string {
   if (typeof unchecked === "string") {
     return unchecked;

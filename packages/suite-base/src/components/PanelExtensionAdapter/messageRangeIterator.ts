@@ -20,7 +20,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
   iterable: AsyncIterable<MessageEvent[]>;
   cancel: () => void;
 } {
-  const { topic, convertTo, rawBatchIterator, sortedTopics, messageConverters } = params;
+  const { topic, convertTo, rawBatchIterator, sortedTopics, messageConverters, emitAlert } = params;
 
   // Create a cancellation token
   let cancelled = false;
@@ -70,7 +70,9 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
           }
           // Apply message conversion if converters exist
           if (topicSchemaConverters.size > 0) {
-            convertMessage(msgEvent, topicSchemaConverters, batchMessages);
+            convertMessage(msgEvent, topicSchemaConverters, batchMessages, undefined, {
+              emitAlert,
+            });
           }
 
           if (performance.now() - lastBatchTime > BATCH_INTERVAL_MS) {

@@ -31,10 +31,7 @@ type Props = {
   searchText?: string;
 };
 
-export default function TextHighlight({
-  targetStr = "",
-  searchText = "",
-}: Props): React.JSX.Element {
+export default function TextHighlight({ targetStr, searchText = "" }: Props): React.JSX.Element {
   const { classes } = useStyles();
 
   if (searchText.length === 0) {

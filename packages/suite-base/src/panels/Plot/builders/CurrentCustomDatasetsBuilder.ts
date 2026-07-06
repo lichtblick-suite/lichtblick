@@ -5,12 +5,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ChartDataset } from "chart.js";
 import * as _ from "lodash-es";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { MessagePath } from "@lichtblick/message-path";
-import { Immutable, Time, MessageEvent } from "@lichtblick/suite";
+import { Immutable } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
 import { mathFunctions } from "@lichtblick/suite-base/panels/Plot/utils/mathFunctions";
 import { PlayerState } from "@lichtblick/suite-base/players/types";
@@ -23,20 +22,9 @@ import {
   SeriesConfigKey,
   SeriesItem,
 } from "./IDatasetsBuilder";
-import { Dataset } from "../types";
-import { getChartValue, isChartValue, Datum } from "../utils/datum";
-
-type DatumWithReceiveTime = Datum & {
-  receiveTime: Time;
-};
-
-type CurrentCustomSeriesItem = {
-  configIndex: number;
-  enabled: boolean;
-  messagePath: string;
-  parsed: Immutable<MessagePath>;
-  dataset: ChartDataset<"scatter", DatumWithReceiveTime[]>;
-};
+import { CurrentFrameSeriesItem } from "./types";
+import { buildViewportDatasets, lastMatchingTopic, setSeries } from "./utils";
+import { getChartValue, isChartValue } from "../utils/datum";
 
 /**
  * CurrentCustomDatasetsBuilder builds datasets from a custom x-axis message path and
@@ -47,7 +35,7 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
 
   #xValues: number[] = [];
 
-  #seriesByKey = new Map<SeriesConfigKey, CurrentCustomSeriesItem>();
+  #seriesByKey = new Map<SeriesConfigKey, CurrentFrameSeriesItem>();
   #pathsWithMismatchedDataLengths = new Set<string>();
 
   // Process the latest messages from the player state to extract any updated x or y values
@@ -149,38 +137,7 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
   }
 
   public setSeries(series: Immutable<SeriesItem[]>): void {
-    // Make a new map so we drop series which are no longer present
-    const newSeries = new Map();
-
-    for (const item of series) {
-      let existingSeries = this.#seriesByKey.get(item.key);
-      existingSeries ??= {
-        configIndex: item.configIndex,
-        enabled: item.enabled,
-        messagePath: item.messagePath,
-        parsed: item.parsed,
-        dataset: {
-          data: [],
-        },
-      };
-
-      existingSeries.configIndex = item.configIndex;
-      existingSeries.enabled = item.enabled;
-      existingSeries.dataset = {
-        ...existingSeries.dataset,
-        borderColor: item.color,
-        showLine: item.showLine,
-        fill: false,
-        borderWidth: item.lineSize,
-        pointRadius: item.lineSize * 1.2,
-        pointHoverRadius: 3,
-        pointBackgroundColor: item.showLine ? item.contrastColor : item.color,
-        pointBorderColor: "transparent",
-      };
-
-      newSeries.set(item.key, existingSeries);
-    }
-    this.#seriesByKey = newSeries;
+    this.#seriesByKey = setSeries(this.#seriesByKey, series);
   }
 
   // We don't use the viewport because we do not do any downsampling on the assumption that
@@ -188,17 +145,7 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
   //
   // If that assumption changes then downsampling can be revisited.
   public async getViewportDatasets(): Promise<GetViewportDatasetsResult> {
-    const datasets: Dataset[] = [];
-    for (const series of this.#seriesByKey.values()) {
-      if (series.enabled) {
-        datasets[series.configIndex] = series.dataset;
-      }
-    }
-
-    return {
-      datasetsByConfigIndex: datasets,
-      pathsWithMismatchedDataLengths: this.#pathsWithMismatchedDataLengths,
-    };
+    return buildViewportDatasets(this.#seriesByKey, this.#pathsWithMismatchedDataLengths);
   }
 
   public async getCsvData(): Promise<CsvDataset[]> {
@@ -216,15 +163,4 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
 
     return datasets;
   }
-}
-
-function lastMatchingTopic(msgEvents: Immutable<MessageEvent[]>, topic: string) {
-  for (let i = msgEvents.length - 1; i >= 0; --i) {
-    const msgEvent = msgEvents[i]!;
-    if (msgEvent.topic === topic) {
-      return msgEvent;
-    }
-  }
-
-  return undefined;
 }

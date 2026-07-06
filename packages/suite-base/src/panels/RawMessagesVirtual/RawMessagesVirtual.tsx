@@ -22,7 +22,7 @@ import {
   PropsRawMessagesVirtual,
   TreeNode,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
-import { useFontSizeSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useFontSizeSettings";
+import { useRawMessagesPanelSettings } from "@lichtblick/suite-base/panels/RawMessagesCommon/useRawMessagesPanelSettings";
 import {
   useRenderDiffLabel,
   useValueRenderer,
@@ -107,15 +107,20 @@ const RawMessagesVirtual = (props: PropsRawMessagesVirtual): React.JSX.Element =
         if (obj == undefined || typeof obj !== "object") {
           return;
         }
-        const entries = Array.isArray(obj)
-          ? obj.map((item, index) => [index, item] as [number, unknown])
-          : Object.entries(obj);
+        // Typed arrays are iterable by index; treat them like regular arrays
+        const iterableObj =
+          ArrayBuffer.isView(obj) && !(obj instanceof DataView)
+            ? Array.from(obj as unknown as ArrayLike<unknown>)
+            : obj;
+        const entries = Array.isArray(iterableObj)
+          ? iterableObj.map((item, index) => [index, item] as [number, unknown])
+          : Object.entries(iterableObj as Record<string, unknown>);
 
         for (const [key, value] of entries) {
           const nodePath = prefix ? `${key}${PATH_NAME_AGGREGATOR}${prefix}` : String(key);
           allNodes.add(nodePath);
 
-          if (value != undefined && typeof value === "object" && !ArrayBuffer.isView(value)) {
+          if (value != undefined && typeof value === "object") {
             generatePaths(value, nodePath);
           }
         }
@@ -286,8 +291,11 @@ const RawMessagesVirtual = (props: PropsRawMessagesVirtual): React.JSX.Element =
     topicPath,
   ]);
 
-  // Setup font size settings in panel settings tree
-  useFontSizeSettings(fontSize, saveConfig);
+  // Setup settings in panel settings tree
+  useRawMessagesPanelSettings({
+    fontSize,
+    saveConfig,
+  });
 
   return (
     <Stack flex="auto" overflow="hidden" position="relative">

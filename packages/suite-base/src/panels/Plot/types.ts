@@ -75,6 +75,8 @@ export type UpdateAction = {
   size?: { width: number; height: number };
   showXAxisLabels?: boolean;
   showYAxisLabels?: boolean;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
   xBounds?: Partial<Bounds1D>;
   yBounds?: Partial<Bounds1D>;
   zoomMode?: "x" | "y" | "xy";
@@ -129,7 +131,7 @@ export type UseHoverHandlersHook = {
     v: () => void;
     b: () => void;
   };
-  keyUphandlers: {
+  keyUpHandlers: {
     v: () => void;
     b: () => void;
   };
@@ -147,6 +149,7 @@ export type ChartRendererProps = {
   devicePixelRatio: number;
   gridColor: string;
   tickColor: string;
+  titleColor: string;
 };
 
 export type ChartOptionsPlot = Omit<ChartRendererProps, "canvas">;

@@ -8,6 +8,7 @@
 export const plot = {
   accumulatedPath: "Path (accumulated)",
   addSeries: "Add series",
+  axisLabel: "Axis label",
   clickToAddASeries: "Click to add a series",
   color: "Color",
   currentPath: "Path (current)",

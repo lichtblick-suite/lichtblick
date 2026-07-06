@@ -24,7 +24,7 @@ declare global {
 
   // This alias is used so that we can prevent null in most places, but still use it
   // where required for React (such as refs and returning from render).
-  // eslint-disable-next-line no-restricted-syntax
+
   type ReactNull = null;
 }
 

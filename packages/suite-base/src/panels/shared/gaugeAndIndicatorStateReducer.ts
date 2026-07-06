@@ -57,7 +57,6 @@ function handlePathActionStateWithGlobalVars({
   state: GaugeAndIndicatorState;
 }): GaugeAndIndicatorState {
   const newPath = parseMessagePath(path);
-  let pathParseError: string | undefined;
   let latestMatchingQueriedData: unknown;
   let error: Error | undefined;
   const filledInPath = fillInGlobalVariablesInPath(newPath!, state.globalVariables!);
@@ -76,7 +75,7 @@ function handlePathActionStateWithGlobalVars({
     latestMatchingQueriedData,
     parsedPath: filledInPath,
     path,
-    pathParseError,
+    pathParseError: undefined,
   };
 }
 

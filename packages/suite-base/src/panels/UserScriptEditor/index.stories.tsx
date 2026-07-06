@@ -87,7 +87,7 @@ const logs: UserScriptLog[] = [
   { source: "registerScript", value: 100 },
   { source: "registerScript", value: false },
   { source: "registerScript", value: "abc" },
-  { source: "registerScript", value: null }, // eslint-disable-line no-restricted-syntax
+  { source: "registerScript", value: null },
   { source: "registerScript", value: undefined },
   {
     source: "processMessage",
@@ -225,6 +225,7 @@ export const UtilsUsageInNode: StoryObj = {
 
 export const EditorShowsNewCodeWhenUserNodesChange: StoryObj = {
   render: function Story() {
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     const ChangeUserNodeOnMount = useCallback(function ChangeUserNodeOnMount(): React.JSX.Element {
       const actions = useCurrentLayoutActions();
       useEffect(() => {

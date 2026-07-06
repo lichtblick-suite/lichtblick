@@ -199,7 +199,6 @@ export class RenderableTriangles extends RenderablePrimitive {
         // which works for non-indexed geometries but not for indexed geoms
         geometry.setDrawRange(0, indices.length);
       } else {
-        // eslint-disable-next-line no-restricted-syntax
         geometry.index = null;
       }
 

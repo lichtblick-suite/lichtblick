@@ -30,7 +30,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-// eslint-disable-next-line no-restricted-syntax
 export type Primitive = string | number | boolean | bigint | symbol | undefined | null;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

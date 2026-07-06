@@ -28,7 +28,10 @@ import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 import { Autocomplete } from "@lichtblick/suite-base/components/Autocomplete";
 import { IAutocomplete } from "@lichtblick/suite-base/components/Autocomplete/types";
 import { useStyles } from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput.style";
-import { MessagePathInputBaseProps } from "@lichtblick/suite-base/components/MessagePathSyntax/types";
+import {
+  MessagePathInputBaseProps,
+  StructureTraversalResult,
+} from "@lichtblick/suite-base/components/MessagePathSyntax/types";
 import { useStructuredItemsByPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useStructureItemsByPath";
 import useGlobalVariables, {
   GlobalVariables,
@@ -40,7 +43,6 @@ import {
   messagePathsForStructure,
   validTerminatingStructureItem,
 } from "./messagePathsForDatatype";
-import { StructureTraversalResult } from "./types";
 
 export function tryToSetDefaultGlobalVar(
   variableName: string,
@@ -281,8 +283,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     } else if (!topic) {
       return "topicName";
     } else if (
-      structureTraversalResult == undefined ||
-      !structureTraversalResult.valid ||
+      structureTraversalResult?.valid !== true ||
       !validTerminatingStructureItem(structureTraversalResult.structureItem, validTypes)
     ) {
       return "messagePath";

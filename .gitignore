@@ -13,6 +13,7 @@ coverage/
 .env
 
 # E2E tests
+.playwright-mcp/
 e2e/reports
 e2e/tests/reports/desktop/*
 e2e/tests/reports/web/*
@@ -30,3 +31,4 @@ test-results/*
 .sonar_lock
 .scannerwork
 eslint-report.json
+blob-report/*

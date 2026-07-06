@@ -49,6 +49,7 @@ export type CreateOrUpdateResponse = {
 export type CreateOrUpdateBody = RemoteExtension & {
   extensionId: string;
   scope: Namespace;
+  replace?: boolean;
 };
 
 export type DownloadExtensionsInBatchBody = {

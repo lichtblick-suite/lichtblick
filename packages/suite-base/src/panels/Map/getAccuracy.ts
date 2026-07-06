@@ -5,14 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MathNumericType, atan2, eigs, isNumber } from "mathjs";
+import { atan2, eigs, index, isNumber, subset } from "mathjs";
 
 import {
   NavSatFixMsg,
   NavSatFixPositionCovarianceType,
 } from "@lichtblick/suite-base/panels/Map/types";
-
-type NumericPair = [MathNumericType, MathNumericType];
 
 /**
  * Calculates the accuracy of a NavSatFix message, based on its type, and returns
@@ -57,18 +55,21 @@ export function getAccuracy(
       // and the corresponding vector is in the rightmost column. Ellipse radii
       // are based on the eigenvalues, and orientation on the vector.
       try {
-        const eigen = eigs(Klatlon) as {
-          vectors: [NumericPair, NumericPair];
-          values: NumericPair;
-        };
+        const eigen = eigs(Klatlon);
 
-        // Eigenvectors are returned in columns
-        const eigenvector = [eigen.vectors[0][1], eigen.vectors[1][1]];
-        const eigenvalues = eigen.values;
+        // Extract the eigenvector corresponding to the largest eigenvalue (index 1, as they're sorted ascending)
+        // and the eigenvalues. Both correspond to the major axis of the error elipse.
+        const eigenvectorLargest = eigen.eigenvectors[1]!.vector;
+        const eigenvalues = [eigen.eigenvectors[0]!.value, eigen.eigenvectors[1]!.value];
+
+        // Extract x and y components from the eigenvector (MathCollection)
+        // This is the direction of the major axis of the error ellipse, and is used to calculate the tilt.
+        const eigenvectorX = subset(eigenvectorLargest, index(0));
+        const eigenvectorY = subset(eigenvectorLargest, index(1));
 
         if (
-          !isNumber(eigenvector[0]) ||
-          !isNumber(eigenvector[1]) ||
+          !isNumber(eigenvectorX) ||
+          !isNumber(eigenvectorY) ||
           !isNumber(eigenvalues[0]) ||
           !isNumber(eigenvalues[1])
         ) {
@@ -76,9 +77,10 @@ export function getAccuracy(
         }
 
         // Ellipse `tilt` is defined as number of degrees from the negative x axis
-        const theta = (atan2(eigenvector[1], eigenvector[0]) * 180) / Math.PI;
+        const theta = (atan2(eigenvectorY, eigenvectorX) * 180) / Math.PI;
         const tilt = -1 * theta;
 
+        // Now that we've calculated tilt, we can calculate the ellipse radii, which are based on the eigenvalues. The larger eigenvalue corresponds to the major axis of the error ellipse, and the smaller to the minor axis.
         const primaryRadius = Math.sqrt(eigenvalues[1]);
         const secondaryRadius = Math.sqrt(eigenvalues[0]);
 

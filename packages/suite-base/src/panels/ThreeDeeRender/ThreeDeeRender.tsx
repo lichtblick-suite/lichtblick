@@ -30,6 +30,7 @@ import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/Th
 import {
   DEFAULT_FOLLOW_MODE,
   PANEL_STYLE,
+  MAX_TRANSFORM_MESSAGES,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
@@ -42,7 +43,6 @@ import { RendererContext, useRendererEvent, useRendererProperty } from "./Render
 import { RendererOverlay } from "./RendererOverlay";
 import { useStyles } from "./ThreeDeeRender.style";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
-import { MAX_TRANSFORM_MESSAGES } from "./constants";
 import {
   PublishRos1Datatypes,
   PublishRos2Datatypes,
@@ -200,6 +200,10 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   const [reloadPreloadTrigger, setReloadPreloadTrigger] = useState<number>(0);
 
   const renderRef = useRef({ needsRender: false });
+  // Marks that the frame currently being processed resulted from a seek. On such frames the panel
+  // defers the frame barrier (`renderDone`) until any in-flight video decode has settled, so the
+  // player parks the cursor on the seek target until the frame is actually rendered.
+  const seekFrameRef = useRef(false);
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
   const schemaSubscriptions = useRendererProperty(
@@ -525,6 +529,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       // trigger a state flush in Renderer
       if (renderState.didSeek === true) {
         setDidSeek(true);
+        seekFrameRef.current = true;
       }
 
       // Set the done callback into a state variable to trigger a re-render
@@ -585,10 +590,15 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
         }
       }
       if (shouldSubscribe) {
+        const sampling =
+          rendererSubscription.preload === true
+            ? undefined
+            : { mode: "latest-per-render-tick" as const };
         newSubscriptions.push({
           topic: topic.name,
           preload: rendererSubscription.preload,
           convertTo,
+          sampling,
         });
       }
     };
@@ -747,10 +757,35 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   });
 
-  // Invoke the done callback once the render is complete
+  // Invoke the done callback once the render is complete. On a seek frame, defer the callback
+  // until any in-flight video decode has settled so the player parks the cursor on the seek target
+  // until the frame is actually painted (matching the "stop, render, then resume" seek behavior),
+  // instead of resuming playback and racing the video forward to catch up. Steady-state frames
+  // invoke the callback immediately, leaving normal playback pacing unchanged.
   useEffect(() => {
-    renderDone?.();
-  }, [renderDone]);
+    const done = renderDone;
+    if (!done) {
+      return;
+    }
+
+    if (!renderer || !seekFrameRef.current) {
+      done();
+      return;
+    }
+    seekFrameRef.current = false;
+
+    let invoke: (() => void) | undefined = done;
+    const callOnce = () => {
+      if (invoke) {
+        invoke();
+        invoke = undefined;
+      }
+    };
+    renderer.settleVideoDecodes().then(callOnce, callOnce);
+    // If a newer frame supersedes this one before the decode settles, release the barrier so the
+    // pipeline is never left waiting on a stale frame.
+    return callOnce;
+  }, [renderDone, renderer]);
 
   // Create a useCallback wrapper for adding a new panel to the layout, used to open the
   // "Raw Messages" panel from the object inspector

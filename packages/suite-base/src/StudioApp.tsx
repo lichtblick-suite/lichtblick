@@ -32,7 +32,7 @@ import SendNotificationToastAdapter from "./components/SendNotificationToastAdap
 import StudioToastProvider from "./components/StudioToastProvider";
 import { UserScriptStateProvider } from "./context/UserScriptStateContext";
 import CurrentLayoutProvider from "./providers/CurrentLayoutProvider";
-import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider";
+import ExtensionCatalogProvider from "./providers/ExtensionCatalogProvider/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "./providers/ExtensionMarketplaceProvider";
 import PanelCatalogProvider from "./providers/PanelCatalogProvider";
 import { LaunchPreference } from "./screens/LaunchPreference";

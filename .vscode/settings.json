@@ -10,7 +10,11 @@
   // enable intellisense in custom snippets (see snippets.code-snippets)
   "editor.suggest.snippetsPreventQuickSuggestions": false,
   "eslint.options": {
-    "reportUnusedDisableDirectives": "error"
+    "overrideConfig": {
+      "linterOptions": {
+        "reportUnusedDisableDirectives": "error"
+      }
+    }
   },
   "files.eol": "\n",
   "files.insertFinalNewline": true,
@@ -24,9 +28,9 @@
     ".yarn/**": true,
     "yarn.lock": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.preferences.importModuleSpecifier": "non-relative",
-  "jest.autoRun": { "watch": false, "onSave": "test-file" },
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "jest.runMode": "on-save",
   "jest.jestCommandLine": "yarn test",
   "eslint.lintTask.enable": true,
   "[shellscript]": {
@@ -38,5 +42,6 @@
   },
   "[ignore]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
-  }
+  },
+  "terminal.integrated.defaultProfile.osx": "zsh",
 }

@@ -215,7 +215,6 @@ export function useSelectedPanels(): SelectedPanelActions {
   const { getCurrentLayoutState: getCurrentLayout } = useCurrentLayoutActions();
 
   const selectAllPanels = useCallback(() => {
-    // eslint-disable-next-line no-restricted-syntax
     const panelIds = getLeaves(getCurrentLayout().selectedLayout?.data?.layout ?? null);
     setSelectedPanelIds(panelIds);
   }, [getCurrentLayout, setSelectedPanelIds]);

@@ -248,4 +248,8 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
   public getStart(): Time | undefined {
     return this.#start;
   }
+
+  public getEnd(): Time | undefined {
+    return this.#end;
+  }
 }

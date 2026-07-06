@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: write
 
@@ -17,14 +20,14 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 18
+          node-version: 24
 
       - name: Enable corepack
         run: corepack enable yarn
@@ -62,11 +65,14 @@ jobs:
         id: get_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
+      - name: Update Sonar version
+        run: sed -i "" "s/^sonar.projectVersion=.*/sonar.projectVersion=${{ env.version }}/" sonar-project.properties
+
       - name: Commit and tag
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json packages/suite/package.json yarn.lock
+          git add package.json packages/suite/package.json yarn.lock sonar-project.properties
           git commit -m "chore: release v${{ env.version }} [skip actions]"
           git tag "v${{ env.version }}"
           git push origin main --tags
@@ -107,3 +113,8 @@ jobs:
             dist/latest-linux.yml
             dist/latest-mac.yml
             dist/latest.yml
+
+      - name: Trigger SonarCloud analysis
+        run: gh workflow run sonarqube.yml --ref main
+        env:
+          GH_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}

@@ -6,4 +6,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export { default as PanelExtensionAdapter } from "./PanelExtensionAdapter";
-export * from "./types";
+export { useSubscribeMessageRange } from "./useSubscribeMessageRange";
+export type {
+  Asset,
+  BuiltinPanelExtensionContext,
+  CreateMessageRangeIteratorParams,
+  DraggedMessagePath,
+  MessagePathDropConfig,
+  MessagePathDropStatus,
+} from "./types";

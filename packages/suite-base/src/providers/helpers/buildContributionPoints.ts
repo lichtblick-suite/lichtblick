@@ -18,9 +18,9 @@ import { ExtensionSettings } from "@lichtblick/suite-base/components/PanelSettin
 import {
   ContributionPoints,
   RegisteredPanel,
-  MessageConverter,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
+import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 
 const log = Logger.getLogger(__filename);
 
@@ -31,7 +31,7 @@ export function buildContributionPoints(
   // registered panels stored by their fully qualified id
   // the fully qualified id is the extension name + panel name
   const panels: Record<string, RegisteredPanel> = {};
-  const messageConverters: RegisterMessageConverterArgs<unknown>[] = [];
+  const messageConverters: InstalledMessageConverter[] = [];
   const panelSettings: ExtensionSettings = {};
   const topicAliasFunctions: ContributionPoints["topicAliasFunctions"] = [];
   const cameraModels: CameraModelsMap = new Map();
@@ -79,7 +79,7 @@ export function buildContributionPoints(
         ...messageConverter,
         extensionNamespace: extension.namespace,
         extensionId: extension.id,
-      } as MessageConverter);
+      } as InstalledMessageConverter);
 
       const converterSettings = _.mapValues(messageConverter.panelSettings, (settings) => ({
         [messageConverter.fromSchemaName]: settings,

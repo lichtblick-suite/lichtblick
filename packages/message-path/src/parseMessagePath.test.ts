@@ -20,7 +20,7 @@ import { parseMessagePath } from "./parseMessagePath";
 import { OperatorType } from "./types";
 
 // Nearley parser returns nulls
-// eslint-disable-next-line no-restricted-syntax
+
 const MISSING = null;
 
 describe("parseRosPath", () => {

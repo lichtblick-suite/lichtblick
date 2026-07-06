@@ -21,7 +21,6 @@ import {
   LayoutData,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { TabPanelConfig } from "@lichtblick/suite-base/types/layouts";
-import { MosaicDropTargetPosition } from "@lichtblick/suite-base/types/panels";
 import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/constants";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 
@@ -874,7 +873,7 @@ describe("layout reducers", () => {
         ...emptyLayout,
         layout: panelState.layout,
       };
-      // eslint-disable-next-line no-restricted-syntax
+
       const leaves = getLeaves(panelState.layout ?? null);
       expect(leaves).toHaveLength(4);
       expect(leaves).toContain("FirstPanel!34otwwt");
@@ -941,7 +940,7 @@ describe("layout reducers", () => {
         ...emptyLayout,
         layout: tabPanelState.layout,
       };
-      // eslint-disable-next-line no-restricted-syntax
+
       const leaves = getLeaves(tabPanelState.layout ?? null);
       expect(leaves).toHaveLength(4);
       expect(leaves).toContain("FirstPanel!34otwwt");
@@ -1451,7 +1450,7 @@ describe("layout reducers", () => {
           panelId: "Audio!a",
           sourceTabId: undefined,
           targetTabId: undefined,
-          position: undefined as unknown as MosaicDropTargetPosition,
+          position: undefined,
           destinationPath: ["second"],
           ownPath: ["first"],
         },

@@ -1,20 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { Locator, Page } from "playwright";
-
 import { changeToEpochFormat } from "../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../fixtures/electron";
 import { loadFiles } from "../../../fixtures/load-files";
+import { PlayerControls } from "../../../page-objects";
 
 const MCAP_FILENAME = "example.mcap";
-
-function getPlaybackElements(mainWindow: Page): { button: Locator; timestamp: Locator } {
-  const button = mainWindow.getByTestId("play-button");
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-
-  return { button, timestamp };
-}
 
 /**
  * GIVEN a .mcap file is loaded
@@ -24,23 +16,28 @@ function getPlaybackElements(mainWindow: Page): { button: Locator; timestamp: Lo
  * And playback time should advance
  */
 
-test("should start playing when clicking on Play button", async ({ mainWindow }) => {
-  // Given
-  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
-  await changeToEpochFormat(mainWindow);
+test(
+  "should start playing when clicking on Play button",
+  { tag: "@smoke" },
+  async ({ mainWindow }) => {
+    const player = new PlayerControls(mainWindow);
 
-  const { button, timestamp } = getPlaybackElements(mainWindow);
-  const startTime = Number(await timestamp.inputValue());
+    // Given
+    await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
+    await changeToEpochFormat(mainWindow);
 
-  // When
-  await expect(button).toHaveAttribute("title", "Play");
-  await button.click(); // start playback
+    const startTime = await player.getTimestampValue();
 
-  // Then
-  await expect(button).toHaveAttribute("title", "Pause");
-  const elapsedTimestamp = Number(await timestamp.inputValue());
-  expect(elapsedTimestamp).toBeGreaterThan(startTime);
-});
+    // When
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
+    await player.play();
+
+    // Then
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
+    const elapsedTimestamp = await player.getTimestampValue();
+    expect(elapsedTimestamp).toBeGreaterThan(startTime);
+  },
+);
 
 /**
  * GIVEN a .mcap file is loaded
@@ -49,22 +46,27 @@ test("should start playing when clicking on Play button", async ({ mainWindow })
  * And playback time should advance
  */
 
-test("should start playing when clicking on Spacebar key", async ({ mainWindow }) => {
-  // Given
-  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
-  await changeToEpochFormat(mainWindow);
-  const { button, timestamp } = getPlaybackElements(mainWindow);
-  const startTime = Number(await timestamp.inputValue());
+test(
+  "should start playing when clicking on Spacebar key",
+  { tag: "@smoke" },
+  async ({ mainWindow }) => {
+    const player = new PlayerControls(mainWindow);
 
-  // When
-  await expect(button).toHaveAttribute("title", "Play");
-  await mainWindow.keyboard.press("Space"); // start playback
+    // Given
+    await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
+    await changeToEpochFormat(mainWindow);
+    const startTime = await player.getTimestampValue();
 
-  // Then
-  await expect(button).toHaveAttribute("title", "Pause");
-  const elapsedTimestamp = Number(await timestamp.inputValue());
-  expect(elapsedTimestamp).toBeGreaterThan(startTime);
-});
+    // When
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
+    await player.togglePlayback();
+
+    // Then
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
+    const elapsedTimestamp = await player.getTimestampValue();
+    expect(elapsedTimestamp).toBeGreaterThan(startTime);
+  },
+);
 
 /**
  * GIVEN a .mcap file is loaded
@@ -74,26 +76,31 @@ test("should start playing when clicking on Spacebar key", async ({ mainWindow }
  * And playback time should stop
  */
 
-test("should stop playing when clicking on Play button", async ({ mainWindow }) => {
-  // Given
-  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
-  await changeToEpochFormat(mainWindow);
-  const { button, timestamp } = getPlaybackElements(mainWindow);
+test(
+  "should stop playing when clicking on Play button",
+  { tag: "@smoke" },
+  async ({ mainWindow }) => {
+    const player = new PlayerControls(mainWindow);
 
-  await button.click(); // start playback
+    // Given
+    await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
+    await changeToEpochFormat(mainWindow);
 
-  // When
-  await expect(button).toHaveAttribute("title", "Pause");
-  await button.click(); // stop playback
+    await player.play();
 
-  // Then
-  await expect(button).toHaveAttribute("title", "Play"); // check if icon has changed first
-  const startTime = Number(await timestamp.inputValue());
+    // When
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
+    await player.pause();
 
-  await mainWindow.waitForTimeout(1000); // wait to check if value is still the same
-  const elapsedTimestamp = Number(await timestamp.inputValue());
-  expect(elapsedTimestamp).toEqual(startTime);
-});
+    // Then
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
+    const startTime = await player.getTimestampValue();
+
+    await mainWindow.waitForTimeout(1000);
+    const elapsedTimestamp = await player.getTimestampValue();
+    expect(elapsedTimestamp).toEqual(startTime);
+  },
+);
 
 /**
  * GIVEN a .mcap file is loaded
@@ -103,23 +110,28 @@ test("should stop playing when clicking on Play button", async ({ mainWindow }) 
  * And playback time should stop
  */
 
-test("should stop playing when clicking on Spacebar key", async ({ mainWindow }) => {
-  // Given
-  await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
-  await changeToEpochFormat(mainWindow);
-  const { button, timestamp } = getPlaybackElements(mainWindow);
+test(
+  "should stop playing when clicking on Spacebar key",
+  { tag: "@smoke" },
+  async ({ mainWindow }) => {
+    const player = new PlayerControls(mainWindow);
 
-  await mainWindow.keyboard.press("Space"); // start playback
+    // Given
+    await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
+    await changeToEpochFormat(mainWindow);
 
-  // When
-  await expect(button).toHaveAttribute("title", "Pause");
-  await mainWindow.keyboard.press("Space"); // stop playback
+    await player.togglePlayback();
 
-  // Then
-  await expect(button).toHaveAttribute("title", "Play"); // check if icon has changed first
-  const startTime = Number(await timestamp.inputValue());
+    // When
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Pause");
+    await player.togglePlayback();
 
-  await mainWindow.waitForTimeout(1000); // wait to check if value is still the same
-  const elapsedTimestamp = Number(await timestamp.inputValue());
-  expect(elapsedTimestamp).toEqual(startTime);
-});
+    // Then
+    await expect(player.getPlayButton()).toHaveAttribute("title", "Play");
+    const startTime = await player.getTimestampValue();
+
+    await mainWindow.waitForTimeout(1000);
+    const elapsedTimestamp = await player.getTimestampValue();
+    expect(elapsedTimestamp).toEqual(startTime);
+  },
+);

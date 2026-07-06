@@ -7,7 +7,7 @@ import { loadFiles } from "../../../fixtures/load-files";
  * GIVEN a .bag file is loaded via drag and drop
  * THEN the filename should be visible and the "Play" button enabled
  */
-test("should open a BAG file via drag and drop", async ({ mainWindow }) => {
+test("should open a BAG file via drag and drop", { tag: "@smoke" }, async ({ mainWindow }) => {
   // Given
   const filename = "example.bag";
   await loadFiles({

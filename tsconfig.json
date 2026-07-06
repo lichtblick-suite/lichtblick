@@ -8,11 +8,13 @@
     "./*.js",
     "./**/jest.config.ts",
     "./ci/**/*.ts",
+    "./e2e/ci-helpers/**/*.ts",
     "./package.json"
   ],
   "compilerOptions": {
     "jsx": "react-jsx",
     "module": "commonjs",
+    "types": ["node"],
     "noEmit": true
   }
 }

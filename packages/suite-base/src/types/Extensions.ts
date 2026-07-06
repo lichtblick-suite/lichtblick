@@ -14,7 +14,7 @@ export type ExtensionInfo = {
   description: string;
   displayName: string;
   homepage: string;
-  keywords: string[];
+  keywords: readonly string[];
   license: string;
   name: string;
   namespace?: Namespace;

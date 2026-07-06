@@ -7,7 +7,7 @@
   "plugins": [
     "babel-plugin-transform-import-meta",
     "@babel/plugin-transform-modules-commonjs",
-    "@babel/plugin-proposal-explicit-resource-management",
+    "@babel/plugin-transform-explicit-resource-management",
     ["@babel/plugin-proposal-decorators", { "version": "legacy" }],
     "@babel/plugin-transform-private-methods"
   ]

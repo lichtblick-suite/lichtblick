@@ -70,6 +70,11 @@ export function useLayoutNavigation(menuClose?: () => void): UseLayoutNavigation
       }
       if (event?.ctrlKey === true || event?.metaKey === true || event?.shiftKey === true) {
         if (item.id !== currentLayoutId) {
+          // selectedIds is empty on intial render
+          // this adds the current layout to selection
+          if (state.selectedIds.length === 0 && currentLayoutId != undefined) {
+            dispatch({ type: "select-id", id: currentLayoutId });
+          }
           dispatch({
             type: "select-id",
             id: item.id,
@@ -84,7 +89,15 @@ export function useLayoutNavigation(menuClose?: () => void): UseLayoutNavigation
         menuClose?.();
       }
     },
-    [analytics, currentLayoutId, dispatch, layouts.value, menuClose, setSelectedLayoutId],
+    [
+      analytics,
+      currentLayoutId,
+      dispatch,
+      layouts.value,
+      menuClose,
+      setSelectedLayoutId,
+      state.selectedIds.length,
+    ],
   );
 
   return { onSelectLayout, state, dispatch };

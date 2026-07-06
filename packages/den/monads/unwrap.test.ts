@@ -15,7 +15,6 @@ describe("unwrap", () => {
     expect(() => unwrap(undefined)).toThrow("Invariant: unexpected undefined value");
   });
   it("throws for null value", () => {
-    // eslint-disable-next-line no-restricted-syntax
     expect(() => unwrap(null)).toThrow("Invariant: unexpected undefined value");
   });
 });

@@ -13,7 +13,10 @@ import { act, render, waitFor } from "@testing-library/react";
 import { Topic } from "@lichtblick/suite";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
-import { DEFAULT_FOLLOW_MODE } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
+import {
+  DEFAULT_FOLLOW_MODE,
+  MAX_TRANSFORM_MESSAGES,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import type { MessageEvent } from "@lichtblick/suite-base/players/types";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RenderStateBuilder from "@lichtblick/suite-base/testing/builders/RenderStateBuilder";
@@ -21,7 +24,6 @@ import RenderStateBuilder from "@lichtblick/suite-base/testing/builders/RenderSt
 import { Renderer } from "./Renderer";
 import { ThreeDeeRender } from "./ThreeDeeRender";
 import { DEFAULT_CAMERA_STATE } from "./camera";
-import { MAX_TRANSFORM_MESSAGES } from "./constants";
 import type { InterfaceMode, ThreeDeeRenderProps } from "./types";
 
 // three.js modules
@@ -98,6 +100,7 @@ const createMockRenderer = (overrides?: Record<string, any>) => {
       setPublishClickType: jest.fn(),
       publishClickType: "point",
     },
+    settleVideoDecodes: jest.fn().mockResolvedValue(undefined),
   };
 
   return { ...defaultRenderer, ...overrides };
@@ -351,6 +354,133 @@ describe("ThreeDeeRender", () => {
     expect(mockedRenderer).toHaveBeenCalled();
     const rendererCall = mockedRenderer.mock.calls[0]?.[0];
     expect(rendererCall?.customCameraModels).toBe(customCameraModels);
+  });
+
+  describe("seek render barrier", () => {
+    function deferred<T>() {
+      let resolve!: (value: T | PromiseLike<T>) => void;
+      let reject!: (reason?: unknown) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    }
+    it("invokes done immediately for non-seek frames", async () => {
+      const customRendererInstance = createMockRenderer();
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      const done = jest.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 1 },
+          },
+          done,
+        );
+      });
+
+      await waitFor(() => {
+        expect(done).toHaveBeenCalledTimes(1);
+      });
+      expect(customRendererInstance.settleVideoDecodes).not.toHaveBeenCalled();
+    });
+
+    it("defers done on seek frames until video decode settles", async () => {
+      const settle = deferred<void>();
+      const customRendererInstance = createMockRenderer({
+        settleVideoDecodes: jest.fn().mockImplementation(async () => {
+          await settle.promise;
+        }),
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      const done = jest.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 2 },
+            didSeek: true,
+          },
+          done,
+        );
+      });
+
+      await waitFor(() => {
+        expect(customRendererInstance.settleVideoDecodes).toHaveBeenCalledTimes(1);
+      });
+      expect(done).not.toHaveBeenCalled();
+
+      await act(async () => {
+        settle.resolve();
+        await settle.promise;
+      });
+
+      expect(done).toHaveBeenCalledTimes(1);
+    });
+
+    it("releases done when settleVideoDecodes rejects", async () => {
+      const settle = deferred<void>();
+      const customRendererInstance = createMockRenderer({
+        settleVideoDecodes: jest.fn().mockImplementation(async () => {
+          await settle.promise;
+        }),
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      const done = jest.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 3 },
+            didSeek: true,
+          },
+          done,
+        );
+      });
+
+      await waitFor(() => {
+        expect(customRendererInstance.settleVideoDecodes).toHaveBeenCalledTimes(1);
+      });
+      expect(done).not.toHaveBeenCalled();
+
+      await act(async () => {
+        settle.reject(new Error("decode failed"));
+        await Promise.resolve();
+      });
+
+      expect(done).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("transfom topic preloading", () => {

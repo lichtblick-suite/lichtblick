@@ -31,8 +31,14 @@ import {
   useMessagePipeline,
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
+import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
+import {
+  collateTopicSchemaConversions,
+  ConverterKey,
+} from "@lichtblick/suite-base/components/PanelExtensionAdapter/messageProcessing";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import { useAlertsActions } from "@lichtblick/suite-base/context/AlertsContext";
 import { useAppConfiguration } from "@lichtblick/suite-base/context/AppConfigurationContext";
 import {
   ExtensionCatalog,
@@ -48,8 +54,8 @@ import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables"
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
+  InternalSubscribePayload,
   PlayerPresence,
-  SubscribePayload,
 } from "@lichtblick/suite-base/players/types";
 import {
   useDefaultPanelTitle,
@@ -60,12 +66,35 @@ import { assertNever } from "@lichtblick/suite-base/util/assertNever";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
-import { createMessageRangeIterator } from "./messageRangeIterator";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
-import { BuiltinPanelExtensionContext } from "./types";
+import { BuiltinPanelExtensionContext, MessageConverterAlertHandler } from "./types";
 import { useSharedPanelState } from "./useSharedPanelState";
+import { useSubscribeMessageRange } from "./useSubscribeMessageRange";
 
 const log = Logger.getLogger(__filename);
+
+/**
+ * Find the converter (if any) that would be used for a given convertTo subscription.
+ * Extracted to module level to avoid deeply nested function declarations (SonarCloud S2004).
+ */
+function getConverterForSubscription(
+  sub: Subscription,
+  topicToSchemaNameMap: Map<string, string | undefined>,
+  topicSchemaConverters: Map<ConverterKey, { toSchemaName: string }[]>,
+): { toSchemaName: string; supportsLatestPerRenderTick?: boolean } | undefined {
+  if (!sub.convertTo) {
+    return undefined;
+  }
+
+  const topicSchemaName = topicToSchemaNameMap.get(sub.topic);
+  if (topicSchemaName && topicSchemaName === sub.convertTo) {
+    return undefined;
+  }
+
+  const key = `${sub.topic}\n${String(topicSchemaName ?? "<no-schema>")}` as ConverterKey;
+  const convertersForTopic = topicSchemaConverters.get(key) ?? [];
+  return convertersForTopic.find((conv) => conv.toSchemaName === sub.convertTo);
+}
 
 type VersionedPanelConfig = Record<string, unknown> & { [VERSION_CONFIG_KEY]: number };
 
@@ -132,7 +161,6 @@ function PanelExtensionAdapter(
     getMetadata,
     sortedTopics,
     sortedServices,
-    getBatchIterator,
   } = messagePipelineContext;
 
   const { capabilities, profile: dataSourceProfile, presence: playerPresence } = playerState;
@@ -142,6 +170,7 @@ function PanelExtensionAdapter(
   const [panelId] = useState(() => uuid());
   const isMounted = useSynchronousMountedState();
   const [error, setError] = useState<Error | undefined>();
+  const [forceConversion, setForceConversion] = useState(new Set<string>());
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
   const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
 
@@ -155,6 +184,7 @@ function PanelExtensionAdapter(
 
   const [slowRender, setSlowRender] = useState(false);
   const [, setDefaultPanelTitle] = useDefaultPanelTitle();
+  const { setAlert } = useAlertsActions();
 
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
 
@@ -187,6 +217,18 @@ function PanelExtensionAdapter(
   const [buildRenderState, setBuildRenderState] = useState(() => initRenderStateBuilder());
 
   const [sharedPanelState, setSharedPanelState] = useSharedPanelState();
+  const emitMessageConverterAlert = useMemo<MessageConverterAlertHandler>(
+    () => (converter, alert, alertId) => {
+      const converterTag = `message-converter:${converter.extensionId ?? "unknown"}:${
+        converter.fromSchemaName
+      }->${converter.toSchemaName}`;
+      const tag = alertId ? `${converterTag}:${alertId}` : converterTag;
+      setAlert(tag, alert);
+    },
+    [setAlert],
+  );
+
+  const subscribeMessageRange = useSubscribeMessageRange(emitMessageConverterAlert);
 
   // Register handlers to update the app settings we subscribe to
   useEffect(() => {
@@ -245,6 +287,7 @@ function PanelExtensionAdapter(
       appSettings,
       colorScheme,
       currentFrame: messageEvents,
+      emitAlert: emitMessageConverterAlert,
       globalVariables,
       hoverValue,
       messageConverters,
@@ -254,6 +297,7 @@ function PanelExtensionAdapter(
       sortedServices,
       subscriptions: localSubscriptions,
       watchedFields,
+      forceConversion,
       config: initialState.current,
     });
 
@@ -265,6 +309,9 @@ function PanelExtensionAdapter(
       setSlowRender(true);
       return;
     }
+
+    // Clear any conversions that were forced.
+    forceConversion.clear();
 
     setSlowRender(false);
     const resumeFrame = pauseFrame(panelId);
@@ -292,6 +339,7 @@ function PanelExtensionAdapter(
     appSettings,
     buildRenderState,
     colorScheme,
+    emitMessageConverterAlert,
     globalVariables,
     hoverValue,
     localSubscriptions,
@@ -306,6 +354,7 @@ function PanelExtensionAdapter(
     sortedServices,
     watchedFields,
     initialState,
+    forceConversion,
   ]);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
@@ -313,6 +362,8 @@ function PanelExtensionAdapter(
   const extensionsSettings = useExtensionCatalog(getExtensionPanelSettings);
 
   type PartialPanelExtensionContext = Omit<BuiltinPanelExtensionContext, "panelElement">;
+
+  const messagePipelineState = useMessagePipelineGetter();
 
   const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
     const layout: PanelExtensionContext["layout"] = {
@@ -346,8 +397,19 @@ function PanelExtensionAdapter(
       saveConfig(
         produce<{ topics: Record<string, unknown> }>((draft) => {
           const [category, topicName] = path;
+
           if (category === "topics" && topicName != undefined) {
-            extensionsSettings[panelName]?.[topicName]?.handler(action, draft.topics[topicName]);
+            const topicToSchemaNameMap = getTopicToSchemaNameMap(messagePipelineState());
+            const schemaName = topicToSchemaNameMap[topicName];
+
+            if (schemaName == undefined) {
+              return;
+            }
+
+            extensionsSettings[panelName]?.[schemaName]?.handler(action, draft.topics[topicName]);
+            setForceConversion((_old) => {
+              return new Set([topicName]);
+            });
           }
         }),
       );
@@ -439,19 +501,6 @@ function PanelExtensionAdapter(
         if (!isMounted()) {
           return;
         }
-        const subscribePayloads = topics.map((item): SubscribePayload => {
-          if (typeof item === "string") {
-            // For backwards compatability with the topic-string-array api `subscribe(["/topic"])`
-            // results in a topic subscription with full preloading
-            return { topic: item, preloadType: "full" };
-          }
-
-          return {
-            topic: item.topic,
-            preloadType: item.preload === true ? "full" : "partial",
-          };
-        });
-
         // ExtensionPanel-Facing subscription type
         const localSubs = topics.map((item): Subscription => {
           if (typeof item === "string") {
@@ -459,6 +508,54 @@ function PanelExtensionAdapter(
           }
 
           return item;
+        });
+
+        // Resolve topic -> schemaName for converter lookup. If we don't know the schema yet,
+        // we default to no sampling (safe "needs all" behavior).
+        const topicToSchemaNameMap = new Map(
+          sortedTopics.map((topic) => [topic.name, topic.schemaName]),
+        );
+
+        // Use the same conversion resolution as renderState to identify converters that apply.
+        const { topicSchemaConverters } = collateTopicSchemaConversions(
+          localSubs,
+          sortedTopics,
+          messageConverters,
+        );
+
+        const subscribePayloads = localSubs.map((item): InternalSubscribePayload => {
+          const preloadType = item.preload === true ? "full" : "partial";
+
+          // Preload requires full message history, so sampling is never allowed here.
+          // Also, if the panel didn't request sampling, default to "needs all".
+          if (item.preload === true || item.sampling?.mode !== "latest-per-render-tick") {
+            return { topic: item.topic, preloadType };
+          }
+
+          // Sampling is only allowed if the converter explicitly declares it supports
+          // latest-per-render-tick sampling.
+          // Native/direct paths are denied by default.
+          // If allowed, we set both the sampling request and the internal authorization bit.
+          // MessagePipeline merge logic strips sampling requests unless authorization is present.
+          const converter = getConverterForSubscription(
+            item,
+            topicToSchemaNameMap,
+            topicSchemaConverters,
+          );
+          const topicSchemaName = topicToSchemaNameMap.get(item.topic);
+          const isNativePath =
+            item.convertTo == undefined ||
+            (topicSchemaName != undefined && topicSchemaName === item.convertTo);
+          const samplingAllowed = isNativePath
+            ? false
+            : converter?.supportsLatestPerRenderTick === true;
+
+          return {
+            topic: item.topic,
+            preloadType,
+            samplingRequest: samplingAllowed ? item.sampling : undefined,
+            samplingAuthorized: samplingAllowed ? true : undefined,
+          };
         });
 
         setLocalSubscriptions(localSubs);
@@ -572,31 +669,11 @@ function PanelExtensionAdapter(
        * - Error handling is still being refined
        * - API surface may change based on testing feedback
        */
-      unstable_subscribeMessageRange({ topic, convertTo, onNewRangeIterator }) {
+      unstable_subscribeMessageRange(args) {
         if (!isMounted()) {
           return () => {};
         }
-
-        const rawBatchIterator = getBatchIterator(topic);
-        if (!rawBatchIterator) {
-          // If no batch iterator is available, just return an empty cleanup function
-          return () => {};
-        }
-
-        const { iterable: messageEventIterable, cancel } = createMessageRangeIterator({
-          topic,
-          convertTo,
-          rawBatchIterator,
-          sortedTopics,
-          messageConverters: messageConverters ?? [],
-        });
-
-        // Call the callback with the processed iterable
-        onNewRangeIterator(messageEventIterable).catch((err: unknown) => {
-          log.error("Error in onNewRangeIterator callback:", err);
-        });
-
-        return cancel;
+        return subscribeMessageRange(args);
       },
 
       unstable_setMessagePathDropConfig(dropConfig) {
@@ -625,6 +702,7 @@ function PanelExtensionAdapter(
     updatePanelSettingsTree,
     setDefaultPanelTitle,
     setMessagePathDropConfig,
+    subscribeMessageRange,
   ]);
 
   const panelContainerRef = useRef<HTMLDivElement>(ReactNull);
@@ -707,9 +785,9 @@ function PanelExtensionAdapter(
 
   const style: CSSProperties = {};
   if (slowRender) {
-    style.borderColor = "orange";
-    style.borderWidth = "1px";
-    style.borderStyle = "solid";
+    // Use an inset box-shadow rather than a border so the indicator doesn't shrink the content box.
+    // A border would change this element's content size, triggering a panel ResizeObserver/relayout
+    style.boxShadow = "inset 0 0 0 1px orange";
   }
 
   if (error) {

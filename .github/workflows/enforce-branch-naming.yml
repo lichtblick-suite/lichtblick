@@ -5,6 +5,9 @@ on:
     types: [opened, synchronize, reopened, edited, ready_for_review]
     branches: [main, develop]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   enforce-naming:
     name: Enforce branch naming rules

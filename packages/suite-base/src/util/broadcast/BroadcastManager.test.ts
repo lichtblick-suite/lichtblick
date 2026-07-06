@@ -15,7 +15,7 @@ const createMockMessage = (): BroadcastMessageEvent => {
   return {
     type: BasicBuilder.sample(["play", "pause", "seek", "playUntil"]),
     time: RosTimeBuilder.time(),
-  } as BroadcastMessageEvent;
+  };
 };
 
 describe("BroadcastManager", () => {

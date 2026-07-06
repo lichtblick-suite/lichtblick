@@ -20,25 +20,11 @@ import { useMessageReducer } from "@lichtblick/suite-base/PanelAPI";
 import { subscribePayloadFromMessagePath } from "@lichtblick/suite-base/players/subscribePayloadFromMessagePath";
 import { MessageEvent, SubscribePayload } from "@lichtblick/suite-base/players/types";
 
+import type { Options, ReducedValue } from "./types";
 import {
   MessageAndData,
   useCachedGetMessagePathDataItems,
 } from "./useCachedGetMessagePathDataItems";
-
-type Options = {
-  historySize: number;
-};
-
-type ReducedValue = {
-  // Matched message (events) oldest message first
-  matches: MessageAndData[];
-
-  // The latest set of message events recevied to addMessages
-  messageEvents: readonly Readonly<MessageEvent>[];
-
-  // The path used to match these messages.
-  path: string;
-};
 
 /**
  * Return an array of MessageAndData[] for matching messages on @param path.
@@ -48,14 +34,14 @@ type ReducedValue = {
  * The `historySize` option configures how many matching messages to keep. The default is 1.
  */
 export function useMessageDataItem(path: string, options?: Options): ReducedValue["matches"] {
-  const { historySize = 1 } = options ?? {};
+  const { historySize = 1, samplingRequest } = options ?? {};
   const topics: SubscribePayload[] = useMemo(() => {
-    const payload = subscribePayloadFromMessagePath(path, "partial");
+    const payload = subscribePayloadFromMessagePath(path, "partial", samplingRequest);
     if (payload) {
       return [payload];
     }
     return [];
-  }, [path]);
+  }, [path, samplingRequest]);
 
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([path]);
 

@@ -20,7 +20,7 @@ class VelodyneDataSourceFactory implements IDataSourceFactory {
   public description =
     "Connect directly to Velodyne Lidar hardware to inspect incoming sensor data.";
   public docsLinks = [
-    { url: "https://lichtblick-suite.github.io/docs/connecting-to-data/velodyne.html" },
+    { url: "https://lichtblick-suite.github.io/docs/docs/connecting-to-data/frameworks/velodyne/" },
   ];
 
   public formConfig = {

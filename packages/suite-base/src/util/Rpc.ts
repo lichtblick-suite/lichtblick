@@ -19,7 +19,7 @@
 // 'global' within them.
 export interface Channel {
   postMessage(data: unknown, transfer?: Transferable[]): void;
-  onmessage?: ((ev: MessageEvent) => unknown) | null; // eslint-disable-line no-restricted-syntax
+  onmessage?: ((ev: MessageEvent) => unknown) | null;
   terminate: () => void;
 }
 

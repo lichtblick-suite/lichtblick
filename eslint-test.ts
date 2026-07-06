@@ -23,10 +23,10 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (str: string, wut: any) => {
   console.log = () => 0;
-  console.log(str); // eslint-disable-line no-restricted-syntax
+  console.log(str);
 
   // All nulls are banned
-  wut == null; // eslint-disable-line no-restricted-syntax
+  wut == null;
 };
 
 // @ts-expect-error unused function

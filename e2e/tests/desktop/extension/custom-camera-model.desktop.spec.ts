@@ -3,6 +3,7 @@
 
 import { test, expect } from "../../../fixtures/electron";
 import { loadFiles } from "../../../fixtures/load-files";
+import { DataSourceDialog, PlayerControls, Sidebar } from "../../../page-objects";
 
 /**
  * Given the Data Source dialog is closed
@@ -23,8 +24,12 @@ import { loadFiles } from "../../../fixtures/load-files";
  * And the user clicks on play
  * Then no error icons should appear on the sidebar
  */
-test("custom camera model", async ({ mainWindow }) => {
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
+test("custom camera model", { tag: "@regression" }, async ({ mainWindow }) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
+  const player = new PlayerControls(mainWindow);
+
+  await dialog.close();
   /**
    * MCAP structure:
    * /image/compressed - Topic with compressed image
@@ -41,7 +46,7 @@ test("custom camera model", async ({ mainWindow }) => {
 
   // WHEN
   await mainWindow.getByTestId("SettingsIcon").nth(1).click();
-  const sidebarLeft = mainWindow.getByTestId("sidebar-left");
+  const sidebarLeft = sidebar.getLeftSidebar();
   await sidebarLeft.getByText("None", { exact: true }).nth(0).click();
   await mainWindow.getByRole("option", { name: "/camera_calibration", exact: true }).click();
 
@@ -69,7 +74,7 @@ test("custom camera model", async ({ mainWindow }) => {
     mainWindow,
     filenames: foxeFile,
   });
-  await mainWindow.getByTestId("play-button").click();
+  await player.play();
 
   // THEN
   await mainWindow.waitForTimeout(100); // await for the sidebar to update

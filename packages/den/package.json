@@ -19,9 +19,8 @@
     "xacro-parser": "0.3.11"
   },
   "devDependencies": {
-    "@lichtblick/log": "workspace:*",
     "@lichtblick/suite": "workspace:*",
-    "@lichtblick/tsconfig": "1.0.2",
+    "@lichtblick/tsconfig": "1.1.2",
     "@types/dom-webcodecs": "0.1.14"
   }
 }

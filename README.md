@@ -8,6 +8,8 @@
   <a href="https://github.com/lichtblick-suite/lichtblick/issues"><img src="https://img.shields.io/github/package-json/v/lichtblick-suite/lichtblick" alt="Versions Badge"/></a>
   <a href="https://github.com/lichtblick-suite/lichtblick/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/lichtblick-suite/lichtblick?color=2b9348"></a>
   <a href="https://opensource.org/licenses/MPL-2.0"><img src="https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg" alt="License: MPL 2.0"></a>
+  <a href="https://github.com/lichtblick-suite/lichtblick/actions/workflows/e2e-regression.yml"><img src="https://github.com/lichtblick-suite/lichtblick/actions/workflows/e2e-regression.yml/badge.svg?branch=develop" alt="E2E Regression (develop)"/></a>
+  <a href="https://github.com/lichtblick-suite/lichtblick/actions/workflows/e2e-regression.yml"><img src="https://github.com/lichtblick-suite/lichtblick/actions/workflows/e2e-regression.yml/badge.svg?branch=main" alt="E2E Regression (main)"/></a>
 
   <br />
 <p  align="center">

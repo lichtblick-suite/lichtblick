@@ -134,6 +134,7 @@ export function TopicRow({
       style={{ ...style, cursor }}
       onClick={onClick}
       onContextMenu={onContextMenu}
+      data-testid="topic-row"
     >
       {draggedItemCount > 1 && (
         <Badge color="primary" className={classes.countBadge} badgeContent={draggedItemCount} />

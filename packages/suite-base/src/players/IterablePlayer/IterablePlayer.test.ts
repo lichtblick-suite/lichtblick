@@ -11,7 +11,12 @@ import * as _ from "lodash-es";
 import { signal } from "@lichtblick/den/async";
 import { fromSec } from "@lichtblick/rostime";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
-import { MessageEvent, PlayerPresence, PlayerState } from "@lichtblick/suite-base/players/types";
+import {
+  InternalSubscribePayload,
+  MessageEvent,
+  PlayerPresence,
+  PlayerState,
+} from "@lichtblick/suite-base/players/types";
 import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import * as highFrequencyUtils from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
@@ -288,6 +293,163 @@ describe("IterablePlayer", () => {
 
     player.close();
     await player.isClosed;
+  });
+
+  it("while playing, seek keeps the cursor parked until the seek emit is released", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    player.setSubscriptions([{ topic: "foo" }]);
+
+    const initialStore = new PlayerStateStore(4);
+    const playingStarted = signal();
+    const seekEmitEntered = signal();
+    const releaseSeekEmit = signal();
+    const resumedAfterSeekEmit = signal();
+
+    let initialized = false;
+    let inSeekEmit = false;
+    let postInitStateCount = 0;
+    let resumedCurrentNs: number | undefined;
+
+    source.getBackfillMessages = async (args: GetBackfillMessagesArgs): Promise<MessageEvent[]> => {
+      return [
+        {
+          topic: "foo",
+          receiveTime: args.time,
+          message: undefined,
+          sizeInBytes: 0,
+          schemaName: "foo",
+        },
+      ];
+    };
+
+    player.setListener(async (state) => {
+      if (!initialized) {
+        await initialStore.add(state);
+        return;
+      }
+
+      postInitStateCount += 1;
+
+      if (state.activeData?.isPlaying === true) {
+        playingStarted.resolve();
+      }
+
+      const messageNs = state.activeData?.messages[0]?.receiveTime.nsec;
+      if (!inSeekEmit && messageNs === 1) {
+        inSeekEmit = true;
+        seekEmitEntered.resolve();
+        await releaseSeekEmit;
+      }
+
+      if (inSeekEmit && messageNs !== 1 && state.activeData?.currentTime.nsec != undefined) {
+        resumedCurrentNs = state.activeData.currentTime.nsec;
+        resumedAfterSeekEmit.resolve();
+      }
+    });
+
+    await initialStore.done;
+    initialized = true;
+
+    player.startPlayback();
+    await playingStarted;
+
+    player.seekPlayback({ sec: 0, nsec: 1 });
+    await seekEmitEntered;
+
+    const stateCountWhileParked = postInitStateCount;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(postInitStateCount).toBe(stateCountWhileParked);
+
+    releaseSeekEmit.resolve();
+    await resumedAfterSeekEmit;
+    expect(resumedCurrentNs).toBeDefined();
+    expect(resumedCurrentNs!).toBeGreaterThan(1);
+
+    player.close();
+    await player.isClosed;
+  });
+
+  describe("expandBackfill hook", () => {
+    const raw: MessageEvent = {
+      topic: "foo",
+      receiveTime: { sec: 0, nsec: 1 },
+      message: undefined,
+      sizeInBytes: 0,
+      schemaName: "foo",
+    };
+    const extra: MessageEvent = {
+      topic: "foo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: undefined,
+      sizeInBytes: 0,
+      schemaName: "foo",
+    };
+
+    it("invokes the hook with the raw backfill and emits its expanded result", async () => {
+      const source = new TestSource();
+      source.getBackfillMessages = async () => [raw];
+
+      const expandBackfill = jest.fn(async (messages: MessageEvent[]) => [extra, ...messages]);
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+        expandBackfill,
+      });
+      const store = new PlayerStateStore(4);
+      player.setSubscriptions([{ topic: "foo" }]);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      store.reset(2);
+      player.seekPlayback({ sec: 0, nsec: 1 });
+      const playerStates = await store.done;
+
+      expect(expandBackfill).toHaveBeenCalledTimes(1);
+      expect(expandBackfill.mock.calls[0]![0]).toEqual([raw]);
+
+      const seekState = playerStates.find((s) => (s.activeData?.messages.length ?? 0) > 0);
+      expect(seekState?.activeData?.messages).toEqual([extra, raw]);
+
+      player.close();
+      await player.isClosed;
+    });
+
+    it("passes the raw backfill through unchanged when no hook is supplied", async () => {
+      const source = new TestSource();
+      source.getBackfillMessages = async () => [raw];
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+      const store = new PlayerStateStore(4);
+      player.setSubscriptions([{ topic: "foo" }]);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      store.reset(2);
+      player.seekPlayback({ sec: 0, nsec: 1 });
+      const playerStates = await store.done;
+
+      const seekState = playerStates.find((s) => (s.activeData?.messages.length ?? 0) > 0);
+      expect(seekState?.activeData?.messages).toEqual([raw]);
+
+      player.close();
+      await player.isClosed;
+    });
   });
 
   it("sets buffering presence when backfill takes too long", async () => {
@@ -930,6 +1092,71 @@ describe("IterablePlayer", () => {
         },
       ],
     ]);
+
+    player.close();
+    await player.isClosed;
+  });
+
+  it("strips unauthorized sampling requests from direct subscriptions", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+    player.setSubscriptions([
+      {
+        topic: "foo",
+        samplingRequest: { mode: "latest-per-render-tick" },
+      },
+    ]);
+
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+    await store.done;
+
+    expect(messageIteratorSpy).toHaveBeenCalledTimes(1);
+    const messageIteratorArgs = messageIteratorSpy.mock.calls[0]?.[0];
+    expect(messageIteratorArgs?.topics.get("foo")).toEqual({ topic: "foo" });
+
+    player.close();
+    await player.isClosed;
+  });
+
+  it("keeps authorized sampling requests from trusted subscriptions", async () => {
+    const source = new TestSource();
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+    player.setSubscriptions([
+      {
+        topic: "foo",
+        samplingRequest: { mode: "latest-per-render-tick" },
+        samplingAuthorized: true,
+      } as InternalSubscribePayload,
+    ]);
+
+    const store = new PlayerStateStore(4);
+    player.setListener(async (state) => {
+      await store.add(state);
+    });
+    await store.done;
+
+    expect(messageIteratorSpy).toHaveBeenCalledTimes(1);
+    const messageIteratorArgs = messageIteratorSpy.mock.calls[0]?.[0];
+    expect(messageIteratorArgs?.topics.get("foo")).toEqual({
+      topic: "foo",
+      samplingRequest: { mode: "latest-per-render-tick" },
+      samplingAuthorized: true,
+    });
 
     player.close();
     await player.isClosed;

@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { diff } from "just-diff";
+import * as _ from "lodash-es";
 
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 
@@ -14,25 +14,46 @@ import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/
  * considered "equal" then the function returns true. If the two instances are not equal it returns
  * false.
  *
- * Layout instances are considered equal if they have all of the same fields and all of the same
- * values in those fields - recursively. An exception is made for where _b_ only differes from _a_
- * by introducing new fields which are _undefined_. If _b_ has an extra field with value undefined,
- * it will still be considered equal to _a_.
+ * The comparison is intentionally additive-lenient in two dimensions:
+ *
+ * 1. Top-level non-configById fields: extra undefined fields in b are ignored.
+ * 2. configById (panel configs): two levels of additive tolerance are applied.
+ *    a. New panel IDs in b that were not in a are ignored — a panel can be added to the
+ *       mosaic but its first saveConfig call is not a user edit.
+ *    b. New config keys in b's panel config that were not in a's panel config are ignored —
+ *       panels populate their own default config keys during initialization, and treating
+ *       those additions as user edits would create false "unsaved changes" indicators on
+ *       shared/team layouts.
+ *
+ * Existing keys that are present in a and have a different value in b (including removal,
+ * i.e., the key is absent in b) are always treated as real differences.
  */
-export function isLayoutEqual(a: LayoutData, b: LayoutData): boolean {
-  const res = diff(a, b);
-  for (const item of res) {
-    // Any replace or remove is treated as a diff
-    if (item.op === "replace" || item.op === "remove") {
-      return false;
-    }
+export function isLayoutEqual(baseline: LayoutData, current: LayoutData): boolean {
+  const { configById: configByIdBaseline, ...restBaseline } = baseline;
+  const { configById: configByIdCurrent, ...restCurrent } = current;
 
-    // If a field is added but the value is anything other than undefined, the layouts are not the same
-    if (item.value != undefined) {
-      return false;
+  // All top-level fields other than configById must be deeply equal.
+  // Strip keys whose value is undefined in current so extra undefined entries don't
+  // register as differences (preserving the original behaviour).
+  const strippedRestCurrent = _.omitBy(restCurrent, _.isUndefined);
+  if (!_.isEqual(_.omitBy(restBaseline, _.isUndefined), strippedRestCurrent)) {
+    return false;
+  }
+
+  // For configById, only check panel IDs that existed in the baseline (a).
+  // New panel entries added by panel initialization are not considered user edits.
+  for (const panelId of Object.keys(configByIdBaseline)) {
+    const panelConfigBaseline = configByIdBaseline[panelId] ?? {};
+    const panelConfigCurrent = configByIdCurrent[panelId] ?? {};
+
+    // For each key in the baseline panel config, check it still has the same value.
+    // New keys added to current's panel config are ignored (panel default initialization).
+    for (const configKey of Object.keys(panelConfigBaseline)) {
+      if (!_.isEqual(panelConfigBaseline[configKey], panelConfigCurrent[configKey])) {
+        return false;
+      }
     }
   }
 
-  // No actual diff, so the values are the same
   return true;
 }

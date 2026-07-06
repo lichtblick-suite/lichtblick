@@ -25,6 +25,8 @@ import { PANEL_TITLE_CONFIG_KEY } from "@lichtblick/suite-base/util/layout";
 
 const selectSetGlobalBounds = (store: TimelineInteractionStateStore) => store.setGlobalBounds;
 
+const DEFAULT_CSV_TITLE = "plot_data";
+
 const usePlotInteractionHandlers = ({
   config,
   coordinator,
@@ -186,7 +188,7 @@ const usePlotInteractionHandlers = ({
     setFocusedPath(["paths", String(index)]);
   }, []);
 
-  const { keyDownHandlers, keyUphandlers } = useMemo(() => {
+  const { keyDownHandlers, keyUpHandlers } = useMemo(() => {
     return {
       keyDownHandlers: {
         v: () => {
@@ -196,7 +198,7 @@ const usePlotInteractionHandlers = ({
           coordinator?.setZoomMode("xy");
         },
       },
-      keyUphandlers: {
+      keyUpHandlers: {
         v: () => {
           coordinator?.setZoomMode("x");
         },
@@ -207,23 +209,31 @@ const usePlotInteractionHandlers = ({
     };
   }, [coordinator]);
 
+  const onDownloadCsvClick = useCallback(() => {
+    void (async () => {
+      try {
+        const data = await coordinator?.getCsvData();
+        if (!data || !isMounted()) {
+          return;
+        }
+
+        downloadCSV(customTitle ?? DEFAULT_CSV_TITLE, data, xAxisMode);
+      } catch (err: unknown) {
+        console.error(err);
+      }
+    })();
+  }, [coordinator, customTitle, isMounted, xAxisMode]);
+
   const getPanelContextMenuItems = useCallback(() => {
     const items: PanelContextMenuItem[] = [
       {
         type: "item",
         label: "Download plot data as CSV",
-        onclick: async () => {
-          const data = await coordinator?.getCsvData();
-          if (!data || !isMounted()) {
-            return;
-          }
-
-          downloadCSV(customTitle ?? "plot_data", data, xAxisMode);
-        },
+        onclick: onDownloadCsvClick,
       },
     ];
     return items;
-  }, [coordinator, customTitle, isMounted, xAxisMode]);
+  }, [onDownloadCsvClick]);
 
   return {
     onMouseMove,
@@ -234,7 +244,7 @@ const usePlotInteractionHandlers = ({
     onClickPath,
     focusedPath,
     keyDownHandlers,
-    keyUphandlers,
+    keyUpHandlers,
     getPanelContextMenuItems,
   };
 };

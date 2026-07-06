@@ -26,6 +26,7 @@ import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPane
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import MessagePathInput, {
   tryToSetDefaultGlobalVar,
@@ -33,14 +34,18 @@ import MessagePathInput, {
 } from "./MessagePathInput";
 import { MessagePathInputBaseProps } from "./types";
 
+// Re-assignable mocks for tests
+let mockDatatypes = new Map();
+let mockTopics: Array<{ name: string; schemaName?: string }> = [];
+
 jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
 jest.mock("@lichtblick/suite-base/components/MessagePipeline");
 jest.mock("@lichtblick/suite-base/context/UserProfileStorageContext");
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext");
 jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
   useDataSourceInfo: () => ({
-    datatypes: new Map(),
-    topics: [],
+    datatypes: mockDatatypes,
+    topics: mockTopics,
   }),
 }));
 jest.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", () =>
@@ -144,5 +149,82 @@ describe("MessagePathInput Component", () => {
     await user.type(input, "{{");
 
     expect(mockOnChange).toHaveBeenCalledWith("{}", 0);
+  });
+
+  describe("autoComplete logic", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (useGlobalVariables as jest.Mock).mockReturnValue({
+        globalVariables: {},
+        setGlobalVariables: jest.fn(),
+      });
+    });
+
+    it("should resolve to 'topicName' when path is empty (rosPath is null)", async () => {
+      // Given
+      const topic1 = { name: `/${BasicBuilder.string()}`, schemaName: "std_msgs/String" };
+      const topic2 = { name: `/${BasicBuilder.number()}`, schemaName: "std_msgs/Int32" };
+      mockTopics = [topic1, topic2];
+      mockDatatypes = new Map();
+
+      // When
+      renderComponent({ path: "" });
+      const input = screen.getByRole("combobox");
+      fireEvent.click(input);
+      fireEvent.focus(input);
+
+      // Then
+      // Wait for autocomplete options to appear
+      const options = await screen.findAllByRole("option");
+      expect(options).toHaveLength(2);
+      expect(options[0]!.textContent).toBe(topic1.name);
+      expect(options[1]!.textContent).toBe(topic2.name);
+    });
+
+    it("should resolve to 'topicName' when typing partial topic name", async () => {
+      const topic1 = { name: `/camera/${BasicBuilder.string()}`, schemaName: "std_msgs/String" };
+      const topic2 = { name: `/camera/${BasicBuilder.string()}`, schemaName: "std_msgs/String" };
+      mockTopics = [topic1, topic2];
+      mockDatatypes = new Map();
+
+      renderComponent({ path: "/cam" });
+      const input = screen.getByRole("combobox");
+
+      fireEvent.click(input);
+      fireEvent.focus(input);
+
+      // Wait for options to appear, then verify them by text content
+      const options = await screen.findAllByRole("option");
+      expect(options).toHaveLength(2);
+      expect(options[0]!.textContent).toBe(topic1.name);
+      expect(options[1]!.textContent).toBe(topic2.name);
+    });
+
+    it("should show field options after selecting a topic from autocomplete", async () => {
+      // Given
+      mockTopics = [{ name: `/topic1`, schemaName: "custom/Type" }];
+      mockDatatypes = new Map([
+        [
+          "custom/Type",
+          {
+            definitions: [
+              { name: "value1", type: "float64", isArray: false, isComplex: false },
+              { name: "value2", type: "string", isArray: false, isComplex: false },
+            ],
+          },
+        ],
+      ]);
+
+      renderComponent({ path: "/topic1.", validTypes: ["primitive"] });
+      const input = screen.getByRole("combobox");
+      // When/Then
+      fireEvent.click(input);
+      fireEvent.focus(input);
+      // Then
+      const options = await screen.findAllByRole("option");
+      expect(options).toHaveLength(2);
+      expect(options[0]!.textContent).toBe(".value1");
+      expect(options[1]!.textContent).toBe(".value2");
+    });
   });
 });

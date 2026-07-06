@@ -5,9 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PanelExtensionContext, RegisterMessageConverterArgs } from "@lichtblick/suite";
+import { MessageConverterAlert, PanelExtensionContext } from "@lichtblick/suite";
 import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { Topic } from "@lichtblick/suite-base/players/types";
+import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 
 /**
  * An asset loaded from Studio's asset manager.
@@ -88,12 +89,17 @@ export type BuiltinPanelExtensionContext = {
   unstable_setMessagePathDropConfig: (config: MessagePathDropConfig | undefined) => void;
 } & PanelExtensionContext;
 
-type MessageConverter = RegisterMessageConverterArgs<unknown>;
+export type MessageConverterAlertHandler = (
+  converter: InstalledMessageConverter,
+  alert: MessageConverterAlert,
+  alertId?: string,
+) => void;
 
 export type CreateMessageRangeIteratorParams = {
   topic: string;
   convertTo?: string;
   rawBatchIterator: AsyncIterableIterator<Readonly<IteratorResult>>;
   sortedTopics: readonly Topic[];
-  messageConverters: readonly MessageConverter[];
+  messageConverters: readonly InstalledMessageConverter[];
+  emitAlert?: MessageConverterAlertHandler;
 };

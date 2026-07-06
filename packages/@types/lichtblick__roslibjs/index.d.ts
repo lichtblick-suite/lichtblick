@@ -16,7 +16,7 @@ declare module "@lichtblick/roslibjs" {
 
     public on(eventName: "connection", cb: () => void): void;
     public on(eventName: "close", cb: () => void): void;
-    // eslint-disable-next-line no-restricted-syntax
+
     public on(eventName: "error", cb: (err: Error | null) => void): void;
 
     public getNodes(cb: (nodes: string[]) => void, errorCallback: (error: Error) => void): void;

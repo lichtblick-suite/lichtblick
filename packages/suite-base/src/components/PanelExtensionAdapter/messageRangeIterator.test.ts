@@ -321,7 +321,13 @@ describe("createMessageRangeIterator", () => {
     }
 
     // Should have called convertMessage since topicSchemaConverters is not empty
-    expect(convertMessage).toHaveBeenCalledWith(mockMessage, expect.any(Map), expect.any(Array));
+    expect(convertMessage).toHaveBeenCalledWith(
+      mockMessage,
+      expect.any(Map),
+      expect.any(Array),
+      undefined,
+      expect.objectContaining({ emitAlert: undefined }),
+    );
   });
 
   it("should yield final batch of remaining messages", async () => {

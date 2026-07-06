@@ -9,13 +9,16 @@ import { parseMessagePath } from "@lichtblick/message-path";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { PlotConfig, PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
+import {
+  PlotConfig,
+  PlotXAxisVal,
+  isReferenceLinePlotPathType,
+} from "@lichtblick/suite-base/panels/Plot/utils/config";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useSubscriptions from "./useSubscriptions";
-import { isReferenceLinePlotPathType } from "../utils/config";
 import { pathToSubscribePayload } from "../utils/subscription";
 
 jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
@@ -66,7 +69,7 @@ describe("useSubscriptions", () => {
     const config: PlotConfig = {
       ...PlotBuilder.config(),
       ...override.config,
-    } as unknown as PlotConfig;
+    };
 
     const subscriberId = Object.hasOwn(override, "subscriberId")
       ? override.subscriberId!

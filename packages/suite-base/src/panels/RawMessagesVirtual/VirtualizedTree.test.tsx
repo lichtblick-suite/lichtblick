@@ -50,7 +50,6 @@ describe("VirtualizedTree", () => {
 
   describe("when rendering with empty data", () => {
     it.each([
-      // eslint-disable-next-line no-restricted-syntax
       ["null data", null],
       ["undefined data", undefined],
       ["empty object", {}],

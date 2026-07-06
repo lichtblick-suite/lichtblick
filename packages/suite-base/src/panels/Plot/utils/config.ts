@@ -91,6 +91,8 @@ export type PlotConfig = DeprecatedPlotConfig & {
   isSynced: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
   followingViewWidth?: number;
   sidebarDimension: number;
   [PANEL_TITLE_CONFIG_KEY]?: string;

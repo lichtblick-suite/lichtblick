@@ -19,13 +19,13 @@ import {
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { PanelContextMenu } from "@lichtblick/suite-base/components/PanelContextMenu";
+import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { VerticalBars } from "@lichtblick/suite-base/panels/Plot/VerticalBars";
-import { DEFAULT_SIDEBAR_DIMENSION } from "@lichtblick/suite-base/panels/Plot/constants";
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
@@ -45,8 +45,8 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     paths: series,
     showLegend,
     xAxisVal: xAxisMode,
-    legendDisplay = config.showSidebar === true ? "left" : "floating",
-    sidebarDimension = config.sidebarWidth ?? DEFAULT_SIDEBAR_DIMENSION,
+    legendDisplay,
+    sidebarDimension,
   } = config;
 
   const { classes } = useStyles();
@@ -69,6 +69,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   const { globalVariables } = useGlobalVariables();
   const getMessagePipelineState = useMessagePipelineGetter();
   const subscribeMessagePipeline = useMessagePipelineSubscribe();
+  const subscribeMessageRange = useSubscribeMessageRange();
 
   const {
     onMouseMove,
@@ -79,7 +80,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     onClickPath,
     focusedPath,
     keyDownHandlers,
-    keyUphandlers,
+    keyUpHandlers,
     getPanelContextMenuItems,
   } = usePlotInteractionHandlers({
     config,
@@ -164,7 +165,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
 
     const contentRect = canvasDiv.getBoundingClientRect();
 
-    const plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder);
+    const plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange);
     setCoordinator(plotCoordinator);
 
     plotCoordinator.setSize({
@@ -188,7 +189,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       resizeObserver.disconnect();
       plotCoordinator.destroy();
     };
-  }, [canvasDiv, datasetsBuilder, renderer]);
+  }, [canvasDiv, datasetsBuilder, renderer, subscribeMessageRange]);
 
   const numSeries = config.paths.length;
   const tooltipContent = useMemo(() => {
@@ -287,7 +288,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
         )}
         <PanelContextMenu getItems={getPanelContextMenuItems} />
       </Stack>
-      <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUphandlers} />
+      <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUpHandlers} />
     </Stack>
   );
 };

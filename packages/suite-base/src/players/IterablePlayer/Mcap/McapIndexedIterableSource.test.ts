@@ -152,4 +152,85 @@ describe("McapIndexedIterableSource", () => {
     expect(start).toEqual({ sec: 1, nsec: 0 });
     expect(end).toEqual({ sec: 5, nsec: 0 });
   });
+
+  describe("getEnd", () => {
+    it("should return undefined before initialization", async () => {
+      // Given an indexed source that has not been initialized
+      const tempBuffer = new TempBuffer();
+      const writer = new McapWriter({ writable: tempBuffer, startChannelId: 1 });
+      await writer.start({ library: "", profile: "" });
+      await writer.registerSchema({
+        data: new Uint8Array(),
+        encoding: "test",
+        name: "test",
+      });
+      await writer.registerChannel({
+        messageEncoding: "1",
+        schemaId: 1,
+        metadata: new Map(),
+        topic: "test",
+      });
+      await writer.addMessage({
+        channelId: 1,
+        data: new Uint8Array(),
+        logTime: 0n,
+        publishTime: 0n,
+        sequence: 1,
+      });
+      await writer.end();
+
+      const readable = new BlobReadable(new Blob([tempBuffer.get()]) as unknown as globalThis.Blob);
+      const decompressHandlers = await loadDecompressHandlers();
+      const reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
+      const source = new McapIndexedIterableSource(reader);
+
+      // When calling getEnd before initialize
+      // Then it should return undefined
+      expect(source.getEnd()).toBeUndefined();
+    });
+
+    it("should return the latest message end time after initialization", async () => {
+      // Given an indexed MCAP with messages spanning from 2s to 10s
+      const tempBuffer = new TempBuffer();
+      const writer = new McapWriter({ writable: tempBuffer, startChannelId: 1 });
+      await writer.start({ library: "", profile: "" });
+      await writer.registerSchema({
+        data: new Uint8Array(),
+        encoding: "test",
+        name: "test",
+      });
+      await writer.registerChannel({
+        messageEncoding: "1",
+        schemaId: 1,
+        metadata: new Map(),
+        topic: "test",
+      });
+      await writer.addMessage({
+        channelId: 1,
+        data: new Uint8Array(),
+        logTime: 2_000_000_000n,
+        publishTime: 0n,
+        sequence: 1,
+      });
+      await writer.addMessage({
+        channelId: 1,
+        data: new Uint8Array(),
+        logTime: 10_000_000_000n,
+        publishTime: 0n,
+        sequence: 2,
+      });
+      await writer.end();
+
+      const readable = new BlobReadable(new Blob([tempBuffer.get()]) as unknown as globalThis.Blob);
+      const decompressHandlers = await loadDecompressHandlers();
+      const reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
+      const source = new McapIndexedIterableSource(reader);
+
+      // When initializing and calling getEnd
+      await source.initialize();
+
+      // Then getEnd should return the latest message time
+      expect(source.getEnd()).toEqual({ sec: 10, nsec: 0 });
+    });
+  });
 });

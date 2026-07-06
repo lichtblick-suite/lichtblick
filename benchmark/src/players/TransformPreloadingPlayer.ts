@@ -17,7 +17,6 @@ import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
   BlockCache,
-  MessageBlock,
   Player,
   PlayerPresence,
   PlayerState,
@@ -210,7 +209,7 @@ class TransformPreloadingPlayer implements Player {
           Math.min(start150HzIndex + numMessagesPerBlock150Hz, msgs150Hz.length),
         ),
       };
-      blocks.push(block as MessageBlock);
+      blocks.push(block);
     }
 
     const progressForListener = {

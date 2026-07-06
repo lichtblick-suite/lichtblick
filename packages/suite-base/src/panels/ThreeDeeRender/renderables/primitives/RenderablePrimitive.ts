@@ -17,6 +17,7 @@ import { LayerSettingsEntity } from "../../settings";
 export type EntityRenderableUserData = BaseUserData & {
   topic?: string;
   entity?: SceneEntity;
+  entityId?: string;
   expiresAt?: bigint;
   settings?: LayerSettingsEntity;
 };

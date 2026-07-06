@@ -23,12 +23,14 @@ import {
   DraggedMessagePath,
   MessagePathDropStatus,
 } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import { HUDItemManager } from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
+import {
+  HUDItemManager,
+  HUDItem,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/HUDItemManager";
 import { ICameraHandler } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import { LabelPool } from "@lichtblick/three-text";
 
-import { HUDItem } from "./HUDItemManager";
 import { Input } from "./Input";
 import { MeshUpAxis, ModelCache } from "./ModelCache";
 import { PickedRenderable } from "./Picker";
@@ -57,6 +59,12 @@ export type RendererEvents = {
     renderer: IRenderer,
   ) => void;
   selectedRenderable: (selection: PickedRenderable | undefined, renderer: IRenderer) => void;
+  renderableHovered: (
+    selections: PickedRenderable[],
+    cursorCoords: { x: number; y: number },
+    renderer: IRenderer,
+  ) => void;
+  hoverMoved: (cursorCoords: { x: number; y: number }, renderer: IRenderer) => void;
   parametersChange: (
     parameters: ReadonlyMap<string, ParameterValue> | undefined,
     renderer: IRenderer,
@@ -391,6 +399,13 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   // Callback handlers
   animationFrame: () => void;
   queueAnimationFrame: () => void;
+
+  /**
+   * Resolves once all scene extensions have finished any in-flight asynchronous video decoding.
+   * Used by the panel to gate the frame barrier on a seek so the cursor parks on the target until
+   * the seek frame is actually rendered.
+   */
+  settleVideoDecodes(): Promise<void>;
 
   // Function to fetch an asset from Studio's asset manager.
   fetchAsset: BuiltinPanelExtensionContext["unstable_fetchAsset"];

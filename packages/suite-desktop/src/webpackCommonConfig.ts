@@ -50,7 +50,7 @@ export function createCommonWebpackConfig(
     plugins: [
       new DefinePlugin({
         // Should match webpack-defines.d.ts
-        ReactNull: null, // eslint-disable-line no-restricted-syntax
+        ReactNull: null,
         LICHTBLICK_PRODUCT_NAME: JSON.stringify(params.packageJson.productName),
         LICHTBLICK_PRODUCT_VERSION: JSON.stringify(params.packageJson.version),
         LICHTBLICK_PRODUCT_HOMEPAGE: JSON.stringify(params.packageJson.homepage),

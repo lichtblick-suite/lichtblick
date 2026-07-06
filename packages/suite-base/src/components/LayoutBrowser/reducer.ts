@@ -24,6 +24,15 @@ function reducer(draft: LayoutSelectionState, action: LayoutSelectionAction) {
       draft.multiAction = { action: action.action, ids: draft.selectedIds };
       break;
 
+    case "shift-multi-action":
+      if (draft.multiAction) {
+        draft.multiAction.ids = draft.multiAction.ids.slice(1);
+        if (draft.multiAction.ids.length === 0) {
+          draft.multiAction = undefined;
+        }
+      }
+      break;
+
     case "select-id": {
       const { id, modKey, shiftKey } = action;
 

@@ -21,7 +21,7 @@ const makeArrayData = ({
       val: i,
       bool: true,
       str: `${i}-abcd-edfg`,
-      n: null, // eslint-disable-line no-restricted-syntax
+      n: null,
       u: undefined,
       obj: {
         date: new Date(`2020-01-${i}`),

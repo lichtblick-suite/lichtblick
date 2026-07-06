@@ -14,6 +14,7 @@ import {
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
+import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import { Player } from "@lichtblick/suite-base/players/types";
 
 const initWorkers: Record<string, () => Worker> = {
@@ -66,11 +67,11 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
   public docsLinks = [
     {
       label: "ROS 1",
-      url: "https://lichtblick-suite.github.io/docs/connecting-to-data/ros1.html",
+      url: "https://lichtblick-suite.github.io/docs/docs/connecting-to-data/frameworks/ros1/",
     },
     {
       label: "MCAP",
-      url: "https://lichtblick-suite.github.io/docs/connecting-to-data/mcap.html",
+      url: "https://lichtblick-suite.github.io/docs/docs/connecting-to-data/frameworks/mcap/",
     },
   ];
 
@@ -115,6 +116,10 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
       urlParams: { urls },
       sourceId: this.id,
       readAheadDuration: { sec: 10, nsec: 0 },
+      // MCAP can carry foxglove.CompressedVideo. Some codecs (e.g. H.265) cannot decode a P/B-frame
+      // in isolation, so on a backward seek the backfill is expanded to include the preceding GOP.
+      // A no-op for non-video (e.g. .bag) sources.
+      expandBackfill: expandVideoSeekBackfill,
     });
   }
 

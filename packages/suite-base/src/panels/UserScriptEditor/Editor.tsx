@@ -18,7 +18,7 @@ import { useTheme } from "@mui/material";
 import { typescript } from "monaco-editor";
 // @ts-expect-error ICodeEditorService does not have type information in the monaco-editor package
 import { ICodeEditorService } from "monaco-editor/esm/vs/editor/browser/services/codeEditorService";
-import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
+import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api.js";
 // @ts-expect-error StandaloneService does not have type information in the monaco-editor package
 import { StandaloneServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
 import * as path from "path";
@@ -130,9 +130,8 @@ const Editor = ({
       async (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         input: any,
-        // eslint-disable-next-line no-restricted-syntax
+
         editor: monacoApi.editor.ICodeEditor | null,
-        // eslint-disable-next-line no-restricted-syntax
       ): Promise<monacoApi.editor.ICodeEditor | null> => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const requestedModel = monacoApi.editor.getModel(input.resource);
@@ -150,7 +149,7 @@ const Editor = ({
         ) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           gotoSelection(editor, input.options.selection);
-          // eslint-disable-next-line no-restricted-syntax
+
           return null;
         }
 
@@ -217,7 +216,7 @@ const Editor = ({
       typescript.javascriptDefaults.setEagerModelSync(true);
 
       monaco.languages.registerDocumentFormattingEditProvider("typescript", {
-        provideDocumentFormattingEdits: async (model) => {
+        provideDocumentFormattingEdits: async (model: monacoApi.editor.ITextModel) => {
           try {
             return [
               {
