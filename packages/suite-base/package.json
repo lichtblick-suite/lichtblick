@@ -36,7 +36,7 @@
     "@lichtblick/message-path": "workspace:*",
     "@lichtblick/ros1": "1.0.0",
     "@lichtblick/rosbag": "1.0.0",
-    "@lichtblick/rosbag2-web": "1.0.4",
+    "@lichtblick/rosbag2-web": "1.0.5",
     "@lichtblick/roslibjs": "1.0.0",
     "@lichtblick/rosmsg": "1.0.0",
     "@lichtblick/rosmsg-msgs-common": "1.0.1",
