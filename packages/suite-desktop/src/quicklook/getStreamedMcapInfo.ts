@@ -129,7 +129,7 @@ export default async function getStreamedMcapInfo<R>(
   for (let offset = 0; offset < file.size; offset += chunkSize) {
     const buffer = await file.slice(offset, offset + chunkSize).arrayBuffer();
     mcapStreamReader.append(new Uint8Array(buffer));
-    for (let record; (record = mcapStreamReader.nextRecord()) != undefined; ) {
+    for (let record; (record = mcapStreamReader.nextRecord()) != undefined;) {
       processRecord(info, record);
     }
     bytesRead += buffer.byteLength;

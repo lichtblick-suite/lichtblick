@@ -48,18 +48,14 @@ export function PieChart({ context }: PieChartProps): React.JSX.Element {
     ...(context.initialState as Partial<PieChartConfig>),
   }));
 
-  const [state, dispatch] = useReducer(
-    stateReducer,
-    config,
-    ({ path }): PieChartState => ({
-      path,
-      parsedPath: parseMessagePath(path),
-      latestMessage: undefined,
-      latestMatchingQueriedData: undefined,
-      pathParseError: undefined,
-      error: undefined,
-    }),
-  );
+  const [state, dispatch] = useReducer(stateReducer, config, ({ path }): PieChartState => ({
+    path,
+    parsedPath: parseMessagePath(path),
+    latestMessage: undefined,
+    latestMatchingQueriedData: undefined,
+    pathParseError: undefined,
+    error: undefined,
+  }));
 
   const settingsActionHandler = useCallback((action: SettingsTreeAction) => {
     setConfig((prevConfig) => settingsActionReducer(prevConfig, action));

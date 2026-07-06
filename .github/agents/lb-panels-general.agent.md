@@ -175,3 +175,4 @@ Access and update panel configuration by panel ID.
 ## Skills Reference
 - PanelExtensionAdapter lifecycle, renderState building, or panel API contracts: `read_file(".github/skills/panel-extension-api/SKILL.md")`
 - Message-path syntax and panel data extraction: `read_file(".github/skills/message-path/SKILL.md")`
+- Panel render profiling and memoization strategy: `read_file(".github/skills/performance/SKILL.md")`

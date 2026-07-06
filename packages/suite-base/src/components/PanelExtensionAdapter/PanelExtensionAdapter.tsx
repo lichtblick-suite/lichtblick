@@ -112,8 +112,7 @@ function isVersionedPanelConfig(config: unknown): config is VersionedPanelConfig
 type PanelExtensionAdapterProps = {
   /** function that initializes the panel extension */
   initPanel:
-    | ExtensionPanelRegistration["initPanel"]
-    | ((context: BuiltinPanelExtensionContext) => void);
+    ExtensionPanelRegistration["initPanel"] | ((context: BuiltinPanelExtensionContext) => void);
   /**
    * If defined, the highest supported version of config the panel supports.
    * Used to prevent older implementations of a panel from trying to access
@@ -679,6 +678,36 @@ function PanelExtensionAdapter(
       unstable_setMessagePathDropConfig(dropConfig) {
         setMessagePathDropConfig(dropConfig);
       },
+
+      getTopicSchema(topic: string) {
+        if (!isMounted()) {
+          return;
+        }
+
+        const ctx = getMessagePipelineContext();
+        const datatypes = ctx.playerState.activeData?.datatypes;
+        if (datatypes == undefined) {
+          return;
+        }
+        const schemaMap = getTopicToSchemaNameMap(ctx);
+        const schemaName = schemaMap[topic];
+        if (schemaName == undefined) {
+          return;
+        }
+        return datatypes.get(schemaName);
+      },
+
+      getSchema(schemaName: string) {
+        if (!isMounted()) {
+          return;
+        }
+        const ctx = getMessagePipelineContext();
+        const datatypes = ctx.playerState.activeData?.datatypes;
+        if (datatypes == undefined) {
+          return;
+        }
+        return datatypes.get(schemaName);
+      },
     };
     // Disable this rule because the metadata function. If used, it will break.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -785,9 +814,9 @@ function PanelExtensionAdapter(
 
   const style: CSSProperties = {};
   if (slowRender) {
-    style.borderColor = "orange";
-    style.borderWidth = "1px";
-    style.borderStyle = "solid";
+    // Use an inset box-shadow rather than a border so the indicator doesn't shrink the content box.
+    // A border would change this element's content size, triggering a panel ResizeObserver/relayout
+    style.boxShadow = "inset 0 0 0 1px orange";
   }
 
   if (error) {

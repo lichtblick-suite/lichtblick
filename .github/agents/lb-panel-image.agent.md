@@ -130,3 +130,4 @@ Overlaid on the image plane:
 - Image panel architecture, camera models, or VideoDecoder pipeline: `read_file(".github/skills/panel-image/SKILL.md")`
 - THREE.js fundamentals or ImageMode rendering internals: `read_file(".github/skills/3d-rendering/SKILL.md")`
 - Worker/Comlink patterns for image decode offloading: `read_file(".github/skills/web-workers/SKILL.md")`
+- Image decode and render performance profiling: `read_file(".github/skills/performance/SKILL.md")`

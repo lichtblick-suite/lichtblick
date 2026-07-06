@@ -176,13 +176,11 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (
-        !(
-          topicIsConvertibleToSchema(topic, POSE_ARRAY_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, NAV_PATH_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, POSES_IN_FRAME_DATATYPES)
-        )
-      ) {
+      if (!(
+        topicIsConvertibleToSchema(topic, POSE_ARRAY_DATATYPES) ||
+        topicIsConvertibleToSchema(topic, NAV_PATH_DATATYPES) ||
+        topicIsConvertibleToSchema(topic, POSES_IN_FRAME_DATATYPES)
+      )) {
         continue;
       }
       const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsPoseArray>;

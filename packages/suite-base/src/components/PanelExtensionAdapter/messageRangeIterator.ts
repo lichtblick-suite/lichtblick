@@ -36,9 +36,8 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
           : { topic, preload: true };
 
         // Import necessary functions for message processing
-        const { convertMessage, collateTopicSchemaConversions } = await import(
-          "./messageProcessing"
-        );
+        const { convertMessage, collateTopicSchemaConversions } =
+          await import("./messageProcessing");
 
         const collatedConversions = collateTopicSchemaConversions(
           [subscription],

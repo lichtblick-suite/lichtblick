@@ -5,6 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { MessageDefinition } from "@lichtblick/message-definition";
+
 import type { RegisterCameraModelArgs } from "./cameraModels";
 import type { Immutable } from "./immutable";
 
@@ -34,12 +36,7 @@ export type ParameterValue =
 
 // Valid types for global variables
 export type VariableValue =
-  | undefined
-  | boolean
-  | number
-  | string
-  | VariableValue[]
-  | { [key: string]: VariableValue };
+  undefined | boolean | number | string | VariableValue[] | { [key: string]: VariableValue };
 
 export type VariableStruct = { [key: string]: VariableValue };
 
@@ -513,6 +510,27 @@ export type PanelExtensionContext = {
    * and blocks future invocations of {@link SubscribeMessageRangeArgs.onNewRangeIterator | onNewRangeIterator}.
    */
   unstable_subscribeMessageRange: (args: SubscribeMessageRangeArgs) => () => void;
+
+  /**
+   * Returns the schema definition for a given topic, without requiring a subscription or reading
+   * any message data. Useful for inspecting message field structure (e.g. building field path
+   * selectors) at panel initialization time.
+   *
+   * @param topic The name of the topic whose schema should be returned.
+   * @returns The `MessageDefinition` for the topic's schema, or `undefined` if the topic is
+   *   unknown or no active data source is available.
+   */
+  getTopicSchema: (topic: string) => Immutable<MessageDefinition> | undefined;
+
+  /**
+   * Returns the schema definition for a given schemaName, without requiring a subscription or reading
+   * any message data.
+   *
+   * @param schemaName The name of the schema whose definition should be returned.
+   * @returns The `MessageDefinition` for the schema, or `undefined`
+   *   if the schema is unknown or no active data source is available.
+   */
+  getSchema: (schemaName: string) => Immutable<MessageDefinition> | undefined;
 };
 
 export type ExtensionPanelRegistration = {
@@ -1012,9 +1030,7 @@ export type SettingsTreeActionReorder = {
  * edits and updates.
  */
 export type SettingsTreeAction =
-  | SettingsTreeActionUpdate
-  | SettingsTreeActionPerformNode
-  | SettingsTreeActionReorder;
+  SettingsTreeActionUpdate | SettingsTreeActionPerformNode | SettingsTreeActionReorder;
 
 export type SettingsTreeNodes = Record<string, undefined | SettingsTreeNode>;
 

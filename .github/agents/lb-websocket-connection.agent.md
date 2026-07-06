@@ -95,3 +95,4 @@ MessagePipeline → Panels
 ## Skills Reference
 - Foxglove WebSocket protocol, message framing, or server capabilities: `read_file(".github/skills/websocket-connection/SKILL.md")`
 - Worker/Comlink patterns for WebSocket processing: `read_file(".github/skills/web-workers/SKILL.md")`
+- Live-message throughput or emission-batching performance: `read_file(".github/skills/performance/SKILL.md")`

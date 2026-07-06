@@ -18,6 +18,9 @@
   "scripts": {
     "prepack": "tsc -b tsconfig.json"
   },
+  "dependencies": {
+    "@lichtblick/message-definition": "1.0.0"
+  },
   "devDependencies": {
     "@lichtblick/tsconfig": "1.1.2",
     "typescript": "6.0.3"

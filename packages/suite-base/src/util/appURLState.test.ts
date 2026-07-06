@@ -130,6 +130,29 @@ describe("app state url parser", () => {
       });
     });
 
+    it("parses layoutUrl from URL", () => {
+      const url = urlBuilder();
+      url.searchParams.append("layoutUrl", "http://example.com/layout.json");
+
+      expect(parseAppURLState(url)).toMatchObject({
+        layoutUrl: "http://example.com/layout.json",
+      });
+    });
+
+    it("parses both ds and layoutUrl from URL", () => {
+      const url = urlBuilder();
+      url.searchParams.append("ds", "ros1-remote-bagfile");
+      url.searchParams.append("ds.url", "http://example.com/test.bag");
+      url.searchParams.append("layoutUrl", "http://example.com/layout.json");
+
+      expect(parseAppURLState(url)).toMatchObject({
+        ds: "ros1-remote-bagfile",
+        dsParams: {
+          url: "http://example.com/test.bag",
+        },
+        layoutUrl: "http://example.com/layout.json",
+      });
+    });
     it("parses sessionid query parameter", () => {
       const url = urlBuilder();
       const sessionId = BasicBuilder.string();
@@ -218,6 +241,42 @@ describe("updateAppURLState", () => {
     expect(result.href).toEqual(
       `${baseURL.origin}/?ds=${urlState.ds}&ds.${key}=${paramArray[0]}&ds.${key}=${paramArray[1]}`,
     );
+  });
+
+  it("encodes layoutUrl", () => {
+    const urlState: AppURLState = {
+      time: undefined,
+      layoutUrl: "http://example.com/layout.json",
+    };
+
+    const result = updateAppURLState(baseURL, urlState);
+
+    expect(result.searchParams.get("layoutUrl")).toBe("http://example.com/layout.json");
+  });
+
+  it("encodes both ds and layoutUrl", () => {
+    const testUrl = `${baseURL.origin}/${BasicBuilder.string()}.bag`;
+    const urlState: AppURLState = {
+      time: undefined,
+      ds: "ros1-remote-bagfile",
+      dsParams: {
+        url: testUrl,
+      },
+      layoutUrl: "http://example.com/layout.json",
+    };
+
+    const result = updateAppURLState(baseURL, urlState);
+
+    expect(result.searchParams.get("ds")).toBe("ros1-remote-bagfile");
+    expect(result.searchParams.get("layoutUrl")).toBe("http://example.com/layout.json");
+    expect(result.searchParams.get("ds.url")).toBe(testUrl);
+  });
+
+  it("removes layoutUrl when set to undefined", () => {
+    const urlWithLayout = new URL(baseURL.href);
+    urlWithLayout.searchParams.set("layoutUrl", "http://example.com/layout.json");
+    const updated = updateAppURLState(urlWithLayout, { layoutUrl: undefined });
+    expect(updated.searchParams.has("layoutUrl")).toBe(false);
   });
 
   describe("url states", () => {

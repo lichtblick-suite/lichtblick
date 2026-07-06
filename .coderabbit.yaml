@@ -5,6 +5,13 @@ language: "en-US"
 
 reviews:
   profile: "chill"
+  tone_instructions: |
+    Pay special attention to performance in hot paths — players, MessagePipeline, 3D and Plot
+    rendering, Web Workers, and frequently re-rendering React components. Flag allocations in
+    render/tick loops, lost reference stability or missing memoization, main-thread work that
+    belongs in a Worker, and buffer copies that should be zero-copy transfers. Follow "measure
+    before you optimize": raise performance concerns only with concrete, high-confidence impact and
+    avoid speculative micro-optimizations.
   request_changes_workflow: false
   high_level_summary: true
   high_level_summary_placeholder: "@coderabbitai summary"
@@ -61,6 +68,47 @@ reviews:
       instructions: |
         Type definition files. Check for accurate and comprehensive type definitions.
         Ensure no `any` types are used without justification.
+
+    - path: "packages/suite-base/src/players/**"
+      instructions: |
+        Performance-critical player and data-source code. Flag allocations inside tick loops or
+        per-message hot paths, missing message batching, and subscriptions that iterate topics no
+        panel requested. Verify message-cache/memory budgets are respected and that large buffers
+        are released behind the read head. Flag concrete regressions only — do not restate the
+        generic rules already in .github/instructions/performance.instructions.md.
+
+    - path: "packages/suite-base/src/components/MessagePipeline/**"
+      instructions: |
+        Hot render-state path. Verify renderState fields keep stable references when their data is
+        unchanged (reference equality drives panel re-renders), zustand selectors stay
+        fine-grained, and subscription merging is preserved. Flag changes that would make all
+        panels re-render every frame.
+
+    - path: "packages/suite-base/src/panels/ThreeDeeRender/**"
+      instructions: |
+        GPU/render hot path. Flag per-frame allocations (new THREE objects, arrays, or closures
+        created inside render/update loops), GPU buffers recreated per frame instead of reused or
+        grown, unbounded draw-call growth, and bypassed object pools. Verify temp objects are
+        reused for frequently created/destroyed values.
+
+    - path: "packages/suite-base/src/panels/Plot/**"
+      instructions: |
+        Chart rendering hot path. Verify heavy dataset work stays off the main thread (Workers or
+        OffscreenCanvas), the per-series point cap is respected, and updates are incremental rather
+        than full rebuilds. Flag main-thread processing of large datasets.
+
+    - path: "**/*.worker.ts"
+      instructions: |
+        Web Worker boundary. Verify large ArrayBuffer/TypedArray payloads use zero-copy
+        Comlink.transfer instead of structured-clone copies, and that worker proxies are disposed
+        to avoid leaks. Flag large buffers copied across the worker boundary.
+
+    - path: "**/*.tsx"
+      instructions: |
+        React render path. Raise only clear, high-impact render-performance issues: inline
+        object/array/function literals passed to memoized children, expensive work run directly in
+        render instead of useMemo, or setState called unconditionally inside useEffect. Do not
+        nitpick low-traffic components — respect the project's "measure before you optimize" rule.
 
   auto_review:
     enabled: true

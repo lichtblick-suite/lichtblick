@@ -66,6 +66,8 @@ describe("Indicator Component", () => {
         updatePanelSettingsEditor: jest.fn(),
         watch: jest.fn(),
         unstable_subscribeMessageRange: jest.fn(),
+        getTopicSchema: jest.fn(),
+        getSchema: jest.fn(),
         ...contextOverride,
       },
     };

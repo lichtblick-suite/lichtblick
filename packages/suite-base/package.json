@@ -36,7 +36,7 @@
     "@lichtblick/message-path": "workspace:*",
     "@lichtblick/ros1": "1.0.0",
     "@lichtblick/rosbag": "1.0.0",
-    "@lichtblick/rosbag2-web": "1.0.4",
+    "@lichtblick/rosbag2-web": "1.0.5",
     "@lichtblick/roslibjs": "1.0.0",
     "@lichtblick/rosmsg": "1.0.0",
     "@lichtblick/rosmsg-msgs-common": "1.0.1",
@@ -146,7 +146,7 @@
     "nearley-loader": "2.0.0",
     "notistack": "3.0.2",
     "path-browserify": "1.0.1",
-    "prettier": "3.6.2",
+    "prettier": "3.9.4",
     "ramda": "0.32.0",
     "react": "18.3.1",
     "react-colorful": "5.6.1",
@@ -189,7 +189,7 @@
     "use-immer": "0.11.0",
     "uuid": "14.0.0",
     "vm-browserify": "1.1.2",
-    "webpack": "5.107.2",
+    "webpack": "5.108.3",
     "zustand": "4.5.7"
   }
 }

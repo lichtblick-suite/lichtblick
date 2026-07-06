@@ -42,12 +42,10 @@ describe("buildSettingsTree", () => {
     const extensionSettings = {
       myPanelType: {
         schema1: {
-          settings: jest.fn(
-            (_config): SettingsTreeNode => ({
-              label: BasicBuilder.string(),
-              children: {},
-            }),
-          ),
+          settings: jest.fn((_config): SettingsTreeNode => ({
+            label: BasicBuilder.string(),
+            children: {},
+          })),
           handler: jest.fn(),
         },
       },

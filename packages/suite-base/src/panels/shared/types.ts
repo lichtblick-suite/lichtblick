@@ -23,7 +23,4 @@ export type UpdateGlobalVariablesAction = {
   globalVariables: GlobalVariables;
 };
 export type GaugeAndIndicatorAction =
-  | FrameAction
-  | PathAction
-  | SeekAction
-  | UpdateGlobalVariablesAction;
+  FrameAction | PathAction | SeekAction | UpdateGlobalVariablesAction;

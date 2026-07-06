@@ -116,12 +116,10 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
     for (const topic of this.renderer.topics ?? []) {
-      if (
-        !(
-          topicIsConvertibleToSchema(topic, ROS_CAMERA_INFO_DATATYPES) ||
-          topicIsConvertibleToSchema(topic, CAMERA_CALIBRATION_DATATYPES)
-        )
-      ) {
+      if (!(
+        topicIsConvertibleToSchema(topic, ROS_CAMERA_INFO_DATATYPES) ||
+        topicIsConvertibleToSchema(topic, CAMERA_CALIBRATION_DATATYPES)
+      )) {
         continue;
       }
       const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsCameraInfo>;
