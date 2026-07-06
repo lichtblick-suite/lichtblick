@@ -25,15 +25,7 @@ import {
   Link,
   Typography,
 } from "@mui/material";
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   ImperativePanelHandle,
   PanelGroup,
@@ -61,11 +53,10 @@ import {
 import BottomBar from "@lichtblick/suite-base/panels/UserScriptEditor/BottomBar";
 import { Sidebar } from "@lichtblick/suite-base/panels/UserScriptEditor/Sidebar";
 import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
-import { SaveConfig } from "@lichtblick/suite-base/types/panels";
+import { SaveConfig, UserScripts } from "@lichtblick/suite-base/types/panels";
 
 import Config from "./Config";
 import { Script } from "./script";
-import { filterVisibleUserScripts } from "./utils";
 
 const Editor = React.lazy(
   async () => await import("@lichtblick/suite-base/panels/UserScriptEditor/Editor"),
@@ -189,7 +180,10 @@ const WelcomeScreen = ({ addNewNode }: { addNewNode: (code?: string) => void }) 
   );
 };
 
-const selectRawUserNodes = (state: LayoutState) => state.selectedLayout?.data?.userNodes;
+const EMPTY_USER_NODES: UserScripts = Object.freeze({});
+
+const selectUserScripts = (state: LayoutState) =>
+  state.selectedLayout?.data?.userNodes ?? EMPTY_USER_NODES;
 
 const selectState = (store: UserScriptStore) => store.state;
 
@@ -199,19 +193,14 @@ function UserScriptEditor(props: Props) {
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
-  const allUserScripts = useCurrentLayoutSelector(selectRawUserNodes);
-  const visibleUserScripts = useMemo(
-    () => filterVisibleUserScripts(allUserScripts),
-    [allUserScripts],
-  );
+  const userScripts = useCurrentLayoutSelector(selectUserScripts);
   const { scriptStates: userScriptStates, rosLib, typesLib } = useUserScriptState(selectState);
 
   const { setUserScripts } = useCurrentLayoutActions();
 
   const selectedNodeDiagnostics =
     (selectedNodeId != undefined ? userScriptStates[selectedNodeId]?.diagnostics : undefined) ?? [];
-  const selectedScript =
-    selectedNodeId != undefined ? visibleUserScripts[selectedNodeId] : undefined;
+  const selectedScript = selectedNodeId != undefined ? userScripts[selectedNodeId] : undefined;
   const [scriptBackStack, setScriptBackStack] = useState<Script[]>([]);
   // Holds the currently active script
   const currentScript =
@@ -385,16 +374,14 @@ function UserScriptEditor(props: Props) {
             saveConfig({ selectedNodeId: scriptId });
           }}
           deleteScript={(scriptId) => {
-            setUserScripts({ ...visibleUserScripts, [scriptId]: undefined });
-            const remainingScriptIds = Object.keys(visibleUserScripts).filter(
-              (id) => id !== scriptId,
-            );
+            setUserScripts({ ...userScripts, [scriptId]: undefined });
             saveConfig({
-              selectedNodeId: remainingScriptIds.length > 0 ? remainingScriptIds[0] : undefined,
+              selectedNodeId:
+                Object.keys(userScripts).length > 1 ? Object.keys(userScripts)[0] : undefined,
             });
           }}
           selectedScriptId={selectedNodeId}
-          userScripts={visibleUserScripts}
+          userScripts={userScripts}
           script={currentScript}
           setScriptOverride={setScriptOverride}
           setUserScripts={setUserScripts}
