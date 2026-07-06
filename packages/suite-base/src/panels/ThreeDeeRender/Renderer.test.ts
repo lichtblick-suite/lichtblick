@@ -858,11 +858,12 @@ describe("3D Renderer", () => {
       renderer.animationFrame();
       const camera = renderer.cameraHandler.getActiveCamera();
 
-      // Then: The headlight should be attached to the camera
+      // Then: The headlight should be attached to the camera with the configured intensity
       const attachedLight = camera.children.find(
         (child: THREE.Object3D) => child instanceof THREE.DirectionalLight,
-      );
+      ) as THREE.DirectionalLight | undefined;
       expect(attachedLight).toBeDefined();
+      expect(attachedLight?.intensity).toBe(2);
 
       renderer.dispose();
     });
@@ -925,11 +926,37 @@ describe("3D Renderer", () => {
           scene: { hemisphereLightIntensity: 3.5 },
         },
       });
+      const renderSpy = jest.spyOn(renderer.gl, "render");
 
-      // When/Then: Updating scene render settings should not throw
-      expect(() => {
-        renderer.updateSceneRenderSettings();
-      }).not.toThrow();
+      // When: Rendering a frame (updateSceneRenderSettings runs during construction and applies
+      // the configured intensity; rendering lets us capture the private scene via the gl mock)
+      renderer.animationFrame();
+
+      // Then: The hemisphere light in the scene should reflect the configured intensity
+      const [scene] = renderSpy.mock.calls[0] as [THREE.Scene, THREE.Camera];
+      const hemiLight = scene.children.find(
+        (child: THREE.Object3D) => child instanceof THREE.HemisphereLight,
+      ) as THREE.HemisphereLight | undefined;
+      expect(hemiLight).toBeDefined();
+      expect(hemiLight?.intensity).toBe(3.5);
+
+      renderer.dispose();
+    });
+
+    it("applies the default hemisphere light intensity when not configured", () => {
+      // Given: A renderer without a custom hemisphere light intensity
+      const renderer = new Renderer({ ...defaultRendererProps, canvas });
+      const renderSpy = jest.spyOn(renderer.gl, "render");
+
+      // When: Rendering a frame
+      renderer.animationFrame();
+
+      // Then: The hemisphere light should use the default intensity (0.5 * PI)
+      const [scene] = renderSpy.mock.calls[0] as [THREE.Scene, THREE.Camera];
+      const hemiLight = scene.children.find(
+        (child: THREE.Object3D) => child instanceof THREE.HemisphereLight,
+      ) as THREE.HemisphereLight | undefined;
+      expect(hemiLight?.intensity).toBe(0.5 * Math.PI);
 
       renderer.dispose();
     });
