@@ -175,8 +175,7 @@ jest.mock("react-resize-detector", () => ({
 }));
 
 let resizeDetectorOptions:
-  | { onResize?: (payload: { width?: number; height?: number }) => void }
-  | undefined;
+  { onResize?: (payload: { width?: number; height?: number }) => void } | undefined;
 
 const userScriptProjectConfig = {
   rosLib: { fileName: "ros-lib.d.ts" },

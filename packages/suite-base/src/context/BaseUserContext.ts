@@ -8,10 +8,7 @@
 import { createContext, useContext } from "react";
 
 export type UserType =
-  | "unauthenticated"
-  | "authenticated-free"
-  | "authenticated-team"
-  | "authenticated-enterprise";
+  "unauthenticated" | "authenticated-free" | "authenticated-team" | "authenticated-enterprise";
 
 export interface CurrentUser {
   currentUserType: UserType;

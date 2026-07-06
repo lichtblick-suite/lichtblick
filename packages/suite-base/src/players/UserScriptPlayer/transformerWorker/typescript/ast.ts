@@ -464,8 +464,7 @@ export const constructDatatypes = (
         }
 
         const typeParam = findDeclaration(nextSymbol, [ts.SyntaxKind.TypeParameter]) as
-          | ts.TypeParameterDeclaration
-          | undefined;
+          ts.TypeParameterDeclaration | undefined;
 
         if (typeParam) {
           if (typeMap[typeParam.name.escapedText.toString()]) {

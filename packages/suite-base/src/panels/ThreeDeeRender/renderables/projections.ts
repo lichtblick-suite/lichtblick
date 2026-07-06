@@ -51,22 +51,20 @@ export function cameraInfosEqual(a: CameraInfo | undefined, b: CameraInfo | unde
     return true;
   }
 
-  if (
-    !(
-      a.header.frame_id === b.header.frame_id &&
-      a.width === b.width &&
-      a.height === b.height &&
-      a.distortion_model === b.distortion_model &&
-      a.binning_x === b.binning_x &&
-      a.binning_y === b.binning_y &&
-      a.roi.x_offset === b.roi.x_offset &&
-      a.roi.y_offset === b.roi.y_offset &&
-      a.roi.height === b.roi.height &&
-      a.roi.width === b.roi.width &&
-      a.roi.do_rectify === b.roi.do_rectify &&
-      a.D.length === b.D.length
-    )
-  ) {
+  if (!(
+    a.header.frame_id === b.header.frame_id &&
+    a.width === b.width &&
+    a.height === b.height &&
+    a.distortion_model === b.distortion_model &&
+    a.binning_x === b.binning_x &&
+    a.binning_y === b.binning_y &&
+    a.roi.x_offset === b.roi.x_offset &&
+    a.roi.y_offset === b.roi.y_offset &&
+    a.roi.height === b.roi.height &&
+    a.roi.width === b.roi.width &&
+    a.roi.do_rectify === b.roi.do_rectify &&
+    a.D.length === b.D.length
+  )) {
     return false;
   }
   for (let i = 0; i < a.D.length; i++) {

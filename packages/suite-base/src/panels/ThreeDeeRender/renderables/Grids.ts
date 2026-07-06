@@ -193,8 +193,7 @@ export class Grids extends SceneExtension<GridRenderable> {
 
     const instanceId = path[1]!;
     const settings = this.renderer.config.layers[instanceId] as
-      | Partial<LayerSettingsGrid>
-      | undefined;
+      Partial<LayerSettingsGrid> | undefined;
     this.#updateGrid(instanceId, settings);
   };
 

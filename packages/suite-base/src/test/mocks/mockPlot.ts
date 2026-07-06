@@ -253,35 +253,29 @@ export const fixture: Fixture = {
     speed: 0.2,
   },
   frame: {
-    "/some_topic/location": locationMessages.map(
-      (message): MessageEvent => ({
-        topic: "/some_topic/location",
+    "/some_topic/location": locationMessages.map((message): MessageEvent => ({
+      topic: "/some_topic/location",
+      receiveTime: message.header.stamp,
+      message,
+      schemaName: "msgs/PoseDebug",
+      sizeInBytes: 0,
+    })),
+    "/some_topic/location_subset": locationMessages
+      .slice(locationMessages.length / 3, (locationMessages.length * 2) / 3)
+      .map((message): MessageEvent => ({
+        topic: "/some_topic/location_subset",
         receiveTime: message.header.stamp,
         message,
         schemaName: "msgs/PoseDebug",
         sizeInBytes: 0,
-      }),
-    ),
-    "/some_topic/location_subset": locationMessages
-      .slice(locationMessages.length / 3, (locationMessages.length * 2) / 3)
-      .map(
-        (message): MessageEvent => ({
-          topic: "/some_topic/location_subset",
-          receiveTime: message.header.stamp,
-          message,
-          schemaName: "msgs/PoseDebug",
-          sizeInBytes: 0,
-        }),
-      ),
-    "/some_topic/state": otherStateMessages.map(
-      (message): MessageEvent => ({
-        topic: "/some_topic/state",
-        receiveTime: message.header.stamp,
-        message,
-        schemaName: "msgs/State",
-        sizeInBytes: 0,
-      }),
-    ),
+      })),
+    "/some_topic/state": otherStateMessages.map((message): MessageEvent => ({
+      topic: "/some_topic/state",
+      receiveTime: message.header.stamp,
+      message,
+      schemaName: "msgs/State",
+      sizeInBytes: 0,
+    })),
     "/boolean_topic": [
       {
         topic: "/boolean_topic",
@@ -295,15 +289,13 @@ export const fixture: Fixture = {
     // This is used in the headerStamp series test to check that the dataset is sorted
     // prior to rendering. If the dataset is not sorted properly, the plot is jumbled.
     "/some_topic/location_shuffled": _.shuffle(
-      locationMessages.map(
-        (message): MessageEvent => ({
-          topic: "/some_topic/location_shuffled",
-          receiveTime: message.header.stamp,
-          message,
-          schemaName: "msgs/PoseDebug",
-          sizeInBytes: 0,
-        }),
-      ),
+      locationMessages.map((message): MessageEvent => ({
+        topic: "/some_topic/location_shuffled",
+        receiveTime: message.header.stamp,
+        message,
+        schemaName: "msgs/PoseDebug",
+        sizeInBytes: 0,
+      })),
     ),
   },
   progress: { messageCache },

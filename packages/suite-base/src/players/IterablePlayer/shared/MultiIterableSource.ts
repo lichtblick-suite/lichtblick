@@ -45,9 +45,10 @@ const DEFAULT_CACHE_TOTAL_BYTES = 1024 * 1024 * 500; // 500 MiB
 // single metadata read, causing CachedFilelike to throw "Requested more data than cache size".
 const MIN_CACHE_PER_SOURCE_BYTES = 1024 * 1024 * 10; // 10 MiB
 
-export class MultiIterableSource<T extends ISerializedIterableSource, P>
-  implements ISerializedIterableSource
-{
+export class MultiIterableSource<
+  T extends ISerializedIterableSource,
+  P,
+> implements ISerializedIterableSource {
   public readonly sourceType = "serialized";
   private SourceConstructor: IterableSourceConstructor<T, P>;
   private dataSource: MultiSource;

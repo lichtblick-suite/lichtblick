@@ -43,12 +43,7 @@ export type HoverEntityInfo = {
  * - `click-pinned` – user clicked to pin; fully static until explicit dismiss.
  */
 export type TooltipMode =
-  | "hidden"
-  | "following"
-  | "settled"
-  | "grace"
-  | "hover-pinned"
-  | "click-pinned";
+  "hidden" | "following" | "settled" | "grace" | "hover-pinned" | "click-pinned";
 
 export type HoverTooltipProperties = Readonly<{
   entities: HoverEntityInfo[];

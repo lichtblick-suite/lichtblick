@@ -94,8 +94,7 @@ export default function useConfigById<Config extends Record<string, unknown>>(
         // We use a getter here instead of referring directly to the config object
         // so that this callback is stable across config changes.
         const currentConfig = getCurrentLayoutState().selectedLayout?.data?.configById[panelId] as
-          | undefined
-          | Config;
+          undefined | Config;
         if (currentConfig) {
           savePanelConfigs({
             configs: [{ id: panelId, config: newConfig(currentConfig) }],

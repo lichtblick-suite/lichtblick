@@ -90,8 +90,7 @@ type MockMessagePipelineState = MessagePipelineInternalState & {
   mockProps: MockMessagePipelineProps;
   dispatch: (
     action:
-      | MessagePipelineStateAction
-      | { type: "set-mock-props"; mockProps: MockMessagePipelineProps },
+      MessagePipelineStateAction | { type: "set-mock-props"; mockProps: MockMessagePipelineProps },
   ) => void;
 };
 

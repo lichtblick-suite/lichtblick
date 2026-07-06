@@ -42,7 +42,9 @@ export type BaseUserData = {
 export class Renderable<
   TUserData extends BaseUserData = BaseUserData,
   TRenderer extends IRenderer | undefined = IRenderer,
-> extends THREE.Object3D {
+>
+  extends THREE.Object3D
+{
   /** Identifies this class as inheriting from `Renderable` */
   public readonly isRenderable = true;
   /** Allow this Renderable to be selected during picking and shown in the Object Details view */

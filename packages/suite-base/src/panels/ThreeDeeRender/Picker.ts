@@ -295,8 +295,7 @@ export class Picker {
     );
     const sizeAttenuation = (material as Partial<THREE.PointsMaterial>).sizeAttenuation === true;
     const pickingMaterial = renderItem.object.userData.pickingMaterial as
-      | THREE.ShaderMaterial
-      | undefined;
+      THREE.ShaderMaterial | undefined;
     // scale picking material to picking target size
     if (pickingMaterial?.uniforms.resolution != undefined) {
       pickingMaterial.uniforms.resolution.value.copy(pickResolution);
@@ -339,8 +338,7 @@ export class Picker {
     }
 
     const instancePickingMaterial = renderItem.object.userData.instancePickingMaterial as
-      | THREE.ShaderMaterial
-      | undefined;
+      THREE.ShaderMaterial | undefined;
     const renderMaterial = instancePickingMaterial ?? this.#instanceRenderMaterial();
     this.#gl.renderBufferDirect(
       this.#camera,
