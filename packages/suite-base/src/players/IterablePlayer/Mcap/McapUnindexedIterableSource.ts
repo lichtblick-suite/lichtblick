@@ -179,9 +179,9 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
     }
 
     const reader = new McapStreamReader({ decompressHandlers });
-    for (let result; (result = await streamReader.read()), !result.done;) {
+    for (let result; (result = await streamReader.read()), !result.done; ) {
       reader.append(result.value);
-      for (let record; (record = reader.nextRecord());) {
+      for (let record; (record = reader.nextRecord()); ) {
         processRecord(record);
       }
     }

@@ -81,16 +81,18 @@ describe("structureAllItemsByPath", () => {
   it("should return correct structure with valid input", () => {
     populateMockMessagePathStructuresForDataype();
 
-    (messagePathsForStructure as jest.Mock).mockImplementation((): MessagePathsForStructure => [
-      {
-        path: ".property",
-        terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
-      },
-      {
-        path: ".property_2",
-        terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
-      },
-    ]);
+    (messagePathsForStructure as jest.Mock).mockImplementation(
+      (): MessagePathsForStructure => [
+        {
+          path: ".property",
+          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+        },
+        {
+          path: ".property_2",
+          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+        },
+      ],
+    );
 
     const result = structureAllItemsByPath({
       noMultiSlices: mockNoMultiSlices,
@@ -106,20 +108,22 @@ describe("structureAllItemsByPath", () => {
   it("should return correct structure removing duplicated and empty item.paths", () => {
     populateMockMessagePathStructuresForDataype();
 
-    (messagePathsForStructure as jest.Mock).mockImplementation((): MessagePathsForStructure => [
-      {
-        path: ".property",
-        terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
-      },
-      {
-        path: ".property", // Duplicated should be ignored
-        terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
-      },
-      {
-        path: "", // Empty path should be ignored
-        terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
-      },
-    ]);
+    (messagePathsForStructure as jest.Mock).mockImplementation(
+      (): MessagePathsForStructure => [
+        {
+          path: ".property",
+          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+        },
+        {
+          path: ".property", // Duplicated should be ignored
+          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+        },
+        {
+          path: "", // Empty path should be ignored
+          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+        },
+      ],
+    );
 
     const result = structureAllItemsByPath({
       noMultiSlices: mockNoMultiSlices,

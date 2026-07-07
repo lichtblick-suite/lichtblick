@@ -6,49 +6,45 @@ import { AppMenu, DataSourceDialog, LayoutManager, Sidebar } from "../../../page
 
 const LAYOUT_FILE = "imported-layout.json";
 
-test(
-  "Import a layout via layout tab > import layout",
-  { tag: "@regression" },
-  async ({ mainWindow }) => {
-    const dialog = new DataSourceDialog(mainWindow);
-    const sidebar = new Sidebar(mainWindow);
-    const layout = new LayoutManager(mainWindow);
+test("Import a layout via layout tab > import layout", { tag: "@regression" }, async ({
+  mainWindow,
+}) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
+  const layout = new LayoutManager(mainWindow);
 
-    // Given
-    await dialog.close();
-    await sidebar.openLayoutsTab();
-    await loadFromFilePicker(mainWindow, LAYOUT_FILE);
+  // Given
+  await dialog.close();
+  await sidebar.openLayoutsTab();
+  await loadFromFilePicker(mainWindow, LAYOUT_FILE);
 
-    // When
-    await layout.importLayout();
+  // When
+  await layout.importLayout();
 
-    // Then
-    await expect(
-      layout.getLayoutListItem().getByText("imported-layout", { exact: true }),
-    ).toBeVisible();
-  },
-);
+  // Then
+  await expect(
+    layout.getLayoutListItem().getByText("imported-layout", { exact: true }),
+  ).toBeVisible();
+});
 
-test(
-  "Import a layout via menu > view > import layout",
-  { tag: "@regression" },
-  async ({ mainWindow }) => {
-    const dialog = new DataSourceDialog(mainWindow);
-    const sidebar = new Sidebar(mainWindow);
-    const layout = new LayoutManager(mainWindow);
-    const appMenu = new AppMenu(mainWindow);
+test("Import a layout via menu > view > import layout", { tag: "@regression" }, async ({
+  mainWindow,
+}) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
+  const layout = new LayoutManager(mainWindow);
+  const appMenu = new AppMenu(mainWindow);
 
-    // Given
-    await dialog.close();
-    await sidebar.openLayoutsTab();
-    await loadFromFilePicker(mainWindow, LAYOUT_FILE);
+  // Given
+  await dialog.close();
+  await sidebar.openLayoutsTab();
+  await loadFromFilePicker(mainWindow, LAYOUT_FILE);
 
-    // When
-    await appMenu.importLayoutFromMenu();
+  // When
+  await appMenu.importLayoutFromMenu();
 
-    // Then
-    await expect(
-      layout.getLayoutListItem().getByText("imported-layout", { exact: true }),
-    ).toBeVisible();
-  },
-);
+  // Then
+  await expect(
+    layout.getLayoutListItem().getByText("imported-layout", { exact: true }),
+  ).toBeVisible();
+});

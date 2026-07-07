@@ -102,7 +102,8 @@ const selectSetGlobalBounds = (store: TimelineInteractionStateStore) => store.se
 
 // Calculation mode for the "reset view" view.
 type ChartDefaultView =
-  { type: "fixed"; minXValue: number; maxXValue: number } | { type: "following"; width: number };
+  | { type: "fixed"; minXValue: number; maxXValue: number }
+  | { type: "following"; width: number };
 
 export type Props = {
   type: "scatter";

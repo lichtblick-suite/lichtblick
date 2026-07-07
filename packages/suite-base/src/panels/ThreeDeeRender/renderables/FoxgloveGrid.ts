@@ -59,11 +59,9 @@ const DEFAULT_MIN_COLOR = { r: 100 / 255, g: 47 / 255, b: 105 / 255, a: 1 };
 const DEFAULT_MAX_COLOR = { r: 227 / 255, g: 177 / 255, b: 135 / 255, a: 1 };
 
 const COLOR_MODE_TO_GLSL: {
-  [
-    K in GridColorModeSettings["colorMode"] as `COLOR_MODE_${K extends "rgba-fields"
-      ? "RGBA"
-      : Uppercase<K>}`
-  ]: number;
+  [K in GridColorModeSettings["colorMode"] as `COLOR_MODE_${K extends "rgba-fields"
+    ? "RGBA"
+    : Uppercase<K>}`]: number;
 } = {
   COLOR_MODE_FLAT: 0,
   COLOR_MODE_RGBA: 1,

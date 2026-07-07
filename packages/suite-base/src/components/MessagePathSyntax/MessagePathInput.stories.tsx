@@ -29,10 +29,12 @@ import { MessagePathInputStoryFixture } from "./fixture";
 let manyTopics: Topic[] = [];
 for (let i = 0; i < 10; i++) {
   manyTopics = manyTopics.concat(
-    Array.from(basicDatatypes.keys()).map((schemaName): Topic => ({
-      name: `/${schemaName.toLowerCase()}/${i}`,
-      schemaName,
-    })),
+    Array.from(basicDatatypes.keys()).map(
+      (schemaName): Topic => ({
+        name: `/${schemaName.toLowerCase()}/${i}`,
+        schemaName,
+      }),
+    ),
   );
 }
 

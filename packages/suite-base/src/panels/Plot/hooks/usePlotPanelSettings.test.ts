@@ -106,46 +106,46 @@ describe("handleUpdateAction", () => {
     expect(input.draft.maxXValue).toBeUndefined();
   });
 
-  it.each(["minXValue", "maxXValue"])(
-    "should update followingViewWidth when path is minXValue or maxXValue",
-    (path1) => {
-      const initialConfig = PlotBuilder.config({ paths: [] });
-      const input: HandleUpdateAction = {
-        draft: _.cloneDeep(initialConfig),
-        path: [BasicBuilder.string(), path1],
-        value: BasicBuilder.string(),
-      };
+  it.each([
+    "minXValue",
+    "maxXValue",
+  ])("should update followingViewWidth when path is minXValue or maxXValue", (path1) => {
+    const initialConfig = PlotBuilder.config({ paths: [] });
+    const input: HandleUpdateAction = {
+      draft: _.cloneDeep(initialConfig),
+      path: [BasicBuilder.string(), path1],
+      value: BasicBuilder.string(),
+    };
 
-      handleUpdateAction(input);
+    handleUpdateAction(input);
 
-      expect(input.draft.followingViewWidth).toBeUndefined();
-    },
-  );
+    expect(input.draft.followingViewWidth).toBeUndefined();
+  });
 });
 
 describe("handleAddSeriesAction", () => {
-  it.each([{ paths: PlotBuilder.paths() }, { paths: [] }])(
-    "should add series with explicit color",
-    ({ paths }) => {
-      const initialConfig = PlotBuilder.config({ paths });
-      const input: HandleAction = {
-        draft: _.cloneDeep(initialConfig),
-      };
-      const initialLength = paths.length;
+  it.each([
+    { paths: PlotBuilder.paths() },
+    { paths: [] },
+  ])("should add series with explicit color", ({ paths }) => {
+    const initialConfig = PlotBuilder.config({ paths });
+    const input: HandleAction = {
+      draft: _.cloneDeep(initialConfig),
+    };
+    const initialLength = paths.length;
 
-      handleAddSeriesAction(input);
+    handleAddSeriesAction(input);
 
-      // Verify a new series was added
-      expect(input.draft.paths.length).toBe(initialLength === 0 ? 2 : initialLength + 1);
+    // Verify a new series was added
+    expect(input.draft.paths.length).toBe(initialLength === 0 ? 2 : initialLength + 1);
 
-      // Verify the added series has the expected structure with explicit color
-      const addedSeries = input.draft.paths[input.draft.paths.length - 1];
-      expect(addedSeries).toMatchObject({
-        ...DEFAULT_PLOT_PATH,
-        color: expect.any(String),
-      });
-    },
-  );
+    // Verify the added series has the expected structure with explicit color
+    const addedSeries = input.draft.paths[input.draft.paths.length - 1];
+    expect(addedSeries).toMatchObject({
+      ...DEFAULT_PLOT_PATH,
+      color: expect.any(String),
+    });
+  });
 });
 
 describe("handleDeleteSeriesAction", () => {
@@ -327,34 +327,34 @@ describe("usePlotPanelSettings", () => {
       { sourceIndex: 2, targetIndex: 0, description: "last to first" },
       { sourceIndex: 0, targetIndex: 1, description: "first to middle" },
       { sourceIndex: 1, targetIndex: 2, description: "middle to last" },
-    ])(
-      "should call saveConfig with reorder action when moving $description",
-      ({ sourceIndex, targetIndex }) => {
-        // Given: A configuration with three series
-        const config = PlotBuilder.config();
+    ])("should call saveConfig with reorder action when moving $description", ({
+      sourceIndex,
+      targetIndex,
+    }) => {
+      // Given: A configuration with three series
+      const config = PlotBuilder.config();
 
-        renderHook(() => {
-          usePlotPanelSettings(config, saveConfig, undefined);
-        });
+      renderHook(() => {
+        usePlotPanelSettings(config, saveConfig, undefined);
+      });
 
-        const actionHandler = updatePanelSettingsTree.mock.calls[0][0].actionHandler;
+      const actionHandler = updatePanelSettingsTree.mock.calls[0][0].actionHandler;
 
-        // When: Triggering reorder-node action
-        const action: SettingsTreeActionReorder = {
-          action: "reorder-node",
-          payload: {
-            path: ["paths", String(sourceIndex)],
-            targetPath: ["paths", String(targetIndex)],
-          },
-        };
+      // When: Triggering reorder-node action
+      const action: SettingsTreeActionReorder = {
+        action: "reorder-node",
+        payload: {
+          path: ["paths", String(sourceIndex)],
+          targetPath: ["paths", String(targetIndex)],
+        },
+      };
 
-        act(() => {
-          actionHandler(action);
-        });
+      act(() => {
+        actionHandler(action);
+      });
 
-        // Then: saveConfig should be called with the producer function
-        expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
-      },
-    );
+      // Then: saveConfig should be called with the producer function
+      expect(saveConfig).toHaveBeenCalledWith(expect.any(Function));
+    });
   });
 });

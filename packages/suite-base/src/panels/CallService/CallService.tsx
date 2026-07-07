@@ -169,10 +169,10 @@ function CallServiceContent(
 
   const canCallService = Boolean(
     context.callService != undefined &&
-    config.requestPayload &&
-    config.serviceName &&
-    parsedObject != undefined &&
-    state?.status !== "requesting",
+      config.requestPayload &&
+      config.serviceName &&
+      parsedObject != undefined &&
+      state?.status !== "requesting",
   );
 
   const callServiceClicked = useCallback(async () => {

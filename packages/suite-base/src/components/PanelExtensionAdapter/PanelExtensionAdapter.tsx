@@ -112,7 +112,8 @@ function isVersionedPanelConfig(config: unknown): config is VersionedPanelConfig
 type PanelExtensionAdapterProps = {
   /** function that initializes the panel extension */
   initPanel:
-    ExtensionPanelRegistration["initPanel"] | ((context: BuiltinPanelExtensionContext) => void);
+    | ExtensionPanelRegistration["initPanel"]
+    | ((context: BuiltinPanelExtensionContext) => void);
   /**
    * If defined, the highest supported version of config the panel supports.
    * Used to prevent older implementations of a panel from trying to access

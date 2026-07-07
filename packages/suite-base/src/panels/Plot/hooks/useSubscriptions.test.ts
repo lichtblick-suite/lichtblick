@@ -60,12 +60,7 @@ describe("useSubscriptions", () => {
     jest.clearAllMocks();
   });
 
-  const setup = (
-    override: {
-      config?: Partial<PlotConfig>;
-      subscriberId?: string;
-    } = {},
-  ) => {
+  const setup = (override: { config?: Partial<PlotConfig>; subscriberId?: string } = {}) => {
     const config: PlotConfig = {
       ...PlotBuilder.config(),
       ...override.config,

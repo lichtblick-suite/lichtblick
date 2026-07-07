@@ -14,43 +14,41 @@ import { PlayerControls, Sidebar } from "../../../page-objects";
  * When Raw Messages is filtered for `/tf.transforms[:]{child_frame_id==$globalVariable}`
  * Then a message with `child_frame_id` equal to "turtle1" should be visible
  */
-test(
-  "Create global variable and use it on Raw Messages Panel",
-  { tag: "@regression" },
-  async ({ mainWindow }) => {
-    const player = new PlayerControls(mainWindow);
-    const sidebar = new Sidebar(mainWindow);
+test("Create global variable and use it on Raw Messages Panel", { tag: "@regression" }, async ({
+  mainWindow,
+}) => {
+  const player = new PlayerControls(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
 
-    // Given
-    const filename = "example.bag";
-    await loadFiles({
-      mainWindow,
-      filenames: filename,
-    });
+  // Given
+  const filename = "example.bag";
+  await loadFiles({
+    mainWindow,
+    filenames: filename,
+  });
 
-    // When
-    await sidebar.toggleRightSidebar();
-    await mainWindow.getByTestId("add-variable-button").click();
+  // When
+  await sidebar.toggleRightSidebar();
+  await mainWindow.getByTestId("add-variable-button").click();
 
-    const newVariableNameInput = mainWindow.getByPlaceholder("variable_name");
-    await newVariableNameInput.fill("globalVariable");
-    const newVariableValueInput = mainWindow.getByTestId("global-variable-value-input");
+  const newVariableNameInput = mainWindow.getByPlaceholder("variable_name");
+  await newVariableNameInput.fill("globalVariable");
+  const newVariableValueInput = mainWindow.getByTestId("global-variable-value-input");
 
-    await newVariableValueInput.click();
-    await newVariableValueInput.press("Control+A");
-    await newVariableValueInput.press("Backspace");
-    await newVariableValueInput.fill('"turtle1"');
+  await newVariableValueInput.click();
+  await newVariableValueInput.press("Control+A");
+  await newVariableValueInput.press("Backspace");
+  await newVariableValueInput.fill('"turtle1"');
 
-    await player.play();
+  await player.play();
 
-    // Then
-    await expect(mainWindow.getByText("No topic selected")).toBeVisible();
+  // Then
+  await expect(mainWindow.getByText("No topic selected")).toBeVisible();
 
-    // When
-    const rawMessagesInputBar = mainWindow.getByPlaceholder("/some/topic.msgs[0].field");
-    await rawMessagesInputBar.fill("/tf.transforms[:]{child_frame_id==$globalVariable}");
+  // When
+  const rawMessagesInputBar = mainWindow.getByPlaceholder("/some/topic.msgs[0].field");
+  await rawMessagesInputBar.fill("/tf.transforms[:]{child_frame_id==$globalVariable}");
 
-    // Then
-    await expect(mainWindow.getByText('child_frame_id "turtle1"')).toBeVisible();
-  },
-);
+  // Then
+  await expect(mainWindow.getByText('child_frame_id "turtle1"')).toBeVisible();
+});

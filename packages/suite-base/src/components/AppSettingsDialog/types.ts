@@ -4,4 +4,8 @@
 export type AppSettingsSectionKey = "documentation" | "legal";
 
 export type AppSettingsTab =
-  "general" | "privacy" | "extensions" | "experimental-features" | "about";
+  | "general"
+  | "privacy"
+  | "extensions"
+  | "experimental-features"
+  | "about";

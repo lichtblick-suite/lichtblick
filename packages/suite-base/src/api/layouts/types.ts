@@ -93,7 +93,8 @@ export interface UpdateLayoutRequestBody {
  * Response from layout update operation
  */
 export type UpdateLayoutResponse =
-  { status: "success"; newLayout: RemoteLayout } | { status: "conflict" };
+  | { status: "success"; newLayout: RemoteLayout }
+  | { status: "conflict" };
 
 /**
  * Response from layout creation/update operations containing server data
