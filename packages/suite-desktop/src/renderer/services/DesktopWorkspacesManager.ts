@@ -19,7 +19,7 @@ function toWorkspace(workspace: DesktopWorkspace): Workspace {
  * through the Electron bridge and maps the on-disk workspace representation to the shared type.
  */
 export class DesktopWorkspacesManager implements IWorkspacesManager {
-  #bridge: Desktop;
+  readonly #bridge: Desktop;
 
   public constructor(bridge: Desktop) {
     this.#bridge = bridge;

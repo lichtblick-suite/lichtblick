@@ -211,6 +211,17 @@ describe("WorkspacesManager", () => {
         "Workspace name cannot be empty",
       );
     });
+
+    it.each(["../evil", "foo/bar"])(
+      "should reject a path-traversal id (%p)",
+      async (traversalId) => {
+        // GIVEN a malicious id that escapes the workspaces root
+        // WHEN renaming THEN it is rejected before touching disk
+        await expect(manager.rename(traversalId, "New Name")).rejects.toThrow(
+          `Invalid workspace id: ${traversalId}`,
+        );
+      },
+    );
   });
 
   describe("delete", () => {
@@ -253,6 +264,27 @@ describe("WorkspacesManager", () => {
       const state = await readState();
       expect(state.currentWorkspaceId).toBe(current.id);
     });
+
+    it.each(["../evil", "foo/bar"])(
+      "should reject a path-traversal id without touching disk (%p)",
+      async (traversalId) => {
+        // GIVEN a sibling file outside the workspaces root that must not be removed
+        const outsideFile = pathJoin(workspacesRoot, "..", "outside-target.txt");
+        await writeFile(outsideFile, "keep me", { encoding: "utf-8" });
+
+        try {
+          // WHEN deleting with a malicious id THEN it is rejected before any rm
+          await expect(manager.delete(traversalId)).rejects.toThrow(
+            `Invalid workspace id: ${traversalId}`,
+          );
+
+          // THEN nothing outside the root was removed
+          expect(existsSync(outsideFile)).toBe(true);
+        } finally {
+          await rm(outsideFile, { force: true });
+        }
+      },
+    );
   });
 
   describe("getCurrent", () => {
@@ -321,6 +353,17 @@ describe("WorkspacesManager", () => {
         `Workspace ${missingId} not found`,
       );
     });
+
+    it.each(["../evil", "foo/bar"])(
+      "should reject a path-traversal id (%p)",
+      async (traversalId) => {
+        // GIVEN a malicious id that escapes the workspaces root
+        // WHEN selecting it THEN it is rejected before any filesystem read
+        await expect(manager.setCurrent(traversalId)).rejects.toThrow(
+          `Invalid workspace id: ${traversalId}`,
+        );
+      },
+    );
   });
 
   describe("getConfig", () => {

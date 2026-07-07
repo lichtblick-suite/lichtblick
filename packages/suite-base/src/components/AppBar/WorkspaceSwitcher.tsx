@@ -15,6 +15,7 @@ import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { usePrompt } from "@lichtblick/suite-base/hooks/usePrompt";
 import { Namespace } from "@lichtblick/suite-base/types";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
+import sendNotification from "@lichtblick/suite-base/util/sendNotification";
 
 import { useStyles } from "./WorkspaceSwitcher.style";
 
@@ -48,9 +49,14 @@ export function WorkspaceSwitcher(): React.JSX.Element | ReactNull {
         if (name == undefined || name.trim().length === 0) {
           return;
         }
-        const workspace = await workspacesContext?.createWorkspace(name, namespace);
-        if (workspace) {
-          await workspacesContext?.switchWorkspace(workspace.id);
+        try {
+          const workspace = await workspacesContext?.createWorkspace(name, namespace);
+          if (workspace) {
+            await workspacesContext?.switchWorkspace(workspace.id);
+          }
+        } catch (error) {
+          console.error(error);
+          sendNotification(t("createWorkspaceError"), error, "app", "error");
         }
       })();
     },
@@ -69,7 +75,12 @@ export function WorkspaceSwitcher(): React.JSX.Element | ReactNull {
         if (name == undefined || name.trim().length === 0) {
           return;
         }
-        await workspacesContext?.renameWorkspace(id, name);
+        try {
+          await workspacesContext?.renameWorkspace(id, name);
+        } catch (error) {
+          console.error(error);
+          sendNotification(t("renameWorkspaceError"), error, "app", "error");
+        }
       })();
     },
     [handleClose, prompt, t, workspacesContext],
@@ -88,7 +99,12 @@ export function WorkspaceSwitcher(): React.JSX.Element | ReactNull {
         if (response !== "ok") {
           return;
         }
-        await workspacesContext?.deleteWorkspace(id);
+        try {
+          await workspacesContext?.deleteWorkspace(id);
+        } catch (error) {
+          console.error(error);
+          sendNotification(t("deleteWorkspaceError"), error, "app", "error");
+        }
       })();
     },
     [handleClose, confirm, t, workspacesContext],
@@ -97,9 +113,16 @@ export function WorkspaceSwitcher(): React.JSX.Element | ReactNull {
   const handleSwitch = useCallback(
     (id: string | undefined) => {
       handleClose();
-      void workspacesContext?.switchWorkspace(id);
+      void (async () => {
+        try {
+          await workspacesContext?.switchWorkspace(id);
+        } catch (error) {
+          console.error(error);
+          sendNotification(t("switchWorkspaceError"), error, "app", "error");
+        }
+      })();
     },
-    [handleClose, workspacesContext],
+    [handleClose, t, workspacesContext],
   );
 
   // Hidden on web (no provider) and on non-desktop builds.

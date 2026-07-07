@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { randomUUID } from "crypto";
-import { existsSync } from "fs";
-import { mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
-import { join as pathJoin } from "path";
+import { randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { basename, join as pathJoin } from "node:path";
 
 import Logger from "@lichtblick/log";
 
@@ -32,11 +32,44 @@ const log = Logger.getLogger(__filename);
 export class WorkspacesManager {
   readonly #workspacesRoot: string;
 
+  // Serializes read-modify-write cycles on state.json so concurrent IPC requests cannot interleave
+  // and clobber each other's writes (e.g. currentWorkspaceId).
+  #stateQueue: Promise<unknown> = Promise.resolve();
+
   public constructor(workspacesRoot: string) {
     this.#workspacesRoot = workspacesRoot;
   }
 
+  /**
+   * Guards against path traversal from renderer-supplied ids. Workspace ids are created via
+   * randomUUID(), so a valid id is always a single, plain path segment.
+   */
+  #assertValidId(id: string): void {
+    if (
+      id.trim().length === 0 ||
+      id === "." ||
+      id === ".." ||
+      id.includes("/") ||
+      id.includes("\\") ||
+      id !== basename(id)
+    ) {
+      throw new Error(`Invalid workspace id: ${id}`);
+    }
+  }
+
+  /** Chains onto the state write queue so read-update-write sequences run serially. */
+  async #withStateLock<T>(fn: () => Promise<T>): Promise<T> {
+    const run = this.#stateQueue.then(async () => await fn());
+    // Reset the queue to the settled promise regardless of outcome so a rejection does not wedge it.
+    this.#stateQueue = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return await run;
+  }
+
   #configPath(id: string): string {
+    this.#assertValidId(id);
     return pathJoin(this.#workspacesRoot, id, WORKSPACE_CONFIG_FILE);
   }
 
@@ -70,6 +103,9 @@ export class WorkspacesManager {
   }
 
   public async getConfig(id: string): Promise<WorkspaceConfig | undefined> {
+    // Validate before the try/catch so an invalid id surfaces as an error (callers such as rename
+    // rely on this) rather than being swallowed as a missing-config undefined.
+    this.#assertValidId(id);
     try {
       const raw = await readFile(this.#configPath(id), { encoding: "utf-8" });
       return JSON.parse(raw) as WorkspaceConfig;
@@ -151,12 +187,15 @@ export class WorkspacesManager {
   }
 
   public async delete(id: string): Promise<void> {
+    this.#assertValidId(id);
     await rm(pathJoin(this.#workspacesRoot, id), { recursive: true, force: true });
 
-    const state = await this.#readState();
-    if (state.currentWorkspaceId === id) {
-      await this.#writeState({ ...state, currentWorkspaceId: undefined });
-    }
+    await this.#withStateLock(async () => {
+      const state = await this.#readState();
+      if (state.currentWorkspaceId === id) {
+        await this.#writeState({ ...state, currentWorkspaceId: undefined });
+      }
+    });
 
     log.info(`Deleted workspace ${id}`);
   }
@@ -174,13 +213,16 @@ export class WorkspacesManager {
 
   public async setCurrent(id: string | undefined): Promise<void> {
     if (id != undefined) {
+      this.#assertValidId(id);
       const config = await this.getConfig(id);
       if (config == undefined) {
         throw new Error(`Workspace ${id} not found`);
       }
     }
 
-    const state = await this.#readState();
-    await this.#writeState({ ...state, currentWorkspaceId: id });
+    await this.#withStateLock(async () => {
+      const state = await this.#readState();
+      await this.#writeState({ ...state, currentWorkspaceId: id });
+    });
   }
 }

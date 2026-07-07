@@ -21,4 +21,8 @@ export const workspaces = {
   delete: "Delete",
   personalWorkspace: "Personal",
   organizationWorkspace: "Organization",
+  createWorkspaceError: "Failed to create workspace",
+  renameWorkspaceError: "Failed to rename workspace",
+  deleteWorkspaceError: "Failed to delete workspace",
+  switchWorkspaceError: "Failed to switch workspace",
 };

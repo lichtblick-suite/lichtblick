@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { app, BrowserWindow, ipcMain, Menu, nativeTheme, session } from "electron";
-import { join as pathJoin } from "path";
+import { join as pathJoin } from "node:path";
 
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/src/AppSetting";

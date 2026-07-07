@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { alpha } from "@mui/material";
 import { makeStyles } from "tss-react/mui";
 
 export const useStyles = makeStyles()((theme) => ({
@@ -9,11 +10,11 @@ export const useStyles = makeStyles()((theme) => ({
     height: theme.spacing(4),
     fontSize: theme.typography.body2.fontSize,
     color: theme.palette.common.white,
-    borderColor: "rgba(255, 255, 255, 0.24)",
+    borderColor: alpha(theme.palette.common.white, 0.24),
 
     "&:hover": {
-      borderColor: "rgba(255, 255, 255, 0.4)",
-      backgroundColor: "rgba(255, 255, 255, 0.08)",
+      borderColor: alpha(theme.palette.common.white, 0.4),
+      backgroundColor: alpha(theme.palette.common.white, 0.08),
     },
   },
   buttonLabel: {

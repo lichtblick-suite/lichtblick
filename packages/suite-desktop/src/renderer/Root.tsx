@@ -105,9 +105,13 @@ export default function Root(props: RootProps): React.JSX.Element {
 
   const handleSwitchWorkspace = useCallback(() => {
     void (async () => {
-      const workspace = await workspacesManager.getCurrent();
-      if (isMounted()) {
-        setCurrentWorkspace(workspace);
+      try {
+        const workspace = await workspacesManager.getCurrent();
+        if (isMounted()) {
+          setCurrentWorkspace(workspace);
+        }
+      } catch (err: unknown) {
+        console.error("Failed to resolve the current workspace after switching", err);
       }
     })();
   }, [workspacesManager, isMounted]);

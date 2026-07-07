@@ -724,6 +724,40 @@ describe("ExtensionCatalogProvider", () => {
       expect(uninstallFn).toHaveBeenCalledWith(useExternalId ? externalId : extensionInfo.id);
     });
 
+    it("should uninstall a desktop org-namespace extension via the filesystem loader using its id (not externalId)", async () => {
+      // Given: a desktop app where org workspace extensions are backed by a filesystem loader
+      (isDesktopApp as jest.Mock).mockReturnValue(true);
+
+      const externalId = BasicBuilder.string();
+      const extensionInfo = ExtensionBuilder.extensionInfo({ namespace: "org", externalId });
+      const uninstallFn = jest.fn().mockResolvedValue(undefined);
+      const loader: IExtensionLoader = {
+        type: "filesystem",
+        namespace: "org",
+        getExtension: jest.fn(),
+        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
+        installExtension: jest.fn().mockResolvedValue(extensionInfo),
+        loadExtension: jest.fn(),
+        uninstallExtension: uninstallFn,
+      };
+
+      const { result } = await setup({ loadersOverride: [loader] });
+
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(1);
+      });
+
+      // When: the org extension is uninstalled on desktop
+      await act(async () => {
+        await result.current.uninstallExtension("org", extensionInfo.id);
+      });
+
+      // Then: the filesystem loader is used with the extension id, not the externalId
+      expect(uninstallFn).toHaveBeenCalledWith(extensionInfo.id);
+      expect(uninstallFn).not.toHaveBeenCalledWith(externalId);
+      expect(result.current.installedExtensions).toHaveLength(0);
+    });
+
     it("should log a warning and still remove extension data from state when uninstallExtension throws", async () => {
       (isDesktopApp as jest.Mock).mockReturnValue(false);
       jest.spyOn(console, "warn").mockImplementation(() => {});

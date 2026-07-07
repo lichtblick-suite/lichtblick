@@ -45,7 +45,7 @@ interface LayoutsDB extends IDB.DBSchema {
  * being the tuple of [namespace, id].
  */
 export class IdbLayoutStorage implements ILayoutStorage {
-  #db;
+  readonly #db;
 
   /**
    * @param databaseName Name of the IndexedDB database. Defaults to the shared, unscoped database so
