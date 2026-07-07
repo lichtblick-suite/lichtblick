@@ -248,6 +248,8 @@ yarn test                   # Unit tests (Jest)
 yarn run tsc --noEmit       # TypeScript type checking
 ```
 
+> Formatting, linting, and type checks also run automatically via Git hooks — see [Git Hooks](#git-hooks).
+
 ### 4. Open a Pull Request
 
 - **Community contributors:** Open a PR **from your fork** targeting the `develop` branch of the upstream repository.
@@ -307,6 +309,21 @@ Code quality is enforced through automated tooling. All checks run in CI and mus
 
 - **ESLint** with the `@lichtblick` plugin suite enforces consistent code patterns.
 - Run `yarn lint` to auto-fix issues locally.
+
+### Git Hooks
+
+Git hooks are managed by [Husky](https://typicode.github.io/husky/) and are **installed automatically** the first time you run `yarn install` (via the `prepare` script). No manual setup is required.
+
+| Hook | When it runs | What it does |
+| ------------ | ------------ | ------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | `git commit` | Runs [lint-staged](https://github.com/lint-staged/lint-staged) on **staged** `*.{js,jsx,mjs,cjs,ts,tsx}` files: `eslint --fix` then `biome format --write`. Auto-fixes are re-staged; non-fixable lint errors block the commit. |
+| `pre-push`   | `git push`   | Runs `tsc --noEmit` to type-check the whole project. A type error blocks the push. |
+
+Notes:
+
+- Only staged JavaScript/TypeScript files are formatted and linted on commit, so hooks stay fast.
+- Type checking runs on `pre-push` rather than `pre-commit` because TypeScript needs the whole project (it cannot be reliably scoped to individual files).
+- If hooks are not running, re-run `yarn install` (or `yarn prepare`) to reinstall them.
 
 ### TypeScript Conventions
 
