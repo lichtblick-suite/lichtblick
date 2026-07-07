@@ -81,13 +81,23 @@ export class IdbLayoutStorage implements ILayoutStorage {
     fromNamespace: string;
     toNamespace: string;
   }): Promise<void> {
-    const tx = (await this.#db).transaction("layouts", "readwrite");
-    const store = tx.objectStore("layouts");
+    const db = await this.#db;
 
     try {
-      for await (const cursor of store.index("namespace").iterate(fromNamespace)) {
-        await store.put({ namespace: toNamespace, layout: cursor.value.layout });
-        await cursor.delete();
+      // Read up front: separate cursor passes in one readwrite tx would auto-commit and throw.
+      const targetRecords = await db.getAllFromIndex(OBJECT_STORE_NAME, "namespace", toNamespace);
+      const existingNames = new Set(targetRecords.map(({ layout }) => layout.name));
+      const sourceRecords = await db.getAllFromIndex(OBJECT_STORE_NAME, "namespace", fromNamespace);
+
+      const tx = db.transaction(OBJECT_STORE_NAME, "readwrite");
+      const store = tx.objectStore(OBJECT_STORE_NAME);
+      for (const { layout } of sourceRecords) {
+        // Skip layouts whose name already exists in the target namespace to avoid duplicates.
+        if (!existingNames.has(layout.name)) {
+          await store.put({ namespace: toNamespace, layout });
+          existingNames.add(layout.name);
+        }
+        await store.delete([fromNamespace, layout.id]);
       }
       await tx.done;
     } catch (error) {
