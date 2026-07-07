@@ -19,6 +19,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppCon
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import { usePrompt } from "@lichtblick/suite-base/hooks/usePrompt";
+import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -249,6 +250,125 @@ describe("LayoutBrowser", () => {
         );
       });
       expect(dispatchMock).toHaveBeenCalledWith({ type: "clear-multi-action" });
+    });
+  });
+
+  describe("section collapse persistence", () => {
+    let setPersonalExpandedMock: jest.Mock;
+    let setSharedExpandedMock: jest.Mock;
+    let onSelectLayoutMock: jest.Mock;
+    let logEventMock: jest.Mock;
+
+    const originalLayoutSectionMock = jest.requireMock("./LayoutSection").default;
+
+    beforeEach(() => {
+      setPersonalExpandedMock = jest.fn().mockResolvedValue(undefined);
+      setSharedExpandedMock = jest.fn().mockResolvedValue(undefined);
+      onSelectLayoutMock = jest.fn().mockResolvedValue(undefined);
+      logEventMock = jest.fn().mockResolvedValue(undefined);
+
+      (useAnalytics as jest.Mock).mockReturnValue({ logEvent: logEventMock });
+      (useLayoutNavigation as jest.Mock).mockReturnValue({
+        onSelectLayout: onSelectLayoutMock,
+        state: {
+          busy: false,
+          error: undefined,
+          online: true,
+          lastSelectedId: undefined,
+          multiAction: undefined,
+          selectedIds: [],
+        },
+        dispatch: dispatchMock,
+      });
+
+      let callIndex = 0;
+      (useAppConfigurationValue as jest.Mock).mockImplementation(() => {
+        callIndex++;
+        switch (callIndex) {
+          case 1: // ENABLE_NEW_TOPNAV
+            return [true, jest.fn()];
+          case 2: // HIDE_SIGN_IN_PROMPT
+            return [false, jest.fn()];
+          case 3: // LAYOUT_SECTION_PERSONAL_EXPANDED
+            return [true, setPersonalExpandedMock];
+          case 4: // LAYOUT_SECTION_SHARED_EXPANDED
+            return [true, setSharedExpandedMock];
+          default:
+            return [undefined, jest.fn()];
+        }
+      });
+    });
+
+    afterEach(() => {
+      jest.requireMock("./LayoutSection").default = originalLayoutSectionMock;
+    });
+
+    it("expands personal section when creating a new layout", async () => {
+      // GIVEN
+      const newLayout = LayoutBuilder.layout();
+      mockLayoutManager.saveNewLayout = jest.fn().mockResolvedValue(newLayout);
+      render(<LayoutBrowser currentDateForStorybook={new Date("2025-01-01")} />);
+
+      // WHEN - simulate createNewLayout by clicking the button
+      const createBtn = screen.getByTestId("create-new-layout");
+      createBtn.click();
+
+      // THEN
+      await waitFor(() => {
+        expect(setPersonalExpandedMock).toHaveBeenCalledWith(true);
+      });
+    });
+
+    it("expands shared section when sharing a layout", async () => {
+      // GIVEN
+      const layout = LayoutBuilder.layout();
+      const newLayout = LayoutBuilder.layout();
+      const promptMock = jest.fn().mockResolvedValue("Shared Layout");
+      (usePrompt as jest.Mock).mockReturnValue([promptMock, undefined]);
+      mockLayoutManager.saveNewLayout = jest.fn().mockResolvedValue(newLayout);
+
+      let capturedOnShare: ((item: Layout) => void) | undefined;
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: { onShare: (item: Layout) => void }) => {
+          capturedOnShare = props.onShare;
+          return <div data-testid="layout-section" />;
+        });
+
+      render(<LayoutBrowser />);
+
+      // WHEN
+      capturedOnShare!(layout);
+
+      // THEN
+      await waitFor(() => {
+        expect(setSharedExpandedMock).toHaveBeenCalledWith(true);
+      });
+    });
+
+    it("expands personal section when making a personal copy", async () => {
+      // GIVEN
+      const layout = LayoutBuilder.layout();
+      const newLayout = LayoutBuilder.layout();
+      mockLayoutManager.makePersonalCopy = jest.fn().mockResolvedValue(newLayout);
+
+      let capturedOnMakePersonalCopy: ((item: Layout) => void) | undefined;
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: { onMakePersonalCopy: (item: Layout) => void }) => {
+          capturedOnMakePersonalCopy = props.onMakePersonalCopy;
+          return <div data-testid="layout-section" />;
+        });
+
+      render(<LayoutBrowser />);
+
+      // WHEN
+      capturedOnMakePersonalCopy!(layout);
+
+      // THEN
+      await waitFor(() => {
+        expect(setPersonalExpandedMock).toHaveBeenCalledWith(true);
+      });
     });
   });
 });

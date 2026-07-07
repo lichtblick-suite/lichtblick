@@ -193,11 +193,11 @@ export default function LayoutBrowser({
   const [sharedExpanded = true, setSharedExpanded] = useAppConfigurationValue<boolean>(
     AppSetting.LAYOUT_SECTION_SHARED_EXPANDED,
   );
-  const togglePersonalExpanded = useCallback(() => {
-    void setPersonalExpanded(!personalExpanded);
+  const togglePersonalExpanded = useCallback(async () => {
+    await setPersonalExpanded(!personalExpanded);
   }, [personalExpanded, setPersonalExpanded]);
-  const toggleSharedExpanded = useCallback(() => {
-    void setSharedExpanded(!sharedExpanded);
+  const toggleSharedExpanded = useCallback(async () => {
+    await setSharedExpanded(!sharedExpanded);
   }, [sharedExpanded, setSharedExpanded]);
 
   const createNewLayout = useCallbackWithToast(async () => {
@@ -215,10 +215,10 @@ export default function LayoutBrowser({
       data: layoutData,
       permission: "CREATOR_WRITE",
     });
-    void onSelectLayout(newLayout);
-    void setPersonalExpanded(true);
+    await onSelectLayout(newLayout);
+    await setPersonalExpanded(true);
 
-    void analytics.logEvent(AppEvent.LAYOUT_CREATE);
+    await analytics.logEvent(AppEvent.LAYOUT_CREATE);
   }, [currentDateForStorybook, layoutManager, onSelectLayout, setPersonalExpanded, analytics]);
 
   const onShareLayout = useCallbackWithToast(
@@ -235,8 +235,8 @@ export default function LayoutBrowser({
           data: item.working?.data ?? item.baseline.data,
           permission: "ORG_WRITE",
         });
-        void analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
-        void setSharedExpanded(true);
+        await analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
+        await setSharedExpanded(true);
         await onSelectLayout(newLayout);
       }
     },
@@ -249,9 +249,9 @@ export default function LayoutBrowser({
         id: item.id,
         name: `${item.name} copy`,
       });
-      void setPersonalExpanded(true);
+      await setPersonalExpanded(true);
       await onSelectLayout(newLayout);
-      void analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
+      await analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
         permission: item.permission,
         syncStatus: item.syncInfo?.status,
       });
