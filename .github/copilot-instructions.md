@@ -25,7 +25,7 @@ primarily with **TypeScript** and **React**, available as a desktop app (Electro
 - **No `console.log`**: Use `console.warn`, `console.error`, `console.debug`, `console.assert` only
 - **License headers**: All source files must include the MPL-2.0 SPDX header
 
-### Formatting (enforced by Prettier + ESLint)
+### Formatting (enforced by Biome; linting by ESLint)
 
 - **Print width**: 100 characters
 - **Quotes**: Double quotes

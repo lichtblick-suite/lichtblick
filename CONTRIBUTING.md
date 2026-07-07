@@ -242,7 +242,8 @@ panels/
 Before pushing, ensure your changes pass all checks:
 
 ```sh
-yarn lint                   # Linting (ESLint + Prettier)
+yarn format                 # Formatting (Biome)
+yarn lint                   # Linting (ESLint)
 yarn test                   # Unit tests (Jest)
 yarn run tsc --noEmit       # TypeScript type checking
 ```
@@ -299,13 +300,13 @@ Code quality is enforced through automated tooling. All checks run in CI and mus
 
 ### Formatting
 
-- **Prettier** is used for code formatting with a `printWidth` of **100** characters.
-- Prettier runs automatically as part of linting in CI.
+- **Biome** is used for code formatting with a `lineWidth` of **100** characters (see `biome.json`).
+- Run `yarn format` to auto-format locally; `yarn format:ci` checks formatting in CI.
 
 ### Linting
 
 - **ESLint** with the `@lichtblick` plugin suite enforces consistent code patterns.
-- Run `yarn lint` to auto-fix issues locally (Prettier integration is disabled locally to speed up linting, but enforced in CI).
+- Run `yarn lint` to auto-fix issues locally.
 
 ### TypeScript Conventions
 
