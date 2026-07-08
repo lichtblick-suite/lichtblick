@@ -40,7 +40,6 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
-import { cleanupDuplicateDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/cleanupDuplicateDefaultLayouts";
 import {
   BUSY_POLLING_INTERVAL_MS,
   BUSY_POLLING_TIMEOUT_MS,
@@ -343,7 +342,6 @@ export default function CurrentLayoutProvider({
       : undefined;
 
     if (layout) {
-      await cleanupDuplicateDefaultLayouts(layouts, layoutManager, currentLayoutId);
       await setSelectedLayoutId(currentLayoutId, { saveToProfile: false });
       return;
     }
