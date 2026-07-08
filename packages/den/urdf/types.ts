@@ -49,7 +49,10 @@ export type UrdfGeometryMesh = {
 };
 
 export type UrdfGeometry =
-  UrdfGeometryBox | UrdfGeometryCylinder | UrdfGeometrySphere | UrdfGeometryMesh;
+  | UrdfGeometryBox
+  | UrdfGeometryCylinder
+  | UrdfGeometrySphere
+  | UrdfGeometryMesh;
 
 export type UrdfCollider = {
   name?: string;

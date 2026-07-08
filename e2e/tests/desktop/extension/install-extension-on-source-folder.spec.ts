@@ -16,21 +16,19 @@ test.use({
   preInstalledExtensions: [extensionSourceFolder],
 });
 
-test(
-  "should install an extension (user folder)",
-  { tag: "@regression" },
-  async ({ mainWindow }) => {
-    const dialog = new DataSourceDialog(mainWindow);
-    const extensions = new ExtensionManager(mainWindow);
+test("should install an extension (user folder)", { tag: "@regression" }, async ({
+  mainWindow,
+}) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const extensions = new ExtensionManager(mainWindow);
 
-    // When
-    await dialog.close();
+  // When
+  await dialog.close();
 
-    await extensions.open();
-    await extensions.search("turtlesim");
-    const turtlesimExtension = extensions.findExtension("turtlesim", "0.0.1");
+  await extensions.open();
+  await extensions.search("turtlesim");
+  const turtlesimExtension = extensions.findExtension("turtlesim", "0.0.1");
 
-    // Then
-    await expect(turtlesimExtension).toBeVisible();
-  },
-);
+  // Then
+  await expect(turtlesimExtension).toBeVisible();
+});

@@ -687,40 +687,42 @@ describe("ExtensionCatalogProvider", () => {
         namespace: "org" as Namespace,
         useExternalId: true,
       },
-    ])(
-      "should call uninstallExtension with correct parameter for $description",
-      async ({ isDesktop, loaderType, namespace, useExternalId }) => {
-        (isDesktopApp as jest.Mock).mockReturnValue(isDesktop);
+    ])("should call uninstallExtension with correct parameter for $description", async ({
+      isDesktop,
+      loaderType,
+      namespace,
+      useExternalId,
+    }) => {
+      (isDesktopApp as jest.Mock).mockReturnValue(isDesktop);
 
-        const externalId = useExternalId ? BasicBuilder.string() : undefined;
-        const extensionInfo = ExtensionBuilder.extensionInfo({
-          namespace,
-          ...(externalId && { externalId }),
-        });
-        const uninstallFn = jest.fn().mockResolvedValue(undefined);
-        const loader: IExtensionLoader = {
-          type: loaderType,
-          namespace,
-          getExtension: jest.fn(),
-          getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
-          installExtension: jest.fn().mockResolvedValue(extensionInfo),
-          loadExtension: jest.fn(),
-          uninstallExtension: uninstallFn,
-        };
+      const externalId = useExternalId ? BasicBuilder.string() : undefined;
+      const extensionInfo = ExtensionBuilder.extensionInfo({
+        namespace,
+        ...(externalId && { externalId }),
+      });
+      const uninstallFn = jest.fn().mockResolvedValue(undefined);
+      const loader: IExtensionLoader = {
+        type: loaderType,
+        namespace,
+        getExtension: jest.fn(),
+        getExtensions: jest.fn().mockResolvedValue([extensionInfo]),
+        installExtension: jest.fn().mockResolvedValue(extensionInfo),
+        loadExtension: jest.fn(),
+        uninstallExtension: uninstallFn,
+      };
 
-        const { result } = await setup({ loadersOverride: [loader] });
+      const { result } = await setup({ loadersOverride: [loader] });
 
-        await waitFor(() => {
-          expect(result.current.installedExtensions).toHaveLength(1);
-        });
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(1);
+      });
 
-        await act(async () => {
-          await result.current.uninstallExtension(namespace, extensionInfo.id);
-        });
+      await act(async () => {
+        await result.current.uninstallExtension(namespace, extensionInfo.id);
+      });
 
-        expect(uninstallFn).toHaveBeenCalledWith(useExternalId ? externalId : extensionInfo.id);
-      },
-    );
+      expect(uninstallFn).toHaveBeenCalledWith(useExternalId ? externalId : extensionInfo.id);
+    });
 
     it("should log a warning and still remove extension data from state when uninstallExtension throws", async () => {
       (isDesktopApp as jest.Mock).mockReturnValue(false);

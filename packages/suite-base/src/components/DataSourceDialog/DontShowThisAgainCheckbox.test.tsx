@@ -36,22 +36,19 @@ describe("DontShowThisAgainCheckbox", () => {
     [true, false],
     [false, true],
     [undefined, false],
-  ])(
-    "renders the checkbox with configValue=$configValue, expects checked=$expectedChecked and newValue=$expectedNewValue",
-    (configValue, expectedChecked) => {
-      // GIVEN
-      const setCheckedMock = jest.fn();
-      (useAppConfigurationValue as jest.Mock).mockReturnValue([configValue, setCheckedMock]);
+  ])("renders the checkbox with configValue=$configValue, expects checked=$expectedChecked and newValue=$expectedNewValue", (configValue, expectedChecked) => {
+    // GIVEN
+    const setCheckedMock = jest.fn();
+    (useAppConfigurationValue as jest.Mock).mockReturnValue([configValue, setCheckedMock]);
 
-      // WHEN
-      render(<DontShowThisAgainCheckbox />);
+    // WHEN
+    render(<DontShowThisAgainCheckbox />);
 
-      // THEN
-      const checkbox = screen.getByRole("checkbox");
-      expect((checkbox as HTMLInputElement).checked).toBe(expectedChecked);
+    // THEN
+    const checkbox = screen.getByRole("checkbox");
+    expect((checkbox as HTMLInputElement).checked).toBe(expectedChecked);
 
-      fireEvent.click(checkbox);
-      expect(setCheckedMock).toHaveBeenCalledWith(expectedChecked);
-    },
-  );
+    fireEvent.click(checkbox);
+    expect(setCheckedMock).toHaveBeenCalledWith(expectedChecked);
+  });
 });

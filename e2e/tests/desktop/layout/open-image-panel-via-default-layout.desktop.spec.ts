@@ -8,25 +8,23 @@ import { DataSourceDialog, LayoutManager, Sidebar } from "../../../page-objects"
  * WHEN the user clicks on the Images panel
  * THEN the Images panel settings should be displayed
  */
-test(
-  "open Image panel when clicking on Layouts > layout",
-  { tag: "@smoke" },
-  async ({ mainWindow }) => {
-    const dialog = new DataSourceDialog(mainWindow);
-    const sidebar = new Sidebar(mainWindow);
-    const layout = new LayoutManager(mainWindow);
+test("open Image panel when clicking on Layouts > layout", { tag: "@smoke" }, async ({
+  mainWindow,
+}) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
+  const layout = new LayoutManager(mainWindow);
 
-    // Given
-    await dialog.close();
-    await sidebar.openLayoutsTab();
-    await layout.openDefaultLayout();
+  // Given
+  await dialog.close();
+  await sidebar.openLayoutsTab();
+  await layout.openDefaultLayout();
 
-    // When
-    await sidebar.openPanelSettingsTab();
-    await mainWindow.getByText("Image").nth(0).click();
+  // When
+  await sidebar.openPanelSettingsTab();
+  await mainWindow.getByText("Image").nth(0).click();
 
-    // Then
-    // The State Transitions panel settings are shown
-    await expect(mainWindow.getByText("Image panel", { exact: true }).count()).resolves.toBe(1);
-  },
-);
+  // Then
+  // The State Transitions panel settings are shown
+  await expect(mainWindow.getByText("Image panel", { exact: true }).count()).resolves.toBe(1);
+});

@@ -37,7 +37,9 @@ function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStat
 
       setGlobalBounds: (
         newBounds:
-          undefined | SyncBounds | ((oldValue: undefined | SyncBounds) => undefined | SyncBounds),
+          | undefined
+          | SyncBounds
+          | ((oldValue: undefined | SyncBounds) => undefined | SyncBounds),
       ) => {
         if (typeof newBounds === "function") {
           set((store) => ({ globalBounds: newBounds(store.globalBounds) }));

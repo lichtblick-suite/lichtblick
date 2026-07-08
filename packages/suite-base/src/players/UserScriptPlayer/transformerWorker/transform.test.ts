@@ -181,13 +181,13 @@ describe("pipeline", () => {
   });
 
   describe("compile", () => {
-    it.each(["const x: string = 'hello foxglove'", "const num: number = 1222"])(
-      "can compile",
-      (sourceCode) => {
-        const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-        expect(diagnostics.length).toEqual(0);
-      },
-    );
+    it.each([
+      "const x: string = 'hello foxglove'",
+      "const num: number = 1222",
+    ])("can compile", (sourceCode) => {
+      const { diagnostics } = compile({ ...baseNodeData, sourceCode });
+      expect(diagnostics.length).toEqual(0);
+    });
     it.each([
       "const x: number = Math.max(1, 2);",
       "const x: string[] = [ 1, 2, 3 ].map(num => num.toString());",

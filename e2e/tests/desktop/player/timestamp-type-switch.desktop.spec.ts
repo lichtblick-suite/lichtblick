@@ -12,27 +12,25 @@ import { PlayerControls } from "../../../page-objects";
  * And playback time epoch format is selected
  * THEN the player time displayed should change to 1740566235.547000000 (epoch format)
  */
-test(
-  "should switch playback time to epoch format next to the player",
-  { tag: "@regression" },
-  async ({ mainWindow }) => {
-    const player = new PlayerControls(mainWindow);
+test("should switch playback time to epoch format next to the player", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const player = new PlayerControls(mainWindow);
 
-    // Given
-    const initialTimeInUTC = "2025-02-26 10:37:15.547 AM WET";
-    const intialTimeInEpoch = "1740566235.547000000";
+  // Given
+  const initialTimeInUTC = "2025-02-26 10:37:15.547 AM WET";
+  const intialTimeInEpoch = "1740566235.547000000";
 
-    const filename = "example.mcap";
-    await loadFiles({
-      mainWindow,
-      filenames: filename,
-    });
+  const filename = "example.mcap";
+  await loadFiles({
+    mainWindow,
+    filenames: filename,
+  });
 
-    // When
-    await player.switchToEpochFormat(initialTimeInUTC);
+  // When
+  await player.switchToEpochFormat(initialTimeInUTC);
 
-    // Then
-    const playerStartingTimeInEpoch = mainWindow.locator(`input[value="${intialTimeInEpoch}"]`);
-    await expect(playerStartingTimeInEpoch).toBeVisible();
-  },
-);
+  // Then
+  const playerStartingTimeInEpoch = mainWindow.locator(`input[value="${intialTimeInEpoch}"]`);
+  await expect(playerStartingTimeInEpoch).toBeVisible();
+});

@@ -33,6 +33,9 @@
     "benchmark:serve": "webpack serve --mode development --progress --config benchmark/webpack.config.ts",
     "benchmark:build:prod": "webpack --mode production --progress --config benchmark/webpack.config.ts",
     "license-check": "ts-node ci/license-check.ts",
+    "prepare": "husky",
+    "format": "biome format --write .",
+    "format:ci": "biome format --max-diagnostics=none .",
     "lint": "TIMING=1 eslint --report-unused-disable-directives --cache --fix .",
     "lint:ci": "TIMING=1 eslint --report-unused-disable-directives --cache --max-warnings 0 --config eslint.config.ci.mjs .",
     "lint:ci:report": "yarn lint:ci -f json -o eslint-report.json --quiet",
@@ -64,6 +67,12 @@
     "storybook": "storybook dev --port 9009 --config-dir .storybook",
     "storybook:build": "storybook build --config-dir .storybook --webpack-stats-json",
     "version:all": "yarn workspaces foreach version"
+  },
+  "lint-staged": {
+    "*.{js,jsx,mjs,cjs,ts,tsx,json}": [
+      "eslint --report-unused-disable-directives --fix --cache",
+      "biome format --write --no-errors-on-unmatched"
+    ]
   },
   "workspaces": {
     "packages": [
@@ -106,6 +115,7 @@
     "@babel/preset-env": "7.29.7",
     "@babel/preset-react": "7.29.7",
     "@babel/preset-typescript": "7.29.7",
+    "@biomejs/biome": "2.5.2",
     "@eslint/compat": "2.1.0",
     "@lichtblick/eslint-plugin": "2.0.7",
     "@lichtblick/eslint-plugin-suite": "workspace:*",
@@ -149,9 +159,11 @@
     "eslint-plugin-storybook": "0.6.15",
     "eslint-plugin-tss-unused-classes": "1.0.3",
     "globals": "16.3.0",
+    "husky": "9.1.7",
     "jest": "30.4.2",
     "jest-environment-jsdom": "30.4.1",
     "license-checker": "25.0.1",
+    "lint-staged": "17.0.8",
     "playwright": "1.60.0",
     "prettier": "3.9.4",
     "react-refresh": "0.18.0",

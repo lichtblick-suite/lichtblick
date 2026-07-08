@@ -101,7 +101,19 @@ export const LabelMarkers: StoryObj = {
       frame: {
         "/tf": [tf1, tf2],
         // prettier-ignore
-        "/labels": [label1, label2, label3, label4, label5, label6, label7, label8, label9, label10, label11],
+        "/labels": [
+          label1,
+          label2,
+          label3,
+          label4,
+          label5,
+          label6,
+          label7,
+          label8,
+          label9,
+          label10,
+          label11,
+        ],
       },
       capabilities: [],
       activeData: {
