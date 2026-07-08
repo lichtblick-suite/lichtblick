@@ -186,7 +186,7 @@ describe("pipeline", () => {
       "const num: number = 1222",
     ])("can compile", (sourceCode) => {
       const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-      expect(diagnostics).toHaveLength(0);
+      expect(diagnostics.length).toEqual(0);
     });
     it.each([
       "const x: number = Math.max(1, 2);",

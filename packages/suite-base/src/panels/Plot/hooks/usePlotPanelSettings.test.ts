@@ -137,7 +137,7 @@ describe("handleAddSeriesAction", () => {
     handleAddSeriesAction(input);
 
     // Verify a new series was added
-    expect(input.draft.paths).toHaveLength(initialLength === 0 ? 2 : initialLength + 1);
+    expect(input.draft.paths.length).toBe(initialLength === 0 ? 2 : initialLength + 1);
 
     // Verify the added series has the expected structure with explicit color
     const addedSeries = input.draft.paths[input.draft.paths.length - 1];

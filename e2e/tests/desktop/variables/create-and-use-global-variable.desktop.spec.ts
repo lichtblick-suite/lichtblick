@@ -50,7 +50,5 @@ test("Create global variable and use it on Raw Messages Panel", { tag: "@regress
   await rawMessagesInputBar.fill("/tf.transforms[:]{child_frame_id==$globalVariable}");
 
   // Then
-  const rawMessagesPanel = mainWindow.getByTestId("panel-scroll-container");
-  await expect(rawMessagesPanel.getByText("child_frame_id").first()).toBeVisible();
-  await expect(rawMessagesPanel.getByText('"turtle1"').first()).toBeVisible();
+  await expect(mainWindow.getByText('child_frame_id "turtle1"')).toBeVisible();
 });
