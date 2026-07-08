@@ -44,7 +44,7 @@
   },
   "json": {
     "formatter": {
-      "enabled": false
+      "enabled": true
     }
   },
   "css": {

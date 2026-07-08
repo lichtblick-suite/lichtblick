@@ -69,7 +69,7 @@
     "version:all": "yarn workspaces foreach version"
   },
   "lint-staged": {
-    "*.{js,jsx,mjs,cjs,ts,tsx}": [
+    "*.{js,jsx,mjs,cjs,ts,tsx,json}": [
       "eslint --report-unused-disable-directives --fix --cache",
       "biome format --write --no-errors-on-unmatched"
     ]
