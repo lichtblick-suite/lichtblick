@@ -43,11 +43,11 @@ import { emitBusyStatus } from "./utils/emitBusyStatus.decorator";
 const log = Logger.getLogger(__filename);
 
 export type SaveNewLayout = {
-    name: string;
-    data: LayoutData;
-    permission: LayoutPermission;
-    from?: string;
-  };
+  name: string;
+  data: LayoutData;
+  permission: LayoutPermission;
+  from?: string;
+};
 
 export default class LayoutManager implements ILayoutManager {
   public static readonly LOCAL_STORAGE_NAMESPACE = "local";

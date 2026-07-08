@@ -9,13 +9,17 @@ export async function cleanupDuplicateDefaultLayouts(
   layouts: readonly Layout[],
   layoutManager: ILayoutManager,
 ): Promise<void> {
-  const defaultLayouts = layouts.filter((layout) => layout.name === DEFAULT_LAYOUT.name && layout.permission === DEFAULT_LAYOUT.permission);
+  const defaultLayouts = layouts.filter(
+    (layout) =>
+      layout.name === DEFAULT_LAYOUT.name && layout.permission === DEFAULT_LAYOUT.permission,
+  );
   if (defaultLayouts.length <= 1) {
     return;
   }
 
   const layoutToKeep =
-    defaultLayouts.find((layout) => layout.permission === DEFAULT_LAYOUT.permission) ?? defaultLayouts[0];
+    defaultLayouts.find((layout) => layout.permission === DEFAULT_LAYOUT.permission) ??
+    defaultLayouts[0];
 
   for (const layout of defaultLayouts) {
     if (layout.id !== layoutToKeep?.id) {
