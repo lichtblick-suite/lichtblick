@@ -1,7 +1,7 @@
 {
   "presets": [
     ["@babel/preset-env", { "targets": { "node": "16" } }],
-    ["@babel/preset-typescript", { "allowDeclareFields": true }],
+    ["@babel/preset-typescript"],
     "@babel/preset-react"
   ],
   "plugins": [
