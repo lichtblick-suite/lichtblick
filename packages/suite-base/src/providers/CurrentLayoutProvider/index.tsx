@@ -343,7 +343,7 @@ export default function CurrentLayoutProvider({
       : undefined;
 
     if (layout) {
-      await cleanupDuplicateDefaultLayouts(layouts, layoutManager);
+      await cleanupDuplicateDefaultLayouts(layouts, layoutManager, currentLayoutId);
       await setSelectedLayoutId(currentLayoutId, { saveToProfile: false });
       return;
     }
