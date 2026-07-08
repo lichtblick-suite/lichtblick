@@ -2,16 +2,16 @@
   "folders": [
     {
       "name": "Root",
-      "path": ".",
+      "path": "."
     },
     {
       "name": "Worktree",
-      "path": "../lichtblick.worktree",
-    },
+      "path": "../lichtblick.worktree"
+    }
   ],
   "settings": {
     "files.exclude": {
-      "**/.DS_Store": true,
-    },
-  },
+      "**/.DS_Store": true
+    }
+  }
 }
