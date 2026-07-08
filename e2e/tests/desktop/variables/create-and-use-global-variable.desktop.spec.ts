@@ -51,6 +51,8 @@ test(
     await rawMessagesInputBar.fill("/tf.transforms[:]{child_frame_id==$globalVariable}");
 
     // Then
-    await expect(mainWindow.getByText('child_frame_id "turtle1"')).toBeVisible();
+    const rawMessagesPanel = mainWindow.getByTestId("panel-scroll-container");
+    await expect(rawMessagesPanel.getByText("child_frame_id").first()).toBeVisible();
+    await expect(rawMessagesPanel.getByText('"turtle1"').first()).toBeVisible();
   },
 );
