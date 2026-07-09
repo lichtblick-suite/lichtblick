@@ -313,6 +313,73 @@ describe("LayoutBrowser", () => {
       jest.requireMock("./LayoutSection").default = originalLayoutSectionMock;
     });
 
+    it("passes expanded state and toggle handlers to LayoutSection", () => {
+      // GIVEN
+      (useWorkspaceStore as jest.Mock).mockReturnValue({ personal: false, shared: true });
+
+      const capturedProps: Record<string, unknown>[] = [];
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: Record<string, unknown>) => {
+          capturedProps.push(props);
+          return <div data-testid="layout-section" />;
+        });
+
+      // WHEN
+      render(<LayoutBrowser />);
+
+      // THEN
+      expect(capturedProps[0]?.expanded).toBe(false);
+      expect(capturedProps[0]?.onToggleExpanded).toBeDefined();
+    });
+
+    it("calls setPersonalSectionExpanded with toggler when togglePersonalExpanded is invoked", () => {
+      // GIVEN
+      let capturedOnToggle: (() => void) | undefined;
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: { onToggleExpanded?: () => void }) => {
+          if (!capturedOnToggle && props.onToggleExpanded) {
+            capturedOnToggle = props.onToggleExpanded;
+          }
+          return <div data-testid="layout-section" />;
+        });
+
+      render(<LayoutBrowser />);
+
+      // WHEN
+      capturedOnToggle!();
+
+      // THEN
+      expect(setPersonalExpandedMock).toHaveBeenCalledTimes(1);
+      expect(setPersonalExpandedMock).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    it("calls setSharedSectionExpanded with toggler when toggleSharedExpanded is invoked", () => {
+      // GIVEN
+      mockLayoutManager.supportsSharing = true;
+
+      const capturedOnToggles: (() => void)[] = [];
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: { onToggleExpanded?: () => void }) => {
+          if (props.onToggleExpanded) {
+            capturedOnToggles.push(props.onToggleExpanded);
+          }
+          return <div data-testid="layout-section" />;
+        });
+
+      render(<LayoutBrowser />);
+
+      // WHEN - second LayoutSection is the shared one
+      const sharedToggle = capturedOnToggles[1];
+      sharedToggle!();
+
+      // THEN
+      expect(setSharedExpandedMock).toHaveBeenCalledTimes(1);
+      expect(setSharedExpandedMock).toHaveBeenCalledWith(expect.any(Function));
+    });
+
     it("expands personal section when creating a new layout", async () => {
       // GIVEN
       const newLayout = LayoutBuilder.layout();

@@ -86,7 +86,9 @@ export const WorkspaceContext = createContext<undefined | StoreApi<WorkspaceCont
 WorkspaceContext.displayName = "WorkspaceContext";
 
 export const WorkspaceStoreSelectors = {
-  selectLayoutSectionExpanded: (store: WorkspaceContextStore) => {
+  selectLayoutSectionExpanded: (
+    store: WorkspaceContextStore,
+  ): WorkspaceContextStore["layoutBrowser"]["expandedSections"] => {
     return store.layoutBrowser.expandedSections;
   },
   selectPanelSettingsOpen: (store: WorkspaceContextStore): boolean => {
