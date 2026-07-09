@@ -201,7 +201,7 @@ export default function LayoutBrowser({
   const togglePersonalExpanded = useCallback(() => {
     setPersonalSectionExpanded((expanded) => !expanded);
   }, [setPersonalSectionExpanded]);
-  
+
   const toggleSharedExpanded = useCallback(() => {
     setSharedSectionExpanded((expanded) => !expanded);
   }, [setSharedSectionExpanded]);
