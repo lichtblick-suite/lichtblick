@@ -109,7 +109,7 @@ describe("ImageRenderable", () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
     renderable.setImage(sampleImage);
     expect(renderable.userData.image).toBe(sampleImage);
-    expect(renderable.getDecodedImage()).toBe(undefined);
+    expect(renderable.getDecodedImage()).toBeUndefined();
 
     // @ts-expect-error decodeImage is protected, but ok to use on tests
     await renderable.decodeImage(renderable.userData.image!, 100);

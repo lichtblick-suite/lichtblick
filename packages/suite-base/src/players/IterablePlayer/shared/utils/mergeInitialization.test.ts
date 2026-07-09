@@ -63,7 +63,7 @@ describe("mergeInitialization utils", () => {
 
       const result = mergeMetadata(metadata1, metadata2);
 
-      expect(result!.length).toBe(2);
+      expect(result!).toHaveLength(2);
       expect(result![0]).toEqual(metadata1[0]);
       expect(result![1]).toEqual(metadata2[0]);
     });
@@ -74,7 +74,7 @@ describe("mergeInitialization utils", () => {
 
       const result = mergeMetadata(metadata1, metadata2);
 
-      expect(result!.length).toBe(1);
+      expect(result!).toHaveLength(1);
       expect(result![0]).toEqual(metadata1[0]);
     });
 
