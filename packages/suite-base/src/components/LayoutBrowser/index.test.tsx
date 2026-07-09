@@ -15,10 +15,7 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
-import {
-  useWorkspaceStore,
-  WorkspaceStoreSelectors,
-} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
