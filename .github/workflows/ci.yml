@@ -22,7 +22,7 @@ jobs:
           # Specify names so that the GitHub branch protection settings for
           # required checks don't need to change if we ever change the commands used.
           - name: npm audit
-            command: yarn npm audit --all --recursive --severity moderate
+            command: yarn npm audit --all --recursive --severity high
           - name: lint
             command: |
               # lint steps
@@ -30,6 +30,7 @@ jobs:
               yarn license-check
               yarn dedupe --check
               yarn run tsc --noEmit # typecheck files that are not included by webpack or package builds
+              yarn run format:ci
               yarn run lint:ci
               yarn run lint:unused-exports
               yarn run lint:dependencies

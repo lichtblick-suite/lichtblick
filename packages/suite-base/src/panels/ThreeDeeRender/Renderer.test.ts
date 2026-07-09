@@ -1849,33 +1849,30 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     const reprocessedBatch = addMessageEventBatchMock.mock.calls[0]?.[0];
     expect(reprocessedBatch).toHaveLength(numMessagesBeforeTime - 1);
   });
-  it.failing(
-    "(does not) reset the cursor if number of messages added **and** removed before cursor are equal in a single update",
-    () => {
-      // Given: A renderer with messages starting at index 2
-      const renderer = new Renderer(rendererArgs);
-      const msgs = [];
-      for (let i = 2; i < 10; i++) {
-        msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
-      }
-      const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+  it.failing("(does not) reset the cursor if number of messages added **and** removed before cursor are equal in a single update", () => {
+    // Given: A renderer with messages starting at index 2
+    const renderer = new Renderer(rendererArgs);
+    const msgs = [];
+    for (let i = 2; i < 10; i++) {
+      msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
+    }
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
 
-      // When: Processing initial messages
-      renderer.setCurrentTime(5n);
-      renderer.handleAllFramesMessages(msgs);
-      expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    // When: Processing initial messages
+    renderer.setCurrentTime(5n);
+    renderer.handleAllFramesMessages(msgs);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
 
-      // When: Removing and adding message at beginning (before cursor)
-      addMessageEventBatchMock.mockClear();
-      msgs.shift();
-      msgs.unshift(createTFMessageEvent("a", "b", 1n, [1n]));
-      const newMessagesHandled = renderer.handleAllFramesMessages(msgs);
+    // When: Removing and adding message at beginning (before cursor)
+    addMessageEventBatchMock.mockClear();
+    msgs.shift();
+    msgs.unshift(createTFMessageEvent("a", "b", 1n, [1n]));
+    const newMessagesHandled = renderer.handleAllFramesMessages(msgs);
 
-      // Then: Should still reprocess because cursor was reset
-      expect(newMessagesHandled).toBeTruthy();
-      expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
-    },
-  );
+    // Then: Should still reprocess because cursor was reset
+    expect(newMessagesHandled).toBeTruthy();
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("Renderer backward seek behavior", () => {

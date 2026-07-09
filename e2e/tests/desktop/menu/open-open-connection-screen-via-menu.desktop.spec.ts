@@ -9,21 +9,19 @@ import { AppMenu, DataSourceDialog } from "../../../page-objects";
  * AND the user clicks on the "Open connection" button
  * THEN the "Open a new connection" dialog should appear
  */
-test(
-  "Display the open a new connection dialog when clicking File > Open... > Open connection",
-  { tag: "@smoke" },
-  async ({ mainWindow }) => {
-    const dialog = new DataSourceDialog(mainWindow);
-    const appMenu = new AppMenu(mainWindow);
+test("Display the open a new connection dialog when clicking File > Open... > Open connection", {
+  tag: "@smoke",
+}, async ({ mainWindow }) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const appMenu = new AppMenu(mainWindow);
 
-    // Given
-    await dialog.close();
+  // Given
+  await dialog.close();
 
-    // When
-    await appMenu.openFile();
-    await mainWindow.getByText("Open connection").nth(0).click();
+  // When
+  await appMenu.openFile();
+  await mainWindow.getByText("Open connection").nth(0).click();
 
-    // Then
-    await expect(mainWindow.getByText("Open a new connection", { exact: true })).toBeVisible();
-  },
-);
+  // Then
+  await expect(mainWindow.getByText("Open a new connection", { exact: true })).toBeVisible();
+});

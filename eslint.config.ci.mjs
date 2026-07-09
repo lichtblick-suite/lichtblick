@@ -15,8 +15,10 @@ export default [
     rules: {
       // disable progress spinner in CI output
       "file-progress/activate": "off",
-      // VSCode is already configured to run prettier on save
-      "prettier/prettier": "error",
+      // Formatting is enforced by Biome (see biome.json + `yarn format:ci`), not ESLint.
+      // The rule is provided by the shared @lichtblick/eslint-plugin base config and is
+      // kept disabled here so ESLint no longer double-checks formatting.
+      "prettier/prettier": "off",
       // Common sense should prevent triggering this in development
       "import/no-self-import": "error",
       // https://github.com/import-js/eslint-plugin-import/issues/242#issuecomment-230118951

@@ -407,128 +407,128 @@ describe("CustomDatasetsBuilder", () => {
     });
   });
 
-  it.each(["current", "message range"] as const)(
-    "combines all values from arrays (%s)",
-    async (type) => {
-      const builder = new CustomDatasetsBuilder();
+  it.each([
+    "current",
+    "message range",
+  ] as const)("combines all values from arrays (%s)", async (type) => {
+    const builder = new CustomDatasetsBuilder();
 
-      builder.setXPath(parseMessagePath("/foo.values[:].val"));
-      builder.setSeries(
-        buildSeriesItems([
-          {
-            enabled: true,
-            timestampMethod: "receiveTime",
-            value: "/bar.values[:].val",
-          },
-          {
-            enabled: true,
-            timestampMethod: "receiveTime",
-            value: "/baz.values[:].val",
-          },
-        ]),
-      );
+    builder.setXPath(parseMessagePath("/foo.values[:].val"));
+    builder.setSeries(
+      buildSeriesItems([
+        {
+          enabled: true,
+          timestampMethod: "receiveTime",
+          value: "/bar.values[:].val",
+        },
+        {
+          enabled: true,
+          timestampMethod: "receiveTime",
+          value: "/baz.values[:].val",
+        },
+      ]),
+    );
 
-      const sendMessages = (messages: MessageEvent[]) => {
-        if (type === "current") {
-          builder.handlePlayerState(buildPlayerState({ messages }));
-        } else {
-          const byTopic = _.groupBy(messages, (item) => item.topic);
-          for (const topicMessages of Object.values(byTopic)) {
-            builder.handleMessageRange(topicMessages, { isReset: false });
-          }
+    const sendMessages = (messages: MessageEvent[]) => {
+      if (type === "current") {
+        builder.handlePlayerState(buildPlayerState({ messages }));
+      } else {
+        const byTopic = _.groupBy(messages, (item) => item.topic);
+        for (const topicMessages of Object.values(byTopic)) {
+          builder.handleMessageRange(topicMessages, { isReset: false });
         }
-      };
+      }
+    };
 
-      sendMessages([
-        {
-          topic: "/foo",
-          schemaName: "foo",
-          receiveTime: { sec: 0, nsec: 0 },
-          sizeInBytes: 0,
-          message: {
-            values: [{ val: 0 }, { val: 1 }, { val: 2 }],
-          },
+    sendMessages([
+      {
+        topic: "/foo",
+        schemaName: "foo",
+        receiveTime: { sec: 0, nsec: 0 },
+        sizeInBytes: 0,
+        message: {
+          values: [{ val: 0 }, { val: 1 }, { val: 2 }],
         },
-        {
-          topic: "/foo",
-          schemaName: "foo",
-          receiveTime: { sec: 0, nsec: 0 },
-          sizeInBytes: 0,
-          message: {
-            values: [{ val: 3 }],
-          },
+      },
+      {
+        topic: "/foo",
+        schemaName: "foo",
+        receiveTime: { sec: 0, nsec: 0 },
+        sizeInBytes: 0,
+        message: {
+          values: [{ val: 3 }],
         },
-        {
-          topic: "/bar",
-          schemaName: "bar",
-          receiveTime: { sec: 0, nsec: 0 },
-          sizeInBytes: 0,
-          message: {
-            values: [{ val: 10 }, { val: 11 }],
-          },
+      },
+      {
+        topic: "/bar",
+        schemaName: "bar",
+        receiveTime: { sec: 0, nsec: 0 },
+        sizeInBytes: 0,
+        message: {
+          values: [{ val: 10 }, { val: 11 }],
         },
-      ]);
+      },
+    ]);
 
-      sendMessages([
-        {
-          topic: "/foo",
-          schemaName: "foo",
-          receiveTime: { sec: 0, nsec: 0 },
-          sizeInBytes: 0,
-          message: {
-            values: [{ val: 4 }],
-          },
+    sendMessages([
+      {
+        topic: "/foo",
+        schemaName: "foo",
+        receiveTime: { sec: 0, nsec: 0 },
+        sizeInBytes: 0,
+        message: {
+          values: [{ val: 4 }],
         },
-        {
-          topic: "/bar",
-          schemaName: "bar",
-          receiveTime: { sec: 0, nsec: 0 },
-          sizeInBytes: 0,
-          message: {
-            values: [{ val: 12 }, { val: 13 }, { val: 14 }],
-          },
+      },
+      {
+        topic: "/bar",
+        schemaName: "bar",
+        receiveTime: { sec: 0, nsec: 0 },
+        sizeInBytes: 0,
+        message: {
+          values: [{ val: 12 }, { val: 13 }, { val: 14 }],
         },
-        {
-          topic: "/baz",
-          schemaName: "baz",
-          receiveTime: { sec: 0, nsec: 0 },
-          sizeInBytes: 0,
-          message: {
-            values: [{ val: 20 }, { val: 21 }],
-          },
+      },
+      {
+        topic: "/baz",
+        schemaName: "baz",
+        receiveTime: { sec: 0, nsec: 0 },
+        sizeInBytes: 0,
+        message: {
+          values: [{ val: 20 }, { val: 21 }],
         },
-      ]);
+      },
+    ]);
 
-      const result = await builder.getViewportDatasets({
-        size: { width: 1_000, height: 1_000 },
-        bounds: {},
-      });
+    const result = await builder.getViewportDatasets({
+      size: { width: 1_000, height: 1_000 },
+      bounds: {},
+    });
 
-      expect(result).toEqual({
-        pathsWithMismatchedDataLengths: new Set(["/baz.values[:].val"]),
-        datasetsByConfigIndex: [
-          expect.objectContaining({
-            data: [
-              { x: 0, y: 10, value: 10 },
-              { x: 1, y: 11, value: 11 },
-              { x: 2, y: 12, value: 12 },
-              { x: 3, y: 13, value: 13 },
-              { x: 4, y: 14, value: 14 },
-            ],
-            showLine: true,
-            pointRadius: 1.2,
-            fill: false,
-          }),
-          expect.objectContaining({
-            data: [
-              { x: 0, y: 20, value: 20 },
-              { x: 1, y: 21, value: 21 },
-            ],
-          }),
-        ],
-      });
-    },
-  );
+    expect(result).toEqual({
+      pathsWithMismatchedDataLengths: new Set(["/baz.values[:].val"]),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          data: [
+            { x: 0, y: 10, value: 10 },
+            { x: 1, y: 11, value: 11 },
+            { x: 2, y: 12, value: 12 },
+            { x: 3, y: 13, value: 13 },
+            { x: 4, y: 14, value: 14 },
+          ],
+          showLine: true,
+          pointRadius: 1.2,
+          fill: false,
+        }),
+        expect.objectContaining({
+          data: [
+            { x: 0, y: 20, value: 20 },
+            { x: 1, y: 21, value: 21 },
+          ],
+        }),
+      ],
+    });
+  });
 
   it("supports toggling series enabled state", async () => {
     const builder = new CustomDatasetsBuilder();

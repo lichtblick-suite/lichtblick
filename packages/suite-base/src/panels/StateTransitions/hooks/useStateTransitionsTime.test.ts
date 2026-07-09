@@ -38,18 +38,19 @@ describe("useStateTransitionsTime", () => {
     jest.clearAllMocks();
   });
 
-  it.each(activeDataCases)(
-    "should return undefined values when there is no active data or it is undefined. (testing with %s)",
-    (activeDataValue: Partial<PlayerStateActiveData> | undefined) => {
-      mockActiveData(activeDataValue);
+  it.each(
+    activeDataCases,
+  )("should return undefined values when there is no active data or it is undefined. (testing with %s)", (activeDataValue:
+    | Partial<PlayerStateActiveData>
+    | undefined) => {
+    mockActiveData(activeDataValue);
 
-      const { result } = renderHook(() => useStateTransitionsTime());
+    const { result } = renderHook(() => useStateTransitionsTime());
 
-      expect(result.current.startTime).toBeUndefined();
-      expect(result.current.currentTimeSinceStart).toBeUndefined();
-      expect(result.current.endTimeSinceStart).toBeUndefined();
-    },
-  );
+    expect(result.current.startTime).toBeUndefined();
+    expect(result.current.currentTimeSinceStart).toBeUndefined();
+    expect(result.current.endTimeSinceStart).toBeUndefined();
+  });
 
   it("should calculate currentTimeSinceStart correctly", () => {
     const startTime: Time = { sec: 1, nsec: 0 };

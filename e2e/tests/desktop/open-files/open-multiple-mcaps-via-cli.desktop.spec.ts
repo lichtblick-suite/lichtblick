@@ -21,14 +21,12 @@ test.use({
  * THEN the file names, example.mcap and example-2.mcap, should be visible on the main window
  * And the "Play" button enabled
  */
-test(
-  "should open a file passed with flag --source via CLI",
-  { tag: "@smoke" },
-  async ({ mainWindow }) => {
-    // Then
-    const sourceTitle = mainWindow.getByText(`${mcapOne}, ${mcapTwo}`);
-    const playButton = mainWindow.getByRole("button", { name: "Play", exact: true });
-    await expect(sourceTitle).toBeVisible();
-    await expect(playButton).toBeEnabled();
-  },
-);
+test("should open a file passed with flag --source via CLI", { tag: "@smoke" }, async ({
+  mainWindow,
+}) => {
+  // Then
+  const sourceTitle = mainWindow.getByText(`${mcapOne}, ${mcapTwo}`);
+  const playButton = mainWindow.getByRole("button", { name: "Play", exact: true });
+  await expect(sourceTitle).toBeVisible();
+  await expect(playButton).toBeEnabled();
+});
