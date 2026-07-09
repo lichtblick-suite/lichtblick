@@ -8,24 +8,22 @@ import { DataSourceDialog, LayoutManager, Sidebar } from "../../../page-objects"
  * WHEN the user clicks on the 3D panel
  * THEN the 3D panel settings should be displayed
  */
-test(
-  "open 3D panel when clicking on Layouts > layout",
-  { tag: "@smoke" },
-  async ({ mainWindow }) => {
-    const dialog = new DataSourceDialog(mainWindow);
-    const sidebar = new Sidebar(mainWindow);
-    const layout = new LayoutManager(mainWindow);
+test("open 3D panel when clicking on Layouts > layout", { tag: "@smoke" }, async ({
+  mainWindow,
+}) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
+  const layout = new LayoutManager(mainWindow);
 
-    // Given
-    await dialog.close();
-    await sidebar.openLayoutsTab();
-    await layout.openDefaultLayout();
+  // Given
+  await dialog.close();
+  await sidebar.openLayoutsTab();
+  await layout.openDefaultLayout();
 
-    // When
-    await sidebar.openPanelSettingsTab();
-    await mainWindow.getByText("3D").nth(0).click();
+  // When
+  await sidebar.openPanelSettingsTab();
+  await mainWindow.getByText("3D").nth(0).click();
 
-    // Then
-    await expect(mainWindow.getByText("3D panel", { exact: true }).count()).resolves.toBe(1);
-  },
-);
+  // Then
+  await expect(mainWindow.getByText("3D panel", { exact: true }).count()).resolves.toBe(1);
+});

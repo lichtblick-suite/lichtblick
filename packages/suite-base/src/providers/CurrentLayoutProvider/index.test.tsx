@@ -574,4 +574,29 @@ describe("CurrentLayoutProvider", () => {
       expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
     });
   });
+
+  describe("Fallback Default layout creation", () => {
+    it("creates a personal Default layout when no layouts exist", async () => {
+      // Given a layout manager with no existing layouts and a user profile without a selection
+      const localOnlyManager = makeMockLayoutManager();
+      localOnlyManager.getLayouts.mockResolvedValue([]);
+      localOnlyManager.saveNewLayout.mockResolvedValue({
+        id: "new-default",
+        name: "Default",
+        baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
+      });
+      mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: undefined });
+
+      // When the provider initializes
+      const { result } = renderTest({ mockLayoutManager: localOnlyManager, mockUserProfile });
+      await act(async () => {
+        await result.current.childMounted;
+      });
+
+      // Then a personal Default layout is created
+      expect(localOnlyManager.saveNewLayout).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "Default", permission: "CREATOR_WRITE" }),
+      );
+    });
+  });
 });

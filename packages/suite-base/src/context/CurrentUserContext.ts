@@ -41,7 +41,10 @@ export function useCurrentUser(): CurrentUser {
 }
 
 export type UserType =
-  "unauthenticated" | "authenticated-free" | "authenticated-team" | "authenticated-enterprise";
+  | "unauthenticated"
+  | "authenticated-free"
+  | "authenticated-team"
+  | "authenticated-enterprise";
 
 export function useCurrentUserType(): UserType {
   const user = useCurrentUser();

@@ -23,7 +23,8 @@ import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { customTypography } from "@lichtblick/theme";
 
 type PlaybackControlsTooltipItem =
-  { type: "divider" } | { type: "item"; title: string; value: string };
+  | { type: "divider" }
+  | { type: "item"; title: string; value: string };
 
 const useStyles = makeStyles()((theme) => ({
   tooltipDivider: {

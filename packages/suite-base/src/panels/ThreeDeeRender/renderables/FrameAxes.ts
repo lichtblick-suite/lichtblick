@@ -642,7 +642,8 @@ function buildSettingsFields(
   if (config.scene.transforms?.editable ?? DEFAULT_EDITABLE) {
     let xyzOffsetValue = config.transforms[frameKey]?.xyzOffset as THREE.Vector3Tuple | undefined;
     let rpyCoefficient = config.transforms[frameKey]?.rpyCoefficient as
-      THREE.Vector3Tuple | undefined;
+      | THREE.Vector3Tuple
+      | undefined;
 
     if (xyzOffsetValue && vec3IsZero(xyzOffsetValue)) {
       xyzOffsetValue = undefined;

@@ -43,10 +43,10 @@ import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfil
 import {
   BUSY_POLLING_INTERVAL_MS,
   BUSY_POLLING_TIMEOUT_MS,
+  DEFAULT_LAYOUT,
   MAX_SUPPORTED_LAYOUT_VERSION,
   ORG_PERMISSION_PREFIX,
 } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
-import { defaultLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/defaultLayout";
 import useUpdateSharedPanelState from "@lichtblick/suite-base/providers/CurrentLayoutProvider/hooks/useUpdateSharedPanelState";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
 import panelsReducer from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
@@ -354,12 +354,8 @@ export default function CurrentLayoutProvider({
       return;
     }
 
-    const newLayout = await layoutManager.saveNewLayout({
-      name: "Default",
-      data: defaultLayout,
-      permission: "CREATOR_WRITE",
-    });
-    await setSelectedLayoutId(newLayout.id);
+    const defaultLayout = await layoutManager.saveNewLayout(DEFAULT_LAYOUT);
+    await setSelectedLayoutId(defaultLayout.id);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getUserProfile, layoutManager, setSelectedLayoutId, enqueueSnackbar]);

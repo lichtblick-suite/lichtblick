@@ -104,12 +104,8 @@ export function normalizeMatrix6(mat: number[] | undefined): Matrix6 {
   if (mat?.length !== 36 || typeof mat[0] !== "number") {
     // prettier-ignore
     return [
-      1, 0, 0, 0, 0, 0,
-      0, 1, 0, 0, 0, 0,
-      0, 0, 1, 0, 0, 0,
-      0, 0, 0, 1, 0, 0,
-      0, 0, 0, 0, 1, 0,
-      0, 0, 0, 0, 0, 1
+      1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+      0, 0, 0, 0, 1,
     ];
   }
   return mat as Matrix6;
@@ -181,7 +177,8 @@ export function normalizeTFMessage(tfMessage: PartialMessage<TFMessage> | undefi
 
 export function normalizeFrameTransform(
   frameTransform:
-    (PartialMessage<FrameTransform> & PartialMessage<LegacyFrameTransform>) | undefined,
+    | (PartialMessage<FrameTransform> & PartialMessage<LegacyFrameTransform>)
+    | undefined,
 ): FrameTransform {
   return {
     timestamp: normalizeTime(frameTransform?.timestamp),

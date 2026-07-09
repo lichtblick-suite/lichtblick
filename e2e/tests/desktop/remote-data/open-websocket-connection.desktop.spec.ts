@@ -13,17 +13,17 @@ import { DataSourceDialog, Panels, Sidebar } from "../../../page-objects";
  * THEN the topic "/websocket_test" should appear in the list
  * AND data should be correctly displayed in the "Raw Messages" panel
  */
-test(
-  "show correctly open a web socket connection showing correct attibutes on raw messages panel",
-  { tag: "@regression" },
-  async ({ mainWindow }) => {
-    const dialog = new DataSourceDialog(mainWindow);
-    const sidebar = new Sidebar(mainWindow);
-    const panels = new Panels(mainWindow);
+test("show correctly open a web socket connection showing correct attibutes on raw messages panel", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
+  const panels = new Panels(mainWindow);
 
-    // Given
-    const websocketServer = launchWebsocket();
+  // Given
+  const websocketServer = launchWebsocket();
 
+  try {
     // When
     await dialog.openConnection();
     await mainWindow.getByText("Open", { exact: true }).click();
@@ -48,7 +48,7 @@ test(
         rawMessagesPanel.getByText(attribute, { exact: true }).innerText(),
       ).resolves.toBe(attribute);
     }
-
-    void websocketServer.close();
-  },
-);
+  } finally {
+    await websocketServer.close();
+  }
+});

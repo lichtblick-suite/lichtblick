@@ -30,6 +30,7 @@ jobs:
               yarn license-check
               yarn dedupe --check
               yarn run tsc --noEmit # typecheck files that are not included by webpack or package builds
+              yarn run format:ci
               yarn run lint:ci
               yarn run lint:unused-exports
               yarn run lint:dependencies

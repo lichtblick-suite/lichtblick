@@ -242,10 +242,13 @@ panels/
 Before pushing, ensure your changes pass all checks:
 
 ```sh
-yarn lint                   # Linting (ESLint + Prettier)
+yarn format                 # Formatting (Biome)
+yarn lint                   # Linting (ESLint)
 yarn test                   # Unit tests (Jest)
 yarn run tsc --noEmit       # TypeScript type checking
 ```
+
+> Formatting and linting also run automatically via Git hooks — see [Git Hooks](#git-hooks).
 
 ### 4. Open a Pull Request
 
@@ -299,13 +302,27 @@ Code quality is enforced through automated tooling. All checks run in CI and mus
 
 ### Formatting
 
-- **Prettier** is used for code formatting with a `printWidth` of **100** characters.
-- Prettier runs automatically as part of linting in CI.
+- **Biome** is used for code formatting with a `lineWidth` of **100** characters (see `biome.json`).
+- Run `yarn format` to auto-format locally; `yarn format:ci` checks formatting in CI.
 
 ### Linting
 
 - **ESLint** with the `@lichtblick` plugin suite enforces consistent code patterns.
-- Run `yarn lint` to auto-fix issues locally (Prettier integration is disabled locally to speed up linting, but enforced in CI).
+- Run `yarn lint` to auto-fix issues locally.
+
+### Git Hooks
+
+Git hooks are managed by [Husky](https://typicode.github.io/husky/) and are **installed automatically** the first time you run `yarn install` (via the `prepare` script). No manual setup is required.
+
+| Hook | When it runs | What it does |
+| ------------ | ------------ | ------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | `git commit` | Runs [lint-staged](https://github.com/lint-staged/lint-staged) on **staged** `*.{js,jsx,mjs,cjs,ts,tsx, json}` files: `eslint --fix` then `biome format --write`. Auto-fixes are re-staged; non-fixable lint errors block the commit. |
+
+Notes:
+
+- Only staged JavaScript/TypeScript files are formatted and linted on commit, so hooks stay fast.
+- Type checking runs on `pre-push` rather than `pre-commit` because TypeScript needs the whole project (it cannot be reliably scoped to individual files).
+- If hooks are not running, re-run `yarn install` (or `yarn prepare`) to reinstall them.
 
 ### TypeScript Conventions
 

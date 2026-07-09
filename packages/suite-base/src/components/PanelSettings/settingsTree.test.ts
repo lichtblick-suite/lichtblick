@@ -42,10 +42,12 @@ describe("buildSettingsTree", () => {
     const extensionSettings = {
       myPanelType: {
         schema1: {
-          settings: jest.fn((_config): SettingsTreeNode => ({
-            label: BasicBuilder.string(),
-            children: {},
-          })),
+          settings: jest.fn(
+            (_config): SettingsTreeNode => ({
+              label: BasicBuilder.string(),
+              children: {},
+            }),
+          ),
           handler: jest.fn(),
         },
       },
@@ -74,21 +76,21 @@ describe("buildSettingsTree", () => {
       settingsTree: { nodes: {}, actionHandler: jest.fn() },
     },
     { panelType: "value", settingsTree: undefined },
-  ])(
-    "should return undefined if settingsTree or panelType is undefined",
-    ({ panelType, settingsTree }) => {
-      const { config, extensionSettings, messagePipelineState } = setup();
+  ])("should return undefined if settingsTree or panelType is undefined", ({
+    panelType,
+    settingsTree,
+  }) => {
+    const { config, extensionSettings, messagePipelineState } = setup();
 
-      const result = buildSettingsTree({
-        config,
-        extensionSettings,
-        panelType,
-        settingsTree,
-        messagePipelineState,
-      });
-      expect(result).toBeUndefined();
-    },
-  );
+    const result = buildSettingsTree({
+      config,
+      extensionSettings,
+      panelType,
+      settingsTree,
+      messagePipelineState,
+    });
+    expect(result).toBeUndefined();
+  });
 
   it("should return undefined if settingsTree is not found", () => {
     const { config, extensionSettings, messagePipelineState } = setup();

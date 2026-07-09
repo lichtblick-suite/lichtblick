@@ -59,7 +59,9 @@ export type TimelineInteractionStateStore = Immutable<{
   /** Sets new global bounds. */
   setGlobalBounds: (
     newBounds:
-      undefined | SyncBounds | ((oldValue: undefined | SyncBounds) => undefined | SyncBounds),
+      | undefined
+      | SyncBounds
+      | ((oldValue: undefined | SyncBounds) => undefined | SyncBounds),
   ) => void;
 
   /** Sets or clears the directly hovered event. */
