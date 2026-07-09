@@ -147,6 +147,16 @@ export const makeRootSeriesNode = memoizeWeak(
   },
 );
 
+function setAxis({ value, label, error }: AxisTreeField): SettingsTreeField {
+  return {
+    label,
+    input: "number",
+    value,
+    placeholder: "auto",
+    error,
+  };
+}
+
 export function buildSettingsTree(
   {
     isSynced,
@@ -163,16 +173,6 @@ export function buildSettingsTree(
     _.isNumber(xAxisMinValue) && _.isNumber(xAxisMaxValue) && xAxisMinValue >= xAxisMaxValue
       ? t("maxXError")
       : undefined;
-
-  function setAxis({ value, label, error }: AxisTreeField): SettingsTreeField {
-    return {
-      label,
-      input: "number",
-      value,
-      placeholder: "auto",
-      error,
-    };
-  }
 
   return {
     general: {

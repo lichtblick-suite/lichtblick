@@ -339,48 +339,30 @@ describe("pipeline", () => {
   describe("compile + extractGlobalVariables", () => {
     const extract = compose(compile, extractGlobalVariables);
 
-    it("should not run if there were any compile time errors", () => {
-      const nodeData = extract(
-        {
-          ...baseNodeData,
-          sourceCode: "const x: string = 41; type GlobalVariables = { foo: string; };",
-        },
-        [],
-      );
-      expect(nodeData.globalVariables).toEqual([]);
-    });
-
-    it("extracts globalVariables from the AST", () => {
-      const nodeData = extract(
-        {
-          ...baseNodeData,
-          sourceCode: "type GlobalVariables = { foo: string; bar: number; };",
-        },
-        [],
-      );
-      expect(nodeData.globalVariables).toEqual(["foo", "bar"]);
-    });
-
-    it("ignores variables named GlobalVariables", () => {
-      const nodeData = extract(
-        {
-          ...baseNodeData,
-          sourceCode: "const GlobalVariables = { foo: 'string', num: 3 };",
-        },
-        [],
-      );
-      expect(nodeData.globalVariables).toEqual([]);
-    });
-
-    it("allows empty GlobalVariables", () => {
-      const nodeData = extract(
-        {
-          ...baseNodeData,
-          sourceCode: "type GlobalVariables = {};",
-        },
-        [],
-      );
-      expect(nodeData.globalVariables).toEqual([]);
+    it.each([
+      {
+        name: "should not run if there were any compile time errors",
+        sourceCode: "const x: string = 41; type GlobalVariables = { foo: string; };",
+        expected: [],
+      },
+      {
+        name: "extracts globalVariables from the AST",
+        sourceCode: "type GlobalVariables = { foo: string; bar: number; };",
+        expected: ["foo", "bar"],
+      },
+      {
+        name: "ignores variables named GlobalVariables",
+        sourceCode: "const GlobalVariables = { foo: 'string', num: 3 };",
+        expected: [],
+      },
+      {
+        name: "allows empty GlobalVariables",
+        sourceCode: "type GlobalVariables = {};",
+        expected: [],
+      },
+    ])("$name", ({ sourceCode, expected }) => {
+      const nodeData = extract({ ...baseNodeData, sourceCode }, []);
+      expect(nodeData.globalVariables).toEqual(expected);
     });
   });
 
