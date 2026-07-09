@@ -63,6 +63,7 @@ export function migrateV0WorkspaceState(
       active: undefined,
       shown: v0State.featureTours.shown,
     },
+    layoutBrowser: { expandedSections: { personal: true, shared: true } },
     sidebars: {
       left: {
         item: v0State.leftSidebarItem,

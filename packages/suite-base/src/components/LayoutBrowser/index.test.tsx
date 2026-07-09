@@ -15,6 +15,11 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
+import {
+  useWorkspaceStore,
+  WorkspaceStoreSelectors,
+} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
@@ -61,6 +66,17 @@ jest.mock("@lichtblick/suite-base/hooks/usePrompt", () => ({
 
 jest.mock("@lichtblick/suite-base/hooks/useAppConfigurationValue", () => ({
   useAppConfigurationValue: jest.fn(),
+}));
+
+jest.mock("@lichtblick/suite-base/context/Workspace/WorkspaceContext", () => ({
+  useWorkspaceStore: jest.fn(),
+  WorkspaceStoreSelectors: {
+    selectLayoutSectionExpanded: jest.fn(),
+  },
+}));
+
+jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", () => ({
+  useWorkspaceActions: jest.fn(),
 }));
 
 jest.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", () => ({
@@ -116,6 +132,13 @@ describe("LayoutBrowser", () => {
     (useConfirm as jest.Mock).mockReturnValue([jest.fn(), undefined]);
     (usePrompt as jest.Mock).mockReturnValue([jest.fn(), undefined]);
     (useAppConfigurationValue as jest.Mock).mockReturnValue([true, jest.fn()]);
+    (useWorkspaceStore as jest.Mock).mockReturnValue({ personal: true, shared: true });
+    (useWorkspaceActions as jest.Mock).mockReturnValue({
+      layoutBrowserActions: {
+        setPersonalSectionExpanded: jest.fn(),
+        setSharedSectionExpanded: jest.fn(),
+      },
+    });
     (useLayoutNavigation as jest.Mock).mockReturnValue({
       onSelectLayout: jest.fn(),
       state: {
@@ -262,12 +285,19 @@ describe("LayoutBrowser", () => {
     const originalLayoutSectionMock = jest.requireMock("./LayoutSection").default;
 
     beforeEach(() => {
-      setPersonalExpandedMock = jest.fn().mockResolvedValue(undefined);
-      setSharedExpandedMock = jest.fn().mockResolvedValue(undefined);
+      setPersonalExpandedMock = jest.fn();
+      setSharedExpandedMock = jest.fn();
       onSelectLayoutMock = jest.fn().mockResolvedValue(undefined);
       logEventMock = jest.fn().mockResolvedValue(undefined);
 
       (useAnalytics as jest.Mock).mockReturnValue({ logEvent: logEventMock });
+      (useWorkspaceStore as jest.Mock).mockReturnValue({ personal: true, shared: true });
+      (useWorkspaceActions as jest.Mock).mockReturnValue({
+        layoutBrowserActions: {
+          setPersonalSectionExpanded: setPersonalExpandedMock,
+          setSharedSectionExpanded: setSharedExpandedMock,
+        },
+      });
       (useLayoutNavigation as jest.Mock).mockReturnValue({
         onSelectLayout: onSelectLayoutMock,
         state: {
@@ -279,23 +309,6 @@ describe("LayoutBrowser", () => {
           selectedIds: [],
         },
         dispatch: dispatchMock,
-      });
-
-      let callIndex = 0;
-      (useAppConfigurationValue as jest.Mock).mockImplementation(() => {
-        callIndex++;
-        switch (callIndex) {
-          case 1: // ENABLE_NEW_TOPNAV
-            return [true, jest.fn()];
-          case 2: // HIDE_SIGN_IN_PROMPT
-            return [false, jest.fn()];
-          case 3: // LAYOUT_SECTION_PERSONAL_EXPANDED
-            return [true, setPersonalExpandedMock];
-          case 4: // LAYOUT_SECTION_SHARED_EXPANDED
-            return [true, setSharedExpandedMock];
-          default:
-            return [undefined, jest.fn()];
-        }
       });
     });
 

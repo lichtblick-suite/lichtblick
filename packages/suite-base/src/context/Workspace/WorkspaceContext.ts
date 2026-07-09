@@ -55,6 +55,12 @@ export type WorkspaceContextStore = {
     active: undefined | string;
     shown: string[];
   };
+  layoutBrowser: {
+    expandedSections: {
+      personal: boolean;
+      shared: boolean;
+    };
+  };
   playbackControls: {
     repeat: boolean;
     syncInstances: boolean;
@@ -80,6 +86,9 @@ export const WorkspaceContext = createContext<undefined | StoreApi<WorkspaceCont
 WorkspaceContext.displayName = "WorkspaceContext";
 
 export const WorkspaceStoreSelectors = {
+  selectLayoutSectionExpanded: (store: WorkspaceContextStore) => {
+    return store.layoutBrowser.expandedSections;
+  },
   selectPanelSettingsOpen: (store: WorkspaceContextStore): boolean => {
     return store.sidebars.left.open && store.sidebars.left.item === "panel-settings";
   },

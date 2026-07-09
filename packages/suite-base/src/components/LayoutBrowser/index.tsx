@@ -37,6 +37,11 @@ import {
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
+import {
+  WorkspaceStoreSelectors,
+  useWorkspaceStore,
+} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useLayoutActions } from "@lichtblick/suite-base/hooks/useLayoutActions";
@@ -187,18 +192,19 @@ export default function LayoutBrowser({
   const [hideSignInPrompt = false, setHideSignInPrompt] = useAppConfigurationValue<boolean>(
     AppSetting.HIDE_SIGN_IN_PROMPT,
   );
-  const [personalExpanded = true, setPersonalExpanded] = useAppConfigurationValue<boolean>(
-    AppSetting.LAYOUT_SECTION_PERSONAL_EXPANDED,
+
+  const { personal: personalExpanded, shared: sharedExpanded } = useWorkspaceStore(
+    WorkspaceStoreSelectors.selectLayoutSectionExpanded,
   );
-  const [sharedExpanded = true, setSharedExpanded] = useAppConfigurationValue<boolean>(
-    AppSetting.LAYOUT_SECTION_SHARED_EXPANDED,
-  );
-  const togglePersonalExpanded = useCallback(async () => {
-    await setPersonalExpanded(!personalExpanded);
-  }, [personalExpanded, setPersonalExpanded]);
-  const toggleSharedExpanded = useCallback(async () => {
-    await setSharedExpanded(!sharedExpanded);
-  }, [sharedExpanded, setSharedExpanded]);
+  const { layoutBrowserActions } = useWorkspaceActions();
+  const { setPersonalSectionExpanded, setSharedSectionExpanded } = layoutBrowserActions;
+  const togglePersonalExpanded = useCallback(() => {
+    setPersonalSectionExpanded((expanded) => !expanded);
+  }, [setPersonalSectionExpanded]);
+  
+  const toggleSharedExpanded = useCallback(() => {
+    setSharedSectionExpanded((expanded) => !expanded);
+  }, [setSharedSectionExpanded]);
 
   const createNewLayout = useCallbackWithToast(async () => {
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
@@ -216,10 +222,16 @@ export default function LayoutBrowser({
       permission: "CREATOR_WRITE",
     });
     await onSelectLayout(newLayout);
-    await setPersonalExpanded(true);
+    setPersonalSectionExpanded(true);
 
     await analytics.logEvent(AppEvent.LAYOUT_CREATE);
-  }, [currentDateForStorybook, layoutManager, onSelectLayout, setPersonalExpanded, analytics]);
+  }, [
+    currentDateForStorybook,
+    layoutManager,
+    onSelectLayout,
+    setPersonalSectionExpanded,
+    analytics,
+  ]);
 
   const onShareLayout = useCallbackWithToast(
     async (item: Layout) => {
@@ -236,11 +248,11 @@ export default function LayoutBrowser({
           permission: "ORG_WRITE",
         });
         await analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
-        await setSharedExpanded(true);
+        setSharedSectionExpanded(true);
         await onSelectLayout(newLayout);
       }
     },
-    [analytics, layoutManager, onSelectLayout, prompt, setSharedExpanded],
+    [analytics, layoutManager, onSelectLayout, prompt, setSharedSectionExpanded],
   );
 
   const onMakePersonalCopy = useCallbackWithToast(
@@ -249,14 +261,14 @@ export default function LayoutBrowser({
         id: item.id,
         name: `${item.name} copy`,
       });
-      await setPersonalExpanded(true);
+      setPersonalSectionExpanded(true);
       await onSelectLayout(newLayout);
       await analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
         permission: item.permission,
         syncStatus: item.syncInfo?.status,
       });
     },
-    [analytics, layoutManager, onSelectLayout, setPersonalExpanded],
+    [analytics, layoutManager, onSelectLayout, setPersonalSectionExpanded],
   );
 
   const showSignInPrompt =
