@@ -34,6 +34,8 @@ const storybookConfig: StorybookConfig = {
         // We are only setting the configFile from Storybook as it is required to properly resolve
         // some assumptions made while traversing the dependency tree in Chromatic.
         tsconfigPath: new URL("tsconfig.json", import.meta.url).pathname,
+        // Required in ESM context (Storybook) where __dirname is not available in webpack.ts.
+        packageDir: new URL("../packages/suite-base", import.meta.url).pathname,
       },
     );
     return {

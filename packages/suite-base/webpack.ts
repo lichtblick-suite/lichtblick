@@ -19,17 +19,33 @@ import { createTssReactNameTransformer } from "@lichtblick/typescript-transforme
 
 import { WebpackArgv } from "./WebpackArgv";
 
-// Compatible with both CJS (ts-node/webpack-cli) and ESM (Storybook 10+).
-// In CJS, __dirname and require are injected by Node's module wrapper; in ESM they are undefined.
+// In CJS (ts-node / webpack-cli), __dirname is injected by Node's module wrapper.
+// In ESM (Storybook 10+), __dirname is undefined; callers must provide `packageDir`.
+// We avoid import.meta.url here to stay compatible with "module: commonjs" TypeScript compilation
+// (e.g. webpack-cli's ts-node with the root tsconfig) and Node.js 24's loadESMFromCJS detection.
 // eslint-disable-next-line no-var, no-underscore-dangle
 declare var __dirname: string | undefined;
-const currentDirUrl =
-  (typeof __dirname !== "undefined" ? _nodePathToFileURL(__dirname + "/") : undefined) ??
-  new URL(".", import.meta.url);
-const localRequire = _nodeCreateRequire(import.meta.url);
 
-// Load environment variables from .env.local
-dotenv.config({ path: _nodeFileURLToPath(new URL("../../.env", currentDirUrl.href)) });
+let _currentDirHref: string | undefined;
+let _localRequire: NodeRequire | undefined;
+
+function initModuleLocals(packageDir: string | undefined): void {
+  if (_currentDirHref != undefined) {
+    return;
+  }
+  const dir = packageDir ?? (typeof __dirname !== "undefined" ? __dirname : undefined);
+  if (dir == undefined) {
+    throw new Error(
+      "makeConfig: cannot determine the @lichtblick/suite-base package directory. " +
+        "Pass the `packageDir` option when calling makeConfig in ESM environments.",
+    );
+  }
+  const dirHref = _nodePathToFileURL(dir + "/").href;
+  _currentDirHref = dirHref;
+  _localRequire = _nodeCreateRequire(dir + "/package.json");
+  // Load environment variables from .env.local
+  dotenv.config({ path: _nodeFileURLToPath(new URL("../../.env", dirHref)) });
+}
 
 type Options = {
   // During hot reloading and development it is useful to comment out code while iterating.
@@ -40,6 +56,12 @@ type Options = {
   version: string;
   /** Specify the path to the tsconfig.json file for ForkTsCheckerWebpackPlugin. If unset, the plugin defaults to finding the config file in the webpack `context` directory. */
   tsconfigPath?: string;
+  /**
+   * Absolute path to the @lichtblick/suite-base package directory.
+   * Required in ESM environments (e.g. Storybook) where __dirname is not available.
+   * Example: `new URL("../packages/suite-base", import.meta.url).pathname`
+   */
+  packageDir?: string;
 };
 
 function buildEnvVars(): Record<string, string | undefined> {
@@ -58,6 +80,13 @@ export function makeConfig(
   Configuration,
   "resolve" | "module" | "optimization" | "plugins" | "node" | "ignoreWarnings"
 > {
+  initModuleLocals(options.packageDir);
+  // After initModuleLocals, _currentDirHref and _localRequire are guaranteed to be set.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const currentDirHref = _currentDirHref!;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const localRequire = _localRequire!;
+
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
 
@@ -67,7 +96,7 @@ export function makeConfig(
     resolve: {
       extensions: [".js", ".ts", ".jsx", ".tsx"],
       alias: {
-        "@lichtblick/suite-base": _nodeFileURLToPath(new URL("src", currentDirUrl.href)),
+        "@lichtblick/suite-base": _nodeFileURLToPath(new URL("src", currentDirHref)),
       },
       fallback: {
         path: localRequire.resolve("path-browserify"), // foxglove-depcheck-used: path-browserify
