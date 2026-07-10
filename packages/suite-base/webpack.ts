@@ -26,11 +26,11 @@ import { WebpackArgv } from "./WebpackArgv";
 // eslint-disable-next-line no-var, no-underscore-dangle
 declare var __dirname: string | undefined;
 
-let _currentDirHref: string | undefined;
-let _localRequire: NodeRequire | undefined;
+let currentDirHref: string | undefined;
+let localRequireInstance: NodeRequire | undefined;
 
 function initModuleLocals(packageDir: string | undefined): void {
-  if (_currentDirHref != undefined) {
+  if (currentDirHref != undefined) {
     return;
   }
   const dir = packageDir ?? (typeof __dirname !== "undefined" ? __dirname : undefined);
@@ -41,8 +41,8 @@ function initModuleLocals(packageDir: string | undefined): void {
     );
   }
   const dirHref = _nodePathToFileURL(dir + "/").href;
-  _currentDirHref = dirHref;
-  _localRequire = _nodeCreateRequire(dir + "/package.json");
+  currentDirHref = dirHref;
+  localRequireInstance = _nodeCreateRequire(dir + "/package.json");
   // Load environment variables from .env.local
   dotenv.config({ path: _nodeFileURLToPath(new URL("../../.env", dirHref)) });
 }
@@ -81,11 +81,9 @@ export function makeConfig(
   "resolve" | "module" | "optimization" | "plugins" | "node" | "ignoreWarnings"
 > {
   initModuleLocals(options.packageDir);
-  // After initModuleLocals, _currentDirHref and _localRequire are guaranteed to be set.
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const currentDirHref = _currentDirHref!;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const localRequire = _localRequire!;
+  // After initModuleLocals, currentDirHref and localRequireInstance are guaranteed to be set.
+  const dirHref = currentDirHref!;
+  const localRequire = localRequireInstance!;
 
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
@@ -96,7 +94,7 @@ export function makeConfig(
     resolve: {
       extensions: [".js", ".ts", ".jsx", ".tsx"],
       alias: {
-        "@lichtblick/suite-base": _nodeFileURLToPath(new URL("src", currentDirHref)),
+        "@lichtblick/suite-base": _nodeFileURLToPath(new URL("src", dirHref)),
       },
       fallback: {
         path: localRequire.resolve("path-browserify"), // foxglove-depcheck-used: path-browserify
