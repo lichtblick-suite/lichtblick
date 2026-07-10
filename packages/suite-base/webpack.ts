@@ -33,7 +33,7 @@ function initModuleLocals(packageDir: string | undefined): void {
   if (currentDirHref != undefined) {
     return;
   }
-  const dir = packageDir ?? (typeof __dirname !== "undefined" ? __dirname : undefined);
+  const dir = packageDir ?? __dirname;
   if (dir == undefined) {
     throw new Error(
       "makeConfig: cannot determine the @lichtblick/suite-base package directory. " +
