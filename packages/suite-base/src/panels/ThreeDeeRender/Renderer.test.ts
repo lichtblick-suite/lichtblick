@@ -2142,6 +2142,38 @@ describe("Renderer backward seek behavior", () => {
     // Frame may exist but should have no transforms, or frame doesn't exist (both are valid)
     expect(frame == undefined || frame.transformsSize() === 0).toBe(true);
   });
+
+  it("preserves static transforms when seeking backward", () => {
+    // Given: A renderer
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+
+    // When: Adding regular and static transforms
+    renderer.setCurrentTime(100n);
+    const regularMsg = createTFMessageEvent("parent", "child_regular", 50n, [50n]);
+    const staticMsg = createTFMessageEvent("parent", "child_static", 10n, [10n], "/tf_static");
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    // Verify both are present
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    // When: Seeking backward
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n);
+
+    // Then: Regular transform should be cleared, static transform preserved
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+  });
 });
 
 describe("Renderer batch message processing", () => {
