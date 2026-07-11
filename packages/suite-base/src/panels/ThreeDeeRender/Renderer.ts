@@ -159,6 +159,14 @@ Object.defineProperty(LabelMaterial.prototype, "fragmentShaderKey", {
   configurable: true,
 });
 
+type StaticTransform = {
+  parentFrameId: string;
+  childFrameId: string;
+  stamp: bigint;
+  translation: Vector3;
+  rotation: Quaternion;
+};
+
 /**
  * An extensible 3D renderer attached to a `HTMLCanvasElement`,
  * `WebGLRenderingContext`, and `SettingsTree`.
@@ -231,6 +239,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     maxCapacity: 5 * DEFAULT_MAX_CAPACITY_PER_FRAME,
   });
   public transformTree = new TransformTree(this.#transformPool);
+  #staticTransformCache = new Map<string, StaticTransform>();
 
   public coordinateFrameList: SelectEntry[] = [];
   public currentTime = 0n;
@@ -547,6 +556,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
       // Clear transforms after current time instead of clearing everything
       this.transformTree.clearAfter(this.currentTime);
+      this.#reapplyStaticTransforms();
 
       // Update cursor to new position
       this.#allFramesCursor = {
@@ -567,6 +577,15 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     } else {
       // Forward seek or no allFrames available - use original behavior
       this.clear({ clearTransforms: movedBack, resetAllFramesCursor: movedBack });
+      if (movedBack) {
+        this.#reapplyStaticTransforms();
+      }
+    }
+  }
+
+  #reapplyStaticTransforms(): void {
+    for (const { parentFrameId, childFrameId, stamp, translation, rotation } of this.#staticTransformCache.values()) {
+      this.addTransform(parentFrameId, childFrameId, stamp, translation, rotation);
     }
   }
 
@@ -1177,13 +1196,23 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  #addFrameTransform(transform: FrameTransform): void {
+  #addFrameTransform(transform: FrameTransform, isStatic = false): void {
     const parentId = transform.parent_frame_id;
     const childId = transform.child_frame_id;
     try {
       const stamp = toNanoSec(transform.timestamp);
       const t = transform.translation;
       const q = transform.rotation;
+
+      if (isStatic) {
+        this.#staticTransformCache.set(childId, {
+          parentFrameId: parentId,
+          childFrameId: childId,
+          stamp,
+          translation: t,
+          rotation: q,
+        });
+      }
 
       this.addTransform(parentId, childId, stamp, t, q);
     } catch (e: unknown) {
@@ -1196,13 +1225,23 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  #addTransformMessage(tf: TransformStamped): void {
+  #addTransformMessage(tf: TransformStamped, isStatic = false): void {
     const normalizedParentId = this.normalizeFrameId(tf.header.frame_id);
     const normalizedChildId = this.normalizeFrameId(tf.child_frame_id);
     try {
       const stamp = toNanoSec(tf.header.stamp);
       const t = tf.transform.translation;
       const q = tf.transform.rotation;
+
+      if (isStatic) {
+        this.#staticTransformCache.set(normalizedChildId, {
+          parentFrameId: normalizedParentId,
+          childFrameId: normalizedChildId,
+          stamp,
+          translation: t,
+          rotation: q,
+        });
+      }
 
       this.addTransform(normalizedParentId, normalizedChildId, stamp, t, q);
     } catch (e: unknown) {
@@ -1492,32 +1531,36 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.emit("renderableHovered", selections, cursorCoords, this);
   };
 
-  #handleFrameTransform = ({ message }: MessageEvent<DeepPartial<FrameTransform>>): void => {
+  #handleFrameTransform = ({ message, topic }: MessageEvent<DeepPartial<FrameTransform>>): void => {
     // foxglove.FrameTransform - Ingest this single transform into our TF tree
     const transform = normalizeFrameTransform(message);
-    this.#addFrameTransform(transform);
+    const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
+    this.#addFrameTransform(transform, isStatic);
   };
 
-  #handleFrameTransforms = ({ message }: MessageEvent<DeepPartial<FrameTransforms>>): void => {
+  #handleFrameTransforms = ({ message, topic }: MessageEvent<DeepPartial<FrameTransforms>>): void => {
     // foxglove.FrameTransforms - Ingest the list of transforms into our TF tree
     const frameTransforms = normalizeFrameTransforms(message);
+    const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
     for (const transform of frameTransforms.transforms) {
-      this.#addFrameTransform(transform);
+      this.#addFrameTransform(transform, isStatic);
     }
   };
 
-  #handleTFMessage = ({ message }: MessageEvent<DeepPartial<TFMessage>>): void => {
+  #handleTFMessage = ({ message, topic }: MessageEvent<DeepPartial<TFMessage>>): void => {
     // tf2_msgs/TFMessage - Ingest the list of transforms into our TF tree
     const tfMessage = normalizeTFMessage(message);
+    const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
     for (const tf of tfMessage.transforms) {
-      this.#addTransformMessage(tf);
+      this.#addTransformMessage(tf, isStatic);
     }
   };
 
-  #handleTransformStamped = ({ message }: MessageEvent<DeepPartial<TransformStamped>>): void => {
+  #handleTransformStamped = ({ message, topic }: MessageEvent<DeepPartial<TransformStamped>>): void => {
     // geometry_msgs/TransformStamped - Ingest this single transform into our TF tree
     const tf = normalizeTransformStamped(message);
-    this.#addTransformMessage(tf);
+    const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
+    this.#addTransformMessage(tf, isStatic);
   };
 
   #handleTopicsAction = (action: SettingsTreeAction): void => {
