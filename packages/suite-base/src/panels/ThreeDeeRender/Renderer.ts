@@ -576,7 +576,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.queueAnimationFrame();
     } else {
       // Forward seek or no allFrames available - use original behavior
-      this.clear({ clearTransforms: movedBack, resetAllFramesCursor: movedBack });
+      this.clear({ clearTransforms: movedBack, resetAllFramesCursor: movedBack, preserveStaticTransforms: movedBack });
       if (movedBack) {
         this.#reapplyStaticTransforms();
       }
@@ -601,24 +601,28 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
    * @param {boolean} params.resetAllFramesCursor - whether to reset the cursor for the allFrames array.
    * Order to clear ImageMode renderables or not. Defaults to true. Not relevant in 3D panel.
    * @param {boolean} params.clearImageModeExtension - whether to reset ImageMode renderables in clear.
+   * @param {boolean} params.preserveStaticTransforms - whether to preserve the static transform cache during a transform tree clear.
    */
   public clear(
     {
       clearTransforms,
       resetAllFramesCursor,
       clearImageModeExtension = true,
+      preserveStaticTransforms = false,
     }: {
       clearTransforms?: boolean;
       resetAllFramesCursor?: boolean;
       clearImageModeExtension?: boolean;
+      preserveStaticTransforms?: boolean;
     } = {
       clearTransforms: false,
       resetAllFramesCursor: false,
+      preserveStaticTransforms: false,
     },
   ): void {
     this.#clearSubscriptionQueues();
     if (clearTransforms === true) {
-      this.#clearTransformTree();
+      this.#clearTransformTree(preserveStaticTransforms);
     }
     if (resetAllFramesCursor === true) {
       this.#resetAllFramesCursor();
@@ -787,8 +791,12 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  #clearTransformTree = () => {
+  // eslint-disable-next-line @lichtblick/no-boolean-parameters
+  #clearTransformTree = (preserveStaticTransforms?: boolean | IRenderer) => {
     this.transformTree.clear();
+    if (preserveStaticTransforms !== true) {
+      this.#staticTransformCache.clear();
+    }
   };
 
   // Call on scene extensions to add subscriptions to the renderer
@@ -1196,7 +1204,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  #addFrameTransform(transform: FrameTransform, isStatic = false): void {
+  #addFrameTransform(transform: FrameTransform, options?: { isStatic?: boolean }): void {
     const parentId = transform.parent_frame_id;
     const childId = transform.child_frame_id;
     try {
@@ -1204,7 +1212,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       const t = transform.translation;
       const q = transform.rotation;
 
-      if (isStatic) {
+      const result = this.addTransform(parentId, childId, stamp, t, q);
+
+      if (options?.isStatic === true && result !== AddTransformResult.CYCLE_DETECTED) {
         this.#staticTransformCache.set(childId, {
           parentFrameId: parentId,
           childFrameId: childId,
@@ -1213,8 +1223,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
           rotation: q,
         });
       }
-
-      this.addTransform(parentId, childId, stamp, t, q);
     } catch (e: unknown) {
       const err = e as Error;
       this.settings.errors.add(
@@ -1225,7 +1233,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  #addTransformMessage(tf: TransformStamped, isStatic = false): void {
+  #addTransformMessage(tf: TransformStamped, options?: { isStatic?: boolean }): void {
     const normalizedParentId = this.normalizeFrameId(tf.header.frame_id);
     const normalizedChildId = this.normalizeFrameId(tf.child_frame_id);
     try {
@@ -1233,7 +1241,9 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       const t = tf.transform.translation;
       const q = tf.transform.rotation;
 
-      if (isStatic) {
+      const result = this.addTransform(normalizedParentId, normalizedChildId, stamp, t, q);
+
+      if (options?.isStatic === true && result !== AddTransformResult.CYCLE_DETECTED) {
         this.#staticTransformCache.set(normalizedChildId, {
           parentFrameId: normalizedParentId,
           childFrameId: normalizedChildId,
@@ -1242,8 +1252,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
           rotation: q,
         });
       }
-
-      this.addTransform(normalizedParentId, normalizedChildId, stamp, t, q);
     } catch (e: unknown) {
       const err = e as Error;
       this.settings.errors.add(
@@ -1262,7 +1270,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     translation: Vector3,
     rotation: Quaternion,
     errorSettingsPath?: string[],
-  ): void {
+  ): AddTransformResult {
     const t = translation;
     const q = rotation;
 
@@ -1309,6 +1317,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         `[Warning] Transform history is at capacity (${frame.maxCapacity}), old TFs will be dropped`,
       );
     }
+    return status;
   }
 
   public removeTransform(childFrameId: string, parentFrameId: string, stamp: bigint): void {
@@ -1535,7 +1544,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     // foxglove.FrameTransform - Ingest this single transform into our TF tree
     const transform = normalizeFrameTransform(message);
     const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
-    this.#addFrameTransform(transform, isStatic);
+    this.#addFrameTransform(transform, { isStatic });
   };
 
   #handleFrameTransforms = ({ message, topic }: MessageEvent<DeepPartial<FrameTransforms>>): void => {
@@ -1543,7 +1552,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const frameTransforms = normalizeFrameTransforms(message);
     const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
     for (const transform of frameTransforms.transforms) {
-      this.#addFrameTransform(transform, isStatic);
+      this.#addFrameTransform(transform, { isStatic });
     }
   };
 
@@ -1552,7 +1561,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const tfMessage = normalizeTFMessage(message);
     const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
     for (const tf of tfMessage.transforms) {
-      this.#addTransformMessage(tf, isStatic);
+      this.#addTransformMessage(tf, { isStatic });
     }
   };
 
@@ -1560,7 +1569,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     // geometry_msgs/TransformStamped - Ingest this single transform into our TF tree
     const tf = normalizeTransformStamped(message);
     const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
-    this.#addTransformMessage(tf, isStatic);
+    this.#addTransformMessage(tf, { isStatic });
   };
 
   #handleTopicsAction = (action: SettingsTreeAction): void => {

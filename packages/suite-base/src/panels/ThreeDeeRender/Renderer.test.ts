@@ -1981,6 +1981,40 @@ describe("Renderer backward seek behavior", () => {
     expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
   });
+
+  it("preserves static transforms when seeking backward with allFrames", () => {
+    // Given: A renderer with preload enabled
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+
+    // When: Adding regular and static transforms
+    renderer.setCurrentTime(100n);
+    const regularMsg = createTFMessageEvent("parent", "child_regular", 50n, [50n]);
+    const staticMsg = createTFMessageEvent("parent", "child_static", 10n, [10n], "/tf_static");
+    const allFrames = [staticMsg, regularMsg];
+
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    // Verify both are present
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    // When: Seeking backward and providing allFrames
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n, allFrames);
+
+    // Then: Regular transform (at 50n) should be cleared, static transform preserved
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+  });
 });
 
 describe("Renderer batch message processing", () => {
