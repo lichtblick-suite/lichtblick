@@ -25,7 +25,9 @@ export function parseProtobufSchema(
   deserialize: (buffer: ArrayBufferView) => unknown;
 } {
   // `Root.fromDescriptor` accepts the raw FileDescriptorSet bytes and decodes them internally.
-  const root = protobufjs.Root.fromDescriptor(schemaData);
+  // `keepCase: true` preserves the original proto field names (snake_case) instead of converting
+  // them to camelCase (the protobufjs v8 default), which would break existing layouts and paths.
+  const root = protobufjs.Root.fromDescriptor(schemaData, { keepCase: true });
   root.resolveAll();
   const rootType = root.lookupType(schemaName);
 
