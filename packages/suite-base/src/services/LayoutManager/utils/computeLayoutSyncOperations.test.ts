@@ -381,4 +381,164 @@ describe("computeLayoutSyncOperations", () => {
       });
     });
   });
+
+  describe("when a remote layout matches a cached (remote) layout by name", () => {
+    it("should delete the stale cached copy and update the cache with remote", () => {
+      // Given a shared local layout and a remote layout with the same name but different ids
+      const sharedName = "Shared Layout";
+      const localLayout = LayoutBuilder.layout({
+        id: LayoutBuilder.layoutId(),
+        name: sharedName,
+        permission: "ORG_WRITE" as LayoutPermission,
+        working: LayoutBuilder.baseline(),
+        syncInfo: { status: "tracked", lastRemoteSavedAt: savedAt },
+      });
+      const remoteLayout = LayoutBuilder.remoteLayout({
+        id: LayoutBuilder.layoutId(),
+        name: sharedName,
+      });
+
+      // When
+      const operations = computeLayoutSyncOperations([localLayout], [remoteLayout]);
+
+      // Then the local copy is dropped and the remote copy becomes the source of truth
+      expect(operations).toEqual([
+        {
+          local: true,
+          type: "delete-local",
+          localLayout: expect.objectContaining({ id: localLayout.id, name: sharedName }),
+        },
+        {
+          local: true,
+          type: "add-to-cache",
+          remoteLayout: expect.objectContaining({ id: remoteLayout.id, name: sharedName }),
+        },
+      ]);
+      // And it must NOT mark the local layout as remotely-deleted
+      expect(operations).not.toContainEqual(
+        expect.objectContaining({ type: "mark-deleted" }),
+      );
+    });
+
+    it("should not drop a personal layout that shares a name with a remote layout", () => {
+      // Given a personal local layout (not a cached remote layout) and a remote layout that share
+      // a name but have different ids. A personal layout with no sync info normally produces no
+      // operation, so if it were incorrectly merged by name we would observe a delete-local.
+      const sharedName = "Personal Layout";
+      const localLayout = LayoutBuilder.layout({
+        id: LayoutBuilder.layoutId(),
+        name: sharedName,
+        permission: "CREATOR_WRITE" as LayoutPermission,
+      });
+      localLayout.working = undefined;
+      localLayout.syncInfo = undefined;
+      const remoteLayout = LayoutBuilder.remoteLayout({
+        id: LayoutBuilder.layoutId(),
+        name: sharedName,
+      });
+
+      // When
+      const operations = computeLayoutSyncOperations([localLayout], [remoteLayout]);
+
+      // Then only the remote layout is added to cache and the personal layout is left untouched.
+      expect(operations).toEqual([
+        {
+          local: true,
+          type: "add-to-cache",
+          remoteLayout: expect.objectContaining({ id: remoteLayout.id }),
+        },
+      ]);
+      expect(operations).not.toContainEqual(expect.objectContaining({ type: "delete-local" }));
+    });
+
+    it("should drop the stale local copy even when multiple remote layouts share the name", () => {
+      // Given a shared local layout and two remote layouts with the same name but different ids
+      const sharedName = "Ambiguous Layout";
+      const localLayout = LayoutBuilder.layout({
+        id: LayoutBuilder.layoutId(),
+        name: sharedName,
+        permission: "ORG_WRITE" as LayoutPermission,
+        working: LayoutBuilder.baseline(),
+        syncInfo: { status: "tracked", lastRemoteSavedAt: savedAt },
+      });
+      const remoteLayout1 = LayoutBuilder.remoteLayout({
+        id: LayoutBuilder.layoutId(),
+        name: sharedName,
+      });
+      const remoteLayout2 = LayoutBuilder.remoteLayout({
+        id: LayoutBuilder.layoutId(),
+        name: sharedName,
+      });
+
+      // When
+      const operations = computeLayoutSyncOperations(
+        [localLayout],
+        [remoteLayout1, remoteLayout2],
+      );
+
+      // Then the stale local copy is dropped (never marked deleted) and both remote layouts are
+      // added to cache.
+      expect(operations).toContainEqual({
+        local: true,
+        type: "delete-local",
+        localLayout: expect.objectContaining({ id: localLayout.id }),
+      });
+      expect(operations).not.toContainEqual(
+        expect.objectContaining({ type: "mark-deleted" }),
+      );
+      expect(operations).toContainEqual({
+        local: true,
+        type: "add-to-cache",
+        remoteLayout: expect.objectContaining({ id: remoteLayout1.id }),
+      });
+      expect(operations).toContainEqual({
+        local: true,
+        type: "add-to-cache",
+        remoteLayout: expect.objectContaining({ id: remoteLayout2.id }),
+      });
+    });
+
+    it("should drop a stale duplicate even when another cached layout matched the remote by id", () => {
+      // Given two cached shared layouts with the same name: one whose id matches the remote layout
+      // and one stale duplicate whose id does not. This is the case a name set built only from
+      // unmatched remotes would miss, because the id match consumes the remote first.
+      const sharedName = "Shared Layout";
+      const remoteLayout = LayoutBuilder.remoteLayout({
+        id: LayoutBuilder.layoutId(),
+        name: sharedName,
+        savedAt,
+      });
+      const matchedLocal = LayoutBuilder.layout({
+        id: remoteLayout.id,
+        name: sharedName,
+        permission: "ORG_WRITE" as LayoutPermission,
+        working: undefined,
+        syncInfo: { status: "tracked", lastRemoteSavedAt: savedAt },
+      });
+      const staleDuplicate = LayoutBuilder.layout({
+        id: LayoutBuilder.layoutId(),
+        name: sharedName,
+        permission: "ORG_WRITE" as LayoutPermission,
+        working: LayoutBuilder.baseline(),
+        syncInfo: { status: "tracked", lastRemoteSavedAt: savedAt },
+      });
+
+      // When
+      const operations = computeLayoutSyncOperations(
+        [matchedLocal, staleDuplicate],
+        [remoteLayout],
+      );
+
+      // Then the stale duplicate is dropped and never marked remotely-deleted, while the
+      // id-matched layout is left untouched.
+      expect(operations).toEqual([
+        {
+          local: true,
+          type: "delete-local",
+          localLayout: expect.objectContaining({ id: staleDuplicate.id }),
+        },
+      ]);
+      expect(operations).not.toContainEqual(expect.objectContaining({ type: "mark-deleted" }));
+    });
+  });
 });

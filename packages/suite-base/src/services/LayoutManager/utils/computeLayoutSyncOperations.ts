@@ -34,17 +34,25 @@ export default function computeLayoutSyncOperations(
   const remoteLayoutsById = new Map<string, RemoteLayout>(
     remoteLayouts.map((remoteLayout) => [remoteLayout.id, remoteLayout]),
   );
+  const remoteLayoutsByName = new Map<string, RemoteLayout>(
+    remoteLayouts.map((remoteLayout) => [remoteLayout.name, remoteLayout]),
+  );
 
   for (const localLayout of localLayouts) {
     const remoteLayout = remoteLayoutsById.get(localLayout.id);
     if (remoteLayout) {
       remoteLayoutsById.delete(localLayout.id);
       syncRemoteLayout(localLayout, remoteLayout, syncOperations);
+    } else if (layoutIsShared(localLayout) && remoteLayoutsByName.has(localLayout.name)) {
+      // The same logical layout exists both locally and remotely under the same name but with a
+      // different id. Treat the remote copy as the source of truth (it is added to the cache
+      // below) and drop the stale cached copy, instead of incorrectly marking it as
+      // remotely-deleted and leaving a duplicate.
+      syncOperations.push({ local: true, type: "delete-local", localLayout });
     } else {
       syncLocalLayout(localLayout, syncOperations);
     }
   }
-
   for (const remoteLayout of remoteLayoutsById.values()) {
     syncOperations.push({ local: true, type: "add-to-cache", remoteLayout });
   }
