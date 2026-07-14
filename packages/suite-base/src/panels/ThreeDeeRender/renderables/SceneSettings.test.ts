@@ -244,22 +244,22 @@ describe("SceneSettings — handleSettingsAction", () => {
     renderer.dispose();
   });
 
-  it.each(["directionalLightIntensity", "hemisphereLightIntensity"] as const)(
-    "calls updateSceneRenderSettings when number field '%s' changes",
-    (settingKey) => {
-      const renderer = makeRenderer();
-      const sceneSettings = new SceneSettings(renderer);
-      const spy = jest.spyOn(renderer, "updateSceneRenderSettings");
+  it.each([
+    "directionalLightIntensity",
+    "hemisphereLightIntensity",
+  ] as const)("calls updateSceneRenderSettings when number field '%s' changes", (settingKey) => {
+    const renderer = makeRenderer();
+    const sceneSettings = new SceneSettings(renderer);
+    const spy = jest.spyOn(renderer, "updateSceneRenderSettings");
 
-      sceneSettings.handleSettingsAction({
-        action: "update",
-        payload: { path: ["scene", settingKey], value: 2, input: "number" },
-      });
+    sceneSettings.handleSettingsAction({
+      action: "update",
+      payload: { path: ["scene", settingKey], value: 2, input: "number" },
+    });
 
-      expect(spy).toHaveBeenCalledTimes(1);
-      renderer.dispose();
-    },
-  );
+    expect(spy).toHaveBeenCalledTimes(1);
+    renderer.dispose();
+  });
 
   it("calls updateSceneRenderSettings on reset-scene action", () => {
     const renderer = makeRenderer();

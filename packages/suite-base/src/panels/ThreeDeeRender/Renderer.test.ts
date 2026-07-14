@@ -45,9 +45,9 @@ jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");
 // We need to mock the WebGLRenderer because it's not available in jsdom
 // only mocking what we currently use
 jest.mock("three", () => {
-  const THREE = jest.requireActual("three");
+  const actualThree = jest.requireActual("three");
   return {
-    ...THREE,
+    ...actualThree,
     WebGLRenderer: function WebGLRenderer() {
       return {
         capabilities: {
@@ -860,8 +860,9 @@ describe("3D Renderer", () => {
 
       // Then: The headlight should be attached to the camera with the configured intensity
       const attachedLight = camera.children.find(
-        (child: THREE.Object3D) => child instanceof THREE.DirectionalLight,
-      ) as THREE.DirectionalLight | undefined;
+        (child: THREE.Object3D): child is THREE.DirectionalLight =>
+          child instanceof THREE.DirectionalLight,
+      );
       expect(attachedLight).toBeDefined();
       expect(attachedLight?.intensity).toBe(2);
 
@@ -935,8 +936,9 @@ describe("3D Renderer", () => {
       // Then: The hemisphere light in the scene should reflect the configured intensity
       const [scene] = renderSpy.mock.calls[0] as [THREE.Scene, THREE.Camera];
       const hemiLight = scene.children.find(
-        (child: THREE.Object3D) => child instanceof THREE.HemisphereLight,
-      ) as THREE.HemisphereLight | undefined;
+        (child: THREE.Object3D): child is THREE.HemisphereLight =>
+          child instanceof THREE.HemisphereLight,
+      );
       expect(hemiLight).toBeDefined();
       expect(hemiLight?.intensity).toBe(3.5);
 
@@ -954,8 +956,9 @@ describe("3D Renderer", () => {
       // Then: The hemisphere light should use the default intensity (0.5 * PI)
       const [scene] = renderSpy.mock.calls[0] as [THREE.Scene, THREE.Camera];
       const hemiLight = scene.children.find(
-        (child: THREE.Object3D) => child instanceof THREE.HemisphereLight,
-      ) as THREE.HemisphereLight | undefined;
+        (child: THREE.Object3D): child is THREE.HemisphereLight =>
+          child instanceof THREE.HemisphereLight,
+      );
       expect(hemiLight?.intensity).toBe(0.5 * Math.PI);
 
       renderer.dispose();
