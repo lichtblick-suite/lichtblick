@@ -279,13 +279,19 @@ export const globalRequestQueue = new RequestQueue(GLOBAL_REQUEST_QUEUE_MAX_CONC
 Thin adapter bridging `CachedFilelike` (byte-offset Filelike API) to `McapTypes.IReadable` (bigint offset/size API).
 
 ```typescript
+const DEFAULT_CACHE_SIZE_BYTES = 1024 * 1024 * 500; // 500MiB
+
 class RemoteFileReadable {
-  #remoteReader: CachedFilelike;         // Configured with 500MB cache
+  #remoteReader: CachedFilelike;         // Cache size configurable, defaults to 500MiB
   #batchingReadable: BatchingReadable;   // Coalesces reads before CachedFilelike
 
   constructor(url: string, options?: { cacheSizeInBytes?: number; readAheadEnabled?: boolean }) {
     const fileReader = new BrowserHttpReader(url);
-    this.#remoteReader = new CachedFilelike({ fileReader, /* cacheSizeInBytes, readAheadEnabled */ });
+    this.#remoteReader = new CachedFilelike({
+      fileReader,
+      cacheSizeInBytes: options?.cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
+      readAheadEnabled: options?.readAheadEnabled,
+    });
     const inner = {
       size: async () => BigInt(this.#remoteReader.size()),
       read: async (offset, size) => this.#remoteReader.read(Number(offset), Number(size)),
@@ -345,4 +351,3 @@ This means:
 | `packages/suite-base/src/util/RequestQueue.ts` | Global concurrency limiter (10 max) |
 | `packages/suite-base/src/players/IterablePlayer/Mcap/RemoteFileReadable.ts` | IReadable adapter (500MB default); reads pass through BatchingReadable |
 | `packages/suite-base/src/players/IterablePlayer/Mcap/BatchingReadable.ts` | Coalesces nearby `read()` calls (gap <64KiB, ≤4MiB span) into fewer inner reads |
-
