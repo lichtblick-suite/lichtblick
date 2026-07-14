@@ -213,7 +213,7 @@ export default function CurrentLayoutProvider({
       }
 
       // Get all the panel types that exist in the new config
-      const panelTypesInUse = _.uniq(Object.keys(newData.configById).map(getPanelTypeFromId));
+      const panelTypesInUse = [...new Set(Object.keys(newData.configById).map(getPanelTypeFromId))];
 
       setLayoutState({
         // discared shared panel state for panel types that are no longer in the layout

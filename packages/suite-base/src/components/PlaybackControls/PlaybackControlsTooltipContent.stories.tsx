@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useTheme } from "@mui/material";
-import { StoryObj, StoryFn } from "@storybook/react";
+import { StoryObj, StoryFn } from "@storybook/react-webpack5";
 import { useEffect } from "react";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";

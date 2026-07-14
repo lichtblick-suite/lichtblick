@@ -141,7 +141,7 @@ describe("pipeline", () => {
       ],
     ])("returns errors for badly formatted input: %s", (sourceCode, errorCategory) => {
       const { diagnostics } = compose(compile, getInputTopics)({ ...baseNodeData, sourceCode }, []);
-      expect(diagnostics.length).toEqual(1);
+      expect(diagnostics).toHaveLength(1);
       expect(diagnostics[0]?.severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
       expect(diagnostics[0]?.code).toEqual(errorCategory);
     });
@@ -160,7 +160,7 @@ describe("pipeline", () => {
       String(ERROR_CODES.OutputTopicChecker.NO_OUTPUTS),
     ])("returns errors for badly formatted output topics", (sourceCode) => {
       const { diagnostics } = getOutputTopic({ ...baseNodeData, sourceCode });
-      expect(diagnostics.length).toEqual(1);
+      expect(diagnostics).toHaveLength(1);
       expect(diagnostics[0]?.severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
       expect(diagnostics[0]?.code).toEqual(ERROR_CODES.OutputTopicChecker.NO_OUTPUTS);
     });
@@ -174,7 +174,7 @@ describe("pipeline", () => {
         { ...baseNodeData, inputTopics },
         topics.map((name) => ({ name, schemaName: "" })),
       );
-      expect(diagnostics.length).toEqual(1);
+      expect(diagnostics).toHaveLength(1);
       expect(diagnostics[0]?.severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
       expect(diagnostics[0]?.code).toEqual(ERROR_CODES.InputTopicsChecker.NO_TOPIC_AVAIL);
     });
@@ -186,7 +186,7 @@ describe("pipeline", () => {
       "const num: number = 1222",
     ])("can compile", (sourceCode) => {
       const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-      expect(diagnostics.length).toEqual(0);
+      expect(diagnostics).toHaveLength(0);
     });
     it.each([
       "const x: number = Math.max(1, 2);",
@@ -194,21 +194,21 @@ describe("pipeline", () => {
       "const x: number = Math.max(...[1, 2, 3]);",
     ])("can compile globals", (sourceCode) => {
       const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-      expect(diagnostics.length).toEqual(0);
+      expect(diagnostics).toHaveLength(0);
     });
     it("compiles type definitions from 'ros'", () => {
       const { diagnostics } = compile({
         ...baseNodeData,
         sourceCode: `import { Time } from 'ros';`,
       });
-      expect(diagnostics.length).toEqual(0);
+      expect(diagnostics).toHaveLength(0);
     });
     it.each([
       "import { Time } from 'ros'; const myIncorrectTime: Time = 'abc'",
       "import { Time } from 'ros'; const myIncompleteTime: Time = { sec: 0 }",
     ])("throws errors when user code breaks 'ros' type definitions", (sourceCode) => {
       const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-      expect(diagnostics.length).toEqual(1);
+      expect(diagnostics).toHaveLength(1);
     });
 
     describe("log function", () => {
@@ -227,7 +227,7 @@ describe("pipeline", () => {
         // "enum Enums { Red, Green, Blue }; log({ 'a': Enums })",
       ])("can compile logs", (sourceCode) => {
         const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-        expect(diagnostics.length).toEqual(0);
+        expect(diagnostics).toHaveLength(0);
       });
       it.each([
         "log(() => {})",
@@ -238,7 +238,7 @@ describe("pipeline", () => {
         "log(1, 1.5, 'A', false, undefined, null, {'someKey': {'someNestedKey': () => {}}})",
       ])("throws errors when user uses incorrect arguments with log function", (sourceCode) => {
         const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-        expect(diagnostics.length).toEqual(1);
+        expect(diagnostics).toHaveLength(1);
         const { source, severity } = diagnostics[0]!;
         expect(source).toEqual(SOURCES.Typescript);
         expect(severity).toEqual(DIAGNOSTIC_SEVERITY.Error);
@@ -263,7 +263,7 @@ describe("pipeline", () => {
       },
     ])("catches semantic errors", ({ sourceCode, errorCode }) => {
       const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-      expect(diagnostics.length).toEqual(1);
+      expect(diagnostics).toHaveLength(1);
       const { source, message, severity, code } = diagnostics[0]!;
       expect(code).toEqual(errorCode);
       expect(source).toEqual("Typescript");
@@ -275,7 +275,7 @@ describe("pipeline", () => {
       { sourceCode: "(", errorCode: 1109 },
     ])("catches syntactic errors", ({ sourceCode, errorCode }) => {
       const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-      expect(diagnostics.length).toEqual(1);
+      expect(diagnostics).toHaveLength(1);
       const { source, message, severity, code } = diagnostics[0]!;
       expect(code).toEqual(errorCode);
       expect(source).toEqual("Typescript");
@@ -321,7 +321,7 @@ describe("pipeline", () => {
     it.each(["const x: string = 'hello foxglove'"])("produces transpiled code", (sourceCode) => {
       const { transpiledCode, diagnostics } = compile({ ...baseNodeData, sourceCode });
       expect(typeof transpiledCode).toEqual("string");
-      expect(diagnostics.length).toEqual(0);
+      expect(diagnostics).toHaveLength(0);
     });
     it.each([
       "const x: string = 'hello foxglove'",
@@ -339,48 +339,30 @@ describe("pipeline", () => {
   describe("compile + extractGlobalVariables", () => {
     const extract = compose(compile, extractGlobalVariables);
 
-    it("should not run if there were any compile time errors", () => {
-      const nodeData = extract(
-        {
-          ...baseNodeData,
-          sourceCode: "const x: string = 41; type GlobalVariables = { foo: string; };",
-        },
-        [],
-      );
-      expect(nodeData.globalVariables).toEqual([]);
-    });
-
-    it("extracts globalVariables from the AST", () => {
-      const nodeData = extract(
-        {
-          ...baseNodeData,
-          sourceCode: "type GlobalVariables = { foo: string; bar: number; };",
-        },
-        [],
-      );
-      expect(nodeData.globalVariables).toEqual(["foo", "bar"]);
-    });
-
-    it("ignores variables named GlobalVariables", () => {
-      const nodeData = extract(
-        {
-          ...baseNodeData,
-          sourceCode: "const GlobalVariables = { foo: 'string', num: 3 };",
-        },
-        [],
-      );
-      expect(nodeData.globalVariables).toEqual([]);
-    });
-
-    it("allows empty GlobalVariables", () => {
-      const nodeData = extract(
-        {
-          ...baseNodeData,
-          sourceCode: "type GlobalVariables = {};",
-        },
-        [],
-      );
-      expect(nodeData.globalVariables).toEqual([]);
+    it.each([
+      {
+        name: "should not run if there were any compile time errors",
+        sourceCode: "const x: string = 41; type GlobalVariables = { foo: string; };",
+        expected: [],
+      },
+      {
+        name: "extracts globalVariables from the AST",
+        sourceCode: "type GlobalVariables = { foo: string; bar: number; };",
+        expected: ["foo", "bar"],
+      },
+      {
+        name: "ignores variables named GlobalVariables",
+        sourceCode: "const GlobalVariables = { foo: 'string', num: 3 };",
+        expected: [],
+      },
+      {
+        name: "allows empty GlobalVariables",
+        sourceCode: "type GlobalVariables = {};",
+        expected: [],
+      },
+    ])("$name", ({ sourceCode, expected }) => {
+      const nodeData = extract({ ...baseNodeData, sourceCode }, []);
+      expect(nodeData.globalVariables).toEqual(expected);
     });
   });
 

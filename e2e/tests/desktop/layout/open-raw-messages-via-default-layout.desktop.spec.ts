@@ -5,12 +5,12 @@ import { DataSourceDialog, LayoutManager, Sidebar } from "../../../page-objects"
 
 /**
  * GIVEN the default layout is open
- * WHEN the user clicks on the Raw Messages panel
- * THEN the Raw Messages panel settings should be displayed
+ * WHEN the user clicks on the Raw Messages Virtual panel
+ * THEN the Raw Messages Virtual panel settings should be displayed
  */
-test("open Raw Messages panel when clicking on Layouts > layout", { tag: "@regression" }, async ({
-  mainWindow,
-}) => {
+test("open Raw Messages Virtual panel when clicking on Layouts > layout", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
   const dialog = new DataSourceDialog(mainWindow);
   const sidebar = new Sidebar(mainWindow);
   const layout = new LayoutManager(mainWindow);
@@ -25,7 +25,7 @@ test("open Raw Messages panel when clicking on Layouts > layout", { tag: "@regre
   await mainWindow.getByText("No topic selected").nth(0).click();
 
   // Then
-  await expect(mainWindow.getByText("Raw Messages panel", { exact: true }).count()).resolves.toBe(
-    1,
-  );
+  await expect(
+    mainWindow.getByText("Raw Messages Virtual panel", { exact: true }).count(),
+  ).resolves.toBe(1);
 });

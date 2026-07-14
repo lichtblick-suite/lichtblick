@@ -35,10 +35,11 @@ test("show correctly open a web socket connection showing correct attibutes on r
     await sidebar.openTopicsTab();
     await expect(mainWindow.getByText("/websocket_test").innerHTML()).resolves.toBeDefined();
     await panels.addPanel("Raw Messages");
-    await mainWindow.getByPlaceholder("/some/topic.msgs[0].field").nth(0).click();
+
+    const rawMessagesPanel = mainWindow.getByTestId(/RawMessages!/);
+    await rawMessagesPanel.getByPlaceholder("/some/topic.msgs[0].field").click();
     await mainWindow.getByTestId("autocomplete-item").click();
 
-    const rawMessagesPanel = mainWindow.getByTestId(/RawMessages/);
     await rawMessagesPanel.getByText("data").nth(0).click();
     const attributesToCheck = ["hello", '"world"', "foo", "42"];
 

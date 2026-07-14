@@ -20,7 +20,7 @@ import {
 import * as _ from "lodash-es";
 import moment from "moment";
 import { useSnackbar } from "notistack";
-import { useEffect, useLayoutEffect, useMemo } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo } from "react";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 
 import Logger from "@lichtblick/log";
@@ -37,6 +37,11 @@ import {
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
+import {
+  WorkspaceStoreSelectors,
+  useWorkspaceStore,
+} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useLayoutActions } from "@lichtblick/suite-base/hooks/useLayoutActions";
@@ -183,6 +188,24 @@ export default function LayoutBrowser({
     });
   }, [reloadLayouts]);
 
+  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
+  const [hideSignInPrompt = false, setHideSignInPrompt] = useAppConfigurationValue<boolean>(
+    AppSetting.HIDE_SIGN_IN_PROMPT,
+  );
+
+  const { personal: personalExpanded, shared: sharedExpanded } = useWorkspaceStore(
+    WorkspaceStoreSelectors.selectLayoutSectionExpanded,
+  );
+  const { layoutBrowserActions } = useWorkspaceActions();
+  const { setPersonalSectionExpanded, setSharedSectionExpanded } = layoutBrowserActions;
+  const togglePersonalExpanded = useCallback(() => {
+    setPersonalSectionExpanded((expanded) => !expanded);
+  }, [setPersonalSectionExpanded]);
+
+  const toggleSharedExpanded = useCallback(() => {
+    setSharedSectionExpanded((expanded) => !expanded);
+  }, [setSharedSectionExpanded]);
+
   const createNewLayout = useCallbackWithToast(async () => {
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
@@ -198,10 +221,17 @@ export default function LayoutBrowser({
       data: layoutData,
       permission: "CREATOR_WRITE",
     });
-    void onSelectLayout(newLayout);
+    await onSelectLayout(newLayout);
+    setPersonalSectionExpanded(true);
 
-    void analytics.logEvent(AppEvent.LAYOUT_CREATE);
-  }, [currentDateForStorybook, layoutManager, onSelectLayout, analytics]);
+    await analytics.logEvent(AppEvent.LAYOUT_CREATE);
+  }, [
+    currentDateForStorybook,
+    layoutManager,
+    onSelectLayout,
+    setPersonalSectionExpanded,
+    analytics,
+  ]);
 
   const onShareLayout = useCallbackWithToast(
     async (item: Layout) => {
@@ -217,11 +247,12 @@ export default function LayoutBrowser({
           data: item.working?.data ?? item.baseline.data,
           permission: "ORG_WRITE",
         });
-        void analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
+        await analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
+        setSharedSectionExpanded(true);
         await onSelectLayout(newLayout);
       }
     },
-    [analytics, layoutManager, onSelectLayout, prompt],
+    [analytics, layoutManager, onSelectLayout, prompt, setSharedSectionExpanded],
   );
 
   const onMakePersonalCopy = useCallbackWithToast(
@@ -230,19 +261,16 @@ export default function LayoutBrowser({
         id: item.id,
         name: `${item.name} copy`,
       });
+      setPersonalSectionExpanded(true);
       await onSelectLayout(newLayout);
-      void analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
+      await analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
         permission: item.permission,
         syncStatus: item.syncInfo?.status,
       });
     },
-    [analytics, layoutManager, onSelectLayout],
+    [analytics, layoutManager, onSelectLayout, setPersonalSectionExpanded],
   );
 
-  const [enableNewTopNav = true] = useAppConfigurationValue<boolean>(AppSetting.ENABLE_NEW_TOPNAV);
-  const [hideSignInPrompt = false, setHideSignInPrompt] = useAppConfigurationValue<boolean>(
-    AppSetting.HIDE_SIGN_IN_PROMPT,
-  );
   const showSignInPrompt =
     signIn != undefined && !layoutManager.supportsSharing && !hideSignInPrompt;
 
@@ -322,6 +350,8 @@ export default function LayoutBrowser({
         <LayoutSection
           disablePadding={enableNewTopNav}
           title={layoutManager.supportsSharing ? "Personal" : undefined}
+          expanded={personalExpanded}
+          onToggleExpanded={togglePersonalExpanded}
           emptyText="Add a new layout to get started with Lichtblick!"
           items={layouts.value?.personal}
           anySelectedModifiedLayouts={anySelectedModifiedLayouts}
@@ -341,6 +371,8 @@ export default function LayoutBrowser({
           <LayoutSection
             disablePadding={enableNewTopNav}
             title="Organization"
+            expanded={sharedExpanded}
+            onToggleExpanded={toggleSharedExpanded}
             emptyText="Your organization doesn’t have any shared layouts yet. Share a layout to collaborate with others."
             items={layouts.value?.shared}
             anySelectedModifiedLayouts={anySelectedModifiedLayouts}

@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { PopoverPosition, PopoverReference } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 import { userEvent, within } from "@storybook/testing-library";
 import * as _ from "lodash-es";
 
