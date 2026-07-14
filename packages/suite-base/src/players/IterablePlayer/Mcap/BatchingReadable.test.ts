@@ -165,7 +165,7 @@ describe("BatchingReadable", () => {
   it("should honor a custom gapThresholdBytes option that prevents merging", async () => {
     // Given
     const inner = makeMockInner();
-    const readable = new BatchingReadable(inner, { gapThresholdBytes: 8 });
+    const readable = new BatchingReadable(inner, { gapThresholdBytes: 8n });
     // Read A ends at offset 4; B is 9 bytes away, which exceeds the custom
     // threshold of 8 (but would be merged under the default threshold).
     const bOffset = 13n;
@@ -261,7 +261,7 @@ describe("BatchingReadable", () => {
     // Given a small max span; the two reads are within the gap threshold but
     // together span more bytes than the cap allows.
     const inner = makeMockInner();
-    const readable = new BatchingReadable(inner, { maxCoalescedBytes: 150 });
+    const readable = new BatchingReadable(inner, { maxCoalescedBytes: 150n });
     // Read A ends at 100; B starts at 120 (gap 20 < default 64 KiB threshold),
     // but the merged span [0, 220) = 220 bytes exceeds the 150-byte cap.
     const bOffset = 120n;

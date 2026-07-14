@@ -7,8 +7,8 @@
 
 import { McapTypes } from "@mcap/core";
 
-const BATCH_GAP_THRESHOLD_BYTES = 64 * 1024;
-const BATCH_MAX_COALESCED_BYTES = 4 * 1024 * 1024;
+const BATCH_GAP_THRESHOLD_BYTES = 64n * 1024n;
+const BATCH_MAX_COALESCED_BYTES = 4n * 1024n * 1024n;
 
 type PendingRead = {
   offset: bigint;
@@ -32,11 +32,11 @@ export class BatchingReadable implements McapTypes.IReadable {
 
   public constructor(
     inner: McapTypes.IReadable,
-    options?: { gapThresholdBytes?: number; maxCoalescedBytes?: number },
+    options?: { gapThresholdBytes?: bigint; maxCoalescedBytes?: bigint },
   ) {
     this.#inner = inner;
-    this.#gapThresholdBytes = BigInt(options?.gapThresholdBytes ?? BATCH_GAP_THRESHOLD_BYTES);
-    this.#maxCoalescedBytes = BigInt(options?.maxCoalescedBytes ?? BATCH_MAX_COALESCED_BYTES);
+    this.#gapThresholdBytes = options?.gapThresholdBytes ?? BATCH_GAP_THRESHOLD_BYTES;
+    this.#maxCoalescedBytes = options?.maxCoalescedBytes ?? BATCH_MAX_COALESCED_BYTES;
   }
 
   public async size(): Promise<bigint> {
@@ -94,7 +94,10 @@ export class BatchingReadable implements McapTypes.IReadable {
       groups.map(async (group) => {
         const groupStart = group.start;
         try {
-          const data = await this.#inner.read(groupStart, group.end - groupStart);
+          const data = await this.#inner.read(
+            groupStart,
+            group.end - groupStart,
+          );
           const first = group.members[0];
           if (group.members.length === 1 && first != undefined) {
             // Single-member read: forward unchanged to avoid a copy in this hot path.
