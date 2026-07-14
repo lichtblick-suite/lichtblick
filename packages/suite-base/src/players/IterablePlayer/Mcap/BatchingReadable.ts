@@ -94,10 +94,7 @@ export class BatchingReadable implements McapTypes.IReadable {
       groups.map(async (group) => {
         const groupStart = group.start;
         try {
-          const data = await this.#inner.read(
-            groupStart,
-            group.end - groupStart,
-          );
+          const data = await this.#inner.read(groupStart, group.end - groupStart);
           const first = group.members[0];
           if (group.members.length === 1 && first != undefined) {
             // Single-member read: forward unchanged to avoid a copy in this hot path.
