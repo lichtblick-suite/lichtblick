@@ -92,12 +92,13 @@ describe("APP_CONFIG", () => {
     (globalThis as any).API_URL = "";
     (globalThis as any).LICHTBLICK_SUITE_VERSION = "";
     (globalThis as any).DEV_WORKSPACE = "";
-    (globalThis as any).SYNC_LOCAL_LAYOUTS = "";
+    // This setting is statically typed as boolean, keep it undefined to test the fallback branch.
+    (globalThis as any).SYNC_LOCAL_LAYOUTS = undefined;
     const { APP_CONFIG } = await import("./config");
 
     expect(APP_CONFIG.apiUrl).toBe(""); // Empty string, not default
     expect(APP_CONFIG.version).toBe(""); // Empty string, not default
     expect(APP_CONFIG.devWorkspace).toBe(""); // Empty string, not default
-    expect(APP_CONFIG.syncLocalLayouts).toBe(""); // Empty string, not default
+    expect(APP_CONFIG.syncLocalLayouts).toBe(false); // Falls back when undefined
   });
 });
