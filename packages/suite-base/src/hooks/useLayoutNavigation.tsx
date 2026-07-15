@@ -66,7 +66,7 @@ export function useLayoutNavigation(menuClose?: () => void): UseLayoutNavigation
       { selectedViaClick = false, event }: { selectedViaClick?: boolean; event?: MouseEvent } = {},
     ) => {
       if (selectedViaClick) {
-        void analytics.logEvent(AppEvent.LAYOUT_SELECT, { permission: item.permission });
+        analytics.logEvent(AppEvent.LAYOUT_SELECT, { permission: item.permission });
       }
       if (event?.ctrlKey === true || event?.metaKey === true || event?.shiftKey === true) {
         if (item.id !== currentLayoutId) {

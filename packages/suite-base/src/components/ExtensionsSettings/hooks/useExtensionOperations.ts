@@ -59,7 +59,7 @@ export function useExtensionOperations(
         const extensionBuffer = await downloadExtension(url);
         await installExtensions("local", [{ buffer: extensionBuffer }]);
         enqueueSnackbar(`${extension.name} installed successfully`, { variant: "success" });
-        await analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
+        analytics.logEvent(AppEvent.EXTENSION_INSTALL, { type: extension.id });
         onInstallSuccess?.(extension.id);
       } catch (error) {
         enqueueSnackbar(error instanceof Error ? error.message : "Failed to install extension", {
@@ -82,7 +82,7 @@ export function useExtensionOperations(
         await new Promise((resolve) => setTimeout(resolve, 200));
         await uninstallExtension(extension.namespace ?? "local", extension.id);
         enqueueSnackbar(`${extension.name} uninstalled successfully`, { variant: "success" });
-        await analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
+        analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
         onUninstallSuccess?.(extension.id);
       } catch (error) {
         enqueueSnackbar(error instanceof Error ? error.message : "Failed to uninstall extension", {

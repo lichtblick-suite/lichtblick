@@ -137,7 +137,7 @@ export default function Variable(props: {
 
   const deleteVariable = useCallback(() => {
     setGlobalVariables({ [name]: undefined });
-    void analytics.logEvent(AppEvent.VARIABLE_DELETE);
+    analytics.logEvent(AppEvent.VARIABLE_DELETE);
     handleClose();
   }, [analytics, name, setGlobalVariables]);
 
