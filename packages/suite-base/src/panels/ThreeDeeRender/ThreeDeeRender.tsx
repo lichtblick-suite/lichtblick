@@ -374,29 +374,34 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [topics, renderer]);
 
+  // Keep transform preloading in sync with the current data source.
   // Preloading is disabled by default, but transform topics generally need to be preloaded to render correctly.
   // Whenever the presence of transform topics changes (e.g. a new data source is loaded), we enable preloading
   // if the source exposes transform topics and disable it otherwise. Because we only react to that
   // presence flipping, a manual toggle by the user within the same data source is preserved.
+  const topicsLoaded = topics != undefined;
   const hasTransformTopics = useMemo(
-    () => topics?.some((topic) => TRANSFORM_TOPIC_SCHEMAS.has(topic.schemaName)),
+    () => topics?.some((topic) => TRANSFORM_TOPIC_SCHEMAS.has(topic.schemaName)) ?? false,
     [topics],
   );
-  const [prevHasTransformTopics, setPrevHasTransformTopics] = useState<boolean | undefined>(
-    undefined,
-  );
-  if (hasTransformTopics != undefined && hasTransformTopics !== prevHasTransformTopics) {
-    setPrevHasTransformTopics(hasTransformTopics);
-    if ((config.scene.transforms?.enablePreloading ?? false) !== hasTransformTopics) {
-      setConfig((prevConfig) => ({
-        ...prevConfig,
-        scene: {
-          ...prevConfig.scene,
-          transforms: { ...prevConfig.scene.transforms, enablePreloading: hasTransformTopics },
-        },
-      }));
+  const prevHasTransformTopicsRef = useRef<boolean | undefined>(undefined);
+  useEffect(() => {
+    if (!topicsLoaded || prevHasTransformTopicsRef.current === hasTransformTopics) {
+      return;
     }
-  }
+    prevHasTransformTopicsRef.current = hasTransformTopics;
+
+    if ((config.scene.transforms?.enablePreloading ?? false) === hasTransformTopics) {
+      return;
+    }
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      scene: {
+        ...prevConfig.scene,
+        transforms: { ...prevConfig.scene.transforms, enablePreloading: hasTransformTopics },
+      },
+    }));
+  }, [topicsLoaded, hasTransformTopics, config.scene.transforms?.enablePreloading]);
 
   // Tell the renderer if we are connected to a ROS data source
   useEffect(() => {

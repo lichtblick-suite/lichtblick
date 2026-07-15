@@ -1327,5 +1327,51 @@ describe("ThreeDeeRender", () => {
         expect(lastRendererPreloading()).toBe(false);
       });
     });
+
+    it("should preserve a manual toggle across renders with the same transform-topic presence", async () => {
+      // Given a persistent renderer instance so configChange (a user toggle) can be emitted across
+      // the renderer re-creations that happen when enablePreloading flips.
+      const persistentRenderer = createMockRenderer();
+      mockedRenderer.mockImplementation(() => persistentRenderer as unknown as Renderer);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // Transform topics auto-enable preloading.
+      act(() => {
+        mockContext.onRender!({ topics: [tfTopic, plainTopic] }, jest.fn());
+      });
+      await waitFor(() => {
+        expect(lastRendererPreloading()).toBe(true);
+      });
+
+      // When the user manually disables preloading (simulated via a configChange event).
+      const currentConfig = mockedRenderer.mock.calls.at(-1)![0].config;
+      persistentRenderer.config = {
+        ...currentConfig,
+        scene: {
+          ...currentConfig.scene,
+          transforms: { ...currentConfig.scene.transforms, enablePreloading: false },
+        },
+      };
+      act(() => {
+        persistentRenderer.emit("configChange", persistentRenderer);
+      });
+      await waitFor(() => {
+        expect(lastRendererPreloading()).toBe(false);
+      });
+
+      // And subsequent renders arrive with the same transform-topic presence.
+      act(() => {
+        mockContext.onRender!({ topics: [tfTopic, plainTopic] }, jest.fn());
+      });
+
+      // Then the manual choice is preserved and not overwritten back to true.
+      expect(lastRendererPreloading()).toBe(false);
+    });
   });
 });
