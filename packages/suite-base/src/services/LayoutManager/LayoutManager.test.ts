@@ -820,7 +820,7 @@ describe("LayoutManager", () => {
           data: sharedLayout.working!.data,
         }),
       );
-      expect(result.working).toBe(undefined);
+      expect(result.working).toBeUndefined();
       expect(result.baseline.data).toEqual(remoteLayout.data);
       expect(result.syncInfo?.status).toBe("tracked");
     });
