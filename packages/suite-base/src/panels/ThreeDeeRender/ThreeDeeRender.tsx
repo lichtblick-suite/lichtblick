@@ -43,6 +43,7 @@ import { RendererContext, useRendererEvent, useRendererProperty } from "./Render
 import { RendererOverlay } from "./RendererOverlay";
 import { useStyles } from "./ThreeDeeRender.style";
 import { CameraState, DEFAULT_CAMERA_STATE } from "./camera";
+import { FRAME_TRANSFORM_DATATYPES, FRAME_TRANSFORMS_DATATYPES } from "./foxglove";
 import {
   PublishRos1Datatypes,
   PublishRos2Datatypes,
@@ -53,9 +54,21 @@ import {
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { PublishClickEventMap } from "./renderables/PublishClickTool";
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/PublishSettings";
+import { TF_DATATYPES, TRANSFORM_STAMPED_DATATYPES } from "./ros";
 import { Shared3DPanelState, ThreeDeeRenderProps } from "./types";
 
 const log = Logger.getLogger(__filename);
+
+/**
+ * Schemas that carry coordinate frame transforms. Topics with one of these schemas generally
+ * require preloading so that transforms are available across the whole playback range.
+ */
+const TRANSFORM_TOPIC_SCHEMAS = new Set<string>([
+  ...FRAME_TRANSFORM_DATATYPES,
+  ...FRAME_TRANSFORMS_DATATYPES,
+  ...TF_DATATYPES,
+  ...TRANSFORM_STAMPED_DATATYPES,
+]);
 
 /**
  * A panel that renders a 3D scene. This is a thin wrapper around a `Renderer` instance.
@@ -360,6 +373,30 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       renderRef.current.needsRender = true;
     }
   }, [topics, renderer]);
+
+  // Preloading is disabled by default, but transform topics generally need to be preloaded to render correctly.
+  // Whenever the presence of transform topics changes (e.g. a new data source is loaded), we enable preloading
+  // if the source exposes transform topics and disable it otherwise. Because we only react to that
+  // presence flipping, a manual toggle by the user within the same data source is preserved.
+  const hasTransformTopics = useMemo(
+    () => topics?.some((topic) => TRANSFORM_TOPIC_SCHEMAS.has(topic.schemaName)),
+    [topics],
+  );
+  const [prevHasTransformTopics, setPrevHasTransformTopics] = useState<boolean | undefined>(
+    undefined,
+  );
+  if (hasTransformTopics != undefined && hasTransformTopics !== prevHasTransformTopics) {
+    setPrevHasTransformTopics(hasTransformTopics);
+    if ((config.scene.transforms?.enablePreloading ?? false) !== hasTransformTopics) {
+      setConfig((prevConfig) => ({
+        ...prevConfig,
+        scene: {
+          ...prevConfig.scene,
+          transforms: { ...prevConfig.scene.transforms, enablePreloading: hasTransformTopics },
+        },
+      }));
+    }
+  }
 
   // Tell the renderer if we are connected to a ROS data source
   useEffect(() => {

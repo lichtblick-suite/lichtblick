@@ -21,6 +21,7 @@ import type { MessageEvent } from "@lichtblick/suite-base/players/types";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RenderStateBuilder from "@lichtblick/suite-base/testing/builders/RenderStateBuilder";
 
+import type { RendererConfig } from "./IRenderer";
 import { Renderer } from "./Renderer";
 import { ThreeDeeRender } from "./ThreeDeeRender";
 import { DEFAULT_CAMERA_STATE } from "./camera";
@@ -1250,6 +1251,80 @@ describe("ThreeDeeRender", () => {
         );
         const seekCall = customRendererInstance.handleSeek.mock.calls[0];
         expect(seekCall?.[1]).toHaveLength(50);
+      });
+    });
+  });
+
+  describe("auto transform preloading", () => {
+    const tfTopic = RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" });
+    const plainTopic = RenderStateBuilder.topic({
+      name: "/other",
+      schemaName: "std_msgs/String",
+    });
+
+    // The renderer is re-created whenever `enablePreloading` flips, so the config passed to the most
+    // recent Renderer construction reflects the current value of the setting.
+    const lastRendererPreloading = (): boolean | undefined =>
+      (mockedRenderer.mock.calls.at(-1)?.[0] as { config: RendererConfig } | undefined)?.config
+        .scene.transforms?.enablePreloading;
+
+    it("should enable preloading when a transform topic is present", async () => {
+      // Given
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // When
+      act(() => {
+        mockContext.onRender!({ topics: [tfTopic, plainTopic] }, jest.fn());
+      });
+
+      // Then
+      await waitFor(() => {
+        expect(lastRendererPreloading()).toBe(true);
+      });
+    });
+
+    it("should keep preloading disabled when no transform topic is present", async () => {
+      // Given
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // When
+      act(() => {
+        mockContext.onRender!({ topics: [plainTopic] }, jest.fn());
+      });
+
+      // Then
+      expect(lastRendererPreloading()).not.toBe(true);
+    });
+
+    it("should reset preloading to false when switching to a source without transform topics", async () => {
+      // Given
+      const mockContext = createMockContext({
+        initialState: { scene: { transforms: { enablePreloading: true } } },
+      });
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // When
+      act(() => {
+        mockContext.onRender!({ topics: [plainTopic] }, jest.fn());
+      });
+
+      // Then
+      await waitFor(() => {
+        expect(lastRendererPreloading()).toBe(false);
       });
     });
   });
