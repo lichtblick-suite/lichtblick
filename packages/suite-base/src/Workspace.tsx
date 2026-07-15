@@ -97,6 +97,7 @@ import { InjectedSidebarItem, Namespace, WorkspaceProps } from "@lichtblick/suit
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import useBroadcast from "@lichtblick/suite-base/util/broadcast/useBroadcast";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
 
@@ -519,7 +520,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   // Resolve session-based MCAP URLs when sessionId is present.
   useEffect(() => {
     const sessionId = targetUrlState?.sessionId;
-    if (!sessionId) {
+    if (!sessionId || !APP_CONFIG.apiUrl) {
       return;
     }
 
