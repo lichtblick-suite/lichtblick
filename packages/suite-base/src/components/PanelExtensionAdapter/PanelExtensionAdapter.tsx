@@ -797,10 +797,6 @@ function PanelExtensionAdapter(
 
     setBuildRenderState(() => initRenderStateBuilder());
 
-    // Capture the stable Set that tracks this panel's alert ids. It is mutated by reference as the
-    // panel sets/clears alerts, so the cleanup below observes the latest ids.
-    const panelAlertIds = panelAlertIdsRef.current;
-
     const panelElement = document.createElement("div");
     panelElement.style.width = "100%";
     panelElement.style.height = "100%";
@@ -827,11 +823,6 @@ function PanelExtensionAdapter(
       panelElement.remove();
       getMessagePipelineContext().setSubscriptions(panelId, []);
       getMessagePipelineContext().setPublishers(panelId, []);
-      // Clear any app-level alerts this panel set so they do not linger after unmount.
-      for (const alertId of panelAlertIds) {
-        clearAlert(`panel-alert:${panelId}:${alertId}`);
-      }
-      panelAlertIds.clear();
     };
   }, [
     initPanel,
@@ -842,6 +833,17 @@ function PanelExtensionAdapter(
     playerIsInitializing,
     clearAlert,
   ]);
+
+  // Clear this panel's alerts on unmount.
+  useEffect(() => {
+    const panelAlertIds = panelAlertIdsRef.current;
+    return () => {
+      for (const alertId of panelAlertIds) {
+        clearAlert(`panel-alert:${panelId}:${alertId}`);
+      }
+      panelAlertIds.clear();
+    };
+  }, [panelId, clearAlert]);
 
   const style: CSSProperties = {};
   if (slowRender) {

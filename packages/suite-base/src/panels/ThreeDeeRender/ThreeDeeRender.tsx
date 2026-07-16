@@ -383,10 +383,6 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [topics, renderer]);
 
-  // Keep transform preloading in sync with the current data source.
-  // Preloading is disabled by default, but transform topics generally need to be preloaded to render correctly.
-  // Whenever the presence of transform topics changes (e.g. a new data source is loaded), we alert the user and recommend enabling preloading for accurate visualization of transform topics.
-  // const topicsLoaded = topics != undefined;
   const hasTransformTopics = useMemo(
     () => topics?.some((topic) => TRANSFORM_TOPIC_SCHEMAS.has(topic.schemaName)) ?? false,
     [topics],
