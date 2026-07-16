@@ -133,19 +133,19 @@ describe("DesktopWorkspacesManager", () => {
   });
 
   describe("setCurrent", () => {
-    it.each<string | undefined>(["id-1", undefined])(
-      "should forward the selection %p to the bridge",
-      async (id) => {
-        // GIVEN the bridge resolves on set
-        bridge.setCurrentWorkspace.mockResolvedValue();
+    it.each<string | undefined>([
+      "id-1",
+      undefined,
+    ])("should forward the selection %p to the bridge", async (id) => {
+      // GIVEN the bridge resolves on set
+      bridge.setCurrentWorkspace.mockResolvedValue();
 
-        // WHEN selecting a workspace (including clearing with undefined)
-        await manager.setCurrent(id);
+      // WHEN selecting a workspace (including clearing with undefined)
+      await manager.setCurrent(id);
 
-        // THEN the bridge is called with the same id
-        expect(bridge.setCurrentWorkspace).toHaveBeenCalledWith(id);
-      },
-    );
+      // THEN the bridge is called with the same id
+      expect(bridge.setCurrentWorkspace).toHaveBeenCalledWith(id);
+    });
 
     it("should accept both namespaces round-tripped through create", async () => {
       // GIVEN two namespaces

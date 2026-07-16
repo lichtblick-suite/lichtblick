@@ -50,30 +50,30 @@ describe("WorkspacesManager", () => {
   }
 
   describe("create", () => {
-    it.each<WorkspaceNamespace>(["local", "org"])(
-      "should persist a config that round-trips through getConfig for the %s namespace",
-      async (namespace) => {
-        // GIVEN a fresh workspaces root
-        // WHEN creating a workspace
-        const workspace = await manager.create("My Workspace", namespace);
+    it.each<WorkspaceNamespace>([
+      "local",
+      "org",
+    ])("should persist a config that round-trips through getConfig for the %s namespace", async (namespace) => {
+      // GIVEN a fresh workspaces root
+      // WHEN creating a workspace
+      const workspace = await manager.create("My Workspace", namespace);
 
-        // THEN the returned workspace exposes the expected fields and disk path
-        expect(workspace.id).toEqual(expect.any(String));
-        expect(workspace.name).toBe("My Workspace");
-        expect(workspace.namespace).toBe(namespace);
-        expect(workspace.path).toBe(pathJoin(workspacesRoot, workspace.id));
+      // THEN the returned workspace exposes the expected fields and disk path
+      expect(workspace.id).toEqual(expect.any(String));
+      expect(workspace.name).toBe("My Workspace");
+      expect(workspace.namespace).toBe(namespace);
+      expect(workspace.path).toBe(pathJoin(workspacesRoot, workspace.id));
 
-        // THEN the persisted config round-trips including the namespace
-        const config = await manager.getConfig(workspace.id);
-        expect(config).toEqual({
-          id: workspace.id,
-          name: "My Workspace",
-          namespace,
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        });
-      },
-    );
+      // THEN the persisted config round-trips including the namespace
+      const config = await manager.getConfig(workspace.id);
+      expect(config).toEqual({
+        id: workspace.id,
+        name: "My Workspace",
+        namespace,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      });
+    });
 
     it("should scaffold the extensions and layouts sub-folders", async () => {
       // GIVEN a fresh workspaces root
@@ -95,16 +95,14 @@ describe("WorkspacesManager", () => {
       expect(workspace.name).toBe("Padded Name");
     });
 
-    it.each(["", "   "])(
-      "should throw when creating a workspace with an empty name (%p)",
-      async (name) => {
-        // GIVEN an empty/whitespace name
-        // WHEN creating a workspace THEN it throws
-        await expect(manager.create(name, "local")).rejects.toThrow(
-          "Workspace name cannot be empty",
-        );
-      },
-    );
+    it.each([
+      "",
+      "   ",
+    ])("should throw when creating a workspace with an empty name (%p)", async (name) => {
+      // GIVEN an empty/whitespace name
+      // WHEN creating a workspace THEN it throws
+      await expect(manager.create(name, "local")).rejects.toThrow("Workspace name cannot be empty");
+    });
 
     it("should assign a unique id to each created workspace", async () => {
       // GIVEN two created workspaces
@@ -212,16 +210,16 @@ describe("WorkspacesManager", () => {
       );
     });
 
-    it.each(["../evil", "foo/bar"])(
-      "should reject a path-traversal id (%p)",
-      async (traversalId) => {
-        // GIVEN a malicious id that escapes the workspaces root
-        // WHEN renaming THEN it is rejected before touching disk
-        await expect(manager.rename(traversalId, "New Name")).rejects.toThrow(
-          `Invalid workspace id: ${traversalId}`,
-        );
-      },
-    );
+    it.each([
+      "../evil",
+      "foo/bar",
+    ])("should reject a path-traversal id (%p)", async (traversalId) => {
+      // GIVEN a malicious id that escapes the workspaces root
+      // WHEN renaming THEN it is rejected before touching disk
+      await expect(manager.rename(traversalId, "New Name")).rejects.toThrow(
+        `Invalid workspace id: ${traversalId}`,
+      );
+    });
   });
 
   describe("delete", () => {
@@ -265,26 +263,26 @@ describe("WorkspacesManager", () => {
       expect(state.currentWorkspaceId).toBe(current.id);
     });
 
-    it.each(["../evil", "foo/bar"])(
-      "should reject a path-traversal id without touching disk (%p)",
-      async (traversalId) => {
-        // GIVEN a sibling file outside the workspaces root that must not be removed
-        const outsideFile = pathJoin(workspacesRoot, "..", "outside-target.txt");
-        await writeFile(outsideFile, "keep me", { encoding: "utf-8" });
+    it.each([
+      "../evil",
+      "foo/bar",
+    ])("should reject a path-traversal id without touching disk (%p)", async (traversalId) => {
+      // GIVEN a sibling file outside the workspaces root that must not be removed
+      const outsideFile = pathJoin(workspacesRoot, "..", "outside-target.txt");
+      await writeFile(outsideFile, "keep me", { encoding: "utf-8" });
 
-        try {
-          // WHEN deleting with a malicious id THEN it is rejected before any rm
-          await expect(manager.delete(traversalId)).rejects.toThrow(
-            `Invalid workspace id: ${traversalId}`,
-          );
+      try {
+        // WHEN deleting with a malicious id THEN it is rejected before any rm
+        await expect(manager.delete(traversalId)).rejects.toThrow(
+          `Invalid workspace id: ${traversalId}`,
+        );
 
-          // THEN nothing outside the root was removed
-          expect(existsSync(outsideFile)).toBe(true);
-        } finally {
-          await rm(outsideFile, { force: true });
-        }
-      },
-    );
+        // THEN nothing outside the root was removed
+        expect(existsSync(outsideFile)).toBe(true);
+      } finally {
+        await rm(outsideFile, { force: true });
+      }
+    });
   });
 
   describe("getCurrent", () => {
@@ -354,16 +352,16 @@ describe("WorkspacesManager", () => {
       );
     });
 
-    it.each(["../evil", "foo/bar"])(
-      "should reject a path-traversal id (%p)",
-      async (traversalId) => {
-        // GIVEN a malicious id that escapes the workspaces root
-        // WHEN selecting it THEN it is rejected before any filesystem read
-        await expect(manager.setCurrent(traversalId)).rejects.toThrow(
-          `Invalid workspace id: ${traversalId}`,
-        );
-      },
-    );
+    it.each([
+      "../evil",
+      "foo/bar",
+    ])("should reject a path-traversal id (%p)", async (traversalId) => {
+      // GIVEN a malicious id that escapes the workspaces root
+      // WHEN selecting it THEN it is rejected before any filesystem read
+      await expect(manager.setCurrent(traversalId)).rejects.toThrow(
+        `Invalid workspace id: ${traversalId}`,
+      );
+    });
   });
 
   describe("getConfig", () => {
