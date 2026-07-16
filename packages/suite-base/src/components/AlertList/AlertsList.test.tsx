@@ -5,7 +5,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import { AlertsList } from "@lichtblick/suite-base/components/AlertsList";
+import { AlertsList } from "@lichtblick/suite-base/components/AlertList/AlertsList";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";

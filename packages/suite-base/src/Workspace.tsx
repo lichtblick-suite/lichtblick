@@ -24,7 +24,7 @@ import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useStyles } from "@lichtblick/suite-base/Workspace.style";
 import SessionAPI from "@lichtblick/suite-base/api/session/SessionAPI";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
-import { AlertsList } from "@lichtblick/suite-base/components/AlertsList";
+import { AlertsList } from "@lichtblick/suite-base/components/AlertList/AlertsList";
 import { AppBar } from "@lichtblick/suite-base/components/AppBar";
 import {
   DataSourceDialog,

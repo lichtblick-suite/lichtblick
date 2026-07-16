@@ -27,7 +27,7 @@ import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 
-import { AlertsList } from "../AlertsList";
+import { AlertsList } from "../AlertList/AlertsList";
 import { DataSourceInfoView } from "../DataSourceInfoView";
 import { StyledTab, StyledTabs, useStyles } from "./DataSourceSidebar.style";
 import { AlertBadge } from "./utils";
