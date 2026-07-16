@@ -20,6 +20,7 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
   return create<AlertsContextStore>((set, get) => {
     return {
       alerts: [],
+      dismissedPlayerAlertKeys: new Set<string>(),
       actions: {
         clearAlert: (tag: string) => {
           set({
@@ -38,6 +39,30 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
           }
 
           set({ alerts: [newAlert, ...alerts.filter((al) => al.tag !== tag)] });
+        },
+        dismissPlayerAlert: (key: string) => {
+          const dismissed = get().dismissedPlayerAlertKeys;
+          if (dismissed.has(key)) {
+            return;
+          }
+          set({ dismissedPlayerAlertKeys: new Set(dismissed).add(key) });
+        },
+        dismissPlayerAlerts: (keys: readonly string[]) => {
+          const dismissed = get().dismissedPlayerAlertKeys;
+          const next = new Set(dismissed);
+          for (const key of keys) {
+            next.add(key);
+          }
+          if (next.size === dismissed.size) {
+            return;
+          }
+          set({ dismissedPlayerAlertKeys: next });
+        },
+        restoreDismissedPlayerAlerts: () => {
+          if (get().dismissedPlayerAlertKeys.size === 0) {
+            return;
+          }
+          set({ dismissedPlayerAlertKeys: new Set<string>() });
         },
       },
     };

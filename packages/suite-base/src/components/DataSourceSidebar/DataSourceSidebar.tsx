@@ -36,6 +36,7 @@ import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/us
 import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
+import { NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
 
 import { AlertsList } from "../AlertsList";
 import { DataSourceInfoView } from "../DataSourceInfoView";
@@ -49,6 +50,25 @@ const useStyles = makeStyles()({
     flex: "auto",
   },
 });
+
+const useAlertBadgeStyles = makeStyles<{ severity: NotificationSeverity }>()(
+  (theme, { severity }) => {
+    const paletteColor = {
+      error: theme.palette.error,
+      warn: theme.palette.warning,
+      info: theme.palette.info,
+    }[severity];
+    return {
+      badge: {
+        backgroundColor: paletteColor.main,
+        fontSize: theme.typography.caption.fontSize,
+        color: paletteColor.contrastText,
+        padding: theme.spacing(0.125, 0.75),
+        borderRadius: 8,
+      },
+    };
+  },
+);
 
 const StyledTab = muiStyled(Tab)(({ theme }) => ({
   minHeight: 30,
@@ -71,13 +91,16 @@ const StyledTabs = muiStyled(Tabs)({
   },
 });
 
-const AlertCount = muiStyled("div")(({ theme }) => ({
-  backgroundColor: theme.palette.error.main,
-  fontSize: theme.typography.caption.fontSize,
-  color: theme.palette.error.contrastText,
-  padding: theme.spacing(0.125, 0.75),
-  borderRadius: 8,
-}));
+function AlertBadge({
+  count,
+  severity = "error",
+}: {
+  count: number;
+  severity?: NotificationSeverity;
+}): React.JSX.Element {
+  const { classes } = useAlertBadgeStyles({ severity });
+  return <span className={classes.badge}>{count}</span>;
+}
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
@@ -88,7 +111,7 @@ type DataSourceSidebarTab = "topics" | "events" | "alerts";
 export default function DataSourceSidebar(props: Props): React.JSX.Element {
   const { disableToolbar = false } = props;
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const { playerAlerts, alertCount } = useAlertCount();
+  const { playerAlerts, alertCount, highestSeverity } = useAlertCount();
   const { currentUser } = useCurrentUser();
   const selectedEventId = useEvents(selectSelectedEventId);
   const [activeTab, setActiveTab] = useState<DataSourceSidebarTab>("topics");
@@ -165,7 +188,9 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
                       label={
                         <Stack direction="row" alignItems="baseline" gap={1}>
                           Alerts
-                          {alertCount > 0 && <AlertCount>{alertCount}</AlertCount>}
+                          {alertCount > 0 && (
+                            <AlertBadge count={alertCount} severity={highestSeverity} />
+                          )}
                         </Stack>
                       }
                       value="alerts"

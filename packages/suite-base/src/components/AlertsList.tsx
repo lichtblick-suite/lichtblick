@@ -5,30 +5,47 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ErrorCircle16Regular, Info16Regular, Warning16Regular } from "@fluentui/react-icons";
+import {
+  Dismiss16Regular,
+  ErrorCircle16Regular,
+  Info16Regular,
+  Warning16Regular,
+} from "@fluentui/react-icons";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Divider,
+  IconButton,
+  Tooltip,
   Typography,
   accordionSummaryClasses,
   useTheme,
 } from "@mui/material";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
+import CopyButton from "@lichtblick/suite-base/components/CopyButton";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import { AlertsContextStore, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
+import {
+  AlertsContextStore,
+  getPlayerAlertKey,
+  useAlertsActions,
+  useAlertsStore,
+} from "@lichtblick/suite-base/context/AlertsContext";
 import { PlayerAlert } from "@lichtblick/suite-base/players/types";
-import { DetailsType, NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
+import {
+  DetailsType,
+  NOTIFICATION_SEVERITY_PRIORITY,
+  NotificationSeverity,
+} from "@lichtblick/suite-base/util/sendNotification";
 import { customTypography } from "@lichtblick/theme";
 
 const useStyles = makeStyles()((theme) => ({
@@ -55,6 +72,8 @@ const useStyles = makeStyles()((theme) => ({
   acccordionSummary: {
     height: 30,
     minHeight: "auto",
+    flex: "1 1 auto",
+    minWidth: 0,
     padding: theme.spacing(0, 0.5, 0, 0.75),
     fontWeight: 500,
 
@@ -91,12 +110,36 @@ const useStyles = makeStyles()((theme) => ({
   icon: {
     flex: "none",
   },
+  rowHeader: {
+    display: "flex",
+    alignItems: "center",
+  },
+  rowActions: {
+    display: "flex",
+    alignItems: "center",
+    flex: "none",
+    paddingRight: theme.spacing(0.5),
+  },
 }));
+
+type ListAlert = {
+  key: string;
+  severity: NotificationSeverity;
+  message: string;
+  error?: DetailsType;
+  tip?: string;
+  /** Present for session alerts, which are removed from the store on dismiss. */
+  tag?: string;
+  /** Present for player alerts, which are hidden by content key on dismiss. */
+  playerAlertKey?: string;
+};
 
 const EMPTY_PLAYER_ALERTS: PlayerAlert[] = [];
 const selectPlayerAlerts = ({ playerState }: MessagePipelineContext) =>
   playerState.alerts ?? EMPTY_PLAYER_ALERTS;
 const selectAlerts = (store: AlertsContextStore) => store.alerts;
+const selectDismissedPlayerAlertKeys = (store: AlertsContextStore) =>
+  store.dismissedPlayerAlertKeys;
 
 function AlertIcon({ severity }: { severity: NotificationSeverity }): React.JSX.Element {
   const { palette } = useTheme();
@@ -143,39 +186,117 @@ function AlertDetails(props: { details: DetailsType; tip?: string }): React.JSX.
   );
 }
 
+function getAlertCopyText(alert: ListAlert): string {
+  const parts = [`[${alert.severity}] ${alert.message}`];
+  if (alert.tip != undefined && alert.tip !== "") {
+    parts.push(alert.tip);
+  }
+  if (alert.error instanceof Error) {
+    parts.push(alert.error.stack ?? alert.error.message);
+  } else if (typeof alert.error === "string" && alert.error !== "") {
+    parts.push(alert.error);
+  }
+  return parts.join("\n\n");
+}
+
 export function AlertsList(): React.JSX.Element {
   const { t } = useTranslation("alertsList");
   const { classes } = useStyles();
   const playerAlerts = useMessagePipeline(selectPlayerAlerts);
   const sessionAlerts = useAlertsStore(selectAlerts);
+  const dismissedPlayerAlertKeys: ReadonlySet<string> = useAlertsStore(
+    selectDismissedPlayerAlertKeys,
+  );
+  const { clearAlert, dismissPlayerAlert } = useAlertsActions();
 
-  const allAlerts = useMemo(() => {
-    return [...sessionAlerts, ...playerAlerts];
-  }, [sessionAlerts, playerAlerts]);
+  const visibleAlerts = useMemo<ListAlert[]>(() => {
+    const combined: ListAlert[] = [];
+    for (const alert of sessionAlerts) {
+      combined.push({
+        key: `session:${alert.tag}`,
+        severity: alert.severity,
+        message: alert.message,
+        error: alert.error,
+        tip: alert.tip,
+        tag: alert.tag,
+      });
+    }
+    for (const alert of playerAlerts) {
+      const playerAlertKey = getPlayerAlertKey(alert);
+      if (dismissedPlayerAlertKeys.has(playerAlertKey)) {
+        continue;
+      }
+      combined.push({
+        key: `player:${playerAlertKey}`,
+        severity: alert.severity,
+        message: alert.message,
+        error: alert.error,
+        tip: alert.tip,
+        playerAlertKey,
+      });
+    }
+    return combined.sort(
+      (a, b) =>
+        NOTIFICATION_SEVERITY_PRIORITY[b.severity] - NOTIFICATION_SEVERITY_PRIORITY[a.severity],
+    );
+  }, [sessionAlerts, playerAlerts, dismissedPlayerAlertKeys]);
 
-  if (allAlerts.length === 0) {
+  const handleDismiss = useCallback(
+    (alert: ListAlert) => {
+      if (alert.tag != undefined) {
+        clearAlert(alert.tag);
+      } else if (alert.playerAlertKey != undefined) {
+        dismissPlayerAlert(alert.playerAlertKey);
+      }
+    },
+    [clearAlert, dismissPlayerAlert],
+  );
+
+  if (visibleAlerts.length === 0) {
     return <EmptyState>{t("noAlertsFound")}</EmptyState>;
   }
 
   return (
     <Stack fullHeight flex="auto" overflow="auto">
-      {allAlerts.map((alert, idx) => (
+      {visibleAlerts.map((alert) => (
         <Accordion
           className={classes.acccordion}
-          key={`${idx}.${alert.severity}.${alert.message}`}
+          key={alert.key}
           slotProps={{ transition: { unmountOnExit: true } }}
           defaultExpanded
         >
-          <AccordionSummary
-            className={classes.acccordionSummary}
-            expandIcon={<ArrowDropDownIcon />}
-            title={alert.message}
-          >
-            <AlertIcon severity={alert.severity} />
-            <Typography variant="inherit" noWrap>
-              {alert.message}
-            </Typography>
-          </AccordionSummary>
+          <div className={classes.rowHeader}>
+            <AccordionSummary
+              className={classes.acccordionSummary}
+              expandIcon={<ArrowDropDownIcon />}
+              title={alert.message}
+            >
+              <AlertIcon severity={alert.severity} />
+              <Typography variant="inherit" noWrap>
+                {alert.message}
+              </Typography>
+            </AccordionSummary>
+            <div className={classes.rowActions}>
+              <CopyButton
+                iconSize="small"
+                size="small"
+                color="inherit"
+                getText={() => getAlertCopyText(alert)}
+              />
+              <Tooltip arrow title={t("dismiss")}>
+                <IconButton
+                  size="small"
+                  color="inherit"
+                  aria-label={t("dismiss")}
+                  onClick={() => {
+                    handleDismiss(alert);
+                  }}
+                >
+                  <Dismiss16Regular />
+                </IconButton>
+              </Tooltip>
+            </div>
+          </div>
           <Divider />
           <AlertDetails details={alert.error} tip={alert.tip} />
         </Accordion>

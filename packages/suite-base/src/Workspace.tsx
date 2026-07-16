@@ -48,7 +48,7 @@ import PlaybackControls from "@lichtblick/suite-base/components/PlaybackControls
 import RemountOnValueChange from "@lichtblick/suite-base/components/RemountOnValueChange";
 import { SidebarContent } from "@lichtblick/suite-base/components/SidebarContent";
 import Sidebars from "@lichtblick/suite-base/components/Sidebars";
-import { SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
+import { SidebarItem, SidebarItemBadge } from "@lichtblick/suite-base/components/Sidebars/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import {
   StudioLogsSettings,
@@ -96,6 +96,7 @@ import { InjectedSidebarItem, Namespace, WorkspaceProps } from "@lichtblick/suit
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import useBroadcast from "@lichtblick/suite-base/util/broadcast/useBroadcast";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
+import { NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
 
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
 
@@ -134,13 +135,26 @@ const selectWorkspaceRightSidebarItem = (store: WorkspaceContextStore) => store.
 const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.sidebars.right.size;
 
+function severityToBadgeColor(
+  severity: NotificationSeverity | undefined,
+): SidebarItemBadge["color"] {
+  switch (severity) {
+    case "warn":
+      return "warning";
+    case "info":
+      return "info";
+    default:
+      return "error";
+  }
+}
+
 function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const { PerformanceSidebarComponent } = useAppContext();
   const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const { alertCount } = useAlertCount();
+  const { alertCount, highestSeverity } = useAlertCount();
 
   const dataSourceDialog = useWorkspaceStore(selectWorkspaceDataSourceDialog);
   const leftSidebarItem = useWorkspaceStore(selectWorkspaceLeftSidebarItem);
@@ -303,7 +317,10 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
           iconName: "DatabaseSettings",
           title: "Data source",
           component: DataSourceSidebarItem,
-          badge: alertCount > 0 ? { count: alertCount } : undefined,
+          badge:
+            alertCount > 0
+              ? { count: alertCount, color: severityToBadgeColor(highestSeverity) }
+              : undefined,
         },
       ],
     ]);
@@ -372,6 +389,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   }, [
     DataSourceSidebarItem,
     alertCount,
+    highestSeverity,
     enableNewTopNav,
     enableStudioLogsSidebar,
     AppContextLayoutBrowser,
@@ -392,13 +410,16 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         {
           title: "Alerts",
           component: AlertsList,
-          badge: alertCount > 0 ? { count: alertCount, color: "error" } : undefined,
+          badge:
+            alertCount > 0
+              ? { count: alertCount, color: severityToBadgeColor(highestSeverity) }
+              : undefined,
         },
       ],
       ["layouts", { title: "Layouts", component: LayoutBrowser }],
     ]);
     return items;
-  }, [PanelSettingsSidebar, alertCount]);
+  }, [PanelSettingsSidebar, alertCount, highestSeverity]);
 
   const rightSidebarItems = useMemo(() => {
     const items = new Map<RightSidebarItemKey, SidebarItem>([

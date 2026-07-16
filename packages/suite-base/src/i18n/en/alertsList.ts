@@ -8,4 +8,5 @@
 export const alertsList = {
   noDetailsProvided: "No details provided",
   noAlertsFound: "No alerts found",
+  dismiss: "Dismiss",
 };
