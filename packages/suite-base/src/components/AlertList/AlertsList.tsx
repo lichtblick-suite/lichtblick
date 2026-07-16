@@ -5,124 +5,41 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Dismiss16Regular,
-  ErrorCircle16Regular,
-  Info16Regular,
-  Warning16Regular,
-} from "@fluentui/react-icons";
+import { Dismiss16Regular } from "@fluentui/react-icons";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {
   Accordion,
-  AccordionDetails,
   AccordionSummary,
   Divider,
   IconButton,
   Tooltip,
   Typography,
-  accordionSummaryClasses,
-  useTheme,
 } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
 
 import CopyButton from "@lichtblick/suite-base/components/CopyButton";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
-import {
-  MessagePipelineContext,
-  useMessagePipeline,
-} from "@lichtblick/suite-base/components/MessagePipeline";
+import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import {
-  AlertsContextStore,
   getPlayerAlertKey,
   useAlertsActions,
   useAlertsStore,
 } from "@lichtblick/suite-base/context/AlertsContext";
-import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 import {
-  DetailsType,
   NOTIFICATION_SEVERITY_PRIORITY,
+  DetailsType,
   NotificationSeverity,
 } from "@lichtblick/suite-base/util/sendNotification";
-import { customTypography } from "@lichtblick/theme";
 
-const useStyles = makeStyles()((theme) => ({
-  acccordion: {
-    background: "none",
-    boxShadow: "none",
-    borderBottom: `1px solid ${theme.palette.divider}`,
+import { AlertDetails } from "./AlertDetails";
+import { AlertIcon } from "./AlertIcon";
+import { useStyles } from "./AlertsList.style";
+import { selectAlerts, selectDismissedPlayerAlertKeys, selectPlayerAlerts } from "./constants";
+import { getAlertCopyText } from "./utils";
 
-    "&:before": {
-      display: "none",
-    },
-    "&.Mui-expanded": {
-      margin: 0,
-    },
-  },
-  accordionDetails: {
-    display: "flex",
-    flexDirection: "column",
-    fontFamily: customTypography.fontMonospace,
-    fontSize: "0.6875rem",
-    padding: theme.spacing(1.125),
-    gap: theme.spacing(1),
-  },
-  acccordionSummary: {
-    height: 30,
-    minHeight: "auto",
-    flex: "1 1 auto",
-    minWidth: 0,
-    padding: theme.spacing(0, 0.5, 0, 0.75),
-    fontWeight: 500,
-
-    "&:hover": {
-      backgroundColor: theme.palette.action.hover,
-    },
-    "&.Mui-expanded": {
-      minHeight: "auto",
-    },
-    [`& .${accordionSummaryClasses.content}`]: {
-      gap: theme.spacing(0.5),
-      overflow: "hidden",
-      alignItems: "center",
-      margin: "0 !important",
-    },
-    [`& .${accordionSummaryClasses.expandIconWrapper}`]: {
-      transform: "rotate(-90deg)",
-    },
-    [`& .${accordionSummaryClasses.expandIconWrapper}.Mui-expanded`]: {
-      transform: "rotate(0deg)",
-    },
-  },
-  detailsText: {
-    color: theme.palette.text.primary,
-    fontSize: theme.typography.caption.fontSize,
-    lineHeight: 1.5,
-    whiteSpace: "pre-wrap",
-    maxHeight: "30vh",
-    overflow: "auto",
-    flex: 1,
-    backgroundColor: theme.palette.action.hover,
-    padding: theme.spacing(1),
-  },
-  icon: {
-    flex: "none",
-  },
-  rowHeader: {
-    display: "flex",
-    alignItems: "center",
-  },
-  rowActions: {
-    display: "flex",
-    alignItems: "center",
-    flex: "none",
-    paddingRight: theme.spacing(0.5),
-  },
-}));
-
-type ListAlert = {
+export type ListAlert = {
   key: string;
   severity: NotificationSeverity;
   message: string;
@@ -133,71 +50,6 @@ type ListAlert = {
   /** Present for player alerts, which are hidden by content key on dismiss. */
   playerAlertKey?: string;
 };
-
-const EMPTY_PLAYER_ALERTS: PlayerAlert[] = [];
-const selectPlayerAlerts = ({ playerState }: MessagePipelineContext) =>
-  playerState.alerts ?? EMPTY_PLAYER_ALERTS;
-const selectAlerts = (store: AlertsContextStore) => store.alerts;
-const selectDismissedPlayerAlertKeys = (store: AlertsContextStore) =>
-  store.dismissedPlayerAlertKeys;
-
-function AlertIcon({ severity }: { severity: NotificationSeverity }): React.JSX.Element {
-  const { palette } = useTheme();
-  const { classes } = useStyles();
-
-  switch (severity) {
-    case "warn":
-      return <Warning16Regular className={classes.icon} primaryFill={palette.warning.main} />;
-    case "error":
-      return <ErrorCircle16Regular className={classes.icon} primaryFill={palette.error.main} />;
-    case "info":
-      return <Info16Regular className={classes.icon} primaryFill={palette.info.main} />;
-    default:
-      return <></>;
-  }
-}
-
-function AlertDetails(props: { details: DetailsType; tip?: string }): React.JSX.Element {
-  const { t } = useTranslation("alertsList");
-  const { details, tip } = props;
-  const { classes } = useStyles();
-
-  const content = useMemo(() => {
-    if (details instanceof Error) {
-      return <div className={classes.detailsText}>{details.message}</div>;
-    } else if (details != undefined && details !== "") {
-      return (
-        <Typography style={{ whiteSpace: "pre-line" /* allow newlines in the details message */ }}>
-          {details}
-        </Typography>
-      );
-    } else if (tip != undefined && tip !== "") {
-      return undefined;
-    }
-
-    return t("noDetailsProvided");
-  }, [classes, details, tip, t]);
-
-  return (
-    <AccordionDetails className={classes.accordionDetails}>
-      {tip && <div>{tip}</div>}
-      {content}
-    </AccordionDetails>
-  );
-}
-
-function getAlertCopyText(alert: ListAlert): string {
-  const parts = [`[${alert.severity}] ${alert.message}`];
-  if (alert.tip != undefined && alert.tip !== "") {
-    parts.push(alert.tip);
-  }
-  if (alert.error instanceof Error) {
-    parts.push(alert.error.stack ?? alert.error.message);
-  } else if (typeof alert.error === "string" && alert.error !== "") {
-    parts.push(alert.error);
-  }
-  return parts.join("\n\n");
-}
 
 export function AlertsList(): React.JSX.Element {
   const { t } = useTranslation("alertsList");
@@ -221,7 +73,7 @@ export function AlertsList(): React.JSX.Element {
         tag: alert.tag,
       });
     }
-    for (const alert of playerAlerts) {
+    for (const alert of playerAlerts ?? []) {
       const playerAlertKey = getPlayerAlertKey(alert);
       if (dismissedPlayerAlertKeys.has(playerAlertKey)) {
         continue;
