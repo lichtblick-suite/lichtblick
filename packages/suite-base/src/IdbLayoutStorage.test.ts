@@ -9,8 +9,7 @@
 
 import { IDBFactory } from "fake-indexeddb";
 
-import { IdbLayoutStorage, layoutDatabaseName } from "@lichtblick/suite-base/IdbLayoutStorage";
-import { KEY_WORKSPACE_PREFIX } from "@lichtblick/suite-base/constants/browserStorageKeys";
+import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
   ISO8601Timestamp,
@@ -18,7 +17,6 @@ import {
   LayoutBaseline,
 } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { migrateLayout } from "@lichtblick/suite-base/services/migrateLayout";
-import { BasicBuilder } from "@lichtblick/test-builders";
 
 const mockLogError = jest.fn();
 
@@ -222,8 +220,8 @@ describe("IdbLayoutStorage", () => {
   describe("database scoping", () => {
     it("should not share data between instances with different database names", async () => {
       // GIVEN two storages backed by differently-scoped databases
-      const firstStorage = new IdbLayoutStorage(layoutDatabaseName("workspace-1"));
-      const secondStorage = new IdbLayoutStorage(layoutDatabaseName("workspace-2"));
+      const firstStorage = new IdbLayoutStorage("workspace-1");
+      const secondStorage = new IdbLayoutStorage("workspace-2");
       await firstStorage.put("local", makeLayout("a", "A"));
 
       // WHEN reading from the other database
@@ -235,13 +233,13 @@ describe("IdbLayoutStorage", () => {
       expect(secondResult).toBeUndefined();
     });
 
-    it("should share data between the default constructor and layoutDatabaseName(undefined)", async () => {
+    it("should share data between the default constructor and an undefined workspace id", async () => {
       // GIVEN a layout written via the default (unscoped) constructor
       const defaultStorage = new IdbLayoutStorage();
       await defaultStorage.put("local", makeLayout("a", "A"));
 
       // WHEN reading through a storage explicitly constructed with the undefined-scoped name
-      const undefinedScopedStorage = new IdbLayoutStorage(layoutDatabaseName(undefined));
+      const undefinedScopedStorage = new IdbLayoutStorage(undefined);
       const result = await undefinedScopedStorage.get("local", "a" as LayoutID);
 
       // THEN both share the same underlying database
@@ -312,7 +310,8 @@ describe("IdbLayoutStorage", () => {
       const storage = new IdbLayoutStorage();
       const layout = makeLayout("legacy-id", "Legacy");
       const key = "studio.layouts.local.legacy-id";
-      localStorage.setItem(key, JSON.stringify(layout));
+      const layoutJson = JSON.stringify(layout)!;
+      localStorage.setItem(key, layoutJson);
 
       // WHEN migrating un-namespaced layouts
       await storage.migrateUnnamespacedLayouts("local");
@@ -327,14 +326,15 @@ describe("IdbLayoutStorage", () => {
       const storage = new IdbLayoutStorage();
       const layout = makeLayout("actual-id", "Mismatch");
       const key = "studio.layouts.local.wrong-id";
-      localStorage.setItem(key, JSON.stringify(layout));
+      const layoutJson = JSON.stringify(layout)!;
+      localStorage.setItem(key, layoutJson);
 
       // WHEN migrating un-namespaced layouts
       await storage.migrateUnnamespacedLayouts("local");
 
       // THEN the layout is not migrated, the entry is left, and an error is logged
       expect(await storage.list("local")).toEqual([]);
-      expect(localStorage.getItem(key)).toBe(JSON.stringify(layout));
+      expect(localStorage.getItem(key)).toBe(layoutJson);
       expect(mockLogError).toHaveBeenCalled();
     });
 
@@ -349,54 +349,5 @@ describe("IdbLayoutStorage", () => {
       await expect(migratePromise).resolves.toBeUndefined();
       expect(await storage.list("local")).toEqual([]);
     });
-  });
-});
-
-describe("layoutDatabaseName", () => {
-  const DEFAULT_NAME = `${KEY_WORKSPACE_PREFIX}lichtblick-layouts`;
-
-  it("should return the default unscoped database name when workspaceId is undefined", () => {
-    // GIVEN no workspace id
-    // WHEN computing the database name
-    const result = layoutDatabaseName(undefined);
-
-    // THEN the shared, unscoped name is returned with no workspace suffix
-    expect(result).toBe(DEFAULT_NAME);
-    expect(result).toMatch(/lichtblick-layouts$/);
-  });
-
-  it("should match the undefined case when called with no arguments (backward compatibility)", () => {
-    // GIVEN no arguments passed
-    // WHEN computing the database name
-    const result = layoutDatabaseName();
-
-    // THEN it matches the default unscoped name used by existing installs and the web build
-    expect(result).toBe(DEFAULT_NAME);
-    expect(result).toBe(layoutDatabaseName(undefined));
-  });
-
-  it("should scope the database name with the workspace id when one is given", () => {
-    // GIVEN a workspace id
-    const workspaceId = BasicBuilder.string();
-
-    // WHEN computing the database name
-    const result = layoutDatabaseName(workspaceId);
-
-    // THEN the id is appended to the default name after a dash
-    expect(result).toBe(`${DEFAULT_NAME}-${workspaceId}`);
-  });
-
-  it("should produce different names for different workspace ids", () => {
-    // GIVEN two distinct workspace ids
-    const firstId = BasicBuilder.string();
-    const secondId = BasicBuilder.string();
-
-    // WHEN computing the database name for each
-    const firstName = layoutDatabaseName(firstId);
-    const secondName = layoutDatabaseName(secondId);
-
-    // THEN the two workspaces resolve to isolated databases
-    expect(firstId).not.toBe(secondId);
-    expect(firstName).not.toBe(secondName);
   });
 });

@@ -9,7 +9,7 @@ import { Fragment, Suspense, useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { IdbLayoutStorage, layoutDatabaseName } from "@lichtblick/suite-base/IdbLayoutStorage";
+import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
 import GlobalCss from "@lichtblick/suite-base/components/GlobalCss";
 import { AppParametersInput } from "@lichtblick/suite-base/context/AppParametersContext";
 import LayoutStorageContext from "@lichtblick/suite-base/context/LayoutStorageContext";
@@ -121,10 +121,7 @@ export function App(props: AppProps): React.JSX.Element {
   providers.unshift(<UserProfileLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);
 
-  const layoutStorage = useMemo(
-    () => new IdbLayoutStorage(layoutDatabaseName(workspaceId)),
-    [workspaceId],
-  );
+  const layoutStorage = useMemo(() => new IdbLayoutStorage(workspaceId), [workspaceId]);
   useEffect(() => {
     return () => {
       void layoutStorage.close();

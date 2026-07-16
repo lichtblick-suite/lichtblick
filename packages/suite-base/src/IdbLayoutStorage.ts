@@ -18,15 +18,6 @@ const log = Log.getLogger(__filename);
 const DATABASE_NAME = `${KEY_WORKSPACE_PREFIX}lichtblick-layouts`;
 const OBJECT_STORE_NAME = "layouts";
 
-/**
- * Compute the IndexedDB database name for a workspace's layouts. When no workspace id is given the
- * default (unscoped) database name is returned, preserving backward compatibility with existing
- * installs and the web build.
- */
-export function layoutDatabaseName(workspaceId?: string): string {
-  return workspaceId == undefined ? DATABASE_NAME : `${DATABASE_NAME}-${workspaceId}`;
-}
-
 interface LayoutsDB extends IDB.DBSchema {
   layouts: {
     key: [namespace: string, id: LayoutID];
@@ -48,10 +39,13 @@ export class IdbLayoutStorage implements ILayoutStorage {
   readonly #db;
 
   /**
-   * @param databaseName Name of the IndexedDB database. Defaults to the shared, unscoped database so
-   * existing (non-workspace) installs and the web build keep their layouts.
+   * @param workspaceId Optional workspace id used to scope the layouts database. When omitted the
+   * shared, unscoped database is used so existing (non-workspace) installs and the web build keep
+   * their layouts.
    */
-  public constructor(databaseName: string = DATABASE_NAME) {
+  public constructor(workspaceId?: string) {
+    const databaseName =
+      workspaceId == undefined ? DATABASE_NAME : `${DATABASE_NAME}-${workspaceId}`;
     this.#db = IDB.openDB<LayoutsDB>(databaseName, 1, {
       upgrade(db) {
         const store = db.createObjectStore(OBJECT_STORE_NAME, {
