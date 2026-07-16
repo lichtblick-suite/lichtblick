@@ -391,12 +391,12 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     () => topics?.some((topic) => TRANSFORM_TOPIC_SCHEMAS.has(topic.schemaName)) ?? false,
     [topics],
   );
+  const isPreloadingEnabled = config.scene.transforms?.enablePreloading === true;
   useEffect(() => {
-    // Surface an informational alert whenever we auto-toggle preloading, and clear it when preloading is
-    // auto-disabled (e.g. a data source without transform topics is loaded).
+    // Surface an informational alert whenever there's a transform topic
     setPanelAlert?.(
       "transform-preload",
-      hasTransformTopics
+      hasTransformTopics && !isPreloadingEnabled
         ? {
             severity: "info",
             message: t("transformPreloadAlert"),
@@ -404,7 +404,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
           }
         : undefined,
     );
-  }, [hasTransformTopics, setPanelAlert, t]);
+  }, [hasTransformTopics, isPreloadingEnabled, setPanelAlert, t]);
 
   // Tell the renderer if we are connected to a ROS data source
   useEffect(() => {

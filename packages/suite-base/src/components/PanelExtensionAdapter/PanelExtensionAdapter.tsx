@@ -660,6 +660,9 @@ function PanelExtensionAdapter(
       },
 
       unstable_setAlert: (alertId: string, alert) => {
+        if (!isMounted()) {
+          return;
+        }
         const tag = `panel-alert:${panelId}:${alertId}`;
         if (alert == undefined) {
           panelAlertIdsRef.current.delete(alertId);
