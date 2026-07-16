@@ -10,7 +10,7 @@ import type { IAppConfiguration, IDataSourceFactory, OsContext } from "@lichtbli
 import type {
   Workspace,
   IWorkspacesManager,
-} from "@lichtblick/suite-base/services/workspaces/IWorkspacesManager";
+} from "@lichtblick/suite-base/src/services/workspaces/IWorkspacesManager";
 
 import type { RootProps } from "./Root.types";
 import type { NativeWindow } from "./services/NativeWindow";
