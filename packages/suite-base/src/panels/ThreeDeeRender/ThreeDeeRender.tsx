@@ -33,8 +33,14 @@ import {
   PANEL_STYLE,
   MAX_TRANSFORM_MESSAGES,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
-import { FRAME_TRANSFORM_DATATYPES, FRAME_TRANSFORMS_DATATYPES } from "@lichtblick/suite-base/panels/ThreeDeeRender/foxglove";
-import { TF_DATATYPES, TRANSFORM_STAMPED_DATATYPES } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
+import {
+  FRAME_TRANSFORM_DATATYPES,
+  FRAME_TRANSFORMS_DATATYPES,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/foxglove";
+import {
+  TF_DATATYPES,
+  TRANSFORM_STAMPED_DATATYPES,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import type { IRenderer, ImageModeConfig, RendererConfig, RendererSubscription } from "./IRenderer";
