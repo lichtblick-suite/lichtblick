@@ -184,7 +184,11 @@ function PanelExtensionAdapter(
 
   const [slowRender, setSlowRender] = useState(false);
   const [, setDefaultPanelTitle] = useDefaultPanelTitle();
-  const { setAlert } = useAlertsActions();
+  const { setAlert, clearAlert } = useAlertsActions();
+
+  // Tracks the ids of alerts this panel has set (via unstable_setAlert) so they can be cleared
+  // when the panel unmounts. Alerts are namespaced by panelId to avoid collisions across panels.
+  const panelAlertIdsRef = useRef(new Set<string>());
 
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
 
@@ -655,6 +659,17 @@ function PanelExtensionAdapter(
         setDefaultPanelTitle(title);
       },
 
+      unstable_setAlert: (alertId: string, alert) => {
+        const tag = `panel-alert:${panelId}:${alertId}`;
+        if (alert == undefined) {
+          panelAlertIdsRef.current.delete(alertId);
+          clearAlert(tag);
+        } else {
+          panelAlertIdsRef.current.add(alertId);
+          setAlert(tag, alert);
+        }
+      },
+
       /**
        * EXPERIMENTAL: Subscribe to message ranges for efficient batch processing.
        *
@@ -733,6 +748,8 @@ function PanelExtensionAdapter(
     setDefaultPanelTitle,
     setMessagePathDropConfig,
     subscribeMessageRange,
+    setAlert,
+    clearAlert,
   ]);
 
   const panelContainerRef = useRef<HTMLDivElement>(ReactNull);
@@ -777,6 +794,10 @@ function PanelExtensionAdapter(
 
     setBuildRenderState(() => initRenderStateBuilder());
 
+    // Capture the stable Set that tracks this panel's alert ids. It is mutated by reference as the
+    // panel sets/clears alerts, so the cleanup below observes the latest ids.
+    const panelAlertIds = panelAlertIdsRef.current;
+
     const panelElement = document.createElement("div");
     panelElement.style.width = "100%";
     panelElement.style.height = "100%";
@@ -803,6 +824,11 @@ function PanelExtensionAdapter(
       panelElement.remove();
       getMessagePipelineContext().setSubscriptions(panelId, []);
       getMessagePipelineContext().setPublishers(panelId, []);
+      // Clear any app-level alerts this panel set so they do not linger after unmount.
+      for (const alertId of panelAlertIds) {
+        clearAlert(`panel-alert:${panelId}:${alertId}`);
+      }
+      panelAlertIds.clear();
     };
   }, [
     initPanel,
@@ -811,6 +837,7 @@ function PanelExtensionAdapter(
     getMessagePipelineContext,
     configTooNew,
     playerIsInitializing,
+    clearAlert,
   ]);
 
   const style: CSSProperties = {};
