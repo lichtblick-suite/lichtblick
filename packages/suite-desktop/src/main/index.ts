@@ -68,6 +68,11 @@ export async function main(): Promise<void> {
   // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
   app.commandLine.appendSwitch("gtk-version", "3");
 
+  // Allow WebGL in software-rendered environments (e.g. TurboVNC without VirtualGL).
+  // Electron 43+ (Chromium 131+) blocklists WebGL on GPUs it cannot identify, which
+  // breaks the 3D panel when no hardware GPU is available.
+  app.commandLine.appendSwitch("ignore-gpu-blocklist");
+
   const start = Date.now();
   log.info(`${LICHTBLICK_PRODUCT_NAME} ${LICHTBLICK_PRODUCT_VERSION}`);
 
