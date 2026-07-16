@@ -134,6 +134,7 @@ const createMockContext = (
     unstable_fetchAsset: jest.fn(),
     unstable_setMessagePathDropConfig: jest.fn(),
     unstable_subscribeMessageRange: jest.fn(),
+    unstable_setAlert: jest.fn(),
     dataSourceProfile: "ros1",
     layout: {
       addPanel: jest.fn(),

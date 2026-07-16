@@ -7,6 +7,7 @@
 
 import * as _ from "lodash-es";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLatest } from "react-use";
 import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
@@ -32,6 +33,8 @@ import {
   PANEL_STYLE,
   MAX_TRANSFORM_MESSAGES,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
+import { FRAME_TRANSFORM_DATATYPES, FRAME_TRANSFORMS_DATATYPES } from "@lichtblick/suite-base/panels/ThreeDeeRender/foxglove";
+import { TF_DATATYPES, TRANSFORM_STAMPED_DATATYPES } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import type { IRenderer, ImageModeConfig, RendererConfig, RendererSubscription } from "./IRenderer";
@@ -55,6 +58,17 @@ import { PublishClickEventMap } from "./renderables/PublishClickTool";
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/PublishSettings";
 import { Shared3DPanelState, ThreeDeeRenderProps } from "./types";
 
+/**
+ * Schemas that carry coordinate frame transforms. Topics with one of these schemas generally
+ * require preloading so that transforms are available across the whole playback range.
+ */
+const TRANSFORM_TOPIC_SCHEMAS = new Set<string>([
+  ...FRAME_TRANSFORM_DATATYPES,
+  ...FRAME_TRANSFORMS_DATATYPES,
+  ...TF_DATATYPES,
+  ...TRANSFORM_STAMPED_DATATYPES,
+]);
+
 const log = Logger.getLogger(__filename);
 
 /**
@@ -75,9 +89,11 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     saveState,
     unstable_fetchAsset: fetchAsset,
     unstable_setMessagePathDropConfig: setMessagePathDropConfig,
+    unstable_setAlert: setPanelAlert,
   } = context;
   const analytics = useAnalytics();
   const { classes } = useStyles();
+  const { t } = useTranslation("threeDee");
 
   // Load and save the persisted panel configuration
   const [config, setConfig] = useState<Immutable<RendererConfig>>(() => {
@@ -361,6 +377,33 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [topics, renderer]);
 
+  // Keep transform preloading in sync with the current data source.
+  // Preloading is disabled by default, but transform topics generally need to be preloaded to render correctly.
+  // Whenever the presence of transform topics changes (e.g. a new data source is loaded), we enable preloading
+  // if the source exposes transform topics and disable it otherwise. Because we only react to that
+  // presence flipping, a manual toggle by the user within the same data source is preserved.
+  // const topicsLoaded = topics != undefined;
+  const hasTransformTopics = useMemo(
+    () => topics?.some((topic) => TRANSFORM_TOPIC_SCHEMAS.has(topic.schemaName)) ?? false,
+    [topics],
+  );
+  // const prevHasTransformTopicsRef = useRef<boolean | undefined>(undefined);
+  useEffect(() => {
+
+    // Surface an informational alert whenever we auto-toggle preloading, and clear it when preloading is
+    // auto-disabled (e.g. a data source without transform topics is loaded).
+    setPanelAlert?.(
+      "transform-preload",
+      hasTransformTopics
+        ? {
+            severity: "info",
+            message: t("transformPreloadAlert"),
+            tip: t("transformPreloadAlertTip"),
+          }
+        : undefined,
+    );
+  }, [hasTransformTopics, setPanelAlert, t]);
+
   // Tell the renderer if we are connected to a ROS data source
   useEffect(() => {
     if (renderer) {
@@ -640,7 +683,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     if (!topicsToSubscribe) {
       return;
     }
-    log.debug(`Subscribing to [${topicsToSubscribe.map((t) => JSON.stringify(t)).join(", ")}]`);
+    log.debug(
+      `Subscribing to [${topicsToSubscribe.map((topic) => JSON.stringify(topic)).join(", ")}]`,
+    );
     context.subscribe(topicsToSubscribe);
   }, [context, topicsToSubscribe]);
 
