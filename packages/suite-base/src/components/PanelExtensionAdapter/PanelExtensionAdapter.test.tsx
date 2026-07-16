@@ -1510,7 +1510,9 @@ describe("PanelExtensionAdapter", () => {
       clearAlert.mockClear();
 
       // WHEN the panel is unmounted
-      unmount();
+      await act(async () => {
+        unmount();
+      });
 
       // THEN the previously set alert is cleared
       expect(clearAlert).toHaveBeenCalledWith(expect.stringMatching(/^panel-alert:.+:my-alert$/));
