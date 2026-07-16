@@ -71,7 +71,7 @@ jest.mock("@lichtblick/suite-base/components/WssErrorModal", () => ({
   default: () => <div data-testid="wss-error-modal" />,
 }));
 
-jest.mock("../AlertsList", () => ({
+jest.mock("../AlertList/AlertsList", () => ({
   AlertsList: () => <div data-testid="alerts-list" />,
 }));
 

@@ -48,7 +48,7 @@ import PlaybackControls from "@lichtblick/suite-base/components/PlaybackControls
 import RemountOnValueChange from "@lichtblick/suite-base/components/RemountOnValueChange";
 import { SidebarContent } from "@lichtblick/suite-base/components/SidebarContent";
 import Sidebars from "@lichtblick/suite-base/components/Sidebars";
-import { SidebarItem, SidebarItemBadge } from "@lichtblick/suite-base/components/Sidebars/types";
+import { SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import {
   StudioLogsSettings,
@@ -96,9 +96,9 @@ import { InjectedSidebarItem, Namespace, WorkspaceProps } from "@lichtblick/suit
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import useBroadcast from "@lichtblick/suite-base/util/broadcast/useBroadcast";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
-import { NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
 
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
+import { severityToBadgeColor } from "./utils";
 
 const log = Logger.getLogger(__filename);
 
@@ -134,19 +134,6 @@ const selectWorkspaceLeftSidebarSize = (store: WorkspaceContextStore) => store.s
 const selectWorkspaceRightSidebarItem = (store: WorkspaceContextStore) => store.sidebars.right.item;
 const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.sidebars.right.size;
-
-function severityToBadgeColor(
-  severity: NotificationSeverity | undefined,
-): SidebarItemBadge["color"] {
-  switch (severity) {
-    case "warn":
-      return "warning";
-    case "info":
-      return "info";
-    default:
-      return "error";
-  }
-}
 
 function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const { PerformanceSidebarComponent } = useAppContext();
