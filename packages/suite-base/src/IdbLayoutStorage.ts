@@ -13,23 +13,12 @@ import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ILayoutStorage, Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { migrateLayout } from "@lichtblick/suite-base/services/migrateLayout";
 
+import type { LayoutsDB } from "./IdbLayoutStorage.types";
+
 const log = Log.getLogger(__filename);
 
 const DATABASE_NAME = `${KEY_WORKSPACE_PREFIX}lichtblick-layouts`;
 const OBJECT_STORE_NAME = "layouts";
-
-interface LayoutsDB extends IDB.DBSchema {
-  layouts: {
-    key: [namespace: string, id: LayoutID];
-    value: {
-      namespace: string;
-      layout: Layout;
-    };
-    indexes: {
-      namespace: string;
-    };
-  };
-}
 
 /**
  * Stores layouts in IndexedDB. All layouts are stored in one object store, with the primary key
