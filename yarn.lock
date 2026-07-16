@@ -2427,13 +2427,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/schemas@npm:1.9.0":
-  version: 1.9.0
-  resolution: "@foxglove/schemas@npm:1.9.0"
+"@foxglove/schemas@npm:1.13.0":
+  version: 1.13.0
+  resolution: "@foxglove/schemas@npm:1.13.0"
   dependencies:
     "@foxglove/rosmsg-msgs-common": "npm:^3.2.2"
     tslib: "npm:^2"
-  checksum: 10/04d552371ca39b9378d913aa35337d817c6406a8c9cf2a4094467c9118e28097105144a8335f15f541b8369bab8d817addac307e45b5c90e43c95945e20c5a8b
+  checksum: 10/faefc18cb1cd898833035fc2d1b16287beb00f166275a9850ef52cea4c25acb008e100cbfadd21dc49e77ccdafa03a100949cfb2208bc2dc80b0ea3a26698e39
   languageName: node
   linkType: hard
 
@@ -3358,7 +3358,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/mcap-support@workspace:packages/mcap-support"
   dependencies:
-    "@foxglove/schemas": "npm:1.9.0"
+    "@foxglove/schemas": "npm:1.13.0"
     "@lichtblick/message-definition": "npm:1.0.0"
     "@lichtblick/omgidl-parser": "npm:1.0.0"
     "@lichtblick/omgidl-serialization": "npm:1.0.0"
@@ -3537,7 +3537,7 @@ __metadata:
     "@emotion/react": "npm:11.14.0"
     "@emotion/styled": "npm:11.14.1"
     "@fluentui/react-icons": "npm:2.0.308"
-    "@foxglove/schemas": "npm:1.9.0"
+    "@foxglove/schemas": "npm:1.13.0"
     "@foxglove/ws-protocol": "npm:0.8.0"
     "@lichtblick/avl": "npm:1.0.0"
     "@lichtblick/chartjs-plugin-zoom": "npm:1.0.0"
@@ -8249,7 +8249,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "benchmark@workspace:benchmark"
   dependencies:
-    "@foxglove/schemas": "npm:1.9.0"
+    "@foxglove/schemas": "npm:1.13.0"
     "@lichtblick/den": "workspace:*"
     "@lichtblick/log": "workspace:*"
     "@lichtblick/rostime": "npm:1.0.0"
