@@ -5,20 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-/* eslint-disable @lichtblick/no-restricted-imports, no-restricted-imports */
-
 import AddIcon from "@mui/icons-material/Add";
-import {
-  CircularProgress,
-  Divider,
-  IconButton,
-  Tab,
-  Tabs,
-  styled as muiStyled,
-} from "@mui/material";
+import { CircularProgress, Divider, IconButton } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { makeStyles } from "tss-react/mui";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { EventsList } from "@lichtblick/suite-base/components/EventsList";
@@ -36,71 +26,15 @@ import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/us
 import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
-import { NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
 
 import { AlertsList } from "../AlertsList";
 import { DataSourceInfoView } from "../DataSourceInfoView";
+import { StyledTab, StyledTabs, useStyles } from "./DataSourceSidebar.style";
+import { AlertBadge } from "./utils";
 
 type Props = {
   disableToolbar?: boolean;
 };
-
-const useStyles = makeStyles()({
-  tabContent: {
-    flex: "auto",
-  },
-});
-
-const useAlertBadgeStyles = makeStyles<{ severity: NotificationSeverity }>()(
-  (theme, { severity }) => {
-    const paletteColor = {
-      error: theme.palette.error,
-      warn: theme.palette.warning,
-      info: theme.palette.info,
-    }[severity];
-    return {
-      badge: {
-        backgroundColor: paletteColor.main,
-        fontSize: theme.typography.caption.fontSize,
-        color: paletteColor.contrastText,
-        padding: theme.spacing(0.125, 0.75),
-        borderRadius: 8,
-      },
-    };
-  },
-);
-
-const StyledTab = muiStyled(Tab)(({ theme }) => ({
-  minHeight: 30,
-  minWidth: theme.spacing(8),
-  padding: theme.spacing(0, 1.5),
-  color: theme.palette.text.secondary,
-  fontSize: "0.6875rem",
-
-  "&.Mui-selected": {
-    color: theme.palette.text.primary,
-  },
-}));
-
-const StyledTabs = muiStyled(Tabs)({
-  minHeight: "auto",
-
-  ".MuiTabs-indicator": {
-    transform: "scaleX(0.5)",
-    height: 2,
-  },
-});
-
-function AlertBadge({
-  count,
-  severity = "error",
-}: {
-  count: number;
-  severity?: NotificationSeverity;
-}): React.JSX.Element {
-  const { classes } = useAlertBadgeStyles({ severity });
-  return <span className={classes.badge}>{count}</span>;
-}
 
 const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;

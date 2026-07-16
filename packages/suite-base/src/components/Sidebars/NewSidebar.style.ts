@@ -10,7 +10,7 @@ export const useStyles = makeStyles()((theme) => ({
   },
   badgeRoot: {
     display: "flex",
-    alignItems: "baseline",
+    alignItems: "center",
     gap: theme.spacing(1),
   },
   badge: {
