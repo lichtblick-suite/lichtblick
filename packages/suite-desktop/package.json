@@ -18,6 +18,7 @@
     "@mcap/core": "2.2.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
     "@storybook/react-webpack5": "10.4.6",
+    "@testing-library/react": "16.0.0",
     "@types/mock-fs": "4.13.4",
     "@types/plist": "^3.0.3",
     "@types/pngjs": "^6.0.2",

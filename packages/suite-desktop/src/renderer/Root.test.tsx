@@ -7,41 +7,30 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import React, { PropsWithChildren } from "react";
 
 import type { IAppConfiguration, IDataSourceFactory, OsContext } from "@lichtblick/suite-base";
-import type { Workspace } from "@lichtblick/suite-base/services/workspaces/IWorkspacesManager";
+import type {
+  Workspace,
+  IWorkspacesManager,
+} from "@lichtblick/suite-base/services/workspaces/IWorkspacesManager";
 
+import type { RootProps } from "./Root.types";
+import type { NativeWindow } from "./services/NativeWindow";
 import type { CLIFlags, Desktop, NativeMenuBridge, Storage } from "../common/types";
 
-// Records the props each mocked collaborator receives so tests can make behavior-focused assertions.
 const mockAppSpy = jest.fn();
 const mockWorkspacesProviderSpy = jest.fn();
 
-// The mocked DesktopWorkspacesManager and NativeWindow expose their instances so tests can inspect
-// the calls Root makes at runtime (the instances are created lazily inside `useMemo`).
-type WorkspacesManagerInstance = {
-  getCurrent: jest.Mock<Promise<Workspace | undefined>>;
-  setCurrent: jest.Mock;
-  list: jest.Mock;
-  create: jest.Mock;
-  rename: jest.Mock;
-  delete: jest.Mock;
-};
-type NativeWindowInstance = {
-  isMaximized: jest.Mock<boolean>;
-  minimize: jest.Mock;
-  maximize: jest.Mock;
-  unmaximize: jest.Mock;
-  close: jest.Mock;
-  handleTitleBarDoubleClick: jest.Mock;
-};
+type WorkspacesManagerInstance = MockedMethods<IWorkspacesManager>;
+type NativeWindowInstance = MockedMethods<
+  Pick<
+    NativeWindow,
+    "isMaximized" | "minimize" | "maximize" | "unmaximize" | "close" | "handleTitleBarDoubleClick"
+  >
+>;
 const mockWorkspacesManagerInstances: WorkspacesManagerInstance[] = [];
 const mockNativeWindowInstances: NativeWindowInstance[] = [];
 
-// Records DesktopExtensionLoader constructor args. A module-scope spy survives the isolated module
-// registry created by `loadRoot`, so assertions see the calls Root actually made.
 const mockDesktopExtensionLoaderSpy = jest.fn();
 
-// Controls what the current workspacesManager instance resolves from getCurrent(). It is read at
-// render time (after each test's beforeEach), so tests can swap the behavior mid-test.
 let mockGetCurrentImpl: () => Promise<Workspace | undefined> = async () => undefined;
 
 jest.mock("@lichtblick/suite-base", () => {
@@ -116,27 +105,19 @@ jest.mock("./services/NativeWindow", () => ({
   }),
 }));
 
-type RootProps = {
-  appParameters: CLIFlags;
-  appConfiguration: IAppConfiguration;
-  extraProviders: React.JSX.Element[] | undefined;
-  dataSources: IDataSourceFactory[] | undefined;
+// Maps each method of a real interface to a property-style `jest.Mock` that keeps the original
+// argument and return types. Property-style (rather than method-style) members avoid the
+// `unbound-method` lint rule triggered by `expect(mock.method)` assertions.
+type MockedMethods<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? jest.MockedFunction<T[K]> : T[K];
 };
-
-// The mocked bridges expose plain `jest.Mock` members (rather than the real method signatures) so
-// that assertions like `expect(bridge.method)` do not trip the `unbound-method` lint rule.
-type MockAppConfiguration = {
-  get: jest.Mock;
-  set: jest.Mock;
-  addChangeListener: jest.Mock;
-  removeChangeListener: jest.Mock;
-};
-type MockDesktopBridge = {
-  updateNativeColorScheme: jest.Mock;
-  updateLanguage: jest.Mock;
-  getDeepLinks: jest.Mock;
-  addIpcEventListener: jest.Mock;
-};
+type MockAppConfiguration = MockedMethods<IAppConfiguration>;
+type MockDesktopBridge = MockedMethods<
+  Pick<
+    Desktop,
+    "updateNativeColorScheme" | "updateLanguage" | "getDeepLinks" | "addIpcEventListener"
+  >
+>;
 
 type GlobalBridges = {
   desktopBridge?: MockDesktopBridge;
@@ -204,7 +185,10 @@ function makeDesktopBridge(): MockDesktopBridge {
     updateNativeColorScheme: jest.fn(async () => {}),
     updateLanguage: jest.fn(),
     getDeepLinks: jest.fn(() => []),
-    addIpcEventListener: jest.fn(() => jest.fn()),
+    addIpcEventListener: jest.fn<
+      ReturnType<Desktop["addIpcEventListener"]>,
+      Parameters<Desktop["addIpcEventListener"]>
+    >(() => jest.fn()),
   };
 }
 
@@ -253,7 +237,6 @@ beforeEach(() => {
   // binding (provided by the bundler in production). Supply it for the test environment.
   (globalThis as unknown as { React: typeof React }).React = React;
 
-  // Reset the URL so deep-link tests start from a clean slate.
   window.history.pushState(undefined, "", "/");
 });
 
