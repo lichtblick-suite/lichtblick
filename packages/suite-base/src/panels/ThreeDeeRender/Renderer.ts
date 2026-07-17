@@ -241,7 +241,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     maxCapacity: 5 * DEFAULT_MAX_CAPACITY_PER_FRAME,
   });
   public transformTree = new TransformTree(this.#transformPool);
-  #staticTransformCache = new Map<string, StaticTransform>();
+  readonly #staticTransformCache = new Map<string, StaticTransform>();
 
   public coordinateFrameList: SelectEntry[] = [];
   public currentTime = 0n;
@@ -589,7 +589,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       this.queueAnimationFrame();
     } else {
       // Forward seek or no allFrames available - use original behavior
-      this.clear({ clearTransforms: movedBack, resetAllFramesCursor: movedBack, preserveStaticTransforms: movedBack });
+      this.clear({
+        clearTransforms: movedBack,
+        resetAllFramesCursor: movedBack,
+        preserveStaticTransforms: movedBack,
+      });
       if (movedBack) {
         this.#reapplyStaticTransforms();
       }
@@ -597,7 +601,13 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   }
 
   #reapplyStaticTransforms(): void {
-    for (const { parentFrameId, childFrameId, stamp, translation, rotation } of this.#staticTransformCache.values()) {
+    for (const {
+      parentFrameId,
+      childFrameId,
+      stamp,
+      translation,
+      rotation,
+    } of this.#staticTransformCache.values()) {
       this.addTransform(parentFrameId, childFrameId, stamp, translation, rotation);
     }
   }
@@ -804,8 +814,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   }
 
-  // eslint-disable-next-line @lichtblick/no-boolean-parameters
-  #clearTransformTree = (preserveStaticTransforms?: boolean | IRenderer) => {
+  readonly #clearTransformTree = (preserveStaticTransforms?: boolean | IRenderer) => {
     this.transformTree.clear();
     if (preserveStaticTransforms !== true) {
       this.#staticTransformCache.clear();
@@ -1603,14 +1612,20 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     this.emit("renderableHovered", selections, cursorCoords, this);
   };
 
-  #handleFrameTransform = ({ message, topic }: MessageEvent<DeepPartial<FrameTransform>>): void => {
+  readonly #handleFrameTransform = ({
+    message,
+    topic,
+  }: MessageEvent<DeepPartial<FrameTransform>>): void => {
     // foxglove.FrameTransform - Ingest this single transform into our TF tree
     const transform = normalizeFrameTransform(message);
     const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
     this.#addFrameTransform(transform, { isStatic });
   };
 
-  #handleFrameTransforms = ({ message, topic }: MessageEvent<DeepPartial<FrameTransforms>>): void => {
+  readonly #handleFrameTransforms = ({
+    message,
+    topic,
+  }: MessageEvent<DeepPartial<FrameTransforms>>): void => {
     // foxglove.FrameTransforms - Ingest the list of transforms into our TF tree
     const frameTransforms = normalizeFrameTransforms(message);
     const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
@@ -1619,7 +1634,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   };
 
-  #handleTFMessage = ({ message, topic }: MessageEvent<DeepPartial<TFMessage>>): void => {
+  readonly #handleTFMessage = ({ message, topic }: MessageEvent<DeepPartial<TFMessage>>): void => {
     // tf2_msgs/TFMessage - Ingest the list of transforms into our TF tree
     const tfMessage = normalizeTFMessage(message);
     const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");
@@ -1628,7 +1643,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   };
 
-  #handleTransformStamped = ({ message, topic }: MessageEvent<DeepPartial<TransformStamped>>): void => {
+  readonly #handleTransformStamped = ({
+    message,
+    topic,
+  }: MessageEvent<DeepPartial<TransformStamped>>): void => {
     // geometry_msgs/TransformStamped - Ingest this single transform into our TF tree
     const tf = normalizeTransformStamped(message);
     const isStatic = topic.endsWith("tf_static") || topic.endsWith("static_transform");

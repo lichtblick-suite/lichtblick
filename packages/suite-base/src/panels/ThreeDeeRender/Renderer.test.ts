@@ -2310,13 +2310,7 @@ describe("Renderer static transform caching across message types", () => {
 
     renderer.setCurrentTime(100n);
     const regularMsg = createFrameTransformEvent("parent", "child_regular", 50n, 50n, "/tf");
-    const staticMsg = createFrameTransformEvent(
-      "parent",
-      "child_static",
-      10n,
-      10n,
-      "/tf_static",
-    );
+    const staticMsg = createFrameTransformEvent("parent", "child_static", 10n, 10n, "/tf_static");
     renderer.addMessageEvent(regularMsg);
     renderer.addMessageEvent(staticMsg);
     renderer.animationFrame();
@@ -2382,13 +2376,7 @@ describe("Renderer static transform caching across message types", () => {
 
     renderer.setCurrentTime(100n);
     const regularMsg = createTransformStampedEvent("parent", "child_regular", 50n, 50n, "/tf");
-    const staticMsg = createTransformStampedEvent(
-      "parent",
-      "child_static",
-      10n,
-      10n,
-      "/tf_static",
-    );
+    const staticMsg = createTransformStampedEvent("parent", "child_static", 10n, 10n, "/tf_static");
     renderer.addMessageEvent(regularMsg);
     renderer.addMessageEvent(staticMsg);
     renderer.animationFrame();
@@ -2421,9 +2409,7 @@ describe("Renderer static transform caching across message types", () => {
     renderer.animationFrame();
 
     // Attempt to add a cyclic *static* transform: child -> grandparent
-    renderer.addMessageEvent(
-      createTFMessageEvent("child", "grandparent", 3n, [3n], "/tf_static"),
-    );
+    renderer.addMessageEvent(createTFMessageEvent("child", "grandparent", 3n, [3n], "/tf_static"));
     renderer.animationFrame();
 
     // The cyclic transform should not have been cached, so a backward seek that
@@ -2432,10 +2418,7 @@ describe("Renderer static transform caching across message types", () => {
     renderer.handleSeek(100n);
 
     const grandparentFrame = renderer.transformTree.frame("grandparent");
-    expect(
-      grandparentFrame == undefined ||
-        grandparentFrame.parent()?.id !== "child",
-    ).toBe(true);
+    expect(grandparentFrame == undefined || grandparentFrame.parent()?.id !== "child").toBe(true);
 
     renderer.dispose();
   });
