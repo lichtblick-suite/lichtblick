@@ -6,6 +6,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { FrameTransform, FrameTransforms } from "@foxglove/schemas";
 import { setupJestCanvasMock } from "jest-canvas-mock";
 import * as THREE from "three";
 
@@ -19,7 +20,7 @@ import { DEFAULT_CAMERA_STATE } from "@lichtblick/suite-base/panels/ThreeDeeRend
 import { HOVER_PICK_THROTTLE_MS } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import { CameraStateSettings } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
-import { TFMessage } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
+import { TFMessage, TransformStamped } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -129,6 +130,73 @@ function createTFMessageEvent(
     schemaName: "tf2_msgs/TFMessage",
     message: {
       transforms: stampedTfs,
+    },
+    sizeInBytes: 0,
+  };
+}
+
+function createFrameTransformEvent(
+  parentId: string,
+  childId: string,
+  receiveTime: bigint,
+  stamp: bigint,
+  topic: string = "/tf",
+): MessageEvent<FrameTransform> {
+  return {
+    topic,
+    receiveTime: fromNanoSec(receiveTime),
+    schemaName: "foxglove.FrameTransform",
+    message: {
+      timestamp: fromNanoSec(stamp),
+      parent_frame_id: parentId,
+      child_frame_id: childId,
+      translation: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0, w: 1 },
+    },
+    sizeInBytes: 0,
+  };
+}
+
+function createFrameTransformsEvent(
+  transforms: { parentId: string; childId: string; stamp: bigint }[],
+  receiveTime: bigint,
+  topic: string = "/tf",
+): MessageEvent<FrameTransforms> {
+  return {
+    topic,
+    receiveTime: fromNanoSec(receiveTime),
+    schemaName: "foxglove.FrameTransforms",
+    message: {
+      transforms: transforms.map(({ parentId, childId, stamp }) => ({
+        timestamp: fromNanoSec(stamp),
+        parent_frame_id: parentId,
+        child_frame_id: childId,
+        translation: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0, w: 1 },
+      })),
+    },
+    sizeInBytes: 0,
+  };
+}
+
+function createTransformStampedEvent(
+  parentId: string,
+  childId: string,
+  receiveTime: bigint,
+  stamp: bigint,
+  topic: string = "/tf",
+): MessageEvent<TransformStamped> {
+  return {
+    topic,
+    receiveTime: fromNanoSec(receiveTime),
+    schemaName: "geometry_msgs/TransformStamped",
+    message: {
+      header: {
+        stamp: fromNanoSec(stamp),
+        frame_id: parentId,
+      },
+      child_frame_id: childId,
+      transform: makeTf(),
     },
     sizeInBytes: 0,
   };
@@ -2207,6 +2275,169 @@ describe("Renderer backward seek behavior", () => {
     const regularFrame = renderer.transformTree.frame("child_regular");
     expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+  });
+});
+
+describe("Renderer static transform caching across message types", () => {
+  let canvas = document.createElement("canvas");
+  let parent = document.createElement("div");
+  let rendererArgs: ConstructorParameters<typeof Renderer>[0] = {
+    ...defaultRendererProps,
+    canvas,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupJestCanvasMock();
+    parent = document.createElement("div");
+    canvas = document.createElement("canvas");
+    parent.appendChild(canvas);
+    rendererArgs = { ...defaultRendererProps, canvas };
+  });
+
+  afterEach(() => {
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("caches and preserves static transforms received as foxglove.FrameTransform messages", () => {
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+
+    renderer.setCurrentTime(100n);
+    const regularMsg = createFrameTransformEvent("parent", "child_regular", 50n, 50n, "/tf");
+    const staticMsg = createFrameTransformEvent(
+      "parent",
+      "child_static",
+      10n,
+      10n,
+      "/tf_static",
+    );
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n);
+
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.dispose();
+  });
+
+  it("caches and preserves static transforms received as foxglove.FrameTransforms messages", () => {
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+
+    renderer.setCurrentTime(100n);
+    const regularMsg = createFrameTransformsEvent(
+      [{ parentId: "parent", childId: "child_regular", stamp: 50n }],
+      50n,
+      "/tf",
+    );
+    const staticMsg = createFrameTransformsEvent(
+      [{ parentId: "parent", childId: "child_static", stamp: 10n }],
+      10n,
+      "/tf_static",
+    );
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n);
+
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.dispose();
+  });
+
+  it("caches and preserves static transforms received as geometry_msgs/TransformStamped messages", () => {
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+
+    renderer.setCurrentTime(100n);
+    const regularMsg = createTransformStampedEvent("parent", "child_regular", 50n, 50n, "/tf");
+    const staticMsg = createTransformStampedEvent(
+      "parent",
+      "child_static",
+      10n,
+      10n,
+      "/tf_static",
+    );
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n);
+
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.dispose();
+  });
+
+  it("does not cache a static transform that is rejected as a cyclic edge", () => {
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+
+    // Build a chain: grandparent -> parent -> child
+    renderer.addMessageEvent(createTFMessageEvent("grandparent", "parent", 1n, [1n], "/tf"));
+    renderer.addMessageEvent(createTFMessageEvent("parent", "child", 2n, [2n], "/tf"));
+    renderer.animationFrame();
+
+    // Attempt to add a cyclic *static* transform: child -> grandparent
+    renderer.addMessageEvent(
+      createTFMessageEvent("child", "grandparent", 3n, [3n], "/tf_static"),
+    );
+    renderer.animationFrame();
+
+    // The cyclic transform should not have been cached, so a backward seek that
+    // preserves the static cache should not resurrect it.
+    renderer.setCurrentTime(100n);
+    renderer.handleSeek(0n);
+
+    const grandparentFrame = renderer.transformTree.frame("grandparent");
+    expect(
+      grandparentFrame == undefined ||
+        grandparentFrame.parent()?.id !== "child",
+    ).toBe(true);
+
+    renderer.dispose();
   });
 });
 
