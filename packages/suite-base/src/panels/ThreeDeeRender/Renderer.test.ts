@@ -2428,8 +2428,8 @@ describe("Renderer static transform caching across message types", () => {
 
     // The cyclic transform should not have been cached, so a backward seek that
     // preserves the static cache should not resurrect it.
-    renderer.setCurrentTime(100n);
-    renderer.handleSeek(0n);
+    renderer.setCurrentTime(0n);
+    renderer.handleSeek(100n);
 
     const grandparentFrame = renderer.transformTree.frame("grandparent");
     expect(
