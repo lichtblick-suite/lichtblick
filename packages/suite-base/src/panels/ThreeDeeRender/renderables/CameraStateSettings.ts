@@ -27,6 +27,8 @@ import { CameraState, DEFAULT_CAMERA_STATE, DEFAULT_ORBIT_CONTROLS_CONFIG } from
 import { PRECISION_DEGREES, PRECISION_DISTANCE } from "../settings";
 
 const DISPLAY_FRAME_NOT_FOUND = "DISPLAY_FRAME_NOT_FOUND";
+const CAMERA_TF_NOT_FOUND = "CAMERA_TF_NOT_FOUND";
+const CAMERA_TF_PATH = ["cameraState", "cameraTf"];
 
 const UNIT_X = new THREE.Vector3(1, 0, 0);
 const UNIT_Z = new THREE.Vector3(0, 0, 1);
@@ -64,6 +66,10 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
   #perspectiveCamera: THREE.PerspectiveCamera;
   #orthographicCamera: THREE.OrthographicCamera;
   #aspect: number;
+
+  // Position last applied on top of the frame-relative camera state.
+  #dynamicTargetPos = new THREE.Vector3();
+  #tempDynamicTargetPos = new THREE.Vector3();
 
   public constructor(renderer: IRenderer, canvas: HTMLCanvasElement, aspect: number) {
     super("foxglove.CameraStateSettings", renderer);
@@ -140,6 +146,18 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     const { cameraState: camera } = config;
     const handler = this.handleSettingsAction;
 
+    const cameraTfOptions = [
+      { label: t("threeDee:cameraTargetFrameNone"), value: "" },
+      ...this.renderer.coordinateFrameList,
+    ];
+    const cameraTfValue = config.cameraTf ?? "";
+    if (config.cameraTf != undefined && !this.renderer.transformTree.hasFrame(config.cameraTf)) {
+      cameraTfOptions.splice(1, 0, {
+        label: CoordinateFrame.DisplayName(config.cameraTf),
+        value: config.cameraTf,
+      });
+    }
+
     return {
       path: ["cameraState"],
       node: {
@@ -153,6 +171,14 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
             error: this.renderer.cameraSyncError(),
             value: config.scene.syncCamera ?? false,
             help: t("threeDee:syncCameraHelp"),
+          },
+          cameraTf: {
+            label: t("threeDee:cameraTargetFrame"),
+            help: t("threeDee:cameraTargetFrameHelp"),
+            input: "select",
+            options: cameraTfOptions,
+            value: cameraTfValue,
+            error: this.renderer.settings.errors.errors.errorAtPath(CAMERA_TF_PATH),
           },
           distance: {
             label: t("threeDee:distance"),
@@ -296,6 +322,16 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
         this.renderer.updateConfig((draft) => {
           draft.scene.syncCamera = value as boolean;
         });
+      } else if (path[1] === "cameraTf") {
+        const cameraTf = (value as string) || undefined;
+        this.renderer.settings.errors.clearPath(CAMERA_TF_PATH);
+        this.renderer.updateConfig((draft) => {
+          draft.cameraTf = cameraTf;
+          if (cameraTf) {
+            // Center on the selected frame while preserving the current orbit angles and distance.
+            draft.cameraState.targetOffset = [...DEFAULT_CAMERA_STATE.targetOffset];
+          }
+        });
       } else {
         this.renderer.updateConfig((draft) => _.set(draft, path, value));
       }
@@ -342,6 +378,8 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     renderFrameId: AnyFrameId,
     fixedFrameId: AnyFrameId,
   ): void {
+    this.#updateDynamicTargetPos(currentTime, renderFrameId, fixedFrameId);
+
     const followMode = this.renderer.config.followMode;
 
     if (
@@ -402,6 +440,71 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
         snapshotInRenderFrame.orientation.z,
         snapshotInRenderFrame.orientation.w,
       );
+    }
+  }
+
+  /**
+   * Track cameraTf by translating the orbit target and camera together. The camera-to-target
+   * vector is unchanged, so OrbitControls preserves the current distance and angles.
+   */
+  #updateDynamicTargetPos(
+    currentTime: bigint,
+    renderFrameId: AnyFrameId,
+    fixedFrameId: AnyFrameId,
+  ): void {
+    const { cameraTf } = this.renderer.config;
+    const { transformTree } = this.renderer;
+
+    if (
+      !cameraTf ||
+      !transformTree.hasFrame(cameraTf) ||
+      renderFrameId === CoordinateFrame.FALLBACK_FRAME_ID ||
+      fixedFrameId === CoordinateFrame.FALLBACK_FRAME_ID
+    ) {
+      if (this.#dynamicTargetPos.lengthSq() > 0) {
+        this.#controls.target.sub(this.#dynamicTargetPos);
+        this.#perspectiveCamera.position.sub(this.#dynamicTargetPos);
+        this.#dynamicTargetPos.set(0, 0, 0);
+      }
+      return;
+    }
+
+    const pose = makePose();
+    const transformApplied = transformTree.apply(
+      pose,
+      pose,
+      renderFrameId,
+      fixedFrameId,
+      cameraTf,
+      currentTime,
+      currentTime,
+    );
+    if (!transformApplied) {
+      this.renderer.settings.errors.add(
+        CAMERA_TF_PATH,
+        CAMERA_TF_NOT_FOUND,
+        t("threeDee:frameNotFound", { frameId: cameraTf }),
+      );
+      return;
+    }
+    this.renderer.settings.errors.remove(CAMERA_TF_PATH, CAMERA_TF_NOT_FOUND);
+
+    const newPosition = this.#tempDynamicTargetPos.set(
+      pose.position.x,
+      pose.position.y,
+      pose.position.z,
+    );
+    const dx = newPosition.x - this.#dynamicTargetPos.x;
+    const dy = newPosition.y - this.#dynamicTargetPos.y;
+    const dz = newPosition.z - this.#dynamicTargetPos.z;
+    if (dx !== 0 || dy !== 0 || dz !== 0) {
+      this.#controls.target.x += dx;
+      this.#controls.target.y += dy;
+      this.#controls.target.z += dz;
+      this.#perspectiveCamera.position.x += dx;
+      this.#perspectiveCamera.position.y += dy;
+      this.#perspectiveCamera.position.z += dz;
+      this.#dynamicTargetPos.copy(newPosition);
     }
   }
 
@@ -499,7 +602,11 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
       distance: this.#controls.getDistance(),
       phi: THREE.MathUtils.radToDeg(this.#controls.getPolarAngle()),
       thetaOffset: THREE.MathUtils.radToDeg(-this.#controls.getAzimuthalAngle()),
-      targetOffset: [this.#controls.target.x, this.#controls.target.y, this.#controls.target.z],
+      targetOffset: [
+        this.#controls.target.x - this.#dynamicTargetPos.x,
+        this.#controls.target.y - this.#dynamicTargetPos.y,
+        this.#controls.target.z - this.#dynamicTargetPos.z,
+      ],
       target: config.cameraState.target,
       targetOrientation: config.cameraState.targetOrientation,
       fovy: config.cameraState.fovy,
@@ -511,12 +618,45 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
   public setCameraState(cameraState: CameraState): void {
     this.#isUpdatingCameraState = true;
     this.#updateCameras(cameraState);
+    this.#dynamicTargetPos.set(0, 0, 0);
+    this.#applyDynamicTargetToCamera({ isPerspective: cameraState.perspective });
     // only active for follow pose mode because it introduces strange behavior into the other modes
     // due to the fact that they are manipulating the camera after update with the `cameraGroup`
     if (this.renderer.config.followMode === "follow-pose") {
       this.#controls.update();
     }
     this.#isUpdatingCameraState = false;
+  }
+
+  /** Apply the current cameraTf position after rebuilding cameras from frame-relative state. */
+  #applyDynamicTargetToCamera({ isPerspective }: { isPerspective: boolean }): void {
+    const { cameraTf } = this.renderer.config;
+    const { transformTree, followFrameId, fixedFrameId, currentTime } = this.renderer;
+    if (!cameraTf || !followFrameId || !fixedFrameId || !transformTree.hasFrame(cameraTf)) {
+      return;
+    }
+
+    const pose = makePose();
+    const transformApplied = transformTree.apply(
+      pose,
+      pose,
+      followFrameId,
+      fixedFrameId,
+      cameraTf,
+      currentTime,
+      currentTime,
+    );
+    if (!transformApplied) {
+      return;
+    }
+
+    this.#dynamicTargetPos.set(pose.position.x, pose.position.y, pose.position.z);
+    this.#controls.target.add(this.#dynamicTargetPos);
+    this.#perspectiveCamera.position.add(this.#dynamicTargetPos);
+    if (!isPerspective) {
+      this.#orthographicCamera.position.x += this.#dynamicTargetPos.x;
+      this.#orthographicCamera.position.y += this.#dynamicTargetPos.y;
+    }
   }
 
   /** Translate a CameraState to the three.js coordinate system */
