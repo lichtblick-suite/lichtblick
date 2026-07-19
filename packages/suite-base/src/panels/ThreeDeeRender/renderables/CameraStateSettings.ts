@@ -457,15 +457,21 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
 
     if (
       !cameraTf ||
-      !transformTree.hasFrame(cameraTf) ||
       renderFrameId === CoordinateFrame.FALLBACK_FRAME_ID ||
       fixedFrameId === CoordinateFrame.FALLBACK_FRAME_ID
     ) {
-      if (this.#dynamicTargetPos.lengthSq() > 0) {
-        this.#controls.target.sub(this.#dynamicTargetPos);
-        this.#perspectiveCamera.position.sub(this.#dynamicTargetPos);
-        this.#dynamicTargetPos.set(0, 0, 0);
-      }
+      this.renderer.settings.errors.remove(CAMERA_TF_PATH, CAMERA_TF_NOT_FOUND);
+      this.#clearDynamicTargetOffset();
+      return;
+    }
+
+    if (!transformTree.hasFrame(cameraTf)) {
+      this.renderer.settings.errors.add(
+        CAMERA_TF_PATH,
+        CAMERA_TF_NOT_FOUND,
+        t("threeDee:frameNotFound", { frameId: cameraTf }),
+      );
+      this.#clearDynamicTargetOffset();
       return;
     }
 
@@ -498,14 +504,37 @@ export class CameraStateSettings extends SceneExtension implements ICameraHandle
     const dy = newPosition.y - this.#dynamicTargetPos.y;
     const dz = newPosition.z - this.#dynamicTargetPos.z;
     if (dx !== 0 || dy !== 0 || dz !== 0) {
-      this.#controls.target.x += dx;
-      this.#controls.target.y += dy;
-      this.#controls.target.z += dz;
-      this.#perspectiveCamera.position.x += dx;
-      this.#perspectiveCamera.position.y += dy;
-      this.#perspectiveCamera.position.z += dz;
+      this.#translateCamerasByDynamicOffset(dx, dy, dz);
       this.#dynamicTargetPos.copy(newPosition);
     }
+  }
+
+  /** Undo any accumulated cameraTf offset from the orbit target and both cameras. */
+  #clearDynamicTargetOffset(): void {
+    if (this.#dynamicTargetPos.lengthSq() === 0) {
+      return;
+    }
+    this.#translateCamerasByDynamicOffset(
+      -this.#dynamicTargetPos.x,
+      -this.#dynamicTargetPos.y,
+      -this.#dynamicTargetPos.z,
+    );
+    this.#dynamicTargetPos.set(0, 0, 0);
+  }
+
+  /**
+   * Translate orbit target + cameras by the same delta. Orthographic mode only follows x/y
+   * (matching #updateCameras / #applyDynamicTargetToCamera).
+   */
+  #translateCamerasByDynamicOffset(dx: number, dy: number, dz: number): void {
+    this.#controls.target.x += dx;
+    this.#controls.target.y += dy;
+    this.#controls.target.z += dz;
+    this.#perspectiveCamera.position.x += dx;
+    this.#perspectiveCamera.position.y += dy;
+    this.#perspectiveCamera.position.z += dz;
+    this.#orthographicCamera.position.x += dx;
+    this.#orthographicCamera.position.y += dy;
   }
 
   #handleCameraMove = (): void => {

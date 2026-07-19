@@ -261,6 +261,19 @@ describe("CameraStateSettings", () => {
       });
     });
 
+    it("reports an error when the configured target frame has never been seen", () => {
+      renderer.updateConfig((draft) => {
+        draft.cameraTf = "missing_frame";
+      });
+      const cameraStateSettings = new CameraStateSettings(renderer, canvas, 16 / 9);
+
+      cameraStateSettings.startFrame(0n, "map", "map");
+
+      expect(renderer.settings.errors.errors.errorAtPath(["cameraState", "cameraTf"])).toBe(
+        "Frame missing_frame not found",
+      );
+    });
+
     it("undoes the tracked offset when the camera target frame is cleared", () => {
       renderer.addTransform(
         "map",
@@ -311,6 +324,85 @@ describe("CameraStateSettings", () => {
       expect(renderer.settings.errors.errors.errorAtPath(["cameraState", "cameraTf"])).toBe(
         "Frame orphan not found",
       );
+    });
+
+    it("tracks frame translation in orthographic mode across frames", () => {
+      renderer.addTransform(
+        "map",
+        "base_link",
+        0n,
+        { x: 1, y: 2, z: 3 },
+        { x: 0, y: 0, z: 0, w: 1 },
+      );
+      renderer.addTransform(
+        "map",
+        "base_link",
+        1n,
+        { x: 4, y: 6, z: 8 },
+        { x: 0, y: 0, z: 0, w: 1 },
+      );
+      renderer.setFollowFrameId("map");
+      renderer.fixedFrameId = "map";
+      renderer.setCurrentTime(0n);
+      renderer.updateConfig((draft) => {
+        draft.cameraTf = "base_link";
+        draft.cameraState.perspective = false;
+      });
+      const cameraStateSettings = new CameraStateSettings(renderer, canvas, 16 / 9);
+      const cameraState = {
+        ...DEFAULT_CAMERA_STATE,
+        perspective: false,
+      };
+      cameraStateSettings.setCameraState(cameraState);
+
+      cameraStateSettings.startFrame(0n, "map", "map");
+      expect(mockOrbitControls.target.toArray()).toEqual([1, 2, 3]);
+      expect(cameraStateSettings.getActiveCamera().position.x).toBeCloseTo(1);
+      expect(cameraStateSettings.getActiveCamera().position.y).toBeCloseTo(2);
+
+      cameraStateSettings.startFrame(1n, "map", "map");
+
+      expect(mockOrbitControls.target.toArray()).toEqual([4, 6, 8]);
+      expect(cameraStateSettings.getActiveCamera().position.x).toBeCloseTo(4);
+      expect(cameraStateSettings.getActiveCamera().position.y).toBeCloseTo(6);
+    });
+
+    it("undoes orthographic offsets when the camera target frame is cleared", () => {
+      renderer.addTransform(
+        "map",
+        "base_link",
+        0n,
+        { x: 5, y: 7, z: 9 },
+        { x: 0, y: 0, z: 0, w: 1 },
+      );
+      renderer.setFollowFrameId("map");
+      renderer.fixedFrameId = "map";
+      renderer.setCurrentTime(0n);
+      renderer.updateConfig((draft) => {
+        draft.cameraTf = "base_link";
+        draft.cameraState.perspective = false;
+      });
+      const cameraStateSettings = new CameraStateSettings(renderer, canvas, 16 / 9);
+      cameraStateSettings.setCameraState({
+        ...DEFAULT_CAMERA_STATE,
+        perspective: false,
+      });
+      cameraStateSettings.startFrame(0n, "map", "map");
+      expect(cameraStateSettings.getActiveCamera().position.x).toBeCloseTo(5);
+      expect(cameraStateSettings.getActiveCamera().position.y).toBeCloseTo(7);
+
+      cameraStateSettings.handleSettingsAction({
+        action: "update",
+        payload: {
+          path: ["cameraState", "cameraTf"],
+          input: "select",
+          value: "",
+        },
+      });
+      cameraStateSettings.startFrame(0n, "map", "map");
+
+      expect(cameraStateSettings.getActiveCamera().position.x).toBeCloseTo(0);
+      expect(cameraStateSettings.getActiveCamera().position.y).toBeCloseTo(0);
     });
 
     it("applies the tracked frame when rebuilding camera state", () => {
