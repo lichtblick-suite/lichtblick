@@ -50,7 +50,7 @@ function embeddedMaterial(renderable: RenderableMeshResource): THREE.Material | 
 }
 
 describe("RenderableMeshResource embedded opacity", () => {
-  it("reloads embedded materials when opacity changes without changing the resource", async () => {
+  it("updates embedded materials in place when only opacity changes", async () => {
     const cachedMaterial = new THREE.MeshStandardMaterial({ opacity: 0.8 });
     const cachedModel = new THREE.Group();
     cachedModel.add(new THREE.Mesh(new THREE.BoxGeometry(), cachedMaterial));
@@ -80,14 +80,20 @@ describe("RenderableMeshResource embedded opacity", () => {
       expect(embeddedMaterial(renderable)?.opacity).toBeCloseTo(0.8);
     });
 
+    const materialAfterLoad = embeddedMaterial(renderable);
     renderable.update(makeMarker(0.5), 1n);
 
-    await waitFor(() => {
-      expect(load).toHaveBeenCalledTimes(2);
-      expect(embeddedMaterial(renderable)?.opacity).toBeCloseTo(0.4);
-      expect(embeddedMaterial(renderable)?.transparent).toBe(true);
-      expect(embeddedMaterial(renderable)?.depthWrite).toBe(false);
-    });
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(embeddedMaterial(renderable)).toBe(materialAfterLoad);
+    expect(embeddedMaterial(renderable)?.opacity).toBeCloseTo(0.4);
+    expect(embeddedMaterial(renderable)?.transparent).toBe(true);
+    expect(embeddedMaterial(renderable)?.depthWrite).toBe(false);
+
+    // A second opacity change must keep multiplying against the original, not the previous result.
+    renderable.update(makeMarker(0.25), 2n);
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(embeddedMaterial(renderable)?.opacity).toBeCloseTo(0.2);
+
     expect(cachedMaterial.opacity).toBe(0.8);
     expect(cachedMaterial.transparent).toBe(false);
     renderable.dispose();

@@ -7,7 +7,7 @@
 
 import * as THREE from "three";
 
-import { setEmbeddedMaterialsOpacity } from "./models";
+import { setEmbeddedMaterialsOpacity, updateEmbeddedMaterialsOpacity } from "./models";
 
 describe("setEmbeddedMaterialsOpacity", () => {
   it("clones embedded materials and applies opacity without mutating cached materials", () => {
@@ -49,5 +49,30 @@ describe("setEmbeddedMaterialsOpacity", () => {
     expect(materials[0]).toMatchObject({ opacity: 1, transparent: false, depthWrite: true });
     expect(materials[1]).not.toBe(transparentMaterial);
     expect(materials[1]).toMatchObject({ opacity: 0.5, transparent: true, depthWrite: false });
+  });
+});
+
+describe("updateEmbeddedMaterialsOpacity", () => {
+  it("updates opacity in place without recloning or compounding multipliers", () => {
+    const cachedMaterial = new THREE.MeshStandardMaterial({ opacity: 0.8 });
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(), cachedMaterial);
+    const model = new THREE.Group();
+    model.add(mesh);
+
+    setEmbeddedMaterialsOpacity(model, 0.5);
+    const instanceMaterial = mesh.material;
+    expect(instanceMaterial.opacity).toBeCloseTo(0.4);
+
+    updateEmbeddedMaterialsOpacity(model, 0.25);
+    expect(mesh.material).toBe(instanceMaterial);
+    expect(instanceMaterial.opacity).toBeCloseTo(0.2);
+
+    // Full layer opacity restores the intrinsic 0.8 (still translucent because base < 1).
+    updateEmbeddedMaterialsOpacity(model, 1);
+    expect(mesh.material).toBe(instanceMaterial);
+    expect(instanceMaterial.opacity).toBeCloseTo(0.8);
+    expect(instanceMaterial.transparent).toBe(true);
+    expect(instanceMaterial.depthWrite).toBe(false);
+    expect(cachedMaterial.opacity).toBe(0.8);
   });
 });
