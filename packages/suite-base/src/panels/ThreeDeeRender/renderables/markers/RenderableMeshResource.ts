@@ -15,7 +15,7 @@ import type { IRenderer } from "../../IRenderer";
 import { rgbToThreeColor } from "../../color";
 import { disposeMeshesRecursive } from "../../dispose";
 import { Marker } from "../../ros";
-import { removeLights, replaceMaterials } from "../models";
+import { removeLights, replaceMaterials, setEmbeddedMaterialsOpacity } from "../models";
 
 const MESH_FETCH_FAILED = "MESH_FETCH_FAILED";
 
@@ -68,10 +68,20 @@ export class RenderableMeshResource extends RenderableMarker {
     rgbToThreeColor(this.#material.color, marker.color);
     this.#material.opacity = marker.color.a;
 
-    if (forceLoad === true || marker.mesh_resource !== prevMarker.mesh_resource) {
+    const embeddedMaterialOptionsChanged =
+      marker.mesh_use_embedded_materials !== prevMarker.mesh_use_embedded_materials ||
+      (marker.mesh_use_embedded_materials && marker.color.a !== prevMarker.color.a);
+    if (
+      forceLoad === true ||
+      marker.mesh_resource !== prevMarker.mesh_resource ||
+      embeddedMaterialOptionsChanged
+    ) {
       const curUpdateId = ++this.#updateId;
 
-      const opts = { useEmbeddedMaterials: marker.mesh_use_embedded_materials };
+      const opts = {
+        useEmbeddedMaterials: marker.mesh_use_embedded_materials,
+        opacity: marker.color.a,
+      };
       const errors = this.renderer.settings.errors;
       if (this.#mesh) {
         this.remove(this.#mesh);
@@ -126,7 +136,7 @@ export class RenderableMeshResource extends RenderableMarker {
 
   async #loadModel(
     url: string,
-    opts: { useEmbeddedMaterials: boolean },
+    opts: { useEmbeddedMaterials: boolean; opacity: number },
   ): Promise<THREE.Group | THREE.Scene | undefined> {
     const cachedModel = await this.renderer.modelCache.load(
       url,
@@ -155,6 +165,8 @@ export class RenderableMeshResource extends RenderableMarker {
     removeLights(mesh);
     if (!opts.useEmbeddedMaterials) {
       replaceMaterials(mesh, this.#material);
+    } else {
+      setEmbeddedMaterialsOpacity(mesh, opts.opacity);
     }
 
     return mesh;

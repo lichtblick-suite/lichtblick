@@ -88,6 +88,7 @@ export type LayerSettingsUrdf = BaseSettings & {
   displayMode: "auto" | "visual" | "collision";
   label: string;
   fallbackColor?: string;
+  opacity?: number;
 };
 
 export type LayerSettingsCustomUrdf = CustomLayerSettings & {
@@ -100,6 +101,7 @@ export type LayerSettingsCustomUrdf = CustomLayerSettings & {
   framePrefix: string;
   displayMode: "auto" | "visual" | "collision";
   fallbackColor?: string;
+  opacity?: number;
 };
 
 const DEFAULT_SETTINGS: LayerSettingsUrdf = {
@@ -109,6 +111,7 @@ const DEFAULT_SETTINGS: LayerSettingsUrdf = {
   displayMode: "auto",
   label: "URDF",
   fallbackColor: DEFAULT_COLOR_STR,
+  opacity: 1,
 };
 
 const DEFAULT_CUSTOM_SETTINGS: LayerSettingsCustomUrdf = {
@@ -125,6 +128,7 @@ const DEFAULT_CUSTOM_SETTINGS: LayerSettingsCustomUrdf = {
   framePrefix: "",
   displayMode: "auto",
   fallbackColor: DEFAULT_COLOR_STR,
+  opacity: 1,
 };
 const URDF_TOPIC_SCHEMAS = new Set<string>(["std_msgs/String", "std_msgs/msg/String"]);
 
@@ -267,6 +271,15 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       help: "Fallback color used in case a link does not specify any color itself",
       input: "rgb",
     };
+    const baseOpacityField: SettingsTreeField = {
+      label: "Opacity",
+      help: "Overall opacity of this URDF layer. Lower values create a transparent ghost overlay.",
+      input: "number",
+      min: 0,
+      max: 1,
+      step: 0.05,
+      precision: 2,
+    };
 
     // /robot_description topic entry
     const topic = this.renderer.topicsByName?.get(TOPIC_NAME);
@@ -280,6 +293,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         fallbackColor: {
           ...baseFallbackColorField,
           value: config.fallbackColor ?? DEFAULT_SETTINGS.fallbackColor,
+        },
+        opacity: {
+          ...baseOpacityField,
+          value: config.opacity ?? DEFAULT_SETTINGS.opacity,
         },
       };
       entries.push({
@@ -312,6 +329,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         fallbackColor: {
           ...baseFallbackColorField,
           value: config.fallbackColor ?? DEFAULT_SETTINGS.fallbackColor,
+        },
+        opacity: {
+          ...baseOpacityField,
+          value: config.opacity ?? DEFAULT_SETTINGS.opacity,
         },
       };
 
@@ -423,6 +444,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
           fallbackColor: {
             ...baseFallbackColorField,
             value: config.fallbackColor ?? DEFAULT_SETTINGS.fallbackColor,
+          },
+          opacity: {
+            ...baseOpacityField,
+            value: config.opacity ?? DEFAULT_CUSTOM_SETTINGS.opacity,
           },
         };
 
@@ -628,7 +653,12 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
       } else if (field === "framePrefix") {
         this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
-      } else if (field === "displayMode" || field === "visible" || field === "fallbackColor") {
+      } else if (
+        field === "displayMode" ||
+        field === "visible" ||
+        field === "fallbackColor" ||
+        field === "opacity"
+      ) {
         this.#loadUrdf({ instanceId, urdf, forceReload: true });
       } else if (field === "sourceType") {
         const sourceType = action.payload.value as LayerSettingsCustomUrdf["sourceType"];
@@ -935,6 +965,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     const fallbackColor = settings.fallbackColor
       ? stringToRgba(makeRgba(), settings.fallbackColor)
       : undefined;
+    const opacity = THREE.MathUtils.clamp(settings.opacity ?? 1, 0, 1);
 
     this.#loadFrames(instanceId, frames);
     this.#loadTransforms(instanceId, transforms);
@@ -952,6 +983,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         renderer,
         baseUrl,
         fallbackColor,
+        opacity,
       });
       // Set the childRenderable settingsPath so errors route to the correct place
       childRenderable.userData.settingsPath = renderable.userData.settingsPath;
@@ -1068,12 +1100,14 @@ function createRenderable(args: {
   renderer: IRenderer;
   baseUrl?: string;
   fallbackColor?: ColorRGBA;
+  opacity: number;
 }): Renderable {
-  const { visual, robot, id, frameId, renderer, baseUrl, fallbackColor } = args;
+  const { visual, robot, id, frameId, renderer, baseUrl, fallbackColor, opacity } = args;
   const name = `${frameId}-${id}-${visual.geometry.geometryType}`;
   const orientation = eulerToQuaternion(visual.origin.rpy);
   const pose = { position: visual.origin.xyz, orientation };
-  const color = getColor(visual, robot) ?? fallbackColor ?? DEFAULT_COLOR;
+  const baseColor = getColor(visual, robot) ?? fallbackColor ?? DEFAULT_COLOR;
+  const color = { ...baseColor, a: baseColor.a * opacity };
   const type = visual.geometry.geometryType;
   switch (type) {
     case "box": {

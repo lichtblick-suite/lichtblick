@@ -52,6 +52,34 @@ export function replaceMaterials(model: LoadedModel, material: THREE.MeshStandar
   });
 }
 
+/**
+ * Clone embedded materials for this model instance and apply a layer opacity multiplier.
+ *
+ * Object3D.clone() keeps material references shared with the cached model. Cloning here prevents
+ * one transparent URDF from changing other instances that use the same cached mesh.
+ */
+export function setEmbeddedMaterialsOpacity(model: LoadedModel, opacity: number): void {
+  model.traverse((child: THREE.Object3D) => {
+    if (!(child instanceof THREE.Mesh)) {
+      return;
+    }
+
+    const applyOpacity = (material: THREE.Material): THREE.Material => {
+      const clonedMaterial = material.clone();
+      clonedMaterial.opacity = material.opacity * opacity;
+      clonedMaterial.transparent = material.transparent || clonedMaterial.opacity < 1;
+      clonedMaterial.depthWrite = clonedMaterial.opacity >= 1 && material.depthWrite;
+      clonedMaterial.needsUpdate = true;
+      return clonedMaterial;
+    };
+
+    const materials = child.material as THREE.Material | THREE.Material[];
+    child.material = Array.isArray(materials)
+      ? materials.map(applyOpacity)
+      : applyOpacity(materials);
+  });
+}
+
 /** Generic MeshStandardMaterial dispose function for materials loaded from an external source */
 function disposeStandardMaterial(material: THREE.MeshStandardMaterial): void {
   material.map?.dispose();
