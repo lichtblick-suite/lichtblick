@@ -651,14 +651,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       } else if (field === "parameter") {
         urdf = this.renderer.parameters?.get(action.payload.value as string) as string | undefined;
         this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
-      } else if (field === "framePrefix") {
+      } else if (field === "framePrefix" || field === "opacity") {
+        // Opacity is a slider; debounce so dragging does not spam parse/reload work.
         this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
-      } else if (
-        field === "displayMode" ||
-        field === "visible" ||
-        field === "fallbackColor" ||
-        field === "opacity"
-      ) {
+      } else if (field === "displayMode" || field === "visible" || field === "fallbackColor") {
         this.#loadUrdf({ instanceId, urdf, forceReload: true });
       } else if (field === "sourceType") {
         const sourceType = action.payload.value as LayerSettingsCustomUrdf["sourceType"];

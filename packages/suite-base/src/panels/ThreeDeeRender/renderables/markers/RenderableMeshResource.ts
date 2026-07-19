@@ -15,7 +15,12 @@ import type { IRenderer } from "../../IRenderer";
 import { rgbToThreeColor } from "../../color";
 import { disposeMeshesRecursive } from "../../dispose";
 import { Marker } from "../../ros";
-import { removeLights, replaceMaterials, setEmbeddedMaterialsOpacity } from "../models";
+import {
+  removeLights,
+  replaceMaterials,
+  setEmbeddedMaterialsOpacity,
+  updateEmbeddedMaterialsOpacity,
+} from "../models";
 
 const MESH_FETCH_FAILED = "MESH_FETCH_FAILED";
 
@@ -68,13 +73,13 @@ export class RenderableMeshResource extends RenderableMarker {
     rgbToThreeColor(this.#material.color, marker.color);
     this.#material.opacity = marker.color.a;
 
-    const embeddedMaterialOptionsChanged =
-      marker.mesh_use_embedded_materials !== prevMarker.mesh_use_embedded_materials ||
-      (marker.mesh_use_embedded_materials && marker.color.a !== prevMarker.color.a);
+    const embeddedMaterialUsageChanged =
+      marker.mesh_use_embedded_materials !== prevMarker.mesh_use_embedded_materials;
+    const opacityChanged = marker.color.a !== prevMarker.color.a;
     if (
       forceLoad === true ||
       marker.mesh_resource !== prevMarker.mesh_resource ||
-      embeddedMaterialOptionsChanged
+      embeddedMaterialUsageChanged
     ) {
       const curUpdateId = ++this.#updateId;
 
@@ -114,6 +119,9 @@ export class RenderableMeshResource extends RenderableMarker {
             `Unhandled error loading mesh from "${marker.mesh_resource}": ${(err as Error).message}`,
           );
         });
+    } else if (opacityChanged && marker.mesh_use_embedded_materials && this.#mesh != undefined) {
+      // Opacity-only updates must not destroy/recreate GPU resources on the hot path.
+      updateEmbeddedMaterialsOpacity(this.#mesh, marker.color.a);
     }
     this.#updateOutlineVisibility();
 
