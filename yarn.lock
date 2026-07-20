@@ -2787,9 +2787,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lichtblick/eslint-plugin@npm:2.0.7":
-  version: 2.0.7
-  resolution: "@lichtblick/eslint-plugin@npm:2.0.7"
+"@lichtblick/eslint-plugin@npm:2.0.8":
+  version: 2.0.8
+  resolution: "@lichtblick/eslint-plugin@npm:2.0.8"
   dependencies:
     "@eslint/compat": ^1
     eslint-config-prettier: ^9
@@ -2808,7 +2808,7 @@ __metadata:
     eslint-config-prettier: ^8 || ^9
     prettier: ^3
     typescript: ^4 || ^5
-  checksum: a69e88203422f225d2a2548f02ed3423c69f23b69a32ca57670d79bff497304c1f732f3616ca8285e30dcee47ef26f104d01300330f249ad85145b050458081d
+  checksum: e8378c4096f47372658b19aac4801f06458f99b3cf44e5b78553f30f85c2617cc44539af1147ec2c3c60c16562090f6dff76c21adb435f5fc4158ff3c5d15d31
   languageName: node
   linkType: hard
 
@@ -14205,7 +14205,7 @@ __metadata:
     "@babel/preset-react": 7.29.7
     "@babel/preset-typescript": 7.29.7
     "@eslint/compat": 2.1.0
-    "@lichtblick/eslint-plugin": 2.0.7
+    "@lichtblick/eslint-plugin": 2.0.8
     "@lichtblick/eslint-plugin-suite": "workspace:*"
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"

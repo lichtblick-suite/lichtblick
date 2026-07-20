@@ -1,11 +1,10 @@
 /** @vitest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { Mock } from "vitest";
 import { render } from "@testing-library/react";
 import React from "react";
+import type { Mock } from "vitest";
 
 import { MessageDataItemsByPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import useMessagesByPath from "@lichtblick/suite-base/components/MessagePathSyntax/useMessagesByPath";

@@ -1,5 +1,4 @@
 /** @vitest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -36,10 +35,12 @@ function renderVirtualizedTree(props: Partial<React.ComponentProps<typeof Virtua
 
 describe("VirtualizedTree", () => {
   const mockOnToggleExpand = vi.fn();
-  const { useVirtualizer } = (await import("@tanstack/react-virtual")) as any;
+  let useVirtualizer: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    const mod = (await import("@tanstack/react-virtual")) as any;
+    useVirtualizer = mod.useVirtualizer;
     useVirtualizer.mockReturnValue({
       getVirtualItems: vi.fn(() => []),
       getTotalSize: vi.fn(() => 0),

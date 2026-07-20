@@ -8,20 +8,19 @@ const mockOpen = vi.fn().mockResolvedValue(undefined);
 const mockSize = vi.fn().mockReturnValue(1024);
 const mockRead = vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3]));
 
-vi.mock("@lichtblick/suite-base/util/CachedFilelike", async () => {
-  return vi.fn().mockImplementation(() => ({
+vi.mock("@lichtblick/suite-base/util/CachedFilelike", async () => ({
+  default: vi.fn().mockImplementation(() => ({
     open: mockOpen,
     size: mockSize,
     read: mockRead,
-  }));
-});
+  })),
+}));
 
 vi.mock("@lichtblick/suite-base/util/BrowserHttpReader", async () => ({
   default: vi.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const CachedFilelike = require("@lichtblick/suite-base/util/CachedFilelike");
+import CachedFilelike from "@lichtblick/suite-base/util/CachedFilelike";
 
 describe("RemoteFileReadable", () => {
   const testUrl = "https://example.com/data.mcap";

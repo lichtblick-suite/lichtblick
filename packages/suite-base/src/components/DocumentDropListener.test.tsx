@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -15,10 +15,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import type { Mock } from "vitest";
 import { SnackbarProvider } from "notistack";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
+import type { Mock } from "vitest";
 
 import DocumentDropListener from "@lichtblick/suite-base/components/DocumentDropListener";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
@@ -41,15 +41,17 @@ describe("<DocumentDropListener>", () => {
     document.body.appendChild(wrapper);
 
     const root = createRoot(wrapper);
-    root.render(
-      <div>
-        <SnackbarProvider>
-          <ThemeProvider isDark={false}>
-            <DocumentDropListener allowedExtensions={[]} />
-          </ThemeProvider>
-        </SnackbarProvider>
-      </div>,
-    );
+    act(() => {
+      root.render(
+        <div>
+          <SnackbarProvider>
+            <ThemeProvider isDark={false}>
+              <DocumentDropListener allowedExtensions={[]} />
+            </ThemeProvider>
+          </SnackbarProvider>
+        </div>,
+      );
+    });
 
     (console.error as Mock).mockClear();
   });

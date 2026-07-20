@@ -18,6 +18,15 @@ import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfe
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
+const mockLogError = vi.hoisted(() => vi.fn());
+vi.mock("@lichtblick/log", async () => ({
+  default: {
+    getLogger: () => ({
+      error: mockLogError,
+    }),
+  },
+}));
+
 vi.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", async () => ({
   useExtensionCatalog: vi.fn(),
 }));
@@ -179,18 +188,14 @@ describe("useHandleFiles", () => {
       };
     });
 
-    const logSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
     await act(async () => {
       await handleFiles(files);
     });
 
-    expect(logSpy).toHaveBeenCalledWith(
+    expect(mockLogError).toHaveBeenCalledWith(
       `Error reading file ${brokenFile.name}`,
       expect.objectContaining({ message: "Read failed" }),
     );
-
-    logSpy.mockRestore();
   });
 
   it("handles and selects source for non-foxe files", async () => {

@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { Mock } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
+import type { Mock } from "vitest";
 
 import { Time, compare } from "@lichtblick/rostime";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
@@ -646,9 +646,14 @@ describe("useTopicMessageNavigation", () => {
         },
       });
 
-      // Wait for boundary discovery to complete
+      // Wait for boundary discovery to complete and state to update
       await waitFor(() => {
         expect(getBatchIterator).toHaveBeenCalledTimes(1);
+      });
+
+      // Allow the state update from boundary discovery to propagate
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
       // When

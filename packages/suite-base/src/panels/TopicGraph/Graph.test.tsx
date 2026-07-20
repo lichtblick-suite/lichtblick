@@ -46,7 +46,7 @@ vi.mock("cytoscape", async () => ({
   ),
 }));
 
-vi.mock("cytoscape-dagre", async () => ({}));
+vi.mock("cytoscape-dagre", async () => ({ default: {} }));
 
 describe("Graph", () => {
   beforeEach(() => {

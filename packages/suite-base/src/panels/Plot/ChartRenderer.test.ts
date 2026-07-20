@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-import type { Mock } from "vitest";
 import { Chart, ChartOptions, Element, InteractionItem, Scale } from "chart.js";
+import type { Mock } from "vitest";
 
 import { Zoom as ZoomPlugin } from "@lichtblick/chartjs-plugin-zoom";
 import { Immutable } from "@lichtblick/suite";
@@ -23,17 +23,17 @@ import {
   WheelInteractionEvent,
 } from "./types";
 
-const OPTIONS_CHART: ChartOptionsPlot = {
+const OPTIONS_CHART = vi.hoisted<ChartOptionsPlot>(() => ({
   devicePixelRatio: 2,
   gridColor: "#ccc",
   tickColor: "#000",
   titleColor: "#111",
-};
+}));
 
-const SCALES_CHART: Record<string, Partial<Scale>> = {
+const SCALES_CHART = vi.hoisted<Record<string, Partial<Scale>>>(() => ({
   x: { min: 0, max: 100 },
   y: { min: 0, max: 100 },
-};
+}));
 
 vi.mock("chart.js", async () => {
   const canvas = { width: 0, height: 0 };
@@ -167,9 +167,10 @@ describe("ChartRenderer", () => {
         },
       });
 
-      chartRenderer.update(action);
       const chartInstance = (chartRenderer as any).getChartInstance();
       const resizeSpy = vi.spyOn(chartInstance, "resize");
+
+      chartRenderer.update(action);
 
       expect(chartInstance.canvas.width).toBe(action.size?.width);
       expect(chartInstance.canvas.height).toBe(action.size?.height);
@@ -262,9 +263,10 @@ describe("ChartRenderer", () => {
     it("should update chart on update action", () => {
       const { action, chartRenderer } = setup();
 
-      chartRenderer.update(action);
       const chartInstance = (chartRenderer as any).getChartInstance();
       const updateSpy = vi.spyOn(chartInstance, "update");
+
+      chartRenderer.update(action);
 
       expect(updateSpy).toHaveBeenCalledTimes(1);
       expect(updateSpy).toHaveBeenCalledWith("none");

@@ -1,14 +1,15 @@
-/** @vitest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+/** @vitest-environment jsdom */
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { Mock } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
+import type { Mock } from "vitest";
 
 import MultiProvider from "@lichtblick/suite-base/components/MultiProvider";
 import PlayerManager from "@lichtblick/suite-base/components/PlayerManager";
@@ -68,6 +69,7 @@ vi.mock("./components/SendNotificationToastAdapter", async () => ({
   default: mockProvider("send-notification-toast-adapter"),
 }));
 vi.mock("./context/NativeAppMenuContext", async () => ({
+  default: { Provider: mockProvider("native-app-component") },
   Provider: mockProvider("native-app-component"),
 }));
 vi.mock("./Workspace", async () => ({ default: mockProvider("workspace-component") }));

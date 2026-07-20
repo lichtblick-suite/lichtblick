@@ -1,9 +1,9 @@
-/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+/** @vitest-environment jsdom */
 
-import type { Mock } from "vitest";
 import { render, screen } from "@testing-library/react";
+import type { Mock } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
@@ -34,7 +34,7 @@ const mockUsePanelContext = vi.hoisted(() =>
     openSiblingPanel: vi.fn(),
   })),
 );
-const mockUseAvailableDiagnostics = vi.hoisted(() => vi.fn());
+const mockUseAvailableDiagnostics = vi.hoisted(() => vi.fn(() => new Map()));
 
 vi.mock("@lichtblick/suite-base/PanelAPI", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@lichtblick/suite-base/PanelAPI")>();
@@ -59,7 +59,7 @@ vi.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", async (imp
     >();
   return {
     ...actual,
-    usePanelSettingsTreeUpdate: vi.fn(),
+    usePanelSettingsTreeUpdate: vi.fn(() => vi.fn()),
   };
 });
 

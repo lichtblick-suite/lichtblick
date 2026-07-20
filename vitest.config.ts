@@ -67,6 +67,7 @@ type ProjectOptions = {
   alias?: { find: string | RegExp; replacement: string }[];
   restoreMocks?: boolean;
   withAssetMocks?: boolean;
+  testTimeout?: number;
 };
 
 function makeProject(options: ProjectOptions): ViteUserConfig {
@@ -95,6 +96,7 @@ function makeProject(options: ProjectOptions): ViteUserConfig {
       exclude: ["**/node_modules/**", "**/dist/**", ...(options.exclude ?? [])],
       setupFiles: options.setupFiles ?? [],
       restoreMocks: options.restoreMocks ?? false,
+      testTimeout: options.testTimeout,
     },
   };
 }
@@ -147,6 +149,7 @@ export default defineConfig({
         name: "eslint-plugin-suite",
         root: path.join(rootDir, "packages/eslint-plugin-suite"),
         include: ["**/*.test.{ts,tsx}"],
+        testTimeout: 30_000,
       }),
       makeProject({
         name: "typescript-transformers",

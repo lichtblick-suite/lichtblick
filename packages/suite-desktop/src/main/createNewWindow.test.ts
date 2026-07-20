@@ -6,9 +6,11 @@ import type { MockedFunction, MockedClass } from "vitest";
 
 // Mock all dependencies before any imports
 vi.mock("@lichtblick/log", async () => ({
-  getLogger: () => ({
-    debug: vi.fn(),
-  }),
+  default: {
+    getLogger: () => ({
+      debug: vi.fn(),
+    }),
+  },
 }));
 
 vi.mock("./fileUtils", async () => ({
