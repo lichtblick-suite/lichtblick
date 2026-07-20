@@ -36,7 +36,7 @@ const useStyles = makeStyles()((theme) => ({
     borderRadius: 0,
 
     ":hover": {
-      backgroundColor: tinycolor2(theme.palette.common.white).setAlpha(0.08).toString(),
+      backgroundColor: tinycolor2(theme.palette.appBar.text).setAlpha(0.08).toString(),
     },
     "&.Mui-selected": {
       backgroundColor: theme.palette.appBar.primary,

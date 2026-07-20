@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { PopoverPosition, PopoverReference } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 import { userEvent, within } from "@storybook/testing-library";
 import * as _ from "lodash-es";
 
@@ -64,7 +64,10 @@ const playerSelection: PlayerSelection = {
   selectRecent: () => {},
   recentSources: [
     // prettier-ignore
-    { id: "1111", title: "NuScenes-v1.0-mini-scene-0655-reallllllllly-long-name-8829908290831091.bag", },
+    {
+      id: "1111",
+      title: "NuScenes-v1.0-mini-scene-0655-reallllllllly-long-name-8829908290831091.bag",
+    },
     { id: "2222", title: "http://localhost:11311", label: "ROS 1" },
     { id: "3333", title: "ws://localhost:9090/", label: "Rosbridge (ROS 1 & 2)" },
     { id: "4444", title: "ws://localhost:8765", label: "Foxglove WebSocket" },

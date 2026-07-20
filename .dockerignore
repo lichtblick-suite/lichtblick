@@ -2,6 +2,9 @@
 *.tsbuildinfo
 .DS_Store
 .webpack/
+.caddy-certs/
+.caddy-data/
+.tls/
 dist/
 node_modules/
 Dockerfile

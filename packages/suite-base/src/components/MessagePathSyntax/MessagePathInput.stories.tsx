@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Stack } from "@mui/material";
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 import { fireEvent, screen, userEvent, waitFor, within } from "@storybook/testing-library";
 import { useState } from "react";
 
@@ -30,7 +30,10 @@ let manyTopics: Topic[] = [];
 for (let i = 0; i < 10; i++) {
   manyTopics = manyTopics.concat(
     Array.from(basicDatatypes.keys()).map(
-      (schemaName): Topic => ({ name: `/${schemaName.toLowerCase()}/${i}`, schemaName }),
+      (schemaName): Topic => ({
+        name: `/${schemaName.toLowerCase()}/${i}`,
+        schemaName,
+      }),
     ),
   );
 }

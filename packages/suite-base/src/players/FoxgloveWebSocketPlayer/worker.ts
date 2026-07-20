@@ -64,7 +64,7 @@ self.onmessage = (event: MessageEvent<ToWorkerMessage>) => {
       ws?.close();
       break;
     case "data":
-      ws?.send(data);
+      ws?.send(data as string | BufferSource);
       break;
   }
 };

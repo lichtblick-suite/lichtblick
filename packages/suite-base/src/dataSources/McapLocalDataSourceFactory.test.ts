@@ -5,6 +5,7 @@ import { DataSourceFactoryInitializeArgs } from "@lichtblick/suite-base/context/
 import { FILE_ACCEPT_TYPE } from "@lichtblick/suite-base/context/Workspace/constants";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
+import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import McapLocalDataSourceFactory from "./McapLocalDataSourceFactory";
@@ -21,9 +22,12 @@ vi.mock("@lichtblick/suite-base/players/IterablePlayer", async () => ({
   IterablePlayer: vi.fn(),
 }));
 
-vi.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource", async () => ({
-  WorkerSerializedIterableSource: vi.fn(),
-}));
+vi.mock(
+  "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource",
+  async () => ({
+    WorkerSerializedIterableSource: vi.fn(),
+  }),
+);
 
 describe("McapLocalDataSourceFactory", () => {
   let factory: McapLocalDataSourceFactory;
@@ -67,6 +71,7 @@ describe("McapLocalDataSourceFactory", () => {
       name: files[0]!.name,
       sourceId: MCAP_LOCAL_FILE_ID,
       readAheadDuration: { sec: 120, nsec: 0 },
+      expandBackfill: expandVideoSeekBackfill,
     });
     expect(player).toBeInstanceOf(IterablePlayer);
   });
@@ -87,6 +92,7 @@ describe("McapLocalDataSourceFactory", () => {
       name: `${files[0]!.name}, ${files[1]!.name}`,
       sourceId: MCAP_LOCAL_FILE_ID,
       readAheadDuration: { sec: 120, nsec: 0 },
+      expandBackfill: expandVideoSeekBackfill,
     });
     expect(player).toBeInstanceOf(IterablePlayer);
   });
@@ -117,6 +123,7 @@ describe("McapLocalDataSourceFactory", () => {
       name: file.name,
       sourceId: MCAP_LOCAL_FILE_ID,
       readAheadDuration: { sec: 120, nsec: 0 },
+      expandBackfill: expandVideoSeekBackfill,
     });
     expect(player).toBeInstanceOf(IterablePlayer);
   });
@@ -138,6 +145,7 @@ describe("McapLocalDataSourceFactory", () => {
       name: `${files[0]?.name}, ${file.name}`,
       sourceId: MCAP_LOCAL_FILE_ID,
       readAheadDuration: { sec: 120, nsec: 0 },
+      expandBackfill: expandVideoSeekBackfill,
     });
     expect(player).toBeInstanceOf(IterablePlayer);
   });

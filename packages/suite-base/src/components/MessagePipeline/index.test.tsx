@@ -16,7 +16,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-/* eslint-disable vi/no-conditional-expect */
+/* eslint-disable vitest/no-conditional-expect */
 
 import { act, renderHook } from "@testing-library/react";
 import { PropsWithChildren, useCallback, useState } from "react";
@@ -306,9 +306,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     act(() => {
       void player.emit();
     });
-    await expect(async () => {
-      await player.emit();
-    }).rejects.toThrow("New playerState was emitted before last playerState was rendered.");
+    await expect(player.emit()).rejects.toThrow(
+      "New playerState was emitted before last playerState was rendered.",
+    );
   });
 
   it("sets subscriptions", async () => {

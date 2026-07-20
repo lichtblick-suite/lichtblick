@@ -13,7 +13,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 import { useCallback, useEffect, useRef, useState } from "react";
 import TestUtils from "react-dom/test-utils";
 import { useAsync } from "react-use";

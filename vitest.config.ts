@@ -40,7 +40,7 @@ function lichtblickBabel(): PluginOption {
       presets: [["@babel/preset-typescript", { allowDeclareFields: true }], "@babel/preset-react"],
       plugins: [
         ["@babel/plugin-proposal-decorators", { version: "legacy" }],
-        "@babel/plugin-proposal-explicit-resource-management",
+        "@babel/plugin-transform-explicit-resource-management",
         "@babel/plugin-transform-private-methods",
       ],
     },

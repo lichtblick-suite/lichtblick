@@ -14,14 +14,18 @@ import {
 } from "@lichtblick/suite-base/dataSources/constants";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
+import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 
 vi.mock("@lichtblick/suite-base/players/IterablePlayer", async () => ({
   IterablePlayer: vi.fn(),
 }));
 
-vi.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource", async () => ({
-  WorkerSerializedIterableSource: vi.fn(),
-}));
+vi.mock(
+  "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource",
+  async () => ({
+    WorkerSerializedIterableSource: vi.fn(),
+  }),
+);
 
 describe("SampleNuscenesDataSourceFactory", () => {
   let factory: SampleNuscenesDataSourceFactory;
@@ -60,6 +64,7 @@ describe("SampleNuscenesDataSourceFactory", () => {
       urlParams: {},
       sourceId: SAMPLE_NUSCENES_DATA_SOURCE_ID,
       readAheadDuration: SAMPLE_NUSCENES_DATA_SOURCE_READ_AHEAD_DURATION,
+      expandBackfill: expandVideoSeekBackfill,
     });
     expect(player).toBeInstanceOf(IterablePlayer);
   });

@@ -6,15 +6,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { Mock } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 import { useNetworkState } from "react-use";
+import type { Mock } from "vitest";
 
 import { useVisibilityState } from "@lichtblick/hooks";
 import { useLayoutStorage } from "@lichtblick/suite-base/context/LayoutStorageContext";
 import { useRemoteLayoutStorage } from "@lichtblick/suite-base/context/RemoteLayoutStorageContext";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
-import { SetOnlineProps } from "@lichtblick/suite-base/services/ILayoutManager";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 
 // Mock dependencies
@@ -49,8 +48,8 @@ describe("LayoutManagerProvider", () => {
 
     await waitFor(() => {
       expect(mockLayoutManager.setOnline).toHaveBeenCalledTimes(2);
-      expect(mockLayoutManager.setOnline).toHaveBeenCalledWith({ online: true } as SetOnlineProps);
-      expect(mockLayoutManager.setOnline).toHaveBeenCalledWith({ online: false } as SetOnlineProps);
+      expect(mockLayoutManager.setOnline).toHaveBeenCalledWith({ online: true });
+      expect(mockLayoutManager.setOnline).toHaveBeenCalledWith({ online: false });
     });
   });
 

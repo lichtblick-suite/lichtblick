@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import type { Mock } from "vitest";
+
 import { MessagePath, MessagePathPart, parseMessagePath } from "@lichtblick/message-path";
 import { MessageEvent } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
@@ -21,7 +22,9 @@ vi.mock("@lichtblick/message-path", async () => ({
   parseMessagePath: vi.fn(),
 }));
 
-vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems", async () => ({
+vi.mock(
+  "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems",
+  async () => ({
     simpleGetMessagePathDataItems: vi.fn(),
   }),
 );
@@ -99,8 +102,7 @@ describe("stateReducer", () => {
       ...stateOverride,
     };
 
-    const action: GaugeAndIndicatorAction =
-      actionOverride ?? (buildFrameAction() as GaugeAndIndicatorAction);
+    const action: GaugeAndIndicatorAction = actionOverride ?? buildFrameAction();
 
     return {
       state,

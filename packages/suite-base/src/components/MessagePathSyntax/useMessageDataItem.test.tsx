@@ -15,8 +15,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import type { Mock } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
+import type { Mock } from "vitest";
 
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { MessageEvent, Topic } from "@lichtblick/suite-base/players/types";
@@ -301,7 +301,7 @@ describe("samplingMode", () => {
         return useMessageDataItem(path, options);
       },
       {
-        initialProps: { sampling: samplingRequest as Options["samplingRequest"] | undefined },
+        initialProps: { sampling: samplingRequest },
         wrapper: Wrapper,
       },
     );
@@ -321,13 +321,13 @@ describe("samplingMode", () => {
 
   it("removes samplingRequest from subscriptions when it is unset", async () => {
     // When
-    const { rerender } = renderHook(
+    const { rerender } = renderHook<unknown, { sampling: typeof samplingRequest | undefined }>(
       ({ sampling }) => {
         const options: Options = { samplingRequest: sampling };
         return useMessageDataItem(path, options);
       },
       {
-        initialProps: { sampling: samplingRequest as Options["samplingRequest"] | undefined },
+        initialProps: { sampling: samplingRequest },
         wrapper: Wrapper,
       },
     );

@@ -22,7 +22,7 @@ import { diffLabels, DiffObject } from "@lichtblick/suite-base/panels/RawMessage
 export const diffLabelsByLabelText = _.keyBy(Object.values(diffLabels), "labelText");
 
 function isValidObjectArray(items: unknown[]): boolean {
-  return _.every(items, (item) => typeof item === "object" && item);
+  return items.every((item) => typeof item === "object" && item != undefined);
 }
 
 function getCandidateIdFields(
@@ -65,8 +65,8 @@ function isValidIdField(
   afterLength: number,
 ): boolean {
   return (
-    _.uniq(candidateIdBefore).length === beforeLength &&
-    _.uniq(candidateIdAfter).length === afterLength
+    new Set(candidateIdBefore).size === beforeLength &&
+    new Set(candidateIdAfter).size === afterLength
   );
 }
 
@@ -126,7 +126,7 @@ function diffArraysByIdField(
   { showFullMessageForDiff }: { showFullMessageForDiff: boolean },
 ): DiffObject[] {
   const unmatchedAfterById = _.keyBy(after, idToCompareWith);
-  const diff = [];
+  const diff: DiffObject[] = [];
 
   for (const beforeItem of before) {
     if (beforeItem == undefined || typeof beforeItem !== "object") {
@@ -184,7 +184,7 @@ function diffObjects(
   const diff: DiffObject = {};
   const allKeys = Object.keys(before).concat(Object.keys(after));
 
-  for (const key of _.uniq(allKeys)) {
+  for (const key of new Set(allKeys)) {
     const innerDiff = getDiff({
       before: before[key],
       after: after[key],

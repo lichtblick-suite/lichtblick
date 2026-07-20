@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Tooltip } from "@mui/material";
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 
 import TimeBasedChartTooltipContent, {
   TimeBasedChartTooltipData,

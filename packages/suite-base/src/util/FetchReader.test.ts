@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import type { Mocked, MockInstance } from "vitest";
+
 import { globalRequestQueue } from "@lichtblick/suite-base/util/RequestQueue";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -25,7 +26,7 @@ describe("FetchReader", () => {
     mockFetch = vi.spyOn(global, "fetch");
 
     // Default: globalRequestQueue.run passes through the function
-    mockGlobalRequestQueue.run.mockImplementation(async (fn) => fn as any);
+    mockGlobalRequestQueue.run.mockImplementation(async (fn) => fn);
   });
 
   afterEach(() => {

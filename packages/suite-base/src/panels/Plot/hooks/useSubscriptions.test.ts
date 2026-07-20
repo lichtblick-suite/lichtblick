@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
+import type { Mock } from "vitest";
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
@@ -30,7 +30,9 @@ vi.mock("@lichtblick/message-path", async () => ({
   parseMessagePath: vi.fn(),
 }));
 
-vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems", async () => ({
+vi.mock(
+  "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems",
+  async () => ({
     fillInGlobalVariablesInPath: vi.fn(),
   }),
 );
@@ -59,16 +61,11 @@ describe("useSubscriptions", () => {
     vi.clearAllMocks();
   });
 
-  const setup = (
-    override: {
-      config?: Partial<PlotConfig>;
-      subscriberId?: string;
-    } = {},
-  ) => {
+  const setup = (override: { config?: Partial<PlotConfig>; subscriberId?: string } = {}) => {
     const config: PlotConfig = {
       ...PlotBuilder.config(),
       ...override.config,
-    } as unknown as PlotConfig;
+    };
 
     const subscriberId = Object.hasOwn(override, "subscriberId")
       ? override.subscriberId!

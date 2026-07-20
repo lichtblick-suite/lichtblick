@@ -7,9 +7,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { Mock } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { act, render, waitFor } from "@testing-library/react";
+import type { Mock } from "vitest";
 
 import { Topic } from "@lichtblick/suite";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
@@ -101,6 +101,7 @@ const createMockRenderer = (overrides?: Record<string, any>) => {
       setPublishClickType: vi.fn(),
       publishClickType: "point",
     },
+    settleVideoDecodes: vi.fn().mockResolvedValue(undefined),
   };
 
   return { ...defaultRenderer, ...overrides };
@@ -134,6 +135,7 @@ const createMockContext = (
     unstable_fetchAsset: vi.fn(),
     unstable_setMessagePathDropConfig: vi.fn(),
     unstable_subscribeMessageRange: vi.fn(),
+    unstable_setAlert: vi.fn(),
     dataSourceProfile: "ros1",
     layout: {
       addPanel: vi.fn(),
@@ -354,6 +356,133 @@ describe("ThreeDeeRender", () => {
     expect(mockedRenderer).toHaveBeenCalled();
     const rendererCall = mockedRenderer.mock.calls[0]?.[0];
     expect(rendererCall?.customCameraModels).toBe(customCameraModels);
+  });
+
+  describe("seek render barrier", () => {
+    function deferred<T>() {
+      let resolve!: (value: T | PromiseLike<T>) => void;
+      let reject!: (reason?: unknown) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    }
+    it("invokes done immediately for non-seek frames", async () => {
+      const customRendererInstance = createMockRenderer();
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      const done = vi.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 1 },
+          },
+          done,
+        );
+      });
+
+      await waitFor(() => {
+        expect(done).toHaveBeenCalledTimes(1);
+      });
+      expect(customRendererInstance.settleVideoDecodes).not.toHaveBeenCalled();
+    });
+
+    it("defers done on seek frames until video decode settles", async () => {
+      const settle = deferred<void>();
+      const customRendererInstance = createMockRenderer({
+        settleVideoDecodes: vi.fn().mockImplementation(async () => {
+          await settle.promise;
+        }),
+      });
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      const done = vi.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 2 },
+            didSeek: true,
+          },
+          done,
+        );
+      });
+
+      await waitFor(() => {
+        expect(customRendererInstance.settleVideoDecodes).toHaveBeenCalledTimes(1);
+      });
+      expect(done).not.toHaveBeenCalled();
+
+      await act(async () => {
+        settle.resolve();
+        await settle.promise;
+      });
+
+      expect(done).toHaveBeenCalledTimes(1);
+    });
+
+    it("releases done when settleVideoDecodes rejects", async () => {
+      const settle = deferred<void>();
+      const customRendererInstance = createMockRenderer({
+        settleVideoDecodes: vi.fn().mockImplementation(async () => {
+          await settle.promise;
+        }),
+      });
+      vi.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      const done = vi.fn();
+      act(() => {
+        mockContext.onRender!(
+          {
+            topics: [],
+            currentFrame: [],
+            currentTime: { sec: 0, nsec: 3 },
+            didSeek: true,
+          },
+          done,
+        );
+      });
+
+      await waitFor(() => {
+        expect(customRendererInstance.settleVideoDecodes).toHaveBeenCalledTimes(1);
+      });
+      expect(done).not.toHaveBeenCalled();
+
+      await act(async () => {
+        settle.reject(new Error("decode failed"));
+        await Promise.resolve();
+      });
+
+      expect(done).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("transfom topic preloading", () => {
@@ -1124,6 +1253,122 @@ describe("ThreeDeeRender", () => {
         const seekCall = customRendererInstance.handleSeek.mock.calls[0];
         expect(seekCall?.[1]).toHaveLength(50);
       });
+    });
+  });
+
+  describe("transform preload alert", () => {
+    const TRANSFORM_ALERT_ID = "transform-preload";
+
+    const lastAlertFor = (mockContext: BuiltinPanelExtensionContext, alertId: string): unknown => {
+      const calls = (mockContext.unstable_setAlert as Mock).mock.calls.filter(
+        (call) => call[0] === alertId,
+      );
+      return calls.at(-1)?.[1];
+    };
+
+    it("surfaces an info alert when a transform topic exists and preloading is disabled", async () => {
+      // Given
+      const topics = [
+        RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" }),
+        RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" }),
+      ];
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // When
+      act(() => {
+        mockContext.onRender!({ topics }, vi.fn());
+      });
+
+      // Then
+      await waitFor(() => {
+        expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toEqual(
+          expect.objectContaining({
+            severity: "info",
+            message: expect.any(String),
+            tip: expect.any(String),
+          }),
+        );
+      });
+    });
+
+    it("clears the alert when a transform topic exists but preloading is enabled", async () => {
+      // Given
+      const topics = [RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" })];
+      const mockContext = createMockContext({
+        initialState: {
+          scene: {
+            transforms: {
+              enablePreloading: true,
+            },
+          },
+        },
+      });
+      const props = setup({}, mockContext);
+
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+      (mockContext.unstable_setAlert as Mock).mockClear();
+
+      // When
+      act(() => {
+        mockContext.onRender!({ topics }, vi.fn());
+      });
+
+      // Then
+      await waitFor(() => {
+        expect(mockContext.unstable_setAlert).toHaveBeenCalledWith(TRANSFORM_ALERT_ID, undefined);
+      });
+      expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toBeUndefined();
+    });
+
+    it("does not show the alert when no transform topic exists", async () => {
+      // Given
+      const topics = [RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" })];
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // When
+      act(() => {
+        mockContext.onRender!({ topics }, vi.fn());
+      });
+
+      // Then
+      await waitFor(() => {
+        expect(mockContext.unstable_setAlert).toHaveBeenCalledWith(TRANSFORM_ALERT_ID, undefined);
+      });
+      expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toBeUndefined();
+    });
+
+    it("does not throw when the host does not provide unstable_setAlert", async () => {
+      // Given
+      const topics = [RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" })];
+      const mockContext = createMockContext({ unstable_setAlert: undefined });
+      const props = setup({}, mockContext);
+
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // When / Then
+      expect(() => {
+        act(() => {
+          mockContext.onRender!({ topics }, vi.fn());
+        });
+      }).not.toThrow();
     });
   });
 });

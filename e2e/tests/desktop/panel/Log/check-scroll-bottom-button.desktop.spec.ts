@@ -14,26 +14,24 @@ const MCAP_FILENAME = "example_logs.mcap";
  * AND the user clicks on the "Log" panel settings
  * THEN the "Log panel" settings should be visible
  */
-test(
-  "open log panel after loading an mcap file",
-  { tag: "@regression" },
-  async ({ mainWindow }) => {
-    const panels = new Panels(mainWindow);
+test("open log panel after loading an mcap file", { tag: "@regression" }, async ({
+  mainWindow,
+}) => {
+  const panels = new Panels(mainWindow);
 
-    /// Given
-    await loadFiles({
-      mainWindow,
-      filenames: MCAP_FILENAME,
-    });
+  /// Given
+  await loadFiles({
+    mainWindow,
+    filenames: MCAP_FILENAME,
+  });
 
-    // When
-    await panels.addPanel("Log");
-    await panels.getLogPanelRoot().getByRole("button", { name: "Settings" }).click();
+  // When
+  await panels.addPanel("Log");
+  await panels.getLogPanelRoot().getByRole("button", { name: "Settings" }).click();
 
-    // Then
-    await expect(mainWindow.getByText("Log panel", { exact: true }).count()).resolves.toBe(1);
-  },
-);
+  // Then
+  await expect(mainWindow.getByText("Log panel", { exact: true }).count()).resolves.toBe(1);
+});
 
 /**
  * GIVEN a .mcap file is loaded

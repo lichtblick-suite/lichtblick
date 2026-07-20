@@ -54,7 +54,7 @@ describe("ExtensionCatalogProvider", () => {
     return {
       getExtension: vi.fn(),
       getExtensions: vi.fn().mockResolvedValue([]),
-      loadExtension: vi.fn().mockResolvedValue({ raw: defaultSource } as LoadedExtension),
+      loadExtension: vi.fn().mockResolvedValue({ raw: defaultSource }),
       installExtension: vi.fn(),
       uninstallExtension: vi.fn(),
       ...overrides,
@@ -74,7 +74,7 @@ describe("ExtensionCatalogProvider", () => {
       getExtensions: vi.fn().mockResolvedValue([extension]),
       loadExtension:
         options?.loadExtensionMock ??
-        vi.fn().mockResolvedValue({ raw: options?.source ?? defaultSource } as LoadedExtension),
+        vi.fn().mockResolvedValue({ raw: options?.source ?? defaultSource }),
     });
   }
 
@@ -92,7 +92,7 @@ describe("ExtensionCatalogProvider", () => {
       getExtension: vi.fn().mockResolvedValue(cachedExtension),
       loadExtension:
         options?.loadExtensionMock ??
-        vi.fn().mockResolvedValue({ raw: options?.source ?? defaultSource } as LoadedExtension),
+        vi.fn().mockResolvedValue({ raw: options?.source ?? defaultSource }),
       installExtension: options?.installExtensionMock ?? vi.fn(),
     });
   }
@@ -125,7 +125,7 @@ describe("ExtensionCatalogProvider", () => {
 
     const loadExtension = vi.fn().mockResolvedValue({
       raw: `module.exports = { activate: function() { return 1; } }`,
-    } as LoadedExtension);
+    });
     const loaderDefault: IExtensionLoader = {
       type: extensionInfo.namespace === "local" ? "browser" : "server",
       namespace: extensionInfo.namespace!,
@@ -167,8 +167,8 @@ describe("ExtensionCatalogProvider", () => {
     const source2 = `module.exports = { activate: function() { return 2; } }`;
     const extension1 = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const extension2 = ExtensionBuilder.extensionInfo({ namespace: "local" });
-    const loadExtension1 = vi.fn().mockResolvedValue({ raw: source1 } as LoadedExtension);
-    const loadExtension2 = vi.fn().mockResolvedValue({ raw: source2 } as LoadedExtension);
+    const loadExtension1 = vi.fn().mockResolvedValue({ raw: source1 });
+    const loadExtension2 = vi.fn().mockResolvedValue({ raw: source2 });
 
     const loader1: IExtensionLoader = {
       type: "browser",
@@ -211,7 +211,7 @@ describe("ExtensionCatalogProvider", () => {
             }
         }
     `;
-    const loadExtension = vi.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = vi.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -260,7 +260,7 @@ describe("ExtensionCatalogProvider", () => {
       };
     `;
 
-    const loadExtension = vi.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = vi.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -326,7 +326,7 @@ describe("ExtensionCatalogProvider", () => {
         }
     `;
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
-    const loadExtension = vi.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = vi.fn().mockResolvedValue({ raw: source });
     const loader: IExtensionLoader = {
       type: "browser",
       namespace: extension.namespace!,
@@ -363,7 +363,7 @@ describe("ExtensionCatalogProvider", () => {
             }
         }
     `;
-    const loadExtension = vi.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = vi.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -405,7 +405,7 @@ describe("ExtensionCatalogProvider", () => {
       };
     `;
 
-    const loadExtension = vi.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = vi.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -452,7 +452,7 @@ describe("ExtensionCatalogProvider", () => {
             }
         }
     `;
-    const loadExtension = vi.fn().mockResolvedValue({ raw: source } as LoadedExtension);
+    const loadExtension = vi.fn().mockResolvedValue({ raw: source });
     const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
     const loader: IExtensionLoader = {
       type: "browser",
@@ -586,7 +586,7 @@ describe("ExtensionCatalogProvider", () => {
           extensionInfo.namespace!,
           extensionData,
         );
-        expect(response.length).toBe(1);
+        expect(response).toHaveLength(1);
         expect(response[0]?.success).toBe(true);
         expect(response[0]?.info).toEqual(extensionInfo);
       });
@@ -682,40 +682,42 @@ describe("ExtensionCatalogProvider", () => {
         namespace: "org" as Namespace,
         useExternalId: true,
       },
-    ])(
-      "should call uninstallExtension with correct parameter for $description",
-      async ({ isDesktop, loaderType, namespace, useExternalId }) => {
-        (isDesktopApp as Mock).mockReturnValue(isDesktop);
+    ])("should call uninstallExtension with correct parameter for $description", async ({
+      isDesktop,
+      loaderType,
+      namespace,
+      useExternalId,
+    }) => {
+      (isDesktopApp as Mock).mockReturnValue(isDesktop);
 
-        const externalId = useExternalId ? BasicBuilder.string() : undefined;
-        const extensionInfo = ExtensionBuilder.extensionInfo({
-          namespace,
-          ...(externalId && { externalId }),
-        });
-        const uninstallFn = vi.fn().mockResolvedValue(undefined);
-        const loader: IExtensionLoader = {
-          type: loaderType,
-          namespace,
-          getExtension: vi.fn(),
-          getExtensions: vi.fn().mockResolvedValue([extensionInfo]),
-          installExtension: vi.fn().mockResolvedValue(extensionInfo),
-          loadExtension: vi.fn(),
-          uninstallExtension: uninstallFn,
-        };
+      const externalId = useExternalId ? BasicBuilder.string() : undefined;
+      const extensionInfo = ExtensionBuilder.extensionInfo({
+        namespace,
+        ...(externalId && { externalId }),
+      });
+      const uninstallFn = vi.fn().mockResolvedValue(undefined);
+      const loader: IExtensionLoader = {
+        type: loaderType,
+        namespace,
+        getExtension: vi.fn(),
+        getExtensions: vi.fn().mockResolvedValue([extensionInfo]),
+        installExtension: vi.fn().mockResolvedValue(extensionInfo),
+        loadExtension: vi.fn(),
+        uninstallExtension: uninstallFn,
+      };
 
-        const { result } = await setup({ loadersOverride: [loader] });
+      const { result } = await setup({ loadersOverride: [loader] });
 
-        await waitFor(() => {
-          expect(result.current.installedExtensions).toHaveLength(1);
-        });
+      await waitFor(() => {
+        expect(result.current.installedExtensions).toHaveLength(1);
+      });
 
-        await act(async () => {
-          await result.current.uninstallExtension(namespace, extensionInfo.id);
-        });
+      await act(async () => {
+        await result.current.uninstallExtension(namespace, extensionInfo.id);
+      });
 
-        expect(uninstallFn).toHaveBeenCalledWith(useExternalId ? externalId : extensionInfo.id);
-      },
-    );
+      expect(uninstallFn).toHaveBeenCalledWith(useExternalId ? externalId : extensionInfo.id);
+    });
 
     it("should log a warning and still remove extension data from state when uninstallExtension throws", async () => {
       (isDesktopApp as Mock).mockReturnValue(false);
@@ -1027,9 +1029,7 @@ describe("ExtensionCatalogProvider", () => {
     it("should reload all extensions from loaders", async () => {
       // Given
       const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
-      const loadExtensionMock = vi
-        .fn()
-        .mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+      const loadExtensionMock = vi.fn().mockResolvedValue({ raw: defaultSource });
       const loader = createLocalLoader(extension, { loadExtensionMock });
       const { result } = await setup({ loadersOverride: [loader] });
       loadExtensionMock.mockClear();
@@ -1063,7 +1063,7 @@ describe("ExtensionCatalogProvider", () => {
         namespace: "local",
         type: "browser",
         getExtensions: vi.fn().mockResolvedValue([extension1, extension2]),
-        loadExtension: vi.fn().mockResolvedValue({ raw: source } as LoadedExtension),
+        loadExtension: vi.fn().mockResolvedValue({ raw: source }),
       });
 
       // When: mount triggers refreshAllExtensions
@@ -1119,14 +1119,13 @@ describe("ExtensionCatalogProvider", () => {
         (cachedVersion ? { ...remoteExtension, version: cachedVersion } : undefined);
 
       const loadCachedMock =
-        overrides?.loadCachedMock ??
-        vi.fn().mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+        overrides?.loadCachedMock ?? vi.fn().mockResolvedValue({ raw: defaultSource });
       const loadRemoteMock =
         overrides?.loadRemoteMock ??
         vi.fn().mockResolvedValue({
           raw: defaultSource,
           ...(overrides?.buffer && { buffer: overrides.buffer }),
-        } as LoadedExtension);
+        });
       const cacheInstallMock = overrides?.installMock ?? vi.fn();
 
       const cacheLoader = createOrgCacheLoader(cachedExtension, {
@@ -1154,9 +1153,7 @@ describe("ExtensionCatalogProvider", () => {
     it("should load from local loader", async () => {
       // Given
       const extension = ExtensionBuilder.extensionInfo({ namespace: "local" });
-      const loadExtensionMock = vi
-        .fn()
-        .mockResolvedValue({ raw: defaultSource } as LoadedExtension);
+      const loadExtensionMock = vi.fn().mockResolvedValue({ raw: defaultSource });
       const loader = createLocalLoader(extension, { loadExtensionMock });
 
       // When

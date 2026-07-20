@@ -5,10 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { Mock } from "vitest";
 import fs from "fs";
 import { openDB } from "idb/with-async-ittr";
 import JSZip from "jszip";
+import type { Mock } from "vitest";
 
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
 import {
@@ -281,7 +281,7 @@ describe("IdbExtensionLoader", () => {
       } as ExtensionInfo;
       mockGet.mockReturnValue({
         info: expectedInfo,
-      } as StoredExtension);
+      });
       const loader = new IdbExtensionLoader("local");
 
       await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });

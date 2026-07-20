@@ -1,12 +1,12 @@
 /** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-import type { Mock } from "vitest";
 import { act, renderHook, RenderHookResult } from "@testing-library/react";
 import { t, TFunction } from "i18next";
 import { produce } from "immer";
 import * as _ from "lodash-es";
 import { PropsWithChildren } from "react";
+import type { Mock } from "vitest";
 
 import { SettingsTreeAction } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
@@ -212,7 +212,7 @@ describe("makeRootSeriesNode", () => {
 describe("buildSettingsTree", () => {
   const setup = ({
     config = {},
-    paths = undefined,
+    paths,
   }: Partial<{
     config: Partial<Omit<StateTransitionConfig, "paths">>;
     paths: PathState[] | undefined;
@@ -340,8 +340,8 @@ describe("usePanelSettings", () => {
 
   const setup = ({
     config = {},
-    focusedPath = undefined,
-    paths = undefined,
+    focusedPath,
+    paths,
   }: Partial<{
     config: Partial<StateTransitionConfig>;
     paths: PathState[] | undefined;

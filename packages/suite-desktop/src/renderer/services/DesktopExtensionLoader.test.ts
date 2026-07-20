@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-import type { Mocked } from "vitest";
 import randomString from "randomstring";
+import type { Mocked } from "vitest";
 
 import { ExtensionInfo } from "@lichtblick/suite-base";
 
@@ -78,13 +78,13 @@ describe("DesktopExtensionLoader", () => {
       const extensions: DesktopExtension[] = [
         {
           id: genericString(),
-          packageJson: { displayName: genericString() } as ExtensionInfo,
+          packageJson: { displayName: genericString() },
           readme: genericString(),
           changelog: genericString(),
         } as DesktopExtension,
         {
           id: genericString(),
-          packageJson: { displayName: genericString() } as ExtensionInfo,
+          packageJson: { displayName: genericString() },
           readme: genericString(),
           changelog: genericString(),
         } as DesktopExtension,
@@ -155,7 +155,7 @@ describe("DesktopExtensionLoader", () => {
       const foxeFileData = new Uint8Array([1, 2, 3]);
       const extension: DesktopExtension = {
         id: genericString(),
-        packageJson: { displayName } as ExtensionInfo,
+        packageJson: { displayName },
         readme: genericString(),
         changelog: genericString(),
       } as DesktopExtension;

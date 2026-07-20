@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { Mock } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, waitFor } from "@testing-library/react";
+import type { Mock } from "vitest";
 
 import {
   useMessagePipeline,
@@ -19,12 +19,14 @@ import {
   useCurrentUserType,
 } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { useEvents } from "@lichtblick/suite-base/context/EventsContext";
+import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
+import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 
@@ -162,6 +164,9 @@ vi.mock("@lichtblick/suite-base/context/AppContext", async () => ({
 }));
 vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => ({
   useCurrentLayoutSelector: vi.fn().mockReturnValue(undefined),
+  useCurrentLayoutActions: vi.fn().mockReturnValue({
+    setSelectedLayoutId: vi.fn(),
+  }),
 }));
 vi.mock("@lichtblick/suite-base/context/CurrentUserContext", async () => ({
   useCurrentUser: vi.fn(),
@@ -169,6 +174,13 @@ vi.mock("@lichtblick/suite-base/context/CurrentUserContext", async () => ({
 }));
 vi.mock("@lichtblick/suite-base/context/EventsContext", async () => ({
   useEvents: vi.fn(),
+}));
+vi.mock("@lichtblick/suite-base/context/LayoutManagerContext", async () => ({
+  useLayoutManager: vi.fn().mockReturnValue({
+    getLayouts: vi.fn().mockResolvedValue([]),
+    deleteLayout: vi.fn().mockResolvedValue(undefined),
+    saveNewLayout: vi.fn().mockResolvedValue({ id: "test-layout-id" }),
+  }),
 }));
 vi.mock("@lichtblick/suite-base/context/PlayerSelectionContext", async () => ({
   usePlayerSelection: vi.fn(),
@@ -200,6 +212,13 @@ vi.mock("@lichtblick/suite-base/hooks/useElectronFilesToOpen", async () => ({
 }));
 vi.mock("@lichtblick/suite-base/hooks/useHandleFiles", async () => ({
   useHandleFiles: vi.fn(),
+}));
+vi.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", async () => ({
+  useLayoutTransfer: vi.fn().mockReturnValue({
+    parseAndInstallLayout: vi.fn().mockResolvedValue({ id: "default-layout-id" }),
+    importLayout: vi.fn(),
+    exportLayout: vi.fn(),
+  }),
 }));
 vi.mock("@lichtblick/suite-base/hooks/useSeekTimeFromCLI", async () => ({
   __esModule: true,
@@ -450,5 +469,243 @@ describe("Workspace - session-based MCAP resolution", () => {
 
     // Then
     expect(mockGetSession).not.toHaveBeenCalled();
+  });
+});
+
+describe("Workspace - fetchLayoutFromUrl", () => {
+  const mockParseAndInstallLayout = vi.fn();
+  const mockGetLayouts = vi.fn();
+  const mockDeleteLayout = vi.fn();
+  const originalFetch = global.fetch;
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  const setupWorkspaceMocks = () => {
+    (useMessagePipeline as Mock).mockImplementation(
+      (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
+    );
+    (useMessagePipelineGetter as Mock).mockReturnValue(() => mockPipelineContext);
+    (useWorkspaceStore as Mock).mockImplementation(
+      (selector: (store: typeof mockWorkspaceStore) => unknown) => selector(mockWorkspaceStore),
+    );
+    (useWorkspaceActions as Mock).mockReturnValue(mockWorkspaceActions);
+    (usePlayerSelection as Mock).mockReturnValue({
+      availableSources: [],
+      selectSource: vi.fn(),
+    });
+    (useAlertCount as Mock).mockReturnValue({
+      playerAlerts: [],
+      sessionAlerts: [],
+      alertCount: 0,
+    });
+    (useHandleFiles as Mock).mockReturnValue({ handleFiles: vi.fn() });
+    (useAppConfigurationValue as Mock).mockReturnValue([false]);
+    (useCurrentUser as Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
+    (useCurrentUserType as Mock).mockReturnValue("unauthenticated");
+    (useEvents as Mock).mockImplementation(
+      (selector: (store: { eventsSupported: boolean; selectEvent: Mock }) => unknown) =>
+        selector({ eventsSupported: false, selectEvent: vi.fn() }),
+    );
+    (useAppContext as Mock).mockReturnValue({
+      PerformanceSidebarComponent: undefined,
+      sidebarItems: [],
+      layoutBrowser: undefined,
+      workspaceStoreCreator: undefined,
+    });
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetLayouts.mockResolvedValue([]);
+    mockDeleteLayout.mockResolvedValue(undefined);
+    mockParseAndInstallLayout.mockResolvedValue({ id: "new-layout-id" });
+    (useLayoutManager as Mock).mockReturnValue({
+      getLayouts: mockGetLayouts,
+      deleteLayout: mockDeleteLayout,
+      saveNewLayout: vi.fn().mockResolvedValue({ id: "test-layout-id" }),
+    });
+    (useLayoutTransfer as Mock).mockReturnValue({
+      parseAndInstallLayout: mockParseAndInstallLayout,
+      importLayout: vi.fn(),
+      exportLayout: vi.fn(),
+    });
+    setupWorkspaceMocks();
+  });
+
+  it("should fetch and install layout from valid https URL", async () => {
+    // Given
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      text: vi.fn().mockResolvedValue('{"configById":{}}'),
+    });
+    (parseAppURLState as Mock).mockReturnValue({
+      layoutUrl: "https://example.com/my-layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/my-layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith("https://example.com/my-layout.json");
+    });
+    await waitFor(() => {
+      expect(mockParseAndInstallLayout).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "my-layout.json" }),
+        "local",
+      );
+    });
+  });
+
+  it("should delete existing layouts with same name after successful install", async () => {
+    // Given
+    mockGetLayouts.mockResolvedValue([{ id: "old-id", name: "my-layout" }]);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      text: vi.fn().mockResolvedValue("{}"),
+    });
+    (parseAppURLState as Mock).mockReturnValue({
+      layoutUrl: "https://example.com/my-layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/my-layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockDeleteLayout).toHaveBeenCalledWith({ id: "old-id" });
+    });
+  });
+
+  it("should not delete existing layouts if parseAndInstallLayout returns undefined", async () => {
+    // Given
+    mockGetLayouts.mockResolvedValue([{ id: "old-id", name: "my-layout" }]);
+    mockParseAndInstallLayout.mockResolvedValue(undefined);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      text: vi.fn().mockResolvedValue("{}"),
+    });
+    (parseAppURLState as Mock).mockReturnValue({
+      layoutUrl: "https://example.com/my-layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/my-layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockParseAndInstallLayout).toHaveBeenCalled();
+    });
+    expect(mockDeleteLayout).not.toHaveBeenCalled();
+  });
+
+  it("should show error snackbar for non-http(s) URL", async () => {
+    // Given
+    (parseAppURLState as Mock).mockReturnValue({
+      layoutUrl: "file:///local/layout.json",
+    });
+
+    // When
+    render(
+      <Workspace deepLinks={["https://app.example.com/?layoutUrl=file:///local/layout.json"]} />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+        "Layout URL must use http or https protocol",
+        {
+          variant: "error",
+        },
+      );
+    });
+  });
+
+  it("should show error snackbar on HTTP error response", async () => {
+    // Given
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404 });
+    (parseAppURLState as Mock).mockReturnValue({
+      layoutUrl: "https://example.com/layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Failed to load layout (HTTP 404)", {
+        variant: "error",
+      });
+    });
+  });
+
+  it("should show error snackbar on network error", async () => {
+    // Given
+    global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
+    (parseAppURLState as Mock).mockReturnValue({
+      layoutUrl: "https://example.com/layout.json",
+    });
+
+    // When
+    render(
+      <Workspace
+        deepLinks={["https://app.example.com/?layoutUrl=https://example.com/layout.json"]}
+      />,
+    );
+
+    // Then
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Failed to load layout from URL", {
+        variant: "error",
+      });
+    });
+  });
+
+  it("should not fetch layout when layoutUrl is absent from URL state", () => {
+    // Given
+    global.fetch = vi.fn();
+    (parseAppURLState as Mock).mockReturnValue({
+      ds: "remote-file",
+      dsParams: { url: "https://example.com/file.mcap" },
+    });
+
+    // When
+    render(<Workspace deepLinks={["https://app.example.com/?ds=remote-file"]} />);
+
+    // Then
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("should show error snackbar for malformed URL that cannot be parsed", async () => {
+    // Given
+    (parseAppURLState as Mock).mockReturnValue({
+      layoutUrl: "not a valid url ://",
+    });
+
+    // When
+    render(<Workspace deepLinks={["https://app.example.com/?layoutUrl=not+a+valid+url"]} />);
+
+    // Then
+    await waitFor(() => {
+      expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Invalid layout URL", { variant: "error" });
+    });
   });
 });

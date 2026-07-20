@@ -4,6 +4,7 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "lib": ["DOM"]
+    "types": ["node", "vitest/globals"],
+    "lib": ["DOM", "es2022"]
   }
 }

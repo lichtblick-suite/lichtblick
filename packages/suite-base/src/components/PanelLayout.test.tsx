@@ -6,11 +6,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { Mock } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import type { Mock } from "vitest";
 
 import { MessagePipelineProvider } from "@lichtblick/suite-base/components/MessagePipeline";
 import Panel from "@lichtblick/suite-base/components/Panel";
@@ -109,14 +109,13 @@ describe("UnconnectedPanelLayout", () => {
     );
 
     await waitFor(() => {
-      expect(renderA).toHaveBeenCalled();
+      expect(renderA).toHaveBeenCalledTimes(2);
+      expect(renderB).toHaveBeenCalledTimes(2);
     });
     // Each panel module should have only been loaded once
     expect(moduleA).toHaveBeenCalledTimes(1);
     expect(moduleB).toHaveBeenCalledTimes(1);
     expect(moduleC).toHaveBeenCalledTimes(0);
-    expect(renderA).toHaveBeenCalledTimes(2);
-    expect(renderB).toHaveBeenCalledTimes(2);
     expect(renderC).toHaveBeenCalledTimes(0);
 
     rerender(

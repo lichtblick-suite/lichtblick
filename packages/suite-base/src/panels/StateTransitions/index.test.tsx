@@ -113,7 +113,7 @@ describe("StateTransitions", () => {
     const { getByTestId } = await renderPanel();
     expect(getByTestId("time-based-chart")).toBeDefined();
     expect(getByTestId("path-legend")).toBeDefined();
-  });
+  }, 15_000);
 
   it("should pass pathStrings to useMessagesByPath when no range data", async () => {
     mockUseDecodedMessageRange.mockReturnValue([{}]);

@@ -137,9 +137,7 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsEntity>
-        | undefined;
+      const settings = this.renderer.config.topics[topicName];
       renderable.userData.settings = { ...SCENE_ENTITIES_DEFAULT_SETTINGS, ...settings };
       renderable.updateSettings();
     }
@@ -170,9 +168,7 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
   #getTopicEntities(topic: string): TopicEntities {
     let topicEntities = this.renderables.get(topic);
     if (!topicEntities) {
-      const userSettings = this.renderer.config.topics[topic] as
-        | Partial<LayerSettingsEntity>
-        | undefined;
+      const userSettings = this.renderer.config.topics[topic];
 
       topicEntities = new TopicEntities(topic, this.#primitivePool, this.renderer, {
         receiveTime: -1n,

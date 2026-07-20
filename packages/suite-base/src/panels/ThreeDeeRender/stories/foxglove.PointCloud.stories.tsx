@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { PointCloud } from "@foxglove/schemas";
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 import { screen, userEvent } from "@storybook/testing-library";
 import { vec3 } from "gl-matrix";
 

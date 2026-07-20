@@ -53,6 +53,7 @@ import delay from "@lichtblick/suite-base/util/delay";
 import { BlockLoader } from "./BlockLoader";
 import { BufferedIterableSource } from "./BufferedIterableSource";
 import {
+  GetBackfillMessagesArgs,
   IDeserializedIterableSource,
   ISerializedIterableSource,
   IteratorResult,
@@ -84,7 +85,23 @@ const SEEK_ON_START_NS = BigInt(99 * 1e6);
 const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
 
 const EMPTY_ARRAY = Object.freeze([]);
-export type IterablePlayerOptions = {
+/**
+ * Hook invoked on a seek to optionally expand the backfill messages before they are emitted, e.g.
+ * to replay a video GOP so a P/B-frame is decodable. It receives the raw backfill messages, a
+ * function to fetch further backfill from the source, and a getter for the current abort signal,
+ * and returns the (possibly expanded) message set. Kept generic so the player carries no
+ * codec-specific knowledge; the data-source layer decides whether to supply one.
+ *
+ * Not exported: it is referenced only by `IterablePlayerOptions` below; consumers supply a
+ * structurally-compatible function (e.g. `expandVideoSeekBackfill`) without naming the type.
+ */
+type ExpandBackfill = (
+  messages: MessageEvent[],
+  getBackfillMessages: (args: GetBackfillMessagesArgs) => Promise<MessageEvent[]>,
+  getAbortSignal: () => AbortSignal | undefined,
+) => Promise<MessageEvent[]>;
+
+type IterablePlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
 
   source: IDeserializedIterableSource | ISerializedIterableSource;
@@ -105,6 +122,10 @@ export type IterablePlayerOptions = {
 
   // Max. time that messages will be buffered ahead for smoother playback. (default: 10sec)
   readAheadDuration?: Time;
+
+  // Optional hook to expand the seek backfill (e.g. replay a video GOP). No-op when omitted,
+  // keeping the player free of codec-specific knowledge.
+  expandBackfill?: ExpandBackfill;
 };
 
 type IterablePlayerState =
@@ -137,6 +158,7 @@ export class IterablePlayer implements Player {
   #start?: Time;
   #end?: Time;
   #enablePreload = true;
+  readonly #expandBackfill?: ExpandBackfill;
 
   // next read start time indicates where to start reading for the next tick
   // after a tick read, it is set to 1nsec past the end of the read operation (preparing for the next tick)
@@ -212,6 +234,7 @@ export class IterablePlayer implements Player {
       enablePreload,
       sourceId,
       readAheadDuration = { sec: 10, nsec: 0 },
+      expandBackfill,
     } = options;
 
     this.#iterableSource = source;
@@ -236,6 +259,7 @@ export class IterablePlayer implements Player {
 
     this.#enablePreload = enablePreload ?? true;
     this.#sourceId = sourceId;
+    this.#expandBackfill = expandBackfill;
 
     this.isClosed = new Promise((resolveClose) => {
       this.#resolveIsClosed = resolveClose;
@@ -441,6 +465,13 @@ export class IterablePlayer implements Player {
 
   public getMetadata(): ReadonlyArray<Readonly<Metadata>> {
     return this.#metadata;
+  }
+
+  /** Whether a state transition has been requested. Used to re-check after awaiting; reading
+   * through a method avoids the type checker narrowing `#nextState` to a constant across `await`
+   * boundaries */
+  #hasPendingState(): boolean {
+    return this.#nextState != undefined;
   }
 
   /** Request the state to switch to newState */
@@ -847,11 +878,21 @@ export class IterablePlayer implements Player {
 
     try {
       this.#abort = new AbortController();
-      const messages = await this.#bufferedSource.getBackfillMessages({
+      const backfillMessages = await this.#bufferedSource.getBackfillMessages({
         topics: this.#allTopics,
         time: targetTime,
         abortSignal: this.#abort.signal,
       });
+      // An optional, source-supplied hook may expand the backfill before emit (e.g. replaying a
+      // video GOP so a P/B-frame is decodable). When no hook is supplied the raw backfill is used
+      // unchanged, keeping the player itself free of codec-specific knowledge.
+      const messages = this.#expandBackfill
+        ? await this.#expandBackfill(
+            backfillMessages,
+            this.#bufferedSource.getBackfillMessages.bind(this.#bufferedSource),
+            () => this.#abort?.signal,
+          )
+        : backfillMessages;
 
       // We've successfully loaded the messages and will emit those, no longer need the ackTimeout
       clearTimeout(seekAckTimeout);
@@ -866,6 +907,20 @@ export class IterablePlayer implements Player {
       this.#presence = PlayerPresence.PRESENT;
       this.#queueEmitState();
       await this.#resetPlaybackIterator();
+
+      // When seeking while playing, park the cursor on the seek target until the emitted frame is
+      // actually rendered. The render barrier (the panel `done` callback) now waits for in-flight
+      // video decode, so awaiting the emit blocks here until the seek frame is painted instead of
+      // resuming playback and racing the video forward to catch up.
+      if (this.#isPlaying) {
+        await this.#queueEmitState.currentPromise;
+        if (this.#hasPendingState()) {
+          return;
+        }
+        this.#lastTickMillis = undefined;
+        this.#lastRangeMillis = undefined;
+      }
+
       this.#setState(this.#isPlaying ? "play" : "idle");
     } catch (e: unknown) {
       const err = e as Error;

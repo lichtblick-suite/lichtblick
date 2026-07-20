@@ -9,11 +9,11 @@ import { MeshoptDecoder } from "meshoptimizer";
 import * as THREE from "three";
 import dracoDecoderWasmUrl from "three/examples/jsm/libs/draco/draco_decoder.wasm";
 import dracoWasmWrapperJs from "three/examples/jsm/libs/draco/draco_wasm_wrapper.js?raw";
-import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
+import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader.js";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 
 import Logger from "@lichtblick/log";
 import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";

@@ -41,7 +41,7 @@ describe("selectCameraModel", () => {
         y_offset: 0,
       },
       ...customProps,
-    } as CameraInfo;
+    };
   };
 
   it("should return the specific camera model when available", () => {

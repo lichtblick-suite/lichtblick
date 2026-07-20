@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { Mock } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import type { Mock } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
 import { LayoutSelectionState } from "@lichtblick/suite-base/components/LayoutBrowser/types";
@@ -16,14 +16,18 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
+import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import { usePrompt } from "@lichtblick/suite-base/hooks/usePrompt";
+import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
+import LayoutSection from "./LayoutSection";
 import LayoutBrowser from "./index";
 
 vi.mock("notistack", async () => ({
@@ -45,6 +49,17 @@ vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => ({
 
 vi.mock("@lichtblick/suite-base/context/CurrentUserContext", async () => ({
   useCurrentUser: vi.fn(),
+}));
+
+vi.mock("@lichtblick/suite-base/context/Workspace/WorkspaceContext", async () => ({
+  useWorkspaceStore: vi.fn(),
+  WorkspaceStoreSelectors: {
+    selectLayoutSectionExpanded: vi.fn(),
+  },
+}));
+
+vi.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", async () => ({
+  useWorkspaceActions: vi.fn(),
 }));
 
 vi.mock("@lichtblick/suite-base/hooks/useLayoutNavigation", async () => ({
@@ -88,7 +103,7 @@ vi.mock("@lichtblick/suite-base/hooks/useLayoutActions", async () => ({
 
 vi.mock("./LayoutSection", async () => ({
   __esModule: true,
-  default: () => <div data-testid="layout-section" />,
+  default: vi.fn(() => <div data-testid="layout-section" />),
 }));
 
 vi.mock("@lichtblick/suite-base/components/SidebarContent", async () => ({
@@ -116,6 +131,13 @@ describe("LayoutBrowser", () => {
     (useConfirm as Mock).mockReturnValue([vi.fn(), undefined]);
     (usePrompt as Mock).mockReturnValue([vi.fn(), undefined]);
     (useAppConfigurationValue as Mock).mockReturnValue([true, vi.fn()]);
+    (useWorkspaceStore as Mock).mockReturnValue({ personal: true, shared: true });
+    (useWorkspaceActions as Mock).mockReturnValue({
+      layoutBrowserActions: {
+        setPersonalSectionExpanded: vi.fn(),
+        setSharedSectionExpanded: vi.fn(),
+      },
+    });
     (useLayoutNavigation as Mock).mockReturnValue({
       onSelectLayout: vi.fn(),
       state: {
@@ -251,6 +273,176 @@ describe("LayoutBrowser", () => {
         );
       });
       expect(dispatchMock).toHaveBeenCalledWith({ type: "clear-multi-action" });
+    });
+  });
+
+  describe("section collapse persistence", () => {
+    let setPersonalExpandedMock: Mock;
+    let setSharedExpandedMock: Mock;
+    let onSelectLayoutMock: Mock;
+    let logEventMock: Mock;
+
+    const originalLayoutSectionMock = (LayoutSection as Mock).getMockImplementation();
+
+    beforeEach(() => {
+      setPersonalExpandedMock = vi.fn();
+      setSharedExpandedMock = vi.fn();
+      onSelectLayoutMock = vi.fn().mockResolvedValue(undefined);
+      logEventMock = vi.fn().mockResolvedValue(undefined);
+
+      (useAnalytics as Mock).mockReturnValue({ logEvent: logEventMock });
+      (useWorkspaceStore as Mock).mockReturnValue({ personal: true, shared: true });
+      (useWorkspaceActions as Mock).mockReturnValue({
+        layoutBrowserActions: {
+          setPersonalSectionExpanded: setPersonalExpandedMock,
+          setSharedSectionExpanded: setSharedExpandedMock,
+        },
+      });
+      (useLayoutNavigation as Mock).mockReturnValue({
+        onSelectLayout: onSelectLayoutMock,
+        state: {
+          busy: false,
+          error: undefined,
+          online: true,
+          lastSelectedId: undefined,
+          multiAction: undefined,
+          selectedIds: [],
+        },
+        dispatch: dispatchMock,
+      });
+    });
+
+    afterEach(() => {
+      (LayoutSection as Mock).mockImplementation(
+        originalLayoutSectionMock ?? (() => <div data-testid="layout-section" />),
+      );
+    });
+
+    it("passes expanded state and toggle handlers to LayoutSection", () => {
+      // GIVEN
+      (useWorkspaceStore as Mock).mockReturnValue({ personal: false, shared: true });
+
+      const capturedProps: Record<string, unknown>[] = [];
+      (LayoutSection as Mock).mockImplementation((props: Record<string, unknown>) => {
+        capturedProps.push(props);
+        return <div data-testid="layout-section" />;
+      });
+
+      // WHEN
+      render(<LayoutBrowser />);
+
+      // THEN
+      expect(capturedProps[0]?.expanded).toBe(false);
+      expect(capturedProps[0]?.onToggleExpanded).toBeDefined();
+    });
+
+    it("calls setPersonalSectionExpanded with toggler when togglePersonalExpanded is invoked", () => {
+      // GIVEN
+      let capturedOnToggle: (() => void) | undefined;
+      (LayoutSection as Mock).mockImplementation((props: { onToggleExpanded?: () => void }) => {
+        if (!capturedOnToggle && props.onToggleExpanded) {
+          capturedOnToggle = props.onToggleExpanded;
+        }
+        return <div data-testid="layout-section" />;
+      });
+
+      render(<LayoutBrowser />);
+
+      // WHEN
+      capturedOnToggle!();
+
+      // THEN
+      expect(setPersonalExpandedMock).toHaveBeenCalledTimes(1);
+      expect(setPersonalExpandedMock).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    it("calls setSharedSectionExpanded with toggler when toggleSharedExpanded is invoked", () => {
+      // GIVEN
+      mockLayoutManager.supportsSharing = true;
+
+      const capturedOnToggles: (() => void)[] = [];
+      (LayoutSection as Mock).mockImplementation((props: { onToggleExpanded?: () => void }) => {
+        if (props.onToggleExpanded) {
+          capturedOnToggles.push(props.onToggleExpanded);
+        }
+        return <div data-testid="layout-section" />;
+      });
+
+      render(<LayoutBrowser />);
+
+      // WHEN - second LayoutSection is the shared one
+      const sharedToggle = capturedOnToggles[1];
+      sharedToggle!();
+
+      // THEN
+      expect(setSharedExpandedMock).toHaveBeenCalledTimes(1);
+      expect(setSharedExpandedMock).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    it("expands personal section when creating a new layout", async () => {
+      // GIVEN
+      const newLayout = LayoutBuilder.layout();
+      mockLayoutManager.saveNewLayout = vi.fn().mockResolvedValue(newLayout);
+      render(<LayoutBrowser currentDateForStorybook={new Date("2025-01-01")} />);
+
+      // WHEN - simulate createNewLayout by clicking the button
+      const createBtn = screen.getByTestId("create-new-layout");
+      createBtn.click();
+
+      // THEN
+      await waitFor(() => {
+        expect(setPersonalExpandedMock).toHaveBeenCalledWith(true);
+      });
+    });
+
+    it("expands shared section when sharing a layout", async () => {
+      // GIVEN
+      const layout = LayoutBuilder.layout();
+      const newLayout = LayoutBuilder.layout();
+      const promptMock = vi.fn().mockResolvedValue("Shared Layout");
+      (usePrompt as Mock).mockReturnValue([promptMock, undefined]);
+      mockLayoutManager.saveNewLayout = vi.fn().mockResolvedValue(newLayout);
+
+      let capturedOnShare: ((item: Layout) => void) | undefined;
+      (LayoutSection as Mock).mockImplementation((props: { onShare: (item: Layout) => void }) => {
+        capturedOnShare = props.onShare;
+        return <div data-testid="layout-section" />;
+      });
+
+      render(<LayoutBrowser />);
+
+      // WHEN
+      capturedOnShare!(layout);
+
+      // THEN
+      await waitFor(() => {
+        expect(setSharedExpandedMock).toHaveBeenCalledWith(true);
+      });
+    });
+
+    it("expands personal section when making a personal copy", async () => {
+      // GIVEN
+      const layout = LayoutBuilder.layout();
+      const newLayout = LayoutBuilder.layout();
+      mockLayoutManager.makePersonalCopy = vi.fn().mockResolvedValue(newLayout);
+
+      let capturedOnMakePersonalCopy: ((item: Layout) => void) | undefined;
+      (LayoutSection as Mock).mockImplementation(
+        (props: { onMakePersonalCopy: (item: Layout) => void }) => {
+          capturedOnMakePersonalCopy = props.onMakePersonalCopy;
+          return <div data-testid="layout-section" />;
+        },
+      );
+
+      render(<LayoutBrowser />);
+
+      // WHEN
+      capturedOnMakePersonalCopy!(layout);
+
+      // THEN
+      await waitFor(() => {
+        expect(setPersonalExpandedMock).toHaveBeenCalledWith(true);
+      });
     });
   });
 });

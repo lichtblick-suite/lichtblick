@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { Mock } from "vitest";
 import { userEvent } from "@storybook/testing-library";
 import { render, screen } from "@testing-library/react";
 import React from "react";
+import type { Mock } from "vitest";
 
 import { PanelExtensionContext } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
@@ -130,17 +130,17 @@ describe("Indicator Component", () => {
     expect(config).toMatchObject(customConfig);
   });
 
-  it.each<IndicatorStyle>(["bulb", "background"])(
-    "renders with the proper style indicator",
-    (style) => {
-      const { matchingRule } = setup({
-        configOverride: {
-          style,
-        },
-      });
+  it.each<IndicatorStyle>([
+    "bulb",
+    "background",
+  ])("renders with the proper style indicator", (style) => {
+    const { matchingRule } = setup({
+      configOverride: {
+        style,
+      },
+    });
 
-      expect(screen.getByTestId(`${style}-indicator`)).toBeTruthy();
-      expect(screen.getByText(matchingRule.label)).toBeTruthy();
-    },
-  );
+    expect(screen.getByTestId(`${style}-indicator`)).toBeTruthy();
+    expect(screen.getByText(matchingRule.label)).toBeTruthy();
+  });
 });

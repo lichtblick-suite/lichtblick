@@ -148,7 +148,7 @@ const createMockEditor = () => {
 };
 
 vi.mock("react-monaco-editor", async () => {
-  const mockMonacoApi = (await import("monaco-editor/esm/vs/editor/editor.api")) as any;
+  const mockMonacoApi = await import("monaco-editor/esm/vs/editor/editor.api");
   return {
     default: function MockMonacoEditor(props: {
       editorWillMount?: (monaco: unknown) => unknown;
@@ -422,7 +422,7 @@ describe("Editor", () => {
     });
 
     const model = monacoApi.editor.getModel(uri);
-    // eslint-disable-next-line @typescript-eslint/unbound-method
+
     expect(model?.setValue).toHaveBeenCalledWith(freshCode);
   });
 

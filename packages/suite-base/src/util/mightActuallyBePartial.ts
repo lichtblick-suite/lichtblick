@@ -13,5 +13,5 @@
  * If you need this it probably means your types are not rigorous enough.
  */
 export function mightActuallyBePartial<T>(value: T): Partial<T> {
-  return value as Partial<T>;
+  return value;
 }

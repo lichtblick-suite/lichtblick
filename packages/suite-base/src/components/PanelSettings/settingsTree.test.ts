@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import type { Mock } from "vitest";
+
 import { SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
-import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
 import { buildSettingsTree } from "@lichtblick/suite-base/components/PanelSettings/settingsTree";
 import { BuildSettingsTreeProps } from "@lichtblick/suite-base/components/PanelSettings/types";
 import {
@@ -57,7 +57,7 @@ describe("buildSettingsTree", () => {
 
     const messagePipelineState = vi.fn().mockReturnValue({
       sortedTopics: PlayerBuilder.topics(),
-    } as Pick<MessagePipelineContext, "sortedTopics">);
+    });
 
     return {
       settingsTree,
@@ -75,24 +75,24 @@ describe("buildSettingsTree", () => {
   it.each([
     {
       panelType: undefined,
-      settingsTree: { nodes: {}, actionHandler: vi.fn() } as ImmutableSettingsTree,
+      settingsTree: { nodes: {}, actionHandler: vi.fn() },
     },
     { panelType: "value", settingsTree: undefined },
-  ])(
-    "should return undefined if settingsTree or panelType is undefined",
-    ({ panelType, settingsTree }) => {
-      const { config, extensionSettings, messagePipelineState } = setup();
+  ])("should return undefined if settingsTree or panelType is undefined", ({
+    panelType,
+    settingsTree,
+  }) => {
+    const { config, extensionSettings, messagePipelineState } = setup();
 
-      const result = buildSettingsTree({
-        config,
-        extensionSettings,
-        panelType,
-        settingsTree,
-        messagePipelineState,
-      });
-      expect(result).toBeUndefined();
-    },
-  );
+    const result = buildSettingsTree({
+      config,
+      extensionSettings,
+      panelType,
+      settingsTree,
+      messagePipelineState,
+    });
+    expect(result).toBeUndefined();
+  });
 
   it("should return undefined if settingsTree is not found", () => {
     const { config, extensionSettings, messagePipelineState } = setup();

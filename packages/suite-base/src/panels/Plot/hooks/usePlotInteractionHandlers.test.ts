@@ -2,8 +2,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 /* eslint-disable @typescript-eslint/unbound-method */
-import type { Mock } from "vitest";
 import { act, renderHook } from "@testing-library/react";
+import type { Mock } from "vitest";
 
 import { debouncePromise } from "@lichtblick/den/async";
 import { Time, toSec } from "@lichtblick/rostime";
@@ -62,7 +62,7 @@ describe("usePlotInteractionHandlers", () => {
 
   const setup = ({
     config,
-    coordinator = undefined,
+    coordinator,
     draggingRef,
     renderer,
     setActiveTooltip = vi.fn(),

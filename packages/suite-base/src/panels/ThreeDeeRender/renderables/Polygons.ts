@@ -96,7 +96,15 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
 
       // prettier-ignore
       const fields: SettingsTreeFields = {
-        lineWidth: { label: "Line Width", input: "number", min: 0, placeholder: String(DEFAULT_LINE_WIDTH), step: 0.005, precision: 3, value: config.lineWidth },
+        lineWidth: {
+          label: "Line Width",
+          input: "number",
+          min: 0,
+          placeholder: String(DEFAULT_LINE_WIDTH),
+          step: 0.005,
+          precision: 3,
+          value: config.lineWidth,
+        },
         color: { label: "Color", input: "rgba", value: config.color ?? DEFAULT_COLOR_STR },
       };
 
@@ -126,9 +134,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsPolygon>
-        | undefined;
+      const settings = this.renderer.config.topics[topicName];
       renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
       this.#updatePolygonRenderable(
         renderable,
@@ -146,9 +152,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic] as
-        | Partial<LayerSettingsPolygon>
-        | undefined;
+      const userSettings = this.renderer.config.topics[topic];
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
       renderable = new PolygonRenderable(topic, this.renderer, {

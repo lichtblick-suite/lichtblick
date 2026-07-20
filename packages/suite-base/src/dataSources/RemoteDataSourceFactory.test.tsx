@@ -4,9 +4,11 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import type { Mock } from "vitest";
+
 import { DataSourceFactoryInitializeArgs } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
+import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import { PlayerMetricsCollectorInterface } from "@lichtblick/suite-base/players/types";
 
 import RemoteDataSourceFactory, { checkExtensionMatch } from "./RemoteDataSourceFactory";
@@ -15,9 +17,12 @@ vi.mock("@lichtblick/suite-base/players/IterablePlayer", async () => ({
   IterablePlayer: vi.fn(),
 }));
 
-vi.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource", async () => ({
-  WorkerSerializedIterableSource: vi.fn(),
-}));
+vi.mock(
+  "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource",
+  async () => ({
+    WorkerSerializedIterableSource: vi.fn(),
+  }),
+);
 
 function setupArgs(params?: Record<string, string | undefined>): DataSourceFactoryInitializeArgs {
   const mockArgs: DataSourceFactoryInitializeArgs = {
@@ -89,6 +94,7 @@ describe("RemoteDataSourceFactory", () => {
       urlParams: { urls: ["https://example.com/test.mcap"] },
       sourceId: "remote-file",
       readAheadDuration: { sec: 10, nsec: 0 },
+      expandBackfill: expandVideoSeekBackfill,
     });
 
     expect(result).toBe(mockPlayer);
@@ -113,6 +119,7 @@ describe("RemoteDataSourceFactory", () => {
       urlParams: { urls: ["https://example.com/test.bag"] },
       sourceId: "remote-file",
       readAheadDuration: { sec: 10, nsec: 0 },
+      expandBackfill: expandVideoSeekBackfill,
     });
 
     expect(result).toBe(mockPlayer);
@@ -132,6 +139,7 @@ describe("RemoteDataSourceFactory", () => {
       urlParams: { urls: ["https://example.com/test1.mcap", "https://example.com/test2.mcap"] },
       sourceId: "remote-file",
       readAheadDuration: { sec: 10, nsec: 0 },
+      expandBackfill: expandVideoSeekBackfill,
     });
 
     expect(result).toBe(mockPlayer);

@@ -297,7 +297,7 @@ describe("BlockLoader", () => {
       progress: async (progress) => {
         count++;
         if (count === 2) {
-          // eslint-disable-next-line vi/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {
@@ -341,7 +341,7 @@ describe("BlockLoader", () => {
       progress: async (progress) => {
         count += 1;
         if (count === 2) {
-          // eslint-disable-next-line vi/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {
@@ -424,7 +424,7 @@ describe("BlockLoader", () => {
         }
 
         if (count === 2) {
-          // eslint-disable-next-line vi/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {
@@ -553,7 +553,7 @@ describe("BlockLoader", () => {
         }
 
         if (count === maxBlockCount) {
-          // eslint-disable-next-line vi/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {

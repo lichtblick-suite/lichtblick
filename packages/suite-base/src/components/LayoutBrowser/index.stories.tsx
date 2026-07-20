@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryObj, StoryContext, StoryFn } from "@storybook/react";
+import { StoryObj, StoryContext, StoryFn } from "@storybook/react-webpack5";
 import { fireEvent, screen, userEvent, within } from "@storybook/testing-library";
 import { useMemo, useState } from "react";
 
