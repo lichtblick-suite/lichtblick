@@ -104,6 +104,10 @@ export class RenderableMeshResource extends RenderableMarker {
             return;
           }
           this.#mesh = mesh;
+          // Opacity may have changed while the load was in flight; apply the latest value.
+          if (this.userData.marker.mesh_use_embedded_materials) {
+            updateEmbeddedMaterialsOpacity(mesh, this.userData.marker.color.a);
+          }
           this.add(mesh);
           this.#updateOutlineVisibility();
 
