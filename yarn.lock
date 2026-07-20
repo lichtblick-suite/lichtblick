@@ -6553,7 +6553,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/tsconfig-utils@npm:8.63.0, @typescript-eslint/tsconfig-utils@npm:^8.62.1, @typescript-eslint/tsconfig-utils@npm:^8.63.0":
+"@typescript-eslint/tsconfig-utils@npm:8.63.0":
   version: 8.63.0
   resolution: "@typescript-eslint/tsconfig-utils@npm:8.63.0"
   peerDependencies:
@@ -6562,7 +6562,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/tsconfig-utils@npm:8.64.0, @typescript-eslint/tsconfig-utils@npm:^8.64.0":
+"@typescript-eslint/tsconfig-utils@npm:8.64.0, @typescript-eslint/tsconfig-utils@npm:^8.62.1, @typescript-eslint/tsconfig-utils@npm:^8.63.0, @typescript-eslint/tsconfig-utils@npm:^8.64.0":
   version: 8.64.0
   resolution: "@typescript-eslint/tsconfig-utils@npm:8.64.0"
   peerDependencies:
@@ -6610,14 +6610,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/types@npm:8.63.0, @typescript-eslint/types@npm:^8.62.1, @typescript-eslint/types@npm:^8.63.0":
+"@typescript-eslint/types@npm:8.63.0":
   version: 8.63.0
   resolution: "@typescript-eslint/types@npm:8.63.0"
   checksum: 10/f72eb114970cae0da8e53f68cd8dca1b51ac410f4438141a2851655fa07aacb3090e24a2ae53462cf0970e4d5b52cabf9693aa6f07abdff5c210874806427e5b
   languageName: node
   linkType: hard
 
-"@typescript-eslint/types@npm:8.64.0, @typescript-eslint/types@npm:^8.64.0":
+"@typescript-eslint/types@npm:8.64.0, @typescript-eslint/types@npm:^8.62.1, @typescript-eslint/types@npm:^8.63.0, @typescript-eslint/types@npm:^8.64.0":
   version: 8.64.0
   resolution: "@typescript-eslint/types@npm:8.64.0"
   checksum: 10/b8951c00ce9b9702f3201f017354774ea5f39c30c2b6f815cb50d91f53f61c325e30f548329daf731d5169d752095cf102da54b754fb202bcfb619faa56fa9f4
@@ -6696,7 +6696,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.63.0, @typescript-eslint/utils@npm:^6.0.0 || ^7.0.0 || ^8.0.0, @typescript-eslint/utils@npm:^8.48.0":
+"@typescript-eslint/utils@npm:8.63.0":
   version: 8.63.0
   resolution: "@typescript-eslint/utils@npm:8.63.0"
   dependencies:
@@ -6711,7 +6711,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:^8.58.0":
+"@typescript-eslint/utils@npm:^6.0.0 || ^7.0.0 || ^8.0.0, @typescript-eslint/utils@npm:^8.48.0, @typescript-eslint/utils@npm:^8.58.0":
   version: 8.64.0
   resolution: "@typescript-eslint/utils@npm:8.64.0"
   dependencies:
@@ -15544,15 +15544,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.3.12":
-  version: 3.3.15
-  resolution: "nanoid@npm:3.3.15"
-  bin:
-    nanoid: bin/nanoid.cjs
-  checksum: 10/13c74a5208d455286f7af46f42ac9f3d7b821b8a719aff8dbd5ad3fb80399c0c63cdd1e92d046ea576e403bec05262fbb7e116beb4cfcd5b5483550372bd94b1
-  languageName: node
-  linkType: hard
-
 "nanoid@npm:^3.3.16":
   version: 3.3.16
   resolution: "nanoid@npm:3.3.16"
@@ -16763,18 +16754,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.3.11, postcss@npm:^8.4.21, postcss@npm:^8.4.40, postcss@npm:^8.5.15":
-  version: 8.5.16
-  resolution: "postcss@npm:8.5.16"
-  dependencies:
-    nanoid: "npm:^3.3.12"
-    picocolors: "npm:^1.1.1"
-    source-map-js: "npm:^1.2.1"
-  checksum: 10/b39408900aa394bce6f567d539b7361e71c07f361313e5b01e40481c5120309a570e7a54c6a0c6ea5f0c0c06ff8c12b560beeebcc29ea173ad42ec74bae86069
-  languageName: node
-  linkType: hard
-
-"postcss@npm:^8.5.6":
+"postcss@npm:^8.3.11, postcss@npm:^8.4.21, postcss@npm:^8.4.40, postcss@npm:^8.5.15, postcss@npm:^8.5.6":
   version: 8.5.20
   resolution: "postcss@npm:8.5.20"
   dependencies:
