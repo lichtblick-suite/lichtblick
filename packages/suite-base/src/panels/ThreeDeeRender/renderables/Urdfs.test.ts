@@ -21,6 +21,7 @@ import {
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
 
 import { RendererConfig } from "../IRenderer";
+import { MarkerUserData } from "./markers/RenderableMarker";
 import { LayerSettingsCustomUrdf, LayerSettingsUrdf, Urdfs } from "./Urdfs";
 
 let mockOrbitControls!: {
@@ -176,7 +177,9 @@ describe("Urdfs opacity", () => {
         value: 0.6,
       },
     });
-    expect(renderer.config.layers.ghost?.opacity).toBe(0.6);
+    expect((renderer.config.layers.ghost as LayerSettingsCustomUrdf | undefined)?.opacity).toBe(
+      0.6,
+    );
     renderer.dispose();
   });
 
@@ -266,7 +269,8 @@ describe("Urdfs opacity", () => {
     await waitFor(() => {
       const robot = urdfs.renderables.get("/robot_description");
       const child = robot?.userData.renderables.values().next().value;
-      expect(child?.userData.marker.color.a).toBeCloseTo(expectedAlpha);
+      const markerAlpha = (child?.userData as MarkerUserData | undefined)?.marker.color.a;
+      expect(markerAlpha).toBeCloseTo(expectedAlpha);
     });
 
     renderer.dispose();
