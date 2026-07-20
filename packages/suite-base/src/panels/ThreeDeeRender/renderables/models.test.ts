@@ -75,4 +75,28 @@ describe("updateEmbeddedMaterialsOpacity", () => {
     expect(instanceMaterial.depthWrite).toBe(false);
     expect(cachedMaterial.opacity).toBe(0.8);
   });
+
+  it("increments material version only when transparent or depthWrite flip", () => {
+    const cachedMaterial = new THREE.MeshStandardMaterial({ opacity: 1, transparent: false });
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(), cachedMaterial);
+    const model = new THREE.Group();
+    model.add(mesh);
+
+    setEmbeddedMaterialsOpacity(model, 1);
+    const instanceMaterial = mesh.material;
+    const versionAfterSetup = instanceMaterial.version;
+
+    // Same structural flags (still fully opaque) — no shader recompile needed.
+    updateEmbeddedMaterialsOpacity(model, 1);
+    expect(instanceMaterial.version).toBe(versionAfterSetup);
+
+    // Crossing into translucent flips transparent/depthWrite.
+    updateEmbeddedMaterialsOpacity(model, 0.5);
+    expect(instanceMaterial.transparent).toBe(true);
+    expect(instanceMaterial.version).toBeGreaterThan(versionAfterSetup);
+
+    const versionAfterFlip = instanceMaterial.version;
+    updateEmbeddedMaterialsOpacity(model, 0.25);
+    expect(instanceMaterial.version).toBe(versionAfterFlip);
+  });
 });
