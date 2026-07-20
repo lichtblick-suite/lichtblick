@@ -120,7 +120,7 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
       .map((topic) => topic.name);
 
     // Keeps only the first occurrence of each topic.
-    return _.uniq([...filtered]);
+    return [...new Set(filtered)];
   }, [topics]);
 
   // If the topicToRender is not in the availableTopics, then we should not try to use it

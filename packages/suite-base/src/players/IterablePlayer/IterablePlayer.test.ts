@@ -992,7 +992,7 @@ describe("IterablePlayer", () => {
 
     {
       const playerStates = await store.done;
-      expect(playerStates.length).toEqual(1);
+      expect(playerStates).toHaveLength(1);
     }
 
     player.close();
@@ -1210,7 +1210,7 @@ describe("IterablePlayer", () => {
     const metadata = player.getMetadata();
 
     // At first, metadata is empty because it's initialized in an async way.
-    expect(metadata.length).toBe(0);
+    expect(metadata).toHaveLength(0);
 
     // Setup store to player update to be in start-play state
     const store = new PlayerStateStore(4);
@@ -1221,7 +1221,7 @@ describe("IterablePlayer", () => {
     await store.done;
 
     const metadataInitialized = player.getMetadata();
-    expect(metadataInitialized.length).toBe(1);
+    expect(metadataInitialized).toHaveLength(1);
     expect(() => {
       // @ts-expect-error because the array is type as readonly
       metadataInitialized.pop();

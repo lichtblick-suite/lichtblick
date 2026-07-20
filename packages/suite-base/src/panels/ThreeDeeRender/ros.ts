@@ -406,7 +406,7 @@ function addRosDataType(output: Set<string>, dataType: string): Set<string> {
   }
 
   // Add the protobuf variation: ros.tf2_msgs.TFMessage
-  output.add("ros." + dataType.split("/").join("."));
+  output.add("ros." + dataType.replaceAll("/", "."));
 
   return output;
 }

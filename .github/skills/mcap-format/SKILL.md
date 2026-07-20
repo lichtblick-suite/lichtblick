@@ -179,6 +179,7 @@ MCAP is an open-source container format for heterogeneous timestamped data, desi
 | Indexed source | `McapIndexedIterableSource.ts` |
 | Unindexed source | `McapUnindexedIterableSource.ts` |
 | File readable | `BlobReadable.ts` (local), `RemoteFileReadable.ts` (HTTP Range) |
+| Remote read coalescing | `BatchingReadable.ts` (merges nearby `read()` calls in a microtask tick) |
 | Decompression | `packages/mcap-support/src/decompressHandlers.ts` |
 | Schema parsing | `packages/mcap-support/src/parseChannel.ts` |
 | 10s read-ahead (default) | `BufferedIterableSource` (`DEFAULT_READ_AHEAD_DURATION = { sec: 10, nsec: 0 }`) |

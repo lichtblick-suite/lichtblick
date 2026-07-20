@@ -298,14 +298,14 @@ describe("MultiIterableSource", () => {
       expect(result.start.sec).toBe(0);
       expect(result.end.sec).toBe(40);
       expect(result.datatypes.size).toBe(1);
-      expect(result.topics.length).toBe(1);
+      expect(result.topics).toHaveLength(1);
       expect(result.topicStats.size).toBe(1);
       expect(result.topicStats.get(topicName)!.numMessages).toBe(30);
-      expect(result.metadata!.length).toBe(2);
+      expect(result.metadata!).toHaveLength(2);
       expect(result.metadata).toContainEqual(init1.metadata![0]);
       expect(result.metadata).toContainEqual(init2.metadata![0]);
       expect(result.profile).toBe(init2.profile);
-      expect(result.alerts.length).toBe(0);
+      expect(result.alerts).toHaveLength(0);
 
       expect(mockSourceConstructor).toHaveBeenCalledTimes(2);
     });
@@ -337,8 +337,8 @@ describe("MultiIterableSource", () => {
       expect(result.start.sec).toBe(0);
       expect(result.end.sec).toBe(30);
       expect(result.datatypes.size).toBe(1);
-      expect(result.topics.length).toBe(1);
-      expect(result.alerts.length).toBe(2);
+      expect(result.topics).toHaveLength(1);
+      expect(result.alerts).toHaveLength(2);
       expect(result.alerts[0]!.message).toBe(
         `Different datatypes found for schema "${dataTypeName}"`,
       );

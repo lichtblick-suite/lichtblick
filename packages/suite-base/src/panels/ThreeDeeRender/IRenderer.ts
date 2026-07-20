@@ -133,6 +133,15 @@ export type RendererConfig = {
     /** Ignore the <up_axis> tag in COLLADA files (matching rviz behavior) */
     ignoreColladaUpAxis?: boolean;
     meshUpAxis?: MeshUpAxis;
+    /**
+     * Fixed world-space directional light vs camera-attached headlight (RViz-style).
+     * Defaults to "fixed".
+     */
+    mainLightMode?: "fixed" | "headlight";
+    /** Intensity of the main directional scene light (default: Math.PI) */
+    directionalLightIntensity?: number;
+    /** Intensity of the ambient hemisphere light (default: 0.5 * Math.PI) */
+    hemisphereLightIntensity?: number;
     transforms?: {
       /** Toggles translation and rotation offset controls for frames */
       editable?: boolean;
@@ -344,6 +353,9 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
 
   /** Update the color scheme and background color, rebuilding any materials as necessary */
   setColorScheme(colorScheme: "dark" | "light", backgroundColor: string | undefined): void;
+
+  /** Re-apply renderer scene settings such as lighting and tone mapping from the current config */
+  updateSceneRenderSettings(): void;
 
   /** Update the list of topics and rebuild all settings nodes when the identity
    * of the topics list changes */

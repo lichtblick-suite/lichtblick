@@ -86,6 +86,34 @@ export class SceneSettings extends SceneExtension {
             ? t("threeDee:takeEffectAfterReboot")
             : undefined,
       },
+      mainLightMode: {
+        label: t("threeDee:mainLightMode"),
+        help: t("threeDee:mainLightModeHelp"),
+        input: "select",
+        value: config.scene.mainLightMode ?? "fixed",
+        options: [
+          { label: t("threeDee:mainLightFixed"), value: "fixed" },
+          { label: t("threeDee:mainLightHeadlight"), value: "headlight" },
+        ],
+      },
+      directionalLightIntensity: {
+        label: t("threeDee:directionalLightIntensity"),
+        input: "number",
+        min: 0,
+        step: 0.1,
+        precision: 2,
+        value: config.scene.directionalLightIntensity,
+        placeholder: String(Math.PI),
+      },
+      hemisphereLightIntensity: {
+        label: t("threeDee:hemisphereLightIntensity"),
+        input: "number",
+        min: 0,
+        step: 0.1,
+        precision: 2,
+        value: config.scene.hemisphereLightIntensity,
+        placeholder: String(0.5 * Math.PI),
+      },
     };
 
     if (process.env.NODE_ENV === "production") {
@@ -110,6 +138,9 @@ export class SceneSettings extends SceneExtension {
       this.renderer.updateConfig((draft) => {
         draft.scene = {};
       });
+      this.renderer.labelPool.setScaleFactor(DEFAULT_LABEL_SCALE_FACTOR);
+      this.renderer.setColorScheme(this.renderer.colorScheme, undefined);
+      this.renderer.updateSceneRenderSettings();
       this.updateSettingsTree();
       return;
     }
@@ -136,6 +167,12 @@ export class SceneSettings extends SceneExtension {
       } else if (path[1] === "labelScaleFactor") {
         const labelScaleFactor = value as number | undefined;
         this.renderer.labelPool.setScaleFactor(labelScaleFactor ?? DEFAULT_LABEL_SCALE_FACTOR);
+      } else if (
+        path[1] === "mainLightMode" ||
+        path[1] === "directionalLightIntensity" ||
+        path[1] === "hemisphereLightIntensity"
+      ) {
+        this.renderer.updateSceneRenderSettings();
       }
     } else {
       return;

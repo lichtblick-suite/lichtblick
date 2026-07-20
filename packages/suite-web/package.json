@@ -14,7 +14,7 @@
     "@lichtblick/tsconfig": "1.1.2",
     "@mui/material": "7.2.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
-    "@storybook/react": "9.1.9",
+    "@storybook/react-webpack5": "10.4.6",
     "@testing-library/react": "16.0.0",
     "clean-webpack-plugin": "4.0.0",
     "copy-webpack-plugin": "14.0.0",

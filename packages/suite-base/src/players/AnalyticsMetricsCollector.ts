@@ -27,7 +27,7 @@ export default class AnalyticsMetricsCollector implements PlayerMetricsCollector
   }
 
   public logEvent(event: AppEvent, data?: EventData): void {
-    void this.#analytics.logEvent(event, { ...this.#metadata, ...data });
+    this.#analytics.logEvent(event, { ...this.#metadata, ...data });
   }
 
   public playerConstructed(): void {

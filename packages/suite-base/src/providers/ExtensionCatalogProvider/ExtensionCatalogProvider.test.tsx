@@ -591,7 +591,7 @@ describe("ExtensionCatalogProvider", () => {
           extensionInfo.namespace!,
           extensionData,
         );
-        expect(response.length).toBe(1);
+        expect(response).toHaveLength(1);
         expect(response[0]?.success).toBe(true);
         expect(response[0]?.info).toEqual(extensionInfo);
       });

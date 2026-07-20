@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Stack } from "@mui/material";
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 import { PropsWithChildren, useState } from "react";
 
 import { Time } from "@lichtblick/rostime";

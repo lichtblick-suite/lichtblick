@@ -16,6 +16,9 @@ FetchReader (Streams API → EventEmitter: data/error/end)
 CachedFilelike (LRU block cache via VirtualLRUBuffer)
      │
      ▼
+BatchingReadable (coalesces nearby read() calls within a microtask tick)
+     │
+     ▼
 RemoteFileReadable (IReadable adapter: size(), read(offset, size))
      │
      ▼                              ┌─── Worker boundary ───┐
@@ -276,20 +279,45 @@ export const globalRequestQueue = new RequestQueue(GLOBAL_REQUEST_QUEUE_MAX_CONC
 Thin adapter bridging `CachedFilelike` (byte-offset Filelike API) to `McapTypes.IReadable` (bigint offset/size API).
 
 ```typescript
-class RemoteFileReadable {
-  #remoteReader: CachedFilelike;  // Configured with 500MB cache
+const DEFAULT_CACHE_SIZE_BYTES = 1024 * 1024 * 500; // 500MiB
 
-  constructor(url: string, cacheSizeInBytes = 500 * 1024 * 1024) {
+class RemoteFileReadable {
+  #remoteReader: CachedFilelike;         // Cache size configurable, defaults to 500MiB
+  #batchingReadable: BatchingReadable;   // Coalesces reads before CachedFilelike
+
+  constructor(url: string, options?: { cacheSizeInBytes?: number; readAheadEnabled?: boolean }) {
     const fileReader = new BrowserHttpReader(url);
-    this.#remoteReader = new CachedFilelike({ fileReader, cacheSizeInBytes });
+    this.#remoteReader = new CachedFilelike({
+      fileReader,
+      cacheSizeInBytes: options?.cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
+      readAheadEnabled: options?.readAheadEnabled,
+    });
+    const inner = {
+      size: async () => BigInt(this.#remoteReader.size()),
+      read: async (offset, size) => this.#remoteReader.read(Number(offset), Number(size)),
+    };
+    this.#batchingReadable = new BatchingReadable(inner);
   }
 
   async size(): Promise<bigint> { return BigInt(this.#remoteReader.size()); }
   async read(offset: bigint, size: bigint): Promise<Uint8Array> {
-    return await this.#remoteReader.read(Number(offset), Number(size));
+    return await this.#batchingReadable.read(offset, size);  // → coalesced → CachedFilelike
   }
 }
 ```
+
+---
+
+## BatchingReadable
+
+**Source**: `packages/suite-base/src/players/IterablePlayer/Mcap/BatchingReadable.ts`
+
+### Purpose
+Coalescing layer between `McapIndexedReader` and `CachedFilelike`. Accumulates `read()` calls that arrive within the same microtask tick, sorts them by offset, and merges those whose gap is `< 64 KiB` (up to a `4 MiB` merged span) into a single underlying read — cutting HTTP Range requests for MCAP files with many small chunks.
+
+### Notes
+- Single-member groups are forwarded zero-copy; multi-member groups are sliced (copied) per request so a small result does not pin the full merged buffer in memory.
+- Only coalesces reads that are concurrently pending in the same tick. `McapIndexedReader` issues reads strictly sequentially (each awaited before the next), so real coalescing depends on concurrent access — validate request-count reduction empirically for a given workload.
 
 ---
 
@@ -321,5 +349,5 @@ This means:
 | `packages/suite-base/src/util/BrowserHttpReader.ts` | HTTP Range request implementation |
 | `packages/suite-base/src/util/FetchReader.ts` | Streams API EventEmitter adapter |
 | `packages/suite-base/src/util/RequestQueue.ts` | Global concurrency limiter (10 max) |
-| `packages/suite-base/src/players/IterablePlayer/Mcap/RemoteFileReadable.ts` | IReadable adapter (500MB default) |
-
+| `packages/suite-base/src/players/IterablePlayer/Mcap/RemoteFileReadable.ts` | IReadable adapter (500MB default); reads pass through BatchingReadable |
+| `packages/suite-base/src/players/IterablePlayer/Mcap/BatchingReadable.ts` | Coalesces nearby `read()` calls (gap <64KiB, ≤4MiB span) into fewer inner reads |

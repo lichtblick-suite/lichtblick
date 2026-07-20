@@ -93,7 +93,7 @@ jobs:
         run: git fetch origin ${{ steps.metadata.outputs.base_ref }}:${{ steps.metadata.outputs.base_ref }}
 
       - name: ScanCloud PR Scan
-        uses: sonarsource/sonarqube-scan-action@v8.2.0
+        uses: sonarsource/sonarqube-scan-action@v8.2.1
         with:
           args: >
             -Dsonar.pullrequest.key=${{ steps.metadata.outputs.number }}

@@ -40,7 +40,7 @@ export default function Start(): React.JSX.Element {
         ),
         onClick: () => {
           dialogActions.dataSource.open("file");
-          void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "local" });
+          analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "local" });
         },
       },
       {
@@ -54,7 +54,7 @@ export default function Start(): React.JSX.Element {
         ),
         onClick: () => {
           dialogActions.dataSource.open("connection");
-          void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "live" });
+          analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "live" });
         },
       },
     ];
