@@ -98,4 +98,49 @@ describe("RenderableMeshResource embedded opacity", () => {
     expect(cachedMaterial.transparent).toBe(false);
     renderable.dispose();
   });
+
+  it("re-applies the latest opacity when it changes during an in-flight load", async () => {
+    const cachedMaterial = new THREE.MeshStandardMaterial({ opacity: 0.8 });
+    const cachedModel = new THREE.Group();
+    cachedModel.add(new THREE.Mesh(new THREE.BoxGeometry(), cachedMaterial));
+
+    let resolveLoad!: (model: THREE.Group) => void;
+    const load = jest.fn().mockImplementation(async () => {
+      return await new Promise<THREE.Group>((resolve) => {
+        resolveLoad = resolve;
+      });
+    });
+    const renderer = {
+      normalizeFrameId: (frameId: string) => frameId,
+      config: { topics: {} },
+      modelCache: { load },
+      settings: {
+        errors: {
+          add: jest.fn(),
+          remove: jest.fn(),
+          hasError: jest.fn().mockReturnValue(false),
+        },
+      },
+      queueAnimationFrame: jest.fn(),
+    } as unknown as IRenderer;
+
+    const renderable = new RenderableMeshResource(
+      "/robot_description",
+      makeMarker(1),
+      0n,
+      renderer,
+    );
+    expect(load).toHaveBeenCalledTimes(1);
+
+    // Opacity changes while the mesh is still loading — cannot update in place yet.
+    renderable.update(makeMarker(0.5), 1n);
+    expect(load).toHaveBeenCalledTimes(1);
+
+    resolveLoad(cachedModel);
+
+    await waitFor(() => {
+      expect(embeddedMaterial(renderable)?.opacity).toBeCloseTo(0.4);
+    });
+    renderable.dispose();
+  });
 });

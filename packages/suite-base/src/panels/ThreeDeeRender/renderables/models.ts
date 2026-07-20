@@ -72,9 +72,15 @@ function applyOpacityToMaterial(material: THREE.Material, opacity: number): void
   material.userData[ORIGINAL_DEPTH_WRITE_KEY] = originalDepthWrite;
 
   material.opacity = originalOpacity * opacity;
-  material.transparent = originalTransparent || material.opacity < 1;
-  material.depthWrite = material.opacity >= 1 && originalDepthWrite;
-  material.needsUpdate = true;
+
+  // opacity is a uniform; only flip structural flags when they change to avoid shader recompiles
+  const newTransparent = originalTransparent || material.opacity < 1;
+  const newDepthWrite = material.opacity >= 1 && originalDepthWrite;
+  if (material.transparent !== newTransparent || material.depthWrite !== newDepthWrite) {
+    material.transparent = newTransparent;
+    material.depthWrite = newDepthWrite;
+    material.needsUpdate = true;
+  }
 }
 
 /**
@@ -103,22 +109,28 @@ export function setEmbeddedMaterialsOpacity(model: LoadedModel, opacity: number)
   });
 }
 
+/** Opacity state for the reused traverse callback (safe: traverse is synchronous). */
+let updateOpacityState = 1;
+
+const updateEmbeddedOpacityCallback = (child: THREE.Object3D): void => {
+  if (!(child instanceof THREE.Mesh)) {
+    return;
+  }
+
+  const materials = child.material as THREE.Material | THREE.Material[];
+  if (Array.isArray(materials)) {
+    for (const material of materials) {
+      applyOpacityToMaterial(material, updateOpacityState);
+    }
+  } else {
+    applyOpacityToMaterial(materials, updateOpacityState);
+  }
+};
+
 /** Update previously prepared embedded materials in place (no clone, no multiplier compounding). */
 export function updateEmbeddedMaterialsOpacity(model: LoadedModel, opacity: number): void {
-  model.traverse((child: THREE.Object3D) => {
-    if (!(child instanceof THREE.Mesh)) {
-      return;
-    }
-
-    const materials = child.material as THREE.Material | THREE.Material[];
-    if (Array.isArray(materials)) {
-      for (const material of materials) {
-        applyOpacityToMaterial(material, opacity);
-      }
-    } else {
-      applyOpacityToMaterial(materials, opacity);
-    }
-  });
+  updateOpacityState = opacity;
+  model.traverse(updateEmbeddedOpacityCallback);
 }
 
 /** Generic MeshStandardMaterial dispose function for materials loaded from an external source */
