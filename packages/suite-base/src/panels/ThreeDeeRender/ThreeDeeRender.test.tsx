@@ -134,6 +134,7 @@ const createMockContext = (
     unstable_fetchAsset: jest.fn(),
     unstable_setMessagePathDropConfig: jest.fn(),
     unstable_subscribeMessageRange: jest.fn(),
+    unstable_setAlert: jest.fn(),
     dataSourceProfile: "ros1",
     layout: {
       addPanel: jest.fn(),
@@ -1251,6 +1252,122 @@ describe("ThreeDeeRender", () => {
         const seekCall = customRendererInstance.handleSeek.mock.calls[0];
         expect(seekCall?.[1]).toHaveLength(50);
       });
+    });
+  });
+
+  describe("transform preload alert", () => {
+    const TRANSFORM_ALERT_ID = "transform-preload";
+
+    const lastAlertFor = (mockContext: BuiltinPanelExtensionContext, alertId: string): unknown => {
+      const calls = (mockContext.unstable_setAlert as jest.Mock).mock.calls.filter(
+        (call) => call[0] === alertId,
+      );
+      return calls.at(-1)?.[1];
+    };
+
+    it("surfaces an info alert when a transform topic exists and preloading is disabled", async () => {
+      // Given
+      const topics = [
+        RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" }),
+        RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" }),
+      ];
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // When
+      act(() => {
+        mockContext.onRender!({ topics }, jest.fn());
+      });
+
+      // Then
+      await waitFor(() => {
+        expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toEqual(
+          expect.objectContaining({
+            severity: "info",
+            message: expect.any(String),
+            tip: expect.any(String),
+          }),
+        );
+      });
+    });
+
+    it("clears the alert when a transform topic exists but preloading is enabled", async () => {
+      // Given
+      const topics = [RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" })];
+      const mockContext = createMockContext({
+        initialState: {
+          scene: {
+            transforms: {
+              enablePreloading: true,
+            },
+          },
+        },
+      });
+      const props = setup({}, mockContext);
+
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+      (mockContext.unstable_setAlert as jest.Mock).mockClear();
+
+      // When
+      act(() => {
+        mockContext.onRender!({ topics }, jest.fn());
+      });
+
+      // Then
+      await waitFor(() => {
+        expect(mockContext.unstable_setAlert).toHaveBeenCalledWith(TRANSFORM_ALERT_ID, undefined);
+      });
+      expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toBeUndefined();
+    });
+
+    it("does not show the alert when no transform topic exists", async () => {
+      // Given
+      const topics = [RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" })];
+      const mockContext = createMockContext();
+      const props = setup({}, mockContext);
+
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // When
+      act(() => {
+        mockContext.onRender!({ topics }, jest.fn());
+      });
+
+      // Then
+      await waitFor(() => {
+        expect(mockContext.unstable_setAlert).toHaveBeenCalledWith(TRANSFORM_ALERT_ID, undefined);
+      });
+      expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toBeUndefined();
+    });
+
+    it("does not throw when the host does not provide unstable_setAlert", async () => {
+      // Given
+      const topics = [RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" })];
+      const mockContext = createMockContext({ unstable_setAlert: undefined });
+      const props = setup({}, mockContext);
+
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // When / Then
+      expect(() => {
+        act(() => {
+          mockContext.onRender!({ topics }, jest.fn());
+        });
+      }).not.toThrow();
     });
   });
 });

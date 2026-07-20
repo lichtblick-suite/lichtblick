@@ -1055,7 +1055,7 @@ export class ImageMode
         // remove any leading / so the image name doesn't start with _
         const topicName = topic.replace(/^\/+/, "");
         const fileName = `${topicName}-${stamp.sec}-${stamp.nsec}`;
-        void this.renderer.analytics?.logEvent(AppEvent.IMAGE_DOWNLOAD);
+        this.renderer.analytics?.logEvent(AppEvent.IMAGE_DOWNLOAD);
         if (this.renderer.testOptions.onDownloadImage) {
           this.renderer.testOptions.onDownloadImage(blob, fileName);
         } else {

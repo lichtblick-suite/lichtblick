@@ -7,6 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { setupJestCanvasMock } from "jest-canvas-mock";
+import * as THREE from "three";
 
 import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { fromNanoSec, toNanoSec } from "@lichtblick/rostime";
@@ -44,9 +45,9 @@ jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");
 // We need to mock the WebGLRenderer because it's not available in jsdom
 // only mocking what we currently use
 jest.mock("three", () => {
-  const THREE = jest.requireActual("three");
+  const actualThree = jest.requireActual("three");
   return {
-    ...THREE,
+    ...actualThree,
     WebGLRenderer: function WebGLRenderer() {
       return {
         capabilities: {
@@ -770,6 +771,198 @@ describe("3D Renderer", () => {
     expect(renderer.schemaSubscriptions.size).toBeGreaterThan(0);
 
     renderer.dispose();
+  });
+
+  describe("image-only mode topic settings validator", () => {
+    it("adds an IMAGE_ONLY_TOPIC error to visible topics while in image-only mode", () => {
+      // Given: A renderer in image mode with image-only subscription mode enabled
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        interfaceMode: "image" as const,
+        canvas,
+      });
+      renderer.enableImageOnlySubscriptionMode();
+
+      // When: A visible topic node is validated
+      renderer.settings.setNodesForKey("test-key", [
+        { path: ["topics", "/camera"], node: { visible: true } },
+      ]);
+
+      // Then: An error should be added to that topic
+      expect(renderer.settings.errors.errors.errorAtPath(["topics", "/camera"])).toBe(
+        "Camera calibration information is required to display 3D topics",
+      );
+
+      renderer.dispose();
+    });
+
+    it("removes the IMAGE_ONLY_TOPIC error when a topic is not visible", () => {
+      // Given: A renderer in image mode with image-only subscription mode enabled
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        interfaceMode: "image" as const,
+        canvas,
+      });
+      renderer.enableImageOnlySubscriptionMode();
+      renderer.settings.setNodesForKey("test-key", [
+        { path: ["topics", "/camera"], node: { visible: true } },
+      ]);
+      expect(renderer.settings.errors.errors.errorAtPath(["topics", "/camera"])).toBeDefined();
+
+      // When: The topic becomes not visible
+      renderer.settings.setNodesForKey("test-key", [
+        { path: ["topics", "/camera"], node: { visible: false } },
+      ]);
+
+      // Then: The error should be removed
+      expect(renderer.settings.errors.errors.errorAtPath(["topics", "/camera"])).toBeUndefined();
+
+      renderer.dispose();
+    });
+
+    it("ignores non-topic paths and topic paths without a topic name", () => {
+      // Given: A renderer in image mode with image-only subscription mode enabled
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        interfaceMode: "image" as const,
+        canvas,
+      });
+      renderer.enableImageOnlySubscriptionMode();
+
+      // When/Then: Validating unrelated or incomplete paths should not throw or add errors
+      expect(() => {
+        renderer.settings.setNodesForKey("test-key", [
+          { path: ["layers"], node: { visible: true } },
+          { path: ["topics"], node: { visible: true } },
+        ]);
+      }).not.toThrow();
+      expect(renderer.settings.errors.errors.errorAtPath(["topics"])).toBeUndefined();
+
+      renderer.dispose();
+    });
+  });
+
+  describe("scene lighting", () => {
+    it("switches the main light to a headlight attached to the active camera", () => {
+      // Given: A renderer with headlight mode configured
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        canvas,
+        config: {
+          ...defaultRendererConfig,
+          scene: { mainLightMode: "headlight", directionalLightIntensity: 2 },
+        },
+      });
+
+      // When: Rendering a frame (which syncs the headlight to the active camera)
+      renderer.animationFrame();
+      const camera = renderer.cameraHandler.getActiveCamera();
+
+      // Then: The headlight should be attached to the camera with the configured intensity
+      const attachedLight = camera.children.find(
+        (child: THREE.Object3D): child is THREE.DirectionalLight =>
+          child instanceof THREE.DirectionalLight,
+      );
+      expect(attachedLight).toBeDefined();
+      expect(attachedLight?.intensity).toBe(2);
+
+      renderer.dispose();
+    });
+
+    it("does not attach a headlight to the camera in fixed lighting mode", () => {
+      // Given: A renderer using the default (fixed) lighting mode
+      const renderer = new Renderer({ ...defaultRendererProps, canvas });
+
+      // When: Rendering a frame
+      renderer.animationFrame();
+      const camera = renderer.cameraHandler.getActiveCamera();
+
+      // Then: No directional light should be attached to the camera
+      const attachedLight = camera.children.find(
+        (child: THREE.Object3D) => child instanceof THREE.DirectionalLight,
+      );
+      expect(attachedLight).toBeUndefined();
+
+      renderer.dispose();
+    });
+
+    it("detaches the headlight from the camera when switching back to fixed mode", () => {
+      // Given: A renderer in headlight mode with the headlight synced to the camera
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        canvas,
+        config: {
+          ...defaultRendererConfig,
+          scene: { mainLightMode: "headlight" },
+        },
+      });
+      renderer.animationFrame();
+      const camera = renderer.cameraHandler.getActiveCamera();
+      expect(
+        camera.children.some((child: THREE.Object3D) => child instanceof THREE.DirectionalLight),
+      ).toBe(true);
+
+      // When: Switching back to fixed lighting mode
+      renderer.config = {
+        ...renderer.config,
+        scene: { mainLightMode: "fixed" },
+      };
+      renderer.updateSceneRenderSettings();
+
+      // Then: The headlight should no longer be attached to the camera
+      expect(
+        camera.children.some((child: THREE.Object3D) => child instanceof THREE.DirectionalLight),
+      ).toBe(false);
+
+      renderer.dispose();
+    });
+
+    it("applies configured hemisphere light intensity", () => {
+      // Given: A renderer with a custom hemisphere light intensity
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        canvas,
+        config: {
+          ...defaultRendererConfig,
+          scene: { hemisphereLightIntensity: 3.5 },
+        },
+      });
+      const renderSpy = jest.spyOn(renderer.gl, "render");
+
+      // When: Rendering a frame (updateSceneRenderSettings runs during construction and applies
+      // the configured intensity; rendering lets us capture the private scene via the gl mock)
+      renderer.animationFrame();
+
+      // Then: The hemisphere light in the scene should reflect the configured intensity
+      const [scene] = renderSpy.mock.calls[0] as [THREE.Scene, THREE.Camera];
+      const hemiLight = scene.children.find(
+        (child: THREE.Object3D): child is THREE.HemisphereLight =>
+          child instanceof THREE.HemisphereLight,
+      );
+      expect(hemiLight).toBeDefined();
+      expect(hemiLight?.intensity).toBe(3.5);
+
+      renderer.dispose();
+    });
+
+    it("applies the default hemisphere light intensity when not configured", () => {
+      // Given: A renderer without a custom hemisphere light intensity
+      const renderer = new Renderer({ ...defaultRendererProps, canvas });
+      const renderSpy = jest.spyOn(renderer.gl, "render");
+
+      // When: Rendering a frame
+      renderer.animationFrame();
+
+      // Then: The hemisphere light should use the default intensity (0.5 * PI)
+      const [scene] = renderSpy.mock.calls[0] as [THREE.Scene, THREE.Camera];
+      const hemiLight = scene.children.find(
+        (child: THREE.Object3D): child is THREE.HemisphereLight =>
+          child instanceof THREE.HemisphereLight,
+      );
+      expect(hemiLight?.intensity).toBe(0.5 * Math.PI);
+
+      renderer.dispose();
+    });
   });
 
   it("does not update topics when topics reference is the same", () => {
