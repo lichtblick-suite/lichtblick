@@ -10,11 +10,13 @@ import {
   UpdateLayoutRequestBody,
   UpdateLayoutResponse,
 } from "@lichtblick/suite-base/api/layouts/types";
+import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ISO8601Timestamp } from "@lichtblick/suite-base/services/ILayoutStorage";
 import {
   IRemoteLayoutStorage,
   RemoteLayout,
 } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
+import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
 
 export class LayoutsAPI implements IRemoteLayoutStorage {
@@ -43,6 +45,20 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
 
   public async getLayout(): Promise<RemoteLayout | undefined> {
     throw new Error("Method not implemented.");
+  }
+
+  public async getDefaultLayoutData(): Promise<Partial<LayoutData> | undefined> {
+    try {
+      const { data: layoutData } = await HttpService.get<Partial<LayoutData>>(
+        `${this.workspacePath}/${this.workspace}/${this.layoutPath}/default_data`,
+      );
+      return layoutData;
+    } catch (error) {
+      if (error instanceof HttpError && error.status === 404) {
+        return undefined;
+      }
+      throw error;
+    }
   }
 
   public async saveNewLayout(params: SaveNewLayoutParams): Promise<RemoteLayout> {
