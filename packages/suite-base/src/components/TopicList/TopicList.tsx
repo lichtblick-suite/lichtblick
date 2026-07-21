@@ -96,12 +96,16 @@ export function TopicList(): React.JSX.Element {
     setContextMenuState(undefined);
   }, []);
 
-
   const itemData = useMemo(() => ({ treeItems, selectedIndexes }), [selectedIndexes, treeItems]);
 
   const renderRow = useCallback(
     // `treeItems` and `selectedIndexes` come from the `rowProps` we pass to the VirtualList below
-    ({ index, style, treeItems: rowTreeItems, selectedIndexes: rowSelectedIndexes }: RowComponentProps<typeof itemData>): React.JSX.Element | null => {
+    ({
+      index,
+      style,
+      treeItems: rowTreeItems,
+      selectedIndexes: rowSelectedIndexes,
+    }: RowComponentProps<typeof itemData>): React.JSX.Element | null => {
       const treeItem = rowTreeItems[index]!;
       const selected = rowSelectedIndexes.has(index);
       const onClick = (event: React.MouseEvent) => {
@@ -206,9 +210,7 @@ export function TopicList(): React.JSX.Element {
                   listRef={listRef}
                   style={{ width, height }}
                   rowCount={treeItems.length}
-                  rowHeight={(index, data) =>
-                    data.treeItems[index]?.type === "topic" ? 50 : 28
-                  }
+                  rowHeight={(index, data) => (data.treeItems[index]?.type === "topic" ? 50 : 28)}
                   rowProps={itemData}
                   overscanCount={10}
                   rowComponent={renderRow}

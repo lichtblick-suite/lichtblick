@@ -77,15 +77,12 @@ function LogList({ items }: LogListProps): React.JSX.Element {
   const itemHeightCache = useRef<Record<number, number>>({});
   const [heightVersion, forceHeightUpdate] = useReducer((n: number) => n + 1, 0);
 
-  const setRowHeight = useCallback(
-    (index: number, height: number) => {
-      if (itemHeightCache.current[index] !== height) {
-        itemHeightCache.current[index] = height;
-        forceHeightUpdate();
-      }
-    },
-    [],
-  );
+  const setRowHeight = useCallback((index: number, height: number) => {
+    if (itemHeightCache.current[index] !== height) {
+      itemHeightCache.current[index] = height;
+      forceHeightUpdate();
+    }
+  }, []);
 
   const getRowHeight = useCallback(
     (index: number, _rowProps: ListItemData) =>
@@ -115,23 +112,20 @@ function LogList({ items }: LogListProps): React.JSX.Element {
   }, [autoscrollToEnd, items.length]);
 
   // Disable autoscroll if the user manually scrolls back.
-  const onScroll = React.useCallback(
-    (event: React.UIEvent<HTMLDivElement>) => {
-      try {
-        const target = event.currentTarget;
-        const { scrollTop, offsetHeight, scrollHeight } = target;
-        const isAtEnd = scrollTop + offsetHeight >= scrollHeight - 1;
-        if (!isAtEnd) {
-          setAutoscrollToEnd(false);
-        } else {
-          setAutoscrollToEnd(true);
-        }
-      } catch (error) {
-        console.error("Error while handling scroll", error);
+  const onScroll = React.useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    try {
+      const target = event.currentTarget;
+      const { scrollTop, offsetHeight, scrollHeight } = target;
+      const isAtEnd = scrollTop + offsetHeight >= scrollHeight - 1;
+      if (!isAtEnd) {
+        setAutoscrollToEnd(false);
+      } else {
+        setAutoscrollToEnd(true);
       }
-    },
-    [],
-  );
+    } catch (error) {
+      console.error("Error while handling scroll", error);
+    }
+  }, []);
 
   // This is passed to each row to tell it what to render.
   const itemData = useMemo(
