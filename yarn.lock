@@ -3374,7 +3374,7 @@ __metadata:
     "@protobufjs/base64": "npm:1.1.2"
     flatbuffers: "npm:25.9.23"
     flatbuffers_reflection: "npm:1.3.0"
-    protobufjs: "npm:8.6.5"
+    protobufjs: "npm:8.6.6"
     typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
@@ -3764,7 +3764,7 @@ __metadata:
     tss-react: "npm:4.9.19"
     utif: "npm:3.1.0"
     webpack: "npm:5.108.3"
-    webpack-dev-server: "npm:5.2.5"
+    webpack-dev-server: "npm:5.2.6"
   languageName: unknown
   linkType: soft
 
@@ -3789,7 +3789,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     tss-react: "npm:4.9.19"
     webpack: "npm:5.108.3"
-    webpack-dev-server: "npm:5.2.5"
+    webpack-dev-server: "npm:5.2.6"
   languageName: unknown
   linkType: soft
 
@@ -8265,7 +8265,7 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.2.0"
     webpack: "npm:5.108.3"
-    webpack-dev-server: "npm:5.2.5"
+    webpack-dev-server: "npm:5.2.6"
   languageName: unknown
   linkType: soft
 
@@ -14882,7 +14882,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"launch-editor@npm:^2.6.1":
+"launch-editor@npm:^2.14.1":
   version: 2.14.1
   resolution: "launch-editor@npm:2.14.1"
   dependencies:
@@ -15042,7 +15042,7 @@ __metadata:
     vm-browserify: "npm:1.1.2"
     webpack: "npm:5.108.3"
     webpack-cli: "npm:7.1.0"
-    webpack-dev-server: "npm:5.2.5"
+    webpack-dev-server: "npm:5.2.6"
     webpack-hot-middleware: "npm:2.26.0"
   languageName: unknown
   linkType: soft
@@ -17686,12 +17686,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:8.6.5":
-  version: 8.6.5
-  resolution: "protobufjs@npm:8.6.5"
+"protobufjs@npm:8.6.6":
+  version: 8.6.6
+  resolution: "protobufjs@npm:8.6.6"
   dependencies:
     long: "npm:^5.3.2"
-  checksum: 10/5252ae235328c1cb478d1fa8a2332f812cea5006fafd54453c92c3a8284d65ea7ecd5271c0bc4d7de30f5234d14873c39ac07f010bc612462c9440a233d3bf76
+  checksum: 10/d3a60d06182ebb89bb688c70914867813dcf37ba5983f6b3d45d44ccb326b039f832d054013669da561e6b8caf20b1bc01fca47ae71a46c9c5ffda575511f3c7
   languageName: node
   linkType: hard
 
@@ -21554,7 +21554,7 @@ __metadata:
     playwright: "npm:1.60.0"
     serve-handler: "npm:6.1.7"
     webpack: "npm:5.108.3"
-    webpack-dev-server: "npm:5.2.5"
+    webpack-dev-server: "npm:5.2.6"
   languageName: unknown
   linkType: soft
 
@@ -21665,9 +21665,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-dev-server@npm:5.2.5":
-  version: 5.2.5
-  resolution: "webpack-dev-server@npm:5.2.5"
+"webpack-dev-server@npm:5.2.6":
+  version: 5.2.6
+  resolution: "webpack-dev-server@npm:5.2.6"
   dependencies:
     "@types/bonjour": "npm:^3.5.13"
     "@types/connect-history-api-fallback": "npm:^1.5.4"
@@ -21687,7 +21687,7 @@ __metadata:
     graceful-fs: "npm:^4.2.6"
     http-proxy-middleware: "npm:^2.0.9"
     ipaddr.js: "npm:^2.1.0"
-    launch-editor: "npm:^2.6.1"
+    launch-editor: "npm:^2.14.1"
     open: "npm:^10.0.3"
     p-retry: "npm:^6.2.0"
     schema-utils: "npm:^4.2.0"
@@ -21706,7 +21706,7 @@ __metadata:
       optional: true
   bin:
     webpack-dev-server: bin/webpack-dev-server.js
-  checksum: 10/2bd8e03615c32ecac53e783e2be5670ccac051d051ef4ed7fe944df8fd8745b508c8ebc63bfecfdccd23c2200ca4c373b22ea2da76ce4e1c0a6f58d900c11ecb
+  checksum: 10/19c107cff555dbe2bda044f6faa45cd1f4d6779c6961b05a475b856709aa4d35cafb1c9a7ec2cb6463a7ca28a308d6e6bbc66b38ce8e1afeec5cd70e326a12ce
   languageName: node
   linkType: hard
 

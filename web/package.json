@@ -9,6 +9,6 @@
     "playwright": "1.60.0",
     "serve-handler": "6.1.7",
     "webpack": "5.108.3",
-    "webpack-dev-server": "5.2.5"
+    "webpack-dev-server": "5.2.6"
   }
 }
