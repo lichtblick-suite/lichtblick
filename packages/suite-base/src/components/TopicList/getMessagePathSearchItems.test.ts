@@ -204,10 +204,7 @@ describe("getMessagePathSearchItems", () => {
     ]);
 
     expect(
-      getMessagePathSearchItems(
-        [{ name: "foo", schemaName: "Foo" }],
-        schemasByName,
-      ).items,
+      getMessagePathSearchItems([{ name: "foo", schemaName: "Foo" }], schemasByName).items,
     ).toEqual([
       {
         topic: { name: "foo", schemaName: "Foo" },
@@ -230,10 +227,7 @@ describe("getMessagePathSearchItems", () => {
     ]);
 
     expect(
-      getMessagePathSearchItems(
-        [{ name: "bar", schemaName: "Bar" }],
-        schemasByName,
-      ).items,
+      getMessagePathSearchItems([{ name: "bar", schemaName: "Bar" }], schemasByName).items,
     ).toEqual([
       {
         topic: { name: "bar", schemaName: "Bar" },
@@ -268,10 +262,8 @@ describe("getMessagePathSearchItems", () => {
     ]);
 
     expect(
-      getMessagePathSearchItems(
-        [{ name: "foo with spaces", schemaName: "Foo" }],
-        schemasByName,
-      ).items,
+      getMessagePathSearchItems([{ name: "foo with spaces", schemaName: "Foo" }], schemasByName)
+        .items,
     ).toEqual([
       {
         topic: { name: "foo with spaces", schemaName: "Foo" },
