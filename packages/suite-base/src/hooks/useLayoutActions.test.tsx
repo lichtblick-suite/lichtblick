@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
@@ -17,27 +18,27 @@ import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/Moc
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
-  useLayoutManager: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/LayoutManagerContext", async () => ({
+  useLayoutManager: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/AnalyticsContext", () => ({
-  useAnalytics: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/AnalyticsContext", async () => ({
+  useAnalytics: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
-  useCurrentLayoutActions: jest.fn(),
-  useCurrentLayoutSelector: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => ({
+  useCurrentLayoutActions: vi.fn(),
+  useCurrentLayoutSelector: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useLayoutNavigation", () => ({
-  useLayoutNavigation: jest.fn().mockReturnValue({
-    onSelectLayout: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks/useLayoutNavigation", async () => ({
+  useLayoutNavigation: vi.fn().mockReturnValue({
+    onSelectLayout: vi.fn(),
   }),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useConfirm", () => ({
-  useConfirm: jest.fn().mockReturnValue([jest.fn().mockResolvedValue("ok"), undefined]),
+vi.mock("@lichtblick/suite-base/hooks/useConfirm", async () => ({
+  useConfirm: vi.fn().mockReturnValue([vi.fn().mockResolvedValue("ok"), undefined]),
 }));
 
 function setup(options: Partial<LayoutSetupOptions> = {}) {
@@ -50,7 +51,7 @@ function setup(options: Partial<LayoutSetupOptions> = {}) {
       multiAction: undefined,
       selectedIds: [] as string[],
     },
-    dispatch = jest.fn(),
+    dispatch = vi.fn(),
   } = options;
 
   const { result } = renderHook(() => useLayoutActions({ state, dispatch }));
@@ -59,35 +60,35 @@ function setup(options: Partial<LayoutSetupOptions> = {}) {
 
 describe("useLayoutActions", () => {
   let analyticsMock: any;
-  let setSelectedLayoutIdMock: jest.Mock;
-  let onSelectLayoutMock: jest.Mock;
-  let confirmMock: jest.Mock;
+  let setSelectedLayoutIdMock: Mock;
+  let onSelectLayoutMock: Mock;
+  let confirmMock: Mock;
   const mockLayoutManager = new MockLayoutManager();
 
   beforeEach(() => {
-    mockLayoutManager.updateLayout = jest.fn().mockResolvedValue(undefined);
-    mockLayoutManager.deleteLayout = jest.fn().mockResolvedValue(undefined);
-    mockLayoutManager.overwriteLayout = jest.fn().mockResolvedValue(undefined);
-    mockLayoutManager.revertLayout = jest.fn().mockResolvedValue(undefined);
-    mockLayoutManager.getLayouts = jest.fn().mockResolvedValue([]);
-    analyticsMock = { logEvent: jest.fn() };
-    setSelectedLayoutIdMock = jest.fn();
-    onSelectLayoutMock = jest.fn();
-    confirmMock = jest.fn().mockResolvedValue("ok");
+    mockLayoutManager.updateLayout = vi.fn().mockResolvedValue(undefined);
+    mockLayoutManager.deleteLayout = vi.fn().mockResolvedValue(undefined);
+    mockLayoutManager.overwriteLayout = vi.fn().mockResolvedValue(undefined);
+    mockLayoutManager.revertLayout = vi.fn().mockResolvedValue(undefined);
+    mockLayoutManager.getLayouts = vi.fn().mockResolvedValue([]);
+    analyticsMock = { logEvent: vi.fn() };
+    setSelectedLayoutIdMock = vi.fn();
+    onSelectLayoutMock = vi.fn();
+    confirmMock = vi.fn().mockResolvedValue("ok");
 
-    (useLayoutManager as jest.Mock).mockReturnValue(mockLayoutManager);
-    (useAnalytics as jest.Mock).mockReturnValue(analyticsMock);
-    (useCurrentLayoutActions as jest.Mock).mockReturnValue({
+    (useLayoutManager as Mock).mockReturnValue(mockLayoutManager);
+    (useAnalytics as Mock).mockReturnValue(analyticsMock);
+    (useCurrentLayoutActions as Mock).mockReturnValue({
       setSelectedLayoutId: setSelectedLayoutIdMock,
     });
-    (useLayoutNavigation as jest.Mock).mockReturnValue({
+    (useLayoutNavigation as Mock).mockReturnValue({
       onSelectLayout: onSelectLayoutMock,
     });
-    (useConfirm as jest.Mock).mockReturnValue([confirmMock, undefined]);
+    (useConfirm as Mock).mockReturnValue([confirmMock, undefined]);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("onRenameLayout", () => {
@@ -114,7 +115,7 @@ describe("useLayoutActions", () => {
   describe("onDuplicateLayout", () => {
     it("saves new layout, selects it, and logs event", async () => {
       const newLayout = LayoutBuilder.layout();
-      mockLayoutManager.saveNewLayout = jest.fn().mockResolvedValue(newLayout);
+      mockLayoutManager.saveNewLayout = vi.fn().mockResolvedValue(newLayout);
 
       const { result } = setup();
       const mockLayout = LayoutBuilder.layout({ permission: "CREATOR_WRITE" });

@@ -30,11 +30,11 @@ function createTestParams(overrides: Partial<WebpackConfigParams> = {}): Webpack
   };
 }
 
-jest.mock("webpack", () => {
-  const original = jest.requireActual("webpack");
+vi.mock("webpack", async () => {
+  const original = await vi.importActual("webpack");
   return {
     ...original,
-    DefinePlugin: jest.fn().mockImplementation((defs) => ({
+    DefinePlugin: vi.fn().mockImplementation((defs) => ({
       pluginName: "DefinePlugin",
       definitions: defs,
     })),
@@ -42,18 +42,18 @@ jest.mock("webpack", () => {
 });
 
 // --- mock other heavy plugins ---
-jest.mock("esbuild-loader", () => ({
-  EsbuildPlugin: jest.fn().mockImplementation((opts) => ({
+vi.mock("esbuild-loader", async () => ({
+  EsbuildPlugin: vi.fn().mockImplementation((opts) => ({
     pluginName: "EsbuildPlugin",
     options: opts,
   })),
 }));
 
-jest.mock("fork-ts-checker-webpack-plugin", () =>
-  jest.fn().mockImplementation(() => ({
+vi.mock("fork-ts-checker-webpack-plugin", async () => ({
+  default: vi.fn().mockImplementation(() => ({
     pluginName: "ForkTsCheckerWebpackPlugin",
   })),
-);
+}));
 
 describe("createCommonWebpackConfig", () => {
   it("should configure development mode with source maps", () => {

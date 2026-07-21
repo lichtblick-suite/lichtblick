@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -8,7 +8,7 @@ import userEvent from "@testing-library/user-event";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import Sidebars from "@lichtblick/suite-base/components/Sidebars";
 import { SidebarItem, SidebarProps } from "@lichtblick/suite-base/components/Sidebars/types";
@@ -20,18 +20,18 @@ describe("Sidebars", () => {
       items: new Map(),
       bottomItems: new Map(),
       selectedKey: undefined,
-      onSelectKey: jest.fn(),
+      onSelectKey: vi.fn(),
       children: <div>Content</div>,
       leftItems: new Map(),
       selectedLeftKey: undefined,
-      onSelectLeftKey: jest.fn(),
+      onSelectLeftKey: vi.fn(),
       leftSidebarSize: 25,
-      setLeftSidebarSize: jest.fn(),
+      setLeftSidebarSize: vi.fn(),
       rightItems: new Map(),
       selectedRightKey: undefined,
-      onSelectRightKey: jest.fn(),
+      onSelectRightKey: vi.fn(),
       rightSidebarSize: 25,
-      setRightSidebarSize: jest.fn(),
+      setRightSidebarSize: vi.fn(),
       ...overrides,
     };
 

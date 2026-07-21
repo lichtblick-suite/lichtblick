@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -8,6 +8,7 @@
 
 import { setupJestCanvasMock } from "jest-canvas-mock";
 import * as THREE from "three";
+import type { Mock } from "vitest";
 
 import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { fromNanoSec, toNanoSec } from "@lichtblick/rostime";
@@ -25,48 +26,48 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { RendererConfig } from "./IRenderer";
 
-jest.mock("./Picker", () => {
-  const actual = jest.requireActual("./Picker");
+vi.mock("./Picker", async () => {
+  const actual = await vi.importActual("./Picker");
   return {
     ...actual,
-    Picker: jest.fn().mockImplementation(() => {
+    Picker: vi.fn().mockImplementation(() => {
       return {
-        pick: jest.fn(() => -1),
-        pickInstance: jest.fn(() => -1),
-        dispose: jest.fn(),
+        pick: vi.fn(() => -1),
+        pickInstance: vi.fn(() => -1),
+        dispose: vi.fn(),
       };
     }),
   };
 });
 
 // Jest doesn't support ES module imports fully yet, so we need to mock the wasm file
-jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");
+vi.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => ({ default: "" }));
 
 // We need to mock the WebGLRenderer because it's not available in jsdom
 // only mocking what we currently use
-jest.mock("three", () => {
-  const actualThree = jest.requireActual("three");
+vi.mock("three", async () => {
+  const ActualTHREE = await vi.importActual("three");
   return {
-    ...actualThree,
+    ...ActualTHREE,
     WebGLRenderer: function WebGLRenderer() {
       return {
         capabilities: {
           isWebGL2: true,
         },
 
-        setPixelRatio: jest.fn(),
-        getPixelRatio: jest.fn(() => 1),
-        setSize: jest.fn(),
-        render: jest.fn(),
-        clear: jest.fn(),
-        setClearColor: jest.fn(),
-        readRenderTargetPixels: jest.fn(),
+        setPixelRatio: vi.fn(),
+        getPixelRatio: vi.fn(() => 1),
+        setSize: vi.fn(),
+        render: vi.fn(),
+        clear: vi.fn(),
+        setClearColor: vi.fn(),
+        readRenderTargetPixels: vi.fn(),
         info: {
-          reset: jest.fn(),
+          reset: vi.fn(),
         },
         shadowMap: {},
-        dispose: jest.fn(),
-        clearDepth: jest.fn(),
+        dispose: vi.fn(),
+        clearDepth: vi.fn(),
         getDrawingBufferSize: () => ({ width: 100, height: 100 }),
       };
     },
@@ -78,15 +79,15 @@ beforeEach(() => {
   // mock matchMedia for `Renderer` class in ThreeDeeRender
   Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: jest.fn().mockImplementation((query) => ({
+    value: vi.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
       onchange: ReactNull,
-      addListener: jest.fn(), // deprecated
-      removeListener: jest.fn(), // deprecated
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
+      addListener: vi.fn(), // deprecated
+      removeListener: vi.fn(), // deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
     })),
   });
 });
@@ -154,14 +155,14 @@ describe("3D Renderer", () => {
   let canvas = document.createElement("canvas");
   let parent = document.createElement("div");
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
     parent.appendChild(canvas);
   });
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("constructs a renderer without error", () => {
@@ -186,8 +187,8 @@ describe("3D Renderer", () => {
   it("disposes all resources correctly", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
-    const disposeSpy = jest.spyOn(renderer.gl, "dispose");
-    const inputDisposeSpy = jest.spyOn(renderer.input, "dispose");
+    const disposeSpy = vi.spyOn(renderer.gl, "dispose");
+    const inputDisposeSpy = vi.spyOn(renderer.input, "dispose");
 
     // When: Disposing the renderer
     renderer.dispose();
@@ -283,18 +284,18 @@ describe("3D Renderer", () => {
 
   describe("hover picking", () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     function prepareDomForInput(inputCanvas: HTMLCanvasElement, inputParent: HTMLDivElement) {
       // Input relies on clientWidth/clientHeight of the canvas parent.
       Object.defineProperty(inputParent, "clientWidth", { configurable: true, value: 300 });
       Object.defineProperty(inputParent, "clientHeight", { configurable: true, value: 300 });
-      inputCanvas.getBoundingClientRect = jest.fn(() => ({
+      inputCanvas.getBoundingClientRect = vi.fn(() => ({
         left: 0,
         top: 0,
         right: 300,
@@ -320,7 +321,7 @@ describe("3D Renderer", () => {
     it("emits renderableHovered at most once per HOVER_PICK_THROTTLE_MS while moving the mouse", () => {
       const { renderer, hoverCanvas } = createHoverRenderer();
 
-      const hoveredSpy = jest.fn();
+      const hoveredSpy = vi.fn();
       renderer.addListener("renderableHovered", hoveredSpy);
 
       hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 10, clientY: 10 }));
@@ -329,7 +330,7 @@ describe("3D Renderer", () => {
 
       expect(hoveredSpy).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(HOVER_PICK_THROTTLE_MS);
+      vi.advanceTimersByTime(HOVER_PICK_THROTTLE_MS);
       hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 13, clientY: 13 }));
       expect(hoveredSpy).toHaveBeenCalledTimes(2);
 
@@ -339,7 +340,7 @@ describe("3D Renderer", () => {
     it("does not hover-pick while mouse is down, then resumes after mouseup", () => {
       const { renderer, hoverCanvas } = createHoverRenderer();
 
-      const hoveredSpy = jest.fn();
+      const hoveredSpy = vi.fn();
       renderer.addListener("renderableHovered", hoveredSpy);
 
       hoverCanvas.dispatchEvent(new MouseEvent("mousedown", { clientX: 10, clientY: 10 }));
@@ -362,11 +363,11 @@ describe("3D Renderer", () => {
       const renderer = new Renderer({ ...defaultRendererProps, canvas: hoverCanvas });
       renderer.setPickingEnabled(false);
 
-      const hoveredSpy = jest.fn();
+      const hoveredSpy = vi.fn();
       renderer.addListener("renderableHovered", hoveredSpy);
 
       hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 10, clientY: 10 }));
-      jest.advanceTimersByTime(HOVER_PICK_THROTTLE_MS * 2);
+      vi.advanceTimersByTime(HOVER_PICK_THROTTLE_MS * 2);
       hoverCanvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 11, clientY: 11 }));
 
       expect(hoveredSpy).toHaveBeenCalledTimes(0);
@@ -378,7 +379,7 @@ describe("3D Renderer", () => {
   it("updates color scheme to dark", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
-    const setClearColorSpy = jest.spyOn(renderer.gl, "setClearColor");
+    const setClearColorSpy = vi.spyOn(renderer.gl, "setClearColor");
 
     // When: Setting dark color scheme
     renderer.setColorScheme("dark", undefined);
@@ -393,7 +394,7 @@ describe("3D Renderer", () => {
   it("updates color scheme to light", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
-    const setClearColorSpy = jest.spyOn(renderer.gl, "setClearColor");
+    const setClearColorSpy = vi.spyOn(renderer.gl, "setClearColor");
 
     // When: Setting light color scheme
     renderer.setColorScheme("light", undefined);
@@ -409,7 +410,7 @@ describe("3D Renderer", () => {
     // Given: A renderer instance and mock analytics
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
     const mockAnalytics = {
-      logEvent: jest.fn(),
+      logEvent: vi.fn(),
     } as unknown as IAnalytics;
 
     // When: Setting analytics
@@ -427,11 +428,11 @@ describe("3D Renderer", () => {
     const customModels: CameraModelsMap = new Map();
     customModels.set(BasicBuilder.string(), {
       extensionId: BasicBuilder.string(),
-      modelBuilder: jest.fn(),
+      modelBuilder: vi.fn(),
     });
     customModels.set(BasicBuilder.string(), {
       extensionId: BasicBuilder.string(),
-      modelBuilder: jest.fn(),
+      modelBuilder: vi.fn(),
     });
     // When: Setting custom camera models
     renderer.setCustomCameraModels(customModels);
@@ -446,7 +447,7 @@ describe("3D Renderer", () => {
   it("updates topics list and emits event", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
-    const emitSpy = jest.spyOn(renderer, "emit");
+    const emitSpy = vi.spyOn(renderer, "emit");
     const topics = [
       { name: "/test", schemaName: "test_schema" },
       { name: "/other", schemaName: "other_schema" },
@@ -499,7 +500,7 @@ describe("3D Renderer", () => {
   it("sets and clears selected renderable", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
-    const emitSpy = jest.spyOn(renderer, "emit");
+    const emitSpy = vi.spyOn(renderer, "emit");
 
     // When: Calling setSelectedRenderable with undefined (no change as it starts undefined)
     renderer.setSelectedRenderable(undefined);
@@ -517,9 +518,9 @@ describe("3D Renderer", () => {
       id: "test-id",
       name: "test-name",
       layers: {
-        set: jest.fn(),
+        set: vi.fn(),
       },
-      traverse: jest.fn((callback) => {
+      traverse: vi.fn((callback) => {
         // Simulate traversing children
         callback(mockRenderable);
       }),
@@ -528,8 +529,8 @@ describe("3D Renderer", () => {
       renderable: mockRenderable as any,
       instanceIndex: 0,
     };
-    const emitSpy = jest.spyOn(renderer, "emit");
-    const animationFrameSpy = jest.spyOn(renderer, "animationFrame");
+    const emitSpy = vi.spyOn(renderer, "emit");
+    const animationFrameSpy = vi.spyOn(renderer, "animationFrame");
 
     // When: Selecting a renderable
     renderer.setSelectedRenderable(selection);
@@ -548,14 +549,14 @@ describe("3D Renderer", () => {
     const firstRenderable = {
       id: "first-id",
       name: "first-name",
-      layers: { set: jest.fn() },
-      traverse: jest.fn(),
+      layers: { set: vi.fn() },
+      traverse: vi.fn(),
     };
     const secondRenderable = {
       id: "second-id",
       name: "second-name",
-      layers: { set: jest.fn() },
-      traverse: jest.fn(),
+      layers: { set: vi.fn() },
+      traverse: vi.fn(),
     };
     const firstSelection = { renderable: firstRenderable, instanceIndex: 0 };
     const secondSelection = { renderable: secondRenderable, instanceIndex: 1 };
@@ -582,14 +583,14 @@ describe("3D Renderer", () => {
     const mockRenderable = {
       id: "test-id",
       name: "test-name",
-      layers: { set: jest.fn() },
-      traverse: jest.fn(),
+      layers: { set: vi.fn() },
+      traverse: vi.fn(),
     };
     const selection = { renderable: mockRenderable, instanceIndex: 0 };
     // @ts-expect-error - Partial mock for testing
     renderer.setSelectedRenderable(selection);
     mockRenderable.layers.set.mockClear();
-    const emitSpy = jest.spyOn(renderer, "emit");
+    const emitSpy = vi.spyOn(renderer, "emit");
 
     // When: Clearing selection
     renderer.setSelectedRenderable(undefined);
@@ -611,11 +612,11 @@ describe("3D Renderer", () => {
     const mockRenderable = {
       id: "test-id",
       name: "test-name",
-      layers: { set: jest.fn() },
-      traverse: jest.fn(),
+      layers: { set: vi.fn() },
+      traverse: vi.fn(),
     };
     const selection = { renderable: mockRenderable, instanceIndex: 0 };
-    const animationFrameSpy = jest.spyOn(renderer, "animationFrame");
+    const animationFrameSpy = vi.spyOn(renderer, "animationFrame");
 
     // When: Selecting a renderable
     // @ts-expect-error - Partial mock for testing
@@ -927,7 +928,7 @@ describe("3D Renderer", () => {
           scene: { hemisphereLightIntensity: 3.5 },
         },
       });
-      const renderSpy = jest.spyOn(renderer.gl, "render");
+      const renderSpy = vi.spyOn(renderer.gl, "render");
 
       // When: Rendering a frame (updateSceneRenderSettings runs during construction and applies
       // the configured intensity; rendering lets us capture the private scene via the gl mock)
@@ -948,7 +949,7 @@ describe("3D Renderer", () => {
     it("applies the default hemisphere light intensity when not configured", () => {
       // Given: A renderer without a custom hemisphere light intensity
       const renderer = new Renderer({ ...defaultRendererProps, canvas });
-      const renderSpy = jest.spyOn(renderer.gl, "render");
+      const renderSpy = vi.spyOn(renderer.gl, "render");
 
       // When: Rendering a frame
       renderer.animationFrame();
@@ -970,7 +971,7 @@ describe("3D Renderer", () => {
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
     const topics = [{ name: "/test", schemaName: "test_schema" }];
     renderer.setTopics(topics);
-    const emitSpy = jest.spyOn(renderer, "emit");
+    const emitSpy = vi.spyOn(renderer, "emit");
 
     // When: Setting the same topics reference
     renderer.setTopics(topics);
@@ -1187,7 +1188,7 @@ describe("3D Renderer", () => {
   it("adds coordinate frame and emits transformTreeUpdated", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
-    const emitSpy = jest.spyOn(renderer, "emit");
+    const emitSpy = vi.spyOn(renderer, "emit");
 
     // When: Adding a new coordinate frame
     renderer.addCoordinateFrame("test_frame");
@@ -1203,7 +1204,7 @@ describe("3D Renderer", () => {
     // Given: A renderer with an existing frame
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
     renderer.addCoordinateFrame("existing_frame");
-    const emitSpy = jest.spyOn(renderer, "emit");
+    const emitSpy = vi.spyOn(renderer, "emit");
 
     // When: Trying to add the same frame again
     renderer.addCoordinateFrame("existing_frame");
@@ -1218,7 +1219,7 @@ describe("3D Renderer", () => {
     // Given: A renderer with a transform
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
     renderer.addTransform("parent", "child", 1n, { x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0, w: 1 });
-    const emitSpy = jest.spyOn(renderer, "emit");
+    const emitSpy = vi.spyOn(renderer, "emit");
 
     // When: Removing the transform
     renderer.removeTransform("child", "parent", 1n);
@@ -1374,7 +1375,7 @@ describe("3D Renderer", () => {
         rootSchemaName: undefined,
       },
     ];
-    const updateConfigSpy = jest.spyOn(renderer, "updateConfig");
+    const updateConfigSpy = vi.spyOn(renderer, "updateConfig");
 
     // When: Handling drop
     renderer.handleDrop(paths);
@@ -1819,7 +1820,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     canvas,
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
@@ -1827,7 +1828,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     rendererArgs = { ...rendererArgs, canvas };
   });
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("constructs a renderer without error", () => {
@@ -1840,7 +1841,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     for (let i = 0; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(10 + i), [BigInt(i)]));
     }
-    const addMessageEventMock = jest.spyOn(renderer, "addMessageEvent");
+    const addMessageEventMock = vi.spyOn(renderer, "addMessageEvent");
     const currentTime = 5n;
     renderer.setCurrentTime(currentTime);
     renderer.handleAllFramesMessages(msgs);
@@ -1854,7 +1855,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
     const currentTime = 4n;
-    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+    const addMessageEventBatchMock = vi.spyOn(renderer, "addMessageEventBatch");
 
     // When: Processing messages up to currentTime
     renderer.setCurrentTime(currentTime);
@@ -1872,7 +1873,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     for (let i = 0; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+    const addMessageEventBatchMock = vi.spyOn(renderer, "addMessageEventBatch");
 
     // When: Processing messages up to time 4
     renderer.setCurrentTime(4n);
@@ -1899,7 +1900,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
     const currentTime = 11n;
-    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+    const addMessageEventBatchMock = vi.spyOn(renderer, "addMessageEventBatch");
 
     // When: Setting current time and handling messages
     renderer.setCurrentTime(currentTime);
@@ -1918,7 +1919,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
     const currentTime = 11n;
-    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+    const addMessageEventBatchMock = vi.spyOn(renderer, "addMessageEventBatch");
 
     // When: Processing first batch
     renderer.setCurrentTime(currentTime);
@@ -1944,7 +1945,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     for (let i = 0; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+    const addMessageEventBatchMock = vi.spyOn(renderer, "addMessageEventBatch");
 
     // When: Processing all messages
     renderer.setCurrentTime(11n);
@@ -1967,7 +1968,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     for (let i = 0; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+    const addMessageEventBatchMock = vi.spyOn(renderer, "addMessageEventBatch");
 
     // When: Processing messages initially
     renderer.setCurrentTime(11n);
@@ -1991,7 +1992,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     for (let i = 2; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+    const addMessageEventBatchMock = vi.spyOn(renderer, "addMessageEventBatch");
 
     // When: Processing initial messages
     renderer.setCurrentTime(5n);
@@ -2021,7 +2022,7 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     for (let i = 2; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+    const addMessageEventBatchMock = vi.spyOn(renderer, "addMessageEventBatch");
 
     // When: Processing initial messages
     renderer.setCurrentTime(5n);
@@ -2042,14 +2043,14 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     const reprocessedBatch = addMessageEventBatchMock.mock.calls[0]?.[0];
     expect(reprocessedBatch).toHaveLength(numMessagesBeforeTime - 1);
   });
-  it.failing("(does not) reset the cursor if number of messages added **and** removed before cursor are equal in a single update", () => {
+  it.fails("(does not) reset the cursor if number of messages added **and** removed before cursor are equal in a single update", () => {
     // Given: A renderer with messages starting at index 2
     const renderer = new Renderer(rendererArgs);
     const msgs = [];
     for (let i = 2; i < 10; i++) {
       msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
     }
-    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+    const addMessageEventBatchMock = vi.spyOn(renderer, "addMessageEventBatch");
 
     // When: Processing initial messages
     renderer.setCurrentTime(5n);
@@ -2077,7 +2078,7 @@ describe("Renderer backward seek behavior", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
@@ -2086,7 +2087,7 @@ describe("Renderer backward seek behavior", () => {
   });
 
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("uses binary search when seeking backward with preload enabled", () => {
@@ -2153,7 +2154,7 @@ describe("Renderer batch message processing", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
@@ -2162,7 +2163,7 @@ describe("Renderer batch message processing", () => {
   });
 
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("processes messages in batch grouped by topic and schema", () => {
@@ -2226,7 +2227,7 @@ describe("Renderer binary search optimization", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
@@ -2235,7 +2236,7 @@ describe("Renderer binary search optimization", () => {
   });
 
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("finds correct cutoff index when seeking backward", () => {
@@ -2327,7 +2328,7 @@ describe("Renderer maxPreloadMessages configuration", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
@@ -2336,7 +2337,7 @@ describe("Renderer maxPreloadMessages configuration", () => {
   });
 
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("uses default MAX_TRANSFORM_MESSAGES when not configured", () => {
@@ -2384,7 +2385,7 @@ describe("Renderer resetAllFramesCursor event handling", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     parent = document.createElement("div");
     canvas = document.createElement("canvas");
@@ -2393,7 +2394,7 @@ describe("Renderer resetAllFramesCursor event handling", () => {
   });
 
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("emits resetAllFramesCursor when seeking backward without allFrames", () => {
@@ -2405,7 +2406,7 @@ describe("Renderer resetAllFramesCursor event handling", () => {
         scene: { transforms: { enablePreloading: true } },
       },
     });
-    const resetListener = jest.fn();
+    const resetListener = vi.fn();
     renderer.addListener("resetAllFramesCursor", resetListener);
 
     // When: Seeking backward without providing allFrames
@@ -2426,7 +2427,7 @@ describe("Renderer resetAllFramesCursor event handling", () => {
         scene: { transforms: { enablePreloading: true } },
       },
     });
-    const resetListener = jest.fn();
+    const resetListener = vi.fn();
     renderer.addListener("resetAllFramesCursor", resetListener);
 
     const allFrames = [
@@ -2452,7 +2453,7 @@ describe("Renderer resetAllFramesCursor event handling", () => {
         scene: { transforms: { enablePreloading: true } },
       },
     });
-    const resetListener = jest.fn();
+    const resetListener = vi.fn();
     renderer.addListener("resetAllFramesCursor", resetListener);
 
     const allFrames = [

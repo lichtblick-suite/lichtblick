@@ -1,9 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import type { Mock } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useTranslation } from "react-i18next";
 
@@ -14,27 +15,27 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import Start from "./Start";
 
-jest.mock("react-i18next", () => ({
-  useTranslation: jest.fn(),
+vi.mock("react-i18next", async () => ({
+  useTranslation: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/AnalyticsContext", () => ({
-  useAnalytics: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/AnalyticsContext", async () => ({
+  useAnalytics: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/PlayerSelectionContext", () => ({
-  usePlayerSelection: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/PlayerSelectionContext", async () => ({
+  usePlayerSelection: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", () => ({
-  useWorkspaceActions: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", async () => ({
+  useWorkspaceActions: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks", () => ({
-  useAppConfigurationValue: jest.fn().mockImplementation(() => [true, jest.fn()]),
+vi.mock("@lichtblick/suite-base/hooks", async () => ({
+  useAppConfigurationValue: vi.fn().mockImplementation(() => [true, vi.fn()]),
 }));
 
-jest.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", () => ({
+vi.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", async () => ({
   useStyles: () => ({
     classes: {
       grid: "grid",
@@ -50,9 +51,9 @@ jest.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", () =
 }));
 
 describe("Start Component", () => {
-  const mockLogEvent = jest.fn();
-  const mockSelectRecent = jest.fn();
-  const mockOpenDialog = jest.fn();
+  const mockLogEvent = vi.fn();
+  const mockSelectRecent = vi.fn();
+  const mockOpenDialog = vi.fn();
 
   const mockRecentSources = BasicBuilder.multiple(() => ({
     id: BasicBuilder.string(),
@@ -60,20 +61,20 @@ describe("Start Component", () => {
   }));
 
   beforeEach(() => {
-    (useTranslation as jest.Mock).mockReturnValue({
+    (useTranslation as Mock).mockReturnValue({
       t: (key: string) => key,
     });
 
-    (useAnalytics as jest.Mock).mockReturnValue({
+    (useAnalytics as Mock).mockReturnValue({
       logEvent: mockLogEvent,
     });
 
-    (usePlayerSelection as jest.Mock).mockReturnValue({
+    (usePlayerSelection as Mock).mockReturnValue({
       recentSources: mockRecentSources,
       selectRecent: mockSelectRecent,
     });
 
-    (useWorkspaceActions as jest.Mock).mockReturnValue({
+    (useWorkspaceActions as Mock).mockReturnValue({
       dialogActions: {
         dataSource: {
           open: mockOpenDialog,
@@ -83,7 +84,7 @@ describe("Start Component", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the Start component correctly", () => {
@@ -139,7 +140,7 @@ describe("Start Component", () => {
 
   it("does not render recent sources section if there are no recent sources", () => {
     // GIVEN
-    (usePlayerSelection as jest.Mock).mockReturnValue({
+    (usePlayerSelection as Mock).mockReturnValue({
       recentSources: [],
       selectRecent: mockSelectRecent,
     });

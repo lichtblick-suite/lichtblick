@@ -8,8 +8,8 @@
 // We assign rather than spy to expose the mock for the user
 const origError = console.error;
 const origWarn = console.warn;
-const consoleErrorMock = (console.error = jest.fn());
-const consoleWarnMock = (console.warn = jest.fn());
+const consoleErrorMock = (console.error = vi.fn());
+const consoleWarnMock = (console.warn = vi.fn());
 
 beforeEach(() => {
   consoleErrorMock.mockClear();

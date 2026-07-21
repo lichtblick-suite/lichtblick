@@ -1,6 +1,7 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+import type { MockInstance } from "vitest";
 import { renderHook } from "@testing-library/react";
 import Hammer from "hammerjs";
 import { act } from "react";
@@ -11,13 +12,13 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import usePanning from "./usePanning";
 
 const mockHammerManager = {
-  add: jest.fn(),
-  on: jest.fn(),
-  destroy: jest.fn(),
+  add: vi.fn(),
+  on: vi.fn(),
+  destroy: vi.fn(),
 };
 
-jest.mock("hammerjs");
-Hammer.Manager = jest.fn().mockImplementation(() => mockHammerManager);
+vi.mock("hammerjs");
+Hammer.Manager = vi.fn().mockImplementation(() => mockHammerManager);
 
 type UsePanningProps = {
   canvasDiv?: HTMLDivElement | ReactNull;
@@ -52,12 +53,12 @@ describe("usePanning", () => {
     }
 
     let coordinator: PlotCoordinator | undefined = undefined;
-    let addInteractionEventSpy: jest.SpyInstance | undefined = undefined;
+    let addInteractionEventSpy: MockInstance | undefined = undefined;
     if (!Object.hasOwn(override, "coodinator")) {
       coordinator = {
-        addInteractionEvent: jest.fn(),
+        addInteractionEvent: vi.fn(),
       } as unknown as PlotCoordinator;
-      addInteractionEventSpy = jest.spyOn(coordinator, "addInteractionEvent");
+      addInteractionEventSpy = vi.spyOn(coordinator, "addInteractionEvent");
     }
 
     const draggingRef: React.MutableRefObject<boolean> = { current: false };
@@ -66,7 +67,7 @@ describe("usePanning", () => {
       deltaX: BasicBuilder.number(),
       deltaY: BasicBuilder.number(),
       target: {
-        getBoundingClientRect: jest.fn().mockReturnValue({
+        getBoundingClientRect: vi.fn().mockReturnValue({
           toJSON: () => ({ x: 0, y: 0, width: `${canvasWidth}px`, height: `${canvasHeight}px` }),
         }),
       },
@@ -85,7 +86,7 @@ describe("usePanning", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should initialize Hammer Manager and set up event listeners", () => {
@@ -159,7 +160,7 @@ describe("usePanning", () => {
       },
     });
 
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     expect(draggingRef.current).toBe(false);
   });
 

@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -15,28 +15,26 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import usePlotDataHandling from "./usePlotDataHandling";
 import { IndexDatasetsBuilder } from "../builders/IndexDatasetsBuilder";
 
-jest.mock("@lichtblick/message-path", () => ({
-  parseMessagePath: jest.fn(),
+vi.mock("@lichtblick/message-path", async () => ({
+  parseMessagePath: vi.fn(),
 }));
 
-jest.mock(
-  "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems",
-  () => ({
-    fillInGlobalVariablesInPath: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems", async () => ({
+    fillInGlobalVariablesInPath: vi.fn(),
   }),
 );
 
-jest.mock("@lichtblick/suite-base/util/plotColors", () => ({
-  getLineColor: jest.fn(
+vi.mock("@lichtblick/suite-base/util/plotColors", async () => ({
+  getLineColor: vi.fn(
     (color: string | undefined, idx: number) => color ?? `default-color-${idx}`,
   ),
 }));
 
-global.Worker = jest.fn().mockImplementation(() => ({
-  addEventListener: jest.fn(),
+global.Worker = vi.fn().mockImplementation(() => ({
+  addEventListener: vi.fn(),
   onmessage: undefined,
-  postMessage: jest.fn(),
-  terminate: jest.fn(),
+  postMessage: vi.fn(),
+  terminate: vi.fn(),
 }));
 
 describe("usePlotDataHandling hook", () => {
@@ -105,7 +103,7 @@ describe("usePlotDataHandling hook", () => {
   });
 
   it("should throw error when xAxisPath is unsupported", () => {
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const config = PlotBuilder.config({
       xAxisVal: "unsupportedMode" as any,
       xAxisPath: undefined,

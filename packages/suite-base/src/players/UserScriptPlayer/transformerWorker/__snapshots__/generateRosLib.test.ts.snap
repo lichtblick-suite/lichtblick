@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`typegen generateRosLib basic snapshot 1`] = `
+exports[`typegen > generateRosLib > basic snapshot 1`] = `
 "
     export declare interface json {
 }
@@ -51,7 +51,7 @@ exports[`typegen generateRosLib basic snapshot 1`] = `
   "
 `;
 
-exports[`typegen generateRosLib more complex snapshot 1`] = `
+exports[`typegen > generateRosLib > more complex snapshot 1`] = `
 "
     export declare interface json {
 }
@@ -303,7 +303,7 @@ exports[`typegen generateRosLib more complex snapshot 1`] = `
   "
 `;
 
-exports[`typegen generateRosLib works with zero topics or datatypes 1`] = `
+exports[`typegen > generateRosLib > works with zero topics or datatypes 1`] = `
 "
     export declare interface json {
 }

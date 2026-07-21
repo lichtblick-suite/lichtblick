@@ -21,7 +21,7 @@ import { formatTime } from "@lichtblick/suite-base/util/formatTime";
 
 describe("formatMessages", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should format a log message correctly", () => {

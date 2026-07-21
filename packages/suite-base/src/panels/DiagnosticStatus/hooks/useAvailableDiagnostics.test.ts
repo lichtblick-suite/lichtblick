@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
@@ -17,7 +18,7 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useAvailableDiagnostics, { addMessages } from "./useAvailableDiagnostics";
 
-jest.mock("@lichtblick/suite-base/PanelAPI");
+vi.mock("@lichtblick/suite-base/PanelAPI");
 
 describe("addMessages", () => {
   it("should add a new hardware ID and diagnostic name", () => {
@@ -86,7 +87,7 @@ describe("addMessages", () => {
 });
 
 describe("useAvailableDiagnostics", () => {
-  const useMessageReducerMock = PanelAPI.useMessageReducer as jest.Mock;
+  const useMessageReducerMock = PanelAPI.useMessageReducer as Mock;
 
   beforeEach(() => {
     useMessageReducerMock.mockReset();

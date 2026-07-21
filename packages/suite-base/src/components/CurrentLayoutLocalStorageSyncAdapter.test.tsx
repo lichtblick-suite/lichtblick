@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { act, render } from "@testing-library/react";
 
 import {
@@ -21,37 +22,37 @@ import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentL
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => {
-  const originalModule = jest.requireActual("@lichtblick/suite-base/context/CurrentLayoutContext");
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => {
+  const originalModule = await vi.importActual("@lichtblick/suite-base/context/CurrentLayoutContext");
   return {
     __esModule: true,
     ...originalModule,
-    useCurrentLayoutActions: jest.fn(),
-    useCurrentLayoutSelector: jest.fn(),
+    useCurrentLayoutActions: vi.fn(),
+    useCurrentLayoutSelector: vi.fn(),
   };
 });
 
-jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => {
-  const originalModule = jest.requireActual("@lichtblick/suite-base/context/LayoutManagerContext");
+vi.mock("@lichtblick/suite-base/context/LayoutManagerContext", async () => {
+  const originalModule = await vi.importActual("@lichtblick/suite-base/context/LayoutManagerContext");
   return {
     __esModule: true,
     ...originalModule,
-    useLayoutManager: jest.fn(),
+    useLayoutManager: vi.fn(),
   };
 });
 
 describe("CurrentLayoutLocalStorageSyncAdapter", () => {
-  const mockGetCurrentLayoutState = jest.fn();
+  const mockGetCurrentLayoutState = vi.fn();
   const mockLayoutManager = new MockLayoutManager();
   const mockLayoutData: LayoutData = LayoutBuilder.layout().baseline.data;
   const mockLayoutId = LayoutBuilder.layoutId();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (useCurrentLayoutActions as jest.Mock).mockReturnValue({
+    vi.clearAllMocks();
+    (useCurrentLayoutActions as Mock).mockReturnValue({
       getCurrentLayoutState: mockGetCurrentLayoutState,
     });
-    (useCurrentLayoutSelector as jest.Mock).mockImplementation((selector) => {
+    (useCurrentLayoutSelector as Mock).mockImplementation((selector) => {
       if (selector === selectLayoutData) {
         return mockLayoutData;
       }
@@ -60,7 +61,7 @@ describe("CurrentLayoutLocalStorageSyncAdapter", () => {
       }
       return undefined;
     });
-    (useLayoutManager as jest.Mock).mockReturnValue(mockLayoutManager);
+    (useLayoutManager as Mock).mockReturnValue(mockLayoutManager);
     localStorage.clear();
   });
 
@@ -109,7 +110,7 @@ describe("CurrentLayoutLocalStorageSyncAdapter", () => {
     // Now simulate a data change by updating the mock to return different data
     const modifiedData = { ...mockLayoutData, modified: true };
 
-    (useCurrentLayoutSelector as jest.Mock).mockImplementation((selector) => {
+    (useCurrentLayoutSelector as Mock).mockImplementation((selector) => {
       if (selector === selectLayoutData) {
         return modifiedData;
       }

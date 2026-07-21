@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+import type { Mocked, Mock } from "vitest";
 import type { Theme } from "@mui/material";
 import { EventEmitter } from "eventemitter3";
 import * as _ from "lodash-es";
@@ -24,8 +25,8 @@ import { PlotCoordinator } from "./PlotCoordinator";
 import { IDatasetsBuilder, SeriesConfigKey, SeriesItem } from "./builders/IDatasetsBuilder";
 import { pathToSubscribePayload } from "./utils/subscription";
 
-jest.mock("./OffscreenCanvasRenderer");
-jest.mock("./builders/IDatasetsBuilder");
+vi.mock("./OffscreenCanvasRenderer");
+vi.mock("./builders/IDatasetsBuilder");
 
 global.OffscreenCanvas = class {
   public width: number;
@@ -41,63 +42,63 @@ global.OffscreenCanvas = class {
   }
 } as unknown as typeof OffscreenCanvas;
 
-jest.mock(
+vi.mock(
   "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems",
-  () => ({
-    simpleGetMessagePathDataItems: jest.fn(),
+  async () => ({
+    simpleGetMessagePathDataItems: vi.fn(),
   }),
 );
 
-jest.mock("@lichtblick/message-path", () => ({
-  parseMessagePath: jest.fn(),
+vi.mock("@lichtblick/message-path", async () => ({
+  parseMessagePath: vi.fn(),
 }));
 
-jest.mock(
+vi.mock(
   "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems",
-  () => ({
-    fillInGlobalVariablesInPath: jest.fn(),
+  async () => ({
+    fillInGlobalVariablesInPath: vi.fn(),
   }),
 );
 
-jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath", () => ({
-  stringifyMessagePath: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath", async () => ({
+  stringifyMessagePath: vi.fn(),
 }));
 
-jest.mock("./utils/subscription", () => ({
-  pathToSubscribePayload: jest.fn().mockReturnValue(undefined),
+vi.mock("./utils/subscription", async () => ({
+  pathToSubscribePayload: vi.fn().mockReturnValue(undefined),
 }));
 
-const mockSubscribeMessageRange = jest.fn();
-jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", () => ({
+const mockSubscribeMessageRange = vi.fn();
+vi.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", async () => ({
   useSubscribeMessageRange: () => mockSubscribeMessageRange,
 }));
 
 describe("PlotCoordinator", () => {
-  let renderer: jest.Mocked<OffscreenCanvasRenderer>;
-  let datasetsBuilder: jest.Mocked<IDatasetsBuilder>;
+  let renderer: Mocked<OffscreenCanvasRenderer>;
+  let datasetsBuilder: Mocked<IDatasetsBuilder>;
   let plotCoordinator: PlotCoordinator;
   let subscribeMessageRange: UseSubscribeMessageRange;
 
   beforeEach(() => {
     const canvas = new OffscreenCanvas(500, 500);
     const theme: Theme = { name: "dark" } as Theme;
-    renderer = new OffscreenCanvasRenderer(canvas, theme) as jest.Mocked<OffscreenCanvasRenderer>;
-    datasetsBuilder = new (EventEmitter as any)() as jest.Mocked<IDatasetsBuilder>;
+    renderer = new OffscreenCanvasRenderer(canvas, theme) as Mocked<OffscreenCanvasRenderer>;
+    datasetsBuilder = new (EventEmitter as any)() as Mocked<IDatasetsBuilder>;
 
-    datasetsBuilder.handlePlayerState = jest.fn().mockReturnValue(undefined);
-    datasetsBuilder.getViewportDatasets = jest.fn().mockResolvedValue({
+    datasetsBuilder.handlePlayerState = vi.fn().mockReturnValue(undefined);
+    datasetsBuilder.getViewportDatasets = vi.fn().mockResolvedValue({
       datasetsByConfigIndex: [],
       pathsWithMismatchedDataLengths: [],
     });
-    datasetsBuilder.setSeries = jest.fn();
-    datasetsBuilder.getCsvData = jest.fn().mockResolvedValue([]);
+    datasetsBuilder.setSeries = vi.fn();
+    datasetsBuilder.getCsvData = vi.fn().mockResolvedValue([]);
 
     subscribeMessageRange = mockSubscribeMessageRange;
     plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should initialize plotCoordinator", () => {
@@ -110,7 +111,7 @@ describe("PlotCoordinator", () => {
         activeData: PlayerBuilder.activeData(),
       });
 
-      const listener = jest.fn();
+      const listener = vi.fn();
       plotCoordinator.on("currentValuesChanged", listener);
 
       plotCoordinator.handlePlayerState(state);
@@ -121,7 +122,7 @@ describe("PlotCoordinator", () => {
     it("should not emit when no activeData", () => {
       const state = PlayerBuilder.playerState({ activeData: undefined });
 
-      const listener = jest.fn();
+      const listener = vi.fn();
       plotCoordinator.on("currentValuesChanged", listener);
 
       plotCoordinator.handlePlayerState(state);
@@ -132,8 +133,8 @@ describe("PlotCoordinator", () => {
     it("should return immediately if plotCoordinator is destroyed", () => {
       const state = PlayerBuilder.playerState();
       plotCoordinator.destroy();
-      const handlePlayerStateSpy = jest.spyOn(datasetsBuilder, "handlePlayerState");
-      const updateSpy = jest.spyOn(renderer, "update");
+      const handlePlayerStateSpy = vi.spyOn(datasetsBuilder, "handlePlayerState");
+      const updateSpy = vi.spyOn(renderer, "update");
 
       plotCoordinator.handlePlayerState(state);
 
@@ -172,7 +173,7 @@ describe("PlotCoordinator", () => {
         },
       ] as SeriesItem[];
       const itemsResponse = [BasicBuilder.numbers(), [BasicBuilder.number()]];
-      (simpleGetMessagePathDataItems as jest.Mock)
+      (simpleGetMessagePathDataItems as Mock)
         .mockReturnValueOnce(itemsResponse[0])
         .mockReturnValueOnce(itemsResponse[1]);
 
@@ -211,9 +212,9 @@ describe("PlotCoordinator", () => {
 
   describe("topic range subscriptions", () => {
     beforeEach(() => {
-      (pathToSubscribePayload as jest.Mock).mockReturnValue({ topic: "/foo", preloadType: "full" });
-      datasetsBuilder.handleMessageRange = jest.fn();
-      mockSubscribeMessageRange.mockReturnValue(jest.fn());
+      (pathToSubscribePayload as Mock).mockReturnValue({ topic: "/foo", preloadType: "full" });
+      datasetsBuilder.handleMessageRange = vi.fn();
+      mockSubscribeMessageRange.mockReturnValue(vi.fn());
     });
 
     it("groups multiple series with the same topic into a single subscription", () => {
@@ -234,7 +235,7 @@ describe("PlotCoordinator", () => {
 
     it("cancels subscription for a topic removed from series", () => {
       // Given — first call subscribes /foo
-      const cancelFoo = jest.fn();
+      const cancelFoo = vi.fn();
       mockSubscribeMessageRange.mockReturnValue(cancelFoo);
       plotCoordinator["seriesKeysByTopic"] = new Map([
         ["/foo", new Set(["0:receiveTime:/foo.val"] as SeriesConfigKey[])],
@@ -266,7 +267,7 @@ describe("PlotCoordinator", () => {
         }) => {
           // Simulate a real subscription that calls onNewRangeIterator
           void onNewRangeIterator((async function* () {})());
-          return jest.fn();
+          return vi.fn();
         },
       );
       plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
@@ -285,7 +286,7 @@ describe("PlotCoordinator", () => {
 
     it("retries subscription when previous was inactive (no-op cancel)", () => {
       // Given — first subscription returns no-op (onNewRangeIterator never called)
-      mockSubscribeMessageRange.mockReturnValue(jest.fn());
+      mockSubscribeMessageRange.mockReturnValue(vi.fn());
       plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
         ["/foo", ["/foo.val"]],
       ]);
@@ -311,7 +312,7 @@ describe("PlotCoordinator", () => {
             onNewRangeIterator: (iter: AsyncIterable<unknown>) => Promise<void>;
           }) => {
             void onNewRangeIterator((async function* () {})());
-            return jest.fn();
+            return vi.fn();
           },
         );
       });
@@ -405,32 +406,32 @@ describe("PlotCoordinator", () => {
 
   describe("dispatchRender", () => {
     it("should return immediately if plotCoordinator is destroyed", async () => {
+      const updateSpy = vi.spyOn(renderer, "update");
       plotCoordinator.destroy();
 
       await plotCoordinator["dispatchRender"]();
 
-      const updateSpy = jest.spyOn(renderer, "update");
       expect(updateSpy).not.toHaveBeenCalled();
     });
 
     it("should call 'update' on the renderer when dispatching render", async () => {
       renderer.update.mockResolvedValue({ x: { min: 0, max: 10 }, y: { min: 0, max: 10 } });
+      const updateSpyOn = vi.spyOn(renderer, "update");
 
       await plotCoordinator["dispatchRender"]();
 
-      const updateSpyOn = jest.spyOn(renderer, "update");
       expect(updateSpyOn).toHaveBeenCalled();
     });
 
     it("should emit 'timeseriesBounds' when updating limits", async () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       plotCoordinator.setShouldSync({ shouldSync: true });
       plotCoordinator.on("timeseriesBounds", listener);
       const bounds: Bounds = {
         x: { min: BasicBuilder.number(), max: BasicBuilder.number() },
         y: { min: BasicBuilder.number(), max: BasicBuilder.number() },
       };
-      (renderer.update as jest.Mock).mockResolvedValue(bounds);
+      (renderer.update as Mock).mockResolvedValue(bounds);
       plotCoordinator.addInteractionEvent({
         type: "zoom",
         scaleX: BasicBuilder.number(),
@@ -444,7 +445,7 @@ describe("PlotCoordinator", () => {
     });
 
     it("should not emit 'timeseriesBounds' if shouldSync is false", async () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
 
       plotCoordinator.setShouldSync({ shouldSync: false });
       plotCoordinator.on("timeseriesBounds", listener);
@@ -452,7 +453,7 @@ describe("PlotCoordinator", () => {
         x: { min: BasicBuilder.number(), max: BasicBuilder.number() },
         y: { min: BasicBuilder.number(), max: BasicBuilder.number() },
       };
-      (renderer.update as jest.Mock).mockResolvedValue(bounds);
+      (renderer.update as Mock).mockResolvedValue(bounds);
       plotCoordinator.addInteractionEvent({
         type: "zoom",
         scaleX: BasicBuilder.number(),
@@ -467,14 +468,14 @@ describe("PlotCoordinator", () => {
 
   describe("dispatchDownsample", () => {
     it("should call 'getViewportDatasets' when dispatching downsample", async () => {
-      datasetsBuilder.getViewportDatasets = jest.fn().mockResolvedValue({
+      datasetsBuilder.getViewportDatasets = vi.fn().mockResolvedValue({
         datasetsByConfigIndex: [],
         pathsWithMismatchedDataLengths: [],
       });
+      const getViewportDatasetsSpyOn = vi.spyOn(datasetsBuilder, "getViewportDatasets");
 
       await plotCoordinator["dispatchDownsample"]();
 
-      const getViewportDatasetsSpyOn = jest.spyOn(datasetsBuilder, "getViewportDatasets");
       expect(getViewportDatasetsSpyOn).toHaveBeenCalled();
     });
   });
@@ -490,7 +491,7 @@ describe("PlotCoordinator", () => {
 
   describe("handleConfig", () => {
     afterEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
     it("should return immediately if plotCoordinator is destroyed", () => {
       const config = PlotBuilder.config({
@@ -546,7 +547,7 @@ describe("PlotCoordinator", () => {
         maxYValue: 5,
       });
       // avoid queueDispatchRender() overwrite updateAction
-      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+      vi.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
 
       plotCoordinator.handleConfig(config, "light", {});
 
@@ -558,7 +559,7 @@ describe("PlotCoordinator", () => {
 
     it("should pass xAxisLabel through to updateAction", () => {
       const config = PlotBuilder.config({ xAxisLabel: "Time (s)", paths: [] });
-      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+      vi.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
 
       plotCoordinator.handleConfig(config, "light", {});
 
@@ -567,7 +568,7 @@ describe("PlotCoordinator", () => {
 
     it("should pass yAxisLabel through to updateAction", () => {
       const config = PlotBuilder.config({ yAxisLabel: "Velocity", paths: [] });
-      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+      vi.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
 
       plotCoordinator.handleConfig(config, "light", {});
 
@@ -580,7 +581,7 @@ describe("PlotCoordinator", () => {
         yAxisLabel: undefined,
         paths: [],
       });
-      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+      vi.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
 
       plotCoordinator.handleConfig(config, "light", {});
 
@@ -590,17 +591,17 @@ describe("PlotCoordinator", () => {
 
     it("should correctly process paths and generate series", () => {
       const config = PlotBuilder.config();
-      (parseMessagePath as jest.Mock).mockReturnValue(BasicBuilder.string());
-      (fillInGlobalVariablesInPath as jest.Mock).mockReturnValue(undefined);
-      (stringifyMessagePath as jest.Mock).mockReturnValue("");
+      (parseMessagePath as Mock).mockReturnValue(BasicBuilder.string());
+      (fillInGlobalVariablesInPath as Mock).mockReturnValue(undefined);
+      (stringifyMessagePath as Mock).mockReturnValue("");
 
+      const setSeriesSpy = vi.spyOn(datasetsBuilder, "setSeries");
       plotCoordinator.handleConfig(config, "light", {});
 
       expect(plotCoordinator["series"].length).toBe(config.paths.length);
       expect(plotCoordinator["series"][0]?.messagePath).toBe(config.paths[0]?.value);
       expect(plotCoordinator["series"][1]?.messagePath).toBe(config.paths[1]?.value);
       expect(plotCoordinator["series"][2]?.messagePath).toBe(config.paths[2]?.value);
-      const setSeriesSpy = jest.spyOn(datasetsBuilder, "setSeries");
       expect(setSeriesSpy).toHaveBeenCalledWith(plotCoordinator["series"]);
     });
 
@@ -611,15 +612,15 @@ describe("PlotCoordinator", () => {
       });
       const plotConfig = PlotBuilder.config({ paths: [messagePath, messagePath] });
 
-      (parseMessagePath as jest.Mock).mockReturnValue({ topicName: messagePath.value });
-      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
-      (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
+      (parseMessagePath as Mock).mockReturnValue({ topicName: messagePath.value });
+      (fillInGlobalVariablesInPath as Mock).mockImplementation((parsed) => parsed);
+      (stringifyMessagePath as Mock).mockImplementation((parsed) => parsed.topicName ?? "");
 
+      const setSeriesSpy = vi.spyOn(datasetsBuilder, "setSeries");
       plotCoordinator.handleConfig(plotConfig, "light", {});
 
-      const setSeriesSpy = jest.spyOn(datasetsBuilder, "setSeries");
       expect(setSeriesSpy).toHaveBeenCalled();
-      const series = (datasetsBuilder.setSeries as jest.Mock).mock.calls[0]?.[0];
+      const series = (datasetsBuilder.setSeries as Mock).mock.calls[0]?.[0];
 
       expect(series).toHaveLength(2);
       expect(series[0].configIndex).toBe(0);
@@ -630,8 +631,8 @@ describe("PlotCoordinator", () => {
     });
 
     it("should dispatch render and queue downsample", async () => {
-      const queueDispatchRender = jest.spyOn(plotCoordinator as any, "queueDispatchRender");
-      const queueDispatchDownsample = jest.spyOn(plotCoordinator as any, "queueDispatchDownsample");
+      const queueDispatchRender = vi.spyOn(plotCoordinator as any, "queueDispatchRender");
+      const queueDispatchDownsample = vi.spyOn(plotCoordinator as any, "queueDispatchDownsample");
       const config = PlotBuilder.config();
 
       plotCoordinator.handleConfig(config, "light", {});
@@ -642,13 +643,13 @@ describe("PlotCoordinator", () => {
 
     describe("seriesKeysByTopic", () => {
       beforeEach(() => {
-        (pathToSubscribePayload as jest.Mock).mockReturnValue({
+        (pathToSubscribePayload as Mock).mockReturnValue({
           topic: "/foo",
           preloadType: "full",
         });
-        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
-        (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
-        (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
+        (parseMessagePath as Mock).mockImplementation((value) => ({ topicName: value }));
+        (fillInGlobalVariablesInPath as Mock).mockImplementation((parsed) => parsed);
+        (stringifyMessagePath as Mock).mockImplementation((parsed) => parsed.topicName ?? "");
       });
 
       it("populates seriesKeysByTopic from paths with a valid subscribe payload", () => {
@@ -671,7 +672,7 @@ describe("PlotCoordinator", () => {
 
       it("excludes series whose pathToSubscribePayload returns undefined", () => {
         // Given
-        (pathToSubscribePayload as jest.Mock).mockReturnValue(undefined);
+        (pathToSubscribePayload as Mock).mockReturnValue(undefined);
         const path = PlotBuilder.path({
           value: "/foo",
           timestampMethod: "receiveTime",
@@ -721,7 +722,7 @@ describe("PlotCoordinator", () => {
           timestampMethod: "receiveTime",
           enabled: true,
         });
-        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
+        (parseMessagePath as Mock).mockImplementation((value) => ({ topicName: value }));
 
         // When
         plotCoordinator.handleConfig(PlotBuilder.config({ paths: [fooPath] }), "light", {});
@@ -740,7 +741,7 @@ describe("PlotCoordinator", () => {
 
       it("includes the xTopic from getXTopic when not already present", () => {
         // Given
-        datasetsBuilder.getXTopic = jest.fn().mockReturnValue("/xtopic");
+        datasetsBuilder.getXTopic = vi.fn().mockReturnValue("/xtopic");
         const path = PlotBuilder.path({
           value: "/foo",
           timestampMethod: "receiveTime",
@@ -759,7 +760,7 @@ describe("PlotCoordinator", () => {
 
       it("does not add xTopic if it is already covered by a series", () => {
         // Given
-        datasetsBuilder.getXTopic = jest.fn().mockReturnValue("/foo");
+        datasetsBuilder.getXTopic = vi.fn().mockReturnValue("/foo");
         const path = PlotBuilder.path({
           value: "/foo",
           timestampMethod: "receiveTime",
@@ -780,7 +781,7 @@ describe("PlotCoordinator", () => {
 
   describe("setGlobalBounds", () => {
     it("should set globalBounds and reset interactionBounds", () => {
-      const queueDispatchRender = jest.spyOn(plotCoordinator as any, "queueDispatchRender");
+      const queueDispatchRender = vi.spyOn(plotCoordinator as any, "queueDispatchRender");
       const bounds = { min: 0, max: 10 };
 
       plotCoordinator.setGlobalBounds(bounds);
@@ -791,7 +792,7 @@ describe("PlotCoordinator", () => {
     });
 
     it("should reset Y bounds when globalBounds is undefined", () => {
-      const queueDispatchRenderSpy = jest
+      const queueDispatchRenderSpy = vi
         .spyOn(plotCoordinator as any, "queueDispatchRender")
         .mockImplementation(() => {});
       plotCoordinator["shouldResetY"] = false;
@@ -815,7 +816,7 @@ describe("PlotCoordinator", () => {
 
   describe("setZoomMode", () => {
     it.each(["x", "xy", "y"])("should update zoomMode in updateAction", (mode: string) => {
-      const queueDispatchRenderSpy = jest
+      const queueDispatchRenderSpy = vi
         .spyOn(plotCoordinator as any, "queueDispatchRender")
         .mockImplementation(() => {});
 
@@ -828,10 +829,10 @@ describe("PlotCoordinator", () => {
 
   describe("setSize", () => {
     it("should update viewport size", () => {
-      const queueDispatchRenderSpy = jest
+      const queueDispatchRenderSpy = vi
         .spyOn(plotCoordinator as any, "queueDispatchRender")
         .mockImplementation(() => {});
-      const queueDispatchDownsampleSpy = jest
+      const queueDispatchDownsampleSpy = vi
         .spyOn(plotCoordinator as any, "queueDispatchDownsample")
         .mockImplementation(() => {});
       const newSize = { width: 800, height: 600 };
@@ -908,11 +909,10 @@ describe("PlotCoordinator", () => {
         { name: "dataset1", data: [1, 2, 3] },
         { name: "dataset2", data: [4, 5, 6] },
       ];
-      datasetsBuilder.getCsvData = jest.fn().mockResolvedValue(mockData);
+      const getCsvDataSpy = vi.spyOn(datasetsBuilder, "getCsvData").mockResolvedValue(mockData);
 
       const result = await plotCoordinator.getCsvData();
 
-      const getCsvDataSpy = jest.spyOn(datasetsBuilder, "getCsvData");
       expect(result).toEqual(mockData);
       expect(getCsvDataSpy).toHaveBeenCalled();
     });

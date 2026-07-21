@@ -1,21 +1,22 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { FieldEditor } from "@lichtblick/suite-base/components/SettingsTreeEditor/FieldEditor";
 import { FieldEditorProps } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
+vi.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
 
-jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
+vi.mock("@lichtblick/suite-base/PanelAPI", async () => ({
   useDataSourceInfo: () => ({
     datatypes: new Map(),
     topics: [],
@@ -27,7 +28,7 @@ describe("FieldEditor", () => {
 
   const renderComponent = async (overrides: Partial<FieldEditorProps> = {}) => {
     const defaultProps: FieldEditorProps = {
-      actionHandler: jest.fn(),
+      actionHandler: vi.fn(),
       path: ["root"],
       field: { input: "string", label },
       ...overrides,
@@ -49,12 +50,12 @@ describe("FieldEditor", () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
 
-    (useGlobalVariables as jest.Mock).mockReturnValue({
+    (useGlobalVariables as Mock).mockReturnValue({
       globalVariables: new Map(),
-      setGlobalVariables: jest.fn(),
-      overwriteGlobalVariables: jest.fn(),
+      setGlobalVariables: vi.fn(),
+      overwriteGlobalVariables: vi.fn(),
     });
   });
 

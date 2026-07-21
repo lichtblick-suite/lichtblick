@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { MouseEvent } from "react";
 
@@ -21,30 +22,30 @@ import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder
 import { useLayoutNavigation } from "./useLayoutNavigation";
 
 type SetupOptions = {
-  menuClose?: jest.Mock;
+  menuClose?: Mock;
   layoutProps?: Partial<Layout>;
 };
 
-jest.mock("@lichtblick/suite-base/hooks/useCallbackWithToast", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useCallbackWithToast", async () => ({
   __esModule: true,
   default: (fn: unknown) => fn,
 }));
 
-jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
-  useLayoutManager: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/LayoutManagerContext", async () => ({
+  useLayoutManager: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/AnalyticsContext", () => ({
-  useAnalytics: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/AnalyticsContext", async () => ({
+  useAnalytics: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
-  useCurrentLayoutActions: jest.fn(),
-  useCurrentLayoutSelector: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => ({
+  useCurrentLayoutActions: vi.fn(),
+  useCurrentLayoutSelector: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/components/LayoutBrowser/reducer", () => ({
-  useLayoutBrowserReducer: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/LayoutBrowser/reducer", async () => ({
+  useLayoutBrowserReducer: vi.fn(),
 }));
 
 describe("useLayoutNavigation", () => {
@@ -60,14 +61,14 @@ describe("useLayoutNavigation", () => {
     selectedIds: [],
   };
 
-  let analyticsMock: { logEvent: jest.Mock };
-  let setSelectedLayoutIdMock: jest.Mock;
-  let dispatchMock: jest.Mock;
+  let analyticsMock: { logEvent: Mock };
+  let setSelectedLayoutIdMock: Mock;
+  let dispatchMock: Mock;
   let mockLayoutManager: {
-    isBusy: jest.Mock;
+    isBusy: Mock;
     error: undefined;
     isOnline: boolean;
-    getLayouts: jest.Mock;
+    getLayouts: Mock;
     supportsSharing: boolean;
   };
 
@@ -85,28 +86,28 @@ describe("useLayoutNavigation", () => {
   }
 
   beforeEach(() => {
-    analyticsMock = { logEvent: jest.fn() };
-    setSelectedLayoutIdMock = jest.fn();
-    dispatchMock = jest.fn();
+    analyticsMock = { logEvent: vi.fn() };
+    setSelectedLayoutIdMock = vi.fn();
+    dispatchMock = vi.fn();
     mockLayoutManager = {
-      isBusy: jest.fn().mockReturnValue(false),
+      isBusy: vi.fn().mockReturnValue(false),
       error: undefined,
       isOnline: true,
-      getLayouts: jest.fn().mockResolvedValue([]),
+      getLayouts: vi.fn().mockResolvedValue([]),
       supportsSharing: false,
     };
 
-    (useAnalytics as jest.Mock).mockReturnValue(analyticsMock);
-    (useCurrentLayoutActions as jest.Mock).mockReturnValue({
+    (useAnalytics as Mock).mockReturnValue(analyticsMock);
+    (useCurrentLayoutActions as Mock).mockReturnValue({
       setSelectedLayoutId: setSelectedLayoutIdMock,
     });
-    (useCurrentLayoutSelector as jest.Mock).mockReturnValue(currentLayoutId);
-    (useLayoutManager as jest.Mock).mockReturnValue(mockLayoutManager);
-    (useLayoutBrowserReducer as jest.Mock).mockReturnValue([defaultState, dispatchMock]);
+    (useCurrentLayoutSelector as Mock).mockReturnValue(currentLayoutId);
+    (useLayoutManager as Mock).mockReturnValue(mockLayoutManager);
+    (useLayoutBrowserReducer as Mock).mockReturnValue([defaultState, dispatchMock]);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("onSelectLayout without modifier keys", () => {
@@ -122,7 +123,7 @@ describe("useLayoutNavigation", () => {
     });
 
     it("calls menuClose when provided", async () => {
-      const menuClose = jest.fn();
+      const menuClose = vi.fn();
       const { result, layout } = setup({ menuClose });
 
       await act(async () => {
@@ -219,7 +220,7 @@ describe("useLayoutNavigation", () => {
     });
 
     it("does not call menuClose when a modifier key is pressed", async () => {
-      const menuClose = jest.fn();
+      const menuClose = vi.fn();
       const { result, layout } = setup({ menuClose, layoutProps: { id: otherLayoutId } });
 
       await act(async () => {
@@ -265,7 +266,7 @@ describe("useLayoutNavigation", () => {
     });
 
     it("does not add current layout to selection when selectedIds is already populated", async () => {
-      (useLayoutBrowserReducer as jest.Mock).mockReturnValue([
+      (useLayoutBrowserReducer as Mock).mockReturnValue([
         { ...defaultState, selectedIds: ["already-selected"] },
         dispatchMock,
       ]);
@@ -284,7 +285,7 @@ describe("useLayoutNavigation", () => {
     });
 
     it("does not dispatch currentLayoutId first when currentLayoutId is undefined", async () => {
-      (useCurrentLayoutSelector as jest.Mock).mockReturnValue(undefined);
+      (useCurrentLayoutSelector as Mock).mockReturnValue(undefined);
       const { result, layout } = setup({ layoutProps: { id: otherLayoutId } });
 
       await act(async () => {

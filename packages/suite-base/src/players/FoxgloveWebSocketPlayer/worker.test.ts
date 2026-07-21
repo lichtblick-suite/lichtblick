@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
+
 import { ToWorkerMessage } from "@lichtblick/suite-base/players/FoxgloveWebSocketPlayer/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -12,8 +14,8 @@ class MockWebSocket {
   public onopen?: (event: unknown) => void;
   public onclose?: (event: unknown) => void;
   public onmessage?: (event: MessageEvent) => void;
-  public close = jest.fn();
-  public send = jest.fn();
+  public close = vi.fn();
+  public send = vi.fn();
 
   public constructor(
     public url: string,
@@ -28,7 +30,7 @@ class MockWebSocket {
 
 let constructorShouldThrow = false;
 let constructorError: unknown;
-let postMessageMock: jest.Mock;
+let postMessageMock: Mock;
 let onmessage: (event: MessageEvent<ToWorkerMessage>) => void;
 
 function dispatch(data: ToWorkerMessage): void {
@@ -38,13 +40,13 @@ function dispatch(data: ToWorkerMessage): void {
 describe("FoxgloveWebSocketPlayer worker", () => {
   const wsUrl = BasicBuilder.string();
   beforeEach(async () => {
-    jest.resetModules();
+    vi.resetModules();
 
     MockWebSocket.lastInstance = undefined;
     constructorShouldThrow = false;
     constructorError = undefined;
 
-    postMessageMock = jest.fn();
+    postMessageMock = vi.fn();
     (global as unknown as { self: unknown }).self = global;
     self.postMessage = postMessageMock;
     (global as unknown as { WebSocket: typeof MockWebSocket }).WebSocket = MockWebSocket;
@@ -54,8 +56,8 @@ describe("FoxgloveWebSocketPlayer worker", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("open", () => {

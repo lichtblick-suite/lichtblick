@@ -4,6 +4,6 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "types": ["node", "jest"]
+    "types": ["node", "vitest/globals"]
   }
 }

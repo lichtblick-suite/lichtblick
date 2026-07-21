@@ -7,11 +7,11 @@ import { HttpError } from "./HttpError";
 import { HttpService } from "./HttpService";
 
 // Mock fetch globally
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock APP_CONFIG
-jest.mock("@lichtblick/suite-base/constants/config", () => ({
+vi.mock("@lichtblick/suite-base/constants/config", async () => ({
   APP_CONFIG: {
     apiUrl: "https://api.example.com",
   },
@@ -26,12 +26,12 @@ describe("HttpService", () => {
   beforeEach(() => {
     httpService = new HttpService();
     mockFetch.mockClear();
-    jest.clearAllTimers();
-    jest.useFakeTimers();
+    vi.clearAllTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe("constructor", () => {
@@ -52,9 +52,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
+        json: vi.fn().mockResolvedValueOnce(mockResponse),
       });
 
       const result = await httpService.get("test");
@@ -77,9 +77,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
+        json: vi.fn().mockResolvedValueOnce(mockResponse),
       });
 
       await httpService.get("users", { page: "1", limit: "10" });
@@ -109,9 +109,9 @@ describe("HttpService", () => {
         status: 201,
         statusText: "Created",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
+        json: vi.fn().mockResolvedValueOnce(mockResponse),
       });
 
       const result = await httpService.post("items", requestData);
@@ -134,9 +134,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: "success" }),
+        json: vi.fn().mockResolvedValueOnce({ data: "success" }),
       });
 
       await httpService.post("action");
@@ -168,9 +168,9 @@ describe("HttpService", () => {
         status: 201,
         statusText: "Created",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
+        json: vi.fn().mockResolvedValueOnce(mockResponse),
       });
 
       const result = await httpService.post("upload", formData);
@@ -195,9 +195,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: updateData }),
+        json: vi.fn().mockResolvedValueOnce({ data: updateData }),
       });
 
       await httpService.put("items/1", updateData);
@@ -221,9 +221,9 @@ describe("HttpService", () => {
         status: 204,
         statusText: "No Content",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({}),
+        json: vi.fn().mockResolvedValueOnce({}),
       });
 
       await httpService.delete("items/1");
@@ -246,10 +246,10 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockRejectedValueOnce(new Error("Invalid JSON")),
-        text: jest.fn().mockResolvedValueOnce("invalid json"),
+        json: vi.fn().mockRejectedValueOnce(new Error("Invalid JSON")),
+        text: vi.fn().mockResolvedValueOnce("invalid json"),
       });
 
       await expect(httpService.get("test")).rejects.toThrow(HttpError);
@@ -266,10 +266,10 @@ describe("HttpService", () => {
         status: 400,
         statusText: "Bad Request",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce(errorResponse),
-        text: jest.fn().mockResolvedValueOnce(JSON.stringify(errorResponse)),
+        json: vi.fn().mockResolvedValueOnce(errorResponse),
+        text: vi.fn().mockResolvedValueOnce(JSON.stringify(errorResponse)),
       });
 
       const errorPromise = httpService.get("test");
@@ -287,10 +287,10 @@ describe("HttpService", () => {
         status: 401,
         statusText: "Unauthorized",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ error: "Unauthorized" }),
-        text: jest.fn().mockResolvedValueOnce("Unauthorized"),
+        json: vi.fn().mockResolvedValueOnce({ error: "Unauthorized" }),
+        text: vi.fn().mockResolvedValueOnce("Unauthorized"),
       });
 
       await expect(httpService.post("protected-resource")).rejects.toThrow(HttpError);
@@ -302,10 +302,10 @@ describe("HttpService", () => {
         status: 403,
         statusText: "Forbidden",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ error: "Access denied" }),
-        text: jest.fn().mockResolvedValueOnce("Access denied"),
+        json: vi.fn().mockResolvedValueOnce({ error: "Access denied" }),
+        text: vi.fn().mockResolvedValueOnce("Access denied"),
       });
 
       await expect(httpService.delete("forbidden-resource")).rejects.toThrow(HttpError);
@@ -317,10 +317,10 @@ describe("HttpService", () => {
         status: 404,
         statusText: "Not Found",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ error: "Resource not found" }),
-        text: jest.fn().mockResolvedValueOnce("Not Found"),
+        json: vi.fn().mockResolvedValueOnce({ error: "Resource not found" }),
+        text: vi.fn().mockResolvedValueOnce("Not Found"),
       });
 
       await expect(httpService.get("nonexistent")).rejects.toThrow(HttpError);
@@ -332,10 +332,10 @@ describe("HttpService", () => {
         status: 500,
         statusText: "Internal Server Error",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockRejectedValueOnce(new Error("Invalid JSON")),
-        text: jest.fn().mockResolvedValueOnce("Internal Server Error"),
+        json: vi.fn().mockRejectedValueOnce(new Error("Invalid JSON")),
+        text: vi.fn().mockResolvedValueOnce("Internal Server Error"),
       });
 
       await expect(httpService.put("server-error", { data: "test" })).rejects.toThrow(HttpError);
@@ -374,10 +374,10 @@ describe("HttpService", () => {
         status: 400,
         statusText: "Bad Request",
         headers: {
-          get: jest.fn().mockReturnValue("text/plain"),
+          get: vi.fn().mockReturnValue("text/plain"),
         },
-        json: jest.fn().mockRejectedValueOnce(new Error("Not JSON")),
-        text: jest.fn().mockResolvedValueOnce("Plain text error message"),
+        json: vi.fn().mockRejectedValueOnce(new Error("Not JSON")),
+        text: vi.fn().mockResolvedValueOnce("Plain text error message"),
       });
 
       const errorPromise = httpService.get("test");
@@ -393,10 +393,10 @@ describe("HttpService", () => {
         status: 503,
         statusText: "Service Unavailable",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockRejectedValueOnce(new Error("No content")),
-        text: jest.fn().mockResolvedValueOnce(""),
+        json: vi.fn().mockRejectedValueOnce(new Error("No content")),
+        text: vi.fn().mockResolvedValueOnce(""),
       });
 
       await expect(httpService.get("unavailable")).rejects.toThrow(HttpError);
@@ -408,10 +408,10 @@ describe("HttpService", () => {
         status: 422,
         statusText: "Unprocessable Entity",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockRejectedValueOnce(new Error("Unexpected token")),
-        text: jest.fn().mockResolvedValueOnce("{ invalid json"),
+        json: vi.fn().mockRejectedValueOnce(new Error("Unexpected token")),
+        text: vi.fn().mockResolvedValueOnce("{ invalid json"),
       });
 
       await expect(httpService.post("invalid", { data: "test" })).rejects.toThrow(HttpError);
@@ -425,9 +425,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: "test" }),
+        json: vi.fn().mockResolvedValueOnce({ data: "test" }),
       });
 
       await httpService.get(
@@ -459,9 +459,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValueOnce({
           data: "file uploaded",
           timestamp: "2023-01-01",
           path: "/upload",
@@ -494,9 +494,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: "success" }),
+        json: vi.fn().mockResolvedValueOnce({ data: "success" }),
       });
 
       await httpService.get("test", {}, { timeout: 5000 });
@@ -511,9 +511,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: "success" }),
+        json: vi.fn().mockResolvedValueOnce({ data: "success" }),
       });
 
       await httpService.get(
@@ -542,9 +542,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: "success" }),
+        json: vi.fn().mockResolvedValueOnce({ data: "success" }),
       });
 
       await httpService.get("test");
@@ -573,9 +573,9 @@ describe("HttpService", () => {
           status: testCase.status,
           statusText: testCase.statusText,
           headers: {
-            get: jest.fn().mockReturnValue("application/json"),
+            get: vi.fn().mockReturnValue("application/json"),
           },
-          json: jest.fn().mockResolvedValueOnce({
+          json: vi.fn().mockResolvedValueOnce({
             data: { success: true },
             timestamp: "2023-01-01",
             path: "/test",
@@ -594,9 +594,9 @@ describe("HttpService", () => {
         status: 204,
         statusText: "No Content",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({
+        json: vi.fn().mockResolvedValueOnce({
           data: undefined,
           timestamp: "2023-01-01",
           path: "/resource",
@@ -613,9 +613,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("text/plain"),
+          get: vi.fn().mockReturnValue("text/plain"),
         },
-        text: jest.fn().mockResolvedValueOnce("plain text response"),
+        text: vi.fn().mockResolvedValueOnce("plain text response"),
       });
 
       const result = await httpService.get("text-endpoint");
@@ -638,9 +638,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/octet-stream"),
+          get: vi.fn().mockReturnValue("application/octet-stream"),
         },
-        arrayBuffer: jest.fn().mockResolvedValueOnce(mockArrayBuffer),
+        arrayBuffer: vi.fn().mockResolvedValueOnce(mockArrayBuffer),
       });
 
       const result = await httpService.get("binary-data", {}, { responseType: "arraybuffer" });
@@ -660,9 +660,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: "test" }),
+        json: vi.fn().mockResolvedValueOnce({ data: "test" }),
       });
 
       await httpService.get("/api/users");
@@ -679,9 +679,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: "test" }),
+        json: vi.fn().mockResolvedValueOnce({ data: "test" }),
       });
 
       await httpService.get("test", {});
@@ -695,9 +695,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: "test" }),
+        json: vi.fn().mockResolvedValueOnce({ data: "test" }),
       });
 
       await httpService.get("test", undefined);
@@ -711,9 +711,9 @@ describe("HttpService", () => {
         status: 200,
         statusText: "OK",
         headers: {
-          get: jest.fn().mockReturnValue("application/json"),
+          get: vi.fn().mockReturnValue("application/json"),
         },
-        json: jest.fn().mockResolvedValueOnce({ data: "test" }),
+        json: vi.fn().mockResolvedValueOnce({ data: "test" }),
       });
 
       await httpService.get("search", {

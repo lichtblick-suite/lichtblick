@@ -14,6 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { Mock } from "vitest";
 import { AppError } from "@lichtblick/suite-base/util/errors";
 
 describe("errors", () => {
@@ -58,7 +59,7 @@ describe("errors", () => {
         "Failed to stringify extraInfo",
         expect.any(Error),
       );
-      (console.error as jest.Mock).mockReset();
+      (console.error as Mock).mockReset();
     });
     it("catches BigInt values in extraInfo", () => {
       const { message } = new AppError("internal error", { val: BigInt(10) });
@@ -69,7 +70,7 @@ describe("errors", () => {
         "Failed to stringify extraInfo",
         expect.any(Error),
       );
-      (console.error as jest.Mock).mockReset();
+      (console.error as Mock).mockReset();
     });
   });
 });

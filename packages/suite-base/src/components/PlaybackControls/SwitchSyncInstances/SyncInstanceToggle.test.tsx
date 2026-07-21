@@ -1,26 +1,27 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 // SyncInstanceToggle.test.tsx
+import type { Mock } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 
 import SyncInstanceToggle from "./SyncInstanceToggle";
 
-jest.mock("@lichtblick/suite-base/context/Workspace/WorkspaceContext", () => ({
-  useWorkspaceStore: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/Workspace/WorkspaceContext", async () => ({
+  useWorkspaceStore: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", () => ({
-  useWorkspaceActions: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", async () => ({
+  useWorkspaceActions: vi.fn(),
 }));
 
-jest.mock("./SyncInstanceToggle.style", () => ({
+vi.mock("./SyncInstanceToggle.style", async () => ({
   useStyles: () => ({
     classes: {
       button: "mock-button",
@@ -32,10 +33,10 @@ jest.mock("./SyncInstanceToggle.style", () => ({
 }));
 
 describe("SyncInstanceToggle", () => {
-  const useWorkspaceActionsMock = useWorkspaceActions as jest.Mock;
-  const useWorkspaceStoreMock = useWorkspaceStore as jest.Mock;
+  const useWorkspaceActionsMock = useWorkspaceActions as Mock;
+  const useWorkspaceStoreMock = useWorkspaceStore as Mock;
 
-  const setSyncInstancesMock = jest.fn();
+  const setSyncInstancesMock = vi.fn();
 
   beforeEach(() => {
     useWorkspaceActionsMock.mockReturnValue({
@@ -44,7 +45,7 @@ describe("SyncInstanceToggle", () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders button with correct text when sync is on", () => {

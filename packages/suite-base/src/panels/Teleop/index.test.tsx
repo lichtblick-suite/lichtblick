@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import type { MockedFunction } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { render } from "@testing-library/react";
 
 import { useCrash } from "@lichtblick/hooks";
@@ -11,16 +12,16 @@ import { TeleopPanelAdapterProps } from "@lichtblick/suite-base/panels/Teleop/ty
 import TeleopPanelAdapter from "./index";
 
 // Mock dependencies
-jest.mock("@lichtblick/hooks", () => ({
-  useCrash: jest.fn(),
+vi.mock("@lichtblick/hooks", async () => ({
+  useCrash: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/components/Panel", () => ({
+vi.mock("@lichtblick/suite-base/components/Panel", async () => ({
   __esModule: true,
   default: (Component: any) => Component,
 }));
 
-jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", () => ({
+vi.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", async () => ({
   PanelExtensionAdapter: ({
     config,
     highestSupportedConfigVersion,
@@ -36,23 +37,23 @@ jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter", () => ({
   ),
 }));
 
-jest.mock("@lichtblick/suite-base/components/CaptureErrorBoundary", () => ({
+vi.mock("@lichtblick/suite-base/components/CaptureErrorBoundary", async () => ({
   CaptureErrorBoundary: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="capture-error-boundary">{children}</div>
   ),
 }));
 
-jest.mock("@lichtblick/suite-base/panels/createSyncRoot", () => ({
+vi.mock("@lichtblick/suite-base/panels/createSyncRoot", async () => ({
   createSyncRoot: (element: React.ReactNode) => <div data-testid="sync-root">{element}</div>,
 }));
 
-jest.mock("./TeleopPanel", () => ({
+vi.mock("./TeleopPanel", async () => ({
   __esModule: true,
   default: () => <div data-testid="teleop-panel" />,
 }));
 
 // Type the mocked hook
-const mockUseCrash = useCrash as jest.MockedFunction<typeof useCrash>;
+const mockUseCrash = useCrash as MockedFunction<typeof useCrash>;
 
 describe("TeleopPanelAdapter", () => {
   // Test data builders
@@ -60,16 +61,16 @@ describe("TeleopPanelAdapter", () => {
     overrides: Partial<TeleopPanelAdapterProps> = {},
   ): TeleopPanelAdapterProps => ({
     config: {},
-    saveConfig: jest.fn(),
+    saveConfig: vi.fn(),
     ...overrides,
   });
 
   // Setup mocks before each test
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock useCrash hook
-    const mockCrashFunction = jest.fn();
+    const mockCrashFunction = vi.fn();
     mockUseCrash.mockReturnValue(mockCrashFunction);
   });
 
@@ -96,7 +97,7 @@ describe("TeleopPanelAdapter", () => {
   it("should maintain stable references", () => {
     // Given
     const props = createMockProps();
-    const mockCrashFunction = jest.fn();
+    const mockCrashFunction = vi.fn();
     mockUseCrash.mockReturnValue(mockCrashFunction);
 
     // When
@@ -111,8 +112,8 @@ describe("TeleopPanelAdapter", () => {
   it("should update with new crash function", () => {
     // Given
     const props = createMockProps();
-    const firstCrashFunction = jest.fn();
-    const secondCrashFunction = jest.fn();
+    const firstCrashFunction = vi.fn();
+    const secondCrashFunction = vi.fn();
 
     // When
     mockUseCrash.mockReturnValueOnce(firstCrashFunction);

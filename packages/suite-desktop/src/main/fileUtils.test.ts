@@ -1,31 +1,34 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mocked } from "vitest";
 import fs from "fs";
 
 import { isFileToOpen } from "./fileUtils";
 
 // Mock the fs module
-jest.mock("fs");
-const mockFs = fs as jest.Mocked<typeof fs>;
+vi.mock("fs");
+const mockFs = fs as Mocked<typeof fs>;
 
 // Mock the logger to avoid actual logging during tests
-jest.mock("@lichtblick/log", () => ({
-  getLogger: () => ({
-    error: jest.fn(),
-  }),
+vi.mock("@lichtblick/log", async () => ({
+  default: {
+    getLogger: () => ({
+      error: vi.fn(),
+    }),
+  },
 }));
 
 describe("isFileToOpen", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return true when argument is a valid file", () => {
     // Mock fs.statSync to return a file stat object
     const mockStat = {
-      isFile: jest.fn().mockReturnValue(true),
-      isDirectory: jest.fn().mockReturnValue(false),
+      isFile: vi.fn().mockReturnValue(true),
+      isDirectory: vi.fn().mockReturnValue(false),
     } as unknown as fs.Stats;
 
     mockFs.statSync.mockReturnValue(mockStat);
@@ -39,8 +42,8 @@ describe("isFileToOpen", () => {
   it("should return false when argument is a directory", () => {
     // Mock fs.statSync to return a directory stat object
     const mockStat = {
-      isFile: jest.fn().mockReturnValue(false),
-      isDirectory: jest.fn().mockReturnValue(true),
+      isFile: vi.fn().mockReturnValue(false),
+      isDirectory: vi.fn().mockReturnValue(true),
     } as unknown as fs.Stats;
 
     mockFs.statSync.mockReturnValue(mockStat);
@@ -93,8 +96,8 @@ describe("isFileToOpen", () => {
   it("should handle special characters in file path", () => {
     // Mock fs.statSync to return a file stat object
     const mockStat = {
-      isFile: jest.fn().mockReturnValue(true),
-      isDirectory: jest.fn().mockReturnValue(false),
+      isFile: vi.fn().mockReturnValue(true),
+      isDirectory: vi.fn().mockReturnValue(false),
     } as unknown as fs.Stats;
 
     mockFs.statSync.mockReturnValue(mockStat);
@@ -109,8 +112,8 @@ describe("isFileToOpen", () => {
   it("should handle relative file paths", () => {
     // Mock fs.statSync to return a file stat object
     const mockStat = {
-      isFile: jest.fn().mockReturnValue(true),
-      isDirectory: jest.fn().mockReturnValue(false),
+      isFile: vi.fn().mockReturnValue(true),
+      isDirectory: vi.fn().mockReturnValue(false),
     } as unknown as fs.Stats;
 
     mockFs.statSync.mockReturnValue(mockStat);
@@ -125,8 +128,8 @@ describe("isFileToOpen", () => {
   it("should handle file paths with different extensions", () => {
     // Mock fs.statSync to return a file stat object
     const mockStat = {
-      isFile: jest.fn().mockReturnValue(true),
-      isDirectory: jest.fn().mockReturnValue(false),
+      isFile: vi.fn().mockReturnValue(true),
+      isDirectory: vi.fn().mockReturnValue(false),
     } as unknown as fs.Stats;
 
     mockFs.statSync.mockReturnValue(mockStat);

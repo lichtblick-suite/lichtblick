@@ -8,8 +8,8 @@
 import { migrateLegacyToNew3DPanels } from "./migrateLegacyToNew3DPanels";
 
 let MOCK_ID = 0;
-jest.mock("@lichtblick/suite-base/util/layout", () => ({
-  ...jest.requireActual("@lichtblick/suite-base/util/layout"),
+vi.mock("@lichtblick/suite-base/util/layout", async () => ({
+  ...await vi.importActual("@lichtblick/suite-base/util/layout"),
   getPanelIdForType(type: string) {
     return `${type}!${++MOCK_ID}`;
   },

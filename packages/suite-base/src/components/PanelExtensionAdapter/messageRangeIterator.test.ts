@@ -5,6 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mock } from "vitest";
+
 import { MessageEvent } from "@lichtblick/suite";
 import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/contants";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
@@ -15,9 +17,9 @@ import { createMessageRangeIterator } from "./messageRangeIterator";
 import { IteratorResult } from "../../players/IterablePlayer/IIterableSource";
 
 // Mock the message processing module
-jest.mock("./messageProcessing", () => ({
-  convertMessage: jest.fn(),
-  collateTopicSchemaConversions: jest.fn().mockReturnValue({
+vi.mock("./messageProcessing", async () => ({
+  convertMessage: vi.fn(),
+  collateTopicSchemaConversions: vi.fn().mockReturnValue({
     topicSchemaConverters: new Map(),
     unconvertedSubscriptionTopics: new Set(),
   }),
@@ -28,10 +30,10 @@ describe("createMessageRangeIterator", () => {
   const mockSortedTopics = [PlayerBuilder.topic({ name: mockTopic })];
   const mockMessageConverters: never[] = [];
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     // Update the mock to include our test topic in unconvertedSubscriptionTopics
-    const { collateTopicSchemaConversions } = jest.requireMock("./messageProcessing");
+    const { collateTopicSchemaConversions } = (await import("./messageProcessing")) as any;
     collateTopicSchemaConversions.mockReturnValue({
       topicSchemaConverters: new Map(),
       unconvertedSubscriptionTopics: new Set([mockTopic]),
@@ -248,7 +250,7 @@ describe("createMessageRangeIterator", () => {
 
     // Create an iterator with artificial delays to trigger time-based batching
     let mockTime = 0;
-    const performanceNowSpy = jest.spyOn(performance, "now").mockImplementation(() => mockTime);
+    const performanceNowSpy = vi.spyOn(performance, "now").mockImplementation(() => mockTime);
 
     // Create an iterator that advances mock time to trigger time-based batching
     async function* timedIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
@@ -292,12 +294,13 @@ describe("createMessageRangeIterator", () => {
   it("should handle message conversion when converters are available", async () => {
     const mockMessage: MessageEvent = MessageEventBuilder.messageEvent({ topic: mockTopic });
 
-    const { convertMessage, collateTopicSchemaConversions } =
-      jest.requireMock("./messageProcessing");
+    const { convertMessage, collateTopicSchemaConversions } = (await import(
+      "./messageProcessing"
+    )) as any;
 
     // Mock to include topic schema converters
     collateTopicSchemaConversions.mockReturnValue({
-      topicSchemaConverters: new Map([["test_key", jest.fn()]]),
+      topicSchemaConverters: new Map([["test_key", vi.fn()]]),
       unconvertedSubscriptionTopics: new Set(),
     });
 
@@ -375,7 +378,7 @@ describe("createMessageRangeIterator", () => {
   });
 
   it("should handle errors gracefully", async () => {
-    (console.error as jest.Mock).mockImplementation(() => {});
+    (console.error as Mock).mockImplementation(() => {});
 
     // Create an iterator that throws an error
     async function* errorIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
@@ -417,7 +420,7 @@ describe("createMessageRangeIterator", () => {
       expect.any(Error),
     );
 
-    (console.error as jest.Mock).mockReset();
+    (console.error as Mock).mockReset();
   });
 
   it("should not yield remaining messages when cancelled", async () => {

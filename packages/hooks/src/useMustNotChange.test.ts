@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -14,7 +14,7 @@ import { useMustNotChangeImpl } from "./useMustNotChange";
 
 describe("useMustNotChange", () => {
   it("should log an error when value changes", () => {
-    const errorMock = jest.fn();
+    const errorMock = vi.fn();
     Logger.channels().forEach((channel) => {
       if (channel.name().endsWith("useMustNotChange.ts")) {
         channel.error = errorMock;

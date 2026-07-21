@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -46,7 +46,7 @@ describe("Log Panel actionHandler", () => {
         },
       },
     ])("should handle $description", ({ path, value, input, initialConfig, expectedResult }) => {
-      const saveConfigMock = jest.fn();
+      const saveConfigMock = vi.fn();
       const actionHandler = createActionHandler(saveConfigMock, new Set<string>());
 
       const action: SettingsTreeActionUpdate = {
@@ -62,7 +62,7 @@ describe("Log Panel actionHandler", () => {
 
     it("should create nested properties for new node visibility entries", () => {
       const nodeName = BasicBuilder.string();
-      const saveConfigMock = jest.fn();
+      const saveConfigMock = vi.fn();
       const actionHandler = createActionHandler(saveConfigMock, new Set<string>());
 
       const action: SettingsTreeAction = {
@@ -99,7 +99,7 @@ describe("Log Panel actionHandler", () => {
         description: "sets all nodes to hidden",
       },
     ])("$actionId action $description", ({ actionId, expectedVisibility }) => {
-      const saveConfigMock = jest.fn();
+      const saveConfigMock = vi.fn();
       const seenNodeNames = new Set(["node1", "node2", "node3"]);
       const actionHandler = createActionHandler(saveConfigMock, seenNodeNames);
 
@@ -128,7 +128,7 @@ describe("Log Panel actionHandler", () => {
     });
 
     it("should create nameFilter from scratch when undefined", () => {
-      const saveConfigMock = jest.fn();
+      const saveConfigMock = vi.fn();
       const seenNodeNames = new Set(["node1", "node2"]);
       const actionHandler = createActionHandler(saveConfigMock, seenNodeNames);
 
@@ -149,7 +149,7 @@ describe("Log Panel actionHandler", () => {
 
     it("should handle empty seen node set", () => {
       const node1 = BasicBuilder.string();
-      const saveConfigMock = jest.fn();
+      const saveConfigMock = vi.fn();
       const actionHandler = createActionHandler(saveConfigMock, new Set<string>());
 
       const action: SettingsTreeAction = {
@@ -174,7 +174,7 @@ describe("Log Panel actionHandler", () => {
       const node = BasicBuilder.string();
       const topicName = `/${BasicBuilder.string()}`;
       const searchTerm = BasicBuilder.string();
-      const saveConfigMock = jest.fn();
+      const saveConfigMock = vi.fn();
       const actionHandler = createActionHandler(saveConfigMock, new Set([node]));
 
       const action: SettingsTreeAction = {
@@ -212,7 +212,7 @@ describe("Log Panel actionHandler", () => {
         },
       },
     ])("should not call saveConfig for $description", ({ action }) => {
-      const saveConfigMock = jest.fn();
+      const saveConfigMock = vi.fn();
       const actionHandler = createActionHandler(saveConfigMock, new Set<string>());
 
       actionHandler(action);
@@ -225,7 +225,7 @@ describe("Log Panel actionHandler", () => {
     it("should handle sequence of multiple updates", () => {
       const node1 = BasicBuilder.string();
       const node2 = BasicBuilder.string();
-      const saveConfigMock = jest.fn();
+      const saveConfigMock = vi.fn();
       const actionHandler = createActionHandler(saveConfigMock, new Set<string>());
 
       const actions: SettingsTreeAction[] = [
@@ -250,7 +250,7 @@ describe("Log Panel actionHandler", () => {
     });
 
     it("should handle toggle between show-all and hide-all", () => {
-      const saveConfigMock = jest.fn();
+      const saveConfigMock = vi.fn();
       const seenNodeNames = new Set([BasicBuilder.string(), BasicBuilder.string()]);
       const actionHandler = createActionHandler(saveConfigMock, seenNodeNames);
 

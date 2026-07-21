@@ -1,7 +1,7 @@
-/** @jest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+/** @vitest-environment jsdom */
 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -9,6 +9,7 @@
 
 import { setupJestCanvasMock } from "jest-canvas-mock";
 import * as THREE from "three";
+import type { Mock } from "vitest";
 
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { Renderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/Renderer";
@@ -27,13 +28,13 @@ let mockOrbitControls!: {
   mouseButtons: { LEFT: number; RIGHT: number };
   touches: { ONE: number; TWO: number };
   keys: { LEFT: string; RIGHT: string; UP: string; BOTTOM: string };
-  addEventListener: jest.Mock;
-  listenToKeyEvents: jest.Mock;
-  getDistance: jest.Mock;
-  getPolarAngle: jest.Mock;
-  getAzimuthalAngle: jest.Mock;
+  addEventListener: Mock;
+  listenToKeyEvents: Mock;
+  getDistance: Mock;
+  getPolarAngle: Mock;
+  getAzimuthalAngle: Mock;
   target: THREE.Vector3;
-  update: jest.Mock;
+  update: Mock;
   minPolarAngle: number;
   maxPolarAngle: number;
 };
@@ -41,27 +42,27 @@ let mockOrbitControls!: {
 beforeEach(() => {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: jest.fn().mockImplementation((query) => ({
+    value: vi.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
       onchange: undefined,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
     })),
   });
 });
 
-jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");
+vi.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => ({ default: "" }));
 
-jest.mock("three/examples/jsm/controls/OrbitControls", () => ({
-  OrbitControls: jest.fn().mockImplementation(() => mockOrbitControls),
+vi.mock("three/examples/jsm/controls/OrbitControls", async () => ({
+  OrbitControls: vi.fn().mockImplementation(() => mockOrbitControls),
 }));
 
-jest.mock("three", () => {
-  const ActualTHREE = jest.requireActual("three");
+vi.mock("three", async () => {
+  const ActualTHREE = await vi.importActual("three");
   return {
     ...ActualTHREE,
     WebGLRenderer: function WebGLRenderer() {
@@ -69,18 +70,18 @@ jest.mock("three", () => {
         capabilities: {
           isWebGL2: true,
         },
-        setPixelRatio: jest.fn(),
-        setSize: jest.fn(),
-        render: jest.fn(),
-        clear: jest.fn(),
-        setClearColor: jest.fn(),
-        readRenderTargetPixels: jest.fn(),
+        setPixelRatio: vi.fn(),
+        setSize: vi.fn(),
+        render: vi.fn(),
+        clear: vi.fn(),
+        setClearColor: vi.fn(),
+        readRenderTargetPixels: vi.fn(),
         info: {
-          reset: jest.fn(),
+          reset: vi.fn(),
         },
         shadowMap: {},
-        dispose: jest.fn(),
-        clearDepth: jest.fn(),
+        dispose: vi.fn(),
+        clearDepth: vi.fn(),
         getDrawingBufferSize: () => ({ width: 100, height: 100 }),
       };
     },
@@ -90,15 +91,15 @@ jest.mock("three", () => {
 function setupOrbitControlsMock() {
   mockOrbitControls = {
     ...DEFAULT_ORBIT_CONTROLS_CONFIG,
-    addEventListener: jest.fn(),
-    listenToKeyEvents: jest.fn(),
-    getDistance: jest.fn().mockReturnValue(DEFAULT_CAMERA_STATE.distance),
-    getPolarAngle: jest.fn().mockReturnValue(THREE.MathUtils.degToRad(DEFAULT_CAMERA_STATE.phi)),
-    getAzimuthalAngle: jest
+    addEventListener: vi.fn(),
+    listenToKeyEvents: vi.fn(),
+    getDistance: vi.fn().mockReturnValue(DEFAULT_CAMERA_STATE.distance),
+    getPolarAngle: vi.fn().mockReturnValue(THREE.MathUtils.degToRad(DEFAULT_CAMERA_STATE.phi)),
+    getAzimuthalAngle: vi
       .fn()
       .mockReturnValue(THREE.MathUtils.degToRad(-DEFAULT_CAMERA_STATE.thetaOffset)),
     target: new THREE.Vector3(...DEFAULT_CAMERA_STATE.targetOffset),
-    update: jest.fn(),
+    update: vi.fn(),
     minPolarAngle: 0,
     maxPolarAngle: Math.PI,
   };
@@ -140,7 +141,7 @@ describe("CameraStateSettings", () => {
   let renderer: Renderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupJestCanvasMock();
     setupOrbitControlsMock();
     parent = document.createElement("div");
@@ -151,7 +152,7 @@ describe("CameraStateSettings", () => {
 
   afterEach(() => {
     renderer.dispose();
-    (console.warn as jest.Mock).mockClear(); // Suppress warnings from the Renderer during tests, if any
+    (console.warn as Mock).mockClear(); // Suppress warnings from the Renderer during tests, if any
   });
 
   describe("constructor", () => {

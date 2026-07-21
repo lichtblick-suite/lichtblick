@@ -125,7 +125,7 @@ class MockRosTopic {
   }
 }
 
-jest.mock("@lichtblick/roslibjs", () => {
+vi.mock("@lichtblick/roslibjs", async () => {
   return {
     __esModule: true,
     default: {

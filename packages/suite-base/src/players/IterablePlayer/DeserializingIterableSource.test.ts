@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mock } from "vitest";
 import { MessageEvent } from "@lichtblick/suite";
 import {
   GetBackfillMessagesArgs,
@@ -314,7 +315,7 @@ describe("DeserializingIterableSources", () => {
     });
     expect(messages.length).toBe(4);
     expect(console.error).toHaveBeenCalledTimes(4);
-    (console.error as jest.Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 
   it("sampling path keeps latest sampled message, preserves unsampled messages, and uses carry-over", async () => {

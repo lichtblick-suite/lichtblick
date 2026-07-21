@@ -1,9 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { act, render, waitFor } from "@testing-library/react";
 
@@ -13,7 +13,7 @@ import { RendererOverlay } from "./RendererOverlay";
 
 let mockLastHoverTooltipProps: any = undefined;
 
-jest.mock("./Interactions/HoverTooltip", () => {
+vi.mock("./Interactions/HoverTooltip", async () => {
   return {
     __esModule: true,
     HoverTooltip: (props: any) => {
@@ -23,7 +23,7 @@ jest.mock("./Interactions/HoverTooltip", () => {
   };
 });
 
-jest.mock("./Interactions", () => {
+vi.mock("./Interactions", async () => {
   return {
     __esModule: true,
     InteractionContextMenu: () => undefined,
@@ -31,28 +31,28 @@ jest.mock("./Interactions", () => {
   };
 });
 
-jest.mock("@lichtblick/suite-base/hooks/usePanelMousePresence", () => {
+vi.mock("@lichtblick/suite-base/hooks/usePanelMousePresence", async () => {
   return {
     __esModule: true,
     usePanelMousePresence: () => true,
   };
 });
 
-jest.mock("react-use", () => {
+vi.mock("react-use", async () => {
   return {
     __esModule: true,
     useLongPress: () => ({}),
   };
 });
 
-jest.mock("@lichtblick/suite-base/panels/ThreeDeeRender/HUD", () => {
+vi.mock("@lichtblick/suite-base/panels/ThreeDeeRender/HUD", async () => {
   return {
     __esModule: true,
     HUD: () => undefined,
   };
 });
 
-jest.mock("./Stats", () => {
+vi.mock("./Stats", async () => {
   return {
     __esModule: true,
     Stats: () => undefined,
@@ -61,14 +61,14 @@ jest.mock("./Stats", () => {
 
 const mockRendererEventCallbacks = new Map<string, (...args: any[]) => void>();
 const mockRenderer = {
-  setPickingEnabled: jest.fn(),
-  setSelectedRenderable: jest.fn(),
-  canResetView: jest.fn(() => false),
-  getContextMenuItems: jest.fn(() => []),
+  setPickingEnabled: vi.fn(),
+  setSelectedRenderable: vi.fn(),
+  canResetView: vi.fn(() => false),
+  getContextMenuItems: vi.fn(() => []),
   fixedFrameId: undefined,
 };
 
-jest.mock("./RendererContext", () => {
+vi.mock("./RendererContext", async () => {
   return {
     __esModule: true,
     useRenderer: () => mockRenderer,
@@ -82,24 +82,24 @@ describe("<RendererOverlay /> hover wiring", () => {
   beforeEach(() => {
     mockRendererEventCallbacks.clear();
     mockLastHoverTooltipProps = undefined;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function renderOverlay(canvas: HTMLCanvasElement | ReactNull) {
     return render(
       <ThemeProvider isDark={false}>
         <RendererOverlay
-          addPanel={jest.fn() as any}
+          addPanel={vi.fn() as any}
           canPublish={false}
           canvas={canvas}
           enableStats={false}
           interfaceMode="3d"
           measureActive={false}
-          onChangePublishClickType={jest.fn()}
-          onClickMeasure={jest.fn()}
-          onClickPublish={jest.fn()}
-          onShowTopicSettings={jest.fn()}
-          onTogglePerspective={jest.fn()}
+          onChangePublishClickType={vi.fn()}
+          onClickMeasure={vi.fn()}
+          onClickPublish={vi.fn()}
+          onShowTopicSettings={vi.fn()}
+          onTogglePerspective={vi.fn()}
           perspective={false}
           publishActive={false}
           publishClickType="point"
@@ -111,17 +111,20 @@ describe("<RendererOverlay /> hover wiring", () => {
 
   it("maps hovered selections into HoverTooltip entities and absolute client position", async () => {
     const canvas = document.createElement("canvas");
-    canvas.getBoundingClientRect = jest.fn(() => ({
-      left: 100,
-      top: 200,
-      right: 500,
-      bottom: 600,
-      width: 400,
-      height: 400,
-      x: 100,
-      y: 200,
-      toJSON: () => "",
-    }));
+    canvas.getBoundingClientRect = vi.fn(
+      () =>
+        ({
+          left: 100,
+          top: 200,
+          right: 500,
+          bottom: 600,
+          width: 400,
+          height: 400,
+          x: 100,
+          y: 200,
+          toJSON: () => "",
+        }) as DOMRect,
+    );
 
     renderOverlay(canvas);
 
@@ -145,8 +148,8 @@ describe("<RendererOverlay /> hover wiring", () => {
       topic: "/my_topic",
       name: "my_entity on /my_topic",
       userData: { entityId: "my_entity" },
-      details: jest.fn(() => details),
-      instanceDetails: jest.fn(),
+      details: vi.fn(() => details),
+      instanceDetails: vi.fn(),
     };
 
     act(() => {
@@ -197,17 +200,20 @@ describe("<RendererOverlay /> hover wiring", () => {
 
   it("uses instanceDetails when instanceIndex is provided", async () => {
     const canvas = document.createElement("canvas");
-    canvas.getBoundingClientRect = jest.fn(() => ({
-      left: 0,
-      top: 0,
-      right: 100,
-      bottom: 100,
-      width: 100,
-      height: 100,
-      x: 0,
-      y: 0,
-      toJSON: () => "",
-    }));
+    canvas.getBoundingClientRect = vi.fn(
+      () =>
+        ({
+          left: 0,
+          top: 0,
+          right: 100,
+          bottom: 100,
+          width: 100,
+          height: 100,
+          x: 0,
+          y: 0,
+          toJSON: () => "",
+        }) as DOMRect,
+    );
 
     renderOverlay(canvas);
 
@@ -218,8 +224,8 @@ describe("<RendererOverlay /> hover wiring", () => {
       topic: "/t",
       name: "n",
       userData: { entityId: "n" },
-      details: jest.fn(() => ({ metadata: [{ key: "wrong", value: "wrong" }] })),
-      instanceDetails: jest.fn(() => ({ metadata: [{ key: "ok", value: "yes" }], id: 9 })),
+      details: vi.fn(() => ({ metadata: [{ key: "wrong", value: "wrong" }] })),
+      instanceDetails: vi.fn(() => ({ metadata: [{ key: "ok", value: "yes" }], id: 9 })),
     };
 
     act(() => {
@@ -248,17 +254,20 @@ describe("<RendererOverlay /> hover wiring", () => {
 
   it("clears hovered entities when selections are empty", async () => {
     const canvas = document.createElement("canvas");
-    canvas.getBoundingClientRect = jest.fn(() => ({
-      left: 0,
-      top: 0,
-      right: 100,
-      bottom: 100,
-      width: 100,
-      height: 100,
-      x: 0,
-      y: 0,
-      toJSON: () => "",
-    }));
+    canvas.getBoundingClientRect = vi.fn(
+      () =>
+        ({
+          left: 0,
+          top: 0,
+          right: 100,
+          bottom: 100,
+          width: 100,
+          height: 100,
+          x: 0,
+          y: 0,
+          toJSON: () => "",
+        }) as DOMRect,
+    );
 
     renderOverlay(canvas);
 
@@ -276,17 +285,20 @@ describe("<RendererOverlay /> hover wiring", () => {
 
   it("does not create tooltip entries for selections with no topic and no metadata", async () => {
     const canvas = document.createElement("canvas");
-    canvas.getBoundingClientRect = jest.fn(() => ({
-      left: 0,
-      top: 0,
-      right: 100,
-      bottom: 100,
-      width: 100,
-      height: 100,
-      x: 0,
-      y: 0,
-      toJSON: () => "",
-    }));
+    canvas.getBoundingClientRect = vi.fn(
+      () =>
+        ({
+          left: 0,
+          top: 0,
+          right: 100,
+          bottom: 100,
+          width: 100,
+          height: 100,
+          x: 0,
+          y: 0,
+          toJSON: () => "",
+        }) as DOMRect,
+    );
 
     renderOverlay(canvas);
 
@@ -297,8 +309,8 @@ describe("<RendererOverlay /> hover wiring", () => {
       topic: undefined,
       name: "af949d5a-8243-4e53-8b39-dfb05aac50ba",
       userData: {},
-      details: jest.fn(() => undefined),
-      instanceDetails: jest.fn(() => undefined),
+      details: vi.fn(() => undefined),
+      instanceDetails: vi.fn(() => undefined),
     };
 
     act(() => {

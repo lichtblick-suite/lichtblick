@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -7,7 +7,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
 
 import { diffArrow } from "@lichtblick/suite-base/panels/RawMessagesCommon/constants";
@@ -15,7 +15,7 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import HighlightedValue from "./HighlightedValue";
 
-jest.mock("./index.style", () => ({
+vi.mock("./index.style", async () => ({
   useStylesDiffSpan: () => ({
     classes: {
       root: "mock-root-class",
@@ -23,7 +23,7 @@ jest.mock("./index.style", () => ({
   }),
 }));
 
-jest.mock("./MaybeCollapsedValue", () => ({
+vi.mock("./MaybeCollapsedValue", async () => ({
   __esModule: true,
   default: ({ itemLabel }: { itemLabel: string }) => (
     <span data-testid="maybe-collapsed">{itemLabel}</span>

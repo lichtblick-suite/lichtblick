@@ -7,7 +7,7 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false,
-    "types": ["node", "jest"],
+    "types": ["node", "vitest/globals"],
     "lib": ["dom", "dom.iterable", "es2022", "webworker"],
     "paths": {
       "@lichtblick/suite-base/*": ["../../../suite-base/src/*"]

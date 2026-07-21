@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -18,8 +18,8 @@ type Setup = {
 };
 
 describe("DiagnosticTable", () => {
-  const mockOnChangeSplitFraction = jest.fn();
-  const mockOpenSiblingPanel = jest.fn();
+  const mockOnChangeSplitFraction = vi.fn();
+  const mockOpenSiblingPanel = vi.fn();
 
   function setup({ infoOverride }: Setup = {}) {
     const info = {

@@ -1,6 +1,8 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+import type { Mock } from "vitest";
 
 import { SettingsTreeNode, SettingsTreeNodes } from "@lichtblick/suite";
 import { buildSettingsTree } from "@lichtblick/suite-base/components/PanelSettings/settingsTree";
@@ -13,7 +15,7 @@ import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/suite-base/util/maybeCast");
+vi.mock("@lichtblick/suite-base/util/maybeCast");
 
 describe("buildSettingsTree", () => {
   function setup(): Pick<
@@ -25,7 +27,7 @@ describe("buildSettingsTree", () => {
         topic1: { someConfig: "valueFromConfig" },
       },
     };
-    (maybeCast as jest.Mock).mockReturnValue(config);
+    (maybeCast as Mock).mockReturnValue(config);
 
     const settingsTreeNodes: SettingsTreeNodes = {
       topics: {
@@ -36,24 +38,24 @@ describe("buildSettingsTree", () => {
     };
     const settingsTree: ImmutableSettingsTree = {
       nodes: settingsTreeNodes,
-      actionHandler: jest.fn(),
+      actionHandler: vi.fn(),
     };
 
     const extensionSettings = {
       myPanelType: {
         schema1: {
-          settings: jest.fn(
+          settings: vi.fn(
             (_config): SettingsTreeNode => ({
               label: BasicBuilder.string(),
               children: {},
             }),
           ),
-          handler: jest.fn(),
+          handler: vi.fn(),
         },
       },
     };
 
-    const messagePipelineState = jest.fn().mockReturnValue({
+    const messagePipelineState = vi.fn().mockReturnValue({
       sortedTopics: PlayerBuilder.topics(),
     });
 
@@ -67,13 +69,13 @@ describe("buildSettingsTree", () => {
   }
 
   beforeEach(() => {
-    (console.error as jest.Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 
   it.each([
     {
       panelType: undefined,
-      settingsTree: { nodes: {}, actionHandler: jest.fn() },
+      settingsTree: { nodes: {}, actionHandler: vi.fn() },
     },
     { panelType: "value", settingsTree: undefined },
   ])("should return undefined if settingsTree or panelType is undefined", ({
@@ -130,7 +132,7 @@ describe("buildSettingsTree", () => {
               children: {},
             },
           },
-          actionHandler: jest.fn(),
+          actionHandler: vi.fn(),
         },
       },
     };

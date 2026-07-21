@@ -1,23 +1,35 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mocked } from "vitest";
 import { ILayoutStorage } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { NamespacedLayoutStorage } from "@lichtblick/suite-base/services/LayoutManager/NamespacedLayoutStorage";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
+const { mockLogError } = vi.hoisted(() => ({
+  mockLogError: vi.fn(),
+}));
+vi.mock("@lichtblick/log", () => ({
+  default: {
+    getLogger: () => ({
+      error: mockLogError,
+    }),
+  },
+}));
+
 describe("NamespacedLayoutStorage", () => {
-  let mockStorage: jest.Mocked<Required<ILayoutStorage>>;
+  let mockStorage: Mocked<Required<ILayoutStorage>>;
   const testNamespace = BasicBuilder.string();
 
   beforeEach(() => {
     mockStorage = {
-      list: jest.fn(),
-      get: jest.fn(),
-      put: jest.fn(),
-      delete: jest.fn(),
-      importLayouts: jest.fn(),
-      migrateUnnamespacedLayouts: jest.fn(),
+      list: vi.fn(),
+      get: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+      importLayouts: vi.fn(),
+      migrateUnnamespacedLayouts: vi.fn(),
     };
 
     mockStorage.migrateUnnamespacedLayouts.mockResolvedValue();
@@ -51,7 +63,7 @@ describe("NamespacedLayoutStorage", () => {
         ...mockStorage,
         migrateUnnamespacedLayouts: undefined,
       } as ILayoutStorage;
-      storageWithoutMigration.list = jest.fn().mockResolvedValue([]);
+      storageWithoutMigration.list = vi.fn().mockResolvedValue([]);
 
       // When
       const storage = new NamespacedLayoutStorage(storageWithoutMigration, testNamespace, options);
@@ -130,9 +142,6 @@ describe("NamespacedLayoutStorage", () => {
       mockStorage.migrateUnnamespacedLayouts.mockRejectedValue(migrationError);
       mockStorage.list.mockResolvedValue([]);
 
-      // Mock console.error to avoid test framework issues
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
-
       // When
       const storage = new NamespacedLayoutStorage(mockStorage, testNamespace, options);
       const result = await storage.list(); // Should not throw
@@ -140,10 +149,7 @@ describe("NamespacedLayoutStorage", () => {
       // Then
       expect(result).toEqual([]);
       expect(mockStorage.migrateUnnamespacedLayouts).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith(expect.any(String), migrationError);
-
-      // Cleanup
-      consoleSpy.mockRestore();
+      expect(mockLogError).toHaveBeenCalledWith(expect.any(String), migrationError);
     });
 
     it("should handle import errors gracefully", async () => {
@@ -157,8 +163,6 @@ describe("NamespacedLayoutStorage", () => {
       mockStorage.importLayouts.mockRejectedValue(importError);
       mockStorage.list.mockResolvedValue([]);
 
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
-
       // When
       const storage = new NamespacedLayoutStorage(mockStorage, testNamespace, options);
       const result = await storage.list(); // Should not throw
@@ -166,10 +170,7 @@ describe("NamespacedLayoutStorage", () => {
       // Then
       expect(result).toEqual([]);
       expect(mockStorage.importLayouts).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith(expect.any(String), importError);
-
-      // Cleanup
-      consoleSpy.mockRestore();
+      expect(mockLogError).toHaveBeenCalledWith(expect.any(String), importError);
     });
   });
 

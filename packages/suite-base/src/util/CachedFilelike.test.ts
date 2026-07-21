@@ -85,7 +85,7 @@ describe("CachedFilelike", () => {
     it("requests only the exact range when read-ahead is disabled", async () => {
       // GIVEN: a file that fits entirely in the cache.
       const fileReader = new InMemoryFileReader(new Uint8Array(100));
-      const fetch = jest.spyOn(fileReader, "fetch");
+      const fetch = vi.spyOn(fileReader, "fetch");
       const cachedFileReader = new CachedFilelike({
         fileReader,
         cacheSizeInBytes: 100,
@@ -118,7 +118,7 @@ describe("CachedFilelike", () => {
       const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
       let interval: any;
       let destroyed: any;
-      jest.spyOn(fileReader, "fetch").mockImplementation(() => {
+      vi.spyOn(fileReader, "fetch").mockImplementation(() => {
         return {
           on: (
             type: "data" | "error",
@@ -147,7 +147,7 @@ describe("CachedFilelike", () => {
       let dataCallback: ((_: Uint8Array) => void) | undefined;
       let errorCallback: ((_: Error) => void) | undefined;
       let destroyed: any;
-      const mockFetch = jest.spyOn(fileReader, "fetch").mockImplementation(() => {
+      const mockFetch = vi.spyOn(fileReader, "fetch").mockImplementation(() => {
         return {
           on: (
             type: "data" | "error",
@@ -166,7 +166,7 @@ describe("CachedFilelike", () => {
         };
       });
 
-      const keepReconnectingCallback = jest.fn();
+      const keepReconnectingCallback = vi.fn();
       const cachedFileReader = new CachedFilelike({ fileReader, log, keepReconnectingCallback });
 
       const readerPromise = cachedFileReader.read(1, 2);

@@ -66,7 +66,7 @@ let constName: string | undefined;
 
 describe("messagesToDataset helper functions", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     constName = BasicBuilder.string();
   });
 

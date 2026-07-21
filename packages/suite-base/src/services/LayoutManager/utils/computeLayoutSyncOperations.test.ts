@@ -6,10 +6,12 @@ import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder
 
 import computeLayoutSyncOperations from "./computeLayoutSyncOperations";
 
-jest.mock("@lichtblick/log", () => ({
-  getLogger: jest.fn(() => ({
-    warn: jest.fn(),
-  })),
+vi.mock("@lichtblick/log", async () => ({
+  default: {
+    getLogger: vi.fn(() => ({
+      warn: vi.fn(),
+    })),
+  },
 }));
 
 describe("computeLayoutSyncOperations", () => {

@@ -16,7 +16,7 @@ import { H264 } from "./h264";
 import { H265 } from "./h265";
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe("canonicalVideoCodec", () => {
@@ -64,22 +64,22 @@ describe("canonicalVideoCodec", () => {
 
 describe("isVideoKeyframe", () => {
   it("dispatches to the H264 parser for h264", () => {
-    const spy = jest.spyOn(H264, "IsKeyframe").mockReturnValue(true);
+    const spy = vi.spyOn(H264, "IsKeyframe").mockReturnValue(true);
     const data = new Uint8Array([0x65]);
     expect(isVideoKeyframe("h264", data)).toBe(true);
     expect(spy).toHaveBeenCalledWith(data);
   });
 
   it("dispatches to the H265 parser for the 'hevc' alias", () => {
-    const spy = jest.spyOn(H265, "IsKeyframe").mockReturnValue(true);
+    const spy = vi.spyOn(H265, "IsKeyframe").mockReturnValue(true);
     const data = new Uint8Array([0x26]);
     expect(isVideoKeyframe("hevc", data)).toBe(true);
     expect(spy).toHaveBeenCalledWith(data);
   });
 
   it("returns false for unrecognized formats without consulting any parser", () => {
-    const h264Spy = jest.spyOn(H264, "IsKeyframe");
-    const h265Spy = jest.spyOn(H265, "IsKeyframe");
+    const h264Spy = vi.spyOn(H264, "IsKeyframe");
+    const h265Spy = vi.spyOn(H265, "IsKeyframe");
     expect(isVideoKeyframe("vp9", new Uint8Array([0x01]))).toBe(false);
     expect(h264Spy).not.toHaveBeenCalled();
     expect(h265Spy).not.toHaveBeenCalled();

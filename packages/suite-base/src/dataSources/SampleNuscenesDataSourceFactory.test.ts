@@ -16,25 +16,28 @@ import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 
-jest.mock("@lichtblick/suite-base/players/IterablePlayer", () => ({
-  IterablePlayer: jest.fn(),
+vi.mock("@lichtblick/suite-base/players/IterablePlayer", async () => ({
+  IterablePlayer: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource", () => ({
-  WorkerSerializedIterableSource: jest.fn(),
-}));
+vi.mock(
+  "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource",
+  async () => ({
+    WorkerSerializedIterableSource: vi.fn(),
+  }),
+);
 
 describe("SampleNuscenesDataSourceFactory", () => {
   let factory: SampleNuscenesDataSourceFactory;
 
   beforeEach(() => {
     factory = new SampleNuscenesDataSourceFactory();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function setup() {
     const args: DataSourceFactoryInitializeArgs = {
-      metricsCollector: jest.fn(),
+      metricsCollector: vi.fn(),
     } as unknown as DataSourceFactoryInitializeArgs;
 
     return { args };

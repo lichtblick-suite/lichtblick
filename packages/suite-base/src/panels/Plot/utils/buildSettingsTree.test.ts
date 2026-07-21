@@ -13,7 +13,7 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { buildSettingsTree } from "./buildSettingsTree";
 
 describe("buildSettingsTree", () => {
-  const t: TFunction<"plot"> = jest.fn((key) => key) as unknown as TFunction<"plot">;
+  const t: TFunction<"plot"> = vi.fn((key) => key) as unknown as TFunction<"plot">;
   const axisLabel = BasicBuilder.string();
 
   beforeEach(() => {});

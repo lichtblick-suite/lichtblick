@@ -1,10 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { SnackbarProvider } from "notistack";
 
 import { NamespaceSelectionModal } from "@lichtblick/suite-base/components/NamespaceSelectionModal";
@@ -21,8 +21,8 @@ const renderWithProviders = (component: React.ReactElement) => {
 describe("NamespaceSelectionModal", () => {
   const defaultProps = {
     open: true,
-    onClose: jest.fn(),
-    onSelect: jest.fn(),
+    onClose: vi.fn(),
+    onSelect: vi.fn(),
     files: [
       new File(["content"], "layout.json", { type: "application/json" }),
       new File(["content"], "extension.foxe", { type: "application/octet-stream" }),
@@ -30,7 +30,7 @@ describe("NamespaceSelectionModal", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("when modal is opened with mixed files", () => {

@@ -1,11 +1,12 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { Immutable } from "@lichtblick/suite";
 import ExtensionList from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionList/ExtensionList";
@@ -19,15 +20,15 @@ import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionB
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/suite-base/util/isDesktopApp", () => jest.fn());
+vi.mock("@lichtblick/suite-base/util/isDesktopApp", async () => ({ default: vi.fn() }));
 
-jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
-  useExtensionCatalog: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", async () => ({
+  useExtensionCatalog: vi.fn(),
 }));
 
-const mockEnqueueSnackbar = jest.fn();
-jest.mock("notistack", () => ({
-  ...jest.requireActual("notistack"),
+const mockEnqueueSnackbar = vi.fn();
+vi.mock("notistack", async () => ({
+  ...(await vi.importActual("notistack")),
   useSnackbar: () => ({
     enqueueSnackbar: mockEnqueueSnackbar,
   }),
@@ -74,16 +75,16 @@ describe("ExtensionList Component", () => {
     }),
   ];
   const mockFilterText = "Extension";
-  const mockSelectExtension = jest.fn();
+  const mockSelectExtension = vi.fn();
 
   const emptyMockEntries: Immutable<ExtensionMarketplaceDetail>[] = [];
 
   beforeEach(() => {
     // Mock useExtensionCatalog as a Zustand selector hook
-    (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+    (useExtensionCatalog as Mock).mockImplementation((selector) => {
       const mockState = {
         installedExtensions: [],
-        uninstallExtension: jest.fn(),
+        uninstallExtension: vi.fn(),
       };
       return selector(mockState);
     });
@@ -159,10 +160,10 @@ describe("ExtensionList Component", () => {
 
   it("calls selectExtension with installed true when clicking an installed extension", () => {
     // Given
-    (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+    (useExtensionCatalog as Mock).mockImplementation((selector) => {
       const mockState = {
         installedExtensions: [mockEntries[0]],
-        uninstallExtension: jest.fn(),
+        uninstallExtension: vi.fn(),
       };
       return selector(mockState);
     });
@@ -187,12 +188,12 @@ describe("ExtensionList Component", () => {
   });
 
   describe("handleBulkUninstall", () => {
-    const mockUninstallExtension = jest.fn();
+    const mockUninstallExtension = vi.fn();
 
     beforeEach(() => {
       mockUninstallExtension.mockClear();
 
-      (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+      (useExtensionCatalog as Mock).mockImplementation((selector) => {
         const mockState = {
           installedExtensions: mockEntries,
           uninstallExtension: mockUninstallExtension,
@@ -244,7 +245,7 @@ describe("ExtensionList Component", () => {
 
     it("does not show uninstall button when selected extensions are not installed", async () => {
       // Given - override to have NO installed extensions
-      (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+      (useExtensionCatalog as Mock).mockImplementation((selector) => {
         const mockState = {
           installedExtensions: [], // Empty - nothing installed
           uninstallExtension: mockUninstallExtension,
@@ -273,7 +274,7 @@ describe("ExtensionList Component", () => {
 
     it("shows snackbar when only some selected extensions are installed", async () => {
       // Given
-      (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+      (useExtensionCatalog as Mock).mockImplementation((selector) => {
         const mockState = {
           installedExtensions: [mockEntries[0]], // Only first one installed
           uninstallExtension: mockUninstallExtension,
@@ -323,7 +324,7 @@ describe("ExtensionList Component", () => {
         .mockRejectedValueOnce(new Error("Second uninstall failed")); // Second call fails
 
       // This is needed to supress the error log from the failed uninstall in the test output, since we are intentionally causing it to fail to test the error handling
-      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation();
 
       render(
         <ExtensionList
@@ -389,7 +390,7 @@ describe("ExtensionList Component", () => {
 
   describe("Actions column renderCell", () => {
     beforeEach(() => {
-      (isDesktopApp as jest.Mock).mockReturnValue(true);
+      (isDesktopApp as Mock).mockReturnValue(true);
     });
 
     it("renders an Install button for an extension that is not installed", () => {
@@ -398,12 +399,7 @@ describe("ExtensionList Component", () => {
 
       // When
       render(
-        <ExtensionList
-          namespace="org"
-          entries={[entry]}
-          filterText=""
-          selectExtension={jest.fn()}
-        />,
+        <ExtensionList namespace="org" entries={[entry]} filterText="" selectExtension={vi.fn()} />,
       );
 
       // Then
@@ -414,22 +410,17 @@ describe("ExtensionList Component", () => {
       // Given
       const entry = ExtensionBuilder.extensionMarketplaceDetail({ namespace: "org" });
 
-      (useExtensionCatalog as jest.Mock).mockImplementation((selector) => {
+      (useExtensionCatalog as Mock).mockImplementation((selector) => {
         const mockState = {
           installedExtensions: [entry],
-          uninstallExtension: jest.fn(),
+          uninstallExtension: vi.fn(),
         };
         return selector(mockState);
       });
 
       // When
       render(
-        <ExtensionList
-          namespace="org"
-          entries={[entry]}
-          filterText=""
-          selectExtension={jest.fn()}
-        />,
+        <ExtensionList namespace="org" entries={[entry]} filterText="" selectExtension={vi.fn()} />,
       );
 
       // Then

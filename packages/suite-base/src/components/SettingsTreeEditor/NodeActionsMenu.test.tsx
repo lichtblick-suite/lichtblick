@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { userEvent } from "@storybook/testing-library";
@@ -16,14 +16,14 @@ describe("NodeActionsMenu", () => {
     divider: "node-actions-menu-divider",
     iconPrefix: "node-actions-menu-item-icon-",
   };
-  const mockOnSelectAction = jest.fn();
+  const mockOnSelectAction = vi.fn();
 
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (propsOverride: Partial<NodeActionsMenuProps> = {}) => {

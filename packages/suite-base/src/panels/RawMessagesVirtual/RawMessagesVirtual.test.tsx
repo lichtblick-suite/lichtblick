@@ -1,9 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
@@ -23,10 +23,10 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import RawMessagesVirtual from "./RawMessagesVirtual";
 
-const mockUseSharedRawMessagesLogic = jest.fn();
+const mockUseSharedRawMessagesLogic = vi.fn();
 
-jest.mock("@lichtblick/suite-base/panels/RawMessagesCommon/useSharedRawMessagesLogic", () => ({
-  useSharedRawMessagesLogic: jest.fn((args) => mockUseSharedRawMessagesLogic(args)),
+vi.mock("@lichtblick/suite-base/panels/RawMessagesCommon/useSharedRawMessagesLogic", async () => ({
+  useSharedRawMessagesLogic: vi.fn((args) => mockUseSharedRawMessagesLogic(args)),
 }));
 
 type MessageDataItem = ReturnType<typeof useMessageDataItem>[number];
@@ -41,14 +41,14 @@ function createMockSharedLogic(
     baseItem: overrides.baseItem,
     diffItem: overrides.diffItem,
     expansion: overrides.expansion ?? "none",
-    setExpansion: jest.fn(),
+    setExpansion: vi.fn(),
     nodes: overrides.nodes ?? new Set<string>(),
     canExpandAll: overrides.canExpandAll ?? false,
-    onTopicPathChange: jest.fn(),
-    onDiffTopicPathChange: jest.fn(),
-    onToggleDiff: jest.fn(),
-    onToggleExpandAll: jest.fn(),
-    onLabelClick: jest.fn(),
+    onTopicPathChange: vi.fn(),
+    onDiffTopicPathChange: vi.fn(),
+    onToggleDiff: vi.fn(),
+    onToggleExpandAll: vi.fn(),
+    onLabelClick: vi.fn(),
     ...overrides,
   };
 }
@@ -93,12 +93,12 @@ function renderComponent(configOverrides: Partial<RawMessagesPanelConfig> = {}) 
       }
       return undefined;
     },
-    set: jest.fn(),
-    addChangeListener: jest.fn(),
-    removeChangeListener: jest.fn(),
+    set: vi.fn(),
+    addChangeListener: vi.fn(),
+    removeChangeListener: vi.fn(),
   };
 
-  const saveConfig = jest.fn();
+  const saveConfig = vi.fn();
 
   const ui: React.ReactElement = (
     <ThemeProvider isDark>
@@ -121,14 +121,14 @@ function renderComponent(configOverrides: Partial<RawMessagesPanelConfig> = {}) 
 
 describe("Given RawMessagesVirtual", () => {
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
 
     // Default mock implementation
     mockUseSharedRawMessagesLogic.mockReturnValue(createMockSharedLogic());
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("When no topic is selected", () => {

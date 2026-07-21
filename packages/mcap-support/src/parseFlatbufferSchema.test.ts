@@ -316,7 +316,7 @@ describe("parseFlatbufferSchema", () => {
   );
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("rejects invalid schema", () => {
@@ -423,7 +423,7 @@ describe("parseFlatbufferSchema", () => {
       enums: [{ name: "StatusEnum", values: undefined }],
       rootTable: { name: "TestMsg" },
     };
-    jest
+    vi
       .spyOn(Schema, "getRootAsSchema")
       .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
         typeof Schema.getRootAsSchema
@@ -452,7 +452,7 @@ describe("parseFlatbufferSchema", () => {
       enums: [{ name: "ItemEnum", values: undefined }],
       rootTable: { name: "TestMsg" },
     };
-    jest
+    vi
       .spyOn(Schema, "getRootAsSchema")
       .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
         typeof Schema.getRootAsSchema
@@ -487,12 +487,12 @@ describe("parseFlatbufferSchema", () => {
       ],
       rootTable: { name: "TestMsg" },
     };
-    jest
+    vi
       .spyOn(Schema, "getRootAsSchema")
       .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
         typeof Schema.getRootAsSchema
       >);
-    jest.spyOn(Parser.prototype, "toObjectLambda").mockReturnValue(jest.fn());
+    vi.spyOn(Parser.prototype, "toObjectLambda").mockReturnValue(vi.fn());
 
     // When
     const { datatypes } = parseFlatbufferSchema("TestMsg", new Uint8Array());
@@ -523,12 +523,12 @@ describe("parseFlatbufferSchema", () => {
       enums: [],
       rootTable: { name: "TestMsg" },
     };
-    jest
+    vi
       .spyOn(Schema, "getRootAsSchema")
       .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
         typeof Schema.getRootAsSchema
       >);
-    jest.spyOn(Parser.prototype, "toObjectLambda").mockReturnValue(jest.fn());
+    vi.spyOn(Parser.prototype, "toObjectLambda").mockReturnValue(vi.fn());
 
     // When
     const { datatypes } = parseFlatbufferSchema("TestMsg", new Uint8Array());
@@ -555,7 +555,7 @@ describe("parseFlatbufferSchema", () => {
       enums: [],
       rootTable: { name: "TestMsg" },
     };
-    jest
+    vi
       .spyOn(Schema, "getRootAsSchema")
       .mockReturnValue({ unpack: () => fakeSchema } as unknown as ReturnType<
         typeof Schema.getRootAsSchema

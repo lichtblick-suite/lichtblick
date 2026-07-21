@@ -1,5 +1,4 @@
-/** @jest-environment jsdom */
-
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -7,19 +6,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import { TreeNode } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 import { VirtualizedTree } from "@lichtblick/suite-base/panels/RawMessagesVirtual/VirtualizedTree";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: jest.fn(() => ({
-    getVirtualItems: jest.fn(() => []),
-    getTotalSize: jest.fn(() => 0),
-    scrollToIndex: jest.fn(),
-    measureElement: jest.fn(),
+vi.mock("@tanstack/react-virtual", async () => ({
+  useVirtualizer: vi.fn(() => ({
+    getVirtualItems: vi.fn(() => []),
+    getTotalSize: vi.fn(() => 0),
+    scrollToIndex: vi.fn(),
+    measureElement: vi.fn(),
   })),
 }));
 
@@ -27,24 +26,26 @@ function renderVirtualizedTree(props: Partial<React.ComponentProps<typeof Virtua
   const defaultProps: React.ComponentProps<typeof VirtualizedTree> = {
     data: {},
     expandedNodes: new Set<string>(),
-    onToggleExpand: jest.fn(),
-    renderValue: jest.fn(),
+    onToggleExpand: vi.fn(),
+    renderValue: vi.fn(),
     ...props,
   };
   return render(<VirtualizedTree {...defaultProps} />);
 }
 
 describe("VirtualizedTree", () => {
-  const mockOnToggleExpand = jest.fn();
-  const { useVirtualizer } = jest.requireMock("@tanstack/react-virtual");
+  const mockOnToggleExpand = vi.fn();
+  let useVirtualizer: any;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const mod = (await import("@tanstack/react-virtual")) as any;
+    useVirtualizer = mod.useVirtualizer;
     useVirtualizer.mockReturnValue({
-      getVirtualItems: jest.fn(() => []),
-      getTotalSize: jest.fn(() => 0),
-      scrollToIndex: jest.fn(),
-      measureElement: jest.fn(),
+      getVirtualItems: vi.fn(() => []),
+      getTotalSize: vi.fn(() => 0),
+      scrollToIndex: vi.fn(),
+      measureElement: vi.fn(),
     });
   });
 
@@ -81,14 +82,14 @@ describe("VirtualizedTree", () => {
       };
       const expandedNodes = new Set<string>();
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
           { index: 2, key: "2", size: 24, start: 48 },
         ]),
-        getTotalSize: jest.fn(() => 72),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 72),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -147,10 +148,10 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
+        getTotalSize: vi.fn(() => 24),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -170,13 +171,13 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>(["nested"]);
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
         ]),
-        getTotalSize: jest.fn(() => 48),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 48),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -196,10 +197,10 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
+        getTotalSize: vi.fn(() => 24),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -219,10 +220,10 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
+        getTotalSize: vi.fn(() => 24),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -246,13 +247,13 @@ describe("VirtualizedTree", () => {
       const customText = BasicBuilder.string();
       const data = { field: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
-      const renderValue = jest.fn((_node: TreeNode) => <span>{customText}</span>);
+      const renderValue = vi.fn((_node: TreeNode) => <span>{customText}</span>);
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
+        getTotalSize: vi.fn(() => 24),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -272,13 +273,13 @@ describe("VirtualizedTree", () => {
       // Given
       const data = { testField: BasicBuilder.string() };
       const expandedNodes = new Set<string>();
-      const renderValue = jest.fn((_node: TreeNode) => <span>custom</span>);
+      const renderValue = vi.fn((_node: TreeNode) => <span>custom</span>);
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
+        getTotalSize: vi.fn(() => 24),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -315,14 +316,14 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>(["level1", "level2~level1"]);
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
           { index: 2, key: "2", size: 24, start: 48 },
         ]),
-        getTotalSize: jest.fn(() => 72),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 72),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -348,13 +349,13 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
         ]),
-        getTotalSize: jest.fn(() => 48),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 48),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -377,10 +378,10 @@ describe("VirtualizedTree", () => {
 
       const virtualItem = { index: 0, key: "0", size: 30, start: 0 };
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [virtualItem]),
-        getTotalSize: jest.fn(() => 30),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [virtualItem]),
+        getTotalSize: vi.fn(() => 30),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -404,10 +405,10 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
+        getTotalSize: vi.fn(() => 24),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -427,10 +428,10 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
+        getTotalSize: vi.fn(() => 24),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -450,13 +451,13 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
         ]),
-        getTotalSize: jest.fn(() => 48),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 48),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -482,11 +483,11 @@ describe("VirtualizedTree", () => {
       };
       const expandedNodes = new Set<string>();
 
-      const mockUseVirtualizer = jest.fn(() => ({
-        getVirtualItems: jest.fn(() => []),
-        getTotalSize: jest.fn(() => 0),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+      const mockUseVirtualizer = vi.fn(() => ({
+        getVirtualItems: vi.fn(() => []),
+        getTotalSize: vi.fn(() => 0),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       }));
 
       useVirtualizer.mockImplementation(mockUseVirtualizer);
@@ -521,14 +522,14 @@ describe("VirtualizedTree", () => {
 
       // Simulate virtualizer returning only 3 visible items out of 5 total
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
           { index: 2, key: "2", size: 24, start: 48 },
         ]),
-        getTotalSize: jest.fn(() => 120), // Total for all 5 items
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 120), // Total for all 5 items
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -550,10 +551,10 @@ describe("VirtualizedTree", () => {
       const totalSize = BasicBuilder.number({ min: 100, max: 1000 });
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => []),
-        getTotalSize: jest.fn(() => totalSize),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => []),
+        getTotalSize: vi.fn(() => totalSize),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -585,15 +586,15 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>(["level1", "level2~level1", "level3~level2~level1"]);
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
           { index: 2, key: "2", size: 24, start: 48 },
           { index: 3, key: "3", size: 24, start: 72 },
         ]),
-        getTotalSize: jest.fn(() => 96),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 96),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -623,7 +624,7 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>(["users", "0~users", "1~users"]);
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
           { index: 2, key: "2", size: 24, start: 48 },
@@ -632,9 +633,9 @@ describe("VirtualizedTree", () => {
           { index: 5, key: "5", size: 24, start: 120 },
           { index: 6, key: "6", size: 24, start: 144 },
         ]),
-        getTotalSize: jest.fn(() => 168),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 168),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When
@@ -657,10 +658,10 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
+        getTotalSize: vi.fn(() => 24),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       renderVirtualizedTree({
@@ -672,13 +673,13 @@ describe("VirtualizedTree", () => {
       // When
       const newExpandedNodes = new Set<string>(["nested"]);
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
         ]),
-        getTotalSize: jest.fn(() => 48),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 48),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       renderVirtualizedTree({
@@ -703,10 +704,10 @@ describe("VirtualizedTree", () => {
       const expandedNodes = new Set<string>();
 
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
-        getTotalSize: jest.fn(() => 24),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getVirtualItems: vi.fn(() => [{ index: 0, key: "0", size: 24, start: 0 }]),
+        getTotalSize: vi.fn(() => 24),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       const { rerender } = renderVirtualizedTree({
@@ -721,13 +722,13 @@ describe("VirtualizedTree", () => {
         field2: BasicBuilder.string(),
       };
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 1, key: "1", size: 24, start: 24 },
         ]),
-        getTotalSize: jest.fn(() => 48),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 48),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       rerender(
@@ -735,7 +736,7 @@ describe("VirtualizedTree", () => {
           data={newData}
           expandedNodes={expandedNodes}
           onToggleExpand={mockOnToggleExpand}
-          renderValue={jest.fn()}
+          renderValue={vi.fn()}
         />,
       );
 
@@ -753,13 +754,13 @@ describe("VirtualizedTree", () => {
 
       // Mock virtualizer to return an index that doesn't exist in flatData
       useVirtualizer.mockReturnValue({
-        getVirtualItems: jest.fn(() => [
+        getVirtualItems: vi.fn(() => [
           { index: 0, key: "0", size: 24, start: 0 },
           { index: 999, key: "999", size: 24, start: 24 }, // Invalid index
         ]),
-        getTotalSize: jest.fn(() => 48),
-        scrollToIndex: jest.fn(),
-        measureElement: jest.fn(),
+        getTotalSize: vi.fn(() => 48),
+        scrollToIndex: vi.fn(),
+        measureElement: vi.fn(),
       });
 
       // When

@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -15,6 +15,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { Mock } from "vitest";
 import { userEvent } from "@storybook/testing-library";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
@@ -38,24 +39,24 @@ import { MessagePathInputBaseProps } from "./types";
 let mockDatatypes = new Map();
 let mockTopics: Array<{ name: string; schemaName?: string }> = [];
 
-jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
-jest.mock("@lichtblick/suite-base/components/MessagePipeline");
-jest.mock("@lichtblick/suite-base/context/UserProfileStorageContext");
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext");
-jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
+vi.mock("@lichtblick/suite-base/components/MessagePipeline");
+vi.mock("@lichtblick/suite-base/context/UserProfileStorageContext");
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext");
+vi.mock("@lichtblick/suite-base/PanelAPI", async () => ({
   useDataSourceInfo: () => ({
     datatypes: mockDatatypes,
     topics: mockTopics,
   }),
 }));
-jest.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", () =>
-  jest.fn(() => new MockLayoutManager()),
+vi.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", async () =>
+  vi.fn(() => new MockLayoutManager()),
 );
-jest.mock("use-debounce");
+vi.mock("use-debounce");
 
 describe("tryToSetDefaultGlobalVar", () => {
   it("correctly returns true/false depending on whether a global variable has a default", () => {
-    const setGlobalVars = jest.fn();
+    const setGlobalVars = vi.fn();
     expect(tryToSetDefaultGlobalVar("some_var_without_default", setGlobalVars)).toEqual(false);
     expect(setGlobalVars).not.toHaveBeenCalled();
   });
@@ -63,7 +64,7 @@ describe("tryToSetDefaultGlobalVar", () => {
 
 describe("getFirstInvalidVariableFromRosPath", () => {
   it("returns all possible message paths when not passing in `validTypes`", () => {
-    const setGlobalVars = jest.fn();
+    const setGlobalVars = vi.fn();
     const defaultOperator = "==";
     const rosPath: MessagePath = {
       topicName: "/some_topic",
@@ -97,17 +98,17 @@ describe("getFirstInvalidVariableFromRosPath", () => {
 });
 
 describe("MessagePathInput Component", () => {
-  const mockOnChange = jest.fn();
-  (useGlobalVariables as jest.Mock).mockReturnValue({
+  const mockOnChange = vi.fn();
+  (useGlobalVariables as Mock).mockReturnValue({
     globalVariables: {},
-    setGlobalVariables: jest.fn(),
+    setGlobalVariables: vi.fn(),
   });
-  (useMessagePipeline as jest.Mock).mockReturnValue({});
-  (useUserProfileStorage as jest.Mock).mockReturnValue({
+  (useMessagePipeline as Mock).mockReturnValue({});
+  (useUserProfileStorage as Mock).mockReturnValue({
     getUserProfile: {},
-    setUserProfile: jest.fn(),
+    setUserProfile: vi.fn(),
   });
-  (useDebounce as jest.Mock).mockImplementation((value) => [value]);
+  (useDebounce as Mock).mockImplementation((value) => [value]);
 
   const renderComponent = (propsOverride: Partial<MessagePathInputBaseProps> = {}) => {
     const props: MessagePathInputBaseProps = {
@@ -130,7 +131,7 @@ describe("MessagePathInput Component", () => {
   };
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should update value when onChange is called", async () => {
@@ -153,10 +154,10 @@ describe("MessagePathInput Component", () => {
 
   describe("autoComplete logic", () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      (useGlobalVariables as jest.Mock).mockReturnValue({
+      vi.clearAllMocks();
+      (useGlobalVariables as Mock).mockReturnValue({
         globalVariables: {},
-        setGlobalVariables: jest.fn(),
+        setGlobalVariables: vi.fn(),
       });
     });
 

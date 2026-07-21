@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -17,18 +17,18 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { SharedRoot } from "./SharedRoot";
 import { useSharedRootContext } from "./context/SharedRootContext";
 
-jest.mock("./components/ColorSchemeThemeProvider", () => ({
+vi.mock("./components/ColorSchemeThemeProvider", () => ({
   ColorSchemeThemeProvider: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
-jest.mock("./components/CssBaseline", () => ({
+vi.mock("./components/CssBaseline", () => ({
   __esModule: true,
   default: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
-jest.mock("./components/ErrorBoundary", () => ({
+vi.mock("./components/ErrorBoundary", () => ({
   __esModule: true,
   default: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
-jest.mock("./components/GlobalCss", () => ({
+vi.mock("./components/GlobalCss", () => ({
   __esModule: true,
   default: () => <></>,
 }));

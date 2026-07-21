@@ -1,33 +1,34 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { loadDefaultFont } from "./loadFont";
 
-jest.mock("@lichtblick/suite-base/styles/assets/PlexMono.woff2", () => "mock-font.woff2");
+vi.mock("@lichtblick/suite-base/styles/assets/PlexMono.woff2", () => ({ default: "mock-font.woff2" }));
 
 describe("loadDefaultFont", () => {
-  let mockFontFace: jest.Mock;
+  let mockFontFace: Mock;
 
   beforeEach(() => {
-    mockFontFace = jest.fn().mockImplementation((family) => ({
-      load: jest.fn().mockResolvedValue({ family }),
+    mockFontFace = vi.fn().mockImplementation((family) => ({
+      load: vi.fn().mockResolvedValue({ family }),
     }));
 
     (global as any).FontFace = mockFontFace;
 
     Object.defineProperty(document, "fonts", {
-      value: { add: jest.fn() },
+      value: { add: vi.fn() },
     });
 
     global.WorkerGlobalScope = undefined as any;
-    global.fetch = jest.fn().mockResolvedValue({
-      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+    global.fetch = vi.fn().mockResolvedValue({
+      arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should load and add the font to document.fonts if not in a worker", async () => {

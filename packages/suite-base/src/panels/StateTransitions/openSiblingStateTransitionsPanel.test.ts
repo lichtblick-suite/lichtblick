@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { StateTransitionConfig } from "@lichtblick/suite-base/panels/StateTransitions/types";
 import { OpenSiblingPanel } from "@lichtblick/suite-base/types/panels";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -16,8 +17,8 @@ describe("openSiblingStateTransitionsPanel", () => {
   const topicName = BasicBuilder.string();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockOpenSiblingPanel = jest.fn();
+    vi.clearAllMocks();
+    mockOpenSiblingPanel = vi.fn();
   });
 
   function setup({ config = {} }: Partial<IOpenSiblingStateTransitionsPanelSetup> = {}) {
@@ -35,7 +36,7 @@ describe("openSiblingStateTransitionsPanel", () => {
     const config: StateTransitionConfig = { paths: [], isSynced: false };
 
     openSiblingStateTransitionsPanel(mockOpenSiblingPanel, topicName);
-    const siblingConfigCreator = (mockOpenSiblingPanel as jest.Mock).mock.calls[0][0]
+    const siblingConfigCreator = (mockOpenSiblingPanel as Mock).mock.calls[0][0]
       .siblingConfigCreator;
     const newConfig = siblingConfigCreator(config);
 
@@ -56,7 +57,7 @@ describe("openSiblingStateTransitionsPanel", () => {
     });
 
     openSiblingStateTransitionsPanel(mockOpenSiblingPanel, topicName);
-    const siblingConfigCreator = (mockOpenSiblingPanel as jest.Mock).mock.calls[0][0]
+    const siblingConfigCreator = (mockOpenSiblingPanel as Mock).mock.calls[0][0]
       .siblingConfigCreator;
     const newConfig = siblingConfigCreator(config);
 

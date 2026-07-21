@@ -7,6 +7,7 @@
 
 // Custom types available globally and required when using app components as dependencies
 
+/// <reference types="vitest/globals" />
 // Global ambient types declared without any `import`/`export` (e.g. `MemoryInfo`,
 // `performance.memory`, `structuredClone`, and the WICG File System Access globals such as
 // `OpenFilePickerOptions`, `window.showOpenFilePicker`, and the `FileSystemFileHandle`

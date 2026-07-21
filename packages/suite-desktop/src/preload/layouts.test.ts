@@ -5,28 +5,29 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { MockedFunction, Mock } from "vitest";
 import { existsSync, Dirent } from "fs";
 import { readFile, readdir } from "fs/promises";
 
 import { fetchLayouts } from "./layouts";
 
 // Mock fs methods
-jest.mock("fs", () => ({
-  existsSync: jest.fn(),
+vi.mock("fs", async () => ({
+  existsSync: vi.fn(),
 }));
 
-jest.mock("fs/promises", () => ({
-  readdir: jest.fn(),
-  readFile: jest.fn(),
+vi.mock("fs/promises", async () => ({
+  readdir: vi.fn(),
+  readFile: vi.fn(),
 }));
 
 describe("fetchLayouts", () => {
-  const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
-  const mockReaddir = readdir as jest.MockedFunction<typeof readdir>;
-  const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
+  const mockExistsSync = existsSync as MockedFunction<typeof existsSync>;
+  const mockReaddir = readdir as MockedFunction<typeof readdir>;
+  const mockReadFile = readFile as MockedFunction<typeof readFile>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return an empty array if root folder does not exist", async () => {
@@ -110,6 +111,6 @@ describe("fetchLayouts", () => {
 
     expect(console.error).toHaveBeenCalledTimes(1);
     expect(console.error).toHaveBeenCalledWith(new Error("read error"));
-    (console.error as jest.Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 });

@@ -8,22 +8,28 @@ import { BasicBuilder } from "@lichtblick/test-builders";
  */
 
 describe("browserStorageKeys", () => {
-  let originalGlobalThis: typeof globalThis;
+  let originalDevWorkspace: unknown;
+  let hadDevWorkspace: boolean;
 
   beforeEach(() => {
-    // Store original globalThis to restore later
-    originalGlobalThis = { ...globalThis };
+    // Store original state
+    hadDevWorkspace = "DEV_WORKSPACE" in globalThis;
+    originalDevWorkspace = (globalThis as any).DEV_WORKSPACE;
 
     // Clear any existing global variables
     delete (globalThis as any).DEV_WORKSPACE;
 
     // Clear module cache to ensure fresh imports
-    jest.resetModules();
+    vi.resetModules();
   });
 
   afterEach(() => {
-    // Restore original globalThis
-    Object.assign(globalThis, originalGlobalThis);
+    // Restore original state
+    if (hadDevWorkspace) {
+      (globalThis as any).DEV_WORKSPACE = originalDevWorkspace;
+    } else {
+      delete (globalThis as any).DEV_WORKSPACE;
+    }
   });
 
   it("should generate keys without workspace prefix when DEV_WORKSPACE is not set", async () => {

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`generateTypesLib generateDatatypesInterface should generate basic Datatypes interface 1`] = `
+exports[`generateTypesLib > generateDatatypesInterface > should generate basic Datatypes interface 1`] = `
 "/**
  * MessageTypeBySchemaName enumerates the message types for for all the schema names
  * in the current data source.
@@ -18,7 +18,7 @@ export type MessageTypeBySchemaName = {
 "
 `;
 
-exports[`generateTypesLib generateDatatypesInterface should generate multiple datatypes in Datatypes interface 1`] = `
+exports[`generateTypesLib > generateDatatypesInterface > should generate multiple datatypes in Datatypes interface 1`] = `
 "/**
  * MessageTypeBySchemaName enumerates the message types for for all the schema names
  * in the current data source.
@@ -36,7 +36,7 @@ export type MessageTypeBySchemaName = {
 "
 `;
 
-exports[`generateTypesLib generateDatatypesInterface should generate type with backslash 1`] = `
+exports[`generateTypesLib > generateDatatypesInterface > should generate type with backslash 1`] = `
 "/**
  * MessageTypeBySchemaName enumerates the message types for for all the schema names
  * in the current data source.
@@ -51,7 +51,7 @@ export type MessageTypeBySchemaName = {
 "
 `;
 
-exports[`generateTypesLib should generate types lib 1`] = `
+exports[`generateTypesLib > should generate types lib 1`] = `
 "// NOTE:
 // This file is generated from the current data source.
 // It contains helper types for looking up message definitions by schema name or topic.
@@ -89,7 +89,7 @@ export type MessageTypeByTopic = {
 "
 `;
 
-exports[`generateTypesLib should work when a datatype is not known 1`] = `
+exports[`generateTypesLib > should work when a datatype is not known 1`] = `
 "// NOTE:
 // This file is generated from the current data source.
 // It contains helper types for looking up message definitions by schema name or topic.

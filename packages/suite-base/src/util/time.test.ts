@@ -14,6 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { Mock } from "vitest";
 import { MessageEvent } from "@lichtblick/suite";
 
 import * as time from "./time";
@@ -35,7 +36,7 @@ describe("time.formatTimeRaw", () => {
   it("does not format negative times", () => {
     expect(time.formatTimeRaw({ sec: -1, nsec: 0 })).toEqual("(invalid negative time)");
     expect(console.error).toHaveBeenCalled();
-    (console.error as jest.Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 });
 

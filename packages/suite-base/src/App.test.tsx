@@ -1,13 +1,15 @@
-/** @jest-environment jsdom */
-
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+
+/** @vitest-environment jsdom */
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { render, screen } from "@testing-library/react";
 import React from "react";
+import type { Mock } from "vitest";
 
 import MultiProvider from "@lichtblick/suite-base/components/MultiProvider";
 import PlayerManager from "@lichtblick/suite-base/components/PlayerManager";
@@ -37,39 +39,50 @@ import { App, AppProps } from "./App";
 import Workspace from "./Workspace";
 
 function mockProvider(testId: string) {
-  return jest.fn(({ children }) => <div data-testid={testId}>{children}</div>);
+  return vi.fn(({ children }) => <div data-testid={testId}>{children}</div>);
 }
 
 // Mocking shared providers and components
-jest.mock("./providers/LayoutManagerProvider", () => mockProvider("layout-manager-provider"));
-jest.mock("./providers/PanelCatalogProvider", () => mockProvider("panel-catalog-provider"));
-jest.mock("./providers/AppParametersProvider", () => mockProvider("app-parameters-provider"));
-jest.mock("./components/MultiProvider", () => mockProvider("multi-provider"));
-jest.mock("./components/StudioToastProvider", () => mockProvider("studio-toast-provider"));
-jest.mock("./components/GlobalCss", () => mockProvider("global-css"));
-jest.mock("./components/DocumentTitleAdapter", () => mockProvider("document-title-adapter"));
-jest.mock("./components/ErrorBoundary", () => mockProvider("error-boundary"));
-jest.mock("./components/ColorSchemeThemeProvider", () => ({
+vi.mock("./providers/LayoutManagerProvider", async () => ({
+  default: mockProvider("layout-manager-provider"),
+}));
+vi.mock("./providers/PanelCatalogProvider", async () => ({
+  default: mockProvider("panel-catalog-provider"),
+}));
+vi.mock("./providers/AppParametersProvider", async () => ({
+  default: mockProvider("app-parameters-provider"),
+}));
+vi.mock("./components/MultiProvider", async () => ({ default: mockProvider("multi-provider") }));
+vi.mock("./components/StudioToastProvider", async () => ({
+  default: mockProvider("studio-toast-provider"),
+}));
+vi.mock("./components/GlobalCss", async () => ({ default: mockProvider("global-css") }));
+vi.mock("./components/DocumentTitleAdapter", async () => ({
+  default: mockProvider("document-title-adapter"),
+}));
+vi.mock("./components/ErrorBoundary", async () => ({ default: mockProvider("error-boundary") }));
+vi.mock("./components/ColorSchemeThemeProvider", async () => ({
   ColorSchemeThemeProvider: mockProvider("color-scheme-theme"),
 }));
-jest.mock("./components/CssBaseline", () => mockProvider("css-baseline"));
-jest.mock("./components/SendNotificationToastAdapter", () =>
-  mockProvider("send-notification-toast-adapter"),
-);
-jest.mock("./context/NativeAppMenuContext", () => ({
+vi.mock("./components/CssBaseline", async () => ({ default: mockProvider("css-baseline") }));
+vi.mock("./components/SendNotificationToastAdapter", async () => ({
+  default: mockProvider("send-notification-toast-adapter"),
+}));
+vi.mock("./context/NativeAppMenuContext", async () => ({
+  default: { Provider: mockProvider("native-app-component") },
   Provider: mockProvider("native-app-component"),
 }));
-jest.mock("./Workspace", () => mockProvider("workspace-component"));
-jest.mock("./screens/LaunchPreference", () => ({
+vi.mock("./Workspace", async () => ({ default: mockProvider("workspace-component") }));
+vi.mock("./screens/LaunchPreference", async () => ({
   LaunchPreference: mockProvider("launch-preference"),
 }));
 
 // Mocked App configuration
 const mockAppConfiguration: IAppConfiguration = {
-  get: jest.fn(),
-  set: jest.fn(),
-  addChangeListener: jest.fn(),
-  removeChangeListener: jest.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  addChangeListener: vi.fn(),
+  removeChangeListener: vi.fn(),
 };
 
 // Helper to render the App with default props
@@ -88,7 +101,7 @@ const setup = (overrides: Partial<AppProps> = {}) => {
 
 describe("App Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders without crashing", () => {
@@ -115,8 +128,8 @@ describe("App Component", () => {
   });
 
   it("adds and removes contextmenu event listener on mount/unmount", () => {
-    const addEventListenerSpy = jest.spyOn(document, "addEventListener");
-    const removeEventListenerSpy = jest.spyOn(document, "removeEventListener");
+    const addEventListenerSpy = vi.spyOn(document, "addEventListener");
+    const removeEventListenerSpy = vi.spyOn(document, "removeEventListener");
 
     const { unmount } = setup();
 
@@ -138,7 +151,7 @@ describe("App Component", () => {
 
   it("passes deepLinks and onAppBarDoubleClick to Workspace", () => {
     const mockDeepLinks = ["link1", "link2"];
-    const mockOnAppBarDoubleClick = jest.fn();
+    const mockOnAppBarDoubleClick = vi.fn();
     expect(Workspace).not.toHaveBeenCalled();
 
     setup({
@@ -175,13 +188,18 @@ describe("App Component MultiProvider Tests", () => {
   ];
 
   function extractProviderTypes() {
-    const props = (MultiProvider as jest.Mock).mock.calls[0][0];
+    const props = (MultiProvider as Mock).mock.calls[0][0];
     const providerTypes = props.providers.map((provider: React.ReactElement) => provider.type);
     return providerTypes;
   }
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    (console.error as Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("verifies that MultiProvider is called with correct providers", () => {
@@ -202,7 +220,7 @@ describe("App Component MultiProvider Tests", () => {
     setup({ appParameters });
     expect(screen.getByTestId("app-parameters-provider")).toBeDefined();
 
-    const props = (AppParametersProvider as jest.Mock).mock.calls[0][0];
+    const props = (AppParametersProvider as Mock).mock.calls[0][0];
     expect(props.appParameters).toBe(appParameters);
   });
 

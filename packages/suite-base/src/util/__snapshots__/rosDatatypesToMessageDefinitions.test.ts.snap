@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`rosDatatypesToMessageDefinition Includes all of the definitions for "visualization_msgs/StudioMarkerArray" 1`] = `
+exports[`rosDatatypesToMessageDefinition > Includes all of the definitions for "visualization_msgs/StudioMarkerArray" 1`] = `
 [
   {
     "definitions": [

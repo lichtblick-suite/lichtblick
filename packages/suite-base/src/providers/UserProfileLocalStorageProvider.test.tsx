@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -16,16 +16,16 @@ import {
 import UserProfileLocalStorageProvider from "@lichtblick/suite-base/providers/UserProfileLocalStorageProvider";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/hooks");
-jest.mock("lodash-es");
+vi.mock("@lichtblick/hooks");
+vi.mock("lodash-es");
 
-const mockedUseShallowMemo = jest.mocked(useShallowMemo);
-const mockedLodash = jest.mocked(_);
+const mockedUseShallowMemo = vi.mocked(useShallowMemo);
+const mockedLodash = vi.mocked(_);
 const mockLocalStorage = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 };
 
 Object.defineProperty(window, "localStorage", {
@@ -45,14 +45,14 @@ describe("UserProfileLocalStorageProvider", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockLocalStorage.getItem.mockReturnValue(undefined);
     mockedUseShallowMemo.mockImplementation((obj) => obj);
     mockedLodash.merge.mockImplementation((target, source) => ({ ...target, ...source }));
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("getUserProfile", () => {
@@ -94,7 +94,7 @@ describe("UserProfileLocalStorageProvider", () => {
     it("should return default profile when localStorage contains invalid JSON", async () => {
       // Given
       mockLocalStorage.getItem.mockReturnValue("invalid-json");
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
       const wrapper = ({ children }: PropsWithChildren) => (
         <UserProfileLocalStorageProvider>{children}</UserProfileLocalStorageProvider>
@@ -193,7 +193,7 @@ describe("UserProfileLocalStorageProvider", () => {
       mockLocalStorage.getItem.mockReturnValue(undefined);
       const newProfile: UserProfile = {};
       const originalStringify = JSON.stringify;
-      JSON.stringify = jest.fn().mockReturnValue(undefined);
+      JSON.stringify = vi.fn().mockReturnValue(undefined);
 
       const wrapper = ({ children }: PropsWithChildren) => (
         <UserProfileLocalStorageProvider>{children}</UserProfileLocalStorageProvider>
@@ -216,12 +216,12 @@ describe("UserProfileLocalStorageProvider", () => {
 
     beforeEach(() => {
       // Mock Date.now() to return a consistent timestamp
-      jest.useFakeTimers();
-      jest.setSystemTime(sysTime.getTime());
+      vi.useFakeTimers();
+      vi.setSystemTime(sysTime.getTime());
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it("should set firstSeenTime when profile is empty", () => {

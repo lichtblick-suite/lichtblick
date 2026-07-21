@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -15,6 +15,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 import * as _ from "lodash-es";
 
@@ -808,6 +809,6 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
 
     expect(console.error).toHaveBeenCalled();
     expect(console.error).toHaveBeenLastCalledWith("Error parsing message path", expect.any(Error));
-    (console.error as jest.Mock).mockReset();
+    (console.error as Mock).mockReset();
   });
 });

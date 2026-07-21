@@ -9,8 +9,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import Ros1LocalBagDataSourceFactory from "./Ros1LocalBagDataSourceFactory";
 
-jest.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource");
-jest.mock("@lichtblick/suite-base/players/IterablePlayer");
+vi.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource");
+vi.mock("@lichtblick/suite-base/players/IterablePlayer");
 
 describe("Ros1LocalBagDataSourceFactory", () => {
   const metricsCollector = new NoopMetricsCollector();

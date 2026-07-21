@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mock } from "vitest";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 
 describe("PlayerAlertManager", () => {
@@ -21,8 +22,8 @@ describe("PlayerAlertManager", () => {
     ]);
     expect(console.warn).toHaveBeenCalledTimes(1);
     expect(console.error).toHaveBeenCalledTimes(2);
-    (console.warn as jest.Mock).mockClear();
-    (console.error as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 
   it("allows removing alerts by id", () => {
@@ -37,8 +38,8 @@ describe("PlayerAlertManager", () => {
     ]);
     expect(console.warn).toHaveBeenCalledTimes(2);
     expect(console.error).toHaveBeenCalledTimes(1);
-    (console.warn as jest.Mock).mockClear();
-    (console.error as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 
   it("allows removing alerts with a predicate", () => {
@@ -51,8 +52,8 @@ describe("PlayerAlertManager", () => {
     expect(manager.alerts()).toEqual([{ severity: "error", message: "D" }]);
     expect(console.warn).toHaveBeenCalledTimes(2);
     expect(console.error).toHaveBeenCalledTimes(2);
-    (console.warn as jest.Mock).mockClear();
-    (console.error as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 
   it("keeps array identity until alerts change", () => {
@@ -91,6 +92,6 @@ describe("PlayerAlertManager", () => {
     expect(result).toEqual([]);
     expect(manager.alerts()).toBe(result);
     expect(console.error).toHaveBeenCalledTimes(2);
-    (console.error as jest.Mock).mockClear();
+    (console.error as Mock).mockClear();
   });
 });

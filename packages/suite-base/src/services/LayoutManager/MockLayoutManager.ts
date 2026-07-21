@@ -9,21 +9,21 @@ import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
 
 export default class MockLayoutManager implements ILayoutManager {
   public supportsSharing = false;
-  public isBusy = jest.fn().mockReturnValue(false);
+  public isBusy = vi.fn().mockReturnValue(false);
   public isOnline = false;
   public error: Error | undefined = undefined;
 
-  public on = jest.fn();
-  public off = jest.fn();
-  public setError = jest.fn();
-  public setOnline = jest.fn();
-  public getLayouts = jest.fn().mockResolvedValue([]);
-  public getLayout = jest.fn();
-  public saveNewLayout = jest.fn();
-  public updateLayout = jest.fn();
-  public deleteLayout = jest.fn();
-  public overwriteLayout = jest.fn();
-  public revertLayout = jest.fn();
-  public makePersonalCopy = jest.fn();
-  public syncWithRemote = jest.fn();
+  public on = vi.fn();
+  public off = vi.fn();
+  public setError = vi.fn();
+  public setOnline = vi.fn();
+  public getLayouts = vi.fn().mockResolvedValue([]);
+  public getLayout = vi.fn();
+  public saveNewLayout = vi.fn();
+  public updateLayout = vi.fn();
+  public deleteLayout = vi.fn();
+  public overwriteLayout = vi.fn();
+  public revertLayout = vi.fn();
+  public makePersonalCopy = vi.fn();
+  public syncWithRemote = vi.fn();
 }

@@ -1,24 +1,25 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 
 import DontShowThisAgainCheckbox from "./DontShowThisAgainCheckbox";
 
-jest.mock("@lichtblick/suite-base/hooks", () => ({
-  useAppConfigurationValue: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks", async () => ({
+  useAppConfigurationValue: vi.fn(),
 }));
 
 describe("DontShowThisAgainCheckbox", () => {
   it("renders the checkbox with the correct label", () => {
     // GIVEN
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([true, jest.fn()]);
+    (useAppConfigurationValue as Mock).mockReturnValue([true, vi.fn()]);
 
     // WHEN
     render(<DontShowThisAgainCheckbox />);
@@ -36,19 +37,22 @@ describe("DontShowThisAgainCheckbox", () => {
     [true, false],
     [false, true],
     [undefined, false],
-  ])("renders the checkbox with configValue=$configValue, expects checked=$expectedChecked and newValue=$expectedNewValue", (configValue, expectedChecked) => {
-    // GIVEN
-    const setCheckedMock = jest.fn();
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([configValue, setCheckedMock]);
+  ])(
+    "renders the checkbox with configValue=$configValue, expects checked=$expectedChecked and newValue=$expectedNewValue",
+    (configValue, expectedChecked) => {
+      // GIVEN
+      const setCheckedMock = vi.fn();
+      (useAppConfigurationValue as Mock).mockReturnValue([configValue, setCheckedMock]);
 
-    // WHEN
-    render(<DontShowThisAgainCheckbox />);
+      // WHEN
+      render(<DontShowThisAgainCheckbox />);
 
-    // THEN
-    const checkbox = screen.getByRole("checkbox");
-    expect((checkbox as HTMLInputElement).checked).toBe(expectedChecked);
+      // THEN
+      const checkbox = screen.getByRole("checkbox");
+      expect((checkbox as HTMLInputElement).checked).toBe(expectedChecked);
 
-    fireEvent.click(checkbox);
-    expect(setCheckedMock).toHaveBeenCalledWith(expectedChecked);
-  });
+      fireEvent.click(checkbox);
+      expect(setCheckedMock).toHaveBeenCalledWith(expectedChecked);
+    },
+  );
 });

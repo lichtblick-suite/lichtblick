@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { enqueueSnackbar } from "notistack";
 
@@ -13,30 +14,30 @@ import { parseTimestampStr } from "@lichtblick/suite-base/util/parseMultipleTime
 
 import useSeekTimeFromCLI from "./useSeekTimeFromCLI";
 
-jest.mock("notistack", () => ({
-  enqueueSnackbar: jest.fn(),
+vi.mock("notistack", async () => ({
+  enqueueSnackbar: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline");
-jest.mock("@lichtblick/suite-base/context/AppParametersContext");
-jest.mock("@lichtblick/suite-base/util/parseMultipleTimes");
+vi.mock("@lichtblick/suite-base/components/MessagePipeline");
+vi.mock("@lichtblick/suite-base/context/AppParametersContext");
+vi.mock("@lichtblick/suite-base/util/parseMultipleTimes");
 
 describe("useSeekTimeFromCLI", () => {
-  const mockSeekPlayback = jest.fn();
-  const mockUseMessagePipelineGetter = useMessagePipelineGetter as jest.Mock;
-  const mockUseAppParameters = useAppParameters as jest.Mock;
-  const mockParseTimestampStr = parseTimestampStr as jest.Mock;
+  const mockSeekPlayback = vi.fn();
+  const mockUseMessagePipelineGetter = useMessagePipelineGetter as Mock;
+  const mockUseAppParameters = useAppParameters as Mock;
+  const mockParseTimestampStr = parseTimestampStr as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseMessagePipelineGetter.mockReturnValue(() => ({
       playerState: { presence: PlayerPresence.PRESENT },
       seekPlayback: mockSeekPlayback,
     }));
     mockUseAppParameters.mockReturnValue({ time: "00:01:00" });
     mockParseTimestampStr.mockReturnValue(60000); // 1 minute in milliseconds
-    jest.mock("notistack", () => ({
-      enqueueSnackbar: jest.fn(),
+    vi.mock("notistack", async () => ({
+      enqueueSnackbar: vi.fn(),
     }));
   });
 

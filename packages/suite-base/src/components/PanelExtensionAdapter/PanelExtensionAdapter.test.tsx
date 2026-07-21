@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -6,8 +6,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-
-/* eslint-disable jest/no-done-callback */
 
 import { render } from "@testing-library/react";
 import { act } from "react";
@@ -72,14 +70,14 @@ describe("PanelExtensionAdapter", () => {
   });
 
   it("sets didSeek=true when seeking", async () => {
-    const mockRAF = jest
+    const mockRAF = vi
       .spyOn(window, "requestAnimationFrame")
       // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
 
     const renderStates: Immutable<RenderState>[] = [];
 
-    const initPanel = jest.fn((context: PanelExtensionContext) => {
+    const initPanel = vi.fn((context: PanelExtensionContext) => {
       context.watch("currentFrame");
       context.watch("didSeek");
       context.subscribe([{ topic: "x", preload: false }]);
@@ -216,9 +214,9 @@ describe("PanelExtensionAdapter", () => {
                 ++count;
 
                 if (count === 1) {
-                  // eslint-disable-next-line jest/no-conditional-expect
+                  // eslint-disable-next-line vitest/no-conditional-expect
                   expect(advertisements).toEqual(
-                    // eslint-disable-next-line jest/no-conditional-expect
+                    // eslint-disable-next-line vitest/no-conditional-expect
                     expect.arrayContaining<AdvertiseOptions>([
                       {
                         topic: "/some/topic",
@@ -228,9 +226,9 @@ describe("PanelExtensionAdapter", () => {
                     ]),
                   );
                 } else if (count === 2) {
-                  // eslint-disable-next-line jest/no-conditional-expect
+                  // eslint-disable-next-line vitest/no-conditional-expect
                   expect(advertisements).toEqual(
-                    // eslint-disable-next-line jest/no-conditional-expect
+                    // eslint-disable-next-line vitest/no-conditional-expect
                     expect.arrayContaining<AdvertiseOptions>([
                       {
                         topic: "/some/topic",
@@ -342,9 +340,9 @@ describe("PanelExtensionAdapter", () => {
                 ++count;
 
                 if (count === 1) {
-                  // eslint-disable-next-line jest/no-conditional-expect
+                  // eslint-disable-next-line vitest/no-conditional-expect
                   expect(advertisements).toEqual(
-                    // eslint-disable-next-line jest/no-conditional-expect
+                    // eslint-disable-next-line vitest/no-conditional-expect
                     expect.arrayContaining<AdvertiseOptions>([
                       {
                         topic: "/some/topic",
@@ -354,9 +352,9 @@ describe("PanelExtensionAdapter", () => {
                     ]),
                   );
                 } else if (count === 2) {
-                  // eslint-disable-next-line jest/no-conditional-expect
+                  // eslint-disable-next-line vitest/no-conditional-expect
                   expect(advertisements).toEqual(
-                    // eslint-disable-next-line jest/no-conditional-expect
+                    // eslint-disable-next-line vitest/no-conditional-expect
                     expect.arrayContaining<AdvertiseOptions>([
                       {
                         topic: "/some/topic",
@@ -371,9 +369,9 @@ describe("PanelExtensionAdapter", () => {
                     ]),
                   );
                 } else if (count === 3) {
-                  // eslint-disable-next-line jest/no-conditional-expect
+                  // eslint-disable-next-line vitest/no-conditional-expect
                   expect(advertisements).toEqual(
-                    // eslint-disable-next-line jest/no-conditional-expect
+                    // eslint-disable-next-line vitest/no-conditional-expect
                     expect.arrayContaining<AdvertiseOptions>([
                       {
                         topic: "/another/topic",
@@ -398,9 +396,10 @@ describe("PanelExtensionAdapter", () => {
     await sig;
   });
 
-  it("should unadvertise when unmounting", (done) => {
+  it("should unadvertise when unmounting", async () => {
     expect.assertions(5);
     let count = 0;
+    const doneSignal = signal();
 
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
@@ -418,9 +417,9 @@ describe("PanelExtensionAdapter", () => {
         ++count;
 
         if (count === 1) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(advertisements).toEqual(
-            // eslint-disable-next-line jest/no-conditional-expect
+            // eslint-disable-next-line vitest/no-conditional-expect
             expect.arrayContaining<AdvertiseOptions>([
               {
                 topic: "/some/topic",
@@ -430,9 +429,9 @@ describe("PanelExtensionAdapter", () => {
             ]),
           );
         } else if (count === 2) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(advertisements).toEqual(expect.arrayContaining([]));
-          done();
+          doneSignal.resolve();
         }
       },
     };
@@ -459,13 +458,16 @@ describe("PanelExtensionAdapter", () => {
     };
 
     const handle = render(<Wrapper mounted />);
-    handle.rerender(<Wrapper mounted={false} />);
+    await act(async () => {
+      handle.rerender(<Wrapper mounted={false} />);
+    });
+    await doneSignal;
   });
 
   it("supports adding new panels to the layout", async () => {
     expect.assertions(3);
 
-    const openSiblingPanel = jest.fn();
+    const openSiblingPanel = vi.fn();
     const config = {};
     const saveConfig = () => {};
 
@@ -752,7 +754,7 @@ describe("PanelExtensionAdapter", () => {
   });
 
   it("should get and set variables", async () => {
-    const mockRAF = jest
+    const mockRAF = vi
       .spyOn(window, "requestAnimationFrame")
       // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
@@ -760,7 +762,7 @@ describe("PanelExtensionAdapter", () => {
     let sequence = 0;
     const renderStates: Immutable<RenderState>[] = [];
 
-    const initPanel = jest.fn((context: PanelExtensionContext) => {
+    const initPanel = vi.fn((context: PanelExtensionContext) => {
       context.watch("variables");
       context.onRender = (renderState, done) => {
         renderStates.push({ ...renderState });
@@ -829,7 +831,7 @@ describe("PanelExtensionAdapter", () => {
   it("should call pause frame with new frame and resume after rendering", async () => {
     const renderStates: Immutable<RenderState>[] = [];
 
-    const initPanel = jest.fn((context: PanelExtensionContext) => {
+    const initPanel = vi.fn((context: PanelExtensionContext) => {
       context.watch("currentTime");
       context.onRender = (renderState, done) => {
         renderStates.push({ ...renderState });
@@ -868,7 +870,7 @@ describe("PanelExtensionAdapter", () => {
     };
 
     // Setup the request animation frame to take some time
-    const mockRAF = jest
+    const mockRAF = vi
       .spyOn(window, "requestAnimationFrame")
       // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
       .mockImplementation((cb) => queueMicrotask(() => cb(performance.now())) as any);
@@ -892,7 +894,7 @@ describe("PanelExtensionAdapter", () => {
 
   it("ignores subscriptions after panel unmount", async () => {
     const sig = signal();
-    const initPanel = jest.fn((context: PanelExtensionContext) => {
+    const initPanel = vi.fn((context: PanelExtensionContext) => {
       context.watch("currentFrame");
       context.subscribe([{ topic: "x", preload: true }]);
       setTimeout(() => {
@@ -904,7 +906,7 @@ describe("PanelExtensionAdapter", () => {
     const config = {};
     const saveConfig = () => {};
 
-    const mockSetSubscriptions = jest.fn();
+    const mockSetSubscriptions = vi.fn();
 
     const { unmount } = render(
       <ThemeProvider isDark>
@@ -1046,13 +1048,13 @@ describe("PanelExtensionAdapter", () => {
   describe("extensionSettingsActionHandler - reorder-node branch", () => {
     it("should return early for reorder-node actions without saving config", async () => {
       // Given: A mock updatePanelSettingsTree to capture the wrapped actionHandler
-      const updatePanelSettingsTreeMock = jest.fn();
-      jest
-        .spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate")
-        .mockReturnValue(updatePanelSettingsTreeMock);
+      const updatePanelSettingsTreeMock = vi.fn();
+      vi.spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate").mockReturnValue(
+        updatePanelSettingsTreeMock,
+      );
 
-      const saveConfig = jest.fn();
-      const settingsActionHandler = jest.fn();
+      const saveConfig = vi.fn();
+      const settingsActionHandler = vi.fn();
 
       const initPanel = (context: PanelExtensionContext) => {
         context.updatePanelSettingsEditor({

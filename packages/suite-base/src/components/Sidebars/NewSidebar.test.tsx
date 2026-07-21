@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
@@ -43,8 +43,8 @@ describe("NewSidebar", () => {
       activeTab: tabs[0],
       anchor: BasicBuilder.sample(["left", "right"]),
       items,
-      onClose: jest.fn(),
-      setActiveTab: jest.fn(),
+      onClose: vi.fn(),
+      setActiveTab: vi.fn(),
       ...propsOverride,
     };
 
@@ -153,7 +153,7 @@ describe("NewSidebar", () => {
   });
 
   it("should call setActiveTab when a tab is clicked", () => {
-    const setActiveTab = jest.fn();
+    const setActiveTab = vi.fn();
 
     const { tabs, props } = renderComponent({
       setActiveTab,
@@ -167,7 +167,7 @@ describe("NewSidebar", () => {
   });
 
   it("should not call setActiveTab when the same tab is clicked", () => {
-    const setActiveTab = jest.fn();
+    const setActiveTab = vi.fn();
 
     const { props } = renderComponent({
       setActiveTab,
@@ -180,7 +180,7 @@ describe("NewSidebar", () => {
   });
 
   it("should call onClose when the close button is clicked", () => {
-    const onClose = jest.fn();
+    const onClose = vi.fn();
 
     const { props } = renderComponent({
       onClose,
@@ -195,7 +195,7 @@ describe("NewSidebar", () => {
   it("should change tabs when setActiveTab is called", () => {
     let newActiveTab = "";
 
-    const setActiveTab = jest.fn((tab: string) => {
+    const setActiveTab = vi.fn((tab: string) => {
       newActiveTab = tab;
     });
 

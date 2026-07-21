@@ -12,12 +12,12 @@ describe("WorkerSocketAdapter", () => {
 
   beforeEach(() => {
     workerMock = {
-      postMessage: jest.fn(),
-      terminate: jest.fn(),
+      postMessage: vi.fn(),
+      terminate: vi.fn(),
       onmessage: undefined as ((event: MessageEvent) => void) | undefined,
     };
 
-    global.Worker = jest.fn(() => workerMock as unknown as Worker);
+    global.Worker = vi.fn(() => workerMock as unknown as Worker);
 
     new WorkerSocketAdapter(wsUrl);
   });

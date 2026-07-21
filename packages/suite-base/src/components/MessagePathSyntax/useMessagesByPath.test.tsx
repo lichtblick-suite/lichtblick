@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -56,7 +56,7 @@ type WrapperProps = {
   globalVariables?: GlobalVariables;
 } & PropsWithChildren;
 function makeMessagePipelineWrapper(initialProps?: WrapperProps) {
-  const setSubscriptions = jest.fn();
+  const setSubscriptions = vi.fn();
 
   let topics = initialProps?.topics ?? [];
   let datatypes: RosDatatypes = initialProps?.datatypes ?? new Map();

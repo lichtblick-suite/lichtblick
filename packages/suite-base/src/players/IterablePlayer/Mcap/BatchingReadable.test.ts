@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { McapTypes } from "@mcap/core";
+import type { Mock } from "vitest";
 
 import { BatchingReadable } from "./BatchingReadable";
 
@@ -25,8 +26,8 @@ function expectedBytes(offset: bigint, size: bigint): Uint8Array {
 }
 
 type MockInner = McapTypes.IReadable & {
-  read: jest.Mock<Promise<Uint8Array>, [bigint, bigint]>;
-  size: jest.Mock<Promise<bigint>, []>;
+  read: Mock<(offset: bigint, size: bigint) => Promise<Uint8Array>>;
+  size: Mock<() => Promise<bigint>>;
 };
 
 /**
@@ -34,10 +35,10 @@ type MockInner = McapTypes.IReadable & {
  * deterministic byte window described by `expectedBytes`.
  */
 function makeMockInner(sizeValue: bigint = 1024n): MockInner {
-  const read = jest.fn(async (offset: bigint, size: bigint): Promise<Uint8Array> => {
+  const read = vi.fn(async (offset: bigint, size: bigint): Promise<Uint8Array> => {
     return expectedBytes(offset, size);
   });
-  const size = jest.fn(async (): Promise<bigint> => sizeValue);
+  const size = vi.fn(async (): Promise<bigint> => sizeValue);
   return { read, size };
 }
 

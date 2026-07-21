@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 
 import { Time } from "@lichtblick/rostime";
@@ -13,20 +14,20 @@ import MockBroadcastChannel from "@lichtblick/suite-base/util/broadcast/MockBroa
 import { useDirectionalSeek } from "./useDirectionalSeek";
 
 type Setup = {
-  seek: jest.Mock;
-  playUntil: jest.Mock | undefined;
+  seek: Mock;
+  playUntil: Mock | undefined;
   currentTime: Time | undefined;
 };
 
 (global as any).BroadcastChannel = MockBroadcastChannel;
 
-jest.mock("@lichtblick/suite-base/hooks", () => ({
-  useAppConfigurationValue: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks", async () => ({
+  useAppConfigurationValue: vi.fn(),
 }));
 
 describe("useDirectionalSeek", () => {
-  const mockSeek = jest.fn();
-  const mockPlayUntil: jest.Mock | undefined = jest.fn();
+  const mockSeek = vi.fn();
+  const mockPlayUntil: Mock | undefined = vi.fn();
 
   const mockStartTime = RosTimeBuilder.time();
   const mockEndTime = RosTimeBuilder.time();
@@ -46,11 +47,11 @@ describe("useDirectionalSeek", () => {
   }
 
   beforeEach(() => {
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([true, jest.fn()]);
+    (useAppConfigurationValue as Mock).mockReturnValue([true, vi.fn()]);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("seekForwardAction", () => {

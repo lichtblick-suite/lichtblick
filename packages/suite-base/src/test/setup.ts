@@ -21,13 +21,18 @@ import setImmediate from "@lichtblick/suite-base/util/setImmediate";
 
 process.env.WASM_LZ4_ENVIRONMENT = "NODE";
 
+// Webpack DefinePlugin globals, injected as real globals for tests (formerly Jest `globals`).
+const globalDefines = global as Record<string, unknown>;
+globalDefines.ReactNull ??= null;
+globalDefines.LICHTBLICK_SUITE_VERSION ??= "TEST";
+globalDefines.API_URL ??= "/";
+globalDefines.DEV_WORKSPACE ??= "";
+
 function noOp() {
   // no-op
 }
 
 if (typeof window !== "undefined") {
-  global.TextDecoder = util.TextDecoder as typeof TextDecoder;
-
   if (typeof window.URL.createObjectURL === "undefined") {
     Object.defineProperty(window.URL, "createObjectURL", { value: noOp });
   }
@@ -37,6 +42,7 @@ if (typeof window !== "undefined") {
   (window as { setImmediate?: typeof setImmediate }).setImmediate ??= setImmediate;
 }
 
+global.TextDecoder = util.TextDecoder as typeof TextDecoder;
 global.TextEncoder = util.TextEncoder as unknown as typeof TextEncoder;
 
 // React available everywhere (matches webpack config)

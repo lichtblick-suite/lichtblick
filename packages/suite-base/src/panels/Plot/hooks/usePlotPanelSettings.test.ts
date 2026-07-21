@@ -1,9 +1,10 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { act, renderHook } from "@testing-library/react";
 import * as _ from "lodash-es";
+import type { Mock } from "vitest";
 
 import {
   SettingsTreeAction,
@@ -27,8 +28,8 @@ import { usePanelSettingsTreeUpdate } from "@lichtblick/suite-base/providers/Pan
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", () => ({
-  usePanelSettingsTreeUpdate: jest.fn(() => jest.fn()),
+vi.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", async () => ({
+  usePanelSettingsTreeUpdate: vi.fn(() => vi.fn()),
 }));
 
 describe("handleUpdateAction", () => {
@@ -252,13 +253,13 @@ describe("handleMoveSeriesAction", () => {
 });
 
 describe("usePlotPanelSettings", () => {
-  const saveConfig = jest.fn();
-  const updatePanelSettingsTree = jest.fn();
+  const saveConfig = vi.fn();
+  const updatePanelSettingsTree = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(console, "error").mockImplementation(() => {});
-    (usePanelSettingsTreeUpdate as jest.Mock).mockReturnValue(updatePanelSettingsTree);
+    vi.clearAllMocks();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    (usePanelSettingsTreeUpdate as Mock).mockReturnValue(updatePanelSettingsTree);
   });
 
   it.each<SettingsTreeAction>([

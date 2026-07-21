@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -7,6 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as _ from "lodash-es";
+import type { MockInstance, Mock } from "vitest";
 
 import { signal } from "@lichtblick/den/async";
 import { fromSec } from "@lichtblick/rostime";
@@ -110,9 +111,9 @@ class PlayerStateStore {
 }
 
 describe("IterablePlayer", () => {
-  let mockDateNow: jest.SpyInstance<number, []>;
+  let mockDateNow: MockInstance<number, []>;
   beforeEach(() => {
-    mockDateNow = jest.spyOn(Date, "now").mockReturnValue(0);
+    mockDateNow = vi.spyOn(Date, "now").mockReturnValue(0);
   });
   afterEach(async () => {
     mockDateNow.mockRestore();
@@ -473,9 +474,9 @@ describe("IterablePlayer", () => {
 
     // replace the message iterator with our own implementation
     source.getBackfillMessages = async function () {
-      mockDateNow = jest.spyOn(Date, "now").mockReturnValue(1);
+      mockDateNow = vi.spyOn(Date, "now").mockReturnValue(1);
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      mockDateNow = jest.spyOn(Date, "now").mockReturnValue(2);
+      mockDateNow = vi.spyOn(Date, "now").mockReturnValue(2);
       return [];
     };
 
@@ -758,7 +759,7 @@ describe("IterablePlayer", () => {
         tip: "Topic A has messages with multiple datatypes: B, C. This may result in errors during visualization.",
       },
     ]);
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("supports seek request during initialization", async () => {
@@ -877,11 +878,11 @@ describe("IterablePlayer", () => {
     player.close();
     await player.isClosed;
 
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("should only call isTopicHighFrequency once even with multiple high frequency topics", async () => {
-    const isTopicHighFrequencySpy = jest.spyOn(highFrequencyUtils, "isTopicHighFrequency");
+    const isTopicHighFrequencySpy = vi.spyOn(highFrequencyUtils, "isTopicHighFrequency");
 
     class MultiHighFreqTopicsSource implements IDeserializedIterableSource {
       public readonly sourceType = "deserialized";
@@ -948,7 +949,7 @@ describe("IterablePlayer", () => {
 
     isTopicHighFrequencySpy.mockRestore();
 
-    (console.warn as jest.Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   it("should start a new iterator mid-tick when old iterator finishes", async () => {
@@ -1057,7 +1058,7 @@ describe("IterablePlayer", () => {
       sourceId: "test",
     });
 
-    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+    const messageIteratorSpy = vi.spyOn(source, "messageIterator");
 
     const store = new PlayerStateStore(4);
     player.setSubscriptions([{ topic: "foo" }]);
@@ -1105,7 +1106,7 @@ describe("IterablePlayer", () => {
       sourceId: "test",
     });
 
-    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+    const messageIteratorSpy = vi.spyOn(source, "messageIterator");
     player.setSubscriptions([
       {
         topic: "foo",
@@ -1135,7 +1136,7 @@ describe("IterablePlayer", () => {
       sourceId: "test",
     });
 
-    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+    const messageIteratorSpy = vi.spyOn(source, "messageIterator");
     player.setSubscriptions([
       {
         topic: "foo",
@@ -1170,7 +1171,7 @@ describe("IterablePlayer", () => {
       sourceId: "test",
     });
 
-    const messageIteratorSpy = jest.spyOn(source, "messageIterator");
+    const messageIteratorSpy = vi.spyOn(source, "messageIterator");
 
     const store = new PlayerStateStore(3);
     player.setListener(async (state) => {
@@ -1246,7 +1247,7 @@ describe("IterablePlayer", () => {
       const source = new TestSource();
 
       // Mock the messageIterator method to track calls
-      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+      const mockMessageIterator = vi.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
           msgEvent: {
@@ -1295,7 +1296,7 @@ describe("IterablePlayer", () => {
     it("should handle multiple topics correctly", async () => {
       const source = new TestSource();
 
-      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+      const mockMessageIterator = vi.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
           msgEvent: {
@@ -1356,7 +1357,7 @@ describe("IterablePlayer", () => {
     it("should handle iterator that yields different result types", async () => {
       const source = new TestSource();
 
-      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+      const mockMessageIterator = vi.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
           msgEvent: {
@@ -1410,7 +1411,7 @@ describe("IterablePlayer", () => {
     it("should handle empty iterator", async () => {
       const source = new TestSource();
 
-      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+      const mockMessageIterator = vi.fn().mockImplementation(async function* () {
         // Empty iterator
       });
 
@@ -1439,7 +1440,7 @@ describe("IterablePlayer", () => {
     it("should handle iterator errors gracefully", async () => {
       const source = new TestSource();
 
-      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+      const mockMessageIterator = vi.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
           msgEvent: {
@@ -1483,7 +1484,7 @@ describe("IterablePlayer", () => {
     it("should use full consumption type", async () => {
       const source = new TestSource();
 
-      const mockMessageIterator = jest.fn().mockImplementation(async function* () {
+      const mockMessageIterator = vi.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
           msgEvent: {

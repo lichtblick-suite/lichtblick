@@ -1,26 +1,27 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 import { useMessagePipelineSubscribe } from "@lichtblick/suite-base/components/MessagePipeline";
 import { useHoverValue } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 
 import { VerticalBars } from "./VerticalBars";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
-  useMessagePipelineSubscribe: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
+  useMessagePipelineSubscribe: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/TimelineInteractionStateContext", () => ({
-  useHoverValue: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/TimelineInteractionStateContext", async () => ({
+  useHoverValue: vi.fn(),
 }));
 
 describe("VerticalBars", () => {
-  let mockSubscribe: jest.Mock;
+  let mockSubscribe: Mock;
   let mockCoordinator: any;
 
   const setup = (props = {}) => {
@@ -34,19 +35,19 @@ describe("VerticalBars", () => {
   };
 
   beforeEach(() => {
-    mockSubscribe = jest.fn((callback) => {
+    mockSubscribe = vi.fn((callback) => {
       callback({ playerState: { activeData: undefined } });
-      return jest.fn();
+      return vi.fn();
     });
-    (useMessagePipelineSubscribe as jest.Mock).mockImplementation(() => mockSubscribe);
+    (useMessagePipelineSubscribe as Mock).mockImplementation(() => mockSubscribe);
 
     mockCoordinator = {
-      on: jest.fn(),
-      off: jest.fn(),
-      renderer: jest.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
+      renderer: vi.fn(),
     };
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders null without coordinator", () => {
@@ -64,7 +65,7 @@ describe("VerticalBars", () => {
   });
 
   it("renders bars correctly if a proper coordinator is defined", () => {
-    (useHoverValue as jest.Mock).mockReturnValue({ value: 5 });
+    (useHoverValue as Mock).mockReturnValue({ value: 5 });
 
     setup({ coordinator: mockCoordinator });
 

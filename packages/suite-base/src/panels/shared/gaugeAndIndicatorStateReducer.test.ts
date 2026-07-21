@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+import type { Mock } from "vitest";
+
 import { MessagePath, MessagePathPart, parseMessagePath } from "@lichtblick/message-path";
 import { MessageEvent } from "@lichtblick/suite";
 import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems";
@@ -16,14 +18,14 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { stateReducer, getSingleDataItem } from "./gaugeAndIndicatorStateReducer";
 
-jest.mock("@lichtblick/message-path", () => ({
-  parseMessagePath: jest.fn(),
+vi.mock("@lichtblick/message-path", async () => ({
+  parseMessagePath: vi.fn(),
 }));
 
-jest.mock(
+vi.mock(
   "@lichtblick/suite-base/components/MessagePathSyntax/simpleGetMessagePathDataItems",
-  () => ({
-    simpleGetMessagePathDataItems: jest.fn(),
+  async () => ({
+    simpleGetMessagePathDataItems: vi.fn(),
   }),
 );
 
@@ -136,7 +138,7 @@ describe("stateReducer", () => {
         }),
       });
       const frameAction = action as FrameAction;
-      (simpleGetMessagePathDataItems as jest.Mock).mockReturnValue(frameAction.messages);
+      (simpleGetMessagePathDataItems as Mock).mockReturnValue(frameAction.messages);
 
       const newState = stateReducer(state, action);
 
@@ -158,7 +160,7 @@ describe("stateReducer", () => {
           messages: [MessageEventBuilder.messageEvent({ topic: topicName })],
         }),
       });
-      (simpleGetMessagePathDataItems as jest.Mock).mockReturnValue([]);
+      (simpleGetMessagePathDataItems as Mock).mockReturnValue([]);
 
       const newState = stateReducer(state, action);
 
@@ -168,7 +170,7 @@ describe("stateReducer", () => {
 
     it("should handle latestMessage and latestMatchingQueriedData when topic is not found", () => {
       const { action, state } = setup();
-      (simpleGetMessagePathDataItems as jest.Mock).mockReturnValue([]);
+      (simpleGetMessagePathDataItems as Mock).mockReturnValue([]);
 
       const newState = stateReducer(state, action);
 
@@ -212,7 +214,7 @@ describe("stateReducer", () => {
         topicName: pathAction.path,
         topicNameRepr: pathAction.path,
       };
-      (parseMessagePath as jest.Mock).mockReturnValue(newPath);
+      (parseMessagePath as Mock).mockReturnValue(newPath);
 
       const newState = stateReducer(state, action);
 
@@ -238,8 +240,8 @@ describe("stateReducer", () => {
         topicNameRepr: "",
       };
       const expectedLatestMessage = MessageEventBuilder.messageEvent();
-      (parseMessagePath as jest.Mock).mockReturnValue(newPath);
-      (simpleGetMessagePathDataItems as jest.Mock).mockReturnValue([expectedLatestMessage]);
+      (parseMessagePath as Mock).mockReturnValue(newPath);
+      (simpleGetMessagePathDataItems as Mock).mockReturnValue([expectedLatestMessage]);
 
       const newState = stateReducer(state, action);
 

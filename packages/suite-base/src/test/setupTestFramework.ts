@@ -14,6 +14,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import "@testing-library/jest-dom/vitest";
+
 import { initI18n } from "@lichtblick/suite-base/i18n";
 import {
   setupMockSendNotification,
@@ -22,7 +24,7 @@ import {
 } from "@lichtblick/suite-base/test/MockSendNotification";
 
 // Mock out sendNotification for all tests
-jest.mock("@lichtblick/suite-base/util/sendNotification", () => {
+vi.mock("@lichtblick/suite-base/util/sendNotification", () => {
   return {
     __esModule: true,
     default: mockSendNotification,
@@ -40,8 +42,8 @@ beforeEach(() => {
 // We assign rather than spy to expose the mock for the user
 const origError = console.error;
 const origWarn = console.warn;
-const consoleErrorMock = (console.error = jest.fn());
-const consoleWarnMock = (console.warn = jest.fn());
+const consoleErrorMock = (console.error = vi.fn());
+const consoleWarnMock = (console.warn = vi.fn());
 
 beforeAll(async () => {
   await initI18n();

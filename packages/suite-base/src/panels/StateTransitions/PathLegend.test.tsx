@@ -1,6 +1,7 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
+import type { Mock } from "vitest";
 import { userEvent } from "@storybook/testing-library";
 import { render, screen } from "@testing-library/react";
 
@@ -12,29 +13,29 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { PathLegend } from "./PathLegend";
 
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext");
-jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions");
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext");
+vi.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions");
 
 describe("PathLegend Component", () => {
-  const mockSetFocusedPath = jest.fn();
-  const mockSaveConfig = jest.fn();
-  const mockOpenPanelSettings = jest.fn();
-  const mockSetSelectedPanelIds = jest.fn();
+  const mockSetFocusedPath = vi.fn();
+  const mockSaveConfig = vi.fn();
+  const mockOpenPanelSettings = vi.fn();
+  const mockSetSelectedPanelIds = vi.fn();
 
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
-    (useSelectedPanels as jest.Mock).mockReturnValue({
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    (useSelectedPanels as Mock).mockReturnValue({
       setSelectedPanelIds: mockSetSelectedPanelIds,
     });
-    (useWorkspaceActions as jest.Mock).mockReturnValue({
+    (useWorkspaceActions as Mock).mockReturnValue({
       globalVariables: {},
       openPanelSettings: mockOpenPanelSettings,
-      setGlobalVariables: jest.fn(),
+      setGlobalVariables: vi.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const renderComponent = (propsOverride: Partial<PathLegendProps & { panelId: string }> = {}) => {

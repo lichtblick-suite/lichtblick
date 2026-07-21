@@ -1,8 +1,9 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { renderHook } from "@testing-library/react";
 
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
@@ -12,15 +13,15 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useAlertCount from "./useAlertCount";
 
-jest.mock("@lichtblick/suite-base/components/MessagePipeline");
-jest.mock("@lichtblick/suite-base/context/AlertsContext");
+vi.mock("@lichtblick/suite-base/components/MessagePipeline");
+vi.mock("@lichtblick/suite-base/context/AlertsContext");
 
 describe("useAlertCount", () => {
-  const mockUseMessagePipeline = useMessagePipeline as jest.Mock;
-  const mockUseAlertsStore = useAlertsStore as jest.Mock;
+  const mockUseMessagePipeline = useMessagePipeline as Mock;
+  const mockUseAlertsStore = useAlertsStore as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return empty alerts when no player or session alerts exist", () => {

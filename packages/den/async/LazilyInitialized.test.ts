@@ -11,7 +11,7 @@ describe("LazilyInitialized", () => {
   it("calls the provided compute function only once", async () => {
     let resolve: undefined | ((_: number) => void);
     const promise = new Promise<number>((res) => (resolve = res));
-    const compute = jest.fn().mockReturnValue(promise);
+    const compute = vi.fn().mockReturnValue(promise);
     const lazy = new LazilyInitialized(compute);
     expect(compute).toHaveBeenCalledTimes(0);
 

@@ -1,7 +1,8 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 
 import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
@@ -13,59 +14,59 @@ import { useLayoutTransfer } from "./useLayoutTransfer";
 import { useAnalytics } from "../context/AnalyticsContext";
 import { useLayoutManager } from "../context/LayoutManagerContext";
 
-jest.mock("notistack", () => ({
-  useSnackbar: () => ({ enqueueSnackbar: jest.fn() }),
+vi.mock("notistack", async () => ({
+  useSnackbar: () => ({ enqueueSnackbar: vi.fn() }),
 }));
 
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
-  useCurrentLayoutActions: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => ({
+  useCurrentLayoutActions: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
-  useLayoutManager: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/LayoutManagerContext", async () => ({
+  useLayoutManager: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/hooks/useLayoutNavigation", () => ({
-  useLayoutNavigation: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks/useLayoutNavigation", async () => ({
+  useLayoutNavigation: vi.fn(),
 }));
 
-jest.mock("../context/AnalyticsContext", () => ({
-  useAnalytics: jest.fn(),
+vi.mock("../context/AnalyticsContext", async () => ({
+  useAnalytics: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/util/showOpenFilePicker");
+vi.mock("@lichtblick/suite-base/util/showOpenFilePicker");
 
-jest.mock("react-use", () => ({
-  ...jest.requireActual("react-use"),
+vi.mock("react-use", async () => ({
+  ...await vi.importActual("react-use"),
   useMountedState: () => () => true,
 }));
 
 describe("useLayoutTransfer", () => {
-  const saveNewLayoutMock = jest.fn();
-  const getCurrentLayoutStateMock = jest.fn();
-  const onSelectLayoutMock = jest.fn();
-  const promptForUnsavedChangesMock = jest.fn();
-  const logEventMock = jest.fn();
+  const saveNewLayoutMock = vi.fn();
+  const getCurrentLayoutStateMock = vi.fn();
+  const onSelectLayoutMock = vi.fn();
+  const promptForUnsavedChangesMock = vi.fn();
+  const logEventMock = vi.fn();
 
   beforeEach(() => {
-    (useLayoutManager as jest.Mock).mockReturnValue({
+    (useLayoutManager as Mock).mockReturnValue({
       saveNewLayout: saveNewLayoutMock,
     });
 
-    (useCurrentLayoutActions as jest.Mock).mockReturnValue({
+    (useCurrentLayoutActions as Mock).mockReturnValue({
       getCurrentLayoutState: getCurrentLayoutStateMock,
     });
 
-    (useLayoutNavigation as jest.Mock).mockReturnValue({
+    (useLayoutNavigation as Mock).mockReturnValue({
       promptForUnsavedChanges: promptForUnsavedChangesMock,
       onSelectLayout: onSelectLayoutMock,
     });
 
-    (useAnalytics as jest.Mock).mockReturnValue({
+    (useAnalytics as Mock).mockReturnValue({
       logEvent: logEventMock,
     });
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should import a layout and call onSelectLayout", async () => {
@@ -77,7 +78,7 @@ describe("useLayoutTransfer", () => {
 
     mockFile.text = async () => content;
 
-    (filePicker.default as jest.Mock).mockResolvedValue([
+    (filePicker.default as Mock).mockResolvedValue([
       {
         getFile: async () => mockFile,
       },

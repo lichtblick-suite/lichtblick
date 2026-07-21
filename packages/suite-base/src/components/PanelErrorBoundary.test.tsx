@@ -1,16 +1,17 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Component, ReactNode } from "react";
 
 import PanelErrorBoundary from "@lichtblick/suite-base/components/PanelErrorBoundary";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
-jest.mock("@lichtblick/suite-base/reportError", () => ({
-  reportError: jest.fn(),
+vi.mock("@lichtblick/suite-base/reportError", async () => ({
+  reportError: vi.fn(),
 }));
 
 interface ErrorThrowingComponentProps {
@@ -38,9 +39,9 @@ function renderErrorBoundary(
   } = {},
 ) {
   const defaultProps = {
-    onResetPanel: jest.fn(),
-    onRemovePanel: jest.fn(),
-    onLogError: jest.fn(),
+    onResetPanel: vi.fn(),
+    onRemovePanel: vi.fn(),
+    onLogError: vi.fn(),
     ...props,
   };
 
@@ -57,11 +58,11 @@ function renderErrorBoundary(
 describe("PanelErrorBoundary", () => {
   beforeEach(() => {
     // Silence console.error for error boundary tests
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    (console.error as jest.Mock).mockRestore();
+    (console.error as Mock).mockRestore();
   });
 
   describe("Given a working component", () => {
@@ -141,7 +142,7 @@ describe("PanelErrorBoundary", () => {
         `Panel render error: ${errorMessage}`,
         expect.any(Error),
       );
-      expect((props.onLogError as jest.Mock).mock.calls[0][1].message).toBe(errorMessage);
+      expect((props.onLogError as Mock).mock.calls[0][1].message).toBe(errorMessage);
     });
 
     it("When onLogError is not provided Then does not throw", () => {

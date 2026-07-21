@@ -1,46 +1,47 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import SettingsTreeEditor from "@lichtblick/suite-base/components/SettingsTreeEditor";
 import { SettingsTreeEditorProps } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
-jest.mock("@lichtblick/suite-base/context/PanelCatalogContext");
-jest.mock("@lichtblick/suite-base/context/PanelStateContext");
+vi.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
+vi.mock("@lichtblick/suite-base/context/PanelCatalogContext");
+vi.mock("@lichtblick/suite-base/context/PanelStateContext");
 
-jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
+vi.mock("@lichtblick/suite-base/PanelAPI", async () => ({
   useDataSourceInfo: () => ({
     datatypes: new Map(),
     topics: [],
   }),
-  useConfigById: jest.fn(() => [{}, jest.fn()]),
+  useConfigById: vi.fn(() => [{}, vi.fn()]),
 }));
 
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
-  useSelectedPanels: jest.fn(() => ({
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => ({
+  useSelectedPanels: vi.fn(() => ({
     selectedPanelIds: [],
-    setSelectedPanelIds: jest.fn(),
+    setSelectedPanelIds: vi.fn(),
   })),
 }));
 
 describe("SettingsTreeEditor", () => {
-  const mockSetSelectedPanelIds = jest.fn();
+  const mockSetSelectedPanelIds = vi.fn();
 
   const renderComponent = async (overrides: Partial<SettingsTreeEditorProps> = {}) => {
     const defaultProps: SettingsTreeEditorProps = {
       variant: "panel",
-      settings: { actionHandler: jest.fn(), nodes: {} },
+      settings: { actionHandler: vi.fn(), nodes: {} },
       ...overrides,
     };
 
@@ -58,11 +59,11 @@ describe("SettingsTreeEditor", () => {
   };
 
   beforeEach(() => {
-    (useSelectedPanels as jest.Mock).mockReturnValue({
+    (useSelectedPanels as Mock).mockReturnValue({
       selectedPanelIds: [],
       setSelectedPanelIds: mockSetSelectedPanelIds,
     });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should render SettingsTreeEditor, apply a filter and only show filtered nodes", async () => {
@@ -71,7 +72,7 @@ describe("SettingsTreeEditor", () => {
 
     const { props } = await renderComponent({
       settings: {
-        actionHandler: jest.fn(),
+        actionHandler: vi.fn(),
         enableFilter: true,
         nodes: { firstNode: { label: nodeLabel }, secondNode: { label: nodeLabel2 } },
       },
@@ -88,7 +89,7 @@ describe("SettingsTreeEditor", () => {
 
     const { props } = await renderComponent({
       settings: {
-        actionHandler: jest.fn(),
+        actionHandler: vi.fn(),
         enableFilter: true,
         nodes: { firstNode: { label: nodeLabel } },
       },

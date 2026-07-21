@@ -7,7 +7,7 @@
     "noEmit": true,
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false,
-    "types": ["node", "jest"],
+    "types": ["node", "vitest/globals"],
     "paths": {
       "@lichtblick/suite-base/*": ["../suite-base/src/*"]
     }

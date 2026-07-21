@@ -43,7 +43,7 @@ class TestSource implements IDeserializedIterableSource {
   }
 }
 
-const consoleErrorMock = console.error as ReturnType<typeof jest.fn>;
+const consoleErrorMock = console.error as ReturnType<typeof vi.fn>;
 
 describe("BlockLoader", () => {
   it("should make an empty block loader", async () => {
@@ -225,17 +225,15 @@ describe("BlockLoader", () => {
             },
           ],
           messageCache: {
-            blocks: [
-              {
-                messagesByTopic: {
-                  a: [msgEvents[0], msgEvents[1]],
-                },
-                needTopics: new Map(),
-                sizeInBytes: 2,
-              },
-            ],
             startTime: { sec: 0, nsec: 0 },
           },
+        });
+        expect(progress.messageCache.blocks[0]).toEqual({
+          messagesByTopic: {
+            a: [msgEvents[0], msgEvents[1]],
+          },
+          needTopics: new Map(),
+          sizeInBytes: 2,
         });
         // need to wait for second progress call to receive cache full error
         if (++progressCount > 1) {
@@ -245,7 +243,7 @@ describe("BlockLoader", () => {
     });
     expect(consoleErrorMock.mock.calls[0] ?? []).toContain("cache-full");
     consoleErrorMock.mockClear();
-    expect.assertions(3);
+    expect.assertions(5);
   });
 
   it("should remove unused topics on blocks if cache is full", async () => {
@@ -299,7 +297,7 @@ describe("BlockLoader", () => {
       progress: async (progress) => {
         count++;
         if (count === 2) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {
@@ -343,7 +341,7 @@ describe("BlockLoader", () => {
       progress: async (progress) => {
         count += 1;
         if (count === 2) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {
@@ -426,7 +424,7 @@ describe("BlockLoader", () => {
         }
 
         if (count === 2) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {
@@ -523,17 +521,15 @@ describe("BlockLoader", () => {
             },
           ],
           messageCache: {
-            blocks: [
-              {
-                messagesByTopic: {
-                  a: msgEvents.slice(0, 5),
-                },
-                needTopics: new Map(),
-                sizeInBytes: 50,
-              },
-            ],
             startTime: { sec: 0, nsec: 0 },
           },
+        });
+        expect(progress.messageCache.blocks[0]).toEqual({
+          messagesByTopic: {
+            a: msgEvents.slice(0, 5),
+          },
+          needTopics: new Map(),
+          sizeInBytes: 50,
         });
 
         // need to wait for second progress call to receive cache full error
@@ -557,7 +553,7 @@ describe("BlockLoader", () => {
         }
 
         if (count === maxBlockCount) {
-          // eslint-disable-next-line jest/no-conditional-expect
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(progress).toEqual({
             fullyLoadedFractionRanges: [
               {

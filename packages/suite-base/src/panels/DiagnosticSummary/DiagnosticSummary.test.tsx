@@ -1,11 +1,14 @@
-/** @jest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+/** @vitest-environment jsdom */
 
-import DiagnosticSummary from "@lichtblick/suite-base/panels/DiagnosticSummary";
+import { render, screen } from "@testing-library/react";
+import type { Mock } from "vitest";
+
+import "@testing-library/jest-dom/vitest";
+
+import DiagnosticSummary from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticSummary";
 import { DEFAULT_CONFIG } from "@lichtblick/suite-base/panels/DiagnosticSummary/constants";
 import useDiagnostics, {
   UseDiagnosticsResult,
@@ -18,9 +21,9 @@ import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import DiagnosticsBuilder from "@lichtblick/suite-base/testing/builders/DiagnosticsBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics");
+vi.mock("@lichtblick/suite-base/panels/DiagnosticSummary/hooks/useDiagnostics");
 
-jest.mock("react-virtualized-auto-sizer", () => ({
+vi.mock("react-virtualized-auto-sizer", async () => ({
   __esModule: true,
   default: ({
     children,
@@ -29,28 +32,29 @@ jest.mock("react-virtualized-auto-sizer", () => ({
   }) => children({ height: 500, width: 500 }),
 }));
 
-describe("DiagnosticSummary", () => {
-  const mockSaveConfig = jest.fn();
-  const mockOpenSiblingPanel = jest.fn();
+const mockOpenSiblingPanel = vi.hoisted(() => vi.fn());
 
-  jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
-    useDataSourceInfo: jest.fn(() => ({
-      topics: [],
-    })),
-  }));
-
-  jest.mock("@lichtblick/suite-base/components/PanelContext", () => ({
-    usePanelContext: jest.fn(() => ({
+vi.mock("@lichtblick/suite-base/components/PanelContext", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@lichtblick/suite-base/components/PanelContext")>();
+  return {
+    ...actual,
+    usePanelContext: vi.fn(() => ({
       openSiblingPanel: mockOpenSiblingPanel,
     })),
-  }));
+  };
+});
 
-  jest.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", () => ({
-    usePanelSettingsTreeUpdate: jest.fn(),
-  }));
+describe("DiagnosticSummary", () => {
+  const mockSaveConfig = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    (console.error as Mock).mockClear();
+    (console.warn as Mock).mockClear();
   });
 
   function setup(overrideConfig: Partial<DiagnosticSummaryConfig> = {}) {
@@ -79,7 +83,7 @@ describe("DiagnosticSummary", () => {
 
   it("renders empty state when no diagnostics are available", () => {
     const diagnosticResult: UseDiagnosticsResult = new Map();
-    (useDiagnostics as jest.Mock).mockReturnValueOnce(diagnosticResult);
+    (useDiagnostics as Mock).mockReturnValueOnce(diagnosticResult);
 
     const { config } = setup();
 
@@ -94,7 +98,7 @@ describe("DiagnosticSummary", () => {
     const diagnosticResult: UseDiagnosticsResult = new Map([
       [hardwareId, new Map([[diagnosticId, diagnosticInfo]])],
     ]);
-    (useDiagnostics as jest.Mock).mockReturnValue(diagnosticResult);
+    (useDiagnostics as Mock).mockReturnValue(diagnosticResult);
 
     setup({
       pinnedIds: [`1|${hardwareId}|${diagnosticId}`],

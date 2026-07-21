@@ -1,7 +1,8 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
-import "@testing-library/jest-dom";
+import type { Mock } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 import { Topic } from "@lichtblick/suite";
@@ -28,22 +29,22 @@ function MockDirectionalPad({ onAction, disabled }: DirectionalPadProps): React.
   );
 }
 
-jest.mock("./DirectionalPad", () => ({
+vi.mock("./DirectionalPad", async () => ({
   __esModule: true,
   default: MockDirectionalPad,
 }));
 
-jest.mock("@lichtblick/suite-base/theme/ThemeProvider", () => ({
+vi.mock("@lichtblick/suite-base/theme/ThemeProvider", async () => ({
   __esModule: true,
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
-jest.mock("@lichtblick/suite-base/components/EmptyState", () => ({
+vi.mock("@lichtblick/suite-base/components/EmptyState", async () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="empty-state">{children}</div>,
 }));
 
-jest.mock("@lichtblick/suite-base/components/Stack", () => ({
+vi.mock("@lichtblick/suite-base/components/Stack", async () => ({
   __esModule: true,
   default: ({ children }: any) => <div>{children}</div>,
 }));
@@ -51,12 +52,12 @@ jest.mock("@lichtblick/suite-base/components/Stack", () => ({
 function getMockContext(overrides: any = {}) {
   return {
     initialState: {},
-    saveState: jest.fn(),
-    watch: jest.fn(),
-    updatePanelSettingsEditor: jest.fn(),
-    advertise: jest.fn(),
-    unadvertise: jest.fn(),
-    publish: jest.fn(),
+    saveState: vi.fn(),
+    watch: vi.fn(),
+    updatePanelSettingsEditor: vi.fn(),
+    advertise: vi.fn(),
+    unadvertise: vi.fn(),
+    publish: vi.fn(),
     onRender: undefined,
     ...overrides,
   };
@@ -64,11 +65,11 @@ function getMockContext(overrides: any = {}) {
 
 describe("TeleopPanel", () => {
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    (console.error as jest.Mock).mockRestore();
+    (console.error as Mock).mockRestore();
   });
 
   it("renders EmptyState when publish is not available", () => {
@@ -80,7 +81,7 @@ describe("TeleopPanel", () => {
   });
 
   it("renders EmptyState when topic is missing", () => {
-    const context = getMockContext({ publish: jest.fn() });
+    const context = getMockContext({ publish: vi.fn() });
     render(<TeleopPanel context={context} />);
     expect(screen.getByTestId("empty-state")).toHaveTextContent(
       "Select a publish topic in the panel settings",
@@ -89,7 +90,7 @@ describe("TeleopPanel", () => {
 
   it("renders DirectionalPad when canPublish and hasTopic", () => {
     const context = getMockContext({
-      publish: jest.fn(),
+      publish: vi.fn(),
       initialState: { topic: BasicBuilder.string() },
     });
     render(<TeleopPanel context={context} />);
@@ -97,7 +98,7 @@ describe("TeleopPanel", () => {
   });
 
   it("does not publish if publishRate is zero", () => {
-    const publish = jest.fn();
+    const publish = vi.fn();
     const context = getMockContext({
       publish,
       initialState: { topic: BasicBuilder.string(), publishRate: 0 },
@@ -107,8 +108,8 @@ describe("TeleopPanel", () => {
   });
 
   it("publishes message when DirectionalPad action is triggered", () => {
-    jest.useFakeTimers();
-    const publish = jest.fn();
+    vi.useFakeTimers();
+    const publish = vi.fn();
     const initialState: Partial<TeleopConfig> = { topic: BasicBuilder.string(), publishRate: 1 };
     const context = getMockContext({
       publish,
@@ -116,7 +117,7 @@ describe("TeleopPanel", () => {
     });
     render(<TeleopPanel context={context} />);
     fireEvent.click(screen.getByText("UP"));
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     expect(publish).toHaveBeenCalledWith(
       initialState.topic,
       expect.objectContaining({
@@ -124,15 +125,15 @@ describe("TeleopPanel", () => {
         angular: expect.any(Object),
       }),
     );
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("calls advertise and unadvertise (but not on the first render), when topic changes", () => {
-    const advertise = jest.fn();
-    const unadvertise = jest.fn();
+    const advertise = vi.fn();
+    const unadvertise = vi.fn();
     const initialState: Partial<TeleopConfig> = { topic: BasicBuilder.string() };
     const context = getMockContext({
-      publish: jest.fn(),
+      publish: vi.fn(),
       advertise,
       unadvertise,
       initialState,
@@ -148,7 +149,7 @@ describe("TeleopPanel", () => {
     rerender(
       <TeleopPanel
         context={getMockContext({
-          publish: jest.fn(),
+          publish: vi.fn(),
           advertise,
           unadvertise,
           initialState,
@@ -160,7 +161,7 @@ describe("TeleopPanel", () => {
     rerender(
       <TeleopPanel
         context={getMockContext({
-          publish: jest.fn(),
+          publish: vi.fn(),
           advertise,
           unadvertise,
           initialState,
@@ -180,7 +181,7 @@ describe("TeleopPanel", () => {
     };
     const context = getMockContext({
       initialState,
-      publish: jest.fn(),
+      publish: vi.fn(),
     });
     render(<TeleopPanel context={context} />);
     expect(screen.getByTestId("empty-state")).toHaveTextContent(
@@ -205,7 +206,7 @@ describe("TeleopPanel", () => {
 
   it("settingsActionHandler updates config", () => {
     const context = getMockContext({
-      publish: jest.fn(),
+      publish: vi.fn(),
       initialState: { topic: BasicBuilder.string() },
     });
     render(<TeleopPanel context={context} />);
@@ -240,16 +241,16 @@ describe("TeleopPanel", () => {
 
   describe("DirectionalPad Actions and Field Value Setting", () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     describe("Given a TeleopPanel with a configured topic and publish capability", () => {
       const setupTestEnvironment = (buttonConfig: Partial<TeleopConfig> = {}) => {
-        const publish = jest.fn();
+        const publish = vi.fn();
         const topic = "test/cmd_vel";
         const defaultConfig: TeleopConfig = {
           topic,
@@ -279,7 +280,7 @@ describe("TeleopPanel", () => {
           // When
           render(<TeleopPanel context={context} />);
           fireEvent.click(screen.getByText("UP"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -300,7 +301,7 @@ describe("TeleopPanel", () => {
           // When
           render(<TeleopPanel context={context} />);
           fireEvent.click(screen.getByText("UP"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -321,7 +322,7 @@ describe("TeleopPanel", () => {
           // When
           render(<TeleopPanel context={context} />);
           fireEvent.click(screen.getByText("UP"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -344,7 +345,7 @@ describe("TeleopPanel", () => {
           // When
           render(<TeleopPanel context={context} />);
           fireEvent.click(screen.getByText("DOWN"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -365,7 +366,7 @@ describe("TeleopPanel", () => {
           // When
           render(<TeleopPanel context={context} />);
           fireEvent.click(screen.getByText("DOWN"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -388,7 +389,7 @@ describe("TeleopPanel", () => {
           // When
           render(<TeleopPanel context={context} />);
           fireEvent.click(screen.getByText("LEFT"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -409,7 +410,7 @@ describe("TeleopPanel", () => {
           // When
           render(<TeleopPanel context={context} />);
           fireEvent.click(screen.getByText("LEFT"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -432,7 +433,7 @@ describe("TeleopPanel", () => {
           // When
           render(<TeleopPanel context={context} />);
           fireEvent.click(screen.getByText("RIGHT"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -453,7 +454,7 @@ describe("TeleopPanel", () => {
           // When
           render(<TeleopPanel context={context} />);
           fireEvent.click(screen.getByText("RIGHT"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -487,7 +488,7 @@ describe("TeleopPanel", () => {
             // When
             render(<TeleopPanel context={context} />);
             fireEvent.click(screen.getByText("UP"));
-            jest.runOnlyPendingTimers();
+            vi.runOnlyPendingTimers();
 
             // Then
             const publishedMessage = publish.mock.calls[0][1];
@@ -514,22 +515,22 @@ describe("TeleopPanel", () => {
 
           // Trigger UP
           fireEvent.click(screen.getByText("UP"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Clear previous calls and trigger DOWN
           publish.mockClear();
           fireEvent.click(screen.getByText("DOWN"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Clear previous calls and trigger LEFT
           publish.mockClear();
           fireEvent.click(screen.getByText("LEFT"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Clear previous calls and trigger RIGHT
           publish.mockClear();
           fireEvent.click(screen.getByText("RIGHT"));
-          jest.runOnlyPendingTimers();
+          vi.runOnlyPendingTimers();
 
           // Then
           expect(publish).toHaveBeenCalledWith(
@@ -554,13 +555,13 @@ describe("TeleopPanel", () => {
           fireEvent.click(screen.getByText("UP"));
 
           // Advance time by 200ms (one interval)
-          jest.advanceTimersByTime(200);
+          vi.advanceTimersByTime(200);
 
           // Then
           expect(publish).toHaveBeenCalledTimes(2); // Initial + one interval
 
           // When advancing another 200ms
-          jest.advanceTimersByTime(200);
+          vi.advanceTimersByTime(200);
 
           // Then
           expect(publish).toHaveBeenCalledTimes(3); // Initial + two intervals
@@ -572,7 +573,7 @@ describe("TeleopPanel", () => {
   describe("onRender callback functionality", () => {
     const setupRenderTestEnvironment = () => {
       const context = getMockContext({
-        publish: jest.fn(),
+        publish: vi.fn(),
         initialState: { topic: "test/topic" },
       });
       return { context };
@@ -599,7 +600,7 @@ describe("TeleopPanel", () => {
         expect(onRenderCallback).toBeDefined();
 
         // Simulate onRender call with topics
-        onRenderCallback?.({ topics: mockTopics }, jest.fn());
+        onRenderCallback?.({ topics: mockTopics }, vi.fn());
 
         // Then
         // Verify that updatePanelSettingsEditor is called with the new topics
@@ -622,7 +623,7 @@ describe("TeleopPanel", () => {
         const onRenderCallback = context.onRender;
 
         // Simulate onRender call with dark color scheme
-        onRenderCallback?.({ colorScheme: "dark" }, jest.fn());
+        onRenderCallback?.({ colorScheme: "dark" }, vi.fn());
 
         // Then
         expect(container).toBeInTheDocument();
@@ -632,17 +633,17 @@ describe("TeleopPanel", () => {
 
   describe("Error handling for publish failures", () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it("should catch and log error when initial publish fails", () => {
       // Given
       const publishError = new Error("Topic not advertised");
-      const publish = jest.fn().mockImplementationOnce(() => {
+      const publish = vi.fn().mockImplementationOnce(() => {
         throw publishError;
       });
       const context = getMockContext({
@@ -653,7 +654,7 @@ describe("TeleopPanel", () => {
       // When
       render(<TeleopPanel context={context} />);
       fireEvent.click(screen.getByText("UP"));
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
 
       // Then
       expect(console.error).toHaveBeenCalledWith("Failed to publish message:", publishError);
@@ -661,7 +662,7 @@ describe("TeleopPanel", () => {
 
     it("should not crash the component when publish throws an error", () => {
       // Given
-      const publish = jest.fn().mockImplementationOnce(() => {
+      const publish = vi.fn().mockImplementationOnce(() => {
         throw new Error("Publish failed");
       });
       const context = getMockContext({
@@ -672,7 +673,7 @@ describe("TeleopPanel", () => {
       // When
       const { container } = render(<TeleopPanel context={context} />);
       fireEvent.click(screen.getByText("UP"));
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
 
       // Then
       expect(container).toBeInTheDocument();
@@ -682,7 +683,7 @@ describe("TeleopPanel", () => {
     it("should catch error in interval publish attempts", () => {
       // Given
       const publishError = new Error("Interval publish failed");
-      const publish = jest
+      const publish = vi
         .fn()
         .mockImplementationOnce(() => undefined)
         .mockImplementationOnce(() => {
@@ -696,8 +697,8 @@ describe("TeleopPanel", () => {
       // When
       render(<TeleopPanel context={context} />);
       fireEvent.click(screen.getByText("UP"));
-      jest.runOnlyPendingTimers();
-      jest.advanceTimersByTime(100);
+      vi.runOnlyPendingTimers();
+      vi.advanceTimersByTime(100);
 
       // Then
       expect(console.error).toHaveBeenCalledWith("Failed to publish message:", publishError);

@@ -2,30 +2,33 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import * as path from "path";
+import type { MockedFunction, MockedClass } from "vitest";
 
 // Mock all dependencies before any imports
-jest.mock("@lichtblick/log", () => ({
-  getLogger: () => ({
-    debug: jest.fn(),
-  }),
+vi.mock("@lichtblick/log", async () => ({
+  default: {
+    getLogger: () => ({
+      debug: vi.fn(),
+    }),
+  },
 }));
 
-jest.mock("./fileUtils", () => ({
-  isFileToOpen: jest.fn(),
+vi.mock("./fileUtils", async () => ({
+  isFileToOpen: vi.fn(),
 }));
 
-jest.mock("./injectFilesToOpen", () => jest.fn());
+vi.mock("./injectFilesToOpen", async () => ({ default: vi.fn() }));
 
 // Mock StudioWindow completely to avoid React dependencies
-const mockLoad = jest.fn();
-const mockGetBrowserWindow = jest.fn();
+const mockLoad = vi.fn();
+const mockGetBrowserWindow = vi.fn();
 
-jest.mock("./StudioWindow", () => {
-  return jest.fn().mockImplementation(() => ({
+vi.mock("./StudioWindow", async () => ({
+  default: vi.fn().mockImplementation(() => ({
     load: mockLoad,
     getBrowserWindow: mockGetBrowserWindow,
-  }));
-});
+  })),
+}));
 
 // Import after mocks
 // eslint-disable-next-line import/first
@@ -37,18 +40,18 @@ import { isFileToOpen } from "./fileUtils";
 // eslint-disable-next-line import/first
 import injectFilesToOpen from "./injectFilesToOpen";
 
-const mockIsFileToOpen = isFileToOpen as jest.MockedFunction<typeof isFileToOpen>;
-const mockInjectFilesToOpen = injectFilesToOpen as jest.MockedFunction<typeof injectFilesToOpen>;
-const MockStudioWindow = StudioWindow as jest.MockedClass<typeof StudioWindow>;
+const mockIsFileToOpen = isFileToOpen as MockedFunction<typeof isFileToOpen>;
+const mockInjectFilesToOpen = injectFilesToOpen as MockedFunction<typeof injectFilesToOpen>;
+const MockStudioWindow = StudioWindow as MockedClass<typeof StudioWindow>;
 
 describe("createNewWindow", () => {
   const mockWebContents = {
-    once: jest.fn(),
+    once: vi.fn(),
     debugger: { mock: "debugger" },
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetBrowserWindow.mockReturnValue({ webContents: mockWebContents });
   });
 

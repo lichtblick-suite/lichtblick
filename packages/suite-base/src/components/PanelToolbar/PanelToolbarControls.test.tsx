@@ -1,10 +1,11 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { MockedFunction } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import React from "react";
 
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
@@ -17,20 +18,20 @@ import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 // Mock the dependencies
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
-  useSelectedPanels: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => ({
+  useSelectedPanels: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/PanelStateContext", () => ({
-  usePanelStateStore: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/PanelStateContext", async () => ({
+  usePanelStateStore: vi.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", () => ({
-  useWorkspaceActions: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", async () => ({
+  useWorkspaceActions: vi.fn(),
 }));
 
 // Mock the PanelActionsDropdown component
-jest.mock("@lichtblick/suite-base/components/PanelToolbar/PanelActionsDropdown", () => ({
+vi.mock("@lichtblick/suite-base/components/PanelToolbar/PanelActionsDropdown", async () => ({
   PanelActionsDropdown: ({ isUnknownPanel }: { isUnknownPanel: boolean }) => (
     <div data-testid="panel-actions-dropdown" data-unknown-panel={isUnknownPanel}>
       Panel Actions Dropdown
@@ -38,9 +39,9 @@ jest.mock("@lichtblick/suite-base/components/PanelToolbar/PanelActionsDropdown",
   ),
 }));
 
-const mockUseSelectedPanels = useSelectedPanels as jest.MockedFunction<typeof useSelectedPanels>;
-const mockUsePanelStateStore = usePanelStateStore as jest.MockedFunction<typeof usePanelStateStore>;
-const mockUseWorkspaceActions = useWorkspaceActions as jest.MockedFunction<
+const mockUseSelectedPanels = useSelectedPanels as MockedFunction<typeof useSelectedPanels>;
+const mockUsePanelStateStore = usePanelStateStore as MockedFunction<typeof usePanelStateStore>;
+const mockUseWorkspaceActions = useWorkspaceActions as MockedFunction<
   typeof useWorkspaceActions
 >;
 
@@ -54,29 +55,29 @@ function renderPanelToolbarControls({
     type: "TestPanel",
     title: "Test Panel",
     showLogs: false,
-    setShowLogs: jest.fn(),
-    logError: jest.fn(),
+    setShowLogs: vi.fn(),
+    logError: vi.fn(),
     logCount: 0,
     config: {},
-    saveConfig: jest.fn(),
-    updatePanelConfigs: jest.fn(),
-    openSiblingPanel: jest.fn(),
-    replacePanel: jest.fn(),
-    enterFullscreen: jest.fn(),
-    exitFullscreen: jest.fn(),
+    saveConfig: vi.fn(),
+    updatePanelConfigs: vi.fn(),
+    openSiblingPanel: vi.fn(),
+    replacePanel: vi.fn(),
+    enterFullscreen: vi.fn(),
+    exitFullscreen: vi.fn(),
     isFullscreen: false,
-    setHasFullscreenDescendant: jest.fn(),
-    connectToolbarDragHandle: jest.fn(),
-    setMessagePathDropConfig: jest.fn(),
+    setHasFullscreenDescendant: vi.fn(),
+    connectToolbarDragHandle: vi.fn(),
+    setMessagePathDropConfig: vi.fn(),
     ...panelContextOverrides,
   };
 
   const panelCatalog = {
-    getPanels: jest.fn().mockReturnValue([]),
-    getPanelByType: jest.fn().mockReturnValue({
+    getPanels: vi.fn().mockReturnValue([]),
+    getPanelByType: vi.fn().mockReturnValue({
       title: "Test Panel",
       type: "TestPanel",
-      module: jest.fn(),
+      module: vi.fn(),
       hasCustomToolbar: false,
     }),
     ...panelCatalogOverrides,
@@ -105,15 +106,15 @@ function renderPanelToolbarControls({
 describe("PanelToolbarControls", () => {
   beforeEach(() => {
     // Reset all mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Set up default mock implementations
     mockUseSelectedPanels.mockReturnValue({
-      getSelectedPanelIds: jest.fn().mockReturnValue([]),
+      getSelectedPanelIds: vi.fn().mockReturnValue([]),
       selectedPanelIds: [],
-      setSelectedPanelIds: jest.fn(),
-      selectAllPanels: jest.fn(),
-      togglePanelSelected: jest.fn(),
+      setSelectedPanelIds: vi.fn(),
+      selectAllPanels: vi.fn(),
+      togglePanelSelected: vi.fn(),
     });
 
     mockUsePanelStateStore.mockReturnValue(false);
@@ -121,15 +122,15 @@ describe("PanelToolbarControls", () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     mockUseWorkspaceActions.mockReturnValue({
       dialogActions: {
-        dataSource: { close: jest.fn(), open: jest.fn() },
-        openFile: { open: jest.fn() },
-        preferences: { close: jest.fn(), open: jest.fn() },
+        dataSource: { close: vi.fn(), open: vi.fn() },
+        openFile: { open: vi.fn() },
+        preferences: { close: vi.fn(), open: vi.fn() },
       },
-      featureTourActions: { startTour: jest.fn(), finishTour: jest.fn() },
-      openAccountSettings: jest.fn(),
-      openPanelSettings: jest.fn(),
-      openLayoutBrowser: jest.fn(),
-      playbackControlActions: { setRepeat: jest.fn() },
+      featureTourActions: { startTour: vi.fn(), finishTour: vi.fn() },
+      openAccountSettings: vi.fn(),
+      openPanelSettings: vi.fn(),
+      openLayoutBrowser: vi.fn(),
+      playbackControlActions: { setRepeat: vi.fn() },
     } as any);
   });
 
@@ -282,29 +283,29 @@ describe("PanelToolbarControls", () => {
 
     it("When settings button is clicked Then opens panel settings", () => {
       // Given
-      const openPanelSettings = jest.fn();
-      const setSelectedPanelIds = jest.fn();
+      const openPanelSettings = vi.fn();
+      const setSelectedPanelIds = vi.fn();
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       mockUseWorkspaceActions.mockReturnValue({
         dialogActions: {
-          dataSource: { close: jest.fn(), open: jest.fn() },
-          openFile: { open: jest.fn() },
-          preferences: { close: jest.fn(), open: jest.fn() },
+          dataSource: { close: vi.fn(), open: vi.fn() },
+          openFile: { open: vi.fn() },
+          preferences: { close: vi.fn(), open: vi.fn() },
         },
-        featureTourActions: { startTour: jest.fn(), finishTour: jest.fn() },
-        openAccountSettings: jest.fn(),
+        featureTourActions: { startTour: vi.fn(), finishTour: vi.fn() },
+        openAccountSettings: vi.fn(),
         openPanelSettings,
-        openLayoutBrowser: jest.fn(),
-        playbackControlActions: { setRepeat: jest.fn() },
+        openLayoutBrowser: vi.fn(),
+        playbackControlActions: { setRepeat: vi.fn() },
       } as any);
 
       mockUseSelectedPanels.mockReturnValue({
-        getSelectedPanelIds: jest.fn().mockReturnValue([]),
+        getSelectedPanelIds: vi.fn().mockReturnValue([]),
         selectedPanelIds: [],
         setSelectedPanelIds,
-        selectAllPanels: jest.fn(),
-        togglePanelSelected: jest.fn(),
+        selectAllPanels: vi.fn(),
+        togglePanelSelected: vi.fn(),
       });
 
       const panelContext = {
@@ -338,10 +339,10 @@ describe("PanelToolbarControls", () => {
     it("When panel has custom toolbar and no settings Then hides settings button", () => {
       // Given
       const panelCatalog = {
-        getPanelByType: jest.fn().mockReturnValue({
+        getPanelByType: vi.fn().mockReturnValue({
           title: "Custom Panel",
           type: "CustomPanel",
-          module: jest.fn(),
+          module: vi.fn(),
           hasCustomToolbar: true,
         }),
       };
@@ -360,10 +361,10 @@ describe("PanelToolbarControls", () => {
     it("When panel has custom toolbar but has settings Then shows settings button", () => {
       // Given
       const panelCatalog = {
-        getPanelByType: jest.fn().mockReturnValue({
+        getPanelByType: vi.fn().mockReturnValue({
           title: "Custom Panel",
           type: "CustomPanel",
-          module: jest.fn(),
+          module: vi.fn(),
           hasCustomToolbar: true,
         }),
       };
@@ -450,7 +451,7 @@ describe("PanelToolbarControls", () => {
     it("When panel catalog returns undefined Then handles gracefully", () => {
       // Given
       const panelCatalog = {
-        getPanelByType: jest.fn().mockReturnValue(undefined),
+        getPanelByType: vi.fn().mockReturnValue(undefined),
       };
 
       // When
@@ -466,7 +467,7 @@ describe("PanelToolbarControls", () => {
     it("When panel type is not found in catalog Then shows settings button", () => {
       // Given
       const panelCatalog = {
-        getPanelByType: jest.fn().mockReturnValue(undefined),
+        getPanelByType: vi.fn().mockReturnValue(undefined),
       };
 
       // When
@@ -528,37 +529,41 @@ describe("PanelToolbarControls", () => {
       rerender(
         <ThemeProvider isDark={false}>
           <PanelCatalogContext.Provider
-            value={{
-              getPanels: jest.fn().mockReturnValue([]),
-              getPanelByType: jest.fn().mockReturnValue({
-                title: "Test Panel",
-                type: "TestPanel",
-                module: jest.fn(),
-                hasCustomToolbar: false,
-              }),
-            }}
+            value={
+              {
+                getPanels: vi.fn().mockReturnValue([]),
+                getPanelByType: vi.fn().mockReturnValue({
+                  title: "Test Panel",
+                  type: "TestPanel",
+                  module: vi.fn(),
+                  hasCustomToolbar: false,
+                }),
+              } as any
+            }
           >
             <PanelContext.Provider
-              value={{
-                id: "test-panel-id",
-                type: "TestPanel",
-                title: "Test Panel",
-                showLogs: false,
-                setShowLogs: jest.fn(),
-                logError: jest.fn(),
-                logCount: 0,
-                config: {},
-                saveConfig: jest.fn(),
-                updatePanelConfigs: jest.fn(),
-                openSiblingPanel: jest.fn(),
-                replacePanel: jest.fn(),
-                enterFullscreen: jest.fn(),
-                exitFullscreen: jest.fn(),
-                isFullscreen: false,
-                setHasFullscreenDescendant: jest.fn(),
-                connectToolbarDragHandle: jest.fn(),
-                setMessagePathDropConfig: jest.fn(),
-              }}
+              value={
+                {
+                  id: "test-panel-id",
+                  type: "TestPanel",
+                  title: "Test Panel",
+                  showLogs: false,
+                  setShowLogs: vi.fn(),
+                  logError: vi.fn(),
+                  logCount: 0,
+                  config: {},
+                  saveConfig: vi.fn(),
+                  updatePanelConfigs: vi.fn(),
+                  openSiblingPanel: vi.fn(),
+                  replacePanel: vi.fn(),
+                  enterFullscreen: vi.fn(),
+                  exitFullscreen: vi.fn(),
+                  isFullscreen: false,
+                  setHasFullscreenDescendant: vi.fn(),
+                  connectToolbarDragHandle: vi.fn(),
+                  setMessagePathDropConfig: vi.fn(),
+                } as any
+              }
             >
               <PanelToolbarControls {...props} />
             </PanelContext.Provider>
@@ -591,37 +596,41 @@ describe("PanelToolbarControls", () => {
       rerender(
         <ThemeProvider isDark={false}>
           <PanelCatalogContext.Provider
-            value={{
-              getPanels: jest.fn().mockReturnValue([]),
-              getPanelByType: jest.fn().mockReturnValue({
-                title: "Test Panel",
-                type: "TestPanel",
-                module: jest.fn(),
-                hasCustomToolbar: false,
-              }),
-            }}
+            value={
+              {
+                getPanels: vi.fn().mockReturnValue([]),
+                getPanelByType: vi.fn().mockReturnValue({
+                  title: "Test Panel",
+                  type: "TestPanel",
+                  module: vi.fn(),
+                  hasCustomToolbar: false,
+                }),
+              } as any
+            }
           >
             <PanelContext.Provider
-              value={{
-                id: "test-panel-id",
-                type: "TestPanel",
-                title: "Test Panel",
-                showLogs: false,
-                setShowLogs: jest.fn(),
-                logError: jest.fn(),
-                logCount: 3,
-                config: {},
-                saveConfig: jest.fn(),
-                updatePanelConfigs: jest.fn(),
-                openSiblingPanel: jest.fn(),
-                replacePanel: jest.fn(),
-                enterFullscreen: jest.fn(),
-                exitFullscreen: jest.fn(),
-                isFullscreen: false,
-                setHasFullscreenDescendant: jest.fn(),
-                connectToolbarDragHandle: jest.fn(),
-                setMessagePathDropConfig: jest.fn(),
-              }}
+              value={
+                {
+                  id: "test-panel-id",
+                  type: "TestPanel",
+                  title: "Test Panel",
+                  showLogs: false,
+                  setShowLogs: vi.fn(),
+                  logError: vi.fn(),
+                  logCount: 3,
+                  config: {},
+                  saveConfig: vi.fn(),
+                  updatePanelConfigs: vi.fn(),
+                  openSiblingPanel: vi.fn(),
+                  replacePanel: vi.fn(),
+                  enterFullscreen: vi.fn(),
+                  exitFullscreen: vi.fn(),
+                  isFullscreen: false,
+                  setHasFullscreenDescendant: vi.fn(),
+                  connectToolbarDragHandle: vi.fn(),
+                  setMessagePathDropConfig: vi.fn(),
+                } as any
+              }
             >
               <PanelToolbarControls isUnknownPanel={false} />
             </PanelContext.Provider>
@@ -650,20 +659,20 @@ describe("PanelToolbarControls", () => {
                 type: "Test",
                 title: "Test",
                 showLogs: false,
-                setShowLogs: jest.fn(),
-                logError: jest.fn(),
+                setShowLogs: vi.fn(),
+                logError: vi.fn(),
                 logCount: 0,
                 config: {},
-                saveConfig: jest.fn(),
-                updatePanelConfigs: jest.fn(),
-                openSiblingPanel: jest.fn(),
-                replacePanel: jest.fn(),
-                enterFullscreen: jest.fn(),
-                exitFullscreen: jest.fn(),
+                saveConfig: vi.fn(),
+                updatePanelConfigs: vi.fn(),
+                openSiblingPanel: vi.fn(),
+                replacePanel: vi.fn(),
+                enterFullscreen: vi.fn(),
+                exitFullscreen: vi.fn(),
                 isFullscreen: false,
-                setHasFullscreenDescendant: jest.fn(),
-                connectToolbarDragHandle: jest.fn(),
-                setMessagePathDropConfig: jest.fn(),
+                setHasFullscreenDescendant: vi.fn(),
+                connectToolbarDragHandle: vi.fn(),
+                setMessagePathDropConfig: vi.fn(),
               } as any
             }
           >
@@ -717,29 +726,29 @@ describe("PanelToolbarControls", () => {
 
     it("When settings button is clicked without panel ID Then does not perform actions", () => {
       // Given
-      const openPanelSettings = jest.fn();
-      const setSelectedPanelIds = jest.fn();
+      const openPanelSettings = vi.fn();
+      const setSelectedPanelIds = vi.fn();
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       mockUseWorkspaceActions.mockReturnValue({
         dialogActions: {
-          dataSource: { close: jest.fn(), open: jest.fn() },
-          openFile: { open: jest.fn() },
-          preferences: { close: jest.fn(), open: jest.fn() },
+          dataSource: { close: vi.fn(), open: vi.fn() },
+          openFile: { open: vi.fn() },
+          preferences: { close: vi.fn(), open: vi.fn() },
         },
-        featureTourActions: { startTour: jest.fn(), finishTour: jest.fn() },
-        openAccountSettings: jest.fn(),
+        featureTourActions: { startTour: vi.fn(), finishTour: vi.fn() },
+        openAccountSettings: vi.fn(),
         openPanelSettings,
-        openLayoutBrowser: jest.fn(),
-        playbackControlActions: { setRepeat: jest.fn() },
+        openLayoutBrowser: vi.fn(),
+        playbackControlActions: { setRepeat: vi.fn() },
       } as any);
 
       mockUseSelectedPanels.mockReturnValue({
-        getSelectedPanelIds: jest.fn().mockReturnValue([]),
+        getSelectedPanelIds: vi.fn().mockReturnValue([]),
         selectedPanelIds: [],
         setSelectedPanelIds,
-        selectAllPanels: jest.fn(),
-        togglePanelSelected: jest.fn(),
+        selectAllPanels: vi.fn(),
+        togglePanelSelected: vi.fn(),
       });
 
       const panelContext = {

@@ -6,7 +6,7 @@ import { TopicListItem } from "@lichtblick/suite-base/components/TopicList/useTo
 
 describe("getDraggedMessagePath", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return correct path for topic type", () => {

@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -10,6 +10,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { SnackbarProvider, useSnackbar } from "notistack";
 import { useEffect } from "react";
+import type { Mock } from "vitest";
 
 import { Condvar } from "@lichtblick/den/async";
 import { CurrentLayoutSyncAdapter } from "@lichtblick/suite-base/components/CurrentLayoutSyncAdapter";
@@ -35,10 +36,10 @@ import {
 import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("notistack", () => ({
-  ...jest.requireActual("notistack"),
-  useSnackbar: jest.fn().mockReturnValue({
-    enqueueSnackbar: jest.fn(),
+vi.mock("notistack", async () => ({
+  ...(await vi.importActual("notistack")),
+  useSnackbar: vi.fn().mockReturnValue({
+    enqueueSnackbar: vi.fn(),
   }),
 }));
 
@@ -62,27 +63,27 @@ function makeMockLayoutManager() {
   return {
     supportsSharing: false,
     supportsSyncing: false,
-    isBusy: jest.fn().mockReturnValue(false),
+    isBusy: vi.fn().mockReturnValue(false),
     isOnline: false,
     error: undefined,
-    on: jest.fn(),
-    off: jest.fn(),
-    setError: jest.fn(),
-    setOnline: jest.fn(),
-    getLayouts: jest.fn(),
-    getLayout: jest.fn(),
-    saveNewLayout: jest.fn().mockImplementation(mockThrow("saveNewLayout")),
-    updateLayout: jest.fn().mockImplementation(mockThrow("updateLayout")),
-    deleteLayout: jest.fn().mockImplementation(mockThrow("deleteLayout")),
-    overwriteLayout: jest.fn().mockImplementation(mockThrow("overwriteLayout")),
-    revertLayout: jest.fn().mockImplementation(mockThrow("revertLayout")),
-    makePersonalCopy: jest.fn().mockImplementation(mockThrow("makePersonalCopy")),
+    on: vi.fn(),
+    off: vi.fn(),
+    setError: vi.fn(),
+    setOnline: vi.fn(),
+    getLayouts: vi.fn(),
+    getLayout: vi.fn(),
+    saveNewLayout: vi.fn().mockImplementation(mockThrow("saveNewLayout")),
+    updateLayout: vi.fn().mockImplementation(mockThrow("updateLayout")),
+    deleteLayout: vi.fn().mockImplementation(mockThrow("deleteLayout")),
+    overwriteLayout: vi.fn().mockImplementation(mockThrow("overwriteLayout")),
+    revertLayout: vi.fn().mockImplementation(mockThrow("revertLayout")),
+    makePersonalCopy: vi.fn().mockImplementation(mockThrow("makePersonalCopy")),
   };
 }
 function makeMockUserProfile() {
   return {
-    getUserProfile: jest.fn().mockImplementation(mockThrow("getUserProfile")),
-    setUserProfile: jest.fn().mockImplementation(mockThrow("setUserProfile")),
+    getUserProfile: vi.fn().mockImplementation(mockThrow("getUserProfile")),
+    setUserProfile: vi.fn().mockImplementation(mockThrow("setUserProfile")),
   };
 }
 
@@ -149,8 +150,7 @@ describe("CurrentLayoutProvider", () => {
   });
 
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("uses currentLayoutId from UserProfile to load from LayoutStorage", async () => {
@@ -509,13 +509,13 @@ describe("CurrentLayoutProvider", () => {
     }
 
     beforeEach(() => {
-      jest.useFakeTimers();
-      jest.spyOn(console, "warn").mockImplementation(() => {});
+      vi.useFakeTimers();
+      vi.spyOn(console, "warn").mockImplementation(() => {});
     });
 
     afterEach(() => {
-      jest.useRealTimers();
-      (console.warn as jest.Mock).mockRestore();
+      vi.useRealTimers();
+      (console.warn as Mock).mockRestore();
     });
 
     it("should resolve immediately if layoutManager is not busy", async () => {
@@ -545,7 +545,7 @@ describe("CurrentLayoutProvider", () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(busyCount * BUSY_POLLING_INTERVAL_MS);
+        await vi.advanceTimersByTimeAsync(busyCount * BUSY_POLLING_INTERVAL_MS);
         await result.current.childMounted;
       });
 
@@ -564,7 +564,7 @@ describe("CurrentLayoutProvider", () => {
       });
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(BUSY_POLLING_TIMEOUT_MS + 100);
+        await vi.advanceTimersByTimeAsync(BUSY_POLLING_TIMEOUT_MS + 100);
         await result.current.childMounted;
       });
 

@@ -1,10 +1,11 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
 import { userEvent } from "@storybook/testing-library";
 import { render, screen } from "@testing-library/react";
 import React from "react";
+import type { Mock } from "vitest";
 
 import { PanelExtensionContext } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
@@ -22,8 +23,8 @@ import IndicatorBuilder from "@lichtblick/suite-base/testing/builders/IndicatorB
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-jest.mock("./getMatchingRule", () => ({
-  getMatchingRule: jest.fn(),
+vi.mock("./getMatchingRule", async () => ({
+  getMatchingRule: vi.fn(),
 }));
 
 type Setup = {
@@ -33,11 +34,11 @@ type Setup = {
 
 describe("Indicator Component", () => {
   beforeEach(() => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function setup({ contextOverride, configOverride }: Setup = {}) {
@@ -50,30 +51,28 @@ describe("Indicator Component", () => {
       context: {
         initialState: config,
         layout: {
-          addPanel: jest.fn(),
+          addPanel: vi.fn(),
         },
-        onRender: jest.fn(),
+        onRender: vi.fn(),
         panelElement: document.createElement("div"),
-        saveState: jest.fn(),
-        setDefaultPanelTitle: jest.fn(),
-        setParameter: jest.fn(),
-        setPreviewTime: jest.fn(),
-        setSharedPanelState: jest.fn(),
-        setVariable: jest.fn(),
-        subscribe: jest.fn(),
-        subscribeAppSettings: jest.fn(),
-        unsubscribeAll: jest.fn(),
-        updatePanelSettingsEditor: jest.fn(),
-        watch: jest.fn(),
-        unstable_subscribeMessageRange: jest.fn(),
-        getTopicSchema: jest.fn(),
-        getSchema: jest.fn(),
+        saveState: vi.fn(),
+        setDefaultPanelTitle: vi.fn(),
+        setParameter: vi.fn(),
+        setPreviewTime: vi.fn(),
+        setSharedPanelState: vi.fn(),
+        setVariable: vi.fn(),
+        subscribe: vi.fn(),
+        subscribeAppSettings: vi.fn(),
+        unsubscribeAll: vi.fn(),
+        updatePanelSettingsEditor: vi.fn(),
+        watch: vi.fn(),
+        unstable_subscribeMessageRange: vi.fn(),
         ...contextOverride,
       },
     };
 
     const saveConfig = () => {};
-    const initPanel = jest.fn();
+    const initPanel = vi.fn();
 
     const ui: React.ReactElement = (
       <ThemeProvider isDark>
@@ -95,9 +94,9 @@ describe("Indicator Component", () => {
       color: "#68e24a",
       label: BasicBuilder.string(),
     };
-    (getMatchingRule as jest.Mock).mockReturnValue(matchingRule);
+    (getMatchingRule as Mock).mockReturnValue(matchingRule);
 
-    const augmentColor = jest.fn(({ color: { main } }) => ({
+    const augmentColor = vi.fn(({ color: { main } }) => ({
       contrastText: `${main}-contrast`,
     }));
 

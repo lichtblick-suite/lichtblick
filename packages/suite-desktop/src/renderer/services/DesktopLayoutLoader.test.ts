@@ -5,16 +5,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Mocked } from "vitest";
 import { DesktopLayoutLoader } from "./DesktopLayoutLoader";
 import { Desktop } from "../../common/types";
 
 describe("DesktopLayoutLoader", () => {
   const mockBridge = {
-    fetchLayouts: jest.fn(),
-  } as unknown as jest.Mocked<Desktop>;
+    fetchLayouts: vi.fn(),
+  } as unknown as Mocked<Desktop>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return correct layouts", async () => {

@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -8,6 +8,7 @@
 
 import { render, waitFor } from "@testing-library/react";
 import { useNetworkState } from "react-use";
+import type { Mock } from "vitest";
 
 import { useVisibilityState } from "@lichtblick/hooks";
 import { useLayoutStorage } from "@lichtblick/suite-base/context/LayoutStorageContext";
@@ -16,30 +17,30 @@ import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManage
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 
 // Mock dependencies
-jest.mock("react-use");
-jest.mock("@lichtblick/hooks");
-jest.mock("@lichtblick/suite-base/context/LayoutStorageContext");
-jest.mock("@lichtblick/suite-base/context/RemoteLayoutStorageContext");
+vi.mock("react-use");
+vi.mock("@lichtblick/hooks");
+vi.mock("@lichtblick/suite-base/context/LayoutStorageContext");
+vi.mock("@lichtblick/suite-base/context/RemoteLayoutStorageContext");
 
 const mockLayoutManager = new MockLayoutManager();
 
-jest.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", () =>
-  jest.fn(() => mockLayoutManager),
-);
+vi.mock("@lichtblick/suite-base/services/LayoutManager/LayoutManager", async () => ({
+  default: vi.fn(() => mockLayoutManager),
+}));
 
 describe("LayoutManagerProvider", () => {
   // Mock necessary hooks to render <LayoutManagerProvider /> component, otherwise it will fail
-  (useNetworkState as jest.Mock).mockReturnValue({ online: true });
-  (useVisibilityState as jest.Mock).mockReturnValue("visible");
-  (useLayoutStorage as jest.Mock).mockReturnValue({});
-  (useRemoteLayoutStorage as jest.Mock).mockReturnValue({});
+  (useNetworkState as Mock).mockReturnValue({ online: true });
+  (useVisibilityState as Mock).mockReturnValue("visible");
+  (useLayoutStorage as Mock).mockReturnValue({});
+  (useRemoteLayoutStorage as Mock).mockReturnValue({});
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should call layoutManager.setOnline accordingly with useNetworkState", async () => {
-    (useNetworkState as jest.Mock).mockResolvedValueOnce({ online: false });
+    (useNetworkState as Mock).mockResolvedValueOnce({ online: false });
 
     // 1 render with true and another with false.
     render(<LayoutManagerProvider />);
@@ -61,7 +62,7 @@ describe("LayoutManagerProvider", () => {
   });
 
   it("should not call layoutManager.syncWithRemote if offline", async () => {
-    (useNetworkState as jest.Mock).mockReturnValueOnce({ online: false });
+    (useNetworkState as Mock).mockReturnValueOnce({ online: false });
 
     render(<LayoutManagerProvider />);
 
@@ -71,7 +72,7 @@ describe("LayoutManagerProvider", () => {
   });
 
   it("should not call layoutManager.syncWithRemote if not visible", async () => {
-    (useVisibilityState as jest.Mock).mockReturnValueOnce("invisible");
+    (useVisibilityState as Mock).mockReturnValueOnce("invisible");
 
     render(<LayoutManagerProvider />);
 
@@ -81,7 +82,7 @@ describe("LayoutManagerProvider", () => {
   });
 
   it("should not call layoutManager.syncWithRemote if there is not remote storage", async () => {
-    (useRemoteLayoutStorage as jest.Mock).mockReturnValueOnce(undefined);
+    (useRemoteLayoutStorage as Mock).mockReturnValueOnce(undefined);
 
     render(<LayoutManagerProvider />);
 

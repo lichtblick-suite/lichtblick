@@ -1,12 +1,11 @@
-/** @jest-environment jsdom */
-
+/** @vitest-environment jsdom */
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 
 import useIndexedDbRecents from "@lichtblick/suite-base/hooks/useIndexedDbRecents";
 
@@ -34,8 +33,9 @@ describe("useIndexedDbRecents", () => {
         });
       });
 
+      // Wait for the IndexedDB write to complete
       await act(async () => {
-        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 50));
       });
 
       unmount();
@@ -46,21 +46,19 @@ describe("useIndexedDbRecents", () => {
       const { result, unmount } = renderHook(() => useIndexedDbRecents());
       expect(result.current.recents).toEqual([]);
 
-      await act(async () => {
-        await Promise.resolve();
-      });
-
-      expect(result.current.recents).toEqual([
-        {
-          id: expect.any(String),
-          sourceId: "foo",
-          title: "my-title",
-          type: "connection",
-          extra: {
-            foo: "bar",
+      await waitFor(() => {
+        expect(result.current.recents).toEqual([
+          {
+            id: expect.any(String),
+            sourceId: "foo",
+            title: "my-title",
+            type: "connection",
+            extra: {
+              foo: "bar",
+            },
           },
-        },
-      ]);
+        ]);
+      });
 
       unmount();
     }

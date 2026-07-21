@@ -4,6 +4,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2025 Takayuki Honda <takayuki.honda@tier4.jp>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Mock } from "vitest";
 import { parseMessagePath } from "@lichtblick/message-path";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import PieChartBuilder from "@lichtblick/suite-base/testing/builders/PieChartBuilder";
@@ -11,14 +12,14 @@ import PieChartBuilder from "@lichtblick/suite-base/testing/builders/PieChartBui
 import { handlePath } from "./handlePath";
 import type { PieChartAction } from "../types";
 
-jest.mock("@lichtblick/message-path", () => ({
-  parseMessagePath: jest.fn(),
+vi.mock("@lichtblick/message-path", async () => ({
+  parseMessagePath: vi.fn(),
 }));
 
 describe("handlePath", () => {
   it("parses the new path and updates the state", () => {
     const parsedPath = { topicName: "test-topic", topicNameRepr: "test-topic", messagePath: [] };
-    (parseMessagePath as jest.Mock).mockReturnValue(parsedPath);
+    (parseMessagePath as Mock).mockReturnValue(parsedPath);
 
     const initialState = PieChartBuilder.pieChartState();
     const action: PieChartAction = { type: "path", path: "/new/path" };
@@ -30,7 +31,7 @@ describe("handlePath", () => {
     expect(newState.pathParseError).toBeUndefined();
   });
   it("sets pathParseError if the path contains variable filters or slices", () => {
-    (parseMessagePath as jest.Mock).mockReturnValue({
+    (parseMessagePath as Mock).mockReturnValue({
       topicName: "test",
       topicNameRepr: "test",
       messagePath: [{ type: "filter", value: { var: "something" } }],
@@ -49,7 +50,7 @@ describe("handlePath", () => {
   });
 
   it("handles errors during path parsing", () => {
-    (parseMessagePath as jest.Mock).mockImplementation(() => {
+    (parseMessagePath as Mock).mockImplementation(() => {
       throw new Error("Parsing error");
     });
 

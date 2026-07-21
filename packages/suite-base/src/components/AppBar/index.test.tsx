@@ -1,4 +1,4 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
@@ -41,10 +41,10 @@ function Wrapper({ children }: React.PropsWithChildren): React.JSX.Element {
 
 describe("<AppBar />", () => {
   it("calls functions for custom window controls", async () => {
-    const mockMinimize = jest.fn();
-    const mockMaximize = jest.fn();
-    const mockUnmaximize = jest.fn();
-    const mockClose = jest.fn();
+    const mockMinimize = vi.fn();
+    const mockMaximize = vi.fn();
+    const mockUnmaximize = vi.fn();
+    const mockClose = vi.fn();
 
     const root = render(
       <Wrapper>

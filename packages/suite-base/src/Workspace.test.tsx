@@ -1,10 +1,11 @@
-/** @jest-environment jsdom */
+/** @vitest-environment jsdom */
 
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { render, waitFor } from "@testing-library/react";
+import type { Mock } from "vitest";
 
 import {
   useMessagePipeline,
@@ -32,219 +33,219 @@ import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import Workspace from "./Workspace";
 
 // ── style ─────────────────────────────────────────────────────────────────────
-jest.mock("@lichtblick/suite-base/Workspace.style", () => ({
+vi.mock("@lichtblick/suite-base/Workspace.style", async () => ({
   useStyles: () => ({ classes: { container: "" } }),
 }));
 
 // ── external libs ─────────────────────────────────────────────────────────────
-jest.mock("i18next", () => ({ t: (key: string) => key }));
-jest.mock("react-i18next", () => ({
+vi.mock("i18next", async () => ({ t: (key: string) => key }));
+vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (key: string) => key }),
   Trans: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
-jest.mock("@lichtblick/log", () => ({
+vi.mock("@lichtblick/log", async () => ({
   __esModule: true,
-  default: { getLogger: () => ({ debug: jest.fn(), error: jest.fn() }) },
+  default: { getLogger: () => ({ debug: vi.fn(), error: vi.fn() }) },
 }));
 
-const mockEnqueueSnackbar = jest.fn();
-jest.mock("notistack", () => ({
+const mockEnqueueSnackbar = vi.fn();
+vi.mock("notistack", async () => ({
   useSnackbar: () => ({ enqueueSnackbar: mockEnqueueSnackbar }),
 }));
 
 // ── api ───────────────────────────────────────────────────────────────────────
-const mockGetSession = jest.fn();
-jest.mock("@lichtblick/suite-base/api/session/SessionAPI", () => ({
+const mockGetSession = vi.fn();
+vi.mock("@lichtblick/suite-base/api/session/SessionAPI", async () => ({
   __esModule: true,
   default: { getSession: (...args: unknown[]) => mockGetSession(...args) },
 }));
 
 // ── components (rendered as null — Sidebars is the exception below) ────────────
-jest.mock("@lichtblick/suite-base/components/Sidebars", () => ({
+vi.mock("@lichtblick/suite-base/components/Sidebars", async () => ({
   __esModule: true,
-  default: jest.fn(() => undefined),
+  default: vi.fn(() => undefined),
 }));
-jest.mock("@lichtblick/suite-base/components/AppBar", () => ({
+vi.mock("@lichtblick/suite-base/components/AppBar", async () => ({
   AppBar: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/AlertsList", () => ({
+vi.mock("@lichtblick/suite-base/components/AlertsList", async () => ({
   AlertsList: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings", () => ({
+vi.mock("@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/DataSourceDialog", () => ({
+vi.mock("@lichtblick/suite-base/components/DataSourceDialog", async () => ({
   DataSourceDialog: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/DataSourceSidebar/DataSourceSidebar", () => ({
+vi.mock("@lichtblick/suite-base/components/DataSourceSidebar/DataSourceSidebar", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/DocumentDropListener", () => ({
+vi.mock("@lichtblick/suite-base/components/DocumentDropListener", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/EventsList", () => ({
+vi.mock("@lichtblick/suite-base/components/EventsList", async () => ({
   EventsList: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/ExtensionsSettings", () => ({
+vi.mock("@lichtblick/suite-base/components/ExtensionsSettings", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/KeyListener", () => ({
+vi.mock("@lichtblick/suite-base/components/KeyListener", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/LayoutBrowser", () => ({
+vi.mock("@lichtblick/suite-base/components/LayoutBrowser", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/PanelCatalog", () => ({
+vi.mock("@lichtblick/suite-base/components/PanelCatalog", async () => ({
   PanelCatalog: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/PanelLayout", () => ({
+vi.mock("@lichtblick/suite-base/components/PanelLayout", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/PanelSettings", () => ({
+vi.mock("@lichtblick/suite-base/components/PanelSettings", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/PlaybackControls", () => ({
+vi.mock("@lichtblick/suite-base/components/PlaybackControls", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/RemountOnValueChange", () => ({
+vi.mock("@lichtblick/suite-base/components/RemountOnValueChange", async () => ({
   __esModule: true,
   default: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
-jest.mock("@lichtblick/suite-base/components/SidebarContent", () => ({
+vi.mock("@lichtblick/suite-base/components/SidebarContent", async () => ({
   SidebarContent: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
-jest.mock("@lichtblick/suite-base/components/Stack", () => ({
+vi.mock("@lichtblick/suite-base/components/Stack", async () => ({
   __esModule: true,
   default: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
-jest.mock("@lichtblick/suite-base/components/StudioLogsSettings", () => ({
+vi.mock("@lichtblick/suite-base/components/StudioLogsSettings", async () => ({
   StudioLogsSettings: () => undefined,
   StudioLogsSettingsSidebar: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/SyncAdapters", () => ({
+vi.mock("@lichtblick/suite-base/components/SyncAdapters", async () => ({
   SyncAdapters: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/TopicList", () => ({
+vi.mock("@lichtblick/suite-base/components/TopicList", async () => ({
   TopicList: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/VariablesList", () => ({
+vi.mock("@lichtblick/suite-base/components/VariablesList", async () => ({
   __esModule: true,
   default: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/WorkspaceDialogs", () => ({
+vi.mock("@lichtblick/suite-base/components/WorkspaceDialogs", async () => ({
   WorkspaceDialogs: () => undefined,
 }));
 
 // ── providers ─────────────────────────────────────────────────────────────────
-jest.mock("@lichtblick/suite-base/providers/WorkspaceContextProvider", () => ({
+vi.mock("@lichtblick/suite-base/providers/WorkspaceContextProvider", async () => ({
   __esModule: true,
   default: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
-jest.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", () => ({
+vi.mock("@lichtblick/suite-base/providers/PanelStateContextProvider", async () => ({
   PanelStateContextProvider: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
 
 // ── hooks ─────────────────────────────────────────────────────────────────────
-jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
-  useMessagePipeline: jest.fn(),
-  useMessagePipelineGetter: jest.fn(),
+vi.mock("@lichtblick/suite-base/components/MessagePipeline", async () => ({
+  useMessagePipeline: vi.fn(),
+  useMessagePipelineGetter: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/context/AppContext", () => ({
-  useAppContext: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/AppContext", async () => ({
+  useAppContext: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
-  useCurrentLayoutSelector: jest.fn().mockReturnValue(undefined),
-  useCurrentLayoutActions: jest.fn().mockReturnValue({
-    setSelectedLayoutId: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/CurrentLayoutContext", async () => ({
+  useCurrentLayoutSelector: vi.fn().mockReturnValue(undefined),
+  useCurrentLayoutActions: vi.fn().mockReturnValue({
+    setSelectedLayoutId: vi.fn(),
   }),
 }));
-jest.mock("@lichtblick/suite-base/context/CurrentUserContext", () => ({
-  useCurrentUser: jest.fn(),
-  useCurrentUserType: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/CurrentUserContext", async () => ({
+  useCurrentUser: vi.fn(),
+  useCurrentUserType: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/context/EventsContext", () => ({
-  useEvents: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/EventsContext", async () => ({
+  useEvents: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
-  useLayoutManager: jest.fn().mockReturnValue({
-    getLayouts: jest.fn().mockResolvedValue([]),
-    deleteLayout: jest.fn().mockResolvedValue(undefined),
-    saveNewLayout: jest.fn().mockResolvedValue({ id: "test-layout-id" }),
+vi.mock("@lichtblick/suite-base/context/LayoutManagerContext", async () => ({
+  useLayoutManager: vi.fn().mockReturnValue({
+    getLayouts: vi.fn().mockResolvedValue([]),
+    deleteLayout: vi.fn().mockResolvedValue(undefined),
+    saveNewLayout: vi.fn().mockResolvedValue({ id: "test-layout-id" }),
   }),
 }));
-jest.mock("@lichtblick/suite-base/context/PlayerSelectionContext", () => ({
-  usePlayerSelection: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/PlayerSelectionContext", async () => ({
+  usePlayerSelection: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/context/Workspace/WorkspaceContext", () => ({
-  useWorkspaceStore: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/Workspace/WorkspaceContext", async () => ({
+  useWorkspaceStore: vi.fn(),
   SidebarItemKeys: [],
 }));
-jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", () => ({
-  useWorkspaceActions: jest.fn(),
+vi.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions", async () => ({
+  useWorkspaceActions: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/hooks", () => ({
-  useAppConfigurationValue: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks", async () => ({
+  useAppConfigurationValue: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/hooks/useAlertCount", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useAlertCount", async () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/hooks/useAddPanel", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useAddPanel", async () => ({
   __esModule: true,
-  default: jest.fn().mockReturnValue(jest.fn()),
+  default: vi.fn().mockReturnValue(vi.fn()),
 }));
-jest.mock("@lichtblick/suite-base/hooks/useDefaultWebLaunchPreference", () => ({
-  useDefaultWebLaunchPreference: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks/useDefaultWebLaunchPreference", async () => ({
+  useDefaultWebLaunchPreference: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/hooks/useElectronFilesToOpen", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useElectronFilesToOpen", async () => ({
   __esModule: true,
-  default: jest.fn().mockReturnValue(undefined),
+  default: vi.fn().mockReturnValue(undefined),
 }));
-jest.mock("@lichtblick/suite-base/hooks/useHandleFiles", () => ({
-  useHandleFiles: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks/useHandleFiles", async () => ({
+  useHandleFiles: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", () => ({
-  useLayoutTransfer: jest.fn().mockReturnValue({
-    parseAndInstallLayout: jest.fn().mockResolvedValue({ id: "default-layout-id" }),
-    importLayout: jest.fn(),
-    exportLayout: jest.fn(),
+vi.mock("@lichtblick/suite-base/hooks/useLayoutTransfer", async () => ({
+  useLayoutTransfer: vi.fn().mockReturnValue({
+    parseAndInstallLayout: vi.fn().mockResolvedValue({ id: "default-layout-id" }),
+    importLayout: vi.fn(),
+    exportLayout: vi.fn(),
   }),
 }));
-jest.mock("@lichtblick/suite-base/hooks/useSeekTimeFromCLI", () => ({
+vi.mock("@lichtblick/suite-base/hooks/useSeekTimeFromCLI", async () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/panels/Plot/hooks/useStructureItemsStoreManager", () => ({
-  useStructureItemsStoreManager: jest.fn(),
+vi.mock("@lichtblick/suite-base/panels/Plot/hooks/useStructureItemsStoreManager", async () => ({
+  useStructureItemsStoreManager: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/theme/icons", () => ({
+vi.mock("@lichtblick/suite-base/theme/icons", async () => ({
   __esModule: true,
   default: {},
 }));
-jest.mock("@lichtblick/suite-base/util/appURLState", () => ({
-  parseAppURLState: jest.fn().mockReturnValue(undefined),
+vi.mock("@lichtblick/suite-base/util/appURLState", async () => ({
+  parseAppURLState: vi.fn().mockReturnValue(undefined),
 }));
-jest.mock("@lichtblick/suite-base/util/broadcast/useBroadcast", () => ({
+vi.mock("@lichtblick/suite-base/util/broadcast/useBroadcast", async () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: vi.fn(),
 }));
-jest.mock("@lichtblick/suite-base/util/isDesktopApp", () => ({
+vi.mock("@lichtblick/suite-base/util/isDesktopApp", async () => ({
   __esModule: true,
-  default: jest.fn().mockReturnValue(false),
+  default: vi.fn().mockReturnValue(false),
 }));
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-const MockedSidebars = Sidebars as unknown as jest.Mock;
+const MockedSidebars = Sidebars as unknown as Mock;
 
 const mockPipelineContext = {
   playerState: {
@@ -272,45 +273,45 @@ const mockWorkspaceStore = {
 
 const mockWorkspaceActions = {
   dialogActions: {
-    dataSource: { open: jest.fn(), close: jest.fn() },
-    preferences: { open: jest.fn() },
-    openFile: { open: jest.fn().mockResolvedValue(undefined) },
+    dataSource: { open: vi.fn(), close: vi.fn() },
+    preferences: { open: vi.fn() },
+    openFile: { open: vi.fn().mockResolvedValue(undefined) },
   },
   sidebarActions: {
-    left: { setOpen: jest.fn(), selectItem: jest.fn(), setSize: jest.fn() },
-    right: { setOpen: jest.fn(), selectItem: jest.fn(), setSize: jest.fn() },
+    left: { setOpen: vi.fn(), selectItem: vi.fn(), setSize: vi.fn() },
+    right: { setOpen: vi.fn(), selectItem: vi.fn(), setSize: vi.fn() },
   },
-  openLayoutBrowser: jest.fn(),
+  openLayoutBrowser: vi.fn(),
 };
 
 describe("Workspace - alerts badge in leftSidebarItems", () => {
   beforeEach(() => {
-    (useMessagePipeline as jest.Mock).mockImplementation(
+    (useMessagePipeline as Mock).mockImplementation(
       (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
     );
-    (useMessagePipelineGetter as jest.Mock).mockReturnValue(() => mockPipelineContext);
-    (useWorkspaceStore as jest.Mock).mockImplementation(
+    (useMessagePipelineGetter as Mock).mockReturnValue(() => mockPipelineContext);
+    (useWorkspaceStore as Mock).mockImplementation(
       (selector: (store: typeof mockWorkspaceStore) => unknown) => selector(mockWorkspaceStore),
     );
-    (useWorkspaceActions as jest.Mock).mockReturnValue(mockWorkspaceActions);
-    (usePlayerSelection as jest.Mock).mockReturnValue({
+    (useWorkspaceActions as Mock).mockReturnValue(mockWorkspaceActions);
+    (usePlayerSelection as Mock).mockReturnValue({
       availableSources: [],
-      selectSource: jest.fn(),
+      selectSource: vi.fn(),
     });
-    (useAlertCount as jest.Mock).mockReturnValue({
+    (useAlertCount as Mock).mockReturnValue({
       playerAlerts: [],
       sessionAlerts: [],
       alertCount: 0,
     });
-    (useHandleFiles as jest.Mock).mockReturnValue({ handleFiles: jest.fn() });
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([false]);
-    (useCurrentUser as jest.Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
-    (useCurrentUserType as jest.Mock).mockReturnValue("unauthenticated");
-    (useEvents as jest.Mock).mockImplementation(
-      (selector: (store: { eventsSupported: boolean; selectEvent: jest.Mock }) => unknown) =>
-        selector({ eventsSupported: false, selectEvent: jest.fn() }),
+    (useHandleFiles as Mock).mockReturnValue({ handleFiles: vi.fn() });
+    (useAppConfigurationValue as Mock).mockReturnValue([false]);
+    (useCurrentUser as Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
+    (useCurrentUserType as Mock).mockReturnValue("unauthenticated");
+    (useEvents as Mock).mockImplementation(
+      (selector: (store: { eventsSupported: boolean; selectEvent: Mock }) => unknown) =>
+        selector({ eventsSupported: false, selectEvent: vi.fn() }),
     );
-    (useAppContext as jest.Mock).mockReturnValue({
+    (useAppContext as Mock).mockReturnValue({
       PerformanceSidebarComponent: undefined,
       sidebarItems: [],
       layoutBrowser: undefined,
@@ -324,7 +325,7 @@ describe("Workspace - alerts badge in leftSidebarItems", () => {
 
   it("should not set badge on alerts sidebar item when alertCount is 0", () => {
     // Given
-    (useAlertCount as jest.Mock).mockReturnValue({
+    (useAlertCount as Mock).mockReturnValue({
       playerAlerts: [],
       sessionAlerts: [],
       alertCount: 0,
@@ -340,7 +341,7 @@ describe("Workspace - alerts badge in leftSidebarItems", () => {
 
   it("should set badge with count and error color on alerts sidebar item when alertCount > 0", () => {
     // Given
-    (useAlertCount as jest.Mock).mockReturnValue({
+    (useAlertCount as Mock).mockReturnValue({
       playerAlerts: [{ message: "err", severity: "error" }],
       sessionAlerts: [],
       alertCount: 1,
@@ -356,7 +357,7 @@ describe("Workspace - alerts badge in leftSidebarItems", () => {
 
   it("should reflect the exact alertCount in the badge", () => {
     // Given
-    (useAlertCount as jest.Mock).mockReturnValue({
+    (useAlertCount as Mock).mockReturnValue({
       playerAlerts: [],
       sessionAlerts: [],
       alertCount: 5,
@@ -372,37 +373,37 @@ describe("Workspace - alerts badge in leftSidebarItems", () => {
 });
 
 describe("Workspace - session-based MCAP resolution", () => {
-  const mockSelectSource = jest.fn();
+  const mockSelectSource = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (useMessagePipeline as jest.Mock).mockImplementation(
+    (useMessagePipeline as Mock).mockImplementation(
       (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
     );
-    (useMessagePipelineGetter as jest.Mock).mockReturnValue(() => mockPipelineContext);
-    (useWorkspaceStore as jest.Mock).mockImplementation(
+    (useMessagePipelineGetter as Mock).mockReturnValue(() => mockPipelineContext);
+    (useWorkspaceStore as Mock).mockImplementation(
       (selector: (store: typeof mockWorkspaceStore) => unknown) => selector(mockWorkspaceStore),
     );
-    (useWorkspaceActions as jest.Mock).mockReturnValue(mockWorkspaceActions);
-    (usePlayerSelection as jest.Mock).mockReturnValue({
+    (useWorkspaceActions as Mock).mockReturnValue(mockWorkspaceActions);
+    (usePlayerSelection as Mock).mockReturnValue({
       availableSources: [],
       selectSource: mockSelectSource,
     });
-    (useAlertCount as jest.Mock).mockReturnValue({
+    (useAlertCount as Mock).mockReturnValue({
       playerAlerts: [],
       sessionAlerts: [],
       alertCount: 0,
     });
-    (useHandleFiles as jest.Mock).mockReturnValue({ handleFiles: jest.fn() });
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([false]);
-    (useCurrentUser as jest.Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
-    (useCurrentUserType as jest.Mock).mockReturnValue("unauthenticated");
-    (useEvents as jest.Mock).mockImplementation(
-      (selector: (store: { eventsSupported: boolean; selectEvent: jest.Mock }) => unknown) =>
-        selector({ eventsSupported: false, selectEvent: jest.fn() }),
+    (useHandleFiles as Mock).mockReturnValue({ handleFiles: vi.fn() });
+    (useAppConfigurationValue as Mock).mockReturnValue([false]);
+    (useCurrentUser as Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
+    (useCurrentUserType as Mock).mockReturnValue("unauthenticated");
+    (useEvents as Mock).mockImplementation(
+      (selector: (store: { eventsSupported: boolean; selectEvent: Mock }) => unknown) =>
+        selector({ eventsSupported: false, selectEvent: vi.fn() }),
     );
-    (useAppContext as jest.Mock).mockReturnValue({
+    (useAppContext as Mock).mockReturnValue({
       PerformanceSidebarComponent: undefined,
       sidebarItems: [],
       layoutBrowser: undefined,
@@ -418,7 +419,7 @@ describe("Workspace - session-based MCAP resolution", () => {
       { url: "https://example.com/file2.mcap", metadata: { robot: "r2" } },
     ];
     mockGetSession.mockResolvedValue(mockMcaps);
-    (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
+    (parseAppURLState as Mock).mockReturnValue({ sessionId });
 
     // When
     render(<Workspace deepLinks={["https://app.example.com/?sessionid=test-session-123"]} />);
@@ -440,7 +441,7 @@ describe("Workspace - session-based MCAP resolution", () => {
     // Given
     const sessionId = "failing-session";
     mockGetSession.mockRejectedValue(new Error("Network error"));
-    (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
+    (parseAppURLState as Mock).mockReturnValue({ sessionId });
 
     // When
     render(<Workspace deepLinks={["https://app.example.com/?sessionid=failing-session"]} />);
@@ -458,7 +459,7 @@ describe("Workspace - session-based MCAP resolution", () => {
 
   it("should not fetch session when sessionId is not present", () => {
     // Given
-    (parseAppURLState as jest.Mock).mockReturnValue({
+    (parseAppURLState as Mock).mockReturnValue({
       ds: "remote-file",
       dsParams: { url: "https://example.com/file.mcap" },
     });
@@ -472,9 +473,9 @@ describe("Workspace - session-based MCAP resolution", () => {
 });
 
 describe("Workspace - fetchLayoutFromUrl", () => {
-  const mockParseAndInstallLayout = jest.fn();
-  const mockGetLayouts = jest.fn();
-  const mockDeleteLayout = jest.fn();
+  const mockParseAndInstallLayout = vi.fn();
+  const mockGetLayouts = vi.fn();
+  const mockDeleteLayout = vi.fn();
   const originalFetch = global.fetch;
 
   afterEach(() => {
@@ -482,32 +483,32 @@ describe("Workspace - fetchLayoutFromUrl", () => {
   });
 
   const setupWorkspaceMocks = () => {
-    (useMessagePipeline as jest.Mock).mockImplementation(
+    (useMessagePipeline as Mock).mockImplementation(
       (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
     );
-    (useMessagePipelineGetter as jest.Mock).mockReturnValue(() => mockPipelineContext);
-    (useWorkspaceStore as jest.Mock).mockImplementation(
+    (useMessagePipelineGetter as Mock).mockReturnValue(() => mockPipelineContext);
+    (useWorkspaceStore as Mock).mockImplementation(
       (selector: (store: typeof mockWorkspaceStore) => unknown) => selector(mockWorkspaceStore),
     );
-    (useWorkspaceActions as jest.Mock).mockReturnValue(mockWorkspaceActions);
-    (usePlayerSelection as jest.Mock).mockReturnValue({
+    (useWorkspaceActions as Mock).mockReturnValue(mockWorkspaceActions);
+    (usePlayerSelection as Mock).mockReturnValue({
       availableSources: [],
-      selectSource: jest.fn(),
+      selectSource: vi.fn(),
     });
-    (useAlertCount as jest.Mock).mockReturnValue({
+    (useAlertCount as Mock).mockReturnValue({
       playerAlerts: [],
       sessionAlerts: [],
       alertCount: 0,
     });
-    (useHandleFiles as jest.Mock).mockReturnValue({ handleFiles: jest.fn() });
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([false]);
-    (useCurrentUser as jest.Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
-    (useCurrentUserType as jest.Mock).mockReturnValue("unauthenticated");
-    (useEvents as jest.Mock).mockImplementation(
-      (selector: (store: { eventsSupported: boolean; selectEvent: jest.Mock }) => unknown) =>
-        selector({ eventsSupported: false, selectEvent: jest.fn() }),
+    (useHandleFiles as Mock).mockReturnValue({ handleFiles: vi.fn() });
+    (useAppConfigurationValue as Mock).mockReturnValue([false]);
+    (useCurrentUser as Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
+    (useCurrentUserType as Mock).mockReturnValue("unauthenticated");
+    (useEvents as Mock).mockImplementation(
+      (selector: (store: { eventsSupported: boolean; selectEvent: Mock }) => unknown) =>
+        selector({ eventsSupported: false, selectEvent: vi.fn() }),
     );
-    (useAppContext as jest.Mock).mockReturnValue({
+    (useAppContext as Mock).mockReturnValue({
       PerformanceSidebarComponent: undefined,
       sidebarItems: [],
       layoutBrowser: undefined,
@@ -516,30 +517,30 @@ describe("Workspace - fetchLayoutFromUrl", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockGetLayouts.mockResolvedValue([]);
     mockDeleteLayout.mockResolvedValue(undefined);
     mockParseAndInstallLayout.mockResolvedValue({ id: "new-layout-id" });
-    (useLayoutManager as jest.Mock).mockReturnValue({
+    (useLayoutManager as Mock).mockReturnValue({
       getLayouts: mockGetLayouts,
       deleteLayout: mockDeleteLayout,
-      saveNewLayout: jest.fn().mockResolvedValue({ id: "test-layout-id" }),
+      saveNewLayout: vi.fn().mockResolvedValue({ id: "test-layout-id" }),
     });
-    (useLayoutTransfer as jest.Mock).mockReturnValue({
+    (useLayoutTransfer as Mock).mockReturnValue({
       parseAndInstallLayout: mockParseAndInstallLayout,
-      importLayout: jest.fn(),
-      exportLayout: jest.fn(),
+      importLayout: vi.fn(),
+      exportLayout: vi.fn(),
     });
     setupWorkspaceMocks();
   });
 
   it("should fetch and install layout from valid https URL", async () => {
     // Given
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      text: jest.fn().mockResolvedValue('{"configById":{}}'),
+      text: vi.fn().mockResolvedValue('{"configById":{}}'),
     });
-    (parseAppURLState as jest.Mock).mockReturnValue({
+    (parseAppURLState as Mock).mockReturnValue({
       layoutUrl: "https://example.com/my-layout.json",
     });
 
@@ -565,11 +566,11 @@ describe("Workspace - fetchLayoutFromUrl", () => {
   it("should delete existing layouts with same name after successful install", async () => {
     // Given
     mockGetLayouts.mockResolvedValue([{ id: "old-id", name: "my-layout" }]);
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      text: jest.fn().mockResolvedValue("{}"),
+      text: vi.fn().mockResolvedValue("{}"),
     });
-    (parseAppURLState as jest.Mock).mockReturnValue({
+    (parseAppURLState as Mock).mockReturnValue({
       layoutUrl: "https://example.com/my-layout.json",
     });
 
@@ -590,11 +591,11 @@ describe("Workspace - fetchLayoutFromUrl", () => {
     // Given
     mockGetLayouts.mockResolvedValue([{ id: "old-id", name: "my-layout" }]);
     mockParseAndInstallLayout.mockResolvedValue(undefined);
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      text: jest.fn().mockResolvedValue("{}"),
+      text: vi.fn().mockResolvedValue("{}"),
     });
-    (parseAppURLState as jest.Mock).mockReturnValue({
+    (parseAppURLState as Mock).mockReturnValue({
       layoutUrl: "https://example.com/my-layout.json",
     });
 
@@ -614,7 +615,7 @@ describe("Workspace - fetchLayoutFromUrl", () => {
 
   it("should show error snackbar for non-http(s) URL", async () => {
     // Given
-    (parseAppURLState as jest.Mock).mockReturnValue({
+    (parseAppURLState as Mock).mockReturnValue({
       layoutUrl: "file:///local/layout.json",
     });
 
@@ -636,8 +637,8 @@ describe("Workspace - fetchLayoutFromUrl", () => {
 
   it("should show error snackbar on HTTP error response", async () => {
     // Given
-    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 404 });
-    (parseAppURLState as jest.Mock).mockReturnValue({
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404 });
+    (parseAppURLState as Mock).mockReturnValue({
       layoutUrl: "https://example.com/layout.json",
     });
 
@@ -658,8 +659,8 @@ describe("Workspace - fetchLayoutFromUrl", () => {
 
   it("should show error snackbar on network error", async () => {
     // Given
-    global.fetch = jest.fn().mockRejectedValue(new Error("Network error"));
-    (parseAppURLState as jest.Mock).mockReturnValue({
+    global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
+    (parseAppURLState as Mock).mockReturnValue({
       layoutUrl: "https://example.com/layout.json",
     });
 
@@ -680,8 +681,8 @@ describe("Workspace - fetchLayoutFromUrl", () => {
 
   it("should not fetch layout when layoutUrl is absent from URL state", () => {
     // Given
-    global.fetch = jest.fn();
-    (parseAppURLState as jest.Mock).mockReturnValue({
+    global.fetch = vi.fn();
+    (parseAppURLState as Mock).mockReturnValue({
       ds: "remote-file",
       dsParams: { url: "https://example.com/file.mcap" },
     });
@@ -695,7 +696,7 @@ describe("Workspace - fetchLayoutFromUrl", () => {
 
   it("should show error snackbar for malformed URL that cannot be parsed", async () => {
     // Given
-    (parseAppURLState as jest.Mock).mockReturnValue({
+    (parseAppURLState as Mock).mockReturnValue({
       layoutUrl: "not a valid url ://",
     });
 

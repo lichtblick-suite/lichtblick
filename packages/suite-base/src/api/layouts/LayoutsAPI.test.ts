@@ -13,7 +13,7 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { LayoutsAPI } from "./LayoutsAPI";
 
 // Mock HttpService
-jest.mock("@lichtblick/suite-base/services/http/HttpService");
+vi.mock("@lichtblick/suite-base/services/http/HttpService");
 
 describe("LayoutsAPI", () => {
   let layoutsAPI: LayoutsAPI;
@@ -27,7 +27,7 @@ describe("LayoutsAPI", () => {
 
   beforeEach(() => {
     layoutsAPI = new LayoutsAPI(mockWorkspace);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should initialize with correct workspace and baseUrl", () => {
@@ -53,8 +53,8 @@ describe("LayoutsAPI", () => {
         },
       ];
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
       mockHttpService.get = mockGet;
 
       const result = await layoutsAPI.getLayouts();
@@ -67,8 +67,8 @@ describe("LayoutsAPI", () => {
     });
 
     it("should handle empty layouts list", async () => {
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse([]));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockResolvedValue(createMockHttpResponse([]));
       mockHttpService.get = mockGet;
 
       const result = await layoutsAPI.getLayouts();
@@ -113,8 +113,8 @@ describe("LayoutsAPI", () => {
         layout: mockLayoutData,
       };
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockPost = jest.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockPost = vi.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
       mockHttpService.post = mockPost;
 
       const result = await layoutsAPI.saveNewLayout(mockSaveRequest);
@@ -157,8 +157,8 @@ describe("LayoutsAPI", () => {
         updatedAt: "2023-01-01T00:00:00.000Z",
       };
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockPut = jest.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockPut = vi.fn().mockResolvedValue(createMockHttpResponse(mockApiResponse));
       mockHttpService.put = mockPut;
 
       const result = await layoutsAPI.updateLayout(mockUpdateRequest);
@@ -193,8 +193,8 @@ describe("LayoutsAPI", () => {
         savedAt: "2023-01-01T00:00:00.000Z" as any,
       };
 
-      const mockHttpService = jest.mocked(HttpService);
-      const mockDelete = jest.fn().mockResolvedValue(createMockHttpResponse(mockDeletedLayout));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockDelete = vi.fn().mockResolvedValue(createMockHttpResponse(mockDeletedLayout));
       mockHttpService.delete = mockDelete;
 
       const result = await layoutsAPI.deleteLayout("external-123");
@@ -204,8 +204,8 @@ describe("LayoutsAPI", () => {
     });
 
     it("should return false when deletion fails", async () => {
-      const mockHttpService = jest.mocked(HttpService);
-      const mockDelete = jest.fn().mockResolvedValue(createMockHttpResponse(undefined));
+      const mockHttpService = vi.mocked(HttpService);
+      const mockDelete = vi.fn().mockResolvedValue(createMockHttpResponse(undefined));
       mockHttpService.delete = mockDelete;
 
       const result = await layoutsAPI.deleteLayout("external-123");
@@ -217,8 +217,8 @@ describe("LayoutsAPI", () => {
   describe("error handling", () => {
     it("should propagate HTTP errors from getLayouts", async () => {
       const mockError = new Error("Network error");
-      const mockHttpService = jest.mocked(HttpService);
-      const mockGet = jest.fn().mockRejectedValue(mockError);
+      const mockHttpService = vi.mocked(HttpService);
+      const mockGet = vi.fn().mockRejectedValue(mockError);
       mockHttpService.get = mockGet;
 
       await expect(layoutsAPI.getLayouts()).rejects.toThrow("Network error");
@@ -226,8 +226,8 @@ describe("LayoutsAPI", () => {
 
     it("should propagate HTTP errors from deleteLayout", async () => {
       const mockError = new Error("Delete failed");
-      const mockHttpService = jest.mocked(HttpService);
-      const mockDelete = jest.fn().mockRejectedValue(mockError);
+      const mockHttpService = vi.mocked(HttpService);
+      const mockDelete = vi.fn().mockRejectedValue(mockError);
       mockHttpService.delete = mockDelete;
 
       await expect(layoutsAPI.deleteLayout("external-123")).rejects.toThrow("Delete failed");
