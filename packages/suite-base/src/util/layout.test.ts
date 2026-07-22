@@ -676,30 +676,32 @@ describe("layout", () => {
       expect(validateLayoutData(data)).toBe(data);
     });
 
-    it.each([undefined, null, 42, "string", []])(
-      "throws when the value is not an object (%p)",
-      (value) => {
-        // Given a non-object value
-        // When validating it
-        // Then it throws
-        expect(() => validateLayoutData(value)).toThrow("expected an object");
-      },
-    );
+    it.each([
+      undefined,
+      null,
+      42,
+      "string",
+      [],
+    ])("throws when the value is not an object (%p)", (value) => {
+      // Given a non-object value
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(value)).toThrow("expected an object");
+    });
 
-    it.each(["configById", "globalVariables", "userNodes"] as const)(
-      "throws when required object field %s is missing",
-      (field) => {
-        // Given a layout missing a required object field
-        const data = validData();
-        delete data[field];
+    it.each([
+      "configById",
+      "globalVariables",
+      "userNodes",
+    ] as const)("throws when required object field %s is missing", (field) => {
+      // Given a layout missing a required object field
+      const data = validData();
+      delete data[field];
 
-        // When validating it
-        // Then it throws referencing that field
-        expect(() => validateLayoutData(data)).toThrow(
-          `missing or invalid "${field}"`,
-        );
-      },
-    );
+      // When validating it
+      // Then it throws referencing that field
+      expect(() => validateLayoutData(data)).toThrow(`missing or invalid "${field}"`);
+    });
 
     it("throws when playbackConfig is missing", () => {
       // Given a layout without playbackConfig
@@ -708,9 +710,7 @@ describe("layout", () => {
 
       // When validating it
       // Then it throws
-      expect(() => validateLayoutData(data)).toThrow(
-        'missing or invalid "playbackConfig"',
-      );
+      expect(() => validateLayoutData(data)).toThrow('missing or invalid "playbackConfig"');
     });
 
     it("throws when playbackConfig.speed is not a number", () => {
@@ -719,9 +719,7 @@ describe("layout", () => {
 
       // When validating it
       // Then it throws
-      expect(() => validateLayoutData(data)).toThrow(
-        'missing or invalid "playbackConfig"',
-      );
+      expect(() => validateLayoutData(data)).toThrow('missing or invalid "playbackConfig"');
     });
 
     it("throws when layout has an invalid type", () => {

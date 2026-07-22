@@ -593,11 +593,7 @@ export function validateLayoutData(data: unknown): LayoutData {
     errors.push(`missing or invalid "playbackConfig"`);
   }
 
-  if (
-    data.layout != undefined &&
-    typeof data.layout !== "string" &&
-    !isPlainObject(data.layout)
-  ) {
+  if (data.layout != undefined && typeof data.layout !== "string" && !isPlainObject(data.layout)) {
     errors.push(`invalid "layout"`);
   }
 
