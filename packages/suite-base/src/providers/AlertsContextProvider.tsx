@@ -25,6 +25,14 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
       dismissedSessionTags: new Map<string, string>(),
       actions: {
         clearAlert: (tag: string) => {
+          set({
+            alerts: get().alerts.filter((al) => al.tag !== tag),
+          });
+        },
+        clearAlerts: () => {
+          set({ alerts: [] });
+        },
+        dismissAlert: (tag: string) => {
           const alerts = get().alerts;
           const dismissed = get().dismissedSessionTags;
           const existing = alerts.find((al) => al.tag === tag);
@@ -36,9 +44,6 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
             alerts: alerts.filter((al) => al.tag !== tag),
             dismissedSessionTags: next,
           });
-        },
-        clearAlerts: () => {
-          set({ alerts: [] });
         },
         setAlert: (tag: string, alert: Immutable<SessionAlert>) => {
           const newAlert = { tag, ...alert };

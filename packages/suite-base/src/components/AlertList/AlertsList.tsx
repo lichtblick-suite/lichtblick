@@ -59,7 +59,7 @@ export function AlertsList(): React.JSX.Element {
   const dismissedPlayerAlertKeys: ReadonlySet<string> = useAlertsStore(
     selectDismissedPlayerAlertKeys,
   );
-  const { clearAlert, dismissPlayerAlert } = useAlertsActions();
+  const { dismissAlert, dismissPlayerAlert } = useAlertsActions();
 
   const visibleAlerts = useMemo<ListAlert[]>(() => {
     const combined: ListAlert[] = [];
@@ -96,12 +96,12 @@ export function AlertsList(): React.JSX.Element {
   const handleDismiss = useCallback(
     (alert: ListAlert) => {
       if (alert.tag != undefined) {
-        clearAlert(alert.tag);
+        dismissAlert(alert.tag);
       } else if (alert.playerAlertKey != undefined) {
         dismissPlayerAlert(alert.playerAlertKey);
       }
     },
-    [clearAlert, dismissPlayerAlert],
+    [dismissAlert, dismissPlayerAlert],
   );
 
   if (visibleAlerts.length === 0) {

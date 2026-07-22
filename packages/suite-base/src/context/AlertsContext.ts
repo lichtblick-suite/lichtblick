@@ -31,9 +31,12 @@ export type AlertsContextStore = Immutable<{
    */
   dismissedSessionTags: Map<string, string>;
   actions: {
+    /** Remove an alert by tag without tracking dismissal. Used by panels/system when a condition resolves. */
     clearAlert: (tag: string) => void;
     clearAlerts: () => void;
     setAlert: (tag: string, alert: Immutable<SessionAlert>) => void;
+    /** User-initiated dismiss: removes the alert AND tracks it so identical re-sets are suppressed. */
+    dismissAlert: (tag: string) => void;
     dismissPlayerAlert: (key: string) => void;
     dismissPlayerAlerts: (keys: readonly string[]) => void;
     restoreDismissedPlayerAlerts: () => void;

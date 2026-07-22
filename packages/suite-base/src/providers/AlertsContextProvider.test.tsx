@@ -251,16 +251,16 @@ describe("AlertsContextProvider", () => {
     expect(result.current.alerts).toHaveLength(1);
 
     act(() => {
-      result.current.actions.clearAlert(tag);
+      result.current.actions.dismissAlert(tag);
     });
     expect(result.current.alerts).toHaveLength(0);
 
-    // When
+    // When — same tag + same content
     act(() => {
       result.current.actions.setAlert(tag, alert);
     });
 
-    // Then
+    // Then — stays dismissed
     expect(result.current.alerts).toHaveLength(0);
   });
 
@@ -282,7 +282,7 @@ describe("AlertsContextProvider", () => {
       result.current.actions.setAlert(tag, originalAlert);
     });
     act(() => {
-      result.current.actions.clearAlert(tag);
+      result.current.actions.dismissAlert(tag);
     });
     expect(result.current.alerts).toHaveLength(0);
 
