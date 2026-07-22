@@ -682,7 +682,7 @@ describe("layout", () => {
         // Given a non-object value
         // When validating it
         // Then it throws
-        expect(() => validateLayoutData(value)).toThrow("Invalid layout: expected an object");
+        expect(() => validateLayoutData(value)).toThrow("expected an object");
       },
     );
 
@@ -696,7 +696,7 @@ describe("layout", () => {
         // When validating it
         // Then it throws referencing that field
         expect(() => validateLayoutData(data)).toThrow(
-          `Invalid layout: missing or invalid "${field}"`,
+          `missing or invalid "${field}"`,
         );
       },
     );
@@ -709,7 +709,7 @@ describe("layout", () => {
       // When validating it
       // Then it throws
       expect(() => validateLayoutData(data)).toThrow(
-        'Invalid layout: missing or invalid "playbackConfig"',
+        'missing or invalid "playbackConfig"',
       );
     });
 
@@ -720,7 +720,7 @@ describe("layout", () => {
       // When validating it
       // Then it throws
       expect(() => validateLayoutData(data)).toThrow(
-        'Invalid layout: missing or invalid "playbackConfig"',
+        'missing or invalid "playbackConfig"',
       );
     });
 
@@ -730,7 +730,7 @@ describe("layout", () => {
 
       // When validating it
       // Then it throws
-      expect(() => validateLayoutData(data)).toThrow('Invalid layout: invalid "layout"');
+      expect(() => validateLayoutData(data)).toThrow('invalid "layout"');
     });
 
     it("throws when version has an invalid type", () => {
@@ -739,7 +739,7 @@ describe("layout", () => {
 
       // When validating it
       // Then it throws
-      expect(() => validateLayoutData(data)).toThrow('Invalid layout: invalid "version"');
+      expect(() => validateLayoutData(data)).toThrow('invalid "version"');
     });
 
     it("aggregates multiple errors into a single message", () => {
@@ -749,7 +749,7 @@ describe("layout", () => {
       // When validating it
       // Then all invalid fields are reported
       expect(() => validateLayoutData(data)).toThrow(
-        'Invalid layout: missing or invalid "configById", missing or invalid "userNodes", missing or invalid "playbackConfig"',
+        'missing or invalid "configById", missing or invalid "userNodes", missing or invalid "playbackConfig"',
       );
     });
   });

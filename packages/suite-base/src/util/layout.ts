@@ -580,7 +580,7 @@ export function validateLayoutData(data: unknown): LayoutData {
   const errors: string[] = [];
 
   if (!isPlainObject(data)) {
-    throw new Error("Invalid layout: expected an object");
+    throw new Error("expected an object");
   }
 
   for (const field of ["configById", "globalVariables", "userNodes"] as const) {
@@ -606,7 +606,7 @@ export function validateLayoutData(data: unknown): LayoutData {
   }
 
   if (errors.length > 0) {
-    throw new Error(`Invalid layout: ${errors.join(", ")}`);
+    throw new Error(errors.join(", "));
   }
 
   return data as LayoutData;
