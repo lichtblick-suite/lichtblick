@@ -63,7 +63,8 @@ export function useLayoutTransfer(): UseLayoutTransfer {
       try {
         data = validateLayoutData(parsedState);
       } catch (err: unknown) {
-        enqueueSnackbar(`${file.name} is not a valid layout: ${(err as Error).message}`, {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        enqueueSnackbar(`${file.name} is not a valid layout: ${errorMessage}`, {
           variant: "error",
         });
         return;

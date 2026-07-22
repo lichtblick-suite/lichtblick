@@ -17,7 +17,7 @@ import { useLayoutManager } from "../context/LayoutManagerContext";
 const mockEnqueueSnackbar = jest.fn();
 
 jest.mock("notistack", () => ({
-  useSnackbar: () => ({ enqueueSnackbar: jest.fn() }),
+  useSnackbar: () => ({ enqueueSnackbar: mockEnqueueSnackbar }),
   enqueueSnackbar: (...args: unknown[]) => mockEnqueueSnackbar(...args),
 }));
 
