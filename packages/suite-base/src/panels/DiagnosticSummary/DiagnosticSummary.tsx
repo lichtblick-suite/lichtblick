@@ -175,7 +175,7 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
       <AutoSizer>
         {({ height, width }) => (
           <List<{ data: DiagnosticInfo[] }>
-            style={{ outline: "none", width, height }}
+            style={{ outline: "none", width, height, maxHeight: height }}
             rowHeight={30}
             rowProps={{ data: nodes }}
             rowCount={nodes.length}

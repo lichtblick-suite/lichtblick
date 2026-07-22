@@ -208,7 +208,7 @@ export function TopicList(): React.JSX.Element {
               {({ width, height }) => (
                 <VirtualList
                   listRef={listRef}
-                  style={{ width, height }}
+                  style={{ width, height, maxHeight: height }}
                   rowCount={treeItems.length}
                   rowHeight={(index, data) => (data.treeItems[index]?.type === "topic" ? 50 : 28)}
                   rowProps={itemData}
