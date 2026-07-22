@@ -174,14 +174,16 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
     return (
       <AutoSizer>
         {({ height, width }) => (
-          <List<{ data: DiagnosticInfo[] }>
-            style={{ outline: "none", width, height }}
-            rowHeight={30}
-            rowProps={{ data: nodes }}
-            rowCount={nodes.length}
-            overscanCount={10}
-            rowComponent={renderRow}
-          />
+          <div style={{ width, height }}>
+            <List<{ data: DiagnosticInfo[] }>
+              style={{ outline: "none", width, height }}
+              rowHeight={30}
+              rowProps={{ data: nodes }}
+              rowCount={nodes.length}
+              overscanCount={10}
+              rowComponent={renderRow}
+            />
+          </div>
         )}
       </AutoSizer>
     );

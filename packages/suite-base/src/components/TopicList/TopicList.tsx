@@ -206,15 +206,17 @@ export function TopicList(): React.JSX.Element {
           <div style={{ flex: "1 1 100%" }}>
             <AutoSizer>
               {({ width, height }) => (
-                <VirtualList
-                  listRef={listRef}
-                  style={{ width, height }}
-                  rowCount={treeItems.length}
-                  rowHeight={(index, data) => (data.treeItems[index]?.type === "topic" ? 50 : 28)}
-                  rowProps={itemData}
-                  overscanCount={10}
-                  rowComponent={renderRow}
-                />
+                <div style={{ width, height }}>
+                  <VirtualList
+                    listRef={listRef}
+                    style={{ width, height }}
+                    rowCount={treeItems.length}
+                    rowHeight={(index, data) => (data.treeItems[index]?.type === "topic" ? 50 : 28)}
+                    rowProps={itemData}
+                    overscanCount={10}
+                    rowComponent={renderRow}
+                  />
+                </div>
               )}
             </AutoSizer>
           </div>

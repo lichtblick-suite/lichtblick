@@ -100,6 +100,8 @@
     "flatted": "3.4.2",
     "@xmldom/xmldom": "0.9.10",
     "uuid": "14.0.0",
+    "fast-uri": "3.1.4",
+    "svgo": "3.3.4",
     "webpack": "5.108.3",
     "plist@3.1.0": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",
     "plist@^3.0.4": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",

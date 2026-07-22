@@ -15,6 +15,7 @@ import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavig
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { Namespace } from "@lichtblick/suite-base/types";
 import { downloadTextFile } from "@lichtblick/suite-base/util/download";
+import { validateLayoutData } from "@lichtblick/suite-base/util/layout";
 import showOpenFilePicker from "@lichtblick/suite-base/util/showOpenFilePicker";
 
 import { useAnalytics } from "../context/AnalyticsContext";
@@ -58,7 +59,17 @@ export function useLayoutTransfer(): UseLayoutTransfer {
         return;
       }
 
-      const data = parsedState as LayoutData;
+      let data: LayoutData;
+      try {
+        data = validateLayoutData(parsedState);
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        enqueueSnackbar(`${file.name} is not a valid layout: ${errorMessage}`, {
+          variant: "error",
+        });
+        return;
+      }
+
       const newLayout = await layoutManager.saveNewLayout({
         name: layoutName,
         data,
