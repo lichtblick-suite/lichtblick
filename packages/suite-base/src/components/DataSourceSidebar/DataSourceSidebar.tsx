@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import AddIcon from "@mui/icons-material/Add";
-import { CircularProgress, Divider, IconButton } from "@mui/material";
+import { CircularProgress, Divider, IconButton, Tab, Tabs } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,7 +29,7 @@ import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 
 import { AlertsList } from "../AlertList/AlertsList";
 import { DataSourceInfoView } from "../DataSourceInfoView";
-import { StyledTab, StyledTabs, useStyles } from "./DataSourceSidebar.style";
+import { useStyles } from "./DataSourceSidebar.style";
 import { AlertBadge } from "./utils";
 
 type Props = {
@@ -108,16 +108,20 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
             <Stack flex={1}>
               {!disableToolbar && (
                 <>
-                  <StyledTabs
+                  <Tabs
+                    className={classes.tabs}
                     value={activeTab}
                     onChange={(_ev, newValue: DataSourceSidebarTab) => {
                       setActiveTab(newValue);
                     }}
                     textColor="inherit"
                   >
-                    <StyledTab disableRipple label="Topics" value="topics" />
-                    {showEventsTab && <StyledTab disableRipple label="Events" value="events" />}
-                    <StyledTab
+                    <Tab className={classes.tab} disableRipple label="Topics" value="topics" />
+                    {showEventsTab && (
+                      <Tab className={classes.tab} disableRipple label="Events" value="events" />
+                    )}
+                    <Tab
+                      className={classes.tab}
                       disableRipple
                       label={
                         <Stack direction="row" alignItems="baseline" gap={1}>
@@ -129,7 +133,7 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
                       }
                       value="alerts"
                     />
-                  </StyledTabs>
+                  </Tabs>
                   <Divider />
                 </>
               )}

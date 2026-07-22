@@ -17,6 +17,7 @@ import { fromSec, toSec } from "@lichtblick/rostime";
 import {
   AppSettingValue,
   ExtensionPanelRegistration,
+  Immutable,
   PanelExtensionContext,
   ParameterValue,
   RenderState,
@@ -55,6 +56,7 @@ import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
   InternalSubscribePayload,
+  PlayerAlert,
   PlayerPresence,
 } from "@lichtblick/suite-base/players/types";
 import {
@@ -659,7 +661,7 @@ function PanelExtensionAdapter(
         setDefaultPanelTitle(title);
       },
 
-      unstable_setAlert: (alertId: string, alert) => {
+      unstable_setAlert: (alertId: string, alert: Immutable<PlayerAlert> | undefined) => {
         if (!isMounted()) {
           return;
         }
