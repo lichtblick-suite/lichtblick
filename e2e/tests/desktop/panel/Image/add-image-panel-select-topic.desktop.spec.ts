@@ -32,7 +32,7 @@ test("add Image panel in a new layout and select a topic", { tag: "@regression" 
   // When
   await sidebar.openPanelSettingsTab();
   const settings = sidebar.getLeftSidebar();
-  const topicSelect = settings.getByTestId("FieldEditor-Select").first();
+  const topicSelect = settings.getByTestId("FieldEditor-Select").getByText(IMAGE_TOPIC);
   await topicSelect.click();
   await mainWindow.getByRole("option", { name: IMAGE_TOPIC, exact: true }).click();
 
