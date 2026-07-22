@@ -6,6 +6,18 @@ applyTo: "**/*.ts,**/*.tsx"
 
 These rules are derived from [CONTRIBUTING.md](../../CONTRIBUTING.md) and apply to all TypeScript and TSX files.
 
+## Branch naming
+
+Branch names must use a prefix that matches the target branch (enforced in CI by
+[enforce-branch-naming.yml](../workflows/enforce-branch-naming.yml)):
+
+| Target branch | Allowed source prefixes |
+|---------------|-------------------------|
+| `main` | `release/`, `hotfix/` |
+| `develop` | `feature/`, `bugfix/`, `dependabot/`, `sync/` |
+
+Use a short, descriptive, kebab-case name after the prefix (e.g. `feature/improve-ai-experience`).
+
 ## Component Structure
 
 Every React component must follow this file organization:
