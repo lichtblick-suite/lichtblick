@@ -9,7 +9,9 @@ import { DetailsType } from "@lichtblick/suite-base/util/sendNotification";
 
 import { useStyles } from "./AlertsList.style";
 
-export function AlertDetails(props: { details: DetailsType; tip?: string }): React.JSX.Element {
+export function AlertDetails(
+  props: Readonly<{ details: DetailsType; tip?: string }>,
+): React.JSX.Element {
   const { t } = useTranslation("alertsList");
   const { details, tip } = props;
   const { classes } = useStyles();

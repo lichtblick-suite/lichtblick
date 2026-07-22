@@ -8,7 +8,9 @@ import { NotificationSeverity } from "@lichtblick/suite-base/util/sendNotificati
 
 import { useStyles } from "./AlertsList.style";
 
-export function AlertIcon({ severity }: { severity: NotificationSeverity }): React.JSX.Element {
+export function AlertIcon({
+  severity,
+}: Readonly<{ severity: NotificationSeverity }>): React.JSX.Element {
   const { palette } = useTheme();
   const { classes } = useStyles();
 

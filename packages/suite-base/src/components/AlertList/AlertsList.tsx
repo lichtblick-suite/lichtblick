@@ -133,6 +133,7 @@ export function AlertsList(): React.JSX.Element {
                 iconSize="small"
                 size="small"
                 color="inherit"
+                aria-label={t("copyDetails")}
                 getText={() => getAlertCopyText(alert)}
               />
               <Tooltip arrow title={t("dismiss")}>

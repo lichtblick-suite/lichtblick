@@ -8,10 +8,10 @@ import { useAlertBadgeStyles } from "./DataSourceSidebar.style";
 export function AlertBadge({
   count,
   severity = "error",
-}: {
+}: Readonly<{
   count: number;
   severity?: NotificationSeverity;
-}): React.JSX.Element {
+}>): React.JSX.Element {
   const { classes } = useAlertBadgeStyles({ severity });
   return <span className={classes.badge}>{count}</span>;
 }
