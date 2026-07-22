@@ -8,8 +8,8 @@
 import { AutocompleteRenderOptionState } from "@mui/material/Autocomplete";
 import MenuItem from "@mui/material/MenuItem";
 import { FzfResultItem } from "fzf";
-import { useMemo, ReactNode } from "react";
-import { FixedSizeList, ListChildComponentProps } from "react-window";
+import { useMemo } from "react";
+import { List, RowComponentProps } from "react-window";
 import { makeStyles } from "tss-react/mui";
 
 import { HighlightChars } from "@lichtblick/suite-base/components/HighlightChars";
@@ -83,28 +83,28 @@ export const ReactWindowListboxAdapter = React.forwardRef<
   return (
     <div ref={ref} {...rest}>
       <div style={{ visibility: "hidden", height: 0 }}>{longestChild}</div>
-      <FixedSizeList<ListboxAdapterChild[]>
-        height={totalHeight}
-        itemCount={options.length}
-        itemData={options}
-        itemSize={Constants.ROW_HEIGHT}
+      <List<{ options: ListboxAdapterChild[] }>
+        rowCount={options.length}
+        rowProps={{ options }}
+        rowHeight={Constants.ROW_HEIGHT}
+        rowComponent={FixedSizeListRenderRow}
         className={className}
-        width="100%"
-      >
-        {FixedSizeListRenderRow}
-      </FixedSizeList>
+        style={{ height: totalHeight, width: "100%" }}
+      />
     </div>
   );
 });
 
-/** Render an individual row for the FixedSizeList */
-function FixedSizeListRenderRow(props: ListChildComponentProps<ListboxAdapterChild[]>): ReactNode {
-  // data is the array of all items, index is the index of the current row (item), and style
+/** Render an individual row for the List */
+function FixedSizeListRenderRow(
+  props: RowComponentProps<{ options: ListboxAdapterChild[] }>,
+): React.JSX.Element | null {
+  // options is the array of all items, index is the index of the current row (item), and style
   // is the position style for the specific item
-  const { data, index, style } = props;
+  const { options, index, style } = props;
   const { classes, cx } = useStyles();
 
-  const dataSet = data[index];
+  const dataSet = options[index];
   if (!dataSet) {
     return ReactNull;
   }

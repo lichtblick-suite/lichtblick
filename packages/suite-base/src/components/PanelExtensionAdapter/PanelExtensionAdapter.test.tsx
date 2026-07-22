@@ -11,6 +11,7 @@
 
 import { render } from "@testing-library/react";
 import { act } from "react";
+import { createStore } from "zustand";
 
 import { Condvar, signal } from "@lichtblick/den/async";
 import type { MessageDefinition } from "@lichtblick/message-definition";
@@ -23,6 +24,7 @@ import {
   Subscription,
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
+import { AlertsContext, AlertsContextStore } from "@lichtblick/suite-base/context/AlertsContext";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AdvertiseOptions } from "@lichtblick/suite-base/players/types";
 import * as PanelStateContextProvider from "@lichtblick/suite-base/providers/PanelStateContextProvider";
@@ -30,6 +32,7 @@ import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
+import { BuiltinPanelExtensionContext } from "./types";
 
 describe("PanelExtensionAdapter", () => {
   it("should call initPanel", async () => {
@@ -1404,6 +1407,115 @@ describe("PanelExtensionAdapter", () => {
 
       // THEN no schema is returned
       expect(context.getSchema("known_schema/Data")).toBeUndefined();
+    });
+  });
+
+  describe("unstable_setAlert", () => {
+    function makeAlertsStore() {
+      const setAlert = jest.fn();
+      const clearAlert = jest.fn();
+      const store = createStore<AlertsContextStore>(() => ({
+        alerts: [],
+        actions: { setAlert, clearAlert, clearAlerts: jest.fn() },
+      }));
+      return { store, setAlert, clearAlert };
+    }
+
+    it("sets an app-level alert scoped to the panel", async () => {
+      // GIVEN a panel that sets an alert during init
+      const { store, setAlert } = makeAlertsStore();
+      const alert = { severity: "error", message: "boom" } as const;
+
+      const sig = signal();
+      const initPanel = (context: PanelExtensionContext) => {
+        (context as BuiltinPanelExtensionContext).unstable_setAlert?.("my-alert", alert);
+        sig.resolve();
+      };
+
+      // WHEN the panel is rendered
+      render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <AlertsContext.Provider value={store}>
+                <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+              </AlertsContext.Provider>
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+
+      // THEN setAlert is called with a panel-scoped tag and the alert
+      expect(setAlert).toHaveBeenCalledWith(
+        expect.stringMatching(/^panel-alert:.+:my-alert$/),
+        alert,
+      );
+    });
+
+    it("clears the alert when passed undefined", async () => {
+      // GIVEN a panel that clears an alert during init
+      const { store, clearAlert } = makeAlertsStore();
+
+      const sig = signal();
+      const initPanel = (context: PanelExtensionContext) => {
+        (context as BuiltinPanelExtensionContext).unstable_setAlert?.("my-alert", undefined);
+        sig.resolve();
+      };
+
+      // WHEN the panel is rendered
+      render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <AlertsContext.Provider value={store}>
+                <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+              </AlertsContext.Provider>
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+
+      // THEN clearAlert is called with the panel-scoped tag
+      expect(clearAlert).toHaveBeenCalledWith(expect.stringMatching(/^panel-alert:.+:my-alert$/));
+    });
+
+    it("clears panel alerts on unmount", async () => {
+      // GIVEN a panel that set an alert
+      const { store, clearAlert } = makeAlertsStore();
+      const alert = { severity: "warn", message: "watch out" } as const;
+
+      const sig = signal();
+      const initPanel = (context: PanelExtensionContext) => {
+        (context as BuiltinPanelExtensionContext).unstable_setAlert?.("my-alert", alert);
+        sig.resolve();
+      };
+
+      const { unmount } = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <AlertsContext.Provider value={store}>
+                <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+              </AlertsContext.Provider>
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+      clearAlert.mockClear();
+
+      // WHEN the panel is unmounted
+      await act(async () => {
+        unmount();
+      });
+
+      // THEN the previously set alert is cleared
+      expect(clearAlert).toHaveBeenCalledWith(expect.stringMatching(/^panel-alert:.+:my-alert$/));
     });
   });
 });

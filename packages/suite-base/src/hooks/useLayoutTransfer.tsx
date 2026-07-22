@@ -101,7 +101,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
       return;
     }
 
-    void analytics.logEvent(AppEvent.LAYOUT_IMPORT, { numLayouts: fileHandles.length });
+    analytics.logEvent(AppEvent.LAYOUT_IMPORT, { numLayouts: fileHandles.length });
   }, [analytics, isMounted, parseAndInstallLayout]);
 
   const exportLayout = useCallbackWithToast(async () => {
@@ -114,7 +114,7 @@ export function useLayoutTransfer(): UseLayoutTransfer {
     const layoutName = name.length > 0 ? name : "lichtblick-layout";
     const content = JSON.stringify(item, undefined, 2) ?? "";
     downloadTextFile(content, `${layoutName}.json`);
-    void analytics.logEvent(AppEvent.LAYOUT_EXPORT);
+    analytics.logEvent(AppEvent.LAYOUT_EXPORT);
   }, [analytics, getCurrentLayoutState]);
 
   return { importLayout, exportLayout, parseAndInstallLayout };

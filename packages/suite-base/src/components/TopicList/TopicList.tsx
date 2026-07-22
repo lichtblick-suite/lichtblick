@@ -7,11 +7,11 @@
 
 import SearchIcon from "@mui/icons-material/Search";
 import { List, ListItem, ListItemText, PopoverPosition, Skeleton } from "@mui/material";
-import { MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MouseEvent, useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLatest } from "react-use";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { ListChildComponentProps, VariableSizeList } from "react-window";
+import { List as VirtualList, RowComponentProps, ListImperativeAPI } from "react-window";
 import { useDebounce } from "use-debounce";
 
 import { filterMap } from "@lichtblick/den/collection";
@@ -50,7 +50,7 @@ export function TopicList(): React.JSX.Element {
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const { topics, datatypes } = useDataSourceInfo();
 
-  const listRef = useRef<VariableSizeList>(ReactNull);
+  const listRef = useRef<ListImperativeAPI>(ReactNull);
 
   const treeItems = useTopicListSearch({
     topics,
@@ -96,18 +96,18 @@ export function TopicList(): React.JSX.Element {
     setContextMenuState(undefined);
   }, []);
 
-  useEffect(() => {
-    // Discard cached row heights when the filter results change
-    listRef.current?.resetAfterIndex(0);
-  }, [treeItems]);
-
   const itemData = useMemo(() => ({ treeItems, selectedIndexes }), [selectedIndexes, treeItems]);
 
-  const renderRow: React.FC<ListChildComponentProps<typeof itemData>> = useCallback(
-    // `data` comes from the `itemData` we pass to the VariableSizeList below
-    ({ index, style, data }) => {
-      const treeItem = data.treeItems[index]!;
-      const selected = data.selectedIndexes.has(index);
+  const renderRow = useCallback(
+    // `treeItems` and `selectedIndexes` come from the `rowProps` we pass to the VirtualList below
+    ({
+      index,
+      style,
+      treeItems: rowTreeItems,
+      selectedIndexes: rowSelectedIndexes,
+    }: RowComponentProps<typeof itemData>): React.JSX.Element | null => {
+      const treeItem = rowTreeItems[index]!;
+      const selected = rowSelectedIndexes.has(index);
       const onClick = (event: React.MouseEvent) => {
         event.preventDefault();
         onSelect({
@@ -142,6 +142,7 @@ export function TopicList(): React.JSX.Element {
             />
           );
       }
+      return ReactNull;
     },
     [handleContextMenu, onSelect],
   );
@@ -205,17 +206,15 @@ export function TopicList(): React.JSX.Element {
           <div style={{ flex: "1 1 100%" }}>
             <AutoSizer>
               {({ width, height }) => (
-                <VariableSizeList
-                  ref={listRef}
-                  width={width}
-                  height={height}
-                  itemCount={treeItems.length}
-                  itemSize={(index) => (treeItems[index]?.type === "topic" ? 50 : 28)}
-                  itemData={itemData}
+                <VirtualList
+                  listRef={listRef}
+                  style={{ width, height }}
+                  rowCount={treeItems.length}
+                  rowHeight={(index, data) => (data.treeItems[index]?.type === "topic" ? 50 : 28)}
+                  rowProps={itemData}
                   overscanCount={10}
-                >
-                  {renderRow}
-                </VariableSizeList>
+                  rowComponent={renderRow}
+                />
               )}
             </AutoSizer>
           </div>

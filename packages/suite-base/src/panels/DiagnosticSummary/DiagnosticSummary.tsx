@@ -17,9 +17,9 @@
 import { InputBase, MenuItem, Select, Typography } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
-import { CSSProperties, useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList as List } from "react-window";
+import { List, RowComponentProps } from "react-window";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { SettingsTreeAction } from "@lichtblick/suite";
@@ -91,7 +91,7 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
   );
 
   const renderRow = useCallback(
-    (renderProps: { data: DiagnosticInfo[]; index: number; style: CSSProperties }) => {
+    (renderProps: RowComponentProps<{ data: DiagnosticInfo[] }>) => {
       const item = renderProps.data[renderProps.index]!;
       return (
         <div
@@ -174,17 +174,14 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
     return (
       <AutoSizer>
         {({ height, width }) => (
-          <List
-            width={width}
-            height={height}
-            style={{ outline: "none" }}
-            itemSize={30}
-            itemData={nodes}
-            itemCount={nodes.length}
+          <List<{ data: DiagnosticInfo[] }>
+            style={{ outline: "none", width, height }}
+            rowHeight={30}
+            rowProps={{ data: nodes }}
+            rowCount={nodes.length}
             overscanCount={10}
-          >
-            {renderRow}
-          </List>
+            rowComponent={renderRow}
+          />
         )}
       </AutoSizer>
     );
