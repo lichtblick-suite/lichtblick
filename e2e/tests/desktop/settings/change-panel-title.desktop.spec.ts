@@ -29,7 +29,7 @@ test("change a panel title and see it updated in the panel UI", { tag: "@regress
   // When
   await sidebar.openPanelSettingsTab();
   const settings = sidebar.getLeftSidebar();
-  const titleField = settings.getByRole('textbox', { name: 'Indicator' })
+  const titleField = settings.getByRole("textbox", { name: "Indicator" });
   await titleField.fill(CUSTOM_TITLE);
   await titleField.press("Enter");
 
