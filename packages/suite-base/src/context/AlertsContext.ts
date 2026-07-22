@@ -24,6 +24,12 @@ export type AlertsContextStore = Immutable<{
    * instead we hide them by key until the underlying condition changes and produces a new key.
    */
   dismissedPlayerAlertKeys: Set<string>;
+  /**
+   * Tags of session alerts the user has dismissed along with their content key at the time of
+   * dismissal. If a panel re-sets the same tag with identical content, it stays dismissed. If the
+   * content changes, the tag is removed from this map and the alert reappears.
+   */
+  dismissedSessionTags: Map<string, string>;
   actions: {
     clearAlert: (tag: string) => void;
     clearAlerts: () => void;

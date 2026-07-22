@@ -14,6 +14,7 @@ import {
   AlertsContext,
   AlertsContextStore,
   SessionAlert,
+  getPlayerAlertKey,
 } from "@lichtblick/suite-base/context/AlertsContext";
 
 function createAlertsStore(): StoreApi<AlertsContextStore> {
@@ -21,10 +22,19 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
     return {
       alerts: [],
       dismissedPlayerAlertKeys: new Set<string>(),
+      dismissedSessionTags: new Map<string, string>(),
       actions: {
         clearAlert: (tag: string) => {
+          const alerts = get().alerts;
+          const dismissed = get().dismissedSessionTags;
+          const existing = alerts.find((al) => al.tag === tag);
+          const next = new Map(dismissed);
+          if (existing) {
+            next.set(tag, getPlayerAlertKey(existing));
+          }
           set({
-            alerts: get().alerts.filter((al) => al.tag !== tag),
+            alerts: alerts.filter((al) => al.tag !== tag),
+            dismissedSessionTags: next,
           });
         },
         clearAlerts: () => {
@@ -35,6 +45,23 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
           const alerts = get().alerts;
           const existing = alerts.find((al) => al.tag === tag);
           if (existing && _.isEqual(existing, newAlert)) {
+            return;
+          }
+
+          const dismissed = get().dismissedSessionTags;
+          const dismissedKey = dismissed.get(tag);
+          if (dismissedKey != undefined) {
+            const newKey = getPlayerAlertKey(alert);
+            if (dismissedKey === newKey) {
+              return;
+            }
+
+            const nextDismissed = new Map(dismissed);
+            nextDismissed.delete(tag);
+            set({
+              alerts: [newAlert, ...alerts.filter((al) => al.tag !== tag)],
+              dismissedSessionTags: nextDismissed,
+            });
             return;
           }
 

@@ -112,14 +112,14 @@ export function AlertsList(): React.JSX.Element {
     <Stack fullHeight flex="auto" overflow="auto">
       {visibleAlerts.map((alert) => (
         <Accordion
-          className={classes.acccordion}
+          className={classes.accordion}
           key={alert.key}
           slotProps={{ transition: { unmountOnExit: true } }}
           defaultExpanded
         >
           <div className={classes.rowHeader}>
             <AccordionSummary
-              className={classes.acccordionSummary}
+              className={classes.accordionSummary}
               expandIcon={<ArrowDropDownIcon />}
               title={alert.message}
             >

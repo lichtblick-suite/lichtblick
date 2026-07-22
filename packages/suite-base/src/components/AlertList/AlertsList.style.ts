@@ -7,7 +7,7 @@ import { makeStyles } from "tss-react/mui";
 import { customTypography } from "@lichtblick/theme";
 
 export const useStyles = makeStyles()((theme) => ({
-  acccordion: {
+  accordion: {
     background: "none",
     boxShadow: "none",
     borderBottom: `1px solid ${theme.palette.divider}`,
@@ -27,7 +27,7 @@ export const useStyles = makeStyles()((theme) => ({
     padding: theme.spacing(1.125),
     gap: theme.spacing(1),
   },
-  acccordionSummary: {
+  accordionSummary: {
     height: 30,
     minHeight: "auto",
     flex: "1 1 auto",

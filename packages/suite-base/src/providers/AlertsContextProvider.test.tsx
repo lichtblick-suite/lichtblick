@@ -231,4 +231,68 @@ describe("AlertsContextProvider", () => {
     // Then
     expect(result.current.dismissedPlayerAlertKeys.size).toBe(0);
   });
+
+  it("does not re-add a session alert when setAlert is called after dismiss with same content", () => {
+    // Given
+    const alert: SessionAlert = { severity: "warn", message: BasicBuilder.string() };
+    const tag = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        alerts: useAlertsStore(selectAlerts),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.actions.setAlert(tag, alert);
+    });
+    expect(result.current.alerts).toHaveLength(1);
+
+    act(() => {
+      result.current.actions.clearAlert(tag);
+    });
+    expect(result.current.alerts).toHaveLength(0);
+
+    // When
+    act(() => {
+      result.current.actions.setAlert(tag, alert);
+    });
+
+    // Then
+    expect(result.current.alerts).toHaveLength(0);
+  });
+
+  it("re-adds a session alert when setAlert is called after dismiss with different content", () => {
+    // Given
+    const originalAlert: SessionAlert = { severity: "warn", message: BasicBuilder.string() };
+    const updatedAlert: SessionAlert = { severity: "error", message: BasicBuilder.string() };
+    const tag = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        alerts: useAlertsStore(selectAlerts),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.actions.setAlert(tag, originalAlert);
+    });
+    act(() => {
+      result.current.actions.clearAlert(tag);
+    });
+    expect(result.current.alerts).toHaveLength(0);
+
+    // When
+    act(() => {
+      result.current.actions.setAlert(tag, updatedAlert);
+    });
+
+    // Then
+    expect(result.current.alerts).toHaveLength(1);
+    expect(result.current.alerts[0]).toMatchObject({ tag, ...updatedAlert });
+  });
 });
