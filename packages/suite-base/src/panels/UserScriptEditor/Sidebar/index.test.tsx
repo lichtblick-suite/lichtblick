@@ -67,6 +67,9 @@ describe("Sidebar", () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    // Reset only this mock's implementation so later tests fall back to Jest's default
+    // undefined return value, while keeping the Uri.parse implementation from the mock factory.
+    mockGetModel.mockReset();
   });
 
   it("should render the three explorer tabs", () => {
