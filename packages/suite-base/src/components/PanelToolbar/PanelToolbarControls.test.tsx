@@ -606,28 +606,6 @@ describe("PanelToolbarControls", () => {
             }}
           >
             <PanelContext.Provider
-<<<<<<< HEAD
-              value={{
-                id: "test-panel-id",
-                type: "TestPanel",
-                title: "Test Panel",
-                showLogs: false,
-                setShowLogs: jest.fn(),
-                logError: jest.fn(),
-                logCount: 3,
-                config: {},
-                saveConfig: jest.fn(),
-                updatePanelConfigs: jest.fn(),
-                openSiblingPanel: jest.fn(),
-                replacePanel: jest.fn(),
-                enterFullscreen: jest.fn(),
-                exitFullscreen: jest.fn(),
-                isFullscreen: false,
-                setHasFullscreenDescendant: jest.fn(),
-                connectToolbarDragHandle: jest.fn(),
-                setMessagePathDropConfig: jest.fn(),
-              }}
-=======
               value={
                 {
                   id: "test-panel-id",
@@ -650,7 +628,6 @@ describe("PanelToolbarControls", () => {
                   setMessagePathDropConfig: jest.fn(),
                 } as any
               }
->>>>>>> 7e113902b (FIX: update log count handling and related tests)
             >
               <PanelToolbarControls isUnknownPanel={false} />
             </PanelContext.Provider>
