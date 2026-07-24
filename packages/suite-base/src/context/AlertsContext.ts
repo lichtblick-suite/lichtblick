@@ -18,12 +18,48 @@ type TaggedAlert = SessionAlert & { tag: string };
 
 export type AlertsContextStore = Immutable<{
   alerts: TaggedAlert[];
+  /**
+   * Content-based keys of player alerts the user has dismissed. Player alerts are owned by the
+   * Player and re-emitted on state changes, so they cannot be removed from the store directly;
+   * instead we hide them by key until the underlying condition changes and produces a new key.
+   */
+  dismissedPlayerAlertKeys: Set<string>;
+  /**
+   * Tags of session alerts the user has dismissed along with their content key at the time of
+   * dismissal. If a panel re-sets the same tag with identical content, it stays dismissed. If the
+   * content changes, the tag is removed from this map and the alert reappears.
+   */
+  dismissedSessionTags: Map<string, string>;
   actions: {
-    clearAlert: (tag: string) => void;
+    /** Remove an alert by tag without tracking dismissal. Used by panels/system when a condition resolves. */
+    clearSessionAlert: (tag: string) => void;
     clearAlerts: () => void;
     setAlert: (tag: string, alert: Immutable<SessionAlert>) => void;
+    /** User-initiated dismiss: removes the alert AND tracks it so identical re-sets are suppressed. */
+    dismissSessionAlert: (tag: string) => void;
+    dismissPlayerAlert: (key: string) => void;
+    dismissPlayerAlerts: (keys: readonly string[]) => void;
   };
 }>;
+
+/**
+ * Builds a stable, content-based key for a player alert so it can be tracked as dismissed and
+ * grouped with identical alerts. The key changes when the alert's severity, message, tip, or
+ * error message changes, allowing a re-emitted-but-changed alert to reappear and preventing
+ * alerts with different details from being incorrectly collapsed into one group.
+ */
+export function getAlertKey(
+  alert: Pick<PlayerAlert, "severity" | "message" | "tip"> & { error?: unknown },
+): string {
+  let errorPart = "";
+  if (alert.error instanceof Error) {
+    errorPart = alert.error.message;
+  } else if (typeof alert.error === "string") {
+    errorPart = alert.error;
+  }
+  const tipPart = alert.tip ?? "";
+  return `${alert.severity}::${alert.message}::${errorPart}::${tipPart}`;
+}
 
 export const AlertsContext = createContext<undefined | StoreApi<AlertsContextStore>>(undefined);
 
