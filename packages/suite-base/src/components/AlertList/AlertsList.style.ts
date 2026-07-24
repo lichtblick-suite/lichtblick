@@ -78,4 +78,12 @@ export const useStyles = makeStyles()((theme) => ({
     flex: "none",
     paddingRight: theme.spacing(0.5),
   },
+  countBadge: {
+    flex: "none",
+    backgroundColor: theme.palette.action.selected,
+    borderRadius: 8,
+    padding: theme.spacing(0, 0.75),
+    lineHeight: 1.6,
+    marginLeft: theme.spacing(0.5),
+  },
 }));

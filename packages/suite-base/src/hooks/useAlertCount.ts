@@ -56,10 +56,12 @@ export default function useAlertCount(): {
     return highest;
   }, [playerAlerts, sessionAlerts]);
 
+  const alertCount = playerAlerts.length + sessionAlerts.length;
+
   return {
     playerAlerts,
     sessionAlerts,
-    alertCount: playerAlerts.length + sessionAlerts.length,
+    alertCount,
     highestSeverity,
   };
 }

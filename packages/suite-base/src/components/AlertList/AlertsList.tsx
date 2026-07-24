@@ -51,6 +51,15 @@ export type ListAlert = {
   playerAlertKey?: string;
 };
 
+type GroupedAlert = ListAlert & {
+  /** Number of identical alerts (by severity+message) collapsed into this entry. */
+  count: number;
+  /** All session tags in this group (for batch dismiss). */
+  tags: string[];
+  /** All player alert keys in this group (for batch dismiss). */
+  playerAlertKeys: string[];
+};
+
 export function AlertsList(): React.JSX.Element {
   const { t } = useTranslation("alertsList");
   const { classes } = useStyles();
@@ -61,7 +70,7 @@ export function AlertsList(): React.JSX.Element {
   );
   const { dismissSessionAlert: dismissAlert, dismissPlayerAlert } = useAlertsActions();
 
-  const visibleAlerts = useMemo<ListAlert[]>(() => {
+  const groupedAlerts = useMemo<GroupedAlert[]>(() => {
     const combined: ListAlert[] = [];
     for (const alert of sessionAlerts) {
       combined.push({
@@ -87,30 +96,59 @@ export function AlertsList(): React.JSX.Element {
         playerAlertKey,
       });
     }
-    return combined.sort(
+
+    // Group by content key (severity::message)
+    const groups = new Map<string, GroupedAlert>();
+    for (const alert of combined) {
+      const contentKey = getAlertKey(alert);
+      const existing = groups.get(contentKey);
+      if (existing) {
+        existing.count += 1;
+        if (alert.tag != undefined) {
+          existing.tags.push(alert.tag);
+        }
+        if (
+          alert.playerAlertKey != undefined &&
+          !existing.playerAlertKeys.includes(alert.playerAlertKey)
+        ) {
+          existing.playerAlertKeys.push(alert.playerAlertKey);
+        }
+      } else {
+        groups.set(contentKey, {
+          ...alert,
+          key: contentKey,
+          count: 1,
+          tags: alert.tag != undefined ? [alert.tag] : [],
+          playerAlertKeys: alert.playerAlertKey != undefined ? [alert.playerAlertKey] : [],
+        });
+      }
+    }
+
+    return Array.from(groups.values()).sort(
       (a, b) =>
         NOTIFICATION_SEVERITY_PRIORITY[b.severity] - NOTIFICATION_SEVERITY_PRIORITY[a.severity],
     );
   }, [sessionAlerts, playerAlerts, dismissedPlayerAlertKeys]);
 
   const handleDismiss = useCallback(
-    (alert: ListAlert) => {
-      if (alert.tag != undefined) {
-        dismissAlert(alert.tag);
-      } else if (alert.playerAlertKey != undefined) {
-        dismissPlayerAlert(alert.playerAlertKey);
+    (alert: GroupedAlert) => {
+      for (const tag of alert.tags) {
+        dismissAlert(tag);
+      }
+      for (const key of alert.playerAlertKeys) {
+        dismissPlayerAlert(key);
       }
     },
     [dismissAlert, dismissPlayerAlert],
   );
 
-  if (visibleAlerts.length === 0) {
+  if (groupedAlerts.length === 0) {
     return <EmptyState>{t("noAlertsFound")}</EmptyState>;
   }
 
   return (
     <Stack fullHeight flex="auto" overflow="auto">
-      {visibleAlerts.map((alert) => (
+      {groupedAlerts.map((alert) => (
         <Accordion
           className={classes.accordion}
           key={alert.key}
@@ -127,6 +165,11 @@ export function AlertsList(): React.JSX.Element {
               <Typography variant="inherit" noWrap>
                 {alert.message}
               </Typography>
+              {alert.count > 1 && (
+                <Typography className={classes.countBadge} variant="caption">
+                  {alert.count}x
+                </Typography>
+              )}
             </AccordionSummary>
             <div className={classes.rowActions}>
               <CopyButton
