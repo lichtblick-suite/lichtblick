@@ -22,22 +22,14 @@ import CopyButton from "@lichtblick/suite-base/components/CopyButton";
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import {
-  getAlertKey,
-  useAlertsActions,
-  useAlertsStore,
-} from "@lichtblick/suite-base/context/AlertsContext";
-import {
-  NOTIFICATION_SEVERITY_PRIORITY,
-  DetailsType,
-  NotificationSeverity,
-} from "@lichtblick/suite-base/util/sendNotification";
+import { useAlertsActions, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
+import { DetailsType, NotificationSeverity } from "@lichtblick/suite-base/util/sendNotification";
 
 import { AlertDetails } from "./AlertDetails";
 import { AlertIcon } from "./AlertIcon";
 import { useStyles } from "./AlertsList.style";
 import { selectAlerts, selectDismissedPlayerAlertKeys, selectPlayerAlerts } from "./constants";
-import { getAlertCopyText } from "./utils";
+import { buildGroupedAlerts, getAlertCopyText } from "./utils";
 
 export type ListAlert = {
   key: string;
@@ -51,7 +43,7 @@ export type ListAlert = {
   playerAlertKey?: string;
 };
 
-type GroupedAlert = ListAlert & {
+export type GroupedAlert = ListAlert & {
   /** Number of identical alerts (by severity+message) collapsed into this entry. */
   count: number;
   /** All session tags in this group (for batch dismiss). */
@@ -70,65 +62,10 @@ export function AlertsList(): React.JSX.Element {
   );
   const { dismissSessionAlert: dismissAlert, dismissPlayerAlert } = useAlertsActions();
 
-  const groupedAlerts = useMemo<GroupedAlert[]>(() => {
-    const combined: ListAlert[] = [];
-    for (const alert of sessionAlerts) {
-      combined.push({
-        key: `session:${alert.tag}`,
-        severity: alert.severity,
-        message: alert.message,
-        error: alert.error,
-        tip: alert.tip,
-        tag: alert.tag,
-      });
-    }
-    for (const alert of playerAlerts ?? []) {
-      const playerAlertKey = getAlertKey(alert);
-      if (dismissedPlayerAlertKeys.has(playerAlertKey)) {
-        continue;
-      }
-      combined.push({
-        key: `player:${playerAlertKey}`,
-        severity: alert.severity,
-        message: alert.message,
-        error: alert.error,
-        tip: alert.tip,
-        playerAlertKey,
-      });
-    }
-
-    // Group by content key (severity::message)
-    const groups = new Map<string, GroupedAlert>();
-    for (const alert of combined) {
-      const contentKey = getAlertKey(alert);
-      const existing = groups.get(contentKey);
-      if (existing) {
-        existing.count += 1;
-        if (alert.tag != undefined) {
-          existing.tags.push(alert.tag);
-        }
-        if (
-          alert.playerAlertKey != undefined &&
-          !existing.playerAlertKeys.includes(alert.playerAlertKey)
-        ) {
-          existing.playerAlertKeys.push(alert.playerAlertKey);
-        }
-      } else {
-        groups.set(contentKey, {
-          ...alert,
-          key: contentKey,
-          count: 1,
-          tags: alert.tag != undefined ? [alert.tag] : [],
-          playerAlertKeys: alert.playerAlertKey != undefined ? [alert.playerAlertKey] : [],
-        });
-      }
-    }
-
-    return Array.from(groups.values()).sort(
-      (a, b) =>
-        NOTIFICATION_SEVERITY_PRIORITY[b.severity] - NOTIFICATION_SEVERITY_PRIORITY[a.severity],
-    );
-  }, [sessionAlerts, playerAlerts, dismissedPlayerAlertKeys]);
+  const groupedAlerts = useMemo<GroupedAlert[]>(
+    () => buildGroupedAlerts(sessionAlerts, playerAlerts ?? [], dismissedPlayerAlertKeys),
+    [sessionAlerts, playerAlerts, dismissedPlayerAlertKeys],
+  );
 
   const handleDismiss = useCallback(
     (alert: GroupedAlert) => {

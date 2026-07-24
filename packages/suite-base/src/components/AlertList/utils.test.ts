@@ -1,8 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { PlayerAlert } from "@lichtblick/suite-base/players/types";
+
 import { ListAlert } from "./AlertsList";
-import { getAlertCopyText } from "./utils";
+import { buildGroupedAlerts, getAlertCopyText } from "./utils";
+
+type SessionAlertInput = PlayerAlert & { tag: string };
 
 describe("getAlertCopyText", () => {
   const baseAlert: ListAlert = {
@@ -91,5 +95,144 @@ describe("getAlertCopyText", () => {
 
     // Then
     expect(result).toBe(`[${alert.severity}] ${alert.message}\n\n${alert.tip}\n\n${alert.error}`);
+  });
+});
+
+describe("buildGroupedAlerts", () => {
+  it("should return empty array when there are no alerts", () => {
+    // Given / When
+    const result = buildGroupedAlerts([], [], new Set());
+
+    // Then
+    expect(result).toEqual([]);
+  });
+
+  it("should return ungrouped session alerts with count 1", () => {
+    // Given
+    const sessionAlerts: SessionAlertInput[] = [
+      { tag: "tag-1", severity: "warn", message: "Alert A" },
+      { tag: "tag-2", severity: "info", message: "Alert B" },
+    ];
+
+    // When
+    const result = buildGroupedAlerts(sessionAlerts, [], new Set());
+
+    // Then
+    expect(result).toHaveLength(2);
+    expect(result[0]!.count).toBe(1);
+    expect(result[1]!.count).toBe(1);
+  });
+
+  it("should group session alerts with identical severity and message", () => {
+    // Given
+    const sessionAlerts: SessionAlertInput[] = [
+      { tag: "panel-A:err", severity: "error", message: "Decode failed" },
+      { tag: "panel-B:err", severity: "error", message: "Decode failed" },
+      { tag: "panel-C:err", severity: "error", message: "Decode failed" },
+    ];
+
+    // When
+    const result = buildGroupedAlerts(sessionAlerts, [], new Set());
+
+    // Then
+    expect(result).toHaveLength(1);
+    expect(result[0]!.count).toBe(3);
+    expect(result[0]!.tags).toEqual(["panel-A:err", "panel-B:err", "panel-C:err"]);
+  });
+
+  it("should not group alerts with different messages", () => {
+    // Given
+    const sessionAlerts: SessionAlertInput[] = [
+      { tag: "tag-1", severity: "error", message: "Error A" },
+      { tag: "tag-2", severity: "error", message: "Error B" },
+    ];
+
+    // When
+    const result = buildGroupedAlerts(sessionAlerts, [], new Set());
+
+    // Then
+    expect(result).toHaveLength(2);
+    expect(result[0]!.count).toBe(1);
+    expect(result[1]!.count).toBe(1);
+  });
+
+  it("should not group alerts with same message but different severity", () => {
+    // Given
+    const sessionAlerts: SessionAlertInput[] = [
+      { tag: "tag-1", severity: "error", message: "Same message" },
+      { tag: "tag-2", severity: "warn", message: "Same message" },
+    ];
+
+    // When
+    const result = buildGroupedAlerts(sessionAlerts, [], new Set());
+
+    // Then
+    expect(result).toHaveLength(2);
+  });
+
+  it("should exclude dismissed player alerts", () => {
+    // Given
+    const playerAlerts: PlayerAlert[] = [
+      { severity: "error", message: "Connection lost" },
+      { severity: "warn", message: "Clock skew" },
+    ];
+    const dismissed = new Set(["error::Connection lost"]);
+
+    // When
+    const result = buildGroupedAlerts([], playerAlerts, dismissed);
+
+    // Then
+    expect(result).toHaveLength(1);
+    expect(result[0]!.message).toBe("Clock skew");
+  });
+
+  it("should sort by severity: errors first, then warnings, then info", () => {
+    // Given
+    const sessionAlerts: SessionAlertInput[] = [
+      { tag: "tag-1", severity: "info", message: "Info alert" },
+      { tag: "tag-2", severity: "error", message: "Error alert" },
+      { tag: "tag-3", severity: "warn", message: "Warn alert" },
+    ];
+
+    // When
+    const result = buildGroupedAlerts(sessionAlerts, [], new Set());
+
+    // Then
+    expect(result.map((a) => a.severity)).toEqual(["error", "warn", "info"]);
+  });
+
+  it("should group mixed session and player alerts with same content", () => {
+    // Given
+    const sessionAlerts: SessionAlertInput[] = [
+      { tag: "panel-A:err", severity: "error", message: "Decode failed" },
+    ];
+    const playerAlerts: PlayerAlert[] = [{ severity: "error", message: "Decode failed" }];
+
+    // When
+    const result = buildGroupedAlerts(sessionAlerts, playerAlerts, new Set());
+
+    // Then
+    expect(result).toHaveLength(1);
+    expect(result[0]!.count).toBe(2);
+    expect(result[0]!.tags).toEqual(["panel-A:err"]);
+    expect(result[0]!.playerAlertKeys).toEqual(["error::Decode failed"]);
+  });
+
+  it("should collect all tags and playerAlertKeys for batch dismiss", () => {
+    // Given
+    const sessionAlerts: SessionAlertInput[] = [
+      { tag: "panel-A:warn", severity: "warn", message: "Frame missing" },
+      { tag: "panel-B:warn", severity: "warn", message: "Frame missing" },
+    ];
+    const playerAlerts: PlayerAlert[] = [{ severity: "warn", message: "Frame missing" }];
+
+    // When
+    const result = buildGroupedAlerts(sessionAlerts, playerAlerts, new Set());
+
+    // Then
+    expect(result).toHaveLength(1);
+    expect(result[0]!.count).toBe(3);
+    expect(result[0]!.tags).toEqual(["panel-A:warn", "panel-B:warn"]);
+    expect(result[0]!.playerAlertKeys).toEqual(["warn::Frame missing"]);
   });
 });
