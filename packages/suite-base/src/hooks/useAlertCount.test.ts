@@ -6,7 +6,7 @@
 import { renderHook } from "@testing-library/react";
 
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
-import { getPlayerAlertKey, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
+import { getAlertKey, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
 import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -18,7 +18,7 @@ jest.mock("@lichtblick/suite-base/context/AlertsContext");
 describe("useAlertCount", () => {
   const mockUseMessagePipeline = useMessagePipeline as jest.Mock;
   const mockUseAlertsStore = useAlertsStore as jest.Mock;
-  const mockGetPlayerAlertKey = getPlayerAlertKey as jest.Mock;
+  const mockGetPlayerAlertKey = getAlertKey as jest.Mock;
 
   function setupAlertsStore(
     alerts: unknown[],

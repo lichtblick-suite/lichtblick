@@ -186,7 +186,7 @@ function PanelExtensionAdapter(
 
   const [slowRender, setSlowRender] = useState(false);
   const [, setDefaultPanelTitle] = useDefaultPanelTitle();
-  const { setAlert, clearAlert } = useAlertsActions();
+  const { setAlert, clearSessionAlert: clearAlert } = useAlertsActions();
 
   // Tracks the ids of alerts this panel has set (via unstable_setAlert) so they can be cleared
   // when the panel unmounts. Alerts are namespaced by panelId to avoid collisions across panels.

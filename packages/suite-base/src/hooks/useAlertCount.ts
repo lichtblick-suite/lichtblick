@@ -13,7 +13,7 @@ import {
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import {
   AlertsContextStore,
-  getPlayerAlertKey,
+  getAlertKey,
   useAlertsStore,
 } from "@lichtblick/suite-base/context/AlertsContext";
 import { PlayerAlert } from "@lichtblick/suite-base/players/types";
@@ -39,30 +39,21 @@ export default function useAlertCount(): {
   const dismissedPlayerAlertKeys = useAlertsStore(selectDismissedPlayerAlertKeys);
 
   const playerAlerts = useMemo(
-    () =>
-      allPlayerAlerts.filter((alert) => !dismissedPlayerAlertKeys.has(getPlayerAlertKey(alert))),
+    () => allPlayerAlerts.filter((alert) => !dismissedPlayerAlertKeys.has(getAlertKey(alert))),
     [allPlayerAlerts, dismissedPlayerAlertKeys],
   );
 
   const highestSeverity = useMemo<NotificationSeverity | undefined>(() => {
-    let best: NotificationSeverity | undefined;
-    for (const alert of playerAlerts) {
+    let highest: NotificationSeverity | undefined;
+    for (const alert of [...playerAlerts, ...sessionAlerts]) {
       if (
-        best == undefined ||
-        NOTIFICATION_SEVERITY_PRIORITY[alert.severity] > NOTIFICATION_SEVERITY_PRIORITY[best]
+        highest == undefined ||
+        NOTIFICATION_SEVERITY_PRIORITY[alert.severity] > NOTIFICATION_SEVERITY_PRIORITY[highest]
       ) {
-        best = alert.severity;
+        highest = alert.severity;
       }
     }
-    for (const alert of sessionAlerts) {
-      if (
-        best == undefined ||
-        NOTIFICATION_SEVERITY_PRIORITY[alert.severity] > NOTIFICATION_SEVERITY_PRIORITY[best]
-      ) {
-        best = alert.severity;
-      }
-    }
-    return best;
+    return highest;
   }, [playerAlerts, sessionAlerts]);
 
   return {

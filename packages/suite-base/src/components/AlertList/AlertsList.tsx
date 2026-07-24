@@ -23,7 +23,7 @@ import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import {
-  getPlayerAlertKey,
+  getAlertKey,
   useAlertsActions,
   useAlertsStore,
 } from "@lichtblick/suite-base/context/AlertsContext";
@@ -59,7 +59,7 @@ export function AlertsList(): React.JSX.Element {
   const dismissedPlayerAlertKeys: ReadonlySet<string> = useAlertsStore(
     selectDismissedPlayerAlertKeys,
   );
-  const { dismissAlert, dismissPlayerAlert } = useAlertsActions();
+  const { dismissSessionAlert: dismissAlert, dismissPlayerAlert } = useAlertsActions();
 
   const visibleAlerts = useMemo<ListAlert[]>(() => {
     const combined: ListAlert[] = [];
@@ -74,7 +74,7 @@ export function AlertsList(): React.JSX.Element {
       });
     }
     for (const alert of playerAlerts ?? []) {
-      const playerAlertKey = getPlayerAlertKey(alert);
+      const playerAlertKey = getAlertKey(alert);
       if (dismissedPlayerAlertKeys.has(playerAlertKey)) {
         continue;
       }

@@ -206,32 +206,6 @@ describe("AlertsContextProvider", () => {
     }
   });
 
-  it("restores dismissed player alerts when restoreDismissedPlayerAlerts is called", () => {
-    // Given
-    const key = BasicBuilder.string();
-
-    const { result } = renderHook(
-      () => ({
-        dismissedPlayerAlertKeys: useAlertsStore(selectDismissedPlayerAlertKeys),
-        actions: useAlertsActions(),
-      }),
-      { wrapper },
-    );
-
-    act(() => {
-      result.current.actions.dismissPlayerAlert(key);
-    });
-    expect(result.current.dismissedPlayerAlertKeys.size).toBe(1);
-
-    // When
-    act(() => {
-      result.current.actions.restoreDismissedPlayerAlerts();
-    });
-
-    // Then
-    expect(result.current.dismissedPlayerAlertKeys.size).toBe(0);
-  });
-
   it("does not re-add a session alert when setAlert is called after dismiss with same content", () => {
     // Given
     const alert: SessionAlert = { severity: "warn", message: BasicBuilder.string() };
@@ -251,7 +225,7 @@ describe("AlertsContextProvider", () => {
     expect(result.current.alerts).toHaveLength(1);
 
     act(() => {
-      result.current.actions.dismissAlert(tag);
+      result.current.actions.dismissSessionAlert(tag);
     });
     expect(result.current.alerts).toHaveLength(0);
 
@@ -282,7 +256,7 @@ describe("AlertsContextProvider", () => {
       result.current.actions.setAlert(tag, originalAlert);
     });
     act(() => {
-      result.current.actions.dismissAlert(tag);
+      result.current.actions.dismissSessionAlert(tag);
     });
     expect(result.current.alerts).toHaveLength(0);
 

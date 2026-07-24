@@ -14,7 +14,7 @@ import {
   AlertsContext,
   AlertsContextStore,
   SessionAlert,
-  getPlayerAlertKey,
+  getAlertKey,
 } from "@lichtblick/suite-base/context/AlertsContext";
 
 function createAlertsStore(): StoreApi<AlertsContextStore> {
@@ -24,7 +24,7 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
       dismissedPlayerAlertKeys: new Set<string>(),
       dismissedSessionTags: new Map<string, string>(),
       actions: {
-        clearAlert: (tag: string) => {
+        clearSessionAlert: (tag: string) => {
           set({
             alerts: get().alerts.filter((al) => al.tag !== tag),
           });
@@ -32,13 +32,13 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
         clearAlerts: () => {
           set({ alerts: [] });
         },
-        dismissAlert: (tag: string) => {
+        dismissSessionAlert: (tag: string) => {
           const alerts = get().alerts;
           const dismissed = get().dismissedSessionTags;
           const existing = alerts.find((al) => al.tag === tag);
           const next = new Map(dismissed);
           if (existing) {
-            next.set(tag, getPlayerAlertKey(existing));
+            next.set(tag, getAlertKey(existing));
           }
           set({
             alerts: alerts.filter((al) => al.tag !== tag),
@@ -56,7 +56,7 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
           const dismissed = get().dismissedSessionTags;
           const dismissedKey = dismissed.get(tag);
           if (dismissedKey != undefined) {
-            const newKey = getPlayerAlertKey(alert);
+            const newKey = getAlertKey(alert);
             if (dismissedKey === newKey) {
               return;
             }
@@ -89,12 +89,6 @@ function createAlertsStore(): StoreApi<AlertsContextStore> {
             return;
           }
           set({ dismissedPlayerAlertKeys: next });
-        },
-        restoreDismissedPlayerAlerts: () => {
-          if (get().dismissedPlayerAlertKeys.size === 0) {
-            return;
-          }
-          set({ dismissedPlayerAlertKeys: new Set<string>() });
         },
       },
     };

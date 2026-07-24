@@ -1420,12 +1420,11 @@ describe("PanelExtensionAdapter", () => {
         dismissedSessionTags: new Map(),
         actions: {
           setAlert,
-          clearAlert,
+          clearSessionAlert: clearAlert,
           clearAlerts: jest.fn(),
-          dismissAlert: jest.fn(),
+          dismissSessionAlert: jest.fn(),
           dismissPlayerAlert: jest.fn(),
           dismissPlayerAlerts: jest.fn(),
-          restoreDismissedPlayerAlerts: jest.fn(),
         },
       }));
       return { store, setAlert, clearAlert };
