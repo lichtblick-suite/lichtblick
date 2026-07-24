@@ -583,14 +583,18 @@ export function validateLayoutData(data: unknown): LayoutData {
     throw new Error("expected an object");
   }
 
-  for (const field of ["configById", "globalVariables", "userNodes"] as const) {
-    if (!isPlainObject(data[field])) {
-      errors.push(`missing or invalid "${field}"`);
-    }
-  }
-
+  const missingFields = ["configById", "globalVariables", "userNodes"].filter(
+    (field) => !isPlainObject(data[field]),
+  );
   if (!isPlainObject(data.playbackConfig) || typeof data.playbackConfig.speed !== "number") {
-    errors.push(`missing or invalid "playbackConfig"`);
+    missingFields.push("playbackConfig");
+  }
+  if (missingFields.length === 1) {
+    errors.push(`missing or invalid "${missingFields[0]}"`);
+  } else if (missingFields.length > 1) {
+    errors.push(
+      `missing or invalid fields: ${missingFields.map((field) => `"${field}"`).join(", ")}`,
+    );
   }
 
   if (data.layout != undefined && typeof data.layout !== "string" && !isPlainObject(data.layout)) {
