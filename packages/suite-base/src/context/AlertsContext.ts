@@ -43,12 +43,22 @@ export type AlertsContextStore = Immutable<{
 }>;
 
 /**
- * Builds a stable, content-based key for a player alert so it can be tracked as dismissed. The key
- * changes when the alert's severity or message changes, allowing a re-emitted-but-changed alert to
- * reappear.
+ * Builds a stable, content-based key for a player alert so it can be tracked as dismissed and
+ * grouped with identical alerts. The key changes when the alert's severity, message, tip, or
+ * error message changes, allowing a re-emitted-but-changed alert to reappear and preventing
+ * alerts with different details from being incorrectly collapsed into one group.
  */
-export function getAlertKey(alert: Pick<PlayerAlert, "severity" | "message">): string {
-  return `${alert.severity}::${alert.message}`;
+export function getAlertKey(
+  alert: Pick<PlayerAlert, "severity" | "message" | "tip"> & { error?: unknown },
+): string {
+  const errorPart =
+    alert.error instanceof Error
+      ? alert.error.message
+      : typeof alert.error === "string"
+        ? alert.error
+        : "";
+  const tipPart = alert.tip ?? "";
+  return `${alert.severity}::${alert.message}::${errorPart}::${tipPart}`;
 }
 
 export const AlertsContext = createContext<undefined | StoreApi<AlertsContextStore>>(undefined);

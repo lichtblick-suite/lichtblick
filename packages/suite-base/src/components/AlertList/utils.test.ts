@@ -170,13 +170,45 @@ describe("buildGroupedAlerts", () => {
     expect(result).toHaveLength(2);
   });
 
+  it("should not group alerts with same severity and message but different tips", () => {
+    // Given
+    const sessionAlerts: SessionAlertInput[] = [
+      { tag: "tag-1", severity: "warn", message: "Same message", tip: "Tip A" },
+      { tag: "tag-2", severity: "warn", message: "Same message", tip: "Tip B" },
+    ];
+
+    // When
+    const result = buildGroupedAlerts(sessionAlerts, [], new Set());
+
+    // Then
+    expect(result).toHaveLength(2);
+    expect(result[0]!.count).toBe(1);
+    expect(result[1]!.count).toBe(1);
+  });
+
+  it("should not group alerts with same severity and message but different errors", () => {
+    // Given
+    const playerAlerts: PlayerAlert[] = [
+      { severity: "error", message: "Same message", error: new Error("Error A") },
+      { severity: "error", message: "Same message", error: new Error("Error B") },
+    ];
+
+    // When
+    const result = buildGroupedAlerts([], playerAlerts, new Set());
+
+    // Then
+    expect(result).toHaveLength(2);
+    expect(result[0]!.count).toBe(1);
+    expect(result[1]!.count).toBe(1);
+  });
+
   it("should exclude dismissed player alerts", () => {
     // Given
     const playerAlerts: PlayerAlert[] = [
       { severity: "error", message: "Connection lost" },
       { severity: "warn", message: "Clock skew" },
     ];
-    const dismissed = new Set(["error::Connection lost"]);
+    const dismissed = new Set(["error::Connection lost::::"]);
 
     // When
     const result = buildGroupedAlerts([], playerAlerts, dismissed);
@@ -215,7 +247,7 @@ describe("buildGroupedAlerts", () => {
     expect(result).toHaveLength(1);
     expect(result[0]!.count).toBe(2);
     expect(result[0]!.tags).toEqual(["panel-A:err"]);
-    expect(result[0]!.playerAlertKeys).toEqual(["error::Decode failed"]);
+    expect(result[0]!.playerAlertKeys).toEqual(["error::Decode failed::::"]);
   });
 
   it("should collect all tags and playerAlertKeys for batch dismiss", () => {
@@ -233,6 +265,6 @@ describe("buildGroupedAlerts", () => {
     expect(result).toHaveLength(1);
     expect(result[0]!.count).toBe(3);
     expect(result[0]!.tags).toEqual(["panel-A:warn", "panel-B:warn"]);
-    expect(result[0]!.playerAlertKeys).toEqual(["warn::Frame missing"]);
+    expect(result[0]!.playerAlertKeys).toEqual(["warn::Frame missing::::"]);
   });
 });

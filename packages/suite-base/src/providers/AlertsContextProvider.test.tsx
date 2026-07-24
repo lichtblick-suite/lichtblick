@@ -269,4 +269,37 @@ describe("AlertsContextProvider", () => {
     expect(result.current.alerts).toHaveLength(1);
     expect(result.current.alerts[0]).toMatchObject({ tag, ...updatedAlert });
   });
+
+  it("re-adds a session alert when setAlert is called after dismiss with only the tip changed", () => {
+    // Given — severity and message stay the same, only the tip differs
+    const message = BasicBuilder.string();
+    const originalAlert: SessionAlert = { severity: "warn", message, tip: "Original tip" };
+    const updatedAlert: SessionAlert = { severity: "warn", message, tip: "Updated tip" };
+    const tag = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        alerts: useAlertsStore(selectAlerts),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.actions.setAlert(tag, originalAlert);
+    });
+    act(() => {
+      result.current.actions.dismissSessionAlert(tag);
+    });
+    expect(result.current.alerts).toHaveLength(0);
+
+    // When — same tag, same severity/message, but the tip content changed
+    act(() => {
+      result.current.actions.setAlert(tag, updatedAlert);
+    });
+
+    // Then — the alert reappears because its content (tip) changed
+    expect(result.current.alerts).toHaveLength(1);
+    expect(result.current.alerts[0]).toMatchObject({ tag, ...updatedAlert });
+  });
 });
