@@ -51,12 +51,12 @@ export type AlertsContextStore = Immutable<{
 export function getAlertKey(
   alert: Pick<PlayerAlert, "severity" | "message" | "tip"> & { error?: unknown },
 ): string {
-  const errorPart =
-    alert.error instanceof Error
-      ? alert.error.message
-      : typeof alert.error === "string"
-        ? alert.error
-        : "";
+  let errorPart = "";
+  if (alert.error instanceof Error) {
+    errorPart = alert.error.message;
+  } else if (typeof alert.error === "string") {
+    errorPart = alert.error;
+  }
   const tipPart = alert.tip ?? "";
   return `${alert.severity}::${alert.message}::${errorPart}::${tipPart}`;
 }
