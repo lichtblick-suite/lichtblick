@@ -275,4 +275,57 @@ describe("Urdfs opacity", () => {
 
     renderer.dispose();
   });
+
+  it("updates opacity in place without rebuilding child renderables", async () => {
+    const renderer = makeRenderer(
+      makeConfig({ topics: { "/robot_description": { visible: true, opacity: 1 } } }),
+    );
+    renderer.setTopics([{ name: "/robot_description", schemaName: "std_msgs/String" }]);
+    const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
+    const topicSubscription = urdfs.getSubscriptions()[0];
+    if (topicSubscription?.type !== "topic") {
+      throw new Error("Expected /robot_description topic subscription");
+    }
+    const messageEvent: MessageEvent<{ data: string }> = {
+      topic: "/robot_description",
+      schemaName: "std_msgs/String",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { data: URDF },
+      sizeInBytes: URDF.length,
+    };
+
+    topicSubscription.subscription.handler(messageEvent);
+    let childBefore: unknown;
+    await waitFor(() => {
+      const robot = urdfs.renderables.get("/robot_description");
+      childBefore = robot?.userData.renderables.values().next().value;
+      expect(childBefore).toBeDefined();
+    });
+
+    const removeChildren = jest.spyOn(
+      urdfs.renderables.get("/robot_description")!,
+      "removeChildren",
+    );
+
+    const settingsNode = urdfs
+      .settingsNodes()
+      .find((entry) => entry.path[1] === "/robot_description");
+    expect(settingsNode?.node.handler).toBeDefined();
+    settingsNode?.node.handler?.({
+      action: "update",
+      payload: {
+        path: ["topics", "/robot_description", "opacity"],
+        input: "number",
+        value: 0.25,
+      },
+    });
+
+    const robot = urdfs.renderables.get("/robot_description");
+    const childAfter = robot?.userData.renderables.values().next().value;
+    expect(childAfter).toBe(childBefore);
+    expect(removeChildren).not.toHaveBeenCalled();
+    expect((childAfter?.userData as MarkerUserData).marker.color.a).toBeCloseTo(0.2);
+
+    renderer.dispose();
+  });
 });

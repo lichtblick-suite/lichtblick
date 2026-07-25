@@ -34,6 +34,7 @@ import { isValidUrl } from "@lichtblick/suite-base/util/isValidURL";
 
 import { RenderableCube } from "./markers/RenderableCube";
 import { RenderableCylinder } from "./markers/RenderableCylinder";
+import { RenderableMarker } from "./markers/RenderableMarker";
 import { RenderableMeshResource } from "./markers/RenderableMeshResource";
 import { RenderableSphere } from "./markers/RenderableSphere";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
@@ -137,6 +138,9 @@ const tempVec3b = new THREE.Vector3();
 const tempQuaternion1 = new THREE.Quaternion();
 const tempQuaternion2 = new THREE.Quaternion();
 const tempEuler = new THREE.Euler();
+
+/** Intrinsic URDF visual alpha before layer opacity is applied (per child renderable). */
+const urdfBaseColorAByChild = new WeakMap<object, number>();
 
 export type UrdfUserData = BaseUserData & {
   settings: LayerSettingsUrdf | LayerSettingsCustomUrdf;
@@ -665,9 +669,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       } else if (field === "parameter") {
         urdf = this.renderer.parameters?.get(action.payload.value as string) as string | undefined;
         this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
-      } else if (field === "framePrefix" || field === "opacity") {
-        // Opacity is a slider; debounce so dragging does not spam parse/reload work.
+      } else if (field === "framePrefix") {
         this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
+      } else if (field === "opacity") {
+        // Opacity is visual-only; update materials in place (no reparse / rebuild).
+        this.#updateUrdfOpacity(instanceId);
       } else if (field === "displayMode" || field === "visible" || field === "fallbackColor") {
         this.#loadUrdf({ instanceId, urdf, forceReload: true });
       } else if (field === "sourceType") {
@@ -981,6 +987,35 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     this.#debouncedLoadUrdfByInstanceId.delete(instanceId);
   }
 
+  /**
+   * Apply layer opacity to existing child renderables without reparsing the URDF or disposing
+   * meshes. Relies on RenderableMeshResource's opacity-only update path for embedded materials.
+   */
+  #updateUrdfOpacity(instanceId: string): void {
+    const renderable = this.renderables.get(instanceId);
+    if (!renderable) {
+      return;
+    }
+
+    const settings = this.#getCurrentSettings(instanceId);
+    renderable.userData.settings = settings;
+    const opacity = THREE.MathUtils.clamp(settings.opacity ?? 1, 0, 1);
+
+    for (const child of renderable.userData.renderables.values()) {
+      if (!(child instanceof RenderableMarker)) {
+        continue;
+      }
+      const baseColorA = urdfBaseColorAByChild.get(child) ?? 1;
+      const prevMarker = child.userData.marker;
+      const nextMarker = {
+        ...prevMarker,
+        color: { ...prevMarker.color, a: baseColorA * opacity },
+      };
+      child.update(nextMarker, undefined);
+    }
+    this.renderer.queueAnimationFrame();
+  }
+
   #loadRobot(
     renderable: UrdfRenderable,
     { robot, frames, transforms }: ParsedUrdf,
@@ -1141,28 +1176,36 @@ function createRenderable(args: {
     case "box": {
       const scale = visual.geometry.size;
       const marker = createMarker(frameId, MarkerType.CUBE, pose, scale, color);
-      return new RenderableCube(name, marker, undefined, renderer);
+      const renderable = new RenderableCube(name, marker, undefined, renderer);
+      urdfBaseColorAByChild.set(renderable, baseColor.a);
+      return renderable;
     }
     case "cylinder": {
       const cylinder = visual.geometry;
       const scale = { x: cylinder.radius * 2, y: cylinder.radius * 2, z: cylinder.length };
       const marker = createMarker(frameId, MarkerType.CUBE, pose, scale, color);
-      return new RenderableCylinder(name, marker, undefined, renderer);
+      const renderable = new RenderableCylinder(name, marker, undefined, renderer);
+      urdfBaseColorAByChild.set(renderable, baseColor.a);
+      return renderable;
     }
     case "sphere": {
       const sphere = visual.geometry;
       const scale = { x: sphere.radius * 2, y: sphere.radius * 2, z: sphere.radius * 2 };
       const marker = createMarker(frameId, MarkerType.CUBE, pose, scale, color);
-      return new RenderableSphere(name, marker, undefined, renderer);
+      const renderable = new RenderableSphere(name, marker, undefined, renderer);
+      urdfBaseColorAByChild.set(renderable, baseColor.a);
+      return renderable;
     }
     case "mesh": {
       const isCollada = visual.geometry.filename.toLowerCase().endsWith(".dae");
       // Use embedded materials if the mesh is a Collada file
       const embedded = isCollada ? EmbeddedMaterialUsage.Use : EmbeddedMaterialUsage.Ignore;
       const marker = createMeshMarker(frameId, pose, embedded, visual.geometry, baseUrl, color);
-      return new RenderableMeshResource(name, marker, undefined, renderer, {
+      const renderable = new RenderableMeshResource(name, marker, undefined, renderer, {
         referenceUrl: baseUrl,
       });
+      urdfBaseColorAByChild.set(renderable, baseColor.a);
+      return renderable;
     }
     default:
       throw new Error(`Unrecognized visual geometryType: ${type}`);
