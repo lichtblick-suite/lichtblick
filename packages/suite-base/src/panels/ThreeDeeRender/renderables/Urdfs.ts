@@ -194,6 +194,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   #jointStates = new Map<string, JointPosition>();
   #textDecoder = new TextDecoder();
   #urdfsByTopic = new Map<string, string>();
+  // One debounce per URDF instance so rapid multi-layer slider updates don't drop loads.
+  #debouncedLoadUrdfByInstanceId = new Map<
+    string,
+    _.DebouncedFunc<(args: { instanceId: string; urdf?: string; forceReload?: boolean }) => void>
+  >();
 
   public constructor(renderer: IRenderer, name: string = Urdfs.extensionId) {
     super(name, renderer);
@@ -212,6 +217,14 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         this.#loadUrdf({ instanceId, urdf: undefined });
       }
     }
+  }
+
+  public override dispose(): void {
+    for (const debounced of this.#debouncedLoadUrdfByInstanceId.values()) {
+      debounced.cancel();
+    }
+    this.#debouncedLoadUrdfByInstanceId.clear();
+    super.dispose();
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {
@@ -562,6 +575,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
           this.remove(renderable);
           this.renderables.delete(instanceId);
         }
+        this.#cancelDebouncedLoadUrdf(instanceId);
 
         // Remove transforms from the TF tree
         const transforms = this.#transformsByInstanceId.get(instanceId);
@@ -947,7 +961,25 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       });
   }
 
-  #debouncedLoadUrdf = _.debounce(this.#loadUrdf.bind(this), 500);
+  #debouncedLoadUrdf(args: { instanceId: string; urdf?: string; forceReload?: boolean }): void {
+    let debounced = this.#debouncedLoadUrdfByInstanceId.get(args.instanceId);
+    if (!debounced) {
+      debounced = _.debounce(
+        (loadArgs: { instanceId: string; urdf?: string; forceReload?: boolean }) => {
+          this.#loadUrdf(loadArgs);
+        },
+        500,
+      );
+      this.#debouncedLoadUrdfByInstanceId.set(args.instanceId, debounced);
+    }
+    debounced(args);
+  }
+
+  #cancelDebouncedLoadUrdf(instanceId: string): void {
+    const debounced = this.#debouncedLoadUrdfByInstanceId.get(instanceId);
+    debounced?.cancel();
+    this.#debouncedLoadUrdfByInstanceId.delete(instanceId);
+  }
 
   #loadRobot(
     renderable: UrdfRenderable,

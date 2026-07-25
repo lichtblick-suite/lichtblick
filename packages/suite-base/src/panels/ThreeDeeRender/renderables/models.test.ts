@@ -11,6 +11,7 @@ import { setEmbeddedMaterialsOpacity, updateEmbeddedMaterialsOpacity } from "./m
 
 describe("setEmbeddedMaterialsOpacity", () => {
   it("clones embedded materials and applies opacity without mutating cached materials", () => {
+    // Given
     const cachedMaterial = new THREE.MeshStandardMaterial({
       opacity: 0.8,
       transparent: false,
@@ -19,8 +20,10 @@ describe("setEmbeddedMaterialsOpacity", () => {
     const model = new THREE.Group();
     model.add(mesh);
 
+    // When
     setEmbeddedMaterialsOpacity(model, 0.5);
 
+    // Then
     const instanceMaterial = mesh.material;
     expect(instanceMaterial).not.toBe(cachedMaterial);
     expect(instanceMaterial.opacity).toBeCloseTo(0.4);
@@ -31,7 +34,48 @@ describe("setEmbeddedMaterialsOpacity", () => {
     expect(cachedMaterial.depthWrite).toBe(true);
   });
 
+  it("reuses one cloned material when multiple children share the source material", () => {
+    // Given
+    const sharedMaterial = new THREE.MeshStandardMaterial({ opacity: 1 });
+    const meshA = new THREE.Mesh(new THREE.BoxGeometry(), sharedMaterial);
+    const meshB = new THREE.Mesh(new THREE.BoxGeometry(), sharedMaterial);
+    const model = new THREE.Group();
+    model.add(meshA, meshB);
+
+    // When
+    setEmbeddedMaterialsOpacity(model, 0.5);
+
+    // Then
+    expect(meshA.material).not.toBe(sharedMaterial);
+    expect(meshA.material).toBe(meshB.material);
+    expect((meshA.material as THREE.Material).opacity).toBeCloseTo(0.5);
+  });
+
+  it("applies opacity to LineSegments and Points as well as meshes", () => {
+    // Given
+    const meshMaterial = new THREE.MeshStandardMaterial({ opacity: 1 });
+    const lineMaterial = new THREE.LineBasicMaterial({ opacity: 1 });
+    const pointsMaterial = new THREE.PointsMaterial({ opacity: 1 });
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(), meshMaterial);
+    const lines = new THREE.LineSegments(new THREE.BufferGeometry(), lineMaterial);
+    const points = new THREE.Points(new THREE.BufferGeometry(), pointsMaterial);
+    const model = new THREE.Group();
+    model.add(mesh, lines, points);
+
+    // When
+    setEmbeddedMaterialsOpacity(model, 0.25);
+
+    // Then
+    expect((mesh.material as THREE.Material).opacity).toBeCloseTo(0.25);
+    expect((lines.material as THREE.Material).opacity).toBeCloseTo(0.25);
+    expect((points.material as THREE.Material).opacity).toBeCloseTo(0.25);
+    expect(meshMaterial.opacity).toBe(1);
+    expect(lineMaterial.opacity).toBe(1);
+    expect(pointsMaterial.opacity).toBe(1);
+  });
+
   it("updates every material in a multi-material mesh", () => {
+    // Given
     const opaqueMaterial = new THREE.MeshStandardMaterial({ opacity: 1 });
     const transparentMaterial = new THREE.MeshStandardMaterial({
       opacity: 0.5,
@@ -42,8 +86,10 @@ describe("setEmbeddedMaterialsOpacity", () => {
     const model = new THREE.Group();
     model.add(mesh);
 
+    // When
     setEmbeddedMaterialsOpacity(model, 1);
 
+    // Then
     const materials = mesh.material;
     expect(materials[0]).not.toBe(opaqueMaterial);
     expect(materials[0]).toMatchObject({ opacity: 1, transparent: false, depthWrite: true });
@@ -54,6 +100,7 @@ describe("setEmbeddedMaterialsOpacity", () => {
 
 describe("updateEmbeddedMaterialsOpacity", () => {
   it("updates opacity in place without recloning or compounding multipliers", () => {
+    // Given
     const cachedMaterial = new THREE.MeshStandardMaterial({ opacity: 0.8 });
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(), cachedMaterial);
     const model = new THREE.Group();
@@ -63,6 +110,7 @@ describe("updateEmbeddedMaterialsOpacity", () => {
     const instanceMaterial = mesh.material;
     expect(instanceMaterial.opacity).toBeCloseTo(0.4);
 
+    // When / Then
     updateEmbeddedMaterialsOpacity(model, 0.25);
     expect(mesh.material).toBe(instanceMaterial);
     expect(instanceMaterial.opacity).toBeCloseTo(0.2);
@@ -76,7 +124,26 @@ describe("updateEmbeddedMaterialsOpacity", () => {
     expect(cachedMaterial.opacity).toBe(0.8);
   });
 
+  it("updates LineSegments opacity in place", () => {
+    // Given
+    const cachedMaterial = new THREE.LineBasicMaterial({ opacity: 1 });
+    const lines = new THREE.LineSegments(new THREE.BufferGeometry(), cachedMaterial);
+    const model = new THREE.Group();
+    model.add(lines);
+
+    setEmbeddedMaterialsOpacity(model, 0.5);
+    const instanceMaterial = lines.material as THREE.Material;
+
+    // When
+    updateEmbeddedMaterialsOpacity(model, 0.25);
+
+    // Then
+    expect(lines.material).toBe(instanceMaterial);
+    expect(instanceMaterial.opacity).toBeCloseTo(0.25);
+  });
+
   it("increments material version only when transparent or depthWrite flip", () => {
+    // Given
     const cachedMaterial = new THREE.MeshStandardMaterial({ opacity: 1, transparent: false });
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(), cachedMaterial);
     const model = new THREE.Group();
@@ -86,7 +153,7 @@ describe("updateEmbeddedMaterialsOpacity", () => {
     const instanceMaterial = mesh.material;
     const versionAfterSetup = instanceMaterial.version;
 
-    // Same structural flags (still fully opaque) — no shader recompile needed.
+    // When / Then — same structural flags (still fully opaque) — no shader recompile needed.
     updateEmbeddedMaterialsOpacity(model, 1);
     expect(instanceMaterial.version).toBe(versionAfterSetup);
 
