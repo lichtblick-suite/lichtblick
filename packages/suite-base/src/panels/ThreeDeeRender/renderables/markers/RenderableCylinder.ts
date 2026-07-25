@@ -64,7 +64,8 @@ export class RenderableCylinder extends RenderableMarker {
       this.#mesh.material.needsUpdate = true;
     }
 
-    this.#outline.visible = this.getSettings()?.showOutlines ?? true;
+    const showOutlines = (this.getSettings()?.showOutlines ?? true) && marker.color.a >= 1;
+    this.#outline.visible = showOutlines;
 
     rgbToThreeColor(this.#mesh.material.color, marker.color);
     this.#mesh.material.opacity = marker.color.a;
