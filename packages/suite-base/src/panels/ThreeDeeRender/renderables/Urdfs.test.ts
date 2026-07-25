@@ -21,8 +21,8 @@ import {
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
 
 import { RendererConfig } from "../IRenderer";
-import { MarkerUserData } from "./markers/RenderableMarker";
 import { LayerSettingsCustomUrdf, LayerSettingsUrdf, Urdfs } from "./Urdfs";
+import { MarkerUserData } from "./markers/RenderableMarker";
 
 let mockOrbitControls!: {
   screenSpacePanning: boolean;
