@@ -83,26 +83,43 @@ function applyOpacityToMaterial(material: THREE.Material, opacity: number): void
   }
 }
 
+type MaterialBearer = THREE.Object3D & {
+  material: THREE.Material | THREE.Material[];
+};
+
+function isMaterialBearer(child: THREE.Object3D): child is MaterialBearer {
+  return "material" in child && (child as Partial<MaterialBearer>).material != undefined;
+}
+
 /**
  * Clone embedded materials for this model instance and apply a layer opacity multiplier.
  *
  * Object3D.clone() keeps material references shared with the cached model. Cloning here prevents
  * one transparent URDF from changing other instances that use the same cached mesh. Intrinsic
  * opacity/transparency are stored on the clone so later updates can adjust opacity in place.
+ *
+ * Clones are keyed by the original material uuid so meshes/lines/points that shared a material
+ * in the source model keep sharing a single cloned material on this instance.
  */
 export function setEmbeddedMaterialsOpacity(model: LoadedModel, opacity: number): void {
+  const clonedMaterials = new Map<string, THREE.Material>();
+
   model.traverse((child: THREE.Object3D) => {
-    if (!(child instanceof THREE.Mesh)) {
+    if (!isMaterialBearer(child)) {
       return;
     }
 
     const cloneWithOpacity = (material: THREE.Material): THREE.Material => {
-      const clonedMaterial = material.clone();
-      applyOpacityToMaterial(clonedMaterial, opacity);
+      let clonedMaterial = clonedMaterials.get(material.uuid);
+      if (!clonedMaterial) {
+        clonedMaterial = material.clone();
+        applyOpacityToMaterial(clonedMaterial, opacity);
+        clonedMaterials.set(material.uuid, clonedMaterial);
+      }
       return clonedMaterial;
     };
 
-    const materials = child.material as THREE.Material | THREE.Material[];
+    const materials = child.material;
     child.material = Array.isArray(materials)
       ? materials.map(cloneWithOpacity)
       : cloneWithOpacity(materials);
@@ -113,11 +130,11 @@ export function setEmbeddedMaterialsOpacity(model: LoadedModel, opacity: number)
 let updateOpacityState = 1;
 
 const updateEmbeddedOpacityCallback = (child: THREE.Object3D): void => {
-  if (!(child instanceof THREE.Mesh)) {
+  if (!isMaterialBearer(child)) {
     return;
   }
 
-  const materials = child.material as THREE.Material | THREE.Material[];
+  const materials = child.material;
   if (Array.isArray(materials)) {
     for (const material of materials) {
       applyOpacityToMaterial(material, updateOpacityState);
