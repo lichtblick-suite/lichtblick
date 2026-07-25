@@ -326,6 +326,14 @@ describe("Urdfs opacity", () => {
     expect(removeChildren).not.toHaveBeenCalled();
     expect((childAfter?.userData as MarkerUserData).marker.color.a).toBeCloseTo(0.2);
 
+    let outlineVisible = true;
+    childAfter?.traverse((obj) => {
+      if (obj instanceof THREE.LineSegments) {
+        outlineVisible = obj.visible;
+      }
+    });
+    expect(outlineVisible).toBe(false);
+
     renderer.dispose();
   });
 });
