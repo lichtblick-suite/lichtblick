@@ -202,4 +202,35 @@ describe("RenderableMeshResource embedded opacity", () => {
 
     renderable.dispose();
   });
+
+  it("updates non-embedded mesh material opacity in place", async () => {
+    const cachedModel = new THREE.Group();
+    cachedModel.add(new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial()));
+    const load = jest.fn().mockResolvedValue(cachedModel);
+    const renderer = {
+      normalizeFrameId: (frameId: string) => frameId,
+      config: { topics: {} },
+      modelCache: { load },
+      settings: {
+        errors: {
+          add: jest.fn(),
+          remove: jest.fn(),
+          hasError: jest.fn().mockReturnValue(false),
+        },
+      },
+      queueAnimationFrame: jest.fn(),
+    } as unknown as IRenderer;
+
+    const marker = { ...makeMarker(1), mesh_use_embedded_materials: false };
+    const renderable = new RenderableMeshResource("/robot_description", marker, 0n, renderer);
+
+    await waitFor(() => {
+      expect(load).toHaveBeenCalledTimes(1);
+    });
+
+    renderable.update({ ...makeMarker(0.5), mesh_use_embedded_materials: false }, 1n);
+    expect(load).toHaveBeenCalledTimes(1);
+
+    renderable.dispose();
+  });
 });

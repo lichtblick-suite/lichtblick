@@ -77,6 +77,34 @@ const URDF = `<?xml version="1.0"?>
   </link>
 </robot>`;
 
+const SHAPES_URDF = `<?xml version="1.0"?>
+<robot name="shapes-test">
+  <link name="base">
+    <visual>
+      <geometry><cylinder radius="0.5" length="1.0"/></geometry>
+      <material><color rgba="1 0 0 0.8"/></material>
+    </visual>
+    <visual>
+      <geometry><sphere radius="0.3"/></geometry>
+      <material><color rgba="0 1 0 1.0"/></material>
+    </visual>
+  </link>
+</robot>`;
+
+function makeCustomLayer(instanceId: string): LayerSettingsCustomUrdf {
+  return {
+    layerId: "foxglove.Urdf",
+    instanceId,
+    label: instanceId,
+    visible: true,
+    frameLocked: true,
+    sourceType: "url",
+    url: "",
+    framePrefix: "",
+    displayMode: "auto",
+  };
+}
+
 function makeConfig(overrides: Partial<RendererConfig> = {}): RendererConfig {
   return {
     cameraState: DEFAULT_CAMERA_STATE,
@@ -344,17 +372,7 @@ describe("Urdfs opacity", () => {
   it("dispose cancels pending debounced URDF loads", () => {
     const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
     try {
-      const layer: LayerSettingsCustomUrdf = {
-        layerId: "foxglove.Urdf",
-        instanceId: "debounce-test",
-        label: "Debounce test",
-        visible: true,
-        frameLocked: true,
-        sourceType: "url",
-        url: "",
-        framePrefix: "",
-        displayMode: "auto",
-      };
+      const layer = makeCustomLayer("debounce-test");
       const renderer = makeRenderer(makeConfig({ layers: { "debounce-test": layer } }));
       const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
       const settingsNode = urdfs
@@ -378,5 +396,121 @@ describe("Urdfs opacity", () => {
     } finally {
       warnSpy.mockRestore();
     }
+  });
+
+  it("deleting a custom URDF layer cancels pending debounced loads", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const layer = makeCustomLayer("delete-debounce");
+      const renderer = makeRenderer(makeConfig({ layers: { "delete-debounce": layer } }));
+      const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
+      const settingsNode = urdfs
+        .settingsNodes()
+        .find((entry) => entry.path[1] === "delete-debounce");
+
+      settingsNode?.node.handler?.({
+        action: "update",
+        payload: {
+          path: ["layers", "delete-debounce", "framePrefix"],
+          input: "string",
+          value: "hw_",
+        },
+      });
+
+      settingsNode?.node.handler?.({
+        action: "perform-node-action",
+        payload: { id: "delete", path: ["layers", "delete-debounce"] },
+      });
+
+      expect(urdfs.renderables.has("delete-debounce")).toBe(false);
+      renderer.dispose();
+    } finally {
+      warnSpy.mockRestore();
+    }
+  });
+
+  it("framePrefix changes still debounce a URDF reload", async () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const renderer = makeRenderer(
+        makeConfig({
+          topics: { "/robot_description": { visible: true } as Partial<LayerSettingsUrdf> },
+        }),
+      );
+      renderer.setTopics([{ name: "/robot_description", schemaName: "std_msgs/String" }]);
+      const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
+      const topicSubscription = urdfs.getSubscriptions()[0];
+      if (topicSubscription?.type !== "topic") {
+        throw new Error("Expected /robot_description topic subscription");
+      }
+
+      topicSubscription.subscription.handler({
+        topic: "/robot_description",
+        schemaName: "std_msgs/String",
+        receiveTime: { sec: 0, nsec: 0 },
+        message: { data: URDF },
+        sizeInBytes: URDF.length,
+      });
+
+      await waitFor(() => {
+        expect(urdfs.renderables.get("/robot_description")?.userData.renderables.size).toBe(1);
+      });
+
+      const removeChildren = jest.spyOn(
+        urdfs.renderables.get("/robot_description")!,
+        "removeChildren",
+      );
+
+      urdfs
+        .settingsNodes()
+        .find((entry) => entry.path[1] === "/robot_description")
+        ?.node.handler?.({
+          action: "update",
+          payload: {
+            path: ["topics", "/robot_description", "framePrefix"],
+            input: "string",
+            value: "hw_",
+          },
+        });
+
+      expect(removeChildren).not.toHaveBeenCalled();
+      renderer.dispose();
+    } finally {
+      warnSpy.mockRestore();
+    }
+  });
+
+  it("applies layer opacity to cylinder and sphere visuals", async () => {
+    const renderer = makeRenderer(
+      makeConfig({
+        topics: { "/robot_description": { visible: true, opacity: 0.5 } as Partial<LayerSettingsUrdf> },
+      }),
+    );
+    renderer.setTopics([{ name: "/robot_description", schemaName: "std_msgs/String" }]);
+    const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
+    const topicSubscription = urdfs.getSubscriptions()[0];
+    if (topicSubscription?.type !== "topic") {
+      throw new Error("Expected /robot_description topic subscription");
+    }
+
+    topicSubscription.subscription.handler({
+      topic: "/robot_description",
+      schemaName: "std_msgs/String",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { data: SHAPES_URDF },
+      sizeInBytes: SHAPES_URDF.length,
+    });
+
+    await waitFor(() => {
+      const robot = urdfs.renderables.get("/robot_description");
+      expect(robot?.userData.renderables.size).toBe(2);
+    });
+
+    const alphas = [...(urdfs.renderables.get("/robot_description")?.userData.renderables.values() ?? [])]
+      .map((child) => (child.userData as MarkerUserData).marker.color.a)
+      .sort((a, b) => a - b);
+
+    expect(alphas).toEqual([0.4, 0.5]);
+    renderer.dispose();
   });
 });
