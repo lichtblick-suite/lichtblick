@@ -278,7 +278,11 @@ describe("Urdfs opacity", () => {
 
   it("updates opacity in place without rebuilding child renderables", async () => {
     const renderer = makeRenderer(
-      makeConfig({ topics: { "/robot_description": { visible: true, opacity: 1 } } }),
+      makeConfig({
+        topics: {
+          "/robot_description": { visible: true, opacity: 1 } as Partial<LayerSettingsUrdf>,
+        },
+      }),
     );
     renderer.setTopics([{ name: "/robot_description", schemaName: "std_msgs/String" }]);
     const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
@@ -335,5 +339,44 @@ describe("Urdfs opacity", () => {
     expect(outlineVisible).toBe(false);
 
     renderer.dispose();
+  });
+
+  it("dispose cancels pending debounced URDF loads", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const layer: LayerSettingsCustomUrdf = {
+        layerId: "foxglove.Urdf",
+        instanceId: "debounce-test",
+        label: "Debounce test",
+        visible: true,
+        frameLocked: true,
+        sourceType: "url",
+        url: "",
+        framePrefix: "",
+        displayMode: "auto",
+      };
+      const renderer = makeRenderer(makeConfig({ layers: { "debounce-test": layer } }));
+      const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
+      const settingsNode = urdfs
+        .settingsNodes()
+        .find((entry) => entry.path[1] === "debounce-test");
+
+      settingsNode?.node.handler?.({
+        action: "update",
+        payload: {
+          path: ["layers", "debounce-test", "framePrefix"],
+          input: "string",
+          value: "hw_",
+        },
+      });
+
+      expect(() => {
+        urdfs.dispose();
+      }).not.toThrow();
+
+      renderer.dispose();
+    } finally {
+      warnSpy.mockRestore();
+    }
   });
 });
