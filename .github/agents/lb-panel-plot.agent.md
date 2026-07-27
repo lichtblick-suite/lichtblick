@@ -62,11 +62,11 @@ All builders implement `IDatasetsBuilder`. The correct builder is selected by `P
 
 ### TimestampDatasetsBuilder
 
-**X-axis:** elapsed time in seconds from start time (`receiveTime` or `headerStamp` — user-selectable).
-**Data accumulation:** yes — accumulates both full (historical, via `handleMessageRange`) and current-frame data. A NaN discontinuity is inserted between the two to avoid a connecting line.
-**Worker:** yes — dataset construction runs in `TimestampDatasetsBuilderImpl.worker`.
-**Point cap:** `MAX_CURRENT_DATUMS_PER_SERIES = 50_000` per series in the current-frame buffer.
-**Downsampling:** `downsampleTimeseries()` (line plots, preserves shape) or `downsampleScatter()` (scatter-only, culls off-screen points).
+**X-axis:** elapsed time in seconds from start time (`receiveTime` or `headerStamp` — user-selectable).  
+**Data accumulation:** yes — accumulates both full (historical, via `handleMessageRange`) and current-frame data. A NaN discontinuity is inserted between the two to avoid a connecting line.  
+**Worker:** yes — dataset construction runs in `TimestampDatasetsBuilderImpl.worker`.  
+**Point cap:** `MAX_CURRENT_DATUMS_PER_SERIES = 50_000` per series in the current-frame buffer.  
+**Downsampling:** `downsampleTimeseries()` (line plots, preserves shape) or `downsampleScatter()` (scatter-only, culls off-screen points).  
 **Unique capabilities:**
 - Only builder that supports the `derivative` modifier (computes dy/dx per point; first datum is always dropped).
 - Supports all other math modifiers: `abs`, `acos`, `asin`, `atan`, `ceil`, `cos`, `log`, `log1p`, `log2`, `log10`, `round`, `sign`.
@@ -78,11 +78,11 @@ All builders implement `IDatasetsBuilder`. The correct builder is selected by `P
 
 ### IndexDatasetsBuilder
 
-**X-axis:** array index (0, 1, 2, …).
-**Data accumulation:** no — processes only the latest message per topic from the current frame.
-**Worker:** no — runs entirely on the main thread.
-**Point cap:** none (assumes a single message produces a reasonable number of array entries).
-**Downsampling:** none.
+**X-axis:** array index (0, 1, 2, …).  
+**Data accumulation:** no — processes only the latest message per topic from the current frame.  
+**Worker:** no — runs entirely on the main thread.  
+**Point cap:** none (assumes a single message produces a reasonable number of array entries).  
+**Downsampling:** none.  
 **Unique capabilities:**
 - Simplest builder; replaces its entire dataset on each new frame.
 - Designed for message paths that return arrays (`float64[] sensor_readings`, `geometry_msgs/Vector3[]`, etc.).
@@ -94,11 +94,11 @@ All builders implement `IDatasetsBuilder`. The correct builder is selected by `P
 
 ### CustomDatasetsBuilder
 
-**X-axis:** values extracted from a user-specified message path (`xPath`) — e.g., `imu.temperature`.
-**Data accumulation:** yes — accumulates full (historical) and current-frame data for both X and Y topics.
-**Worker:** yes — dataset construction runs in `CustomDatasetsBuilderImpl.worker`.
-**Point cap:** `MAX_CURRENT_DATUMS_PER_SERIES = 50_000` for both X and Y buffers independently.
-**Downsampling:** `downsampleScatter()` for scatter/non-line plots.
+**X-axis:** values extracted from a user-specified message path (`xPath`) — e.g., `imu.temperature`.  
+**Data accumulation:** yes — accumulates full (historical) and current-frame data for both X and Y topics.  
+**Worker:** yes — dataset construction runs in `CustomDatasetsBuilderImpl.worker`.  
+**Point cap:** `MAX_CURRENT_DATUMS_PER_SERIES = 50_000` for both X and Y buffers independently.  
+**Downsampling:** `downsampleScatter()` for scatter/non-line plots.  
 **Unique capabilities:**
 - Only builder implementing `getXTopic()` — signals `PlotCoordinator` to subscribe to a second topic for X-axis values.
 - Pairs X and Y values **by position index**: `(xValues[i], yValues[i])`. Reports `pathsWithMismatchedDataLengths` when array lengths differ.
@@ -111,11 +111,11 @@ All builders implement `IDatasetsBuilder`. The correct builder is selected by `P
 
 ### CurrentCustomDatasetsBuilder
 
-**X-axis:** values extracted from a user-specified `xPath`, current frame only.
-**Data accumulation:** no — discards previous frame data on each update.
-**Worker:** no — runs entirely on the main thread.
-**Point cap:** none (single message assumed).
-**Downsampling:** none.
+**X-axis:** values extracted from a user-specified `xPath`, current frame only.  
+**Data accumulation:** no — discards previous frame data on each update.  
+**Worker:** no — runs entirely on the main thread.  
+**Point cap:** none (single message assumed).  
+**Downsampling:** none.  
 **Unique capabilities:**
 - Lightweight alternative to `CustomDatasetsBuilder` when preloading is not needed.
 - Same mismatch detection as `CustomDatasetsBuilder` (`pathsWithMismatchedDataLengths`).
@@ -183,3 +183,4 @@ await renderer.updateDatasets(ds); // Push new data
 - Deep plot builder internals, downsampling, or dataset accumulation: `read_file(".github/skills/plot-internals/SKILL.md")`
 - Message-path syntax and topic data extraction: `read_file(".github/skills/message-path/SKILL.md")`
 - Worker/Comlink patterns (OffscreenCanvas, datasetsWorker): `read_file(".github/skills/web-workers/SKILL.md")`
+- Chart rendering throughput and dataset-size profiling: `read_file(".github/skills/performance/SKILL.md")`

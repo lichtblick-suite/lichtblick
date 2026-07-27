@@ -45,7 +45,14 @@ export type H265FrameInfo = {
   sliceTypes: H265SliceType[];
   hasUnparsedVclSlice: boolean;
   normalizedData?: Uint8Array;
+  /** `normalizedData` with VPS/SPS/PPS NAL units removed, or undefined if none were present. */
+  strippedData?: Uint8Array;
   parameterSets?: Uint8Array;
+  /**
+   * Decoder configuration derived from the first SPS NAL unit, computed during the same NAL-unit
+   * pass. Populated for keyframes only, since only keyframes carry parameter sets.
+   */
+  decoderConfig?: VideoDecoderConfig;
   hasRequiredParameterSets: boolean;
   diagnostics?: string;
 };

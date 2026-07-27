@@ -206,3 +206,4 @@ const unsubscribe = context.unstable_subscribeMessageRange({
 - MCAP chunk-level format and indexed reads: `read_file(".github/skills/mcap-format/SKILL.md")`
 - Worker-based source patterns and Comlink: `read_file(".github/skills/web-workers/SKILL.md")`
 - Player state machine and tick loop context: `read_file(".github/skills/player-internals/SKILL.md")`
+- Cache budgets, eviction, or read-ahead performance tuning: `read_file(".github/skills/performance/SKILL.md")`

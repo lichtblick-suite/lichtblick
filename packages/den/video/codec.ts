@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { H265_CODEC_FORMAT_STRINGS } from "./constants";
 import { H264 as H264Parser } from "./h264";
 import { H265 as H265Parser } from "./h265";
 
@@ -19,17 +20,17 @@ export enum VideoCodec {
 
 /**
  * Maps an external `CompressedVideo.format` string to the canonical {@link VideoCodec}, or returns
- * undefined if the format is not a recognized video codec. This is the single boundary where the
- * "hevc" alias is normalized to {@link VideoCodec.H265}.
+ * undefined if the format is not a recognized video codec.
  */
 export function canonicalVideoCodec(format: string): VideoCodec | undefined {
-  switch (format) {
-    case "h264":
-      return VideoCodec.H264;
-    case "h265":
-    case "hevc":
-      return VideoCodec.H265;
+  if (H265_CODEC_FORMAT_STRINGS.some((substr) => format.startsWith(substr))) {
+    return VideoCodec.H265;
   }
+
+  if (format === "h264") {
+    return VideoCodec.H264;
+  }
+
   return undefined;
 }
 
@@ -37,8 +38,12 @@ export function canonicalVideoCodec(format: string): VideoCodec | undefined {
  * Returns whether the given frame is a keyframe, dispatching to the parser for its (normalized)
  * codec. Non-video formats always return false.
  */
-export function isVideoKeyframe(format: string, data: Uint8Array): boolean {
-  switch (canonicalVideoCodec(format)) {
+export function isVideoKeyframe(
+  format: string,
+  data: Uint8Array,
+  resolvedCodec?: VideoCodec,
+): boolean {
+  switch (resolvedCodec ?? canonicalVideoCodec(format)) {
     case VideoCodec.H264:
       // Search for an IDR NAL unit to determine if this is a keyframe.
       return H264Parser.IsKeyframe(data);

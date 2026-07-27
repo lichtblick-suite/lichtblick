@@ -68,3 +68,4 @@ This is the single function that resolves any channel's schema into a deserializ
 ## Skills Reference
 - MCAP format, chunk structure, and indexed reading: `read_file(".github/skills/mcap-format/SKILL.md")`
 - Worker/Comlink patterns (offloading decode to SharedWorker): `read_file(".github/skills/web-workers/SKILL.md")`
+- Decode throughput profiling or allocation reduction: `read_file(".github/skills/performance/SKILL.md")`

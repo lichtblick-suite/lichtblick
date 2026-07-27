@@ -224,10 +224,11 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   // Incremented whenever a WebGL frame needs to be rendered.
   // Using a counter (vs. a boolean ref) makes the dependency trackable by React's effect system,
   // so the animationFrame() call only fires when genuinely needed rather than after every commit.
+  const seekFrameRef = useRef(false);
   const [renderToken, setRenderToken] = useState(0);
-  const requestRender = useCallback(() => {
-    setRenderToken((t) => t + 1);
-  }, []);
+ const requestRender = useCallback(() => {
+  setRenderToken((prevToken) => prevToken + 1);
+}, []);
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
   // Refs for values that are set inside onRender to avoid redundant setState calls.
@@ -418,7 +419,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     if (renderer) {
       renderer.ros = context.dataSourceProfile === "ros1" || context.dataSourceProfile === "ros2";
     }
-  }, [context.dataSourceProfile, renderer, requestRender]);
+  }, [context.dataSourceProfile, renderer]);
 
   // Save panel settings whenever they change
   const throttledSave = useDebouncedCallback(
@@ -825,7 +826,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
   // Render a new frame whenever renderToken is incremented.
   // Using a state-based token instead of a ref means this effect only fires when a render
-  // is explicitly requested, not after every Rezact commit.
+  // is explicitly requested, not after every React commit.
   useEffect(() => {
     renderer?.animationFrame();
   }, [renderer, renderToken]);

@@ -91,3 +91,4 @@ On zoom change → grid recalculated
 
 ## Skills Reference
 - Map panel internals, Leaflet integration, or GeoJSON/GPS data handling: `read_file(".github/skills/panel-map/SKILL.md")`
+- Marker rendering and point-density performance: `read_file(".github/skills/performance/SKILL.md")`

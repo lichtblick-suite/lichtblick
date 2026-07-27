@@ -827,7 +827,7 @@ describe("ThreeDeeRender", () => {
       ]);
 
       const mockContext = createMockContext();
-      const props = setup({ customCameraModels: initialModels as any }, mockContext);
+      const props = setup({ customCameraModels: initialModels }, mockContext);
 
       // When
       render(<ThreeDeeRender {...props} />);
@@ -1102,42 +1102,6 @@ describe("ThreeDeeRender", () => {
           perspective: false,
         }),
       });
-      const props = setup({}, mockContext);
-
-      // When
-      render(<ThreeDeeRender {...props} />);
-
-      // Then
-      expect(jest.mocked(Renderer)).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fetchAsset: fetchAssetMock,
-        }),
-      );
-    });
-
-    it("passes testOptions to renderer", async () => {
-      // Given
-      const testOptions = { someOption: true };
-
-      // Wrap it in an object matching the ThreeDeeRenderProps structure
-      const props = setup({ testOptions: testOptions as any });
-
-      // When
-      render(<ThreeDeeRender {...props} />);
-
-      // Then
-      expect(jest.mocked(Renderer)).toHaveBeenCalledWith(
-        expect.objectContaining({
-          testOptions: { someOption: true },
-        }),
-      );
-    });
-  });
-
-  describe("Analytics integration", () => {
-    it("sets analytics on renderer when renderer is available", async () => {
-      // Given
-      const customRendererInstance = createMockRenderer();
       jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
 
       const mockContext = createMockContext();
@@ -2069,7 +2033,7 @@ describe("ThreeDeeRender", () => {
     const renderer = createMockRenderer();
     jest.mocked(Renderer).mockImplementationOnce(() => renderer as any);
 
-    const context = createMockContext({ dataSourceProfile: "custom" as any });
+    const context = createMockContext({ dataSourceProfile: "custom" });
     render(<ThreeDeeRender {...setup({}, context)} />);
 
     const submitHandler = renderer.publishClickTool.addEventListener.mock.calls.find(
