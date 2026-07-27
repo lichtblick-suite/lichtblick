@@ -10,6 +10,8 @@
 import { waitFor } from "@testing-library/react";
 import * as THREE from "three";
 
+import { EDGE_LINE_SEGMENTS_NAME } from "@lichtblick/suite-base/panels/ThreeDeeRender/ModelCache";
+
 import { RenderableMeshResource } from "./RenderableMeshResource";
 import { IRenderer } from "../../IRenderer";
 import { Marker, MarkerAction, MarkerType } from "../../ros";
@@ -141,6 +143,63 @@ describe("RenderableMeshResource embedded opacity", () => {
     await waitFor(() => {
       expect(embeddedMaterial(renderable)?.opacity).toBeCloseTo(0.4);
     });
+    renderable.dispose();
+  });
+
+  it("hides mesh edge outlines when marker alpha is below 1", async () => {
+    const cachedMaterial = new THREE.MeshStandardMaterial({ opacity: 1 });
+    const cachedModel = new THREE.Group();
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(), cachedMaterial);
+    const edges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry()),
+      new THREE.LineBasicMaterial(),
+    );
+    edges.name = EDGE_LINE_SEGMENTS_NAME;
+    cachedModel.add(mesh, edges);
+
+    const load = jest.fn().mockResolvedValue(cachedModel);
+    const renderer = {
+      normalizeFrameId: (frameId: string) => frameId,
+      config: { topics: {} },
+      modelCache: { load },
+      settings: {
+        errors: {
+          add: jest.fn(),
+          remove: jest.fn(),
+          hasError: jest.fn().mockReturnValue(false),
+        },
+      },
+      queueAnimationFrame: jest.fn(),
+    } as unknown as IRenderer;
+
+    const renderable = new RenderableMeshResource(
+      "/robot_description",
+      makeMarker(1),
+      0n,
+      renderer,
+    );
+
+    await waitFor(() => {
+      expect(load).toHaveBeenCalledTimes(1);
+    });
+
+    let outlineVisible = true;
+    renderable.traverse((obj) => {
+      if (obj instanceof THREE.LineSegments && obj.name === EDGE_LINE_SEGMENTS_NAME) {
+        outlineVisible = obj.visible;
+      }
+    });
+    expect(outlineVisible).toBe(true);
+
+    renderable.update(makeMarker(0.5), 1n);
+
+    renderable.traverse((obj) => {
+      if (obj instanceof THREE.LineSegments && obj.name === EDGE_LINE_SEGMENTS_NAME) {
+        outlineVisible = obj.visible;
+      }
+    });
+    expect(outlineVisible).toBe(false);
+
     renderable.dispose();
   });
 });
