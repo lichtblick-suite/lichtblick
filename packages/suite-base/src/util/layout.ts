@@ -592,9 +592,8 @@ export function validateLayoutData(data: unknown): LayoutData {
   if (missingFields.length === 1) {
     errors.push(`missing or invalid "${missingFields[0]}"`);
   } else if (missingFields.length > 1) {
-    errors.push(
-      `missing or invalid fields: ${missingFields.map((field) => `"${field}"`).join(", ")}`,
-    );
+    const quotedFields = missingFields.map((field) => `"${field}"`).join(", ");
+    errors.push(`missing or invalid fields: ${quotedFields}`);
   }
 
   if (data.layout != undefined && typeof data.layout !== "string" && !isPlainObject(data.layout)) {

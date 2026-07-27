@@ -747,7 +747,7 @@ describe("layout", () => {
       // When validating it
       // Then all invalid fields are reported
       expect(() => validateLayoutData(data)).toThrow(
-        "missing or invalid fields: configById, userNodes, playbackConfig",
+        'missing or invalid fields: "configById", "userNodes", "playbackConfig"',
       );
     });
   });
