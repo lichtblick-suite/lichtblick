@@ -21,7 +21,7 @@ import {
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
 
 import { RendererConfig } from "../IRenderer";
-import { LayerSettingsCustomUrdf, LayerSettingsUrdf, Urdfs } from "./Urdfs";
+import { LayerSettingsCustomUrdf, LayerSettingsUrdf, UrdfRenderable, Urdfs } from "./Urdfs";
 import { MarkerUserData } from "./markers/RenderableMarker";
 
 let mockOrbitControls!: {
@@ -91,7 +91,7 @@ const SHAPES_URDF = `<?xml version="1.0"?>
   </link>
 </robot>`;
 
-function makeCustomLayer(instanceId: string): LayerSettingsCustomUrdf {
+function makeCustomLayer(instanceId: string, overrides: Partial<LayerSettingsCustomUrdf> = {}): LayerSettingsCustomUrdf {
   return {
     layerId: "foxglove.Urdf",
     instanceId,
@@ -100,8 +100,12 @@ function makeCustomLayer(instanceId: string): LayerSettingsCustomUrdf {
     frameLocked: true,
     sourceType: "url",
     url: "",
+    filePath: "",
+    parameter: "",
+    topic: "",
     framePrefix: "",
     displayMode: "auto",
+    ...overrides,
   };
 }
 
@@ -369,8 +373,52 @@ describe("Urdfs opacity", () => {
     renderer.dispose();
   });
 
+  it("exposes topic, parameter, and file path fields for custom URDF sources", () => {
+    const renderer = makeRenderer(
+      makeConfig({
+        layers: {
+          "topic-layer": makeCustomLayer("topic-layer", {
+            sourceType: "topic",
+            topic: "/robot_description",
+          }),
+          "param-layer": makeCustomLayer("param-layer", {
+            sourceType: "param",
+            parameter: "/robot_description",
+          }),
+          "file-layer": makeCustomLayer("file-layer", {
+            sourceType: "filePath",
+            filePath: "/tmp/robot.urdf",
+          }),
+        },
+      }),
+    );
+    renderer.setTopics([{ name: "/robot_description", schemaName: "std_msgs/String" }]);
+    renderer.setParameters(new Map([["/robot_description", URDF]]));
+    const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
+
+    const nodes = urdfs.settingsNodes();
+    const topicFields = nodes.find((entry) => entry.path[1] === "topic-layer")?.node.fields;
+    const paramFields = nodes.find((entry) => entry.path[1] === "param-layer")?.node.fields;
+    const fileFields = nodes.find((entry) => entry.path[1] === "file-layer")?.node.fields;
+
+    expect(topicFields?.topic).toMatchObject({
+      value: "/robot_description",
+      items: ["/robot_description"],
+    });
+    expect(paramFields?.parameter).toMatchObject({
+      value: "/robot_description",
+      items: ["/robot_description"],
+    });
+    expect(fileFields?.filePath).toMatchObject({
+      value: "/tmp/robot.urdf",
+    });
+
+    renderer.dispose();
+  });
+
   it("dispose cancels pending debounced URDF loads", () => {
-    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    jest.useFakeTimers();
+    const removeChildren = jest.spyOn(UrdfRenderable.prototype, "removeChildren");
     try {
       const layer = makeCustomLayer("debounce-test");
       const renderer = makeRenderer(makeConfig({ layers: { "debounce-test": layer } }));
@@ -378,8 +426,10 @@ describe("Urdfs opacity", () => {
       const settingsNode = urdfs
         .settingsNodes()
         .find((entry) => entry.path[1] === "debounce-test");
+      expect(settingsNode).toBeDefined();
+      expect(settingsNode?.node.handler).toBeDefined();
 
-      settingsNode?.node.handler?.({
+      settingsNode!.node.handler!({
         action: "update",
         payload: {
           path: ["layers", "debounce-test", "framePrefix"],
@@ -388,18 +438,21 @@ describe("Urdfs opacity", () => {
         },
       });
 
-      expect(() => {
-        urdfs.dispose();
-      }).not.toThrow();
+      urdfs.dispose();
+      const callsAfterDispose = removeChildren.mock.calls.length;
+      jest.advanceTimersByTime(1000);
+      expect(removeChildren.mock.calls.length).toBe(callsAfterDispose);
 
       renderer.dispose();
     } finally {
-      warnSpy.mockRestore();
+      removeChildren.mockRestore();
+      jest.useRealTimers();
     }
   });
 
   it("deleting a custom URDF layer cancels pending debounced loads", () => {
-    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    jest.useFakeTimers();
+    const removeChildren = jest.spyOn(UrdfRenderable.prototype, "removeChildren");
     try {
       const layer = makeCustomLayer("delete-debounce");
       const renderer = makeRenderer(makeConfig({ layers: { "delete-debounce": layer } }));
@@ -407,8 +460,10 @@ describe("Urdfs opacity", () => {
       const settingsNode = urdfs
         .settingsNodes()
         .find((entry) => entry.path[1] === "delete-debounce");
+      expect(settingsNode).toBeDefined();
+      expect(settingsNode?.node.handler).toBeDefined();
 
-      settingsNode?.node.handler?.({
+      settingsNode!.node.handler!({
         action: "update",
         payload: {
           path: ["layers", "delete-debounce", "framePrefix"],
@@ -417,20 +472,26 @@ describe("Urdfs opacity", () => {
         },
       });
 
-      settingsNode?.node.handler?.({
+      settingsNode!.node.handler!({
         action: "perform-node-action",
         payload: { id: "delete", path: ["layers", "delete-debounce"] },
       });
 
       expect(urdfs.renderables.has("delete-debounce")).toBe(false);
+      const callsAfterDelete = removeChildren.mock.calls.length;
+      jest.advanceTimersByTime(1000);
+      expect(removeChildren.mock.calls.length).toBe(callsAfterDelete);
+
       renderer.dispose();
     } finally {
-      warnSpy.mockRestore();
+      removeChildren.mockRestore();
+      jest.useRealTimers();
     }
   });
 
-  it("framePrefix changes still debounce a URDF reload", async () => {
-    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+  it("framePrefix changes still debounce a URDF reload", () => {
+    jest.useFakeTimers();
+    const removeChildren = jest.spyOn(UrdfRenderable.prototype, "removeChildren");
     try {
       const renderer = makeRenderer(
         makeConfig({
@@ -439,44 +500,31 @@ describe("Urdfs opacity", () => {
       );
       renderer.setTopics([{ name: "/robot_description", schemaName: "std_msgs/String" }]);
       const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
-      const topicSubscription = urdfs.getSubscriptions()[0];
-      if (topicSubscription?.type !== "topic") {
-        throw new Error("Expected /robot_description topic subscription");
-      }
-
-      topicSubscription.subscription.handler({
-        topic: "/robot_description",
-        schemaName: "std_msgs/String",
-        receiveTime: { sec: 0, nsec: 0 },
-        message: { data: URDF },
-        sizeInBytes: URDF.length,
-      });
-
-      await waitFor(() => {
-        expect(urdfs.renderables.get("/robot_description")?.userData.renderables.size).toBe(1);
-      });
-
-      const removeChildren = jest.spyOn(
-        urdfs.renderables.get("/robot_description")!,
-        "removeChildren",
-      );
-
-      urdfs
+      const settingsNode = urdfs
         .settingsNodes()
-        .find((entry) => entry.path[1] === "/robot_description")
-        ?.node.handler?.({
-          action: "update",
-          payload: {
-            path: ["topics", "/robot_description", "framePrefix"],
-            input: "string",
-            value: "hw_",
-          },
-        });
+        .find((entry) => entry.path[1] === "/robot_description");
+      expect(settingsNode).toBeDefined();
+      expect(settingsNode?.node.handler).toBeDefined();
 
-      expect(removeChildren).not.toHaveBeenCalled();
+      const callsBefore = removeChildren.mock.calls.length;
+      settingsNode!.node.handler!({
+        action: "update",
+        payload: {
+          path: ["topics", "/robot_description", "framePrefix"],
+          input: "string",
+          value: "hw_",
+        },
+      });
+
+      expect(removeChildren.mock.calls.length).toBe(callsBefore);
+
+      jest.advanceTimersByTime(500);
+      expect(removeChildren.mock.calls.length - callsBefore).toBe(1);
+
       renderer.dispose();
     } finally {
-      warnSpy.mockRestore();
+      removeChildren.mockRestore();
+      jest.useRealTimers();
     }
   });
 
