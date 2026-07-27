@@ -91,7 +91,10 @@ const SHAPES_URDF = `<?xml version="1.0"?>
   </link>
 </robot>`;
 
-function makeCustomLayer(instanceId: string, overrides: Partial<LayerSettingsCustomUrdf> = {}): LayerSettingsCustomUrdf {
+function makeCustomLayer(
+  instanceId: string,
+  overrides: Partial<LayerSettingsCustomUrdf> = {},
+): LayerSettingsCustomUrdf {
   return {
     layerId: "foxglove.Urdf",
     instanceId,
@@ -423,9 +426,7 @@ describe("Urdfs opacity", () => {
       const layer = makeCustomLayer("debounce-test");
       const renderer = makeRenderer(makeConfig({ layers: { "debounce-test": layer } }));
       const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
-      const settingsNode = urdfs
-        .settingsNodes()
-        .find((entry) => entry.path[1] === "debounce-test");
+      const settingsNode = urdfs.settingsNodes().find((entry) => entry.path[1] === "debounce-test");
       expect(settingsNode).toBeDefined();
       expect(settingsNode?.node.handler).toBeDefined();
 
@@ -495,7 +496,7 @@ describe("Urdfs opacity", () => {
     try {
       const renderer = makeRenderer(
         makeConfig({
-          topics: { "/robot_description": { visible: true } as Partial<LayerSettingsUrdf> },
+          topics: { "/robot_description": { visible: true } },
         }),
       );
       renderer.setTopics([{ name: "/robot_description", schemaName: "std_msgs/String" }]);
@@ -531,7 +532,9 @@ describe("Urdfs opacity", () => {
   it("applies layer opacity to cylinder and sphere visuals", async () => {
     const renderer = makeRenderer(
       makeConfig({
-        topics: { "/robot_description": { visible: true, opacity: 0.5 } as Partial<LayerSettingsUrdf> },
+        topics: {
+          "/robot_description": { visible: true, opacity: 0.5 } as Partial<LayerSettingsUrdf>,
+        },
       }),
     );
     renderer.setTopics([{ name: "/robot_description", schemaName: "std_msgs/String" }]);
@@ -554,7 +557,9 @@ describe("Urdfs opacity", () => {
       expect(robot?.userData.renderables.size).toBe(2);
     });
 
-    const alphas = [...(urdfs.renderables.get("/robot_description")?.userData.renderables.values() ?? [])]
+    const alphas = [
+      ...(urdfs.renderables.get("/robot_description")?.userData.renderables.values() ?? []),
+    ]
       .map((child) => (child.userData as MarkerUserData).marker.color.a)
       .sort((a, b) => a - b);
 
