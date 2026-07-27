@@ -11,11 +11,21 @@ declare const API_URL: string | undefined;
 declare const LICHTBLICK_SUITE_VERSION: string | undefined;
 declare const DEV_WORKSPACE: string | undefined;
 
+type RuntimeConfig = {
+  API_URL?: string;
+};
+
+const runtimeConfig = (
+  globalThis as typeof globalThis & {
+    LICHTBLICK_RUNTIME_CONFIG?: RuntimeConfig;
+  }
+).LICHTBLICK_RUNTIME_CONFIG;
+
 export const APP_CONFIG = {
   /**
    * API base URL for HTTP requests
    */
-  apiUrl: API_URL,
+  apiUrl: runtimeConfig?.API_URL || API_URL,
 
   /**
    * Application version

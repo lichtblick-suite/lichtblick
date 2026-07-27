@@ -179,6 +179,9 @@ export const mainConfig =
     <script>
       global = globalThis;
       globalThis.LICHTBLICK_SUITE_DEFAULT_LAYOUT = [/*LICHTBLICK_SUITE_DEFAULT_LAYOUT_PLACEHOLDER*/][0];
+      globalThis.LICHTBLICK_RUNTIME_CONFIG = {
+        API_URL: "/*LICHTBLICK_SUITE_RUNTIME_API_URL_PLACEHOLDER*/",
+      };
     </script>
     <body>
       <div id="root"></div>
