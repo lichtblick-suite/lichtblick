@@ -160,8 +160,8 @@ describe("updateEmbeddedMaterialsOpacity", () => {
     const cloned = mesh.material as THREE.Material[];
 
     updateEmbeddedMaterialsOpacity(model, 0.5);
-    expect(cloned[0].opacity).toBeCloseTo(0.5);
-    expect(cloned[1].opacity).toBeCloseTo(0.25);
+    expect(cloned[0]).toMatchObject({ opacity: 0.5 });
+    expect(cloned[1]).toMatchObject({ opacity: 0.25 });
   });
 
   it("increments material version only when transparent or depthWrite flip", () => {
