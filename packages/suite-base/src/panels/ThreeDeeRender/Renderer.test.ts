@@ -2300,6 +2300,7 @@ describe("Renderer static transform caching across message types", () => {
   });
 
   it("caches and preserves static transforms received as foxglove.FrameTransform messages", () => {
+    // Given: A renderer that has received a regular and a static foxglove.FrameTransform message
     const renderer = new Renderer({
       ...rendererArgs,
       config: {
@@ -2307,7 +2308,6 @@ describe("Renderer static transform caching across message types", () => {
         scene: { transforms: { enablePreloading: false } },
       },
     });
-
     renderer.setCurrentTime(100n);
     const regularMsg = createFrameTransformEvent("parent", "child_regular", 50n, 50n, "/tf");
     const staticMsg = createFrameTransformEvent("parent", "child_static", 10n, 10n, "/tf_static");
@@ -2315,12 +2315,15 @@ describe("Renderer static transform caching across message types", () => {
     renderer.addMessageEvent(staticMsg);
     renderer.animationFrame();
 
+    // Then: Both transforms should be present before seeking
     expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
 
+    // When: Seeking backward
     renderer.setCurrentTime(20n);
     renderer.handleSeek(100n);
 
+    // Then: The regular transform should be cleared, but the static transform preserved
     const regularFrame = renderer.transformTree.frame("child_regular");
     expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
@@ -2329,6 +2332,7 @@ describe("Renderer static transform caching across message types", () => {
   });
 
   it("caches and preserves static transforms received as foxglove.FrameTransforms messages", () => {
+    // Given: A renderer that has received a regular and a static foxglove.FrameTransforms message
     const renderer = new Renderer({
       ...rendererArgs,
       config: {
@@ -2336,7 +2340,6 @@ describe("Renderer static transform caching across message types", () => {
         scene: { transforms: { enablePreloading: false } },
       },
     });
-
     renderer.setCurrentTime(100n);
     const regularMsg = createFrameTransformsEvent(
       [{ parentId: "parent", childId: "child_regular", stamp: 50n }],
@@ -2352,12 +2355,15 @@ describe("Renderer static transform caching across message types", () => {
     renderer.addMessageEvent(staticMsg);
     renderer.animationFrame();
 
+    // Then: Both transforms should be present before seeking
     expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
 
+    // When: Seeking backward
     renderer.setCurrentTime(20n);
     renderer.handleSeek(100n);
 
+    // Then: The regular transform should be cleared, but the static transform preserved
     const regularFrame = renderer.transformTree.frame("child_regular");
     expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
@@ -2366,6 +2372,7 @@ describe("Renderer static transform caching across message types", () => {
   });
 
   it("caches and preserves static transforms received as geometry_msgs/TransformStamped messages", () => {
+    // Given: A renderer that has received a regular and a static geometry_msgs/TransformStamped message
     const renderer = new Renderer({
       ...rendererArgs,
       config: {
@@ -2373,7 +2380,6 @@ describe("Renderer static transform caching across message types", () => {
         scene: { transforms: { enablePreloading: false } },
       },
     });
-
     renderer.setCurrentTime(100n);
     const regularMsg = createTransformStampedEvent("parent", "child_regular", 50n, 50n, "/tf");
     const staticMsg = createTransformStampedEvent("parent", "child_static", 10n, 10n, "/tf_static");
@@ -2381,12 +2387,15 @@ describe("Renderer static transform caching across message types", () => {
     renderer.addMessageEvent(staticMsg);
     renderer.animationFrame();
 
+    // Then: Both transforms should be present before seeking
     expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
 
+    // When: Seeking backward
     renderer.setCurrentTime(20n);
     renderer.handleSeek(100n);
 
+    // Then: The regular transform should be cleared, but the static transform preserved
     const regularFrame = renderer.transformTree.frame("child_regular");
     expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
@@ -2395,6 +2404,7 @@ describe("Renderer static transform caching across message types", () => {
   });
 
   it("does not cache a static transform that is rejected as a cyclic edge", () => {
+    // Given: A renderer with a transform chain grandparent -> parent -> child
     const renderer = new Renderer({
       ...rendererArgs,
       config: {
@@ -2402,21 +2412,19 @@ describe("Renderer static transform caching across message types", () => {
         scene: { transforms: { enablePreloading: false } },
       },
     });
-
-    // Build a chain: grandparent -> parent -> child
     renderer.addMessageEvent(createTFMessageEvent("grandparent", "parent", 1n, [1n], "/tf"));
     renderer.addMessageEvent(createTFMessageEvent("parent", "child", 2n, [2n], "/tf"));
     renderer.animationFrame();
 
-    // Attempt to add a cyclic *static* transform: child -> grandparent
+    // When: A cyclic *static* transform (child -> grandparent) is received
     renderer.addMessageEvent(createTFMessageEvent("child", "grandparent", 3n, [3n], "/tf_static"));
     renderer.animationFrame();
 
-    // The cyclic transform should not have been cached, so a backward seek that
-    // preserves the static cache should not resurrect it.
+    // And: Seeking backward reapplies whatever was cached from static topics
     renderer.setCurrentTime(0n);
     renderer.handleSeek(100n);
 
+    // Then: The cyclic transform must not have been cached, so it is not resurrected
     const grandparentFrame = renderer.transformTree.frame("grandparent");
     expect(grandparentFrame == undefined || grandparentFrame.parent()?.id !== "child").toBe(true);
 
