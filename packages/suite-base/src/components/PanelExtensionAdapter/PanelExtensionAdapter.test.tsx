@@ -1416,7 +1416,16 @@ describe("PanelExtensionAdapter", () => {
       const clearAlert = jest.fn();
       const store = createStore<AlertsContextStore>(() => ({
         alerts: [],
-        actions: { setAlert, clearAlert, clearAlerts: jest.fn() },
+        dismissedPlayerAlertKeys: new Set(),
+        dismissedSessionTags: new Map(),
+        actions: {
+          setAlert,
+          clearSessionAlert: clearAlert,
+          clearAlerts: jest.fn(),
+          dismissSessionAlert: jest.fn(),
+          dismissPlayerAlert: jest.fn(),
+          dismissPlayerAlerts: jest.fn(),
+        },
       }));
       return { store, setAlert, clearAlert };
     }

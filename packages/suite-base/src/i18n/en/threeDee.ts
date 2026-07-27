@@ -35,7 +35,7 @@ export const threeDee = {
   clearPreloadBuffer: "Clear preload buffer",
   transformPreloadAlert: "Transform topics detected",
   transformPreloadAlertTip:
-    "Activating preloading (3D panel -> Transforms -> Settings) is recommended for accurate visualization of transform topics. NOTE: this may impact performance.",
+    "Activating preloading (3D/Image panel -> Transforms -> Settings) is recommended for accurate visualization of transform topics. NOTE: this may impact performance.",
   fixed: "Fixed",
   followMode: "Follow mode",
   followModeHelp: "Change the camera behavior during playback to follow the display frame or not.",
