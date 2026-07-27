@@ -51,6 +51,16 @@ function embeddedMaterial(renderable: RenderableMeshResource): THREE.Material | 
   return result;
 }
 
+function outlineVisible(renderable: RenderableMeshResource): boolean | undefined {
+  let visible: boolean | undefined;
+  renderable.traverse((obj) => {
+    if (obj instanceof THREE.LineSegments && obj.name === EDGE_LINE_SEGMENTS_NAME) {
+      visible = obj.visible;
+    }
+  });
+  return visible;
+}
+
 describe("RenderableMeshResource embedded opacity", () => {
   it("updates embedded materials in place when only opacity changes", async () => {
     const cachedMaterial = new THREE.MeshStandardMaterial({ opacity: 0.8 });
@@ -181,31 +191,20 @@ describe("RenderableMeshResource embedded opacity", () => {
 
     await waitFor(() => {
       expect(load).toHaveBeenCalledTimes(1);
+      expect(outlineVisible(renderable)).toBe(true);
     });
-
-    let outlineVisible = true;
-    renderable.traverse((obj) => {
-      if (obj instanceof THREE.LineSegments && obj.name === EDGE_LINE_SEGMENTS_NAME) {
-        outlineVisible = obj.visible;
-      }
-    });
-    expect(outlineVisible).toBe(true);
 
     renderable.update(makeMarker(0.5), 1n);
 
-    renderable.traverse((obj) => {
-      if (obj instanceof THREE.LineSegments && obj.name === EDGE_LINE_SEGMENTS_NAME) {
-        outlineVisible = obj.visible;
-      }
-    });
-    expect(outlineVisible).toBe(false);
+    expect(outlineVisible(renderable)).toBe(false);
 
     renderable.dispose();
   });
 
   it("updates non-embedded mesh material opacity in place", async () => {
+    const cachedMaterial = new THREE.MeshStandardMaterial({ opacity: 1, transparent: false });
     const cachedModel = new THREE.Group();
-    cachedModel.add(new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial()));
+    cachedModel.add(new THREE.Mesh(new THREE.BoxGeometry(), cachedMaterial));
     const load = jest.fn().mockResolvedValue(cachedModel);
     const renderer = {
       normalizeFrameId: (frameId: string) => frameId,
@@ -226,10 +225,16 @@ describe("RenderableMeshResource embedded opacity", () => {
 
     await waitFor(() => {
       expect(load).toHaveBeenCalledTimes(1);
+      expect(embeddedMaterial(renderable)?.opacity).toBe(1);
     });
 
     renderable.update({ ...makeMarker(0.5), mesh_use_embedded_materials: false }, 1n);
     expect(load).toHaveBeenCalledTimes(1);
+
+    const material = embeddedMaterial(renderable);
+    expect(material?.opacity).toBeCloseTo(0.5);
+    expect(material?.transparent).toBe(true);
+    expect(material?.depthWrite).toBe(false);
 
     renderable.dispose();
   });
