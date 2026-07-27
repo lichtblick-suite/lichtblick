@@ -1,4 +1,5 @@
 ---
+name: "panel-user-scripts"
 description: "Deep UserScripts panel knowledge: Monaco editor integration, UserScriptPlayer wrapper, TypeScript compilation in the transformer Worker, sandboxed runtime Worker execution, diagnostics, and the script API."
 ---
 

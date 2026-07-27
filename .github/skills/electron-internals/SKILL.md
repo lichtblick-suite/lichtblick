@@ -1,4 +1,5 @@
 ---
+name: "electron-internals"
 description: "Deep Electron implementation knowledge: main/renderer process communication, contextBridge patterns, BrowserWindow lifecycle, native menu integration, and security considerations."
 ---
 

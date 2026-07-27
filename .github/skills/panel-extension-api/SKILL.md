@@ -1,4 +1,5 @@
 ---
+name: "panel-extension-api"
 description: "Deep panel infrastructure knowledge: PanelExtensionAdapter, RenderState incremental building, PanelExtensionContext API, pauseFrame backpressure, panel lifecycle, and the PanelAPI internal hooks."
 ---
 
