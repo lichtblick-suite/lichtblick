@@ -72,7 +72,7 @@ jobs:
       - name: Enable auto-merge (merge commit) for clean syncs
         if: steps.merge.outputs.has_conflicts == 'false'
         run: |
-          gh pr merge "${{ env.BRANCH_NAME }}" --merge --auto || \
+          gh pr merge "$BRANCH_NAME" --merge --auto || \
             echo "::warning::Could not enable auto-merge. Merge this sync PR with a MERGE COMMIT (never squash/rebase) to keep main an ancestor of develop."
         env:
           GITHUB_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
