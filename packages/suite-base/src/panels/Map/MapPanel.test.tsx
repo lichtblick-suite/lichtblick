@@ -201,4 +201,12 @@ describe("MapPanel", () => {
     // THEN nothing from the historical range is drawn as GeoJSON
     expect(drawnFeatureNames()).toEqual([]);
   });
+
+  it("should not render stray text into the panel", () => {
+    // GIVEN a freshly mounted panel
+    const { container } = setup();
+
+    // THEN the only text shown is the empty state, with no leftover debug characters
+    expect(container.textContent).toBe("Waiting for first GPS point...");
+  });
 });

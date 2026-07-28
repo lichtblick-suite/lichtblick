@@ -738,7 +738,6 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
             visibility: center ? "visible" : "hidden",
           }}
         />
-        x
       </Stack>
     </ThemeProvider>
   );
