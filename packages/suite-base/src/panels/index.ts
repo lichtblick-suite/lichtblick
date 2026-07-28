@@ -92,6 +92,18 @@ export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
     module: async () => await import("./Map"),
   },
   {
+    title: "Tactical Map",
+    type: "TacticalMap",
+    description: "Overhead trajectory, planned path, hazard zone, and lidar terrain for blackbox incidents",
+    module: async () => await import("./TacticalMap"),
+  },
+  {
+    title: "Lidar Profile",
+    type: "LidarProfile",
+    description: "Top-down and bearing-slice lidar range/height views for blackbox incidents",
+    module: async () => await import("./LidarProfile"),
+  },
+  {
     title: t("parameters"),
     type: "Parameters",
     description: t("parametersDescription"),

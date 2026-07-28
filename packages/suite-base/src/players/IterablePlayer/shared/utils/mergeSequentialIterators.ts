@@ -78,43 +78,54 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
     nextSourceIndex++;
   }
 
-  // Activate sources whose start time is at or before the query start time.
-  // When no query start is provided, activate only the first source (the earliest by startTime)
-  // to avoid starting HTTP requests for all files simultaneously.
-  //
-  // When a query start IS provided (e.g. after a seek), only activate sources whose time range
-  // [startTime, endTime] actually contains the queryStart. Sources that end before queryStart
-  // are skipped entirely — they cannot contain relevant data at the seek position.
-  // This avoids activating all preceding sources when seeking to the end of the timeline.
-  const queryStart = args.start;
-  if (queryStart != undefined) {
-    // Skip sources that end before queryStart (they can't contain messages at the seek point)
-    while (nextSourceIndex < sourcesWithTime.length) {
-      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-      if (compare(sourceInfo.endTime, queryStart) >= 0) {
-        break;
-      }
-      nextSourceIndex++;
-    }
-    // Activate sources that contain queryStart (startTime <= queryStart)
-    while (nextSourceIndex < sourcesWithTime.length) {
-      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-      if (compare(sourceInfo.startTime, queryStart) > 0) {
-        break;
-      }
-      await activateNextSource();
-    }
+  if (args.consumptionType === "full") {
+    // "full" consumption (block preloading, batch export) reads the entire requested range in
+    // one pass — there's no "current playback time" to gate activation on, so trickling sources
+    // in one at a time only adds serial network latency for no benefit. Activate every source
+    // that overlaps the requested range concurrently instead. Playback ("partial") keeps the
+    // lazy gating below so scrubbing around a large multi-file timeline doesn't open connections
+    // to every file at once.
+    await Promise.all(sourcesWithTime.map(async (sourceInfo) => activateSource(sourceInfo.source)));
+    nextSourceIndex = sourcesWithTime.length;
   } else {
-    // No query start — activate only the first source
-    if (nextSourceIndex < sourcesWithTime.length) {
+    // Activate sources whose start time is at or before the query start time.
+    // When no query start is provided, activate only the first source (the earliest by startTime)
+    // to avoid starting HTTP requests for all files simultaneously.
+    //
+    // When a query start IS provided (e.g. after a seek), only activate sources whose time range
+    // [startTime, endTime] actually contains the queryStart. Sources that end before queryStart
+    // are skipped entirely — they cannot contain relevant data at the seek position.
+    // This avoids activating all preceding sources when seeking to the end of the timeline.
+    const queryStart = args.start;
+    if (queryStart != undefined) {
+      // Skip sources that end before queryStart (they can't contain messages at the seek point)
+      while (nextSourceIndex < sourcesWithTime.length) {
+        const sourceInfo = sourcesWithTime[nextSourceIndex]!;
+        if (compare(sourceInfo.endTime, queryStart) >= 0) {
+          break;
+        }
+        nextSourceIndex++;
+      }
+      // Activate sources that contain queryStart (startTime <= queryStart)
+      while (nextSourceIndex < sourcesWithTime.length) {
+        const sourceInfo = sourcesWithTime[nextSourceIndex]!;
+        if (compare(sourceInfo.startTime, queryStart) > 0) {
+          break;
+        }
+        await activateNextSource();
+      }
+    } else {
+      // No query start — activate only the first source
+      if (nextSourceIndex < sourcesWithTime.length) {
+        await activateNextSource();
+      }
+    }
+
+    // If the initial source(s) were empty, advance through pending sources until
+    // we find one with data or exhaust all sources.
+    while (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
       await activateNextSource();
     }
-  }
-
-  // If the initial source(s) were empty, advance through pending sources until
-  // we find one with data or exhaust all sources.
-  while (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
-    await activateNextSource();
   }
 
   try {

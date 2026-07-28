@@ -391,6 +391,71 @@ describe("mergeSequentialIterators", () => {
     expect(jest.spyOn(source3, "messageIterator")).toHaveBeenCalledTimes(1);
   });
 
+  it("activates all overlapping sources concurrently when consumptionType is 'full'", async () => {
+    // 3 sequential MCAPs: [0-10], [10-20], [20-30]
+    const source1 = makeMockSource({ sec: 0, nsec: 0 }, { sec: 10, nsec: 0 }, [
+      makeMessageEvent("topic", 2),
+    ]);
+    const source2 = makeMockSource({ sec: 10, nsec: 0 }, { sec: 20, nsec: 0 }, [
+      makeMessageEvent("topic", 12),
+    ]);
+    const source3 = makeMockSource({ sec: 20, nsec: 0 }, { sec: 30, nsec: 0 }, [
+      makeMessageEvent("topic", 22),
+    ]);
+
+    const fullArgs: MessageIteratorArgs = { ...defaultArgs, consumptionType: "full" };
+
+    const results: IteratorResult[] = [];
+    for await (const msg of mergeSequentialIterators(
+      [source1, source2, source3],
+      fullArgs,
+    )) {
+      results.push(msg);
+    }
+
+    // All three sources are activated up front, not gated on playback time reaching them.
+    expect(source1.messageIterator).toHaveBeenCalledTimes(1);
+    expect(source2.messageIterator).toHaveBeenCalledTimes(1);
+    expect(source3.messageIterator).toHaveBeenCalledTimes(1);
+
+    // Results are still merged in time order despite concurrent activation.
+    expect(results).toHaveLength(3);
+    expect(
+      (results[0] as IteratorResult<Uint8Array> & { type: "message-event" }).msgEvent.receiveTime
+        .sec,
+    ).toBe(2);
+    expect(
+      (results[1] as IteratorResult<Uint8Array> & { type: "message-event" }).msgEvent.receiveTime
+        .sec,
+    ).toBe(12);
+    expect(
+      (results[2] as IteratorResult<Uint8Array> & { type: "message-event" }).msgEvent.receiveTime
+        .sec,
+    ).toBe(22);
+  });
+
+  it("still gates activation lazily when consumptionType is 'partial' (default)", async () => {
+    const source1 = makeMockSource({ sec: 0, nsec: 0 }, { sec: 10, nsec: 0 }, [
+      makeMessageEvent("topic", 2),
+    ]);
+    const source2 = makeMockSource({ sec: 10, nsec: 0 }, { sec: 20, nsec: 0 }, [
+      makeMessageEvent("topic", 12),
+    ]);
+
+    const partialArgs: MessageIteratorArgs = { ...defaultArgs, consumptionType: "partial" };
+
+    const results: IteratorResult[] = [];
+    for await (const msg of mergeSequentialIterators([source1, source2], partialArgs)) {
+      results.push(msg);
+      // source2 must not be activated while source1 is still being consumed.
+      if (results.length === 1) {
+        expect(source2.messageIterator).not.toHaveBeenCalled();
+      }
+    }
+
+    expect(results).toHaveLength(2);
+  });
+
   it("orders stamp results by their stamp time", async () => {
     const stampResult1: IteratorResult<Uint8Array> = {
       type: "stamp",
