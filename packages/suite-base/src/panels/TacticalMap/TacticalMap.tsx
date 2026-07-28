@@ -1,3 +1,4 @@
+import { Button, Typography } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MessageEvent, SettingsTreeAction } from "@lichtblick/suite";
@@ -23,6 +24,8 @@ export function TacticalMap({ context }: TacticalMapProps): React.JSX.Element {
     ...DEFAULT_CONFIG,
     ...(context.initialState as Partial<TacticalMapConfig>),
   }));
+
+  const [loaded, setLoaded] = useState(false);
 
   // Decoded data is cached in refs (rather than React state) so per-frame onRender callbacks can
   // update it imperatively without triggering a React re-render for every incoming message --
@@ -63,6 +66,9 @@ export function TacticalMap({ context }: TacticalMapProps): React.JSX.Element {
   }, [config, context]);
 
   useEffect(() => {
+    if (!loaded) {
+      return undefined;
+    }
     context.subscribe([
       { topic: config.odomTopic, preload: true },
       { topic: config.zoneReportTopic, preload: true },
@@ -75,6 +81,7 @@ export function TacticalMap({ context }: TacticalMapProps): React.JSX.Element {
     };
   }, [
     context,
+    loaded,
     config.odomTopic,
     config.zoneReportTopic,
     config.plannedPathTopic,
@@ -83,6 +90,9 @@ export function TacticalMap({ context }: TacticalMapProps): React.JSX.Element {
   ]);
 
   useEffect(() => {
+    if (!loaded) {
+      return undefined;
+    }
     context.onRender = (renderState, done) => {
       setRenderDone(() => done);
 
@@ -151,12 +161,15 @@ export function TacticalMap({ context }: TacticalMapProps): React.JSX.Element {
     return () => {
       context.onRender = undefined;
     };
-  }, [context, config, redraw]);
+  }, [context, config, loaded, redraw]);
 
   useEffect(() => {
+    if (!loaded) {
+      return undefined;
+    }
     const container = containerRef.current;
     if (!container) {
-      return;
+      return undefined;
     }
     const observer = new ResizeObserver(() => {
       redraw();
@@ -165,7 +178,13 @@ export function TacticalMap({ context }: TacticalMapProps): React.JSX.Element {
     return () => {
       observer.disconnect();
     };
-  }, [redraw]);
+  }, [redraw, loaded]);
+
+  useEffect(() => {
+    if (loaded) {
+      redraw();
+    }
+  }, [loaded, redraw]);
 
   const settingsActionHandler = useCallback((action: SettingsTreeAction) => {
     setConfig((prevConfig) => settingsActionReducer(prevConfig, action));
@@ -179,6 +198,26 @@ export function TacticalMap({ context }: TacticalMapProps): React.JSX.Element {
   useEffect(() => {
     renderDone();
   }, [renderDone]);
+
+  if (!loaded) {
+    return (
+      <Stack fullHeight alignItems="center" justifyContent="center" gap={1} padding={2}>
+        <Typography variant="body2" color="text.secondary" align="center">
+          Tactical Map preloads odometry and zone-report history for the whole clip, which can be
+          heavy on long recordings.
+        </Typography>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => {
+            setLoaded(true);
+          }}
+        >
+          Load Tactical Map
+        </Button>
+      </Stack>
+    );
+  }
 
   return (
     <Stack fullHeight>
