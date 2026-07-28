@@ -43,6 +43,8 @@ import {
   GeoJsonMessage,
   hasFix,
   isGeoJSONMessage,
+  isGeoJSONSchema,
+  isNavSatFixMessage,
   isSupportedSchema,
   isValidMapMessage,
   parseGeoJSON,
@@ -106,8 +108,10 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
   const [allMapMessages, setAllMapMessages] = useState<MapPanelMessage[]>([]);
   const [currentMapMessages, setCurrentMapMessages] = useState<MapPanelMessage[]>([]);
 
-  const [allGeoMessages, allNavMessages] = useMemo(
-    () => _.partition(allMapMessages, isGeoJSONMessage),
+  // Only location fixes are accumulated over the whole recording (see the range subscription
+  // below), so everything collected here contributes to the travelled track.
+  const allNavMessages = useMemo(
+    () => allMapMessages.filter(isNavSatFixMessage),
     [allMapMessages],
   );
 
@@ -309,6 +313,14 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     const unsubscriptions: (() => void)[] = [];
     for (const topic of eligibleTopics) {
       if (config.disabledTopics.includes(topic.name)) {
+        continue;
+      }
+      // The range subscription feeds the "all frames" layer, which exists to draw the travelled
+      // track from every location fix in the recording. A GeoJSON message is instead a
+      // self-contained scene that the next message replaces, so it is rendered from the current
+      // frame only. Ranging over it would overlay every past *and* not-yet-reached message on the
+      // map at once - and keep them all in memory - so those topics are skipped here.
+      if (isGeoJSONSchema(topic.schemaName)) {
         continue;
       }
       const unsubscribe = context.unstable_subscribeMessageRange({
@@ -546,23 +558,8 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
 
       // Push this layer to the back so it renders under the current messages.
       pointLayer.bringToBack();
-
-      allGeoMessages
-        .filter((message) => message.topic === topic)
-        .forEach((message) => {
-          addGeoJsonMessage(message, topicLayer.allFrames);
-        });
     }
-  }, [
-    addGeoJsonMessage,
-    allGeoMessages,
-    allNavMessages,
-    currentMap,
-    filterBounds,
-    onClick,
-    onHover,
-    topicLayers,
-  ]);
+  }, [allNavMessages, currentMap, filterBounds, onClick, onHover, topicLayers]);
 
   // create a filtered marker layer for the current nav messages
   // this effect is added after the allNavMessages so the layer appears above
@@ -606,11 +603,12 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     const geoByTopic = _.groupBy(currentGeoMessages, (msg) => msg.topic);
     for (const [topic, messages] of Object.entries(geoByTopic)) {
       const topicLayer = topicLayers.get(topic);
-      if (topicLayer) {
+      // Each GeoJSON message supersedes the previous one, so when a frame carries several of them
+      // only the newest is drawn instead of stacking them all on top of each other.
+      const latestMessage = _.last(messages);
+      if (topicLayer && latestMessage) {
         topicLayer.currentFrame.clearLayers();
-        for (const message of messages) {
-          addGeoJsonMessage(message, topicLayer.currentFrame);
-        }
+        addGeoJsonMessage(latestMessage, topicLayer.currentFrame);
       }
     }
   }, [
