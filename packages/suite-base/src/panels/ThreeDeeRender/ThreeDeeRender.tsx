@@ -226,9 +226,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   // so the animationFrame() call only fires when genuinely needed rather than after every commit.
   const seekFrameRef = useRef(false);
   const [renderToken, setRenderToken] = useState(0);
- const requestRender = useCallback(() => {
-  setRenderToken((prevToken) => prevToken + 1);
-}, []);
+  const requestRender = useCallback(() => {
+    setRenderToken((prevToken) => prevToken + 1);
+  }, []);
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
   // Refs for values that are set inside onRender to avoid redundant setState calls.

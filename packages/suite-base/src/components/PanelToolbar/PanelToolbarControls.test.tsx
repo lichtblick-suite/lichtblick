@@ -541,28 +541,26 @@ describe("PanelToolbarControls", () => {
             }}
           >
             <PanelContext.Provider
-              value={
-                {
-                  id: "test-panel-id",
-                  type: "TestPanel",
-                  title: "Test Panel",
-                  showLogs: false,
-                  setShowLogs: jest.fn(),
-                  logError: jest.fn(),
-                  getLogCount: jest.fn(() => 0),
-                  config: {},
-                  saveConfig: jest.fn(),
-                  updatePanelConfigs: jest.fn(),
-                  openSiblingPanel: jest.fn(),
-                  replacePanel: jest.fn(),
-                  enterFullscreen: jest.fn(),
-                  exitFullscreen: jest.fn(),
-                  isFullscreen: false,
-                  setHasFullscreenDescendant: jest.fn(),
-                  connectToolbarDragHandle: jest.fn(),
-                  setMessagePathDropConfig: jest.fn(),
-                }
-              }
+              value={{
+                id: "test-panel-id",
+                type: "TestPanel",
+                title: "Test Panel",
+                showLogs: false,
+                setShowLogs: jest.fn(),
+                logError: jest.fn(),
+                getLogCount: jest.fn(() => 0),
+                config: {},
+                saveConfig: jest.fn(),
+                updatePanelConfigs: jest.fn(),
+                openSiblingPanel: jest.fn(),
+                replacePanel: jest.fn(),
+                enterFullscreen: jest.fn(),
+                exitFullscreen: jest.fn(),
+                isFullscreen: false,
+                setHasFullscreenDescendant: jest.fn(),
+                connectToolbarDragHandle: jest.fn(),
+                setMessagePathDropConfig: jest.fn(),
+              }}
             >
               <PanelToolbarControls {...props} />
             </PanelContext.Provider>
@@ -606,28 +604,26 @@ describe("PanelToolbarControls", () => {
             }}
           >
             <PanelContext.Provider
-              value={
-                {
-                  id: "test-panel-id",
-                  type: "TestPanel",
-                  title: "Test Panel",
-                  showLogs: false,
-                  setShowLogs: jest.fn(),
-                  logError: jest.fn(),
-                  getLogCount: jest.fn(() => 3),
-                  config: {},
-                  saveConfig: jest.fn(),
-                  updatePanelConfigs: jest.fn(),
-                  openSiblingPanel: jest.fn(),
-                  replacePanel: jest.fn(),
-                  enterFullscreen: jest.fn(),
-                  exitFullscreen: jest.fn(),
-                  isFullscreen: false,
-                  setHasFullscreenDescendant: jest.fn(),
-                  connectToolbarDragHandle: jest.fn(),
-                  setMessagePathDropConfig: jest.fn(),
-                }
-              }
+              value={{
+                id: "test-panel-id",
+                type: "TestPanel",
+                title: "Test Panel",
+                showLogs: false,
+                setShowLogs: jest.fn(),
+                logError: jest.fn(),
+                getLogCount: jest.fn(() => 3),
+                config: {},
+                saveConfig: jest.fn(),
+                updatePanelConfigs: jest.fn(),
+                openSiblingPanel: jest.fn(),
+                replacePanel: jest.fn(),
+                enterFullscreen: jest.fn(),
+                exitFullscreen: jest.fn(),
+                isFullscreen: false,
+                setHasFullscreenDescendant: jest.fn(),
+                connectToolbarDragHandle: jest.fn(),
+                setMessagePathDropConfig: jest.fn(),
+              }}
             >
               <PanelToolbarControls isUnknownPanel={false} />
             </PanelContext.Provider>
