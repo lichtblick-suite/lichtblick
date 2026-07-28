@@ -142,41 +142,41 @@ describe("NodeEditor childNodes filtering", () => {
   it("all nodes should be visible at start", async () => {
     await renderComponent();
 
-    expect(screen.queryByText(nodes[0])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[1])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[0])).toBeInTheDocument();
+    expect(screen.getByText(nodes[1])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
   });
 
   it("should list only the selected option filter", async () => {
     await renderComponent();
 
-    expect(screen.queryByText(nodes[0])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[1])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[0])).toBeInTheDocument();
+    expect(screen.getByText(nodes[1])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
 
     act(() => {
       changeVisibilityFilter("visible");
     });
 
-    expect(screen.queryByText(nodes[0])).toBeInTheDocument();
+    expect(screen.getByText(nodes[0])).toBeInTheDocument();
     expect(screen.queryByText(nodes[1])).not.toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
 
     act(() => {
       changeVisibilityFilter("invisible");
     });
 
     expect(screen.queryByText(nodes[0])).not.toBeInTheDocument();
-    expect(screen.queryByText(nodes[1])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[1])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
 
     act(() => {
       changeVisibilityFilter("all");
     });
 
-    expect(screen.queryByText(nodes[0])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[1])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[0])).toBeInTheDocument();
+    expect(screen.getByText(nodes[1])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
   });
 
   it("does not show the text filter field when enableVisibilityFilter is not set, even with children", async () => {
@@ -210,7 +210,7 @@ describe("NodeEditor childNodes filtering", () => {
     // nodes[1] is excluded by the visibility filter, and nodes[0] doesn't match the text filter.
     expect(screen.queryByText(nodes[0])).not.toBeInTheDocument();
     expect(screen.queryByText(nodes[1])).not.toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
   });
 
   it("recursively filters descendants by text, keeping ancestors of matches", async () => {
@@ -376,7 +376,7 @@ describe("NodeEditor childNodes filtering", () => {
 
     // Then: Node remains expanded and still in editing mode
     expect(screen.getByRole("textbox")).toBeInTheDocument();
-    expect(screen.queryByText(childLabel)).toBeInTheDocument();
+    expect(screen.getByText(childLabel)).toBeInTheDocument();
   });
 
   it("renders icon when icon is set and not a drag handle", async () => {
