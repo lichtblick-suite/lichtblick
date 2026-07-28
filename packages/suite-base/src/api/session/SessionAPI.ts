@@ -3,11 +3,11 @@
 
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
 
-import { SessionMcap, SessionResponse } from "./types";
+import { SessionData, SessionResponse } from "./types";
 
 export class SessionAPI {
   public readonly sessionPath = "session";
-  public async getSession(sessionId: string, signal?: AbortSignal): Promise<SessionMcap[]> {
+  public async getSession(sessionId: string, signal?: AbortSignal): Promise<SessionData> {
     const { data } = await HttpService.get<SessionResponse>(
       `${this.sessionPath}/${sessionId}`,
       {},
@@ -15,7 +15,10 @@ export class SessionAPI {
         signal,
       },
     );
-    return data.mcaps;
+    return {
+      mcaps: data.mcaps,
+      additionalSources: data.additionalSources ?? [],
+    };
   }
 }
 

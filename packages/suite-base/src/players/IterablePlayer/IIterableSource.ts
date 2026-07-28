@@ -7,6 +7,7 @@
 
 import { Time } from "@lichtblick/rostime";
 import { Immutable, MessageEvent, Metadata } from "@lichtblick/suite";
+import { AdditionalSourceDescriptor } from "@lichtblick/suite-base/players/IterablePlayer/additionalSources/types";
 import {
   PlayerAlert,
   Topic,
@@ -216,6 +217,12 @@ export type IterableSourceInitializeArgs = {
   files?: File[];
   urls?: string[];
   params?: Record<string, string | undefined>;
+
+  /**
+   * Self-describing additional (non-MCAP) sources to merge into this source. Each descriptor supplies its own topics, schemas and serialized
+   * messages and is wrapped in an AdditionalIterableSource and combined with the primary source(s).
+   */
+  additionalSources?: AdditionalSourceDescriptor[];
 
   api?: {
     baseUrl: string;

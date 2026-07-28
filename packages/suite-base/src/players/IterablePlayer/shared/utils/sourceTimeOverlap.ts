@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Time, compare } from "@lichtblick/rostime";
-import { IIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import {
+  GetBackfillMessagesArgs,
+  IIterableSource,
+} from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 /**
  * Returns true if the source's time range [getStart(), getEnd()] overlaps with
@@ -60,4 +64,42 @@ export function filterSourcesForBackfill<T>(
     // Source is relevant if it starts at or before the backfill time
     return compare(sourceStart, time) <= 0;
   });
+}
+
+/**
+ * Collects backfill messages from every source that could contain a message at or before the
+ * requested time. Shared by the aggregate sources (MultiIterableSource, CombinedIterableSource).
+ */
+export async function getBackfillMessagesFromSources(
+  sources: IIterableSource<Uint8Array>[],
+  args: GetBackfillMessagesArgs,
+): Promise<MessageEvent<Uint8Array>[]> {
+  const relevantSources = filterSourcesForBackfill(sources, args.time);
+
+  if (args.topics.size === 0) {
+    return [];
+  }
+
+  const latestByTopic = new Map<string, MessageEvent<Uint8Array>>();
+  for (let index = relevantSources.length - 1; index >= 0; index--) {
+    const source = relevantSources[index]!;
+    const messages = await source.getBackfillMessages(args);
+
+    if (messages.length === 0) {
+      continue;
+    }
+
+    for (const message of messages) {
+      if (!args.topics.has(message.topic)) {
+        continue;
+      }
+
+      const previous = latestByTopic.get(message.topic);
+      if (!previous || compare(previous.receiveTime, message.receiveTime) < 0) {
+        latestByTopic.set(message.topic, message);
+      }
+    }
+  }
+
+  return Array.from(latestByTopic.values());
 }

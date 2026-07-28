@@ -13,6 +13,7 @@ import {
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
+import { IterableSourceInitializeArgs } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import { Player } from "@lichtblick/suite-base/players/types";
@@ -106,7 +107,10 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
 
     const initWorker = initWorkers[extension]!;
 
-    const initArgs = urls.length === 1 ? { url: urls[0] } : { urls };
+    const initArgs: IterableSourceInitializeArgs = {
+      ...(urls.length === 1 ? { url: urls[0] } : { urls }),
+      additionalSources: args.additionalSources,
+    };
     const source = new WorkerSerializedIterableSource({ initWorker, initArgs });
 
     return new IterablePlayer({

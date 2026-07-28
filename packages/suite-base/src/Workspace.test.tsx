@@ -26,6 +26,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
+import { AdditionalSourceDescriptor } from "@lichtblick/suite-base/players/IterablePlayer/additionalSources";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 
@@ -53,6 +54,21 @@ jest.mock("notistack", () => ({
 }));
 
 // ── api ───────────────────────────────────────────────────────────────────────
+// ── config ───────────────────────────────────────────────────────────────────
+// jest.mock is hoisted before variable declarations, so the factory must be self-contained.
+// We retrieve a mutable reference afterwards via jest.requireMock.
+jest.mock("@lichtblick/suite-base/constants/config", () => ({
+  APP_CONFIG: {
+    apiUrl: "/" as string | undefined,
+    version: "TEST",
+    devWorkspace: "",
+    syncLocalLayouts: false,
+  },
+}));
+const mockAppConfig = jest.requireMock("@lichtblick/suite-base/constants/config").APP_CONFIG as {
+  apiUrl: string | undefined;
+};
+
 const mockGetSession = jest.fn();
 jest.mock("@lichtblick/suite-base/api/session/SessionAPI", () => ({
   __esModule: true,
@@ -376,6 +392,7 @@ describe("Workspace - session-based MCAP resolution", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAppConfig.apiUrl = "/";
 
     (useMessagePipeline as jest.Mock).mockImplementation(
       (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
@@ -417,7 +434,20 @@ describe("Workspace - session-based MCAP resolution", () => {
       { url: "https://example.com/file1.mcap", metadata: { robot: "r1" } },
       { url: "https://example.com/file2.mcap", metadata: { robot: "r2" } },
     ];
-    mockGetSession.mockResolvedValue(mockMcaps);
+    const additionalSources: AdditionalSourceDescriptor[] = [
+      {
+        id: "additionalSourcesId",
+        topics: [{ name: "testTopic", messageEncoding: "json", schemaName: "testSchema" }],
+        messages: [
+          {
+            topic: "testTopic",
+            data: "eyJrZXkiOiJ2YWx1ZSJ9",
+            receiveTime: { sec: 123, nsec: 123456789 },
+          },
+        ],
+      },
+    ];
+    mockGetSession.mockResolvedValue({ mcaps: mockMcaps, additionalSources });
     (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
 
     // When
@@ -432,6 +462,7 @@ describe("Workspace - session-based MCAP resolution", () => {
         type: "connection",
         params: { url: "https://example.com/file1.mcap,https://example.com/file2.mcap" },
         sourceMetadata: [{ robot: "r1" }, { robot: "r2" }],
+        additionalSources,
       });
     });
   });
@@ -465,6 +496,21 @@ describe("Workspace - session-based MCAP resolution", () => {
 
     // When
     render(<Workspace deepLinks={["https://app.example.com/?ds=remote-file"]} />);
+
+    // Then
+    expect(mockGetSession).not.toHaveBeenCalled();
+  });
+
+  it("should not call SessionAPI when apiUrl is not configured", () => {
+    // Given
+    const sessionId = "test-session-no-api-url";
+    mockAppConfig.apiUrl = undefined;
+    (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
+
+    // When
+    render(
+      <Workspace deepLinks={["https://app.example.com/?sessionid=test-session-no-api-url"]} />,
+    );
 
     // Then
     expect(mockGetSession).not.toHaveBeenCalled();

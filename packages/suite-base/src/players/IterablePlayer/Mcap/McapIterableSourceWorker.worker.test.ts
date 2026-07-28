@@ -76,6 +76,6 @@ describe("initialize", () => {
   });
 
   it("should throw an error if no valid input is provided", () => {
-    expect(() => initialize({})).toThrow("file or url required");
+    expect(() => initialize({})).toThrow("file, files, url, or urls required");
   });
 });
