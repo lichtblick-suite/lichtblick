@@ -6,11 +6,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useTheme } from "@mui/material";
-import { StoryFn, StoryObj } from "@storybook/react";
+import { StoryFn, StoryObj } from "@storybook/react-webpack5";
 import { useEffect } from "react";
 
 import { fromDate } from "@lichtblick/rostime";
-import { AlertsList } from "@lichtblick/suite-base/components/AlertsList";
+import { AlertsList } from "@lichtblick/suite-base/components/AlertList/AlertsList";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { useAlertsActions } from "@lichtblick/suite-base/context/AlertsContext";
 import { PlayerPresence, PlayerAlert, Topic } from "@lichtblick/suite-base/players/types";

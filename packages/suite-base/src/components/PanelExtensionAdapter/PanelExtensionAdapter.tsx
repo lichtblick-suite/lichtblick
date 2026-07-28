@@ -17,6 +17,7 @@ import { fromSec, toSec } from "@lichtblick/rostime";
 import {
   AppSettingValue,
   ExtensionPanelRegistration,
+  Immutable,
   PanelExtensionContext,
   ParameterValue,
   RenderState,
@@ -55,6 +56,7 @@ import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
   AdvertiseOptions,
   InternalSubscribePayload,
+  PlayerAlert,
   PlayerPresence,
 } from "@lichtblick/suite-base/players/types";
 import {
@@ -184,7 +186,11 @@ function PanelExtensionAdapter(
 
   const [slowRender, setSlowRender] = useState(false);
   const [, setDefaultPanelTitle] = useDefaultPanelTitle();
-  const { setAlert } = useAlertsActions();
+  const { setAlert, clearSessionAlert: clearAlert } = useAlertsActions();
+
+  // Tracks the ids of alerts this panel has set (via unstable_setAlert) so they can be cleared
+  // when the panel unmounts. Alerts are namespaced by panelId to avoid collisions across panels.
+  const panelAlertIdsRef = useRef(new Set<string>());
 
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
 
@@ -655,6 +661,20 @@ function PanelExtensionAdapter(
         setDefaultPanelTitle(title);
       },
 
+      unstable_setAlert: (alertId: string, alert: Immutable<PlayerAlert> | undefined) => {
+        if (!isMounted()) {
+          return;
+        }
+        const tag = `panel-alert:${panelId}:${alertId}`;
+        if (alert == undefined) {
+          panelAlertIdsRef.current.delete(alertId);
+          clearAlert(tag);
+        } else {
+          panelAlertIdsRef.current.add(alertId);
+          setAlert(tag, alert);
+        }
+      },
+
       /**
        * EXPERIMENTAL: Subscribe to message ranges for efficient batch processing.
        *
@@ -733,6 +753,8 @@ function PanelExtensionAdapter(
     setDefaultPanelTitle,
     setMessagePathDropConfig,
     subscribeMessageRange,
+    setAlert,
+    clearAlert,
   ]);
 
   const panelContainerRef = useRef<HTMLDivElement>(ReactNull);
@@ -811,7 +833,19 @@ function PanelExtensionAdapter(
     getMessagePipelineContext,
     configTooNew,
     playerIsInitializing,
+    clearAlert,
   ]);
+
+  // Clear this panel's alerts on unmount.
+  useEffect(() => {
+    const panelAlertIds = panelAlertIdsRef.current;
+    return () => {
+      for (const alertId of panelAlertIds) {
+        clearAlert(`panel-alert:${panelId}:${alertId}`);
+      }
+      panelAlertIds.clear();
+    };
+  }, [panelId, clearAlert]);
 
   const style: CSSProperties = {};
   if (slowRender) {

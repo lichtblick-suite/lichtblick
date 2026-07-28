@@ -18,6 +18,7 @@ function makeElectronBuilderConfig(params) {
     appId: "dev.lichtblick.suite",
     npmRebuild: false,
     asar: true,
+    files: ["**/*", "!**/node_modules/**"],
     directories: {
       app: params.appPath,
       buildResources: path.join(__dirname, "../resources"),

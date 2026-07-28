@@ -38,7 +38,7 @@ export function useLayoutActions({ state, dispatch }: LayoutSetupOptions): UseLa
     async (item: Layout, newName: string) => {
       await layoutManager.updateLayout({ id: item.id, name: newName });
       setSelectedLayoutId(item.id);
-      void analytics.logEvent(AppEvent.LAYOUT_RENAME, { permission: item.permission });
+      analytics.logEvent(AppEvent.LAYOUT_RENAME, { permission: item.permission });
     },
     [analytics, layoutManager, setSelectedLayoutId],
   );
@@ -56,7 +56,7 @@ export function useLayoutActions({ state, dispatch }: LayoutSetupOptions): UseLa
         permission: "CREATOR_WRITE",
       });
       await onSelectLayout(newLayout);
-      void analytics.logEvent(AppEvent.LAYOUT_DUPLICATE, { permission: item.permission });
+      analytics.logEvent(AppEvent.LAYOUT_DUPLICATE, { permission: item.permission });
     },
     [analytics, dispatch, layoutManager, onSelectLayout, state.selectedIds.length],
   );
@@ -68,7 +68,7 @@ export function useLayoutActions({ state, dispatch }: LayoutSetupOptions): UseLa
         return;
       }
 
-      void analytics.logEvent(AppEvent.LAYOUT_DELETE, { permission: item.permission });
+      analytics.logEvent(AppEvent.LAYOUT_DELETE, { permission: item.permission });
 
       // If the layout was selected, select a different available layout.
       //
@@ -117,7 +117,7 @@ export function useLayoutActions({ state, dispatch }: LayoutSetupOptions): UseLa
         }
       }
       await layoutManager.overwriteLayout({ id: item.id });
-      void analytics.logEvent(AppEvent.LAYOUT_OVERWRITE, { permission: item.permission });
+      analytics.logEvent(AppEvent.LAYOUT_OVERWRITE, { permission: item.permission });
     },
     [analytics, confirm, dispatch, layoutManager, state.selectedIds.length],
   );
@@ -130,7 +130,7 @@ export function useLayoutActions({ state, dispatch }: LayoutSetupOptions): UseLa
       }
 
       await layoutManager.revertLayout({ id: item.id });
-      void analytics.logEvent(AppEvent.LAYOUT_REVERT, { permission: item.permission });
+      analytics.logEvent(AppEvent.LAYOUT_REVERT, { permission: item.permission });
     },
     [analytics, dispatch, layoutManager, state.selectedIds.length],
   );

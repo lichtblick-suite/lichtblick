@@ -67,7 +67,7 @@ jest.mock("@lichtblick/suite-base/components/Sidebars", () => ({
 jest.mock("@lichtblick/suite-base/components/AppBar", () => ({
   AppBar: () => undefined,
 }));
-jest.mock("@lichtblick/suite-base/components/AlertsList", () => ({
+jest.mock("@lichtblick/suite-base/components/AlertList/AlertsList", () => ({
   AlertsList: () => undefined,
 }));
 jest.mock("@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings", () => ({

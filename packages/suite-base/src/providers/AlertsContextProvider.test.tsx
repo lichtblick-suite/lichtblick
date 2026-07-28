@@ -17,6 +17,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import AlertsContextProvider from "./AlertsContextProvider";
 
 const selectAlerts = (store: AlertsContextStore) => store.alerts;
+const selectDismissedPlayerAlertKeys = (store: AlertsContextStore) =>
+  store.dismissedPlayerAlertKeys;
 
 describe("AlertsContextProvider", () => {
   const wrapper = ({ children }: PropsWithChildren) => (
@@ -129,5 +131,175 @@ describe("AlertsContextProvider", () => {
 
     // Then
     expect(result.current.alerts).toHaveLength(0);
+  });
+
+  it("tracks dismissed player alert keys when dismissPlayerAlert is called", () => {
+    // Given
+    const key = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        dismissedPlayerAlertKeys: useAlertsStore(selectDismissedPlayerAlertKeys),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    expect(result.current.dismissedPlayerAlertKeys.size).toBe(0);
+
+    // When
+    act(() => {
+      result.current.actions.dismissPlayerAlert(key);
+    });
+
+    // Then
+    expect(result.current.dismissedPlayerAlertKeys.has(key)).toBe(true);
+  });
+
+  it("does not create a new set when dismissing an already dismissed key", () => {
+    // Given
+    const key = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        dismissedPlayerAlertKeys: useAlertsStore(selectDismissedPlayerAlertKeys),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.actions.dismissPlayerAlert(key);
+    });
+    const firstRef = result.current.dismissedPlayerAlertKeys;
+
+    // When
+    act(() => {
+      result.current.actions.dismissPlayerAlert(key);
+    });
+
+    // Then
+    expect(result.current.dismissedPlayerAlertKeys).toBe(firstRef);
+  });
+
+  it("dismisses multiple player alert keys at once", () => {
+    // Given
+    const keys = [BasicBuilder.string(), BasicBuilder.string()];
+
+    const { result } = renderHook(
+      () => ({
+        dismissedPlayerAlertKeys: useAlertsStore(selectDismissedPlayerAlertKeys),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    // When
+    act(() => {
+      result.current.actions.dismissPlayerAlerts(keys);
+    });
+
+    // Then
+    expect(result.current.dismissedPlayerAlertKeys.size).toBe(2);
+    for (const key of keys) {
+      expect(result.current.dismissedPlayerAlertKeys.has(key)).toBe(true);
+    }
+  });
+
+  it("does not re-add a session alert when setAlert is called after dismiss with same content", () => {
+    // Given
+    const alert: SessionAlert = { severity: "warn", message: BasicBuilder.string() };
+    const tag = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        alerts: useAlertsStore(selectAlerts),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.actions.setAlert(tag, alert);
+    });
+    expect(result.current.alerts).toHaveLength(1);
+
+    act(() => {
+      result.current.actions.dismissSessionAlert(tag);
+    });
+    expect(result.current.alerts).toHaveLength(0);
+
+    // When — same tag + same content
+    act(() => {
+      result.current.actions.setAlert(tag, alert);
+    });
+
+    // Then — stays dismissed
+    expect(result.current.alerts).toHaveLength(0);
+  });
+
+  it("re-adds a session alert when setAlert is called after dismiss with different content", () => {
+    // Given
+    const originalAlert: SessionAlert = { severity: "warn", message: BasicBuilder.string() };
+    const updatedAlert: SessionAlert = { severity: "error", message: BasicBuilder.string() };
+    const tag = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        alerts: useAlertsStore(selectAlerts),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.actions.setAlert(tag, originalAlert);
+    });
+    act(() => {
+      result.current.actions.dismissSessionAlert(tag);
+    });
+    expect(result.current.alerts).toHaveLength(0);
+
+    // When
+    act(() => {
+      result.current.actions.setAlert(tag, updatedAlert);
+    });
+
+    // Then
+    expect(result.current.alerts).toHaveLength(1);
+    expect(result.current.alerts[0]).toMatchObject({ tag, ...updatedAlert });
+  });
+
+  it("re-adds a session alert when setAlert is called after dismiss with only the tip changed", () => {
+    // Given — severity and message stay the same, only the tip differs
+    const message = BasicBuilder.string();
+    const originalAlert: SessionAlert = { severity: "warn", message, tip: "Original tip" };
+    const updatedAlert: SessionAlert = { severity: "warn", message, tip: "Updated tip" };
+    const tag = BasicBuilder.string();
+
+    const { result } = renderHook(
+      () => ({
+        alerts: useAlertsStore(selectAlerts),
+        actions: useAlertsActions(),
+      }),
+      { wrapper },
+    );
+
+    act(() => {
+      result.current.actions.setAlert(tag, originalAlert);
+    });
+    act(() => {
+      result.current.actions.dismissSessionAlert(tag);
+    });
+    expect(result.current.alerts).toHaveLength(0);
+
+    // When — same tag, same severity/message, but the tip content changed
+    act(() => {
+      result.current.actions.setAlert(tag, updatedAlert);
+    });
+
+    // Then — the alert reappears because its content (tip) changed
+    expect(result.current.alerts).toHaveLength(1);
+    expect(result.current.alerts[0]).toMatchObject({ tag, ...updatedAlert });
   });
 });

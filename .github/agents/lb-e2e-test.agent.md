@@ -196,4 +196,8 @@ yarn test:e2e:desktop                             # All desktop tests
 # Web
 yarn test:e2e:web:debug <filename-fragment>       # Debug single test
 yarn test:e2e:web                                 # All web tests
+
+# CI
+yarn test:e2e:ci                                  # Always confirm that all tests pass in CI before pushing
+
 ```

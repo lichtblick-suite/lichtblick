@@ -98,13 +98,21 @@ describe("getMessagePathSearchItems", () => {
       {
         topic: { name: "foo1", schemaName: "Foo" },
         fullPath: "foo1.bar.str_array",
-        suffix: { pathSuffix: ".bar.str_array", type: "string[]", isLeaf: true },
+        suffix: {
+          pathSuffix: ".bar.str_array",
+          type: "string[]",
+          isLeaf: true,
+        },
         offset: 4,
       },
       {
         topic: { name: "foo2", schemaName: "Foo" },
         fullPath: "foo2.bar.str_array",
-        suffix: { pathSuffix: ".bar.str_array", type: "string[]", isLeaf: true },
+        suffix: {
+          pathSuffix: ".bar.str_array",
+          type: "string[]",
+          isLeaf: true,
+        },
         offset: 4,
       },
       {
@@ -122,25 +130,41 @@ describe("getMessagePathSearchItems", () => {
       {
         topic: { name: "foo1", schemaName: "Foo" },
         fullPath: "foo1.bar_array[:].str",
-        suffix: { pathSuffix: ".bar_array[:].str", type: "string", isLeaf: true },
+        suffix: {
+          pathSuffix: ".bar_array[:].str",
+          type: "string",
+          isLeaf: true,
+        },
         offset: 4,
       },
       {
         topic: { name: "foo2", schemaName: "Foo" },
         fullPath: "foo2.bar_array[:].str",
-        suffix: { pathSuffix: ".bar_array[:].str", type: "string", isLeaf: true },
+        suffix: {
+          pathSuffix: ".bar_array[:].str",
+          type: "string",
+          isLeaf: true,
+        },
         offset: 4,
       },
       {
         topic: { name: "foo1", schemaName: "Foo" },
         fullPath: "foo1.bar_array[:].str_array",
-        suffix: { pathSuffix: ".bar_array[:].str_array", type: "string[]", isLeaf: true },
+        suffix: {
+          pathSuffix: ".bar_array[:].str_array",
+          type: "string[]",
+          isLeaf: true,
+        },
         offset: 4,
       },
       {
         topic: { name: "foo2", schemaName: "Foo" },
         fullPath: "foo2.bar_array[:].str_array",
-        suffix: { pathSuffix: ".bar_array[:].str_array", type: "string[]", isLeaf: true },
+        suffix: {
+          pathSuffix: ".bar_array[:].str_array",
+          type: "string[]",
+          isLeaf: true,
+        },
         offset: 4,
       },
       {
@@ -266,814 +290,1009 @@ describe("getMessagePathSearchItems", () => {
         datatypes,
       ).items,
     ).toMatchInlineSnapshot(`
-      [
-        {
-          "fullPath": "annotations.circles",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".circles",
-            "type": "foxglove.ImageAnnotations.circles[]",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].timestamp",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".circles[:].timestamp",
-            "type": "foxglove.ImageAnnotations.circles.timestamp",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].timestamp.sec",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].timestamp.sec",
-            "type": "uint32",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].timestamp.nsec",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].timestamp.nsec",
-            "type": "uint32",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].position",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".circles[:].position",
-            "type": "foxglove.ImageAnnotations.circles.position",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].position.x",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].position.x",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].position.y",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].position.y",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].diameter",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].diameter",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].thickness",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].thickness",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].fill_color",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".circles[:].fill_color",
-            "type": "foxglove.ImageAnnotations.circles.fill_color",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].fill_color.r",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].fill_color.r",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].fill_color.g",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].fill_color.g",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].fill_color.b",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].fill_color.b",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].fill_color.a",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].fill_color.a",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].outline_color",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".circles[:].outline_color",
-            "type": "foxglove.ImageAnnotations.circles.outline_color",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].outline_color.r",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].outline_color.r",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].outline_color.g",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].outline_color.g",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].outline_color.b",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].outline_color.b",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.circles[:].outline_color.a",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".circles[:].outline_color.a",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".points",
-            "type": "foxglove.ImageAnnotations.points[]",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].timestamp",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".points[:].timestamp",
-            "type": "foxglove.ImageAnnotations.points.timestamp",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].timestamp.sec",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].timestamp.sec",
-            "type": "uint32",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].timestamp.nsec",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].timestamp.nsec",
-            "type": "uint32",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].type",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].type",
-            "type": "uint32",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].points",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".points[:].points",
-            "type": "foxglove.ImageAnnotations.points.points[]",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].points[:].x",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].points[:].x",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].points[:].y",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].points[:].y",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_color",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".points[:].outline_color",
-            "type": "foxglove.ImageAnnotations.points.outline_color",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_color.r",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].outline_color.r",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_color.g",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].outline_color.g",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_color.b",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].outline_color.b",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_color.a",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].outline_color.a",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_colors",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".points[:].outline_colors",
-            "type": "foxglove.ImageAnnotations.points.outline_colors[]",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_colors[:].r",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].outline_colors[:].r",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_colors[:].g",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].outline_colors[:].g",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_colors[:].b",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].outline_colors[:].b",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].outline_colors[:].a",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].outline_colors[:].a",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].fill_color",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".points[:].fill_color",
-            "type": "foxglove.ImageAnnotations.points.fill_color",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].fill_color.r",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].fill_color.r",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].fill_color.g",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].fill_color.g",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].fill_color.b",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].fill_color.b",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].fill_color.a",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].fill_color.a",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.points[:].thickness",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".points[:].thickness",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".texts",
-            "type": "foxglove.ImageAnnotations.texts[]",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].timestamp",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".texts[:].timestamp",
-            "type": "foxglove.ImageAnnotations.texts.timestamp",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].timestamp.sec",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].timestamp.sec",
-            "type": "uint32",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].timestamp.nsec",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].timestamp.nsec",
-            "type": "uint32",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].position",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".texts[:].position",
-            "type": "foxglove.ImageAnnotations.texts.position",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].position.x",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].position.x",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].position.y",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].position.y",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].text",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].text",
-            "type": "string",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].font_size",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].font_size",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].text_color",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".texts[:].text_color",
-            "type": "foxglove.ImageAnnotations.texts.text_color",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].text_color.r",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].text_color.r",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].text_color.g",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].text_color.g",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].text_color.b",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].text_color.b",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].text_color.a",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].text_color.a",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].background_color",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": false,
-            "pathSuffix": ".texts[:].background_color",
-            "type": "foxglove.ImageAnnotations.texts.background_color",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].background_color.r",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].background_color.r",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].background_color.g",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].background_color.g",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].background_color.b",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].background_color.b",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-        {
-          "fullPath": "annotations.texts[:].background_color.a",
-          "offset": 11,
-          "suffix": {
-            "isLeaf": true,
-            "pathSuffix": ".texts[:].background_color.a",
-            "type": "float64",
-          },
-          "topic": {
-            "name": "annotations",
-            "schemaName": "foxglove.ImageAnnotations",
-          },
-        },
-      ]
+     [
+       {
+         "fullPath": "annotations.timestamp",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".timestamp",
+           "type": "foxglove.ImageAnnotations.timestamp",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.timestamp.sec",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".timestamp.sec",
+           "type": "uint32",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.timestamp.nsec",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".timestamp.nsec",
+           "type": "uint32",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".circles",
+           "type": "foxglove.ImageAnnotations.circles[]",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].timestamp",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".circles[:].timestamp",
+           "type": "foxglove.ImageAnnotations.circles.timestamp",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].timestamp.sec",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].timestamp.sec",
+           "type": "uint32",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].timestamp.nsec",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].timestamp.nsec",
+           "type": "uint32",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].position",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".circles[:].position",
+           "type": "foxglove.ImageAnnotations.circles.position",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].position.x",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].position.x",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].position.y",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].position.y",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].diameter",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].diameter",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].thickness",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].thickness",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].fill_color",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".circles[:].fill_color",
+           "type": "foxglove.ImageAnnotations.circles.fill_color",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].fill_color.r",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].fill_color.r",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].fill_color.g",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].fill_color.g",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].fill_color.b",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].fill_color.b",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].fill_color.a",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].fill_color.a",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].outline_color",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".circles[:].outline_color",
+           "type": "foxglove.ImageAnnotations.circles.outline_color",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].outline_color.r",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].outline_color.r",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].outline_color.g",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].outline_color.g",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].outline_color.b",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].outline_color.b",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].outline_color.a",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].outline_color.a",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].metadata",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".circles[:].metadata",
+           "type": "foxglove.ImageAnnotations.circles.metadata[]",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].metadata[:].key",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].metadata[:].key",
+           "type": "string",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.circles[:].metadata[:].value",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".circles[:].metadata[:].value",
+           "type": "string",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".points",
+           "type": "foxglove.ImageAnnotations.points[]",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].timestamp",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".points[:].timestamp",
+           "type": "foxglove.ImageAnnotations.points.timestamp",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].timestamp.sec",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].timestamp.sec",
+           "type": "uint32",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].timestamp.nsec",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].timestamp.nsec",
+           "type": "uint32",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].type",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].type",
+           "type": "uint32",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].points",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".points[:].points",
+           "type": "foxglove.ImageAnnotations.points.points[]",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].points[:].x",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].points[:].x",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].points[:].y",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].points[:].y",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_color",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".points[:].outline_color",
+           "type": "foxglove.ImageAnnotations.points.outline_color",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_color.r",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].outline_color.r",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_color.g",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].outline_color.g",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_color.b",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].outline_color.b",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_color.a",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].outline_color.a",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_colors",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".points[:].outline_colors",
+           "type": "foxglove.ImageAnnotations.points.outline_colors[]",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_colors[:].r",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].outline_colors[:].r",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_colors[:].g",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].outline_colors[:].g",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_colors[:].b",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].outline_colors[:].b",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].outline_colors[:].a",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].outline_colors[:].a",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].fill_color",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".points[:].fill_color",
+           "type": "foxglove.ImageAnnotations.points.fill_color",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].fill_color.r",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].fill_color.r",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].fill_color.g",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].fill_color.g",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].fill_color.b",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].fill_color.b",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].fill_color.a",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].fill_color.a",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].thickness",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].thickness",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].metadata",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".points[:].metadata",
+           "type": "foxglove.ImageAnnotations.points.metadata[]",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].metadata[:].key",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].metadata[:].key",
+           "type": "string",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.points[:].metadata[:].value",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".points[:].metadata[:].value",
+           "type": "string",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".texts",
+           "type": "foxglove.ImageAnnotations.texts[]",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].timestamp",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".texts[:].timestamp",
+           "type": "foxglove.ImageAnnotations.texts.timestamp",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].timestamp.sec",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].timestamp.sec",
+           "type": "uint32",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].timestamp.nsec",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].timestamp.nsec",
+           "type": "uint32",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].position",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".texts[:].position",
+           "type": "foxglove.ImageAnnotations.texts.position",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].position.x",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].position.x",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].position.y",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].position.y",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].text",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].text",
+           "type": "string",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].font_size",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].font_size",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].text_color",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".texts[:].text_color",
+           "type": "foxglove.ImageAnnotations.texts.text_color",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].text_color.r",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].text_color.r",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].text_color.g",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].text_color.g",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].text_color.b",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].text_color.b",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].text_color.a",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].text_color.a",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].background_color",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".texts[:].background_color",
+           "type": "foxglove.ImageAnnotations.texts.background_color",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].background_color.r",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].background_color.r",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].background_color.g",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].background_color.g",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].background_color.b",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].background_color.b",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].background_color.a",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].background_color.a",
+           "type": "float64",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].metadata",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".texts[:].metadata",
+           "type": "foxglove.ImageAnnotations.texts.metadata[]",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].metadata[:].key",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].metadata[:].key",
+           "type": "string",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.texts[:].metadata[:].value",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".texts[:].metadata[:].value",
+           "type": "string",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.metadata",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": false,
+           "pathSuffix": ".metadata",
+           "type": "foxglove.ImageAnnotations.metadata[]",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.metadata[:].key",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".metadata[:].key",
+           "type": "string",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+       {
+         "fullPath": "annotations.metadata[:].value",
+         "offset": 11,
+         "suffix": {
+           "isLeaf": true,
+           "pathSuffix": ".metadata[:].value",
+           "type": "string",
+         },
+         "topic": {
+           "name": "annotations",
+           "schemaName": "foxglove.ImageAnnotations",
+         },
+       },
+     ]
     `);
   });
 });

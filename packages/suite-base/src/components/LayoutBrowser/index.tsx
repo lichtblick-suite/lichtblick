@@ -224,7 +224,7 @@ export default function LayoutBrowser({
     await onSelectLayout(newLayout);
     setPersonalSectionExpanded(true);
 
-    await analytics.logEvent(AppEvent.LAYOUT_CREATE);
+    analytics.logEvent(AppEvent.LAYOUT_CREATE);
   }, [
     currentDateForStorybook,
     layoutManager,
@@ -247,7 +247,7 @@ export default function LayoutBrowser({
           data: item.working?.data ?? item.baseline.data,
           permission: "ORG_WRITE",
         });
-        await analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
+        analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
         setSharedSectionExpanded(true);
         await onSelectLayout(newLayout);
       }
@@ -263,7 +263,7 @@ export default function LayoutBrowser({
       });
       setPersonalSectionExpanded(true);
       await onSelectLayout(newLayout);
-      await analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
+      analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
         permission: item.permission,
         syncStatus: item.syncInfo?.status,
       });

@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import type { FrameTransform } from "@foxglove/schemas";
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 
 import { fromSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";

@@ -16,11 +16,11 @@
 
 import DoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import { Fab } from "@mui/material";
-import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { useLatest } from "react-use";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { VariableSizeList as List } from "react-window";
+import { List, ListImperativeAPI, RowComponentProps } from "react-window";
 
 import { useAppTimeFormat } from "@lichtblick/suite-base/hooks";
 import { NormalizedLogMessage } from "@lichtblick/suite-base/panels/Log/types";
@@ -36,26 +36,27 @@ export type LogListProps = {
 type ListItemData = {
   items: readonly NormalizedLogMessage[];
   setRowHeight: (index: number, height: number) => void;
+  /** Incremented when heights change; passed through rowProps so List re-calls rowHeight. */
+  heightVersion: number;
+  /** Included so the Row effect re-fires when the container width changes. */
+  resizedWidth: number | undefined;
 };
 
-function Row(props: {
-  data: ListItemData;
-  index: number;
-  style: CSSProperties;
-}): React.JSX.Element {
+function Row(props: RowComponentProps<ListItemData>): React.JSX.Element {
+  const { setRowHeight, index, style, items, resizedWidth } = props;
   const { timeFormat, timeZone } = useAppTimeFormat();
   const ref = useRef<HTMLDivElement>(ReactNull);
 
   useEffect(() => {
     if (ref.current) {
-      props.data.setRowHeight(props.index, ref.current.clientHeight);
+      setRowHeight(index, ref.current.clientHeight);
     }
-  }, [props.index, props.data]);
+  }, [index, setRowHeight, resizedWidth]);
 
-  const item = props.data.items[props.index]!;
+  const item = items[index]!;
 
   return (
-    <div style={{ ...props.style, height: "auto" }} ref={ref}>
+    <div style={{ ...style, height: "auto" }} ref={ref}>
       <LogMessage value={item} timestampFormat={timeFormat} timeZone={timeZone} />
     </div>
   );
@@ -69,97 +70,72 @@ function LogList({ items }: LogListProps): React.JSX.Element {
   const { classes } = useStyles();
 
   // Reference to the list item itself.
-  const listRef = useRef<List>(ReactNull);
+  const listRef = useRef<ListImperativeAPI>(ReactNull);
 
-  // Reference to the outer list div. Needed for autoscroll determination.
-  const outerRef = useRef<HTMLDivElement>(ReactNull);
+  const latestItems = useLatest(items);
 
-  const latestItems = useLatest(items); // Cache calculated item heights.
   const itemHeightCache = useRef<Record<number, number>>({});
-
-  const isResizing = useRef(false);
-
-  // Automatically scroll to reveal new items.
-  const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
-
-  const onResetView = React.useCallback(() => {
-    setAutoscrollToEnd(true);
-    listRef.current?.scrollToItem(latestItems.current.length - 1, "end");
-  }, [latestItems]);
-
-  useEffect(() => {
-    if (autoscrollToEnd) {
-      listRef.current?.scrollToItem(items.length - 1, "end");
-    }
-  }, [autoscrollToEnd, items.length]);
-
-  // Disable autoscroll if the user manually scrolls back.
-  const onScroll = React.useCallback(
-    ({
-      scrollDirection,
-      scrollOffset,
-      scrollUpdateWasRequested,
-    }: {
-      scrollDirection: "forward" | "backward";
-      scrollOffset: number;
-      scrollUpdateWasRequested: boolean;
-    }) => {
-      try {
-        // Ignore row resize scroll events
-        if (isResizing.current) {
-          isResizing.current = false;
-          return;
-        }
-
-        // Asserted by react-window
-        const outerElement = outerRef.current!;
-
-        const { offsetHeight, scrollHeight } = outerElement;
-
-        const lastRowHeight = itemHeightCache.current[latestItems.current.length - 1] ?? 0;
-        const isAtEnd = scrollOffset + offsetHeight + lastRowHeight >= scrollHeight;
-
-        if (!scrollUpdateWasRequested && scrollDirection === "backward" && !isAtEnd) {
-          setAutoscrollToEnd(false);
-        } else if (scrollDirection === "forward" && isAtEnd) {
-          setAutoscrollToEnd(true);
-        }
-      } catch (error) {
-        console.error("Error while handling scroll", error);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
-
-  const getRowHeight = useCallback((index: number) => {
-    const height = itemHeightCache.current[index] ?? DEFAULT_ROW_HEIGHT;
-    return height;
-  }, []);
+  const [heightVersion, forceHeightUpdate] = useReducer((n: number) => n + 1, 0);
 
   const setRowHeight = useCallback((index: number, height: number) => {
     if (itemHeightCache.current[index] !== height) {
       itemHeightCache.current[index] = height;
-      isResizing.current = true;
-      listRef.current?.resetAfterIndex(index);
+      forceHeightUpdate();
     }
   }, []);
+
+  const getRowHeight = useCallback(
+    (index: number, _rowProps: ListItemData) =>
+      itemHeightCache.current[index] ?? DEFAULT_ROW_HEIGHT,
+    [],
+  );
 
   const { width: resizedWidth, ref: resizeRootRef } = useResizeDetector({
     refreshRate: 0,
     refreshMode: "debounce",
   });
 
+  // Automatically scroll to reveal new items.
+  const [autoscrollToEnd, setAutoscrollToEnd] = useState(true);
+
+  const onResetView = React.useCallback(() => {
+    setAutoscrollToEnd(true);
+    if (latestItems.current.length > 0) {
+      listRef.current?.scrollToRow({ index: latestItems.current.length - 1, align: "end" });
+    }
+  }, [latestItems]);
+
+  useEffect(() => {
+    if (autoscrollToEnd && items.length > 0) {
+      listRef.current?.scrollToRow({ index: items.length - 1, align: "end" });
+    }
+  }, [autoscrollToEnd, items.length]);
+
+  // Disable autoscroll if the user manually scrolls back.
+  const onScroll = React.useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    try {
+      const target = event.currentTarget;
+      const { scrollTop, offsetHeight, scrollHeight } = target;
+      const isAtEnd = scrollTop + offsetHeight >= scrollHeight - 1;
+      if (!isAtEnd) {
+        setAutoscrollToEnd(false);
+      } else {
+        setAutoscrollToEnd(true);
+      }
+    } catch (error) {
+      console.error("Error while handling scroll", error);
+    }
+  }, []);
+
   // This is passed to each row to tell it what to render.
   const itemData = useMemo(
     () => ({
       items,
       setRowHeight,
+      heightVersion,
+      resizedWidth,
     }),
-    // Add resized width as an extra dep here to force the list to recalculate
-    // everything when the width changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, setRowHeight, resizedWidth],
+    [items, setRowHeight, heightVersion, resizedWidth],
   );
 
   return (
@@ -171,20 +147,16 @@ function LogList({ items }: LogListProps): React.JSX.Element {
             ref={resizeRootRef}
             data-testid="virtualized-list"
           >
-            <List
-              ref={listRef}
-              width={width}
-              height={height}
-              style={{ outline: "none" }}
-              itemData={itemData}
-              itemSize={getRowHeight}
-              itemCount={items.length}
-              outerRef={outerRef}
+            <List<ListItemData>
+              listRef={listRef}
+              style={{ outline: "none", width, height }}
+              rowProps={itemData}
+              rowHeight={getRowHeight}
+              rowCount={items.length}
               onScroll={onScroll}
+              rowComponent={Row}
               data-testid="scrollable-list"
-            >
-              {Row}
-            </List>
+            />
 
             {!autoscrollToEnd && (
               <Fab

@@ -71,7 +71,7 @@ export default function ExtensionList({
         await new Promise((resolve) => setTimeout(resolve, 100));
         await uninstallExtension(extension.namespace ?? "local", extension.id);
         successCount++;
-        await analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
+        analytics.logEvent(AppEvent.EXTENSION_UNINSTALL, { type: extension.id });
       } catch (error) {
         console.error("Failed to uninstall extension:", error);
         failCount++;

@@ -13,7 +13,7 @@ import {
   PointsAnnotationType,
   RawImage,
 } from "@foxglove/schemas";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 import { fireEvent, screen, userEvent, waitFor } from "@storybook/testing-library";
 import { useCallback, useMemo, useState } from "react";
 import { useAsync } from "react-use";

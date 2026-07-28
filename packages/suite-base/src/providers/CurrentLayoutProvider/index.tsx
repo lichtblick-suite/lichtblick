@@ -381,7 +381,7 @@ export default function CurrentLayoutProvider({
       createTabPanel: (payload: CreateTabPanelPayload) => {
         performAction({ type: "CREATE_TAB_PANEL", payload });
         setSelectedPanelIds([]);
-        void analytics.logEvent(AppEvent.PANEL_ADD, { type: "Tab" });
+        analytics.logEvent(AppEvent.PANEL_ADD, { type: "Tab" });
       },
       changePanelLayout: (payload: ChangePanelLayoutPayload) => {
         performAction({ type: "CHANGE_PANEL_LAYOUT", payload });
@@ -405,7 +405,7 @@ export default function CurrentLayoutProvider({
         // Deselect the removed panel
         setSelectedPanelIds((ids) => ids.filter((id) => id !== closedId));
 
-        void analytics.logEvent(
+        analytics.logEvent(
           AppEvent.PANEL_DELETE,
           typeof closedId === "string" ? { type: getPanelTypeFromId(closedId) } : undefined,
         );
@@ -428,8 +428,8 @@ export default function CurrentLayoutProvider({
           );
           setSelectedPanelIds(_.difference(afterPanelIds, beforePanelIds));
         }
-        void analytics.logEvent(AppEvent.PANEL_ADD, { type: payload.type, action: "swap" });
-        void analytics.logEvent(AppEvent.PANEL_DELETE, {
+        analytics.logEvent(AppEvent.PANEL_ADD, { type: payload.type, action: "swap" });
+        analytics.logEvent(AppEvent.PANEL_DELETE, {
           type: getPanelTypeFromId(payload.originalId),
           action: "swap",
         });
@@ -439,11 +439,11 @@ export default function CurrentLayoutProvider({
       },
       addPanel: (payload: AddPanelPayload) => {
         performAction({ type: "ADD_PANEL", payload });
-        void analytics.logEvent(AppEvent.PANEL_ADD, { type: getPanelTypeFromId(payload.id) });
+        analytics.logEvent(AppEvent.PANEL_ADD, { type: getPanelTypeFromId(payload.id) });
       },
       dropPanel: (payload: DropPanelPayload) => {
         performAction({ type: "DROP_PANEL", payload });
-        void analytics.logEvent(AppEvent.PANEL_ADD, {
+        analytics.logEvent(AppEvent.PANEL_ADD, {
           type: payload.newPanelType,
           action: "drop",
         });

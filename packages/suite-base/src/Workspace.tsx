@@ -24,7 +24,7 @@ import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useStyles } from "@lichtblick/suite-base/Workspace.style";
 import SessionAPI from "@lichtblick/suite-base/api/session/SessionAPI";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
-import { AlertsList } from "@lichtblick/suite-base/components/AlertsList";
+import { AlertsList } from "@lichtblick/suite-base/components/AlertList/AlertsList";
 import { AppBar } from "@lichtblick/suite-base/components/AppBar";
 import {
   DataSourceDialog,
@@ -98,6 +98,7 @@ import useBroadcast from "@lichtblick/suite-base/util/broadcast/useBroadcast";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import { useWorkspaceActions } from "./context/Workspace/useWorkspaceActions";
+import { severityToBadgeColor } from "./utils";
 
 const log = Logger.getLogger(__filename);
 
@@ -140,7 +141,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { availableSources, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const { alertCount } = useAlertCount();
+  const { alertCount, highestSeverity } = useAlertCount();
 
   const dataSourceDialog = useWorkspaceStore(selectWorkspaceDataSourceDialog);
   const leftSidebarItem = useWorkspaceStore(selectWorkspaceLeftSidebarItem);
@@ -303,7 +304,10 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
           iconName: "DatabaseSettings",
           title: "Data source",
           component: DataSourceSidebarItem,
-          badge: alertCount > 0 ? { count: alertCount } : undefined,
+          badge:
+            alertCount > 0
+              ? { count: alertCount, color: severityToBadgeColor(highestSeverity) }
+              : undefined,
         },
       ],
     ]);
@@ -372,6 +376,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   }, [
     DataSourceSidebarItem,
     alertCount,
+    highestSeverity,
     enableNewTopNav,
     enableStudioLogsSidebar,
     AppContextLayoutBrowser,
@@ -392,13 +397,16 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         {
           title: "Alerts",
           component: AlertsList,
-          badge: alertCount > 0 ? { count: alertCount, color: "error" } : undefined,
+          badge:
+            alertCount > 0
+              ? { count: alertCount, color: severityToBadgeColor(highestSeverity) }
+              : undefined,
         },
       ],
       ["layouts", { title: "Layouts", component: LayoutBrowser }],
     ]);
     return items;
-  }, [PanelSettingsSidebar, alertCount]);
+  }, [PanelSettingsSidebar, alertCount, highestSeverity]);
 
   const rightSidebarItems = useMemo(() => {
     const items = new Map<RightSidebarItemKey, SidebarItem>([

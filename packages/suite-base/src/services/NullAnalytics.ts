@@ -8,5 +8,5 @@
 import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 
 export default class NullAnalytics implements IAnalytics {
-  public logEvent(): void | Promise<void> {}
+  public logEvent(): void {}
 }
