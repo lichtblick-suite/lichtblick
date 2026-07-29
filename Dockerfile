@@ -19,8 +19,11 @@ COPY <<'EOF' /entrypoint.sh
 # Optionally override API_URL at runtime using environment variable
 index_html=$(cat index.html)
 runtime_api_url="${API_URL:-}"
-runtime_api_placeholder='/*LICHTBLICK_SUITE_RUNTIME_API_URL_PLACEHOLDER*/'
-index_html="${index_html/"$runtime_api_placeholder"/$runtime_api_url}"
+# Serialize API_URL to JSON-safe string: escape backslashes and quotes (and defensively encode HTML/special chars in case of edge cases)
+runtime_api_url_json=$(printf '%s' "$runtime_api_url" | awk 'BEGIN { printf "\"" } { if (NR > 1) { printf "\\n" } gsub(/\\/, "\\\\"); gsub(/"/, "\\\""); gsub(/</, "\\u003c"); gsub(/>/, "\\u003e"); gsub(/&/, "\\u0026"); printf "%s", $0 } END { printf "\"" }')
+runtime_api_url_json=${runtime_api_url_json:-'""'}
+runtime_api_placeholder='/*LICHTBLICK_SUITE_RUNTIME_API_URL_PLACEHOLDER*/ null'
+index_html="${index_html/"$runtime_api_placeholder"/$runtime_api_url_json}"
 
 # Optionally override the default layout with one provided via bind mount
 mkdir -p /lichtblick

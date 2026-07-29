@@ -180,7 +180,7 @@ export const mainConfig =
       global = globalThis;
       globalThis.LICHTBLICK_SUITE_DEFAULT_LAYOUT = [/*LICHTBLICK_SUITE_DEFAULT_LAYOUT_PLACEHOLDER*/][0];
       globalThis.LICHTBLICK_RUNTIME_CONFIG = {
-        API_URL: "/*LICHTBLICK_SUITE_RUNTIME_API_URL_PLACEHOLDER*/",
+        API_URL: /*LICHTBLICK_SUITE_RUNTIME_API_URL_PLACEHOLDER*/ null,
       };
     </script>
     <body>

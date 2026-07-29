@@ -21,11 +21,13 @@ const runtimeConfig = (
   }
 ).LICHTBLICK_RUNTIME_CONFIG;
 
+const useRuntimeApiUrl: boolean = !!(runtimeConfig?.API_URL && runtimeConfig.API_URL !== "");
+
 export const APP_CONFIG = {
   /**
    * API base URL for HTTP requests
    */
-  apiUrl: runtimeConfig?.API_URL || API_URL,
+  apiUrl: useRuntimeApiUrl ? runtimeConfig?.API_URL : API_URL,
 
   /**
    * Application version
