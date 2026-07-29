@@ -124,7 +124,7 @@ export type RendererConfig = {
   /** Camera follow mode */
   followMode: FollowMode;
   /** Coordinate frameId the camera orbits around, tracked independently of followTf */
-  cameraTf?: string | undefined;
+  cameraTf?: string;
   scene: {
     /** Show rendering metrics in a DOM overlay */
     enableStats?: boolean;
