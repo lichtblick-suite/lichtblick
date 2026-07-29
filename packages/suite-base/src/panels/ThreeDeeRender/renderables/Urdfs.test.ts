@@ -442,7 +442,7 @@ describe("Urdfs opacity", () => {
       urdfs.dispose();
       const callsAfterDispose = removeChildren.mock.calls.length;
       jest.advanceTimersByTime(1000);
-      expect(removeChildren.mock.calls.length).toBe(callsAfterDispose);
+      expect(removeChildren.mock.calls).toHaveLength(callsAfterDispose);
 
       renderer.dispose();
     } finally {
@@ -481,7 +481,7 @@ describe("Urdfs opacity", () => {
       expect(urdfs.renderables.has("delete-debounce")).toBe(false);
       const callsAfterDelete = removeChildren.mock.calls.length;
       jest.advanceTimersByTime(1000);
-      expect(removeChildren.mock.calls.length).toBe(callsAfterDelete);
+      expect(removeChildren.mock.calls).toHaveLength(callsAfterDelete);
 
       renderer.dispose();
     } finally {
@@ -517,10 +517,10 @@ describe("Urdfs opacity", () => {
         },
       });
 
-      expect(removeChildren.mock.calls.length).toBe(callsBefore);
+      expect(removeChildren.mock.calls).toHaveLength(callsBefore);
 
       jest.advanceTimersByTime(500);
-      expect(removeChildren.mock.calls.length - callsBefore).toBe(1);
+      expect(removeChildren.mock.calls).toHaveLength(callsBefore + 1);
 
       renderer.dispose();
     } finally {
