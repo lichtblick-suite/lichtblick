@@ -468,12 +468,12 @@ Reusable prompts in `.github/prompts/` implement a Specify → Setup → Plan �
 
 | Prompt                                   | Purpose                                                   |
 | ---------------------------------------- | --------------------------------------------------------- |
-| `sdd-feature-develop.prompt.md`          | Feature development end-to-end                            |
-| `sdd-bug-fix.prompt.md`                  | Root-cause-driven bug fixes                               |
-| `sdd-lichtblick-upstream-sync.prompt.md` | Upstream merge with risk analysis                         |
-| `sdd-lichtblick-feature-adopt.prompt.md` | Adopt a specific upstream feature                         |
-| `open-pr.prompt.md`                      | Create a well-structured PR via `github` MCP (fork-aware) |
-| `review-pr.prompt.md`                    | Structured review integrating CodeRabbit                  |
+| `lb-feature-develop.prompt.md`          | Feature development end-to-end                            |
+| `lb-bug-fix.prompt.md`                  | Root-cause-driven bug fixes                               |
+| `lb-upstream-sync.prompt.md` | Upstream merge with risk analysis                         |
+| `lb-feature-adopt.prompt.md` | Adopt a specific upstream feature                         |
+| `lb-open-pr.prompt.md`                      | Create a well-structured PR via `github` MCP (fork-aware) |
+| `lb-review-pr.prompt.md`                    | Structured review integrating CodeRabbit                  |
 
 > **Fork-aware PR creation:** The `open-pr` and SDD prompts auto-detect whether the contributor is working from a fork or a direct clone. The correct `head` parameter (`owner:branch` for forks, `branch` for direct) is set automatically when calling `github/create_pull_request`.
 

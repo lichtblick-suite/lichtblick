@@ -32,7 +32,7 @@ Determine the contributor's git context:
    ```sh
    git fetch upstream && git rebase upstream/develop
    ```
-4. **Optional — parallel work:** If this fix runs alongside other independent SDD tasks, set it up in a dedicated git worktree first (see [setup-worktree.prompt.md](./setup-worktree.prompt.md)) and run the rest of this workflow inside that worktree. This keeps each task on its own branch and checkout.
+4. **Optional — parallel work:** If this fix runs alongside other independent SDD tasks, set it up in a dedicated git worktree first (see [lb-setup-worktree.prompt.md](./lb-setup-worktree.prompt.md)) and run the rest of this workflow inside that worktree. This keeps each task on its own branch and checkout.
 
 ## Phase 3: Diagnose
 

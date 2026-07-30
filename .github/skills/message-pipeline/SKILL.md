@@ -1,4 +1,5 @@
 ---
+name: "message-pipeline"
 description: "Deep MessagePipeline implementation knowledge: zustand store shape, React context provider, subscription merging/memoization, render-state flow, and the Player→panel data bus."
 ---
 

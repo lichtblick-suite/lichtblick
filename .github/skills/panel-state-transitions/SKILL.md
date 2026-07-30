@@ -1,4 +1,5 @@
 ---
+name: "panel-state-transitions"
 description: "Deep StateTransitions panel knowledge: TimeBasedChart segments, message-path extraction, preloaded-range subscription with 250ms batch flush, block+currentFrame merge, and messagesToDataset."
 ---
 

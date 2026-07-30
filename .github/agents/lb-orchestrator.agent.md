@@ -44,7 +44,7 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 Parallelism happens at two distinct layers — do not conflate them:
 
 1. **Within a single task** — governed by the Write-Ownership Principle above. Multiple agents may read the same files; exactly one writer edits a given path. This is logical parallelism inside one checkout; no git worktree is involved.
-2. **Across independent tasks** — handled at the session level using git worktrees (`setup-worktree.prompt.md`), set up **once per task by a human before** orchestration begins, ideally with a separate session per worktree.
+2. **Across independent tasks** — handled at the session level using git worktrees (`lb-setup-worktree.prompt.md`), set up **once per task by a human before** orchestration begins, ideally with a separate session per worktree.
 
 This orchestrator does **not** create worktrees: it has no `execute` tool, and prompt files are human-invoked entry points, not agent-callable. Do not route a task expecting a sub-agent to provision its own worktree — sub-agent invocations share this workspace's filesystem and working directory.
 

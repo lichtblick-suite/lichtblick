@@ -1,4 +1,5 @@
 ---
+name: "panel-log"
 description: "Deep Log panel knowledge: react-window VariableSizeList virtualization, dynamic measured row heights, autoscroll/tail behavior, multi-format log normalization, and level/text filtering."
 ---
 

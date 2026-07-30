@@ -41,9 +41,9 @@ Determine the contributor's git context to ensure correct branching and PR mecha
    ```sh
    git fetch upstream && git rebase upstream/develop
    ```
-4. **Optional — parallel work:** If this task runs alongside other independent SDD tasks, set it up in a dedicated git worktree first (see [setup-worktree.prompt.md](./setup-worktree.prompt.md)) and run the rest of this workflow inside that worktree. This keeps each task on its own branch and checkout.
+4. **Optional — parallel work:** If this task runs alongside other independent SDD tasks, set it up in a dedicated git worktree first (see [lb-setup-worktree.prompt.md](./lb-setup-worktree.prompt.md)) and run the rest of this workflow inside that worktree. This keeps each task on its own branch and checkout.
 
-This context is carried forward to Phase 5 (PR creation via `open-pr.prompt.md`).
+This context is carried forward to Phase 5 (PR creation via `lb-open-pr.prompt.md`).
 
 ## Phase 3: Plan
 

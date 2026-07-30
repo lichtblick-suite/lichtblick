@@ -1,4 +1,5 @@
 ---
+name: "panel-map"
 description: "Deep Map panel knowledge: Leaflet lifecycle, NavSatFix/LocationFix/GeoJSON handling, tile layers, and the FilteredPointLayer pixel-deduplication grid that bounds rendering cost."
 ---
 

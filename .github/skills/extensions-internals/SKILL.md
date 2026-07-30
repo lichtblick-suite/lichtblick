@@ -1,4 +1,5 @@
 ---
+name: "extensions-internals"
 description: "Deep extension system implementation knowledge: IExtensionLoader interface contracts, IndexedDB storage schema, version-compare cache strategy, contribution point registration, extension sandbox, and the .foxe packaging format."
 ---
 

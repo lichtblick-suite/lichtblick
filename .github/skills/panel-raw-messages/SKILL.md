@@ -1,4 +1,5 @@
 ---
+name: "panel-raw-messages"
 description: "Deep RawMessages panel knowledge: legacy (react-json-tree) vs virtual (@tanstack/react-virtual) implementations, flattenTreeData, TreeNode shape, expansion-state management, shared logic hook, and diff mode."
 ---
 

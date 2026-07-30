@@ -1,4 +1,5 @@
 ---
+name: "layouts-internals"
 description: "Deep layout system implementation knowledge: ILayoutStorage contracts, IndexedDB schema, sync operation computation, mutex-locked LayoutManager, conflict resolution, WriteThroughLayoutCache, NamespacedLayoutStorage, and CurrentLayoutProvider reducers."
 ---
 
