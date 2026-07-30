@@ -1,4 +1,5 @@
 ---
+name: "remote-caching"
 description: "Deep implementation details of HTTP-layer caching for remote file access: CachedFilelike, VirtualLRUBuffer, connection management algorithm, BrowserHttpReader, FetchReader streaming, and RequestQueue concurrency control."
 ---
 

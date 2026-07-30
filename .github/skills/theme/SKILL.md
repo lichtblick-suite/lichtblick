@@ -1,4 +1,5 @@
 ---
+name: "theme"
 description: "Deep theme system knowledge: createMuiTheme factory, dark/light palette tokens, typography scale, ThemeProvider color-scheme application, and tss-react/mui styling conventions."
 ---
 

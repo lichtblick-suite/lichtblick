@@ -178,12 +178,12 @@ Located in `.github/prompts/`. Prompt files provide reusable workflows for multi
 
 | Prompt                                   | Purpose                                                                                                                 |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `sdd-feature-develop.prompt.md`          | Structured feature workflow: Specify -> Plan -> Tasks -> Implement -> Verify.                                           |
-| `sdd-bug-fix.prompt.md`                  | Structured bug-fix workflow: Reproduce -> Diagnose -> Plan -> Implement -> Verify.                                      |
-| `sdd-lichtblick-upstream-sync.prompt.md` | Evaluate and execute upstream synchronization with compatibility/risk analysis.                                         |
-| `sdd-lichtblick-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature with an explicit decision matrix.                                        |
-| `open-pr.prompt.md`                      | Create a complete PR description with testing evidence and risk notes. Uses `github` MCP server.                        |
-| `review-pr.prompt.md`                    | Two-phase PR review: structured analysis integrating CodeRabbit, then implement CodeRabbit AI agent prompt suggestions. |
+| `lb-feature-develop.prompt.md`          | Structured feature workflow: Specify -> Plan -> Tasks -> Implement -> Verify.                                           |
+| `lb-bug-fix.prompt.md`                  | Structured bug-fix workflow: Reproduce -> Diagnose -> Plan -> Implement -> Verify.                                      |
+| `lb-upstream-sync.prompt.md` | Evaluate and execute upstream synchronization with compatibility/risk analysis.                                         |
+| `lb-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature with an explicit decision matrix.                                        |
+| `lb-open-pr.prompt.md`                      | Create a complete PR description with testing evidence and risk notes. Uses `github` MCP server.                        |
+| `lb-review-pr.prompt.md`                    | Two-phase PR review: structured analysis integrating CodeRabbit, then implement CodeRabbit AI agent prompt suggestions. |
 
 ---
 

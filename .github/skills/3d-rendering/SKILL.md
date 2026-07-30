@@ -1,4 +1,5 @@
 ---
+name: "3d-rendering"
 description: "Deep THREE.js rendering knowledge for the 3D panel: WebGL pipeline, buffer management, instanced rendering, shader considerations, and scene optimization techniques."
 ---
 

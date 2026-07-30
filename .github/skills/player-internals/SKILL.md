@@ -1,4 +1,5 @@
 ---
+name: "player-internals"
 description: "Deep implementation details of the IterablePlayer state machine, tick loop, and data source iteration patterns."
 ---
 

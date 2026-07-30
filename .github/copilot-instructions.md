@@ -147,12 +147,12 @@ Reusable workflow prompts live in `.github/prompts/`.
 
 | Prompt | Purpose |
 | --- | --- |
-| `sdd-feature-develop.prompt.md` | Specify -> Plan -> Tasks -> Implement workflow for feature work |
-| `sdd-bug-fix.prompt.md` | Reproduce -> Diagnose -> Plan -> Implement workflow for bug fixes |
-| `sdd-lichtblick-upstream-sync.prompt.md` | Structured upstream sync analysis and execution workflow |
-| `sdd-lichtblick-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature safely |
-| `open-pr.prompt.md` | Build a complete PR title/body with validation evidence |
-| `review-pr.prompt.md` | Two-phase PR review: structured analysis integrating CodeRabbit findings, then implement CodeRabbit's AI agent prompt |
+| `lb-feature-develop.prompt.md` | Specify -> Plan -> Tasks -> Implement workflow for feature work |
+| `lb-bug-fix.prompt.md` | Reproduce -> Diagnose -> Plan -> Implement workflow for bug fixes |
+| `lb-upstream-sync.prompt.md` | Structured upstream sync analysis and execution workflow |
+| `lb-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature safely |
+| `lb-open-pr.prompt.md` | Build a complete PR title/body with validation evidence |
+| `lb-review-pr.prompt.md` | Two-phase PR review: structured analysis integrating CodeRabbit findings, then implement CodeRabbit's AI agent prompt |
 
 ---
 

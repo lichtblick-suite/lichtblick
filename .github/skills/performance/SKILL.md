@@ -1,4 +1,5 @@
 ---
+name: "performance"
 description: "Deep performance optimization knowledge for the Lichtblick codebase. Covers profiling techniques, common bottlenecks, memory management patterns, and optimization strategies specific to real-time data visualization."
 ---
 
