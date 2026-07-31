@@ -721,6 +721,15 @@ describe("layout", () => {
       expect(() => validateLayoutData(data)).toThrow('invalid "userNodes"');
     });
 
+    it("throws when userNodes is null", () => {
+      // Given a layout whose userNodes field is explicitly null
+      const data = { ...validData(), userNodes: null };
+
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(data)).toThrow('invalid "userNodes"');
+    });
+
     it("throws when playbackConfig is missing", () => {
       // Given a layout without playbackConfig
       const data = validData();
