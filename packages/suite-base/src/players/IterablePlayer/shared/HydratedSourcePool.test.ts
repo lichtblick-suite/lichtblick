@@ -172,10 +172,7 @@ describe("HydratedSourcePool", () => {
     const pool = new HydratedSourcePool(2);
     const token = {};
     const hydrator = {
-      open: jest
-        .fn()
-        .mockRejectedValueOnce(new Error("boom"))
-        .mockResolvedValueOnce("recovered"),
+      open: jest.fn().mockRejectedValueOnce(new Error("boom")).mockResolvedValueOnce("recovered"),
       close: jest.fn().mockResolvedValue(undefined),
     };
 

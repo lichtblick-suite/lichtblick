@@ -619,9 +619,9 @@ describe("McapIterableSource", () => {
 
       // When iterating messageIterator before initialize
       // Then it should throw (the async generator body runs on first next())
-      await expect(
-        source.messageIterator({ topics: new Map() }).next(),
-      ).rejects.toThrow("Invariant: uninitialized");
+      await expect(source.messageIterator({ topics: new Map() }).next()).rejects.toThrow(
+        "Invariant: uninitialized",
+      );
     });
 
     it("should return an iterator from the underlying source after initialization", async () => {
