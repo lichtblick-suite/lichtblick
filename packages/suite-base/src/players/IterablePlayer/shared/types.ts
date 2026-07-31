@@ -12,6 +12,9 @@ export type MultiSource =
   | {
       type: "files";
       files: Blob[];
+      // Primary byte budget for resident heavyweight readers (worker memory). Overrides the
+      // internal default when set. `maxHydratedSources` remains a count-cap safety on top of this.
+      maxHydratedBytes?: number;
       // Maximum number of heavyweight per-file readers kept resident at once. Bounds worker memory
       // for large multi-file sessions; sources beyond this are re-opened on demand.
       maxHydratedSources?: number;
@@ -31,6 +34,9 @@ export type MultiSource =
       // burst and the transient memory spike from concurrent MCAP summary reads. Defaults to a
       // small value for multi-file remote sessions.
       initConcurrency?: number;
+      // Primary byte budget for resident heavyweight readers (worker memory). Overrides the
+      // internal default when set. `maxHydratedSources` remains a count-cap safety on top of this.
+      maxHydratedBytes?: number;
       // Maximum number of heavyweight per-file readers kept resident at once. Bounds worker memory
       // for large multi-file remote sessions; sources beyond this are re-opened on demand.
       maxHydratedSources?: number;

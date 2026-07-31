@@ -10,31 +10,63 @@ export type SourceHydrator<T> = {
   open: () => Promise<T>;
   // Release the heavyweight value (close readable/connection, drop references).
   close: (value: T) => Promise<void>;
+  // Optional estimated resident memory (bytes) of the hydrated value, used by the byte budget.
+  // When omitted, every entry weighs 1 so the pool behaves as a pure count cap.
+  weigh?: (value: T) => number;
 };
 
 type Entry = {
   hydrator: SourceHydrator<unknown>;
   value: Promise<unknown>;
   pins: number;
+  // Estimated resident bytes for this entry. 0 until the value resolves (for acquire()).
+  weight: number;
+};
+
+export type HydratedSourcePoolOptions = {
+  // Primary limiter: evict LRU unpinned entries while total estimated bytes exceeds this.
+  maxBytes?: number;
+  // Safety cap on resident entry count (bounds open connections/readers regardless of weight).
+  maxCount?: number;
+  // Never evict below this many entries (default 1), even when over the byte/count budget.
+  minResident?: number;
 };
 
 /**
- * Bounded LRU pool of hydrated (heavyweight) sources. At most `capacity` entries are kept
- * resident; least-recently-used *unpinned* entries are closed when the pool is over capacity.
- * Entries currently in use are pinned via acquire()/release() and are never evicted while pinned,
- * so the pool may temporarily exceed capacity if more than `capacity` sources are active at once.
+ * Bounded LRU pool of hydrated (heavyweight) sources. Residency is bounded by a hybrid budget:
+ * a primary byte budget (`maxBytes`, via each entry's estimated `weight`) and a safety count cap
+ * (`maxCount`). Least-recently-used *unpinned* entries are closed when the pool is over either
+ * bound, but never below `minResident` entries and never while pinned (so the pool may temporarily
+ * exceed its bounds when more than the budget's worth of sources are active at once).
+ *
+ * Backward compatible: `new HydratedSourcePool(n)` is a pure count cap (`maxCount=n`,
+ * `maxBytes=Infinity`), and with no `weigh` hook every entry weighs 1.
  *
  * A JS Map preserves insertion order, so re-inserting an entry on access implements LRU ordering
  * (oldest first).
  */
 export class HydratedSourcePool {
-  readonly #capacity: number;
+  readonly #maxBytes: number;
+  readonly #maxCount: number;
+  readonly #minResident: number;
   // Insertion order is LRU order: the first entry is the least-recently-used.
   readonly #entries = new Map<object, Entry>();
+  #totalWeight = 0;
   #overCapacityReported = false;
 
-  public constructor(capacity: number) {
-    this.#capacity = Math.max(1, Math.floor(capacity));
+  public constructor(capacityOrOptions: number | HydratedSourcePoolOptions) {
+    if (typeof capacityOrOptions === "number") {
+      this.#maxCount = Math.max(1, Math.floor(capacityOrOptions));
+      this.#maxBytes = Number.POSITIVE_INFINITY;
+      this.#minResident = 1;
+    } else {
+      this.#maxCount =
+        capacityOrOptions.maxCount != undefined
+          ? Math.max(1, Math.floor(capacityOrOptions.maxCount))
+          : Number.POSITIVE_INFINITY;
+      this.#maxBytes = capacityOrOptions.maxBytes ?? Number.POSITIVE_INFINITY;
+      this.#minResident = Math.max(1, Math.floor(capacityOrOptions.minResident ?? 1));
+    }
   }
 
   // eslint-disable-next-line no-restricted-syntax
@@ -45,7 +77,7 @@ export class HydratedSourcePool {
   /**
    * Seed the pool with an already-hydrated value produced elsewhere (e.g. during initialization),
    * avoiding a redundant open(). The entry starts unpinned and may be evicted immediately if the
-   * pool is already at capacity. `hydrator.open` is used for later re-hydration after eviction.
+   * pool is already over budget. `hydrator.open` is used for later re-hydration after eviction.
    */
   public async admit<T>(token: object, hydrator: SourceHydrator<T>, value: T): Promise<void> {
     const existing = this.#entries.get(token);
@@ -56,11 +88,14 @@ export class HydratedSourcePool {
       await hydrator.close(value);
       return;
     }
+    const weight = Math.max(0, hydrator.weigh?.(value) ?? 1);
     this.#entries.set(token, {
       hydrator: hydrator as SourceHydrator<unknown>,
       value: Promise.resolve(value),
       pins: 0,
+      weight,
     });
+    this.#totalWeight += weight;
     await this.#evictBeyondCapacity();
   }
 
@@ -76,22 +111,35 @@ export class HydratedSourcePool {
       this.#entries.delete(token);
       this.#entries.set(token, existing);
       existing.pins += 1;
-      return (await existing.value) as T;
+      try {
+        return (await existing.value) as T;
+      } catch (err) {
+        // A co-pending open() rejected: drop the pin we just added so the (already removed by the
+        // hydrating caller) entry does not leak a phantom pin.
+        existing.pins -= 1;
+        throw err;
+      }
     }
 
     const entry: Entry = {
       hydrator: hydrator as SourceHydrator<unknown>,
       value: hydrator.open(),
       pins: 1,
+      weight: 0,
     };
     this.#entries.set(token, entry);
     try {
       const value = (await entry.value) as T;
+      entry.weight = Math.max(0, hydrator.weigh?.(value) ?? 1);
+      this.#totalWeight += entry.weight;
       await this.#evictBeyondCapacity();
-      log.debug(`hydrated source; resident=${this.#entries.size}/${this.#capacity}`);
+      log.debug(
+        `hydrated source; resident=${this.#entries.size}/${this.#maxCount} bytes=${this.#totalWeight}/${this.#maxBytes}`,
+      );
       return value;
     } catch (err) {
-      // Hydration failed: remove the broken entry so a later acquire can retry.
+      // Hydration failed: remove the broken entry so a later acquire can retry. Its weight was
+      // never added to #totalWeight, so there is nothing to roll back.
       entry.pins -= 1;
       this.#entries.delete(token);
       throw err;
@@ -107,7 +155,7 @@ export class HydratedSourcePool {
     if (entry.pins > 0) {
       entry.pins -= 1;
     }
-    // Opportunistically reclaim memory if we are over capacity and this entry is now evictable.
+    // Opportunistically reclaim memory if we are over budget and this entry is now evictable.
     void this.#evictBeyondCapacity().catch((err: unknown) => {
       log.error("HydratedSourcePool eviction failed", err);
     });
@@ -117,6 +165,7 @@ export class HydratedSourcePool {
   public async terminate(): Promise<void> {
     const entries = [...this.#entries.entries()];
     this.#entries.clear();
+    this.#totalWeight = 0;
     await Promise.all(
       entries.map(async ([, entry]) => {
         try {
@@ -128,10 +177,18 @@ export class HydratedSourcePool {
     );
   }
 
-  // Close least-recently-used unpinned entries until at or below capacity, or until only pinned
-  // entries remain (in which case the pool temporarily exceeds capacity).
+  // True when the pool exceeds either bound and may shed a least-recently-used unpinned entry.
+  #isOverCapacity(): boolean {
+    if (this.#entries.size <= this.#minResident) {
+      return false;
+    }
+    return this.#entries.size > this.#maxCount || this.#totalWeight > this.#maxBytes;
+  }
+
+  // Close least-recently-used unpinned entries until within budget, `minResident` is reached, or
+  // only pinned entries remain (in which case the pool temporarily exceeds its bounds).
   async #evictBeyondCapacity(): Promise<void> {
-    while (this.#entries.size > this.#capacity) {
+    while (this.#isOverCapacity()) {
       let evictKey: object | undefined;
       for (const [key, entry] of this.#entries) {
         if (entry.pins === 0) {
@@ -145,18 +202,19 @@ export class HydratedSourcePool {
       if (!this.#overCapacityReported) {
         this.#overCapacityReported = true;
         log.info(
-          `HydratedSourcePool over capacity: capping resident sources at ${this.#capacity} and re-opening others on demand.`,
+          `HydratedSourcePool over capacity: capping resident sources (maxCount=${this.#maxCount}, maxBytes=${this.#maxBytes}) and re-opening others on demand.`,
         );
       }
       const entry = this.#entries.get(evictKey)!;
       // Delete before awaiting close so concurrent evictions never target the same entry twice.
       this.#entries.delete(evictKey);
+      this.#totalWeight -= entry.weight;
       try {
         await entry.hydrator.close(await entry.value);
       } catch (err) {
         log.error("HydratedSourcePool evict close failed", err);
       }
-      log.debug(`evicted LRU source; resident=${this.#entries.size}/${this.#capacity}`);
+      log.debug(`evicted LRU source; resident=${this.#entries.size}/${this.#maxCount}`);
     }
   }
 }

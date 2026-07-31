@@ -51,9 +51,15 @@ const MIN_CACHE_PER_SOURCE_BYTES = 1024 * 1024 * 10; // 10 MiB
 // Default number of remote sources initialized concurrently. Bounds the initial request burst and the transient memory spike from concurrent MCAP summary reads.
 const DEFAULT_INIT_CONCURRENCY = 4;
 
-// Default number of heavyweight per-file readers kept resident at once for remote multi-file
-// sessions. Bounds worker memory; sources beyond this are re-opened on demand.
-const DEFAULT_MAX_HYDRATED_SOURCES = 8;
+// Default count-cap safety for heavyweight per-file readers kept resident at once. The byte
+// budget is primary; this was raised from 8 to allow more small-file residents.
+const DEFAULT_MAX_HYDRATED_SOURCES = 12;
+
+// Default primary byte budget for resident heavyweight readers in a multi-file session. The pool
+// evicts least-recently-used readers once estimated resident bytes exceed this. Heuristic; tune
+// against real datasets (see calibration task). Kept conservative so worker memory stays well
+// under the browser tab limit even if per-reader weight is under-estimated.
+const DEFAULT_MAX_HYDRATED_BYTES = 1024 * 1024 * 512; // 512 MiB
 
 export class MultiIterableSource<T extends ISerializedIterableSource, P>
   implements ISerializedIterableSource
@@ -63,6 +69,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   private dataSource: MultiSource;
   private sourceImpl: IIterableSource<Uint8Array>[] = [];
   #pool: HydratedSourcePool | undefined;
+  #maxHydratedSources: number = DEFAULT_MAX_HYDRATED_SOURCES;
 
   public constructor(dataSource: MultiSource, SourceConstructor: IterableSourceConstructor<T, P>) {
     this.dataSource = dataSource;
@@ -74,8 +81,13 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
 
     let sources: IIterableSource<Uint8Array>[];
     if (type === "files") {
-      const maxHydrated = this.dataSource.maxHydratedSources ?? DEFAULT_MAX_HYDRATED_SOURCES;
-      this.#pool = new HydratedSourcePool(maxHydrated);
+      const maxHydratedCount = this.dataSource.maxHydratedSources ?? DEFAULT_MAX_HYDRATED_SOURCES;
+      const maxHydratedBytes = this.dataSource.maxHydratedBytes ?? DEFAULT_MAX_HYDRATED_BYTES;
+      this.#maxHydratedSources = maxHydratedCount;
+      this.#pool = new HydratedSourcePool({
+        maxBytes: maxHydratedBytes,
+        maxCount: maxHydratedCount,
+      });
       sources = this.dataSource.files.map(
         (file) => new this.SourceConstructor({ type: "file", file, pool: this.#pool } as P),
       );
@@ -103,8 +115,13 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
       const readAheadEnabled: boolean =
         this.dataSource.readAheadEnabled ?? this.dataSource.urls.length === 1;
 
-      const maxHydrated = this.dataSource.maxHydratedSources ?? DEFAULT_MAX_HYDRATED_SOURCES;
-      this.#pool = new HydratedSourcePool(maxHydrated);
+      const maxHydratedCount = this.dataSource.maxHydratedSources ?? DEFAULT_MAX_HYDRATED_SOURCES;
+      const maxHydratedBytes = this.dataSource.maxHydratedBytes ?? DEFAULT_MAX_HYDRATED_BYTES;
+      this.#maxHydratedSources = maxHydratedCount;
+      this.#pool = new HydratedSourcePool({
+        maxBytes: maxHydratedBytes,
+        maxCount: maxHydratedCount,
+      });
 
       sources = this.dataSource.urls.map(
         (url) =>
@@ -153,7 +170,30 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
       return compare(aStart, bStart);
     });
 
+    // I1: warm the earliest-by-start sources so playback beginning at t=0 does not stall
+    // re-hydrating them. Best-effort and bounded by the pool's count cap.
+    await this.#prewarmEarliestSources();
+
     return resultInit;
+  }
+
+  // Touch the earliest-by-start sources in DESCENDING start order so the earliest end up
+  // most-recently-used in the pool (least likely to be evicted before playback reaches them).
+  // sourceImpl is sorted ascending by start time before this runs. Errors are non-fatal: a source
+  // that fails to prewarm will simply be hydrated on demand later.
+  async #prewarmEarliestSources(): Promise<void> {
+    if (!this.#pool) {
+      return;
+    }
+    const warmCount = Math.min(this.#maxHydratedSources, this.sourceImpl.length);
+    for (let index = warmCount - 1; index >= 0; index--) {
+      const source = this.sourceImpl[index] as { prewarm?: () => Promise<void> };
+      try {
+        await source.prewarm?.();
+      } catch (err) {
+        log.debug("prewarmEarliestSources: source prewarm failed", err);
+      }
+    }
   }
 
   public async *messageIterator(

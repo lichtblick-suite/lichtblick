@@ -27,6 +27,22 @@ import { HydratedSourcePool, SourceHydrator } from "../shared/HydratedSourcePool
 
 const log = Log.getLogger(__filename);
 
+// Heuristic per-reader resident-memory weights (bytes) used by the pool's byte budget. Absolute
+// values are approximate; the RELATIVE weighting (heavier index/more channels => evicted sooner)
+// is what matters. Calibrate against real datasets before loosening pool defaults.
+const READER_BASE_BYTES = 2 * 1024 * 1024; // fixed reader/deserializer overhead
+const BYTES_PER_CHUNK_INDEX = 512; // per chunk-index entry retained by McapIndexedReader
+const BYTES_PER_CHANNEL = 16 * 1024; // parsed schema + per-channel deserializer
+
+function estimateReaderWeightBytes(reader: McapIndexedReader, cacheBytes: number): number {
+  return (
+    READER_BASE_BYTES +
+    reader.chunkIndexes.length * BYTES_PER_CHUNK_INDEX +
+    reader.channelsById.size * BYTES_PER_CHANNEL +
+    cacheBytes
+  );
+}
+
 type McapSource =
   | { type: "file"; file: Blob; pool?: HydratedSourcePool }
   | {
@@ -41,6 +57,8 @@ type HydratedInner = {
   inner: ISerializedIterableSource;
   // Present only for remote sources so the connection/cache can be closed on eviction.
   readable?: RemoteFileReadable;
+  // Estimated resident bytes, fed to the pool's byte budget.
+  weightBytes: number;
 };
 
 /**
@@ -85,6 +103,7 @@ export class McapIterableSource implements ISerializedIterableSource {
     inner: ISerializedIterableSource;
     readable?: RemoteFileReadable;
     indexed: boolean;
+    weightBytes: number;
   }> {
     const source = this.#source;
 
@@ -104,7 +123,11 @@ export class McapIterableSource implements ISerializedIterableSource {
         const readable = new BlobReadable(source.file);
         const reader = await tryCreateIndexedReader(readable, decompressHandlers);
         if (reader) {
-          return { inner: new McapIndexedIterableSource(reader), indexed: true };
+          return {
+            inner: new McapIndexedIterableSource(reader),
+            indexed: true,
+            weightBytes: estimateReaderWeightBytes(reader, 0),
+          };
         }
         return {
           inner: new McapUnindexedIterableSource({
@@ -112,6 +135,7 @@ export class McapIterableSource implements ISerializedIterableSource {
             stream: source.file.stream(),
           }),
           indexed: false,
+          weightBytes: READER_BASE_BYTES,
         };
       }
       case "url": {
@@ -122,7 +146,12 @@ export class McapIterableSource implements ISerializedIterableSource {
         await readable.open();
         const reader = await tryCreateIndexedReader(readable, decompressHandlers);
         if (reader) {
-          return { inner: new McapIndexedIterableSource(reader), readable, indexed: true };
+          return {
+            inner: new McapIndexedIterableSource(reader),
+            readable,
+            indexed: true,
+            weightBytes: estimateReaderWeightBytes(reader, source.cacheSizeInBytes ?? 0),
+          };
         }
         // Unindexed remote fallback: single-pass streaming read of the whole file.
         readable.close();
@@ -137,6 +166,7 @@ export class McapIterableSource implements ISerializedIterableSource {
         return {
           inner: new McapUnindexedIterableSource({ size: parseInt(size), stream: response.body }),
           indexed: false,
+          weightBytes: READER_BASE_BYTES,
         };
       }
     }
@@ -146,13 +176,14 @@ export class McapIterableSource implements ISerializedIterableSource {
   // it can be closed on eviction.
   readonly #hydrator: SourceHydrator<HydratedInner> = {
     open: async () => {
-      const { inner, readable } = await this.#openInner();
+      const { inner, readable, weightBytes } = await this.#openInner();
       await inner.initialize();
-      return { inner, readable };
+      return { inner, readable, weightBytes };
     },
     close: async ({ readable }) => {
       readable?.close();
     },
+    weigh: ({ weightBytes }) => weightBytes,
   };
 
   public async initialize(): Promise<Initialization> {
@@ -166,8 +197,15 @@ export class McapIterableSource implements ISerializedIterableSource {
       this.#pool = pool;
       // Seed the pool with the already-hydrated inner (no redundant open). May be evicted+closed
       // immediately if the pool is already at capacity.
-      await pool.admit(this, this.#hydrator, { inner: opened.inner, readable: opened.readable });
+      await pool.admit(this, this.#hydrator, {
+        inner: opened.inner,
+        readable: opened.readable,
+        weightBytes: opened.weightBytes,
+      });
     } else {
+      // Unindexed (and unpooled) sources are retained eagerly for the whole session and are NOT
+      // bounded by the pool. A session of many large unindexed MCAPs can therefore grow unbounded;
+      // pooling them is non-trivial because re-hydration would re-stream the entire file.
       this.#eagerInner = opened.inner;
     }
     return init;
@@ -176,6 +214,9 @@ export class McapIterableSource implements ISerializedIterableSource {
   public async *messageIterator(
     opt: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult<Uint8Array>>> {
+    // NOTE: this is an async generator, so the "uninitialized" invariant below throws on the first
+    // .next() call, not when messageIterator() is invoked. Callers that expect a synchronous throw
+    // (mergeSequentialIterators calls .next(), so it surfaces there) should account for this.
     if (!this.#pool) {
       if (!this.#eagerInner) {
         throw new Error("Invariant: uninitialized");
@@ -214,6 +255,17 @@ export class McapIterableSource implements ISerializedIterableSource {
 
   public getEnd(): Time | undefined {
     return this.#end;
+  }
+
+  // Best-effort warm-up (I1): re-hydrate this source into the pool and immediately release it, so
+  // it becomes resident (and most-recently-used) without holding a pin. No-op for unpooled sources.
+  // Used to keep the earliest-by-start sources warm ahead of playback starting at t=0.
+  public async prewarm(): Promise<void> {
+    if (!this.#pool) {
+      return;
+    }
+    await this.#pool.acquire(this, this.#hydrator);
+    this.#pool.release(this);
   }
 
   public async terminate(): Promise<void> {
