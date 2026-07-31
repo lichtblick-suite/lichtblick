@@ -422,7 +422,7 @@ describe("McapIterableSource", () => {
         // Then getStart/getEnd return the cached range without opening a new reader
         expect(sourceA.getStart()).toEqual({ sec: 2, nsec: 0 });
         expect(sourceA.getEnd()).toEqual({ sec: 8, nsec: 0 });
-        expect(MockRemoteFileReadable.mock.calls.length).toBe(constructorCallsAfterInit);
+        expect(MockRemoteFileReadable.mock.calls).toHaveLength(constructorCallsAfterInit);
       });
 
       it("keeps every pooled source resident when N <= pool capacity", async () => {

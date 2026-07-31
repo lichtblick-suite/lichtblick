@@ -55,9 +55,7 @@ type McapSource =
 
 type HydratedInner = {
   inner: ISerializedIterableSource;
-  // Present only for remote sources so the connection/cache can be closed on eviction.
   readable?: RemoteFileReadable;
-  // Estimated resident bytes, fed to the pool's byte budget.
   weightBytes: number;
 };
 
@@ -97,8 +95,7 @@ export class McapIterableSource implements ISerializedIterableSource {
     this.#source = source;
   }
 
-  // Build a fresh inner source (open readable + reader). Returns the readable for remote sources so
-  // the caller can close its connection/cache when releasing.
+  // Build a fresh inner source. Returns the readable for remote sources so it can be closed later.
   async #openInner(): Promise<{
     inner: ISerializedIterableSource;
     readable?: RemoteFileReadable;
@@ -107,10 +104,7 @@ export class McapIterableSource implements ISerializedIterableSource {
   }> {
     const source = this.#source;
 
-    // Preload decompression handlers before starting any MCAP operations.
-    // This ensures WASM modules are fully loaded before the reader attempts any operations
-    // that might need decompression. Under network congestion, WASM modules can be slow
-    // to download/initialize. Without preloading, message reading could fail when handlers aren't ready yet.
+    // Preload decompression handlers so WASM is ready before any read that needs it.
     const decompressHandlers = await loadDecompressHandlers();
 
     switch (source.type) {
@@ -164,7 +158,10 @@ export class McapIterableSource implements ISerializedIterableSource {
           throw new Error(`Remote file is missing Content-Length header. <${source.url}>`);
         }
         return {
-          inner: new McapUnindexedIterableSource({ size: parseInt(size), stream: response.body }),
+          inner: new McapUnindexedIterableSource({
+            size: Number.parseInt(size, 10),
+            stream: response.body,
+          }),
           indexed: false,
           weightBytes: READER_BASE_BYTES,
         };
@@ -257,9 +254,8 @@ export class McapIterableSource implements ISerializedIterableSource {
     return this.#end;
   }
 
-  // Best-effort warm-up (I1): re-hydrate this source into the pool and immediately release it, so
-  // it becomes resident (and most-recently-used) without holding a pin. No-op for unpooled sources.
-  // Used to keep the earliest-by-start sources warm ahead of playback starting at t=0.
+  // Warm this source into the pool (resident + most-recently-used) without holding a pin, so the
+  // earliest-by-start sources are ready before playback begins. No-op for unpooled sources.
   public async prewarm(): Promise<void> {
     if (!this.#pool) {
       return;

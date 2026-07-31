@@ -252,5 +252,29 @@ describe("CachedFilelike", () => {
       // THEN: the pending read rejects with the closed error.
       await expect(readPromise).rejects.toThrow("CachedFilelike is closed");
     });
+
+    it("rejects an oversized uncached read when closed", async () => {
+      // GIVEN: a small cache and a fetch that never delivers data, so an oversized (uncached)
+      // read stays pending.
+      const fileReader = new InMemoryFileReader(new Uint8Array(100));
+      jest.spyOn(fileReader, "fetch").mockImplementation(() => ({
+        on: () => {
+          // Never emits "data", "end", or "error", leaving the uncached read pending.
+        },
+        destroy() {
+          // no-op
+        },
+      }));
+      const cachedFileReader = new CachedFilelike({ fileReader, cacheSizeInBytes: 10, log });
+      await cachedFileReader.open();
+
+      // WHEN: an oversized read (larger than the cache budget) is started, then the reader closes.
+      const readPromise = cachedFileReader.read(0, 50);
+      await delay(10);
+      cachedFileReader.close();
+
+      // THEN: the oversized uncached read settles by rejecting with the closed error.
+      await expect(readPromise).rejects.toThrow("CachedFilelike is closed");
+    });
   });
 });

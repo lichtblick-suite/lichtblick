@@ -53,6 +53,7 @@ import { Range } from "./ranges";
 export type FileStream = {
   on<T>(event: "data", listener: (chunk: T) => void): void;
   on(event: "error", listener: (err: Error) => void): void;
+  on(event: "end", listener: () => void): void;
   destroy: () => void;
 };
 export interface FileReader {
@@ -82,6 +83,8 @@ export default class CachedFilelike implements Filelike {
   #virtualBuffer: VirtualLRUBuffer;
   #log: ILogger;
   #closed: boolean = false;
+  // In-flight uncached reads, tracked so close() can destroy streams and reject promises.
+  readonly #activeUncachedReads = new Set<{ cancel: (err: Error) => void }>();
   // eslint-disable-next-line @lichtblick/no-boolean-parameters
   #keepReconnectingCallback?: (reconnecting: boolean) => void;
 
@@ -192,9 +195,7 @@ export default class CachedFilelike implements Filelike {
     });
   }
 
-  // Close the reader: abort any in-flight download, reject pending reads, and release cached
-  // blocks so a lazily-released remote source frees its memory promptly. Idempotent and terminal —
-  // the instance must not be reused after close().
+  // Terminal close: abort downloads, reject pending reads, and release cache blocks promptly.
   public close(): void {
     if (this.#closed) {
       return;
@@ -209,7 +210,10 @@ export default class CachedFilelike implements Filelike {
       request.reject(closedError);
     }
     this.#readRequests = [];
-    // Release cached blocks held by the VirtualLRUBuffer.
+    // Reject in-flight uncached reads (copy first: cancel() mutates the set).
+    for (const active of [...this.#activeUncachedReads]) {
+      active.cancel(new Error("CachedFilelike is closed"));
+    }
     this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
   }
 
@@ -228,24 +232,60 @@ export default class CachedFilelike implements Filelike {
     return await new Promise<Uint8Array>((resolve, reject) => {
       const result = new Uint8Array(length);
       let bytesRead = 0;
+      let settled = false;
       const stream = this.#fileReader.fetch(range.start, length);
 
-      stream.on("error", (error: Error) => {
+      // Registered so close() can destroy the stream and reject this read.
+      const active: { cancel: (err: Error) => void } = { cancel: () => {} };
+      const finish = (action: () => void): void => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        this.#activeUncachedReads.delete(active);
         stream.destroy();
-        reject(error);
+        action();
+      };
+      active.cancel = (err: Error) => {
+        finish(() => {
+          reject(err);
+        });
+      };
+      this.#activeUncachedReads.add(active);
+
+      stream.on("error", (error: Error) => {
+        finish(() => {
+          reject(error);
+        });
+      });
+
+      // A stream that ends before `length` bytes were received must reject, not hang forever.
+      stream.on("end", () => {
+        finish(() => {
+          reject(
+            new Error(
+              `CachedFilelike#readUncached stream ended after ${bytesRead}/${length} bytes`,
+            ),
+          );
+        });
       });
 
       stream.on("data", (chunk: Uint8Array) => {
+        if (settled) {
+          return;
+        }
         if (bytesRead + chunk.byteLength > length) {
-          stream.destroy();
-          reject(new Error("CachedFilelike#readUncached received more data than requested"));
+          finish(() => {
+            reject(new Error("CachedFilelike#readUncached received more data than requested"));
+          });
           return;
         }
         result.set(chunk, bytesRead);
         bytesRead += chunk.byteLength;
         if (bytesRead === length) {
-          stream.destroy();
-          resolve(result);
+          finish(() => {
+            resolve(result);
+          });
         }
       });
     });

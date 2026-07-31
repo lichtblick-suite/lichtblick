@@ -181,6 +181,36 @@ describe("HydratedSourcePool", () => {
     expect(pool.size).toBe(0);
   });
 
+  it("rejects acquire() after terminate() and does not re-hydrate", async () => {
+    // GIVEN: a terminated pool.
+    const pool = new HydratedSourcePool(2);
+    const token = {};
+    const hydrator = makeHydrator("A");
+    await pool.terminate();
+
+    // WHEN/THEN: acquiring rejects and open() is never called.
+    await expect(pool.acquire(token, hydrator)).rejects.toThrow();
+    expect(hydrator.open).not.toHaveBeenCalled();
+    expect(pool.size).toBe(0);
+  });
+
+  it("closes a duplicate admitted value without re-opening", async () => {
+    // GIVEN: a token already admitted with a value.
+    const pool = new HydratedSourcePool(2);
+    const token = {};
+    const hydrator = makeHydrator("A");
+    await pool.admit(token, hydrator, "first");
+
+    // WHEN: admitting the same token again with a new value.
+    await pool.admit(token, hydrator, "second");
+
+    // THEN: the second value is closed, open() is never called, and one entry remains.
+    expect(hydrator.close).toHaveBeenCalledTimes(1);
+    expect(hydrator.close).toHaveBeenCalledWith("second");
+    expect(hydrator.open).not.toHaveBeenCalled();
+    expect(pool.size).toBe(1);
+  });
+
   it("removes a broken entry on rejected open() and allows a later retry", async () => {
     // GIVEN: a hydrator whose first open() rejects, then succeeds.
     const pool = new HydratedSourcePool(2);

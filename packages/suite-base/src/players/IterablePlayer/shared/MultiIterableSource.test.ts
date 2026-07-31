@@ -29,6 +29,31 @@ jest.mock("@lichtblick/log", () => ({
   })),
 }));
 
+// Shared source-constructor mock that tracks concurrent initialize() calls so tests can assert on
+// the effective initialization concurrency.
+function trackInitConcurrency(): {
+  implementation: () => jest.Mocked<IIterableSource>;
+  getMaxInFlight: () => number;
+} {
+  let inFlight = 0;
+  let maxInFlight = 0;
+  const implementation = () =>
+    ({
+      initialize: jest.fn().mockImplementation(async () => {
+        inFlight++;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await delay(1);
+        inFlight--;
+        return InitializationSourceBuilder.initialization();
+      }),
+      messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+      getBackfillMessages: jest.fn().mockResolvedValue([]),
+      getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+      getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+    }) as jest.Mocked<IIterableSource>;
+  return { implementation, getMaxInFlight: () => maxInFlight };
+}
+
 describe("MultiIterableSource", () => {
   let mockSourceConstructor: jest.Mock;
   let dataSource: MultiSource;
@@ -183,24 +208,8 @@ describe("MultiIterableSource", () => {
     it("should bound default initialization concurrency for url sources", async () => {
       // GIVEN: more URL sources than the default remote initialization concurrency.
       const urls = Array.from({ length: 8 }, () => BasicBuilder.string());
-      let inFlight = 0;
-      let maxInFlight = 0;
-      mockSourceConstructor.mockImplementation(
-        () =>
-          ({
-            initialize: jest.fn().mockImplementation(async () => {
-              inFlight++;
-              maxInFlight = Math.max(maxInFlight, inFlight);
-              await delay(1);
-              inFlight--;
-              return InitializationSourceBuilder.initialization();
-            }),
-            messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
-            getBackfillMessages: jest.fn().mockResolvedValue([]),
-            getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
-            getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
-          }) as jest.Mocked<IIterableSource>,
-      );
+      const { implementation, getMaxInFlight } = trackInitConcurrency();
+      mockSourceConstructor.mockImplementation(implementation);
       const multiSource = new MultiIterableSource(
         {
           type: "urls",
@@ -212,31 +221,16 @@ describe("MultiIterableSource", () => {
       // WHEN: initializing all remote sources.
       await multiSource["loadMultipleSources"]();
 
-      // THEN: no more than four sources initialize concurrently.
-      expect(maxInFlight).toBeLessThanOrEqual(4);
+      // THEN: initialization runs concurrently but no more than four at a time.
+      expect(getMaxInFlight()).toBeGreaterThan(1);
+      expect(getMaxInFlight()).toBeLessThanOrEqual(4);
       expect(mockSourceConstructor).toHaveBeenCalledTimes(urls.length);
     });
     it("should bound default initialization concurrency for file sources", async () => {
       // GIVEN: more file sources than the default initialization concurrency.
       const files = Array.from({ length: 8 }, () => new Blob([BasicBuilder.string()]));
-      let inFlight = 0;
-      let maxInFlight = 0;
-      mockSourceConstructor.mockImplementation(
-        () =>
-          ({
-            initialize: jest.fn().mockImplementation(async () => {
-              inFlight++;
-              maxInFlight = Math.max(maxInFlight, inFlight);
-              await delay(1);
-              inFlight--;
-              return InitializationSourceBuilder.initialization();
-            }),
-            messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
-            getBackfillMessages: jest.fn().mockResolvedValue([]),
-            getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
-            getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
-          }) as jest.Mocked<IIterableSource>,
-      );
+      const { implementation, getMaxInFlight } = trackInitConcurrency();
+      mockSourceConstructor.mockImplementation(implementation);
       const multiSource = new MultiIterableSource(
         {
           type: "files",
@@ -248,31 +242,16 @@ describe("MultiIterableSource", () => {
       // WHEN: initializing all file sources.
       await multiSource["loadMultipleSources"]();
 
-      // THEN: no more than the default of four sources initialize concurrently.
-      expect(maxInFlight).toBeLessThanOrEqual(4);
+      // THEN: initialization runs concurrently but no more than the default of four at a time.
+      expect(getMaxInFlight()).toBeGreaterThan(1);
+      expect(getMaxInFlight()).toBeLessThanOrEqual(4);
       expect(mockSourceConstructor).toHaveBeenCalledTimes(files.length);
     });
     it("should respect explicit initialization concurrency for url sources", async () => {
       // GIVEN: a URL source with an explicit lower initialization concurrency.
       const urls = Array.from({ length: 6 }, () => BasicBuilder.string());
-      let inFlight = 0;
-      let maxInFlight = 0;
-      mockSourceConstructor.mockImplementation(
-        () =>
-          ({
-            initialize: jest.fn().mockImplementation(async () => {
-              inFlight++;
-              maxInFlight = Math.max(maxInFlight, inFlight);
-              await delay(1);
-              inFlight--;
-              return InitializationSourceBuilder.initialization();
-            }),
-            messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
-            getBackfillMessages: jest.fn().mockResolvedValue([]),
-            getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
-            getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
-          }) as jest.Mocked<IIterableSource>,
-      );
+      const { implementation, getMaxInFlight } = trackInitConcurrency();
+      mockSourceConstructor.mockImplementation(implementation);
       const multiSource = new MultiIterableSource(
         {
           type: "urls",
@@ -286,7 +265,7 @@ describe("MultiIterableSource", () => {
       await multiSource["loadMultipleSources"]();
 
       // THEN: the explicit concurrency override is enforced.
-      expect(maxInFlight).toBeLessThanOrEqual(2);
+      expect(getMaxInFlight()).toBeLessThanOrEqual(2);
       expect(mockSourceConstructor).toHaveBeenCalledTimes(urls.length);
     });
     it("should allocate equal cache split when few sources do not trigger the minimum floor", async () => {
@@ -691,10 +670,18 @@ describe("MultiIterableSource", () => {
       );
       await multiSource.initialize();
 
+      // Spy on the shared pool captured from the first source construction.
+      const pool = mockSourceConstructor.mock.calls[0]![0].pool as HydratedSourcePool;
+      const poolTerminateSpy = jest.spyOn(pool, "terminate");
+
       // WHEN: terminating the multi-source.
-      // THEN: it resolves and every source's terminate is called.
+      // THEN: it resolves, every source's terminate is called, and the pool is torn down after.
       await expect(multiSource.terminate()).resolves.toBeUndefined();
       expect(terminateSpy).toHaveBeenCalledTimes(2);
+      expect(poolTerminateSpy).toHaveBeenCalledTimes(1);
+      expect(terminateSpy.mock.invocationCallOrder[0]!).toBeLessThan(
+        poolTerminateSpy.mock.invocationCallOrder[0]!,
+      );
     });
   });
 });

@@ -53,6 +53,7 @@ export class HydratedSourcePool {
   readonly #entries = new Map<object, Entry>();
   #totalWeight = 0;
   #overCapacityReported = false;
+  #terminated = false;
 
   public constructor(capacityOrOptions: number | HydratedSourcePoolOptions) {
     if (typeof capacityOrOptions === "number") {
@@ -80,6 +81,11 @@ export class HydratedSourcePool {
    * pool is already over budget. `hydrator.open` is used for later re-hydration after eviction.
    */
   public async admit<T>(token: object, hydrator: SourceHydrator<T>, value: T): Promise<void> {
+    if (this.#terminated) {
+      // Pool is torn down: never retain new values.
+      await hydrator.close(value);
+      return;
+    }
     const existing = this.#entries.get(token);
     if (existing) {
       // Refresh recency; keep the existing (possibly in-use) value and drop the new one.
@@ -105,9 +111,11 @@ export class HydratedSourcePool {
    * Callers MUST call release(token) exactly once per acquire, ideally in a finally block.
    */
   public async acquire<T>(token: object, hydrator: SourceHydrator<T>): Promise<T> {
+    if (this.#terminated) {
+      throw new Error("HydratedSourcePool has been terminated");
+    }
     const existing = this.#entries.get(token);
     if (existing) {
-      // Refresh recency (LRU) and pin.
       this.#entries.delete(token);
       this.#entries.set(token, existing);
       existing.pins += 1;
@@ -138,10 +146,13 @@ export class HydratedSourcePool {
       );
       return value;
     } catch (err) {
-      // Hydration failed: remove the broken entry so a later acquire can retry. Its weight was
-      // never added to #totalWeight, so there is nothing to roll back.
+      // Hydration failed: remove the broken entry so a later acquire can retry. Guard on entry
+      // identity so a late rejection cannot delete a newer entry re-created for the same token.
+      // Its weight was never added to #totalWeight, so there is nothing to roll back.
       entry.pins -= 1;
-      this.#entries.delete(token);
+      if (this.#entries.get(token) === entry) {
+        this.#entries.delete(token);
+      }
       throw err;
     }
   }
@@ -163,6 +174,8 @@ export class HydratedSourcePool {
 
   /** Close and remove every entry. Use on teardown. */
   public async terminate(): Promise<void> {
+    // Mark terminal before clearing so concurrent acquire()/admit() cannot hydrate or retain.
+    this.#terminated = true;
     const entries = [...this.#entries.entries()];
     this.#entries.clear();
     this.#totalWeight = 0;

@@ -42,24 +42,22 @@ const log = Logger.getLogger(__filename);
 // Default total cache budget for remote sources (500 MiB — same as single-file default).
 const DEFAULT_CACHE_TOTAL_BYTES = 1024 * 1024 * 500; // 500 MiB
 
-// Minimum cache allocated per remote source to prevent crashes when reading MCAP metadata.
-// The MCAP summary section (chunk indexes, schema records, etc.) can be several MiB in size.
-// Without a floor, a linear split across 300+ files produces cache slices smaller than a
-// single metadata read, causing CachedFilelike to throw "Requested more data than cache size".
+// Minimum per-source cache for MCAP metadata reads; without a floor, hundreds of files can split
+// the budget into slices smaller than one summary/index read and crash.
 const MIN_CACHE_PER_SOURCE_BYTES = 1024 * 1024 * 10; // 10 MiB
 
-// Default number of remote sources initialized concurrently. Bounds the initial request burst and the transient memory spike from concurrent MCAP summary reads.
+// Bounds the initial request burst and transient memory from concurrent MCAP summary reads.
 const DEFAULT_INIT_CONCURRENCY = 4;
 
-// Default count-cap safety for heavyweight per-file readers kept resident at once. The byte
-// budget is primary; this was raised from 8 to allow more small-file residents.
+// Count-cap safety for heavyweight per-file readers; the byte budget is primary.
 const DEFAULT_MAX_HYDRATED_SOURCES = 12;
 
-// Default primary byte budget for resident heavyweight readers in a multi-file session. The pool
-// evicts least-recently-used readers once estimated resident bytes exceed this. Heuristic; tune
-// against real datasets (see calibration task). Kept conservative so worker memory stays well
-// under the browser tab limit even if per-reader weight is under-estimated.
+// Primary byte budget for resident heavyweight readers; the pool evicts LRU readers once estimated
+// resident bytes exceed this. Heuristic — tune against real datasets.
 const DEFAULT_MAX_HYDRATED_BYTES = 1024 * 1024 * 512; // 512 MiB
+
+// Small dedicated prewarm limit: enough for t=0 playback, not a large open/request burst.
+const PREWARM_EARLIEST_COUNT = 3;
 
 export class MultiIterableSource<T extends ISerializedIterableSource, P>
   implements ISerializedIterableSource
@@ -69,7 +67,6 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   private dataSource: MultiSource;
   private sourceImpl: IIterableSource<Uint8Array>[] = [];
   #pool: HydratedSourcePool | undefined;
-  #maxHydratedSources: number = DEFAULT_MAX_HYDRATED_SOURCES;
 
   public constructor(dataSource: MultiSource, SourceConstructor: IterableSourceConstructor<T, P>) {
     this.dataSource = dataSource;
@@ -79,15 +76,16 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   private async loadMultipleSources(): Promise<Initialization[]> {
     const { type } = this.dataSource;
 
+    // Construct one bounded reader pool before branching; files and URLs use the same overrides.
+    const maxHydratedCount = this.dataSource.maxHydratedSources ?? DEFAULT_MAX_HYDRATED_SOURCES;
+    const maxHydratedBytes = this.dataSource.maxHydratedBytes ?? DEFAULT_MAX_HYDRATED_BYTES;
+    this.#pool = new HydratedSourcePool({
+      maxBytes: maxHydratedBytes,
+      maxCount: maxHydratedCount,
+    });
+
     let sources: IIterableSource<Uint8Array>[];
     if (type === "files") {
-      const maxHydratedCount = this.dataSource.maxHydratedSources ?? DEFAULT_MAX_HYDRATED_SOURCES;
-      const maxHydratedBytes = this.dataSource.maxHydratedBytes ?? DEFAULT_MAX_HYDRATED_BYTES;
-      this.#maxHydratedSources = maxHydratedCount;
-      this.#pool = new HydratedSourcePool({
-        maxBytes: maxHydratedBytes,
-        maxCount: maxHydratedCount,
-      });
       sources = this.dataSource.files.map(
         (file) => new this.SourceConstructor({ type: "file", file, pool: this.#pool } as P),
       );
@@ -115,14 +113,6 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
       const readAheadEnabled: boolean =
         this.dataSource.readAheadEnabled ?? this.dataSource.urls.length === 1;
 
-      const maxHydratedCount = this.dataSource.maxHydratedSources ?? DEFAULT_MAX_HYDRATED_SOURCES;
-      const maxHydratedBytes = this.dataSource.maxHydratedBytes ?? DEFAULT_MAX_HYDRATED_BYTES;
-      this.#maxHydratedSources = maxHydratedCount;
-      this.#pool = new HydratedSourcePool({
-        maxBytes: maxHydratedBytes,
-        maxCount: maxHydratedCount,
-      });
-
       sources = this.dataSource.urls.map(
         (url) =>
           new this.SourceConstructor({
@@ -137,9 +127,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
 
     this.sourceImpl.push(...sources);
 
-    // Both local blobs and remote urls are bounded: parsing many MCAP channel schemas concurrently
-    // produces a large transient memory spike (a dominant contributor to worker OOM in big
-    // multi-file sessions).
+    // Bound local and remote initialization: concurrent MCAP summary parsing can spike worker
+    // memory in large multi-file sessions.
     const concurrency = this.dataSource.initConcurrency ?? DEFAULT_INIT_CONCURRENCY;
 
     return await this.initializeSources(sources, concurrency);
@@ -149,7 +138,10 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     sources: IIterableSource<Uint8Array>[],
     concurrency: number,
   ): Promise<Initialization[]> {
-    const semaphore = new Semaphore(Math.max(1, concurrency));
+    // Normalize overrides to a positive integer permit count.
+    const floored = Math.floor(concurrency);
+    const permits = Number.isFinite(floored) && floored >= 1 ? floored : 1;
+    const semaphore = new Semaphore(permits);
     // Promise.all preserves input order regardless of settle order, so the returned
     // initializations stay aligned with `sources`.
     return await Promise.all(
@@ -170,22 +162,19 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
       return compare(aStart, bStart);
     });
 
-    // I1: warm the earliest-by-start sources so playback beginning at t=0 does not stall
-    // re-hydrating them. Best-effort and bounded by the pool's count cap.
+    // Warm earliest sources so t=0 playback does not stall re-hydrating them.
     await this.#prewarmEarliestSources();
 
     return resultInit;
   }
 
-  // Touch the earliest-by-start sources in DESCENDING start order so the earliest end up
-  // most-recently-used in the pool (least likely to be evicted before playback reaches them).
-  // sourceImpl is sorted ascending by start time before this runs. Errors are non-fatal: a source
-  // that fails to prewarm will simply be hydrated on demand later.
+  // Touch earliest sources in descending start order so the earliest become most-recently-used.
+  // Prewarm failures are non-fatal; the source will hydrate on demand later.
   async #prewarmEarliestSources(): Promise<void> {
     if (!this.#pool) {
       return;
     }
-    const warmCount = Math.min(this.#maxHydratedSources, this.sourceImpl.length);
+    const warmCount = Math.min(PREWARM_EARLIEST_COUNT, this.sourceImpl.length);
     for (let index = warmCount - 1; index >= 0; index--) {
       const source = this.sourceImpl[index] as { prewarm?: () => Promise<void> };
       try {
@@ -204,9 +193,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     // with specific start/end it avoids triggering HTTP requests to irrelevant files.
     const relevantSources = filterSourcesByTimeRange(this.sourceImpl, opt.start, opt.end);
 
-    // Use lazy sequential merge: iterators for later sources are only started
-    // when the current playback time reaches their start time, avoiding
-    // concurrent HTTP byte-range requests to all remote MCAP files at once.
+    // Start later iterators only when playback reaches their start time, avoiding concurrent
+    // byte-range requests to all remote MCAP files.
     yield* mergeSequentialIterators(relevantSources, opt);
   }
   public async getBackfillMessages(
@@ -216,14 +204,9 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     // This avoids triggering HTTP requests to MCAP files that start after the requested time.
     const relevantSources = filterSourcesForBackfill(this.sourceImpl, args.time);
 
-    // Query sources nearest to the backfill time first and stop as soon as every requested topic
-    // has a value. `sourceImpl` (and therefore `relevantSources`) is sorted ascending by start
-    // time, so we iterate in reverse to begin with the source covering the seek target.
-    //
-    // Without this short-circuit, every preceding source would independently read its last chunk
-    // for the requested topics — a large redundant download. For example, a forward seek across
-    // many small remote MCAPs fetched ~one chunk per preceding file even though only the
-    // nearest source(s) hold the winning "latest message before time" values.
+    // Iterate in reverse (sources are sorted ascending by start) so we begin at the source covering
+    // the seek target and stop once every topic has a value. Without this short-circuit each
+    // preceding source would redundantly read its last chunk for the requested topics.
     const backfillMessages: MessageEvent<Uint8Array>[] = [];
     const missingTopics = new Map(args.topics);
 
@@ -251,8 +234,24 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   }
 
   public async terminate(): Promise<void> {
-    await Promise.all(this.sourceImpl.map(async (source) => await source.terminate?.()));
-    await this.#pool?.terminate();
+    try {
+      // Attempt every source terminate; one rejection must not skip the others or the pool teardown.
+      const results = await Promise.allSettled(
+        this.sourceImpl.map(async (source) => await source.terminate?.()),
+      );
+      const rejected = results.filter(
+        (result): result is PromiseRejectedResult => result.status === "rejected",
+      );
+      if (rejected.length > 0) {
+        for (const failure of rejected) {
+          log.error("MultiIterableSource source terminate failed", failure.reason);
+        }
+        throw rejected[0]!.reason;
+      }
+    } finally {
+      // Always tear down the pool, even if a source failed to terminate.
+      await this.#pool?.terminate();
+    }
   }
 
   private mergeInitializations(initializations: Initialization[]): Initialization {
@@ -280,7 +279,6 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
       resultInit.topicStats = mergeTopicStats(resultInit.topicStats, init.topicStats);
       resultInit.metadata = mergeMetadata(resultInit.metadata, init.metadata);
       resultInit.alerts.push(...init.alerts);
-      // These methos validate and add to avoid lopp through all topics and datatypes once again
       validateAndAddNewDatatypes(resultInit, init);
       validateAndAddNewTopics(resultInit, init);
     }
