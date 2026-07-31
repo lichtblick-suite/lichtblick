@@ -135,4 +135,66 @@ describe("structureAllItemsByPath", () => {
     // Each topic should yield only one paths, for .property. For the second .property and the empty, it should be ignored.
     expect(result.size).toBe(mockTopics.length);
   });
+  it("keys entries by the quoted topic name concatenated with the path", () => {
+    const topic = { name: "/my_topic", schemaName: "my_schema" } as Topic;
+    mockMessagePathStructuresForDataype = { my_schema: mockMessagePathStructureItemMessage };
+    (messagePathsForStructure as jest.Mock).mockImplementation(
+      (): MessagePathsForStructure => [
+        {
+          path: ".property",
+          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+        },
+      ],
+    );
+
+    const result = structureAllItemsByPath({
+      messagePathStructuresForDataype: mockMessagePathStructuresForDataype,
+      topics: [topic],
+    });
+
+    expect([...result.keys()]).toEqual(["/my_topic.property"]);
+    expect(result.get("/my_topic.property")).toBe(
+      mockMessagePathStructureItemMessage.nextByName.property,
+    );
+  });
+
+  it("produces entries for multiple topics that share the same schemaName", () => {
+    const topicA = { name: "/a", schemaName: "shared" } as Topic;
+    const topicB = { name: "/b", schemaName: "shared" } as Topic;
+    mockMessagePathStructuresForDataype = { shared: mockMessagePathStructureItemMessage };
+    (messagePathsForStructure as jest.Mock).mockImplementation(
+      (): MessagePathsForStructure => [
+        {
+          path: ".property",
+          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+        },
+      ],
+    );
+
+    const result = structureAllItemsByPath({
+      messagePathStructuresForDataype: mockMessagePathStructuresForDataype,
+      topics: [topicA, topicB],
+    });
+
+    expect([...result.keys()].sort()).toEqual(["/a.property", "/b.property"]);
+  });
+
+  it("forwards validTypes and noMultiSlices to messagePathsForStructure", () => {
+    const topic = { name: "/t", schemaName: "s" } as Topic;
+    mockMessagePathStructuresForDataype = { s: mockMessagePathStructureItemMessage };
+    (messagePathsForStructure as jest.Mock).mockImplementation((): MessagePathsForStructure => []);
+
+    structureAllItemsByPath({
+      noMultiSlices: true,
+      validTypes: ["float64"],
+      messagePathStructuresForDataype: mockMessagePathStructuresForDataype,
+      topics: [topic],
+    });
+
+    expect(messagePathsForStructure).toHaveBeenCalledWith(mockMessagePathStructureItemMessage, {
+      validTypes: ["float64"],
+      noMultiSlices: true,
+    });
+  });
+
 });

@@ -73,4 +73,27 @@ describe("useStructuredItemsByPath", () => {
 
     expect(MessagePathSyntax.messagePathStructures).toHaveBeenCalledWith(mockDatatypes);
   });
+  it("memoizes the computed map across re-renders with an equal (but new) validTypes array", () => {
+    const { rerender } = renderHook(
+      ({ validTypes }: { validTypes: string[] }) => useStructuredItemsByPath({ validTypes }),
+      { initialProps: { validTypes: ["foo_msgs/Bar"] } },
+    );
+
+    // Re-render with a brand-new array instance that has identical content.
+    rerender({ validTypes: ["foo_msgs/Bar"] });
+
+    expect(StructureAllItems.structureAllItemsByPath).toHaveBeenCalledTimes(1);
+  });
+
+  it("recomputes when the validTypes content changes", () => {
+    const { rerender } = renderHook(
+      ({ validTypes }: { validTypes: string[] }) => useStructuredItemsByPath({ validTypes }),
+      { initialProps: { validTypes: ["a"] } },
+    );
+
+    rerender({ validTypes: ["b"] });
+
+    expect(StructureAllItems.structureAllItemsByPath).toHaveBeenCalledTimes(2);
+  });
+
 });

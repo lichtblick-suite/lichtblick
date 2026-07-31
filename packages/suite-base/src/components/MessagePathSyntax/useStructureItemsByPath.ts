@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 import { MessagePathStructureItem } from "@lichtblick/message-path";
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
@@ -22,11 +22,14 @@ type UseStructuredItemsByPathProps = {
  * from the global store (`useStructureItemsByPathStore`), which is populated by `useStructureItemsStoreManager`.
  * This avoids recomputing structure definitions unnecessarily, improving performance for common use cases.
  *
- * When either `validTypes` or `noMultiSlices` is provided, a custom computation is triggered based on the
- * current data source and filtering options. This allows components like `MessagePathInput` to dynamically
- * adjust their view while still benefiting from shared logic and optimization.
+ * When either `validTypes` or `noMultiSlices` is provided, the map is computed for the current data source
+ * and filtering options. The result is memoized across renders so that consumers such as `MessagePathInput`
+ * (whose autocomplete re-renders on every keystroke) do not rebuild the entire structure map on each render.
+ *
+ * `validTypes` is tracked via a content-based key so that an unstable array reference — for example an
+ * extension-provided `SettingsTreeFieldMessagePath.validTypes` that a settings tree rebuilds every render —
+ * does not needlessly invalidate the memo.
  */
-
 export function useStructuredItemsByPath({
   noMultiSlices,
   validTypes,
@@ -40,20 +43,22 @@ export function useStructuredItemsByPath({
     [datatypes],
   );
 
-  const gettingAllStructureItemsByPath = useCallback(
-    () =>
-      structureAllItemsByPath({
-        noMultiSlices,
-        validTypes,
-        messagePathStructuresForDataype,
-        topics,
-      }),
-    [messagePathStructuresForDataype, noMultiSlices, topics, validTypes],
-  );
+  const validTypesKey = validTypes?.join(",");
 
-  if (!validTypes && noMultiSlices == undefined) {
-    return structureItemsByPath;
-  }
+  const computedItemsByPath = useMemo(() => {
+    if (!validTypes && noMultiSlices == undefined) {
+      return undefined;
+    }
+    return structureAllItemsByPath({
+      noMultiSlices,
+      validTypes,
+      messagePathStructuresForDataype,
+      topics,
+    });
+    // `validTypes` is intentionally tracked via the content-based `validTypesKey`
+    // to avoid invalidating the memo on unstable array references.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messagePathStructuresForDataype, noMultiSlices, topics, validTypesKey]);
 
-  return gettingAllStructureItemsByPath();
+  return computedItemsByPath ?? structureItemsByPath;
 }
