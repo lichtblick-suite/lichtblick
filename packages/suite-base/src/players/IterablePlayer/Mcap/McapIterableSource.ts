@@ -23,12 +23,25 @@ import {
   GetBackfillMessagesArgs,
   ISerializedIterableSource,
 } from "../IIterableSource";
+import { HydratedSourcePool, SourceHydrator } from "../shared/HydratedSourcePool";
 
 const log = Log.getLogger(__filename);
 
 type McapSource =
-  | { type: "file"; file: Blob }
-  | { type: "url"; url: string; cacheSizeInBytes?: number; readAheadEnabled?: boolean };
+  | { type: "file"; file: Blob; pool?: HydratedSourcePool }
+  | {
+      type: "url";
+      url: string;
+      cacheSizeInBytes?: number;
+      readAheadEnabled?: boolean;
+      pool?: HydratedSourcePool;
+    };
+
+type HydratedInner = {
+  inner: ISerializedIterableSource;
+  // Present only for remote sources so the connection/cache can be closed on eviction.
+  readable?: RemoteFileReadable;
+};
 
 /**
  * Create a McapIndexedReader if it will be possible to do an indexed read. If the file is not
@@ -53,7 +66,12 @@ async function tryCreateIndexedReader(
 
 export class McapIterableSource implements ISerializedIterableSource {
   #source: McapSource;
-  #sourceImpl: ISerializedIterableSource | undefined;
+  // Eagerly-retained inner: used for local blobs, unindexed streams, and unpooled sources.
+  #eagerInner: ISerializedIterableSource | undefined;
+  // Set when this source is managed by a bounded LRU pool (re-hydrated on demand).
+  #pool: HydratedSourcePool | undefined;
+  #start?: Time;
+  #end?: Time;
 
   public readonly sourceType = "serialized";
 
@@ -61,7 +79,13 @@ export class McapIterableSource implements ISerializedIterableSource {
     this.#source = source;
   }
 
-  public async initialize(): Promise<Initialization> {
+  // Build a fresh inner source (open readable + reader). Returns the readable for remote sources so
+  // the caller can close its connection/cache when releasing.
+  async #openInner(): Promise<{
+    inner: ISerializedIterableSource;
+    readable?: RemoteFileReadable;
+    indexed: boolean;
+  }> {
     const source = this.#source;
 
     // Preload decompression handlers before starting any MCAP operations.
@@ -80,14 +104,15 @@ export class McapIterableSource implements ISerializedIterableSource {
         const readable = new BlobReadable(source.file);
         const reader = await tryCreateIndexedReader(readable, decompressHandlers);
         if (reader) {
-          this.#sourceImpl = new McapIndexedIterableSource(reader);
-        } else {
-          this.#sourceImpl = new McapUnindexedIterableSource({
+          return { inner: new McapIndexedIterableSource(reader), indexed: true };
+        }
+        return {
+          inner: new McapUnindexedIterableSource({
             size: source.file.size,
             stream: source.file.stream(),
-          });
-        }
-        break;
+          }),
+          indexed: false,
+        };
       }
       case "url": {
         const readable = new RemoteFileReadable(source.url, {
@@ -97,54 +122,103 @@ export class McapIterableSource implements ISerializedIterableSource {
         await readable.open();
         const reader = await tryCreateIndexedReader(readable, decompressHandlers);
         if (reader) {
-          this.#sourceImpl = new McapIndexedIterableSource(reader);
-        } else {
-          const response = await fetch(source.url);
-          if (!response.body) {
-            throw new Error(`Unable to stream remote file. <${source.url}>`);
-          }
-          const size = response.headers.get("content-length");
-          if (size == undefined) {
-            throw new Error(`Remote file is missing Content-Length header. <${source.url}>`);
-          }
-
-          this.#sourceImpl = new McapUnindexedIterableSource({
-            size: parseInt(size),
-            stream: response.body,
-          });
+          return { inner: new McapIndexedIterableSource(reader), readable, indexed: true };
         }
-        break;
+        // Unindexed remote fallback: single-pass streaming read of the whole file.
+        readable.close();
+        const response = await fetch(source.url);
+        if (!response.body) {
+          throw new Error(`Unable to stream remote file. <${source.url}>`);
+        }
+        const size = response.headers.get("content-length");
+        if (size == undefined) {
+          throw new Error(`Remote file is missing Content-Length header. <${source.url}>`);
+        }
+        return {
+          inner: new McapUnindexedIterableSource({ size: parseInt(size), stream: response.body }),
+          indexed: false,
+        };
       }
     }
-
-    return await this.#sourceImpl.initialize();
   }
 
-  public messageIterator(
+  // Pool hydrator: builds a ready-to-iterate indexed inner (channels parsed) plus its readable so
+  // it can be closed on eviction.
+  readonly #hydrator: SourceHydrator<HydratedInner> = {
+    open: async () => {
+      const { inner, readable } = await this.#openInner();
+      await inner.initialize();
+      return { inner, readable };
+    },
+    close: async ({ readable }) => {
+      readable?.close();
+    },
+  };
+
+  public async initialize(): Promise<Initialization> {
+    const opened = await this.#openInner();
+    const init = await opened.inner.initialize();
+    this.#start = init.start;
+    this.#end = init.end;
+
+    const pool = this.#source.pool;
+    if (pool && opened.indexed) {
+      this.#pool = pool;
+      // Seed the pool with the already-hydrated inner (no redundant open). May be evicted+closed
+      // immediately if the pool is already at capacity.
+      await pool.admit(this, this.#hydrator, { inner: opened.inner, readable: opened.readable });
+    } else {
+      this.#eagerInner = opened.inner;
+    }
+    return init;
+  }
+
+  public async *messageIterator(
     opt: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult<Uint8Array>>> {
-    if (!this.#sourceImpl) {
-      throw new Error("Invariant: uninitialized");
+    if (!this.#pool) {
+      if (!this.#eagerInner) {
+        throw new Error("Invariant: uninitialized");
+      }
+      yield* this.#eagerInner.messageIterator(opt);
+      return;
     }
-
-    return this.#sourceImpl.messageIterator(opt);
+    const { inner } = await this.#pool.acquire(this, this.#hydrator);
+    try {
+      yield* inner.messageIterator(opt);
+    } finally {
+      this.#pool.release(this);
+    }
   }
 
   public async getBackfillMessages(
     args: GetBackfillMessagesArgs,
   ): Promise<MessageEvent<Uint8Array>[]> {
-    if (!this.#sourceImpl) {
-      throw new Error("Invariant: uninitialized");
+    if (!this.#pool) {
+      if (!this.#eagerInner) {
+        throw new Error("Invariant: uninitialized");
+      }
+      return await this.#eagerInner.getBackfillMessages(args);
     }
-
-    return await this.#sourceImpl.getBackfillMessages(args);
+    const { inner } = await this.#pool.acquire(this, this.#hydrator);
+    try {
+      return await inner.getBackfillMessages(args);
+    } finally {
+      this.#pool.release(this);
+    }
   }
 
   public getStart(): Time | undefined {
-    return this.#sourceImpl!.getStart!();
+    return this.#start;
   }
 
   public getEnd(): Time | undefined {
-    return this.#sourceImpl!.getEnd!();
+    return this.#end;
+  }
+
+  public async terminate(): Promise<void> {
+    // Pooled inners are torn down by the pool (owned by MultiIterableSource); only release an
+    // eagerly-retained inner here.
+    await this.#eagerInner?.terminate?.();
   }
 }

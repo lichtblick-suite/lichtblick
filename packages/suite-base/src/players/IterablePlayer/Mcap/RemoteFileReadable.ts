@@ -53,4 +53,8 @@ export class RemoteFileReadable {
   public async read(offset: bigint, size: bigint): Promise<Uint8Array> {
     return await this.#batchingReadable.read(offset, size);
   }
+
+  public close(): void {
+    this.#remoteReader.close();
+  }
 }

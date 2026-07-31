@@ -101,17 +101,28 @@ describe("CachedFilelike", () => {
       expect(fetch).toHaveBeenCalledWith(0, 10);
     });
 
-    it("throws a clear error when a single read exceeds the cache size", () => {
+    it("reads the exact range uncached when a single read exceeds the cache size", async () => {
       // GIVEN: a source allocated a small cache (mirrors a many-file remote session where each
       // source receives only the 10 MiB minimum floor) backed by a larger file.
-      const fileReader = new InMemoryFileReader(new Uint8Array(100));
+      const sourceData = Uint8Array.from({ length: 100 }, (_, index) => index);
+      const fileReader = new InMemoryFileReader(sourceData);
       const cachedFileReader = new CachedFilelike({ fileReader, cacheSizeInBytes: 10, log });
 
-      // WHEN/THEN: a chunk read larger than the cache fails fast with an explicit, actionable
-      // message instead of silently truncating or mis-reading.
-      expect(() => {
-        void cachedFileReader.read(0, 20);
-      }).toThrow("Requested more data than cache size: 20 > 10");
+      // WHEN: a chunk read is larger than the cache.
+      const result = await cachedFileReader.read(0, 20);
+
+      // THEN: the exact bytes are returned via the uncached path.
+      expect(result).toEqual(sourceData.slice(0, 20));
+    });
+
+    it("rejects when an uncached read exceeds the file size", async () => {
+      // GIVEN: a small file and a cache smaller than the requested read.
+      const fileReader = new InMemoryFileReader(new Uint8Array(10));
+      const cachedFileReader = new CachedFilelike({ fileReader, cacheSizeInBytes: 5, log });
+
+      // WHEN/THEN: an oversized read that extends past EOF still rejects with the normal
+      // out-of-bounds error.
+      await expect(cachedFileReader.read(0, 1000)).rejects.toThrow("CachedFilelike#read past size");
     });
 
     it("returns an error in the callback if the FileReader keeps returning errors", async () => {
@@ -191,6 +202,55 @@ describe("CachedFilelike", () => {
       const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
       const cachedFileReader = new CachedFilelike({ fileReader, log });
       await expect(cachedFileReader.read(1, 0)).resolves.toEqual(new Uint8Array([]));
+    });
+  });
+
+  describe("#close", () => {
+    it("rejects reads after close()", async () => {
+      // GIVEN: an opened reader.
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
+      const cachedFileReader = new CachedFilelike({ fileReader, log });
+      await cachedFileReader.open();
+
+      // WHEN: the reader is closed.
+      cachedFileReader.close();
+
+      // THEN: subsequent reads reject with the closed error.
+      await expect(cachedFileReader.read(0, 2)).rejects.toThrow("CachedFilelike is closed");
+    });
+
+    it("is idempotent when called twice", () => {
+      // GIVEN: a reader.
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
+      const cachedFileReader = new CachedFilelike({ fileReader, log });
+
+      // WHEN/THEN: closing twice does not throw.
+      expect(() => {
+        cachedFileReader.close();
+        cachedFileReader.close();
+      }).not.toThrow();
+    });
+
+    it("rejects an in-flight pending read request", async () => {
+      // GIVEN: a file reader whose fetch never delivers data, so the read stays pending.
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
+      jest.spyOn(fileReader, "fetch").mockImplementation(() => ({
+        on: () => {
+          // Never emits "data" or "error", leaving the read request pending.
+        },
+        destroy() {
+          // no-op
+        },
+      }));
+      const cachedFileReader = new CachedFilelike({ fileReader, log });
+
+      // WHEN: a read is started (and stays pending) and then the reader is closed.
+      const readPromise = cachedFileReader.read(0, 2);
+      await delay(10);
+      cachedFileReader.close();
+
+      // THEN: the pending read rejects with the closed error.
+      await expect(readPromise).rejects.toThrow("CachedFilelike is closed");
     });
   });
 });

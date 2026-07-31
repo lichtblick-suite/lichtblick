@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { Semaphore } from "async-mutex";
+
 import Logger from "@lichtblick/log";
 import { compare } from "@lichtblick/rostime";
 import {
@@ -33,6 +35,7 @@ import {
   GetBackfillMessagesArgs,
   ISerializedIterableSource,
 } from "../IIterableSource";
+import { HydratedSourcePool } from "./HydratedSourcePool";
 
 const log = Logger.getLogger(__filename);
 
@@ -45,6 +48,13 @@ const DEFAULT_CACHE_TOTAL_BYTES = 1024 * 1024 * 500; // 500 MiB
 // single metadata read, causing CachedFilelike to throw "Requested more data than cache size".
 const MIN_CACHE_PER_SOURCE_BYTES = 1024 * 1024 * 10; // 10 MiB
 
+// Default number of remote sources initialized concurrently. Bounds the initial request burst and the transient memory spike from concurrent MCAP summary reads.
+const DEFAULT_INIT_CONCURRENCY = 4;
+
+// Default number of heavyweight per-file readers kept resident at once for remote multi-file
+// sessions. Bounds worker memory; sources beyond this are re-opened on demand.
+const DEFAULT_MAX_HYDRATED_SOURCES = 8;
+
 export class MultiIterableSource<T extends ISerializedIterableSource, P>
   implements ISerializedIterableSource
 {
@@ -52,6 +62,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   private SourceConstructor: IterableSourceConstructor<T, P>;
   private dataSource: MultiSource;
   private sourceImpl: IIterableSource<Uint8Array>[] = [];
+  #pool: HydratedSourcePool | undefined;
 
   public constructor(dataSource: MultiSource, SourceConstructor: IterableSourceConstructor<T, P>) {
     this.dataSource = dataSource;
@@ -63,8 +74,10 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
 
     let sources: IIterableSource<Uint8Array>[];
     if (type === "files") {
+      const maxHydrated = this.dataSource.maxHydratedSources ?? DEFAULT_MAX_HYDRATED_SOURCES;
+      this.#pool = new HydratedSourcePool(maxHydrated);
       sources = this.dataSource.files.map(
-        (file) => new this.SourceConstructor({ type: "file", file } as P),
+        (file) => new this.SourceConstructor({ type: "file", file, pool: this.#pool } as P),
       );
     } else {
       // Distribute total cache budget across remote sources with a minimum floor per source.
@@ -90,6 +103,9 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
       const readAheadEnabled: boolean =
         this.dataSource.readAheadEnabled ?? this.dataSource.urls.length === 1;
 
+      const maxHydrated = this.dataSource.maxHydratedSources ?? DEFAULT_MAX_HYDRATED_SOURCES;
+      this.#pool = new HydratedSourcePool(maxHydrated);
+
       sources = this.dataSource.urls.map(
         (url) =>
           new this.SourceConstructor({
@@ -97,17 +113,33 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
             url,
             cacheSizeInBytes: perSourceCache,
             readAheadEnabled,
+            pool: this.#pool,
           } as P),
       );
     }
 
     this.sourceImpl.push(...sources);
 
-    const initializations: Initialization[] = await Promise.all(
-      sources.map(async (source) => await source.initialize()),
-    );
+    // Both local blobs and remote urls are bounded: parsing many MCAP channel schemas concurrently
+    // produces a large transient memory spike (a dominant contributor to worker OOM in big
+    // multi-file sessions).
+    const concurrency = this.dataSource.initConcurrency ?? DEFAULT_INIT_CONCURRENCY;
 
-    return initializations;
+    return await this.initializeSources(sources, concurrency);
+  }
+
+  private async initializeSources(
+    sources: IIterableSource<Uint8Array>[],
+    concurrency: number,
+  ): Promise<Initialization[]> {
+    const semaphore = new Semaphore(Math.max(1, concurrency));
+    // Promise.all preserves input order regardless of settle order, so the returned
+    // initializations stay aligned with `sources`.
+    return await Promise.all(
+      sources.map(
+        async (source) => await semaphore.runExclusive(async () => await source.initialize()),
+      ),
+    );
   }
 
   public async initialize(): Promise<Initialization> {
@@ -176,6 +208,11 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     }
 
     return backfillMessages;
+  }
+
+  public async terminate(): Promise<void> {
+    await Promise.all(this.sourceImpl.map(async (source) => await source.terminate?.()));
+    await this.#pool?.terminate();
   }
 
   private mergeInitializations(initializations: Initialization[]): Initialization {

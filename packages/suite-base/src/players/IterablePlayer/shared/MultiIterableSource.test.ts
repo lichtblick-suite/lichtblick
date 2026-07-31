@@ -5,9 +5,11 @@ import { MessageEvent, TopicSelection } from "@lichtblick/suite-base/players/typ
 import InitializationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitializationSourceBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import delay from "@lichtblick/suite-base/util/delay";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { IIterableSource, Initialization } from "../IIterableSource";
+import { HydratedSourcePool } from "./HydratedSourcePool";
 import { MultiIterableSource } from "./MultiIterableSource";
 import { MultiSource } from "./types";
 
@@ -65,10 +67,12 @@ describe("MultiIterableSource", () => {
       expect(mockSourceConstructor).toHaveBeenNthCalledWith(1, {
         type: "file",
         file: file1,
+        pool: expect.any(HydratedSourcePool),
       });
       expect(mockSourceConstructor).toHaveBeenNthCalledWith(2, {
         type: "file",
         file: file2,
+        pool: expect.any(HydratedSourcePool),
       });
       expect(initializations).toHaveLength(2);
     });
@@ -91,12 +95,14 @@ describe("MultiIterableSource", () => {
         url: url1,
         cacheSizeInBytes: expect.any(Number),
         readAheadEnabled: false,
+        pool: expect.any(HydratedSourcePool),
       });
       expect(mockSourceConstructor).toHaveBeenNthCalledWith(2, {
         type: "url",
         url: url2,
         cacheSizeInBytes: expect.any(Number),
         readAheadEnabled: false,
+        pool: expect.any(HydratedSourcePool),
       });
       expect(initializations).toHaveLength(2);
     });
@@ -173,6 +179,115 @@ describe("MultiIterableSource", () => {
 
       // THEN: the explicit value overrides the single-url default of true.
       expect(mockSourceConstructor.mock.calls[0]![0].readAheadEnabled).toBe(false);
+    });
+    it("should bound default initialization concurrency for url sources", async () => {
+      // GIVEN: more URL sources than the default remote initialization concurrency.
+      const urls = Array.from({ length: 8 }, () => BasicBuilder.string());
+      let inFlight = 0;
+      let maxInFlight = 0;
+      mockSourceConstructor.mockImplementation(
+        () =>
+          ({
+            initialize: jest.fn().mockImplementation(async () => {
+              inFlight++;
+              maxInFlight = Math.max(maxInFlight, inFlight);
+              await delay(1);
+              inFlight--;
+              return InitializationSourceBuilder.initialization();
+            }),
+            messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            getBackfillMessages: jest.fn().mockResolvedValue([]),
+            getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+            getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+          }) as jest.Mocked<IIterableSource>,
+      );
+      const multiSource = new MultiIterableSource(
+        {
+          type: "urls",
+          urls,
+        },
+        mockSourceConstructor,
+      );
+
+      // WHEN: initializing all remote sources.
+      await multiSource["loadMultipleSources"]();
+
+      // THEN: no more than four sources initialize concurrently.
+      expect(maxInFlight).toBeLessThanOrEqual(4);
+      expect(mockSourceConstructor).toHaveBeenCalledTimes(urls.length);
+    });
+    it("should bound default initialization concurrency for file sources", async () => {
+      // GIVEN: more file sources than the default initialization concurrency.
+      const files = Array.from({ length: 8 }, () => new Blob([BasicBuilder.string()]));
+      let inFlight = 0;
+      let maxInFlight = 0;
+      mockSourceConstructor.mockImplementation(
+        () =>
+          ({
+            initialize: jest.fn().mockImplementation(async () => {
+              inFlight++;
+              maxInFlight = Math.max(maxInFlight, inFlight);
+              await delay(1);
+              inFlight--;
+              return InitializationSourceBuilder.initialization();
+            }),
+            messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            getBackfillMessages: jest.fn().mockResolvedValue([]),
+            getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+            getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+          }) as jest.Mocked<IIterableSource>,
+      );
+      const multiSource = new MultiIterableSource(
+        {
+          type: "files",
+          files,
+        },
+        mockSourceConstructor,
+      );
+
+      // WHEN: initializing all file sources.
+      await multiSource["loadMultipleSources"]();
+
+      // THEN: no more than the default of four sources initialize concurrently.
+      expect(maxInFlight).toBeLessThanOrEqual(4);
+      expect(mockSourceConstructor).toHaveBeenCalledTimes(files.length);
+    });
+    it("should respect explicit initialization concurrency for url sources", async () => {
+      // GIVEN: a URL source with an explicit lower initialization concurrency.
+      const urls = Array.from({ length: 6 }, () => BasicBuilder.string());
+      let inFlight = 0;
+      let maxInFlight = 0;
+      mockSourceConstructor.mockImplementation(
+        () =>
+          ({
+            initialize: jest.fn().mockImplementation(async () => {
+              inFlight++;
+              maxInFlight = Math.max(maxInFlight, inFlight);
+              await delay(1);
+              inFlight--;
+              return InitializationSourceBuilder.initialization();
+            }),
+            messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            getBackfillMessages: jest.fn().mockResolvedValue([]),
+            getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+            getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+          }) as jest.Mocked<IIterableSource>,
+      );
+      const multiSource = new MultiIterableSource(
+        {
+          type: "urls",
+          urls,
+          initConcurrency: 2,
+        },
+        mockSourceConstructor,
+      );
+
+      // WHEN: initializing all remote sources.
+      await multiSource["loadMultipleSources"]();
+
+      // THEN: the explicit concurrency override is enforced.
+      expect(maxInFlight).toBeLessThanOrEqual(2);
+      expect(mockSourceConstructor).toHaveBeenCalledTimes(urls.length);
     });
     it("should allocate equal cache split when few sources do not trigger the minimum floor", async () => {
       // GIVEN: 2 URL sources with the default 500 MiB total cache budget.
@@ -493,6 +608,93 @@ describe("MultiIterableSource", () => {
       const sources = multiSource["sourceImpl"];
       expect(sources[0]).toBe(sourceWithoutStart);
       expect(sources[1]).toBe(sourceWithStart);
+    });
+  });
+
+  describe("HydratedSourcePool wiring", () => {
+    it("should create a single shared pool and pass it to every url source", async () => {
+      // GIVEN: a multi-url source with three URLs.
+      const urls = [BasicBuilder.string(), BasicBuilder.string(), BasicBuilder.string()];
+      const multiSource = new MultiIterableSource(
+        {
+          type: "urls",
+          urls,
+        },
+        mockSourceConstructor,
+      );
+
+      // WHEN
+      await multiSource["loadMultipleSources"]();
+
+      // THEN: every source receives the same pool instance.
+      const pool = mockSourceConstructor.mock.calls[0]![0].pool;
+      expect(pool).toBeInstanceOf(HydratedSourcePool);
+      expect(mockSourceConstructor.mock.calls[1]![0].pool).toBe(pool);
+      expect(mockSourceConstructor.mock.calls[2]![0].pool).toBe(pool);
+    });
+
+    it("should create a single shared pool and pass it to every file source", async () => {
+      // GIVEN: a multi-file source with three files.
+      const multiSource = new MultiIterableSource(
+        { type: "files", files: [new Blob(), new Blob(), new Blob()] },
+        mockSourceConstructor,
+      );
+
+      // WHEN
+      await multiSource["loadMultipleSources"]();
+
+      // THEN: every file source receives the same pool instance.
+      const pool = mockSourceConstructor.mock.calls[0]![0].pool;
+      expect(pool).toBeInstanceOf(HydratedSourcePool);
+      expect(mockSourceConstructor.mock.calls[1]![0].pool).toBe(pool);
+      expect(mockSourceConstructor.mock.calls[2]![0].pool).toBe(pool);
+    });
+
+    it("should honor a maxHydratedSources override without crashing", async () => {
+      // GIVEN: a multi-url source with an explicit maxHydratedSources of 1.
+      const urls = [BasicBuilder.string(), BasicBuilder.string(), BasicBuilder.string()];
+      const multiSource = new MultiIterableSource(
+        {
+          type: "urls",
+          urls,
+          maxHydratedSources: 1,
+        },
+        mockSourceConstructor,
+      );
+
+      // WHEN: initializing all remote sources.
+      const result = await multiSource.initialize();
+
+      // THEN: a pool is still created and shared, and a merged initialization is returned.
+      expect(mockSourceConstructor.mock.calls[0]![0].pool).toBeInstanceOf(HydratedSourcePool);
+      expect(result.start).toBeDefined();
+      expect(result.end).toBeDefined();
+    });
+
+    it("should terminate all sources and tear down the pool", async () => {
+      // GIVEN: url sources whose terminate is observable.
+      const terminateSpy = jest.fn().mockResolvedValue(undefined);
+      mockSourceConstructor.mockImplementation(() => ({
+        initialize: jest.fn().mockResolvedValue(InitializationSourceBuilder.initialization()),
+        messageIterator: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        getBackfillMessages: jest.fn().mockResolvedValue([]),
+        getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+        getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+        terminate: terminateSpy,
+      }));
+      const multiSource = new MultiIterableSource(
+        {
+          type: "urls",
+          urls: [BasicBuilder.string(), BasicBuilder.string()],
+        },
+        mockSourceConstructor,
+      );
+      await multiSource.initialize();
+
+      // WHEN: terminating the multi-source.
+      // THEN: it resolves and every source's terminate is called.
+      await expect(multiSource.terminate()).resolves.toBeUndefined();
+      expect(terminateSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

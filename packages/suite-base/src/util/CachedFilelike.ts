@@ -153,6 +153,9 @@ export default class CachedFilelike implements Filelike {
   // Potentially performance-sensitive; await can be expensive
   // eslint-disable-next-line @typescript-eslint/promise-function-async
   public read(offset: number, length: number): Promise<Uint8Array> {
+    if (this.#closed) {
+      return Promise.reject(new Error("CachedFilelike is closed"));
+    }
     if (length === 0) {
       return Promise.resolve(new Uint8Array());
     }
@@ -163,7 +166,11 @@ export default class CachedFilelike implements Filelike {
       throw new Error("CachedFilelike#read invalid input");
     }
     if (length > this.#cacheSizeInBytes) {
-      throw new Error(`Requested more data than cache size: ${length} > ${this.#cacheSizeInBytes}`);
+      // A single read larger than the LRU cache budget (e.g. an MCAP summary/index section that
+      // exceeds a small per-source cache slice in a many-file remote session) cannot be served
+      // through the VirtualLRUBuffer. Rather than failing, fetch the exact range directly without
+      // caching. Memory stays transient and the cache budget is unchanged.
+      return this.#readUncached(range);
     }
 
     // Potentially performance-sensitive; await can be expensive
@@ -182,6 +189,65 @@ export default class CachedFilelike implements Filelike {
         .catch((err: unknown) => {
           reject(err instanceof Error ? err : new Error(String(err)));
         });
+    });
+  }
+
+  // Close the reader: abort any in-flight download, reject pending reads, and release cached
+  // blocks so a lazily-released remote source frees its memory promptly. Idempotent and terminal —
+  // the instance must not be reused after close().
+  public close(): void {
+    if (this.#closed) {
+      return;
+    }
+    this.#closed = true;
+    if (this.#currentConnection) {
+      this.#currentConnection.stream.destroy();
+      this.#currentConnection = undefined;
+    }
+    const closedError = new Error("CachedFilelike is closed");
+    for (const request of this.#readRequests) {
+      request.reject(closedError);
+    }
+    this.#readRequests = [];
+    // Release cached blocks held by the VirtualLRUBuffer.
+    this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
+  }
+
+  // Reads a byte range directly from the underlying file reader without caching. Used for single
+  // reads larger than the LRU cache budget, which cannot be represented in the VirtualLRUBuffer.
+  async #readUncached(range: Range): Promise<Uint8Array> {
+    await this.open();
+    if (this.#closed) {
+      throw new Error("CachedFilelike is closed");
+    }
+    if (range.end > this.size()) {
+      throw new Error(`CachedFilelike#read past size`);
+    }
+
+    const length = range.end - range.start;
+    return await new Promise<Uint8Array>((resolve, reject) => {
+      const result = new Uint8Array(length);
+      let bytesRead = 0;
+      const stream = this.#fileReader.fetch(range.start, length);
+
+      stream.on("error", (error: Error) => {
+        stream.destroy();
+        reject(error);
+      });
+
+      stream.on("data", (chunk: Uint8Array) => {
+        if (bytesRead + chunk.byteLength > length) {
+          stream.destroy();
+          reject(new Error("CachedFilelike#readUncached received more data than requested"));
+          return;
+        }
+        result.set(chunk, bytesRead);
+        bytesRead += chunk.byteLength;
+        if (bytesRead === length) {
+          stream.destroy();
+          resolve(result);
+        }
+      });
     });
   }
 

@@ -7,12 +7,14 @@ import { RemoteFileReadable } from "./RemoteFileReadable";
 const mockOpen = jest.fn().mockResolvedValue(undefined);
 const mockSize = jest.fn().mockReturnValue(1024);
 const mockRead = jest.fn().mockResolvedValue(new Uint8Array([1, 2, 3]));
+const mockClose = jest.fn();
 
 jest.mock("@lichtblick/suite-base/util/CachedFilelike", () => {
   return jest.fn().mockImplementation(() => ({
     open: mockOpen,
     size: mockSize,
     read: mockRead,
+    close: mockClose,
   }));
 });
 
@@ -104,6 +106,19 @@ describe("RemoteFileReadable", () => {
       await expect(reader.read(BigInt(Number.MAX_SAFE_INTEGER), BigInt(1))).rejects.toThrow(
         "Read too large",
       );
+    });
+  });
+
+  describe("close", () => {
+    it("should delegate to CachedFilelike.close()", () => {
+      // Given a RemoteFileReadable instance
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When calling close
+      reader.close();
+
+      // Then it should delegate to the internal CachedFilelike
+      expect(mockClose).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -9,7 +9,16 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 
 export type MultiSource =
-  | { type: "files"; files: Blob[] }
+  | {
+      type: "files";
+      files: Blob[];
+      // Maximum number of heavyweight per-file readers kept resident at once. Bounds worker memory
+      // for large multi-file sessions; sources beyond this are re-opened on demand.
+      maxHydratedSources?: number;
+      // Maximum number of sources initialized concurrently. Bounds the transient memory spike from
+      // concurrently parsing many MCAP channel schemas.
+      initConcurrency?: number;
+    }
   | {
       type: "urls";
       urls: string[];
@@ -18,6 +27,13 @@ export type MultiSource =
       // When false (default for multi-file), each remote source downloads lazily without
       // speculative read-ahead. When true, legacy whole-file read-ahead is used.
       readAheadEnabled?: boolean;
+      // Maximum number of remote sources initialized concurrently. Bounds the initial request
+      // burst and the transient memory spike from concurrent MCAP summary reads. Defaults to a
+      // small value for multi-file remote sessions.
+      initConcurrency?: number;
+      // Maximum number of heavyweight per-file readers kept resident at once. Bounds worker memory
+      // for large multi-file remote sessions; sources beyond this are re-opened on demand.
+      maxHydratedSources?: number;
     };
 
 export type IterableSourceConstructor<T extends IIterableSource, P> = new (args: P) => T;
