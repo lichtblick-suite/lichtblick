@@ -43,7 +43,9 @@ export function useStructuredItemsByPath({
     [datatypes],
   );
 
-  const validTypesKey = validTypes?.join(",");
+  // Use JSON.stringify (not join) so arrays whose elements contain commas
+  // remain distinguishable, e.g. ["a,b","c"] vs ["a","b,c"].
+  const validTypesKey = JSON.stringify(validTypes);
 
   const computedItemsByPath = useMemo(() => {
     if (!validTypes && noMultiSlices == undefined) {

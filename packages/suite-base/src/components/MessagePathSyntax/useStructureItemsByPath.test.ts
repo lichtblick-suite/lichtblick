@@ -96,4 +96,17 @@ describe("useStructuredItemsByPath", () => {
     expect(StructureAllItems.structureAllItemsByPath).toHaveBeenCalledTimes(2);
   });
 
+  it("recomputes when validTypes differ only by comma placement (no join-collision)", () => {
+    const { rerender } = renderHook(
+      ({ validTypes }: { validTypes: string[] }) => useStructuredItemsByPath({ validTypes }),
+      { initialProps: { validTypes: ["a,b", "c"] } },
+    );
+
+    // ["a,b","c"] and ["a","b,c"] both join to "a,b,c"; a join-based key would
+    // collide and skip recomputation. JSON.stringify keeps them distinct.
+    rerender({ validTypes: ["a", "b,c"] });
+
+    expect(StructureAllItems.structureAllItemsByPath).toHaveBeenCalledTimes(2);
+  });
+
 });
