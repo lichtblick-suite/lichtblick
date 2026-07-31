@@ -210,8 +210,9 @@ export default class CachedFilelike implements Filelike {
       request.reject(closedError);
     }
     this.#readRequests = [];
-    // Reject in-flight uncached reads (copy first: cancel() mutates the set).
-    for (const active of [...this.#activeUncachedReads]) {
+    // Reject in-flight uncached reads. Safe to iterate the Set directly: cancel() is synchronous
+    // and only removes the entry currently being visited, which for...of over a Set permits.
+    for (const active of this.#activeUncachedReads) {
       active.cancel(new Error("CachedFilelike is closed"));
     }
     this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
