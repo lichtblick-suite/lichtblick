@@ -5,9 +5,11 @@ import Logger from "@lichtblick/log";
 
 import type { HydratedSourcePoolOptions, SourceHydrator } from "./types";
 
-// Re-exported so existing imports of these types from "./HydratedSourcePool" keep working; their
-// canonical definition now lives in shared/types.ts alongside the other shared contract types.
-export type { HydratedSourcePoolOptions, SourceHydrator };
+// Re-exported so the existing external import of this type from "./HydratedSourcePool" keeps
+// working; its canonical definition now lives in shared/types.ts. HydratedSourcePoolOptions is
+// only used internally here (constructor parameter type) — external consumers import it directly
+// from "./types".
+export type { SourceHydrator };
 
 const log = Logger.getLogger(__filename);
 
