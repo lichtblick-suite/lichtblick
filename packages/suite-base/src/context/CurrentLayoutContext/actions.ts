@@ -33,10 +33,6 @@ export type LayoutData = {
   layout?: MosaicNode<string>;
   globalVariables: GlobalVariables;
   playbackConfig: PlaybackConfig;
-  /**
-   * User scripts (a.k.a. user nodes). Optional: a layout with no user scripts may omit this field,
-   * in which case consumers treat it as an empty object.
-   */
   userNodes?: UserScripts;
   /** @deprecated renamed to configById */
   savedProps?: SavedProps;

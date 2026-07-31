@@ -596,7 +596,6 @@ export function validateLayoutData(data: unknown): LayoutData {
     errors.push(`missing or invalid fields: ${quotedFields}`);
   }
 
-  // userNodes is optional; validate its type whenever the field is present (rejecting null).
   if ("userNodes" in data && !isPlainObject(data.userNodes)) {
     errors.push(`invalid "userNodes"`);
   }
