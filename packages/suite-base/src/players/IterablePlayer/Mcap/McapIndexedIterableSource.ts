@@ -25,7 +25,7 @@ import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 const log = Logger.getLogger(__filename);
 
 export class McapIndexedIterableSource implements ISerializedIterableSource {
-  #reader: McapIndexedReader;
+  #reader: McapIndexedReader | undefined;
   #channelInfoById = new Map<
     number,
     {
@@ -161,9 +161,14 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
       return;
     }
 
+    const reader = this.#reader;
+    if (!reader) {
+      return;
+    }
+
     const topicNames = Array.from(topics.keys());
 
-    for await (const message of this.#reader.readMessages({
+    for await (const message of reader.readMessages({
       startTime: toNanoSec(start),
       endTime: toNanoSec(end),
       topics: topicNames,
@@ -213,11 +218,15 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
     const { topics, time } = args;
 
     const messages: MessageEvent<Uint8Array>[] = [];
+    const reader = this.#reader;
+    if (!reader) {
+      return messages;
+    }
     for (const topic of topics.keys()) {
       // NOTE: An iterator is made for each topic to get the latest message on that topic.
       // An single iterator for all the topics could result in iterating through many
       // irrelevant messages to get to an older message on a topic.
-      for await (const message of this.#reader.readMessages({
+      for await (const message of reader.readMessages({
         endTime: toNanoSec(time),
         topics: [topic],
         reverse: true,
@@ -243,6 +252,12 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
     }
     messages.sort((a, b) => compare(a.receiveTime, b.receiveTime));
     return messages;
+  }
+
+  // Releases the parsed reader (chunk indexes) and channel info so their memory can be reclaimed.
+  public async terminate(): Promise<void> {
+    this.#reader = undefined;
+    this.#channelInfoById.clear();
   }
 
   public getStart(): Time | undefined {

@@ -257,6 +257,63 @@ describe("MultiIterableSource", () => {
       await multiSource["loadMultipleSources"]();
       expect(mockSourceConstructor).toHaveBeenCalledTimes(2);
     });
+    it("should not initialize more sources concurrently than initConcurrency", async () => {
+      // GIVEN: many url sources whose initialize() overlaps in time, with a low concurrency cap.
+      const initConcurrency = 2;
+      const urls = Array.from({ length: 6 }, () => BasicBuilder.string());
+      let activeCount = 0;
+      let maxActiveCount = 0;
+      const concurrencyTrackingConstructor = jest.fn().mockImplementation(() => ({
+        initialize: jest.fn().mockImplementation(async () => {
+          activeCount++;
+          maxActiveCount = Math.max(maxActiveCount, activeCount);
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          activeCount--;
+          return InitializationSourceBuilder.initialization();
+        }),
+        getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+        getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+      }));
+      const multiSource = new MultiIterableSource(
+        { type: "urls", urls, initConcurrency },
+        concurrencyTrackingConstructor,
+      );
+
+      // WHEN
+      const initializations = await multiSource["loadMultipleSources"]();
+
+      // THEN: every source was initialized, but never more than initConcurrency at once.
+      expect(concurrencyTrackingConstructor).toHaveBeenCalledTimes(urls.length);
+      expect(initializations).toHaveLength(urls.length);
+      expect(maxActiveCount).toBeLessThanOrEqual(initConcurrency);
+    });
+  });
+  describe("terminate", () => {
+    it("should terminate every sub-source to release their retained memory", async () => {
+      // GIVEN: several sources that have been loaded.
+      const urls = Array.from({ length: 3 }, () => BasicBuilder.string());
+      const terminateFns = urls.map(() => jest.fn().mockResolvedValue(undefined));
+      let index = 0;
+      const terminatingConstructor = jest.fn().mockImplementation(() => {
+        const terminate = terminateFns[index++]!;
+        return {
+          initialize: jest.fn().mockResolvedValue(InitializationSourceBuilder.initialization()),
+          getStart: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+          getEnd: jest.fn().mockReturnValue(RosTimeBuilder.time()),
+          terminate,
+        };
+      });
+      const multiSource = new MultiIterableSource({ type: "urls", urls }, terminatingConstructor);
+      await multiSource["loadMultipleSources"]();
+
+      // WHEN
+      await multiSource.terminate();
+
+      // THEN: each sub-source's terminate was called.
+      for (const terminate of terminateFns) {
+        expect(terminate).toHaveBeenCalledTimes(1);
+      }
+    });
   });
   describe("Initialization", () => {
     const mockInitialization = (initialization: Initialization) => {
@@ -489,10 +546,13 @@ describe("MultiIterableSource", () => {
       // When initializing
       await multiSource.initialize();
 
-      // Then source without getStart should sort first (fallback to sec:0)
+      // Then source without getStart should sort first (fallback to sec:0). sourceImpl holds
+      // lifecycle proxies, so identify each by its cached end time.
       const sources = multiSource["sourceImpl"];
-      expect(sources[0]).toBe(sourceWithoutStart);
-      expect(sources[1]).toBe(sourceWithStart);
+      expect(sources[0]!.getStart!()).toBeUndefined();
+      expect(sources[0]!.getEnd!()).toEqual({ sec: 5, nsec: 0 });
+      expect(sources[1]!.getStart!()).toEqual({ sec: 5, nsec: 0 });
+      expect(sources[1]!.getEnd!()).toEqual({ sec: 10, nsec: 0 });
     });
   });
 });

@@ -140,6 +140,12 @@ export class McapIterableSource implements ISerializedIterableSource {
     return await this.#sourceImpl.getBackfillMessages(args);
   }
 
+  // Releases the underlying source (parsed reader / cache) so its memory can be reclaimed.
+  public async terminate(): Promise<void> {
+    await this.#sourceImpl?.terminate?.();
+    this.#sourceImpl = undefined;
+  }
+
   public getStart(): Time | undefined {
     return this.#sourceImpl!.getStart!();
   }

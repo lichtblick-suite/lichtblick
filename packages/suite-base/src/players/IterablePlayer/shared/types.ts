@@ -9,7 +9,7 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 
 export type MultiSource =
-  | { type: "files"; files: Blob[] }
+  | { type: "files"; files: Blob[]; initConcurrency?: number; maxResidentSources?: number }
   | {
       type: "urls";
       urls: string[];
@@ -18,6 +18,12 @@ export type MultiSource =
       // When false (default for multi-file), each remote source downloads lazily without
       // speculative read-ahead. When true, legacy whole-file read-ahead is used.
       readAheadEnabled?: boolean;
+      // Max number of sources whose initialize() runs concurrently. Bounds the memory/CPU
+      // spike from reading many MCAP summary sections at once.
+      initConcurrency?: number;
+      // Max number of sources kept initialized (parsed reader resident) at once. Others are
+      // terminated and re-created lazily to bound worker memory.
+      maxResidentSources?: number;
     };
 
 export type IterableSourceConstructor<T extends IIterableSource, P> = new (args: P) => T;

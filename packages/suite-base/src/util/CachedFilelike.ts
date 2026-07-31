@@ -163,7 +163,7 @@ export default class CachedFilelike implements Filelike {
       throw new Error("CachedFilelike#read invalid input");
     }
     if (length > this.#cacheSizeInBytes) {
-      throw new Error(`Requested more data than cache size: ${length} > ${this.#cacheSizeInBytes}`);
+      return this.#readUncached(range);
     }
 
     // Potentially performance-sensitive; await can be expensive
@@ -335,6 +335,56 @@ export default class CachedFilelike implements Filelike {
 
       // Always call `_updateState` so it can decide to create new connections, resolve callbacks, etc.
       this.#updateState();
+    });
+  }
+
+  // Reads a byte range directly from the underlying file reader without caching. Used for single
+  // reads larger than the LRU cache budget, which cannot be represented in the VirtualLRUBuffer.
+  async #readUncached(range: Range): Promise<Uint8Array> {
+    await this.open();
+
+    if (this.#closed) {
+      throw new Error("CachedFilelike is closed");
+    }
+
+    if (range.end > this.size()) {
+      throw new Error(`CachedFilelike#read past size`);
+    }
+
+    const length = range.end - range.start;
+
+    return await new Promise<Uint8Array>((resolve, reject) => {
+      const result = new Uint8Array(length);
+
+      let bytesRead = 0;
+
+      const stream = this.#fileReader.fetch(range.start, length);
+
+      stream.on("error", (error: Error) => {
+        stream.destroy();
+
+        reject(error);
+      });
+
+      stream.on("data", (chunk: Uint8Array) => {
+        if (bytesRead + chunk.byteLength > length) {
+          stream.destroy();
+
+          reject(new Error("CachedFilelike#readUncached received more data than requested"));
+
+          return;
+        }
+
+        result.set(chunk, bytesRead);
+
+        bytesRead += chunk.byteLength;
+
+        if (bytesRead === length) {
+          stream.destroy();
+
+          resolve(result);
+        }
+      });
     });
   }
 }
