@@ -30,7 +30,8 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
     const { additionalIcons, isUnknownPanel } = props;
     const { classes } = useStyles();
     const panelContext = useContext(PanelContext);
-    const { id: panelId, type: panelType, showLogs, setShowLogs, logCount } = panelContext ?? {};
+    const { id: panelId, type: panelType, showLogs, setShowLogs, getLogCount } = panelContext ?? {};
+    const logCount = getLogCount?.() ?? 0;
     const toggleLogs = () => {
       if (setShowLogs) {
         setShowLogs({ show: !(showLogs ?? false) });
@@ -73,18 +74,11 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
         paddingTop={1}
       >
         {additionalIcons}
-        <Badge
-          color="error"
-          variant="dot"
-          invisible={(logCount ?? 0) === 0}
-          className={classes.logsBadge}
-        >
+        <Badge color="error" variant="dot" invisible={logCount === 0} className={classes.logsBadge}>
           <ToolbarIconButton
-            disabled={(logCount ?? 0) === 0}
+            disabled={logCount === 0}
             title={
-              showLogs === true
-                ? "Hide logs"
-                : `Show logs${(logCount ?? 0) > 0 ? ` (${logCount})` : ""}`
+              showLogs === true ? "Hide logs" : `Show logs${logCount > 0 ? ` (${logCount})` : ""}`
             }
             onClick={toggleLogs}
           >

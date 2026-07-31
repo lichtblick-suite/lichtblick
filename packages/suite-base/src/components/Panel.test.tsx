@@ -236,7 +236,7 @@ describe("Panel", () => {
             <button onClick={logInfo}>Log Info</button>
             <button onClick={logError}>Log Error</button>
             <button onClick={toggleLogs}>Toggle Logs</button>
-            <span data-testid="log-count">{panelContext?.logCount ?? 0}</span>
+            <span data-testid="log-count">{panelContext?.getLogCount?.() ?? 0}</span>
             <span data-testid="config-value">{props.config.someString}</span>
           </div>
         );
