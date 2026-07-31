@@ -196,5 +196,4 @@ describe("structureAllItemsByPath", () => {
       noMultiSlices: true,
     });
   });
-
 });

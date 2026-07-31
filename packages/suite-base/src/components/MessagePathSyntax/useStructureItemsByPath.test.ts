@@ -108,5 +108,4 @@ describe("useStructuredItemsByPath", () => {
 
     expect(StructureAllItems.structureAllItemsByPath).toHaveBeenCalledTimes(2);
   });
-
 });
