@@ -6,12 +6,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMountedState } from "react-use";
 
 import {
   App,
   AppSetting,
   FoxgloveWebSocketDataSourceFactory,
-  IAppConfiguration,
   IDataSourceFactory,
   IdbExtensionLoader,
   McapLocalDataSourceFactory,
@@ -24,25 +24,22 @@ import {
   SampleNuscenesDataSourceFactory,
   UlogLocalDataSourceFactory,
   VelodyneDataSourceFactory,
+  Workspace,
+  WorkspacesProvider,
 } from "@lichtblick/suite-base";
 
+import { RootProps } from "./Root.types";
 import { DesktopExtensionLoader } from "./services/DesktopExtensionLoader";
 import { DesktopLayoutLoader } from "./services/DesktopLayoutLoader";
+import { DesktopWorkspacesManager } from "./services/DesktopWorkspacesManager";
 import { NativeAppMenu } from "./services/NativeAppMenu";
 import { NativeWindow } from "./services/NativeWindow";
-import { CLIFlags, Desktop, NativeMenuBridge, Storage } from "../common/types";
+import { Desktop, NativeMenuBridge, Storage } from "../common/types";
 
 const desktopBridge = (global as unknown as { desktopBridge: Desktop }).desktopBridge;
 const storageBridge = (global as unknown as { storageBridge?: Storage }).storageBridge;
 const menuBridge = (global as { menuBridge?: NativeMenuBridge }).menuBridge;
 const ctxbridge = (global as { ctxbridge?: OsContext }).ctxbridge;
-
-type RootProps = {
-  appParameters: CLIFlags;
-  appConfiguration: IAppConfiguration;
-  extraProviders: React.JSX.Element[] | undefined;
-  dataSources: IDataSourceFactory[] | undefined;
-};
 
 export default function Root(props: RootProps): React.JSX.Element {
   if (!storageBridge) {
@@ -71,12 +68,56 @@ export default function Root(props: RootProps): React.JSX.Element {
     };
   }, [appConfiguration]);
 
-  const [extensionLoaders] = useState(() => [
-    new IdbExtensionLoader("org"),
-    new DesktopExtensionLoader(desktopBridge),
-  ]);
+  const workspacesManager = useMemo(() => new DesktopWorkspacesManager(desktopBridge), []);
+  const isMounted = useMountedState();
 
-  const [layoutLoaders] = useState(() => [new DesktopLayoutLoader(desktopBridge)]);
+  // Active workspace drives the keyed remount of the workspace-scoped provider subtree (B1).
+  // It is seeded once from the persisted selection; an undefined workspace uses the legacy folders.
+  const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | undefined>(undefined);
+  const [workspaceInitialized, setWorkspaceInitialized] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const workspace = await workspacesManager.getCurrent();
+        if (isMounted()) {
+          setCurrentWorkspace(workspace);
+        }
+      } catch (err: unknown) {
+        console.error("Failed to resolve the current workspace", err);
+      } finally {
+        if (isMounted()) {
+          setWorkspaceInitialized(true);
+        }
+      }
+    })();
+  }, [workspacesManager, isMounted]);
+
+  const workspaceId = currentWorkspace?.id;
+  const workspaceNamespace = currentWorkspace?.namespace ?? "local";
+
+  const handleSwitchWorkspace = useCallback(() => {
+    void (async () => {
+      try {
+        const workspace = await workspacesManager.getCurrent();
+        if (isMounted()) {
+          setCurrentWorkspace(workspace);
+        }
+      } catch (err: unknown) {
+        console.error("Failed to resolve the current workspace after switching", err);
+      }
+    })();
+  }, [workspacesManager, isMounted]);
+
+  const extensionLoaders = useMemo(
+    () => [
+      new IdbExtensionLoader("org"),
+      new DesktopExtensionLoader(desktopBridge, workspaceNamespace),
+    ],
+    [workspaceNamespace],
+  );
+
+  const layoutLoaders = useMemo(() => [new DesktopLayoutLoader(desktopBridge)], []);
 
   const nativeAppMenu = useMemo(() => new NativeAppMenu(menuBridge), []);
   const nativeWindow = useMemo(() => new NativeWindow(desktopBridge), []);
@@ -150,27 +191,40 @@ export default function Root(props: RootProps): React.JSX.Element {
     };
   }, []);
 
+  // Wait for the persisted workspace selection to resolve before mounting the workspace-scoped
+  // subtree so users with an active workspace do not briefly mount the legacy folders first.
+  if (!workspaceInitialized) {
+    return <></>;
+  }
+
   return (
-    <App
-      appParameters={appParameters}
-      deepLinks={deepLinks}
-      dataSources={dataSources}
-      appConfiguration={appConfiguration}
-      extensionLoaders={extensionLoaders}
-      layoutLoaders={layoutLoaders}
-      nativeAppMenu={nativeAppMenu}
-      nativeWindow={nativeWindow}
-      enableGlobalCss
-      appBarLeftInset={ctxbridge?.platform === "darwin" && !isFullScreen ? 72 : undefined}
-      onAppBarDoubleClick={() => {
-        nativeWindow.handleTitleBarDoubleClick();
-      }}
-      isMaximized={isMaximized}
-      onMinimizeWindow={onMinimizeWindow}
-      onMaximizeWindow={onMaximizeWindow}
-      onUnmaximizeWindow={onUnmaximizeWindow}
-      onCloseWindow={onCloseWindow}
-      extraProviders={extraProviders}
-    />
+    <WorkspacesProvider
+      manager={workspacesManager}
+      currentWorkspaceId={workspaceId}
+      onSwitchWorkspace={handleSwitchWorkspace}
+    >
+      <App
+        appParameters={appParameters}
+        deepLinks={deepLinks}
+        dataSources={dataSources}
+        appConfiguration={appConfiguration}
+        extensionLoaders={extensionLoaders}
+        layoutLoaders={layoutLoaders}
+        workspaceId={workspaceId}
+        nativeAppMenu={nativeAppMenu}
+        nativeWindow={nativeWindow}
+        enableGlobalCss
+        appBarLeftInset={ctxbridge?.platform === "darwin" && !isFullScreen ? 72 : undefined}
+        onAppBarDoubleClick={() => {
+          nativeWindow.handleTitleBarDoubleClick();
+        }}
+        isMaximized={isMaximized}
+        onMinimizeWindow={onMinimizeWindow}
+        onMaximizeWindow={onMaximizeWindow}
+        onUnmaximizeWindow={onUnmaximizeWindow}
+        onCloseWindow={onCloseWindow}
+        extraProviders={extraProviders}
+      />
+    </WorkspacesProvider>
   );
 }

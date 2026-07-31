@@ -5,6 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { Namespace } from "@lichtblick/suite-base/src/types/Namespace";
+
 // Events that are forwarded from the main process
 export type ForwardedMenuEvent =
   | "open"
@@ -77,6 +79,22 @@ type DesktopLayout = {
   from: string;
 };
 
+/**
+ * Kind of a workspace, reusing the shared {@link Namespace} type. `"local"` denotes a personal
+ * workspace and `"org"` an organization workspace. This determines the namespace that the
+ * workspace's artifacts inherit when loaded.
+ */
+export type WorkspaceNamespace = Namespace;
+
+/** A workspace exposed to the renderer across the bridge. */
+type DesktopWorkspace = {
+  id: string;
+  name: string;
+  namespace: WorkspaceNamespace;
+  /** Absolute path to the workspace folder on disk. */
+  path: string;
+};
+
 export type CLIFlags = Readonly<Record<string, string>>;
 
 export type LoadedExtension = {
@@ -133,6 +151,35 @@ interface Desktop {
 
   /** Notify the app that the language setting has been changed */
   updateLanguage(): void;
+
+  // Workspace management (desktop only). A workspace groups the extensions and layouts loaded by the
+  // app. When no workspace is selected the app falls back to the legacy global folders.
+
+  /** List all available workspaces. */
+  listWorkspaces: () => Promise<DesktopWorkspace[]>;
+
+  /** Create a new workspace and return it. */
+  createWorkspace: (name: string, namespace: WorkspaceNamespace) => Promise<DesktopWorkspace>;
+
+  /** Rename an existing workspace and return the updated workspace. */
+  renameWorkspace: (id: string, name: string) => Promise<DesktopWorkspace>;
+
+  /** Delete a workspace and all of its contents. */
+  deleteWorkspace: (id: string) => Promise<void>;
+
+  /** Get the currently selected workspace, or undefined when using the legacy global folders. */
+  getCurrentWorkspace: () => Promise<DesktopWorkspace | undefined>;
+
+  /** Select the active workspace (persisted). Pass undefined to fall back to the legacy folders. */
+  setCurrentWorkspace: (id: string | undefined) => Promise<void>;
 }
 
-export type { Desktop, DesktopExtension, DesktopLayout, NativeMenuBridge, Storage, StorageContent };
+export type {
+  Desktop,
+  DesktopExtension,
+  DesktopLayout,
+  DesktopWorkspace,
+  NativeMenuBridge,
+  Storage,
+  StorageContent,
+};

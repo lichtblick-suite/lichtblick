@@ -14,6 +14,22 @@ export class DataSourceDialog {
     await this.dialog.getByTestId("CloseIcon").click();
   }
 
+  /**
+   * Dismisses the dialog only when it is currently shown. Switching workspaces remounts the app
+   * subtree, which reopens the start dialog, so specs use this to dismiss it without failing when
+   * the dialog is not present.
+   */
+  public async closeIfVisible(): Promise<void> {
+    const closeIcon = this.dialog.getByTestId("CloseIcon");
+    try {
+      await closeIcon.waitFor({ state: "visible", timeout: 15_000 });
+    } catch {
+      return;
+    }
+    await closeIcon.click();
+    await this.dialog.waitFor({ state: "hidden" });
+  }
+
   public async isVisible(): Promise<boolean> {
     return await this.dialog.isVisible();
   }

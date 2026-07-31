@@ -6,6 +6,10 @@ import { CustomWindowControlsProps } from "@lichtblick/suite-base/components/App
 import { SidebarItem } from "@lichtblick/suite-base/components/Sidebars/types";
 import { SidebarItemKey } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 
+import type { Namespace } from "./types/Namespace";
+
+export type { Namespace };
+
 export type InjectedSidebarItem = [SidebarItemKey, SidebarItem];
 
 export type WorkspaceProps = CustomWindowControlsProps & {
@@ -23,5 +27,3 @@ export type DropHandler = {
   namespace?: Namespace;
   isSource?: boolean;
 };
-
-export type Namespace = "local" | "org";

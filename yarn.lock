@@ -3729,6 +3729,7 @@ __metadata:
     "@mcap/core": "npm:2.2.0"
     "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
     "@storybook/react-webpack5": "npm:10.4.6"
+    "@testing-library/react": "npm:16.0.0"
     "@types/mock-fs": "npm:4.13.4"
     "@types/plist": "npm:^3.0.3"
     "@types/pngjs": "npm:^6.0.2"

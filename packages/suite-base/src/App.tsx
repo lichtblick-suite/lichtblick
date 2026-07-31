@@ -58,6 +58,12 @@ export type AppProps = CustomWindowControlsProps & {
   appBarLeftInset?: number;
   extraProviders?: React.JSX.Element[];
   onAppBarDoubleClick?: () => void;
+  /**
+   * Active workspace id (desktop only). Layouts are isolated per workspace and the workspace-scoped
+   * provider subtree remounts when this changes. When undefined the app uses the shared, legacy
+   * layout database (backward compatible).
+   */
+  workspaceId?: string;
 };
 
 // Suppress context menu for the entire app except on inputs & textareas.
@@ -83,6 +89,7 @@ export function App(props: AppProps): React.JSX.Element {
     enableLaunchPreferenceScreen,
     enableGlobalCss = false,
     extraProviders,
+    workspaceId,
   } = props;
 
   const providers = [
@@ -114,7 +121,12 @@ export function App(props: AppProps): React.JSX.Element {
   providers.unshift(<UserProfileLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);
 
-  const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
+  const layoutStorage = useMemo(() => new IdbLayoutStorage(workspaceId), [workspaceId]);
+  useEffect(() => {
+    return () => {
+      void layoutStorage.close();
+    };
+  }, [layoutStorage]);
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
 
   // The toast and logs provider comes first so they are available to all downstream providers
@@ -138,7 +150,7 @@ export function App(props: AppProps): React.JSX.Element {
           <CssBaseline>
             <ErrorBoundary>
               <MaybeLaunchPreference>
-                <MultiProvider providers={providers}>
+                <MultiProvider key={workspaceId ?? "default"} providers={providers}>
                   <DocumentTitleAdapter />
                   <SendNotificationToastAdapter />
                   <DndProvider backend={HTML5Backend}>

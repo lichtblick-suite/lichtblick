@@ -28,3 +28,4 @@ export * from "./stateTransitions";
 export * from "./threeDee";
 export * from "./topicList";
 export * from "./workspace";
+export * from "./workspaces";

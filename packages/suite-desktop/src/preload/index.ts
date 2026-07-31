@@ -20,12 +20,21 @@ import { decodeRendererArg } from "../common/rendererArgs";
 import {
   CLIFlags,
   Desktop,
+  DesktopWorkspace,
   ForwardedMenuEvent,
   ForwardedWindowEvent,
   NativeMenuBridge,
   Storage,
+  WorkspaceNamespace,
 } from "../common/types";
 import { LICHTBLICK_PRODUCT_NAME, LICHTBLICK_PRODUCT_VERSION } from "../common/webpackDefines";
+import {
+  LEGACY_EXTENSIONS_FOLDER,
+  LEGACY_LAYOUTS_FOLDER,
+  SUITE_ROOT_FOLDER,
+  WORKSPACE_EXTENSIONS_FOLDER,
+  WORKSPACE_LAYOUTS_FOLDER,
+} from "../common/workspaces";
 
 // Since we have no way of modifying `window.process.argv` we use a sentinel cookie and reload
 // hack to reset the page without deep links. By setting a session cookie and reloading
@@ -106,12 +115,32 @@ export function main(): void {
   ipcRenderer.on("unmaximize", () => (isMaximized = false));
 
   let extensionHandler: ExtensionsHandler | undefined;
+  let extensionHandlerDir: string | undefined;
 
+  // Resolve the on-disk directory for a workspace sub-folder. When a workspace is selected we use
+  // `<workspace>/<subFolder>`; otherwise we fall back to the legacy global folder
+  // `<home>/.lichtblick-suite/<legacyFolder>` so existing installs keep working unchanged.
+  const resolveWorkspaceDir = async (subFolder: string, legacyFolder: string): Promise<string> => {
+    const currentWorkspace = (await ipcRenderer.invoke("workspaces:getCurrent")) as
+      | DesktopWorkspace
+      | undefined;
+    if (currentWorkspace) {
+      return pathJoin(currentWorkspace.path, subFolder);
+    }
+    const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
+    return pathJoin(homePath, SUITE_ROOT_FOLDER, legacyFolder);
+  };
+
+  // The active workspace can change at runtime (keyed remount, no page reload), so re-resolve the
+  // extensions directory on every access and rebuild the handler when it points at a new folder.
   const getExtensionHandler = async (): Promise<ExtensionsHandler> => {
-    if (!extensionHandler) {
-      const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
-      const userExtensionsDir = pathJoin(homePath, ".lichtblick-suite", "extensions");
+    const userExtensionsDir = await resolveWorkspaceDir(
+      WORKSPACE_EXTENSIONS_FOLDER,
+      LEGACY_EXTENSIONS_FOLDER,
+    );
+    if (!extensionHandler || extensionHandlerDir !== userExtensionsDir) {
       extensionHandler = new ExtensionsHandler(userExtensionsDir);
+      extensionHandlerDir = userExtensionsDir;
     }
     return extensionHandler;
   };
@@ -149,10 +178,9 @@ export function main(): void {
     },
     // Layout management
     async fetchLayouts() {
-      const userLayoutsDir = pathJoin(
-        (await ipcRenderer.invoke("getHomePath")) as string,
-        ".lichtblick-suite",
-        "layouts",
+      const userLayoutsDir = await resolveWorkspaceDir(
+        WORKSPACE_LAYOUTS_FOLDER,
+        LEGACY_LAYOUTS_FOLDER,
       );
       return await fetchLayouts(userLayoutsDir);
     },
@@ -193,6 +221,25 @@ export function main(): void {
     },
     reloadWindow() {
       ipcRenderer.send("reloadMainWindow");
+    },
+    // Workspace management
+    async listWorkspaces(): Promise<DesktopWorkspace[]> {
+      return (await ipcRenderer.invoke("workspaces:list")) as DesktopWorkspace[];
+    },
+    async createWorkspace(name: string, namespace: WorkspaceNamespace): Promise<DesktopWorkspace> {
+      return (await ipcRenderer.invoke("workspaces:create", name, namespace)) as DesktopWorkspace;
+    },
+    async renameWorkspace(id: string, name: string): Promise<DesktopWorkspace> {
+      return (await ipcRenderer.invoke("workspaces:rename", id, name)) as DesktopWorkspace;
+    },
+    async deleteWorkspace(id: string): Promise<void> {
+      await ipcRenderer.invoke("workspaces:delete", id);
+    },
+    async getCurrentWorkspace(): Promise<DesktopWorkspace | undefined> {
+      return (await ipcRenderer.invoke("workspaces:getCurrent")) as DesktopWorkspace | undefined;
+    },
+    async setCurrentWorkspace(id: string | undefined): Promise<void> {
+      await ipcRenderer.invoke("workspaces:setCurrent", id);
     },
   };
 

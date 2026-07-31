@@ -13,37 +13,46 @@ import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { ILayoutStorage, Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 import { migrateLayout } from "@lichtblick/suite-base/services/migrateLayout";
 
+import type { LayoutsDB } from "./IdbLayoutStorage.types";
+
 const log = Log.getLogger(__filename);
 
 const DATABASE_NAME = `${KEY_WORKSPACE_PREFIX}lichtblick-layouts`;
 const OBJECT_STORE_NAME = "layouts";
-
-interface LayoutsDB extends IDB.DBSchema {
-  layouts: {
-    key: [namespace: string, id: LayoutID];
-    value: {
-      namespace: string;
-      layout: Layout;
-    };
-    indexes: {
-      namespace: string;
-    };
-  };
-}
 
 /**
  * Stores layouts in IndexedDB. All layouts are stored in one object store, with the primary key
  * being the tuple of [namespace, id].
  */
 export class IdbLayoutStorage implements ILayoutStorage {
-  #db = IDB.openDB<LayoutsDB>(DATABASE_NAME, 1, {
-    upgrade(db) {
-      const store = db.createObjectStore(OBJECT_STORE_NAME, {
-        keyPath: ["namespace", "layout.id"],
-      });
-      store.createIndex("namespace", "namespace");
-    },
-  });
+  readonly #db;
+
+  /**
+   * @param workspaceId Optional workspace id used to scope the layouts database. When omitted the
+   * shared, unscoped database is used so existing (non-workspace) installs and the web build keep
+   * their layouts.
+   */
+  public constructor(workspaceId?: string) {
+    const databaseName =
+      workspaceId == undefined ? DATABASE_NAME : `${DATABASE_NAME}-${workspaceId}`;
+    this.#db = IDB.openDB<LayoutsDB>(databaseName, 1, {
+      upgrade(db) {
+        const store = db.createObjectStore(OBJECT_STORE_NAME, {
+          keyPath: ["namespace", "layout.id"],
+        });
+        store.createIndex("namespace", "namespace");
+      },
+    });
+  }
+
+  /**
+   * Close the underlying IndexedDB connection. Call when discarding a storage instance (for example
+   * when switching workspaces) so stale database connections are released and the database can be
+   * deleted cleanly.
+   */
+  public async close(): Promise<void> {
+    (await this.#db).close();
+  }
 
   public async list(namespace: string): Promise<readonly Layout[]> {
     const results: Layout[] = [];

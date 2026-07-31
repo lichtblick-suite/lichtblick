@@ -267,7 +267,8 @@ function createExtensionRegistryStore(
       };
 
       const localAndRemoteLoaders = loaders.filter(
-        (loader) => loader.namespace === "local" || loader.type === "server",
+        (loader) =>
+          loader.namespace === "local" || loader.type === "server" || loader.type === "filesystem",
       );
       await Promise.all(localAndRemoteLoaders.map(processLoader));
 
@@ -286,8 +287,16 @@ function createExtensionRegistryStore(
     };
 
     const uninstallExtension = async (namespace: Namespace, id: string) => {
-      const localLoaderType = isDesktopApp() ? "filesystem" : "browser";
-      const loaderType: TypeExtensionLoader = namespace === "local" ? localLoaderType : "server";
+      // On desktop both `local` and `org` workspace extensions are backed by filesystem loaders; on
+      // web `org` extensions come from the remote server loader.
+      let loaderType: TypeExtensionLoader;
+      if (isDesktopApp()) {
+        loaderType = "filesystem";
+      } else if (namespace === "local") {
+        loaderType = "browser";
+      } else {
+        loaderType = "server";
+      }
 
       const namespaceLoader = loaders.find(
         (loader) => loader.namespace === namespace && loader.type === loaderType,

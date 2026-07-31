@@ -9,10 +9,10 @@ import Logger from "@lichtblick/log";
 import {
   ExtensionInfo,
   IExtensionLoader,
-  Namespace,
   TypeExtensionLoader,
   InstallExtensionProps,
 } from "@lichtblick/suite-base";
+import type { Namespace } from "@lichtblick/suite-base/src/types/Namespace";
 
 import { Desktop, DesktopExtension, LoadedExtension } from "../../common/types";
 
@@ -20,11 +20,12 @@ const log = Logger.getLogger(__filename);
 
 export class DesktopExtensionLoader implements IExtensionLoader {
   #bridge?: Desktop;
-  public readonly namespace: Namespace = "local";
+  public readonly namespace: Namespace;
   public readonly type: TypeExtensionLoader = "filesystem";
 
-  public constructor(bridge: Desktop) {
+  public constructor(bridge: Desktop, namespace: Namespace = "local") {
     this.#bridge = bridge;
+    this.namespace = namespace;
   }
 
   public async getExtension(id: string): Promise<ExtensionInfo | undefined> {
