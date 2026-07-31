@@ -8,6 +8,26 @@ import {
   IteratorResult,
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 
+// Contract a caller supplies to HydratedSourcePool for a hydrated (heavyweight) value.
+export type SourceHydrator<T> = {
+  // Create the heavyweight value (open readable, build reader, parse channels, ...).
+  open: () => Promise<T>;
+  // Release the heavyweight value (close readable/connection, drop references).
+  close: (value: T) => Promise<void>;
+  // Optional estimated resident memory (bytes) of the hydrated value, used by the byte budget.
+  // When omitted, every entry weighs 1 so the pool behaves as a pure count cap.
+  weigh?: (value: T) => number;
+};
+
+export type HydratedSourcePoolOptions = {
+  // Primary limiter: evict LRU unpinned entries while total estimated bytes exceeds this.
+  maxBytes?: number;
+  // Safety cap on resident entry count (bounds open connections/readers regardless of weight).
+  maxCount?: number;
+  // Never evict below this many entries (default 1), even when over the byte/count budget.
+  minResident?: number;
+};
+
 // Shared memory/concurrency overrides for a multi-file session. All optional; internal defaults
 // apply when unset.
 type MultiSourceHydrationOptions = {

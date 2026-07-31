@@ -16,6 +16,7 @@ import { BlobReadable } from "./BlobReadable";
 import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
 import { McapUnindexedIterableSource } from "./McapUnindexedIterableSource";
 import { RemoteFileReadable } from "./RemoteFileReadable";
+import { READER_BASE_BYTES, estimateReaderWeightBytes } from "./readerWeight";
 import {
   IteratorResult,
   Initialization,
@@ -26,22 +27,6 @@ import {
 import { HydratedSourcePool, SourceHydrator } from "../shared/HydratedSourcePool";
 
 const log = Log.getLogger(__filename);
-
-// Heuristic per-reader resident-memory weights (bytes) used by the pool's byte budget. Absolute
-// values are approximate; the RELATIVE weighting (heavier index/more channels => evicted sooner)
-// is what matters. Calibrate against real datasets before loosening pool defaults.
-const READER_BASE_BYTES = 2 * 1024 * 1024; // fixed reader/deserializer overhead
-const BYTES_PER_CHUNK_INDEX = 512; // per chunk-index entry retained by McapIndexedReader
-const BYTES_PER_CHANNEL = 16 * 1024; // parsed schema + per-channel deserializer
-
-function estimateReaderWeightBytes(reader: McapIndexedReader, cacheBytes: number): number {
-  return (
-    READER_BASE_BYTES +
-    reader.chunkIndexes.length * BYTES_PER_CHUNK_INDEX +
-    reader.channelsById.size * BYTES_PER_CHANNEL +
-    cacheBytes
-  );
-}
 
 type McapSource =
   | { type: "file"; file: Blob; pool?: HydratedSourcePool }

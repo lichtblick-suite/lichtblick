@@ -46,17 +46,14 @@ const DEFAULT_CACHE_TOTAL_BYTES = 1024 * 1024 * 500; // 500 MiB
 // the budget into slices smaller than one summary/index read and crash.
 const MIN_CACHE_PER_SOURCE_BYTES = 1024 * 1024 * 10; // 10 MiB
 
-// Bounds the initial request burst and transient memory from concurrent MCAP summary reads.
+// Defaults for the optional MultiSourceHydrationOptions overrides (see shared/types.ts for the
+// rationale behind each knob). Heuristic; tune against real datasets.
 const DEFAULT_INIT_CONCURRENCY = 4;
-
-// Count-cap safety for heavyweight per-file readers; the byte budget is primary.
 const DEFAULT_MAX_HYDRATED_SOURCES = 12;
-
-// Primary byte budget for resident heavyweight readers; the pool evicts LRU readers once estimated
-// resident bytes exceed this. Heuristic — tune against real datasets.
 const DEFAULT_MAX_HYDRATED_BYTES = 1024 * 1024 * 512; // 512 MiB
 
-// Small dedicated prewarm limit: enough for t=0 playback, not a large open/request burst.
+// Earliest-by-start sources to prewarm for t=0 playback. Not part of MultiSourceHydrationOptions:
+// intentionally fixed and small to avoid a large open/request burst.
 const PREWARM_EARLIEST_COUNT = 3;
 
 export class MultiIterableSource<T extends ISerializedIterableSource, P>
