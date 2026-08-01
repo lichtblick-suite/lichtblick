@@ -166,7 +166,7 @@
     "react-use": "17.6.0",
     "react-virtualized-auto-sizer": "1.0.26",
     "react-window": "2.2.7",
-    "readable-stream": "4.4.2",
+    "readable-stream": "4.7.0",
     "recharts": "2.15.3",
     "rehype-raw": "7.0.0",
     "reselect": "5.1.1",
