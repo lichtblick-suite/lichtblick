@@ -3643,7 +3643,7 @@ __metadata:
     idb-keyval: "npm:6.2.1"
     immer: "npm:10.1.1"
     intervals-fn: "npm:3.0.3"
-    jest-canvas-mock: "npm:2.5.2"
+    jest-canvas-mock: "npm:2.5.8"
     jszip: "npm:3.10.1"
     leaflet: "npm:1.9.4"
     leaflet-ellipse: "npm:0.9.1"
@@ -14156,13 +14156,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-canvas-mock@npm:2.5.2":
-  version: 2.5.2
-  resolution: "jest-canvas-mock@npm:2.5.2"
+"jest-canvas-mock@npm:2.5.8":
+  version: 2.5.8
+  resolution: "jest-canvas-mock@npm:2.5.8"
   dependencies:
     cssfontparser: "npm:^1.2.1"
     moo-color: "npm:^1.0.2"
-  checksum: 10/094e2e1c773c658fab7e91e9279027fc38a55060865b5b6a3c9acc47fc912fb9d3451ab4fdf544d016578f77b975626707c3a62e396575aa878f46d939c7ca5e
+  checksum: 10/44d04607a91cadf5042baaf49483df9aae530aad2948e8c9c0235a571ec9b0d9141cefc0f1bb1ee22232682e327817fef0510a73c97d135f3f8fc687ea7aa897
   languageName: node
   linkType: hard
 
