@@ -84,8 +84,9 @@ class CachedFilelike {
 
 ### Error Handling
 - **With `keepReconnectingCallback`**: unlimited retries, callback notified of reconnection state
-- **Without callback**: two errors within 100ms → fatal (rejects all pending reads, closes)
+- **Without callback**: two errors within 100ms → fatal via `#closeWithError()` (destroys the active stream, rejects all pending `#readRequests`, cancels all `#activeUncachedReads`, resets `#virtualBuffer` to an empty `VirtualLRUBuffer`, and closes)
 - **Single error**: destroys stream, clears connection, calls `#updateState()` to retry
+- `close()` also funnels through `#closeWithError()` so explicit close and fatal shutdown share the same cleanup path
 
 ### VirtualLRUBuffer Initialization
 ```typescript
@@ -322,12 +323,139 @@ Coalescing layer between `McapIndexedReader` and `CachedFilelike`. Accumulates `
 
 ---
 
+## HydratedSourcePool
+
+**Source**: `packages/suite-base/src/players/IterablePlayer/shared/HydratedSourcePool.ts`
+
+### Purpose
+Bounds resident heavyweight per-file reader objects (for example `McapIndexedReader` instances with chunk indexes, channel schemas, and deserializers) using a hybrid **count + byte** budget. This is a separate layer from `CachedFilelike`: it manages parsed reader objects, not raw downloaded file bytes and not decoded message payloads.
+
+### Key Properties
+- Constructor options are all optional: `HydratedSourcePoolOptions = { maxBytes?, maxCount?, minResident? }`
+- `maxCount` is normalized to `Math.max(1, Math.floor(...))`, or `Infinity` when unset
+- `maxBytes` defaults to `Infinity`
+- `minResident` defaults to `1`, then clamps to `Math.min(maxCount, Math.max(1, Math.floor(...)))`
+- Internal state is a `Map<object, Entry>` where:
+  - `token` = caller-owned identity object for one source
+  - `Entry = { hydrator, value: Promise<unknown>, pins: number, weight: number }`
+- JavaScript `Map` preserves insertion order. Deleting and re-setting an entry on access refreshes recency, so iteration order is LRU order (first entry = least recently used).
+
+### Architecture
+```typescript
+type SourceHydrator<T> = {
+  open: () => Promise<T>;
+  close: (value: T) => Promise<void>;
+  weigh?: (value: T) => number;
+};
+
+type Entry = {
+  hydrator: SourceHydrator<unknown>;
+  value: Promise<unknown>;
+  pins: number;
+  weight: number;
+};
+
+class HydratedSourcePool {
+  #entries: Map<object, Entry>;  // insertion order = LRU order
+  #totalWeight: number;          // sum of resident entry weights
+  #terminated: boolean;
+}
+```
+
+### Operations
+
+| Method | Description |
+|--------|-------------|
+| `acquire(token, hydrator)` | Returns a resident value, opening it on demand and pinning it while in use |
+| `release(token)` | Decrements the pin count (never below 0) and opportunistically triggers eviction |
+| `admit(token, hydrator, value)` | Seeds the pool with an already-open value, usually from a source's own initialization path |
+| `terminate()` | Prevents future admission/hydration, clears the pool, and closes every resident value |
+
+### `acquire()` / `release()` lifecycle
+1. `acquire(token, hydrator)` checks `#terminated` first and immediately throws `"HydratedSourcePool has been terminated"` when shutdown has started.
+2. If the token is already resident:
+   - delete + re-set the `Map` entry to refresh LRU position
+   - increment `pins`
+   - await and return the cached `value` promise
+   - if that promise rejects, roll back the pin increment and rethrow so a co-pending failed `open()` does not leak a phantom pin
+3. If the token is not resident:
+   - insert a new entry with `pins: 1`, `value: hydrator.open()`, `weight: 0`
+   - await the value
+   - compute `weight = Math.max(0, hydrator.weigh?.(value) ?? 1)`
+   - add the weight to `#totalWeight`
+   - run eviction and return the value
+4. If a new entry's hydration rejects:
+   - decrement `pins`
+   - only delete the map entry when `this.#entries.get(token) === entry`
+   - this identity guard prevents a late rejection from deleting a newer entry recreated for the same token by another caller
+5. `release(token)` decrements `pins` when the entry still exists, then fires-and-forgets `#evictBeyondCapacity()` so newly unpinned entries can be reclaimed.
+
+### `admit()` and `terminate()`
+- `admit(token, hydrator, value)` lets callers seed the pool with an already-hydrated value, avoiding a redundant `open()` call.
+- If the pool is already terminated, `admit()` immediately closes the supplied value instead of retaining it.
+- If the token is already resident, the pool keeps the existing entry, refreshes its LRU position, and closes the redundant newly supplied value.
+- Otherwise it inserts the value as an **unpinned** entry (`pins: 0`), computes weight, updates `#totalWeight`, and runs eviction. A newly admitted value may be evicted immediately if the pool is already over budget.
+- `terminate()` sets `#terminated = true` **before** clearing the map so concurrent or later `acquire()` / `admit()` calls cannot repopulate the pool during shutdown.
+- Shutdown snapshots the entries, clears the map, resets `#totalWeight` to 0, and closes every resolved value in parallel. Each close is individually guarded so one failing `close()` does not stop the rest.
+
+### Eviction Algorithm
+`#isOverCapacity()` returns:
+- `false` when `entries.size <= minResident`
+- otherwise `true` when either:
+  - `entries.size > maxCount`, or
+  - `#totalWeight > maxBytes`
+
+`#evictBeyondCapacity()` then:
+1. Loops while `#isOverCapacity()` remains true
+2. Scans current `Map` iteration order (LRU order)
+3. Picks the **first** entry with `pins === 0`
+4. Deletes it from the map **before** awaiting `close()` so concurrent eviction passes cannot target it twice
+5. Subtracts its weight from `#totalWeight`
+6. Awaits `hydrator.close(value)` and logs errors instead of throwing
+
+If every remaining entry is pinned, eviction stops early. The pool may temporarily remain over `maxCount` and/or `maxBytes`; that is intentional because pinned entries are actively in use and cannot be evicted.
+
+### Termination Semantics
+- `#terminated` is a hard gate, not just a best-effort hint
+- `acquire()` after termination throws immediately
+- `admit()` after termination discards and closes the supplied value immediately
+- Because the flag is set before the map is cleared, concurrent shutdown cannot race with a new resident entry being retained after `terminate()`
+
+### readerWeight.ts / `estimateReaderWeightBytes`
+
+**Source**: `packages/suite-base/src/players/IterablePlayer/Mcap/readerWeight.ts`
+
+```typescript
+export const READER_BASE_BYTES = 2 * 1024 * 1024; // fixed reader/deserializer overhead
+const BYTES_PER_CHUNK_INDEX = 512; // per chunk-index entry retained by McapIndexedReader
+const BYTES_PER_CHANNEL = 16 * 1024; // parsed schema + per-channel deserializer
+
+export function estimateReaderWeightBytes(reader: McapIndexedReader, cacheBytes: number): number {
+  return (
+    READER_BASE_BYTES +
+    reader.chunkIndexes.length * BYTES_PER_CHUNK_INDEX +
+    reader.channelsById.size * BYTES_PER_CHANNEL +
+    cacheBytes
+  );
+}
+```
+
+This is the `weigh()` heuristic for pooled MCAP readers:
+- `READER_BASE_BYTES` models fixed parser/deserializer overhead
+- chunk indexes and channels scale the estimate with file complexity
+- `cacheBytes` folds in the reader's own byte-cache allocation (for example its `CachedFilelike` budget)
+
+Absolute values are approximate; the relative weighting is what matters. Heavier readers do not get special eviction priority directly — eviction still removes the next LRU unpinned entry — but heavier readers push the pool over `maxBytes` sooner, causing LRU eviction pressure earlier.
+
+---
+
 ## Multi-File Cache Budget Distribution
 
 When `MultiIterableSource` handles multiple remote URLs:
 ```typescript
 const totalCache = dataSource.totalCacheSizeInBytes ?? 500 * 1024 * 1024;  // 500MB total
-const perSourceCache = Math.floor(totalCache / urls.length);
+const minPerSource = dataSource.minCachePerSourceBytes ?? 10 * 1024 * 1024;  // 10MiB floor
+const perSourceCache = Math.max(minPerSource, Math.floor(totalCache / urls.length));
 // Each McapIterableSource gets perSourceCache for its RemoteFileReadable
 ```
 
@@ -335,8 +463,13 @@ const perSourceCache = Math.floor(totalCache / urls.length);
 
 This means:
 - More files = less cache per file = more network re-fetches
+- `MIN_CACHE_PER_SOURCE_BYTES = 10 MiB` prevents multi-file sessions from slicing the total budget so small that a single MCAP summary/index read can crash `CachedFilelike`
+- `dataSource.minCachePerSourceBytes` overrides that floor when a caller needs a different minimum
+- For `urls.length > 1`, `readAheadEnabled` now defaults to `false` so multi-file remote sessions stay lazy instead of speculatively reading ahead across every file; single-file sessions keep the legacy eager default unless `dataSource.readAheadEnabled` overrides it
 - For large multi-file datasets, consider increasing `totalCacheSizeInBytes`
 - Each file's CachedFilelike manages its own VirtualLRUBuffer independently
+
+> `totalCacheSizeInBytes` / `perSourceCache` govern the **raw byte cache** for each source's `CachedFilelike` / `RemoteFileReadable`. `HydratedSourcePool` adds a separate resident-reader-object budget (`maxBytes` / `maxCount`) for parsed `McapIndexedReader` instances. Both budgets apply at the same time and solve different memory problems.
 
 ---
 
@@ -352,3 +485,6 @@ This means:
 | `packages/suite-base/src/util/RequestQueue.ts` | Global concurrency limiter (10 max) |
 | `packages/suite-base/src/players/IterablePlayer/Mcap/RemoteFileReadable.ts` | IReadable adapter (500MB default); reads pass through BatchingReadable |
 | `packages/suite-base/src/players/IterablePlayer/Mcap/BatchingReadable.ts` | Coalesces nearby `read()` calls (gap <64KiB, ≤4MiB span) into fewer inner reads |
+| `packages/suite-base/src/players/IterablePlayer/shared/HydratedSourcePool.ts` | Resident-reader pool with LRU eviction across count and byte budgets |
+| `packages/suite-base/src/players/IterablePlayer/shared/types.ts` | `SourceHydrator` and `HydratedSourcePoolOptions` type definitions |
+| `packages/suite-base/src/players/IterablePlayer/Mcap/readerWeight.ts` | Heuristic weight estimate for pooled MCAP readers |
