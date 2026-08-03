@@ -692,7 +692,6 @@ describe("layout", () => {
     it.each([
       "configById",
       "globalVariables",
-      "userNodes",
     ] as const)("throws when required object field %s is missing", (field) => {
       // Given a layout missing a required object field
       const data = validData();
@@ -701,6 +700,34 @@ describe("layout", () => {
       // When validating it
       // Then it throws referencing that field
       expect(() => validateLayoutData(data)).toThrow(`missing or invalid "${field}"`);
+    });
+
+    it("accepts a layout that omits userNodes", () => {
+      // Given a valid layout without a userNodes field
+      const data = validData();
+      delete data.userNodes;
+
+      // When validating it
+      // Then it is accepted
+      expect(validateLayoutData(data)).toBe(data);
+    });
+
+    it("throws when userNodes is present but not an object", () => {
+      // Given a layout whose userNodes field is not an object
+      const data = { ...validData(), userNodes: [] };
+
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(data)).toThrow('invalid "userNodes"');
+    });
+
+    it("throws when userNodes is null", () => {
+      // Given a layout whose userNodes field is explicitly null
+      const data = { ...validData(), userNodes: null };
+
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(data)).toThrow('invalid "userNodes"');
     });
 
     it("throws when playbackConfig is missing", () => {
@@ -747,7 +774,7 @@ describe("layout", () => {
       // When validating it
       // Then all invalid fields are reported
       expect(() => validateLayoutData(data)).toThrow(
-        'missing or invalid fields: "configById", "userNodes", "playbackConfig"',
+        'missing or invalid fields: "configById", "playbackConfig"',
       );
     });
   });

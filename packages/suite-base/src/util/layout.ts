@@ -583,7 +583,7 @@ export function validateLayoutData(data: unknown): LayoutData {
     throw new Error("expected an object");
   }
 
-  const missingFields = ["configById", "globalVariables", "userNodes"].filter(
+  const missingFields = ["configById", "globalVariables"].filter(
     (field) => !isPlainObject(data[field]),
   );
   if (!isPlainObject(data.playbackConfig) || typeof data.playbackConfig.speed !== "number") {
@@ -594,6 +594,10 @@ export function validateLayoutData(data: unknown): LayoutData {
   } else if (missingFields.length > 1) {
     const quotedFields = missingFields.map((field) => `"${field}"`).join(", ");
     errors.push(`missing or invalid fields: ${quotedFields}`);
+  }
+
+  if ("userNodes" in data && !isPlainObject(data.userNodes)) {
+    errors.push(`invalid "userNodes"`);
   }
 
   if (data.layout != undefined && typeof data.layout !== "string" && !isPlainObject(data.layout)) {
