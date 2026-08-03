@@ -205,17 +205,22 @@ export default class CachedFilelike implements Filelike {
       this.#currentConnection.stream.destroy();
       this.#currentConnection = undefined;
     }
-    const closedError = new Error("CachedFilelike is closed");
+    this.#rejectPendingReads(new Error("CachedFilelike is closed"));
+    this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
+  }
+
+  // Reject all queued read requests and cancel all in-flight uncached reads with `error`. Shared
+  // by close() and the fatal-error path in #setConnection so neither can forget to release the
+  // other's tracked state. Safe to iterate #activeUncachedReads directly: cancel() is synchronous
+  // and only removes the entry currently being visited, which for...of over a Set permits.
+  #rejectPendingReads(error: Error): void {
     for (const request of this.#readRequests) {
-      request.reject(closedError);
+      request.reject(error);
     }
     this.#readRequests = [];
-    // Reject in-flight uncached reads. Safe to iterate the Set directly: cancel() is synchronous
-    // and only removes the entry currently being visited, which for...of over a Set permits.
     for (const active of this.#activeUncachedReads) {
-      active.cancel(new Error("CachedFilelike is closed"));
+      active.cancel(error);
     }
-    this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
   }
 
   // Reads a byte range directly from the underlying file reader without caching. Used for single
@@ -372,9 +377,7 @@ export default class CachedFilelike implements Filelike {
           );
 
           this.#closed = true;
-          for (const request of this.#readRequests) {
-            request.reject(error);
-          }
+          this.#rejectPendingReads(error);
           return;
         }
       }

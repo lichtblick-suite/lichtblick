@@ -32,7 +32,7 @@ function makeHydrator(
 describe("HydratedSourcePool", () => {
   it("reuses an admitted value without calling open again", async () => {
     // GIVEN: a pool seeded with an already-hydrated value.
-    const pool = new HydratedSourcePool(4);
+    const pool = new HydratedSourcePool({ maxCount: 4 });
     const token = {};
     const hydrator = makeHydrator("seed-value");
     await pool.admit(token, hydrator, "seed-value");
@@ -49,7 +49,7 @@ describe("HydratedSourcePool", () => {
 
   it("hydrates via open() when not resident and allows eviction after release", async () => {
     // GIVEN: an empty pool and a token that has not been hydrated.
-    const pool = new HydratedSourcePool(1);
+    const pool = new HydratedSourcePool({ maxCount: 1 });
     const tokenA = {};
     const hydratorA = makeHydrator("A");
 
@@ -76,7 +76,7 @@ describe("HydratedSourcePool", () => {
 
   it("enforces capacity by closing the least-recently-used unpinned entry", async () => {
     // GIVEN: a pool with capacity 2.
-    const pool = new HydratedSourcePool(2);
+    const pool = new HydratedSourcePool({ maxCount: 2 });
     const tokenA = {};
     const tokenB = {};
     const tokenC = {};
@@ -99,7 +99,7 @@ describe("HydratedSourcePool", () => {
 
   it("never evicts a pinned entry even when over capacity", async () => {
     // GIVEN: a pool with capacity 2.
-    const pool = new HydratedSourcePool(2);
+    const pool = new HydratedSourcePool({ maxCount: 2 });
     const tokenA = {};
     const tokenB = {};
     const tokenC = {};
@@ -136,7 +136,7 @@ describe("HydratedSourcePool", () => {
 
   it("re-hydrates via open() again after a token was evicted", async () => {
     // GIVEN: a capacity-1 pool where an acquired token is evicted by a second acquire.
-    const pool = new HydratedSourcePool(1);
+    const pool = new HydratedSourcePool({ maxCount: 1 });
     const tokenA = {};
     const hydratorA = makeHydrator("A");
 
@@ -163,7 +163,7 @@ describe("HydratedSourcePool", () => {
 
   it("terminate() closes all resident entries and empties the pool", async () => {
     // GIVEN: a pool with two resident entries.
-    const pool = new HydratedSourcePool(4);
+    const pool = new HydratedSourcePool({ maxCount: 4 });
     const tokenA = {};
     const tokenB = {};
     const hydratorA = makeHydrator("A");
@@ -183,7 +183,7 @@ describe("HydratedSourcePool", () => {
 
   it("rejects acquire() after terminate() and does not re-hydrate", async () => {
     // GIVEN: a terminated pool.
-    const pool = new HydratedSourcePool(2);
+    const pool = new HydratedSourcePool({ maxCount: 2 });
     const token = {};
     const hydrator = makeHydrator("A");
     await pool.terminate();
@@ -196,7 +196,7 @@ describe("HydratedSourcePool", () => {
 
   it("closes a duplicate admitted value without re-opening", async () => {
     // GIVEN: a token already admitted with a value.
-    const pool = new HydratedSourcePool(2);
+    const pool = new HydratedSourcePool({ maxCount: 2 });
     const token = {};
     const hydrator = makeHydrator("A");
     await pool.admit(token, hydrator, "first");
@@ -213,7 +213,7 @@ describe("HydratedSourcePool", () => {
 
   it("removes a broken entry on rejected open() and allows a later retry", async () => {
     // GIVEN: a hydrator whose first open() rejects, then succeeds.
-    const pool = new HydratedSourcePool(2);
+    const pool = new HydratedSourcePool({ maxCount: 2 });
     const token = {};
     const hydrator = {
       open: jest.fn().mockRejectedValueOnce(new Error("boom")).mockResolvedValueOnce("recovered"),

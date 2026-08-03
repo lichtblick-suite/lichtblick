@@ -137,6 +137,10 @@ export class WorkerSerializedIterableSource implements ISerializedIterableSource
   }
 
   public async terminate(): Promise<void> {
+    // Give the worker-side source (e.g. MultiIterableSource's pool) a chance to release pooled
+    // readers/streams gracefully before the worker is hard-killed below.
+    await this.#sourceWorkerRemote?.terminate();
+
     this.#disposeRemote?.();
     // shouldn't normally have to do this, but if `initialize` is called after again we don't want
     // to reuse the old remote

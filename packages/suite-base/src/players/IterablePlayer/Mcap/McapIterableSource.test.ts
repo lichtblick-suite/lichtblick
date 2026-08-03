@@ -372,7 +372,7 @@ describe("McapIterableSource", () => {
         const topic = "/pooled_topic";
         const mcapData = await buildIndexedMcapWithTopic(topic, [1_000_000_000n]);
         mockRemoteFileReadableWith(mcapData);
-        const pool = new HydratedSourcePool(1);
+        const pool = new HydratedSourcePool({ maxCount: 1 });
         const sourceA = new McapIterableSource({ type: "url", url: urlIndexedMcap, pool });
         const sourceB = new McapIterableSource({ type: "url", url: urlIndexedMcap, pool });
 
@@ -410,7 +410,7 @@ describe("McapIterableSource", () => {
           8_000_000_000n,
         ]);
         mockRemoteFileReadableWith(mcapData);
-        const pool = new HydratedSourcePool(1);
+        const pool = new HydratedSourcePool({ maxCount: 1 });
         const sourceA = new McapIterableSource({ type: "url", url: urlIndexedMcap, pool });
         const sourceB = new McapIterableSource({ type: "url", url: urlIndexedMcap, pool });
 
@@ -429,7 +429,7 @@ describe("McapIterableSource", () => {
         // Given two indexed MCAPs sharing a pool with capacity 2
         const mcapData = await buildIndexedMcapWithTopic("/n_topic", [1_000_000_000n]);
         mockRemoteFileReadableWith(mcapData);
-        const pool = new HydratedSourcePool(2);
+        const pool = new HydratedSourcePool({ maxCount: 2 });
         const sourceA = new McapIterableSource({ type: "url", url: urlIndexedMcap, pool });
         const sourceB = new McapIterableSource({ type: "url", url: urlIndexedMcap, pool });
 
@@ -449,7 +449,7 @@ describe("McapIterableSource", () => {
         // Given a pooled url source whose inner is owned by the pool
         const mcapData = await buildIndexedMcapWithTopic("/term_topic", [1_000_000_000n]);
         mockRemoteFileReadableWith(mcapData);
-        const pool = new HydratedSourcePool(4);
+        const pool = new HydratedSourcePool({ maxCount: 4 });
         const source = new McapIterableSource({ type: "url", url: urlIndexedMcap, pool });
         await source.initialize();
 
@@ -468,7 +468,7 @@ describe("McapIterableSource", () => {
       const topic = `/${BasicBuilder.string()}`;
       const fileA = await createMcapFile({ withMessage: true, topic });
       const fileB = await createMcapFile({ withMessage: true, topic });
-      const pool = new HydratedSourcePool(1);
+      const pool = new HydratedSourcePool({ maxCount: 1 });
       const sourceA = new McapIterableSource({ type: "file", file: fileA, pool });
       const sourceB = new McapIterableSource({ type: "file", file: fileB, pool });
 
@@ -497,7 +497,7 @@ describe("McapIterableSource", () => {
       const topic = `/${BasicBuilder.string()}`;
       const fileA = await createMcapFile({ withMessage: true, topic });
       const fileB = await createMcapFile({ withMessage: true, topic });
-      const pool = new HydratedSourcePool(2);
+      const pool = new HydratedSourcePool({ maxCount: 2 });
       const sourceA = new McapIterableSource({ type: "file", file: fileA, pool });
       const sourceB = new McapIterableSource({ type: "file", file: fileB, pool });
 

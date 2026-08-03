@@ -173,9 +173,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     }
     const warmCount = Math.min(PREWARM_EARLIEST_COUNT, this.sourceImpl.length);
     for (let index = warmCount - 1; index >= 0; index--) {
-      const source = this.sourceImpl[index] as { prewarm?: () => Promise<void> };
       try {
-        await source.prewarm?.();
+        await this.sourceImpl[index]?.prewarm?.();
       } catch (err) {
         log.debug("prewarmEarliestSources: source prewarm failed", err);
       }

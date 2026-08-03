@@ -28,8 +28,8 @@ type Entry = {
  * bound, but never below `minResident` entries and never while pinned (so the pool may temporarily
  * exceed its bounds when more than the budget's worth of sources are active at once).
  *
- * Backward compatible: `new HydratedSourcePool(n)` is a pure count cap (`maxCount=n`,
- * `maxBytes=Infinity`), and with no `weigh` hook every entry weighs 1.
+ * With no `maxBytes` set the pool is a pure count cap, and with no `weigh` hook every entry
+ * weighs 1.
  *
  * A JS Map preserves insertion order, so re-inserting an entry on access implements LRU ordering
  * (oldest first).
@@ -44,19 +44,13 @@ export class HydratedSourcePool {
   #overCapacityReported = false;
   #terminated = false;
 
-  public constructor(capacityOrOptions: number | HydratedSourcePoolOptions) {
-    if (typeof capacityOrOptions === "number") {
-      this.#maxCount = Math.max(1, Math.floor(capacityOrOptions));
-      this.#maxBytes = Number.POSITIVE_INFINITY;
-      this.#minResident = 1;
-    } else {
-      this.#maxCount =
-        capacityOrOptions.maxCount != undefined
-          ? Math.max(1, Math.floor(capacityOrOptions.maxCount))
-          : Number.POSITIVE_INFINITY;
-      this.#maxBytes = capacityOrOptions.maxBytes ?? Number.POSITIVE_INFINITY;
-      this.#minResident = Math.max(1, Math.floor(capacityOrOptions.minResident ?? 1));
-    }
+  public constructor(options: HydratedSourcePoolOptions) {
+    this.#maxCount =
+      options.maxCount != undefined
+        ? Math.max(1, Math.floor(options.maxCount))
+        : Number.POSITIVE_INFINITY;
+    this.#maxBytes = options.maxBytes ?? Number.POSITIVE_INFINITY;
+    this.#minResident = Math.max(1, Math.floor(options.minResident ?? 1));
   }
 
   // eslint-disable-next-line no-restricted-syntax

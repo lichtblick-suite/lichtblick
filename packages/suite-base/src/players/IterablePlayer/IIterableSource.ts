@@ -208,6 +208,13 @@ export interface IIterableSource<MessageType = unknown> {
    * method when the source will no longer be used.
    */
   terminate?: () => Promise<void>;
+
+  /**
+   * Optional method a data source can implement to warm itself up before it becomes the active
+   * source (e.g. hydrate a pooled reader ahead of playback reaching it). Failures should be
+   * treated as non-fatal by callers; the source can still hydrate on demand later.
+   */
+  prewarm?: () => Promise<void>;
 }
 
 export type IterableSourceInitializeArgs = {
