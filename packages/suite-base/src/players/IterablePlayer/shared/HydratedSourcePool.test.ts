@@ -295,6 +295,25 @@ describe("HydratedSourcePool", () => {
       expect(hydratorB.close).not.toHaveBeenCalled();
     });
 
+    it("clamps minResident to maxCount so the count cap is still enforced", async () => {
+      // GIVEN: a pool whose configured minResident (5) exceeds its count cap (1).
+      const pool = new HydratedSourcePool({ maxCount: 1, minResident: 5 });
+      const tokenA = {};
+      const tokenB = {};
+      const hydratorA = makeHydrator("A");
+      const hydratorB = makeHydrator("B");
+
+      // WHEN: two unpinned entries are hydrated and released.
+      await pool.acquire(tokenA, hydratorA);
+      pool.release(tokenA);
+      await pool.acquire(tokenB, hydratorB);
+      pool.release(tokenB);
+
+      // THEN: the count cap (1) is enforced rather than the unclamped minResident (5).
+      expect(pool.size).toBe(1);
+      expect(hydratorA.close).toHaveBeenCalledTimes(1);
+    });
+
     it("keeps a single entry heavier than the whole budget", async () => {
       // GIVEN: a pool with a byte budget smaller than one entry.
       const pool = new HydratedSourcePool({ maxBytes: 5 });

@@ -279,5 +279,49 @@ describe("CachedFilelike", () => {
       // THEN: the oversized uncached read settles by rejecting with the closed error.
       await expect(readPromise).rejects.toThrow("CachedFilelike is closed");
     });
+
+    it("destroys the active connection when two quick stream errors trigger the fatal close path", async () => {
+      // GIVEN: a read that reconnects once and then hits the fatal double-error close path.
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
+      const streams: Array<{ destroy: jest.Mock; error?: (_error: Error) => void }> = [];
+      jest.spyOn(fileReader, "fetch").mockImplementation(() => {
+        const stream = { destroy: jest.fn() };
+        streams.push(stream);
+        return {
+          on: (
+            type: "data" | "error" | "end",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
+          ) => {
+            if (type === "error") {
+              streams[streams.length - 1]!.error = callback;
+            }
+          },
+          destroy: stream.destroy,
+        };
+      });
+      let now = 1_000;
+      const dateNow = jest.spyOn(Date, "now").mockImplementation(() => now);
+      const cachedFileReader = new CachedFilelike({ fileReader, log });
+
+      try {
+        // WHEN: two connection errors happen within the fatal 100ms window.
+        const readPromise = cachedFileReader.read(0, 2);
+        await delay(10);
+
+        now = 1_010;
+        streams[0]!.error?.(new Error("transient"));
+        await delay(10);
+
+        now = 1_050;
+        const fatalError = new Error("fatal");
+        streams[1]!.error?.(fatalError);
+
+        // THEN: the read rejects, and the active connection is destroyed as part of full cleanup.
+        await expect(readPromise).rejects.toThrow("fatal");
+        expect(streams[1]!.destroy).toHaveBeenCalledTimes(1);
+      } finally {
+        dateNow.mockRestore();
+      }
+    });
   });
 });

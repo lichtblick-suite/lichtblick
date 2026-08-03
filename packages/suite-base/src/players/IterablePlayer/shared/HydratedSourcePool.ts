@@ -50,7 +50,9 @@ export class HydratedSourcePool {
         ? Math.max(1, Math.floor(options.maxCount))
         : Number.POSITIVE_INFINITY;
     this.#maxBytes = options.maxBytes ?? Number.POSITIVE_INFINITY;
-    this.#minResident = Math.max(1, Math.floor(options.minResident ?? 1));
+    // Never let the resident floor exceed the count cap (Math.min with Infinity is a no-op when
+    // maxCount is unset).
+    this.#minResident = Math.min(this.#maxCount, Math.max(1, Math.floor(options.minResident ?? 1)));
   }
 
   // eslint-disable-next-line no-restricted-syntax

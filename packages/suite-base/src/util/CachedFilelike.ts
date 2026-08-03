@@ -197,6 +197,15 @@ export default class CachedFilelike implements Filelike {
 
   // Terminal close: abort downloads, reject pending reads, and release cache blocks promptly.
   public close(): void {
+    this.#closeWithError(new Error("CachedFilelike is closed"));
+  }
+
+  // Shared terminal-close logic used by close() and the fatal double-error path in
+  // #setConnection, so neither can forget to destroy the active connection, reject/cancel pending
+  // reads, or release cached memory. Safe to iterate #activeUncachedReads directly: cancel() is
+  // synchronous and only removes the entry currently being visited, which for...of over a Set
+  // permits.
+  #closeWithError(error: Error): void {
     if (this.#closed) {
       return;
     }
@@ -205,15 +214,6 @@ export default class CachedFilelike implements Filelike {
       this.#currentConnection.stream.destroy();
       this.#currentConnection = undefined;
     }
-    this.#rejectPendingReads(new Error("CachedFilelike is closed"));
-    this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
-  }
-
-  // Reject all queued read requests and cancel all in-flight uncached reads with `error`. Shared
-  // by close() and the fatal-error path in #setConnection so neither can forget to release the
-  // other's tracked state. Safe to iterate #activeUncachedReads directly: cancel() is synchronous
-  // and only removes the entry currently being visited, which for...of over a Set permits.
-  #rejectPendingReads(error: Error): void {
     for (const request of this.#readRequests) {
       request.reject(error);
     }
@@ -221,6 +221,7 @@ export default class CachedFilelike implements Filelike {
     for (const active of this.#activeUncachedReads) {
       active.cancel(error);
     }
+    this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
   }
 
   // Reads a byte range directly from the underlying file reader without caching. Used for single
@@ -376,8 +377,7 @@ export default class CachedFilelike implements Filelike {
             )} threw another error; closing: ${error.toString()}`,
           );
 
-          this.#closed = true;
-          this.#rejectPendingReads(error);
+          this.#closeWithError(error);
           return;
         }
       }
