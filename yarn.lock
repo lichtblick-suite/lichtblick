@@ -3687,7 +3687,7 @@ __metadata:
     recharts: "npm:2.15.3"
     rehype-raw: "npm:7.0.0"
     reselect: "npm:5.1.1"
-    sanitize-html: "npm:2.17.4"
+    sanitize-html: "npm:2.17.5"
     seedrandom: "npm:3.0.5"
     shallowequal: "npm:1.1.0"
     storybook: "npm:10.4.6"
@@ -19136,9 +19136,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sanitize-html@npm:2.17.4":
-  version: 2.17.4
-  resolution: "sanitize-html@npm:2.17.4"
+"sanitize-html@npm:2.17.5":
+  version: 2.17.5
+  resolution: "sanitize-html@npm:2.17.5"
   dependencies:
     deepmerge: "npm:^4.2.2"
     escape-string-regexp: "npm:^4.0.0"
@@ -19147,7 +19147,7 @@ __metadata:
     launder: "npm:^1.7.1"
     parse-srcset: "npm:^1.0.2"
     postcss: "npm:^8.3.11"
-  checksum: 10/64db6f97fcbad57f4b0a97cc2eee85778580e38c4cafaa357e86ee0f796db0c497fda9c6d5d5f057edbdffee15551f208e174440f9c0d0f623e38534c975f7e0
+  checksum: 10/93c7ae236faa9bf281533394caebd5cbbc3e52349c1d82c32fb921826b65fcdab435238eee2931d70e9781f46be47c9e530909d258e239fa230f12496bfdc4f6
   languageName: node
   linkType: hard
 
