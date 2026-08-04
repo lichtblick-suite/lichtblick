@@ -41,6 +41,36 @@ function makeMockSource(
   } as unknown as IIterableSource<Uint8Array>;
 }
 
+function makeMockSourceWithReturn(
+  start: Time,
+  end: Time,
+  messages: IteratorResult<Uint8Array>[],
+  returnFn: jest.Mock,
+): IIterableSource<Uint8Array> {
+  return {
+    sourceType: "serialized",
+    initialize: jest.fn(),
+    getBackfillMessages: jest.fn(),
+    getStart: () => start,
+    getEnd: () => end,
+    messageIterator: jest.fn().mockImplementation(() => {
+      let index = 0;
+      return {
+        next: async () => {
+          if (index < messages.length) {
+            return { value: messages[index++], done: false };
+          }
+          return { value: undefined, done: true };
+        },
+        return: returnFn.mockResolvedValue({ value: undefined, done: true }),
+        [Symbol.asyncIterator]() {
+          return this;
+        },
+      };
+    }),
+  } as unknown as IIterableSource<Uint8Array>;
+}
+
 describe("mergeSequentialIterators", () => {
   const defaultArgs: MessageIteratorArgs = {
     topics: new Map([["topic", { topic: "topic" }]]),
@@ -248,36 +278,6 @@ describe("mergeSequentialIterators", () => {
   it("cleans up active iterators when consumer breaks early", async () => {
     const returnFns = [jest.fn(), jest.fn(), jest.fn()];
 
-    function makeMockSourceWithReturn(
-      start: Time,
-      end: Time,
-      messages: IteratorResult<Uint8Array>[],
-      returnFn: jest.Mock,
-    ): IIterableSource<Uint8Array> {
-      return {
-        sourceType: "serialized",
-        initialize: jest.fn(),
-        getBackfillMessages: jest.fn(),
-        getStart: () => start,
-        getEnd: () => end,
-        messageIterator: jest.fn().mockImplementation(() => {
-          let index = 0;
-          return {
-            next: async () => {
-              if (index < messages.length) {
-                return { value: messages[index++], done: false };
-              }
-              return { value: undefined, done: true };
-            },
-            return: returnFn.mockResolvedValue({ value: undefined, done: true }),
-            [Symbol.asyncIterator]() {
-              return this;
-            },
-          };
-        }),
-      } as unknown as IIterableSource<Uint8Array>;
-    }
-
     // All three sources overlap at time 0, so all will be activated initially
     const source1 = makeMockSourceWithReturn(
       { sec: 0, nsec: 0 },
@@ -311,6 +311,54 @@ describe("mergeSequentialIterators", () => {
     // All active iterators that still had remaining data should have .return() called
     const totalReturnCalls = returnFns.reduce((sum, fn) => sum + fn.mock.calls.length, 0);
     expect(totalReturnCalls).toBeGreaterThan(0);
+  });
+
+  it("calls return() on the currently-yielded iterator when cancelled mid-yield (not just heap-resident ones)", async () => {
+    const returnFns = [jest.fn(), jest.fn(), jest.fn()];
+
+    // All three sources overlap at time 0, so all will be activated initially.
+    const source1 = makeMockSourceWithReturn(
+      { sec: 0, nsec: 0 },
+      { sec: 10, nsec: 0 },
+      [makeMessageEvent("topic", 1), makeMessageEvent("topic", 5), makeMessageEvent("topic", 9)],
+      returnFns[0]!,
+    );
+    const source2 = makeMockSourceWithReturn(
+      { sec: 0, nsec: 0 },
+      { sec: 10, nsec: 0 },
+      [makeMessageEvent("topic", 2), makeMessageEvent("topic", 6)],
+      returnFns[1]!,
+    );
+    const source3 = makeMockSourceWithReturn(
+      { sec: 0, nsec: 0 },
+      { sec: 10, nsec: 0 },
+      [makeMessageEvent("topic", 3), makeMessageEvent("topic", 7)],
+      returnFns[2]!,
+    );
+
+    const results: IteratorResult[] = [];
+    for await (const msg of mergeSequentialIterators([source1, source2, source3], defaultArgs)) {
+      results.push(msg);
+      // Break after consuming only 2 messages. The first popped/yielded value is source1's
+      // sec=1 message; resuming after that yield advances source1 (now sec=5, re-pushed into
+      // the heap) and pops source2's sec=2 message for the second yield. Cancellation happens
+      // while suspended at THAT yield, so source2's iterator was popped from the heap and not
+      // yet put back — it must still be cleaned up in `finally`.
+      if (results.length >= 2) {
+        break;
+      }
+    }
+
+    expect(results).toHaveLength(2);
+    // source2's iterator was mid-yield (popped, not yet re-pushed) at cancellation time — it
+    // must still be closed by the finally block, not skipped just because it's absent from heap.
+    expect(returnFns[1]).toHaveBeenCalledTimes(1);
+    // source1's iterator was re-pushed into the heap before the second yield, so it remains
+    // heap-resident at cancellation and should already be cleaned up.
+    expect(returnFns[0]).toHaveBeenCalledTimes(1);
+    // source3 was activated eagerly (all three sources overlap at time 0) and remains
+    // heap-resident, untouched, at cancellation.
+    expect(returnFns[2]).toHaveBeenCalledTimes(1);
   });
 
   it("only activates the source containing queryStart on seek (skips earlier sources)", async () => {
