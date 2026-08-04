@@ -15,14 +15,8 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
 
 /**
- * A lazy sequential iterator that only activates source iterators when the current
- * playback time reaches (or is near) that source's time range.
- *
- * This avoids starting HTTP byte-range requests for all remote MCAP files simultaneously.
- * Instead, only the source(s) covering the current time window are actively read from.
- *
- * Sources are sorted by start time. When the current yield time approaches a source's
- * start time, that source's iterator is initialized and added to the merge heap.
+ * Lazily merges sources in start-time order, activating each iterator only when playback reaches
+ * that source's time range. This avoids starting remote reads for every file at once.
  */
 export async function* mergeSequentialIterators<T extends IteratorResult>(
   sources: IIterableSource[],
@@ -43,26 +37,32 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
     }
   }
 
-  // Sort by start time
   sourcesWithTime.sort((a, b) => compare(a.startTime, b.startTime));
 
   const heap = new Heap<SequentialIteratorMergeOptions<T>>(
     (a, b) => getTime(a.value) - getTime(b.value),
   );
 
-  /**
-   * Activate a source's iterator and push its first value onto the heap.
-   * Returns true if the source produced a value, false if it was empty.
-   */
+  // Tracks every iterator that has been activated (messageIterator() called and not yet
+  // exhausted). Unlike the heap, this includes the iterator whose value is currently being
+  // yielded (removed from the heap by `pop()` before `yield`), so cancellation while suspended
+  // at that yield can still clean it up in `finally`.
+  const activeIterators = new Set<AsyncIterableIterator<Readonly<IteratorResult>>>();
+
+  /** Activate a source iterator and push its first value onto the heap if present. */
   async function activateSource(source: IIterableSource): Promise<void> {
     const iterator = source.messageIterator(args);
+    activeIterators.add(iterator);
     const result = await iterator.next();
     if (!(result.done ?? false)) {
       heap.push({ value: result.value as T, iterator });
+    } else {
+      // Exhausted immediately (empty source): nothing left to clean up.
+      activeIterators.delete(iterator);
     }
   }
 
-  // Initialize sources that don't have time info (must be started eagerly)
+  // Start sources without time info eagerly.
   for (const source of sourcesWithoutTime) {
     await activateSource(source);
   }
@@ -70,25 +70,18 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
   // Index into the sorted sourcesWithTime array tracking the next source to potentially activate
   let nextSourceIndex = 0;
 
-  /**
-   * Activate the next pending source from sourcesWithTime and advance the index.
-   */
+  /** Activate the next pending timed source. */
   async function activateNextSource(): Promise<void> {
     await activateSource(sourcesWithTime[nextSourceIndex]!.source);
     nextSourceIndex++;
   }
 
-  // Activate sources whose start time is at or before the query start time.
-  // When no query start is provided, activate only the first source (the earliest by startTime)
-  // to avoid starting HTTP requests for all files simultaneously.
-  //
-  // When a query start IS provided (e.g. after a seek), only activate sources whose time range
-  // [startTime, endTime] actually contains the queryStart. Sources that end before queryStart
-  // are skipped entirely — they cannot contain relevant data at the seek position.
-  // This avoids activating all preceding sources when seeking to the end of the timeline.
+  // On seek, start only sources whose range can contain queryStart; otherwise start just the
+  // earliest source. Additional sources are activated lazily as playback reaches them so we do
+  // not open remote reads for every file up front.
   const queryStart = args.start;
   if (queryStart != undefined) {
-    // Skip sources that end before queryStart (they can't contain messages at the seek point)
+    // Skip sources that end before queryStart.
     while (nextSourceIndex < sourcesWithTime.length) {
       const sourceInfo = sourcesWithTime[nextSourceIndex]!;
       if (compare(sourceInfo.endTime, queryStart) >= 0) {
@@ -96,7 +89,7 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
       }
       nextSourceIndex++;
     }
-    // Activate sources that contain queryStart (startTime <= queryStart)
+    // Activate sources that contain queryStart.
     while (nextSourceIndex < sourcesWithTime.length) {
       const sourceInfo = sourcesWithTime[nextSourceIndex]!;
       if (compare(sourceInfo.startTime, queryStart) > 0) {
@@ -105,7 +98,7 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
       await activateNextSource();
     }
   } else {
-    // No query start — activate only the first source
+    // No query start: activate only the first source.
     if (nextSourceIndex < sourcesWithTime.length) {
       await activateNextSource();
     }
@@ -122,8 +115,7 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
       const node = heap.pop()!;
       const currentTimeMs = getTime(node.value);
 
-      // Before yielding, check if any pending sources should be activated.
-      // Activate sources whose startTime is <= the current message time.
+      // Activate any pending sources whose startTime is <= the current message time.
       while (nextSourceIndex < sourcesWithTime.length) {
         const sourceInfo = sourcesWithTime[nextSourceIndex]!;
         if (toMillis(sourceInfo.startTime) > currentTimeMs) {
@@ -137,18 +129,24 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
       const nextResult = await node.iterator.next();
       if (!(nextResult.done ?? false)) {
         heap.push({ value: nextResult.value as T, iterator: node.iterator });
-      } else if (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
-        // Current heap is exhausted but there are still pending sources.
-        // Activate the next source to continue yielding.
-        await activateNextSource();
+      } else {
+        activeIterators.delete(node.iterator);
+        if (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
+          // Heap is empty but timed sources remain; activate the next one.
+          await activateNextSource();
+        }
       }
     }
   } finally {
-    // Close all active iterators to release resources (e.g. HTTP connections)
-    // when the consumer breaks early or the generator is discarded.
-    for (const node of heap.toArray()) {
-      await node.iterator.return?.();
-    }
+    // Close every iterator that is still active — this includes any left in the heap AND the
+    // one whose value was mid-yield when the consumer cancelled (that node was already popped
+    // from the heap by `pop()` before `yield`, so it would otherwise be skipped here, leaking
+    // any resources it holds open — e.g. a pinned HydratedSourcePool entry in McapIterableSource).
+    await Promise.allSettled(
+      [...activeIterators].map(async (iterator) => {
+        await iterator.return?.();
+      }),
+    );
   }
 }
 

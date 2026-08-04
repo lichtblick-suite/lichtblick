@@ -7,12 +7,14 @@ import { RemoteFileReadable } from "./RemoteFileReadable";
 const mockOpen = jest.fn().mockResolvedValue(undefined);
 const mockSize = jest.fn().mockReturnValue(1024);
 const mockRead = jest.fn().mockResolvedValue(new Uint8Array([1, 2, 3]));
+const mockClose = jest.fn();
 
 jest.mock("@lichtblick/suite-base/util/CachedFilelike", () => {
   return jest.fn().mockImplementation(() => ({
     open: mockOpen,
     size: mockSize,
     read: mockRead,
+    close: mockClose,
   }));
 });
 
@@ -52,6 +54,19 @@ describe("RemoteFileReadable", () => {
       // Then CachedFilelike should be created with the custom size
       expect(CachedFilelike).toHaveBeenCalledWith(
         expect.objectContaining({ cacheSizeInBytes: customSize }),
+      );
+    });
+
+    it("should pass through readAheadBufferBytes when provided", () => {
+      // Given a URL with a bounded read-ahead buffer override
+      const readAheadBufferBytes = 2 * 1024 * 1024;
+
+      // When creating a RemoteFileReadable
+      new RemoteFileReadable(testUrl, { readAheadBufferBytes });
+
+      // Then CachedFilelike should receive the same bounded read-ahead override
+      expect(CachedFilelike).toHaveBeenCalledWith(
+        expect.objectContaining({ readAheadBufferBytes }),
       );
     });
   });
@@ -104,6 +119,19 @@ describe("RemoteFileReadable", () => {
       await expect(reader.read(BigInt(Number.MAX_SAFE_INTEGER), BigInt(1))).rejects.toThrow(
         "Read too large",
       );
+    });
+  });
+
+  describe("close", () => {
+    it("should delegate to CachedFilelike.close()", () => {
+      // Given a RemoteFileReadable instance
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When calling close
+      reader.close();
+
+      // Then it should delegate to the internal CachedFilelike
+      expect(mockClose).toHaveBeenCalledTimes(1);
     });
   });
 });

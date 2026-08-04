@@ -9,7 +9,7 @@ import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/I
 import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import { PlayerMetricsCollectorInterface } from "@lichtblick/suite-base/players/types";
 
-import RemoteDataSourceFactory, { checkExtensionMatch } from "./RemoteDataSourceFactory";
+import RemoteDataSourceFactory from "./RemoteDataSourceFactory";
 
 jest.mock("@lichtblick/suite-base/players/IterablePlayer", () => ({
   IterablePlayer: jest.fn(),
@@ -28,32 +28,28 @@ function setupArgs(params?: Record<string, string | undefined>): DataSourceFacto
 }
 
 describe("checkExtensionMatch", () => {
+  let factory: RemoteDataSourceFactory;
+
+  beforeEach(() => {
+    factory = new RemoteDataSourceFactory();
+  });
+
   it("should return the extension if the comparing extension is undefined", () => {
-    const mockExtenstion = ".mcap";
+    const result = (factory as any).checkExtensionMatch(".mcap");
 
-    const result = checkExtensionMatch(mockExtenstion);
-
-    expect(result).toBe(mockExtenstion);
+    expect(result).toBe(".mcap");
   });
 
   it("should return the extension when the comparator and comparing extensions are equal", () => {
-    const mockExtenstion = ".mcap";
-    const comparatorExtension = ".mcap";
+    const result = (factory as any).checkExtensionMatch(".mcap", ".mcap");
 
-    const result = checkExtensionMatch(mockExtenstion, comparatorExtension);
-
-    expect(result).toBe(mockExtenstion);
+    expect(result).toBe(".mcap");
   });
 
   it("should throw an error if the comparator and comparing extensions are different", () => {
-    const mockExtenstion = ".mcap";
-    const comparatorExtension = ".bag";
-
-    const result = () => {
-      checkExtensionMatch(mockExtenstion, comparatorExtension);
-    };
-
-    expect(result).toThrow("All sources need to be from the same type");
+    expect(() => (factory as any).checkExtensionMatch(".mcap", ".bag")).toThrow(
+      "All sources need to be from the same type",
+    );
   });
 });
 
@@ -138,6 +134,29 @@ describe("RemoteDataSourceFactory", () => {
     });
 
     expect(result).toBe(mockPlayer);
+  });
+
+  it("should pass configured hydration overrides into multi-url initArgs", () => {
+    factory = new RemoteDataSourceFactory({
+      maxHydratedSources: 4,
+      maxHydratedBytes: 5678,
+      initConcurrency: 3,
+    });
+    const mockArgs = setupArgs({
+      url: "https://example.com/test1.mcap,https://example.com/test2.mcap",
+    });
+
+    factory.initialize(mockArgs);
+
+    expect(WorkerSerializedIterableSource).toHaveBeenCalledWith({
+      initWorker: expect.any(Function),
+      initArgs: {
+        urls: ["https://example.com/test1.mcap", "https://example.com/test2.mcap"],
+        maxHydratedSources: 4,
+        maxHydratedBytes: 5678,
+        initConcurrency: 3,
+      },
+    });
   });
 
   it("should return undefined if args.params.url is undefined", () => {

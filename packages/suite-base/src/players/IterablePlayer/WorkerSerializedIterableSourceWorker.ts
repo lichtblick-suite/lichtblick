@@ -62,6 +62,10 @@ export class WorkerSerializedIterableSourceWorker implements ISerializedIterable
     const cursor = new ComlinkTransferIteratorCursor(new IteratorCursor<Uint8Array>(iter, abort));
     return Comlink.proxy(cursor);
   }
+
+  public async terminate(): Promise<void> {
+    await this.#source.terminate?.();
+  }
 }
 
 Comlink.transferHandlers.set("abortsignal", abortSignalTransferHandler);
