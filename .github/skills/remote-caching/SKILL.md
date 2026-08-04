@@ -475,6 +475,7 @@ This means:
 - More files = less cache per file = more network re-fetches
 - `MIN_CACHE_PER_SOURCE_BYTES = 10 MiB` prevents multi-file sessions from slicing the total budget so small that a single MCAP summary/index read can crash `CachedFilelike`
 - `dataSource.minCachePerSourceBytes` overrides that floor when a caller needs a different minimum
+- `totalCacheSizeInBytes` is **not a hard aggregate cap**: because `perSourceCache = Math.max(minPerSource, Math.floor(totalCache / numSources))`, the per-source floor can win when there are many sources. When `perSourceCache * numSources > totalCache`, a `log.warn` reports it and the real aggregate cache usage exceeds the nominal `totalCacheSizeInBytes`
 - `readAheadEnabled` still defaults to `true` for both single- and multi-file sessions (unless `dataSource.readAheadEnabled` overrides it); what changes for `urls.length > 1` is `readAheadBufferBytes`, which defaults to `min(2 MiB, perSourceCache / 4)` instead of the legacy 50 MiB default, bounding read-ahead so it doesn't outrun the smaller per-source cache slice
 - For large multi-file datasets, consider increasing `totalCacheSizeInBytes`
 - Each file's CachedFilelike manages its own VirtualLRUBuffer independently
