@@ -136,15 +136,15 @@ WorkerSerializedIterableSource → BufferedIterableSource → Player
 
 ## HydratedSourcePool (Bounded Reader Pool)
 
-`HydratedSourcePool` bounds **resident heavyweight per-file `McapIndexedReader` instances** (reader/deserializer state, plus each source's cache allocation folded into the weight estimate). It does **not** bound decoded message data; that still lives in `BufferedIterableSource`, `CachedFilelike`, and downstream playback buffers.
+`HydratedSourcePool` bounds **resident heavyweight per-file `McapIndexedReader` instances** (reader/deserializer state sized from chunk-index and channel counts). It does **not** bound decoded message data or each source's byte cache; those still live in `BufferedIterableSource`, `CachedFilelike`, and downstream playback buffers.
 
 ```typescript
 const pool = new HydratedSourcePool({
-  maxCount: dataSource.maxHydratedSources ?? 12,
+  maxCount: dataSource.maxHydratedSources ?? 4,
   maxBytes: dataSource.maxHydratedBytes ?? 512 * 1024 * 1024,
-  minResident: 1,
 });
 ```
+(`minResident` is not passed at the call site — it relies on `HydratedSourcePool`'s own internal default of `1`.)
 
 - **Hybrid budget**: `maxCount` caps resident readers, `maxBytes` caps total estimated resident weight, and `minResident` keeps a small floor hot (clamped so it never exceeds the count cap). `MultiIterableSource` constructs one shared pool and passes it to **both** the local-files and remote-urls branches.
 - **API contract**:
@@ -156,12 +156,12 @@ const pool = new HydratedSourcePool({
 - **Weight heuristic** (`readerWeight.ts`): `weigh()` defaults to `1`, but MCAP readers use an approximate byte estimate so larger readers churn first:
   ```typescript
   READER_BASE_BYTES +
-    reader.chunkIndexes.length * 512 +
-    reader.channelsById.size * (16 * 1024) +
-    cacheBytes
+    reader.chunkIndexes.length * BYTES_PER_CHUNK_INDEX_BASE +
+    messageIndexEntries * BYTES_PER_MESSAGE_INDEX_ENTRY +
+    reader.channelsById.size * BYTES_PER_CHANNEL
   ```
-  The absolute numbers are heuristic; relative weighting is what matters.
-- **Indexed URL reuse vs unindexed bypass**: for `type: "url"` sources, `McapIterableSource` keeps one session-long `#persistentReadable` (`RemoteFileReadable` + `CachedFilelike` cache) and reuses it across pool eviction/re-`acquire()`; the pool only evicts the heavyweight `McapIndexedReader` layer, not that transport/cache. If a source proves unindexed (or the URL path falls back to raw `fetch()` streaming), it skips `HydratedSourcePool` entirely and lives in `#eagerInner` for the whole session, so unindexed files are outside the pool's count/byte budget.
+  where `messageIndexEntries` sums `chunkIndex.messageIndexOffsets.size` across all chunk indexes. There is no `cacheBytes` term — the weight reflects only reader/index/channel structure size, not each source's byte-cache allocation. The absolute numbers are heuristic; relative weighting is what matters.
+- **Indexed URL reuse vs unindexed bypass**: for `type: "url"` sources, `McapIterableSource` keeps one session-long `#persistentReadable` (`RemoteFileReadable` + `CachedFilelike` cache) and reuses it across pool eviction/re-`acquire()`; the pool only evicts the heavyweight `McapIndexedReader` layer, not that transport/cache. If a source proves unindexed (or the URL path falls back to raw `fetch()` streaming), it skips `HydratedSourcePool` entirely and lives in `#eagerInner` for the whole session, so unindexed files are outside the pool's count/byte budget. `#persistentReadable` is also closed unconditionally when the whole `McapIterableSource` is `terminate()`d at normal session end — not only on failed init or unindexed fallback.
 
 ---
 
@@ -225,8 +225,8 @@ const perSourceCache = Math.max(minPerSource, Math.floor(totalCache / urls.lengt
 - Prevents `totalCache / N` from dropping below a viable per-file metadata-read budget; if `perSourceCache * N > totalCache`, a `log.warn` notes the aggregate may exceed the nominal budget
 
 ### Initialization
-1. Constructs one shared `HydratedSourcePool` before branching on local files vs remote URLs (`maxHydratedSources ?? 12`, `maxHydratedBytes ?? 512 MiB`) and passes `pool` to every source constructor.
-2. Creates N `McapIterableSource` instances (one per URL) with the divided cache budget; for multiple URLs, `readAheadEnabled` defaults to **lazy** (`false`) unless the caller overrides it. Single-file remote sessions keep the legacy eager default.
+1. Constructs one shared `HydratedSourcePool` before branching on local files vs remote URLs (`maxHydratedSources ?? 4`, `maxHydratedBytes ?? 512 MiB`) and passes `pool` to every source constructor.
+2. Creates N `McapIterableSource` instances (one per URL) with the divided cache budget; `readAheadEnabled` still defaults to `true` for both single- and multi-file sessions. What changes for multi-file (`numSources > 1`) is `readAheadBufferBytes`, which defaults to `min(2 MiB, perSourceCache / 4)` instead of the legacy 50 MiB default, bounding read-ahead so it doesn't outrun the smaller per-source cache slice.
 3. Initializes sources under a `Semaphore` (`initConcurrency ?? 4`, normalized to a positive integer) instead of unconstrained `Promise.all`; the returned `Initialization[]` still preserves input order.
 4. Merges results: topics, datatypes, metadata, topicStats, alerts, publishersByTopic.
 5. Sorts sources by start time (`source.getStart()`), then `#prewarmEarliestSources()` prewarms the earliest 3 sources in **reverse** order so the t=0 source ends up most-recently-used in the pool. Prewarm failures are logged at debug and treated as non-fatal.

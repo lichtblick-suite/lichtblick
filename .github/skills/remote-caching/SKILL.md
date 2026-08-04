@@ -427,29 +427,34 @@ If every remaining entry is pinned, eviction stops early. The pool may temporari
 
 ```typescript
 export const READER_BASE_BYTES = 2 * 1024 * 1024; // fixed reader/deserializer overhead
-const BYTES_PER_CHUNK_INDEX = 512; // per chunk-index entry retained by McapIndexedReader
+const BYTES_PER_CHUNK_INDEX_BASE = 128; // fixed scalar fields of one ChunkIndex
+const BYTES_PER_MESSAGE_INDEX_ENTRY = 64; // one messageIndexOffsets entry per (chunk, channel)
 const BYTES_PER_CHANNEL = 16 * 1024; // parsed schema + per-channel deserializer
 
-export function estimateReaderWeightBytes(reader: McapIndexedReader, cacheBytes: number): number {
+export function estimateReaderWeightBytes(reader: McapIndexedReader): number {
+  let messageIndexEntries = 0;
+  for (const chunkIndex of reader.chunkIndexes) {
+    messageIndexEntries += chunkIndex.messageIndexOffsets.size;
+  }
   return (
     READER_BASE_BYTES +
-    reader.chunkIndexes.length * BYTES_PER_CHUNK_INDEX +
-    reader.channelsById.size * BYTES_PER_CHANNEL +
-    cacheBytes
+    reader.chunkIndexes.length * BYTES_PER_CHUNK_INDEX_BASE +
+    messageIndexEntries * BYTES_PER_MESSAGE_INDEX_ENTRY +
+    reader.channelsById.size * BYTES_PER_CHANNEL
   );
 }
 ```
 
 This is the `weigh()` heuristic for pooled MCAP readers:
 - `READER_BASE_BYTES` models fixed parser/deserializer overhead
-- chunk indexes and channels scale the estimate with file complexity
-- `cacheBytes` folds in the reader's own byte-cache allocation (for example its `CachedFilelike` budget)
+- chunk-index count, message-index-entry count, and channel count scale the estimate with file complexity
+- there is no `cacheBytes` parameter — the weight reflects only reader/index/channel structure size, not each source's byte-cache allocation (for example its `CachedFilelike` budget)
 
 Absolute values are approximate; the relative weighting is what matters. Heavier readers do not get special eviction priority directly — eviction still removes the next LRU unpinned entry — but heavier readers push the pool over `maxBytes` sooner, causing LRU eviction pressure earlier.
 
 ### Session-Persistent Connections & Unpooled Fallback
 
-- **`type: "url"` persistent transport**: pooled indexed URL sources create `RemoteFileReadable` once, stash it in `#persistentReadable`, and reuse that same connection + internal `CachedFilelike` byte cache across every later `HydratedSourcePool.acquire()` re-hydration; the source hydrator's `close()` only tears down the heavyweight `McapIndexedReader` / parsed-channel state. `#persistentReadable.close()` only happens when indexed initialization itself fails, or when the source falls back to the unindexed streaming path (raw `fetch()` bypasses the pool/readable entirely); `type: "file"` has no analogous persistent transport because the backing `Blob` is already resident.
+- **`type: "url"` persistent transport**: pooled indexed URL sources create `RemoteFileReadable` once, stash it in `#persistentReadable`, and reuse that same connection + internal `CachedFilelike` byte cache across every later `HydratedSourcePool.acquire()` re-hydration; the source hydrator's `close()` only tears down the heavyweight `McapIndexedReader` / parsed-channel state. `#persistentReadable.close()` happens in three cases: indexed initialization itself fails, the source falls back to the unindexed streaming path (raw `fetch()` bypasses the pool/readable entirely), or the whole `McapIterableSource` is `terminate()`d at normal session end (the common case for a healthy indexed source). `type: "file"` has no analogous persistent transport because the backing `Blob` is already resident.
 - **Unindexed sources bypass the pool**: if a source ends up unindexed (`chunkIndexes.length === 0`, `channelsById.size === 0`, or the URL fallback path triggers), `McapIterableSource` does **not** `admit()` / `acquire()` it from `HydratedSourcePool` even when a pool exists; it stores the resulting `McapUnindexedIterableSource` in `#eagerInner` for the full session instead. Practical consequence: many large unindexed MCAPs can grow memory usage outside `maxHydratedSources` / `maxHydratedBytes`, because re-hydrating them would require replaying the whole stream/file from scratch.
 
 ---
@@ -470,7 +475,7 @@ This means:
 - More files = less cache per file = more network re-fetches
 - `MIN_CACHE_PER_SOURCE_BYTES = 10 MiB` prevents multi-file sessions from slicing the total budget so small that a single MCAP summary/index read can crash `CachedFilelike`
 - `dataSource.minCachePerSourceBytes` overrides that floor when a caller needs a different minimum
-- For `urls.length > 1`, `readAheadEnabled` now defaults to `false` so multi-file remote sessions stay lazy instead of speculatively reading ahead across every file; single-file sessions keep the legacy eager default unless `dataSource.readAheadEnabled` overrides it
+- `readAheadEnabled` still defaults to `true` for both single- and multi-file sessions (unless `dataSource.readAheadEnabled` overrides it); what changes for `urls.length > 1` is `readAheadBufferBytes`, which defaults to `min(2 MiB, perSourceCache / 4)` instead of the legacy 50 MiB default, bounding read-ahead so it doesn't outrun the smaller per-source cache slice
 - For large multi-file datasets, consider increasing `totalCacheSizeInBytes`
 - Each file's CachedFilelike manages its own VirtualLRUBuffer independently
 
