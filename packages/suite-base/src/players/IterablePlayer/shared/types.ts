@@ -53,9 +53,15 @@ export type MultiSource =
       urls: string[];
       totalCacheSizeInBytes?: number;
       minCachePerSourceBytes?: number;
-      // When false (default for multi-file), each remote source downloads lazily without
-      // speculative read-ahead. When true, legacy whole-file read-ahead is used.
+      // When false, each remote source downloads only exact requested ranges with no speculative
+      // read-ahead. When omitted, MultiIterableSource now defaults to read-ahead enabled and uses
+      // readAheadBufferBytes to keep multi-file sessions safely bounded.
       readAheadEnabled?: boolean;
+      // Bounds the speculative read-ahead extension (bytes) used when readAheadEnabled is true.
+      // When omitted, MultiIterableSource derives a safe multi-file value from the per-source
+      // cache budget, while single-file sessions keep the legacy 50 MiB default from
+      // getNewConnection.ts.
+      readAheadBufferBytes?: number;
     } & MultiSourceHydrationOptions);
 
 export type IterableSourceConstructor<T extends IIterableSource, P> = new (args: P) => T;

@@ -56,6 +56,19 @@ describe("RemoteFileReadable", () => {
         expect.objectContaining({ cacheSizeInBytes: customSize }),
       );
     });
+
+    it("should pass through readAheadBufferBytes when provided", () => {
+      // Given a URL with a bounded read-ahead buffer override
+      const readAheadBufferBytes = 2 * 1024 * 1024;
+
+      // When creating a RemoteFileReadable
+      new RemoteFileReadable(testUrl, { readAheadBufferBytes });
+
+      // Then CachedFilelike should receive the same bounded read-ahead override
+      expect(CachedFilelike).toHaveBeenCalledWith(
+        expect.objectContaining({ readAheadBufferBytes }),
+      );
+    });
   });
 
   describe("open", () => {

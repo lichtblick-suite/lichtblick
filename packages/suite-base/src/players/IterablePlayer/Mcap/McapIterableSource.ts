@@ -14,6 +14,11 @@ import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import { BlobReadable } from "./BlobReadable";
 import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
+import type {
+  HydratedInner,
+  IndexedReaderResult,
+  McapSource,
+} from "./McapIterableSource.types";
 import { McapUnindexedIterableSource } from "./McapUnindexedIterableSource";
 import { RemoteFileReadable } from "./RemoteFileReadable";
 import { READER_BASE_BYTES, estimateReaderWeightBytes } from "./readerWeight";
@@ -28,41 +33,39 @@ import { HydratedSourcePool, SourceHydrator } from "../shared/HydratedSourcePool
 
 const log = Log.getLogger(__filename);
 
-type McapSource =
-  | { type: "file"; file: Blob; pool?: HydratedSourcePool }
-  | {
-      type: "url";
-      url: string;
-      cacheSizeInBytes?: number;
-      readAheadEnabled?: boolean;
-      pool?: HydratedSourcePool;
-    };
-
-type HydratedInner = {
-  inner: ISerializedIterableSource;
-  readable?: RemoteFileReadable;
-  weightBytes: number;
-};
-
 /**
- * Create a McapIndexedReader if it will be possible to do an indexed read. If the file is not
- * indexed or is empty, returns undefined.
+ * Create a McapIndexedReader if it will be possible to do an indexed read. Distinguishes a
+ * genuinely unindexed/empty file (safe, expected fallback to streaming read) from an operational
+ * failure while attempting indexed initialization (e.g. a network/range-read error from the
+ * underlying `readable`, or a malformed/corrupt index) — the latter must NOT be silently treated
+ * as "unindexed", since that would mask a real error behind an unbounded, unpooled eager-streaming
+ * fallback (see `#eagerInner`).
  */
 async function tryCreateIndexedReader(
   readable: McapTypes.IReadable,
   decompressHandlers: McapTypes.DecompressHandlers,
-): Promise<McapIndexedReader | undefined> {
+): Promise<IndexedReaderResult> {
+  let reader: McapIndexedReader;
   try {
-    const reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
-
-    if (reader.chunkIndexes.length === 0 || reader.channelsById.size === 0) {
-      return undefined;
-    }
-    return reader;
+    reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
   } catch (err: unknown) {
-    log.error(err);
-    return undefined;
+    const error = err instanceof Error ? err : new Error(String(err));
+    // @mcap/core throws exactly this message (plus a " [library=...]" suffix) when the file has
+    // no summary section at all (footer.summaryStart === 0n) — a genuinely unindexed file, not an
+    // operational failure. Any other message indicates a malformed file or an I/O error bubbling
+    // up from `readable` and must be surfaced as a real failure, not silently swallowed.
+    if (error.message.includes("File is not indexed")) {
+      return { status: "unindexed" };
+    }
+    log.error(error);
+    return { status: "failed", error };
   }
+
+  if (reader.chunkIndexes.length === 0 || reader.channelsById.size === 0) {
+    // Parsed successfully but genuinely has no index data (e.g. an empty recording).
+    return { status: "unindexed" };
+  }
+  return { status: "indexed", reader };
 }
 
 export class McapIterableSource implements ISerializedIterableSource {
@@ -73,6 +76,12 @@ export class McapIterableSource implements ISerializedIterableSource {
   #pool: HydratedSourcePool | undefined;
   #start?: Time;
   #end?: Time;
+  // Session-persistent remote connection + byte cache for `type: "url"` indexed sources.
+  // Created once (on first hydration) and reused across every subsequent re-hydration, so pool
+  // eviction only discards the heavyweight indexed-reader/parsed-channel state. Closed only in
+  // terminate(). Undefined for "file" sources and for remote sources that fail indexed init or
+  // fall back to eager unindexed streaming.
+  #persistentReadable: RemoteFileReadable | undefined;
 
   public readonly sourceType = "serialized";
 
@@ -100,12 +109,17 @@ export class McapIterableSource implements ISerializedIterableSource {
         await source.file.slice(0, 1).arrayBuffer();
 
         const readable = new BlobReadable(source.file);
-        const reader = await tryCreateIndexedReader(readable, decompressHandlers);
-        if (reader) {
+        const result = await tryCreateIndexedReader(readable, decompressHandlers);
+        if (result.status === "failed") {
+          // A real initialization failure (not "unindexed") must not be masked by the eager,
+          // unbounded streaming fallback — surface it so the caller sees an actual error.
+          throw result.error;
+        }
+        if (result.status === "indexed") {
           return {
-            inner: new McapIndexedIterableSource(reader),
+            inner: new McapIndexedIterableSource(result.reader),
             indexed: true,
-            weightBytes: estimateReaderWeightBytes(reader, 0),
+            weightBytes: estimateReaderWeightBytes(result.reader),
           };
         }
         return {
@@ -118,22 +132,39 @@ export class McapIterableSource implements ISerializedIterableSource {
         };
       }
       case "url": {
-        const readable = new RemoteFileReadable(source.url, {
-          cacheSizeInBytes: source.cacheSizeInBytes,
-          readAheadEnabled: source.readAheadEnabled,
-        });
-        await readable.open();
-        const reader = await tryCreateIndexedReader(readable, decompressHandlers);
-        if (reader) {
+        let readable = this.#persistentReadable;
+        if (!readable) {
+          readable = new RemoteFileReadable(source.url, {
+            cacheSizeInBytes: source.cacheSizeInBytes,
+            readAheadEnabled: source.readAheadEnabled,
+            ...(source.readAheadBufferBytes != undefined
+              ? { readAheadBufferBytes: source.readAheadBufferBytes }
+              : {}),
+          });
+          await readable.open();
+          this.#persistentReadable = readable;
+        }
+        const result = await tryCreateIndexedReader(readable, decompressHandlers);
+        if (result.status === "failed") {
+          // A real initialization failure (not "unindexed") must not be masked by re-fetching the
+          // whole file via the eager, unbounded streaming fallback — surface the actual error.
+          readable.close();
+          this.#persistentReadable = undefined;
+          throw result.error;
+        }
+        if (result.status === "indexed") {
           return {
-            inner: new McapIndexedIterableSource(reader),
+            inner: new McapIndexedIterableSource(result.reader),
             readable,
             indexed: true,
-            weightBytes: estimateReaderWeightBytes(reader, source.cacheSizeInBytes ?? 0),
+            weightBytes: estimateReaderWeightBytes(result.reader),
           };
         }
-        // Unindexed remote fallback: single-pass streaming read of the whole file.
+        // Unindexed remote fallback: single-pass streaming read of the whole file. This path
+        // bypasses the pool entirely and never re-hydrates, so there is no benefit in keeping the
+        // indexed-init probe connection/cache alive.
         readable.close();
+        this.#persistentReadable = undefined;
         const response = await fetch(source.url);
         if (!response.body) {
           throw new Error(`Unable to stream remote file. <${source.url}>`);
@@ -154,16 +185,19 @@ export class McapIterableSource implements ISerializedIterableSource {
     }
   }
 
-  // Pool hydrator: builds a ready-to-iterate indexed inner (channels parsed) plus its readable so
-  // it can be closed on eviction.
+  // Pool hydrator: builds a ready-to-iterate indexed inner (channels parsed). The underlying
+  // remote readable/connection is session-persistent and intentionally survives pool eviction.
   readonly #hydrator: SourceHydrator<HydratedInner> = {
     open: async () => {
       const { inner, readable, weightBytes } = await this.#openInner();
       await inner.initialize();
       return { inner, readable, weightBytes };
     },
-    close: async ({ readable }) => {
-      readable?.close();
+    close: async (_value) => {
+      // The underlying RemoteFileReadable/connection is session-persistent (see
+      // #persistentReadable) and is intentionally NOT closed here. Eviction only discards the
+      // heavyweight indexed-reader/parsed-channel structures, which are rebuilt on the next
+      // acquire() from the already-open, already-cached remote source.
     },
     weigh: ({ weightBytes }) => weightBytes,
   };
@@ -253,5 +287,9 @@ export class McapIterableSource implements ISerializedIterableSource {
     // Pooled inners are torn down by the pool (owned by MultiIterableSource); only release an
     // eagerly-retained inner here.
     await this.#eagerInner?.terminate?.();
+    // The pool's hydrator.close() intentionally does not close this — it is session-persistent
+    // (see #persistentReadable) and is only closed when the whole source is torn down.
+    this.#persistentReadable?.close();
+    this.#persistentReadable = undefined;
   }
 }

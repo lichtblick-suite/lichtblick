@@ -39,17 +39,24 @@ import { HydratedSourcePool } from "./HydratedSourcePool";
 
 const log = Logger.getLogger(__filename);
 
-// Default total cache budget for remote sources (500 MiB — same as single-file default).
+// Default total cache budget for remote sources, matching the single-file default.
 const DEFAULT_CACHE_TOTAL_BYTES = 1024 * 1024 * 500; // 500 MiB
 
-// Minimum per-source cache for MCAP metadata reads; without a floor, hundreds of files can split
-// the budget into slices smaller than one summary/index read and crash.
+// Floor per-source cache so large fan-out sessions still fit at least one MCAP summary/index read.
 const MIN_CACHE_PER_SOURCE_BYTES = 1024 * 1024 * 10; // 10 MiB
+
+// Small bounded multi-file read-ahead that coalesces sequential remote reads without outrunning
+// the per-source cache budget.
+const DEFAULT_READ_AHEAD_BUFFER_BYTES = 1024 * 1024 * 2; // 2 MiB
 
 // Defaults for the optional MultiSourceHydrationOptions overrides (see shared/types.ts for the
 // rationale behind each knob). Heuristic; tune against real datasets.
 const DEFAULT_INIT_CONCURRENCY = 4;
-const DEFAULT_MAX_HYDRATED_SOURCES = 12;
+// Raising the resident-reader budget made multi-file OOMs worse because evicted sources must fully
+// rebuild their reader, cache, and parsed channels on re-hydration.
+// Keep the smaller defaults until eviction can preserve the cheap per-source connection/cache
+// while only dropping heavyweight reader state.
+const DEFAULT_MAX_HYDRATED_SOURCES = 4;
 const DEFAULT_MAX_HYDRATED_BYTES = 1024 * 1024 * 512; // 512 MiB
 
 // Earliest-by-start sources to prewarm for t=0 playback. Not part of MultiSourceHydrationOptions:
@@ -87,9 +94,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
         (file) => new this.SourceConstructor({ type: "file", file, pool: this.#pool } as P),
       );
     } else {
-      // Distribute total cache budget across remote sources with a minimum floor per source.
-      // A pure linear split (totalCache / n) can produce a per-source budget smaller than a
-      // single MCAP metadata read when n > ~300, causing a crash in CachedFilelike.
+      // Split remote cache budget across sources, but keep a floor so large fan-out sessions do
+      // not drop below a single MCAP metadata read and crash CachedFilelike.
       const totalCache: number = this.dataSource.totalCacheSizeInBytes ?? DEFAULT_CACHE_TOTAL_BYTES;
       const minPerSource: number =
         this.dataSource.minCachePerSourceBytes ?? MIN_CACHE_PER_SOURCE_BYTES;
@@ -104,11 +110,15 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
         );
       }
 
-      // Default to lazy loading for multi-file remote sessions: with many small MCAPs the
-      // speculative whole-file read-ahead would download every file up-front. A single-file
-      // session keeps the legacy read-ahead behaviour. Callers may override explicitly.
-      const readAheadEnabled: boolean =
-        this.dataSource.readAheadEnabled ?? this.dataSource.urls.length === 1;
+      // Keep read-ahead enabled by default so sequential remote reads still coalesce into fewer
+      // requests, but pair it with a small bounded buffer to stay within the per-source cache.
+      // Callers can still opt out with readAheadEnabled: false.
+      const readAheadEnabled: boolean = this.dataSource.readAheadEnabled ?? true;
+      const readAheadBufferBytes: number | undefined =
+        this.dataSource.readAheadBufferBytes ??
+        (numSources > 1
+          ? Math.min(DEFAULT_READ_AHEAD_BUFFER_BYTES, Math.floor(perSourceCache / 4))
+          : undefined);
 
       sources = this.dataSource.urls.map(
         (url) =>
@@ -117,6 +127,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
             url,
             cacheSizeInBytes: perSourceCache,
             readAheadEnabled,
+            readAheadBufferBytes,
             pool: this.#pool,
           } as P),
       );
@@ -184,9 +195,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   public async *messageIterator(
     opt: MessageIteratorArgs,
   ): AsyncIterableIterator<Readonly<IteratorResult<Uint8Array>>> {
-    // Filter sources to only those overlapping the requested time range.
-    // For full-range playback this still includes all sources, but for block loading
-    // with specific start/end it avoids triggering HTTP requests to irrelevant files.
+    // Restrict iteration to sources overlapping the requested time range to avoid irrelevant
+    // remote reads during block loading.
     const relevantSources = filterSourcesByTimeRange(this.sourceImpl, opt.start, opt.end);
 
     // Start later iterators only when playback reaches their start time, avoiding concurrent
@@ -197,12 +207,10 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     args: GetBackfillMessagesArgs,
   ): Promise<MessageEvent<Uint8Array>[]> {
     // Only consider sources that could contain messages at or before the backfill time.
-    // This avoids triggering HTTP requests to MCAP files that start after the requested time.
     const relevantSources = filterSourcesForBackfill(this.sourceImpl, args.time);
 
-    // Iterate in reverse (sources are sorted ascending by start) so we begin at the source covering
-    // the seek target and stop once every topic has a value. Without this short-circuit each
-    // preceding source would redundantly read its last chunk for the requested topics.
+    // Iterate newest-first so we start near the seek target and stop once every topic has a value,
+    // avoiding redundant reads from earlier sources.
     const backfillMessages: MessageEvent<Uint8Array>[] = [];
     const missingTopics = new Map(args.topics);
 
