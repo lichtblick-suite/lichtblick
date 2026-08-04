@@ -10,7 +10,7 @@ description: "Release pipeline knowledge covering the stable release flow (relea
 Lichtblick has two release tracks:
 
 1. **Stable releases** — triggered automatically when a merged pull request into `main` comes from a `release/*` or `hotfix/*` branch. This runs `.github/workflows/release.yml`, which creates the GitHub Release and then fan-outs into post-release publishing and main→develop sync via GitHub's `release: released` event.
-2. **Manual pre-release / RC builds** — triggered manually through `.github/workflows/prerelease.yml` (`workflow_dispatch` only). This builds the same production artifacts and, when `create_release: true`, creates a GitHub **Pre-release** through `ncipollo/release-action` with `prerelease: true`.
+2. **Manual pre-release / RC builds** — triggered manually through `.github/workflows/prerelease.yml` (`workflow_dispatch` only). This builds the same production artifacts and, when `create_release: true`, creates a GitHub **Pre-release** through `ncipollo/release-action` with `prerelease: true`. Because GitHub's `release` event fires `prereleased` (not `released`) for pre-releases, this does **not** trigger `post-release.yml` or `release-sync.yml` — RC builds are never auto-published to NPM/GHCR or auto-synced to `develop`.
 
 The stable and RC flows share the same artifact packaging shape, but only the stable flow performs the in-repo version bump, commit, and tag push to `main`.
 
@@ -87,12 +87,14 @@ Release artifacts:
 
 Trigger:
 
-- `release: types: [released]`
-- manual `workflow_dispatch`
+- `release: types: [released]` — fires only for full (non-prerelease) GitHub Releases; pre-releases fire GitHub's separate `prereleased` event, which this workflow does not listen for.
+- manual `workflow_dispatch` — declares no inputs, so `github.event.release.tag_name` is empty on a manual run. The checkout and Docker version-tagging steps both depend on that value, so triggering this workflow manually checks out an empty ref and produces an empty Docker version tag; treat this trigger path as non-functional until the workflow is changed to accept an explicit tag input.
 
 This workflow fans out into two parallel jobs:
 
 ### `npm`
+
+> Yarn 3.6.3 via Corepack remains this repo's dependency manager everywhere else; `npm publish` here is an intentional, pipeline-only exception used solely to publish the built package to the npm registry.
 
 1. Check out the release tag (`github.event.release.tag_name`).
 2. Set up Node.js 24 and point npm at `https://registry.npmjs.org`.
@@ -114,7 +116,7 @@ This workflow fans out into two parallel jobs:
 
 Trigger:
 
-- `release: types: [released]`
+- `release: types: [released]` — same caveat as `post-release.yml`: pre-releases fire `prereleased`, not `released`, so this workflow does not run for RC builds.
 - manual `workflow_dispatch`
 
 This workflow keeps `develop` descended from `main` after a release:
@@ -137,10 +139,12 @@ This workflow is manual-only (`workflow_dispatch`).
 
 | Input | Type / options | Default | Purpose |
 |-------|----------------|---------|---------|
-| `branch` | choice: `develop`, `release/*` | `develop` | Branch to build the pre-release from |
+| `branch` | choice (fixed dropdown values): `develop`, `release/*` | `develop` | Branch to build the pre-release from |
 | `version_type` | choice: `prerelease`, `prepatch`, `preminor`, `premajor` | `prerelease` | How to compute the next RC version |
 | `create_release` | boolean | `true` | Whether to publish a GitHub Pre-release |
 | `release_notes` | string | none | Optional custom release notes body |
+
+> **Note:** `release/*` is a literal option string in the workflow's `choice` input, not a wildcard/glob pattern. Selecting it only works if a branch is literally named `release/*`; to build an RC from an actual release branch (e.g. `release/minor/v1.5.0`), that exact branch name would need to be added as its own choice option (or the input changed to a free-text `string` type).
 
 Version computation logic:
 
@@ -162,16 +166,16 @@ Build and release steps:
 3. Create `dist/lichtblick-web.tar.gz`.
 4. If `create_release == true`, create a GitHub Pre-release with `ncipollo/release-action@v1`, `prerelease: true`, and the same artifact list as the stable release flow.
 
-> **Note:** This flow does not commit a version bump into git history in the workflow as summarized here. It is also worth verifying whether creating a GitHub Pre-release emits the same `release: released` event that triggers `post-release.yml` and `release-sync.yml`; after creating an RC, check the GitHub Actions run history for those workflows to confirm what actually fired.
+> **Note:** This flow does not commit a version bump into git history. As covered above, GitHub fires `prereleased` (not `released`) for pre-releases, so `post-release.yml` and `release-sync.yml` do not run automatically after this workflow creates a GitHub Pre-release — NPM publishing, the GHCR image push, and the develop-sync PR only happen for stable releases.
 
 ## Workflow Trigger Reference
 
 | Workflow file | Trigger | Jobs |
 |---------------|---------|------|
 | `.github/workflows/release.yml` | `pull_request` closed on `main`, gated to merged PRs whose head branch starts with `release/` or `hotfix/` | `release` |
-| `.github/workflows/post-release.yml` | `release: released` or `workflow_dispatch` | `npm`, `docker` |
+| `.github/workflows/post-release.yml` | `release: released` (excludes pre-releases) or `workflow_dispatch` (non-functional — no tag context) | `npm`, `docker` |
 | `.github/workflows/prerelease.yml` | `workflow_dispatch` | `prerelease` |
-| `.github/workflows/release-sync.yml` | `release: released` or `workflow_dispatch` | `sync` |
+| `.github/workflows/release-sync.yml` | `release: released` (excludes pre-releases) or `workflow_dispatch` | `sync` |
 
 ## Key Files
 

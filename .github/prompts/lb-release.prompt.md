@@ -15,7 +15,7 @@ Ask the user for the following before proceeding:
 
 1. **Release type** — `major`, `minor`, `hotfix`, or `rc`
 2. If `rc`:
-   - **Branch to build from** — `develop` or a `release/*` branch
+   - **Branch to build from** — the workflow's `branch` input only offers two literal dropdown values, `develop` or the literal string `release/*` (not a wildcard — see the skill's note on this input)
    - **Version type** — `prerelease`, `prepatch`, `preminor`, or `premajor`
    - **Create GitHub Pre-release automatically** — `true` or `false`
    - **Custom release notes** (optional)
@@ -54,16 +54,23 @@ gh workflow run prerelease.yml \
 
 ## Post-Release Verification Checklist
 
+### Stable release
 - [ ] Confirm the `release.yml` run succeeded and the GitHub Release exists with all expected artifacts.
-- [ ] Confirm `post-release.yml` succeeded.
+- [ ] Confirm `post-release.yml` succeeded (it fires automatically because stable releases emit GitHub's `released` event).
 - [ ] Verify the published npm version at https://www.npmjs.com/package/@lichtblick/suite matches the release version.
 - [ ] Verify the new GHCR image tag exists.
 - [ ] Confirm `release-sync.yml` opened a `sync/main-to-develop-{version}` PR into `develop`.
 - [ ] If the sync PR auto-merged after a clean merge, no further action is needed.
 - [ ] If the sync PR has merge conflicts, resolve them manually and merge per the merge-commit rule in the skill's "Release Sync" section (never squash/rebase).
 
+### Manual pre-release / RC
+- [ ] Confirm the `prerelease.yml` run succeeded.
+- [ ] If `create_release=true`, confirm the GitHub Pre-release was created with the expected artifacts.
+- [ ] If `create_release=false`, no release or artifacts are published anywhere — the build output is discarded when the job ends.
+- [ ] Do **not** expect `post-release.yml` or `release-sync.yml` to run: GitHub fires `prereleased` (not `released`) for pre-releases, and both workflows only trigger on `released`. No npm publish, no GHCR push, and no develop-sync PR happen for RCs.
+
 ## Output format
 
 - Release type and computed version
-- Links: GitHub Release URL, npm package URL, GHCR image tag
-- Release-sync PR status: auto-merged or needs manual conflict resolution
+- **Stable release:** GitHub Release URL, npm package URL, GHCR image tag, and release-sync PR status (auto-merged or needs manual conflict resolution)
+- **RC / pre-release:** GitHub Pre-release URL (only if `create_release=true`) — npm package URL, GHCR image tag, and sync-PR status do not apply
