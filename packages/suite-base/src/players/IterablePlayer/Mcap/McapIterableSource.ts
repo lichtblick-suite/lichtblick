@@ -14,7 +14,12 @@ import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import { BlobReadable } from "./BlobReadable";
 import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
-import type { HydratedInner, IndexedReaderResult, McapSource } from "./McapIterableSource.types";
+import type {
+  HydratedInner,
+  IndexedReaderResult,
+  McapSource,
+  OpenedInner,
+} from "./McapIterableSource.types";
 import { McapUnindexedIterableSource } from "./McapUnindexedIterableSource";
 import { RemoteFileReadable } from "./RemoteFileReadable";
 import { READER_BASE_BYTES, estimateReaderWeightBytes } from "./readerWeight";
@@ -89,99 +94,110 @@ export class McapIterableSource implements ISerializedIterableSource {
   }
 
   // Build a fresh inner source. Returns the readable for remote sources so it can be closed later.
-  async #openInner(): Promise<{
-    inner: ISerializedIterableSource;
-    readable?: RemoteFileReadable;
-    indexed: boolean;
-    weightBytes: number;
-  }> {
+  async #openInner(): Promise<OpenedInner> {
     const source = this.#source;
 
     // Preload decompression handlers so WASM is ready before any read that needs it.
     const decompressHandlers = await loadDecompressHandlers();
 
     switch (source.type) {
-      case "file": {
-        // Ensure the file is readable before proceeding (will throw in the event of a permission
-        // error). Workaround for the fact that `file.stream().getReader()` returns a generic
-        // "network error" in the event of a permission error.
-        await source.file.slice(0, 1).arrayBuffer();
-
-        const readable = new BlobReadable(source.file);
-        const result = await tryCreateIndexedReader(readable, decompressHandlers);
-        if (result.status === "failed") {
-          // A real initialization failure (not "unindexed") must not be masked by the eager,
-          // unbounded streaming fallback — surface it so the caller sees an actual error.
-          throw result.error;
-        }
-        if (result.status === "indexed") {
-          return {
-            inner: new McapIndexedIterableSource(result.reader),
-            indexed: true,
-            weightBytes: estimateReaderWeightBytes(result.reader),
-          };
-        }
-        return {
-          inner: new McapUnindexedIterableSource({
-            size: source.file.size,
-            stream: source.file.stream(),
-          }),
-          indexed: false,
-          weightBytes: READER_BASE_BYTES,
-        };
-      }
-      case "url": {
-        let readable = this.#persistentReadable;
-        if (!readable) {
-          readable = new RemoteFileReadable(source.url, {
-            cacheSizeInBytes: source.cacheSizeInBytes,
-            readAheadEnabled: source.readAheadEnabled,
-            ...(source.readAheadBufferBytes != undefined
-              ? { readAheadBufferBytes: source.readAheadBufferBytes }
-              : {}),
-          });
-          await readable.open();
-          this.#persistentReadable = readable;
-        }
-        const result = await tryCreateIndexedReader(readable, decompressHandlers);
-        if (result.status === "failed") {
-          // A real initialization failure (not "unindexed") must not be masked by re-fetching the
-          // whole file via the eager, unbounded streaming fallback — surface the actual error.
-          readable.close();
-          this.#persistentReadable = undefined;
-          throw result.error;
-        }
-        if (result.status === "indexed") {
-          return {
-            inner: new McapIndexedIterableSource(result.reader),
-            readable,
-            indexed: true,
-            weightBytes: estimateReaderWeightBytes(result.reader),
-          };
-        }
-        // Unindexed remote fallback: single-pass streaming read of the whole file. This path
-        // bypasses the pool entirely and never re-hydrates, so there is no benefit in keeping the
-        // indexed-init probe connection/cache alive.
-        readable.close();
-        this.#persistentReadable = undefined;
-        const response = await fetch(source.url);
-        if (!response.body) {
-          throw new Error(`Unable to stream remote file. <${source.url}>`);
-        }
-        const size = response.headers.get("content-length");
-        if (size == undefined) {
-          throw new Error(`Remote file is missing Content-Length header. <${source.url}>`);
-        }
-        return {
-          inner: new McapUnindexedIterableSource({
-            size: Number.parseInt(size, 10),
-            stream: response.body,
-          }),
-          indexed: false,
-          weightBytes: READER_BASE_BYTES,
-        };
-      }
+      case "file":
+        return await this.#openFileSource(source, decompressHandlers);
+      case "url":
+        return await this.#openUrlSource(source, decompressHandlers);
     }
+  }
+
+  async #openFileSource(
+    source: Extract<McapSource, { type: "file" }>,
+    decompressHandlers: McapTypes.DecompressHandlers,
+  ): Promise<OpenedInner> {
+    // Ensure the file is readable before proceeding (will throw in the event of a permission
+    // error). Workaround for the fact that `file.stream().getReader()` returns a generic
+    // "network error" in the event of a permission error.
+    await source.file.slice(0, 1).arrayBuffer();
+
+    const readable = new BlobReadable(source.file);
+    const result = await tryCreateIndexedReader(readable, decompressHandlers);
+    if (result.status === "failed") {
+      // A real initialization failure (not "unindexed") must not be masked by the eager,
+      // unbounded streaming fallback — surface it so the caller sees an actual error.
+      throw result.error;
+    }
+    if (result.status === "indexed") {
+      return {
+        inner: new McapIndexedIterableSource(result.reader),
+        indexed: true,
+        weightBytes: estimateReaderWeightBytes(result.reader),
+      };
+    }
+    return {
+      inner: new McapUnindexedIterableSource({
+        size: source.file.size,
+        stream: source.file.stream(),
+      }),
+      indexed: false,
+      weightBytes: READER_BASE_BYTES,
+    };
+  }
+
+  async #openUrlSource(
+    source: Extract<McapSource, { type: "url" }>,
+    decompressHandlers: McapTypes.DecompressHandlers,
+  ): Promise<OpenedInner> {
+    let readable = this.#persistentReadable;
+    if (!readable) {
+      readable = new RemoteFileReadable(source.url, {
+        cacheSizeInBytes: source.cacheSizeInBytes,
+        readAheadEnabled: source.readAheadEnabled,
+        ...(source.readAheadBufferBytes != undefined
+          ? { readAheadBufferBytes: source.readAheadBufferBytes }
+          : {}),
+      });
+      await readable.open();
+      this.#persistentReadable = readable;
+    }
+    const result = await tryCreateIndexedReader(readable, decompressHandlers);
+    if (result.status === "failed") {
+      // A real initialization failure (not "unindexed") must not be masked by re-fetching the
+      // whole file via the eager, unbounded streaming fallback — surface the actual error.
+      readable.close();
+      this.#persistentReadable = undefined;
+      throw result.error;
+    }
+    if (result.status === "indexed") {
+      return {
+        inner: new McapIndexedIterableSource(result.reader),
+        readable,
+        indexed: true,
+        weightBytes: estimateReaderWeightBytes(result.reader),
+      };
+    }
+    // Unindexed remote fallback: single-pass streaming read of the whole file. This path
+    // bypasses the pool entirely and never re-hydrates, so there is no benefit in keeping the
+    // indexed-init probe connection/cache alive.
+    readable.close();
+    this.#persistentReadable = undefined;
+    return await this.#openUnindexedUrlFallback(source.url);
+  }
+
+  async #openUnindexedUrlFallback(url: string): Promise<OpenedInner> {
+    const response = await fetch(url);
+    if (!response.body) {
+      throw new Error(`Unable to stream remote file. <${url}>`);
+    }
+    const size = response.headers.get("content-length");
+    if (size == undefined) {
+      throw new Error(`Remote file is missing Content-Length header. <${url}>`);
+    }
+    return {
+      inner: new McapUnindexedIterableSource({
+        size: Number.parseInt(size, 10),
+        stream: response.body,
+      }),
+      indexed: false,
+      weightBytes: READER_BASE_BYTES,
+    };
   }
 
   // Pool hydrator: builds a ready-to-iterate indexed inner (channels parsed). The underlying

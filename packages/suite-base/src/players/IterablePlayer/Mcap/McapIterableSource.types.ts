@@ -32,3 +32,10 @@ export type IndexedReaderResult =
   | { status: "indexed"; reader: McapIndexedReader }
   | { status: "unindexed" }
   | { status: "failed"; error: Error };
+
+export type OpenedInner = {
+  inner: ISerializedIterableSource;
+  readable?: RemoteFileReadable;
+  indexed: boolean;
+  weightBytes: number;
+};
