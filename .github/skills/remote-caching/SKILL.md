@@ -447,6 +447,11 @@ This is the `weigh()` heuristic for pooled MCAP readers:
 
 Absolute values are approximate; the relative weighting is what matters. Heavier readers do not get special eviction priority directly — eviction still removes the next LRU unpinned entry — but heavier readers push the pool over `maxBytes` sooner, causing LRU eviction pressure earlier.
 
+### Session-Persistent Connections & Unpooled Fallback
+
+- **`type: "url"` persistent transport**: pooled indexed URL sources create `RemoteFileReadable` once, stash it in `#persistentReadable`, and reuse that same connection + internal `CachedFilelike` byte cache across every later `HydratedSourcePool.acquire()` re-hydration; the source hydrator's `close()` only tears down the heavyweight `McapIndexedReader` / parsed-channel state. `#persistentReadable.close()` only happens when indexed initialization itself fails, or when the source falls back to the unindexed streaming path (raw `fetch()` bypasses the pool/readable entirely); `type: "file"` has no analogous persistent transport because the backing `Blob` is already resident.
+- **Unindexed sources bypass the pool**: if a source ends up unindexed (`chunkIndexes.length === 0`, `channelsById.size === 0`, or the URL fallback path triggers), `McapIterableSource` does **not** `admit()` / `acquire()` it from `HydratedSourcePool` even when a pool exists; it stores the resulting `McapUnindexedIterableSource` in `#eagerInner` for the full session instead. Practical consequence: many large unindexed MCAPs can grow memory usage outside `maxHydratedSources` / `maxHydratedBytes`, because re-hydrating them would require replaying the whole stream/file from scratch.
+
 ---
 
 ## Multi-File Cache Budget Distribution
@@ -486,5 +491,6 @@ This means:
 | `packages/suite-base/src/players/IterablePlayer/Mcap/RemoteFileReadable.ts` | IReadable adapter (500MB default); reads pass through BatchingReadable |
 | `packages/suite-base/src/players/IterablePlayer/Mcap/BatchingReadable.ts` | Coalesces nearby `read()` calls (gap <64KiB, ≤4MiB span) into fewer inner reads |
 | `packages/suite-base/src/players/IterablePlayer/shared/HydratedSourcePool.ts` | Resident-reader pool with LRU eviction across count and byte budgets |
+| `packages/suite-base/src/players/IterablePlayer/shared/multiFileHydrationOptions.ts` | Shared multi-file hydration override merging, used by both data source factories and the MCAP worker |
 | `packages/suite-base/src/players/IterablePlayer/shared/types.ts` | `SourceHydrator` and `HydratedSourcePoolOptions` type definitions |
 | `packages/suite-base/src/players/IterablePlayer/Mcap/readerWeight.ts` | Heuristic weight estimate for pooled MCAP readers |

@@ -86,6 +86,7 @@ WorkerSerializedIterableSource → BufferedIterableSource → Player
 | `IterablePlayer/Mcap/McapIndexedIterableSource.ts` | Random access via chunk indexes |
 | `IterablePlayer/Mcap/readerWeight.ts` | Heuristic byte-weight estimate for a `McapIndexedReader`, used as the pool's `weigh()` hook |
 | `IterablePlayer/shared/HydratedSourcePool.ts` | Bounded LRU pool of resident heavyweight per-file readers (byte + count budget) |
+| `IterablePlayer/shared/multiFileHydrationOptions.ts` | Shared hydration-override merging (`maxHydratedSources`/`maxHydratedBytes`/`initConcurrency`), used by both data source factories and the MCAP worker |
 | `IterablePlayer/shared/MultiIterableSource.ts` | Multi-file orchestration |
 | `IterablePlayer/shared/utils/mergeSequentialIterators.ts` | Heap-based lazy iterator merge |
 | `IterablePlayer/shared/utils/sourceTimeOverlap.ts` | Time range filtering |
@@ -160,6 +161,7 @@ const pool = new HydratedSourcePool({
     cacheBytes
   ```
   The absolute numbers are heuristic; relative weighting is what matters.
+- **Indexed URL reuse vs unindexed bypass**: for `type: "url"` sources, `McapIterableSource` keeps one session-long `#persistentReadable` (`RemoteFileReadable` + `CachedFilelike` cache) and reuses it across pool eviction/re-`acquire()`; the pool only evicts the heavyweight `McapIndexedReader` layer, not that transport/cache. If a source proves unindexed (or the URL path falls back to raw `fetch()` streaming), it skips `HydratedSourcePool` entirely and lives in `#eagerInner` for the whole session, so unindexed files are outside the pool's count/byte budget.
 
 ---
 
