@@ -26,6 +26,6 @@ export const stateTransitions = {
   maxXError: "X max must be greater than X min.",
   min: "Min",
   pathErrorMessage: "This path resolves to more than one value",
-  secondsRange: "Range (seconds)",
+  windowSize: "Window size",
   xAxis: "X Axis",
 };

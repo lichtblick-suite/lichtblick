@@ -51,7 +51,7 @@ export default class PlotBuilder {
 
   public static config(props: Partial<PlotConfig> = {}): PlotConfig {
     return defaults<PlotConfig>(props, {
-      followingViewWidth: BasicBuilder.number(),
+      slidingViewWidth: BasicBuilder.number(),
       lichtblickPanelTitle: BasicBuilder.string(),
       isSynced: BasicBuilder.boolean(),
       legendDisplay: "floating",

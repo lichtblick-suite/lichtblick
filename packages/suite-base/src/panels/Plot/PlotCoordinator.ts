@@ -56,6 +56,8 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private globalBounds?: Immutable<Partial<Bounds1D>>;
   private datasetRange?: Bounds1D;
   private followRange?: number;
+  private cursorPosition: "center" | "leading" = "center";
+  private followRafId?: ReturnType<typeof requestAnimationFrame>;
   private interactionBounds?: Bounds;
   private lastSeekTime = NaN;
   /** Normalized series from latest config */
@@ -102,6 +104,10 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       cancel();
     }
     this.rangeSubscriptionCancels.clear();
+    if (this.followRafId != undefined) {
+      cancelAnimationFrame(this.followRafId);
+      this.followRafId = undefined;
+    }
     this.destroyed = true;
   }
 
@@ -131,6 +137,13 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     if (this.isTimeseriesPlot) {
       const secondsSinceStart = toSec(subtractTime(currentTime, startTime));
       this.currentSeconds = secondsSinceStart;
+
+      if (this.followRange != undefined && this.followRafId == undefined) {
+        this.followRafId = requestAnimationFrame(() => {
+          this.followRafId = undefined;
+          this.queueDispatchRender();
+        });
+      }
     }
 
     if (lastSeekTime !== this.lastSeekTime) {
@@ -194,7 +207,8 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     if (!this.isTimeseriesPlot) {
       this.currentSeconds = undefined;
     }
-    this.followRange = config.followingViewWidth;
+    this.followRange = config.slidingViewWidth;
+    this.cursorPosition = config.xTimeWindow === "sliding" ? (config.windowCursorPosition ?? "center") : "leading";
 
     const newConfigBounds = {
       x: {
@@ -393,13 +407,24 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       this.isTimeseriesPlot && this.followRange != undefined && this.currentSeconds != undefined
         ? this.currentSeconds
         : undefined;
-    const xMax = currentSecondsIfFollowMode ?? this.configBounds.x.max ?? this.datasetRange?.max;
 
-    const xMinIfFollowMode =
-      this.isTimeseriesPlot && this.followRange != undefined && xMax != undefined
-        ? xMax - this.followRange
-        : undefined;
-    const xMin = xMinIfFollowMode ?? this.configBounds.x.min ?? this.datasetRange?.min;
+    let xMin: number | undefined;
+    let xMax: number | undefined;
+
+    if (currentSecondsIfFollowMode != undefined && this.followRange != undefined) {
+      if (this.cursorPosition === "center") {
+        const halfRange = this.followRange / 2;
+        xMin = currentSecondsIfFollowMode - halfRange;
+        xMax = currentSecondsIfFollowMode + halfRange;
+      } else {
+        // "leading": cursor is at the right edge
+        xMax = currentSecondsIfFollowMode;
+        xMin = currentSecondsIfFollowMode - this.followRange;
+      }
+    } else {
+      xMax = this.configBounds.x.max ?? this.datasetRange?.max;
+      xMin = this.configBounds.x.min ?? this.datasetRange?.min;
+    }
 
     return { min: xMin, max: xMax };
   }
@@ -445,13 +470,26 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     this.emit("viewportChange", this.canReset());
 
-    // The viewport has changed from some render interactions so we need to consider new datasets
+    // The viewport has changed from some render interactions so we need to consider new datasets.
+    // In follow mode, skip downsample when only the x position shifted (same window width) since
+    // the data density is unchanged.
     const x = this.getXBounds();
     const y = this.interactionBounds?.y ?? this.configBounds.y;
-    if (!_.isEqual(this.viewport.bounds.x, x) || !_.isEqual(this.viewport.bounds.y, y)) {
+    const xChanged = !_.isEqual(this.viewport.bounds.x, x);
+    const yChanged = !_.isEqual(this.viewport.bounds.y, y);
+
+    if (xChanged || yChanged) {
+      const prevXWidth =
+        (this.viewport.bounds.x?.max ?? 0) - (this.viewport.bounds.x?.min ?? 0);
+      const newXWidth = (x.max ?? 0) - (x.min ?? 0);
+      const xWidthChanged = Math.abs(newXWidth - prevXWidth) > prevXWidth * 0.01;
+
       this.viewport.bounds.x = x;
       this.viewport.bounds.y = y;
-      this.queueDispatchDownsample();
+
+      if (yChanged || xWidthChanged || haveInteractionEvents) {
+        this.queueDispatchDownsample();
+      }
     }
   }
 

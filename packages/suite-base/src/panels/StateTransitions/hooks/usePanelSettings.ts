@@ -197,7 +197,7 @@ export function buildSettingsTree(
         },
         xAxisMaxValue: setAxis({ label: t("max"), value: xAxisMaxValue, error: maxXError }),
         xAxisMinValue: setAxis({ label: t("min"), value: xAxisMinValue }),
-        xAxisRange: setAxis({ label: t("secondsRange"), value: xAxisRange }),
+        xAxisRange: setAxis({ label: t("windowSize"), value: xAxisRange }),
       },
     },
     paths: makeRootSeriesNode(paths, t),

@@ -50,6 +50,8 @@ export const DEFAULT_PLOT_CONFIG: PlotConfig = {
   sidebarDimension: DEFAULT_SIDEBAR_DIMENSION,
   xAxisLabel: undefined,
   yAxisLabel: undefined,
+  xTimeWindow: "fixed",
+  windowCursorPosition: "center",
 };
 
 export const DEFAULT_PLOT_PATH: PlotPath = Object.freeze({

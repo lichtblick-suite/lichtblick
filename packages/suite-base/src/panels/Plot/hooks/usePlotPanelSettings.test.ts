@@ -97,7 +97,7 @@ describe("handleUpdateAction", () => {
     const initialConfig = PlotBuilder.config({ paths: [] });
     const input: HandleUpdateAction = {
       draft: _.cloneDeep(initialConfig),
-      path: [BasicBuilder.string(), "followingViewWidth"],
+      path: [BasicBuilder.string(), "slidingViewWidth"],
       value: BasicBuilder.string(),
     };
 
@@ -108,7 +108,7 @@ describe("handleUpdateAction", () => {
   });
 
   it.each(["minXValue", "maxXValue"])(
-    "should update followingViewWidth when path is minXValue or maxXValue",
+    "should update slidingViewWidth when path is minXValue or maxXValue",
     (path1) => {
       const initialConfig = PlotBuilder.config({ paths: [] });
       const input: HandleUpdateAction = {
@@ -119,7 +119,7 @@ describe("handleUpdateAction", () => {
 
       handleUpdateAction(input);
 
-      expect(input.draft.followingViewWidth).toBeUndefined();
+      expect(input.draft.slidingViewWidth).toBeUndefined();
     },
   );
 });

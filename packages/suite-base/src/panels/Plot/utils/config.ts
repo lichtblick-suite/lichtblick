@@ -41,6 +41,18 @@ export type PlotXAxisVal =
   // for x-axis and each series
   | "currentCustom";
 
+export type XAxisTimeWindow =
+  // x-axis is independent of player cursor
+  | "fixed"
+  // x-axis follows player cursor, showing a time window relative to the current player time
+  | "sliding";
+
+export type XAxisWindowCursorPosition =
+  // The time window is centered around the player cursor
+  | "center"
+  // The time window shows the range leading up to the player cursor (i.e. the player cursor is on the right edge of the plot)
+  | "leading";
+
 export type PlotDataItem = {
   queriedData: MessagePathDataItem[];
   receiveTime: Time;
@@ -93,7 +105,9 @@ export type PlotConfig = DeprecatedPlotConfig & {
   xAxisPath?: BasePlotPath;
   xAxisLabel?: string;
   yAxisLabel?: string;
-  followingViewWidth?: number;
+  slidingViewWidth?: number;
   sidebarDimension: number;
   [PANEL_TITLE_CONFIG_KEY]?: string;
+  xTimeWindow?: XAxisTimeWindow;
+  windowCursorPosition?: XAxisWindowCursorPosition;
 };

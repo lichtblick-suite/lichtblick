@@ -49,11 +49,11 @@ export function handleUpdateAction({ draft, path, value }: HandleUpdateAction): 
     _.set(draft, path.slice(1), value);
 
     // X min/max and following width are mutually exclusive.
-    if (path[1] === "followingViewWidth") {
+    if (path[1] === "slidingViewWidth") {
       draft.minXValue = undefined;
       draft.maxXValue = undefined;
     } else if (path[1] === "minXValue" || path[1] === "maxXValue") {
-      draft.followingViewWidth = undefined;
+      draft.slidingViewWidth = undefined;
     }
   }
 }

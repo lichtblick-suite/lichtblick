@@ -193,6 +193,11 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
           input: "string",
           value: config.xAxisLabel,
         },
+        showXAxisLabels: {
+          label: t("showLabels"),
+          input: "boolean",
+          value: config.showXAxisLabels,
+        },
         xAxisVal: {
           label: t("value"),
           input: "select",
@@ -213,31 +218,44 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
                 validTypes: PLOTABLE_ROS_TYPES,
               }
             : undefined,
-
-        showXAxisLabels: {
-          label: t("showLabels"),
-          input: "boolean",
-          value: config.showXAxisLabels,
+        xTimeWindow:
+        {
+          label: t("xTimeWindow"),
+          input: "select",
+          value: config.xTimeWindow,
+          options: [
+            { label: t("fixedWindow"), value: "fixed" },
+            { label: t("slidingWindow"), value: "sliding" },
+          ],
         },
-        minXValue: {
+        minXValue: config.xTimeWindow === "fixed" ? {
           label: t("min"),
           input: "number",
           value: _.isNumber(config.minXValue) ? config.minXValue : undefined,
           placeholder: "auto",
-        },
-        maxXValue: {
+        } : undefined,
+        maxXValue: config.xTimeWindow === "fixed" ? {
           label: t("max"),
           input: "number",
           error: maxXError,
           value: _.isNumber(config.maxXValue) ? config.maxXValue : undefined,
           placeholder: "auto",
-        },
-        followingViewWidth: {
-          label: t("secondsRange"),
+        } : undefined,
+        slidingViewWidth: config.xTimeWindow === "sliding" ? {
+          label: t("windowSize"),
           input: "number",
           placeholder: "auto",
-          value: config.followingViewWidth,
-        },
+          value: config.slidingViewWidth,
+        } : undefined,
+        windowCursorPosition: config.xTimeWindow === "sliding" ? {
+          label: t("cursorPosition"),
+          input: "toggle",
+          value: config.windowCursorPosition === "leading" ? "leading" : "center",
+          options: [
+            { label: t("cursorCenter"), value: "center" },
+            { label: t("cursorLeading"), value: "leading" },
+          ],
+        } : undefined,
       },
     },
     paths: makeRootSeriesNode({ paths: config.paths, t }),
