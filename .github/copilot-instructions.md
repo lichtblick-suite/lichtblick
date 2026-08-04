@@ -153,6 +153,7 @@ Reusable workflow prompts live in `.github/prompts/`.
 | `lb-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature safely |
 | `lb-open-pr.prompt.md` | Build a complete PR title/body with validation evidence |
 | `lb-review-pr.prompt.md` | Two-phase PR review: structured analysis integrating CodeRabbit findings, then implement CodeRabbit's AI agent prompt |
+| `lb-release.prompt.md` | Guided runbook to cut a release (major/minor/hotfix/RC) and verify the automated publish pipeline |
 
 ---
 

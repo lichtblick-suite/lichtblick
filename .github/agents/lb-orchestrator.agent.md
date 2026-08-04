@@ -48,6 +48,10 @@ Parallelism happens at two distinct layers — do not conflate them:
 
 This orchestrator does **not** create worktrees: it has no `execute` tool, and prompt files are human-invoked entry points, not agent-callable. Do not route a task expecting a sub-agent to provision its own worktree — sub-agent invocations share this workspace's filesystem and working directory.
 
+## Release Requests
+
+Release-cutting requests (creating a release branch, triggering a release, or verifying that a release/RC published successfully) are **not** routed to a sub-agent. Point the user to `.github/prompts/lb-release.prompt.md`, which is a human-invoked runbook. Like `lb-setup-worktree.prompt.md`, it is a prompt file rather than an agent tool target, and this orchestrator has no `execute` tool, so release execution stays a human-invoked entry point rather than an agent delegation.
+
 ## Routing Rules
 
 ### Tier 1: Cross-cutting (action-capable)
