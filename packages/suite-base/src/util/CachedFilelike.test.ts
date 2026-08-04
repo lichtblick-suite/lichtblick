@@ -110,21 +110,23 @@ describe("CachedFilelike", () => {
     it("bounds speculative fetch length with readAheadBufferBytes", async () => {
       // GIVEN: a large remote-like file with a small cache budget and a much smaller read-ahead cap.
       const readAheadBufferBytes = 2 * 1024 * 1024;
-      const fetch = jest.fn((_offset: number, length: number): FileStream => ({
-        on: (
-          type: "data" | "error" | "end",
-          callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
-        ) => {
-          if (type === "data") {
-            setTimeout(() => {
-              callback(new Uint8Array(length));
-            }, 0);
-          }
-        },
-        destroy() {
-          // no-op
-        },
-      }));
+      const fetch = jest.fn(
+        (_offset: number, length: number): FileStream => ({
+          on: (
+            type: "data" | "error" | "end",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
+          ) => {
+            if (type === "data") {
+              setTimeout(() => {
+                callback(new Uint8Array(length));
+              }, 0);
+            }
+          },
+          destroy() {
+            // no-op
+          },
+        }),
+      );
       const fileReader: FileReader = {
         open: async () => ({ size: 100 * 1024 * 1024 }),
         fetch,
@@ -143,12 +145,11 @@ describe("CachedFilelike", () => {
       expect(fetch).toHaveBeenNthCalledWith(1, 0, readAheadBufferBytes);
     });
 
-    it(
-      "resolves a later overlapping read instead of hanging when a small read-ahead buffer trails cached bytes",
-      async () => {
-        // GIVEN: a file where an earlier 2 MiB speculative fetch is still in flight when a later
-        // 4 MiB read arrives, matching the production hang scenario exposed by a 2 MiB buffer.
-        const fetch = jest.fn((_offset: number, length: number): FileStream => ({
+    it("resolves a later overlapping read instead of hanging when a small read-ahead buffer trails cached bytes", async () => {
+      // GIVEN: a file where an earlier 2 MiB speculative fetch is still in flight when a later
+      // 4 MiB read arrives, matching the production hang scenario exposed by a 2 MiB buffer.
+      const fetch = jest.fn(
+        (_offset: number, length: number): FileStream => ({
           on: (
             type: "data" | "error" | "end",
             callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
@@ -162,36 +163,35 @@ describe("CachedFilelike", () => {
           destroy() {
             // no-op
           },
-        }));
-        const fileReader: FileReader = {
-          open: async () => ({ size: 8 * MEBIBYTE }),
-          fetch,
-        };
-        const cachedFileReader = new CachedFilelike({
-          fileReader,
-          cacheSizeInBytes: 6 * MEBIBYTE,
-          readAheadBufferBytes: 2 * MEBIBYTE,
-          log,
-        });
+        }),
+      );
+      const fileReader: FileReader = {
+        open: async () => ({ size: 8 * MEBIBYTE }),
+        fetch,
+      };
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 6 * MEBIBYTE,
+        readAheadBufferBytes: 2 * MEBIBYTE,
+        log,
+      });
 
-        const firstReadPromise = cachedFileReader.read(0, 1);
-        await delay(10);
-        expect(fetch).toHaveBeenCalledTimes(1);
+      const firstReadPromise = cachedFileReader.read(0, 1);
+      await delay(10);
+      expect(fetch).toHaveBeenCalledTimes(1);
 
-        // WHEN: a larger overlapping read needs bytes beyond the already cached 2 MiB prefix.
-        const secondReadPromise = cachedFileReader.read(0, 4 * MEBIBYTE);
+      // WHEN: a larger overlapping read needs bytes beyond the already cached 2 MiB prefix.
+      const secondReadPromise = cachedFileReader.read(0, 4 * MEBIBYTE);
 
-        // THEN: the second fetch makes forward progress by requesting the missing 2 MiB tail
-        // instead of issuing a degenerate 2 MiB-2 MiB range and hanging forever.
-        await expect(firstReadPromise).resolves.toEqual(new Uint8Array([0]));
-        await expect(secondReadPromise).resolves.toEqual(new Uint8Array(4 * MEBIBYTE));
-        expect(fetch.mock.calls.slice(0, 2)).toEqual([
-          [0, 2 * MEBIBYTE],
-          [2 * MEBIBYTE, 2 * MEBIBYTE],
-        ]);
-      },
-      2000,
-    );
+      // THEN: the second fetch makes forward progress by requesting the missing 2 MiB tail
+      // instead of issuing a degenerate 2 MiB-2 MiB range and hanging forever.
+      await expect(firstReadPromise).resolves.toEqual(new Uint8Array([0]));
+      await expect(secondReadPromise).resolves.toEqual(new Uint8Array(4 * MEBIBYTE));
+      expect(fetch.mock.calls.slice(0, 2)).toEqual([
+        [0, 2 * MEBIBYTE],
+        [2 * MEBIBYTE, 2 * MEBIBYTE],
+      ]);
+    }, 2000);
 
     it("ignores a degenerate zero-width idle connection instead of fetching it", async () => {
       jest.resetModules();
@@ -330,11 +330,10 @@ describe("CachedFilelike", () => {
       await expect(cachedFileReader.read(1, 0)).resolves.toEqual(new Uint8Array([]));
     });
 
-    it(
-      "rejects instead of hanging when a cached connection ends before the requested range is fully downloaded",
-      async () => {
-        // GIVEN: a cached read whose underlying stream ends early twice in a row.
-        const fetch = jest.fn((_offset: number, length: number): FileStream => ({
+    it("rejects instead of hanging when a cached connection ends before the requested range is fully downloaded", async () => {
+      // GIVEN: a cached read whose underlying stream ends early twice in a row.
+      const fetch = jest.fn(
+        (_offset: number, length: number): FileStream => ({
           on: (
             type: "data" | "error" | "end",
             callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
@@ -353,26 +352,23 @@ describe("CachedFilelike", () => {
           destroy() {
             // no-op
           },
-        }));
-        const fileReader: FileReader = {
-          open: async () => ({ size: 100 }),
-          fetch,
-        };
-        const cachedFileReader = new CachedFilelike({
-          fileReader,
-          readAheadEnabled: false,
-          log,
-        });
+        }),
+      );
+      const fileReader: FileReader = {
+        open: async () => ({ size: 100 }),
+        fetch,
+      };
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        readAheadEnabled: false,
+        log,
+      });
 
-        // WHEN / THEN: the read rejects after the early EOF retry path rather than staying
-        // pending forever with no further network activity.
-        await expect(cachedFileReader.read(0, 10)).rejects.toThrow(
-          /ended before download completed/,
-        );
-        expect(fetch).toHaveBeenCalledTimes(2);
-      },
-      1000,
-    );
+      // WHEN / THEN: the read rejects after the early EOF retry path rather than staying
+      // pending forever with no further network activity.
+      await expect(cachedFileReader.read(0, 10)).rejects.toThrow(/ended before download completed/);
+      expect(fetch).toHaveBeenCalledTimes(2);
+    }, 1000);
   });
 
   describe("#close", () => {

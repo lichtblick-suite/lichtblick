@@ -17,9 +17,7 @@ export function pickDefinedHydrationOverrides(
     ...(source.maxHydratedSources != undefined
       ? { maxHydratedSources: source.maxHydratedSources }
       : {}),
-    ...(source.maxHydratedBytes != undefined
-      ? { maxHydratedBytes: source.maxHydratedBytes }
-      : {}),
+    ...(source.maxHydratedBytes != undefined ? { maxHydratedBytes: source.maxHydratedBytes } : {}),
     ...(source.initConcurrency != undefined ? { initConcurrency: source.initConcurrency } : {}),
   };
 }

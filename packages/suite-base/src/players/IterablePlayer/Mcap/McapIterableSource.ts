@@ -14,11 +14,7 @@ import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import { BlobReadable } from "./BlobReadable";
 import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
-import type {
-  HydratedInner,
-  IndexedReaderResult,
-  McapSource,
-} from "./McapIterableSource.types";
+import type { HydratedInner, IndexedReaderResult, McapSource } from "./McapIterableSource.types";
 import { McapUnindexedIterableSource } from "./McapUnindexedIterableSource";
 import { RemoteFileReadable } from "./RemoteFileReadable";
 import { READER_BASE_BYTES, estimateReaderWeightBytes } from "./readerWeight";
@@ -47,7 +43,10 @@ async function tryCreateIndexedReader(
 ): Promise<IndexedReaderResult> {
   let reader: McapIndexedReader;
   try {
-    reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
+    reader = await McapIndexedReader.Initialize({
+      readable,
+      decompressHandlers,
+    });
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));
     // @mcap/core throws exactly this message (plus a " [library=...]" suffix) when the file has

@@ -389,7 +389,10 @@ describe("HydratedSourcePool", () => {
     expect(pool.size).toBe(0);
 
     // WHEN: the token is retried after the failure.
-    const value = await pool.acquire(token, { ...hydrator, open: jest.fn().mockResolvedValue("ok") });
+    const value = await pool.acquire(token, {
+      ...hydrator,
+      open: jest.fn().mockResolvedValue("ok"),
+    });
 
     // THEN: the retry succeeds normally.
     expect(value).toBe("ok");
