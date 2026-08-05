@@ -94,7 +94,7 @@ This workflow fans out into two parallel jobs:
 
 ### `npm`
 
-> Yarn 3.6.3 via Corepack remains this repo's dependency manager everywhere else; `npm publish` here is an intentional, pipeline-only exception used solely to publish the built package to the npm registry.
+> Yarn (per the `packageManager` field in `package.json`, currently 4.17.0) via Corepack remains this repo's dependency manager everywhere else; `npm publish` here is an intentional, pipeline-only exception used solely to publish the built package to the npm registry.
 
 1. Check out the release tag (`github.event.release.tag_name`).
 2. Set up Node.js 24 and point npm at `https://registry.npmjs.org`.
