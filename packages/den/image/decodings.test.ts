@@ -19,6 +19,8 @@ import {
   decodeRGBA8,
   decodeUYVY,
   decodeYUYV,
+  decodeYUV420,
+  decodeNV12,
 } from "./decodings";
 
 function float32LE(num: number) {
@@ -451,6 +453,61 @@ describe("decodeYUYV", () => {
     expect(() => {
       decodeYUYV(new Uint8Array([]), width, height, step + 1, new Uint8ClampedArray([]));
     }).not.toThrow();
+  });
+});
+
+// Shared expected RGBA output for the planar/semi-planar YUV 4:2:0 tests below. Both decoders map
+// pixel (row, col) to the chroma sample at (row >> 1, col >> 1), so an identical Y plane and
+// identical U/V samples must produce the same RGBA result regardless of byte layout.
+const YUV420_EXPECTED_OUTPUT = new Uint8ClampedArray([
+  ...[238, 15, 14, 255, 255, 79, 78, 255, 2, 56, 62, 255, 171, 225, 231, 255],
+  ...[255, 34, 33, 255, 255, 54, 53, 255, 21, 75, 81, 255, 161, 215, 221, 255],
+]);
+
+describe("decodeYUV420", () => {
+  it("decodes a planar I420 (Y, U, V) image", () => {
+    // GIVEN a 4x2 I420 image: full-res Y plane, then quarter-size U plane, then V plane
+    const width = 4;
+    const height = 2;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN it is decoded
+    decodeYUV420(
+      new Uint8Array([
+        ...[81, 145, 41, 210, 100, 120, 60, 200], // Y plane (2 rows of 4)
+        ...[90, 140], // U plane (2 samples)
+        ...[240, 100], // V plane (2 samples)
+      ]),
+      width,
+      height,
+      output,
+    );
+
+    // THEN each pixel expands to RGBA using its shared chroma sample
+    expect(output).toEqual(YUV420_EXPECTED_OUTPUT);
+  });
+});
+
+describe("decodeNV12", () => {
+  it("decodes a semi-planar NV12 (Y, interleaved UV) image", () => {
+    // GIVEN a 4x2 NV12 image: full-res Y plane, then interleaved U/V pairs at quarter resolution
+    const width = 4;
+    const height = 2;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN it is decoded
+    decodeNV12(
+      new Uint8Array([
+        ...[81, 145, 41, 210, 100, 120, 60, 200], // Y plane (2 rows of 4)
+        ...[90, 240, 140, 100], // interleaved UV plane (U0,V0,U1,V1)
+      ]),
+      width,
+      height,
+      output,
+    );
+
+    // THEN it produces the same RGBA output as the equivalent I420 image
+    expect(output).toEqual(YUV420_EXPECTED_OUTPUT);
   });
 });
 

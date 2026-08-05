@@ -121,6 +121,79 @@ export function decodeRGB8(
   }
 }
 
+export function decodeYUV420(
+  yuv: Uint8Array,
+  width: number,
+  height: number,
+  output: Uint8ClampedArray,
+): void {
+  const yPlaneSize = width * height;
+  const uPlaneSize = (width >> 1) * (height >> 1);
+
+  const yPlane = yuv.subarray(0, yPlaneSize);
+  const uPlane = yuv.subarray(yPlaneSize, yPlaneSize + uPlaneSize);
+  const vPlane = yuv.subarray(yPlaneSize + uPlaneSize);
+
+  let outIdx = 0;
+
+  for (let row = 0; row < height; row++) {
+    const yRow = row * width;
+    const uvRow = (row >> 1) * (width >> 1);
+
+    for (let col = 0; col < width; col += 2) {
+      const y1 = yPlane[yRow + col]!;
+      const y2 = yPlane[yRow + col + 1]!;
+
+      const uvCol = col >> 1;
+      const u = uPlane[uvRow + uvCol]! - 128;
+      const v = vPlane[uvRow + uvCol]! - 128;
+
+      // identical expansion as decodeYUYV
+      yuvToRGBA8(y1, u, y2, v, outIdx, output);
+      outIdx += 8;
+    }
+  }
+}
+
+/**
+ * Decodes an NV12 (YUV 4:2:0 semi-planar) image. NV12 stores a full-resolution Y plane followed by
+ * a single interleaved chroma plane containing U/V byte pairs at half resolution in both
+ * dimensions. For NV21 the U and V bytes are swapped within each pair.
+ */
+export function decodeNV12(
+  nv12: Uint8Array,
+  width: number,
+  height: number,
+  output: Uint8ClampedArray,
+): void {
+  const yPlaneSize = width * height;
+
+  const yPlane = nv12.subarray(0, yPlaneSize);
+  const uvPlane = nv12.subarray(yPlaneSize);
+
+  let outIdx = 0;
+
+  for (let row = 0; row < height; row++) {
+    const yRow = row * width;
+    // Each interleaved chroma row (width bytes = width/2 U/V pairs) serves two image rows.
+    const uvRow = (row >> 1) * width;
+
+    for (let col = 0; col < width; col += 2) {
+      const y1 = yPlane[yRow + col]!;
+      const y2 = yPlane[yRow + col + 1]!;
+
+      // (col >> 1) selects the chroma pair; each pair is 2 bytes, so the byte offset is `col`.
+      const uvOff = uvRow + col;
+      const u = uvPlane[uvOff]! - 128;
+      const v = uvPlane[uvOff + 1]! - 128;
+
+      // identical expansion as decodeYUYV
+      yuvToRGBA8(y1, u, y2, v, outIdx, output);
+      outIdx += 8;
+    }
+  }
+}
+
 export function decodeRGBA8(
   rgba: Uint8Array,
   width: number,
