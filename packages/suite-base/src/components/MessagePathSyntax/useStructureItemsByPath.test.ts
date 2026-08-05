@@ -9,6 +9,7 @@ import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 import * as MessagePathSyntax from "@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype";
 import * as StructureAllItems from "@lichtblick/suite-base/components/MessagePathSyntax/structureAllItemsByPath";
 import { useStructuredItemsByPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useStructureItemsByPath";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useStructureItemsByPathStore } from "./useStructureItemsByPathStore";
 
@@ -19,9 +20,12 @@ jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/structureAllItems
 jest.mock("./useStructureItemsByPathStore");
 
 describe("useStructuredItemsByPath", () => {
-  const mockAllStructureItems = new Map([["/foo", { path: "/foo" }]]);
-  const mockTopics = [{ name: "/topic", datatype: "foo_msgs/Bar" }];
-  const mockDatatypes = { "foo_msgs/Bar": { fields: [] } };
+  const mockSchemaName = BasicBuilder.string();
+  const mockStructureItemPath = `/${BasicBuilder.string()}`;
+  const mockComputedItemPath = `/${BasicBuilder.string()}`;
+  const mockAllStructureItems = new Map([[mockStructureItemPath, { path: mockStructureItemPath }]]);
+  const mockTopics = [{ name: `/${BasicBuilder.string()}`, datatype: mockSchemaName }];
+  const mockDatatypes = { [mockSchemaName]: { fields: [] } };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,11 +38,11 @@ describe("useStructuredItemsByPath", () => {
     });
 
     (MessagePathSyntax.messagePathStructures as jest.Mock).mockImplementation(() => ({
-      "foo_msgs/Bar": [],
+      [mockSchemaName]: [],
     }));
 
     (StructureAllItems.structureAllItemsByPath as jest.Mock).mockReturnValue(
-      new Map([["/computed", { path: "/computed" }]]),
+      new Map([[mockComputedItemPath, { path: mockComputedItemPath }]]),
     );
   });
 
@@ -50,37 +54,41 @@ describe("useStructuredItemsByPath", () => {
   });
 
   it("calls structureAllItemsByPath when validTypes is passed", () => {
-    const { result } = renderHook(() => useStructuredItemsByPath({ validTypes: ["foo_msgs/Bar"] }));
+    const { result } = renderHook(() => useStructuredItemsByPath({ validTypes: [mockSchemaName] }));
 
     expect(StructureAllItems.structureAllItemsByPath).toHaveBeenCalledWith(
       expect.objectContaining({
-        validTypes: ["foo_msgs/Bar"],
+        validTypes: [mockSchemaName],
         topics: mockTopics,
       }),
     );
-    expect(result.current).toEqual(new Map([["/computed", { path: "/computed" }]]));
+    expect(result.current).toEqual(
+      new Map([[mockComputedItemPath, { path: mockComputedItemPath }]]),
+    );
   });
 
   it("calls structureAllItemsByPath when noMultiSlices is true", () => {
     const { result } = renderHook(() => useStructuredItemsByPath({ noMultiSlices: true }));
 
     expect(StructureAllItems.structureAllItemsByPath).toHaveBeenCalled();
-    expect(result.current).toEqual(new Map([["/computed", { path: "/computed" }]]));
+    expect(result.current).toEqual(
+      new Map([[mockComputedItemPath, { path: mockComputedItemPath }]]),
+    );
   });
 
   it("memoizes messagePathStructures by datatypes", () => {
-    renderHook(() => useStructuredItemsByPath({ validTypes: ["foo_msgs/Bar"] }));
+    renderHook(() => useStructuredItemsByPath({ validTypes: [mockSchemaName] }));
 
     expect(MessagePathSyntax.messagePathStructures).toHaveBeenCalledWith(mockDatatypes);
   });
   it("memoizes the computed map across re-renders with an equal (but new) validTypes array", () => {
     const { rerender } = renderHook(
       ({ validTypes }: { validTypes: string[] }) => useStructuredItemsByPath({ validTypes }),
-      { initialProps: { validTypes: ["foo_msgs/Bar"] } },
+      { initialProps: { validTypes: [mockSchemaName] } },
     );
 
     // Re-render with a brand-new array instance that has identical content.
-    rerender({ validTypes: ["foo_msgs/Bar"] });
+    rerender({ validTypes: [mockSchemaName] });
 
     expect(StructureAllItems.structureAllItemsByPath).toHaveBeenCalledTimes(1);
   });
@@ -88,10 +96,10 @@ describe("useStructuredItemsByPath", () => {
   it("recomputes when the validTypes content changes", () => {
     const { rerender } = renderHook(
       ({ validTypes }: { validTypes: string[] }) => useStructuredItemsByPath({ validTypes }),
-      { initialProps: { validTypes: ["a"] } },
+      { initialProps: { validTypes: [BasicBuilder.string()] } },
     );
 
-    rerender({ validTypes: ["b"] });
+    rerender({ validTypes: [BasicBuilder.string()] });
 
     expect(StructureAllItems.structureAllItemsByPath).toHaveBeenCalledTimes(2);
   });
