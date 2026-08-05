@@ -100,7 +100,7 @@
     "@xmldom/xmldom": "0.9.10",
     "uuid": "14.0.0",
     "svgo": "3.3.4",
-    "webpack": "5.108.3",
+    "webpack": "5.109.2",
     "plist@3.1.0": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",
     "plist@^3.0.4": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",
     "plist@^3.0.5": "patch:plist@npm%3A3.1.0#./patches/plist-npm-3.1.0-66799cb2cb.patch",
@@ -175,9 +175,9 @@
     "ts-unused-exports": "11.0.1",
     "tslib": "2.8.1",
     "typescript": "6.0.3",
-    "webpack": "5.108.3",
-    "webpack-cli": "7.1.0",
-    "webpack-dev-server": "5.2.6",
+    "webpack": "5.109.2",
+    "webpack-cli": "7.2.2",
+    "webpack-dev-server": "6.0.0",
     "webpack-hot-middleware": "2.26.0"
   },
   "dependencies": {
