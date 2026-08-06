@@ -153,10 +153,10 @@ describe("app state url parser", () => {
         layoutUrl: "http://example.com/layout.json",
       });
     });
-    it("parses sessionid query parameter", () => {
+    it("parses mcap-bundle query parameter", () => {
       const url = urlBuilder();
       const sessionId = BasicBuilder.string();
-      url.searchParams.append("sessionid", sessionId);
+      url.searchParams.append("mcap-bundle", sessionId);
 
       const parsed = parseAppURLState(url);
 
@@ -165,10 +165,10 @@ describe("app state url parser", () => {
       });
     });
 
-    it("parses sessionid alongside time and other params", () => {
+    it("parses mcap-bundle alongside time and other params", () => {
       const url = urlBuilder();
       const sessionId = BasicBuilder.string();
-      url.searchParams.append("sessionid", sessionId);
+      url.searchParams.append("mcap-bundle", sessionId);
       url.searchParams.append("time", "2025-07-01T14:05:09.331293771Z");
 
       const parsed = parseAppURLState(url);

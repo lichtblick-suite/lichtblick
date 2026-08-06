@@ -89,7 +89,7 @@ export function updateAppURLState(url: URL, urlState: AppURLState): URL {
 export function parseAppURLState(url: URL): AppURLState | undefined {
   const ds = url.searchParams.get("ds") ?? undefined;
   const layoutUrl = url.searchParams.get("layoutUrl");
-  const sessionId = url.searchParams.get("sessionid") ?? undefined;
+  const sessionId = url.searchParams.get("mcap-bundle") ?? undefined;
   const timeString = url.searchParams.get("time");
   const time = parseTimeUrlString(timeString ?? undefined);
   const dsParams: Record<string, string> = {};

@@ -421,7 +421,7 @@ describe("Workspace - session-based MCAP resolution", () => {
     (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
 
     // When
-    render(<Workspace deepLinks={["https://app.example.com/?sessionid=test-session-123"]} />);
+    render(<Workspace deepLinks={["https://app.example.com/?mcap-bundle=test-session-123"]} />);
 
     // Then
     await waitFor(() => {
@@ -443,7 +443,7 @@ describe("Workspace - session-based MCAP resolution", () => {
     (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
 
     // When
-    render(<Workspace deepLinks={["https://app.example.com/?sessionid=failing-session"]} />);
+    render(<Workspace deepLinks={["https://app.example.com/?mcap-bundle=failing-session"]} />);
 
     // Then
     await waitFor(() => {

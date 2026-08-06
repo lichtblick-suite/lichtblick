@@ -83,11 +83,11 @@ describe("useStateToURLSynchronization", () => {
     );
   });
 
-  it("suppresses ds param writeback when sessionid is present in the URL", () => {
+  it("suppresses ds param writeback when mcap-bundle is present in the URL", () => {
     const spy = jest.spyOn(window.history, "replaceState");
 
-    // Set the URL to include sessionid
-    window.history.pushState({}, "", "http://localhost/?sessionid=test-session-123");
+    // Set the URL to include mcap-bundle
+    window.history.pushState({}, "", "http://localhost/?mcap-bundle=test-session-123");
 
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
       selector({

@@ -48,14 +48,14 @@ export function useStateToURLSynchronization(): void {
   }, [canSeek, debouncedCurrentTime]);
 
   // Sync player state with the url.
-  // When a sessionid is present, skip writing ds/dsParams to avoid URL length issues.
+  // When an mcap-bundle lookup key is present, skip writing ds/dsParams to avoid URL length issues.
   useEffect(() => {
     if (stablePlayerUrlState == undefined) {
       return;
     }
 
     const currentUrl = new URL(globalThis.location.href);
-    if (currentUrl.searchParams.has("sessionid")) {
+    if (currentUrl.searchParams.has("mcap-bundle")) {
       return;
     }
 
