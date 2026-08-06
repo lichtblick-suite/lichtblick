@@ -1,4 +1,5 @@
 ---
+name: "message-path"
 description: "Deep knowledge about the message-path package: path syntax, parsing grammar, data extraction from nested messages, and React hook integration. Shared across Plot, RawMessages, StateTransitions, and general panel agents."
 ---
 

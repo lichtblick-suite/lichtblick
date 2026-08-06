@@ -1,4 +1,5 @@
 ---
+name: "mcap-format"
 description: "MCAP file format specification knowledge: binary structure, record types, indexing strategies, compression options, and best practices for creating MCAP files that optimize Lichtblick reading performance."
 ---
 

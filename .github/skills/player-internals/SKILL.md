@@ -1,4 +1,5 @@
 ---
+name: "player-internals"
 description: "Deep implementation details of the IterablePlayer state machine, tick loop, and data source iteration patterns."
 ---
 
@@ -83,6 +84,9 @@ IterablePlayer (tick loop consumes messages)
 > ⚠️ `DeserializingIterableSource` is **optional** — it is only inserted when the underlying source
 > is serialized (`ISerializedIterableSource`). Sources that already return `IDeserializedIterableSource`
 > bypass it.
+>
+> `IIterableSource` also exposes optional `prewarm?(): Promise<void>` for pooled/multi-file sources
+> to warm up before becoming active; see `.github/skills/remote-caching/SKILL.md` for `HydratedSourcePool`.
 
 ## Backfill Strategy
 

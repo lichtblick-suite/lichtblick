@@ -1,4 +1,5 @@
 ---
+name: "web-workers"
 description: "Web Worker patterns used throughout the Lichtblick codebase: Comlink integration, ComlinkWrap lifecycle, transfer handlers, OffscreenCanvas, SharedWorker isolation, and testing utilities."
 ---
 

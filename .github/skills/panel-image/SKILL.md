@@ -1,4 +1,5 @@
 ---
+name: "panel-image"
 description: "Deep Image panel knowledge: the panel is ThreeDeeRender's ImageMode SceneExtension, WorkerImageDecoder pipeline, camera-model projection (pinhole/fisheye), and annotation overlays."
 ---
 

@@ -1,4 +1,5 @@
 ---
+name: "plot-internals"
 description: "Deep Chart.js integration knowledge for the Plot panel: Worker-based rendering, dataset management, downsampling strategies, scale handling, and interaction patterns."
 ---
 

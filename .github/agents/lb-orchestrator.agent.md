@@ -44,9 +44,13 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 Parallelism happens at two distinct layers — do not conflate them:
 
 1. **Within a single task** — governed by the Write-Ownership Principle above. Multiple agents may read the same files; exactly one writer edits a given path. This is logical parallelism inside one checkout; no git worktree is involved.
-2. **Across independent tasks** — handled at the session level using git worktrees (`setup-worktree.prompt.md`), set up **once per task by a human before** orchestration begins, ideally with a separate session per worktree.
+2. **Across independent tasks** — handled at the session level using git worktrees (`lb-setup-worktree.prompt.md`), set up **once per task by a human before** orchestration begins, ideally with a separate session per worktree.
 
 This orchestrator does **not** create worktrees: it has no `execute` tool, and prompt files are human-invoked entry points, not agent-callable. Do not route a task expecting a sub-agent to provision its own worktree — sub-agent invocations share this workspace's filesystem and working directory.
+
+## Release Requests
+
+Release-cutting requests (creating a release branch, triggering a release, or verifying that a release/RC published successfully) are **not** routed to a sub-agent. Point the user to `.github/prompts/lb-release.prompt.md`, which is a human-invoked runbook. Like `lb-setup-worktree.prompt.md`, it is a prompt file rather than an agent tool target, and this orchestrator has no `execute` tool, so release execution stays a human-invoked entry point rather than an agent delegation.
 
 ## Routing Rules
 

@@ -1,4 +1,5 @@
 ---
+name: "caching-internals"
 description: "Deep implementation details of caching strategies, memory budgets, block eviction, and buffered reading in the Lichtblick preloading subsystem."
 ---
 

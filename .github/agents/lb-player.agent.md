@@ -189,6 +189,9 @@ const cancel = subscribeMessageRange({
 | `WorkerIterableSource` | Runs an `IIterableSource` in a Web Worker via Comlink |
 | `WorkerSerializedIterableSource` | Serialized variant for Worker-based sources |
 
+`IIterableSource` also exposes optional lifecycle hooks: `terminate?()` for cleanup on close, and
+`prewarm?()` to warm a source before it becomes active (used by pooled/multi-file sources; failures are non-fatal).
+
 ### IteratorResult Types
 ```typescript
 type IteratorResult =
@@ -288,6 +291,8 @@ type IteratorResult =
 - `packages/suite-base/src/players/IterablePlayer/DeserializingIterableSource.ts` — lazy deserialization + sampling
 - `packages/suite-base/src/players/IterablePlayer/BlockLoader.ts` — preloading for full subscriptions
 - `packages/suite-base/src/players/IterablePlayer/WorkerIterableSource.ts` — Worker-based source (Comlink)
+- `packages/suite-base/src/players/IterablePlayer/shared/MultiIterableSource.ts` — multi-file/multi-URL orchestration; deep dive in `@lb-remote-connection`'s knowledge base
+- `packages/suite-base/src/players/IterablePlayer/shared/HydratedSourcePool.ts` — bounded LRU pool for resident heavyweight per-file readers; deep dive in `@lb-remote-connection`'s knowledge base
 - `packages/suite-base/src/players/IterablePlayer/CachingIterableSource.ts` — block-level cache
 - `packages/suite-base/src/players/FoxgloveWebSocketPlayer/index.ts` — WebSocket player
 - `packages/suite-base/src/players/FoxgloveWebSocketPlayer/WorkerSocketAdapter.ts` — Worker WebSocket
@@ -301,6 +306,7 @@ type IteratorResult =
 - Modifying `#allTopics` identity without triggering `reset-playback-iterator` (misses new topics)
 - Calling `seekPlayback` before initialization completes (must store in `#seekTarget` for later)
 - Not clamping times to `[start, end]` range (causes source errors)
+- When `initialize()` and `terminate()` can race on shared mutable fields, `terminate()` must capture fields into locals before any `await`, clear instance fields synchronously, and run dispose/cleanup in a `finally` block so rejections do not skip cleanup or touch newer state; this pattern was established in `WorkerSerializedIterableSource.terminate()` this session, and similar sibling lifecycles (for example `WorkerIterableSource`) have not yet been audited
 - UserScriptPlayer: emitting upstream messages twice when scripts change (use empty messages array)
 
 ## Skills Reference

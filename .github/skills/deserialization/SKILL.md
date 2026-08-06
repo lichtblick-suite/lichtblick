@@ -1,4 +1,5 @@
 ---
+name: "deserialization"
 description: "Deep deserialization knowledge: parseChannel schema dispatch, ros1msg/ros2msg/ros2idl/jsonschema/protobuf/flatbuffer decoders, WASM decompression handlers, and the DeserializingIterableSource wrapping pattern."
 ---
 

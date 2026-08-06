@@ -1,4 +1,5 @@
 ---
+name: "unit-testing"
 description: "Unit testing patterns, mock builder usage, and test data construction strategies for the Lichtblick monorepo."
 ---
 

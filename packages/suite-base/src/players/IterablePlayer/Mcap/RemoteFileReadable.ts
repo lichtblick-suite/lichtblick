@@ -11,13 +11,9 @@ import BrowserHttpReader from "@lichtblick/suite-base/util/BrowserHttpReader";
 import CachedFilelike from "@lichtblick/suite-base/util/CachedFilelike";
 
 import { BatchingReadable } from "./BatchingReadable";
+import type { RemoteFileReadableOptions } from "./RemoteFileReadable.types";
 
 const DEFAULT_CACHE_SIZE_BYTES = 1024 * 1024 * 500; // 500MiB
-
-type RemoteFileReadableOptions = {
-  cacheSizeInBytes?: number;
-  readAheadEnabled?: boolean;
-};
 
 export class RemoteFileReadable {
   readonly #remoteReader: CachedFilelike;
@@ -29,6 +25,7 @@ export class RemoteFileReadable {
       fileReader,
       cacheSizeInBytes: options?.cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
       readAheadEnabled: options?.readAheadEnabled,
+      readAheadBufferBytes: options?.readAheadBufferBytes,
     });
 
     const inner: McapTypes.IReadable = {
@@ -52,5 +49,9 @@ export class RemoteFileReadable {
   }
   public async read(offset: bigint, size: bigint): Promise<Uint8Array> {
     return await this.#batchingReadable.read(offset, size);
+  }
+
+  public close(): void {
+    this.#remoteReader.close();
   }
 }

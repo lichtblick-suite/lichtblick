@@ -14,6 +14,10 @@ import {
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
+import {
+  MultiFileHydrationOverrides,
+  addMultiFileHydrationOverrides,
+} from "@lichtblick/suite-base/players/IterablePlayer/shared/multiFileHydrationOptions";
 import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import { Player } from "@lichtblick/suite-base/players/types";
 
@@ -43,14 +47,9 @@ const fileTypesAllowed: AllowedFileExtensions[] = [
   AllowedFileExtensions.MCAP,
 ];
 
-export function checkExtensionMatch(fileExtension: string, previousExtension?: string): string {
-  if (previousExtension != undefined && previousExtension !== fileExtension) {
-    throw new Error("All sources need to be from the same type");
-  }
-  return fileExtension;
-}
-
 class RemoteDataSourceFactory implements IDataSourceFactory {
+  private readonly multiFileHydrationOverrides?: MultiFileHydrationOverrides;
+
   public id = "remote-file";
 
   // The remote file feature use to be handled by two separate factories with these IDs.
@@ -90,6 +89,12 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
 
   public warning = "Loading large files over HTTP can be slow";
 
+  // Optional pass-through for future multi-file hydration tuning experiments. Omitted by default
+  // so existing behavior remains unchanged until a caller explicitly opts in.
+  public constructor(multiFileHydrationOverrides?: MultiFileHydrationOverrides) {
+    this.multiFileHydrationOverrides = multiFileHydrationOverrides;
+  }
+
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     if (args.params?.url == undefined) {
       return;
@@ -101,12 +106,15 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
 
     urls.forEach((url) => {
       extension = path.extname(new URL(url).pathname);
-      nextExtension = checkExtensionMatch(extension, nextExtension);
+      nextExtension = this.checkExtensionMatch(extension, nextExtension);
     });
 
     const initWorker = initWorkers[extension]!;
 
-    const initArgs = urls.length === 1 ? { url: urls[0] } : { urls };
+    const initArgs =
+      urls.length === 1
+        ? { url: urls[0] }
+        : addMultiFileHydrationOverrides({ urls }, this.multiFileHydrationOverrides);
     const source = new WorkerSerializedIterableSource({ initWorker, initArgs });
 
     return new IterablePlayer({
@@ -121,6 +129,13 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
       // A no-op for non-video (e.g. .bag) sources.
       expandBackfill: expandVideoSeekBackfill,
     });
+  }
+
+  private checkExtensionMatch(fileExtension: string, previousExtension?: string): string {
+    if (previousExtension != undefined && previousExtension !== fileExtension) {
+      throw new Error("All sources need to be from the same type");
+    }
+    return fileExtension;
   }
 
   #validateUrl(newValue: string): Error | undefined {
