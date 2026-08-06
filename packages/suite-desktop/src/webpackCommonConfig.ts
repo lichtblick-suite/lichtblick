@@ -59,6 +59,9 @@ export function createCommonWebpackConfig(
         DEV_WORKSPACE: process.env.DEV_WORKSPACE
           ? JSON.stringify(process.env.DEV_WORKSPACE)
           : undefined,
+        SYNC_LOCAL_LAYOUTS: process.env.SYNC_LOCAL_LAYOUTS
+          ? process.env.SYNC_LOCAL_LAYOUTS === "true"
+          : undefined,
       }),
       new ForkTsCheckerWebpackPlugin(),
     ],
