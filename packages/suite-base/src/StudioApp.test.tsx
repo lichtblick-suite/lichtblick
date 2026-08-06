@@ -9,8 +9,12 @@ import "@testing-library/jest-dom";
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
 import { LayoutsAPI } from "@lichtblick/suite-base/api/layouts/LayoutsAPI";
 import { SharedRootContext } from "@lichtblick/suite-base/context/SharedRootContext";
+import HttpService from "@lichtblick/suite-base/services/http/HttpService";
+import { PostMessageAuthProvider } from "@lichtblick/suite-base/services/http/PostMessageAuthProvider";
 
 import { StudioApp } from "./StudioApp";
+
+const OriginalURL = global.URL;
 
 // Mock all the heavy dependencies
 jest.mock("./Workspace", () => ({
@@ -75,6 +79,21 @@ jest.mock("@lichtblick/suite-base/api/layouts/LayoutsAPI", () => ({
   })),
 }));
 
+jest.mock("@lichtblick/suite-base/services/http/HttpService", () => ({
+  __esModule: true,
+  default: {
+    setAuthProvider: jest.fn(),
+  },
+}));
+
+jest.mock("@lichtblick/suite-base/services/http/PostMessageAuthProvider", () => ({
+  __esModule: true,
+  PostMessageAuthProvider: jest.fn().mockImplementation(() => ({
+    getAuthHeaders: jest.fn(),
+    dispose: jest.fn(),
+  })),
+}));
+
 // Mock react-dnd
 jest.mock("react-dnd", () => ({
   DndProvider: ({ children }: any) => <div data-testid="dnd-provider">{children}</div>,
@@ -135,6 +154,16 @@ describe("StudioApp", () => {
         get: jest.fn().mockReturnValue(undefined),
       },
     })) as any;
+
+    Object.defineProperty(document, "referrer", {
+      configurable: true,
+      value: "",
+    });
+
+    Object.defineProperty(window, "parent", {
+      configurable: true,
+      value: window,
+    });
 
     // Mock document.addEventListener
     jest.spyOn(document, "addEventListener").mockImplementation();
@@ -283,6 +312,96 @@ describe("StudioApp", () => {
     renderWithContext();
 
     expect(jest.mocked(LayoutsAPI)).toHaveBeenCalledWith("test-workspace");
+  });
+
+  it("should configure HttpService with the provided remote layout auth provider", () => {
+    const setAuthProviderSpy = jest.spyOn(HttpService, "setAuthProvider");
+
+    global.URL = jest.fn().mockImplementation((value) => {
+      if (value === "https://host.example.com/embed") {
+        return { origin: "https://host.example.com" };
+      }
+
+      return {
+        searchParams: {
+          get: jest
+            .fn()
+            .mockImplementation((key) => (key === "workspace" ? "test-workspace" : undefined)),
+        },
+      };
+    }) as any;
+
+    const authProvider = {
+      getAuthHeaders: jest.fn().mockResolvedValue({ Authorization: "Bearer token" }),
+    };
+
+    renderWithContext({
+      ...mockSharedRootContext,
+      authProvider,
+    });
+
+    expect(setAuthProviderSpy).toHaveBeenCalledWith(authProvider);
+  });
+
+  it("should create a default PostMessageAuthProvider for embedded remote layouts", () => {
+    const setAuthProviderSpy = jest.spyOn(HttpService, "setAuthProvider");
+    const parentWindow = { postMessage: jest.fn() } as unknown as Window;
+
+    global.URL = OriginalURL;
+    window.history.pushState({}, "", "http://localhost/?workspace=test-workspace");
+
+    Object.defineProperty(document, "referrer", {
+      configurable: true,
+      value: "https://host.example.com/embed",
+    });
+
+    Object.defineProperty(window, "parent", {
+      configurable: true,
+      get: () => parentWindow,
+    });
+
+    expect(document.referrer).toBe("https://host.example.com/embed");
+    expect(new URL(document.referrer).origin).toBe("https://host.example.com");
+    expect(window.parent).toBe(parentWindow);
+    expect(window.parent === window).toBe(false);
+
+    renderWithContext();
+
+    expect(PostMessageAuthProvider).toHaveBeenCalledWith({
+      allowedOrigins: ["https://host.example.com"],
+      sourceWindow: parentWindow,
+    });
+    expect(setAuthProviderSpy).toHaveBeenCalledWith(
+      (PostMessageAuthProvider as jest.Mock).mock.results[0]?.value,
+    );
+  });
+
+  it("should clear the auth provider and dispose it when unmounted", () => {
+    const setAuthProviderSpy = jest.spyOn(HttpService, "setAuthProvider");
+    const parentWindow = { postMessage: jest.fn() } as unknown as Window;
+
+    global.URL = OriginalURL;
+    window.history.pushState({}, "", "http://localhost/?workspace=test-workspace");
+
+    Object.defineProperty(document, "referrer", {
+      configurable: true,
+      value: "https://host.example.com/embed",
+    });
+
+    Object.defineProperty(window, "parent", {
+      configurable: true,
+      get: () => parentWindow,
+    });
+
+    const { unmount } = renderWithContext();
+    const mockProviderInstance = (PostMessageAuthProvider as jest.Mock).mock.results[0]?.value as {
+      dispose: jest.Mock;
+    };
+
+    unmount();
+
+    expect(setAuthProviderSpy).toHaveBeenCalledWith(undefined);
+    expect(mockProviderInstance.dispose).toHaveBeenCalled();
   });
 
   it("should not create remote layout storage when no workspace is provided", () => {

@@ -15,6 +15,7 @@ import { INativeAppMenu } from "@lichtblick/suite-base/context/NativeAppMenuCont
 import { INativeWindow } from "@lichtblick/suite-base/context/NativeWindowContext";
 import { IDataSourceFactory } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExtensionLoader";
+import { AuthProvider } from "@lichtblick/suite-base/services/http/AuthProvider";
 
 interface ISharedRootContext {
   deepLinks: readonly string[];
@@ -31,6 +32,7 @@ interface ISharedRootContext {
   customWindowControlProps?: CustomWindowControlsProps;
   onAppBarDoubleClick?: () => void;
   AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
+  authProvider?: AuthProvider;
 }
 
 const SharedRootContext = createContext<ISharedRootContext>({
