@@ -96,4 +96,27 @@ describe("downsampleStates", () => {
       { x: 100, index: 4 },
     ]);
   });
+
+  it("keeps a gap point ordered between the surrounding states", () => {
+    // Given
+    // A gap marker (no label, e.g. a NaN datum) sits between two distinct
+    // states. It must remain between them after downsampling so the rendered
+    // line breaks instead of reconnecting across the gap.
+    // in:  A--|-#-|--B   (# = gap)
+    const data: Datum[] = [
+      { x: 0, y: 0, label: A },
+      { x: 50, y: Number.NaN },
+      { x: 100, y: 0, label: B },
+    ];
+
+    // When
+    const result = downsampleStates(iterateObjects(data), bounds, numPoints);
+
+    // Then
+    expect(result).toEqual([
+      { x: 0, index: 0 },
+      { x: 50, index: 1 },
+      { x: 100, index: 2 },
+    ]);
+  });
 });

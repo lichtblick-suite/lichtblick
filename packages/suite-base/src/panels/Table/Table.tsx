@@ -189,7 +189,7 @@ function getColumnsFromObject(val: CellValue, accessorPath: string) {
   }
   const columns: MergedColumnsType = Object.keys(val).map((accessor) => {
     const id = accessorPath.length !== 0 ? `${accessorPath}.${accessor}` : accessor;
-    return columnHelper.accessor(accessor, {
+    return columnHelper.accessor((row) => row[accessor], {
       header: accessor,
       id,
       cell: memoizedCellRenderer(accessorPath, id),

@@ -110,6 +110,46 @@ describe("IndexDatasetsBuilder", () => {
     });
   });
 
+  it("should create a gap (NaN) for null values inside an array so the line breaks", async () => {
+    // Given
+    const builder = new IndexDatasetsBuilder();
+
+    builder.setSeries(
+      buildSeriesItems([{ enabled: true, timestampMethod: "receiveTime", value: "/bar.val[:]" }]),
+    );
+
+    // When
+    builder.handlePlayerState(
+      buildPlayerState({
+        messages: [
+          {
+            topic: "/bar",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: [1, ReactNull, 3],
+            },
+          },
+        ],
+      }),
+    );
+
+    // Then
+    await expect(builder.getViewportDatasets()).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          data: [
+            { x: 0, y: 1, value: 1, receiveTime: { sec: 0, nsec: 0 } },
+            { x: 1, y: NaN, value: NaN, receiveTime: { sec: 0, nsec: 0 } },
+            { x: 2, y: 3, value: 3, receiveTime: { sec: 0, nsec: 0 } },
+          ],
+        }),
+      ],
+    });
+  });
+
   it("should return the existing dataset range when no input messages", async () => {
     const builder = new IndexDatasetsBuilder();
 

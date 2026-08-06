@@ -178,6 +178,29 @@ function readMessagePathItems(
 
     const items = simpleGetMessagePathDataItems(event, path);
     for (const item of items) {
+      const headerStamp = getTimestampForMessage(event.message);
+      const timestamp = timestampMethod === "receiveTime" ? event.receiveTime : headerStamp;
+      if (!timestamp) {
+        continue;
+      }
+
+      const xValue = toSec(subtractTime(timestamp, startTime));
+
+      // A null/undefined value means the series has no value at this timestamp. Emit a gap
+      // (NaN) so the line breaks at this point instead of interpolating across the missing
+      // value. NaN values survive the downsampling pipeline and create a discontinuity in
+      // the rendered chart.
+      if (item == undefined) {
+        out.push({
+          x: xValue,
+          y: Number.NaN,
+          receiveTime: event.receiveTime,
+          headerStamp,
+          value: Number.NaN,
+        });
+        continue;
+      }
+
       if (!isChartValue(item)) {
         continue;
       }
@@ -186,13 +209,6 @@ function readMessagePathItems(
         continue;
       }
 
-      const headerStamp = getTimestampForMessage(event.message);
-      const timestamp = timestampMethod === "receiveTime" ? event.receiveTime : headerStamp;
-      if (!timestamp) {
-        continue;
-      }
-
-      const xValue = toSec(subtractTime(timestamp, startTime));
       const mathModified = mathFunction ? mathFunction(chartValue) : chartValue;
       out.push({
         x: xValue,

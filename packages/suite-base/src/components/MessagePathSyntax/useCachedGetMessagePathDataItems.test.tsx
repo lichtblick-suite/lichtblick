@@ -614,6 +614,66 @@ describe("useCachedGetMessagePathDataItems", () => {
         ],
       ]);
     });
+
+    it("captures null/undefined values when they are at the end of a path", () => {
+      const messages: MessageEvent[] = [
+        {
+          topic: "/some/topic",
+          receiveTime: { sec: 0, nsec: 0 },
+          message: { payload: null },
+          schemaName: "datatype",
+          sizeInBytes: 0,
+        },
+        {
+          topic: "/some/topic",
+          receiveTime: { sec: 0, nsec: 0 },
+          message: { payload: undefined },
+          schemaName: "datatype",
+          sizeInBytes: 0,
+        },
+        {
+          topic: "/some/topic",
+          receiveTime: { sec: 0, nsec: 0 },
+          message: { payload: { x: 10 } },
+          schemaName: "datatype",
+          sizeInBytes: 0,
+        },
+      ];
+      const topics: Topic[] = [{ name: "/some/topic", schemaName: "some_datatype" }];
+      const datatypes: RosDatatypes = new Map(
+        Object.entries({
+          some_datatype: {
+            definitions: [{ name: "payload", type: "some_other_datatype", isComplex: true }],
+          },
+          some_other_datatype: {
+            definitions: [{ name: "x", type: "uint32" }],
+          },
+        }),
+      );
+
+      expect(addValuesWithPathsToItems(messages, "/some/topic.payload", topics, datatypes)).toEqual(
+        [
+          [
+            {
+              value: null,
+              path: "/some/topic.payload",
+            },
+          ],
+          [
+            {
+              value: undefined,
+              path: "/some/topic.payload",
+            },
+          ],
+          [
+            {
+              value: { x: 10 },
+              path: "/some/topic.payload",
+            },
+          ],
+        ],
+      );
+    });
   });
 });
 

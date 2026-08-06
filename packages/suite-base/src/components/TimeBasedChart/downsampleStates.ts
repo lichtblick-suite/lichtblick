@@ -163,9 +163,17 @@ export function downsampleStates(
       continue;
     }
 
-    // This only seems to occur when we've inserted a dummy final point, which
-    // we need to add
+    // A point without a label is either the dummy final point or a gap marker
+    // (e.g. a NaN datum inserted by the state transitions panel to break the
+    // line). We must finish and reset the current interval first so the gap
+    // point keeps its position between the surrounding states. Otherwise the
+    // still-open interval would be flushed by the next labeled point and end up
+    // ordered *after* the gap, reconnecting the line across the gap.
     if (label == undefined) {
+      if (interval != undefined) {
+        finishInterval();
+        interval = undefined;
+      }
       indices.push({
         x,
         index,

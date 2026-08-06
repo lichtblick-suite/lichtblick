@@ -233,16 +233,14 @@ export function getMessagePathDataItems(
     path: string,
     structureItem: MessagePathStructureItem | undefined,
   ) {
-    if (value == undefined) {
-      return;
-    }
     const pathItem = filledInPath.messagePath[pathIndex];
     const nextPathItem = filledInPath.messagePath[pathIndex + 1];
     if (!pathItem) {
       // If we're at the end of the `messagePath`, we're done! Just store the point.
+      // Note: value can be undefined/null here, and we want to capture that as valid data
       let constantName: string | undefined;
       const prevPathItem = filledInPath.messagePath[pathIndex - 1];
-      if (prevPathItem?.type === "name") {
+      if (prevPathItem?.type === "name" && value != undefined) {
         const fieldName = prevPathItem.name;
         const enumMap = structureItem != undefined ? enumValues[structureItem.datatype] : undefined;
         constantName = enumMap?.[fieldName]?.[value];
@@ -253,12 +251,19 @@ export function getMessagePathDataItems(
       (structureItem == undefined || structureItem.structureType === "message")
     ) {
       // If the `pathItem` is a name, we're traversing down using that name.
-      const next = structureItem?.nextByName[pathItem.name];
-      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.repr}`, next);
+      // Skip if value is undefined - we can't traverse into undefined
+      if (value != undefined) {
+        const next = structureItem?.nextByName[pathItem.name];
+        traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.repr}`, next);
+      }
     } else if (
       pathItem.type === "slice" &&
       (structureItem == undefined || structureItem.structureType === "array")
     ) {
+      // Skip if value is undefined - we can't slice an undefined array
+      if (value == undefined) {
+        return;
+      }
       const { start, end } = pathItem;
       if (typeof start === "object" || typeof end === "object") {
         throw new Error(
@@ -308,7 +313,7 @@ export function getMessagePathDataItems(
         traverse(arrayElement, pathIndex + 1, newPath, structureItem?.next);
       }
     } else if (pathItem.type === "filter") {
-      if (filterMatches(pathItem, value)) {
+      if (value != undefined && filterMatches(pathItem, value)) {
         traverse(value, pathIndex + 1, `${path}{${pathItem.repr}}`, structureItem);
       }
     } else {

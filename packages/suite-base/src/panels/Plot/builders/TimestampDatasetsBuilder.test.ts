@@ -236,6 +236,63 @@ describe("TimestampDatasetsBuilder", () => {
     });
   });
 
+  it("should create a gap (NaN) for null values so the line breaks", async () => {
+    // Given
+    const builder = new TimestampDatasetsBuilder();
+
+    builder.setSeries(
+      buildSeriesItems([{ enabled: true, timestampMethod: "receiveTime", value: "/foo.val" }]),
+    );
+
+    // When
+    builder.handlePlayerState(
+      buildPlayerState({
+        messages: [
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: 1 },
+          },
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 1, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: ReactNull },
+          },
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 2, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: 2 },
+          },
+        ],
+      }),
+    );
+
+    // Then
+    await expect(
+      builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      }),
+    ).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          data: [
+            { x: 0, y: 1, value: 1 },
+            { x: 1, y: NaN, value: NaN },
+            { x: 2, y: 2, value: 2 },
+          ],
+        }),
+      ],
+    });
+  });
+
   it("should reset full data when isReset is true", async () => {
     const builder = new TimestampDatasetsBuilder();
 

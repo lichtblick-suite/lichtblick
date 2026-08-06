@@ -61,6 +61,18 @@ export class IndexDatasetsBuilder implements IDatasetsBuilder {
 
       const items = simpleGetMessagePathDataItems(msgEvent, series.parsed);
       const pathItems = filterMap(items, (item, idx) => {
+        // A null/undefined value means there is no value at this index. Emit a gap (NaN) so the
+        // line breaks here instead of interpolating across the missing value, while preserving
+        // the x index of the surrounding points.
+        if (item == undefined) {
+          return {
+            x: idx,
+            y: Number.NaN,
+            receiveTime: msgEvent.receiveTime,
+            value: Number.NaN,
+          };
+        }
+
         if (!isChartValue(item)) {
           return;
         }
