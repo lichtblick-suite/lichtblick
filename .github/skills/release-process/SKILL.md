@@ -88,7 +88,7 @@ Release artifacts:
 Trigger:
 
 - `release: types: [released]` — fires only for full (non-prerelease) GitHub Releases; pre-releases fire GitHub's separate `prereleased` event, which this workflow does not listen for.
-- manual `workflow_dispatch` — declares no inputs, so `github.event.release.tag_name` is empty on a manual run. The checkout and Docker version-tagging steps both depend on that value, so triggering this workflow manually checks out an empty ref and produces an empty Docker version tag; treat this trigger path as non-functional until the workflow is changed to accept an explicit tag input.
+- manual `workflow_dispatch` — requires an explicit `tag` input (for example `v1.28.1`). Both jobs use `github.event.inputs.tag || github.event.release.tag_name` for the checkout ref and Docker version tagging, so a manual run publishes the specified tag instead of depending on release-event context.
 
 This workflow fans out into two parallel jobs:
 
@@ -173,7 +173,7 @@ Build and release steps:
 | Workflow file | Trigger | Jobs |
 |---------------|---------|------|
 | `.github/workflows/release.yml` | `pull_request` closed on `main`, gated to merged PRs whose head branch starts with `release/` or `hotfix/` | `release` |
-| `.github/workflows/post-release.yml` | `release: released` (excludes pre-releases) or `workflow_dispatch` (non-functional — no tag context) | `npm`, `docker` |
+| `.github/workflows/post-release.yml` | `release: released` (excludes pre-releases) or `workflow_dispatch` (requires `tag` input) | `npm`, `docker` |
 | `.github/workflows/prerelease.yml` | `workflow_dispatch` | `prerelease` |
 | `.github/workflows/release-sync.yml` | `release: released` (excludes pre-releases) or `workflow_dispatch` | `sync` |
 
