@@ -15,7 +15,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/exec@npm:1.1.1, @actions/exec@npm:^1.0.0, @actions/exec@npm:^1.1.1":
+"@actions/exec@npm:3.0.0":
+  version: 3.0.0
+  resolution: "@actions/exec@npm:3.0.0"
+  dependencies:
+    "@actions/io": "npm:^3.0.2"
+  checksum: 10/c1904163e326cbe27f887514b4837e357d46e7a6c5eeda66c0e2efffd2772cb34d8ef0a2a48c65eb0e3b6ec72beb9b049eaba343c9f55978d3f45b09d09d2c54
+  languageName: node
+  linkType: hard
+
+"@actions/exec@npm:^1.0.0, @actions/exec@npm:^1.1.1":
   version: 1.1.1
   resolution: "@actions/exec@npm:1.1.1"
   dependencies:
@@ -38,6 +47,13 @@ __metadata:
   version: 1.1.3
   resolution: "@actions/io@npm:1.1.3"
   checksum: 10/4de44e8d428ba9f20049c844b37ecd486b589ed201f8cc8c5b550a9e4c72d1f594271ee2a7a6cfe8a42ebfb5dd527ef65016454656db391a353d41eab4f147e1
+  languageName: node
+  linkType: hard
+
+"@actions/io@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@actions/io@npm:3.0.2"
+  checksum: 10/ef17cb4ec0a2b640d5f4851446ad1c12bf4b2b1cf83741c5eecee4e8f50b3ca3ac9ae4084027dcaa1bf0c016d653dbc0e5fe20daedd39ee5fb6edb671f6e45b5
   languageName: node
   linkType: hard
 
@@ -3715,7 +3731,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lichtblick/suite-desktop@workspace:packages/suite-desktop"
   dependencies:
-    "@actions/exec": "npm:1.1.1"
+    "@actions/exec": "npm:3.0.0"
     "@actions/tool-cache": "npm:2.0.2"
     "@lichtblick/den": "workspace:*"
     "@lichtblick/electron-socket": "npm:1.0.0"
@@ -14997,7 +15013,7 @@ __metadata:
   resolution: "lichtblick@workspace:."
   dependencies:
     "@actions/core": "npm:1.11.1"
-    "@actions/exec": "npm:1.1.1"
+    "@actions/exec": "npm:3.0.0"
     "@actions/tool-cache": "npm:2.0.2"
     "@babel/core": "npm:7.29.7"
     "@babel/plugin-proposal-decorators": "npm:7.29.7"
