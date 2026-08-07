@@ -55,7 +55,7 @@ export function useStateToURLSynchronization(): void {
     }
 
     const currentUrl = new URL(globalThis.location.href);
-    if (currentUrl.searchParams.has("mcap-bundle")) {
+    if (currentUrl.searchParams.get("mcap-bundle")) {
       return;
     }
 
