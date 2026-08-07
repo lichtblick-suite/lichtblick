@@ -993,8 +993,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     if (renderer == undefined) {
       return;
     }
-    const isRos =
-      context.dataSourceProfile === "ros1" || context.dataSourceProfile === "ros2";
+    const isRos = context.dataSourceProfile === "ros1" || context.dataSourceProfile === "ros2";
     const publishEditedTransforms = (curRenderer: IRenderer) => {
       if (!hasEditedTransforms(curRenderer)) {
         if (hadEditsRef.current) {
