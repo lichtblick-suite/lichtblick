@@ -2430,6 +2430,35 @@ describe("Renderer static transform caching across message types", () => {
 
     renderer.dispose();
   });
+
+  it("preserves static transforms when preloading is enabled but allFrames is empty", () => {
+    // Given: A renderer with preloading enabled, which subscribes #onResetAllFramesCursor to
+    // the resetAllFramesCursor event, and which has received a static transform
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    renderer.setCurrentTime(100n);
+    renderer.addMessageEvent(
+      createTFMessageEvent("parent", "child_static", 10n, [10n], "/tf_static"),
+    );
+    renderer.animationFrame();
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    // When: Seeking backward while the preload buffer is still empty, which takes the
+    // clear()-based path and emits resetAllFramesCursor
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n, []);
+
+    // Then: The static transform is still restored. The resetAllFramesCursor handler must not
+    // wipe the static cache, otherwise #reapplyStaticTransforms has nothing left to reapply.
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.dispose();
+  });
 });
 
 describe("Renderer batch message processing", () => {

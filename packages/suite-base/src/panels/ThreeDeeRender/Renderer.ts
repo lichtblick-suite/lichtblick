@@ -827,9 +827,14 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
   };
 
-  /** `resetAllFramesCursor` event handler: always clears the transform tree and the static transform cache. */
+  /**
+   * `resetAllFramesCursor` event handler: clears the transform tree so preloaded transforms are
+   * re-read from the start of `allFrames`, but keeps the static transform cache. The cache exists
+   * precisely to survive seek-driven tree clears, and this event is emitted during a seek. It is
+   * only dropped on a genuine data source reset, via `clear()` without `preserveStaticTransforms`.
+   */
   readonly #onResetAllFramesCursor = (): void => {
-    this.#clearTransformTree();
+    this.#clearTransformTree(true);
   };
 
   // Call on scene extensions to add subscriptions to the renderer
