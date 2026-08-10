@@ -140,7 +140,7 @@
     "moment-timezone": "0.6.3",
     "monaco-editor": "0.55.1",
     "monaco-editor-webpack-plugin": "7.1.1",
-    "nanoid": "5.1.6",
+    "nanoid": "5.1.16",
     "natsort": "2.0.3",
     "nearley": "2.20.1",
     "nearley-loader": "2.0.0",
