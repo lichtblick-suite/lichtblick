@@ -486,6 +486,76 @@ describe("ImageRenderable error handling", () => {
     decodeResolvers.get(33333)?.();
   });
 
+  it("should accept an encoded stream published as sensor_msgs/CompressedImage", async () => {
+    // Regression guard: a ROS CompressedImage keeps its time in `header.stamp`, so reading
+    // `timestamp` off it yielded undefined and threw out of setImage — before the frame reached
+    // the decoder and outside any catch, which took down the whole panel.
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    jest.spyOn(renderable, "update").mockImplementation(() => undefined);
+    const decodeImage = jest
+      .spyOn(renderable as unknown as { decodeImage: jest.Mock }, "decodeImage")
+      .mockResolvedValue({});
+
+    const rosFrame = {
+      header: { frame_id: "camera", stamp: { sec: 4, nsec: 500_000_000 } },
+      format: "h264",
+      data: h265Keyframe,
+    };
+
+    renderable.setImage(rosFrame);
+
+    // Queued rather than decoded inline, which is what marks it as taking the video path.
+    await Promise.resolve();
+    expect(decodeImage).not.toHaveBeenCalled();
+
+    renderable.flushPendingDecodes();
+    await renderable.settleVideoDecodes();
+
+    expect(decodeImage).toHaveBeenCalledWith(rosFrame, undefined);
+    expect(mockAddToTopic).not.toHaveBeenCalled();
+  });
+
+  it("should decode a sensor_msgs/CompressedImage stream against its header stamp", async () => {
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    jest.spyOn(renderable, "update").mockImplementation(() => undefined);
+
+    const decode = jest
+      .fn<Promise<VideoFrame | undefined>, [Uint8Array, number, "key" | "delta"]>()
+      .mockResolvedValueOnce(createDecodedVideoFrame(0))
+      .mockResolvedValueOnce(createDecodedVideoFrame(16666));
+    renderable.videoPlayer = {
+      isInitialized: jest.fn().mockReturnValue(true),
+      init: jest.fn().mockResolvedValue(undefined),
+      decode,
+      codedSize: jest.fn(),
+      decoderConfig: jest.fn().mockReturnValue({ codec: "hvc1.1.6.L93.B0" }),
+      resetForSeek: jest.fn(),
+      lastImageBitmap: undefined,
+      lastVideoFrame: undefined,
+    } as unknown as ImageRenderable["videoPlayer"];
+
+    const originalCreateImageBitmap = self.createImageBitmap;
+    self.createImageBitmap = jest.fn().mockResolvedValue(new ImageBitmap());
+
+    const rosFrame = (data: Uint8Array, stamp: { sec: number; nsec: number }) => ({
+      header: { frame_id: "camera", stamp },
+      format: "hevc",
+      data,
+    });
+
+    renderable.setImage(rosFrame(h265Keyframe, { sec: 8, nsec: 0 }));
+    renderable.setImage(rosFrame(h265DeltaFrame, { sec: 8, nsec: 16_666_666 }));
+    renderable.flushPendingDecodes();
+    await renderable.settleVideoDecodes();
+
+    // Presentation timestamps are relative to the first frame, so a stamp-derived time gives
+    // 0 then 16666 microseconds. Any other origin means the header stamp was not used.
+    expect(decode).toHaveBeenNthCalledWith(1, expect.any(Uint8Array), 0, "key");
+    expect(decode).toHaveBeenNthCalledWith(2, expect.any(Uint8Array), 16666, "delta");
+
+    self.createImageBitmap = originalCreateImageBitmap;
+  });
+
   it("should decode every pending h265 frame in order", async () => {
     const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
     jest.spyOn(renderable, "update").mockImplementation(() => undefined);

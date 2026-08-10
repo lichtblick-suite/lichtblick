@@ -146,7 +146,10 @@ export class Images extends SceneExtension<ImageRenderable> {
         schemaNames: ROS_COMPRESSED_IMAGE_DATATYPES,
         subscription: {
           handler: this.#handleRosCompressedImage,
-          filterQueue: onlyLastByTopicMessage,
+          // Compressed images are usually stills, where this collapses to onlyLastByTopicMessage.
+          // When the format names a video codec, the filter keeps the active GOP so P-frames stay
+          // decodable instead of being dropped along with the rest of the queue.
+          filterQueue: filterCompressedVideoQueue,
         },
       },
       {
@@ -162,7 +165,7 @@ export class Images extends SceneExtension<ImageRenderable> {
         schemaNames: COMPRESSED_IMAGE_DATATYPES,
         subscription: {
           handler: this.#handleCompressedImage,
-          filterQueue: onlyLastByTopicMessage,
+          filterQueue: filterCompressedVideoQueue,
         },
       },
       {

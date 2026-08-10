@@ -14,6 +14,7 @@ import {
   CompressedVideo,
   getFrameIdFromImage,
   getTimestampFromImage,
+  toCompressedVideoFrame,
 } from "./ImageTypes";
 import { Image as RosImage, CompressedImage as RosCompressedImage } from "../../ros";
 
@@ -113,6 +114,22 @@ describe("ImageTypes utility functions", () => {
       it(`should return the correct timestamp for ${name}`, () => {
         expect(getTimestampFromImage(image)).toEqual(expectedTime);
       });
+    });
+  });
+
+  describe("toCompressedVideoFrame", () => {
+    it("should move the ROS header fields onto the video frame", () => {
+      expect(toCompressedVideoFrame({ ...rosCompressedImage, format: "h264" })).toEqual({
+        timestamp: mockTime,
+        frame_id: "ros_frame",
+        format: "h264",
+        data: mockData,
+      });
+    });
+
+    it("should pass through messages that already have the video frame shape", () => {
+      expect(toCompressedVideoFrame(compressedVideo)).toBe(compressedVideo);
+      expect(toCompressedVideoFrame(compressedImage)).toBe(compressedImage);
     });
   });
 });

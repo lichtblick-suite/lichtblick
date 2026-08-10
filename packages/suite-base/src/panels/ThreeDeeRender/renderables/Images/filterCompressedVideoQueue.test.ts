@@ -10,6 +10,7 @@ import H265FrameBuilder from "@lichtblick/suite-base/testing/builders/H265FrameB
 
 import { CompressedVideo } from "./ImageTypes";
 import { filterCompressedVideoQueue } from "./filterCompressedVideoQueue";
+import { CompressedImage as RosCompressedImage } from "../../ros";
 
 function videoMessageEvent(
   topic: string,
@@ -166,6 +167,31 @@ describe("filterCompressedVideoQueue", () => {
     // Both /h264 and /h265 keep from their latest keyframe onward. The pre-keyframe h264Delta1
     // is dropped; everything else survives. Output stays sorted by original arrival order.
     expect(result).toEqual([h265Key, h264Key, h265Delta1, h264Delta2, h265Delta2]);
+  });
+
+  it("keeps the GOP for a stream published as sensor_msgs/CompressedImage", () => {
+    // The same encoded stream can arrive on a ROS schema, where time and frame live in `header`.
+    // Only `format` and `data` matter for GOP decisions, so those topics get the same treatment
+    // instead of being trimmed to the latest frame and losing the reference chain.
+    const rosFrame = (data: number[], receiveSec: number): MessageEvent<RosCompressedImage> => ({
+      topic: "/head/camera/color",
+      schemaName: "sensor_msgs/CompressedImage",
+      message: {
+        header: { stamp: { sec: receiveSec, nsec: 0 }, frame_id: "camera" },
+        format: "h264",
+        data: new Uint8Array(data),
+      },
+      receiveTime: { sec: receiveSec, nsec: 0 },
+      sizeInBytes: data.length,
+    });
+
+    const olderDelta = rosFrame([0x00, 0x00, 0x00, 0x01, 0x41], 1);
+    const key = rosFrame([0x00, 0x00, 0x00, 0x01, 0x65], 2);
+    const delta = rosFrame([0x00, 0x00, 0x00, 0x01, 0x41], 3);
+
+    const result = filterCompressedVideoQueue([olderDelta, key, delta]);
+
+    expect(result).toEqual([key, delta]);
   });
 
   it("does not mutate the input array", () => {

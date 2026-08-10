@@ -13,8 +13,13 @@ import { MessageEvent } from "@lichtblick/suite";
 import { CompressedVideo } from "./ImageTypes";
 import { isCompressedVideoKeyframe } from "./decodeImage";
 
+/** Minimum shape needed to recognize an encoded frame, shared by every schema that can carry one. */
+type EncodedFrame = Pick<CompressedVideo, "format" | "data">;
+
 /**
- * Filters the per-frame queue for the `CompressedVideo` subscription.
+ * Filters the per-frame queue for a subscription that can deliver encoded video frames. That is
+ * `foxglove.CompressedVideo`, but also `sensor_msgs/CompressedImage` and `foxglove.CompressedImage`,
+ * which carry encoded streams in the wild by naming a codec in `format`.
  *
  * Codecs whose delta frames depend on a preceding GOP (H.264 and H.265) need the entire chain
  * from the most recent keyframe through the latest delta preserved — dropping older queued frames
@@ -27,24 +32,24 @@ import { isCompressedVideoKeyframe } from "./decodeImage";
  * The relative order of the kept messages is preserved so downstream handlers see the stream in
  * the same order it arrived.
  */
-export function filterCompressedVideoQueue(
-  msgs: MessageEvent<CompressedVideo>[],
-): MessageEvent<CompressedVideo>[] {
+export function filterCompressedVideoQueue<T extends EncodedFrame>(
+  msgs: MessageEvent<T>[],
+): MessageEvent<T>[] {
   if (msgs.length <= 1) {
     return msgs;
   }
 
-  const originalIndex = new Map<MessageEvent<CompressedVideo>, number>();
+  const originalIndex = new Map<MessageEvent<T>, number>();
   msgs.forEach((msg, index) => originalIndex.set(msg, index));
 
   const msgsByTopic = _.groupBy(msgs, (msg) => msg.topic);
-  const kept: MessageEvent<CompressedVideo>[] = Object.values(msgsByTopic).flatMap(filterTopic);
+  const kept: MessageEvent<T>[] = Object.values(msgsByTopic).flatMap(filterTopic);
 
   kept.sort((a, b) => (originalIndex.get(a) ?? 0) - (originalIndex.get(b) ?? 0));
   return kept;
 }
 
-function filterTopic(topicMsgs: MessageEvent<CompressedVideo>[]): MessageEvent<CompressedVideo>[] {
+function filterTopic<T extends EncodedFrame>(topicMsgs: MessageEvent<T>[]): MessageEvent<T>[] {
   const latest = topicMsgs.at(-1);
   if (latest == undefined) {
     return [];
@@ -62,10 +67,10 @@ function filterTopic(topicMsgs: MessageEvent<CompressedVideo>[]): MessageEvent<C
  * can be replayed. If we never find one in the queue, keep the entire topic queue — the next
  * keyframe will arrive eventually and we want the intervening frames available.
  */
-function keepFromLatestKeyframe(
-  topicMsgs: MessageEvent<CompressedVideo>[],
+function keepFromLatestKeyframe<T extends EncodedFrame>(
+  topicMsgs: MessageEvent<T>[],
   codec: VideoCodec,
-): MessageEvent<CompressedVideo>[] {
+): MessageEvent<T>[] {
   let keyIndex = -1;
   for (let i = topicMsgs.length - 1; i >= 0; i--) {
     if (isCompressedVideoKeyframe(topicMsgs[i]!.message, codec)) {

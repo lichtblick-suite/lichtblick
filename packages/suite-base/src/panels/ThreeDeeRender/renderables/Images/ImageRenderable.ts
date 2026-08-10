@@ -30,7 +30,7 @@ import { WorkerImageDecoder } from "@lichtblick/suite-base/panels/ThreeDeeRender
 import { projectPixel } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/projections";
 import { RosValue } from "@lichtblick/suite-base/players/types";
 
-import { AnyImage, CompressedVideo } from "./ImageTypes";
+import { AnyImage, CompressedVideo, toCompressedVideoFrame } from "./ImageTypes";
 import {
   decodeCompressedImageToBitmap,
   decodeCompressedVideoToBitmap,
@@ -289,7 +289,8 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     this.userData.image = image;
 
     const seq = ++this.#receivedImageSequenceNumber;
-    const incomingFormat = "format" in image ? image.format : undefined;
+    const compressedImage = "format" in image ? image : undefined;
+    const incomingFormat = compressedImage?.format;
     const incomingCodec =
       incomingFormat == undefined ? undefined : this.#cachedCanonicalCodec(incomingFormat);
     const incomingVideoFormat = incomingCodec == undefined ? undefined : incomingFormat;
@@ -298,8 +299,8 @@ export class ImageRenderable extends Renderable<ImageUserData> {
     }
     const codec = this.#codec;
 
-    if (codec != undefined) {
-      const videoImage = image as CompressedVideo;
+    if (codec != undefined && compressedImage != undefined) {
+      const videoImage = toCompressedVideoFrame(compressedImage);
       const messageTime = toNanoSec(videoImage.timestamp);
       // Duplicate exact-timestamp resubmission — `expandVideoSeekBackfill` can include the
       // already-delivered target frame alongside its preceding GOP. Suppress the redundant decode.
@@ -668,7 +669,7 @@ export class ImageRenderable extends Renderable<ImageUserData> {
       if (this.#codec == undefined) {
         return await decodeCompressedImageToBitmap(image, resizeWidth);
       } else {
-        const frameMsg = image as CompressedVideo;
+        const frameMsg = toCompressedVideoFrame(image);
 
         if (frameMsg.data.byteLength === 0) {
           const error = "Empty video frame";

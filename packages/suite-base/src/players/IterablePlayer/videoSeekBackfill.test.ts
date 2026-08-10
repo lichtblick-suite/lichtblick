@@ -21,18 +21,42 @@ afterEach(() => {
 });
 
 describe("needsGopBackfill", () => {
-  it("rejects messages with the wrong schema name", () => {
+  it("accepts an encoded stream regardless of the schema carrying it", () => {
+    // Encoded video is commonly published as sensor_msgs/CompressedImage with a codec format. A
+    // seek into such a topic needs the same GOP backfill as foxglove.CompressedVideo, so the frame
+    // is recognized by its payload rather than by schema name.
     // Given
-    const message = MessageEventBuilder.messageEvent({
+    const rosCompressedImage = MessageEventBuilder.messageEvent({
       topic: "video",
-      schemaName: "something.else",
+      schemaName: "sensor_msgs/CompressedImage",
       receiveTime: { sec: 0, nsec: 0 },
-      message: { format: "h265", data: new Uint8Array([0x01]) },
+      message: {
+        header: { stamp: { sec: 0, nsec: 0 }, frame_id: "camera" },
+        format: "h264",
+        data: new Uint8Array([0x01]),
+      },
       sizeInBytes: 1,
     });
 
     // When
-    const result = needsGopBackfill(message);
+    const result = needsGopBackfill(rosCompressedImage);
+
+    // Then
+    expect(result).toBe(true);
+  });
+
+  it("rejects messages that do not carry an encoded frame", () => {
+    // Given
+    const notAFrame = MessageEventBuilder.messageEvent({
+      topic: "/diagnostics",
+      schemaName: "something.else",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { level: 1, name: "sensor" },
+      sizeInBytes: 1,
+    });
+
+    // When
+    const result = needsGopBackfill(notAFrame);
 
     // Then
     expect(result).toBe(false);

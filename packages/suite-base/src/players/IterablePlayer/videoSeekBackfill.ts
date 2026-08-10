@@ -12,7 +12,6 @@ import {
 } from "@lichtblick/den/video";
 import { compare, fromNanoSec, toNanoSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
-import { COMPRESSED_VIDEO_DATATYPES } from "@lichtblick/suite-base/util/foxgloveSchemas";
 
 import { GetBackfillMessagesArgs } from "./IIterableSource";
 
@@ -26,20 +25,22 @@ type CompressedVideoLike = {
 export type GetBackfillMessages = (args: GetBackfillMessagesArgs) => Promise<MessageEvent[]>;
 
 /**
- * Returns true for a `foxglove.CompressedVideo` message whose codec can only be decoded by
- * replaying the full GOP (the keyframe and every frame after it). H.264 and H.265 both qualify:
- * a seek that lands on a P/B-frame is not decodable without the preceding keyframe and every
- * intervening delta frame, regardless of whether the renderable serializes its decoder
- * submissions at playback time. The codec decision is delegated to
- * {@link videoCodecNeedsSeekBackfill} so this stays codec-agnostic.
+ * Returns true for an encoded video frame whose codec can only be decoded by replaying the full
+ * GOP (the keyframe and every frame after it). H.264 and H.265 both qualify: a seek that lands on
+ * a P/B-frame is not decodable without the preceding keyframe and every intervening delta frame,
+ * regardless of whether the renderable serializes its decoder submissions at playback time. The
+ * codec decision is delegated to {@link videoCodecNeedsSeekBackfill} so this stays codec-agnostic.
+ *
+ * Recognition is by payload rather than by schema name: `foxglove.CompressedVideo` is the schema
+ * designed for this, but encoded streams are also published as `sensor_msgs/CompressedImage` with
+ * a codec `format`, and those need the same backfill to survive a seek. A byte payload plus a
+ * `format` naming a video codec identifies a frame unambiguously enough, and the cost of a false
+ * positive is one wasted backfill read rather than a decode error.
  */
 export function needsGopBackfill(message: MessageEvent): boolean {
-  if (!COMPRESSED_VIDEO_DATATYPES.has(message.schemaName)) {
-    return false;
-  }
-  const video = message.message as CompressedVideoLike;
+  const video = message.message as CompressedVideoLike | undefined;
   return (
-    video.data instanceof Uint8Array &&
+    video?.data instanceof Uint8Array &&
     videoCodecNeedsSeekBackfill(canonicalVideoCodec(video.format ?? ""))
   );
 }

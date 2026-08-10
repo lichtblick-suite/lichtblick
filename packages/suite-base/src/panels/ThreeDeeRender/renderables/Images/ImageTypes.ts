@@ -48,3 +48,24 @@ export function getTimestampFromImage(image: AnyImage): Time {
     return image.timestamp;
   }
 }
+
+/**
+ * Adapts any compressed image message to the `CompressedVideo` shape the video decode path works
+ * with. Encoded video streams are routed there purely by codec `format`, and `sensor_msgs/
+ * CompressedImage` is commonly published with such a format even though it keeps its time and
+ * frame in `header`. Every consumer of a video frame must go through this so no code path reads
+ * `timestamp`/`frame_id` off a message that does not have them.
+ */
+export function toCompressedVideoFrame(
+  image: CompressedImageTypes | CompressedVideo,
+): CompressedVideo {
+  if (!("header" in image)) {
+    return image;
+  }
+  return {
+    timestamp: image.header.stamp,
+    frame_id: image.header.frame_id,
+    data: image.data,
+    format: image.format,
+  };
+}

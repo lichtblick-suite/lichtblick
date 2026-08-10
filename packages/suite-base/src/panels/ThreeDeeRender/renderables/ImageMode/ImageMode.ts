@@ -250,7 +250,7 @@ export class ImageMode
         subscription: {
           handler: this.messageHandler.handleRosCompressedImage,
           shouldSubscribe: this.imageShouldSubscribe,
-          filterQueue: this.#filterMessageQueue.bind(this),
+          filterQueue: this.#filterEncodedFrameQueue.bind(this),
         },
       },
       {
@@ -268,7 +268,7 @@ export class ImageMode
         subscription: {
           handler: this.messageHandler.handleCompressedImage,
           shouldSubscribe: this.imageShouldSubscribe,
-          filterQueue: this.#filterMessageQueue.bind(this),
+          filterQueue: this.#filterEncodedFrameQueue.bind(this),
         },
       },
       {
@@ -277,7 +277,7 @@ export class ImageMode
         subscription: {
           handler: this.messageHandler.handleCompressedVideo,
           shouldSubscribe: this.imageShouldSubscribe,
-          filterQueue: this.#filterCompressedVideoMessageQueue.bind(this),
+          filterQueue: this.#filterEncodedFrameQueue.bind(this),
         },
       },
     ];
@@ -293,15 +293,16 @@ export class ImageMode
   }
 
   /**
-   * Compressed video filter: same shape as `#filterMessageQueue` but aware that HEVC P-frames
+   * Encoded frame filter: same shape as `#filterMessageQueue` but aware that HEVC P-frames
    * cannot be dropped without losing decodability. When synchronization is on we keep every
    * message (sync needs the full timeline); when it is off we delegate to
    * {@link filterCompressedVideoQueue}, which trims to the latest frame for non-HEVC topics and
-   * to the active GOP for HEVC topics.
+   * to the active GOP for HEVC topics. Used for every subscription that can deliver an encoded
+   * stream, including the compressed image schemas that carry one when `format` names a codec.
    */
-  #filterCompressedVideoMessageQueue(
-    msgs: MessageEvent<CompressedVideo>[],
-  ): MessageEvent<CompressedVideo>[] {
+  #filterEncodedFrameQueue<T extends Pick<CompressedVideo, "format" | "data">>(
+    msgs: MessageEvent<T>[],
+  ): MessageEvent<T>[] {
     if (this.getImageModeSettings().synchronize) {
       return msgs;
     }

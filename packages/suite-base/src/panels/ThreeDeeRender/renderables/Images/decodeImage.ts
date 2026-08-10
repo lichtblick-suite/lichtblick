@@ -51,7 +51,7 @@ export async function decodeCompressedImageToBitmap(
 }
 
 export function isCompressedVideoKeyframe(
-  frameMsg: CompressedVideo,
+  frameMsg: Pick<CompressedVideo, "format" | "data">,
   resolvedCodec?: VideoCodec,
 ): boolean {
   return isVideoKeyframe(frameMsg.format, frameMsg.data, resolvedCodec);
