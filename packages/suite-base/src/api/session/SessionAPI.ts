@@ -6,7 +6,7 @@ import HttpService from "@lichtblick/suite-base/services/http/HttpService";
 import { SessionMcap, SessionResponse } from "./types";
 
 export class SessionAPI {
-  public readonly sessionPath = "session";
+  public readonly sessionPath = "mcap-bundle";
   public async getSession(sessionId: string, signal?: AbortSignal): Promise<SessionMcap[]> {
     const { data } = await HttpService.get<SessionResponse>(
       `${this.sessionPath}/${sessionId}`,
