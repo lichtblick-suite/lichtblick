@@ -3625,7 +3625,7 @@ __metadata:
     css-loader: "npm:6.8.1"
     cytoscape: "npm:3.31.1"
     cytoscape-dagre: "npm:2.5.0"
-    dompurify: "npm:3.4.12"
+    dompurify: "npm:3.4.13"
     dotenv: "npm:17.2.2"
     esbuild-loader: "npm:4.3.0"
     eventemitter3: "npm:5.0.1"
