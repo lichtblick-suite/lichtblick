@@ -543,17 +543,19 @@ describe("ImageRenderable error handling", () => {
       data,
     });
 
-    renderable.setImage(rosFrame(h265Keyframe, { sec: 8, nsec: 0 }));
-    renderable.setImage(rosFrame(h265DeltaFrame, { sec: 8, nsec: 16_666_666 }));
-    renderable.flushPendingDecodes();
-    await renderable.settleVideoDecodes();
+    try {
+      renderable.setImage(rosFrame(h265Keyframe, { sec: 8, nsec: 0 }));
+      renderable.setImage(rosFrame(h265DeltaFrame, { sec: 8, nsec: 16_666_666 }));
+      renderable.flushPendingDecodes();
+      await renderable.settleVideoDecodes();
 
-    // Presentation timestamps are relative to the first frame, so a stamp-derived time gives
-    // 0 then 16666 microseconds. Any other origin means the header stamp was not used.
-    expect(decode).toHaveBeenNthCalledWith(1, expect.any(Uint8Array), 0, "key");
-    expect(decode).toHaveBeenNthCalledWith(2, expect.any(Uint8Array), 16666, "delta");
-
-    self.createImageBitmap = originalCreateImageBitmap;
+      // Presentation timestamps are relative to the first frame, so a stamp-derived time gives
+      // 0 then 16666 microseconds. Any other origin means the header stamp was not used.
+      expect(decode).toHaveBeenNthCalledWith(1, expect.any(Uint8Array), 0, "key");
+      expect(decode).toHaveBeenNthCalledWith(2, expect.any(Uint8Array), 16666, "delta");
+    } finally {
+      self.createImageBitmap = originalCreateImageBitmap;
+    }
   });
 
   it("should decode every pending h265 frame in order", async () => {

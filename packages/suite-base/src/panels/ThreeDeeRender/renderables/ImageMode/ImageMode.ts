@@ -293,12 +293,12 @@ export class ImageMode
   }
 
   /**
-   * Encoded frame filter: same shape as `#filterMessageQueue` but aware that HEVC P-frames
-   * cannot be dropped without losing decodability. When synchronization is on we keep every
-   * message (sync needs the full timeline); when it is off we delegate to
-   * {@link filterCompressedVideoQueue}, which trims to the latest frame for non-HEVC topics and
-   * to the active GOP for HEVC topics. Used for every subscription that can deliver an encoded
-   * stream, including the compressed image schemas that carry one when `format` names a codec.
+   * Encoded frame filter: same shape as `#filterMessageQueue` but aware that the delta frames of
+   * an inter-frame codec cannot be dropped without losing decodability. When synchronization is on
+   * we keep every message (sync needs the full timeline); when it is off we delegate to
+   * {@link filterCompressedVideoQueue}, which keeps the active GOP for both H.264 and H.265 topics
+   * and trims to the latest frame for topics whose `format` names no codec. Used for every
+   * subscription that can deliver an encoded stream, including the compressed image schemas.
    */
   #filterEncodedFrameQueue<T extends Pick<CompressedVideo, "format" | "data">>(
     msgs: MessageEvent<T>[],
