@@ -4,12 +4,12 @@
 import HttpService from "@lichtblick/suite-base/services/http/HttpService";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import { SessionAPI } from "./SessionAPI";
+import { McapBundleAPI } from "./McapBundleAPI";
 
 jest.mock("@lichtblick/suite-base/services/http/HttpService");
 
-describe("SessionAPI", () => {
-  let sessionApi: SessionAPI;
+describe("McapBundleAPI", () => {
+  let mcapBundleApi: McapBundleAPI;
 
   const createMockHttpResponse = <T>(data: T) => ({
     data,
@@ -18,13 +18,13 @@ describe("SessionAPI", () => {
   });
 
   beforeEach(() => {
-    sessionApi = new SessionAPI();
+    mcapBundleApi = new McapBundleAPI();
     jest.clearAllMocks();
   });
 
-  describe("getSession", () => {
+  describe("getMcapBundle", () => {
     it("should fetch and return session mcap URLs", async () => {
-      const sessionId = BasicBuilder.string();
+      const mcapBundleId = BasicBuilder.string();
       const mockMcaps = [
         { url: `https://${BasicBuilder.string()}.com/file1.mcap`, metadata: {} },
         { url: `https://${BasicBuilder.string()}.com/file2.mcap`, metadata: { size: 1024 } },
@@ -34,20 +34,24 @@ describe("SessionAPI", () => {
       const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse({ mcaps: mockMcaps }));
       mockHttpService.get = mockGet;
 
-      const result = await sessionApi.getSession(sessionId);
+      const result = await mcapBundleApi.getMcapBundle(mcapBundleId);
 
-      expect(mockGet).toHaveBeenCalledWith(`mcap-bundle/${sessionId}`, {}, { signal: undefined });
+      expect(mockGet).toHaveBeenCalledWith(
+        `mcap-bundle/${mcapBundleId}`,
+        {},
+        { signal: undefined },
+      );
       expect(result).toEqual(mockMcaps);
     });
 
     it("should handle empty mcaps list", async () => {
-      const sessionId = BasicBuilder.string();
+      const mcapBundleId = BasicBuilder.string();
 
       const mockHttpService = jest.mocked(HttpService);
       const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse({ mcaps: [] }));
       mockHttpService.get = mockGet;
 
-      const result = await sessionApi.getSession(sessionId);
+      const result = await mcapBundleApi.getMcapBundle(mcapBundleId);
 
       expect(result).toEqual([]);
     });
@@ -55,14 +59,16 @@ describe("SessionAPI", () => {
 
   describe("error handling", () => {
     it("should propagate HTTP errors", async () => {
-      const sessionId = BasicBuilder.string();
+      const mcapBundleId = BasicBuilder.string();
       const mockError = new Error("HTTP Error: 404 Not Found");
 
       const mockHttpService = jest.mocked(HttpService);
       const mockGet = jest.fn().mockRejectedValue(mockError);
       mockHttpService.get = mockGet;
 
-      await expect(sessionApi.getSession(sessionId)).rejects.toThrow("HTTP Error: 404 Not Found");
+      await expect(mcapBundleApi.getMcapBundle(mcapBundleId)).rejects.toThrow(
+        "HTTP Error: 404 Not Found",
+      );
     });
   });
 });
