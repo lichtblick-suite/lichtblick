@@ -517,6 +517,23 @@ export type PanelExtensionContext = {
   unstable_subscribeMessageRange: (args: SubscribeMessageRangeArgs) => () => void;
 
   /**
+   * Reads the most recent message on `topic` at or before `time`, without moving the playback
+   * cursor and without affecting `currentFrame`, `didSeek`, or any other panel's subscriptions.
+   *
+   * Unlike `subscribe()` + `watch("currentFrame")` or `seekPlayback()`, this does not depend on
+   * shared playback state, so multiple calls — including concurrent calls issued via
+   * `Promise.all()` for different topics or timestamps — are fully independent of each other and
+   * of the current playback position.
+   *
+   * Note: This functionality is unavailable for real-time data sources, including foxglove_bridge,
+   * rosbridge, or ROS 1 native connections. For such sources this resolves to `undefined`.
+   *
+   * @returns The message at or before `time`, or `undefined` if none exists or the active data
+   * source does not support point-in-time queries.
+   */
+  unstable_getMessageAtTime?: (topic: string, time: Time) => Promise<MessageEvent | undefined>;
+
+  /**
    * Returns the schema definition for a given topic, without requiring a subscription or reading
    * any message data. Useful for inspecting message field structure (e.g. building field path
    * selectors) at panel initialization time.
