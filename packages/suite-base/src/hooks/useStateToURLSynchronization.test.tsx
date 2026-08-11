@@ -83,11 +83,11 @@ describe("useStateToURLSynchronization", () => {
     );
   });
 
-  it("suppresses ds param writeback when sessionid is present in the URL", () => {
+  it("suppresses ds param writeback when mcap-bundle is present in the URL", () => {
     const spy = jest.spyOn(window.history, "replaceState");
 
-    // Set the URL to include sessionid
-    window.history.pushState({}, "", "http://localhost/?sessionid=test-session-123");
+    // Set the URL to include mcap-bundle
+    window.history.pushState({}, "", "http://localhost/?mcap-bundle=test-session-123");
 
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
       selector({
@@ -115,5 +115,39 @@ describe("useStateToURLSynchronization", () => {
     const lastCallUrl = calls[calls.length - 1]?.[2] as string | undefined;
     expect(lastCallUrl).not.toContain("ds=remote-file");
     expect(lastCallUrl).not.toContain("ds.url=");
+  });
+
+  it("writes ds params when mcap-bundle is present but empty in the URL", () => {
+    const spy = jest.spyOn(window.history, "replaceState");
+
+    // Set the URL to include an empty mcap-bundle value
+    window.history.pushState({}, "", "http://localhost/?mcap-bundle=");
+
+    (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
+      selector({
+        playerState: {
+          activeData: {
+            currentTime: { sec: 5, nsec: 0 },
+          },
+          capabilities: ["playbackControl"],
+          urlState: {
+            sourceId: "remote-file",
+            parameters: { url: "http://example.com/file.mcap" },
+          },
+        },
+      }),
+    );
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <EventsProvider>{children}</EventsProvider>
+    );
+
+    renderHook(useStateToURLSynchronization, { wrapper });
+
+    // Should write ds params normally since mcap-bundle has no value
+    const calls = spy.mock.calls;
+    const lastCallUrl = calls[calls.length - 1]?.[2] as string | undefined;
+    expect(lastCallUrl).toContain("ds=remote-file");
+    expect(lastCallUrl).toContain("ds.url=");
   });
 });
