@@ -244,6 +244,89 @@ describe("UserScriptPlayer", () => {
       userScriptPlayer.publish(publishPayload);
       expect(fakePlayer.publish).toHaveBeenCalledWith(publishPayload);
     });
+
+    it("should pass through backfill lookups for real topics when requested", async () => {
+      // GIVEN - a player with an initialized script and a real input topic
+      const fakePlayer = new FakePlayer() as FakePlayer & {
+        getBackfillMessages: jest.Mock;
+      };
+      const backfillMessage = {
+        topic: "/np_input",
+        receiveTime: { sec: 0, nsec: 1 },
+        message: {
+          payload: "baz",
+        },
+        schemaName: "foo",
+        sizeInBytes: 0,
+      };
+      fakePlayer.getBackfillMessages = jest.fn().mockResolvedValue([backfillMessage]);
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+      userScriptPlayer.setListener(async () => {
+        // no-op
+      });
+
+      const activeDataWithInput = {
+        ...basicPlayerState,
+        topics: [{ name: "/np_input", schemaName: "foo" }],
+        datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+      };
+
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+      await userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      // WHEN - requesting backfill messages for both the real and virtual topics
+      const result = await userScriptPlayer.getBackfillMessages({
+        topics: new Map([
+          ["/np_input", { topic: "/np_input" }],
+          [`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, { topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1` }],
+        ]),
+        time: { sec: 0, nsec: 1 },
+      });
+
+      // THEN - only the real topic is forwarded to the underlying player
+      expect(fakePlayer.getBackfillMessages).toHaveBeenCalledWith({
+        topics: new Map([["/np_input", { topic: "/np_input" }]]),
+        time: { sec: 0, nsec: 1 },
+      });
+      expect(result).toEqual([backfillMessage]);
+    });
+
+    it("should return no messages when backfill lookups only include virtual topics", async () => {
+      // GIVEN - a player with an initialized script whose output topic is virtual
+      const fakePlayer = new FakePlayer() as FakePlayer & {
+        getBackfillMessages: jest.Mock;
+      };
+      fakePlayer.getBackfillMessages = jest.fn();
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+      userScriptPlayer.setListener(async () => {
+        // no-op
+      });
+
+      const activeDataWithInput = {
+        ...basicPlayerState,
+        topics: [{ name: "/np_input", schemaName: "foo" }],
+        datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
+      };
+
+      await fakePlayer.emit({ activeData: activeDataWithInput });
+      await userScriptPlayer.setUserScripts({
+        nodeId: { name: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, sourceCode: nodeUserCode },
+      });
+
+      // WHEN - requesting backfill messages only for the script output topic
+      const result = await userScriptPlayer.getBackfillMessages({
+        topics: new Map([
+          [`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, { topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1` }],
+        ]),
+        time: { sec: 0, nsec: 1 },
+      });
+
+      // THEN - the request short-circuits without calling the underlying player
+      expect(fakePlayer.getBackfillMessages).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
+    });
   });
 
   describe("resetWorkers", () => {

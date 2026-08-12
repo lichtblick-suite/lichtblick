@@ -191,6 +191,51 @@ describe("IterablePlayer", () => {
     await player.isClosed;
   });
 
+  it("should return backfill messages from the iterable source when requested", async () => {
+    // GIVEN - a source that can resolve backfill messages for a topic
+    const source = new TestSource();
+    const backfillMessage = {
+      topic: "foo",
+      receiveTime: { sec: 0, nsec: 1 },
+      message: undefined,
+      sizeInBytes: 0,
+      schemaName: "foo",
+    };
+    const getBackfillMessagesSpy = jest
+      .spyOn(source, "getBackfillMessages")
+      .mockResolvedValue([backfillMessage]);
+    const player = new IterablePlayer({
+      source,
+      enablePreload: false,
+      sourceId: "test",
+    });
+    const ready = signal();
+    player.setListener(async (state) => {
+      if (state.activeData) {
+        ready.resolve();
+      }
+    });
+
+    // Wait until initialization has populated the message range source.
+    await ready;
+
+    // WHEN - asking the player for a point-in-time backfill lookup
+    const result = await player.getBackfillMessages({
+      topics: new Map([["foo", { topic: "foo" }]]),
+      time: fromSec(1),
+    });
+
+    // THEN - the player delegates to the source and returns the matching messages
+    expect(getBackfillMessagesSpy).toHaveBeenCalledWith({
+      topics: new Map([["foo", { topic: "foo" }]]),
+      time: fromSec(1),
+    });
+    expect(result).toEqual([backfillMessage]);
+
+    player.close();
+    await player.isClosed;
+  });
+
   it("when seeking during a seek backfill, start another seek after the current one exits", async () => {
     const source = new TestSource();
     const player = new IterablePlayer({

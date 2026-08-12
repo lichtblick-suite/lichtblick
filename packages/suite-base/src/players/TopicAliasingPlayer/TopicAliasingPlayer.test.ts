@@ -223,6 +223,30 @@ describe("TopicAliasingPlayer", () => {
     );
   });
 
+  it("should pass through backfill lookups without alias translation when requested", async () => {
+    // GIVEN - a player whose underlying source can answer backfill lookups directly
+    const fakePlayer = new FakePlayer() as FakePlayer & {
+      getBackfillMessages: jest.Mock;
+    };
+    const backfillMessage = mockMessage("message", { topic: "/original_topic_1" });
+    const getBackfillMessagesSpy = jest.fn().mockResolvedValue([backfillMessage]);
+    fakePlayer.getBackfillMessages = getBackfillMessagesSpy;
+    const player = new TopicAliasingPlayer(fakePlayer);
+
+    // WHEN - looking up a backfill message for a topic alias
+    const result = await player.getBackfillMessages({
+      topics: new Map([["/renamed_topic_1", { topic: "/renamed_topic_1" }]]),
+      time: { sec: 0, nsec: 1 },
+    });
+
+    // THEN - the request is forwarded unchanged to the underlying player
+    expect(getBackfillMessagesSpy).toHaveBeenCalledWith({
+      topics: new Map([["/renamed_topic_1", { topic: "/renamed_topic_1" }]]),
+      time: { sec: 0, nsec: 1 },
+    });
+    expect(result).toEqual([backfillMessage]);
+  });
+
   it("provides global variables on startup", async () => {
     const fakePlayer = new FakePlayer();
     const mappers: TopicAliasFunctions = [
