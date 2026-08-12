@@ -327,6 +327,23 @@ describe("UserScriptPlayer", () => {
       expect(fakePlayer.getBackfillMessages).not.toHaveBeenCalled();
       expect(result).toEqual([]);
     });
+
+    it("should return no messages when the wrapped player does not support lookups", async () => {
+      // GIVEN - a script player backed by a player without the optional API
+      const userScriptPlayer = new UserScriptPlayer(new FakePlayer(), defaultUserScriptActions);
+      userScriptPlayer.setListener(async () => {
+        // no-op
+      });
+
+      // WHEN - requesting a lookup for a real topic
+      const result = await userScriptPlayer.getBackfillMessages({
+        topics: new Map([["/np_input", { topic: "/np_input" }]]),
+        time: { sec: 0, nsec: 1 },
+      });
+
+      // THEN - the script player reports that no messages are available
+      expect(result).toEqual([]);
+    });
   });
 
   describe("resetWorkers", () => {

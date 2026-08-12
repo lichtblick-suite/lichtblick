@@ -236,6 +236,27 @@ describe("IterablePlayer", () => {
     await player.isClosed;
   });
 
+  it("should return no backfill messages before the range source is initialized", async () => {
+    // GIVEN - a player whose asynchronous initialization has not completed
+    const player = new IterablePlayer({
+      source: new TestSource(),
+      enablePreload: false,
+      sourceId: "test",
+    });
+
+    // WHEN - requesting a point-in-time backfill lookup immediately
+    const result = await player.getBackfillMessages({
+      topics: new Map([["foo", { topic: "foo" }]]),
+      time: fromSec(1),
+    });
+
+    // THEN - the player reports that there are no available messages yet
+    expect(result).toEqual([]);
+
+    player.close();
+    await player.isClosed;
+  });
+
   it("when seeking during a seek backfill, start another seek after the current one exits", async () => {
     const source = new TestSource();
     const player = new IterablePlayer({

@@ -247,6 +247,20 @@ describe("TopicAliasingPlayer", () => {
     expect(result).toEqual([backfillMessage]);
   });
 
+  it("should return no backfill messages when the wrapped player does not support lookups", async () => {
+    // GIVEN - a wrapped player without the optional backfill API
+    const player = new TopicAliasingPlayer(new FakePlayer());
+
+    // WHEN - requesting a point-in-time backfill lookup
+    const result = await player.getBackfillMessages({
+      topics: new Map([["/topic", { topic: "/topic" }]]),
+      time: { sec: 0, nsec: 1 },
+    });
+
+    // THEN - the wrapper reports that no messages are available
+    expect(result).toEqual([]);
+  });
+
   it("provides global variables on startup", async () => {
     const fakePlayer = new FakePlayer();
     const mappers: TopicAliasFunctions = [
