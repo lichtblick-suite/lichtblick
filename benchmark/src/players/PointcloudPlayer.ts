@@ -9,20 +9,10 @@ import Log from "@lichtblick/log";
 import * as rostime from "@lichtblick/rostime";
 import { Time } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
-import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-import {
-  AdvertiseOptions,
-  Player,
-  PlayerPresence,
-  PlayerState,
-  PublishPayload,
-  SubscribePayload,
-  Topic,
-  TopicStats,
-} from "@lichtblick/suite-base/players/types";
+import { Player, PlayerPresence, Topic, TopicStats } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
+import { BenchmarkPlayerBase } from "./BenchmarkPlayerBase";
 import { BenchmarkStats } from "../BenchmarkStats";
 
 const log = Log.getLogger(__filename);
@@ -112,13 +102,13 @@ function makePointCloud(stamp: rostime.Time): FoxglovePointCloud {
   };
 }
 
-class PointcloudPlayer implements Player {
+class PointcloudPlayer extends BenchmarkPlayerBase implements Player {
   #name: string = "pointcloud";
   #startTime: Time = rostime.fromDate(new Date());
-  #listener?: (state: PlayerState) => Promise<void>;
   #datatypes: RosDatatypes = new Map();
 
   public constructor() {
+    super();
     this.#datatypes.set("Time", {
       definitions: [
         {
@@ -153,38 +143,8 @@ class PointcloudPlayer implements Player {
     });
   }
 
-  public getBatchIterator(
-    _topic: string,
-  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
-    return undefined;
-  }
-
-  public setListener(listener: (state: PlayerState) => Promise<void>): void {
-    this.#listener = listener;
-    void this.#run();
-  }
-  public close(): void {
-    // no-op
-  }
-  public setSubscriptions(_subscriptions: SubscribePayload[]): void {}
-  public setPublishers(_publishers: AdvertiseOptions[]): void {
-    // no-op
-  }
-  public setParameter(_key: string, _value: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  public publish(_request: PublishPayload): void {
-    throw new Error("Method not implemented.");
-  }
-  public async callService(_service: string, _request: unknown): Promise<unknown> {
-    throw new Error("Method not implemented.");
-  }
-  public setGlobalVariables(_globalVariables: GlobalVariables): void {
-    // no-op
-  }
-
-  async #run() {
-    const listener = this.#listener;
+  protected async run(): Promise<void> {
+    const listener = this.listener;
     if (!listener) {
       throw new Error("Invariant: listener is not set");
     }

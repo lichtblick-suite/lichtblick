@@ -11,22 +11,12 @@ import Log from "@lichtblick/log";
 import * as rostime from "@lichtblick/rostime";
 import { Time } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
-import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-import {
-  AdvertiseOptions,
-  Player,
-  PlayerPresence,
-  PlayerState,
-  PublishPayload,
-  SubscribePayload,
-  Topic,
-  TopicStats,
-} from "@lichtblick/suite-base/players/types";
+import { Player, PlayerPresence, Topic, TopicStats } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 import { Quaternion } from "@lichtblick/suite-base/util/geometry";
 
+import { BenchmarkPlayerBase } from "./BenchmarkPlayerBase";
 import { now } from "./time";
 import { BenchmarkStats } from "../BenchmarkStats";
 
@@ -35,50 +25,20 @@ const log = Log.getLogger(__filename);
 const TRANSFORMS_PER_TICK = 50;
 const CAPABILITIES: string[] = [];
 
-class TransformPlayer implements Player {
+class TransformPlayer extends BenchmarkPlayerBase implements Player {
   #name: string = "transform";
-  #listener?: (state: PlayerState) => Promise<void>;
   // basicDatatypes already resolves foxglove.FrameTransform's nested Vector3/Quaternion types
   #datatypes: RosDatatypes = new Map(basicDatatypes);
 
   public constructor() {
+    super();
     if (!this.#datatypes.has("foxglove.FrameTransform")) {
       throw new Error("Invariant: basicDatatypes is missing 'foxglove.FrameTransform'");
     }
   }
 
-  public getBatchIterator(
-    _topic: string,
-  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
-    return undefined;
-  }
-
-  public setListener(listener: (state: PlayerState) => Promise<void>): void {
-    this.#listener = listener;
-    void this.#run();
-  }
-  public close(): void {
-    // no-op
-  }
-  public setSubscriptions(_subscriptions: SubscribePayload[]): void {}
-  public setPublishers(_publishers: AdvertiseOptions[]): void {
-    // no-op
-  }
-  public setParameter(_key: string, _value: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  public publish(_request: PublishPayload): void {
-    throw new Error("Method not implemented.");
-  }
-  public async callService(_service: string, _request: unknown): Promise<unknown> {
-    throw new Error("Method not implemented.");
-  }
-  public setGlobalVariables(_globalVariables: GlobalVariables): void {
-    // no-op
-  }
-
-  async #run() {
-    const listener = this.#listener;
+  protected async run(): Promise<void> {
+    const listener = this.listener;
     if (!listener) {
       throw new Error("Invariant: listener is not set");
     }
