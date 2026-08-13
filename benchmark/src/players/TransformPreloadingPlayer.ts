@@ -26,6 +26,7 @@ import {
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 import delay from "@lichtblick/suite-base/util/delay";
 
 const log = Log.getLogger(__filename);
@@ -35,30 +36,14 @@ const CAPABILITIES: string[] = [PLAYER_CAPABILITIES.playbackControl];
 class TransformPreloadingPlayer implements Player {
   #name: string = "transformpreloading";
   #listener?: (state: PlayerState) => Promise<void>;
-  #datatypes: RosDatatypes = new Map();
+  // basicDatatypes already resolves foxglove.FrameTransform's nested Vector3/Quaternion types
+  #datatypes: RosDatatypes = new Map(basicDatatypes);
   #startTime: Time;
   #endTime: Time;
   #topicStats: Map<string, TopicStats>;
   #topics: Topic[];
 
   public constructor() {
-    this.#datatypes.set("Time", {
-      definitions: [
-        { name: "sec", type: "uint32" },
-        { name: "nsec", type: "uint32" },
-      ],
-    });
-
-    this.#datatypes.set("foxglove.FrameTransform", {
-      name: "foxglove.FrameTransform",
-      definitions: [
-        { name: "timestamp", type: "Time", isComplex: true },
-        { name: "parent_frame_id", type: "string" },
-        { name: "child_frame_id", type: "string" },
-        { name: "translation", type: "Vector3", isComplex: true },
-        { name: "rotation", type: "Quaternion", isComplex: true },
-      ],
-    });
     this.#startTime = { sec: 0, nsec: 0 };
     this.#endTime = { sec: 600, nsec: 0 };
 
@@ -122,7 +107,7 @@ class TransformPreloadingPlayer implements Player {
     throw new Error("Method not implemented.");
   }
   public setGlobalVariables(_globalVariables: GlobalVariables): void {
-    throw new Error("Method not implemented.");
+    // no-op
   }
 
   async #run() {

@@ -77,7 +77,7 @@ class BenchmarkPlayer implements Player {
     throw new Error("Method not implemented.");
   }
   public setGlobalVariables(_globalVariables: GlobalVariables): void {
-    throw new Error("Method not implemented.");
+    // no-op
   }
 
   async #run() {

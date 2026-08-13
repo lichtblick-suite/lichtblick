@@ -24,6 +24,7 @@ import {
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 import { Quaternion } from "@lichtblick/suite-base/util/geometry";
 
 import { now } from "./time";
@@ -37,27 +38,8 @@ const CAPABILITIES: string[] = [];
 class TransformPlayer implements Player {
   #name: string = "transform";
   #listener?: (state: PlayerState) => Promise<void>;
-  #datatypes: RosDatatypes = new Map();
-
-  public constructor() {
-    this.#datatypes.set("Time", {
-      definitions: [
-        { name: "sec", type: "uint32" },
-        { name: "nsec", type: "uint32" },
-      ],
-    });
-
-    this.#datatypes.set("foxglove.FrameTransform", {
-      name: "foxglove.FrameTransform",
-      definitions: [
-        { name: "timestamp", type: "Time", isComplex: true },
-        { name: "parent_frame_id", type: "string" },
-        { name: "child_frame_id", type: "string" },
-        { name: "translation", type: "Vector3", isComplex: true },
-        { name: "rotation", type: "Quaternion", isComplex: true },
-      ],
-    });
-  }
+  // basicDatatypes already resolves foxglove.FrameTransform's nested Vector3/Quaternion types
+  #datatypes: RosDatatypes = new Map(basicDatatypes);
 
   public getBatchIterator(
     _topic: string,
@@ -86,7 +68,7 @@ class TransformPlayer implements Player {
     throw new Error("Method not implemented.");
   }
   public setGlobalVariables(_globalVariables: GlobalVariables): void {
-    throw new Error("Method not implemented.");
+    // no-op
   }
 
   async #run() {
