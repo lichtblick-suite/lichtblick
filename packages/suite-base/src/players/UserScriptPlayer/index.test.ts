@@ -26,9 +26,11 @@ import {
   PlayerStateActiveData,
   Topic,
 } from "@lichtblick/suite-base/players/types";
+import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
+import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { UserScript } from "@lichtblick/suite-base/types/panels";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
@@ -252,7 +254,7 @@ describe("UserScriptPlayer", () => {
       };
       const backfillMessage = {
         topic: "/np_input",
-        receiveTime: { sec: 0, nsec: 1 },
+        receiveTime: RosTimeBuilder.time({ sec: 0, nsec: 1 }),
         message: {
           payload: "baz",
         },
@@ -278,17 +280,14 @@ describe("UserScriptPlayer", () => {
 
       // WHEN - requesting backfill messages for both the real and virtual topics
       const result = await userScriptPlayer.getBackfillMessages({
-        topics: new Map([
-          ["/np_input", { topic: "/np_input" }],
-          [`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, { topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1` }],
-        ]),
-        time: { sec: 0, nsec: 1 },
+        topics: mockTopicSelection("/np_input", `${DEFAULT_STUDIO_SCRIPT_PREFIX}1`),
+        time: RosTimeBuilder.time({ sec: 0, nsec: 1 }),
       });
 
       // THEN - only the real topic is forwarded to the underlying player
       expect(fakePlayer.getBackfillMessages).toHaveBeenCalledWith({
-        topics: new Map([["/np_input", { topic: "/np_input" }]]),
-        time: { sec: 0, nsec: 1 },
+        topics: mockTopicSelection("/np_input"),
+        time: RosTimeBuilder.time({ sec: 0, nsec: 1 }),
       });
       expect(result).toEqual([backfillMessage]);
     });
@@ -317,10 +316,8 @@ describe("UserScriptPlayer", () => {
 
       // WHEN - requesting backfill messages only for the script output topic
       const result = await userScriptPlayer.getBackfillMessages({
-        topics: new Map([
-          [`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`, { topic: `${DEFAULT_STUDIO_SCRIPT_PREFIX}1` }],
-        ]),
-        time: { sec: 0, nsec: 1 },
+        topics: mockTopicSelection(`${DEFAULT_STUDIO_SCRIPT_PREFIX}1`),
+        time: RosTimeBuilder.time({ sec: 0, nsec: 1 }),
       });
 
       // THEN - the request short-circuits without calling the underlying player
@@ -337,8 +334,8 @@ describe("UserScriptPlayer", () => {
 
       // WHEN - requesting a lookup for a real topic
       const result = await userScriptPlayer.getBackfillMessages({
-        topics: new Map([["/np_input", { topic: "/np_input" }]]),
-        time: { sec: 0, nsec: 1 },
+        topics: mockTopicSelection("/np_input"),
+        time: RosTimeBuilder.time({ sec: 0, nsec: 1 }),
       });
 
       // THEN - the script player reports that no messages are available

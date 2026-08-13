@@ -91,6 +91,7 @@ describe("PanelExtensionAdapter", () => {
 
     // WHEN - requesting a message while mounted, then after unmounting
     expect(panelContext).toBeDefined();
+    expect(panelContext!.unstable_getMessageAtTime).toBeDefined();
     await expect(
       panelContext!.unstable_getMessageAtTime?.("/topic", { sec: 1, nsec: 0 }),
     ).resolves.toBeUndefined();
