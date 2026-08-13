@@ -54,13 +54,14 @@ IterablePlayer (state machine, tick loop)
 URLs: [url1.mcap, url2.mcap, url3.mcap]
     │
     ▼
-MultiIterableSource (500MB total cache ÷ N sources)
+MultiIterableSource (500MB total cache ÷ N, floored by MIN_CACHE_PER_SOURCE_BYTES)
     │
-    ├── McapIterableSource(url1, ~166MB cache)
-    ├── McapIterableSource(url2, ~166MB cache)
-    └── McapIterableSource(url3, ~166MB cache)
+    ├── shared HydratedSourcePool (bounds resident McapIndexedReaders by count + bytes)
+    │      ├── McapIterableSource(url1, ~166MB cache)
+    │      ├── McapIterableSource(url2, ~166MB cache)
+    │      └── McapIterableSource(url3, ~166MB cache)
     │
-    ▼ (each initialized in parallel)
+    ▼ (each initialized under bounded concurrency)
 mergeSequentialIterators (min-heap, lazy source activation)
     │
     ▼
@@ -83,6 +84,9 @@ WorkerSerializedIterableSource → BufferedIterableSource → Player
 | `IterablePlayer/Mcap/BatchingReadable.ts` | Coalesces nearby `IReadable.read()` calls into fewer, larger reads |
 | `IterablePlayer/Mcap/McapIterableSource.ts` | Factory: indexed vs streaming decision |
 | `IterablePlayer/Mcap/McapIndexedIterableSource.ts` | Random access via chunk indexes |
+| `IterablePlayer/Mcap/readerWeight.ts` | Heuristic byte-weight estimate for a `McapIndexedReader`, used as the pool's `weigh()` hook |
+| `IterablePlayer/shared/HydratedSourcePool.ts` | Bounded LRU pool of resident heavyweight per-file readers (byte + count budget) |
+| `IterablePlayer/shared/multiFileHydrationOptions.ts` | Shared hydration-override merging (`maxHydratedSources`/`maxHydratedBytes`/`initConcurrency`), used by both data source factories and the MCAP worker |
 | `IterablePlayer/shared/MultiIterableSource.ts` | Multi-file orchestration |
 | `IterablePlayer/shared/utils/mergeSequentialIterators.ts` | Heap-based lazy iterator merge |
 | `IterablePlayer/shared/utils/sourceTimeOverlap.ts` | Time range filtering |
@@ -124,8 +128,40 @@ WorkerSerializedIterableSource → BufferedIterableSource → Player
 
 ### Error Recovery
 - **`keepReconnectingCallback` set** (browser mode): unlimited retries, UI notified of reconnection state
-- **No callback**: two errors within 100ms → fatal, rejects all pending reads
 - **Single error**: destroys connection, retries via `#updateState()`
+- **No callback**: two errors within 100ms → fatal, routes through shared `#closeWithError(error)` cleanup
+- **`close()` + fatal path**: both destroy the active stream, reject pending `#readRequests`, cancel `#activeUncachedReads`, and reset `#virtualBuffer`
+
+---
+
+## HydratedSourcePool (Bounded Reader Pool)
+
+`HydratedSourcePool` bounds **resident heavyweight per-file `McapIndexedReader` instances** (reader/deserializer state sized from chunk-index and channel counts). It does **not** bound decoded message data or each source's byte cache; those still live in `BufferedIterableSource`, `CachedFilelike`, and downstream playback buffers.
+
+```typescript
+const pool = new HydratedSourcePool({
+  maxCount: dataSource.maxHydratedSources ?? 4,
+  maxBytes: dataSource.maxHydratedBytes ?? 512 * 1024 * 1024,
+});
+```
+(`minResident` is not passed at the call site — it relies on `HydratedSourcePool`'s own internal default of `1`.)
+
+- **Hybrid budget**: `maxCount` caps resident readers, `maxBytes` caps total estimated resident weight, and `minResident` keeps a small floor hot (clamped so it never exceeds the count cap). `MultiIterableSource` constructs one shared pool and passes it to **both** the local-files and remote-urls branches.
+- **API contract**:
+  - `acquire(token, hydrator)`: open or reuse a resident reader, increment its pin count, refresh LRU recency, and keep it non-evictable until a matching `release(token)`. After `terminate()`, `acquire()` throws instead of rehydrating.
+  - `release(token)`: decrement the pin count (floor 0) and opportunistically evict
+  - `admit(token, hydrator, value)`: seed an already-open reader (for example from `initialize()` / prewarm) without calling `open()`. If the token is already resident, or the pool is already terminated, the redundant value is closed instead of replacing the existing entry.
+  - `terminate()`: mark the pool terminated first, then close every resident entry in parallel so late `acquire()` / `admit()` calls cannot repopulate it
+- **Eviction semantics**: entries live in a `Map<object, Entry>` whose insertion order is the LRU order. Re-inserting on access moves an entry to the most-recent end. Eviction scans from oldest to newest and closes the first **unpinned** entries until the pool is back under budget. If everything remaining is pinned, the pool may temporarily stay over budget by design.
+- **Weight heuristic** (`readerWeight.ts`): `weigh()` defaults to `1`, but MCAP readers use an approximate byte estimate so larger readers churn first:
+  ```typescript
+  READER_BASE_BYTES +
+    reader.chunkIndexes.length * BYTES_PER_CHUNK_INDEX_BASE +
+    messageIndexEntries * BYTES_PER_MESSAGE_INDEX_ENTRY +
+    reader.channelsById.size * BYTES_PER_CHANNEL
+  ```
+  where `messageIndexEntries` sums `chunkIndex.messageIndexOffsets.size` across all chunk indexes. There is no `cacheBytes` term — the weight reflects only reader/index/channel structure size, not each source's byte-cache allocation. The absolute numbers are heuristic; relative weighting is what matters.
+- **Indexed URL reuse vs unindexed bypass**: for `type: "url"` sources, `McapIterableSource` keeps one session-long `#persistentReadable` (`RemoteFileReadable` + `CachedFilelike` cache) and reuses it across pool eviction/re-`acquire()`; the pool only evicts the heavyweight `McapIndexedReader` layer, not that transport/cache. If a source proves unindexed (or the URL path falls back to raw `fetch()` streaming), it skips `HydratedSourcePool` entirely and lives in `#eagerInner` for the whole session, so unindexed files are outside the pool's count/byte budget. `#persistentReadable` is also closed unconditionally when the whole `McapIterableSource` is `terminate()`d at normal session end — not only on failed init or unindexed fallback.
 
 ---
 
@@ -180,18 +216,22 @@ getBackfillMessages({ topics, time }) {
 ### Cache Budget Distribution
 ```typescript
 const totalCache = dataSource.totalCacheSizeInBytes ?? 500 * 1024 * 1024;  // 500MB total
-const perSourceCache = Math.floor(totalCache / urls.length);
-// Each source gets: totalCache / N
+const minPerSource = dataSource.minCachePerSourceBytes ?? 10 * 1024 * 1024;  // 10MB floor
+const perSourceCache = Math.max(minPerSource, Math.floor(totalCache / urls.length));
 ```
 - 2 files → 250MB each
 - 5 files → 100MB each
-- More files = more network re-fetches per file
+- Hundreds of files → floor at 10MiB per source by default (override `minCachePerSourceBytes`)
+- Prevents `totalCache / N` from dropping below a viable per-file metadata-read budget; if `perSourceCache * N > totalCache`, a `log.warn` notes the aggregate may exceed the nominal budget
 
 ### Initialization
-1. Creates N `McapIterableSource` instances (one per URL) with divided cache budget
-2. Initializes all sources **in parallel** (`Promise.all`)
-3. Merges results: topics, datatypes, metadata, topicStats, alerts, publishersByTopic
-4. Sorts sources by start time (`source.getStart()`)
+1. Constructs one shared `HydratedSourcePool` before branching on local files vs remote URLs (`maxHydratedSources ?? 4`, `maxHydratedBytes ?? 512 MiB`) and passes `pool` to every source constructor.
+2. Creates N `McapIterableSource` instances (one per URL) with the divided cache budget; `readAheadEnabled` still defaults to `true` for both single- and multi-file sessions. What changes for multi-file (`numSources > 1`) is `readAheadBufferBytes`, which defaults to `min(2 MiB, perSourceCache / 4)` instead of the legacy 50 MiB default, bounding read-ahead so it doesn't outrun the smaller per-source cache slice.
+3. Initializes sources under a `Semaphore` (`initConcurrency ?? 4`, normalized to a positive integer) instead of unconstrained `Promise.all`; the returned `Initialization[]` still preserves input order.
+4. Merges results: topics, datatypes, metadata, topicStats, alerts, publishersByTopic.
+5. Sorts sources by start time (`source.getStart()`), then `#prewarmEarliestSources()` prewarms the earliest 3 sources in **reverse** order so the t=0 source ends up most-recently-used in the pool. Prewarm failures are logged at debug and treated as non-fatal.
+
+- `terminate()`: runs `Promise.allSettled` over `source.terminate?.()`, logs each rejection, re-throws the first rejection after cleanup, and always tears down `pool.terminate()` in a `finally` block.
 
 ### Message Iteration — Lazy Sequential Merge
 ```typescript
@@ -308,7 +348,7 @@ WorkerSerializedIterableSource       McapIterableSourceWorker.worker.ts
 6. **Lazy sequential merge** avoids simultaneous HTTP streams to all remote files
 7. **Indexed MCAP** required for acceptable remote performance (random access via chunk indexes)
 8. **WASM decompression preload** prevents initialization failures under slow network
-9. **Cache budget division** for multi-file: consider fewer large files over many small ones
+9. **Cache budget division** for multi-file uses a 10MiB per-source floor; many small files still increase refetch pressure and reader churn
 10. **BufferedIterableSource** (10s, 300MB) smooths network latency for playback
 11. **Read coalescing** (`BatchingReadable`): merges `read()` calls arriving in the same microtask tick (gap <64KiB, ≤4MiB span) before they reach `CachedFilelike`
 
@@ -316,7 +356,8 @@ WorkerSerializedIterableSource       McapIterableSourceWorker.worker.ts
 - Server missing `Accept-Ranges: bytes` header → fails at open
 - CORS not exposing `Accept-Ranges` header → browser can't detect range support
 - Unindexed MCAP over remote → falls back to full streaming (slow, limited to 1GB)
-- Too many remote files → cache per file drops below useful threshold
+- Too many remote files → per-source cache hits the 10MiB floor, aggregate cache may exceed the nominal total, and readers churn more often
+- Worker teardown races → follow the capture-before-`await` plus `disposeRemote()`-in-`finally` pattern from `WorkerSerializedIterableSource.terminate()` or an older terminate can leak/dispose the wrong worker
 - S3 presigned URLs with non-GET method → `BrowserHttpReader.open()` requires GET
 
 ## Skills Reference
@@ -325,3 +366,5 @@ WorkerSerializedIterableSource       McapIterableSourceWorker.worker.ts
 - Worker/Comlink patterns: `read_file(".github/skills/web-workers/SKILL.md")`
 - BufferedIterableSource or BlockLoader details: `read_file(".github/skills/caching-internals/SKILL.md")`
 - Network/read latency profiling and buffering performance: `read_file(".github/skills/performance/SKILL.md")`
+- Bounded reader pool implementation: `read_file("packages/suite-base/src/players/IterablePlayer/shared/HydratedSourcePool.ts")`
+- Reader weight heuristic: `read_file("packages/suite-base/src/players/IterablePlayer/Mcap/readerWeight.ts")`
