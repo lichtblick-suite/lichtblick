@@ -41,6 +41,12 @@ class TransformPlayer implements Player {
   // basicDatatypes already resolves foxglove.FrameTransform's nested Vector3/Quaternion types
   #datatypes: RosDatatypes = new Map(basicDatatypes);
 
+  public constructor() {
+    if (!this.#datatypes.has("foxglove.FrameTransform")) {
+      throw new Error("Invariant: basicDatatypes is missing 'foxglove.FrameTransform'");
+    }
+  }
+
   public getBatchIterator(
     _topic: string,
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {

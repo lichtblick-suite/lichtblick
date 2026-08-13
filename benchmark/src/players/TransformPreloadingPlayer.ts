@@ -44,6 +44,10 @@ class TransformPreloadingPlayer implements Player {
   #topics: Topic[];
 
   public constructor() {
+    if (!this.#datatypes.has("foxglove.FrameTransform")) {
+      throw new Error("Invariant: basicDatatypes is missing 'foxglove.FrameTransform'");
+    }
+
     this.#startTime = { sec: 0, nsec: 0 };
     this.#endTime = { sec: 600, nsec: 0 };
 
