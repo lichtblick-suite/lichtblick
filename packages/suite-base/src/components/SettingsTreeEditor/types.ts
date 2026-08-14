@@ -45,5 +45,6 @@ export type NodeEditorState = {
   editing: boolean;
   focusedPath: undefined | readonly string[];
   open: boolean;
+  textFilter: string;
   visibilityFilter: SelectVisibilityFilterValue;
 };

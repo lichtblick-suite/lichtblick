@@ -255,9 +255,11 @@ const LogPanel = React.memo(({ config, saveConfig }: Props) => {
 
 LogPanel.displayName = "Log";
 
+const defaultConfig: Config = { searchTerms: [], minLogLevel: 1 };
+
 export default Panel(
   Object.assign(LogPanel, {
-    defaultConfig: { searchTerms: [], minLogLevel: 1 } as Config,
+    defaultConfig,
     panelType: "RosOut", // The legacy RosOut name is used for backwards compatibility
   }),
 );

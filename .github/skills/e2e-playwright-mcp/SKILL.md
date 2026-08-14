@@ -6,7 +6,7 @@ description: Domain knowledge for Playwright MCP-assisted E2E test development i
 # E2E Testing with Playwright MCP
 
 This skill covers writing E2E tests for Lichtblick using Playwright, with AI-assisted exploration
-via the Playwright MCP server configured in `.vscode/mcp.json`.
+via the Playwright MCP server configured in `.mcp.json` at the repo root.
 
 Follow the **test-conventions** skill for GWT pattern and core quality rules.
 
@@ -387,7 +387,7 @@ When no stable selector exists for an interactive element, add a `data-testid` t
 
 ## Playwright MCP Usage
 
-The MCP server is configured in `.vscode/mcp.json` with `--isolated`, `--browser chrome`, `--codegen typescript`, and `--caps testing`.
+The MCP server is configured in `.mcp.json` (repo root) with `--isolated`, `--browser chrome`, `--codegen typescript`, and `--caps testing`.
 
 ### Workflow
 

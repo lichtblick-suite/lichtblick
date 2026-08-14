@@ -43,10 +43,10 @@ import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfil
 import {
   BUSY_POLLING_INTERVAL_MS,
   BUSY_POLLING_TIMEOUT_MS,
+  DEFAULT_LAYOUT,
   MAX_SUPPORTED_LAYOUT_VERSION,
   ORG_PERMISSION_PREFIX,
 } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
-import { defaultLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/defaultLayout";
 import useUpdateSharedPanelState from "@lichtblick/suite-base/providers/CurrentLayoutProvider/hooks/useUpdateSharedPanelState";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
 import panelsReducer from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
@@ -213,7 +213,7 @@ export default function CurrentLayoutProvider({
       }
 
       // Get all the panel types that exist in the new config
-      const panelTypesInUse = _.uniq(Object.keys(newData.configById).map(getPanelTypeFromId));
+      const panelTypesInUse = [...new Set(Object.keys(newData.configById).map(getPanelTypeFromId))];
 
       setLayoutState({
         // discared shared panel state for panel types that are no longer in the layout
@@ -240,8 +240,7 @@ export default function CurrentLayoutProvider({
       if (
         event.type === "revert" &&
         updatedLayout &&
-        layoutStateRef.current.selectedLayout &&
-        updatedLayout.id === layoutStateRef.current.selectedLayout.id
+        updatedLayout.id === layoutStateRef.current.selectedLayout?.id
       ) {
         setLayoutState({
           selectedLayout: {
@@ -316,10 +315,16 @@ export default function CurrentLayoutProvider({
 
     const layouts = await layoutManager.getLayouts();
 
-    // Check if there's a layout specified by app parameter
-    const defaultLayoutFromParameters = layouts.find((l) => l.name === appParameters.defaultLayout);
+    // Check if there's a layout specified by app parameter. When multiple layouts share the
+    // name, prefer the organizational (shared) layout over a local one.
+    const matchingLayouts = layouts.filter((l) => l.name === appParameters.defaultLayout);
+    const defaultLayoutFromParameters =
+      matchingLayouts.find((l) => l.permission.startsWith(ORG_PERMISSION_PREFIX)) ??
+      matchingLayouts[0];
     if (defaultLayoutFromParameters) {
-      await setSelectedLayoutId(defaultLayoutFromParameters.id, { saveToProfile: true });
+      // Apply the URL-selected layout for the current session only, without persisting it to the
+      // user's profile, so a one-off ?layout= override does not become sticky on later visits.
+      await setSelectedLayoutId(defaultLayoutFromParameters.id, { saveToProfile: false });
       return;
     }
 
@@ -349,12 +354,8 @@ export default function CurrentLayoutProvider({
       return;
     }
 
-    const newLayout = await layoutManager.saveNewLayout({
-      name: "Default",
-      data: defaultLayout,
-      permission: "CREATOR_WRITE",
-    });
-    await setSelectedLayoutId(newLayout.id);
+    const defaultLayout = await layoutManager.saveNewLayout(DEFAULT_LAYOUT);
+    await setSelectedLayoutId(defaultLayout.id);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getUserProfile, layoutManager, setSelectedLayoutId, enqueueSnackbar]);
@@ -380,7 +381,7 @@ export default function CurrentLayoutProvider({
       createTabPanel: (payload: CreateTabPanelPayload) => {
         performAction({ type: "CREATE_TAB_PANEL", payload });
         setSelectedPanelIds([]);
-        void analytics.logEvent(AppEvent.PANEL_ADD, { type: "Tab" });
+        analytics.logEvent(AppEvent.PANEL_ADD, { type: "Tab" });
       },
       changePanelLayout: (payload: ChangePanelLayoutPayload) => {
         performAction({ type: "CHANGE_PANEL_LAYOUT", payload });
@@ -404,7 +405,7 @@ export default function CurrentLayoutProvider({
         // Deselect the removed panel
         setSelectedPanelIds((ids) => ids.filter((id) => id !== closedId));
 
-        void analytics.logEvent(
+        analytics.logEvent(
           AppEvent.PANEL_DELETE,
           typeof closedId === "string" ? { type: getPanelTypeFromId(closedId) } : undefined,
         );
@@ -427,8 +428,8 @@ export default function CurrentLayoutProvider({
           );
           setSelectedPanelIds(_.difference(afterPanelIds, beforePanelIds));
         }
-        void analytics.logEvent(AppEvent.PANEL_ADD, { type: payload.type, action: "swap" });
-        void analytics.logEvent(AppEvent.PANEL_DELETE, {
+        analytics.logEvent(AppEvent.PANEL_ADD, { type: payload.type, action: "swap" });
+        analytics.logEvent(AppEvent.PANEL_DELETE, {
           type: getPanelTypeFromId(payload.originalId),
           action: "swap",
         });
@@ -438,11 +439,11 @@ export default function CurrentLayoutProvider({
       },
       addPanel: (payload: AddPanelPayload) => {
         performAction({ type: "ADD_PANEL", payload });
-        void analytics.logEvent(AppEvent.PANEL_ADD, { type: getPanelTypeFromId(payload.id) });
+        analytics.logEvent(AppEvent.PANEL_ADD, { type: getPanelTypeFromId(payload.id) });
       },
       dropPanel: (payload: DropPanelPayload) => {
         performAction({ type: "DROP_PANEL", payload });
-        void analytics.logEvent(AppEvent.PANEL_ADD, {
+        analytics.logEvent(AppEvent.PANEL_ADD, {
           type: payload.newPanelType,
           action: "drop",
         });

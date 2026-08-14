@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Initialization } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-import InitilizationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitilizationSourceBuilder";
+import InitializationSourceBuilder from "@lichtblick/suite-base/testing/builders/InitializationSourceBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import RosDatatypesBuilder from "@lichtblick/suite-base/testing/builders/RosDatatypesBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -14,8 +14,8 @@ describe("validateInitialization", () => {
   let current: Initialization;
 
   beforeEach(() => {
-    accumulated = InitilizationSourceBuilder.initialization();
-    current = InitilizationSourceBuilder.initialization();
+    accumulated = InitializationSourceBuilder.initialization();
+    current = InitializationSourceBuilder.initialization();
   });
 
   describe("validateAndAddDatatypes", () => {

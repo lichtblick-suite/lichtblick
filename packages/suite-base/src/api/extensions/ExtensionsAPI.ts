@@ -65,7 +65,7 @@ class ExtensionsAPI implements IExtensionAPI {
       scope: "org",
       version: extension.info.version,
       replace: true,
-    } as CreateOrUpdateBody;
+    };
 
     Object.entries(body).forEach(([key, value]) => {
       if (typeof value === "object") {

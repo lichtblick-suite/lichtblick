@@ -30,6 +30,7 @@ import { filterMap } from "@lichtblick/den/collection";
 import Logger from "@lichtblick/log";
 import {
   ConfigsPayload,
+  LayoutData,
   SaveConfigsPayload,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { reportError } from "@lichtblick/suite-base/reportError";
@@ -561,4 +562,55 @@ export function getConfigsForNestedPanelsInsideTab(
     }
   });
   return configs;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value != undefined && !Array.isArray(value);
+}
+
+/**
+ * Validates that a parsed value has the shape required by {@link LayoutData} before it is
+ * installed. Throws an Error whose message lists every missing or invalid field so the caller can
+ * surface it to the user.
+ *
+ * @param data The unknown value parsed from a layout file.
+ * @returns The same value narrowed to {@link LayoutData} when valid.
+ */
+export function validateLayoutData(data: unknown): LayoutData {
+  const errors: string[] = [];
+
+  if (!isPlainObject(data)) {
+    throw new Error("expected an object");
+  }
+
+  const missingFields = ["configById", "globalVariables"].filter(
+    (field) => !isPlainObject(data[field]),
+  );
+  if (!isPlainObject(data.playbackConfig) || typeof data.playbackConfig.speed !== "number") {
+    missingFields.push("playbackConfig");
+  }
+  if (missingFields.length === 1) {
+    errors.push(`missing or invalid "${missingFields[0]}"`);
+  } else if (missingFields.length > 1) {
+    const quotedFields = missingFields.map((field) => `"${field}"`).join(", ");
+    errors.push(`missing or invalid fields: ${quotedFields}`);
+  }
+
+  if ("userNodes" in data && !isPlainObject(data.userNodes)) {
+    errors.push(`invalid "userNodes"`);
+  }
+
+  if (data.layout != undefined && typeof data.layout !== "string" && !isPlainObject(data.layout)) {
+    errors.push(`invalid "layout"`);
+  }
+
+  if (data.version != undefined && typeof data.version !== "number") {
+    errors.push(`invalid "version"`);
+  }
+
+  if (errors.length > 0) {
+    throw new Error(errors.join(", "));
+  }
+
+  return data as LayoutData;
 }

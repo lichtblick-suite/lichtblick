@@ -3,7 +3,6 @@
 
 import { ExtensionActionButton } from "@lichtblick/suite-base/components/ExtensionsSettings/components/ExtensionActionButton/ExtensionActionButton";
 import { ExtensionActionButtonProps } from "@lichtblick/suite-base/components/ExtensionsSettings/types";
-import { ExtensionMarketplaceDetail } from "@lichtblick/suite-base/context/ExtensionMarketplaceContext";
 import { canInstallExtension } from "@lichtblick/suite-base/util/canInstallExtension";
 
 /**
@@ -13,7 +12,7 @@ import { canInstallExtension } from "@lichtblick/suite-base/util/canInstallExten
 export function InstallButton(
   props: Readonly<ExtensionActionButtonProps>,
 ): React.ReactElement | undefined {
-  if (!canInstallExtension(props.extension as ExtensionMarketplaceDetail)) {
+  if (!canInstallExtension(props.extension)) {
     return undefined;
   }
 

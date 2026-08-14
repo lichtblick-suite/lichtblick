@@ -26,6 +26,7 @@ import {
   SettingsTreeField,
   SettingsTreeNode,
   SettingsTreeNodeActionItem,
+  SettingsTreeNodes,
 } from "@lichtblick/suite";
 import { HighlightedText } from "@lichtblick/suite-base/components/HighlightedText";
 import { useStyles } from "@lichtblick/suite-base/components/SettingsTreeEditor/NodeEditor.style";
@@ -43,7 +44,7 @@ import { FieldEditor } from "./FieldEditor";
 import { NodeActionsMenu } from "./NodeActionsMenu";
 import { VisibilityToggle } from "./VisibilityToggle";
 import { icons } from "./icons";
-import { prepareSettingsNodes } from "./utils";
+import { filterTreeNodes, prepareSettingsNodes } from "./utils";
 
 function ExpansionArrow({ expanded }: Readonly<{ expanded: boolean }>): React.JSX.Element {
   const { classes } = useStyles();
@@ -102,6 +103,7 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
     editing: false,
     focusedPath: undefined,
     open: defaultOpen,
+    textFilter: "",
     visibilityFilter: "all",
   });
   const { renderSettingsStatusButton } = useAppContext();
@@ -159,6 +161,14 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
     if (action.action === "update" && action.payload.input === "select") {
       setState((draft) => {
         draft.visibilityFilter = action.payload.value as SelectVisibilityFilterValue;
+      });
+    }
+  };
+
+  const textFilterHandler = (action: SettingsTreeAction) => {
+    if (action.action === "update" && action.payload.input === "string") {
+      setState((draft) => {
+        draft.textFilter = action.payload.value as string;
       });
     }
   };
@@ -229,12 +239,20 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
 
   const preparedNodes = useMemo(() => prepareSettingsNodes(children ?? {}), [children]);
 
-  const filteredNodes = useMemo(() => {
+  const visibilityFilteredNodes = useMemo(() => {
     if (!filterFn) {
       return preparedNodes;
     }
     return preparedNodes.filter(([, child]) => filterFn(child));
   }, [preparedNodes, filterFn]);
+
+  const filteredNodes = useMemo(() => {
+    if (state.textFilter.length === 0) {
+      return visibilityFilteredNodes;
+    }
+    const nodesRecord: Immutable<SettingsTreeNodes> = Object.fromEntries(visibilityFilteredNodes);
+    return prepareSettingsNodes(filterTreeNodes(nodesRecord, state.textFilter));
+  }, [visibilityFilteredNodes, state.textFilter]);
 
   const childNodes = useMemo(() => {
     return filterMap(filteredNodes, ([key, child]) => (
@@ -511,6 +529,18 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
             field={{ ...getSelectVisibilityFilterField(t), value: state.visibilityFilter }}
             path={makeStablePath(props.path, "visibilityFilter")}
             actionHandler={selectVisibilityFilter}
+          />
+          <FieldEditor
+            key="textFilter"
+            field={{
+              input: "string",
+              label: t("filterListText"),
+              help: t("filterListTextHelp"),
+              placeholder: t("filterListTextPlaceholder"),
+              value: state.textFilter,
+            }}
+            path={makeStablePath(props.path, "textFilter")}
+            actionHandler={textFilterHandler}
           />
         </>
       )}

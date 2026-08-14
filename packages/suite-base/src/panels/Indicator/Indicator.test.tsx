@@ -66,6 +66,8 @@ describe("Indicator Component", () => {
         updatePanelSettingsEditor: jest.fn(),
         watch: jest.fn(),
         unstable_subscribeMessageRange: jest.fn(),
+        getTopicSchema: jest.fn(),
+        getSchema: jest.fn(),
         ...contextOverride,
       },
     };
@@ -129,17 +131,17 @@ describe("Indicator Component", () => {
     expect(config).toMatchObject(customConfig);
   });
 
-  it.each<IndicatorStyle>(["bulb", "background"])(
-    "renders with the proper style indicator",
-    (style) => {
-      const { matchingRule } = setup({
-        configOverride: {
-          style,
-        },
-      });
+  it.each<IndicatorStyle>([
+    "bulb",
+    "background",
+  ])("renders with the proper style indicator", (style) => {
+    const { matchingRule } = setup({
+      configOverride: {
+        style,
+      },
+    });
 
-      expect(screen.getByTestId(`${style}-indicator`)).toBeTruthy();
-      expect(screen.getByText(matchingRule.label)).toBeTruthy();
-    },
-  );
+    expect(screen.getByTestId(`${style}-indicator`)).toBeTruthy();
+    expect(screen.getByText(matchingRule.label)).toBeTruthy();
+  });
 });

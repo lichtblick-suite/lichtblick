@@ -1,6 +1,6 @@
 {
   "name": "@lichtblick/suite",
-  "version": "1.25.1",
+  "version": "1.28.1",
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
@@ -18,8 +18,11 @@
   "scripts": {
     "prepack": "tsc -b tsconfig.json"
   },
+  "dependencies": {
+    "@lichtblick/message-definition": "1.0.0"
+  },
   "devDependencies": {
-    "@lichtblick/tsconfig": "1.0.2",
-    "typescript": "5.9.3"
+    "@lichtblick/tsconfig": "1.1.2",
+    "typescript": "6.0.3"
   }
 }

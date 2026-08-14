@@ -12,7 +12,7 @@ import {
   PointsAnnotationType,
   SceneUpdate,
 } from "@foxglove/schemas";
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 import { screen, userEvent, within } from "@storybook/testing-library";
 import tinycolor from "tinycolor2";
 

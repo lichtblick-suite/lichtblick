@@ -55,16 +55,15 @@ describe("isTopicHighFrequency", () => {
     expect(result).toBe(true);
   });
 
-  it.each([...LOG_SCHEMAS])(
-    "should return false if the schemaName belongs to logs schemas",
-    (schema: string) => {
-      const result = isTopicHighFrequency({
-        topicStats,
-        topic: { name: topicName, schemaName: schema },
-        duration,
-      });
+  it.each([
+    ...LOG_SCHEMAS,
+  ])("should return false if the schemaName belongs to logs schemas", (schema: string) => {
+    const result = isTopicHighFrequency({
+      topicStats,
+      topic: { name: topicName, schemaName: schema },
+      duration,
+    });
 
-      expect(result).toBe(false);
-    },
-  );
+    expect(result).toBe(false);
+  });
 });

@@ -27,7 +27,7 @@ export function applySamplingGuardToSubscription<T extends SamplingGuardInput>(s
       ...subscription,
       samplingRequest: undefined,
       samplingAuthorized: undefined,
-    } as T;
+    };
   }
 
   return subscription;

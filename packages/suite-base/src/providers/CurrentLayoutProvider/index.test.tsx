@@ -440,6 +440,43 @@ describe("CurrentLayoutProvider", () => {
 
     expect(selectedLayout).toBeDefined();
     expect(selectedLayout).toBe("layout2");
+    // A ?layout= override is session-only and must not be persisted to the user profile.
+    expect(mockUserProfile.setUserProfile).not.toHaveBeenCalled();
+  });
+
+  it("prefers the organizational layout when the app parameter name matches multiple layouts", async () => {
+    const mockAppParameters = { defaultLayout: "SHARED LAYOUT" };
+    mockLayoutManager.getLayouts.mockImplementation(async () => {
+      return [
+        {
+          id: "personal",
+          name: "SHARED LAYOUT",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+        {
+          id: "org",
+          name: "SHARED LAYOUT",
+          data: { data: TEST_LAYOUT },
+          permission: "ORG_READ",
+        },
+      ];
+    });
+
+    const { result, all } = renderTest({
+      mockLayoutManager,
+      mockUserProfile,
+      mockAppParameters,
+    });
+
+    await act(async () => {
+      await result.current.childMounted;
+    });
+
+    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+      .selectedLayout?.id;
+
+    expect(selectedLayout).toBe("org");
   });
 
   it("should show a message to the user if the defaultLayout from app parameter is not found", async () => {
@@ -535,6 +572,31 @@ describe("CurrentLayoutProvider", () => {
         `CurrentLayoutProvider: timeout after ${BUSY_POLLING_TIMEOUT_MS}ms, continuing anyway`,
       );
       expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
+  });
+
+  describe("Fallback Default layout creation", () => {
+    it("creates a personal Default layout when no layouts exist", async () => {
+      // Given a layout manager with no existing layouts and a user profile without a selection
+      const localOnlyManager = makeMockLayoutManager();
+      localOnlyManager.getLayouts.mockResolvedValue([]);
+      localOnlyManager.saveNewLayout.mockResolvedValue({
+        id: "new-default",
+        name: "Default",
+        baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
+      });
+      mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: undefined });
+
+      // When the provider initializes
+      const { result } = renderTest({ mockLayoutManager: localOnlyManager, mockUserProfile });
+      await act(async () => {
+        await result.current.childMounted;
+      });
+
+      // Then a personal Default layout is created
+      expect(localOnlyManager.saveNewLayout).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "Default", permission: "CREATOR_WRITE" }),
+      );
     });
   });
 });

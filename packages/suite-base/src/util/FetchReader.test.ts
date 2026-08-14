@@ -24,7 +24,7 @@ describe("FetchReader", () => {
     mockFetch = jest.spyOn(global, "fetch");
 
     // Default: globalRequestQueue.run passes through the function
-    mockGlobalRequestQueue.run.mockImplementation(async (fn) => fn as any);
+    mockGlobalRequestQueue.run.mockImplementation(async (fn) => fn);
   });
 
   afterEach(() => {

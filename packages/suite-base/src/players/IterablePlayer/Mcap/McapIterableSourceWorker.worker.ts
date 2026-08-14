@@ -9,6 +9,7 @@ import * as Comlink from "@lichtblick/comlink";
 import { IterableSourceInitializeArgs } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { WorkerSerializedIterableSourceWorker } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSourceWorker";
 import { MultiIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/shared/MultiIterableSource";
+import { pickDefinedHydrationOverrides } from "@lichtblick/suite-base/players/IterablePlayer/shared/multiFileHydrationOptions";
 
 import { McapIterableSource } from "./McapIterableSource";
 
@@ -21,7 +22,7 @@ export function initialize(
     return Comlink.proxy(wrapped);
   } else if (args.files) {
     const source = new MultiIterableSource(
-      { type: "files", files: args.files },
+      { type: "files", files: args.files, ...pickDefinedHydrationOverrides(args) },
       McapIterableSource,
     );
     const wrapped = new WorkerSerializedIterableSourceWorker(source);
@@ -31,7 +32,10 @@ export function initialize(
     const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   } else if (args.urls) {
-    const source = new MultiIterableSource({ type: "urls", urls: args.urls }, McapIterableSource);
+    const source = new MultiIterableSource(
+      { type: "urls", urls: args.urls, ...pickDefinedHydrationOverrides(args) },
+      McapIterableSource,
+    );
     const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   }

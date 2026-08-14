@@ -6,7 +6,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { FrameTransform, FrameTransforms } from "@foxglove/schemas";
 import { setupJestCanvasMock } from "jest-canvas-mock";
+import * as THREE from "three";
 
 import { CameraModelsMap } from "@lichtblick/den/image/types";
 import { fromNanoSec, toNanoSec } from "@lichtblick/rostime";
@@ -18,7 +20,7 @@ import { DEFAULT_CAMERA_STATE } from "@lichtblick/suite-base/panels/ThreeDeeRend
 import { HOVER_PICK_THROTTLE_MS } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import { CameraStateSettings } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
-import { TFMessage } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
+import { TFMessage, TransformStamped } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -44,9 +46,9 @@ jest.mock("three/examples/jsm/libs/draco/draco_decoder.wasm", () => "");
 // We need to mock the WebGLRenderer because it's not available in jsdom
 // only mocking what we currently use
 jest.mock("three", () => {
-  const THREE = jest.requireActual("three");
+  const actualThree = jest.requireActual("three");
   return {
-    ...THREE,
+    ...actualThree,
     WebGLRenderer: function WebGLRenderer() {
       return {
         capabilities: {
@@ -128,6 +130,73 @@ function createTFMessageEvent(
     schemaName: "tf2_msgs/TFMessage",
     message: {
       transforms: stampedTfs,
+    },
+    sizeInBytes: 0,
+  };
+}
+
+function createFrameTransformEvent(
+  parentId: string,
+  childId: string,
+  receiveTime: bigint,
+  stamp: bigint,
+  topic: string = "/tf",
+): MessageEvent<FrameTransform> {
+  return {
+    topic,
+    receiveTime: fromNanoSec(receiveTime),
+    schemaName: "foxglove.FrameTransform",
+    message: {
+      timestamp: fromNanoSec(stamp),
+      parent_frame_id: parentId,
+      child_frame_id: childId,
+      translation: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0, w: 1 },
+    },
+    sizeInBytes: 0,
+  };
+}
+
+function createFrameTransformsEvent(
+  transforms: { parentId: string; childId: string; stamp: bigint }[],
+  receiveTime: bigint,
+  topic: string = "/tf",
+): MessageEvent<FrameTransforms> {
+  return {
+    topic,
+    receiveTime: fromNanoSec(receiveTime),
+    schemaName: "foxglove.FrameTransforms",
+    message: {
+      transforms: transforms.map(({ parentId, childId, stamp }) => ({
+        timestamp: fromNanoSec(stamp),
+        parent_frame_id: parentId,
+        child_frame_id: childId,
+        translation: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0, w: 1 },
+      })),
+    },
+    sizeInBytes: 0,
+  };
+}
+
+function createTransformStampedEvent(
+  parentId: string,
+  childId: string,
+  receiveTime: bigint,
+  stamp: bigint,
+  topic: string = "/tf",
+): MessageEvent<TransformStamped> {
+  return {
+    topic,
+    receiveTime: fromNanoSec(receiveTime),
+    schemaName: "geometry_msgs/TransformStamped",
+    message: {
+      header: {
+        stamp: fromNanoSec(stamp),
+        frame_id: parentId,
+      },
+      child_frame_id: childId,
+      transform: makeTf(),
     },
     sizeInBytes: 0,
   };
@@ -229,6 +298,34 @@ describe("3D Renderer", () => {
     renderer.dispose();
   });
 
+  it("cancels a queued animation frame when animationFrame runs synchronously", () => {
+    // Given
+    const mockResult = BasicBuilder.number();
+    const requestAnimationFrameSpy = jest
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation(() => mockResult);
+    const cancelAnimationFrameSpy = jest
+      .spyOn(window, "cancelAnimationFrame")
+      .mockImplementation(() => undefined);
+
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+
+    // Renderer init may schedule internal frames; focus this test on the explicit queue+sync path.
+    requestAnimationFrameSpy.mockClear();
+    cancelAnimationFrameSpy.mockClear();
+
+    // When
+    // Simulate seek/clear code path that queues a frame, then immediately renders synchronously.
+    renderer.queueAnimationFrame();
+    renderer.animationFrame();
+
+    // Then
+    expect(requestAnimationFrameSpy).toHaveBeenCalledTimes(1);
+    expect(cancelAnimationFrameSpy).toHaveBeenCalledWith(mockResult);
+
+    renderer.dispose();
+  });
+
   it("enables and disables picking mode", () => {
     // Given: A renderer instance
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
@@ -265,20 +362,17 @@ describe("3D Renderer", () => {
       // Input relies on clientWidth/clientHeight of the canvas parent.
       Object.defineProperty(inputParent, "clientWidth", { configurable: true, value: 300 });
       Object.defineProperty(inputParent, "clientHeight", { configurable: true, value: 300 });
-      inputCanvas.getBoundingClientRect = jest.fn(
-        () =>
-          ({
-            left: 0,
-            top: 0,
-            right: 300,
-            bottom: 300,
-            width: 300,
-            height: 300,
-            x: 0,
-            y: 0,
-            toJSON: () => "",
-          }) as DOMRect,
-      );
+      inputCanvas.getBoundingClientRect = jest.fn(() => ({
+        left: 0,
+        top: 0,
+        right: 300,
+        bottom: 300,
+        width: 300,
+        height: 300,
+        x: 0,
+        y: 0,
+        toJSON: () => "",
+      }));
     }
 
     function createHoverRenderer(): { renderer: Renderer; hoverCanvas: HTMLCanvasElement } {
@@ -745,6 +839,198 @@ describe("3D Renderer", () => {
     expect(renderer.schemaSubscriptions.size).toBeGreaterThan(0);
 
     renderer.dispose();
+  });
+
+  describe("image-only mode topic settings validator", () => {
+    it("adds an IMAGE_ONLY_TOPIC error to visible topics while in image-only mode", () => {
+      // Given: A renderer in image mode with image-only subscription mode enabled
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        interfaceMode: "image" as const,
+        canvas,
+      });
+      renderer.enableImageOnlySubscriptionMode();
+
+      // When: A visible topic node is validated
+      renderer.settings.setNodesForKey("test-key", [
+        { path: ["topics", "/camera"], node: { visible: true } },
+      ]);
+
+      // Then: An error should be added to that topic
+      expect(renderer.settings.errors.errors.errorAtPath(["topics", "/camera"])).toBe(
+        "Camera calibration information is required to display 3D topics",
+      );
+
+      renderer.dispose();
+    });
+
+    it("removes the IMAGE_ONLY_TOPIC error when a topic is not visible", () => {
+      // Given: A renderer in image mode with image-only subscription mode enabled
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        interfaceMode: "image" as const,
+        canvas,
+      });
+      renderer.enableImageOnlySubscriptionMode();
+      renderer.settings.setNodesForKey("test-key", [
+        { path: ["topics", "/camera"], node: { visible: true } },
+      ]);
+      expect(renderer.settings.errors.errors.errorAtPath(["topics", "/camera"])).toBeDefined();
+
+      // When: The topic becomes not visible
+      renderer.settings.setNodesForKey("test-key", [
+        { path: ["topics", "/camera"], node: { visible: false } },
+      ]);
+
+      // Then: The error should be removed
+      expect(renderer.settings.errors.errors.errorAtPath(["topics", "/camera"])).toBeUndefined();
+
+      renderer.dispose();
+    });
+
+    it("ignores non-topic paths and topic paths without a topic name", () => {
+      // Given: A renderer in image mode with image-only subscription mode enabled
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        interfaceMode: "image" as const,
+        canvas,
+      });
+      renderer.enableImageOnlySubscriptionMode();
+
+      // When/Then: Validating unrelated or incomplete paths should not throw or add errors
+      expect(() => {
+        renderer.settings.setNodesForKey("test-key", [
+          { path: ["layers"], node: { visible: true } },
+          { path: ["topics"], node: { visible: true } },
+        ]);
+      }).not.toThrow();
+      expect(renderer.settings.errors.errors.errorAtPath(["topics"])).toBeUndefined();
+
+      renderer.dispose();
+    });
+  });
+
+  describe("scene lighting", () => {
+    it("switches the main light to a headlight attached to the active camera", () => {
+      // Given: A renderer with headlight mode configured
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        canvas,
+        config: {
+          ...defaultRendererConfig,
+          scene: { mainLightMode: "headlight", directionalLightIntensity: 2 },
+        },
+      });
+
+      // When: Rendering a frame (which syncs the headlight to the active camera)
+      renderer.animationFrame();
+      const camera = renderer.cameraHandler.getActiveCamera();
+
+      // Then: The headlight should be attached to the camera with the configured intensity
+      const attachedLight = camera.children.find(
+        (child: THREE.Object3D): child is THREE.DirectionalLight =>
+          child instanceof THREE.DirectionalLight,
+      );
+      expect(attachedLight).toBeDefined();
+      expect(attachedLight?.intensity).toBe(2);
+
+      renderer.dispose();
+    });
+
+    it("does not attach a headlight to the camera in fixed lighting mode", () => {
+      // Given: A renderer using the default (fixed) lighting mode
+      const renderer = new Renderer({ ...defaultRendererProps, canvas });
+
+      // When: Rendering a frame
+      renderer.animationFrame();
+      const camera = renderer.cameraHandler.getActiveCamera();
+
+      // Then: No directional light should be attached to the camera
+      const attachedLight = camera.children.find(
+        (child: THREE.Object3D) => child instanceof THREE.DirectionalLight,
+      );
+      expect(attachedLight).toBeUndefined();
+
+      renderer.dispose();
+    });
+
+    it("detaches the headlight from the camera when switching back to fixed mode", () => {
+      // Given: A renderer in headlight mode with the headlight synced to the camera
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        canvas,
+        config: {
+          ...defaultRendererConfig,
+          scene: { mainLightMode: "headlight" },
+        },
+      });
+      renderer.animationFrame();
+      const camera = renderer.cameraHandler.getActiveCamera();
+      expect(
+        camera.children.some((child: THREE.Object3D) => child instanceof THREE.DirectionalLight),
+      ).toBe(true);
+
+      // When: Switching back to fixed lighting mode
+      renderer.config = {
+        ...renderer.config,
+        scene: { mainLightMode: "fixed" },
+      };
+      renderer.updateSceneRenderSettings();
+
+      // Then: The headlight should no longer be attached to the camera
+      expect(
+        camera.children.some((child: THREE.Object3D) => child instanceof THREE.DirectionalLight),
+      ).toBe(false);
+
+      renderer.dispose();
+    });
+
+    it("applies configured hemisphere light intensity", () => {
+      // Given: A renderer with a custom hemisphere light intensity
+      const renderer = new Renderer({
+        ...defaultRendererProps,
+        canvas,
+        config: {
+          ...defaultRendererConfig,
+          scene: { hemisphereLightIntensity: 3.5 },
+        },
+      });
+      const renderSpy = jest.spyOn(renderer.gl, "render");
+
+      // When: Rendering a frame (updateSceneRenderSettings runs during construction and applies
+      // the configured intensity; rendering lets us capture the private scene via the gl mock)
+      renderer.animationFrame();
+
+      // Then: The hemisphere light in the scene should reflect the configured intensity
+      const [scene] = renderSpy.mock.calls[0] as [THREE.Scene, THREE.Camera];
+      const hemiLight = scene.children.find(
+        (child: THREE.Object3D): child is THREE.HemisphereLight =>
+          child instanceof THREE.HemisphereLight,
+      );
+      expect(hemiLight).toBeDefined();
+      expect(hemiLight?.intensity).toBe(3.5);
+
+      renderer.dispose();
+    });
+
+    it("applies the default hemisphere light intensity when not configured", () => {
+      // Given: A renderer without a custom hemisphere light intensity
+      const renderer = new Renderer({ ...defaultRendererProps, canvas });
+      const renderSpy = jest.spyOn(renderer.gl, "render");
+
+      // When: Rendering a frame
+      renderer.animationFrame();
+
+      // Then: The hemisphere light should use the default intensity (0.5 * PI)
+      const [scene] = renderSpy.mock.calls[0] as [THREE.Scene, THREE.Camera];
+      const hemiLight = scene.children.find(
+        (child: THREE.Object3D): child is THREE.HemisphereLight =>
+          child instanceof THREE.HemisphereLight,
+      );
+      expect(hemiLight?.intensity).toBe(0.5 * Math.PI);
+
+      renderer.dispose();
+    });
   });
 
   it("does not update topics when topics reference is the same", () => {
@@ -1824,33 +2110,30 @@ describe("Renderer.handleAllFramesMessages behavior", () => {
     const reprocessedBatch = addMessageEventBatchMock.mock.calls[0]?.[0];
     expect(reprocessedBatch).toHaveLength(numMessagesBeforeTime - 1);
   });
-  it.failing(
-    "(does not) reset the cursor if number of messages added **and** removed before cursor are equal in a single update",
-    () => {
-      // Given: A renderer with messages starting at index 2
-      const renderer = new Renderer(rendererArgs);
-      const msgs = [];
-      for (let i = 2; i < 10; i++) {
-        msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
-      }
-      const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
+  it.failing("(does not) reset the cursor if number of messages added **and** removed before cursor are equal in a single update", () => {
+    // Given: A renderer with messages starting at index 2
+    const renderer = new Renderer(rendererArgs);
+    const msgs = [];
+    for (let i = 2; i < 10; i++) {
+      msgs.push(createTFMessageEvent("a", "b", BigInt(i), [BigInt(i)]));
+    }
+    const addMessageEventBatchMock = jest.spyOn(renderer, "addMessageEventBatch");
 
-      // When: Processing initial messages
-      renderer.setCurrentTime(5n);
-      renderer.handleAllFramesMessages(msgs);
-      expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+    // When: Processing initial messages
+    renderer.setCurrentTime(5n);
+    renderer.handleAllFramesMessages(msgs);
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
 
-      // When: Removing and adding message at beginning (before cursor)
-      addMessageEventBatchMock.mockClear();
-      msgs.shift();
-      msgs.unshift(createTFMessageEvent("a", "b", 1n, [1n]));
-      const newMessagesHandled = renderer.handleAllFramesMessages(msgs);
+    // When: Removing and adding message at beginning (before cursor)
+    addMessageEventBatchMock.mockClear();
+    msgs.shift();
+    msgs.unshift(createTFMessageEvent("a", "b", 1n, [1n]));
+    const newMessagesHandled = renderer.handleAllFramesMessages(msgs);
 
-      // Then: Should still reprocess because cursor was reset
-      expect(newMessagesHandled).toBeTruthy();
-      expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
-    },
-  );
+    // Then: Should still reprocess because cursor was reset
+    expect(newMessagesHandled).toBeTruthy();
+    expect(addMessageEventBatchMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("Renderer backward seek behavior", () => {
@@ -1926,6 +2209,255 @@ describe("Renderer backward seek behavior", () => {
     const frame = renderer.transformTree.frame("child");
     // Frame may exist but should have no transforms, or frame doesn't exist (both are valid)
     expect(frame == undefined || frame.transformsSize() === 0).toBe(true);
+  });
+
+  it("preserves static transforms when seeking backward", () => {
+    // Given: A renderer
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+
+    // When: Adding regular and static transforms
+    renderer.setCurrentTime(100n);
+    const regularMsg = createTFMessageEvent("parent", "child_regular", 50n, [50n]);
+    const staticMsg = createTFMessageEvent("parent", "child_static", 10n, [10n], "/tf_static");
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    // Verify both are present
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    // When: Seeking backward
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n);
+
+    // Then: Regular transform should be cleared, static transform preserved
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+  });
+
+  it("preserves static transforms when seeking backward with allFrames", () => {
+    // Given: A renderer with preload enabled
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+
+    // When: Adding regular and static transforms
+    renderer.setCurrentTime(100n);
+    const regularMsg = createTFMessageEvent("parent", "child_regular", 50n, [50n]);
+    const staticMsg = createTFMessageEvent("parent", "child_static", 10n, [10n], "/tf_static");
+    const allFrames = [staticMsg, regularMsg];
+
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    // Verify both are present
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    // When: Seeking backward and providing allFrames
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n, allFrames);
+
+    // Then: Regular transform (at 50n) should be cleared, static transform preserved
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+  });
+});
+
+describe("Renderer static transform caching across message types", () => {
+  let canvas = document.createElement("canvas");
+  let parent = document.createElement("div");
+  let rendererArgs: ConstructorParameters<typeof Renderer>[0] = {
+    ...defaultRendererProps,
+    canvas,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupJestCanvasMock();
+    parent = document.createElement("div");
+    canvas = document.createElement("canvas");
+    parent.appendChild(canvas);
+    rendererArgs = { ...defaultRendererProps, canvas };
+  });
+
+  afterEach(() => {
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  it("caches and preserves static transforms received as foxglove.FrameTransform messages", () => {
+    // Given: A renderer that has received a regular and a static foxglove.FrameTransform message
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+    renderer.setCurrentTime(100n);
+    const regularMsg = createFrameTransformEvent("parent", "child_regular", 50n, 50n, "/tf");
+    const staticMsg = createFrameTransformEvent("parent", "child_static", 10n, 10n, "/tf_static");
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    // Then: Both transforms should be present before seeking
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    // When: Seeking backward
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n);
+
+    // Then: The regular transform should be cleared, but the static transform preserved
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.dispose();
+  });
+
+  it("caches and preserves static transforms received as foxglove.FrameTransforms messages", () => {
+    // Given: A renderer that has received a regular and a static foxglove.FrameTransforms message
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+    renderer.setCurrentTime(100n);
+    const regularMsg = createFrameTransformsEvent(
+      [{ parentId: "parent", childId: "child_regular", stamp: 50n }],
+      50n,
+      "/tf",
+    );
+    const staticMsg = createFrameTransformsEvent(
+      [{ parentId: "parent", childId: "child_static", stamp: 10n }],
+      10n,
+      "/tf_static",
+    );
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    // Then: Both transforms should be present before seeking
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    // When: Seeking backward
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n);
+
+    // Then: The regular transform should be cleared, but the static transform preserved
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.dispose();
+  });
+
+  it("caches and preserves static transforms received as geometry_msgs/TransformStamped messages", () => {
+    // Given: A renderer that has received a regular and a static geometry_msgs/TransformStamped message
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+    renderer.setCurrentTime(100n);
+    const regularMsg = createTransformStampedEvent("parent", "child_regular", 50n, 50n, "/tf");
+    const staticMsg = createTransformStampedEvent("parent", "child_static", 10n, 10n, "/tf_static");
+    renderer.addMessageEvent(regularMsg);
+    renderer.addMessageEvent(staticMsg);
+    renderer.animationFrame();
+
+    // Then: Both transforms should be present before seeking
+    expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    // When: Seeking backward
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n);
+
+    // Then: The regular transform should be cleared, but the static transform preserved
+    const regularFrame = renderer.transformTree.frame("child_regular");
+    expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.dispose();
+  });
+
+  it("does not cache a static transform that is rejected as a cyclic edge", () => {
+    // Given: A renderer with a transform chain grandparent -> parent -> child
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: false } },
+      },
+    });
+    renderer.addMessageEvent(createTFMessageEvent("grandparent", "parent", 1n, [1n], "/tf"));
+    renderer.addMessageEvent(createTFMessageEvent("parent", "child", 2n, [2n], "/tf"));
+    renderer.animationFrame();
+
+    // When: A cyclic *static* transform (child -> grandparent) is received
+    renderer.addMessageEvent(createTFMessageEvent("child", "grandparent", 3n, [3n], "/tf_static"));
+    renderer.animationFrame();
+
+    // And: Seeking backward reapplies whatever was cached from static topics
+    renderer.setCurrentTime(0n);
+    renderer.handleSeek(100n);
+
+    // Then: The cyclic transform must not have been cached, so it is not resurrected
+    const grandparentFrame = renderer.transformTree.frame("grandparent");
+    expect(grandparentFrame == undefined || grandparentFrame.parent()?.id !== "child").toBe(true);
+
+    renderer.dispose();
+  });
+
+  it("preserves static transforms when preloading is enabled but allFrames is empty", () => {
+    // Given: A renderer with preloading enabled, which subscribes #onResetAllFramesCursor to
+    // the resetAllFramesCursor event, and which has received a static transform
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    renderer.setCurrentTime(100n);
+    renderer.addMessageEvent(
+      createTFMessageEvent("parent", "child_static", 10n, [10n], "/tf_static"),
+    );
+    renderer.animationFrame();
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    // When: Seeking backward while the preload buffer is still empty, which takes the
+    // clear()-based path and emits resetAllFramesCursor
+    renderer.setCurrentTime(20n);
+    renderer.handleSeek(100n, []);
+
+    // Then: The static transform is still restored. The resetAllFramesCursor handler must not
+    // wipe the static cache, otherwise #reapplyStaticTransforms has nothing left to reapply.
+    expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+
+    renderer.dispose();
   });
 });
 

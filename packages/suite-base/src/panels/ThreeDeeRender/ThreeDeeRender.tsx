@@ -7,6 +7,7 @@
 
 import * as _ from "lodash-es";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLatest } from "react-use";
 import { DeepPartial } from "ts-essentials";
 import { useDebouncedCallback } from "use-debounce";
@@ -32,6 +33,14 @@ import {
   PANEL_STYLE,
   MAX_TRANSFORM_MESSAGES,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
+import {
+  FRAME_TRANSFORM_DATATYPES,
+  FRAME_TRANSFORMS_DATATYPES,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/foxglove";
+import {
+  TF_DATATYPES,
+  TRANSFORM_STAMPED_DATATYPES,
+} from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 
 import type { IRenderer, ImageModeConfig, RendererConfig, RendererSubscription } from "./IRenderer";
@@ -55,6 +64,17 @@ import { PublishClickEventMap } from "./renderables/PublishClickTool";
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/PublishSettings";
 import { Shared3DPanelState, ThreeDeeRenderProps } from "./types";
 
+/**
+ * Schemas that carry coordinate frame transforms. Topics with one of these schemas generally
+ * require preloading so that transforms are available across the whole playback range.
+ */
+const TRANSFORM_TOPIC_SCHEMAS = new Set<string>([
+  ...FRAME_TRANSFORM_DATATYPES,
+  ...FRAME_TRANSFORMS_DATATYPES,
+  ...TF_DATATYPES,
+  ...TRANSFORM_STAMPED_DATATYPES,
+]);
+
 const log = Logger.getLogger(__filename);
 
 /**
@@ -75,9 +95,11 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     saveState,
     unstable_fetchAsset: fetchAsset,
     unstable_setMessagePathDropConfig: setMessagePathDropConfig,
+    unstable_setAlert: setPanelAlert,
   } = context;
   const analytics = useAnalytics();
   const { classes } = useStyles();
+  const { t } = useTranslation("threeDee");
 
   // Load and save the persisted panel configuration
   const [config, setConfig] = useState<Immutable<RendererConfig>>(() => {
@@ -200,6 +222,10 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   const [reloadPreloadTrigger, setReloadPreloadTrigger] = useState<number>(0);
 
   const renderRef = useRef({ needsRender: false });
+  // Marks that the frame currently being processed resulted from a seek. On such frames the panel
+  // defers the frame barrier (`renderDone`) until any in-flight video decode has settled, so the
+  // player parks the cursor on the seek target until the frame is actually rendered.
+  const seekFrameRef = useRef(false);
   const [renderDone, setRenderDone] = useState<(() => void) | undefined>();
 
   const schemaSubscriptions = useRendererProperty(
@@ -357,6 +383,25 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [topics, renderer]);
 
+  const hasTransformTopics = useMemo(
+    () => topics?.some((topic) => TRANSFORM_TOPIC_SCHEMAS.has(topic.schemaName)) ?? false,
+    [topics],
+  );
+  const isPreloadingEnabled = config.scene.transforms?.enablePreloading === true;
+  useEffect(() => {
+    // Surface an informational alert whenever there's a transform topic
+    setPanelAlert?.(
+      "transform-preload",
+      hasTransformTopics && !isPreloadingEnabled
+        ? {
+            severity: "info",
+            message: t("transformPreloadAlert"),
+            tip: t("transformPreloadAlertTip"),
+          }
+        : undefined,
+    );
+  }, [hasTransformTopics, isPreloadingEnabled, setPanelAlert, t]);
+
   // Tell the renderer if we are connected to a ROS data source
   useEffect(() => {
     if (renderer) {
@@ -430,7 +475,6 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   // Subscribe to eligible and enabled topics for range messages
   useLayoutEffect(() => {
     const transformTopics = transformTopicsToPreload;
-    const isPreloadingEnabled = config.scene.transforms?.enablePreloading === true;
     const maxMessages: number =
       config.scene.transforms?.maxPreloadMessages ?? MAX_TRANSFORM_MESSAGES;
 
@@ -525,6 +569,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       // trigger a state flush in Renderer
       if (renderState.didSeek === true) {
         setDidSeek(true);
+        seekFrameRef.current = true;
       }
 
       // Set the done callback into a state variable to trigger a re-render
@@ -635,7 +680,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     if (!topicsToSubscribe) {
       return;
     }
-    log.debug(`Subscribing to [${topicsToSubscribe.map((t) => JSON.stringify(t)).join(", ")}]`);
+    log.debug(
+      `Subscribing to [${topicsToSubscribe.map((topic) => JSON.stringify(topic)).join(", ")}]`,
+    );
     context.subscribe(topicsToSubscribe);
   }, [context, topicsToSubscribe]);
 
@@ -752,10 +799,35 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   });
 
-  // Invoke the done callback once the render is complete
+  // Invoke the done callback once the render is complete. On a seek frame, defer the callback
+  // until any in-flight video decode has settled so the player parks the cursor on the seek target
+  // until the frame is actually painted (matching the "stop, render, then resume" seek behavior),
+  // instead of resuming playback and racing the video forward to catch up. Steady-state frames
+  // invoke the callback immediately, leaving normal playback pacing unchanged.
   useEffect(() => {
-    renderDone?.();
-  }, [renderDone]);
+    const done = renderDone;
+    if (!done) {
+      return;
+    }
+
+    if (!renderer || !seekFrameRef.current) {
+      done();
+      return;
+    }
+    seekFrameRef.current = false;
+
+    let invoke: (() => void) | undefined = done;
+    const callOnce = () => {
+      if (invoke) {
+        invoke();
+        invoke = undefined;
+      }
+    };
+    renderer.settleVideoDecodes().then(callOnce, callOnce);
+    // If a newer frame supersedes this one before the decode settles, release the barrier so the
+    // pipeline is never left waiting on a stale frame.
+    return callOnce;
+  }, [renderDone, renderer]);
 
   // Create a useCallback wrapper for adding a new panel to the layout, used to open the
   // "Raw Messages" panel from the object inspector

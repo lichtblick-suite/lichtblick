@@ -34,8 +34,8 @@ const SidebarItems = (props: {
           <Button
             onClick={() => {
               onSelectView("demo");
-              void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "demo" });
-              void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
+              analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, { type: "demo" });
+              analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
                 user: currentUserType,
                 cta: "demo",
               });
@@ -72,7 +72,7 @@ const SidebarItems = (props: {
                 target="_blank"
                 className={classes.button}
                 onClick={() => {
-                  void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
+                  analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
                     user: currentUserType,
                     cta: "tutorials",
                   });
@@ -105,7 +105,7 @@ const SidebarItems = (props: {
                   variant="outlined"
                   className={classes.button}
                   onClick={() => {
-                    void analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
+                    analytics.logEvent(AppEvent.DIALOG_CLICK_CTA, {
                       user: currentUserType,
                       cta: "upload-to-dp",
                     });

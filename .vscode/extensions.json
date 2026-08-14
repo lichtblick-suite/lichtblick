@@ -6,7 +6,7 @@
   // List of extensions which should be recommended for users of this workspace.
   "recommendations": [
     "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
+    "biomejs.biome",
     "orta.vscode-jest",
     "bierner.comment-tagged-templates"
   ],

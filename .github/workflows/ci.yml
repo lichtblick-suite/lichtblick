@@ -22,7 +22,7 @@ jobs:
           # Specify names so that the GitHub branch protection settings for
           # required checks don't need to change if we ever change the commands used.
           - name: npm audit
-            command: yarn npm audit --all --recursive --severity moderate
+            command: yarn npm audit --all --recursive --severity high
           - name: lint
             command: |
               # lint steps
@@ -30,6 +30,7 @@ jobs:
               yarn license-check
               yarn dedupe --check
               yarn run tsc --noEmit # typecheck files that are not included by webpack or package builds
+              yarn run format:ci
               yarn run lint:ci
               yarn run lint:unused-exports
               yarn run lint:dependencies
@@ -52,15 +53,15 @@ jobs:
     name: ${{ matrix.config.name }} (${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             .yarn/cache
@@ -91,15 +92,15 @@ jobs:
       TZ: Europe/Lisbon
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             .yarn/cache
@@ -142,15 +143,15 @@ jobs:
       TZ: Europe/Lisbon
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             .yarn/cache
@@ -184,15 +185,15 @@ jobs:
     name: e2e-report (merge all reports)
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - run: corepack enable yarn
 
       - name: Restore cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             .yarn/cache

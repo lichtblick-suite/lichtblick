@@ -33,6 +33,9 @@ export const threeDee = {
   maxPreloadMessagesTooltip:
     "Maximum number of transform messages to keep in memory when preloading is enabled. Higher values provide more history but use more memory.",
   clearPreloadBuffer: "Clear preload buffer",
+  transformPreloadAlert: "Transform topics detected",
+  transformPreloadAlertTip:
+    "Activating preloading (3D/Image panel -> Transforms -> Settings) is recommended for accurate visualization of transform topics. NOTE: this may impact performance.",
   fixed: "Fixed",
   followMode: "Follow mode",
   followModeHelp: "Change the camera behavior during playback to follow the display frame or not.",
@@ -68,6 +71,15 @@ export const threeDee = {
   takeEffectAfterReboot: "This setting requires a restart to take effect",
   YUp: "Y-up",
   ZUp: "Z-up",
+
+  // Lighting
+  mainLightMode: "Main light",
+  mainLightModeHelp:
+    "Fixed uses a world-space directional light. Headlight attaches the light to the camera so the scene is always lit from the viewer's perspective (similar to RViz).",
+  mainLightFixed: "Fixed (scene)",
+  mainLightHeadlight: "Headlight (camera)",
+  directionalLightIntensity: "Directional light intensity",
+  hemisphereLightIntensity: "Hemisphere light intensity",
 
   // Camera
   distance: "Distance",

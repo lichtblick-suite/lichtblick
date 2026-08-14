@@ -29,16 +29,32 @@ export function getNewConnection(options: {
   maxRequestSize: number; // The cache size. If equal to or larger than `fileSize` we will attempt to download the whole file.
   fileSize: number; // Size of the file.
   continueDownloadingThreshold: number; // Amount we're willing to wait downloading before opening a new connection.
+  // When false, only the exact requested byte ranges are downloaded and no speculative
+  // read-ahead is performed. Used for many-small-file remote sessions to avoid fetching
+  // whole files up-front. Defaults to true (legacy behaviour).
+  readAheadEnabled?: boolean;
+  readAheadBufferBytes?: number;
 }): Range | undefined {
-  const { readRequestRange, currentRemainingRange, ...otherOptions } = options;
+  const {
+    readRequestRange,
+    currentRemainingRange,
+    readAheadEnabled = true,
+    readAheadBufferBytes = READ_AHEAD_BUFFER_SIZE,
+    ...otherOptions
+  } = options;
   if (readRequestRange) {
     return getNewConnectionWithExistingReadRequest({
       readRequestRange,
       currentRemainingRange,
+      readAheadEnabled,
+      readAheadBufferBytes,
       ...otherOptions,
     });
-  } else if (!currentRemainingRange) {
-    return getNewConnectionWithoutExistingConnection(otherOptions);
+  } else if (!currentRemainingRange && readAheadEnabled) {
+    return getNewConnectionWithoutExistingConnection({
+      ...otherOptions,
+      readAheadBufferBytes,
+    });
   }
   return undefined;
 }
@@ -50,6 +66,8 @@ function getNewConnectionWithExistingReadRequest({
   maxRequestSize,
   fileSize,
   continueDownloadingThreshold,
+  readAheadEnabled,
+  readAheadBufferBytes,
 }: {
   currentRemainingRange?: Range;
   readRequestRange: Range;
@@ -58,6 +76,8 @@ function getNewConnectionWithExistingReadRequest({
   maxRequestSize: number;
   fileSize: number;
   continueDownloadingThreshold: number;
+  readAheadEnabled: boolean;
+  readAheadBufferBytes: number;
 }): Range | undefined {
   // We have a requested range that we're trying to download.
   if (readRequestRange.end - readRequestRange.start > maxRequestSize) {
@@ -86,6 +106,12 @@ function getNewConnectionWithExistingReadRequest({
   if (!startNewConnection) {
     return;
   }
+  // When read-ahead is disabled, only download exactly the missing portion of the requested
+  // range. This skips both the "download the whole file" path (maxRequestSize >= fileSize) and
+  // the 50 MiB look-ahead extension below, keeping multi-file remote sessions lazy.
+  if (!readAheadEnabled) {
+    return notDownloadedRanges[0];
+  }
   if (maxRequestSize >= fileSize) {
     // If we're trying to download the whole file, read all the way up to the next range that we have already downloaded.
     const range = { start: notDownloadedRanges[0].start, end: fileSize };
@@ -96,10 +122,14 @@ function getNewConnectionWithExistingReadRequest({
     // If we're downloading to the end of our range, do some reading ahead while we're at it.
     // Note that we might have already downloaded parts of this range, but we don't know when
     // they get evicted, so for now we just the entire range again.
-    // Use a conservative read-ahead of 50 MB to avoid downloading too much data that may not be needed
+    // Use the configured read-ahead buffer to avoid downloading too much data that may not be needed,
+    // but never shrink below the actual missing tail of the pending read request.
     return {
       ...notDownloadedRanges[0],
-      end: Math.min(readRequestRange.start + READ_AHEAD_BUFFER_SIZE, fileSize),
+      end: Math.max(
+        notDownloadedRanges[0].end,
+        Math.min(readRequestRange.start + readAheadBufferBytes, fileSize),
+      ),
     };
   }
 
@@ -112,11 +142,13 @@ function getNewConnectionWithoutExistingConnection({
   lastResolvedCallbackEnd,
   maxRequestSize,
   fileSize,
+  readAheadBufferBytes,
 }: {
   downloadedRanges: Range[];
   lastResolvedCallbackEnd?: number;
   maxRequestSize: number;
   fileSize: number;
+  readAheadBufferBytes: number;
 }): Range | undefined {
   // If we don't have any read requests, and we also don't have an active connection, then start
   // reading ahead as much data as we can!
@@ -131,12 +163,15 @@ function getNewConnectionWithoutExistingConnection({
       readAheadRange = { start: 0, end: fileSize };
     }
   } else if (lastResolvedCallbackEnd != undefined) {
+    if (lastResolvedCallbackEnd >= fileSize) {
+      return undefined;
+    }
     // Otherwise, if we have a limited cache, we want to read the data right after the last
     // read request, because usually read requests are sequential without gaps.
-    // Use a conservative read-ahead of 50 MB to avoid downloading too much data that may not be needed
+    // Use the configured read-ahead buffer to avoid downloading too much data that may not be needed.
     readAheadRange = {
       start: lastResolvedCallbackEnd,
-      end: Math.min(lastResolvedCallbackEnd + READ_AHEAD_BUFFER_SIZE, fileSize),
+      end: Math.min(lastResolvedCallbackEnd + readAheadBufferBytes, fileSize),
     };
   }
   if (readAheadRange) {

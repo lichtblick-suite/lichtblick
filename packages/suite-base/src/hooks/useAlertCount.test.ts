@@ -6,7 +6,7 @@
 import { renderHook } from "@testing-library/react";
 
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
-import { useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
+import { getAlertKey, useAlertsStore } from "@lichtblick/suite-base/context/AlertsContext";
 import { PlayerAlert } from "@lichtblick/suite-base/players/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -18,15 +18,28 @@ jest.mock("@lichtblick/suite-base/context/AlertsContext");
 describe("useAlertCount", () => {
   const mockUseMessagePipeline = useMessagePipeline as jest.Mock;
   const mockUseAlertsStore = useAlertsStore as jest.Mock;
+  const mockGetPlayerAlertKey = getAlertKey as jest.Mock;
+
+  function setupAlertsStore(
+    alerts: unknown[],
+    dismissedPlayerAlertKeys: ReadonlySet<string> = new Set(),
+  ): void {
+    mockUseAlertsStore.mockImplementation((selector: (store: unknown) => unknown) =>
+      selector({ alerts, dismissedPlayerAlertKeys }),
+    );
+  }
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetPlayerAlertKey.mockImplementation(
+      (alert: PlayerAlert) => `${alert.severity}::${alert.message}`,
+    );
   });
 
   it("should return empty alerts when no player or session alerts exist", () => {
     // Given
     mockUseMessagePipeline.mockReturnValue([]);
-    mockUseAlertsStore.mockReturnValue([]);
+    setupAlertsStore([]);
 
     // When
     const { result } = renderHook(() => useAlertCount());
@@ -50,7 +63,7 @@ describe("useAlertCount", () => {
     const playerAlerts = [playerAlert1, playerAlert2];
 
     mockUseMessagePipeline.mockReturnValue(playerAlerts);
-    mockUseAlertsStore.mockReturnValue([]);
+    setupAlertsStore([]);
 
     // When
     const { result } = renderHook(() => useAlertCount());
@@ -73,7 +86,7 @@ describe("useAlertCount", () => {
     const sessionAlerts = [sessionAlert1, sessionAlert2];
 
     mockUseMessagePipeline.mockReturnValue([]);
-    mockUseAlertsStore.mockReturnValue(sessionAlerts);
+    setupAlertsStore(sessionAlerts);
 
     // When
     const { result } = renderHook(() => useAlertCount());
@@ -95,7 +108,7 @@ describe("useAlertCount", () => {
     };
 
     mockUseMessagePipeline.mockReturnValue([playerAlert]);
-    mockUseAlertsStore.mockReturnValue([sessionAlert]);
+    setupAlertsStore([sessionAlert]);
 
     // When
     const { result } = renderHook(() => useAlertCount());
@@ -106,10 +119,39 @@ describe("useAlertCount", () => {
     expect(result.current.alertCount).toBe(2);
   });
 
+  it("should exclude dismissed player alerts from the list and count", () => {
+    // Given
+    const dismissedAlert: PlayerAlert = {
+      message: BasicBuilder.string(),
+      severity: "error",
+    };
+    const visibleAlert: PlayerAlert = {
+      message: BasicBuilder.string(),
+      severity: "warn",
+    };
+    const sessionAlert = {
+      message: BasicBuilder.string(),
+      severity: "info" as const,
+    };
+
+    mockUseMessagePipeline.mockReturnValue([dismissedAlert, visibleAlert]);
+    setupAlertsStore(
+      [sessionAlert],
+      new Set([`${dismissedAlert.severity}::${dismissedAlert.message}`]),
+    );
+
+    // When
+    const { result } = renderHook(() => useAlertCount());
+
+    // Then
+    expect(result.current.playerAlerts).toEqual([visibleAlert]);
+    expect(result.current.alertCount).toBe(2);
+  });
+
   it("should handle undefined player alerts gracefully", () => {
     // Given
     mockUseMessagePipeline.mockReturnValue(undefined);
-    mockUseAlertsStore.mockReturnValue([]);
+    setupAlertsStore([]);
 
     // When
     const { result } = renderHook(() => useAlertCount());

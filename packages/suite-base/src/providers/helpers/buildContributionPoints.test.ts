@@ -55,7 +55,7 @@ describe("buildContributionPoints", () => {
         registration: expect.objectContaining({
           name: panelName,
           initPanel: expect.any(Function),
-        } as ExtensionPanelRegistration),
+        }),
       }),
     );
     delete (globalThis as any).panel;
@@ -113,7 +113,7 @@ describe("buildContributionPoints", () => {
     const result = buildContributionPoints(extensionInfo, extensionSource);
 
     expect(result.messageConverters).toHaveLength(1);
-    expect(result.messageConverters.length).toBe(1);
+    expect(result.messageConverters).toHaveLength(1);
     expect(result.messageConverters[0]).toEqual({
       ...messageConverter,
       extensionNamespace: extensionInfo.namespace,

@@ -12,16 +12,29 @@ import {
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
+import {
+  MultiFileHydrationOverrides,
+  addMultiFileHydrationOverrides,
+} from "@lichtblick/suite-base/players/IterablePlayer/shared/multiFileHydrationOptions";
+import { expandVideoSeekBackfill } from "@lichtblick/suite-base/players/IterablePlayer/videoSeekBackfill";
 import { Player } from "@lichtblick/suite-base/players/types";
 import { mergeMultipleFileNames } from "@lichtblick/suite-base/util/mergeMultipleFileName";
 
 class McapLocalDataSourceFactory implements IDataSourceFactory {
+  private readonly multiFileHydrationOverrides?: MultiFileHydrationOverrides;
+
   public id = "mcap-local-file";
   public type: IDataSourceFactory["type"] = "file";
   public displayName = "MCAP";
   public iconName: IDataSourceFactory["iconName"] = "OpenFile";
   public supportedFileTypes = [AllowedFileExtensions.MCAP];
   public supportsMultiFile = true;
+
+  // Optional pass-through for future multi-file hydration tuning experiments. Omitted by default
+  // so existing behavior remains unchanged until a caller explicitly opts in.
+  public constructor(multiFileHydrationOverrides?: MultiFileHydrationOverrides) {
+    this.multiFileHydrationOverrides = multiFileHydrationOverrides;
+  }
 
   public initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
     const files = args.files ?? [];
@@ -43,7 +56,7 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
           ),
         );
       },
-      initArgs: { files },
+      initArgs: addMultiFileHydrationOverrides({ files }, this.multiFileHydrationOverrides),
     });
 
     return new IterablePlayer({
@@ -52,6 +65,9 @@ class McapLocalDataSourceFactory implements IDataSourceFactory {
       name: mergeMultipleFileNames(files.map((file) => file.name)),
       sourceId: this.id,
       readAheadDuration: { sec: 120, nsec: 0 },
+      // MCAP can carry foxglove.CompressedVideo. Some codecs (e.g. H.265) cannot decode a P/B-frame
+      // in isolation, so on a backward seek the backfill is expanded to include the preceding GOP.
+      expandBackfill: expandVideoSeekBackfill,
     });
   }
 }

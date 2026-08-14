@@ -7,7 +7,7 @@
 
 import { Add20Filled, Edit20Filled, Heart20Filled, Toolbox20Filled } from "@fluentui/react-icons";
 import { Fab, FabProps, Stack } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 
 const variants: FabProps["variant"][] = ["circular", "extended"];
 const sizes: FabProps["size"][] = ["small", "medium", "large"];

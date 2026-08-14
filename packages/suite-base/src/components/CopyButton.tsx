@@ -34,6 +34,7 @@ function CopyButtonComponent(
     color?: ButtonProps["color"];
     className?: string;
     edge?: IconButtonProps["edge"];
+    "aria-label"?: string;
   }>,
 ): React.JSX.Element {
   const {
@@ -44,6 +45,7 @@ function CopyButtonComponent(
     size = "medium",
     iconSize = "medium",
     getText,
+    "aria-label": ariaLabel,
   } = props;
   const theme = useTheme();
   const [copied, setCopied] = useState(false);
@@ -93,6 +95,7 @@ function CopyButtonComponent(
           size={size}
           onClick={handleCopy}
           color={copied ? "success" : color}
+          aria-label={ariaLabel ?? "Copy to clipboard"}
         >
           {copied ? checkIcon : copyIcon}
         </IconButton>

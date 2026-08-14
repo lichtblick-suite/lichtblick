@@ -44,7 +44,7 @@ jobs:
           echo "base_ref=$(jq -r '.base_ref' ./.sonar-pr/pr-metadata.json)" >> "$GITHUB_OUTPUT"
 
       - name: Checkout default branch (for workflow scripts only)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: develop
           sparse-checkout: .github/workflows/scripts
@@ -64,10 +64,14 @@ jobs:
             const script = require('/tmp/workflow-scripts/create-check-run.js');
             return await script({ github, context });
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: refs/pull/${{ steps.metadata.outputs.number }}/head
+          # Allows this workflow to checkout the PR head ref even though it is from a fork.
+          # This is safe because this workflow does not execute any code from the fork, only downloads artifacts and runs the scanner.
+          # https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target#opting-out-of-built-in-protections
+          allow-unsafe-pr-checkout: true
 
       - name: Download ESLint report artifact
         uses: actions/download-artifact@v8
@@ -89,7 +93,7 @@ jobs:
         run: git fetch origin ${{ steps.metadata.outputs.base_ref }}:${{ steps.metadata.outputs.base_ref }}
 
       - name: ScanCloud PR Scan
-        uses: sonarsource/sonarqube-scan-action@v8.1.0
+        uses: sonarsource/sonarqube-scan-action@v8.2.1
         with:
           args: >
             -Dsonar.pullrequest.key=${{ steps.metadata.outputs.number }}

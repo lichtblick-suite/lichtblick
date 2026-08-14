@@ -6,14 +6,33 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
+import { Topic } from "@lichtblick/suite-base/players/types";
+
+// Cache the derived map keyed on the `sortedTopics` array reference. The pipeline store only
+// rebuilds `sortedTopics` (new reference) when the player's topics change, so the same map can be
+// reused across pipeline updates. This keeps frequent callers (e.g. getTopicSchema during
+// interactions) from rebuilding the map on every call.
+const topicToSchemaNameMapCache = new WeakMap<
+  readonly Topic[],
+  Record<string, string | undefined>
+>();
 
 export const getTopicToSchemaNameMap = (
   state: MessagePipelineContext,
 ): Record<string, string | undefined> => {
+  const { sortedTopics } = state;
+
+  const cached = topicToSchemaNameMapCache.get(sortedTopics);
+  if (cached) {
+    return cached;
+  }
+
   const result: Record<string, string | undefined> = {};
 
-  for (const topic of state.sortedTopics) {
+  for (const topic of sortedTopics) {
     result[topic.name] = topic.schemaName;
   }
+
+  topicToSchemaNameMapCache.set(sortedTopics, result);
   return result;
 };
