@@ -222,7 +222,7 @@ export function createMessagePipelineStore({
       },
       async getMessageAtTime(topic: string, time: Time) {
         const player = get().player;
-        if (!player?.getBackfillMessages) {
+        if (player?.getBackfillMessages == undefined) {
           return undefined;
         }
         const messages = await player.getBackfillMessages({
