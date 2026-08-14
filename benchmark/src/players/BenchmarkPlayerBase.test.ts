@@ -5,9 +5,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Log from "@lichtblick/log";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { BenchmarkPlayerBase } from "./BenchmarkPlayerBase";
+
+jest.mock("@lichtblick/log", () => ({
+  getLogger: jest.fn(() => ({ error: jest.fn() })),
+}));
+
+// BenchmarkPlayerBase resolves its logger once at module load, so capture that same instance here.
+const mockLoggerError = (Log.getLogger as jest.Mock).mock.results[0]?.value?.error as jest.Mock;
 
 class TestPlayer extends BenchmarkPlayerBase {
   public run = jest.fn(async (): Promise<void> => {});
@@ -27,6 +35,19 @@ describe("BenchmarkPlayerBase", () => {
     await Promise.resolve();
     // Then
     expect(player.run).toHaveBeenCalledTimes(1);
+  });
+
+  it("should log the error when run() rejects", async () => {
+    // Given
+    const player = new TestPlayer();
+    const error = new Error("boom");
+    player.run.mockRejectedValueOnce(error);
+    // When
+    player.setListener(async () => {});
+    await Promise.resolve();
+    await Promise.resolve();
+    // Then
+    expect(mockLoggerError).toHaveBeenCalledWith(error);
   });
 
   it("should return undefined from getBatchIterator", () => {

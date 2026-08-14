@@ -8,5 +8,7 @@
   "//": "Enable transpilation of node_modules to support ESM-only packages",
   "transformIgnorePatterns": [],
   "//": "Native find is slow because it does not exclude files: https://github.com/facebook/jest/pull/11264#issuecomment-825377579",
-  "haste": { "forceNodeFilesystemAPI": true }
+  "haste": { "forceNodeFilesystemAPI": true },
+  "setupFiles": ["<rootDir>/../packages/suite-base/src/test/setup.ts"],
+  "restoreMocks": true
 }
