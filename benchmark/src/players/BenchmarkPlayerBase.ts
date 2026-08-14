@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Log from "@lichtblick/log";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import {
@@ -14,6 +15,8 @@ import {
   PublishPayload,
   SubscribePayload,
 } from "@lichtblick/suite-base/players/types";
+
+const log = Log.getLogger(__filename);
 
 /**
  * Shared no-op/unimplemented Player method stubs common to all synthetic benchmark players.
@@ -26,7 +29,9 @@ abstract class BenchmarkPlayerBase implements Player {
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {
     this.listener = listener;
-    void this.run();
+    this.run().catch((err: unknown) => {
+      log.error(err);
+    });
   }
 
   public getBatchIterator(
