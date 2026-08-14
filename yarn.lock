@@ -8281,6 +8281,7 @@ __metadata:
     "@lichtblick/rostime": "npm:1.0.0"
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
+    "@lichtblick/test-builders": "npm:1.0.1"
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
     "@types/react": "npm:18.3.12"
