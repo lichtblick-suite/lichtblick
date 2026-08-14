@@ -20,6 +20,8 @@ import {
 import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import * as highFrequencyUtils from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import {
   GetBackfillMessagesArgs,
@@ -55,6 +57,22 @@ class TestSource implements IDeserializedIterableSource {
     return [];
   }
 }
+
+function messageEvent(props: Partial<MessageEvent> = {}): MessageEvent {
+  const event = MessageEventBuilder.messageEvent({
+    message: undefined,
+    sizeInBytes: 0,
+    schemaName: BasicBuilder.string(),
+    topic: BasicBuilder.string(),
+    ...props,
+  });
+  event.message = props.message;
+  delete event.publishTime;
+  delete event.topicConfig;
+  return event;
+}
+
+const defaultTopic = BasicBuilder.string();
 
 type PlayerStateWithoutPlayerId = Omit<PlayerState, "playerId">;
 
@@ -194,13 +212,11 @@ describe("IterablePlayer", () => {
   it("should return backfill messages from the iterable source when requested", async () => {
     // GIVEN - a source that can resolve backfill messages for a topic
     const source = new TestSource();
-    const backfillMessage = {
-      topic: "foo",
+    const topic = BasicBuilder.string();
+    const backfillMessage = messageEvent({
+      topic,
       receiveTime: { sec: 0, nsec: 1 },
-      message: undefined,
-      sizeInBytes: 0,
-      schemaName: "foo",
-    };
+    });
     const getBackfillMessagesSpy = jest
       .spyOn(source, "getBackfillMessages")
       .mockResolvedValue([backfillMessage]);
@@ -221,13 +237,13 @@ describe("IterablePlayer", () => {
 
     // WHEN - asking the player for a point-in-time backfill lookup
     const result = await player.getBackfillMessages({
-      topics: new Map([["foo", { topic: "foo" }]]),
+      topics: new Map([[topic, { topic }]]),
       time: fromSec(1),
     });
 
     // THEN - the player delegates to the source and returns the matching messages
     expect(getBackfillMessagesSpy).toHaveBeenCalledWith({
-      topics: new Map([["foo", { topic: "foo" }]]),
+      topics: new Map([[topic, { topic }]]),
       time: fromSec(1),
     });
     expect(result).toEqual([backfillMessage]);
@@ -243,10 +259,11 @@ describe("IterablePlayer", () => {
       enablePreload: false,
       sourceId: "test",
     });
+    const topic = BasicBuilder.string();
 
     // WHEN - requesting a point-in-time backfill lookup immediately
     const result = await player.getBackfillMessages({
-      topics: new Map([["foo", { topic: "foo" }]]),
+      topics: new Map([[topic, { topic }]]),
       time: fromSec(1),
     });
 
@@ -259,13 +276,15 @@ describe("IterablePlayer", () => {
 
   it("when seeking during a seek backfill, start another seek after the current one exits", async () => {
     const source = new TestSource();
+    const topic = BasicBuilder.string();
+    const schemaName = BasicBuilder.string();
     const player = new IterablePlayer({
       source,
       enablePreload: false,
       sourceId: "test",
     });
     const store = new PlayerStateStore(4);
-    player.setSubscriptions([{ topic: "foo" }]);
+    player.setSubscriptions([{ topic }]);
     player.setListener(async (state) => {
       await store.add(state);
     });
@@ -284,15 +303,7 @@ describe("IterablePlayer", () => {
       // Set a new backfill method and initiate another seek
       source.getBackfillMessages = async function () {
         source.getBackfillMessages = originalMethod;
-        return [
-          {
-            topic: "foo",
-            receiveTime: { sec: 0, nsec: 1 },
-            message: undefined,
-            sizeInBytes: 0,
-            schemaName: "foo",
-          },
-        ];
+        return [messageEvent({ topic, receiveTime: { sec: 0, nsec: 1 }, schemaName })];
       };
 
       player.seekPlayback({ sec: 0, nsec: 1 });
@@ -339,15 +350,7 @@ describe("IterablePlayer", () => {
       activeData: {
         ...baseState.activeData!,
         currentTime: { sec: 0, nsec: 1 },
-        messages: [
-          {
-            message: undefined,
-            receiveTime: { sec: 0, nsec: 1 },
-            sizeInBytes: 0,
-            topic: "foo",
-            schemaName: "foo",
-          },
-        ],
+        messages: [messageEvent({ topic, receiveTime: { sec: 0, nsec: 1 }, schemaName })],
       },
     };
 
@@ -363,13 +366,15 @@ describe("IterablePlayer", () => {
 
   it("while playing, seek keeps the cursor parked until the seek emit is released", async () => {
     const source = new TestSource();
+    const topic = BasicBuilder.string();
+    const schemaName = BasicBuilder.string();
     const player = new IterablePlayer({
       source,
       enablePreload: false,
       sourceId: "test",
     });
 
-    player.setSubscriptions([{ topic: "foo" }]);
+    player.setSubscriptions([{ topic }]);
 
     const initialStore = new PlayerStateStore(4);
     const playingStarted = signal();
@@ -383,15 +388,7 @@ describe("IterablePlayer", () => {
     let resumedCurrentNs: number | undefined;
 
     source.getBackfillMessages = async (args: GetBackfillMessagesArgs): Promise<MessageEvent[]> => {
-      return [
-        {
-          topic: "foo",
-          receiveTime: args.time,
-          message: undefined,
-          sizeInBytes: 0,
-          schemaName: "foo",
-        },
-      ];
+      return [messageEvent({ topic, receiveTime: args.time, schemaName })];
     };
 
     player.setListener(async (state) => {
@@ -442,20 +439,14 @@ describe("IterablePlayer", () => {
   });
 
   describe("expandBackfill hook", () => {
-    const raw: MessageEvent = {
-      topic: "foo",
-      receiveTime: { sec: 0, nsec: 1 },
-      message: undefined,
-      sizeInBytes: 0,
-      schemaName: "foo",
-    };
-    const extra: MessageEvent = {
-      topic: "foo",
+    const topic = BasicBuilder.string();
+    const schemaName = BasicBuilder.string();
+    const raw = messageEvent({ topic, receiveTime: { sec: 0, nsec: 1 }, schemaName });
+    const extra = messageEvent({
+      topic,
       receiveTime: { sec: 0, nsec: 0 },
-      message: undefined,
-      sizeInBytes: 0,
-      schemaName: "foo",
-    };
+      schemaName,
+    });
 
     it("invokes the hook with the raw backfill and emits its expanded result", async () => {
       const source = new TestSource();
@@ -470,7 +461,7 @@ describe("IterablePlayer", () => {
         expandBackfill,
       });
       const store = new PlayerStateStore(4);
-      player.setSubscriptions([{ topic: "foo" }]);
+      player.setSubscriptions([{ topic }]);
       player.setListener(async (state) => {
         await store.add(state);
       });
@@ -500,7 +491,7 @@ describe("IterablePlayer", () => {
         sourceId: "test",
       });
       const store = new PlayerStateStore(4);
-      player.setSubscriptions([{ topic: "foo" }]);
+      player.setSubscriptions([{ topic }]);
       player.setListener(async (state) => {
         await store.add(state);
       });
@@ -526,7 +517,7 @@ describe("IterablePlayer", () => {
       sourceId: "test",
     });
     const store = new PlayerStateStore(4);
-    player.setSubscriptions([{ topic: "foo" }]);
+    player.setSubscriptions([{ topic: defaultTopic }]);
     player.setListener(async (state) => {
       await store.add(state);
     });
@@ -601,13 +592,15 @@ describe("IterablePlayer", () => {
 
   it("startPlayback emits when seek-backfill state is active", async () => {
     const source = new TestSource();
+    const topic = BasicBuilder.string();
+    const schemaName = BasicBuilder.string();
     const player = new IterablePlayer({
       source,
       enablePreload: false,
       sourceId: "test",
     });
     const store = new PlayerStateStore(4);
-    player.setSubscriptions([{ topic: "foo" }]);
+    player.setSubscriptions([{ topic }]);
     player.setListener(async (state) => {
       await store.add(state);
     });
@@ -623,13 +616,11 @@ describe("IterablePlayer", () => {
 
       yield {
         type: "message-event",
-        msgEvent: {
-          topic: "foo",
+        msgEvent: messageEvent({
+          topic,
           receiveTime: { sec: 0, nsec: 99000001 },
-          message: undefined,
-          sizeInBytes: 0,
-          schemaName: "foo",
-        },
+          schemaName,
+        }),
       };
     };
 
@@ -647,15 +638,7 @@ describe("IterablePlayer", () => {
       source.getBackfillMessages = originalMethod;
       backfillStarted.resolve();
       await backfillPromise;
-      return [
-        {
-          topic: "foo",
-          receiveTime: { sec: 0, nsec: 1 },
-          message: undefined,
-          sizeInBytes: 0,
-          schemaName: "foo",
-        },
-      ];
+      return [messageEvent({ topic, receiveTime: { sec: 0, nsec: 1 }, schemaName })];
     };
 
     // Reset store to get state from the seeks
@@ -685,13 +668,15 @@ describe("IterablePlayer", () => {
 
   it("pausePlayback emits when seek-backfill state is active", async () => {
     const source = new TestSource();
+    const topic = BasicBuilder.string();
+    const schemaName = BasicBuilder.string();
     const player = new IterablePlayer({
       source,
       enablePreload: false,
       sourceId: "test",
     });
     const store = new PlayerStateStore(4);
-    player.setSubscriptions([{ topic: "foo" }]);
+    player.setSubscriptions([{ topic }]);
     player.setListener(async (state) => {
       await store.add(state);
     });
@@ -708,13 +693,11 @@ describe("IterablePlayer", () => {
 
       yield {
         type: "message-event",
-        msgEvent: {
-          topic: "foo",
+        msgEvent: messageEvent({
+          topic,
           receiveTime: { sec: 0, nsec: 99000001 },
-          message: undefined,
-          sizeInBytes: 0,
-          schemaName: "foo",
-        },
+          schemaName,
+        }),
       };
     };
 
@@ -732,15 +715,7 @@ describe("IterablePlayer", () => {
       source.getBackfillMessages = originalMethod;
       backfillStarted.resolve();
       await backfillPromise;
-      return [
-        {
-          topic: "foo",
-          receiveTime: { sec: 0, nsec: 1 },
-          message: undefined,
-          sizeInBytes: 0,
-          schemaName: "foo",
-        },
-      ];
+      return [messageEvent({ topic, receiveTime: { sec: 0, nsec: 1 }, schemaName })];
     };
     store.reset(1);
     // emit state
@@ -835,7 +810,7 @@ describe("IterablePlayer", () => {
       sourceId: "test",
     });
     const store = new PlayerStateStore(4);
-    player.setSubscriptions([{ topic: "foo" }]);
+    player.setSubscriptions([{ topic: defaultTopic }]);
     player.setListener(async (state) => {
       await store.add(state);
     });
@@ -1042,13 +1017,9 @@ describe("IterablePlayer", () => {
 
       yield {
         type: "message-event",
-        msgEvent: {
-          topic: "foo",
+        msgEvent: messageEvent({
           receiveTime: { sec: 0, nsec: 99000001 },
-          message: undefined,
-          sizeInBytes: 0,
-          schemaName: "foo",
-        },
+        }),
       };
     };
 
@@ -1091,13 +1062,9 @@ describe("IterablePlayer", () => {
 
       yield {
         type: "message-event",
-        msgEvent: {
-          topic: "foo",
+        msgEvent: messageEvent({
           receiveTime: { sec: 0, nsec: 99000001 },
-          message: undefined,
-          sizeInBytes: 0,
-          schemaName: "foo",
-        },
+        }),
       };
     };
 
@@ -1117,6 +1084,8 @@ describe("IterablePlayer", () => {
 
   it("should make a new message iterator when topic subscriptions change", async () => {
     const source = new TestSource();
+    const topic = BasicBuilder.string();
+    const secondTopic = BasicBuilder.string();
     const player = new IterablePlayer({
       source,
       enablePreload: false,
@@ -1126,7 +1095,7 @@ describe("IterablePlayer", () => {
     const messageIteratorSpy = jest.spyOn(source, "messageIterator");
 
     const store = new PlayerStateStore(4);
-    player.setSubscriptions([{ topic: "foo" }]);
+    player.setSubscriptions([{ topic }]);
     player.setListener(async (state) => {
       await store.add(state);
     });
@@ -1136,7 +1105,7 @@ describe("IterablePlayer", () => {
 
     // Call set subscriptions and add a new topic
     store.reset(2);
-    player.setSubscriptions([{ topic: "foo" }, { topic: "bar" }]);
+    player.setSubscriptions([{ topic }, { topic: secondTopic }]);
 
     await store.done;
 
@@ -1145,7 +1114,7 @@ describe("IterablePlayer", () => {
         {
           start: { sec: 0, nsec: 0 },
           end: { sec: 1, nsec: 0 },
-          topics: mockTopicSelection("foo"),
+          topics: mockTopicSelection(topic),
           consumptionType: "partial",
         },
       ],
@@ -1153,7 +1122,7 @@ describe("IterablePlayer", () => {
         {
           start: { sec: 0, nsec: 99000001 },
           end: { sec: 1, nsec: 0 },
-          topics: mockTopicSelection("bar", "foo"),
+          topics: mockTopicSelection(secondTopic, topic),
           consumptionType: "partial",
         },
       ],
@@ -1165,6 +1134,7 @@ describe("IterablePlayer", () => {
 
   it("strips unauthorized sampling requests from direct subscriptions", async () => {
     const source = new TestSource();
+    const topic = BasicBuilder.string();
     const player = new IterablePlayer({
       source,
       enablePreload: false,
@@ -1174,7 +1144,7 @@ describe("IterablePlayer", () => {
     const messageIteratorSpy = jest.spyOn(source, "messageIterator");
     player.setSubscriptions([
       {
-        topic: "foo",
+        topic,
         samplingRequest: { mode: "latest-per-render-tick" },
       },
     ]);
@@ -1187,7 +1157,7 @@ describe("IterablePlayer", () => {
 
     expect(messageIteratorSpy).toHaveBeenCalledTimes(1);
     const messageIteratorArgs = messageIteratorSpy.mock.calls[0]?.[0];
-    expect(messageIteratorArgs?.topics.get("foo")).toEqual({ topic: "foo" });
+    expect(messageIteratorArgs?.topics.get(topic)).toEqual({ topic });
 
     player.close();
     await player.isClosed;
@@ -1195,6 +1165,7 @@ describe("IterablePlayer", () => {
 
   it("keeps authorized sampling requests from trusted subscriptions", async () => {
     const source = new TestSource();
+    const topic = BasicBuilder.string();
     const player = new IterablePlayer({
       source,
       enablePreload: false,
@@ -1204,7 +1175,7 @@ describe("IterablePlayer", () => {
     const messageIteratorSpy = jest.spyOn(source, "messageIterator");
     player.setSubscriptions([
       {
-        topic: "foo",
+        topic,
         samplingRequest: { mode: "latest-per-render-tick" },
         samplingAuthorized: true,
       } as InternalSubscribePayload,
@@ -1218,8 +1189,8 @@ describe("IterablePlayer", () => {
 
     expect(messageIteratorSpy).toHaveBeenCalledTimes(1);
     const messageIteratorArgs = messageIteratorSpy.mock.calls[0]?.[0];
-    expect(messageIteratorArgs?.topics.get("foo")).toEqual({
-      topic: "foo",
+    expect(messageIteratorArgs?.topics.get(topic)).toEqual({
+      topic,
       samplingRequest: { mode: "latest-per-render-tick" },
       samplingAuthorized: true,
     });
@@ -1230,6 +1201,7 @@ describe("IterablePlayer", () => {
 
   it("should allow changing subscriptions when player in start-play state", async () => {
     const source = new TestSource();
+    const topic = BasicBuilder.string();
     const player = new IterablePlayer({
       source,
       enablePreload: false,
@@ -1244,7 +1216,7 @@ describe("IterablePlayer", () => {
     });
     // Wait for player to be in start-play state
     await store.done;
-    player.setSubscriptions([{ topic: "foo" }]);
+    player.setSubscriptions([{ topic }]);
 
     // Wait for player's initial setup to complete (seek-backfill + idle)
     store.reset(2);
@@ -1255,7 +1227,7 @@ describe("IterablePlayer", () => {
         {
           start: { sec: 0, nsec: 99000001 },
           end: { sec: 1, nsec: 0 },
-          topics: mockTopicSelection("foo"),
+          topics: mockTopicSelection(topic),
           consumptionType: "partial",
         },
       ],
@@ -1315,13 +1287,13 @@ describe("IterablePlayer", () => {
       const mockMessageIterator = jest.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
-          msgEvent: {
+          msgEvent: messageEvent({
             topic: "test_topic",
             receiveTime: { sec: 1, nsec: 0 },
-            message: { data: "test" },
+            message: { data: BasicBuilder.string() },
             sizeInBytes: 100,
             schemaName: "test_schema",
-          },
+          }),
         };
       });
 
@@ -1364,23 +1336,23 @@ describe("IterablePlayer", () => {
       const mockMessageIterator = jest.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
-          msgEvent: {
+          msgEvent: messageEvent({
             topic: "topic1",
             receiveTime: { sec: 1, nsec: 0 },
-            message: { data: "test1" },
+            message: { data: BasicBuilder.string() },
             sizeInBytes: 100,
             schemaName: "test_schema",
-          },
+          }),
         };
         yield {
           type: "message-event",
-          msgEvent: {
+          msgEvent: messageEvent({
             topic: "topic2",
             receiveTime: { sec: 2, nsec: 0 },
-            message: { data: "test2" },
+            message: { data: BasicBuilder.string() },
             sizeInBytes: 100,
             schemaName: "test_schema",
-          },
+          }),
         };
       });
 
@@ -1425,13 +1397,13 @@ describe("IterablePlayer", () => {
       const mockMessageIterator = jest.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
-          msgEvent: {
+          msgEvent: messageEvent({
             topic: "test_topic",
             receiveTime: { sec: 1, nsec: 0 },
-            message: { data: "test" },
+            message: { data: BasicBuilder.string() },
             sizeInBytes: 100,
             schemaName: "test_schema",
-          },
+          }),
         };
         yield {
           type: "alert",
@@ -1508,13 +1480,13 @@ describe("IterablePlayer", () => {
       const mockMessageIterator = jest.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
-          msgEvent: {
+          msgEvent: messageEvent({
             topic: "test_topic",
             receiveTime: { sec: 1, nsec: 0 },
-            message: { data: "test" },
+            message: { data: BasicBuilder.string() },
             sizeInBytes: 100,
             schemaName: "test_schema",
-          },
+          }),
         };
         throw new Error("Iterator error");
       });
@@ -1552,13 +1524,13 @@ describe("IterablePlayer", () => {
       const mockMessageIterator = jest.fn().mockImplementation(async function* () {
         yield {
           type: "message-event",
-          msgEvent: {
+          msgEvent: messageEvent({
             topic: "test_topic",
             receiveTime: { sec: 1, nsec: 0 },
-            message: { data: "test" },
+            message: { data: BasicBuilder.string() },
             sizeInBytes: 100,
             schemaName: "test_schema",
-          },
+          }),
         };
       });
 
