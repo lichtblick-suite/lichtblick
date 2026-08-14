@@ -5,41 +5,28 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import * as basicDatatypes from "@lichtblick/suite-base/util/basicDatatypes";
+
+import { TransformPlayer } from "./TransformPlayer";
+
 describe("TransformPlayer", () => {
   afterEach(() => {
-    jest.resetModules();
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
-  it("should construct without throwing when basicDatatypes resolves foxglove.FrameTransform", async () => {
+  it("should throw when basicDatatypes is missing foxglove.FrameTransform", () => {
     // Given
-    const { TransformPlayer } = await import("./TransformPlayer");
+    jest.replaceProperty(basicDatatypes, "basicDatatypes", new Map());
+
     // When / Then
-    expect(() => new TransformPlayer()).not.toThrow();
-  });
-
-  it("should throw when basicDatatypes is missing foxglove.FrameTransform", async () => {
-    // Given
-    jest.resetModules();
-    jest.doMock("@lichtblick/suite-base/util/basicDatatypes", () => ({
-      basicDatatypes: new Map(),
-    }));
-
-    try {
-      const { TransformPlayer } = await import("./TransformPlayer");
-      // When / Then
-      expect(() => new TransformPlayer()).toThrow(
-        "Invariant: basicDatatypes is missing 'foxglove.FrameTransform'",
-      );
-    } finally {
-      jest.dontMock("@lichtblick/suite-base/util/basicDatatypes");
-    }
+    expect(() => new TransformPlayer()).toThrow(
+      "Invariant: basicDatatypes is missing 'foxglove.FrameTransform'",
+    );
   });
 
   it("should not throw when calling setGlobalVariables", async () => {
     // Given
-    const { TransformPlayer } = await import("./TransformPlayer");
     const player = new TransformPlayer();
     // When / Then
     expect(() => {

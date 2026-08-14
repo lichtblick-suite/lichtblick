@@ -5,41 +5,33 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import * as basicDatatypes from "@lichtblick/suite-base/util/basicDatatypes";
+
+import { TransformPreloadingPlayer } from "./TransformPreloadingPlayer";
+
 describe("TransformPreloadingPlayer", () => {
   afterEach(() => {
-    jest.resetModules();
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
-  it("should construct without throwing when basicDatatypes resolves foxglove.FrameTransform", async () => {
-    // Given
-    const { TransformPreloadingPlayer } = await import("./TransformPreloadingPlayer");
-    // When / Then
+  it("should construct without throwing when basicDatatypes resolves foxglove.FrameTransform", () => {
+    // Given / When / Then
     expect(() => new TransformPreloadingPlayer()).not.toThrow();
   });
 
-  it("should throw when basicDatatypes is missing foxglove.FrameTransform", async () => {
+  it("should throw when basicDatatypes is missing foxglove.FrameTransform", () => {
     // Given
-    jest.resetModules();
-    jest.doMock("@lichtblick/suite-base/util/basicDatatypes", () => ({
-      basicDatatypes: new Map(),
-    }));
+    jest.replaceProperty(basicDatatypes, "basicDatatypes", new Map());
 
-    try {
-      const { TransformPreloadingPlayer } = await import("./TransformPreloadingPlayer");
-      // When / Then
-      expect(() => new TransformPreloadingPlayer()).toThrow(
-        "Invariant: basicDatatypes is missing 'foxglove.FrameTransform'",
-      );
-    } finally {
-      jest.dontMock("@lichtblick/suite-base/util/basicDatatypes");
-    }
+    // When / Then
+    expect(() => new TransformPreloadingPlayer()).toThrow(
+      "Invariant: basicDatatypes is missing 'foxglove.FrameTransform'",
+    );
   });
 
-  it("should not throw when calling setGlobalVariables", async () => {
+  it("should not throw when calling setGlobalVariables", () => {
     // Given
-    const { TransformPreloadingPlayer } = await import("./TransformPreloadingPlayer");
     const player = new TransformPreloadingPlayer();
     // When / Then
     expect(() => {

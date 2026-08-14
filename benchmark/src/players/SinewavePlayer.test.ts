@@ -5,6 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { BasicBuilder } from "@lichtblick/test-builders";
+
 import { SinewavePlayer } from "./SinewavePlayer";
 
 describe("SinewavePlayer", () => {
@@ -21,8 +23,9 @@ describe("SinewavePlayer", () => {
   it("should inherit getBatchIterator returning undefined from BenchmarkPlayerBase", () => {
     // Given
     const player = new SinewavePlayer();
+    const topic = BasicBuilder.string();
     // When
-    const result = player.getBatchIterator("sinewave_0");
+    const result = player.getBatchIterator(topic);
     // Then
     expect(result).toBeUndefined();
   });
