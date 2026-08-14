@@ -26,9 +26,9 @@ const TRANSFORMS_PER_TICK = 50;
 const CAPABILITIES: string[] = [];
 
 class TransformPlayer extends BenchmarkPlayerBase implements Player {
-  #name: string = "transform";
+  readonly #name: string = "transform";
   // basicDatatypes already resolves foxglove.FrameTransform's nested Vector3/Quaternion types
-  #datatypes: RosDatatypes = new Map(basicDatatypes);
+  readonly #datatypes: RosDatatypes = new Map(basicDatatypes);
 
   public constructor() {
     super();

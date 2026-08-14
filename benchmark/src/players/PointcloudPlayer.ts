@@ -103,9 +103,9 @@ function makePointCloud(stamp: rostime.Time): FoxglovePointCloud {
 }
 
 class PointcloudPlayer extends BenchmarkPlayerBase implements Player {
-  #name: string = "pointcloud";
-  #startTime: Time = rostime.fromDate(new Date());
-  #datatypes: RosDatatypes = new Map();
+  readonly #name: string = "pointcloud";
+  readonly #startTime: Time = rostime.fromDate(new Date());
+  readonly #datatypes: RosDatatypes = new Map();
 
   public constructor() {
     super();

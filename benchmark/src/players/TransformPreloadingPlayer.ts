@@ -30,13 +30,13 @@ const log = Log.getLogger(__filename);
 const CAPABILITIES: string[] = [PLAYER_CAPABILITIES.playbackControl];
 
 class TransformPreloadingPlayer extends BenchmarkPlayerBase implements Player {
-  #name: string = "transformpreloading";
+  readonly #name: string = "transformpreloading";
   // basicDatatypes already resolves foxglove.FrameTransform's nested Vector3/Quaternion types
-  #datatypes: RosDatatypes = new Map(basicDatatypes);
-  #startTime: Time;
-  #endTime: Time;
-  #topicStats: Map<string, TopicStats>;
-  #topics: Topic[];
+  readonly #datatypes: RosDatatypes = new Map(basicDatatypes);
+  readonly #startTime: Time;
+  readonly #endTime: Time;
+  readonly #topicStats: Map<string, TopicStats>;
+  readonly #topics: Topic[];
 
   public constructor() {
     super();

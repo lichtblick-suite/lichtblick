@@ -20,9 +20,9 @@ const log = Log.getLogger(__filename);
 const CAPABILITIES: string[] = [];
 
 class SinewavePlayer extends BenchmarkPlayerBase implements Player {
-  #name: string = "sinewave";
-  #startTime: Time = rostime.fromDate(new Date());
-  #datatypes: RosDatatypes = new Map();
+  readonly #name: string = "sinewave";
+  readonly #startTime: Time = rostime.fromDate(new Date());
+  readonly #datatypes: RosDatatypes = new Map();
 
   public constructor() {
     super();
