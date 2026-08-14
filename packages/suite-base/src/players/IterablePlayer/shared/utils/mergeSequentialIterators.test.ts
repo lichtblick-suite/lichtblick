@@ -361,6 +361,38 @@ describe("mergeSequentialIterators", () => {
     expect(returnFns[2]).toHaveBeenCalledTimes(1);
   });
 
+  it("cleans up activated iterators when a later source fails during activation", async () => {
+    const source1Return = jest.fn();
+    const source2Return = jest.fn();
+    const activationError = new Error("source activation failed");
+    const source1 = makeMockSourceWithReturn(
+      { sec: 0, nsec: 0 },
+      { sec: 10, nsec: 0 },
+      [makeMessageEvent("topic", 1)],
+      source1Return,
+    );
+    const source2 = makeMockSource({ sec: 0, nsec: 0 }, { sec: 10, nsec: 0 }, []);
+    source2.messageIterator = jest.fn().mockReturnValue({
+      next: jest.fn().mockRejectedValue(activationError),
+      return: source2Return.mockResolvedValue({ value: undefined, done: true }),
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+    });
+
+    await expect(
+      (async () => {
+        for await (const message of mergeSequentialIterators([source1, source2], defaultArgs)) {
+          // The second source fails before the first message can be yielded.
+          expect(message).toBeDefined();
+        }
+      })(),
+    ).rejects.toBe(activationError);
+
+    expect(source1Return).toHaveBeenCalledTimes(1);
+    expect(source2Return).toHaveBeenCalledTimes(1);
+  });
+
   it("only activates the source containing queryStart on seek (skips earlier sources)", async () => {
     // 4 sequential MCAPs: [0-10], [10-20], [20-30], [30-40]
     const source1 = makeMockSource({ sec: 0, nsec: 0 }, { sec: 10, nsec: 0 }, [
