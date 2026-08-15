@@ -18,6 +18,23 @@ import {
   NormalizedLogMessage,
 } from "./types";
 
+/**
+ * Exact schema names the Log panel (and the agent's log search) accept, with their aliases.
+ * Matched exactly; convertibleTo does not qualify.
+ */
+export const LOG_DATATYPES = [
+  "foxglove_msgs/Log",
+  "foxglove_msgs/msg/Log",
+  "foxglove.Log",
+  "foxglove::Log",
+  "rcl_interfaces/msg/Log",
+  "ros.rcl_interfaces.Log",
+  "ros.rosgraph_msgs.Log",
+  "rosgraph_msgs/Log",
+] as const;
+
+export type LogDatatype = (typeof LOG_DATATYPES)[number];
+
 // Get the log message string from the log message
 export function getNormalizedMessage(logMessage: Partial<LogMessageEvent["message"]>): string {
   if ("msg" in logMessage) {
@@ -40,7 +57,9 @@ export function getNormalizedLevel(
     case "foxglove.Log":
       return (raw as Partial<FoxgloveLog>).level ?? LogLevel.UNKNOWN;
     case "rosgraph_msgs/Log":
+    case "ros.rosgraph_msgs.Log":
     case "rcl_interfaces/msg/Log":
+    case "ros.rcl_interfaces.Log":
       return rosLevelToLogLevel((raw as Ros1RosgraphMsgs$Log).level);
   }
 
@@ -60,8 +79,10 @@ function getNormalizedStamp(datatype: string, raw: Partial<LogMessageEvent["mess
       return timestamp ?? { sec: 0, nsec: 0 };
     }
     case "rosgraph_msgs/Log":
+    case "ros.rosgraph_msgs.Log":
       return (raw as Ros1RosgraphMsgs$Log).header.stamp;
     case "rcl_interfaces/msg/Log":
+    case "ros.rcl_interfaces.Log":
       return (raw as Ros2RosgraphMsgs$Log).stamp;
   }
 

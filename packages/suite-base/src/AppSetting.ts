@@ -7,6 +7,18 @@
 
 export enum AppSetting {
   // General
+  // Agent (local pi runtime). The desktop secure credential store additionally protects the
+  // provider API keys under agent.llmApiKey / agent.profile.*.llmApiKey (never AppConfiguration).
+  AGENT_ENABLED = "agent.enabled",
+  AGENT_LLM_PROVIDER = "agent.llmProvider",
+  AGENT_ANTHROPIC_BASE_URL = "agent.anthropic.baseUrl",
+  AGENT_ANTHROPIC_MODEL = "agent.anthropic.model",
+  AGENT_OPENAI_BASE_URL = "agent.openai.baseUrl",
+  AGENT_OPENAI_MODEL = "agent.openai.model",
+  /** JSON-serialized agent long-term memory. Not a secret; see services/agent/memory. */
+  AGENT_MEMORY = "agent.memory",
+  /** JSON-serialized user edits to the agent's instructions and skills; see services/agent/prompts. */
+  AGENT_PROMPT_CUSTOMIZATION = "agent.promptCustomization",
   COLOR_SCHEME = "colorScheme",
   TIMEZONE = "timezone",
   TIME_FORMAT = "time.format",

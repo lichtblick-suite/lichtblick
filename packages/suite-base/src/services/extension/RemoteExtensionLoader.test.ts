@@ -197,6 +197,48 @@ describe("RemoteExtensionLoader", () => {
       expect(result).toBe(mockStoredExtension.info);
     });
 
+    it("When installing an extension with panel metadata, Then should forward parsed panelsMeta", async () => {
+      const mockPackageJson = {
+        name: "panel-metadata-extension",
+        namespace: mockNamespace,
+        publisher: "Acme",
+        version: "1.0.0",
+        displayName: "Panel metadata extension",
+        lichtblickPanels: {
+          Diagnostics: {
+            description: "Shows diagnostic state.",
+            schemas: ["diagnostic_msgs/DiagnosticArray"],
+          },
+        },
+      };
+      const zip = new JSZip();
+      zip.file(ALLOWED_FILES.PACKAGE, JSON.stringify(mockPackageJson) ?? "");
+      zip.file(ALLOWED_FILES.EXTENSION, "extension-content");
+      const mockFile = {} as File;
+      const mockStoredExtension = ExtensionBuilder.storedExtension();
+      const createOrUpdateSpy = jest.spyOn(mockExtensionsAPI, "createOrUpdate");
+      createOrUpdateSpy.mockResolvedValue(mockStoredExtension);
+
+      await loader.installExtension({
+        foxeFileData: await zip.generateAsync({ type: "uint8array" }),
+        file: mockFile,
+      });
+
+      expect(createOrUpdateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          info: expect.objectContaining({
+            panelsMeta: {
+              Diagnostics: {
+                description: "Shows diagnostic state.",
+                schemas: ["diagnostic_msgs/DiagnosticArray"],
+              },
+            },
+          }),
+        }),
+        mockFile,
+      );
+    });
+
     it("When installing extension without file parameter, Then should throw error", async () => {
       // Given
       const zip = new JSZip();

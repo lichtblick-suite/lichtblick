@@ -6,6 +6,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { Namespace } from "@lichtblick/suite-base/types";
 
+export type ExtensionPanelMetadata = {
+  description?: string;
+  schemas?: readonly string[];
+};
+
+export type ExtensionPanelsMetadata = Record<string, ExtensionPanelMetadata>;
+
 /**
  * Metadata describing an extension.
  */
@@ -18,6 +25,7 @@ export type ExtensionInfo = {
   license: string;
   name: string;
   namespace?: Namespace;
+  panelsMeta?: ExtensionPanelsMetadata;
   publisher: string;
   qualifiedName: string;
   version: string;
