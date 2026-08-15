@@ -8,7 +8,6 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 
 import { KEY_WORKSPACE_PREFIX } from "@lichtblick/suite-base/constants/browserStorageKeys";
-import type { LlmMessage } from "@lichtblick/suite-base/services/agent/local/types";
 
 import type {
   ConversationListPage,
@@ -102,10 +101,11 @@ function rememberConversationId(conversationId: string): void {
  */
 export type AgentConversationPersistence = {
   getActiveConversationId: () => string;
-  /** Resolves the stored record once; repeat calls reuse the same read. */
-  restoreLlmHistory: () => Promise<LlmMessage[]>;
+  /** Restores only versioned pi context; legacy transcripts deliberately start a fresh context. */
+  restorePiLlmHistory: () => Promise<AgentMessage[]>;
   restoreUiMessages: () => Promise<unknown[]>;
-  onLlmHistoryChanged: (history: readonly LlmMessage[]) => void;
+  /** Persists the pi Agent state with an explicit format marker. */
+  onPiLlmHistoryChanged: (history: readonly AgentMessage[]) => void;
   onUiMessagesChanged: (messages: readonly unknown[]) => void;
   /** Records the profile used for the next message; later sends overwrite the prior stamp. */
   setProfileName: (profileName: string | undefined) => void;
@@ -126,13 +126,6 @@ export type AgentConversationPersistence = {
   clear: () => void;
 };
 
-export type PiAgentConversationPersistence = AgentConversationPersistence & {
-  /** Restores only versioned pi context; legacy transcripts deliberately start a fresh context. */
-  restorePiLlmHistory: () => Promise<AgentMessage[]>;
-  /** Persists the pi Agent state with an explicit format marker. */
-  onPiLlmHistoryChanged: (history: readonly AgentMessage[]) => void;
-};
-
 type ConversationStore = {
   load: (conversationId: string) => Promise<StoredConversation | undefined>;
   save: (conversation: StoredConversation) => Promise<void>;
@@ -151,7 +144,7 @@ export function createAgentConversationPersistence({
   makeId: () => string;
   now?: () => Date;
   store: ConversationStore;
-}): PiAgentConversationPersistence {
+}): AgentConversationPersistence {
   let conversationId = initialConversationId;
   let loaded: Promise<StoredConversation | undefined> | undefined;
   let llmHistory: unknown[] = [];
@@ -187,22 +180,14 @@ export function createAgentConversationPersistence({
 
   return {
     getActiveConversationId: () => conversationId,
-    restoreLlmHistory: async () => {
-      await load();
-      return llmHistoryFormat == undefined ? ([...llmHistory] as LlmMessage[]) : [];
-    },
     restorePiLlmHistory: async () => {
       await load();
+      // The pi/v1 format marker guards against misreading legacy unversioned transcripts.
       return llmHistoryFormat === PI_LLM_HISTORY_FORMAT ? clonePiHistory(llmHistory) : [];
     },
     restoreUiMessages: async () => {
       await load();
       return [...uiMessages];
-    },
-    onLlmHistoryChanged: (history) => {
-      llmHistory = [...history];
-      llmHistoryFormat = undefined;
-      flush();
     },
     onPiLlmHistoryChanged: (history) => {
       llmHistory = clonePiHistory(history);

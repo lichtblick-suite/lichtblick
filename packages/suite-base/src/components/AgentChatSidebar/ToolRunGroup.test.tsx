@@ -28,8 +28,6 @@ function createT(): (key: string, options?: { count?: number }) => string {
         return "Execution process";
       case "steps":
         return `${String(options?.count ?? 0)} steps`;
-      case "awaitingConfirmation":
-        return "Needs confirmation";
       case "executionRunning":
         return "Running";
       case "executionFailed":
@@ -80,27 +78,6 @@ describe("ToolRunGroup", () => {
     expect(screen.getAllByTestId("tool-run-card")).toHaveLength(2);
     expect(screen.getByText("load_skill")).toBeVisible();
     expect(screen.getByText("get_data_catalog")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Collapse execution process" })).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
-  });
-
-  it("auto-expands and highlights an awaiting-confirmation run", () => {
-    render(
-      <ToolRunGroup
-        toolRuns={[
-          {
-            id: "tool-confirm",
-            name: "memory_write",
-            status: "awaiting-confirmation",
-          },
-        ]}
-      />,
-    );
-
-    expect(screen.getByText("Needs confirmation")).toBeVisible();
-    expect(screen.getByTestId("tool-run-card")).toHaveTextContent("memory_write");
     expect(screen.getByRole("button", { name: "Collapse execution process" })).toHaveAttribute(
       "aria-expanded",
       "true",

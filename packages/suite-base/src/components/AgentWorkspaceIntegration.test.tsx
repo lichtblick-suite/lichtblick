@@ -76,9 +76,7 @@ jest.mock("@lichtblick/suite-base/services/agent/memory/agentConversationPersist
   getOrCreateConversationId: () => "conversation-1",
   createAgentConversationPersistence: () => ({
     getActiveConversationId: () => "conversation-1",
-    restoreLlmHistory: jest.fn(),
     restoreUiMessages: jest.fn().mockResolvedValue([]),
-    onLlmHistoryChanged: jest.fn(),
     onUiMessagesChanged: jest.fn(),
     setProfileName: jest.fn(),
     startNewConversation: jest.fn(),

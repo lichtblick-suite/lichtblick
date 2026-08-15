@@ -122,7 +122,6 @@ describe("toolRuntime", () => {
     const deps = makeDeps();
     const input = {
       urls: ["https://data.example/record%2C1.mcap"],
-      sessionId: "session-1",
     };
 
     await expect(runOpenDataSourceTool(input, deps)).resolves.toEqual({

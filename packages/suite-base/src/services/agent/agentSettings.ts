@@ -23,9 +23,9 @@ export type AgentConfiguration = {
   provider: AgentLlmProvider;
 };
 
-export type AgentConfigurationField =
+type AgentConfigurationField =
   "apiKey" | "baseUrl" | "model";
-export type AgentConfigurationError =
+type AgentConfigurationError =
   "invalidUrl" | "required";
 export type AgentConfigurationErrors = Partial<
   Record<AgentConfigurationField, AgentConfigurationError>

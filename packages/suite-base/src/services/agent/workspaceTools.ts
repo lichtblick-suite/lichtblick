@@ -71,8 +71,7 @@ export function useAgentWorkspaceTools(): AgentWorkspaceTools {
 
       // PlayerSelection's public API returns void. It validates these synchronous arguments, but
       // remote player initialization failures are reported later by PlayerManager. Agent Chat must
-      // therefore rely on AgentCatalogWatcher and the actionable
-      // `agentChat:catalogLoadTimeout` 120-second timeout surfaced by the state/UI integration.
+      // therefore rely on AgentCatalogWatcher to surface a catalog-load timeout.
       selectSource("remote-file", {
         type: "connection",
         params: { url: urls.join(",") },

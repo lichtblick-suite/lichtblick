@@ -448,14 +448,6 @@ export function validateLayoutProposalData(
   return validateLayoutProposalDataWithOptions(data, options);
 }
 
-export function isValidLayoutProposalData(data: unknown): data is AgentSafeLayoutData {
-  try {
-    validateLayoutProposalData(data);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 export function validateLayoutProposal(
   proposal: LayoutProposal,

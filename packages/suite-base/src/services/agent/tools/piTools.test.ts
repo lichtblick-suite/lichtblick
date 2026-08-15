@@ -35,9 +35,7 @@ describe("buildPiTools", () => {
   });
 
   it("passes through every existing tool schema and restricts load_skill to enabled ids", async () => {
-    const tools = buildPiTools(makeDeps(), ["enabled"], {
-      requestConfirmation: jest.fn(),
-    });
+    const tools = buildPiTools(makeDeps(), ["enabled"]);
     const definitions = buildToolDefinitions(["enabled"]);
 
     expect(tools.map((tool) => tool.name)).toEqual(
@@ -65,9 +63,9 @@ describe("buildPiTools", () => {
   });
 
   it("maps running and completed progress through onUpdate", async () => {
-    const tool = buildPiTools(makeDeps(), ["enabled"], {
-      requestConfirmation: jest.fn(),
-    }).find((candidate) => candidate.name === "memory_list")!;
+    const tool = buildPiTools(makeDeps(), ["enabled"]).find(
+      (candidate) => candidate.name === "memory_list",
+    )!;
     const onUpdate = jest.fn();
 
     await tool.execute("list-call", {}, undefined, onUpdate);

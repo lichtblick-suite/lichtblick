@@ -33,7 +33,6 @@ const translations: Record<string, string> = {
   inputLabel: "Message",
   send: "Send",
   reset: "Reset",
-  confirm: "Confirm",
   cancel: "Cancel",
   apply: "Apply",
   ignore: "Ignore",
@@ -41,9 +40,6 @@ const translations: Record<string, string> = {
   previousProposalApplying: "Previous proposal is still applying",
   showEarlierMessages: "Show earlier messages",
   imageHasAdditionalParameters: "Includes additional parameters",
-  loadData: "Load data",
-  loadDataFailed: "Failed to load data. Try again.",
-  toolDecisionFailed: "Could not update the tool run. Try again.",
   executionExpand: "Expand execution process",
   executionCollapse: "Collapse execution process",
   executionRunning: "Running",
@@ -57,25 +53,17 @@ const translations: Record<string, string> = {
   "status.error": "Error",
   "toolStatus.queued": "Queued",
   "toolStatus.running": "Running",
-  "toolStatus.awaitingConfirmation": "Needs confirmation",
   "toolStatus.succeeded": "Succeeded",
   "toolStatus.failed": "Failed",
   "toolStatus.cancelled": "Cancelled",
 };
 
 const sendMessage = jest.fn<ReturnType<AgentChatState["actions"]["sendMessage"]>, [string]>();
-const confirmToolRun =
-  jest.fn<
-    ReturnType<AgentChatState["actions"]["confirmToolRun"]>,
-    [string, { approve: boolean }]
-  >();
 const applyProposal = jest.fn<ReturnType<AgentChatState["actions"]["applyProposal"]>, []>();
 const dismissProposal = jest.fn<ReturnType<AgentChatState["actions"]["dismissProposal"]>, []>();
 const reset = jest.fn<ReturnType<AgentChatState["actions"]["reset"]>, []>();
 const notifyCatalogReady = jest.fn();
 const cancelWaiting = jest.fn();
-const newConversation =
-  jest.fn<ReturnType<AgentChatState["actions"]["newConversation"]>, []>();
 const startNewConversation = jest.fn();
 const switchConversation = jest.fn().mockResolvedValue(undefined);
 const deleteConversation = jest.fn().mockResolvedValue(undefined);
@@ -114,13 +102,11 @@ function setMockState(overrides: Partial<AgentChatState> = {}): void {
     status: "idle",
     actions: {
       sendMessage,
-      confirmToolRun,
       applyProposal,
       dismissProposal,
       reset,
       notifyCatalogReady,
       cancelWaiting,
-      newConversation,
       startNewConversation,
       switchConversation,
       deleteConversation,
@@ -169,7 +155,6 @@ describe("AgentChatSidebar", () => {
   beforeEach(() => {
     setMockState();
     sendMessage.mockResolvedValue(undefined);
-    confirmToolRun.mockResolvedValue(undefined);
     applyProposal.mockResolvedValue(undefined);
     (useTranslation as jest.Mock).mockReturnValue({
       t: (key: string, options?: { defaultValue?: string; name?: string }) =>
@@ -349,7 +334,7 @@ describe("AgentChatSidebar", () => {
     const button = screen.getByTestId("agent-chat-new-conversation");
     expect(button).toBeEnabled();
     fireEvent.click(button);
-    expect(newConversation).toHaveBeenCalledTimes(1);
+    expect(startNewConversation).toHaveBeenCalledTimes(1);
   });
 
   it("renders local profiles and switches the selected profile", () => {
@@ -469,136 +454,6 @@ describe("AgentChatSidebar", () => {
       submission.resolve();
       await submission.promise;
     });
-  });
-
-  it("keeps a tool decision locked through same-status object updates", async () => {
-    const confirmation = createDeferred();
-    confirmToolRun.mockReturnValue(confirmation.promise);
-    const toolRun = {
-      id: "tool-1",
-      name: "memory_write",
-      status: "awaiting-confirmation" as const,
-      summary: "Create a data slice",
-    };
-    setMockState({
-      messages: [
-        {
-          id: "message-1",
-          role: "assistant",
-          content: "A tool needs approval.",
-          createdAt: "2026-07-27T00:00:00.000Z",
-          toolRuns: [toolRun],
-        },
-      ],
-    });
-
-    const { rerender } = render(<AgentChatSidebar />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
-    expect(confirmToolRun).toHaveBeenCalledWith("tool-1", { approve: true });
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
-
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(confirmToolRun).toHaveBeenCalledTimes(1);
-
-    setMockState({
-      messages: [
-        {
-          id: "message-1",
-          role: "assistant",
-          content: "A tool needs approval.",
-          createdAt: "2026-07-27T00:00:00.000Z",
-          toolRuns: [{ ...toolRun, summary: "Updated while the request is pending" }],
-        },
-      ],
-    });
-    rerender(<AgentChatSidebar />);
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
-
-    await act(async () => {
-      confirmation.resolve();
-      await confirmation.promise;
-    });
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
-
-    setMockState({
-      messages: [
-        {
-          id: "message-1",
-          role: "assistant",
-          content: "A tool needs approval.",
-          createdAt: "2026-07-27T00:00:00.000Z",
-          toolRuns: [{ ...toolRun, status: "running" }],
-        },
-      ],
-    });
-    rerender(<AgentChatSidebar />);
-    expect(screen.queryByRole("button", { name: "Confirm" })).not.toBeInTheDocument();
-  });
-
-  it("unlocks a tool decision and shows the error when the action rejects", async () => {
-    const confirmation = createDeferred();
-    confirmToolRun
-      .mockReturnValueOnce(confirmation.promise)
-      .mockResolvedValueOnce(undefined);
-    setMockState({
-      messages: [
-        {
-          id: "message-1",
-          role: "assistant",
-          content: "A tool needs approval.",
-          createdAt: "2026-07-27T00:00:00.000Z",
-          toolRuns: [
-            {
-              id: "tool-1",
-              name: "memory_write",
-              status: "awaiting-confirmation",
-            },
-          ],
-        },
-      ],
-    });
-    render(<AgentChatSidebar />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
-    confirmation.reject(new Error("Confirmation request failed"));
-
-    expect(await screen.findByText("Confirmation request failed")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeEnabled();
-
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(confirmToolRun).toHaveBeenLastCalledWith("tool-1", { approve: false });
-    expect(confirmToolRun).toHaveBeenCalledTimes(2);
-  });
-
-  it("cancels a tool run when cancel is chosen first", () => {
-    setMockState({
-      messages: [
-        {
-          id: "message-1",
-          role: "assistant",
-          content: "A tool needs approval.",
-          createdAt: "2026-07-27T00:00:00.000Z",
-          toolRuns: [
-            {
-              id: "tool-1",
-              name: "memory_write",
-              status: "awaiting-confirmation",
-            },
-          ],
-        },
-      ],
-    });
-
-    render(<AgentChatSidebar />);
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-
-    expect(confirmToolRun).toHaveBeenCalledWith("tool-1", { approve: false });
-    expect(confirmToolRun).toHaveBeenCalledTimes(1);
   });
 
   it("shows tool status and determinate progress", () => {

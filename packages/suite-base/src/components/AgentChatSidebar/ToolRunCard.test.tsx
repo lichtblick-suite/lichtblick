@@ -7,17 +7,12 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useTranslation } from "react-i18next";
 
-import { useAgentChat } from "@lichtblick/suite-base/context/AgentChatContext";
 import { ToolRun } from "@lichtblick/suite-base/services/agent/types";
 
 import { ToolRunCard } from "./ToolRunCard";
 
 jest.mock("react-i18next", () => ({
   useTranslation: jest.fn(),
-}));
-
-jest.mock("@lichtblick/suite-base/context/AgentChatContext", () => ({
-  useAgentChat: jest.fn(),
 }));
 
 function createT(): (key: string, options?: { name?: string }) => string {
@@ -29,14 +24,10 @@ function createT(): (key: string, options?: { name?: string }) => string {
         return `Collapse details for ${options?.name ?? ""}`;
       case "toolResultTruncated":
         return "Result truncated; showing the first 4000 characters.";
-      case "toolDecisionFailed":
-        return "Could not update the tool run. Try again.";
       case "toolStatus.queued":
         return "Queued";
       case "toolStatus.running":
         return "Running";
-      case "toolStatus.awaitingConfirmation":
-        return "Needs confirmation";
       case "toolStatus.succeeded":
         return "Succeeded";
       case "toolStatus.failed":
@@ -45,12 +36,6 @@ function createT(): (key: string, options?: { name?: string }) => string {
         return "Cancelled";
       case "toolProgress":
         return `Progress for ${options?.name ?? ""}`;
-      case "confirm":
-        return "Confirm";
-      case "confirmAll":
-        return "Confirm all";
-      case "cancel":
-        return "Cancel";
       default:
         return key;
     }
@@ -62,14 +47,8 @@ function renderToolRun(toolRun: ToolRun): void {
 }
 
 describe("ToolRunCard", () => {
-  const confirmToolRun = jest.fn().mockResolvedValue(undefined);
-
   beforeEach(() => {
-    confirmToolRun.mockReset().mockResolvedValue(undefined);
     (useTranslation as jest.Mock).mockReturnValue({ t: createT() });
-    (useAgentChat as jest.Mock).mockReturnValue({
-      confirmToolRun,
-    });
   });
 
   afterEach(() => {
@@ -118,47 +97,6 @@ describe("ToolRunCard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Collapse details for query" }));
     await waitFor(() => {
       expect(summary).not.toBeVisible();
-    });
-  });
-
-  it("keeps all confirmation buttons visible and auto-expands when awaiting confirmation", async () => {
-    renderToolRun({
-      id: "run-3",
-      name: "apply_changes",
-      status: "awaiting-confirmation",
-      summary: "About to apply 3 changes",
-    });
-
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Confirm all" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
-    expect(screen.getByText("About to apply 3 changes")).toBeVisible();
-
-    // Collapsing details must not hide the decision buttons.
-    fireEvent.click(screen.getByRole("button", { name: "Collapse details for apply_changes" }));
-    await waitFor(() => {
-      expect(screen.getByText("About to apply 3 changes")).not.toBeVisible();
-    });
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Confirm all" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeVisible();
-  });
-
-  it.each([
-    ["Confirm", { approve: true }],
-    ["Confirm all", { approve: true, scope: "session" }],
-    ["Cancel", { approve: false }],
-  ] as const)("submits the %s decision with the expected scope", async (label, options) => {
-    renderToolRun({
-      id: "run-decision",
-      name: "memory_write",
-      status: "awaiting-confirmation",
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: label }));
-
-    await waitFor(() => {
-      expect(confirmToolRun).toHaveBeenCalledWith("run-decision", options);
     });
   });
 

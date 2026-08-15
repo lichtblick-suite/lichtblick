@@ -19,7 +19,7 @@ import {
 } from "react";
 
 import { type AgentChatState, useAgentChat } from "@lichtblick/suite-base/context/AgentChatContext";
-import { computeLayoutFingerprint } from "@lichtblick/suite-base/services/agent/layoutDiff";
+import { collectLayoutBaseline } from "@lichtblick/suite-base/services/agent/layoutDiff";
 import { useLocalAgentClient } from "@lichtblick/suite-base/services/agent/localAgentClient";
 import type { AgentConversationPersistence } from "@lichtblick/suite-base/services/agent/memory/agentConversationPersistence";
 import {
@@ -49,7 +49,6 @@ type SubscriptionCall = {
 type ClientHarness = {
   client: jest.Mocked<IAgentClient>;
   emit: (event: AgentEvent, subscriptionIndex?: number) => void;
-  eof: (subscriptionIndex?: number) => void;
   fail: (error: Error, subscriptionIndex?: number) => void;
   subscriptions: SubscriptionCall[];
 };
@@ -66,7 +65,6 @@ function deferred<T>(): Deferred<T> {
 
 function createMockClient(): jest.Mocked<IAgentClient> {
   return {
-    confirmToolRun: jest.fn().mockResolvedValue(undefined),
     createSession: jest.fn().mockResolvedValue({ sessionId: "session-1" }),
     notifyCatalogReady: jest.fn().mockResolvedValue(undefined),
     sendMessage: jest.fn().mockResolvedValue(undefined),
@@ -110,9 +108,6 @@ function createClientHarness(): ClientHarness {
     emit: (event, index) => {
       getSubscription(index).listener(event);
     },
-    eof: (index) => {
-      getSubscription(index).deferred.resolve();
-    },
     fail: (error, index) => {
       getSubscription(index).deferred.reject(error);
     },
@@ -139,7 +134,6 @@ function validProposal(name = "Diagnostics"): LayoutProposal {
 const selectState = (state: AgentChatState) => state;
 
 type MockOrchestrator = {
-  confirmToolRun: jest.Mock;
   createSession: jest.Mock;
   dispose: jest.Mock;
   emit: (event: AgentEvent) => void;
@@ -157,7 +151,6 @@ jest.mock("@lichtblick/suite-base/services/agent/pi/PiAgentOrchestrator", () => 
       signal?: AbortSignal;
     }> = [];
     const instance: MockOrchestrator = {
-      confirmToolRun: jest.fn().mockResolvedValue(undefined),
       createSession: jest.fn().mockResolvedValue({ sessionId: "session-1" }),
       dispose: jest.fn(),
       emit(event: AgentEvent) {
@@ -264,7 +257,7 @@ function makeWrapper(
   client: IAgentClient,
   options: {
     onApplyProposal?: (proposal: LayoutProposal, signal: AbortSignal) => Promise<void>;
-    onOpenDataSource?: (urls: string[], sessionId?: string) => void;
+    onOpenDataSource?: (urls: string[]) => void;
     getCurrentLayoutState?: () => { id?: string; data?: unknown } | undefined;
     getCatalog?: () => { topics: readonly unknown[]; datatypes: ReadonlyMap<string, unknown> };
     getInstalledPanelTypes?: () => ReadonlySet<string>;
@@ -402,9 +395,9 @@ describe("AgentChatProvider", () => {
         total: 0,
         offline: false,
       }),
-      onLlmHistoryChanged: jest.fn(),
+      onPiLlmHistoryChanged: jest.fn(),
       onUiMessagesChanged: jest.fn(),
-      restoreLlmHistory: jest.fn().mockResolvedValue([]),
+      restorePiLlmHistory: jest.fn().mockResolvedValue([]),
       restoreUiMessages: jest.fn(async () => transcripts.get(activeConversationId) ?? []),
       setProfileName: jest.fn(),
       startNewConversation: jest.fn(() => {
@@ -828,7 +821,6 @@ describe("AgentChatProvider", () => {
     act(() => {
       tool("tool-failed", "queued", 1);
       tool("tool-failed", "running", 2);
-      tool("tool-failed", "awaiting-confirmation", 3);
       tool("tool-failed", "running", 4);
       tool("tool-failed", "failed", 5);
       tool("tool-failed", "failed", 6, "failed details");
@@ -862,130 +854,27 @@ describe("AgentChatProvider", () => {
     });
   });
 
-  it("reconnects after normal EOF with lastSeq and resolves only on done", async () => {
-    jest.useFakeTimers();
-    const harness = createClientHarness();
-    const { result } = renderHook(() => useAgentChat(selectState), {
-      wrapper: makeWrapper(harness.client),
-    });
-    let resolved = false;
-    let send!: Promise<void>;
-    act(() => {
-      send = result.current.actions.sendMessage("reconnect");
-      void send.then(() => {
-        resolved = true;
-      });
-    });
-    await act(flushMicrotasks);
-    const requestId = requestIdAt(harness.client, 0);
-    act(() => {
-      harness.emit({
-        type: "message-end",
-        messageId: "assistant-1",
-        requestId,
-        seq: 1,
-      });
-      harness.eof();
-    });
-    await act(flushMicrotasks);
-    expect(resolved).toBe(false);
-
-    await act(async () => {
-      jest.advanceTimersByTime(250);
-      await flushMicrotasks();
-    });
-    expect(harness.client.subscribeEvents).toHaveBeenCalledTimes(2);
-    expect(harness.subscriptions[1]?.options?.lastSeq).toBe(1);
-
-    act(() => {
-      harness.emit({ type: "done", requestId, seq: 2 }, 1);
-    });
-    await act(async () => {
-      await send;
-    });
-  });
-
-  it("resets reconnect backoff after receiving a valid event", async () => {
-    jest.useFakeTimers();
+  it("fails the session on a generic subscription rejection without re-subscribing", async () => {
     const harness = createClientHarness();
     const { result } = renderHook(() => useAgentChat(selectState), {
       wrapper: makeWrapper(harness.client),
     });
     let send!: Promise<void>;
     act(() => {
-      send = result.current.actions.sendMessage("backoff");
+      send = result.current.actions.sendMessage("generic failure");
     });
-    await act(flushMicrotasks);
-    const requestId = requestIdAt(harness.client, 0);
-
-    act(() => {
-      harness.eof(0);
-    });
-    await act(flushMicrotasks);
-    await act(async () => {
-      jest.advanceTimersByTime(250);
-      await flushMicrotasks();
-    });
-    expect(harness.subscriptions).toHaveLength(2);
-
-    act(() => {
-      harness.eof(1);
-    });
-    await act(flushMicrotasks);
-    await act(async () => {
-      jest.advanceTimersByTime(499);
-      await flushMicrotasks();
-    });
-    expect(harness.subscriptions).toHaveLength(2);
-    await act(async () => {
-      jest.advanceTimersByTime(1);
-      await flushMicrotasks();
-    });
-    expect(harness.subscriptions).toHaveLength(3);
-
-    act(() => {
-      harness.emit({
-        type: "message-start",
-        messageId: "assistant-1",
-        requestId,
-        seq: 1,
-      });
-      harness.eof(2);
-    });
-    await act(flushMicrotasks);
-    await act(async () => {
-      jest.advanceTimersByTime(250);
-      await flushMicrotasks();
-    });
-    expect(harness.subscriptions).toHaveLength(4);
-    act(() => {
-      harness.emit({ type: "done", requestId, seq: 2 }, 3);
-    });
-    await act(async () => {
-      await send;
-    });
-  });
-
-  it("does not reconnect after aborting during backoff", async () => {
-    jest.useFakeTimers();
-    const harness = createClientHarness();
-    const { result, unmount } = renderHook(() => useAgentChat(selectState), {
-      wrapper: makeWrapper(harness.client),
+    await waitFor(() => {
+      expect(harness.client.sendMessage).toHaveBeenCalledTimes(1);
     });
     act(() => {
-      void result.current.actions.sendMessage("abort");
+      harness.fail(new Error("connection reset"));
     });
-    await act(flushMicrotasks);
-    act(() => {
-      harness.eof();
-    });
-    await act(flushMicrotasks);
-    unmount();
     await act(async () => {
-      jest.advanceTimersByTime(2_000);
-      await flushMicrotasks();
+      await expect(send).rejects.toThrow("connection reset");
     });
     expect(harness.client.subscribeEvents).toHaveBeenCalledTimes(1);
+    expect(result.current.status).toBe("error");
+    expect(result.current.error).toContain("connection reset");
   });
 
   it.each([
@@ -1640,30 +1529,6 @@ describe("AgentChatProvider", () => {
     expect(harness.subscriptions[0]?.signal?.aborted).toBe(false);
   });
 
-  it("passes the lifecycle signal to confirmToolRun and aborts it on unmount", async () => {
-    const harness = createClientHarness();
-    const confirmation = deferred<void>();
-    harness.client.confirmToolRun.mockImplementation(async () => {
-      await confirmation.promise;
-    });
-    const { result, unmount } = renderHook(() => useAgentChat(selectState), {
-      wrapper: makeWrapper(harness.client),
-    });
-    let confirm!: Promise<void>;
-    act(() => {
-      confirm = result.current.actions.confirmToolRun("tool-1", { approve: true });
-    });
-    await waitFor(() => {
-      expect(harness.client.confirmToolRun).toHaveBeenCalledTimes(1);
-    });
-    const signal = harness.client.confirmToolRun.mock.calls[0]?.[3];
-    expect(signal).toBeInstanceOf(AbortSignal);
-    unmount();
-    expect(signal?.aborted).toBe(true);
-    confirmation.resolve();
-    await confirm;
-  });
-
   it("computes the pending proposal display mode with the strict apply decision at enqueue time", async () => {
     const harness = createClientHarness();
     const currentLayoutData = {
@@ -1705,7 +1570,11 @@ describe("AgentChatProvider", () => {
     const incrementalProposal: LayoutProposal = {
       ...validProposal("Panels"),
       baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(currentLayoutData),
+      baseFingerprint: collectLayoutBaseline(
+        () => currentLayoutData,
+        () => "layout-1",
+        () => ({ topics: [], datatypes: new Map() }),
+      ).baseFingerprint,
       data: {
         configById: {
           "Image!camera": {},
@@ -1783,7 +1652,11 @@ describe("AgentChatProvider", () => {
     const incrementalProposal: LayoutProposal = {
       ...validProposal("Panels"),
       baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(currentLayoutData),
+      baseFingerprint: collectLayoutBaseline(
+        () => currentLayoutData,
+        () => "layout-1",
+        () => ({ topics: [], datatypes: new Map() }),
+      ).baseFingerprint,
       data: {
         configById: {
           "Image!camera": {},
@@ -1866,7 +1739,11 @@ describe("AgentChatProvider", () => {
       ...validProposal("Panels"),
       baseLayoutId: "layout-1",
       // Fingerprint over the sanitized layout with the EMPTY catalog (sanitize is identity).
-      baseFingerprint: computeLayoutFingerprint(currentLayoutData),
+      baseFingerprint: collectLayoutBaseline(
+        () => currentLayoutData,
+        () => "layout-1",
+        () => ({ topics: [], datatypes: new Map() }),
+      ).baseFingerprint,
       data: {
         configById: {
           "Plot!speed": { paths: [{ value: "/missing.topic.x", enabled: true }] },
@@ -2004,9 +1881,9 @@ describe("AgentChatProvider", () => {
       deleteConversation: jest.fn().mockResolvedValue(false),
       getActiveConversationId: () => "conversation-1",
       listConversations: jest.fn().mockResolvedValue({ items: [], total: 0, offline: false }),
-      onLlmHistoryChanged: jest.fn(),
+      onPiLlmHistoryChanged: jest.fn(),
       onUiMessagesChanged: jest.fn(),
-      restoreLlmHistory: jest.fn().mockResolvedValue([]),
+      restorePiLlmHistory: jest.fn().mockResolvedValue([]),
       restoreUiMessages,
       setProfileName: jest.fn(),
       startNewConversation: jest.fn(() => "conversation-2"),
@@ -2077,9 +1954,9 @@ describe("AgentChatProvider", () => {
       deleteConversation: jest.fn().mockResolvedValue(false),
       getActiveConversationId: () => "workspace-2-conversation",
       listConversations: jest.fn().mockResolvedValue({ items: [], total: 0, offline: false }),
-      onLlmHistoryChanged: jest.fn(),
+      onPiLlmHistoryChanged: jest.fn(),
       onUiMessagesChanged: jest.fn(),
-      restoreLlmHistory: jest.fn().mockResolvedValue([]),
+      restorePiLlmHistory: jest.fn().mockResolvedValue([]),
       restoreUiMessages: jest.fn().mockResolvedValue([]),
       setProfileName: jest.fn(),
       startNewConversation: jest.fn(() => "workspace-2-new"),

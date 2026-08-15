@@ -30,10 +30,8 @@ const startNewConversation = jest.fn();
 const actions: AgentChatState["actions"] = {
   applyProposal: jest.fn(),
   cancelWaiting: jest.fn(),
-  confirmToolRun: jest.fn(),
   deleteConversation,
   dismissProposal: jest.fn(),
-  newConversation: jest.fn(),
   notifyCatalogReady: jest.fn(),
   refreshConversations: jest.fn(),
   reset: jest.fn(),

@@ -12,7 +12,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { PiAgentOrchestrator } from "@lichtblick/suite-base/services/agent/pi/PiAgentOrchestrator";
 import type { AgentDataQueryContext } from "@lichtblick/suite-base/services/agent/tools/toolRuntime";
 
-import { createLocalAgentClient, useLocalAgentClient } from "./localAgentClient";
+import { useLocalAgentClient } from "./localAgentClient";
 
 const mockPiAgentOrchestrator = jest.fn();
 const mockInstances: Array<{ dispose: jest.Mock }> = [];
@@ -58,7 +58,7 @@ function renderClient(props: HookProps = {}) {
   );
 }
 
-describe("createLocalAgentClient data-query wiring", () => {
+describe("useLocalAgentClient data-query wiring", () => {
   beforeEach(() => {
     mockPiAgentOrchestrator.mockClear();
     mockInstances.length = 0;
@@ -66,7 +66,13 @@ describe("createLocalAgentClient data-query wiring", () => {
 
   it("passes the dataQuery adapter into the orchestrator tool runtime deps", () => {
     const dataQuery = { getContext: jest.fn() };
-    createLocalAgentClient({ ...validConfiguration(), getCatalog, dataQuery });
+    renderHook(() =>
+      useLocalAgentClient(validConfiguration(), {
+        enabled: true,
+        getCatalog,
+        dataQuery,
+      }),
+    );
 
     expect(mockPiAgentOrchestrator).toHaveBeenCalledTimes(1);
     const options = mockPiAgentOrchestrator.mock.calls[0]![0] as {
@@ -76,7 +82,12 @@ describe("createLocalAgentClient data-query wiring", () => {
   });
 
   it("omits dataQuery when the workspace does not provide one", () => {
-    createLocalAgentClient({ ...validConfiguration(), getCatalog });
+    renderHook(() =>
+      useLocalAgentClient(validConfiguration(), {
+        enabled: true,
+        getCatalog,
+      }),
+    );
 
     const options = mockPiAgentOrchestrator.mock.calls[0]![0] as {
       toolRuntime: { deps: { dataQuery?: unknown } };

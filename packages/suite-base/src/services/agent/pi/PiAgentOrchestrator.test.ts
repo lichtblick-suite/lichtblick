@@ -12,7 +12,7 @@ import {
 } from "@earendil-works/pi-ai";
 
 import type { AgentConfiguration } from "@lichtblick/suite-base/services/agent/agentSettings";
-import { computeLayoutFingerprint } from "@lichtblick/suite-base/services/agent/layoutDiff";
+import { collectLayoutBaseline } from "@lichtblick/suite-base/services/agent/layoutDiff";
 import { SKILL_IDS } from "@lichtblick/suite-base/services/agent/local/skills";
 import { LOCAL_AGENT_TOOL_DEFINITIONS } from "@lichtblick/suite-base/services/agent/local/toolDefinitions";
 import type { AgentMemoryStore } from "@lichtblick/suite-base/services/agent/memory/agentMemory";
@@ -256,17 +256,6 @@ describe("PiAgentOrchestrator", () => {
     harness.client.dispose();
   });
 
-  it("rejects public confirmation when no tool run is pending", async () => {
-    const harness = await setup(successfulStream(["ok"]));
-
-    await expect(
-      harness.client.confirmToolRun(harness.sessionId, "unknown-run", { approve: true }),
-    ).rejects.toThrow("No pending confirmation");
-
-    await stopSubscription(harness.abortSubscription, harness.subscription);
-    harness.client.dispose();
-  });
-
   it("converges every turn's tools with SKILL_IDS and produces layout proposal events", async () => {
     const contexts: Context[] = [];
     let call = 0;
@@ -486,7 +475,11 @@ describe("PiAgentOrchestrator", () => {
         type: "layout-proposal",
         proposal: expect.objectContaining({
           baseLayoutId: "layout-1",
-          baseFingerprint: computeLayoutFingerprint(currentLayoutData),
+          baseFingerprint: collectLayoutBaseline(
+            () => currentLayoutData,
+            () => "layout-1",
+            () => ({ topics: [], datatypes: new Map() }),
+          ).baseFingerprint,
         }),
       }),
     );

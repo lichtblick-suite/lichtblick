@@ -16,7 +16,7 @@ import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerCo
 import { usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 
-import { computeLayoutFingerprint, sanitizeLayoutData } from "./layoutDiff";
+import { collectLayoutBaseline } from "./layoutDiff";
 import { useAgentWorkspaceTools } from "./workspaceTools";
 
 jest.mock("notistack", () => ({
@@ -290,7 +290,13 @@ describe("useAgentWorkspaceTools", () => {
       playbackConfig: { speed: 1 },
       userNodes: {},
     };
-    const baseFingerprint = computeLayoutFingerprint(currentLayout);
+    // Public baseline oracle: proposal-time baseline capture over the same catalog the apply
+    // path uses.
+    const baseFingerprint = collectLayoutBaseline(
+      () => currentLayout,
+      () => "layout-1",
+      () => ({ topics, datatypes }),
+    ).baseFingerprint;
 
     beforeEach(() => {
       getCurrentLayoutState.mockReturnValue({
@@ -409,10 +415,13 @@ describe("useAgentWorkspaceTools", () => {
 
       await result.current.applyLayout("Agent layout", stalePlotProposal, {
         baseLayoutId: "layout-1",
-        // Same pipeline as the apply path: fingerprint over the sanitized base layout.
-        baseFingerprint: computeLayoutFingerprint(
-          sanitizeLayoutData(stalePlotLayout, { topics, datatypes })!,
-        ),
+        // Same pipeline as the apply path: the baseline captures the fingerprint over the
+        // sanitized base layout.
+        baseFingerprint: collectLayoutBaseline(
+          () => stalePlotLayout,
+          () => "layout-1",
+          () => ({ topics, datatypes }),
+        ).baseFingerprint,
       });
 
       expect(addPanelsAtomically).toHaveBeenCalledTimes(1);
@@ -451,7 +460,11 @@ describe("useAgentWorkspaceTools", () => {
       (usePanelCatalog as jest.Mock).mockReturnValue({
         getPanels: () => [{ type: extensionPanelType }],
       });
-      const baseFingerprint = computeLayoutFingerprint(baseLayout);
+      const baseFingerprint = collectLayoutBaseline(
+        () => baseLayout,
+        () => "layout-1",
+        () => ({ topics, datatypes }),
+      ).baseFingerprint;
       getCurrentLayoutState.mockReturnValue({
         selectedLayout: { id: "layout-1", data: baseLayout },
       });

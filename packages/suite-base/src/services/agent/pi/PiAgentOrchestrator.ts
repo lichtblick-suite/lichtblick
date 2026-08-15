@@ -29,10 +29,7 @@ import {
   resolveSkills,
   type AgentPromptCustomization,
 } from "@lichtblick/suite-base/services/agent/prompts/agentPrompts";
-import {
-  buildPiTools,
-  type ToolConfirmationRequest,
-} from "@lichtblick/suite-base/services/agent/tools/piTools";
+import { buildPiTools } from "@lichtblick/suite-base/services/agent/tools/piTools";
 import {
   boundedToolResult,
   type ToolRuntimeDeps,
@@ -41,9 +38,6 @@ import type {
   AgentEvent,
   IAgentClient,
   SubscribeEventsOptions,
-  SubscribeEventsResult,
-  ToolConfirmationDecision,
-  ToolConfirmationOptions,
 } from "@lichtblick/suite-base/services/agent/types";
 
 import {
@@ -56,7 +50,6 @@ export const PI_AGENT_EVENT_REPLAY_LIMIT = 1000;
 
 export type PiAgentToolRuntime = {
   deps: Pick<ToolRuntimeDeps, "dataQuery" | "getCatalog" | "memoryStore">;
-  confirmationTimeoutMs?: number;
 };
 
 export type PiAgentOrchestratorOptions = {
@@ -85,14 +78,6 @@ type ActiveRequest = {
   messageId: string;
   openedDataSource: boolean;
   requestId: string;
-};
-
-type PendingConfirmation = {
-  reject: (reason: unknown) => void;
-  requestId: string;
-  resolve: (decision: ToolConfirmationDecision) => void;
-  sessionId: string;
-  toolName: ToolConfirmationRequest["toolName"];
 };
 
 type SessionState = {
@@ -232,13 +217,8 @@ export class PiAgentOrchestrator implements IAgentClient {
   readonly #memoryStore?: AgentMemoryStore;
   readonly #now: () => Date;
   readonly #onHistoryChanged?: (history: readonly AgentMessage[]) => void;
-  readonly #pendingConfirmations = new Map<string, PendingConfirmation>();
   readonly #restoreHistory?: () => Promise<AgentMessage[]>;
   readonly #runtime: PiModelRuntime;
-  readonly #sessionToolAuthorizations = new Map<
-    string,
-    Set<ToolConfirmationRequest["toolName"]>
-  >();
   readonly #sessions = new Map<string, SessionState>();
   readonly #streamFn: StreamFn;
   readonly #toolRuntime?: PiAgentToolRuntime;
@@ -268,7 +248,6 @@ export class PiAgentOrchestrator implements IAgentClient {
   ): Promise<{ sessionId: string }> {
     throwIfAborted(signal);
     const sessionId = this.#makeId();
-    this.#sessionToolAuthorizations.delete(sessionId);
     const controller = new AbortController();
     let restoredHistory: AgentMessage[] = [];
     try {
@@ -402,11 +381,6 @@ export class PiAgentOrchestrator implements IAgentClient {
         }
         throw error;
       } finally {
-        this.#cancelRequestConfirmations(
-          sessionId,
-          requestId,
-          abortReason(linked.signal),
-        );
         if (session.active?.requestId === requestId) {
           session.active = undefined;
         }
@@ -422,7 +396,7 @@ export class PiAgentOrchestrator implements IAgentClient {
     onEvent: (event: AgentEvent) => void,
     signal?: AbortSignal,
     options?: SubscribeEventsOptions,
-  ): Promise<SubscribeEventsResult> {
+  ): Promise<void> {
     const session = this.#requireSession(sessionId);
     throwIfAborted(signal);
     const lastSeq = options?.lastSeq ?? 0;
@@ -437,7 +411,7 @@ export class PiAgentOrchestrator implements IAgentClient {
       }
     }
 
-    return await new Promise<SubscribeEventsResult>((_resolve, reject) => {
+    await new Promise<void>((_resolve, reject) => {
       const cleanup = () => {
         session.subscribers.delete(onEvent);
         signal?.removeEventListener("abort", onAbort);
@@ -457,41 +431,6 @@ export class PiAgentOrchestrator implements IAgentClient {
         once: true,
       });
     });
-  }
-
-  public async confirmToolRun(
-    sessionId: string,
-    toolRunId: string,
-    options: ToolConfirmationOptions,
-    signal?: AbortSignal,
-  ): Promise<void> {
-    this.#requireSession(sessionId);
-    throwIfAborted(signal);
-    const requestedScope: unknown = options.scope ?? "once";
-    if (requestedScope !== "once" && requestedScope !== "session") {
-      throw new Error(`Unsupported tool confirmation scope "${String(requestedScope)}"`);
-    }
-    const scope = requestedScope;
-    const clearedAuthorization = options.approve
-      ? false
-      : this.#sessionToolAuthorizations.delete(sessionId);
-    const confirmationKey = this.#confirmationKey(sessionId, toolRunId);
-    const pending = this.#pendingConfirmations.get(confirmationKey);
-    if (pending == undefined) {
-      if (!options.approve && clearedAuthorization) {
-        return;
-      }
-      throw new Error(`No pending confirmation for tool run "${toolRunId}"`);
-    }
-    this.#pendingConfirmations.delete(confirmationKey);
-    if (options.approve && scope === "session") {
-      const authorizedTools =
-        this.#sessionToolAuthorizations.get(sessionId) ??
-        new Set<ToolConfirmationRequest["toolName"]>();
-      authorizedTools.add(pending.toolName);
-      this.#sessionToolAuthorizations.set(sessionId, authorizedTools);
-    }
-    pending.resolve({ approved: options.approve, scope });
   }
 
   public async notifyCatalogReady(
@@ -543,16 +482,9 @@ export class PiAgentOrchestrator implements IAgentClient {
     session.controller.abort(reason);
     session.unsubscribeAgent();
     session.removeParentAbortListener?.();
-    for (const [key, pending] of this.#pendingConfirmations) {
-      if (pending.sessionId === sessionId) {
-        this.#pendingConfirmations.delete(key);
-        pending.reject(abortReason(session.controller.signal));
-      }
-    }
     session.catalogNotifications.clear();
     session.subscribers.clear();
     session.waitingCatalogRequestIds.clear();
-    this.#sessionToolAuthorizations.delete(sessionId);
     this.#sessions.delete(sessionId);
   }
 
@@ -669,30 +601,10 @@ export class PiAgentOrchestrator implements IAgentClient {
           messageId: active.messageId,
           requestId: active.requestId,
           urls: request.urls,
-          ...(request.sessionId == undefined
-            ? {}
-            : { sessionId: request.sessionId }),
         });
       },
     };
-    return buildPiTools(
-      deps,
-      skills.map((skill) => skill.id),
-      {
-        ...(this.#toolRuntime.confirmationTimeoutMs == undefined
-          ? {}
-          : { confirmationTimeoutMs: this.#toolRuntime.confirmationTimeoutMs }),
-        isConfirmationRequired: (request) =>
-          this.#sessionToolAuthorizations.get(sessionId)?.has(request.toolName) !== true,
-        requestConfirmation: async (toolCallId, request, signal) =>
-          await this.#waitForConfirmation(
-            sessionId,
-            toolCallId,
-            request,
-            signal,
-          ),
-      },
-    );
+    return buildPiTools(deps, skills.map((skill) => skill.id));
   }
 
   async #beforeToolCall(
@@ -751,71 +663,6 @@ export class PiAgentOrchestrator implements IAgentClient {
       session.controller.signal,
     );
     session.waitingCatalogRequestIds.delete(requestId);
-  }
-
-  async #waitForConfirmation(
-    sessionId: string,
-    toolCallId: string,
-    request: ToolConfirmationRequest,
-    signal?: AbortSignal,
-  ): Promise<ToolConfirmationDecision> {
-    throwIfAborted(signal);
-    const session = this.#requireSession(sessionId);
-    const active = this.#requireActiveRequest(session);
-    if (this.#sessionToolAuthorizations.get(sessionId)?.has(request.toolName) === true) {
-      return { approved: true, scope: "session" };
-    }
-    const confirmationKey = this.#confirmationKey(sessionId, toolCallId);
-    if (this.#pendingConfirmations.has(confirmationKey)) {
-      throw new Error(`Duplicate pending tool run id "${toolCallId}"`);
-    }
-    let rejectConfirmation!: (reason: unknown) => void;
-    const confirmation = new Promise<ToolConfirmationDecision>(
-      (resolve, reject) => {
-        rejectConfirmation = reject;
-        this.#pendingConfirmations.set(confirmationKey, {
-          reject,
-          requestId: active.requestId,
-          resolve,
-          sessionId,
-          toolName: request.toolName,
-        });
-      },
-    );
-    const onAbort = () => {
-      if (this.#pendingConfirmations.delete(confirmationKey)) {
-        rejectConfirmation(
-          signal == undefined ? abortError() : abortReason(signal),
-        );
-      }
-    };
-    signal?.addEventListener("abort", onAbort, { once: true });
-    if (signal?.aborted === true) {
-      onAbort();
-    }
-    try {
-      return await confirmation;
-    } finally {
-      signal?.removeEventListener("abort", onAbort);
-      this.#pendingConfirmations.delete(confirmationKey);
-    }
-  }
-
-  #confirmationKey(sessionId: string, toolCallId: string): string {
-    return `${sessionId}\0${toolCallId}`;
-  }
-
-  #cancelRequestConfirmations(
-    sessionId: string,
-    requestId: string,
-    reason: unknown,
-  ): void {
-    for (const [key, pending] of this.#pendingConfirmations) {
-      if (pending.sessionId === sessionId && pending.requestId === requestId) {
-        this.#pendingConfirmations.delete(key);
-        pending.reject(reason);
-      }
-    }
   }
 
   #emit(session: SessionState, event: UnsequencedAgentEvent): void {

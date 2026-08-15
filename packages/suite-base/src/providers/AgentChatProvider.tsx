@@ -31,7 +31,6 @@ import {
   type ChatMessage,
   type IAgentClient,
   type LayoutProposal,
-  type ToolConfirmationOptions,
   type ToolRun,
   type ToolRunStatus,
 } from "@lichtblick/suite-base/services/agent/types";
@@ -40,8 +39,6 @@ const log = Logger.getLogger(__filename);
 
 const WAITING_FOR_CATALOG_TIMEOUT_MS = 120_000;
 const REQUEST_WATCHDOG_TIMEOUT_MS = 180_000;
-const SUBSCRIPTION_RETRY_BASE_MS = 250;
-const SUBSCRIPTION_RETRY_MAX_MS = 2_000;
 const MAX_TERMINAL_REQUEST_IDS = 1_024;
 const AGENT_CHAT_DISABLED_ERROR = "Agent chat is disabled";
 const CONVERSATION_LIST_REFRESH_DELAY_MS = 2_250;
@@ -55,7 +52,7 @@ type AgentChatProviderProps = PropsWithChildren<{
   onSelectProfile?: (profileId: string) => void;
   persistence?: AgentConversationPersistence;
   onApplyProposal?: (proposal: LayoutProposal, signal: AbortSignal) => Promise<void>;
-  onOpenDataSource?: (urls: string[], sessionId?: string) => void;
+  onOpenDataSource?: (urls: string[]) => void;
   /**
    * Current layout snapshot (id + data) used to compute the proposal card display mode with the
    * same strict incremental decision as the apply path.
@@ -86,7 +83,7 @@ type AgentChatProviderProps = PropsWithChildren<{
 type CallbackRefs = {
   selectedProfileName?: string;
   onApplyProposal?: (proposal: LayoutProposal, signal: AbortSignal) => Promise<void>;
-  onOpenDataSource?: (urls: string[], sessionId?: string) => void;
+  onOpenDataSource?: (urls: string[]) => void;
   getCurrentLayoutState?: () => { id?: string; data?: unknown } | undefined;
   getCatalog?: () => { topics: readonly unknown[]; datatypes: ReadonlyMap<string, unknown> };
   getInstalledPanelTypes?: () => ReadonlySet<string>;
@@ -136,7 +133,6 @@ type Subscription = {
   fatal: boolean;
   generation: number;
   lastSeq: number;
-  retryAttempt: number;
   sessionId: string;
 };
 
@@ -200,22 +196,8 @@ function updateAssistantMessage(
 const TERMINAL_TOOL_STATUSES = new Set<ToolRunStatus>(["succeeded", "failed", "cancelled"]);
 
 const ALLOWED_TOOL_TRANSITIONS: Record<ToolRunStatus, ReadonlySet<ToolRunStatus>> = {
-  queued: new Set([
-    "queued",
-    "running",
-    "awaiting-confirmation",
-    "succeeded",
-    "failed",
-    "cancelled",
-  ]),
-  running: new Set(["running", "awaiting-confirmation", "succeeded", "failed", "cancelled"]),
-  "awaiting-confirmation": new Set([
-    "awaiting-confirmation",
-    "running",
-    "succeeded",
-    "failed",
-    "cancelled",
-  ]),
+  queued: new Set(["queued", "running", "succeeded", "failed", "cancelled"]),
+  running: new Set(["running", "succeeded", "failed", "cancelled"]),
   succeeded: new Set(["succeeded"]),
   failed: new Set(["failed"]),
   cancelled: new Set(["cancelled"]),
@@ -301,22 +283,6 @@ function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
-async function abortableDelay(delayMs: number, signal: AbortSignal): Promise<void> {
-  await new Promise<void>((resolve) => {
-    if (signal.aborted) {
-      resolve();
-      return;
-    }
-    const timeout = setTimeout(finish, delayMs);
-    function finish() {
-      clearTimeout(timeout);
-      signal.removeEventListener("abort", finish);
-      resolve();
-    }
-    signal.addEventListener("abort", finish, { once: true });
-  });
-}
-
 function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): AgentChatRuntime {
   let applyingProposal: Promise<void> | undefined;
   let committedEnabled: boolean | undefined;
@@ -333,7 +299,6 @@ function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): A
   let suspendUiPersistence = false;
   let subscription: Subscription | undefined;
 
-  const confirmingToolRuns = new Map<string, Promise<void>>();
   const endedMessageIds = new Set<string>();
   const lastSeqByToolRun = new Map<string, number>();
   const sendWaiters = new Map<string, SendWaiter>();
@@ -410,47 +375,6 @@ function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): A
         throw error;
       } finally {
         removeLifecycleAbortListener?.();
-      }
-    },
-    confirmToolRun: async (toolRunId: string, options: ToolConfirmationOptions) => {
-      const active = await getActionLifecycle();
-      if (active == undefined) {
-        return;
-      }
-      const existing = confirmingToolRuns.get(toolRunId);
-      if (existing != undefined) {
-        await existing;
-        return;
-      }
-
-      const operation = (async () => {
-        clearRecoverableError();
-        try {
-          const sessionId = await ensureSession(active);
-          if (!isActive(active)) {
-            return;
-          }
-          startSubscription(sessionId, active);
-          await active.client.confirmToolRun(
-            sessionId,
-            toolRunId,
-            options,
-            active.controller.signal,
-          );
-          restoreStatusAfterSideEffect(active);
-        } catch (error) {
-          if (isActive(active) && !isAbortError(error)) {
-            setRecoverableError(error);
-          }
-        }
-      })();
-      confirmingToolRuns.set(toolRunId, operation);
-      try {
-        await operation;
-      } finally {
-        if (confirmingToolRuns.get(toolRunId) === operation) {
-          confirmingToolRuns.delete(toolRunId);
-        }
       }
     },
     applyProposal: async () => {
@@ -566,9 +490,6 @@ function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): A
       stopLifecycle(active.generation);
       startLifecycle(active.client);
       store.setState(emptyStateWithConversationList());
-    },
-    newConversation: () => {
-      startNewConversation();
     },
     startNewConversation,
     switchConversation: async (conversationId) => {
@@ -967,7 +888,6 @@ function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): A
       fatal: false,
       generation: expected.generation,
       lastSeq: 0,
-      retryAttempt: 0,
       sessionId,
     };
     subscription = record;
@@ -983,7 +903,6 @@ function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): A
         );
         return;
       }
-      record.retryAttempt = 0;
       if (event.seq <= record.lastSeq) {
         return;
       }
@@ -993,43 +912,27 @@ function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): A
 
     void (async () => {
       try {
-        while (isActive(expected) && subscription === record && !record.fatal) {
-          try {
-            await expected.client.subscribeEvents(
-              sessionId,
-              handleSubscriptionEvent,
-              subscriptionController.signal,
-              { lastSeq: record.lastSeq },
-            );
-          } catch (error) {
-            if (
-              subscriptionController.signal.aborted ||
-              !isActive(expected) ||
-              subscription !== record
-            ) {
-              return;
-            }
-            if (error instanceof AgentStreamProtocolError) {
-              failSubscription(record, error);
-              return;
-            }
-          }
-
-          if (
-            subscriptionController.signal.aborted ||
-            !isActive(expected) ||
-            subscription !== record
-          ) {
-            return;
-          }
-
-          const delayMs = Math.min(
-            SUBSCRIPTION_RETRY_BASE_MS * 2 ** record.retryAttempt,
-            SUBSCRIPTION_RETRY_MAX_MS,
-          );
-          record.retryAttempt = Math.min(record.retryAttempt + 1, 3);
-          await abortableDelay(delayMs, subscriptionController.signal);
+        // The local subscription stays pending until the session is aborted or disposed; there
+        // is no EOF/reconnect cycle to retry.
+        await expected.client.subscribeEvents(
+          sessionId,
+          handleSubscriptionEvent,
+          subscriptionController.signal,
+          { lastSeq: record.lastSeq },
+        );
+      } catch (error) {
+        if (
+          subscriptionController.signal.aborted ||
+          !isActive(expected) ||
+          subscription !== record
+        ) {
+          return;
         }
+        if (error instanceof AgentStreamProtocolError) {
+          failSubscription(record, error);
+          return;
+        }
+        failSubscription(record, error instanceof Error ? error : new Error(String(error)));
       } finally {
         expected.controller.signal.removeEventListener("abort", abortSubscription);
         if (subscription === record && (record.fatal || subscriptionController.signal.aborted)) {
@@ -1093,10 +996,7 @@ function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): A
       case "open-data-source":
         enterWaitingForCatalog(event.requestId, event.urls, expected);
         try {
-          callbackRefs.current.onOpenDataSource?.(
-            event.urls,
-            event.sessionId ?? store.getState().sessionId,
-          );
+          callbackRefs.current.onOpenDataSource?.(event.urls);
           if (!isActive(expected) || subscription !== subscriptionRecord) {
             return;
           }
@@ -1278,7 +1178,6 @@ function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): A
 
   function clearRuntimeState(): void {
     applyingProposal = undefined;
-    confirmingToolRuns.clear();
     endedMessageIds.clear();
     lastSeqByToolRun.clear();
     queuedProposal = undefined;

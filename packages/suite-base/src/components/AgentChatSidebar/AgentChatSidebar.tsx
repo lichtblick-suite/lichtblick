@@ -243,7 +243,7 @@ export function AgentChatSidebar(): React.JSX.Element {
             size="small"
             title={t("newConversation")}
             onClick={() => {
-              actions.newConversation();
+              actions.startNewConversation();
             }}
           >
             <AddCommentOutlinedIcon fontSize="small" />

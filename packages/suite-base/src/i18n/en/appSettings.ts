@@ -9,7 +9,6 @@ export const appSettings = {
   about: "About",
   advanced: "Advanced",
   agent: "Agent",
-  agentApiKeyStorageError: "The API key could not be saved in local storage.",
   agentConfigured: "Agent is configured.",
   agentCredentialBackendUnavailable:
     "The operating system credential backend is temporarily unavailable. Existing desktop credentials and the current form values have been preserved; unlock or restore the credential service, then retry.",

@@ -45,11 +45,9 @@ describe("AgentCatalogWatcher", () => {
     return {
       applyProposal: jest.fn(),
       cancelWaiting: jest.fn(),
-      confirmToolRun: jest.fn(),
       dismissProposal: jest.fn(),
       notifyCatalogReady,
       reset: jest.fn(),
-      newConversation: jest.fn(),
       startNewConversation: jest.fn(),
       switchConversation: jest.fn(),
       deleteConversation: jest.fn(),

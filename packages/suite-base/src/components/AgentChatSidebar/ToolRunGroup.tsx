@@ -7,7 +7,6 @@ import {
   ErrorOutline,
   KeyboardArrowDown,
   KeyboardArrowUp,
-  WarningAmber,
 } from "@mui/icons-material";
 import { ButtonBase, CircularProgress, Collapse, Paper, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
@@ -24,9 +23,6 @@ const useStyles = makeStyles()((theme) => ({
     overflow: "hidden",
     color: theme.palette.text.primary,
     backgroundColor: theme.palette.background.paper,
-  },
-  warning: {
-    borderColor: theme.palette.warning.main,
   },
   error: {
     borderColor: theme.palette.error.main,
@@ -59,9 +55,6 @@ const useStyles = makeStyles()((theme) => ({
     gap: theme.spacing(0.5),
     color: theme.palette.text.secondary,
   },
-  warningStatus: {
-    color: theme.palette.warning.main,
-  },
   errorStatus: {
     color: theme.palette.error.main,
   },
@@ -82,7 +75,7 @@ export function ToolRunGroup({ toolRuns }: ToolRunGroupProps): React.JSX.Element
   const { classes, cx } = useStyles();
   const { t } = useTranslation("agentChat");
   const attentionKey = toolRuns
-    .filter((toolRun) => toolRun.status === "awaiting-confirmation" || hasError(toolRun))
+    .filter(hasError)
     .map((toolRun) => `${toolRun.id}:${toolRun.status}:${toolRun.error ?? ""}`)
     .join("|");
   const [expanded, setExpanded] = useState(attentionKey.length > 0);
@@ -97,9 +90,6 @@ export function ToolRunGroup({ toolRuns }: ToolRunGroupProps): React.JSX.Element
     if (toolRuns.some(hasError)) {
       return "error";
     }
-    if (toolRuns.some((toolRun) => toolRun.status === "awaiting-confirmation")) {
-      return "awaiting-confirmation";
-    }
     if (toolRuns.some((toolRun) => toolRun.status === "running" || toolRun.status === "queued")) {
       return "running";
     }
@@ -113,7 +103,6 @@ export function ToolRunGroup({ toolRuns }: ToolRunGroupProps): React.JSX.Element
   return (
     <Paper
       className={cx(classes.root, {
-        [classes.warning]: groupStatus === "awaiting-confirmation",
         [classes.error]: groupStatus === "error",
       })}
       data-testid="tool-run-group"
@@ -138,7 +127,6 @@ export function ToolRunGroup({ toolRuns }: ToolRunGroupProps): React.JSX.Element
         </Typography>
         <span
           className={cx(classes.status, {
-            [classes.warningStatus]: groupStatus === "awaiting-confirmation",
             [classes.errorStatus]: groupStatus === "error",
           })}
         >
@@ -147,14 +135,6 @@ export function ToolRunGroup({ toolRuns }: ToolRunGroupProps): React.JSX.Element
               <CircularProgress aria-label={t("executionRunning")} color="inherit" size={14} />
               <Typography color="inherit" component="span" variant="caption">
                 {t("executionRunning")}
-              </Typography>
-            </>
-          )}
-          {groupStatus === "awaiting-confirmation" && (
-            <>
-              <WarningAmber fontSize="small" />
-              <Typography color="inherit" component="span" variant="caption">
-                {t("awaitingConfirmation")}
               </Typography>
             </>
           )}

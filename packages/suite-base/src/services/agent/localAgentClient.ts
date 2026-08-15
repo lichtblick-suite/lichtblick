@@ -40,7 +40,7 @@ export type AgentClientConfiguration = AgentConfiguration & {
   dataQuery?: ToolRuntimeDeps["dataQuery"];
 };
 
-export function createLocalAgentClient({
+function createLocalAgentClient({
   apiKey,
   baseUrl,
   dataQuery,
@@ -274,7 +274,7 @@ export function useLocalAgentClient(
  * Wraps a getter in a stable identity so it can be handed to the orchestrator without a changing
  * reference forcing the client to be rebuilt on every render.
  */
-export function useLatestGetter<T>(getter: () => T): () => T {
+function useLatestGetter<T>(getter: () => T): () => T {
   const latestRef = useRef(getter);
   useLayoutEffect(() => {
     latestRef.current = getter;
@@ -282,7 +282,7 @@ export function useLatestGetter<T>(getter: () => T): () => T {
   return useCallback(() => latestRef.current(), []);
 }
 
-export function useLatestAgentCatalog(
+function useLatestAgentCatalog(
   getCatalog: AgentClientConfiguration["getCatalog"],
 ): AgentClientConfiguration["getCatalog"] {
   return useLatestGetter(getCatalog);

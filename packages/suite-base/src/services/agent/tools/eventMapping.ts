@@ -19,7 +19,6 @@ type PiToolExecutionEvent = Extract<
 const TOOL_RUN_STATUSES = new Set<ToolRunStatus>([
   "queued",
   "running",
-  "awaiting-confirmation",
   "succeeded",
   "failed",
   "cancelled",

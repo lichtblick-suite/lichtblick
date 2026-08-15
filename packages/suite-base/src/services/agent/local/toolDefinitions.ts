@@ -100,7 +100,6 @@ export const LOCAL_AGENT_TOOL_DEFINITIONS: LlmToolDef[] = [
           minItems: 1,
           items: { type: "string", minLength: 1, format: "uri" },
         },
-        sessionId: nonEmptyString,
       },
     },
   },

@@ -14,7 +14,6 @@ import type {
   ChatMessage,
   LayoutProposal,
   LayoutProposalMode,
-  ToolConfirmationOptions,
 } from "@lichtblick/suite-base/services/agent/types";
 
 export type AgentChatStatus = "idle" | "connecting" | "streaming" | "waiting-for-catalog" | "error";
@@ -48,17 +47,11 @@ export type AgentChatState = {
   error?: string;
   actions: {
     sendMessage: (text: string) => Promise<void>;
-    confirmToolRun: (
-      toolRunId: string,
-      options: ToolConfirmationOptions,
-    ) => Promise<void>;
     applyProposal: () => Promise<void>;
     dismissProposal: () => void;
     notifyCatalogReady: (requestId: string) => void;
     cancelWaiting: () => void;
     reset: () => void;
-    /** Compatibility alias for startNewConversation. */
-    newConversation: () => void;
     /** Leaves the current conversation in history and starts a fresh one. */
     startNewConversation: () => void;
     switchConversation: (conversationId: string) => Promise<void>;

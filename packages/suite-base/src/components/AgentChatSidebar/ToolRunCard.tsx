@@ -3,7 +3,6 @@
 
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import {
-  Button,
   Chip,
   ChipProps,
   Collapse,
@@ -12,26 +11,17 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
-import {
-  AgentChatState,
-  useAgentChat,
-} from "@lichtblick/suite-base/context/AgentChatContext";
-import {
-  ToolConfirmationOptions,
-  ToolRun,
-  ToolRunStatus,
-} from "@lichtblick/suite-base/services/agent/types";
+import type { ToolRun, ToolRunStatus } from "@lichtblick/suite-base/services/agent/types";
 
 import { useStyles } from "./AgentChatSidebar.style";
 
 const STATUS_LABEL_KEYS = {
   queued: "toolStatus.queued",
   running: "toolStatus.running",
-  "awaiting-confirmation": "toolStatus.awaitingConfirmation",
   succeeded: "toolStatus.succeeded",
   failed: "toolStatus.failed",
   cancelled: "toolStatus.cancelled",
@@ -40,15 +30,12 @@ const STATUS_LABEL_KEYS = {
 const STATUS_COLORS: Record<ToolRunStatus, ChipProps["color"]> = {
   queued: "default",
   running: "primary",
-  "awaiting-confirmation": "warning",
   succeeded: "success",
   failed: "error",
   cancelled: "default",
 };
 
 const RESULT_MAX_CHARS = 4000;
-
-const selectActions = (state: AgentChatState) => state.actions;
 
 type ToolRunCardProps = {
   toolRun: ToolRun;
@@ -57,61 +44,7 @@ type ToolRunCardProps = {
 export function ToolRunCard({ toolRun }: ToolRunCardProps): React.JSX.Element {
   const { classes } = useStyles();
   const { t } = useTranslation("agentChat");
-  const actions = useAgentChat(selectActions);
   const [expanded, setExpanded] = useState(false);
-  const [decisionPending, setDecisionPending] = useState(false);
-  const [decisionError, setDecisionError] = useState<string>();
-  const decisionTokenRef = useRef<symbol>();
-  const mountedRef = useRef(true);
-
-  useLayoutEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useLayoutEffect(() => {
-    if (toolRun.status !== "awaiting-confirmation") {
-      const hadPendingDecision = decisionTokenRef.current != undefined;
-      decisionTokenRef.current = undefined;
-      if (hadPendingDecision) {
-        setDecisionPending(false);
-      }
-      setDecisionError(undefined);
-    }
-  }, [toolRun.status]);
-
-  const submitDecision = useCallback(
-    async (options: ToolConfirmationOptions) => {
-      if (decisionTokenRef.current != undefined) {
-        return;
-      }
-      const token = Symbol("tool-run-decision");
-      decisionTokenRef.current = token;
-      setDecisionPending(true);
-      setDecisionError(undefined);
-      try {
-        await actions.confirmToolRun(toolRun.id, options);
-      } catch (error) {
-        if (decisionTokenRef.current !== token) {
-          return;
-        }
-        decisionTokenRef.current = undefined;
-        if (mountedRef.current && toolRun.status === "awaiting-confirmation") {
-          setDecisionError(
-            error instanceof Error && error.message !== ""
-              ? error.message
-              : t("toolDecisionFailed", {
-                  defaultValue: "Could not update the tool run. Try again.",
-                }),
-          );
-          setDecisionPending(false);
-        }
-      }
-    },
-    [actions, t, toolRun.id, toolRun.status],
-  );
 
   const progress = useMemo(() => {
     if (toolRun.progress == undefined) {
@@ -121,16 +54,14 @@ export function ToolRunCard({ toolRun }: ToolRunCardProps): React.JSX.Element {
   }, [toolRun.progress]);
 
   const showProgress = toolRun.status === "running" || progress != undefined;
-  const needsConfirmation = toolRun.status === "awaiting-confirmation";
-  const hasError = toolRun.error != undefined || decisionError != undefined;
+  const hasError = toolRun.error != undefined;
 
-  // Runs that need user attention (confirmation or failure) are always expanded
-  // so that the required actions and error details are never missed.
+  // Failed runs are always expanded so the error details are never missed.
   useEffect(() => {
-    if (needsConfirmation || hasError) {
+    if (hasError) {
       setExpanded(true);
     }
-  }, [needsConfirmation, hasError]);
+  }, [hasError]);
 
   const resultText = useMemo(() => {
     if (toolRun.result == undefined) {
@@ -195,11 +126,6 @@ export function ToolRunCard({ toolRun }: ToolRunCardProps): React.JSX.Element {
               {toolRun.error}
             </Typography>
           )}
-          {decisionError != undefined && (
-            <Typography className={classes.toolError} color="error" variant="body2">
-              {decisionError}
-            </Typography>
-          )}
 
           {resultText != undefined && (
             <pre className={classes.toolResult} data-testid="tool-run-result">
@@ -208,41 +134,6 @@ export function ToolRunCard({ toolRun }: ToolRunCardProps): React.JSX.Element {
           )}
         </div>
       </Collapse>
-
-      {needsConfirmation && (
-        <Stack className={classes.cardActions} direction="row" justifyContent="flex-end" gap={1}>
-          <Button
-            disabled={decisionPending}
-            size="small"
-            variant="contained"
-            onClick={() => {
-              void submitDecision({ approve: true });
-            }}
-          >
-            {t("confirm")}
-          </Button>
-          <Button
-            disabled={decisionPending}
-            size="small"
-            variant="outlined"
-            onClick={() => {
-              void submitDecision({ approve: true, scope: "session" });
-            }}
-          >
-            {t("confirmAll")}
-          </Button>
-          <Button
-            disabled={decisionPending}
-            size="small"
-            variant="text"
-            onClick={() => {
-              void submitDecision({ approve: false });
-            }}
-          >
-            {t("cancel")}
-          </Button>
-        </Stack>
-      )}
     </Paper>
   );
 }

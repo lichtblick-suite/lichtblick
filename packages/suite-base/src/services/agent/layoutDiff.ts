@@ -155,7 +155,7 @@ export function sanitizeLayoutData(
  * pre-filter; the structural diff below is the actual gate, so collisions cannot admit an unsafe
  * apply.
  */
-export function computeLayoutFingerprint(data: unknown): string {
+function computeLayoutFingerprint(data: unknown): string {
   const canonical = canonicalSerialize(data, new Set());
   let hash = 0x811c9dc5;
   for (let index = 0; index < canonical.length; index++) {
@@ -209,7 +209,7 @@ function countSubtreeOccurrences(
  * layout and switch). The only way back from an applied incremental edit is the whole-layout
  * Revert; there is no fine-grained undo.
  */
-export function planIncrementalApplyData(
+function planIncrementalApplyData(
   base: LayoutData,
   proposal: LayoutData,
 ): IncrementalApplyPlan | undefined {

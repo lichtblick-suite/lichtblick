@@ -4,13 +4,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { act, renderHook } from "@testing-library/react";
-import { StrictMode, useMemo } from "react";
+import { StrictMode, useCallback, useLayoutEffect, useMemo, useRef } from "react";
 
 import { AgentConfiguration } from "@lichtblick/suite-base/services/agent/agentSettings";
-import {
-  useLatestAgentCatalog,
-  useLocalAgentClient,
-} from "@lichtblick/suite-base/services/agent/localAgentClient";
+import { useLocalAgentClient } from "@lichtblick/suite-base/services/agent/localAgentClient";
 import { PiAgentOrchestrator } from "@lichtblick/suite-base/services/agent/pi/PiAgentOrchestrator";
 import type { AgentDataQueryContext } from "@lichtblick/suite-base/services/agent/tools/toolRuntime";
 
@@ -38,10 +35,17 @@ describe("local Agent client lifecycle", () => {
   it("uses the latest catalog without rebuilding the client", () => {
     const { result, rerender } = renderHook(
       ({ catalogVersion }: { catalogVersion: number }) => {
-        const getCatalog = useLatestAgentCatalog(() => ({
-          datatypes: new Map(),
-          topics: [{ name: `/catalog/${catalogVersion}`, schemaName: "test" }],
-        }));
+        const catalogRef = useRef(catalogVersion);
+        useLayoutEffect(() => {
+          catalogRef.current = catalogVersion;
+        });
+        const getCatalog = useCallback(
+          () => ({
+            datatypes: new Map(),
+            topics: [{ name: `/catalog/${catalogRef.current}`, schemaName: "test" }],
+          }),
+          [],
+        );
         const client = useLocalAgentClient(validConfiguration, {
           enabled: true,
           getCatalog,
@@ -165,10 +169,14 @@ describe("local Agent client lifecycle", () => {
     type Topic = { name: string; schemaName: string };
     const { result, rerender } = renderHook<PiAgentOrchestrator | undefined, { topics: Topic[] }>(
       ({ topics }: { topics: Topic[] }) => {
-        const getCatalog = useLatestAgentCatalog(() => ({
-          datatypes: new Map(),
-          topics,
-        }));
+        const topicsRef = useRef(topics);
+        useLayoutEffect(() => {
+          topicsRef.current = topics;
+        });
+        const getCatalog = useCallback(
+          () => ({ datatypes: new Map(), topics: topicsRef.current }),
+          [],
+        );
         const dataQuery = useMemo(
           () => ({ getContext: () => ({}) as AgentDataQueryContext }),
           [],

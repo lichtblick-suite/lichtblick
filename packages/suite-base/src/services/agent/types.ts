@@ -19,7 +19,6 @@ export class AgentStreamProtocolError extends Error {
 export type ToolRunStatus =
   | "queued"
   | "running"
-  | "awaiting-confirmation"
   | "succeeded"
   | "failed"
   | "cancelled";
@@ -31,15 +30,6 @@ export type ToolRun = {
   summary?: string;
   result?: unknown;
   error?: string;
-};
-export type ToolConfirmationScope = "once" | "session";
-export type ToolConfirmationOptions = {
-  approve: boolean;
-  scope?: ToolConfirmationScope;
-};
-export type ToolConfirmationDecision = {
-  approved: boolean;
-  scope: ToolConfirmationScope;
 };
 export type ChatRole = "user" | "assistant";
 export type ChatMessage = {
@@ -108,26 +98,13 @@ export type AgentEvent =
       type: "open-data-source";
       messageId: string;
       urls: string[];
-      sessionId?: string;
       requestId: string;
     })
   | (AgentEventEnvelope & { type: "error"; error: string })
   | (AgentEventEnvelope & { type: "done"; requestId: string });
 export type SubscribeEventsOptions = {
-  /**
-   * Maximum time without receiving any response bytes before the subscription rejects.
-   * Defaults to 60 seconds.
-   */
-  idleTimeoutMs?: number;
-  /** Non-negative safe-integer replay cursor. The server returns events above this value. */
+  /** Non-negative safe-integer replay cursor. Events above this value are delivered. */
   lastSeq?: number;
-};
-export type SubscribeEventsResult = {
-  /**
-   * EOF always means that this physical connection ended and may be reconnected. A server that
-   * intends to terminate the session must send a session-level error or a dedicated control event.
-   */
-  reason: "eof";
 };
 export interface IAgentClient {
   createSession: (signal?: AbortSignal) => Promise<{ sessionId: string }>;
@@ -138,22 +115,14 @@ export interface IAgentClient {
     signal?: AbortSignal,
   ) => Promise<void>;
   /**
-   * Resolves with an EOF reason when the physical SSE connection closes. Events with
-   * seq <= options.lastSeq, including replayed events, are discarded. Caller cancellation rejects
-   * with the AbortSignal reason. The void union preserves compatibility with legacy client
-   * implementations; current implementations always return SubscribeEventsResult.
+   * Local subscription: events with seq <= options.lastSeq are discarded and the promise stays
+   * pending until the caller aborts or the session is disposed.
    */
   subscribeEvents: (
     sessionId: string,
     onEvent: (event: AgentEvent) => void,
     signal?: AbortSignal,
     options?: SubscribeEventsOptions,
-  ) => Promise<SubscribeEventsResult | void>;
-  confirmToolRun: (
-    sessionId: string,
-    toolRunId: string,
-    options: ToolConfirmationOptions,
-    signal?: AbortSignal,
   ) => Promise<void>;
   notifyCatalogReady: (
     sessionId: string,

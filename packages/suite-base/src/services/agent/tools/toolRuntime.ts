@@ -25,7 +25,6 @@ export const TOOL_RUNTIME_MAX_RESULT_BYTES = 256 * 1024;
 
 export type OpenDataSourceRequest = {
   urls: string[];
-  sessionId?: string;
 };
 
 export type ToolRuntimeDeps = {
@@ -412,7 +411,6 @@ export async function runOpenDataSourceTool(
   const input = requireRecord(value, toolName);
   const request: OpenDataSourceRequest = {
     urls: requireUrls(input, toolName),
-    sessionId: optionalString(input, "sessionId", toolName),
   };
   await runDependency(async () => {
     await deps.emitOpenDataSource(request, context.signal);

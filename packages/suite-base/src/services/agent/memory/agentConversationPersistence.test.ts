@@ -5,8 +5,6 @@
 
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 
-import type { LlmMessage } from "@lichtblick/suite-base/services/agent/local/types";
-
 import { AgentConversationStore } from "./AgentConversationStore";
 import {
   AGENT_CONVERSATION_ID_KEY,
@@ -14,7 +12,6 @@ import {
   getOrCreateConversationId,
 } from "./agentConversationPersistence";
 
-const history: LlmMessage[] = [{ role: "user", content: "find SN001" }];
 const piHistory: AgentMessage[] = [
   {
     role: "user",
@@ -22,6 +19,14 @@ const piHistory: AgentMessage[] = [
     timestamp: Date.parse("2026-08-04T09:30:00.000Z"),
   },
 ];
+
+function piUserMessage(text: string): AgentMessage {
+  return {
+    role: "user",
+    content: [{ type: "text", text }],
+    timestamp: Date.parse("2026-08-04T09:30:00.000Z"),
+  };
+}
 
 describe("getOrCreateConversationId", () => {
   beforeEach(() => {
@@ -50,21 +55,6 @@ describe("createAgentConversationPersistence", () => {
     localStorage.clear();
   });
 
-  it("restores both transcripts from one record", async () => {
-    const store = new AgentConversationStore();
-    await store.save({
-      conversationId: "c1",
-      updatedAt: "2026-07-28T00:00:00Z",
-      llmHistory: history,
-      uiMessages: [{ id: "u1", role: "user", text: "find SN001" }],
-    });
-
-    const persistence = createAgentConversationPersistence({ conversationId: "c1", makeId: () => "next", store });
-    await expect(persistence.restoreLlmHistory()).resolves.toEqual(history);
-    await expect(persistence.restorePiLlmHistory()).resolves.toEqual([]);
-    await expect(persistence.restoreUiMessages()).resolves.toHaveLength(1);
-  });
-
   it("round-trips pi history with its format marker and the UI transcript", async () => {
     const store = new AgentConversationStore();
     const persistence = createAgentConversationPersistence({
@@ -89,7 +79,6 @@ describe("createAgentConversationPersistence", () => {
       store,
     });
     await expect(restored.restorePiLlmHistory()).resolves.toEqual(piHistory);
-    await expect(restored.restoreLlmHistory()).resolves.toEqual([]);
     await expect(restored.restoreUiMessages()).resolves.toEqual([
       { id: "ui-message", content: "find SN001" },
     ]);
@@ -136,7 +125,9 @@ describe("createAgentConversationPersistence", () => {
     await store.save({
       conversationId: "legacy-conversation",
       updatedAt: "2026-08-04T09:30:00.000Z",
-      llmHistory: history,
+      // A legacy unversioned record: the pi format marker is missing, so the transcript must be
+      // treated as unreadable rather than misparsed.
+      llmHistory: piHistory,
       uiMessages: [{ id: "legacy-ui-message", content: "still visible" }],
     });
     const persistence = createAgentConversationPersistence({
@@ -157,33 +148,34 @@ describe("createAgentConversationPersistence", () => {
       makeId: () => "next",
       store: new AgentConversationStore(),
     });
-    await expect(persistence.restoreLlmHistory()).resolves.toEqual([]);
+    await expect(persistence.restorePiLlmHistory()).resolves.toEqual([]);
     await expect(persistence.restoreUiMessages()).resolves.toEqual([]);
   });
 
   it("keeps both halves in the same record when only one changes", async () => {
     const store = new AgentConversationStore();
     const persistence = createAgentConversationPersistence({ conversationId: "c2", makeId: () => "next", store });
-    await persistence.restoreLlmHistory();
+    await persistence.restorePiLlmHistory();
 
-    persistence.onLlmHistoryChanged(history);
+    persistence.onPiLlmHistoryChanged(piHistory);
     persistence.onUiMessagesChanged([{ id: "u1" }]);
     // Writes are queued; let the queue drain.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     const stored = await store.load("c2");
-    expect(stored?.llmHistory).toEqual(history);
+    expect(stored?.llmHistory).toEqual(piHistory);
+    expect(stored?.llmHistoryFormat).toBe("pi/v1");
     expect(stored?.uiMessages).toEqual([{ id: "u1" }]);
   });
 
   it("snapshots each change so a later mutation cannot rewrite a queued record", async () => {
     const store = new AgentConversationStore();
     const persistence = createAgentConversationPersistence({ conversationId: "c3", makeId: () => "next", store });
-    await persistence.restoreLlmHistory();
+    await persistence.restorePiLlmHistory();
 
-    const mutable: LlmMessage[] = [{ role: "user", content: "first" }];
-    persistence.onLlmHistoryChanged(mutable);
-    mutable.push({ role: "user", content: "second" });
+    const mutable: AgentMessage[] = [piUserMessage("first")];
+    persistence.onPiLlmHistoryChanged(mutable);
+    mutable.push(piUserMessage("second"));
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect((await store.load("c3"))?.llmHistory).toHaveLength(1);
@@ -197,7 +189,7 @@ describe("createAgentConversationPersistence", () => {
       makeId: () => "c6",
       store,
     });
-    persistence.onLlmHistoryChanged(history);
+    persistence.onPiLlmHistoryChanged(piHistory);
     persistence.onUiMessagesChanged([{ id: "u1" }]);
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(await store.load("c5")).toBeDefined();
@@ -206,7 +198,7 @@ describe("createAgentConversationPersistence", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(await store.load("c5")).toBeDefined();
-    await expect(persistence.restoreLlmHistory()).resolves.toEqual([]);
+    await expect(persistence.restorePiLlmHistory()).resolves.toEqual([]);
     await expect(persistence.restoreUiMessages()).resolves.toEqual([]);
     // The new id has to survive a reload, otherwise the next launch resumes the discarded one.
     expect(localStorage.getItem(AGENT_CONVERSATION_ID_KEY)).toBe("c6");
@@ -220,10 +212,10 @@ describe("createAgentConversationPersistence", () => {
       store,
     });
     persistence.startNewConversation();
-    persistence.onLlmHistoryChanged(history);
+    persistence.onPiLlmHistoryChanged(piHistory);
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect((await store.load("c8"))?.llmHistory).toEqual(history);
+    expect((await store.load("c8"))?.llmHistory).toEqual(piHistory);
     expect(await store.load("c7")).toBeUndefined();
   });
 
@@ -232,7 +224,8 @@ describe("createAgentConversationPersistence", () => {
     await store.save({
       conversationId: "target",
       updatedAt: "2026-07-29T00:00:00Z",
-      llmHistory: [{ role: "assistant", content: "target history" }],
+      llmHistory: [piUserMessage("target history")],
+      llmHistoryFormat: "pi/v1",
       uiMessages: [{ id: "target-message" }],
     });
     const persistence = createAgentConversationPersistence({
@@ -240,14 +233,14 @@ describe("createAgentConversationPersistence", () => {
       makeId: () => "new",
       store,
     });
-    persistence.onLlmHistoryChanged(history);
+    persistence.onPiLlmHistoryChanged(piHistory);
     persistence.onUiMessagesChanged([{ id: "source-message" }]);
 
     await persistence.switchConversation("target");
 
     expect((await store.load("source"))?.uiMessages).toEqual([{ id: "source-message" }]);
-    await expect(persistence.restoreLlmHistory()).resolves.toEqual([
-      { role: "assistant", content: "target history" },
+    await expect(persistence.restorePiLlmHistory()).resolves.toEqual([
+      piUserMessage("target history"),
     ]);
     await expect(persistence.restoreUiMessages()).resolves.toEqual([
       { id: "target-message" },
@@ -258,14 +251,14 @@ describe("createAgentConversationPersistence", () => {
   it("clears the stored conversation", async () => {
     const store = new AgentConversationStore();
     const persistence = createAgentConversationPersistence({ conversationId: "c4", makeId: () => "next", store });
-    persistence.onLlmHistoryChanged(history);
+    persistence.onPiLlmHistoryChanged(piHistory);
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     persistence.clear();
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(await store.load("c4")).toBeUndefined();
-    await expect(persistence.restoreLlmHistory()).resolves.toEqual([]);
+    await expect(persistence.restorePiLlmHistory()).resolves.toEqual([]);
   });
 
   it("forwards the local conversation list and marks offline failures", async () => {
@@ -275,7 +268,7 @@ describe("createAgentConversationPersistence", () => {
       makeId: () => "next",
       store,
     });
-    persistence.onLlmHistoryChanged(history);
+    persistence.onPiLlmHistoryChanged(piHistory);
     persistence.onUiMessagesChanged([{ role: "user", content: "listed" }]);
     await new Promise((resolve) => setTimeout(resolve, 0));
 

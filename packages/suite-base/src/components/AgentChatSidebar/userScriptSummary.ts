@@ -12,7 +12,7 @@
  * `inputs` and a single string literal for `output`. Extraction failure degrades to undefined —
  * the card shows a "could not parse" placeholder instead of failing.
  */
-export function extractInputTopics(sourceCode: string): readonly string[] | undefined {
+function extractInputTopics(sourceCode: string): readonly string[] | undefined {
   const arrayMatch = /export\s+const\s+inputs\s*=\s*\[([\s\S]*?)\]/m.exec(sourceCode);
   if (arrayMatch == undefined) {
     return undefined;
@@ -20,13 +20,13 @@ export function extractInputTopics(sourceCode: string): readonly string[] | unde
   return [...arrayMatch[1]!.matchAll(/["']([^"']+)["']/g)].map((match) => match[1]!);
 }
 
-export function extractOutputTopic(sourceCode: string): string | undefined {
+function extractOutputTopic(sourceCode: string): string | undefined {
   const outputMatch =
     /export\s+const\s+output\s*=\s*("([^"]+)"|'([^']+)')/m.exec(sourceCode);
   return outputMatch?.[2] ?? outputMatch?.[3];
 }
 
-export type UserScriptSummary = {
+type UserScriptSummary = {
   id: string;
   name: string;
   sourceCode: string;
@@ -34,7 +34,7 @@ export type UserScriptSummary = {
   outputTopic: string | undefined;
 };
 
-export type UserScriptsData = Record<string, { name?: string; sourceCode?: string }>;
+type UserScriptsData = Record<string, { name?: string; sourceCode?: string }>;
 
 /**
  * Builds the ordered summary list for the scripts carried in a proposal's `userNodes`. Entries

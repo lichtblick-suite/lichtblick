@@ -1,19 +1,13 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/
-
 import type { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import type { CatalogSnapshot } from "@lichtblick/suite-base/services/agent/local/types";
 
 import {
   collectLayoutBaseline,
-  computeLayoutFingerprint,
   computeProposalMode,
   planIncrementalApply,
-  planIncrementalApplyData,
   sanitizeLayoutData,
 } from "./layoutDiff";
 
@@ -30,14 +24,12 @@ function baseLayout(): LayoutData {
   return {
     configById: {
       "3D!scene": { topics: { "/points": { visible: true } } },
-      "Plot!speed": {
-        paths: [{ value: "/odom.twist.twist.linear.x", enabled: true }],
-      },
+      "Image!front": { imageMode: { imageTopic: "/camera/front/image_raw" } },
     },
     layout: {
       direction: "row",
       first: "3D!scene",
-      second: "Plot!speed",
+      second: "Image!front",
       splitPercentage: 50,
     },
     globalVariables: {},
@@ -62,6 +54,23 @@ function addGaugeTo(layout: LayoutData): LayoutData {
   };
 }
 
+/**
+ * Public baseline oracle: captures the proposal-time fingerprint the same way the orchestrator
+ * does (validate+sanitize, then fingerprint), through the exported collectLayoutBaseline entry.
+ */
+function fingerprintOf(
+  data: LayoutData,
+  catalog: CatalogSnapshot = emptyCatalog,
+): string {
+  const baseline = collectLayoutBaseline(
+    () => data,
+    () => "layout-1",
+    () => catalog,
+  );
+  expect(baseline.baseFingerprint).toBeDefined();
+  return baseline.baseFingerprint!;
+}
+
 function incrementalInput(overrides?: {
   baseLayout?: LayoutData;
   proposal?: LayoutData;
@@ -78,7 +87,7 @@ function incrementalInput(overrides?: {
     baseFingerprint:
       overrides != undefined && "baseFingerprint" in overrides
         ? overrides.baseFingerprint
-        : computeLayoutFingerprint(base),
+        : fingerprintOf(base),
     currentLayoutId: overrides?.currentLayoutId ?? "layout-1",
     currentLayoutData: base,
     proposalData: overrides?.proposal ?? addGaugeTo(base),
@@ -114,51 +123,9 @@ describe("sanitizeLayoutData", () => {
   });
 });
 
-describe("computeLayoutFingerprint", () => {
-  it("is deterministic for the same data", () => {
-    expect(computeLayoutFingerprint(baseLayout())).toBe(computeLayoutFingerprint(baseLayout()));
-  });
-
-  it("is independent of object key order", () => {
-    const data = baseLayout();
-    const reordered: LayoutData = {
-      playbackConfig: data.playbackConfig,
-      userNodes: data.userNodes,
-      globalVariables: data.globalVariables,
-      configById: data.configById,
-      layout: data.layout,
-    };
-    expect(computeLayoutFingerprint(data)).toBe(computeLayoutFingerprint(reordered));
-  });
-
-  it("differs when the data differs", () => {
-    const changed = baseLayout();
-    changed.playbackConfig = { speed: 2 };
-    expect(computeLayoutFingerprint(changed)).not.toBe(
-      computeLayoutFingerprint(baseLayout()),
-    );
-  });
-
-  it("does not throw on pathological non-JSON values", () => {
-    const cyclic: Record<string, unknown> = { name: "x" };
-    cyclic.self = cyclic;
-    expect(() =>
-      computeLayoutFingerprint({
-        big: 1n,
-        bytes: new Uint8Array([1, 2, 3]),
-        cyclic,
-        missing: undefined,
-      }),
-    ).not.toThrow();
-    // Stable across calls.
-    const value = { bytes: new Uint8Array([1, 2, 3]), cyclic };
-    expect(computeLayoutFingerprint(value)).toBe(computeLayoutFingerprint(value));
-  });
-});
-
-describe("planIncrementalApplyData", () => {
+describe("planIncrementalApply (strict structural gate)", () => {
   it("returns a plan for an exact superset of the base layout", () => {
-    const plan = planIncrementalApplyData(baseLayout(), addGaugeTo(baseLayout()));
+    const plan = planIncrementalApply(incrementalInput());
 
     expect(plan).toEqual({
       kind: "incremental",
@@ -167,7 +134,7 @@ describe("planIncrementalApplyData", () => {
         first: {
           direction: "row",
           first: "3D!scene",
-          second: "Plot!speed",
+          second: "Image!front",
           splitPercentage: 50,
         },
         second: "Gauge!battery",
@@ -199,7 +166,7 @@ describe("planIncrementalApplyData", () => {
       },
     };
 
-    const plan = planIncrementalApplyData(baseLayout(), proposal);
+    const plan = planIncrementalApply(incrementalInput({ proposal }));
     expect(plan).toEqual({
       kind: "incremental",
       layout: proposal.layout,
@@ -215,13 +182,13 @@ describe("planIncrementalApplyData", () => {
     (proposal.configById["3D!scene"] as Record<string, unknown>) = {
       topics: { "/points": { visible: false } },
     };
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when an existing panel was removed", () => {
     const proposal = addGaugeTo(baseLayout());
     delete proposal.configById["3D!scene"];
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when the old tree was reordered", () => {
@@ -231,13 +198,13 @@ describe("planIncrementalApplyData", () => {
       first: "Gauge!battery",
       second: {
         direction: "row",
-        first: "Plot!speed",
+        first: "Image!front",
         second: "3D!scene",
         splitPercentage: 50,
       },
       splitPercentage: 70,
     };
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when the old tree is duplicated", () => {
@@ -251,7 +218,7 @@ describe("planIncrementalApplyData", () => {
         second: baseLayout().layout!,
       },
     };
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when userNodes changed (script added or edited)", () => {
@@ -259,81 +226,60 @@ describe("planIncrementalApplyData", () => {
     proposal.userNodes = {
       "script-1": { name: "Speed", sourceCode: "export default () => {}" },
     };
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when globalVariables changed", () => {
     const proposal = addGaugeTo(baseLayout());
     proposal.globalVariables = { speed: 1 };
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when playbackConfig changed", () => {
     const proposal = addGaugeTo(baseLayout());
     proposal.playbackConfig = { speed: 2 };
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when version changed", () => {
     const proposal = addGaugeTo(baseLayout());
     proposal.version = 2;
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when savedProps changed", () => {
     const proposal = addGaugeTo(baseLayout());
     // savedProps is deprecated on LayoutData; write it via an untyped record.
     (proposal as unknown as Record<string, unknown>)["savedProps"] = {
-      "Plot!speed": { paths: [] },
+      "Image!front": { imageMode: {} },
     };
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when a new config entry has no matching leaf", () => {
     const proposal = addGaugeTo(baseLayout());
     proposal.configById["Gauge!orphan"] = { path: "/nope" };
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when a new leaf has no config entry", () => {
     const proposal = addGaugeTo(baseLayout());
     delete proposal.configById["Gauge!battery"];
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
-  });
-
-  it("returns a plan when the base layout is empty (all panels are new)", () => {
-    const emptyBase: LayoutData = {
-      configById: {},
-      layout: undefined,
-      globalVariables: {},
-      playbackConfig: { speed: 1 },
-      userNodes: {},
-    };
-    const proposal: LayoutData = {
-      ...emptyBase,
-      configById: { "Plot!speed": { paths: [] } },
-      layout: "Plot!speed",
-    };
-
-    expect(planIncrementalApplyData(emptyBase, proposal)).toEqual({
-      kind: "incremental",
-      layout: "Plot!speed",
-      newPanelConfigs: { "Plot!speed": { paths: [] } },
-    });
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
 
   it("returns undefined when the proposal has no new panels", () => {
-    expect(planIncrementalApplyData(baseLayout(), baseLayout())).toBeUndefined();
+    expect(
+      planIncrementalApply(incrementalInput({ proposal: baseLayout() })),
+    ).toBeUndefined();
   });
 
   it("returns undefined when the proposal has no mosaic tree", () => {
     const proposal = addGaugeTo(baseLayout());
     proposal.layout = undefined;
-    expect(planIncrementalApplyData(baseLayout(), proposal)).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal }))).toBeUndefined();
   });
-});
 
-describe("planIncrementalApply", () => {
   it("returns undefined when the proposal carries no baseline", () => {
     expect(planIncrementalApply(incrementalInput({ baseLayoutId: undefined }))).toBeUndefined();
     expect(
@@ -358,7 +304,7 @@ describe("planIncrementalApply", () => {
   it("returns undefined when the current layout fingerprint differs from the baseline", () => {
     expect(
       planIncrementalApply(
-        incrementalInput({ baseFingerprint: computeLayoutFingerprint(addGaugeTo(baseLayout())) }),
+        incrementalInput({ baseFingerprint: fingerprintOf(addGaugeTo(baseLayout())) }),
       ),
     ).toBeUndefined();
   });
@@ -375,7 +321,7 @@ describe("planIncrementalApply", () => {
     expect(
       planIncrementalApply(
         incrementalInput({
-          baseFingerprint: computeLayoutFingerprint(baseLayout()),
+          baseFingerprint: fingerprintOf(baseLayout()),
           currentLayoutId: "layout-1",
           proposal: addGaugeTo(edited),
           baseLayout: edited,
@@ -385,17 +331,103 @@ describe("planIncrementalApply", () => {
   });
 });
 
-describe("collectLayoutBaseline", () => {
-  it("captures the layout id and the fingerprint of the sanitized data", () => {
+describe("baseline fingerprint semantics", () => {
+  it("treats key order as semantically identical through the apply gate", () => {
+    const data = baseLayout();
+    const reordered: LayoutData = {
+      playbackConfig: data.playbackConfig,
+      userNodes: data.userNodes,
+      globalVariables: data.globalVariables,
+      configById: data.configById,
+      layout: data.layout,
+    };
+    const a = collectLayoutBaseline(() => data, () => "layout-1", () => emptyCatalog);
+    const b = collectLayoutBaseline(() => reordered, () => "layout-1", () => emptyCatalog);
+    expect(a.baseFingerprint).toBeDefined();
+    expect(a.baseFingerprint).toBe(b.baseFingerprint);
+    // The apply gate accepts the reordered layout against the original fingerprint.
+    expect(
+      planIncrementalApply(
+        incrementalInput({
+          baseFingerprint: a.baseFingerprint,
+          baseLayout: reordered,
+        }),
+      )?.kind,
+    ).toBe("incremental");
+  });
+
+  it("does not throw on pathological non-JSON values through the public apply gate", () => {
+    const cyclic: Record<string, unknown> = { name: "x" };
+    cyclic.self = cyclic;
+    const pathological = {
+      big: 1n,
+      bytes: new Uint8Array([1, 2, 3]),
+      cyclic,
+      missing: undefined,
+    };
+    // The fingerprint mismatch path must degrade to a fallback, never throw.
+    expect(
+      planIncrementalApply({
+        baseLayoutId: "layout-1",
+        baseFingerprint: "00000000",
+        currentLayoutId: "layout-1",
+        currentLayoutData: pathological as unknown as LayoutData,
+        proposalData: baseLayout(),
+      }),
+    ).toBeUndefined();
+  });
+
+  it("returns an incremental plan for an empty base layout with all-new panels", () => {
+    // A valid empty layout omits the layout key entirely (undefined values are not JSON-safe);
+    // every panel in the proposal is new.
+    const emptyBase: LayoutData = {
+      configById: {},
+      globalVariables: {},
+      playbackConfig: { speed: 1 },
+      userNodes: {},
+    };
+    const proposal: LayoutData = {
+      ...emptyBase,
+      configById: { "Plot!speed": { paths: [] } },
+      layout: "Plot!speed",
+    };
     const baseline = collectLayoutBaseline(
+      () => emptyBase,
+      () => "layout-1",
+      () => emptyCatalog,
+    );
+    expect(baseline.baseFingerprint).toBeDefined();
+    expect(
+      planIncrementalApply({
+        baseLayoutId: "layout-1",
+        baseFingerprint: baseline.baseFingerprint,
+        currentLayoutId: "layout-1",
+        currentLayoutData: emptyBase,
+        proposalData: proposal,
+      }),
+    ).toEqual({
+      kind: "incremental",
+      layout: "Plot!speed",
+      newPanelConfigs: { "Plot!speed": { paths: [] } },
+    });
+  });
+});
+
+describe("collectLayoutBaseline", () => {
+  it("captures the layout id and a deterministic fingerprint", () => {
+    const first = collectLayoutBaseline(
       () => baseLayout(),
       () => "layout-1",
       () => emptyCatalog,
     );
-    expect(baseline).toEqual({
-      baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(sanitizeLayoutData(baseLayout(), emptyCatalog)!),
-    });
+    const second = collectLayoutBaseline(
+      () => baseLayout(),
+      () => "layout-1",
+      () => emptyCatalog,
+    );
+    expect(first.baseLayoutId).toBe("layout-1");
+    expect(first.baseFingerprint).toBeDefined();
+    expect(first.baseFingerprint).toBe(second.baseFingerprint);
   });
 
   it("fingerprints the sanitized form, not the raw data", () => {
@@ -409,18 +441,27 @@ describe("collectLayoutBaseline", () => {
       userNodes: {},
     };
     const catalog = catalogWithTopic("/camera", "sensor_msgs/Image");
-    const baseline = collectLayoutBaseline(
+    const sanitized = collectLayoutBaseline(
       () => withInvalidPlotPath,
       () => "layout-1",
       () => catalog,
     );
-    const sanitizedFingerprint = computeLayoutFingerprint(
-      sanitizeLayoutData(withInvalidPlotPath, catalog)!,
+    const rawShaped = collectLayoutBaseline(
+      () => ({
+        ...withInvalidPlotPath,
+        configById: {
+          ...withInvalidPlotPath.configById,
+          "Plot!speed": {
+            ...withInvalidPlotPath.configById["Plot!speed"],
+            autoSeeded: true,
+            paths: [],
+          },
+        },
+      }),
+      () => "layout-1",
+      () => emptyCatalog,
     );
-    expect(baseline.baseFingerprint).toBe(sanitizedFingerprint);
-    expect(baseline.baseFingerprint).not.toBe(
-      computeLayoutFingerprint(withInvalidPlotPath),
-    );
+    expect(sanitized.baseFingerprint).toBe(rawShaped.baseFingerprint);
   });
 
   it("returns no baseline when the current layout getters are absent or empty", () => {
@@ -466,7 +507,7 @@ describe("computeProposalMode", () => {
       name: "n",
       data: addGaugeTo(baseLayout()),
       baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(sanitizeLayoutData(baseLayout(), emptyCatalog)!),
+      baseFingerprint: fingerprintOf(baseLayout()),
     };
     expect(
       computeProposalMode(proposal, { id: "layout-1", data: baseLayout() }, emptyCatalog),
@@ -481,7 +522,7 @@ describe("computeProposalMode", () => {
         userNodes: { "script-1": { name: "S", sourceCode: "x" } },
       },
       baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(sanitizeLayoutData(baseLayout(), emptyCatalog)!),
+      baseFingerprint: fingerprintOf(baseLayout()),
     };
     // Script additions make the apply fall back to a new layout — the card must not claim
     // "Add panels to the current layout".
@@ -495,7 +536,7 @@ describe("computeProposalMode", () => {
       name: "n",
       data: addGaugeTo(baseLayout()),
       baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(sanitizeLayoutData(baseLayout(), emptyCatalog)!),
+      baseFingerprint: fingerprintOf(baseLayout()),
     };
     const editedCurrent: LayoutData = { ...baseLayout(), playbackConfig: { speed: 4 } };
     expect(
@@ -508,7 +549,7 @@ describe("computeProposalMode", () => {
       name: "n",
       data: addGaugeTo(baseLayout()),
       baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(sanitizeLayoutData(baseLayout(), emptyCatalog)!),
+      baseFingerprint: fingerprintOf(baseLayout()),
     };
     expect(
       computeProposalMode(proposal, { id: "layout-other", data: baseLayout() }, emptyCatalog),
@@ -516,19 +557,48 @@ describe("computeProposalMode", () => {
   });
 
   it("reports a new layout when the catalog changed since the baseline", () => {
+    const plotLayout = {
+      configById: {
+        "Plot!points": { paths: [{ value: "/points.x", enabled: true }] },
+      },
+      layout: "Plot!points",
+      globalVariables: {},
+      playbackConfig: { speed: 1 },
+      userNodes: {},
+    };
+    const catalogWithPoints: CatalogSnapshot = {
+      topics: [{ name: "/points", schemaName: "sensor_msgs/PointCloud2" }],
+      datatypes: new Map([
+        ["sensor_msgs/PointCloud2", { definitions: [{ name: "x", type: "float64" }] }],
+      ]),
+    };
     const proposal = {
       name: "n",
-      data: addGaugeTo(baseLayout()),
+      data: addGaugeTo(plotLayout),
       baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(sanitizeLayoutData(baseLayout(), emptyCatalog)!),
+      baseFingerprint: collectLayoutBaseline(
+        () => plotLayout,
+        () => "layout-1",
+        () => catalogWithPoints,
+      ).baseFingerprint,
     };
+    // The baseline was captured while /points existed; with a catalog that does not contain the
+    // Plot path's topic it is sanitized away and the fingerprint no longer matches.
     expect(
       computeProposalMode(
         proposal,
-        { id: "layout-1", data: baseLayout() },
+        { id: "layout-1", data: plotLayout },
         catalogWithTopic("/imu", "sensor_msgs/Imu"),
       ),
     ).toEqual({ kind: "new" });
+    // With the same catalog the mode stays incremental.
+    expect(
+      computeProposalMode(
+        proposal,
+        { id: "layout-1", data: plotLayout },
+        catalogWithPoints,
+      ),
+    ).toEqual({ kind: "incremental", newPanelCount: 1 });
   });
 
   it("degrades to a new layout when the current layout or catalog is unavailable", () => {
@@ -536,7 +606,7 @@ describe("computeProposalMode", () => {
       name: "n",
       data: addGaugeTo(baseLayout()),
       baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(sanitizeLayoutData(baseLayout(), emptyCatalog)!),
+      baseFingerprint: fingerprintOf(baseLayout()),
     };
     expect(computeProposalMode(proposal, undefined, emptyCatalog)).toEqual({ kind: "new" });
     expect(computeProposalMode(proposal, { id: "layout-1", data: baseLayout() }, undefined)).toEqual(
@@ -569,9 +639,11 @@ describe("computeProposalMode", () => {
         },
       },
       baseLayoutId: "layout-1",
-      baseFingerprint: computeLayoutFingerprint(
-        sanitizeLayoutData(withInvalidPlotPath, emptyCatalog)!,
-      ),
+      baseFingerprint: collectLayoutBaseline(
+        () => withInvalidPlotPath,
+        () => "layout-1",
+        () => emptyCatalog,
+      ).baseFingerprint,
     };
     // The fingerprint matches (both sanitized), so the mode is incremental — and applying would
     // be incremental too.

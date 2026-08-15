@@ -11,7 +11,6 @@ import {
   AGENT_SAFE_LAYOUT_MAX_MOSAIC_DEPTH,
   AGENT_SAFE_LAYOUT_MAX_STRING_BYTES,
   type AgentSafeLayoutData,
-  isValidLayoutProposalData,
   validateLayoutProposal,
   validateLayoutProposalData,
 } from "./layoutSchema";
@@ -73,7 +72,6 @@ describe("layoutSchema", () => {
     const data = validLayoutData();
 
     expect(validateLayoutProposalData(data)).toBe(data);
-    expect(isValidLayoutProposalData(data)).toBe(true);
   });
 
   it("returns a proposal whose data is validated as AgentSafeLayoutData", () => {
@@ -209,7 +207,6 @@ describe("layoutSchema", () => {
     expect(() => validateLayoutProposalData(data)).toThrow(
       'uses unsupported panel type "Publish"',
     );
-    expect(isValidLayoutProposalData(data)).toBe(false);
   });
 
   it.each(["Plot", "Plot!", "!suffix", "Plot!one!two", "Plot! "])(
