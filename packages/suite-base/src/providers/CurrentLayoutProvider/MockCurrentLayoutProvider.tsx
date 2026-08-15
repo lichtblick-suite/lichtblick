@@ -15,6 +15,7 @@ import CurrentLayoutContext, {
   SelectedLayout,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
+  AddPanelsAtomicallyPayload,
   LayoutData,
   PanelsActions,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
@@ -155,6 +156,9 @@ export default function MockCurrentLayoutProvider({
       },
       addPanel: (payload) => {
         performAction({ type: "ADD_PANEL", payload });
+      },
+      addPanelsAtomically: (payload: AddPanelsAtomicallyPayload) => {
+        performAction({ type: "ADD_PANELS_ATOMIC", payload });
       },
       dropPanel: (payload) => {
         performAction({ type: "DROP_PANEL", payload });

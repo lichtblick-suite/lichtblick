@@ -136,6 +136,22 @@ export type AddPanelPayload = {
 };
 export type ADD_PANEL = { type: "ADD_PANEL"; payload: AddPanelPayload };
 
+/**
+ * Atomic addition of new panels to the current layout (agent incremental apply). The payload is
+ * the complete target mosaic tree (the current tree is preserved as a subtree inside it) plus
+ * configById entries only for the newly added panels; both are committed in a single reducer
+ * step, so no intermediate state with orphan configs or a partially applied tree can be observed.
+ * Fallback semantics for a mis-apply is the whole-layout Revert; there is no fine-grained undo.
+ */
+export type AddPanelsAtomicallyPayload = {
+  layout: MosaicNode<string>;
+  configs: Record<string, PanelConfig>;
+};
+export type ADD_PANELS_ATOMIC = {
+  type: "ADD_PANELS_ATOMIC";
+  payload: AddPanelsAtomicallyPayload;
+};
+
 export type DropPanelPayload = {
   newPanelType: string;
   destinationPath?: MosaicPath;
@@ -177,6 +193,7 @@ export type PanelsActions =
   | SWAP_PANEL
   | MOVE_TAB
   | ADD_PANEL
+  | ADD_PANELS_ATOMIC
   | DROP_PANEL
   | START_DRAG
   | END_DRAG;

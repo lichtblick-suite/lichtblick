@@ -21,6 +21,7 @@ import { PanelConfig, PlaybackConfig, UserScripts } from "@lichtblick/suite-base
 
 import {
   AddPanelPayload,
+  AddPanelsAtomicallyPayload,
   ChangePanelLayoutPayload,
   ClosePanelPayload,
   CreateTabPanelPayload,
@@ -113,6 +114,7 @@ export interface ICurrentLayout {
     swapPanel: (payload: SwapPanelPayload) => void;
     moveTab: (payload: MoveTabPayload) => void;
     addPanel: (payload: AddPanelPayload) => void;
+    addPanelsAtomically: (payload: AddPanelsAtomicallyPayload) => void;
     dropPanel: (payload: DropPanelPayload) => void;
     startDrag: (payload: StartDragPayload) => void;
     endDrag: (payload: EndDragPayload) => void;

@@ -34,6 +34,67 @@ const emptyLayout: LayoutData = {
 };
 
 describe("layout reducers", () => {
+  describe("adds panels atomically (agent incremental apply)", () => {
+    it("commits the new mosaic tree and configs in a single step without touching existing configs", () => {
+      const base: LayoutData = {
+        ...emptyLayout,
+        layout: "Plot!speed",
+        configById: { "Plot!speed": { paths: [] } },
+      };
+
+      const next = panelsReducer(base, {
+        type: "ADD_PANELS_ATOMIC",
+        payload: {
+          layout: {
+            direction: "column",
+            first: "Plot!speed",
+            second: "Gauge!battery",
+            splitPercentage: 70,
+          },
+          configs: {
+            "Gauge!battery": { path: "/battery", minValue: 0, maxValue: 100 },
+          },
+        },
+      });
+
+      // One commit: layout replaced and configs merged, existing config identical, no orphans.
+      expect(next.layout).toEqual({
+        direction: "column",
+        first: "Plot!speed",
+        second: "Gauge!battery",
+        splitPercentage: 70,
+      });
+      expect(next.configById).toEqual({
+        "Plot!speed": { paths: [] },
+        "Gauge!battery": { path: "/battery", minValue: 0, maxValue: 100 },
+      });
+      expect(getLeaves(next.layout ?? null)).toEqual(["Plot!speed", "Gauge!battery"]);
+      expect(Object.keys(next.configById).sort()).toEqual(["Gauge!battery", "Plot!speed"]);
+    });
+
+    it("does not trim existing configs and keeps non-panel top-level data", () => {
+      const base: LayoutData = {
+        ...emptyLayout,
+        layout: "Plot!speed",
+        configById: { "Plot!speed": { paths: [] } },
+        userNodes: { "script-1": { name: "S", sourceCode: "x" } },
+        version: 1,
+      };
+
+      const next = panelsReducer(base, {
+        type: "ADD_PANELS_ATOMIC",
+        payload: {
+          layout: { direction: "row", first: "Plot!speed", second: "Image!camera" },
+          configs: { "Image!camera": { imageMode: { imageTopic: "/cam" } } },
+        },
+      });
+
+      expect(next.userNodes).toEqual(base.userNodes);
+      expect(next.version).toBe(1);
+      expect(next.globalVariables).toEqual({});
+    });
+  });
+
   describe("adds panel to a layout", () => {
     it("adds panel to main app layout", () => {
       let panels: LayoutData = {

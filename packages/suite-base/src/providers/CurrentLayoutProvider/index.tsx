@@ -26,6 +26,7 @@ import CurrentLayoutContext, {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
   AddPanelPayload,
+  AddPanelsAtomicallyPayload,
   ChangePanelLayoutPayload,
   ClosePanelPayload,
   CreateTabPanelPayload,
@@ -440,6 +441,9 @@ export default function CurrentLayoutProvider({
       addPanel: (payload: AddPanelPayload) => {
         performAction({ type: "ADD_PANEL", payload });
         analytics.logEvent(AppEvent.PANEL_ADD, { type: getPanelTypeFromId(payload.id) });
+      },
+      addPanelsAtomically: (payload: AddPanelsAtomicallyPayload) => {
+        performAction({ type: "ADD_PANELS_ATOMIC", payload });
       },
       dropPanel: (payload: DropPanelPayload) => {
         performAction({ type: "DROP_PANEL", payload });
