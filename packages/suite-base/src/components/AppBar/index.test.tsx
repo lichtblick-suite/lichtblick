@@ -6,13 +6,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { render } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import { fireEvent, render } from "@testing-library/react";
 
+import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import MultiProvider from "@lichtblick/suite-base/components/MultiProvider";
 import StudioToastProvider from "@lichtblick/suite-base/components/StudioToastProvider";
-import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
+import AppConfigurationContext, {
+  type AppConfigurationValue,
+} from "@lichtblick/suite-base/context/AppConfigurationContext";
 import LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
+import {
+  useWorkspaceStore,
+} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
@@ -22,8 +29,13 @@ import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAp
 
 import { AppBar } from ".";
 
-function Wrapper({ children }: React.PropsWithChildren): React.JSX.Element {
-  const appConfiguration = makeMockAppConfiguration();
+function Wrapper({
+  children,
+  initialSettings,
+}: React.PropsWithChildren<{ initialSettings?: Array<[string, unknown]> }>): React.JSX.Element {
+  const appConfiguration = makeMockAppConfiguration(
+    initialSettings as Array<[string, AppConfigurationValue]> | undefined,
+  );
   const providers = [
     /* eslint-disable react/jsx-key */
     <WorkspaceContextProvider />,
@@ -88,5 +100,35 @@ describe("<AppBar />", () => {
     expect(mockClose).toHaveBeenCalled();
 
     root.unmount();
+  });
+
+  it("shows the Agent Chat button only when the agent is enabled and opens agent-chat on click", async () => {
+    const probe = jest.fn();
+    function RightSidebarProbe(): ReactNull {
+      probe(useWorkspaceStore((store) => store.sidebars.right));
+      return null;
+    }
+
+    const withoutAgent = render(
+      <Wrapper>
+        <AppBar />
+      </Wrapper>,
+    );
+    expect(withoutAgent.queryByTestId("agent-chat-button")).not.toBeInTheDocument();
+    withoutAgent.unmount();
+
+    const withAgent = render(
+      <Wrapper initialSettings={[[AppSetting.AGENT_ENABLED, true]]}>
+        <AppBar />
+        <RightSidebarProbe />
+      </Wrapper>,
+    );
+    const button = await withAgent.findByTestId("agent-chat-button");
+    fireEvent.click(button);
+
+    expect(probe).toHaveBeenLastCalledWith(
+      expect.objectContaining({ item: "agent-chat", open: true }),
+    );
+    withAgent.unmount();
   });
 });

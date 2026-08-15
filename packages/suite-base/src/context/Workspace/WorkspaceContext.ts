@@ -36,6 +36,7 @@ export const RightSidebarItemKeys = [
   "variables",
   "logs-settings",
   "performance",
+  "agent-chat",
 ] as const;
 export type RightSidebarItemKey = (typeof RightSidebarItemKeys)[number];
 

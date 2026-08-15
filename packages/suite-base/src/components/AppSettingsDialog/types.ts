@@ -8,4 +8,5 @@ export type AppSettingsTab =
   | "privacy"
   | "extensions"
   | "experimental-features"
-  | "about";
+  | "about"
+  | "agent";

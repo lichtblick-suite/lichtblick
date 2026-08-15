@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export * from "./addPanel";
+export * from "./agentChat";
 export * from "./appBar";
 export * from "./appSettings";
 export * from "./dataSourceInfo";

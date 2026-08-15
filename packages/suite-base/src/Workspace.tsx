@@ -24,6 +24,8 @@ import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useStyles } from "@lichtblick/suite-base/Workspace.style";
 import McapBundleAPI from "@lichtblick/suite-base/api/mcapBundle/McapBundleAPI";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
+import { AgentChatSidebar } from "@lichtblick/suite-base/components/AgentChatSidebar";
+import { AgentWorkspaceIntegration } from "@lichtblick/suite-base/components/AgentWorkspaceIntegration";
 import { AlertsList } from "@lichtblick/suite-base/components/AlertList/AlertsList";
 import { AppBar } from "@lichtblick/suite-base/components/AppBar";
 import {
@@ -135,7 +137,10 @@ const selectWorkspaceRightSidebarItem = (store: WorkspaceContextStore) => store.
 const selectWorkspaceRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
 const selectWorkspaceRightSidebarSize = (store: WorkspaceContextStore) => store.sidebars.right.size;
 
-function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
+function WorkspaceContent({
+  agentEnabled,
+  ...props
+}: WorkspaceProps & { agentEnabled: boolean }): React.JSX.Element {
   const { PerformanceSidebarComponent } = useAppContext();
   const { classes } = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
@@ -174,6 +179,16 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     isPlaying,
     playerEvents: { play, pause },
   });
+
+  useEffect(() => {
+    if (!agentEnabled && rightSidebarItem === "agent-chat") {
+      // Normalize persisted state to the first right-sidebar item that remains visible.
+      sidebarActions.right.selectItem("variables");
+      if (!rightSidebarOpen) {
+        sidebarActions.right.setOpen(false);
+      }
+    }
+  }, [agentEnabled, rightSidebarItem, rightSidebarOpen, sidebarActions.right]);
 
   // Store stable reference to avoid re-running effects unnecessarily
   const handleFilesRef = useRef<typeof handleFiles>(handleFiles);
@@ -436,8 +451,14 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         component: EventsList,
       });
     }
+    if (agentEnabled) {
+      items.set("agent-chat", {
+        title: t("workspace:agentChat"),
+        component: AgentChatSidebar,
+      });
+    }
     return items;
-  }, [enableDebugMode, showEventsTab, PerformanceSidebarComponent]);
+  }, [enableDebugMode, showEventsTab, PerformanceSidebarComponent, agentEnabled]);
 
   const keyboardEventHasModifier = (event: KeyboardEvent) =>
     navigator.userAgent.includes("Mac") ? event.metaKey : event.ctrlKey;
@@ -763,6 +784,9 @@ export default function Workspace(props: WorkspaceProps): React.JSX.Element {
   const [showOpenDialogOnStartup = true] = useAppConfigurationValue<boolean>(
     AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP,
   );
+  const [agentEnabled = false] = useAppConfigurationValue<boolean>(
+    AppSetting.AGENT_ENABLED,
+  );
 
   const { workspaceStoreCreator } = useAppContext();
 
@@ -791,7 +815,9 @@ export default function Workspace(props: WorkspaceProps): React.JSX.Element {
       workspaceStoreCreator={workspaceStoreCreator}
       disablePersistenceForStorybook={props.disablePersistenceForStorybook}
     >
-      <WorkspaceContent {...props} />
+      <AgentWorkspaceIntegration agentEnabled={agentEnabled}>
+        <WorkspaceContent {...props} agentEnabled={agentEnabled} />
+      </AgentWorkspaceIntegration>
     </WorkspaceContextProvider>
   );
 }

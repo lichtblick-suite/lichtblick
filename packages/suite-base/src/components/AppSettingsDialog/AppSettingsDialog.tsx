@@ -24,10 +24,14 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { MouseEvent, SyntheticEvent, useState } from "react";
+import { MouseEvent, SyntheticEvent, useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import {
+  AgentSettings,
+  AgentSettingsCommitHandler,
+} from "@lichtblick/suite-base/components/AppSettingsDialog/AgentSettings";
 import { useStyles } from "@lichtblick/suite-base/components/AppSettingsDialog/AppSettingsDialog.style";
 import { APP_SETTINGS_ABOUT_ITEMS } from "@lichtblick/suite-base/components/AppSettingsDialog/constants";
 import { AppSettingsTab } from "@lichtblick/suite-base/components/AppSettingsDialog/types";
@@ -63,7 +67,7 @@ export function AppSettingsDialog(
   props: DialogProps & { activeTab?: AppSettingsTab },
 ): React.JSX.Element {
   const { t } = useTranslation("appSettings");
-  const { activeTab: _activeTab } = props;
+  const { activeTab: _activeTab, onClose, ...dialogProps } = props;
   const initialActiveTab = useWorkspaceStore(selectWorkspaceInitialActiveTab);
   const [activeTab, setActiveTab] = useState<AppSettingsTab>(
     _activeTab ?? initialActiveTab ?? "general",
@@ -79,20 +83,54 @@ export function AppSettingsDialog(
   // automatic updates are a desktop-only setting
   const supportsAppUpdates = isDesktopApp();
 
-  const handleTabChange = (_event: SyntheticEvent, newValue: AppSettingsTab) => {
+  const agentCommitHandlerRef = useRef<AgentSettingsCommitHandler>();
+
+  const registerAgentCommitHandler = useCallback(
+    (handler: AgentSettingsCommitHandler | undefined) => {
+      agentCommitHandlerRef.current = handler;
+    },
+    [],
+  );
+
+  const commitAgentDraft = async (): Promise<boolean> => {
+    if (activeTab !== "agent") {
+      return true;
+    }
+    return (await agentCommitHandlerRef.current?.()) ?? true;
+  };
+
+  const handleTabChange = async (
+    _event: SyntheticEvent,
+    newValue: AppSettingsTab,
+  ): Promise<void> => {
+    if (!(await commitAgentDraft())) {
+      return;
+    }
     setActiveTab(newValue);
   };
 
-  const handleClose = (event: MouseEvent<HTMLElement>) => {
-    if (props.onClose != undefined) {
-      props.onClose(event, "backdropClick");
+  const handleClose = async (event: MouseEvent<HTMLElement>): Promise<void> => {
+    if ((await commitAgentDraft()) && onClose != undefined) {
+      onClose(event, "backdropClick");
     }
   };
 
   const extensionSettingsComponent = extensionSettings ?? <ExtensionsSettings />;
 
   return (
-    <Dialog {...props} fullWidth maxWidth="md" data-testid={`AppSettingsDialog--${activeTab}`}>
+    <Dialog
+      {...dialogProps}
+      onClose={(event, reason) => {
+        void (async () => {
+          if (await commitAgentDraft()) {
+            onClose?.(event, reason);
+          }
+        })();
+      }}
+      fullWidth
+      maxWidth="md"
+      data-testid={`AppSettingsDialog--${activeTab}`}
+    >
       <DialogTitle className={classes.dialogTitle}>
         {t("settings")}
         <IconButton edge="end" onClick={handleClose}>
@@ -107,6 +145,7 @@ export function AppSettingsDialog(
           onChange={handleTabChange}
         >
           <Tab className={classes.tab} label={t("general")} value="general" />
+          <Tab className={classes.tab} label={t("agent")} value="agent" />
           <Tab className={classes.tab} label={t("extensions")} value="extensions" />
           <Tab
             className={classes.tab}
@@ -148,6 +187,19 @@ export function AppSettingsDialog(
                 />
               </Stack>
             </Stack>
+          </section>
+
+          <section
+            className={cx(classes.tabPanel, {
+              [classes.tabPanelActive]: activeTab === "agent",
+            })}
+          >
+            {activeTab === "agent" && (
+              <AgentSettings
+                isDesktop={supportsAppUpdates}
+                onCommitHandlerChange={registerAgentCommitHandler}
+              />
+            )}
           </section>
 
           <section
@@ -213,7 +265,7 @@ export function AppSettingsDialog(
         </Stack>
       </div>
       <DialogActions className={classes.dialogActions}>
-        <Button onClick={handleClose}>Done</Button>
+        <Button onClick={(event) => void handleClose(event)}>Done</Button>
       </DialogActions>
     </Dialog>
   );
