@@ -7,6 +7,8 @@ import {
   IteratorResult,
   MessageIteratorArgs,
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { mergeSequentialIterators } from "./mergeSequentialIterators";
 
@@ -67,6 +69,58 @@ function makeMockSourceWithReturn(
           return this;
         },
       };
+    }),
+  } as unknown as IIterableSource<Uint8Array>;
+}
+
+// Like makeMockSourceWithReturn, but omits getStart/getEnd so the source is treated as a
+// "source without time info" and activated eagerly.
+function makeMockSourceWithoutTimeAndReturn(
+  messages: IteratorResult<Uint8Array>[],
+  returnFn: jest.Mock,
+): IIterableSource<Uint8Array> {
+  return {
+    sourceType: "serialized",
+    initialize: jest.fn(),
+    getBackfillMessages: jest.fn(),
+    messageIterator: jest.fn().mockImplementation(() => {
+      let index = 0;
+      return {
+        next: async () => {
+          if (index < messages.length) {
+            return { value: messages[index++], done: false };
+          }
+          return { value: undefined, done: true };
+        },
+        return: returnFn.mockResolvedValue({ value: undefined, done: true }),
+        [Symbol.asyncIterator]() {
+          return this;
+        },
+      };
+    }),
+  } as unknown as IIterableSource<Uint8Array>;
+}
+
+// A source whose iterator rejects on its first next(), simulating a network, range-read,
+// decompression, or malformed-index error during activation. Omit start/end to make it a
+// "source without time info".
+function makeMockRejectingSource(
+  error: Error,
+  returnFn: jest.Mock,
+  start?: Time,
+  end?: Time,
+): IIterableSource<Uint8Array> {
+  return {
+    sourceType: "serialized",
+    initialize: jest.fn(),
+    getBackfillMessages: jest.fn(),
+    ...(start && end ? { getStart: () => start, getEnd: () => end } : {}),
+    messageIterator: jest.fn().mockReturnValue({
+      next: jest.fn().mockRejectedValue(error),
+      return: returnFn.mockResolvedValue({ value: undefined, done: true }),
+      [Symbol.asyncIterator]() {
+        return this;
+      },
     }),
   } as unknown as IIterableSource<Uint8Array>;
 }
@@ -391,6 +445,126 @@ describe("mergeSequentialIterators", () => {
 
     expect(source1Return).toHaveBeenCalledTimes(1);
     expect(source2Return).toHaveBeenCalledTimes(1);
+  });
+
+  it("cleans up previously activated iterators when a later source fails during eager activation of sources without time info", async () => {
+    const activatedReturn = jest.fn();
+    const failingReturn = jest.fn();
+    const activationError = new Error(BasicBuilder.string());
+
+    // Both sources lack time info, so both are activated eagerly, in order, before any seek or
+    // drain-loop logic runs.
+    const activatedSource = makeMockSourceWithoutTimeAndReturn(
+      [makeMessageEvent(BasicBuilder.string(), 1)],
+      activatedReturn,
+    );
+    const failingSource = makeMockRejectingSource(activationError, failingReturn);
+
+    await expect(
+      (async () => {
+        for await (const message of mergeSequentialIterators(
+          [activatedSource, failingSource],
+          defaultArgs,
+        )) {
+          // Eager activation of the second source fails before any message is yielded.
+          expect(message).toBeDefined();
+        }
+      })(),
+    ).rejects.toBe(activationError);
+
+    // The previously activated iterator must still be closed even though it never got a chance
+    // to be tracked by the drain loop's try/finally.
+    expect(activatedReturn).toHaveBeenCalledTimes(1);
+    // The failing iterator itself was registered in activeIterators before its next() rejected,
+    // so it must also be offered a return() call.
+    expect(failingReturn).toHaveBeenCalledTimes(1);
+  });
+
+  it("cleans up previously activated iterators when a later source fails during seek-time activation", async () => {
+    const activatedReturn = jest.fn();
+    const failingReturn = jest.fn();
+    const activationError = new Error(BasicBuilder.string());
+
+    // Both sources' ranges contain the requested queryStart, so both are activated during the
+    // seek-time matching loop, in order.
+    const rangeStart = RosTimeBuilder.time({ sec: 0, nsec: 0 });
+    const rangeEnd = RosTimeBuilder.time({ sec: 10, nsec: 0 });
+
+    const activatedSource = makeMockSourceWithReturn(
+      rangeStart,
+      rangeEnd,
+      [makeMessageEvent(BasicBuilder.string(), 1)],
+      activatedReturn,
+    );
+    const failingSource = makeMockRejectingSource(
+      activationError,
+      failingReturn,
+      rangeStart,
+      rangeEnd,
+    );
+
+    const seekArgs: MessageIteratorArgs = {
+      ...defaultArgs,
+      start: RosTimeBuilder.time({ sec: 5, nsec: 0 }),
+    };
+
+    await expect(
+      (async () => {
+        for await (const message of mergeSequentialIterators(
+          [activatedSource, failingSource],
+          seekArgs,
+        )) {
+          // Seek-time activation of the second matching source fails before any message is
+          // yielded.
+          expect(message).toBeDefined();
+        }
+      })(),
+    ).rejects.toBe(activationError);
+
+    expect(activatedReturn).toHaveBeenCalledTimes(1);
+    expect(failingReturn).toHaveBeenCalledTimes(1);
+  });
+
+  it("cleans up previously activated iterators when a later source fails while advancing through initial empty sources", async () => {
+    const failingReturn = jest.fn();
+    const activationError = new Error(BasicBuilder.string());
+
+    // No queryStart is provided, so only the first timed source is activated up front. It and
+    // the next source are both empty, so the merge keeps advancing — without yielding anything
+    // yet — until it reaches the source that fails.
+    const emptySource1 = makeMockSource(
+      RosTimeBuilder.time({ sec: 0, nsec: 0 }),
+      RosTimeBuilder.time({ sec: 10, nsec: 0 }),
+      [],
+    );
+    const emptySource2 = makeMockSource(
+      RosTimeBuilder.time({ sec: 10, nsec: 0 }),
+      RosTimeBuilder.time({ sec: 20, nsec: 0 }),
+      [],
+    );
+    const failingSource = makeMockRejectingSource(
+      activationError,
+      failingReturn,
+      RosTimeBuilder.time({ sec: 20, nsec: 0 }),
+      RosTimeBuilder.time({ sec: 30, nsec: 0 }),
+    );
+
+    await expect(
+      (async () => {
+        for await (const message of mergeSequentialIterators(
+          [emptySource1, emptySource2, failingSource],
+          defaultArgs,
+        )) {
+          // The merge is still searching for the first source with data when activation fails.
+          expect(message).toBeDefined();
+        }
+      })(),
+    ).rejects.toBe(activationError);
+
+    // The empty sources were exhausted normally and require no cleanup; the failing source's
+    // own iterator was registered in activeIterators before it rejected and must still be
+    // offered a return() call.
+    expect(failingReturn).toHaveBeenCalledTimes(1);
   });
 
   it("only activates the source containing queryStart on seek (skips earlier sources)", async () => {
