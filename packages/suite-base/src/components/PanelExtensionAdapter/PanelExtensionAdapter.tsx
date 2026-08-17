@@ -696,7 +696,7 @@ function PanelExtensionAdapter(
         return subscribeMessageRange(args);
       },
 
-      async unstable_getMessageAtTime(topic: string, time: Time) {
+      async getMessageAtTime(topic: string, time: Time) {
         if (!isMounted()) {
           return undefined;
         }

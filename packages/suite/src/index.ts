@@ -531,7 +531,7 @@ export type PanelExtensionContext = {
    * @returns The message at or before `time`, or `undefined` if none exists or the active data
    * source does not support point-in-time queries.
    */
-  unstable_getMessageAtTime?: (topic: string, time: Time) => Promise<MessageEvent | undefined>;
+  getMessageAtTime?: (topic: string, time: Time) => Promise<MessageEvent | undefined>;
 
   /**
    * Returns the schema definition for a given topic, without requiring a subscription or reading
