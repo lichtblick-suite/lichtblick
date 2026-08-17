@@ -342,5 +342,3 @@ export function AgentChatSidebar(): React.JSX.Element {
     </div>
   );
 }
-
-export default AgentChatSidebar;

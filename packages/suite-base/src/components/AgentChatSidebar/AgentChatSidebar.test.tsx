@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { AgentChatState, useAgentChat } from "@lichtblick/suite-base/context/AgentChatContext";
 import LinkHandlerContext from "@lichtblick/suite-base/context/LinkHandlerContext";
 
-import AgentChatSidebar from "./AgentChatSidebar";
+import { AgentChatSidebar } from "./AgentChatSidebar";
 
 jest.mock("react-i18next", () => ({
   useTranslation: jest.fn(),
