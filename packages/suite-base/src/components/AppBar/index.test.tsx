@@ -17,9 +17,7 @@ import AppConfigurationContext, {
   type AppConfigurationValue,
 } from "@lichtblick/suite-base/context/AppConfigurationContext";
 import LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
-import {
-  useWorkspaceStore,
-} from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";

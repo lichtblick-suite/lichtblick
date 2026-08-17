@@ -16,12 +16,7 @@ import {
 } from "@lichtblick/suite-base/services/agent/layoutSchema";
 
 import { LOCAL_AGENT_TOOL_DEFINITIONS } from "../toolDefinitions";
-import {
-  SKILL_IDS,
-  SKILL_REGISTRY,
-  buildSkillIndex,
-  renderSkill,
-} from "./index";
+import { SKILL_IDS, SKILL_REGISTRY, buildSkillIndex, renderSkill } from "./index";
 import {
   LOG_TROUBLESHOOTING_LAYOUT,
   REPLAY_ANALYSIS_LAYOUT,
@@ -35,9 +30,7 @@ describe("skill registry", () => {
     expect(new Set(registryIds).size).toBe(registryIds.length);
     expect([...SKILL_IDS].sort()).toEqual([...registryIds].sort());
 
-    const loadSkill = LOCAL_AGENT_TOOL_DEFINITIONS.find(
-      (tool) => tool.name === "load_skill",
-    );
+    const loadSkill = LOCAL_AGENT_TOOL_DEFINITIONS.find((tool) => tool.name === "load_skill");
     const schemaEnum = (
       loadSkill?.inputSchema as {
         properties?: { skillId?: { enum?: string[] } };
@@ -114,9 +107,7 @@ describe("skill registry", () => {
 
   it("documents every allowlisted panel type in some skill", () => {
     // A panel the agent may propose but no skill describes is a panel it will use badly.
-    const documented = [...SKILL_REGISTRY.values()]
-      .map((skill) => skill.body)
-      .join("\n");
+    const documented = [...SKILL_REGISTRY.values()].map((skill) => skill.body).join("\n");
     for (const panelType of ALLOWED_PANEL_TYPES) {
       expect(documented).toContain(panelType);
     }
@@ -136,9 +127,7 @@ describe("skill registry", () => {
     ];
     // The documented schema list must be exactly these eight, in order: a missing, extra, or
     // renamed entry fails the exact equality.
-    const schemasBlock = catalog.match(
-      /never through `convertibleTo`:\n\n```\n([\s\S]*?)\n```/,
-    );
+    const schemasBlock = catalog.match(/never through `convertibleTo`:\n\n```\n([\s\S]*?)\n```/);
     expect(schemasBlock?.[1]).toBeDefined();
     const documentedSchemas = schemasBlock![1]!
       .split("\n")
@@ -190,13 +179,10 @@ describe("skill registry", () => {
       expect(skill!.body).toContain(`\`${panelType}\``);
       expect(catalog).toContain(skillId);
     }
-
   });
 
   it("registers every non-indexed skill in the load_skill enum", () => {
-    const loadSkill = LOCAL_AGENT_TOOL_DEFINITIONS.find(
-      (tool) => tool.name === "load_skill",
-    );
+    const loadSkill = LOCAL_AGENT_TOOL_DEFINITIONS.find((tool) => tool.name === "load_skill");
     const schemaEnum = (
       loadSkill?.inputSchema as {
         properties?: { skillId?: { enum?: string[] } };
@@ -500,8 +486,7 @@ export default function script(event: Input<"/odom">): Output {
           if (TITLELESS_EXCEPTIONS.has(panelType)) {
             continue;
           }
-          const title = (config as { lichtblickPanelTitle?: unknown })
-            .lichtblickPanelTitle;
+          const title = (config as { lichtblickPanelTitle?: unknown }).lichtblickPanelTitle;
           expect(typeof title).toBe("string");
           expect((title as string).length).toBeGreaterThan(0);
         }
@@ -535,8 +520,7 @@ export default function script(event: Input<"/odom">): Output {
           continue;
         }
         for (const [panelId, config] of Object.entries(
-          (parsed as { configById: Record<string, Record<string, unknown>> })
-            .configById,
+          (parsed as { configById: Record<string, Record<string, unknown>> }).configById,
         )) {
           const panelType = panelId.slice(0, panelId.indexOf("!"));
           if (TITLELESS_EXCEPTIONS.has(panelType)) {

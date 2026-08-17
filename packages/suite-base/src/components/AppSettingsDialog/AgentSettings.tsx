@@ -28,13 +28,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
@@ -99,19 +93,14 @@ export type AgentSettingsCommitHandler = () => Promise<boolean>;
 
 type AgentSettingsFormProps = {
   desktop: boolean;
-  onCommitHandlerChange?: (
-    handler: AgentSettingsCommitHandler | undefined,
-  ) => void;
+  onCommitHandlerChange?: (handler: AgentSettingsCommitHandler | undefined) => void;
 };
 
 function createAgentProfileId(): string {
   if (typeof globalThis.crypto.randomUUID === "function") {
     return globalThis.crypto.randomUUID();
   }
-  return `profile-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`.slice(
-    0,
-    64,
-  );
+  return `profile-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`.slice(0, 64);
 }
 
 function nextAgentProfileName(profiles: readonly AgentProfile[]): string {
@@ -123,10 +112,7 @@ function nextAgentProfileName(profiles: readonly AgentProfile[]): string {
   return `Profile ${index}`;
 }
 
-function uniqueAgentProfileName(
-  profiles: readonly AgentProfile[],
-  preferredName: string,
-): string {
+function uniqueAgentProfileName(profiles: readonly AgentProfile[], preferredName: string): string {
   const profileNames = new Set(profiles.map((profile) => profile.name));
   if (!profileNames.has(preferredName)) {
     return preferredName;
@@ -138,9 +124,7 @@ function uniqueAgentProfileName(
   return `${preferredName} ${index}`;
 }
 
-function createBlankAgentProfile(
-  profiles: readonly AgentProfile[],
-): AgentProfile {
+function createBlankAgentProfile(profiles: readonly AgentProfile[]): AgentProfile {
   return {
     anthropic: {
       apiKey: "",
@@ -165,17 +149,12 @@ function AgentSettingsForm({
   const { t } = useTranslation("appSettings");
   const { classes } = useStyles();
   const appConfiguration = useAppConfiguration();
-  const [agentEnabled = false, setAgentEnabled] =
-    useAppConfigurationValue<boolean>(AppSetting.AGENT_ENABLED);
-  const {
-    credentialBackendUnavailable,
-    migrationError,
-    migrationReady,
-    snapshot,
-  } = useAgentSettings(appConfiguration, { desktop });
-  const [draft, setDraft] = useState<AgentSettingsDraft>(() =>
-    createAgentSettingsDraft(snapshot),
+  const [agentEnabled = false, setAgentEnabled] = useAppConfigurationValue<boolean>(
+    AppSetting.AGENT_ENABLED,
   );
+  const { credentialBackendUnavailable, migrationError, migrationReady, snapshot } =
+    useAgentSettings(appConfiguration, { desktop });
+  const [draft, setDraft] = useState<AgentSettingsDraft>(() => createAgentSettingsDraft(snapshot));
   const [selectedProfileId, setSelectedProfileId] = useState(
     () => draft.activeProfileId ?? draft.profiles?.[0]?.id ?? "",
   );
@@ -184,8 +163,7 @@ function AgentSettingsForm({
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
-  const [plaintextLockUnavailable, setPlaintextLockUnavailable] =
-    useState(false);
+  const [plaintextLockUnavailable, setPlaintextLockUnavailable] = useState(false);
   const [revisionConflict, setRevisionConflict] = useState(false);
   const commitInFlightRef = useRef<Promise<boolean>>();
 
@@ -193,10 +171,7 @@ function AgentSettingsForm({
     if (!migrationReady) {
       return;
     }
-    if (
-      draft.revision !== snapshot.revision &&
-      commitInFlightRef.current == undefined
-    ) {
+    if (draft.revision !== snapshot.revision && commitInFlightRef.current == undefined) {
       if (dirty) {
         setRevisionConflict(true);
       }
@@ -222,9 +197,7 @@ function AgentSettingsForm({
   const formReady = migrationReady && draft.revision === snapshot.revision;
 
   const profiles = useMemo(() => draft.profiles ?? [], [draft.profiles]);
-  const selectedProfile = profiles.find(
-    (profile) => profile.id === selectedProfileId,
-  );
+  const selectedProfile = profiles.find((profile) => profile.id === selectedProfileId);
   const providerSettings =
     selectedProfile?.provider === "openai-compatible"
       ? selectedProfile.openAiCompatible
@@ -263,8 +236,7 @@ function AgentSettingsForm({
   const updateProviderSettings = useCallback(
     (update: Partial<AgentSettingsDraft["anthropic"]>) => {
       updateSelectedProfile((profile) => {
-        const key =
-          profile.provider === "anthropic" ? "anthropic" : "openAiCompatible";
+        const key = profile.provider === "anthropic" ? "anthropic" : "openAiCompatible";
         return {
           ...profile,
           [key]: { ...profile[key], ...update },
@@ -327,9 +299,7 @@ function AgentSettingsForm({
     if (selectedProfile == undefined || profiles.length <= 1) {
       return;
     }
-    const remainingProfiles = profiles.filter(
-      (profile) => profile.id !== selectedProfile.id,
-    );
+    const remainingProfiles = profiles.filter((profile) => profile.id !== selectedProfile.id);
     const nextSelectedProfile = remainingProfiles[0];
     if (nextSelectedProfile == undefined) {
       return;
@@ -347,10 +317,7 @@ function AgentSettingsForm({
   }, [markDraftDirty, profiles, selectedProfile]);
 
   const setDefaultProfile = useCallback(() => {
-    if (
-      selectedProfile == undefined ||
-      draft.activeProfileId === selectedProfile.id
-    ) {
+    if (selectedProfile == undefined || draft.activeProfileId === selectedProfile.id) {
       return;
     }
     markDraftDirty();
@@ -384,9 +351,7 @@ function AgentSettingsForm({
           setDirty(false);
         } else if (error instanceof AgentCredentialsBackendUnavailableError) {
           setSaveFailed(false);
-        } else if (
-          error instanceof AgentPlaintextCredentialLockUnavailableError
-        ) {
+        } else if (error instanceof AgentPlaintextCredentialLockUnavailableError) {
           setPlaintextLockUnavailable(true);
           setSaveFailed(false);
         } else {
@@ -406,14 +371,7 @@ function AgentSettingsForm({
         commitInFlightRef.current = undefined;
       }
     }
-  }, [
-    appConfiguration,
-    desktop,
-    dirty,
-    draft,
-    formReady,
-    snapshot.credentialResaveRequired,
-  ]);
+  }, [appConfiguration, desktop, dirty, draft, formReady, snapshot.credentialResaveRequired]);
 
   useEffect(() => {
     onCommitHandlerChange?.(commit);
@@ -422,9 +380,7 @@ function AgentSettingsForm({
     };
   }, [commit, onCommitHandlerChange]);
 
-  const helperText = (
-    error: AgentConfigurationErrors[keyof AgentConfigurationErrors],
-  ) => {
+  const helperText = (error: AgentConfigurationErrors[keyof AgentConfigurationErrors]) => {
     if (error === "required") {
       return t("agentFieldRequired");
     }
@@ -451,30 +407,20 @@ function AgentSettingsForm({
         <FormHelperText>{t("agentEnableHelp")}</FormHelperText>
       </FormControl>
       <Alert severity={Object.keys(errors).length === 0 ? "success" : "info"}>
-        {Object.keys(errors).length === 0
-          ? t("agentConfigured")
-          : t("agentNotConfigured")}
+        {Object.keys(errors).length === 0 ? t("agentConfigured") : t("agentNotConfigured")}
       </Alert>
       {(credentialBackendUnavailable ||
         migrationError instanceof AgentCredentialsBackendUnavailableError) && (
-        <Alert severity="warning">
-          {t("agentCredentialBackendUnavailable")}
-        </Alert>
+        <Alert severity="warning">{t("agentCredentialBackendUnavailable")}</Alert>
       )}
       {(snapshot.storageError ||
         (migrationError != undefined &&
-          !(
-            migrationError instanceof AgentCredentialsBackendUnavailableError
-          )) ||
-        saveFailed) && (
-        <Alert severity="error">{t("agentSettingsStorageError")}</Alert>
-      )}
+          !(migrationError instanceof AgentCredentialsBackendUnavailableError)) ||
+        saveFailed) && <Alert severity="error">{t("agentSettingsStorageError")}</Alert>}
       {!migrationReady && migrationError == undefined && (
         <Alert severity="info">{t("agentSettingsLoading")}</Alert>
       )}
-      {revisionConflict && (
-        <Alert severity="warning">{t("agentSettingsRevisionConflict")}</Alert>
-      )}
+      {revisionConflict && <Alert severity="warning">{t("agentSettingsRevisionConflict")}</Alert>}
       {plaintextLockUnavailable && (
         <Alert severity="warning">{t("agentPlaintextLockUnavailable")}</Alert>
       )}
@@ -493,9 +439,7 @@ function AgentSettingsForm({
             {profiles.map((profile) => (
               <MenuItem key={profile.id} value={profile.id}>
                 {profile.name}
-                {profile.id === draft.activeProfileId
-                  ? ` (${t("agentProfileActive")})`
-                  : ""}
+                {profile.id === draft.activeProfileId ? ` (${t("agentProfileActive")})` : ""}
               </MenuItem>
             ))}
           </Select>
@@ -523,12 +467,7 @@ function AgentSettingsForm({
         </IconButton>
         <IconButton
           aria-label={t("agentProfileDelete")}
-          disabled={
-            saving ||
-            !formReady ||
-            selectedProfile == undefined ||
-            profiles.length <= 1
-          }
+          disabled={saving || !formReady || selectedProfile == undefined || profiles.length <= 1}
           onClick={deleteProfile}
         >
           <DeleteOutlineIcon />
@@ -574,19 +513,13 @@ function AgentSettingsForm({
           >
             {t("agentProfileRenameCancel")}
           </Button>
-          <Button
-            disabled={renameValue.trim() === ""}
-            onClick={renameProfile}
-            variant="contained"
-          >
+          <Button disabled={renameValue.trim() === ""} onClick={renameProfile} variant="contained">
             {t("agentProfileRenameSave")}
           </Button>
         </DialogActions>
       </Dialog>
       <FormControl fullWidth>
-        <FormLabel id="agent-llm-provider-label">
-          {t("agentLlmProvider")}:
-        </FormLabel>
+        <FormLabel id="agent-llm-provider-label">{t("agentLlmProvider")}:</FormLabel>
         <Select<AgentLlmProvider>
           disabled={saving || !formReady}
           inputProps={{ "aria-label": t("agentLlmProvider") }}
@@ -599,9 +532,7 @@ function AgentSettingsForm({
           }}
         >
           <MenuItem value="anthropic">{t("agentProviderAnthropic")}</MenuItem>
-          <MenuItem value="openai-compatible">
-            {t("agentProviderOpenAICompatible")}
-          </MenuItem>
+          <MenuItem value="openai-compatible">{t("agentProviderOpenAICompatible")}</MenuItem>
         </Select>
       </FormControl>
       <TextField
@@ -628,13 +559,7 @@ function AgentSettingsForm({
           updateProviderSettings({ apiKey: event.target.value });
         }}
       />
-      <Alert
-        severity={
-          desktop && snapshot.credentialStorage === "secure"
-            ? "info"
-            : "warning"
-        }
-      >
+      <Alert severity={desktop && snapshot.credentialStorage === "secure" ? "info" : "warning"}>
         {desktop && snapshot.credentialStorage === "secure"
           ? t("agentDesktopCredentialStorageInfo")
           : desktop && snapshot.credentialResaveRequired
@@ -656,9 +581,7 @@ function AgentSettingsForm({
         }}
       />
       <Button
-        disabled={
-          (!dirty && !snapshot.credentialResaveRequired) || saving || !formReady
-        }
+        disabled={(!dirty && !snapshot.credentialResaveRequired) || saving || !formReady}
         onClick={() => void commit()}
         variant="contained"
       >
@@ -695,11 +618,9 @@ function AgentPromptSettings(): React.ReactElement {
 
   const skills = useMemo(() => resolveSkills(draft), [draft]);
   const selectedSkill = skills.find((skill) => skill.id === selectedSkillId);
-  const isBuiltIn =
-    selectedSkill != undefined && SKILL_REGISTRY.has(selectedSkill.id);
+  const isBuiltIn = selectedSkill != undefined && SKILL_REGISTRY.has(selectedSkill.id);
   const isOverridden =
-    selectedSkill != undefined &&
-    draft.skillOverrides[selectedSkill.id] != undefined;
+    selectedSkill != undefined && draft.skillOverrides[selectedSkill.id] != undefined;
 
   const update = (next: AgentPromptCustomization) => {
     setDraft(next);
@@ -749,9 +670,7 @@ function AgentPromptSettings(): React.ReactElement {
           {skills.map((skill) => (
             <MenuItem key={skill.id} value={skill.id}>
               {skill.id}
-              {draft.skillOverrides[skill.id] != undefined
-                ? ` ${t("agentSkillEdited")}`
-                : ""}
+              {draft.skillOverrides[skill.id] != undefined ? ` ${t("agentSkillEdited")}` : ""}
             </MenuItem>
           ))}
         </Select>
@@ -772,17 +691,12 @@ function AgentPromptSettings(): React.ReactElement {
             }}
           >
             <ToggleButton value="edit">{t("agentSkillEdit")}</ToggleButton>
-            <ToggleButton value="preview">
-              {t("agentSkillPreview")}
-            </ToggleButton>
+            <ToggleButton value="preview">{t("agentSkillPreview")}</ToggleButton>
           </ToggleButtonGroup>
           {skillView === "preview" ? (
             // Skills are markdown and the agent consumes them as such; previewing the rendered form
             // is how you catch a broken table or an unclosed fence before the agent reads it.
-            <div
-              className={classes.skillPreview}
-              data-testid="agent-skill-preview"
-            >
+            <div className={classes.skillPreview} data-testid="agent-skill-preview">
               <AgentMarkdown>{selectedSkill.body}</AgentMarkdown>
             </div>
           ) : (
@@ -807,9 +721,7 @@ function AgentPromptSettings(): React.ReactElement {
                   update({
                     ...draft,
                     customSkills: draft.customSkills.map((skill) =>
-                      skill.id === selectedSkill.id
-                        ? { ...skill, body }
-                        : skill,
+                      skill.id === selectedSkill.id ? { ...skill, body } : skill,
                     ),
                   });
                 }
@@ -820,8 +732,7 @@ function AgentPromptSettings(): React.ReactElement {
             <Button
               disabled={!isOverridden}
               onClick={() => {
-                const { [selectedSkill.id]: _removed, ...rest } =
-                  draft.skillOverrides;
+                const { [selectedSkill.id]: _removed, ...rest } = draft.skillOverrides;
                 update({ ...draft, skillOverrides: rest });
               }}
             >
@@ -833,9 +744,7 @@ function AgentPromptSettings(): React.ReactElement {
               onClick={() => {
                 update({
                   ...draft,
-                  customSkills: draft.customSkills.filter(
-                    (skill) => skill.id !== selectedSkill.id,
-                  ),
+                  customSkills: draft.customSkills.filter((skill) => skill.id !== selectedSkill.id),
                 });
                 setSelectedSkillId("");
               }}
@@ -917,9 +826,7 @@ function AgentMemorySettings(): React.ReactElement {
                   <IconButton
                     edge="end"
                     aria-label={t("agentMemoryForget", { text: memory.text })}
-                    onClick={() =>
-                      void removeAgentMemory(appConfiguration, memory.id)
-                    }
+                    onClick={() => void removeAgentMemory(appConfiguration, memory.id)}
                   >
                     <DeleteOutlineIcon fontSize="small" />
                   </IconButton>
@@ -947,14 +854,7 @@ export function AgentSettings({
   onCommitHandlerChange,
 }: {
   isDesktop: boolean;
-  onCommitHandlerChange?: (
-    handler: AgentSettingsCommitHandler | undefined,
-  ) => void;
+  onCommitHandlerChange?: (handler: AgentSettingsCommitHandler | undefined) => void;
 }): React.ReactElement {
-  return (
-    <AgentSettingsForm
-      desktop={isDesktop}
-      onCommitHandlerChange={onCommitHandlerChange}
-    />
-  );
+  return <AgentSettingsForm desktop={isDesktop} onCommitHandlerChange={onCommitHandlerChange} />;
 }

@@ -70,7 +70,7 @@ export function ToolRunCard({ toolRun }: ToolRunCardProps): React.JSX.Element {
     const serialized =
       typeof toolRun.result === "string"
         ? toolRun.result
-        : JSON.stringify(toolRun.result, null, 2) ?? "";
+        : (JSON.stringify(toolRun.result, null, 2) ?? "");
     if (serialized.length > RESULT_MAX_CHARS) {
       return `${serialized.slice(0, RESULT_MAX_CHARS)}\n… ${t("toolResultTruncated", {
         defaultValue: "Result truncated; showing the first 4000 characters.",

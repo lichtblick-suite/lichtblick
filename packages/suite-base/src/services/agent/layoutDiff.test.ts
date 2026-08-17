@@ -58,10 +58,7 @@ function addGaugeTo(layout: LayoutData): LayoutData {
  * Public baseline oracle: captures the proposal-time fingerprint the same way the orchestrator
  * does (validate+sanitize, then fingerprint), through the exported collectLayoutBaseline entry.
  */
-function fingerprintOf(
-  data: LayoutData,
-  catalog: CatalogSnapshot = emptyCatalog,
-): string {
+function fingerprintOf(data: LayoutData, catalog: CatalogSnapshot = emptyCatalog): string {
   const baseline = collectLayoutBaseline(
     () => data,
     () => "layout-1",
@@ -81,9 +78,7 @@ function incrementalInput(overrides?: {
   const base = overrides?.baseLayout ?? baseLayout();
   return {
     baseLayoutId:
-      overrides != undefined && "baseLayoutId" in overrides
-        ? overrides.baseLayoutId
-        : "layout-1",
+      overrides != undefined && "baseLayoutId" in overrides ? overrides.baseLayoutId : "layout-1",
     baseFingerprint:
       overrides != undefined && "baseFingerprint" in overrides
         ? overrides.baseFingerprint
@@ -97,10 +92,7 @@ function incrementalInput(overrides?: {
 describe("sanitizeLayoutData", () => {
   it("returns undefined for data that fails validation", () => {
     expect(
-      sanitizeLayoutData(
-        { configById: {}, playbackConfig: { speed: "fast" } },
-        emptyCatalog,
-      ),
+      sanitizeLayoutData({ configById: {}, playbackConfig: { speed: "fast" } }, emptyCatalog),
     ).toBeUndefined();
   });
 
@@ -269,9 +261,7 @@ describe("planIncrementalApply (strict structural gate)", () => {
   });
 
   it("returns undefined when the proposal has no new panels", () => {
-    expect(
-      planIncrementalApply(incrementalInput({ proposal: baseLayout() })),
-    ).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ proposal: baseLayout() }))).toBeUndefined();
   });
 
   it("returns undefined when the proposal has no mosaic tree", () => {
@@ -282,9 +272,7 @@ describe("planIncrementalApply (strict structural gate)", () => {
 
   it("returns undefined when the proposal carries no baseline", () => {
     expect(planIncrementalApply(incrementalInput({ baseLayoutId: undefined }))).toBeUndefined();
-    expect(
-      planIncrementalApply(incrementalInput({ baseFingerprint: undefined })),
-    ).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ baseFingerprint: undefined }))).toBeUndefined();
   });
 
   it("returns undefined when no layout is currently selected", () => {
@@ -296,9 +284,7 @@ describe("planIncrementalApply (strict structural gate)", () => {
   });
 
   it("returns undefined when the selected layout id differs from the baseline", () => {
-    expect(
-      planIncrementalApply(incrementalInput({ currentLayoutId: "layout-2" })),
-    ).toBeUndefined();
+    expect(planIncrementalApply(incrementalInput({ currentLayoutId: "layout-2" }))).toBeUndefined();
   });
 
   it("returns undefined when the current layout fingerprint differs from the baseline", () => {
@@ -341,8 +327,16 @@ describe("baseline fingerprint semantics", () => {
       configById: data.configById,
       layout: data.layout,
     };
-    const a = collectLayoutBaseline(() => data, () => "layout-1", () => emptyCatalog);
-    const b = collectLayoutBaseline(() => reordered, () => "layout-1", () => emptyCatalog);
+    const a = collectLayoutBaseline(
+      () => data,
+      () => "layout-1",
+      () => emptyCatalog,
+    );
+    const b = collectLayoutBaseline(
+      () => reordered,
+      () => "layout-1",
+      () => emptyCatalog,
+    );
     expect(a.baseFingerprint).toBeDefined();
     expect(a.baseFingerprint).toBe(b.baseFingerprint);
     // The apply gate accepts the reordered layout against the original fingerprint.
@@ -466,13 +460,27 @@ describe("collectLayoutBaseline", () => {
 
   it("returns no baseline when the current layout getters are absent or empty", () => {
     expect(collectLayoutBaseline(undefined, undefined, undefined)).toEqual({});
-    expect(collectLayoutBaseline(() => undefined, () => "layout-1", () => emptyCatalog)).toEqual(
-      {},
-    );
-    expect(collectLayoutBaseline(() => baseLayout(), () => undefined, () => emptyCatalog)).toEqual(
-      {},
-    );
-    expect(collectLayoutBaseline(() => baseLayout(), () => "layout-1", undefined)).toEqual({});
+    expect(
+      collectLayoutBaseline(
+        () => undefined,
+        () => "layout-1",
+        () => emptyCatalog,
+      ),
+    ).toEqual({});
+    expect(
+      collectLayoutBaseline(
+        () => baseLayout(),
+        () => undefined,
+        () => emptyCatalog,
+      ),
+    ).toEqual({});
+    expect(
+      collectLayoutBaseline(
+        () => baseLayout(),
+        () => "layout-1",
+        undefined,
+      ),
+    ).toEqual({});
   });
 
   it("returns no baseline when a getter throws or the layout fails validation", () => {
@@ -498,7 +506,11 @@ describe("collectLayoutBaseline", () => {
 describe("computeProposalMode", () => {
   it("reports a new layout when the proposal carries no baseline", () => {
     expect(
-      computeProposalMode({ name: "n", data: baseLayout() }, { id: "l", data: baseLayout() }, emptyCatalog),
+      computeProposalMode(
+        { name: "n", data: baseLayout() },
+        { id: "l", data: baseLayout() },
+        emptyCatalog,
+      ),
     ).toEqual({ kind: "new" });
   });
 
@@ -593,11 +605,7 @@ describe("computeProposalMode", () => {
     ).toEqual({ kind: "new" });
     // With the same catalog the mode stays incremental.
     expect(
-      computeProposalMode(
-        proposal,
-        { id: "layout-1", data: plotLayout },
-        catalogWithPoints,
-      ),
+      computeProposalMode(proposal, { id: "layout-1", data: plotLayout }, catalogWithPoints),
     ).toEqual({ kind: "incremental", newPanelCount: 1 });
   });
 
@@ -609,9 +617,9 @@ describe("computeProposalMode", () => {
       baseFingerprint: fingerprintOf(baseLayout()),
     };
     expect(computeProposalMode(proposal, undefined, emptyCatalog)).toEqual({ kind: "new" });
-    expect(computeProposalMode(proposal, { id: "layout-1", data: baseLayout() }, undefined)).toEqual(
-      { kind: "new" },
-    );
+    expect(
+      computeProposalMode(proposal, { id: "layout-1", data: baseLayout() }, undefined),
+    ).toEqual({ kind: "new" });
   });
 
   it("matches the apply decision for a layout with invalid Plot paths (sanitized on both sides)", () => {

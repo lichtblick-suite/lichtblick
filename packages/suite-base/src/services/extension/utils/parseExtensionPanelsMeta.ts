@@ -7,15 +7,11 @@ import type {
 } from "@lichtblick/suite-base/types/Extensions";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return (
-    typeof value === "object" && value != undefined && !Array.isArray(value)
-  );
+  return typeof value === "object" && value != undefined && !Array.isArray(value);
 }
 
 /** Reads the optional `lichtblickPanels` package field without trusting extension input. */
-export function parseExtensionPanelsMeta(
-  value: unknown,
-): ExtensionPanelsMetadata | undefined {
+export function parseExtensionPanelsMeta(value: unknown): ExtensionPanelsMetadata | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
@@ -27,15 +23,12 @@ export function parseExtensionPanelsMeta(
     }
 
     const description =
-      typeof candidate.description === "string" &&
-      candidate.description.trim().length > 0
+      typeof candidate.description === "string" && candidate.description.trim().length > 0
         ? candidate.description.trim()
         : undefined;
     const schemas =
       Array.isArray(candidate.schemas) &&
-      candidate.schemas.every(
-        (schema) => typeof schema === "string" && schema.trim().length > 0,
-      )
+      candidate.schemas.every((schema) => typeof schema === "string" && schema.trim().length > 0)
         ? candidate.schemas.map((schema) => schema.trim())
         : undefined;
     const metadata: ExtensionPanelMetadata = {

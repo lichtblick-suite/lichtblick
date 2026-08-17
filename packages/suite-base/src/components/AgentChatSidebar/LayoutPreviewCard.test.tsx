@@ -58,12 +58,11 @@ function renderCard(
   proposal: LayoutProposal,
   pendingProposalMode?: unknown,
 ): ReturnType<typeof render> {
-  (useAgentChat as jest.Mock).mockImplementation(
-    (selector: (state: unknown) => unknown) =>
-      selector({
-        actions: { applyProposal, dismissProposal },
-        pendingProposalMode,
-      }),
+  (useAgentChat as jest.Mock).mockImplementation((selector: (state: unknown) => unknown) =>
+    selector({
+      actions: { applyProposal, dismissProposal },
+      pendingProposalMode,
+    }),
   );
   (useTranslation as jest.Mock).mockReturnValue({
     t: (key: string, options?: { defaultValue?: string } & Record<string, unknown>) => {
@@ -71,9 +70,7 @@ function renderCard(
       if (options == undefined) {
         return template;
       }
-      return template.replace(/\{\{(\w+)\}\}/g, (_match, name: string) =>
-        String(options[name]),
-      );
+      return template.replace(/\{\{(\w+)\}\}/g, (_match, name: string) => String(options[name]));
     },
   });
   return render(
@@ -92,10 +89,10 @@ describe("LayoutPreviewCard", () => {
   });
 
   it("shows the incremental mode with the new panel count", () => {
-    renderCard(
-      makeProposal({ baseLayoutId: "layout-1", baseFingerprint: "abc" }),
-      { kind: "incremental", newPanelCount: 2 },
-    );
+    renderCard(makeProposal({ baseLayoutId: "layout-1", baseFingerprint: "abc" }), {
+      kind: "incremental",
+      newPanelCount: 2,
+    });
     expect(screen.getByText("Add 2 panels to the current layout")).toBeInTheDocument();
   });
 
@@ -158,18 +155,10 @@ export default function (event) { return event; }`,
       expect(screen.getByText("GPS fix")).toBeInTheDocument();
       expect(screen.getByText("(script-b)")).toBeInTheDocument();
 
-      expect(
-        screen.getByText("Inputs: /imu/data, /gps/fix"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("Output: /studio_script/speed"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("Inputs: /gps"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("Output: /studio_script/gps"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Inputs: /imu/data, /gps/fix")).toBeInTheDocument();
+      expect(screen.getByText("Output: /studio_script/speed")).toBeInTheDocument();
+      expect(screen.getByText("Inputs: /gps")).toBeInTheDocument();
+      expect(screen.getByText("Output: /studio_script/gps")).toBeInTheDocument();
 
       // Sources are collapsed by default and expand on demand. The pre content stays in the
       // DOM while collapsed (details hides it), so assert on the open attribute instead.
@@ -185,7 +174,9 @@ export default function (event) { return event; }`,
 
     it("renders no script section when the proposal has no userNodes", () => {
       renderCard(makeProposal(), { kind: "new" });
-      expect(screen.queryByText(/Applying this layout will execute these scripts/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Applying this layout will execute these scripts/),
+      ).not.toBeInTheDocument();
       expect(screen.queryByText("Script source")).not.toBeInTheDocument();
     });
 
@@ -206,6 +197,7 @@ export default function (event) { return event; }`,
       );
 
       expect(screen.getByText("Broken")).toBeInTheDocument();
-      expect(screen.getAllByText("Could not parse")).toHaveLength(2);    });
+      expect(screen.getAllByText("Could not parse")).toHaveLength(2);
+    });
   });
 });

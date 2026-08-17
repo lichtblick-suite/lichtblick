@@ -16,12 +16,7 @@ export class AgentStreamProtocolError extends Error {
   }
 }
 
-export type ToolRunStatus =
-  | "queued"
-  | "running"
-  | "succeeded"
-  | "failed"
-  | "cancelled";
+export type ToolRunStatus = "queued" | "running" | "succeeded" | "failed" | "cancelled";
 export type ToolRun = {
   id: string;
   name: string;
@@ -56,9 +51,7 @@ export type LayoutProposal = {
  * Display mode for a layout proposal card: adding panels to the current layout vs creating a new
  * layout. The count is a display hint only; the apply-time diff is authoritative.
  */
-export type LayoutProposalMode =
-  | { kind: "incremental"; newPanelCount: number }
-  | { kind: "new" };
+export type LayoutProposalMode = { kind: "incremental"; newPanelCount: number } | { kind: "new" };
 export type AgentEventEnvelope = {
   /** Monotonically increasing positive safe integer within a session event stream. */
   seq: number;
@@ -124,9 +117,5 @@ export interface IAgentClient {
     signal?: AbortSignal,
     options?: SubscribeEventsOptions,
   ) => Promise<void>;
-  notifyCatalogReady: (
-    sessionId: string,
-    requestId: string,
-    signal?: AbortSignal,
-  ) => Promise<void>;
+  notifyCatalogReady: (sessionId: string, requestId: string, signal?: AbortSignal) => Promise<void>;
 }

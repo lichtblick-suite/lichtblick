@@ -69,17 +69,14 @@ describe("local Agent client lifecycle", () => {
   it("disposes replaced, disabled, and unmounted orchestrators", async () => {
     const dispose = jest.spyOn(PiAgentOrchestrator.prototype, "dispose");
     const { result, rerender, unmount } = renderHook(
-      ({
-        enabled,
-        model,
-      }: {
-        enabled: boolean;
-        model: string;
-      }) =>
-        useLocalAgentClient({ ...validConfiguration, model }, {
-          enabled,
-          getCatalog: () => ({ datatypes: new Map(), topics: [] }),
-        }),
+      ({ enabled, model }: { enabled: boolean; model: string }) =>
+        useLocalAgentClient(
+          { ...validConfiguration, model },
+          {
+            enabled,
+            getCatalog: () => ({ datatypes: new Map(), topics: [] }),
+          },
+        ),
       { initialProps: { enabled: true, model: "model-1" } },
     );
     const firstClient = result.current;
@@ -136,9 +133,7 @@ describe("local Agent client lifecycle", () => {
 
   it("disposes both committed StrictMode instances without leaking either one", async () => {
     const dispose = jest.spyOn(PiAgentOrchestrator.prototype, "dispose");
-    const wrapper = ({ children }: React.PropsWithChildren) => (
-      <StrictMode>{children}</StrictMode>
-    );
+    const wrapper = ({ children }: React.PropsWithChildren) => <StrictMode>{children}</StrictMode>;
     const { unmount } = renderHook(
       () =>
         useLocalAgentClient(validConfiguration, {
@@ -177,10 +172,7 @@ describe("local Agent client lifecycle", () => {
           () => ({ datatypes: new Map(), topics: topicsRef.current }),
           [],
         );
-        const dataQuery = useMemo(
-          () => ({ getContext: () => ({}) as AgentDataQueryContext }),
-          [],
-        );
+        const dataQuery = useMemo(() => ({ getContext: () => ({}) as AgentDataQueryContext }), []);
         return useLocalAgentClient(validConfiguration, {
           enabled: true,
           getCatalog,

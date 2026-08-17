@@ -8,8 +8,7 @@ import { mapPiToolExecutionEvent, summarizeToolValue } from "./eventMapping";
 type PiToolExecutionEvent = Extract<
   PiAgentEvent,
   {
-    type:
-      "tool_execution_start" | "tool_execution_update" | "tool_execution_end";
+    type: "tool_execution_start" | "tool_execution_update" | "tool_execution_end";
   }
 >;
 

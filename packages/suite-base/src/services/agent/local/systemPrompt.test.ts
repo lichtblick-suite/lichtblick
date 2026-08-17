@@ -108,9 +108,7 @@ describe("buildSystemPrompt", () => {
     });
 
     expect(prompt).toContain(clock);
-    expect(prompt.indexOf("Loaded data source with 3 topics.")).toBeLessThan(
-      prompt.indexOf(clock),
-    );
+    expect(prompt.indexOf("Loaded data source with 3 topics.")).toBeLessThan(prompt.indexOf(clock));
     expect(prompt.endsWith(clock)).toBe(true);
   });
 
@@ -138,9 +136,7 @@ describe("buildSystemPrompt", () => {
   });
 
   it("omits the current-time section unless both time and timezone are present", () => {
-    expect(buildSystemPrompt({ now: "2026-08-04T09:30:00.000Z" })).not.toContain(
-      "Current time:",
-    );
+    expect(buildSystemPrompt({ now: "2026-08-04T09:30:00.000Z" })).not.toContain("Current time:");
     expect(buildSystemPrompt({ timezone: "Asia/Shanghai" })).not.toContain("Current time:");
   });
 
@@ -235,9 +231,7 @@ describe("summarizeWorkspace", () => {
     expect(summary).toContain(
       "Data is already loaded — use read_messages / search_messages for the current recording instead of asking to open new data.",
     );
-    expect(summary.indexOf("use read_messages")).toBeLessThan(
-      summary.indexOf("Topics by schema"),
-    );
+    expect(summary.indexOf("use read_messages")).toBeLessThan(summary.indexOf("Topics by schema"));
   });
 
   it("keeps the loaded-data instruction when the summary is truncated (B5)", () => {

@@ -6,9 +6,7 @@ import ExtensionBuilder from "@lichtblick/suite-base/testing/builders/ExtensionB
 
 import { buildPanelInventory } from "./panelInventory";
 
-function panel(
-  info: Pick<PanelInfo, "description" | "title" | "type">,
-): PanelInfo {
+function panel(info: Pick<PanelInfo, "description" | "title" | "type">): PanelInfo {
   return {
     ...info,
     module: jest.fn() as PanelInfo["module"],
@@ -84,11 +82,7 @@ describe("buildPanelInventory", () => {
         ],
         [extension],
       ).map((entry) => entry.description),
-    ).toEqual([
-      "Shows status from the catalog.",
-      "Tools from Acme.",
-      "Unknown panel.",
-    ]);
+    ).toEqual(["Shows status from the catalog.", "Tools from Acme.", "Unknown panel."]);
   });
 
   it("ignores malformed runtime metadata without throwing", () => {

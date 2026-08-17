@@ -7,10 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import { AgentMarkdown } from "@lichtblick/suite-base/components/AgentMarkdown";
 import type { AgentChatStatus } from "@lichtblick/suite-base/context/AgentChatContext";
-import {
-  ChatMessage,
-  LayoutProposal,
-} from "@lichtblick/suite-base/services/agent/types";
+import { ChatMessage, LayoutProposal } from "@lichtblick/suite-base/services/agent/types";
 
 import { useStyles } from "./AgentChatSidebar.style";
 import { LayoutPreviewCard } from "./LayoutPreviewCard";
@@ -58,11 +55,7 @@ const MessageItem = memo(function MemoizedMessageItem({
         <ToolRunGroup toolRuns={message.toolRuns} />
       )}
       {isProcessing && (
-        <Typography
-          color="text.secondary"
-          data-testid="agent-chat-processing"
-          variant="body2"
-        >
+        <Typography color="text.secondary" data-testid="agent-chat-processing" variant="body2">
           {t("processing")}
         </Typography>
       )}
@@ -80,8 +73,7 @@ export function MessageList(props: MessageListProps): React.JSX.Element {
   } = props;
   const { classes } = useStyles();
   const { t } = useTranslation("agentChat");
-  const [oldestVisibleMessageId, setOldestVisibleMessageId] =
-    useState<string>();
+  const [oldestVisibleMessageId, setOldestVisibleMessageId] = useState<string>();
   const anchorIndex =
     oldestVisibleMessageId == undefined
       ? -1
@@ -105,9 +97,7 @@ export function MessageList(props: MessageListProps): React.JSX.Element {
   }
 
   const oldestVisibleIndex =
-    anchorIndex === -1
-      ? Math.max(0, messages.length - MESSAGE_WINDOW_SIZE)
-      : anchorIndex;
+    anchorIndex === -1 ? Math.max(0, messages.length - MESSAGE_WINDOW_SIZE) : anchorIndex;
   const visibleMessages = messages.slice(oldestVisibleIndex);
   const latestMessage = messages.at(-1);
   const processingMessageId =
@@ -125,10 +115,7 @@ export function MessageList(props: MessageListProps): React.JSX.Element {
           className={classes.showEarlierButton}
           size="small"
           onClick={() => {
-            const expandedStartIndex = Math.max(
-              0,
-              oldestVisibleIndex - MESSAGE_WINDOW_SIZE,
-            );
+            const expandedStartIndex = Math.max(0, oldestVisibleIndex - MESSAGE_WINDOW_SIZE);
             setOldestVisibleMessageId(messages[expandedStartIndex]?.id);
           }}
         >

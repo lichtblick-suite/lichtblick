@@ -44,7 +44,7 @@ const MAX_SERIALIZE_OUTPUT_BYTES = 64 * 1024;
  */
 const CONTENT_BUDGET = MAX_SERIALIZE_OUTPUT_BYTES - 64;
 
-const TRUNCATED_MARKER = "\"<truncated>\"";
+const TRUNCATED_MARKER = '"<truncated>"';
 
 const LOG_LEVELS = ["debug", "info", "warn", "error", "fatal", "unknown"] as const;
 type LogLevelName = (typeof LOG_LEVELS)[number];
@@ -80,8 +80,7 @@ type SerializeBudget = { bytes: number; nodes: number };
  */
 export function safeSerializeMessage(value: unknown): string {
   return (
-    serializeControlled(value, 0, new WeakSet<object>(), { bytes: 0, nodes: 0 }) ??
-    TRUNCATED_MARKER
+    serializeControlled(value, 0, new WeakSet<object>(), { bytes: 0, nodes: 0 }) ?? TRUNCATED_MARKER
   );
 }
 
@@ -119,10 +118,7 @@ function emitFragment(budget: SerializeBudget, fragment: string): string | undef
  * own delimiters): the whole fragment must fit, otherwise nothing is written — a bare truncation
  * marker can never stand in for a composite structure.
  */
-function compositeFragment(
-  budget: SerializeBudget,
-  fragment: string,
-): string | undefined {
+function compositeFragment(budget: SerializeBudget, fragment: string): string | undefined {
   if (budget.bytes + utf8Length(fragment) < CONTENT_BUDGET) {
     budget.bytes += utf8Length(fragment);
     return fragment;
@@ -575,7 +571,10 @@ function normalizedLogText(schemaName: string, msgEvent: MessageEvent): string |
   if (!isLogDatatype(schemaName)) {
     return undefined;
   }
-  const normalized = normalizedLogMessage(schemaName, msgEvent.message as LogMessageEvent["message"]);
+  const normalized = normalizedLogMessage(
+    schemaName,
+    msgEvent.message as LogMessageEvent["message"],
+  );
   return [normalized.message, normalized.name].filter(Boolean).join(" ").toLowerCase();
 }
 
@@ -606,10 +605,7 @@ export async function runSearchMessagesTool(
   const topic = requireString(input, "topic", toolName);
   const text = input.text;
   const level = optionalEnum<LogLevelName>(input, "level", toolName, LOG_LEVELS);
-  if (
-    (typeof text !== "string" || text.trim().length === 0) &&
-    level == undefined
-  ) {
+  if ((typeof text !== "string" || text.trim().length === 0) && level == undefined) {
     throw new Error(
       `${toolName} requires at least one of "text" or "level"; both are applied as AND when given`,
     );

@@ -21,8 +21,7 @@ function extractInputTopics(sourceCode: string): readonly string[] | undefined {
 }
 
 function extractOutputTopic(sourceCode: string): string | undefined {
-  const outputMatch =
-    /export\s+const\s+output\s*=\s*("([^"]+)"|'([^']+)')/m.exec(sourceCode);
+  const outputMatch = /export\s+const\s+output\s*=\s*("([^"]+)"|'([^']+)')/m.exec(sourceCode);
   return outputMatch?.[2] ?? outputMatch?.[3];
 }
 

@@ -778,9 +778,7 @@ describe("Workspace - Agent sidebar wiring", () => {
 
     render(<Workspace />);
 
-    expect(mockWorkspaceActions.sidebarActions.right.selectItem).toHaveBeenCalledWith(
-      "variables",
-    );
+    expect(mockWorkspaceActions.sidebarActions.right.selectItem).toHaveBeenCalledWith("variables");
     // The sidebar stays open: only the stale item is normalized.
     expect(mockWorkspaceActions.sidebarActions.right.setOpen).not.toHaveBeenCalled();
   });
@@ -792,9 +790,7 @@ describe("Workspace - Agent sidebar wiring", () => {
 
     render(<Workspace />);
 
-    expect(mockWorkspaceActions.sidebarActions.right.selectItem).toHaveBeenCalledWith(
-      "variables",
-    );
+    expect(mockWorkspaceActions.sidebarActions.right.selectItem).toHaveBeenCalledWith("variables");
     // Selecting a new item would open the sidebar; the previous closed state is restored.
     expect(mockWorkspaceActions.sidebarActions.right.setOpen).toHaveBeenCalledWith(false);
   });

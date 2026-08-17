@@ -185,18 +185,13 @@ export class AgentConversationStore {
     page = LIST_DEFAULT_PAGE,
     pageSize = LIST_DEFAULT_PAGE_SIZE,
   ): Promise<ConversationListPage> {
-    const normalizedPage =
-      Number.isSafeInteger(page) && page >= 1 ? page : LIST_DEFAULT_PAGE;
+    const normalizedPage = Number.isSafeInteger(page) && page >= 1 ? page : LIST_DEFAULT_PAGE;
     const normalizedPageSize =
-      Number.isSafeInteger(pageSize) && pageSize >= 1
-        ? pageSize
-        : LIST_DEFAULT_PAGE_SIZE;
+      Number.isSafeInteger(pageSize) && pageSize >= 1 ? pageSize : LIST_DEFAULT_PAGE_SIZE;
     try {
       const db = await this.#db;
       const transaction = db.transaction(OBJECT_STORE_NAME, "readonly");
-      const records = await transaction
-        .objectStore(OBJECT_STORE_NAME)
-        .getAll();
+      const records = await transaction.objectStore(OBJECT_STORE_NAME).getAll();
       await transaction.done;
       const summaries: ConversationSummary[] = [];
       for (const record of records) {

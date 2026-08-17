@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
-import { SKILL_REGISTRY, buildSkillIndex } from "@lichtblick/suite-base/services/agent/local/skills";
+import {
+  SKILL_REGISTRY,
+  buildSkillIndex,
+} from "@lichtblick/suite-base/services/agent/local/skills";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
 
 import {
@@ -23,7 +26,9 @@ const customSkill = {
   body: "Prefix every layout with the squad name.",
 };
 
-function customization(overrides: Partial<AgentPromptCustomization> = {}): AgentPromptCustomization {
+function customization(
+  overrides: Partial<AgentPromptCustomization> = {},
+): AgentPromptCustomization {
   return { ...EMPTY_CUSTOMIZATION, ...overrides };
 }
 
@@ -64,44 +69,42 @@ describe("agent prompt customization", () => {
   });
 
   it("rejects custom skills that collide with or shadow built-ins", () => {
-    expect(() =>
-      { validateAgentPromptCustomization(
+    expect(() => {
+      validateAgentPromptCustomization(
         customization({ customSkills: [{ ...customSkill, id: "data-query" }] }),
-      ); },
-    ).toThrow(AgentPromptValidationError);
-    expect(() =>
-      { validateAgentPromptCustomization(
+      );
+    }).toThrow(AgentPromptValidationError);
+    expect(() => {
+      validateAgentPromptCustomization(
         customization({ skillOverrides: { "not-a-skill": "body" } }),
-      ); },
-    ).toThrow(/not a built-in skill/);
+      );
+    }).toThrow(/not a built-in skill/);
   });
 
   it("rejects malformed ids, duplicates, empty bodies, and too many skills", () => {
-    expect(() =>
-      { validateAgentPromptCustomization(
+    expect(() => {
+      validateAgentPromptCustomization(
         customization({ customSkills: [{ ...customSkill, id: "Not Kebab" }] }),
-      ); },
-    ).toThrow(/lowercase words/);
-    expect(() =>
-      { validateAgentPromptCustomization(
-        customization({ customSkills: [customSkill, customSkill] }),
-      ); },
-    ).toThrow(/Duplicate skill id/);
-    expect(() =>
-      { validateAgentPromptCustomization(
+      );
+    }).toThrow(/lowercase words/);
+    expect(() => {
+      validateAgentPromptCustomization(customization({ customSkills: [customSkill, customSkill] }));
+    }).toThrow(/Duplicate skill id/);
+    expect(() => {
+      validateAgentPromptCustomization(
         customization({ customSkills: [{ ...customSkill, body: "   " }] }),
-      ); },
-    ).toThrow(/needs both/);
-    expect(() =>
-      { validateAgentPromptCustomization(
+      );
+    }).toThrow(/needs both/);
+    expect(() => {
+      validateAgentPromptCustomization(
         customization({
           customSkills: Array.from({ length: AGENT_PROMPT_MAX_CUSTOM_SKILLS + 1 }, (_u, i) => ({
             ...customSkill,
             id: `skill-${String(i)}`,
           })),
         }),
-      ); },
-    ).toThrow(/At most/);
+      );
+    }).toThrow(/At most/);
   });
 
   it("applies overrides without mutating the built-in skill", () => {
@@ -126,9 +129,9 @@ describe("agent prompt customization", () => {
     // `indexed` is built-in metadata. A user-authored skill that carries it must not be able to
     // hide itself from the prompt index.
     const hiddenMarker = { ...customSkill, indexed: false as const };
-    expect(() =>
-      { validateAgentPromptCustomization(customization({ customSkills: [hiddenMarker] })); },
-    ).not.toThrow();
+    expect(() => {
+      validateAgentPromptCustomization(customization({ customSkills: [hiddenMarker] }));
+    }).not.toThrow();
 
     const resolved = resolveSkills(customization({ customSkills: [hiddenMarker] }));
     const resolvedSkill = resolved.find((skill) => skill.id === customSkill.id);

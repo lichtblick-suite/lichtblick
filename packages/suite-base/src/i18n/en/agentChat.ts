@@ -22,8 +22,7 @@ export const agentChat = {
   assistant: "Assistant",
   you: "You",
   emptyTitle: "How can I help?",
-  emptyDescription:
-    "Ask about the current data, find a recording, or create a visualization.",
+  emptyDescription: "Ask about the current data, find a recording, or create a visualization.",
   inputPlaceholder: "Ask the agent…",
   inputLabel: "Message to Agent Chat",
   send: "Send",

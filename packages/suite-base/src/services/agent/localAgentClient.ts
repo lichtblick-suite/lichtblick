@@ -125,8 +125,7 @@ export function useLocalAgentClient(
     dataQuery?: AgentClientConfiguration["dataQuery"];
   },
 ): PiAgentOrchestrator | undefined {
-  const { apiKey, baseUrl, desktop, model, provider } =
-    configuration;
+  const { apiKey, baseUrl, desktop, model, provider } = configuration;
   const stableGetCatalog = useLatestAgentCatalog(getCatalog);
   const stableGetCurrentLayout = useLatestGetter(getCurrentLayout ?? noLayout);
   const stableGetCurrentLayoutId = useLatestGetter(getCurrentLayoutId ?? noLayout);
@@ -145,18 +144,13 @@ export function useLocalAgentClient(
     }),
     [apiKey, baseUrl, desktop, enabled, model, profileId, provider],
   );
-  const valid =
-    configurationIdentity.enabled &&
-    isAgentConfigurationValid(configurationIdentity);
+  const valid = configurationIdentity.enabled && isAgentConfigurationValid(configurationIdentity);
   // Core configuration: these fields count as a real switch (workspace/auth/profile-like) and
   // releasing the client clears the conversation, which is the desired behavior for those
   // transitions. Transient validity flickers of the SAME core fields (or unrelated re-renders)
   // must NOT release the client — releasing would make AgentChatProvider wipe the conversation.
   const coreKey = useMemo(
-    () =>
-      [apiKey, baseUrl, desktop, model, profileId, provider].join(
-        "\u0000",
-      ),
+    () => [apiKey, baseUrl, desktop, model, profileId, provider].join("\u0000"),
     [apiKey, baseUrl, desktop, model, profileId, provider],
   );
   const [resource, setResource] = useState<{

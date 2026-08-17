@@ -6,10 +6,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
-import {
-  AgentChatState,
-  useAgentChat,
-} from "@lichtblick/suite-base/context/AgentChatContext";
+import { AgentChatState, useAgentChat } from "@lichtblick/suite-base/context/AgentChatContext";
 import { LayoutProposal } from "@lichtblick/suite-base/services/agent/types";
 
 import { useStyles } from "./AgentChatSidebar.style";
@@ -32,11 +29,7 @@ type ProposalLock = {
   token: symbol;
 };
 
-function ProposalModeLabel({
-  newPanelCount,
-}: {
-  newPanelCount: number;
-}): React.JSX.Element {
+function ProposalModeLabel({ newPanelCount }: { newPanelCount: number }): React.JSX.Element {
   const { t } = useTranslation("agentChat");
   return (
     <Typography color="text.secondary" variant="body2">
@@ -48,11 +41,7 @@ function ProposalModeLabel({
   );
 }
 
-function UserScriptsSection({
-  proposal,
-}: {
-  proposal: LayoutProposal;
-}): React.JSX.Element | null {
+function UserScriptsSection({ proposal }: { proposal: LayoutProposal }): React.JSX.Element | null {
   const { t } = useTranslation("agentChat");
   const data = proposal.data as { userNodes?: Record<string, unknown> } | undefined;
   const rawUserNodes = data?.userNodes as
@@ -227,12 +216,7 @@ export function LayoutPreviewCard({
       )}
       <UserScriptsSection proposal={proposal} />
       <Stack className={classes.cardActions} direction="row" justifyContent="flex-end" gap={1}>
-        <Button
-          disabled={actionPending}
-          size="small"
-          variant="text"
-          onClick={dismiss}
-        >
+        <Button disabled={actionPending} size="small" variant="text" onClick={dismiss}>
           {t("ignore")}
         </Button>
         <Button

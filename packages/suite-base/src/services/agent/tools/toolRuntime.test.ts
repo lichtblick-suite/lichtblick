@@ -63,36 +63,29 @@ describe("toolRuntime", () => {
   it("loads an enabled skill and preserves the legacy invalid-id error", async () => {
     const deps = makeDeps();
 
-    await expect(
-      runLoadSkillTool({ skillId: "test-skill" }, deps),
-    ).resolves.toBe('<skill id="test-skill">\n# Test skill\n</skill>');
-    await expect(
-      runLoadSkillTool({ skillId: "missing" }, deps),
-    ).rejects.toThrow("load_skill.skillId must be one of: test-skill");
+    await expect(runLoadSkillTool({ skillId: "test-skill" }, deps)).resolves.toBe(
+      '<skill id="test-skill">\n# Test skill\n</skill>',
+    );
+    await expect(runLoadSkillTool({ skillId: "missing" }, deps)).rejects.toThrow(
+      "load_skill.skillId must be one of: test-skill",
+    );
   });
 
   it("writes memory and reports unavailable memory with the legacy error", async () => {
     const deps = makeDeps();
 
-    await expect(
-      runMemoryWriteTool({ text: "Another fact" }, deps),
-    ).resolves.toEqual({
+    await expect(runMemoryWriteTool({ text: "Another fact" }, deps)).resolves.toEqual({
       remembered: "memory-2",
     });
     await expect(
-      runMemoryWriteTool(
-        { text: "Another fact" },
-        { ...deps, memoryStore: undefined },
-      ),
+      runMemoryWriteTool({ text: "Another fact" }, { ...deps, memoryStore: undefined }),
     ).rejects.toThrow("memory_write is unavailable: memory is not configured");
   });
 
   it("forgets memory and preserves the not-stored error", async () => {
     const deps = makeDeps();
 
-    await expect(
-      runMemoryForgetTool({ id: "memory-1" }, deps),
-    ).resolves.toEqual({
+    await expect(runMemoryForgetTool({ id: "memory-1" }, deps)).resolves.toEqual({
       forgotten: "memory-1",
     });
     jest.mocked(deps.memoryStore.remove).mockResolvedValueOnce(false);
@@ -130,10 +123,7 @@ describe("toolRuntime", () => {
     });
     expect(deps.emitOpenDataSource).toHaveBeenCalledWith(input, undefined);
     await expect(
-      runOpenDataSourceTool(
-        { urls: ["http://data.example/record.mcap"] },
-        deps,
-      ),
+      runOpenDataSourceTool({ urls: ["http://data.example/record.mcap"] }, deps),
     ).rejects.toThrow(
       "open_data_source.urls must contain only HTTPS .mcap URLs without literal commas; encode commas as %2C",
     );
@@ -149,9 +139,7 @@ describe("toolRuntime", () => {
     jest.mocked(deps.getCatalog).mockImplementationOnce(() => {
       throw new Error("catalog unavailable");
     });
-    await expect(runGetDataCatalogTool({}, deps)).rejects.toThrow(
-      "catalog unavailable",
-    );
+    await expect(runGetDataCatalogTool({}, deps)).rejects.toThrow("catalog unavailable");
   });
 
   it("validates and emits layout proposals and rejects unsafe layouts", async () => {
@@ -186,9 +174,7 @@ describe("toolRuntime", () => {
     const deps = makeDeps();
     const panelType = "Acme Extension.Custom Panel";
     const panelId = `${panelType}!main`;
-    jest
-      .mocked(deps.getInstalledPanelTypes)
-      .mockReturnValue(new Set([panelType]));
+    jest.mocked(deps.getInstalledPanelTypes).mockReturnValue(new Set([panelType]));
     const input = {
       name: "Installed extension",
       data: {
@@ -213,9 +199,9 @@ describe("toolRuntime", () => {
     const controller = new AbortController();
     controller.abort(new Error("cancelled by caller"));
 
-    await expect(
-      runGetDataCatalogTool({}, deps, { signal: controller.signal }),
-    ).rejects.toThrow("cancelled by caller");
+    await expect(runGetDataCatalogTool({}, deps, { signal: controller.signal })).rejects.toThrow(
+      "cancelled by caller",
+    );
     expect(deps.getCatalog).not.toHaveBeenCalled();
     await expect(executeToolRuntime("unknown", {}, deps)).rejects.toThrow(
       'Unsupported local agent tool "unknown"',
@@ -225,9 +211,7 @@ describe("toolRuntime", () => {
       topics: ["x".repeat(TOOL_RUNTIME_MAX_RESULT_BYTES + 1)],
       datatypes: new Map(),
     });
-    await expect(
-      executeToolRuntime("get_data_catalog", {}, deps),
-    ).resolves.toMatchObject({
+    await expect(executeToolRuntime("get_data_catalog", {}, deps)).resolves.toMatchObject({
       truncated: true,
     });
   });

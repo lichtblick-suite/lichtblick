@@ -18,9 +18,7 @@ describe("LOCAL_AGENT_TOOL_DEFINITIONS", () => {
       "playback_control",
     ]);
     for (const tool of LOCAL_AGENT_TOOL_DEFINITIONS) {
-      expect(tool.inputSchema).toEqual(
-        expect.objectContaining({ type: "object" }),
-      );
+      expect(tool.inputSchema).toEqual(expect.objectContaining({ type: "object" }));
       expect(tool.description.length).toBeGreaterThan(0);
     }
   });

@@ -44,8 +44,7 @@ jest.mock("@lichtblick/suite-base/components/AgentCatalogWatcher", () => ({
 }));
 jest.mock("@lichtblick/suite-base/providers/AgentChatProvider", () => ({
   __esModule: true,
-  default: (props: React.PropsWithChildren<ProviderProps>) =>
-    mockAgentChatProvider(props),
+  default: (props: React.PropsWithChildren<ProviderProps>) => mockAgentChatProvider(props),
 }));
 jest.mock("@lichtblick/suite-base/context/PanelCatalogContext", () => ({
   usePanelCatalog: () => ({
@@ -53,9 +52,8 @@ jest.mock("@lichtblick/suite-base/context/PanelCatalogContext", () => ({
   }),
 }));
 jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
-  useExtensionCatalog: (
-    selector: (state: { installedExtensions: [] }) => unknown,
-  ) => selector({ installedExtensions: [] }),
+  useExtensionCatalog: (selector: (state: { installedExtensions: [] }) => unknown) =>
+    selector({ installedExtensions: [] }),
 }));
 jest.mock("@lichtblick/suite-base/context/AppConfigurationContext", () => ({
   useAppConfiguration: () => ({}),
@@ -128,10 +126,7 @@ const mockSnapshotRef: { current: AgentSettingsSnapshot } = {
   current: undefined as unknown as AgentSettingsSnapshot,
 };
 
-function makeSnapshot(
-  profiles: AgentProfile[],
-  activeProfileId: string,
-): AgentSettingsSnapshot {
+function makeSnapshot(profiles: AgentProfile[], activeProfileId: string): AgentSettingsSnapshot {
   const active = profiles.find((entry) => entry.id === activeProfileId) ?? profiles[0]!;
   return {
     activeProfileId,
@@ -254,22 +249,15 @@ describe("AgentWorkspaceIntegration profile wiring", () => {
     };
 
     await act(async () => {
-      await lastProviderPropsRef.current?.onApplyProposal?.(
-        proposal,
-        new AbortController().signal,
-      );
+      await lastProviderPropsRef.current?.onApplyProposal?.(proposal, new AbortController().signal);
     });
 
     // The landing chain forwards the validated proposal to the workspace-tools apply path with
     // the baseline that decides the incremental ADD_PANELS_ATOMIC dispatch.
-    expect(mockWorkspaceTools.applyLayout).toHaveBeenCalledWith(
-      "Add gauge",
-      proposal.data,
-      {
-        baseLayoutId: "layout-1",
-        baseFingerprint: "fingerprint-1",
-      },
-    );
+    expect(mockWorkspaceTools.applyLayout).toHaveBeenCalledWith("Add gauge", proposal.data, {
+      baseLayoutId: "layout-1",
+      baseFingerprint: "fingerprint-1",
+    });
     root.unmount();
   });
 });

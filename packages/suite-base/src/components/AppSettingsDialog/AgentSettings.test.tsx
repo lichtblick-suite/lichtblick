@@ -4,8 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import "@testing-library/jest-dom";
-import { act, fireEvent, render, screen,
-  waitFor, } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import AppConfigurationContext, {
@@ -33,23 +32,15 @@ type TestDesktopBridge = {
 const testGlobal = globalThis as typeof globalThis & {
   desktopBridge?: TestDesktopBridge;
 };
-const originalBridgeDescriptor = Object.getOwnPropertyDescriptor(
-  globalThis,
-  "desktopBridge",
-);
-const originalLocksDescriptor = Object.getOwnPropertyDescriptor(
-  globalThis.navigator,
-  "locks",
-);
+const originalBridgeDescriptor = Object.getOwnPropertyDescriptor(globalThis, "desktopBridge");
+const originalLocksDescriptor = Object.getOwnPropertyDescriptor(globalThis.navigator, "locks");
 
 function installTestCrossRendererLock(): void {
   Object.defineProperty(globalThis.navigator, "locks", {
     configurable: true,
     value: {
-      request: async (
-        _name: string,
-        callback: () => Promise<unknown>,
-      ): Promise<unknown> => await callback(),
+      request: async (_name: string, callback: () => Promise<unknown>): Promise<unknown> =>
+        await callback(),
     },
   });
 }
@@ -74,9 +65,7 @@ function installDesktopCredentialBridge(): TestDesktopBridge {
         } catch {
           storedRevision = "";
         }
-        if (
-          entry.expectedRevision != undefined && entry.expectedRevision !== storedRevision
-        ) {
+        if (entry.expectedRevision != undefined && entry.expectedRevision !== storedRevision) {
           return { code: "revision-conflict", ok: false };
         }
       }
@@ -97,9 +86,7 @@ function installDesktopCredentialBridge(): TestDesktopBridge {
 function makeSharedConfigurations(): [IAppConfiguration, IAppConfiguration] {
   const values = new Map<string, AppConfigurationValue>();
   const makeConfiguration = (): IAppConfiguration => {
-    const listeners = new Map<
-      string, Set<(newValue: AppConfigurationValue) => void>
-    >();
+    const listeners = new Map<string, Set<(newValue: AppConfigurationValue) => void>>();
     return {
       addChangeListener: (key, listener) => {
         const current = listeners.get(key) ?? new Set();
@@ -125,9 +112,7 @@ function makeCachedConfiguration(
   durableValues: Map<string, AppConfigurationValue>,
 ): IAppConfiguration {
   const cachedValues = new Map(durableValues);
-  const listeners = new Map<
-    string, Set<(newValue: AppConfigurationValue) => void>
-  >();
+  const listeners = new Map<string, Set<(newValue: AppConfigurationValue) => void>>();
   return {
     addChangeListener: (key, listener) => {
       const current = listeners.get(key) ?? new Set();
@@ -210,9 +195,7 @@ function renderSettings(
     onCommitHandlerChange,
   }: {
     isDesktop?: boolean;
-    onCommitHandlerChange?: (
-      handler: AgentSettingsCommitHandler | undefined,
-    ) => void;
+    onCommitHandlerChange?: (handler: AgentSettingsCommitHandler | undefined) => void;
   } = {},
 ) {
   return render(
@@ -234,19 +217,12 @@ describe("AgentSettings", () => {
     if (originalLocksDescriptor == undefined) {
       Reflect.deleteProperty(globalThis.navigator, "locks");
     } else {
-      Object.defineProperty(
-        globalThis.navigator,
-        "locks",
-        originalLocksDescriptor,
-      );
+      Object.defineProperty(globalThis.navigator, "locks", originalLocksDescriptor);
     }
     if (originalBridgeDescriptor == undefined) {
       delete testGlobal.desktopBridge;
     } else {
-      Object.defineProperty(
-        globalThis, "desktopBridge",
-        originalBridgeDescriptor,
-      );
+      Object.defineProperty(globalThis, "desktopBridge", originalBridgeDescriptor);
     }
   });
 
@@ -270,9 +246,7 @@ describe("AgentSettings", () => {
     await waitFor(() => {
       expect(configuration.get(AppSetting.AGENT_ENABLED)).toBe(true);
     });
-    expect(
-      screen.getByRole("checkbox", { name: "Enable agent" }),
-    ).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Enable agent" })).toBeChecked();
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Enable agent" }));
 
@@ -288,9 +262,7 @@ describe("AgentSettings", () => {
     renderSettings(configuration);
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("checkbox", { name: "Enable agent" }),
-      ).toBeChecked();
+      expect(screen.getByRole("checkbox", { name: "Enable agent" })).toBeChecked();
     });
   });
 
@@ -306,17 +278,13 @@ describe("AgentSettings", () => {
     const editor = screen.getByRole("textbox", {
       name: /Panel catalog/,
     });
-    expect((editor as HTMLTextAreaElement).value).toContain(
-      "# Panel catalog",
-    );
+    expect((editor as HTMLTextAreaElement).value).toContain("# Panel catalog");
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
 
     const preview = screen.getByTestId("agent-skill-preview");
     // The heading and table must come back as real elements, not literal markdown syntax.
-    expect(preview.querySelector("h1")).toHaveTextContent(
-      "Panel catalog",
-    );
+    expect(preview.querySelector("h1")).toHaveTextContent("Panel catalog");
     expect(preview.querySelector("table")).toBeInTheDocument();
     expect(preview.textContent).not.toContain("| Panel type |");
 
@@ -330,8 +298,8 @@ describe("AgentSettings", () => {
     await configuration.set(
       AppSetting.AGENT_MEMORY,
       JSON.stringify([
-        { id: "m1", text: "Usually reviews SN001", createdAt: "2026-07-28T00:00:00Z", },
-        { id: "m2", text: "Prefers 3D beside a plot", createdAt: "2026-07-28T00:00:00Z", },
+        { id: "m1", text: "Usually reviews SN001", createdAt: "2026-07-28T00:00:00Z" },
+        { id: "m2", text: "Prefers 3D beside a plot", createdAt: "2026-07-28T00:00:00Z" },
       ]),
     );
     renderSettings(configuration);
@@ -339,23 +307,17 @@ describe("AgentSettings", () => {
     expect(screen.getByText("Usually reviews SN001")).toBeInTheDocument();
     expect(screen.getByText("Prefers 3D beside a plot")).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Forget: Usually reviews SN001" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Forget: Usually reviews SN001" }));
 
     await waitFor(() => {
-      expect(
-        screen.queryByText("Usually reviews SN001"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Usually reviews SN001")).not.toBeInTheDocument();
     });
     expect(screen.getByText("Prefers 3D beside a plot")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Forget all" }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("The agent has not stored anything yet."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("The agent has not stored anything yet.")).toBeInTheDocument();
     });
     expect(configuration.get(AppSetting.AGENT_MEMORY)).toBeUndefined();
   });
@@ -376,27 +338,18 @@ describe("AgentSettings", () => {
       target: { value: "https://next.example.com/v1" },
     });
 
-    expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe(
-      "local-model",
-    );
+    expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe("local-model");
     expect(set).not.toHaveBeenCalled();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
 
     await waitFor(() => {
-      expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe(
-        "next-model",
-      );
+      expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe("next-model");
       expect(configuration.get(AppSetting.AGENT_OPENAI_BASE_URL)).toBe(
         "https://next.example.com/v1",
       );
     });
-    expect(set).toHaveBeenCalledWith(
-      AppSetting.AGENT_LLM_PROVIDER,
-      "openai-compatible",
-    );
+    expect(set).toHaveBeenCalledWith(AppSetting.AGENT_LLM_PROVIDER, "openai-compatible");
   });
 
   it("switches provider drafts without persisting or reusing credentials", async () => {
@@ -430,9 +383,7 @@ describe("AgentSettings", () => {
 
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "LLM provider" }));
     fireEvent.click(screen.getByRole("option", { name: "Anthropic" }));
-    expect(screen.getByLabelText("API key")).toHaveValue(
-      "edited-anthropic-key",
-    );
+    expect(screen.getByLabelText("API key")).toHaveValue("edited-anthropic-key");
   });
 
   it("keeps edits isolated while switching between Agent profiles", async () => {
@@ -452,9 +403,7 @@ describe("AgentSettings", () => {
       target: { value: "edited-alpha-model" },
     });
 
-    fireEvent.mouseDown(
-      screen.getByRole("combobox", { name: "Agent profile" }),
-    );
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Agent profile" }));
     fireEvent.click(screen.getByRole("option", { name: "Beta" }));
     expect(screen.getByLabelText("Model")).toHaveValue("beta-model");
     expect(screen.getByLabelText("API key")).toHaveValue("beta-key");
@@ -462,16 +411,12 @@ describe("AgentSettings", () => {
       target: { value: "edited-beta-key" },
     });
 
-    fireEvent.mouseDown(
-      screen.getByRole("combobox", { name: "Agent profile" }),
-    );
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Agent profile" }));
     fireEvent.click(screen.getByRole("option", { name: "Alpha (active)" }));
     expect(screen.getByLabelText("Model")).toHaveValue("edited-alpha-model");
     expect(screen.getByLabelText("API key")).toHaveValue("alpha-key");
 
-    fireEvent.mouseDown(
-      screen.getByRole("combobox", { name: "Agent profile" }),
-    );
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Agent profile" }));
     fireEvent.click(screen.getByRole("option", { name: "Beta" }));
     expect(screen.getByLabelText("API key")).toHaveValue("edited-beta-key");
   });
@@ -496,34 +441,20 @@ describe("AgentSettings", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Copy profile" }));
-    fireEvent.mouseDown(
-      screen.getByRole("combobox", { name: "Agent profile" }),
-    );
-    expect(
-      screen.getByRole("option", { name: "Copy of Renamed profile" }),
-    ).toBeVisible();
-    fireEvent.click(
-      screen.getByRole("option", { name: "Copy of Renamed profile" }),
-    );
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Agent profile" }));
+    expect(screen.getByRole("option", { name: "Copy of Renamed profile" })).toBeVisible();
+    fireEvent.click(screen.getByRole("option", { name: "Copy of Renamed profile" }));
 
     fireEvent.click(screen.getByRole("button", { name: "Set as default" }));
-    fireEvent.mouseDown(
-      screen.getByRole("combobox", { name: "Agent profile" }),
-    );
-    expect(
-      screen.getByRole("option", { name: "Copy of Renamed profile (active)" }),
-    ).toBeVisible();
-    fireEvent.click(
-      screen.getByRole("option", { name: "Copy of Renamed profile (active)" }),
-    );
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Agent profile" }));
+    expect(screen.getByRole("option", { name: "Copy of Renamed profile (active)" })).toBeVisible();
+    fireEvent.click(screen.getByRole("option", { name: "Copy of Renamed profile (active)" }));
 
     fireEvent.click(screen.getByRole("button", { name: "Delete profile" }));
-    expect(
-      screen.getByRole("combobox", { name: "Agent profile" }),
-    ).toHaveTextContent("Default (active)");
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
+    expect(screen.getByRole("combobox", { name: "Agent profile" })).toHaveTextContent(
+      "Default (active)",
     );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
 
     await waitFor(() => {
       expect(commitSpy).toHaveBeenCalled();
@@ -537,14 +468,11 @@ describe("AgentSettings", () => {
         expect.objectContaining({ name: "Renamed profile" }),
       ],
     });
-    const storedProfiles = JSON.parse(
-      String(configuration.get("agent.profiles")),
-    ) as Array<Record<string, unknown>>;
+    const storedProfiles = JSON.parse(String(configuration.get("agent.profiles"))) as Array<
+      Record<string, unknown>
+    >;
     expect(storedProfiles).toHaveLength(2);
-    expect(storedProfiles.map(({ name }) => name)).toEqual([
-      "Default",
-      "Renamed profile",
-    ]);
+    expect(storedProfiles.map(({ name }) => name)).toEqual(["Default", "Renamed profile"]);
     expect(JSON.stringify(storedProfiles)).not.toContain("apiKey");
     const credentialBundle = JSON.parse(
       localStorage.getItem("lichtblick.agent.credentials.v1") ?? "",
@@ -562,15 +490,11 @@ describe("AgentSettings", () => {
     await commitAgentSettings(configuration, baseDraft);
     renderSettings(configuration);
 
-    expect(
-      screen.getByRole("button", { name: "Delete profile" }),
-    ).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: "Rename profile" }),
-    ).toBeEnabled();
-    expect(
-      screen.getByRole("combobox", { name: "Agent profile" }),
-    ).toHaveTextContent("Default (active)");
+    expect(screen.getByRole("button", { name: "Delete profile" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Rename profile" })).toBeEnabled();
+    expect(screen.getByRole("combobox", { name: "Agent profile" })).toHaveTextContent(
+      "Default (active)",
+    );
   });
 
   it("exposes a single commit handler for dialog close and tab changes", async () => {
@@ -590,9 +514,7 @@ describe("AgentSettings", () => {
       expect(await commitHandler?.()).toBe(true);
     });
 
-    expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe(
-      "closed-model",
-    );
+    expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe("closed-model");
   });
 
   it("rejects URL query and fragment suffixes before constructing a client", async () => {
@@ -607,9 +529,7 @@ describe("AgentSettings", () => {
     renderSettings(configuration);
 
     expect(
-      screen.getByText(
-        "Agent is not configured. Fix the fields below to enable it.",
-      ),
+      screen.getByText("Agent is not configured. Fix the fields below to enable it."),
     ).toBeVisible();
     expect(
       screen.getAllByText(
@@ -637,12 +557,8 @@ describe("AgentSettings", () => {
 
     expect(screen.getByLabelText("API key")).toBeDisabled();
     expect(screen.getByLabelText("Model")).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    ).toBeDisabled();
-    expect(
-      screen.getByText("Loading and migrating Agent credentials…"),
-    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Save Agent settings" })).toBeDisabled();
+    expect(screen.getByText("Loading and migrating Agent credentials…")).toBeVisible();
 
     await act(async () => {
       resolveCredentialRead?.();
@@ -702,9 +618,7 @@ describe("AgentSettings", () => {
     await commitAgentSettings(configuration, baseDraft, { desktop: true });
     renderSettings(configuration, { isDesktop: true });
     await waitFor(() => {
-      expect(screen.getByLabelText("Model")).toHaveValue(
-        baseDraft.openAiCompatible.model,
-      );
+      expect(screen.getByLabelText("Model")).toHaveValue(baseDraft.openAiCompatible.model);
     });
     Reflect.deleteProperty(globalThis.navigator, "locks");
     bridge.setManySecureCredentials.mockResolvedValue({
@@ -715,24 +629,16 @@ describe("AgentSettings", () => {
     fireEvent.change(screen.getByLabelText("Model"), {
       target: { value: "retry-with-cross-window-lock" },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
 
     expect(
       await screen.findByText(
         "Plaintext credential storage cannot be saved because cross-window locking is unavailable. Use a secure desktop credential backend or a runtime with Web Locks support, then retry.",
       ),
     ).toBeVisible();
-    expect(screen.getByLabelText("Model")).toHaveValue(
-      "retry-with-cross-window-lock",
-    );
-    expect(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    ).toBeEnabled();
-    expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe(
-      baseDraft.openAiCompatible.model,
-    );
+    expect(screen.getByLabelText("Model")).toHaveValue("retry-with-cross-window-lock");
+    expect(screen.getByRole("button", { name: "Save Agent settings" })).toBeEnabled();
+    expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe(baseDraft.openAiCompatible.model);
     expect(localStorage.getItem("lichtblick.agent.credentials.v1")).toBeNull();
   });
 
@@ -754,9 +660,7 @@ describe("AgentSettings", () => {
       ),
     ).toBeVisible();
     expect(screen.getByLabelText("API key")).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save Agent settings" })).toBeDisabled();
     expect(bridge.setManySecureCredentials).not.toHaveBeenCalled();
     expect(bridge.deleteSecureCredential).not.toHaveBeenCalled();
     expect(localStorage.getItem("lichtblick.agent.credentials.v1")).toBeNull();
@@ -778,9 +682,7 @@ describe("AgentSettings", () => {
     fireEvent.change(screen.getByLabelText("Model"), {
       target: { value: "retry-after-unlock" },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
 
     expect(
       await screen.findByText(
@@ -794,23 +696,17 @@ describe("AgentSettings", () => {
         "Agent credentials or settings could not be read or saved. Your draft has not been discarded.",
       ),
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Save Agent settings" })).toBeEnabled();
 
     bridge.setManySecureCredentials.mockResolvedValue({ ok: true });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
     await waitFor(() => {
       expect(
         screen.queryByText(
           "The operating system credential backend is temporarily unavailable. Existing desktop credentials and the current form values have been preserved; unlock or restore the credential service, then retry.",
         ),
       ).not.toBeInTheDocument();
-      expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe(
-        "retry-after-unlock",
-      );
+      expect(configuration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe("retry-after-unlock");
     });
   });
 
@@ -842,10 +738,7 @@ describe("AgentSettings", () => {
     }));
     const configuration = makeMockAppConfiguration([
       [AppSetting.AGENT_LLM_PROVIDER, configurationMirror.provider],
-      [
-        AppSetting.AGENT_ANTHROPIC_BASE_URL,
-        configurationMirror.anthropicBaseUrl,
-      ],
+      [AppSetting.AGENT_ANTHROPIC_BASE_URL, configurationMirror.anthropicBaseUrl],
       [AppSetting.AGENT_ANTHROPIC_MODEL, configurationMirror.anthropicModel],
       [AppSetting.AGENT_OPENAI_BASE_URL, configurationMirror.openAiBaseUrl],
       [AppSetting.AGENT_OPENAI_MODEL, configurationMirror.openAiModel],
@@ -859,9 +752,7 @@ describe("AgentSettings", () => {
         "These credentials are currently stored with plaintext-equivalent protection by a legacy insecure backend. Review and save Agent settings again to move them to the supported plaintext fallback. Installed extensions are trusted at the same level as the application and can access credentials stored on this device.",
       ),
     ).toBeVisible();
-    expect(screen.getByLabelText("API key")).toHaveValue(
-      "legacy-basic-text-key",
-    );
+    expect(screen.getByLabelText("API key")).toHaveValue("legacy-basic-text-key");
 
     const saveButton = screen.getByRole("button", {
       name: "Save Agent settings",
@@ -892,27 +783,21 @@ describe("AgentSettings", () => {
       target: { value: "stale-model" },
     });
 
-    const currentRevision = firstConfiguration.get(
-      "agent.configurationRevision",
-    );
+    const currentRevision = firstConfiguration.get("agent.configurationRevision");
     expect(typeof currentRevision).toBe("string");
     await commitAgentSettings(firstConfiguration, {
       ...baseDraft,
       anthropic: { ...baseDraft.anthropic, apiKey: "winner-key" },
       revision: currentRevision as string,
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
 
     expect(
       await screen.findByText(
         "Agent settings changed in another tab. The latest saved values were reloaded; review them and try your edit again.",
       ),
     ).toBeVisible();
-    expect(screen.getByLabelText("Model")).toHaveValue(
-      baseDraft.openAiCompatible.model,
-    );
+    expect(screen.getByLabelText("Model")).toHaveValue(baseDraft.openAiCompatible.model);
   });
 
   it("reloads a desktop winner from secure storage and saves on the next attempt", async () => {
@@ -943,9 +828,7 @@ describe("AgentSettings", () => {
       },
       { desktop: true },
     );
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
 
     expect(
       await screen.findByText(
@@ -953,20 +836,14 @@ describe("AgentSettings", () => {
       ),
     ).toBeVisible();
     expect(screen.getByLabelText("Model")).toHaveValue("winner-model");
-    expect(screen.getByLabelText("Base URL")).toHaveValue(
-      "https://winner.example.com/v1",
-    );
+    expect(screen.getByLabelText("Base URL")).toHaveValue("https://winner.example.com/v1");
 
     fireEvent.change(screen.getByLabelText("Model"), {
       target: { value: "retry-model" },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
     await waitFor(() => {
-      expect(secondConfiguration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe(
-        "retry-model",
-      );
+      expect(secondConfiguration.get(AppSetting.AGENT_OPENAI_MODEL)).toBe("retry-model");
       expect(
         screen.queryByText(
           "Agent settings changed in another tab. The latest saved values were reloaded; review them and try your edit again.",
@@ -983,14 +860,10 @@ describe("AgentSettings", () => {
       target: { value: "retry-key" },
     });
 
-    const setItem = jest
-      .spyOn(Storage.prototype, "setItem")
-      .mockImplementation(() => {
+    const setItem = jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new DOMException("Storage denied", "SecurityError");
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
     expect(
       await screen.findByText(
         "Agent credentials or settings could not be read or saved. Your draft has not been discarded.",
@@ -998,13 +871,9 @@ describe("AgentSettings", () => {
     ).toBeVisible();
 
     setItem.mockRestore();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Save Agent settings" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Save Agent settings" }));
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Save Agent settings" }),
-      ).toBeDisabled();
+      expect(screen.getByRole("button", { name: "Save Agent settings" })).toBeDisabled();
     });
   });
 });

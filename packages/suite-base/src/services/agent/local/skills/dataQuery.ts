@@ -14,8 +14,7 @@ import type { Skill } from "./types";
 export const DATA_QUERY_SKILL: Skill = {
   id: "data-query",
   name: "Reading loaded messages and playback control",
-  whenToUse:
-    "Before reading or searching loaded messages, or controlling playback.",
+  whenToUse: "Before reading or searching loaded messages, or controlling playback.",
   body: `# Reading loaded data and playback control
 
 The tools \`read_messages\`, \`search_messages\`, and \`playback_control\` operate on the data

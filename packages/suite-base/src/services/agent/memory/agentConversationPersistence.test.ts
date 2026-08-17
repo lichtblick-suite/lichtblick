@@ -154,7 +154,11 @@ describe("createAgentConversationPersistence", () => {
 
   it("keeps both halves in the same record when only one changes", async () => {
     const store = new AgentConversationStore();
-    const persistence = createAgentConversationPersistence({ conversationId: "c2", makeId: () => "next", store });
+    const persistence = createAgentConversationPersistence({
+      conversationId: "c2",
+      makeId: () => "next",
+      store,
+    });
     await persistence.restorePiLlmHistory();
 
     persistence.onPiLlmHistoryChanged(piHistory);
@@ -170,7 +174,11 @@ describe("createAgentConversationPersistence", () => {
 
   it("snapshots each change so a later mutation cannot rewrite a queued record", async () => {
     const store = new AgentConversationStore();
-    const persistence = createAgentConversationPersistence({ conversationId: "c3", makeId: () => "next", store });
+    const persistence = createAgentConversationPersistence({
+      conversationId: "c3",
+      makeId: () => "next",
+      store,
+    });
     await persistence.restorePiLlmHistory();
 
     const mutable: AgentMessage[] = [piUserMessage("first")];
@@ -242,15 +250,17 @@ describe("createAgentConversationPersistence", () => {
     await expect(persistence.restorePiLlmHistory()).resolves.toEqual([
       piUserMessage("target history"),
     ]);
-    await expect(persistence.restoreUiMessages()).resolves.toEqual([
-      { id: "target-message" },
-    ]);
+    await expect(persistence.restoreUiMessages()).resolves.toEqual([{ id: "target-message" }]);
     expect(localStorage.getItem(AGENT_CONVERSATION_ID_KEY)).toBe("target");
   });
 
   it("clears the stored conversation", async () => {
     const store = new AgentConversationStore();
-    const persistence = createAgentConversationPersistence({ conversationId: "c4", makeId: () => "next", store });
+    const persistence = createAgentConversationPersistence({
+      conversationId: "c4",
+      makeId: () => "next",
+      store,
+    });
     persistence.onPiLlmHistoryChanged(piHistory);
     await new Promise((resolve) => setTimeout(resolve, 0));
 

@@ -40,10 +40,7 @@ import type {
   SubscribeEventsOptions,
 } from "@lichtblick/suite-base/services/agent/types";
 
-import {
-  PiAgentEventAdapter,
-  type UnsequencedAgentEvent,
-} from "./eventAdapter";
+import { PiAgentEventAdapter, type UnsequencedAgentEvent } from "./eventAdapter";
 import { createPiModelRuntime, type PiModelRuntime } from "./models";
 
 export const PI_AGENT_EVENT_REPLAY_LIMIT = 1000;
@@ -136,12 +133,9 @@ function throwIfAborted(signal?: AbortSignal): void {
   }
 }
 
-function requestsOpenDataSource(
-  context: BeforeToolCallContext | AfterToolCallContext,
-): boolean {
+function requestsOpenDataSource(context: BeforeToolCallContext | AfterToolCallContext): boolean {
   return context.assistantMessage.content.some(
-    (content) =>
-      content.type === "toolCall" && content.name === "open_data_source",
+    (content) => content.type === "toolCall" && content.name === "open_data_source",
   );
 }
 
@@ -179,10 +173,7 @@ function linkAbortSignals(signals: readonly (AbortSignal | undefined)[]): {
   };
 }
 
-async function raceWithAbort<T>(
-  promise: Promise<T>,
-  signal?: AbortSignal,
-): Promise<T> {
+async function raceWithAbort<T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> {
   if (signal == undefined) {
     return await promise;
   }
@@ -230,8 +221,7 @@ export class PiAgentOrchestrator implements IAgentClient {
     this.#getPanelInventory = options.getPanelInventory;
     this.#getPromptCustomization = options.getPromptCustomization;
     this.#getTimezone =
-      options.getTimezone ??
-      (() => Intl.DateTimeFormat().resolvedOptions().timeZone);
+      options.getTimezone ?? (() => Intl.DateTimeFormat().resolvedOptions().timeZone);
     this.#getWorkspaceContext = options.getWorkspaceContext;
     this.#getCurrentLayout = options.getCurrentLayout;
     this.#getCurrentLayoutId = options.getCurrentLayoutId;
@@ -243,9 +233,7 @@ export class PiAgentOrchestrator implements IAgentClient {
     this.#toolRuntime = options.toolRuntime;
   }
 
-  public async createSession(
-    signal?: AbortSignal,
-  ): Promise<{ sessionId: string }> {
+  public async createSession(signal?: AbortSignal): Promise<{ sessionId: string }> {
     throwIfAborted(signal);
     const sessionId = this.#makeId();
     const controller = new AbortController();
@@ -401,9 +389,7 @@ export class PiAgentOrchestrator implements IAgentClient {
     throwIfAborted(signal);
     const lastSeq = options?.lastSeq ?? 0;
     if (!Number.isSafeInteger(lastSeq) || lastSeq < 0) {
-      throw new Error(
-        "Agent event replay cursor must be a non-negative safe integer",
-      );
+      throw new Error("Agent event replay cursor must be a non-negative safe integer");
     }
     for (const event of session.events) {
       if (event.seq > lastSeq) {
@@ -604,7 +590,10 @@ export class PiAgentOrchestrator implements IAgentClient {
         });
       },
     };
-    return buildPiTools(deps, skills.map((skill) => skill.id));
+    return buildPiTools(
+      deps,
+      skills.map((skill) => skill.id),
+    );
   }
 
   async #beforeToolCall(
@@ -622,8 +611,7 @@ export class PiAgentOrchestrator implements IAgentClient {
     }
     if (
       requestsOpenDataSource(context) &&
-      (context.toolCall.name === "get_data_catalog" ||
-        context.toolCall.name === "propose_layout")
+      (context.toolCall.name === "get_data_catalog" || context.toolCall.name === "propose_layout")
     ) {
       return {
         block: true,
@@ -643,10 +631,7 @@ export class PiAgentOrchestrator implements IAgentClient {
     return requestsOpenDataSource(context) ? { terminate: true } : undefined;
   }
 
-  async #continueWithCatalog(
-    session: SessionState,
-    requestId: string,
-  ): Promise<void> {
+  async #continueWithCatalog(session: SessionState, requestId: string): Promise<void> {
     const getCatalog = this.#toolRuntime?.deps.getCatalog;
     if (getCatalog == undefined) {
       return;

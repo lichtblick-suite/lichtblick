@@ -23,10 +23,8 @@ export type AgentConfiguration = {
   provider: AgentLlmProvider;
 };
 
-type AgentConfigurationField =
-  "apiKey" | "baseUrl" | "model";
-type AgentConfigurationError =
-  "invalidUrl" | "required";
+type AgentConfigurationField = "apiKey" | "baseUrl" | "model";
+type AgentConfigurationError = "invalidUrl" | "required";
 export type AgentConfigurationErrors = Partial<
   Record<AgentConfigurationField, AgentConfigurationError>
 >;
@@ -63,11 +61,7 @@ export type AgentSettingsSnapshot = {
 
 export type AgentSettingsDraft = Omit<
   AgentSettingsSnapshot,
-  | "activeProfileId"
-  | "credentialResaveRequired"
-  | "credentialStorage"
-  | "profiles"
-  | "storageError"
+  "activeProfileId" | "credentialResaveRequired" | "credentialStorage" | "profiles" | "storageError"
 > & {
   // Optional only for compatibility with callers constructing the legacy single-profile draft.
   activeProfileId?: string;
@@ -195,10 +189,7 @@ const stores = new WeakMap<
 let agentSettingsCommitChain: Promise<void> = Promise.resolve();
 
 type CrossRendererLockManager = {
-  request<Result>(
-    name: string,
-    callback: () => Promise<Result>,
-  ): Promise<Result>;
+  request<Result>(name: string, callback: () => Promise<Result>): Promise<Result>;
 };
 
 const OBSERVED_SETTINGS = [
@@ -224,8 +215,7 @@ async function withAgentSettingsCommitLock<Result>(
 }
 
 function getCrossRendererLockManager(): CrossRendererLockManager | undefined {
-  const navigatorValue = globalThis.navigator as
-    (Navigator & { locks?: unknown }) | undefined;
+  const navigatorValue = globalThis.navigator as (Navigator & { locks?: unknown }) | undefined;
   const lockManager = navigatorValue?.locks;
   if (
     !isRecord(lockManager) ||
@@ -269,9 +259,7 @@ function getLocalStorage(): Storage | undefined {
 }
 
 function getDesktopCredentialBridge(): DesktopBridgeWithSecureCredentials {
-  const candidate = (
-    globalThis as typeof globalThis & { desktopBridge?: unknown }
-  ).desktopBridge;
+  const candidate = (globalThis as typeof globalThis & { desktopBridge?: unknown }).desktopBridge;
   if (
     typeof candidate !== "object" ||
     candidate == undefined ||
@@ -296,9 +284,7 @@ function getProvider(value: unknown): AgentLlmProvider {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return (
-    typeof value === "object" && value != undefined && !Array.isArray(value)
-  );
+  return typeof value === "object" && value != undefined && !Array.isArray(value);
 }
 
 function isProfileId(value: unknown): value is string {
@@ -313,9 +299,7 @@ function emptyProfileCredentialKeys(): ProfileCredentialKeys {
   return { anthropicApiKey: "", openAiApiKey: "" };
 }
 
-function parseProfileCredentialKeys(
-  value: unknown,
-): Record<string, ProfileCredentialKeys> {
+function parseProfileCredentialKeys(value: unknown): Record<string, ProfileCredentialKeys> {
   if (!isRecord(value)) {
     return {};
   }
@@ -353,8 +337,7 @@ function parseProfileMirror(value: unknown): AgentProfileMirror | undefined {
     !isRecord(value) ||
     !isProfileId(value.id) ||
     typeof value.name !== "string" ||
-    (value.provider !== "anthropic" &&
-      value.provider !== "openai-compatible") ||
+    (value.provider !== "anthropic" && value.provider !== "openai-compatible") ||
     !isRecord(value.anthropic) ||
     typeof value.anthropic.baseUrl !== "string" ||
     typeof value.anthropic.model !== "string" ||
@@ -388,14 +371,10 @@ function parseProfileMirrors(value: unknown): AgentProfileMirror[] | undefined {
     return undefined;
   }
   const parsed = profiles as AgentProfileMirror[];
-  return new Set(parsed.map((profile) => profile.id)).size === parsed.length
-    ? parsed
-    : undefined;
+  return new Set(parsed.map((profile) => profile.id)).size === parsed.length ? parsed : undefined;
 }
 
-function parseStoredProfileMirrors(
-  value: string | undefined,
-): AgentProfileMirror[] | undefined {
+function parseStoredProfileMirrors(value: string | undefined): AgentProfileMirror[] | undefined {
   if (value == undefined) {
     return undefined;
   }
@@ -423,9 +402,7 @@ function normalizeCredentialBridgeError(error: unknown): never {
   }
   if (
     error instanceof Error &&
-    error.message.includes(
-      "OS-backed secure credential encryption is unavailable",
-    )
+    error.message.includes("OS-backed secure credential encryption is unavailable")
   ) {
     throw new AgentCredentialsBackendUnavailableError();
   }
@@ -453,10 +430,7 @@ async function getDesktopCredential(
   if (isInsecureBackendResult(result)) {
     return {
       insecureBackend: true,
-      value:
-        isRecord(result) && typeof result.value === "string"
-          ? result.value
-          : undefined,
+      value: isRecord(result) && typeof result.value === "string" ? result.value : undefined,
     };
   }
   if (typeof result === "string") {
@@ -473,9 +447,7 @@ async function getDesktopCredential(
       return { insecureBackend: false };
     }
   }
-  throw new Error(
-    "Desktop secure credential bridge returned an invalid get result",
-  );
+  throw new Error("Desktop secure credential bridge returned an invalid get result");
 }
 
 async function setManyDesktopCredentials(
@@ -502,9 +474,7 @@ async function setManyDesktopCredentials(
     throw new AgentSettingsConflictError();
   }
   if (isRecord(result) && result.code === "invalid-request") {
-    throw new Error(
-      "Desktop secure credential bridge rejected a credential bundle",
-    );
+    throw new Error("Desktop secure credential bridge rejected a credential bundle");
   }
   if (
     result == undefined ||
@@ -513,9 +483,7 @@ async function setManyDesktopCredentials(
   ) {
     return;
   }
-  throw new Error(
-    "Desktop secure credential bridge returned an invalid setMany result",
-  );
+  throw new Error("Desktop secure credential bridge returned an invalid setMany result");
 }
 
 async function deleteDesktopCredentialState(
@@ -530,10 +498,7 @@ async function deleteDesktopCredentialState(
   ]);
 }
 
-function readAppSetting(
-  appConfiguration: IAppConfiguration,
-  key: string,
-): string | undefined {
+function readAppSetting(appConfiguration: IAppConfiguration, key: string): string | undefined {
   try {
     const value = appConfiguration.get(key);
     return typeof value === "string" ? value : undefined;
@@ -589,8 +554,7 @@ function parseSettingsMirror(value: unknown): AgentSettingsMirror | undefined {
   }
   const profiles = parseProfileMirrors(value.profiles);
   const activeProfileId = getString(value.activeProfileId);
-  const hasValidProfiles =
-    profiles?.some((profile) => profile.id === activeProfileId) === true;
+  const hasValidProfiles = profiles?.some((profile) => profile.id === activeProfileId) === true;
   return {
     ...(hasValidProfiles ? { activeProfileId } : {}),
     anthropicBaseUrl: value.anthropicBaseUrl,
@@ -640,10 +604,8 @@ function readWebCredentialState(): CredentialState {
       };
     }
 
-    const anthropicApiKey =
-      storage.getItem(PREVIOUS_API_KEY_STORAGE_KEYS.anthropic) ?? "";
-    const openAiApiKey =
-      storage.getItem(PREVIOUS_API_KEY_STORAGE_KEYS["openai-compatible"]) ?? "";
+    const anthropicApiKey = storage.getItem(PREVIOUS_API_KEY_STORAGE_KEYS.anthropic) ?? "";
+    const openAiApiKey = storage.getItem(PREVIOUS_API_KEY_STORAGE_KEYS["openai-compatible"]) ?? "";
     return {
       credentials: {
         profileKeys: {
@@ -671,9 +633,7 @@ async function readDesktopCredentialState(
   const llmValue = llmRead.value;
   const llmRecord = llmValue == undefined ? undefined : parseRecord(llmValue);
   const configuration = parseSettingsMirror(llmRecord?.configuration);
-  const profileIds = configuration?.profiles?.map((profile) => profile.id) ?? [
-    DEFAULT_PROFILE_ID,
-  ];
+  const profileIds = configuration?.profiles?.map((profile) => profile.id) ?? [DEFAULT_PROFILE_ID];
   const profileReads = await Promise.all(
     profileIds.map(async (profileId) => ({
       profileId,
@@ -681,15 +641,12 @@ async function readDesktopCredentialState(
     })),
   );
   const insecureBackend =
-    llmRead.insecureBackend ||
-    profileReads.some(({ read }) => read.insecureBackend);
+    llmRead.insecureBackend || profileReads.some(({ read }) => read.insecureBackend);
   const desktopRecordsPresent =
-    llmValue != undefined ||
-    profileReads.some(({ read }) => read.value != undefined);
+    llmValue != undefined || profileReads.some(({ read }) => read.value != undefined);
   if (insecureBackend) {
     const webState = readWebCredentialState();
-    const configurationRevision =
-      readAppSetting(appConfiguration, COMMIT_REVISION_SETTING) ?? "";
+    const configurationRevision = readAppSetting(appConfiguration, COMMIT_REVISION_SETTING) ?? "";
     if (
       desktopRecordsPresent &&
       webState.revision !== "" &&
@@ -699,20 +656,14 @@ async function readDesktopCredentialState(
       return webState;
     }
   }
-  const legacyApiKey =
-    llmValue != undefined && llmRecord == undefined ? llmValue : undefined;
+  const legacyApiKey = llmValue != undefined && llmRecord == undefined ? llmValue : undefined;
   const llmRevision = getString(llmRecord?.revision);
   const profileKeys: Record<string, ProfileCredentialKeys> = {};
   let profileRevisionMismatch = false;
   for (const { profileId, read } of profileReads) {
-    const profileRecord =
-      read.value == undefined ? undefined : parseRecord(read.value);
+    const profileRecord = read.value == undefined ? undefined : parseRecord(read.value);
     const profileRevision = getString(profileRecord?.revision);
-    if (
-      profileRevision !== "" &&
-      llmRevision !== "" &&
-      profileRevision !== llmRevision
-    ) {
+    if (profileRevision !== "" && llmRevision !== "" && profileRevision !== llmRevision) {
       profileRevisionMismatch = true;
       continue;
     }
@@ -774,9 +725,8 @@ function writeWebCredentialState(
     throw new Error("Local storage is unavailable");
   }
   const activeProfileKeys =
-    credentials.profileKeys[
-      configuration.activeProfileId ?? DEFAULT_PROFILE_ID
-    ] ?? emptyProfileCredentialKeys();
+    credentials.profileKeys[configuration.activeProfileId ?? DEFAULT_PROFILE_ID] ??
+    emptyProfileCredentialKeys();
   storage.setItem(
     WEB_CREDENTIAL_STORAGE_KEY,
     serializeCredentialValue({
@@ -797,9 +747,8 @@ async function writeDesktopCredentialState(
 ): Promise<void> {
   const bridge = getDesktopCredentialBridge();
   const activeProfileKeys =
-    credentials.profileKeys[
-      configuration.activeProfileId ?? DEFAULT_PROFILE_ID
-    ] ?? emptyProfileCredentialKeys();
+    credentials.profileKeys[configuration.activeProfileId ?? DEFAULT_PROFILE_ID] ??
+    emptyProfileCredentialKeys();
   await setManyDesktopCredentials(bridge, [
     {
       ...(expectedRevision == undefined ? {} : { expectedRevision }),
@@ -818,9 +767,7 @@ async function writeDesktopCredentialState(
   ]);
 }
 
-async function readCredentialState(
-  store: AgentSettingsStore,
-): Promise<CredentialState> {
+async function readCredentialState(store: AgentSettingsStore): Promise<CredentialState> {
   if (!store.desktop || store.credentialState.source === "web") {
     return readWebCredentialState();
   }
@@ -843,21 +790,14 @@ async function writeCredentialState(
   let storage: CredentialState["storage"] = "plaintext";
   const desktopProfileIds = [
     ...new Set([
-      ...(store.credentialState.configuration?.profiles?.map(
-        (profile) => profile.id,
-      ) ?? []),
+      ...(store.credentialState.configuration?.profiles?.map((profile) => profile.id) ?? []),
       ...(configuration.profiles?.map((profile) => profile.id) ?? []),
     ]),
   ];
   if (store.desktop) {
     if (store.credentialState.storage === "secure") {
       try {
-        await writeDesktopCredentialState(
-          credentials,
-          revision,
-          configuration,
-          expectedRevision,
-        );
+        await writeDesktopCredentialState(credentials, revision, configuration, expectedRevision);
         storage = "secure";
       } catch (error) {
         if (!(error instanceof InsecureCredentialBackendError)) {
@@ -866,20 +806,14 @@ async function writeCredentialState(
         assertDesktopPlaintextLockAvailable();
         writeWebCredentialState(credentials, revision, configuration);
         if (store.credentialState.desktopRecordsPresent) {
-          await deleteDesktopCredentialState(
-            getDesktopCredentialBridge(),
-            desktopProfileIds,
-          );
+          await deleteDesktopCredentialState(getDesktopCredentialBridge(), desktopProfileIds);
         }
       }
     } else {
       assertDesktopPlaintextLockAvailable();
       writeWebCredentialState(credentials, revision, configuration);
       if (store.credentialState.desktopRecordsPresent) {
-        await deleteDesktopCredentialState(
-          getDesktopCredentialBridge(),
-          desktopProfileIds,
-        );
+        await deleteDesktopCredentialState(getDesktopCredentialBridge(), desktopProfileIds);
       }
     }
   } else {
@@ -905,9 +839,7 @@ async function writeCredentialState(
   };
 }
 
-function settingsMirrorFromDraft(
-  draft: AgentSettingsDraft,
-): AgentSettingsMirror {
+function settingsMirrorFromDraft(draft: AgentSettingsDraft): AgentSettingsMirror {
   if (draft.profiles == undefined || draft.activeProfileId == undefined) {
     throw new Error("Agent settings draft has not been normalized");
   }
@@ -983,9 +915,7 @@ function normalizeDraft(
   const profileIds = new Set<string>();
   for (const profile of profiles) {
     if (!isProfileId(profile.id) || profileIds.has(profile.id)) {
-      throw new Error(
-        "Agent profile IDs must be unique and use 1-64 letters, numbers, or hyphens",
-      );
+      throw new Error("Agent profile IDs must be unique and use 1-64 letters, numbers, or hyphens");
     }
     profileIds.add(profile.id);
   }
@@ -994,9 +924,7 @@ function normalizeDraft(
     throw new Error("Active Agent profile must reference a stored profile");
   }
 
-  const activeProfileIndex = profiles.findIndex(
-    (profile) => profile.id === activeProfileId,
-  );
+  const activeProfileIndex = profiles.findIndex((profile) => profile.id === activeProfileId);
   const activeProfile = profiles[activeProfileIndex];
   if (activeProfile == undefined) {
     throw new Error("Active Agent profile is unavailable");
@@ -1006,10 +934,8 @@ function normalizeDraft(
   );
   const topLevelProjectionChanged =
     currentSnapshot != undefined &&
-    (JSON.stringify(draft.anthropic) !==
-      JSON.stringify(currentSnapshot.anthropic) ||
-      JSON.stringify(draft.openAiCompatible) !==
-        JSON.stringify(currentSnapshot.openAiCompatible) ||
+    (JSON.stringify(draft.anthropic) !== JSON.stringify(currentSnapshot.anthropic) ||
+      JSON.stringify(draft.openAiCompatible) !== JSON.stringify(currentSnapshot.openAiCompatible) ||
       draft.provider !== currentSnapshot.provider);
   const profileWasNotEdited =
     currentActiveProfile != undefined &&
@@ -1036,9 +962,7 @@ function normalizeDraft(
     );
   }
 
-  const projectedProfile = profiles.find(
-    (profile) => profile.id === activeProfileId,
-  );
+  const projectedProfile = profiles.find((profile) => profile.id === activeProfileId);
   if (projectedProfile == undefined) {
     throw new Error("Active Agent profile is unavailable");
   }
@@ -1054,17 +978,14 @@ function normalizeDraft(
 
 function makeSnapshot(store: AgentSettingsStore): AgentSettingsSnapshot {
   const { appConfiguration, credentialState } = store;
-  const configurationRevision =
-    readAppSetting(appConfiguration, COMMIT_REVISION_SETTING) ?? "";
+  const configurationRevision = readAppSetting(appConfiguration, COMMIT_REVISION_SETTING) ?? "";
   // A revisioned credential record is the transaction log for the complete Agent settings
   // snapshot. Its configuration mirror stays authoritative even when AppConfiguration has the
   // same revision, so an interrupted/partial configuration restore cannot pair old credentials
   // with a mixture of new non-sensitive values.
   const mirroredConfiguration = credentialState.configuration;
   const legacyAnthropic: ProviderSettings = {
-    apiKey:
-      credentialState.credentials.profileKeys[DEFAULT_PROFILE_ID]
-        ?.anthropicApiKey ?? "",
+    apiKey: credentialState.credentials.profileKeys[DEFAULT_PROFILE_ID]?.anthropicApiKey ?? "",
     baseUrl:
       mirroredConfiguration?.anthropicBaseUrl ??
       readAppSetting(appConfiguration, AppSetting.AGENT_ANTHROPIC_BASE_URL) ??
@@ -1075,9 +996,7 @@ function makeSnapshot(store: AgentSettingsStore): AgentSettingsSnapshot {
       DEFAULT_ANTHROPIC_MODEL,
   };
   const legacyOpenAiCompatible: ProviderSettings = {
-    apiKey:
-      credentialState.credentials.profileKeys[DEFAULT_PROFILE_ID]
-        ?.openAiApiKey ?? "",
+    apiKey: credentialState.credentials.profileKeys[DEFAULT_PROFILE_ID]?.openAiApiKey ?? "",
     baseUrl:
       mirroredConfiguration?.openAiBaseUrl ??
       readAppSetting(appConfiguration, AppSetting.AGENT_OPENAI_BASE_URL) ??
@@ -1089,19 +1008,14 @@ function makeSnapshot(store: AgentSettingsStore): AgentSettingsSnapshot {
   };
   const legacyProvider =
     mirroredConfiguration?.provider ??
-    getProvider(
-      readAppSetting(appConfiguration, AppSetting.AGENT_LLM_PROVIDER),
-    );
+    getProvider(readAppSetting(appConfiguration, AppSetting.AGENT_LLM_PROVIDER));
   const profileMirrors =
     mirroredConfiguration?.profiles ??
-    parseStoredProfileMirrors(
-      readAppSetting(appConfiguration, PROFILES_SETTING),
-    );
+    parseStoredProfileMirrors(readAppSetting(appConfiguration, PROFILES_SETTING));
   const profiles = profileMirrors?.map((profile) =>
     profileFromMirror(
       profile,
-      credentialState.credentials.profileKeys[profile.id] ??
-        emptyProfileCredentialKeys(),
+      credentialState.credentials.profileKeys[profile.id] ?? emptyProfileCredentialKeys(),
     ),
   ) ?? [
     makeDefaultProfile({
@@ -1113,14 +1027,10 @@ function makeSnapshot(store: AgentSettingsStore): AgentSettingsSnapshot {
   const storedActiveProfileId =
     mirroredConfiguration?.activeProfileId ??
     readAppSetting(appConfiguration, ACTIVE_PROFILE_ID_SETTING);
-  const activeProfileId = profiles.some(
-    (profile) => profile.id === storedActiveProfileId,
-  )
+  const activeProfileId = profiles.some((profile) => profile.id === storedActiveProfileId)
     ? storedActiveProfileId!
     : profiles[0]!.id;
-  const activeProfile = profiles.find(
-    (profile) => profile.id === activeProfileId,
-  )!;
+  const activeProfile = profiles.find((profile) => profile.id === activeProfileId)!;
   return {
     activeProfileId,
     anthropic: { ...activeProfile.anthropic },
@@ -1129,14 +1039,10 @@ function makeSnapshot(store: AgentSettingsStore): AgentSettingsSnapshot {
     openAiCompatible: { ...activeProfile.openAiCompatible },
     profiles,
     provider: activeProfile.provider,
-    revision:
-      mirroredConfiguration == undefined
-        ? configurationRevision
-        : credentialState.revision,
+    revision: mirroredConfiguration == undefined ? configurationRevision : credentialState.revision,
     storageError:
       credentialState.storageError ||
-      (credentialState.revision !== configurationRevision &&
-        mirroredConfiguration == undefined),
+      (credentialState.revision !== configurationRevision && mirroredConfiguration == undefined),
   };
 }
 
@@ -1156,8 +1062,7 @@ function hasPreviousCredentialKeys(): boolean {
   try {
     return (
       storage.getItem(PREVIOUS_API_KEY_STORAGE_KEYS.anthropic) != undefined ||
-      storage.getItem(PREVIOUS_API_KEY_STORAGE_KEYS["openai-compatible"]) !=
-        undefined
+      storage.getItem(PREVIOUS_API_KEY_STORAGE_KEYS["openai-compatible"]) != undefined
     );
   } catch {
     return false;
@@ -1168,17 +1073,14 @@ function webMigrationPending(
   appConfiguration: IAppConfiguration,
   credentialState: CredentialState,
 ): boolean {
-  const configurationRevision =
-    readAppSetting(appConfiguration, COMMIT_REVISION_SETTING) ?? "";
+  const configurationRevision = readAppSetting(appConfiguration, COMMIT_REVISION_SETTING) ?? "";
   return (
     hasLegacyAppSettings(appConfiguration) ||
     hasPreviousCredentialKeys() ||
     credentialState.legacyFormat ||
     credentialState.revision !== configurationRevision ||
     (credentialState.configuration?.profiles == undefined &&
-      parseStoredProfileMirrors(
-        readAppSetting(appConfiguration, PROFILES_SETTING),
-      ) == undefined)
+      parseStoredProfileMirrors(readAppSetting(appConfiguration, PROFILES_SETTING)) == undefined)
   );
 }
 
@@ -1205,9 +1107,7 @@ function getStore(
     credentialState,
     desktop,
     listeners: new Set(),
-    migrated: desktop
-      ? false
-      : !webMigrationPending(appConfiguration, credentialState),
+    migrated: desktop ? false : !webMigrationPending(appConfiguration, credentialState),
     snapshot: undefined as unknown as AgentSettingsSnapshot,
     suppressRefresh: 0,
   };
@@ -1223,9 +1123,7 @@ function publishStore(store: AgentSettingsStore): void {
   }
 }
 
-function publishStoreWithoutRefreshingSnapshot(
-  store: AgentSettingsStore,
-): void {
+function publishStoreWithoutRefreshingSnapshot(store: AgentSettingsStore): void {
   store.snapshot = {
     ...store.snapshot,
     anthropic: { ...store.snapshot.anthropic },
@@ -1237,18 +1135,13 @@ function publishStoreWithoutRefreshingSnapshot(
   }
 }
 
-async function refreshStoreFromStorage(
-  store: AgentSettingsStore,
-): Promise<void> {
+async function refreshStoreFromStorage(store: AgentSettingsStore): Promise<void> {
   store.credentialState = await readCredentialState(store);
   store.credentialBackendUnavailable = false;
   publishStore(store);
 }
 
-function subscribeStore(
-  store: AgentSettingsStore,
-  listener: () => void,
-): () => void {
+function subscribeStore(store: AgentSettingsStore, listener: () => void): () => void {
   store.listeners.add(listener);
   if (store.unsubscribeSources != undefined) {
     return () => {
@@ -1294,10 +1187,7 @@ function subscribeStore(
 
   store.unsubscribeSources = () => {
     for (const key of observedSettings) {
-      store.appConfiguration.removeChangeListener(
-        key,
-        handleAppConfigurationChange,
-      );
+      store.appConfiguration.removeChangeListener(key, handleAppConfigurationChange);
     }
     globalThis.removeEventListener("storage", handleStorage);
   };
@@ -1310,9 +1200,7 @@ function subscribeStore(
   };
 }
 
-function draftFromSnapshot(
-  snapshot: AgentSettingsSnapshot,
-): AgentSettingsDraft {
+function draftFromSnapshot(snapshot: AgentSettingsSnapshot): AgentSettingsDraft {
   return {
     activeProfileId: snapshot.activeProfileId,
     anthropic: { ...snapshot.anthropic },
@@ -1362,14 +1250,10 @@ function settingFromMirror(
 
 async function assertAppConfigurationSnapshot(
   store: AgentSettingsStore,
-  expectedValues: ReadonlyMap<
-    (typeof OBSERVED_SETTINGS)[number],
-    string | undefined
-  >,
+  expectedValues: ReadonlyMap<(typeof OBSERVED_SETTINGS)[number], string | undefined>,
 ): Promise<void> {
   const mismatches = [...expectedValues].filter(
-    ([key, expectedValue]) =>
-      readAppSetting(store.appConfiguration, key) !== expectedValue,
+    ([key, expectedValue]) => readAppSetting(store.appConfiguration, key) !== expectedValue,
   );
   if (mismatches.length === 0) {
     return;
@@ -1389,9 +1273,7 @@ async function assertAppConfigurationSnapshot(
   });
   publishStore(store);
   if (restoreResults.some((result) => result.status === "rejected")) {
-    throw new Error(
-      "Failed to restore Agent settings after a configuration conflict",
-    );
+    throw new Error("Failed to restore Agent settings after a configuration conflict");
   }
   throw new AgentSettingsConflictError();
 }
@@ -1411,8 +1293,7 @@ async function assertCurrentRevision(
     ? currentCredentials.revision
     : currentConfigurationRevision;
   const credentialsMatch =
-    (currentCredentials.revision === currentConfigurationRevision ||
-      mirroredWinner) &&
+    (currentCredentials.revision === currentConfigurationRevision || mirroredWinner) &&
     !currentCredentials.legacyFormat &&
     !currentCredentials.storageError;
   if (expectedRevision !== currentRevision || !credentialsMatch) {
@@ -1424,20 +1305,14 @@ async function assertCurrentRevision(
           await restoreSetting(
             store.appConfiguration,
             key,
-            settingFromMirror(
-              key,
-              winnerConfiguration,
-              currentCredentials.revision,
-            ),
+            settingFromMirror(key, winnerConfiguration, currentCredentials.revision),
           );
         }),
       ).finally(() => {
         store.suppressRefresh--;
       });
       if (restoreResults.some((result) => result.status === "rejected")) {
-        throw new Error(
-          "Failed to load winning Agent settings after a revision conflict",
-        );
+        throw new Error("Failed to load winning Agent settings after a revision conflict");
       }
     }
     store.credentialState = currentCredentials;
@@ -1465,21 +1340,14 @@ async function commitDraft(
     previousCredentials.configuration ??
     settingsMirrorFromDraft(draftFromSnapshot(makeSnapshot(store)));
   const persistedSettings = OBSERVED_SETTINGS;
-  const previousValues = new Map<
-    (typeof OBSERVED_SETTINGS)[number],
-    string | undefined
-  >(
+  const previousValues = new Map<(typeof OBSERVED_SETTINGS)[number], string | undefined>(
     persistedSettings.map((key) => [
       key,
       previousCredentials.configuration == undefined ||
       ((key === PROFILES_SETTING || key === ACTIVE_PROFILE_ID_SETTING) &&
         previousCredentials.configuration.profiles == undefined)
         ? readAppSetting(appConfiguration, key)
-        : settingFromMirror(
-            key,
-            previousCredentials.configuration,
-            previousCredentials.revision,
-          ),
+        : settingFromMirror(key, previousCredentials.configuration, previousCredentials.revision),
     ]),
   );
   const nextCredentials: CredentialBundle = {
@@ -1510,13 +1378,9 @@ async function commitDraft(
   store.suppressRefresh++;
   let credentialWriteCompleted = false;
   try {
-    await writeCredentialState(
-      store,
-      nextCredentials,
-      revision,
-      nextConfiguration,
-      { expectedRevision: previousCredentials.revision },
-    );
+    await writeCredentialState(store, nextCredentials, revision, nextConfiguration, {
+      expectedRevision: previousCredentials.revision,
+    });
     credentialWriteCompleted = true;
     if (store.desktop && store.credentialState.storage === "secure") {
       const bridge = getDesktopCredentialBridge();
@@ -1527,36 +1391,19 @@ async function commitDraft(
       );
     }
     const writes = [
-      appConfiguration.set(
-        AppSetting.AGENT_LLM_PROVIDER,
-        normalizedDraft.provider,
-      ),
-      appConfiguration.set(
-        AppSetting.AGENT_ANTHROPIC_BASE_URL,
-        normalizedDraft.anthropic.baseUrl,
-      ),
-      appConfiguration.set(
-        AppSetting.AGENT_ANTHROPIC_MODEL,
-        normalizedDraft.anthropic.model,
-      ),
+      appConfiguration.set(AppSetting.AGENT_LLM_PROVIDER, normalizedDraft.provider),
+      appConfiguration.set(AppSetting.AGENT_ANTHROPIC_BASE_URL, normalizedDraft.anthropic.baseUrl),
+      appConfiguration.set(AppSetting.AGENT_ANTHROPIC_MODEL, normalizedDraft.anthropic.model),
       appConfiguration.set(
         AppSetting.AGENT_OPENAI_BASE_URL,
         normalizedDraft.openAiCompatible.baseUrl,
       ),
-      appConfiguration.set(
-        AppSetting.AGENT_OPENAI_MODEL,
-        normalizedDraft.openAiCompatible.model,
-      ),
+      appConfiguration.set(AppSetting.AGENT_OPENAI_MODEL, normalizedDraft.openAiCompatible.model),
       appConfiguration.set(
         PROFILES_SETTING,
-        serializeCredentialValue(
-          normalizedDraft.profiles.map(profileMirrorFromProfile),
-        ),
+        serializeCredentialValue(normalizedDraft.profiles.map(profileMirrorFromProfile)),
       ),
-      appConfiguration.set(
-        ACTIVE_PROFILE_ID_SETTING,
-        normalizedDraft.activeProfileId,
-      ),
+      appConfiguration.set(ACTIVE_PROFILE_ID_SETTING, normalizedDraft.activeProfileId),
     ];
     const writeResults = await Promise.allSettled(writes);
     const rejectedWrite = writeResults.find(
@@ -1586,12 +1433,9 @@ async function commitDraft(
       store.credentialState = winnerCredentials;
       publishStore(store);
       if (restoreResults.some((result) => result.status === "rejected")) {
-        throw new Error(
-          "Failed to restore the winning Agent settings after a conflict",
-          {
-            cause: error,
-          },
-        );
+        throw new Error("Failed to restore the winning Agent settings after a conflict", {
+          cause: error,
+        });
       }
       throw error;
     }
@@ -1622,10 +1466,9 @@ async function commitDraft(
         // unreadable. Either the forward or rollback mirror is still internally complete.
       }
       publishStore(store);
-      throw new Error(
-        "Failed to save Agent settings and restore the previous snapshot",
-        { cause: rollbackError },
-      );
+      throw new Error("Failed to save Agent settings and restore the previous snapshot", {
+        cause: rollbackError,
+      });
     }
     store.credentialState = previousCredentials;
     throw error;
@@ -1663,11 +1506,7 @@ export async function commitAgentSettings(
   }
 }
 
-function removeLegacyWebCredentials({
-  removeBundle,
-}: {
-  removeBundle: boolean;
-}): void {
+function removeLegacyWebCredentials({ removeBundle }: { removeBundle: boolean }): void {
   const storage = getLocalStorage();
   if (storage == undefined) {
     throw new Error("Local storage is unavailable");
@@ -1693,19 +1532,12 @@ async function ensureMigration(store: AgentSettingsStore): Promise<void> {
     const primaryCredentials = await readCredentialState(store);
     const legacyWebCredentials = readWebCredentialState();
     store.credentialState = primaryCredentials;
-    const provider = getProvider(
-      readAppSetting(appConfiguration, AppSetting.AGENT_LLM_PROVIDER),
-    );
+    const provider = getProvider(readAppSetting(appConfiguration, AppSetting.AGENT_LLM_PROVIDER));
     const legacyApiKey =
-      readAppSetting(appConfiguration, LEGACY_API_KEY_SETTING) ??
-      primaryCredentials.legacyApiKey;
+      readAppSetting(appConfiguration, LEGACY_API_KEY_SETTING) ?? primaryCredentials.legacyApiKey;
     const legacyModel = readAppSetting(appConfiguration, LEGACY_MODEL_SETTING);
-    const legacyBaseUrl = readAppSetting(
-      appConfiguration,
-      LEGACY_BASE_URL_SETTING,
-    );
-    const configurationRevision =
-      readAppSetting(appConfiguration, COMMIT_REVISION_SETTING) ?? "";
+    const legacyBaseUrl = readAppSetting(appConfiguration, LEGACY_BASE_URL_SETTING);
+    const configurationRevision = readAppSetting(appConfiguration, COMMIT_REVISION_SETTING) ?? "";
     const legacyWebDefaultKeys =
       legacyWebCredentials.credentials.profileKeys[DEFAULT_PROFILE_ID] ??
       emptyProfileCredentialKeys();
@@ -1715,9 +1547,8 @@ async function ensureMigration(store: AgentSettingsStore): Promise<void> {
       primaryCredentials.legacyFormat ||
       primaryCredentials.revision !== configurationRevision ||
       (primaryCredentials.configuration?.profiles == undefined &&
-        parseStoredProfileMirrors(
-          readAppSetting(appConfiguration, PROFILES_SETTING),
-        ) == undefined) ||
+        parseStoredProfileMirrors(readAppSetting(appConfiguration, PROFILES_SETTING)) ==
+          undefined) ||
       (store.desktop &&
         primaryCredentials.storage === "secure" &&
         (legacyWebCredentials.legacyFormat ||
@@ -1732,12 +1563,9 @@ async function ensureMigration(store: AgentSettingsStore): Promise<void> {
       if (draft.openAiCompatible.apiKey === "") {
         draft.openAiCompatible.apiKey = legacyWebDefaultKeys.openAiApiKey;
       }
-      const providerDraft =
-        provider === "anthropic" ? draft.anthropic : draft.openAiCompatible;
+      const providerDraft = provider === "anthropic" ? draft.anthropic : draft.openAiCompatible;
       const providerModelSetting =
-        provider === "anthropic"
-          ? AppSetting.AGENT_ANTHROPIC_MODEL
-          : AppSetting.AGENT_OPENAI_MODEL;
+        provider === "anthropic" ? AppSetting.AGENT_ANTHROPIC_MODEL : AppSetting.AGENT_OPENAI_MODEL;
       const providerBaseUrlSetting =
         provider === "anthropic"
           ? AppSetting.AGENT_ANTHROPIC_BASE_URL
@@ -1788,8 +1616,7 @@ async function ensureMigration(store: AgentSettingsStore): Promise<void> {
         appConfiguration.set(LEGACY_BASE_URL_SETTING, undefined),
       ]);
       removeLegacyWebCredentials({
-        removeBundle:
-          store.desktop && store.credentialState.storage === "secure",
+        removeBundle: store.desktop && store.credentialState.storage === "secure",
       });
     } else {
       store.credentialState = primaryCredentials;
@@ -1799,12 +1626,10 @@ async function ensureMigration(store: AgentSettingsStore): Promise<void> {
     publishStore(store);
   };
 
-  store.migration = withAgentSettingsPersistenceLock(migrate).catch(
-    (error: unknown) => {
-      store.migration = undefined;
-      throw error;
-    },
-  );
+  store.migration = withAgentSettingsPersistenceLock(migrate).catch((error: unknown) => {
+    store.migration = undefined;
+    throw error;
+  });
   await store.migration;
 }
 
@@ -1856,16 +1681,11 @@ export function useAgentSettings(
   };
 }
 
-export function createAgentSettingsDraft(
-  snapshot: AgentSettingsSnapshot,
-): AgentSettingsDraft {
+export function createAgentSettingsDraft(snapshot: AgentSettingsSnapshot): AgentSettingsDraft {
   return draftFromSnapshot(snapshot);
 }
 
-type AgentSettingsSelectionSnapshot = Omit<
-  AgentSettingsSnapshot,
-  "activeProfileId" | "profiles"
-> &
+type AgentSettingsSelectionSnapshot = Omit<AgentSettingsSnapshot, "activeProfileId" | "profiles"> &
   Partial<Pick<AgentSettingsSnapshot, "activeProfileId" | "profiles">>;
 
 export function selectAgentConfiguration(
@@ -1874,13 +1694,10 @@ export function selectAgentConfiguration(
 ): AgentConfiguration {
   const profiles = snapshot.profiles ?? [];
   const selectedProfile =
-    profiles.find(
-      (profile) => profile.id === (profileId ?? snapshot.activeProfileId),
-    ) ??
+    profiles.find((profile) => profile.id === (profileId ?? snapshot.activeProfileId)) ??
     profiles.find((profile) => profile.id === snapshot.activeProfileId) ??
     profiles[0];
-  const provider =
-    selectedProfile?.provider ?? snapshot.provider;
+  const provider = selectedProfile?.provider ?? snapshot.provider;
   const providerSettings =
     provider === "anthropic"
       ? (selectedProfile?.anthropic ?? snapshot.anthropic)
@@ -1920,10 +1737,7 @@ export function validateAgentConfiguration(
   if (configuration.model.trim() === "") {
     errors.model = "required";
   }
-  if (
-    configuration.provider === "openai-compatible" &&
-    configuration.baseUrl.trim() === ""
-  ) {
+  if (configuration.provider === "openai-compatible" && configuration.baseUrl.trim() === "") {
     errors.baseUrl = "required";
   } else if (
     configuration.baseUrl.trim() !== "" &&
@@ -1935,8 +1749,6 @@ export function validateAgentConfiguration(
   return errors;
 }
 
-export function isAgentConfigurationValid(
-  configuration: AgentConfiguration,
-): boolean {
+export function isAgentConfigurationValid(configuration: AgentConfiguration): boolean {
   return Object.keys(validateAgentConfiguration(configuration)).length === 0;
 }

@@ -36,9 +36,7 @@ describe("assistant markdown rendering", () => {
   });
 
   it("renders GFM tables as real tables", () => {
-    renderContent(
-      ["| Panel | Renders |", "| --- | --- |", "| Plot | numeric paths |"].join("\n"),
-    );
+    renderContent(["| Panel | Renders |", "| --- | --- |", "| Plot | numeric paths |"].join("\n"));
 
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Panel" })).toBeInTheDocument();
@@ -73,9 +71,7 @@ describe("assistant markdown rendering", () => {
     );
 
     expect(screen.getByRole("heading", { level: 2, name: "Findings" })).toBeInTheDocument();
-    expect(container.querySelector("code")).toHaveTextContent(
-      "/imu/data.linear_acceleration.x",
-    );
+    expect(container.querySelector("code")).toHaveTextContent("/imu/data.linear_acceleration.x");
     expect(container.querySelector("blockquote")).toHaveTextContent("Sliced before opening.");
     expect(container.querySelector("pre code")).toHaveTextContent('{ "enabled": true }');
   });

@@ -91,7 +91,8 @@ export type LoadedExtension = {
 export const SECURE_CREDENTIAL_KEYS = ["agent.llmApiKey"] as const;
 
 export type SecureCredentialKey =
-  (typeof SECURE_CREDENTIAL_KEYS)[number] | `agent.profile.${string}.llmApiKey`;
+  | (typeof SECURE_CREDENTIAL_KEYS)[number]
+  | `agent.profile.${string}.llmApiKey`;
 
 export type SecureCredentialGetResult =
   | {
@@ -115,16 +116,10 @@ export type SecureCredentialSetManyResult =
   | { ok: true }
   | {
       ok: false;
-      code:
-        | "backend-unavailable"
-        | "insecure-backend"
-        | "invalid-request"
-        | "revision-conflict";
+      code: "backend-unavailable" | "insecure-backend" | "invalid-request" | "revision-conflict";
     };
 
-export function isSecureCredentialKey(
-  value: unknown,
-): value is SecureCredentialKey {
+export function isSecureCredentialKey(value: unknown): value is SecureCredentialKey {
   return (
     typeof value === "string" &&
     ((SECURE_CREDENTIAL_KEYS as readonly string[]).includes(value) ||
@@ -172,9 +167,7 @@ interface Desktop {
   // Trust boundary: installed extensions run as full-privilege code in this same renderer realm
   // and are intentionally trusted at the same level as built-in application code. These APIs
   // protect credentials at rest; they are not an isolation boundary against installed extensions.
-  getSecureCredential: (
-    key: SecureCredentialKey,
-  ) => Promise<SecureCredentialGetResult>;
+  getSecureCredential: (key: SecureCredentialKey) => Promise<SecureCredentialGetResult>;
   setSecureCredential: (
     key: SecureCredentialKey,
     value: string,

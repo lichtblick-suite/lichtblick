@@ -116,11 +116,7 @@ function renderPanelInventory(panels: readonly PanelInventoryEntry[]): string | 
       return `- ${inline(panel.type)}: ${inline(panel.description)}${schemas}`;
     }),
   ].join("\n");
-  return truncateUtf8(
-    section,
-    LOCAL_AGENT_MAX_PANEL_INVENTORY_BYTES,
-    "\n… truncated.",
-  );
+  return truncateUtf8(section, LOCAL_AGENT_MAX_PANEL_INVENTORY_BYTES, "\n… truncated.");
 }
 
 function readStringField(value: unknown, field: string): string | undefined {

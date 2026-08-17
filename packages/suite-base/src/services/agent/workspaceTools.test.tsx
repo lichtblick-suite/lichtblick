@@ -95,9 +95,7 @@ describe("useAgentWorkspaceTools", () => {
 
     expect(() => {
       result.current.openDataSource(["https://example.com/segment,part.mcap"]);
-    }).toThrow(
-      "Agent data source URLs must not contain literal commas; encode commas as %2C",
-    );
+    }).toThrow("Agent data source URLs must not contain literal commas; encode commas as %2C");
     expect(selectSource).not.toHaveBeenCalled();
   });
 

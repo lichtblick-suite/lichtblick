@@ -136,7 +136,7 @@ describe("useLocalAgentClient client stability (B1)", () => {
       expect(result.current).toBeDefined();
     });
     const first = result.current!;
-    dataQueryRef.current = { getContext: () => ({} as AgentDataQueryContext) };
+    dataQueryRef.current = { getContext: () => ({}) as AgentDataQueryContext };
 
     rerender({ dataQuery: dataQueryRef.current });
     expect(result.current).toBeDefined();

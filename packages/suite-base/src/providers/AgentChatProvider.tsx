@@ -1038,10 +1038,7 @@ function createAgentChatRuntime(callbackRefs: MutableRefObject<CallbackRefs>): A
       });
       return;
     }
-    if (
-      applyingProposal == undefined &&
-      state.pendingProposalRequestId === record.requestId
-    ) {
+    if (applyingProposal == undefined && state.pendingProposalRequestId === record.requestId) {
       if (queuedProposal?.requestId === record.requestId) {
         queuedProposal = undefined;
       }

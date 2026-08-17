@@ -18,9 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
 import { AgentCatalogWatcher } from "@lichtblick/suite-base/components/AgentCatalogWatcher";
-import {
-  useMessagePipelineGetter,
-} from "@lichtblick/suite-base/components/MessagePipeline";
+import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
 import { useAppConfiguration } from "@lichtblick/suite-base/context/AppConfigurationContext";
 import CurrentLayoutContext from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
@@ -85,10 +83,7 @@ function ConfiguredAgentWorkspaceIntegration({
   }, [workspaceTools]);
   const getCatalog = useCallback(() => workspaceToolsRef.current.getCatalog(), []);
   const getCurrentLayout = useCallback(() => workspaceToolsRef.current.getCurrentLayout(), []);
-  const getCurrentLayoutId = useCallback(
-    () => workspaceToolsRef.current.getCurrentLayoutId(),
-    [],
-  );
+  const getCurrentLayoutId = useCallback(() => workspaceToolsRef.current.getCurrentLayoutId(), []);
   const getCurrentLayoutState = useCallback(
     () => ({
       id: workspaceToolsRef.current.getCurrentLayoutId(),

@@ -5,12 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type {
-  IpcMain,
-  IpcMainInvokeEvent,
-  WebContents,
-  WebFrameMain,
-} from "electron";
+import type { IpcMain, IpcMainInvokeEvent, WebContents, WebFrameMain } from "electron";
 
 import { registerSecureCredentialsIpcHandlers } from "./SecureCredentialsIpcHandlers";
 import SecureCredentialsService from "./SecureCredentialsService";
@@ -71,26 +66,16 @@ describe("registerSecureCredentialsIpcHandlers", () => {
       ok: false,
     });
     await expect(
-      handlers.get("secureCredentials:get")?.(
-        event,
-        "agent.profile.profile-123.llmApiKey",
-      ),
+      handlers.get("secureCredentials:get")?.(event, "agent.profile.profile-123.llmApiKey"),
     ).resolves.toEqual({
       code: "backend-unavailable",
       ok: false,
     });
     await expect(
-      handlers.get("secureCredentials:set")?.(
-        event,
-        "agent.llmApiKey",
-        "new-secret",
-      ),
+      handlers.get("secureCredentials:set")?.(event, "agent.llmApiKey", "new-secret"),
     ).resolves.toEqual({ ok: true });
     await expect(
-      handlers.get("secureCredentials:get")?.(
-        event,
-        "agent.profile.profile-123.llmApiKey",
-      ),
+      handlers.get("secureCredentials:get")?.(event, "agent.profile.profile-123.llmApiKey"),
     ).resolves.toEqual({
       code: "insecure-backend",
       ok: true,
@@ -103,9 +88,7 @@ describe("registerSecureCredentialsIpcHandlers", () => {
         value: "new-bundle",
       },
     ];
-    await expect(
-      handlers.get("secureCredentials:setMany")?.(event, entries),
-    ).resolves.toEqual({
+    await expect(handlers.get("secureCredentials:setMany")?.(event, entries)).resolves.toEqual({
       ok: true,
     });
     setCredential.mockResolvedValueOnce({
@@ -113,11 +96,7 @@ describe("registerSecureCredentialsIpcHandlers", () => {
       ok: false,
     });
     await expect(
-      handlers.get("secureCredentials:set")?.(
-        event,
-        "agent.llmApiKey",
-        "other-secret",
-      ),
+      handlers.get("secureCredentials:set")?.(event, "agent.llmApiKey", "other-secret"),
     ).resolves.toEqual({
       code: "insecure-backend",
       ok: false,
@@ -126,19 +105,9 @@ describe("registerSecureCredentialsIpcHandlers", () => {
       handlers.get("secureCredentials:delete")?.(event, "agent.llmApiKey"),
     ).resolves.toBeUndefined();
     expect(getCredential).toHaveBeenCalledWith("agent.llmApiKey");
-    expect(getCredential).toHaveBeenCalledWith(
-      "agent.profile.profile-123.llmApiKey",
-    );
-    expect(setCredential).toHaveBeenNthCalledWith(
-      1,
-      "agent.llmApiKey",
-      "new-secret",
-    );
-    expect(setCredential).toHaveBeenNthCalledWith(
-      2,
-      "agent.llmApiKey",
-      "other-secret",
-    );
+    expect(getCredential).toHaveBeenCalledWith("agent.profile.profile-123.llmApiKey");
+    expect(setCredential).toHaveBeenNthCalledWith(1, "agent.llmApiKey", "new-secret");
+    expect(setCredential).toHaveBeenNthCalledWith(2, "agent.llmApiKey", "other-secret");
     expect(setManyCredentials).toHaveBeenCalledWith(entries);
     expect(deleteCredential).toHaveBeenCalledWith("agent.llmApiKey");
     expect(isAllowedSender).toHaveBeenCalledWith(event.sender);
@@ -162,12 +131,10 @@ describe("registerSecureCredentialsIpcHandlers", () => {
     registerSecureCredentialsIpcHandlers({ ipcMain, isAllowedSender, service });
     const get = handlers.get("secureCredentials:get");
 
-    await expect(
-      get?.(fakeEvent(101, { isMainFrame: false }), "agent.llmApiKey"),
-    ).rejects.toThrow("Unauthorized");
-    await expect(get?.(fakeEvent(202), "agent.llmApiKey")).rejects.toThrow(
+    await expect(get?.(fakeEvent(101, { isMainFrame: false }), "agent.llmApiKey")).rejects.toThrow(
       "Unauthorized",
     );
+    await expect(get?.(fakeEvent(202), "agent.llmApiKey")).rejects.toThrow("Unauthorized");
     expect(getCredential).not.toHaveBeenCalled();
   });
 });

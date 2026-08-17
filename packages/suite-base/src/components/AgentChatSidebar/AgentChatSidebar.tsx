@@ -17,13 +17,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -58,10 +52,8 @@ const STATUS_COLORS: Record<AgentChatStatus, ChipProps["color"]> = {
 const selectMessages = (state: AgentChatState) => state.messages;
 const selectStatus = (state: AgentChatState) => state.status;
 const selectPendingProposal = (state: AgentChatState) => state.pendingProposal;
-const selectPendingProposalMessageId = (state: AgentChatState) =>
-  state.pendingProposalMessageId;
-const selectPendingProposalRequestId = (state: AgentChatState) =>
-  state.pendingProposalRequestId;
+const selectPendingProposalMessageId = (state: AgentChatState) => state.pendingProposalMessageId;
+const selectPendingProposalRequestId = (state: AgentChatState) => state.pendingProposalRequestId;
 const selectError = (state: AgentChatState) => state.error;
 const selectActions = (state: AgentChatState) => state.actions;
 const selectProfileOptions = (state: AgentChatState) => state.profileOptions;
@@ -84,8 +76,7 @@ export function AgentChatSidebar(): React.JSX.Element {
 
   const [draft, setDraft] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [conversationListAnchor, setConversationListAnchor] =
-    useState<HTMLElement>();
+  const [conversationListAnchor, setConversationListAnchor] = useState<HTMLElement>();
   const bottomRef = useRef<HTMLDivElement>(ReactNull);
   const messagesRef = useRef<HTMLDivElement>(ReactNull);
   const scrollFrameRef = useRef<number>();
@@ -105,12 +96,8 @@ export function AgentChatSidebar(): React.JSX.Element {
       return;
     }
 
-    const distanceFromBottom =
-      element.scrollHeight - element.scrollTop - element.clientHeight;
-    if (
-      distanceFromBottom > AUTO_SCROLL_THRESHOLD_PX ||
-      scrollFrameRef.current != undefined
-    ) {
+    const distanceFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
+    if (distanceFromBottom > AUTO_SCROLL_THRESHOLD_PX || scrollFrameRef.current != undefined) {
       return;
     }
 
@@ -121,9 +108,7 @@ export function AgentChatSidebar(): React.JSX.Element {
         return;
       }
       const currentDistanceFromBottom =
-        currentElement.scrollHeight -
-        currentElement.scrollTop -
-        currentElement.clientHeight;
+        currentElement.scrollHeight - currentElement.scrollTop - currentElement.clientHeight;
       if (currentDistanceFromBottom <= AUTO_SCROLL_THRESHOLD_PX) {
         bottomRef.current?.scrollIntoView({ block: "end" });
       }
@@ -171,9 +156,7 @@ export function AgentChatSidebar(): React.JSX.Element {
   const statusLabel = t(STATUS_LABEL_KEYS[status]);
   const latestMessage = messages.at(-1);
   const latestCompletedMessage =
-    status === "idle" && latestMessage?.role === "assistant"
-      ? latestMessage.content
-      : undefined;
+    status === "idle" && latestMessage?.role === "assistant" ? latestMessage.content : undefined;
 
   return (
     <div
@@ -202,9 +185,7 @@ export function AgentChatSidebar(): React.JSX.Element {
                 inputProps={{ "aria-label": t("profileSelector.label") }}
                 size="small"
                 title={
-                  messages.length > 0
-                    ? t("profileSelector.appliesToFutureMessages")
-                    : undefined
+                  messages.length > 0 ? t("profileSelector.appliesToFutureMessages") : undefined
                 }
                 value={selectedProfileId}
                 onChange={(event) => {
@@ -221,9 +202,7 @@ export function AgentChatSidebar(): React.JSX.Element {
             )}
         </Stack>
         <Stack direction="row" alignItems="center" gap={1}>
-          {showBusyIndicator && (
-            <CircularProgress aria-label={statusLabel} size={14} />
-          )}
+          {showBusyIndicator && <CircularProgress aria-label={statusLabel} size={14} />}
           <IconButton
             aria-label={t("conversationList.history")}
             data-testid="agent-chat-conversation-history"
@@ -283,9 +262,7 @@ export function AgentChatSidebar(): React.JSX.Element {
 
       <div
         aria-busy={
-          status === "connecting" ||
-          status === "streaming" ||
-          status === "waiting-for-catalog"
+          status === "connecting" || status === "streaming" || status === "waiting-for-catalog"
         }
         aria-label={t("title")}
         aria-live="off"
@@ -326,12 +303,7 @@ export function AgentChatSidebar(): React.JSX.Element {
         </Alert>
       )}
 
-      <Stack
-        className={classes.composer}
-        direction="row"
-        alignItems="flex-end"
-        gap={1}
-      >
+      <Stack className={classes.composer} direction="row" alignItems="flex-end" gap={1}>
         <TextField
           fullWidth
           multiline
@@ -349,11 +321,7 @@ export function AgentChatSidebar(): React.JSX.Element {
             setDraft(event.target.value);
           }}
           onKeyDown={(event) => {
-            if (
-              event.key === "Enter" &&
-              !event.shiftKey &&
-              !event.nativeEvent.isComposing
-            ) {
+            if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
               event.preventDefault();
               void handleSend();
             }
@@ -368,11 +336,7 @@ export function AgentChatSidebar(): React.JSX.Element {
             void handleSend();
           }}
         >
-          {submitting ? (
-            <CircularProgress aria-label={t("send")} size={20} />
-          ) : (
-            <SendIcon />
-          )}
+          {submitting ? <CircularProgress aria-label={t("send")} size={20} /> : <SendIcon />}
         </IconButton>
       </Stack>
     </div>

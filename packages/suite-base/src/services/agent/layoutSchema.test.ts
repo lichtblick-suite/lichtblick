@@ -204,23 +204,22 @@ describe("layoutSchema", () => {
     data.configById = { "Publish!publisher": {} };
     data.layout = "Publish!publisher";
 
-    expect(() => validateLayoutProposalData(data)).toThrow(
-      'uses unsupported panel type "Publish"',
-    );
+    expect(() => validateLayoutProposalData(data)).toThrow('uses unsupported panel type "Publish"');
   });
 
-  it.each(["Plot", "Plot!", "!suffix", "Plot!one!two", "Plot! "])(
-    "rejects malformed panel id %s",
-    (panelId) => {
-      const data = validLayoutData();
-      data.configById = { [panelId]: {} };
-      data.layout = panelId;
+  it.each([
+    "Plot",
+    "Plot!",
+    "!suffix",
+    "Plot!one!two",
+    "Plot! ",
+  ])("rejects malformed panel id %s", (panelId) => {
+    const data = validLayoutData();
+    data.configById = { [panelId]: {} };
+    data.layout = panelId;
 
-      expect(() => validateLayoutProposalData(data)).toThrow(
-        'must match "<type>!<suffix>"',
-      );
-    },
-  );
+    expect(() => validateLayoutProposalData(data)).toThrow('must match "<type>!<suffix>"');
+  });
 
   it("rejects a Mosaic leaf without a configById entry", () => {
     const data = validLayoutData();
@@ -281,9 +280,7 @@ describe("layoutSchema", () => {
     const data = validLayoutData();
     (data.layout as Record<string, unknown>).extra = { hidden: true };
 
-    expect(() => validateLayoutProposalData(data)).toThrow(
-      'layout contains unknown field "extra"',
-    );
+    expect(() => validateLayoutProposalData(data)).toThrow('layout contains unknown field "extra"');
   });
 
   it("rejects cyclic Mosaic objects", () => {
@@ -425,9 +422,7 @@ describe("layoutSchema", () => {
       "script-1": { name: "x", sourceCode: "export const inputs = [];".repeat(20_000) },
     };
 
-    expect(() => validateLayoutProposalData(data)).toThrow(
-      "exceeds the string size limit",
-    );
+    expect(() => validateLayoutProposalData(data)).toThrow("exceeds the string size limit");
   });
 
   it("rejects cyclic values inside panel configurations", () => {

@@ -9,10 +9,7 @@ import type { AgentMessage } from "@earendil-works/pi-agent-core";
 
 import { KEY_WORKSPACE_PREFIX } from "@lichtblick/suite-base/constants/browserStorageKeys";
 
-import type {
-  ConversationListPage,
-  StoredConversation,
-} from "./AgentConversationStore";
+import type { ConversationListPage, StoredConversation } from "./AgentConversationStore";
 
 export const AGENT_CONVERSATION_ID_KEY = `${KEY_WORKSPACE_PREFIX}studio.agent.conversation-id`;
 export const PI_LLM_HISTORY_FORMAT = "pi/v1" as const;

@@ -135,18 +135,12 @@ function validatePanelId(
   if (panelType == undefined) {
     throw new Error(`${location} must match "<type>!<suffix>"`);
   }
-  if (
-    !allowedPanelTypes.has(panelType) &&
-    installedPanelTypes?.has(panelType) !== true
-  ) {
+  if (!allowedPanelTypes.has(panelType) && installedPanelTypes?.has(panelType) !== true) {
     throw new Error(`${location} uses unsupported panel type "${panelType}"`);
   }
 }
 
-function validatePanelConfig(
-  panelId: string,
-  config: Record<string, unknown>,
-): void {
+function validatePanelConfig(panelId: string, config: Record<string, unknown>): void {
   const panelType = getPanelType(panelId);
   if (panelType == undefined || !allowedPanelTypes.has(panelType)) {
     // Runtime-installed extension panels have no per-type schema here. Their configs have already
@@ -164,10 +158,7 @@ function validatePanelConfig(
       throw new Error(`configById["${panelId}"].${field} must be an array`);
     }
   }
-  if (
-    (panelType === "Plot" || panelType === "StateTransitions") &&
-    Array.isArray(config.paths)
-  ) {
+  if ((panelType === "Plot" || panelType === "StateTransitions") && Array.isArray(config.paths)) {
     for (const [index, path] of config.paths.entries()) {
       if (!isPlainObject(path) || typeof path.value !== "string") {
         throw new Error(
@@ -195,8 +186,7 @@ function validatePanelConfig(
   if (
     panelType === "Gauge" &&
     Array.isArray(config.gradient) &&
-    (config.gradient.length !== 2 ||
-      !config.gradient.every((color) => typeof color === "string"))
+    (config.gradient.length !== 2 || !config.gradient.every((color) => typeof color === "string"))
   ) {
     throw new Error(`configById["${panelId}"].gradient must contain two strings`);
   }
@@ -204,11 +194,7 @@ function validatePanelConfig(
 
 type JsonGraphBudget = { nodes: number };
 
-function validateJsonGraph(
-  value: unknown,
-  location: string,
-  budget: JsonGraphBudget,
-): void {
+function validateJsonGraph(value: unknown, location: string, budget: JsonGraphBudget): void {
   type StackEntry =
     | { type: "enter"; value: unknown; location: string; depth: number }
     | { type: "exit"; value: object };
@@ -233,10 +219,7 @@ function validateJsonGraph(
       budget.nodes++;
     } else if (typeof entry.value === "string") {
       budget.nodes++;
-      if (
-        textEncoder.encode(entry.value).byteLength >
-        AGENT_SAFE_LAYOUT_MAX_STRING_BYTES
-      ) {
+      if (textEncoder.encode(entry.value).byteLength > AGENT_SAFE_LAYOUT_MAX_STRING_BYTES) {
         throw new Error(`${entry.location} exceeds the string size limit`);
       }
     } else if (Array.isArray(entry.value) || isPlainObject(entry.value)) {
@@ -410,11 +393,7 @@ function validateLayoutProposalDataWithOptions(
   }
 
   for (const [panelId, config] of configEntries) {
-    validatePanelId(
-      panelId,
-      `configById key "${panelId}"`,
-      options?.installedPanelTypes,
-    );
+    validatePanelId(panelId, `configById key "${panelId}"`, options?.installedPanelTypes);
     if (!isPlainObject(config)) {
       throw new Error(`configById["${panelId}"] must be an object`);
     }
@@ -448,17 +427,13 @@ export function validateLayoutProposalData(
   return validateLayoutProposalDataWithOptions(data, options);
 }
 
-
 export function validateLayoutProposal(
   proposal: LayoutProposal,
   options?: ValidateLayoutProposalOptions,
 ): ValidatedLayoutProposal {
   // typeof-based: `!= undefined` under loose equality treats null as absent and would accept it,
   // which the wire-boundary validation must not (typeof null is "object" and is rejected).
-  if (
-    typeof proposal.baseLayoutId !== "undefined" &&
-    typeof proposal.baseLayoutId !== "string"
-  ) {
+  if (typeof proposal.baseLayoutId !== "undefined" && typeof proposal.baseLayoutId !== "string") {
     throw new Error("LayoutProposal.baseLayoutId must be a string");
   }
   if (

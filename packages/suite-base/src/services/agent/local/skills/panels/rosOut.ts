@@ -16,7 +16,8 @@ import type { Skill } from "../types";
 export const PANEL_ROSOUT_SKILL: Skill = {
   id: "panel-rosout",
   name: "RosOut panel: ROS log message filtering",
-  whenToUse: "Before proposing a layout that uses the RosOut panel — exact Log schemas and filters.",
+  whenToUse:
+    "Before proposing a layout that uses the RosOut panel — exact Log schemas and filters.",
   indexed: false,
   body: `# The \`RosOut\` panel
 

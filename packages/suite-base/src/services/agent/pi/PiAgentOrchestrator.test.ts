@@ -94,11 +94,7 @@ function successfulStream(chunks: readonly string[]): StreamFn {
   };
 }
 
-function toolCallStream(
-  id: string,
-  name: string,
-  args: Record<string, unknown>,
-): StreamFn {
+function toolCallStream(id: string, name: string, args: Record<string, unknown>): StreamFn {
   return toolCallsStream([{ id, name, arguments: args }]);
 }
 
@@ -124,9 +120,7 @@ function toolCallsStream(
   };
 }
 
-function makeToolRuntime(
-  overrides: Partial<PiAgentToolRuntime> = {},
-): PiAgentToolRuntime {
+function makeToolRuntime(overrides: Partial<PiAgentToolRuntime> = {}): PiAgentToolRuntime {
   return {
     deps: {
       getCatalog: jest.fn().mockReturnValue({ topics: [], datatypes: new Map() }),
@@ -329,16 +323,11 @@ describe("PiAgentOrchestrator", () => {
     // The load_skill enum converges with SKILL_IDS plus the effective custom skill.
     const loadSkill = turnTools?.find((tool) => tool.name === "load_skill");
     expect(loadSkill).toBeDefined();
-    const enumValue = (
-      loadSkill?.parameters as { properties: { skillId: { enum: string[] } } }
-    ).properties.skillId.enum;
-    expect(enumValue.slice().sort()).toEqual(
-      [...SKILL_IDS, "team-conventions"].sort(),
-    );
+    const enumValue = (loadSkill?.parameters as { properties: { skillId: { enum: string[] } } })
+      .properties.skillId.enum;
+    expect(enumValue.slice().sort()).toEqual([...SKILL_IDS, "team-conventions"].sort());
     // load_skill and propose_layout both executed, and the proposal event carried the right shape.
-    expect(JSON.stringify(contexts[1]?.messages)).toContain(
-      "Prefix layouts with the squad name.",
-    );
+    expect(JSON.stringify(contexts[1]?.messages)).toContain("Prefix layouts with the squad name.");
     expect(
       harness.events.some(
         (event) =>
@@ -870,17 +859,13 @@ describe("PiAgentOrchestrator", () => {
     await harness.client.sendMessage(harness.sessionId, "hello", "request-customization");
 
     expect(contexts[0]?.systemPrompt).toContain("Always answer in Chinese.");
-    expect(contexts[0]?.systemPrompt).toContain(
-      "- team-conventions: When naming layouts.",
-    );
+    expect(contexts[0]?.systemPrompt).toContain("- team-conventions: When naming layouts.");
     const loadSkill = contexts[0]?.tools?.find((tool) => tool.name === "load_skill");
     expect(
       (loadSkill?.parameters as { properties: { skillId: { enum: string[] } } }).properties.skillId
         .enum,
     ).toContain("team-conventions");
-    expect(JSON.stringify(contexts[1]?.messages)).toContain(
-      "Prefix layouts with the squad name.",
-    );
+    expect(JSON.stringify(contexts[1]?.messages)).toContain("Prefix layouts with the squad name.");
     expect(JSON.stringify(contexts[1]?.messages)).toContain("my replacement body");
 
     await stopSubscription(harness.abortSubscription, harness.subscription);

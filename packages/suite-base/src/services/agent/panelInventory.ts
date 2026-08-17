@@ -3,9 +3,7 @@
 
 import type { PanelInfo } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import { parseExtensionPanelsMeta } from "@lichtblick/suite-base/services/extension/utils/parseExtensionPanelsMeta";
-import type {
-  ExtensionInfo,
-} from "@lichtblick/suite-base/types/Extensions";
+import type { ExtensionInfo } from "@lichtblick/suite-base/types/Extensions";
 
 export type PanelInventoryEntry = {
   type: string;
@@ -21,9 +19,7 @@ type ExtensionPanelMatch = {
 };
 
 function nonEmpty(value: string | undefined): string | undefined {
-  return value == undefined || value.trim().length === 0
-    ? undefined
-    : value.trim();
+  return value == undefined || value.trim().length === 0 ? undefined : value.trim();
 }
 
 function findExtensionPanel(
@@ -55,9 +51,7 @@ export function buildPanelInventory(
     const metadata =
       match == undefined
         ? undefined
-        : parseExtensionPanelsMeta(match.extension.panelsMeta)?.[
-            match.panelName
-          ];
+        : parseExtensionPanelsMeta(match.extension.panelsMeta)?.[match.panelName];
     const description =
       nonEmpty(metadata?.description) ??
       nonEmpty(panel.description) ??

@@ -112,7 +112,9 @@ export async function addAgentMemory(
     createdAt: now().toISOString(),
   };
   const next = [...entries, entry];
-  if (new TextEncoder().encode(JSON.stringify(next) ?? "").byteLength > AGENT_MEMORY_MAX_TOTAL_BYTES) {
+  if (
+    new TextEncoder().encode(JSON.stringify(next) ?? "").byteLength > AGENT_MEMORY_MAX_TOTAL_BYTES
+  ) {
     throw new AgentMemoryLimitError("Memory is full; forget an entry first");
   }
   await writeAgentMemories(configuration, next);

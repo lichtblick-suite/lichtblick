@@ -3,16 +3,12 @@
 
 import type { AgentEvent as PiAgentEvent } from "@earendil-works/pi-agent-core";
 
-import type {
-  ToolRun,
-  ToolRunStatus,
-} from "@lichtblick/suite-base/services/agent/types";
+import type { ToolRun, ToolRunStatus } from "@lichtblick/suite-base/services/agent/types";
 
 type PiToolExecutionEvent = Extract<
   PiAgentEvent,
   {
-    type:
-      "tool_execution_start" | "tool_execution_update" | "tool_execution_end";
+    type: "tool_execution_start" | "tool_execution_update" | "tool_execution_end";
   }
 >;
 
@@ -25,9 +21,7 @@ const TOOL_RUN_STATUSES = new Set<ToolRunStatus>([
 ]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return (
-    typeof value === "object" && value != undefined && !Array.isArray(value)
-  );
+  return typeof value === "object" && value != undefined && !Array.isArray(value);
 }
 
 export function serializeToolValue(value: unknown): string {
@@ -53,11 +47,8 @@ export function serializeToolValue(value: unknown): string {
 
 /** Matches the local orchestrator's existing 240-character tool summary bound. */
 export function summarizeToolValue(value: unknown): string {
-  const serialized =
-    typeof value === "string" ? value : serializeToolValue(value);
-  return serialized.length > 240
-    ? `${serialized.slice(0, 237)}...`
-    : serialized;
+  const serialized = typeof value === "string" ? value : serializeToolValue(value);
+  return serialized.length > 240 ? `${serialized.slice(0, 237)}...` : serialized;
 }
 
 function extractText(result: unknown): string | undefined {
@@ -67,9 +58,7 @@ function extractText(result: unknown): string | undefined {
   const text = result.content
     .filter(
       (entry): entry is { type: "text"; text: string } =>
-        isRecord(entry) &&
-        entry.type === "text" &&
-        typeof entry.text === "string",
+        isRecord(entry) && entry.type === "text" && typeof entry.text === "string",
     )
     .map((entry) => entry.text)
     .join("\n");
@@ -83,28 +72,21 @@ function extractDetails(result: unknown): Record<string, unknown> | undefined {
   return result.details;
 }
 
-function detailStatus(
-  details: Record<string, unknown> | undefined,
-): ToolRunStatus | undefined {
+function detailStatus(details: Record<string, unknown> | undefined): ToolRunStatus | undefined {
   const status = details?.status;
-  return typeof status === "string" &&
-    TOOL_RUN_STATUSES.has(status as ToolRunStatus)
+  return typeof status === "string" && TOOL_RUN_STATUSES.has(status as ToolRunStatus)
     ? (status as ToolRunStatus)
     : undefined;
 }
 
-function detailProgress(
-  details: Record<string, unknown> | undefined,
-): number | undefined {
+function detailProgress(details: Record<string, unknown> | undefined): number | undefined {
   const progress = details?.progress;
   return typeof progress === "number" && Number.isFinite(progress)
     ? Math.min(1, Math.max(0, progress))
     : undefined;
 }
 
-function detailSummary(
-  details: Record<string, unknown> | undefined,
-): string | undefined {
+function detailSummary(details: Record<string, unknown> | undefined): string | undefined {
   return typeof details?.summary === "string" ? details.summary : undefined;
 }
 
@@ -128,9 +110,7 @@ export function mapPiToolExecutionEvent(event: PiToolExecutionEvent): ToolRun {
         progress: detailProgress(details),
         summary:
           detailSummary(details) ??
-          (typeof result !== "undefined"
-            ? summarizeToolValue(result)
-            : undefined),
+          (typeof result !== "undefined" ? summarizeToolValue(result) : undefined),
         result: status === "cancelled" ? result : undefined,
         error: typeof details?.error === "string" ? details.error : undefined,
       };
@@ -156,9 +136,7 @@ export function mapPiToolExecutionEvent(event: PiToolExecutionEvent): ToolRun {
             "Tool execution failed",
         };
       }
-      const result = Object.hasOwn(details ?? {}, "result")
-        ? details?.result
-        : details;
+      const result = Object.hasOwn(details ?? {}, "result") ? details?.result : details;
       return {
         ...base,
         status: "succeeded",

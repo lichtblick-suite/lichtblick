@@ -80,16 +80,16 @@ const t11: Time = { sec: 11, nsec: 500_000_000 };
 describe("read_messages", () => {
   it("reads messages in receive order with safe serialization", async () => {
     const events = [
-      message("/imu", "sensor_msgs/Imu", t10, { linear_acceleration: { x: 1.5 }, big: 9007199254740993n }),
+      message("/imu", "sensor_msgs/Imu", t10, {
+        linear_acceleration: { x: 1.5 },
+        big: 9007199254740993n,
+      }),
       message("/imu", "sensor_msgs/Imu", t11, { linear_acceleration: { x: 2.5 } }),
     ];
     const iterator = makeIterator(events);
     const context = makeContext({ getBatchIterator: jest.fn(() => iterator) });
 
-    const result = (await runReadMessagesTool(
-      { topic: "/imu", limit: 10 },
-      makeDeps(context),
-    )) as {
+    const result = (await runReadMessagesTool({ topic: "/imu", limit: 10 }, makeDeps(context))) as {
       count: number;
       messages: Array<{ receiveTimeNs: string; message: { big: string } }>;
       truncated: boolean;
@@ -107,10 +107,7 @@ describe("read_messages", () => {
   });
 
   it("honors the limit and time range bounds", async () => {
-    const events = [
-      message("/a", "s", t10, { v: 1 }),
-      message("/a", "s", t11, { v: 2 }),
-    ];
+    const events = [message("/a", "s", t10, { v: 1 }), message("/a", "s", t11, { v: 2 })];
     const iterator = makeIterator(events);
     const getBatchIterator = jest.fn(() => iterator);
     const context = makeContext({ getBatchIterator });
@@ -158,10 +155,11 @@ describe("read_messages", () => {
     const iterator = makeIterator(events);
     const context = makeContext({ getBatchIterator: jest.fn(() => iterator) });
 
-    const result = (await runReadMessagesTool(
-      { topic: "/big" },
-      makeDeps(context),
-    )) as { count: number; truncated: boolean; messages: Array<{ message: unknown }> };
+    const result = (await runReadMessagesTool({ topic: "/big" }, makeDeps(context))) as {
+      count: number;
+      truncated: boolean;
+      messages: Array<{ message: unknown }>;
+    };
 
     // Both messages collected; the oversized payload became a field summary, not a dropped entry.
     expect(result.count).toBe(2);
@@ -169,9 +167,9 @@ describe("read_messages", () => {
     expect(result.messages[0]!.message).toEqual(
       expect.objectContaining({ note: "message too large to serialize" }),
     );
-    expect(
-      (result.messages[0]!.message as { bytes: number }).bytes,
-    ).toBeGreaterThan(DATA_QUERY_MAX_SINGLE_MESSAGE_BYTES);
+    expect((result.messages[0]!.message as { bytes: number }).bytes).toBeGreaterThan(
+      DATA_QUERY_MAX_SINGLE_MESSAGE_BYTES,
+    );
     // The safe serializer still produced the binary marker for a binary payload.
     expect(
       safeSerializeMessage({ data: new Uint8Array(DATA_QUERY_MAX_SINGLE_MESSAGE_BYTES) }),
@@ -186,10 +184,11 @@ describe("read_messages", () => {
     const iterator = makeIterator(events);
     const context = makeContext({ getBatchIterator: jest.fn(() => iterator) });
 
-    const result = (await runReadMessagesTool(
-      { topic: "/big" },
-      makeDeps(context),
-    )) as { count: number; truncated: boolean; scanned: number };
+    const result = (await runReadMessagesTool({ topic: "/big" }, makeDeps(context))) as {
+      count: number;
+      truncated: boolean;
+      scanned: number;
+    };
 
     expect(result.truncated).toBe(true);
     expect(result.scanned).toBe(result.count + 1); // stopped one entry after the budget broke
@@ -242,7 +241,10 @@ describe("read_messages", () => {
     expect(iterator.return).not.toHaveBeenCalled(); // next() still pending; cleanup is detached
 
     // Once the pending next() settles, the detached cleanup chain releases the iterator.
-    resolveNext({ done: false, value: { type: "message-event", msgEvent: message("/a", "s", t10, { v: 1 }) } });
+    resolveNext({
+      done: false,
+      value: { type: "message-event", msgEvent: message("/a", "s", t10, { v: 1 }) },
+    });
     for (let i = 0; i < 10; i++) {
       await Promise.resolve();
     }
@@ -267,10 +269,7 @@ describe("search_messages", () => {
   });
 
   it("matches text on log messages and returns receiveTimeNs for seeking", async () => {
-    const events = [
-      logEvent(2, "odom ok", t10),
-      logEvent(4, "wheel slip detected", t11),
-    ];
+    const events = [logEvent(2, "odom ok", t10), logEvent(4, "wheel slip detected", t11)];
     const iterator = makeIterator(events);
     const context = makeContext({ getBatchIterator: jest.fn(() => iterator) });
 
@@ -285,10 +284,7 @@ describe("search_messages", () => {
   });
 
   it("matches level-only searches with the error level", async () => {
-    const events = [
-      logEvent(2, "odom ok", t10),
-      logEvent(8, "odom timeout", t11),
-    ];
+    const events = [logEvent(2, "odom ok", t10), logEvent(8, "odom timeout", t11)];
     const iterator = makeIterator(events);
     const context = makeContext({ getBatchIterator: jest.fn(() => iterator) });
 
@@ -302,26 +298,31 @@ describe("search_messages", () => {
   });
 
   it.each([
-    ["ros.rcl_interfaces.Log", { level: 40, msg: "brake fault", name: "chassis", stamp: { sec: 1, nsec: 0 } }],
+    [
+      "ros.rcl_interfaces.Log",
+      { level: 40, msg: "brake fault", name: "chassis", stamp: { sec: 1, nsec: 0 } },
+    ],
     [
       "ros.rosgraph_msgs.Log",
-      { level: 8, msg: "brake fault", name: "chassis", header: { stamp: { sec: 1, nsec: 0 }, seq: 0, frame_id: "" } },
+      {
+        level: 8,
+        msg: "brake fault",
+        name: "chassis",
+        header: { stamp: { sec: 1, nsec: 0 }, seq: 0, frame_id: "" },
+      },
     ],
   ] as const)("matches level=error on the ROS alias %s", async (schema, payload) => {
-      const events = [
-        message("/rosout", schema, t10, payload),
-      ];
-      const iterator = makeIterator(events);
-      const context = makeContext({ getBatchIterator: jest.fn(() => iterator) });
+    const events = [message("/rosout", schema, t10, payload)];
+    const iterator = makeIterator(events);
+    const context = makeContext({ getBatchIterator: jest.fn(() => iterator) });
 
-      const result = (await runSearchMessagesTool(
-        { topic: "/rosout", level: "error" },
-        makeDeps(context),
-      )) as { count: number };
+    const result = (await runSearchMessagesTool(
+      { topic: "/rosout", level: "error" },
+      makeDeps(context),
+    )) as { count: number };
 
-      expect(result.count).toBe(1);
-    },
-  );
+    expect(result.count).toBe(1);
+  });
 
   it("ANDs text and level", async () => {
     const events = [
@@ -487,12 +488,12 @@ describe("playback_control", () => {
 
   it("errors when the player does not expose the requested control", async () => {
     const context = makeContext({}); // no playback functions bound
-    await expect(
-      runPlaybackControlTool({ action: "play" }, makeDeps(context)),
-    ).rejects.toThrow("play is unavailable");
-    await expect(
-      runPlaybackControlTool({ action: "pause" }, makeDeps(context)),
-    ).rejects.toThrow("pause is unavailable");
+    await expect(runPlaybackControlTool({ action: "play" }, makeDeps(context))).rejects.toThrow(
+      "play is unavailable",
+    );
+    await expect(runPlaybackControlTool({ action: "pause" }, makeDeps(context))).rejects.toThrow(
+      "pause is unavailable",
+    );
     await expect(
       runPlaybackControlTool({ action: "seek", time: "15000000000" }, makeDeps(context)),
     ).rejects.toThrow("seek is unavailable");
@@ -510,9 +511,9 @@ describe("playback_control", () => {
 
   it("requires time for seek", async () => {
     const context = makeContext({ seekPlayback: jest.fn() });
-    await expect(
-      runPlaybackControlTool({ action: "seek" }, makeDeps(context)),
-    ).rejects.toThrow('time is required for action "seek"');
+    await expect(runPlaybackControlTool({ action: "seek" }, makeDeps(context))).rejects.toThrow(
+      'time is required for action "seek"',
+    );
   });
 });
 
@@ -570,7 +571,9 @@ describe("safeSerializeMessage", () => {
 
     const parsedObject = JSON.parse(objectText) as Record<string, unknown>;
     expect(parsedObject["<truncated>"]).toBeGreaterThan(0);
-    expect(JSON.parse(mapText)).toEqual(expect.objectContaining({ "<truncated>": expect.any(Number) }));
+    expect(JSON.parse(mapText)).toEqual(
+      expect.objectContaining({ "<truncated>": expect.any(Number) }),
+    );
     expect(JSON.parse(setText)).toEqual(
       expect.arrayContaining([{ "<truncated>": expect.any(Number) }]),
     );

@@ -98,7 +98,11 @@ function DeferredMarkdownImage(props: { alt?: string; src: string }): React.JSX.
 }
 
 const MarkdownImage: NonNullable<Components["img"]> = ({ alt, src }) => {
-  return src == undefined || src === "" ? <>{alt}</> : <DeferredMarkdownImage alt={alt} src={src} />;
+  return src == undefined || src === "" ? (
+    <>{alt}</>
+  ) : (
+    <DeferredMarkdownImage alt={alt} src={src} />
+  );
 };
 
 /**

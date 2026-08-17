@@ -19,8 +19,7 @@ export const appSettings = {
   agentDesktopPlaintextCredentialStorageWarning:
     "No secure credential backend is available (for example, Linux without a keyring), so credentials are stored in plain text. Installed extensions are trusted at the same level as the application and can access credentials stored on this device.",
   agentEnable: "Enable agent",
-  agentEnableHelp:
-    "Show the Agent Chat button in the app bar and allow the agent sidebar to open.",
+  agentEnableHelp: "Show the Agent Chat button in the app bar and allow the agent sidebar to open.",
   agentFieldRequired: "This field is required.",
   agentInvalidUrl:
     "Enter a valid HTTP or HTTPS URL without credentials, query parameters, or a fragment.",

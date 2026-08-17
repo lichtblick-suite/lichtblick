@@ -12,25 +12,15 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
-import {
-  AgentChatState,
-  useAgentChat,
-} from "@lichtblick/suite-base/context/AgentChatContext";
-import {
-  PlayerPresence,
-  PlayerURLState,
-} from "@lichtblick/suite-base/players/types";
+import { AgentChatState, useAgentChat } from "@lichtblick/suite-base/context/AgentChatContext";
+import { PlayerPresence, PlayerURLState } from "@lichtblick/suite-base/players/types";
 
 const log = Logger.getLogger(__filename);
 
-const selectPlayerId = ({ playerState }: MessagePipelineContext) =>
-  playerState.playerId;
-const selectPlayerPresence = ({ playerState }: MessagePipelineContext) =>
-  playerState.presence;
-const selectActiveData = ({ playerState }: MessagePipelineContext) =>
-  playerState.activeData;
-const selectPlayerUrlState = ({ playerState }: MessagePipelineContext) =>
-  playerState.urlState;
+const selectPlayerId = ({ playerState }: MessagePipelineContext) => playerState.playerId;
+const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
+const selectActiveData = ({ playerState }: MessagePipelineContext) => playerState.activeData;
+const selectPlayerUrlState = ({ playerState }: MessagePipelineContext) => playerState.urlState;
 const selectSessionId = (state: AgentChatState) => state.sessionId;
 
 type WaitingRequest = NonNullable<AgentChatState["waitingRequest"]>;
@@ -45,14 +35,8 @@ const selectWaitingRequest = (state: AgentChatState) => state.waitingRequest;
 const selectNotifyCatalogReady = (state: AgentChatState): NotifyCatalogReady =>
   state.actions.notifyCatalogReady;
 
-function stringArraysEqual(
-  left: readonly string[],
-  right: readonly string[],
-): boolean {
-  return (
-    left.length === right.length &&
-    left.every((value, index) => value === right[index])
-  );
+function stringArraysEqual(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 function playerMatchesWaitingRequest(
@@ -71,9 +55,7 @@ function playerMatchesWaitingRequest(
   // Keep this fallback for Player implementations which preserve the original selectSource params
   // instead of RemoteDataSourceFactory's normalized `urls` array.
   const playerUrl = urlState.parameters?.url;
-  return (
-    typeof playerUrl === "string" && playerUrl === waitingRequest.urls.join(",")
-  );
+  return typeof playerUrl === "string" && playerUrl === waitingRequest.urls.join(",");
 }
 
 export function AgentCatalogWatcher(): null {
@@ -99,9 +81,7 @@ export function AgentCatalogWatcher(): null {
     }
 
     if (waitingRequest != undefined) {
-      const existing = waitingObservations.current.get(
-        waitingRequest.requestId,
-      );
+      const existing = waitingObservations.current.get(waitingRequest.requestId);
       if (existing == undefined) {
         // The baseline must be the player from before this waiting intent became observable. The
         // Provider publishes waitingRequest before selectSource, so this remains correct even when
@@ -121,10 +101,7 @@ export function AgentCatalogWatcher(): null {
       // URL matching rules out unrelated manual source changes and late completion of another
       // request. A manual open of the exact same URL remains indistinguishable until PlayerSelection
       // exposes an operation/player correlation id.
-      const playerMatchesRequest = playerMatchesWaitingRequest(
-        playerUrlState,
-        observation.request,
-      );
+      const playerMatchesRequest = playerMatchesWaitingRequest(playerUrlState, observation.request);
       if (
         !observation.notified &&
         playerChanged &&

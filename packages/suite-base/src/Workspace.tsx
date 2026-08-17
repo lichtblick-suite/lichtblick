@@ -784,9 +784,7 @@ export default function Workspace(props: WorkspaceProps): React.JSX.Element {
   const [showOpenDialogOnStartup = true] = useAppConfigurationValue<boolean>(
     AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP,
   );
-  const [agentEnabled = false] = useAppConfigurationValue<boolean>(
-    AppSetting.AGENT_ENABLED,
-  );
+  const [agentEnabled = false] = useAppConfigurationValue<boolean>(AppSetting.AGENT_ENABLED);
 
   const { workspaceStoreCreator } = useAppContext();
 

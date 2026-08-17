@@ -7,10 +7,7 @@ import "@testing-library/jest-dom";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useTranslation } from "react-i18next";
 
-import {
-  AgentChatState,
-  useAgentChat,
-} from "@lichtblick/suite-base/context/AgentChatContext";
+import { AgentChatState, useAgentChat } from "@lichtblick/suite-base/context/AgentChatContext";
 import LinkHandlerContext from "@lichtblick/suite-base/context/LinkHandlerContext";
 
 import AgentChatSidebar from "./AgentChatSidebar";
@@ -162,8 +159,8 @@ describe("AgentChatSidebar", () => {
           ? `Progress for ${options?.name ?? ""}`
           : (translations[key] ?? options?.defaultValue ?? key),
     });
-    (useAgentChat as jest.Mock).mockImplementation(
-      (selector: (state: AgentChatState) => unknown) => selector(mockState),
+    (useAgentChat as jest.Mock).mockImplementation((selector: (state: AgentChatState) => unknown) =>
+      selector(mockState),
     );
   });
 
@@ -178,7 +175,7 @@ describe("AgentChatSidebar", () => {
         {
           id: "message-1",
           role: "assistant",
-          content: "**Ready** <span data-testid=\"unsafe-html\">unsafe</span>",
+          content: '**Ready** <span data-testid="unsafe-html">unsafe</span>',
           createdAt: "2026-07-27T00:00:00.000Z",
         },
       ],
@@ -360,9 +357,7 @@ describe("AgentChatSidebar", () => {
     const selector = screen.getByRole("combobox", { name: "Agent profile" });
     expect(selector).toHaveTextContent("Diagnostics ★");
     fireEvent.mouseDown(selector);
-    expect(
-      screen.getByRole("option", { name: "Second profile" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Second profile" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("option", { name: "Second profile" }));
     expect(selectProfile).toHaveBeenCalledWith("second");
   });
@@ -383,9 +378,7 @@ describe("AgentChatSidebar", () => {
     render(<AgentChatSidebar />);
     fireEvent.mouseDown(screen.getByRole("combobox", { name: "Agent profile" }));
 
-    expect(
-      screen.queryByRole("option", { name: "Second profile" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Second profile" })).not.toBeInTheDocument();
   });
 
   it("disables profile switching while the agent is generating", () => {
@@ -606,10 +599,7 @@ describe("AgentChatSidebar", () => {
 
     setMockState({
       status: "streaming",
-      messages: [
-        initialMessage,
-        { ...initialMessage, id: "message-2", content: "New content" },
-      ],
+      messages: [initialMessage, { ...initialMessage, id: "message-2", content: "New content" }],
     });
     rerender(<AgentChatSidebar />);
 
@@ -639,10 +629,7 @@ describe("AgentChatSidebar", () => {
 
     setMockState({
       status: "streaming",
-      messages: [
-        initialMessage,
-        { ...initialMessage, id: "message-2", content: "New content" },
-      ],
+      messages: [initialMessage, { ...initialMessage, id: "message-2", content: "New content" }],
     });
     rerender(<AgentChatSidebar />);
 

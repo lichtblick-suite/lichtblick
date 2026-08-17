@@ -72,7 +72,13 @@ describe("AgentConversationStore.list", () => {
   it("supports block-content UI messages for the title", async () => {
     await save(
       record("c-blocks", "2026-08-04T00:00:00.000Z", [
-        { role: "user", content: [{ type: "text", text: "hello" }, { type: "text", text: "world" }] },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "hello" },
+            { type: "text", text: "world" },
+          ],
+        },
       ]),
     );
 

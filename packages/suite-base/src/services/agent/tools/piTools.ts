@@ -54,12 +54,7 @@ export function buildPiTools(
   };
 
   return buildToolDefinitions(enabledSkillIds).map((definition): AgentTool => {
-    const execute: AgentTool["execute"] = async (
-      _toolCallId,
-      params,
-      signal,
-      onUpdate,
-    ) => {
+    const execute: AgentTool["execute"] = async (_toolCallId, params, signal, onUpdate) => {
       signal?.throwIfAborted();
 
       update(onUpdate, `Running ${definition.name}`, {

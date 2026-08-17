@@ -6,10 +6,7 @@ import {
   validateLayoutProposal,
   type ValidatedLayoutProposal,
 } from "@lichtblick/suite-base/services/agent/layoutSchema";
-import {
-  renderSkill,
-  type Skill,
-} from "@lichtblick/suite-base/services/agent/local/skills";
+import { renderSkill, type Skill } from "@lichtblick/suite-base/services/agent/local/skills";
 import type { CatalogSnapshot } from "@lichtblick/suite-base/services/agent/local/types";
 import type { AgentMemoryStore } from "@lichtblick/suite-base/services/agent/memory/agentMemory";
 import {
@@ -17,9 +14,7 @@ import {
   runReadMessagesTool,
   runSearchMessagesTool,
 } from "@lichtblick/suite-base/services/agent/tools/dataQueryTools";
-import type {
-  LayoutProposal,
-} from "@lichtblick/suite-base/services/agent/types";
+import type { LayoutProposal } from "@lichtblick/suite-base/services/agent/types";
 
 export const TOOL_RUNTIME_MAX_RESULT_BYTES = 256 * 1024;
 
@@ -54,11 +49,7 @@ export type ToolRuntimeDeps = {
  */
 export type AgentDataQueryContext = Pick<
   MessagePipelineContext,
-  | "getBatchIterator"
-  | "startPlayback"
-  | "pausePlayback"
-  | "seekPlayback"
-  | "playerState"
+  "getBatchIterator" | "startPlayback" | "pausePlayback" | "seekPlayback" | "playerState"
 >;
 
 export type AgentDataQueryDeps = {
@@ -71,15 +62,10 @@ export type ToolRuntimeContext = {
 };
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
-  return (
-    typeof value === "object" && value != undefined && !Array.isArray(value)
-  );
+  return typeof value === "object" && value != undefined && !Array.isArray(value);
 }
 
-export function requireRecord(
-  value: unknown,
-  toolName: string,
-): Record<string, unknown> {
+export function requireRecord(value: unknown, toolName: string): Record<string, unknown> {
   if (!isRecord(value)) {
     throw new Error(`${toolName} input must be an object`);
   }
@@ -124,9 +110,7 @@ export function optionalEnum<T extends string>(
     return undefined;
   }
   if (!allowed.includes(value as T)) {
-    throw new Error(
-      `${toolName}.${property} must be one of: ${allowed.join(", ")}`,
-    );
+    throw new Error(`${toolName}.${property} must be one of: ${allowed.join(", ")}`);
   }
   return value as T;
 }
@@ -141,11 +125,7 @@ export function optionalPositiveInteger(
   if (!Object.hasOwn(input, property) || typeof value === "undefined") {
     return undefined;
   }
-  if (
-    !Number.isSafeInteger(value) ||
-    (value as number) <= 0 ||
-    (value as number) > maximum
-  ) {
+  if (!Number.isSafeInteger(value) || (value as number) <= 0 || (value as number) > maximum) {
     throw new Error(`${toolName}.${property} must be a positive safe integer`);
   }
   return value as number;
@@ -163,9 +143,7 @@ function optionalStringArray(
   if (
     !Array.isArray(value) ||
     value.length === 0 ||
-    value.some(
-      (entry) => typeof entry !== "string" || entry.trim().length === 0,
-    )
+    value.some((entry) => typeof entry !== "string" || entry.trim().length === 0)
   ) {
     throw new Error(`${toolName}.${property} must be a non-empty string array`);
   }
@@ -179,17 +157,12 @@ export function optionalDecimalString(
 ): string | undefined {
   const value = optionalString(input, property, toolName);
   if (value != undefined && !/^[0-9]+$/.test(value)) {
-    throw new Error(
-      `${toolName}.${property} must be an unsigned decimal string`,
-    );
+    throw new Error(`${toolName}.${property} must be an unsigned decimal string`);
   }
   return value;
 }
 
-function requireUrls(
-  input: Record<string, unknown>,
-  toolName: string,
-): string[] {
+function requireUrls(input: Record<string, unknown>, toolName: string): string[] {
   const urls = optionalStringArray(input, "urls", toolName);
   if (urls == undefined) {
     throw new Error(`${toolName}.urls is required`);
@@ -256,10 +229,7 @@ export async function runDependency<T>(
   });
 }
 
-function requireMemoryStore(
-  deps: ToolRuntimeDeps,
-  toolName: string,
-): AgentMemoryStore {
+function requireMemoryStore(deps: ToolRuntimeDeps, toolName: string): AgentMemoryStore {
   if (deps.memoryStore == undefined) {
     throw new Error(`${toolName} is unavailable: memory is not configured`);
   }
@@ -380,9 +350,7 @@ export async function runMemoryForgetTool(
   const input = requireRecord(value, toolName);
   const store = requireMemoryStore(deps, toolName);
   const id = requireString(input, "id", toolName);
-  if (
-    !(await runDependency(async () => await store.remove(id), context.signal))
-  ) {
+  if (!(await runDependency(async () => await store.remove(id), context.signal))) {
     throw new Error(`${toolName}.id "${id}" is not a stored memory`);
   }
   return { forgotten: id };
@@ -426,8 +394,7 @@ export async function runGetDataCatalogTool(
   const toolName = "get_data_catalog";
   requireRecord(value, toolName);
   const catalog =
-    context.catalogReady ??
-    (await runDependency(() => deps.getCatalog(), context.signal));
+    context.catalogReady ?? (await runDependency(() => deps.getCatalog(), context.signal));
   context.signal?.throwIfAborted();
   return normalizeCatalog(catalog);
 }
@@ -459,9 +426,7 @@ type ToolRuntimeFunction = (
   context?: ToolRuntimeContext,
 ) => Promise<unknown>;
 
-export const TOOL_RUNTIME_FUNCTIONS: Readonly<
-  Record<string, ToolRuntimeFunction>
-> = {
+export const TOOL_RUNTIME_FUNCTIONS: Readonly<Record<string, ToolRuntimeFunction>> = {
   load_skill: runLoadSkillTool,
   memory_write: runMemoryWriteTool,
   memory_forget: runMemoryForgetTool,

@@ -8,8 +8,7 @@ const nonEmptyString = { type: "string", minLength: 1 } as const;
 const decimalNanoseconds = {
   type: "string",
   pattern: "^[0-9]+$",
-  description:
-    "Decimal nanoseconds encoded as a string to avoid precision loss.",
+  description: "Decimal nanoseconds encoded as a string to avoid precision loss.",
 } as const;
 
 /**
@@ -18,9 +17,7 @@ const decimalNanoseconds = {
  * The load_skill enum has to reflect the skills actually available, which depends on the user's
  * custom skills, so this is a function rather than a constant.
  */
-export function buildToolDefinitions(
-  skillIds: readonly string[] = SKILL_IDS,
-): LlmToolDef[] {
+export function buildToolDefinitions(skillIds: readonly string[] = SKILL_IDS): LlmToolDef[] {
   return LOCAL_AGENT_TOOL_DEFINITIONS.map((tool) =>
     tool.name === "load_skill"
       ? {
@@ -105,8 +102,7 @@ export const LOCAL_AGENT_TOOL_DEFINITIONS: LlmToolDef[] = [
   },
   {
     name: "get_data_catalog",
-    description:
-      "Read the topics and datatypes currently loaded in the Lichtblick workspace.",
+    description: "Read the topics and datatypes currently loaded in the Lichtblick workspace.",
     inputSchema: {
       type: "object",
       additionalProperties: false,

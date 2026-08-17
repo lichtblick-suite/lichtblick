@@ -102,9 +102,7 @@ function canonicalSerialize(value: unknown, ancestors: Set<object>): string {
         const record = value as Record<string, unknown>;
         result = `{${Object.keys(record)
           .sort()
-          .map(
-            (key) => `${JSON.stringify(key)}:${canonicalSerialize(record[key], ancestors)}`,
-          )
+          .map((key) => `${JSON.stringify(key)}:${canonicalSerialize(record[key], ancestors)}`)
           .join(",")}}`;
       }
       ancestors.delete(value);
@@ -179,10 +177,7 @@ function getLeafIds(layout: MosaicNode<string> | undefined): string[] {
  * within a valid tree, so for valid inputs the answer is 0 or 1; a count other than 1 means the
  * old tree was deleted, duplicated, or reordered and the caller must take the full path.
  */
-function countSubtreeOccurrences(
-  node: MosaicNode<string>,
-  target: MosaicNode<string>,
-): number {
+function countSubtreeOccurrences(node: MosaicNode<string>, target: MosaicNode<string>): number {
   let count = _.isEqual(node, target) ? 1 : 0;
   if (typeof node !== "string") {
     count += countSubtreeOccurrences(node.first, target);
@@ -272,13 +267,7 @@ function planIncrementalApplyData(
 export function planIncrementalApply(
   input: IncrementalApplyInput,
 ): IncrementalApplyPlan | undefined {
-  const {
-    baseFingerprint,
-    baseLayoutId,
-    currentLayoutData,
-    currentLayoutId,
-    proposalData,
-  } = input;
+  const { baseFingerprint, baseLayoutId, currentLayoutData, currentLayoutId, proposalData } = input;
   if (baseLayoutId == undefined || baseFingerprint == undefined) {
     return undefined;
   }

@@ -42,24 +42,18 @@ describe("buildPiTools", () => {
       definitions.map((definition) => definition.name),
     );
     for (const definition of definitions) {
-      const tool = tools.find(
-        (candidate) => candidate.name === definition.name,
-      );
+      const tool = tools.find((candidate) => candidate.name === definition.name);
       expect(tool?.description).toBe(definition.description);
       expect(tool?.parameters).toEqual(definition.inputSchema);
     }
 
     const loadSkill = tools.find((tool) => tool.name === "load_skill")!;
-    await expect(
-      loadSkill.execute("load-1", { skillId: "enabled" }),
-    ).resolves.toMatchObject({
-      content: [
-        { type: "text", text: '<skill id="enabled">\n# Enabled\n</skill>' },
-      ],
+    await expect(loadSkill.execute("load-1", { skillId: "enabled" })).resolves.toMatchObject({
+      content: [{ type: "text", text: '<skill id="enabled">\n# Enabled\n</skill>' }],
     });
-    await expect(
-      loadSkill.execute("load-2", { skillId: "disabled" }),
-    ).rejects.toThrow("load_skill.skillId must be one of: enabled");
+    await expect(loadSkill.execute("load-2", { skillId: "disabled" })).rejects.toThrow(
+      "load_skill.skillId must be one of: enabled",
+    );
   });
 
   it("maps running and completed progress through onUpdate", async () => {

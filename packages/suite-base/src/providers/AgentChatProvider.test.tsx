@@ -160,25 +160,31 @@ jest.mock("@lichtblick/suite-base/services/agent/pi/PiAgentOrchestrator", () => 
       },
       notifyCatalogReady: jest.fn().mockResolvedValue(undefined),
       sendMessage: jest.fn().mockResolvedValue(undefined),
-      subscribeEvents: jest.fn().mockImplementation(
-        async (_sessionId: string, listener: (event: AgentEvent) => void, signal?: AbortSignal) => {
-          const pending = new Promise<void>((resolve) => {
-            if (signal?.aborted === true) {
-              resolve();
-            } else {
-              signal?.addEventListener(
-                "abort",
-                () => {
-                  resolve();
-                },
-                { once: true },
-              );
-            }
-          });
-          subscriptions.push({ listener, signal });
-          await pending;
-        },
-      ),
+      subscribeEvents: jest
+        .fn()
+        .mockImplementation(
+          async (
+            _sessionId: string,
+            listener: (event: AgentEvent) => void,
+            signal?: AbortSignal,
+          ) => {
+            const pending = new Promise<void>((resolve) => {
+              if (signal?.aborted === true) {
+                resolve();
+              } else {
+                signal?.addEventListener(
+                  "abort",
+                  () => {
+                    resolve();
+                  },
+                  { once: true },
+                );
+              }
+            });
+            subscriptions.push({ listener, signal });
+            await pending;
+          },
+        ),
     };
     mockOrchestratorInstances.push(instance);
     return instance;
@@ -1773,7 +1779,10 @@ describe("AgentChatProvider", () => {
     // path, the fingerprint no longer matches, and applying would fall back — the label must
     // flip to new-layout.
     act(() => {
-      catalog = { topics: [{ name: "/camera", schemaName: "sensor_msgs/Image" }], datatypes: new Map([["sensor_msgs/Image", { definitions: [] }]]) };
+      catalog = {
+        topics: [{ name: "/camera", schemaName: "sensor_msgs/Image" }],
+        datatypes: new Map([["sensor_msgs/Image", { definitions: [] }]]),
+      };
       catalogChangeListener?.();
     });
     expect(result.current.pendingProposalMode).toEqual({ kind: "new" });
@@ -1871,9 +1880,7 @@ describe("AgentChatProvider", () => {
 
   it("keeps non-empty messages when the transcript restore rejects (B1)", async () => {
     const clientRef: { current?: IAgentClient } = {};
-    const restoreUiMessages = jest
-      .fn()
-      .mockRejectedValue(new Error("remote unavailable"));
+    const restoreUiMessages = jest.fn().mockRejectedValue(new Error("remote unavailable"));
     // The failing persistence is present from the very first mount: its restore rejects both on
     // the initial mount (empty transcript — nothing to lose) and on the re-bind.
     const failingPersistence: AgentConversationPersistence = {

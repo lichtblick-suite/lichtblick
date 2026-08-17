@@ -72,9 +72,7 @@ describe("sanitizePlotPaths", () => {
 
     expect(droppedCount).toBe(2);
     const paths = (result.configById["Plot!agent"] as { paths: Array<{ value: string }> }).paths;
-    expect(paths).toEqual([
-      { value: "/points.x", enabled: true, timestampMethod: "receiveTime" },
-    ]);
+    expect(paths).toEqual([{ value: "/points.x", enabled: true, timestampMethod: "receiveTime" }]);
   });
 
   it("drops paths terminating at a message or an unsliced array even when the field exists", () => {
@@ -116,7 +114,7 @@ describe("sanitizePlotPaths", () => {
   it("preserves slice/filter/modifier expressions on otherwise valid paths", () => {
     const data = makeLayoutData([
       {
-        value: "/points.channels[:]{name==\"x\"}.values[0]",
+        value: '/points.channels[:]{name=="x"}.values[0]',
         enabled: true,
         timestampMethod: "receiveTime",
       },
@@ -128,7 +126,7 @@ describe("sanitizePlotPaths", () => {
     expect(droppedCount).toBe(0);
     const paths = (result.configById["Plot!agent"] as { paths: Array<{ value: string }> }).paths;
     expect(paths.map((path) => path.value)).toEqual([
-      "/points.channels[:]{name==\"x\"}.values[0]",
+      '/points.channels[:]{name=="x"}.values[0]',
       "/points.x.@derivative",
     ]);
   });
@@ -143,10 +141,7 @@ describe("sanitizePlotPaths", () => {
 
     const { data: result, droppedCount } = sanitizePlotPaths(
       data,
-      [
-        ...topics,
-        { name: "/missing_schema_topic", schemaName: "unknown/NotInDatatypes" },
-      ],
+      [...topics, { name: "/missing_schema_topic", schemaName: "unknown/NotInDatatypes" }],
       datatypesWithoutTopicSchema,
     );
 
@@ -174,9 +169,7 @@ describe("sanitizePlotPaths", () => {
       { value: "/nonexistent.x", enabled: true, timestampMethod: "receiveTime" },
     ]);
 
-    expect(() =>
-      sanitizePlotPaths(data, topics, datatypesWithBrokenReference),
-    ).not.toThrow();
+    expect(() => sanitizePlotPaths(data, topics, datatypesWithBrokenReference)).not.toThrow();
     const { data: result, droppedCount } = sanitizePlotPaths(
       data,
       topics,
@@ -185,10 +178,7 @@ describe("sanitizePlotPaths", () => {
 
     expect(droppedCount).toBe(0);
     const paths = (result.configById["Plot!agent"] as { paths: Array<{ value: string }> }).paths;
-    expect(paths.map((path) => path.value)).toEqual([
-      "/points.header.seq",
-      "/nonexistent.x",
-    ]);
+    expect(paths.map((path) => path.value)).toEqual(["/points.header.seq", "/nonexistent.x"]);
   });
 
   it("does not filter when no data source is loaded", () => {

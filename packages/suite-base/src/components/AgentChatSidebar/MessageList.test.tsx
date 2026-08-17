@@ -31,11 +31,7 @@ jest.mock("react-markdown", () => ({
 }));
 
 jest.mock("./ToolRunGroup", () => ({
-  ToolRunGroup: ({
-    toolRuns,
-  }: {
-    toolRuns: { id: string; name: string }[];
-  }) => (
+  ToolRunGroup: ({ toolRuns }: { toolRuns: { id: string; name: string }[] }) => (
     <div data-testid="tool-run-group">
       {toolRuns.map((toolRun) => (
         <div key={toolRun.id} data-testid="tool-run-card">
@@ -51,11 +47,8 @@ describe("MessageList", () => {
     mockMarkdownRender.mockClear();
     sendMessage.mockClear();
     (useAgentChat as jest.Mock).mockImplementation(
-      (
-        selector: (state: {
-          actions: { sendMessage: typeof sendMessage };
-        }) => unknown,
-      ) => selector({ actions: { sendMessage } }),
+      (selector: (state: { actions: { sendMessage: typeof sendMessage } }) => unknown) =>
+        selector({ actions: { sendMessage } }),
     );
     (useTranslation as jest.Mock).mockReturnValue({
       t: (key: string) => key,
@@ -76,11 +69,7 @@ describe("MessageList", () => {
       createdAt: "2026-07-27T00:00:01.000Z",
     };
 
-    const { rerender } = render(
-      <MessageList
-        messages={[firstMessage, streamingMessage]}
-      />,
-    );
+    const { rerender } = render(<MessageList messages={[firstMessage, streamingMessage]} />);
     expect(mockMarkdownRender).toHaveBeenCalledTimes(2);
 
     rerender(
@@ -96,9 +85,7 @@ describe("MessageList", () => {
     );
 
     expect(mockMarkdownRender).toHaveBeenCalledTimes(3);
-    expect(mockMarkdownRender.mock.calls[2]?.[0].children).toBe(
-      "Partial response",
-    );
+    expect(mockMarkdownRender.mock.calls[2]?.[0].children).toBe("Partial response");
   });
 
   it("anchors expanded history across appends and resets when the anchor disappears", () => {
@@ -109,18 +96,13 @@ describe("MessageList", () => {
       createdAt: "2026-07-27T00:00:00.000Z",
     }));
 
-    const { rerender } = render(
-      <MessageList messages={messages}
- />,
-    );
+    const { rerender } = render(<MessageList messages={messages} />);
 
     expect(screen.getAllByRole("article")).toHaveLength(100);
     expect(screen.queryByText("Message 0")).not.toBeInTheDocument();
     expect(mockMarkdownRender).toHaveBeenCalledTimes(100);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "showEarlierMessages" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "showEarlierMessages" }));
 
     expect(screen.getAllByRole("article")).toHaveLength(105);
     expect(screen.getByText("Message 0")).toBeInTheDocument();
@@ -132,39 +114,24 @@ describe("MessageList", () => {
       content: "Message 105",
       createdAt: "2026-07-27T00:00:01.000Z",
     };
-    rerender(
-      <MessageList
-        messages={[...messages, appendedMessage]}
-      />,
-    );
+    rerender(<MessageList messages={[...messages, appendedMessage]} />);
 
     expect(screen.getAllByRole("article")).toHaveLength(106);
     expect(screen.getByText("Message 0")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "showEarlierMessages" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "showEarlierMessages" })).not.toBeInTheDocument();
 
-    const resetMessages: ChatMessage[] = Array.from(
-      { length: 150 },
-      (_, index) => ({
-        id: `reset-message-${index}`,
-        role: "assistant",
-        content: `Reset message ${index}`,
-        createdAt: "2026-07-27T00:01:00.000Z",
-      }),
-    );
-    rerender(
-      <MessageList
-        messages={resetMessages}
-      />,
-    );
+    const resetMessages: ChatMessage[] = Array.from({ length: 150 }, (_, index) => ({
+      id: `reset-message-${index}`,
+      role: "assistant",
+      content: `Reset message ${index}`,
+      createdAt: "2026-07-27T00:01:00.000Z",
+    }));
+    rerender(<MessageList messages={resetMessages} />);
 
     expect(screen.getAllByRole("article")).toHaveLength(100);
     expect(screen.queryByText("Reset message 0")).not.toBeInTheDocument();
     expect(screen.getByText("Reset message 50")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "showEarlierMessages" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "showEarlierMessages" })).toBeInTheDocument();
   });
 
   it("renders all tool runs for one message inside a single execution group", () => {
@@ -179,10 +146,7 @@ describe("MessageList", () => {
       ],
     };
 
-    render(
-      <MessageList messages={[message]}
- />,
-    );
+    render(<MessageList messages={[message]} />);
 
     const group = screen.getByTestId("tool-run-group");
     expect(screen.getAllByTestId("tool-run-group")).toHaveLength(1);
@@ -200,20 +164,13 @@ describe("MessageList", () => {
       toolRuns: [{ id: "tool-running", name: "get_data_catalog", status: "running" }],
     };
 
-    render(
-      <MessageList
-        messages={[message]}
-        status="streaming"
-      />,
-    );
+    render(<MessageList messages={[message]} status="streaming" />);
 
     const article = screen.getByRole("article");
     const toolGroup = within(article).getByTestId("tool-run-group");
     const processing = within(article).getByTestId("agent-chat-processing");
     expect(processing).toHaveTextContent("processing");
-    expect(
-      within(article).queryByText("Fragmented intermediate response"),
-    ).not.toBeInTheDocument();
+    expect(within(article).queryByText("Fragmented intermediate response")).not.toBeInTheDocument();
     expect(toolGroup.nextElementSibling).toBe(processing);
   });
 
@@ -225,17 +182,10 @@ describe("MessageList", () => {
       createdAt: "2026-08-04T00:00:00.000Z",
     };
 
-    render(
-      <MessageList
-        messages={[message]}
-        status="streaming"
-      />,
-    );
+    render(<MessageList messages={[message]} status="streaming" />);
 
     expect(screen.getByText("Streaming text response")).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("agent-chat-processing"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("agent-chat-processing")).not.toBeInTheDocument();
   });
 
   it("reveals the full assistant response when the tool-assisted turn completes", () => {
@@ -244,22 +194,13 @@ describe("MessageList", () => {
       role: "assistant",
       content: "Final complete response",
       createdAt: "2026-08-04T00:00:00.000Z",
-      toolRuns: [
-        { id: "tool-complete", name: "get_data_catalog", status: "succeeded" },
-      ],
+      toolRuns: [{ id: "tool-complete", name: "get_data_catalog", status: "succeeded" }],
     };
 
-    render(
-      <MessageList
-        messages={[message]}
-        status="idle"
-      />,
-    );
+    render(<MessageList messages={[message]} status="idle" />);
 
     expect(screen.getByText("Final complete response")).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("agent-chat-processing"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("agent-chat-processing")).not.toBeInTheDocument();
   });
 
   it("leaves historical tool-assisted messages visible during a later tool run", () => {
@@ -268,9 +209,7 @@ describe("MessageList", () => {
       role: "assistant",
       content: "Historical final response",
       createdAt: "2026-08-04T00:00:00.000Z",
-      toolRuns: [
-        { id: "tool-history", name: "get_data_catalog", status: "succeeded" },
-      ],
+      toolRuns: [{ id: "tool-history", name: "get_data_catalog", status: "succeeded" }],
     };
     const activeMessage: ChatMessage = {
       id: "message-active",
@@ -280,18 +219,10 @@ describe("MessageList", () => {
       toolRuns: [{ id: "tool-active", name: "get_data_catalog", status: "running" }],
     };
 
-    render(
-      <MessageList
-        messages={[historicalMessage, activeMessage]}
-        status="streaming"
-      />,
-    );
+    render(<MessageList messages={[historicalMessage, activeMessage]} status="streaming" />);
 
     expect(screen.getByText("Historical final response")).toBeInTheDocument();
-    expect(
-      screen.queryByText("Active fragmented response"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Active fragmented response")).not.toBeInTheDocument();
     expect(screen.getAllByTestId("agent-chat-processing")).toHaveLength(1);
   });
-
 });
