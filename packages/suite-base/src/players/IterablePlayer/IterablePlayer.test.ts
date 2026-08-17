@@ -254,8 +254,11 @@ describe("IterablePlayer", () => {
 
   it("should return no backfill messages before the range source is initialized", async () => {
     // GIVEN - a player whose asynchronous initialization has not completed
+    const source = new TestSource();
+    const sentinelMessage = messageEvent({ topic: "sentinel" });
+    jest.spyOn(source, "getBackfillMessages").mockResolvedValue([sentinelMessage]);
     const player = new IterablePlayer({
-      source: new TestSource(),
+      source,
       enablePreload: false,
       sourceId: "test",
     });
