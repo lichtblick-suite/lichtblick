@@ -5,7 +5,6 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import userEvent, { UserEvent } from "@testing-library/user-event";
 
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { BasicBuilder } from "@lichtblick/test-builders";
