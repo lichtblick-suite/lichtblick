@@ -40,7 +40,7 @@ function makeMockSource(
     messageIterator: jest.fn().mockImplementation(async function* () {
       yield* messages;
     }),
-  } as unknown as IIterableSource<Uint8Array>;
+  } as IIterableSource<Uint8Array>;
 }
 
 // start/end may be omitted to create a "source without time info" (activated eagerly). An
@@ -76,7 +76,7 @@ function makeMockSourceWithReturn(
         },
       };
     }),
-  } as unknown as IIterableSource<Uint8Array>;
+  } as IIterableSource<Uint8Array>;
 }
 
 describe("mergeSequentialIterators", () => {
@@ -214,7 +214,7 @@ describe("mergeSequentialIterators", () => {
       messageIterator: jest.fn().mockImplementation(async function* () {
         yield makeMessageEvent("topic", 5);
       }),
-    } as unknown as IIterableSource<Uint8Array>;
+    } as IIterableSource<Uint8Array>;
 
     const sourceWithTime = makeMockSource({ sec: 10, nsec: 0 }, { sec: 20, nsec: 0 }, [
       makeMessageEvent("topic", 15),
@@ -444,6 +444,47 @@ describe("mergeSequentialIterators", () => {
     expect(activatedReturn).toHaveBeenCalledTimes(1);
     // The failing iterator itself was registered in activeIterators before its next() rejected,
     // so it must also be offered a return() call.
+    expect(failingReturn).toHaveBeenCalledTimes(1);
+  });
+
+  it("cleans up a successfully activated source without time info when a subsequent timed source fails during activation", async () => {
+    // Given
+    const activatedReturn = jest.fn();
+    const failingReturn = jest.fn();
+    const activationError = new Error(BasicBuilder.string());
+
+    // The source without time info is activated eagerly and succeeds; with no queryStart, the
+    // timed source is then activated unconditionally right after and fails. This crosses the two
+    // source categories the shared try/finally was introduced to cover together.
+    const activatedSource = makeMockSourceWithReturn(
+      undefined,
+      undefined,
+      [makeMessageEvent(BasicBuilder.string(), 1)],
+      activatedReturn,
+    );
+    const failingSource = makeMockSourceWithReturn(
+      RosTimeBuilder.time({ sec: 0, nsec: 0 }),
+      RosTimeBuilder.time({ sec: 10, nsec: 0 }),
+      [],
+      failingReturn,
+      activationError,
+    );
+
+    // When
+    await expect(
+      (async () => {
+        for await (const message of mergeSequentialIterators(
+          [activatedSource, failingSource],
+          defaultArgs,
+        )) {
+          // The timed source fails right after the source without time info is activated.
+          expect(message).toBeDefined();
+        }
+      })(),
+    ).rejects.toBe(activationError);
+
+    // Then
+    expect(activatedReturn).toHaveBeenCalledTimes(1);
     expect(failingReturn).toHaveBeenCalledTimes(1);
   });
 
