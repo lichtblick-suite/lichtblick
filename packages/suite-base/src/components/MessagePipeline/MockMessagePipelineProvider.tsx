@@ -208,6 +208,9 @@ function getPublicState(
     getBatchIterator: () => {
       return undefined;
     },
+    getMessageAtTime: async () => {
+      return undefined;
+    },
   };
 }
 

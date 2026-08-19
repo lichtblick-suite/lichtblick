@@ -44,4 +44,8 @@ export type MessagePipelineContext = Immutable<{
     topic: string,
     options?: { start?: Time; end?: Time },
   ) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
+  // Read the most recent message on `topic` at or before `time`, independent of the current
+  // playback position. Resolves to `undefined` if unsupported (e.g. live data sources) or if no
+  // matching message exists.
+  getMessageAtTime: (topic: string, time: Time) => Promise<MessageEvent | undefined>;
 }>;
