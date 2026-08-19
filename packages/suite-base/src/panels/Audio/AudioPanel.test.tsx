@@ -42,7 +42,7 @@ class MockAudioContext {
         getChannelData: (ch: number) => channels[ch] ?? new Float32Array(),
         copyFromChannel: jest.fn(),
         copyToChannel: jest.fn(),
-      } as unknown as AudioBuffer;
+      };
     },
   );
 
@@ -134,7 +134,7 @@ describe("AudioPanel", () => {
     };
 
     act(() => {
-      ctx.onRender?.(renderState as RenderState, () => {});
+      ctx.onRender?.(renderState, () => {});
     });
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -165,7 +165,7 @@ describe("AudioPanel", () => {
 
     // when... a seek occurs
     act(() => {
-      ctx.onRender?.({ didSeek: true, currentFrame: [] } as unknown as RenderState, () => {});
+      ctx.onRender?.({ didSeek: true, currentFrame: [] }, () => {});
     });
 
     // then... playback state is reset
