@@ -104,15 +104,16 @@ export default class WebMPlaybackMocksBuilder {
       public static isTypeSupported(): boolean {
         return true;
       }
-      public constructor() {
-        return mediaSource;
-      }
+      public readyState = mediaSource.readyState;
+      public addSourceBuffer = mediaSource.addSourceBuffer;
+      public addEventListener = mediaSource.addEventListener;
+      public endOfStream = mediaSource.endOfStream;
     }
 
     return {
       mediaSource,
       sourceOpenListeners,
-      MockMediaSource: MockMediaSource as unknown as new () => MediaSourceMock,
+      MockMediaSource,
     };
   }
 

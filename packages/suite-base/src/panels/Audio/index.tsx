@@ -35,14 +35,14 @@ type AudioPanelAdapterProps = {
   saveConfig: SaveConfig<AudioConfig>;
 };
 
-function AudioPanelAdapter({ config, saveConfig }: AudioPanelAdapterProps) {
+function AudioPanelAdapter(props: Readonly<AudioPanelAdapterProps>) {
   const crash = useCrash();
   const boundInitPanel = useMemo(() => initPanel.bind(undefined, crash), [crash]);
 
   return (
     <PanelExtensionAdapter
-      config={config}
-      saveConfig={saveConfig}
+      config={props.config}
+      saveConfig={props.saveConfig}
       initPanel={boundInitPanel}
       highestSupportedConfigVersion={1}
     />
