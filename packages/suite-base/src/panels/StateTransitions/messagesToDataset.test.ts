@@ -401,6 +401,26 @@ describe("messagesToDataset", () => {
     expect(result.data.length).toBe(0);
   });
 
+  it("should treat a null value as a gap and emit a NaN datum", () => {
+    const blocks: MessageAndData[][] = [
+      [
+        {
+          messageEvent,
+          queriedData: [{ value: null, path: queriedDataPath }],
+        },
+      ],
+    ];
+    const argsDataset: MessageDatasetArgs = {
+      ...args,
+      path: { ...args.path, timestampMethod: "receiveTime" },
+      blocks,
+    };
+
+    const result = messagesToDataset(argsDataset);
+
+    expect(result.data).toEqual([{ x: expect.any(Number), y: NaN }]);
+  });
+
   it("should not assign a label to repeated consecutive data points", () => {
     const messageAndData = {
       messageEvent,

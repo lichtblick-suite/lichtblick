@@ -156,8 +156,13 @@ export class CustomDatasetsBuilderImpl {
           value: yValue.originalValue,
         });
 
-        extendBounds1D(xBounds, xValue.value);
-        extendBounds1D(yBounds, yValue.value);
+        // Skip gap values (NaN) so a single missing point doesn't collapse the bounds to NaN.
+        if (!isNaN(xValue.value)) {
+          extendBounds1D(xBounds, xValue.value);
+        }
+        if (!isNaN(yValue.value)) {
+          extendBounds1D(yBounds, yValue.value);
+        }
       }
 
       const fullLength = allData.length;
@@ -176,8 +181,12 @@ export class CustomDatasetsBuilderImpl {
           value: yValue.originalValue,
         });
 
-        extendBounds1D(xBounds, xValue.value);
-        extendBounds1D(yBounds, yValue.value);
+        if (!isNaN(xValue.value)) {
+          extendBounds1D(xBounds, xValue.value);
+        }
+        if (!isNaN(yValue.value)) {
+          extendBounds1D(yBounds, yValue.value);
+        }
       }
 
       // Downsample scatter is designed for scatter plots without points since it culls values
