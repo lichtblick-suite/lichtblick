@@ -249,8 +249,6 @@ export function getMessagePathDataItems(
       return;
     }
 
-    // Beyond this point we still need to traverse further into `value`, so bail if there's
-    // nothing to traverse.
     if (value == undefined) {
       return;
     }

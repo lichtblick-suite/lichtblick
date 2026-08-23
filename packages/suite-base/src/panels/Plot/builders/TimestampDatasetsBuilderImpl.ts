@@ -15,6 +15,7 @@ import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types
 import { extendBounds1D } from "@lichtblick/suite-base/types/Bounds";
 
 import { CsvDataset, SeriesConfigKey, SeriesItem, Viewport } from "./IDatasetsBuilder";
+import { MAX_CURRENT_DATUMS_PER_SERIES, buildDatasetStyle, updateSeriesConfig } from "./utils";
 import { Dataset } from "../types";
 import { Datum } from "../utils/datum";
 
@@ -69,10 +70,6 @@ export type UpdateDataAction =
   | UpdateSeriesCurrentAction
   | UpdateSeriesFullAction;
 
-// When accumulating datums into the current buffer we cap each series to this number of datums so
-// we do not grow the memory for accumulated current data indefinitely
-const MAX_CURRENT_DATUMS_PER_SERIES = 50_000;
-
 const compareDatum = (a: Datum, b: Datum) => a.x - b.x;
 
 export class TimestampDatasetsBuilderImpl {
@@ -85,16 +82,8 @@ export class TimestampDatasetsBuilderImpl {
       if (!series.config.enabled) {
         continue;
       }
-      const { color, contrastColor, showLine } = series.config;
       const dataset: Dataset = {
-        borderColor: color,
-        showLine,
-        fill: false,
-        borderWidth: series.config.lineSize,
-        pointRadius: series.config.lineSize * 1.2,
-        pointHoverRadius: 3,
-        pointBackgroundColor: showLine ? contrastColor : color,
-        pointBorderColor: "transparent",
+        ...buildDatasetStyle(series.config),
         data: [],
       };
 
@@ -132,13 +121,14 @@ export class TimestampDatasetsBuilderImpl {
             prevY = item.y;
             continue;
           }
-          // calculate derivative and replace existing datum
+
           const dx = item.x - prevX;
+          // when dx is 0 we have a gap or duplicate timestamp, so we return NaN to break the line
           const newY = dx === 0 ? NaN : (item.y - prevY) / dx;
           allData[i] = {
             ...item,
             y: newY,
-            value: newY,
+            value: Number.isNaN(newY) ? null : newY, // when there's NaN, value should be null (only relevant for tooltip and csv export)
           };
           prevX = item.x;
           prevY = item.y;
@@ -149,11 +139,11 @@ export class TimestampDatasetsBuilderImpl {
           continue;
         }
 
-        if (!isNaN(item.x)) {
+        if (!Number.isNaN(item.x)) {
           extendBounds1D(xBounds, item.x);
         }
 
-        if (!isNaN(item.y)) {
+        if (!Number.isNaN(item.y)) {
           extendBounds1D(yBounds, item.y);
         }
 
@@ -381,19 +371,6 @@ export class TimestampDatasetsBuilderImpl {
   }
 
   #updateSeriesConfigAction(series: Immutable<SeriesItem[]>): void {
-    // Make a new map so we drop series which are no longer present
-    const newSeries = new Map();
-
-    for (const config of series) {
-      let existingSeries = this.#seriesByKey.get(config.key);
-      existingSeries ??= {
-        config,
-        current: [],
-        full: [],
-      };
-      newSeries.set(config.key, existingSeries);
-      existingSeries.config = config;
-    }
-    this.#seriesByKey = newSeries;
+    this.#seriesByKey = updateSeriesConfig(this.#seriesByKey, series);
   }
 }

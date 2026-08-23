@@ -84,6 +84,60 @@ function buildPlayerState(
 }
 
 describe("CustomDatasetsBuilder", () => {
+  it("should render a gap by mapping a null value to NaN", async () => {
+    const builder = new CustomDatasetsBuilder();
+
+    builder.setXPath(parseMessagePath("/foo.val[:]"));
+    builder.setSeries(
+      buildSeriesItems([
+        {
+          enabled: true,
+          timestampMethod: "receiveTime",
+          value: "/bar.val[:]",
+        },
+      ]),
+    );
+
+    builder.handlePlayerState(
+      buildPlayerState({
+        messages: [
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: [0, 1, 2] },
+          },
+          {
+            topic: "/bar",
+            schemaName: "bar",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: [0, null, 2] },
+          },
+        ],
+      }),
+    );
+
+    const result = await builder.getViewportDatasets({
+      size: { width: 1_000, height: 1_000 },
+      bounds: {},
+    });
+
+    expect(result).toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          data: [
+            { x: 0, y: 0, value: 0 },
+            { x: 1, y: NaN, value: null },
+            { x: 2, y: 2, value: 2 },
+          ],
+        }),
+      ],
+    });
+  });
+
   it("should dataset from current messages", async () => {
     const builder = new CustomDatasetsBuilder();
 

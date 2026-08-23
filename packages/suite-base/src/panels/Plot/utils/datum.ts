@@ -46,7 +46,7 @@ export function isChartValue(value: unknown): value is OriginalValue {
 export function getChartValue(value: unknown): number | undefined {
   // eslint-disable-next-line @lichtblick/strict-equality
   if (value === null) {
-    return NaN;
+    return Number.NaN;
   }
   switch (typeof value) {
     case "bigint":
@@ -83,11 +83,18 @@ export function resolveChartDatum(
   if (!isChartValue(item)) {
     return undefined;
   }
+  // eslint-disable-next-line @lichtblick/strict-equality
+  if (item === null) {
+    return { y: Number.NaN, value: null };
+  }
   const chartValue = getChartValue(item);
   if (chartValue == undefined) {
     return undefined;
   }
 
   const y = mathFunction ? mathFunction(chartValue) : chartValue;
-  return { y, value: Number.isNaN(chartValue) ? null : mathFunction ? y : item };
+  if (Number.isNaN(chartValue)) {
+    return { y, value: null };
+  }
+  return { y, value: mathFunction ? y : item };
 }
