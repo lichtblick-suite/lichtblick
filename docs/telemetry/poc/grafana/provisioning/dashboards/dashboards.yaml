@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: lichtblick-poc
+    folder: Lichtblick PoC
+    type: file
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/provisioning/dashboards

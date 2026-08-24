@@ -21,7 +21,7 @@ const params: WebpackConfigParams = {
   outputPath: path.resolve(__dirname, ".webpack"),
   prodSourceMap: "source-map",
   rendererContext: path.resolve(__dirname, "renderer"),
-  rendererEntrypoint: "./index.ts",
+  rendererEntrypoint: "./index.tsx",
   mainContext: path.resolve(__dirname, "main"),
   mainEntrypoint: "./index.ts",
   quicklookContext: path.resolve(__dirname, "quicklook"),

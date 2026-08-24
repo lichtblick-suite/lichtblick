@@ -29,6 +29,7 @@ import { palette } from "@lichtblick/theme";
 
 import StudioAppUpdater from "./StudioAppUpdater";
 import getDevModeIcon from "./getDevModeIcon";
+import { attachRendererGoneTelemetry } from "./processTelemetry";
 import { simulateUserClick } from "./simulateUserClick";
 import { getTelemetrySettings } from "./telemetry";
 import { encodeRendererArg } from "../common/rendererArgs";
@@ -106,6 +107,7 @@ function newStudioWindow(deepLinks: string[] = [], reloadMainWindow: () => void)
   }
 
   const browserWindow = new BrowserWindow(windowOptions);
+  attachRendererGoneTelemetry(browserWindow.webContents);
   nativeTheme.on("updated", () => {
     if (!isMac) {
       // Although the TS types say this function is always available, it is undefined on non-Windows platforms

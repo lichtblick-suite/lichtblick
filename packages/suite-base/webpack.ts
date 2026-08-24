@@ -283,6 +283,9 @@ export function makeConfig(
         LICHTBLICK_SUITE_VERSION: JSON.stringify(version),
         API_URL: JSON.stringify(process.env.API_URL),
         DEV_WORKSPACE: JSON.stringify(process.env.DEV_WORKSPACE),
+        // Base URL of the OTLP/HTTP collector for the telemetry PoC (docs/telemetry/poc). Absent
+        // by default: telemetry stays fully inert unless a build explicitly sets this.
+        OTLP_ENDPOINT: JSON.stringify(process.env.OTLP_ENDPOINT),
         ...buildEnvVars(),
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales

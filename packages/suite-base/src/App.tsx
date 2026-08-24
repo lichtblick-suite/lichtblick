@@ -104,10 +104,6 @@ export function App(props: AppProps): React.JSX.Element {
     providers.push(<NativeWindowContext.Provider value={nativeWindow} />);
   }
 
-  if (extraProviders) {
-    providers.unshift(...extraProviders);
-  }
-
   // Alerts provider also must come before other, dependent contexts.
   providers.unshift(<AlertsContextProvider />);
   providers.unshift(<CurrentLayoutProvider loaders={layoutLoaders} />);
@@ -120,6 +116,14 @@ export function App(props: AppProps): React.JSX.Element {
   // The toast and logs provider comes first so they are available to all downstream providers
   providers.unshift(<StudioToastProvider />);
   providers.unshift(<StudioLogsSettingsProvider />);
+
+  // Extra providers are added last so they end up outermost: MultiProvider nests via reduceRight,
+  // so index 0 wraps everything else. A provider supplying a context that the providers above
+  // consume (e.g. TelemetryProvider, whose analytics context is read by CurrentLayoutProvider)
+  // must sit above them, otherwise those consumers silently read the context default instead.
+  if (extraProviders) {
+    providers.unshift(...extraProviders);
+  }
 
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
 

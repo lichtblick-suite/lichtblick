@@ -59,6 +59,11 @@ export function createCommonWebpackConfig(
         DEV_WORKSPACE: process.env.DEV_WORKSPACE
           ? JSON.stringify(process.env.DEV_WORKSPACE)
           : undefined,
+        // Base URL of the OTLP/HTTP collector for the telemetry PoC (docs/telemetry/poc). Shared
+        // by main and renderer builds; absent by default (see constants/config.ts).
+        OTLP_ENDPOINT: process.env.OTLP_ENDPOINT
+          ? JSON.stringify(process.env.OTLP_ENDPOINT)
+          : undefined,
       }),
       new ForkTsCheckerWebpackPlugin(),
     ],

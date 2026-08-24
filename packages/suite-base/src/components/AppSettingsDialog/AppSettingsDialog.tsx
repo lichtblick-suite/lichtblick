@@ -51,6 +51,7 @@ import {
   LaunchDefault,
   MessageFramerate,
   StepSize,
+  PrivacySettings,
   RosPackagePath,
   TimeFormat,
   TimezoneSettings,
@@ -107,6 +108,7 @@ export function AppSettingsDialog(
           onChange={handleTabChange}
         >
           <Tab className={classes.tab} label={t("general")} value="general" />
+          <Tab className={classes.tab} label={t("privacy")} value="privacy" />
           <Tab className={classes.tab} label={t("extensions")} value="extensions" />
           <Tab
             className={classes.tab}
@@ -147,6 +149,16 @@ export function AppSettingsDialog(
                   label={t("debugModeDescription")}
                 />
               </Stack>
+            </Stack>
+          </section>
+
+          <section
+            className={cx(classes.tabPanel, {
+              [classes.tabPanelActive]: activeTab === "privacy",
+            })}
+          >
+            <Stack gap={2}>
+              <PrivacySettings />
             </Stack>
           </section>
 

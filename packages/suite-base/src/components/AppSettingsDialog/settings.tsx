@@ -24,6 +24,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   ToggleButtonGroupProps,
+  Typography,
 } from "@mui/material";
 import moment from "moment-timezone";
 import { MouseEvent, useCallback, useEffect, useMemo, useRef } from "react";
@@ -429,6 +430,53 @@ export function LanguageSettings(): React.ReactElement {
           </MenuItem>
         ))}
       </Select>
+    </Stack>
+  );
+}
+
+export function PrivacySettings(): React.ReactElement {
+  const { classes } = useStyles();
+  const { t } = useTranslation("appSettings");
+  const [telemetryEnabled = false, setTelemetryEnabled] = useAppConfigurationValue<boolean>(
+    AppSetting.TELEMETRY_ENABLED,
+  );
+  const [crashReportingEnabled = false, setCrashReportingEnabled] =
+    useAppConfigurationValue<boolean>(AppSetting.CRASH_REPORTING_ENABLED);
+
+  return (
+    <Stack gap={2}>
+      <Stack>
+        <FormControlLabel
+          className={classes.formControlLabel}
+          control={
+            <Checkbox
+              className={classes.checkbox}
+              checked={telemetryEnabled}
+              onChange={(_event, checked) => void setTelemetryEnabled(checked)}
+            />
+          }
+          label={t("telemetryEnabled")}
+        />
+        <Typography variant="body2" color="text.secondary">
+          {t("telemetryEnabledDescription")}
+        </Typography>
+      </Stack>
+      <Stack>
+        <FormControlLabel
+          className={classes.formControlLabel}
+          control={
+            <Checkbox
+              className={classes.checkbox}
+              checked={crashReportingEnabled}
+              onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
+            />
+          }
+          label={t("crashReportingEnabled")}
+        />
+        <Typography variant="body2" color="text.secondary">
+          {t("crashReportingEnabledDescription")}
+        </Typography>
+      </Stack>
     </Stack>
   );
 }

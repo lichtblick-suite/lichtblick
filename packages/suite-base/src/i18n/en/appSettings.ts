@@ -32,8 +32,15 @@ export const appSettings = {
     "Activates the button in the right lower corner of the application to sync Lichtblick instances opened.",
   noExperimentalFeatures: "Currently there are no experimental features.",
   openLinksIn: "Open links in",
+  privacy: "Privacy",
   ros: "ROS",
   settings: "Settings",
   timestampFormat: "Timestamp format",
   webApp: "Web app",
+  telemetryEnabled: "Send anonymous usage telemetry",
+  telemetryEnabledDescription:
+    "Helps us understand which features are used (e.g. panels added, layouts created) so we can prioritize improvements. Disabled by default; no file paths, topic names or personal data are ever sent. See docs/telemetry/poc-opentelemetry-plano.md for what is collected.",
+  crashReportingEnabled: "Send crash reports",
+  crashReportingEnabledDescription:
+    "Automatically reports when the app crashes or runs out of memory, to help us find and fix stability issues. Disabled by default.",
 };
