@@ -7,19 +7,12 @@
 
 import * as THREE from "three";
 
-import { RenderableMarker } from "./RenderableMarker";
-import {
-  makeStandardMaterial,
-  shouldShowMarkerOutlines,
-  updateStandardMaterialColor,
-} from "./materials";
+import { RenderableOutlinedMeshMarker } from "./RenderableOutlinedMeshMarker";
+import { makeStandardMaterial } from "./materials";
 import type { IRenderer } from "../../IRenderer";
 import { Marker } from "../../ros";
 
-export class RenderableCube extends RenderableMarker {
-  #mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
-  #outline: THREE.LineSegments;
-
+export class RenderableCube extends RenderableOutlinedMeshMarker {
   public constructor(
     topic: string,
     marker: Marker,
@@ -37,34 +30,17 @@ export class RenderableCube extends RenderableMarker {
       `${this.constructor.name}-cube-edges`,
       () => createEdgesGeometry(cubeGeometry),
     );
-    this.#mesh = new THREE.Mesh(cubeGeometry, makeStandardMaterial(marker.color));
-    this.#mesh.castShadow = true;
-    this.#mesh.receiveShadow = true;
-    this.add(this.#mesh);
+    this.mesh = new THREE.Mesh(cubeGeometry, makeStandardMaterial(marker.color));
+    this.mesh.castShadow = true;
+    this.mesh.receiveShadow = true;
+    this.add(this.mesh);
 
     // Cube outline
-    this.#outline = new THREE.LineSegments(cubeEdgesGeometry, renderer.outlineMaterial);
-    this.#outline.userData.picking = false;
-    this.#mesh.add(this.#outline);
+    this.outline = new THREE.LineSegments(cubeEdgesGeometry, renderer.outlineMaterial);
+    this.outline.userData.picking = false;
+    this.mesh.add(this.outline);
 
     this.update(marker, receiveTime);
-  }
-
-  public override dispose(): void {
-    this.#mesh.material.dispose();
-  }
-
-  public override update(newMarker: Marker, receiveTime: bigint | undefined): void {
-    super.update(newMarker, receiveTime);
-    const marker = this.userData.marker;
-
-    updateStandardMaterialColor(this.#mesh.material, marker.color);
-    this.#outline.visible = shouldShowMarkerOutlines({
-      showOutlines: this.getSettings()?.showOutlines,
-      alpha: marker.color.a,
-    });
-
-    this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }
 }
 
