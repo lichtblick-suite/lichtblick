@@ -10,9 +10,12 @@ import * as THREE from "three";
 import { EDGE_LINE_SEGMENTS_NAME } from "@lichtblick/suite-base/panels/ThreeDeeRender/ModelCache";
 
 import { RenderableMarker } from "./RenderableMarker";
-import { makeStandardMaterial } from "./materials";
+import {
+  makeStandardMaterial,
+  shouldShowMarkerOutlines,
+  updateStandardMaterialColor,
+} from "./materials";
 import type { IRenderer } from "../../IRenderer";
-import { rgbToThreeColor } from "../../color";
 import { disposeMeshesRecursive } from "../../dispose";
 import { Marker } from "../../ros";
 import {
@@ -63,15 +66,7 @@ export class RenderableMeshResource extends RenderableMarker {
     super.update(newMarker, receiveTime);
     const marker = this.userData.marker;
 
-    const transparent = marker.color.a < 1;
-    if (transparent !== this.#material.transparent) {
-      this.#material.transparent = transparent;
-      this.#material.depthWrite = !transparent;
-      this.#material.needsUpdate = true;
-    }
-
-    rgbToThreeColor(this.#material.color, marker.color);
-    this.#material.opacity = marker.color.a;
+    updateStandardMaterialColor(this.#material, marker.color);
 
     const embeddedMaterialUsageChanged =
       marker.mesh_use_embedded_materials !== prevMarker.mesh_use_embedded_materials;
@@ -133,8 +128,10 @@ export class RenderableMeshResource extends RenderableMarker {
   }
 
   #updateOutlineVisibility(): void {
-    const showOutlines =
-      (this.getSettings()?.showOutlines ?? true) && this.userData.marker.color.a >= 1;
+    const showOutlines = shouldShowMarkerOutlines({
+      showOutlines: this.getSettings()?.showOutlines,
+      alpha: this.userData.marker.color.a,
+    });
     this.traverse((lineSegments) => {
       // Want to avoid picking up the LineSegments from the model itself
       // only update line segments that we've added with the special name
