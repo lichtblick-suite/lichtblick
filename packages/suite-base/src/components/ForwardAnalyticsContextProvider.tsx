@@ -10,9 +10,9 @@ import { StoreApi, createStore, useStore } from "zustand";
 
 import { useMustNotChange } from "@lichtblick/hooks";
 import AnalyticsContext from "@lichtblick/suite-base/context/AnalyticsContext";
-import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
+import ITelemetry from "@lichtblick/suite-base/services/ITelemetry";
 
-export type ForwardedAnalytics = StoreApi<{ value: IAnalytics }>;
+export type ForwardedAnalytics = StoreApi<{ value: ITelemetry }>;
 
 /**
  * Returns a store for forwarding the given context's value, which can be passed to

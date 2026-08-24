@@ -13,8 +13,11 @@ export function getTelemetrySettings(): {
   crashReportingEnabled: boolean;
   telemetryEnabled: boolean;
 } {
-  const crashReportingEnabled = getAppSetting<boolean>(AppSetting.CRASH_REPORTING_ENABLED) ?? true;
-  const telemetryEnabled = getAppSetting<boolean>(AppSetting.TELEMETRY_ENABLED) ?? true;
+  // Fail closed, matching the renderer's TelemetryProvider: an absent setting means the user never
+  // opted in, so it must read as disabled. Defaulting to `true` here also made the two processes
+  // disagree — the main process considered itself enabled while the renderer stayed silent.
+  const crashReportingEnabled = getAppSetting<boolean>(AppSetting.CRASH_REPORTING_ENABLED) ?? false;
+  const telemetryEnabled = getAppSetting<boolean>(AppSetting.TELEMETRY_ENABLED) ?? false;
 
   return { crashReportingEnabled, telemetryEnabled };
 }

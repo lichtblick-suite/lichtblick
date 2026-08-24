@@ -5,8 +5,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
+import ITelemetry from "./ITelemetry";
 
-export default class NullAnalytics implements IAnalytics {
-  public logEvent(): void {}
+// Implements `ITelemetry` (a superset of `IAnalytics`) so it can be used as the fallback for both
+// call sites that only log events and call sites that also record metrics (see ITelemetry.ts).
+export default class NullAnalytics implements ITelemetry {
+  public logEvent(): void {
+    // no-op
+  }
+  public recordValue(): void {
+    // no-op
+  }
+  public recordDuration(): void {
+    // no-op
+  }
+  public async flush(): Promise<void> {
+    // no-op
+  }
 }

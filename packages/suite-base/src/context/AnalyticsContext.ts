@@ -7,13 +7,15 @@
 
 import { createContext, useContext } from "react";
 
-import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
+import ITelemetry from "@lichtblick/suite-base/services/ITelemetry";
 import NullAnalytics from "@lichtblick/suite-base/services/NullAnalytics";
 
-const AnalyticsContext = createContext<IAnalytics>(new NullAnalytics());
+// Typed as `ITelemetry` (superset of `IAnalytics`) so both `.logEvent()` call sites and
+// `.recordValue()`/`.recordDuration()` call sites (telemetry PoC) can share this context.
+const AnalyticsContext = createContext<ITelemetry>(new NullAnalytics());
 AnalyticsContext.displayName = "AnalyticsContext";
 
-export function useAnalytics(): IAnalytics {
+export function useAnalytics(): ITelemetry {
   return useContext(AnalyticsContext);
 }
 

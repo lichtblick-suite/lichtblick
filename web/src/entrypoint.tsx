@@ -5,6 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import TelemetryProvider from "@lichtblick/suite-base/providers/TelemetryProvider";
 import { main } from "@lichtblick/suite-web";
 
-void main();
+// suite-web's `main` takes a `getParams` factory, not a params object directly.
+void main(async () => ({ extraProviders: [<TelemetryProvider key="TelemetryProvider" />] }));

@@ -20,6 +20,7 @@ import { getFilesToOpen } from "./getFilesToOpen";
 import injectFilesToOpen from "./injectFilesToOpen";
 import installChromeExtensions from "./installChromeExtensions";
 import { parseCLIFlags } from "./parseCLIFlags";
+import { startProcessMetricsReporting } from "./processTelemetry";
 import {
   registerRosPackageProtocolHandlers,
   registerRosPackageProtocolSchemes,
@@ -248,6 +249,7 @@ export async function main(): Promise<void> {
     const initialWindow = new StudioWindow([...deepLinks, ...openUrls]);
 
     registerRosPackageProtocolHandlers();
+    startProcessMetricsReporting();
 
     // Only production builds check for automatic updates
     if (process.env.NODE_ENV !== "production") {

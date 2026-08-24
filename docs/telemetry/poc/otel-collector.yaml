@@ -1,0 +1,39 @@
+# Receives OTLP/HTTP from the app (metrics + logs) and fans out to Prometheus (series)
+# and Loki (discrete events with device_id in the body — see plan section 3/6).
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "*"
+
+processors:
+  batch: {}
+  # Second cardinality barrier (first one is app-side, see section 6 of the plan): device_id must
+  # never reach a metric label. session_id is a deliberate, narrow exception — it's only ever
+  # attached to the heap gauge, which has short retention by design — so it is NOT scrubbed here.
+  attributes/metrics-scrub:
+    actions:
+      - key: device_id
+        action: delete
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [attributes/metrics-scrub, batch]
+      exporters: [prometheus, debug]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [loki, debug]

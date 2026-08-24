@@ -68,6 +68,12 @@ enum AppEvent {
   // User engagement
   USER_OBSERVATION = "Studio: User Makes Observation",
   USER_ACTIVATION = "Studio: User Activated",
+
+  // Telemetry PoC (docs/telemetry/poc-opentelemetry-plano.md)
+  SESSION_HEARTBEAT = "Studio: Session Heartbeat",
+  SESSION_END = "Studio: Session Ended",
+  PANEL_FOCUS = "Studio: Panel Focused",
+  RENDERER_GONE = "Studio: Renderer Process Gone",
 }
 
 interface IAnalytics {

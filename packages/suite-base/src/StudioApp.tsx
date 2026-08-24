@@ -73,10 +73,6 @@ export function StudioApp(): React.JSX.Element {
     /* eslint-enable react/jsx-key */
   ];
 
-  if (extraProviders) {
-    providers.unshift(...extraProviders);
-  }
-
   if (nativeAppMenu) {
     providers.push(<NativeAppMenuContext.Provider value={nativeAppMenu} />);
   }
@@ -98,6 +94,15 @@ export function StudioApp(): React.JSX.Element {
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
 
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
+
+  // Extra providers are added last so they end up outermost: MultiProvider nests via reduceRight,
+  // so index 0 wraps everything else. A provider supplying a context that the providers above
+  // consume (e.g. TelemetryProvider, whose analytics context is read by CurrentLayoutProvider)
+  // must sit above them, otherwise those consumers silently read the context default instead.
+  if (extraProviders) {
+    providers.unshift(...extraProviders);
+  }
+
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
 
   const url = new URL(window.location.href);

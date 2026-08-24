@@ -1,0 +1,145 @@
+{
+  "title": "Lichtblick Telemetry [PoC]",
+  "uid": "lichtblick-telemetry-poc",
+  "tags": ["lichtblick", "poc", "telemetry"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 3,
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "A1 - Weekly active users (distinct device_id)",
+      "type": "stat",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "count(count by (attributes_device_id) (count_over_time({service_name=\"lichtblick\"} | json | body=\"Studio: App Initialized\" [7d])))",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "description": "Distinct anonymous devices that started a session in the window. Loki lines are JSON, so the parser is | json (not logfmt) and the event name is the AppEvent text in `body`; device_id lives in the line body, never as a metric label."
+    },
+    {
+      "id": 2,
+      "title": "A2 - Session duration (p50/p95, derived from heartbeat)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "quantile(0.50, max_over_time(lichtblick_session_duration_seconds[$__range]))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "quantile(0.95, max_over_time(lichtblick_session_duration_seconds[$__range]))",
+          "legendFormat": "p95",
+          "refId": "B"
+        }
+      ],
+      "description": "Per-session duration is a gauge refreshed on every heartbeat (no reliance on an end-of-session event). max_over_time gives how long each session reached within the range; quantile() then takes percentiles across sessions.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "A3 - Top panels by type (last 7d)",
+      "type": "bargauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "topk(10, sum by (panel_type) (increase(lichtblick_panel_added_total[7d])))",
+          "legendFormat": "{{panel_type}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "A4 - Renderer heap (gauge, resolution <= 30s)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "expr": "lichtblick_memory_heap_used_bytes",
+          "legendFormat": "session {{session_id}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "description": "Renderer JS heap. The `_bytes` suffix comes from the instrument's UCUM unit (By) declared in eventRouting.ts METRIC_UNITS."
+    },
+    {
+      "id": 5,
+      "title": "A5 - Renderer gone, by reason",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (reason) (increase(lichtblick_renderer_gone_total[$__range]))",
+          "legendFormat": "{{reason}}",
+          "refId": "A"
+        }
+      ],
+      "description": "Every abnormal renderer exit, grouped by reason — never filtered to reason=\"oom\". A V8 heap OOM does not necessarily surface as \"oom\": an isolated probe on macOS reported reason=\"crashed\" (exit code 5) for `V8 javascript OOM (Reached heap limit)`, and since StudioWindow runs with sandbox:false the renderer carries a Node environment, so the OOM can instead come through Node's handler. Filtering on a single reason silently hides the event we most care about."
+    }
+  ]
+}
