@@ -40,6 +40,22 @@ export function updateStandardMaterialColor(
   material.opacity = color.a;
 }
 
+/** Update a standard mesh marker's material, outline visibility, and scale from a Marker. */
+export function updateStandardMeshMarker(
+  target: THREE.Object3D,
+  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>,
+  outline: THREE.Object3D,
+  settings: { showOutlines?: boolean } | undefined,
+  marker: Marker,
+): void {
+  updateStandardMaterialColor(mesh.material, marker.color);
+  outline.visible = shouldShowMarkerOutlines({
+    showOutlines: settings?.showOutlines,
+    alpha: marker.color.a,
+  });
+  target.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
+}
+
 export function markerHasTransparency(marker: Marker): boolean {
   switch (marker.type) {
     case MarkerType.ARROW:
