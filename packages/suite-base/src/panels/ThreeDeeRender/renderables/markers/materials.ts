@@ -8,12 +8,37 @@
 import * as THREE from "three";
 
 import { LineMaterialWithAlphaVertex } from "../../LineMaterialWithAlphaVertex";
+import { rgbToThreeColor } from "../../color";
 import { ColorRGBA, Marker, MarkerType } from "../../ros";
 
 export type LineOptions = {
   resolution: THREE.Vector2;
   worldUnits?: boolean;
 };
+
+/** Outlines are hidden when the marker is translucent so edges don't poke through. */
+export function shouldShowMarkerOutlines(options: {
+  showOutlines: boolean | undefined;
+  alpha: number;
+}): boolean {
+  return (options.showOutlines ?? true) && options.alpha >= 1;
+}
+
+/** Sync MeshStandardMaterial color/opacity and transparency flags from a ColorRGBA. */
+export function updateStandardMaterialColor(
+  material: THREE.MeshStandardMaterial,
+  color: ColorRGBA,
+): void {
+  const transparent = color.a < 1;
+  if (transparent !== material.transparent) {
+    material.transparent = transparent;
+    material.depthWrite = !transparent;
+    material.needsUpdate = true;
+  }
+
+  rgbToThreeColor(material.color, color);
+  material.opacity = color.a;
+}
 
 export function markerHasTransparency(marker: Marker): boolean {
   switch (marker.type) {

@@ -8,9 +8,12 @@
 import * as THREE from "three";
 
 import { RenderableMarker } from "./RenderableMarker";
-import { makeStandardMaterial } from "./materials";
+import {
+  makeStandardMaterial,
+  shouldShowMarkerOutlines,
+  updateStandardMaterialColor,
+} from "./materials";
 import type { IRenderer } from "../../IRenderer";
-import { rgbToThreeColor } from "../../color";
 import { Marker } from "../../ros";
 
 export class RenderableCube extends RenderableMarker {
@@ -55,18 +58,11 @@ export class RenderableCube extends RenderableMarker {
     super.update(newMarker, receiveTime);
     const marker = this.userData.marker;
 
-    const transparent = marker.color.a < 1;
-    if (transparent !== this.#mesh.material.transparent) {
-      this.#mesh.material.transparent = transparent;
-      this.#mesh.material.depthWrite = !transparent;
-      this.#mesh.material.needsUpdate = true;
-    }
-
-    const showOutlines = (this.getSettings()?.showOutlines ?? true) && marker.color.a >= 1;
-    this.#outline.visible = showOutlines;
-
-    rgbToThreeColor(this.#mesh.material.color, marker.color);
-    this.#mesh.material.opacity = marker.color.a;
+    updateStandardMaterialColor(this.#mesh.material, marker.color);
+    this.#outline.visible = shouldShowMarkerOutlines({
+      showOutlines: this.getSettings()?.showOutlines,
+      alpha: marker.color.a,
+    });
 
     this.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
   }
