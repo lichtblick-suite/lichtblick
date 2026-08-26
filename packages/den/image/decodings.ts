@@ -121,14 +121,62 @@ export function decodeRGB8(
   }
 }
 
+/**
+ * YUV 4:2:0 formats subsample chroma by two in both dimensions, so a single chroma sample always
+ * covers a 2x2 block of pixels. Odd dimensions have no valid representation: the decode loops step
+ * two pixels at a time and would read across row boundaries and overrun the output buffer.
+ */
+function assertEvenDimensions(encoding: string, width: number, height: number): void {
+  if (width % 2 !== 0 || height % 2 !== 0) {
+    throw new Error(
+      `${encoding} image dimensions (${width}x${height}) must both be even for 4:2:0 chroma subsampling`,
+    );
+  }
+}
+
+/**
+ * Guards against truncated payloads. Out-of-range reads on a short buffer yield `undefined`, which
+ * silently becomes `NaN` and is then clamped to 0 by `Uint8ClampedArray`, so a truncated image
+ * would otherwise decode to garbage instead of reporting an error.
+ */
+function assertSufficientData(encoding: string, data: Uint8Array, requiredLength: number): void {
+  if (data.length < requiredLength) {
+    throw new Error(
+      `${encoding} image data is truncated: expected at least ${requiredLength} bytes, got ${data.length}`,
+    );
+  }
+}
+
+/**
+ * Decodes a YUV420 (I420, YUV 4:2:0 planar) image. I420 stores a full-resolution Y plane followed
+ * by separate U and V planes at half resolution in both dimensions. `step` is the Y-plane row
+ * stride in bytes; the chroma planes use half that stride.
+ */
 export function decodeYUV420(
   yuv: Uint8Array,
   width: number,
   height: number,
+  step: number,
   output: Uint8ClampedArray,
 ): void {
-  const yPlaneSize = width * height;
-  const uPlaneSize = (width >> 1) * (height >> 1);
+  assertEvenDimensions("YUV420", width, height);
+  if (!Number.isInteger(step)) {
+    throw new Error(`YUV420 image row step (${step}) must be an integer`);
+  }
+  if (step < width) {
+    throw new Error(`YUV420 image row step (${step}) must be at least width (${width})`);
+  }
+  if (step % 2 !== 0) {
+    throw new Error(`YUV420 image row step (${step}) must be even to derive the chroma stride`);
+  }
+
+  // Rows may be padded beyond `width`, so plane sizes and offsets are derived from the stride
+  // rather than assuming tightly packed data.
+  const chromaStep = step >> 1;
+  const yPlaneSize = step * height;
+  const uPlaneSize = chromaStep * (height >> 1);
+
+  assertSufficientData("YUV420", yuv, yPlaneSize + uPlaneSize * 2);
 
   const yPlane = yuv.subarray(0, yPlaneSize);
   const uPlane = yuv.subarray(yPlaneSize, yPlaneSize + uPlaneSize);
@@ -137,8 +185,8 @@ export function decodeYUV420(
   let outIdx = 0;
 
   for (let row = 0; row < height; row++) {
-    const yRow = row * width;
-    const uvRow = (row >> 1) * (width >> 1);
+    const yRow = row * step;
+    const uvRow = (row >> 1) * chromaStep;
 
     for (let col = 0; col < width; col += 2) {
       const y1 = yPlane[yRow + col]!;
@@ -164,9 +212,25 @@ export function decodeNV12(
   nv12: Uint8Array,
   width: number,
   height: number,
+  step: number,
   output: Uint8ClampedArray,
 ): void {
-  const yPlaneSize = width * height;
+  assertEvenDimensions("NV12", width, height);
+  if (!Number.isInteger(step)) {
+    throw new Error(`NV12 image row step (${step}) must be an integer`);
+  }
+  if (step < width) {
+    throw new Error(`NV12 image row step (${step}) must be at least width (${width})`);
+  }
+
+  // The Y plane spans `height` rows of `step` bytes each; the row stride may include padding
+  // beyond `width`, so the chroma plane offset must account for it rather than assuming
+  // width * height.
+  const yPlaneSize = step * height;
+  // The interleaved chroma plane has one row per two image rows, sharing the Y-plane stride.
+  const uvPlaneSize = step * (height >> 1);
+
+  assertSufficientData("NV12", nv12, yPlaneSize + uvPlaneSize);
 
   const yPlane = nv12.subarray(0, yPlaneSize);
   const uvPlane = nv12.subarray(yPlaneSize);
@@ -174,9 +238,10 @@ export function decodeNV12(
   let outIdx = 0;
 
   for (let row = 0; row < height; row++) {
-    const yRow = row * width;
-    // Each interleaved chroma row (width bytes = width/2 U/V pairs) serves two image rows.
-    const uvRow = (row >> 1) * width;
+    const yRow = row * step;
+    // Each interleaved chroma row (width bytes = width/2 U/V pairs, plus any row padding) serves
+    // two image rows and shares the same stride as the Y plane.
+    const uvRow = (row >> 1) * step;
 
     for (let col = 0; col < width; col += 2) {
       const y1 = yPlane[yRow + col]!;

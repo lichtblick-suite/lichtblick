@@ -185,10 +185,10 @@ export function decodeRawImage(
   const rawData = image.data as Uint8Array;
   switch (encoding) {
     case "yuv420":
-      decodeYUV420(rawData, width, height, output);
+      decodeYUV420(rawData, width, height, step, output);
       break;
     case "nv12":
-      decodeNV12(rawData, width, height, output);
+      decodeNV12(rawData, width, height, step, output);
       break;
     case "yuv422":
     case "uyvy":

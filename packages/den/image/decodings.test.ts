@@ -471,7 +471,7 @@ describe("decodeYUV420", () => {
     const height = 2;
     const output = new Uint8ClampedArray(width * height * 4);
 
-    // WHEN it is decoded
+    // WHEN it is decoded with a step equal to width (no row padding)
     decodeYUV420(
       new Uint8Array([
         ...[81, 145, 41, 210, 100, 120, 60, 200], // Y plane (2 rows of 4)
@@ -480,11 +480,105 @@ describe("decodeYUV420", () => {
       ]),
       width,
       height,
+      width,
       output,
     );
 
     // THEN each pixel expands to RGBA using its shared chroma sample
     expect(output).toEqual(YUV420_EXPECTED_OUTPUT);
+  });
+
+  it("ignores row padding when step is greater than width", () => {
+    // GIVEN a 4x2 I420 image padded to a Y step of 6 bytes per row (chroma rows use half that
+    // stride), with padding bytes set to a value that would corrupt the output if decoded
+    const width = 4;
+    const height = 2;
+    const step = 6;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN it is decoded
+    decodeYUV420(
+      new Uint8Array([
+        ...[81, 145, 41, 210, 255, 255], // Y row 0 (4 real + 2 padding)
+        ...[100, 120, 60, 200, 255, 255], // Y row 1 (4 real + 2 padding)
+        ...[90, 140, 255], // U plane row (2 real + 1 padding)
+        ...[240, 100, 255], // V plane row (2 real + 1 padding)
+      ]),
+      width,
+      height,
+      step,
+      output,
+    );
+
+    // THEN the result matches the unpadded equivalent, proving the padding bytes were skipped
+    expect(output).toEqual(YUV420_EXPECTED_OUTPUT);
+  });
+
+  it("throws when step is less than width", () => {
+    // GIVEN a step smaller than the image width
+    const width = 4;
+    const height = 2;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN / THEN decoding throws instead of reading out of bounds
+    expect(() => {
+      decodeYUV420(new Uint8Array(width * height * 2), width, height, 2, output);
+    }).toThrow(`YUV420 image row step (2) must be at least width (${width})`);
+  });
+
+  it("throws when step is odd", () => {
+    // GIVEN a step that is >= width but odd, so it has no exact integer chroma stride
+    const width = 4;
+    const height = 2;
+    const step = 5;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN / THEN decoding throws instead of silently truncating the chroma stride
+    expect(() => {
+      decodeYUV420(new Uint8Array(step * height * 2), width, height, step, output);
+    }).toThrow(`YUV420 image row step (${step}) must be even to derive the chroma stride`);
+  });
+
+  it.each([
+    ["odd width", 3, 2],
+    ["odd height", 4, 3],
+  ])("throws for %s because 4:2:0 chroma requires even dimensions", (_label, width, height) => {
+    // GIVEN an image with an odd dimension
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN / THEN decoding throws instead of reading across row boundaries
+    expect(() => {
+      decodeYUV420(new Uint8Array(width * height * 2), width, height, width, output);
+    }).toThrow(
+      `YUV420 image dimensions (${width}x${height}) must both be even for 4:2:0 chroma subsampling`,
+    );
+  });
+
+  it("throws when the buffer is smaller than the Y, U and V planes combined", () => {
+    // GIVEN a 4x2 I420 payload one byte shorter than the required 12 bytes (8 Y + 2 U + 2 V)
+    const width = 4;
+    const height = 2;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN / THEN decoding throws instead of silently clamping missing samples to zero
+    expect(() => {
+      decodeYUV420(new Uint8Array(11), width, height, width, output);
+    }).toThrow("YUV420 image data is truncated: expected at least 12 bytes, got 11");
+  });
+
+  it.each([
+    ["NaN", NaN],
+    ["fractional", 4.5],
+  ])("throws when step is %s instead of an integer", (_label, step) => {
+    // GIVEN a non-integer step
+    const width = 4;
+    const height = 2;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN / THEN decoding throws instead of silently reading undefined/NaN samples
+    expect(() => {
+      decodeYUV420(new Uint8Array(width * height * 2), width, height, step, output);
+    }).toThrow(`YUV420 image row step (${step}) must be an integer`);
   });
 });
 
@@ -495,7 +589,7 @@ describe("decodeNV12", () => {
     const height = 2;
     const output = new Uint8ClampedArray(width * height * 4);
 
-    // WHEN it is decoded
+    // WHEN it is decoded with a step equal to width (no row padding)
     decodeNV12(
       new Uint8Array([
         ...[81, 145, 41, 210, 100, 120, 60, 200], // Y plane (2 rows of 4)
@@ -503,11 +597,92 @@ describe("decodeNV12", () => {
       ]),
       width,
       height,
+      width,
       output,
     );
 
     // THEN it produces the same RGBA output as the equivalent I420 image
     expect(output).toEqual(YUV420_EXPECTED_OUTPUT);
+  });
+
+  it("ignores row padding when step is greater than width", () => {
+    // GIVEN a 4x2 NV12 image whose Y and UV planes are padded to a step of 6 bytes per row
+    // (2 bytes wider than the 4-pixel width), with the padding bytes set to a value that would
+    // corrupt the output if it were mistakenly treated as pixel/chroma data
+    const width = 4;
+    const height = 2;
+    const step = 6;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN it is decoded
+    decodeNV12(
+      new Uint8Array([
+        ...[81, 145, 41, 210, 255, 255], // Y row 0 (4 real + 2 padding)
+        ...[100, 120, 60, 200, 255, 255], // Y row 1 (4 real + 2 padding)
+        ...[90, 240, 140, 100, 255, 255], // interleaved UV row (4 real + 2 padding)
+      ]),
+      width,
+      height,
+      step,
+      output,
+    );
+
+    // THEN the result matches the unpadded equivalent, proving the padding bytes were skipped
+    expect(output).toEqual(YUV420_EXPECTED_OUTPUT);
+  });
+
+  it("throws when step is less than width", () => {
+    // GIVEN a step smaller than the image width
+    const width = 4;
+    const height = 2;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN / THEN decoding throws instead of reading out of bounds
+    expect(() => {
+      decodeNV12(new Uint8Array(width * height + width * height), width, height, 2, output);
+    }).toThrow(`NV12 image row step (2) must be at least width (${width})`);
+  });
+
+  it.each([
+    ["odd width", 3, 2],
+    ["odd height", 4, 3],
+  ])("throws for %s because 4:2:0 chroma requires even dimensions", (_label, width, height) => {
+    // GIVEN an image with an odd dimension
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN / THEN decoding throws instead of reading across row boundaries
+    expect(() => {
+      decodeNV12(new Uint8Array(width * height * 2), width, height, width, output);
+    }).toThrow(
+      `NV12 image dimensions (${width}x${height}) must both be even for 4:2:0 chroma subsampling`,
+    );
+  });
+
+  it("throws when the buffer is smaller than the Y and interleaved UV planes combined", () => {
+    // GIVEN a 4x2 NV12 payload one byte shorter than the required 12 bytes (8 Y + 4 UV)
+    const width = 4;
+    const height = 2;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN / THEN decoding throws instead of silently clamping missing samples to zero
+    expect(() => {
+      decodeNV12(new Uint8Array(11), width, height, width, output);
+    }).toThrow("NV12 image data is truncated: expected at least 12 bytes, got 11");
+  });
+
+  it.each([
+    ["NaN", NaN],
+    ["fractional", 4.5],
+  ])("throws when step is %s instead of an integer", (_label, step) => {
+    // GIVEN a non-integer step
+    const width = 4;
+    const height = 2;
+    const output = new Uint8ClampedArray(width * height * 4);
+
+    // WHEN / THEN decoding throws instead of silently reading undefined/NaN samples
+    expect(() => {
+      decodeNV12(new Uint8Array(width * height * 2), width, height, step, output);
+    }).toThrow(`NV12 image row step (${step}) must be an integer`);
   });
 });
 
