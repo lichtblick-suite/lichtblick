@@ -10,55 +10,40 @@ import { FrameTransform, Vector3 } from "@foxglove/schemas";
 import Log from "@lichtblick/log";
 import { Time, compare } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
-import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { normalizeFrameTransform } from "@lichtblick/suite-base/panels/ThreeDeeRender/normalizeMessages";
-import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import {
-  AdvertiseOptions,
   BlockCache,
   Player,
   PlayerPresence,
-  PlayerState,
-  PublishPayload,
-  SubscribePayload,
   Topic,
   TopicStats,
 } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
 import delay from "@lichtblick/suite-base/util/delay";
+
+import { BenchmarkPlayerBase } from "./BenchmarkPlayerBase";
 
 const log = Log.getLogger(__filename);
 
 const CAPABILITIES: string[] = [PLAYER_CAPABILITIES.playbackControl];
 
-class TransformPreloadingPlayer implements Player {
-  #name: string = "transformpreloading";
-  #listener?: (state: PlayerState) => Promise<void>;
-  #datatypes: RosDatatypes = new Map();
-  #startTime: Time;
-  #endTime: Time;
-  #topicStats: Map<string, TopicStats>;
-  #topics: Topic[];
+class TransformPreloadingPlayer extends BenchmarkPlayerBase implements Player {
+  readonly #name: string = "transformpreloading";
+  // basicDatatypes already resolves foxglove.FrameTransform's nested Vector3/Quaternion types
+  readonly #datatypes: RosDatatypes = new Map(basicDatatypes);
+  readonly #startTime: Time;
+  readonly #endTime: Time;
+  readonly #topicStats: Map<string, TopicStats>;
+  readonly #topics: Topic[];
 
   public constructor() {
-    this.#datatypes.set("Time", {
-      definitions: [
-        { name: "sec", type: "uint32" },
-        { name: "nsec", type: "uint32" },
-      ],
-    });
+    super();
+    if (!this.#datatypes.has("foxglove.FrameTransform")) {
+      throw new Error("Invariant: basicDatatypes is missing 'foxglove.FrameTransform'");
+    }
 
-    this.#datatypes.set("foxglove.FrameTransform", {
-      name: "foxglove.FrameTransform",
-      definitions: [
-        { name: "timestamp", type: "Time", isComplex: true },
-        { name: "parent_frame_id", type: "string" },
-        { name: "child_frame_id", type: "string" },
-        { name: "translation", type: "Vector3", isComplex: true },
-        { name: "rotation", type: "Quaternion", isComplex: true },
-      ],
-    });
     this.#startTime = { sec: 0, nsec: 0 };
     this.#endTime = { sec: 600, nsec: 0 };
 
@@ -93,40 +78,8 @@ class TransformPreloadingPlayer implements Player {
     ];
   }
 
-  public getBatchIterator(
-    _topic: string,
-  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
-    throw new Error("Method not implemented.");
-  }
-
-  public setListener(listener: (state: PlayerState) => Promise<void>): void {
-    this.#listener = listener;
-    void this.#run();
-  }
-  public close(): void {
-    // no-op
-  }
-  public setSubscriptions(_subs: SubscribePayload[]): void {
-    // no-op
-  }
-  public setPublishers(_publishers: AdvertiseOptions[]): void {
-    // no-op
-  }
-  public setParameter(_key: string, _value: unknown): void {
-    throw new Error("Method not implemented.");
-  }
-  public publish(_request: PublishPayload): void {
-    throw new Error("Method not implemented.");
-  }
-  public async callService(_service: string, _request: unknown): Promise<unknown> {
-    throw new Error("Method not implemented.");
-  }
-  public setGlobalVariables(_globalVariables: GlobalVariables): void {
-    throw new Error("Method not implemented.");
-  }
-
-  async #run() {
-    const listener = this.#listener;
+  protected async run(): Promise<void> {
+    const listener = this.listener;
     if (!listener) {
       throw new Error("Invariant: listener is not set");
     }
