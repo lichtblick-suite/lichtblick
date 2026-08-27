@@ -19,6 +19,9 @@ export default class NullAnalytics implements ITelemetry {
   public recordDuration(): void {
     // no-op
   }
+  public incrementCounter(): void {
+    // no-op
+  }
   public async flush(): Promise<void> {
     // no-op
   }

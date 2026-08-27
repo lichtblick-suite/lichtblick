@@ -117,6 +117,10 @@ export default class OtelTelemetry implements ITelemetry {
     this.#getHistogram(metric).record(ms, sanitizeMetricAttributes(attrs));
   }
 
+  public incrementCounter(name: string, attrs?: Attributes): void {
+    this.#getCounter(name).add(1, sanitizeMetricAttributes(attrs));
+  }
+
   public async flush(): Promise<void> {
     await Promise.all([this.#meterProvider.forceFlush(), this.#loggerProvider.forceFlush()]);
   }

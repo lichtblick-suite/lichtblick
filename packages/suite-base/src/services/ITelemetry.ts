@@ -30,6 +30,16 @@ export default interface ITelemetry extends IAnalytics {
   /** Records a duration in milliseconds (histogram), e.g. session length. */
   recordDuration(metric: MetricName, ms: number, attrs?: Attributes): void;
 
+  /**
+   * Increments a bare Prometheus counter by 1, with sanitized attributes. Unlike `logEvent`, this
+   * never emits a log line — use it for counts that can occur far more often than it is safe to
+   * write to the log tier (e.g. the interaction rate limiter's drop count, see
+   * docs/telemetry/interaction-heatmap-poc-plan.md WS-3). `name` is a free string rather than
+   * `MetricName` because it mirrors the AppEvent-driven counters in eventRouting.ts, which are
+   * also not part of that closed union.
+   */
+  incrementCounter(name: string, attrs?: Attributes): void;
+
   /** Flushes any buffered metrics/events. Must be safe to call multiple times. */
   flush(): Promise<void>;
 }

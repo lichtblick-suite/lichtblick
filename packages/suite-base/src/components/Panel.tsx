@@ -60,6 +60,7 @@ import {
   useWorkspaceStore,
   WorkspaceStoreSelectors,
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useInteractionCapture } from "@lichtblick/suite-base/hooks/useInteractionCapture";
 import usePanelDrag from "@lichtblick/suite-base/hooks/usePanelDrag";
 import { useMessagePathDrop } from "@lichtblick/suite-base/services/messagePathDragging";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
@@ -145,6 +146,8 @@ export default function Panel<
       () => panelCatalog.getPanelByType(type)?.title ?? "",
       [panelCatalog, type],
     );
+
+    useInteractionCapture({ rootRef: panelRootRef, panelType: type, panelId: childId });
 
     const defaultConfig = PanelComponent.defaultConfig;
     const [savedConfig, saveConfig] = useConfigById<Config>(childId);
