@@ -1,0 +1,408 @@
+<!doctype html>
+<!--
+  SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+  SPDX-License-Identifier: MPL-2.0
+
+  Spatial (click-position) view for the interaction heatmap PoC. Deliberately a standalone,
+  dependency-free page rather than a Grafana panel or a `suite-base` component: it queries Loki's
+  `query_range` API directly from the browser, so nothing here has to survive upstream review and
+  no new runtime dependency enters the app bundle. See
+  docs/telemetry/interaction-heatmap-poc-plan.md WS-5.
+
+  Usage: open this file directly in a browser (file://) while the PoC stack is running
+  (docs/telemetry/poc/docker-compose.yml, Loki on http://localhost:3100 by default) and click Load.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lichtblick interaction heatmap [PoC]</title>
+    <style>
+      body {
+        font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        margin: 0;
+        padding: 16px;
+        background: #1e1e1e;
+        color: #ddd;
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0 0 4px;
+      }
+      p.subtitle {
+        margin: 0 0 16px;
+        color: #999;
+      }
+      form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-end;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: #2a2a2a;
+        border-radius: 6px;
+      }
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 12px;
+        color: #aaa;
+      }
+      input,
+      select {
+        font: inherit;
+        padding: 4px 6px;
+        background: #1e1e1e;
+        color: #eee;
+        border: 1px solid #444;
+        border-radius: 4px;
+      }
+      button {
+        font: inherit;
+        padding: 6px 14px;
+        background: #3b6ea5;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        height: 30px;
+      }
+      button:hover {
+        background: #4a82c2;
+      }
+      #status {
+        margin-bottom: 12px;
+        color: #999;
+        white-space: pre-wrap;
+      }
+      #status.error {
+        color: #e57373;
+      }
+      #stage {
+        position: relative;
+        display: inline-block;
+        background-image:
+          linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
+          linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
+          linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+        background-size: 20px 20px;
+        background-position:
+          0 0,
+          0 10px,
+          10px -10px,
+          -10px 0;
+        background-color: #333;
+        border: 1px solid #444;
+      }
+      #reference {
+        display: block;
+        max-width: 100%;
+      }
+      #heatmapCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      #legend {
+        margin-top: 8px;
+        font-size: 12px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Lichtblick interaction heatmap [PoC]</h1>
+    <p class="subtitle">
+      Aggregates the quantized <code>nx</code>/<code>ny</code> position carried on
+      <code>Studio: UI Interaction</code> log lines (never a metric label, see
+      <code>interactionTypes.ts</code>) into a click-density map. Grafana panels A6&ndash;A9 cover
+      ranked/volume views of the same data; this page covers the one thing a table can't show.
+    </p>
+
+    <form id="controls">
+      <label>
+        Loki base URL (CORS proxy, not Loki's own port — see nginx-cors-proxy.conf)
+        <input id="lokiUrl" type="text" value="http://localhost:3101" size="24" />
+      </label>
+      <label>
+        Panel type
+        <input id="panelType" type="text" value="ThreeDeeRender" size="16" />
+      </label>
+      <label>
+        Size bucket
+        <select id="sizeBucket">
+          <option value="">any</option>
+          <option value="s">s</option>
+          <option value="m">m</option>
+          <option value="l" selected>l</option>
+          <option value="xl">xl</option>
+        </select>
+      </label>
+      <label>
+        Hours back
+        <input id="hoursBack" type="number" value="168" min="1" max="4320" size="6" />
+      </label>
+      <label>
+        Grid
+        <select id="gridSize">
+          <option value="32" selected>32x32</option>
+          <option value="16">16x16 (sparse data fallback, see WS-6 risk)</option>
+        </select>
+      </label>
+      <label>
+        Reference width x height (used if no screenshot loads)
+        <span style="display: flex; gap: 4px">
+          <input id="refWidth" type="number" value="800" min="100" max="4000" size="6" />
+          <input id="refHeight" type="number" value="450" min="100" max="4000" size="6" />
+        </span>
+      </label>
+      <button id="load" type="submit">Load</button>
+    </form>
+
+    <div id="status"></div>
+
+    <div id="stage">
+      <img id="reference" alt="" />
+      <canvas id="heatmapCanvas"></canvas>
+    </div>
+    <div id="legend"></div>
+
+    <script>
+      "use strict";
+
+      // ---- Loki query -------------------------------------------------------------------------
+      // Loki's `| json` parser flattens the log line's nested `attributes` object into
+      // `attributes_<key>` labels (this is the same convention the provisioned Grafana dashboard's
+      // existing panels already rely on, see lichtblick-poc.json's A1 description) — used here only
+      // to *filter*; the actual nx/ny values are read back out of the raw JSON line body below,
+      // since a plain `query_range` call returns the original log line, not the derived labels.
+      function buildLogQL(panelType, sizeBucket) {
+        const escape = (s) => s.replace(/"/g, '\\"');
+        let query = '{service_name="lichtblick"} | json | body="Studio: UI Interaction"';
+        if (panelType) {
+          query += ` | attributes_panel_type=\`${escape(panelType)}\``;
+        }
+        if (sizeBucket) {
+          query += ` | attributes_size_bucket=\`${escape(sizeBucket)}\``;
+        }
+        return query;
+      }
+
+      async function queryLoki(lokiUrl, logql, hoursBack) {
+        const end = Date.now() * 1e6; // Loki wants nanoseconds
+        const start = end - hoursBack * 60 * 60 * 1e9;
+        const params = new URLSearchParams({
+          query: logql,
+          start: String(Math.trunc(start)),
+          end: String(Math.trunc(end)),
+          limit: "5000",
+          direction: "forward",
+        });
+        const res = await fetch(`${lokiUrl.replace(/\/+$/, "")}/loki/api/v1/query_range?${params}`);
+        if (!res.ok) {
+          throw new Error(`Loki returned ${res.status} ${res.statusText}`);
+        }
+        const body = await res.json();
+        if (body.status !== "success") {
+          throw new Error(`Loki query failed: ${JSON.stringify(body)}`);
+        }
+        return body.data.result; // array of { stream, values: [[nsTimestamp, line], ...] }
+      }
+
+      /**
+       * Extracts {nx, ny} from one raw Loki log line. Tries the nested `attributes.nx/ny` shape
+       * the OTel collector's Loki exporter is expected to emit (matching the `attributes_*` label
+       * naming already used by the provisioned dashboard's other panels), then falls back to a
+       * flat `nx`/`ny` top-level key in case the collector version in use shapes lines differently.
+       * Returns undefined if neither shape yields a pair of numbers, rather than guessing.
+       */
+      function extractGridCell(line) {
+        let parsed;
+        try {
+          parsed = JSON.parse(line);
+        } catch {
+          return undefined;
+        }
+        const attrs = parsed.attributes ?? parsed.Attributes ?? parsed;
+        const nx = Number(attrs.nx);
+        const ny = Number(attrs.ny);
+        if (!Number.isFinite(nx) || !Number.isFinite(ny)) {
+          return undefined;
+        }
+        return { nx, ny };
+      }
+
+      // ---- Canvas-based heat rendering (no external library / CDN dependency on purpose) -------
+      // Same technique heatmap.js itself uses: additive radial-gradient "blobs" per grid cell,
+      // read back as an alpha channel, then colorized through a fixed gradient stop table.
+      const GRADIENT_STOPS = [
+        { stop: 0.0, color: [0, 0, 255] },
+        { stop: 0.35, color: [0, 255, 255] },
+        { stop: 0.6, color: [0, 255, 0] },
+        { stop: 0.85, color: [255, 255, 0] },
+        { stop: 1.0, color: [255, 0, 0] },
+      ];
+
+      function colorFor(t) {
+        for (let i = 1; i < GRADIENT_STOPS.length; i++) {
+          const prev = GRADIENT_STOPS[i - 1];
+          const next = GRADIENT_STOPS[i];
+          if (t <= next.stop) {
+            const span = next.stop - prev.stop || 1;
+            const localT = (t - prev.stop) / span;
+            return prev.color.map((c, idx) => Math.round(c + (next.color[idx] - c) * localT));
+          }
+        }
+        return GRADIENT_STOPS[GRADIENT_STOPS.length - 1].color;
+      }
+
+      function renderHeatmap(canvas, counts, gridSize, width, height) {
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, width, height);
+
+        const max = Math.max(1, ...counts);
+        const cellW = width / gridSize;
+        const cellH = height / gridSize;
+        const radius = Math.max(cellW, cellH) * 1.5;
+
+        // Pass 1: accumulate intensity (alpha only) on an offscreen canvas via additive blending.
+        const alphaCanvas = document.createElement("canvas");
+        alphaCanvas.width = width;
+        alphaCanvas.height = height;
+        const actx = alphaCanvas.getContext("2d");
+        actx.globalCompositeOperation = "lighter";
+
+        for (let cy = 0; cy < gridSize; cy++) {
+          for (let cx = 0; cx < gridSize; cx++) {
+            const value = counts[cy * gridSize + cx];
+            if (!value) {
+              continue;
+            }
+            const px = (cx + 0.5) * cellW;
+            const py = (cy + 0.5) * cellH;
+            const intensity = Math.min(1, value / max);
+            const gradient = actx.createRadialGradient(px, py, 0, px, py, radius);
+            gradient.addColorStop(0, `rgba(0,0,0,${intensity})`);
+            gradient.addColorStop(1, "rgba(0,0,0,0)");
+            actx.fillStyle = gradient;
+            actx.fillRect(px - radius, py - radius, radius * 2, radius * 2);
+          }
+        }
+
+        // Pass 2: colorize by alpha and paint onto the visible canvas.
+        const imageData = actx.getImageData(0, 0, width, height);
+        const out = ctx.createImageData(width, height);
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          const alpha = imageData.data[i + 3] / 255;
+          if (alpha <= 0) {
+            continue;
+          }
+          const [r, g, b] = colorFor(Math.min(1, alpha));
+          out.data[i] = r;
+          out.data[i + 1] = g;
+          out.data[i + 2] = b;
+          out.data[i + 3] = Math.min(255, Math.round(alpha * 200) + 55); // keep the reference image visible underneath
+        }
+        ctx.putImageData(out, 0, 0);
+      }
+
+      // ---- Wiring -------------------------------------------------------------------------------
+      const statusEl = document.getElementById("status");
+      const referenceEl = document.getElementById("reference");
+      const stageEl = document.getElementById("stage");
+      const canvasEl = document.getElementById("heatmapCanvas");
+      const legendEl = document.getElementById("legend");
+
+      function setStatus(message, isError) {
+        statusEl.textContent = message;
+        statusEl.className = isError ? "error" : "";
+      }
+
+      document.getElementById("controls").addEventListener("submit", (event) => {
+        event.preventDefault();
+        void load();
+      });
+
+      async function load() {
+        const lokiUrl = document.getElementById("lokiUrl").value.trim();
+        const panelType = document.getElementById("panelType").value.trim();
+        const sizeBucket = document.getElementById("sizeBucket").value;
+        const hoursBack = Number(document.getElementById("hoursBack").value) || 168;
+        const gridSize = Number(document.getElementById("gridSize").value) || 32;
+        const refWidth = Number(document.getElementById("refWidth").value) || 800;
+        const refHeight = Number(document.getElementById("refHeight").value) || 450;
+
+        setStatus("Querying Loki…", false);
+        legendEl.textContent = "";
+
+        let results;
+        try {
+          const logql = buildLogQL(panelType, sizeBucket);
+          results = await queryLoki(lokiUrl, logql, hoursBack);
+        } catch (err) {
+          setStatus(
+            `Failed to query Loki: ${err instanceof Error ? err.message : String(err)}\n` +
+              "Check the base URL, that the PoC stack is running (docker-compose.yml), and that " +
+              "you're using the CORS proxy port (3101), not Loki's own port (3100) — Loki has no " +
+              "CORS support, see nginx-cors-proxy.conf.",
+            true,
+          );
+          return;
+        }
+
+        const counts = new Array(gridSize * gridSize).fill(0);
+        let total = 0;
+        for (const stream of results) {
+          for (const [, line] of stream.values) {
+            const cell = extractGridCell(line);
+            if (!cell) {
+              continue;
+            }
+            // Re-bucket from the capture-time grid (fixed at 32, see useInteractionCapture.ts)
+            // down to the requested display grid, in case a 16x16 fallback is selected.
+            const scale = gridSize / 32;
+            const gx = Math.min(gridSize - 1, Math.max(0, Math.floor(cell.nx * scale)));
+            const gy = Math.min(gridSize - 1, Math.max(0, Math.floor(cell.ny * scale)));
+            counts[gy * gridSize + gx] += 1;
+            total += 1;
+          }
+        }
+
+        if (total === 0) {
+          setStatus(
+            "No interaction events matched. Either nothing has been clicked yet for this " +
+              "panel_type/size_bucket in the selected window, or the taxonomy/attribute shape " +
+              "assumed by extractGridCell() doesn't match what your collector emits — check the " +
+              "otel-collector `debug` exporter output for one raw UI_INTERACTION line.",
+            true,
+          );
+        } else {
+          setStatus(`Loaded ${total} interaction(s) across ${results.length} stream(s).`, false);
+        }
+
+        const referencePath = `./reference/${panelType || "unknown"}-${sizeBucket || "any"}.png`;
+        referenceEl.onerror = () => {
+          referenceEl.style.display = "none";
+          stageEl.style.width = `${refWidth}px`;
+          stageEl.style.height = `${refHeight}px`;
+          renderHeatmap(canvasEl, counts, gridSize, refWidth, refHeight);
+        };
+        referenceEl.onload = () => {
+          referenceEl.style.display = "block";
+          stageEl.style.width = `${referenceEl.naturalWidth}px`;
+          stageEl.style.height = `${referenceEl.naturalHeight}px`;
+          renderHeatmap(canvasEl, counts, gridSize, referenceEl.naturalWidth, referenceEl.naturalHeight);
+        };
+        referenceEl.src = referencePath;
+
+        legendEl.textContent =
+          "Color scale: blue (low) → cyan → green → yellow → red (high), relative to this view's own max cell count.";
+      }
+    </script>
+  </body>
+</html>

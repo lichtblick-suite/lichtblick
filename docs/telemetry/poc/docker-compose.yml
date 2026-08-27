@@ -25,6 +25,18 @@ services:
     ports:
       - "3100:3100"
 
+  # CORS shim in front of Loki, for docs/telemetry/poc/heatmap/index.html only — Loki itself has
+  # no CORS support (see nginx-cors-proxy.conf). Grafana's own Loki queries go through its
+  # server-side datasource proxy instead, so they never need this.
+  loki-cors-proxy:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./nginx-cors-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "3101:3100"
+    depends_on:
+      - loki
+
   grafana:
     image: grafana/grafana:11.3.1
     environment:

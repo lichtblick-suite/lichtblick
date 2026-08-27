@@ -4,10 +4,31 @@
   "tags": ["lichtblick", "poc", "telemetry"],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 3,
+  "version": 4,
   "time": {
     "from": "now-7d",
     "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "panel_type",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "Prometheus"
+        },
+        "query": "label_values(lichtblick_ui_interaction_total, panel_type)",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      }
+    ]
   },
   "panels": [
     {
@@ -140,6 +161,98 @@
         }
       ],
       "description": "Every abnormal renderer exit, grouped by reason — never filtered to reason=\"oom\". A V8 heap OOM does not necessarily surface as \"oom\": an isolated probe on macOS reported reason=\"crashed\" (exit code 5) for `V8 javascript OOM (Reached heap limit)`, and since StudioWindow runs with sandbox:false the renderer carries a Node environment, so the OOM can instead come through Node's handler. Filtering on a single reason silently hides the event we most care about."
+    },
+    {
+      "id": 6,
+      "title": "A6 - Interactions by panel type (last 7d)",
+      "type": "bargauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "topk(10, sum by (panel_type) (increase(lichtblick_ui_interaction_total[7d])))",
+          "legendFormat": "{{panel_type}}",
+          "refId": "A"
+        }
+      ],
+      "description": "Interaction volume (pointerdown captured in the Panel HOC, see useInteractionCapture.ts), not just panel presence like A3 — a panel can be open all week and never be clicked."
+    },
+    {
+      "id": 7,
+      "title": "A7 - Top controls by target_id",
+      "type": "bargauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "topk(15, sum by (target_id) (increase(lichtblick_ui_interaction_total{target_kind=\"control\", panel_type=~\"$panel_type\"}[7d])))",
+          "legendFormat": "{{target_id}}",
+          "refId": "A"
+        }
+      ],
+      "description": "Ranked by the $panel_type template variable (defaults to all panels). Filtered to target_kind=\"control\" so the ranking reflects annotated controls (see the taxonomy pilot, docs/telemetry/interaction-heatmap-poc-plan.md WS-4) rather than being dominated by target_id=\"unlabeled\" panel-surface clicks, which the spatial heatmap (docs/telemetry/poc/heatmap/) covers instead."
+    },
+    {
+      "id": 8,
+      "title": "A8 - Least-used controls by target_id",
+      "type": "bargauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "bottomk(15, sum by (target_id) (increase(lichtblick_ui_interaction_total{target_kind=\"control\", panel_type=~\"$panel_type\"}[7d])))",
+          "legendFormat": "{{target_id}}",
+          "refId": "A"
+        }
+      ],
+      "description": "The bottom of the same ranking as A7 — the more actionable half of \"where do users interact least\", since a control that is never used is a candidate for simplification in a way a heavily-used one is not."
+    },
+    {
+      "id": 9,
+      "title": "A9 - Distinct devices per target (k-anonymity check)",
+      "type": "bargauge",
+      "datasource": {
+        "type": "loki",
+        "uid": "Loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "topk(20, count by (attributes_target_id) (count by (attributes_target_id, attributes_device_id) (count_over_time({service_name=\"lichtblick\"} | json | body=\"Studio: UI Interaction\" [7d]))))",
+          "queryType": "instant",
+          "refId": "A"
+        }
+      ],
+      "description": "Distinct anonymous devices behind each target_id, over the dashboard's 7d window. This is the k-anonymity threshold expressed as a query rather than promised in prose: WS-6 requires no drill-down below 5 distinct devices, so any bar at or below 5 here means that target_id's other panels (A7/A8, and the spatial heatmap) are not yet safe to show without further aggregation. Uses Loki (device_id is deliberately never a metric label, see METRIC_ATTRIBUTE_ALLOWLIST) so this is heavier than a Prometheus query — keep the time range short when iterating."
     }
   ]
 }
