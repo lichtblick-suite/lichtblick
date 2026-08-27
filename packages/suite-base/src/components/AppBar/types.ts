@@ -22,6 +22,8 @@ export type AppBarMenuItem =
       external?: boolean;
       icon?: ReactNode;
       dataTestId?: string;
+      /** Taxonomy pilot id, e.g. "appbar.menu.file.open" (docs/telemetry/interaction-heatmap-poc-plan.md WS-4). */
+      analyticsId?: string;
     }
   | { type: "subheader"; label: ReactNode; key: string }
   | { type: "divider" };

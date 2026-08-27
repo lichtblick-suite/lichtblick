@@ -48,13 +48,15 @@ const useStyles = makeStyles<void, "endIcon">()((theme, _params, classes) => ({
 export function NestedMenuItem(
   props: PropsWithChildren<{
     id?: string;
+    /** Taxonomy pilot id for this submenu's own trigger, e.g. "appbar.menu.file". */
+    analyticsId?: string;
     items: AppBarMenuItem[];
     open: boolean;
     onPointerEnter: (itemId: string) => void;
   }>,
 ): React.JSX.Element {
   const { classes } = useStyles();
-  const { children, items, open, onPointerEnter, id } = props;
+  const { children, items, open, onPointerEnter, id, analyticsId } = props;
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLLIElement>(undefined);
 
   const handlePointerEnter = () => {
@@ -74,6 +76,7 @@ export function NestedMenuItem(
         className={classes.menuItem}
         onPointerEnter={handlePointerEnter}
         data-testid={id}
+        data-analytics-id={analyticsId}
       >
         {children}
         <ChevronRight12Regular className={classes.endIcon} />
@@ -113,6 +116,7 @@ export function NestedMenuItem(
                   key={item.key}
                   onClick={item.onClick}
                   data-testid={item.dataTestId}
+                  data-analytics-id={item.analyticsId}
                   disabled={item.disabled}
                 >
                   {item.label}

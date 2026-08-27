@@ -81,6 +81,7 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
         >
           <ToolbarIconButton
             disabled={(logCount ?? 0) === 0}
+            data-analytics-id="panel.toolbar.logs.toggle"
             title={
               showLogs === true
                 ? "Hide logs"
@@ -92,7 +93,11 @@ const PanelToolbarControlsComponent = forwardRef<HTMLDivElement, PanelToolbarCon
           </ToolbarIconButton>
         </Badge>
         {showSettingsButton && (
-          <ToolbarIconButton title="Settings" onClick={openSettings}>
+          <ToolbarIconButton
+            data-analytics-id="panel.toolbar.settings.open"
+            title="Settings"
+            onClick={openSettings}
+          >
             <SettingsIcon />
           </ToolbarIconButton>
         )}

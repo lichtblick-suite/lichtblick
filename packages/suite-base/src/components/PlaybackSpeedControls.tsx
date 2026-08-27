@@ -72,6 +72,7 @@ export default function PlaybackSpeedControls(): React.JSX.Element {
         iconPosition="end"
         onClick={handleClick}
         data-testid="PlaybackSpeedControls-Dropdown"
+        data-analytics-id="playback.speed.open"
         disabled={setPlaybackSpeed == undefined}
         title="Playback speed"
         color="inherit"

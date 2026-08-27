@@ -363,6 +363,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
           ref={publickClickButtonRef}
           onClick={props.onClickPublish}
           data-testid="publish-button"
+          data-analytics-id="panel.3d.publish"
         >
           {selectedPublishClickIcon}
           <div
@@ -431,6 +432,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
       color="secondary"
       onClick={onResetView}
       data-testid="reset-view"
+      data-analytics-id="panel.3d.reset-view"
     >
       {t("resetView")}
     </Button>
@@ -476,6 +478,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
                 size="small"
                 color={props.perspective ? "info" : "inherit"}
                 onClick={props.onTogglePerspective}
+                data-analytics-id="panel.3d.toggle-perspective"
               >
                 <span className={classes.threeDeeButton}>3D</span>
               </IconButton>
@@ -490,6 +493,7 @@ export function RendererOverlay(props: Props): React.JSX.Element {
                 size="small"
                 color={props.measureActive ? "info" : "inherit"}
                 onClick={props.onClickMeasure}
+                data-analytics-id="panel.3d.measure"
               >
                 <div className={classes.rulerIcon}>
                   {props.measureActive ? <Ruler20Filled /> : <Ruler20Regular />}

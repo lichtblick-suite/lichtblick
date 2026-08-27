@@ -153,6 +153,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Ele
         {
           key: "vsplit",
           text: t("splitRight"),
+          analyticsId: "panel.toolbar.split-right",
           onClick: () => {
             split(panelContext?.id, "row");
           },
@@ -160,6 +161,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Ele
         {
           key: "hsplit",
           text: t("splitDown"),
+          analyticsId: "panel.toolbar.split-down",
           onClick: () => {
             split(panelContext?.id, "column");
           },
@@ -173,6 +175,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Ele
         text: t("fullscreen"),
         onClick: enterFullscreen,
         "data-testid": "panel-menu-fullscreen",
+        analyticsId: "panel.toolbar.fullscreen",
       });
     }
 
@@ -183,6 +186,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Ele
       text: t("removePanel"),
       onClick: close,
       "data-testid": "panel-menu-remove",
+      analyticsId: "panel.toolbar.remove",
       className: classes.error,
     });
 
@@ -214,6 +218,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Ele
         aria-expanded={menuOpen ? "true" : undefined}
         onClick={handleMenuClick}
         data-testid="panel-menu"
+        data-analytics-id="panel.toolbar.menu.open"
         title={t("more")}
       >
         <MoreVertIcon />
@@ -241,6 +246,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Ele
           aria-expanded={submenuOpen ? "true" : undefined}
           onClick={handleSubmenuClick}
           onMouseEnter={handleSubmenuMouseEnter}
+          data-analytics-id="panel.toolbar.menu.change-panel"
         >
           {t("changePanel")}
           <ChevronRightIcon className={classes.icon} fontSize="small" />
@@ -262,6 +268,7 @@ function PanelActionsDropdownComponent({ isUnknownPanel }: Props): React.JSX.Ele
               }}
               className={cx(classes.menuItem, item.className)}
               data-testid={item["data-testid"]}
+              data-analytics-id={item.analyticsId}
             >
               {item.text}
             </MenuItem>

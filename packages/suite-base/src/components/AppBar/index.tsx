@@ -208,6 +208,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                 color="inherit"
                 id="app-menu-button"
                 data-testid="AppMenuButton"
+                data-analytics-id="appbar.menu.open"
                 title="Menu"
                 aria-controls={appMenuOpen ? "app-menu" : undefined}
                 aria-haspopup="true"
@@ -237,6 +238,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                 id="add-panel-button"
                 data-testid="AddPanelButton"
                 data-tourid="add-panel-button"
+                data-analytics-id="appbar.panel.add"
                 title={t("addPanel")}
                 aria-label="Add panel button"
                 aria-controls={panelMenuOpen ? "add-panel-menu" : undefined}
@@ -274,6 +276,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                   }}
                   data-tourid="left-sidebar-button"
                   data-testid="left-sidebar-button"
+                  data-analytics-id="appbar.sidebar.toggle-left"
                 >
                   {leftSidebarOpen ? <PanelLeft24Filled /> : <PanelLeft24Regular />}
                 </AppBarIconButton>
@@ -290,6 +293,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                   }}
                   data-tourid="right-sidebar-button"
                   data-testid="right-sidebar-button"
+                  data-analytics-id="appbar.sidebar.toggle-right"
                 >
                   {rightSidebarOpen ? <PanelRight24Filled /> : <PanelRight24Regular />}
                 </AppBarIconButton>
@@ -301,6 +305,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                   color="inherit"
                   id="user-button"
                   data-tourid="user-button"
+                  data-analytics-id="appbar.user.menu"
                   aria-controls={userMenuOpen ? "user-menu" : undefined}
                   aria-haspopup="true"
                   aria-expanded={userMenuOpen ? "true" : undefined}

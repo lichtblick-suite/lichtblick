@@ -164,6 +164,7 @@ export default function PlaybackControls({
                 icon={<EventOutlinedIcon />}
                 activeIcon={<EventIcon />}
                 onClick={toggleCreateEventDialog}
+                data-analytics-id="playback.event.create"
               />
             )}
             <Tooltip
@@ -202,6 +203,7 @@ export default function PlaybackControls({
                 seekBackwardAction();
               }}
               data-testid="seek-backward-button"
+              data-analytics-id="playback.seek-backward"
             />
             <HoverableIconButton
               disabled={disableControls}
@@ -211,6 +213,7 @@ export default function PlaybackControls({
               icon={isPlaying ? <Pause20Regular /> : <Play20Regular />}
               activeIcon={isPlaying ? <Pause20Filled /> : <Play20Filled />}
               data-testid="play-button"
+              data-analytics-id="playback.play-pause"
             />
             <HoverableIconButton
               disabled={disableControls}
@@ -222,6 +225,7 @@ export default function PlaybackControls({
                 seekForwardAction();
               }}
               data-testid="seek-forward-button"
+              data-analytics-id="playback.seek-forward"
             />
           </Stack>
           <Stack direction="row" flex={1} alignItems="center" justifyContent="flex-end" gap={0.5}>
@@ -232,6 +236,7 @@ export default function PlaybackControls({
               color={repeat ? "primary" : "inherit"}
               onClick={toggleRepeat}
               icon={repeat ? <ArrowRepeatAll20Regular /> : <ArrowRepeatAllOff20Regular />}
+              data-analytics-id="playback.loop-toggle"
             />
             <PlaybackSpeedControls />
           </Stack>

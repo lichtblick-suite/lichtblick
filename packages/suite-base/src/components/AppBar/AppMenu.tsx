@@ -74,6 +74,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         label: t("open"),
         key: "open",
         dataTestId: "menu-item-open",
+        analyticsId: "appbar.menu.file.open",
         onClick: () => {
           dialogActions.dataSource.open("start");
           handleNestedMenuClose();
@@ -85,6 +86,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         key: "open-file",
         shortcut: formatKeyboardShortcut("O", ["Meta"]),
         dataTestId: "menu-item-open-local-file",
+        analyticsId: "appbar.menu.file.open-local-file",
         onClick: () => {
           handleNestedMenuClose();
           dialogActions.openFile.open().catch((err: unknown) => {
@@ -98,6 +100,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         key: "open-connection",
         shortcut: formatKeyboardShortcut("O", ["Meta", "Shift"]),
         dataTestId: "menu-item-open-connection",
+        analyticsId: "appbar.menu.file.open-connection",
         onClick: () => {
           dialogActions.dataSource.open("connection");
           handleNestedMenuClose();
@@ -139,6 +142,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         label: leftSidebarOpen ? t("hideLeftSidebar") : t("showLeftSidebar"),
         key: "left-sidebar",
         shortcut: "[",
+        analyticsId: "appbar.menu.view.toggle-left-sidebar",
         onClick: () => {
           sidebarActions.left.setOpen(!leftSidebarOpen);
           handleNestedMenuClose();
@@ -149,6 +153,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         label: rightSidebarOpen ? t("hideRightSidebar") : t("showRightSidebar"),
         key: "right-sidebar",
         shortcut: "]",
+        analyticsId: "appbar.menu.view.toggle-right-sidebar",
         onClick: () => {
           sidebarActions.right.setOpen(!rightSidebarOpen);
           handleNestedMenuClose();
@@ -161,6 +166,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         type: "item",
         label: t("importLayoutFromFile"),
         key: "import-layout",
+        analyticsId: "appbar.menu.view.import-layout",
         onClick: () => {
           runLayoutAction(importLayout);
         },
@@ -169,6 +175,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         type: "item",
         label: t("exportLayoutToFile"),
         key: "export-layout",
+        analyticsId: "appbar.menu.view.export-layout",
         onClick: () => {
           runLayoutAction(exportLayout);
         },
@@ -206,11 +213,29 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
 
   const helpItems = useMemo<AppBarMenuItem[]>(
     () => [
-      { type: "item", key: "about", label: t("about"), onClick: onAboutClick },
+      {
+        type: "item",
+        key: "about",
+        label: t("about"),
+        analyticsId: "appbar.menu.help.about",
+        onClick: onAboutClick,
+      },
       { type: "divider" },
-      { type: "item", key: "docs", label: t("documentation"), onClick: onDocsClick },
+      {
+        type: "item",
+        key: "docs",
+        label: t("documentation"),
+        analyticsId: "appbar.menu.help.docs",
+        onClick: onDocsClick,
+      },
       { type: "divider" },
-      { type: "item", key: "demo", label: t("exploreSampleData"), onClick: onDemoClick },
+      {
+        type: "item",
+        key: "demo",
+        label: t("exploreSampleData"),
+        analyticsId: "appbar.menu.help.demo",
+        onClick: onDemoClick,
+      },
     ],
     [onAboutClick, onDemoClick, onDocsClick, t],
   );
@@ -242,6 +267,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
           items={fileItems}
           open={nestedMenu === "app-menu-file"}
           id="app-menu-file"
+          analyticsId="appbar.menu.file"
         >
           {t("file")}
         </NestedMenuItem>
@@ -250,6 +276,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
           items={viewItems}
           open={nestedMenu === "app-menu-view"}
           id="app-menu-view"
+          analyticsId="appbar.menu.view"
         >
           {t("view")}
         </NestedMenuItem>
@@ -258,6 +285,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
           items={helpItems}
           open={nestedMenu === "app-menu-help"}
           id="app-menu-help"
+          analyticsId="appbar.menu.help"
         >
           {t("help")}
         </NestedMenuItem>

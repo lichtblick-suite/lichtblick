@@ -50,6 +50,7 @@ export function CustomWindowControls({
         color="inherit"
         onClick={onMinimizeWindow}
         data-testid="win-minimize"
+        data-analytics-id="appbar.window.minimize"
       >
         <MinimizeIcon fontSize="inherit" color="inherit" />
       </IconButton>
@@ -59,6 +60,7 @@ export function CustomWindowControls({
         color="inherit"
         onClick={isMaximized ? onUnmaximizeWindow : onMaximizeWindow}
         data-testid="win-maximize"
+        data-analytics-id="appbar.window.maximize"
       >
         {isMaximized ? (
           <FilterNoneIcon fontSize="inherit" color="inherit" />
@@ -73,6 +75,7 @@ export function CustomWindowControls({
         color="inherit"
         onClick={onCloseWindow}
         data-testid="win-close"
+        data-analytics-id="appbar.window.close"
       >
         <CloseIcon fontSize="inherit" color="inherit" />
       </IconButton>

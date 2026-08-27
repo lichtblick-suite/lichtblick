@@ -133,6 +133,7 @@ export function DataSource(): React.JSX.Element {
             <IconButton
               color="inherit"
               className={classes.iconButton}
+              data-analytics-id="appbar.data-source.show-alerts"
               onClick={() => {
                 sidebarActions.left.setOpen(true);
                 sidebarActions.left.selectItem("alerts");
