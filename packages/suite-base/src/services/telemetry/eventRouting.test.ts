@@ -6,8 +6,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
+import { InteractionAttributes } from "@lichtblick/suite-base/services/telemetry/interactionTypes";
 
 import {
+  METRIC_ATTRIBUTE_ALLOWLIST,
   METRIC_UNITS,
   attributesCacheKey,
   getEventCounterName,
@@ -22,6 +24,7 @@ describe("getEventCounterName", () => {
     expect(getEventCounterName(AppEvent.PANEL_ADD)).toEqual("lichtblick.panel.added");
     expect(getEventCounterName(AppEvent.PANEL_DELETE)).toEqual("lichtblick.panel.removed");
     expect(getEventCounterName(AppEvent.RENDERER_GONE)).toEqual("lichtblick.renderer.gone");
+    expect(getEventCounterName(AppEvent.UI_INTERACTION)).toEqual("lichtblick.ui.interaction");
   });
 
   it("returns undefined for events that must stay log-only", () => {
@@ -107,5 +110,39 @@ describe("METRIC_UNITS", () => {
       "lichtblick.memory.process.rss": "By",
       "lichtblick.session.duration": "s",
     });
+  });
+});
+
+describe("sanitizeMetricAttributes (interaction heatmap PoC privacy contract)", () => {
+  it("strips nx/ny from a full UI_INTERACTION payload before it can reach a metric label", () => {
+    // Given: the full attribute set logEvent() sends for every interaction (see
+    // interactionTypes.ts) — nx/ny are a quantized click position, never safe as a label.
+    const attrs: InteractionAttributes = {
+      panel_type: "ThreeDeeRender",
+      target_id: "panel.toolbar.settings",
+      target_kind: "control",
+      size_bucket: "l",
+      nx: 12,
+      ny: 5,
+    };
+
+    // When
+    const sanitized = sanitizeMetricAttributes(attrs, AppEvent.UI_INTERACTION);
+
+    // Then: this fails the build the moment nx/ny (or any future coordinate field) is added to
+    // the allowlist, turning the privacy rule from a comment into a test.
+    expect(sanitized).toEqual({
+      panel_type: "ThreeDeeRender",
+      target_id: "panel.toolbar.settings",
+      target_kind: "control",
+      size_bucket: "l",
+    });
+    expect(Object.keys(sanitized)).not.toContain("nx");
+    expect(Object.keys(sanitized)).not.toContain("ny");
+  });
+
+  it("never allowlists nx or ny directly", () => {
+    expect(METRIC_ATTRIBUTE_ALLOWLIST.has("nx")).toBe(false);
+    expect(METRIC_ATTRIBUTE_ALLOWLIST.has("ny")).toBe(false);
   });
 });

@@ -28,6 +28,11 @@ export const METRIC_ATTRIBUTE_ALLOWLIST = new Set([
   "platform",
   "os_type",
   "session_id",
+  // Interaction heatmap PoC (docs/telemetry/interaction-heatmap-poc-plan.md WS-1) — `nx`/`ny` are
+  // deliberately NOT here, see InteractionAttributes in ./interactionTypes.ts.
+  "target_id",
+  "target_kind",
+  "size_bucket",
 ]);
 
 /**
@@ -53,6 +58,7 @@ const EVENT_COUNTER_NAME: Partial<Record<AppEvent, string>> = {
   [AppEvent.PANEL_ADD]: "lichtblick.panel.added",
   [AppEvent.PANEL_DELETE]: "lichtblick.panel.removed",
   [AppEvent.RENDERER_GONE]: "lichtblick.renderer.gone",
+  [AppEvent.UI_INTERACTION]: "lichtblick.ui.interaction",
 };
 
 /**

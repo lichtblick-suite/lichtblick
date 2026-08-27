@@ -74,6 +74,9 @@ enum AppEvent {
   SESSION_END = "Studio: Session Ended",
   PANEL_FOCUS = "Studio: Panel Focused",
   RENDERER_GONE = "Studio: Renderer Process Gone",
+
+  // Interaction heatmap PoC (docs/telemetry/interaction-heatmap-poc-plan.md)
+  UI_INTERACTION = "Studio: UI Interaction",
 }
 
 interface IAnalytics {
