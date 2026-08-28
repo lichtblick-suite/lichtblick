@@ -71,6 +71,24 @@ export type UpdateDataAction =
   | UpdateSeriesFullAction;
 
 const compareDatum = (a: Datum, b: Datum) => a.x - b.x;
+type IndexedDatum = Datum & { index: number };
+
+function getDerivativeY(
+  item: IndexedDatum,
+  prevX: number | undefined,
+  prevY: number | undefined,
+): number {
+  if (
+    prevX == undefined ||
+    prevY == undefined ||
+    Number.isNaN(item.x) ||
+    Number.isNaN(item.y) ||
+    item.x === prevX
+  ) {
+    return NaN;
+  }
+  return (item.y - prevY) / (item.x - prevX);
+}
 
 export class TimestampDatasetsBuilderImpl {
   #seriesByKey = new Map<SeriesConfigKey, Series>();
@@ -91,19 +109,13 @@ export class TimestampDatasetsBuilderImpl {
 
       // Copy so we can set the .index property for downsampling
       // If downsampling algos change to not need the .index then we can get rid of some copies
-      const allData = series.full.slice();
-
-      allData.push(...series.current);
+      const allData = this.#getData(series);
 
       let startIdx = 0;
       let endIdx = allData.length;
 
       const xBounds: Bounds1D = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
       const yBounds: Bounds1D = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
-
-      // Keep previous original values for computing derivative
-      let prevX = NaN;
-      let prevY = NaN;
 
       const derivative = series.config.parsed.modifier === "derivative";
 
@@ -113,25 +125,10 @@ export class TimestampDatasetsBuilderImpl {
         const item = allData[i]!;
         item.index = i;
 
-        if (derivative) {
-          if (i === 0) {
-            // When we compute the derivative we will remove the first datum since we cannot compute its derivative
-            startIdx = 1;
-            prevX = item.x;
-            prevY = item.y;
-            continue;
-          }
-
-          const dx = item.x - prevX;
-          // when dx is 0 we have a gap or duplicate timestamp, so we return NaN to break the line
-          const newY = dx === 0 ? NaN : (item.y - prevY) / dx;
-          allData[i] = {
-            ...item,
-            y: newY,
-            value: Number.isNaN(newY) ? null : newY, // when there's NaN, value should be null (only relevant for tooltip and csv export)
-          };
-          prevX = item.x;
-          prevY = item.y;
+        if (derivative && i === 0) {
+          // When we compute the derivative we will remove the first datum since we cannot compute its derivative
+          startIdx = 1;
+          continue;
         }
 
         if (viewport.bounds.x?.min != undefined && item.x < viewport.bounds.x.min) {
@@ -190,6 +187,16 @@ export class TimestampDatasetsBuilderImpl {
             ? downsampleTimeseries(items, downsampleViewport, maxPoints)
             : downsampleScatter(items, downsampleViewport);
 
+      if (dataset.showLine === true) {
+        const downsampledIndexSet = new Set(downsampledIndices);
+        for (const item of items) {
+          if (Number.isNaN(item.y) && !downsampledIndexSet.has(item.index)) {
+            downsampledIndices.push(item.index);
+          }
+        }
+        downsampledIndices.sort((a, b) => a - b);
+      }
+
       // When a series is downsampled the points are disabled as a visual indicator that
       // data is downsampled.
       //
@@ -238,18 +245,46 @@ export class TimestampDatasetsBuilderImpl {
         continue;
       }
 
-      const allData = series.full.slice();
-      if (series.current.length > 0) {
-        allData.push(...series.current);
-      }
-
       datasets.push({
         label: series.config.messagePath,
-        data: allData,
+        data: this.#getData(series),
       });
     }
 
     return datasets;
+  }
+
+  #getData(series: Series): IndexedDatum[] {
+    const allData: IndexedDatum[] = series.full.slice();
+    allData.push(...series.current);
+
+    if (series.config.parsed.modifier !== "derivative") {
+      return allData;
+    }
+
+    let prevX: number | undefined;
+    let prevY: number | undefined;
+    for (let i = 0; i < allData.length; ++i) {
+      const item = allData[i]!;
+      if (i > 0) {
+        const newY = getDerivativeY(item, prevX, prevY);
+        allData[i] = {
+          ...item,
+          y: newY,
+          value: Number.isNaN(newY) ? null : newY,
+        };
+      }
+
+      if (Number.isNaN(item.x) || Number.isNaN(item.y)) {
+        prevX = undefined;
+        prevY = undefined;
+      } else {
+        prevX = item.x;
+        prevY = item.y;
+      }
+    }
+
+    return allData;
   }
 
   public applyActions(actions: Immutable<UpdateDataAction[]>): void {

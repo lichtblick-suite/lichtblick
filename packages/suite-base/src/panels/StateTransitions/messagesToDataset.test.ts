@@ -516,4 +516,29 @@ describe("messagesToDataset", () => {
 
     expect(result.data.length).toBe(2);
   });
+
+  it("should preserve the pending state before a gap", () => {
+    const repeatedValue = BasicBuilder.number();
+    const messageAndData = {
+      messageEvent,
+      queriedData: [{ value: repeatedValue, path: queriedDataPath }],
+    };
+    const gap = {
+      messageEvent,
+      queriedData: [{ value: null, path: queriedDataPath }],
+    };
+
+    const result = messagesToDataset({
+      ...args,
+      blocks: [[messageAndData, messageAndData, gap]],
+      path: { ...args.path, timestampMethod: "receiveTime" },
+      showPoints: false,
+    });
+
+    expect(result.data).toEqual([
+      expect.objectContaining({ value: repeatedValue }),
+      expect.objectContaining({ value: repeatedValue }),
+      { x: expect.any(Number), y: NaN },
+    ]);
+  });
 });

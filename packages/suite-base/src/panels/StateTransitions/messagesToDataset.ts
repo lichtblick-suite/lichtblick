@@ -66,6 +66,9 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
       // A null value marks a gap: break the line here and start a fresh segment once data resumes.
       // eslint-disable-next-line @lichtblick/strict-equality
       if (value === null) {
+        if (lastDatum != undefined) {
+          dataset.data.push(lastDatum);
+        }
         dataset.data.push({ x, y: Number.NaN });
         lastValue = undefined;
         lastDatum = undefined;
