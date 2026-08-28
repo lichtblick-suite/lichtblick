@@ -85,7 +85,7 @@ function getDerivativeY(
     Number.isNaN(item.y) ||
     item.x === prevX
   ) {
-    return NaN;
+    return Number.NaN;
   }
   return (item.y - prevY) / (item.x - prevX);
 }
