@@ -18,6 +18,7 @@ import {
   SeriesItem,
   Viewport,
 } from "./IDatasetsBuilder";
+import { MAX_CURRENT_DATUMS_PER_SERIES, buildDatasetStyle, updateSeriesConfig } from "./utils";
 import { Dataset } from "../types";
 import { Datum, OriginalValue } from "../utils/datum";
 
@@ -94,10 +95,6 @@ export type UpdateDataAction =
   | UpdateSeriesCurrentAction
   | UpdateSeriesFullAction;
 
-// When accumulating datums into the current buffer we cap each series to this number of datums so
-// we do not grow the memory for accumulated current data indefinitely
-const MAX_CURRENT_DATUMS_PER_SERIES = 50_000;
-
 export class CustomDatasetsBuilderImpl {
   #xValues: { current: ValueItem[]; full: ValueItem[] } = {
     current: [],
@@ -118,16 +115,8 @@ export class CustomDatasetsBuilderImpl {
       if (!series.config.enabled) {
         continue;
       }
-      const { showLine, color, contrastColor } = series.config;
       const dataset: Dataset = {
-        borderColor: color,
-        showLine,
-        fill: false,
-        borderWidth: series.config.lineSize,
-        pointRadius: series.config.lineSize * 1.2,
-        pointHoverRadius: 3,
-        pointBackgroundColor: showLine ? contrastColor : color,
-        pointBorderColor: "transparent",
+        ...buildDatasetStyle(series.config),
         data: [],
       };
 
@@ -135,49 +124,18 @@ export class CustomDatasetsBuilderImpl {
 
       // Create the full dataset by pairing full y-values with their x-value peers
       // And then pairing current y-values with their x-value peers
-
-      const allData: FullDatum[] = [];
+      const allData = this.#pairFullAndCurrentData(series);
 
       const xBounds: Bounds1D = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
       const yBounds: Bounds1D = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
 
-      for (let idx = 0; idx < series.full.length && idx < this.#xValues.full.length; ++idx) {
-        const xValue = this.#xValues.full[idx];
-        const yValue = series.full[idx];
-        if (xValue == undefined || yValue == undefined) {
-          continue;
+      for (const item of allData) {
+        if (!Number.isNaN(item.x)) {
+          extendBounds1D(xBounds, item.x);
         }
-
-        allData.push({
-          x: xValue.value,
-          y: yValue.value,
-          index: idx,
-          receiveTime: xValue.receiveTime,
-          value: yValue.originalValue,
-        });
-
-        extendBounds1D(xBounds, xValue.value);
-        extendBounds1D(yBounds, yValue.value);
-      }
-
-      const fullLength = allData.length;
-      for (let idx = 0; idx < series.current.length && idx < this.#xValues.current.length; ++idx) {
-        const xValue = this.#xValues.current[idx];
-        const yValue = series.current[idx];
-        if (xValue == undefined || yValue == undefined) {
-          continue;
+        if (!Number.isNaN(item.y)) {
+          extendBounds1D(yBounds, item.y);
         }
-
-        allData.push({
-          x: xValue.value,
-          y: yValue.value,
-          index: idx + fullLength,
-          receiveTime: xValue.receiveTime,
-          value: yValue.originalValue,
-        });
-
-        extendBounds1D(xBounds, xValue.value);
-        extendBounds1D(yBounds, yValue.value);
       }
 
       // Downsample scatter is designed for scatter plots without points since it culls values
@@ -240,48 +198,54 @@ export class CustomDatasetsBuilderImpl {
         continue;
       }
 
-      const allData: FullDatum[] = [];
-
-      for (let idx = 0; idx < series.full.length && idx < this.#xValues.full.length; ++idx) {
-        const xValue = this.#xValues.full[idx];
-        const yValue = series.full[idx];
-        if (xValue == undefined || yValue == undefined) {
-          continue;
-        }
-
-        allData.push({
-          x: xValue.value,
-          y: yValue.value,
-          index: idx,
-          receiveTime: xValue.receiveTime,
-          value: yValue.originalValue,
-        });
-      }
-
-      const fullLength = allData.length;
-      for (let idx = 0; idx < series.current.length && idx < this.#xValues.current.length; ++idx) {
-        const xValue = this.#xValues.current[idx];
-        const yValue = series.current[idx];
-        if (xValue == undefined || yValue == undefined) {
-          continue;
-        }
-
-        allData.push({
-          x: xValue.value,
-          y: yValue.value,
-          index: idx + fullLength,
-          receiveTime: xValue.receiveTime,
-          value: yValue.originalValue,
-        });
-      }
-
       datasets.push({
         label: series.config.messagePath,
-        data: allData,
+        data: this.#pairFullAndCurrentData(series),
       });
     }
 
     return datasets;
+  }
+
+  // Pairs each series' full and current y-values with their x-value peers (by array index) into
+  // a single, index-ordered array of datums. Shared by getViewportDatasets and getCsvData.
+  #pairFullAndCurrentData(series: Series): FullDatum[] {
+    const allData: FullDatum[] = [];
+
+    for (let idx = 0; idx < series.full.length && idx < this.#xValues.full.length; ++idx) {
+      const xValue = this.#xValues.full[idx];
+      const yValue = series.full[idx];
+      if (xValue == undefined || yValue == undefined) {
+        continue;
+      }
+
+      allData.push({
+        x: xValue.value,
+        y: yValue.value,
+        index: idx,
+        receiveTime: xValue.receiveTime,
+        value: yValue.originalValue,
+      });
+    }
+
+    const fullLength = allData.length;
+    for (let idx = 0; idx < series.current.length && idx < this.#xValues.current.length; ++idx) {
+      const xValue = this.#xValues.current[idx];
+      const yValue = series.current[idx];
+      if (xValue == undefined || yValue == undefined) {
+        continue;
+      }
+
+      allData.push({
+        x: xValue.value,
+        y: yValue.value,
+        index: idx + fullLength,
+        receiveTime: xValue.receiveTime,
+        value: yValue.originalValue,
+      });
+    }
+
+    return allData;
   }
 
   #applyAction(action: Immutable<UpdateDataAction>): void {
@@ -416,19 +380,6 @@ export class CustomDatasetsBuilderImpl {
   }
 
   #updateSeriesConfigAction(series: Immutable<SeriesItem[]>): void {
-    // Make a new map so we drop series which are no longer present
-    const newSeries = new Map();
-
-    for (const config of series) {
-      let existingSeries = this.#seriesByKey.get(config.key);
-      existingSeries ??= {
-        config,
-        current: [],
-        full: [],
-      };
-      newSeries.set(config.key, existingSeries);
-      existingSeries.config = config;
-    }
-    this.#seriesByKey = newSeries;
+    this.#seriesByKey = updateSeriesConfig(this.#seriesByKey, series);
   }
 }

@@ -233,13 +233,11 @@ export function getMessagePathDataItems(
     path: string,
     structureItem: MessagePathStructureItem | undefined,
   ) {
-    if (value == undefined) {
-      return;
-    }
     const pathItem = filledInPath.messagePath[pathIndex];
     const nextPathItem = filledInPath.messagePath[pathIndex + 1];
     if (!pathItem) {
-      // If we're at the end of the `messagePath`, we're done! Just store the point.
+      // If we're at the end of the `messagePath`, we're done! Just store the point, even if the
+      // value itself is null/undefined (e.g. a message field explicitly set to null).
       let constantName: string | undefined;
       const prevPathItem = filledInPath.messagePath[pathIndex - 1];
       if (prevPathItem?.type === "name") {
@@ -248,7 +246,13 @@ export function getMessagePathDataItems(
         constantName = enumMap?.[fieldName]?.[value];
       }
       queriedData.push({ value, path, constantName });
-    } else if (
+      return;
+    }
+
+    if (value == undefined) {
+      return;
+    }
+    if (
       pathItem.type === "name" &&
       (structureItem == undefined || structureItem.structureType === "message")
     ) {

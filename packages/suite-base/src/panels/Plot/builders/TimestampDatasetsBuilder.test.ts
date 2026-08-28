@@ -157,6 +157,150 @@ describe("TimestampDatasetsBuilder", () => {
     });
   });
 
+  it("should render a gap by mapping a null value to NaN", async () => {
+    const builder = new TimestampDatasetsBuilder();
+
+    builder.setSeries(
+      buildSeriesItems([
+        {
+          enabled: true,
+          timestampMethod: "receiveTime",
+          value: "/foo.val",
+        },
+      ]),
+    );
+
+    builder.handlePlayerState(
+      buildPlayerState({
+        messages: [
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: 0,
+            },
+          },
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 1, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: null,
+            },
+          },
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 2, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: 1,
+            },
+          },
+        ],
+      }),
+    );
+
+    await expect(
+      builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      }),
+    ).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          data: [
+            { x: 0, y: 0, value: 0 },
+            { x: 1, y: NaN, value: null },
+            { x: 2, y: 1, value: 1 },
+          ],
+        }),
+      ],
+    });
+  });
+
+  it("resets the derivative segment after a gap instead of computing across it", async () => {
+    const builder = new TimestampDatasetsBuilder();
+
+    builder.setSeries(
+      buildSeriesItems([
+        {
+          enabled: true,
+          timestampMethod: "receiveTime",
+          value: "/foo.val.@derivative",
+        },
+      ]),
+    );
+
+    builder.handlePlayerState(
+      buildPlayerState({
+        messages: [
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: 0 },
+          },
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 1, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: 1 },
+          },
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 2, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: null },
+          },
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 3, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: 5 },
+          },
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 4, nsec: 0 },
+            sizeInBytes: 0,
+            message: { val: 7 },
+          },
+        ],
+      }),
+    );
+
+    await expect(
+      builder.getViewportDatasets({
+        size: { width: 1_000, height: 1_000 },
+        bounds: {},
+      }),
+    ).resolves.toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          // t=0 is dropped (no previous datum to diff against). t=1 is a normal derivative.
+          // t=2 is the gap itself, and t=3 is the first datum after it: both have nothing
+          // valid to diff against, so both come out as NaN/null. t=4 resumes normally.
+          data: [
+            { x: 1, y: 1, value: 1 },
+            { x: 2, y: NaN, value: null },
+            { x: 3, y: NaN, value: null },
+            { x: 4, y: 2, value: 2 },
+          ],
+        }),
+      ],
+    });
+  });
+
   it("should create a discontinuity between current and full", async () => {
     const builder = new TimestampDatasetsBuilder();
 
