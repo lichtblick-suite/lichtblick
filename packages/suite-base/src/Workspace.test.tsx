@@ -6,6 +6,7 @@
 import "@testing-library/jest-dom";
 import { render, waitFor } from "@testing-library/react";
 
+import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import {
   useMessagePipeline,
   useMessagePipelineGetter,
@@ -60,6 +61,9 @@ jest.mock("@lichtblick/suite-base/api/mcapBundle/McapBundleAPI", () => ({
 }));
 
 // ── components (rendered as null — Sidebars is the exception below) ────────────
+jest.mock("@lichtblick/suite-base/components/AgentWorkspaceIntegration", () => ({
+  AgentWorkspaceIntegration: ({ children }: React.PropsWithChildren) => <>{children}</>,
+}));
 jest.mock("@lichtblick/suite-base/components/Sidebars", () => ({
   __esModule: true,
   default: jest.fn(() => undefined),
@@ -706,5 +710,88 @@ describe("Workspace - fetchLayoutFromUrl", () => {
     await waitFor(() => {
       expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Invalid layout URL", { variant: "error" });
     });
+  });
+});
+
+describe("Workspace - Agent sidebar wiring", () => {
+  const installMocks = () => {
+    (useMessagePipeline as jest.Mock).mockImplementation(
+      (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
+    );
+    (useMessagePipelineGetter as jest.Mock).mockReturnValue(() => mockPipelineContext);
+    (useWorkspaceStore as jest.Mock).mockImplementation(
+      (selector: (store: typeof mockWorkspaceStore) => unknown) => selector(mockWorkspaceStore),
+    );
+    (useWorkspaceActions as jest.Mock).mockReturnValue(mockWorkspaceActions);
+    (usePlayerSelection as jest.Mock).mockReturnValue({
+      availableSources: [],
+      selectSource: jest.fn(),
+    });
+    (useAlertCount as jest.Mock).mockReturnValue({
+      playerAlerts: [],
+      sessionAlerts: [],
+      alertCount: 0,
+    });
+    (useHandleFiles as jest.Mock).mockReturnValue({ handleFiles: jest.fn() });
+    (useCurrentUser as jest.Mock).mockReturnValue({ currentUser: undefined, signIn: undefined });
+    (useCurrentUserType as jest.Mock).mockReturnValue("unauthenticated");
+    (useEvents as jest.Mock).mockImplementation(
+      (selector: (store: { eventsSupported: boolean; selectEvent: jest.Mock }) => unknown) =>
+        selector({ eventsSupported: false, selectEvent: jest.fn() }),
+    );
+    (useAppContext as jest.Mock).mockReturnValue({
+      PerformanceSidebarComponent: undefined,
+      sidebarItems: [],
+      layoutBrowser: undefined,
+      workspaceStoreCreator: undefined,
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockWorkspaceStore.sidebars.right.item = undefined;
+    mockWorkspaceStore.sidebars.right.open = false;
+    installMocks();
+  });
+
+  it("registers the agent-chat right sidebar item only while the agent is enabled", () => {
+    (useAppConfigurationValue as jest.Mock).mockImplementation((key: string) => [
+      key === AppSetting.AGENT_ENABLED,
+    ]);
+
+    const root = render(<Workspace />);
+    let rightItems = MockedSidebars.mock.lastCall?.[0]?.rightItems as Map<string, SidebarItem>;
+    expect(rightItems.get("agent-chat")).toBeDefined();
+    expect(rightItems.get("agent-chat")?.title).toBe("workspace:agentChat");
+
+    // Disabling the agent removes the item from the right sidebar.
+    (useAppConfigurationValue as jest.Mock).mockImplementation(() => [false]);
+    root.rerender(<Workspace />);
+    rightItems = MockedSidebars.mock.lastCall?.[0]?.rightItems as Map<string, SidebarItem>;
+    expect(rightItems.get("agent-chat")).toBeUndefined();
+  });
+
+  it("normalizes the right sidebar selection to variables when the agent is disabled while agent-chat is open", () => {
+    mockWorkspaceStore.sidebars.right.item = "agent-chat" as never;
+    mockWorkspaceStore.sidebars.right.open = true;
+    (useAppConfigurationValue as jest.Mock).mockImplementation(() => [false]);
+
+    render(<Workspace />);
+
+    expect(mockWorkspaceActions.sidebarActions.right.selectItem).toHaveBeenCalledWith("variables");
+    // The sidebar stays open: only the stale item is normalized.
+    expect(mockWorkspaceActions.sidebarActions.right.setOpen).not.toHaveBeenCalled();
+  });
+
+  it("preserves the closed state when normalizing a stale agent-chat selection", () => {
+    mockWorkspaceStore.sidebars.right.item = "agent-chat" as never;
+    mockWorkspaceStore.sidebars.right.open = false;
+    (useAppConfigurationValue as jest.Mock).mockImplementation(() => [false]);
+
+    render(<Workspace />);
+
+    expect(mockWorkspaceActions.sidebarActions.right.selectItem).toHaveBeenCalledWith("variables");
+    // Selecting a new item would open the sidebar; the previous closed state is restored.
+    expect(mockWorkspaceActions.sidebarActions.right.setOpen).toHaveBeenCalledWith(false);
   });
 });

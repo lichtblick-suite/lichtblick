@@ -9,7 +9,9 @@ import fs from "fs";
 import { openDB } from "idb/with-async-ittr";
 import JSZip from "jszip";
 
+import type { PanelInfo } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
+import { buildPanelInventory } from "@lichtblick/suite-base/services/agent/panelInventory";
 import {
   EXTENSION_STORE_NAME,
   METADATA_STORE_NAME,
@@ -140,6 +142,112 @@ describe("IdbExtensionLoader", () => {
         }),
       });
       expect((await loader.getExtensions())[0]).toBe(info);
+    });
+
+    it("parses optional panel metadata from package.json", async () => {
+      const zip = new JSZip();
+      zip.file(
+        ALLOWED_FILES.PACKAGE,
+        JSON.stringify({
+          name: "panel-metadata-extension",
+          publisher: "Acme",
+          version: "1.0.0",
+          lichtblickPanels: {
+            Camera: {
+              description: "Shows camera images.",
+              schemas: ["sensor_msgs/Image"],
+            },
+          },
+        }) ?? "",
+      );
+      zip.file(ALLOWED_FILES.EXTENSION, "extension-content");
+      const loader = new IdbExtensionLoader("local");
+
+      const result = await loader.installExtension({
+        foxeFileData: await zip.generateAsync({ type: "uint8array" }),
+      });
+
+      expect(result.panelsMeta).toEqual({
+        Camera: {
+          description: "Shows camera images.",
+          schemas: ["sensor_msgs/Image"],
+        },
+      });
+      expect(result).not.toHaveProperty("lichtblickPanels");
+    });
+
+    it("ignores malformed panel metadata fields", async () => {
+      const zip = new JSZip();
+      zip.file(
+        ALLOWED_FILES.PACKAGE,
+        JSON.stringify({
+          name: "invalid-panel-metadata-extension",
+          publisher: "Acme",
+          version: "1.0.0",
+          lichtblickPanels: {
+            Broken: "not-an-object",
+            Mixed: { description: 42, schemas: ["sensor_msgs/Image", 7] },
+            Valid: { description: "Still valid." },
+          },
+        }) ?? "",
+      );
+      zip.file(ALLOWED_FILES.EXTENSION, "extension-content");
+      const loader = new IdbExtensionLoader("local");
+
+      const result = await loader.installExtension({
+        foxeFileData: await zip.generateAsync({ type: "uint8array" }),
+      });
+
+      expect(result.panelsMeta).toEqual({
+        Valid: { description: "Still valid." },
+      });
+    });
+
+    it("feeds installed panel metadata into the agent panel inventory", async () => {
+      const zip = new JSZip();
+      zip.file(
+        ALLOWED_FILES.PACKAGE,
+        JSON.stringify({
+          name: "inventory-extension",
+          publisher: "Acme",
+          version: "1.0.0",
+          lichtblickPanels: {
+            Diagnostics: {
+              description: "Shows diagnostic state.",
+              schemas: ["diagnostic_msgs/DiagnosticArray"],
+            },
+          },
+        }) ?? "",
+      );
+      zip.file(ALLOWED_FILES.EXTENSION, "extension-content");
+      const loader = new IdbExtensionLoader("local");
+      const info = await loader.installExtension({
+        foxeFileData: await zip.generateAsync({ type: "uint8array" }),
+      });
+
+      // Production chain: the foxe package.json `lichtblickPanels` field lands in
+      // ExtensionInfo.panelsMeta, and buildPanelInventory projects it onto the agent's panel
+      // inventory (description/schemas) without trusting any other input.
+      const inventory = buildPanelInventory(
+        [
+          {
+            type: `${info.qualifiedName}.Diagnostics`,
+            title: "Diagnostics",
+            module: jest.fn() as PanelInfo["module"],
+          },
+        ],
+        [info],
+      );
+
+      expect(inventory).toEqual([
+        {
+          type: `${info.qualifiedName}.Diagnostics`,
+          title: "Diagnostics",
+          description: "Shows diagnostic state.",
+          source: "extension",
+          schemas: ["diagnostic_msgs/DiagnosticArray"],
+        },
+      ]);
     });
 
     it("When installing extension with missing package.json, Then should throw error", async () => {

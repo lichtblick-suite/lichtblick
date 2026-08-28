@@ -30,6 +30,7 @@ import { MarkOptional } from "ts-essentials";
 import { filterMap } from "@lichtblick/den/collection";
 import {
   AddPanelPayload,
+  AddPanelsAtomicallyPayload,
   ChangePanelLayoutPayload,
   ClosePanelPayload,
   ConfigsPayload,
@@ -71,6 +72,23 @@ import {
 export const defaultPlaybackConfig: PlaybackConfig = {
   speed: 1.0,
 };
+
+/**
+ * Single-commit atomic addition of panels: merges the new configById entries and replaces the
+ * mosaic tree in one state object. The old tree is expected to be preserved inside `layout` (the
+ * caller's strict diff guarantees this); existing configs are never touched. Fallback semantics
+ * for a mis-apply is the whole-layout Revert — there is no fine-grained undo.
+ */
+function addPanelsAtomically(
+  panelsState: LayoutData,
+  { layout, configs }: AddPanelsAtomicallyPayload,
+): LayoutData {
+  return {
+    ...panelsState,
+    configById: { ...panelsState.configById, ...configs },
+    layout,
+  };
+}
 
 function changePanelLayout(
   state: LayoutData,
@@ -829,6 +847,9 @@ export default function (panelsState: Readonly<LayoutData>, action: PanelsAction
 
     case "ADD_PANEL":
       return addPanel(panelsState, action.payload);
+
+    case "ADD_PANELS_ATOMIC":
+      return addPanelsAtomically(panelsState, action.payload);
 
     case "DROP_PANEL":
       return dropPanel(panelsState, action.payload);

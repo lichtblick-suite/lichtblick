@@ -23,6 +23,11 @@ import {
   ForwardedMenuEvent,
   ForwardedWindowEvent,
   NativeMenuBridge,
+  SecureCredentialGetResult,
+  SecureCredentialKey,
+  SecureCredentialSetManyEntry,
+  SecureCredentialSetManyResult,
+  SecureCredentialSetResult,
   Storage,
 } from "../common/types";
 import { LICHTBLICK_PRODUCT_NAME, LICHTBLICK_PRODUCT_VERSION } from "../common/webpackDefines";
@@ -172,6 +177,26 @@ export function main(): void {
     async uninstallExtension(id: string): Promise<boolean> {
       const handler = await getExtensionHandler();
       return await handler.uninstall(id);
+    },
+    // Trust boundary: installed extensions run as full-privilege code in this same renderer realm
+    // and are intentionally trusted at the same level as built-in application code. These APIs
+    // protect credentials at rest; they are not an isolation boundary against installed extensions.
+    async getSecureCredential(key: SecureCredentialKey): Promise<SecureCredentialGetResult> {
+      return await ipcRenderer.invoke("secureCredentials:get", key);
+    },
+    async setSecureCredential(
+      key: SecureCredentialKey,
+      value: string,
+    ): Promise<SecureCredentialSetResult> {
+      return await ipcRenderer.invoke("secureCredentials:set", key, value);
+    },
+    async setManySecureCredentials(
+      entries: SecureCredentialSetManyEntry[],
+    ): Promise<SecureCredentialSetManyResult> {
+      return await ipcRenderer.invoke("secureCredentials:setMany", entries);
+    },
+    async deleteSecureCredential(key: SecureCredentialKey): Promise<void> {
+      await ipcRenderer.invoke("secureCredentials:delete", key);
     },
     handleTitleBarDoubleClick() {
       ipcRenderer.send("titleBarDoubleClicked");

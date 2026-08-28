@@ -191,5 +191,10 @@
     "vm-browserify": "1.1.2",
     "webpack": "5.108.3",
     "zustand": "4.5.7"
+  },
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "0.83.0",
+    "@earendil-works/pi-ai": "0.83.0",
+    "remark-gfm": "4.0.1"
   }
 }

@@ -7,6 +7,7 @@
 
 import {
   ChevronDown12Regular,
+  Chat24Regular,
   PanelLeft24Filled,
   PanelLeft24Regular,
   PanelRight24Filled,
@@ -161,6 +162,7 @@ export type AppBarProps = CustomWindowControlsProps & {
 const selectHasCurrentLayout = (state: LayoutState) => state.selectedLayout != undefined;
 const selectLeftSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.left.open;
 const selectRightSidebarOpen = (store: WorkspaceContextStore) => store.sidebars.right.open;
+const selectRightSidebarItem = (store: WorkspaceContextStore) => store.sidebars.right.item;
 
 export function AppBar(props: AppBarProps): React.JSX.Element {
   const {
@@ -176,6 +178,7 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
   } = props;
   const { classes, cx, theme } = useStyles({ debugDragRegion });
   const { t } = useTranslation("appBar");
+  const { t: tWorkspace } = useTranslation("workspace");
 
   const { appBarLayoutButton } = useAppContext();
   const [enableMemoryUseIndicator = false] = useAppConfigurationValue<boolean>(
@@ -183,9 +186,11 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
   );
 
   const hasCurrentLayout = useCurrentLayoutSelector(selectHasCurrentLayout);
+  const [agentEnabled = false] = useAppConfigurationValue<boolean>(AppSetting.AGENT_ENABLED);
 
   const leftSidebarOpen = useWorkspaceStore(selectLeftSidebarOpen);
   const rightSidebarOpen = useWorkspaceStore(selectRightSidebarOpen);
+  const rightSidebarItem = useWorkspaceStore(selectRightSidebarItem);
 
   const { sidebarActions } = useWorkspaceActions();
 
@@ -294,6 +299,22 @@ export function AppBar(props: AppBarProps): React.JSX.Element {
                   {rightSidebarOpen ? <PanelRight24Filled /> : <PanelRight24Regular />}
                 </AppBarIconButton>
               </Stack>
+              {agentEnabled && (
+                <AppBarIconButton
+                  className={cx({
+                    "Mui-selected": rightSidebarOpen && rightSidebarItem === "agent-chat",
+                  })}
+                  title={tWorkspace("agentChat")}
+                  aria-label={tWorkspace("agentChat")}
+                  onClick={() => {
+                    sidebarActions.right.selectItem("agent-chat");
+                  }}
+                  data-tourid="agent-chat-button"
+                  data-testid="agent-chat-button"
+                >
+                  <Chat24Regular />
+                </AppBarIconButton>
+              )}
               <Tooltip classes={{ tooltip: classes.tooltip }} title="Profile" arrow={false}>
                 <IconButton
                   className={cx(classes.iconButton, { "Mui-selected": userMenuOpen })}

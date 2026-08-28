@@ -84,6 +84,49 @@ export type LoadedExtension = {
   raw: string;
 };
 
+/**
+ * Secure credential keys accepted by the main-process credential store. Only the local Agent LLM
+ * key (one revisioned base record) and per-profile keys exist; there is no other secret type.
+ */
+export const SECURE_CREDENTIAL_KEYS = ["agent.llmApiKey"] as const;
+
+export type SecureCredentialKey =
+  | (typeof SECURE_CREDENTIAL_KEYS)[number]
+  | `agent.profile.${string}.llmApiKey`;
+
+export type SecureCredentialGetResult =
+  | {
+      ok: true;
+      value: string | undefined;
+      code?: "insecure-backend";
+    }
+  | { ok: false; code: "backend-unavailable" };
+
+export type SecureCredentialSetResult =
+  | { ok: true }
+  | { ok: false; code: "backend-unavailable" | "insecure-backend" };
+
+export type SecureCredentialSetManyEntry = {
+  expectedRevision?: string;
+  key: SecureCredentialKey;
+  value: string;
+};
+
+export type SecureCredentialSetManyResult =
+  | { ok: true }
+  | {
+      ok: false;
+      code: "backend-unavailable" | "insecure-backend" | "invalid-request" | "revision-conflict";
+    };
+
+export function isSecureCredentialKey(value: unknown): value is SecureCredentialKey {
+  return (
+    typeof value === "string" &&
+    ((SECURE_CREDENTIAL_KEYS as readonly string[]).includes(value) ||
+      /^agent\.profile\.[A-Za-z0-9-]{1,64}\.llmApiKey$/.test(value))
+  );
+}
+
 interface Desktop {
   /** https://www.electronjs.org/docs/tutorial/represented-file */
   setRepresentedFilename(path: string | undefined): Promise<void>;
@@ -120,6 +163,19 @@ interface Desktop {
 
   // Get CLI flags passed when the app was launched
   getCLIFlags: () => Promise<CLIFlags>;
+
+  // Trust boundary: installed extensions run as full-privilege code in this same renderer realm
+  // and are intentionally trusted at the same level as built-in application code. These APIs
+  // protect credentials at rest; they are not an isolation boundary against installed extensions.
+  getSecureCredential: (key: SecureCredentialKey) => Promise<SecureCredentialGetResult>;
+  setSecureCredential: (
+    key: SecureCredentialKey,
+    value: string,
+  ) => Promise<SecureCredentialSetResult>;
+  setManySecureCredentials: (
+    entries: SecureCredentialSetManyEntry[],
+  ) => Promise<SecureCredentialSetManyResult>;
+  deleteSecureCredential: (key: SecureCredentialKey) => Promise<void>;
 
   /** Handle a double-click on the custom title bar */
   handleTitleBarDoubleClick(): void;
