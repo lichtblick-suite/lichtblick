@@ -161,7 +161,7 @@ export function decodeYUV420(
 ): void {
   assertEvenDimensions("YUV420", width, height);
   if (!Number.isInteger(step)) {
-    throw new Error(`YUV420 image row step (${step}) must be an integer`);
+    throw new TypeError(`YUV420 image row step (${step}) must be an integer`);
   }
   if (step < width) {
     throw new Error(`YUV420 image row step (${step}) must be at least width (${width})`);
@@ -217,7 +217,7 @@ export function decodeNV12(
 ): void {
   assertEvenDimensions("NV12", width, height);
   if (!Number.isInteger(step)) {
-    throw new Error(`NV12 image row step (${step}) must be an integer`);
+    throw new TypeError(`NV12 image row step (${step}) must be an integer`);
   }
   if (step < width) {
     throw new Error(`NV12 image row step (${step}) must be at least width (${width})`);
