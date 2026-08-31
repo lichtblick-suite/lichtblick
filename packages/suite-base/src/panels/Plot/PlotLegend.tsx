@@ -20,6 +20,7 @@ import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
 import { Immutable } from "@lichtblick/suite";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import { DEFAULT_PLOT_PATH } from "@lichtblick/suite-base/panels/Plot/constants";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -59,7 +60,9 @@ const useStyles = makeStyles<void, "grid" | "toggleButton" | "toggleButtonFloati
       overflow: "hidden",
       zIndex: 1000,
       gap: spacing(0.75),
-      padding: spacing(1.5, 3.75, 4, 4.5),
+      // Extra top clearance (beyond the usual padding) so the legend doesn't render underneath
+      // the panel's floating title.
+      padding: `calc(${spacing(1.5)} + ${PANEL_TOOLBAR_MIN_HEIGHT}px) ${spacing(3.75)} ${spacing(4)} ${spacing(4.5)}`,
 
       [`.${classes.grid}`]: {
         pointerEvents: "auto",
@@ -81,6 +84,8 @@ const useStyles = makeStyles<void, "grid" | "toggleButton" | "toggleButtonFloati
     rootLeft: {
       alignItems: "flex-start",
       maxWidth: "80%",
+      // Clear the panel's floating title, which otherwise renders on top of the legend.
+      paddingTop: PANEL_TOOLBAR_MIN_HEIGHT,
 
       [`.${classes.toggleButton}`]: {
         padding: spacing(0.25),
@@ -98,6 +103,8 @@ const useStyles = makeStyles<void, "grid" | "toggleButton" | "toggleButtonFloati
     rootTop: {
       flexDirection: "column",
       maxHeight: "80%",
+      // Clear the panel's floating title, which otherwise renders on top of the legend.
+      paddingTop: PANEL_TOOLBAR_MIN_HEIGHT,
 
       [`.${classes.toggleButton}`]: {
         padding: spacing(0.25),

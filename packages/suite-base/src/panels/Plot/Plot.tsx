@@ -21,7 +21,6 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import { PanelContextMenu } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
-import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
@@ -58,6 +57,10 @@ const Plot = (props: PlotProps): React.JSX.Element => {
 
   // When true the user can reset the plot back to the original view
   const [canReset, setCanReset] = useState(false);
+
+  // Tracks whether the mouse is anywhere within the panel, so the floating toolbar's controls
+  // (settings, fullscreen, etc.) are revealed as soon as the panel is hovered.
+  const [isPanelHovered, setIsPanelHovered] = useState(false);
 
   const [activeTooltip, setActiveTooltip] = useState<TooltipStateSetter>();
 
@@ -223,13 +226,19 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       justifyContent="center"
       overflow="hidden"
       position="relative"
+      onPointerEnter={() => {
+        setIsPanelHovered(true);
+      }}
+      onPointerLeave={() => {
+        setIsPanelHovered(false);
+      }}
     >
-      <PanelToolbar />
+      <PanelToolbar floating hovered={isPanelHovered} />
       <Stack
         direction={legendDisplay === "top" ? "column" : "row"}
         flex="auto"
         fullWidth
-        style={{ height: `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px)` }}
+        style={{ height: "100%" }}
         position="relative"
       >
         {/* Pass stable values here for properties when not showing values so that the legend memoization remains stable. */}
