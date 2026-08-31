@@ -1388,7 +1388,7 @@ describe("ThreeDeeRender", () => {
       render(<ThreeDeeRender {...props} />);
 
       // Then
-      const advertise1 = (mockContext as { advertise: jest.Mock }).advertise;
+      const advertise1 = mockContext.advertise as jest.Mock;
       await waitFor(() => {
         expect(advertise1).toHaveBeenCalledWith(
           "/lichtblick/edited_transforms",
@@ -1407,7 +1407,7 @@ describe("ThreeDeeRender", () => {
       render(<ThreeDeeRender {...props} />);
 
       // Then
-      const advertise = (mockContext as { advertise: jest.Mock }).advertise;
+      const advertise = mockContext.advertise as jest.Mock;
       await waitFor(() => {
         expect(advertise).toHaveBeenCalledWith(
           "/lichtblick/edited_transforms",
