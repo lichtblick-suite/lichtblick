@@ -59,6 +59,14 @@ import {
   makePoseEstimateMessage,
   makePoseMessage,
 } from "./publish";
+import {
+  EDITED_TRANSFORMS_TOPIC,
+  EDITED_TRANSFORMS_VARIABLE,
+  FRAME_TRANSFORM_SCHEMA,
+  FrameTransformDatatypes,
+  collectEditedTransforms,
+  hasEditedTransforms,
+} from "./publishTransforms";
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
 import { PublishClickEventMap } from "./renderables/PublishClickTool";
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/PublishSettings";
@@ -963,6 +971,57 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     renderer?.followFrameId,
     renderer?.publishClickTool,
   ]);
+
+  // Advertise the edited-transforms topic on ROS connections only.
+  useEffect(() => {
+    if (context.dataSourceProfile !== "ros1" && context.dataSourceProfile !== "ros2") {
+      return;
+    }
+    context.advertise?.(EDITED_TRANSFORMS_TOPIC, FRAME_TRANSFORM_SCHEMA, {
+      datatypes: FrameTransformDatatypes,
+    });
+    return () => {
+      context.unadvertise?.(EDITED_TRANSFORMS_TOPIC);
+    };
+  }, [context]);
+
+  // Survives context/renderer re-runs so we can clear the variable when edits are removed even
+  // after a reconnect that resets the effect closure.
+  const hadEditsRef = useRef(false);
+
+  useEffect(() => {
+    if (renderer == undefined) {
+      return;
+    }
+    const isRos = context.dataSourceProfile === "ros1" || context.dataSourceProfile === "ros2";
+    const publishEditedTransforms = (curRenderer: IRenderer) => {
+      if (!hasEditedTransforms(curRenderer)) {
+        if (hadEditsRef.current) {
+          hadEditsRef.current = false;
+          context.setVariable(EDITED_TRANSFORMS_VARIABLE, []);
+        }
+        return;
+      }
+      hadEditsRef.current = true;
+
+      const msgs = collectEditedTransforms(curRenderer);
+      context.setVariable(EDITED_TRANSFORMS_VARIABLE, msgs);
+
+      if (isRos && context.publish) {
+        for (const message of msgs) {
+          try {
+            context.publish(EDITED_TRANSFORMS_TOPIC, message);
+          } catch (error) {
+            log.error(`Failed to publish to ${EDITED_TRANSFORMS_TOPIC}`, error);
+          }
+        }
+      }
+    };
+    renderer.addListener("configChange", publishEditedTransforms);
+    return () => {
+      renderer.removeListener("configChange", publishEditedTransforms);
+    };
+  }, [context, renderer]);
 
   const onClickPublish = useCallback(() => {
     if (publishActive) {
