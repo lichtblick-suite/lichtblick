@@ -19,6 +19,7 @@ import {
   ExtensionPanelRegistration,
   Immutable,
   PanelExtensionContext,
+  PanelToolbarAction,
   ParameterValue,
   RenderState,
   SettingsTree,
@@ -39,6 +40,7 @@ import {
   ConverterKey,
 } from "@lichtblick/suite-base/components/PanelExtensionAdapter/messageProcessing";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
 import { useAlertsActions } from "@lichtblick/suite-base/context/AlertsContext";
 import { useAppConfiguration } from "@lichtblick/suite-base/context/AppConfigurationContext";
 import {
@@ -186,6 +188,9 @@ function PanelExtensionAdapter(
   // Tracks whether the mouse is anywhere within the panel, so a floating toolbar's controls
   // (settings, fullscreen, etc.) are revealed as soon as the panel is hovered.
   const [isPanelHovered, setIsPanelHovered] = useState(false);
+  // Custom toolbar actions the panel has registered via `context.setToolbarActions`, rendered
+  // alongside the built-in fullscreen/settings/more-options icons.
+  const [toolbarActions, setToolbarActionsState] = useState<readonly PanelToolbarAction[]>([]);
 
   const [localSubscriptions, setLocalSubscriptions] = useState<Subscription[]>([]);
 
@@ -672,6 +677,13 @@ function PanelExtensionAdapter(
         setDefaultPanelTitle(title);
       },
 
+      setToolbarActions: (actions: readonly PanelToolbarAction[]) => {
+        if (!isMounted()) {
+          return;
+        }
+        setToolbarActionsState(actions);
+      },
+
       unstable_setAlert: (alertId: string, alert: Immutable<PlayerAlert> | undefined) => {
         if (!isMounted()) {
           return;
@@ -876,6 +888,24 @@ function PanelExtensionAdapter(
     throw error;
   }
 
+  const additionalIcons =
+    toolbarActions.length > 0 ? (
+      <>
+        {toolbarActions.map((action) => (
+          <ToolbarIconButton
+            key={action.id}
+            title={action.title}
+            disabled={action.disabled}
+            onClick={action.onClick}
+          >
+            <svg viewBox="0 0 24 24" width="1em" height="1em">
+              <path d={action.iconPath} fill="currentColor" />
+            </svg>
+          </ToolbarIconButton>
+        ))}
+      </>
+    ) : undefined;
+
   return (
     <div
       style={{
@@ -904,7 +934,11 @@ function PanelExtensionAdapter(
           : undefined
       }
     >
-      <PanelToolbar floating={floatingToolbar} hovered={isPanelHovered} />
+      <PanelToolbar
+        floating={floatingToolbar}
+        hovered={isPanelHovered}
+        additionalIcons={additionalIcons}
+      />
       {configTooNew && <PanelConfigVersionError />}
       {props.children}
       <div style={{ flex: 1, overflow: "hidden" }} ref={panelContainerRef} />
