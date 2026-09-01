@@ -59,3 +59,6 @@ export { makeWorkspaceContextInitialState } from "./providers/WorkspaceContextPr
 export type { AppBarProps } from "./components/AppBar";
 export { IdbExtensionLoader } from "./services/extension/IdbExtensionLoader";
 export { LOCAL_STORAGE_APP_CONFIGURATION } from "./constants/browserStorageKeys";
+export type { AuthProvider } from "./services/http/AuthProvider";
+export { PostMessageAuthProvider } from "./services/http/PostMessageAuthProvider";
+export type { PostMessageAuthProviderOptions } from "./services/http/PostMessageAuthProvider";
