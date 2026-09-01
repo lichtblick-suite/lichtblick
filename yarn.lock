@@ -3594,7 +3594,7 @@ __metadata:
     "@types/leaflet": "npm:1.9.20"
     "@types/lichtblick__roslibjs": "workspace:*"
     "@types/memoize-weak": "workspace:*"
-    "@types/moment-duration-format": "npm:2.2.6"
+    "@types/moment-duration-format": "npm:2.2.7"
     "@types/nearley": "npm:2.11.5"
     "@types/ramda": "npm:0.29.4"
     "@types/react": "npm:18.3.12"
@@ -6243,12 +6243,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/moment-duration-format@npm:2.2.6":
-  version: 2.2.6
-  resolution: "@types/moment-duration-format@npm:2.2.6"
+"@types/moment-duration-format@npm:2.2.7":
+  version: 2.2.7
+  resolution: "@types/moment-duration-format@npm:2.2.7"
   dependencies:
     moment: "npm:>=2.14.0"
-  checksum: 10/497f2019c5aae19cd39768397da717864c1f3964a1ce5c5c5ababd47f3f6716801053e0d7d7a443c840c1c4fb3ac014a3e2ed34b9d3963f86656ba14ab823eaa
+  checksum: 10/54faa0f0ce0cd05cdecfe0558b88609b36a60b718a997a725f5b03e01de7bb3b0633a74be05f12b780b3111cf96e0ff57910b978ccd7c386fd71d0a93ef761d5
   languageName: node
   linkType: hard
 
