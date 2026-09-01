@@ -125,6 +125,8 @@ type PanelExtensionAdapterProps = {
   highestSupportedConfigVersion?: number;
   config: unknown;
   saveConfig: SaveConfig<unknown>;
+  /** @see ExtensionPanelRegistration.floatingToolbar */
+  floatingToolbar?: boolean;
 };
 
 function selectContext(ctx: MessagePipelineContext) {
@@ -144,7 +146,13 @@ type RenderFn = NonNullable<PanelExtensionContext["onRender"]>;
 function PanelExtensionAdapter(
   props: React.PropsWithChildren<PanelExtensionAdapterProps>,
 ): React.JSX.Element {
-  const { initPanel, config, saveConfig, highestSupportedConfigVersion } = props;
+  const {
+    initPanel,
+    config,
+    saveConfig,
+    highestSupportedConfigVersion,
+    floatingToolbar = false,
+  } = props;
 
   // Unlike the react data flow, the config is only provided to the panel once on setup.
   // The panel is meant to manage the config and call saveConfig on its own.
@@ -175,6 +183,9 @@ function PanelExtensionAdapter(
   const [forceConversion, setForceConversion] = useState(new Set<string>());
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
   const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
+  // Tracks whether the mouse is anywhere within the panel, so a floating toolbar's controls
+  // (settings, fullscreen, etc.) are revealed as soon as the panel is hovered.
+  const [isPanelHovered, setIsPanelHovered] = useState(false);
 
   const [localSubscriptions, setLocalSubscriptions] = useState<Subscription[]>([]);
 
@@ -875,10 +886,25 @@ function PanelExtensionAdapter(
         overflow: "hidden",
         width: "100%",
         zIndex: 0,
+        position: floatingToolbar ? "relative" : undefined,
         ...style,
       }}
+      onPointerEnter={
+        floatingToolbar
+          ? () => {
+              setIsPanelHovered(true);
+            }
+          : undefined
+      }
+      onPointerLeave={
+        floatingToolbar
+          ? () => {
+              setIsPanelHovered(false);
+            }
+          : undefined
+      }
     >
-      <PanelToolbar />
+      <PanelToolbar floating={floatingToolbar} hovered={isPanelHovered} />
       {configTooNew && <PanelConfigVersionError />}
       {props.children}
       <div style={{ flex: 1, overflow: "hidden" }} ref={panelContainerRef} />

@@ -568,6 +568,15 @@ export type ExtensionPanelRegistration = {
    * @return: (optional) A function which is called when the panel is removed or replaced. Typically intended for cleanup logic to gracefully teardown your panel.
    */
   initPanel: (context: PanelExtensionContext) => void | (() => void);
+
+  /**
+   * When true, the panel's built-in toolbar (title, fullscreen/settings/more-options icons) no
+   * longer reserves layout space above the panel content. Only the title stays always visible,
+   * floating above the content; the rest of the toolbar is revealed on hover.
+   *
+   * @default false
+   */
+  floatingToolbar?: boolean;
 };
 
 export interface PanelSettings<ExtensionSettings> {
