@@ -3581,7 +3581,7 @@ __metadata:
     "@storybook/react-webpack5": "npm:10.5.5"
     "@storybook/testing-library": "npm:0.2.2"
     "@svgr/webpack": "npm:8.1.0"
-    "@tanstack/react-table": "npm:8.21.2"
+    "@tanstack/react-table": "npm:9.2.4"
     "@tanstack/react-virtual": "npm:3.13.18"
     "@testing-library/jest-dom": "npm:6.6.2"
     "@testing-library/react": "npm:16.0.0"
@@ -5498,15 +5498,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-table@npm:8.21.2":
-  version: 8.21.2
-  resolution: "@tanstack/react-table@npm:8.21.2"
+"@tanstack/react-store@npm:^0.11.1":
+  version: 0.11.1
+  resolution: "@tanstack/react-store@npm:0.11.1"
   dependencies:
-    "@tanstack/table-core": "npm:8.21.2"
+    "@tanstack/store": "npm:0.11.1"
+    use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
-    react: ">=16.8"
-    react-dom: ">=16.8"
-  checksum: 10/62b944b79f0ac06b74921c1da4821a4f122f7b30e2bd3391b5eac2d15a8050f3ac7752282354520ec42a3fa382580ac88e28731121ad445bb65218614ab21fd1
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10/55e8b99926a296b630f5f287f95be6411851d5d026096d1b17a5564ad1d763c2b859734496baff91433eb6cb19cc3ce02f4946ac900984379ffb5c73821b6724
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-table@npm:9.2.4":
+  version: 9.2.4
+  resolution: "@tanstack/react-table@npm:9.2.4"
+  dependencies:
+    "@tanstack/react-store": "npm:^0.11.1"
+    "@tanstack/table-core": "npm:9.2.4"
+  peerDependencies:
+    react: ">=18"
+  checksum: 10/98792aca92ae017d0aa4104c957b0aa9d16e8030076151f59c1ddb72a8504b2c196f22732fd2de63d5648def5078e5cf34aeafaafb830fc392539b7fdad27296
   languageName: node
   linkType: hard
 
@@ -5522,10 +5535,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/table-core@npm:8.21.2":
-  version: 8.21.2
-  resolution: "@tanstack/table-core@npm:8.21.2"
-  checksum: 10/6a435905fcfa2ac0d06963f14125f313a08086cb0c71949d60fbd04c3a5e229779f94ff6783e35cf09f77fddfbe987cfdd74b18577ac7476b5a43729f3e4b9d5
+"@tanstack/store@npm:0.11.1, @tanstack/store@npm:^0.11.1":
+  version: 0.11.1
+  resolution: "@tanstack/store@npm:0.11.1"
+  checksum: 10/412d1c9fd6f41657c5f9995672fdb205c048948bf5873dae3028155e2d708bb2319c79f27b59b0f51d0673edb36e2437efc72af83a0c424b0bad05c03ed74393
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:9.2.4":
+  version: 9.2.4
+  resolution: "@tanstack/table-core@npm:9.2.4"
+  dependencies:
+    "@tanstack/store": "npm:^0.11.1"
+  checksum: 10/a201c7ae585c41f9b4e59950852c4ac86326b1c3fb93295874c61e43772dd8c2df2a7e5ed1fac232ee272922fa84ff26a83c1dec51324a7b405aefc27a53ce26
   languageName: node
   linkType: hard
 
