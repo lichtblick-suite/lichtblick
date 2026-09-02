@@ -210,12 +210,21 @@ export default function LayoutBrowser({
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
     ).format("LT")}`;
-    const layoutData: Omit<LayoutData, "name" | "id"> = {
+    let templateData: Partial<LayoutData> | undefined;
+    try {
+      templateData = await layoutManager.getDefaultLayoutData();
+    } catch (err: unknown) {
+      log.warn("Failed to fetch default layout data, using base layout instead", err);
+    }
+    const baseLayoutData: Omit<LayoutData, "name" | "id"> = {
       configById: {},
       globalVariables: {},
       userNodes: {},
       playbackConfig: defaultPlaybackConfig,
     };
+    const layoutData = templateData
+      ? (_.merge({}, baseLayoutData, templateData) as Omit<LayoutData, "name" | "id">)
+      : baseLayoutData;
     const newLayout = await layoutManager.saveNewLayout({
       name,
       data: layoutData,
