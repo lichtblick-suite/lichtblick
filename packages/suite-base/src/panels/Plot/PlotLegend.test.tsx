@@ -19,6 +19,7 @@ const defaultProps = {
   saveConfig: jest.fn(),
   sidebarDimension: BasicBuilder.number(),
   paths: [],
+  floatingToolbar: false,
 };
 
 const getContextValue = () => ({
