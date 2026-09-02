@@ -1215,6 +1215,10 @@ describe("LayoutManager", () => {
       const localLayout = LayoutBuilder.layout({
         id: layoutId,
         permission: "CREATOR_WRITE",
+        syncInfo: {
+          status: "tracked",
+          lastRemoteSavedAt: "2023-01-01T00:00:00Z" as ISO8601Timestamp,
+        },
       });
       localLayout.externalId = BasicBuilder.string();
 
