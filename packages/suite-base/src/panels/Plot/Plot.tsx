@@ -21,12 +21,14 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import { PanelContextMenu } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { VerticalBars } from "@lichtblick/suite-base/panels/Plot/VerticalBars";
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
+import usePlotPanelsFloatingToolbar from "@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelsFloatingToolbar";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
 
 import { useStyles } from "./Plot.style";
@@ -47,6 +49,8 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     legendDisplay,
     sidebarDimension,
   } = config;
+
+  const floatingToolbar = usePlotPanelsFloatingToolbar();
 
   const { classes } = useStyles();
   const theme = useTheme();
@@ -233,18 +237,21 @@ const Plot = (props: PlotProps): React.JSX.Element => {
         setIsPanelHovered(false);
       }}
     >
-      <PanelToolbar floating hovered={isPanelHovered} />
+      <PanelToolbar floating={floatingToolbar} hovered={isPanelHovered} />
       <Stack
         direction={legendDisplay === "top" ? "column" : "row"}
         flex="auto"
         fullWidth
-        style={{ height: "100%" }}
+        style={{
+          height: floatingToolbar ? "100%" : `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px)`,
+        }}
         position="relative"
       >
         {/* Pass stable values here for properties when not showing values so that the legend memoization remains stable. */}
         {legendDisplay !== "none" && (
           <PlotLegend
             coordinator={coordinator}
+            floatingToolbar={floatingToolbar}
             legendDisplay={legendDisplay}
             onClickPath={onClickPath}
             paths={series}
