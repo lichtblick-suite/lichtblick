@@ -245,7 +245,6 @@ describe("ScriptListItem", () => {
     expect(screen.queryByTestId("lock-icon")).not.toBeInTheDocument();
   });
 
-
   describe("readOnly=true", () => {
     it("should show the lock icon", () => {
       // Given
