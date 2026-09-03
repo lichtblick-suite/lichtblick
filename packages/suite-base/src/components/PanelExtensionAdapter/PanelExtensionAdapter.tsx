@@ -826,6 +826,10 @@ function PanelExtensionAdapter(
     setRenderFn(undefined);
     renderingRef.current = false;
     setSlowRender(false);
+    // Clear any toolbar actions registered by the previous panel instance so stale buttons
+    // (retaining the old instance's callbacks) don't remain visible if the new instance never
+    // calls `context.setToolbarActions` itself.
+    setToolbarActionsState([]);
 
     setBuildRenderState(() => initRenderStateBuilder());
 

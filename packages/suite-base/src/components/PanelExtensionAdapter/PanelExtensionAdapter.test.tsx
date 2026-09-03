@@ -1628,5 +1628,52 @@ describe("PanelExtensionAdapter", () => {
       // THEN the button is removed
       expect(handle.queryByTitle("Reset view")).not.toBeInTheDocument();
     });
+
+    it("clears stale toolbar actions when the panel re-initializes without registering new ones", async () => {
+      // GIVEN a first panel instance that registers a custom toolbar action during init
+      const sig1 = signal();
+      const initPanelWithAction = (context: PanelExtensionContext) => {
+        context.setToolbarActions?.([
+          { id: "reset", title: "Reset view", iconPath: "M0 0h24v24H0z", onClick: () => {} },
+        ]);
+        sig1.resolve();
+      };
+
+      const config = {};
+      const saveConfig = () => {};
+
+      const Wrapper = ({ initPanel }: { initPanel: (context: PanelExtensionContext) => void }) => (
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter
+                config={config}
+                saveConfig={saveConfig}
+                initPanel={initPanel}
+              />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>
+      );
+
+      const handle = render(<Wrapper initPanel={initPanelWithAction} />);
+      await act(async () => undefined);
+      await sig1;
+      expect(handle.getByTitle("Reset view")).toBeInTheDocument();
+
+      // WHEN the panel re-initializes (e.g. because the data source changed) with an instance
+      // that does not register any toolbar actions itself
+      const sig2 = signal();
+      const initPanelWithoutAction = (_context: PanelExtensionContext) => {
+        sig2.resolve();
+      };
+      handle.rerender(<Wrapper initPanel={initPanelWithoutAction} />);
+      await act(async () => undefined);
+      await sig2;
+
+      // THEN the stale button (and its now-orphaned callback) from the previous instance is no
+      // longer rendered
+      expect(handle.queryByTitle("Reset view")).not.toBeInTheDocument();
+    });
   });
 });
