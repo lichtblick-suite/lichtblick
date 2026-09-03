@@ -53,6 +53,12 @@ export const useStyles = makeStyles()((theme) => ({
     backgroundColor: alpha(theme.palette.background.paper, 0.7),
     borderRadius: theme.shape.borderRadius,
 
+    // Keyboard users tab through the (invisible until hovered) controls same as anyone else; if
+    // a control receives focus it must be shown, or a sighted keyboard user could focus and
+    // invoke a control they can't see.
+    "&:focus-within": {
+      opacity: 1,
+    },
     "&:hover": {
       opacity: 1,
     },
