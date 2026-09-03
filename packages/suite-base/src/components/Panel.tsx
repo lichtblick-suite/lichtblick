@@ -60,7 +60,9 @@ import {
   useWorkspaceStore,
   WorkspaceStoreSelectors,
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
+import { useInteractionCapture } from "@lichtblick/suite-base/hooks/useInteractionCapture";
 import usePanelDrag from "@lichtblick/suite-base/hooks/usePanelDrag";
+import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { useMessagePathDrop } from "@lichtblick/suite-base/services/messagePathDragging";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
@@ -289,6 +291,10 @@ export default function Panel<
       },
       [childId, tabId, togglePanelSelected, isSelected, setSelectedPanelIds, panelSettingsOpen],
     );
+
+    const capturePanelInteraction = useInteractionCapture(AppEvent.PANEL_INTERACTION, {
+      data: { type },
+    });
 
     const groupPanels = useCallback(() => {
       const layout = getCurrentLayoutState().selectedLayout?.data?.layout;
@@ -604,6 +610,7 @@ export default function Panel<
             {(fullscreenState) => (
               <PanelRoot
                 onClick={onPanelRootClick}
+                onClickCapture={capturePanelInteraction}
                 hasFullscreenDescendant={hasFullscreenDescendant}
                 fullscreenState={fullscreenState}
                 sourceRect={fullscreenSourceRect}
