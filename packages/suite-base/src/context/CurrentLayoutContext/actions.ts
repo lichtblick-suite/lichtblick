@@ -41,6 +41,13 @@ export type LayoutData = {
    * studio trying to load and possibly corrupt the layout.
    */
   version?: number;
+  /**
+   * When `true`, every Plot panel in this layout floats its title/toolbar above the plot
+   * (instead of reserving a full-height title bar strip). This is a plain JSON field intended
+   * to be set by hand-editing (or generating) the layout file - there is no per-panel override
+   * and no UI control for it.
+   */
+  plotPanelsFloatingToolbar?: boolean;
 };
 
 export type ConfigsPayload = {

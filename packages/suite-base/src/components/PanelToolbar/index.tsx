@@ -37,6 +37,8 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
   children,
   className,
   isUnknownPanel = false,
+  floating = false,
+  hovered = false,
 }: PanelToolbarProps) {
   const { classes, cx } = useStyles();
   const {
@@ -86,24 +88,39 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
       : defaultPanelTitle;
 
   const title = customPanelTitle ?? panelContext?.title;
+  const controls = (
+    <PanelToolbarControls
+      additionalIcons={additionalIconsWithHelp}
+      isUnknownPanel={isUnknownPanel}
+      ref={controlsDragRef}
+    />
+  );
   return (
     <header
-      className={cx(classes.root, className)}
+      className={cx(classes.root, floating && classes.floatingRoot, className)}
       data-testid="mosaic-drag-handle"
       ref={rootDragRef}
       style={{ backgroundColor, cursor: rootDragRef != undefined ? "grab" : "auto" }}
     >
       {children ??
         (title && (
-          <Typography noWrap variant="body2" color="text.secondary" flex="auto">
+          <Typography
+            noWrap
+            variant="body2"
+            color="text.secondary"
+            flex={floating ? "0 1 auto" : "auto"}
+            className={floating ? classes.floatingTitle : undefined}
+          >
             {title}
           </Typography>
         ))}
-      <PanelToolbarControls
-        additionalIcons={additionalIconsWithHelp}
-        isUnknownPanel={isUnknownPanel}
-        ref={controlsDragRef}
-      />
+      {floating ? (
+        <div className={cx(classes.floatingControls, hovered && classes.floatingControlsVisible)}>
+          {controls}
+        </div>
+      ) : (
+        controls
+      )}
     </header>
   );
 });
