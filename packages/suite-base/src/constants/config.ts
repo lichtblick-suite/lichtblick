@@ -30,7 +30,7 @@ export const APP_CONFIG = {
 
   /**
    * Base URL of the OTLP/HTTP collector for OpenTelemetry logs, e.g. http://localhost:4318.
-   * Undefined disables telemetry regardless of the user opt-in setting.
+   * Undefined disables telemetry
    */
   otlpEndpoint: OTLP_ENDPOINT,
 } as const;

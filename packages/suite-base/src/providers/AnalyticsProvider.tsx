@@ -13,6 +13,7 @@ import AnalyticsContext from "@lichtblick/suite-base/context/AnalyticsContext";
 import type IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import NullAnalytics from "@lichtblick/suite-base/services/NullAnalytics";
 import type OtelAnalytics from "@lichtblick/suite-base/services/telemetry/OtelAnalytics";
+import loadOtelAnalytics from "@lichtblick/suite-base/services/telemetry/loadOtelAnalytics";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 const log = Logger.getLogger(__filename);
@@ -38,9 +39,6 @@ export default function AnalyticsProvider({
   const [analytics, setAnalytics] = useState<IAnalytics>(() => NULL_ANALYTICS);
   const analyticsRef = useRef<OtelAnalytics | undefined>();
 
-  // Telemetry is opt-in at build time only: if OTLP_ENDPOINT was compiled into
-  // APP_CONFIG.otlpEndpoint, analytics connect automatically; otherwise NullAnalytics is used.
-  // There is intentionally no runtime user-facing toggle.
   useEffect(() => {
     let cancelled = false;
     let created: OtelAnalytics | undefined;
@@ -55,8 +53,8 @@ export default function AnalyticsProvider({
     const platform = isDesktopApp() ? "desktop" : "web";
     log.info(`Initializing OpenTelemetry analytics for the ${platform} app.`);
 
-    void import("@lichtblick/suite-base/services/telemetry/OtelAnalytics")
-      .then(({ default: OtelAnalyticsImpl }) => {
+    void loadOtelAnalytics()
+      .then((OtelAnalyticsImpl) => {
         const nextAnalytics = new OtelAnalyticsImpl({
           endpoint: APP_CONFIG.otlpEndpoint!,
           version: APP_CONFIG.version,

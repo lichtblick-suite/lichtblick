@@ -50,11 +50,9 @@ people interact with) and to help detect performance regressions.
   selection/creation, panel add/remove, app menu clicks — as OpenTelemetry logs and traces.
   There is no free-form event capture and no keystroke/input logging.
 - **Rate-limited.** A token-bucket rate limiter bounds how much telemetry any single session
-  can emit, so a burst of clicks can never flood a collector.
+  can emit.
 
-If you're building your own distribution and want to enable it, set `OTLP_ENDPOINT` (e.g.
-`OTLP_ENDPOINT=https://your-collector.example.com`) when running `yarn web:serve`,
-`yarn desktop:serve`/`start`, or your production build — the app will export OTLP/HTTP logs
+If you're building your own distribution and want to enable it, set `OTLP_ENDPOINT` in your .env file — the app will export OTLP/HTTP logs
 and traces to `${OTLP_ENDPOINT}/v1/logs` and `${OTLP_ENDPOINT}/v1/traces`.
 
 **Dependencies:**

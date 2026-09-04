@@ -49,8 +49,7 @@ export function useInteractionCapture(
 
   // Validate once per distinct attribute name: an invalid value could otherwise produce a
   // malformed CSS selector (or unintended selector syntax) when interpolated into
-  // `target.closest()`. Fail closed (undefined) rather than risk a thrown SyntaxError or a
-  // selector that doesn't mean what the caller intended.
+  // `target.closest()`
   const attribute = useMemo(() => {
     if (!SAFE_ATTRIBUTE_NAME.test(requestedAttribute)) {
       log.warn(
