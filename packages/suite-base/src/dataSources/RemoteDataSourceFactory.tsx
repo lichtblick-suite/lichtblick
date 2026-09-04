@@ -13,6 +13,7 @@ import {
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
+import { IterableSourceInitializeArgs } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 import {
   MultiFileHydrationOverrides,
@@ -111,10 +112,13 @@ class RemoteDataSourceFactory implements IDataSourceFactory {
 
     const initWorker = initWorkers[extension]!;
 
-    const initArgs =
+    const initArgs: IterableSourceInitializeArgs =
       urls.length === 1
-        ? { url: urls[0] }
-        : addMultiFileHydrationOverrides({ urls }, this.multiFileHydrationOverrides);
+        ? { url: urls[0], additionalSources: args.additionalSources }
+        : addMultiFileHydrationOverrides(
+            { urls, additionalSources: args.additionalSources },
+            this.multiFileHydrationOverrides,
+          );
     const source = new WorkerSerializedIterableSource({ initWorker, initArgs });
 
     return new IterablePlayer({

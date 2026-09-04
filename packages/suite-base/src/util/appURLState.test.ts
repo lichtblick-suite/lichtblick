@@ -153,40 +153,40 @@ describe("app state url parser", () => {
         layoutUrl: "http://example.com/layout.json",
       });
     });
-    it("parses mcap-bundle query parameter", () => {
+    it("parses source-bundle query parameter", () => {
       const url = urlBuilder();
-      const mcapBundleId = BasicBuilder.string();
-      url.searchParams.append("mcap-bundle", mcapBundleId);
+      const sourceBundleId = BasicBuilder.string();
+      url.searchParams.append("source-bundle", sourceBundleId);
 
       const parsed = parseAppURLState(url);
 
       expect(parsed).toMatchObject({
-        mcapBundleId,
+        sourceBundleId,
       });
     });
 
-    it("parses mcap-bundle alongside time and other params", () => {
+    it("parses source-bundle alongside time and other params", () => {
       const url = urlBuilder();
-      const mcapBundleId = BasicBuilder.string();
-      url.searchParams.append("mcap-bundle", mcapBundleId);
+      const sourceBundleId = BasicBuilder.string();
+      url.searchParams.append("source-bundle", sourceBundleId);
       url.searchParams.append("time", "2025-07-01T14:05:09.331293771Z");
 
       const parsed = parseAppURLState(url);
 
       expect(parsed).toMatchObject({
-        mcapBundleId,
+        sourceBundleId,
         time: { sec: 1751378709, nsec: 331293771 },
       });
     });
 
-    it("returns undefined mcapBundleId when not present", () => {
+    it("returns undefined sourceBundleId when not present", () => {
       const url = urlBuilder();
       url.searchParams.append("ds", "remote-file");
       url.searchParams.append("ds.url", `http://${BasicBuilder.string()}.com/file.mcap`);
 
       const parsed = parseAppURLState(url);
 
-      expect(parsed?.mcapBundleId).toBeUndefined();
+      expect(parsed?.sourceBundleId).toBeUndefined();
     });
   });
 });
