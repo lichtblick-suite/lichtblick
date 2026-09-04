@@ -18,7 +18,9 @@ import {
   useWorkspaceStore,
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import { useInteractionCapture } from "@lichtblick/suite-base/hooks/useInteractionCapture";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
+import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { formatKeyboardShortcut } from "@lichtblick/suite-base/util/formatKeyboardShortcut";
 
 import { NestedMenuItem } from "./NestedMenuItem";
@@ -33,6 +35,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
   const { t } = useTranslation("appBar");
 
   const [nestedMenu, setNestedMenu] = useState<string | undefined>();
+  const captureMenuClick = useInteractionCapture(AppEvent.APP_MENU_CLICK);
 
   const { recentSources, selectRecent } = usePlayerSelection();
 
@@ -223,6 +226,7 @@ export function AppMenu(props: AppMenuProps): React.JSX.Element {
         anchorPosition={anchorPosition}
         disablePortal={disablePortal}
         id="app-menu"
+        onClickCapture={captureMenuClick}
         open={open}
         disableAutoFocusItem
         onClose={handleNestedMenuClose}

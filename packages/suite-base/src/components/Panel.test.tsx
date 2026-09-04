@@ -21,8 +21,11 @@ import { useEffect, useCallback, useContext } from "react";
 
 import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
+import AnalyticsContext from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { PanelsActions } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
+import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
+import type IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -920,6 +923,35 @@ describe("Panel", () => {
       // Then
       expect(screen.getByTestId("panel-id")).toHaveTextContent(childId);
       expect(screen.getByTestId("config-value")).toBeInTheDocument();
+    });
+
+    it("When clicking panel Then interaction analytics are logged", () => {
+      // Given
+      const renderFn = jest.fn();
+      const SelectablePanel = getSelectablePanel(renderFn);
+      const childId = "SelectableDummy!test-interaction";
+      const logEvent = jest.fn();
+      const mockAnalytics: IAnalytics = { logEvent };
+
+      const { container } = render(
+        <AnalyticsContext.Provider value={mockAnalytics}>
+          <PanelSetup>
+            <SelectablePanel childId={childId} />
+          </PanelSetup>
+        </AnalyticsContext.Provider>,
+      );
+
+      const panelRoot = container.querySelector('[data-telemetry-id="panel"]');
+      expect(panelRoot).toBeInTheDocument();
+
+      // When
+      fireEvent.click(panelRoot!);
+
+      // Then
+      expect(logEvent).toHaveBeenCalledWith(AppEvent.PANEL_INTERACTION, {
+        type: "SelectableDummy",
+        id: "panel",
+      });
     });
 
     it("When pressing Escape with multiple panels selected Then deselects panels", async () => {
