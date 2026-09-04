@@ -34,7 +34,7 @@ async function flushAndShutdown(analytics: OtelAnalytics): Promise<void> {
 
 export default function AnalyticsProvider({
   children,
-}: PropsWithChildren): React.JSX.Element {
+}: Readonly<PropsWithChildren>): React.JSX.Element {
   const [analytics, setAnalytics] = useState<IAnalytics>(() => NULL_ANALYTICS);
   const analyticsRef = useRef<OtelAnalytics | undefined>();
 

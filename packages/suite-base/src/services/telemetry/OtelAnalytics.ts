@@ -23,10 +23,7 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic
 
 import IAnalytics, { AppEvent } from "../IAnalytics";
 import { getDeviceId, sessionId } from "./identity";
-import RateLimiter, {
-  DEFAULT_RATE_LIMITER_CONFIG,
-  type RateLimiterConfig,
-} from "./rateLimiter";
+import RateLimiter, { DEFAULT_RATE_LIMITER_CONFIG, type RateLimiterConfig } from "./rateLimiter";
 
 const DEFAULT_OTEL_ANALYTICS_RATE_LIMITER_CONFIG: RateLimiterConfig = DEFAULT_RATE_LIMITER_CONFIG;
 

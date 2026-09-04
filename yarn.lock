@@ -21716,6 +21716,7 @@ __metadata:
   resolution: "web@workspace:web"
   dependencies:
     "@lichtblick/log": "workspace:*"
+    "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/suite-web": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@types/serve-handler": "npm:^6"

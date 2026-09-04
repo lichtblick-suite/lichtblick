@@ -40,7 +40,9 @@ describe("useInteractionCapture", () => {
     const wrapper = makeWrapper(analytics);
     const target = document.createElement("button");
     target.setAttribute("data-testid", "menu-item-open");
-    const { result } = renderHook(() => useInteractionCapture(AppEvent.APP_MENU_CLICK), { wrapper });
+    const { result } = renderHook(() => useInteractionCapture(AppEvent.APP_MENU_CLICK), {
+      wrapper,
+    });
 
     // When
     act(() => {
@@ -77,7 +79,9 @@ describe("useInteractionCapture", () => {
     // Given
     const wrapper = makeWrapper(analytics);
     const target = document.createElement("div");
-    const { result } = renderHook(() => useInteractionCapture(AppEvent.APP_MENU_CLICK), { wrapper });
+    const { result } = renderHook(() => useInteractionCapture(AppEvent.APP_MENU_CLICK), {
+      wrapper,
+    });
 
     // When
     act(() => {
@@ -138,7 +142,9 @@ describe("useInteractionCapture", () => {
   it("ignores non-Element targets without throwing", () => {
     // Given
     const wrapper = makeWrapper(analytics);
-    const { result } = renderHook(() => useInteractionCapture(AppEvent.APP_MENU_CLICK), { wrapper });
+    const { result } = renderHook(() => useInteractionCapture(AppEvent.APP_MENU_CLICK), {
+      wrapper,
+    });
 
     // When/Then
     expect(() => {

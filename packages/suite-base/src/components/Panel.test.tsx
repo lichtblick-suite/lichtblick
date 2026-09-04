@@ -954,7 +954,6 @@ describe("Panel", () => {
       });
     });
 
-
     it("When pressing Escape with multiple panels selected Then deselects panels", async () => {
       // Given
       const renderFn = jest.fn();

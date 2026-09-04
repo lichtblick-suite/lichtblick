@@ -68,10 +68,13 @@ function AnalyticsConsumer(): React.JSX.Element {
 
   return (
     <>
-      <div data-testid="analytics-kind">
-        {analytics instanceof NullAnalytics ? "null" : "otel"}
-      </div>
-      <button type="button" onClick={() => { analytics.logEvent(AppEvent.APP_INIT); }}>
+      <div data-testid="analytics-kind">{analytics instanceof NullAnalytics ? "null" : "otel"}</div>
+      <button
+        type="button"
+        onClick={() => {
+          analytics.logEvent(AppEvent.APP_INIT);
+        }}
+      >
         emit
       </button>
     </>
@@ -126,7 +129,7 @@ describe("AnalyticsProvider", () => {
     // Then
     const mockLogger = getMockLogger();
     expect(screen.getByTestId("analytics-kind")).toHaveTextContent("null");
-    expect(mockLogger.warn).toHaveBeenCalledWith(
+    expect(mockLogger.debug).toHaveBeenCalledWith(
       "No OTLP endpoint was compiled in; analytics events will not be exported.",
     );
     expect(mockOtelAnalytics).not.toHaveBeenCalled();

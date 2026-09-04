@@ -14,13 +14,7 @@ import { StudioApp } from "./StudioApp";
 
 // Mock all the heavy dependencies
 const mockMultiProvider = jest.fn(
-  ({
-    providers,
-    children,
-  }: {
-    providers: React.JSX.Element[];
-    children?: React.ReactNode;
-  }) => (
+  ({ providers, children }: { providers: React.JSX.Element[]; children?: React.ReactNode }) => (
     <div data-testid="multi-provider" data-provider-count={providers.length}>
       {children}
     </div>

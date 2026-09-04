@@ -124,7 +124,6 @@ describe("AppMenu", () => {
     expect(logEvent).toHaveBeenCalledWith(AppEvent.APP_MENU_CLICK, { id: "menu-item-open" });
   });
 
-
   it("handles View menu actions", () => {
     renderAppMenu();
 
