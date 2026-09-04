@@ -293,6 +293,7 @@ export default function Panel<
     );
 
     const capturePanelInteraction = useInteractionCapture(AppEvent.PANEL_INTERACTION, {
+      attribute: "data-telemetry-id",
       data: { type },
     });
 
@@ -616,6 +617,7 @@ export default function Panel<
                 sourceRect={fullscreenSourceRect}
                 selected={isSelected || (isDragging && isValidTarget && isOver)}
                 data-testid={cx("panel-mouseenter-container", childId)}
+                data-telemetry-id="panel"
                 ref={(el) => {
                   panelRootRef.current = el;
                   // disallow dragging the root panel in a layout

@@ -104,6 +104,17 @@ jest.mock("@opentelemetry/sdk-trace-web", () => ({
   },
 }));
 
+function deferredPromise<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+}
+
 describe("OtelAnalytics", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -263,7 +274,7 @@ describe("OtelAnalytics", () => {
     expect(mockSpanEnd).toHaveBeenCalledTimes(1);
   });
 
-  it("flushes and shuts down through the logger provider", async () => {
+  it("flush resolves when both providers flush successfully", async () => {
     // Given
     const { default: OtelAnalytics } = await import("./OtelAnalytics");
     const analytics = new OtelAnalytics({
@@ -273,13 +284,113 @@ describe("OtelAnalytics", () => {
     });
 
     // When
-    await analytics.flush();
-    await analytics.shutdown();
+    await expect(analytics.flush()).resolves.toBeUndefined();
 
     // Then
     expect(mockForceFlush).toHaveBeenCalledTimes(1);
-    expect(mockShutdown).toHaveBeenCalledTimes(1);
     expect(mockTracerForceFlush).toHaveBeenCalledTimes(1);
+  });
+
+  it("flush waits for both providers to settle before rejecting", async () => {
+    // Given
+    const { default: OtelAnalytics } = await import("./OtelAnalytics");
+    const loggerFlush = deferredPromise<void>();
+    const tracerError = new Error("trace flush failed");
+    mockForceFlush.mockReturnValueOnce(loggerFlush.promise);
+    mockTracerForceFlush.mockRejectedValueOnce(tracerError);
+
+    const analytics = new OtelAnalytics({
+      endpoint: "http://collector:4318",
+      version: "1.2.3",
+      platform: "desktop",
+    });
+
+    // When
+    const flushPromise = analytics.flush();
+    const onSettled = jest.fn();
+    void flushPromise.then(
+      () => {
+        onSettled("resolved");
+      },
+      (error: unknown) => {
+        onSettled(error);
+      },
+    );
+
+    await Promise.resolve();
+
+    // Then
+    expect(mockForceFlush).toHaveBeenCalledTimes(1);
+    expect(mockTracerForceFlush).toHaveBeenCalledTimes(1);
+    expect(onSettled).not.toHaveBeenCalled();
+
+    loggerFlush.resolve();
+
+    const flushError = await flushPromise.catch((error: unknown) => error);
+    expect(flushError).toBeInstanceOf(AggregateError);
+    expect(flushError).toMatchObject({
+      message: "OtelAnalytics.flush() failed for one or more providers",
+      errors: [tracerError],
+    });
+  });
+
+  it("shutdown resolves when both providers shut down successfully", async () => {
+    // Given
+    const { default: OtelAnalytics } = await import("./OtelAnalytics");
+    const analytics = new OtelAnalytics({
+      endpoint: "http://collector:4318",
+      version: "1.2.3",
+      platform: "desktop",
+    });
+
+    // When
+    await expect(analytics.shutdown()).resolves.toBeUndefined();
+
+    // Then
+    expect(mockShutdown).toHaveBeenCalledTimes(1);
     expect(mockTracerShutdown).toHaveBeenCalledTimes(1);
+  });
+
+  it("shutdown waits for both providers to settle before rejecting", async () => {
+    // Given
+    const { default: OtelAnalytics } = await import("./OtelAnalytics");
+    const loggerShutdown = deferredPromise<void>();
+    const tracerError = new Error("trace shutdown failed");
+    mockShutdown.mockReturnValueOnce(loggerShutdown.promise);
+    mockTracerShutdown.mockRejectedValueOnce(tracerError);
+
+    const analytics = new OtelAnalytics({
+      endpoint: "http://collector:4318",
+      version: "1.2.3",
+      platform: "desktop",
+    });
+
+    // When
+    const shutdownPromise = analytics.shutdown();
+    const onSettled = jest.fn();
+    void shutdownPromise.then(
+      () => {
+        onSettled("resolved");
+      },
+      (error: unknown) => {
+        onSettled(error);
+      },
+    );
+
+    await Promise.resolve();
+
+    // Then
+    expect(mockShutdown).toHaveBeenCalledTimes(1);
+    expect(mockTracerShutdown).toHaveBeenCalledTimes(1);
+    expect(onSettled).not.toHaveBeenCalled();
+
+    loggerShutdown.resolve();
+
+    const shutdownError = await shutdownPromise.catch((error: unknown) => error);
+    expect(shutdownError).toBeInstanceOf(AggregateError);
+    expect(shutdownError).toMatchObject({
+      message: "OtelAnalytics.shutdown() failed for one or more providers",
+      errors: [tracerError],
+    });
   });
 });

@@ -32,6 +32,9 @@ const DEFAULT_OTEL_ANALYTICS_RATE_LIMITER_CONFIG: RateLimiterConfig = DEFAULT_RA
 
 let diagLoggerInitialized = false;
 
+const isRejected = (result: PromiseSettledResult<unknown>): result is PromiseRejectedResult =>
+  result.status === "rejected";
+
 function ensureDiagLogger(): void {
   if (diagLoggerInitialized) {
     return;
@@ -106,10 +109,32 @@ export default class OtelAnalytics implements IAnalytics {
   }
 
   public async flush(): Promise<void> {
-    await Promise.all([this.#loggerProvider.forceFlush(), this.#tracerProvider.forceFlush()]);
+    const results = await Promise.allSettled([
+      this.#loggerProvider.forceFlush(),
+      this.#tracerProvider.forceFlush(),
+    ]);
+    const rejected = results.filter(isRejected);
+
+    if (rejected.length > 0) {
+      throw new AggregateError(
+        rejected.map(({ reason }) => reason),
+        "OtelAnalytics.flush() failed for one or more providers",
+      );
+    }
   }
 
   public async shutdown(): Promise<void> {
-    await Promise.all([this.#loggerProvider.shutdown(), this.#tracerProvider.shutdown()]);
+    const results = await Promise.allSettled([
+      this.#loggerProvider.shutdown(),
+      this.#tracerProvider.shutdown(),
+    ]);
+    const rejected = results.filter(isRejected);
+
+    if (rejected.length > 0) {
+      throw new AggregateError(
+        rejected.map(({ reason }) => reason),
+        "OtelAnalytics.shutdown() failed for one or more providers",
+      );
+    }
   }
 }

@@ -941,7 +941,7 @@ describe("Panel", () => {
         </AnalyticsContext.Provider>,
       );
 
-      const panelRoot = container.querySelector('[data-testid*="panel-mouseenter-container"]');
+      const panelRoot = container.querySelector('[data-telemetry-id="panel"]');
       expect(panelRoot).toBeInTheDocument();
 
       // When
@@ -950,7 +950,7 @@ describe("Panel", () => {
       // Then
       expect(logEvent).toHaveBeenCalledWith(AppEvent.PANEL_INTERACTION, {
         type: "SelectableDummy",
-        id: `panel-mouseenter-container ${childId}`,
+        id: "panel",
       });
     });
 
