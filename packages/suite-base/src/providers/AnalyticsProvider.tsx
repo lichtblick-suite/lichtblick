@@ -46,7 +46,7 @@ export default function AnalyticsProvider({
     let created: OtelAnalytics | undefined;
 
     if (APP_CONFIG.otlpEndpoint == undefined) {
-      log.warn("No OTLP endpoint was compiled in; analytics events will not be exported.");
+      log.debug("No OTLP endpoint was compiled in; analytics events will not be exported.");
       analyticsRef.current = undefined;
       setAnalytics((current) => (current === NULL_ANALYTICS ? current : NULL_ANALYTICS));
       return;

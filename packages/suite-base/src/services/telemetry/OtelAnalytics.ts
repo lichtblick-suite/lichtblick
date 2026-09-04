@@ -35,6 +35,35 @@ let diagLoggerInitialized = false;
 const isRejected = (result: PromiseSettledResult<unknown>): result is PromiseRejectedResult =>
   result.status === "rejected";
 
+type ScalarAttributeValue = string | number | boolean;
+
+function isScalarAttributeValue(value: unknown): value is ScalarAttributeValue {
+  return typeof value === "string" || typeof value === "number" || typeof value === "boolean";
+}
+
+function isAttributeArray(value: unknown): value is Array<null | undefined | ScalarAttributeValue> {
+  return (
+    Array.isArray(value) && value.every((item) => item == undefined || isScalarAttributeValue(item))
+  );
+}
+
+/**
+ * Filters an arbitrary record down to values that are valid OpenTelemetry `Attributes`
+ * (primitives or homogeneous arrays of primitives), dropping unsupported values such as
+ * objects, functions, and mixed/nested arrays so they aren't silently mishandled by exporters.
+ */
+function sanitizeAttributes(data: Record<string, unknown>): Attributes {
+  const sanitized: Attributes = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (isScalarAttributeValue(value) || isAttributeArray(value)) {
+      sanitized[key] = value as Attributes[string];
+    } else if (value != undefined) {
+      diag.warn(`OtelAnalytics: dropping unsupported attribute "${key}" of type ${typeof value}`);
+    }
+  }
+  return sanitized;
+}
+
 function ensureDiagLogger(): void {
   if (diagLoggerInitialized) {
     return;
@@ -92,11 +121,11 @@ export default class OtelAnalytics implements IAnalytics {
     }
 
     const deviceId = getDeviceId();
-    const attributes = {
-      ...data,
+    const attributes: Attributes = {
+      ...sanitizeAttributes(data ?? {}),
       device_id: deviceId,
       session_id: sessionId,
-    } as Attributes;
+    };
 
     this.#logger.emit({
       body: event,

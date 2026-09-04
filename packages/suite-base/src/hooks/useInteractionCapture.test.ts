@@ -148,4 +148,32 @@ describe("useInteractionCapture", () => {
     }).not.toThrow();
     expect(logEvent).not.toHaveBeenCalled();
   });
+
+  it("fails closed and does not throw for an invalid attribute name", () => {
+    // Given
+    const wrapper = makeWrapper(analytics);
+    const target = document.createElement("button");
+    // An attribute name containing selector-breaking characters would otherwise be
+    // interpolated directly into `target.closest()` and could throw a SyntaxError.
+    target.setAttribute("data-testid", "menu-item-open");
+    const { result } = renderHook(
+      () =>
+        useInteractionCapture(AppEvent.APP_MENU_CLICK, {
+          attribute: 'data-testid]:not([foo="bar',
+        }),
+      { wrapper },
+    );
+
+    // When/Then
+    expect(() => {
+      act(() => {
+        result.current(makeDomEvent(target));
+      });
+    }).not.toThrow();
+    expect(logEvent).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('ignoring invalid attribute name "data-testid]:not([foo="bar"'),
+    );
+    (console.warn as jest.Mock).mockClear();
+  });
 });

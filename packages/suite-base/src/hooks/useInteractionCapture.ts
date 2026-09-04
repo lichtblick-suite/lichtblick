@@ -5,10 +5,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MouseEvent, useCallback } from "react";
+import { MouseEvent, useCallback, useMemo } from "react";
 
+import Logger from "@lichtblick/log";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
+
+const log = Logger.getLogger(__filename);
+
+// Matches simple HTML attribute names (e.g. "data-testid"). Anything else could produce an
+// invalid or unintended CSS selector when interpolated into `target.closest()`.
+const SAFE_ATTRIBUTE_NAME = /^[a-z][a-z0-9_-]*$/i;
 
 export type InteractionCaptureOptions = {
   /**
@@ -37,11 +44,30 @@ export function useInteractionCapture(
   options: InteractionCaptureOptions = {},
 ): (domEvent: MouseEvent) => void {
   const analytics = useAnalytics();
-  const attribute = options.attribute ?? "data-testid";
+  const requestedAttribute = options.attribute ?? "data-testid";
   const { data } = options;
+
+  // Validate once per distinct attribute name: an invalid value could otherwise produce a
+  // malformed CSS selector (or unintended selector syntax) when interpolated into
+  // `target.closest()`. Fail closed (undefined) rather than risk a thrown SyntaxError or a
+  // selector that doesn't mean what the caller intended.
+  const attribute = useMemo(() => {
+    if (!SAFE_ATTRIBUTE_NAME.test(requestedAttribute)) {
+      log.warn(
+        `useInteractionCapture: ignoring invalid attribute name "${requestedAttribute}"; ` +
+          "interaction capture will be disabled for this handler.",
+      );
+      return undefined;
+    }
+    return requestedAttribute;
+  }, [requestedAttribute]);
 
   return useCallback(
     (domEvent: MouseEvent) => {
+      if (attribute == undefined) {
+        return;
+      }
+
       const target = domEvent.target;
       if (!(target instanceof Element)) {
         return;

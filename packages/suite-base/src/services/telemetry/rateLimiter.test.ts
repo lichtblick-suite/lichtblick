@@ -118,4 +118,65 @@ describe("RateLimiter", () => {
     // Then
     expect(result).toBe(true);
   });
+
+  it("refunds the global token when an error occurs after it was consumed", () => {
+    // Given
+    let shouldThrow = false;
+    let clockCallsSinceThrow = 0;
+    const rateLimiter = new RateLimiter(
+      {
+        perKey: { capacity: 1, refillPerSecond: 0 },
+        global: { capacity: 1, refillPerSecond: 0 },
+      },
+      () => {
+        clockCallsSinceThrow += 1;
+        // Throw only on the second clock read (the per-key bucket check) of the
+        // first `allow()` call, simulating a failure after the global token is consumed.
+        if (shouldThrow && clockCallsSinceThrow === 2) {
+          throw new Error("per-key bucket failure");
+        }
+        return 0;
+      },
+    );
+    shouldThrow = true;
+
+    // When
+    const failedOpen = rateLimiter.allow("app.init");
+    shouldThrow = false;
+    clockCallsSinceThrow = 0;
+    const afterFailure = rateLimiter.allow("app.init");
+
+    // Then
+    expect(failedOpen).toBe(true);
+    expect(afterFailure).toBe(true);
+  });
+
+  it("evicts the least-recently-used per-key bucket once maxKeys is exceeded", () => {
+    // Given
+    const currentTime = 0;
+    const rateLimiter = new RateLimiter(
+      {
+        perKey: { capacity: 1, refillPerSecond: 0 },
+        global: { capacity: 10, refillPerSecond: 0 },
+        maxKeys: 2,
+      },
+      () => currentTime,
+    );
+
+    // When
+    rateLimiter.allow("alpha"); // Map: [alpha]
+    rateLimiter.allow("beta"); // Map: [alpha, beta]
+    // Re-access "alpha" (even though its token is already spent) to mark it as
+    // more-recently-used than "beta", moving it to the end of the eviction order.
+    rateLimiter.allow("alpha"); // Map: [beta, alpha]
+    // Adding a third key exceeds maxKeys, so the least-recently-used bucket ("beta")
+    // is evicted rather than "alpha".
+    rateLimiter.allow("gamma"); // Map: [alpha, gamma]
+    // "alpha" should still be present (and still out of tokens), proving it survived
+    // eviction because it was more recently used than "beta".
+    const alphaStillPresent = rateLimiter.allow("alpha");
+
+    // Then
+    expect(alphaStillPresent).toBe(false);
+  });
 });

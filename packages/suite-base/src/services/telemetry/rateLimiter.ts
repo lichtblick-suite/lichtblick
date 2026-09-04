@@ -67,7 +67,15 @@ class TokenBucket {
 export type RateLimiterConfig = {
   perKey: TokenBucketOptions;
   global: TokenBucketOptions;
+  /**
+   * Maximum number of distinct per-key buckets to retain. `allow()` is expected to be called
+   * with keys from a bounded set (e.g. `AppEvent` values). If more distinct keys than this are
+   * seen, the least-recently-used bucket is evicted to bound memory usage.
+   */
+  maxKeys?: number;
 };
+
+const DEFAULT_MAX_KEYS = 256;
 
 export const DEFAULT_RATE_LIMITER_CONFIG: RateLimiterConfig = {
   perKey: {
@@ -78,12 +86,14 @@ export const DEFAULT_RATE_LIMITER_CONFIG: RateLimiterConfig = {
     capacity: 100,
     refillPerSecond: 5,
   },
+  maxKeys: DEFAULT_MAX_KEYS,
 };
 
 export default class RateLimiter {
   readonly #globalBucket: TokenBucket;
   readonly #perKeyBucketOptions: ResolvedTokenBucketOptions;
   readonly #perKeyBuckets = new Map<string, TokenBucket>();
+  readonly #maxKeys: number;
 
   public constructor(
     config: RateLimiterConfig = DEFAULT_RATE_LIMITER_CONFIG,
@@ -91,13 +101,16 @@ export default class RateLimiter {
   ) {
     this.#globalBucket = new TokenBucket({ ...config.global, now });
     this.#perKeyBucketOptions = { ...config.perKey, now };
+    this.#maxKeys = Math.max(1, config.maxKeys ?? DEFAULT_MAX_KEYS);
   }
 
   public allow(key: string): boolean {
+    let globalConsumed = false;
     try {
       if (!this.#globalBucket.tryConsume()) {
         return false;
       }
+      globalConsumed = true;
 
       const bucket = this.#getPerKeyBucket(key);
       if (bucket.tryConsume()) {
@@ -105,18 +118,39 @@ export default class RateLimiter {
       }
 
       this.#globalBucket.refund();
+      globalConsumed = false;
       return false;
     } catch {
+      // Fail open: an unexpected error should not block the event, and any global token
+      // consumed before the error must be refunded so it doesn't permanently throttle
+      // future events.
+      if (globalConsumed) {
+        this.#globalBucket.refund();
+      }
       return true;
     }
   }
 
   #getPerKeyBucket(key: string): TokenBucket {
     let bucket = this.#perKeyBuckets.get(key);
-    if (bucket == undefined) {
-      bucket = new TokenBucket(this.#perKeyBucketOptions);
+    if (bucket != undefined) {
+      // Refresh recency: delete + re-set moves this entry to the end of Map iteration order.
+      this.#perKeyBuckets.delete(key);
       this.#perKeyBuckets.set(key, bucket);
+      return bucket;
     }
+
+    if (this.#perKeyBuckets.size >= this.#maxKeys) {
+      // Evict the least-recently-used entry (first key in iteration order) to bound memory
+      // usage when `allow()` is called with high-cardinality or unbounded keys.
+      const oldestKey = this.#perKeyBuckets.keys().next().value;
+      if (oldestKey != undefined) {
+        this.#perKeyBuckets.delete(oldestKey);
+      }
+    }
+
+    bucket = new TokenBucket(this.#perKeyBucketOptions);
+    this.#perKeyBuckets.set(key, bucket);
     return bucket;
   }
 }
