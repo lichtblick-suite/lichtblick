@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import AV1FrameBuilder from "@lichtblick/den/testing/builders/AV1FrameBuilder";
 import { MessageEvent } from "@lichtblick/suite";
 import H265FrameBuilder from "@lichtblick/suite-base/testing/builders/H265FrameBuilder";
 
@@ -53,6 +54,15 @@ function h265DeltaFrame(): CompressedVideo {
   return {
     format: "h265",
     data: H265FrameBuilder.deltaFrame(),
+    frame_id: "camera",
+    timestamp: { sec: 0, nsec: 0 },
+  };
+}
+
+function av1Frame(data: Uint8Array): CompressedVideo {
+  return {
+    format: "av1",
+    data,
     frame_id: "camera",
     timestamp: { sec: 0, nsec: 0 },
   };
@@ -178,5 +188,29 @@ describe("filterCompressedVideoQueue", () => {
     filterCompressedVideoQueue(messages);
 
     expect(messages).toEqual(snapshot);
+  });
+
+  it("keeps the AV1 GOP starting from the most recent keyframe", () => {
+    // GIVEN two AV1 GOPs followed by their delta frames
+    const oldKey = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.keyframe()), 1);
+    const oldDelta = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.deltaFrame()), 2);
+    const newKey = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.keyframe()), 3);
+    const newDelta = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.deltaFrame()), 4);
+
+    // WHEN the subscription queue is filtered
+    const result = filterCompressedVideoQueue([oldKey, oldDelta, newKey, newDelta]);
+
+    // THEN only the newest complete GOP is retained
+    expect(result).toEqual([newKey, newDelta]);
+  });
+
+  it("Keeps the full AV1 queue when no keyframe is preset yet", () => {
+    const deltaA = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.deltaFrame()), 1);
+    const deltaB = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.deltaFrame()), 2);
+    const deltaC = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.deltaFrame()), 3);
+
+    const result = filterCompressedVideoQueue([deltaA, deltaB, deltaC]);
+
+    expect(result).toEqual([deltaA, deltaB, deltaC]);
   });
 });
