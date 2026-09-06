@@ -26,6 +26,7 @@ import {
 import {
   H264 as H264Parser,
   H265 as H265Parser,
+  AV1 as AV1Parser,
   VideoCodec,
   VideoPlayer,
   canonicalVideoCodec,
@@ -64,6 +65,8 @@ export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderCo
       return H264Parser.ParseDecoderConfig(frameMsg.data);
     case VideoCodec.H265:
       return H265Parser.ParseDecoderConfig(frameMsg.data);
+    case VideoCodec.AV1:
+      return AV1Parser.ParseDecoderConfig(frameMsg.data);
   }
   return undefined;
 }
@@ -101,6 +104,22 @@ export function prepareVideoFrame(
             : (frameInfo.strippedData ?? frameInfo.normalizedData),
         decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
         status: PreparedVideoFrameStatus.Ok,
+        type,
+      };
+    }
+    case VideoCodec.AV1: {
+      const frameData = frameMsg.data;
+      const type = AV1Parser.IsKeyframe(frameData) ? "key" : "delta";
+      const decoderConfig = type === "key" ? AV1Parser.ParseDecoderConfig(frameData) : undefined;
+      return {
+        data: frameData,
+        decoderConfig,
+        diagnostics:
+          type === "key" && decoderConfig == undefined ? "invalid AV1 sequence header" : undefined,
+        status:
+          type === "key" && decoderConfig == undefined
+            ? PreparedVideoFrameStatus.UnsupportedBitstream
+            : PreparedVideoFrameStatus.Ok,
         type,
       };
     }
