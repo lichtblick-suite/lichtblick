@@ -132,4 +132,15 @@ describe("PlotLegend", () => {
 
     expect(mockOnClickPath).toHaveBeenCalledWith(0);
   });
+
+  it("Given floatingToolbar is true When rendering Then it renders without crashing for every legend position", () => {
+    // Given / When
+    for (const legendDisplay of ["floating", "top", "left"] as const) {
+      const { unmount } = setup({ floatingToolbar: true, legendDisplay });
+
+      // Then
+      expect(screen.getByTitle("Add series")).toBeDefined();
+      unmount();
+    }
+  });
 });

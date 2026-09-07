@@ -1629,6 +1629,38 @@ describe("PanelExtensionAdapter", () => {
       expect(handle.queryByTitle("Reset view")).not.toBeInTheDocument();
     });
 
+    it("does not update state when called after the panel has unmounted", async () => {
+      // GIVEN a panel that captures its extension context
+      let capturedContext: PanelExtensionContext | undefined;
+      const sig = signal();
+      const initPanel = (context: PanelExtensionContext) => {
+        capturedContext = context;
+        sig.resolve();
+      };
+
+      const handle = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+      handle.unmount();
+
+      // WHEN the panel registers toolbar actions after unmounting
+      // THEN no error is thrown and no button is rendered (there is nothing left to render into)
+      expect(() => {
+        capturedContext!.setToolbarActions?.([
+          { id: "reset", title: "Reset view", iconPath: "M0 0h24v24H0z", onClick: () => {} },
+        ]);
+      }).not.toThrow();
+      expect(handle.queryByTitle("Reset view")).not.toBeInTheDocument();
+    });
+
     it("clears stale toolbar actions when the panel re-initializes without registering new ones", async () => {
       // GIVEN a first panel instance that registers a custom toolbar action during init
       const sig1 = signal();
@@ -1674,6 +1706,77 @@ describe("PanelExtensionAdapter", () => {
       // THEN the stale button (and its now-orphaned callback) from the previous instance is no
       // longer rendered
       expect(handle.queryByTitle("Reset view")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("floatingToolbar hover tracking", () => {
+    it("passes hovered=true/false to PanelToolbar as the pointer enters/leaves when floatingToolbar is enabled", async () => {
+      // GIVEN a panel rendered with floatingToolbar enabled
+      const sig = signal();
+      const initPanel = (_context: PanelExtensionContext) => {
+        sig.resolve();
+      };
+
+      const handle = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter
+                config={{}}
+                saveConfig={() => {}}
+                initPanel={initPanel}
+                floatingToolbar
+              />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+
+      const panelRoot = handle.getByTestId("mosaic-drag-handle").parentElement!;
+      expect(panelRoot.style.position).toBe("relative");
+
+      // WHEN the pointer enters the panel
+      fireEvent.pointerEnter(panelRoot);
+
+      // THEN the toolbar's floating controls become visible
+      expect(panelRoot.querySelector('[class*="floatingControlsVisible"]')).not.toBeNull();
+
+      // WHEN the pointer leaves the panel
+      fireEvent.pointerLeave(panelRoot);
+
+      // THEN the toolbar's floating controls are hidden again
+      expect(panelRoot.querySelector('[class*="floatingControlsVisible"]')).toBeNull();
+    });
+
+    it("does not set the position style or pointer handlers when floatingToolbar is disabled", async () => {
+      // GIVEN a panel rendered without floatingToolbar
+      const sig = signal();
+      const initPanel = (_context: PanelExtensionContext) => {
+        sig.resolve();
+      };
+
+      const handle = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+
+      const panelRoot = handle.getByTestId("mosaic-drag-handle").parentElement!;
+
+      // THEN the root container does not opt into the floating layout
+      expect(panelRoot.style.position).toBe("");
+
+      // AND hovering has no effect on the toolbar controls' visibility class
+      fireEvent.pointerEnter(panelRoot);
+      expect(panelRoot.querySelector('[class*="floatingControlsVisible"]')).toBeNull();
     });
   });
 });

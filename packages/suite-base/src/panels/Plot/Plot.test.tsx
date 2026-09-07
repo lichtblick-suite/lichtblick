@@ -283,6 +283,25 @@ describe("Plot Component", () => {
     expect(mockLatestLegendProps?.floatingToolbar).toBe(true);
   });
 
+  it("Given the panel is hovered and then unhovered When the pointer enters and leaves Then the toolbar's hovered prop toggles accordingly", () => {
+    // Given
+    const config = new PlotConfigBuilder().build();
+    renderPlot(config);
+    const panelRoot = screen.getByTestId("panel-toolbar").parentElement!;
+
+    // When
+    fireEvent.pointerEnter(panelRoot);
+
+    // Then
+    expect(mockLatestPanelToolbarProps?.hovered).toBe(true);
+
+    // When
+    fireEvent.pointerLeave(panelRoot);
+
+    // Then
+    expect(mockLatestPanelToolbarProps?.hovered).toBe(false);
+  });
+
   it("Given reset allowed When clicking reset button Then onResetView is called", async () => {
     // Given
     const config = new PlotConfigBuilder().build();
