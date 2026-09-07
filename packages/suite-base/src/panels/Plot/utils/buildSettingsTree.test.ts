@@ -14,6 +14,7 @@ import { buildSettingsTree } from "./buildSettingsTree";
 
 describe("buildSettingsTree", () => {
   const t: TFunction<"plot"> = jest.fn((key) => key) as unknown as TFunction<"plot">;
+  const axisLabel = BasicBuilder.string();
 
   beforeEach(() => {});
 
@@ -122,6 +123,54 @@ describe("buildSettingsTree", () => {
 
     const tree = buildSettingsTree(config, t);
     expect(tree.xAxis?.fields?.maxXValue?.error).toBe("maxXError");
+  });
+
+  it("should include xAxisLabel field with provided value", () => {
+    const config: PlotConfig = PlotBuilder.config({ xAxisLabel: axisLabel, paths: [] });
+
+    const tree = buildSettingsTree(config, t);
+
+    expect(tree.xAxis?.fields?.xAxisLabel).toEqual({
+      label: "axisLabel",
+      input: "string",
+      value: axisLabel,
+    });
+  });
+
+  it("should include xAxisLabel field with undefined value when not set", () => {
+    const config: PlotConfig = PlotBuilder.config({ xAxisLabel: undefined, paths: [] });
+
+    const tree = buildSettingsTree(config, t);
+
+    expect(tree.xAxis?.fields?.xAxisLabel).toEqual({
+      label: "axisLabel",
+      input: "string",
+      value: undefined,
+    });
+  });
+
+  it("should include yAxisLabel field with provided value", () => {
+    const config: PlotConfig = PlotBuilder.config({ yAxisLabel: axisLabel, paths: [] });
+
+    const tree = buildSettingsTree(config, t);
+
+    expect(tree.yAxis?.fields?.yAxisLabel).toEqual({
+      label: "axisLabel",
+      input: "string",
+      value: axisLabel,
+    });
+  });
+
+  it("should include yAxisLabel field with undefined value when not set", () => {
+    const config: PlotConfig = PlotBuilder.config({ yAxisLabel: undefined, paths: [] });
+
+    const tree = buildSettingsTree(config, t);
+
+    expect(tree.yAxis?.fields?.yAxisLabel).toEqual({
+      label: "axisLabel",
+      input: "string",
+      value: undefined,
+    });
   });
 
   describe("makeSeriesNode - reorderable and icon properties", () => {

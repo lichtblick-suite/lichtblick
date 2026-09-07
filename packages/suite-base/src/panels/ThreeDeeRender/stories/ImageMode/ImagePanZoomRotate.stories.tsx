@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ImageAnnotations, SceneUpdate } from "@foxglove/schemas";
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 import { fireEvent } from "@storybook/testing-library";
 import * as THREE from "three";
 

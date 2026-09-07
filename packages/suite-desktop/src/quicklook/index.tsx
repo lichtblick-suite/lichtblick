@@ -6,6 +6,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 /// <reference types="quicklookjs" />
+// `__filename` is a Node.js global. TypeScript 6.0 no longer auto-discovers `@types/node`, so
+// reference it explicitly to keep the global available across the quicklook program.
+/// <reference types="node" />
 
 import { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";

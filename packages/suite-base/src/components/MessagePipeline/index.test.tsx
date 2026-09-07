@@ -111,6 +111,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
         getBatchIterator: expect.any(Function),
+        getMessageAtTime: expect.any(Function),
       },
       {
         playerState: {
@@ -140,6 +141,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
         getBatchIterator: expect.any(Function),
+        getMessageAtTime: expect.any(Function),
       },
     ]);
   });

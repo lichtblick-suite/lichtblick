@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 
 import { MessageEvent } from "@lichtblick/suite";
 import { Topic } from "@lichtblick/suite-base/players/types";
@@ -101,7 +101,19 @@ export const LabelMarkers: StoryObj = {
       frame: {
         "/tf": [tf1, tf2],
         // prettier-ignore
-        "/labels": [label1, label2, label3, label4, label5, label6, label7, label8, label9, label10, label11],
+        "/labels": [
+          label1,
+          label2,
+          label3,
+          label4,
+          label5,
+          label6,
+          label7,
+          label8,
+          label9,
+          label10,
+          label11,
+        ],
       },
       capabilities: [],
       activeData: {

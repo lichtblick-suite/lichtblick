@@ -5,9 +5,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageConverterAlert, PanelExtensionContext } from "@lichtblick/suite";
+import { Immutable, MessageConverterAlert, PanelExtensionContext } from "@lichtblick/suite";
 import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
-import { Topic } from "@lichtblick/suite-base/players/types";
+import { PlayerAlert, Topic } from "@lichtblick/suite-base/players/types";
 import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 
 /**
@@ -87,6 +87,14 @@ export type BuiltinPanelExtensionContext = {
    * indicates that the panel does not accept any dragged message paths.
    */
   unstable_setMessagePathDropConfig: (config: MessagePathDropConfig | undefined) => void;
+
+  /**
+   * Set or clear an app-level alert on behalf of this panel. The alert is surfaced in the app
+   * notifications UI. `alertId` scopes the alert within this panel; alerts are namespaced per
+   * panel and automatically cleared when the panel unmounts. Passing `undefined` for `alert`
+   * clears the alert with the given `alertId`.
+   */
+  unstable_setAlert?: (alertId: string, alert: Immutable<PlayerAlert> | undefined) => void;
 } & PanelExtensionContext;
 
 export type MessageConverterAlertHandler = (

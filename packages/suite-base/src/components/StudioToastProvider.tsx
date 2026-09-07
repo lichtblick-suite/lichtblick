@@ -7,10 +7,10 @@
 
 import {
   CheckmarkCircle20Regular,
-  DismissCircle20Regular,
   Dismiss16Filled,
   Info20Regular,
   Warning20Regular,
+  ErrorCircle20Regular,
 } from "@fluentui/react-icons";
 import { Grow, IconButton } from "@mui/material";
 import {
@@ -121,7 +121,7 @@ export default function StudioToastProvider({ children }: PropsWithChildren): Re
       iconVariant={{
         default: <Info20Regular className={classes.icon} />,
         info: <Info20Regular className={classes.icon} />,
-        error: <DismissCircle20Regular className={classes.icon} />,
+        error: <ErrorCircle20Regular className={classes.icon} />,
         warning: <Warning20Regular className={classes.icon} />,
         success: <CheckmarkCircle20Regular className={classes.icon} />,
       }}

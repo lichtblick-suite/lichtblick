@@ -86,7 +86,7 @@ export function CurrentLayoutSyncAdapter(): ReactNull {
       }
     }
 
-    void analytics.logEvent(AppEvent.LAYOUT_UPDATE);
+    analytics.logEvent(AppEvent.LAYOUT_UPDATE);
   }, [analytics, debouncedUnsavedLayouts, isMounted, layoutManager]);
 
   return ReactNull;

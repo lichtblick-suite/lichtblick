@@ -26,6 +26,7 @@ const OPTIONS_CHART: ChartOptionsPlot = {
   devicePixelRatio: 2,
   gridColor: "#ccc",
   tickColor: "#000",
+  titleColor: "#111",
 };
 
 const SCALES_CHART: Record<string, Partial<Scale>> = {
@@ -149,6 +150,7 @@ describe("ChartRenderer", () => {
         devicePixelRatio: props.devicePixelRatio,
         gridColor: props.gridColor,
         tickColor: props.tickColor,
+        titleColor: props.titleColor,
       });
     });
   });
@@ -220,6 +222,40 @@ describe("ChartRenderer", () => {
       const chartInstance: ChartType = (chartRenderer as any).getChartInstance();
 
       expect(chartInstance.options.scales!.y!.ticks?.display).toBe(true);
+    });
+
+    it("should set x-axis title when provided in update action", () => {
+      const xAxisLabel = BasicBuilder.string();
+      const { action, chartRenderer } = setup({
+        actionOverride: {
+          xAxisLabel,
+        },
+      });
+
+      chartRenderer.update(action);
+      const chartInstance: ChartType = (chartRenderer as any).getChartInstance();
+      expect(chartInstance.options.scales!.x!.title).toEqual({
+        display: true,
+        text: xAxisLabel,
+        color: OPTIONS_CHART.titleColor,
+      });
+    });
+
+    it("should set y-axis title when provided in update action", () => {
+      const yAxisLabel = BasicBuilder.string();
+      const { action, chartRenderer } = setup({
+        actionOverride: {
+          yAxisLabel,
+        },
+      });
+
+      chartRenderer.update(action);
+      const chartInstance: ChartType = (chartRenderer as any).getChartInstance();
+      expect(chartInstance.options.scales!.y!.title).toEqual({
+        display: true,
+        text: yAxisLabel,
+        color: OPTIONS_CHART.titleColor,
+      });
     });
 
     it("should update chart on update action", () => {

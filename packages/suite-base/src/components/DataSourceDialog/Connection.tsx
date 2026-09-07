@@ -118,7 +118,7 @@ export default function Connection(): React.JSX.Element {
   const [selectedConnectionIdx, setSelectedConnectionIdx] = useState<number>(() => {
     const foundIdx = connectionSources.findIndex((source) => source === activeDataSource);
     const selectedIdx = foundIdx < 0 ? 0 : foundIdx;
-    void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, {
+    analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, {
       type: "live",
       data: enabledSourcesFirst[selectedIdx]?.id,
     });
@@ -156,7 +156,7 @@ export default function Connection(): React.JSX.Element {
       return;
     }
     selectSource(selectedSource.id, { type: "connection", params: fieldValues });
-    void analytics.logEvent(AppEvent.DIALOG_CLOSE, { activeDataSource });
+    analytics.logEvent(AppEvent.DIALOG_CLOSE, { activeDataSource });
     dialogActions.dataSource.close();
   }, [
     selectedSource,
@@ -195,7 +195,7 @@ export default function Connection(): React.JSX.Element {
             orientation={mdUp ? "vertical" : "horizontal"}
             onChange={(_event, newValue: number) => {
               setSelectedConnectionIdx(newValue);
-              void analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, {
+              analytics.logEvent(AppEvent.DIALOG_SELECT_VIEW, {
                 type: "live",
                 data: enabledSourcesFirst[newValue]?.id,
               });

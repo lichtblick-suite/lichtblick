@@ -52,3 +52,10 @@ export const ERROR_CODES = {
     EXISTING_TOPIC: 3,
   },
 };
+
+/**
+ * Maximum number of unconsumed results kept in the shared replay buffer per virtual topic.
+ * Once the gap between the producer head and the slowest consumer exceeds this limit,
+ * the slowest consumer is evicted to bound memory.
+ */
+export const MAX_GLOBAL_BUFFER_SIZE = 100;

@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { PackageName } from "@lichtblick/suite-base/services/extension/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import parsePackageName from "./parsePackageName";
@@ -18,7 +17,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher } as PackageName);
+      expect(result).toEqual({ name, publisher });
     });
 
     it("When parsing a scoped package with hyphens, Then should handle hyphens correctly", () => {
@@ -31,7 +30,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher } as PackageName);
+      expect(result).toEqual({ name, publisher });
     });
 
     it("When parsing a scoped package with underscores, Then should handle underscores correctly", () => {
@@ -44,7 +43,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher } as PackageName);
+      expect(result).toEqual({ name, publisher });
     });
 
     it("When parsing a scoped package with numbers, Then should handle numbers correctly", () => {
@@ -57,7 +56,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher } as PackageName);
+      expect(result).toEqual({ name, publisher });
     });
 
     it("When parsing a scoped package with dots, Then should handle dots correctly", () => {
@@ -70,7 +69,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(packageName);
 
       // Then
-      expect(result).toEqual({ name, publisher } as PackageName);
+      expect(result).toEqual({ name, publisher });
     });
   });
 
@@ -83,7 +82,7 @@ describe("parsePackageName", () => {
       const result = parsePackageName(name);
 
       // Then
-      expect(result).toEqual({ name } as PackageName);
+      expect(result).toEqual({ name });
     });
   });
 });

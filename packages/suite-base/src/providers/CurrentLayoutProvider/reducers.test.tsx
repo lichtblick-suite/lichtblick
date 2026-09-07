@@ -21,7 +21,6 @@ import {
   LayoutData,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { TabPanelConfig } from "@lichtblick/suite-base/types/layouts";
-import { MosaicDropTargetPosition } from "@lichtblick/suite-base/types/panels";
 import { TAB_PANEL_TYPE } from "@lichtblick/suite-base/util/constants";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 
@@ -88,7 +87,7 @@ describe("layout reducers", () => {
       expect(configById["Tab!a"]?.activeTabIdx).toEqual(0);
       expect(tabs[0]!.title).toEqual("A");
       expect(newAudioId).toEqual("Audio!x");
-      expect(tabs.length).toEqual(3);
+      expect(tabs).toHaveLength(3);
 
       expect(configById[newAudioId]).toEqual({ foo: "bar" });
       expect(configById[layout as string]).toEqual({
@@ -116,7 +115,7 @@ describe("layout reducers", () => {
 
       const { configById } = panels;
       const tabs = (configById["Tab!a"] as TabPanelConfig).tabs;
-      expect(tabs.length).toEqual(1);
+      expect(tabs).toHaveLength(1);
     });
   });
 
@@ -168,7 +167,7 @@ describe("layout reducers", () => {
       expect(configById["Audio!a"]).toEqual({ foo: "bar" });
       const { activeTabIdx, tabs } = configById[layout.second as string] as TabPanelConfig;
       expect(activeTabIdx).toEqual(0);
-      expect(tabs.length).toEqual(1);
+      expect(tabs).toHaveLength(1);
       expect(tabs[0]?.title).toEqual("A");
 
       expect(tabs[0]?.layout).toBeUndefined();
@@ -196,7 +195,7 @@ describe("layout reducers", () => {
       const tabs = (configById["Tab!a"] as TabPanelConfig).tabs;
       expect(tabs[0]!.title).toEqual("A");
       expect(getPanelTypeFromId(tabs[0]!.layout as string)).toEqual("Audio");
-      expect(tabs.length).toEqual(3);
+      expect(tabs).toHaveLength(3);
     });
     it("drops panel into nested Tab layout", () => {
       let panels: LayoutData = {
@@ -222,7 +221,7 @@ describe("layout reducers", () => {
       expect(layout).toEqual("Tab!a");
       expect(configById["Tab!a"]).toEqual(originalLayout.configById["Tab!a"]);
       const tabBTabs = (configById["Tab!b"] as TabPanelConfig).tabs;
-      expect(tabBTabs.length).toEqual(1);
+      expect(tabBTabs).toHaveLength(1);
       expect((tabBTabs[0]!.layout as MosaicParent<string>).first).toEqual("Plot!a");
       expect(
         getPanelTypeFromId((tabBTabs[0]!.layout as MosaicParent<string>).second as string),
@@ -301,7 +300,7 @@ describe("layout reducers", () => {
       payload: { root: "Audio!a", path: [] },
     });
     const { layout, configById } = panels;
-    expect(layout).toEqual(undefined);
+    expect(layout).toBeUndefined();
     expect(configById).toEqual({});
   });
 
@@ -752,7 +751,7 @@ describe("layout reducers", () => {
       const { configById } = panels;
       const layout = panels.layout as string;
       expect(getPanelTypeFromId(layout)).toEqual("RawMessages");
-      expect(configById["Audio!a"]).toEqual(undefined);
+      expect(configById["Audio!a"]).toBeUndefined();
       expect(configById[layout]).toEqual(rawMessagesConfig);
     });
 
@@ -1451,7 +1450,7 @@ describe("layout reducers", () => {
           panelId: "Audio!a",
           sourceTabId: undefined,
           targetTabId: undefined,
-          position: undefined as unknown as MosaicDropTargetPosition,
+          position: undefined,
           destinationPath: ["second"],
           ownPath: ["first"],
         },

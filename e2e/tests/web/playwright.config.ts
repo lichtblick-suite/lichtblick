@@ -19,7 +19,7 @@ export default defineConfig({
   timeout: 30 * 1000,
   testDir: "./",
   webServer: {
-    command: "yarn web:serve",
+    command: "DISABLE_OVERLAY=true yarn web:serve",
     url: URL,
     timeout: 3 * 60 * 1000,
   },

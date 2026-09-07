@@ -21,6 +21,7 @@ import type { VerticalBarsProps, Scale } from "./types";
  *
  * This is a separate component in order to limit the scope of what needs to re-render when time and scale change.
  */
+// eslint-disable-next-line @typescript-eslint/no-shadow
 export const VerticalBars = React.memo(function VerticalBars({
   coordinator,
   hoverComponentId,

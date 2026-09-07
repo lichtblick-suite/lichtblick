@@ -18,11 +18,12 @@ describe("structureAllItemsByPath", () => {
   let mockNoMultiSlices: boolean;
   let mockValidTypes: string[];
   let mockTopics: Topic[];
+  const mockPropertyKey = BasicBuilder.string();
   const mockMessagePathStructureItemMessage: MessagePathStructureItemMessage = {
     structureType: "message",
     datatype: BasicBuilder.string(),
     nextByName: {
-      property: {
+      [mockPropertyKey]: {
         structureType: "primitive",
         primitiveType: "string",
         datatype: "string",
@@ -84,12 +85,14 @@ describe("structureAllItemsByPath", () => {
     (messagePathsForStructure as jest.Mock).mockImplementation(
       (): MessagePathsForStructure => [
         {
-          path: ".property",
-          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+          path: `.${mockPropertyKey}`,
+          terminatingStructureItem:
+            mockMessagePathStructureItemMessage.nextByName[mockPropertyKey]!,
         },
         {
-          path: ".property_2",
-          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+          path: `.${mockPropertyKey}_2`,
+          terminatingStructureItem:
+            mockMessagePathStructureItemMessage.nextByName[mockPropertyKey]!,
         },
       ],
     );
@@ -111,16 +114,19 @@ describe("structureAllItemsByPath", () => {
     (messagePathsForStructure as jest.Mock).mockImplementation(
       (): MessagePathsForStructure => [
         {
-          path: ".property",
-          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+          path: `.${mockPropertyKey}`,
+          terminatingStructureItem:
+            mockMessagePathStructureItemMessage.nextByName[mockPropertyKey]!,
         },
         {
-          path: ".property", // Duplicated should be ignored
-          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+          path: `.${mockPropertyKey}`, // Duplicated should be ignored
+          terminatingStructureItem:
+            mockMessagePathStructureItemMessage.nextByName[mockPropertyKey]!,
         },
         {
           path: "", // Empty path should be ignored
-          terminatingStructureItem: mockMessagePathStructureItemMessage.nextByName.property!,
+          terminatingStructureItem:
+            mockMessagePathStructureItemMessage.nextByName[mockPropertyKey]!,
         },
       ],
     );
@@ -134,5 +140,81 @@ describe("structureAllItemsByPath", () => {
 
     // Each topic should yield only one paths, for .property. For the second .property and the empty, it should be ignored.
     expect(result.size).toBe(mockTopics.length);
+  });
+  it("keys entries by the quoted topic name concatenated with the path", () => {
+    const topic = PlayerBuilder.topic();
+    mockMessagePathStructuresForDataype = {
+      [topic.schemaName!]: mockMessagePathStructureItemMessage,
+    };
+    (messagePathsForStructure as jest.Mock).mockImplementation(
+      (): MessagePathsForStructure => [
+        {
+          path: `.${mockPropertyKey}`,
+          terminatingStructureItem:
+            mockMessagePathStructureItemMessage.nextByName[mockPropertyKey]!,
+        },
+      ],
+    );
+
+    const result = structureAllItemsByPath({
+      messagePathStructuresForDataype: mockMessagePathStructuresForDataype,
+      topics: [topic],
+    });
+
+    const expectedKey = `${topic.name}.${mockPropertyKey}`;
+
+    expect([...result.keys()]).toEqual([expectedKey]);
+    expect(result.get(expectedKey)).toBe(
+      mockMessagePathStructureItemMessage.nextByName[mockPropertyKey],
+    );
+  });
+
+  it("produces entries for multiple topics that share the same schemaName", () => {
+    const sharedSchemaName = BasicBuilder.string();
+    const topicA = PlayerBuilder.topic({ schemaName: sharedSchemaName });
+    const topicB = PlayerBuilder.topic({ schemaName: sharedSchemaName });
+    mockMessagePathStructuresForDataype = {
+      [sharedSchemaName]: mockMessagePathStructureItemMessage,
+    };
+    (messagePathsForStructure as jest.Mock).mockImplementation(
+      (): MessagePathsForStructure => [
+        {
+          path: `.${mockPropertyKey}`,
+          terminatingStructureItem:
+            mockMessagePathStructureItemMessage.nextByName[mockPropertyKey]!,
+        },
+      ],
+    );
+
+    const result = structureAllItemsByPath({
+      messagePathStructuresForDataype: mockMessagePathStructuresForDataype,
+      topics: [topicA, topicB],
+    });
+
+    expect([...result.keys()].sort()).toEqual(
+      [`${topicA.name}.${mockPropertyKey}`, `${topicB.name}.${mockPropertyKey}`].sort(),
+    );
+  });
+
+  it("forwards validTypes and noMultiSlices to messagePathsForStructure", () => {
+    const topic = PlayerBuilder.topic();
+    const mockValidType = BasicBuilder.string();
+    const mockNoMultiSlicesValue = BasicBuilder.boolean();
+    mockMessagePathStructuresForDataype = {
+      [topic.schemaName!]: mockMessagePathStructureItemMessage,
+    };
+    (messagePathsForStructure as jest.Mock).mockImplementation((): MessagePathsForStructure => []);
+
+    structureAllItemsByPath({
+      noMultiSlices: mockNoMultiSlicesValue,
+      validTypes: [mockValidType],
+      messagePathStructuresForDataype: mockMessagePathStructuresForDataype,
+      topics: [topic],
+    });
+
+    expect(messagePathsForStructure).toHaveBeenCalledWith(mockMessagePathStructureItemMessage, {
+      validTypes: [mockValidType],
+      noMultiSlices: mockNoMultiSlicesValue,
+    });
   });
 });

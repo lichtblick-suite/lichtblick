@@ -87,26 +87,28 @@ describe("memoryEstimationBySchema", () => {
     { numFloats: 550, numInts: 550, measuredSize: 31220, tolerancePercent: 5 },
     { numFloats: 1000, numInts: 1000, measuredSize: 61196, tolerancePercent: 5 },
     { numFloats: 2000, numInts: 2000, measuredSize: 122348, tolerancePercent: 5 },
-  ])(
-    "matches the size of objects with int + double fields measured with chrome devtools",
-    ({ numFloats, numInts, measuredSize, tolerancePercent }) => {
-      const datatypes = new Map([
-        [
-          "SomeType",
-          {
-            definitions: [
-              ...new Array(numInts).fill({ type: "int16", name: "field" }),
-              ...new Array(numFloats).fill({ type: "float64", name: "field" }),
-            ],
-          },
-        ],
-      ]);
-      const sizeInBytes = estimateMessageObjectSize(datatypes, "SomeType", new Map());
-      expect(Math.abs(sizeInBytes - measuredSize)).toBeLessThanOrEqual(
-        measuredSize * (tolerancePercent / 100),
-      );
-    },
-  );
+  ])("matches the size of objects with int + double fields measured with chrome devtools", ({
+    numFloats,
+    numInts,
+    measuredSize,
+    tolerancePercent,
+  }) => {
+    const datatypes = new Map([
+      [
+        "SomeType",
+        {
+          definitions: [
+            ...new Array(numInts).fill({ type: "int16", name: "field" }),
+            ...new Array(numFloats).fill({ type: "float64", name: "field" }),
+          ],
+        },
+      ],
+    ]);
+    const sizeInBytes = estimateMessageObjectSize(datatypes, "SomeType", new Map());
+    expect(Math.abs(sizeInBytes - measuredSize)).toBeLessThanOrEqual(
+      measuredSize * (tolerancePercent / 100),
+    );
+  });
 
   it("sum of field sizes matches total object size", () => {
     const datatypes = new Map([

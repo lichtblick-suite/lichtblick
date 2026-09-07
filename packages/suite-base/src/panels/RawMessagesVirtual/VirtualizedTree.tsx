@@ -20,6 +20,7 @@ import {
 import { useStyles } from "./VirtualizedTree.style";
 import { flattenTreeData } from "./flattenTreeData";
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 export const VirtualizedTree = memo(function VirtualizedTree({
   data,
   expandedNodes,
@@ -31,8 +32,13 @@ export const VirtualizedTree = memo(function VirtualizedTree({
 
   const parentRef = useRef<HTMLDivElement>(null);
 
+  // Cache typed-array → regular-array conversions so Array.from() is called at most
+  // once per unique typed array object across re-renders caused by node expand/collapse.
+
+  const typedArrayCache = useRef(new WeakMap<object, unknown[]>());
+
   const flatData = useMemo(() => {
-    return flattenTreeData(data, expandedNodes);
+    return flattenTreeData(data, expandedNodes, "", 0, [], typedArrayCache.current);
   }, [data, expandedNodes]);
 
   const getScrollElement = useCallback(() => parentRef.current, []);

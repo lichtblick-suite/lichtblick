@@ -7,7 +7,7 @@
 
 /* eslint-disable filenames/match-exported */
 
-import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
+import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api.js";
 
 const theme: monacoApi.editor.IStandaloneThemeData = {
   base: "vs",

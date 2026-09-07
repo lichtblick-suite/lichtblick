@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import "@testing-library/jest-dom";
-import { render } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
@@ -17,6 +17,9 @@ import { useMultiSelection } from "./useMultiSelection";
 import { TopicListItem, useTopicListSearch } from "./useTopicListSearch";
 
 // Mock dependencies
+jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
+  useDataSourceInfo: jest.fn().mockReturnValue({ topics: [], datatypes: {} }),
+}));
 jest.mock("@lichtblick/suite-base/components/MessagePipeline");
 jest.mock("./useTopicListSearch");
 jest.mock("./useMultiSelection", () => ({
@@ -37,6 +40,52 @@ jest.mock(
 );
 jest.mock("@lichtblick/suite-base/components/DirectTopicStatsUpdater", () => ({
   DirectTopicStatsUpdater: () => undefined,
+}));
+jest.mock("react-virtualized-auto-sizer", () => ({
+  __esModule: true,
+  default: ({
+    children,
+  }: {
+    children: (size: { width: number; height: number }) => React.ReactNode;
+  }) => <>{children({ width: 800, height: 600 })}</>,
+}));
+// Lightweight stand-ins so renderRow branches execute without full component trees
+jest.mock("./TopicRow", () => ({
+  TopicRow: ({
+    topicResult,
+    onClick,
+    onContextMenu,
+  }: {
+    topicResult: { item: { name: string } };
+    onClick?: React.MouseEventHandler;
+    onContextMenu?: React.MouseEventHandler;
+  }) => (
+    <div data-testid="topic-row" onClick={onClick} onContextMenu={onContextMenu}>
+      {topicResult.item.name}
+    </div>
+  ),
+}));
+jest.mock("./MessagePathRow", () => ({
+  MessagePathRow: ({
+    messagePathResult,
+    onClick,
+    onContextMenu,
+  }: {
+    messagePathResult: { item: { path: string } };
+    onClick?: React.MouseEventHandler;
+    onContextMenu?: React.MouseEventHandler;
+  }) => (
+    <div data-testid="schema-row" onClick={onClick} onContextMenu={onContextMenu}>
+      {messagePathResult.item.path}
+    </div>
+  ),
+}));
+jest.mock("@lichtblick/suite-base/components/TopicList/ContextMenu", () => ({
+  ContextMenu: ({ onClose }: { onClose: () => void }) => (
+    <div data-testid="context-menu">
+      <button onClick={onClose}>close</button>
+    </div>
+  ),
 }));
 
 const mockUseMessagePipeline = (playerPresence: PlayerPresence) => {
@@ -67,6 +116,127 @@ describe("TopicList Component", () => {
     const { getByPlaceholderText, getAllByRole } = setup(PlayerPresence.INITIALIZING);
     expect(getByPlaceholderText("Waiting for data…")).toBeInTheDocument();
     expect(getAllByRole("listitem")).toHaveLength(16);
+  });
+
+  it("renders EmptyState with 'no topics' when PRESENT and treeItems is empty", () => {
+    (useTopicListSearch as jest.Mock).mockReturnValue([]);
+    setup(PlayerPresence.PRESENT);
+    expect(screen.getByText(/No topics available/)).toBeInTheDocument();
+  });
+
+  it("renders EmptyState with reconnecting message when RECONNECTING", () => {
+    (useTopicListSearch as jest.Mock).mockReturnValue([]);
+    setup(PlayerPresence.RECONNECTING);
+    expect(screen.getByText(/Waiting for connection/)).toBeInTheDocument();
+  });
+  it("renders VirtualList with TopicRow when PRESENT and treeItems has topic items", () => {
+    const topicItem: TopicListItem = {
+      type: "topic",
+      item: {
+        item: { name: "/test/topic", schemaName: "std_msgs/String" },
+        score: 0,
+        positions: new Set<number>(),
+        start: 0,
+        end: 0,
+      },
+    };
+    (useTopicListSearch as jest.Mock).mockReturnValue([topicItem]);
+    setup(PlayerPresence.PRESENT);
+    expect(screen.getByTestId("topic-row")).toBeInTheDocument();
+    expect(screen.getByText("/test/topic")).toBeInTheDocument();
+  });
+
+  it("renders VirtualList with MessagePathRow when PRESENT and treeItems has schema items", () => {
+    const schemaItem: TopicListItem = {
+      type: "schema",
+      item: {
+        item: { path: "/test/topic.field", topic: "/test/topic" } as never,
+        score: 0,
+        positions: new Set<number>(),
+        start: 0,
+        end: 0,
+      },
+    };
+    (useTopicListSearch as jest.Mock).mockReturnValue([schemaItem]);
+    setup(PlayerPresence.PRESENT);
+    expect(screen.getByTestId("schema-row")).toBeInTheDocument();
+  });
+
+  it("shows filter-no-match EmptyState when PRESENT with filter text and empty results", () => {
+    (useTopicListSearch as jest.Mock).mockReturnValue([]);
+    setup(PlayerPresence.PRESENT);
+
+    const searchInput = screen.getByRole("textbox");
+    fireEvent.change(searchInput, { target: { value: "nomatch" } });
+
+    // undebouncedFilterText is set immediately; the EmptyState switches to the
+    // filter-no-match message before the debounce fires.
+    expect(screen.getByText(/No topics or datatypes matching/)).toBeInTheDocument();
+  });
+
+  it("calls onSelect when a topic row is clicked", () => {
+    const onSelect = jest.fn();
+    (useMultiSelection as jest.Mock).mockReturnValue({
+      selectedIndexes: new Set(),
+      onSelect,
+      getSelectedIndexes: jest.fn().mockReturnValue(new Set()),
+    });
+    const topicItem: TopicListItem = {
+      type: "topic",
+      item: {
+        item: { name: "/click/topic", schemaName: "std_msgs/String" },
+        score: 0,
+        positions: new Set<number>(),
+        start: 0,
+        end: 0,
+      },
+    };
+    (useTopicListSearch as jest.Mock).mockReturnValue([topicItem]);
+    setup(PlayerPresence.PRESENT);
+
+    fireEvent.click(screen.getByTestId("topic-row"));
+
+    expect(onSelect).toHaveBeenCalledWith({ index: 0, modKey: false, shiftKey: false });
+  });
+
+  it("opens context menu on right-click of a topic row", () => {
+    const topicItem: TopicListItem = {
+      type: "topic",
+      item: {
+        item: { name: "/ctx/topic", schemaName: "std_msgs/String" },
+        score: 0,
+        positions: new Set<number>(),
+        start: 0,
+        end: 0,
+      },
+    };
+    (useTopicListSearch as jest.Mock).mockReturnValue([topicItem]);
+    setup(PlayerPresence.PRESENT);
+
+    fireEvent.contextMenu(screen.getByTestId("topic-row"));
+
+    expect(screen.getByTestId("context-menu")).toBeInTheDocument();
+  });
+
+  it("closes context menu when onClose is triggered", () => {
+    const topicItem: TopicListItem = {
+      type: "topic",
+      item: {
+        item: { name: "/ctx/topic", schemaName: "std_msgs/String" },
+        score: 0,
+        positions: new Set<number>(),
+        start: 0,
+        end: 0,
+      },
+    };
+    (useTopicListSearch as jest.Mock).mockReturnValue([topicItem]);
+    setup(PlayerPresence.PRESENT);
+
+    fireEvent.contextMenu(screen.getByTestId("topic-row"));
+    expect(screen.getByTestId("context-menu")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("close"));
+    expect(screen.queryByTestId("context-menu")).not.toBeInTheDocument();
   });
 });
 

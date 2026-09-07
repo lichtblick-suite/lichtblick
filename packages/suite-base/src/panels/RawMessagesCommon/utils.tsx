@@ -165,6 +165,25 @@ export function getConstantNameByKeyPath(
   return undefined;
 }
 
+/**
+ * Converts a typed array (e.g. Float32Array, Uint8Array) to a plain JS array,
+ * using a WeakMap cache so Array.from() is called at most once per unique instance.
+ * Pass a fresh `WeakMap` (e.g. from a `useRef`) to scope the cache lifetime.
+ * Returns non-typed-array values unchanged.
+ */
+export function typedArrayToArray(val: unknown, cache: WeakMap<object, unknown[]>): unknown {
+  if (!(ArrayBuffer.isView(val) && !(val instanceof DataView))) {
+    return val;
+  }
+  const cached = cache.get(val);
+  if (cached != undefined) {
+    return cached;
+  }
+  const converted = Array.from(val as unknown as ArrayLike<unknown>);
+  cache.set(val, converted);
+  return converted;
+}
+
 export const isSingleElemArray = (obj: unknown): obj is unknown[] => {
   if (!Array.isArray(obj)) {
     return false;

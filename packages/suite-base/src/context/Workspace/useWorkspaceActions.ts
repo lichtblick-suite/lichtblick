@@ -47,6 +47,11 @@ export type WorkspaceActions = {
     finishTour: (tour: string) => void;
   };
 
+  layoutBrowserActions: {
+    setPersonalSectionExpanded: Dispatch<SetStateAction<boolean>>;
+    setSharedSectionExpanded: Dispatch<SetStateAction<boolean>>;
+  };
+
   openAccountSettings: () => void;
   openPanelSettings: () => void;
   openLayoutBrowser: () => void;
@@ -153,6 +158,26 @@ export function useWorkspaceActions(): WorkspaceActions {
           });
         },
       },
+
+      layoutBrowserActions: {
+        setPersonalSectionExpanded: (setter: SetStateAction<boolean>) => {
+          set((draft) => {
+            draft.layoutBrowser.expandedSections.personal = setterValue(
+              setter,
+              draft.layoutBrowser.expandedSections.personal,
+            );
+          });
+        },
+        setSharedSectionExpanded: (setter: SetStateAction<boolean>) => {
+          set((draft) => {
+            draft.layoutBrowser.expandedSections.shared = setterValue(
+              setter,
+              draft.layoutBrowser.expandedSections.shared,
+            );
+          });
+        },
+      },
+
       openAccountSettings: () => {},
       openPanelSettings: () => {
         set((draft) => {

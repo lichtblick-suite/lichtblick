@@ -15,9 +15,18 @@ type Matrix3 = [number, number, number, number, number, number, number, number, 
 
 // prettier-ignore
 type Matrix3x4 = [
-  number, number, number, number,
-  number, number, number, number,
-  number, number, number, number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
 ];
 
 type Vec8 = [number, number, number, number, number, number, number, number];

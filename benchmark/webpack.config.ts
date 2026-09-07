@@ -12,8 +12,8 @@ import path from "path";
 import { Configuration, WebpackPluginInstance } from "webpack";
 import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 
-import type { WebpackArgv } from "@lichtblick/suite-base/WebpackArgv";
-import { makeConfig } from "@lichtblick/suite-base/webpack";
+import type { WebpackArgv } from "../packages/suite-base/WebpackArgv";
+import { makeConfig } from "../packages/suite-base/webpack";
 
 interface WebpackConfiguration extends Configuration {
   devServer?: WebpackDevServerConfiguration;

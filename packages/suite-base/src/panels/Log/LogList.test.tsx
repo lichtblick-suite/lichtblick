@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { userEvent } from "@storybook/testing-library";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
@@ -49,17 +49,33 @@ jest.mock("react-resize-detector", () => ({
 }));
 
 describe("LogList Component", () => {
+  let originalClientHeight: PropertyDescriptor | undefined;
+
   beforeEach(() => {
     jest.spyOn(console, "error").mockImplementation(() => {});
     (useAppTimeFormat as jest.Mock).mockReturnValue({
       timeFormat: "SEC",
       timeZone: "UTC",
     });
+    // In JSDOM clientHeight is always 0, which makes the v2 List skip row 0
+    // (all heights collapse to 0, shifting startIndexOverscan past row 0).
+    // Return DEFAULT_ROW_HEIGHT (12px) so the layout stays consistent with
+    // what the component would produce in a real browser.
+    originalClientHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientHeight");
+    Object.defineProperty(HTMLElement.prototype, "clientHeight", {
+      configurable: true,
+      get() {
+        return 12;
+      },
+    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
     cleanup();
+    if (originalClientHeight) {
+      Object.defineProperty(HTMLElement.prototype, "clientHeight", originalClientHeight);
+    }
   });
 
   function setup(items: NormalizedLogMessage[] = []) {
@@ -136,5 +152,67 @@ describe("LogList Component", () => {
     expect(virtualizedList.textContent).toContain("INFO");
     expect(virtualizedList.textContent).toContain("WARN");
     expect(virtualizedList.textContent).toContain("ERROR");
+  });
+
+  describe("scroll behavior", () => {
+    function scrollTo(
+      element: HTMLElement,
+      {
+        scrollTop,
+        offsetHeight,
+        scrollHeight,
+      }: { scrollTop: number; offsetHeight: number; scrollHeight: number },
+    ) {
+      Object.defineProperty(element, "scrollTop", { configurable: true, value: scrollTop });
+      Object.defineProperty(element, "offsetHeight", { configurable: true, value: offsetHeight });
+      Object.defineProperty(element, "scrollHeight", { configurable: true, value: scrollHeight });
+      fireEvent.scroll(element);
+    }
+
+    it("shows scroll-to-bottom button when scrolled away from end", () => {
+      const items = Array.from({ length: 5 }, (_, i) => createMockLogMessage(i, 2));
+      setup(items);
+
+      expect(screen.queryByTestId("scroll-to-bottom-button")).not.toBeInTheDocument();
+
+      scrollTo(screen.getByTestId("scrollable-list"), {
+        scrollTop: 0,
+        offsetHeight: 100,
+        scrollHeight: 1000,
+      });
+
+      expect(screen.getByTestId("scroll-to-bottom-button")).toBeInTheDocument();
+    });
+
+    it("hides scroll-to-bottom button when scrolled back to end", () => {
+      const items = Array.from({ length: 5 }, (_, i) => createMockLogMessage(i, 2));
+      setup(items);
+
+      const list = screen.getByTestId("scrollable-list");
+
+      scrollTo(list, { scrollTop: 0, offsetHeight: 100, scrollHeight: 1000 });
+      expect(screen.getByTestId("scroll-to-bottom-button")).toBeInTheDocument();
+
+      scrollTo(list, { scrollTop: 900, offsetHeight: 100, scrollHeight: 1000 });
+      expect(screen.queryByTestId("scroll-to-bottom-button")).not.toBeInTheDocument();
+    });
+
+    it("clicking scroll-to-bottom button restores autoscroll and hides button", async () => {
+      const items = Array.from({ length: 5 }, (_, i) => createMockLogMessage(i, 2));
+      const { user } = setup(items);
+
+      scrollTo(screen.getByTestId("scrollable-list"), {
+        scrollTop: 0,
+        offsetHeight: 100,
+        scrollHeight: 1000,
+      });
+
+      const button = screen.getByTestId("scroll-to-bottom-button");
+      expect(button).toBeInTheDocument();
+
+      await user.click(button);
+
+      expect(screen.queryByTestId("scroll-to-bottom-button")).not.toBeInTheDocument();
+    });
   });
 });

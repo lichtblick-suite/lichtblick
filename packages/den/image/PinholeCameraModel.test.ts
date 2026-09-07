@@ -89,18 +89,10 @@ function makeCameraInfo(
   return {
     D,
     // prettier-ignore
-    K: [
-      fx, 0, cx,
-      0, fy, cy,
-      0, 0, 1,
-    ],
+    K: [fx, 0, cx, 0, fy, cy, 0, 0, 1],
     R: [1, 0, 0, 0, 1, 0, 0, 0, 1],
     // prettier-ignore
-    P: [
-      fx, 0, cx, 0,
-      0, fy, cy, 0,
-      0,  0,  1, 0,
-    ],
+    P: [fx, 0, cx, 0, 0, fy, cy, 0, 0, 0, 1, 0],
     width,
     height,
     binning_x: 0,

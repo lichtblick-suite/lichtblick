@@ -22,19 +22,29 @@ import {
 } from "@lichtblick/suite-base/components/SettingsTreeEditor/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-let capturedActionHandler: (action: SettingsTreeAction) => void;
+// Keyed by the last path segment (e.g. "visibilityFilter", "textFilter") since multiple
+// FieldEditor mocks can be rendered at once for a single NodeEditor.
+const capturedActionHandlers: Record<string, (action: SettingsTreeAction) => void> = {};
 
 jest.mock("@lichtblick/suite-base/components/SettingsTreeEditor/FieldEditor", () => ({
   FieldEditor: (props: FieldEditorProps) => {
-    capturedActionHandler = props.actionHandler;
-    return <div />; // Simple mock because UI does not matter here
+    const key = props.path[props.path.length - 1] ?? "";
+    capturedActionHandlers[key] = props.actionHandler;
+    return <div data-testid={`FieldEditor-${key}`} />;
   },
 }));
 
 const changeVisibilityFilter = (visibility: SelectVisibilityFilterValue) => {
-  capturedActionHandler({
+  capturedActionHandlers.visibilityFilter?.({
     action: "update",
     payload: { input: "select", value: visibility, path: ["topics", "visibilityFilter"] },
+  });
+};
+
+const changeTextFilter = (value: string) => {
+  capturedActionHandlers.textFilter?.({
+    action: "update",
+    payload: { input: "string", value, path: ["topics", "textFilter"] },
   });
 };
 
@@ -132,41 +142,107 @@ describe("NodeEditor childNodes filtering", () => {
   it("all nodes should be visible at start", async () => {
     await renderComponent();
 
-    expect(screen.queryByText(nodes[0])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[1])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[0])).toBeInTheDocument();
+    expect(screen.getByText(nodes[1])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
   });
 
   it("should list only the selected option filter", async () => {
     await renderComponent();
 
-    expect(screen.queryByText(nodes[0])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[1])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[0])).toBeInTheDocument();
+    expect(screen.getByText(nodes[1])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
 
     act(() => {
       changeVisibilityFilter("visible");
     });
 
-    expect(screen.queryByText(nodes[0])).toBeInTheDocument();
+    expect(screen.getByText(nodes[0])).toBeInTheDocument();
     expect(screen.queryByText(nodes[1])).not.toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
 
     act(() => {
       changeVisibilityFilter("invisible");
     });
 
     expect(screen.queryByText(nodes[0])).not.toBeInTheDocument();
-    expect(screen.queryByText(nodes[1])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[1])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
 
     act(() => {
       changeVisibilityFilter("all");
     });
 
-    expect(screen.queryByText(nodes[0])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[1])).toBeInTheDocument();
-    expect(screen.queryByText(nodes[2])).toBeInTheDocument();
+    expect(screen.getByText(nodes[0])).toBeInTheDocument();
+    expect(screen.getByText(nodes[1])).toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
+  });
+
+  it("does not show the text filter field when enableVisibilityFilter is not set, even with children", async () => {
+    const label = BasicBuilder.string();
+    const childLabel = BasicBuilder.string();
+
+    await renderComponent({
+      settings: { label, children: { child1: { label: childLabel } } },
+    });
+
+    expect(screen.queryByTestId("FieldEditor-textFilter")).not.toBeInTheDocument();
+  });
+
+  it("shows the text filter field when enableVisibilityFilter is set and the node has children", async () => {
+    await renderComponent();
+
+    expect(screen.getByTestId("FieldEditor-textFilter")).toBeInTheDocument();
+  });
+
+  it("filters through the already visibility-filtered options when text filter is applied", async () => {
+    await renderComponent();
+
+    act(() => {
+      changeVisibilityFilter("visible");
+    });
+
+    act(() => {
+      changeTextFilter(nodes[2]);
+    });
+
+    // nodes[1] is excluded by the visibility filter, and nodes[0] doesn't match the text filter.
+    expect(screen.queryByText(nodes[0])).not.toBeInTheDocument();
+    expect(screen.queryByText(nodes[1])).not.toBeInTheDocument();
+    expect(screen.getByText(nodes[2])).toBeInTheDocument();
+  });
+
+  it("recursively filters descendants by text, keeping ancestors of matches", async () => {
+    const grandchildLabel = BasicBuilder.string();
+    const matchingChildLabel = BasicBuilder.string();
+    const nonMatchingChildLabel = BasicBuilder.string();
+
+    const settings: Immutable<SettingsTreeNode> = {
+      label: "root",
+      enableVisibilityFilter: true,
+      children: {
+        branchA: {
+          label: matchingChildLabel,
+          children: {
+            grandchild: { label: grandchildLabel },
+          },
+        },
+        branchB: {
+          label: nonMatchingChildLabel,
+        },
+      },
+    };
+
+    await renderComponent({ settings });
+
+    act(() => {
+      changeTextFilter(grandchildLabel);
+    });
+
+    expect(screen.getByText(matchingChildLabel)).toBeInTheDocument();
+    expect(screen.getByText(grandchildLabel)).toBeInTheDocument();
+    expect(screen.queryByText(nonMatchingChildLabel)).not.toBeInTheDocument();
   });
 
   it("calls actionHandler with toggled visibility", async () => {
@@ -300,7 +376,7 @@ describe("NodeEditor childNodes filtering", () => {
 
     // Then: Node remains expanded and still in editing mode
     expect(screen.getByRole("textbox")).toBeInTheDocument();
-    expect(screen.queryByText(childLabel)).toBeInTheDocument();
+    expect(screen.getByText(childLabel)).toBeInTheDocument();
   });
 
   it("renders icon when icon is set and not a drag handle", async () => {

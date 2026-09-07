@@ -29,7 +29,7 @@ import type {
 } from "./TimestampDatasetsBuilderImpl";
 import { buildCurrentSeriesActions, buildFullSeriesActions } from "./utils";
 import { MATH_FUNCTIONS } from "../constants";
-import { getChartValue, isChartValue } from "../utils/datum";
+import { resolveChartDatum } from "../utils/datum";
 import { MathFunction } from "../utils/mathFunctions";
 
 // If the datasets builder is garbage collected we also need to cleanup the worker
@@ -89,7 +89,7 @@ export class TimestampDatasetsBuilder implements IDatasetsBuilder {
     if (!this.#hasRangeSource && msgEvents.length > 0) {
       const { actions: seriesActions, datasetsChanged: seriesChanged } = buildCurrentSeriesActions(
         this.#series,
-        { didSeek },
+        { didSeek, hasRangeSource: this.#hasRangeSource },
         (config) => {
           const mathFn = config.parsed.modifier
             ? MATH_FUNCTIONS[config.parsed.modifier]
@@ -178,11 +178,8 @@ function readMessagePathItems(
 
     const items = simpleGetMessagePathDataItems(event, path);
     for (const item of items) {
-      if (!isChartValue(item)) {
-        continue;
-      }
-      const chartValue = getChartValue(item);
-      if (chartValue == undefined) {
+      const datum = resolveChartDatum(item, mathFunction);
+      if (!datum) {
         continue;
       }
 
@@ -193,13 +190,12 @@ function readMessagePathItems(
       }
 
       const xValue = toSec(subtractTime(timestamp, startTime));
-      const mathModified = mathFunction ? mathFunction(chartValue) : chartValue;
       out.push({
         x: xValue,
-        y: mathModified,
+        y: datum.y,
         receiveTime: event.receiveTime,
         headerStamp,
-        value: mathFunction ? mathModified : item,
+        value: datum.value,
       });
     }
   }

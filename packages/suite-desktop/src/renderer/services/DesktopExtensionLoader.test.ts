@@ -75,13 +75,13 @@ describe("DesktopExtensionLoader", () => {
       const extensions: DesktopExtension[] = [
         {
           id: genericString(),
-          packageJson: { displayName: genericString() } as ExtensionInfo,
+          packageJson: { displayName: genericString() },
           readme: genericString(),
           changelog: genericString(),
         } as DesktopExtension,
         {
           id: genericString(),
-          packageJson: { displayName: genericString() } as ExtensionInfo,
+          packageJson: { displayName: genericString() },
           readme: genericString(),
           changelog: genericString(),
         } as DesktopExtension,
@@ -152,7 +152,7 @@ describe("DesktopExtensionLoader", () => {
       const foxeFileData = new Uint8Array([1, 2, 3]);
       const extension: DesktopExtension = {
         id: genericString(),
-        packageJson: { displayName } as ExtensionInfo,
+        packageJson: { displayName },
         readme: genericString(),
         changelog: genericString(),
       } as DesktopExtension;

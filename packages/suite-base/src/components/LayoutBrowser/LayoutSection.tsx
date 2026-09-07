@@ -5,22 +5,26 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Typography, List } from "@mui/material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { ButtonBase, Collapse, Typography, List } from "@mui/material";
 import { MouseEvent } from "react";
 
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 import LayoutRow from "./LayoutRow";
+import { useLayoutSectionStyles } from "./LayoutSection.style";
 
 export default function LayoutSection({
   title,
   disablePadding = false,
+  expanded = true,
   emptyText,
   items,
   anySelectedModifiedLayouts,
   multiSelectedIds,
   selectedId,
+  onToggleExpanded,
   onSelect,
   onRename,
   onDuplicate,
@@ -33,11 +37,13 @@ export default function LayoutSection({
 }: Readonly<{
   title: string | undefined;
   disablePadding?: boolean;
+  expanded?: boolean;
   emptyText: string | undefined;
   items: readonly Layout[] | undefined;
   anySelectedModifiedLayouts: boolean;
   multiSelectedIds: readonly string[];
   selectedId?: string;
+  onToggleExpanded?: () => void;
   onSelect: (item: Layout, params?: { selectedViaClick?: boolean; event?: MouseEvent }) => void;
   onRename: (item: Layout, newName: string) => void;
   onDuplicate: (item: Layout) => void;
@@ -48,42 +54,56 @@ export default function LayoutSection({
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
 }>): React.JSX.Element {
+  const { classes, cx } = useLayoutSectionStyles();
+
+  const isCollapsible = title != undefined;
+
   return (
     <Stack>
       {title != undefined && (
-        <Stack paddingX={2} paddingY={disablePadding ? 1 : 0}>
+        <ButtonBase
+          className={classes.sectionHeader}
+          onClick={onToggleExpanded}
+          disableRipple
+          data-testid={`layout-section-header-${title}`}
+        >
+          <ArrowDropDownIcon
+            className={cx(classes.arrow, { [classes.arrowCollapsed]: !expanded })}
+          />
           <Typography variant="overline" color="text.secondary">
             {title}
           </Typography>
-        </Stack>
+        </ButtonBase>
       )}
-      <List disablePadding={disablePadding}>
-        {items?.length === 0 && (
-          <Stack paddingX={2}>
-            <Typography variant="body2" color="text.secondary">
-              {emptyText}
-            </Typography>
-          </Stack>
-        )}
-        {items?.map((layout) => (
-          <LayoutRow
-            key={layout.id}
-            layout={layout}
-            anySelectedModifiedLayouts={anySelectedModifiedLayouts}
-            multiSelectedIds={multiSelectedIds}
-            selected={selectedId === layout.id}
-            onSelect={onSelect}
-            onRename={onRename}
-            onDuplicate={onDuplicate}
-            onDelete={onDelete}
-            onShare={onShare}
-            onExport={onExport}
-            onOverwrite={onOverwrite}
-            onRevert={onRevert}
-            onMakePersonalCopy={onMakePersonalCopy}
-          />
-        ))}
-      </List>
+      <Collapse in={!isCollapsible || expanded} unmountOnExit>
+        <List disablePadding={disablePadding}>
+          {items?.length === 0 && (
+            <Stack paddingX={2}>
+              <Typography variant="body2" color="text.secondary">
+                {emptyText}
+              </Typography>
+            </Stack>
+          )}
+          {items?.map((layout) => (
+            <LayoutRow
+              key={layout.id}
+              layout={layout}
+              anySelectedModifiedLayouts={anySelectedModifiedLayouts}
+              multiSelectedIds={multiSelectedIds}
+              selected={selectedId === layout.id}
+              onSelect={onSelect}
+              onRename={onRename}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
+              onShare={onShare}
+              onExport={onExport}
+              onOverwrite={onOverwrite}
+              onRevert={onRevert}
+              onMakePersonalCopy={onMakePersonalCopy}
+            />
+          ))}
+        </List>
+      </Collapse>
     </Stack>
   );
 }

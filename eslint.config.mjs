@@ -182,7 +182,9 @@ export default [
       // show progress while linting; disabled in CI via eslint.config.ci.mjs
       "file-progress/activate": "warn",
 
-      // enabled in eslint.config.ci.mjs
+      // Formatting is handled by Biome (see biome.json), not ESLint. The prettier/prettier
+      // rule is registered by the shared @lichtblick/eslint-plugin base config, so it is
+      // explicitly disabled here and in eslint.config.ci.mjs.
       "prettier/prettier": "off",
       "import/no-self-import": "off",
       "import/no-duplicates": "off",

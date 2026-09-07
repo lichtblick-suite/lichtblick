@@ -6,13 +6,12 @@ import { Locator, Page } from "playwright";
 import { changeToEpochFormat } from "../../../fixtures/change-to-epoch-format";
 import { test, expect } from "../../../fixtures/electron";
 import { loadFiles } from "../../../fixtures/load-files";
+import { PlayerControls } from "../../../page-objects";
 
 const MCAP_FILENAME = "example.mcap";
 
-async function clickPlayblackSlider(mainWindow: Page, fraction: number) {
-  const slider = mainWindow.getByTestId("playback-slider");
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-  const box = await slider.boundingBox();
+async function clickPlayblackSlider(player: PlayerControls, mainWindow: Page, fraction: number) {
+  const box = await player.getSlider().boundingBox();
   if (!box) {
     throw new Error("Slider bounding box not found");
   }
@@ -31,7 +30,7 @@ async function clickPlayblackSlider(mainWindow: Page, fraction: number) {
   const y = box.y + box.height / 2;
 
   await mainWindow.mouse.click(x, y);
-  await waitTimestamp(timestamp);
+  await waitTimestamp(player.getTimestampInput());
 }
 
 async function waitTimestamp(timestamp: Locator): Promise<void> {
@@ -58,23 +57,23 @@ async function waitTimestamp(timestamp: Locator): Promise<void> {
  * THEN the playback time should advance
  */
 
-test("should advance timestamp 100ms when seek forward button is clicked", async ({
-  mainWindow,
-}) => {
+test("should advance timestamp 100ms when seek forward button is clicked", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const player = new PlayerControls(mainWindow);
+
   // Given
   await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
-  const button = mainWindow.getByTestId("seek-forward-button");
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-  const startTime = Number(await timestamp.inputValue());
+  const startTime = await player.getTimestampValue();
 
   // When
-  await button.click(); // seek forwards
+  await player.seekForward();
+  await waitTimestamp(player.getTimestampInput());
 
-  await waitTimestamp(timestamp);
   // Then
-  const elapsedTimestamp = Number(await timestamp.inputValue());
+  const elapsedTimestamp = await player.getTimestampValue();
 
   const diff = Math.abs(elapsedTimestamp - startTime); // 100ms
   expect(diff).toBeLessThanOrEqual(0.11); // 100ms + 10% tolerance
@@ -87,20 +86,23 @@ test("should advance timestamp 100ms when seek forward button is clicked", async
  * THEN the playback time should advance 100ms
  */
 
-test("should advance timestamp 100ms when right arrow key is pressed", async ({ mainWindow }) => {
+test("should advance timestamp 100ms when right arrow key is pressed", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const player = new PlayerControls(mainWindow);
+
   // Given
   await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-  const startTime = Number(await timestamp.inputValue());
+  const startTime = await player.getTimestampValue();
 
   await mainWindow.keyboard.press("ArrowRight"); // seek forwards
-  await waitTimestamp(timestamp);
+  await waitTimestamp(player.getTimestampInput());
 
   // Then
-  const elapsedTimestamp = Number(await timestamp.inputValue());
+  const elapsedTimestamp = await player.getTimestampValue();
 
   const diff = Math.abs(elapsedTimestamp - startTime);
   expect(diff).toBeLessThanOrEqual(0.11); // 100ms + 10% tolerance
@@ -112,23 +114,24 @@ test("should advance timestamp 100ms when right arrow key is pressed", async ({ 
  * THEN the playback time should advance 500ms
  */
 
-test("should advance timestamp 500ms when alt + right arrow key is pressed", async ({
-  mainWindow,
-}) => {
+test("should advance timestamp 500ms when alt + right arrow key is pressed", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const player = new PlayerControls(mainWindow);
+
   // Given
   await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-  const startTime = Number(await timestamp.inputValue());
+  const startTime = await player.getTimestampValue();
 
   await mainWindow.keyboard.down("Alt");
   await mainWindow.keyboard.press("ArrowRight");
-  await waitTimestamp(timestamp);
+  await waitTimestamp(player.getTimestampInput());
 
   // Then
-  const elapsedTimestamp = Number(await timestamp.inputValue());
+  const elapsedTimestamp = await player.getTimestampValue();
 
   const diff = Math.abs(elapsedTimestamp - startTime);
   expect(diff).toBeLessThanOrEqual(0.55); // 500ms + 10% tolerance
@@ -141,25 +144,25 @@ test("should advance timestamp 500ms when alt + right arrow key is pressed", asy
  * THEN the playback time should regress 100ms
  */
 
-test("should regress timestamp 100ms when seek forward backward is clicked", async ({
-  mainWindow,
-}) => {
+test("should regress timestamp 100ms when seek forward backward is clicked", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const player = new PlayerControls(mainWindow);
+
   // Given
   await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
-  const button = mainWindow.getByTestId("seek-backward-button");
 
   // When
-  await clickPlayblackSlider(mainWindow, 0.5); // move slider to middle
+  await clickPlayblackSlider(player, mainWindow, 0.5); // move slider to middle
 
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-  const startTime = Number(await timestamp.inputValue());
+  const startTime = await player.getTimestampValue();
 
-  await button.click();
-  await waitTimestamp(timestamp);
+  await player.seekBackward();
+  await waitTimestamp(player.getTimestampInput());
 
   // Then
-  const elapsedTimestamp = Number(await timestamp.inputValue());
+  const elapsedTimestamp = await player.getTimestampValue();
 
   const diff = Math.abs(elapsedTimestamp - startTime);
   expect(diff).toBeLessThanOrEqual(0.11); // 100ms + 10% tolerance
@@ -172,22 +175,25 @@ test("should regress timestamp 100ms when seek forward backward is clicked", asy
  * THEN the playback time should regress 100ms
  */
 
-test("should regress timestamp 100ms when left arrow key is pressed", async ({ mainWindow }) => {
+test("should regress timestamp 100ms when left arrow key is pressed", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const player = new PlayerControls(mainWindow);
+
   // Given
   await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
-  await clickPlayblackSlider(mainWindow, 0.5); // move slider to middle
+  await clickPlayblackSlider(player, mainWindow, 0.5); // move slider to middle
 
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-  const startTime = Number(await timestamp.inputValue());
+  const startTime = await player.getTimestampValue();
 
   await mainWindow.keyboard.press("ArrowLeft"); // seek backwards
-  await waitTimestamp(timestamp);
+  await waitTimestamp(player.getTimestampInput());
 
   // Then
-  const elapsedTimestamp = Number(await timestamp.inputValue());
+  const elapsedTimestamp = await player.getTimestampValue();
 
   const diff = Math.abs(elapsedTimestamp - startTime);
   expect(diff).toBeLessThanOrEqual(0.11); // 100ms + 10% tolerance
@@ -200,25 +206,26 @@ test("should regress timestamp 100ms when left arrow key is pressed", async ({ m
  * THEN the playback time should regress 500ms
  */
 
-test("should regress timestamp 500ms when alt + left arrow key is pressed", async ({
-  mainWindow,
-}) => {
+test("should regress timestamp 500ms when alt + left arrow key is pressed", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const player = new PlayerControls(mainWindow);
+
   // Given
   await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
-  await clickPlayblackSlider(mainWindow, 0.5); // move slider to middle
+  await clickPlayblackSlider(player, mainWindow, 0.5); // move slider to middle
 
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-  const startTime = Number(await timestamp.inputValue());
+  const startTime = await player.getTimestampValue();
 
   await mainWindow.keyboard.down("Alt");
   await mainWindow.keyboard.press("ArrowLeft");
 
   // Then
-  await waitTimestamp(timestamp);
-  const elapsedTimestamp = Number(await timestamp.inputValue());
+  await waitTimestamp(player.getTimestampInput());
+  const elapsedTimestamp = await player.getTimestampValue();
 
   const diff = Math.abs(elapsedTimestamp - startTime);
   expect(diff).toBeLessThanOrEqual(0.55); // 500ms + 10% tolerance
@@ -231,26 +238,27 @@ test("should regress timestamp 500ms when alt + left arrow key is pressed", asyn
  * THEN the playback time should go to start
  */
 
-test("should foward timestamp to end of slider when alt + right arrow key is pressed less than 500ms from the end", async ({
-  mainWindow,
-}) => {
+test("should foward timestamp to end of slider when alt + right arrow key is pressed less than 500ms from the end", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const player = new PlayerControls(mainWindow);
+
   // Given
   await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-  await clickPlayblackSlider(mainWindow, 1); // move slider to end
-  const startTime = Number(await timestamp.inputValue());
+  await clickPlayblackSlider(player, mainWindow, 1); // move slider to end
+  const startTime = await player.getTimestampValue();
 
-  await clickPlayblackSlider(mainWindow, 0.9); // move slider close to end
+  await clickPlayblackSlider(player, mainWindow, 0.9); // move slider close to end
 
   await mainWindow.keyboard.down("Alt");
   await mainWindow.keyboard.press("ArrowRight");
-  await waitTimestamp(timestamp);
+  await waitTimestamp(player.getTimestampInput());
 
   // Then
-  const elapsedTimestamp = Number(await timestamp.inputValue());
+  const elapsedTimestamp = await player.getTimestampValue();
 
   const diff = Math.abs(elapsedTimestamp - startTime);
   expect(diff).toBeLessThanOrEqual(0.01);
@@ -263,26 +271,27 @@ test("should foward timestamp to end of slider when alt + right arrow key is pre
  * THEN the playback time should go to start
  */
 
-test("should regress timestamp to start of slider alt + left arrow key is pressed less than 500ms from the start", async ({
-  mainWindow,
-}) => {
+test("should regress timestamp to start of slider alt + left arrow key is pressed less than 500ms from the start", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const player = new PlayerControls(mainWindow);
+
   // Given
   await loadFiles({ mainWindow, filenames: MCAP_FILENAME });
   await changeToEpochFormat(mainWindow);
 
   // When
-  const timestamp = mainWindow.getByTestId("PlaybackTime-text").locator("input");
-  await clickPlayblackSlider(mainWindow, 0); // move slider to start
-  const startTime = Number(await timestamp.inputValue());
+  await clickPlayblackSlider(player, mainWindow, 0); // move slider to start
+  const startTime = await player.getTimestampValue();
 
-  await clickPlayblackSlider(mainWindow, 0.1); // move slider close to start
+  await clickPlayblackSlider(player, mainWindow, 0.1); // move slider close to start
 
   await mainWindow.keyboard.down("Alt");
   await mainWindow.keyboard.press("ArrowLeft");
 
   // Then
-  await waitTimestamp(timestamp);
-  const elapsedTimestamp = Number(await timestamp.inputValue());
+  await waitTimestamp(player.getTimestampInput());
+  const elapsedTimestamp = await player.getTimestampValue();
 
   const diff = Math.abs(elapsedTimestamp - startTime);
   expect(diff).toBeLessThanOrEqual(0.01);

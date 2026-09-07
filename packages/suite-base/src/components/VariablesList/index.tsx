@@ -82,7 +82,7 @@ export default function VariablesList(): ReactElement {
           disabled={globalVariables[""] != undefined}
           onClick={() => {
             setGlobalVariables({ "": '""' });
-            void analytics.logEvent(AppEvent.VARIABLE_ADD);
+            analytics.logEvent(AppEvent.VARIABLE_ADD);
           }}
         >
           Add variable

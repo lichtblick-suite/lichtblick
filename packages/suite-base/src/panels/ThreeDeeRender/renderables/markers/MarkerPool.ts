@@ -67,7 +67,7 @@ export class MarkerPool {
   }
 
   public release(renderable: RenderableMarker): void {
-    const type = renderable.userData.marker.type as MarkerType;
+    const type = renderable.userData.marker.type;
     const renderables = this.#renderablesByType.get(type);
     if (!renderables) {
       this.#renderablesByType.set(type, [renderable]);

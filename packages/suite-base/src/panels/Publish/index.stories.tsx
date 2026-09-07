@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { expect } from "@storybook/jest";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 import { userEvent, within } from "@storybook/testing-library";
 import { action } from "storybook/actions";
 

@@ -33,25 +33,25 @@ describe("buildConicGradient", () => {
       height: 100,
       width: 200,
       gaugeAngle: Math.PI / 4,
-      config: config as GaugeConfig,
+      config,
       ...propsOverride,
     };
     return { props };
   }
 
-  it.each([ColorMapConfig.RED_YELLOW_GREEN, ColorMapConfig.RAINBOW])(
-    "should generate a gradient for the RED_YELLOW_GREEN and RAINBOW colormaps",
-    (colorMap) => {
-      const { props } = setup({ colorMap });
-      const colorStops = COLOR_MAPS[colorMap];
+  it.each([
+    ColorMapConfig.RED_YELLOW_GREEN,
+    ColorMapConfig.RAINBOW,
+  ])("should generate a gradient for the RED_YELLOW_GREEN and RAINBOW colormaps", (colorMap) => {
+    const { props } = setup({ colorMap });
+    const colorStops = COLOR_MAPS[colorMap];
 
-      const result = buildConicGradient(props);
+    const result = buildConicGradient(props);
 
-      colorStops.forEach((colorStop) => {
-        expect(result).toContain(colorStop.color);
-      });
-    },
-  );
+    colorStops.forEach((colorStop) => {
+      expect(result).toContain(colorStop.color);
+    });
+  });
 
   it("should generate a gradient for the TURBO colormap", () => {
     const colorMap = ColorMapConfig.TURBO;

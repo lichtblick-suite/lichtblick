@@ -33,7 +33,7 @@ export type LayoutData = {
   layout?: MosaicNode<string>;
   globalVariables: GlobalVariables;
   playbackConfig: PlaybackConfig;
-  userNodes: UserScripts;
+  userNodes?: UserScripts;
   /** @deprecated renamed to configById */
   savedProps?: SavedProps;
   /**

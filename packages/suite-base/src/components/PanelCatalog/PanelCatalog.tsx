@@ -79,6 +79,7 @@ type Props = {
   isMenu?: boolean;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 export const PanelCatalog = forwardRef<HTMLDivElement, Props>(function PanelCatalog(
   props: Props,
   ref,

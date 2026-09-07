@@ -9,6 +9,7 @@ export const stateTransitions = {
   addSeriesButton: "Click to add a series",
   labels: {
     addSeries: "Add series",
+    axisLabel: "Axis label",
     deleteSeries: "Delete series",
     general: "General",
     helpGeneral: "Display a point for every state transition message",

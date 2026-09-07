@@ -17,9 +17,9 @@
 import { InputBase, MenuItem, Select, Typography } from "@mui/material";
 import { produce } from "immer";
 import * as _ from "lodash-es";
-import { CSSProperties, useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList as List } from "react-window";
+import { List, RowComponentProps } from "react-window";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { SettingsTreeAction } from "@lichtblick/suite";
@@ -28,10 +28,7 @@ import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
-import {
-  DiagnosticInfo,
-  DiagnosticStatusConfig,
-} from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
+import { DiagnosticInfo } from "@lichtblick/suite-base/panels/DiagnosticStatus/types";
 import DiagnosticNodeRow from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticNodeRow";
 import { useStyles } from "@lichtblick/suite-base/panels/DiagnosticSummary/DiagnosticSummary.style";
 import {
@@ -81,13 +78,12 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
     (info: DiagnosticInfo) => {
       openSiblingPanel({
         panelType: "DiagnosticStatusPanel",
-        siblingConfigCreator: () =>
-          ({
-            selectedHardwareId: info.status.hardware_id,
-            selectedName: info.status.name,
-            topicToRender,
-            collapsedSections: [],
-          }) as DiagnosticStatusConfig,
+        siblingConfigCreator: () => ({
+          selectedHardwareId: info.status.hardware_id,
+          selectedName: info.status.name,
+          topicToRender,
+          collapsedSections: [],
+        }),
         updateIfExists: true,
       });
     },
@@ -95,7 +91,7 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
   );
 
   const renderRow = useCallback(
-    (renderProps: { data: DiagnosticInfo[]; index: number; style: CSSProperties }) => {
+    (renderProps: RowComponentProps<{ data: DiagnosticInfo[] }>) => {
       const item = renderProps.data[renderProps.index]!;
       return (
         <div
@@ -124,7 +120,7 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
       .map((topic) => topic.name);
 
     // Keeps only the first occurrence of each topic.
-    return _.uniq([...filtered]);
+    return [...new Set(filtered)];
   }, [topics]);
 
   // If the topicToRender is not in the availableTopics, then we should not try to use it
@@ -178,17 +174,16 @@ const DiagnosticSummary = (props: DiagnosticSummaryProps): React.JSX.Element => 
     return (
       <AutoSizer>
         {({ height, width }) => (
-          <List
-            width={width}
-            height={height}
-            style={{ outline: "none" }}
-            itemSize={30}
-            itemData={nodes}
-            itemCount={nodes.length}
-            overscanCount={10}
-          >
-            {renderRow}
-          </List>
+          <div style={{ width, height }}>
+            <List<{ data: DiagnosticInfo[] }>
+              style={{ outline: "none", width, height }}
+              rowHeight={30}
+              rowProps={{ data: nodes }}
+              rowCount={nodes.length}
+              overscanCount={10}
+              rowComponent={renderRow}
+            />
+          </div>
         )}
       </AutoSizer>
     );

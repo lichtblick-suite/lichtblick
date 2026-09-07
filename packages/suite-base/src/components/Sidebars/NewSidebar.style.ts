@@ -10,12 +10,12 @@ export const useStyles = makeStyles()((theme) => ({
   },
   badgeRoot: {
     display: "flex",
-    alignItems: "baseline",
+    alignItems: "center",
     gap: theme.spacing(1),
   },
   badge: {
     fontSize: theme.typography.caption.fontSize,
-    padding: theme.spacing(0.125, 0.75),
+    lineHeight: 0,
     borderRadius: 8,
     transform: "none",
     position: "relative",

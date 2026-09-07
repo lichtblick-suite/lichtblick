@@ -14,7 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { FileReader, FileStream } from "@lichtblick/suite-base/util/CachedFilelike";
+import type { FileReader, FileStream } from "@lichtblick/suite-base/util/CachedFilelike.types";
 import FetchReader from "@lichtblick/suite-base/util/FetchReader";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 

@@ -18,7 +18,7 @@ import { useTheme } from "@mui/material";
 import { typescript } from "monaco-editor";
 // @ts-expect-error ICodeEditorService does not have type information in the monaco-editor package
 import { ICodeEditorService } from "monaco-editor/esm/vs/editor/browser/services/codeEditorService";
-import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
+import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api.js";
 // @ts-expect-error StandaloneService does not have type information in the monaco-editor package
 import { StandaloneServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
 import * as path from "path";
@@ -216,7 +216,7 @@ const Editor = ({
       typescript.javascriptDefaults.setEagerModelSync(true);
 
       monaco.languages.registerDocumentFormattingEditProvider("typescript", {
-        provideDocumentFormattingEdits: async (model) => {
+        provideDocumentFormattingEdits: async (model: monacoApi.editor.ITextModel) => {
           try {
             return [
               {

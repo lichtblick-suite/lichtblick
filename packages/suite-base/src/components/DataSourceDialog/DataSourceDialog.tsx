@@ -61,7 +61,7 @@ export function DataSourceDialog(props: DataSourceDialogProps): React.JSX.Elemen
   const analytics = useAnalytics();
 
   const onModalClose = useCallback(() => {
-    void analytics.logEvent(AppEvent.DIALOG_CLOSE, { activeDataSource });
+    analytics.logEvent(AppEvent.DIALOG_CLOSE, { activeDataSource });
     dialogActions.dataSource.close();
   }, [analytics, activeDataSource, dialogActions.dataSource]);
 

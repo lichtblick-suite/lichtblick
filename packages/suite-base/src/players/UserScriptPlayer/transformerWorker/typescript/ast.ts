@@ -577,7 +577,7 @@ export const constructDatatypes = (
     }
   };
 
-  const { members = [] } = node;
+  const { members } = node;
   const rosMsgFields = members.map((member) => {
     if (!member.name) {
       throw new DatatypeExtractionError({

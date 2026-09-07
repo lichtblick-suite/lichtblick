@@ -19,7 +19,11 @@ import { useCallback, useMemo, useState } from "react";
 import { parseMessagePath } from "@lichtblick/message-path";
 import { add as addTimes, fromSec } from "@lichtblick/rostime";
 import useMessagesByPath from "@lichtblick/suite-base/components/MessagePathSyntax/useMessagesByPath";
-import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+  useMessagePipelineGetter,
+} from "@lichtblick/suite-base/components/MessagePipeline";
 import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -28,6 +32,8 @@ import { PathLegend } from "@lichtblick/suite-base/panels/StateTransitions/PathL
 import { useStateTransitionsStyles } from "@lichtblick/suite-base/panels/StateTransitions/StateTransitions.style";
 import {
   EMPTY_ITEMS_BY_PATH,
+  EMPTY_PATHS,
+  EMPTY_TOPICS,
   STATE_TRANSITION_PLUGINS,
 } from "@lichtblick/suite-base/panels/StateTransitions/constants";
 import useChartScalesAndBounds from "@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAndBounds";
@@ -36,14 +42,20 @@ import useMessagePathDropConfig from "@lichtblick/suite-base/panels/StateTransit
 import { usePanelSettings } from "@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings";
 import useStateTransitionsData from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsData";
 import useStateTransitionsTime from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsTime";
+import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
 
 import { StateTransitionConfig, StateTransitionPanelProps } from "./types";
+
+const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 
 function StateTransitions(props: StateTransitionPanelProps) {
   const { config, saveConfig } = props;
   const { paths } = config;
   const { classes } = useStateTransitionsStyles();
+  const playerPresence = useMessagePipeline(selectPlayerPresence);
+  const isPlayerPresent =
+    playerPresence === PlayerPresence.PRESENT || playerPresence === PlayerPresence.BUFFERING;
 
   const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
 
@@ -68,7 +80,10 @@ function StateTransitions(props: StateTransitionPanelProps) {
     };
   }, [paths]);
 
-  const decodedMessages = useDecodedMessageRange(topics, pathStrings);
+  const decodedMessages = useDecodedMessageRange(
+    isPlayerPresent ? topics : EMPTY_TOPICS,
+    isPlayerPresent ? pathStrings : EMPTY_PATHS,
+  );
 
   // When range data is active, skip useMessagesByPath subscriptions entirely
   // to avoid wasteful current-frame processing and decoding.
@@ -80,7 +95,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
     [decodedMessages, pathStrings],
   );
 
-  const itemsByPath = useMessagesByPath(hasRangeData ? [] : pathStrings);
+  const itemsByPath = useMessagesByPath(hasRangeData ? EMPTY_PATHS : pathStrings);
 
   const { height, heightPerTopic } = useMemo(() => {
     const onlyTopicsHeight = paths.length * 64;

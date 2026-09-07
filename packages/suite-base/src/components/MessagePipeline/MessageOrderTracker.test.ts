@@ -54,17 +54,19 @@ const playerStateWithMessages = (messages: any): PlayerState => ({
 const message = (
   headerStampSeconds: number | undefined,
   receiveTimeSeconds: number | undefined,
-): MessageEvent => ({
-  topic: "/foo",
-  receiveTime:
-    receiveTimeSeconds == undefined ? undefined : ({ sec: receiveTimeSeconds, nsec: 1 } as any),
-  message: {
-    header:
-      headerStampSeconds == undefined ? undefined : { stamp: { sec: headerStampSeconds, nsec: 1 } },
-  },
-  schemaName: "visualization_msgs/Marker",
-  sizeInBytes: 0,
-});
+): MessageEvent =>
+  ({
+    topic: "/foo",
+    receiveTime: receiveTimeSeconds == undefined ? undefined : { sec: receiveTimeSeconds, nsec: 1 },
+    message: {
+      header:
+        headerStampSeconds == undefined
+          ? undefined
+          : { stamp: { sec: headerStampSeconds, nsec: 1 } },
+    },
+    schemaName: "visualization_msgs/Marker",
+    sizeInBytes: 0,
+  }) as MessageEvent;
 
 describe("MessagePipeline/MessageOrderTracker", () => {
   describe("when expecting messages ordered by receive time", () => {

@@ -7,10 +7,10 @@
 
 import { LinePrimitive, LineType, SceneEntity } from "@foxglove/schemas";
 import * as THREE from "three";
-import { Line2 } from "three/examples/jsm/lines/Line2";
-import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
-import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2";
-import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry";
+import { Line2 } from "three/examples/jsm/lines/Line2.js";
+import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
+import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { assert } from "ts-essentials";
 
 import { toNanoSec } from "@lichtblick/rostime";

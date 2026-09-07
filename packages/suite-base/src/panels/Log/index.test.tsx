@@ -199,7 +199,7 @@ describe("Log Panel actionHandler", () => {
   });
 
   describe("early returns", () => {
-    it.each([
+    it.each<{ description: string; action: SettingsTreeAction }>([
       {
         description: "unknown action type",
         action: { action: "unknown-action", payload: {} } as unknown as SettingsTreeAction,
@@ -209,7 +209,7 @@ describe("Log Panel actionHandler", () => {
         action: {
           action: "perform-node-action",
           payload: { id: "unknown-id", path: [] },
-        } as SettingsTreeAction,
+        },
       },
     ])("should not call saveConfig for $description", ({ action }) => {
       const saveConfigMock = jest.fn();

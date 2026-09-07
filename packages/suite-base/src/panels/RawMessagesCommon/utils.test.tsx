@@ -21,6 +21,7 @@ import {
   getValueString,
   isSingleElemArray,
   toggleExpansion,
+  typedArrayToArray,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -806,6 +807,125 @@ describe("getValueString", () => {
         // Then
         expect(result.itemLabel).toBe(`${value} (TIME_CONSTANT)`);
       });
+    });
+  });
+});
+
+describe("typedArrayToArray", () => {
+  describe("when handling typed arrays", () => {
+    it("should convert Float32Array to a plain array", () => {
+      // Given
+      const cache = new WeakMap<object, unknown[]>();
+      const input = new Float32Array([1.5, 2.5, 3.5]);
+
+      // When
+      const result = typedArrayToArray(input, cache);
+
+      // Then
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toEqual([Math.fround(1.5), Math.fround(2.5), Math.fround(3.5)]);
+    });
+
+    it("should convert Uint8Array to a plain array", () => {
+      // Given
+      const cache = new WeakMap<object, unknown[]>();
+      const input = new Uint8Array([1, 2, 3]);
+
+      // When
+      const result = typedArrayToArray(input, cache);
+
+      // Then
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toEqual([1, 2, 3]);
+    });
+
+    it("should convert Int32Array to a plain array", () => {
+      // Given
+      const cache = new WeakMap<object, unknown[]>();
+      const input = new Int32Array([-1, 0, 1]);
+
+      // When
+      const result = typedArrayToArray(input, cache);
+
+      // Then
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toEqual([-1, 0, 1]);
+    });
+  });
+
+  describe("when using the cache", () => {
+    it("should return the same reference for the same typed array instance", () => {
+      // Given
+      const cache = new WeakMap<object, unknown[]>();
+      const input = new Float32Array([1.0, 2.0]);
+
+      // When
+      const first = typedArrayToArray(input, cache);
+      const second = typedArrayToArray(input, cache);
+
+      // Then
+      expect(first).toBe(second);
+    });
+  });
+
+  describe("when handling non-typed-array values", () => {
+    it("should return plain objects unchanged", () => {
+      // Given
+      const cache = new WeakMap<object, unknown[]>();
+      const obj = { foo: "bar" };
+
+      // When
+      const result = typedArrayToArray(obj, cache);
+
+      // Then
+      expect(result).toBe(obj);
+    });
+
+    it("should return strings unchanged", () => {
+      // Given
+      const cache = new WeakMap<object, unknown[]>();
+      const value = "string";
+
+      // When
+      const result = typedArrayToArray(value, cache);
+
+      // Then
+      expect(result).toBe(value);
+    });
+
+    it("should return numbers unchanged", () => {
+      // Given
+      const cache = new WeakMap<object, unknown[]>();
+      const value = 42;
+
+      // When
+      const result = typedArrayToArray(value, cache);
+
+      // Then
+      expect(result).toBe(value);
+    });
+
+    it("should return undefined unchanged", () => {
+      // Given
+      const cache = new WeakMap<object, unknown[]>();
+
+      // When
+      const result = typedArrayToArray(undefined, cache);
+
+      // Then
+      expect(result).toBeUndefined();
+    });
+
+    it("should not convert DataView", () => {
+      // Given
+      const cache = new WeakMap<object, unknown[]>();
+      const dv = new DataView(new ArrayBuffer(8));
+
+      // When
+      const result = typedArrayToArray(dv, cache);
+
+      // Then
+      expect(result).toBe(dv);
     });
   });
 });

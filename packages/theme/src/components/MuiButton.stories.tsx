@@ -7,7 +7,7 @@
 
 import { Delete20Regular, Send20Filled } from "@fluentui/react-icons";
 import { Button, ButtonProps, Stack } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 import { Fragment } from "react";
 
 const variants: ButtonProps["variant"][] = ["text", "outlined", "contained"];

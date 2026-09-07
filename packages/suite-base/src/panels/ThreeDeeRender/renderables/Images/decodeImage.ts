@@ -23,12 +23,24 @@ import {
   decodeUYVY,
   decodeYUYV,
 } from "@lichtblick/den/image";
-import { H264, VideoPlayer } from "@lichtblick/den/video";
-import { toMicroSec } from "@lichtblick/rostime";
+import {
+  H264 as H264Parser,
+  H265 as H265Parser,
+  VideoCodec,
+  VideoPlayer,
+  canonicalVideoCodec,
+  isVideoKeyframe,
+} from "@lichtblick/den/video";
+import { toNanoSec } from "@lichtblick/rostime";
 
 import { CompressedImageTypes, CompressedVideo } from "./ImageTypes";
+import { PreparedVideoFrame, PreparedVideoFrameStatus, PrepareVideoFrameContext } from "./types";
 import { Image as RosImage } from "../../ros";
 import { ColorModeSettings, getColorConverter } from "../colorMode";
+
+// Codec normalization (`VideoCodec`, `canonicalVideoCodec`, `isVideoKeyframe`) lives in
+// `@lichtblick/den/video` so both the renderer and the player-side seek backfill share a single
+// source of truth.
 
 export async function decodeCompressedImageToBitmap(
   image: CompressedImageTypes,
@@ -38,29 +50,78 @@ export async function decodeCompressedImageToBitmap(
   return await createImageBitmap(bitmapData, { resizeWidth });
 }
 
-export function isVideoKeyframe(frameMsg: CompressedVideo): boolean {
-  switch (frameMsg.format) {
-    case "h264": {
-      // Search for an IDR NAL unit to determine if this is a keyframe
-      return H264.IsKeyframe(frameMsg.data);
-    }
-  }
-  return false;
+export function isCompressedVideoKeyframe(
+  frameMsg: CompressedVideo,
+  resolvedCodec?: VideoCodec,
+): boolean {
+  return isVideoKeyframe(frameMsg.format, frameMsg.data, resolvedCodec);
 }
 
 export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderConfig | undefined {
-  switch (frameMsg.format) {
-    case "h264": {
-      // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe
-      return H264.ParseDecoderConfig(frameMsg.data);
-    }
+  switch (canonicalVideoCodec(frameMsg.format)) {
+    // Search for an SPS NAL unit to initialize the decoder. This should precede each keyframe.
+    case VideoCodec.H264:
+      return H264Parser.ParseDecoderConfig(frameMsg.data);
+    case VideoCodec.H265:
+      return H265Parser.ParseDecoderConfig(frameMsg.data);
   }
-
   return undefined;
 }
 
-export async function decodeCompressedVideoToBitmap(
+export function prepareVideoFrame(
   frameMsg: CompressedVideo,
+  context?: PrepareVideoFrameContext,
+  resolvedCodec?: VideoCodec,
+): PreparedVideoFrame {
+  switch (resolvedCodec ?? canonicalVideoCodec(frameMsg.format)) {
+    case VideoCodec.H265: {
+      const frameInfo = H265Parser.InspectFrame(frameMsg.data, context?.h265);
+      if (frameInfo.bitstreamFormat === "unknown" || frameInfo.normalizedData == undefined) {
+        return {
+          data: frameMsg.data,
+          status: PreparedVideoFrameStatus.UnsupportedBitstream,
+          diagnostics: "unsupported H.265 bitstream format",
+          type: "delta",
+        };
+      }
+      if (frameInfo.frameType === "B") {
+        return {
+          data: frameInfo.normalizedData,
+          status: PreparedVideoFrameStatus.UnsupportedBFrame,
+          diagnostics: "H.265 B frames are not supported",
+          type: "delta",
+        };
+      }
+
+      const type = frameInfo.isKeyframe ? "key" : "delta";
+      return {
+        data:
+          type === "key"
+            ? frameInfo.normalizedData
+            : (frameInfo.strippedData ?? frameInfo.normalizedData),
+        decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
+        status: PreparedVideoFrameStatus.Ok,
+        type,
+      };
+    }
+    case VideoCodec.H264:
+    default: {
+      const frameData = frameMsg.data;
+      const type = H264Parser.IsKeyframe(frameData) ? "key" : "delta";
+      return {
+        data: frameData,
+        // Only keyframes carry an SPS; delta frames have nothing to parse.
+        decoderConfig: type === "key" ? H264Parser.ParseDecoderConfig(frameData) : undefined,
+        status: PreparedVideoFrameStatus.Ok,
+        type,
+      };
+    }
+  }
+}
+
+export async function decodeCompressedVideoToBitmap(
+  frameMsg: Pick<CompressedVideo, "timestamp">,
+  preparedFrame: PreparedVideoFrame,
   videoPlayer: VideoPlayer,
   firstMessageTime: bigint,
   resizeWidth?: number,
@@ -69,22 +130,30 @@ export async function decodeCompressedVideoToBitmap(
     return await emptyVideoFrame(videoPlayer, resizeWidth);
   }
 
-  // Get the timestamp of this frame as microseconds relative to the first frame
-  const firstTimestampMicros = Number(firstMessageTime / 1000n);
-  const timestampMicros = toMicroSec(frameMsg.timestamp) - firstTimestampMicros;
+  // Match Foxglove/WebCodecs behavior by using integer microseconds relative to the first frame.
+  const timestampMicros = Number((toNanoSec(frameMsg.timestamp) - firstMessageTime) / 1000n);
 
   const videoFrame = await videoPlayer.decode(
-    frameMsg.data,
+    preparedFrame.data,
     timestampMicros,
-    isVideoKeyframe(frameMsg) ? "key" : "delta",
+    preparedFrame.type,
   );
-  if (videoFrame) {
-    const imageBitmap = await self.createImageBitmap(videoFrame, { resizeWidth });
+  try {
+    const frameToRender = videoFrame ?? videoPlayer.lastVideoFrame;
+    if (!frameToRender) {
+      return videoPlayer.lastImageBitmap ?? (await emptyVideoFrame(videoPlayer, resizeWidth));
+    }
+    // Skip re-encoding the same frame when the decoder produced nothing new.
+    if (!videoFrame && videoPlayer.lastImageBitmap) {
+      return videoPlayer.lastImageBitmap;
+    }
+    const imageBitmap = await globalThis.createImageBitmap(frameToRender, { resizeWidth });
+    videoPlayer.lastImageBitmap?.close();
     videoPlayer.lastImageBitmap = imageBitmap;
-    videoFrame.close();
     return imageBitmap;
+  } finally {
+    videoFrame?.close();
   }
-  return await emptyVideoFrame(videoPlayer, resizeWidth);
 }
 
 export const IMAGE_DEFAULT_COLOR_MODE_SETTINGS: Required<

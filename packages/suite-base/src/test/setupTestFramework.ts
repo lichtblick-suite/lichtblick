@@ -23,7 +23,9 @@ import {
 
 // Mock out sendNotification for all tests
 jest.mock("@lichtblick/suite-base/util/sendNotification", () => {
+  const actual = jest.requireActual("@lichtblick/suite-base/util/sendNotification");
   return {
+    ...actual,
     __esModule: true,
     default: mockSendNotification,
     setNotificationHandler: mockSetNotificationHandler,

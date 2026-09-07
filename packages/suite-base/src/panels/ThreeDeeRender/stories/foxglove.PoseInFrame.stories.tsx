@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { FrameTransform, PoseInFrame } from "@foxglove/schemas";
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 import { userEvent, screen } from "@storybook/testing-library";
 import { quat } from "gl-matrix";
 

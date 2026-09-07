@@ -66,6 +66,64 @@ function buildPlayerState(activeDataOverride?: Partial<PlayerStateActiveData>): 
 }
 
 describe("CurrentCustomDatasetsBuilder", () => {
+  it("should render a gap by mapping a null value to NaN", async () => {
+    const builder = new CurrentCustomDatasetsBuilder();
+
+    builder.setXPath(parseMessagePath("/foo.val[:]"));
+    builder.setSeries(
+      buildSeriesItems([
+        {
+          enabled: true,
+          timestampMethod: "receiveTime",
+          value: "/bar.val[:]",
+        },
+      ]),
+    );
+
+    builder.handlePlayerState(
+      buildPlayerState({
+        messages: [
+          {
+            topic: "/foo",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: [0, 1, 2],
+            },
+          },
+          {
+            topic: "/bar",
+            schemaName: "foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            sizeInBytes: 0,
+            message: {
+              val: [0, null, 2],
+            },
+          },
+        ],
+      }),
+    );
+
+    const result = await builder.getViewportDatasets();
+
+    expect(result).toEqual({
+      pathsWithMismatchedDataLengths: new Set(),
+      datasetsByConfigIndex: [
+        expect.objectContaining({
+          data: [
+            { x: 0, y: 0, value: 0, receiveTime: { sec: 0, nsec: 0 } },
+            { x: 1, y: NaN, value: null, receiveTime: { sec: 0, nsec: 0 } },
+            { x: 2, y: 2, value: 2, receiveTime: { sec: 0, nsec: 0 } },
+          ],
+          showLine: true,
+          pointRadius: 1.2,
+          fill: false,
+        }),
+      ],
+    });
+  });
+
   it("should apply a math function", async () => {
     const builder = new CurrentCustomDatasetsBuilder();
 

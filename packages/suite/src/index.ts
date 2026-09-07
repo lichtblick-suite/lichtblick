@@ -5,6 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { MessageDefinition } from "@lichtblick/message-definition";
+
 import type { RegisterCameraModelArgs } from "./cameraModels";
 import type { Immutable } from "./immutable";
 
@@ -513,6 +515,44 @@ export type PanelExtensionContext = {
    * and blocks future invocations of {@link SubscribeMessageRangeArgs.onNewRangeIterator | onNewRangeIterator}.
    */
   unstable_subscribeMessageRange: (args: SubscribeMessageRangeArgs) => () => void;
+
+  /**
+   * Reads the most recent message on `topic` at or before `time`, without moving the playback
+   * cursor and without affecting `currentFrame`, `didSeek`, or any other panel's subscriptions.
+   *
+   * Unlike `subscribe()` + `watch("currentFrame")` or `seekPlayback()`, this does not depend on
+   * shared playback state, so multiple calls — including concurrent calls issued via
+   * `Promise.all()` for different topics or timestamps — are fully independent of each other and
+   * of the current playback position.
+   *
+   * Note: This functionality is unavailable for real-time data sources, including foxglove_bridge,
+   * rosbridge, or ROS 1 native connections. For such sources this resolves to `undefined`.
+   *
+   * @returns The message at or before `time`, or `undefined` if none exists or the active data
+   * source does not support point-in-time queries.
+   */
+  getMessageAtTime?: (topic: string, time: Time) => Promise<MessageEvent | undefined>;
+
+  /**
+   * Returns the schema definition for a given topic, without requiring a subscription or reading
+   * any message data. Useful for inspecting message field structure (e.g. building field path
+   * selectors) at panel initialization time.
+   *
+   * @param topic The name of the topic whose schema should be returned.
+   * @returns The `MessageDefinition` for the topic's schema, or `undefined` if the topic is
+   *   unknown or no active data source is available.
+   */
+  getTopicSchema: (topic: string) => Immutable<MessageDefinition> | undefined;
+
+  /**
+   * Returns the schema definition for a given schemaName, without requiring a subscription or reading
+   * any message data.
+   *
+   * @param schemaName The name of the schema whose definition should be returned.
+   * @returns The `MessageDefinition` for the schema, or `undefined`
+   *   if the schema is unknown or no active data source is available.
+   */
+  getSchema: (schemaName: string) => Immutable<MessageDefinition> | undefined;
 };
 
 export type ExtensionPanelRegistration = {

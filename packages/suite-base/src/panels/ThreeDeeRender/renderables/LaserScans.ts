@@ -353,11 +353,10 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
     const finalQueue: MessageEvent<T>[] = [];
     for (const topic in msgsByTopic) {
       const topicMsgs = msgsByTopic[topic]!;
-      const userSettings = this.renderer.config.topics[topic] as
-        | Partial<LayerSettingsLaserScan>
-        | undefined;
+      const userSettings = (this.renderer.config.topics[topic] ??
+        {}) as Partial<LayerSettingsLaserScan>;
       // if the topic has a decaytime add all messages to queue for topic
-      if ((userSettings?.decayTime ?? DEFAULT_SETTINGS.decayTime) > 0) {
+      if ((userSettings.decayTime ?? DEFAULT_SETTINGS.decayTime) > 0) {
         finalQueue.push(...topicMsgs);
         continue;
       }
@@ -424,9 +423,7 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const prevSettings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsLaserScan>
-        | undefined;
+      const prevSettings = this.renderer.config.topics[topicName];
       const settings = { ...DEFAULT_SETTINGS, ...prevSettings };
 
       renderable.updateLaserScan(
@@ -451,9 +448,8 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic] as
-        | Partial<LayerSettingsLaserScan>
-        | undefined;
+      const userSettings = (this.renderer.config.topics[topic] ??
+        {}) as Partial<LayerSettingsLaserScan>;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       if (settings.colorField == undefined) {
         settings.colorField = "intensity";

@@ -29,6 +29,16 @@ import { inWebWorker } from "@lichtblick/suite-base/util/workers";
 export type NotificationType = "app" | "user";
 export type DetailsType = string | Error | ReactNode;
 export type NotificationSeverity = "error" | "warn" | "info";
+
+/**
+ * Relative priority of notification severities, highest value is most severe. Used to find the most
+ * severe alert in a collection and to sort alerts by severity.
+ */
+export const NOTIFICATION_SEVERITY_PRIORITY: Record<NotificationSeverity, number> = {
+  error: 2,
+  warn: 1,
+  info: 0,
+};
 export type NotificationHandler = (
   message: string,
   details: DetailsType,

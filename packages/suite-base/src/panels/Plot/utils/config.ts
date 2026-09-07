@@ -53,7 +53,7 @@ export type PlotDataItem = {
  * @returns true if the series config is a reference line
  */
 export function isReferenceLinePlotPathType(path: Immutable<PlotPath>): boolean {
-  return !isNaN(Number.parseFloat(path.value));
+  return !Number.isNaN(Number.parseFloat(path.value));
 }
 
 /**
@@ -91,6 +91,8 @@ export type PlotConfig = DeprecatedPlotConfig & {
   isSynced: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
   followingViewWidth?: number;
   sidebarDimension: number;
   [PANEL_TITLE_CONFIG_KEY]?: string;

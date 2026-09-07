@@ -43,7 +43,7 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
     isFullscreen,
     exitFullscreen,
     enterFullscreen,
-    config: { [PANEL_TITLE_CONFIG_KEY]: customTitle = undefined } = {},
+    config: { [PANEL_TITLE_CONFIG_KEY]: customTitle } = {},
   } = useContext(PanelContext) ?? {};
 
   const panelContext = useContext(PanelContext);

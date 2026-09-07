@@ -47,7 +47,18 @@ async function run(rootPath: string) {
   info(`Linting dependencies in ${rootPath}...`);
   const options: depcheck.Options = {
     detectors: [...Object.values(depcheck.detector), commentDetector, tripleSlashDetector],
-    ignoreMatches: ["~"],
+    // These come from `/// <reference types="X" />` directives or tsconfig `types` entries that are
+    // satisfied by an `@types/*` package (or root-provided types) rather than a runtime package
+    // literally named "X", so depcheck cannot match them against the workspace's declared
+    // dependencies.
+    ignoreMatches: [
+      "~",
+      "node",
+      "@types/node",
+      "@types/jest",
+      "foxglove__web",
+      "wicg-file-system-access",
+    ],
   };
   return await depcheck(rootPath, options);
 }

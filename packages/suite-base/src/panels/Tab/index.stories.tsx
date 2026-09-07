@@ -16,7 +16,7 @@
 
 import { useTheme } from "@mui/material";
 import { expect } from "@storybook/jest";
-import { StoryObj, Meta } from "@storybook/react";
+import { StoryObj, Meta } from "@storybook/react-webpack5";
 import { fireEvent, within } from "@storybook/testing-library";
 
 import Panel from "@lichtblick/suite-base/components/Panel";

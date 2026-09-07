@@ -5,6 +5,7 @@ import { Page } from "playwright";
 
 import { test, expect } from "../../../fixtures/electron";
 import { loadFiles } from "../../../fixtures/load-files";
+import { DataSourceDialog, Sidebar } from "../../../page-objects";
 
 const LAYOUT_FILE = "imported-layout.json";
 
@@ -24,7 +25,9 @@ async function splitPanel(mainWindow: Page, panelId: string): Promise<void> {
  * THEN the unsaved changes icon should be visible after making changes
  * AND should disappear after reverting them
  */
-test("makes changes to layout and then reverts them", async ({ mainWindow }) => {
+test("makes changes to layout and then reverts them", { tag: "@regression" }, async ({
+  mainWindow,
+}) => {
   // Given
   await loadFiles({
     mainWindow,
@@ -32,8 +35,8 @@ test("makes changes to layout and then reverts them", async ({ mainWindow }) => 
   });
 
   // When
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  await mainWindow.getByTestId("layouts-left").click();
+  await new DataSourceDialog(mainWindow).close();
+  await new Sidebar(mainWindow).openLayoutsTab();
 
   // Then
   const importedLayout = mainWindow.getByRole("button", { name: "imported-layout" });

@@ -30,6 +30,7 @@ type InitArgs = {
   devicePixelRatio: number;
   gridColor: string;
   tickColor: string;
+  titleColor: string;
 };
 
 export type Service<T> = {

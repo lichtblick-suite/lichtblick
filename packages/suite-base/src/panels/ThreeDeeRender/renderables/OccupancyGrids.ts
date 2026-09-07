@@ -210,9 +210,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     const renderable = this.renderables.get(topicName);
     if (renderable) {
       const prevTransparent = occupancyGridHasTransparency(renderable.userData.settings);
-      const settings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsOccupancyGrid>
-        | undefined;
+      const settings = this.renderer.config.topics[topicName];
       renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
 
       // Check if the transparency changed and we need to create a new material
@@ -239,9 +237,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic] as
-        | Partial<LayerSettingsOccupancyGrid>
-        | undefined;
+      const userSettings = this.renderer.config.topics[topic];
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
       const texture = createTexture(occupancyGrid);

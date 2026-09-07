@@ -100,8 +100,7 @@ describe("stateReducer", () => {
       ...stateOverride,
     };
 
-    const action: GaugeAndIndicatorAction =
-      actionOverride ?? (buildFrameAction() as GaugeAndIndicatorAction);
+    const action: GaugeAndIndicatorAction = actionOverride ?? buildFrameAction();
 
     return {
       state,

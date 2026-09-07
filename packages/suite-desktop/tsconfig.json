@@ -4,6 +4,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "es2022", "webworker"],
+    "types": ["node", "jest"],
     "noEmit": true,
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false,

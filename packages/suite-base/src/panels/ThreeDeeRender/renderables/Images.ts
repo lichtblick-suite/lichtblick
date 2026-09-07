@@ -23,6 +23,7 @@ import {
   ImageUserData,
 } from "./Images/ImageRenderable";
 import { ALL_CAMERA_INFO_SCHEMAS, AnyImage, CompressedVideo } from "./Images/ImageTypes";
+import { filterCompressedVideoQueue } from "./Images/filterCompressedVideoQueue";
 import {
   normalizeCompressedImage,
   normalizeCompressedVideo,
@@ -51,7 +52,7 @@ import {
 } from "../ros";
 import { BaseSettings, PRECISION_DISTANCE } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
-import { makePose } from "../transforms";
+import { makePose, AnyFrameId } from "../transforms";
 
 const log = Logger.getLogger(__filename);
 void log;
@@ -102,6 +103,29 @@ export class Images extends SceneExtension<ImageRenderable> {
     super.dispose();
   }
 
+  public override startFrame(
+    currentTime: bigint,
+    renderFrameId: AnyFrameId,
+    fixedFrameId: AnyFrameId,
+  ): void {
+    // All setImage() calls for this frame have been made by the time startFrame() fires (they
+    // happen inside #handleSubscriptionQueues(), which runs before startFrame()). Flushing here
+    // means the full GOP batch is already in each queue, so skipRender correctly suppresses every
+    // intermediate frame and only the last one triggers a GPU upload.
+    for (const renderable of this.renderables.values()) {
+      renderable.flushPendingDecodes();
+    }
+    super.startFrame(currentTime, renderFrameId, fixedFrameId);
+  }
+
+  public override async settleVideoDecodes(): Promise<void> {
+    await Promise.all(
+      Array.from(this.renderables.values(), async (renderable) => {
+        await renderable.settleVideoDecodes();
+      }),
+    );
+  }
+
   public override getSubscriptions(): readonly AnyRendererSubscription[] {
     return [
       {
@@ -146,7 +170,9 @@ export class Images extends SceneExtension<ImageRenderable> {
         schemaNames: COMPRESSED_VIDEO_DATATYPES,
         subscription: {
           handler: this.#handleCompressedVideo,
-          filterQueue: onlyLastByTopicMessage,
+          // For non-HEVC streams this collapses to the original onlyLastByTopicMessage behavior.
+          // For HEVC, the filter preserves the active GOP so P-frames are still decodable.
+          filterQueue: filterCompressedVideoQueue,
         },
       },
     ];
@@ -235,17 +261,14 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
 
     const imageTopic = path[1]!;
-    const prevSettings = this.renderer.config.topics[imageTopic] as
-      | Partial<LayerSettingsImage>
-      | undefined;
-    const prevCameraInfoTopic = prevSettings?.cameraInfoTopic;
+    const prevSettings = (this.renderer.config.topics[imageTopic] ??
+      {}) as Partial<LayerSettingsImage>;
+    const prevCameraInfoTopic = prevSettings.cameraInfoTopic;
 
     this.saveSetting(path, action.payload.value);
 
-    const settings = this.renderer.config.topics[imageTopic] as
-      | Partial<LayerSettingsImage>
-      | undefined;
-    const cameraInfoTopic = settings?.cameraInfoTopic;
+    const settings = (this.renderer.config.topics[imageTopic] ?? {}) as Partial<LayerSettingsImage>;
+    const cameraInfoTopic = settings.cameraInfoTopic;
 
     // Add this camera_info_topic -> image_topic mapping
     if (cameraInfoTopic !== prevCameraInfoTopic && cameraInfoTopic != undefined) {
@@ -451,9 +474,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
 
     // Look up any existing settings for the image topic to save as user data with the renderable
-    const userSettings = this.renderer.config.topics[imageTopic] as
-      | Partial<LayerSettingsImage>
-      | undefined;
+    const userSettings = this.renderer.config.topics[imageTopic];
     const messageTime = image
       ? toNanoSec("header" in image ? image.header.stamp : image.timestamp)
       : 0n;

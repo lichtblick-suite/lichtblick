@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useTheme } from "@mui/material";
-import { StoryFn, StoryObj } from "@storybook/react";
+import { StoryFn, StoryObj } from "@storybook/react-webpack5";
 
 import { ProgressPlot } from "./ProgressPlot";
 

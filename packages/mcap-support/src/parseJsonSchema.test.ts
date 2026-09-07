@@ -203,14 +203,17 @@ describe("parseJsonSchema", () => {
         },
       },
     },
-  ])(
-    "converts schema to datatypes and decodes base64",
-    ({ name, schema, expectedDatatypes, value, expectedValue }) => {
-      const { datatypes, postprocessValue } = parseJsonSchema(schema, name);
-      expect(datatypes).toEqual(expectedDatatypes);
-      expect(postprocessValue(value)).toEqual(expectedValue);
-    },
-  );
+  ])("converts schema to datatypes and decodes base64", ({
+    name,
+    schema,
+    expectedDatatypes,
+    value,
+    expectedValue,
+  }) => {
+    const { datatypes, postprocessValue } = parseJsonSchema(schema, name);
+    expect(datatypes).toEqual(expectedDatatypes);
+    expect(postprocessValue(value)).toEqual(expectedValue);
+  });
 
   it("allows missing sub-properties", () => {
     const { postprocessValue } = parseJsonSchema(

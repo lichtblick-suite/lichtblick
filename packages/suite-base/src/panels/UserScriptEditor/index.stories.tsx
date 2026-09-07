@@ -14,7 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 import { fireEvent, screen } from "@storybook/testing-library";
 import { useCallback, useEffect } from "react";
 
@@ -225,6 +225,7 @@ export const UtilsUsageInNode: StoryObj = {
 
 export const EditorShowsNewCodeWhenUserNodesChange: StoryObj = {
   render: function Story() {
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     const ChangeUserNodeOnMount = useCallback(function ChangeUserNodeOnMount(): React.JSX.Element {
       const actions = useCurrentLayoutActions();
       useEffect(() => {

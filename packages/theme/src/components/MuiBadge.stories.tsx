@@ -7,7 +7,7 @@
 
 import { Alert24Filled } from "@fluentui/react-icons";
 import { BadgeProps, Badge as MuiBadge, Stack } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 
 const colors: BadgeProps["color"][] = [
   "default",

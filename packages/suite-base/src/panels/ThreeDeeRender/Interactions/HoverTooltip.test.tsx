@@ -14,21 +14,18 @@ import type { HoverEntityInfo } from "./types";
 
 function makeCanvas(bounds?: Partial<DOMRect>): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
-  canvas.getBoundingClientRect = jest.fn(
-    () =>
-      ({
-        left: 0,
-        top: 0,
-        right: 300,
-        bottom: 300,
-        width: 300,
-        height: 300,
-        x: 0,
-        y: 0,
-        toJSON: () => "",
-        ...bounds,
-      }) as DOMRect,
-  );
+  canvas.getBoundingClientRect = jest.fn(() => ({
+    left: 0,
+    top: 0,
+    right: 300,
+    bottom: 300,
+    width: 300,
+    height: 300,
+    x: 0,
+    y: 0,
+    toJSON: () => "",
+    ...bounds,
+  }));
   return canvas;
 }
 

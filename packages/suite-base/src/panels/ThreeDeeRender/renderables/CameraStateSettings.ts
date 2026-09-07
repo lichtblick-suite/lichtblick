@@ -8,7 +8,7 @@
 import { t } from "i18next";
 import * as _ from "lodash-es";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 import { SettingsTreeAction } from "@lichtblick/suite";
 import { ICameraHandler } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ICameraHandler";

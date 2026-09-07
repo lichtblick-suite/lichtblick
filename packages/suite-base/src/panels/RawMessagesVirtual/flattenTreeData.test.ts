@@ -11,6 +11,9 @@ import { flattenTreeData } from "./flattenTreeData";
 
 describe("flattenTreeData", () => {
   let expandedNodes = new Set<string>();
+  beforeEach(() => {
+    expandedNodes = new Set<string>();
+  });
   describe("when data is null or undefined", () => {
     it("should return empty array given undefined data", () => {
       // Given
@@ -60,7 +63,7 @@ describe("flattenTreeData", () => {
   });
 
   describe("when data is an ArrayBuffer view", () => {
-    it("should return empty array given a Uint8Array", () => {
+    it("should flatten Uint8Array elements as indexed nodes", () => {
       // Given
       const data = new Uint8Array([1, 2, 3]);
 
@@ -68,10 +71,16 @@ describe("flattenTreeData", () => {
       const result = flattenTreeData(data, expandedNodes);
 
       // Then
-      expect(result).toEqual([]);
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual(
+        expect.objectContaining({ key: "0", label: "0", value: 1, depth: 0 }),
+      );
+      expect(result[2]).toEqual(
+        expect.objectContaining({ key: "2", label: "2", value: 3, depth: 0 }),
+      );
     });
 
-    it("should return empty array given a Float32Array", () => {
+    it("should flatten Float32Array elements as indexed nodes", () => {
       // Given
       const data = new Float32Array([1.5, 2.5, 3.5]);
 
@@ -79,12 +88,40 @@ describe("flattenTreeData", () => {
       const result = flattenTreeData(data, expandedNodes);
 
       // Then
-      expect(result).toEqual([]);
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          key: "0",
+          label: "0",
+          value: Math.fround(1.5),
+          depth: 0,
+        }),
+      );
+      expect(result[1]).toEqual(
+        expect.objectContaining({
+          key: "1",
+          label: "1",
+          value: Math.fround(2.5),
+          depth: 0,
+        }),
+      );
     });
 
-    it("should return empty array given an Int16Array", () => {
+    it("should flatten Int16Array elements as indexed nodes", () => {
       // Given
       const data = new Int16Array([10, 20, 30]);
+
+      // When
+      const result = flattenTreeData(data, expandedNodes);
+
+      // Then
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual(expect.objectContaining({ key: "0", value: 10 }));
+    });
+
+    it("should return empty array given an empty typed array", () => {
+      // Given
+      const data = new Float32Array([]);
 
       // When
       const result = flattenTreeData(data, expandedNodes);
@@ -153,10 +190,49 @@ describe("flattenTreeData", () => {
       expect(result[1]?.isExpandable).toBe(false);
     });
 
-    it("should mark ArrayBuffer views as not expandable", () => {
+    it("should mark non-empty typed array values as expandable", () => {
       // Given
       const data = {
         buffer: new Uint8Array([1, 2, 3]),
+      };
+
+      // When
+      const result = flattenTreeData(data, expandedNodes);
+
+      // Then
+      expect(result).toHaveLength(1);
+      expect(result[0]?.isExpandable).toBe(true);
+    });
+
+    it("should expand typed array children when node is expanded", () => {
+      // Given
+      const data = {
+        values: new Float32Array([1.5, 2.5, 3.5]),
+      };
+      expandedNodes = new Set<string>(["values"]);
+
+      // When
+      const result = flattenTreeData(data, expandedNodes);
+
+      // Then
+      expect(result).toHaveLength(4);
+      expect(result[0]?.key).toBe("values");
+      expect(result[0]?.isExpandable).toBe(true);
+      expect(result[1]).toEqual(
+        expect.objectContaining({ key: "0~values", value: Math.fround(1.5), depth: 1 }),
+      );
+      expect(result[2]).toEqual(
+        expect.objectContaining({ key: "1~values", value: Math.fround(2.5), depth: 1 }),
+      );
+      expect(result[3]).toEqual(
+        expect.objectContaining({ key: "2~values", value: Math.fround(3.5), depth: 1 }),
+      );
+    });
+
+    it("should mark empty typed array values as not expandable", () => {
+      // Given
+      const data = {
+        buffer: new Uint8Array([]),
       };
 
       // When

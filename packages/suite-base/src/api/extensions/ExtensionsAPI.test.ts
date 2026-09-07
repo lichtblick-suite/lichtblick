@@ -53,7 +53,7 @@ describe("ExtensionsAPI", () => {
 
       // Then
       expect(mockGet).toHaveBeenCalledWith(`workspaces/${workspace}/extensions`);
-      expect(result.length).toBe(extensions.length);
+      expect(result).toHaveLength(extensions.length);
     });
 
     it("should handle empty list", async () => {
@@ -118,7 +118,7 @@ describe("ExtensionsAPI", () => {
         workspace,
         fileId: apiResponse.fileId,
         externalId: apiResponse.id,
-      } as StoredExtension);
+      });
     });
 
     it("should return undefined when extension not found", async () => {

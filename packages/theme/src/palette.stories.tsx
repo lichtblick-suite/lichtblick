@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line no-restricted-imports
 import { Stack, Box, Typography, useTheme } from "@mui/material";
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 
 export default {
   title: "Theme/Palette",

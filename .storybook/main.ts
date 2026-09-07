@@ -8,19 +8,16 @@
 /* eslint-disable filenames/match-exported */
 
 import { StorybookConfig } from "@storybook/react-webpack5";
-import path from "path";
 import { Configuration } from "webpack";
 
-import { makeConfig } from "@lichtblick/suite-base/webpack";
+import { makeConfig } from "../packages/suite-base/webpack";
 
 const storybookConfig: StorybookConfig = {
   // Workaround for https://github.com/storybookjs/storybook/issues/19446
   stories: ["../packages/**/!(node_modules)**/*.stories.tsx"],
   framework: {
     name: "@storybook/react-webpack5",
-    options: {
-      legacyRootApi: true,
-    },
+    options: {},
   },
   // Carefully merge our main webpack config with the Storybook default config.
   // For the most part, our webpack config has already been designed to handle
@@ -36,7 +33,9 @@ const storybookConfig: StorybookConfig = {
         version: "0.0.0-storybook",
         // We are only setting the configFile from Storybook as it is required to properly resolve
         // some assumptions made while traversing the dependency tree in Chromatic.
-        tsconfigPath: `${path.resolve(__dirname)}/tsconfig.json`,
+        tsconfigPath: new URL("tsconfig.json", import.meta.url).pathname,
+        // Required in ESM context (Storybook) where __dirname is not available in webpack.ts.
+        packageDir: new URL("../packages/suite-base", import.meta.url).pathname,
       },
     );
     return {
@@ -67,8 +66,9 @@ const storybookConfig: StorybookConfig = {
         ...(studioWebpackConfig.plugins ?? []),
       ],
       node: studioWebpackConfig.node,
+      ignoreWarnings: studioWebpackConfig.ignoreWarnings,
     };
   },
 };
 
-module.exports = storybookConfig;
+export default storybookConfig;

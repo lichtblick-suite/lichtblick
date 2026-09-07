@@ -7,6 +7,8 @@
 
 // foxglove-depcheck-used: @types/foxglove__web
 
+/// <reference types="foxglove__web" />
+
 import { useEffect, useState } from "react";
 
 import Logger from "@lichtblick/log";

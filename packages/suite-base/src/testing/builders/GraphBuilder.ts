@@ -32,7 +32,7 @@ export default class GraphBuilder {
   ): Cytoscape.StylesheetStyle {
     return defaults<Cytoscape.StylesheetStyle>(props, {
       selector: BasicBuilder.string(),
-      style: {} as Cytoscape.Css.Node & Cytoscape.Css.Edge,
+      style: {},
     });
   }
 

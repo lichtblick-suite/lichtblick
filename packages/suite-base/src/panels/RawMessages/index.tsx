@@ -3,7 +3,7 @@
 
 import { Checkbox, FormControlLabel, Typography, useTheme } from "@mui/material";
 import * as _ from "lodash-es";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import Tree from "react-json-tree";
 
 import { useDataSourceInfo } from "@lichtblick/suite-base/PanelAPI";
@@ -42,6 +42,7 @@ import {
   dataWithoutWrappingArray,
   getSingleValue,
   isSingleElemArray,
+  typedArrayToArray,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/utils";
 import { useJsonTreeTheme } from "@lichtblick/suite-base/util/globalConstants";
 
@@ -87,6 +88,11 @@ function RawMessages(props: PropsRawMessages) {
     openSiblingPanel,
   });
 
+  // Cache typed-array → regular-array conversions so Array.from() is called at most
+  // once per unique typed array object. The WeakMap lets the cached arrays be GC'd
+  // whenever the originals are released (e.g. when a new message arrives).
+  const typedArrayCache = useRef(new WeakMap<object, unknown[]>());
+
   const defaultGetItemString = useGetItemStringWithTimezone();
   const getItemString = useMemo(
     () =>
@@ -108,10 +114,10 @@ function RawMessages(props: PropsRawMessages) {
       }
 
       const joinedPath = keypath.join(PATH_NAME_AGGREGATOR);
-      if (expansion && expansion[joinedPath] === NodeState.Collapsed) {
+      if (expansion?.[joinedPath] === NodeState.Collapsed) {
         return false;
       }
-      if (expansion && expansion[joinedPath] === NodeState.Expanded) {
+      if (expansion?.[joinedPath] === NodeState.Expanded) {
         return true;
       }
 
@@ -244,12 +250,22 @@ function RawMessages(props: PropsRawMessages) {
                 if (rawVal == undefined) {
                   return rawVal;
                 }
-                const idValue = (rawVal as Record<string, unknown>)[diffLabels.ID.labelText];
-                const addedValue = (rawVal as Record<string, unknown>)[diffLabels.ADDED.labelText];
-                const changedValue = (rawVal as Record<string, unknown>)[
+
+                // react-json-tree treats typed arrays as opaque objects; convert them
+                // to regular arrays so users can expand and inspect element values.
+                // Results are cached in a WeakMap so Array.from() runs at most once per
+                // unique typed array instance instead of on every render call.
+                const toDisplayValue = typedArrayToArray(rawVal, typedArrayCache.current);
+                const idValue = (toDisplayValue as Record<string, unknown>)[
+                  diffLabels.ID.labelText
+                ];
+                const addedValue = (toDisplayValue as Record<string, unknown>)[
+                  diffLabels.ADDED.labelText
+                ];
+                const changedValue = (toDisplayValue as Record<string, unknown>)[
                   diffLabels.CHANGED.labelText
                 ];
-                const deletedValue = (rawVal as Record<string, unknown>)[
+                const deletedValue = (toDisplayValue as Record<string, unknown>)[
                   diffLabels.DELETED.labelText
                 ];
                 if (
@@ -259,9 +275,12 @@ function RawMessages(props: PropsRawMessages) {
                     1 &&
                   idValue == undefined
                 ) {
-                  return addedValue ?? changedValue ?? deletedValue;
+                  return typedArrayToArray(
+                    addedValue ?? changedValue ?? deletedValue,
+                    typedArrayCache.current,
+                  );
                 }
-                return rawVal;
+                return toDisplayValue;
               }}
               theme={{
                 ...jsonTreeTheme,

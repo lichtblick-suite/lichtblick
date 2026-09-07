@@ -5,6 +5,7 @@
     "rootDir": "../../",
     "noEmit": true,
     "lib": ["dom", "es2022"],
+    "types": ["node", "jest"],
     "useUnknownInCatchVariables": false
   }
 }

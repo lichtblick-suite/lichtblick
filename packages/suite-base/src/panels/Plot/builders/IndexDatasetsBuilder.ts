@@ -22,7 +22,7 @@ import {
 import { CurrentFrameSeriesItem } from "./types";
 import { buildViewportDatasets, lastMatchingTopic, setSeries } from "./utils";
 import { MATH_FUNCTIONS } from "../constants";
-import { getChartValue, isChartValue } from "../utils/datum";
+import { resolveChartDatum } from "../utils/datum";
 
 export class IndexDatasetsBuilder implements IDatasetsBuilder {
   #seriesByKey = new Map<SeriesConfigKey, CurrentFrameSeriesItem>();
@@ -61,18 +61,16 @@ export class IndexDatasetsBuilder implements IDatasetsBuilder {
 
       const items = simpleGetMessagePathDataItems(msgEvent, series.parsed);
       const pathItems = filterMap(items, (item, idx) => {
-        if (!isChartValue(item)) {
+        const datum = resolveChartDatum(item, mathFn);
+        if (!datum) {
           return;
         }
 
-        const chartValue = getChartValue(item);
-        const mathModifiedValue =
-          mathFn && chartValue != undefined ? mathFn(chartValue) : undefined;
         return {
           x: idx,
-          y: chartValue == undefined ? NaN : (mathModifiedValue ?? chartValue),
+          y: datum.y,
           receiveTime: msgEvent.receiveTime,
-          value: mathModifiedValue ?? item,
+          value: datum.value,
         };
       });
 

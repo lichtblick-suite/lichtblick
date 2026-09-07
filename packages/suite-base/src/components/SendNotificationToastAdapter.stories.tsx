@@ -14,7 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { StoryFn, StoryObj } from "@storybook/react";
+import { StoryFn, StoryObj } from "@storybook/react-webpack5";
 import { useEffect } from "react";
 
 import SendNotificationToastAdapter from "@lichtblick/suite-base/components/SendNotificationToastAdapter";

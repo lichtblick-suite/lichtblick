@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { expect } from "@storybook/jest";
-import { StoryContext, StoryFn, StoryObj } from "@storybook/react";
+import { StoryContext, StoryFn, StoryObj } from "@storybook/react-webpack5";
 import { userEvent, within } from "@storybook/testing-library";
 
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";

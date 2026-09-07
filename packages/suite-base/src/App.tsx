@@ -73,7 +73,7 @@ function contextMenuHandler(event: MouseEvent) {
 export function App(props: AppProps): React.JSX.Element {
   const {
     appConfiguration,
-    appParameters = {},
+    appParameters,
     dataSources,
     extensionLoaders,
     layoutLoaders,

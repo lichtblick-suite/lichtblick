@@ -37,6 +37,12 @@ export function makeWorkspaceContextInitialState(): WorkspaceContextStore {
       active: undefined,
       shown: [],
     },
+    layoutBrowser: {
+      expandedSections: {
+        personal: true,
+        shared: true,
+      },
+    },
     sidebars: {
       left: {
         item: "panel-settings",
@@ -78,7 +84,7 @@ function createWorkspaceContextStore(
       partialize: (state) => {
         // Note that this is an opt-in list of keys from the store that we
         // include and restore when persisting to and from localStorage.
-        return _.pick(state, ["featureTours", "playbackControls", "sidebars"]);
+        return _.pick(state, ["featureTours", "layoutBrowser", "playbackControls", "sidebars"]);
       },
       merge(persistedState, currentState) {
         // Use a deep merge to ensure that defaults are filled in for nested values if the values

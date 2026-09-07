@@ -11,7 +11,7 @@ import {
   Toolbox24Regular,
 } from "@fluentui/react-icons";
 import { Divider, Paper, Tab, Tabs, tabClasses, tabsClasses } from "@mui/material";
-import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
+import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api.js";
 import { SyntheticEvent, useCallback, useMemo, useState } from "react";
 import tc from "tinycolor2";
 import { makeStyles } from "tss-react/mui";

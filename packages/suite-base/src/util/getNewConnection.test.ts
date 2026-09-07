@@ -17,6 +17,7 @@
 import { getNewConnection } from "./getNewConnection";
 
 const READ_AHEAD_BUFFER_SIZE = 50 * 1024 * 1024; // 50 MB - must match the constant in getNewConnection.ts
+const MEBIBYTE = 1024 * 1024;
 
 describe("getNewConnection", () => {
   describe("when using a limited cache", () => {
@@ -188,6 +189,25 @@ describe("getNewConnection", () => {
           });
           expect(newConnection).toEqual(undefined);
         });
+
+        it("does not create a zero-width read-ahead range after reaching end of file", () => {
+          const newConnection = getNewConnection({
+            ...defaults,
+            lastResolvedCallbackEnd: 100,
+            downloadedRanges: [{ start: 0, end: 100 }],
+          });
+
+          expect(newConnection).toBeUndefined();
+        });
+
+        it("keeps a valid tail read-ahead range just before the end of file", () => {
+          const newConnection = getNewConnection({
+            ...defaults,
+            lastResolvedCallbackEnd: 99,
+          });
+
+          expect(newConnection).toEqual({ start: 99, end: 100 });
+        });
       });
     });
   });
@@ -312,6 +332,100 @@ describe("getNewConnection", () => {
         });
         expect(newConnection).toEqual({ start: 30, end: 100 });
       });
+
+      it("backfills an earlier gap at EOF when using the unlimited-cache branch", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          lastResolvedCallbackEnd: 100,
+          downloadedRanges: [{ start: 30, end: 100 }],
+        });
+
+        expect(newConnection).toEqual({ start: 0, end: 30 });
+      });
+
+      it("does not create a zero-width read-ahead range after reaching end of file", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          lastResolvedCallbackEnd: 100,
+          downloadedRanges: [{ start: 0, end: 100 }],
+        });
+
+        expect(newConnection).toBeUndefined();
+      });
+    });
+  });
+
+  describe("when read-ahead is disabled (readAheadEnabled: false)", () => {
+    it("returns only the exact requested range instead of the whole file when cache spans the file", () => {
+      // GIVEN: a read request on a file that fits in the cache.
+      // WHEN: read-ahead is disabled.
+      const result = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 10, end: 20 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 100, // >= fileSize -> would normally download whole file
+        fileSize: 100,
+        continueDownloadingThreshold: 5,
+        readAheadEnabled: false,
+      });
+
+      // THEN: only the requested range is downloaded.
+      expect(result).toEqual({ start: 10, end: 20 });
+    });
+
+    it("keeps legacy whole-file read-ahead when readAheadEnabled is true", () => {
+      // GIVEN: the same inputs as the lazy-loading case above.
+      // WHEN: read-ahead is enabled.
+      const result = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 10, end: 20 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 100, // >= fileSize -> download to the end of the file
+        fileSize: 100,
+        continueDownloadingThreshold: 5,
+        readAheadEnabled: true,
+      });
+
+      // THEN: the legacy whole-file read-ahead range is returned.
+      expect(result).toEqual({ start: 10, end: 100 });
+    });
+
+    it("does not extend the range by the 50 MiB read-ahead buffer when finishing at the request end", () => {
+      // GIVEN: a cache smaller than the file where read-ahead would normally extend the request.
+      // WHEN: read-ahead is disabled.
+      const result = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 0, end: 10 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 100 * 1024 * 1024, // < fileSize
+        fileSize: 200 * 1024 * 1024,
+        continueDownloadingThreshold: 5,
+        readAheadEnabled: false,
+      });
+
+      // THEN: the request is not extended.
+      expect(result).toEqual({ start: 0, end: 10 });
+    });
+
+    it("returns undefined when idle (no read request) and read-ahead is disabled", () => {
+      // GIVEN: no active read request or connection.
+      // WHEN: read-ahead is disabled.
+      const result = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: undefined,
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: 20,
+        maxRequestSize: 100,
+        fileSize: 100,
+        continueDownloadingThreshold: 5,
+        readAheadEnabled: false,
+      });
+
+      // THEN: no speculative connection is created.
+      expect(result).toBeUndefined();
     });
   });
 
@@ -417,6 +531,98 @@ describe("getNewConnection", () => {
       // Both should use READ_AHEAD_BUFFER_SIZE, not maxRequestSize
       expect(connection1).toEqual({ start: 0, end: READ_AHEAD_BUFFER_SIZE });
       expect(connection2).toEqual({ start: 0, end: READ_AHEAD_BUFFER_SIZE });
+    });
+
+    it("uses a smaller explicit readAheadBufferBytes when extending a request-end read", () => {
+      // GIVEN: a large file and an explicit read-ahead buffer smaller than the legacy 50 MiB.
+      const fileSize = 200 * 1024 * 1024;
+      const readAheadBufferBytes = 2 * 1024 * 1024;
+
+      // WHEN: the requested range ends at the first missing sub-range boundary.
+      const newConnection = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 8 * 1024 * 1024, end: 8 * 1024 * 1024 + 1024 },
+        downloadedRanges: [],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 5 * 1024 * 1024,
+        fileSize,
+        continueDownloadingThreshold: 5,
+        readAheadBufferBytes,
+      });
+
+      // THEN: the extension uses the smaller explicit buffer instead of 50 MiB.
+      expect(newConnection).toEqual({
+        start: 8 * 1024 * 1024,
+        end: 10 * 1024 * 1024,
+      });
+    });
+
+    it("covers the full missing tail when a small explicit readAheadBufferBytes falls behind the cached prefix", () => {
+      // GIVEN: the beginning of the read request is already cached farther than the small
+      // read-ahead buffer reaches.
+      const readAheadBufferBytes = 2 * MEBIBYTE;
+      const newConnection = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 0, end: 4 * MEBIBYTE },
+        downloadedRanges: [{ start: 0, end: 2 * MEBIBYTE }],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 6 * MEBIBYTE,
+        fileSize: 20 * MEBIBYTE,
+        continueDownloadingThreshold: 5,
+        readAheadBufferBytes,
+      });
+
+      // THEN: the new connection still covers the missing request tail instead of collapsing to a
+      // zero-width range at 2 MiB.
+      expect(newConnection).toEqual({
+        start: 2 * MEBIBYTE,
+        end: 4 * MEBIBYTE,
+      });
+    });
+
+    it("still reads ahead past the missing tail when a large explicit readAheadBufferBytes is used", () => {
+      // GIVEN: the same partially cached request, but with the legacy large read-ahead budget.
+      const newConnection = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: { start: 0, end: 4 * MEBIBYTE },
+        downloadedRanges: [{ start: 0, end: 2 * MEBIBYTE }],
+        lastResolvedCallbackEnd: undefined,
+        maxRequestSize: 60 * MEBIBYTE,
+        fileSize: 200 * MEBIBYTE,
+        continueDownloadingThreshold: 5,
+        readAheadBufferBytes: READ_AHEAD_BUFFER_SIZE,
+      });
+
+      // THEN: read-ahead still extends beyond the missing request tail when the buffer allows it.
+      expect(newConnection).toEqual({
+        start: 2 * MEBIBYTE,
+        end: READ_AHEAD_BUFFER_SIZE,
+      });
+    });
+
+    it("uses a smaller explicit readAheadBufferBytes for idle read-ahead after the last resolved request", () => {
+      // GIVEN: an idle connection that wants to read ahead from the last resolved request end.
+      const fileSize = 200 * 1024 * 1024;
+      const lastResolvedCallbackEnd = 12 * 1024 * 1024;
+      const readAheadBufferBytes = 2 * 1024 * 1024;
+
+      // WHEN: getNewConnection computes the next speculative idle range.
+      const newConnection = getNewConnection({
+        currentRemainingRange: undefined,
+        readRequestRange: undefined,
+        downloadedRanges: [],
+        lastResolvedCallbackEnd,
+        maxRequestSize: 5 * 1024 * 1024,
+        fileSize,
+        continueDownloadingThreshold: 5,
+        readAheadBufferBytes,
+      });
+
+      // THEN: the idle read-ahead range uses the smaller explicit buffer instead of 50 MiB.
+      expect(newConnection).toEqual({
+        start: lastResolvedCallbackEnd,
+        end: lastResolvedCallbackEnd + readAheadBufferBytes,
+      });
     });
   });
 });

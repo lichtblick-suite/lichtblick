@@ -8,12 +8,18 @@
 import { isTypicalFilterName } from "./isTypicalFilterName";
 
 describe("isTypicalFilterName", () => {
-  it.each(["id", "trackID", "_id", "track_id", "ID", "Id", "key", "trackId"])(
-    "returns true for %s",
-    (value) => {
-      expect(isTypicalFilterName(value)).toBe(true);
-    },
-  );
+  it.each([
+    "id",
+    "trackID",
+    "_id",
+    "track_id",
+    "ID",
+    "Id",
+    "key",
+    "trackId",
+  ])("returns true for %s", (value) => {
+    expect(isTypicalFilterName(value)).toBe(true);
+  });
 
   it.each(["trackiD", "some_key", "iD"])("returns false for %s", (value) => {
     expect(isTypicalFilterName(value)).toBe(false);

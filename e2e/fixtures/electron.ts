@@ -34,6 +34,13 @@ export const test = base.extend<ElectronFixtures & { electronArgs: string[] }>({
         WEBPACK_PATH,
         `--user-data-dir=${userDataDir}`,
         `--home-dir=${homeDir}`,
+        // Force ANGLE's SwiftShader backend so GPU-heavy panels (3D/WebGL, Image)
+        // render reliably under headless CI. Newer Chromium (Electron 42) changed
+        // its SwiftShader fallback, which slowed panel initialization past the
+        // Playwright per-test timeout.
+        "--use-gl=angle",
+        "--use-angle=swiftshader",
+        "--enable-unsafe-swiftshader",
         ...electronArgs,
       ],
       executablePath: electronPath as unknown as string,

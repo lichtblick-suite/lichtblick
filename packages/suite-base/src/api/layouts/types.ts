@@ -31,10 +31,10 @@ export interface LayoutApiData {
   permission: LayoutPermission;
   /** Source or origin information */
   from: string;
-  /** User who created the layout */
-  createdBy: string;
-  /** User who last updated the layout */
-  updatedBy: string;
+  /** Timestamp when the layout was created */
+  createdAt: string;
+  /** Timestamp when the layout was last updated */
+  updatedAt: string;
 }
 
 // =============================================================================

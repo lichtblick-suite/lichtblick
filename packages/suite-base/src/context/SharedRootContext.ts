@@ -10,6 +10,7 @@ import { createContext, useContext } from "react";
 import { AppBarProps } from "@lichtblick/suite-base/components/AppBar";
 import { CustomWindowControlsProps } from "@lichtblick/suite-base/components/AppBar/CustomWindowControls";
 import { IAppConfiguration } from "@lichtblick/suite-base/context/AppConfigurationContext";
+import { AppParametersInput } from "@lichtblick/suite-base/context/AppParametersContext";
 import { INativeAppMenu } from "@lichtblick/suite-base/context/NativeAppMenuContext";
 import { INativeWindow } from "@lichtblick/suite-base/context/NativeWindowContext";
 import { IDataSourceFactory } from "@lichtblick/suite-base/context/PlayerSelectionContext";
@@ -18,6 +19,7 @@ import { IExtensionLoader } from "@lichtblick/suite-base/services/extension/IExt
 interface ISharedRootContext {
   deepLinks: readonly string[];
   appConfiguration?: IAppConfiguration;
+  appParameters?: AppParametersInput;
   dataSources: IDataSourceFactory[];
   extensionLoaders: readonly IExtensionLoader[];
   nativeAppMenu?: INativeAppMenu;

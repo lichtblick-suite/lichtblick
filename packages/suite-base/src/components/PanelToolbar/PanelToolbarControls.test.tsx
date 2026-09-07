@@ -528,41 +528,37 @@ describe("PanelToolbarControls", () => {
       rerender(
         <ThemeProvider isDark={false}>
           <PanelCatalogContext.Provider
-            value={
-              {
-                getPanels: jest.fn().mockReturnValue([]),
-                getPanelByType: jest.fn().mockReturnValue({
-                  title: "Test Panel",
-                  type: "TestPanel",
-                  module: jest.fn(),
-                  hasCustomToolbar: false,
-                }),
-              } as any
-            }
+            value={{
+              getPanels: jest.fn().mockReturnValue([]),
+              getPanelByType: jest.fn().mockReturnValue({
+                title: "Test Panel",
+                type: "TestPanel",
+                module: jest.fn(),
+                hasCustomToolbar: false,
+              }),
+            }}
           >
             <PanelContext.Provider
-              value={
-                {
-                  id: "test-panel-id",
-                  type: "TestPanel",
-                  title: "Test Panel",
-                  showLogs: false,
-                  setShowLogs: jest.fn(),
-                  logError: jest.fn(),
-                  logCount: 0,
-                  config: {},
-                  saveConfig: jest.fn(),
-                  updatePanelConfigs: jest.fn(),
-                  openSiblingPanel: jest.fn(),
-                  replacePanel: jest.fn(),
-                  enterFullscreen: jest.fn(),
-                  exitFullscreen: jest.fn(),
-                  isFullscreen: false,
-                  setHasFullscreenDescendant: jest.fn(),
-                  connectToolbarDragHandle: jest.fn(),
-                  setMessagePathDropConfig: jest.fn(),
-                } as any
-              }
+              value={{
+                id: "test-panel-id",
+                type: "TestPanel",
+                title: "Test Panel",
+                showLogs: false,
+                setShowLogs: jest.fn(),
+                logError: jest.fn(),
+                logCount: 0,
+                config: {},
+                saveConfig: jest.fn(),
+                updatePanelConfigs: jest.fn(),
+                openSiblingPanel: jest.fn(),
+                replacePanel: jest.fn(),
+                enterFullscreen: jest.fn(),
+                exitFullscreen: jest.fn(),
+                isFullscreen: false,
+                setHasFullscreenDescendant: jest.fn(),
+                connectToolbarDragHandle: jest.fn(),
+                setMessagePathDropConfig: jest.fn(),
+              }}
             >
               <PanelToolbarControls {...props} />
             </PanelContext.Provider>
@@ -595,41 +591,37 @@ describe("PanelToolbarControls", () => {
       rerender(
         <ThemeProvider isDark={false}>
           <PanelCatalogContext.Provider
-            value={
-              {
-                getPanels: jest.fn().mockReturnValue([]),
-                getPanelByType: jest.fn().mockReturnValue({
-                  title: "Test Panel",
-                  type: "TestPanel",
-                  module: jest.fn(),
-                  hasCustomToolbar: false,
-                }),
-              } as any
-            }
+            value={{
+              getPanels: jest.fn().mockReturnValue([]),
+              getPanelByType: jest.fn().mockReturnValue({
+                title: "Test Panel",
+                type: "TestPanel",
+                module: jest.fn(),
+                hasCustomToolbar: false,
+              }),
+            }}
           >
             <PanelContext.Provider
-              value={
-                {
-                  id: "test-panel-id",
-                  type: "TestPanel",
-                  title: "Test Panel",
-                  showLogs: false,
-                  setShowLogs: jest.fn(),
-                  logError: jest.fn(),
-                  logCount: 3,
-                  config: {},
-                  saveConfig: jest.fn(),
-                  updatePanelConfigs: jest.fn(),
-                  openSiblingPanel: jest.fn(),
-                  replacePanel: jest.fn(),
-                  enterFullscreen: jest.fn(),
-                  exitFullscreen: jest.fn(),
-                  isFullscreen: false,
-                  setHasFullscreenDescendant: jest.fn(),
-                  connectToolbarDragHandle: jest.fn(),
-                  setMessagePathDropConfig: jest.fn(),
-                } as any
-              }
+              value={{
+                id: "test-panel-id",
+                type: "TestPanel",
+                title: "Test Panel",
+                showLogs: false,
+                setShowLogs: jest.fn(),
+                logError: jest.fn(),
+                logCount: 3,
+                config: {},
+                saveConfig: jest.fn(),
+                updatePanelConfigs: jest.fn(),
+                openSiblingPanel: jest.fn(),
+                replacePanel: jest.fn(),
+                enterFullscreen: jest.fn(),
+                exitFullscreen: jest.fn(),
+                isFullscreen: false,
+                setHasFullscreenDescendant: jest.fn(),
+                connectToolbarDragHandle: jest.fn(),
+                setMessagePathDropConfig: jest.fn(),
+              }}
             >
               <PanelToolbarControls isUnknownPanel={false} />
             </PanelContext.Provider>

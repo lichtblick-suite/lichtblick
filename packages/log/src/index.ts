@@ -5,6 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// `global` is a Node.js global. TypeScript 6.0 no longer auto-discovers `@types/node`, so reference
+// it explicitly to keep the global available program-wide.
+/// <reference types="node" />
+
 // logger channel -> logger
 const channels = new Map<string, Logger>();
 

@@ -148,9 +148,14 @@ export const getValueActionForValue = (
       // We currently don't support looking inside them.
       return undefined;
     } else {
-      throw new Error(
-        `Invalid structureType: ${state.structureItem?.structureType} for value/pathItem.`,
+      // Unexpected path/value/schema combinations can happen for synthetic keys
+      // (e.g. array internals). This path is only used for optional hover actions,
+      // so fail gracefully instead of crashing the panel.
+      console.warn(
+        "getValueActionForValue: unexpected structureType",
+        state.structureItem?.structureType,
       );
+      return undefined;
     }
   }
 

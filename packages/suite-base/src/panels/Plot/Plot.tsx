@@ -26,7 +26,6 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { VerticalBars } from "@lichtblick/suite-base/panels/Plot/VerticalBars";
-import { DEFAULT_SIDEBAR_DIMENSION } from "@lichtblick/suite-base/panels/Plot/constants";
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
@@ -46,8 +45,8 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     paths: series,
     showLegend,
     xAxisVal: xAxisMode,
-    legendDisplay = config.showSidebar === true ? "left" : "floating",
-    sidebarDimension = config.sidebarWidth ?? DEFAULT_SIDEBAR_DIMENSION,
+    legendDisplay,
+    sidebarDimension,
   } = config;
 
   const { classes } = useStyles();

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { act, render, waitFor } from "@testing-library/react";
-import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
+import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api.js";
 
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -417,6 +417,7 @@ describe("Editor", () => {
     });
 
     const model = monacoApi.editor.getModel(uri);
+
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(model?.setValue).toHaveBeenCalledWith(freshCode);
   });

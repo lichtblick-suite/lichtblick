@@ -7,7 +7,7 @@
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Button, ButtonGroup, ButtonProps, Stack } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 
 const variants: ButtonProps["variant"][] = ["text", "outlined", "contained"];
 const sizes: ButtonProps["size"][] = ["small", "medium", "large"];

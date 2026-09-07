@@ -36,6 +36,7 @@ it("map schema names by topic name", () => {
     subscriptions: [],
     getMetadata: jest.fn(),
     getBatchIterator: () => undefined,
+    getMessageAtTime: jest.fn(),
   };
   const result = getTopicToSchemaNameMap(state);
   expect(result).toEqual({

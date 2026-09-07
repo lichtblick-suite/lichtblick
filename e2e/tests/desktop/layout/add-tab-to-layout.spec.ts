@@ -3,6 +3,7 @@
 
 import { test, expect } from "../../../fixtures/electron";
 import { loadFromFilePicker } from "../../../fixtures/load-from-file-picker";
+import { DataSourceDialog, LayoutManager, Sidebar } from "../../../page-objects";
 
 const LAYOUT_FILE = "tab-layout.json";
 
@@ -16,13 +17,17 @@ const LAYOUT_FILE = "tab-layout.json";
  * WHEN the parent tab is removed
  * THEN the layout should display zero tabs
  */
-test("create a new layout and add a tab", async ({ mainWindow }) => {
+test("create a new layout and add a tab", { tag: "@regression" }, async ({ mainWindow }) => {
   test.setTimeout(45_000);
+  const dialog = new DataSourceDialog(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
+  const layout = new LayoutManager(mainWindow);
+
   // Given
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
-  await mainWindow.getByTestId("layouts-left").click();
+  await dialog.close();
+  await sidebar.openLayoutsTab();
   await loadFromFilePicker(mainWindow, LAYOUT_FILE);
-  await mainWindow.getByRole("button", { name: "Import from file…" }).click();
+  await layout.importLayout();
 
   //Then
   await expect(mainWindow.getByTestId("toolbar-tab")).toHaveCount(1);

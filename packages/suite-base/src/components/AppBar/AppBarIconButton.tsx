@@ -23,7 +23,7 @@ const useStyles = makeStyles()((theme) => ({
       fontSize: "1em",
     },
     "&:hover": {
-      backgroundColor: tinycolor(theme.palette.common.white).setAlpha(0.08).toRgbString(),
+      backgroundColor: tinycolor(theme.palette.appBar.text).setAlpha(0.08).toRgbString(),
     },
     "&.Mui-selected": {
       backgroundColor: theme.palette.appBar.primary,

@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 import { fireEvent, userEvent, within } from "@storybook/testing-library";
 
 import Table from "@lichtblick/suite-base/panels/Table";
@@ -15,7 +15,10 @@ import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 const makeArrayData = ({
   length = 50,
   nestArray = true,
-}: { length?: number; nestArray?: boolean } = {}): unknown => {
+}: {
+  length?: number;
+  nestArray?: boolean;
+} = {}): unknown => {
   return new Array(length).fill(0).map((_, i) => {
     return {
       val: i,

@@ -3,6 +3,7 @@
 
 import { test, expect } from "../../../../fixtures/electron";
 import { loadFiles } from "../../../../fixtures/load-files";
+import { LayoutManager, Sidebar } from "../../../../page-objects";
 
 const MCAP_FILENAME = "example_logs.mcap";
 
@@ -16,19 +17,22 @@ const MCAP_FILENAME = "example_logs.mcap";
  * WHEN raw messages settings are open and font size is changed to 30px
  * THEN messages on the panel should have CSS attribute font size as 30px
  */
-test("create a new layout with raw messages panel, select a topic and change the font size", async ({
-  mainWindow,
-}) => {
+test("create a new layout with raw messages panel, select a topic and change the font size", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
+  const sidebar = new Sidebar(mainWindow);
+  const layout = new LayoutManager(mainWindow);
+
   // Given
   await loadFiles({
     mainWindow,
     filenames: MCAP_FILENAME,
   });
-  await mainWindow.getByTestId("layouts-left").click();
+  await sidebar.openLayoutsTab();
 
   // When
-  await mainWindow.getByTestId("layout-list-item").getByText("Default", { exact: true }).click();
-  await mainWindow.getByText("Create new layout").click();
+  await layout.openDefaultLayout();
+  await layout.createNewLayout();
 
   const panelSearch = mainWindow.getByTestId("panel-list-textfield").locator("input");
   await panelSearch.fill("Raw Messages");
@@ -40,7 +44,9 @@ test("create a new layout with raw messages panel, select a topic and change the
   await expect(mainWindow.getByText("No topic selected")).toBeVisible();
 
   // When
-  const topicPathInput = mainWindow.getByPlaceholder("/some/topic.msgs[0].field", { exact: true });
+  const topicPathInput = mainWindow.getByPlaceholder("/some/topic.msgs[0].field", {
+    exact: true,
+  });
   await topicPathInput.fill("/rosout");
 
   // Then
@@ -50,7 +56,7 @@ test("create a new layout with raw messages panel, select a topic and change the
   await expect(topicMessage).toHaveCSS("font-size", "12px");
 
   // When
-  await mainWindow.getByTestId("panel-settings-left").click();
+  await sidebar.openPanelSettingsTab();
   await mainWindow.getByTestId("FieldEditor-Select").click();
   await mainWindow.getByText("30 px").click();
 

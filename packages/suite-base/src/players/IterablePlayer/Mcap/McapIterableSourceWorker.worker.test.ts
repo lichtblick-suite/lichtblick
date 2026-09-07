@@ -50,6 +50,33 @@ describe("initialize", () => {
     expect(result).toBeInstanceOf(WorkerSerializedIterableSourceWorker);
   });
 
+  it("should pass hydration overrides through for multiple files", () => {
+    const filename1 = `${BasicBuilder.string()}.mcap`;
+    const filename2 = `${BasicBuilder.string()}.mcap`;
+    const files = [new File(["data"], filename1), new File(["data"], filename2)];
+
+    const result = initialize({
+      files,
+      maxHydratedSources: 3,
+      maxHydratedBytes: 1234,
+      initConcurrency: 2,
+    });
+
+    expect(MultiIterableSource).toHaveBeenCalledWith(
+      {
+        type: "files",
+        files,
+        maxHydratedSources: 3,
+        maxHydratedBytes: 1234,
+        initConcurrency: 2,
+      },
+      McapIterableSource,
+    );
+    expect(WorkerSerializedIterableSourceWorker).toHaveBeenCalled();
+    expect(Comlink.proxy).toHaveBeenCalled();
+    expect(result).toBeInstanceOf(WorkerSerializedIterableSourceWorker);
+  });
+
   it("should initialize with a single URL", () => {
     const url = `http://${BasicBuilder.string()}.com/${BasicBuilder.string()}.mcap`;
 
@@ -70,6 +97,34 @@ describe("initialize", () => {
     const result = initialize({ urls });
 
     expect(MultiIterableSource).toHaveBeenCalledWith({ type: "urls", urls }, McapIterableSource);
+    expect(WorkerSerializedIterableSourceWorker).toHaveBeenCalled();
+    expect(Comlink.proxy).toHaveBeenCalled();
+    expect(result).toBeInstanceOf(WorkerSerializedIterableSourceWorker);
+  });
+
+  it("should pass hydration overrides through for multiple URLs", () => {
+    const urls = [
+      `http://${BasicBuilder.string()}.com/${BasicBuilder.string()}.mcap`,
+      `http://${BasicBuilder.string()}.com/${BasicBuilder.string()}.mcap`,
+    ];
+
+    const result = initialize({
+      urls,
+      maxHydratedSources: 4,
+      maxHydratedBytes: 5678,
+      initConcurrency: 3,
+    });
+
+    expect(MultiIterableSource).toHaveBeenCalledWith(
+      {
+        type: "urls",
+        urls,
+        maxHydratedSources: 4,
+        maxHydratedBytes: 5678,
+        initConcurrency: 3,
+      },
+      McapIterableSource,
+    );
     expect(WorkerSerializedIterableSourceWorker).toHaveBeenCalled();
     expect(Comlink.proxy).toHaveBeenCalled();
     expect(result).toBeInstanceOf(WorkerSerializedIterableSourceWorker);

@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { AlertProps, AlertTitle, Alert as MuiAlert, Stack } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 
 const severities = ["error", "info", "success", "warning", "primary"] as AlertProps["severity"][];
 

@@ -75,7 +75,7 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
           checked={enabled ?? false}
           onChange={(_, checked) => {
             void setEnabled(checked);
-            void analytics.logEvent(AppEvent.EXPERIMENTAL_FEATURE_TOGGLE, {
+            analytics.logEvent(AppEvent.EXPERIMENTAL_FEATURE_TOGGLE, {
               feature: feature.key,
               checked,
             });

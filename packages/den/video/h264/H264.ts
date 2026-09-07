@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { findNextStartCode, findNextStartCodeEnd } from "../utils";
 import { SPS as SPSNALU } from "./SPS";
 
 export enum H264NaluType {
@@ -58,13 +59,17 @@ export class H264 {
     while (i < data.length) {
       // Annex B NALU type is the 5 least significant bits of the first byte following the start
       // code
-      const naluType = data[i]! & 0x1f;
+      const byte = data[i];
+      if (byte == undefined) {
+        break;
+      }
+      const naluType = byte & 0x1f;
       if (naluType === H264NaluType.IDR) {
         return true;
       }
 
       // Scan for another start code, signifying the beginning of the next NAL unit
-      i = H264.FindNextStartCodeEnd(data, i + 1);
+      i = findNextStartCodeEnd(data, i + 1);
     }
 
     return false;
@@ -85,17 +90,21 @@ export class H264 {
     while (i < data.length) {
       // Annex B NALU type is the 5 least significant bits of the first byte following the start
       // code
-      const curNaluType = data[i]! & 0x1f;
+      const byte = data[i];
+      if (byte == undefined) {
+        break;
+      }
+      const curNaluType = byte & 0x1f;
       if (curNaluType === naluType) {
         // Find the end of this NALU
-        const end = H264.FindNextStartCode(data, i + 1);
+        const end = findNextStartCode(data, i + 1);
 
         // Return the NALU
         return data.subarray(i, end);
       }
 
       // Scan for another start code, signifying the beginning of the next NAL unit
-      i = H264.FindNextStartCodeEnd(data, i + 1);
+      i = findNextStartCodeEnd(data, i + 1);
     }
 
     return undefined;
@@ -132,55 +141,5 @@ export class H264 {
     }
 
     return config;
-  }
-
-  /**
-   * Find the index of the next start code (0x000001 or 0x00000001) in the
-   * given buffer, starting at the given offset.
-   */
-  public static FindNextStartCode(data: Uint8Array, start: number): number {
-    let i = start;
-    while (i < data.length - 3) {
-      const isStartCode3Bytes = data[i + 0] === 0 && data[i + 1] === 0 && data[i + 2] === 1;
-      if (isStartCode3Bytes) {
-        return i;
-      }
-      const isStartCode4Bytes =
-        i + 3 < data.length &&
-        data[i + 0] === 0 &&
-        data[i + 1] === 0 &&
-        data[i + 2] === 0 &&
-        data[i + 3] === 1;
-      if (isStartCode4Bytes) {
-        return i;
-      }
-      i++;
-    }
-    return data.length;
-  }
-
-  /**
-   * Find the index of the end of the next start code (0x000001 or 0x00000001) in the
-   * given buffer, starting at the given offset.
-   */
-  public static FindNextStartCodeEnd(data: Uint8Array, start: number): number {
-    let i = start;
-    while (i < data.length - 3) {
-      const isStartCode3Bytes = data[i + 0] === 0 && data[i + 1] === 0 && data[i + 2] === 1;
-      if (isStartCode3Bytes) {
-        return i + 3;
-      }
-      const isStartCode4Bytes =
-        i + 3 < data.length &&
-        data[i + 0] === 0 &&
-        data[i + 1] === 0 &&
-        data[i + 2] === 0 &&
-        data[i + 3] === 1;
-      if (isStartCode4Bytes) {
-        return i + 4;
-      }
-      i++;
-    }
-    return data.length;
   }
 }

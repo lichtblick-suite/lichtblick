@@ -71,7 +71,7 @@ enum AppEvent {
 }
 
 interface IAnalytics {
-  logEvent(event: AppEvent, data?: { [key: string]: unknown }): void | Promise<void>;
+  logEvent(event: AppEvent, data?: { [key: string]: unknown }): void;
 }
 
 export { AppEvent };

@@ -20,7 +20,10 @@ describe("settingsActionReducer", () => {
   function buildUpdateAction({
     path,
     value,
-  }: { path?: string[]; value?: string } = {}): SettingsTreeAction {
+  }: {
+    path?: string[];
+    value?: string;
+  } = {}): SettingsTreeAction {
     return {
       action: "update",
       payload: {

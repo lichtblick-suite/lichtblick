@@ -37,7 +37,7 @@ async function promiseTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     }, ms);
     promise
       .then(resolve, (reason: unknown) => {
-        reject(reason as Error);
+        reject(reason instanceof Error ? reason : new Error(String(reason)));
       })
       .finally(() => {
         clearTimeout(id);

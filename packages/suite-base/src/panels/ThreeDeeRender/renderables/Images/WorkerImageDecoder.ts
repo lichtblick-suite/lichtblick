@@ -22,7 +22,7 @@ import { Image as RosImage } from "../../ros";
  * back to the main thread.
  */
 
-type WorkerService = (typeof import("./WorkerImageDecoder.worker"))["service"];
+type WorkerService = typeof import("./WorkerImageDecoder.worker")["service"];
 export class WorkerImageDecoder {
   #remote: Comlink.Remote<WorkerService>;
   #dispose: () => void;

@@ -14,7 +14,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { StoryObj } from "@storybook/react";
+import { StoryObj } from "@storybook/react-webpack5";
 
 import RawMessages from "@lichtblick/suite-base/panels/RawMessages";
 import {
@@ -273,15 +273,13 @@ export const DisplayDiffWithIDFields: StoryObj = {
   render: () => (
     <PanelSetup fixture={topicsWithIdsToDiffFixture}>
       <RawMessages
-        overrideConfig={
-          {
-            ...diffConfig,
-            topicPath: "/baz/enum_advanced_array.value",
-            diffTopicPath: "/another/baz/enum_advanced_array.value",
-            showFullMessageForDiff: false,
-            expansion: "all",
-          } as RawMessagesPanelConfig
-        }
+        overrideConfig={{
+          ...diffConfig,
+          topicPath: "/baz/enum_advanced_array.value",
+          diffTopicPath: "/another/baz/enum_advanced_array.value",
+          showFullMessageForDiff: false,
+          expansion: "all",
+        }}
       />
     </PanelSetup>
   ),
@@ -290,9 +288,7 @@ export const DisplayDiffWithIDFields: StoryObj = {
 export const EmptyDiffMessage: StoryObj = {
   render: () => (
     <PanelSetup fixture={{ topics: [], frame: {} }}>
-      <RawMessages
-        overrideConfig={{ ...diffConfig, showFullMessageForDiff: false } as RawMessagesPanelConfig}
-      />
+      <RawMessages overrideConfig={{ ...diffConfig, showFullMessageForDiff: false }} />
     </PanelSetup>
   ),
 };

@@ -277,7 +277,7 @@ describe("IdbExtensionLoader", () => {
       } as ExtensionInfo;
       mockGet.mockReturnValue({
         info: expectedInfo,
-      } as StoredExtension);
+      });
       const loader = new IdbExtensionLoader("local");
 
       await loader.installExtension({ foxeFileData: foxe as unknown as Uint8Array });

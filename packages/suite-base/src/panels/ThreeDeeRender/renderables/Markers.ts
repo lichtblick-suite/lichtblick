@@ -11,7 +11,7 @@ import * as _ from "lodash-es";
 import { toNanoSec } from "@lichtblick/rostime";
 import { SettingsTreeAction } from "@lichtblick/suite";
 
-import { LayerSettingsMarker, LayerSettingsMarkerNamespace, TopicMarkers } from "./TopicMarkers";
+import { LayerSettingsMarker, TopicMarkers } from "./TopicMarkers";
 import type { AnyRendererSubscription, IRenderer } from "../IRenderer";
 import { SELECTED_ID_VARIABLE } from "../Renderable";
 import { PartialMessage, PartialMessageEvent, SceneExtension } from "../SceneExtension";
@@ -142,9 +142,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
     const topicName = path[1]!;
     const topicMarkers = this.renderables.get(topicName);
     if (topicMarkers) {
-      const settings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsMarker>
-        | undefined;
+      const settings = this.renderer.config.topics[topicName];
       topicMarkers.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
       topicMarkers.update();
     }
@@ -173,14 +171,11 @@ export class Markers extends SceneExtension<TopicMarkers> {
     // Update the MarkersNamespace settings
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName] as
-        | Partial<LayerSettingsMarker>
-        | undefined;
+      const settings = (this.renderer.config.topics[topicName] ??
+        {}) as Partial<LayerSettingsMarker>;
       const ns = renderable.namespaces.get(namespace);
       if (ns) {
-        const nsSettings = settings?.namespaces?.[namespace] as
-          | Partial<LayerSettingsMarkerNamespace>
-          | undefined;
+        const nsSettings = settings.namespaces?.[namespace];
         ns.settings = { ...ns.settings, ...nsSettings };
       }
     }
@@ -242,9 +237,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
   #getTopicMarkers(topic: string, marker: Marker, receiveTime: bigint): TopicMarkers {
     let topicMarkers = this.renderables.get(topic);
     if (!topicMarkers) {
-      const userSettings = this.renderer.config.topics[topic] as
-        | Partial<LayerSettingsMarker>
-        | undefined;
+      const userSettings = this.renderer.config.topics[topic];
 
       topicMarkers = new TopicMarkers(topic, this.renderer, {
         receiveTime,

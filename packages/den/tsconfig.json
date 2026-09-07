@@ -4,6 +4,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "./dist",
+    "types": ["node", "jest"],
     "lib": ["DOM", "es2022"]
   }
 }

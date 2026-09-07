@@ -48,6 +48,8 @@ export const DEFAULT_PLOT_CONFIG: PlotConfig = {
   isSynced: true,
   xAxisVal: "timestamp",
   sidebarDimension: DEFAULT_SIDEBAR_DIMENSION,
+  xAxisLabel: undefined,
+  yAxisLabel: undefined,
 };
 
 export const DEFAULT_PLOT_PATH: PlotPath = Object.freeze({

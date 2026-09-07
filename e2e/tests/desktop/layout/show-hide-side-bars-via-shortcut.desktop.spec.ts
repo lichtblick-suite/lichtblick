@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 import { test, expect } from "../../../fixtures/electron";
+import { DataSourceDialog, Sidebar } from "../../../page-objects";
 
 /**
  * Given the Data Source dialog is closed
@@ -9,27 +10,30 @@ import { test, expect } from "../../../fixtures/electron";
  * When the user presses [ again
  * Then the left‐sidebar tabs are all visible
  */
-test("show/hide left side bar via shortcut", async ({ mainWindow }) => {
+test("show/hide left side bar via shortcut", { tag: "@regression" }, async ({ mainWindow }) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
+
   // Given
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
+  await dialog.close();
 
   // When
   await mainWindow.keyboard.press("[");
 
   // Then
-  await expect(mainWindow.getByTestId("panel-settings-left")).not.toBeVisible();
-  await expect(mainWindow.getByTestId("topics-left")).not.toBeVisible();
-  await expect(mainWindow.getByTestId("alerts-left")).not.toBeVisible();
-  await expect(mainWindow.getByTestId("layouts-left")).not.toBeVisible();
+  await expect(sidebar.getPanelSettingsTab()).not.toBeVisible();
+  await expect(sidebar.getTopicsTab()).not.toBeVisible();
+  await expect(sidebar.getAlertsTab()).not.toBeVisible();
+  await expect(sidebar.getLayoutsTab()).not.toBeVisible();
 
   // When
   await mainWindow.keyboard.press("[");
 
   // Then
-  await expect(mainWindow.getByTestId("panel-settings-left")).toBeVisible();
-  await expect(mainWindow.getByTestId("topics-left")).toBeVisible();
-  await expect(mainWindow.getByTestId("alerts-left")).toBeVisible();
-  await expect(mainWindow.getByTestId("layouts-left")).toBeVisible();
+  await expect(sidebar.getPanelSettingsTab()).toBeVisible();
+  await expect(sidebar.getTopicsTab()).toBeVisible();
+  await expect(sidebar.getAlertsTab()).toBeVisible();
+  await expect(sidebar.getLayoutsTab()).toBeVisible();
 });
 
 /**
@@ -39,19 +43,22 @@ test("show/hide left side bar via shortcut", async ({ mainWindow }) => {
  * When the user presses ] again
  * Then the right‐sidebar panels are all hidden
  */
-test("hide/show right side bar via shortcut", async ({ mainWindow }) => {
+test("hide/show right side bar via shortcut", { tag: "@regression" }, async ({ mainWindow }) => {
+  const dialog = new DataSourceDialog(mainWindow);
+  const sidebar = new Sidebar(mainWindow);
+
   // Given
-  await mainWindow.getByTestId("DataSourceDialog").getByTestId("CloseIcon").click();
+  await dialog.close();
 
   // When
   await mainWindow.keyboard.press("]");
 
   // Then
-  await expect(mainWindow.getByTestId("variables-right")).toBeVisible();
+  await expect(sidebar.getVariablesTab()).toBeVisible();
 
   // When
   await mainWindow.keyboard.press("]");
 
   // Then
-  await expect(mainWindow.getByTestId("variables-right")).not.toBeVisible();
+  await expect(sidebar.getVariablesTab()).not.toBeVisible();
 });

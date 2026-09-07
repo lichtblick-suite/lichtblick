@@ -32,6 +32,7 @@ import {
   reorderTabWithinTabPanel,
   getPathFromNode,
   getParentTabPanelByPanelId,
+  validateLayoutData,
 } from "./layout";
 
 const tabConfig = {
@@ -640,6 +641,141 @@ describe("layout", () => {
       };
       const parentTabsByPanelId = getParentTabPanelByPanelId(configById);
       expect(parentTabsByPanelId).toEqual({});
+    });
+  });
+
+  describe("validateLayoutData", () => {
+    function validData(): Record<string, unknown> {
+      return {
+        configById: {},
+        globalVariables: {},
+        userNodes: {},
+        playbackConfig: { speed: 1 },
+      };
+    }
+
+    it("returns the data when all required fields are valid", () => {
+      // Given a fully populated layout
+      const data = {
+        ...validData(),
+        layout: { first: "Plot!1", second: "Plot!2", direction: "row" },
+        version: 1,
+      };
+
+      // When validating it
+      // Then the same object is returned without throwing
+      expect(validateLayoutData(data)).toBe(data);
+    });
+
+    it("accepts optional layout as a string and omitted version", () => {
+      // Given a layout whose root is a single panel id
+      const data = { ...validData(), layout: "Plot!1" };
+
+      // When validating it
+      // Then it is accepted
+      expect(validateLayoutData(data)).toBe(data);
+    });
+
+    it.each([
+      undefined,
+      null,
+      42,
+      "string",
+      [],
+    ])("throws when the value is not an object (%p)", (value) => {
+      // Given a non-object value
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(value)).toThrow("expected an object");
+    });
+
+    it.each([
+      "configById",
+      "globalVariables",
+    ] as const)("throws when required object field %s is missing", (field) => {
+      // Given a layout missing a required object field
+      const data = validData();
+      delete data[field];
+
+      // When validating it
+      // Then it throws referencing that field
+      expect(() => validateLayoutData(data)).toThrow(`missing or invalid "${field}"`);
+    });
+
+    it("accepts a layout that omits userNodes", () => {
+      // Given a valid layout without a userNodes field
+      const data = validData();
+      delete data.userNodes;
+
+      // When validating it
+      // Then it is accepted
+      expect(validateLayoutData(data)).toBe(data);
+    });
+
+    it("throws when userNodes is present but not an object", () => {
+      // Given a layout whose userNodes field is not an object
+      const data = { ...validData(), userNodes: [] };
+
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(data)).toThrow('invalid "userNodes"');
+    });
+
+    it("throws when userNodes is null", () => {
+      // Given a layout whose userNodes field is explicitly null
+      const data = { ...validData(), userNodes: null };
+
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(data)).toThrow('invalid "userNodes"');
+    });
+
+    it("throws when playbackConfig is missing", () => {
+      // Given a layout without playbackConfig
+      const data = validData();
+      delete data.playbackConfig;
+
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(data)).toThrow('missing or invalid "playbackConfig"');
+    });
+
+    it("throws when playbackConfig.speed is not a number", () => {
+      // Given a layout whose playbackConfig has a non-numeric speed
+      const data = { ...validData(), playbackConfig: { speed: "fast" } };
+
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(data)).toThrow('missing or invalid "playbackConfig"');
+    });
+
+    it("throws when layout has an invalid type", () => {
+      // Given a layout whose layout field is a number
+      const data = { ...validData(), layout: 5 };
+
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(data)).toThrow('invalid "layout"');
+    });
+
+    it("throws when version has an invalid type", () => {
+      // Given a layout whose version is a string
+      const data = { ...validData(), version: "1" };
+
+      // When validating it
+      // Then it throws
+      expect(() => validateLayoutData(data)).toThrow('invalid "version"');
+    });
+
+    it("aggregates multiple errors into a single message", () => {
+      // Given a layout missing several fields
+      const data = { globalVariables: {} };
+
+      // When validating it
+      // Then all invalid fields are reported
+      expect(() => validateLayoutData(data)).toThrow(
+        'missing or invalid fields: "configById", "playbackConfig"',
+      );
     });
   });
 });

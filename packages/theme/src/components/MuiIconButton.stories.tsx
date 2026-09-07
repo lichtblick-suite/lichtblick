@@ -15,7 +15,7 @@ import {
   ShoppingBag20Regular,
 } from "@fluentui/react-icons";
 import { IconButtonProps, IconButton as MuiIconButton, Stack } from "@mui/material";
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-webpack5";
 
 const colors: IconButtonProps["color"][] = [
   "inherit",

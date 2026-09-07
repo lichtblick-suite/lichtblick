@@ -37,7 +37,7 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
       name: layout.name,
       data: layout.data,
       permission: layout.permission,
-      savedAt: layout.updatedBy as ISO8601Timestamp | undefined,
+      savedAt: layout.updatedAt as ISO8601Timestamp,
     }));
   }
 
@@ -66,7 +66,7 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
       name: layoutData.name,
       data: layoutData.data,
       permission: layoutData.permission,
-      savedAt: layoutData.updatedBy as ISO8601Timestamp | undefined,
+      savedAt: layoutData.updatedAt as ISO8601Timestamp,
     };
 
     return transformedLayout;
@@ -91,7 +91,7 @@ export class LayoutsAPI implements IRemoteLayoutStorage {
       name: layoutData.name,
       data: layoutData.data,
       permission: layoutData.permission,
-      savedAt: layoutData.updatedBy as ISO8601Timestamp | undefined,
+      savedAt: layoutData.updatedAt as ISO8601Timestamp,
     };
 
     return { status: "success", newLayout };
