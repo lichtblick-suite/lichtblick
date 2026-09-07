@@ -14,6 +14,61 @@ import { Dataset } from "../types";
 const emptyPaths = new Set<string>();
 
 /**
+ * Caps how many current-frame (unpreloaded) datums a series accumulates so memory does not grow
+ * indefinitely. Shared by builders that separately track current and full (preloaded) buffers.
+ */
+export const MAX_CURRENT_DATUMS_PER_SERIES = 50_000;
+
+/**
+ * Builds the chart.js dataset styling fields derived from a series config. Shared by builders
+ * that render full/current data (CustomDatasetsBuilderImpl, TimestampDatasetsBuilderImpl) and
+ * `setSeries` below for builders that only track the current frame.
+ */
+export function buildDatasetStyle(config: Immutable<SeriesItem>): Omit<Dataset, "data"> {
+  const { color, contrastColor, showLine, lineSize } = config;
+  return {
+    borderColor: color,
+    showLine,
+    fill: false,
+    borderWidth: lineSize,
+    pointRadius: lineSize * 1.2,
+    pointHoverRadius: 3,
+    pointBackgroundColor: showLine ? contrastColor : color,
+    pointBorderColor: "transparent",
+  };
+}
+
+/**
+ * Series entry shared by builders that accumulate both a "full" (preloaded) and "current"
+ * (unpreloaded) buffer of items. Used by CustomDatasetsBuilderImpl and TimestampDatasetsBuilderImpl.
+ */
+type FullAndCurrentSeries<TItem> = {
+  config: Immutable<SeriesItem>;
+  current: TItem[];
+  full: TItem[];
+};
+
+/**
+ * Rebuilds a series map from a new config array, preserving each series' existing current/full
+ * buffers for matching keys.
+ */
+export function updateSeriesConfig<TItem>(
+  existing: ReadonlyMap<SeriesConfigKey, FullAndCurrentSeries<TItem>>,
+  series: Immutable<SeriesItem[]>,
+): Map<SeriesConfigKey, FullAndCurrentSeries<TItem>> {
+  const newSeries = new Map<SeriesConfigKey, FullAndCurrentSeries<TItem>>();
+
+  for (const config of series) {
+    let existingSeries = existing.get(config.key);
+    existingSeries ??= { config, current: [], full: [] };
+    existingSeries.config = config;
+    newSeries.set(config.key, existingSeries);
+  }
+
+  return newSeries;
+}
+
+/**
  * Rebuilds the series map from a new config array, preserving existing dataset data for
  * matching keys and updating chart.js styling properties.
  */
@@ -37,14 +92,7 @@ export function setSeries(
     existingSeries.enabled = item.enabled;
     existingSeries.dataset = {
       ...existingSeries.dataset,
-      borderColor: item.color,
-      showLine: item.showLine,
-      fill: false,
-      borderWidth: item.lineSize,
-      pointRadius: item.lineSize * 1.2,
-      pointHoverRadius: 3,
-      pointBackgroundColor: item.showLine ? item.contrastColor : item.color,
-      pointBorderColor: "transparent",
+      ...buildDatasetStyle(item),
     };
 
     newSeries.set(item.key, existingSeries);

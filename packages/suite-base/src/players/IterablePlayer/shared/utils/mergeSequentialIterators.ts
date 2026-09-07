@@ -62,11 +62,6 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
     }
   }
 
-  // Start sources without time info eagerly.
-  for (const source of sourcesWithoutTime) {
-    await activateSource(source);
-  }
-
   // Index into the sorted sourcesWithTime array tracking the next source to potentially activate
   let nextSourceIndex = 0;
 
@@ -76,41 +71,46 @@ export async function* mergeSequentialIterators<T extends IteratorResult>(
     nextSourceIndex++;
   }
 
-  // On seek, start only sources whose range can contain queryStart; otherwise start just the
-  // earliest source. Additional sources are activated lazily as playback reaches them so we do
-  // not open remote reads for every file up front.
-  const queryStart = args.start;
-  if (queryStart != undefined) {
-    // Skip sources that end before queryStart.
-    while (nextSourceIndex < sourcesWithTime.length) {
-      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-      if (compare(sourceInfo.endTime, queryStart) >= 0) {
-        break;
-      }
-      nextSourceIndex++;
-    }
-    // Activate sources that contain queryStart.
-    while (nextSourceIndex < sourcesWithTime.length) {
-      const sourceInfo = sourcesWithTime[nextSourceIndex]!;
-      if (compare(sourceInfo.startTime, queryStart) > 0) {
-        break;
-      }
-      await activateNextSource();
-    }
-  } else {
-    // No query start: activate only the first source.
-    if (nextSourceIndex < sourcesWithTime.length) {
-      await activateNextSource();
-    }
-  }
-
-  // If the initial source(s) were empty, advance through pending sources until
-  // we find one with data or exhaust all sources.
-  while (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
-    await activateNextSource();
-  }
-
   try {
+    // Start sources without time info eagerly.
+    for (const source of sourcesWithoutTime) {
+      await activateSource(source);
+    }
+
+    // On seek, start only sources whose range can contain queryStart; otherwise start just the
+    // earliest source. Additional sources are activated lazily as playback reaches them so we
+    // do not open remote reads for every file up front.
+    const queryStart = args.start;
+    if (queryStart != undefined) {
+      // Skip sources that end before queryStart.
+      while (nextSourceIndex < sourcesWithTime.length) {
+        const sourceInfo = sourcesWithTime[nextSourceIndex]!;
+        if (compare(sourceInfo.endTime, queryStart) >= 0) {
+          break;
+        }
+        nextSourceIndex++;
+      }
+      // Activate sources that contain queryStart.
+      while (nextSourceIndex < sourcesWithTime.length) {
+        const sourceInfo = sourcesWithTime[nextSourceIndex]!;
+        if (compare(sourceInfo.startTime, queryStart) > 0) {
+          break;
+        }
+        await activateNextSource();
+      }
+    } else {
+      // No query start: activate only the first source.
+      if (nextSourceIndex < sourcesWithTime.length) {
+        await activateNextSource();
+      }
+    }
+
+    // If the initial source(s) were empty, advance through pending sources until
+    // we find one with data or exhaust all sources.
+    while (heap.isEmpty() && nextSourceIndex < sourcesWithTime.length) {
+      await activateNextSource();
+    }
+
     while (!heap.isEmpty()) {
       const node = heap.pop()!;
       const currentTimeMs = getTime(node.value);

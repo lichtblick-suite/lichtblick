@@ -30,7 +30,10 @@ import {
   PerformanceMetricID,
 } from "@lichtblick/suite-base/context/PerformanceContext";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { IteratorResult as IIterableSourceIteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import {
+  GetBackfillMessagesArgs,
+  IteratorResult as IIterableSourceIteratorResult,
+} from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { MemoizedLibGenerator } from "@lichtblick/suite-base/players/UserScriptPlayer/MemoizedLibGenerator";
 import { generateTypesLib } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/generateTypesLib";
 import { TransformArgs } from "@lichtblick/suite-base/players/UserScriptPlayer/transformerWorker/types";
@@ -1026,6 +1029,18 @@ export default class UserScriptPlayer implements Player {
     }
 
     return this.#getVirtualBatchIterator(registration, options);
+  }
+
+  // Script-output (virtual) topics aren't supported for point-in-time backfill — that would
+  // require re-running the transform against historical input backfill. Real topics pass through.
+  public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
+    const realTopics = new Map(
+      Array.from(args.topics).filter(([topic]) => !this.#outputTopicRegistrations.has(topic)),
+    );
+    if (realTopics.size === 0) {
+      return [];
+    }
+    return (await this.#player.getBackfillMessages?.({ ...args, topics: realTopics })) ?? [];
   }
 
   #collectInputIterators(

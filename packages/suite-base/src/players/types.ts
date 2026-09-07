@@ -20,7 +20,10 @@ import type { MessageEvent, Metadata, ParameterValue } from "@lichtblick/suite";
 import { Immutable } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
-import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
+import {
+  GetBackfillMessagesArgs,
+  IteratorResult,
+} from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { Range } from "@lichtblick/suite-base/util/ranges";
@@ -82,6 +85,9 @@ export interface Player {
     topic: string,
     options?: { start?: Time; end?: Time },
   ) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
+  // Read the most recent message per topic at or before a given time, independent of the current
+  // playback position. Not available for live/real-time data sources.
+  getBackfillMessages?(args: GetBackfillMessagesArgs): Promise<MessageEvent[]>;
 }
 
 export enum PlayerPresence {

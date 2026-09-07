@@ -22,7 +22,7 @@ import { Trans, useTranslation } from "react-i18next";
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useStyles } from "@lichtblick/suite-base/Workspace.style";
-import SessionAPI from "@lichtblick/suite-base/api/session/SessionAPI";
+import McapBundleAPI from "@lichtblick/suite-base/api/mcapBundle/McapBundleAPI";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
 import { AlertsList } from "@lichtblick/suite-base/components/AlertList/AlertsList";
 import { AppBar } from "@lichtblick/suite-base/components/AppBar";
@@ -513,7 +513,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       }
     | undefined
   >(
-    targetUrlState && !targetUrlState.sessionId
+    targetUrlState && !targetUrlState.mcapBundleId
       ? {
           ds: targetUrlState.ds,
           dsParams: targetUrlState.dsParams,
@@ -522,10 +522,10 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       : undefined,
   );
 
-  // Resolve session-based MCAP URLs when sessionId is present.
+  // Resolve MCAP bundle URLs when mcapBundleId is present.
   useEffect(() => {
-    const sessionId = targetUrlState?.sessionId;
-    if (!sessionId) {
+    const mcapBundleId = targetUrlState?.mcapBundleId;
+    if (!mcapBundleId) {
       return;
     }
 
@@ -534,7 +534,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
     void (async () => {
       try {
-        const mcaps = await SessionAPI.getSession(sessionId, signal);
+        const mcaps = await McapBundleAPI.getMcapBundle(mcapBundleId, signal);
         if (mcaps.length === 0) {
           enqueueSnackbar("Session contains no data sources", { variant: "error" });
           return;
@@ -558,7 +558,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     return () => {
       controller.abort();
     };
-  }, [targetUrlState?.sessionId, enqueueSnackbar]);
+  }, [targetUrlState?.mcapBundleId, enqueueSnackbar]);
 
   const selectEvent = useEvents(selectSelectEvent);
 

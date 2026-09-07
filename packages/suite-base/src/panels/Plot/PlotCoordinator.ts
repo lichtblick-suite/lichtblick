@@ -241,7 +241,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       }
 
       const value = +path.value;
-      if (isNaN(value)) {
+      if (Number.isNaN(value)) {
         return;
       }
 

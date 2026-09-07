@@ -696,6 +696,13 @@ function PanelExtensionAdapter(
         return subscribeMessageRange(args);
       },
 
+      async getMessageAtTime(topic: string, time: Time) {
+        if (!isMounted()) {
+          return undefined;
+        }
+        return await getMessagePipelineContext().getMessageAtTime(topic, time);
+      },
+
       unstable_setMessagePathDropConfig(dropConfig) {
         setMessagePathDropConfig(dropConfig);
       },

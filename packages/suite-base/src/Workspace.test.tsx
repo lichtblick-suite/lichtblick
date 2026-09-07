@@ -53,10 +53,10 @@ jest.mock("notistack", () => ({
 }));
 
 // ── api ───────────────────────────────────────────────────────────────────────
-const mockGetSession = jest.fn();
-jest.mock("@lichtblick/suite-base/api/session/SessionAPI", () => ({
+const mockGetMcapBundle = jest.fn();
+jest.mock("@lichtblick/suite-base/api/mcapBundle/McapBundleAPI", () => ({
   __esModule: true,
-  default: { getSession: (...args: unknown[]) => mockGetSession(...args) },
+  default: { getMcapBundle: (...args: unknown[]) => mockGetMcapBundle(...args) },
 }));
 
 // ── components (rendered as null — Sidebars is the exception below) ────────────
@@ -412,20 +412,20 @@ describe("Workspace - session-based MCAP resolution", () => {
 
   it("should fetch session and call selectSource with resolved URLs and metadata", async () => {
     // Given
-    const sessionId = "test-session-123";
+    const mcapBundleId = "test-session-123";
     const mockMcaps = [
       { url: "https://example.com/file1.mcap", metadata: { robot: "r1" } },
       { url: "https://example.com/file2.mcap", metadata: { robot: "r2" } },
     ];
-    mockGetSession.mockResolvedValue(mockMcaps);
-    (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
+    mockGetMcapBundle.mockResolvedValue(mockMcaps);
+    (parseAppURLState as jest.Mock).mockReturnValue({ mcapBundleId });
 
     // When
-    render(<Workspace deepLinks={["https://app.example.com/?sessionid=test-session-123"]} />);
+    render(<Workspace deepLinks={["https://app.example.com/?mcap-bundle=test-session-123"]} />);
 
     // Then
     await waitFor(() => {
-      expect(mockGetSession).toHaveBeenCalledWith(sessionId, expect.any(AbortSignal));
+      expect(mockGetMcapBundle).toHaveBeenCalledWith(mcapBundleId, expect.any(AbortSignal));
     });
     await waitFor(() => {
       expect(mockSelectSource).toHaveBeenCalledWith("remote-file", {
@@ -438,16 +438,16 @@ describe("Workspace - session-based MCAP resolution", () => {
 
   it("should show error snackbar when session fetch fails", async () => {
     // Given
-    const sessionId = "failing-session";
-    mockGetSession.mockRejectedValue(new Error("Network error"));
-    (parseAppURLState as jest.Mock).mockReturnValue({ sessionId });
+    const mcapBundleId = "failing-session";
+    mockGetMcapBundle.mockRejectedValue(new Error("Network error"));
+    (parseAppURLState as jest.Mock).mockReturnValue({ mcapBundleId });
 
     // When
-    render(<Workspace deepLinks={["https://app.example.com/?sessionid=failing-session"]} />);
+    render(<Workspace deepLinks={["https://app.example.com/?mcap-bundle=failing-session"]} />);
 
     // Then
     await waitFor(() => {
-      expect(mockGetSession).toHaveBeenCalledWith(sessionId, expect.any(AbortSignal));
+      expect(mockGetMcapBundle).toHaveBeenCalledWith(mcapBundleId, expect.any(AbortSignal));
     });
     await waitFor(() => {
       expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Failed to load session data sources", {
@@ -456,7 +456,7 @@ describe("Workspace - session-based MCAP resolution", () => {
     });
   });
 
-  it("should not fetch session when sessionId is not present", () => {
+  it("should not fetch session when mcapBundleId is not present", () => {
     // Given
     (parseAppURLState as jest.Mock).mockReturnValue({
       ds: "remote-file",
@@ -467,7 +467,7 @@ describe("Workspace - session-based MCAP resolution", () => {
     render(<Workspace deepLinks={["https://app.example.com/?ds=remote-file"]} />);
 
     // Then
-    expect(mockGetSession).not.toHaveBeenCalled();
+    expect(mockGetMcapBundle).not.toHaveBeenCalled();
   });
 });
 

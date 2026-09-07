@@ -3,7 +3,11 @@
 
 import { isTime, toSec } from "@lichtblick/rostime";
 import { Time } from "@lichtblick/suite";
-import { getChartValue, isChartValue } from "@lichtblick/suite-base/panels/Plot/utils/datum";
+import {
+  getChartValue,
+  isChartValue,
+  resolveChartDatum,
+} from "@lichtblick/suite-base/panels/Plot/utils/datum";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/rostime", () => ({
@@ -27,6 +31,9 @@ describe("Chart Value Utilities", () => {
   };
 
   describe("isChartValue", () => {
+    it("should return true if value is null", () => {
+      expect(isChartValue(null)).toBe(true);
+    });
     it("should return true for valid types: bigint, boolean, number, string", () => {
       expect(isChartValue(42n)).toBe(true);
       expect(isChartValue(true)).toBe(true);
@@ -55,6 +62,9 @@ describe("Chart Value Utilities", () => {
   });
 
   describe("getChartValue", () => {
+    it("should return NaN when value is null", () => {
+      expect(getChartValue(null)).toBeNaN();
+    });
     it("should correctly convert bigint, boolean, number, and string", () => {
       expect(getChartValue(42n)).toBe(42);
       expect(getChartValue(true)).toBe(1);
@@ -83,6 +93,45 @@ describe("Chart Value Utilities", () => {
       expect(getChartValue(undefined)).toBeUndefined();
       expect(getChartValue(Symbol(BasicBuilder.string()))).toBeUndefined();
       expect(getChartValue(() => {})).toBeUndefined();
+    });
+  });
+
+  describe("resolveChartDatum", () => {
+    it("should return undefined for unsupported types", () => {
+      expect(resolveChartDatum(undefined)).toBeUndefined();
+      expect(resolveChartDatum(Symbol(BasicBuilder.string()))).toBeUndefined();
+      expect(resolveChartDatum(() => {})).toBeUndefined();
+    });
+
+    it("should map a null item to a gap without invoking the math function", () => {
+      const mathFunction = jest.fn();
+
+      expect(resolveChartDatum(null, mathFunction)).toEqual({ y: NaN, value: null });
+      expect(mathFunction).not.toHaveBeenCalled();
+    });
+
+    it("should resolve a numeric item without a math function", () => {
+      const value = 3.14;
+
+      expect(resolveChartDatum(value)).toEqual({ y: value, value });
+    });
+
+    it("should map a value that resolves to NaN to a null value", () => {
+      expect(resolveChartDatum("not-a-number")).toEqual({ y: NaN, value: null });
+    });
+
+    it("should apply the math function to the resolved chart value", () => {
+      const mathFunction = jest.fn().mockReturnValue(42);
+
+      expect(resolveChartDatum(3, mathFunction)).toEqual({ y: 42, value: 42 });
+      expect(mathFunction).toHaveBeenCalledWith(3);
+    });
+
+    it("should resolve Time objects using toSec", () => {
+      const time: Time = { sec: 10, nsec: 500 };
+      setupMocks({ isTimeMockReturnValue: true, toSecMockReturnValue: 10.5 });
+
+      expect(resolveChartDatum(time)).toEqual({ y: 10.5, value: time });
     });
   });
 });

@@ -71,6 +71,38 @@ describe("PanelExtensionAdapter", () => {
     await sig;
   });
 
+  it("should expose point-in-time message lookups through the panel context", async () => {
+    // GIVEN - a panel that captures its extension context
+    let panelContext: PanelExtensionContext | undefined;
+    const initPanel = (context: PanelExtensionContext) => {
+      panelContext = context;
+    };
+
+    const handle = render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup>
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+    await act(async () => undefined);
+
+    // WHEN - requesting a message while mounted, then after unmounting
+    expect(panelContext).toBeDefined();
+    expect(panelContext!.getMessageAtTime).toBeDefined();
+    await expect(
+      panelContext!.getMessageAtTime?.("/topic", { sec: 1, nsec: 0 }),
+    ).resolves.toBeUndefined();
+    handle.unmount();
+
+    // THEN - the adapter does not query the pipeline after it is unmounted
+    await expect(
+      panelContext!.getMessageAtTime?.("/topic", { sec: 1, nsec: 0 }),
+    ).resolves.toBeUndefined();
+  });
+
   it("sets didSeek=true when seeking", async () => {
     const mockRAF = jest
       .spyOn(window, "requestAnimationFrame")

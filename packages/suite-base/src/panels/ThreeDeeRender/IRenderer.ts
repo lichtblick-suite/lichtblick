@@ -46,7 +46,7 @@ import { ColorModeSettings } from "./renderables/colorMode";
 import { MarkerPool } from "./renderables/markers/MarkerPool";
 import { Quaternion, Vector3 } from "./ros";
 import { BaseSettings, CustomLayerSettings, SelectEntry } from "./settings";
-import { TransformTree } from "./transforms";
+import { AddTransformResult, TransformTree } from "./transforms";
 import { InterfaceMode } from "./types";
 
 export type RendererEvents = {
@@ -404,7 +404,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
     translation: Vector3,
     rotation: Quaternion,
     errorSettingsPath?: string[],
-  ): void;
+  ): AddTransformResult;
 
   removeTransform(childFrameId: string, parentFrameId: string, stamp: bigint): void;
 
