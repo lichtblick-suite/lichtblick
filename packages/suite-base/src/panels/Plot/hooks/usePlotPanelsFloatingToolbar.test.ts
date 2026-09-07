@@ -5,12 +5,15 @@
 
 import { renderHook } from "@testing-library/react";
 
+import { LayoutState } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+
 import usePlotPanelsFloatingToolbar from "./usePlotPanelsFloatingToolbar";
 
 const mockUseCurrentLayoutSelector = jest.fn();
 
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
-  useCurrentLayoutSelector: (selector: any) => mockUseCurrentLayoutSelector(selector),
+  useCurrentLayoutSelector: (selector: (state: LayoutState) => boolean) =>
+    mockUseCurrentLayoutSelector(selector),
 }));
 
 describe("usePlotPanelsFloatingToolbar", () => {

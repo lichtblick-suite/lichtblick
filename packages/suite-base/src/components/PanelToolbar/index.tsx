@@ -95,6 +95,11 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
       ref={controlsDragRef}
     />
   );
+  // When `children` is provided it replaces the title slot with custom, interactive toolbar
+  // content (e.g. a filter dropdown). While floating, that content must stay inside a
+  // pointer-enabled container just like `controls`, or it would inherit `pointer-events: none`
+  // from `floatingRoot` and become unusable - grouped with `controls` so both are revealed
+  // together on hover.
   return (
     <header
       className={cx(classes.root, floating && classes.floatingRoot, className)}
@@ -102,24 +107,27 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
       ref={rootDragRef}
       style={{ backgroundColor, cursor: rootDragRef != undefined ? "grab" : "auto" }}
     >
-      {children ??
-        (title && (
-          <Typography
-            noWrap
-            variant="body2"
-            color="text.secondary"
-            flex={floating ? "0 1 auto" : "auto"}
-            className={floating ? classes.floatingTitle : undefined}
-          >
-            {title}
-          </Typography>
-        ))}
+      {children == undefined && title && (
+        <Typography
+          noWrap
+          variant="body2"
+          color="text.secondary"
+          flex={floating ? "0 1 auto" : "auto"}
+          className={floating ? classes.floatingTitle : undefined}
+        >
+          {title}
+        </Typography>
+      )}
       {floating ? (
         <div className={cx(classes.floatingControls, hovered && classes.floatingControlsVisible)}>
+          {children}
           {controls}
         </div>
       ) : (
-        controls
+        <>
+          {children}
+          {controls}
+        </>
       )}
     </header>
   );

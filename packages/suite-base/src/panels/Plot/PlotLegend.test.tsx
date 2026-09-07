@@ -133,13 +133,39 @@ describe("PlotLegend", () => {
     expect(mockOnClickPath).toHaveBeenCalledWith(0);
   });
 
-  it("Given floatingToolbar is true When rendering Then it renders without crashing for every legend position", () => {
-    // Given / When
-    for (const legendDisplay of ["floating", "top", "left"] as const) {
-      const { unmount } = setup({ floatingToolbar: true, legendDisplay });
+  it("Given floatingToolbar is true When rendering Then the legend gets extra top clearance for each position, and none when floatingToolbar is false", () => {
+    // Given / When / Then
+    // paddingTop values below come from PANEL_TOOLBAR_MIN_HEIGHT (30px) being added only when
+    // floatingToolbar is true, per position (see PlotLegend.tsx's rootFloating/rootTop/rootLeft
+    // styles) - asserting the resolved computed style (not just that the component renders)
+    // exercises the actual position-specific styling branch, not just the getByTitle smoke check.
+    const expectedClassNameByPosition = {
+      floating: "rootFloating",
+      top: "rootTop",
+      left: "rootLeft",
+    } as const;
+    const cases: Array<{
+      legendDisplay: "floating" | "top" | "left";
+      floatingToolbar: boolean;
+      expectedPaddingTop: string;
+    }> = [
+      { legendDisplay: "floating", floatingToolbar: true, expectedPaddingTop: "calc(42px)" },
+      { legendDisplay: "floating", floatingToolbar: false, expectedPaddingTop: "12px" },
+      { legendDisplay: "top", floatingToolbar: true, expectedPaddingTop: "30px" },
+      { legendDisplay: "top", floatingToolbar: false, expectedPaddingTop: "0px" },
+      { legendDisplay: "left", floatingToolbar: true, expectedPaddingTop: "30px" },
+      { legendDisplay: "left", floatingToolbar: false, expectedPaddingTop: "0px" },
+    ];
 
-      // Then
-      expect(screen.getByTitle("Add series")).toBeDefined();
+    for (const { legendDisplay, floatingToolbar, expectedPaddingTop } of cases) {
+      const { container, unmount } = setup({ floatingToolbar, legendDisplay });
+
+      const root = container.querySelector('[class*="root"]')!;
+      expect(root.className).toEqual(
+        expect.stringContaining(expectedClassNameByPosition[legendDisplay]),
+      );
+      expect(getComputedStyle(root).paddingTop).toBe(expectedPaddingTop);
+
       unmount();
     }
   });

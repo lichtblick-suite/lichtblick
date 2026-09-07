@@ -4,6 +4,7 @@
 import { userEvent } from "@storybook/testing-library";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
+import { PanelToolbarProps } from "@lichtblick/suite-base/components/PanelToolbar/types";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { DEFAULT_PLOT_CONFIG } from "@lichtblick/suite-base/panels/Plot/constants";
 import useGlobalSync from "@lichtblick/suite-base/panels/Plot/hooks/useGlobalSync";
@@ -39,10 +40,10 @@ jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
 jest.mock("@lichtblick/suite-base/components/PanelContextMenu", () => ({
   PanelContextMenu: jest.fn(() => <div data-testid="panel-context-menu" />),
 }));
-let mockLatestPanelToolbarProps: any;
+let mockLatestPanelToolbarProps: PanelToolbarProps | undefined;
 jest.mock("@lichtblick/suite-base/components/PanelToolbar", () => ({
   __esModule: true,
-  default: (props: any) => {
+  default: (props: PanelToolbarProps) => {
     mockLatestPanelToolbarProps = props;
     return <div data-testid="panel-toolbar" />;
   },
@@ -285,6 +286,7 @@ describe("Plot Component", () => {
 
   it("Given the panel is hovered and then unhovered When the pointer enters and leaves Then the toolbar's hovered prop toggles accordingly", () => {
     // Given
+    (usePlotPanelsFloatingToolbar as jest.Mock).mockReturnValue(true);
     const config = new PlotConfigBuilder().build();
     renderPlot(config);
     const panelRoot = screen.getByTestId("panel-toolbar").parentElement!;
@@ -293,6 +295,7 @@ describe("Plot Component", () => {
     fireEvent.pointerEnter(panelRoot);
 
     // Then
+    expect(mockLatestPanelToolbarProps?.floating).toBe(true);
     expect(mockLatestPanelToolbarProps?.hovered).toBe(true);
 
     // When

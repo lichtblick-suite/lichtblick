@@ -1629,7 +1629,7 @@ describe("PanelExtensionAdapter", () => {
       expect(handle.queryByTitle("Reset view")).not.toBeInTheDocument();
     });
 
-    it("does not update state when called after the panel has unmounted", async () => {
+    it("calling setToolbarActions after unmount does not throw (smoke test)", async () => {
       // GIVEN a panel that captures its extension context
       let capturedContext: PanelExtensionContext | undefined;
       const sig = signal();
@@ -1652,7 +1652,15 @@ describe("PanelExtensionAdapter", () => {
       handle.unmount();
 
       // WHEN the panel registers toolbar actions after unmounting
-      // THEN no error is thrown and no button is rendered (there is nothing left to render into)
+      // THEN no error is thrown and no button is rendered (there is nothing left to render into).
+      // Note: this does NOT prove the `isMounted()` guard branch executed - in React 18, calling
+      // a `useState` setter after unmount is already a silent no-op with no observable signal
+      // (verified empirically: this assertion still passes identically with the guard removed).
+      // There's no test seam to observe the guard's effect more directly without invasive
+      // instrumentation of production code, so this is a smoke/regression test - consistent with
+      // the equally-unprovable `getMessageAtTime` guard test elsewhere in this file - guarding
+      // against a thrown error or a stale UI artifact leaking through, which is what callers of
+      // this API actually depend on.
       expect(() => {
         capturedContext!.setToolbarActions?.([
           { id: "reset", title: "Reset view", iconPath: "M0 0h24v24H0z", onClick: () => {} },
