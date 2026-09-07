@@ -152,4 +152,12 @@ describe("PanelToolbar", () => {
       expect.stringContaining("floatingControls"),
     );
   });
+
+  it("Given children evaluates to false (e.g. a falsy conditional) When rendering Then the title still renders instead of the toolbar going empty", () => {
+    // Given / When
+    renderPanelToolbar({ propsOverrides: { children: false } });
+
+    // Then
+    expect(screen.getByText("Test Panel")).toBeInTheDocument();
+  });
 });

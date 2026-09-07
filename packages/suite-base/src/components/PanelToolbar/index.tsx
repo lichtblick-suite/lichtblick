@@ -73,13 +73,18 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
     );
   }, [additionalIcons, isFullscreen, exitFullscreen, enterFullscreen]);
 
+  // `children` is typed `React.ReactNode`, which includes `false` (e.g. from a caller passing
+  // `condition && <Foo />`). Treat that the same as `undefined` - no custom content - so the
+  // title still renders instead of the toolbar going empty.
+  const hasCustomChildren = children != undefined && children !== false;
+
   // If we have children then we limit the drag area to the controls. Otherwise the entire
   // toolbar is draggable.
   const rootDragRef =
-    isUnknownPanel || children != undefined ? undefined : panelContext?.connectToolbarDragHandle;
+    isUnknownPanel || hasCustomChildren ? undefined : panelContext?.connectToolbarDragHandle;
 
   const controlsDragRef =
-    isUnknownPanel || children == undefined ? undefined : panelContext?.connectToolbarDragHandle;
+    isUnknownPanel || !hasCustomChildren ? undefined : panelContext?.connectToolbarDragHandle;
 
   const [defaultPanelTitle] = useDefaultPanelTitle();
   const customPanelTitle =
@@ -107,7 +112,7 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
       ref={rootDragRef}
       style={{ backgroundColor, cursor: rootDragRef != undefined ? "grab" : "auto" }}
     >
-      {children == undefined && title && (
+      {!hasCustomChildren && title && (
         <Typography
           noWrap
           variant="body2"
