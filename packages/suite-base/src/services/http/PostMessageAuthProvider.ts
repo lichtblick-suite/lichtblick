@@ -31,7 +31,7 @@ export class PostMessageAuthProvider implements AuthProvider {
   private rejectFirstToken?: (error: Error) => void;
   private firstTokenReceived = false;
   private token?: string;
-  private tokenTimeoutId?: ReturnType<typeof setTimeout>;
+  private readonly tokenTimeoutId?: ReturnType<typeof setTimeout>;
 
   public constructor(options: PostMessageAuthProviderOptions) {
     this.allowedOrigins = new Set(options.allowedOrigins);

@@ -363,7 +363,7 @@ describe("StudioApp", () => {
     expect(document.referrer).toBe("https://host.example.com/embed");
     expect(new URL(document.referrer).origin).toBe("https://host.example.com");
     expect(window.parent).toBe(parentWindow);
-    expect(window.parent === window).toBe(false);
+    expect(window.parent).not.toBe(window);
 
     renderWithContext();
 
