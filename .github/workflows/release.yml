@@ -12,6 +12,12 @@ env:
 permissions:
   contents: write
 
+# Serialize runs so concurrent triggers (e.g. a manual retry while a merge-triggered run is
+# still in-flight) can't both compute and push the same "chore: release" commit/tag.
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
 jobs:
   release:
     if: |
@@ -23,6 +29,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          ref: ${{ github.ref }}
+          # Full history is required for the ancestry-based duplicate-release detection below.
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -38,7 +47,7 @@ jobs:
       - name: Determine version bump type
         id: bump_type
         run: |
-          branch_name="${GITHUB_HEAD_REF}"
+          branch_name="$GITHUB_HEAD_REF"
           if [[ "$branch_name" == hotfix/* ]]; then
             echo "type=patch" >> "$GITHUB_ENV"
           elif [[ "$branch_name" =~ ^release/major(/.*)?$ ]]; then
@@ -54,21 +63,30 @@ jobs:
             exit 1
           fi
 
+      # See .github/workflows/scripts/check-existing-release.sh for what this detects and why.
+      - name: Check for existing release commit
+        run: bash .github/workflows/scripts/check-existing-release.sh
+
       - name: Bump root version
+        if: env.already_released != 'true'
         run: yarn version ${{ env.type }}
 
       - name: Bump suite version
+        if: env.already_released != 'true'
         working-directory: packages/suite
         run: yarn version ${{ env.type }}
 
       - name: Get new version
+        if: env.already_released != 'true'
         id: get_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       - name: Update Sonar version
+        if: env.already_released != 'true'
         run: sed -i "" "s/^sonar.projectVersion=.*/sonar.projectVersion=${{ env.version }}/" sonar-project.properties
 
       - name: Commit and tag
+        if: env.already_released != 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -76,6 +94,18 @@ jobs:
           git commit -m "chore: release v${{ env.version }} [skip actions]"
           git tag "v${{ env.version }}"
           git push origin main --tags
+
+      # Retry path: the bump/commit/tag already landed on main in a previous attempt.
+      # Reset to the exact release commit (not origin/main's tip), in case later
+      # commits have since landed on main.
+      - name: Use existing release commit
+        if: env.already_released == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git reset --hard "${{ env.release_commit_sha }}"
+          git tag -f "v${{ env.version }}"
+          git push --force origin "v${{ env.version }}"
 
       - name: Build prod files
         run: |
