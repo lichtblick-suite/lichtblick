@@ -41,6 +41,7 @@ const mockSetLogger = jest.fn();
 const mockDiagConsoleLogger = jest.fn().mockImplementation(() => ({ name: "diag-logger" }));
 const mockSetGlobalLoggerProvider = jest.fn().mockImplementation((provider) => provider);
 const mockSetGlobalTracerProvider = jest.fn().mockImplementation((provider) => provider);
+const mockDiagWarn = jest.fn();
 
 jest.mock("./identity", () => ({
   __esModule: true,
@@ -51,6 +52,7 @@ jest.mock("./identity", () => ({
 jest.mock("@opentelemetry/api", () => ({
   diag: {
     setLogger: (...args: unknown[]) => mockSetLogger(...args),
+    warn: (...args: unknown[]) => mockDiagWarn(...args),
   },
   trace: {
     setGlobalTracerProvider: (...args: unknown[]) => mockSetGlobalTracerProvider(...args),
@@ -229,6 +231,38 @@ describe("OtelAnalytics", () => {
       },
     });
     expect(mockSpanEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it("drops attributes with mixed-type arrays instead of forwarding them", async () => {
+    // Given
+    const { default: OtelAnalytics } = await import("./OtelAnalytics");
+    const allow = jest.fn(() => true);
+    const rateLimiter = {
+      allow,
+    } as unknown as RateLimiter;
+    const analytics = new OtelAnalytics({
+      endpoint: "http://collector:4318",
+      version: "1.2.3",
+      platform: "web",
+      rateLimiter,
+    });
+
+    // When
+    analytics.logEvent(AppEvent.APP_INIT, { source: "test", mixed: [1, "a"] });
+
+    // Then
+    expect(mockEmit).toHaveBeenCalledWith({
+      body: AppEvent.APP_INIT,
+      severityNumber: mockSeverityNumber.INFO,
+      attributes: {
+        source: "test",
+        device_id: "device-id",
+        session_id: mockSessionId,
+      },
+    });
+    expect(mockDiagWarn).toHaveBeenCalledWith(
+      expect.stringContaining('dropping unsupported attribute "mixed"'),
+    );
   });
 
   it("drops events silently when rate limiting blocks them", async () => {

@@ -5,7 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { getDeviceId, IdentityStorage, sessionId } from "./identity";
+import { getDeviceId, sessionId } from "./identity";
+import type { IdentityStorage } from "./types";
 
 function makeMemoryStorage(): IdentityStorage {
   const values = new Map<string, string>();
@@ -55,7 +56,13 @@ describe("identity", () => {
   });
 
   it("exposes a session id that looks like a uuid", () => {
+    // Given
+    const id = sessionId;
+
+    // When
+    const looksLikeUuid = /^[0-9a-f-]{36}$/iu.test(id);
+
     // Then
-    expect(sessionId).toMatch(/^[0-9a-f-]{36}$/iu);
+    expect(looksLikeUuid).toBe(true);
   });
 });

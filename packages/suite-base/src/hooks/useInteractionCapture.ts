@@ -9,23 +9,11 @@ import { MouseEvent, useCallback, useMemo } from "react";
 
 import Logger from "@lichtblick/log";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
+import { SAFE_ATTRIBUTE_NAME } from "@lichtblick/suite-base/hooks/constants";
+import type { InteractionCaptureOptions } from "@lichtblick/suite-base/hooks/types";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 
 const log = Logger.getLogger(__filename);
-
-// Matches simple HTML attribute names (e.g. "data-testid"). Anything else could produce an
-// invalid or unintended CSS selector when interpolated into `target.closest()`.
-const SAFE_ATTRIBUTE_NAME = /^[a-z][a-z0-9_-]*$/i;
-
-export type InteractionCaptureOptions = {
-  /**
-   * DOM attribute used to identify the clicked element. Defaults to "data-testid".
-   * Callers with dynamic/high-cardinality test IDs should pass a dedicated static attribute instead.
-   */
-  attribute?: string;
-  /** Optional static attributes merged into every logged event's data payload. */
-  data?: Record<string, unknown>;
-};
 
 /**
  * Returns a click-capture handler for a container element's `onClickCapture` prop that

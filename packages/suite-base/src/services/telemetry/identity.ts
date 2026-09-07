@@ -7,12 +7,8 @@
 
 import { v4 as uuidv4 } from "uuid";
 
-const DEVICE_ID_STORAGE_KEY = "lichtblick.telemetry.deviceId";
-
-export interface IdentityStorage {
-  getItem(key: string): string | null;
-  setItem(key: string, value: string): void;
-}
+import { DEVICE_ID_STORAGE_KEY } from "@lichtblick/suite-base/services/telemetry/constants";
+import type { IdentityStorage } from "@lichtblick/suite-base/services/telemetry/types";
 
 function getDefaultStorage(): IdentityStorage | undefined {
   try {

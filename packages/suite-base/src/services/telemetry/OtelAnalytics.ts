@@ -22,10 +22,10 @@ import { BatchSpanProcessor, WebTracerProvider } from "@opentelemetry/sdk-trace-
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
 
 import IAnalytics, { AppEvent } from "../IAnalytics";
+import { DEFAULT_RATE_LIMITER_CONFIG } from "./constants";
 import { getDeviceId, sessionId } from "./identity";
-import RateLimiter, { DEFAULT_RATE_LIMITER_CONFIG, type RateLimiterConfig } from "./rateLimiter";
-
-const DEFAULT_OTEL_ANALYTICS_RATE_LIMITER_CONFIG: RateLimiterConfig = DEFAULT_RATE_LIMITER_CONFIG;
+import RateLimiter from "./rateLimiter";
+import type { OtelAnalyticsOptions } from "./types";
 
 let diagLoggerInitialized = false;
 
@@ -39,9 +39,27 @@ function isScalarAttributeValue(value: unknown): value is ScalarAttributeValue {
 }
 
 function isAttributeArray(value: unknown): value is Array<null | undefined | ScalarAttributeValue> {
-  return (
-    Array.isArray(value) && value.every((item) => item == undefined || isScalarAttributeValue(item))
-  );
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  let elementType: "string" | "number" | "boolean" | undefined;
+  for (const item of value) {
+    if (item == undefined) {
+      continue;
+    }
+    if (!isScalarAttributeValue(item)) {
+      return false;
+    }
+    // Reject mixed-type arrays (e.g. [1, "a"]): OpenTelemetry Attributes require homogeneous arrays.
+    if (elementType == undefined) {
+      elementType = typeof item as "string" | "number" | "boolean";
+    } else if (typeof item !== elementType) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -70,13 +88,6 @@ function ensureDiagLogger(): void {
   diagLoggerInitialized = true;
 }
 
-export type OtelAnalyticsOptions = {
-  endpoint: string;
-  version: string;
-  platform: "web" | "desktop";
-  rateLimiter?: RateLimiter;
-};
-
 export default class OtelAnalytics implements IAnalytics {
   readonly #loggerProvider: LoggerProvider;
   readonly #logger;
@@ -86,8 +97,7 @@ export default class OtelAnalytics implements IAnalytics {
 
   public constructor(options: OtelAnalyticsOptions) {
     ensureDiagLogger();
-    this.#rateLimiter =
-      options.rateLimiter ?? new RateLimiter(DEFAULT_OTEL_ANALYTICS_RATE_LIMITER_CONFIG);
+    this.#rateLimiter = options.rateLimiter ?? new RateLimiter(DEFAULT_RATE_LIMITER_CONFIG);
 
     const resource = resourceFromAttributes({
       [ATTR_SERVICE_NAME]: "lichtblick",

@@ -7,11 +7,8 @@
 
 /* eslint-disable filenames/match-exported */
 
-export type TokenBucketOptions = {
-  capacity: number;
-  refillPerSecond: number;
-  now?: () => number;
-};
+import { DEFAULT_MAX_KEYS, DEFAULT_RATE_LIMITER_CONFIG } from "./constants";
+import type { RateLimiterConfig, TokenBucketOptions } from "./types";
 
 type ResolvedTokenBucketOptions = Omit<TokenBucketOptions, "now"> & {
   now: () => number;
@@ -63,31 +60,6 @@ class TokenBucket {
     this.#lastRefillTime = currentTime;
   }
 }
-
-export type RateLimiterConfig = {
-  perKey: TokenBucketOptions;
-  global: TokenBucketOptions;
-  /**
-   * Maximum number of distinct per-key buckets to retain. `allow()` is expected to be called
-   * with keys from a bounded set (e.g. `AppEvent` values). If more distinct keys than this are
-   * seen, the least-recently-used bucket is evicted to bound memory usage.
-   */
-  maxKeys?: number;
-};
-
-const DEFAULT_MAX_KEYS = 256;
-
-export const DEFAULT_RATE_LIMITER_CONFIG: RateLimiterConfig = {
-  perKey: {
-    capacity: 20,
-    refillPerSecond: 1,
-  },
-  global: {
-    capacity: 100,
-    refillPerSecond: 5,
-  },
-  maxKeys: DEFAULT_MAX_KEYS,
-};
 
 export default class RateLimiter {
   readonly #globalBucket: TokenBucket;
