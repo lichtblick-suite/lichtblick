@@ -6,6 +6,7 @@
 import { renderHook } from "@testing-library/react";
 
 import { LayoutState } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 
 import usePlotPanelsFloatingToolbar from "./usePlotPanelsFloatingToolbar";
 
@@ -23,9 +24,13 @@ describe("usePlotPanelsFloatingToolbar", () => {
 
   it("Given the layout data has plotPanelsFloatingToolbar true When reading the value Then it returns true", () => {
     // Given
-    mockUseCurrentLayoutSelector.mockImplementation((selector) =>
-      selector({ selectedLayout: { data: { plotPanelsFloatingToolbar: true } } }),
-    );
+    const layoutState: LayoutState = {
+      selectedLayout: {
+        id: LayoutBuilder.layoutId(),
+        data: LayoutBuilder.data({ plotPanelsFloatingToolbar: true }),
+      },
+    };
+    mockUseCurrentLayoutSelector.mockImplementation((selector) => selector(layoutState));
 
     // When
     const { result } = renderHook(() => usePlotPanelsFloatingToolbar());
@@ -36,9 +41,13 @@ describe("usePlotPanelsFloatingToolbar", () => {
 
   it("Given the layout data has plotPanelsFloatingToolbar false When reading the value Then it returns false", () => {
     // Given
-    mockUseCurrentLayoutSelector.mockImplementation((selector) =>
-      selector({ selectedLayout: { data: { plotPanelsFloatingToolbar: false } } }),
-    );
+    const layoutState: LayoutState = {
+      selectedLayout: {
+        id: LayoutBuilder.layoutId(),
+        data: LayoutBuilder.data({ plotPanelsFloatingToolbar: false }),
+      },
+    };
+    mockUseCurrentLayoutSelector.mockImplementation((selector) => selector(layoutState));
 
     // When
     const { result } = renderHook(() => usePlotPanelsFloatingToolbar());
@@ -49,9 +58,13 @@ describe("usePlotPanelsFloatingToolbar", () => {
 
   it("Given the layout data does not set plotPanelsFloatingToolbar When reading the value Then it defaults to false", () => {
     // Given
-    mockUseCurrentLayoutSelector.mockImplementation((selector) =>
-      selector({ selectedLayout: { data: {} } }),
-    );
+    const layoutState: LayoutState = {
+      selectedLayout: {
+        id: LayoutBuilder.layoutId(),
+        data: LayoutBuilder.data({ plotPanelsFloatingToolbar: undefined }),
+      },
+    };
+    mockUseCurrentLayoutSelector.mockImplementation((selector) => selector(layoutState));
 
     // When
     const { result } = renderHook(() => usePlotPanelsFloatingToolbar());
@@ -62,9 +75,8 @@ describe("usePlotPanelsFloatingToolbar", () => {
 
   it("Given no layout is selected When reading the value Then it defaults to false", () => {
     // Given
-    mockUseCurrentLayoutSelector.mockImplementation((selector) =>
-      selector({ selectedLayout: undefined }),
-    );
+    const layoutState: LayoutState = { selectedLayout: undefined };
+    mockUseCurrentLayoutSelector.mockImplementation((selector) => selector(layoutState));
 
     // When
     const { result } = renderHook(() => usePlotPanelsFloatingToolbar());
