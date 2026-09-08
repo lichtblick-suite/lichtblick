@@ -32,7 +32,10 @@ if git merge-base --is-ancestor "$merge_commit" origin/main; then
   # origin/main's tip instead of the immediate child of merge_commit. Fail loudly if the cap is
   # hit instead of guessing.
   ancestry_path_cap=1000
-  mapfile -t ancestry_path < <(git rev-list --ancestry-path --reverse --max-count="$ancestry_path_cap" "${merge_commit}..origin/main")
+  ancestry_path=()
+  while IFS= read -r commit_sha; do
+    ancestry_path+=("$commit_sha")
+  done < <(git rev-list --ancestry-path --reverse --max-count="$ancestry_path_cap" "${merge_commit}..origin/main")
   if [[ "${#ancestry_path[@]}" -eq "$ancestry_path_cap" ]]; then
     echo "ERROR: more than $ancestry_path_cap commits between $merge_commit and origin/main; refusing to guess the immediate child commit." >&2
     exit 1
