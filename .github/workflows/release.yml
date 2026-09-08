@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
-          ref: ${{ github.ref }}
+          ref: main
           # Full history is required for the ancestry-based duplicate-release detection below.
           fetch-depth: 0
 
@@ -65,6 +65,11 @@ jobs:
 
       # See .github/workflows/scripts/check-existing-release.sh for what this detects and why.
       - name: Check for existing release commit
+        env:
+          # github.ref/github.sha would be the ephemeral pull_request merge-preview ref/commit,
+          # which can be stale or gone once the PR is closed. merge_commit_sha is the actual,
+          # permanent commit that landed on main.
+          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: bash .github/workflows/scripts/check-existing-release.sh
 
       - name: Bump root version

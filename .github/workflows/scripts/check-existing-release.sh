@@ -13,13 +13,16 @@
 # after the release commit was pushed.
 #
 # Requires a full (unshallow) checkout: `fetch-depth: 0` in actions/checkout.
+# Requires $MERGE_COMMIT_SHA (the PR's merge_commit_sha, not github.sha/HEAD).
 # Writes already_released, version, and release_commit_sha to $GITHUB_ENV.
 
 set -euo pipefail
 
+: "${MERGE_COMMIT_SHA:?MERGE_COMMIT_SHA env var is required}"
+
 git fetch origin main
 
-merge_commit="$(git rev-parse HEAD)"
+merge_commit="$MERGE_COMMIT_SHA"
 release_commit_pattern='^chore: release v(.*) \[skip actions\]$'
 already_released=false
 
