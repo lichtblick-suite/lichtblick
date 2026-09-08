@@ -31,6 +31,7 @@ import {
   MutableContext,
   Scale,
   UpdateAction,
+  YScale,
   ZoomableChart,
 } from "./types";
 
@@ -60,13 +61,21 @@ export class ChartRenderer {
     });
 
     const origZoomStart = ZoomPlugin.start?.bind(ZoomPlugin);
-    ZoomPlugin.start = (chartInstance: MutableContext<unknown>, startArgs, pluginOptions) => {
+    ZoomPlugin.start = (
+      chartInstance: MutableContext<unknown>,
+      startArgs,
+      pluginOptions,
+    ) => {
       // swap the canvas with our fake dom node canvas to support zoom plugin addEventListener
       const ctx = chartInstance.ctx;
       chartInstance.ctx = {
         canvas: fakeNode,
       };
-      const res = origZoomStart?.(chartInstance as Chart, startArgs, pluginOptions);
+      const res = origZoomStart?.(
+        chartInstance as Chart,
+        startArgs,
+        pluginOptions,
+      );
       chartInstance.ctx = ctx;
       return res;
     };
@@ -160,7 +169,8 @@ export class ChartRenderer {
     }
 
     if (action.zoomMode) {
-      unwrap(this.#chartInstance.options.plugins?.zoom?.zoom).mode = action.zoomMode;
+      unwrap(this.#chartInstance.options.plugins?.zoom?.zoom).mode =
+        action.zoomMode;
     }
 
     if (action.referenceLines) {
@@ -169,13 +179,15 @@ export class ChartRenderer {
         return;
       }
 
-      const newAnnotations: AnnotationOptions[] = action.referenceLines.map((config) => {
-        return {
-          ...DEFAULT_ANNOTATION,
-          borderColor: config.color,
-          value: config.value,
-        };
-      });
+      const newAnnotations: AnnotationOptions[] = action.referenceLines.map(
+        (config) => {
+          return {
+            ...DEFAULT_ANNOTATION,
+            borderColor: config.color,
+            value: config.value,
+          };
+        },
+      );
 
       annotation.annotations = newAnnotations;
     }
@@ -237,7 +249,10 @@ export class ChartRenderer {
     });
 
     for (const element of elements) {
-      const data = this.#chartInstance.data.datasets[element.datasetIndex]?.data[element.index];
+      const data =
+        this.#chartInstance.data.datasets[element.datasetIndex]?.data[
+          element.index
+        ];
       if (data == undefined || typeof data === "number") {
         continue;
       }
@@ -251,7 +266,7 @@ export class ChartRenderer {
     return out;
   }
 
-  public updateDatasets(datasets: Dataset[]): Scale | undefined {
+  public updateDatasets(datasets: Dataset[]): { x?: Scale; y?: YScale } {
     this.#chartInstance.data.datasets = datasets;
 
     // While the chartjs API doesn't indicate update should be called after resize, in practice
@@ -260,7 +275,7 @@ export class ChartRenderer {
     // NOTE: "none" disables animations - this is important for chart performance because we update
     // the entire data set which does not preserve history for the chart animations
     this.#chartInstance.update("none");
-    return this.#getXScale();
+    return { x: this.#getXScale(), y: this.#getYScale() };
   }
 
   #getXScale(): Scale | undefined {
@@ -274,6 +289,20 @@ export class ChartRenderer {
       max: xScale.max,
       left: xScale.left,
       right: xScale.right,
+    };
+  }
+
+  #getYScale(): YScale | undefined {
+    const yScale = this.#chartInstance.scales.y;
+    if (!yScale) {
+      return undefined;
+    }
+
+    return {
+      min: yScale.min,
+      max: yScale.max,
+      top: yScale.top,
+      bottom: yScale.bottom,
     };
   }
 

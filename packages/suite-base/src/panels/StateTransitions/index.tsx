@@ -14,10 +14,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Ruler20Regular } from "@fluentui/react-icons";
+import { useTheme } from "@mui/material";
+import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { add as addTimes, fromSec } from "@lichtblick/rostime";
+import KeyListener from "@lichtblick/suite-base/components/KeyListener";
 import useMessagesByPath from "@lichtblick/suite-base/components/MessagePathSyntax/useMessagesByPath";
 import {
   MessagePipelineContext,
@@ -26,6 +31,7 @@ import {
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import Panel from "@lichtblick/suite-base/components/Panel";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChart from "@lichtblick/suite-base/components/TimeBasedChart";
 import { PathLegend } from "@lichtblick/suite-base/panels/StateTransitions/PathLegend";
@@ -41,27 +47,45 @@ import { useDecodedMessageRange } from "@lichtblick/suite-base/panels/StateTrans
 import useMessagePathDropConfig from "@lichtblick/suite-base/panels/StateTransitions/hooks/useMessagePathDropConfig";
 import { usePanelSettings } from "@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings";
 import useStateTransitionsData from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsData";
+import useStateTransitionsDeltaMode from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsDeltaMode";
 import useStateTransitionsTime from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsTime";
+import { stateTransitionPathDisplayName } from "@lichtblick/suite-base/panels/StateTransitions/shared";
+import {
+  DeltaOverlay,
+  DeltaOverlaySeriesLabel,
+} from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
+import {
+  computeDelta,
+  getDeltaSeriesConfigIndexes,
+} from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
+import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
 import { StateTransitionConfig, StateTransitionPanelProps } from "./types";
 
-const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
+const selectPlayerPresence = (ctx: MessagePipelineContext) =>
+  ctx.playerState.presence;
 
 function StateTransitions(props: StateTransitionPanelProps) {
   const { config, saveConfig } = props;
   const { paths } = config;
   const { classes } = useStateTransitionsStyles();
+  const theme = useTheme();
+  const { t } = useTranslation("stateTransitions");
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const isPlayerPresent =
-    playerPresence === PlayerPresence.PRESENT || playerPresence === PlayerPresence.BUFFERING;
+    playerPresence === PlayerPresence.PRESENT ||
+    playerPresence === PlayerPresence.BUFFERING;
 
-  const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
+  const [focusedPath, setFocusedPath] = useState<undefined | string[]>(
+    undefined,
+  );
 
   useMessagePathDropConfig(saveConfig);
 
-  const { startTime, currentTimeSinceStart, endTimeSinceStart } = useStateTransitionsTime();
+  const { startTime, currentTimeSinceStart, endTimeSinceStart } =
+    useStateTransitionsTime();
 
   const { topics, pathStrings } = useMemo(() => {
     const newPathStrings = paths.map(({ value }) => value);
@@ -95,7 +119,9 @@ function StateTransitions(props: StateTransitionPanelProps) {
     [decodedMessages, pathStrings],
   );
 
-  const itemsByPath = useMessagesByPath(hasRangeData ? EMPTY_PATHS : pathStrings);
+  const itemsByPath = useMessagesByPath(
+    hasRangeData ? EMPTY_PATHS : pathStrings,
+  );
 
   const { height, heightPerTopic } = useMemo(() => {
     const onlyTopicsHeight = paths.length * 64;
@@ -118,36 +144,141 @@ function StateTransitions(props: StateTransitionPanelProps) {
     showPoints,
   );
 
-  const { yScale, xScale, databounds, width, sizeRef } = useChartScalesAndBounds(
-    minY,
-    currentTimeSinceStart,
-    endTimeSinceStart,
-    config,
+  const { yScale, xScale, databounds, width, sizeRef } =
+    useChartScalesAndBounds(
+      minY,
+      currentTimeSinceStart,
+      endTimeSinceStart,
+      config,
+    );
+
+  const deltaMode = useStateTransitionsDeltaMode({
+    datasets: data.datasets,
+    // Markers reference paths by index, so stale ones need clearing when the path list changes.
+    resetKey: paths.map((path) => path.value).join("|"),
+  });
+  const { markerA, markerB } = deltaMode;
+
+  const keyDownHandlers = useMemo(
+    () => ({
+      escape: () => {
+        if (deltaMode.active) {
+          deltaMode.toggleActive();
+        }
+      },
+    }),
+    [deltaMode],
   );
 
   const messagePipeline = useMessagePipelineGetter();
 
   const onClick = useCallback(
     ({ x: seekSeconds }: OnChartClickArgs) => {
+      if (seekSeconds == undefined) {
+        return;
+      }
+
+      if (deltaMode.active) {
+        deltaMode.handleChartClick(seekSeconds);
+        return;
+      }
+
       const {
         seekPlayback,
         playerState: { activeData: { startTime: start } = {} },
       } = messagePipeline();
-      if (!seekPlayback || seekSeconds == undefined || start == undefined) {
+      if (!seekPlayback || start == undefined) {
         return;
       }
       const seekTime = addTimes(start, fromSec(seekSeconds));
       seekPlayback(seekTime);
     },
-    [messagePipeline],
+    [deltaMode, messagePipeline],
   );
+
+  const annotations = useMemo((): AnnotationOptions[] => {
+    const markerAnnotation = (
+      value: number,
+      content: string,
+    ): AnnotationOptions => ({
+      type: "line",
+      scaleID: "x",
+      value,
+      borderColor: theme.palette.error.main,
+      borderWidth: 2,
+      borderDash: [6, 4],
+      label: {
+        display: true,
+        content,
+        position: "start",
+        backgroundColor: theme.palette.error.main,
+        color: theme.palette.error.contrastText,
+        font: { size: 10 },
+      },
+    });
+
+    return [
+      ...(markerA ? [markerAnnotation(markerA.xValue, t("markerA"))] : []),
+      ...(markerB ? [markerAnnotation(markerB.xValue, t("markerB"))] : []),
+    ];
+  }, [
+    markerA,
+    markerB,
+    t,
+    theme.palette.error.contrastText,
+    theme.palette.error.main,
+  ]);
+
+  const overlayData = useMemo(() => {
+    if (!markerA || !markerB) {
+      return undefined;
+    }
+
+    const seriesLabels: DeltaOverlaySeriesLabel[] = getDeltaSeriesConfigIndexes(
+      markerA,
+      markerB,
+    ).map((configIndex): DeltaOverlaySeriesLabel => {
+      const path = paths[configIndex];
+      return {
+        configIndex,
+        label: path ? stateTransitionPathDisplayName(path, configIndex) : "",
+        color: getLineColor(path?.color, configIndex),
+      };
+    });
+
+    return {
+      xValueA: markerA.xValue,
+      xValueB: markerB.xValue,
+      delta: computeDelta(markerA, markerB),
+      seriesLabels,
+    };
+  }, [markerA, markerB, paths]);
 
   usePanelSettings(config, saveConfig, pathState, focusedPath);
 
   return (
     <Stack flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>
-      <PanelToolbar />
-      <Stack fullWidth fullHeight flex="auto" overflowX="hidden" overflowY="auto">
+      <PanelToolbar
+        additionalIcons={
+          <ToolbarIconButton
+            title={t("measureMode")}
+            aria-label={t("measureMode")}
+            aria-pressed={deltaMode.active}
+            color={deltaMode.active ? "primary" : "default"}
+            onClick={deltaMode.toggleActive}
+            data-testid="state-transitions-measure-mode-toggle"
+          >
+            <Ruler20Regular />
+          </ToolbarIconButton>
+        }
+      />
+      <Stack
+        fullWidth
+        fullHeight
+        flex="auto"
+        overflowX="hidden"
+        overflowY="auto"
+      >
         <div className={classes.chartWrapper} ref={sizeRef}>
           <TimeBasedChart
             zoom
@@ -163,6 +294,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
             xAxisIsPlaybackTime
             yAxes={yScale}
             plugins={STATE_TRANSITION_PLUGINS}
+            annotations={annotations}
             interactionMode="lastX"
             onClick={onClick}
             currentTime={currentTimeSinceStart}
@@ -173,8 +305,29 @@ function StateTransitions(props: StateTransitionPanelProps) {
             setFocusedPath={setFocusedPath}
             saveConfig={saveConfig}
           />
+          {overlayData && (
+            <div
+              className={classes.deltaOverlayWrapper}
+              data-testid="delta-overlay-wrapper"
+            >
+              <DeltaOverlay
+                deltaRowLabel={t("delta")}
+                xColumnLabel={t("labels.timestamp")}
+                markerALabel={t("markerA")}
+                markerBLabel={t("markerB")}
+                xValueA={overlayData.xValueA}
+                xValueB={overlayData.xValueB}
+                deltaX={overlayData.delta.deltaX}
+                seriesLabels={overlayData.seriesLabels}
+                series={overlayData.delta.series}
+                onRemoveMarkerA={deltaMode.removeMarkerA}
+                onRemoveMarkerB={deltaMode.removeMarkerB}
+              />
+            </div>
+          )}
         </div>
       </Stack>
+      <KeyListener global keyDownHandlers={keyDownHandlers} />
     </Stack>
   );
 }

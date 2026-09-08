@@ -15,6 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { StoryObj } from "@storybook/react-webpack5";
+import { fireEvent, screen, userEvent } from "@storybook/testing-library";
 import { produce } from "immer";
 import { useCallback } from "react";
 
@@ -22,6 +23,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import { BlockCache } from "@lichtblick/suite-base/players/types";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import { useReadySignal } from "@lichtblick/suite-base/stories/ReadySignalContext";
+import delay from "@lichtblick/suite-base/util/delay";
 import { expandedLineColors } from "@lichtblick/suite-base/util/plotColors";
 
 import StateTransitions from "./index";
@@ -57,13 +59,23 @@ const fixture: Fixture = {
     Object.entries({
       "msgs/SystemState": {
         definitions: [
-          { type: "std_msgs/Header", name: "header", isArray: false, isComplex: true },
+          {
+            type: "std_msgs/Header",
+            name: "header",
+            isArray: false,
+            isComplex: true,
+          },
           { type: "int8", name: "UNKNOWN", isConstant: true, value: -1 },
           { type: "int8", name: "OFF", isConstant: true, value: 1 },
           { type: "int8", name: "BOOTING", isConstant: true, value: 2 },
           { type: "int8", name: "ACTIVE", isConstant: true, value: 3 },
           { type: "int8", name: "state", isArray: false },
-          { type: "msgs/DataValue", name: "data", isArray: false, isComplex: true },
+          {
+            type: "msgs/DataValue",
+            name: "data",
+            isArray: false,
+            isComplex: true,
+          },
         ],
       },
       "std_msgs/Header": {
@@ -78,7 +90,9 @@ const fixture: Fixture = {
         ],
       },
       "msgs/DataValue": {
-        definitions: [{ type: "string", name: "value", isArray: false, isComplex: false }],
+        definitions: [
+          { type: "string", name: "value", isArray: false, isComplex: false },
+        ],
       },
     }),
   ),
@@ -187,7 +201,12 @@ export const CloseValues: StoryObj = {
       <PanelSetup fixture={closeFixture} pauseFrame={pauseFrame}>
         <StateTransitions
           overrideConfig={{
-            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
+            paths: [
+              {
+                value: "/some/topic/with/state.state",
+                timestampMethod: "receiveTime",
+              },
+            ],
             isSynced: true,
           }}
         />
@@ -212,7 +231,12 @@ export const OnePath: StoryObj = {
       <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
         <StateTransitions
           overrideConfig={{
-            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
+            paths: [
+              {
+                value: "/some/topic/with/state.state",
+                timestampMethod: "receiveTime",
+              },
+            ],
             isSynced: true,
           }}
         />
@@ -221,6 +245,62 @@ export const OnePath: StoryObj = {
   },
   play: async ({ parameters }) => {
     await parameters.storyReady;
+  },
+  parameters: { useReadySignal: true, colorScheme: "light" },
+};
+
+export const DeltaMeasureMode: StoryObj = {
+  render: function Story() {
+    const readySignal = useReadySignal({ count: 1 });
+    const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+    return (
+      <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
+        <StateTransitions
+          overrideConfig={{
+            paths: [
+              {
+                value: "/some/topic/with/state.state",
+                timestampMethod: "receiveTime",
+              },
+            ],
+            isSynced: true,
+          }}
+        />
+      </PanelSetup>
+    );
+  },
+  play: async ({ parameters }) => {
+    await parameters.storyReady;
+    await delay(200);
+
+    const toggle = await screen.findByTestId(
+      "state-transitions-measure-mode-toggle",
+    );
+    await userEvent.click(toggle);
+
+    const canvasEl = document.querySelector("canvas");
+    const target = canvasEl?.parentElement;
+    if (!target) {
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+
+    // Placing markers here is synchronous (no worker round-trip), but the chart still needs a
+    // render tick to pick up the new annotations/overlay.
+    fireEvent.click(target, {
+      clientX: rect.left + rect.width * 0.25,
+      clientY: rect.top + rect.height / 2,
+    });
+    await delay(100);
+
+    fireEvent.click(target, {
+      clientX: rect.left + rect.width * 0.75,
+      clientY: rect.top + rect.height / 2,
+    });
+    await delay(100);
+
+    await screen.findByTestId("delta-overlay");
   },
   parameters: { useReadySignal: true, colorScheme: "light" },
 };
@@ -236,7 +316,12 @@ export const WithXAxisMinMax: StoryObj = {
           overrideConfig={{
             xAxisMinValue: 1,
             xAxisMaxValue: 3,
-            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
+            paths: [
+              {
+                value: "/some/topic/with/state.state",
+                timestampMethod: "receiveTime",
+              },
+            ],
             isSynced: true,
           }}
         />
@@ -263,7 +348,12 @@ export const WithXAxisRange: StoryObj = {
         <StateTransitions
           overrideConfig={{
             xAxisRange: 3,
-            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
+            paths: [
+              {
+                value: "/some/topic/with/state.state",
+                timestampMethod: "receiveTime",
+              },
+            ],
             isSynced: true,
           }}
         />
@@ -285,7 +375,12 @@ export const WithSettings: StoryObj = {
       <PanelSetup fixture={fixture} pauseFrame={pauseFrame} includeSettings>
         <StateTransitions
           overrideConfig={{
-            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
+            paths: [
+              {
+                value: "/some/topic/with/state.state",
+                timestampMethod: "receiveTime",
+              },
+            ],
             isSynced: true,
           }}
         />
@@ -329,10 +424,19 @@ export const LongPath: StoryObj = {
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
-      <PanelSetup fixture={fixture} pauseFrame={pauseFrame} style={{ maxWidth: 100 }}>
+      <PanelSetup
+        fixture={fixture}
+        pauseFrame={pauseFrame}
+        style={{ maxWidth: 100 }}
+      >
         <StateTransitions
           overrideConfig={{
-            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
+            paths: [
+              {
+                value: "/some/topic/with/state.state",
+                timestampMethod: "receiveTime",
+              },
+            ],
             isSynced: true,
           }}
         />
@@ -355,7 +459,10 @@ export const ColorClash: StoryObj = {
         <StateTransitions
           overrideConfig={{
             paths: [
-              { value: "/some/topic/with/string_state.data.value", timestampMethod: "receiveTime" },
+              {
+                value: "/some/topic/with/string_state.data.value",
+                timestampMethod: "receiveTime",
+              },
             ],
             isSynced: true,
           }}
@@ -423,11 +530,17 @@ export const Blocks: StoryObj = {
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
-      <PanelSetup fixture={{ ...fixture, progress: { messageCache } }} pauseFrame={pauseFrame}>
+      <PanelSetup
+        fixture={{ ...fixture, progress: { messageCache } }}
+        pauseFrame={pauseFrame}
+      >
         <StateTransitions
           overrideConfig={{
             paths: [
-              { value: "/some/topic/with/state.state", timestampMethod: "receiveTime" },
+              {
+                value: "/some/topic/with/state.state",
+                timestampMethod: "receiveTime",
+              },
               { value: "/blocks.state", timestampMethod: "receiveTime" },
               { value: "/blocks.state", timestampMethod: "receiveTime" },
             ],

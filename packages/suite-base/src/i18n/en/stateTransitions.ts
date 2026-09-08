@@ -7,6 +7,7 @@
 
 export const stateTransitions = {
   addSeriesButton: "Click to add a series",
+  delta: "Delta",
   labels: {
     addSeries: "Add series",
     axisLabel: "Axis label",
@@ -22,8 +23,11 @@ export const stateTransitions = {
     timestampHeaderStamp: "Header Stamp",
     timestampReceiveTime: "Receive Time",
   },
+  markerA: "P1",
+  markerB: "P2",
   max: "Max",
   maxXError: "X max must be greater than X min.",
+  measureMode: "Measure delta",
   min: "Min",
   pathErrorMessage: "This path resolves to more than one value",
   secondsRange: "Range (seconds)",

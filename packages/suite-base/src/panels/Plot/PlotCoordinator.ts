@@ -21,7 +21,10 @@ import { Bounds1D } from "@lichtblick/suite-base/components/TimeBasedChart/types
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { PlayerState, Topic } from "@lichtblick/suite-base/players/types";
 import { Bounds } from "@lichtblick/suite-base/types/Bounds";
-import { getContrastColor, getLineColor } from "@lichtblick/suite-base/util/plotColors";
+import {
+  getContrastColor,
+  getLineColor,
+} from "@lichtblick/suite-base/util/plotColors";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import {
@@ -38,11 +41,13 @@ import {
   PlotCoordinatorEventTypes,
   Scale,
   UpdateAction,
+  YScale,
 } from "./types";
 import { isReferenceLinePlotPathType, PlotConfig } from "./utils/config";
 import { pathToSubscribePayload } from "./utils/subscription";
 
-const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) => dataset ?? { data: [] };
+const replaceUndefinedWithEmptyDataset = (dataset: Dataset | undefined) =>
+  dataset ?? { data: [] };
 
 /**
  * PlotCoordinator interfaces commands and updates between the dataset builder and the chart
@@ -72,15 +77,24 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     bounds: { x: undefined, y: undefined },
   };
   private latestXScale?: Scale;
+  private latestYScale?: YScale;
   private queueDispatchRender = debouncePromise(this.dispatchRender.bind(this));
-  private queueDispatchDownsample = debouncePromise(this.dispatchDownsample.bind(this));
-  private queueDatasetsRender = debouncePromise(this.dispatchDatasetsRender.bind(this));
+  private queueDispatchDownsample = debouncePromise(
+    this.dispatchDownsample.bind(this),
+  );
+  private queueDatasetsRender = debouncePromise(
+    this.dispatchDatasetsRender.bind(this),
+  );
   private destroyed = false;
 
   private readonly subscribeMessageRange: UseSubscribeMessageRange;
   private readonly rangeSubscriptionCancels = new Map<
     string,
-    { cancel: () => void; seriesKeys: ReadonlySet<SeriesConfigKey>; active: boolean }
+    {
+      cancel: () => void;
+      seriesKeys: ReadonlySet<SeriesConfigKey>;
+      active: boolean;
+    }
   >();
   private startTime: Immutable<Time> | undefined;
   private seriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
@@ -174,9 +188,13 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
         if (msgEvent.topic !== seriesItem.parsed.topicName) {
           continue;
         }
-        const items = simpleGetMessagePathDataItems(msgEvent, seriesItem.parsed);
+        const items = simpleGetMessagePathDataItems(
+          msgEvent,
+          seriesItem.parsed,
+        );
         if (items.length > 0) {
-          this.currentValuesByConfigIndex[seriesItem.configIndex] = items[items.length - 1];
+          this.currentValuesByConfigIndex[seriesItem.configIndex] =
+            items[items.length - 1];
           break;
         }
       }
@@ -184,7 +202,8 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     this.emit("currentValuesChanged", this.currentValuesByConfigIndex);
 
-    const handlePlayerStateResult = this.datasetsBuilder.handlePlayerState(state);
+    const handlePlayerStateResult =
+      this.datasetsBuilder.handlePlayerState(state);
 
     if (!handlePlayerStateResult) {
       this.datasetRange = undefined;
@@ -263,60 +282,68 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     }
     const newSeriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
     const newCurrentValuesByConfigIndex: unknown[] = [];
-    this.series = filterMap(config.paths, (path, idx): Immutable<SeriesItem> | undefined => {
-      if (isReferenceLinePlotPathType(path)) {
-        return;
-      }
+    this.series = filterMap(
+      config.paths,
+      (path, idx): Immutable<SeriesItem> | undefined => {
+        if (isReferenceLinePlotPathType(path)) {
+          return;
+        }
 
-      const parsed = parseMessagePath(path.value);
-      if (!parsed) {
-        return;
-      }
+        const parsed = parseMessagePath(path.value);
+        if (!parsed) {
+          return;
+        }
 
-      const filledParsed = fillInGlobalVariablesInPath(parsed, globalVariables);
+        const filledParsed = fillInGlobalVariablesInPath(
+          parsed,
+          globalVariables,
+        );
 
-      // When global variables change the path.value is still the original value with the variable
-      // names But we need to consider this as a new series (new block cursor) so we compute new
-      // values when variables cause the resolved path value to update.
-      //
-      // We also want to re-compute values when the timestamp method changes. So we use a _key_ that
-      // is the filled path and the timestamp method. If either change, we consider this a new
-      // series.
-      //
-      // This key lets us treat series with the same name but different timestamp methods as distinct
-      // using a key instead of the path index lets us preserve loaded data when a path is removed
-      const key = `${idx}:${path.timestampMethod}:${stringifyMessagePath(
-        filledParsed,
-      )}` as SeriesConfigKey;
+        // When global variables change the path.value is still the original value with the variable
+        // names But we need to consider this as a new series (new block cursor) so we compute new
+        // values when variables cause the resolved path value to update.
+        //
+        // We also want to re-compute values when the timestamp method changes. So we use a _key_ that
+        // is the filled path and the timestamp method. If either change, we consider this a new
+        // series.
+        //
+        // This key lets us treat series with the same name but different timestamp methods as distinct
+        // using a key instead of the path index lets us preserve loaded data when a path is removed
+        const key = `${idx}:${path.timestampMethod}:${stringifyMessagePath(
+          filledParsed,
+        )}` as SeriesConfigKey;
 
-      // Keep current values for paths that match existing ones
-      const existingSeries = this.series.find((series) => series.key === key);
-      if (existingSeries != undefined) {
-        newCurrentValuesByConfigIndex[idx] =
-          this.currentValuesByConfigIndex[existingSeries.configIndex];
-      }
+        // Keep current values for paths that match existing ones
+        const existingSeries = this.series.find((series) => series.key === key);
+        if (existingSeries != undefined) {
+          newCurrentValuesByConfigIndex[idx] =
+            this.currentValuesByConfigIndex[existingSeries.configIndex];
+        }
 
-      const color = getLineColor(path.color, idx);
+        const color = getLineColor(path.color, idx);
 
-      if (pathToSubscribePayload(filledParsed, "full") != undefined) {
-        const keys = newSeriesKeysByTopic.get(filledParsed.topicName) ?? new Set<SeriesConfigKey>();
-        keys.add(key);
-        newSeriesKeysByTopic.set(filledParsed.topicName, keys);
-      }
+        if (pathToSubscribePayload(filledParsed, "full") != undefined) {
+          const keys =
+            newSeriesKeysByTopic.get(filledParsed.topicName) ??
+            new Set<SeriesConfigKey>();
+          keys.add(key);
+          newSeriesKeysByTopic.set(filledParsed.topicName, keys);
+        }
 
-      return {
-        key,
-        configIndex: idx,
-        messagePath: path.value,
-        parsed: filledParsed,
-        color,
-        contrastColor: getContrastColor(colorScheme, color),
-        lineSize: path.lineSize ?? 1.0,
-        timestampMethod: path.timestampMethod,
-        showLine: path.showLine ?? true,
-        enabled: path.enabled,
-      };
-    });
+        return {
+          key,
+          configIndex: idx,
+          messagePath: path.value,
+          parsed: filledParsed,
+          color,
+          contrastColor: getContrastColor(colorScheme, color),
+          lineSize: path.lineSize ?? 1.0,
+          timestampMethod: path.timestampMethod,
+          showLine: path.showLine ?? true,
+          enabled: path.enabled,
+        };
+      },
+    );
 
     // If the builder uses a separate x-axis topic (e.g. custom x-axis), subscribe to it too.
     const xTopic = this.datasetsBuilder.getXTopic?.();
@@ -406,7 +433,10 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
     if (this.globalBounds) {
       const resetBounds = this.getXResetBounds();
-      return this.globalBounds.min !== resetBounds.min || this.globalBounds.max !== resetBounds.max;
+      return (
+        this.globalBounds.min !== resetBounds.min ||
+        this.globalBounds.max !== resetBounds.max
+      );
     }
 
     return false;
@@ -414,16 +444,24 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
 
   private getXResetBounds(): Partial<Bounds1D> {
     const currentSecondsIfFollowMode =
-      this.isTimeseriesPlot && this.followRange != undefined && this.currentSeconds != undefined
+      this.isTimeseriesPlot &&
+      this.followRange != undefined &&
+      this.currentSeconds != undefined
         ? this.currentSeconds
         : undefined;
-    const xMax = currentSecondsIfFollowMode ?? this.configBounds.x.max ?? this.datasetRange?.max;
+    const xMax =
+      currentSecondsIfFollowMode ??
+      this.configBounds.x.max ??
+      this.datasetRange?.max;
 
     const xMinIfFollowMode =
-      this.isTimeseriesPlot && this.followRange != undefined && xMax != undefined
+      this.isTimeseriesPlot &&
+      this.followRange != undefined &&
+      xMax != undefined
         ? xMax - this.followRange
         : undefined;
-    const xMin = xMinIfFollowMode ?? this.configBounds.x.min ?? this.datasetRange?.min;
+    const xMin =
+      xMinIfFollowMode ?? this.configBounds.x.min ?? this.datasetRange?.min;
 
     return { min: xMin, max: xMax };
   }
@@ -431,8 +469,14 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private getXBounds(): Partial<Bounds1D> {
     const resetBounds = this.getXResetBounds();
     return {
-      min: this.interactionBounds?.x.min ?? this.globalBounds?.min ?? resetBounds.min,
-      max: this.interactionBounds?.x.max ?? this.globalBounds?.max ?? resetBounds.max,
+      min:
+        this.interactionBounds?.x.min ??
+        this.globalBounds?.min ??
+        resetBounds.min,
+      max:
+        this.interactionBounds?.x.max ??
+        this.globalBounds?.max ??
+        resetBounds.max,
     };
   }
 
@@ -449,7 +493,8 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       this.shouldResetY = false;
     }
 
-    const haveInteractionEvents = (this.updateAction.interactionEvents?.length ?? 0) > 0;
+    const haveInteractionEvents =
+      (this.updateAction.interactionEvents?.length ?? 0) > 0;
 
     const action = this.updateAction;
     this.updateAction = { type: "update" };
@@ -472,7 +517,10 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     // The viewport has changed from some render interactions so we need to consider new datasets
     const x = this.getXBounds();
     const y = this.interactionBounds?.y ?? this.configBounds.y;
-    if (!_.isEqual(this.viewport.bounds.x, x) || !_.isEqual(this.viewport.bounds.y, y)) {
+    if (
+      !_.isEqual(this.viewport.bounds.x, x) ||
+      !_.isEqual(this.viewport.bounds.y, y)
+    ) {
       this.viewport.bounds.x = x;
       this.viewport.bounds.y = y;
       this.queueDispatchDownsample();
@@ -485,15 +533,22 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       return;
     }
 
-    const result = await this.datasetsBuilder.getViewportDatasets(this.viewport);
+    const result = await this.datasetsBuilder.getViewportDatasets(
+      this.viewport,
+    );
     if (this.isDestroyed()) {
       return;
     }
-    this.emit("pathsWithMismatchedDataLengthsChanged", [...result.pathsWithMismatchedDataLengths]);
+    this.emit("pathsWithMismatchedDataLengthsChanged", [
+      ...result.pathsWithMismatchedDataLengths,
+    ]);
 
     // Use Array.from to fill in any `undefined` entries with an empty dataset (`map` would not
     // work for sparse arrays)
-    const datasets = Array.from(result.datasetsByConfigIndex, replaceUndefinedWithEmptyDataset);
+    const datasets = Array.from(
+      result.datasetsByConfigIndex,
+      replaceUndefinedWithEmptyDataset,
+    );
     this.queueDatasetsRender(datasets);
   }
 
@@ -503,11 +558,14 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       return;
     }
 
-    this.latestXScale = await this.renderer.updateDatasets(datasets);
+    const scales = await this.renderer.updateDatasets(datasets);
     if (this.isDestroyed()) {
       return;
     }
+    this.latestXScale = scales.x;
+    this.latestYScale = scales.y;
     this.emit("xScaleChanged", this.latestXScale);
+    this.emit("yScaleChanged", this.latestYScale);
   }
 
   private cancelTopicSubscription(topic: string): void {
@@ -530,8 +588,12 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     return false;
   }
 
-  private subscribeTopicRanges(seriesKeysByTopic: Map<string, Set<SeriesConfigKey>>): void {
-    const handleMessageRange = this.datasetsBuilder.handleMessageRange?.bind(this.datasetsBuilder);
+  private subscribeTopicRanges(
+    seriesKeysByTopic: Map<string, Set<SeriesConfigKey>>,
+  ): void {
+    const handleMessageRange = this.datasetsBuilder.handleMessageRange?.bind(
+      this.datasetsBuilder,
+    );
 
     if (!handleMessageRange) {
       return;
@@ -549,7 +611,10 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       const existing = this.rangeSubscriptionCancels.get(topic);
       if (existing?.seriesKeys) {
         // Retry if previous subscription was inactive (no-op cancel from missing getBatchIterator)
-        if (!this.seriesKeysChanged(existing.seriesKeys, currentKeys) && existing.active) {
+        if (
+          !this.seriesKeysChanged(existing.seriesKeys, currentKeys) &&
+          existing.active
+        ) {
           continue;
         }
         this.cancelTopicSubscription(topic);

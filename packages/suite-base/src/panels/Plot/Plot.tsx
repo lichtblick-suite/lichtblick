@@ -5,9 +5,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { Ruler20Regular } from "@fluentui/react-icons";
 import { Button, Tooltip, Fade, useTheme } from "@mui/material";
 import * as _ from "lodash-es";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
 
@@ -21,14 +22,20 @@ import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext"
 import { PanelContextMenu } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { DeltaMarkerBars } from "@lichtblick/suite-base/panels/Plot/DeltaMarkerBars";
 import { VerticalBars } from "@lichtblick/suite-base/panels/Plot/VerticalBars";
+import useDeltaMeasureMode from "@lichtblick/suite-base/panels/Plot/hooks/useDeltaMeasureMode";
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
-import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
+import {
+  PlotProps,
+  TooltipStateSetter,
+} from "@lichtblick/suite-base/panels/Plot/types";
 
 import { useStyles } from "./Plot.style";
 import { PlotCoordinator } from "./PlotCoordinator";
@@ -62,8 +69,12 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   const [activeTooltip, setActiveTooltip] = useState<TooltipStateSetter>();
 
   const [subscriberId] = useState(() => uuidv4());
-  const [canvasDiv, setCanvasDiv] = useState<HTMLDivElement | ReactNull>(ReactNull);
-  const [coordinator, setCoordinator] = useState<PlotCoordinator | undefined>(undefined);
+  const [canvasDiv, setCanvasDiv] = useState<HTMLDivElement | ReactNull>(
+    ReactNull,
+  );
+  const [coordinator, setCoordinator] = useState<PlotCoordinator | undefined>(
+    undefined,
+  );
   const shouldSync = config.isSynced;
   const renderer = useRenderer(canvasDiv, theme);
   const { globalVariables } = useGlobalVariables();
@@ -96,9 +107,40 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   useSubscriptions(config, subscriberId);
   useGlobalSync(coordinator, setCanReset, { shouldSync }, subscriberId);
   usePanning(canvasDiv, coordinator, draggingRef);
-  const { colorsByDatasetIndex, labelsByDatasetIndex, datasetsBuilder } = usePlotDataHandling(
-    config,
-    globalVariables,
+  const { colorsByDatasetIndex, labelsByDatasetIndex, datasetsBuilder } =
+    usePlotDataHandling(config, globalVariables);
+
+  // Markers reference series by index and axis meaning, so stale ones need clearing when either changes.
+  const deltaMeasureModeResetKey = useMemo(
+    () => `${xAxisMode}|${config.paths.map((path) => path.value).join("|")}`,
+    [config.paths, xAxisMode],
+  );
+  const deltaMeasureMode = useDeltaMeasureMode({
+    coordinator,
+    renderer,
+    draggingRef,
+    resetKey: deltaMeasureModeResetKey,
+  });
+  const handleCanvasClick = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      if (deltaMeasureMode.active) {
+        deltaMeasureMode.handleCanvasClick(event);
+        return;
+      }
+      onClick(event);
+    },
+    [deltaMeasureMode, onClick],
+  );
+  const mergedKeyDownHandlers = useMemo(
+    () => ({
+      ...keyDownHandlers,
+      escape: () => {
+        if (deltaMeasureMode.active) {
+          deltaMeasureMode.toggleActive();
+        }
+      },
+    }),
+    [deltaMeasureMode, keyDownHandlers],
   );
 
   useEffect(() => {
@@ -133,7 +175,13 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     if (coordinator) {
       coordinator.handlePlayerState(getMessagePipelineState().playerState);
     }
-  }, [coordinator, config, globalVariables, theme.palette.mode, getMessagePipelineState]);
+  }, [
+    coordinator,
+    config,
+    globalVariables,
+    theme.palette.mode,
+    getMessagePipelineState,
+  ]);
 
   // This effect must come after the one above it so the coordinator gets the latest config before
   // the latest player state and can properly initialize if the player state already contains the
@@ -165,7 +213,11 @@ const Plot = (props: PlotProps): React.JSX.Element => {
 
     const contentRect = canvasDiv.getBoundingClientRect();
 
-    const plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange);
+    const plotCoordinator = new PlotCoordinator(
+      renderer,
+      datasetsBuilder,
+      subscribeMessageRange,
+    );
     setCoordinator(plotCoordinator);
 
     plotCoordinator.setSize({
@@ -173,7 +225,8 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       height: contentRect.height,
     });
 
-    const isCanvasTarget = (entry: Immutable<ResizeObserverEntry>) => entry.target === canvasDiv;
+    const isCanvasTarget = (entry: Immutable<ResizeObserverEntry>) =>
+      entry.target === canvasDiv;
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = _.findLast(entries, isCanvasTarget);
       if (entry != undefined) {
@@ -224,7 +277,20 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       overflow="hidden"
       position="relative"
     >
-      <PanelToolbar />
+      <PanelToolbar
+        additionalIcons={
+          <ToolbarIconButton
+            title={t("measureMode")}
+            aria-label={t("measureMode")}
+            aria-pressed={deltaMeasureMode.active}
+            color={deltaMeasureMode.active ? "primary" : "default"}
+            onClick={deltaMeasureMode.toggleActive}
+            data-testid="plot-measure-mode-toggle"
+          >
+            <Ruler20Regular />
+          </ToolbarIconButton>
+        }
+      />
       <Stack
         direction={legendDisplay === "top" ? "column" : "row"}
         flex="auto"
@@ -257,14 +323,17 @@ const Plot = (props: PlotProps): React.JSX.Element => {
           slots={{ transition: Fade }}
           slotProps={{ transition: { timeout: 0 } }}
         >
-          <div className={classes.verticalBarWrapper} data-testid="vertical-bar-wrapper">
+          <div
+            className={classes.verticalBarWrapper}
+            data-testid="vertical-bar-wrapper"
+          >
             <div
               className={classes.canvasDiv}
               ref={setCanvasDiv}
               onWheel={onWheel}
               onMouseMove={onMouseMove}
               onMouseOut={onMouseOut}
-              onClick={onClick}
+              onClick={handleCanvasClick}
               onDoubleClick={onResetView}
             />
             <VerticalBars
@@ -272,10 +341,28 @@ const Plot = (props: PlotProps): React.JSX.Element => {
               hoverComponentId={subscriberId}
               xAxisIsPlaybackTime={xAxisMode === "timestamp"}
             />
+            <DeltaMarkerBars
+              coordinator={coordinator}
+              markerA={deltaMeasureMode.markerA}
+              markerB={deltaMeasureMode.markerB}
+              colorsByDatasetIndex={colorsByDatasetIndex}
+              labelsByDatasetIndex={labelsByDatasetIndex}
+              deltaRowLabel={t("delta")}
+              xColumnLabel={
+                xAxisMode === "timestamp" ? t("timestamp") : t("xAxis")
+              }
+              markerALabel={t("markerA")}
+              markerBLabel={t("markerB")}
+              onRemoveMarkerA={deltaMeasureMode.removeMarkerA}
+              onRemoveMarkerB={deltaMeasureMode.removeMarkerB}
+            />
           </div>
         </Tooltip>
         {canReset && (
-          <div className={classes.resetZoomButton} data-testid="plot-reset-view-button">
+          <div
+            className={classes.resetZoomButton}
+            data-testid="plot-reset-view-button"
+          >
             <Button
               variant="contained"
               color="inherit"
@@ -288,7 +375,11 @@ const Plot = (props: PlotProps): React.JSX.Element => {
         )}
         <PanelContextMenu getItems={getPanelContextMenuItems} />
       </Stack>
-      <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUpHandlers} />
+      <KeyListener
+        global
+        keyDownHandlers={mergedKeyDownHandlers}
+        keyUpHandlers={keyUpHandlers}
+      />
     </Stack>
   );
 };

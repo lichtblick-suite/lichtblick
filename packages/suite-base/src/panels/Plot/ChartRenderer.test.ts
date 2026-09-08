@@ -190,7 +190,9 @@ describe("ChartRenderer", () => {
       });
 
       chartRenderer.update(action);
-      const chartInstance: ChartType = (chartRenderer as any).getChartInstance();
+      const chartInstance: ChartType = (
+        chartRenderer as any
+      ).getChartInstance();
 
       expect(chartInstance.options.scales!.x!.min).toBe(action.xBounds!.min);
       expect(chartInstance.options.scales!.x!.max).toBe(action.xBounds!.max);
@@ -206,7 +208,9 @@ describe("ChartRenderer", () => {
       });
 
       chartRenderer.update(action);
-      const chartInstance: ChartType = (chartRenderer as any).getChartInstance();
+      const chartInstance: ChartType = (
+        chartRenderer as any
+      ).getChartInstance();
 
       expect(chartInstance.options.scales!.x!.ticks?.display).toBe(true);
     });
@@ -219,7 +223,9 @@ describe("ChartRenderer", () => {
       });
 
       chartRenderer.update(action);
-      const chartInstance: ChartType = (chartRenderer as any).getChartInstance();
+      const chartInstance: ChartType = (
+        chartRenderer as any
+      ).getChartInstance();
 
       expect(chartInstance.options.scales!.y!.ticks?.display).toBe(true);
     });
@@ -233,7 +239,9 @@ describe("ChartRenderer", () => {
       });
 
       chartRenderer.update(action);
-      const chartInstance: ChartType = (chartRenderer as any).getChartInstance();
+      const chartInstance: ChartType = (
+        chartRenderer as any
+      ).getChartInstance();
       expect(chartInstance.options.scales!.x!.title).toEqual({
         display: true,
         text: xAxisLabel,
@@ -250,7 +258,9 @@ describe("ChartRenderer", () => {
       });
 
       chartRenderer.update(action);
-      const chartInstance: ChartType = (chartRenderer as any).getChartInstance();
+      const chartInstance: ChartType = (
+        chartRenderer as any
+      ).getChartInstance();
       expect(chartInstance.options.scales!.y!.title).toEqual({
         display: true,
         text: yAxisLabel,
@@ -308,7 +318,10 @@ describe("ChartRenderer", () => {
           interactionEvents: [wheelEvent],
         },
       });
-      const fakeNodeEventsEmitSpy = jest.spyOn((chartRenderer as any).getFakeNodeEvents(), "emit");
+      const fakeNodeEventsEmitSpy = jest.spyOn(
+        (chartRenderer as any).getFakeNodeEvents(),
+        "emit",
+      );
 
       chartRenderer.update(action);
 
@@ -334,7 +347,10 @@ describe("ChartRenderer", () => {
         },
       });
       const chartInstance = (chartRenderer as any).getChartInstance();
-      const panStartHandlerSpy = jest.spyOn(chartInstance.$zoom, "panStartHandler");
+      const panStartHandlerSpy = jest.spyOn(
+        chartInstance.$zoom,
+        "panStartHandler",
+      );
 
       chartRenderer.update(action);
 
@@ -407,7 +423,8 @@ describe("ChartRenderer", () => {
 
       chartRenderer.update(action);
 
-      const newAnnotations = chartInstance.options.plugins?.annotation?.annotations;
+      const newAnnotations =
+        chartInstance.options.plugins?.annotation?.annotations;
       expect(newAnnotations).toEqual([
         {
           ...DEFAULT_ANNOTATION,
@@ -433,7 +450,9 @@ describe("ChartRenderer", () => {
         { element: { x: 20, y: 20 } as Element, datasetIndex: 2, index: 2 },
       ];
 
-      (chartInstance.getElementsAtEventForMode as jest.Mock).mockReturnValue(elementsAtEventMock);
+      (chartInstance.getElementsAtEventForMode as jest.Mock).mockReturnValue(
+        elementsAtEventMock,
+      );
       chartInstance.data.datasets = [
         {
           data: [{ x: 10, y: 10 }],
@@ -484,7 +503,9 @@ describe("ChartRenderer", () => {
 
       const elements = chartRenderer.getElementsAtPixel(pixelPoint);
 
-      expect(elements).toEqual([{ data: { x: element1.x, y: element1.y }, configIndex: 0 }]);
+      expect(elements).toEqual([
+        { data: { x: element1.x, y: element1.y }, configIndex: 0 },
+      ]);
     });
   });
 
@@ -502,10 +523,18 @@ describe("ChartRenderer", () => {
       expect(chartInstance.data.datasets).toBe(datasets);
       expect(updateSpy).toHaveBeenCalledWith("none");
       expect(result).toEqual({
-        min: chartInstance.scales.x?.min,
-        max: chartInstance.scales.x?.max,
-        left: chartInstance.scales.x?.left,
-        right: chartInstance.scales.x?.right,
+        x: {
+          min: chartInstance.scales.x?.min,
+          max: chartInstance.scales.x?.max,
+          left: chartInstance.scales.x?.left,
+          right: chartInstance.scales.x?.right,
+        },
+        y: {
+          min: chartInstance.scales.y?.min,
+          max: chartInstance.scales.y?.max,
+          top: chartInstance.scales.y?.top,
+          bottom: chartInstance.scales.y?.bottom,
+        },
       });
     });
   });

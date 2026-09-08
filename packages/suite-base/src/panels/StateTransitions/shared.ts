@@ -9,8 +9,13 @@ import * as R from "ramda";
 
 import { Immutable } from "@lichtblick/suite";
 import { MessageAndData } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { ChartDatum } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 
-import { ImmutableDataset, StateTransitionPath } from "./types";
+import {
+  ImmutableDataset,
+  StateTransitionPath,
+  ValidQueriedDataValue,
+} from "./types";
 
 function presence<T>(value: undefined | T): undefined | T {
   if (value === "") {
@@ -39,5 +44,36 @@ export function datasetContainsArray(dataset: ImmutableDataset): boolean {
     }),
     R.uniq,
   )(dataset);
-  return dataCounts.length > 0 && dataCounts.every((numPoints) => numPoints > 1);
+  return (
+    dataCounts.length > 0 && dataCounts.every((numPoints) => numPoints > 1)
+  );
+}
+
+export type ValueAtTime = {
+  value: ValidQueriedDataValue;
+  constantName: string | undefined;
+};
+
+/** Finds the state active at `time`, assuming `data` is sorted by `x` ascending (message order). */
+export function getValueAtTime(
+  data: readonly (ChartDatum | undefined)[],
+  time: number,
+): ValueAtTime | undefined {
+  let result: ValueAtTime | undefined;
+
+  for (const datum of data) {
+    if (!datum) {
+      continue;
+    }
+    if (datum.x > time) {
+      break;
+    }
+    // A datum with no value marks a gap in the data - there is no active state until the next point.
+    result =
+      datum.value != undefined
+        ? { value: datum.value, constantName: datum.constantName }
+        : undefined;
+  }
+
+  return result;
 }

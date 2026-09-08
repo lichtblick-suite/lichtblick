@@ -9,7 +9,10 @@ import { simpleGetMessagePathDataItems } from "@lichtblick/suite-base/components
 import { stringifyMessagePath } from "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { UseSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter/useSubscribeMessageRange";
-import { InteractionEvent, Scale } from "@lichtblick/suite-base/panels/Plot/types";
+import {
+  InteractionEvent,
+  Scale,
+} from "@lichtblick/suite-base/panels/Plot/types";
 import { PlotXAxisVal } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { Topic } from "@lichtblick/suite-base/players/types";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
@@ -21,7 +24,11 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { OffscreenCanvasRenderer } from "./OffscreenCanvasRenderer";
 import { PlotCoordinator } from "./PlotCoordinator";
-import { IDatasetsBuilder, SeriesConfigKey, SeriesItem } from "./builders/IDatasetsBuilder";
+import {
+  IDatasetsBuilder,
+  SeriesConfigKey,
+  SeriesItem,
+} from "./builders/IDatasetsBuilder";
 import { pathToSubscribePayload } from "./utils/subscription";
 
 jest.mock("./OffscreenCanvasRenderer");
@@ -59,9 +66,12 @@ jest.mock(
   }),
 );
 
-jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath", () => ({
-  stringifyMessagePath: jest.fn(),
-}));
+jest.mock(
+  "@lichtblick/suite-base/components/MessagePathSyntax/stringifyRosPath",
+  () => ({
+    stringifyMessagePath: jest.fn(),
+  }),
+);
 
 jest.mock("./utils/subscription", () => ({
   pathToSubscribePayload: jest.fn().mockReturnValue(undefined),
@@ -81,8 +91,17 @@ describe("PlotCoordinator", () => {
   beforeEach(() => {
     const canvas = new OffscreenCanvas(500, 500);
     const theme: Theme = { name: "dark" } as Theme;
-    renderer = new OffscreenCanvasRenderer(canvas, theme) as jest.Mocked<OffscreenCanvasRenderer>;
-    datasetsBuilder = new (EventEmitter as any)() as jest.Mocked<IDatasetsBuilder>;
+    renderer = new OffscreenCanvasRenderer(
+      canvas,
+      theme,
+    ) as jest.Mocked<OffscreenCanvasRenderer>;
+    datasetsBuilder = new (
+      EventEmitter as any
+    )() as jest.Mocked<IDatasetsBuilder>;
+
+    // updateDatasets always resolves to an object in production; match that contract here so
+    // tests that don't care about the resulting scales don't have to mock it individually.
+    (renderer.updateDatasets as jest.Mock).mockResolvedValue({});
 
     datasetsBuilder.handlePlayerState = jest.fn().mockReturnValue(undefined);
     datasetsBuilder.getViewportDatasets = jest.fn().mockResolvedValue({
@@ -93,7 +112,11 @@ describe("PlotCoordinator", () => {
     datasetsBuilder.getCsvData = jest.fn().mockResolvedValue([]);
 
     subscribeMessageRange = mockSubscribeMessageRange;
-    plotCoordinator = new PlotCoordinator(renderer, datasetsBuilder, subscribeMessageRange);
+    plotCoordinator = new PlotCoordinator(
+      renderer,
+      datasetsBuilder,
+      subscribeMessageRange,
+    );
   });
 
   afterEach(() => {
@@ -132,7 +155,10 @@ describe("PlotCoordinator", () => {
     it("should return immediately if plotCoordinator is destroyed", () => {
       const state = PlayerBuilder.playerState();
       plotCoordinator.destroy();
-      const handlePlayerStateSpy = jest.spyOn(datasetsBuilder, "handlePlayerState");
+      const handlePlayerStateSpy = jest.spyOn(
+        datasetsBuilder,
+        "handlePlayerState",
+      );
       const updateSpy = jest.spyOn(renderer, "update");
 
       plotCoordinator.handlePlayerState(state);
@@ -211,7 +237,10 @@ describe("PlotCoordinator", () => {
 
   describe("topic range subscriptions", () => {
     beforeEach(() => {
-      (pathToSubscribePayload as jest.Mock).mockReturnValue({ topic: "/foo", preloadType: "full" });
+      (pathToSubscribePayload as jest.Mock).mockReturnValue({
+        topic: "/foo",
+        preloadType: "full",
+      });
       datasetsBuilder.handleMessageRange = jest.fn();
       mockSubscribeMessageRange.mockReturnValue(jest.fn());
     });
@@ -219,17 +248,22 @@ describe("PlotCoordinator", () => {
     it("groups multiple series with the same topic into a single subscription", () => {
       // Given
       const topic = "/foo";
-      plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
-        [topic, ["/foo.x", "/foo.y"]],
-      ]);
-      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      plotCoordinator["seriesKeysByTopic"] =
+        PlotCoordinatorBuilder.seriesKeysByTopic([
+          [topic, ["/foo.x", "/foo.y"]],
+        ]);
+      const state = PlayerBuilder.playerState({
+        activeData: PlayerBuilder.activeData(),
+      });
 
       // When
       plotCoordinator.handlePlayerState(state);
 
       // Then
       expect(mockSubscribeMessageRange).toHaveBeenCalledTimes(1);
-      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(expect.objectContaining({ topic }));
+      expect(mockSubscribeMessageRange).toHaveBeenCalledWith(
+        expect.objectContaining({ topic }),
+      );
     });
 
     it("cancels subscription for a topic removed from series", () => {
@@ -239,14 +273,15 @@ describe("PlotCoordinator", () => {
       plotCoordinator["seriesKeysByTopic"] = new Map([
         ["/foo", new Set(["0:receiveTime:/foo.val"] as SeriesConfigKey[])],
       ]);
-      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      const state = PlayerBuilder.playerState({
+        activeData: PlayerBuilder.activeData(),
+      });
       plotCoordinator.handlePlayerState(state);
 
       // When — second call with /bar only
       mockSubscribeMessageRange.mockClear();
-      plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
-        ["/bar", ["/bar.val"]],
-      ]);
+      plotCoordinator["seriesKeysByTopic"] =
+        PlotCoordinatorBuilder.seriesKeysByTopic([["/bar", ["/bar.val"]]]);
       plotCoordinator.handlePlayerState(state);
 
       // Then
@@ -269,10 +304,11 @@ describe("PlotCoordinator", () => {
           return jest.fn();
         },
       );
-      plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
-        ["/foo", ["/foo.val"]],
-      ]);
-      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      plotCoordinator["seriesKeysByTopic"] =
+        PlotCoordinatorBuilder.seriesKeysByTopic([["/foo", ["/foo.val"]]]);
+      const state = PlayerBuilder.playerState({
+        activeData: PlayerBuilder.activeData(),
+      });
       plotCoordinator.handlePlayerState(state);
       mockSubscribeMessageRange.mockClear();
 
@@ -286,10 +322,11 @@ describe("PlotCoordinator", () => {
     it("retries subscription when previous was inactive (no-op cancel)", () => {
       // Given — first subscription returns no-op (onNewRangeIterator never called)
       mockSubscribeMessageRange.mockReturnValue(jest.fn());
-      plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
-        ["/foo", ["/foo.val"]],
-      ]);
-      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      plotCoordinator["seriesKeysByTopic"] =
+        PlotCoordinatorBuilder.seriesKeysByTopic([["/foo", ["/foo.val"]]]);
+      const state = PlayerBuilder.playerState({
+        activeData: PlayerBuilder.activeData(),
+      });
       plotCoordinator.handlePlayerState(state);
       mockSubscribeMessageRange.mockClear();
 
@@ -321,9 +358,10 @@ describe("PlotCoordinator", () => {
       });
 
       function subscribeToTopics(topics: Array<Topic>) {
-        plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic(
-          topics.map((t) => [t.name, [`${t.name}.${BasicBuilder.string()}`]]),
-        );
+        plotCoordinator["seriesKeysByTopic"] =
+          PlotCoordinatorBuilder.seriesKeysByTopic(
+            topics.map((t) => [t.name, [`${t.name}.${BasicBuilder.string()}`]]),
+          );
         const state = PlayerBuilder.playerState({
           activeData: PlayerBuilder.activeData({ topics }),
         });
@@ -378,9 +416,10 @@ describe("PlotCoordinator", () => {
         const topic1 = PlayerBuilder.topic();
         const topic2 = PlayerBuilder.topic();
 
-        plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
-          [topic1.name, [`${topic1.name}.${BasicBuilder.string()}`]],
-        ]);
+        plotCoordinator["seriesKeysByTopic"] =
+          PlotCoordinatorBuilder.seriesKeysByTopic([
+            [topic1.name, [`${topic1.name}.${BasicBuilder.string()}`]],
+          ]);
         emitTopics([topic2]);
 
         // When — topics array changes and now includes topic1
@@ -414,7 +453,10 @@ describe("PlotCoordinator", () => {
     });
 
     it("should call 'update' on the renderer when dispatching render", async () => {
-      renderer.update.mockResolvedValue({ x: { min: 0, max: 10 }, y: { min: 0, max: 10 } });
+      renderer.update.mockResolvedValue({
+        x: { min: 0, max: 10 },
+        y: { min: 0, max: 10 },
+      });
 
       await plotCoordinator["dispatchRender"]();
 
@@ -474,7 +516,10 @@ describe("PlotCoordinator", () => {
 
       await plotCoordinator["dispatchDownsample"]();
 
-      const getViewportDatasetsSpyOn = jest.spyOn(datasetsBuilder, "getViewportDatasets");
+      const getViewportDatasetsSpyOn = jest.spyOn(
+        datasetsBuilder,
+        "getViewportDatasets",
+      );
       expect(getViewportDatasetsSpyOn).toHaveBeenCalled();
     });
   });
@@ -519,7 +564,11 @@ describe("PlotCoordinator", () => {
 
     it("should set isTimeseriesPlot to false when xAxisVal is not 'timestamp'", () => {
       const config = PlotBuilder.config({
-        xAxisVal: BasicBuilder.sample(["index", "custom", "currentCustom"] as PlotXAxisVal[]),
+        xAxisVal: BasicBuilder.sample([
+          "index",
+          "custom",
+          "currentCustom",
+        ] as PlotXAxisVal[]),
         paths: [],
       });
 
@@ -546,7 +595,9 @@ describe("PlotCoordinator", () => {
         maxYValue: 5,
       });
       // avoid queueDispatchRender() overwrite updateAction
-      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+      jest
+        .spyOn(plotCoordinator as any, "queueDispatchRender")
+        .mockImplementation(() => {});
 
       plotCoordinator.handleConfig(config, "light", {});
 
@@ -558,7 +609,9 @@ describe("PlotCoordinator", () => {
 
     it("should pass xAxisLabel through to updateAction", () => {
       const config = PlotBuilder.config({ xAxisLabel: "Time (s)", paths: [] });
-      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+      jest
+        .spyOn(plotCoordinator as any, "queueDispatchRender")
+        .mockImplementation(() => {});
 
       plotCoordinator.handleConfig(config, "light", {});
 
@@ -567,7 +620,9 @@ describe("PlotCoordinator", () => {
 
     it("should pass yAxisLabel through to updateAction", () => {
       const config = PlotBuilder.config({ yAxisLabel: "Velocity", paths: [] });
-      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+      jest
+        .spyOn(plotCoordinator as any, "queueDispatchRender")
+        .mockImplementation(() => {});
 
       plotCoordinator.handleConfig(config, "light", {});
 
@@ -580,7 +635,9 @@ describe("PlotCoordinator", () => {
         yAxisLabel: undefined,
         paths: [],
       });
-      jest.spyOn(plotCoordinator as any, "queueDispatchRender").mockImplementation(() => {});
+      jest
+        .spyOn(plotCoordinator as any, "queueDispatchRender")
+        .mockImplementation(() => {});
 
       plotCoordinator.handleConfig(config, "light", {});
 
@@ -597,9 +654,15 @@ describe("PlotCoordinator", () => {
       plotCoordinator.handleConfig(config, "light", {});
 
       expect(plotCoordinator["series"].length).toBe(config.paths.length);
-      expect(plotCoordinator["series"][0]?.messagePath).toBe(config.paths[0]?.value);
-      expect(plotCoordinator["series"][1]?.messagePath).toBe(config.paths[1]?.value);
-      expect(plotCoordinator["series"][2]?.messagePath).toBe(config.paths[2]?.value);
+      expect(plotCoordinator["series"][0]?.messagePath).toBe(
+        config.paths[0]?.value,
+      );
+      expect(plotCoordinator["series"][1]?.messagePath).toBe(
+        config.paths[1]?.value,
+      );
+      expect(plotCoordinator["series"][2]?.messagePath).toBe(
+        config.paths[2]?.value,
+      );
       const setSeriesSpy = jest.spyOn(datasetsBuilder, "setSeries");
       expect(setSeriesSpy).toHaveBeenCalledWith(plotCoordinator["series"]);
     });
@@ -609,17 +672,26 @@ describe("PlotCoordinator", () => {
         value: BasicBuilder.string(),
         timestampMethod: "receiveTime",
       });
-      const plotConfig = PlotBuilder.config({ paths: [messagePath, messagePath] });
+      const plotConfig = PlotBuilder.config({
+        paths: [messagePath, messagePath],
+      });
 
-      (parseMessagePath as jest.Mock).mockReturnValue({ topicName: messagePath.value });
-      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
-      (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
+      (parseMessagePath as jest.Mock).mockReturnValue({
+        topicName: messagePath.value,
+      });
+      (fillInGlobalVariablesInPath as jest.Mock).mockImplementation(
+        (parsed) => parsed,
+      );
+      (stringifyMessagePath as jest.Mock).mockImplementation(
+        (parsed) => parsed.topicName ?? "",
+      );
 
       plotCoordinator.handleConfig(plotConfig, "light", {});
 
       const setSeriesSpy = jest.spyOn(datasetsBuilder, "setSeries");
       expect(setSeriesSpy).toHaveBeenCalled();
-      const series = (datasetsBuilder.setSeries as jest.Mock).mock.calls[0]?.[0];
+      const series = (datasetsBuilder.setSeries as jest.Mock).mock
+        .calls[0]?.[0];
 
       expect(series).toHaveLength(2);
       expect(series[0].configIndex).toBe(0);
@@ -630,8 +702,14 @@ describe("PlotCoordinator", () => {
     });
 
     it("should dispatch render and queue downsample", async () => {
-      const queueDispatchRender = jest.spyOn(plotCoordinator as any, "queueDispatchRender");
-      const queueDispatchDownsample = jest.spyOn(plotCoordinator as any, "queueDispatchDownsample");
+      const queueDispatchRender = jest.spyOn(
+        plotCoordinator as any,
+        "queueDispatchRender",
+      );
+      const queueDispatchDownsample = jest.spyOn(
+        plotCoordinator as any,
+        "queueDispatchDownsample",
+      );
       const config = PlotBuilder.config();
 
       plotCoordinator.handleConfig(config, "light", {});
@@ -646,9 +724,15 @@ describe("PlotCoordinator", () => {
           topic: "/foo",
           preloadType: "full",
         });
-        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
-        (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
-        (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
+        (parseMessagePath as jest.Mock).mockImplementation((value) => ({
+          topicName: value,
+        }));
+        (fillInGlobalVariablesInPath as jest.Mock).mockImplementation(
+          (parsed) => parsed,
+        );
+        (stringifyMessagePath as jest.Mock).mockImplementation(
+          (parsed) => parsed.topicName ?? "",
+        );
       });
 
       it("populates seriesKeysByTopic from paths with a valid subscribe payload", () => {
@@ -721,16 +805,26 @@ describe("PlotCoordinator", () => {
           timestampMethod: "receiveTime",
           enabled: true,
         });
-        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
+        (parseMessagePath as jest.Mock).mockImplementation((value) => ({
+          topicName: value,
+        }));
 
         // When
-        plotCoordinator.handleConfig(PlotBuilder.config({ paths: [fooPath] }), "light", {});
+        plotCoordinator.handleConfig(
+          PlotBuilder.config({ paths: [fooPath] }),
+          "light",
+          {},
+        );
 
         // Then
         expect(plotCoordinator["seriesKeysByTopic"].has("/foo")).toBe(true);
 
         // When
-        plotCoordinator.handleConfig(PlotBuilder.config({ paths: [barPath] }), "light", {});
+        plotCoordinator.handleConfig(
+          PlotBuilder.config({ paths: [barPath] }),
+          "light",
+          {},
+        );
 
         // Then
         const map = plotCoordinator["seriesKeysByTopic"];
@@ -754,7 +848,9 @@ describe("PlotCoordinator", () => {
         // Then
         expect(plotCoordinator["seriesKeysByTopic"].has("/xtopic")).toBe(true);
         // X-topic is added with an empty set of keys since it is not directly associated with any series
-        expect(plotCoordinator["seriesKeysByTopic"].get("/xtopic")!.size).toBe(0);
+        expect(plotCoordinator["seriesKeysByTopic"].get("/xtopic")!.size).toBe(
+          0,
+        );
       });
 
       it("does not add xTopic if it is already covered by a series", () => {
@@ -780,7 +876,10 @@ describe("PlotCoordinator", () => {
 
   describe("setGlobalBounds", () => {
     it("should set globalBounds and reset interactionBounds", () => {
-      const queueDispatchRender = jest.spyOn(plotCoordinator as any, "queueDispatchRender");
+      const queueDispatchRender = jest.spyOn(
+        plotCoordinator as any,
+        "queueDispatchRender",
+      );
       const bounds = { min: 0, max: 10 };
 
       plotCoordinator.setGlobalBounds(bounds);
@@ -806,24 +905,30 @@ describe("PlotCoordinator", () => {
 
   describe("setShouldSync", () => {
     // eslint-disable-next-line @lichtblick/no-boolean-parameters
-    it.each([true, false])("should update shouldSync property", (shouldSync: boolean) => {
-      plotCoordinator.setShouldSync({ shouldSync });
+    it.each([true, false])(
+      "should update shouldSync property",
+      (shouldSync: boolean) => {
+        plotCoordinator.setShouldSync({ shouldSync });
 
-      expect(plotCoordinator["shouldSync"]).toBe(shouldSync);
-    });
+        expect(plotCoordinator["shouldSync"]).toBe(shouldSync);
+      },
+    );
   });
 
   describe("setZoomMode", () => {
-    it.each(["x", "xy", "y"])("should update zoomMode in updateAction", (mode: string) => {
-      const queueDispatchRenderSpy = jest
-        .spyOn(plotCoordinator as any, "queueDispatchRender")
-        .mockImplementation(() => {});
+    it.each(["x", "xy", "y"])(
+      "should update zoomMode in updateAction",
+      (mode: string) => {
+        const queueDispatchRenderSpy = jest
+          .spyOn(plotCoordinator as any, "queueDispatchRender")
+          .mockImplementation(() => {});
 
-      plotCoordinator.setZoomMode(mode as "x" | "xy" | "y");
+        plotCoordinator.setZoomMode(mode as "x" | "xy" | "y");
 
-      expect(plotCoordinator["updateAction"].zoomMode).toBe(mode);
-      expect(queueDispatchRenderSpy).toHaveBeenCalled();
-    });
+        expect(plotCoordinator["updateAction"].zoomMode).toBe(mode);
+        expect(queueDispatchRenderSpy).toHaveBeenCalled();
+      },
+    );
   });
 
   describe("setSize", () => {
@@ -863,7 +968,12 @@ describe("PlotCoordinator", () => {
     });
 
     it("should return -1 when pixelRange is zero or negative", () => {
-      plotCoordinator["latestXScale"] = buildXScale({ left: 50, right: 50, min: 0, max: 10 });
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 50,
+        right: 50,
+        min: 0,
+        max: 10,
+      });
 
       const result = plotCoordinator.getXValueAtPixel(100);
 
@@ -871,7 +981,12 @@ describe("PlotCoordinator", () => {
     });
 
     it("should correctly map pixelX to x value", () => {
-      plotCoordinator["latestXScale"] = buildXScale({ left: 0, right: 200, min: 10, max: 50 });
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
 
       const result = plotCoordinator.getXValueAtPixel(100);
 
@@ -879,7 +994,12 @@ describe("PlotCoordinator", () => {
     });
 
     it("should return min value when pixelX is at left boundary", () => {
-      plotCoordinator["latestXScale"] = buildXScale({ left: 0, right: 200, min: 10, max: 50 });
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
 
       const result = plotCoordinator.getXValueAtPixel(0);
 
@@ -887,7 +1007,12 @@ describe("PlotCoordinator", () => {
     });
 
     it("should return max value when pixelX is at right boundary", () => {
-      plotCoordinator["latestXScale"] = buildXScale({ left: 0, right: 200, min: 10, max: 50 });
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
 
       const result = plotCoordinator.getXValueAtPixel(200);
 
