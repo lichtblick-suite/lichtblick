@@ -247,13 +247,19 @@ function UserScriptEditor(props: Props) {
   }, [actionHandler, config, updatePanelSettingsTree]);
 
   useLayoutEffect(() => {
+    const testItems = props.config.additionalBackStackItems ?? [];
     if (selectedScript) {
-      const testItems = props.config.additionalBackStackItems ?? [];
       setScriptBackStack([
-        { filePath: selectedScript.name, code: selectedScript.sourceCode, readOnly: false },
+        {
+          filePath: selectedScript.name,
+          code: selectedScript.sourceCode,
+          readOnly: selectedScript.mode === "readOnly",
+        },
         ...testItems,
       ]);
+      return;
     }
+    setScriptBackStack(testItems);
   }, [props.config.additionalBackStackItems, selectedScript]);
 
   useLayoutEffect(() => {

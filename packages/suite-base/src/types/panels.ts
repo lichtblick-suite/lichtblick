@@ -34,7 +34,10 @@ export type PlaybackConfig = {
   speed: number;
 };
 
-export type UserScript = { name: string; sourceCode: string };
+export type UserScriptMode = "readOnly";
+
+export type UserScript = { name: string; sourceCode: string; mode?: UserScriptMode };
+
 export type UserScripts = {
   [scriptId: string]: UserScript;
 };

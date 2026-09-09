@@ -214,6 +214,68 @@ describe("LayoutsAPI", () => {
     });
   });
 
+  describe("getDefaultLayoutData", () => {
+    it("should return layout data when the server responds with 200", async () => {
+      const mockLayoutData = {
+        configById: { panel1: { foo: "bar" } },
+        globalVariables: { myVar: 42 },
+        userNodes: { scriptA: { name: "scriptA", sourceCode: "// hello" } },
+        playbackConfig: { speed: 2 },
+      };
+      const mockHttpService = jest.mocked(HttpService);
+      const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse(mockLayoutData));
+      mockHttpService.get = mockGet;
+
+      const result = await layoutsAPI.getDefaultLayoutData();
+
+      expect(mockGet).toHaveBeenCalledWith(`workspaces/${mockWorkspace}/layouts/default_data`);
+      expect(result).toEqual(mockLayoutData);
+    });
+
+    it("should return partial layout data when the server responds with sparse defaults", async () => {
+      // Given
+      const partialLayoutData = {
+        playbackConfig: { speed: 2 },
+      };
+      const mockHttpService = jest.mocked(HttpService);
+      mockHttpService.get = jest.fn().mockResolvedValue(createMockHttpResponse(partialLayoutData));
+
+      // When
+      const result = await layoutsAPI.getDefaultLayoutData();
+
+      // Then
+      expect(result).toEqual(partialLayoutData);
+    });
+
+    it("should return undefined when the server responds with 404", async () => {
+      const { HttpError } = await import("@lichtblick/suite-base/services/http/HttpError");
+      const notFoundError = new HttpError("Not Found", 404, "Not Found");
+      const mockHttpService = jest.mocked(HttpService);
+      mockHttpService.get = jest.fn().mockRejectedValue(notFoundError);
+
+      const result = await layoutsAPI.getDefaultLayoutData();
+
+      expect(result).toBeUndefined();
+    });
+
+    it("should rethrow HttpError when the status is not 404", async () => {
+      const { HttpError } = await import("@lichtblick/suite-base/services/http/HttpError");
+      const serverError = new HttpError("Internal Server Error", 500, "Internal Server Error");
+      const mockHttpService = jest.mocked(HttpService);
+      mockHttpService.get = jest.fn().mockRejectedValue(serverError);
+
+      await expect(layoutsAPI.getDefaultLayoutData()).rejects.toThrow("Internal Server Error");
+    });
+
+    it("should rethrow non-HttpError errors", async () => {
+      const networkError = new Error("Network failure");
+      const mockHttpService = jest.mocked(HttpService);
+      mockHttpService.get = jest.fn().mockRejectedValue(networkError);
+
+      await expect(layoutsAPI.getDefaultLayoutData()).rejects.toThrow("Network failure");
+    });
+  });
+
   describe("error handling", () => {
     it("should propagate HTTP errors from getLayouts", async () => {
       const mockError = new Error("Network error");
