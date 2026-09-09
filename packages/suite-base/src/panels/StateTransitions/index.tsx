@@ -19,6 +19,7 @@ import { useTheme } from "@mui/material";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { v4 as uuidv4 } from "uuid";
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { add as addTimes, fromSec } from "@lichtblick/rostime";
@@ -81,6 +82,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
   const [focusedPath, setFocusedPath] = useState<undefined | string[]>(
     undefined,
   );
+  const [subscriberId] = useState(() => uuidv4());
 
   useMessagePathDropConfig(saveConfig);
 
@@ -156,6 +158,8 @@ function StateTransitions(props: StateTransitionPanelProps) {
     datasets: data.datasets,
     // Markers reference paths by index, so stale ones need clearing when the path list changes.
     resetKey: paths.map((path) => path.value).join("|"),
+    subscriberId,
+    syncEnabled: config.syncDeltaMarkers === true,
   });
   const { markerA, markerB } = deltaMode;
 
@@ -335,6 +339,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
 const defaultConfig: StateTransitionConfig = {
   paths: [],
   isSynced: true,
+  syncDeltaMarkers: false,
 };
 
 export default Panel(

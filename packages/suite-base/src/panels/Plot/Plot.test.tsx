@@ -74,6 +74,20 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
+const mockDeltaMeasureMode = {
+  active: false,
+  toggleActive: jest.fn(),
+  markerA: undefined,
+  markerB: undefined,
+  removeMarkerA: jest.fn(),
+  removeMarkerB: jest.fn(),
+  handleCanvasClick: jest.fn(),
+};
+jest.mock("@lichtblick/suite-base/panels/Plot/hooks/useDeltaMeasureMode", () => ({
+  __esModule: true,
+  default: jest.fn(() => mockDeltaMeasureMode),
+}));
+
 let mockLatestSetActiveTooltip: ((data: any) => void) | undefined;
 const mockInteractionHandlers = {
   onMouseMove: jest.fn(),

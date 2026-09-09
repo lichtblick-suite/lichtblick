@@ -42,6 +42,7 @@ export const plot = {
   showLabels: "Show labels",
   showLine: "Show lines",
   showValues: "Show values",
+  syncDeltaMarkers: "Sync delta markers with other plots",
   syncWithOtherPlots: "Sync with other plots",
   timestamp: "Timestamp",
   top: "Top",

@@ -115,11 +115,16 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     () => `${xAxisMode}|${config.paths.map((path) => path.value).join("|")}`,
     [config.paths, xAxisMode],
   );
+  // Marker x values only mean the same instant in time as another panel's when the x-axis is
+  // playback time - "index" and "custom" axes aren't comparable across panels.
+  const deltaMarkerSyncEnabled = config.syncDeltaMarkers === true && xAxisMode === "timestamp";
   const deltaMeasureMode = useDeltaMeasureMode({
     coordinator,
     renderer,
     draggingRef,
     resetKey: deltaMeasureModeResetKey,
+    subscriberId,
+    syncEnabled: deltaMarkerSyncEnabled,
   });
   const handleCanvasClick = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {

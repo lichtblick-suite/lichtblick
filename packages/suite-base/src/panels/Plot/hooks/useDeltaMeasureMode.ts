@@ -1,18 +1,20 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { MutableRefObject, useCallback } from "react";
+import { MutableRefObject, useCallback, useRef } from "react";
 import { useMountedState } from "react-use";
 
 import { isTime, toSec } from "@lichtblick/rostime";
 import type { OffscreenCanvasRenderer } from "@lichtblick/suite-base/panels/Plot/OffscreenCanvasRenderer";
 import type { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
+import { HoverElement } from "@lichtblick/suite-base/panels/Plot/types";
 import { OriginalValue } from "@lichtblick/suite-base/panels/Plot/utils/datum";
 import {
   DeltaMarker,
   DeltaMarkerSeriesValue,
 } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 import useDeltaMarkerState from "@lichtblick/suite-base/panels/shared/useDeltaMarkerState";
+import useDeltaMarkerSync from "@lichtblick/suite-base/panels/shared/useDeltaMarkerSync";
 
 export type UseDeltaMeasureModeProps = {
   coordinator: PlotCoordinator | undefined;
@@ -20,6 +22,10 @@ export type UseDeltaMeasureModeProps = {
   draggingRef: MutableRefObject<boolean>;
   /** Markers are cleared (but the mode stays active) whenever this value changes. */
   resetKey?: string;
+  /** Stable id identifying this panel instance to other synced panels. */
+  subscriberId: string;
+  /** Whether marker positions should be synced with other synced panels (config + axis-compatibility gate). */
+  syncEnabled: boolean;
 };
 
 export type UseDeltaMeasureModeResult = {
@@ -51,11 +57,32 @@ function toSeriesValue(
   }
 }
 
+function elementsToSeriesValues(
+  elements: readonly HoverElement[],
+): DeltaMarkerSeriesValue[] {
+  const seriesValues: DeltaMarkerSeriesValue[] = [];
+  const seenConfigIndexes = new Set<number>();
+  for (const element of elements) {
+    if (seenConfigIndexes.has(element.configIndex)) {
+      continue;
+    }
+    seenConfigIndexes.add(element.configIndex);
+
+    const value = toSeriesValue(element.data.value ?? element.data.y);
+    if (value != undefined) {
+      seriesValues.push({ configIndex: element.configIndex, value });
+    }
+  }
+  return seriesValues;
+}
+
 function useDeltaMeasureMode({
   coordinator,
   renderer,
   draggingRef,
   resetKey,
+  subscriberId,
+  syncEnabled,
 }: UseDeltaMeasureModeProps): UseDeltaMeasureModeResult {
   const isMounted = useMountedState();
   const {
@@ -67,6 +94,7 @@ function useDeltaMeasureMode({
     removeMarkerB,
     nextMarkerSlot,
     setMarker,
+    setMarkers,
   } = useDeltaMarkerState({ resetKey });
 
   const handleCanvasClick = useCallback(
@@ -91,21 +119,7 @@ function useDeltaMeasureMode({
           return;
         }
 
-        const seriesValues: DeltaMarkerSeriesValue[] = [];
-        const seenConfigIndexes = new Set<number>();
-        for (const element of elements) {
-          if (seenConfigIndexes.has(element.configIndex)) {
-            continue;
-          }
-          seenConfigIndexes.add(element.configIndex);
-
-          const value = toSeriesValue(element.data.value ?? element.data.y);
-          if (value != undefined) {
-            seriesValues.push({ configIndex: element.configIndex, value });
-          }
-        }
-
-        setMarker(slot, { xValue, seriesValues });
+        setMarker(slot, { xValue, seriesValues: elementsToSeriesValues(elements) });
       })();
     },
     [
@@ -118,6 +132,54 @@ function useDeltaMeasureMode({
       setMarker,
     ],
   );
+
+  // Resolves the marker a synced panel needs when it places/moves a marker at a given x value (no
+  // click/pixel event is available in that case, so the "y" pixel is irrelevant - the chart's "x"
+  // interaction mode matches by x position only).
+  const resolveMarkerAtXValue = useCallback(
+    async (xValue: number | undefined): Promise<DeltaMarker | undefined> => {
+      if (xValue == undefined || !coordinator) {
+        return undefined;
+      }
+      const canvasX = coordinator.getPixelForXValue(xValue);
+      const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: 0 })) ?? [];
+      return { xValue, seriesValues: elementsToSeriesValues(elements) };
+    },
+    [coordinator, renderer],
+  );
+
+  // Both markers must be resolved and committed together in one setMarkers call - resolving them
+  // separately (e.g. one setMarker call per slot) can leak an intermediate state where only one
+  // slot reflects the update, which then gets rebroadcast and can stomp the other synced panel.
+  //
+  // Resolution is async (Worker round-trip), so a later call can finish before an earlier one -
+  // remoteRequestIdRef discards any result that isn't from the most recently started call.
+  const remoteRequestIdRef = useRef(0);
+  const handleRemoteMarkers = useCallback(
+    (markerAXValue: number | undefined, markerBXValue: number | undefined) => {
+      const requestId = ++remoteRequestIdRef.current;
+      void (async () => {
+        const [nextMarkerA, nextMarkerB] = await Promise.all([
+          resolveMarkerAtXValue(markerAXValue),
+          resolveMarkerAtXValue(markerBXValue),
+        ]);
+        if (!isMounted() || remoteRequestIdRef.current !== requestId) {
+          return;
+        }
+
+        setMarkers(nextMarkerA, nextMarkerB);
+      })();
+    },
+    [resolveMarkerAtXValue, isMounted, setMarkers],
+  );
+
+  useDeltaMarkerSync({
+    subscriberId,
+    enabled: syncEnabled && active,
+    markerA,
+    markerB,
+    onRemoteMarkers: handleRemoteMarkers,
+  });
 
   return {
     active,

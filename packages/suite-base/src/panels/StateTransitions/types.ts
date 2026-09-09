@@ -21,6 +21,8 @@ export type StateTransitionPath = {
 
 export type StateTransitionConfig = {
   isSynced: boolean;
+  /** Sync delta measure-mode marker positions (in playback seconds) with other synced panels. */
+  syncDeltaMarkers?: boolean;
   paths: StateTransitionPath[];
   xAxisMaxValue?: number;
   xAxisMinValue?: number;

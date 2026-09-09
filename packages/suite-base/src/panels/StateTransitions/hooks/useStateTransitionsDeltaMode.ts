@@ -11,11 +11,16 @@ import {
   DeltaMarkerSeriesValue,
 } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 import useDeltaMarkerState from "@lichtblick/suite-base/panels/shared/useDeltaMarkerState";
+import useDeltaMarkerSync from "@lichtblick/suite-base/panels/shared/useDeltaMarkerSync";
 
 export type UseStateTransitionsDeltaModeProps = {
   datasets: ChartDatasets;
   /** Markers are cleared (but the mode stays active) whenever this value changes. */
   resetKey?: string;
+  /** Stable id identifying this panel instance to other synced panels. */
+  subscriberId: string;
+  /** Whether marker positions should be synced with other synced panels. */
+  syncEnabled: boolean;
 };
 
 export type UseStateTransitionsDeltaModeResult = {
@@ -31,6 +36,8 @@ export type UseStateTransitionsDeltaModeResult = {
 function useStateTransitionsDeltaMode({
   datasets,
   resetKey,
+  subscriberId,
+  syncEnabled,
 }: UseStateTransitionsDeltaModeProps): UseStateTransitionsDeltaModeResult {
   const {
     active,
@@ -41,14 +48,11 @@ function useStateTransitionsDeltaMode({
     removeMarkerB,
     nextMarkerSlot,
     setMarker,
+    setMarkers,
   } = useDeltaMarkerState({ resetKey });
 
-  const handleChartClick = useCallback(
-    (xValue: number) => {
-      if (!active) {
-        return;
-      }
-
+  const resolveSeriesValuesAtXValue = useCallback(
+    (xValue: number): DeltaMarkerSeriesValue[] => {
       const seriesValues: DeltaMarkerSeriesValue[] = [];
       datasets.forEach((dataset, configIndex) => {
         const valueAtTime = getValueAtTime(dataset.data, xValue);
@@ -59,11 +63,45 @@ function useStateTransitionsDeltaMode({
           });
         }
       });
-
-      setMarker(nextMarkerSlot(), { xValue, seriesValues });
+      return seriesValues;
     },
-    [active, datasets, nextMarkerSlot, setMarker],
+    [datasets],
   );
+
+  const handleChartClick = useCallback(
+    (xValue: number) => {
+      if (!active) {
+        return;
+      }
+
+      setMarker(nextMarkerSlot(), { xValue, seriesValues: resolveSeriesValuesAtXValue(xValue) });
+    },
+    [active, nextMarkerSlot, resolveSeriesValuesAtXValue, setMarker],
+  );
+
+  const resolveMarkerAtXValue = useCallback(
+    (xValue: number | undefined): DeltaMarker | undefined =>
+      xValue == undefined ? undefined : { xValue, seriesValues: resolveSeriesValuesAtXValue(xValue) },
+    [resolveSeriesValuesAtXValue],
+  );
+
+  // Both markers are committed together in one setMarkers call - resolving/committing them
+  // separately can leak an intermediate state where only one slot reflects the update, which
+  // then gets rebroadcast and can stomp the other synced panel.
+  const handleRemoteMarkers = useCallback(
+    (markerAXValue: number | undefined, markerBXValue: number | undefined) => {
+      setMarkers(resolveMarkerAtXValue(markerAXValue), resolveMarkerAtXValue(markerBXValue));
+    },
+    [resolveMarkerAtXValue, setMarkers],
+  );
+
+  useDeltaMarkerSync({
+    subscriberId,
+    enabled: syncEnabled && active,
+    markerA,
+    markerB,
+    onRemoteMarkers: handleRemoteMarkers,
+  });
 
   return {
     active,

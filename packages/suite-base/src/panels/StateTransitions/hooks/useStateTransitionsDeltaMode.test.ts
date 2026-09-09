@@ -5,10 +5,14 @@
 import { act, renderHook } from "@testing-library/react";
 
 import { ChartDatasets } from "@lichtblick/suite-base/components/TimeBasedChart/types";
+import useDeltaMarkerSync from "@lichtblick/suite-base/panels/shared/useDeltaMarkerSync";
+import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useStateTransitionsDeltaMode, {
   UseStateTransitionsDeltaModeProps,
 } from "./useStateTransitionsDeltaMode";
+
+jest.mock("@lichtblick/suite-base/panels/shared/useDeltaMarkerSync");
 
 describe("useStateTransitionsDeltaMode", () => {
   function buildDatasets(
@@ -19,8 +23,21 @@ describe("useStateTransitionsDeltaMode", () => {
     }));
   }
 
-  const setup = (datasets: ChartDatasets = [], resetKey?: string) => {
-    const props: UseStateTransitionsDeltaModeProps = { datasets, resetKey };
+  beforeEach(() => {
+    (useDeltaMarkerSync as jest.Mock).mockReturnValue(undefined);
+  });
+
+  const setup = (
+    datasets: ChartDatasets = [],
+    resetKey?: string,
+    overrides: { subscriberId?: string; syncEnabled?: boolean } = {},
+  ) => {
+    const props: UseStateTransitionsDeltaModeProps = {
+      datasets,
+      resetKey,
+      subscriberId: overrides.subscriberId ?? BasicBuilder.string(),
+      syncEnabled: overrides.syncEnabled ?? false,
+    };
     return {
       ...renderHook(
         (hookProps: UseStateTransitionsDeltaModeProps) =>
@@ -253,5 +270,112 @@ describe("useStateTransitionsDeltaMode", () => {
 
     // Then
     expect(result.current.markerA).toBeDefined();
+  });
+
+  describe("remote marker sync", () => {
+    function getOnRemoteMarkers(): (
+      markerAXValue: number | undefined,
+      markerBXValue: number | undefined,
+    ) => void {
+      const call = (useDeltaMarkerSync as jest.Mock).mock.calls.at(-1)[0];
+      return call.onRemoteMarkers;
+    }
+
+    it("passes subscriberId through, gating enabled on active", () => {
+      // Given / When
+      const subscriberId = BasicBuilder.string();
+      setup([], undefined, { subscriberId, syncEnabled: true });
+
+      // Then
+      expect(useDeltaMarkerSync).toHaveBeenCalledWith(
+        expect.objectContaining({ subscriberId, enabled: false }),
+      );
+    });
+
+    it("enables sync only once the mode is active", () => {
+      // Given
+      const { result } = setup([], undefined, { syncEnabled: true });
+
+      // When
+      act(() => {
+        result.current.toggleActive();
+      });
+
+      // Then
+      expect(useDeltaMarkerSync).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+    });
+
+    it("places marker A from a remote x value using this panel's own datasets", () => {
+      // Given
+      const datasets = buildDatasets([[{ x: 1, value: "IDLE" }]]);
+      const { result } = setup(datasets, undefined, { syncEnabled: true });
+
+      // When
+      act(() => {
+        getOnRemoteMarkers()(1, undefined);
+      });
+
+      // Then
+      expect(result.current.markerA).toEqual({
+        xValue: 1,
+        seriesValues: [{ configIndex: 0, value: "IDLE" }],
+      });
+    });
+
+    it("removes marker B when the remote value is cleared", () => {
+      // Given
+      const datasets = buildDatasets([[{ x: 1, value: "IDLE" }]]);
+      const { result } = setup(datasets, undefined, { syncEnabled: true });
+      act(() => {
+        result.current.toggleActive();
+      });
+      act(() => {
+        result.current.handleChartClick(1);
+      });
+      act(() => {
+        result.current.handleChartClick(5);
+      });
+      expect(result.current.markerB).toBeDefined();
+
+      // When
+      act(() => {
+        getOnRemoteMarkers()(1, undefined);
+      });
+
+      // Then
+      expect(result.current.markerB).toBeUndefined();
+    });
+
+    it("commits a remote reset (new A, cleared B) atomically instead of a stale intermediate A", () => {
+      // Given: locally both markers are set (mirrors this panel already showing P1/P2).
+      const datasets = buildDatasets([[{ x: 1, value: "IDLE" }, { x: 9, value: "RUNNING" }]]);
+      const { result } = setup(datasets, undefined, { syncEnabled: true });
+      act(() => {
+        result.current.toggleActive();
+      });
+      act(() => {
+        result.current.handleChartClick(1);
+      });
+      act(() => {
+        result.current.handleChartClick(9);
+      });
+      const staleMarkerA = result.current.markerA;
+      expect(result.current.markerB).toBeDefined();
+
+      // When: a combined remote update arrives - a new A and a cleared B in the same call, like
+      // a wraparound reset broadcasts it.
+      act(() => {
+        getOnRemoteMarkers()(9, undefined);
+      });
+
+      // Then: marker A reflects the fresh value directly and marker B stays cleared - never a
+      // transient render with the old marker A and no marker B.
+      expect(result.current.markerA).toEqual({
+        xValue: 9,
+        seriesValues: [{ configIndex: 0, value: "RUNNING" }],
+      });
+      expect(result.current.markerA).not.toEqual(staleMarkerA);
+      expect(result.current.markerB).toBeUndefined();
+    });
   });
 });

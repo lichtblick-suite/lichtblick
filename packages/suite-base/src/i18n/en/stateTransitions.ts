@@ -19,6 +19,7 @@ export const stateTransitions = {
     series: "Series",
     showPoints: "Show points",
     sync: "Sync with other plots",
+    syncDeltaMarkers: "Sync delta markers with other plots",
     timestamp: "Timestamp",
     timestampHeaderStamp: "Header Stamp",
     timestampReceiveTime: "Receive Time",

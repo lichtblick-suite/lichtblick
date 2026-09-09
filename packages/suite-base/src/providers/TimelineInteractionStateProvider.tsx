@@ -14,6 +14,7 @@ import {
   TimelineInteractionStateContext,
   TimelineInteractionStateStore,
   SyncBounds,
+  SyncedDeltaMarkers,
 } from "@lichtblick/suite-base/context/TimelineInteractionStateContext";
 import { HoverValue } from "@lichtblick/suite-base/types/hoverValue";
 
@@ -22,6 +23,7 @@ function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStat
     return {
       eventsAtHoverValue: {},
       globalBounds: undefined,
+      globalDeltaMarkers: undefined,
       hoveredEvent: undefined,
       hoverValue: undefined,
 
@@ -45,6 +47,19 @@ function createTimelineInteractionStateStore(): StoreApi<TimelineInteractionStat
           set((store) => ({ globalBounds: newBounds(store.globalBounds) }));
         } else {
           set({ globalBounds: newBounds });
+        }
+      },
+
+      setGlobalDeltaMarkers: (
+        newValue:
+          | undefined
+          | SyncedDeltaMarkers
+          | ((oldValue: undefined | SyncedDeltaMarkers) => undefined | SyncedDeltaMarkers),
+      ) => {
+        if (typeof newValue === "function") {
+          set((store) => ({ globalDeltaMarkers: newValue(store.globalDeltaMarkers) }));
+        } else {
+          set({ globalDeltaMarkers: newValue });
         }
       },
 

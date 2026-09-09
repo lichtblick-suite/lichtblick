@@ -160,6 +160,7 @@ function setAxis({ value, label, error }: AxisTreeField): SettingsTreeField {
 export function buildSettingsTree(
   {
     isSynced,
+    syncDeltaMarkers,
     xAxisMaxValue,
     xAxisMinValue,
     xAxisRange,
@@ -179,6 +180,11 @@ export function buildSettingsTree(
       label: t("labels.general"),
       fields: {
         isSynced: { label: t("labels.sync"), input: "boolean", value: isSynced },
+        syncDeltaMarkers: {
+          label: t("labels.syncDeltaMarkers"),
+          input: "boolean",
+          value: syncDeltaMarkers,
+        },
         showPoints: {
           help: t("labels.helpGeneral"),
           input: "boolean",
@@ -229,6 +235,8 @@ export function usePanelSettings(
 
         if (input === "boolean" && _.isEqual(path, ["general", "isSynced"])) {
           saveConfig({ isSynced: value });
+        } else if (input === "boolean" && _.isEqual(path, ["general", "syncDeltaMarkers"])) {
+          saveConfig({ syncDeltaMarkers: value });
         } else if (input === "boolean" && _.isEqual(path, ["general", "showPoints"])) {
           saveConfig({ showPoints: value });
         } else if (path[0] === "xAxis") {

@@ -89,6 +89,8 @@ export type PlotConfig = DeprecatedPlotConfig & {
   showXAxisLabels: boolean;
   showYAxisLabels: boolean;
   isSynced: boolean;
+  /** Sync delta measure-mode marker positions (in playback seconds) with other synced panels. */
+  syncDeltaMarkers?: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
   xAxisLabel?: string;

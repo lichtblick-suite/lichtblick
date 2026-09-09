@@ -25,6 +25,8 @@ export type UseDeltaMarkerStateResult = {
    */
   nextMarkerSlot: () => "a" | "b";
   setMarker: (slot: "a" | "b", marker: DeltaMarker) => void;
+  /** Sets both markers in a single state update - use when both may change together (e.g. applying a remote sync update) so no intermediate single-marker state is ever observed. */
+  setMarkers: (markerA: DeltaMarker | undefined, markerB: DeltaMarker | undefined) => void;
 };
 
 /** Shared A/B marker state machine used by both the Plot and StateTransitions measure modes. */
@@ -74,6 +76,14 @@ function useDeltaMarkerState({
     }
   }, []);
 
+  const setMarkers = useCallback(
+    (newMarkerA: DeltaMarker | undefined, newMarkerB: DeltaMarker | undefined) => {
+      setMarkerA(newMarkerA);
+      setMarkerB(newMarkerB);
+    },
+    [],
+  );
+
   return {
     active,
     toggleActive,
@@ -83,6 +93,7 @@ function useDeltaMarkerState({
     removeMarkerB,
     nextMarkerSlot,
     setMarker,
+    setMarkers,
   };
 }
 

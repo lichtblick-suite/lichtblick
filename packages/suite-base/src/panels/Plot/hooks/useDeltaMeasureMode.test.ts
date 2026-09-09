@@ -7,6 +7,7 @@ import { act, renderHook } from "@testing-library/react";
 import { toSec } from "@lichtblick/rostime";
 import type { OffscreenCanvasRenderer } from "@lichtblick/suite-base/panels/Plot/OffscreenCanvasRenderer";
 import { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
+import useDeltaMarkerSync from "@lichtblick/suite-base/panels/shared/useDeltaMarkerSync";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -14,6 +15,8 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import useDeltaMeasureMode, {
   UseDeltaMeasureModeProps,
 } from "./useDeltaMeasureMode";
+
+jest.mock("@lichtblick/suite-base/panels/shared/useDeltaMarkerSync");
 
 describe("useDeltaMeasureMode", () => {
   function buildClickEvent(
@@ -41,11 +44,17 @@ describe("useDeltaMeasureMode", () => {
     renderer?: MockRenderer;
   };
 
+  beforeEach(() => {
+    (useDeltaMarkerSync as jest.Mock).mockReturnValue(undefined);
+  });
+
   const setup = ({
     coordinator,
     renderer,
     draggingRef,
     resetKey,
+    subscriberId,
+    syncEnabled,
   }: SetupOverrides = {}) => {
     const props: UseDeltaMeasureModeProps = {
       coordinator,
@@ -55,6 +64,8 @@ describe("useDeltaMeasureMode", () => {
       } as unknown as OffscreenCanvasRenderer,
       draggingRef: { current: false, ...draggingRef },
       resetKey,
+      subscriberId: subscriberId ?? BasicBuilder.string(),
+      syncEnabled: syncEnabled ?? false,
     };
 
     return {
@@ -70,6 +81,7 @@ describe("useDeltaMeasureMode", () => {
 
   const mockCoordinator = {
     getXValueAtPixel: jest.fn(() => BasicBuilder.number()),
+    getPixelForXValue: jest.fn(() => BasicBuilder.number()),
   } as unknown as PlotCoordinator;
 
   it("should start inactive with no markers", () => {
@@ -413,5 +425,125 @@ describe("useDeltaMeasureMode", () => {
 
     // Then
     expect(result.current.markerA).toBeDefined();
+  });
+
+  describe("remote marker sync", () => {
+    function getOnRemoteMarkers(): (
+      markerAXValue: number | undefined,
+      markerBXValue: number | undefined,
+    ) => void {
+      const call = (useDeltaMarkerSync as jest.Mock).mock.calls.at(-1)[0];
+      return (markerAXValue, markerBXValue) => {
+        call.onRemoteMarkers(markerAXValue, markerBXValue);
+      };
+    }
+
+    it("passes subscriberId through, gating enabled on active", () => {
+      // Given / When
+      const subscriberId = BasicBuilder.string();
+      setup({ coordinator: mockCoordinator, subscriberId, syncEnabled: true });
+
+      // Then
+      expect(useDeltaMarkerSync).toHaveBeenCalledWith(
+        expect.objectContaining({ subscriberId, enabled: false }),
+      );
+    });
+
+    it("enables sync only once the mode is active", () => {
+      // Given
+      const { result } = setup({ coordinator: mockCoordinator, syncEnabled: true });
+
+      // When
+      act(() => {
+        result.current.toggleActive();
+      });
+
+      // Then
+      expect(useDeltaMarkerSync).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+    });
+
+    it("places marker A from a remote x value, resolved via getPixelForXValue", async () => {
+      // Given
+      const xValue = BasicBuilder.number();
+      const configIndex = BasicBuilder.number();
+      const value = BasicBuilder.number();
+      (mockCoordinator.getPixelForXValue as jest.Mock).mockReturnValueOnce(42);
+      const getElementsAtPixel = jest
+        .fn()
+        .mockResolvedValue([
+          PlotBuilder.hoverElement({ configIndex, data: PlotBuilder.datum({ value }) }),
+        ]);
+      const { result } = setup({
+        coordinator: mockCoordinator,
+        renderer: { getElementsAtPixel },
+        syncEnabled: true,
+      });
+
+      // When
+      await act(async () => {
+        getOnRemoteMarkers()(xValue, undefined);
+      });
+
+      // Then
+      expect(getElementsAtPixel).toHaveBeenCalledWith({ x: 42, y: 0 });
+      expect(result.current.markerA).toEqual({
+        xValue,
+        seriesValues: [{ configIndex, value }],
+      });
+    });
+
+    it("removes marker B when the remote value is cleared", async () => {
+      // Given
+      const { result } = setup({ coordinator: mockCoordinator, syncEnabled: true });
+      act(() => {
+        result.current.toggleActive();
+      });
+      await act(async () => {
+        result.current.handleCanvasClick(buildClickEvent());
+      });
+      await act(async () => {
+        result.current.handleCanvasClick(buildClickEvent());
+      });
+      const markerA = result.current.markerA;
+      expect(result.current.markerB).toBeDefined();
+
+      // When
+      await act(async () => {
+        getOnRemoteMarkers()(markerA?.xValue, undefined);
+      });
+
+      // Then
+      expect(result.current.markerB).toBeUndefined();
+    });
+
+    it("commits a remote reset (new A, cleared B) atomically instead of a stale intermediate A", async () => {
+      // Given: locally both markers are set (mirrors the follower panel already showing P1/P2).
+      const { result } = setup({ coordinator: mockCoordinator, syncEnabled: true });
+      act(() => {
+        result.current.toggleActive();
+      });
+      await act(async () => {
+        result.current.handleCanvasClick(buildClickEvent());
+      });
+      await act(async () => {
+        result.current.handleCanvasClick(buildClickEvent());
+      });
+      const staleMarkerA = result.current.markerA;
+      expect(result.current.markerB).toBeDefined();
+
+      // When: a combined remote update arrives - a new A and a cleared B in the same call, like
+      // a wraparound reset broadcasts it. Marker A resolution is async (Worker round-trip) while
+      // marker B is a plain removal - both must land in the same committed state.
+      const freshXValue = BasicBuilder.number();
+      await act(async () => {
+        getOnRemoteMarkers()(freshXValue, undefined);
+      });
+
+      // Then: marker A reflects the fresh value directly and marker B stays cleared - never a
+      // transient render with the old marker A and no marker B.
+      expect(result.current.markerA).toEqual({ xValue: freshXValue, seriesValues: [] });
+      expect(result.current.markerA).not.toEqual(staleMarkerA);
+      expect(result.current.markerB).toBeUndefined();
+    });
   });
 });

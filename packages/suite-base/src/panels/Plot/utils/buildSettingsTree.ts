@@ -132,6 +132,11 @@ export function buildSettingsTree(config: PlotConfig, t: TFunction<"plot">): Set
       label: t("general"),
       fields: {
         isSynced: { label: t("syncWithOtherPlots"), input: "boolean", value: config.isSynced },
+        syncDeltaMarkers: {
+          label: t("syncDeltaMarkers"),
+          input: "boolean",
+          value: config.syncDeltaMarkers,
+        },
       },
     },
     legend: {

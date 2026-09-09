@@ -46,6 +46,18 @@ jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAn
 }));
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useMessagePathDropConfig");
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings");
+jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsDeltaMode", () => ({
+  __esModule: true,
+  default: () => ({
+    active: false,
+    toggleActive: jest.fn(),
+    markerA: undefined,
+    markerB: undefined,
+    removeMarkerA: jest.fn(),
+    removeMarkerB: jest.fn(),
+    handleChartClick: jest.fn(),
+  }),
+}));
 jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
   useMessagePipeline: (selector: (ctx: unknown) => unknown) =>
     selector({ playerState: { presence: "PRESENT" } }),

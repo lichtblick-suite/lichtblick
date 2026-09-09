@@ -34,6 +34,16 @@ export type SyncBounds = {
 };
 
 /**
+ * Shared delta measure-mode marker positions, for panels that opt into syncing their
+ * marker A / marker B x values (in playback seconds) with other synced panels.
+ */
+export type SyncedDeltaMarkers = {
+  sourceId: string;
+  markerAXValue: undefined | number;
+  markerBXValue: undefined | number;
+};
+
+/**
  * The TimelineInteractionStateStore manages state related to dynamic user interactions with data in the app.
  * Things like the hovered time value and global bounds for plots are managed here.
  */
@@ -43,6 +53,9 @@ export type TimelineInteractionStateStore = Immutable<{
 
   /** Shared time bounds for synced plots, if any. */
   globalBounds: undefined | SyncBounds;
+
+  /** Shared delta measure-mode marker x values for synced panels, if any. */
+  globalDeltaMarkers: undefined | SyncedDeltaMarkers;
 
   /** The event directly hovered over by the user, if any. */
   hoveredEvent: undefined | TimelinePositionedEvent;
@@ -62,6 +75,14 @@ export type TimelineInteractionStateStore = Immutable<{
       | undefined
       | SyncBounds
       | ((oldValue: undefined | SyncBounds) => undefined | SyncBounds),
+  ) => void;
+
+  /** Sets new global delta marker positions. */
+  setGlobalDeltaMarkers: (
+    newValue:
+      | undefined
+      | SyncedDeltaMarkers
+      | ((oldValue: undefined | SyncedDeltaMarkers) => undefined | SyncedDeltaMarkers),
   ) => void;
 
   /** Sets or clears the directly hovered event. */

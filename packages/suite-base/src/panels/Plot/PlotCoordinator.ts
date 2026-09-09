@@ -418,6 +418,23 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     );
   }
 
+  /** Inverse of getXValueAtPixel: get the canvas pixel x location for a plot x value. */
+  public getPixelForXValue(xValue: number): number {
+    if (!this.latestXScale) {
+      return -1;
+    }
+
+    const pixelRange = this.latestXScale.right - this.latestXScale.left;
+    const valueRange = this.latestXScale.max - this.latestXScale.min;
+    if (pixelRange <= 0 || valueRange === 0) {
+      return -1;
+    }
+
+    return (
+      this.latestXScale.left + ((xValue - this.latestXScale.min) / valueRange) * pixelRange
+    );
+  }
+
   /** Get the entire data for all series */
   public async getCsvData(): Promise<CsvDataset[]> {
     if (this.isDestroyed()) {

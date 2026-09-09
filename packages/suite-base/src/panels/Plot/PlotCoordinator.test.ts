@@ -1020,6 +1020,102 @@ describe("PlotCoordinator", () => {
     });
   });
 
+  describe("getPixelForXValue", () => {
+    function buildXScale(scale: Partial<Scale> = {}): Scale {
+      return {
+        left: BasicBuilder.number(),
+        right: BasicBuilder.number(),
+        min: BasicBuilder.number(),
+        max: BasicBuilder.number(),
+        ...scale,
+      };
+    }
+
+    it("should return -1 when latestXScale is undefined", () => {
+      const result = plotCoordinator.getPixelForXValue(30);
+
+      expect(result).toBe(-1);
+    });
+
+    it("should return -1 when pixelRange is zero or negative", () => {
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 50,
+        right: 50,
+        min: 0,
+        max: 10,
+      });
+
+      const result = plotCoordinator.getPixelForXValue(5);
+
+      expect(result).toBe(-1);
+    });
+
+    it("should return -1 when valueRange is zero", () => {
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 10,
+      });
+
+      const result = plotCoordinator.getPixelForXValue(10);
+
+      expect(result).toBe(-1);
+    });
+
+    it("should correctly map x value to pixelX", () => {
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
+
+      const result = plotCoordinator.getPixelForXValue(30);
+
+      expect(result).toBe(100);
+    });
+
+    it("should return left boundary when xValue is at min", () => {
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
+
+      const result = plotCoordinator.getPixelForXValue(10);
+
+      expect(result).toBe(0);
+    });
+
+    it("should return right boundary when xValue is at max", () => {
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
+
+      const result = plotCoordinator.getPixelForXValue(50);
+
+      expect(result).toBe(200);
+    });
+
+    it("should round-trip with getXValueAtPixel", () => {
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
+
+      const pixel = plotCoordinator.getPixelForXValue(37);
+
+      expect(plotCoordinator.getXValueAtPixel(pixel)).toBeCloseTo(37);
+    });
+  });
+
   describe("getCsvData", () => {
     it("should return an empty array when destroyed", async () => {
       plotCoordinator["destroyed"] = true;

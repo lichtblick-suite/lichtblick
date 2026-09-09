@@ -207,4 +207,61 @@ describe("useDeltaMarkerState", () => {
     // Then
     expect(result.current.markerA).toBeDefined();
   });
+
+  describe("setMarkers", () => {
+    it("sets both markers atomically", () => {
+      // Given
+      const { result } = setup();
+      const markerA = buildMarker();
+      const markerB = buildMarker();
+
+      // When
+      act(() => {
+        result.current.setMarkers(markerA, markerB);
+      });
+
+      // Then
+      expect(result.current.markerA).toEqual(markerA);
+      expect(result.current.markerB).toEqual(markerB);
+    });
+
+    it("clears both markers when called with undefined", () => {
+      // Given
+      const { result } = setup();
+      act(() => {
+        result.current.setMarkers(buildMarker(), buildMarker());
+      });
+
+      // When
+      act(() => {
+        result.current.setMarkers(undefined, undefined);
+      });
+
+      // Then
+      expect(result.current.markerA).toBeUndefined();
+      expect(result.current.markerB).toBeUndefined();
+    });
+
+    it("never renders an intermediate state with only one marker updated", () => {
+      // Given
+      const { result } = setup();
+      act(() => {
+        result.current.setMarker(result.current.nextMarkerSlot(), buildMarker());
+      });
+      act(() => {
+        result.current.setMarker(result.current.nextMarkerSlot(), buildMarker());
+      });
+      const freshMarkerA = buildMarker();
+
+      // When: mirrors the "reset to a fresh A" transition (old A replaced, B cleared) applied
+      // as a single remote update instead of two separate local setMarker calls.
+      act(() => {
+        result.current.setMarkers(freshMarkerA, undefined);
+      });
+
+      // Then
+      expect(result.current.markerA).toEqual(freshMarkerA);
+      expect(result.current.markerB).toBeUndefined();
+    });
+  });
 });

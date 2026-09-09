@@ -46,6 +46,7 @@ export const DEFAULT_PLOT_CONFIG: PlotConfig = {
   legendDisplay: "floating",
   showPlotValuesInLegend: false,
   isSynced: true,
+  syncDeltaMarkers: false,
   xAxisVal: "timestamp",
   sidebarDimension: DEFAULT_SIDEBAR_DIMENSION,
   xAxisLabel: undefined,
