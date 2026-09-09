@@ -24,6 +24,7 @@ import {
   SharedRoot,
   UlogLocalDataSourceFactory,
 } from "@lichtblick/suite-base";
+import type { AuthProvider } from "@lichtblick/suite-base";
 import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { AppParametersInput } from "@lichtblick/suite-base/context/AppParametersContext";
 
@@ -34,6 +35,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 export function WebRoot(props: {
   extraProviders: React.JSX.Element[] | undefined;
   dataSources: IDataSourceFactory[] | undefined;
+  authProvider?: AuthProvider;
   AppBarComponent?: (props: AppBarProps) => React.JSX.Element;
   children: React.JSX.Element;
 }): React.JSX.Element {
@@ -93,6 +95,7 @@ export function WebRoot(props: {
       extensionLoaders={extensionLoaders}
       enableGlobalCss
       extraProviders={props.extraProviders}
+      authProvider={props.authProvider}
       AppBarComponent={props.AppBarComponent}
     >
       {props.children}
