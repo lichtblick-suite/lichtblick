@@ -163,9 +163,12 @@ export function downsampleStates(
       continue;
     }
 
-    // This only seems to occur when we've inserted a dummy final point, which
-    // we need to add
+    // Gap markers and synthetic endpoints are represented without labels.
+    // They must also break the current interval so that the first point of the
+    // next segment is not merged away when it has the same state value.
     if (label == undefined) {
+      finishInterval();
+      interval = undefined;
       indices.push({
         x,
         index,
