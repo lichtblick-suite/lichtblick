@@ -283,6 +283,7 @@ export function makeConfig(
         LICHTBLICK_SUITE_VERSION: JSON.stringify(version),
         API_URL: JSON.stringify(process.env.API_URL),
         DEV_WORKSPACE: JSON.stringify(process.env.DEV_WORKSPACE),
+        SYNC_LOCAL_LAYOUTS: process.env.SYNC_LOCAL_LAYOUTS === "true",
         ...buildEnvVars(),
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales

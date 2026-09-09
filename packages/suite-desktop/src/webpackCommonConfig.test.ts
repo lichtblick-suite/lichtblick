@@ -113,10 +113,11 @@ describe("createCommonWebpackConfig", () => {
     expect(hasForkTs).toBe(true);
   });
 
-  it("should propagate API_URL and DEV_WORKSPACE from environment if set", () => {
+  it("should propagate API_URL, DEV_WORKSPACE and SYNC_LOCAL_LAYOUTS from environment if set", () => {
     // Given
     process.env.API_URL = "https://api.example.com";
     (process.env as any).DEV_WORKSPACE = "workspace-1";
+    (process.env as any).SYNC_LOCAL_LAYOUTS = true;
     const params = createTestParams();
 
     // When
@@ -126,12 +127,14 @@ describe("createCommonWebpackConfig", () => {
     // Then
     expect(definePlugin.definitions.API_URL).toBe(JSON.stringify("https://api.example.com"));
     expect(definePlugin.definitions.DEV_WORKSPACE).toBe(JSON.stringify("workspace-1"));
+    expect(definePlugin.definitions.SYNC_LOCAL_LAYOUTS).toBe(true);
   });
 
-  it("should leave API_URL and DEV_WORKSPACE undefined if not set", () => {
+  it("should leave API_URL, DEV_WORKSPACE and SYNC_LOCAL_LAYOUTS undefined if not set", () => {
     // Given
     delete process.env.API_URL;
     delete (process.env as any).DEV_WORKSPACE;
+    delete (process.env as any).SYNC_LOCAL_LAYOUTS;
     const params = createTestParams();
 
     // When
@@ -141,5 +144,6 @@ describe("createCommonWebpackConfig", () => {
     // Then
     expect(definePlugin.definitions.API_URL).toBeUndefined();
     expect(definePlugin.definitions.DEV_WORKSPACE).toBeUndefined();
+    expect(definePlugin.definitions.SYNC_LOCAL_LAYOUTS).toBeUndefined();
   });
 });
