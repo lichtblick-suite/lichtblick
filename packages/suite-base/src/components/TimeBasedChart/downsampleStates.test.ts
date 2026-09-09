@@ -116,4 +116,22 @@ describe("downsampleStates", () => {
       { x: 100, index: 3 },
     ]);
   });
+
+  it("clamps synthetic endpoint when a multi-state interval is followed by a gap in the same pixel", () => {
+    // in:  A-B-gap (all within one pixel interval around x=50)
+    // out: first point + synthetic endpoint clamped to gap + gap point
+    const gapData: Datum[] = [
+      { x: 50, y: 0, label: A },
+      { x: 50.02, y: 0, label: B },
+      { x: 50.04, y: Number.NaN },
+    ];
+
+    const result = downsampleStates(iterateObjects(gapData), bounds, numPoints);
+
+    expect(result).toEqual([
+      { x: 50, index: undefined, states: [A, B] },
+      { x: 50.04, index: 1 },
+      { x: 50.04, index: 2 },
+    ]);
+  });
 });

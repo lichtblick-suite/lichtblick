@@ -110,7 +110,7 @@ export function downsampleStates(
    * * One at the x-value of the end of the interval (which is not a real point)
    * This allows the renderer to draw a gray line segment between these two points.
    */
-  const finishInterval = () => {
+  const finishInterval = (gapX?: number) => {
     if (interval == undefined) {
       return;
     }
@@ -135,7 +135,7 @@ export function downsampleStates(
     }
 
     indices.push({
-      x: endX,
+      x: gapX != undefined ? Math.min(endX, gapX) : endX,
       index: last.index,
     });
   };
@@ -167,7 +167,7 @@ export function downsampleStates(
     // They must also break the current interval so that the first point of the
     // next segment is not merged away when it has the same state value.
     if (label == undefined) {
-      finishInterval();
+      finishInterval(x);
       interval = undefined;
       indices.push({
         x,
