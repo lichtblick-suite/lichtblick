@@ -31,14 +31,29 @@ export function hasFix(ev: MessageEvent<NavSatFixMsg>): boolean {
   }
 }
 
-export function isGeoJSONMessage(msgEvent: MessageEvent): msgEvent is GeoJsonMessage {
-  const datatype = msgEvent.schemaName;
+/**
+ * @returns true if the schema name identifies a GeoJSON message
+ */
+export function isGeoJSONSchema(schemaName: string): boolean {
   return (
-    datatype === "foxglove_msgs/GeoJSON" ||
-    datatype === "foxglove_msgs/msg/GeoJSON" ||
-    datatype === "foxglove::GeoJSON" ||
-    datatype === "foxglove.GeoJSON"
+    schemaName === "foxglove_msgs/GeoJSON" ||
+    schemaName === "foxglove_msgs/msg/GeoJSON" ||
+    schemaName === "foxglove::GeoJSON" ||
+    schemaName === "foxglove.GeoJSON"
   );
+}
+
+export function isGeoJSONMessage(msgEvent: MessageEvent): msgEvent is GeoJsonMessage {
+  return isGeoJSONSchema(msgEvent.schemaName);
+}
+
+/**
+ * Within the set of messages this panel accepts, anything that is not GeoJSON is a location fix.
+ */
+export function isNavSatFixMessage(
+  msgEvent: MapPanelMessage,
+): msgEvent is MessageEvent<NavSatFixMsg> {
+  return !isGeoJSONMessage(msgEvent);
 }
 
 /**
