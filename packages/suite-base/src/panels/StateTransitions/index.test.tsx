@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { render } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
 import { MessageDataItemsByPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
@@ -12,7 +13,6 @@ import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/Message
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useDecodedMessageRange } from "./hooks/useDecodedMessageRange";
-import useStateTransitionsDeltaMode from "./hooks/useStateTransitionsDeltaMode";
 import { StateTransitionConfig } from "./types";
 
 jest.mock("@lichtblick/suite-base/components/Panel", () => ({
@@ -47,18 +47,6 @@ jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAn
 }));
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useMessagePathDropConfig");
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings");
-jest.mock("./hooks/useStateTransitionsDeltaMode", () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    active: false,
-    handleChartClick: jest.fn(),
-    markerA: undefined,
-    markerB: undefined,
-    removeMarkerA: jest.fn(),
-    removeMarkerB: jest.fn(),
-    toggleActive: jest.fn(),
-  })),
-}));
 jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
   useMessagePipeline: (selector: (ctx: unknown) => unknown) =>
     selector({ playerState: { presence: "PRESENT" } }),
@@ -69,11 +57,27 @@ jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
 }));
 jest.mock("@lichtblick/suite-base/components/PanelToolbar", () => ({
   __esModule: true,
-  default: () => <div data-testid="panel-toolbar" />,
+  default: ({ additionalIcons }: { additionalIcons: React.ReactNode }) => (
+    <div data-testid="panel-toolbar">{additionalIcons}</div>
+  ),
 }));
 jest.mock("@lichtblick/suite-base/components/TimeBasedChart", () => ({
   __esModule: true,
-  default: () => <div data-testid="time-based-chart" />,
+  default: ({
+    annotations,
+    onClick,
+  }: {
+    annotations: unknown[];
+    onClick: (arg: unknown) => void;
+  }) => (
+    <button
+      data-testid="time-based-chart"
+      data-annotation-count={annotations.length}
+      onClick={() => {
+        onClick({ x: 1, y: 0 });
+      }}
+    />
+  ),
 }));
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/PathLegend", () => ({
   PathLegend: () => <div data-testid="path-legend" />,
@@ -84,7 +88,6 @@ jest.mock("@lichtblick/suite-base/panels/StateTransitions/StateTransitions.style
 
 const mockUseMessagesByPath = useMessagesByPath as jest.Mock;
 const mockUseDecodedMessageRange = useDecodedMessageRange as jest.Mock;
-const mockUseStateTransitionsDeltaMode = useStateTransitionsDeltaMode as jest.Mock;
 
 function buildMessageAndData(path: string) {
   const topic = path.split(".")[0]!;
@@ -139,13 +142,15 @@ describe("StateTransitions", () => {
     expect(mockUseMessagesByPath).toHaveBeenCalledWith([topicA, topicB]);
   });
 
-  it("should reset delta markers when a path timestamp source changes", () => {
+  it("should remove marker annotations when a path timestamp source changes", () => {
     // Given
     const topic = BasicBuilder.string();
     const { rerender, StateTransitionsPanel } = renderPanel({
       paths: [{ value: topic, timestampMethod: "receiveTime" }],
     });
-    const firstResetKey = mockUseStateTransitionsDeltaMode.mock.calls[0][0].resetKey;
+    fireEvent.click(screen.getByTestId("state-transitions-measure-mode-toggle"));
+    fireEvent.click(screen.getByTestId("time-based-chart"));
+    expect(screen.getByTestId("time-based-chart")).toHaveAttribute("data-annotation-count", "1");
 
     // When
     rerender(
@@ -159,8 +164,7 @@ describe("StateTransitions", () => {
     );
 
     // Then
-    const secondResetKey = mockUseStateTransitionsDeltaMode.mock.calls.at(-1)[0].resetKey;
-    expect(secondResetKey).not.toEqual(firstResetKey);
+    expect(screen.getByTestId("time-based-chart")).toHaveAttribute("data-annotation-count", "0");
   });
 
   it("should pass empty array to useMessagesByPath when range data is active", () => {

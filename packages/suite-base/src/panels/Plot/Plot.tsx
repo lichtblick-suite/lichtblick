@@ -107,8 +107,9 @@ const Plot = (props: PlotProps): React.JSX.Element => {
 
   // Markers reference series by index and axis meaning, so stale ones need clearing when either changes.
   const deltaMeasureModeResetKey = useMemo(
-    () => `${xAxisMode}|${config.paths.map((path) => path.value).join("|")}`,
-    [config.paths, xAxisMode],
+    () =>
+      `${xAxisMode}|${config.xAxisPath?.value ?? ""}|${config.paths.map((path) => path.value).join("|")}`,
+    [config.paths, config.xAxisPath?.value, xAxisMode],
   );
   const deltaMeasureMode = useDeltaMeasureMode({
     coordinator,
