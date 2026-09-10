@@ -120,8 +120,7 @@ jest.mock("./PlotCoordinator", () => ({
 
 const rendererStub = { id: "renderer" } as any;
 const datasetsBuilderStub = { id: "datasets-builder" } as any;
-let mockSetCanReset:
-  (({ canReset }: { canReset: boolean }) => void) | undefined;
+let mockSetCanReset: (({ canReset }: { canReset: boolean }) => void) | undefined;
 
 class PlotConfigBuilder {
   private config = {
@@ -219,9 +218,7 @@ describe("Plot Component", () => {
     toJSON: () => ({}) as any,
   } as DOMRect;
 
-  jest
-    .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-    .mockReturnValue(defaultBoundingRect);
+  jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue(defaultBoundingRect);
 
   function renderPlot(config: PlotConfig, saveConfig: jest.Mock = jest.fn()) {
     const props: PlotProps = { config, saveConfig };
@@ -292,13 +289,10 @@ describe("Plot Component", () => {
   it("Given canvas interactions When user moves, clicks, scrolls Then delegate handlers fire", async () => {
     // Given
     const config = new PlotConfigBuilder()
-      .withPaths([
-        { value: "/topic", enabled: true, timestampMethod: "receiveTime" },
-      ])
+      .withPaths([{ value: "/topic", enabled: true, timestampMethod: "receiveTime" }])
       .build();
     renderPlot(config);
-    const canvas = screen.getByTestId("vertical-bar-wrapper")
-      .firstElementChild as HTMLElement;
+    const canvas = screen.getByTestId("vertical-bar-wrapper").firstElementChild as HTMLElement;
 
     // When
     fireEvent.mouseMove(canvas);
@@ -341,9 +335,7 @@ describe("Plot Component", () => {
   it("Given renderer present When mounted Then coordinator lifecycle hooks are exercised", () => {
     // Given
     const config = new PlotConfigBuilder()
-      .withPaths([
-        { value: "/topic", enabled: true, timestampMethod: "receiveTime" },
-      ])
+      .withPaths([{ value: "/topic", enabled: true, timestampMethod: "receiveTime" }])
       .build();
 
     const { unmount } = renderPlot(config);

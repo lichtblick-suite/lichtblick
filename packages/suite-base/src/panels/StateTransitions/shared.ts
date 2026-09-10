@@ -11,11 +11,7 @@ import { Immutable } from "@lichtblick/suite";
 import { MessageAndData } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { ChartDatum } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 
-import {
-  ImmutableDataset,
-  StateTransitionPath,
-  ValidQueriedDataValue,
-} from "./types";
+import { ImmutableDataset, StateTransitionPath, ValidQueriedDataValue } from "./types";
 
 function presence<T>(value: undefined | T): undefined | T {
   if (value === "") {
@@ -44,9 +40,7 @@ export function datasetContainsArray(dataset: ImmutableDataset): boolean {
     }),
     R.uniq,
   )(dataset);
-  return (
-    dataCounts.length > 0 && dataCounts.every((numPoints) => numPoints > 1)
-  );
+  return dataCounts.length > 0 && dataCounts.every((numPoints) => numPoints > 1);
 }
 
 export type ValueAtTime = {

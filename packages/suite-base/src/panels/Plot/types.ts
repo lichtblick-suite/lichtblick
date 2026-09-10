@@ -14,10 +14,7 @@ import { CurrentCustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot
 import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/CustomDatasetsBuilder";
 import { IndexDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/IndexDatasetsBuilder";
 import { TimestampDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilder";
-import {
-  PlotConfig,
-  PlotPath,
-} from "@lichtblick/suite-base/panels/Plot/utils/config";
+import { PlotConfig, PlotPath } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 import { Bounds1D } from "@lichtblick/suite-base/types/Bounds";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
@@ -52,8 +49,7 @@ export type MouseBase = BaseInteractionEvent & {
   clientY: number;
 };
 
-export type WheelInteractionEvent = { type: "wheel" } & BaseInteractionEvent &
-  MouseBase;
+export type WheelInteractionEvent = { type: "wheel" } & BaseInteractionEvent & MouseBase;
 
 export type PanStartInteractionEvent = {
   type: "panstart";
@@ -179,6 +175,8 @@ export type VerticalBarsProps = {
 
 export type DeltaMarkerBarsProps = {
   coordinator?: PlotCoordinator;
+  /** Whether Measure mode is active - the DeltaOverlay renders as soon as this is true. */
+  active: boolean;
   markerA?: DeltaMarker;
   markerB?: DeltaMarker;
   colorsByDatasetIndex: Record<string, string>;
@@ -189,6 +187,8 @@ export type DeltaMarkerBarsProps = {
   markerBLabel: string;
   onRemoveMarkerA: () => void;
   onRemoveMarkerB: () => void;
+  /** Closes the overlay entirely and deactivates measure mode. */
+  onClose: () => void;
 };
 
 export type UsePlotDataHandling = {
@@ -224,9 +224,7 @@ export type PlotCoordinatorEventTypes = {
   currentValuesChanged(values: readonly unknown[]): void;
 
   /** Paths with mismatched data lengths were detected */
-  pathsWithMismatchedDataLengthsChanged(
-    pathsWithMismatchedDataLengths: string[],
-  ): void;
+  pathsWithMismatchedDataLengthsChanged(pathsWithMismatchedDataLengths: string[]): void;
 
   /** Rendering updated the viewport. `canReset` is true if the viewport can be reset. */
   viewportChange(canReset: boolean): void;
@@ -242,8 +240,7 @@ export type HandleDeleteSeriesAction = HandleAction & {
   index: number;
 };
 
-export type HandleUpdateAction = HandleAction &
-  Omit<SettingsTreeActionUpdatePayload, "input">;
+export type HandleUpdateAction = HandleAction & Omit<SettingsTreeActionUpdatePayload, "input">;
 
 export type MakeSeriesNode = {
   path: PlotPath;

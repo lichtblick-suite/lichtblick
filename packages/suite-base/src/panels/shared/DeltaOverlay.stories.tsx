@@ -24,14 +24,11 @@ export const SingleSeries: StoryObj = {
       xValueB: 14.8,
       deltaX: 4.6,
       formatXValue: (value) => `${value.toFixed(2)}s`,
-      seriesLabels: [
-        { configIndex: 0, label: "/imu/acceleration_x", color: "#4e98e2" },
-      ],
-      series: [
-        { configIndex: 0, valueAtA: 12.5, valueAtB: 18.75, delta: 6.25 },
-      ],
+      seriesLabels: [{ configIndex: 0, label: "/imu/acceleration_x", color: "#4e98e2" }],
+      series: [{ configIndex: 0, valueAtA: 12.5, valueAtB: 18.75, delta: 6.25 }],
       onRemoveMarkerA: noop,
       onRemoveMarkerB: noop,
+      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },
@@ -60,6 +57,7 @@ export const MultiSeries: StoryObj = {
       ],
       onRemoveMarkerA: noop,
       onRemoveMarkerB: noop,
+      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },
@@ -78,9 +76,7 @@ export const CategoricalStateValues: StoryObj = {
       xValueB: 11.4,
       deltaX: 6.4,
       formatXValue: (value) => `${value.toFixed(1)}s`,
-      seriesLabels: [
-        { configIndex: 0, label: "/robot/state", color: "#bd10e0" },
-      ],
+      seriesLabels: [{ configIndex: 0, label: "/robot/state", color: "#bd10e0" }],
       series: [
         {
           configIndex: 0,
@@ -91,6 +87,7 @@ export const CategoricalStateValues: StoryObj = {
       ],
       onRemoveMarkerA: noop,
       onRemoveMarkerB: noop,
+      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },
@@ -115,6 +112,7 @@ export const MissingSeriesResult: StoryObj = {
       series: [{ configIndex: 0, valueAtA: 1.2, valueAtB: -0.4, delta: 1.6 }],
       onRemoveMarkerA: noop,
       onRemoveMarkerB: noop,
+      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },
@@ -140,18 +138,38 @@ export const Interactive: StoryObj = {
       xValueB: 14.8,
       deltaX: 4.6,
       formatXValue: (value) => `${value.toFixed(2)}s`,
-      seriesLabels: [
-        { configIndex: 0, label: "/imu/acceleration_x", color: "#4e98e2" },
-      ],
-      series: [
-        { configIndex: 0, valueAtA: 12.5, valueAtB: 18.75, delta: 6.25 },
-      ],
+      seriesLabels: [{ configIndex: 0, label: "/imu/acceleration_x", color: "#4e98e2" }],
+      series: [{ configIndex: 0, valueAtA: 12.5, valueAtB: 18.75, delta: 6.25 }],
       onRemoveMarkerA: () => {
         setMarkerA(false);
       },
       onRemoveMarkerB: () => {
         setMarkerB(false);
       },
+      onClose: noop,
+    };
+    return <DeltaOverlay {...props} />;
+  },
+};
+
+// Measure mode is active but only marker A has been placed yet - marker B, delta and the
+// per-series delta column render as placeholders until the second point is clicked.
+export const OnlyMarkerAPlaced: StoryObj = {
+  render: function Story() {
+    const props: DeltaOverlayProps = {
+      deltaRowLabel: "Delta",
+      xColumnLabel: "Time",
+      markerALabel: "P1",
+      markerBLabel: "P2",
+      xValueA: 10.2,
+      xValueB: undefined,
+      deltaX: undefined,
+      formatXValue: (value) => `${value.toFixed(2)}s`,
+      seriesLabels: [{ configIndex: 0, label: "/imu/acceleration_x", color: "#4e98e2" }],
+      series: [{ configIndex: 0, valueAtA: 12.5, valueAtB: undefined, delta: undefined }],
+      onRemoveMarkerA: noop,
+      onRemoveMarkerB: noop,
+      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },

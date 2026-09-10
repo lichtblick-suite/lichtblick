@@ -1,16 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useLatest } from "react-use";
 
+import { DEFAULT_MARKER_COLOR } from "@lichtblick/suite-base/panels/Plot/constants";
 import { getPixelForXValue } from "@lichtblick/suite-base/panels/Plot/utils/getPixelForXValue";
 import { getPixelForYValue } from "@lichtblick/suite-base/panels/Plot/utils/getPixelForYValue";
 import {
@@ -18,15 +12,13 @@ import {
   DeltaOverlaySeriesLabel,
 } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
 import {
-  computeDelta,
+  computeDeltaDisplay,
   DeltaMarker,
   getDeltaSeriesConfigIndexes,
 } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 
 import { useDeltaMarkerBarsStyles } from "./DeltaMarkerBars.style";
 import type { DeltaMarkerBarsProps, Scale, YScale } from "./types";
-
-const DEFAULT_MARKER_COLOR = "#f44336";
 
 /** The value+color of the series closest to where a marker was placed (used for the crosshair). */
 function getPrimarySeries(
@@ -50,10 +42,78 @@ type MarkerRefs = {
   label: React.RefObject<HTMLDivElement>;
 };
 
+function setVerticalBarPosition(
+  el: HTMLDivElement | null,
+  pixelX: number | undefined,
+  color: string,
+): void {
+  if (!el) {
+    return;
+  }
+  el.style.display = pixelX == undefined ? "none" : "block";
+  if (pixelX != undefined) {
+    el.style.transform = `translateX(${pixelX}px)`;
+  }
+  el.style.borderLeftColor = color;
+}
+
+// Only needs pixelY (the line spans the full width), unlike the point/label below.
+function setHorizontalBarPosition(
+  el: HTMLDivElement | null,
+  pixelX: number | undefined,
+  pixelY: number | undefined,
+  color: string,
+): void {
+  if (!el) {
+    return;
+  }
+  el.style.display = pixelX == undefined || pixelY == undefined ? "none" : "block";
+  if (pixelY != undefined) {
+    el.style.transform = `translateY(${pixelY}px)`;
+    el.style.borderTopColor = color;
+  }
+}
+
+function setPointPosition(
+  el: HTMLDivElement | null,
+  pixelX: number | undefined,
+  pixelY: number | undefined,
+  color: string,
+): void {
+  if (!el) {
+    return;
+  }
+  const visible = pixelX != undefined && pixelY != undefined;
+  el.style.display = visible ? "block" : "none";
+  if (visible) {
+    el.style.transform = `translate(${pixelX}px, ${pixelY}px)`;
+    el.style.backgroundColor = color;
+  }
+}
+
+function setLabelPosition(
+  el: HTMLDivElement | null,
+  pixelX: number | undefined,
+  pixelY: number | undefined,
+  text: string,
+): void {
+  if (!el) {
+    return;
+  }
+  const visible = pixelX != undefined && pixelY != undefined;
+  el.style.display = visible ? "block" : "none";
+  if (visible) {
+    // Offset up and to the right of the point so the label doesn't sit on top of it.
+    el.style.transform = `translate(${pixelX + 6}px, ${pixelY - 22}px)`;
+    el.textContent = text;
+  }
+}
+
 /**
  * Draws the two Delta/Measure-mode marker crosshairs (matching Foxglove's reference behavior: a
  * vertical + horizontal dashed line and an on-chart "P1"/"P2" label snapped to the nearest
- * series) and, once both are placed, the DeltaOverlay table.
+ * series) and the DeltaOverlay table, which renders as soon as measure mode is active and fills
+ * in each row as markers are placed.
  *
  * Bar/label positions are updated directly on refs (not React state) on every xScaleChanged /
  * yScaleChanged tick so panning/zooming doesn't re-render the (potentially large) overlay.
@@ -61,6 +121,7 @@ type MarkerRefs = {
 // eslint-disable-next-line @typescript-eslint/no-shadow
 export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   coordinator,
+  active,
   markerA,
   markerB,
   colorsByDatasetIndex,
@@ -71,6 +132,7 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   markerBLabel,
   onRemoveMarkerA,
   onRemoveMarkerB,
+  onClose,
 }: DeltaMarkerBarsProps): React.JSX.Element {
   const { classes } = useDeltaMarkerBarsStyles();
 
@@ -95,50 +157,14 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   const updateMarker = useCallback(
     (refs: MarkerRefs, marker: DeltaMarker | undefined, label: string) => {
       const pixelX = getPixelForXValue(latestXScale.current, marker?.xValue);
-      if (refs.verticalBar.current) {
-        if (pixelX == undefined) {
-          refs.verticalBar.current.style.display = "none";
-        } else {
-          refs.verticalBar.current.style.display = "block";
-          refs.verticalBar.current.style.transform = `translateX(${pixelX}px)`;
-        }
-      }
-
       const primary = getPrimarySeries(marker, colorsByDatasetIndex);
-      const pixelY =
-        primary && getPixelForYValue(latestYScale.current, primary.value);
+      const pixelY = primary && getPixelForYValue(latestYScale.current, primary.value);
       const color = primary?.color ?? DEFAULT_MARKER_COLOR;
 
-      if (refs.verticalBar.current) {
-        refs.verticalBar.current.style.borderLeftColor = color;
-      }
-
-      for (const ref of [refs.horizontalBar, refs.point, refs.label]) {
-        if (!ref.current) {
-          continue;
-        }
-        if (pixelX == undefined || pixelY == undefined) {
-          ref.current.style.display = "none";
-          continue;
-        }
-        ref.current.style.display = "block";
-      }
-
-      if (refs.horizontalBar.current && pixelY != undefined) {
-        refs.horizontalBar.current.style.transform = `translateY(${pixelY}px)`;
-        refs.horizontalBar.current.style.borderTopColor = color;
-      }
-
-      if (refs.point.current && pixelX != undefined && pixelY != undefined) {
-        refs.point.current.style.transform = `translate(${pixelX}px, ${pixelY}px)`;
-        refs.point.current.style.backgroundColor = color;
-      }
-
-      if (refs.label.current && pixelX != undefined && pixelY != undefined) {
-        // Offset up and to the right of the point so the label doesn't sit on top of it.
-        refs.label.current.style.transform = `translate(${pixelX + 6}px, ${pixelY - 22}px)`;
-        refs.label.current.textContent = label;
-      }
+      setVerticalBarPosition(refs.verticalBar.current, pixelX, color);
+      setHorizontalBarPosition(refs.horizontalBar.current, pixelX, pixelY, color);
+      setPointPosition(refs.point.current, pixelX, pixelY, color);
+      setLabelPosition(refs.label.current, pixelX, pixelY, label);
     },
     [colorsByDatasetIndex],
   );
@@ -176,21 +202,23 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   }, [coordinator, updateBars]);
 
   const overlayData = useMemo(() => {
-    if (!markerA || !markerB) {
+    if (!active) {
       return undefined;
     }
 
     const seriesLabels: DeltaOverlaySeriesLabel[] = getDeltaSeriesConfigIndexes(
       markerA,
       markerB,
-    ).map((configIndex): DeltaOverlaySeriesLabel => ({
-      configIndex,
-      label: labelsByDatasetIndex[configIndex] ?? "",
-      color: colorsByDatasetIndex[configIndex] ?? "",
-    }));
+    ).map(
+      (configIndex): DeltaOverlaySeriesLabel => ({
+        configIndex,
+        label: labelsByDatasetIndex[configIndex] ?? "",
+        color: colorsByDatasetIndex[configIndex] ?? "",
+      }),
+    );
 
-    return { delta: computeDelta(markerA, markerB), seriesLabels };
-  }, [colorsByDatasetIndex, labelsByDatasetIndex, markerA, markerB]);
+    return { delta: computeDeltaDisplay(markerA, markerB), seriesLabels };
+  }, [active, colorsByDatasetIndex, labelsByDatasetIndex, markerA, markerB]);
 
   if (!coordinator) {
     return <></>;
@@ -225,23 +253,21 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
           />
         </Fragment>
       ))}
-      {overlayData && markerA && markerB && (
-        <div
-          className={classes.overlayWrapper}
-          data-testid="delta-overlay-wrapper"
-        >
+      {overlayData && (
+        <div className={classes.overlayWrapper} data-testid="delta-overlay-wrapper">
           <DeltaOverlay
             deltaRowLabel={deltaRowLabel}
             xColumnLabel={xColumnLabel}
             markerALabel={markerALabel}
             markerBLabel={markerBLabel}
-            xValueA={markerA.xValue}
-            xValueB={markerB.xValue}
+            xValueA={markerA?.xValue}
+            xValueB={markerB?.xValue}
             deltaX={overlayData.delta.deltaX}
             seriesLabels={overlayData.seriesLabels}
             series={overlayData.delta.series}
             onRemoveMarkerA={onRemoveMarkerA}
             onRemoveMarkerB={onRemoveMarkerB}
+            onClose={onClose}
           />
         </div>
       )}

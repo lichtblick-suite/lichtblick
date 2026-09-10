@@ -90,9 +90,7 @@ const fixture: Fixture = {
         ],
       },
       "msgs/DataValue": {
-        definitions: [
-          { type: "string", name: "value", isArray: false, isComplex: false },
-        ],
+        definitions: [{ type: "string", name: "value", isArray: false, isComplex: false }],
       },
     }),
   ),
@@ -274,9 +272,7 @@ export const DeltaMeasureMode: StoryObj = {
     await parameters.storyReady;
     await delay(200);
 
-    const toggle = await screen.findByTestId(
-      "state-transitions-measure-mode-toggle",
-    );
+    const toggle = await screen.findByTestId("state-transitions-measure-mode-toggle");
     await userEvent.click(toggle);
 
     const canvasEl = document.querySelector("canvas");
@@ -424,11 +420,7 @@ export const LongPath: StoryObj = {
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
-      <PanelSetup
-        fixture={fixture}
-        pauseFrame={pauseFrame}
-        style={{ maxWidth: 100 }}
-      >
+      <PanelSetup fixture={fixture} pauseFrame={pauseFrame} style={{ maxWidth: 100 }}>
         <StateTransitions
           overrideConfig={{
             paths: [
@@ -530,10 +522,7 @@ export const Blocks: StoryObj = {
     const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
     return (
-      <PanelSetup
-        fixture={{ ...fixture, progress: { messageCache } }}
-        pauseFrame={pauseFrame}
-      >
+      <PanelSetup fixture={{ ...fixture, progress: { messageCache } }} pauseFrame={pauseFrame}>
         <StateTransitions
           overrideConfig={{
             paths: [

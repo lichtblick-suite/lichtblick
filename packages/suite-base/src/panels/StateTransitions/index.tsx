@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Ruler20Regular } from "@fluentui/react-icons";
-import { useTheme } from "@mui/material";
+import { alpha, useTheme } from "@mui/material";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -56,7 +56,7 @@ import {
   DeltaOverlaySeriesLabel,
 } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
 import {
-  computeDelta,
+  computeDeltaDisplay,
   getDeltaSeriesConfigIndexes,
 } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
@@ -65,8 +65,7 @@ import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
 import { StateTransitionConfig, StateTransitionPanelProps } from "./types";
 
-const selectPlayerPresence = (ctx: MessagePipelineContext) =>
-  ctx.playerState.presence;
+const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 
 function StateTransitions(props: StateTransitionPanelProps) {
   const { config, saveConfig } = props;
@@ -76,18 +75,14 @@ function StateTransitions(props: StateTransitionPanelProps) {
   const { t } = useTranslation("stateTransitions");
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const isPlayerPresent =
-    playerPresence === PlayerPresence.PRESENT ||
-    playerPresence === PlayerPresence.BUFFERING;
+    playerPresence === PlayerPresence.PRESENT || playerPresence === PlayerPresence.BUFFERING;
 
-  const [focusedPath, setFocusedPath] = useState<undefined | string[]>(
-    undefined,
-  );
+  const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
   const [subscriberId] = useState(() => uuidv4());
 
   useMessagePathDropConfig(saveConfig);
 
-  const { startTime, currentTimeSinceStart, endTimeSinceStart } =
-    useStateTransitionsTime();
+  const { startTime, currentTimeSinceStart, endTimeSinceStart } = useStateTransitionsTime();
 
   const { topics, pathStrings } = useMemo(() => {
     const newPathStrings = paths.map(({ value }) => value);
@@ -121,9 +116,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
     [decodedMessages, pathStrings],
   );
 
-  const itemsByPath = useMessagesByPath(
-    hasRangeData ? EMPTY_PATHS : pathStrings,
-  );
+  const itemsByPath = useMessagesByPath(hasRangeData ? EMPTY_PATHS : pathStrings);
 
   const { height, heightPerTopic } = useMemo(() => {
     const onlyTopicsHeight = paths.length * 64;
@@ -146,18 +139,26 @@ function StateTransitions(props: StateTransitionPanelProps) {
     showPoints,
   );
 
-  const { yScale, xScale, databounds, width, sizeRef } =
-    useChartScalesAndBounds(
-      minY,
-      currentTimeSinceStart,
-      endTimeSinceStart,
-      config,
-    );
+  const { yScale, xScale, databounds, width, sizeRef } = useChartScalesAndBounds(
+    minY,
+    currentTimeSinceStart,
+    endTimeSinceStart,
+    config,
+  );
 
   const deltaMode = useStateTransitionsDeltaMode({
     datasets: data.datasets,
-    // Markers reference paths by index, so stale ones need clearing when the path list changes.
-    resetKey: paths.map((path) => path.value).join("|"),
+    // Markers reference paths by index, so clear stale ones when any path input changes.
+    resetKey:
+      JSON.stringify(
+        paths.map(({ color, value, label, enabled, timestampMethod }) => [
+          color,
+          value,
+          label,
+          enabled,
+          timestampMethod,
+        ]),
+      ) ?? "",
     subscriberId,
     syncEnabled: config.syncDeltaMarkers === true,
   });
@@ -201,22 +202,19 @@ function StateTransitions(props: StateTransitionPanelProps) {
   );
 
   const annotations = useMemo((): AnnotationOptions[] => {
-    const markerAnnotation = (
-      value: number,
-      content: string,
-    ): AnnotationOptions => ({
+    const markerAnnotation = (value: number, content: string): AnnotationOptions => ({
       type: "line",
       scaleID: "x",
       value,
-      borderColor: theme.palette.error.main,
+      borderColor: alpha(theme.palette.error.main, 0.6),
       borderWidth: 2,
       borderDash: [6, 4],
       label: {
         display: true,
         content,
         position: "start",
-        backgroundColor: theme.palette.error.main,
-        color: theme.palette.error.contrastText,
+        backgroundColor: alpha(theme.palette.error.main, 0.15),
+        color: theme.palette.error.main,
         font: { size: 10 },
       },
     });
@@ -225,16 +223,10 @@ function StateTransitions(props: StateTransitionPanelProps) {
       ...(markerA ? [markerAnnotation(markerA.xValue, t("markerA"))] : []),
       ...(markerB ? [markerAnnotation(markerB.xValue, t("markerB"))] : []),
     ];
-  }, [
-    markerA,
-    markerB,
-    t,
-    theme.palette.error.contrastText,
-    theme.palette.error.main,
-  ]);
+  }, [markerA, markerB, t, theme.palette.error.main]);
 
   const overlayData = useMemo(() => {
-    if (!markerA || !markerB) {
+    if (!deltaMode.active) {
       return undefined;
     }
 
@@ -251,12 +243,12 @@ function StateTransitions(props: StateTransitionPanelProps) {
     });
 
     return {
-      xValueA: markerA.xValue,
-      xValueB: markerB.xValue,
-      delta: computeDelta(markerA, markerB),
+      xValueA: markerA?.xValue,
+      xValueB: markerB?.xValue,
+      delta: computeDeltaDisplay(markerA, markerB),
       seriesLabels,
     };
-  }, [markerA, markerB, paths]);
+  }, [deltaMode.active, markerA, markerB, paths]);
 
   usePanelSettings(config, saveConfig, pathState, focusedPath);
 
@@ -276,13 +268,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
           </ToolbarIconButton>
         }
       />
-      <Stack
-        fullWidth
-        fullHeight
-        flex="auto"
-        overflowX="hidden"
-        overflowY="auto"
-      >
+      <Stack fullWidth fullHeight flex="auto" overflowX="hidden" overflowY="auto">
         <div className={classes.chartWrapper} ref={sizeRef}>
           <TimeBasedChart
             zoom
@@ -310,10 +296,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
             saveConfig={saveConfig}
           />
           {overlayData && (
-            <div
-              className={classes.deltaOverlayWrapper}
-              data-testid="delta-overlay-wrapper"
-            >
+            <div className={classes.deltaOverlayWrapper} data-testid="delta-overlay-wrapper">
               <DeltaOverlay
                 deltaRowLabel={t("delta")}
                 xColumnLabel={t("labels.timestamp")}
@@ -326,6 +309,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
                 series={overlayData.delta.series}
                 onRemoveMarkerA={deltaMode.removeMarkerA}
                 onRemoveMarkerB={deltaMode.removeMarkerB}
+                onClose={deltaMode.toggleActive}
               />
             </div>
           )}

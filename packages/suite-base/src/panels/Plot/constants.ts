@@ -58,3 +58,6 @@ export const DEFAULT_PLOT_PATH: PlotPath = Object.freeze({
   value: "",
   enabled: true,
 });
+
+/** Fallback crosshair/label color for a delta measure-mode marker whose series has no color. */
+export const DEFAULT_MARKER_COLOR = "#f44336";

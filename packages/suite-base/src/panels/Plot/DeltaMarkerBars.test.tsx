@@ -4,11 +4,7 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import {
-  DeltaMarkerBarsProps,
-  Scale,
-  YScale,
-} from "@lichtblick/suite-base/panels/Plot/types";
+import { DeltaMarkerBarsProps, Scale, YScale } from "@lichtblick/suite-base/panels/Plot/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { DeltaMarkerBars } from "./DeltaMarkerBars";
@@ -20,6 +16,7 @@ describe("DeltaMarkerBars", () => {
   const setup = (propsOverride: Partial<DeltaMarkerBarsProps> = {}) => {
     const props: DeltaMarkerBarsProps = {
       coordinator: mockCoordinator,
+      active: false,
       colorsByDatasetIndex: {},
       labelsByDatasetIndex: {},
       deltaRowLabel: "Delta",
@@ -28,6 +25,7 @@ describe("DeltaMarkerBars", () => {
       markerBLabel: "P2",
       onRemoveMarkerA: jest.fn(),
       onRemoveMarkerB: jest.fn(),
+      onClose: jest.fn(),
       ...propsOverride,
     };
     return { ...render(<DeltaMarkerBars {...props} />), props };
@@ -50,19 +48,13 @@ describe("DeltaMarkerBars", () => {
     const { unmount } = setup();
 
     // Then
-    expect(mockCoordinator.on).toHaveBeenCalledWith(
-      "xScaleChanged",
-      expect.any(Function),
-    );
+    expect(mockCoordinator.on).toHaveBeenCalledWith("xScaleChanged", expect.any(Function));
 
     // When
     unmount();
 
     // Then
-    expect(mockCoordinator.off).toHaveBeenCalledWith(
-      "xScaleChanged",
-      expect.any(Function),
-    );
+    expect(mockCoordinator.off).toHaveBeenCalledWith("xScaleChanged", expect.any(Function));
   });
 
   it("renders both marker bars once a coordinator is present", () => {
@@ -74,12 +66,41 @@ describe("DeltaMarkerBars", () => {
     expect(screen.getByTestId("delta-marker-bar-b")).toBeInTheDocument();
   });
 
-  it("does not render the delta overlay when only marker A is set", () => {
+  it("does not render the delta overlay when measure mode isn't active", () => {
     // Given / When
-    setup({ markerA: { xValue: 1, seriesValues: [] } });
+    setup({
+      active: false,
+      markerA: { xValue: 1, seriesValues: [] },
+      markerB: { xValue: 4, seriesValues: [] },
+    });
 
     // Then
     expect(screen.queryByTestId("delta-overlay")).not.toBeInTheDocument();
+  });
+
+  it("renders the delta overlay as soon as measure mode is active, even with no markers set", () => {
+    // Given / When
+    setup({ active: true });
+
+    // Then
+    expect(screen.getByTestId("delta-overlay")).toBeInTheDocument();
+  });
+
+  it("renders marker A's value in the overlay before marker B is set", () => {
+    // Given
+    const configIndex = BasicBuilder.number();
+    const label = BasicBuilder.string();
+
+    // When
+    setup({
+      active: true,
+      markerA: { xValue: 1, seriesValues: [{ configIndex, value: 5 }] },
+      labelsByDatasetIndex: { [configIndex]: label },
+    });
+
+    // Then
+    expect(screen.getByTestId("delta-overlay")).toBeInTheDocument();
+    expect(screen.getByText(label)).toBeInTheDocument();
   });
 
   it("renders the delta overlay with the computed delta once both markers are set", () => {
@@ -89,6 +110,7 @@ describe("DeltaMarkerBars", () => {
 
     // When
     setup({
+      active: true,
       markerA: { xValue: 1, seriesValues: [{ configIndex, value: 5 }] },
       markerB: { xValue: 4, seriesValues: [{ configIndex, value: 11 }] },
       labelsByDatasetIndex: { [configIndex]: label },
@@ -100,11 +122,24 @@ describe("DeltaMarkerBars", () => {
     expect(screen.getByText(label)).toBeInTheDocument();
   });
 
+  it("forwards onClose to the overlay's close button", () => {
+    // Given
+    const onClose = jest.fn();
+    setup({ active: true, onClose });
+
+    // When
+    fireEvent.click(screen.getByTestId("delta-overlay-close"));
+
+    // Then
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("forwards onRemoveMarkerA/onRemoveMarkerB to the overlay buttons", () => {
     // Given
     const onRemoveMarkerA = jest.fn();
     const onRemoveMarkerB = jest.fn();
     setup({
+      active: true,
       markerA: { xValue: 1, seriesValues: [] },
       markerB: { xValue: 4, seriesValues: [] },
       onRemoveMarkerA,
@@ -125,19 +160,13 @@ describe("DeltaMarkerBars", () => {
     const { unmount } = setup();
 
     // Then
-    expect(mockCoordinator.on).toHaveBeenCalledWith(
-      "yScaleChanged",
-      expect.any(Function),
-    );
+    expect(mockCoordinator.on).toHaveBeenCalledWith("yScaleChanged", expect.any(Function));
 
     // When
     unmount();
 
     // Then
-    expect(mockCoordinator.off).toHaveBeenCalledWith(
-      "yScaleChanged",
-      expect.any(Function),
-    );
+    expect(mockCoordinator.off).toHaveBeenCalledWith("yScaleChanged", expect.any(Function));
   });
 
   it("hides the horizontal bar, point and label when the marker has no numeric series value", () => {
@@ -145,24 +174,18 @@ describe("DeltaMarkerBars", () => {
     setup({ markerA: { xValue: 1, seriesValues: [] } });
 
     // Then
-    expect(
-      screen.getByTestId("delta-marker-horizontal-bar-a"),
-    ).not.toBeVisible();
+    expect(screen.getByTestId("delta-marker-horizontal-bar-a")).not.toBeVisible();
     expect(screen.getByTestId("delta-marker-point-a")).not.toBeVisible();
     expect(screen.getByTestId("delta-marker-label-a")).not.toBeVisible();
   });
 
   function triggerXScaleChanged(scale: Scale): void {
-    const call = mockCoordinator.on.mock.calls.find(
-      ([name]: [string]) => name === "xScaleChanged",
-    );
+    const call = mockCoordinator.on.mock.calls.find(([name]: [string]) => name === "xScaleChanged");
     call[1](scale);
   }
 
   function triggerYScaleChanged(scale: YScale): void {
-    const call = mockCoordinator.on.mock.calls.find(
-      ([name]: [string]) => name === "yScaleChanged",
-    );
+    const call = mockCoordinator.on.mock.calls.find(([name]: [string]) => name === "yScaleChanged");
     call[1](scale);
   }
 

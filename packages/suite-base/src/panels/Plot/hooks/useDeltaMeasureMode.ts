@@ -39,9 +39,7 @@ export type UseDeltaMeasureModeResult = {
 };
 
 // bigint/boolean/Time don't have a natural delta - normalize them into what computeDelta expects.
-function toSeriesValue(
-  value: OriginalValue | undefined,
-): number | string | undefined {
+function toSeriesValue(value: OriginalValue | undefined): number | string | undefined {
   switch (typeof value) {
     case "number":
     case "string":
@@ -57,9 +55,7 @@ function toSeriesValue(
   }
 }
 
-function elementsToSeriesValues(
-  elements: readonly HoverElement[],
-): DeltaMarkerSeriesValue[] {
+function elementsToSeriesValues(elements: readonly HoverElement[]): DeltaMarkerSeriesValue[] {
   const seriesValues: DeltaMarkerSeriesValue[] = [];
   const seenConfigIndexes = new Set<number>();
   for (const element of elements) {
@@ -107,30 +103,27 @@ function useDeltaMeasureMode({
       const canvasX = event.clientX - boundingRect.left;
       const canvasY = event.clientY - boundingRect.top;
       const xValue = coordinator.getXValueAtPixel(canvasX);
+      if (xValue === -1) {
+        return;
+      }
 
       // Decide the target slot now since the datum lookup below is async - a third click resets.
       const slot = nextMarkerSlot();
 
       void (async () => {
-        const elements =
-          (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ??
-          [];
-        if (!isMounted()) {
-          return;
-        }
+        try {
+          const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ?? [];
+          if (!isMounted()) {
+            return;
+          }
 
-        setMarker(slot, { xValue, seriesValues: elementsToSeriesValues(elements) });
+          setMarker(slot, { xValue, seriesValues: elementsToSeriesValues(elements) });
+        } catch (err: unknown) {
+          console.error(err);
+        }
       })();
     },
-    [
-      active,
-      coordinator,
-      draggingRef,
-      isMounted,
-      nextMarkerSlot,
-      renderer,
-      setMarker,
-    ],
+    [active, coordinator, draggingRef, isMounted, nextMarkerSlot, renderer, setMarker],
   );
 
   // Resolves the marker a synced panel needs when it places/moves a marker at a given x value (no
@@ -141,9 +134,14 @@ function useDeltaMeasureMode({
       if (xValue == undefined || !coordinator) {
         return undefined;
       }
-      const canvasX = coordinator.getPixelForXValue(xValue);
-      const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: 0 })) ?? [];
-      return { xValue, seriesValues: elementsToSeriesValues(elements) };
+      try {
+        const canvasX = coordinator.getPixelForXValue(xValue);
+        const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: 0 })) ?? [];
+        return { xValue, seriesValues: elementsToSeriesValues(elements) };
+      } catch (err: unknown) {
+        console.error(err);
+        return undefined;
+      }
     },
     [coordinator, renderer],
   );

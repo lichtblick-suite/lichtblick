@@ -4,29 +4,19 @@
 
 import { act, renderHook } from "@testing-library/react";
 
-import { BasicBuilder } from "@lichtblick/test-builders";
+import DeltaMarkerBuilder from "@lichtblick/suite-base/testing/builders/DeltaMarkerBuilder";
 
-import { DeltaMarker } from "./deltaMarkers";
-import useDeltaMarkerState, {
-  UseDeltaMarkerStateProps,
-} from "./useDeltaMarkerState";
+import useDeltaMarkerState, { UseDeltaMarkerStateProps } from "./useDeltaMarkerState";
 
 describe("useDeltaMarkerState", () => {
-  function buildMarker(overrides: Partial<DeltaMarker> = {}): DeltaMarker {
-    return {
-      xValue: BasicBuilder.number(),
-      seriesValues: [],
-      ...overrides,
-    };
-  }
+  const buildMarker = DeltaMarkerBuilder.marker;
 
   const setup = (resetKey?: string) => {
     const props: UseDeltaMarkerStateProps = { resetKey };
     return {
-      ...renderHook(
-        (hookProps: UseDeltaMarkerStateProps) => useDeltaMarkerState(hookProps),
-        { initialProps: props },
-      ),
+      ...renderHook((hookProps: UseDeltaMarkerStateProps) => useDeltaMarkerState(hookProps), {
+        initialProps: props,
+      }),
       props,
     };
   };
@@ -95,6 +85,25 @@ describe("useDeltaMarkerState", () => {
     // When
     act(() => {
       result.current.setMarker(result.current.nextMarkerSlot(), markerB);
+    });
+
+    // Then
+    expect(result.current.markerA).toEqual(markerA);
+    expect(result.current.markerB).toEqual(markerB);
+  });
+
+  it("should reserve distinct slots for rapid placements", () => {
+    // Given
+    const { result } = setup();
+    const markerA = buildMarker();
+    const markerB = buildMarker();
+
+    // When
+    act(() => {
+      const reservationA = result.current.nextMarkerSlot();
+      const reservationB = result.current.nextMarkerSlot();
+      result.current.setMarker(reservationB, markerB);
+      result.current.setMarker(reservationA, markerA);
     });
 
     // Then
@@ -190,6 +199,46 @@ describe("useDeltaMarkerState", () => {
 
     // Then
     expect(result.current.active).toBe(true);
+    expect(result.current.markerA).toBeUndefined();
+  });
+
+  it("should ignore a delayed placement after resetKey changes", () => {
+    // Given
+    const { result, rerender, props } = setup("a");
+    const reservation = result.current.nextMarkerSlot();
+    const marker = buildMarker();
+
+    // When
+    rerender({ ...props, resetKey: "b" });
+    act(() => {
+      result.current.setMarker(reservation, marker);
+    });
+
+    // Then
+    expect(result.current.markerA).toBeUndefined();
+    expect(result.current.markerB).toBeUndefined();
+  });
+
+  it("should ignore a delayed placement after deactivation", () => {
+    // Given
+    const { result } = setup();
+    act(() => {
+      result.current.toggleActive();
+    });
+    let reservation!: ReturnType<typeof result.current.nextMarkerSlot>;
+    act(() => {
+      reservation = result.current.nextMarkerSlot();
+    });
+    const marker = buildMarker();
+
+    // When
+    act(() => {
+      result.current.toggleActive();
+      result.current.setMarker(reservation, marker);
+    });
+
+    // Then
+    expect(result.current.active).toBe(false);
     expect(result.current.markerA).toBeUndefined();
   });
 

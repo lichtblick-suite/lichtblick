@@ -12,9 +12,7 @@ import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import useDeltaMeasureMode, {
-  UseDeltaMeasureModeProps,
-} from "./useDeltaMeasureMode";
+import useDeltaMeasureMode, { UseDeltaMeasureModeProps } from "./useDeltaMeasureMode";
 
 jest.mock("@lichtblick/suite-base/panels/shared/useDeltaMarkerSync");
 
@@ -36,9 +34,7 @@ describe("useDeltaMeasureMode", () => {
 
   // OffscreenCanvasRenderer has private fields, so a plain mock object can only structurally
   // satisfy a type picked from its public members - not Partial<OffscreenCanvasRenderer> itself.
-  type MockRenderer = Partial<
-    Pick<OffscreenCanvasRenderer, "getElementsAtPixel">
-  >;
+  type MockRenderer = Partial<Pick<OffscreenCanvasRenderer, "getElementsAtPixel">>;
 
   type SetupOverrides = Omit<Partial<UseDeltaMeasureModeProps>, "renderer"> & {
     renderer?: MockRenderer;
@@ -69,12 +65,9 @@ describe("useDeltaMeasureMode", () => {
     };
 
     return {
-      ...renderHook(
-        (hookProps: UseDeltaMeasureModeProps) => useDeltaMeasureMode(hookProps),
-        {
-          initialProps: props,
-        },
-      ),
+      ...renderHook((hookProps: UseDeltaMeasureModeProps) => useDeltaMeasureMode(hookProps), {
+        initialProps: props,
+      }),
       props,
     };
   };
@@ -180,6 +173,46 @@ describe("useDeltaMeasureMode", () => {
     });
 
     // Then
+    expect(result.current.markerA).toBeUndefined();
+  });
+
+  it("should not place a marker when the coordinator has no usable x scale (-1 sentinel)", async () => {
+    // Given
+    (mockCoordinator.getXValueAtPixel as jest.Mock).mockReturnValueOnce(-1);
+    const { result } = setup({ coordinator: mockCoordinator });
+    act(() => {
+      result.current.toggleActive();
+    });
+
+    // When
+    await act(async () => {
+      result.current.handleCanvasClick(buildClickEvent());
+    });
+
+    // Then
+    expect(result.current.markerA).toBeUndefined();
+    expect(result.current.markerB).toBeUndefined();
+  });
+
+  it("should log renderer lookup errors without placing a marker", async () => {
+    // Given
+    const error = new Error("renderer lookup failed");
+    const { result } = setup({
+      coordinator: mockCoordinator,
+      renderer: { getElementsAtPixel: jest.fn().mockRejectedValue(error) },
+    });
+    act(() => {
+      result.current.toggleActive();
+    });
+
+    // When
+    await act(async () => {
+      result.current.handleCanvasClick(buildClickEvent());
+    });
+
+    // Then
+    expect(console.error).toHaveBeenCalledWith(error);
+    (console.error as jest.Mock).mockClear();
     expect(result.current.markerA).toBeUndefined();
   });
 
@@ -293,9 +326,7 @@ describe("useDeltaMeasureMode", () => {
     });
 
     // Then
-    expect(result.current.markerA?.seriesValues).toEqual([
-      { configIndex, value: 1 },
-    ]);
+    expect(result.current.markerA?.seriesValues).toEqual([{ configIndex, value: 1 }]);
   });
 
   it("should convert a Time value to seconds", async () => {
@@ -348,9 +379,7 @@ describe("useDeltaMeasureMode", () => {
     });
 
     // Then
-    expect(result.current.markerA?.seriesValues[0]?.value).toEqual(
-      elements[0]!.data.y,
-    );
+    expect(result.current.markerA?.seriesValues[0]?.value).toEqual(elements[0]!.data.y);
   });
 
   it("should remove marker A and marker B independently", async () => {
