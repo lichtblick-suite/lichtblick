@@ -32,6 +32,29 @@ Looking for guidance on using Lichtblick? Check out our [official documentation 
 
 We are actively updating our documentation with new features, stay tunned! :rocket:
 
+## :satellite: Telemetry
+
+Lichtblick includes an **opt-in, privacy-respecting** [OpenTelemetry](https://opentelemetry.io/)
+integration used to understand how the app is used (e.g. which menu actions or panel types
+people interact with) and to help detect performance regressions.
+
+- **Off by default.** Telemetry is only active if the specific build you're running was
+  compiled with an OTLP collector endpoint (`OTLP_ENDPOINT` at build time). Official public
+  builds do not enable this unless explicitly configured — if no endpoint is compiled in,
+  nothing is ever collected or sent, and there is no runtime toggle to turn it on.
+- **No PII.** Only anonymous, randomly-generated device/session identifiers are attached to
+  events — no user accounts, file contents, message data, or personally identifiable
+  information is ever captured.
+- **Bounded, named events only.** Only a fixed, closed set of named UI interaction events (see
+  [`AppEvent`](packages/suite-base/src/services/IAnalytics.ts)) can be emitted — e.g. layout
+  selection/creation, panel add/remove, app menu clicks — as OpenTelemetry logs and traces.
+  There is no free-form event capture and no keystroke/input logging.
+- **Rate-limited.** A token-bucket rate limiter bounds how much telemetry any single session
+  can emit.
+
+If you're building your own distribution and want to enable it, set `OTLP_ENDPOINT` in your .env file — the app will export OTLP/HTTP logs
+and traces to `${OTLP_ENDPOINT}/v1/logs` and `${OTLP_ENDPOINT}/v1/traces`.
+
 **Dependencies:**
 
 - [Node.js](https://nodejs.org/en/) v16.10+
