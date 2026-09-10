@@ -3,11 +3,7 @@
 
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import {
-  computeDelta,
-  DeltaMarker,
-  getDeltaSeriesConfigIndexes,
-} from "./deltaMarkers";
+import { computeDelta, DeltaMarker, getDeltaSeriesConfigIndexes } from "./deltaMarkers";
 
 describe("computeDelta", () => {
   function buildMarker(overrides: Partial<DeltaMarker> = {}): DeltaMarker {
@@ -52,9 +48,7 @@ describe("computeDelta", () => {
     const result = computeDelta(markerA, markerB);
 
     // Then
-    expect(result.series).toEqual([
-      { configIndex, valueAtA: 5, valueAtB: 12, delta: 7 },
-    ]);
+    expect(result.series).toEqual([{ configIndex, valueAtA: 5, valueAtB: 12, delta: 7 }]);
   });
 
   it("should leave delta undefined when values are strings (e.g. StateTransitions state labels)", () => {
@@ -86,9 +80,7 @@ describe("computeDelta", () => {
     const result = computeDelta(markerA, markerB);
 
     // Then
-    expect(result.series).toEqual([
-      { configIndex, valueAtA: 12, valueAtB: 5, delta: 7 },
-    ]);
+    expect(result.series).toEqual([{ configIndex, valueAtA: 12, valueAtB: 5, delta: 7 }]);
   });
 
   it("should skip series that are only present on one marker", () => {

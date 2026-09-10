@@ -7,9 +7,7 @@ import { act, renderHook } from "@testing-library/react";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { DeltaMarker } from "./deltaMarkers";
-import useDeltaMarkerState, {
-  UseDeltaMarkerStateProps,
-} from "./useDeltaMarkerState";
+import useDeltaMarkerState, { UseDeltaMarkerStateProps } from "./useDeltaMarkerState";
 
 describe("useDeltaMarkerState", () => {
   function buildMarker(overrides: Partial<DeltaMarker> = {}): DeltaMarker {
@@ -23,10 +21,9 @@ describe("useDeltaMarkerState", () => {
   const setup = (resetKey?: string) => {
     const props: UseDeltaMarkerStateProps = { resetKey };
     return {
-      ...renderHook(
-        (hookProps: UseDeltaMarkerStateProps) => useDeltaMarkerState(hookProps),
-        { initialProps: props },
-      ),
+      ...renderHook((hookProps: UseDeltaMarkerStateProps) => useDeltaMarkerState(hookProps), {
+        initialProps: props,
+      }),
       props,
     };
   };

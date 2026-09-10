@@ -4,11 +4,7 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import {
-  DeltaMarkerBarsProps,
-  Scale,
-  YScale,
-} from "@lichtblick/suite-base/panels/Plot/types";
+import { DeltaMarkerBarsProps, Scale, YScale } from "@lichtblick/suite-base/panels/Plot/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { DeltaMarkerBars } from "./DeltaMarkerBars";
@@ -50,19 +46,13 @@ describe("DeltaMarkerBars", () => {
     const { unmount } = setup();
 
     // Then
-    expect(mockCoordinator.on).toHaveBeenCalledWith(
-      "xScaleChanged",
-      expect.any(Function),
-    );
+    expect(mockCoordinator.on).toHaveBeenCalledWith("xScaleChanged", expect.any(Function));
 
     // When
     unmount();
 
     // Then
-    expect(mockCoordinator.off).toHaveBeenCalledWith(
-      "xScaleChanged",
-      expect.any(Function),
-    );
+    expect(mockCoordinator.off).toHaveBeenCalledWith("xScaleChanged", expect.any(Function));
   });
 
   it("renders both marker bars once a coordinator is present", () => {
@@ -125,19 +115,13 @@ describe("DeltaMarkerBars", () => {
     const { unmount } = setup();
 
     // Then
-    expect(mockCoordinator.on).toHaveBeenCalledWith(
-      "yScaleChanged",
-      expect.any(Function),
-    );
+    expect(mockCoordinator.on).toHaveBeenCalledWith("yScaleChanged", expect.any(Function));
 
     // When
     unmount();
 
     // Then
-    expect(mockCoordinator.off).toHaveBeenCalledWith(
-      "yScaleChanged",
-      expect.any(Function),
-    );
+    expect(mockCoordinator.off).toHaveBeenCalledWith("yScaleChanged", expect.any(Function));
   });
 
   it("hides the horizontal bar, point and label when the marker has no numeric series value", () => {
@@ -145,24 +129,18 @@ describe("DeltaMarkerBars", () => {
     setup({ markerA: { xValue: 1, seriesValues: [] } });
 
     // Then
-    expect(
-      screen.getByTestId("delta-marker-horizontal-bar-a"),
-    ).not.toBeVisible();
+    expect(screen.getByTestId("delta-marker-horizontal-bar-a")).not.toBeVisible();
     expect(screen.getByTestId("delta-marker-point-a")).not.toBeVisible();
     expect(screen.getByTestId("delta-marker-label-a")).not.toBeVisible();
   });
 
   function triggerXScaleChanged(scale: Scale): void {
-    const call = mockCoordinator.on.mock.calls.find(
-      ([name]: [string]) => name === "xScaleChanged",
-    );
+    const call = mockCoordinator.on.mock.calls.find(([name]: [string]) => name === "xScaleChanged");
     call[1](scale);
   }
 
   function triggerYScaleChanged(scale: YScale): void {
-    const call = mockCoordinator.on.mock.calls.find(
-      ([name]: [string]) => name === "yScaleChanged",
-    );
+    const call = mockCoordinator.on.mock.calls.find(([name]: [string]) => name === "yScaleChanged");
     call[1](scale);
   }
 

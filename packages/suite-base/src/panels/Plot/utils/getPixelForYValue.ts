@@ -27,7 +27,5 @@ export function getPixelForYValue(
   }
 
   // Linear interpolation, inverted: yValue===min maps to the bottom pixel.
-  return (
-    scale.bottom - ((yValue - scale.min) / (scale.max - scale.min)) * pixelRange
-  );
+  return scale.bottom - ((yValue - scale.min) / (scale.max - scale.min)) * pixelRange;
 }

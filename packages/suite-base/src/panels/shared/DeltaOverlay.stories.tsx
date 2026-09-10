@@ -24,12 +24,8 @@ export const SingleSeries: StoryObj = {
       xValueB: 14.8,
       deltaX: 4.6,
       formatXValue: (value) => `${value.toFixed(2)}s`,
-      seriesLabels: [
-        { configIndex: 0, label: "/imu/acceleration_x", color: "#4e98e2" },
-      ],
-      series: [
-        { configIndex: 0, valueAtA: 12.5, valueAtB: 18.75, delta: 6.25 },
-      ],
+      seriesLabels: [{ configIndex: 0, label: "/imu/acceleration_x", color: "#4e98e2" }],
+      series: [{ configIndex: 0, valueAtA: 12.5, valueAtB: 18.75, delta: 6.25 }],
       onRemoveMarkerA: noop,
       onRemoveMarkerB: noop,
     };
@@ -78,9 +74,7 @@ export const CategoricalStateValues: StoryObj = {
       xValueB: 11.4,
       deltaX: 6.4,
       formatXValue: (value) => `${value.toFixed(1)}s`,
-      seriesLabels: [
-        { configIndex: 0, label: "/robot/state", color: "#bd10e0" },
-      ],
+      seriesLabels: [{ configIndex: 0, label: "/robot/state", color: "#bd10e0" }],
       series: [
         {
           configIndex: 0,
@@ -140,12 +134,8 @@ export const Interactive: StoryObj = {
       xValueB: 14.8,
       deltaX: 4.6,
       formatXValue: (value) => `${value.toFixed(2)}s`,
-      seriesLabels: [
-        { configIndex: 0, label: "/imu/acceleration_x", color: "#4e98e2" },
-      ],
-      series: [
-        { configIndex: 0, valueAtA: 12.5, valueAtB: 18.75, delta: 6.25 },
-      ],
+      seriesLabels: [{ configIndex: 0, label: "/imu/acceleration_x", color: "#4e98e2" }],
+      series: [{ configIndex: 0, valueAtA: 12.5, valueAtB: 18.75, delta: 6.25 }],
       onRemoveMarkerA: () => {
         setMarkerA(false);
       },

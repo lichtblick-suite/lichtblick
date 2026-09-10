@@ -20,10 +20,7 @@ import { produce } from "immer";
 import { useEffect, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import PanelSetup, {
-  Fixture,
-  triggerWheel,
-} from "@lichtblick/suite-base/stories/PanelSetup";
+import PanelSetup, { Fixture, triggerWheel } from "@lichtblick/suite-base/stories/PanelSetup";
 import { fixture } from "@lichtblick/suite-base/test/mocks/mockPlot";
 import delay from "@lichtblick/suite-base/util/delay";
 
@@ -133,9 +130,7 @@ export const LineGraph: StoryObj<typeof PlotWrapper> = {
   },
 };
 
-export const LineGraphWithValuesAndDisabledSeries: StoryObj<
-  typeof PlotWrapper
-> = {
+export const LineGraphWithValuesAndDisabledSeries: StoryObj<typeof PlotWrapper> = {
   args: {
     config: produce(exampleConfig, (draft) => {
       draft.paths[1]!.enabled = false;
@@ -152,9 +147,7 @@ export const LineGraphWithValuesAndDisabledSeries: StoryObj<
 
 export const LineGraphWithXMinMax: StoryObj = {
   render: function Story() {
-    return (
-      <PlotWrapper config={{ ...exampleConfig, minXValue: 1, maxXValue: 2 }} />
-    );
+    return <PlotWrapper config={{ ...exampleConfig, minXValue: 1, maxXValue: 2 }} />;
   },
 
   name: "line graph with x min & max",
@@ -166,12 +159,7 @@ export const LineGraphWithXMinMax: StoryObj = {
 
 export const LineGraphWithXRange: StoryObj = {
   render: function Story() {
-    return (
-      <PlotWrapper
-        config={{ ...exampleConfig, followingViewWidth: 3 }}
-        includeSettings
-      />
-    );
+    return <PlotWrapper config={{ ...exampleConfig, followingViewWidth: 3 }} includeSettings />;
   },
 
   parameters: {
@@ -204,14 +192,10 @@ export const LineGraphWithSettings: StoryObj = {
   name: "line graph with settings",
 
   play: async () => {
-    const yLabel = await screen.findByTestId(
-      "settings__nodeHeaderToggle__yAxis",
-    );
+    const yLabel = await screen.findByTestId("settings__nodeHeaderToggle__yAxis");
     await userEvent.click(yLabel);
 
-    const xLabel = await screen.findByTestId(
-      "settings__nodeHeaderToggle__xAxis",
-    );
+    const xLabel = await screen.findByTestId("settings__nodeHeaderToggle__xAxis");
     await userEvent.click(xLabel);
   },
 };
@@ -336,11 +320,7 @@ export const DeltaMeasureMode: StoryObj = {
   render: function Story() {
     // A single series keeps the demo predictable: clicks reliably snap to this one line instead
     // of whichever of several overlapping series happens to be nearest.
-    return (
-      <PlotWrapper
-        config={{ ...exampleConfig, paths: [exampleConfig.paths[0]!] }}
-      />
-    );
+    return <PlotWrapper config={{ ...exampleConfig, paths: [exampleConfig.paths[0]!] }} />;
   },
 
   name: "delta measure mode",
@@ -910,9 +890,7 @@ export const SuperCloseValues: StoryObj = {
           datatypes: new Map(
             Object.entries({
               "std_msgs/Float32": {
-                definitions: [
-                  { name: "data", type: "float32", isArray: false },
-                ],
+                definitions: [{ name: "data", type: "float32", isArray: false }],
               },
             }),
           ),

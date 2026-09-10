@@ -23,8 +23,7 @@ describe("useStateTransitionsDeltaMode", () => {
     const props: UseStateTransitionsDeltaModeProps = { datasets, resetKey };
     return {
       ...renderHook(
-        (hookProps: UseStateTransitionsDeltaModeProps) =>
-          useStateTransitionsDeltaMode(hookProps),
+        (hookProps: UseStateTransitionsDeltaModeProps) => useStateTransitionsDeltaMode(hookProps),
         { initialProps: props },
       ),
       props,
@@ -88,10 +87,7 @@ describe("useStateTransitionsDeltaMode", () => {
 
   it("should place marker A on the first click with the state per path", () => {
     // Given
-    const datasets = buildDatasets([
-      [{ x: 1, value: "IDLE" }],
-      [{ x: 1, value: "RUNNING" }],
-    ]);
+    const datasets = buildDatasets([[{ x: 1, value: "IDLE" }], [{ x: 1, value: "RUNNING" }]]);
     const { result } = setup(datasets);
 
     // When
@@ -164,10 +160,7 @@ describe("useStateTransitionsDeltaMode", () => {
 
   it("should skip a path with no state at the clicked time", () => {
     // Given
-    const datasets = buildDatasets([
-      [{ x: 5, value: "IDLE" }],
-      [{ x: 1, value: "RUNNING" }],
-    ]);
+    const datasets = buildDatasets([[{ x: 5, value: "IDLE" }], [{ x: 1, value: "RUNNING" }]]);
     const { result } = setup(datasets);
     act(() => {
       result.current.toggleActive();
@@ -179,9 +172,7 @@ describe("useStateTransitionsDeltaMode", () => {
     });
 
     // Then
-    expect(result.current.markerA?.seriesValues).toEqual([
-      { configIndex: 1, value: "RUNNING" },
-    ]);
+    expect(result.current.markerA?.seriesValues).toEqual([{ configIndex: 1, value: "RUNNING" }]);
   });
 
   it("should remove marker A and marker B independently", () => {

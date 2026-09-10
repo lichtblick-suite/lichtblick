@@ -28,9 +28,7 @@ export type UseDeltaMarkerStateResult = {
 };
 
 /** Shared A/B marker state machine used by both the Plot and StateTransitions measure modes. */
-function useDeltaMarkerState({
-  resetKey,
-}: UseDeltaMarkerStateProps): UseDeltaMarkerStateResult {
+function useDeltaMarkerState({ resetKey }: UseDeltaMarkerStateProps): UseDeltaMarkerStateResult {
   const [active, setActive] = useState(false);
   const [markerA, setMarkerA] = useState<DeltaMarker | undefined>(undefined);
   const [markerB, setMarkerB] = useState<DeltaMarker | undefined>(undefined);

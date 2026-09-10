@@ -36,8 +36,7 @@ export class OffscreenCanvasRenderer {
       new URL("./ChartRenderer.worker", import.meta.url),
     );
 
-    const { remote, dispose } =
-      ComlinkWrap<Service<Comlink.RemoteObject<ChartRenderer>>>(worker);
+    const { remote, dispose } = ComlinkWrap<Service<Comlink.RemoteObject<ChartRenderer>>>(worker);
 
     // Set the promise without await so init creates only one instance of renderer even if called
     // twice.
@@ -57,22 +56,15 @@ export class OffscreenCanvasRenderer {
     registry.register(this, dispose);
   }
 
-  public async update(
-    action: Immutable<UpdateAction>,
-  ): Promise<Bounds | undefined> {
+  public async update(action: Immutable<UpdateAction>): Promise<Bounds | undefined> {
     return await (await this.#remote).update(action);
   }
 
-  public async getElementsAtPixel(pixel: {
-    x: number;
-    y: number;
-  }): Promise<HoverElement[]> {
+  public async getElementsAtPixel(pixel: { x: number; y: number }): Promise<HoverElement[]> {
     return await (await this.#remote).getElementsAtPixel(pixel);
   }
 
-  public async updateDatasets(
-    datasets: Dataset[],
-  ): Promise<{ x?: Scale; y?: YScale }> {
+  public async updateDatasets(datasets: Dataset[]): Promise<{ x?: Scale; y?: YScale }> {
     return await (await this.#remote).updateDatasets(datasets);
   }
 }

@@ -64,9 +64,7 @@ describe("getPixelForYValue", () => {
 
     // Then
     const expected =
-      scale.bottom -
-      ((yValue - scale.min) / (scale.max - scale.min)) *
-        (scale.bottom - scale.top);
+      scale.bottom - ((yValue - scale.min) / (scale.max - scale.min)) * (scale.bottom - scale.top);
     expect(result).toBeCloseTo(expected);
   });
 
@@ -80,10 +78,7 @@ describe("getPixelForYValue", () => {
     };
 
     // When
-    const result = getPixelForYValue(
-      zeroPixelRangeScale,
-      BasicBuilder.number(),
-    );
+    const result = getPixelForYValue(zeroPixelRangeScale, BasicBuilder.number());
 
     // Then
     expect(result).toBeUndefined();

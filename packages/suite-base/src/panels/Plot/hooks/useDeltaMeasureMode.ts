@@ -33,9 +33,7 @@ export type UseDeltaMeasureModeResult = {
 };
 
 // bigint/boolean/Time don't have a natural delta - normalize them into what computeDelta expects.
-function toSeriesValue(
-  value: OriginalValue | undefined,
-): number | string | undefined {
+function toSeriesValue(value: OriginalValue | undefined): number | string | undefined {
   switch (typeof value) {
     case "number":
     case "string":
@@ -84,9 +82,7 @@ function useDeltaMeasureMode({
       const slot = nextMarkerSlot();
 
       void (async () => {
-        const elements =
-          (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ??
-          [];
+        const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ?? [];
         if (!isMounted()) {
           return;
         }
@@ -108,15 +104,7 @@ function useDeltaMeasureMode({
         setMarker(slot, { xValue, seriesValues });
       })();
     },
-    [
-      active,
-      coordinator,
-      draggingRef,
-      isMounted,
-      nextMarkerSlot,
-      renderer,
-      setMarker,
-    ],
+    [active, coordinator, draggingRef, isMounted, nextMarkerSlot, renderer, setMarker],
   );
 
   return {

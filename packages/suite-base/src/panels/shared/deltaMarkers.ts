@@ -26,10 +26,7 @@ export type DeltaResult = {
 };
 
 // Series are matched by configIndex; a series present on only one marker is skipped.
-export function computeDelta(
-  markerA: DeltaMarker,
-  markerB: DeltaMarker,
-): DeltaResult {
+export function computeDelta(markerA: DeltaMarker, markerB: DeltaMarker): DeltaResult {
   const valueAtBByConfigIndex = new Map(
     markerB.seriesValues.map(({ configIndex, value }) => [configIndex, value]),
   );
@@ -59,15 +56,9 @@ export function computeDelta(
 }
 
 /** Config indexes referenced by either marker, de-duplicated and sorted numerically ascending. */
-export function getDeltaSeriesConfigIndexes(
-  markerA: DeltaMarker,
-  markerB: DeltaMarker,
-): number[] {
+export function getDeltaSeriesConfigIndexes(markerA: DeltaMarker, markerB: DeltaMarker): number[] {
   const configIndexes = new Set<number>();
-  for (const seriesValue of [
-    ...markerA.seriesValues,
-    ...markerB.seriesValues,
-  ]) {
+  for (const seriesValue of [...markerA.seriesValues, ...markerB.seriesValues]) {
     configIndexes.add(seriesValue.configIndex);
   }
   return [...configIndexes].sort((a, b) => a - b);

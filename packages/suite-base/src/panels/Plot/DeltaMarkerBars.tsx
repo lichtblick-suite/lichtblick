@@ -1,14 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useLatest } from "react-use";
 
 import { getPixelForXValue } from "@lichtblick/suite-base/panels/Plot/utils/getPixelForXValue";
@@ -105,8 +98,7 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
       }
 
       const primary = getPrimarySeries(marker, colorsByDatasetIndex);
-      const pixelY =
-        primary && getPixelForYValue(latestYScale.current, primary.value);
+      const pixelY = primary && getPixelForYValue(latestYScale.current, primary.value);
       const color = primary?.color ?? DEFAULT_MARKER_COLOR;
 
       if (refs.verticalBar.current) {
@@ -183,11 +175,13 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
     const seriesLabels: DeltaOverlaySeriesLabel[] = getDeltaSeriesConfigIndexes(
       markerA,
       markerB,
-    ).map((configIndex): DeltaOverlaySeriesLabel => ({
-      configIndex,
-      label: labelsByDatasetIndex[configIndex] ?? "",
-      color: colorsByDatasetIndex[configIndex] ?? "",
-    }));
+    ).map(
+      (configIndex): DeltaOverlaySeriesLabel => ({
+        configIndex,
+        label: labelsByDatasetIndex[configIndex] ?? "",
+        color: colorsByDatasetIndex[configIndex] ?? "",
+      }),
+    );
 
     return { delta: computeDelta(markerA, markerB), seriesLabels };
   }, [colorsByDatasetIndex, labelsByDatasetIndex, markerA, markerB]);
@@ -226,10 +220,7 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
         </Fragment>
       ))}
       {overlayData && markerA && markerB && (
-        <div
-          className={classes.overlayWrapper}
-          data-testid="delta-overlay-wrapper"
-        >
+        <div className={classes.overlayWrapper} data-testid="delta-overlay-wrapper">
           <DeltaOverlay
             deltaRowLabel={deltaRowLabel}
             xColumnLabel={xColumnLabel}

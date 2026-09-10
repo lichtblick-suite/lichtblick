@@ -11,9 +11,7 @@ import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import useDeltaMeasureMode, {
-  UseDeltaMeasureModeProps,
-} from "./useDeltaMeasureMode";
+import useDeltaMeasureMode, { UseDeltaMeasureModeProps } from "./useDeltaMeasureMode";
 
 describe("useDeltaMeasureMode", () => {
   function buildClickEvent(
@@ -33,20 +31,13 @@ describe("useDeltaMeasureMode", () => {
 
   // OffscreenCanvasRenderer has private fields, so a plain mock object can only structurally
   // satisfy a type picked from its public members - not Partial<OffscreenCanvasRenderer> itself.
-  type MockRenderer = Partial<
-    Pick<OffscreenCanvasRenderer, "getElementsAtPixel">
-  >;
+  type MockRenderer = Partial<Pick<OffscreenCanvasRenderer, "getElementsAtPixel">>;
 
   type SetupOverrides = Omit<Partial<UseDeltaMeasureModeProps>, "renderer"> & {
     renderer?: MockRenderer;
   };
 
-  const setup = ({
-    coordinator,
-    renderer,
-    draggingRef,
-    resetKey,
-  }: SetupOverrides = {}) => {
+  const setup = ({ coordinator, renderer, draggingRef, resetKey }: SetupOverrides = {}) => {
     const props: UseDeltaMeasureModeProps = {
       coordinator,
       renderer: {
@@ -58,12 +49,9 @@ describe("useDeltaMeasureMode", () => {
     };
 
     return {
-      ...renderHook(
-        (hookProps: UseDeltaMeasureModeProps) => useDeltaMeasureMode(hookProps),
-        {
-          initialProps: props,
-        },
-      ),
+      ...renderHook((hookProps: UseDeltaMeasureModeProps) => useDeltaMeasureMode(hookProps), {
+        initialProps: props,
+      }),
       props,
     };
   };
@@ -281,9 +269,7 @@ describe("useDeltaMeasureMode", () => {
     });
 
     // Then
-    expect(result.current.markerA?.seriesValues).toEqual([
-      { configIndex, value: 1 },
-    ]);
+    expect(result.current.markerA?.seriesValues).toEqual([{ configIndex, value: 1 }]);
   });
 
   it("should convert a Time value to seconds", async () => {
@@ -336,9 +322,7 @@ describe("useDeltaMeasureMode", () => {
     });
 
     // Then
-    expect(result.current.markerA?.seriesValues[0]?.value).toEqual(
-      elements[0]!.data.y,
-    );
+    expect(result.current.markerA?.seriesValues[0]?.value).toEqual(elements[0]!.data.y);
   });
 
   it("should remove marker A and marker B independently", async () => {

@@ -57,17 +57,13 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
   } = props;
   const { classes } = useDeltaOverlayStyles();
 
-  const resultByConfigIndex = new Map(
-    series.map((result) => [result.configIndex, result]),
-  );
+  const resultByConfigIndex = new Map(series.map((result) => [result.configIndex, result]));
 
   const renderSeriesValue = (
     configIndex: number,
     pick: "valueAtA" | "valueAtB" | "delta",
   ): number | string => {
-    return (
-      resultByConfigIndex.get(configIndex)?.[pick] ?? MISSING_VALUE_PLACEHOLDER
-    );
+    return resultByConfigIndex.get(configIndex)?.[pick] ?? MISSING_VALUE_PLACEHOLDER;
   };
 
   return (
@@ -82,12 +78,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
         <div />
         <div className={classes.rowLabel}>{xColumnLabel}</div>
         {seriesLabels.map(({ configIndex, label, color }) => (
-          <Stack
-            key={configIndex}
-            direction="row"
-            alignItems="center"
-            gap={0.5}
-          >
+          <Stack key={configIndex} direction="row" alignItems="center" gap={0.5}>
             <Square12Filled className={classes.colorIcon} style={{ color }} />
             <span className={classes.rowLabel}>{label}</span>
           </Stack>

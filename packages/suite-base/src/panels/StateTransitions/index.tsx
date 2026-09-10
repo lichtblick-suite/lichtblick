@@ -64,8 +64,7 @@ import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
 import { StateTransitionConfig, StateTransitionPanelProps } from "./types";
 
-const selectPlayerPresence = (ctx: MessagePipelineContext) =>
-  ctx.playerState.presence;
+const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 
 function StateTransitions(props: StateTransitionPanelProps) {
   const { config, saveConfig } = props;
@@ -75,17 +74,13 @@ function StateTransitions(props: StateTransitionPanelProps) {
   const { t } = useTranslation("stateTransitions");
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const isPlayerPresent =
-    playerPresence === PlayerPresence.PRESENT ||
-    playerPresence === PlayerPresence.BUFFERING;
+    playerPresence === PlayerPresence.PRESENT || playerPresence === PlayerPresence.BUFFERING;
 
-  const [focusedPath, setFocusedPath] = useState<undefined | string[]>(
-    undefined,
-  );
+  const [focusedPath, setFocusedPath] = useState<undefined | string[]>(undefined);
 
   useMessagePathDropConfig(saveConfig);
 
-  const { startTime, currentTimeSinceStart, endTimeSinceStart } =
-    useStateTransitionsTime();
+  const { startTime, currentTimeSinceStart, endTimeSinceStart } = useStateTransitionsTime();
 
   const { topics, pathStrings } = useMemo(() => {
     const newPathStrings = paths.map(({ value }) => value);
@@ -119,9 +114,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
     [decodedMessages, pathStrings],
   );
 
-  const itemsByPath = useMessagesByPath(
-    hasRangeData ? EMPTY_PATHS : pathStrings,
-  );
+  const itemsByPath = useMessagesByPath(hasRangeData ? EMPTY_PATHS : pathStrings);
 
   const { height, heightPerTopic } = useMemo(() => {
     const onlyTopicsHeight = paths.length * 64;
@@ -144,13 +137,12 @@ function StateTransitions(props: StateTransitionPanelProps) {
     showPoints,
   );
 
-  const { yScale, xScale, databounds, width, sizeRef } =
-    useChartScalesAndBounds(
-      minY,
-      currentTimeSinceStart,
-      endTimeSinceStart,
-      config,
-    );
+  const { yScale, xScale, databounds, width, sizeRef } = useChartScalesAndBounds(
+    minY,
+    currentTimeSinceStart,
+    endTimeSinceStart,
+    config,
+  );
 
   const deltaMode = useStateTransitionsDeltaMode({
     datasets: data.datasets,
@@ -197,10 +189,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
   );
 
   const annotations = useMemo((): AnnotationOptions[] => {
-    const markerAnnotation = (
-      value: number,
-      content: string,
-    ): AnnotationOptions => ({
+    const markerAnnotation = (value: number, content: string): AnnotationOptions => ({
       type: "line",
       scaleID: "x",
       value,
@@ -221,13 +210,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
       ...(markerA ? [markerAnnotation(markerA.xValue, t("markerA"))] : []),
       ...(markerB ? [markerAnnotation(markerB.xValue, t("markerB"))] : []),
     ];
-  }, [
-    markerA,
-    markerB,
-    t,
-    theme.palette.error.contrastText,
-    theme.palette.error.main,
-  ]);
+  }, [markerA, markerB, t, theme.palette.error.contrastText, theme.palette.error.main]);
 
   const overlayData = useMemo(() => {
     if (!markerA || !markerB) {
@@ -272,13 +255,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
           </ToolbarIconButton>
         }
       />
-      <Stack
-        fullWidth
-        fullHeight
-        flex="auto"
-        overflowX="hidden"
-        overflowY="auto"
-      >
+      <Stack fullWidth fullHeight flex="auto" overflowX="hidden" overflowY="auto">
         <div className={classes.chartWrapper} ref={sizeRef}>
           <TimeBasedChart
             zoom
@@ -306,10 +283,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
             saveConfig={saveConfig}
           />
           {overlayData && (
-            <div
-              className={classes.deltaOverlayWrapper}
-              data-testid="delta-overlay-wrapper"
-            >
+            <div className={classes.deltaOverlayWrapper} data-testid="delta-overlay-wrapper">
               <DeltaOverlay
                 deltaRowLabel={t("delta")}
                 xColumnLabel={t("labels.timestamp")}

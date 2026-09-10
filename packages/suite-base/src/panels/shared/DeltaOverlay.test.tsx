@@ -10,9 +10,7 @@ import { DeltaOverlay, DeltaOverlayProps } from "./DeltaOverlay";
 import "@testing-library/jest-dom";
 
 describe("DeltaOverlay", () => {
-  function buildProps(
-    overrides: Partial<DeltaOverlayProps> = {},
-  ): DeltaOverlayProps {
+  function buildProps(overrides: Partial<DeltaOverlayProps> = {}): DeltaOverlayProps {
     return {
       deltaRowLabel: "Delta",
       xColumnLabel: "X",

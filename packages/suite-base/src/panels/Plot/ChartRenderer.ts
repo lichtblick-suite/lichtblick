@@ -61,21 +61,13 @@ export class ChartRenderer {
     });
 
     const origZoomStart = ZoomPlugin.start?.bind(ZoomPlugin);
-    ZoomPlugin.start = (
-      chartInstance: MutableContext<unknown>,
-      startArgs,
-      pluginOptions,
-    ) => {
+    ZoomPlugin.start = (chartInstance: MutableContext<unknown>, startArgs, pluginOptions) => {
       // swap the canvas with our fake dom node canvas to support zoom plugin addEventListener
       const ctx = chartInstance.ctx;
       chartInstance.ctx = {
         canvas: fakeNode,
       };
-      const res = origZoomStart?.(
-        chartInstance as Chart,
-        startArgs,
-        pluginOptions,
-      );
+      const res = origZoomStart?.(chartInstance as Chart, startArgs, pluginOptions);
       chartInstance.ctx = ctx;
       return res;
     };
@@ -169,8 +161,7 @@ export class ChartRenderer {
     }
 
     if (action.zoomMode) {
-      unwrap(this.#chartInstance.options.plugins?.zoom?.zoom).mode =
-        action.zoomMode;
+      unwrap(this.#chartInstance.options.plugins?.zoom?.zoom).mode = action.zoomMode;
     }
 
     if (action.referenceLines) {
@@ -179,15 +170,13 @@ export class ChartRenderer {
         return;
       }
 
-      const newAnnotations: AnnotationOptions[] = action.referenceLines.map(
-        (config) => {
-          return {
-            ...DEFAULT_ANNOTATION,
-            borderColor: config.color,
-            value: config.value,
-          };
-        },
-      );
+      const newAnnotations: AnnotationOptions[] = action.referenceLines.map((config) => {
+        return {
+          ...DEFAULT_ANNOTATION,
+          borderColor: config.color,
+          value: config.value,
+        };
+      });
 
       annotation.annotations = newAnnotations;
     }
@@ -249,10 +238,7 @@ export class ChartRenderer {
     });
 
     for (const element of elements) {
-      const data =
-        this.#chartInstance.data.datasets[element.datasetIndex]?.data[
-          element.index
-        ];
+      const data = this.#chartInstance.data.datasets[element.datasetIndex]?.data[element.index];
       if (data == undefined || typeof data === "number") {
         continue;
       }

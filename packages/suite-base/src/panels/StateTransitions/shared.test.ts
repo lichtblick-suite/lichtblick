@@ -10,11 +10,7 @@ import {
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import {
-  datasetContainsArray,
-  getValueAtTime,
-  stateTransitionPathDisplayName,
-} from "./shared";
+import { datasetContainsArray, getValueAtTime, stateTransitionPathDisplayName } from "./shared";
 
 describe("stateTransitionPathDisplayName", () => {
   function buildStateTransitionPath(
@@ -91,18 +87,12 @@ describe("datasetContainsArray", () => {
   });
 
   it("should return true for multiple MessageAndData[] elements with consistent queriedData lengths greater than 1", () => {
-    const dataset: ImmutableDataset = [
-      [createMessageAndData(2)],
-      [createMessageAndData(2)],
-    ];
+    const dataset: ImmutableDataset = [[createMessageAndData(2)], [createMessageAndData(2)]];
     expect(datasetContainsArray(dataset)).toBe(true);
   });
 
   it("should return false for multiple MessageAndData[] elements with mixed queriedData lengths, including lengths less than or equal to 1", () => {
-    const dataset: ImmutableDataset = [
-      [createMessageAndData(2)],
-      [createMessageAndData(1)],
-    ];
+    const dataset: ImmutableDataset = [[createMessageAndData(2)], [createMessageAndData(1)]];
     expect(datasetContainsArray(dataset)).toBe(false);
   });
 });
