@@ -53,7 +53,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     sidebarDimension,
   } = config;
 
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
   const theme = useTheme();
   const { t } = useTranslation("plot");
 
@@ -126,6 +126,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     },
     [deltaMeasureMode, onClick],
   );
+  const isHoveringSelectablePoint = deltaMeasureMode.active && activeTooltip != undefined;
   const mergedKeyDownHandlers = useMemo(
     () => ({
       ...keyDownHandlers,
@@ -311,7 +312,10 @@ const Plot = (props: PlotProps): React.JSX.Element => {
         >
           <div className={classes.verticalBarWrapper} data-testid="vertical-bar-wrapper">
             <div
-              className={classes.canvasDiv}
+              className={cx(
+                classes.canvasDiv,
+                isHoveringSelectablePoint && classes.canvasDivPointer,
+              )}
               ref={setCanvasDiv}
               onWheel={onWheel}
               onMouseMove={onMouseMove}

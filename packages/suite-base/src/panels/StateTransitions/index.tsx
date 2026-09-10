@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Ruler20Regular } from "@fluentui/react-icons";
-import { useTheme } from "@mui/material";
+import { alpha, useTheme } from "@mui/material";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -202,15 +202,15 @@ function StateTransitions(props: StateTransitionPanelProps) {
       type: "line",
       scaleID: "x",
       value,
-      borderColor: theme.palette.error.main,
+      borderColor: alpha(theme.palette.error.main, 0.6),
       borderWidth: 2,
       borderDash: [6, 4],
       label: {
         display: true,
         content,
         position: "start",
-        backgroundColor: theme.palette.error.main,
-        color: theme.palette.error.contrastText,
+        backgroundColor: alpha(theme.palette.error.main, 0.15),
+        color: theme.palette.error.main,
         font: { size: 10 },
       },
     });
@@ -219,7 +219,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
       ...(markerA ? [markerAnnotation(markerA.xValue, t("markerA"))] : []),
       ...(markerB ? [markerAnnotation(markerB.xValue, t("markerB"))] : []),
     ];
-  }, [markerA, markerB, t, theme.palette.error.contrastText, theme.palette.error.main]);
+  }, [markerA, markerB, t, theme.palette.error.main]);
 
   const overlayData = useMemo(() => {
     if (!markerA || !markerB) {
