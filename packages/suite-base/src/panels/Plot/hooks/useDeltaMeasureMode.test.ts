@@ -159,6 +159,46 @@ describe("useDeltaMeasureMode", () => {
     expect(result.current.markerA).toBeUndefined();
   });
 
+  it("should not place a marker when the coordinator has no usable x scale (-1 sentinel)", async () => {
+    // Given
+    (mockCoordinator.getXValueAtPixel as jest.Mock).mockReturnValueOnce(-1);
+    const { result } = setup({ coordinator: mockCoordinator });
+    act(() => {
+      result.current.toggleActive();
+    });
+
+    // When
+    await act(async () => {
+      result.current.handleCanvasClick(buildClickEvent());
+    });
+
+    // Then
+    expect(result.current.markerA).toBeUndefined();
+    expect(result.current.markerB).toBeUndefined();
+  });
+
+  it("should log renderer lookup errors without placing a marker", async () => {
+    // Given
+    const error = new Error("renderer lookup failed");
+    const { result } = setup({
+      coordinator: mockCoordinator,
+      renderer: { getElementsAtPixel: jest.fn().mockRejectedValue(error) },
+    });
+    act(() => {
+      result.current.toggleActive();
+    });
+
+    // When
+    await act(async () => {
+      result.current.handleCanvasClick(buildClickEvent());
+    });
+
+    // Then
+    expect(console.error).toHaveBeenCalledWith(error);
+    (console.error as jest.Mock).mockClear();
+    expect(result.current.markerA).toBeUndefined();
+  });
+
   it("should place marker A on the first click with the resolved x value and series values", async () => {
     // Given
     const xValue = BasicBuilder.number();

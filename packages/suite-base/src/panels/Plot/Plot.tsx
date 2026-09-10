@@ -132,7 +132,9 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       escape: () => {
         if (deltaMeasureMode.active) {
           deltaMeasureMode.toggleActive();
+          return;
         }
+        return false;
       },
     }),
     [deltaMeasureMode, keyDownHandlers],

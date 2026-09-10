@@ -56,6 +56,22 @@ describe("DeltaOverlay", () => {
     expect(screen.getByText(seriesLabel)).toBeInTheDocument();
   });
 
+  it("should label the marker removal buttons distinctly", () => {
+    // Given
+    const props = buildProps();
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getByTestId("delta-overlay-remove-marker-a")).toHaveAccessibleName(
+      "Remove marker A",
+    );
+    expect(screen.getByTestId("delta-overlay-remove-marker-b")).toHaveAccessibleName(
+      "Remove marker B",
+    );
+  });
+
   it("should render a placeholder when a series has no computed result", () => {
     // Given
     const props = buildProps({

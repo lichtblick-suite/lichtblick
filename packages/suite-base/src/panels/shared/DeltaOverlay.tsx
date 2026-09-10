@@ -3,7 +3,8 @@
 
 import { Dismiss12Regular, Square12Filled } from "@fluentui/react-icons";
 import { Button } from "@mui/material";
-import { CSSProperties } from "react";
+import React, { type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Immutable } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
@@ -55,6 +56,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
     onRemoveMarkerB,
     style,
   } = props;
+  const { t } = useTranslation("plot");
   const { classes } = useDeltaOverlayStyles();
 
   const resultByConfigIndex = new Map(series.map((result) => [result.configIndex, result]));
@@ -98,6 +100,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
             size="small"
             disableRipple
             data-testid="delta-overlay-remove-marker-a"
+            aria-label={t("removeMarkerA")}
             onClick={onRemoveMarkerA}
           >
             <Dismiss12Regular />
@@ -117,6 +120,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
             size="small"
             disableRipple
             data-testid="delta-overlay-remove-marker-b"
+            aria-label={t("removeMarkerB")}
             onClick={onRemoveMarkerB}
           >
             <Dismiss12Regular />

@@ -99,6 +99,25 @@ describe("useDeltaMarkerState", () => {
     expect(result.current.markerB).toEqual(markerB);
   });
 
+  it("should reserve distinct slots for rapid placements", () => {
+    // Given
+    const { result } = setup();
+    const markerA = buildMarker();
+    const markerB = buildMarker();
+
+    // When
+    act(() => {
+      const reservationA = result.current.nextMarkerSlot();
+      const reservationB = result.current.nextMarkerSlot();
+      result.current.setMarker(reservationB, markerB);
+      result.current.setMarker(reservationA, markerA);
+    });
+
+    // Then
+    expect(result.current.markerA).toEqual(markerA);
+    expect(result.current.markerB).toEqual(markerB);
+  });
+
   it("should reset to a fresh marker A on the third slot request", () => {
     // Given
     const { result } = setup();
@@ -187,6 +206,46 @@ describe("useDeltaMarkerState", () => {
 
     // Then
     expect(result.current.active).toBe(true);
+    expect(result.current.markerA).toBeUndefined();
+  });
+
+  it("should ignore a delayed placement after resetKey changes", () => {
+    // Given
+    const { result, rerender, props } = setup("a");
+    const reservation = result.current.nextMarkerSlot();
+    const marker = buildMarker();
+
+    // When
+    rerender({ ...props, resetKey: "b" });
+    act(() => {
+      result.current.setMarker(reservation, marker);
+    });
+
+    // Then
+    expect(result.current.markerA).toBeUndefined();
+    expect(result.current.markerB).toBeUndefined();
+  });
+
+  it("should ignore a delayed placement after deactivation", () => {
+    // Given
+    const { result } = setup();
+    act(() => {
+      result.current.toggleActive();
+    });
+    let reservation!: ReturnType<typeof result.current.nextMarkerSlot>;
+    act(() => {
+      reservation = result.current.nextMarkerSlot();
+    });
+    const marker = buildMarker();
+
+    // When
+    act(() => {
+      result.current.toggleActive();
+      result.current.setMarker(reservation, marker);
+    });
+
+    // Then
+    expect(result.current.active).toBe(false);
     expect(result.current.markerA).toBeUndefined();
   });
 

@@ -36,6 +36,8 @@ export const plot = {
   position: "Position",
   receiveTime: "Receive Time",
   reorderSeries: "Reorder series",
+  removeMarkerA: "Remove marker A",
+  removeMarkerB: "Remove marker B",
   resetView: "Reset view",
   secondsRange: "Range (seconds)",
   series: "Series",

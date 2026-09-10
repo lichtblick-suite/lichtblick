@@ -77,31 +77,38 @@ function useDeltaMeasureMode({
       const canvasX = event.clientX - boundingRect.left;
       const canvasY = event.clientY - boundingRect.top;
       const xValue = coordinator.getXValueAtPixel(canvasX);
+      if (xValue === -1) {
+        return;
+      }
 
       // Decide the target slot now since the datum lookup below is async - a third click resets.
       const slot = nextMarkerSlot();
 
       void (async () => {
-        const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ?? [];
-        if (!isMounted()) {
-          return;
-        }
-
-        const seriesValues: DeltaMarkerSeriesValue[] = [];
-        const seenConfigIndexes = new Set<number>();
-        for (const element of elements) {
-          if (seenConfigIndexes.has(element.configIndex)) {
-            continue;
+        try {
+          const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ?? [];
+          if (!isMounted()) {
+            return;
           }
-          seenConfigIndexes.add(element.configIndex);
 
-          const value = toSeriesValue(element.data.value ?? element.data.y);
-          if (value != undefined) {
-            seriesValues.push({ configIndex: element.configIndex, value });
+          const seriesValues: DeltaMarkerSeriesValue[] = [];
+          const seenConfigIndexes = new Set<number>();
+          for (const element of elements) {
+            if (seenConfigIndexes.has(element.configIndex)) {
+              continue;
+            }
+            seenConfigIndexes.add(element.configIndex);
+
+            const value = toSeriesValue(element.data.value ?? element.data.y);
+            if (value != undefined) {
+              seriesValues.push({ configIndex: element.configIndex, value });
+            }
           }
-        }
 
-        setMarker(slot, { xValue, seriesValues });
+          setMarker(slot, { xValue, seriesValues });
+        } catch (err: unknown) {
+          console.error(err);
+        }
       })();
     },
     [active, coordinator, draggingRef, isMounted, nextMarkerSlot, renderer, setMarker],

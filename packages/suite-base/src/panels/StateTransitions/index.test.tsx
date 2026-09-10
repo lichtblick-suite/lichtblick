@@ -12,6 +12,7 @@ import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/Message
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { useDecodedMessageRange } from "./hooks/useDecodedMessageRange";
+import useStateTransitionsDeltaMode from "./hooks/useStateTransitionsDeltaMode";
 import { StateTransitionConfig } from "./types";
 
 jest.mock("@lichtblick/suite-base/components/Panel", () => ({
@@ -46,6 +47,18 @@ jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAn
 }));
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useMessagePathDropConfig");
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings");
+jest.mock("./hooks/useStateTransitionsDeltaMode", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    active: false,
+    handleChartClick: jest.fn(),
+    markerA: undefined,
+    markerB: undefined,
+    removeMarkerA: jest.fn(),
+    removeMarkerB: jest.fn(),
+    toggleActive: jest.fn(),
+  })),
+}));
 jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
   useMessagePipeline: (selector: (ctx: unknown) => unknown) =>
     selector({ playerState: { presence: "PRESENT" } }),
@@ -71,6 +84,7 @@ jest.mock("@lichtblick/suite-base/panels/StateTransitions/StateTransitions.style
 
 const mockUseMessagesByPath = useMessagesByPath as jest.Mock;
 const mockUseDecodedMessageRange = useDecodedMessageRange as jest.Mock;
+const mockUseStateTransitionsDeltaMode = useStateTransitionsDeltaMode as jest.Mock;
 
 function buildMessageAndData(path: string) {
   const topic = path.split(".")[0]!;
@@ -96,9 +110,12 @@ describe("StateTransitions", () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const StateTransitionsPanel = require("./index").default;
     const saveConfig = jest.fn();
-    return render(
-      <StateTransitionsPanel config={{ ...defaultConfig, ...config }} saveConfig={saveConfig} />,
-    );
+    return {
+      ...render(
+        <StateTransitionsPanel config={{ ...defaultConfig, ...config }} saveConfig={saveConfig} />,
+      ),
+      StateTransitionsPanel,
+    };
   }
 
   it("should render the panel", () => {
@@ -120,6 +137,30 @@ describe("StateTransitions", () => {
     });
 
     expect(mockUseMessagesByPath).toHaveBeenCalledWith([topicA, topicB]);
+  });
+
+  it("should reset delta markers when a path timestamp source changes", () => {
+    // Given
+    const topic = BasicBuilder.string();
+    const { rerender, StateTransitionsPanel } = renderPanel({
+      paths: [{ value: topic, timestampMethod: "receiveTime" }],
+    });
+    const firstResetKey = mockUseStateTransitionsDeltaMode.mock.calls[0][0].resetKey;
+
+    // When
+    rerender(
+      <StateTransitionsPanel
+        config={{
+          ...defaultConfig,
+          paths: [{ value: topic, timestampMethod: "headerStamp" }],
+        }}
+        saveConfig={jest.fn()}
+      />,
+    );
+
+    // Then
+    const secondResetKey = mockUseStateTransitionsDeltaMode.mock.calls.at(-1)[0].resetKey;
+    expect(secondResetKey).not.toEqual(firstResetKey);
   });
 
   it("should pass empty array to useMessagesByPath when range data is active", () => {

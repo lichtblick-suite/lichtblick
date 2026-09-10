@@ -146,8 +146,17 @@ function StateTransitions(props: StateTransitionPanelProps) {
 
   const deltaMode = useStateTransitionsDeltaMode({
     datasets: data.datasets,
-    // Markers reference paths by index, so stale ones need clearing when the path list changes.
-    resetKey: paths.map((path) => path.value).join("|"),
+    // Markers reference paths by index, so clear stale ones when any path input changes.
+    resetKey:
+      JSON.stringify(
+        paths.map(({ color, value, label, enabled, timestampMethod }) => [
+          color,
+          value,
+          label,
+          enabled,
+          timestampMethod,
+        ]),
+      ) ?? "",
   });
   const { markerA, markerB } = deltaMode;
 
