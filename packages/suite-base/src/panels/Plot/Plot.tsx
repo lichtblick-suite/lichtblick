@@ -330,6 +330,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
             />
             <DeltaMarkerBars
               coordinator={coordinator}
+              active={deltaMeasureMode.active}
               markerA={deltaMeasureMode.markerA}
               markerB={deltaMeasureMode.markerB}
               colorsByDatasetIndex={colorsByDatasetIndex}
@@ -340,6 +341,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
               markerBLabel={t("markerB")}
               onRemoveMarkerA={deltaMeasureMode.removeMarkerA}
               onRemoveMarkerB={deltaMeasureMode.removeMarkerB}
+              onClose={deltaMeasureMode.toggleActive}
             />
           </div>
         </Tooltip>

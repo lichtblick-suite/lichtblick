@@ -1,18 +1,13 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import DeltaMarkerBuilder from "@lichtblick/suite-base/testing/builders/DeltaMarkerBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import { computeDelta, DeltaMarker, getDeltaSeriesConfigIndexes } from "./deltaMarkers";
+import { computeDelta, computeDeltaDisplay, getDeltaSeriesConfigIndexes } from "./deltaMarkers";
 
 describe("computeDelta", () => {
-  function buildMarker(overrides: Partial<DeltaMarker> = {}): DeltaMarker {
-    return {
-      xValue: BasicBuilder.number(),
-      seriesValues: [],
-      ...overrides,
-    };
-  }
+  const buildMarker = DeltaMarkerBuilder.marker;
 
   it("should compute the delta between the x values of both markers", () => {
     // Given
@@ -120,13 +115,7 @@ describe("computeDelta", () => {
 });
 
 describe("getDeltaSeriesConfigIndexes", () => {
-  function buildMarker(overrides: Partial<DeltaMarker> = {}): DeltaMarker {
-    return {
-      xValue: BasicBuilder.number(),
-      seriesValues: [],
-      ...overrides,
-    };
-  }
+  const buildMarker = DeltaMarkerBuilder.marker;
 
   it("should sort config indexes numerically, not lexicographically", () => {
     // Given
@@ -192,5 +181,80 @@ describe("getDeltaSeriesConfigIndexes", () => {
 
     // Then
     expect(result).toEqual([]);
+  });
+
+  it("should tolerate an undefined marker on either side", () => {
+    // Given
+    const configIndex = BasicBuilder.number();
+    const markerA = buildMarker({ seriesValues: [{ configIndex, value: 1 }] });
+
+    // When
+    const result = getDeltaSeriesConfigIndexes(markerA, undefined);
+
+    // Then
+    expect(result).toEqual([configIndex]);
+  });
+
+  it("should return an empty array when both markers are undefined", () => {
+    // Given / When
+    const result = getDeltaSeriesConfigIndexes(undefined, undefined);
+
+    // Then
+    expect(result).toEqual([]);
+  });
+});
+
+describe("computeDeltaDisplay", () => {
+  const buildMarker = DeltaMarkerBuilder.marker;
+
+  it("should return an undefined deltaX and empty series when neither marker is set", () => {
+    // Given / When
+    const result = computeDeltaDisplay(undefined, undefined);
+
+    // Then
+    expect(result).toEqual({ deltaX: undefined, series: [] });
+  });
+
+  it("should list marker A's series with valueAtB undefined when only marker A is set", () => {
+    // Given
+    const configIndex = BasicBuilder.number();
+    const markerA = buildMarker({ seriesValues: [{ configIndex, value: 5 }] });
+
+    // When
+    const result = computeDeltaDisplay(markerA, undefined);
+
+    // Then
+    expect(result).toEqual({
+      deltaX: undefined,
+      series: [{ configIndex, valueAtA: 5, valueAtB: undefined, delta: undefined }],
+    });
+  });
+
+  it("should list marker B's series with valueAtA undefined when only marker B is set", () => {
+    // Given
+    const configIndex = BasicBuilder.number();
+    const markerB = buildMarker({ seriesValues: [{ configIndex, value: 9 }] });
+
+    // When
+    const result = computeDeltaDisplay(undefined, markerB);
+
+    // Then
+    expect(result).toEqual({
+      deltaX: undefined,
+      series: [{ configIndex, valueAtA: undefined, valueAtB: 9, delta: undefined }],
+    });
+  });
+
+  it("should delegate to computeDelta once both markers are set", () => {
+    // Given
+    const configIndex = BasicBuilder.number();
+    const markerA = buildMarker({ xValue: 1, seriesValues: [{ configIndex, value: 5 }] });
+    const markerB = buildMarker({ xValue: 4, seriesValues: [{ configIndex, value: 11 }] });
+
+    // When
+    const result = computeDeltaDisplay(markerA, markerB);
+
+    // Then
+    expect(result).toEqual(computeDelta(markerA, markerB));
   });
 });

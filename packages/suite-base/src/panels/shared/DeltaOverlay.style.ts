@@ -7,12 +7,13 @@ import { customTypography } from "@lichtblick/theme";
 
 export const useDeltaOverlayStyles = makeStyles()((theme) => ({
   root: {
+    position: "relative",
     pointerEvents: "auto",
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[4],
-    padding: theme.spacing(1),
+    padding: theme.spacing(1, 3, 1, 1),
   },
   grid: {
     display: "grid",
@@ -37,6 +38,13 @@ export const useDeltaOverlayStyles = makeStyles()((theme) => ({
     flexShrink: 0,
   },
   removeButton: {
+    minWidth: "unset",
+    padding: theme.spacing(0.25),
+  },
+  closeButton: {
+    position: "absolute",
+    top: theme.spacing(0.5),
+    right: theme.spacing(0.5),
     minWidth: "unset",
     padding: theme.spacing(0.25),
   },

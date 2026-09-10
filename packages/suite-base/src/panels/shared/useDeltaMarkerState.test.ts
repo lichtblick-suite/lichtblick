@@ -4,19 +4,12 @@
 
 import { act, renderHook } from "@testing-library/react";
 
-import { BasicBuilder } from "@lichtblick/test-builders";
+import DeltaMarkerBuilder from "@lichtblick/suite-base/testing/builders/DeltaMarkerBuilder";
 
-import { DeltaMarker } from "./deltaMarkers";
 import useDeltaMarkerState, { UseDeltaMarkerStateProps } from "./useDeltaMarkerState";
 
 describe("useDeltaMarkerState", () => {
-  function buildMarker(overrides: Partial<DeltaMarker> = {}): DeltaMarker {
-    return {
-      xValue: BasicBuilder.number(),
-      seriesValues: [],
-      ...overrides,
-    };
-  }
+  const buildMarker = DeltaMarkerBuilder.marker;
 
   const setup = (resetKey?: string) => {
     const props: UseDeltaMarkerStateProps = { resetKey };

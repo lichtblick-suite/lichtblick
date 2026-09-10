@@ -4,6 +4,7 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useLatest } from "react-use";
 
+import { DEFAULT_MARKER_COLOR } from "@lichtblick/suite-base/panels/Plot/constants";
 import { getPixelForXValue } from "@lichtblick/suite-base/panels/Plot/utils/getPixelForXValue";
 import { getPixelForYValue } from "@lichtblick/suite-base/panels/Plot/utils/getPixelForYValue";
 import {
@@ -11,15 +12,13 @@ import {
   DeltaOverlaySeriesLabel,
 } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
 import {
-  computeDelta,
+  computeDeltaDisplay,
   DeltaMarker,
   getDeltaSeriesConfigIndexes,
 } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 
 import { useDeltaMarkerBarsStyles } from "./DeltaMarkerBars.style";
 import type { DeltaMarkerBarsProps, Scale, YScale } from "./types";
-
-const DEFAULT_MARKER_COLOR = "#f44336";
 
 /** The value+color of the series closest to where a marker was placed (used for the crosshair). */
 function getPrimarySeries(
@@ -113,7 +112,8 @@ function setLabelPosition(
 /**
  * Draws the two Delta/Measure-mode marker crosshairs (matching Foxglove's reference behavior: a
  * vertical + horizontal dashed line and an on-chart "P1"/"P2" label snapped to the nearest
- * series) and, once both are placed, the DeltaOverlay table.
+ * series) and the DeltaOverlay table, which renders as soon as measure mode is active and fills
+ * in each row as markers are placed.
  *
  * Bar/label positions are updated directly on refs (not React state) on every xScaleChanged /
  * yScaleChanged tick so panning/zooming doesn't re-render the (potentially large) overlay.
@@ -121,6 +121,7 @@ function setLabelPosition(
 // eslint-disable-next-line @typescript-eslint/no-shadow
 export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   coordinator,
+  active,
   markerA,
   markerB,
   colorsByDatasetIndex,
@@ -131,6 +132,7 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   markerBLabel,
   onRemoveMarkerA,
   onRemoveMarkerB,
+  onClose,
 }: DeltaMarkerBarsProps): React.JSX.Element {
   const { classes } = useDeltaMarkerBarsStyles();
 
@@ -200,7 +202,7 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   }, [coordinator, updateBars]);
 
   const overlayData = useMemo(() => {
-    if (!markerA || !markerB) {
+    if (!active) {
       return undefined;
     }
 
@@ -215,8 +217,8 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
       }),
     );
 
-    return { delta: computeDelta(markerA, markerB), seriesLabels };
-  }, [colorsByDatasetIndex, labelsByDatasetIndex, markerA, markerB]);
+    return { delta: computeDeltaDisplay(markerA, markerB), seriesLabels };
+  }, [active, colorsByDatasetIndex, labelsByDatasetIndex, markerA, markerB]);
 
   if (!coordinator) {
     return <></>;
@@ -251,20 +253,21 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
           />
         </Fragment>
       ))}
-      {overlayData && markerA && markerB && (
+      {overlayData && (
         <div className={classes.overlayWrapper} data-testid="delta-overlay-wrapper">
           <DeltaOverlay
             deltaRowLabel={deltaRowLabel}
             xColumnLabel={xColumnLabel}
             markerALabel={markerALabel}
             markerBLabel={markerBLabel}
-            xValueA={markerA.xValue}
-            xValueB={markerB.xValue}
+            xValueA={markerA?.xValue}
+            xValueB={markerB?.xValue}
             deltaX={overlayData.delta.deltaX}
             seriesLabels={overlayData.seriesLabels}
             series={overlayData.delta.series}
             onRemoveMarkerA={onRemoveMarkerA}
             onRemoveMarkerB={onRemoveMarkerB}
+            onClose={onClose}
           />
         </div>
       )}

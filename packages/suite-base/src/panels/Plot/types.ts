@@ -175,6 +175,8 @@ export type VerticalBarsProps = {
 
 export type DeltaMarkerBarsProps = {
   coordinator?: PlotCoordinator;
+  /** Whether Measure mode is active - the DeltaOverlay renders as soon as this is true. */
+  active: boolean;
   markerA?: DeltaMarker;
   markerB?: DeltaMarker;
   colorsByDatasetIndex: Record<string, string>;
@@ -185,6 +187,8 @@ export type DeltaMarkerBarsProps = {
   markerBLabel: string;
   onRemoveMarkerA: () => void;
   onRemoveMarkerB: () => void;
+  /** Closes the overlay entirely and deactivates measure mode. */
+  onClose: () => void;
 };
 
 export type UsePlotDataHandling = {

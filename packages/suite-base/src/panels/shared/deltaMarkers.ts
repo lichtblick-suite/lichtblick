@@ -13,8 +13,9 @@ export type DeltaMarker = {
 
 export type DeltaSeriesResult = {
   configIndex: number;
-  valueAtA: number | string;
-  valueAtB: number | string;
+  // Undefined when that marker isn't placed yet (DeltaOverlay shows a placeholder).
+  valueAtA: number | string | undefined;
+  valueAtB: number | string | undefined;
   // Absolute value; undefined when either value isn't numeric (e.g. StateTransitions state labels).
   delta: number | undefined;
 };
@@ -55,10 +56,44 @@ export function computeDelta(markerA: DeltaMarker, markerB: DeltaMarker): DeltaR
   };
 }
 
+export type DeltaDisplay = {
+  /** Undefined until both markers are placed. */
+  deltaX: number | undefined;
+  series: DeltaSeriesResult[];
+};
+
+/**
+ * Like `computeDelta`, but also handles the "Measure mode is active but zero or one markers have
+ * been placed yet" states - the DeltaOverlay renders regardless of how many markers exist, using
+ * this to fill in what's known so far and placeholders for the rest.
+ */
+export function computeDeltaDisplay(
+  markerA: DeltaMarker | undefined,
+  markerB: DeltaMarker | undefined,
+): DeltaDisplay {
+  if (markerA && markerB) {
+    return computeDelta(markerA, markerB);
+  }
+
+  const marker = markerA ?? markerB;
+  return {
+    deltaX: undefined,
+    series: (marker?.seriesValues ?? []).map(({ configIndex, value }) => ({
+      configIndex,
+      valueAtA: markerA ? value : undefined,
+      valueAtB: markerB ? value : undefined,
+      delta: undefined,
+    })),
+  };
+}
+
 /** Config indexes referenced by either marker, de-duplicated and sorted numerically ascending. */
-export function getDeltaSeriesConfigIndexes(markerA: DeltaMarker, markerB: DeltaMarker): number[] {
+export function getDeltaSeriesConfigIndexes(
+  markerA: DeltaMarker | undefined,
+  markerB: DeltaMarker | undefined,
+): number[] {
   const configIndexes = new Set<number>();
-  for (const seriesValue of [...markerA.seriesValues, ...markerB.seriesValues]) {
+  for (const seriesValue of [...(markerA?.seriesValues ?? []), ...(markerB?.seriesValues ?? [])]) {
     configIndexes.add(seriesValue.configIndex);
   }
   return [...configIndexes].sort((a, b) => a - b);

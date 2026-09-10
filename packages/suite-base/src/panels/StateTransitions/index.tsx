@@ -55,7 +55,7 @@ import {
   DeltaOverlaySeriesLabel,
 } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
 import {
-  computeDelta,
+  computeDeltaDisplay,
   getDeltaSeriesConfigIndexes,
 } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
@@ -222,7 +222,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
   }, [markerA, markerB, t, theme.palette.error.main]);
 
   const overlayData = useMemo(() => {
-    if (!markerA || !markerB) {
+    if (!deltaMode.active) {
       return undefined;
     }
 
@@ -239,12 +239,12 @@ function StateTransitions(props: StateTransitionPanelProps) {
     });
 
     return {
-      xValueA: markerA.xValue,
-      xValueB: markerB.xValue,
-      delta: computeDelta(markerA, markerB),
+      xValueA: markerA?.xValue,
+      xValueB: markerB?.xValue,
+      delta: computeDeltaDisplay(markerA, markerB),
       seriesLabels,
     };
-  }, [markerA, markerB, paths]);
+  }, [deltaMode.active, markerA, markerB, paths]);
 
   usePanelSettings(config, saveConfig, pathState, focusedPath);
 
@@ -305,6 +305,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
                 series={overlayData.delta.series}
                 onRemoveMarkerA={deltaMode.removeMarkerA}
                 onRemoveMarkerB={deltaMode.removeMarkerB}
+                onClose={deltaMode.toggleActive}
               />
             </div>
           )}

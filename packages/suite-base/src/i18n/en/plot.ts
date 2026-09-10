@@ -10,6 +10,7 @@ export const plot = {
   addSeries: "Add series",
   axisLabel: "Axis label",
   clickToAddASeries: "Click to add a series",
+  closeMeasureMode: "Close measure mode",
   color: "Color",
   currentPath: "Path (current)",
   deleteSeries: "Delete series",

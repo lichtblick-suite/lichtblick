@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { Immutable } from "@lichtblick/suite";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useDeltaOverlayStyles } from "@lichtblick/suite-base/panels/shared/DeltaOverlay.style";
+import { MISSING_VALUE_PLACEHOLDER } from "@lichtblick/suite-base/panels/shared/constants";
 import { DeltaResult } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 
 export type DeltaOverlaySeriesLabel = {
@@ -22,19 +23,20 @@ export type DeltaOverlayProps = Immutable<{
   xColumnLabel: string;
   markerALabel: string;
   markerBLabel: string;
-  xValueA: number;
-  xValueB: number;
-  deltaX: number;
+  /** Undefined until that marker is placed - rendered as a placeholder. */
+  xValueA: number | undefined;
+  xValueB: number | undefined;
+  deltaX: number | undefined;
   /** One column per series, in display order. */
   seriesLabels: DeltaOverlaySeriesLabel[];
   series: DeltaResult["series"];
   formatXValue?: (value: number) => string;
   onRemoveMarkerA: () => void;
   onRemoveMarkerB: () => void;
+  /** Closes the overlay entirely and deactivates measure mode. */
+  onClose: () => void;
   style?: CSSProperties;
 }>;
-
-const MISSING_VALUE_PLACEHOLDER = "—";
 
 // Purely presentational: panels place markers, compute values via computeDelta, and position this overlay.
 // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -54,6 +56,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
     formatXValue = (value) => value.toFixed(3),
     onRemoveMarkerA,
     onRemoveMarkerB,
+    onClose,
     style,
   } = props;
   const { t } = useTranslation("plot");
@@ -68,8 +71,21 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
     return resultByConfigIndex.get(configIndex)?.[pick] ?? MISSING_VALUE_PLACEHOLDER;
   };
 
+  const renderXValue = (value: number | undefined): string =>
+    value != undefined ? formatXValue(value) : MISSING_VALUE_PLACEHOLDER;
+
   return (
     <div className={classes.root} style={style} data-testid="delta-overlay">
+      <Button
+        className={classes.closeButton}
+        size="small"
+        disableRipple
+        data-testid="delta-overlay-close"
+        aria-label={t("closeMeasureMode")}
+        onClick={onClose}
+      >
+        <Dismiss12Regular />
+      </Button>
       <div
         className={classes.grid}
         style={{
@@ -87,7 +103,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
         ))}
 
         <div className={classes.rowLabel}>{deltaRowLabel}</div>
-        <div className={classes.value}>{formatXValue(deltaX)}</div>
+        <div className={classes.value}>{renderXValue(deltaX)}</div>
         {seriesLabels.map(({ configIndex }) => (
           <div className={classes.value} key={configIndex}>
             {renderSeriesValue(configIndex, "delta")}
@@ -107,7 +123,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
           </Button>
           {markerALabel}
         </Stack>
-        <div className={classes.value}>{formatXValue(xValueA)}</div>
+        <div className={classes.value}>{renderXValue(xValueA)}</div>
         {seriesLabels.map(({ configIndex }) => (
           <div className={classes.value} key={configIndex}>
             {renderSeriesValue(configIndex, "valueAtA")}
@@ -127,7 +143,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
           </Button>
           {markerBLabel}
         </Stack>
-        <div className={classes.value}>{formatXValue(xValueB)}</div>
+        <div className={classes.value}>{renderXValue(xValueB)}</div>
         {seriesLabels.map(({ configIndex }) => (
           <div className={classes.value} key={configIndex}>
             {renderSeriesValue(configIndex, "valueAtB")}

@@ -23,6 +23,7 @@ describe("DeltaOverlay", () => {
       series: [],
       onRemoveMarkerA: jest.fn(),
       onRemoveMarkerB: jest.fn(),
+      onClose: jest.fn(),
       ...overrides,
     };
   }
@@ -116,6 +117,62 @@ describe("DeltaOverlay", () => {
 
     // Then
     expect(onRemoveMarkerB).toHaveBeenCalledTimes(1);
+  });
+
+  it("should call onClose when the close button is clicked", () => {
+    // Given
+    const onClose = jest.fn();
+    const props = buildProps({ onClose });
+    render(<DeltaOverlay {...props} />);
+
+    // When
+    fireEvent.click(screen.getByTestId("delta-overlay-close"));
+
+    // Then
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("should label the close button distinctly from the marker removal buttons", () => {
+    // Given
+    const props = buildProps();
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getByTestId("delta-overlay-close")).toHaveAccessibleName("Close measure mode");
+  });
+
+  it("should render placeholders for xValueA, xValueB and deltaX before both markers are placed", () => {
+    // Given
+    const props = buildProps({
+      xValueA: undefined,
+      xValueB: undefined,
+      deltaX: undefined,
+    });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getAllByText("—")).toHaveLength(3);
+  });
+
+  it("should render marker A's value once placed while marker B is still a placeholder", () => {
+    // Given
+    const props = buildProps({
+      xValueA: 4.5,
+      xValueB: undefined,
+      deltaX: undefined,
+      formatXValue: (value) => `${value.toFixed(1)}s`,
+    });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getByText("4.5s")).toBeInTheDocument();
+    expect(screen.getAllByText("—")).toHaveLength(2);
   });
 
   it("should format x values using the provided formatXValue function", () => {
