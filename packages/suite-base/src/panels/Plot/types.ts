@@ -15,6 +15,7 @@ import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builde
 import { IndexDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/IndexDatasetsBuilder";
 import { TimestampDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilder";
 import { PlotConfig, PlotPath } from "@lichtblick/suite-base/panels/Plot/utils/config";
+import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 import { Bounds1D } from "@lichtblick/suite-base/types/Bounds";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -25,6 +26,14 @@ export type Scale = {
   max: number;
   left: number;
   right: number;
+};
+
+/** Y-axis pixel bounds - named `top`/`bottom` directly instead of reusing `Scale`'s `left`/`right`. */
+export type YScale = {
+  min: number;
+  max: number;
+  top: number;
+  bottom: number;
 };
 
 export type BaseInteractionEvent = {
@@ -42,10 +51,14 @@ export type MouseBase = BaseInteractionEvent & {
 
 export type WheelInteractionEvent = { type: "wheel" } & BaseInteractionEvent & MouseBase;
 
-export type PanStartInteractionEvent = { type: "panstart" } & BaseInteractionEvent & {
+export type PanStartInteractionEvent = {
+  type: "panstart";
+} & BaseInteractionEvent & {
     center: { x: number; y: number };
   };
-export type PanMoveInteractionEvent = { type: "panmove" } & BaseInteractionEvent;
+export type PanMoveInteractionEvent = {
+  type: "panmove";
+} & BaseInteractionEvent;
 
 export type PanEndInteractionEvent = { type: "panend" } & BaseInteractionEvent;
 
@@ -160,6 +173,24 @@ export type VerticalBarsProps = {
   xAxisIsPlaybackTime: boolean;
 };
 
+export type DeltaMarkerBarsProps = {
+  coordinator?: PlotCoordinator;
+  /** Whether Measure mode is active - the DeltaOverlay renders as soon as this is true. */
+  active: boolean;
+  markerA?: DeltaMarker;
+  markerB?: DeltaMarker;
+  colorsByDatasetIndex: Record<string, string>;
+  labelsByDatasetIndex: Record<string, string>;
+  deltaRowLabel: string;
+  xColumnLabel: string;
+  markerALabel: string;
+  markerBLabel: string;
+  onRemoveMarkerA: () => void;
+  onRemoveMarkerB: () => void;
+  /** Closes the overlay entirely and deactivates measure mode. */
+  onClose: () => void;
+};
+
 export type UsePlotDataHandling = {
   colorsByDatasetIndex: Record<string, string>;
   labelsByDatasetIndex: Record<string, string>;
@@ -185,6 +216,9 @@ export type PlotCoordinatorEventTypes = {
 
   /** X scale changed. */
   xScaleChanged(scale: Scale | undefined): void;
+
+  /** Y scale changed. */
+  yScaleChanged(scale: YScale | undefined): void;
 
   /** Current values changed (for displaying in the legend) */
   currentValuesChanged(values: readonly unknown[]): void;

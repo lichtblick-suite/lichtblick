@@ -25,6 +25,7 @@ export const useStyles = makeStyles()((theme) => ({
     },
   },
   canvasDiv: { width: "100%", height: "100%", overflow: "hidden", cursor: "crosshair" },
+  canvasDivPointer: { cursor: "pointer" },
   verticalBarWrapper: {
     width: "100%",
     height: "100%",

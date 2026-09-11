@@ -502,10 +502,18 @@ describe("ChartRenderer", () => {
       expect(chartInstance.data.datasets).toBe(datasets);
       expect(updateSpy).toHaveBeenCalledWith("none");
       expect(result).toEqual({
-        min: chartInstance.scales.x?.min,
-        max: chartInstance.scales.x?.max,
-        left: chartInstance.scales.x?.left,
-        right: chartInstance.scales.x?.right,
+        x: {
+          min: chartInstance.scales.x?.min,
+          max: chartInstance.scales.x?.max,
+          left: chartInstance.scales.x?.left,
+          right: chartInstance.scales.x?.right,
+        },
+        y: {
+          min: chartInstance.scales.y?.min,
+          max: chartInstance.scales.y?.max,
+          top: chartInstance.scales.y?.top,
+          bottom: chartInstance.scales.y?.bottom,
+        },
       });
     });
   });

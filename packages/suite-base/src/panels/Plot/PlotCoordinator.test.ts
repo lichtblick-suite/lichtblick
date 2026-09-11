@@ -84,6 +84,10 @@ describe("PlotCoordinator", () => {
     renderer = new OffscreenCanvasRenderer(canvas, theme) as jest.Mocked<OffscreenCanvasRenderer>;
     datasetsBuilder = new (EventEmitter as any)() as jest.Mocked<IDatasetsBuilder>;
 
+    // updateDatasets always resolves to an object in production; match that contract here so
+    // tests that don't care about the resulting scales don't have to mock it individually.
+    (renderer.updateDatasets as jest.Mock).mockResolvedValue({});
+
     datasetsBuilder.handlePlayerState = jest.fn().mockReturnValue(undefined);
     datasetsBuilder.getViewportDatasets = jest.fn().mockResolvedValue({
       datasetsByConfigIndex: [],
@@ -211,7 +215,10 @@ describe("PlotCoordinator", () => {
 
   describe("topic range subscriptions", () => {
     beforeEach(() => {
-      (pathToSubscribePayload as jest.Mock).mockReturnValue({ topic: "/foo", preloadType: "full" });
+      (pathToSubscribePayload as jest.Mock).mockReturnValue({
+        topic: "/foo",
+        preloadType: "full",
+      });
       datasetsBuilder.handleMessageRange = jest.fn();
       mockSubscribeMessageRange.mockReturnValue(jest.fn());
     });
@@ -222,7 +229,9 @@ describe("PlotCoordinator", () => {
       plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
         [topic, ["/foo.x", "/foo.y"]],
       ]);
-      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      const state = PlayerBuilder.playerState({
+        activeData: PlayerBuilder.activeData(),
+      });
 
       // When
       plotCoordinator.handlePlayerState(state);
@@ -239,7 +248,9 @@ describe("PlotCoordinator", () => {
       plotCoordinator["seriesKeysByTopic"] = new Map([
         ["/foo", new Set(["0:receiveTime:/foo.val"] as SeriesConfigKey[])],
       ]);
-      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      const state = PlayerBuilder.playerState({
+        activeData: PlayerBuilder.activeData(),
+      });
       plotCoordinator.handlePlayerState(state);
 
       // When — second call with /bar only
@@ -272,7 +283,9 @@ describe("PlotCoordinator", () => {
       plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
         ["/foo", ["/foo.val"]],
       ]);
-      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      const state = PlayerBuilder.playerState({
+        activeData: PlayerBuilder.activeData(),
+      });
       plotCoordinator.handlePlayerState(state);
       mockSubscribeMessageRange.mockClear();
 
@@ -289,7 +302,9 @@ describe("PlotCoordinator", () => {
       plotCoordinator["seriesKeysByTopic"] = PlotCoordinatorBuilder.seriesKeysByTopic([
         ["/foo", ["/foo.val"]],
       ]);
-      const state = PlayerBuilder.playerState({ activeData: PlayerBuilder.activeData() });
+      const state = PlayerBuilder.playerState({
+        activeData: PlayerBuilder.activeData(),
+      });
       plotCoordinator.handlePlayerState(state);
       mockSubscribeMessageRange.mockClear();
 
@@ -414,7 +429,10 @@ describe("PlotCoordinator", () => {
     });
 
     it("should call 'update' on the renderer when dispatching render", async () => {
-      renderer.update.mockResolvedValue({ x: { min: 0, max: 10 }, y: { min: 0, max: 10 } });
+      renderer.update.mockResolvedValue({
+        x: { min: 0, max: 10 },
+        y: { min: 0, max: 10 },
+      });
 
       await plotCoordinator["dispatchRender"]();
 
@@ -609,9 +627,13 @@ describe("PlotCoordinator", () => {
         value: BasicBuilder.string(),
         timestampMethod: "receiveTime",
       });
-      const plotConfig = PlotBuilder.config({ paths: [messagePath, messagePath] });
+      const plotConfig = PlotBuilder.config({
+        paths: [messagePath, messagePath],
+      });
 
-      (parseMessagePath as jest.Mock).mockReturnValue({ topicName: messagePath.value });
+      (parseMessagePath as jest.Mock).mockReturnValue({
+        topicName: messagePath.value,
+      });
       (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
       (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
 
@@ -646,7 +668,9 @@ describe("PlotCoordinator", () => {
           topic: "/foo",
           preloadType: "full",
         });
-        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
+        (parseMessagePath as jest.Mock).mockImplementation((value) => ({
+          topicName: value,
+        }));
         (fillInGlobalVariablesInPath as jest.Mock).mockImplementation((parsed) => parsed);
         (stringifyMessagePath as jest.Mock).mockImplementation((parsed) => parsed.topicName ?? "");
       });
@@ -721,7 +745,9 @@ describe("PlotCoordinator", () => {
           timestampMethod: "receiveTime",
           enabled: true,
         });
-        (parseMessagePath as jest.Mock).mockImplementation((value) => ({ topicName: value }));
+        (parseMessagePath as jest.Mock).mockImplementation((value) => ({
+          topicName: value,
+        }));
 
         // When
         plotCoordinator.handleConfig(PlotBuilder.config({ paths: [fooPath] }), "light", {});
@@ -863,7 +889,12 @@ describe("PlotCoordinator", () => {
     });
 
     it("should return -1 when pixelRange is zero or negative", () => {
-      plotCoordinator["latestXScale"] = buildXScale({ left: 50, right: 50, min: 0, max: 10 });
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 50,
+        right: 50,
+        min: 0,
+        max: 10,
+      });
 
       const result = plotCoordinator.getXValueAtPixel(100);
 
@@ -871,7 +902,12 @@ describe("PlotCoordinator", () => {
     });
 
     it("should correctly map pixelX to x value", () => {
-      plotCoordinator["latestXScale"] = buildXScale({ left: 0, right: 200, min: 10, max: 50 });
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
 
       const result = plotCoordinator.getXValueAtPixel(100);
 
@@ -879,7 +915,12 @@ describe("PlotCoordinator", () => {
     });
 
     it("should return min value when pixelX is at left boundary", () => {
-      plotCoordinator["latestXScale"] = buildXScale({ left: 0, right: 200, min: 10, max: 50 });
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
 
       const result = plotCoordinator.getXValueAtPixel(0);
 
@@ -887,7 +928,12 @@ describe("PlotCoordinator", () => {
     });
 
     it("should return max value when pixelX is at right boundary", () => {
-      plotCoordinator["latestXScale"] = buildXScale({ left: 0, right: 200, min: 10, max: 50 });
+      plotCoordinator["latestXScale"] = buildXScale({
+        left: 0,
+        right: 200,
+        min: 10,
+        max: 50,
+      });
 
       const result = plotCoordinator.getXValueAtPixel(200);
 

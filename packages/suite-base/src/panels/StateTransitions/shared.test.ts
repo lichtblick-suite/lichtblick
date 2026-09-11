@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { MessageAndData } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { ChartDatum } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import {
   ImmutableDataset,
   StateTransitionPath,
@@ -9,7 +10,7 @@ import {
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import { datasetContainsArray, stateTransitionPathDisplayName } from "./shared";
+import { datasetContainsArray, getValueAtTime, stateTransitionPathDisplayName } from "./shared";
 
 describe("stateTransitionPathDisplayName", () => {
   function buildStateTransitionPath(
@@ -93,5 +94,111 @@ describe("datasetContainsArray", () => {
   it("should return false for multiple MessageAndData[] elements with mixed queriedData lengths, including lengths less than or equal to 1", () => {
     const dataset: ImmutableDataset = [[createMessageAndData(2)], [createMessageAndData(1)]];
     expect(datasetContainsArray(dataset)).toBe(false);
+  });
+});
+
+describe("getValueAtTime", () => {
+  function buildDatum(overrides: Partial<ChartDatum> = {}): ChartDatum {
+    return {
+      x: BasicBuilder.number(),
+      y: 0,
+      value: BasicBuilder.string(),
+      ...overrides,
+    };
+  }
+
+  it("should return undefined for empty data", () => {
+    // Given / When
+    const result = getValueAtTime([], 10);
+
+    // Then
+    expect(result).toBeUndefined();
+  });
+
+  it("should return undefined when time is before the first point", () => {
+    // Given
+    const data = [buildDatum({ x: 5, value: "IDLE" })];
+
+    // When
+    const result = getValueAtTime(data, 1);
+
+    // Then
+    expect(result).toBeUndefined();
+  });
+
+  it("should return the value of the point exactly at time", () => {
+    // Given
+    const data = [buildDatum({ x: 5, value: "IDLE" })];
+
+    // When
+    const result = getValueAtTime(data, 5);
+
+    // Then
+    expect(result).toEqual({
+      value: "IDLE",
+      constantName: undefined,
+    });
+  });
+
+  it("should return the latest point at or before time", () => {
+    // Given
+    const data = [
+      buildDatum({ x: 1, value: "IDLE" }),
+      buildDatum({ x: 5, value: "RUNNING" }),
+      buildDatum({ x: 20, value: "DONE" }),
+    ];
+
+    // When
+    const result = getValueAtTime(data, 10);
+
+    // Then
+    expect(result).toEqual({
+      value: "RUNNING",
+      constantName: undefined,
+    });
+  });
+
+  it("should include the constantName when present", () => {
+    // Given
+    const data = [buildDatum({ x: 1, value: 0, constantName: "IDLE" })];
+
+    // When
+    const result = getValueAtTime(data, 1);
+
+    // Then
+    expect(result).toEqual({ value: 0, constantName: "IDLE" });
+  });
+
+  it("should return undefined once time crosses a gap (a point without a value)", () => {
+    // Given
+    const data = [
+      buildDatum({ x: 1, value: "RUNNING" }),
+      { x: 5, y: Number.NaN },
+      buildDatum({ x: 10, value: "IDLE" }),
+    ];
+
+    // When
+    const result = getValueAtTime(data, 7);
+
+    // Then
+    expect(result).toBeUndefined();
+  });
+
+  it("should skip undefined entries", () => {
+    // Given
+    const data = [
+      buildDatum({ x: 1, value: "IDLE" }),
+      undefined,
+      buildDatum({ x: 10, value: "DONE" }),
+    ];
+
+    // When
+    const result = getValueAtTime(data, 3);
+
+    // Then
+    expect(result).toEqual({
+      value: "IDLE",
+      constantName: undefined,
+    });
   });
 });
