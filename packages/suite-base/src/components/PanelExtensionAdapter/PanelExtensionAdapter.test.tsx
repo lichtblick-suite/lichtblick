@@ -9,7 +9,8 @@
 
 /* eslint-disable jest/no-done-callback */
 
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { act } from "react";
 import { createStore } from "zustand";
 
@@ -1557,6 +1558,233 @@ describe("PanelExtensionAdapter", () => {
 
       // THEN the previously set alert is cleared
       expect(clearAlert).toHaveBeenCalledWith(expect.stringMatching(/^panel-alert:.+:my-alert$/));
+    });
+  });
+
+  describe("setToolbarActions", () => {
+    it("renders a custom toolbar action registered by the panel", async () => {
+      // GIVEN a panel that registers a custom toolbar action during init
+      const onClick = jest.fn();
+      const sig = signal();
+      const initPanel = (context: PanelExtensionContext) => {
+        context.setToolbarActions?.([
+          { id: "reset", title: "Reset view", iconPath: "M0 0h24v24H0z", onClick },
+        ]);
+        sig.resolve();
+      };
+
+      // WHEN the panel is rendered
+      const handle = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+
+      // THEN a toolbar button with the action's title is rendered
+      const button = handle.getByTitle("Reset view");
+      expect(button).toBeInTheDocument();
+
+      // AND clicking it invokes the action's onClick
+      fireEvent.click(button);
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it("removes previously registered actions when called again with an empty array", async () => {
+      // GIVEN a panel that registers a custom toolbar action during init
+      const sig = signal();
+      let capturedContext: PanelExtensionContext;
+      const initPanel = (context: PanelExtensionContext) => {
+        capturedContext = context;
+        context.setToolbarActions?.([
+          { id: "reset", title: "Reset view", iconPath: "M0 0h24v24H0z", onClick: () => {} },
+        ]);
+        sig.resolve();
+      };
+
+      const handle = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+      expect(handle.getByTitle("Reset view")).toBeInTheDocument();
+
+      // WHEN the panel clears its toolbar actions
+      await act(async () => {
+        capturedContext.setToolbarActions?.([]);
+      });
+
+      // THEN the button is removed
+      expect(handle.queryByTitle("Reset view")).not.toBeInTheDocument();
+    });
+
+    it("calling setToolbarActions after unmount does not throw (smoke test)", async () => {
+      // GIVEN a panel that captures its extension context
+      let capturedContext: PanelExtensionContext | undefined;
+      const sig = signal();
+      const initPanel = (context: PanelExtensionContext) => {
+        capturedContext = context;
+        sig.resolve();
+      };
+
+      const handle = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+      handle.unmount();
+
+      // WHEN the panel registers toolbar actions after unmounting
+      // THEN no error is thrown and no button is rendered (there is nothing left to render into).
+      // Note: this does NOT prove the `isMounted()` guard branch executed - in React 18, calling
+      // a `useState` setter after unmount is already a silent no-op with no observable signal
+      // (verified empirically: this assertion still passes identically with the guard removed).
+      // There's no test seam to observe the guard's effect more directly without invasive
+      // instrumentation of production code, so this is a smoke/regression test - consistent with
+      // the equally-unprovable `getMessageAtTime` guard test elsewhere in this file - guarding
+      // against a thrown error or a stale UI artifact leaking through, which is what callers of
+      // this API actually depend on.
+      expect(() => {
+        capturedContext!.setToolbarActions?.([
+          { id: "reset", title: "Reset view", iconPath: "M0 0h24v24H0z", onClick: () => {} },
+        ]);
+      }).not.toThrow();
+      expect(handle.queryByTitle("Reset view")).not.toBeInTheDocument();
+    });
+
+    it("clears stale toolbar actions when the panel re-initializes without registering new ones", async () => {
+      // GIVEN a first panel instance that registers a custom toolbar action during init
+      const sig1 = signal();
+      const initPanelWithAction = (context: PanelExtensionContext) => {
+        context.setToolbarActions?.([
+          { id: "reset", title: "Reset view", iconPath: "M0 0h24v24H0z", onClick: () => {} },
+        ]);
+        sig1.resolve();
+      };
+
+      const config = {};
+      const saveConfig = () => {};
+
+      const Wrapper = ({ initPanel }: { initPanel: (context: PanelExtensionContext) => void }) => (
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter
+                config={config}
+                saveConfig={saveConfig}
+                initPanel={initPanel}
+              />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>
+      );
+
+      const handle = render(<Wrapper initPanel={initPanelWithAction} />);
+      await act(async () => undefined);
+      await sig1;
+      expect(handle.getByTitle("Reset view")).toBeInTheDocument();
+
+      // WHEN the panel re-initializes (e.g. because the data source changed) with an instance
+      // that does not register any toolbar actions itself
+      const sig2 = signal();
+      const initPanelWithoutAction = (_context: PanelExtensionContext) => {
+        sig2.resolve();
+      };
+      handle.rerender(<Wrapper initPanel={initPanelWithoutAction} />);
+      await act(async () => undefined);
+      await sig2;
+
+      // THEN the stale button (and its now-orphaned callback) from the previous instance is no
+      // longer rendered
+      expect(handle.queryByTitle("Reset view")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("floatingToolbar hover tracking", () => {
+    it("passes hovered=true/false to PanelToolbar as the pointer enters/leaves when floatingToolbar is enabled", async () => {
+      // GIVEN a panel rendered with floatingToolbar enabled
+      const sig = signal();
+      const initPanel = (_context: PanelExtensionContext) => {
+        sig.resolve();
+      };
+
+      const handle = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter
+                config={{}}
+                saveConfig={() => {}}
+                initPanel={initPanel}
+                floatingToolbar
+              />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+
+      const panelRoot = handle.getByTestId("mosaic-drag-handle").parentElement!;
+      expect(panelRoot.style.position).toBe("relative");
+
+      // WHEN the pointer enters the panel
+      fireEvent.pointerEnter(panelRoot);
+
+      // THEN the toolbar's floating controls become visible
+      expect(panelRoot.querySelector('[class*="floatingControlsVisible"]')).not.toBeNull();
+
+      // WHEN the pointer leaves the panel
+      fireEvent.pointerLeave(panelRoot);
+
+      // THEN the toolbar's floating controls are hidden again
+      expect(panelRoot.querySelector('[class*="floatingControlsVisible"]')).toBeNull();
+    });
+
+    it("does not set the position style or pointer handlers when floatingToolbar is disabled", async () => {
+      // GIVEN a panel rendered without floatingToolbar
+      const sig = signal();
+      const initPanel = (_context: PanelExtensionContext) => {
+        sig.resolve();
+      };
+
+      const handle = render(
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup>
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>,
+      );
+      await act(async () => undefined);
+      await sig;
+
+      const panelRoot = handle.getByTestId("mosaic-drag-handle").parentElement!;
+
+      // THEN the root container does not opt into the floating layout
+      expect(panelRoot.style.position).toBe("");
+
+      // AND hovering has no effect on the toolbar controls' visibility class
+      fireEvent.pointerEnter(panelRoot);
+      expect(panelRoot.querySelector('[class*="floatingControlsVisible"]')).toBeNull();
     });
   });
 });

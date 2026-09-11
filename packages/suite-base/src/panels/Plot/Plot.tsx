@@ -28,6 +28,7 @@ import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables"
 import { VerticalBars } from "@lichtblick/suite-base/panels/Plot/VerticalBars";
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
+import usePlotPanelsFloatingToolbar from "@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelsFloatingToolbar";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
 
 import { useStyles } from "./Plot.style";
@@ -49,6 +50,8 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     sidebarDimension,
   } = config;
 
+  const floatingToolbar = usePlotPanelsFloatingToolbar();
+
   const { classes } = useStyles();
   const theme = useTheme();
   const { t } = useTranslation("plot");
@@ -58,6 +61,10 @@ const Plot = (props: PlotProps): React.JSX.Element => {
 
   // When true the user can reset the plot back to the original view
   const [canReset, setCanReset] = useState(false);
+
+  // Tracks whether the mouse is anywhere within the panel, so the floating toolbar's controls
+  // (settings, fullscreen, etc.) are revealed as soon as the panel is hovered.
+  const [isPanelHovered, setIsPanelHovered] = useState(false);
 
   const [activeTooltip, setActiveTooltip] = useState<TooltipStateSetter>();
 
@@ -223,19 +230,28 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       justifyContent="center"
       overflow="hidden"
       position="relative"
+      onPointerEnter={() => {
+        setIsPanelHovered(true);
+      }}
+      onPointerLeave={() => {
+        setIsPanelHovered(false);
+      }}
     >
-      <PanelToolbar />
+      <PanelToolbar floating={floatingToolbar} hovered={isPanelHovered} />
       <Stack
         direction={legendDisplay === "top" ? "column" : "row"}
         flex="auto"
         fullWidth
-        style={{ height: `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px)` }}
+        style={{
+          height: floatingToolbar ? "100%" : `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px)`,
+        }}
         position="relative"
       >
         {/* Pass stable values here for properties when not showing values so that the legend memoization remains stable. */}
         {legendDisplay !== "none" && (
           <PlotLegend
             coordinator={coordinator}
+            floatingToolbar={floatingToolbar}
             legendDisplay={legendDisplay}
             onClickPath={onClickPath}
             paths={series}
