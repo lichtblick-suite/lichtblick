@@ -13,7 +13,7 @@ import {
   Square12Regular,
 } from "@fluentui/react-icons";
 import { ButtonBase, Checkbox, Tooltip, Typography, buttonBaseClasses } from "@mui/material";
-import { MouseEventHandler } from "react";
+import { MouseEventHandler, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
@@ -22,6 +22,8 @@ import { Immutable } from "@lichtblick/suite";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import { useDraggedMessagePath } from "@lichtblick/suite-base/panels/shared/useDraggedMessagePath";
+import { useMessagePathDrag } from "@lichtblick/suite-base/services/messagePathDragging";
 import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
 import { customTypography } from "@lichtblick/theme";
 
@@ -84,6 +86,9 @@ const useStyles = makeStyles<void, "plotName" | "actionButton">()((theme, _param
     },
   },
   disabledPathLabel: {
+    opacity: 0.5,
+  },
+  dragging: {
     opacity: 0.5,
   },
   plotName: {
@@ -167,6 +172,30 @@ export function PlotLegendRow({
   // When there are no series configured we render an extra row to show an "add series" button.
   const isAddSeriesRow = paths.length === 0;
 
+  const draggedItem = useDraggedMessagePath(isAddSeriesRow ? undefined : path.value);
+  const { connectDragSource, connectDragPreview, cursor, isDragging } = useMessagePathDrag({
+    item: draggedItem ?? {
+      path: "",
+      rootSchemaName: undefined,
+      isTopic: false,
+      isLeaf: true,
+      topicName: "",
+    },
+    selected: false,
+    sourcePanelId: panelId,
+  });
+
+  const dragRef = useCallback(
+    (el: HTMLDivElement | ReactNull) => {
+      if (draggedItem == undefined) {
+        return;
+      }
+      connectDragSource(el);
+      connectDragPreview(el);
+    },
+    [connectDragSource, connectDragPreview, draggedItem],
+  );
+
   const handleDeletePath: MouseEventHandler<HTMLButtonElement> = (ev) => {
     // Deleting a path is a "quick action" and we want to avoid opening the settings sidebar
     // so whatever sidebar the user is already viewing says active.
@@ -218,8 +247,12 @@ export function PlotLegendRow({
         />
       </div>
       <div
-        className={classes.plotName}
-        style={{ gridColumn: !showPlotValuesInLegend ? "span 2" : undefined }}
+        ref={dragRef}
+        className={cx(classes.plotName, { [classes.dragging]: isDragging })}
+        style={{
+          gridColumn: !showPlotValuesInLegend ? "span 2" : undefined,
+          cursor: draggedItem != undefined ? (cursor ?? "grab") : undefined,
+        }}
       >
         <Typography
           noWrap={showPlotValuesInLegend}
