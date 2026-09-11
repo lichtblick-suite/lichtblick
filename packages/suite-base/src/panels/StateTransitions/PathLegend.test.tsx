@@ -8,12 +8,28 @@ import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPane
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { PathLegendProps } from "@lichtblick/suite-base/panels/StateTransitions/types";
+import { useDraggedMessagePath } from "@lichtblick/suite-base/panels/shared/useDraggedMessagePath";
+import { useMessagePathDrag } from "@lichtblick/suite-base/services/messagePathDragging";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { PathLegend } from "./PathLegend";
 
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext");
 jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions");
+
+jest.mock("@lichtblick/suite-base/panels/shared/useDraggedMessagePath", () => ({
+  useDraggedMessagePath: jest.fn(() => undefined),
+}));
+
+jest.mock("@lichtblick/suite-base/services/messagePathDragging", () => ({
+  useMessagePathDrag: jest.fn(() => ({
+    connectDragSource: jest.fn(),
+    connectDragPreview: jest.fn(),
+    cursor: undefined,
+    isDragging: false,
+    draggedItemCount: 0,
+  })),
+}));
 
 describe("PathLegend Component", () => {
   const mockSetFocusedPath = jest.fn();
@@ -113,5 +129,24 @@ describe("PathLegend Component", () => {
 
     expect(firstRowStyle.cssText).toContain(heightStyle);
     expect(secondRowStyle.cssText).toContain(heightStyle);
+  });
+
+  it("wires each row as a message-path drag source scoped to the panel", () => {
+    const panelId = BasicBuilder.string();
+    const { props } = renderComponent({ panelId });
+
+    // A DraggedMessagePath is built from each series' value
+    expect(useDraggedMessagePath).toHaveBeenCalledWith(props.paths[0]!.value);
+    expect(useDraggedMessagePath).toHaveBeenCalledWith(props.paths[1]!.value);
+
+    // The drag is scoped to the owning panel so it can't be dropped back onto itself
+    expect(useMessagePathDrag).toHaveBeenCalledWith(
+      expect.objectContaining({ sourcePanelId: panelId, selected: false }),
+    );
+  });
+
+  it("does not build a drag source for the placeholder row", () => {
+    renderComponent({ paths: [] });
+    expect(useDraggedMessagePath).toHaveBeenCalledWith(undefined);
   });
 });

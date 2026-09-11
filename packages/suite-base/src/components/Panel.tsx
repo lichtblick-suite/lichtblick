@@ -383,7 +383,7 @@ export default function Panel<
       connectMessagePathDropTarget,
       dropMessage,
       setMessagePathDropConfig,
-    } = useMessagePathDrop();
+    } = useMessagePathDrop({ ownerPanelId: childId });
 
     // We use two separate sets of key handlers because the panel context and exitFullScreen
     // change often and invalidate our key handlers during user interactions.
