@@ -383,7 +383,12 @@ export default function Panel<
       connectMessagePathDropTarget,
       dropMessage,
       setMessagePathDropConfig,
-    } = useMessagePathDrop();
+    } = useMessagePathDrop({
+      // When a panel has no real id (FALLBACK_PANEL_ID), do not use it as the drop owner: multiple
+      // unidentified panels would otherwise share the same id and incorrectly suppress valid
+      // cross-panel drops between them.
+      ownerPanelId: childId === FALLBACK_PANEL_ID ? undefined : childId,
+    });
 
     // We use two separate sets of key handlers because the panel context and exitFullScreen
     // change often and invalidate our key handlers during user interactions.
