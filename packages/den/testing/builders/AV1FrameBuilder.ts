@@ -57,6 +57,54 @@ class BitWriter {
   }
 }
 
+function writeNonReducedSequenceHeaderFields(
+  bits: BitWriter,
+  {
+    decoderModel,
+    initialDisplayDelay,
+    operatingPoints,
+    timingInfo,
+  }: {
+    decoderModel: boolean;
+    initialDisplayDelay: boolean;
+    operatingPoints: { level: number; tier?: 0 | 1 }[];
+    timingInfo: boolean;
+  },
+): void {
+  bits.write(timingInfo ? 1 : 0, 1);
+  if (timingInfo) {
+    bits.write(1, 32); // num_units_in_display_tick
+    bits.write(30, 32); // time_scale
+    bits.write(0, 1); // equal_picture_interval
+    bits.write(decoderModel ? 1 : 0, 1);
+    if (decoderModel) {
+      bits.write(3, 5); // buffer_delay_length_minus_1
+      bits.write(1, 32); // num_units_in_decoding_tick
+      bits.write(3, 5); // buffer_removal_time_length_minus_1
+      bits.write(3, 5); // frame_presentation_time_length_minus_1
+    }
+  }
+  bits.write(initialDisplayDelay ? 1 : 0, 1);
+  bits.write(operatingPoints.length - 1, 5);
+  for (const operatingPoint of operatingPoints) {
+    bits.write(0, 12); // operating_point_idc
+    bits.write(operatingPoint.level, 5);
+    if (operatingPoint.level > 7) {
+      bits.write(operatingPoint.tier ?? 0, 1);
+    }
+    if (decoderModel) {
+      bits.write(1, 1); // decoder_model_present_for_this_op
+      bits.write(1, 4); // decoder_buffer_delay
+      bits.write(1, 4); // encoder_buffer_delay
+      bits.write(0, 1); // low_delay_mode_flag
+    }
+    if (initialDisplayDelay) {
+      bits.write(1, 1); // initial_display_delay_present_for_this_op
+      bits.write(0, 4); // initial_display_delay_minus_1
+    }
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export default class AV1FrameBuilder {
   public static obu(type: number, payload: number[], extension?: number): number[] {
@@ -93,38 +141,12 @@ export default class AV1FrameBuilder {
     if (reducedStillPicture) {
       bits.write(level, 5); // seq_level_idx[0]
     } else {
-      bits.write(timingInfo ? 1 : 0, 1);
-      if (timingInfo) {
-        bits.write(1, 32); // num_units_in_display_tick
-        bits.write(30, 32); // time_scale
-        bits.write(0, 1); // equal_picture_interval
-        bits.write(decoderModel ? 1 : 0, 1);
-        if (decoderModel) {
-          bits.write(3, 5); // buffer_delay_length_minus_1
-          bits.write(1, 32); // num_units_in_decoding_tick
-          bits.write(3, 5); // buffer_removal_time_length_minus_1
-          bits.write(3, 5); // frame_presentation_time_length_minus_1
-        }
-      }
-      bits.write(initialDisplayDelay ? 1 : 0, 1);
-      bits.write(operatingPoints.length - 1, 5);
-      for (const operatingPoint of operatingPoints) {
-        bits.write(0, 12); // operating_point_idc
-        bits.write(operatingPoint.level, 5);
-        if (operatingPoint.level > 7) {
-          bits.write(operatingPoint.tier ?? 0, 1);
-        }
-        if (decoderModel) {
-          bits.write(1, 1); // decoder_model_present_for_this_op
-          bits.write(1, 4); // decoder_buffer_delay
-          bits.write(1, 4); // encoder_buffer_delay
-          bits.write(0, 1); // low_delay_mode_flag
-        }
-        if (initialDisplayDelay) {
-          bits.write(1, 1); // initial_display_delay_present_for_this_op
-          bits.write(0, 4); // initial_display_delay_minus_1
-        }
-      }
+      writeNonReducedSequenceHeaderFields(bits, {
+        decoderModel,
+        initialDisplayDelay,
+        operatingPoints,
+        timingInfo,
+      });
     }
 
     const widthBits = Math.max(1, Math.ceil(Math.log2(width)));

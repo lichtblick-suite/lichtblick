@@ -287,65 +287,74 @@ function parseFrameHeader(
   return { frameType: bits.read(2), showExistingFrame: false };
 }
 
-function parseSequenceHeader(data: Uint8Array): AV1SequenceHeader {
-  const bits = new BitReader(data);
-  const profile = bits.read(3);
-  bits.skip(1); // still_picture
-  const reducedStillPictureHeader = bits.read(1) === 1;
+function readTimingAndDecoderModelInfo(bits: BitReader): {
+  bufferDelayLength: number;
+  decoderModelInfoPresent: boolean;
+} {
+  const timingInfoPresent = bits.read(1) === 1;
+  if (!timingInfoPresent) {
+    return { bufferDelayLength: 0, decoderModelInfoPresent: false };
+  }
 
-  let decoderModelInfoPresent = false;
-  let bufferDelayLength = 0;
-  let initialDisplayDelayPresent = false;
-  let operatingPointsCount = 1;
+  bits.skip(32); // num_units_in_display_tick
+  bits.skip(32); // time_scale
+  const equalPictureInterval = bits.read(1) === 1;
+  if (equalPictureInterval) {
+    bits.readUnsignedVariableLength();
+  }
+
+  const decoderModelInfoPresent = bits.read(1) === 1;
+  if (!decoderModelInfoPresent) {
+    return { bufferDelayLength: 0, decoderModelInfoPresent: false };
+  }
+
+  const bufferDelayLength = bits.read(5) + 1;
+  bits.skip(32); // num_units_in_decoding_tick
+  bits.skip(5); // buffer_removal_time_length_minus_1
+  bits.skip(5); // frame_presentation_time_length_minus_1
+  return { bufferDelayLength, decoderModelInfoPresent };
+}
+
+function readOperatingPoints(
+  bits: BitReader,
+  {
+    bufferDelayLength,
+    decoderModelInfoPresent,
+  }: {
+    bufferDelayLength: number;
+    decoderModelInfoPresent: boolean;
+  },
+): Pick<AV1SequenceHeader, "level" | "tier"> {
+  const initialDisplayDelayPresent = bits.read(1) === 1;
+  const operatingPointsCount = bits.read(5) + 1;
   let level = 0;
   let tier = 0;
 
-  if (reducedStillPictureHeader) {
-    level = bits.read(5);
-  } else {
-    const timingInfoPresent = bits.read(1) === 1;
-    if (timingInfoPresent) {
-      bits.skip(32); // num_units_in_display_tick
-      bits.skip(32); // time_scale
-      const equalPictureInterval = bits.read(1) === 1;
-      if (equalPictureInterval) {
-        bits.readUnsignedVariableLength();
-      }
-      decoderModelInfoPresent = bits.read(1) === 1;
-      if (decoderModelInfoPresent) {
-        bufferDelayLength = bits.read(5) + 1;
-        bits.skip(32); // num_units_in_decoding_tick
-        bits.skip(5); // buffer_removal_time_length_minus_1
-        bits.skip(5); // frame_presentation_time_length_minus_1
-      }
+  for (let i = 0; i < operatingPointsCount; i++) {
+    bits.skip(12); // operating_point_idc
+    const operatingPointLevel = bits.read(5);
+    const operatingPointTier = operatingPointLevel > 7 ? bits.read(1) : 0;
+    if (i === 0) {
+      level = operatingPointLevel;
+      tier = operatingPointTier;
     }
-
-    initialDisplayDelayPresent = bits.read(1) === 1;
-    operatingPointsCount = bits.read(5) + 1;
-    for (let i = 0; i < operatingPointsCount; i++) {
-      bits.skip(12); // operating_point_idc
-      const operatingPointLevel = bits.read(5);
-      const operatingPointTier = operatingPointLevel > 7 ? bits.read(1) : 0;
-      if (i === 0) {
-        level = operatingPointLevel;
-        tier = operatingPointTier;
-      }
-      if (decoderModelInfoPresent && bits.read(1) === 1) {
-        bits.skip(bufferDelayLength); // decoder_buffer_delay
-        bits.skip(bufferDelayLength); // encoder_buffer_delay
-        bits.skip(1); // low_delay_mode_flag
-      }
-      if (initialDisplayDelayPresent && bits.read(1) === 1) {
-        bits.skip(4); // initial_display_delay_minus_1
-      }
+    if (decoderModelInfoPresent && bits.read(1) === 1) {
+      bits.skip(bufferDelayLength); // decoder_buffer_delay
+      bits.skip(bufferDelayLength); // encoder_buffer_delay
+      bits.skip(1); // low_delay_mode_flag
+    }
+    if (initialDisplayDelayPresent && bits.read(1) === 1) {
+      bits.skip(4); // initial_display_delay_minus_1
     }
   }
 
-  const frameWidthBits = bits.read(4) + 1;
-  const frameHeightBits = bits.read(4) + 1;
-  const codedWidth = bits.read(frameWidthBits) + 1;
-  const codedHeight = bits.read(frameHeightBits) + 1;
+  return { level, tier };
+}
 
+function skipSequenceFeatureFlags(
+  bits: BitReader,
+  { reducedStillPictureHeader }: { reducedStillPictureHeader: boolean },
+): void {
   if (!reducedStillPictureHeader && bits.read(1) === 1) {
     bits.skip(4); // delta_frame_id_length_minus_2
     bits.skip(3); // additional_frame_id_length_minus_1
@@ -353,27 +362,52 @@ function parseSequenceHeader(data: Uint8Array): AV1SequenceHeader {
 
   bits.skip(3); // use_128x128_superblock, enable_filter_intra, enable_intra_edge_filter
   if (reducedStillPictureHeader) {
-    // Reduced headers imply the remaining inter-frame feature flags.
-  } else {
-    bits.skip(4); // interintra, masked compound, warped motion, dual filter
-    const enableOrderHint = bits.read(1) === 1;
-    if (enableOrderHint) {
-      bits.skip(2); // enable_jnt_comp, enable_ref_frame_mvs
-    }
-    const chooseScreenContentTools = bits.read(1) === 1;
-    const forceScreenContentTools = chooseScreenContentTools ? 2 : bits.read(1);
-    if (forceScreenContentTools > 0) {
-      const chooseIntegerMv = bits.read(1) === 1;
-      if (!chooseIntegerMv) {
-        bits.skip(1); // seq_force_integer_mv
-      }
-    }
-    if (enableOrderHint) {
-      bits.skip(3); // order_hint_bits_minus_1
-    }
+    bits.skip(3); // enable_superres, enable_cdef, enable_restoration
+    return;
   }
 
+  bits.skip(4); // interintra, masked compound, warped motion, dual filter
+  const enableOrderHint = bits.read(1) === 1;
+  if (enableOrderHint) {
+    bits.skip(2); // enable_jnt_comp, enable_ref_frame_mvs
+  }
+  const chooseScreenContentTools = bits.read(1) === 1;
+  const forceScreenContentTools = chooseScreenContentTools ? 2 : bits.read(1);
+  if (forceScreenContentTools > 0) {
+    const chooseIntegerMv = bits.read(1) === 1;
+    if (!chooseIntegerMv) {
+      bits.skip(1); // seq_force_integer_mv
+    }
+  }
+  if (enableOrderHint) {
+    bits.skip(3); // order_hint_bits_minus_1
+  }
   bits.skip(3); // enable_superres, enable_cdef, enable_restoration
+}
+
+function parseSequenceHeader(data: Uint8Array): AV1SequenceHeader {
+  const bits = new BitReader(data);
+  const profile = bits.read(3);
+  bits.skip(1); // still_picture
+  const reducedStillPictureHeader = bits.read(1) === 1;
+
+  let level: number;
+  let tier: number;
+
+  if (reducedStillPictureHeader) {
+    level = bits.read(5);
+    tier = 0;
+  } else {
+    const decoderModelInfo = readTimingAndDecoderModelInfo(bits);
+    ({ level, tier } = readOperatingPoints(bits, decoderModelInfo));
+  }
+
+  const frameWidthBits = bits.read(4) + 1;
+  const frameHeightBits = bits.read(4) + 1;
+  const codedWidth = bits.read(frameWidthBits) + 1;
+  const codedHeight = bits.read(frameHeightBits) + 1;
+
+  skipSequenceFeatureFlags(bits, { reducedStillPictureHeader });
   const highBitdepth = bits.read(1) === 1;
   let bitDepth = highBitdepth ? 10 : 8;
   if (profile === AV1_PROFILE_PROFESSIONAL && highBitdepth && bits.read(1) === 1) {
