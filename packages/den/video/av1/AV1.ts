@@ -155,6 +155,10 @@ export class AV1 {
 
     try {
       const parsed = parseSequenceHeader(sequenceHeader);
+      if (parsed.profile > AV1_PROFILE_PROFESSIONAL) {
+        // Section 6.4.1 of the AV1 specification reserves `seq_profile` values 3 through 7.
+        return undefined;
+      }
       const tier = parsed.tier === 0 ? AV1_MAIN_TIER : AV1_HIGH_TIER;
       const level = parsed.level.toString().padStart(AV1_CODEC_FIELD_DIGITS, "0");
       const bitDepth = parsed.bitDepth.toString().padStart(AV1_CODEC_FIELD_DIGITS, "0");

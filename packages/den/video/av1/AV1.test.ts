@@ -281,4 +281,38 @@ describe("AV1", () => {
       expect(AV1.ParseDecoderConfig(data)).toBeUndefined();
     }
   });
+
+  it.each([0, 1, 2] as const)("accepts valid sequence profile %i", (seqProfile) => {
+    // Given a sequence header with a valid sequence profile
+    const seqHeaderWithProfile = AV1FrameBuilder.sequenceHeader({ profile: seqProfile });
+    const data = new Uint8Array([
+      ...AV1FrameBuilder.obu(AV1ObuType.SequenceHeader, seqHeaderWithProfile),
+      ...AV1FrameBuilder.frame(),
+    ]);
+
+    // When its decoder configuration is parsed
+    const config = AV1.ParseDecoderConfig(data);
+
+    // Then a valid configuration is returned
+    expect(config).toBeDefined();
+    expect(config?.codec).toBe(`av01.${seqProfile}.05M.08`);
+  });
+
+  it.each([3, 4, 5, 6, 7])("rejects reserved sequence profile %i", (seqProfile) => {
+    // Given a sequence header with a reserved sequence profile
+    const seqHeaderWithProfile = AV1FrameBuilder.sequenceHeader();
+    // Set the raw `seq_profile` value (the most significant 3 bits) directly
+    // because reserved values are not valid builder options.
+    seqHeaderWithProfile[0] = (seqHeaderWithProfile[0]! & 0b0001_1111) | (seqProfile << 5);
+    const data = new Uint8Array([
+      ...AV1FrameBuilder.obu(AV1ObuType.SequenceHeader, seqHeaderWithProfile),
+      ...AV1FrameBuilder.frame(),
+    ]);
+
+    // When its decoder configuration is parsed
+    const config = AV1.ParseDecoderConfig(data);
+
+    // Then no configuration is returned
+    expect(config).toBeUndefined();
+  });
 });
