@@ -3,11 +3,14 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import AV1FrameBuilder from "@lichtblick/den/testing/builders/AV1FrameBuilder";
 import {
   H264 as H264Parser,
   H265 as H265Parser,
   H265NaluType,
   H265SliceType,
+  AV1 as AV1Parser,
+  AV1ObuType,
   VideoPlayer,
 } from "@lichtblick/den/video";
 import H265FrameBuilder from "@lichtblick/suite-base/testing/builders/H265FrameBuilder";
@@ -95,6 +98,16 @@ describe("isCompressedVideoKeyframe", () => {
     // THEN the H.265 parser is used and reports a keyframe
     expect(isCompressedVideoKeyframe(mockVideoFrame)).toBe(true);
   });
+
+  it("should use AV1 keyframe detection for av1 format", () => {
+    // GIVEN an AV1 frame that the parser reports as a keyframe
+    const mockVideoFrame = createMockVideoFrame({ format: "av1", data: new Uint8Array([0x0a]) });
+    jest.spyOn(AV1Parser, "IsKeyframe").mockReturnValue(true);
+
+    // WHEN keyframe detection runs
+    // THEN the AV1 parser is used and reports a keyframe
+    expect(isCompressedVideoKeyframe(mockVideoFrame)).toBe(true);
+  });
 });
 
 describe("getVideoDecoderConfig", () => {
@@ -134,6 +147,17 @@ describe("getVideoDecoderConfig", () => {
 
     // WHEN the decoder config is requested
     // THEN the H.265 parser config is returned
+    expect(getVideoDecoderConfig(mockVideoFrame)).toEqual(mockConfig);
+  });
+
+  it("should return a VideoDecoderConfig for av1 format", () => {
+    // GIVEN an AV1 keyframe and a stubbed decoder config
+    const mockVideoFrame = createMockVideoFrame({ format: "av1", data: new Uint8Array([0x0a]) });
+    const mockConfig = { codec: "av01.0.05M.08" };
+    jest.spyOn(AV1Parser, "ParseDecoderConfig").mockReturnValue(mockConfig);
+
+    // WHEN the decoder config is requested
+    // THEN the AV1 parser config is returned
     expect(getVideoDecoderConfig(mockVideoFrame)).toEqual(mockConfig);
   });
 });
@@ -336,6 +360,60 @@ describe("prepareVideoFrame", () => {
     expect(preparedFrame.data).toBe(data);
     expect(preparedFrame.decoderConfig).toBe(decoderConfig);
     expect(preparedFrame.type).toBe("key");
+  });
+
+  it("should pass through av1 keyframes with a sequence-derived decoder config", () => {
+    // GIVEN a Foxglove-compliant AV1 keyframe
+    const data = AV1FrameBuilder.keyframe();
+    const mockVideoFrame = createMockVideoFrame({ format: "av1", data });
+
+    // WHEN the frame is prepared for decoding
+    const preparedFrame = prepareVideoFrame(mockVideoFrame);
+
+    // THEN the low-overhead OBU bytes pass through with their decoder configuration
+    expect(preparedFrame).toEqual({
+      data,
+      decoderConfig: { codec: "av01.0.05M.08", codedWidth: 640, codedHeight: 480 },
+      diagnostics: undefined,
+      status: PreparedVideoFrameStatus.Ok,
+      type: "key",
+    });
+  });
+
+  it("should report an invalid av1 sequence header", () => {
+    // GIVEN a key frame whose Sequence Header OBU carries a truncated payload
+    const data = new Uint8Array([
+      ...AV1FrameBuilder.obu(AV1ObuType.SequenceHeader, [0x00]),
+      ...AV1FrameBuilder.frame(),
+    ]);
+    const mockVideoFrame = createMockVideoFrame({ format: "av1", data });
+
+    // WHEN the frame is prepared for decoding
+    const preparedFrame = prepareVideoFrame(mockVideoFrame);
+
+    // THEN it is identified as a keyframe but cannot initialize the decoder
+    expect(preparedFrame.decoderConfig).toBeUndefined();
+    expect(preparedFrame.diagnostics).toBe("invalid AV1 sequence header");
+    expect(preparedFrame.status).toBe(PreparedVideoFrameStatus.UnsupportedBitstream);
+    expect(preparedFrame.type).toBe("key");
+  });
+
+  it("should pass through av1 delta frames without decoder config", () => {
+    // GIVEN a Foxglove-compliant AV1 delta frame
+    const data = AV1FrameBuilder.deltaFrame();
+    const mockVideoFrame = createMockVideoFrame({ format: "av1", data });
+
+    // WHEN the frame is prepared for decoding
+    const preparedFrame = prepareVideoFrame(mockVideoFrame);
+
+    // THEN the OBU bytes pass through and reuse the decoder's cached keyframe configuration
+    expect(preparedFrame).toEqual({
+      data,
+      decoderConfig: undefined,
+      diagnostics: undefined,
+      status: PreparedVideoFrameStatus.Ok,
+      type: "delta",
+    });
   });
 });
 
