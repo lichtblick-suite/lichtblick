@@ -204,13 +204,16 @@ describe("filterCompressedVideoQueue", () => {
     expect(result).toEqual([newKey, newDelta]);
   });
 
-  it("Keeps the full AV1 queue when no keyframe is preset yet", () => {
+  it("keeps the full AV1 queue when no keyframe is present yet", () => {
+    // GIVEN an AV1 queue containing only delta frames
     const deltaA = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.deltaFrame()), 1);
     const deltaB = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.deltaFrame()), 2);
     const deltaC = videoMessageEvent("/av1", av1Frame(AV1FrameBuilder.deltaFrame()), 3);
 
+    // WHEN the subscription queue is filtered
     const result = filterCompressedVideoQueue([deltaA, deltaB, deltaC]);
 
+    // THEN the full queue is retained
     expect(result).toEqual([deltaA, deltaB, deltaC]);
   });
 });
