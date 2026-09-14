@@ -82,6 +82,10 @@ export const threeDee = {
   hemisphereLightIntensity: "Hemisphere light intensity",
 
   // Camera
+  cameraTargetFrame: "Camera target frame",
+  cameraTargetFrameHelp:
+    "The coordinate frame the camera orbits around. Tracks this frame's position each render frame, like RViz's Orbit target frame. Leave empty to orbit a fixed point.",
+  cameraTargetFrameNone: "None (fixed point)",
   distance: "Distance",
   far: "Far",
   fovy: "Y-Axis FOV",

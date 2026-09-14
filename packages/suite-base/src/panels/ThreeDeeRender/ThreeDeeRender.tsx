@@ -121,6 +121,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       cameraState,
       followMode: partialConfig?.followMode ?? DEFAULT_FOLLOW_MODE,
       followTf: partialConfig?.followTf,
+      cameraTf: partialConfig?.cameraTf,
       scene: partialConfig?.scene ?? {},
       transforms,
       topics: partialConfig?.topics ?? {},
