@@ -19,6 +19,7 @@ import {
   ExtensionPanelRegistration,
   Immutable,
   PanelExtensionContext,
+  PanelToolbarAction,
   ParameterValue,
   RenderState,
   SettingsTree,
@@ -39,6 +40,7 @@ import {
   ConverterKey,
 } from "@lichtblick/suite-base/components/PanelExtensionAdapter/messageProcessing";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
+import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
 import { useAlertsActions } from "@lichtblick/suite-base/context/AlertsContext";
 import { useAppConfiguration } from "@lichtblick/suite-base/context/AppConfigurationContext";
 import {
@@ -125,6 +127,8 @@ type PanelExtensionAdapterProps = {
   highestSupportedConfigVersion?: number;
   config: unknown;
   saveConfig: SaveConfig<unknown>;
+  /** @see ExtensionPanelRegistration.floatingToolbar */
+  floatingToolbar?: boolean;
 };
 
 function selectContext(ctx: MessagePipelineContext) {
@@ -144,7 +148,13 @@ type RenderFn = NonNullable<PanelExtensionContext["onRender"]>;
 function PanelExtensionAdapter(
   props: React.PropsWithChildren<PanelExtensionAdapterProps>,
 ): React.JSX.Element {
-  const { initPanel, config, saveConfig, highestSupportedConfigVersion } = props;
+  const {
+    initPanel,
+    config,
+    saveConfig,
+    highestSupportedConfigVersion,
+    floatingToolbar = false,
+  } = props;
 
   // Unlike the react data flow, the config is only provided to the panel once on setup.
   // The panel is meant to manage the config and call saveConfig on its own.
@@ -175,6 +185,12 @@ function PanelExtensionAdapter(
   const [forceConversion, setForceConversion] = useState(new Set<string>());
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
   const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
+  // Tracks whether the mouse is anywhere within the panel, so a floating toolbar's controls
+  // (settings, fullscreen, etc.) are revealed as soon as the panel is hovered.
+  const [isPanelHovered, setIsPanelHovered] = useState(false);
+  // Custom toolbar actions the panel has registered via `context.setToolbarActions`, rendered
+  // alongside the built-in fullscreen/settings/more-options icons.
+  const [toolbarActions, setToolbarActionsState] = useState<readonly PanelToolbarAction[]>([]);
 
   const [localSubscriptions, setLocalSubscriptions] = useState<Subscription[]>([]);
 
@@ -661,6 +677,13 @@ function PanelExtensionAdapter(
         setDefaultPanelTitle(title);
       },
 
+      setToolbarActions: (actions: readonly PanelToolbarAction[]) => {
+        if (!isMounted()) {
+          return;
+        }
+        setToolbarActionsState(actions);
+      },
+
       unstable_setAlert: (alertId: string, alert: Immutable<PlayerAlert> | undefined) => {
         if (!isMounted()) {
           return;
@@ -803,6 +826,10 @@ function PanelExtensionAdapter(
     setRenderFn(undefined);
     renderingRef.current = false;
     setSlowRender(false);
+    // Clear any toolbar actions registered by the previous panel instance so stale buttons
+    // (retaining the old instance's callbacks) don't remain visible if the new instance never
+    // calls `context.setToolbarActions` itself.
+    setToolbarActionsState([]);
 
     setBuildRenderState(() => initRenderStateBuilder());
 
@@ -865,6 +892,24 @@ function PanelExtensionAdapter(
     throw error;
   }
 
+  const additionalIcons =
+    toolbarActions.length > 0 ? (
+      <>
+        {toolbarActions.map((action) => (
+          <ToolbarIconButton
+            key={action.id}
+            title={action.title}
+            disabled={action.disabled}
+            onClick={action.onClick}
+          >
+            <svg viewBox="0 0 24 24" width="1em" height="1em">
+              <path d={action.iconPath} fill="currentColor" />
+            </svg>
+          </ToolbarIconButton>
+        ))}
+      </>
+    ) : undefined;
+
   return (
     <div
       style={{
@@ -875,10 +920,29 @@ function PanelExtensionAdapter(
         overflow: "hidden",
         width: "100%",
         zIndex: 0,
+        position: floatingToolbar ? "relative" : undefined,
         ...style,
       }}
+      onPointerEnter={
+        floatingToolbar
+          ? () => {
+              setIsPanelHovered(true);
+            }
+          : undefined
+      }
+      onPointerLeave={
+        floatingToolbar
+          ? () => {
+              setIsPanelHovered(false);
+            }
+          : undefined
+      }
     >
-      <PanelToolbar />
+      <PanelToolbar
+        floating={floatingToolbar}
+        hovered={isPanelHovered}
+        additionalIcons={additionalIcons}
+      />
       {configTooNew && <PanelConfigVersionError />}
       {props.children}
       <div style={{ flex: 1, overflow: "hidden" }} ref={panelContainerRef} />

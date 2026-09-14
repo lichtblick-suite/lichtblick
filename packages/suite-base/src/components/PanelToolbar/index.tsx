@@ -37,6 +37,8 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
   children,
   className,
   isUnknownPanel = false,
+  floating = false,
+  hovered = false,
 }: PanelToolbarProps) {
   const { classes, cx } = useStyles();
   const {
@@ -71,13 +73,18 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
     );
   }, [additionalIcons, isFullscreen, exitFullscreen, enterFullscreen]);
 
+  // `children` is typed `React.ReactNode`, which includes `false` (e.g. from a caller passing
+  // `condition && <Foo />`). Treat that the same as `undefined` - no custom content - so the
+  // title still renders instead of the toolbar going empty.
+  const hasCustomChildren = children != undefined && children !== false;
+
   // If we have children then we limit the drag area to the controls. Otherwise the entire
   // toolbar is draggable.
   const rootDragRef =
-    isUnknownPanel || children != undefined ? undefined : panelContext?.connectToolbarDragHandle;
+    isUnknownPanel || hasCustomChildren ? undefined : panelContext?.connectToolbarDragHandle;
 
   const controlsDragRef =
-    isUnknownPanel || children == undefined ? undefined : panelContext?.connectToolbarDragHandle;
+    isUnknownPanel || !hasCustomChildren ? undefined : panelContext?.connectToolbarDragHandle;
 
   const [defaultPanelTitle] = useDefaultPanelTitle();
   const customPanelTitle =
@@ -86,24 +93,47 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
       : defaultPanelTitle;
 
   const title = customPanelTitle ?? panelContext?.title;
+  const controls = (
+    <PanelToolbarControls
+      additionalIcons={additionalIconsWithHelp}
+      isUnknownPanel={isUnknownPanel}
+      ref={controlsDragRef}
+    />
+  );
+  // When `children` is provided it replaces the title slot with custom, interactive toolbar
+  // content (e.g. a filter dropdown). While floating, that content must stay inside a
+  // pointer-enabled container just like `controls`, or it would inherit `pointer-events: none`
+  // from `floatingRoot` and become unusable - grouped with `controls` so both are revealed
+  // together on hover.
   return (
     <header
-      className={cx(classes.root, className)}
+      className={cx(classes.root, floating && classes.floatingRoot, className)}
       data-testid="mosaic-drag-handle"
       ref={rootDragRef}
       style={{ backgroundColor, cursor: rootDragRef != undefined ? "grab" : "auto" }}
     >
-      {children ??
-        (title && (
-          <Typography noWrap variant="body2" color="text.secondary" flex="auto">
-            {title}
-          </Typography>
-        ))}
-      <PanelToolbarControls
-        additionalIcons={additionalIconsWithHelp}
-        isUnknownPanel={isUnknownPanel}
-        ref={controlsDragRef}
-      />
+      {!hasCustomChildren && title && (
+        <Typography
+          noWrap
+          variant="body2"
+          color="text.secondary"
+          flex={floating ? "0 1 auto" : "auto"}
+          className={floating ? classes.floatingTitle : undefined}
+        >
+          {title}
+        </Typography>
+      )}
+      {floating ? (
+        <div className={cx(classes.floatingControls, hovered && classes.floatingControlsVisible)}>
+          {children}
+          {controls}
+        </div>
+      ) : (
+        <>
+          {children}
+          {controls}
+        </>
+      )}
     </header>
   );
 });
