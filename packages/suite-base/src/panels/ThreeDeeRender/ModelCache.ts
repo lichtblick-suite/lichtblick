@@ -113,6 +113,7 @@ export class ModelCache {
           buffer.byteOffset,
           buffer.byteOffset + buffer.byteLength,
         ),
+        this.options.meshUpAxis,
         reportError,
       );
     }
@@ -149,6 +150,7 @@ export class ModelCache {
   async #loadGltf(
     url: string,
     buffer: ArrayBuffer,
+    meshUpAxis: MeshUpAxis,
     reportError: ErrorCallback,
   ): Promise<LoadedModel> {
     const onError = (assetUrl: string) => {
@@ -169,7 +171,9 @@ export class ModelCache {
 
     // THREE.js uses Y-up, while Studio follows the ROS
     // [REP-0103](https://www.ros.org/reps/rep-0103.html) convention of Z-up
-    gltf.scene.rotateX(Math.PI / 2);
+    if (meshUpAxis === "y_up") {
+      gltf.scene.rotateX(Math.PI / 2);
+    }
 
     return gltf.scene;
   }
