@@ -218,14 +218,12 @@ describe("App Component MultiProvider Tests", () => {
 
   //add test for extraProviders
   it("verifies that MultiProvider has rendered all providers when it has extraProviders", () => {
-    const extraProviders = [
-      //ad key on data-testid
-      <div key="1" data-testid="extra-provider" />,
-      <div key="2" data-testid="extra-provider" />,
-    ];
+    const ExtraProviderOne = ({ children }: React.PropsWithChildren) => <div>{children}</div>;
+    const ExtraProviderTwo = ({ children }: React.PropsWithChildren) => <div>{children}</div>;
+    const extraProviders = [<ExtraProviderOne key="1" />, <ExtraProviderTwo key="2" />];
     setup({ extraProviders });
 
-    expect(extractProviderTypes()).toContain(extraProviders[0]?.type);
+    expect(extractProviderTypes().slice(0, 2)).toEqual([ExtraProviderOne, ExtraProviderTwo]);
     expect(extractProviderTypes()).toHaveLength(expectedProviders.length + 2);
   });
 });

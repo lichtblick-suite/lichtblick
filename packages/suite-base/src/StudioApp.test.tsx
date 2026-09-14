@@ -13,6 +13,14 @@ import { SharedRootContext } from "@lichtblick/suite-base/context/SharedRootCont
 import { StudioApp } from "./StudioApp";
 
 // Mock all the heavy dependencies
+const mockMultiProvider = jest.fn(
+  ({ providers, children }: { providers: React.JSX.Element[]; children?: React.ReactNode }) => (
+    <div data-testid="multi-provider" data-provider-count={providers.length}>
+      {children}
+    </div>
+  ),
+);
+
 jest.mock("./Workspace", () => ({
   __esModule: true,
   default: ({ deepLinks, appBarLeftInset, AppBarComponent, ...props }: any) => (
@@ -37,11 +45,8 @@ jest.mock("./Workspace", () => ({
 
 jest.mock("./components/MultiProvider", () => ({
   __esModule: true,
-  default: ({ providers, children }: any) => (
-    <div data-testid="multi-provider" data-provider-count={providers.length}>
-      {children}
-    </div>
-  ),
+  default: (props: { providers: React.JSX.Element[]; children?: React.ReactNode }) =>
+    mockMultiProvider(props),
 }));
 
 jest.mock("./components/DocumentTitleAdapter", () => ({
@@ -124,6 +129,8 @@ describe("StudioApp", () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     // Clear console.error mock to avoid setupTestFramework.ts throwing
     if (typeof (console.error as any).mockClear === "function") {
       (console.error as any).mockClear();
@@ -245,8 +252,8 @@ describe("StudioApp", () => {
   });
 
   it("should include extra providers when provided", () => {
-    const ExtraProvider1 = ({ children }: any) => <div>{children}</div>;
-    const ExtraProvider2 = ({ children }: any) => <div>{children}</div>;
+    const ExtraProvider1 = ({ children }: React.PropsWithChildren) => <div>{children}</div>;
+    const ExtraProvider2 = ({ children }: React.PropsWithChildren) => <div>{children}</div>;
 
     renderWithContext({
       ...mockSharedRootContext,
@@ -255,9 +262,12 @@ describe("StudioApp", () => {
 
     const multiProvider = screen.getByTestId("multi-provider");
     const providerCount = parseInt(multiProvider.getAttribute("data-provider-count") ?? "0", 10);
+    const multiProviderProps = mockMultiProvider.mock.calls[0]?.[0];
+    const providerTypes = multiProviderProps?.providers.map((provider) => provider.type) ?? [];
 
     // Should have extra providers added
     expect(providerCount).toBeGreaterThan(7);
+    expect(providerTypes.slice(0, 2)).toEqual([ExtraProvider1, ExtraProvider2]);
   });
 
   it("should handle context menu prevention", () => {
