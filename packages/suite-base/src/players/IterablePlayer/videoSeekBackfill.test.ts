@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import AV1FrameBuilder from "@lichtblick/den/testing/builders/AV1FrameBuilder";
 import { H265 } from "@lichtblick/den/video";
 import { MessageEvent } from "@lichtblick/suite";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
@@ -38,7 +39,7 @@ describe("needsGopBackfill", () => {
     expect(result).toBe(false);
   });
 
-  it("accepts inter-frame-dependent video codecs (H.264 and H.265, including the 'hevc' alias)", () => {
+  it("accepts inter-frame-dependent video codecs", () => {
     // H.264 belongs here too: a seek that lands on a P-frame is not decodable without the
     // preceding GOP, so backfill is required at the player/source boundary even though the
     // renderable doesn't serialize its decoder submissions for H.264 during normal playback.
@@ -64,16 +65,25 @@ describe("needsGopBackfill", () => {
       message: { format: "hevc", data: new Uint8Array([0x02]) },
       sizeInBytes: 1,
     });
+    const av1 = MessageEventBuilder.messageEvent({
+      topic: "video",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: "av1", data: AV1FrameBuilder.deltaFrame() },
+      sizeInBytes: 1,
+    });
 
     // When
     const h264Result = needsGopBackfill(h264);
     const h265Result = needsGopBackfill(h265);
     const hevcResult = needsGopBackfill(hevc);
+    const av1Result = needsGopBackfill(av1);
 
     // Then
     expect(h264Result).toBe(true);
     expect(h265Result).toBe(true);
     expect(hevcResult).toBe(true);
+    expect(av1Result).toBe(true);
   });
 
   it("rejects unrecognized codecs and non-Uint8Array payloads", () => {
