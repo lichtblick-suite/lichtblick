@@ -7,7 +7,7 @@
 
 import { Button, Tooltip, Fade, useTheme } from "@mui/material";
 import * as _ from "lodash-es";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
 
@@ -20,15 +20,18 @@ import {
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { PanelContextMenu } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
+import { DeltaMarkerBars } from "@lichtblick/suite-base/panels/Plot/DeltaMarkerBars";
 import { VerticalBars } from "@lichtblick/suite-base/panels/Plot/VerticalBars";
+import useDeltaMeasureMode from "@lichtblick/suite-base/panels/Plot/hooks/useDeltaMeasureMode";
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
+import { MeasureModeToolbarButton } from "@lichtblick/suite-base/panels/shared/MeasureModeToolbarButton";
+import useAppendOnlyKey from "@lichtblick/suite-base/panels/shared/useAppendOnlyKey";
 
 import { useStyles } from "./Plot.style";
 import { PlotCoordinator } from "./PlotCoordinator";
@@ -49,7 +52,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     sidebarDimension,
   } = config;
 
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
   const theme = useTheme();
   const { t } = useTranslation("plot");
 
@@ -99,6 +102,42 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   const { colorsByDatasetIndex, labelsByDatasetIndex, datasetsBuilder } = usePlotDataHandling(
     config,
     globalVariables,
+  );
+
+  // Markers reference series by index, so an existing one being edited/reordered/removed goes stale -
+  // appending a brand new series shouldn't reset anything (see useAppendOnlyKey).
+  const seriesValues = useMemo(() => config.paths.map((path) => path.value), [config.paths]);
+  const stableSeriesKey = useAppendOnlyKey(seriesValues);
+  const deltaMeasureModeResetKey = `${xAxisMode}|${config.xAxisPath?.value ?? ""}|${stableSeriesKey}`;
+  const deltaMeasureMode = useDeltaMeasureMode({
+    coordinator,
+    renderer,
+    draggingRef,
+    resetKey: deltaMeasureModeResetKey,
+  });
+  const handleCanvasClick = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      if (deltaMeasureMode.active) {
+        deltaMeasureMode.handleCanvasClick(event);
+        return;
+      }
+      onClick(event);
+    },
+    [deltaMeasureMode, onClick],
+  );
+  const isHoveringSelectablePoint = deltaMeasureMode.active && activeTooltip != undefined;
+  const mergedKeyDownHandlers = useMemo(
+    () => ({
+      ...keyDownHandlers,
+      escape: () => {
+        if (deltaMeasureMode.active) {
+          deltaMeasureMode.toggleActive();
+          return;
+        }
+        return false;
+      },
+    }),
+    [deltaMeasureMode, keyDownHandlers],
   );
 
   useEffect(() => {
@@ -224,7 +263,12 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       overflow="hidden"
       position="relative"
     >
-      <PanelToolbar />
+      <MeasureModeToolbarButton
+        active={deltaMeasureMode.active}
+        onToggle={deltaMeasureMode.toggleActive}
+        title={t("measureMode")}
+        testId="plot-measure-mode-toggle"
+      />
       <Stack
         direction={legendDisplay === "top" ? "column" : "row"}
         flex="auto"
@@ -259,18 +303,36 @@ const Plot = (props: PlotProps): React.JSX.Element => {
         >
           <div className={classes.verticalBarWrapper} data-testid="vertical-bar-wrapper">
             <div
-              className={classes.canvasDiv}
+              className={cx(
+                classes.canvasDiv,
+                isHoveringSelectablePoint && classes.canvasDivPointer,
+              )}
               ref={setCanvasDiv}
               onWheel={onWheel}
               onMouseMove={onMouseMove}
               onMouseOut={onMouseOut}
-              onClick={onClick}
+              onClick={handleCanvasClick}
               onDoubleClick={onResetView}
             />
             <VerticalBars
               coordinator={coordinator}
               hoverComponentId={subscriberId}
               xAxisIsPlaybackTime={xAxisMode === "timestamp"}
+            />
+            <DeltaMarkerBars
+              coordinator={coordinator}
+              active={deltaMeasureMode.active}
+              markerA={deltaMeasureMode.markerA}
+              markerB={deltaMeasureMode.markerB}
+              colorsByDatasetIndex={colorsByDatasetIndex}
+              deltaRowLabel={t("delta")}
+              xColumnLabel={xAxisMode === "timestamp" ? t("timestamp") : t("xAxis")}
+              yColumnLabel={t("yAxis")}
+              markerALabel={t("markerA")}
+              markerBLabel={t("markerB")}
+              onRemoveMarkerA={deltaMeasureMode.removeMarkerA}
+              onRemoveMarkerB={deltaMeasureMode.removeMarkerB}
+              onClose={deltaMeasureMode.toggleActive}
             />
           </div>
         </Tooltip>
@@ -288,7 +350,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
         )}
         <PanelContextMenu getItems={getPanelContextMenuItems} />
       </Stack>
-      <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUpHandlers} />
+      <KeyListener global keyDownHandlers={mergedKeyDownHandlers} keyUpHandlers={keyUpHandlers} />
     </Stack>
   );
 };

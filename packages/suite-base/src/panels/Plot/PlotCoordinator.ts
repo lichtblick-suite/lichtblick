@@ -38,6 +38,7 @@ import {
   PlotCoordinatorEventTypes,
   Scale,
   UpdateAction,
+  YScale,
 } from "./types";
 import { isReferenceLinePlotPathType, PlotConfig } from "./utils/config";
 import { pathToSubscribePayload } from "./utils/subscription";
@@ -72,6 +73,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     bounds: { x: undefined, y: undefined },
   };
   private latestXScale?: Scale;
+  private latestYScale?: YScale;
   private queueDispatchRender = debouncePromise(this.dispatchRender.bind(this));
   private queueDispatchDownsample = debouncePromise(this.dispatchDownsample.bind(this));
   private queueDatasetsRender = debouncePromise(this.dispatchDatasetsRender.bind(this));
@@ -80,7 +82,11 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private readonly subscribeMessageRange: UseSubscribeMessageRange;
   private readonly rangeSubscriptionCancels = new Map<
     string,
-    { cancel: () => void; seriesKeys: ReadonlySet<SeriesConfigKey>; active: boolean }
+    {
+      cancel: () => void;
+      seriesKeys: ReadonlySet<SeriesConfigKey>;
+      active: boolean;
+    }
   >();
   private startTime: Immutable<Time> | undefined;
   private seriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
@@ -503,11 +509,14 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       return;
     }
 
-    this.latestXScale = await this.renderer.updateDatasets(datasets);
+    const scales = await this.renderer.updateDatasets(datasets);
     if (this.isDestroyed()) {
       return;
     }
+    this.latestXScale = scales.x;
+    this.latestYScale = scales.y;
     this.emit("xScaleChanged", this.latestXScale);
+    this.emit("yScaleChanged", this.latestYScale);
   }
 
   private cancelTopicSubscription(topic: string): void {
