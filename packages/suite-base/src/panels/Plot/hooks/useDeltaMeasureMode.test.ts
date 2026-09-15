@@ -7,11 +7,12 @@ import { act, renderHook } from "@testing-library/react";
 import { toSec } from "@lichtblick/rostime";
 import type { OffscreenCanvasRenderer } from "@lichtblick/suite-base/panels/Plot/OffscreenCanvasRenderer";
 import { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
+import { UseDeltaMeasureModeProps } from "@lichtblick/suite-base/panels/Plot/hooks/types";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
-import useDeltaMeasureMode, { UseDeltaMeasureModeProps } from "./useDeltaMeasureMode";
+import useDeltaMeasureMode from "./useDeltaMeasureMode";
 
 describe("useDeltaMeasureMode", () => {
   function buildClickEvent(
@@ -26,7 +27,7 @@ describe("useDeltaMeasureMode", () => {
           top: overrides.top ?? 0,
         })),
       } as unknown as EventTarget & HTMLElement,
-    } as unknown as React.MouseEvent<HTMLElement>;
+    } as React.MouseEvent<HTMLElement>;
   }
 
   // OffscreenCanvasRenderer has private fields, so a plain mock object can only structurally
@@ -38,12 +39,19 @@ describe("useDeltaMeasureMode", () => {
   };
 
   const setup = ({ coordinator, renderer, draggingRef, resetKey }: SetupOverrides = {}) => {
+    const defaultElements = [
+      PlotBuilder.hoverElement({
+        configIndex: 0,
+        data: PlotBuilder.datum({ value: BasicBuilder.number() }),
+      }),
+    ];
+
     const props: UseDeltaMeasureModeProps = {
       coordinator,
       renderer: {
-        getElementsAtPixel: jest.fn().mockResolvedValue([]),
+        getElementsAtPixel: jest.fn().mockResolvedValue(defaultElements),
         ...renderer,
-      } as unknown as OffscreenCanvasRenderer,
+      } as OffscreenCanvasRenderer,
       draggingRef: { current: false, ...draggingRef },
       resetKey,
     };
@@ -56,8 +64,10 @@ describe("useDeltaMeasureMode", () => {
     };
   };
 
+  const getXValueAtPixelMock = jest.fn<number, [pixelX: number]>(() => BasicBuilder.number());
+
   const mockCoordinator = {
-    getXValueAtPixel: jest.fn(() => BasicBuilder.number()),
+    getXValueAtPixel: getXValueAtPixelMock,
   } as unknown as PlotCoordinator;
 
   it("should start inactive with no markers", () => {
@@ -161,7 +171,7 @@ describe("useDeltaMeasureMode", () => {
 
   it("should not place a marker when the coordinator has no usable x scale (-1 sentinel)", async () => {
     // Given
-    (mockCoordinator.getXValueAtPixel as jest.Mock).mockReturnValueOnce(-1);
+    getXValueAtPixelMock.mockReturnValueOnce(-1);
     const { result } = setup({ coordinator: mockCoordinator });
     act(() => {
       result.current.toggleActive();
@@ -199,12 +209,32 @@ describe("useDeltaMeasureMode", () => {
     expect(result.current.markerA).toBeUndefined();
   });
 
+  it("should not place a marker when no plot point exists at the click location", async () => {
+    // Given
+    const { result } = setup({
+      coordinator: mockCoordinator,
+      renderer: { getElementsAtPixel: jest.fn().mockResolvedValue([]) },
+    });
+    act(() => {
+      result.current.toggleActive();
+    });
+
+    // When
+    await act(async () => {
+      result.current.handleCanvasClick(buildClickEvent());
+    });
+
+    // Then
+    expect(result.current.markerA).toBeUndefined();
+    expect(result.current.markerB).toBeUndefined();
+  });
+
   it("should place marker A on the first click with the resolved x value and series values", async () => {
     // Given
     const xValue = BasicBuilder.number();
     const configIndex = BasicBuilder.number();
     const value = BasicBuilder.number();
-    (mockCoordinator.getXValueAtPixel as jest.Mock).mockReturnValueOnce(xValue);
+    getXValueAtPixelMock.mockReturnValueOnce(xValue);
     const elements = [
       PlotBuilder.hoverElement({
         configIndex,
@@ -255,10 +285,7 @@ describe("useDeltaMeasureMode", () => {
 
   it("should reset to a fresh marker A on the third click", async () => {
     // Given
-    (mockCoordinator.getXValueAtPixel as jest.Mock)
-      .mockReturnValueOnce(1)
-      .mockReturnValueOnce(2)
-      .mockReturnValueOnce(3);
+    getXValueAtPixelMock.mockReturnValueOnce(1).mockReturnValueOnce(2).mockReturnValueOnce(3);
     const { result } = setup({ coordinator: mockCoordinator });
     act(() => {
       result.current.toggleActive();

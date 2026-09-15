@@ -5,11 +5,8 @@ import { useCallback } from "react";
 
 import { ChartDatasets } from "@lichtblick/suite-base/components/TimeBasedChart/types";
 import { createLabel } from "@lichtblick/suite-base/panels/StateTransitions/messagesToDataset";
-import { getValueAtTime } from "@lichtblick/suite-base/panels/StateTransitions/shared";
-import {
-  DeltaMarker,
-  DeltaMarkerSeriesValue,
-} from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import { getValueAtTime } from "@lichtblick/suite-base/panels/shared/getValueAtTime";
+import { DeltaMarker, DeltaMarkerSeriesValue } from "@lichtblick/suite-base/panels/shared/types";
 import useDeltaMarkerState from "@lichtblick/suite-base/panels/shared/useDeltaMarkerState";
 
 export type UseStateTransitionsDeltaModeProps = {

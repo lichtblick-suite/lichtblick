@@ -27,3 +27,34 @@ export type GaugeAndIndicatorAction =
   | PathAction
   | SeekAction
   | UpdateGlobalVariablesAction;
+
+export type DeltaMarkerSeriesValue = {
+  configIndex: number;
+  value: number | string;
+};
+
+export type DeltaMarker = {
+  xValue: number;
+  seriesValues: DeltaMarkerSeriesValue[];
+};
+
+export type DeltaSeriesResult = {
+  configIndex: number;
+  // Undefined when that marker isn't placed yet (DeltaOverlay shows a placeholder).
+  valueAtA: number | string | undefined;
+  valueAtB: number | string | undefined;
+  // Absolute value; undefined when either value isn't numeric (e.g. StateTransitions state labels).
+  delta: number | undefined;
+};
+
+export type DeltaResult = {
+  /** Absolute value, so it doesn't flip sign depending on which marker was placed first. */
+  deltaX: number;
+  series: DeltaSeriesResult[];
+};
+
+export type DeltaDisplay = {
+  /** Undefined until both markers are placed. */
+  deltaX: number | undefined;
+  series: DeltaSeriesResult[];
+};

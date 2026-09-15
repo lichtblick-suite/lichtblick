@@ -13,9 +13,9 @@ import {
 } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
 import {
   computeDeltaDisplay,
-  DeltaMarker,
   getDeltaSeriesConfigIndexes,
 } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/types";
 
 import { useDeltaMarkerBarsStyles } from "./DeltaMarkerBars.style";
 import type { DeltaMarkerBarsProps, Scale, YScale } from "./types";
@@ -128,6 +128,7 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   labelsByDatasetIndex,
   deltaRowLabel,
   xColumnLabel,
+  yColumnLabel,
   markerALabel,
   markerBLabel,
   onRemoveMarkerA,
@@ -213,12 +214,11 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
       (configIndex): DeltaOverlaySeriesLabel => ({
         configIndex,
         label: labelsByDatasetIndex[configIndex] ?? "",
-        color: colorsByDatasetIndex[configIndex] ?? "",
       }),
     );
 
     return { delta: computeDeltaDisplay(markerA, markerB), seriesLabels };
-  }, [active, colorsByDatasetIndex, labelsByDatasetIndex, markerA, markerB]);
+  }, [active, labelsByDatasetIndex, markerA, markerB]);
 
   if (!coordinator) {
     return <></>;
@@ -258,6 +258,7 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
           <DeltaOverlay
             deltaRowLabel={deltaRowLabel}
             xColumnLabel={xColumnLabel}
+            yColumnLabel={yColumnLabel}
             markerALabel={markerALabel}
             markerBLabel={markerBLabel}
             xValueA={markerA?.xValue}

@@ -1,30 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-export type DeltaMarkerSeriesValue = {
-  configIndex: number;
-  value: number | string;
-};
-
-export type DeltaMarker = {
-  xValue: number;
-  seriesValues: DeltaMarkerSeriesValue[];
-};
-
-export type DeltaSeriesResult = {
-  configIndex: number;
-  // Undefined when that marker isn't placed yet (DeltaOverlay shows a placeholder).
-  valueAtA: number | string | undefined;
-  valueAtB: number | string | undefined;
-  // Absolute value; undefined when either value isn't numeric (e.g. StateTransitions state labels).
-  delta: number | undefined;
-};
-
-export type DeltaResult = {
-  /** Absolute value, so it doesn't flip sign depending on which marker was placed first. */
-  deltaX: number;
-  series: DeltaSeriesResult[];
-};
+import {
+  DeltaDisplay,
+  DeltaMarker,
+  DeltaResult,
+  DeltaSeriesResult,
+} from "@lichtblick/suite-base/panels/shared/types";
 
 // Series are matched by configIndex; a series present on only one marker is skipped.
 export function computeDelta(markerA: DeltaMarker, markerB: DeltaMarker): DeltaResult {
@@ -55,12 +37,6 @@ export function computeDelta(markerA: DeltaMarker, markerB: DeltaMarker): DeltaR
     series,
   };
 }
-
-export type DeltaDisplay = {
-  /** Undefined until both markers are placed. */
-  deltaX: number | undefined;
-  series: DeltaSeriesResult[];
-};
 
 /**
  * Like `computeDelta`, but also handles the "Measure mode is active but zero or one markers have

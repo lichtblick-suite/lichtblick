@@ -15,7 +15,7 @@ import { CustomDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builde
 import { IndexDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/IndexDatasetsBuilder";
 import { TimestampDatasetsBuilder } from "@lichtblick/suite-base/panels/Plot/builders/TimestampDatasetsBuilder";
 import { PlotConfig, PlotPath } from "@lichtblick/suite-base/panels/Plot/utils/config";
-import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/types";
 import { Bounds1D } from "@lichtblick/suite-base/types/Bounds";
 import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -183,6 +183,7 @@ export type DeltaMarkerBarsProps = {
   labelsByDatasetIndex: Record<string, string>;
   deltaRowLabel: string;
   xColumnLabel: string;
+  yColumnLabel: string;
   markerALabel: string;
   markerBLabel: string;
   onRemoveMarkerA: () => void;

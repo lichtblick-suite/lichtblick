@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/types";
 
 export type UseDeltaMarkerStateProps = {
   /** Markers are cleared (but the mode stays active) whenever this value changes. */

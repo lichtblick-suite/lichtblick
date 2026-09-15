@@ -1,36 +1,18 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { MutableRefObject, useCallback } from "react";
+import { useCallback } from "react";
 import { useMountedState } from "react-use";
 
 import { isTime, toSec } from "@lichtblick/rostime";
-import type { OffscreenCanvasRenderer } from "@lichtblick/suite-base/panels/Plot/OffscreenCanvasRenderer";
-import type { PlotCoordinator } from "@lichtblick/suite-base/panels/Plot/PlotCoordinator";
-import { OriginalValue } from "@lichtblick/suite-base/panels/Plot/utils/datum";
 import {
-  DeltaMarker,
-  DeltaMarkerSeriesValue,
-} from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+  UseDeltaMeasureModeProps,
+  UseDeltaMeasureModeResult,
+} from "@lichtblick/suite-base/panels/Plot/hooks/types";
+import { HoverElement } from "@lichtblick/suite-base/panels/Plot/types";
+import { OriginalValue } from "@lichtblick/suite-base/panels/Plot/utils/datum";
+import { DeltaMarkerSeriesValue } from "@lichtblick/suite-base/panels/shared/types";
 import useDeltaMarkerState from "@lichtblick/suite-base/panels/shared/useDeltaMarkerState";
-
-export type UseDeltaMeasureModeProps = {
-  coordinator: PlotCoordinator | undefined;
-  renderer: OffscreenCanvasRenderer | undefined;
-  draggingRef: MutableRefObject<boolean>;
-  /** Markers are cleared (but the mode stays active) whenever this value changes. */
-  resetKey?: string;
-};
-
-export type UseDeltaMeasureModeResult = {
-  active: boolean;
-  toggleActive: () => void;
-  markerA: DeltaMarker | undefined;
-  markerB: DeltaMarker | undefined;
-  removeMarkerA: () => void;
-  removeMarkerB: () => void;
-  handleCanvasClick: (event: React.MouseEvent<HTMLElement>) => void;
-};
 
 // bigint/boolean/Time don't have a natural delta - normalize them into what computeDelta expects.
 function toSeriesValue(value: OriginalValue | undefined): number | string | undefined {
@@ -47,6 +29,24 @@ function toSeriesValue(value: OriginalValue | undefined): number | string | unde
     default:
       return undefined;
   }
+}
+
+// Dedupe by configIndex (elements can overlap at a pixel) and drop values that don't normalize.
+function resolveSeriesValues(elements: readonly HoverElement[]): DeltaMarkerSeriesValue[] {
+  const seriesValues: DeltaMarkerSeriesValue[] = [];
+  const seenConfigIndexes = new Set<number>();
+  for (const element of elements) {
+    if (seenConfigIndexes.has(element.configIndex)) {
+      continue;
+    }
+    seenConfigIndexes.add(element.configIndex);
+
+    const value = toSeriesValue(element.data.value ?? element.data.y);
+    if (value != undefined) {
+      seriesValues.push({ configIndex: element.configIndex, value });
+    }
+  }
+  return seriesValues;
 }
 
 function useDeltaMeasureMode({
@@ -81,9 +81,6 @@ function useDeltaMeasureMode({
         return;
       }
 
-      // Decide the target slot now since the datum lookup below is async - a third click resets.
-      const slot = nextMarkerSlot();
-
       void (async () => {
         try {
           const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ?? [];
@@ -91,21 +88,12 @@ function useDeltaMeasureMode({
             return;
           }
 
-          const seriesValues: DeltaMarkerSeriesValue[] = [];
-          const seenConfigIndexes = new Set<number>();
-          for (const element of elements) {
-            if (seenConfigIndexes.has(element.configIndex)) {
-              continue;
-            }
-            seenConfigIndexes.add(element.configIndex);
-
-            const value = toSeriesValue(element.data.value ?? element.data.y);
-            if (value != undefined) {
-              seriesValues.push({ configIndex: element.configIndex, value });
-            }
+          const seriesValues = resolveSeriesValues(elements);
+          if (seriesValues.length === 0) {
+            return;
           }
 
-          setMarker(slot, { xValue, seriesValues });
+          setMarker(nextMarkerSlot(), { xValue, seriesValues });
         } catch (err: unknown) {
           console.error(err);
         }

@@ -31,5 +31,6 @@ export const stateTransitions = {
   min: "Min",
   pathErrorMessage: "This path resolves to more than one value",
   secondsRange: "Range (seconds)",
+  value: "Value",
   xAxis: "X Axis",
 };

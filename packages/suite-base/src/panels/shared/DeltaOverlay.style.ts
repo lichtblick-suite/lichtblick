@@ -14,6 +14,7 @@ export const useDeltaOverlayStyles = makeStyles()((theme) => ({
     borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[4],
     padding: theme.spacing(1, 3, 1, 1),
+    opacity: 0.9,
   },
   grid: {
     display: "grid",
@@ -32,20 +33,13 @@ export const useDeltaOverlayStyles = makeStyles()((theme) => ({
     fontWeight: 600,
     whiteSpace: "nowrap",
   },
-  colorIcon: {
-    height: 12,
-    width: 12,
-    flexShrink: 0,
-  },
   removeButton: {
-    minWidth: "unset",
     padding: theme.spacing(0.25),
   },
   closeButton: {
     position: "absolute",
     top: theme.spacing(0.5),
     right: theme.spacing(0.5),
-    minWidth: "unset",
     padding: theme.spacing(0.25),
   },
 }));

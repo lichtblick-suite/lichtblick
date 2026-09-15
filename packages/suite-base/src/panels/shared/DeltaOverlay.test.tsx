@@ -14,6 +14,7 @@ describe("DeltaOverlay", () => {
     return {
       deltaRowLabel: "Delta",
       xColumnLabel: "X",
+      yColumnLabel: "Y",
       markerALabel: "P1",
       markerBLabel: "P2",
       xValueA: 1,
@@ -41,12 +42,24 @@ describe("DeltaOverlay", () => {
     expect(screen.getByText(props.markerBLabel)).toBeInTheDocument();
   });
 
-  it("should render one column per series with its label", () => {
+  it("should use a three-column grid when there are no series", () => {
+    // Given
+    const props = buildProps({ seriesLabels: [] });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    const grid = screen.getByTestId("delta-overlay").children[1] as HTMLElement;
+    expect(grid.style.gridTemplateColumns).toEqual("auto max-content max-content");
+  });
+
+  it("should render the y column label once per series, titled with its series label", () => {
     // Given
     const seriesLabel = BasicBuilder.string();
     const configIndex = BasicBuilder.number();
     const props = buildProps({
-      seriesLabels: [{ configIndex, label: seriesLabel, color: "#ff0000" }],
+      seriesLabels: [{ configIndex, label: seriesLabel }],
       series: [{ configIndex, valueAtA: 1, valueAtB: 2, delta: 1 }],
     });
 
@@ -54,7 +67,8 @@ describe("DeltaOverlay", () => {
     render(<DeltaOverlay {...props} />);
 
     // Then
-    expect(screen.getByText(seriesLabel)).toBeInTheDocument();
+    expect(screen.getByTitle(seriesLabel)).toHaveTextContent(props.yColumnLabel);
+    expect(screen.queryByText(seriesLabel)).not.toBeInTheDocument();
   });
 
   it("should label the marker removal buttons distinctly", () => {
@@ -80,7 +94,6 @@ describe("DeltaOverlay", () => {
         {
           configIndex: BasicBuilder.number(),
           label: BasicBuilder.string(),
-          color: "#ff0000",
         },
       ],
       series: [],
@@ -117,6 +130,18 @@ describe("DeltaOverlay", () => {
 
     // Then
     expect(onRemoveMarkerB).toHaveBeenCalledTimes(1);
+  });
+
+  it("should not render a marker's remove button before that marker is placed", () => {
+    // Given
+    const props = buildProps({ xValueA: undefined, xValueB: undefined });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.queryByTestId("delta-overlay-remove-marker-a")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("delta-overlay-remove-marker-b")).not.toBeInTheDocument();
   });
 
   it("should call onClose when the close button is clicked", () => {

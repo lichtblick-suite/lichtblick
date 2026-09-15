@@ -14,7 +14,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Ruler20Regular } from "@fluentui/react-icons";
 import { alpha, useTheme } from "@mui/material";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { useCallback, useMemo, useState } from "react";
@@ -30,8 +29,6 @@ import {
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import Panel from "@lichtblick/suite-base/components/Panel";
-import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
-import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChart from "@lichtblick/suite-base/components/TimeBasedChart";
 import { PathLegend } from "@lichtblick/suite-base/panels/StateTransitions/PathLegend";
@@ -54,13 +51,14 @@ import {
   DeltaOverlay,
   DeltaOverlaySeriesLabel,
 } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
+import { MeasureModeToolbarButton } from "@lichtblick/suite-base/panels/shared/MeasureModeToolbarButton";
 import {
   computeDeltaDisplay,
   getDeltaSeriesConfigIndexes,
 } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import useAppendOnlyKey from "@lichtblick/suite-base/panels/shared/useAppendOnlyKey";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
-import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
 
 import { StateTransitionConfig, StateTransitionPanelProps } from "./types";
 
@@ -144,19 +142,20 @@ function StateTransitions(props: StateTransitionPanelProps) {
     config,
   );
 
+  // Markers reference paths by index, so an existing one being edited/reordered/removed goes stale -
+  // appending a brand new path shouldn't reset anything (see useAppendOnlyKey).
+  const pathSignatures = useMemo(
+    () =>
+      paths.map(
+        ({ color, value, label, enabled, timestampMethod }) =>
+          JSON.stringify([color, value, label, enabled, timestampMethod]) ?? "",
+      ),
+    [paths],
+  );
+  const deltaModeResetKey = useAppendOnlyKey(pathSignatures);
   const deltaMode = useStateTransitionsDeltaMode({
     datasets: data.datasets,
-    // Markers reference paths by index, so clear stale ones when any path input changes.
-    resetKey:
-      JSON.stringify(
-        paths.map(({ color, value, label, enabled, timestampMethod }) => [
-          color,
-          value,
-          label,
-          enabled,
-          timestampMethod,
-        ]),
-      ) ?? "",
+    resetKey: deltaModeResetKey,
   });
   const { markerA, markerB } = deltaMode;
 
@@ -234,7 +233,6 @@ function StateTransitions(props: StateTransitionPanelProps) {
       return {
         configIndex,
         label: path ? stateTransitionPathDisplayName(path, configIndex) : "",
-        color: getLineColor(path?.color, configIndex),
       };
     });
 
@@ -250,19 +248,11 @@ function StateTransitions(props: StateTransitionPanelProps) {
 
   return (
     <Stack flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>
-      <PanelToolbar
-        additionalIcons={
-          <ToolbarIconButton
-            title={t("measureMode")}
-            aria-label={t("measureMode")}
-            aria-pressed={deltaMode.active}
-            color={deltaMode.active ? "primary" : "default"}
-            onClick={deltaMode.toggleActive}
-            data-testid="state-transitions-measure-mode-toggle"
-          >
-            <Ruler20Regular />
-          </ToolbarIconButton>
-        }
+      <MeasureModeToolbarButton
+        active={deltaMode.active}
+        onToggle={deltaMode.toggleActive}
+        title={t("measureMode")}
+        testId="state-transitions-measure-mode-toggle"
       />
       <Stack fullWidth fullHeight flex="auto" overflowX="hidden" overflowY="auto">
         <div className={classes.chartWrapper} ref={sizeRef}>
@@ -296,6 +286,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
               <DeltaOverlay
                 deltaRowLabel={t("delta")}
                 xColumnLabel={t("labels.timestamp")}
+                yColumnLabel={t("value")}
                 markerALabel={t("markerA")}
                 markerBLabel={t("markerB")}
                 xValueA={overlayData.xValueA}

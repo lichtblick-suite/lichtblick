@@ -5,7 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Ruler20Regular } from "@fluentui/react-icons";
 import { Button, Tooltip, Fade, useTheme } from "@mui/material";
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -21,8 +20,6 @@ import {
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { PanelContextMenu } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
-import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
@@ -33,6 +30,8 @@ import useDeltaMeasureMode from "@lichtblick/suite-base/panels/Plot/hooks/useDel
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
+import { MeasureModeToolbarButton } from "@lichtblick/suite-base/panels/shared/MeasureModeToolbarButton";
+import useAppendOnlyKey from "@lichtblick/suite-base/panels/shared/useAppendOnlyKey";
 
 import { useStyles } from "./Plot.style";
 import { PlotCoordinator } from "./PlotCoordinator";
@@ -105,12 +104,11 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     globalVariables,
   );
 
-  // Markers reference series by index and axis meaning, so stale ones need clearing when either changes.
-  const deltaMeasureModeResetKey = useMemo(
-    () =>
-      `${xAxisMode}|${config.xAxisPath?.value ?? ""}|${config.paths.map((path) => path.value).join("|")}`,
-    [config.paths, config.xAxisPath?.value, xAxisMode],
-  );
+  // Markers reference series by index, so an existing one being edited/reordered/removed goes stale -
+  // appending a brand new series shouldn't reset anything (see useAppendOnlyKey).
+  const seriesValues = useMemo(() => config.paths.map((path) => path.value), [config.paths]);
+  const stableSeriesKey = useAppendOnlyKey(seriesValues);
+  const deltaMeasureModeResetKey = `${xAxisMode}|${config.xAxisPath?.value ?? ""}|${stableSeriesKey}`;
   const deltaMeasureMode = useDeltaMeasureMode({
     coordinator,
     renderer,
@@ -265,19 +263,11 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       overflow="hidden"
       position="relative"
     >
-      <PanelToolbar
-        additionalIcons={
-          <ToolbarIconButton
-            title={t("measureMode")}
-            aria-label={t("measureMode")}
-            aria-pressed={deltaMeasureMode.active}
-            color={deltaMeasureMode.active ? "primary" : "default"}
-            onClick={deltaMeasureMode.toggleActive}
-            data-testid="plot-measure-mode-toggle"
-          >
-            <Ruler20Regular />
-          </ToolbarIconButton>
-        }
+      <MeasureModeToolbarButton
+        active={deltaMeasureMode.active}
+        onToggle={deltaMeasureMode.toggleActive}
+        title={t("measureMode")}
+        testId="plot-measure-mode-toggle"
       />
       <Stack
         direction={legendDisplay === "top" ? "column" : "row"}
@@ -338,6 +328,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
               labelsByDatasetIndex={labelsByDatasetIndex}
               deltaRowLabel={t("delta")}
               xColumnLabel={xAxisMode === "timestamp" ? t("timestamp") : t("xAxis")}
+              yColumnLabel={t("yAxis")}
               markerALabel={t("markerA")}
               markerBLabel={t("markerB")}
               onRemoveMarkerA={deltaMeasureMode.removeMarkerA}

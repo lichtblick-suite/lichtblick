@@ -1,26 +1,26 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { Dismiss12Regular, Square12Filled } from "@fluentui/react-icons";
-import { Button } from "@mui/material";
+import { Delete12Regular } from "@fluentui/react-icons";
+import CloseIcon from "@mui/icons-material/Close";
+import { IconButton } from "@mui/material";
 import React, { type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Immutable } from "@lichtblick/suite";
-import Stack from "@lichtblick/suite-base/components/Stack";
 import { useDeltaOverlayStyles } from "@lichtblick/suite-base/panels/shared/DeltaOverlay.style";
 import { MISSING_VALUE_PLACEHOLDER } from "@lichtblick/suite-base/panels/shared/constants";
-import { DeltaResult } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import { DeltaResult } from "@lichtblick/suite-base/panels/shared/types";
 
 export type DeltaOverlaySeriesLabel = {
   configIndex: number;
   label: string;
-  color: string;
 };
 
 export type DeltaOverlayProps = Immutable<{
   deltaRowLabel: string;
   xColumnLabel: string;
+  yColumnLabel: string;
   markerALabel: string;
   markerBLabel: string;
   /** Undefined until that marker is placed - rendered as a placeholder. */
@@ -46,6 +46,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
   const {
     deltaRowLabel,
     xColumnLabel,
+    yColumnLabel,
     markerALabel,
     markerBLabel,
     xValueA,
@@ -76,7 +77,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
 
   return (
     <div className={classes.root} style={style} data-testid="delta-overlay">
-      <Button
+      <IconButton
         className={classes.closeButton}
         size="small"
         disableRipple
@@ -84,23 +85,27 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
         aria-label={t("closeMeasureMode")}
         onClick={onClose}
       >
-        <Dismiss12Regular />
-      </Button>
+        {/* Distinct from the per-marker remove icon below - matches Lichtblick's standard close icon. */}
+        <CloseIcon fontSize="small" />
+      </IconButton>
       <div
         className={classes.grid}
         style={{
-          // One column per series, sized to fit its longest value/label.
-          gridTemplateColumns: `auto max-content repeat(${seriesLabels.length}, max-content)`,
+          // One color-dot column per series, plus a trailing column for the per-marker delete button.
+          gridTemplateColumns:
+            seriesLabels.length > 0
+              ? `auto max-content repeat(${seriesLabels.length}, max-content) max-content`
+              : "auto max-content max-content",
         }}
       >
         <div />
         <div className={classes.rowLabel}>{xColumnLabel}</div>
-        {seriesLabels.map(({ configIndex, label, color }) => (
-          <Stack key={configIndex} direction="row" alignItems="center" gap={0.5}>
-            <Square12Filled className={classes.colorIcon} style={{ color }} />
-            <span className={classes.rowLabel}>{label}</span>
-          </Stack>
+        {seriesLabels.map(({ configIndex, label }) => (
+          <span key={configIndex} className={classes.rowLabel} title={label}>
+            {yColumnLabel}
+          </span>
         ))}
+        <div />
 
         <div className={classes.rowLabel}>{deltaRowLabel}</div>
         <div className={classes.value}>{renderXValue(deltaX)}</div>
@@ -109,9 +114,17 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
             {renderSeriesValue(configIndex, "delta")}
           </div>
         ))}
+        <div />
 
-        <Stack direction="row" alignItems="center" gap={0.5}>
-          <Button
+        <div className={classes.rowLabel}>{markerALabel}</div>
+        <div className={classes.value}>{renderXValue(xValueA)}</div>
+        {seriesLabels.map(({ configIndex }) => (
+          <div className={classes.value} key={configIndex}>
+            {renderSeriesValue(configIndex, "valueAtA")}
+          </div>
+        ))}
+        {xValueA != undefined ? (
+          <IconButton
             className={classes.removeButton}
             size="small"
             disableRipple
@@ -119,19 +132,21 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
             aria-label={t("removeMarkerA")}
             onClick={onRemoveMarkerA}
           >
-            <Dismiss12Regular />
-          </Button>
-          {markerALabel}
-        </Stack>
-        <div className={classes.value}>{renderXValue(xValueA)}</div>
+            <Delete12Regular />
+          </IconButton>
+        ) : (
+          <div />
+        )}
+
+        <div className={classes.rowLabel}>{markerBLabel}</div>
+        <div className={classes.value}>{renderXValue(xValueB)}</div>
         {seriesLabels.map(({ configIndex }) => (
           <div className={classes.value} key={configIndex}>
-            {renderSeriesValue(configIndex, "valueAtA")}
+            {renderSeriesValue(configIndex, "valueAtB")}
           </div>
         ))}
-
-        <Stack direction="row" alignItems="center" gap={0.5}>
-          <Button
+        {xValueB != undefined ? (
+          <IconButton
             className={classes.removeButton}
             size="small"
             disableRipple
@@ -139,16 +154,11 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
             aria-label={t("removeMarkerB")}
             onClick={onRemoveMarkerB}
           >
-            <Dismiss12Regular />
-          </Button>
-          {markerBLabel}
-        </Stack>
-        <div className={classes.value}>{renderXValue(xValueB)}</div>
-        {seriesLabels.map(({ configIndex }) => (
-          <div className={classes.value} key={configIndex}>
-            {renderSeriesValue(configIndex, "valueAtB")}
-          </div>
-        ))}
+            <Delete12Regular />
+          </IconButton>
+        ) : (
+          <div />
+        )}
       </div>
     </div>
   );

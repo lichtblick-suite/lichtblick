@@ -21,6 +21,7 @@ describe("DeltaMarkerBars", () => {
       labelsByDatasetIndex: {},
       deltaRowLabel: "Delta",
       xColumnLabel: "Time",
+      yColumnLabel: "Y",
       markerALabel: "P1",
       markerBLabel: "P2",
       onRemoveMarkerA: jest.fn(),
@@ -100,7 +101,7 @@ describe("DeltaMarkerBars", () => {
 
     // Then
     expect(screen.getByTestId("delta-overlay")).toBeInTheDocument();
-    expect(screen.getByText(label)).toBeInTheDocument();
+    expect(screen.getByTitle(label)).toBeInTheDocument();
   });
 
   it("renders the delta overlay with the computed delta once both markers are set", () => {
@@ -119,7 +120,7 @@ describe("DeltaMarkerBars", () => {
 
     // Then
     expect(screen.getByTestId("delta-overlay")).toBeInTheDocument();
-    expect(screen.getByText(label)).toBeInTheDocument();
+    expect(screen.getByTitle(label)).toBeInTheDocument();
   });
 
   it("forwards onClose to the overlay's close button", () => {
