@@ -53,12 +53,12 @@ describe("useStateToURLSynchronization", () => {
     expect(spy).toHaveBeenCalledWith(
       undefined,
       "",
-      "http://localhost/?time=1970-01-01T00:00:01.000000001Z",
+      "http://localhost/?time=1970-01-01T00%3A00%3A01.000000001Z",
     );
     expect(spy).toHaveBeenLastCalledWith(
       undefined,
       "",
-      "http://localhost/?ds=test-source&ds.a=one&ds.b=two&time=1970-01-01T00:00:01.000000001Z",
+      "http://localhost/?ds=test-source&ds.a=one&ds.b=two&time=1970-01-01T00%3A00%3A01.000000001Z",
     );
 
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
@@ -79,8 +79,45 @@ describe("useStateToURLSynchronization", () => {
     expect(spy).toHaveBeenLastCalledWith(
       undefined,
       "",
-      "http://localhost/?ds=test-source2&ds.b=two&ds.c=three&time=1970-01-01T00:00:01.000000001Z",
+      "http://localhost/?ds=test-source2&ds.b=two&ds.c=three&time=1970-01-01T00%3A00%3A01.000000001Z",
     );
+  });
+
+  it("keeps a data-source url that carries its own query string intact", () => {
+    // A GCS signed URL brings &X-Goog-Signature= and friends with it. The address bar used to
+    // be written through decodeURIComponent, which unescaped those into the page's own query
+    // string: ds.url came back truncated at its first & and the reloaded tab could not
+    // authenticate. Reparsing what we hand to replaceState must give the url back unchanged.
+    const signed =
+      "https://storage.googleapis.com/bucket/x.mcap?X-Goog-Algorithm=GOOG4-RSA-SHA256" +
+      "&X-Goog-Credential=sa%40p.iam.gserviceaccount.com%2F20260914%2Fauto%2Fstorage%2Fgoog4_request" +
+      "&X-Goog-Expires=43200&X-Goog-Signature=deadbeef";
+    const spy = jest.spyOn(window.history, "replaceState");
+
+    (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
+      selector({
+        playerState: {
+          activeData: { currentTime: { sec: 1, nsec: 1 } },
+          capabilities: ["playbackControl"],
+          urlState: {
+            sourceId: "remote-file",
+            parameters: { urls: [signed] },
+          },
+        },
+      }),
+    );
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <EventsProvider>{children}</EventsProvider>
+    );
+    renderHook(useStateToURLSynchronization, { wrapper });
+
+    const written = spy.mock.calls[spy.mock.calls.length - 1]![2] as string;
+    const reparsed = new URL(written);
+
+    expect(reparsed.searchParams.get("ds.url")).toBe(signed);
+    // the url's own params must not have leaked out to the page's query string
+    expect(reparsed.searchParams.get("X-Goog-Signature")).toBeNull();
   });
 
   it("suppresses ds param writeback when mcap-bundle is present in the URL", () => {
