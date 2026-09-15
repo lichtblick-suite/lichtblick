@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { Delete12Regular } from "@fluentui/react-icons";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import React, { type CSSProperties } from "react";
@@ -23,14 +22,20 @@ export type DeltaOverlayProps = Immutable<{
   yColumnLabel: string;
   markerALabel: string;
   markerBLabel: string;
+  markerAColor?: string;
+  markerBColor?: string;
   /** Undefined until that marker is placed - rendered as a placeholder. */
   xValueA: number | undefined;
   xValueB: number | undefined;
+  yValueA?: number | string;
+  yValueB?: number | string;
   deltaX: number | undefined;
-  /** One column per series, in display order. */
-  seriesLabels: DeltaOverlaySeriesLabel[];
-  series: DeltaResult["series"];
+  deltaY?: number;
+  /** Preserved for backward-compatibility if passed. */
+  seriesLabels?: DeltaOverlaySeriesLabel[];
+  series?: DeltaResult["series"];
   formatXValue?: (value: number) => string;
+  formatYValue?: (value: number) => string;
   onRemoveMarkerA: () => void;
   onRemoveMarkerB: () => void;
   /** Closes the overlay entirely and deactivates measure mode. */
@@ -49,12 +54,16 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
     yColumnLabel,
     markerALabel,
     markerBLabel,
+    markerAColor,
+    markerBColor,
     xValueA,
     xValueB,
+    yValueA,
+    yValueB,
     deltaX,
-    seriesLabels,
-    series,
-    formatXValue = (value) => value.toFixed(3),
+    deltaY,
+    formatXValue = (value) => value.toFixed(6),
+    formatYValue = (value) => value.toFixed(6),
     onRemoveMarkerA,
     onRemoveMarkerB,
     onClose,
@@ -63,17 +72,18 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
   const { t } = useTranslation("plot");
   const { classes } = useDeltaOverlayStyles();
 
-  const resultByConfigIndex = new Map(series.map((result) => [result.configIndex, result]));
-
-  const renderSeriesValue = (
-    configIndex: number,
-    pick: "valueAtA" | "valueAtB" | "delta",
-  ): number | string => {
-    return resultByConfigIndex.get(configIndex)?.[pick] ?? MISSING_VALUE_PLACEHOLDER;
-  };
-
-  const renderXValue = (value: number | undefined): string =>
+  const renderFormattedX = (value: number | undefined): string =>
     value != undefined ? formatXValue(value) : MISSING_VALUE_PLACEHOLDER;
+
+  const renderFormattedY = (value: number | string | undefined): string => {
+    if (value == undefined) {
+      return MISSING_VALUE_PLACEHOLDER;
+    }
+    if (typeof value === "number") {
+      return formatYValue(value);
+    }
+    return value;
+  };
 
   return (
     <div className={classes.root} style={style} data-testid="delta-overlay">
@@ -85,44 +95,31 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
         aria-label={t("closeMeasureMode")}
         onClick={onClose}
       >
-        {/* Distinct from the per-marker remove icon below - matches Lichtblick's standard close icon. */}
         <CloseIcon fontSize="small" />
       </IconButton>
-      <div
-        className={classes.grid}
-        style={{
-          // One color-dot column per series, plus a trailing column for the per-marker delete button.
-          gridTemplateColumns:
-            seriesLabels.length > 0
-              ? `auto max-content repeat(${seriesLabels.length}, max-content) max-content`
-              : "auto max-content max-content",
-        }}
-      >
+      <div className={classes.grid}>
         <div />
-        <div className={classes.rowLabel}>{xColumnLabel}</div>
-        {seriesLabels.map(({ configIndex, label }) => (
-          <span key={configIndex} className={classes.rowLabel} title={label}>
-            {yColumnLabel}
-          </span>
-        ))}
+        <div className={classes.columnHeader}>{xColumnLabel}</div>
+        <div className={classes.columnHeader}>{yColumnLabel}</div>
         <div />
 
         <div className={classes.rowLabel}>{deltaRowLabel}</div>
-        <div className={classes.value}>{renderXValue(deltaX)}</div>
-        {seriesLabels.map(({ configIndex }) => (
-          <div className={classes.value} key={configIndex}>
-            {renderSeriesValue(configIndex, "delta")}
-          </div>
-        ))}
+        <div className={classes.value}>{renderFormattedX(deltaX)}</div>
+        <div className={classes.value}>{renderFormattedY(deltaY)}</div>
         <div />
 
-        <div className={classes.rowLabel}>{markerALabel}</div>
-        <div className={classes.value}>{renderXValue(xValueA)}</div>
-        {seriesLabels.map(({ configIndex }) => (
-          <div className={classes.value} key={configIndex}>
-            {renderSeriesValue(configIndex, "valueAtA")}
-          </div>
-        ))}
+        <div className={classes.markerLabelCell}>
+          {markerAColor && (
+            <span
+              className={classes.markerDot}
+              style={{ backgroundColor: markerAColor }}
+              data-testid="delta-overlay-dot-a"
+            />
+          )}
+          <span className={classes.rowLabel}>{markerALabel}</span>
+        </div>
+        <div className={classes.value}>{renderFormattedX(xValueA)}</div>
+        <div className={classes.value}>{renderFormattedY(yValueA)}</div>
         {xValueA != undefined ? (
           <IconButton
             className={classes.removeButton}
@@ -132,19 +129,24 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
             aria-label={t("removeMarkerA")}
             onClick={onRemoveMarkerA}
           >
-            <Delete12Regular />
+            <CloseIcon fontSize="small" />
           </IconButton>
         ) : (
           <div />
         )}
 
-        <div className={classes.rowLabel}>{markerBLabel}</div>
-        <div className={classes.value}>{renderXValue(xValueB)}</div>
-        {seriesLabels.map(({ configIndex }) => (
-          <div className={classes.value} key={configIndex}>
-            {renderSeriesValue(configIndex, "valueAtB")}
-          </div>
-        ))}
+        <div className={classes.markerLabelCell}>
+          {markerBColor && (
+            <span
+              className={classes.markerDot}
+              style={{ backgroundColor: markerBColor }}
+              data-testid="delta-overlay-dot-b"
+            />
+          )}
+          <span className={classes.rowLabel}>{markerBLabel}</span>
+        </div>
+        <div className={classes.value}>{renderFormattedX(xValueB)}</div>
+        <div className={classes.value}>{renderFormattedY(yValueB)}</div>
         {xValueB != undefined ? (
           <IconButton
             className={classes.removeButton}
@@ -154,7 +156,7 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
             aria-label={t("removeMarkerB")}
             onClick={onRemoveMarkerB}
           >
-            <Delete12Regular />
+            <CloseIcon fontSize="small" />
           </IconButton>
         ) : (
           <div />

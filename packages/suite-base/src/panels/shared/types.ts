@@ -50,11 +50,14 @@ export type DeltaSeriesResult = {
 export type DeltaResult = {
   /** Absolute value, so it doesn't flip sign depending on which marker was placed first. */
   deltaX: number;
+  /** Absolute difference between primary numeric values of both markers, or undefined if non-numeric/missing. */
+  deltaY: number | undefined;
   series: DeltaSeriesResult[];
 };
 
 export type DeltaDisplay = {
   /** Undefined until both markers are placed. */
   deltaX: number | undefined;
+  deltaY: number | undefined;
   series: DeltaSeriesResult[];
 };

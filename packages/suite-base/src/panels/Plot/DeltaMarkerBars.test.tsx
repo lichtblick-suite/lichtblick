@@ -90,37 +90,35 @@ describe("DeltaMarkerBars", () => {
   it("renders marker A's value in the overlay before marker B is set", () => {
     // Given
     const configIndex = BasicBuilder.number();
-    const label = BasicBuilder.string();
 
     // When
     setup({
       active: true,
       markerA: { xValue: 1, seriesValues: [{ configIndex, value: 5 }] },
-      labelsByDatasetIndex: { [configIndex]: label },
     });
 
     // Then
     expect(screen.getByTestId("delta-overlay")).toBeInTheDocument();
-    expect(screen.getByTitle(label)).toBeInTheDocument();
+    expect(screen.getByText("5.000000")).toBeInTheDocument();
   });
 
   it("renders the delta overlay with the computed delta once both markers are set", () => {
     // Given
     const configIndex = BasicBuilder.number();
-    const label = BasicBuilder.string();
 
     // When
     setup({
       active: true,
       markerA: { xValue: 1, seriesValues: [{ configIndex, value: 5 }] },
       markerB: { xValue: 4, seriesValues: [{ configIndex, value: 11 }] },
-      labelsByDatasetIndex: { [configIndex]: label },
       colorsByDatasetIndex: { [configIndex]: "#ff0000" },
     });
 
     // Then
     expect(screen.getByTestId("delta-overlay")).toBeInTheDocument();
-    expect(screen.getByTitle(label)).toBeInTheDocument();
+    expect(screen.getByText("5.000000")).toBeInTheDocument();
+    expect(screen.getByText("11.000000")).toBeInTheDocument();
+    expect(screen.getByText("6.000000")).toBeInTheDocument();
   });
 
   it("forwards onClose to the overlay's close button", () => {

@@ -8,32 +8,43 @@ import {
   DeltaSeriesResult,
 } from "@lichtblick/suite-base/panels/shared/types";
 
-// Series are matched by configIndex; a series present on only one marker is skipped.
+// Series are matched by configIndex; all series present on either marker are included.
 export function computeDelta(markerA: DeltaMarker, markerB: DeltaMarker): DeltaResult {
+  const valueAtAByConfigIndex = new Map(
+    markerA.seriesValues.map(({ configIndex, value }) => [configIndex, value]),
+  );
   const valueAtBByConfigIndex = new Map(
     markerB.seriesValues.map(({ configIndex, value }) => [configIndex, value]),
   );
 
-  const series: DeltaSeriesResult[] = [];
-  for (const { configIndex, value: valueAtA } of markerA.seriesValues) {
-    const valueAtB = valueAtBByConfigIndex.get(configIndex);
-    if (valueAtB == undefined) {
-      continue;
-    }
+  const allConfigIndexes = getDeltaSeriesConfigIndexes(markerA, markerB);
 
-    series.push({
+  const series: DeltaSeriesResult[] = allConfigIndexes.map((configIndex) => {
+    const valueAtA = valueAtAByConfigIndex.get(configIndex);
+    const valueAtB = valueAtBByConfigIndex.get(configIndex);
+    const delta =
+      typeof valueAtA === "number" && typeof valueAtB === "number"
+        ? Math.abs(valueAtB - valueAtA)
+        : undefined;
+
+    return {
       configIndex,
       valueAtA,
       valueAtB,
-      delta:
-        typeof valueAtA === "number" && typeof valueAtB === "number"
-          ? Math.abs(valueAtB - valueAtA)
-          : undefined,
-    });
-  }
+      delta,
+    };
+  });
+
+  const primaryA = markerA.seriesValues[0]?.value;
+  const primaryB = markerB.seriesValues[0]?.value;
+  const deltaY =
+    typeof primaryA === "number" && typeof primaryB === "number"
+      ? Math.abs(primaryB - primaryA)
+      : undefined;
 
   return {
     deltaX: Math.abs(markerB.xValue - markerA.xValue),
+    deltaY,
     series,
   };
 }
@@ -54,6 +65,7 @@ export function computeDeltaDisplay(
   const marker = markerA ?? markerB;
   return {
     deltaX: undefined,
+    deltaY: undefined,
     series: (marker?.seriesValues ?? []).map(({ configIndex, value }) => ({
       configIndex,
       valueAtA: markerA ? value : undefined,

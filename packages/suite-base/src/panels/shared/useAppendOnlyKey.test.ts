@@ -77,6 +77,19 @@ describe("useAppendOnlyKey", () => {
     expect(result.current).toEqual("a");
   });
 
+  it("should not change when a newly appended segment is modified", () => {
+    // Given (e.g. user clicks + Add Series which starts empty, then types the topic name)
+    const { result, rerender } = setup(["a"]);
+
+    // When
+    rerender({ segments: ["a", ""] });
+    rerender({ segments: ["a", "b"] });
+    rerender({ segments: ["a", "c"] });
+
+    // Then
+    expect(result.current).toEqual("a");
+  });
+
   it("should detect removal of a segment that was only ever appended", () => {
     // Given
     const { result, rerender } = setup(["a"]);

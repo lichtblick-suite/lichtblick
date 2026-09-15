@@ -93,7 +93,8 @@ function useDeltaMeasureMode({
             return;
           }
 
-          setMarker(nextMarkerSlot(), { xValue, seriesValues });
+          const snappedX = typeof elements[0]?.data.x === "number" ? elements[0].data.x : xValue;
+          setMarker(nextMarkerSlot(), { xValue: snappedX, seriesValues });
         } catch (err: unknown) {
           console.error(err);
         }

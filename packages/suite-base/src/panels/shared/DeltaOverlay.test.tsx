@@ -4,8 +4,6 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import { BasicBuilder } from "@lichtblick/test-builders";
-
 import { DeltaOverlay, DeltaOverlayProps } from "./DeltaOverlay";
 import "@testing-library/jest-dom";
 
@@ -13,15 +11,16 @@ describe("DeltaOverlay", () => {
   function buildProps(overrides: Partial<DeltaOverlayProps> = {}): DeltaOverlayProps {
     return {
       deltaRowLabel: "Delta",
-      xColumnLabel: "X",
-      yColumnLabel: "Y",
+      xColumnLabel: "X-axis",
+      yColumnLabel: "Y-axis",
       markerALabel: "P1",
       markerBLabel: "P2",
       xValueA: 1,
       xValueB: 2,
+      yValueA: 10,
+      yValueB: 20,
       deltaX: 1,
-      seriesLabels: [],
-      series: [],
+      deltaY: 10,
       onRemoveMarkerA: jest.fn(),
       onRemoveMarkerB: jest.fn(),
       onClose: jest.fn(),
@@ -42,33 +41,31 @@ describe("DeltaOverlay", () => {
     expect(screen.getByText(props.markerBLabel)).toBeInTheDocument();
   });
 
-  it("should use a three-column grid when there are no series", () => {
+  it("should render the column headers for X-axis and Y-axis", () => {
     // Given
-    const props = buildProps({ seriesLabels: [] });
+    const props = buildProps();
 
     // When
     render(<DeltaOverlay {...props} />);
 
     // Then
-    const grid = screen.getByTestId("delta-overlay").children[1] as HTMLElement;
-    expect(grid.style.gridTemplateColumns).toEqual("auto max-content max-content");
+    expect(screen.getByText(props.xColumnLabel)).toBeInTheDocument();
+    expect(screen.getByText(props.yColumnLabel)).toBeInTheDocument();
   });
 
-  it("should render the y column label once per series, titled with its series label", () => {
+  it("should render colored marker dots when marker colors are provided", () => {
     // Given
-    const seriesLabel = BasicBuilder.string();
-    const configIndex = BasicBuilder.number();
     const props = buildProps({
-      seriesLabels: [{ configIndex, label: seriesLabel }],
-      series: [{ configIndex, valueAtA: 1, valueAtB: 2, delta: 1 }],
+      markerAColor: "#EF833A",
+      markerBColor: "#FFC107",
     });
 
     // When
     render(<DeltaOverlay {...props} />);
 
     // Then
-    expect(screen.getByTitle(seriesLabel)).toHaveTextContent(props.yColumnLabel);
-    expect(screen.queryByText(seriesLabel)).not.toBeInTheDocument();
+    expect(screen.getByTestId("delta-overlay-dot-a")).toBeInTheDocument();
+    expect(screen.getByTestId("delta-overlay-dot-b")).toBeInTheDocument();
   });
 
   it("should label the marker removal buttons distinctly", () => {
@@ -87,23 +84,22 @@ describe("DeltaOverlay", () => {
     );
   });
 
-  it("should render a placeholder when a series has no computed result", () => {
+  it("should render placeholders when values are undefined", () => {
     // Given
     const props = buildProps({
-      seriesLabels: [
-        {
-          configIndex: BasicBuilder.number(),
-          label: BasicBuilder.string(),
-        },
-      ],
-      series: [],
+      xValueA: undefined,
+      xValueB: undefined,
+      yValueA: undefined,
+      yValueB: undefined,
+      deltaX: undefined,
+      deltaY: undefined,
     });
 
     // When
     render(<DeltaOverlay {...props} />);
 
     // Then
-    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("—")).toHaveLength(6);
   });
 
   it("should call onRemoveMarkerA when the marker A remove button is clicked", () => {
@@ -173,14 +169,17 @@ describe("DeltaOverlay", () => {
     const props = buildProps({
       xValueA: undefined,
       xValueB: undefined,
+      yValueA: undefined,
+      yValueB: undefined,
       deltaX: undefined,
+      deltaY: undefined,
     });
 
     // When
     render(<DeltaOverlay {...props} />);
 
     // Then
-    expect(screen.getAllByText("—")).toHaveLength(3);
+    expect(screen.getAllByText("—")).toHaveLength(6);
   });
 
   it("should render marker A's value once placed while marker B is still a placeholder", () => {
@@ -188,8 +187,12 @@ describe("DeltaOverlay", () => {
     const props = buildProps({
       xValueA: 4.5,
       xValueB: undefined,
+      yValueA: 10.2,
+      yValueB: undefined,
       deltaX: undefined,
+      deltaY: undefined,
       formatXValue: (value) => `${value.toFixed(1)}s`,
+      formatYValue: (value) => `${value.toFixed(1)}s`,
     });
 
     // When
@@ -197,24 +200,30 @@ describe("DeltaOverlay", () => {
 
     // Then
     expect(screen.getByText("4.5s")).toBeInTheDocument();
-    expect(screen.getAllByText("—")).toHaveLength(2);
+    expect(screen.getByText("10.2s")).toBeInTheDocument();
+    expect(screen.getAllByText("—")).toHaveLength(4);
   });
 
-  it("should format x values using the provided formatXValue function", () => {
+  it("should format x values and y values with 6 decimal places by default", () => {
     // Given
     const props = buildProps({
-      xValueA: 1.23456,
-      xValueB: 7.891011,
-      deltaX: 6.656451,
-      formatXValue: (value) => `${value.toFixed(1)}s`,
+      xValueA: 4.6,
+      xValueB: 6.0,
+      yValueA: 93.688286,
+      yValueB: 13.924775,
+      deltaX: 1.4,
+      deltaY: 79.763511,
     });
 
     // When
     render(<DeltaOverlay {...props} />);
 
     // Then
-    expect(screen.getByText("1.2s")).toBeInTheDocument();
-    expect(screen.getByText("7.9s")).toBeInTheDocument();
-    expect(screen.getByText("6.7s")).toBeInTheDocument();
+    expect(screen.getByText("4.600000")).toBeInTheDocument();
+    expect(screen.getByText("6.000000")).toBeInTheDocument();
+    expect(screen.getByText("1.400000")).toBeInTheDocument();
+    expect(screen.getByText("93.688286")).toBeInTheDocument();
+    expect(screen.getByText("13.924775")).toBeInTheDocument();
+    expect(screen.getByText("79.763511")).toBeInTheDocument();
   });
 });

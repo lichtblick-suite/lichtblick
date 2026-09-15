@@ -46,16 +46,9 @@ import { usePanelSettings } from "@lichtblick/suite-base/panels/StateTransitions
 import useStateTransitionsData from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsData";
 import useStateTransitionsDeltaMode from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsDeltaMode";
 import useStateTransitionsTime from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsTime";
-import { stateTransitionPathDisplayName } from "@lichtblick/suite-base/panels/StateTransitions/shared";
-import {
-  DeltaOverlay,
-  DeltaOverlaySeriesLabel,
-} from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
+import { DeltaOverlay } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
 import { MeasureModeToolbarButton } from "@lichtblick/suite-base/panels/shared/MeasureModeToolbarButton";
-import {
-  computeDeltaDisplay,
-  getDeltaSeriesConfigIndexes,
-} from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import { computeDeltaDisplay } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 import useAppendOnlyKey from "@lichtblick/suite-base/panels/shared/useAppendOnlyKey";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
@@ -225,22 +218,19 @@ function StateTransitions(props: StateTransitionPanelProps) {
       return undefined;
     }
 
-    const seriesLabels: DeltaOverlaySeriesLabel[] = getDeltaSeriesConfigIndexes(
-      markerA,
-      markerB,
-    ).map((configIndex): DeltaOverlaySeriesLabel => {
-      const path = paths[configIndex];
-      return {
-        configIndex,
-        label: path ? stateTransitionPathDisplayName(path, configIndex) : "",
-      };
-    });
+    const primaryA = markerA?.seriesValues[0];
+    const primaryB = markerB?.seriesValues[0];
+    const markerAColor = primaryA ? paths[primaryA.configIndex]?.color : undefined;
+    const markerBColor = primaryB ? paths[primaryB.configIndex]?.color : undefined;
 
     return {
       xValueA: markerA?.xValue,
       xValueB: markerB?.xValue,
+      yValueA: primaryA?.value,
+      yValueB: primaryB?.value,
+      markerAColor,
+      markerBColor,
       delta: computeDeltaDisplay(markerA, markerB),
-      seriesLabels,
     };
   }, [deltaMode.active, markerA, markerB, paths]);
 
@@ -289,11 +279,14 @@ function StateTransitions(props: StateTransitionPanelProps) {
                 yColumnLabel={t("value")}
                 markerALabel={t("markerA")}
                 markerBLabel={t("markerB")}
+                markerAColor={overlayData.markerAColor}
+                markerBColor={overlayData.markerBColor}
                 xValueA={overlayData.xValueA}
                 xValueB={overlayData.xValueB}
+                yValueA={overlayData.yValueA}
+                yValueB={overlayData.yValueB}
                 deltaX={overlayData.delta.deltaX}
-                seriesLabels={overlayData.seriesLabels}
-                series={overlayData.delta.series}
+                deltaY={overlayData.delta.deltaY}
                 onRemoveMarkerA={deltaMode.removeMarkerA}
                 onRemoveMarkerB={deltaMode.removeMarkerB}
                 onClose={deltaMode.toggleActive}

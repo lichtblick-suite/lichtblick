@@ -78,10 +78,62 @@ describe("computeDelta", () => {
     expect(result.series).toEqual([{ configIndex, valueAtA: 12, valueAtB: 5, delta: 7 }]);
   });
 
-  it("should skip series that are only present on one marker", () => {
+  it("should compute deltaY between primary numeric values of both markers", () => {
     // Given
-    const sharedIndex = BasicBuilder.number();
-    const onlyOnAIndex = sharedIndex + 1;
+    const markerA = buildMarker({ seriesValues: [{ configIndex: 0, value: 5 }] });
+    const markerB = buildMarker({ seriesValues: [{ configIndex: 0, value: 12 }] });
+
+    // When
+    const result = computeDelta(markerA, markerB);
+
+    // Then
+    expect(result.deltaY).toEqual(7);
+  });
+
+  it("should compute deltaY when markers belong to different series", () => {
+    // Given
+    const markerA = buildMarker({ seriesValues: [{ configIndex: 0, value: 10 }] });
+    const markerB = buildMarker({ seriesValues: [{ configIndex: 1, value: 25 }] });
+
+    // When
+    const result = computeDelta(markerA, markerB);
+
+    // Then
+    expect(result.deltaY).toEqual(15);
+    expect(result.series).toEqual([
+      { configIndex: 0, valueAtA: 10, valueAtB: undefined, delta: undefined },
+      { configIndex: 1, valueAtA: undefined, valueAtB: 25, delta: undefined },
+    ]);
+  });
+
+  it("should leave deltaY undefined when values are non-numeric", () => {
+    // Given
+    const markerA = buildMarker({ seriesValues: [{ configIndex: 0, value: "IDLE" }] });
+    const markerB = buildMarker({ seriesValues: [{ configIndex: 0, value: "RUNNING" }] });
+
+    // When
+    const result = computeDelta(markerA, markerB);
+
+    // Then
+    expect(result.deltaY).toBeUndefined();
+  });
+
+  it("should leave deltaY undefined when markers have no series values", () => {
+    // Given
+    const markerA = buildMarker({ seriesValues: [] });
+    const markerB = buildMarker({ seriesValues: [] });
+
+    // When
+    const result = computeDelta(markerA, markerB);
+
+    // Then
+    expect(result.deltaY).toBeUndefined();
+  });
+
+  it("should retain series that are only present on one marker with missing counter-values", () => {
+    // Given
+    const sharedIndex = 0;
+    const onlyOnAIndex = 1;
     const markerA = buildMarker({
       seriesValues: [
         { configIndex: sharedIndex, value: 1 },
@@ -98,6 +150,7 @@ describe("computeDelta", () => {
     // Then
     expect(result.series).toEqual([
       { configIndex: sharedIndex, valueAtA: 1, valueAtB: 3, delta: 2 },
+      { configIndex: onlyOnAIndex, valueAtA: 2, valueAtB: undefined, delta: undefined },
     ]);
   });
 
@@ -207,12 +260,12 @@ describe("getDeltaSeriesConfigIndexes", () => {
 describe("computeDeltaDisplay", () => {
   const buildMarker = DeltaMarkerBuilder.marker;
 
-  it("should return an undefined deltaX and empty series when neither marker is set", () => {
+  it("should return an undefined deltaX, deltaY, and empty series when neither marker is set", () => {
     // Given / When
     const result = computeDeltaDisplay(undefined, undefined);
 
     // Then
-    expect(result).toEqual({ deltaX: undefined, series: [] });
+    expect(result).toEqual({ deltaX: undefined, deltaY: undefined, series: [] });
   });
 
   it("should list marker A's series with valueAtB undefined when only marker A is set", () => {
@@ -226,6 +279,7 @@ describe("computeDeltaDisplay", () => {
     // Then
     expect(result).toEqual({
       deltaX: undefined,
+      deltaY: undefined,
       series: [{ configIndex, valueAtA: 5, valueAtB: undefined, delta: undefined }],
     });
   });
@@ -241,6 +295,7 @@ describe("computeDeltaDisplay", () => {
     // Then
     expect(result).toEqual({
       deltaX: undefined,
+      deltaY: undefined,
       series: [{ configIndex, valueAtA: undefined, valueAtB: 9, delta: undefined }],
     });
   });

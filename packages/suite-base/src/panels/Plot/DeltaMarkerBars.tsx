@@ -7,14 +7,8 @@ import { useLatest } from "react-use";
 import { DEFAULT_MARKER_COLOR } from "@lichtblick/suite-base/panels/Plot/constants";
 import { getPixelForXValue } from "@lichtblick/suite-base/panels/Plot/utils/getPixelForXValue";
 import { getPixelForYValue } from "@lichtblick/suite-base/panels/Plot/utils/getPixelForYValue";
-import {
-  DeltaOverlay,
-  DeltaOverlaySeriesLabel,
-} from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
-import {
-  computeDeltaDisplay,
-  getDeltaSeriesConfigIndexes,
-} from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import { DeltaOverlay } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
+import { computeDeltaDisplay } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
 import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/types";
 
 import { useDeltaMarkerBarsStyles } from "./DeltaMarkerBars.style";
@@ -125,7 +119,6 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   markerA,
   markerB,
   colorsByDatasetIndex,
-  labelsByDatasetIndex,
   deltaRowLabel,
   xColumnLabel,
   yColumnLabel,
@@ -207,22 +200,15 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
       return undefined;
     }
 
-    const seriesLabels: DeltaOverlaySeriesLabel[] = getDeltaSeriesConfigIndexes(
-      markerA,
-      markerB,
-    ).map(
-      (configIndex): DeltaOverlaySeriesLabel => ({
-        configIndex,
-        label: labelsByDatasetIndex[configIndex] ?? "",
-      }),
-    );
-
-    return { delta: computeDeltaDisplay(markerA, markerB), seriesLabels };
-  }, [active, labelsByDatasetIndex, markerA, markerB]);
+    return computeDeltaDisplay(markerA, markerB);
+  }, [active, markerA, markerB]);
 
   if (!coordinator) {
     return <></>;
   }
+
+  const primaryA = getPrimarySeries(markerA, colorsByDatasetIndex);
+  const primaryB = getPrimarySeries(markerB, colorsByDatasetIndex);
 
   return (
     <>
@@ -261,11 +247,14 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
             yColumnLabel={yColumnLabel}
             markerALabel={markerALabel}
             markerBLabel={markerBLabel}
+            markerAColor={primaryA?.color}
+            markerBColor={primaryB?.color}
             xValueA={markerA?.xValue}
             xValueB={markerB?.xValue}
-            deltaX={overlayData.delta.deltaX}
-            seriesLabels={overlayData.seriesLabels}
-            series={overlayData.delta.series}
+            yValueA={primaryA?.value}
+            yValueB={primaryB?.value}
+            deltaX={overlayData.deltaX}
+            deltaY={overlayData.deltaY}
             onRemoveMarkerA={onRemoveMarkerA}
             onRemoveMarkerB={onRemoveMarkerB}
             onClose={onClose}

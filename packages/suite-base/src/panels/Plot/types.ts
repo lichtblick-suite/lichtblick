@@ -180,7 +180,6 @@ export type DeltaMarkerBarsProps = {
   markerA?: DeltaMarker;
   markerB?: DeltaMarker;
   colorsByDatasetIndex: Record<string, string>;
-  labelsByDatasetIndex: Record<string, string>;
   deltaRowLabel: string;
   xColumnLabel: string;
   yColumnLabel: string;

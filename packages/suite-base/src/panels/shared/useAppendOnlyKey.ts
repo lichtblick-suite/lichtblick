@@ -5,25 +5,28 @@ import { useRef } from "react";
 
 /**
  * Joins `segments` into a "|"-separated key that only changes when an existing segment is
- * edited, reordered, or removed - appending new segments to the end leaves it unchanged. Useful
- * for a `resetKey` that shouldn't reset state (e.g. delta measure mode markers) just because the
- * user added a new series/path.
+ * edited, reordered, or removed - appending new segments to the end (and editing the newly
+ * appended segments) leaves it unchanged. Useful for a `resetKey` that shouldn't reset state
+ * (e.g. delta measure mode markers) just because the user added a new series/path.
  */
 function useAppendOnlyKey(segments: readonly string[]): string {
-  const previousSegmentsRef = useRef<readonly string[] | undefined>(undefined);
+  const previousLengthRef = useRef(0);
+  const baselineSegmentsRef = useRef<readonly string[] | undefined>(undefined);
   const stableKeyRef = useRef("");
-  const previous = previousSegmentsRef.current;
 
-  // `undefined` (not yet initialized) must never vacuously count as "append-only" via Array.every.
+  const baseline = baselineSegmentsRef.current;
+  const previousLength = previousLengthRef.current;
+
+  // An append-only transition keeps the baseline prefix intact and does not decrease length.
   const isAppendOnly =
-    previous != undefined &&
-    segments.length >= previous.length &&
-    previous.every((value, index) => segments[index] === value);
+    baseline != undefined &&
+    segments.length >= previousLength &&
+    baseline.every((value, index) => segments[index] === value);
 
-  // Track the true latest segments regardless, so a later edit/removal is compared against them -
-  // but only recompute the exposed key on a real change, so pure appends leave it untouched.
-  previousSegmentsRef.current = segments;
+  previousLengthRef.current = segments.length;
+
   if (!isAppendOnly) {
+    baselineSegmentsRef.current = segments;
     stableKeyRef.current = segments.join("|");
   }
 

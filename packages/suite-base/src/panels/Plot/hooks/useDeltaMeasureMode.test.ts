@@ -39,17 +39,15 @@ describe("useDeltaMeasureMode", () => {
   };
 
   const setup = ({ coordinator, renderer, draggingRef, resetKey }: SetupOverrides = {}) => {
-    const defaultElements = [
-      PlotBuilder.hoverElement({
-        configIndex: 0,
-        data: PlotBuilder.datum({ value: BasicBuilder.number() }),
-      }),
-    ];
-
     const props: UseDeltaMeasureModeProps = {
       coordinator,
       renderer: {
-        getElementsAtPixel: jest.fn().mockResolvedValue(defaultElements),
+        getElementsAtPixel: jest.fn().mockImplementation(async () => [
+          PlotBuilder.hoverElement({
+            configIndex: 0,
+            data: PlotBuilder.datum({ value: BasicBuilder.number() }),
+          }),
+        ]),
         ...renderer,
       } as OffscreenCanvasRenderer,
       draggingRef: { current: false, ...draggingRef },
@@ -238,7 +236,7 @@ describe("useDeltaMeasureMode", () => {
     const elements = [
       PlotBuilder.hoverElement({
         configIndex,
-        data: PlotBuilder.datum({ value }),
+        data: PlotBuilder.datum({ value, x: xValue }),
       }),
     ];
     const { result } = setup({

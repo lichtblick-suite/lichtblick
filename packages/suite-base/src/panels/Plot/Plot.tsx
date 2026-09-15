@@ -325,7 +325,6 @@ const Plot = (props: PlotProps): React.JSX.Element => {
               markerA={deltaMeasureMode.markerA}
               markerB={deltaMeasureMode.markerB}
               colorsByDatasetIndex={colorsByDatasetIndex}
-              labelsByDatasetIndex={labelsByDatasetIndex}
               deltaRowLabel={t("delta")}
               xColumnLabel={xAxisMode === "timestamp" ? t("timestamp") : t("xAxis")}
               yColumnLabel={t("yAxis")}
