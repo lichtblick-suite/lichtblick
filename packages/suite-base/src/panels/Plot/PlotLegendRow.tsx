@@ -13,7 +13,7 @@ import {
   Square12Regular,
 } from "@fluentui/react-icons";
 import { ButtonBase, Checkbox, Tooltip, Typography, buttonBaseClasses } from "@mui/material";
-import { MouseEventHandler } from "react";
+import { MouseEventHandler, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
@@ -22,6 +22,8 @@ import { Immutable } from "@lichtblick/suite";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
+import { useDraggedMessagePath } from "@lichtblick/suite-base/panels/shared/useDraggedMessagePath";
+import { useMessagePathDrag } from "@lichtblick/suite-base/services/messagePathDragging";
 import { getLineColor } from "@lichtblick/suite-base/util/plotColors";
 import { customTypography } from "@lichtblick/theme";
 
@@ -86,6 +88,12 @@ const useStyles = makeStyles<void, "plotName" | "actionButton">()((theme, _param
   disabledPathLabel: {
     opacity: 0.5,
   },
+  dragging: {
+    opacity: 0.5,
+  },
+  draggable: {
+    cursor: "grab",
+  },
   plotName: {
     display: "flex",
     alignItems: "center",
@@ -130,6 +138,11 @@ const useStyles = makeStyles<void, "plotName" | "actionButton">()((theme, _param
   },
 }));
 
+/**
+ * Format a series' current value for display in the legend value column. Returns a string or number
+ * for renderable primitives (including bigint and Time), or undefined for values that cannot be
+ * shown inline.
+ */
 function renderValue(value: unknown): string | number | undefined {
   switch (typeof value) {
     case "bigint":
@@ -148,6 +161,11 @@ function renderValue(value: unknown): string | number | undefined {
   }
 }
 
+/**
+ * A single row in the Plot legend. Renders the series color swatch, the series label (which doubles
+ * as a message-path drag source so the series can be dragged onto another timeseries panel), the
+ * live value column, and a delete button; or an "add series" placeholder when there are no paths.
+ */
 export function PlotLegendRow({
   hasMismatchedDataLength,
   index,
@@ -166,6 +184,30 @@ export function PlotLegendRow({
 
   // When there are no series configured we render an extra row to show an "add series" button.
   const isAddSeriesRow = paths.length === 0;
+
+  const draggedItem = useDraggedMessagePath(isAddSeriesRow ? undefined : path.value);
+  const { connectDragSource, connectDragPreview, isDragging } = useMessagePathDrag({
+    item: draggedItem ?? {
+      path: "",
+      rootSchemaName: undefined,
+      isTopic: false,
+      isLeaf: true,
+      topicName: "",
+    },
+    selected: false,
+    sourcePanelId: panelId,
+  });
+
+  const dragRef = useCallback(
+    (el: HTMLDivElement | ReactNull) => {
+      if (draggedItem == undefined) {
+        return;
+      }
+      connectDragSource(el);
+      connectDragPreview(el);
+    },
+    [connectDragSource, connectDragPreview, draggedItem],
+  );
 
   const handleDeletePath: MouseEventHandler<HTMLButtonElement> = (ev) => {
     // Deleting a path is a "quick action" and we want to avoid opening the settings sidebar
@@ -218,8 +260,14 @@ export function PlotLegendRow({
         />
       </div>
       <div
-        className={classes.plotName}
-        style={{ gridColumn: !showPlotValuesInLegend ? "span 2" : undefined }}
+        ref={dragRef}
+        className={cx(classes.plotName, {
+          [classes.dragging]: isDragging,
+          [classes.draggable]: draggedItem != undefined,
+        })}
+        style={{
+          gridColumn: !showPlotValuesInLegend ? "span 2" : undefined,
+        }}
       >
         <Typography
           noWrap={showPlotValuesInLegend}
