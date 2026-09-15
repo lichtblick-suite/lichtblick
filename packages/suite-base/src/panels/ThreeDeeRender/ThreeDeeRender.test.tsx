@@ -149,21 +149,24 @@ const createMockContext = (
   } as BuiltinPanelExtensionContext;
 };
 
-function buildTfMessages({
-  topic = "/tf",
-  count,
-  startSec = 100,
-  startNsec = 0,
-  schemaName = "tf2_msgs/TFMessage",
-  sizeInBytes = 100,
-}: {
-  count: number;
-  topic?: string;
-  startSec?: number;
-  startNsec?: number;
-  schemaName?: string;
-  sizeInBytes?: number;
-}): MessageEvent[] {
+function buildTfMessages(
+  this: void,
+  {
+    topic = "/tf",
+    count,
+    startSec = 100,
+    startNsec = 0,
+    schemaName = "tf2_msgs/TFMessage",
+    sizeInBytes = 100,
+  }: {
+    count: number;
+    topic?: string;
+    startSec?: number;
+    startNsec?: number;
+    schemaName?: string;
+    sizeInBytes?: number;
+  },
+): MessageEvent[] {
   return Array.from({ length: count }, (_, i) =>
     MessageEventBuilder.messageEvent({
       topic,
@@ -358,7 +361,7 @@ describe("ThreeDeeRender", () => {
   });
 
   describe("seek render barrier", () => {
-    function deferred<T>() {
+    function deferred<T>(this: void) {
       let resolve!: (value: T | PromiseLike<T>) => void;
       let reject!: (reason?: unknown) => void;
       const promise = new Promise<T>((res, rej) => {
@@ -1258,12 +1261,16 @@ describe("ThreeDeeRender", () => {
   describe("transform preload alert", () => {
     const TRANSFORM_ALERT_ID = "transform-preload";
 
-    const lastAlertFor = (mockContext: BuiltinPanelExtensionContext, alertId: string): unknown => {
+    function lastAlertFor(
+      this: void,
+      mockContext: BuiltinPanelExtensionContext,
+      alertId: string,
+    ): unknown {
       const calls = (mockContext.unstable_setAlert as jest.Mock).mock.calls.filter(
         (call) => call[0] === alertId,
       );
       return calls.at(-1)?.[1];
-    };
+    }
 
     it("surfaces an info alert when a transform topic exists and preloading is disabled", async () => {
       // Given
@@ -1368,6 +1375,215 @@ describe("ThreeDeeRender", () => {
           mockContext.onRender!({ topics }, jest.fn());
         });
       }).not.toThrow();
+    });
+  });
+
+  describe("edited-transforms effects", () => {
+    it("advertises the edited-transforms topic on a ROS1 connection", async () => {
+      // Given
+      const mockContext = createMockContext({ dataSourceProfile: "ros1" });
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      // Then
+      const advertise1 = mockContext.advertise as jest.Mock;
+      await waitFor(() => {
+        expect(advertise1).toHaveBeenCalledWith(
+          "/lichtblick/edited_transforms",
+          "foxglove_msgs/FrameTransform",
+          expect.objectContaining({ datatypes: expect.any(Map) }),
+        );
+      });
+    });
+
+    it("advertises the edited-transforms topic on a ROS2 connection", async () => {
+      // Given
+      const mockContext = createMockContext({ dataSourceProfile: "ros2" });
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+
+      // Then
+      const advertise = mockContext.advertise as jest.Mock;
+      await waitFor(() => {
+        expect(advertise).toHaveBeenCalledWith(
+          "/lichtblick/edited_transforms",
+          "foxglove_msgs/FrameTransform",
+          expect.anything(),
+        );
+      });
+    });
+
+    it("does not advertise the edited-transforms topic on a non-ROS connection", async () => {
+      // Given
+      const mockContext = createMockContext({ dataSourceProfile: "mcap" });
+      const props = setup({}, mockContext);
+
+      // When
+      render(<ThreeDeeRender {...props} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+
+      // Then: the edited-transforms topic must not be advertised
+      const advertisedTopics = (mockContext.advertise as jest.Mock).mock.calls.map(
+        (c: unknown[]) => c[0],
+      );
+      expect(advertisedTopics).not.toContain("/lichtblick/edited_transforms");
+    });
+
+    it("publishes edited transforms via setVariable when configChange fires with edits", async () => {
+      // Given: a component whose initial config has an edited frame, and a renderer that can
+      // resolve it. The component writes renderer.config = config after mount, so we set the edited
+      // frame in initialState rather than in the mock renderer's config directly.
+      const applyMock = jest.fn((output: any) => {
+        output.position.x = 1;
+        output.orientation.w = 1;
+        return output;
+      });
+      const customRendererInstance = createMockRenderer({
+        currentTime: 0n,
+        transformTree: {
+          frame: (id: string) => (id === "sensor" ? { parent: () => ({ id: "base" }) } : undefined),
+          apply: applyMock,
+        },
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext({
+        dataSourceProfile: "ros1",
+        initialState: { transforms: { "frame:sensor": { xyzOffset: [1, 0, 0] } } },
+      });
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      // Wait for the publish effect's configChange listener to be registered before emitting.
+      // The effect registers exactly one listener; we wait for it to appear.
+      await waitFor(() => {
+        expect(customRendererInstance.addListener).toHaveBeenCalledWith(
+          "configChange",
+          expect.any(Function),
+        );
+      });
+
+      // When: the renderer fires a configChange event
+      act(() => {
+        customRendererInstance.emit("configChange", customRendererInstance);
+      });
+
+      // Then: setVariable is called with the resolved transforms
+      await waitFor(() => {
+        expect(mockContext.setVariable).toHaveBeenCalledWith(
+          "edited_transforms",
+          expect.arrayContaining([
+            expect.objectContaining({
+              parent_frame_id: "base",
+              child_frame_id: "sensor",
+            }),
+          ]),
+        );
+      });
+    });
+
+    it("clears the edited_transforms variable when the last offset is reset", async () => {
+      // Given: component with an edited frame; the renderer resolves it on the first configChange,
+      // then the config is cleared and the next configChange should clear the variable.
+      const customRendererInstance = createMockRenderer({
+        currentTime: 0n,
+        transformTree: {
+          frame: (id: string) => (id === "sensor" ? { parent: () => ({ id: "base" }) } : undefined),
+          apply: jest.fn((output: any) => {
+            output.orientation.w = 1;
+            return output;
+          }),
+        },
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext({
+        dataSourceProfile: "ros1",
+        initialState: { transforms: { "frame:sensor": { xyzOffset: [1, 0, 0] } } },
+      });
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      // Wait for the publish effect's configChange listener to be registered before emitting.
+      await waitFor(() => {
+        expect(customRendererInstance.addListener).toHaveBeenCalledWith(
+          "configChange",
+          expect.any(Function),
+        );
+      });
+
+      // Establish the initial edited state
+      act(() => {
+        customRendererInstance.emit("configChange", customRendererInstance);
+      });
+      await waitFor(() => {
+        expect(mockContext.setVariable).toHaveBeenCalledWith(
+          "edited_transforms",
+          expect.arrayContaining([expect.objectContaining({ child_frame_id: "sensor" })]),
+        );
+      });
+
+      // When: the offset is cleared by updating the renderer config directly (simulating a user
+      // reset — the component writes renderer.config = newConfig when config state changes)
+      customRendererInstance.config = {
+        ...customRendererInstance.config,
+        transforms: { "frame:sensor": { xyzOffset: [0, 0, 0] } },
+      };
+      (mockContext.setVariable as jest.Mock).mockClear();
+      act(() => {
+        customRendererInstance.emit("configChange", customRendererInstance);
+      });
+
+      // Then: setVariable is called with an empty array
+      await waitFor(() => {
+        expect(mockContext.setVariable).toHaveBeenCalledWith("edited_transforms", []);
+      });
+    });
+
+    it("does not call setVariable when configChange fires with no edits", async () => {
+      // Given: a renderer whose config has a frame entry with all-zero offsets. We seed this via
+      // initialState so the component writes it into renderer.config on mount, actually exercising
+      // the zero-offset filtering path in hasEditedTransforms rather than the empty-config path.
+      const customRendererInstance = createMockRenderer({
+        currentTime: 0n,
+        transformTree: {
+          frame: jest.fn(),
+          apply: jest.fn(),
+        },
+      });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+
+      const mockContext = createMockContext({
+        initialState: { transforms: { "frame:sensor": { xyzOffset: [0, 0, 0] } } },
+      });
+      const props = setup({}, mockContext);
+      render(<ThreeDeeRender {...props} />);
+
+      // Wait for the configChange listener to be registered before emitting
+      await waitFor(() => {
+        expect(customRendererInstance.addListener).toHaveBeenCalledWith(
+          "configChange",
+          expect.any(Function),
+        );
+      });
+
+      // When: configChange fires repeatedly (simulating camera drags)
+      act(() => {
+        customRendererInstance.emit("configChange", customRendererInstance);
+        customRendererInstance.emit("configChange", customRendererInstance);
+      });
+
+      // Then: setVariable is never called with the edited_transforms key
+      expect(mockContext.setVariable).not.toHaveBeenCalledWith(
+        "edited_transforms",
+        expect.anything(),
+      );
     });
   });
 });
