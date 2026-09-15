@@ -20,7 +20,9 @@ import { ReactNode } from "react";
 
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { useStateToURLSynchronization } from "@lichtblick/suite-base/hooks/useStateToURLSynchronization";
+import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
+import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext");
 jest.mock("@lichtblick/suite-base/components/MessagePipeline");
@@ -96,14 +98,14 @@ describe("useStateToURLSynchronization", () => {
 
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
       selector({
-        playerState: {
-          activeData: { currentTime: { sec: 1, nsec: 1 } },
-          capabilities: ["playbackControl"],
+        playerState: PlayerBuilder.playerState({
+          activeData: PlayerBuilder.activeData({ currentTime: { sec: 1, nsec: 1 } }),
+          capabilities: [PLAYER_CAPABILITIES.playbackControl],
           urlState: {
             sourceId: "remote-file",
             parameters: { urls: [signed] },
           },
-        },
+        }),
       }),
     );
 
