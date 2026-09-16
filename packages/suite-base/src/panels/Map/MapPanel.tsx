@@ -37,7 +37,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 import FilteredPointLayer from "@lichtblick/suite-base/panels/Map/FilteredPointLayer";
 import { MapRotationOverlay } from "@lichtblick/suite-base/panels/Map/MapRotationOverlay";
 import { POINT_MARKER_RADIUS } from "@lichtblick/suite-base/panels/Map/constants";
-import { getHeadingFromTrack, precedingTrack } from "@lichtblick/suite-base/panels/Map/getHeading";
+import { headingForTopic, precedingTrack } from "@lichtblick/suite-base/panels/Map/getHeading";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { darkColor, lightColor, lineColors } from "@lichtblick/suite-base/util/plotColors";
 
@@ -805,32 +805,13 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
   // same derivation the oriented marker uses, so the map and the marker cannot disagree.
   const rotationActive = config.rotateWithHeading === true && config.followTopic !== "";
 
-  const mapHeading = useMemo(() => {
-    if (!rotationActive) {
-      return undefined;
-    }
-
-    const current = _.findLast(
-      currentNavMessages,
-      (message) => message.topic === config.followTopic,
-    );
-    if (!current) {
-      return undefined;
-    }
-
-    const fixes = allNavMessages
-      .filter((message) => message.topic === config.followTopic)
-      .map((message) => ({
-        timeSec: toSec(message.receiveTime),
-        lat: message.message.latitude,
-        lon: message.message.longitude,
-      }));
-
-    return getHeadingFromTrack(
-      { lat: current.message.latitude, lon: current.message.longitude },
-      precedingTrack(fixes, toSec(current.receiveTime)),
-    );
-  }, [allNavMessages, config.followTopic, currentNavMessages, rotationActive]);
+  const mapHeading = useMemo(
+    () =>
+      rotationActive
+        ? headingForTopic(currentNavMessages, allNavMessages, config.followTopic)
+        : undefined,
+    [allNavMessages, config.followTopic, currentNavMessages, rotationActive],
+  );
 
   // Hold the last usable bearing. A frame with no fix, or one too short to take a bearing
   // from, should leave the map where it is rather than snapping back to north. The topic it
