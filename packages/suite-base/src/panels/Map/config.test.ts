@@ -8,6 +8,8 @@
 import { SettingsTreeField } from "@lichtblick/suite";
 import { buildSettingsTree, Config } from "@lichtblick/suite-base/panels/Map/config";
 
+// Not PlayerBuilder.topic: that returns the player-facing Topic, whose schemaName is
+// optional, while buildSettingsTree takes the extension-facing Topic where it is required.
 const TOPICS = [{ name: "/gps", schemaName: "sensor_msgs/NavSatFix" }];
 
 function makeConfig(overrides: Partial<Config> = {}): Config {

@@ -193,12 +193,18 @@ describe("headingForTopic", () => {
     expect(headingForTopic([fix("/gps", 3, 2, 0)], mixed, "/gps")).toBeCloseTo(0, 3);
   });
 
-  it("uses the latest fix in the frame when it carries several", () => {
-    // The track ends at (1, 0). Bearing onto the later fix (2, 1) is roughly north east;
-    // had the earlier fix (2, 0) been taken instead the bearing would be due north, so the
-    // angle alone distinguishes them.
+  it("bears the latest fix in a frame against the earlier fixes in that same frame", () => {
+    // This is what keeps the map and the marker on it pointing the same way: the marker
+    // layer orients (2, 1) against (2, 0), so the map has to as well. Taking the bearing
+    // from the history alone would give roughly 45 degrees instead of due east.
     const frame = [fix("/gps", 3, 2, 0), fix("/gps", 4, 2, 1)];
-    expect(headingForTopic(frame, history, "/gps")).toBeCloseTo(45, 0);
+    expect(headingForTopic(frame, history, "/gps")).toBeCloseTo(90, 0);
+  });
+
+  it("tolerates the same fix appearing in both the history and the frame", () => {
+    // In the panel the history already holds the frame's messages, so the two overlap.
+    const shared = fix("/gps", 3, 2, 0);
+    expect(headingForTopic([shared], [...history, shared], "/gps")).toBeCloseTo(0, 3);
   });
 
   it("returns undefined while the platform has not moved far enough", () => {
