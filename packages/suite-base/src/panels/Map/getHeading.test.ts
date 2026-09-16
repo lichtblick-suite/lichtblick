@@ -10,10 +10,12 @@ import {
   distanceMeters,
   getHeading,
   getHeadingFromTrack,
+  headingForTopic,
   precedingTrack,
   TimedFix,
 } from "@lichtblick/suite-base/panels/Map/getHeading";
-import { Point } from "@lichtblick/suite-base/panels/Map/types";
+import { NavSatFixMsg, Point } from "@lichtblick/suite-base/panels/Map/types";
+import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 const origin: Point = { lat: 0, lon: 0 };
 
@@ -156,5 +158,52 @@ describe("precedingTrack", () => {
 
   it("carries only the position, not the timing", () => {
     expect(Object.keys(precedingTrack(fixes, 2)[0]!).sort()).toEqual(["lat", "lon"]);
+  });
+});
+
+describe("headingForTopic", () => {
+  function fix(topic: string, sec: number, lat: number, lon: number): MessageEvent<NavSatFixMsg> {
+    return {
+      topic,
+      schemaName: "sensor_msgs/NavSatFix",
+      receiveTime: { sec, nsec: 0 },
+      sizeInBytes: 0,
+      message: { latitude: lat, longitude: lon },
+    };
+  }
+
+  const history = [fix("/gps", 1, 0, 0), fix("/gps", 2, 1, 0)];
+
+  it("bears the current fix against the topic's earlier ones", () => {
+    // Running north: at latitude 2, having come from 1.
+    expect(headingForTopic([fix("/gps", 3, 2, 0)], history, "/gps")).toBeCloseTo(0, 3);
+  });
+
+  it("returns undefined when the frame carries no fix on that topic", () => {
+    expect(headingForTopic([fix("/other", 3, 2, 0)], history, "/gps")).toBeUndefined();
+  });
+
+  it("returns undefined for an empty frame", () => {
+    expect(headingForTopic([], history, "/gps")).toBeUndefined();
+  });
+
+  it("ignores other topics' fixes when building the track", () => {
+    // An eastward fix on another topic must not bend a northward bearing.
+    const mixed = [...history, fix("/other", 2, 1, 5)];
+    expect(headingForTopic([fix("/gps", 3, 2, 0)], mixed, "/gps")).toBeCloseTo(0, 3);
+  });
+
+  it("uses the latest fix in the frame when it carries several", () => {
+    // The track ends at (1, 0). Bearing onto the later fix (2, 1) is roughly north east;
+    // had the earlier fix (2, 0) been taken instead the bearing would be due north, so the
+    // angle alone distinguishes them.
+    const frame = [fix("/gps", 3, 2, 0), fix("/gps", 4, 2, 1)];
+    expect(headingForTopic(frame, history, "/gps")).toBeCloseTo(45, 0);
+  });
+
+  it("returns undefined while the platform has not moved far enough", () => {
+    const jitter = MIN_HEADING_DISTANCE_METERS / 100 / 111_195;
+    const still = [fix("/gps", 1, 0, 0), fix("/gps", 2, jitter, 0)];
+    expect(headingForTopic([fix("/gps", 3, -jitter, 0)], still, "/gps")).toBeUndefined();
   });
 });

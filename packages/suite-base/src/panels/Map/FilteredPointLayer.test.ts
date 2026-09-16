@@ -145,3 +145,74 @@ describe("FilteredPointLayer heading track", () => {
     expect(markerHtml(markers[0]!)).toContain("rotate(0 12 12)");
   });
 });
+
+describe("FilteredPointLayer interaction", () => {
+  const track: Point[] = [{ lat: 0, lon: 0 }];
+
+  function interactiveLayer(markerStyle: "dot" | "vehicle") {
+    const onHover = jest.fn();
+    const onClick = jest.fn();
+    const layer = FilteredPointLayer({
+      map: fakeMap,
+      bounds: WORLD,
+      color: "#ff0000",
+      hoverColor: "#00ff00",
+      navSatMessageEvents: [navSatFix(1, 0), navSatFix(2, 0)],
+      markerStyle,
+      headingTrack: track,
+      onHover,
+      onClick,
+    });
+    return { layer, onHover, onClick, markers: layer.getLayers() };
+  }
+
+  it.each([
+    "dot",
+    "vehicle",
+  ] as const)("reports the hovered message and its release for the %s style", (markerStyle) => {
+    const { layer, onHover, markers } = interactiveLayer(markerStyle);
+
+    layer.fire("mouseover", { sourceTarget: markers[0] });
+    expect(onHover).toHaveBeenLastCalledWith(expect.objectContaining({ topic: "/gps" }));
+
+    layer.fire("mouseout", { sourceTarget: markers[0] });
+    expect(onHover).toHaveBeenLastCalledWith(undefined);
+  });
+
+  it("releases the previous marker when the pointer moves straight onto another", () => {
+    const { layer, onHover, markers } = interactiveLayer("vehicle");
+
+    layer.fire("mouseover", { sourceTarget: markers[0] });
+    layer.fire("mouseover", { sourceTarget: markers[1] });
+
+    // The second hover reports its own message rather than clearing the first.
+    expect(onHover).toHaveBeenLastCalledWith(expect.objectContaining({ topic: "/gps" }));
+    expect(onHover).toHaveBeenCalledTimes(2);
+  });
+
+  it("releases the marker when the pointer leaves the layer entirely", () => {
+    const { layer, onHover, markers } = interactiveLayer("vehicle");
+
+    layer.fire("mouseover", { sourceTarget: markers[0] });
+    layer.fire("mouseleave", {});
+
+    expect(onHover).toHaveBeenLastCalledWith(undefined);
+  });
+
+  it("ignores a mouseout for a marker that is not the hovered one", () => {
+    const { layer, onHover, markers } = interactiveLayer("vehicle");
+
+    layer.fire("mouseover", { sourceTarget: markers[0] });
+    layer.fire("mouseout", { sourceTarget: markers[1] });
+
+    expect(onHover).toHaveBeenLastCalledWith(expect.objectContaining({ topic: "/gps" }));
+  });
+
+  it.each(["dot", "vehicle"] as const)("reports a click for the %s style", (markerStyle) => {
+    const { layer, onClick, markers } = interactiveLayer(markerStyle);
+
+    layer.fire("click", { sourceTarget: markers[0] });
+
+    expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ topic: "/gps" }));
+  });
+});

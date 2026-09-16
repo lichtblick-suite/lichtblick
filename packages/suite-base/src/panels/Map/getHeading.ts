@@ -5,8 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import * as _ from "lodash-es";
+
+import { toSec } from "@lichtblick/rostime";
 import { MIN_HEADING_DISTANCE_METERS } from "@lichtblick/suite-base/panels/Map/constants";
-import { Point } from "@lichtblick/suite-base/panels/Map/types";
+import { NavSatFixMsg, Point } from "@lichtblick/suite-base/panels/Map/types";
+import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 const EARTH_RADIUS_METERS = 6_371_000;
 const DEGREES_TO_RADIANS = Math.PI / 180;
@@ -114,4 +118,39 @@ export function getHeadingFromTrack(to: Point, track: readonly Point[]): number 
   }
 
   return undefined;
+}
+
+/**
+ * Heading of one topic at the current frame, for turning the map to match it.
+ *
+ * Takes the latest fix on `topic` from the current frame and bears it against that topic's
+ * earlier fixes. Returns undefined when the frame carries no fix on the topic, or when the
+ * platform has not moved far enough for a bearing to mean anything.
+ *
+ * @param currentFrame fixes in the frame being drawn, any topic
+ * @param history every known fix, any topic, oldest first
+ * @param topic the topic being followed
+ */
+export function headingForTopic(
+  currentFrame: readonly MessageEvent<NavSatFixMsg>[],
+  history: readonly MessageEvent<NavSatFixMsg>[],
+  topic: string,
+): number | undefined {
+  const current = _.findLast(currentFrame, (message) => message.topic === topic);
+  if (!current) {
+    return undefined;
+  }
+
+  const fixes: TimedFix[] = history
+    .filter((message) => message.topic === topic)
+    .map((message) => ({
+      timeSec: toSec(message.receiveTime),
+      lat: message.message.latitude,
+      lon: message.message.longitude,
+    }));
+
+  return getHeadingFromTrack(
+    { lat: current.message.latitude, lon: current.message.longitude },
+    precedingTrack(fixes, toSec(current.receiveTime)),
+  );
 }
