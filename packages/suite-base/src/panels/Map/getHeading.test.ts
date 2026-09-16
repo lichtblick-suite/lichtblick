@@ -98,11 +98,7 @@ describe("getHeadingFromTrack", () => {
     const jitter = MIN_HEADING_DISTANCE_METERS / 100 / 111_195;
     // The two most recent entries are stationary noise around the destination; the bearing
     // must come from the genuinely distant position earlier in the track.
-    const track: Point[] = [
-      WEST,
-      { lat: jitter, lon: 1 },
-      { lat: -jitter, lon: 1 },
-    ];
+    const track: Point[] = [WEST, { lat: jitter, lon: 1 }, { lat: -jitter, lon: 1 }];
     expect(getHeadingFromTrack(EAST, track)).toBeCloseTo(90, 3);
   });
 

@@ -850,7 +850,6 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
   // centred square whose side is the panel diagonal and the overflow is clipped away.
   const rotatedSide = Math.ceil(Math.hypot(panelWidth ?? 0, panelHeight ?? 0));
 
-
   // Pointer positions no longer line up with the turned tiles, so dragging is disabled and
   // wheel zoom is anchored to the centre, which is the followed vehicle. Leaflet reads the
   // zoom option when the wheel actually turns, so setting it is enough. Re-registering the
