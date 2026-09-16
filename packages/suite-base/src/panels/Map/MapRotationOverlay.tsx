@@ -5,7 +5,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-const COMPASS_SIZE = 34;
+import { useStyles } from "@lichtblick/suite-base/panels/Map/MapRotationOverlay.style";
+import { COMPASS_SIZE } from "@lichtblick/suite-base/panels/Map/constants";
 
 type MapRotationOverlayProps = {
   /** Map rotation in degrees clockwise from north. */
@@ -16,25 +17,16 @@ type MapRotationOverlayProps = {
  * Compass rose for a heading-up map.
  *
  * Once the tiles no longer point north this is the only cue to which way north is, so it
- * sits outside the rotated container and turns by the same angle as the tiles.
+ * sits outside the rotated container and turns by the same angle as the tiles. The angle
+ * arrives as a CSS variable so the rule itself stays static.
  */
 export function MapRotationOverlay({ heading }: MapRotationOverlayProps): React.JSX.Element {
+  const { classes } = useStyles();
+
   return (
     <div
-      style={{
-        position: "absolute",
-        top: 8,
-        right: 8,
-        width: COMPASS_SIZE,
-        height: COMPASS_SIZE,
-        borderRadius: "50%",
-        background: "rgba(255,255,255,0.85)",
-        boxShadow: "0 0 2px rgba(0,0,0,0.5)",
-        pointerEvents: "none",
-        zIndex: 1000,
-        // The container is turned by -heading, so north ends up at the same angle on screen.
-        transform: `rotate(${-heading}deg)`,
-      }}
+      className={classes.compass}
+      style={{ "--map-heading": `${heading}deg` } as React.CSSProperties}
       title={`Heading ${heading.toFixed(0)} degrees`}
     >
       <svg viewBox="0 0 34 34" width={COMPASS_SIZE} height={COMPASS_SIZE} aria-hidden="true">

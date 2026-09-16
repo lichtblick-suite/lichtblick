@@ -125,3 +125,23 @@ describe("FilteredPointLayer marker colour", () => {
     expect(html).not.toContain('fill="#ff0000"');
   });
 });
+
+describe("FilteredPointLayer heading track", () => {
+  it("takes a bearing from a fix that was never drawn", () => {
+    // Only the northern half is on screen, so the southern fix is skipped for rendering.
+    // It still happened, so the marker that follows it must point north because of it.
+    const layer = FilteredPointLayer({
+      map: fakeMap,
+      bounds: new LatLngBounds([0.5, -180], [90, 180]),
+      color: "#ff0000",
+      hoverColor: "#00ff00",
+      navSatMessageEvents: [navSatFix(0, 0), navSatFix(1, 0)],
+      markerStyle: "arrow",
+      headingTrack: [],
+    });
+
+    const markers = orientedMarkers(layer);
+    expect(markers).toHaveLength(1);
+    expect(markerHtml(markers[0]!)).toContain("rotate(0 12 12)");
+  });
+});
