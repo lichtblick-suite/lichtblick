@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 
 import { DeltaOverlay, DeltaOverlayProps } from "./DeltaOverlay";
 import "@testing-library/jest-dom";
@@ -23,7 +23,6 @@ describe("DeltaOverlay", () => {
       deltaY: 10,
       onRemoveMarkerA: jest.fn(),
       onRemoveMarkerB: jest.fn(),
-      onClose: jest.fn(),
       ...overrides,
     };
   }
@@ -79,7 +78,15 @@ describe("DeltaOverlay", () => {
     expect(screen.getByTestId("delta-overlay-remove-marker-a")).toHaveAccessibleName(
       "Remove marker A",
     );
+    expect(screen.getByTestId("delta-overlay-remove-marker-a")).toHaveAttribute(
+      "title",
+      "Remove marker A",
+    );
     expect(screen.getByTestId("delta-overlay-remove-marker-b")).toHaveAccessibleName(
+      "Remove marker B",
+    );
+    expect(screen.getByTestId("delta-overlay-remove-marker-b")).toHaveAttribute(
+      "title",
       "Remove marker B",
     );
   });
@@ -128,6 +135,57 @@ describe("DeltaOverlay", () => {
     expect(onRemoveMarkerB).toHaveBeenCalledTimes(1);
   });
 
+  it("should drag the overlay within its panel container", () => {
+    // Given
+    const { container } = render(<DeltaOverlay {...buildProps()} />);
+    const overlay = screen.getByTestId("delta-overlay");
+    const overlayParent = overlay.parentElement!;
+    const setPointerCapture = jest.fn();
+    const releasePointerCapture = jest.fn();
+    const panel = document.createElement("div");
+    panel.getBoundingClientRect = jest.fn(() => ({
+      left: 0,
+      top: 0,
+      right: 300,
+      bottom: 200,
+      width: 300,
+      height: 200,
+    })) as typeof panel.getBoundingClientRect;
+    overlay.getBoundingClientRect = jest.fn(() => ({
+      left: 0,
+      top: 0,
+      right: 100,
+      bottom: 50,
+      width: 100,
+      height: 50,
+    })) as typeof overlay.getBoundingClientRect;
+    Object.defineProperty(overlayParent, "offsetParent", { value: panel });
+    overlay.setPointerCapture = setPointerCapture;
+    overlay.releasePointerCapture = releasePointerCapture;
+
+    // When
+    const dispatchPointerEvent = (type: string, clientX: number, clientY: number): void => {
+      const event = new Event(type, { bubbles: true });
+      Object.defineProperties(event, {
+        pointerId: { value: 1 },
+        clientX: { value: clientX },
+        clientY: { value: clientY },
+      });
+      overlay.dispatchEvent(event);
+    };
+    act(() => {
+      dispatchPointerEvent("pointerdown", 10, 10);
+      dispatchPointerEvent("pointermove", 260, 180);
+      dispatchPointerEvent("pointerup", 260, 180);
+    });
+
+    // Then
+    expect(setPointerCapture).toHaveBeenCalledWith(1);
+    expect(releasePointerCapture).toHaveBeenCalledWith(1);
+    expect(overlay).toHaveStyle({ transform: "translate(200px, 150px)" });
+    expect(container).toContainElement(overlay);
+  });
+
   it("should not render a marker's remove button before that marker is placed", () => {
     // Given
     const props = buildProps({ xValueA: undefined, xValueB: undefined });
@@ -138,30 +196,6 @@ describe("DeltaOverlay", () => {
     // Then
     expect(screen.queryByTestId("delta-overlay-remove-marker-a")).not.toBeInTheDocument();
     expect(screen.queryByTestId("delta-overlay-remove-marker-b")).not.toBeInTheDocument();
-  });
-
-  it("should call onClose when the close button is clicked", () => {
-    // Given
-    const onClose = jest.fn();
-    const props = buildProps({ onClose });
-    render(<DeltaOverlay {...props} />);
-
-    // When
-    fireEvent.click(screen.getByTestId("delta-overlay-close"));
-
-    // Then
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("should label the close button distinctly from the marker removal buttons", () => {
-    // Given
-    const props = buildProps();
-
-    // When
-    render(<DeltaOverlay {...props} />);
-
-    // Then
-    expect(screen.getByTestId("delta-overlay-close")).toHaveAccessibleName("Close measure mode");
   });
 
   it("should render placeholders for xValueA, xValueB and deltaX before both markers are placed", () => {

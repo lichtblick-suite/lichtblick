@@ -32,7 +32,6 @@ export const SingleSeries: StoryObj = {
       formatXValue: (value) => `${value.toFixed(2)}s`,
       onRemoveMarkerA: noop,
       onRemoveMarkerB: noop,
-      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },
@@ -58,7 +57,6 @@ export const MultiSeriesCrossPoints: StoryObj = {
       formatYValue: (value) => value.toFixed(6),
       onRemoveMarkerA: noop,
       onRemoveMarkerB: noop,
-      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },
@@ -85,7 +83,6 @@ export const CategoricalStateValues: StoryObj = {
       formatXValue: (value) => `${value.toFixed(1)}s`,
       onRemoveMarkerA: noop,
       onRemoveMarkerB: noop,
-      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },
@@ -124,7 +121,6 @@ export const Interactive: StoryObj = {
       onRemoveMarkerB: () => {
         setMarkerB(false);
       },
-      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },
@@ -152,7 +148,6 @@ export const OnlyMarkerAPlaced: StoryObj = {
       formatYValue: (value) => value.toFixed(6),
       onRemoveMarkerA: noop,
       onRemoveMarkerB: noop,
-      onClose: noop,
     };
     return <DeltaOverlay {...props} />;
   },

@@ -126,7 +126,6 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   markerBLabel,
   onRemoveMarkerA,
   onRemoveMarkerB,
-  onClose,
 }: DeltaMarkerBarsProps): React.JSX.Element {
   const { classes } = useDeltaMarkerBarsStyles();
 
@@ -257,7 +256,6 @@ export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
             deltaY={overlayData.deltaY}
             onRemoveMarkerA={onRemoveMarkerA}
             onRemoveMarkerB={onRemoveMarkerB}
-            onClose={onClose}
           />
         </div>
       )}

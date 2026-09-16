@@ -12,7 +12,7 @@ import { makeStyles } from "tss-react/mui";
 const useStyles = makeStyles()((theme) => ({
   root: {
     padding: theme.spacing(0.375),
-    fontSize: "0.875rem",
+    fontSize: "0.985rem",
 
     ".MuiSvgIcon-root, svg:not(.MuiSvgIcon-root)": {
       height: "1em",

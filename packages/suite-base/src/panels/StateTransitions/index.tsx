@@ -289,7 +289,6 @@ function StateTransitions(props: StateTransitionPanelProps) {
                 deltaY={overlayData.delta.deltaY}
                 onRemoveMarkerA={deltaMode.removeMarkerA}
                 onRemoveMarkerB={deltaMode.removeMarkerB}
-                onClose={deltaMode.toggleActive}
               />
             </div>
           )}

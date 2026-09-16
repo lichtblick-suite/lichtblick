@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { Ruler20Regular } from "@fluentui/react-icons";
+import { PointScan20Regular } from "@fluentui/react-icons";
 
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import ToolbarIconButton from "@lichtblick/suite-base/components/PanelToolbar/ToolbarIconButton";
@@ -31,7 +31,7 @@ export const MeasureModeToolbarButton = React.memo(function MeasureModeToolbarBu
           onClick={onToggle}
           data-testid={testId}
         >
-          <Ruler20Regular />
+          <PointScan20Regular />
         </ToolbarIconButton>
       }
     />

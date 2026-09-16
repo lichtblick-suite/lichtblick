@@ -26,7 +26,6 @@ describe("DeltaMarkerBars", () => {
       markerBLabel: "P2",
       onRemoveMarkerA: jest.fn(),
       onRemoveMarkerB: jest.fn(),
-      onClose: jest.fn(),
       ...propsOverride,
     };
     return { ...render(<DeltaMarkerBars {...props} />), props };
@@ -119,18 +118,6 @@ describe("DeltaMarkerBars", () => {
     expect(screen.getByText("5.000000")).toBeInTheDocument();
     expect(screen.getByText("11.000000")).toBeInTheDocument();
     expect(screen.getByText("6.000000")).toBeInTheDocument();
-  });
-
-  it("forwards onClose to the overlay's close button", () => {
-    // Given
-    const onClose = jest.fn();
-    setup({ active: true, onClose });
-
-    // When
-    fireEvent.click(screen.getByTestId("delta-overlay-close"));
-
-    // Then
-    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("forwards onRemoveMarkerA/onRemoveMarkerB to the overlay buttons", () => {

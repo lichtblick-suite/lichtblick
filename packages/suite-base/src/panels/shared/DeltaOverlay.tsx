@@ -3,7 +3,7 @@
 
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
-import React, { type CSSProperties } from "react";
+import React, { type CSSProperties, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Immutable } from "@lichtblick/suite";
@@ -38,8 +38,6 @@ export type DeltaOverlayProps = Immutable<{
   formatYValue?: (value: number) => string;
   onRemoveMarkerA: () => void;
   onRemoveMarkerB: () => void;
-  /** Closes the overlay entirely and deactivates measure mode. */
-  onClose: () => void;
   style?: CSSProperties;
 }>;
 
@@ -66,11 +64,20 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
     formatYValue = (value) => value.toFixed(6),
     onRemoveMarkerA,
     onRemoveMarkerB,
-    onClose,
     style,
   } = props;
   const { t } = useTranslation("plot");
   const { classes } = useDeltaOverlayStyles();
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    x: number;
+    y: number;
+  }>();
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const positionRef = useRef(position);
 
   const renderFormattedX = (value: number | undefined): string =>
     value != undefined ? formatXValue(value) : MISSING_VALUE_PLACEHOLDER;
@@ -85,29 +92,101 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
     return value;
   };
 
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>): void => {
+    if ((event.target as HTMLElement).closest("[data-delta-overlay-action]")) {
+      return;
+    }
+
+    const overlay = overlayRef.current;
+    const container = overlay?.parentElement?.offsetParent as HTMLElement | null;
+    if (!overlay || !container) {
+      return;
+    }
+
+    overlay.setPointerCapture(event.pointerId);
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      x: positionRef.current.x,
+      y: positionRef.current.y,
+    };
+    event.preventDefault();
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>): void => {
+    const drag = dragRef.current;
+    const overlay = overlayRef.current;
+    const container = overlay?.parentElement?.offsetParent as HTMLElement | null;
+    if (drag?.pointerId !== event.pointerId || !overlay || !container) {
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const overlayRect = overlay.getBoundingClientRect();
+    const movementX = event.clientX - drag.startX;
+    const movementY = event.clientY - drag.startY;
+    const minX = containerRect.left - overlayRect.left + drag.x;
+    const maxX = containerRect.right - overlayRect.right + drag.x;
+    const minY = containerRect.top - overlayRect.top + drag.y;
+    const maxY = containerRect.bottom - overlayRect.bottom + drag.y;
+
+    const nextPosition = {
+      x: Math.min(Math.max(drag.x + movementX, minX), maxX),
+      y: Math.min(Math.max(drag.y + movementY, minY), maxY),
+    };
+    positionRef.current = nextPosition;
+    overlay.style.transform = `translate(${nextPosition.x}px, ${nextPosition.y}px)`;
+    event.preventDefault();
+  };
+
+  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>): void => {
+    if (dragRef.current?.pointerId !== event.pointerId) {
+      return;
+    }
+    overlayRef.current?.releasePointerCapture(event.pointerId);
+    setPosition(positionRef.current);
+    dragRef.current = undefined;
+  };
+
   return (
-    <div className={classes.root} style={style} data-testid="delta-overlay">
-      <IconButton
-        className={classes.closeButton}
-        size="small"
-        disableRipple
-        data-testid="delta-overlay-close"
-        aria-label={t("closeMeasureMode")}
-        onClick={onClose}
-      >
-        <CloseIcon fontSize="small" />
-      </IconButton>
+    <div
+      ref={overlayRef}
+      className={classes.root}
+      style={{ ...style, transform: `translate(${position.x}px, ${position.y}px)` }}
+      data-testid="delta-overlay"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+    >
       <div className={classes.grid}>
+        <div />
         <div />
         <div className={classes.columnHeader}>{xColumnLabel}</div>
         <div className={classes.columnHeader}>{yColumnLabel}</div>
-        <div />
 
+        <div />
         <div className={classes.rowLabel}>{deltaRowLabel}</div>
         <div className={classes.value}>{renderFormattedX(deltaX)}</div>
         <div className={classes.value}>{renderFormattedY(deltaY)}</div>
-        <div />
 
+        {xValueA != undefined ? (
+          <IconButton
+            className={classes.removeButton}
+            size="small"
+            disableRipple
+            data-testid="delta-overlay-remove-marker-a"
+            data-delta-overlay-action
+            aria-label={t("removeMarkerA")}
+            title={t("removeMarkerA")}
+            onClick={onRemoveMarkerA}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        ) : (
+          <div />
+        )}
         <div className={classes.markerLabelCell}>
           {markerAColor && (
             <span
@@ -120,21 +199,23 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
         </div>
         <div className={classes.value}>{renderFormattedX(xValueA)}</div>
         <div className={classes.value}>{renderFormattedY(yValueA)}</div>
-        {xValueA != undefined ? (
+
+        {xValueB != undefined ? (
           <IconButton
             className={classes.removeButton}
             size="small"
             disableRipple
-            data-testid="delta-overlay-remove-marker-a"
-            aria-label={t("removeMarkerA")}
-            onClick={onRemoveMarkerA}
+            data-testid="delta-overlay-remove-marker-b"
+            data-delta-overlay-action
+            aria-label={t("removeMarkerB")}
+            title={t("removeMarkerB")}
+            onClick={onRemoveMarkerB}
           >
             <CloseIcon fontSize="small" />
           </IconButton>
         ) : (
           <div />
         )}
-
         <div className={classes.markerLabelCell}>
           {markerBColor && (
             <span
@@ -147,20 +228,6 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
         </div>
         <div className={classes.value}>{renderFormattedX(xValueB)}</div>
         <div className={classes.value}>{renderFormattedY(yValueB)}</div>
-        {xValueB != undefined ? (
-          <IconButton
-            className={classes.removeButton}
-            size="small"
-            disableRipple
-            data-testid="delta-overlay-remove-marker-b"
-            aria-label={t("removeMarkerB")}
-            onClick={onRemoveMarkerB}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        ) : (
-          <div />
-        )}
       </div>
     </div>
   );

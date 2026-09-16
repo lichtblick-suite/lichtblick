@@ -64,14 +64,14 @@ export function HUD(props: HUDProps): React.ReactElement {
   }
 
   if (emptyStates.length > 0) {
-    const highPriorityEmptyState = emptyStates[emptyStates.length - 1]!;
+    const highPriorityEmptyState = emptyStates.at(-1)!;
     return <EmptyState className={classes.empty}>{highPriorityEmptyState.getMessage()}</EmptyState>;
   }
 
   return (
     <div className={classes.root}>
-      {notices.map((item, index) => (
-        <Chip className={classes.chip} size="small" key={index} label={item.getMessage()} />
+      {notices.map((item) => (
+        <Chip className={classes.chip} size="small" key={item.id} label={item.getMessage()} />
       ))}
     </div>
   );

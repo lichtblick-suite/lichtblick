@@ -332,7 +332,6 @@ const Plot = (props: PlotProps): React.JSX.Element => {
               markerBLabel={t("markerB")}
               onRemoveMarkerA={deltaMeasureMode.removeMarkerA}
               onRemoveMarkerB={deltaMeasureMode.removeMarkerB}
-              onClose={deltaMeasureMode.toggleActive}
             />
           </div>
         </Tooltip>

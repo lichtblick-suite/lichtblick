@@ -187,8 +187,6 @@ export type DeltaMarkerBarsProps = {
   markerBLabel: string;
   onRemoveMarkerA: () => void;
   onRemoveMarkerB: () => void;
-  /** Closes the overlay entirely and deactivates measure mode. */
-  onClose: () => void;
 };
 
 export type UsePlotDataHandling = {

@@ -15,10 +15,13 @@ export const useDeltaOverlayStyles = makeStyles()((theme) => ({
     boxShadow: theme.shadows[4],
     padding: theme.spacing(1, 3.5, 1, 1.5),
     opacity: 0.95,
+    cursor: "grab",
+    touchAction: "none",
+    userSelect: "none",
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "auto max-content max-content max-content",
+    gridTemplateColumns: "max-content auto max-content max-content",
     columnGap: theme.spacing(2),
     rowGap: theme.spacing(0.5),
     alignItems: "center",
@@ -56,11 +59,5 @@ export const useDeltaOverlayStyles = makeStyles()((theme) => ({
   removeButton: {
     padding: theme.spacing(0.25),
     marginLeft: theme.spacing(0.5),
-  },
-  closeButton: {
-    position: "absolute",
-    top: theme.spacing(0.5),
-    right: theme.spacing(0.5),
-    padding: theme.spacing(0.25),
   },
 }));
