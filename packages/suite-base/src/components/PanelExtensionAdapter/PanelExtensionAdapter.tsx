@@ -190,7 +190,7 @@ function PanelExtensionAdapter(
   const [isPanelHovered, setIsPanelHovered] = useState(false);
   // Custom toolbar actions the panel has registered via `context.setToolbarActions`, rendered
   // alongside the built-in fullscreen/settings/more-options icons.
-  const [toolbarActions, setToolbarActionsState] = useState<readonly PanelToolbarAction[]>([]);
+  const [toolbarActionsState, setToolbarActionsState] = useState<readonly PanelToolbarAction[]>([]);
 
   const [localSubscriptions, setLocalSubscriptions] = useState<Subscription[]>([]);
 
@@ -893,9 +893,9 @@ function PanelExtensionAdapter(
   }
 
   const additionalIcons =
-    toolbarActions.length > 0 ? (
+    toolbarActionsState.length > 0 ? (
       <>
-        {toolbarActions.map((action) => (
+        {toolbarActionsState.map((action) => (
           <ToolbarIconButton
             key={action.id}
             title={action.title}

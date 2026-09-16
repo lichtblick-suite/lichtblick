@@ -9,10 +9,8 @@ import { Ref } from "react";
 
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import { PanelContextType } from "@lichtblick/suite-base/components/types";
-import {
-  PanelStateStore,
-  usePanelStateStore,
-} from "@lichtblick/suite-base/context/PanelStateContext";
+import { usePanelStateStore } from "@lichtblick/suite-base/context/PanelStateContext";
+import PanelStateStoreBuilder from "@lichtblick/suite-base/testing/builders/PanelStateStoreBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { PanelConfig } from "@lichtblick/suite-base/types/panels";
 
@@ -78,14 +76,7 @@ function renderPanelToolbar({
 describe("PanelToolbar", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    const panelStateStore: PanelStateStore = {
-      sequenceNumbers: {},
-      settingsTrees: {},
-      defaultTitles: {},
-      incrementSequenceNumber: jest.fn(),
-      updateSettingsTree: jest.fn(),
-      updateDefaultTitle: jest.fn(),
-    };
+    const panelStateStore = PanelStateStoreBuilder.panelStateStore();
     mockUsePanelStateStore.mockImplementation((selector) => selector(panelStateStore));
   });
 
