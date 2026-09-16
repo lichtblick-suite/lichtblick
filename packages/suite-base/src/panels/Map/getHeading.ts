@@ -25,8 +25,7 @@ export function distanceMeters(from: Point, to: Point): number {
   const deltaLon = (to.lon - from.lon) * DEGREES_TO_RADIANS;
 
   const haversine =
-    Math.sin(deltaLat / 2) ** 2 +
-    Math.cos(fromLat) * Math.cos(toLat) * Math.sin(deltaLon / 2) ** 2;
+    Math.sin(deltaLat / 2) ** 2 + Math.cos(fromLat) * Math.cos(toLat) * Math.sin(deltaLon / 2) ** 2;
 
   // Clamp against floating point drift, which can push the term marginally outside
   // [0, 1] for near-identical positions and make the sqrt below produce NaN.
@@ -63,8 +62,7 @@ export function getHeading(from: Point, to: Point): number | undefined {
 
   const y = Math.sin(deltaLon) * Math.cos(toLat);
   const x =
-    Math.cos(fromLat) * Math.sin(toLat) -
-    Math.sin(fromLat) * Math.cos(toLat) * Math.cos(deltaLon);
+    Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(deltaLon);
 
   return (Math.atan2(y, x) * RADIANS_TO_DEGREES + 360) % 360;
 }
@@ -87,17 +85,12 @@ export type TimedFix = {
  * @param fixes every known fix on the topic, oldest first
  * @param beforeSec time of the frame being drawn; undefined means the frame carries no fixes
  */
-export function precedingTrack(
-  fixes: readonly TimedFix[],
-  beforeSec: number | undefined,
-): Point[] {
+export function precedingTrack(fixes: readonly TimedFix[], beforeSec: number | undefined): Point[] {
   if (beforeSec == undefined) {
     return [];
   }
 
-  return fixes
-    .filter((fix) => fix.timeSec < beforeSec)
-    .map(({ lat, lon }) => ({ lat, lon }));
+  return fixes.filter((fix) => fix.timeSec < beforeSec).map(({ lat, lon }) => ({ lat, lon }));
 }
 
 /**
