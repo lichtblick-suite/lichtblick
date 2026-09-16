@@ -21,7 +21,7 @@ type MapRotationOverlayProps = {
  * arrives as a CSS variable so the rule itself stays static.
  */
 export function MapRotationOverlay({ heading }: MapRotationOverlayProps): React.JSX.Element {
-  const { classes } = useStyles();
+  const { classes, theme } = useStyles();
 
   return (
     <div
@@ -30,9 +30,18 @@ export function MapRotationOverlay({ heading }: MapRotationOverlayProps): React.
       title={`Heading ${heading.toFixed(0)} degrees`}
     >
       <svg viewBox="0 0 34 34" width={COMPASS_SIZE} height={COMPASS_SIZE} aria-hidden="true">
+        {/* The north needle is red by cartographic convention rather than by theme, so it
+            stays recognisable whichever palette is active. */}
         <polygon points="17,4 21,18 17,15 13,18" fill="#d32f2f" />
-        <polygon points="17,30 21,16 17,19 13,16" fill="#555555" />
-        <text x="17" y="12" textAnchor="middle" fontSize="7" fontWeight="700" fill="#ffffff">
+        <polygon points="17,30 21,16 17,19 13,16" fill={theme.palette.text.secondary} />
+        <text
+          x="17"
+          y="12"
+          textAnchor="middle"
+          fontSize="7"
+          fontWeight="700"
+          fill={theme.palette.common.white}
+        >
           N
         </text>
       </svg>
