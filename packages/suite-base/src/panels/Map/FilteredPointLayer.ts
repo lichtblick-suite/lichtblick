@@ -90,6 +90,18 @@ function FilteredPointLayer(args: FilteredPointLayerArgs): FeatureGroup {
     const lat = messageEvent.message.latitude;
     const lon = messageEvent.message.longitude;
 
+    // Oriented styles fall back to a dot when there is nothing to take a bearing from:
+    // the first fix of a track, or a platform that has not moved far enough to be sure
+    // which way it is pointing.
+    const heading =
+      markerStyle === "dot" ? undefined : getHeadingFromTrack({ lat, lon }, headingTrack);
+
+    // Every fix contributes to the direction of travel, including the ones that are never
+    // drawn. A fix dropped below for being off screen, or for landing on a pixel already
+    // taken, still says where the platform went, and leaving it out would take the next
+    // bearing from further back than it should.
+    headingTrack.push({ lat, lon });
+
     // if the point is outside the bounds, we don't include it
     if (!localBounds.contains([lat, lon])) {
       continue;
@@ -105,20 +117,12 @@ function FilteredPointLayer(args: FilteredPointLayerArgs): FeatureGroup {
 
     (sparse2d[x] = sparse2d[x] ?? [])[y] = true;
 
-    // Oriented styles fall back to a dot when there is nothing to take a bearing from:
-    // the first fix of a track, or a platform that has not moved far enough to be sure
-    // which way it is pointing.
-    const heading =
-      markerStyle === "dot" ? undefined : getHeadingFromTrack({ lat, lon }, headingTrack);
-
     const marker: AnyPointMarker =
       markerStyle !== "dot" && heading != undefined
         ? new OrientedPointMarker([lat, lon], {
             icon: createOrientedIcon(markerStyle, orientedColor, heading),
           })
         : new PointMarker([lat, lon], { ...defaultStyle, radius: POINT_MARKER_RADIUS });
-
-    headingTrack.push({ lat, lon });
 
     marker.messageEvent = messageEvent;
     marker.addTo(markersLayer);

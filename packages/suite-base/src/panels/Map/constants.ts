@@ -4,6 +4,9 @@
 export const POINT_MARKER_RADIUS = 3;
 
 /** Edge length, in pixels, of the square icon used by the oriented marker styles. */
+/** Diameter of the heading-up compass rose, in pixels. */
+export const COMPASS_SIZE = 34;
+
 export const ORIENTED_MARKER_SIZE = 24;
 
 /**

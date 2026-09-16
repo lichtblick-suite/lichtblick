@@ -98,6 +98,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
       zoomLevel: initialConfig.zoomLevel,
       maxNativeZoom: initialConfig.maxNativeZoom ?? 18,
       markerStyle: initialConfig.markerStyle ?? "dot",
+      markerColor: initialConfig.markerColor,
       rotateWithHeading: initialConfig.rotateWithHeading ?? false,
     };
   });
@@ -172,7 +173,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     // during a render.
     void { panelWidth, panelHeight };
     currentMap?.invalidateSize();
-  }, [panelWidth, panelHeight, currentMap, config.rotateWithHeading]);
+  }, [panelWidth, panelHeight, currentMap, config.rotateWithHeading, config.followTopic]);
 
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
@@ -832,14 +833,18 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
   }, [allNavMessages, config.followTopic, currentNavMessages, rotationActive]);
 
   // Hold the last usable bearing. A frame with no fix, or one too short to take a bearing
-  // from, should leave the map where it is rather than snapping back to north. Assigning
-  // during render is safe here because it is idempotent: a repeated render under
-  // StrictMode writes the same value.
-  const lastHeadingRef = useRef(0);
+  // from, should leave the map where it is rather than snapping back to north. The topic it
+  // came from is held with it, so switching to another topic starts from north rather than
+  // inheriting a bearing the new topic never reported. Assigning during render is safe here
+  // because it is idempotent: a repeated render under StrictMode writes the same value.
+  const lastHeadingRef = useRef<{ topic: string; heading: number }>({ topic: "", heading: 0 });
   if (mapHeading != undefined) {
-    lastHeadingRef.current = mapHeading;
+    lastHeadingRef.current = { topic: config.followTopic, heading: mapHeading };
   }
-  const appliedHeading = rotationActive ? lastHeadingRef.current : 0;
+  const appliedHeading =
+    rotationActive && lastHeadingRef.current.topic === config.followTopic
+      ? lastHeadingRef.current.heading
+      : 0;
 
   // Turning a rectangle leaves its corners empty, so while rotating the map lives in a
   // centred square whose side is the panel diagonal and the overflow is clipped away.
