@@ -127,6 +127,11 @@ export function getHeadingFromTrack(to: Point, track: readonly Point[]): number 
  * earlier fixes. Returns undefined when the frame carries no fix on the topic, or when the
  * platform has not moved far enough for a bearing to mean anything.
  *
+ * The track is drawn from the history and the current frame together. A frame can carry
+ * several fixes, and the marker layer orients each one against the ones before it in the
+ * same frame; building this track from the history alone would take the bearing from an
+ * older position and leave the map pointing one way while the marker on it points another.
+ *
  * @param currentFrame fixes in the frame being drawn, any topic
  * @param history every known fix, any topic, oldest first
  * @param topic the topic being followed
@@ -141,13 +146,17 @@ export function headingForTopic(
     return undefined;
   }
 
-  const fixes: TimedFix[] = history
+  // The history usually already contains the current frame's fixes, so the two sources
+  // overlap. A repeated position is harmless: it sits zero metres from its twin and the
+  // bearing threshold steps over it.
+  const fixes: TimedFix[] = [...history, ...currentFrame]
     .filter((message) => message.topic === topic)
     .map((message) => ({
       timeSec: toSec(message.receiveTime),
       lat: message.message.latitude,
       lon: message.message.longitude,
-    }));
+    }))
+    .sort((a, b) => a.timeSec - b.timeSec);
 
   return getHeadingFromTrack(
     { lat: current.message.latitude, lon: current.message.longitude },
