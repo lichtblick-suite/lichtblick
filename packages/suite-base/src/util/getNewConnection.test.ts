@@ -295,6 +295,28 @@ describe("getNewConnection", () => {
           });
           expect(newConnection).toEqual({ start: 50, end: 100 });
         });
+
+        it("caps the read-ahead at READ_AHEAD_BUFFER_SIZE instead of downloading the whole remote file, when the file is bigger than the buffer", () => {
+          // GIVEN: a cache large enough to hold the whole (large) file -- the "unlimited cache"
+          // scenario that a single remote MCAP file smaller than the default 500 MiB cache hits in
+          // practice.
+          const largeFileSize = 170 * 1024 * 1024; // 170 MB, e.g. a real MCAP file
+          // WHEN: a read request arrives whose missing range reaches the end of what was asked.
+          const newConnection = getNewConnection({
+            currentRemainingRange: undefined,
+            readRequestRange: { start: 0, end: 1024 },
+            downloadedRanges: [],
+            lastResolvedCallbackEnd: undefined,
+            maxRequestSize: 500 * 1024 * 1024, // >= fileSize
+            fileSize: largeFileSize,
+            continueDownloadingThreshold: 5,
+          });
+          // THEN: the connection is capped at READ_AHEAD_BUFFER_SIZE (50 MB), not the whole file --
+          // opening a connection for the entire remaining ~170 MB (and then aborting it as soon as
+          // the next small index/footer read arrives) would make S3 start streaming the whole
+          // object for nothing.
+          expect(newConnection).toEqual({ start: 0, end: READ_AHEAD_BUFFER_SIZE });
+        });
       });
     });
 
@@ -352,6 +374,40 @@ describe("getNewConnection", () => {
 
         expect(newConnection).toBeUndefined();
       });
+
+      it("caps the idle read-ahead at READ_AHEAD_BUFFER_SIZE instead of downloading the whole remote file, when the file is bigger than the buffer", () => {
+        // GIVEN: no active connection or read request yet (e.g. right after `open()` resolves the
+        // file size, before the player has asked for the footer/index), and a cache large enough
+        // to hold the whole (large) file.
+        const largeFileSize = 170 * 1024 * 1024; // 170 MB, e.g. a real MCAP file
+        const newConnection = getNewConnection({
+          currentRemainingRange: undefined,
+          readRequestRange: undefined,
+          downloadedRanges: [],
+          lastResolvedCallbackEnd: undefined,
+          maxRequestSize: 500 * 1024 * 1024, // >= fileSize
+          fileSize: largeFileSize,
+          continueDownloadingThreshold: 5,
+        });
+        // THEN: still capped at READ_AHEAD_BUFFER_SIZE, not the whole ~170 MB file.
+        expect(newConnection).toEqual({ start: 0, end: READ_AHEAD_BUFFER_SIZE });
+      });
+
+      it("caps the idle read-ahead from lastResolvedCallbackEnd at READ_AHEAD_BUFFER_SIZE on a large file with an unlimited cache", () => {
+        const largeFileSize = 170 * 1024 * 1024;
+        const lastEnd = 100 * 1024 * 1024;
+        const newConnection = getNewConnection({
+          currentRemainingRange: undefined,
+          readRequestRange: undefined,
+          downloadedRanges: [],
+          lastResolvedCallbackEnd: lastEnd,
+          maxRequestSize: 500 * 1024 * 1024,
+          fileSize: largeFileSize,
+          continueDownloadingThreshold: 5,
+        });
+        // THEN: capped at lastEnd + READ_AHEAD_BUFFER_SIZE, not the remaining ~70 MB of the file.
+        expect(newConnection).toEqual({ start: lastEnd, end: lastEnd + READ_AHEAD_BUFFER_SIZE });
+      });
     });
   });
 
@@ -374,21 +430,23 @@ describe("getNewConnection", () => {
       expect(result).toEqual({ start: 10, end: 20 });
     });
 
-    it("keeps legacy whole-file read-ahead when readAheadEnabled is true", () => {
-      // GIVEN: the same inputs as the lazy-loading case above.
+    it("reads ahead to end of file when readAheadEnabled is true and the file fits within READ_AHEAD_BUFFER_SIZE", () => {
+      // GIVEN: the same inputs as the lazy-loading case above, with a file much smaller than
+      // READ_AHEAD_BUFFER_SIZE (50 MB) -- unlike the large-file cases in the "unlimited cache"
+      // describe block above, capping doesn't change anything observable here.
       // WHEN: read-ahead is enabled.
       const result = getNewConnection({
         currentRemainingRange: undefined,
         readRequestRange: { start: 10, end: 20 },
         downloadedRanges: [],
         lastResolvedCallbackEnd: undefined,
-        maxRequestSize: 100, // >= fileSize -> download to the end of the file
+        maxRequestSize: 100, // >= fileSize -> capped read-ahead reaches end of file anyway
         fileSize: 100,
         continueDownloadingThreshold: 5,
         readAheadEnabled: true,
       });
 
-      // THEN: the legacy whole-file read-ahead range is returned.
+      // THEN: read-ahead reaches the end of the (tiny) file.
       expect(result).toEqual({ start: 10, end: 100 });
     });
 
