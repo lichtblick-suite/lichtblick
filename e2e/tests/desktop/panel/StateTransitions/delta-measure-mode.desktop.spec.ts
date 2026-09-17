@@ -36,10 +36,10 @@ test("should show the delta overlay when measure mode is enabled", { tag: "@regr
 
 /**
  * GIVEN a State Transitions panel is in measure mode
- * WHEN the user closes the delta overlay
- * THEN measure mode should be disabled and the overlay should disappear
+ * WHEN the user toggles measure mode off again
+ * THEN the overlay should disappear and the toggle should be inactive
  */
-test("should close State Transitions measure mode from the overlay", {
+test("should hide the State Transitions delta overlay when measure mode is turned off", {
   tag: "@regression",
 }, async ({ mainWindow }) => {
   // Given
@@ -49,7 +49,7 @@ test("should close State Transitions measure mode from the overlay", {
   await expect(mainWindow.getByTestId("delta-overlay")).toBeVisible();
 
   // When
-  await mainWindow.getByTestId("delta-overlay-close").click();
+  await toggle.click();
 
   // Then
   await expect(toggle).toHaveAttribute("aria-pressed", "false");

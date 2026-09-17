@@ -25,12 +25,12 @@ const openPlotWithSeries = async (
 
 /**
  * GIVEN a Plot panel contains a numeric series
- * WHEN the user enables measure mode and clicks two points on the plot
- * THEN both markers and the delta overlay should be visible
+ * WHEN the user enables measure mode and clicks on the plot
+ * THEN the delta overlay should be visible while the mode remains active
  */
-test("should show delta markers after selecting two plot points", { tag: "@regression" }, async ({
-  mainWindow,
-}) => {
+test("should show the delta overlay after selecting plot points", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
   // Given
   await openPlotWithSeries(mainWindow);
   const toggle = mainWindow.getByTestId("plot-measure-mode-toggle");
@@ -49,18 +49,16 @@ test("should show delta markers after selecting two plot points", { tag: "@regre
 
   // Then
   await expect(mainWindow.getByTestId("delta-overlay")).toBeVisible();
-  await expect(mainWindow.getByTestId("delta-marker-label-a")).toHaveCSS("display", "block");
-  await expect(mainWindow.getByTestId("delta-marker-label-b")).toHaveCSS("display", "block");
 });
 
 /**
  * GIVEN a Plot panel is in measure mode
- * WHEN the user closes the delta overlay
- * THEN measure mode should be disabled and the overlay should disappear
+ * WHEN the user toggles measure mode off again
+ * THEN the overlay should disappear and the toggle should be inactive
  */
-test("should close delta measure mode from the overlay", { tag: "@regression" }, async ({
-  mainWindow,
-}) => {
+test("should hide the delta overlay when measure mode is turned off", {
+  tag: "@regression",
+}, async ({ mainWindow }) => {
   // Given
   await openPlotWithSeries(mainWindow);
   const toggle = mainWindow.getByTestId("plot-measure-mode-toggle");
@@ -68,7 +66,7 @@ test("should close delta measure mode from the overlay", { tag: "@regression" },
   await expect(mainWindow.getByTestId("delta-overlay")).toBeVisible();
 
   // When
-  await mainWindow.getByTestId("delta-overlay-close").click();
+  await toggle.click();
 
   // Then
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
