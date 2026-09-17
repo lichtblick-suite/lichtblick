@@ -67,6 +67,28 @@ function useDeltaMeasureMode({
     setMarker,
   } = useDeltaMarkerState({ resetKey });
 
+  const setMarkerAtCanvasPosition = useCallback(
+    async (canvasX: number, canvasY: number, xValue: number) => {
+      try {
+        const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ?? [];
+        if (!isMounted()) {
+          return;
+        }
+
+        const seriesValues = resolveSeriesValues(elements);
+        if (seriesValues.length === 0) {
+          return;
+        }
+
+        const snappedX = typeof elements[0]?.data.x === "number" ? elements[0].data.x : xValue;
+        setMarker(nextMarkerSlot(), { xValue: snappedX, seriesValues });
+      } catch (err: unknown) {
+        console.error(err);
+      }
+    },
+    [isMounted, nextMarkerSlot, renderer, setMarker],
+  );
+
   const handleCanvasClick = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
       if (!active || draggingRef.current || !coordinator) {
@@ -81,26 +103,9 @@ function useDeltaMeasureMode({
         return;
       }
 
-      void (async () => {
-        try {
-          const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ?? [];
-          if (!isMounted()) {
-            return;
-          }
-
-          const seriesValues = resolveSeriesValues(elements);
-          if (seriesValues.length === 0) {
-            return;
-          }
-
-          const snappedX = typeof elements[0]?.data.x === "number" ? elements[0].data.x : xValue;
-          setMarker(nextMarkerSlot(), { xValue: snappedX, seriesValues });
-        } catch (err: unknown) {
-          console.error(err);
-        }
-      })();
+      void setMarkerAtCanvasPosition(canvasX, canvasY, xValue);
     },
-    [active, coordinator, draggingRef, isMounted, nextMarkerSlot, renderer, setMarker],
+    [active, coordinator, draggingRef, setMarkerAtCanvasPosition],
   );
 
   return {
