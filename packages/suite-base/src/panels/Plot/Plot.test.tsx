@@ -11,7 +11,6 @@ import useGlobalSync from "@lichtblick/suite-base/panels/Plot/hooks/useGlobalSyn
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotDataHandling from "@lichtblick/suite-base/panels/Plot/hooks/usePlotDataHandling";
 import usePlotPanelSettings from "@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelSettings";
-import usePlotPanelsFloatingToolbar from "@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelsFloatingToolbar";
 import useRenderer from "@lichtblick/suite-base/panels/Plot/hooks/useRenderer";
 import useSubscriptions from "@lichtblick/suite-base/panels/Plot/hooks/useSubscriptions";
 import { PlotProps } from "@lichtblick/suite-base/panels/Plot/types";
@@ -68,9 +67,9 @@ jest.mock("@lichtblick/suite-base/panels/Plot/hooks/useGlobalSync");
 jest.mock("@lichtblick/suite-base/panels/Plot/hooks/usePanning");
 jest.mock("@lichtblick/suite-base/panels/Plot/hooks/useSubscriptions");
 jest.mock("@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelSettings");
-jest.mock("@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelsFloatingToolbar", () => ({
-  __esModule: true,
-  default: jest.fn(() => false),
+let mockFloatingToolbarEnabled = false;
+jest.mock("@lichtblick/suite-base/hooks/useAppConfigurationValue", () => ({
+  useAppConfigurationValue: jest.fn(() => [mockFloatingToolbarEnabled, jest.fn()]),
 }));
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -165,7 +164,7 @@ describe("Plot Component", () => {
     (usePanning as jest.Mock).mockReturnValue(undefined);
     (useSubscriptions as jest.Mock).mockReturnValue(undefined);
     (usePlotPanelSettings as jest.Mock).mockReturnValue(undefined);
-    (usePlotPanelsFloatingToolbar as jest.Mock).mockReturnValue(false);
+    mockFloatingToolbarEnabled = false;
     mockLatestSetActiveTooltip = undefined;
     mockLatestLegendProps = undefined;
     mockLatestPanelToolbarProps = undefined;
@@ -258,9 +257,9 @@ describe("Plot Component", () => {
     expect(screen.queryByTestId("plot-legend")).toBeNull();
   });
 
-  it("Given the layout-wide floatingToolbar switch is off When rendering Then the toolbar does not float", () => {
+  it("Given the floating panel toolbar setting is off When rendering Then the toolbar does not float", () => {
     // Given
-    (usePlotPanelsFloatingToolbar as jest.Mock).mockReturnValue(false);
+    mockFloatingToolbarEnabled = false;
     const config = new PlotConfigBuilder().build();
 
     // When
@@ -271,9 +270,9 @@ describe("Plot Component", () => {
     expect(mockLatestLegendProps?.floatingToolbar).toBe(false);
   });
 
-  it("Given the layout-wide floatingToolbar switch is on When rendering Then the toolbar floats", () => {
+  it("Given the floating panel toolbar setting is on When rendering Then the toolbar floats", () => {
     // Given
-    (usePlotPanelsFloatingToolbar as jest.Mock).mockReturnValue(true);
+    mockFloatingToolbarEnabled = true;
     const config = new PlotConfigBuilder().build();
 
     // When
@@ -286,7 +285,7 @@ describe("Plot Component", () => {
 
   it("Given the panel is hovered and then unhovered When the pointer enters and leaves Then the toolbar's hovered prop toggles accordingly", () => {
     // Given
-    (usePlotPanelsFloatingToolbar as jest.Mock).mockReturnValue(true);
+    mockFloatingToolbarEnabled = true;
     const config = new PlotConfigBuilder().build();
     renderPlot(config);
     const panelRoot = screen.getByTestId("panel-toolbar").parentElement!;

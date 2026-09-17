@@ -14,6 +14,7 @@ export enum AppSetting {
   UPDATES_ENABLED = "updates.enabled",
   LANGUAGE = "language",
   DEFAULT_STEP_SIZE = "stepSize",
+  ENABLE_FLOATING_PANEL_TOOLBAR = "enableFloatingPanelToolbar",
 
   // ROS
   ROS_PACKAGE_PATH = "ros.ros_package_path",

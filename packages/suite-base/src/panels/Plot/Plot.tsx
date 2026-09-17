@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
 
 import { Immutable } from "@lichtblick/suite";
+import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import KeyListener from "@lichtblick/suite-base/components/KeyListener";
 import {
   useMessagePipelineGetter,
@@ -24,11 +25,11 @@ import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import { PANEL_TOOLBAR_MIN_HEIGHT } from "@lichtblick/suite-base/components/PanelToolbar/constants";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChartTooltipContent from "@lichtblick/suite-base/components/TimeBasedChart/TimeBasedChartTooltipContent";
+import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { VerticalBars } from "@lichtblick/suite-base/panels/Plot/VerticalBars";
 import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
-import usePlotPanelsFloatingToolbar from "@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelsFloatingToolbar";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
 
 import { useStyles } from "./Plot.style";
@@ -50,7 +51,9 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     sidebarDimension,
   } = config;
 
-  const floatingToolbar = usePlotPanelsFloatingToolbar();
+  const [floatingToolbar = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_FLOATING_PANEL_TOOLBAR,
+  );
 
   const { classes } = useStyles();
   const theme = useTheme();
