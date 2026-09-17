@@ -14,10 +14,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { alpha, useTheme } from "@mui/material";
+import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { add as addTimes, fromSec } from "@lichtblick/rostime";
+import KeyListener from "@lichtblick/suite-base/components/KeyListener";
 import useMessagesByPath from "@lichtblick/suite-base/components/MessagePathSyntax/useMessagesByPath";
 import {
   MessagePipelineContext,
@@ -25,7 +29,6 @@ import {
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import Panel from "@lichtblick/suite-base/components/Panel";
-import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TimeBasedChart from "@lichtblick/suite-base/components/TimeBasedChart";
 import { PathLegend } from "@lichtblick/suite-base/panels/StateTransitions/PathLegend";
@@ -41,7 +44,12 @@ import { useDecodedMessageRange } from "@lichtblick/suite-base/panels/StateTrans
 import useMessagePathDropConfig from "@lichtblick/suite-base/panels/StateTransitions/hooks/useMessagePathDropConfig";
 import { usePanelSettings } from "@lichtblick/suite-base/panels/StateTransitions/hooks/usePanelSettings";
 import useStateTransitionsData from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsData";
+import useStateTransitionsDeltaMode from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsDeltaMode";
 import useStateTransitionsTime from "@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsTime";
+import { DeltaOverlay } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
+import { MeasureModeToolbarButton } from "@lichtblick/suite-base/panels/shared/MeasureModeToolbarButton";
+import { computeDeltaDisplay } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import useAppendOnlyKey from "@lichtblick/suite-base/panels/shared/useAppendOnlyKey";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
 
@@ -53,6 +61,8 @@ function StateTransitions(props: StateTransitionPanelProps) {
   const { config, saveConfig } = props;
   const { paths } = config;
   const { classes } = useStateTransitionsStyles();
+  const theme = useTheme();
+  const { t } = useTranslation("stateTransitions");
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const isPlayerPresent =
     playerPresence === PlayerPresence.PRESENT || playerPresence === PlayerPresence.BUFFERING;
@@ -125,28 +135,115 @@ function StateTransitions(props: StateTransitionPanelProps) {
     config,
   );
 
+  // Markers reference paths by index, so an existing one being edited/reordered/removed goes stale -
+  // appending a brand new path shouldn't reset anything (see useAppendOnlyKey).
+  const pathSignatures = useMemo(
+    () =>
+      paths.map(
+        ({ color, value, label, enabled, timestampMethod }) =>
+          JSON.stringify([color, value, label, enabled, timestampMethod]) ?? "",
+      ),
+    [paths],
+  );
+  const deltaModeResetKey = useAppendOnlyKey(pathSignatures);
+  const deltaMode = useStateTransitionsDeltaMode({
+    datasets: data.datasets,
+    resetKey: deltaModeResetKey,
+  });
+  const { markerA, markerB } = deltaMode;
+
+  const keyDownHandlers = useMemo(
+    () => ({
+      escape: () => {
+        if (deltaMode.active) {
+          deltaMode.toggleActive();
+        }
+      },
+    }),
+    [deltaMode],
+  );
+
   const messagePipeline = useMessagePipelineGetter();
 
   const onClick = useCallback(
     ({ x: seekSeconds }: OnChartClickArgs) => {
+      if (seekSeconds == undefined) {
+        return;
+      }
+
+      if (deltaMode.active) {
+        deltaMode.handleChartClick(seekSeconds);
+        return;
+      }
+
       const {
         seekPlayback,
         playerState: { activeData: { startTime: start } = {} },
       } = messagePipeline();
-      if (!seekPlayback || seekSeconds == undefined || start == undefined) {
+      if (!seekPlayback || start == undefined) {
         return;
       }
       const seekTime = addTimes(start, fromSec(seekSeconds));
       seekPlayback(seekTime);
     },
-    [messagePipeline],
+    [deltaMode, messagePipeline],
   );
+
+  const annotations = useMemo((): AnnotationOptions[] => {
+    const markerAnnotation = (value: number, content: string): AnnotationOptions => ({
+      type: "line",
+      scaleID: "x",
+      value,
+      borderColor: alpha(theme.palette.error.main, 0.6),
+      borderWidth: 2,
+      borderDash: [6, 4],
+      label: {
+        display: true,
+        content,
+        position: "start",
+        backgroundColor: alpha(theme.palette.error.main, 0.15),
+        color: theme.palette.error.main,
+        font: { size: 10 },
+      },
+    });
+
+    return [
+      ...(markerA ? [markerAnnotation(markerA.xValue, t("markerA"))] : []),
+      ...(markerB ? [markerAnnotation(markerB.xValue, t("markerB"))] : []),
+    ];
+  }, [markerA, markerB, t, theme.palette.error.main]);
+
+  const overlayData = useMemo(() => {
+    if (!deltaMode.active) {
+      return undefined;
+    }
+
+    const primaryA = markerA?.seriesValues[0];
+    const primaryB = markerB?.seriesValues[0];
+    const markerAColor = primaryA ? paths[primaryA.configIndex]?.color : undefined;
+    const markerBColor = primaryB ? paths[primaryB.configIndex]?.color : undefined;
+
+    return {
+      xValueA: markerA?.xValue,
+      xValueB: markerB?.xValue,
+      yValueA: primaryA?.value,
+      yValueB: primaryB?.value,
+      markerAColor,
+      markerBColor,
+      delta: computeDeltaDisplay(markerA, markerB),
+    };
+  }, [deltaMode.active, markerA, markerB, paths]);
 
   usePanelSettings(config, saveConfig, pathState, focusedPath);
 
   return (
     <Stack flexGrow={1} overflow="hidden" style={{ zIndex: 0 }}>
-      <PanelToolbar />
+      <MeasureModeToolbarButton
+        active={deltaMode.active}
+        onToggle={deltaMode.toggleActive}
+        title={t("measureMode")}
+        testId="state-transitions-measure-mode-toggle"
+      />
       <Stack fullWidth fullHeight flex="auto" overflowX="hidden" overflowY="auto">
         <div className={classes.chartWrapper} ref={sizeRef}>
           <TimeBasedChart
@@ -163,6 +260,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
             xAxisIsPlaybackTime
             yAxes={yScale}
             plugins={STATE_TRANSITION_PLUGINS}
+            annotations={annotations}
             interactionMode="lastX"
             onClick={onClick}
             currentTime={currentTimeSinceStart}
@@ -173,8 +271,30 @@ function StateTransitions(props: StateTransitionPanelProps) {
             setFocusedPath={setFocusedPath}
             saveConfig={saveConfig}
           />
+          {overlayData && (
+            <div className={classes.deltaOverlayWrapper} data-testid="delta-overlay-wrapper">
+              <DeltaOverlay
+                deltaRowLabel={t("delta")}
+                xColumnLabel={t("labels.timestamp")}
+                yColumnLabel={t("value")}
+                markerALabel={t("markerA")}
+                markerBLabel={t("markerB")}
+                markerAColor={overlayData.markerAColor}
+                markerBColor={overlayData.markerBColor}
+                xValueA={overlayData.xValueA}
+                xValueB={overlayData.xValueB}
+                yValueA={overlayData.yValueA}
+                yValueB={overlayData.yValueB}
+                deltaX={overlayData.delta.deltaX}
+                deltaY={overlayData.delta.deltaY}
+                onRemoveMarkerA={deltaMode.removeMarkerA}
+                onRemoveMarkerB={deltaMode.removeMarkerB}
+              />
+            </div>
+          )}
         </div>
       </Stack>
+      <KeyListener global keyDownHandlers={keyDownHandlers} />
     </Stack>
   );
 }
