@@ -18,6 +18,11 @@ import type { FileReader, FileStream } from "@lichtblick/suite-base/util/CachedF
 import FetchReader from "@lichtblick/suite-base/util/FetchReader";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
+// Matches a single-range `Content-Range: bytes <start>-<end>/<total>` response header and
+// extracts the total resource size. Deliberately does not match the unsatisfiable-range form
+// (`bytes */<total>`) since that only occurs for out-of-bounds requests, which `bytes=0-0` never is.
+const CONTENT_RANGE_TOTAL_PATTERN = /^bytes \d+-\d+\/(\d+)$/;
+
 // A file reader that reads from a remote HTTP URL, for usage in the browser (not for node.js).
 export default class BrowserHttpReader implements FileReader {
   #url: string;
@@ -27,6 +32,17 @@ export default class BrowserHttpReader implements FileReader {
   }
 
   public async open(): Promise<{ size: number; identifier?: string }> {
+    // Opportunistic fast path: a tiny `Range: bytes=0-0` probe can reveal the total file size via
+    // `Content-Range` without the server (and any proxy in front of it) starting to stream the
+    // entire object, unlike the full-GET-then-abort probe below. This only works when the
+    // response exposes `Content-Range` (not guaranteed for arbitrary third-party servers, e.g. as
+    // a CORS-exposed header), so any failure/ambiguity here silently falls back to the original
+    // behavior. See ORIONINIT-211029 / docs/performance/README.md for the full rationale.
+    const rangedProbeResult = await this.#tryOpenViaRangedProbe();
+    if (rangedProbeResult) {
+      return rangedProbeResult;
+    }
+
     let response: Response;
     try {
       // Make a GET request and then immediately cancel it. This is more robust than a HEAD request,
@@ -84,4 +100,56 @@ export default class BrowserHttpReader implements FileReader {
     reader.read();
     return reader;
   }
+
+  /**
+   * Attempts to resolve the file size via a single-byte ranged GET (`Range: bytes=0-0`) instead of
+   * the full-GET-then-abort probe. Returns `undefined` (never throws) whenever the ranged request
+   * fails, is ignored by the server (any status other than 206), or the response doesn't carry a
+   * parsable `Content-Range` total -- in all of those cases `open()` falls back to the original,
+   * more broadly compatible probe.
+   */
+  async #tryOpenViaRangedProbe(): Promise<{ size: number; identifier?: string } | undefined> {
+    let response: Response;
+    try {
+      // "no-store" forces an unconditional remote request, same rationale as the full-GET probe.
+      response = await fetch(this.#url, {
+        headers: { range: "bytes=0-0" },
+        cache: "no-store",
+      });
+    } catch {
+      return undefined;
+    }
+
+    if (response.status !== 206) {
+      // Server ignored the Range header (full 200 response) or otherwise doesn't support ranges.
+      await response.body?.cancel();
+      return undefined;
+    }
+
+    const size = parseTotalSizeFromContentRange(response.headers.get("content-range"));
+    if (size == undefined) {
+      await response.body?.cancel();
+      return undefined;
+    }
+
+    await response.body?.cancel();
+    return {
+      size,
+      identifier:
+        response.headers.get("etag") ?? response.headers.get("last-modified") ?? undefined,
+    };
+  }
+}
+
+/** Parses the total resource size out of a `Content-Range: bytes <start>-<end>/<total>` header. */
+function parseTotalSizeFromContentRange(contentRange: string | null): number | undefined {
+  if (contentRange == undefined) {
+    return undefined;
+  }
+  const match = CONTENT_RANGE_TOTAL_PATTERN.exec(contentRange);
+  if (!match) {
+    return undefined;
+  }
+  const size = parseInt(match[1]!, 10);
+  return Number.isFinite(size) ? size : undefined;
 }
