@@ -143,22 +143,8 @@ describe("DeltaOverlay", () => {
     const setPointerCapture = jest.fn();
     const releasePointerCapture = jest.fn();
     const panel = document.createElement("div");
-    panel.getBoundingClientRect = jest.fn(() => ({
-      left: 0,
-      top: 0,
-      right: 300,
-      bottom: 200,
-      width: 300,
-      height: 200,
-    })) as typeof panel.getBoundingClientRect;
-    overlay.getBoundingClientRect = jest.fn(() => ({
-      left: 0,
-      top: 0,
-      right: 100,
-      bottom: 50,
-      width: 100,
-      height: 50,
-    })) as typeof overlay.getBoundingClientRect;
+    panel.getBoundingClientRect = jest.fn(() => new DOMRect(0, 0, 300, 200));
+    overlay.getBoundingClientRect = jest.fn(() => new DOMRect(0, 0, 100, 50));
     Object.defineProperty(overlayParent, "offsetParent", { value: panel });
     overlay.setPointerCapture = setPointerCapture;
     overlay.releasePointerCapture = releasePointerCapture;

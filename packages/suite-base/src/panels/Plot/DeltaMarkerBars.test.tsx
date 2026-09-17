@@ -18,7 +18,6 @@ describe("DeltaMarkerBars", () => {
       coordinator: mockCoordinator,
       active: false,
       colorsByDatasetIndex: {},
-      labelsByDatasetIndex: {},
       deltaRowLabel: "Delta",
       xColumnLabel: "Time",
       yColumnLabel: "Y",
