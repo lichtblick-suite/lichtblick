@@ -372,6 +372,31 @@ export function AutoUpdate(): React.ReactElement {
   );
 }
 
+export function FloatingToolbarSettings(): React.ReactElement {
+  const [floatingToolbarEnabled = false, setFloatingToolbarEnabled] =
+    useAppConfigurationValue<boolean>(AppSetting.ENABLE_FLOATING_PANEL_TOOLBAR);
+
+  const { classes } = useStyles();
+  const { t } = useTranslation("appSettings");
+
+  return (
+    <Stack>
+      <FormLabel>{t("floatingPlotToolbar")}:</FormLabel>
+      <FormControlLabel
+        className={classes.formControlLabel}
+        control={
+          <Checkbox
+            className={classes.checkbox}
+            checked={floatingToolbarEnabled}
+            onChange={(_event, checked) => void setFloatingToolbarEnabled(checked)}
+          />
+        }
+        label={t("floatingPlotToolbarDescription")}
+      />
+    </Stack>
+  );
+}
+
 export function RosPackagePath(): React.ReactElement {
   const [rosPackagePath, setRosPackagePath] = useAppConfigurationValue<string>(
     AppSetting.ROS_PACKAGE_PATH,
