@@ -4,15 +4,16 @@
 import { useRef } from "react";
 
 /**
- * Joins `segments` into a "|"-separated key that only changes when an existing segment is
- * edited, reordered, or removed - appending new segments to the end (and editing the newly
- * appended segments) leaves it unchanged. Useful for a `resetKey` that shouldn't reset state
- * (e.g. delta measure mode markers) just because the user added a new series/path.
+ * Joins `segments` into a "|"-separated key that stays stable across append-only updates but
+ * changes when an existing segment is edited, reordered, removed, or restored. Each non-append
+ * transition increments a monotonic revision suffix so stale markers/config state is reset even if
+ * the remaining segments match an earlier snapshot.
  */
 function useAppendOnlyKey(segments: readonly string[]): string {
   const previousLengthRef = useRef(0);
   const baselineSegmentsRef = useRef<readonly string[] | undefined>(undefined);
   const stableKeyRef = useRef("");
+  const revisionRef = useRef(0);
 
   const baseline = baselineSegmentsRef.current;
   const previousLength = previousLengthRef.current;
@@ -25,9 +26,10 @@ function useAppendOnlyKey(segments: readonly string[]): string {
 
   previousLengthRef.current = segments.length;
 
-  if (!isAppendOnly) {
+  if (baseline == undefined || !isAppendOnly) {
     baselineSegmentsRef.current = segments;
-    stableKeyRef.current = segments.join("|");
+    revisionRef.current += 1;
+    stableKeyRef.current = `${segments.join("|")}|${revisionRef.current}`;
   }
 
   return stableKeyRef.current;

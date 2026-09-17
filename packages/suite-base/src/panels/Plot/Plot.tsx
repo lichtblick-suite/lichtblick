@@ -105,8 +105,16 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   );
 
   // Markers reference series by index, so an existing one being edited/reordered/removed goes stale -
-  // appending a brand new series shouldn't reset anything (see useAppendOnlyKey).
-  const seriesValues = useMemo(() => config.paths.map((path) => path.value), [config.paths]);
+  // appending a brand new series shouldn't reset anything (see useAppendOnlyKey). Include the
+  // metadata that changes the plotted data so a delta marker reset is triggered when a path is
+  // toggled or reconfigured without disturbing append-only semantics.
+  const seriesValues = useMemo(
+    () =>
+      config.paths.map(
+        ({ value, enabled, timestampMethod }) => `${value}|${enabled}|${timestampMethod}`,
+      ),
+    [config.paths],
+  );
   const stableSeriesKey = useAppendOnlyKey(seriesValues);
   const deltaMeasureModeResetKey = `${xAxisMode}|${config.xAxisPath?.value ?? ""}|${stableSeriesKey}`;
   const deltaMeasureMode = useDeltaMeasureMode({
