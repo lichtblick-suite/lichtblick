@@ -13,6 +13,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { isOverlapping } from "intervals-fn";
 import * as _ from "lodash-es";
 
 import Logger from "@lichtblick/log";
@@ -24,13 +25,20 @@ import { getNewConnection } from "./getNewConnection";
 import { Range } from "./ranges";
 
 // CachedFilelike is a streamed Filelike backed by a VirtualLRUBuffer.
-// It serves requested byte ranges from an in-memory LRU cache, keeps at most one underlying fetch
-// active, and optionally uses bounded read-ahead/reconnect behavior for remote readers.
+// It serves requested byte ranges from an in-memory LRU cache, keeps at most
+// `maxConcurrentConnections` underlying fetches active (1 by default, matching the original
+// behavior; remote MCAP sessions may opt into 2 -- see `RemoteFileReadable`), and optionally uses
+// bounded read-ahead/reconnect behavior for remote readers.
 
 const LOGGING_INTERVAL_IN_BYTES = 1024 * 1024 * 300; // Log every 300MiB to avoid cluttering the logs too much.
 const CACHE_BLOCK_SIZE = 1024 * 1024 * 10; // 10MiB blocks.
 // Don't start a new connection if we're 5MiB away from downloading the requested byte.
 const CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION = 1024 * 1024 * 5;
+// Default number of concurrent underlying fetches. 1 preserves the original, exclusively-tested
+// single-connection behavior; remote MCAP sessions opt into 2 (see `RemoteFileReadable`) so that a
+// genuinely disjoint read (e.g. a seek/scrub jump) doesn't have to tear down an in-flight
+// read-ahead connection that a *different*, still-pending read is relying on.
+const DEFAULT_MAX_CONCURRENT_CONNECTIONS = 1;
 
 const log = Logger.getLogger(__filename);
 
@@ -39,6 +47,7 @@ export default class CachedFilelike implements Filelike {
   #cacheSizeInBytes: number = Infinity;
   readonly #readAheadEnabled: boolean = true;
   readonly #readAheadBufferBytes: number | undefined;
+  readonly #maxConcurrentConnections: number;
   #fileSize?: number;
   #virtualBuffer: VirtualLRUBuffer;
   #log: ILogger;
@@ -48,9 +57,10 @@ export default class CachedFilelike implements Filelike {
   // eslint-disable-next-line @lichtblick/no-boolean-parameters
   #keepReconnectingCallback?: (reconnecting: boolean) => void;
 
-  // The current active connection, if there is one. `remainingRange.start` gets updated whenever
-  // we receive new data, so it truly is the remaining range that it is going to download.
-  #currentConnection: { stream: FileStream; remainingRange: Range } | undefined;
+  // Active connections, in insertion order (oldest first). `remainingRange.start` gets updated
+  // whenever we receive new data, so it truly is the remaining range each one is going to
+  // download. Bounded at `#maxConcurrentConnections` entries -- see `#setConnection`.
+  #connections: { stream: FileStream; remainingRange: Range }[] = [];
 
   // A list of read requests and associated ranges for all read requests, in order.
   #readRequests: {
@@ -71,6 +81,7 @@ export default class CachedFilelike implements Filelike {
     cacheSizeInBytes?: number;
     readAheadEnabled?: boolean;
     readAheadBufferBytes?: number;
+    maxConcurrentConnections?: number;
     log?: ILogger;
     // eslint-disable-next-line @lichtblick/no-boolean-parameters
     keepReconnectingCallback?: (reconnecting: boolean) => void;
@@ -79,6 +90,8 @@ export default class CachedFilelike implements Filelike {
     this.#cacheSizeInBytes = options.cacheSizeInBytes ?? this.#cacheSizeInBytes;
     this.#readAheadEnabled = options.readAheadEnabled ?? this.#readAheadEnabled;
     this.#readAheadBufferBytes = options.readAheadBufferBytes;
+    this.#maxConcurrentConnections =
+      options.maxConcurrentConnections ?? DEFAULT_MAX_CONCURRENT_CONNECTIONS;
     this.#keepReconnectingCallback = options.keepReconnectingCallback;
     this.#log = options.log ?? log;
     this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });
@@ -170,10 +183,10 @@ export default class CachedFilelike implements Filelike {
       return;
     }
     this.#closed = true;
-    if (this.#currentConnection) {
-      this.#currentConnection.stream.destroy();
-      this.#currentConnection = undefined;
+    for (const connection of this.#connections) {
+      connection.stream.destroy();
     }
+    this.#connections = [];
     for (const request of this.#readRequests) {
       request.reject(error);
     }
@@ -277,12 +290,7 @@ export default class CachedFilelike implements Filelike {
     });
 
     const size = this.size();
-
-    const newConnection = getNewConnection({
-      currentRemainingRange: this.#currentConnection
-        ? this.#currentConnection.remainingRange
-        : undefined,
-      readRequestRange: this.#readRequests[0] ? this.#readRequests[0].range : undefined,
+    const commonOptions = {
       downloadedRanges: this.#virtualBuffer.getRangesWithData(),
       lastResolvedCallbackEnd: this.#lastResolvedCallbackEnd,
       maxRequestSize: this.#cacheSizeInBytes,
@@ -290,14 +298,62 @@ export default class CachedFilelike implements Filelike {
       continueDownloadingThreshold: CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION,
       readAheadEnabled: this.#readAheadEnabled,
       readAheadBufferBytes: this.#readAheadBufferBytes,
-    });
-    if (newConnection) {
-      this.#setConnection(newConnection);
+    };
+
+    if (this.#readRequests.length === 0) {
+      // Idle path (no pending read request): only speculate if we have no connections at all --
+      // unchanged from the original single-connection behavior.
+      if (this.#connections.length === 0) {
+        const newConnection = getNewConnection({
+          currentRemainingRange: undefined,
+          readRequestRange: undefined,
+          ...commonOptions,
+        });
+        if (newConnection) {
+          this.#setConnection(newConnection);
+        }
+      }
+      return;
+    }
+
+    // Walk pending read requests in priority order (oldest/first is highest priority, matching
+    // resolution order). For each one not already covered by an existing (or about-to-exist)
+    // connection, try to give it a connection:
+    // - If there's spare capacity, just add one.
+    // - Otherwise, evict the farthest existing connection (see #setConnection) -- but ONLY if
+    //   that eviction wouldn't take away the connection serving a higher-priority (earlier still
+    //   pending) request. This exactly reproduces the original single-connection semantics when
+    //   `maxConcurrentConnections` is 1 (the sole existing connection is always eligible), while
+    //   preventing a lower-priority request from starving a higher-priority one under contention.
+    for (const [index, request] of this.#readRequests.entries()) {
+      const newConnection = getNewConnection({
+        currentRemainingRange: this.#connections[0]?.remainingRange,
+        additionalRemainingRanges: this.#connections.slice(1).map((c) => c.remainingRange),
+        readRequestRange: request.range,
+        ...commonOptions,
+      });
+      if (!newConnection) {
+        continue;
+      }
+      if (this.#connections.length < this.#maxConcurrentConnections) {
+        this.#setConnection(newConnection);
+        continue;
+      }
+      const higherPriorityRanges = this.#readRequests.slice(0, index).map((r) => r.range);
+      this.#setConnection(newConnection, { protectedRanges: higherPriorityRanges });
+      // If every existing connection was protected, #setConnection is a no-op for this request;
+      // it'll be reconsidered the next time #updateState() runs.
     }
   }
 
-  // Replace the current connection with a new one, spanning a certain range.
-  #setConnection(range: Range): void {
+  // Add a new connection spanning `range`, evicting the least useful existing one first if we're
+  // already at `#maxConcurrentConnections`. With the default of 1, this always evicts the (only)
+  // existing connection, exactly matching the original single-connection behavior.
+  // `protectedRanges` (used when a lower-priority request is trying to open a connection under
+  // contention -- see #updateState) excludes any connection that overlaps one of them from
+  // eviction; if every existing connection is protected, this is a no-op (the caller's request
+  // stays pending until capacity frees up naturally).
+  #setConnection(range: Range, options?: { protectedRanges?: Range[] }): void {
     if (range.end <= range.start) {
       // Prevent an invalid/inverted HTTP Range header (for example "bytes=100-99") and the 416
       // response it would trigger; keep this defense-in-depth even though getNewConnection guards it.
@@ -307,16 +363,44 @@ export default class CachedFilelike implements Filelike {
 
     this.#log.debug(`Setting new connection @ ${rangeToString(range)}`);
 
-    if (this.#currentConnection) {
-      const currentConnection = this.#currentConnection;
-      currentConnection.stream.destroy();
+    if (this.#connections.length >= this.#maxConcurrentConnections) {
+      const protectedRanges = options?.protectedRanges ?? [];
+      const evictableIndexes = this.#connections
+        .map((_connection, i) => i)
+        .filter(
+          (i) =>
+            !protectedRanges.some((protectedRange) =>
+              isOverlapping([this.#connections[i]!.remainingRange], [protectedRange]),
+            ),
+        );
+      if (evictableIndexes.length === 0) {
+        // Every existing connection is protected (needed by a higher-priority pending request);
+        // leave this request pending rather than starve a more important one.
+        return;
+      }
+
+      // Evict whichever eligible connection's remaining range starts farthest from the new one --
+      // an LRU-ish heuristic since we don't track true recency per connection. With
+      // maxConcurrentConnections=1 (no protected ranges ever apply) there is only ever one
+      // candidate, so this is unambiguous.
+      let evictIndex = evictableIndexes[0]!;
+      let maxDistance = -1;
+      for (const i of evictableIndexes) {
+        const distance = Math.abs(this.#connections[i]!.remainingRange.start - range.start);
+        if (distance > maxDistance) {
+          maxDistance = distance;
+          evictIndex = i;
+        }
+      }
+      const [evicted] = this.#connections.splice(evictIndex, 1);
+      evicted!.stream.destroy();
       this.#log.debug(
-        `Destroyed current connection @ ${rangeToString(currentConnection.remainingRange)}`,
+        `Destroyed connection @ ${rangeToString(evicted!.remainingRange)} to make room for @ ${rangeToString(range)}`,
       );
     }
 
     const stream = this.#fileReader.fetch(range.start, range.end - range.start);
-    this.#currentConnection = { stream, remainingRange: range };
+    this.#connections.push({ stream, remainingRange: range });
 
     stream.on("error", (error: Error) => {
       this.#handleConnectionInterrupted({
@@ -331,10 +415,11 @@ export default class CachedFilelike implements Filelike {
     let bytesRead = 0;
     let lastReportedBytesRead = 0;
     stream.on("data", (chunk: Uint8Array) => {
-      const currentConnection = this.#currentConnection;
-      if (stream !== currentConnection?.stream) {
-        return; // Ignore data from old streams.
+      const index = this.#connections.findIndex((c) => c.stream === stream);
+      if (index === -1) {
+        return; // Ignore data from old/evicted streams.
       }
+      const connection = this.#connections[index]!;
 
       if (this.#lastErrorTime != undefined) {
         // If we had an error before, then that has clearly been resolved since we received some data.
@@ -345,7 +430,7 @@ export default class CachedFilelike implements Filelike {
         }
       }
 
-      this.#virtualBuffer.copyFrom(Buffer.from(chunk), currentConnection.remainingRange.start);
+      this.#virtualBuffer.copyFrom(Buffer.from(chunk), connection.remainingRange.start);
       bytesRead += chunk.byteLength;
 
       // Every now and then, do some logging of the current download speed.
@@ -356,19 +441,17 @@ export default class CachedFilelike implements Filelike {
         const mibibytes = bytesToMiB(bytesRead);
         const speed = _.round(mibibytes / sec, 2);
         this.#log.debug(
-          `Connection @ ${rangeToString(
-            currentConnection.remainingRange,
-          )} downloading at ${speed} MiB/s`,
+          `Connection @ ${rangeToString(connection.remainingRange)} downloading at ${speed} MiB/s`,
         );
       }
 
       if (this.#virtualBuffer.hasData(range.start, range.end)) {
         // If the requested range has been downloaded, we're done!
-        this.#log.info(`Connection @ ${rangeToString(currentConnection.remainingRange)} finished!`);
+        this.#log.info(`Connection @ ${rangeToString(connection.remainingRange)} finished!`);
         stream.destroy();
-        this.#currentConnection = undefined;
+        this.#connections.splice(index, 1);
       } else {
-        this.#currentConnection = {
+        this.#connections[index] = {
           stream,
           remainingRange: { start: range.start + bytesRead, end: range.end },
         };
@@ -379,14 +462,15 @@ export default class CachedFilelike implements Filelike {
     });
 
     stream.on("end", () => {
-      const currentConnection = this.#currentConnection;
-      if (stream !== currentConnection?.stream) {
+      const index = this.#connections.findIndex((c) => c.stream === stream);
+      if (index === -1) {
         return;
       }
+      const connection = this.#connections[index]!;
 
       if (this.#virtualBuffer.hasData(range.start, range.end)) {
-        this.#log.info(`Connection @ ${rangeToString(currentConnection.remainingRange)} finished!`);
-        this.#currentConnection = undefined;
+        this.#log.info(`Connection @ ${rangeToString(connection.remainingRange)} finished!`);
+        this.#connections.splice(index, 1);
         this.#updateState();
         return;
       }
@@ -411,8 +495,8 @@ export default class CachedFilelike implements Filelike {
     error: Error;
     reason: string;
   }): void {
-    const currentConnection = this.#currentConnection;
-    if (stream !== currentConnection?.stream) {
+    const index = this.#connections.findIndex((c) => c.stream === stream);
+    if (index === -1) {
       return;
     }
 
@@ -440,8 +524,8 @@ export default class CachedFilelike implements Filelike {
       `Connection @ ${rangeToString(range)} ${reason}; trying to continue: ${error.toString()}`,
     );
     this.#lastErrorTime = Date.now();
-    currentConnection.stream.destroy();
-    this.#currentConnection = undefined;
+    const [connection] = this.#connections.splice(index, 1);
+    connection!.stream.destroy();
     this.#updateState();
   }
 }

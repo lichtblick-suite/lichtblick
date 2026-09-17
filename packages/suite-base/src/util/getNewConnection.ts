@@ -23,6 +23,12 @@ const READ_AHEAD_BUFFER_SIZE = 50 * 1024 * 1024; // 50 MB
 // not. It can be used for any type of ranges, be it bytes, timestamps, or something else.
 export function getNewConnection(options: {
   currentRemainingRange?: Range; // The remaining range that the current connection (if any) is going to download.
+  // Remaining ranges for any additional concurrent connections beyond the primary one (see
+  // `maxConcurrentConnections` on `CachedFilelike`). Empty/omitted preserves the original
+  // single-connection behavior exactly. A new connection is only started when NONE of
+  // `currentRemainingRange` or `additionalRemainingRanges` already covers (or is close enough to
+  // reach) the pending read -- see `getNewConnectionWithExistingReadRequest`.
+  additionalRemainingRanges?: Range[];
   readRequestRange?: Range; // The range of the read request that we're trying to satisfy.
   downloadedRanges: Range[]; // Array of ranges that have been downloaded already.
   lastResolvedCallbackEnd?: number; // The range.end of the last read request that we resolved. Useful for reading ahead a bit.
@@ -38,19 +44,24 @@ export function getNewConnection(options: {
   const {
     readRequestRange,
     currentRemainingRange,
+    additionalRemainingRanges = [],
     readAheadEnabled = true,
     readAheadBufferBytes = READ_AHEAD_BUFFER_SIZE,
     ...otherOptions
   } = options;
+  const allRemainingRanges =
+    currentRemainingRange != undefined
+      ? [currentRemainingRange, ...additionalRemainingRanges]
+      : additionalRemainingRanges;
   if (readRequestRange) {
     return getNewConnectionWithExistingReadRequest({
       readRequestRange,
-      currentRemainingRange,
+      allRemainingRanges,
       readAheadEnabled,
       readAheadBufferBytes,
       ...otherOptions,
     });
-  } else if (!currentRemainingRange && readAheadEnabled) {
+  } else if (allRemainingRanges.length === 0 && readAheadEnabled) {
     return getNewConnectionWithoutExistingConnection({
       ...otherOptions,
       readAheadBufferBytes,
@@ -60,7 +71,7 @@ export function getNewConnection(options: {
 }
 
 function getNewConnectionWithExistingReadRequest({
-  currentRemainingRange,
+  allRemainingRanges,
   readRequestRange,
   downloadedRanges,
   maxRequestSize,
@@ -69,7 +80,7 @@ function getNewConnectionWithExistingReadRequest({
   readAheadEnabled,
   readAheadBufferBytes,
 }: {
-  currentRemainingRange?: Range;
+  allRemainingRanges: Range[];
   readRequestRange: Range;
   downloadedRanges: Range[];
   lastResolvedCallbackEnd?: number;
@@ -97,13 +108,18 @@ function getNewConnectionWithExistingReadRequest({
     );
   }
 
-  // We want to start a new connection if:
-  const startNewConnection = // 1. There is no current connection.
-    !currentRemainingRange || // 2. Or if there is no overlap between the current connection and the requested range.
-    !isOverlapping(notDownloadedRanges, [currentRemainingRange]) || // 3. Or if we'll reach the requested range at some point, but that would take too long.
-    currentRemainingRange.start + continueDownloadingThreshold < notDownloadedRanges[0].start;
+  // A new connection is unnecessary if at least one existing connection both overlaps the missing
+  // range AND will reach it soon enough (i.e. is "good enough" on its own). With a single
+  // connection (the common case) this is exactly the original single-connection check; with
+  // `maxConcurrentConnections > 1` on `CachedFilelike`, this lets a second, genuinely-disjoint
+  // in-flight connection avoid being torn down just because a new (different) request arrived.
+  const hasGoodEnoughConnection = allRemainingRanges.some(
+    (remainingRange) =>
+      isOverlapping(notDownloadedRanges, [remainingRange]) &&
+      !(remainingRange.start + continueDownloadingThreshold < notDownloadedRanges[0]!.start),
+  );
 
-  if (!startNewConnection) {
+  if (hasGoodEnoughConnection) {
     return;
   }
   // When read-ahead is disabled, only download exactly the missing portion of the requested

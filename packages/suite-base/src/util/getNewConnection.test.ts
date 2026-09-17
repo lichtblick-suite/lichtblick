@@ -683,4 +683,94 @@ describe("getNewConnection", () => {
       });
     });
   });
+
+  // Tests specific to `additionalRemainingRanges` (multi-connection support, item #9).
+  describe("additionalRemainingRanges (multi-connection)", () => {
+    const defaults = {
+      downloadedRanges: [],
+      lastResolvedCallbackEnd: undefined,
+      maxRequestSize: 10,
+      fileSize: 1000,
+      continueDownloadingThreshold: 5,
+    };
+
+    it("does not start a new connection when an additional connection (not the primary) already covers the request", () => {
+      // GIVEN: the primary connection is far from the request, but a second connection already
+      // overlaps it and is close enough.
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: { start: 900, end: 910 },
+        additionalRemainingRanges: [{ start: 40, end: 60 }],
+        readRequestRange: { start: 40, end: 50 },
+      });
+
+      // THEN: no new connection is needed -- the second connection will serve it.
+      expect(newConnection).toEqual(undefined);
+    });
+
+    it("starts a new connection when neither the primary nor any additional connection covers the request", () => {
+      // GIVEN: two existing connections, both far from and non-overlapping with the request.
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: { start: 900, end: 910 },
+        additionalRemainingRanges: [{ start: 800, end: 810 }],
+        readRequestRange: { start: 40, end: 50 },
+      });
+
+      // THEN: a new connection is started for the uncovered range, read-ahead-extended to the
+      // end of the (small, 1000-byte) file since the default 50 MiB read-ahead buffer exceeds it.
+      expect(newConnection).toEqual({ start: 40, end: 1000 });
+    });
+
+    it("does not start a new connection when an additional connection overlaps but the primary does not", () => {
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: undefined,
+        additionalRemainingRanges: [{ start: 40, end: 50 }],
+        readRequestRange: { start: 42, end: 48 },
+      });
+
+      expect(newConnection).toEqual(undefined);
+    });
+
+    it("still requires an additional connection to be close enough, not just overlapping", () => {
+      // GIVEN: an additional connection overlaps the missing range, but its start is too far
+      // behind (further than continueDownloadingThreshold) to be considered "good enough".
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: undefined,
+        additionalRemainingRanges: [{ start: 10, end: 100 }],
+        readRequestRange: { start: 40, end: 50 },
+        continueDownloadingThreshold: 5,
+      });
+
+      // THEN: a new connection is still started (10 + 5 < 40), again read-ahead-extended to EOF.
+      expect(newConnection).toEqual({ start: 40, end: 1000 });
+    });
+
+    it("does not trigger idle read-ahead when only an additional connection (no primary) is active", () => {
+      // GIVEN: no read request, no primary connection, but one additional connection is active.
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: undefined,
+        additionalRemainingRanges: [{ start: 100, end: 200 }],
+        readRequestRange: undefined,
+        lastResolvedCallbackEnd: 300,
+      });
+
+      // THEN: idle read-ahead is skipped -- there's already an active connection (just not the
+      // primary one), so `getNewConnectionWithoutExistingConnection` must not run.
+      expect(newConnection).toEqual(undefined);
+    });
+
+    it("defaults additionalRemainingRanges to empty, preserving single-connection behavior exactly", () => {
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: { start: 900, end: 910 },
+        readRequestRange: { start: 40, end: 50 },
+      });
+
+      expect(newConnection).toEqual({ start: 40, end: 1000 });
+    });
+  });
 });

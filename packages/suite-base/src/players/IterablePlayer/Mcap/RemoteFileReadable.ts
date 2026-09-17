@@ -26,6 +26,7 @@ export class RemoteFileReadable {
       cacheSizeInBytes: options?.cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
       readAheadEnabled: options?.readAheadEnabled,
       readAheadBufferBytes: options?.readAheadBufferBytes,
+      maxConcurrentConnections: options?.maxConcurrentConnections,
     });
 
     const inner: McapTypes.IReadable = {

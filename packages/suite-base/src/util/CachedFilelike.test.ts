@@ -487,4 +487,208 @@ describe("CachedFilelike", () => {
       }
     });
   });
+
+  describe("multi-connection support (maxConcurrentConnections)", () => {
+    // A fetch mock whose emitted data is delayed by a configurable amount per call, so tests can
+    // control which connections are still in-flight when a later read arrives.
+    function makeControllableFetch(delayMs: number) {
+      const streams: { destroy: jest.Mock }[] = [];
+      const fetch = jest.fn((_offset: number, length: number): FileStream => {
+        const destroy = jest.fn();
+        streams.push({ destroy });
+        return {
+          on: (
+            type: "data" | "error" | "end",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
+          ) => {
+            if (type === "data") {
+              setTimeout(() => {
+                callback(new Uint8Array(length));
+              }, delayMs);
+            }
+          },
+          destroy,
+        };
+      });
+      return { fetch, streams };
+    }
+
+    it("keeps a genuinely disjoint read's connection alive instead of tearing it down for a second one", async () => {
+      // GIVEN: a large file, room for 2 concurrent connections, and a slow first fetch that is
+      // still in flight when a second, disjoint read arrives.
+      const { fetch, streams } = makeControllableFetch(30);
+      const fileReader: FileReader = { open: async () => ({ size: 20 * MEBIBYTE }), fetch };
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 4 * MEBIBYTE,
+        readAheadEnabled: false,
+        maxConcurrentConnections: 2,
+        log,
+      });
+
+      // WHEN: the first (slow) read starts, then a disjoint second read starts before it settles.
+      const firstReadPromise = cachedFileReader.read(0, 1024);
+      await delay(5);
+      const secondReadPromise = cachedFileReader.read(10 * MEBIBYTE, 1024);
+      await delay(5);
+
+      // THEN: both connections are open concurrently -- the first was NOT destroyed to make room
+      // for the second.
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(streams[0]!.destroy).not.toHaveBeenCalled();
+
+      // AND: both reads still resolve correctly once their data arrives.
+      await expect(firstReadPromise).resolves.toEqual(new Uint8Array(1024));
+      await expect(secondReadPromise).resolves.toEqual(new Uint8Array(1024));
+    });
+
+    it("evicts the farthest connection that isn't backing another still-pending request", async () => {
+      // GIVEN: a manually-controlled fetch mock that lets the test decide exactly how many bytes
+      // each connection has delivered so far -- needed to construct connections that have
+      // already satisfied their *original* request (which is no longer pending) but are still
+      // downloading their read-ahead-extended range, and are therefore free to evict.
+      const emitters: Array<(bytes: number) => void> = [];
+      const destroys: jest.Mock[] = [];
+      const fetch = jest.fn((): FileStream => {
+        let dataCallback: ((chunk: Uint8Array) => void) | undefined;
+        const destroy = jest.fn();
+        destroys.push(destroy);
+        emitters.push((bytes: number) => dataCallback?.(new Uint8Array(bytes)));
+        return {
+          on: (
+            type: "data" | "error" | "end",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
+          ) => {
+            if (type === "data") {
+              dataCallback = callback;
+            }
+          },
+          destroy,
+        };
+      });
+      const fileReader: FileReader = { open: async () => ({ size: 20 * MEBIBYTE }), fetch };
+      const readAheadBufferBytes = 2000;
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 4 * MEBIBYTE, // < fileSize, so the small readAheadBufferBytes extension applies.
+        readAheadBufferBytes,
+        maxConcurrentConnections: 2,
+        log,
+      });
+
+      // WHEN: connection A (near, @ 0) and connection B (far, @ 15 MiB) each fully satisfy their
+      // own small request, but keep running to fill out their read-ahead-extended 2000-byte range.
+      const nearReadPromise = cachedFileReader.read(0, 100);
+      await delay(5);
+      emitters[0]!(100); // satisfies the 100-byte request; connection A's 2000-byte range is not.
+      await expect(nearReadPromise).resolves.toEqual(new Uint8Array(100));
+
+      const farReadPromise = cachedFileReader.read(15 * MEBIBYTE, 100);
+      await delay(5);
+      emitters[1]!(100); // same for connection B.
+      await expect(farReadPromise).resolves.toEqual(new Uint8Array(100));
+
+      // Both original requests are now resolved (removed from the pending queue), but neither
+      // connection is done -- each has only received 100 of its 2000-byte read-ahead range.
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(destroys[0]).not.toHaveBeenCalled();
+      expect(destroys[1]).not.toHaveBeenCalled();
+
+      // AND: a third read arrives near connection A (1 MiB) -- far from connection B (15 MiB) --
+      // while at capacity (2/2) and with no other pending request to protect either connection.
+      const thirdReadPromise = cachedFileReader.read(1 * MEBIBYTE, 100);
+      await delay(5);
+
+      // THEN: connection B (the farther one) is evicted to make room; connection A is untouched.
+      expect(fetch).toHaveBeenCalledTimes(3);
+      expect(destroys[0]).not.toHaveBeenCalled();
+      expect(destroys[1]).toHaveBeenCalledTimes(1);
+
+      emitters[2]!(100);
+      await expect(thirdReadPromise).resolves.toEqual(new Uint8Array(100));
+    });
+
+    it("defaults to a single connection (evicts the prior one) when maxConcurrentConnections is not specified", async () => {
+      // GIVEN: the same "connection outlives its own resolved request" setup as the eviction test
+      // above (via a small readAheadBufferBytes extension), but without opting into
+      // multi-connection -- reproduces the original single-connection semantics exactly.
+      const emitters: Array<(bytes: number) => void> = [];
+      const destroys: jest.Mock[] = [];
+      const fetch = jest.fn((): FileStream => {
+        let dataCallback: ((chunk: Uint8Array) => void) | undefined;
+        const destroy = jest.fn();
+        destroys.push(destroy);
+        emitters.push((bytes: number) => dataCallback?.(new Uint8Array(bytes)));
+        return {
+          on: (
+            type: "data" | "error" | "end",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
+          ) => {
+            if (type === "data") {
+              dataCallback = callback;
+            }
+          },
+          destroy,
+        };
+      });
+      const fileReader: FileReader = { open: async () => ({ size: 20 * MEBIBYTE }), fetch };
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 4 * MEBIBYTE,
+        readAheadBufferBytes: 2000,
+        log,
+      });
+
+      // WHEN: the first request resolves, but its connection is still extending via read-ahead...
+      const firstReadPromise = cachedFileReader.read(0, 100);
+      await delay(5);
+      emitters[0]!(100);
+      await expect(firstReadPromise).resolves.toEqual(new Uint8Array(100));
+      expect(destroys[0]).not.toHaveBeenCalled();
+
+      // ...and then a disjoint (seek-like) read arrives.
+      const secondReadPromise = cachedFileReader.read(10 * MEBIBYTE, 100);
+      await delay(5);
+
+      // THEN: the original single-connection behavior is preserved -- the still-extending first
+      // connection is torn down to make room for the new one, even though nothing protects it
+      // (there's no other pending request, matching the original always-replace semantics).
+      expect(destroys[0]).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledTimes(2);
+
+      emitters[1]!(100);
+      await expect(secondReadPromise).resolves.toEqual(new Uint8Array(100));
+    });
+
+    it("destroys every active connection on close() when more than one is open", async () => {
+      // GIVEN: 2 concurrent, never-resolving connections.
+      const fetchMock = jest.fn((): FileStream => ({ on: () => {}, destroy: jest.fn() }));
+      const fileReader: FileReader = {
+        open: async () => ({ size: 20 * MEBIBYTE }),
+        fetch: fetchMock,
+      };
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 4 * MEBIBYTE,
+        readAheadEnabled: false,
+        maxConcurrentConnections: 2,
+        log,
+      });
+
+      cachedFileReader.read(0, 1024).catch(() => {});
+      await delay(5);
+      cachedFileReader.read(10 * MEBIBYTE, 1024).catch(() => {});
+      await delay(5);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+
+      // WHEN: the reader is closed.
+      cachedFileReader.close();
+
+      // THEN: both underlying streams are destroyed, not just the most recent one.
+      const firstStream = fetchMock.mock.results[0]!.value;
+      const secondStream = fetchMock.mock.results[1]!.value;
+      expect(firstStream.destroy).toHaveBeenCalledTimes(1);
+      expect(secondStream.destroy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

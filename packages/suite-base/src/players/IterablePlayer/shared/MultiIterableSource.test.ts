@@ -123,6 +123,7 @@ describe("MultiIterableSource", () => {
         cacheSizeInBytes: expect.any(Number),
         readAheadEnabled: true,
         readAheadBufferBytes: DEFAULT_READ_AHEAD_BUFFER_BYTES,
+        maxConcurrentConnections: 2,
         pool: expect.any(HydratedSourcePool),
       });
       expect(mockSourceConstructor).toHaveBeenNthCalledWith(2, {
@@ -131,6 +132,7 @@ describe("MultiIterableSource", () => {
         cacheSizeInBytes: expect.any(Number),
         readAheadEnabled: true,
         readAheadBufferBytes: DEFAULT_READ_AHEAD_BUFFER_BYTES,
+        maxConcurrentConnections: 2,
         pool: expect.any(HydratedSourcePool),
       });
       expect(initializations).toHaveLength(2);
