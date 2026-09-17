@@ -13,6 +13,7 @@ import { Time } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import { BlobReadable } from "./BlobReadable";
+import { FooterPrefetchingReadable } from "./FooterPrefetchingReadable";
 import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
 import type {
   HydratedInner,
@@ -48,8 +49,13 @@ async function tryCreateIndexedReader(
 ): Promise<IndexedReaderResult> {
   let reader: McapIndexedReader;
   try {
+    // McapIndexedReader.Initialize() (external @mcap/core package) reads the file header and then
+    // the footer sequentially, even though the footer's location only depends on the already-known
+    // file size, not on anything parsed from the header -- see FooterPrefetchingReadable for the
+    // full rationale. Wrapping here (rather than inside RemoteFileReadable) applies to every
+    // McapSource uniformly and keeps this optimization isolated to exactly where it's used.
     reader = await McapIndexedReader.Initialize({
-      readable,
+      readable: new FooterPrefetchingReadable(readable),
       decompressHandlers,
     });
   } catch (err: unknown) {
@@ -152,6 +158,9 @@ export class McapIterableSource implements ISerializedIterableSource {
         readAheadEnabled: source.readAheadEnabled,
         ...(source.readAheadBufferBytes != undefined
           ? { readAheadBufferBytes: source.readAheadBufferBytes }
+          : {}),
+        ...(source.maxConcurrentConnections != undefined
+          ? { maxConcurrentConnections: source.maxConcurrentConnections }
           : {}),
       });
       await readable.open();

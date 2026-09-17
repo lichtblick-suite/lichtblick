@@ -13,6 +13,7 @@ import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
+import type { FooterPrefetchingReadable } from "./FooterPrefetchingReadable";
 import { McapIterableSource } from "./McapIterableSource";
 import { RemoteFileReadable } from "./RemoteFileReadable";
 import { HydratedSourcePool } from "../shared/HydratedSourcePool";
@@ -435,7 +436,9 @@ describe("McapIterableSource", () => {
         expect(sourceAReadable).toBeDefined();
         expect(sourceAReadable?.open).toHaveBeenCalledTimes(1);
         expect(
-          readerInitializeSpy.mock.calls.filter(([arg]) => arg.readable === sourceAReadable),
+          readerInitializeSpy.mock.calls.filter(
+            ([arg]) => (arg.readable as FooterPrefetchingReadable).inner === sourceAReadable,
+          ),
         ).toHaveLength(1);
 
         // When B initializes, A is evicted, and A is iterated again after eviction
@@ -456,7 +459,9 @@ describe("McapIterableSource", () => {
         expect(MockRemoteFileReadable.mock.calls).toHaveLength(constructorCallsAfterEviction);
         expect(sourceAReadable?.open).toHaveBeenCalledTimes(1);
         expect(
-          readerInitializeSpy.mock.calls.filter(([arg]) => arg.readable === sourceAReadable),
+          readerInitializeSpy.mock.calls.filter(
+            ([arg]) => (arg.readable as FooterPrefetchingReadable).inner === sourceAReadable,
+          ),
         ).toHaveLength(2);
       });
 
@@ -477,7 +482,7 @@ describe("McapIterableSource", () => {
         let failRehydrateForReadable: MockRemoteReadable | undefined;
         const fatalError = new Error("fatal indexed init");
         jest.spyOn(McapIndexedReader, "Initialize").mockImplementation(async (args) => {
-          if (args.readable === failRehydrateForReadable) {
+          if ((args.readable as FooterPrefetchingReadable).inner === failRehydrateForReadable) {
             failRehydrateForReadable = undefined;
             throw fatalError;
           }
