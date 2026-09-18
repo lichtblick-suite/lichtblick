@@ -3,6 +3,7 @@
 
 import { BasicBuilder } from "@lichtblick/test-builders";
 
+import { AuthProvider } from "./AuthProvider";
 import { HttpError } from "./HttpError";
 import { HttpService } from "./HttpService";
 
@@ -555,6 +556,57 @@ describe("HttpService", () => {
           credentials: "same-origin",
         }),
       );
+    });
+
+    it("should switch credentials to omit when auth headers are provided by AuthProvider", async () => {
+      const authProvider: AuthProvider = {
+        getAuthHeaders: jest.fn().mockResolvedValue({ Authorization: "Bearer abc123" }),
+      };
+      httpService.setAuthProvider(authProvider);
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValueOnce({ data: "success" }),
+      });
+
+      await httpService.get("test");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.example.com/test?",
+        expect.objectContaining({
+          credentials: "omit",
+          headers: expect.objectContaining({ Authorization: "Bearer abc123" }),
+        }),
+      );
+    });
+  });
+
+  describe("auth provider callbacks", () => {
+    it("calls handleUnauthorizedResponse for 401 responses", async () => {
+      const authProvider: AuthProvider = {
+        getAuthHeaders: jest.fn().mockResolvedValue({ Authorization: "Bearer token" }),
+        handleUnauthorizedResponse: jest.fn(),
+      };
+
+      httpService.setAuthProvider(authProvider);
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        statusText: "Unauthorized",
+        headers: {
+          get: jest.fn().mockReturnValue("application/json"),
+        },
+        text: jest.fn().mockResolvedValueOnce("Unauthorized"),
+      });
+
+      await expect(httpService.get("protected")).rejects.toThrow(HttpError);
+      expect(authProvider.handleUnauthorizedResponse).toHaveBeenCalled();
     });
   });
 
