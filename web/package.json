@@ -3,6 +3,7 @@
   "private": true,
   "devDependencies": {
     "@lichtblick/log": "workspace:*",
+    "@lichtblick/suite-base": "workspace:*",
     "@lichtblick/suite-web": "workspace:*",
     "@lichtblick/tsconfig": "1.1.2",
     "@types/serve-handler": "^6",
