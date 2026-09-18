@@ -22,7 +22,7 @@ import { Trans, useTranslation } from "react-i18next";
 import Logger from "@lichtblick/log";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
 import { useStyles } from "@lichtblick/suite-base/Workspace.style";
-import McapBundleAPI from "@lichtblick/suite-base/api/mcapBundle/McapBundleAPI";
+import SourceBundleAPI from "@lichtblick/suite-base/api/sourceBundle/SourceBundleAPI";
 import AccountSettings from "@lichtblick/suite-base/components/AccountSettingsSidebar/AccountSettings";
 import { AlertsList } from "@lichtblick/suite-base/components/AlertList/AlertsList";
 import { AppBar } from "@lichtblick/suite-base/components/AppBar";
@@ -59,6 +59,7 @@ import { TopicList } from "@lichtblick/suite-base/components/TopicList";
 import VariablesList from "@lichtblick/suite-base/components/VariablesList";
 import { WorkspaceDialogs } from "@lichtblick/suite-base/components/WorkspaceDialogs";
 import { AllowedFileExtensions } from "@lichtblick/suite-base/constants/allowedFileExtensions";
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { useAppContext } from "@lichtblick/suite-base/context/AppContext";
 import {
   LayoutState,
@@ -88,6 +89,7 @@ import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
 import useSeekTimeFromCLI from "@lichtblick/suite-base/hooks/useSeekTimeFromCLI";
 import { useStructureItemsStoreManager } from "@lichtblick/suite-base/panels/Plot/hooks/useStructureItemsStoreManager";
+import { AdditionalSourceDescriptor } from "@lichtblick/suite-base/players/IterablePlayer/additionalSources/types";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { PanelStateContextProvider } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import WorkspaceContextProvider from "@lichtblick/suite-base/providers/WorkspaceContextProvider";
@@ -510,10 +512,11 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         dsParams: Record<string, string> | undefined;
         sourceMetadata?: Record<string, unknown>[];
         layoutUrl?: string;
+        additionalSources?: AdditionalSourceDescriptor[];
       }
     | undefined
   >(
-    targetUrlState && !targetUrlState.mcapBundleId
+    targetUrlState && !targetUrlState.sourceBundleId
       ? {
           ds: targetUrlState.ds,
           dsParams: targetUrlState.dsParams,
@@ -522,10 +525,10 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
       : undefined,
   );
 
-  // Resolve MCAP bundle URLs when mcapBundleId is present.
+  // Resolve source bundle URLs when sourceBundleId is present.
   useEffect(() => {
-    const mcapBundleId = targetUrlState?.mcapBundleId;
-    if (!mcapBundleId) {
+    const sourceBundleId = targetUrlState?.sourceBundleId;
+    if (!sourceBundleId || !APP_CONFIG.apiUrl) {
       return;
     }
 
@@ -534,7 +537,10 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
 
     void (async () => {
       try {
-        const mcaps = await McapBundleAPI.getMcapBundle(mcapBundleId, signal);
+        const { mcaps, additionalSources } = await SourceBundleAPI.getSourceBundle(
+          sourceBundleId,
+          signal,
+        );
         if (mcaps.length === 0) {
           enqueueSnackbar("Session contains no data sources", { variant: "error" });
           return;
@@ -545,6 +551,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
           ds: "remote-file",
           dsParams: { url: urls.join(",") },
           sourceMetadata: mcaps.map((mcap) => mcap.metadata),
+          additionalSources,
         });
       } catch (error) {
         if (signal.aborted) {
@@ -558,7 +565,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
     return () => {
       controller.abort();
     };
-  }, [targetUrlState?.mcapBundleId, enqueueSnackbar]);
+  }, [targetUrlState?.sourceBundleId, enqueueSnackbar]);
 
   const selectEvent = useEvents(selectSelectEvent);
 
@@ -638,6 +645,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
         type: "connection",
         params: unappliedSourceArgs.dsParams,
         sourceMetadata: unappliedSourceArgs.sourceMetadata,
+        additionalSources: unappliedSourceArgs.additionalSources,
       });
       selectEvent(unappliedSourceArgs.dsParams?.eventId);
       shouldUpdate = true;
