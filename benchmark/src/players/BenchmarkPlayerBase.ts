@@ -23,6 +23,10 @@ const log = Log.getLogger(__filename);
  * Subclasses only need to implement `run()` and override whichever methods they actually use.
  */
 abstract class BenchmarkPlayerBase implements Player {
+  /** Marks results from this player as coming from the legacy synthetic pipeline, not the real
+   * production `IterablePlayer`. See `benchmark/src/dataSources/pipelineKind.ts`. */
+  public readonly pipeline = "synthetic" as const;
+
   protected listener?: (state: PlayerState) => Promise<void>;
 
   protected abstract run(): Promise<void>;
