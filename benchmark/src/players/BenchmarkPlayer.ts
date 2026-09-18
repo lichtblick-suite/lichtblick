@@ -21,6 +21,7 @@ import {
 } from "@lichtblick/suite-base/players/types";
 import delay from "@lichtblick/suite-base/util/delay";
 
+import { BenchmarkStats } from "../BenchmarkStats";
 import { BenchmarkPlayerBase } from "./BenchmarkPlayerBase";
 
 const log = Log.getLogger(__filename);
@@ -140,7 +141,6 @@ class BenchmarkPlayer extends BenchmarkPlayerBase implements Player {
     this.#blockLoader?.setTopics(topicsForPreload);
 
     const msgEvents: MessageEvent[] = [];
-    const frameMs: number[] = [];
 
     // Load all messages into memory
     for await (const item of iterator) {
@@ -151,7 +151,6 @@ class BenchmarkPlayer extends BenchmarkPlayerBase implements Player {
       if (item.type === "message-event") {
         msgEvents.push(item.msgEvent);
       }
-      frameMs.push(0);
     }
     let progressForListener: Progress = {};
 
@@ -176,8 +175,7 @@ class BenchmarkPlayer extends BenchmarkPlayerBase implements Player {
     performance.mark("message-emit-start");
 
     let totalBytesReceived = 0;
-    for (let i = 0; i < msgEvents.length; i++) {
-      const msgEvent = msgEvents[i]!;
+    for (const msgEvent of msgEvents) {
       totalBytesReceived += msgEvent.sizeInBytes;
       const startFrame = performance.now();
       await listener({
@@ -202,22 +200,11 @@ class BenchmarkPlayer extends BenchmarkPlayerBase implements Player {
         },
       });
       const endFrame = performance.now();
-      frameMs[i] = endFrame - startFrame;
+      BenchmarkStats.Instance().recordFrameTime(endFrame - startFrame);
     }
 
     performance.mark("message-emit-end");
     performance.measure("message-emit", "message-emit-start", "message-emit-end");
-
-    // Discard the first and last frames
-    const filteredFrameMs = frameMs.slice(1, -1);
-
-    const frameMsStats = getFrameStats(filteredFrameMs);
-
-    log.info(
-      `Frame time (filtered) average: ${frameMsStats.avgFrameMs}, median: ${frameMsStats.medianFrameMs}, P90: ${frameMsStats.p90FrameMs}`,
-    );
-
-    console.log(frameMs);
 
     const tries = 20;
     const steps = 10;
@@ -267,20 +254,6 @@ class BenchmarkPlayer extends BenchmarkPlayerBase implements Player {
         .join("ms, ")}ms`,
     );
   }
-}
-
-function getFrameStats(frames: number[]) {
-  const totalFrameMs = frames.reduce((a, b) => a + b, 0);
-  const avgFrameMs = totalFrameMs / frames.length;
-
-  const sortedFrameMs = frames.sort();
-  const medianFrameMs = sortedFrameMs[Math.floor(sortedFrameMs.length * 0.5)]!;
-  const p90FrameMs = sortedFrameMs[Math.floor(sortedFrameMs.length * 0.9)]!;
-  return {
-    avgFrameMs,
-    medianFrameMs,
-    p90FrameMs,
-  };
 }
 
 export { BenchmarkPlayer };

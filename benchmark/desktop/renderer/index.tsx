@@ -5,6 +5,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-export * from "./SyntheticDataSourceFactory";
-export * from "./McapLocalBenchmarkDataSourceFactory";
-export * from "./McapRealPipelineBenchmarkDataSourceFactory";
+// Electron's renderer target is "web" (see webpack.desktop.config.ts), so it boots identically to
+// the plain web build; reusing that entry point keeps both builds' bootstrap logic in sync.
+import "../../src/index";
