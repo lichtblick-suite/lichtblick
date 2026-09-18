@@ -2,7 +2,8 @@
   "name": "benchmark",
   "private": true,
   "dependencies": {
-    "@lichtblick/suite-base": "workspace:*"
+    "@lichtblick/suite-base": "workspace:*",
+    "react-mosaic-component": "6.2.0"
   },
   "devDependencies": {
     "@foxglove/schemas": "1.13.0",
@@ -11,10 +12,13 @@
     "@lichtblick/rostime": "1.0.0",
     "@lichtblick/suite": "workspace:*",
     "@lichtblick/tsconfig": "1.1.2",
+    "@playwright/test": "1.60.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
+    "@testing-library/react": "16.0.0",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.0",
     "clean-webpack-plugin": "4.0.0",
+    "electron": "44.0.0",
     "html-webpack-plugin": "5.6.0",
     "mathjs": "15.2.0",
     "react": "18.3.1",
