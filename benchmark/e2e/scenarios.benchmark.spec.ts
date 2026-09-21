@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 import { test, expect } from "./fixtures/benchmark-electron";
 import type { ScenarioUnderTest, FrameTimeSample, MemorySample, BenchmarkArtifact } from "./types";

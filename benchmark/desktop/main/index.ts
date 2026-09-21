@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { app, BrowserWindow, ipcMain } from "electron";
-import path from "path";
+import path from "node:path";
 
 import { registerMemoryMetricsHandler } from "./memoryMetrics";
 
