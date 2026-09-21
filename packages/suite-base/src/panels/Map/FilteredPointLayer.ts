@@ -59,6 +59,87 @@ function resetMarker(marker: AnyPointMarker, style: PathOptions, color: string):
 }
 
 /**
+ * Draw the accuracy ellipse for a fix, when the panel asks for it and the message carries a
+ * covariance good enough to derive one from.
+ */
+function addAccuracyMarker(
+  layer: FeatureGroup,
+  messageEvent: MessageEvent<NavSatFixMsg>,
+  color: string,
+): void {
+  const accuracy = getAccuracy(messageEvent.message);
+  if (accuracy == undefined) {
+    return;
+  }
+  const { latitude, longitude } = messageEvent.message;
+  new Ellipse([latitude, longitude], accuracy.radii, accuracy.tilt, {
+    color,
+    fillOpacity: 0.2,
+    stroke: false,
+  }).addTo(layer);
+}
+
+/**
+ * Wire hover and click reporting for the layer.
+ *
+ * Bound on the group rather than on each marker, so the handlers are installed once however
+ * many fixes are drawn. Hover state lives here because resetting the previous marker needs to
+ * outlive a single event.
+ */
+function attachInteractionHandlers(
+  layer: FeatureGroup,
+  args: FilteredPointLayerArgs,
+  defaultStyle: PathOptions,
+  orientedColor: string,
+): void {
+  let currentHoveredMarker: AnyPointMarker | undefined;
+
+  const clearHover = () => {
+    if (!currentHoveredMarker) {
+      return;
+    }
+    resetMarker(currentHoveredMarker, defaultStyle, orientedColor);
+    currentHoveredMarker = undefined;
+    args.onHover?.(undefined);
+  };
+
+  if (args.onHover) {
+    layer.on("mouseover", (event) => {
+      const marker = event.sourceTarget as AnyPointMarker;
+
+      // Reset previous hovered marker if there is one
+      if (currentHoveredMarker && currentHoveredMarker !== marker) {
+        resetMarker(currentHoveredMarker, defaultStyle, orientedColor);
+      }
+
+      // Set new marker as hovered
+      currentHoveredMarker = marker;
+      setMarkerColor(marker, args.hoverColor);
+      bringMarkerToFront(marker);
+      args.onHover?.(marker.messageEvent);
+    });
+    layer.on("mouseout", (event) => {
+      // Only reset if this is the currently hovered marker
+      if (currentHoveredMarker === (event.sourceTarget as AnyPointMarker)) {
+        clearHover();
+      }
+    });
+
+    // Handle case when mouse leaves the entire layer group
+    layer.on("mouseleave", clearHover);
+  }
+
+  if (args.onClick) {
+    layer.on("click", (event) => {
+      const marker = event.sourceTarget as AnyPointMarker;
+      if (marker.messageEvent) {
+        args.onClick?.(marker.messageEvent);
+      }
+    });
+  }
+}
+
+/**
  * Create a leaflet LayerGroup with filtered points
  */
 function FilteredPointLayer(args: FilteredPointLayerArgs): FeatureGroup {
@@ -75,9 +156,6 @@ function FilteredPointLayer(args: FilteredPointLayerArgs): FeatureGroup {
 
   // track which pixels have been used
   const sparse2d: (boolean | undefined)[][] = [];
-
-  // track the currently hovered marker to reset its style when hovering another
-  let currentHoveredMarker: AnyPointMarker | undefined;
 
   const markerStyle = args.markerStyle ?? "dot";
   const orientedColor = args.markerColor ?? args.color;
@@ -128,60 +206,11 @@ function FilteredPointLayer(args: FilteredPointLayerArgs): FeatureGroup {
     marker.addTo(markersLayer);
 
     if (args.showAccuracy === true) {
-      const accuracy = getAccuracy(messageEvent.message);
-      if (accuracy != undefined) {
-        const accuracyMarker = new Ellipse([lat, lon], accuracy.radii, accuracy.tilt, {
-          color: args.color,
-          fillOpacity: 0.2,
-          stroke: false,
-        });
-        accuracyMarker.addTo(markersLayer);
-      }
+      addAccuracyMarker(markersLayer, messageEvent, args.color);
     }
   }
 
-  if (args.onHover) {
-    markersLayer.on("mouseover", (event) => {
-      const marker = event.sourceTarget as AnyPointMarker;
-
-      // Reset previous hovered marker if there is one
-      if (currentHoveredMarker && currentHoveredMarker !== marker) {
-        resetMarker(currentHoveredMarker, defaultStyle, orientedColor);
-      }
-
-      // Set new marker as hovered
-      currentHoveredMarker = marker;
-      setMarkerColor(marker, args.hoverColor);
-      bringMarkerToFront(marker);
-      args.onHover?.(marker.messageEvent);
-    });
-    markersLayer.on("mouseout", (event) => {
-      const marker = event.sourceTarget as AnyPointMarker;
-      // Only reset if this is the currently hovered marker
-      if (currentHoveredMarker === marker) {
-        resetMarker(marker, defaultStyle, orientedColor);
-        currentHoveredMarker = undefined;
-        args.onHover?.(undefined);
-      }
-    });
-
-    // Handle case when mouse leaves the entire layer group
-    markersLayer.on("mouseleave", () => {
-      if (currentHoveredMarker) {
-        resetMarker(currentHoveredMarker, defaultStyle, orientedColor);
-        currentHoveredMarker = undefined;
-        args.onHover?.(undefined);
-      }
-    });
-  }
-  if (args.onClick) {
-    markersLayer.on("click", (event) => {
-      const marker = event.sourceTarget as AnyPointMarker;
-      if (marker.messageEvent) {
-        args.onClick?.(marker.messageEvent);
-      }
-    });
-  }
+  attachInteractionHandlers(markersLayer, args, defaultStyle, orientedColor);
 
   return markersLayer;
 }

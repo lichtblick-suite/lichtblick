@@ -8,10 +8,10 @@
 import { useStyles } from "@lichtblick/suite-base/panels/Map/MapRotationOverlay.style";
 import { COMPASS_SIZE } from "@lichtblick/suite-base/panels/Map/constants";
 
-type MapRotationOverlayProps = {
+type MapRotationOverlayProps = Readonly<{
   /** Map rotation in degrees clockwise from north. */
   heading: number;
-};
+}>;
 
 /**
  * Compass rose for a heading-up map.
