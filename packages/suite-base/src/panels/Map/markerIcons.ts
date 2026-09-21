@@ -55,7 +55,7 @@ export function orientedMarkerSvg(
   color: string,
   heading: number,
 ): string {
-  const rotation = isFinite(heading) ? heading : 0;
+  const rotation = Number.isFinite(heading) ? heading : 0;
 
   const paths = SHAPES[style]
     .map((part) =>

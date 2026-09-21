@@ -52,7 +52,12 @@ export function distanceMeters(from: Point, to: Point): number {
  * @returns bearing in degrees, or undefined if the positions are too close to be meaningful
  */
 export function getHeading(from: Point, to: Point): number | undefined {
-  if (!isFinite(from.lat) || !isFinite(from.lon) || !isFinite(to.lat) || !isFinite(to.lon)) {
+  if (
+    !Number.isFinite(from.lat) ||
+    !Number.isFinite(from.lon) ||
+    !Number.isFinite(to.lat) ||
+    !Number.isFinite(to.lon)
+  ) {
     return undefined;
   }
 
