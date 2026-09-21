@@ -62,10 +62,12 @@ export const useStyles = makeStyles()((theme) => ({
     "&:hover": {
       opacity: 1,
     },
-  },
-  // Applied in addition to `floatingControls` while the mouse is anywhere within the panel, so
-  // the controls aren't only revealed when hovering their own small area.
-  floatingControlsVisible: {
-    opacity: 1,
+    // Reveals the controls as soon as the mouse is anywhere within the panel, not only when
+    // hovering their own small area. Relies on plain CSS `:hover` bubbling from the panel's
+    // root container (see `data-panel-root` on `PanelExtensionAdapter` and `Plot`) rather than
+    // JS-tracked hover state, so no component needs to own or pass down a "hovered" flag.
+    "[data-panel-root]:hover &": {
+      opacity: 1,
+    },
   },
 }));

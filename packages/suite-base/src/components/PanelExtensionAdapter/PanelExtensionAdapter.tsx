@@ -185,9 +185,6 @@ function PanelExtensionAdapter(
   const [forceConversion, setForceConversion] = useState(new Set<string>());
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
   const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
-  // Tracks whether the mouse is anywhere within the panel, so a floating toolbar's controls
-  // (settings, fullscreen, etc.) are revealed as soon as the panel is hovered.
-  const [isPanelHovered, setIsPanelHovered] = useState(false);
   // Custom toolbar actions the panel has registered via `context.setToolbarActions`, rendered
   // alongside the built-in fullscreen/settings/more-options icons.
   const [toolbarActionsState, setToolbarActionsState] = useState<readonly PanelToolbarAction[]>([]);
@@ -912,6 +909,10 @@ function PanelExtensionAdapter(
 
   return (
     <div
+      // Lets the floating toolbar's controls reveal themselves via CSS `:hover` bubbling from
+      // this container, without any component needing to track hover state in JS (see
+      // `PanelToolbar.style.ts`).
+      data-panel-root={floatingToolbar ? "" : undefined}
       style={{
         alignItems: "stretch",
         display: "flex",
@@ -923,26 +924,8 @@ function PanelExtensionAdapter(
         position: floatingToolbar ? "relative" : undefined,
         ...style,
       }}
-      onPointerEnter={
-        floatingToolbar
-          ? () => {
-              setIsPanelHovered(true);
-            }
-          : undefined
-      }
-      onPointerLeave={
-        floatingToolbar
-          ? () => {
-              setIsPanelHovered(false);
-            }
-          : undefined
-      }
     >
-      <PanelToolbar
-        floating={floatingToolbar}
-        hovered={isPanelHovered}
-        additionalIcons={additionalIcons}
-      />
+      <PanelToolbar floating={floatingToolbar} additionalIcons={additionalIcons} />
       {configTooNew && <PanelConfigVersionError />}
       {props.children}
       <div style={{ flex: 1, overflow: "hidden" }} ref={panelContainerRef} />

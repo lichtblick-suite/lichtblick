@@ -283,25 +283,32 @@ describe("Plot Component", () => {
     expect(mockLatestLegendProps?.floatingToolbar).toBe(true);
   });
 
-  it("Given the panel is hovered and then unhovered When the pointer enters and leaves Then the toolbar's hovered prop toggles accordingly", () => {
+  it("Given the floating panel toolbar setting is on When rendering Then the panel root exposes the CSS hover hook", () => {
     // Given
     mockFloatingToolbarEnabled = true;
     const config = new PlotConfigBuilder().build();
+
+    // When
     renderPlot(config);
+
+    // Then the root container exposes the `data-panel-root` attribute that `PanelToolbar`'s
+    // stylesheet uses to reveal the floating controls via CSS `:hover` bubbling - no JS-tracked
+    // hover state or `hovered` prop is involved.
     const panelRoot = screen.getByTestId("panel-toolbar").parentElement!;
+    expect(panelRoot.getAttribute("data-panel-root")).toBe("");
+  });
+
+  it("Given the floating panel toolbar setting is off When rendering Then the panel root does not expose the CSS hover hook", () => {
+    // Given
+    mockFloatingToolbarEnabled = false;
+    const config = new PlotConfigBuilder().build();
 
     // When
-    fireEvent.pointerEnter(panelRoot);
+    renderPlot(config);
 
     // Then
-    expect(mockLatestPanelToolbarProps?.floating).toBe(true);
-    expect(mockLatestPanelToolbarProps?.hovered).toBe(true);
-
-    // When
-    fireEvent.pointerLeave(panelRoot);
-
-    // Then
-    expect(mockLatestPanelToolbarProps?.hovered).toBe(false);
+    const panelRoot = screen.getByTestId("panel-toolbar").parentElement!;
+    expect(panelRoot.getAttribute("data-panel-root")).toBeNull();
   });
 
   it("Given reset allowed When clicking reset button Then onResetView is called", async () => {

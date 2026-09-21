@@ -92,28 +92,16 @@ describe("PanelToolbar", () => {
     );
   });
 
-  it("Given floating is true and hovered is false When rendering Then the controls are wrapped without the visible class", () => {
+  it("Given floating is true When rendering Then the controls are wrapped in the floating container", () => {
     // Given / When
-    renderPanelToolbar({ propsOverrides: { floating: true, hovered: false } });
+    renderPanelToolbar({ propsOverrides: { floating: true } });
 
-    // Then
+    // Then the controls sit in a container that reveals itself via CSS `:hover` bubbling from
+    // the panel's root (see `data-panel-root` in `PanelExtensionAdapter` and `Plot`) rather than
+    // a JS-driven visibility class, so there's no "hovered" prop or class to assert on here.
     const controls = screen.getByTestId("panel-toolbar-controls");
     expect(controls.parentElement).not.toBeNull();
     expect(controls.parentElement?.className).toEqual(expect.stringContaining("floatingControls"));
-    expect(controls.parentElement?.className).not.toEqual(
-      expect.stringContaining("floatingControlsVisible"),
-    );
-  });
-
-  it("Given floating is true and hovered is true When rendering Then the floating controls are made visible", () => {
-    // Given / When
-    renderPanelToolbar({ propsOverrides: { floating: true, hovered: true } });
-
-    // Then
-    const controls = screen.getByTestId("panel-toolbar-controls");
-    expect(controls.parentElement?.className).toEqual(
-      expect.stringContaining("floatingControlsVisible"),
-    );
   });
 
   it("Given floating is true When rendering the title Then it uses the floating title styling", () => {

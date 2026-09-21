@@ -1718,7 +1718,7 @@ describe("PanelExtensionAdapter", () => {
   });
 
   describe("floatingToolbar hover tracking", () => {
-    it("passes hovered=true/false to PanelToolbar as the pointer enters/leaves when floatingToolbar is enabled", async () => {
+    it("marks the panel root with data-panel-root and position: relative when floatingToolbar is enabled", async () => {
       // GIVEN a panel rendered with floatingToolbar enabled
       const sig = signal();
       const initPanel = (_context: PanelExtensionContext) => {
@@ -1743,22 +1743,15 @@ describe("PanelExtensionAdapter", () => {
       await sig;
 
       const panelRoot = handle.getByTestId("mosaic-drag-handle").parentElement!;
+
+      // THEN the root container opts into the floating layout and exposes the CSS hook
+      // (`data-panel-root`) that `PanelToolbar`'s stylesheet uses to reveal the floating
+      // controls via `:hover` bubbling - no JS-tracked hover state is involved.
       expect(panelRoot.style.position).toBe("relative");
-
-      // WHEN the pointer enters the panel
-      fireEvent.pointerEnter(panelRoot);
-
-      // THEN the toolbar's floating controls become visible
-      expect(panelRoot.querySelector('[class*="floatingControlsVisible"]')).not.toBeNull();
-
-      // WHEN the pointer leaves the panel
-      fireEvent.pointerLeave(panelRoot);
-
-      // THEN the toolbar's floating controls are hidden again
-      expect(panelRoot.querySelector('[class*="floatingControlsVisible"]')).toBeNull();
+      expect(panelRoot).toHaveAttribute("data-panel-root", "");
     });
 
-    it("does not set the position style or pointer handlers when floatingToolbar is disabled", async () => {
+    it("does not set the position style or the data-panel-root hook when floatingToolbar is disabled", async () => {
       // GIVEN a panel rendered without floatingToolbar
       const sig = signal();
       const initPanel = (_context: PanelExtensionContext) => {
@@ -1781,10 +1774,7 @@ describe("PanelExtensionAdapter", () => {
 
       // THEN the root container does not opt into the floating layout
       expect(panelRoot.style.position).toBe("");
-
-      // AND hovering has no effect on the toolbar controls' visibility class
-      fireEvent.pointerEnter(panelRoot);
-      expect(panelRoot.querySelector('[class*="floatingControlsVisible"]')).toBeNull();
+      expect(panelRoot).not.toHaveAttribute("data-panel-root");
     });
   });
 });

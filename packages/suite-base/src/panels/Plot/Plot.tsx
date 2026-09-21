@@ -65,10 +65,6 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   // When true the user can reset the plot back to the original view
   const [canReset, setCanReset] = useState(false);
 
-  // Tracks whether the mouse is anywhere within the panel, so the floating toolbar's controls
-  // (settings, fullscreen, etc.) are revealed as soon as the panel is hovered.
-  const [isPanelHovered, setIsPanelHovered] = useState(false);
-
   const [activeTooltip, setActiveTooltip] = useState<TooltipStateSetter>();
 
   const [subscriberId] = useState(() => uuidv4());
@@ -233,14 +229,11 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       justifyContent="center"
       overflow="hidden"
       position="relative"
-      onPointerEnter={() => {
-        setIsPanelHovered(true);
-      }}
-      onPointerLeave={() => {
-        setIsPanelHovered(false);
-      }}
+      // Lets the floating toolbar's controls reveal themselves via CSS `:hover` bubbling from
+      // this container, without tracking hover state in JS (see `PanelToolbar.style.ts`).
+      data-panel-root={floatingToolbar ? "" : undefined}
     >
-      <PanelToolbar floating={floatingToolbar} hovered={isPanelHovered} />
+      <PanelToolbar floating={floatingToolbar} />
       <Stack
         direction={legendDisplay === "top" ? "column" : "row"}
         flex="auto"

@@ -17,14 +17,10 @@ export type PanelToolbarProps = {
   /**
    * When true, the toolbar no longer reserves layout space above the panel content.
    * Only the title stays always visible, floating above the content; the rest of the
-   * toolbar (icons, settings, etc.) is revealed as an overlay when hovering the panel
-   * (see `hovered`) or the toolbar area itself.
+   * toolbar (icons, settings, etc.) is revealed as an overlay when hovering anywhere within
+   * the panel or the toolbar area itself. Visibility is driven entirely by CSS - the panel's
+   * root container must carry a `data-panel-root` attribute for the `:hover` bubbling to work
+   * (see `PanelExtensionAdapter` and `Plot`).
    */
   floating?: boolean;
-  /**
-   * When `floating` is true, controls whether the floating controls (icons, settings, etc.)
-   * are shown. Pass whether the mouse is anywhere within the panel so the controls appear as
-   * soon as the panel is hovered, not only when hovering the small controls area itself.
-   */
-  hovered?: boolean;
 };

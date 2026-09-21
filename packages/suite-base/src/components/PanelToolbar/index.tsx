@@ -38,7 +38,6 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
   className,
   isUnknownPanel = false,
   floating = false,
-  hovered = false,
 }: PanelToolbarProps) {
   const { classes, cx } = useStyles();
   const {
@@ -124,7 +123,7 @@ export default React.memo<PanelToolbarProps>(function PanelToolbar({
         </Typography>
       )}
       {floating ? (
-        <div className={cx(classes.floatingControls, hovered && classes.floatingControlsVisible)}>
+        <div className={classes.floatingControls}>
           {children}
           {controls}
         </div>
