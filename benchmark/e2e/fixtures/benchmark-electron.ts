@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 import { test as base, _electron as electron, ElectronApplication, Page } from "@playwright/test";
 import electronPath from "electron";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 export type BenchmarkElectronFixtures = {
   electronApp: ElectronApplication;

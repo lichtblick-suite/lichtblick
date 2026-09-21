@@ -8,7 +8,7 @@
 import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import path from "path";
+import path from "node:path";
 import { Configuration, WebpackPluginInstance } from "webpack";
 import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 
