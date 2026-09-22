@@ -33,6 +33,7 @@ import {
   MAX_SUPPORTED_LAYOUT_VERSION,
 } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
+import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("notistack", () => ({
@@ -498,6 +499,103 @@ describe("CurrentLayoutProvider", () => {
       `The layout '${mockAppParameters.defaultLayout}' specified in the app parameters does not exist.`,
       { variant: "warning" },
     );
+  });
+
+  describe("Favorite layout logic", () => {
+    const layout1 = LayoutBuilder.layout({
+      id: LayoutBuilder.layoutId("layout1"),
+      name: "LAYOUT 1",
+      permission: "CREATOR_WRITE",
+    });
+    const layout2 = LayoutBuilder.layout({
+      id: LayoutBuilder.layoutId("layout2"),
+      name: "LAYOUT 2",
+      permission: "CREATOR_WRITE",
+    });
+    const layout3 = LayoutBuilder.layout({
+      id: LayoutBuilder.layoutId("layout3"),
+      name: "LAYOUT 3",
+      permission: "CREATOR_WRITE",
+    });
+
+    beforeEach(() => {
+      mockLayoutManager.getLayouts.mockImplementation(async () => [layout1, layout2, layout3]);
+    });
+
+    it("auto-opens the favourite layout instead of the last selected layout", async () => {
+      mockUserProfile.getUserProfile.mockResolvedValue({
+        currentLayoutId: layout1.id,
+        favoriteLayoutIds: [layout2.id],
+      });
+
+      const { result, all } = renderTest({ mockLayoutManager, mockUserProfile });
+
+      await act(async () => {
+        await result.current.childMounted;
+      });
+
+      const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+        .selectedLayout?.id;
+
+      expect(selectedLayout).toBe(layout2.id);
+      // The auto-selected favourite is session-only and must not overwrite the stored profile.
+      expect(mockUserProfile.setUserProfile).not.toHaveBeenCalled();
+    });
+
+    it("prefers the app parameter default layout over a favourite", async () => {
+      const mockAppParameters = { defaultLayout: layout1.name };
+      mockUserProfile.getUserProfile.mockResolvedValue({
+        currentLayoutId: layout3.id,
+        favoriteLayoutIds: [layout2.id],
+      });
+
+      const { result, all } = renderTest({ mockLayoutManager, mockUserProfile, mockAppParameters });
+
+      await act(async () => {
+        await result.current.childMounted;
+      });
+
+      const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+        .selectedLayout?.id;
+
+      expect(selectedLayout).toBe(layout1.id);
+    });
+
+    it("picks a deterministic favourite (alphabetical) when there is more than one", async () => {
+      mockUserProfile.getUserProfile.mockResolvedValue({
+        currentLayoutId: undefined,
+        favoriteLayoutIds: [layout3.id, layout1.id],
+      });
+
+      const { result, all } = renderTest({ mockLayoutManager, mockUserProfile });
+
+      await act(async () => {
+        await result.current.childMounted;
+      });
+
+      const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+        .selectedLayout?.id;
+
+      expect(selectedLayout).toBe(layout1.id);
+    });
+
+    it("falls back to the last selected layout when the favourite no longer exists", async () => {
+      mockUserProfile.getUserProfile.mockResolvedValue({
+        currentLayoutId: layout3.id,
+        favoriteLayoutIds: [LayoutBuilder.layoutId("deleted-layout")],
+      });
+
+      const { result, all } = renderTest({ mockLayoutManager, mockUserProfile });
+
+      await act(async () => {
+        await result.current.childMounted;
+      });
+
+      const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
+        .selectedLayout?.id;
+
+      expect(selectedLayout).toBe(layout3.id);
+    });
   });
 
   describe("Default layout logic", () => {

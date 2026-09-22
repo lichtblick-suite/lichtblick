@@ -20,6 +20,7 @@ import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/us
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
+import { useListFavoriteLayouts } from "@lichtblick/suite-base/hooks/useListFavoriteLayouts";
 import { usePrompt } from "@lichtblick/suite-base/hooks/usePrompt";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
@@ -99,6 +100,10 @@ jest.mock("@lichtblick/suite-base/hooks/useLayoutActions", () => ({
   }),
 }));
 
+jest.mock("@lichtblick/suite-base/hooks/useListFavoriteLayouts", () => ({
+  useListFavoriteLayouts: jest.fn(),
+}));
+
 jest.mock("./LayoutSection", () => ({
   __esModule: true,
   default: () => <div data-testid="layout-section" />,
@@ -130,6 +135,11 @@ describe("LayoutBrowser", () => {
     (usePrompt as jest.Mock).mockReturnValue([jest.fn(), undefined]);
     (useAppConfigurationValue as jest.Mock).mockReturnValue([true, jest.fn()]);
     (useWorkspaceStore as jest.Mock).mockReturnValue({ personal: true, shared: true });
+    (useListFavoriteLayouts as jest.Mock).mockReturnValue({
+      favoriteLayoutIds: [],
+      loading: false,
+      toggleFavoriteLayout: jest.fn(),
+    });
     (useWorkspaceActions as jest.Mock).mockReturnValue({
       layoutBrowserActions: {
         setPersonalSectionExpanded: jest.fn(),
@@ -445,6 +455,86 @@ describe("LayoutBrowser", () => {
       // THEN
       await waitFor(() => {
         expect(setPersonalExpandedMock).toHaveBeenCalledWith(true);
+      });
+    });
+  });
+
+  describe("favorite layouts", () => {
+    const originalLayoutSectionMock = jest.requireMock("./LayoutSection").default;
+
+    afterEach(() => {
+      jest.requireMock("./LayoutSection").default = originalLayoutSectionMock;
+    });
+
+    it("attaches favorite flags and sorts favorites first for the Personal section", async () => {
+      // GIVEN
+      mockLayoutManager.supportsSharing = false;
+      const alpha = LayoutBuilder.layout({
+        id: LayoutBuilder.layoutId("alpha"),
+        name: "Alpha",
+        permission: "CREATOR_WRITE",
+      });
+      const zeta = LayoutBuilder.layout({
+        id: LayoutBuilder.layoutId("zeta"),
+        name: "Zeta",
+        permission: "CREATOR_WRITE",
+      });
+      mockLayoutManager.getLayouts = jest.fn().mockResolvedValue([alpha, zeta]);
+      (useListFavoriteLayouts as jest.Mock).mockReturnValue({
+        favoriteLayoutIds: [zeta.id],
+        loading: false,
+        toggleFavoriteLayout: jest.fn(),
+      });
+
+      const capturedProps: Record<string, unknown>[] = [];
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: Record<string, unknown>) => {
+          capturedProps.push(props);
+          return <div data-testid="layout-section" />;
+        });
+
+      // WHEN
+      render(<LayoutBrowser />);
+
+      // THEN
+      await waitFor(() => {
+        expect(capturedProps.at(-1)?.items).toEqual([
+          { ...zeta, favorite: true },
+          { ...alpha, favorite: false },
+        ]);
+      });
+    });
+
+    it("wires onToggleFavorite so it invokes toggleFavoriteLayout with the layout id", async () => {
+      // GIVEN
+      mockLayoutManager.supportsSharing = false;
+      const toggleFavoriteLayout = jest.fn().mockResolvedValue(undefined);
+      (useListFavoriteLayouts as jest.Mock).mockReturnValue({
+        favoriteLayoutIds: [],
+        loading: false,
+        toggleFavoriteLayout,
+      });
+
+      let capturedOnToggleFavorite: ((item: Layout) => void) | undefined;
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: { onToggleFavorite: (item: Layout) => void }) => {
+          capturedOnToggleFavorite ??= props.onToggleFavorite;
+          return <div data-testid="layout-section" />;
+        });
+      const layout = LayoutBuilder.layout({ id: LayoutBuilder.layoutId("layout-x") });
+
+      // WHEN
+      render(<LayoutBrowser />);
+      await waitFor(() => {
+        expect(capturedOnToggleFavorite).toBeDefined();
+      });
+      capturedOnToggleFavorite!(layout);
+
+      // THEN
+      await waitFor(() => {
+        expect(toggleFavoriteLayout).toHaveBeenCalledWith(layout.id);
       });
     });
   });

@@ -14,6 +14,7 @@ import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 import LayoutRow from "./LayoutRow";
 import { useLayoutSectionStyles } from "./LayoutSection.style";
+import { LayoutListItem } from "./types";
 
 export default function LayoutSection({
   title,
@@ -34,12 +35,13 @@ export default function LayoutSection({
   onOverwrite,
   onRevert,
   onMakePersonalCopy,
+  onToggleFavorite,
 }: Readonly<{
   title: string | undefined;
   disablePadding?: boolean;
   expanded?: boolean;
   emptyText: string | undefined;
-  items: readonly Layout[] | undefined;
+  items: readonly LayoutListItem[] | undefined;
   anySelectedModifiedLayouts: boolean;
   multiSelectedIds: readonly string[];
   selectedId?: string;
@@ -53,6 +55,7 @@ export default function LayoutSection({
   onOverwrite: (item: Layout) => void;
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
+  onToggleFavorite: (item: Layout) => void;
 }>): React.JSX.Element {
   const { classes, cx } = useLayoutSectionStyles();
 
@@ -100,6 +103,7 @@ export default function LayoutSection({
               onOverwrite={onOverwrite}
               onRevert={onRevert}
               onMakePersonalCopy={onMakePersonalCopy}
+              onToggleFavorite={onToggleFavorite}
             />
           ))}
         </List>

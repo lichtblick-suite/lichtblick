@@ -7,38 +7,44 @@ import { ListItem, MenuItem, styled as muiStyled } from "@mui/material";
 
 export const StyledListItem = muiStyled(ListItem, {
   shouldForwardProp: (prop) =>
-    prop !== "hasModifications" && prop !== "deletedOnServer" && prop !== "editingName",
-})<{ editingName: boolean; hasModifications: boolean; deletedOnServer: boolean }>(
-  ({ editingName, hasModifications, deletedOnServer, theme }) => ({
-    ".MuiListItemSecondaryAction-root": {
-      right: theme.spacing(0.25),
-    },
+    prop !== "hasModifications" &&
+    prop !== "deletedOnServer" &&
+    prop !== "editingName" &&
+    prop !== "favorite",
+})<{
+  editingName: boolean;
+  hasModifications: boolean;
+  deletedOnServer: boolean;
+  favorite: boolean;
+}>(({ editingName, hasModifications, deletedOnServer, favorite, theme }) => ({
+  ".MuiListItemSecondaryAction-root": {
+    right: theme.spacing(0.25),
+  },
+  ".MuiListItemButton-root": {
+    maxWidth: "100%",
+  },
+  "@media (pointer: fine)": {
     ".MuiListItemButton-root": {
-      maxWidth: "100%",
+      paddingRight: theme.spacing(4.5),
     },
-    "@media (pointer: fine)": {
-      ".MuiListItemButton-root": {
-        paddingRight: theme.spacing(4.5),
-      },
-      ".MuiListItemSecondaryAction-root": {
-        visibility: !hasModifications && !deletedOnServer && "hidden",
-      },
-      "&:hover .MuiListItemSecondaryAction-root": {
-        visibility: "visible",
-      },
+    ".MuiListItemSecondaryAction-root": {
+      visibility: !hasModifications && !deletedOnServer && !favorite && "hidden",
     },
-    ...(editingName && {
-      ".MuiListItemButton-root": {
-        paddingTop: theme.spacing(0.5),
-        paddingBottom: theme.spacing(0.5),
-        paddingLeft: theme.spacing(1),
-      },
-      ".MuiListItemText-root": {
-        margin: 0,
-      },
-    }),
+    "&:hover .MuiListItemSecondaryAction-root": {
+      visibility: "visible",
+    },
+  },
+  ...(editingName && {
+    ".MuiListItemButton-root": {
+      paddingTop: theme.spacing(0.5),
+      paddingBottom: theme.spacing(0.5),
+      paddingLeft: theme.spacing(1),
+    },
+    ".MuiListItemText-root": {
+      margin: 0,
+    },
   }),
-);
+}));
 
 export const StyledMenuItem = muiStyled(MenuItem, {
   shouldForwardProp: (prop) => prop !== "debug",

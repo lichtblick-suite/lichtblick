@@ -5,6 +5,8 @@ import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 export type MultiAction = "delete" | "duplicate" | "revert" | "save";
 
+export type LayoutListItem = Layout & { favorite?: boolean };
+
 export type LayoutSelectionState = {
   busy: boolean;
   error: undefined | Error;

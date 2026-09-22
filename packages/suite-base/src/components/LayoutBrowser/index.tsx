@@ -47,12 +47,14 @@ import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithTo
 import { useLayoutActions } from "@lichtblick/suite-base/hooks/useLayoutActions";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
+import { useListFavoriteLayouts } from "@lichtblick/suite-base/hooks/useListFavoriteLayouts";
 import { usePrompt } from "@lichtblick/suite-base/hooks/usePrompt";
 import { defaultPlaybackConfig } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 import LayoutSection from "./LayoutSection";
+import { attachFavorites } from "./attachFavorites";
 import { useStyles } from "./index.style";
 
 const log = Logger.getLogger(__filename);
@@ -84,6 +86,13 @@ export default function LayoutBrowser({
   } = useLayoutActions({ state, dispatch });
   const { importLayout, exportLayout } = useLayoutTransfer();
   const onExportLayout = exportLayout;
+  const { favoriteLayoutIds, toggleFavoriteLayout } = useListFavoriteLayouts();
+  const onToggleFavorite = useCallbackWithToast(
+    async (item: Layout) => {
+      await toggleFavoriteLayout(item.id);
+    },
+    [toggleFavoriteLayout],
+  );
 
   useLayoutEffect(() => {
     const busyListener = () => {
@@ -282,6 +291,15 @@ export default function LayoutBrowser({
       .some((layout) => layout.working != undefined && state.selectedIds.includes(layout.id));
   }, [layouts, state.selectedIds]);
 
+  const personalLayoutsWithFavorites = useMemo(
+    () => attachFavorites(layouts.value?.personal, favoriteLayoutIds),
+    [layouts.value?.personal, favoriteLayoutIds],
+  );
+  const sharedLayoutsWithFavorites = useMemo(
+    () => attachFavorites(layouts.value?.shared, favoriteLayoutIds),
+    [layouts.value?.shared, favoriteLayoutIds],
+  );
+
   return (
     <SidebarContent
       title="Layouts"
@@ -353,7 +371,7 @@ export default function LayoutBrowser({
           expanded={personalExpanded}
           onToggleExpanded={togglePersonalExpanded}
           emptyText="Add a new layout to get started with Lichtblick!"
-          items={layouts.value?.personal}
+          items={personalLayoutsWithFavorites}
           anySelectedModifiedLayouts={anySelectedModifiedLayouts}
           multiSelectedIds={state.selectedIds}
           selectedId={currentLayoutId}
@@ -366,6 +384,7 @@ export default function LayoutBrowser({
           onOverwrite={onOverwriteLayout}
           onRevert={onRevertLayout}
           onMakePersonalCopy={onMakePersonalCopy}
+          onToggleFavorite={onToggleFavorite}
         />
         {layoutManager.supportsSharing && (
           <LayoutSection
@@ -374,7 +393,7 @@ export default function LayoutBrowser({
             expanded={sharedExpanded}
             onToggleExpanded={toggleSharedExpanded}
             emptyText="Your organization doesn’t have any shared layouts yet. Share a layout to collaborate with others."
-            items={layouts.value?.shared}
+            items={sharedLayoutsWithFavorites}
             anySelectedModifiedLayouts={anySelectedModifiedLayouts}
             multiSelectedIds={state.selectedIds}
             selectedId={currentLayoutId}
@@ -387,6 +406,7 @@ export default function LayoutBrowser({
             onOverwrite={onOverwriteLayout}
             onRevert={onRevertLayout}
             onMakePersonalCopy={onMakePersonalCopy}
+            onToggleFavorite={onToggleFavorite}
           />
         )}
         {!enableNewTopNav && <Stack flexGrow={1} />}

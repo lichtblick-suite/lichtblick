@@ -29,12 +29,14 @@ import {
 } from "react";
 import { useMountedState } from "react-use";
 
+import Stack from "@lichtblick/suite-base/components/Stack";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
+import LayoutFavoriteToggle from "./LayoutFavoriteToggle";
 import { StyledListItem, StyledMenuItem } from "./LayoutRow.style";
-import { LayoutActionMenuItem } from "./types";
+import { LayoutActionMenuItem, LayoutListItem } from "./types";
 
 export default React.memo(function LayoutRow({
   layout,
@@ -50,8 +52,9 @@ export default React.memo(function LayoutRow({
   onOverwrite,
   onRevert,
   onMakePersonalCopy,
+  onToggleFavorite,
 }: {
-  layout: Layout;
+  layout: LayoutListItem;
   anySelectedModifiedLayouts: boolean;
   multiSelectedIds: readonly string[];
   selected: boolean;
@@ -64,6 +67,7 @@ export default React.memo(function LayoutRow({
   onOverwrite: (item: Layout) => void;
   onRevert: (item: Layout) => void;
   onMakePersonalCopy: (item: Layout) => void;
+  onToggleFavorite: (item: Layout) => void;
 }): React.JSX.Element {
   const isMounted = useMountedState();
   const [confirm, confirmModal] = useConfirm();
@@ -81,6 +85,7 @@ export default React.memo(function LayoutRow({
   const deletedOnServer = layout.syncInfo?.status === "remotely-deleted";
   const hasModifications = layout.working != undefined;
   const multiSelection = multiSelectedIds.length > 1;
+  const favorite = layout.favorite ?? false;
 
   useLayoutEffect(() => {
     const onlineListener = () => {
@@ -318,24 +323,35 @@ export default React.memo(function LayoutRow({
       editingName={editingName}
       hasModifications={hasModifications}
       deletedOnServer={deletedOnServer}
+      favorite={favorite}
       disablePadding
       secondaryAction={
-        <IconButton
-          data-testid="layout-actions"
-          aria-controls={contextMenuTarget != undefined ? "layout-action-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={contextMenuTarget != undefined ? "true" : undefined}
-          onClick={handleMenuButtonClick}
-          onContextMenu={handleContextMenu}
-        >
-          {actionIcon}
-        </IconButton>
+        <Stack direction="row" alignItems="center">
+          <LayoutFavoriteToggle
+            favorite={favorite}
+            onToggle={(event) => {
+              event.stopPropagation();
+              onToggleFavorite(layout);
+            }}
+          />
+          <IconButton
+            data-testid="layout-actions"
+            aria-controls={contextMenuTarget != undefined ? "layout-action-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={contextMenuTarget != undefined ? "true" : undefined}
+            onClick={handleMenuButtonClick}
+            onContextMenu={handleContextMenu}
+          >
+            {actionIcon}
+          </IconButton>
+        </Stack>
       }
     >
       {confirmModal}
       <ListItemButton
         data-testid="layout-list-item"
         selected={selected || multiSelectedIds.includes(layout.id)}
+        aria-current={selected ? "true" : undefined}
         onSubmit={onSubmit}
         onClick={(event) => {
           // Toggle selection for multi-select support

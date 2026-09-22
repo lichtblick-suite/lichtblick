@@ -16,9 +16,23 @@ import LayoutSection from "./LayoutSection";
 
 jest.mock("./LayoutRow", () => ({
   __esModule: true,
-  default: ({ layout, selected }: { layout: Layout; selected: boolean }) => (
+  default: ({
+    layout,
+    selected,
+    onToggleFavorite,
+  }: {
+    layout: Layout;
+    selected: boolean;
+    onToggleFavorite: (item: Layout) => void;
+  }) => (
     <div data-testid={`layout-row-${layout.id}`} data-selected={selected}>
       {layout.name}
+      <button
+        data-testid={`toggle-favorite-${layout.id}`}
+        onClick={() => {
+          onToggleFavorite(layout);
+        }}
+      />
     </div>
   ),
 }));
@@ -46,6 +60,7 @@ describe("LayoutSection", () => {
     onOverwrite: jest.fn(),
     onRevert: jest.fn(),
     onMakePersonalCopy: jest.fn(),
+    onToggleFavorite: jest.fn(),
   };
 
   it("renders title when provided", () => {
@@ -178,5 +193,17 @@ describe("LayoutSection", () => {
     expect(screen.getByTestId("layout-row-1")).toBeInTheDocument();
     expect(screen.getByTestId("layout-row-2")).toBeInTheDocument();
     expect(screen.getByTestId("layout-row-3")).toBeInTheDocument();
+  });
+
+  it("forwards onToggleFavorite to each LayoutRow", () => {
+    // GIVEN
+    const onToggleFavorite = jest.fn();
+    render(<LayoutSection {...defaultProps} onToggleFavorite={onToggleFavorite} />);
+
+    // WHEN
+    screen.getByTestId("toggle-favorite-2").click();
+
+    // THEN
+    expect(onToggleFavorite).toHaveBeenCalledWith(layout2);
   });
 });

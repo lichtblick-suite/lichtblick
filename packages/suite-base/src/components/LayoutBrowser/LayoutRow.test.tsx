@@ -74,6 +74,7 @@ const renderComponent = (props = {}) =>
       onOverwrite={jest.fn()}
       onRevert={jest.fn()}
       onMakePersonalCopy={jest.fn()}
+      onToggleFavorite={jest.fn()}
       {...props}
     />,
   );
@@ -91,6 +92,12 @@ describe("LayoutRow rendering", () => {
   it("Given selected=true, when rendered, then the list item is marked as selected", () => {
     renderComponent({ selected: true });
     expect(screen.getByTestId("layout-list-item")).toHaveClass("Mui-selected");
+    expect(screen.getByTestId("layout-list-item")).toHaveAttribute("aria-current", "true");
+  });
+
+  it("Given selected=false, when rendered, then aria-current is not set", () => {
+    renderComponent({ selected: false });
+    expect(screen.getByTestId("layout-list-item")).not.toHaveAttribute("aria-current");
   });
 
   it("Given a layout with a different name, when rendered, then displays that name", () => {
@@ -254,5 +261,36 @@ describe("LayoutRow rendering", () => {
     fireEvent.click(screen.getByTestId("layout-actions"));
 
     expect(screen.getByTestId("duplicate-layout")).toBeInTheDocument();
+  });
+
+  it("Given a layout that is not favorite, when rendered, then shows the outlined star toggle", () => {
+    renderComponent({ layout: { ...defaultLayout, favorite: false } });
+
+    expect(screen.getByTestId("toggle-favorite-layout")).toHaveAttribute(
+      "aria-label",
+      "Add to favorites",
+    );
+    expect(screen.getByTestId("toggle-favorite-layout")).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("Given a favorite layout, when rendered, then shows the filled star toggle", () => {
+    renderComponent({ layout: { ...defaultLayout, favorite: true } });
+
+    expect(screen.getByTestId("toggle-favorite-layout")).toHaveAttribute(
+      "aria-label",
+      "Remove from favorites",
+    );
+    expect(screen.getByTestId("toggle-favorite-layout")).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("Given a layout, when the favorite toggle is clicked, then onToggleFavorite is called with the layout and selection is not triggered", () => {
+    const onToggleFavorite = jest.fn();
+    const onSelect = jest.fn();
+    renderComponent({ onToggleFavorite, onSelect });
+
+    fireEvent.click(screen.getByTestId("toggle-favorite-layout"));
+
+    expect(onToggleFavorite).toHaveBeenCalledWith(defaultLayout);
+    expect(onSelect).not.toHaveBeenCalled();
   });
 });

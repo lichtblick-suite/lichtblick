@@ -285,7 +285,7 @@ export default function CurrentLayoutProvider({
     }
 
     // For some reason, this needs to go before the setSelectedLayoutId, probably some initialization
-    const { currentLayoutId } = await getUserProfile();
+    const { currentLayoutId, favoriteLayoutIds } = await getUserProfile();
 
     // Try to load default layouts, before checking to add the fallback "Default".
     await loadDefaultLayouts(layoutManager, loaders);
@@ -333,6 +333,16 @@ export default function CurrentLayoutProvider({
       enqueueSnackbar(t("noDefaultLayoutParameter", { layoutName: appParameters.defaultLayout }), {
         variant: "warning",
       });
+    }
+
+    if (favoriteLayoutIds && favoriteLayoutIds.length > 0) {
+      const favoriteLayouts = layouts
+        .filter((l) => favoriteLayoutIds.includes(l.id))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      if (favoriteLayouts[0]) {
+        await setSelectedLayoutId(favoriteLayouts[0].id, { saveToProfile: false });
+        return;
+      }
     }
 
     // Retrieve the selected layout id from the user's profile. If there's no layout specified
