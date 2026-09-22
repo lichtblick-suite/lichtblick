@@ -49,12 +49,22 @@ export class LayoutManager {
     await this.page.getByRole("button", { name: "Delete" }).click();
   }
 
+  public async toggleFavorite(name: string): Promise<void> {
+    const layoutRow = this.getLayoutRow(name);
+    await layoutRow.hover();
+    await layoutRow.getByTestId("toggle-favorite-layout").click();
+  }
+
   public async addTab(): Promise<void> {
     await this.page.getByTestId("add-tab").click();
   }
 
   public getLayoutListItem(): Locator {
     return this.page.getByTestId("layout-list-item");
+  }
+
+  public getLayoutRow(name: string): Locator {
+    return this.page.getByRole("listitem").filter({ hasText: name });
   }
 
   public getCreateNewLayoutButton(): Locator {
