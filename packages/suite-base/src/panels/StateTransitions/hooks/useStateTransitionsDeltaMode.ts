@@ -57,6 +57,10 @@ function useStateTransitionsDeltaMode({
         }
       });
 
+      if (seriesValues.length === 0) {
+        return;
+      }
+
       setMarker(nextMarkerSlot(), { xValue, seriesValues });
     },
     [active, datasets, nextMarkerSlot, setMarker],

@@ -10,8 +10,13 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 import { DeltaMarkerBars } from "./DeltaMarkerBars";
 import "@testing-library/jest-dom";
 
+type MockCoordinator = {
+  on: jest.Mock;
+  off: jest.Mock;
+};
+
 describe("DeltaMarkerBars", () => {
-  let mockCoordinator: any;
+  let mockCoordinator: MockCoordinator;
 
   const setup = (propsOverride: Partial<DeltaMarkerBarsProps> = {}) => {
     const props: DeltaMarkerBarsProps = {

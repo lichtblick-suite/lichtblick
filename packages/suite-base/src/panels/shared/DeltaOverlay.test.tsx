@@ -172,6 +172,47 @@ describe("DeltaOverlay", () => {
     expect(container).toContainElement(overlay);
   });
 
+  it("should stay pinned to the edge across multiple moves in the same drag gesture", () => {
+    // Given
+    render(<DeltaOverlay {...buildProps()} />);
+    const overlay = screen.getByTestId("delta-overlay");
+    const overlayParent = overlay.parentElement!;
+    const panel = document.createElement("div");
+    panel.getBoundingClientRect = jest.fn(() => new DOMRect(0, 0, 300, 200));
+    // A real browser's getBoundingClientRect reflects the currently applied transform - mimic that
+    // here so this test can catch clamp bounds drifting across moves within the same gesture.
+    overlay.getBoundingClientRect = jest.fn(() => {
+      const match = /translate\((-?[\d.]+)px, (-?[\d.]+)px\)/.exec(overlay.style.transform);
+      const [translateX, translateY] = match ? [Number(match[1]), Number(match[2])] : [0, 0];
+      return new DOMRect(translateX, translateY, 100, 50);
+    });
+    Object.defineProperty(overlayParent, "offsetParent", { value: panel });
+    overlay.setPointerCapture = jest.fn();
+    overlay.releasePointerCapture = jest.fn();
+
+    const dispatchPointerEvent = (type: string, clientX: number, clientY: number): void => {
+      const event = new Event(type, { bubbles: true });
+      Object.defineProperties(event, {
+        pointerId: { value: 1 },
+        clientX: { value: clientX },
+        clientY: { value: clientY },
+      });
+      overlay.dispatchEvent(event);
+    };
+
+    // When: drag far past the right/bottom edge, then ease off slightly while still past it.
+    act(() => {
+      dispatchPointerEvent("pointerdown", 10, 10);
+      dispatchPointerEvent("pointermove", 400, 300);
+    });
+    act(() => {
+      dispatchPointerEvent("pointermove", 380, 280);
+    });
+
+    // Then: still well past the clamp threshold, so the overlay must remain pinned to the edge.
+    expect(overlay).toHaveStyle({ transform: "translate(200px, 150px)" });
+  });
+
   it("should not render a marker's remove button before that marker is placed", () => {
     // Given
     const props = buildProps({ xValueA: undefined, xValueB: undefined });

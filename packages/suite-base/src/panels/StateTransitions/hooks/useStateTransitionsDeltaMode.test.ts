@@ -85,6 +85,23 @@ describe("useStateTransitionsDeltaMode", () => {
     expect(result.current.markerA).toBeUndefined();
   });
 
+  it("should not place a marker when clicking a gap with no state on any path", () => {
+    // Given
+    const datasets = buildDatasets([[{ x: 5, value: "IDLE" }]]);
+    const { result } = setup(datasets);
+    act(() => {
+      result.current.toggleActive();
+    });
+
+    // When: click before the first state transition, where no path has an active state yet.
+    act(() => {
+      result.current.handleChartClick(1);
+    });
+
+    // Then
+    expect(result.current.markerA).toBeUndefined();
+  });
+
   it("should place marker A on the first click with the state per path", () => {
     // Given
     const datasets = buildDatasets([[{ x: 1, value: "IDLE" }], [{ x: 1, value: "RUNNING" }]]);

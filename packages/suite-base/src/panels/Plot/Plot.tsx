@@ -31,6 +31,7 @@ import usePanning from "@lichtblick/suite-base/panels/Plot/hooks/usePanning";
 import usePlotInteractionHandlers from "@lichtblick/suite-base/panels/Plot/hooks/usePlotInteractionHandlers";
 import { PlotProps, TooltipStateSetter } from "@lichtblick/suite-base/panels/Plot/types";
 import { MeasureModeToolbarButton } from "@lichtblick/suite-base/panels/shared/MeasureModeToolbarButton";
+import { createMeasureModeEscapeHandler } from "@lichtblick/suite-base/panels/shared/measureModeEscapeHandler";
 import useAppendOnlyKey from "@lichtblick/suite-base/panels/shared/useAppendOnlyKey";
 
 import { useStyles } from "./Plot.style";
@@ -137,13 +138,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
   const mergedKeyDownHandlers = useMemo(
     () => ({
       ...keyDownHandlers,
-      escape: () => {
-        if (deltaMeasureMode.active) {
-          deltaMeasureMode.toggleActive();
-          return;
-        }
-        return false;
-      },
+      escape: createMeasureModeEscapeHandler(deltaMeasureMode),
     }),
     [deltaMeasureMode, keyDownHandlers],
   );

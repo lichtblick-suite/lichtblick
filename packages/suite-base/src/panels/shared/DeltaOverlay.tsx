@@ -75,6 +75,10 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
     startY: number;
     x: number;
     y: number;
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
   }>();
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const positionRef = useRef(position);
@@ -103,13 +107,21 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
       return;
     }
 
+    const containerRect = container.getBoundingClientRect();
+    const overlayRect = overlay.getBoundingClientRect();
+    const { x, y } = positionRef.current;
+
     overlay.setPointerCapture(event.pointerId);
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      x: positionRef.current.x,
-      y: positionRef.current.y,
+      x,
+      y,
+      minX: containerRect.left - overlayRect.left + x,
+      maxX: containerRect.right - overlayRect.right + x,
+      minY: containerRect.top - overlayRect.top + y,
+      maxY: containerRect.bottom - overlayRect.bottom + y,
     };
     event.preventDefault();
   };
@@ -117,23 +129,16 @@ export const DeltaOverlay = React.memo(function DeltaOverlay(
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>): void => {
     const drag = dragRef.current;
     const overlay = overlayRef.current;
-    const container = overlay?.parentElement?.offsetParent as HTMLElement | null;
-    if (drag?.pointerId !== event.pointerId || !overlay || !container) {
+    if (drag?.pointerId !== event.pointerId || !overlay) {
       return;
     }
 
-    const containerRect = container.getBoundingClientRect();
-    const overlayRect = overlay.getBoundingClientRect();
     const movementX = event.clientX - drag.startX;
     const movementY = event.clientY - drag.startY;
-    const minX = containerRect.left - overlayRect.left + drag.x;
-    const maxX = containerRect.right - overlayRect.right + drag.x;
-    const minY = containerRect.top - overlayRect.top + drag.y;
-    const maxY = containerRect.bottom - overlayRect.bottom + drag.y;
 
     const nextPosition = {
-      x: Math.min(Math.max(drag.x + movementX, minX), maxX),
-      y: Math.min(Math.max(drag.y + movementY, minY), maxY),
+      x: Math.min(Math.max(drag.x + movementX, drag.minX), drag.maxX),
+      y: Math.min(Math.max(drag.y + movementY, drag.minY), drag.maxY),
     };
     positionRef.current = nextPosition;
     overlay.style.transform = `translate(${nextPosition.x}px, ${nextPosition.y}px)`;

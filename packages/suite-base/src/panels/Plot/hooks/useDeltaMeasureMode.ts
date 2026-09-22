@@ -18,12 +18,9 @@ import useDeltaMarkerState from "@lichtblick/suite-base/panels/shared/useDeltaMa
 function toSeriesValue(value: OriginalValue | undefined): number | string | undefined {
   switch (typeof value) {
     case "number":
-    case "string":
       return value;
     case "bigint":
       return Number(value);
-    case "boolean":
-      return String(value);
     case "object":
       return isTime(value) ? toSec(value) : undefined;
     default:
@@ -70,10 +67,10 @@ function useDeltaMeasureMode({
   const setMarkerAtCanvasPosition = useCallback(
     async (canvasX: number, canvasY: number, xValue: number) => {
       try {
-        const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ?? [];
         if (!isMounted()) {
           return;
         }
+        const elements = (await renderer?.getElementsAtPixel({ x: canvasX, y: canvasY })) ?? [];
 
         const seriesValues = resolveSeriesValues(elements);
         if (seriesValues.length === 0) {

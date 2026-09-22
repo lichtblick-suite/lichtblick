@@ -33,7 +33,12 @@ jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransiti
 }));
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useStateTransitionsData", () => ({
   __esModule: true,
-  default: () => ({ pathState: [], data: { datasets: [] }, minY: 0 }),
+  // One point at x=1 so the mocked chart's click (below) lands on real data.
+  default: () => ({
+    pathState: [],
+    data: { datasets: [{ data: [{ x: 1, y: 0, value: "A" }] }] },
+    minY: 0,
+  }),
 }));
 jest.mock("@lichtblick/suite-base/panels/StateTransitions/hooks/useChartScalesAndBounds", () => ({
   __esModule: true,

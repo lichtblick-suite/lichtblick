@@ -49,6 +49,7 @@ import useStateTransitionsTime from "@lichtblick/suite-base/panels/StateTransiti
 import { DeltaOverlay } from "@lichtblick/suite-base/panels/shared/DeltaOverlay";
 import { MeasureModeToolbarButton } from "@lichtblick/suite-base/panels/shared/MeasureModeToolbarButton";
 import { computeDeltaDisplay } from "@lichtblick/suite-base/panels/shared/deltaMarkers";
+import { createMeasureModeEscapeHandler } from "@lichtblick/suite-base/panels/shared/measureModeEscapeHandler";
 import useAppendOnlyKey from "@lichtblick/suite-base/panels/shared/useAppendOnlyKey";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { OnClickArg as OnChartClickArgs } from "@lichtblick/suite-base/src/components/Chart";
@@ -154,11 +155,7 @@ function StateTransitions(props: StateTransitionPanelProps) {
 
   const keyDownHandlers = useMemo(
     () => ({
-      escape: () => {
-        if (deltaMode.active) {
-          deltaMode.toggleActive();
-        }
-      },
+      escape: createMeasureModeEscapeHandler(deltaMode),
     }),
     [deltaMode],
   );

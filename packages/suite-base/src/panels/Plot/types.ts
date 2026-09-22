@@ -174,7 +174,7 @@ export type VerticalBarsProps = {
 };
 
 export type DeltaMarkerBarsProps = {
-  coordinator?: PlotCoordinator;
+  coordinator?: Pick<PlotCoordinator, "on" | "off">;
   /** Whether Measure mode is active - the DeltaOverlay renders as soon as this is true. */
   active: boolean;
   markerA?: DeltaMarker;
