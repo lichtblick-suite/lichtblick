@@ -7,10 +7,15 @@
 
 import { SettingsTreeField } from "@lichtblick/suite";
 import { buildSettingsTree, Config } from "@lichtblick/suite-base/panels/Map/config";
+import RenderStateBuilder from "@lichtblick/suite-base/testing/builders/RenderStateBuilder";
 
-// Not PlayerBuilder.topic: that returns the player-facing Topic, whose schemaName is
-// optional, while buildSettingsTree takes the extension-facing Topic where it is required.
-const TOPICS = [{ name: "/gps", schemaName: "sensor_msgs/NavSatFix" }];
+// RenderStateBuilder, not PlayerBuilder: buildSettingsTree takes the extension-facing Topic,
+// where schemaName is required, and only RenderStateBuilder.topic builds that one.
+//
+// Both fields are pinned rather than left random. The settings tree branches on the schema
+// name, offering a topic as a follow target only when it is not GeoJSON, so a random schema
+// would decide the assertions rather than the code under test.
+const TOPICS = [RenderStateBuilder.topic({ name: "/gps", schemaName: "sensor_msgs/NavSatFix" })];
 
 function makeConfig(overrides: Partial<Config> = {}): Config {
   return {
