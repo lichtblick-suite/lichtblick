@@ -9,11 +9,13 @@ import { PropsWithChildren } from "react";
 import { useShallowMemo } from "@lichtblick/hooks";
 import { LOCAL_STORAGE_PROFILE_DATA } from "@lichtblick/suite-base/constants/browserStorageKeys";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import { RemoteUserProfileStorageContext } from "@lichtblick/suite-base/context/RemoteUserProfileStorageContext";
 import {
   UserProfile,
   useUserProfileStorage,
 } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import UserProfileLocalStorageProvider from "@lichtblick/suite-base/providers/UserProfileLocalStorageProvider";
+import { IRemoteUserProfileStorage } from "@lichtblick/suite-base/services/IRemoteUserProfileStorage";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("@lichtblick/hooks");
@@ -342,6 +344,103 @@ describe("UserProfileLocalStorageProvider", () => {
 
       // Then
       expect(mockedLodash.merge).toHaveBeenCalledWith({}, profileWithNulls);
+    });
+  });
+
+  describe("with remote storage", () => {
+    const mockRemote: jest.Mocked<IRemoteUserProfileStorage> = {
+      getUserProfile: jest.fn(),
+      setUserProfile: jest.fn(),
+    };
+
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <RemoteUserProfileStorageContext.Provider value={mockRemote}>
+        <UserProfileLocalStorageProvider>{children}</UserProfileLocalStorageProvider>
+      </RemoteUserProfileStorageContext.Provider>
+    );
+
+    beforeEach(() => {
+      mockRemote.getUserProfile.mockReset();
+      mockRemote.setUserProfile.mockReset().mockResolvedValue(undefined);
+    });
+
+    describe("getUserProfile", () => {
+      it("should return the remote profile and cache it in localStorage", async () => {
+        // Given
+        const remoteProfile: UserProfile = { currentLayoutId: createLayoutId("remote-layout") };
+        mockRemote.getUserProfile.mockResolvedValue(remoteProfile);
+
+        // When
+        const { result } = renderHook(() => useUserProfileStorage(), { wrapper });
+        const profile = await result.current.getUserProfile();
+
+        // Then
+        expect(profile).toEqual(remoteProfile);
+        expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+          LOCAL_STORAGE_PROFILE_DATA,
+          JSON.stringify(remoteProfile),
+        );
+      });
+
+      it("should fall back to the cached local profile when the remote call fails", async () => {
+        // Given
+        const localProfile: UserProfile = { currentLayoutId: createLayoutId("local-layout") };
+        mockLocalStorage.getItem.mockReturnValue(JSON.stringify(localProfile));
+        mockRemote.getUserProfile.mockRejectedValue(new Error("network error"));
+        const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+        // When
+        const { result } = renderHook(() => useUserProfileStorage(), { wrapper });
+        const profile = await result.current.getUserProfile();
+
+        // Then
+        expect(profile).toEqual(localProfile);
+        expect(consoleSpy).toHaveBeenCalled();
+
+        // Cleanup
+        consoleSpy.mockRestore();
+      });
+    });
+
+    describe("setUserProfile", () => {
+      it("should persist locally and forward the merged profile to remote", async () => {
+        // Given
+        mockLocalStorage.getItem.mockReturnValue(undefined);
+        const newProfile: UserProfile = { currentLayoutId: createLayoutId("new-layout") };
+
+        // When
+        const { result } = renderHook(() => useUserProfileStorage(), { wrapper });
+        await result.current.setUserProfile(newProfile);
+
+        // Then
+        expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+          LOCAL_STORAGE_PROFILE_DATA,
+          JSON.stringify(newProfile),
+        );
+        expect(mockRemote.setUserProfile).toHaveBeenCalledWith(newProfile);
+      });
+
+      it("should keep the local write even when the remote call fails", async () => {
+        // Given
+        mockLocalStorage.getItem.mockReturnValue(undefined);
+        const newProfile: UserProfile = { currentLayoutId: createLayoutId("new-layout") };
+        mockRemote.setUserProfile.mockRejectedValue(new Error("network error"));
+        const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+        // When
+        const { result } = renderHook(() => useUserProfileStorage(), { wrapper });
+        await expect(result.current.setUserProfile(newProfile)).resolves.toBeUndefined();
+
+        // Then
+        expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+          LOCAL_STORAGE_PROFILE_DATA,
+          JSON.stringify(newProfile),
+        );
+        expect(consoleSpy).toHaveBeenCalled();
+
+        // Cleanup
+        consoleSpy.mockRestore();
+      });
     });
   });
 });

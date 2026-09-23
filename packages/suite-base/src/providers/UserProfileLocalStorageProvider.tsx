@@ -10,6 +10,7 @@ import { useCallback, useEffect } from "react";
 
 import { useShallowMemo } from "@lichtblick/hooks";
 import { LOCAL_STORAGE_PROFILE_DATA } from "@lichtblick/suite-base/constants/browserStorageKeys";
+import { useRemoteUserProfileStorage } from "@lichtblick/suite-base/context/RemoteUserProfileStorageContext";
 import {
   UserProfile,
   UserProfileStorageContext,
@@ -18,24 +19,55 @@ import {
 const DEFAULT_PROFILE: UserProfile = {};
 
 /**
- * A provider for UserProfileStorage that stores data in localStorage.
+ * A provider for UserProfileStorage that stores data in localStorage, kept as a synchronous
+ * working cache. When a RemoteUserProfileStorageContext is supplied (i.e. deployed with a
+ * backend), the remote profile is treated as the source of truth: reads prefer remote (falling
+ * back to the local cache on failure) and writes go to both, so the profile survives across
+ * devices/browsers instead of being pinned to a single browser's localStorage.
  */
 export default function UserProfileLocalStorageProvider({
   children,
 }: React.PropsWithChildren): React.JSX.Element {
-  const getUserProfile = useCallback(async (): Promise<UserProfile> => {
+  const remote = useRemoteUserProfileStorage();
+
+  const readLocalProfile = useCallback((): UserProfile => {
     const item = localStorage.getItem(LOCAL_STORAGE_PROFILE_DATA);
     return item != undefined ? (JSON.parse(item) as UserProfile) : DEFAULT_PROFILE;
   }, []);
 
+  const writeLocalProfile = useCallback((profile: UserProfile) => {
+    localStorage.setItem(LOCAL_STORAGE_PROFILE_DATA, JSON.stringify(profile) ?? "");
+  }, []);
+
+  const getUserProfile = useCallback(async (): Promise<UserProfile> => {
+    if (!remote) {
+      return readLocalProfile();
+    }
+    try {
+      const remoteProfile = await remote.getUserProfile();
+      writeLocalProfile(remoteProfile);
+      return remoteProfile;
+    } catch (err: unknown) {
+      console.error(err);
+      return readLocalProfile();
+    }
+  }, [remote, readLocalProfile, writeLocalProfile]);
+
   const setUserProfile = useCallback(
     async (value: UserProfile | ((prev: UserProfile) => UserProfile)) => {
-      const item = localStorage.getItem(LOCAL_STORAGE_PROFILE_DATA);
-      const prev = item != undefined ? (JSON.parse(item) as UserProfile) : DEFAULT_PROFILE;
+      const prev = readLocalProfile();
       const newProfile = typeof value === "function" ? value(prev) : _.merge(prev, value);
-      localStorage.setItem(LOCAL_STORAGE_PROFILE_DATA, JSON.stringify(newProfile) ?? "");
+      writeLocalProfile(newProfile);
+
+      if (remote) {
+        try {
+          await remote.setUserProfile(newProfile);
+        } catch (err: unknown) {
+          console.error(err);
+        }
+      }
     },
-    [],
+    [remote, readLocalProfile, writeLocalProfile],
   );
 
   // On first load stamp firstSeenTime timestamp. We consider the time at which

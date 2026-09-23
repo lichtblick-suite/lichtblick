@@ -335,6 +335,10 @@ export default function CurrentLayoutProvider({
       });
     }
 
+    // Auto-open the user's favourite layout, if any. This takes priority over the last selected
+    // layout (currentLayoutId) so favouriting a layout reliably opens it on every subsequent load.
+    // With multiple favourites, pick deterministically (alphabetically); picking the most-used one
+    // instead is a possible future improvement, out of scope here.
     if (favoriteLayoutIds && favoriteLayoutIds.length > 0) {
       const favoriteLayouts = layouts
         .filter((l) => favoriteLayoutIds.includes(l.id))

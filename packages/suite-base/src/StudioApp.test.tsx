@@ -8,6 +8,7 @@ import "@testing-library/jest-dom";
 
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
 import { LayoutsAPI } from "@lichtblick/suite-base/api/layouts/LayoutsAPI";
+import { UserProfileAPI } from "@lichtblick/suite-base/api/profile/UserProfileAPI";
 import { SharedRootContext } from "@lichtblick/suite-base/context/SharedRootContext";
 
 import { StudioApp } from "./StudioApp";
@@ -77,6 +78,12 @@ jest.mock("@lichtblick/suite-base/IdbLayoutStorage", () => ({
 jest.mock("@lichtblick/suite-base/api/layouts/LayoutsAPI", () => ({
   LayoutsAPI: jest.fn().mockImplementation(() => ({
     mockRemoteLayoutStorage: true,
+  })),
+}));
+
+jest.mock("@lichtblick/suite-base/api/profile/UserProfileAPI", () => ({
+  UserProfileAPI: jest.fn().mockImplementation(() => ({
+    mockRemoteUserProfileStorage: true,
   })),
 }));
 
@@ -309,6 +316,40 @@ describe("StudioApp", () => {
     renderWithContext();
 
     expect(jest.mocked(LayoutsAPI)).not.toHaveBeenCalled();
+  });
+
+  it("should create remote user profile storage when workspace is provided", () => {
+    // Mock URL with workspace parameter
+    global.URL = jest.fn().mockImplementation(() => ({
+      searchParams: {
+        get: jest.fn().mockImplementation((key) => {
+          if (key === "workspace") {
+            return "test-workspace";
+          }
+          return undefined;
+        }),
+      },
+    })) as any;
+
+    renderWithContext();
+
+    expect(jest.mocked(UserProfileAPI)).toHaveBeenCalled();
+  });
+
+  it("should not create remote user profile storage when no workspace is provided", () => {
+    // Clear previous calls
+    jest.mocked(UserProfileAPI).mockClear();
+
+    // Mock URL without workspace parameter
+    global.URL = jest.fn().mockImplementation(() => ({
+      searchParams: {
+        get: jest.fn().mockReturnValue(undefined),
+      },
+    })) as any;
+
+    renderWithContext();
+
+    expect(jest.mocked(UserProfileAPI)).not.toHaveBeenCalled();
   });
 
   it("should create IdbLayoutStorage", () => {

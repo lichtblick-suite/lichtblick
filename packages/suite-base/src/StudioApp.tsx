@@ -11,11 +11,13 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
 import { LayoutsAPI } from "@lichtblick/suite-base/api/layouts/LayoutsAPI";
+import { UserProfileAPI } from "@lichtblick/suite-base/api/profile/UserProfileAPI";
 import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import LayoutStorageContext from "@lichtblick/suite-base/context/LayoutStorageContext";
 import NativeAppMenuContext from "@lichtblick/suite-base/context/NativeAppMenuContext";
 import NativeWindowContext from "@lichtblick/suite-base/context/NativeWindowContext";
 import { RemoteLayoutStorageContext } from "@lichtblick/suite-base/context/RemoteLayoutStorageContext";
+import { RemoteUserProfileStorageContext } from "@lichtblick/suite-base/context/RemoteUserProfileStorageContext";
 import { useSharedRootContext } from "@lichtblick/suite-base/context/SharedRootContext";
 import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
@@ -108,6 +110,19 @@ export function StudioApp(): React.JSX.Element {
 
   if (remoteLayoutStorage) {
     providers.unshift(<RemoteLayoutStorageContext.Provider value={remoteLayoutStorage} />);
+  }
+
+  const remoteUserProfileStorage = useMemo(() => {
+    if (workspace && APP_CONFIG.apiUrl) {
+      return new UserProfileAPI();
+    }
+    return undefined;
+  }, [workspace]);
+
+  if (remoteUserProfileStorage) {
+    providers.unshift(
+      <RemoteUserProfileStorageContext.Provider value={remoteUserProfileStorage} />,
+    );
   }
 
   if (extraProviders) {
