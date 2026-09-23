@@ -79,14 +79,18 @@ describe("Maps", () => {
     maps.dispose();
   });
 
-  it("anchors the first fix at its timestamp in the fixed frame and does not follow subsequent vehicle poses", () => {
+  it("refreshes coverage and alignment for moving fixes without seeking", () => {
     const { maps, apply } = setup();
     locationHandler(maps)(fix());
     maps.startFrame(12_000_000_000n, "base_link", "map");
     const renderable = maps.renderables.get("map")!;
     expect(renderable.userData.frameId).toBe("map");
     expect(renderable.userData.settings.latitude).toBe(59);
-    expect(renderable.userData.pose.position).toEqual({ x: 100, y: 200, z: 2.99 });
+    expect(renderable.userData.pose.position).toEqual({
+      x: 100,
+      y: 200,
+      z: 2.99,
+    });
     expect(apply.mock.calls[0]).toEqual([
       expect.anything(),
       makePose(),
@@ -96,10 +100,68 @@ describe("Maps", () => {
       10_000_000_000n,
       10_000_000_000n,
     ]);
+    const signal = (fetch as jest.Mock).mock.calls[0][1].signal as AbortSignal;
+    const initialUrl = (fetch as jest.Mock).mock.calls[0][0];
+    locationHandler(maps)(fix(59.0000001));
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(signal.aborted).toBe(false);
     locationHandler(maps)(fix(60));
     maps.startFrame(13_000_000_000n, "base_link", "map");
     expect(renderable.userData.settings.latitude).toBe(59);
+    expect(renderable.userData.pose.position.x).toBe(100);
+    expect(renderable.userData.pose.position.y).toBeLessThan(200);
+    expect(renderable.userData.pose.position.z).toBe(2.99);
+    expect(fetch).toHaveBeenCalledTimes(4);
+    expect(signal.aborted).toBe(true);
+    expect((fetch as jest.Mock).mock.calls[2][0]).not.toBe(initialUrl);
+    maps.dispose();
+  });
+
+  it("moves the map on every GPS fix in a static frame without reloading the same tiles", () => {
+    const { maps, renderer } = setup();
+    locationHandler(maps)(fix());
+    maps.startFrame(12_000_000_000n, "base_link", "map");
+    const renderable = maps.renderables.get("map")!;
+    const initialPosition = { ...renderable.userData.pose.position };
+    renderer.queueAnimationFrame.mockClear();
+    locationHandler(maps)(fix(59.00001));
+    expect(renderer.queueAnimationFrame).toHaveBeenCalled();
+    maps.startFrame(13_000_000_000n, "base_link", "map");
+    expect(renderable.userData.pose.position.x).toBe(initialPosition.x);
+    expect(renderable.userData.pose.position.y).toBeCloseTo(initialPosition.y - 1.113195, 4);
     expect(fetch).toHaveBeenCalledTimes(2);
+    const updatedPosition = { ...renderable.userData.pose.position };
+    maps.startFrame(14_000_000_000n, "base_link", "map");
+    expect(renderable.userData.pose.position).toEqual(updatedPosition);
+    maps.dispose();
+  });
+
+  it("keeps the map stationary when the vehicle transform matches GPS movement", () => {
+    const { maps, apply } = setup();
+    locationHandler(maps)(fix());
+    maps.startFrame(12_000_000_000n, "base_link", "map");
+    const renderable = maps.renderables.get("map")!;
+    const initialPosition = { ...renderable.userData.pose.position };
+    locationHandler(maps)(fix(59.00001));
+    apply.mockImplementationOnce((out: Pose) => {
+      out.position = { x: 100, y: 201.113195, z: 3 };
+      return out;
+    });
+    maps.startFrame(13_000_000_000n, "base_link", "map");
+    expect(renderable.userData.pose.position.y).toBeCloseTo(initialPosition.y, 4);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    maps.dispose();
+  });
+
+  it("applies the map rotation to GPS displacement", () => {
+    const { maps } = setup({ rotation: [0, 0, 90] });
+    locationHandler(maps)(fix());
+    maps.startFrame(12_000_000_000n, "base_link", "map");
+    locationHandler(maps)(fix(59.00001));
+    maps.startFrame(13_000_000_000n, "base_link", "map");
+    const position = maps.renderables.get("map")!.userData.pose.position;
+    expect(position.x).toBeCloseTo(101.113195, 4);
+    expect(position.y).toBeCloseTo(200, 4);
     maps.dispose();
   });
 
@@ -146,13 +208,21 @@ describe("Maps", () => {
     const signal = (fetch as jest.Mock).mock.calls[0][1].signal as AbortSignal;
     maps.handleSettingsAction({
       action: "update",
-      payload: { path: ["layers", "map", "opacity"], input: "number", value: 0.4 },
+      payload: {
+        path: ["layers", "map", "opacity"],
+        input: "number",
+        value: 0.4,
+      },
     });
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(signal.aborted).toBe(false);
     maps.handleSettingsAction({
       action: "update",
-      payload: { path: ["layers", "map", "visible"], input: "boolean", value: false },
+      payload: {
+        path: ["layers", "map", "visible"],
+        input: "boolean",
+        value: false,
+      },
     });
     expect(signal.aborted).toBe(true);
     maps.dispose();
@@ -164,7 +234,10 @@ describe("Maps", () => {
       configurable: true,
       value: jest.fn().mockResolvedValue({ close }),
     });
-    (fetch as jest.Mock).mockResolvedValue({ ok: true, blob: async () => new Blob() });
+    (fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      blob: async () => new Blob(),
+    });
     const { maps } = setup({ originMode: "manual", radius: 0 });
     await new Promise((resolve) => setTimeout(resolve, 0));
     const renderable = maps.renderables.get("map")!;

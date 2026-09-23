@@ -4,7 +4,31 @@
 export const MAX_MAP_LATITUDE = 85.05112878;
 const EARTH_CIRCUMFERENCE = 2 * Math.PI * 6378137;
 
-export type MapTile = { x: number; y: number; east: number; north: number; size: number };
+export type MapTile = {
+  x: number;
+  y: number;
+  east: number;
+  north: number;
+  size: number;
+};
+
+/** Geographic displacement in the same local east/north plane used by mapTiles. */
+export function mapOffset(
+  latitude: number,
+  longitude: number,
+  location: { latitude: number; longitude: number },
+): { east: number; north: number } {
+  const radians = (latitude * Math.PI) / 180;
+  const scale = EARTH_CIRCUMFERENCE * Math.cos(radians);
+  const longitudeDelta = (location.longitude - longitude) / 360;
+  return {
+    east: (longitudeDelta - Math.round(longitudeDelta)) * scale,
+    north:
+      ((Math.asinh(Math.tan((location.latitude * Math.PI) / 180)) - Math.asinh(Math.tan(radians))) /
+        (2 * Math.PI)) *
+      scale,
+  };
+}
 
 /** Web Mercator tiles placed in a local east/north plane, in ground meters at the origin. */
 export function mapTiles(
@@ -12,19 +36,25 @@ export function mapTiles(
   longitude: number,
   zoom: number,
   radius: number,
+  center: { latitude: number; longitude: number } = { latitude, longitude },
 ): MapTile[] {
   const count = 2 ** zoom;
   const radians = (latitude * Math.PI) / 180;
   const originX = ((longitude + 180) / 360) * count;
   const originY = ((1 - Math.asinh(Math.tan(radians)) / Math.PI) / 2) * count;
+  // Select coverage around the latest fix while retaining the original coordinate system.
+  let centerX = ((center.longitude + 180) / 360) * count;
+  centerX += Math.round((originX - centerX) / count) * count;
+  const centerY =
+    ((1 - Math.asinh(Math.tan((center.latitude * Math.PI) / 180)) / Math.PI) / 2) * count;
   const size = (EARTH_CIRCUMFERENCE * Math.cos(radians)) / count;
   const tiles: MapTile[] = [];
   for (
-    let y = Math.max(0, Math.floor(originY) - radius);
-    y <= Math.min(count - 1, Math.floor(originY) + radius);
+    let y = Math.max(0, Math.floor(centerY) - radius);
+    y <= Math.min(count - 1, Math.floor(centerY) + radius);
     y++
   ) {
-    for (let x = Math.floor(originX) - radius; x <= Math.floor(originX) + radius; x++) {
+    for (let x = Math.floor(centerX) - radius; x <= Math.floor(centerX) + radius; x++) {
       tiles.push({
         x: ((x % count) + count) % count,
         y,

@@ -15,7 +15,7 @@ import { normalizeTime } from "../normalizeMessages";
 import { CustomLayerSettings } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose, xyzrpyToPose } from "../transforms";
-import { mapTiles, mapTileUrl, MAX_MAP_LATITUDE, validateMapUrl } from "./mapTiles";
+import { mapOffset, mapTiles, mapTileUrl, MAX_MAP_LATITUDE, validateMapUrl } from "./mapTiles";
 
 export type LayerSettingsMap = CustomLayerSettings & {
   frameId?: string;
@@ -100,13 +100,26 @@ export class MapRenderable extends Renderable<MapUserData> {
   #meshes: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>[] = [];
   #key: string | undefined;
 
-  public update(settings: LayerSettingsMap): void {
+  public update(
+    settings: LayerSettingsMap,
+    center: { latitude: number; longitude: number } = settings,
+  ): void {
     this.userData.settings = settings;
     this.userData.pose = xyzrpyToPose(settings.position, settings.rotation);
     this.visible = settings.visible;
     for (const mesh of this.#meshes) {
       mesh.material.opacity = settings.opacity;
     }
+    const centerTile =
+      Number.isFinite(center.latitude) &&
+      Math.abs(center.latitude) <= MAX_MAP_LATITUDE &&
+      Number.isFinite(center.longitude) &&
+      Math.abs(center.longitude) <= 180 &&
+      Number.isInteger(settings.zoom) &&
+      settings.zoom >= 0 &&
+      settings.zoom <= 19
+        ? mapTiles(center.latitude, center.longitude, settings.zoom, 0)[0]
+        : undefined;
     const key = JSON.stringify([
       settings.visible,
       settings.provider,
@@ -116,6 +129,8 @@ export class MapRenderable extends Renderable<MapUserData> {
       settings.longitude,
       settings.zoom,
       settings.radius,
+      centerTile?.x,
+      centerTile?.y,
     ]);
     if (key === this.#key) {
       return;
@@ -157,7 +172,13 @@ export class MapRenderable extends Renderable<MapUserData> {
     }
     const signal = this.#controller.signal;
     const isAborted = (): boolean => signal.aborted;
-    const pending = mapTiles(settings.latitude, settings.longitude, settings.zoom, settings.radius);
+    const pending = mapTiles(
+      settings.latitude,
+      settings.longitude,
+      settings.zoom,
+      settings.radius,
+      center,
+    );
     // Only two in-flight requests per layer; no speculative zoom levels or persistent tile cache.
     const load = async (): Promise<void> => {
       while (!isAborted()) {
@@ -179,7 +200,9 @@ export class MapRenderable extends Renderable<MapUserData> {
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
           }
-          bitmap = await createImageBitmap(await response.blob(), { imageOrientation: "flipY" });
+          bitmap = await createImageBitmap(await response.blob(), {
+            imageOrientation: "flipY",
+          });
           if (isAborted()) {
             bitmap.close();
             return;
@@ -299,6 +322,7 @@ export class Maps extends SceneExtension<MapRenderable> {
       return;
     }
     this.#fixes.set(event.topic, event);
+    this.renderer.queueAnimationFrame();
   };
 
   public override removeAllRenderables(): void {
@@ -327,7 +351,10 @@ export class Maps extends SceneExtension<MapRenderable> {
       if (config?.layerId !== MAP_LAYER_ID) {
         continue;
       }
-      const settings = { ...DEFAULT_MAP_SETTINGS, ...config } as LayerSettingsMap;
+      const settings = {
+        ...DEFAULT_MAP_SETTINGS,
+        ...config,
+      } as LayerSettingsMap;
       const fields: SettingsTreeFields = {
         provider: {
           label: "Map provider",
@@ -385,7 +412,7 @@ export class Maps extends SceneExtension<MapRenderable> {
                     .filter((topic) => topicIsConvertibleToSchema(topic, LOCATION_SCHEMAS))
                     .map((topic) => ({ label: topic.name, value: topic.name })),
                 ],
-                help: "Uses the first valid location fix and its frame transform to anchor the map in the fixed frame. Fixed-frame axes should be east/north/up; adjust rotation if needed.",
+                help: "Aligns the map with each location fix and its frame transform during playback. Tile coverage follows the latest location fix. Fixed-frame axes should be east/north/up; adjust rotation if needed.",
               },
             }
           : {}),
@@ -439,7 +466,7 @@ export class Maps extends SceneExtension<MapRenderable> {
           max: 3,
           step: 1,
           precision: 0,
-          help: "Tiles around the origin: 0 = 1 tile, 1 = 9 tiles, up to 3 = 49 tiles.",
+          help: "Tiles around the current location (or manual origin): 0 = 1 tile, 1 = 9 tiles, up to 3 = 49 tiles.",
         },
         opacity: {
           label: "Opacity",
@@ -486,7 +513,7 @@ export class Maps extends SceneExtension<MapRenderable> {
   public override startFrame(time: bigint, renderFrameId: string, fixedFrameId: string): void {
     for (const [id, renderable] of this.renderables) {
       const config = this.renderer.config.layers[id] as Partial<LayerSettingsMap>;
-      if (config.originMode !== "manual" && !this.#anchors.has(id)) {
+      if (config.originMode !== "manual") {
         const event = this.#fixes.get(this.#locationTopic(config) ?? "");
         if (event) {
           const message = event.message;
@@ -509,12 +536,32 @@ export class Maps extends SceneExtension<MapRenderable> {
               messageTime,
             )
           ) {
-            this.#anchors.set(id, {
-              latitude: message.latitude,
-              longitude: message.longitude,
-              position: [pose.position.x, pose.position.y, pose.position.z],
-              frameId: fixedFrameId,
-            });
+            const previous = this.#anchors.get(id);
+            const anchor =
+              previous?.frameId === fixedFrameId
+                ? previous
+                : {
+                    latitude: message.latitude,
+                    longitude: message.longitude,
+                    position: [0, 0, 0] as [number, number, number],
+                    frameId: fixedFrameId,
+                  };
+            // Align the current geographic fix with its current frame position. This also
+            // works when GPS changes but the dataset has only a static vehicle frame.
+            const offset = mapOffset(anchor.latitude, anchor.longitude, message);
+            const rotation = xyzrpyToPose(
+              [0, 0, 0],
+              config.rotation ?? DEFAULT_MAP_SETTINGS.rotation,
+            ).orientation;
+            const displacement = new THREE.Vector3(offset.east, offset.north, 0).applyQuaternion(
+              new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w),
+            );
+            anchor.position = [
+              pose.position.x - displacement.x,
+              pose.position.y - displacement.y,
+              pose.position.z - displacement.z,
+            ];
+            this.#anchors.set(id, anchor);
             this.renderer.settings.errors.remove(["layers", id], "map-origin");
             this.#updateMap(id, config);
           }
@@ -629,8 +676,16 @@ export class Maps extends SceneExtension<MapRenderable> {
       this.renderables.set(id, renderable);
       this.add(renderable);
     }
-    this.hud.removeHUDItem(`map-origin-${id}`);
-    this.hud.removeHUDItem(`map-${id}`);
-    renderable.update(settings);
+    if (
+      settings.provider !== renderable.userData.settings.provider ||
+      settings.attribution !== renderable.userData.settings.attribution
+    ) {
+      this.hud.removeHUDItem(`map-${id}`);
+    }
+    const center =
+      settings.originMode === "gps"
+        ? this.#fixes.get(this.#locationTopic(settings) ?? "")?.message
+        : undefined;
+    renderable.update(settings, center);
   }
 }
