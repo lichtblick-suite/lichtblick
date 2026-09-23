@@ -29,6 +29,14 @@ abstract class BenchmarkPlayerBase implements Player {
 
   protected listener?: (state: PlayerState) => Promise<void>;
 
+  /**
+   * Set by `close()` so that subclasses with unbounded `run()` loops (e.g. synthetic players
+   * that produce messages as fast as the message pipeline allows) can exit promptly. Without
+   * this, `run()` keeps calling `listener()` forever, which keeps the renderer's event loop busy
+   * and significantly delays Electron's shutdown once the test/host tears down the player.
+   */
+  protected closed = false;
+
   protected abstract run(): Promise<void>;
 
   public setListener(listener: (state: PlayerState) => Promise<void>): void {
@@ -44,7 +52,7 @@ abstract class BenchmarkPlayerBase implements Player {
     return undefined;
   }
   public close(): void {
-    // no-op
+    this.closed = true;
   }
   public setSubscriptions(_subscriptions: SubscribePayload[]): void {
     // no-op
