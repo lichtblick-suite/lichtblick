@@ -77,6 +77,8 @@ export function HUD(props: HUDProps): React.ReactElement {
     return <EmptyState className={classes.empty}>{highPriorityEmptyState.getMessage()}</EmptyState>;
   }
 
+  const attributions = notices.filter((item) => item.displayType === "attribution");
+
   return (
     <>
       <div className={classes.root}>
@@ -86,10 +88,9 @@ export function HUD(props: HUDProps): React.ReactElement {
             <Chip className={classes.chip} size="small" key={index} label={item.getMessage()} />
           ))}
       </div>
-      <div className={classes.attribution}>
-        {notices
-          .filter((item) => item.displayType === "attribution")
-          .map((item) => (
+      {attributions.length > 0 && (
+        <div className={classes.attribution}>
+          {attributions.map((item) => (
             <div key={item.id}>
               {item.href ? (
                 <Link href={item.href} target="_blank" rel="noopener noreferrer">
@@ -100,7 +101,8 @@ export function HUD(props: HUDProps): React.ReactElement {
               )}
             </div>
           ))}
-      </div>
+        </div>
+      )}
     </>
   );
 }

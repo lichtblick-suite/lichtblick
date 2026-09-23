@@ -79,7 +79,7 @@ describe("Maps", () => {
     maps.dispose();
   });
 
-  it("refreshes coverage and alignment for moving fixes without seeking", () => {
+  it("refreshes coverage and alignment for moving fixes without seeking", async () => {
     const { maps, apply } = setup();
     locationHandler(maps)(fix());
     maps.startFrame(12_000_000_000n, "base_link", "map");
@@ -111,6 +111,7 @@ describe("Maps", () => {
     expect(renderable.userData.pose.position.x).toBe(100);
     expect(renderable.userData.pose.position.y).toBeLessThan(200);
     expect(renderable.userData.pose.position.z).toBe(2.99);
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(fetch).toHaveBeenCalledTimes(4);
     expect(signal.aborted).toBe(true);
     expect((fetch as jest.Mock).mock.calls[2][0]).not.toBe(initialUrl);
@@ -226,6 +227,97 @@ describe("Maps", () => {
     });
     expect(signal.aborted).toBe(true);
     maps.dispose();
+  });
+
+  it("keeps overlapping meshes visible and fetches only the new tile column", async () => {
+    const close = jest.fn();
+    Object.defineProperty(globalThis, "createImageBitmap", {
+      configurable: true,
+      value: jest.fn().mockImplementation(async () => ({ close })),
+    });
+    (fetch as jest.Mock).mockResolvedValue({ ok: true, blob: async () => new Blob() });
+    const { maps } = setup({ originMode: "manual", latitude: 59, longitude: 18 });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const renderable = maps.renderables.get("map")!;
+    const original = [...renderable.children];
+    expect(original).toHaveLength(9);
+    expect(fetch).toHaveBeenCalledTimes(9);
+    renderable.update(renderable.userData.settings, {
+      latitude: 59,
+      longitude: 18 + 360 / 2 ** 18,
+    });
+    expect(renderable.children).toHaveLength(6);
+    expect(renderable.children.every((mesh) => original.includes(mesh))).toBe(true);
+    expect(close).toHaveBeenCalledTimes(3);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(renderable.children).toHaveLength(9);
+    expect(fetch).toHaveBeenCalledTimes(12);
+    const urls = (fetch as jest.Mock).mock.calls.map(([url]) => url);
+    expect(new Set(urls).size).toBe(12);
+    maps.dispose();
+    expect(close).toHaveBeenCalledTimes(12);
+  });
+
+  it("preserves wrapped tile placements at world zoom", async () => {
+    Object.defineProperty(globalThis, "createImageBitmap", {
+      configurable: true,
+      value: jest.fn().mockImplementation(async () => ({ close: jest.fn() })),
+    });
+    (fetch as jest.Mock).mockResolvedValue({ ok: true, blob: async () => new Blob() });
+    const { maps } = setup({ originMode: "manual", latitude: 0, longitude: 0, zoom: 0 });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const meshes = maps.renderables.get("map")!.children;
+    expect(meshes).toHaveLength(3);
+    expect(meshes.map((mesh) => Math.sign(mesh.position.x))).toEqual([-1, 0, 1]);
+    maps.dispose();
+  });
+
+  it("retains overlapping in-flight requests and limits concurrency across coverage changes", async () => {
+    const { maps } = setup({ originMode: "manual", latitude: 59, longitude: 18 });
+    const renderable = maps.renderables.get("map")!;
+    const calls = (fetch as jest.Mock).mock.calls;
+    const leavingSignal = calls[0][1].signal as AbortSignal;
+    const retainedSignal = calls[1][1].signal as AbortSignal;
+    renderable.update(renderable.userData.settings, {
+      latitude: 59,
+      longitude: 18 + 360 / 2 ** 18,
+    });
+    expect(leavingSignal.aborted).toBe(true);
+    expect(retainedSignal.aborted).toBe(false);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(calls.filter(([, options]) => !(options.signal as AbortSignal).aborted)).toHaveLength(2);
+    expect(calls.filter(([url]) => url === calls[1][0])).toHaveLength(1);
+    maps.dispose();
+    expect(calls.every(([, options]) => (options.signal as AbortSignal).aborted)).toBe(true);
+  });
+
+  it.each<Partial<LayerSettingsMap>>([
+    { provider: "satellite" },
+    { tileUrl: "https://example.com/{z}/{x}/{y}.png" },
+    { scheme: "tms" },
+    { zoom: 17 },
+    { radius: 2 },
+    { latitude: 59.00001 },
+    { longitude: 18.00001 },
+  ])("fully clears tiles when configuration changes: %j", async (change) => {
+    const close = jest.fn();
+    Object.defineProperty(globalThis, "createImageBitmap", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ close }),
+    });
+    (fetch as jest.Mock).mockResolvedValue({ ok: true, blob: async () => new Blob() });
+    const { maps } = setup({ originMode: "manual", latitude: 59, longitude: 18 });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const renderable = maps.renderables.get("map")!;
+    expect(renderable.children).toHaveLength(9);
+    renderable.update({ ...renderable.userData.settings, ...change });
+    expect(renderable.children).toHaveLength(0);
+    expect(close).toHaveBeenCalledTimes(9);
+    maps.dispose();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(renderable.children).toHaveLength(0);
   });
 
   it("disposes tile textures, geometry, material and bitmap", async () => {

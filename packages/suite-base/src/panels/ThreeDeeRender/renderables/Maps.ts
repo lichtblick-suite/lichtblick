@@ -15,7 +15,14 @@ import { normalizeTime } from "../normalizeMessages";
 import { CustomLayerSettings } from "../settings";
 import { topicIsConvertibleToSchema } from "../topicIsConvertibleToSchema";
 import { makePose, xyzrpyToPose } from "../transforms";
-import { mapOffset, mapTiles, mapTileUrl, MAX_MAP_LATITUDE, validateMapUrl } from "./mapTiles";
+import {
+  MapTile,
+  mapOffset,
+  mapTiles,
+  mapTileUrl,
+  MAX_MAP_LATITUDE,
+  validateMapUrl,
+} from "./mapTiles";
 
 export type LayerSettingsMap = CustomLayerSettings & {
   frameId?: string;
@@ -94,11 +101,21 @@ type MapAnchor = {
 const ERROR_ID = "map-tiles";
 type MapUserData = BaseUserData & { settings: LayerSettingsMap };
 
+type TileMesh = THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
+type TileState = {
+  tile: MapTile;
+  url: string;
+  controller: AbortController;
+  started: boolean;
+  mesh?: TileMesh;
+};
+
 export class MapRenderable extends Renderable<MapUserData> {
   public override readonly pickable = false;
-  #controller = new AbortController();
-  #meshes: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>[] = [];
+  #tiles = new Map<string, TileState>();
+  #activeLoads = 0;
   #key: string | undefined;
+  #configurationKey: string | undefined;
 
   public update(
     settings: LayerSettingsMap,
@@ -107,8 +124,10 @@ export class MapRenderable extends Renderable<MapUserData> {
     this.userData.settings = settings;
     this.userData.pose = xyzrpyToPose(settings.position, settings.rotation);
     this.visible = settings.visible;
-    for (const mesh of this.#meshes) {
-      mesh.material.opacity = settings.opacity;
+    for (const { mesh } of this.#tiles.values()) {
+      if (mesh) {
+        mesh.material.opacity = settings.opacity;
+      }
     }
     const centerTile =
       Number.isFinite(center.latitude) &&
@@ -120,7 +139,7 @@ export class MapRenderable extends Renderable<MapUserData> {
       settings.zoom <= 19
         ? mapTiles(center.latitude, center.longitude, settings.zoom, 0)[0]
         : undefined;
-    const key = JSON.stringify([
+    const configurationKey = JSON.stringify([
       settings.visible,
       settings.provider,
       settings.tileUrl,
@@ -129,21 +148,25 @@ export class MapRenderable extends Renderable<MapUserData> {
       settings.longitude,
       settings.zoom,
       settings.radius,
-      centerTile?.x,
-      centerTile?.y,
     ]);
+    const key = JSON.stringify([configurationKey, centerTile?.x, centerTile?.y]);
     if (key === this.#key) {
       return;
     }
     this.#key = key;
-    this.#clearTiles();
+    if (configurationKey !== this.#configurationKey) {
+      this.#clearTiles();
+      this.#configurationKey = configurationKey;
+    }
     this.renderer.settings.errors.remove(this.userData.settingsPath, ERROR_ID);
     if (!settings.visible) {
+      this.#clearTiles();
       return;
     }
     const template =
       settings.provider === "custom" ? settings.tileUrl : PROVIDERS[settings.provider].url;
     if (!validateMapUrl(template)) {
+      this.#clearTiles();
       this.renderer.settings.errors.add(
         this.userData.settingsPath,
         ERROR_ID,
@@ -161,8 +184,13 @@ export class MapRenderable extends Renderable<MapUserData> {
       settings.zoom > 19 ||
       !Number.isInteger(settings.radius) ||
       settings.radius < 0 ||
-      settings.radius > 3
+      settings.radius > 3 ||
+      !Number.isFinite(center.latitude) ||
+      Math.abs(center.latitude) > MAX_MAP_LATITUDE ||
+      !Number.isFinite(center.longitude) ||
+      Math.abs(center.longitude) > 180
     ) {
+      this.#clearTiles();
       this.renderer.settings.errors.add(
         this.userData.settingsPath,
         ERROR_ID,
@@ -170,91 +198,132 @@ export class MapRenderable extends Renderable<MapUserData> {
       );
       return;
     }
-    const signal = this.#controller.signal;
-    const isAborted = (): boolean => signal.aborted;
-    const pending = mapTiles(
+    const desired = new Map<string, { tile: MapTile; url: string }>();
+    for (const tile of mapTiles(
       settings.latitude,
       settings.longitude,
       settings.zoom,
       settings.radius,
       center,
-    );
-    // Only two in-flight requests per layer; no speculative zoom levels or persistent tile cache.
-    const load = async (): Promise<void> => {
-      while (!isAborted()) {
-        const tile = pending.shift();
-        if (!tile) {
-          return;
-        }
-        let bitmap: ImageBitmap | undefined;
-        try {
-          const response = await fetch(
-            mapTileUrl(
-              template,
-              tile,
-              settings.zoom,
-              settings.provider === "custom" ? settings.scheme : "xyz",
-            ),
-            { signal },
-          );
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-          bitmap = await createImageBitmap(await response.blob(), {
-            imageOrientation: "flipY",
-          });
-          if (isAborted()) {
-            bitmap.close();
-            return;
-          }
-          const texture = new THREE.Texture(bitmap);
-          texture.colorSpace = THREE.SRGBColorSpace;
-          texture.needsUpdate = true;
-          const material = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            opacity: this.userData.settings.opacity,
-            depthWrite: false,
-            side: THREE.DoubleSide,
-          });
-          const mesh = new THREE.Mesh(new THREE.PlaneGeometry(tile.size, tile.size), material);
-          mesh.position.set(tile.east, tile.north, 0);
-          mesh.renderOrder = -1;
-          this.#meshes.push(mesh);
-          this.add(mesh);
-          this.renderer.queueAnimationFrame();
-        } catch (error) {
-          bitmap?.close();
-          if (!isAborted()) {
-            this.renderer.settings.errors.add(
-              this.userData.settingsPath,
-              ERROR_ID,
-              `Unable to load map tiles. Check the URL, network, and server CORS permissions. ${String(error)}`,
-            );
-          }
-        }
+    )) {
+      const url = mapTileUrl(
+        template,
+        tile,
+        settings.zoom,
+        settings.provider === "custom" ? settings.scheme : "xyz",
+      );
+      // Wrapped copies at low zoom share x/y but occupy distinct places in the anchored plane.
+      const tileKey = `${tile.x}/${tile.y}/${tile.east}`;
+      desired.set(tileKey, { tile, url });
+    }
+    for (const [tileKey, state] of this.#tiles) {
+      if (!desired.has(tileKey)) {
+        this.#disposeTile(state);
+        this.#tiles.delete(tileKey);
       }
-    };
-    void load();
-    void load();
+    }
+    for (const [tileKey, { tile, url }] of desired) {
+      const state = this.#tiles.get(tileKey);
+      if (state) {
+        state.tile = tile;
+        if (state.mesh) {
+          this.#positionTile(state.mesh, tile);
+        }
+      } else {
+        this.#tiles.set(tileKey, { tile, url, controller: new AbortController(), started: false });
+      }
+    }
+    this.#loadPendingTiles();
   }
 
-  #clearTiles(): void {
-    this.#controller.abort();
-    this.#controller = new AbortController();
-    for (const mesh of this.#meshes) {
+  #positionTile(mesh: TileMesh, tile: MapTile): void {
+    mesh.position.set(tile.east, tile.north, 0);
+    const scale = tile.size / mesh.geometry.parameters.width;
+    mesh.scale.set(scale, scale, 1);
+  }
+
+  #loadPendingTiles(): void {
+    // Keep the concurrency limit across coverage changes, including requests being aborted.
+    for (const state of this.#tiles.values()) {
+      if (this.#activeLoads >= 2) {
+        return;
+      }
+      if (!state.started) {
+        state.started = true;
+        this.#activeLoads++;
+        void this.#loadTile(state);
+      }
+    }
+  }
+
+  async #loadTile(state: TileState): Promise<void> {
+    const { signal } = state.controller;
+    let bitmap: ImageBitmap | undefined;
+    try {
+      const response = await fetch(state.url, { signal });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      bitmap = await createImageBitmap(await response.blob(), { imageOrientation: "flipY" });
+      if (signal.aborted) {
+        bitmap.close();
+        return;
+      }
+      const texture = new THREE.Texture(bitmap);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.needsUpdate = true;
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        opacity: this.userData.settings.opacity,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(state.tile.size, state.tile.size),
+        material,
+      );
+      this.#positionTile(mesh, state.tile);
+      mesh.renderOrder = -1;
+      state.mesh = mesh;
+      this.add(mesh);
+      this.renderer.queueAnimationFrame();
+    } catch (error) {
+      bitmap?.close();
+      if (!signal.aborted) {
+        this.renderer.settings.errors.add(
+          this.userData.settingsPath,
+          ERROR_ID,
+          `Unable to load map tiles. Check the URL, network, and server CORS permissions. ${String(error)}`,
+        );
+      }
+    } finally {
+      this.#activeLoads--;
+      this.#loadPendingTiles();
+    }
+  }
+
+  #disposeTile(state: TileState): void {
+    state.controller.abort();
+    const mesh = state.mesh;
+    if (mesh) {
       (mesh.material.map?.image as ImageBitmap | undefined)?.close();
       mesh.material.map?.dispose();
       mesh.material.dispose();
       mesh.geometry.dispose();
       this.remove(mesh);
     }
-    this.#meshes = [];
+  }
+
+  #clearTiles(): void {
+    for (const state of this.#tiles.values()) {
+      this.#disposeTile(state);
+    }
+    this.#tiles.clear();
   }
 
   public override dispose(): void {
     this.#clearTiles();
-    this.#controller.abort();
     super.dispose();
   }
 }
