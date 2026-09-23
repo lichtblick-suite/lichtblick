@@ -21,7 +21,7 @@ const SCENARIOS_UNDER_TEST: readonly ScenarioUnderTest[] = [
   { scenarioId: "pointcloud", pipeline: "synthetic" },
   { scenarioId: "transform", pipeline: "synthetic" },
   { scenarioId: "transformpreloading", pipeline: "synthetic" },
-  { scenarioId: "mcap-ingest", pipeline: "real", durationMs: SAMPLE_DURATION_MS },
+  // { scenarioId: "mcap-ingest", pipeline: "real", durationMs: SAMPLE_DURATION_MS }, // since we don't have a real data source for this scenario in the CI environment, skip it
 ];
 
 for (const scenario of SCENARIOS_UNDER_TEST) {
@@ -36,6 +36,7 @@ for (const scenario of SCENARIOS_UNDER_TEST) {
     });
 
     const startedAt = new Date().toISOString();
+    console.log(`Starting scenario: ${scenario.scenarioId}`, startedAt);
     const scenarioUrl = `${mainWindow.url()}?scenario=${scenario.scenarioId}`;
     await mainWindow.goto(scenarioUrl);
 

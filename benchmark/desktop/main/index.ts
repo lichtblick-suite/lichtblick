@@ -14,12 +14,22 @@ function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    show: !process.env.CI,
+    // Always shown, even in CI: CI runs this under Xvfb (a real, if virtual, display - see
+    // e2e-benchmark.yml), so there's no need to hide the window there. A hidden (`show: false`)
+    // BrowserWindow never gets a compositor/paint pipeline at all, so `requestAnimationFrame`
+    // never fires for it - which hangs the Plot panel's pauseFrame/resumeFrame handshake
+    // (TimeBasedChart's `onFinishRender`) forever, since it waits on a rAF callback that will
+    // never come. `backgroundThrottling: false` below only stops *timer* throttling; it doesn't
+    // restore rAF for a window that's never shown.
+    show: true,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
       preload: path.join(__dirname, "preload.js"),
+      // Without this, Chromium throttles rAF/timers for non-visible (e.g. minimized/occluded)
+      // windows, which would skew frame-time/memory benchmark results.
+      backgroundThrottling: false,
     },
   });
 
@@ -37,4 +47,16 @@ app
 
 app.on("window-all-closed", () => {
   app.quit();
+});
+
+// `app.quit()` (used by Playwright's `electronApplication.close()`) waits for each window's
+// `beforeunload`/`unload` events to round-trip through the renderer before actually closing it.
+// The synthetic benchmark players keep the renderer's event loop continuously busy producing
+// messages, which can delay that round-trip by tens of seconds. Since this is a throwaway
+// benchmark shell (not a real app with unsaved state to protect), force-destroy windows on quit
+// to skip the beforeunload/unload handshake entirely and shut down promptly.
+app.on("before-quit", () => {
+  for (const mainWindow of BrowserWindow.getAllWindows()) {
+    mainWindow.destroy();
+  }
 });

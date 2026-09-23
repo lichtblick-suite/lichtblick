@@ -1,0 +1,83 @@
+name: E2E Benchmark
+
+# Runs the benchmark E2E suite (benchmark/e2e), which drives each registered scenario
+# (benchmark/src/scenarios/registry.ts) in the standalone benchmark Electron shell and collects
+# memory/frame-time samples. Manual only - not run on a schedule or on every PR since it's a
+# long-running, resource-sensitive suite whose results are only meaningful in a stable environment.
+
+on:
+  workflow_dispatch: {}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  e2e-benchmark:
+    runs-on: ubuntu-latest
+
+    name: e2e-benchmark (ubuntu-latest)
+
+    # Set a fixed timezone to ensure consistent test results.
+    env:
+      TZ: Europe/Lisbon
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: corepack enable yarn
+
+      - name: Restore cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+
+      - run: yarn install --immutable
+
+      - name: Apply AppArmor Fix (Ubuntu)
+        # Required for Playwright/Electron on Ubuntu to work properly
+        # See: https://github.com/microsoft/playwright/issues/34251
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      # It must be a dev build so the benchmark scenarios match what's built from source.
+      - name: Build benchmark desktop app
+        run: yarn benchmark:desktop:build:prod
+
+      - name: Run Benchmark E2E tests
+        uses: coactions/setup-xvfb@v1
+        with:
+          working-directory: ./
+          # Call playwright directly with an explicit reporter list instead of relying on
+          # `yarn test:e2e:benchmark:ci`'s config default: `--reporter=json` alone has no syntax
+          # for an output path, so without PLAYWRIGHT_JSON_OUTPUT_NAME below the json reporter
+          # would dump the report to stdout instead of a file.
+          run: yarn test:e2e:benchmark:ci --reporter=list,json
+        env:
+          CI: true
+          # Resolved relative to the config's rootDir (benchmark/e2e/, the config file's own
+          # directory), not the process cwd - so this lands at benchmark/e2e/reports/results.json.
+          PLAYWRIGHT_JSON_OUTPUT_NAME: reports/results.json
+
+      - name: Generate Benchmark Test Summary
+        if: always()
+        run: yarn test:e2e:benchmark:summary >> "$GITHUB_STEP_SUMMARY"
+
+      # - name: Upload Benchmark E2E Reports
+      #   if: always()
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     name: benchmark-e2e-reports
+      #     path: |
+      #       benchmark/e2e/reports/
+      #       benchmark/.artifacts/
+      #       benchmark/e2e/test-results/
+      #     retention-days: 7
+      #     if-no-files-found: warn
+      #     # benchmark/.artifacts/ is a dot-directory
+      #     include-hidden-files: true

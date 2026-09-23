@@ -9,6 +9,7 @@
     "./**/jest.config.ts",
     "./ci/**/*.ts",
     "./e2e/ci-helpers/**/*.ts",
+    "./benchmark/e2e/ci-helpers/**/*.ts",
     "./package.json"
   ],
   "compilerOptions": {

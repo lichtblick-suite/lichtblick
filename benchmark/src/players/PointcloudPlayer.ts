@@ -175,7 +175,7 @@ class PointcloudPlayer extends BenchmarkPlayerBase implements Player {
     }
 
     let messageCount = 0;
-    for (;;) {
+    while (!this.closed) {
       messageCount += 1;
 
       const topicStats = new Map<string, TopicStats>();
