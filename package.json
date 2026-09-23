@@ -64,7 +64,7 @@
     "test:e2e:benchmark": "playwright test --config=benchmark/e2e/playwright.config.ts",
     "test:e2e:benchmark:debug": "playwright test --config=benchmark/e2e/playwright.config.ts --debug",
     "test:e2e:benchmark:report": "playwright show-report benchmark/e2e/reports",
-    "test:e2e:benchmark:ci": "CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=reports/results.json playwright test --config=benchmark/e2e/playwright.config.ts",
+    "test:e2e:benchmark:ci": "CI=true PLAYWRIGHT_JSON_OUTPUT_NAME=reports/results.json playwright test --config=benchmark/e2e/playwright.config.ts --reporter=list,json",
     "test:e2e:benchmark:summary": "ts-node benchmark/e2e/ci-helpers/generate-benchmark-summary.ts",
     "package:win": "yarn package --win",
     "package:darwin": "yarn package --mac",

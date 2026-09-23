@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 import type { BenchmarkArtifact } from "../types";
 
@@ -63,7 +63,7 @@ function printTestResults(): void {
   for (const suite of report.suites) {
     for (const spec of suite.specs) {
       for (const test of spec.tests) {
-        const lastResult = test.results[test.results.length - 1];
+        const lastResult = test.results.at(-1);
         if (!lastResult) {
           continue;
         }
