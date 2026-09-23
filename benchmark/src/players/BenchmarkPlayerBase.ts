@@ -24,7 +24,8 @@ const log = Log.getLogger(__filename);
  */
 abstract class BenchmarkPlayerBase implements Player {
   /** Marks results from this player as coming from the legacy synthetic pipeline, not the real
-   * production `IterablePlayer`. See `benchmark/src/dataSources/pipelineKind.ts`. */
+   * production `IterablePlayer`.
+   * */
   public readonly pipeline = "synthetic" as const;
 
   protected listener?: (state: PlayerState) => Promise<void>;
