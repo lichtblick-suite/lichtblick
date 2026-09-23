@@ -2,11 +2,13 @@ name: E2E Benchmark
 
 # Runs the benchmark E2E suite (benchmark/e2e), which drives each registered scenario
 # (benchmark/src/scenarios/registry.ts) in the standalone benchmark Electron shell and collects
-# memory/frame-time samples. Manual only - not run on a schedule or on every PR since it's a
-# long-running, resource-sensitive suite whose results are only meaningful in a stable environment.
+# memory/frame-time samples. Runs on pushes to the long-lived branches - not on a
+# schedule or every PR since it's a long-running, resource-sensitive suite whose results are only
+# meaningful in a stable environment.
 
 on:
-  workflow_dispatch: {}
+  push:
+    branches: [develop, main]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
