@@ -11,8 +11,6 @@ export const useStyles = makeStyles()((theme) => ({
     marginLeft: theme.spacing(-1),
   },
   grid: {
-    position: "relative",
-
     [theme.breakpoints.up("md")]: {
       display: "grid",
       gridTemplateAreas: `
