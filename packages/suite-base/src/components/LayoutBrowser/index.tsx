@@ -36,6 +36,7 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
+import { useLayoutFavorites } from "@lichtblick/suite-base/context/LayoutFavoritesContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import {
   WorkspaceStoreSelectors,
@@ -71,6 +72,7 @@ export default function LayoutBrowser({
   const layoutManager = useLayoutManager();
   const [prompt, promptModal] = usePrompt();
   const analytics = useAnalytics();
+  const { isFavorite, setFavorite } = useLayoutFavorites();
 
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const { onSelectLayout, state, dispatch } = useLayoutNavigation();
@@ -122,6 +124,18 @@ export default function LayoutBrowser({
     [layoutManager],
     { loading: true },
   );
+
+  // Favorites are listed first in each section, keeping the alphabetical order within each group.
+  const sortedLayouts = useMemo(() => {
+    if (!layouts.value) {
+      return undefined;
+    }
+    const favoritesFirst = (items: Layout[]) => _.sortBy(items, (item) => !isFavorite(item));
+    return {
+      personal: favoritesFirst(layouts.value.personal),
+      shared: favoritesFirst(layouts.value.shared),
+    };
+  }, [isFavorite, layouts.value]);
 
   useEffect(() => {
     const processAction = async () => {
@@ -248,11 +262,25 @@ export default function LayoutBrowser({
           permission: "ORG_WRITE",
         });
         analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
+        if (isFavorite(item)) {
+          // The shared copy is a new layout: keep it as a favorite, like the original.
+          await setFavorite(newLayout, { favorite: true }).catch((error: unknown) => {
+            log.error("Failed to mark shared layout as favorite", error);
+          });
+        }
         setSharedSectionExpanded(true);
         await onSelectLayout(newLayout);
       }
     },
-    [analytics, layoutManager, onSelectLayout, prompt, setSharedSectionExpanded],
+    [
+      analytics,
+      isFavorite,
+      layoutManager,
+      onSelectLayout,
+      prompt,
+      setFavorite,
+      setSharedSectionExpanded,
+    ],
   );
 
   const onMakePersonalCopy = useCallbackWithToast(
@@ -353,7 +381,7 @@ export default function LayoutBrowser({
           expanded={personalExpanded}
           onToggleExpanded={togglePersonalExpanded}
           emptyText="Add a new layout to get started with Lichtblick!"
-          items={layouts.value?.personal}
+          items={sortedLayouts?.personal}
           anySelectedModifiedLayouts={anySelectedModifiedLayouts}
           multiSelectedIds={state.selectedIds}
           selectedId={currentLayoutId}
@@ -374,7 +402,7 @@ export default function LayoutBrowser({
             expanded={sharedExpanded}
             onToggleExpanded={toggleSharedExpanded}
             emptyText="Your organization doesn’t have any shared layouts yet. Share a layout to collaborate with others."
-            items={layouts.value?.shared}
+            items={sortedLayouts?.shared}
             anySelectedModifiedLayouts={anySelectedModifiedLayouts}
             multiSelectedIds={state.selectedIds}
             selectedId={currentLayoutId}

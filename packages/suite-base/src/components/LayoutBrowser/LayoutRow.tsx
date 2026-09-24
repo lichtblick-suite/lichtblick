@@ -7,6 +7,8 @@
 
 import ErrorIcon from "@mui/icons-material/Error";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
   Divider,
   IconButton,
@@ -29,7 +31,9 @@ import {
 } from "react";
 import { useMountedState } from "react-use";
 
+import { useLayoutFavorites } from "@lichtblick/suite-base/context/LayoutFavoritesContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
+import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
@@ -68,6 +72,7 @@ export default React.memo(function LayoutRow({
   const isMounted = useMountedState();
   const [confirm, confirmModal] = useConfirm();
   const layoutManager = useLayoutManager();
+  const layoutFavorites = useLayoutFavorites();
 
   const [editingName, setEditingName] = useState(false);
   const [nameFieldValue, setNameFieldValue] = useState("");
@@ -81,6 +86,8 @@ export default React.memo(function LayoutRow({
   const deletedOnServer = layout.syncInfo?.status === "remotely-deleted";
   const hasModifications = layout.working != undefined;
   const multiSelection = multiSelectedIds.length > 1;
+  const canFavorite = layoutFavorites.canFavorite(layout);
+  const favorite = layoutFavorites.isFavorite(layout);
 
   useLayoutEffect(() => {
     const onlineListener = () => {
@@ -126,6 +133,10 @@ export default React.memo(function LayoutRow({
   const shareAction = useCallback(() => {
     onShare(layout);
   }, [layout, onShare]);
+
+  const toggleFavorite = useCallbackWithToast(async () => {
+    await layoutFavorites.setFavorite(layout, { favorite: !favorite });
+  }, [favorite, layout, layoutFavorites]);
 
   const exportAction = useCallback(() => {
     onExport(layout);
@@ -318,18 +329,44 @@ export default React.memo(function LayoutRow({
       editingName={editingName}
       hasModifications={hasModifications}
       deletedOnServer={deletedOnServer}
+      hasFavoriteAction={canFavorite}
       disablePadding
       secondaryAction={
-        <IconButton
-          data-testid="layout-actions"
-          aria-controls={contextMenuTarget != undefined ? "layout-action-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={contextMenuTarget != undefined ? "true" : undefined}
-          onClick={handleMenuButtonClick}
-          onContextMenu={handleContextMenu}
-        >
-          {actionIcon}
-        </IconButton>
+        <>
+          {canFavorite && (
+            <IconButton
+              className={favorite ? "layout-favorite-active" : undefined}
+              data-testid="layout-favorite-toggle"
+              aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
+              aria-pressed={favorite}
+              title={
+                layoutIsShared(layout) && !isOnline
+                  ? "Offline"
+                  : favorite
+                    ? "Remove from favorites"
+                    : "Add to favorites"
+              }
+              disabled={layoutIsShared(layout) && !isOnline}
+              onClick={toggleFavorite}
+            >
+              {favorite ? (
+                <StarIcon fontSize="small" color="warning" />
+              ) : (
+                <StarBorderIcon fontSize="small" />
+              )}
+            </IconButton>
+          )}
+          <IconButton
+            data-testid="layout-actions"
+            aria-controls={contextMenuTarget != undefined ? "layout-action-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={contextMenuTarget != undefined ? "true" : undefined}
+            onClick={handleMenuButtonClick}
+            onContextMenu={handleContextMenu}
+          >
+            {actionIcon}
+          </IconButton>
+        </>
       }
     >
       {confirmModal}

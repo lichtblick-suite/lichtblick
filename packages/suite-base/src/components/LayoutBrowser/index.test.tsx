@@ -14,6 +14,10 @@ import {
   useCurrentLayoutActions,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
+import {
+  LayoutFavorites,
+  LayoutFavoritesContext,
+} from "@lichtblick/suite-base/context/LayoutFavoritesContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
@@ -446,6 +450,119 @@ describe("LayoutBrowser", () => {
       await waitFor(() => {
         expect(setPersonalExpandedMock).toHaveBeenCalledWith(true);
       });
+    });
+  });
+
+  describe("favorites", () => {
+    const makeFavorites = (favoriteIds: string[]): LayoutFavorites => ({
+      canFavorite: jest.fn().mockReturnValue(true),
+      isFavorite: jest.fn((layout: Layout) => favoriteIds.includes(layout.id)),
+      setFavorite: jest.fn().mockResolvedValue(undefined),
+    });
+
+    it("lists favorite layouts first in each section, keeping alphabetical order", async () => {
+      // GIVEN
+      const personalA = LayoutBuilder.layout({ name: "a", permission: "CREATOR_WRITE" });
+      const personalB = LayoutBuilder.layout({ name: "b", permission: "CREATOR_WRITE" });
+      const personalC = LayoutBuilder.layout({ name: "c", permission: "CREATOR_WRITE" });
+      const sharedA = LayoutBuilder.layout({ name: "a", permission: "ORG_WRITE" });
+      const sharedB = LayoutBuilder.layout({ name: "b", permission: "ORG_WRITE" });
+      mockLayoutManager.supportsSharing = true;
+      mockLayoutManager.getLayouts = jest
+        .fn()
+        .mockResolvedValue([personalC, sharedB, personalA, sharedA, personalB]);
+
+      const renderedItems: (readonly Layout[] | undefined)[] = [];
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: { items: readonly Layout[] | undefined }) => {
+          renderedItems.push(props.items);
+          return <div data-testid="layout-section" />;
+        });
+
+      // WHEN
+      render(
+        <LayoutFavoritesContext.Provider value={makeFavorites([personalC.id, sharedB.id])}>
+          <LayoutBrowser />
+        </LayoutFavoritesContext.Provider>,
+      );
+
+      // THEN
+      await waitFor(() => {
+        const [personal, shared] = renderedItems.slice(-2);
+        expect(personal?.map((layout) => layout.name)).toEqual(["c", "a", "b"]);
+        expect(shared?.map((layout) => layout.name)).toEqual(["b", "a"]);
+      });
+      mockLayoutManager.supportsSharing = false;
+    });
+
+    it("keeps a favorite layout as favorite when it is shared", async () => {
+      // GIVEN
+      const layout = LayoutBuilder.layout({ permission: "CREATOR_WRITE" });
+      const newLayout = LayoutBuilder.layout({ permission: "ORG_WRITE" });
+      (usePrompt as jest.Mock).mockReturnValue([
+        jest.fn().mockResolvedValue("Shared Layout"),
+        undefined,
+      ]);
+      mockLayoutManager.saveNewLayout = jest.fn().mockResolvedValue(newLayout);
+      const favorites = makeFavorites([layout.id]);
+
+      let capturedOnShare: ((item: Layout) => void) | undefined;
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: { onShare: (item: Layout) => void }) => {
+          capturedOnShare = props.onShare;
+          return <div data-testid="layout-section" />;
+        });
+
+      render(
+        <LayoutFavoritesContext.Provider value={favorites}>
+          <LayoutBrowser />
+        </LayoutFavoritesContext.Provider>,
+      );
+
+      // WHEN
+      capturedOnShare!(layout);
+
+      // THEN
+      await waitFor(() => {
+        expect(favorites.setFavorite).toHaveBeenCalledWith(newLayout, { favorite: true });
+      });
+    });
+
+    it("does not mark the shared copy as favorite when the original is not a favorite", async () => {
+      // GIVEN
+      const layout = LayoutBuilder.layout({ permission: "CREATOR_WRITE" });
+      const newLayout = LayoutBuilder.layout({ permission: "ORG_WRITE" });
+      (usePrompt as jest.Mock).mockReturnValue([
+        jest.fn().mockResolvedValue("Shared Layout"),
+        undefined,
+      ]);
+      mockLayoutManager.saveNewLayout = jest.fn().mockResolvedValue(newLayout);
+      const favorites = makeFavorites([]);
+
+      let capturedOnShare: ((item: Layout) => void) | undefined;
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: { onShare: (item: Layout) => void }) => {
+          capturedOnShare = props.onShare;
+          return <div data-testid="layout-section" />;
+        });
+
+      render(
+        <LayoutFavoritesContext.Provider value={favorites}>
+          <LayoutBrowser />
+        </LayoutFavoritesContext.Provider>,
+      );
+
+      // WHEN
+      capturedOnShare!(layout);
+
+      // THEN
+      await waitFor(() => {
+        expect(mockLayoutManager.saveNewLayout).toHaveBeenCalled();
+      });
+      expect(favorites.setFavorite).not.toHaveBeenCalled();
     });
   });
 });

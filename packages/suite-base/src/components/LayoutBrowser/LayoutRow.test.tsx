@@ -7,6 +7,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import "@testing-library/jest-dom";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import {
+  LayoutFavorites,
+  LayoutFavoritesContext,
+} from "@lichtblick/suite-base/context/LayoutFavoritesContext";
 import * as LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
 import * as useConfirmModule from "@lichtblick/suite-base/hooks/useConfirm";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
@@ -254,5 +258,94 @@ describe("LayoutRow rendering", () => {
     fireEvent.click(screen.getByTestId("layout-actions"));
 
     expect(screen.getByTestId("duplicate-layout")).toBeInTheDocument();
+  });
+});
+
+describe("LayoutRow favorites", () => {
+  const renderWithFavorites = (favorites: Partial<LayoutFavorites>, props = {}) => {
+    const value: LayoutFavorites = {
+      canFavorite: jest.fn().mockReturnValue(true),
+      isFavorite: jest.fn().mockReturnValue(false),
+      setFavorite: jest.fn().mockResolvedValue(undefined),
+      ...favorites,
+    };
+    render(
+      <LayoutFavoritesContext.Provider value={value}>
+        <LayoutRow
+          layout={defaultLayout}
+          anySelectedModifiedLayouts={false}
+          multiSelectedIds={[]}
+          selected={false}
+          onSelect={jest.fn()}
+          onRename={jest.fn()}
+          onDuplicate={jest.fn()}
+          onDelete={jest.fn()}
+          onShare={jest.fn()}
+          onExport={jest.fn()}
+          onOverwrite={jest.fn()}
+          onRevert={jest.fn()}
+          onMakePersonalCopy={jest.fn()}
+          {...props}
+        />
+      </LayoutFavoritesContext.Provider>,
+    );
+    return value;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLayoutManager.isOnline = true;
+  });
+
+  it("Given no favorites provider, when rendered, then the favorite toggle is not shown", () => {
+    renderComponent();
+
+    expect(screen.queryByTestId("layout-favorite-toggle")).not.toBeInTheDocument();
+  });
+
+  it("Given the layout cannot be favorited, when rendered, then the favorite toggle is not shown", () => {
+    renderWithFavorites({ canFavorite: jest.fn().mockReturnValue(false) });
+
+    expect(screen.queryByTestId("layout-favorite-toggle")).not.toBeInTheDocument();
+  });
+
+  it("Given a layout that is not a favorite, when the toggle is clicked, then it is added to favorites", async () => {
+    const favorites = renderWithFavorites({});
+
+    const toggle = screen.getByTestId("layout-favorite-toggle");
+    expect(toggle).toHaveAttribute("aria-label", "Add to favorites");
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(toggle);
+
+    await waitFor(() => {
+      expect(favorites.setFavorite).toHaveBeenCalledWith(defaultLayout, { favorite: true });
+    });
+  });
+
+  it("Given a favorite layout, when the toggle is clicked, then it is removed from favorites", async () => {
+    const favorites = renderWithFavorites({ isFavorite: jest.fn().mockReturnValue(true) });
+
+    const toggle = screen.getByTestId("layout-favorite-toggle");
+    expect(toggle).toHaveAttribute("aria-label", "Remove from favorites");
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(toggle);
+
+    await waitFor(() => {
+      expect(favorites.setFavorite).toHaveBeenCalledWith(defaultLayout, { favorite: false });
+    });
+  });
+
+  it("Given a shared layout while offline, when rendered, then the favorite toggle is disabled", () => {
+    mockLayoutManager.isOnline = false;
+    renderWithFavorites({}, { layout: { ...defaultLayout, permission: "ORG_WRITE" as const } });
+
+    expect(screen.getByTestId("layout-favorite-toggle")).toBeDisabled();
+  });
+
+  it("Given a personal layout while offline, when rendered, then the favorite toggle is enabled", () => {
+    mockLayoutManager.isOnline = false;
+    renderWithFavorites({}, { layout: { ...defaultLayout, permission: "CREATOR_WRITE" as const } });
+
+    expect(screen.getByTestId("layout-favorite-toggle")).toBeEnabled();
   });
 });

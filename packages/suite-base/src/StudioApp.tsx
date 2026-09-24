@@ -10,15 +10,18 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
+import { LayoutFavoritesAPI } from "@lichtblick/suite-base/api/layouts/LayoutFavoritesAPI";
 import { LayoutsAPI } from "@lichtblick/suite-base/api/layouts/LayoutsAPI";
 import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import LayoutStorageContext from "@lichtblick/suite-base/context/LayoutStorageContext";
 import NativeAppMenuContext from "@lichtblick/suite-base/context/NativeAppMenuContext";
 import NativeWindowContext from "@lichtblick/suite-base/context/NativeWindowContext";
+import { RemoteLayoutFavoritesStorageContext } from "@lichtblick/suite-base/context/RemoteLayoutFavoritesStorageContext";
 import { RemoteLayoutStorageContext } from "@lichtblick/suite-base/context/RemoteLayoutStorageContext";
 import { useSharedRootContext } from "@lichtblick/suite-base/context/SharedRootContext";
 import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
+import LayoutFavoritesProvider from "@lichtblick/suite-base/providers/LayoutFavoritesProvider";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
@@ -106,9 +109,24 @@ export function StudioApp(): React.JSX.Element {
     return undefined;
   }, [workspace]);
 
+  // Favorites of shared layouts are only needed when shared layouts come from the same API.
+  const remoteLayoutFavoritesStorage = useMemo(
+    () => (remoteLayoutStorage ? new LayoutFavoritesAPI() : undefined),
+    [remoteLayoutStorage],
+  );
+
   if (remoteLayoutStorage) {
     providers.unshift(<RemoteLayoutStorageContext.Provider value={remoteLayoutStorage} />);
   }
+
+  if (remoteLayoutFavoritesStorage) {
+    providers.unshift(
+      <RemoteLayoutFavoritesStorageContext.Provider value={remoteLayoutFavoritesStorage} />,
+    );
+  }
+
+  // Depends on the layout manager and user profile providers above, so it is nested inside them.
+  providers.push(<LayoutFavoritesProvider />);
 
   if (extraProviders) {
     // Providers supplying context consumed by providers above them in this list must stay outermost,
