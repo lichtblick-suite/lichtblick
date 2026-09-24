@@ -33,6 +33,11 @@ describe("buildSettingsTree", () => {
     const tree = buildSettingsTree(config, t);
 
     expect(tree.general?.fields?.isSynced?.value).toBe(config.isSynced);
+    expect(tree.general?.fields?.floatingToolbar).toEqual({
+      label: "floatingToolbar",
+      input: "boolean",
+      value: false,
+    });
     expect(tree.legend?.fields?.legendDisplay?.value).toBe(config.legendDisplay);
     expect(tree.yAxis?.fields?.minYValue?.value).toBe(config.minYValue);
     expect(tree.yAxis?.fields?.maxYValue?.value).toBe(config.maxYValue);

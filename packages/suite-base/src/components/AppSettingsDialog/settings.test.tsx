@@ -8,7 +8,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 
-import { AutoUpdate, FloatingToolbarSettings, StepSize } from "./settings";
+import { AutoUpdate, StepSize } from "./settings";
 
 jest.mock("@lichtblick/suite-base/hooks/useAppConfigurationValue", () => ({
   useAppConfigurationValue: jest.fn(),
@@ -54,34 +54,5 @@ describe("AutoUpdate component", () => {
     render(<AutoUpdate />);
     const input: HTMLInputElement = screen.getByRole("checkbox");
     expect(input.checked).toBe(true);
-  });
-});
-
-describe("FloatingToolbarSettings component", () => {
-  it("should render unchecked (off) by default", () => {
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([undefined, jest.fn()]);
-
-    render(<FloatingToolbarSettings />);
-    const input: HTMLInputElement = screen.getByRole("checkbox");
-    expect(input.checked).toBe(false);
-  });
-
-  it("should render a checked checkbox when the setting is enabled", () => {
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([true, jest.fn()]);
-
-    render(<FloatingToolbarSettings />);
-    const input: HTMLInputElement = screen.getByRole("checkbox");
-    expect(input.checked).toBe(true);
-  });
-
-  it("calls the setter when the checkbox is toggled", () => {
-    const mockSetEnabled = jest.fn();
-    (useAppConfigurationValue as jest.Mock).mockReturnValue([false, mockSetEnabled]);
-
-    render(<FloatingToolbarSettings />);
-    const input: HTMLInputElement = screen.getByRole("checkbox");
-    fireEvent.click(input);
-
-    expect(mockSetEnabled).toHaveBeenCalledWith(true);
   });
 });

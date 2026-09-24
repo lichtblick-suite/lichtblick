@@ -92,6 +92,22 @@ describe("handleUpdateAction", () => {
     );
   });
 
+  it("Given a floating toolbar settings update When handling it Then the plot config enables it", () => {
+    // Given
+    const initialConfig = PlotBuilder.config({ paths: [] });
+    const input: HandleUpdateAction = {
+      draft: _.cloneDeep(initialConfig),
+      path: ["general", "floatingToolbar"],
+      value: true,
+    };
+
+    // When
+    handleUpdateAction(input);
+
+    // Then
+    expect(input.draft.floatingToolbar).toBe(true);
+  });
+
   it("should update minXValue and maxXValue to undefined", () => {
     const initialConfig = PlotBuilder.config({ paths: [] });
     const input: HandleUpdateAction = {

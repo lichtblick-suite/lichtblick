@@ -17,9 +17,6 @@ export const appSettings = {
   experimentalFeatures: "Experimental features",
   experimentalFeaturesDescription: "These features are unstable and not recommended for daily use.",
   extensions: "Extensions",
-  floatingPlotToolbar: "Floating Plot toolbar",
-  floatingPlotToolbarDescription:
-    "The Plot panel's title floats above the chart instead of reserving space for a toolbar bar; the rest of the toolbar (fullscreen, settings, etc.) appears on hover.",
   followSystem: "Follow system",
   general: "General",
   language: "Language",

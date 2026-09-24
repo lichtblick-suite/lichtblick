@@ -67,10 +67,6 @@ jest.mock("@lichtblick/suite-base/panels/Plot/hooks/useGlobalSync");
 jest.mock("@lichtblick/suite-base/panels/Plot/hooks/usePanning");
 jest.mock("@lichtblick/suite-base/panels/Plot/hooks/useSubscriptions");
 jest.mock("@lichtblick/suite-base/panels/Plot/hooks/usePlotPanelSettings");
-let mockFloatingToolbarEnabled = false;
-jest.mock("@lichtblick/suite-base/hooks/useAppConfigurationValue", () => ({
-  useAppConfigurationValue: jest.fn(() => [mockFloatingToolbarEnabled, jest.fn()]),
-}));
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
@@ -129,6 +125,11 @@ class PlotConfigBuilder {
     return this;
   }
 
+  public withFloatingToolbar(): this {
+    this.config = { ...this.config, floatingToolbar: true };
+    return this;
+  }
+
   public build(): PlotConfig {
     return { ...this.config, paths: [...this.config.paths] };
   }
@@ -164,7 +165,6 @@ describe("Plot Component", () => {
     (usePanning as jest.Mock).mockReturnValue(undefined);
     (useSubscriptions as jest.Mock).mockReturnValue(undefined);
     (usePlotPanelSettings as jest.Mock).mockReturnValue(undefined);
-    mockFloatingToolbarEnabled = false;
     mockLatestSetActiveTooltip = undefined;
     mockLatestLegendProps = undefined;
     mockLatestPanelToolbarProps = undefined;
@@ -257,9 +257,8 @@ describe("Plot Component", () => {
     expect(screen.queryByTestId("plot-legend")).toBeNull();
   });
 
-  it("Given the floating panel toolbar setting is off When rendering Then the toolbar does not float", () => {
+  it("Given floating toolbar is off by default When rendering Then the toolbar does not float", () => {
     // Given
-    mockFloatingToolbarEnabled = false;
     const config = new PlotConfigBuilder().build();
 
     // When
@@ -270,10 +269,9 @@ describe("Plot Component", () => {
     expect(mockLatestLegendProps?.floatingToolbar).toBe(false);
   });
 
-  it("Given the floating panel toolbar setting is on When rendering Then the toolbar floats", () => {
+  it("Given floating toolbar is enabled for this panel When rendering Then the toolbar floats", () => {
     // Given
-    mockFloatingToolbarEnabled = true;
-    const config = new PlotConfigBuilder().build();
+    const config = new PlotConfigBuilder().withFloatingToolbar().build();
 
     // When
     renderPlot(config);
@@ -283,12 +281,9 @@ describe("Plot Component", () => {
     expect(mockLatestLegendProps?.floatingToolbar).toBe(true);
   });
 
-  it("Given the floating panel toolbar setting is on When rendering Then the panel root exposes the CSS hover hook", () => {
+  it("Given floating toolbar is enabled for this panel When rendering Then the panel root exposes the CSS hover hook", () => {
     // Given
-    mockFloatingToolbarEnabled = true;
-    const config = new PlotConfigBuilder().build();
-
-    // When
+    const config = new PlotConfigBuilder().withFloatingToolbar().build();
     renderPlot(config);
 
     // Then the root container exposes the `data-panel-root` attribute that `PanelToolbar`'s
@@ -298,9 +293,8 @@ describe("Plot Component", () => {
     expect(panelRoot.getAttribute("data-panel-root")).toBe("");
   });
 
-  it("Given the floating panel toolbar setting is off When rendering Then the panel root does not expose the CSS hover hook", () => {
+  it("Given floating toolbar is off by default When rendering Then the panel root does not expose the CSS hover hook", () => {
     // Given
-    mockFloatingToolbarEnabled = false;
     const config = new PlotConfigBuilder().build();
 
     // When

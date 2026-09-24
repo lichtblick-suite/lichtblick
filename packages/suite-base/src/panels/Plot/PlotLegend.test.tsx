@@ -136,7 +136,7 @@ describe("PlotLegend", () => {
   it("Given floatingToolbar is true When rendering Then the legend gets extra top clearance for each position, and none when floatingToolbar is false", () => {
     // Given / When / Then
     // paddingTop values below come from PANEL_TOOLBAR_MIN_HEIGHT (30px) being added only when
-    // floatingToolbar is true, per position (see PlotLegend.tsx's rootFloating/rootTop/rootLeft
+    // floatingToolbar is true, per position (see PlotLegend.style.ts's rootFloating/rootTop/rootLeft
     // styles) - asserting the resolved computed style (not just that the component renders)
     // exercises the actual position-specific styling branch, not just the getByTitle smoke check.
     const expectedClassNameByPosition = {

@@ -69,5 +69,9 @@ export const useStyles = makeStyles()((theme) => ({
     "[data-panel-root]:hover &": {
       opacity: 1,
     },
+    // Menus are portaled outside the panel, so retain visibility while their trigger is expanded.
+    '&:has([aria-expanded="true"])': {
+      opacity: 1,
+    },
   },
 }));

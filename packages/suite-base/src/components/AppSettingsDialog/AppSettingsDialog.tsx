@@ -47,7 +47,6 @@ import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 import {
   AutoUpdate,
   ColorSchemeSettings,
-  FloatingToolbarSettings,
   LanguageSettings,
   LaunchDefault,
   MessageFramerate,
@@ -130,7 +129,6 @@ export function AppSettingsDialog(
               <StepSize />
               <LanguageSettings />
               {supportsAppUpdates && <AutoUpdate />}
-              <FloatingToolbarSettings />
               {!isDesktopApp() && <LaunchDefault />}
               {isDesktopApp() && <RosPackagePath />}
               <Stack>
