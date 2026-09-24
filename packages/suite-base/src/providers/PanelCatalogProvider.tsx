@@ -38,6 +38,7 @@ export default function PanelCatalogProvider(props: PropsWithChildren): React.Re
               config={panelProps.config}
               saveConfig={panelProps.saveConfig}
               initPanel={panel.registration.initPanel}
+              floatingToolbar={panel.registration.floatingToolbar}
             />
           </>
         );

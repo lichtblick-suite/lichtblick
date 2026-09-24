@@ -503,6 +503,14 @@ export type PanelExtensionContext = {
   setDefaultPanelTitle(defaultTitle: string | undefined): void;
 
   /**
+   * Sets the panel's custom toolbar actions, rendered next to the panel's built-in toolbar icons
+   * (fullscreen, settings, more-options). Call again with a new array to update the set of
+   * actions (e.g. to change an action's disabled state); call with an empty array to remove them
+   * all.
+   */
+  setToolbarActions?(actions: readonly PanelToolbarAction[]): void;
+
+  /**
    * Enables subscription to retrieve complete message history for a specified topic from the active data source.
    *
    * See {@link SubscribeMessageRangeArgs} for more information on behavior.
@@ -555,6 +563,33 @@ export type PanelExtensionContext = {
   getSchema: (schemaName: string) => Immutable<MessageDefinition> | undefined;
 };
 
+/**
+ * Describes a custom action button rendered in a panel's toolbar, alongside the panel's built-in
+ * toolbar icons (fullscreen, settings, more-options). See {@link PanelExtensionContext.setToolbarActions}.
+ */
+export type PanelToolbarAction = {
+  /**
+   * Unique id for this action. Used as the React key; passing a new list of actions with the
+   * same id updates that action's button in place instead of remounting it.
+   */
+  id: string;
+
+  /** Tooltip / accessible label shown for the action. */
+  title: string;
+
+  /**
+   * SVG path data (the `d` attribute of an SVG `<path>` element) used to render the action's
+   * icon, drawn within a 24x24 viewBox.
+   */
+  iconPath: string;
+
+  /** Called when the user activates (clicks) the action. */
+  onClick: () => void;
+
+  /** When true, the action is rendered but not clickable. */
+  disabled?: boolean;
+};
+
 export type ExtensionPanelRegistration = {
   // Unique name of the panel within your extension
   //
@@ -568,6 +603,15 @@ export type ExtensionPanelRegistration = {
    * @return: (optional) A function which is called when the panel is removed or replaced. Typically intended for cleanup logic to gracefully teardown your panel.
    */
   initPanel: (context: PanelExtensionContext) => void | (() => void);
+
+  /**
+   * When true, the panel's built-in toolbar (title, fullscreen/settings/more-options icons) no
+   * longer reserves layout space above the panel content. Only the title stays always visible,
+   * floating above the content; the rest of the toolbar is revealed on hover.
+   *
+   * @default false
+   */
+  floatingToolbar?: boolean;
 };
 
 export interface PanelSettings<ExtensionSettings> {
