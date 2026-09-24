@@ -11,6 +11,8 @@ export const useStyles = makeStyles()((theme) => ({
     marginLeft: theme.spacing(-1),
   },
   grid: {
+    position: "relative",
+
     [theme.breakpoints.up("md")]: {
       display: "grid",
       gridTemplateAreas: `
@@ -20,6 +22,12 @@ export const useStyles = makeStyles()((theme) => ({
       gridTemplateRows: `content auto`,
       gridTemplateColumns: `1fr 375px`,
     },
+  },
+  version: {
+    position: "absolute",
+    right: theme.spacing(1),
+    bottom: theme.spacing(0.5),
+    color: theme.palette.text.secondary,
   },
   header: {
     padding: theme.spacing(6),
