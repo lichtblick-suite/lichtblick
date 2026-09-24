@@ -6,7 +6,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/types";
 
 export type UseDeltaMarkerStateProps = {
-  /** Markers are cleared (but the mode stays active) whenever this value changes. */
   resetKey?: string;
 };
 
@@ -17,12 +16,6 @@ export type UseDeltaMarkerStateResult = {
   markerB: DeltaMarker | undefined;
   removeMarkerA: () => void;
   removeMarkerB: () => void;
-  /**
-   * Decides which slot ("a" or "b") the next placed marker should fill: A, then B, then back to
-   * a fresh A (clearing B) on a third click. Callers that resolve a marker's value asynchronously
-   * should call this synchronously on click, then pass the returned reservation to `setMarker` once
-   * the value is ready.
-   */
   nextMarkerSlot: () => DeltaMarkerSlotReservation;
   setMarker: (reservation: DeltaMarkerSlotReservation, marker: DeltaMarker) => void;
 };
@@ -33,7 +26,6 @@ export type DeltaMarkerSlotReservation = {
   token: number;
 };
 
-/** Shared A/B marker state machine used by both the Plot and StateTransitions measure modes. */
 function useDeltaMarkerState({ resetKey }: UseDeltaMarkerStateProps): UseDeltaMarkerStateResult {
   const [active, setActive] = useState(false);
   const [markerA, setMarkerA] = useState<DeltaMarker | undefined>(undefined);

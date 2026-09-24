@@ -24,14 +24,12 @@ export type DeltaOverlayProps = Immutable<{
   markerBLabel: string;
   markerAColor?: string;
   markerBColor?: string;
-  /** Undefined until that marker is placed - rendered as a placeholder. */
   xValueA: number | undefined;
   xValueB: number | undefined;
   yValueA?: number | string;
   yValueB?: number | string;
   deltaX: number | undefined;
   deltaY?: number;
-  /** Preserved for backward-compatibility if passed. */
   seriesLabels?: DeltaOverlaySeriesLabel[];
   series?: DeltaResult["series"];
   formatXValue?: (value: number) => string;

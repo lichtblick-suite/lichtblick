@@ -14,7 +14,6 @@ import { OriginalValue } from "@lichtblick/suite-base/panels/Plot/utils/datum";
 import { DeltaMarkerSeriesValue } from "@lichtblick/suite-base/panels/shared/types";
 import useDeltaMarkerState from "@lichtblick/suite-base/panels/shared/useDeltaMarkerState";
 
-// bigint/boolean/Time don't have a natural delta - normalize them into what computeDelta expects.
 function toSeriesValue(value: OriginalValue | undefined): number | string | undefined {
   switch (typeof value) {
     case "number":
@@ -28,7 +27,6 @@ function toSeriesValue(value: OriginalValue | undefined): number | string | unde
   }
 }
 
-// Dedupe by configIndex (elements can overlap at a pixel) and drop values that don't normalize.
 function resolveSeriesValues(elements: readonly HoverElement[]): DeltaMarkerSeriesValue[] {
   const seriesValues: DeltaMarkerSeriesValue[] = [];
   const seenConfigIndexes = new Set<number>();

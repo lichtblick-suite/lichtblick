@@ -8,7 +8,6 @@ import {
   DeltaSeriesResult,
 } from "@lichtblick/suite-base/panels/shared/types";
 
-// Series are matched by configIndex; all series present on either marker are included.
 export function computeDelta(markerA: DeltaMarker, markerB: DeltaMarker): DeltaResult {
   const valueAtAByConfigIndex = new Map(
     markerA.seriesValues.map(({ configIndex, value }) => [configIndex, value]),
@@ -49,11 +48,6 @@ export function computeDelta(markerA: DeltaMarker, markerB: DeltaMarker): DeltaR
   };
 }
 
-/**
- * Like `computeDelta`, but also handles the "Measure mode is active but zero or one markers have
- * been placed yet" states - the DeltaOverlay renders regardless of how many markers exist, using
- * this to fill in what's known so far and placeholders for the rest.
- */
 export function computeDeltaDisplay(
   markerA: DeltaMarker | undefined,
   markerB: DeltaMarker | undefined,

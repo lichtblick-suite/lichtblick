@@ -14,7 +14,6 @@ import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/types";
 import { useDeltaMarkerBarsStyles } from "./DeltaMarkerBars.style";
 import type { DeltaMarkerBarsProps, Scale, YScale } from "./types";
 
-/** The value+color of the series closest to where a marker was placed (used for the crosshair). */
 function getPrimarySeries(
   marker: DeltaMarker | undefined,
   colorsByDatasetIndex: Record<string, string>,
@@ -103,15 +102,6 @@ function setLabelPosition(
   }
 }
 
-/**
- * Draws the two Delta/Measure-mode marker crosshairs (matching Foxglove's reference behavior: a
- * vertical + horizontal dashed line and an on-chart "P1"/"P2" label snapped to the nearest
- * series) and the DeltaOverlay table, which renders as soon as measure mode is active and fills
- * in each row as markers are placed.
- *
- * Bar/label positions are updated directly on refs (not React state) on every xScaleChanged /
- * yScaleChanged tick so panning/zooming doesn't re-render the (potentially large) overlay.
- */
 // eslint-disable-next-line @typescript-eslint/no-shadow
 export const DeltaMarkerBars = React.memo(function DeltaMarkerBars({
   coordinator,

@@ -18,7 +18,7 @@ export function getValueAtTime(
     if (datum.x > time) {
       break;
     }
-    // A datum with no value marks a gap in the data - there is no active state until the next point.
+
     result =
       datum.value != undefined
         ? { value: datum.value, constantName: datum.constantName }

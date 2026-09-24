@@ -18,5 +18,4 @@ export const PLOTABLE_ROS_TYPES = [
   "uint8",
 ];
 
-/** Shown in the DeltaOverlay table for a series with no computed result at a marker. */
 export const MISSING_VALUE_PLACEHOLDER = "—";

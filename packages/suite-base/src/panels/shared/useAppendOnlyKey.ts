@@ -18,7 +18,6 @@ function useAppendOnlyKey(segments: readonly string[]): string {
   const baseline = baselineSegmentsRef.current;
   const previousLength = previousLengthRef.current;
 
-  // An append-only transition keeps the baseline prefix intact and does not decrease length.
   const isAppendOnly =
     baseline != undefined &&
     segments.length >= previousLength &&

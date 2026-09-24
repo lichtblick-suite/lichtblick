@@ -28,7 +28,6 @@ export type Scale = {
   right: number;
 };
 
-/** Y-axis pixel bounds - named `top`/`bottom` directly instead of reusing `Scale`'s `left`/`right`. */
 export type YScale = {
   min: number;
   max: number;
