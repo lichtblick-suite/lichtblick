@@ -32,7 +32,6 @@ describe("UserProfileAPI", () => {
       // Given
       const mockProfile: UserProfile = {
         currentLayoutId: BasicBuilder.string() as never,
-        favoriteLayoutIds: BasicBuilder.strings() as never,
       };
       const mockGet = jest.fn().mockResolvedValue(createMockHttpResponse({ profile: mockProfile }));
       jest.mocked(HttpService).get = mockGet;

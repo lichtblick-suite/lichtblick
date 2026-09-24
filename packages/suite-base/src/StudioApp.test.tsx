@@ -8,6 +8,7 @@ import "@testing-library/jest-dom";
 
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
 import { LayoutsAPI } from "@lichtblick/suite-base/api/layouts/LayoutsAPI";
+import { FavoriteLayoutsAPI } from "@lichtblick/suite-base/api/profile/FavoriteLayoutsAPI";
 import { UserProfileAPI } from "@lichtblick/suite-base/api/profile/UserProfileAPI";
 import { SharedRootContext } from "@lichtblick/suite-base/context/SharedRootContext";
 
@@ -84,6 +85,12 @@ jest.mock("@lichtblick/suite-base/api/layouts/LayoutsAPI", () => ({
 jest.mock("@lichtblick/suite-base/api/profile/UserProfileAPI", () => ({
   UserProfileAPI: jest.fn().mockImplementation(() => ({
     mockRemoteUserProfileStorage: true,
+  })),
+}));
+
+jest.mock("@lichtblick/suite-base/api/profile/FavoriteLayoutsAPI", () => ({
+  FavoriteLayoutsAPI: jest.fn().mockImplementation(() => ({
+    mockRemoteFavoriteLayoutsStorage: true,
   })),
 }));
 
@@ -350,6 +357,40 @@ describe("StudioApp", () => {
     renderWithContext();
 
     expect(jest.mocked(UserProfileAPI)).not.toHaveBeenCalled();
+  });
+
+  it("should create remote favorite layouts storage when workspace is provided", () => {
+    // Mock URL with workspace parameter
+    global.URL = jest.fn().mockImplementation(() => ({
+      searchParams: {
+        get: jest.fn().mockImplementation((key) => {
+          if (key === "workspace") {
+            return "test-workspace";
+          }
+          return undefined;
+        }),
+      },
+    })) as any;
+
+    renderWithContext();
+
+    expect(jest.mocked(FavoriteLayoutsAPI)).toHaveBeenCalled();
+  });
+
+  it("should not create remote favorite layouts storage when no workspace is provided", () => {
+    // Clear previous calls
+    jest.mocked(FavoriteLayoutsAPI).mockClear();
+
+    // Mock URL without workspace parameter
+    global.URL = jest.fn().mockImplementation(() => ({
+      searchParams: {
+        get: jest.fn().mockReturnValue(undefined),
+      },
+    })) as any;
+
+    renderWithContext();
+
+    expect(jest.mocked(FavoriteLayoutsAPI)).not.toHaveBeenCalled();
   });
 
   it("should create IdbLayoutStorage", () => {

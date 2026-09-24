@@ -10,7 +10,7 @@ import useAsyncFn from "react-use/lib/useAsyncFn";
 
 import Logger from "@lichtblick/log";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
-import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
+import { useFavoriteLayoutsStorage } from "@lichtblick/suite-base/context/FavoriteLayoutsStorageContext";
 
 const log = Logger.getLogger(__filename);
 
@@ -24,14 +24,11 @@ type UseListFavoriteLayouts = {
  * Lists the current user's favourite layout ids.
  */
 export function useListFavoriteLayouts(): UseListFavoriteLayouts {
-  const { getUserProfile, setUserProfile } = useUserProfileStorage();
+  const { getFavoriteLayoutIds, toggleFavoriteLayout: toggle } = useFavoriteLayoutsStorage();
 
   const [{ value: favoriteLayoutIds = [], loading }, reload] = useAsyncFn(
-    async () => {
-      const profile = await getUserProfile();
-      return profile.favoriteLayoutIds ?? [];
-    },
-    [getUserProfile],
+    getFavoriteLayoutIds,
+    [getFavoriteLayoutIds],
     { loading: true },
   );
 
@@ -43,16 +40,10 @@ export function useListFavoriteLayouts(): UseListFavoriteLayouts {
 
   const toggleFavoriteLayout = useCallback(
     async (id: LayoutID) => {
-      await setUserProfile((profile) => {
-        const existing = profile.favoriteLayoutIds ?? [];
-        const nextFavoriteLayoutIds = existing.includes(id)
-          ? existing.filter((favoriteId) => favoriteId !== id)
-          : [...existing, id];
-        return { ...profile, favoriteLayoutIds: nextFavoriteLayoutIds };
-      });
+      await toggle(id);
       await reload();
     },
-    [reload, setUserProfile],
+    [reload, toggle],
   );
 
   return { favoriteLayoutIds, loading, toggleFavoriteLayout };

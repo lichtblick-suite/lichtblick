@@ -11,16 +11,19 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
 import { LayoutsAPI } from "@lichtblick/suite-base/api/layouts/LayoutsAPI";
+import { FavoriteLayoutsAPI } from "@lichtblick/suite-base/api/profile/FavoriteLayoutsAPI";
 import { UserProfileAPI } from "@lichtblick/suite-base/api/profile/UserProfileAPI";
 import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import LayoutStorageContext from "@lichtblick/suite-base/context/LayoutStorageContext";
 import NativeAppMenuContext from "@lichtblick/suite-base/context/NativeAppMenuContext";
 import NativeWindowContext from "@lichtblick/suite-base/context/NativeWindowContext";
+import { RemoteFavoriteLayoutsStorageContext } from "@lichtblick/suite-base/context/RemoteFavoriteLayoutsStorageContext";
 import { RemoteLayoutStorageContext } from "@lichtblick/suite-base/context/RemoteLayoutStorageContext";
 import { RemoteUserProfileStorageContext } from "@lichtblick/suite-base/context/RemoteUserProfileStorageContext";
 import { useSharedRootContext } from "@lichtblick/suite-base/context/SharedRootContext";
 import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
+import FavoriteLayoutsLocalStorageProvider from "@lichtblick/suite-base/providers/FavoriteLayoutsLocalStorageProvider";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
@@ -91,6 +94,7 @@ export function StudioApp(): React.JSX.Element {
   providers.unshift(<AlertsContextProvider />);
   providers.unshift(<CurrentLayoutProvider />);
   providers.unshift(<UserProfileLocalStorageProvider />);
+  providers.unshift(<FavoriteLayoutsLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
@@ -122,6 +126,19 @@ export function StudioApp(): React.JSX.Element {
   if (remoteUserProfileStorage) {
     providers.unshift(
       <RemoteUserProfileStorageContext.Provider value={remoteUserProfileStorage} />,
+    );
+  }
+
+  const remoteFavoriteLayoutsStorage = useMemo(() => {
+    if (workspace && APP_CONFIG.apiUrl) {
+      return new FavoriteLayoutsAPI();
+    }
+    return undefined;
+  }, [workspace]);
+
+  if (remoteFavoriteLayoutsStorage) {
+    providers.unshift(
+      <RemoteFavoriteLayoutsStorageContext.Provider value={remoteFavoriteLayoutsStorage} />,
     );
   }
 

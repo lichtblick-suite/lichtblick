@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import * as _ from "lodash-es";
 import { PropsWithChildren } from "react";
 
@@ -360,7 +360,7 @@ describe("UserProfileLocalStorageProvider", () => {
     );
 
     beforeEach(() => {
-      mockRemote.getUserProfile.mockReset();
+      mockRemote.getUserProfile.mockReset().mockResolvedValue({});
       mockRemote.setUserProfile.mockReset().mockResolvedValue(undefined);
     });
 
@@ -440,6 +440,53 @@ describe("UserProfileLocalStorageProvider", () => {
 
         // Cleanup
         consoleSpy.mockRestore();
+      });
+
+      it("should merge against the freshly-hydrated remote profile on the very first write of the session, not a stale/empty local cache", async () => {
+        // Given: local storage mock simulates real read-after-write persistence (the fixed
+        // mockReturnValue pattern used elsewhere in this file can't exercise "hydration writes to
+        // local cache, a later read observes it", which is what real (synchronous) localStorage does).
+        let stored: string | undefined;
+        mockLocalStorage.getItem.mockImplementation(() => stored);
+        mockLocalStorage.setItem.mockImplementation((_key: string, value: string) => {
+          stored = value;
+        });
+        const remoteProfile: UserProfile = {
+          currentLayoutId: createLayoutId("layout-from-other-device"),
+        };
+        mockRemote.getUserProfile.mockResolvedValue(remoteProfile);
+        const partialUpdate: UserProfile = { firstSeenTime: "2025-01-01T00:00:00.000Z" };
+
+        // When: the provider mounts (its own firstSeenTime effect also calls setUserProfile
+        // concurrently - let it settle first so the following call is unambiguously ours).
+        const { result } = renderHook(() => useUserProfileStorage(), { wrapper });
+        await waitFor(() => {
+          expect(mockRemote.setUserProfile).toHaveBeenCalled();
+        });
+        mockRemote.setUserProfile.mockClear();
+
+        await result.current.setUserProfile(partialUpdate);
+
+        // Then: the remote profile must have been fetched (only once, cached) and merged in, not
+        // clobbered by an empty local cache.
+        expect(mockRemote.getUserProfile).toHaveBeenCalledTimes(1);
+        expect(mockRemote.setUserProfile).toHaveBeenCalledWith(
+          expect.objectContaining({ ...remoteProfile, ...partialUpdate }),
+        );
+      });
+
+      it("should only hydrate from remote once per mount across multiple setUserProfile calls", async () => {
+        // Given
+        mockLocalStorage.getItem.mockReturnValue(undefined);
+        mockRemote.getUserProfile.mockResolvedValue({});
+
+        // When
+        const { result } = renderHook(() => useUserProfileStorage(), { wrapper });
+        await result.current.setUserProfile({ currentLayoutId: createLayoutId("layout-1") });
+        await result.current.setUserProfile({ currentLayoutId: createLayoutId("layout-2") });
+
+        // Then
+        expect(mockRemote.getUserProfile).toHaveBeenCalledTimes(1);
       });
     });
   });

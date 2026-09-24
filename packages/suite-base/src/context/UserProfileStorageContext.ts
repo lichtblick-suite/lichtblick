@@ -13,9 +13,6 @@ export type UserProfile = {
   /** The id of the layout the user is currently working with. */
   currentLayoutId?: LayoutID;
 
-  /** Ids of the layouts the user has marked as favourite, across personal and shared layouts. */
-  favoriteLayoutIds?: LayoutID[];
-
   /** Timestamp of the first time the user loaded the app. */
   firstSeenTime?: string;
 

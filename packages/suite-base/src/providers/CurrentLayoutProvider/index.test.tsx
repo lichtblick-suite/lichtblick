@@ -20,6 +20,10 @@ import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import {
+  FavoriteLayoutsStorage,
+  FavoriteLayoutsStorageContext,
+} from "@lichtblick/suite-base/context/FavoriteLayoutsStorageContext";
 import LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
 import {
   UserProfileStorage,
@@ -87,13 +91,22 @@ function makeMockUserProfile() {
   };
 }
 
+function makeMockFavoriteLayoutsStorage(): FavoriteLayoutsStorage {
+  return {
+    getFavoriteLayoutIds: jest.fn().mockResolvedValue([]),
+    toggleFavoriteLayout: jest.fn().mockImplementation(mockThrow("toggleFavoriteLayout")),
+  };
+}
+
 function renderTest({
   mockLayoutManager,
   mockUserProfile,
+  mockFavoriteLayoutsStorage = makeMockFavoriteLayoutsStorage(),
   mockAppParameters = {},
 }: {
   mockLayoutManager: ILayoutManager;
   mockUserProfile: UserProfileStorage;
+  mockFavoriteLayoutsStorage?: FavoriteLayoutsStorage;
   mockAppParameters?: Record<string, string>;
 }) {
   const childMounted = new Condvar();
@@ -123,10 +136,12 @@ function renderTest({
             <SnackbarProvider>
               <LayoutManagerContext.Provider value={mockLayoutManager}>
                 <UserProfileStorageContext.Provider value={mockUserProfile}>
-                  <CurrentLayoutProvider loaders={[]}>
-                    {children}
-                    <CurrentLayoutSyncAdapter />
-                  </CurrentLayoutProvider>
+                  <FavoriteLayoutsStorageContext.Provider value={mockFavoriteLayoutsStorage}>
+                    <CurrentLayoutProvider loaders={[]}>
+                      {children}
+                      <CurrentLayoutSyncAdapter />
+                    </CurrentLayoutProvider>
+                  </FavoriteLayoutsStorageContext.Provider>
                 </UserProfileStorageContext.Provider>
               </LayoutManagerContext.Provider>
             </SnackbarProvider>
@@ -144,9 +159,21 @@ describe("CurrentLayoutProvider", () => {
 
   beforeEach(() => {
     // Default mocks
-    mockLayoutManager.getLayout.mockImplementation(async () => undefined);
     mockLayoutManager.getLayouts.mockImplementation(() => []);
+    mockLayoutManager.getLayout.mockImplementation(async (id: string) => {
+      const layouts = await mockLayoutManager.getLayouts();
+      const found = layouts.find((layout: { id: string; name: string }) => layout.id === id);
+      if (found == undefined) {
+        return undefined;
+      }
+      return {
+        id: found.id,
+        name: found.name,
+        baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
+      };
+    });
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: undefined });
+    mockUserProfile.setUserProfile.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -523,12 +550,17 @@ describe("CurrentLayoutProvider", () => {
     });
 
     it("auto-opens the favourite layout instead of the last selected layout", async () => {
-      mockUserProfile.getUserProfile.mockResolvedValue({
-        currentLayoutId: layout1.id,
-        favoriteLayoutIds: [layout2.id],
-      });
+      mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: layout1.id });
+      const mockFavoriteLayoutsStorage = makeMockFavoriteLayoutsStorage();
+      (mockFavoriteLayoutsStorage.getFavoriteLayoutIds as jest.Mock).mockResolvedValue([
+        layout2.id,
+      ]);
 
-      const { result, all } = renderTest({ mockLayoutManager, mockUserProfile });
+      const { result, all } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+        mockFavoriteLayoutsStorage,
+      });
 
       await act(async () => {
         await result.current.childMounted;
@@ -544,12 +576,18 @@ describe("CurrentLayoutProvider", () => {
 
     it("prefers the app parameter default layout over a favourite", async () => {
       const mockAppParameters = { defaultLayout: layout1.name };
-      mockUserProfile.getUserProfile.mockResolvedValue({
-        currentLayoutId: layout3.id,
-        favoriteLayoutIds: [layout2.id],
-      });
+      mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: layout3.id });
+      const mockFavoriteLayoutsStorage = makeMockFavoriteLayoutsStorage();
+      (mockFavoriteLayoutsStorage.getFavoriteLayoutIds as jest.Mock).mockResolvedValue([
+        layout2.id,
+      ]);
 
-      const { result, all } = renderTest({ mockLayoutManager, mockUserProfile, mockAppParameters });
+      const { result, all } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+        mockFavoriteLayoutsStorage,
+        mockAppParameters,
+      });
 
       await act(async () => {
         await result.current.childMounted;
@@ -562,12 +600,18 @@ describe("CurrentLayoutProvider", () => {
     });
 
     it("picks a deterministic favourite (alphabetical) when there is more than one", async () => {
-      mockUserProfile.getUserProfile.mockResolvedValue({
-        currentLayoutId: undefined,
-        favoriteLayoutIds: [layout3.id, layout1.id],
-      });
+      mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: undefined });
+      const mockFavoriteLayoutsStorage = makeMockFavoriteLayoutsStorage();
+      (mockFavoriteLayoutsStorage.getFavoriteLayoutIds as jest.Mock).mockResolvedValue([
+        layout3.id,
+        layout1.id,
+      ]);
 
-      const { result, all } = renderTest({ mockLayoutManager, mockUserProfile });
+      const { result, all } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+        mockFavoriteLayoutsStorage,
+      });
 
       await act(async () => {
         await result.current.childMounted;
@@ -580,12 +624,17 @@ describe("CurrentLayoutProvider", () => {
     });
 
     it("falls back to the last selected layout when the favourite no longer exists", async () => {
-      mockUserProfile.getUserProfile.mockResolvedValue({
-        currentLayoutId: layout3.id,
-        favoriteLayoutIds: [LayoutBuilder.layoutId("deleted-layout")],
-      });
+      mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: layout3.id });
+      const mockFavoriteLayoutsStorage = makeMockFavoriteLayoutsStorage();
+      (mockFavoriteLayoutsStorage.getFavoriteLayoutIds as jest.Mock).mockResolvedValue([
+        LayoutBuilder.layoutId("deleted-layout"),
+      ]);
 
-      const { result, all } = renderTest({ mockLayoutManager, mockUserProfile });
+      const { result, all } = renderTest({
+        mockLayoutManager,
+        mockUserProfile,
+        mockFavoriteLayoutsStorage,
+      });
 
       await act(async () => {
         await result.current.childMounted;

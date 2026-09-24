@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import * as _ from "lodash-es";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { useShallowMemo } from "@lichtblick/hooks";
 import { LOCAL_STORAGE_PROFILE_DATA } from "@lichtblick/suite-base/constants/browserStorageKeys";
@@ -53,8 +53,28 @@ export default function UserProfileLocalStorageProvider({
     }
   }, [remote, readLocalProfile, writeLocalProfile]);
 
+  // Memoized per-mount so every setUserProfile call in this session (however it's triggered,
+  // e.g. the firstSeenTime stamp effect below) merges against a freshly-hydrated local cache
+  // instead of racing the initial remote fetch. Without this, the FIRST write of the session
+  // can be based on a stale/empty local cache and, since the backend does a full-blob replace,
+  // wipe out remote-only data written from another device/browser.
+  const hydrationRef = useRef<Promise<void>>();
+  const ensureHydrated = useCallback(async (): Promise<void> => {
+    if (!remote) {
+      return;
+    }
+    hydrationRef.current ??= remote
+      .getUserProfile()
+      .then(writeLocalProfile)
+      .catch((err: unknown) => {
+        console.error(err);
+      });
+    await hydrationRef.current;
+  }, [remote, writeLocalProfile]);
+
   const setUserProfile = useCallback(
     async (value: UserProfile | ((prev: UserProfile) => UserProfile)) => {
+      await ensureHydrated();
       const prev = readLocalProfile();
       const newProfile = typeof value === "function" ? value(prev) : _.merge(prev, value);
       writeLocalProfile(newProfile);
@@ -67,7 +87,7 @@ export default function UserProfileLocalStorageProvider({
         }
       }
     },
-    [remote, readLocalProfile, writeLocalProfile],
+    [remote, ensureHydrated, readLocalProfile, writeLocalProfile],
   );
 
   // On first load stamp firstSeenTime timestamp. We consider the time at which

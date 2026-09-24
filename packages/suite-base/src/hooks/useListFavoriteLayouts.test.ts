@@ -9,28 +9,27 @@
 
 import { act, renderHook, waitFor } from "@testing-library/react";
 
-import {
-  UserProfile,
-  useUserProfileStorage,
-} from "@lichtblick/suite-base/context/UserProfileStorageContext";
+import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import { useFavoriteLayoutsStorage } from "@lichtblick/suite-base/context/FavoriteLayoutsStorageContext";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 
 import { useListFavoriteLayouts } from "./useListFavoriteLayouts";
 
-jest.mock("@lichtblick/suite-base/context/UserProfileStorageContext", () => ({
-  useUserProfileStorage: jest.fn(),
+jest.mock("@lichtblick/suite-base/context/FavoriteLayoutsStorageContext", () => ({
+  useFavoriteLayoutsStorage: jest.fn(),
 }));
 
-function mockProfileStorage(initialProfile: UserProfile) {
-  let profile = initialProfile;
-  const getUserProfile = jest.fn(async () => profile);
-  const setUserProfile = jest.fn(
-    async (value: UserProfile | ((prev: UserProfile) => UserProfile)) => {
-      profile = typeof value === "function" ? value(profile) : { ...profile, ...value };
-    },
-  );
-  (useUserProfileStorage as jest.Mock).mockReturnValue({ getUserProfile, setUserProfile });
-  return { getUserProfile, setUserProfile };
+function mockFavoriteLayoutsStorage(initialIds: LayoutID[]) {
+  let ids = initialIds;
+  const getFavoriteLayoutIds = jest.fn(async () => ids);
+  const toggleFavoriteLayout = jest.fn(async (id: LayoutID) => {
+    ids = ids.includes(id) ? ids.filter((existing) => existing !== id) : [...ids, id];
+  });
+  (useFavoriteLayoutsStorage as jest.Mock).mockReturnValue({
+    getFavoriteLayoutIds,
+    toggleFavoriteLayout,
+  });
+  return { getFavoriteLayoutIds, toggleFavoriteLayout };
 }
 
 describe("useListFavoriteLayouts", () => {
@@ -38,9 +37,9 @@ describe("useListFavoriteLayouts", () => {
     jest.clearAllMocks();
   });
 
-  it("Given a profile without favourites, when mounted, then resolves to an empty list", async () => {
+  it("Given no favourites, when mounted, then resolves to an empty list", async () => {
     // GIVEN
-    mockProfileStorage({});
+    mockFavoriteLayoutsStorage([]);
 
     // WHEN
     const { result } = renderHook(() => useListFavoriteLayouts());
@@ -52,13 +51,13 @@ describe("useListFavoriteLayouts", () => {
     expect(result.current.favoriteLayoutIds).toEqual([]);
   });
 
-  it("Given a profile with favourites, when mounted, then resolves to the stored ids", async () => {
+  it("Given stored favourites, when mounted, then resolves to the stored ids", async () => {
     // GIVEN
     const favoriteLayoutIds = [
       LayoutBuilder.layoutId("layout-1"),
       LayoutBuilder.layoutId("layout-2"),
     ];
-    mockProfileStorage({ favoriteLayoutIds });
+    mockFavoriteLayoutsStorage(favoriteLayoutIds);
 
     // WHEN
     const { result } = renderHook(() => useListFavoriteLayouts());
@@ -69,9 +68,9 @@ describe("useListFavoriteLayouts", () => {
     });
   });
 
-  it("Given a layout is not yet favourite, when toggled, then it is added and persisted", async () => {
+  it("Given a layout is not yet favourite, when toggled, then it is added, persisted and the list is reloaded", async () => {
     // GIVEN
-    const { setUserProfile } = mockProfileStorage({});
+    const { toggleFavoriteLayout } = mockFavoriteLayoutsStorage([]);
     const { result } = renderHook(() => useListFavoriteLayouts());
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -83,15 +82,16 @@ describe("useListFavoriteLayouts", () => {
     });
 
     // THEN
-    expect(setUserProfile).toHaveBeenCalledWith(expect.any(Function));
+    expect(toggleFavoriteLayout).toHaveBeenCalledWith("layout-1");
     expect(result.current.favoriteLayoutIds).toEqual(["layout-1"]);
   });
 
   it("Given a layout is already favourite, when toggled, then it is removed and persisted", async () => {
     // GIVEN
-    mockProfileStorage({
-      favoriteLayoutIds: [LayoutBuilder.layoutId("layout-1"), LayoutBuilder.layoutId("layout-2")],
-    });
+    mockFavoriteLayoutsStorage([
+      LayoutBuilder.layoutId("layout-1"),
+      LayoutBuilder.layoutId("layout-2"),
+    ]);
     const { result } = renderHook(() => useListFavoriteLayouts());
     await waitFor(() => {
       expect(result.current.favoriteLayoutIds).toEqual(["layout-1", "layout-2"]);

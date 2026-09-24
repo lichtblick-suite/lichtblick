@@ -12,6 +12,7 @@ export const KEY_WORKSPACE_PREFIX = APP_CONFIG.devWorkspace ? `${APP_CONFIG.devW
 // Local storage keys
 export const LOCAL_STORAGE_STUDIO_LAYOUT_KEY = `${KEY_WORKSPACE_PREFIX}studio.layout`;
 export const LOCAL_STORAGE_PROFILE_DATA = `${KEY_WORKSPACE_PREFIX}studio.profile-data`;
+export const LOCAL_STORAGE_FAVORITE_LAYOUT_IDS = `${KEY_WORKSPACE_PREFIX}studio.favorite-layout-ids`;
 export const LOCAL_STORAGE_APP_CONFIGURATION = `${KEY_WORKSPACE_PREFIX}studio.app-configuration.`;
 export const LOCAL_STORAGE_PANEL_LOGS_HEIGHT = `${KEY_WORKSPACE_PREFIX}studio.panel-logs-height`;
 

@@ -38,6 +38,7 @@ import {
   StartDragPayload,
   SwapPanelPayload,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
+import { useFavoriteLayoutsStorage } from "@lichtblick/suite-base/context/FavoriteLayoutsStorageContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import {
@@ -73,6 +74,7 @@ export default function CurrentLayoutProvider({
 }>): React.JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const { getUserProfile, setUserProfile } = useUserProfileStorage();
+  const { getFavoriteLayoutIds } = useFavoriteLayoutsStorage();
   const layoutManager = useLayoutManager();
   const analytics = useAnalytics();
   const isMounted = useMountedState();
@@ -285,7 +287,10 @@ export default function CurrentLayoutProvider({
     }
 
     // For some reason, this needs to go before the setSelectedLayoutId, probably some initialization
-    const { currentLayoutId, favoriteLayoutIds } = await getUserProfile();
+    const [{ currentLayoutId }, favoriteLayoutIds] = await Promise.all([
+      getUserProfile(),
+      getFavoriteLayoutIds(),
+    ]);
 
     // Try to load default layouts, before checking to add the fallback "Default".
     await loadDefaultLayouts(layoutManager, loaders);
@@ -339,7 +344,7 @@ export default function CurrentLayoutProvider({
     // layout (currentLayoutId) so favouriting a layout reliably opens it on every subsequent load.
     // With multiple favourites, pick deterministically (alphabetically); picking the most-used one
     // instead is a possible future improvement, out of scope here.
-    if (favoriteLayoutIds && favoriteLayoutIds.length > 0) {
+    if (favoriteLayoutIds.length > 0) {
       const favoriteLayouts = layouts
         .filter((l) => favoriteLayoutIds.includes(l.id))
         .sort((a, b) => a.name.localeCompare(b.name));
@@ -372,7 +377,7 @@ export default function CurrentLayoutProvider({
     await setSelectedLayoutId(defaultLayout.id);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getUserProfile, layoutManager, setSelectedLayoutId, enqueueSnackbar]);
+  }, [getUserProfile, getFavoriteLayoutIds, layoutManager, setSelectedLayoutId, enqueueSnackbar]);
 
   const { updateSharedPanelState } = useUpdateSharedPanelState(layoutStateRef, setLayoutState);
 
