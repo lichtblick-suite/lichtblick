@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { DeltaMarker } from "@lichtblick/suite-base/panels/shared/types";
 
@@ -36,16 +36,14 @@ function useDeltaMarkerState({ resetKey }: UseDeltaMarkerStateProps): UseDeltaMa
     new Map<DeltaMarkerSlotReservation["slot"], DeltaMarkerSlotReservation>(),
   );
 
-  const previousResetKeyRef = useRef(resetKey);
-  useEffect(() => {
-    if (previousResetKeyRef.current !== resetKey) {
-      previousResetKeyRef.current = resetKey;
-      generationRef.current += 1;
-      pendingReservationsRef.current.clear();
-      setMarkerA(undefined);
-      setMarkerB(undefined);
-    }
-  }, [resetKey]);
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+  if (prevResetKey !== resetKey) {
+    setPrevResetKey(resetKey);
+    generationRef.current += 1;
+    pendingReservationsRef.current.clear();
+    setMarkerA(undefined);
+    setMarkerB(undefined);
+  }
 
   const toggleActive = useCallback(() => {
     generationRef.current += 1;
