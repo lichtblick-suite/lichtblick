@@ -1,4 +1,12 @@
 {
+  "installCommand": "corepack enable yarn && corepack yarn install --immutable",
+  "buildCommand": "corepack yarn web:build:prod",
+  "build": {
+    "env": {
+      "NODE_OPTIONS": "--max-old-space-size=6144"
+    }
+  },
+  "outputDirectory": "web/.webpack",
   "github": {
     "silent": true
   },
