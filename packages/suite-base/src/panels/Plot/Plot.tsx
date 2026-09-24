@@ -47,6 +47,7 @@ const Plot = (props: PlotProps): React.JSX.Element => {
     xAxisVal: xAxisMode,
     legendDisplay,
     sidebarDimension,
+    floatingToolbar = false,
   } = config;
 
   const { classes } = useStyles();
@@ -223,19 +224,25 @@ const Plot = (props: PlotProps): React.JSX.Element => {
       justifyContent="center"
       overflow="hidden"
       position="relative"
+      // Lets the floating toolbar's controls reveal themselves via CSS `:hover` bubbling from
+      // this container, without tracking hover state in JS (see `PanelToolbar.style.ts`).
+      data-panel-root={floatingToolbar ? "" : undefined}
     >
-      <PanelToolbar />
+      <PanelToolbar floating={floatingToolbar} />
       <Stack
         direction={legendDisplay === "top" ? "column" : "row"}
         flex="auto"
         fullWidth
-        style={{ height: `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px)` }}
+        style={{
+          height: floatingToolbar ? "100%" : `calc(100% - ${PANEL_TOOLBAR_MIN_HEIGHT}px)`,
+        }}
         position="relative"
       >
         {/* Pass stable values here for properties when not showing values so that the legend memoization remains stable. */}
         {legendDisplay !== "none" && (
           <PlotLegend
             coordinator={coordinator}
+            floatingToolbar={floatingToolbar}
             legendDisplay={legendDisplay}
             onClickPath={onClickPath}
             paths={series}

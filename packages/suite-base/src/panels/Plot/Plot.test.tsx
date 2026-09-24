@@ -4,6 +4,7 @@
 import { userEvent } from "@storybook/testing-library";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
+import { PanelToolbarProps } from "@lichtblick/suite-base/components/PanelToolbar/types";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { DEFAULT_PLOT_CONFIG } from "@lichtblick/suite-base/panels/Plot/constants";
 import useGlobalSync from "@lichtblick/suite-base/panels/Plot/hooks/useGlobalSync";
@@ -38,9 +39,13 @@ jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
 jest.mock("@lichtblick/suite-base/components/PanelContextMenu", () => ({
   PanelContextMenu: jest.fn(() => <div data-testid="panel-context-menu" />),
 }));
+let mockLatestPanelToolbarProps: PanelToolbarProps | undefined;
 jest.mock("@lichtblick/suite-base/components/PanelToolbar", () => ({
   __esModule: true,
-  default: () => <div data-testid="panel-toolbar" />,
+  default: (props: PanelToolbarProps) => {
+    mockLatestPanelToolbarProps = props;
+    return <div data-testid="panel-toolbar" />;
+  },
 }));
 
 let mockLatestLegendProps: any;
@@ -120,6 +125,11 @@ class PlotConfigBuilder {
     return this;
   }
 
+  public withFloatingToolbar(): this {
+    this.config = { ...this.config, floatingToolbar: true };
+    return this;
+  }
+
   public build(): PlotConfig {
     return { ...this.config, paths: [...this.config.paths] };
   }
@@ -157,6 +167,7 @@ describe("Plot Component", () => {
     (usePlotPanelSettings as jest.Mock).mockReturnValue(undefined);
     mockLatestSetActiveTooltip = undefined;
     mockLatestLegendProps = undefined;
+    mockLatestPanelToolbarProps = undefined;
     Object.values(mockInteractionHandlers).forEach((handler) => {
       if (typeof handler === "function") {
         handler.mockClear();
@@ -244,6 +255,54 @@ describe("Plot Component", () => {
 
     // Then
     expect(screen.queryByTestId("plot-legend")).toBeNull();
+  });
+
+  it("Given floating toolbar is off by default When rendering Then the toolbar does not float", () => {
+    // Given
+    const config = new PlotConfigBuilder().build();
+
+    // When
+    renderPlot(config);
+
+    // Then
+    expect(mockLatestPanelToolbarProps?.floating).toBe(false);
+    expect(mockLatestLegendProps?.floatingToolbar).toBe(false);
+  });
+
+  it("Given floating toolbar is enabled for this panel When rendering Then the toolbar floats", () => {
+    // Given
+    const config = new PlotConfigBuilder().withFloatingToolbar().build();
+
+    // When
+    renderPlot(config);
+
+    // Then
+    expect(mockLatestPanelToolbarProps?.floating).toBe(true);
+    expect(mockLatestLegendProps?.floatingToolbar).toBe(true);
+  });
+
+  it("Given floating toolbar is enabled for this panel When rendering Then the panel root exposes the CSS hover hook", () => {
+    // Given
+    const config = new PlotConfigBuilder().withFloatingToolbar().build();
+    renderPlot(config);
+
+    // Then the root container exposes the `data-panel-root` attribute that `PanelToolbar`'s
+    // stylesheet uses to reveal the floating controls via CSS `:hover` bubbling - no JS-tracked
+    // hover state or `hovered` prop is involved.
+    const panelRoot = screen.getByTestId("panel-toolbar").parentElement!;
+    expect(panelRoot.getAttribute("data-panel-root")).toBe("");
+  });
+
+  it("Given floating toolbar is off by default When rendering Then the panel root does not expose the CSS hover hook", () => {
+    // Given
+    const config = new PlotConfigBuilder().build();
+
+    // When
+    renderPlot(config);
+
+    // Then
+    const panelRoot = screen.getByTestId("panel-toolbar").parentElement!;
+    expect(panelRoot.getAttribute("data-panel-root")).toBeNull();
   });
 
   it("Given reset allowed When clicking reset button Then onResetView is called", async () => {

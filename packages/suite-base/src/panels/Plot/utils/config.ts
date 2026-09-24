@@ -89,6 +89,7 @@ export type PlotConfig = DeprecatedPlotConfig & {
   showXAxisLabels: boolean;
   showYAxisLabels: boolean;
   isSynced: boolean;
+  floatingToolbar?: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
   xAxisLabel?: string;

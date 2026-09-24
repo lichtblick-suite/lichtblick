@@ -14,6 +14,7 @@ export const plot = {
   currentPath: "Path (current)",
   deleteSeries: "Delete series",
   floating: "Floating",
+  floatingToolbar: "Floating toolbar",
   general: "General",
   headerStamp: "Header Stamp",
   hidden: "Hidden",
