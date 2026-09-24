@@ -16,6 +16,7 @@ describe("APP_CONFIG", () => {
     delete (globalThis as any).API_URL;
     delete (globalThis as any).LICHTBLICK_SUITE_VERSION;
     delete (globalThis as any).DEV_WORKSPACE;
+    delete (globalThis as any).LICHTBLICK_RUNTIME_CONFIG;
 
     // Clear module cache to ensure fresh imports
     jest.resetModules();
@@ -31,7 +32,7 @@ describe("APP_CONFIG", () => {
     (globalThis as any).API_URL = undefined;
     (globalThis as any).LICHTBLICK_SUITE_VERSION = undefined;
     (globalThis as any).DEV_WORKSPACE = undefined;
-
+    (globalThis as any).LICHTBLICK_RUNTIME_CONFIG = undefined;
     const { APP_CONFIG } = await import("./config");
 
     expect(APP_CONFIG.apiUrl).toBe(undefined);
@@ -44,7 +45,7 @@ describe("APP_CONFIG", () => {
     (globalThis as any).API_URL = "https://api.example.com";
     (globalThis as any).LICHTBLICK_SUITE_VERSION = "1.2.3";
     (globalThis as any).DEV_WORKSPACE = "test-workspace";
-
+    (globalThis as any).LICHTBLICK_RUNTIME_CONFIG = undefined;
     const { APP_CONFIG } = await import("./config");
 
     expect(APP_CONFIG.apiUrl).toBe("https://api.example.com");
@@ -57,6 +58,7 @@ describe("APP_CONFIG", () => {
     (globalThis as any).API_URL = "https://partial.example.com";
     (globalThis as any).LICHTBLICK_SUITE_VERSION = undefined;
     (globalThis as any).DEV_WORKSPACE = "partial-workspace";
+    (globalThis as any).LICHTBLICK_RUNTIME_CONFIG = undefined;
 
     const { APP_CONFIG } = await import("./config");
 
@@ -70,6 +72,7 @@ describe("APP_CONFIG", () => {
     (globalThis as any).API_URL = undefined;
     (globalThis as any).LICHTBLICK_SUITE_VERSION = undefined;
     (globalThis as any).DEV_WORKSPACE = undefined;
+    (globalThis as any).LICHTBLICK_RUNTIME_CONFIG = undefined;
 
     const { APP_CONFIG } = await import("./config");
 
@@ -85,11 +88,59 @@ describe("APP_CONFIG", () => {
     (globalThis as any).API_URL = "";
     (globalThis as any).LICHTBLICK_SUITE_VERSION = "";
     (globalThis as any).DEV_WORKSPACE = "";
-
+    (globalThis as any).LICHTBLICK_RUNTIME_CONFIG = undefined;
     const { APP_CONFIG } = await import("./config");
 
     expect(APP_CONFIG.apiUrl).toBe(""); // Empty string, not default
     expect(APP_CONFIG.version).toBe(""); // Empty string, not default
     expect(APP_CONFIG.devWorkspace).toBe(""); // Empty string, not default
+  });
+
+  it("should prefer runtime API_URL over build-time API_URL", async () => {
+    (globalThis as any).API_URL = "https://build-time.example.com";
+    (globalThis as any).LICHTBLICK_SUITE_VERSION = undefined;
+    (globalThis as any).DEV_WORKSPACE = undefined;
+    (globalThis as any).LICHTBLICK_RUNTIME_CONFIG = {
+      API_URL: "https://runtime.example.com",
+    };
+
+    const { APP_CONFIG } = await import("./config");
+
+    expect(APP_CONFIG.apiUrl).toBe("https://runtime.example.com");
+  });
+
+  it("should fallback to build-time API_URL when runtime API_URL is missing", async () => {
+    (globalThis as any).API_URL = "https://build-time.example.com";
+    (globalThis as any).LICHTBLICK_SUITE_VERSION = undefined;
+    (globalThis as any).DEV_WORKSPACE = undefined;
+    (globalThis as any).LICHTBLICK_RUNTIME_CONFIG = {};
+
+    const { APP_CONFIG } = await import("./config");
+
+    expect(APP_CONFIG.apiUrl).toBe("https://build-time.example.com");
+  });
+
+  it("should fallback to build-time API_URL when runtime API_URL is an empty string", async () => {
+    (globalThis as any).API_URL = "https://build-time.example.com";
+    (globalThis as any).LICHTBLICK_SUITE_VERSION = undefined;
+    (globalThis as any).DEV_WORKSPACE = undefined;
+    (globalThis as any).LICHTBLICK_RUNTIME_CONFIG = { API_URL: "" };
+
+    const { APP_CONFIG } = await import("./config");
+
+    expect(APP_CONFIG.apiUrl).toBe("https://build-time.example.com");
+  });
+
+  it("should use runtime API_URL when build-time API_URL is undefined", async () => {
+    (globalThis as any).API_URL = undefined;
+    (globalThis as any).LICHTBLICK_SUITE_VERSION = undefined;
+    (globalThis as any).DEV_WORKSPACE = undefined;
+    (globalThis as any).LICHTBLICK_RUNTIME_CONFIG = {
+      API_URL: "https://runtime-only.example.com",
+    };
+
+    const { APP_CONFIG } = await import("./config");
+
+    expect(APP_CONFIG.apiUrl).toBe("https://runtime-only.example.com");
   });
 });
