@@ -52,6 +52,104 @@ export function replaceMaterials(model: LoadedModel, material: THREE.MeshStandar
   });
 }
 
+const ORIGINAL_OPACITY_KEY = "originalOpacity";
+const ORIGINAL_TRANSPARENT_KEY = "originalTransparent";
+const ORIGINAL_DEPTH_WRITE_KEY = "originalDepthWrite";
+
+function applyOpacityToMaterial(material: THREE.Material, opacity: number): void {
+  const storedOpacity = material.userData[ORIGINAL_OPACITY_KEY];
+  const storedTransparent = material.userData[ORIGINAL_TRANSPARENT_KEY];
+  const storedDepthWrite = material.userData[ORIGINAL_DEPTH_WRITE_KEY];
+
+  const originalOpacity = typeof storedOpacity === "number" ? storedOpacity : material.opacity;
+  const originalTransparent =
+    typeof storedTransparent === "boolean" ? storedTransparent : material.transparent;
+  const originalDepthWrite =
+    typeof storedDepthWrite === "boolean" ? storedDepthWrite : material.depthWrite;
+
+  material.userData[ORIGINAL_OPACITY_KEY] = originalOpacity;
+  material.userData[ORIGINAL_TRANSPARENT_KEY] = originalTransparent;
+  material.userData[ORIGINAL_DEPTH_WRITE_KEY] = originalDepthWrite;
+
+  material.opacity = originalOpacity * opacity;
+
+  // opacity is a uniform; only flip structural flags when they change to avoid shader recompiles
+  const newTransparent = originalTransparent || material.opacity < 1;
+  const newDepthWrite = material.opacity >= 1 && originalDepthWrite;
+  if (material.transparent !== newTransparent || material.depthWrite !== newDepthWrite) {
+    material.transparent = newTransparent;
+    material.depthWrite = newDepthWrite;
+    material.needsUpdate = true;
+  }
+}
+
+type MaterialBearer = THREE.Object3D & {
+  material: THREE.Material | THREE.Material[];
+};
+
+function isMaterialBearer(child: THREE.Object3D): child is MaterialBearer {
+  return "material" in child && (child as Partial<MaterialBearer>).material != undefined;
+}
+
+/**
+ * Clone embedded materials for this model instance and apply a layer opacity multiplier.
+ *
+ * Object3D.clone() keeps material references shared with the cached model. Cloning here prevents
+ * one transparent URDF from changing other instances that use the same cached mesh. Intrinsic
+ * opacity/transparency are stored on the clone so later updates can adjust opacity in place.
+ *
+ * Clones are keyed by the original material uuid so meshes/lines/points that shared a material
+ * in the source model keep sharing a single cloned material on this instance.
+ */
+export function setEmbeddedMaterialsOpacity(model: LoadedModel, opacity: number): void {
+  const clonedMaterials = new Map<string, THREE.Material>();
+
+  model.traverse((child: THREE.Object3D) => {
+    if (!isMaterialBearer(child)) {
+      return;
+    }
+
+    const cloneWithOpacity = (material: THREE.Material): THREE.Material => {
+      let clonedMaterial = clonedMaterials.get(material.uuid);
+      if (!clonedMaterial) {
+        clonedMaterial = material.clone();
+        applyOpacityToMaterial(clonedMaterial, opacity);
+        clonedMaterials.set(material.uuid, clonedMaterial);
+      }
+      return clonedMaterial;
+    };
+
+    const materials = child.material;
+    child.material = Array.isArray(materials)
+      ? materials.map(cloneWithOpacity)
+      : cloneWithOpacity(materials);
+  });
+}
+
+/** Opacity state for the reused traverse callback (safe: traverse is synchronous). */
+let updateOpacityState = 1;
+
+const updateEmbeddedOpacityCallback = (child: THREE.Object3D): void => {
+  if (!isMaterialBearer(child)) {
+    return;
+  }
+
+  const materials = child.material;
+  if (Array.isArray(materials)) {
+    for (const material of materials) {
+      applyOpacityToMaterial(material, updateOpacityState);
+    }
+  } else {
+    applyOpacityToMaterial(materials, updateOpacityState);
+  }
+};
+
+/** Update previously prepared embedded materials in place (no clone, no multiplier compounding). */
+export function updateEmbeddedMaterialsOpacity(model: LoadedModel, opacity: number): void {
+  updateOpacityState = opacity;
+  model.traverse(updateEmbeddedOpacityCallback);
+}
+
 /** Generic MeshStandardMaterial dispose function for materials loaded from an external source */
 function disposeStandardMaterial(material: THREE.MeshStandardMaterial): void {
   material.map?.dispose();
