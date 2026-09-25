@@ -6,6 +6,7 @@
 import * as THREE from "three";
 
 import { PinholeCameraModel } from "@lichtblick/den/image";
+import AV1FrameBuilder from "@lichtblick/den/testing/builders/AV1FrameBuilder";
 import { H265SliceType, VideoPlayer } from "@lichtblick/den/video";
 import { IRenderer } from "@lichtblick/suite-base/panels/ThreeDeeRender/IRenderer";
 import H265FrameBuilder from "@lichtblick/suite-base/testing/builders/H265FrameBuilder";
@@ -68,6 +69,10 @@ const h265BFrame = H265FrameBuilder.deltaFrameWithPps(H265SliceType.B);
 
 function createH265Frame(data: Uint8Array, timestamp = { sec: 0, nsec: 1 }) {
   return H265FrameBuilder.frame({ data, frame_id: "camera", timestamp });
+}
+
+function createAV1Frame(data: Uint8Array, timestamp = { sec: 0, nsec: 1 }): CompressedVideo {
+  return { data, format: "av1", frame_id: "camera", timestamp };
 }
 
 function createDecodedVideoFrame(timestamp = 0): VideoFrame {
@@ -258,6 +263,48 @@ describe("ImageRenderable error handling", () => {
     await decodeAndSettle(renderable, h265Keyframe);
 
     expect(init).toHaveBeenCalledWith({ codec: "hvc1.1.6.L93.B0" });
+    self.createImageBitmap = originalCreateImageBitmap;
+  });
+
+  it("should initialize AV1 and decode key and delta frames in order", async () => {
+    // GIVEN an AV1 renderable waiting for its first keyframe
+    const renderable = new ImageRenderable(mockUserData.topic, mockRenderer, { ...mockUserData });
+    jest.spyOn(renderable, "update").mockImplementation(() => undefined);
+    let initialized = false;
+    const init = jest.fn().mockImplementation(async () => {
+      initialized = true;
+    });
+    const decode = jest
+      .fn<Promise<VideoFrame | undefined>, [Uint8Array, number, "key" | "delta"]>()
+      .mockResolvedValue(createDecodedVideoFrame());
+    renderable.videoPlayer = {
+      isInitialized: jest.fn(() => initialized),
+      init,
+      decode,
+      decodeFrames: jest.fn(),
+      codedSize: jest.fn(),
+      decoderConfig: jest.fn().mockReturnValue(undefined),
+      resetForSeek: jest.fn(),
+      lastImageBitmap: undefined,
+      lastVideoFrame: undefined,
+    } as unknown as ImageRenderable["videoPlayer"];
+    const originalCreateImageBitmap = self.createImageBitmap;
+    self.createImageBitmap = jest.fn().mockResolvedValue(new ImageBitmap());
+
+    // WHEN an AV1 keyframe and its dependent delta frame are decoded
+    renderable.setImage(createAV1Frame(AV1FrameBuilder.keyframe(), { sec: 0, nsec: 0 }));
+    renderable.setImage(createAV1Frame(AV1FrameBuilder.deltaFrame(), { sec: 0, nsec: 33_333_333 }));
+    renderable.flushPendingDecodes();
+    await renderable.settleVideoDecodes();
+
+    // THEN WebCodecs is initialized from the sequence header and receives both frames in order
+    expect(init).toHaveBeenCalledWith({
+      codec: "av01.0.05M.08",
+      codedWidth: 640,
+      codedHeight: 480,
+    });
+    expect(decode).toHaveBeenNthCalledWith(1, expect.any(Uint8Array), 0, "key");
+    expect(decode).toHaveBeenNthCalledWith(2, expect.any(Uint8Array), 33333, "delta");
     self.createImageBitmap = originalCreateImageBitmap;
   });
 
