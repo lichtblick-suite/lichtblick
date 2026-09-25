@@ -33,6 +33,7 @@ type DataSourceDialogProps = {
 
 const useStyles = makeStyles()((theme) => ({
   paper: {
+    position: "relative",
     maxWidth: `calc(min(${theme.breakpoints.values.md}px, 100% - ${theme.spacing(4)}))`,
   },
   closeButton: {

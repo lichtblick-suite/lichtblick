@@ -7,6 +7,7 @@ import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useTranslation } from "react-i18next";
 
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
@@ -45,6 +46,7 @@ jest.mock("@lichtblick/suite-base/components/DataSourceDialog/index.style", () =
       recentSourceSecondary: "recentSourceSecondary",
       spacer: "spacer",
       sidebar: "sidebar",
+      version: "version",
     },
   }),
 }));
@@ -61,7 +63,8 @@ describe("Start Component", () => {
 
   beforeEach(() => {
     (useTranslation as jest.Mock).mockReturnValue({
-      t: (key: string) => key,
+      t: (key: string, options?: { version?: string }) =>
+        key === "version" && options ? `v${options.version}` : key,
     });
 
     (useAnalytics as jest.Mock).mockReturnValue({
@@ -149,5 +152,13 @@ describe("Start Component", () => {
 
     // THEN
     expect(screen.queryByText("recentDataSources")).not.toBeInTheDocument();
+  });
+
+  it("renders the app version", () => {
+    // GIVEN
+    render(<Start />);
+
+    // THEN
+    expect(screen.getByText(`v${APP_CONFIG.version}`)).toBeInTheDocument();
   });
 });
