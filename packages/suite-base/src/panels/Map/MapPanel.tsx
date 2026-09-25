@@ -20,6 +20,7 @@ import {
 import * as _ from "lodash-es";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import { makeStyles } from "tss-react/mui";
 import { useDebouncedCallback } from "use-debounce";
 
 import { filterMap } from "@lichtblick/den/collection";
@@ -34,7 +35,9 @@ import {
 import EmptyState from "@lichtblick/suite-base/components/EmptyState";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import FilteredPointLayer from "@lichtblick/suite-base/panels/Map/FilteredPointLayer";
+import { MapRotationOverlay } from "@lichtblick/suite-base/panels/Map/MapRotationOverlay";
 import { POINT_MARKER_RADIUS } from "@lichtblick/suite-base/panels/Map/constants";
+import { headingForTopic, precedingTrack } from "@lichtblick/suite-base/panels/Map/getHeading";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { darkColor, lightColor, lineColors } from "@lichtblick/suite-base/util/plotColors";
 
@@ -47,17 +50,41 @@ import {
   isValidMapMessage,
   parseGeoJSON,
 } from "./support";
-import { MapPanelMessage, Point } from "./types";
+import { MapMarkerStyle, MapPanelMessage, Point } from "./types";
 
 type MapPanelProps = {
   context: PanelExtensionContext;
 };
+
+const useStyles = makeStyles()({
+  // While the map is turned, its controls must not be. Leaflet's control container is
+  // pinned back over the panel rectangle and turned the other way. It shares a centre with
+  // the oversized square, so undoing the rotation lands it exactly on the panel again. That
+  // keeps the zoom buttons and the tile layer's own attribution upright, on screen and in
+  // their normal styling, rather than being carried off with the tiles.
+  rotatedControls: {
+    "& .leaflet-control-container": {
+      position: "absolute",
+      top: "calc((100% - var(--map-panel-height)) / 2)",
+      left: "calc((100% - var(--map-panel-width)) / 2)",
+      width: "var(--map-panel-width)",
+      height: "var(--map-panel-height)",
+      transform: "rotate(var(--map-heading))",
+      transformOrigin: "center center",
+      // The transform makes this a stacking context, so the z-index Leaflet puts on the
+      // controls inside it no longer lifts them above the tile panes. Without this they
+      // are positioned correctly but painted underneath the map.
+      zIndex: 1000,
+    },
+  },
+});
 
 function MapPanel(props: MapPanelProps): React.JSX.Element {
   const { context } = props;
   const [colorScheme, setColorScheme] = useState<"dark" | "light">("light");
 
   const mapContainerRef = useRef<HTMLDivElement>(ReactNull);
+  const { classes, cx } = useStyles();
 
   const [config, setConfig] = useState<Config>(() => {
     const initialConfig = props.context.initialState as Partial<Config>;
@@ -70,6 +97,9 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
       topicColors: initialConfig.topicColors ?? {},
       zoomLevel: initialConfig.zoomLevel,
       maxNativeZoom: initialConfig.maxNativeZoom ?? 18,
+      markerStyle: initialConfig.markerStyle ?? "dot",
+      markerColor: initialConfig.markerColor,
+      rotateWithHeading: initialConfig.rotateWithHeading ?? false,
     };
   });
 
@@ -143,7 +173,7 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     // during a render.
     void { panelWidth, panelHeight };
     currentMap?.invalidateSize();
-  }, [panelWidth, panelHeight, currentMap]);
+  }, [panelWidth, panelHeight, currentMap, config.rotateWithHeading, config.followTopic]);
 
   // panel extensions must notify when they've completed rendering
   // onRender will setRenderDone to a done callback which we can invoke after we've rendered
@@ -235,6 +265,31 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     if (path[1] === "followTopic" && input === "select") {
       setConfig((oldConfig) => {
         return { ...oldConfig, followTopic: String(value) };
+      });
+    }
+
+    if (path[1] === "markerStyle" && input === "select") {
+      setConfig((oldConfig) => {
+        return { ...oldConfig, markerStyle: value as MapMarkerStyle };
+      });
+    }
+
+    if (path[1] === "rotateWithHeading" && input === "boolean") {
+      setConfig((oldConfig) => {
+        return { ...oldConfig, rotateWithHeading: value === true };
+      });
+    }
+
+    if (path[1] === "markerColoring" && input === "select") {
+      setConfig((oldConfig) => {
+        // Absent means automatic, matching how a topic's own colour override is stored.
+        return { ...oldConfig, markerColor: value === "Custom" ? lineColors[0] : undefined };
+      });
+    }
+
+    if (path[1] === "markerColor" && input === "rgb") {
+      setConfig((oldConfig) => {
+        return { ...oldConfig, markerColor: value };
       });
     }
   }, []);
@@ -581,6 +636,21 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
       topicLayer.currentFrame.clearLayers();
       const [fixEvents, noFixEvents] = _.partition(messages, hasFix);
 
+      // Preceding fixes on this topic, oldest first, so an oriented marker can be turned to
+      // the direction of travel. Only the current frame is oriented: the historical track
+      // stays as dots, where hundreds of arrows would be noise rather than information.
+      const frameStartSec = _.min(messages.map((message) => toSec(message.receiveTime)));
+      const headingTrack = precedingTrack(
+        allNavMessages
+          .filter((message) => message.topic === topic)
+          .map((message) => ({
+            timeSec: toSec(message.receiveTime),
+            lat: message.message.latitude,
+            lon: message.message.longitude,
+          })),
+        frameStartSec,
+      );
+
       const pointLayerNoFix = FilteredPointLayer({
         map: currentMap,
         navSatMessageEvents: noFixEvents,
@@ -588,6 +658,9 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
         color: darkColor(topicLayer.baseColor),
         hoverColor: darkColor(topicLayer.baseColor),
         showAccuracy: true,
+        markerStyle: config.markerStyle,
+        markerColor: config.markerColor,
+        headingTrack,
       });
 
       const pointLayerFix = FilteredPointLayer({
@@ -597,6 +670,9 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
         color: topicLayer.baseColor,
         hoverColor: darkColor(topicLayer.baseColor),
         showAccuracy: true,
+        markerStyle: config.markerStyle,
+        markerColor: config.markerColor,
+        headingTrack,
       });
 
       topicLayer.currentFrame.addLayer(pointLayerNoFix);
@@ -615,6 +691,9 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     }
   }, [
     addGeoJsonMessage,
+    allNavMessages,
+    config.markerColor,
+    config.markerStyle,
     currentGeoMessages,
     currentMap,
     currentNavMessages,
@@ -722,6 +801,57 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
     didResetZoomRef.current = true;
   }, [center, config.zoomLevel, currentMap]);
 
+  // Heading-up rotation. The bearing is taken from the followed topic's own fixes, by the
+  // same derivation the oriented marker uses, so the map and the marker cannot disagree.
+  const rotationActive = config.rotateWithHeading === true && config.followTopic !== "";
+
+  const mapHeading = useMemo(
+    () =>
+      rotationActive
+        ? headingForTopic(currentNavMessages, allNavMessages, config.followTopic)
+        : undefined,
+    [allNavMessages, config.followTopic, currentNavMessages, rotationActive],
+  );
+
+  // Hold the last usable bearing. A frame with no fix, or one too short to take a bearing
+  // from, should leave the map where it is rather than snapping back to north. The topic it
+  // came from is held with it, so switching to another topic starts from north rather than
+  // inheriting a bearing the new topic never reported. Assigning during render is safe here
+  // because it is idempotent: a repeated render under StrictMode writes the same value.
+  const lastHeadingRef = useRef<{ topic: string; heading: number }>({ topic: "", heading: 0 });
+  if (mapHeading != undefined) {
+    lastHeadingRef.current = { topic: config.followTopic, heading: mapHeading };
+  }
+  const appliedHeading =
+    rotationActive && lastHeadingRef.current.topic === config.followTopic
+      ? lastHeadingRef.current.heading
+      : 0;
+
+  // Turning a rectangle leaves its corners empty, so while rotating the map lives in a
+  // centred square whose side is the panel diagonal and the overflow is clipped away.
+  const rotatedSide = Math.ceil(Math.hypot(panelWidth ?? 0, panelHeight ?? 0));
+
+  // Pointer positions no longer line up with the turned tiles, so dragging is disabled and
+  // wheel zoom is anchored to the centre, which is the followed vehicle. Leaflet reads the
+  // zoom option when the wheel actually turns, so setting it is enough. Re-registering the
+  // handler instead, by disabling and re-enabling it, tears down and rebuilds listeners on
+  // a map instance that React may already have replaced, which crashed the panel.
+  useEffect(() => {
+    // A map that has been removed keeps its handler objects but loses its panes, and
+    // reaching into one is how a torn-down instance gets resurrected mid-teardown.
+    if (currentMap?.getPane("mapPane") == undefined) {
+      return;
+    }
+
+    if (rotationActive) {
+      currentMap.dragging.disable();
+    } else {
+      currentMap.dragging.enable();
+    }
+
+    currentMap.options.scrollWheelZoom = rotationActive ? "center" : true;
+  }, [currentMap, rotationActive]);
+
   // Indicate render is complete - the effect runs after the dom is updated
   useEffect(() => {
     renderDone();
@@ -729,18 +859,31 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
 
   return (
     <ThemeProvider isDark={colorScheme === "dark"}>
-      <Stack ref={sizeRef} fullHeight fullWidth position="relative">
+      <Stack ref={sizeRef} fullHeight fullWidth position="relative" overflow="hidden">
         {!center && <EmptyState>Waiting for first GPS point...</EmptyState>}
         <Stack
           position="absolute"
           ref={mapContainerRef}
+          className={cx({ [classes.rotatedControls]: rotationActive })}
           style={{
-            inset: 0,
+            ...(rotationActive
+              ? ({
+                  width: rotatedSide,
+                  height: rotatedSide,
+                  left: ((panelWidth ?? 0) - rotatedSide) / 2,
+                  top: ((panelHeight ?? 0) - rotatedSide) / 2,
+                  transform: `rotate(${-appliedHeading}deg)`,
+                  transformOrigin: "center center",
+                  "--map-heading": `${appliedHeading}deg`,
+                  "--map-panel-width": `${panelWidth ?? 0}px`,
+                  "--map-panel-height": `${panelHeight ?? 0}px`,
+                } as React.CSSProperties)
+              : { inset: 0 }),
             cursor: "auto",
             visibility: center ? "visible" : "hidden",
           }}
         />
-        x
+        {rotationActive && center && <MapRotationOverlay heading={appliedHeading} />}
       </Stack>
     </ThemeProvider>
   );
