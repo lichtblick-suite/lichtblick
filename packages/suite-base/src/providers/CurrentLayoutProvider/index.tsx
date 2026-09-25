@@ -39,6 +39,7 @@ import {
   SwapPanelPayload,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
+import { useRemoteLayoutFavoritesStorage } from "@lichtblick/suite-base/context/RemoteLayoutFavoritesStorageContext";
 import { useUserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import {
   BUSY_POLLING_INTERVAL_MS,
@@ -47,6 +48,7 @@ import {
   MAX_SUPPORTED_LAYOUT_VERSION,
   ORG_PERMISSION_PREFIX,
 } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
+import { findFavoriteLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/findFavoriteLayout";
 import useUpdateSharedPanelState from "@lichtblick/suite-base/providers/CurrentLayoutProvider/hooks/useUpdateSharedPanelState";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
 import panelsReducer from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
@@ -74,6 +76,7 @@ export default function CurrentLayoutProvider({
   const { enqueueSnackbar } = useSnackbar();
   const { getUserProfile, setUserProfile } = useUserProfileStorage();
   const layoutManager = useLayoutManager();
+  const remoteLayoutFavorites = useRemoteLayoutFavoritesStorage();
   const analytics = useAnalytics();
   const isMounted = useMountedState();
 
@@ -285,7 +288,7 @@ export default function CurrentLayoutProvider({
     }
 
     // For some reason, this needs to go before the setSelectedLayoutId, probably some initialization
-    const { currentLayoutId } = await getUserProfile();
+    const { currentLayoutId, favoriteLayoutIds } = await getUserProfile();
 
     // Try to load default layouts, before checking to add the fallback "Default".
     await loadDefaultLayouts(layoutManager, loaders);
@@ -335,6 +338,21 @@ export default function CurrentLayoutProvider({
       });
     }
 
+    const sharedFavoriteLayoutIds = remoteLayoutFavorites
+      ? await remoteLayoutFavorites.getFavoriteLayoutIds().catch((error: unknown) => {
+          log.warn("Failed to load favorite shared layouts", error);
+          return [];
+        })
+      : [];
+    const favoriteLayout = findFavoriteLayout(layouts, {
+      personal: new Set(favoriteLayoutIds ?? []),
+      shared: new Set(sharedFavoriteLayoutIds),
+    });
+    if (favoriteLayout) {
+      await setSelectedLayoutId(favoriteLayout.id, { saveToProfile: false });
+      return;
+    }
+
     // Retrieve the selected layout id from the user's profile. If there's no layout specified
     // or we can't load it then save and select a default layout
     const layout = currentLayoutId
@@ -358,7 +376,7 @@ export default function CurrentLayoutProvider({
     await setSelectedLayoutId(defaultLayout.id);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getUserProfile, layoutManager, setSelectedLayoutId, enqueueSnackbar]);
+  }, [getUserProfile, layoutManager, setSelectedLayoutId, enqueueSnackbar, remoteLayoutFavorites]);
 
   const { updateSharedPanelState } = useUpdateSharedPanelState(layoutStateRef, setLayoutState);
 
