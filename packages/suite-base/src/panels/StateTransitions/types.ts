@@ -75,4 +75,9 @@ export type MessageDatasetArgs = {
 
 export type ValidQueriedDataValue = number | string | boolean | bigint;
 
+export type ValueAtTime = {
+  value: ValidQueriedDataValue;
+  constantName: string | undefined;
+};
+
 export type ImmutableDataset = Immutable<(MessageAndData[] | undefined)[]>;

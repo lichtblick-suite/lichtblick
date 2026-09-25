@@ -73,10 +73,6 @@ export function StudioApp(): React.JSX.Element {
     /* eslint-enable react/jsx-key */
   ];
 
-  if (extraProviders) {
-    providers.unshift(...extraProviders);
-  }
-
   if (nativeAppMenu) {
     providers.push(<NativeAppMenuContext.Provider value={nativeAppMenu} />);
   }
@@ -112,6 +108,12 @@ export function StudioApp(): React.JSX.Element {
 
   if (remoteLayoutStorage) {
     providers.unshift(<RemoteLayoutStorageContext.Provider value={remoteLayoutStorage} />);
+  }
+
+  if (extraProviders) {
+    // Providers supplying context consumed by providers above them in this list must stay outermost,
+    // otherwise those consumers silently fall back to the context default (for example analytics).
+    providers.unshift(...extraProviders);
   }
 
   useEffect(() => {

@@ -9,10 +9,13 @@ import { useTranslation } from "react-i18next";
 
 import { AppMenuProps } from "@lichtblick/suite-base/components/AppBar/types";
 import { LICHTBLICK_DOCUMENTATION_LINK } from "@lichtblick/suite-base/constants/documentation";
+import AnalyticsContext from "@lichtblick/suite-base/context/AnalyticsContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
+import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
+import type IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 
 import { AppMenu } from "./AppMenu";
 
@@ -50,6 +53,8 @@ describe("AppMenu", () => {
   const mockImportLayout = jest.fn();
   const mockExportLayout = jest.fn();
   const mockSelectRecent = jest.fn();
+  const logEvent = jest.fn();
+  const mockAnalytics: IAnalytics = { logEvent };
 
   beforeEach(() => {
     (useTranslation as jest.Mock).mockReturnValue({
@@ -83,7 +88,11 @@ describe("AppMenu", () => {
   });
 
   const renderAppMenu = (props: Partial<AppMenuProps> = {}) =>
-    render(<AppMenu open={true} handleClose={mockHandleClose} disablePortal={false} {...props} />);
+    render(
+      <AnalyticsContext.Provider value={mockAnalytics}>
+        <AppMenu open={true} handleClose={mockHandleClose} disablePortal={false} {...props} />
+      </AnalyticsContext.Provider>,
+    );
 
   it("renders the menu with File, View, and Help sections", () => {
     renderAppMenu();
@@ -101,6 +110,18 @@ describe("AppMenu", () => {
 
     expect(mockDialogActions.dataSource.open).toHaveBeenCalledWith("start");
     expect(mockHandleClose).toHaveBeenCalled();
+  });
+
+  it("logs app menu interactions for clicked menu items", () => {
+    // Given
+    renderAppMenu();
+
+    // When
+    fireEvent.pointerEnter(screen.getByText("file"));
+    fireEvent.click(screen.getByText("open"));
+
+    // Then
+    expect(logEvent).toHaveBeenCalledWith(AppEvent.APP_MENU_CLICK, { id: "menu-item-open" });
   });
 
   it("handles View menu actions", () => {

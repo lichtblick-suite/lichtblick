@@ -53,7 +53,7 @@ export type PlotDataItem = {
  * @returns true if the series config is a reference line
  */
 export function isReferenceLinePlotPathType(path: Immutable<PlotPath>): boolean {
-  return !isNaN(Number.parseFloat(path.value));
+  return !Number.isNaN(Number.parseFloat(path.value));
 }
 
 /**

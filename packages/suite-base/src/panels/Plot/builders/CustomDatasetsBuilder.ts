@@ -28,7 +28,7 @@ import {
   Viewport,
 } from "./IDatasetsBuilder";
 import { buildCurrentSeriesActions, buildFullSeriesActions } from "./utils";
-import { getChartValue, isChartValue } from "../utils/datum";
+import { resolveChartDatum } from "../utils/datum";
 import { MathFunction, mathFunctions } from "../utils/mathFunctions";
 
 type CustomDatasetsSeriesItem = {
@@ -233,18 +233,14 @@ function readMessagePathItems(
 
     const items = simpleGetMessagePathDataItems(event, path);
     for (const item of items) {
-      if (!isChartValue(item)) {
-        continue;
-      }
-      const chartValue = getChartValue(item);
-      if (chartValue == undefined) {
+      const datum = resolveChartDatum(item, mathFunction);
+      if (!datum) {
         continue;
       }
 
-      const mathModified = mathFunction ? mathFunction(chartValue) : chartValue;
       out.push({
-        value: mathModified,
-        originalValue: mathFunction ? mathModified : item,
+        value: datum.y,
+        originalValue: datum.value,
         receiveTime: event.receiveTime,
       });
     }

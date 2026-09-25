@@ -24,7 +24,7 @@ import {
 } from "./IDatasetsBuilder";
 import { CurrentFrameSeriesItem } from "./types";
 import { buildViewportDatasets, lastMatchingTopic, setSeries } from "./utils";
-import { getChartValue, isChartValue } from "../utils/datum";
+import { getChartValue, isChartValue, resolveChartDatum } from "../utils/datum";
 
 /**
  * CurrentCustomDatasetsBuilder builds datasets from a custom x-axis message path and
@@ -92,19 +92,16 @@ export class CurrentCustomDatasetsBuilder implements IDatasetsBuilder {
       datasetsChanged ||= items.length > 0;
 
       const pathItems = filterMap(items, (item, idx) => {
-        if (!isChartValue(item)) {
+        const datum = resolveChartDatum(item, mathFn);
+        if (!datum) {
           return;
         }
 
-        const chartValue = getChartValue(item);
-        const mathModifiedValue =
-          mathFn && chartValue != undefined ? mathFn(chartValue) : undefined;
-
         return {
           x: this.#xValues[idx] ?? NaN,
-          y: chartValue == undefined ? NaN : (mathModifiedValue ?? chartValue),
+          y: datum.y,
           receiveTime: msgEvent.receiveTime,
-          value: mathModifiedValue ?? item,
+          value: datum.value,
         };
       });
 
