@@ -11,6 +11,7 @@ declare const API_URL: string | undefined;
 declare const LICHTBLICK_SUITE_VERSION: string | undefined;
 declare const DEV_WORKSPACE: string | undefined;
 declare const OTLP_ENDPOINT: string | undefined;
+declare const SYNC_LOCAL_LAYOUTS: boolean | undefined;
 
 export const APP_CONFIG = {
   /**
@@ -33,4 +34,9 @@ export const APP_CONFIG = {
    * Undefined disables telemetry
    */
   otlpEndpoint: OTLP_ENDPOINT,
+
+  /**
+   * Whether to sync local layouts with remote storage
+   */
+  syncLocalLayouts: SYNC_LOCAL_LAYOUTS ?? false,
 } as const;
