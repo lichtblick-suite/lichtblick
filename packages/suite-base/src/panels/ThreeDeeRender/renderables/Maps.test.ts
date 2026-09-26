@@ -58,8 +58,9 @@ function locationHandler(maps: Maps) {
 
 describe("Maps", () => {
   beforeEach(() => {
-    globalThis.fetch = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>(
-      async (_url, options) =>
+    // Accept both DOM and Node fetch inputs; these tests only use the abort signal.
+    globalThis.fetch = jest.fn(
+      async (_url: unknown, options?: Pick<RequestInit, "signal">) =>
         await new Promise<Response>((_resolve, reject) => {
           options?.signal?.addEventListener("abort", () => {
             reject(new Error("aborted"));
