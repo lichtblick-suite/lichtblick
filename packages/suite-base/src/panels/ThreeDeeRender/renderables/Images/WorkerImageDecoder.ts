@@ -10,6 +10,8 @@ import { RawImage } from "@foxglove/schemas";
 import * as Comlink from "@lichtblick/comlink";
 import { ComlinkWrap } from "@lichtblick/den/worker";
 
+import type { CompressedImageTypes } from "./ImageTypes";
+import type { CompressedDepthFormat } from "./decodeCompressedDepth";
 import type { RawImageOptions } from "./decodeImage";
 import { Image as RosImage } from "../../ros";
 
@@ -46,6 +48,18 @@ export class WorkerImageDecoder {
     options: Partial<RawImageOptions>,
   ): Promise<ImageData> {
     return await this.#remote.decode(image, options);
+  }
+
+  /**
+   * Copies a `compressed_depth_image_transport` image to the worker, where it is unpacked into the
+   * raw depth image it encodes and decoded. The result is transferred back to the main thread.
+   */
+  public async decodeCompressedDepth(
+    image: CompressedImageTypes,
+    format: CompressedDepthFormat,
+    options: Partial<RawImageOptions>,
+  ): Promise<ImageData> {
+    return await this.#remote.decodeCompressedDepth(image, format, options);
   }
 
   public terminate(): void {
