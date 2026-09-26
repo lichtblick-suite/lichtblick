@@ -83,11 +83,11 @@ describe("useStateToURLSynchronization", () => {
     );
   });
 
-  it("suppresses ds param writeback when mcap-bundle is present in the URL", () => {
+  it("suppresses ds param writeback when source-bundle is present in the URL", () => {
     const spy = jest.spyOn(window.history, "replaceState");
 
-    // Set the URL to include mcap-bundle
-    window.history.pushState({}, "", "http://localhost/?mcap-bundle=test-session-123");
+    // Set the URL to include source-bundle
+    window.history.pushState({}, "", "http://localhost/?source-bundle=test-session-123");
 
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
       selector({
@@ -117,11 +117,11 @@ describe("useStateToURLSynchronization", () => {
     expect(lastCallUrl).not.toContain("ds.url=");
   });
 
-  it("writes ds params when mcap-bundle is present but empty in the URL", () => {
+  it("writes ds params when source-bundle is present but empty in the URL", () => {
     const spy = jest.spyOn(window.history, "replaceState");
 
-    // Set the URL to include an empty mcap-bundle value
-    window.history.pushState({}, "", "http://localhost/?mcap-bundle=");
+    // Set the URL to include an empty source-bundle value
+    window.history.pushState({}, "", "http://localhost/?source-bundle=");
 
     (useMessagePipeline as jest.Mock).mockImplementation((selector) =>
       selector({
@@ -144,7 +144,7 @@ describe("useStateToURLSynchronization", () => {
 
     renderHook(useStateToURLSynchronization, { wrapper });
 
-    // Should write ds params normally since mcap-bundle has no value
+    // Should write ds params normally since source-bundle has no value
     const calls = spy.mock.calls;
     const lastCallUrl = calls[calls.length - 1]?.[2] as string | undefined;
     expect(lastCallUrl).toContain("ds=remote-file");
