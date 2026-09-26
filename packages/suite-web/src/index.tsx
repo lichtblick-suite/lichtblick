@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import Logger from "@lichtblick/log";
-import type { IDataSourceFactory } from "@lichtblick/suite-base";
+import type { AuthProvider, IDataSourceFactory } from "@lichtblick/suite-base";
 import CssBaseline from "@lichtblick/suite-base/components/CssBaseline";
 
 import { CompatibilityBanner } from "./CompatibilityBanner";
@@ -29,6 +29,7 @@ function LogAfterRender(props: React.PropsWithChildren): React.JSX.Element {
 export type MainParams = {
   dataSources?: IDataSourceFactory[];
   extraProviders?: React.JSX.Element[];
+  authProvider?: AuthProvider;
   rootElement?: React.JSX.Element;
 };
 
@@ -80,7 +81,11 @@ export async function main(getParams: () => Promise<MainParams> = async () => ({
   const { WebRoot } = await import("./WebRoot");
   const params = await getParams();
   const rootElement = params.rootElement ?? (
-    <WebRoot extraProviders={params.extraProviders} dataSources={params.dataSources}>
+    <WebRoot
+      extraProviders={params.extraProviders}
+      dataSources={params.dataSources}
+      authProvider={params.authProvider}
+    >
       <StudioApp />
     </WebRoot>
   );
