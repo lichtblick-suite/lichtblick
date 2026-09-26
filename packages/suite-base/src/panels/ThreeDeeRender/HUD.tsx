@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Chip } from "@mui/material";
+import { Chip, Link } from "@mui/material";
 import * as _ from "lodash-es";
 import * as React from "react";
 import tc from "tinycolor2";
@@ -33,6 +33,15 @@ const useStyles = makeStyles()((theme) => ({
   },
   chip: {
     backgroundColor: tc(theme.palette.background.paper).setAlpha(0.8).toString(),
+  },
+  attribution: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    maxWidth: "100%",
+    padding: theme.spacing(0.25, 0.5),
+    fontSize: 10,
+    backgroundColor: tc(theme.palette.background.paper).setAlpha(0.85).toString(),
   },
   empty: {
     backgroundColor: theme.palette.background.default,
@@ -68,11 +77,32 @@ export function HUD(props: HUDProps): React.ReactElement {
     return <EmptyState className={classes.empty}>{highPriorityEmptyState.getMessage()}</EmptyState>;
   }
 
+  const attributions = notices.filter((item) => item.displayType === "attribution");
+
   return (
-    <div className={classes.root}>
-      {notices.map((item, index) => (
-        <Chip className={classes.chip} size="small" key={index} label={item.getMessage()} />
-      ))}
-    </div>
+    <>
+      <div className={classes.root}>
+        {notices
+          .filter((item) => item.displayType === "notice")
+          .map((item, index) => (
+            <Chip className={classes.chip} size="small" key={index} label={item.getMessage()} />
+          ))}
+      </div>
+      {attributions.length > 0 && (
+        <div className={classes.attribution}>
+          {attributions.map((item) => (
+            <div key={item.id}>
+              {item.href ? (
+                <Link href={item.href} target="_blank" rel="noopener noreferrer">
+                  {item.getMessage()}
+                </Link>
+              ) : (
+                item.getMessage()
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
