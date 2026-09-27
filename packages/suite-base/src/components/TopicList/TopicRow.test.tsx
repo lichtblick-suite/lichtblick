@@ -30,6 +30,12 @@ jest.mock("@lichtblick/suite-base/services/messagePathDragging", () => ({
 
 jest.mock("./useTopicMessageNavigation");
 
+const mockAddPanel = jest.fn();
+jest.mock("@lichtblick/suite-base/hooks/useAddPanel", () => ({
+  __esModule: true,
+  default: () => mockAddPanel,
+}));
+
 interface SetupOptions {
   topicName?: string;
   isNavigating?: boolean;
@@ -155,5 +161,47 @@ describe("TopicRow navigation buttons", () => {
     // Then
     expect(screen.getByRole("button", { name: "Previous message" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Next message" })).toBeEnabled();
+  });
+});
+
+describe("TopicRow open in Raw Messages button", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("adds a Raw Messages panel for the topic", () => {
+    // Given
+    setup({ topicName: "/some_topic" });
+
+    // When
+    fireEvent.click(screen.getByRole("button", { name: "Open in Raw Messages" }));
+
+    // Then
+    expect(mockAddPanel).toHaveBeenCalledWith({
+      type: "RawMessages",
+      config: { topicPath: "/some_topic" },
+    });
+  });
+
+  it("quotes topic names that need it", () => {
+    // Given
+    setup({ topicName: "sdv.adas.ego.EgoBelts" });
+
+    // When
+    fireEvent.click(screen.getByRole("button", { name: "Open in Raw Messages" }));
+
+    // Then
+    expect(mockAddPanel).toHaveBeenCalledWith({
+      type: "RawMessages",
+      config: { topicPath: '"sdv.adas.ego.EgoBelts"' },
+    });
+  });
+
+  it("stays enabled when the topic is not selected or subscribed", () => {
+    // Given / When
+    setup({ isNavigating: true, canNavigateNext: false, canNavigatePrevious: false });
+
+    // Then
+    expect(screen.getByRole("button", { name: "Open in Raw Messages" })).toBeEnabled();
   });
 });
