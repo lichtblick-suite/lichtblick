@@ -57,6 +57,17 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
             break;
           }
 
+          // A stamp means the source has yielded everything up to that time (e.g. a live source
+          // about to wait for new data): deliver the pending batch now.
+          if (iterResult.type === "stamp") {
+            if (batchMessages.length > 0) {
+              yield batchMessages;
+              batchMessages.length = 0;
+              lastBatchTime = performance.now();
+            }
+            continue;
+          }
+
           // Only process "message-event" type results
           if (iterResult.type !== "message-event") {
             continue;

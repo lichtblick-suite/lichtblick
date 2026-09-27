@@ -194,6 +194,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #lastSeekEmitTime = 0;
   #tickTimer?: ReturnType<typeof setTimeout>;
   #lastTickMs?: number;
+  /** Live range iterators waiting for new messages, per topic. */
+  #liveWaiters = new Map<string, (() => void)[]>();
+  #liveWakeTopics = new Set<string>();
+  #liveWakeTimer?: ReturnType<typeof setTimeout>;
+  /** Incremented on each new connection session, to end the previous session's iterators. */
+  #session = 0;
 
   public constructor({
     url,
@@ -1015,6 +1021,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
   public close(): void {
     this.#closed = true;
     this.#stopTicking();
+    if (this.#liveWakeTimer != undefined) {
+      clearTimeout(this.#liveWakeTimer);
+      this.#liveWakeTimer = undefined;
+    }
+    this.#wakeLiveIterators();
     if (this.#dirtyFlushTimer != undefined) {
       clearTimeout(this.#dirtyFlushTimer);
       this.#dirtyFlushTimer = undefined;
@@ -1285,13 +1296,20 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
   /**
    * Iterate over the received history of a topic (used by the Plot panel & co to get the full
-   * dataset). The iterator is a snapshot: when new data arrives for the topic, the topic object is
-   * replaced (see #flushDirtyTopics) and the panels request a fresh iterator.
+   * dataset).
+   *
+   * Live source, whole topic requested (message range subscriptions): the iterator yields the
+   * history, then keeps yielding new messages as they arrive, so the panels stay in sync with the
+   * timeline end. Otherwise the iterator is a snapshot: when new data arrives for the topic, the
+   * topic object is replaced (see #flushDirtyTopics) and the panels request a fresh iterator.
    */
   public getBatchIterator(
     topic: string,
     options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    if (options == undefined && this.#isLiveSource()) {
+      return this.#liveIterator(topic);
+    }
     const events = this.#history.get(topic) ?? [];
     const first = options?.start ? upperBound(events, options.start, { inclusive: true }) : 0;
     const last = options?.end
@@ -1303,6 +1321,64 @@ export default class FoxgloveWebSocketPlayer implements Player {
         yield { type: "message-event", msgEvent } as const;
       }
     })();
+  }
+
+  #liveIterator(topic: string): AsyncIterableIterator<Readonly<IteratorResult>> {
+    const session = this.#session;
+    const isStale = () => this.#closed || this.#session !== session;
+    const getEvents = () => this.#history.get(topic) ?? [];
+    const waitForData = async () => {
+      await new Promise<void>((resolve) => {
+        const waiters = this.#liveWaiters.get(topic) ?? [];
+        waiters.push(resolve);
+        this.#liveWaiters.set(topic, waiters);
+      });
+    };
+    return (async function* () {
+      let next = 0;
+      for (;;) {
+        const events = getEvents();
+        while (next < events.length) {
+          yield { type: "message-event", msgEvent: events[next++]! } as const;
+        }
+        if (isStale()) {
+          return;
+        }
+        const last = events[events.length - 1];
+        if (last) {
+          // Everything received so far was yielded: lets the consumer flush its pending batch.
+          yield { type: "stamp", stamp: last.receiveTime } as const;
+        }
+        await waitForData();
+      }
+    })();
+  }
+
+  /** Wake the live iterators of `topic` soon (at most once per frame, so panels get batches). */
+  #scheduleLiveWake(topic: string): void {
+    this.#liveWakeTopics.add(topic);
+    this.#liveWakeTimer ??= setTimeout(() => {
+      this.#liveWakeTimer = undefined;
+      const topics = this.#liveWakeTopics;
+      this.#liveWakeTopics = new Set();
+      for (const name of topics) {
+        this.#wakeLiveIterators(name);
+      }
+    }, TICK_INTERVAL_MS);
+  }
+
+  /** Wake the live iterators of `topic` (all topics if undefined). */
+  #wakeLiveIterators(topic?: string): void {
+    const topics = topic != undefined ? [topic] : [...this.#liveWaiters.keys()];
+    for (const name of topics) {
+      const waiters = this.#liveWaiters.get(name);
+      if (waiters) {
+        this.#liveWaiters.delete(name);
+        for (const resolve of waiters) {
+          resolve();
+        }
+      }
+    }
   }
 
   /** Latest message at or before `time` for each requested topic. */
@@ -1463,7 +1539,13 @@ export default class FoxgloveWebSocketPlayer implements Player {
     }
     this.#lastDataWallMs = Date.now();
     this.#playbackTime ??= this.#serverDataStart ?? msgEvent.receiveTime;
-    this.#markTopicDirty(msgEvent.topic);
+    if (this.#isLiveSource() && index === events.length - 1) {
+      // Appended at the end: the live iterators pick it up.
+      this.#scheduleLiveWake(msgEvent.topic);
+    } else {
+      // Inserted in the past: panels reload the topic.
+      this.#markTopicDirty(msgEvent.topic);
+    }
     if (this.#followLive && this.#isLiveSource() && !this.#isPlaying) {
       // Live source: play and keep the cursor on the latest data.
       this.#isPlaying = true;
@@ -1691,6 +1773,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
   }
 
   #resetSessionState(): void {
+    this.#session++;
+    this.#wakeLiveIterators();
     this.#startTime = undefined;
     this.#endTime = undefined;
     this.#clockTime = undefined;
