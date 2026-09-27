@@ -31,15 +31,22 @@ import CommonRosTypes from "@lichtblick/rosmsg-msgs-common";
 import { MessageWriter as Ros1MessageWriter } from "@lichtblick/rosmsg-serialization";
 import { MessageWriter as Ros2MessageWriter } from "@lichtblick/rosmsg2-serialization";
 import {
+  add,
+  compare,
   fromMillis,
   fromNanoSec,
   isGreaterThan,
   isLessThan,
   subtract,
   Time,
+  toSec,
 } from "@lichtblick/rostime";
 import { ParameterValue } from "@lichtblick/suite";
 import { Asset } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import {
+  GetBackfillMessagesArgs,
+  IteratorResult,
+} from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
@@ -94,7 +101,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #client?: FoxgloveClient; // The client when we're connected.
   #id: string = uuidv4(); // Unique ID for this player session.
   #serverCapabilities: string[] = [];
-  #playerCapabilities: (typeof PLAYER_CAPABILITIES)[keyof typeof PLAYER_CAPABILITIES][] = [];
+  #playerCapabilities: (typeof PLAYER_CAPABILITIES)[keyof typeof PLAYER_CAPABILITIES][] = [
+    PLAYER_CAPABILITIES.playbackControl,
+    PLAYER_CAPABILITIES.setSpeed,
+  ];
   #supportedEncodings?: string[];
   #listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   #closed: boolean = false; // Whether the player has been completely closed using close().
@@ -107,7 +117,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #metricsCollector: PlayerMetricsCollectorInterface;
   #presence: PlayerPresence = PlayerPresence.INITIALIZING;
   #alerts = new PlayerAlertManager();
-  #numTimeSeeks = 0;
   #profile?: string;
   #urlState: PlayerState["urlState"];
 
@@ -149,6 +158,36 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #parameterTypeByName = new Map<string, Parameter["type"]>();
   #messageSizeEstimateByTopic: Record<string, number> = {};
   #ishighFrequencyMessage = false;
+
+  // ---------------------------------------------------------------------------------------------
+  // Memory mode: every received message is kept (per topic, sorted by its own log time) so the
+  // connection behaves like an opened file: timeline with play / pause / seek / speed, and panels
+  // using message ranges (Plot...) get the full history, including series added later.
+  // ---------------------------------------------------------------------------------------------
+  /** Received messages per topic, sorted by receiveTime (= message log time sent by the server). */
+  #history = new Map<string, MessageEvent[]>();
+  /** Topics that received new history since the Plot panels last reloaded their range. */
+  #dirtyTopics = new Set<string>();
+  #dirtyFlushTimer?: ReturnType<typeof setTimeout>;
+  #dirtySinceMs?: number;
+  /** Wall time (ms) of the last received message, to know if data is still streaming. */
+  #lastDataWallMs = 0;
+  /** Data range announced by the server (serverInfo dataStartTime / dataEndTime), if any. */
+  #serverDataStart?: Time;
+  #serverDataEnd?: Time;
+  /** Earliest / latest message time received. */
+  #historyStart?: Time;
+  #historyEnd?: Time;
+  /** Topics requested by the panels. */
+  #requestedTopics = new Set<string>();
+  /** Playback cursor. */
+  #playbackTime?: Time;
+  #isPlaying = false;
+  #speed = 1;
+  #untilTime?: Time;
+  #lastSeekEmitTime = 0;
+  #tickTimer?: ReturnType<typeof setTimeout>;
+  #lastTickMs?: number;
 
   public constructor({
     url,
@@ -297,6 +336,19 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this.#serverPublishesTime = this.#serverCapabilities.includes(ServerCapability.time);
       this.#supportedEncodings = event.supportedEncodings;
       this.#datatypes = new Map();
+
+      // Servers with playback control announce the full data range: show it on the timeline
+      // right away, before the data arrives.
+      const range = event as unknown as {
+        dataStartTime?: { sec: number; nsec: number };
+        dataEndTime?: { sec: number; nsec: number };
+      };
+      this.#serverDataStart = range.dataStartTime
+        ? { sec: range.dataStartTime.sec, nsec: range.dataStartTime.nsec }
+        : undefined;
+      this.#serverDataEnd = range.dataEndTime
+        ? { sec: range.dataEndTime.sec, nsec: range.dataEndTime.nsec }
+        : undefined;
 
       // If the server publishes the time we clear any existing clockTime we might have and let the
       // server override
@@ -508,7 +560,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this.#emitState();
     });
 
-    this.#client.on("message", ({ subscriptionId, data }) => {
+    this.#client.on("message", ({ subscriptionId, timestamp, data }) => {
       const chanInfo = this.#resolvedSubscriptionsById.get(subscriptionId);
       if (!chanInfo) {
         const wasRecentlyCanceled = this.#recentlyCanceledSubscriptions.has(subscriptionId);
@@ -524,7 +576,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
       try {
         this.#receivedBytes += data.byteLength;
-        const receiveTime = this.#getCurrentTime();
+        // Memory mode: a message is placed at its own log time (sent by the server), not at the
+        // time it arrives.
+        const receiveTime = fromNanoSec(timestamp);
         const topic = chanInfo.channel.topic;
         const deserializedMessage = chanInfo.parsedChannel.deserialize(data);
 
@@ -536,13 +590,26 @@ export default class FoxgloveWebSocketPlayer implements Player {
         }
 
         const sizeInBytes = Math.max(data.byteLength, msgSizeEstimate);
-        this.#parsedMessages.push({
+        const msgEvent: MessageEvent = {
           topic,
           receiveTime,
           message: deserializedMessage,
           sizeInBytes,
           schemaName: chanInfo.channel.schemaName,
-        });
+        };
+        if (!this.#addToHistory(msgEvent)) {
+          // Already known (the server re-sent it): nothing new.
+          return;
+        }
+        // If the cursor is already past this message and it is now the latest one of its topic,
+        // hand it to the panels so they show the current value.
+        const cursor = this.#playbackTime;
+        if (cursor && compare(receiveTime, cursor) <= 0) {
+          const latest = this.#latestAt(topic, cursor);
+          if (latest === msgEvent) {
+            this.#parsedMessages.push(msgEvent);
+          }
+        }
         this.#parsedMessagesBytes += sizeInBytes;
         if (this.#parsedMessagesBytes > CURRENT_FRAME_MAXIMUM_SIZE_BYTES) {
           this.#alerts.addAlert(`webSocketPlayer:parsedMessageCacheFull`, {
@@ -602,28 +669,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this.#emitState();
     });
 
-    this.#client.on("time", ({ timestamp }) => {
-      if (!this.#serverPublishesTime) {
-        return;
-      }
-
-      const time = fromNanoSec(timestamp);
-      if (this.#clockTime != undefined && isLessThan(time, this.#clockTime)) {
-        this.#numTimeSeeks++;
-        this.#parsedMessages = [];
-        this.#parsedMessagesBytes = 0;
-      }
-
-      // Override any previous start/end time when we set a clockTime for the first time which means
-      // we've received the first "time" event and know the server controlled time.
-      if (!this.#clockTime) {
-        this.#startTime = time;
-        this.#endTime = time;
-      }
-
-      this.#clockTime = time;
-      this.#emitState();
-    });
+    // Memory mode: the playback cursor is controlled locally (like for a file) and every message
+    // carries its own time, so server time messages are not used.
+    this.#client.on("time", () => {});
 
     this.#client.on("parameterValues", ({ parameters, id }) => {
       const mappedParameters = parameters.map((param) => {
@@ -908,13 +956,17 @@ export default class FoxgloveWebSocketPlayer implements Player {
       });
     }
 
-    const currentTime = this.#getCurrentTime();
-    if (!this.#startTime || isLessThan(currentTime, this.#startTime)) {
-      this.#startTime = currentTime;
+    const range = this.#dataRange();
+    if (range) {
+      this.#startTime = range.start;
+      this.#endTime = range.end;
+    } else {
+      // No data yet: an empty range at "now" so the app can render.
+      const now = this.#getCurrentTime();
+      this.#startTime ??= now;
+      this.#endTime ??= now;
     }
-    if (!this.#endTime || isGreaterThan(currentTime, this.#endTime)) {
-      this.#endTime = currentTime;
-    }
+    const currentTime = this.#playbackTime ?? this.#startTime;
 
     const messages = this.#parsedMessages;
     this.#parsedMessages = [];
@@ -922,7 +974,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     return this.#listener({
       name: this.#name,
       presence: this.#presence,
-      progress: {},
+      progress: { fullyLoadedFractionRanges: this.#loadedRanges() },
       capabilities: this.#playerCapabilities,
       profile: this.#profile,
       playerId: this.#id,
@@ -935,9 +987,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
         startTime: this.#startTime,
         endTime: this.#endTime,
         currentTime,
-        isPlaying: true,
-        speed: 1,
-        lastSeekTime: this.#numTimeSeeks,
+        isPlaying: this.#isPlaying,
+        speed: this.#speed,
+        lastSeekTime: this.#lastSeekEmitTime,
         topics: this.#topics,
         topicStats: this.#topicsStats,
         datatypes: this.#datatypes,
@@ -956,6 +1008,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
   public close(): void {
     this.#closed = true;
+    this.#stopTicking();
+    if (this.#dirtyFlushTimer != undefined) {
+      clearTimeout(this.#dirtyFlushTimer);
+      this.#dirtyFlushTimer = undefined;
+    }
     this.#client?.close();
     if (this.#openTimeout != undefined) {
       clearTimeout(this.#openTimeout);
@@ -969,6 +1026,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
   public setSubscriptions(subscriptions: SubscribePayload[]): void {
     const newTopics = new Set(subscriptions.map(({ topic }) => topic));
+    this.#requestedTopics = newTopics;
 
     if (!this.#client || this.#closed) {
       // Remember requested subscriptions so we can retry subscribing when
@@ -1215,10 +1273,263 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
   public setGlobalVariables(): void {}
 
-  public getBatchIterator(): undefined {
-    // FoxgloveWebSocketPlayer does not support batch iteration
-    return undefined;
+  // ---------------------------------------------------------------------------------------------
+  // Memory mode: message ranges, backfill and playback, served from the received history
+  // ---------------------------------------------------------------------------------------------
+
+  /**
+   * Iterate over the received history of a topic (used by the Plot panel & co to get the full
+   * dataset). The iterator is a snapshot: when new data arrives for the topic, the topic object is
+   * replaced (see #flushDirtyTopics) and the panels request a fresh iterator.
+   */
+  public getBatchIterator(
+    topic: string,
+    options?: { start?: Time; end?: Time },
+  ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    const events = this.#history.get(topic) ?? [];
+    const first = options?.start ? upperBound(events, options.start, { inclusive: true }) : 0;
+    const last = options?.end
+      ? upperBound(events, options.end, { inclusive: false })
+      : events.length;
+    const snapshot = events.slice(first, last);
+    return (async function* () {
+      for (const msgEvent of snapshot) {
+        yield { type: "message-event", msgEvent } as const;
+      }
+    })();
   }
+
+  /** Latest message at or before `time` for each requested topic. */
+  public async getBackfillMessages(args: GetBackfillMessagesArgs): Promise<MessageEvent[]> {
+    return this.#backfill(args.topics.keys(), args.time);
+  }
+
+  public startPlayback(): void {
+    this.#startPlay();
+  }
+
+  public playUntil(time: Time): void {
+    this.#startPlay(time);
+  }
+
+  public pausePlayback(): void {
+    if (!this.#isPlaying) {
+      return;
+    }
+    this.#isPlaying = false;
+    this.#untilTime = undefined;
+    this.#stopTicking();
+    this.#emitState();
+  }
+
+  public setPlaybackSpeed(speed: number): void {
+    this.#speed = speed;
+    this.#lastTickMs = undefined;
+    this.#emitState();
+  }
+
+  public seekPlayback(time: Time): void {
+    const range = this.#dataRange();
+    if (!range) {
+      return;
+    }
+    const target = clampTime(time, range.start, range.end);
+    this.#playbackTime = target;
+    this.#lastTickMs = undefined;
+    // Like a file: panels get the last message of each topic at the new time.
+    this.#parsedMessages = this.#backfill(this.#requestedTopics, target);
+    this.#parsedMessagesBytes = 0;
+    this.#lastSeekEmitTime = Date.now();
+    this.#emitState();
+  }
+
+  #startPlay(untilTime?: Time): void {
+    const range = this.#dataRange();
+    if (this.#isPlaying || !range) {
+      return;
+    }
+    // At the end: restart from the beginning (like a file).
+    if (!this.#playbackTime || compare(this.#playbackTime, range.end) >= 0) {
+      this.seekPlayback(range.start);
+    }
+    if (untilTime && this.#playbackTime && compare(untilTime, this.#playbackTime) <= 0) {
+      return;
+    }
+    this.#untilTime = untilTime ? clampTime(untilTime, range.start, range.end) : undefined;
+    this.#isPlaying = true;
+    this.#lastTickMs = undefined;
+    this.#scheduleTick();
+    this.#emitState();
+  }
+
+  #scheduleTick(): void {
+    if (this.#tickTimer == undefined && this.#isPlaying && !this.#closed) {
+      this.#tickTimer = setTimeout(this.#tick, TICK_INTERVAL_MS);
+    }
+  }
+
+  #stopTicking(): void {
+    if (this.#tickTimer != undefined) {
+      clearTimeout(this.#tickTimer);
+      this.#tickTimer = undefined;
+    }
+    this.#lastTickMs = undefined;
+  }
+
+  /** Advance the cursor by the elapsed wall time x speed and emit the messages in between. */
+  #tick = (): void => {
+    this.#tickTimer = undefined;
+    const range = this.#dataRange();
+    if (!this.#isPlaying || !range || !this.#playbackTime) {
+      return;
+    }
+    const nowMs = performance.now();
+    const elapsedMs = this.#lastTickMs != undefined ? nowMs - this.#lastTickMs : TICK_INTERVAL_MS;
+    this.#lastTickMs = nowMs;
+    // Cap a single step so a slow frame does not jump too far.
+    const stepMs = Math.min(elapsedMs, MAX_TICK_WALL_MS) * this.#speed;
+
+    const stop = this.#untilTime ?? range.end;
+    let target = add(this.#playbackTime, fromMillis(stepMs));
+    const reachedStop = compare(target, stop) >= 0;
+    if (reachedStop) {
+      target = stop;
+    }
+
+    this.#parsedMessages.push(...this.#collect(this.#requestedTopics, this.#playbackTime, target));
+    this.#playbackTime = target;
+
+    if (reachedStop) {
+      // Data still streaming in (live): keep following the end. Otherwise stop, like a file.
+      const streaming = Date.now() - this.#lastDataWallMs < LIVE_DATA_TIMEOUT_MS;
+      if (this.#untilTime != undefined || !streaming) {
+        this.#isPlaying = false;
+        this.#untilTime = undefined;
+      }
+    }
+    this.#emitState();
+    this.#scheduleTick();
+  };
+
+  /** Insert a message in the topic history. Returns false if it was already there. */
+  #addToHistory(msgEvent: MessageEvent): boolean {
+    let events = this.#history.get(msgEvent.topic);
+    if (!events) {
+      events = [];
+      this.#history.set(msgEvent.topic, events);
+    }
+    const index = upperBound(events, msgEvent.receiveTime, { inclusive: false });
+    // Same topic, same time: the server re-sent a message we already have.
+    const previous = events[index - 1];
+    if (previous && compare(previous.receiveTime, msgEvent.receiveTime) === 0) {
+      return false;
+    }
+    events.splice(index, 0, msgEvent);
+
+    if (!this.#historyStart || isLessThan(msgEvent.receiveTime, this.#historyStart)) {
+      this.#historyStart = msgEvent.receiveTime;
+    }
+    if (!this.#historyEnd || isGreaterThan(msgEvent.receiveTime, this.#historyEnd)) {
+      this.#historyEnd = msgEvent.receiveTime;
+    }
+    this.#lastDataWallMs = Date.now();
+    this.#playbackTime ??= this.#serverDataStart ?? msgEvent.receiveTime;
+    this.#markTopicDirty(msgEvent.topic);
+    return true;
+  }
+
+  /** Last message of `topic` at or before `time`. */
+  #latestAt(topic: string, time: Time): MessageEvent | undefined {
+    const events = this.#history.get(topic);
+    if (!events) {
+      return undefined;
+    }
+    return events[upperBound(events, time, { inclusive: false }) - 1];
+  }
+
+  #backfill(topics: Iterable<string>, time: Time): MessageEvent[] {
+    const out: MessageEvent[] = [];
+    for (const topic of topics) {
+      const msgEvent = this.#latestAt(topic, time);
+      if (msgEvent) {
+        out.push(msgEvent);
+      }
+    }
+    return out.sort((a, b) => compare(a.receiveTime, b.receiveTime));
+  }
+
+  /** Messages of `topics` with from < time <= to, sorted by time. */
+  #collect(topics: Iterable<string>, from: Time, to: Time): MessageEvent[] {
+    const out: MessageEvent[] = [];
+    for (const topic of topics) {
+      const events = this.#history.get(topic);
+      if (!events) {
+        continue;
+      }
+      const first = upperBound(events, from, { inclusive: false });
+      const last = upperBound(events, to, { inclusive: false });
+      for (let i = first; i < last; i++) {
+        out.push(events[i]!);
+      }
+    }
+    return out.sort((a, b) => compare(a.receiveTime, b.receiveTime));
+  }
+
+  /** Timeline range: announced by the server, extended by the received data. */
+  #dataRange(): { start: Time; end: Time } | undefined {
+    let start = this.#serverDataStart;
+    let end = this.#serverDataEnd;
+    if (this.#historyStart && (!start || isLessThan(this.#historyStart, start))) {
+      start = this.#historyStart;
+    }
+    if (this.#historyEnd && (!end || isGreaterThan(this.#historyEnd, end))) {
+      end = this.#historyEnd;
+    }
+    return start && end ? { start, end } : undefined;
+  }
+
+  /** Part of the timeline already received (shown as loaded on the timeline). */
+  #loadedRanges(): { start: number; end: number }[] {
+    const range = this.#dataRange();
+    if (!range || !this.#historyStart || !this.#historyEnd) {
+      return [];
+    }
+    const duration = toSec(subtract(range.end, range.start));
+    if (duration <= 0) {
+      return [{ start: 0, end: 1 }];
+    }
+    const fraction = (time: Time) =>
+      Math.min(1, Math.max(0, toSec(subtract(time, range.start)) / duration));
+    return [{ start: fraction(this.#historyStart), end: fraction(this.#historyEnd) }];
+  }
+
+  /**
+   * New data for a topic: replace its Topic object (a new reference) once the data settles. Panels
+   * using message ranges (Plot) then reload the topic's full history from memory.
+   */
+  #markTopicDirty(topic: string): void {
+    this.#dirtyTopics.add(topic);
+    this.#dirtySinceMs ??= Date.now();
+    if (this.#dirtyFlushTimer != undefined) {
+      clearTimeout(this.#dirtyFlushTimer);
+    }
+    // Debounce while a burst is arriving, but refresh at least every MAX_DIRTY_WAIT_MS.
+    const waited = Date.now() - this.#dirtySinceMs;
+    const delay = waited >= MAX_DIRTY_WAIT_MS ? 0 : DIRTY_DEBOUNCE_MS;
+    this.#dirtyFlushTimer = setTimeout(this.#flushDirtyTopics, delay);
+  }
+
+  #flushDirtyTopics = (): void => {
+    this.#dirtyFlushTimer = undefined;
+    this.#dirtySinceMs = undefined;
+    if (this.#dirtyTopics.size === 0 || !this.#topics) {
+      return;
+    }
+    const dirty = this.#dirtyTopics;
+    this.#dirtyTopics = new Set();
+    this.#topics = this.#topics.map((topic) => (dirty.has(topic.name) ? { ...topic } : topic));
+    this.#emitState();
+  };
 
   // Return the current time
   //
@@ -1337,6 +1648,14 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#startTime = undefined;
     this.#endTime = undefined;
     this.#clockTime = undefined;
+    this.#history = new Map();
+    this.#dirtyTopics = new Set();
+    this.#historyStart = undefined;
+    this.#historyEnd = undefined;
+    this.#playbackTime = undefined;
+    this.#isPlaying = false;
+    this.#untilTime = undefined;
+    this.#stopTicking();
     this.#topicsStats = new Map();
     this.#parsedMessages = [];
     this.#receivedBytes = 0;
@@ -1383,4 +1702,48 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this.#datatypes = updatedDatatypes; // Signal that datatypes changed.
     }
   }
+}
+
+/** Playback tick period (ms). */
+const TICK_INTERVAL_MS = 16;
+/** Maximum wall time handled by one tick (ms), so a slow frame does not jump too far. */
+const MAX_TICK_WALL_MS = 100;
+/** Without new data for this long (ms), the stream is considered finished. */
+const LIVE_DATA_TIMEOUT_MS = 1000;
+/** Wait this long (ms) after the last message of a burst before panels reload a topic. */
+const DIRTY_DEBOUNCE_MS = 200;
+/** While data keeps streaming, reload topics at least this often (ms). */
+const MAX_DIRTY_WAIT_MS = 2000;
+
+function clampTime(time: Time, start: Time, end: Time): Time {
+  if (isLessThan(time, start)) {
+    return start;
+  }
+  if (isGreaterThan(time, end)) {
+    return end;
+  }
+  return time;
+}
+
+/**
+ * Index of the first event whose time is after `time` (or at/after it when `inclusive` is true),
+ * in a time-sorted array.
+ */
+function upperBound(
+  events: readonly MessageEvent[],
+  time: Time,
+  { inclusive }: { inclusive: boolean },
+): number {
+  let low = 0;
+  let high = events.length;
+  while (low < high) {
+    const mid = (low + high) >> 1;
+    const cmp = compare(events[mid]!.receiveTime, time);
+    if (cmp < 0 || (!inclusive && cmp === 0)) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+  }
+  return low;
 }
