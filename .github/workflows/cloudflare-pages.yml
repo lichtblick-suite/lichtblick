@@ -14,6 +14,8 @@ jobs:
   deploy:
     name: Deploy to Cloudflare Pages
     runs-on: ubuntu-latest
+    # Uses the upstream project's Cloudflare account and secrets: only run there, not on forks.
+    if: ${{ github.repository == 'lichtblick-suite/lichtblick' }}
 
     env:
       # Environment variables that are injected into the build
