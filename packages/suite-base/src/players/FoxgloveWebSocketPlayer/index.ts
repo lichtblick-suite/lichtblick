@@ -183,6 +183,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
   /** Playback cursor. */
   #playbackTime?: Time;
   #isPlaying = false;
+  /**
+   * Live follow: the cursor stays on the latest received data (like live data). On for sources
+   * without an announced end (live / streamed); off after a pause or a seek back in time, on
+   * again when the cursor catches up with the end while playing.
+   */
+  #followLive = true;
   #speed = 1;
   #untilTime?: Time;
   #lastSeekEmitTime = 0;
@@ -1317,6 +1323,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       return;
     }
     this.#isPlaying = false;
+    this.#followLive = false;
     this.#untilTime = undefined;
     this.#stopTicking();
     this.#emitState();
@@ -1334,6 +1341,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
       return;
     }
     const target = clampTime(time, range.start, range.end);
+    // Seeking to the end while playing keeps following the live data; anywhere else stops it.
+    this.#followLive = this.#isPlaying && compare(target, range.end) >= 0 && this.#isLiveSource();
     this.#playbackTime = target;
     this.#lastTickMs = undefined;
     // Like a file: panels get the last message of each topic at the new time.
@@ -1348,8 +1357,12 @@ export default class FoxgloveWebSocketPlayer implements Player {
     if (this.#isPlaying || !range) {
       return;
     }
-    // At the end: restart from the beginning (like a file).
-    if (!this.#playbackTime || compare(this.#playbackTime, range.end) >= 0) {
+    const atEnd = !this.#playbackTime || compare(this.#playbackTime, range.end) >= 0;
+    if (atEnd && this.#isLiveSource() && this.#isStreaming()) {
+      // At the end of data still arriving: follow it.
+      this.#followLive = true;
+    } else if (atEnd) {
+      // At the end: restart from the beginning (like a file).
       this.seekPlayback(range.start);
     }
     if (untilTime && this.#playbackTime && compare(untilTime, this.#playbackTime) <= 0) {
@@ -1389,6 +1402,20 @@ export default class FoxgloveWebSocketPlayer implements Player {
     // Cap a single step so a slow frame does not jump too far.
     const stepMs = Math.min(elapsedMs, MAX_TICK_WALL_MS) * this.#speed;
 
+    if (this.#followLive) {
+      // Live follow: jump to the latest data, whatever the speed. Keeps playing even when no data
+      // arrives for a while (e.g. the server is stopped on a breakpoint).
+      if (compare(range.end, this.#playbackTime) > 0) {
+        this.#parsedMessages.push(
+          ...this.#collect(this.#requestedTopics, this.#playbackTime, range.end),
+        );
+        this.#playbackTime = range.end;
+        this.#emitState();
+      }
+      this.#scheduleTick();
+      return;
+    }
+
     const stop = this.#untilTime ?? range.end;
     let target = add(this.#playbackTime, fromMillis(stepMs));
     const reachedStop = compare(target, stop) >= 0;
@@ -1400,9 +1427,11 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#playbackTime = target;
 
     if (reachedStop) {
-      // Data still streaming in (live): keep following the end. Otherwise stop, like a file.
-      const streaming = Date.now() - this.#lastDataWallMs < LIVE_DATA_TIMEOUT_MS;
-      if (this.#untilTime != undefined || !streaming) {
+      if (this.#untilTime == undefined && this.#isLiveSource() && this.#isStreaming()) {
+        // Caught up with data still arriving: follow it (live).
+        this.#followLive = true;
+      } else if (this.#untilTime != undefined || !this.#isStreaming()) {
+        // Otherwise stop, like a file.
         this.#isPlaying = false;
         this.#untilTime = undefined;
       }
@@ -1435,7 +1464,24 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#lastDataWallMs = Date.now();
     this.#playbackTime ??= this.#serverDataStart ?? msgEvent.receiveTime;
     this.#markTopicDirty(msgEvent.topic);
+    if (this.#followLive && this.#isLiveSource() && !this.#isPlaying) {
+      // Live source: play and keep the cursor on the latest data.
+      this.#isPlaying = true;
+      this.#untilTime = undefined;
+      this.#lastTickMs = undefined;
+      this.#scheduleTick();
+    }
     return true;
+  }
+
+  /** No data end announced by the server: live data or a stream whose end is not known. */
+  #isLiveSource(): boolean {
+    return this.#serverDataEnd == undefined;
+  }
+
+  /** Data received recently. */
+  #isStreaming(): boolean {
+    return Date.now() - this.#lastDataWallMs < LIVE_DATA_TIMEOUT_MS;
   }
 
   /** Last message of `topic` at or before `time`. */
@@ -1654,6 +1700,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#historyEnd = undefined;
     this.#playbackTime = undefined;
     this.#isPlaying = false;
+    this.#followLive = true;
     this.#untilTime = undefined;
     this.#stopTicking();
     this.#topicsStats = new Map();
