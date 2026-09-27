@@ -1,0 +1,100 @@
+name: Build Lichtblick Desktop (Windows & Linux)
+
+# Builds the desktop app for Windows (.exe installer) and Linux (.deb / .tar.gz), keeps the files
+# as workflow artifacts and publishes them in the "desktop-latest" GitHub release.
+
+on:
+  push:
+    branches: ["develop"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+# Only the latest build of a branch matters.
+concurrency:
+  group: desktop-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            package: package:win
+            files: |
+              dist/*.exe
+          - name: Linux
+            os: ubuntu-latest
+            package: package:linux
+            files: |
+              dist/*.deb
+              dist/*.tar.gz
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build desktop app
+        run: yarn desktop:build:prod
+
+      - name: Package ${{ matrix.name }}
+        run: yarn run ${{ matrix.package }}
+
+      - name: Upload ${{ matrix.name }} packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: lichtblick-desktop-${{ matrix.name }}
+          path: ${{ matrix.files }}
+          if-no-files-found: error
+
+  release:
+    name: Publish "desktop-latest" release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download packages
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Move the desktop-latest tag to this commit
+        run: |
+          git tag -f desktop-latest
+          git push -f origin desktop-latest
+
+      - name: Update the desktop-latest release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: desktop-latest
+          name: Lichtblick desktop (latest ${{ github.ref_name }} build)
+          body: |
+            Desktop build of `${{ github.ref_name }}` at ${{ github.sha }}.
+
+            - Windows: `lichtblick-*-win.exe` (installer)
+            - Linux: `lichtblick-*-linux-amd64.deb` or `lichtblick-*-linux-x64.tar.gz`
+          prerelease: true
+          allowUpdates: true
+          removeArtifacts: true
+          replacesArtifacts: true
+          artifacts: dist/*

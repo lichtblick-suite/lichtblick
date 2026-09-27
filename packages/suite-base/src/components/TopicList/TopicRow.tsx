@@ -9,6 +9,7 @@ import {
   ChevronLeft16Regular,
   ChevronRight16Regular,
   ReOrderDotsVertical16Regular,
+  WindowNew16Regular,
 } from "@fluentui/react-icons";
 import { Badge, IconButton, Tooltip, Typography } from "@mui/material";
 import { FzfResultItem } from "fzf";
@@ -20,6 +21,7 @@ import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePip
 import { MessagePipelineContext } from "@lichtblick/suite-base/components/MessagePipeline/types";
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import useAddPanel from "@lichtblick/suite-base/hooks/useAddPanel";
 import { Topic } from "@lichtblick/suite-base/players/types";
 import { useMessagePathDrag } from "@lichtblick/suite-base/services/messagePathDragging";
 
@@ -124,6 +126,15 @@ export function TopicRow({
     event.stopPropagation();
   }, []);
 
+  const addPanel = useAddPanel();
+  const openInRawMessages = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      addPanel({ type: "RawMessages", config: { topicPath: quoteTopicNameIfNeeded(topic.name) } });
+    },
+    [addPanel, topic.name],
+  );
+
   return (
     <div
       ref={combinedRef}
@@ -165,7 +176,21 @@ export function TopicRow({
         )}
       </Stack>
       <Stack direction="column" alignItems="flex-end" gap={0.5}>
-        <TopicStatsChip selected={selected} topicName={topic.name} />
+        <Stack direction="row" gap={0.5} alignItems="center">
+          <TopicStatsChip selected={selected} topicName={topic.name} />
+          <Tooltip title="Open in Raw Messages">
+            <IconButton
+              size="small"
+              aria-label="Open in Raw Messages"
+              onClick={openInRawMessages}
+              onMouseDown={handleButtonMouseDown}
+              className={classes.navIconButton}
+              data-testid="open-in-raw-messages"
+            >
+              <WindowNew16Regular />
+            </IconButton>
+          </Tooltip>
+        </Stack>
         <Stack direction="row" gap={0.5} alignItems="center">
           <Tooltip title={isPreviousDisabled ? "" : "Previous message"}>
             <span>
