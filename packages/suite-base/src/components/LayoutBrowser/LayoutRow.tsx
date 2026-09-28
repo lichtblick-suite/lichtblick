@@ -350,7 +350,7 @@ export default React.memo(function LayoutRow({
               onClick={toggleFavorite}
             >
               {favorite ? (
-                <StarIcon fontSize="small" color="warning" />
+                <StarIcon fontSize="small" color="action" />
               ) : (
                 <StarBorderIcon fontSize="small" />
               )}
