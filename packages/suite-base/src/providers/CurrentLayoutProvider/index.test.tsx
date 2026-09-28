@@ -536,6 +536,14 @@ describe("CurrentLayoutProvider", () => {
       },
     ];
 
+    beforeEach(() => {
+      mockLayoutManager.isOnline = true;
+    });
+
+    afterEach(() => {
+      mockLayoutManager.isOnline = false;
+    });
+
     function makeMockRemoteLayoutFavorites(ids: string[]) {
       return {
         getFavoriteLayoutIds: jest.fn().mockResolvedValue(ids),
@@ -619,6 +627,23 @@ describe("CurrentLayoutProvider", () => {
 
       // Then the first one in the layout list is selected
       expect(selectedLayoutId).toBe("shared-c");
+    });
+
+    it("does not request remote favorites while offline", async () => {
+      // Given an offline layout manager, a favorite personal layout and a favorite shared layout
+      mockLayoutManager.isOnline = false;
+      mockUserProfile.getUserProfile.mockResolvedValue({
+        currentLayoutId: undefined,
+        favoriteLayoutIds: ["personal-b"],
+      });
+      const mockRemoteLayoutFavorites = makeMockRemoteLayoutFavorites(["remote-d"]);
+
+      // When the app opens
+      const selectedLayoutId = await renderAndGetSelectedLayoutId(mockRemoteLayoutFavorites);
+
+      // Then remote favorites are not requested and the favorite personal layout is selected
+      expect(mockRemoteLayoutFavorites.getFavoriteLayoutIds).not.toHaveBeenCalled();
+      expect(selectedLayoutId).toBe("personal-b");
     });
 
     it("falls back to the favorite personal layout when remote favorites cannot be loaded", async () => {

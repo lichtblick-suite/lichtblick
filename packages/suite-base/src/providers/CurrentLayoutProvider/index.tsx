@@ -338,12 +338,13 @@ export default function CurrentLayoutProvider({
       });
     }
 
-    const sharedFavoriteLayoutIds = remoteLayoutFavorites
-      ? await remoteLayoutFavorites.getFavoriteLayoutIds().catch((error: unknown) => {
-          log.warn("Failed to load favorite shared layouts", error);
-          return [];
-        })
-      : [];
+    const sharedFavoriteLayoutIds =
+      remoteLayoutFavorites && layoutManager.isOnline
+        ? await remoteLayoutFavorites.getFavoriteLayoutIds().catch((error: unknown) => {
+            log.warn("Failed to load favorite shared layouts", error);
+            return [];
+          })
+        : [];
     const favoriteLayout = findFavoriteLayout(layouts, {
       personal: new Set(favoriteLayoutIds ?? []),
       shared: new Set(sharedFavoriteLayoutIds),

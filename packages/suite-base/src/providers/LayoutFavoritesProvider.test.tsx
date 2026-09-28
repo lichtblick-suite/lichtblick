@@ -35,6 +35,20 @@ function makeUserProfileStorage(initial: UserProfile = {}): UserProfileStorage &
   };
 }
 
+function deferred(): {
+  promise: Promise<void>;
+  resolve: () => void;
+  reject: (error: Error) => void;
+} {
+  let resolve: () => void = () => {};
+  let reject: (error: Error) => void = () => {};
+  const promise = new Promise<void>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
 function makeRemoteStorage(ids: string[] = []): jest.Mocked<IRemoteLayoutFavoritesStorage> {
   return {
     getFavoriteLayoutIds: jest.fn().mockResolvedValue(ids),
@@ -150,6 +164,26 @@ describe("LayoutFavoritesProvider", () => {
       expect(result.current.isFavorite(layout)).toBe(false);
     });
 
+    it("Given consecutive changes before a render, when the last one fails, then it rolls back to the previous change", async () => {
+      const layout = personalLayout();
+      const profileStorage = makeUserProfileStorage();
+      const { result } = await setup({ profileStorage });
+      const { setFavorite } = result.current;
+
+      await act(async () => {
+        await setFavorite(layout, { favorite: true });
+      });
+      (profileStorage.setUserProfile as jest.Mock).mockRejectedValueOnce(
+        new Error("Quota exceeded"),
+      );
+      await act(async () => {
+        // Same callback as the first change, as if called before the provider re-rendered.
+        await expect(setFavorite(layout, { favorite: false })).rejects.toThrow("Quota exceeded");
+      });
+
+      expect(result.current.isFavorite(layout)).toBe(true);
+    });
+
     it("Given a personal layout, when adding a favorite, then the remote storage is not used", async () => {
       const remote = makeRemoteStorage();
       const { result } = await setup({ remote });
@@ -253,6 +287,109 @@ describe("LayoutFavoritesProvider", () => {
           "Forbidden",
         );
       });
+      expect(result.current.isFavorite(layout)).toBe(false);
+    });
+
+    it("Given a pending write, when changing the same layout again, then the writes are sent in order", async () => {
+      const layout = sharedLayout();
+      const remote = makeRemoteStorage();
+      const add = deferred();
+      remote.addFavoriteLayout.mockReturnValueOnce(add.promise);
+      const { result } = await setup({ remote });
+
+      let adding: Promise<void> = Promise.resolve();
+      let removing: Promise<void> = Promise.resolve();
+      act(() => {
+        adding = result.current.setFavorite(layout, { favorite: true });
+      });
+      act(() => {
+        removing = result.current.setFavorite(layout, { favorite: false });
+      });
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(remote.addFavoriteLayout).toHaveBeenCalledWith(layout.externalId);
+      expect(remote.removeFavoriteLayout).not.toHaveBeenCalled();
+      expect(result.current.isFavorite(layout)).toBe(false);
+
+      await act(async () => {
+        add.resolve();
+        await adding;
+        await removing;
+      });
+      expect(remote.removeFavoriteLayout).toHaveBeenCalledWith(layout.externalId);
+      expect(result.current.isFavorite(layout)).toBe(false);
+    });
+
+    it("Given a pending write, when changing another layout, then its write is not delayed", async () => {
+      const first = sharedLayout();
+      const second = sharedLayout();
+      const remote = makeRemoteStorage();
+      const add = deferred();
+      remote.addFavoriteLayout.mockReturnValueOnce(add.promise);
+      const { result } = await setup({ remote });
+
+      let addingFirst: Promise<void> = Promise.resolve();
+      act(() => {
+        addingFirst = result.current.setFavorite(first, { favorite: true });
+      });
+      await act(async () => {
+        await result.current.setFavorite(second, { favorite: true });
+      });
+
+      expect(remote.addFavoriteLayout).toHaveBeenCalledWith(second.externalId);
+      expect(result.current.isFavorite(second)).toBe(true);
+      await act(async () => {
+        add.resolve();
+        await addingFirst;
+      });
+      expect(result.current.isFavorite(first)).toBe(true);
+    });
+
+    it("Given a write of another layout after it, when a write fails, then only the failed layout is rolled back", async () => {
+      const first = sharedLayout();
+      const second = sharedLayout();
+      const remote = makeRemoteStorage();
+      const add = deferred();
+      remote.addFavoriteLayout.mockReturnValueOnce(add.promise);
+      const { result } = await setup({ remote });
+
+      let addingFirst: Promise<void> = Promise.resolve();
+      act(() => {
+        addingFirst = result.current.setFavorite(first, { favorite: true });
+      });
+      await act(async () => {
+        await result.current.setFavorite(second, { favorite: true });
+      });
+      await act(async () => {
+        add.reject(new Error("Forbidden"));
+        await expect(addingFirst).rejects.toThrow("Forbidden");
+      });
+
+      expect(result.current.isFavorite(first)).toBe(false);
+      expect(result.current.isFavorite(second)).toBe(true);
+    });
+
+    it("Given consecutive writes of a layout, when all of them fail, then it rolls back to the saved state", async () => {
+      const layout = sharedLayout();
+      const remote = makeRemoteStorage();
+      remote.addFavoriteLayout.mockRejectedValue(new Error("Forbidden"));
+      remote.removeFavoriteLayout.mockRejectedValue(new Error("Forbidden"));
+      const { result } = await setup({ remote });
+
+      let adding: Promise<void> = Promise.resolve();
+      let removing: Promise<void> = Promise.resolve();
+      act(() => {
+        adding = result.current.setFavorite(layout, { favorite: true });
+      });
+      act(() => {
+        removing = result.current.setFavorite(layout, { favorite: false });
+      });
+      await act(async () => {
+        await expect(adding).rejects.toThrow("Forbidden");
+        await expect(removing).rejects.toThrow("Forbidden");
+      });
+
       expect(result.current.isFavorite(layout)).toBe(false);
     });
 

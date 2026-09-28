@@ -41,7 +41,9 @@ function updateIds(
  * - Shared layouts are favorited through the remote favorites storage (when available), keyed by
  *   `Layout.externalId`. Remote favorites are (re)loaded whenever the layout manager goes online.
  *
- * Changes are applied optimistically and rolled back if persisting them fails.
+ * Changes are applied optimistically and rolled back if persisting them fails. Remote writes for
+ * the same layout are sent one after the other, so they reach the server in the order they were
+ * made.
  */
 export default function LayoutFavoritesProvider({
   children,
@@ -53,10 +55,37 @@ export default function LayoutFavoritesProvider({
   const [localIds, setLocalIds] = useState<ReadonlySet<string>>(() => new Set());
   const [remoteIds, setRemoteIds] = useState<ReadonlySet<string>>(() => new Set());
 
-  // Incremented on every local change. A load that started before a change is stale and must not
+  // Kept in sync with the state above without waiting for a render, so consecutive changes read
+  // the latest favorites.
+  const localIdsRef = useRef<ReadonlySet<string>>(localIds);
+  const remoteIdsRef = useRef<ReadonlySet<string>>(remoteIds);
+
+  // Remote favorites as last loaded from or written to the server. Failed writes roll back to it.
+  const savedRemoteIds = useRef<ReadonlySet<string>>(new Set<string>());
+
+  // The last remote write per external id. Each write waits for the previous one of its layout.
+  const remoteWrites = useRef(new Map<string, Promise<void>>());
+
+  // Incremented on every change. A load that started before a change is stale and must not
   // overwrite it.
   const localVersion = useRef(0);
   const remoteVersion = useRef(0);
+
+  const updateLocalIds = useCallback(
+    (update: (ids: ReadonlySet<string>) => ReadonlySet<string>) => {
+      localIdsRef.current = update(localIdsRef.current);
+      setLocalIds(localIdsRef.current);
+    },
+    [],
+  );
+
+  const updateRemoteIds = useCallback(
+    (update: (ids: ReadonlySet<string>) => ReadonlySet<string>) => {
+      remoteIdsRef.current = update(remoteIdsRef.current);
+      setRemoteIds(remoteIdsRef.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -64,7 +93,7 @@ export default function LayoutFavoritesProvider({
     getUserProfile()
       .then((profile) => {
         if (!cancelled && version === localVersion.current) {
-          setLocalIds(new Set(profile.favoriteLayoutIds ?? []));
+          updateLocalIds(() => new Set(profile.favoriteLayoutIds ?? []));
         }
       })
       .catch((error: unknown) => {
@@ -73,7 +102,7 @@ export default function LayoutFavoritesProvider({
     return () => {
       cancelled = true;
     };
-  }, [getUserProfile]);
+  }, [getUserProfile, updateLocalIds]);
 
   useEffect(() => {
     if (!remote) {
@@ -89,7 +118,8 @@ export default function LayoutFavoritesProvider({
         .getFavoriteLayoutIds()
         .then((ids) => {
           if (!cancelled && version === remoteVersion.current) {
-            setRemoteIds(new Set(ids));
+            savedRemoteIds.current = new Set(ids);
+            updateRemoteIds(() => new Set(ids));
           }
         })
         .catch((error: unknown) => {
@@ -102,7 +132,7 @@ export default function LayoutFavoritesProvider({
       cancelled = true;
       layoutManager.off("onlinechange", load);
     };
-  }, [layoutManager, remote]);
+  }, [layoutManager, remote, updateRemoteIds]);
 
   const canFavorite = useCallback(
     (layout: Layout) =>
@@ -125,27 +155,45 @@ export default function LayoutFavoritesProvider({
         if (!remote || externalId == undefined) {
           throw new Error(`Layout "${layout.name}" cannot be marked as favorite`);
         }
-        const wasFavorite = remoteIds.has(externalId);
-        const version = ++remoteVersion.current;
-        setRemoteIds((ids) => updateIds(ids, externalId, { included: favorite }));
-        try {
+        remoteVersion.current++;
+        updateRemoteIds((ids) => updateIds(ids, externalId, { included: favorite }));
+
+        const write = (remoteWrites.current.get(externalId) ?? Promise.resolve()).then(async () => {
           if (favorite) {
             await remote.addFavoriteLayout(externalId);
           } else {
             await remote.removeFavoriteLayout(externalId);
           }
+          savedRemoteIds.current = updateIds(savedRemoteIds.current, externalId, {
+            included: favorite,
+          });
+        });
+        // The next write of this layout runs after this one, whether it succeeds or fails.
+        const settled = write.catch(() => {});
+        remoteWrites.current.set(externalId, settled);
+        try {
+          await write;
         } catch (error) {
-          if (version === remoteVersion.current) {
-            setRemoteIds((ids) => updateIds(ids, externalId, { included: wasFavorite }));
+          // A newer write of this layout is pending and will settle its state.
+          if (remoteWrites.current.get(externalId) === settled) {
+            updateRemoteIds((ids) =>
+              updateIds(ids, externalId, {
+                included: savedRemoteIds.current.has(externalId),
+              }),
+            );
           }
           throw error;
+        } finally {
+          if (remoteWrites.current.get(externalId) === settled) {
+            remoteWrites.current.delete(externalId);
+          }
         }
         return;
       }
 
-      const wasFavorite = localIds.has(layout.id);
+      const wasFavorite = localIdsRef.current.has(layout.id);
       const version = ++localVersion.current;
-      setLocalIds((ids) => updateIds(ids, layout.id, { included: favorite }));
+      updateLocalIds((ids) => updateIds(ids, layout.id, { included: favorite }));
       try {
         await setUserProfile((profile) => ({
           ...profile,
@@ -157,12 +205,12 @@ export default function LayoutFavoritesProvider({
         }));
       } catch (error) {
         if (version === localVersion.current) {
-          setLocalIds((ids) => updateIds(ids, layout.id, { included: wasFavorite }));
+          updateLocalIds((ids) => updateIds(ids, layout.id, { included: wasFavorite }));
         }
         throw error;
       }
     },
-    [localIds, remote, remoteIds, setUserProfile],
+    [remote, setUserProfile, updateLocalIds, updateRemoteIds],
   );
 
   const value = useMemo<LayoutFavorites>(
