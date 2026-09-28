@@ -125,7 +125,6 @@ export default function LayoutBrowser({
     { loading: true },
   );
 
-  // Favorites are listed first in each section, keeping the alphabetical order within each group.
   const sortedLayouts = useMemo(() => {
     if (!layouts.value) {
       return undefined;

@@ -109,7 +109,6 @@ export function StudioApp(): React.JSX.Element {
     return undefined;
   }, [workspace]);
 
-  // Favorites of shared layouts are only needed when shared layouts come from the same API.
   const remoteLayoutFavoritesStorage = useMemo(
     () => (remoteLayoutStorage ? new LayoutFavoritesAPI() : undefined),
     [remoteLayoutStorage],

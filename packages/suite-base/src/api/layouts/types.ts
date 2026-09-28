@@ -109,7 +109,7 @@ export type WorkspaceLayoutResponse = {
  * Response listing the current user's favorite layouts
  */
 export type FavoriteLayoutsResponse = {
-  /** Server-side ids (externalId) of the favorite layouts */
+  /** Server-side ids of the favorite layouts */
   favoriteLayouts: string[];
 };
 

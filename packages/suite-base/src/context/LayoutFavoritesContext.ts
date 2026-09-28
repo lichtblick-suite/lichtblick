@@ -7,9 +7,7 @@ import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 /**
  * The current user's favorite layouts.
- *
- * Personal layouts are favorited locally; shared layouts are favorited through remote storage, so
- * the favorite state belongs to the user and is not shared with the layout's workspace.
+ * Personal layouts are favorited locally; shared layouts are favorited through remote storage
  */
 export type LayoutFavorites = {
   /** Whether the favorite state of this layout can be changed. */
@@ -29,7 +27,6 @@ const NO_FAVORITES: LayoutFavorites = {
 export const LayoutFavoritesContext = createContext<LayoutFavorites>(NO_FAVORITES);
 LayoutFavoritesContext.displayName = "LayoutFavoritesContext";
 
-/** Without a provider, favorites are disabled: no layout is a favorite and none can be changed. */
 export function useLayoutFavorites(): LayoutFavorites {
   return useContext(LayoutFavoritesContext);
 }

@@ -4,7 +4,7 @@
 /**
  * Stores the current user's favorite remote layouts.
  *
- * Favorites belong to the user, not to the workspace: marking a shared layout as favorite does not
+ * Favorites belong to the user: marking a shared layout as favorite does not
  * change it for other users who can access the same layout. Layouts are identified by their remote
  * id (`Layout.externalId`).
  */
