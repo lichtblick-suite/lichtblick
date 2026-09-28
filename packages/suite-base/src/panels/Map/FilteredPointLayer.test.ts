@@ -6,11 +6,24 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DivIcon, LatLngBounds, Map as LeafMap, Marker, Point as LeafPoint } from "leaflet";
+import {
+  DivIcon,
+  Ellipse,
+  LatLngBounds,
+  Map as LeafMap,
+  Marker,
+  Point as LeafPoint,
+} from "leaflet";
 
 import FilteredPointLayer from "@lichtblick/suite-base/panels/Map/FilteredPointLayer";
-import { NavSatFixMsg, Point } from "@lichtblick/suite-base/panels/Map/types";
+import {
+  NavSatFixMsg,
+  NavSatFixPositionCovarianceType,
+  Point,
+} from "@lichtblick/suite-base/panels/Map/types";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
+
+import "leaflet-ellipse";
 
 // The layer only ever asks the map to project a position, and deduplicates points that land
 // on the same pixel. Scaling degrees up keeps distinct fixes on distinct pixels without
@@ -214,5 +227,55 @@ describe("FilteredPointLayer interaction", () => {
     layer.fire("click", { sourceTarget: markers[0] });
 
     expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ topic: "/gps" }));
+  });
+});
+
+describe("FilteredPointLayer accuracy", () => {
+  /** A fix carrying a diagonal covariance, which is the shape getAccuracy can size an ellipse from. */
+  function fixWithCovariance(): MessageEvent<NavSatFixMsg> {
+    const fix = navSatFix(1, 0);
+    return {
+      ...fix,
+      message: {
+        ...fix.message,
+        position_covariance: [9, 0, 0, 0, 25, 0, 0, 0, 0],
+        position_covariance_type: NavSatFixPositionCovarianceType.COVARIANCE_TYPE_DIAGONAL_KNOWN,
+      },
+    };
+  }
+
+  function ellipsesFor(
+    point: MessageEvent<NavSatFixMsg>,
+    showAccuracy: boolean | undefined,
+  ): Ellipse[] {
+    const layer = FilteredPointLayer({
+      map: fakeMap,
+      bounds: WORLD,
+      color: "#ff0000",
+      hoverColor: "#00ff00",
+      navSatMessageEvents: [point],
+      showAccuracy,
+    });
+    return layer.getLayers().filter((l): l is Ellipse => l instanceof Ellipse);
+  }
+
+  it("draws an ellipse sized from the covariance", () => {
+    const ellipses = ellipsesFor(fixWithCovariance(), true);
+
+    expect(ellipses).toHaveLength(1);
+    // Radii are the standard deviations, so the square roots of the east and north variances.
+    const radius = ellipses[0]!.getRadius();
+    expect([radius.x, radius.y]).toEqual([3, 5]);
+  });
+
+  // The panel asks for accuracy per topic, not per message, so a topic that mostly reports
+  // covariance will still carry fixes that do not. Those draw the marker and nothing else.
+  it("draws no ellipse for a fix with no covariance", () => {
+    expect(ellipsesFor(navSatFix(1, 0), true)).toHaveLength(0);
+  });
+
+  it("draws no ellipse while the setting is off, covariance or not", () => {
+    expect(ellipsesFor(fixWithCovariance(), false)).toHaveLength(0);
+    expect(ellipsesFor(fixWithCovariance(), undefined)).toHaveLength(0);
   });
 });
