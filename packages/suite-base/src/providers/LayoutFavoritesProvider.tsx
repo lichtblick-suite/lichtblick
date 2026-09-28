@@ -126,7 +126,7 @@ export default function LayoutFavoritesProvider({
           throw new Error(`Layout "${layout.name}" cannot be marked as favorite`);
         }
         const wasFavorite = remoteIds.has(externalId);
-        remoteVersion.current++;
+        const version = ++remoteVersion.current;
         setRemoteIds((ids) => updateIds(ids, externalId, { included: favorite }));
         try {
           if (favorite) {
@@ -135,14 +135,16 @@ export default function LayoutFavoritesProvider({
             await remote.removeFavoriteLayout(externalId);
           }
         } catch (error) {
-          setRemoteIds((ids) => updateIds(ids, externalId, { included: wasFavorite }));
+          if (version === remoteVersion.current) {
+            setRemoteIds((ids) => updateIds(ids, externalId, { included: wasFavorite }));
+          }
           throw error;
         }
         return;
       }
 
       const wasFavorite = localIds.has(layout.id);
-      localVersion.current++;
+      const version = ++localVersion.current;
       setLocalIds((ids) => updateIds(ids, layout.id, { included: favorite }));
       try {
         await setUserProfile((profile) => ({
@@ -154,7 +156,9 @@ export default function LayoutFavoritesProvider({
           ] as LayoutID[],
         }));
       } catch (error) {
-        setLocalIds((ids) => updateIds(ids, layout.id, { included: wasFavorite }));
+        if (version === localVersion.current) {
+          setLocalIds((ids) => updateIds(ids, layout.id, { included: wasFavorite }));
+        }
         throw error;
       }
     },
