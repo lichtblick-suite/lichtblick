@@ -45,7 +45,7 @@ function updateIds(
  */
 export default function LayoutFavoritesProvider({
   children,
-}: PropsWithChildren): React.JSX.Element {
+}: Readonly<PropsWithChildren>): React.JSX.Element {
   const remote = useRemoteLayoutFavoritesStorage();
   const { getUserProfile, setUserProfile } = useUserProfileStorage();
   const layoutManager = useLayoutManager();

@@ -89,6 +89,13 @@ export default React.memo(function LayoutRow({
   const canFavorite = layoutFavorites.canFavorite(layout);
   const favorite = layoutFavorites.isFavorite(layout);
 
+  let favoriteTitle: string;
+  if (layoutIsShared(layout) && !isOnline) {
+    favoriteTitle = "Offline";
+  } else {
+    favoriteTitle = favorite ? "Remove from favorites" : "Add to favorites";
+  }
+
   useLayoutEffect(() => {
     const onlineListener = () => {
       setIsOnline(layoutManager.isOnline);
@@ -339,13 +346,7 @@ export default React.memo(function LayoutRow({
               data-testid="layout-favorite-toggle"
               aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
               aria-pressed={favorite}
-              title={
-                layoutIsShared(layout) && !isOnline
-                  ? "Offline"
-                  : favorite
-                    ? "Remove from favorites"
-                    : "Add to favorites"
-              }
+              title={favoriteTitle}
               disabled={layoutIsShared(layout) && !isOnline}
               onClick={toggleFavorite}
             >
