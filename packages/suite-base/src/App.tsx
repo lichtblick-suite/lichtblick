@@ -17,6 +17,7 @@ import { UserScriptStateProvider } from "@lichtblick/suite-base/context/UserScri
 import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import AppParametersProvider from "@lichtblick/suite-base/providers/AppParametersProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
+import LayoutFavoritesProvider from "@lichtblick/suite-base/providers/LayoutFavoritesProvider";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
@@ -112,6 +113,8 @@ export function App(props: AppProps): React.JSX.Element {
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
+
+  providers.push(<LayoutFavoritesProvider />);
 
   // The toast and logs provider comes first so they are available to all downstream providers
   providers.unshift(<StudioToastProvider />);
