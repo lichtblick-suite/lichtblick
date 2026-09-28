@@ -79,7 +79,7 @@ function printScenarioMetrics(): void {
   process.stdout.write("\n## Benchmark Scenario Metrics\n");
 
   if (!fs.existsSync(ARTIFACTS_DIR)) {
-    process.stdout.write(`\nNo benchmark artifacts found at: ${ARTIFACTS_DIR}\n`);
+    process.stdout.write(`\nArtifacts directory not found: ${ARTIFACTS_DIR}\n`);
     return;
   }
 

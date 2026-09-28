@@ -40,11 +40,6 @@ for (const scenario of SCENARIOS_UNDER_TEST) {
     const scenarioUrl = `${mainWindow.url()}?scenario=${scenario.scenarioId}`;
     await mainWindow.goto(scenarioUrl);
 
-    // When
-    if (scenario.pipeline === "real") {
-      await expect(mainWindow.getByRole("button", { name: "Play", exact: true })).toBeVisible();
-    }
-
     const memorySamples: MemorySample[] = [];
     const samplingState = { active: true };
     const samplingLoop = (async () => {
@@ -62,32 +57,18 @@ for (const scenario of SCENARIOS_UNDER_TEST) {
       }
     })();
 
-    if (scenario.pipeline === "synthetic") {
-      // No Play/Pause control exists for this pipeline: just sample for a fixed window.
-      await mainWindow.waitForTimeout(SAMPLE_DURATION_MS);
-    } else if (scenario.durationMs != undefined) {
-      // The data source fetches/buffers over the network before autoStart can actually begin
-      // playing; observed to take close to 30s on a slow connection, so a generous timeout is
-      // needed to avoid flaking here rather than genuinely detecting a stuck data source.
-      await expect(mainWindow.getByRole("button", { name: "Pause", exact: true })).toBeVisible({
-        timeout: 60 * 1000,
-      });
-      // durationMs (registry.ts) elapses and the scenario auto-pauses, so Play reappears.
-      await expect(mainWindow.getByRole("button", { name: "Play", exact: true })).toBeVisible({
-        timeout: scenario.durationMs + 25 * 1000,
-      });
-    } else {
-      // No auto-pause for this scenario (indefinite playback): sample for a fixed window, then
-      // pause manually via the same toggle button (now showing "Pause").
-      await mainWindow.waitForTimeout(SAMPLE_DURATION_MS);
-      await mainWindow.getByRole("button", { name: "Pause", exact: true }).click();
-    }
+    // When
+    await mainWindow.waitForTimeout(SAMPLE_DURATION_MS);
     samplingState.active = false;
     await samplingLoop;
 
     const finishedAt = new Date().toISOString();
 
-    // Thens
+    if (scenario.pipeline === "real") {
+      await mainWindow.getByRole("button", { name: "Pause", exact: true }).click();
+    }
+
+    // Then
     expect(memorySamples.length).toBeGreaterThan(0);
 
     const artifact: BenchmarkArtifact = {

@@ -47,7 +47,6 @@ jobs:
         # See: https://github.com/microsoft/playwright/issues/34251
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      # It must be a dev build so the benchmark scenarios match what's built from source.
       - name: Build benchmark desktop app
         run: yarn benchmark:desktop:build:prod
 
@@ -60,26 +59,7 @@ jobs:
           # for an output path, so without PLAYWRIGHT_JSON_OUTPUT_NAME below the json reporter
           # would dump the report to stdout instead of a file.
           run: yarn test:e2e:benchmark:ci --reporter=list,json
-        env:
-          CI: true
-          # Resolved relative to the config's rootDir (benchmark/e2e/, the config file's own
-          # directory), not the process cwd - so this lands at benchmark/e2e/reports/results.json.
-          PLAYWRIGHT_JSON_OUTPUT_NAME: reports/results.json
 
       - name: Generate Benchmark Test Summary
         if: always()
         run: yarn test:e2e:benchmark:summary >> "$GITHUB_STEP_SUMMARY"
-
-      # - name: Upload Benchmark E2E Reports
-      #   if: always()
-      #   uses: actions/upload-artifact@v7
-      #   with:
-      #     name: benchmark-e2e-reports
-      #     path: |
-      #       benchmark/e2e/reports/
-      #       benchmark/.artifacts/
-      #       benchmark/e2e/test-results/
-      #     retention-days: 7
-      #     if-no-files-found: warn
-      #     # benchmark/.artifacts/ is a dot-directory
-      #     include-hidden-files: true
