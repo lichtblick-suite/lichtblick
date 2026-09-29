@@ -290,15 +290,19 @@ function PanelExtensionAdapter(
   // On a live source, a panel keeps the last message of a newly subscribed topic until a rendered
   // frame has delivered it (see UndeliveredMessages).
   const [undelivered] = useState(() => new UndeliveredMessages());
+  // Messages are held on any live source: like the local subscriptions, the watched fields are
+  // React state, so the injected frame can arrive before a watch of currentFrame takes effect. They
+  // are handed to the panel once it watches currentFrame.
   const keepUndelivered = !capabilities.includes(PLAYER_CAPABILITIES.playbackControl);
+  const deliverHeld = keepUndelivered && watchedFields.has("currentFrame");
   // Re-runs the render effect when the panel finishes a render while messages are still held, so
   // they are delivered even if no new frame follows (e.g. a static scene).
   const [heldRetry, setHeldRetry] = useState(0);
   const retryIfHeld = useCallback(() => {
-    if (keepUndelivered && undelivered.hasHeld()) {
+    if (deliverHeld && undelivered.hasHeld()) {
       setHeldRetry((n) => n + 1);
     }
-  }, [keepUndelivered, undelivered]);
+  }, [deliverHeld, undelivered]);
 
   useLayoutEffect(() => {
     if (keepUndelivered) {
@@ -317,7 +321,6 @@ function PanelExtensionAdapter(
     }
 
     const subscribedTopics = new Set(localSubscriptions.map((sub) => sub.topic));
-    const deliverHeld = keepUndelivered && watchedFields.has("currentFrame");
     const currentFrame = deliverHeld
       ? undelivered.frameFor(messageEvents, subscribedTopics)
       : messageEvents;
@@ -383,6 +386,7 @@ function PanelExtensionAdapter(
     appSettings,
     buildRenderState,
     colorScheme,
+    deliverHeld,
     emitMessageConverterAlert,
     globalVariables,
     heldRetry,
