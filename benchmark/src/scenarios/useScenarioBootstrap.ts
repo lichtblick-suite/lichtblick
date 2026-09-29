@@ -38,6 +38,7 @@ export function useScenarioBootstrap(): void {
 
   const didSelectSourceRef = useRef(false);
   const didAutoStartRef = useRef(false);
+  const pauseTimeoutIdRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (!scenario || didSelectSourceRef.current) {
@@ -74,12 +75,19 @@ export function useScenarioBootstrap(): void {
       return undefined;
     }
 
-    const timeoutId = setTimeout(() => {
+    // Owned by `didAutoStartRef`, not this effect's cleanup, so later re-runs triggered by
+    // `playerPresence`/`startPlayback`/`pausePlayback` changes (which now no-op via the guard
+    // above) can't cancel or lose this deadline.
+    pauseTimeoutIdRef.current = setTimeout(() => {
       pausePlayback?.();
     }, scenario.durationMs);
 
-    return () => {
-      clearTimeout(timeoutId);
-    };
+    return undefined;
   }, [scenario, playerPresence, startPlayback, pausePlayback]);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(pauseTimeoutIdRef.current);
+    };
+  }, []);
 }

@@ -22,8 +22,11 @@ import { makeConfig } from "../packages/suite-base/webpack";
 const outputPath = path.resolve(__dirname, ".webpack-desktop");
 
 // Cleans the output directory once and writes the `package.json` that Electron reads to find its
-// main entry point when launched with `electron <outputPath>`.
+// main entry point when launched with `electron <outputPath>`. Named so the other configs can
+// declare it as a `dependencies` entry, forcing webpack to run cleanup before their compilers
+// start (they run in parallel otherwise, which can delete output emitted by a sibling compiler).
 const rootConfig = (_env: unknown, _argv: WebpackArgv): Configuration => ({
+  name: "root",
   entry: {},
   output: {
     publicPath: "",
@@ -47,6 +50,7 @@ const mainConfig = (_env: unknown, argv: WebpackArgv): Configuration => {
 
   return {
     name: "main",
+    dependencies: ["root"],
     target: "electron-main",
     context: path.resolve(__dirname, "desktop/main"),
     entry: "./index.ts",
@@ -78,6 +82,7 @@ const preloadConfig = (_env: unknown, argv: WebpackArgv): Configuration => {
 
   return {
     name: "preload",
+    dependencies: ["root"],
     target: "electron-preload",
     context: path.resolve(__dirname, "desktop/preload"),
     entry: "./index.ts",
@@ -116,6 +121,7 @@ const rendererConfig = (env: unknown, argv: WebpackArgv): Configuration => {
   return {
     name: "renderer",
     ...appWebpackConfig,
+    dependencies: ["root"],
 
     // force web target instead of electron-renderer
     // Fixes "require is not defined" errors since nodeIntegration is off

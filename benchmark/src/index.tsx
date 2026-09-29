@@ -20,7 +20,6 @@ window.onerror = (...args) => {
 
 async function main() {
   const { overwriteFetch, waitForFonts } = await import("@lichtblick/suite-base");
-  console.log("CALLING MAIN");
   overwriteFetch();
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();
