@@ -15,8 +15,8 @@ import { Immutable, MessageEvent } from "@lichtblick/suite";
  */
 export class UndeliveredMessages {
   #requestedTopics = new Set<string>();
-  #deliveredTopics = new Set<string>();
-  #heldByTopic = new Map<string, MessageEvent>();
+  readonly #deliveredTopics = new Set<string>();
+  readonly #heldByTopic = new Map<string, MessageEvent>();
   #lastBuilt: {
     pipelineFrame: Immutable<MessageEvent[]> | undefined;
     frame: Immutable<MessageEvent[]> | undefined;
@@ -109,7 +109,9 @@ export class UndeliveredMessages {
     subscribedTopics: ReadonlySet<string>,
   ): Immutable<MessageEvent[]> | undefined {
     const inFrame = new Set<unknown>(pipelineFrame ?? []);
-    const missed = this.#heldOn(subscribedTopics).filter((messageEvent) => !inFrame.has(messageEvent));
+    const missed = this.#heldOn(subscribedTopics).filter(
+      (messageEvent) => !inFrame.has(messageEvent),
+    );
     return missed.length > 0 ? [...missed, ...(pipelineFrame ?? [])] : pipelineFrame;
   }
 
