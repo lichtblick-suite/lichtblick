@@ -118,8 +118,19 @@ export default function LayoutFavoritesProvider({
         .getFavoriteLayoutIds()
         .then((ids) => {
           if (!cancelled && version === remoteVersion.current) {
-            savedRemoteIds.current = new Set(ids);
-            updateRemoteIds(() => new Set(ids));
+            const loaded = new Set(ids);
+            savedRemoteIds.current = loaded;
+            updateRemoteIds((current) => {
+              const next = new Set(loaded);
+              for (const externalId of remoteWrites.current.keys()) {
+                if (current.has(externalId)) {
+                  next.add(externalId);
+                } else {
+                  next.delete(externalId);
+                }
+              }
+              return next;
+            });
           }
         })
         .catch((error: unknown) => {
