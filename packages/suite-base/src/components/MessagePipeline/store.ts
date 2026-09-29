@@ -294,13 +294,22 @@ function updateSubscriberAction(
 
   const lastMessageEventByTopic = new Map(prevState.lastMessageEventByTopic);
 
-  for (const topic of prevTopics) {
-    // if this topic has no other subscribers, we want to remove it from the lastMessageEventByTopic.
-    // This fixes the case where if a panel unsubscribes, triggers playback, and then resubscribes,
-    // they won't get this old stale message when they resubscribe again before getting the message
-    // at the current time frome seek-backfill.
-    if (!subscriberIdsByTopic.has(topic)) {
-      lastMessageEventByTopic.delete(topic);
+  // With playback, if this topic has no other subscribers, we remove it from the
+  // lastMessageEventByTopic. This fixes the case where if a panel unsubscribes, triggers playback,
+  // and then resubscribes, they won't get this old stale message when they resubscribe again before
+  // getting the message at the current time from seek-backfill.
+  //
+  // A live source has no seek-backfill and never re-sends a latched message (e.g. /tf_static), so
+  // the cached message is the only way a panel that subscribes later can get it. This matters on a
+  // tab switch: the old tab's panels unsubscribe before the new tab's panels subscribe.
+  const canSeekBackfill = prevState.public.playerState.capabilities.includes(
+    PLAYER_CAPABILITIES.playbackControl,
+  );
+  if (canSeekBackfill) {
+    for (const topic of prevTopics) {
+      if (!subscriberIdsByTopic.has(topic)) {
+        lastMessageEventByTopic.delete(topic);
+      }
     }
   }
 

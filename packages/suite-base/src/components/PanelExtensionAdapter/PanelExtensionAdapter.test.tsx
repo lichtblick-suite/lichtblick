@@ -858,6 +858,130 @@ describe("PanelExtensionAdapter", () => {
     mockRAF.mockRestore();
   });
 
+  describe("last message injected when a panel subscribes to a topic (live source)", () => {
+    const msg = (topic: string, sec: number): MessageEvent => ({
+      topic,
+      receiveTime: { sec, nsec: 0 },
+      sizeInBytes: 0,
+      message: sec,
+      schemaName: "foo",
+    });
+
+    function setup() {
+      const renderStates: Immutable<RenderState>[] = [];
+      const held: (() => void)[] = [];
+      const panel: { context?: PanelExtensionContext; hold: boolean } = { hold: false };
+      const initPanel = jest.fn((context: PanelExtensionContext) => {
+        panel.context = context;
+        context.watch("currentFrame");
+        context.subscribe([
+          { topic: "fast", preload: false },
+          { topic: "latched", preload: false },
+        ]);
+        context.onRender = (renderState, done) => {
+          renderStates.push({ ...renderState });
+          if (panel.hold) {
+            held.push(done);
+          } else {
+            done();
+          }
+        };
+      });
+      const Wrapper = ({ frame }: { frame: Record<string, MessageEvent[]> }) => (
+        <ThemeProvider isDark>
+          <MockPanelContextProvider>
+            <PanelSetup
+              fixture={{
+                topics: [
+                  { name: "fast", schemaName: "foo" },
+                  { name: "latched", schemaName: "foo" },
+                ],
+                frame,
+              }}
+              // The real pipeline applies subscription updates immediately and only holds the next
+              // player frame until panels finish rendering; the mock would also hold subscription
+              // updates, so don't register render promises with it.
+              pauseFrame={() => () => {}}
+            >
+              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+            </PanelSetup>
+          </MockPanelContextProvider>
+        </ThemeProvider>
+      );
+      const delivered = () =>
+        renderStates.flatMap((state) =>
+          (state.currentFrame ?? []).map((ev) => `${ev.topic}@${ev.receiveTime.sec}`),
+        );
+      const subscribe = (topics: string[]) => {
+        act(() => {
+          panel.context!.subscribe(topics.map((topic) => ({ topic, preload: false })));
+        });
+      };
+      return { Wrapper, panel, held, delivered, subscribe };
+    }
+
+    async function settle() {
+      for (let i = 0; i < 5; i++) {
+        await act(async () => {
+          await Promise.resolve();
+        });
+      }
+    }
+
+    // Tab switch: the old tab's panel held /tf_static and leaves, the new tab's 3D panel subscribes
+    // while it is still rendering its first frame. The pipeline injects the cached message into
+    // that moment's frame, which the adapter used to drop because the panel was busy; a live
+    // source never sends /tf_static again.
+    it("is delivered after the panel finishes the frame it was rendering", async () => {
+      // Given a panel that got the latched message once and is now busy rendering a frame
+      const { Wrapper, panel, held, delivered, subscribe } = setup();
+      render(<Wrapper frame={{ fast: [msg("fast", 1)], latched: [msg("latched", 2)] }} />);
+      await settle();
+      expect(delivered().filter((d) => d === "latched@2")).toHaveLength(1);
+
+      panel.hold = true;
+      subscribe(["fast"]);
+      await settle();
+      expect(held.length).toBeGreaterThan(0); // the panel is busy rendering
+
+      // When it subscribes to the latched topic while busy, then finishes rendering
+      subscribe(["fast", "latched"]);
+      await settle();
+      expect(delivered().filter((d) => d === "latched@2")).toHaveLength(1);
+
+      panel.hold = false;
+      act(() => {
+        held.splice(0).forEach((done) => {
+          done();
+        });
+      });
+      await settle();
+
+      // Then the latched message is delivered with the next rendered frame
+      expect(delivered().filter((d) => d === "latched@2")).toHaveLength(2);
+    });
+
+    // The injected message used to arrive before the adapter's local subscriptions included the
+    // topic, so the render state builder filtered it out and never saw that frame again.
+    it("is delivered once when the panel is not busy", async () => {
+      // Given a panel that got the latched message once and then unsubscribed from it
+      const { Wrapper, delivered, subscribe } = setup();
+      render(<Wrapper frame={{ fast: [msg("fast", 1)], latched: [msg("latched", 2)] }} />);
+      await settle();
+      subscribe(["fast"]);
+      await settle();
+
+      // When it subscribes to the latched topic again and keeps rendering
+      subscribe(["fast", "latched"]);
+      await settle();
+      subscribe(["fast", "latched"]);
+      await settle();
+
+      // Then the latched message is delivered exactly once more
+      expect(delivered().filter((d) => d === "latched@2")).toHaveLength(2);
+    });
+  });
+
   it("should call pause frame with new frame and resume after rendering", async () => {
     const renderStates: Immutable<RenderState>[] = [];
 

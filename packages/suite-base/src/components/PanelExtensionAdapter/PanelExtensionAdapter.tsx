@@ -7,7 +7,15 @@
 
 import { useTheme } from "@mui/material";
 import { produce } from "immer";
-import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useLatest } from "react-use";
 import { v4 as uuid } from "uuid";
 
@@ -18,6 +26,7 @@ import {
   AppSettingValue,
   ExtensionPanelRegistration,
   Immutable,
+  MessageEvent,
   PanelExtensionContext,
   ParameterValue,
   RenderState,
@@ -277,7 +286,47 @@ function PanelExtensionAdapter(
   // slowRenderState to indicate that the panel could not keep up with rendering relative to
   // updates.
   const renderingRef = useRef<boolean>(false);
+
+  // When a panel subscribes to a topic, the pipeline injects the topic's last message (e.g. a
+  // latched /tf_static that a live source never sends again) into a single frame. That frame can
+  // miss the panel: it arrives before `localSubscriptions` (React state) includes the topic, so the
+  // render state builder filters it out, or while the panel is not ready or still rendering, so the
+  // frame is dropped. On a live source, keep the latest message of each requested topic until a
+  // rendered frame has delivered a message on that topic, and deliver it with the next render.
+  const requestedTopicsRef = useRef(new Set<string>());
+  const undeliveredByTopicRef = useRef(new Map<string, MessageEvent>());
+  const deliveredTopicsRef = useRef(new Set<string>());
+  const lastBuiltRef = useRef<{
+    base: Immutable<MessageEvent[]> | undefined;
+    frame: Immutable<MessageEvent[]> | undefined;
+  }>({ base: undefined, frame: undefined });
+  const keepUndelivered = !capabilities.includes(PLAYER_CAPABILITIES.playbackControl);
+  // Re-runs the render effect when the panel finishes a render while messages are still held, so
+  // they are delivered even if no new frame follows (e.g. a static scene).
+  const [heldRetry, setHeldRetry] = useState(0);
+  // A topic that is subscribed again later must wait for its (injected) last message again.
+  const setRequestedTopics = useCallback((topics: ReadonlySet<string>) => {
+    requestedTopicsRef.current = new Set(topics);
+    for (const topic of [...deliveredTopicsRef.current, ...undeliveredByTopicRef.current.keys()]) {
+      if (!topics.has(topic)) {
+        deliveredTopicsRef.current.delete(topic);
+        undeliveredByTopicRef.current.delete(topic);
+      }
+    }
+  }, []);
+
   useLayoutEffect(() => {
+    if (keepUndelivered && messageEvents) {
+      for (const messageEvent of messageEvents) {
+        if (
+          requestedTopicsRef.current.has(messageEvent.topic) &&
+          !deliveredTopicsRef.current.has(messageEvent.topic)
+        ) {
+          undeliveredByTopicRef.current.set(messageEvent.topic, messageEvent);
+        }
+      }
+    }
+
     /**
      * We need to check that the panel has been initialized because the renderFn function is being
      * called between the initPanel's useLayoutEffect cleanup and initPanel being called
@@ -289,10 +338,29 @@ function PanelExtensionAdapter(
       return;
     }
 
+    // Add undelivered messages on topics the builder will now pass through. The builder only
+    // processes a frame it has not seen, so a pipeline frame it already got contributes nothing
+    // again, and without anything to add we hand it the same array as last time.
+    let currentFrame = messageEvents;
+    const subscribedTopics = new Set(localSubscriptions.map((sub) => sub.topic));
+    if (keepUndelivered && watchedFields.has("currentFrame")) {
+      const fresh = messageEvents !== lastBuiltRef.current.base;
+      const inFrame = new Set<unknown>(fresh ? (messageEvents ?? []) : []);
+      const missed = [...undeliveredByTopicRef.current.values()].filter(
+        (ev) => subscribedTopics.has(ev.topic) && !inFrame.has(ev),
+      );
+      if (missed.length > 0) {
+        currentFrame = fresh ? [...missed, ...(messageEvents ?? [])] : missed;
+      } else if (!fresh) {
+        currentFrame = lastBuiltRef.current.frame;
+      }
+      lastBuiltRef.current = { base: messageEvents, frame: currentFrame };
+    }
+
     const renderState = buildRenderState({
       appSettings,
       colorScheme,
-      currentFrame: messageEvents,
+      currentFrame,
       emitAlert: emitMessageConverterAlert,
       globalVariables,
       hoverValue,
@@ -322,6 +390,15 @@ function PanelExtensionAdapter(
     setSlowRender(false);
     const resumeFrame = pauseFrame(panelId);
 
+    if (keepUndelivered && watchedFields.has("currentFrame")) {
+      for (const messageEvent of currentFrame ?? []) {
+        if (subscribedTopics.has(messageEvent.topic)) {
+          deliveredTopicsRef.current.add(messageEvent.topic);
+          undeliveredByTopicRef.current.delete(messageEvent.topic);
+        }
+      }
+    }
+
     // tell the panel to render and lockout future renders until rendering is complete
     renderingRef.current = true;
     try {
@@ -336,6 +413,9 @@ function PanelExtensionAdapter(
         doneCalled = true;
         resumeFrame();
         renderingRef.current = false;
+        if (keepUndelivered && undeliveredByTopicRef.current.size > 0) {
+          setHeldRetry((n) => n + 1);
+        }
       });
     } catch (e: unknown) {
       const err = e as Error;
@@ -347,7 +427,9 @@ function PanelExtensionAdapter(
     colorScheme,
     emitMessageConverterAlert,
     globalVariables,
+    heldRetry,
     hoverValue,
+    keepUndelivered,
     localSubscriptions,
     messageConverters,
     messageEvents,
@@ -564,6 +646,7 @@ function PanelExtensionAdapter(
           };
         });
 
+        setRequestedTopics(new Set(localSubs.map((sub) => sub.topic)));
         setLocalSubscriptions(localSubs);
         setSubscriptions(panelId, subscribePayloads);
       },
@@ -632,6 +715,7 @@ function PanelExtensionAdapter(
         if (!isMounted()) {
           return;
         }
+        setRequestedTopics(new Set());
         setLocalSubscriptions([]);
         setSubscriptions(panelId, []);
       },
@@ -755,6 +839,7 @@ function PanelExtensionAdapter(
     clearHoverValue,
     setHoverValue,
     setSubscriptions,
+    setRequestedTopics,
     panelId,
     updatePanelSettingsTree,
     setDefaultPanelTitle,
@@ -802,6 +887,10 @@ function PanelExtensionAdapter(
     // Reset local state when the panel element is mounted or changes
     setRenderFn(undefined);
     renderingRef.current = false;
+    requestedTopicsRef.current = new Set();
+    undeliveredByTopicRef.current.clear();
+    deliveredTopicsRef.current.clear();
+    lastBuiltRef.current = { base: undefined, frame: undefined };
     setSlowRender(false);
 
     setBuildRenderState(() => initRenderStateBuilder());
