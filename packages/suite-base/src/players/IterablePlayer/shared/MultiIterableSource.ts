@@ -9,22 +9,12 @@ import {
   IterableSourceConstructor,
   MultiSource,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/types";
-import {
-  accumulateMap,
-  mergeMetadata,
-  mergeTopicStats,
-  setEndTime,
-  setStartTime,
-} from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/mergeInitialization";
+import { mergeInitializations } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/mergeInitialization";
 import { mergeSequentialIterators } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/mergeSequentialIterators";
 import {
-  filterSourcesForBackfill,
+  getBackfillMessagesFromSources,
   filterSourcesByTimeRange,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/sourceTimeOverlap";
-import {
-  validateAndAddNewTopics,
-  validateAndAddNewDatatypes,
-} from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/validateInitialization";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import {
@@ -160,9 +150,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   }
 
   public async initialize(): Promise<Initialization> {
-    const initializations: Initialization[] = await this.loadMultipleSources();
-
-    const resultInit: Initialization = this.mergeInitializations(initializations);
+    const resultInit: Initialization = mergeInitializations(await this.loadMultipleSources());
 
     this.sourceImpl.sort((a, b) => {
       const aStart = a.getStart?.() ?? { sec: 0, nsec: 0 };
@@ -207,34 +195,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     args: GetBackfillMessagesArgs,
   ): Promise<MessageEvent<Uint8Array>[]> {
     // Only consider sources that could contain messages at or before the backfill time.
-    const relevantSources = filterSourcesForBackfill(this.sourceImpl, args.time);
-
-    // Iterate newest-first so we start near the seek target and stop once every topic has a value,
-    // avoiding redundant reads from earlier sources.
-    const backfillMessages: MessageEvent<Uint8Array>[] = [];
-    const missingTopics = new Map(args.topics);
-
-    for (let index = relevantSources.length - 1; index >= 0; index--) {
-      if (missingTopics.size === 0) {
-        break;
-      }
-
-      const source = relevantSources[index]!;
-      // Pass a snapshot of the still-missing topics so later mutation of `missingTopics` cannot
-      // alias the map handed to the source.
-      const topicsForSource = new Map(missingTopics);
-      const messages = await source.getBackfillMessages({ ...args, topics: topicsForSource });
-      if (messages.length === 0) {
-        continue;
-      }
-
-      backfillMessages.push(...messages);
-      for (const message of messages) {
-        missingTopics.delete(message.topic);
-      }
-    }
-
-    return backfillMessages;
+    // This avoids triggering HTTP requests to MCAP files that start after the requested time.
+    return await getBackfillMessagesFromSources(this.sourceImpl, args);
   }
 
   public async terminate(): Promise<void> {
@@ -256,36 +218,5 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
       // Always tear down the pool, even if a source failed to terminate.
       await this.#pool?.terminate();
     }
-  }
-
-  private mergeInitializations(initializations: Initialization[]): Initialization {
-    const resultInit: Initialization = {
-      start: { sec: Number.MAX_SAFE_INTEGER, nsec: Number.MAX_SAFE_INTEGER },
-      end: { sec: Number.MIN_SAFE_INTEGER, nsec: Number.MIN_SAFE_INTEGER },
-      datatypes: new Map(),
-      metadata: [],
-      alerts: [],
-      profile: "",
-      publishersByTopic: new Map(),
-      topics: [],
-      topicStats: new Map(),
-    };
-
-    for (const init of initializations) {
-      resultInit.start = setStartTime(resultInit.start, init.start);
-      resultInit.end = setEndTime(resultInit.end, init.end);
-
-      resultInit.profile = init.profile ?? resultInit.profile;
-      resultInit.publishersByTopic = accumulateMap(
-        resultInit.publishersByTopic,
-        init.publishersByTopic,
-      );
-      resultInit.topicStats = mergeTopicStats(resultInit.topicStats, init.topicStats);
-      resultInit.metadata = mergeMetadata(resultInit.metadata, init.metadata);
-      resultInit.alerts.push(...init.alerts);
-      validateAndAddNewDatatypes(resultInit, init);
-      validateAndAddNewTopics(resultInit, init);
-    }
-    return resultInit;
   }
 }

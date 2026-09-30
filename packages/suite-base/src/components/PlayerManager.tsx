@@ -202,6 +202,7 @@ export default function PlayerManager(
               metricsCollector,
               params: args.params,
               sourceMetadata: args.sourceMetadata,
+              additionalSources: args.additionalSources,
             });
             setBasePlayer(newPlayer);
 
