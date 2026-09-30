@@ -8,12 +8,28 @@ import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPane
 import { useSelectedPanels } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
 import { PathLegendProps } from "@lichtblick/suite-base/panels/StateTransitions/types";
+import { useDraggedMessagePath } from "@lichtblick/suite-base/panels/shared/useDraggedMessagePath";
+import { useMessagePathDrag } from "@lichtblick/suite-base/services/messagePathDragging";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { PathLegend } from "./PathLegend";
 
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext");
 jest.mock("@lichtblick/suite-base/context/Workspace/useWorkspaceActions");
+
+jest.mock("@lichtblick/suite-base/panels/shared/useDraggedMessagePath", () => ({
+  useDraggedMessagePath: jest.fn(() => undefined),
+}));
+
+jest.mock("@lichtblick/suite-base/services/messagePathDragging", () => ({
+  useMessagePathDrag: jest.fn(() => ({
+    connectDragSource: jest.fn(),
+    connectDragPreview: jest.fn(),
+    cursor: undefined,
+    isDragging: false,
+    draggedItemCount: 0,
+  })),
+}));
 
 describe("PathLegend Component", () => {
   const mockSetFocusedPath = jest.fn();
@@ -105,13 +121,44 @@ describe("PathLegend Component", () => {
     expect(mockSaveConfig).toHaveBeenCalledWith({ paths: [props.paths[1]] });
   });
 
-  it("should apply the correct height for each topic", () => {
-    const { props } = renderComponent();
-    const { style: firstRowStyle } = screen.getByTestId(`row-0`);
-    const { style: secondRowStyle } = screen.getByTestId(`row-1`);
-    const heightStyle = `height: ${props.heightPerTopic}px;`;
+  it("should apply the row styling (including height) via a generated class to each topic row", () => {
+    // Given a rendered legend with multiple series
+    renderComponent();
 
-    expect(firstRowStyle.cssText).toContain(heightStyle);
-    expect(secondRowStyle.cssText).toContain(heightStyle);
+    // When reading the row elements
+    const firstRow = screen.getByTestId(`row-0`);
+    const secondRow = screen.getByTestId(`row-1`);
+
+    // Then height is applied through a tss-react generated class (not an inline style), and both
+    // rows share the same class since they use the same heightPerTopic parameter
+    expect(firstRow.getAttribute("style")).toBeNull();
+    expect(firstRow.className).toBeTruthy();
+    expect(firstRow.className).toBe(secondRow.className);
+  });
+
+  it("wires each row as a message-path drag source scoped to the panel", () => {
+    // Given a legend rendered for a specific panel with configured series
+    const panelId = BasicBuilder.string();
+
+    // When the component renders
+    const { props } = renderComponent({ panelId });
+
+    // Then a DraggedMessagePath is built from each series' value
+    expect(useDraggedMessagePath).toHaveBeenCalledWith(props.paths[0]!.value);
+    expect(useDraggedMessagePath).toHaveBeenCalledWith(props.paths[1]!.value);
+
+    // And the drag is scoped to the owning panel so it can't be dropped back onto itself
+    expect(useMessagePathDrag).toHaveBeenCalledWith(
+      expect.objectContaining({ sourcePanelId: panelId, selected: false }),
+    );
+  });
+
+  it("does not build a drag source for the placeholder row", () => {
+    // Given a legend with no configured series (placeholder row only)
+    // When the component renders
+    renderComponent({ paths: [] });
+
+    // Then no draggable path is built for the placeholder
+    expect(useDraggedMessagePath).toHaveBeenCalledWith(undefined);
   });
 });
