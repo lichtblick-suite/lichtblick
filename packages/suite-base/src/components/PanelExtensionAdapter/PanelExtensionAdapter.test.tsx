@@ -867,17 +867,21 @@ describe("PanelExtensionAdapter", () => {
       schemaName: "foo",
     });
 
-    function setup() {
+    function setup({ watchCurrentFrame = true }: { watchCurrentFrame?: boolean } = {}) {
       const renderStates: Immutable<RenderState>[] = [];
       const held: (() => void)[] = [];
       const panel: { context?: PanelExtensionContext; hold: boolean } = { hold: false };
       const initPanel = jest.fn((context: PanelExtensionContext) => {
         panel.context = context;
-        context.watch("currentFrame");
-        context.subscribe([
-          { topic: "fast", preload: false },
-          { topic: "latched", preload: false },
-        ]);
+        if (watchCurrentFrame) {
+          context.watch("currentFrame");
+          context.subscribe([
+            { topic: "fast", preload: false },
+            { topic: "latched", preload: false },
+          ]);
+        } else {
+          context.watch("topics");
+        }
         context.onRender = (renderState, done) => {
           renderStates.push({ ...renderState });
           if (panel.hold) {
@@ -979,6 +983,37 @@ describe("PanelExtensionAdapter", () => {
 
       // Then the latched message is delivered exactly once more
       expect(delivered().filter((d) => d === "latched@2")).toHaveLength(2);
+    });
+
+    // The render-done callback belongs to the render that started it. If the panel starts watching
+    // currentFrame and subscribes while that render is in progress, the effect holds the injected
+    // message but cannot render; finishing the render must still deliver it.
+    it("is delivered when the panel starts watching currentFrame while rendering", async () => {
+      // Given a panel that watches only the topic list and is busy rendering it
+      const { Wrapper, panel, held, delivered, subscribe } = setup({ watchCurrentFrame: false });
+      panel.hold = true;
+      render(<Wrapper frame={{ fast: [msg("fast", 1)], latched: [msg("latched", 2)] }} />);
+      await settle();
+      expect(held.length).toBeGreaterThan(0);
+
+      // When it starts watching currentFrame and subscribes to the latched topic while busy, then
+      // finishes rendering
+      act(() => {
+        panel.context!.watch("currentFrame");
+      });
+      subscribe(["fast", "latched"]);
+      await settle();
+      expect(delivered()).toEqual([]);
+      panel.hold = false;
+      act(() => {
+        held.splice(0).forEach((done) => {
+          done();
+        });
+      });
+      await settle();
+
+      // Then the latched message is delivered without waiting for another frame
+      expect(delivered()).toContain("latched@2");
     });
   });
 

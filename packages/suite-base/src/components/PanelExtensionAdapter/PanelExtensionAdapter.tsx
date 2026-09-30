@@ -295,14 +295,17 @@ function PanelExtensionAdapter(
   // are handed to the panel once it watches currentFrame.
   const keepUndelivered = !capabilities.includes(PLAYER_CAPABILITIES.playbackControl);
   const deliverHeld = keepUndelivered && watchedFields.has("currentFrame");
+  // The render-done callback belongs to the render that started it; read the current gate, since
+  // the panel may start watching currentFrame while that render is in progress.
+  const deliverHeldRef = useLatest(deliverHeld);
   // Re-runs the render effect when the panel finishes a render while messages are still held, so
   // they are delivered even if no new frame follows (e.g. a static scene).
   const [heldRetry, setHeldRetry] = useState(0);
   const retryIfHeld = useCallback(() => {
-    if (deliverHeld && undelivered.hasHeld()) {
+    if (deliverHeldRef.current && undelivered.hasHeld()) {
       setHeldRetry((n) => n + 1);
     }
-  }, [deliverHeld, undelivered]);
+  }, [deliverHeldRef, undelivered]);
 
   useLayoutEffect(() => {
     if (keepUndelivered) {
