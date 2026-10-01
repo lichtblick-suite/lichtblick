@@ -177,32 +177,44 @@ describe("PlotCoordinator", () => {
           .mockReturnValue({ range: { min: 0, max: 15 }, datasetsChanged: false });
       });
 
-      it("re-renders so the x-axis window follows the playback time", () => {
+      // Let queued renders finish so the next assertion only sees the work it triggers.
+      const settle = async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      };
+
+      it("re-renders so the x-axis window follows the playback time", async () => {
         plotCoordinator.handleConfig(
           PlotBuilder.config({ xAxisVal: "timestamp", followingViewWidth: 4, paths: [] }),
           "light",
           {},
         );
         plotCoordinator.handlePlayerState(at(0));
-        const queueDispatchRender = jest.spyOn(plotCoordinator as any, "queueDispatchRender");
+        await settle();
+        const update = jest.spyOn(renderer, "update");
+        update.mockClear();
 
         plotCoordinator.handlePlayerState(at(5));
+        await settle();
 
-        expect(queueDispatchRender).toHaveBeenCalled();
-        expect(plotCoordinator["getXBounds"]()).toEqual({ min: 1, max: 5 });
+        expect(update).toHaveBeenLastCalledWith(
+          expect.objectContaining({ xBounds: { min: 1, max: 5 } }),
+        );
       });
 
-      it("does not re-render while paused or without follow mode", () => {
+      it("does not re-render while paused or without follow mode", async () => {
         plotCoordinator.handleConfig(
           PlotBuilder.config({ xAxisVal: "timestamp", followingViewWidth: 4, paths: [] }),
           "light",
           {},
         );
         plotCoordinator.handlePlayerState(at(5));
-        const queueDispatchRender = jest.spyOn(plotCoordinator as any, "queueDispatchRender");
+        await settle();
+        const update = jest.spyOn(renderer, "update");
+        update.mockClear();
 
         plotCoordinator.handlePlayerState(at(5));
-        expect(queueDispatchRender).not.toHaveBeenCalled();
+        await settle();
+        expect(update).not.toHaveBeenCalled();
 
         // PlotBuilder fills an undefined followingViewWidth with a random number — clear it after.
         plotCoordinator.handleConfig(
@@ -213,9 +225,11 @@ describe("PlotCoordinator", () => {
           "light",
           {},
         );
-        queueDispatchRender.mockClear();
+        await settle();
+        update.mockClear();
         plotCoordinator.handlePlayerState(at(6));
-        expect(queueDispatchRender).not.toHaveBeenCalled();
+        await settle();
+        expect(update).not.toHaveBeenCalled();
       });
     });
 

@@ -405,13 +405,15 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   }
 
   private updateCurrentSeconds(secondsSinceStart: number): void {
+    const moved = secondsSinceStart !== this.currentSeconds;
+    // Set the time first: queueDispatchRender may start rendering right away and reads it.
+    this.currentSeconds = secondsSinceStart;
     // In follow mode the x-axis window ends at the current time. A source with a fixed range
     // (file playback) never changes the dataset range, so nothing else would re-render the axis
     // and it would stay where the panel was first drawn.
-    if (this.followRange != undefined && secondsSinceStart !== this.currentSeconds) {
+    if (this.followRange != undefined && moved) {
       this.queueDispatchRender();
     }
-    this.currentSeconds = secondsSinceStart;
   }
 
   private canReset(): boolean {
