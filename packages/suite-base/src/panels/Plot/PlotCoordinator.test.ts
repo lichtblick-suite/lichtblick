@@ -161,6 +161,64 @@ describe("PlotCoordinator", () => {
       );
     });
 
+    describe("follow mode during playback (fixed dataset range)", () => {
+      const at = (seconds: number) =>
+        PlayerBuilder.playerState({
+          activeData: PlayerBuilder.activeData({
+            startTime: RosTimeBuilder.time({ sec: 100, nsec: 0 }),
+            currentTime: RosTimeBuilder.time({ sec: 100 + seconds, nsec: 0 }),
+          }),
+        });
+
+      beforeEach(() => {
+        // A file source reports the whole file as the dataset range, so it never changes while playing.
+        datasetsBuilder.handlePlayerState = jest
+          .fn()
+          .mockReturnValue({ range: { min: 0, max: 15 }, datasetsChanged: false });
+      });
+
+      it("re-renders so the x-axis window follows the playback time", () => {
+        plotCoordinator.handleConfig(
+          PlotBuilder.config({ xAxisVal: "timestamp", followingViewWidth: 4, paths: [] }),
+          "light",
+          {},
+        );
+        plotCoordinator.handlePlayerState(at(0));
+        const queueDispatchRender = jest.spyOn(plotCoordinator as any, "queueDispatchRender");
+
+        plotCoordinator.handlePlayerState(at(5));
+
+        expect(queueDispatchRender).toHaveBeenCalled();
+        expect(plotCoordinator["getXBounds"]()).toEqual({ min: 1, max: 5 });
+      });
+
+      it("does not re-render while paused or without follow mode", () => {
+        plotCoordinator.handleConfig(
+          PlotBuilder.config({ xAxisVal: "timestamp", followingViewWidth: 4, paths: [] }),
+          "light",
+          {},
+        );
+        plotCoordinator.handlePlayerState(at(5));
+        const queueDispatchRender = jest.spyOn(plotCoordinator as any, "queueDispatchRender");
+
+        plotCoordinator.handlePlayerState(at(5));
+        expect(queueDispatchRender).not.toHaveBeenCalled();
+
+        // PlotBuilder fills an undefined followingViewWidth with a random number — clear it after.
+        plotCoordinator.handleConfig(
+          {
+            ...PlotBuilder.config({ xAxisVal: "timestamp", paths: [] }),
+            followingViewWidth: undefined,
+          },
+          "light",
+          {},
+        );
+        queueDispatchRender.mockClear();
+        plotCoordinator.handlePlayerState(at(6));
+        expect(queueDispatchRender).not.toHaveBeenCalled();
+      });
+    });
+
     it("should update currentValuesByConfigIndex with the latest message item", () => {
       const state = PlayerBuilder.playerState({
         activeData: PlayerBuilder.activeData(),

@@ -159,8 +159,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     this.subscribeTopicRanges(this.seriesKeysByTopic);
 
     if (this.isTimeseriesPlot) {
-      const secondsSinceStart = toSec(subtractTime(currentTime, startTime));
-      this.currentSeconds = secondsSinceStart;
+      this.updateCurrentSeconds(toSec(subtractTime(currentTime, startTime)));
     }
 
     if (lastSeekTime !== this.lastSeekTime) {
@@ -403,6 +402,16 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       return [];
     }
     return await this.datasetsBuilder.getCsvData();
+  }
+
+  private updateCurrentSeconds(secondsSinceStart: number): void {
+    // In follow mode the x-axis window ends at the current time. A source with a fixed range
+    // (file playback) never changes the dataset range, so nothing else would re-render the axis
+    // and it would stay where the panel was first drawn.
+    if (this.followRange != undefined && secondsSinceStart !== this.currentSeconds) {
+      this.queueDispatchRender();
+    }
+    this.currentSeconds = secondsSinceStart;
   }
 
   private canReset(): boolean {
