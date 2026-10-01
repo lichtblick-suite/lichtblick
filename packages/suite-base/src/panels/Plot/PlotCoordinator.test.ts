@@ -182,7 +182,8 @@ describe("PlotCoordinator", () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       };
 
-      it("re-renders so the x-axis window follows the playback time", async () => {
+      it("should render the x-axis window ending at the new time when playback advances in follow mode", async () => {
+        // GIVEN a timestamp plot following the last 4 s, rendered at the start of the file
         plotCoordinator.handleConfig(
           PlotBuilder.config({ xAxisVal: "timestamp", followingViewWidth: 4, paths: [] }),
           "light",
@@ -193,15 +194,18 @@ describe("PlotCoordinator", () => {
         const update = jest.spyOn(renderer, "update");
         update.mockClear();
 
+        // WHEN playback reaches 5 s
         plotCoordinator.handlePlayerState(at(5));
         await settle();
 
+        // THEN the renderer receives the window from 1 s to 5 s
         expect(update).toHaveBeenLastCalledWith(
           expect.objectContaining({ xBounds: { min: 1, max: 5 } }),
         );
       });
 
-      it("does not re-render while paused or without follow mode", async () => {
+      it("should not render again when the playback time has not changed", async () => {
+        // GIVEN a timestamp plot following the last 4 s, rendered at 5 s
         plotCoordinator.handleConfig(
           PlotBuilder.config({ xAxisVal: "timestamp", followingViewWidth: 4, paths: [] }),
           "light",
@@ -212,11 +216,17 @@ describe("PlotCoordinator", () => {
         const update = jest.spyOn(renderer, "update");
         update.mockClear();
 
+        // WHEN the same time arrives again (playback is paused)
         plotCoordinator.handlePlayerState(at(5));
         await settle();
-        expect(update).not.toHaveBeenCalled();
 
-        // PlotBuilder fills an undefined followingViewWidth with a random number — clear it after.
+        // THEN nothing is rendered
+        expect(update).not.toHaveBeenCalled();
+      });
+
+      it("should not render on time changes when the plot is not in follow mode", async () => {
+        // GIVEN a timestamp plot without a fixed x-axis range, rendered at 5 s
+        // (PlotBuilder fills an undefined followingViewWidth with a random number, so clear it after)
         plotCoordinator.handleConfig(
           {
             ...PlotBuilder.config({ xAxisVal: "timestamp", paths: [] }),
@@ -225,10 +235,16 @@ describe("PlotCoordinator", () => {
           "light",
           {},
         );
+        plotCoordinator.handlePlayerState(at(5));
         await settle();
+        const update = jest.spyOn(renderer, "update");
         update.mockClear();
+
+        // WHEN playback reaches 6 s
         plotCoordinator.handlePlayerState(at(6));
         await settle();
+
+        // THEN nothing is rendered
         expect(update).not.toHaveBeenCalled();
       });
     });
