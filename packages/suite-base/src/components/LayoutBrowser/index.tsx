@@ -36,7 +36,6 @@ import {
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
-import { useLayoutFavorites } from "@lichtblick/suite-base/context/LayoutFavoritesContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import {
   WorkspaceStoreSelectors,
@@ -46,11 +45,13 @@ import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/us
 import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useLayoutActions } from "@lichtblick/suite-base/hooks/useLayoutActions";
+import { useLayoutFavorites } from "@lichtblick/suite-base/hooks/useLayoutFavorites";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
 import { usePrompt } from "@lichtblick/suite-base/hooks/usePrompt";
 import { defaultPlaybackConfig } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
+import { layoutIsFavorite } from "@lichtblick/suite-base/services/ILayoutManager";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 import LayoutSection from "./LayoutSection";
@@ -72,7 +73,11 @@ export default function LayoutBrowser({
   const layoutManager = useLayoutManager();
   const [prompt, promptModal] = usePrompt();
   const analytics = useAnalytics();
-  const { isFavorite, setFavorite } = useLayoutFavorites();
+  const favorites = useLayoutFavorites();
+  const isFavorite = useCallback(
+    (layout: Layout) => layoutIsFavorite(favorites, layout),
+    [favorites],
+  );
 
   const currentLayoutId = useCurrentLayoutSelector(selectedLayoutIdSelector);
   const { onSelectLayout, state, dispatch } = useLayoutNavigation();
@@ -129,7 +134,9 @@ export default function LayoutBrowser({
     if (!layouts.value) {
       return undefined;
     }
-    const favoritesFirst = (items: Layout[]) => _.sortBy(items, (item) => !isFavorite(item));
+    // Sort a copy: sorting the loaded arrays in place would lose their alphabetical order.
+    const favoritesFirst = (items: Layout[]) =>
+      [...items].sort((a, b) => Number(!isFavorite(a)) - Number(!isFavorite(b)));
     return {
       personal: favoritesFirst(layouts.value.personal),
       shared: favoritesFirst(layouts.value.shared),
@@ -263,7 +270,7 @@ export default function LayoutBrowser({
         analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
         if (isFavorite(item)) {
           // The shared copy is a new layout: keep it as a favorite, like the original.
-          await setFavorite(newLayout, { favorite: true }).catch((error: unknown) => {
+          await layoutManager.setFavorite(newLayout, { favorite: true }).catch((error: unknown) => {
             log.error("Failed to mark shared layout as favorite", error);
           });
         }
@@ -271,15 +278,7 @@ export default function LayoutBrowser({
         await onSelectLayout(newLayout);
       }
     },
-    [
-      analytics,
-      isFavorite,
-      layoutManager,
-      onSelectLayout,
-      prompt,
-      setFavorite,
-      setSharedSectionExpanded,
-    ],
+    [analytics, isFavorite, layoutManager, onSelectLayout, prompt, setSharedSectionExpanded],
   );
 
   const onMakePersonalCopy = useCallbackWithToast(

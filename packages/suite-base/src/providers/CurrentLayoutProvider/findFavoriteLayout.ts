@@ -1,14 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { LayoutFavorites, layoutIsFavorite } from "@lichtblick/suite-base/services/ILayoutManager";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
-
-type FavoriteLayoutIds = {
-  /** Favorite personal layouts, identified by `Layout.id`. */
-  personal: ReadonlySet<string>;
-  /** Favorite shared layouts, identified by `Layout.externalId`. */
-  shared: ReadonlySet<string>;
-};
 
 function firstByName(layouts: readonly Layout[]): Layout | undefined {
   return [...layouts].sort((a, b) => a.name.localeCompare(b.name))[0];
@@ -22,16 +16,11 @@ function firstByName(layouts: readonly Layout[]): Layout | undefined {
  */
 export function findFavoriteLayout(
   layouts: readonly Layout[],
-  favoriteIds: FavoriteLayoutIds,
+  favorites: LayoutFavorites,
 ): Layout | undefined {
-  const shared = layouts.filter(
-    (layout) =>
-      layoutIsShared(layout) &&
-      layout.externalId != undefined &&
-      favoriteIds.shared.has(layout.externalId),
+  const favoriteLayouts = layouts.filter((layout) => layoutIsFavorite(favorites, layout));
+  return (
+    firstByName(favoriteLayouts.filter(layoutIsShared)) ??
+    firstByName(favoriteLayouts.filter((layout) => !layoutIsShared(layout)))
   );
-  const personal = layouts.filter(
-    (layout) => !layoutIsShared(layout) && favoriteIds.personal.has(layout.id),
-  );
-  return firstByName(shared) ?? firstByName(personal);
 }

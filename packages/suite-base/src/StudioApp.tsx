@@ -21,7 +21,6 @@ import { RemoteLayoutStorageContext } from "@lichtblick/suite-base/context/Remot
 import { useSharedRootContext } from "@lichtblick/suite-base/context/SharedRootContext";
 import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
-import LayoutFavoritesProvider from "@lichtblick/suite-base/providers/LayoutFavoritesProvider";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
@@ -91,8 +90,9 @@ export function StudioApp(): React.JSX.Element {
   // Alerts provider also must come before other, dependent contexts.
   providers.unshift(<AlertsContextProvider />);
   providers.unshift(<CurrentLayoutProvider />);
-  providers.unshift(<UserProfileLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);
+  // The layout manager stores favorites in the user profile, so it is nested inside it.
+  providers.unshift(<UserProfileLocalStorageProvider />);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
 
@@ -123,9 +123,6 @@ export function StudioApp(): React.JSX.Element {
       <RemoteLayoutFavoritesStorageContext.Provider value={remoteLayoutFavoritesStorage} />,
     );
   }
-
-  // Depends on the layout manager and user profile providers above, so it is nested inside them.
-  providers.push(<LayoutFavoritesProvider />);
 
   if (extraProviders) {
     // Providers supplying context consumed by providers above them in this list must stay outermost,
