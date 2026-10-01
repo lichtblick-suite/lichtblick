@@ -13,8 +13,10 @@ import { MutexLocked } from "@lichtblick/den/async";
 import Logger from "@lichtblick/log";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
+import { UserProfileStorage } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import {
   ILayoutManager,
+  LayoutFavorites,
   LayoutManagerChangeEvent,
   LayoutManagerEventTypes,
   SetOnlineProps,
@@ -28,6 +30,7 @@ import {
   layoutIsShared,
   layoutPermissionIsShared,
 } from "@lichtblick/suite-base/services/ILayoutStorage";
+import { IRemoteLayoutFavoritesStorage } from "@lichtblick/suite-base/services/IRemoteLayoutFavoritesStorage";
 import { IRemoteLayoutStorage } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
 import computeLayoutSyncOperations, {
   SyncOperation,
@@ -49,12 +52,32 @@ export type SaveNewLayout = {
   from?: string;
 };
 
+function updateIds(
+  ids: ReadonlySet<string>,
+  id: string,
+  { included }: { included: boolean },
+): ReadonlySet<string> {
+  if (ids.has(id) === included) {
+    return ids;
+  }
+  const next = new Set(ids);
+  if (included) {
+    next.add(id);
+  } else {
+    next.delete(id);
+  }
+  return next;
+}
+
+type FavoriteKind = keyof LayoutFavorites;
+
 export default class LayoutManager implements ILayoutManager {
   public static readonly LOCAL_STORAGE_NAMESPACE = "local";
   public static readonly REMOTE_STORAGE_NAMESPACE_PREFIX = "remote-";
   public readonly supportsSharing: boolean;
   public isOnline = false;
   public error: Error | undefined = undefined;
+  public favorites: LayoutFavorites = { personal: new Set(), shared: new Set() };
 
   private emitter = new EventEmitter<LayoutManagerEventTypes>();
   private busyCount = 0;
@@ -68,12 +91,37 @@ export default class LayoutManager implements ILayoutManager {
   /** Ensures at most one sync operation is in progress at a time */
   private currentSync?: Promise<void>;
 
+  /** Stores the favorites of personal layouts, which only exist locally. */
+  private userProfile: UserProfileStorage | undefined;
+  /** Stores the favorites of shared layouts. */
+  private remoteFavorites: IRemoteLayoutFavoritesStorage | undefined;
+  private personalFavoritesLoad?: Promise<void>;
+  private sharedFavoritesLoad: Promise<void> = Promise.resolve();
+  /** Favorites as last loaded from or written to their storage. Failed writes roll back to it. */
+  private savedFavorites: LayoutFavorites = { personal: new Set(), shared: new Set() };
+  /** The last write per layout. Each write waits for the previous one of its layout. */
+  private favoriteWrites: Record<FavoriteKind, Map<string, Promise<void>>> = {
+    personal: new Map(),
+    shared: new Map(),
+  };
+  /**
+   * The writes saved while each load of shared favorites is running, by external id. The load's
+   * response may predate them, so they take precedence over it.
+   */
+  private sharedFavoriteLoads = new Set<Map<string, boolean>>();
+
   public constructor({
     local,
     remote,
+    userProfile,
+    remoteFavorites,
   }: {
     local: ILayoutStorage;
     remote: IRemoteLayoutStorage | undefined;
+    /** Without it, personal layouts cannot be marked as favorite. */
+    userProfile?: UserProfileStorage;
+    /** Without it, shared layouts cannot be marked as favorite. */
+    remoteFavorites?: IRemoteLayoutFavoritesStorage;
   }) {
     this.local = new MutexLocked(
       new NamespacedLayoutStorage(
@@ -91,6 +139,8 @@ export default class LayoutManager implements ILayoutManager {
     );
     this.remote = remote;
     this.supportsSharing = remote != undefined;
+    this.userProfile = userProfile;
+    this.remoteFavorites = remoteFavorites;
   }
 
   public isBusy(): boolean {
@@ -100,6 +150,9 @@ export default class LayoutManager implements ILayoutManager {
   public setOnline({ online }: SetOnlineProps): void {
     this.isOnline = online;
     this.emitter.emit("onlinechange");
+    if (online && this.remoteFavorites) {
+      this.sharedFavoritesLoad = this.loadSharedFavorites(this.remoteFavorites);
+    }
   }
 
   public setError(error: undefined | Error): void {
@@ -446,6 +499,155 @@ export default class LayoutManager implements ILayoutManager {
     });
     this.notifyChangeListeners({ type: "change", updatedLayout: undefined });
     return result;
+  }
+
+  public async getFavorites(): Promise<LayoutFavorites> {
+    await Promise.all([this.loadPersonalFavorites(), this.sharedFavoritesLoad]);
+    return this.favorites;
+  }
+
+  public canFavorite(layout: Layout): boolean {
+    return layoutIsShared(layout)
+      ? this.remoteFavorites != undefined && layout.externalId != undefined
+      : this.userProfile != undefined;
+  }
+
+  public async setFavorite(layout: Layout, params: { favorite: boolean }): Promise<void> {
+    const { userProfile, remoteFavorites } = this;
+    if (!layoutIsShared(layout) && userProfile) {
+      await this.setPersonalFavorite(userProfile, layout.id, params);
+    } else if (layoutIsShared(layout) && remoteFavorites && layout.externalId != undefined) {
+      await this.setSharedFavorite(remoteFavorites, layout.externalId, params);
+    } else {
+      throw new Error(`Layout "${layout.name}" cannot be marked as favorite`);
+    }
+  }
+
+  private updateFavorites(update: Partial<LayoutFavorites>): void {
+    const next = { ...this.favorites, ...update };
+    if (next.personal === this.favorites.personal && next.shared === this.favorites.shared) {
+      return;
+    }
+    this.favorites = next;
+    this.emitter.emit("favoriteschange");
+  }
+
+  private async loadPersonalFavorites(): Promise<void> {
+    const userProfile = this.userProfile;
+    if (!userProfile) {
+      return;
+    }
+    this.personalFavoritesLoad ??= userProfile
+      .getUserProfile()
+      .then(({ favoriteLayoutIds = [] }) => {
+        const personal = new Set(favoriteLayoutIds);
+        this.savedFavorites = { ...this.savedFavorites, personal };
+        this.updateFavorites({ personal });
+      })
+      .catch((error: unknown) => {
+        log.error("Failed to load personal favorite layouts", error);
+      });
+    await this.personalFavoritesLoad;
+  }
+
+  private async loadSharedFavorites(remote: IRemoteLayoutFavoritesStorage): Promise<void> {
+    const savedWhileLoading = new Map<string, boolean>();
+    this.sharedFavoriteLoads.add(savedWhileLoading);
+    try {
+      let saved: ReadonlySet<string> = new Set(await remote.getFavoriteLayoutIds());
+      for (const [externalId, favorite] of savedWhileLoading) {
+        saved = updateIds(saved, externalId, { included: favorite });
+      }
+      this.savedFavorites = { ...this.savedFavorites, shared: saved };
+      // A layout with a pending write keeps its unsaved state; the write settles it.
+      let shared = saved;
+      for (const externalId of this.favoriteWrites.shared.keys()) {
+        shared = updateIds(shared, externalId, {
+          included: this.favorites.shared.has(externalId),
+        });
+      }
+      this.updateFavorites({ shared });
+    } catch (error) {
+      log.error("Failed to load remote favorite layouts", error);
+    } finally {
+      this.sharedFavoriteLoads.delete(savedWhileLoading);
+    }
+  }
+
+  private async setPersonalFavorite(
+    userProfile: UserProfileStorage,
+    id: LayoutID,
+    { favorite }: { favorite: boolean },
+  ): Promise<void> {
+    await this.loadPersonalFavorites();
+    await this.saveFavorite("personal", id, { favorite }, async () => {
+      await userProfile.setUserProfile((profile) => ({
+        ...profile,
+        favoriteLayoutIds: [
+          ...updateIds(new Set(profile.favoriteLayoutIds ?? []), id, { included: favorite }),
+        ] as LayoutID[],
+      }));
+    });
+  }
+
+  private async setSharedFavorite(
+    remote: IRemoteLayoutFavoritesStorage,
+    externalId: string,
+    { favorite }: { favorite: boolean },
+  ): Promise<void> {
+    await this.saveFavorite("shared", externalId, { favorite }, async () => {
+      if (favorite) {
+        await remote.addFavoriteLayout(externalId);
+      } else {
+        await remote.removeFavoriteLayout(externalId);
+      }
+      for (const savedWhileLoading of this.sharedFavoriteLoads) {
+        savedWhileLoading.set(externalId, favorite);
+      }
+    });
+  }
+
+  /**
+   * Apply a favorite change immediately, then save it after the previous write of the same layout.
+   * If it cannot be saved and no newer write of the layout is pending, the layout is rolled back to
+   * its saved state.
+   */
+  private async saveFavorite(
+    kind: FavoriteKind,
+    id: string,
+    { favorite }: { favorite: boolean },
+    save: () => Promise<void>,
+  ): Promise<void> {
+    this.updateFavorites({ [kind]: updateIds(this.favorites[kind], id, { included: favorite }) });
+
+    const writes = this.favoriteWrites[kind];
+    const write = (writes.get(id) ?? Promise.resolve()).then(async () => {
+      await save();
+      this.savedFavorites = {
+        ...this.savedFavorites,
+        [kind]: updateIds(this.savedFavorites[kind], id, { included: favorite }),
+      };
+    });
+    // The next write of this layout runs after this one, whether it succeeds or fails.
+    const settled = write.catch(() => {});
+    writes.set(id, settled);
+    try {
+      await write;
+    } catch (error) {
+      // Otherwise a newer write of this layout is pending and will settle its state.
+      if (writes.get(id) === settled) {
+        this.updateFavorites({
+          [kind]: updateIds(this.favorites[kind], id, {
+            included: this.savedFavorites[kind].has(id),
+          }),
+        });
+      }
+      throw error;
+    } finally {
+      if (writes.get(id) === settled) {
+        writes.delete(id);
+      }
+    }
   }
 
   /**

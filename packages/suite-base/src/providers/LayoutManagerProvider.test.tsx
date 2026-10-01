@@ -11,8 +11,11 @@ import { useNetworkState } from "react-use";
 
 import { useVisibilityState } from "@lichtblick/hooks";
 import { useLayoutStorage } from "@lichtblick/suite-base/context/LayoutStorageContext";
+import { RemoteLayoutFavoritesStorageContext } from "@lichtblick/suite-base/context/RemoteLayoutFavoritesStorageContext";
 import { useRemoteLayoutStorage } from "@lichtblick/suite-base/context/RemoteLayoutStorageContext";
+import { UserProfileStorageContext } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
+import LayoutManager from "@lichtblick/suite-base/services/LayoutManager/LayoutManager";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 
 // Mock dependencies
@@ -88,5 +91,30 @@ describe("LayoutManagerProvider", () => {
     await waitFor(() => {
       expect(mockLayoutManager.syncWithRemote).toHaveBeenCalledTimes(0);
     });
+  });
+
+  it("should give the favorites storages to the layout manager and load favorites", () => {
+    // Given
+    const userProfile = { getUserProfile: jest.fn(), setUserProfile: jest.fn() };
+    const remoteFavorites = {
+      getFavoriteLayoutIds: jest.fn(),
+      addFavoriteLayout: jest.fn(),
+      removeFavoriteLayout: jest.fn(),
+    };
+
+    // When
+    render(
+      <UserProfileStorageContext.Provider value={userProfile}>
+        <RemoteLayoutFavoritesStorageContext.Provider value={remoteFavorites}>
+          <LayoutManagerProvider />
+        </RemoteLayoutFavoritesStorageContext.Provider>
+      </UserProfileStorageContext.Provider>,
+    );
+
+    // Then
+    expect(jest.mocked(LayoutManager)).toHaveBeenCalledWith(
+      expect.objectContaining({ userProfile, remoteFavorites }),
+    );
+    expect(mockLayoutManager.getFavorites).toHaveBeenCalled();
   });
 });

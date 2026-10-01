@@ -27,7 +27,6 @@ import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayou
 import EventsProvider from "@lichtblick/suite-base/providers/EventsProvider";
 import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider/ExtensionCatalogProvider";
 import ExtensionMarketplaceProvider from "@lichtblick/suite-base/providers/ExtensionMarketplaceProvider";
-import LayoutFavoritesProvider from "@lichtblick/suite-base/providers/LayoutFavoritesProvider";
 import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManagerProvider";
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
@@ -173,7 +172,6 @@ describe("App Component MultiProvider Tests", () => {
     UserProfileLocalStorageProvider,
     LayoutManagerProvider,
     LayoutStorageContext.Provider,
-    LayoutFavoritesProvider,
   ];
 
   function extractProviderTypes() {
@@ -195,14 +193,14 @@ describe("App Component MultiProvider Tests", () => {
     });
   });
 
-  it("nests LayoutFavoritesProvider inside the layout manager and user profile providers", () => {
+  it("nests LayoutManagerProvider inside the user profile provider", () => {
     setup();
     const providerTypes: unknown[] = extractProviderTypes();
 
     // MultiProvider nests later providers inside earlier ones.
-    const favoritesIndex = providerTypes.indexOf(LayoutFavoritesProvider);
-    expect(favoritesIndex).toBeGreaterThan(providerTypes.indexOf(LayoutManagerProvider));
-    expect(favoritesIndex).toBeGreaterThan(providerTypes.indexOf(UserProfileLocalStorageProvider));
+    expect(providerTypes.indexOf(LayoutManagerProvider)).toBeGreaterThan(
+      providerTypes.indexOf(UserProfileLocalStorageProvider),
+    );
   });
 
   it("verifies that AppParametersProvider is called with correct parameters", () => {

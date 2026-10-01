@@ -31,10 +31,11 @@ import {
 } from "react";
 import { useMountedState } from "react-use";
 
-import { useLayoutFavorites } from "@lichtblick/suite-base/context/LayoutFavoritesContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import useCallbackWithToast from "@lichtblick/suite-base/hooks/useCallbackWithToast";
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
+import { useLayoutFavorites } from "@lichtblick/suite-base/hooks/useLayoutFavorites";
+import { layoutIsFavorite } from "@lichtblick/suite-base/services/ILayoutManager";
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 import { StyledListItem, StyledMenuItem } from "./LayoutRow.style";
@@ -72,11 +73,11 @@ export default React.memo(function LayoutRow({
   const isMounted = useMountedState();
   const [confirm, confirmModal] = useConfirm();
   const layoutManager = useLayoutManager();
-  const layoutFavorites = useLayoutFavorites();
 
   const [editingName, setEditingName] = useState(false);
   const [nameFieldValue, setNameFieldValue] = useState("");
   const [isOnline, setIsOnline] = useState(layoutManager.isOnline);
+  const favorites = useLayoutFavorites();
   const [contextMenuTarget, setContextMenuTarget] = useState<
     | { type: "position"; mouseX: number; mouseY: number; element?: undefined }
     | { type: "element"; element: Element }
@@ -86,11 +87,12 @@ export default React.memo(function LayoutRow({
   const deletedOnServer = layout.syncInfo?.status === "remotely-deleted";
   const hasModifications = layout.working != undefined;
   const multiSelection = multiSelectedIds.length > 1;
-  const canFavorite = layoutFavorites.canFavorite(layout);
-  const favorite = layoutFavorites.isFavorite(layout);
+  const canFavorite = layoutManager.canFavorite(layout);
+  const favorite = layoutIsFavorite(favorites, layout);
+  const favoriteDisabled = layoutIsShared(layout) && !isOnline;
 
   let favoriteTitle: string;
-  if (layoutIsShared(layout) && !isOnline) {
+  if (favoriteDisabled) {
     favoriteTitle = "Offline";
   } else {
     favoriteTitle = favorite ? "Remove from favorites" : "Add to favorites";
@@ -142,8 +144,8 @@ export default React.memo(function LayoutRow({
   }, [layout, onShare]);
 
   const toggleFavorite = useCallbackWithToast(async () => {
-    await layoutFavorites.setFavorite(layout, { favorite: !favorite });
-  }, [favorite, layout, layoutFavorites]);
+    await layoutManager.setFavorite(layout, { favorite: !favorite });
+  }, [favorite, layout, layoutManager]);
 
   const exportAction = useCallback(() => {
     onExport(layout);
@@ -347,7 +349,7 @@ export default React.memo(function LayoutRow({
               aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
               aria-pressed={favorite}
               title={favoriteTitle}
-              disabled={layoutIsShared(layout) && !isOnline}
+              disabled={favoriteDisabled}
               onClick={toggleFavorite}
             >
               {favorite ? (

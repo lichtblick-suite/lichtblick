@@ -5,14 +5,16 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useEffect, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { useNetworkState } from "react-use";
 
 import { useVisibilityState } from "@lichtblick/hooks";
 import Logger from "@lichtblick/log";
 import LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useLayoutStorage } from "@lichtblick/suite-base/context/LayoutStorageContext";
+import { useRemoteLayoutFavoritesStorage } from "@lichtblick/suite-base/context/RemoteLayoutFavoritesStorageContext";
 import { useRemoteLayoutStorage } from "@lichtblick/suite-base/context/RemoteLayoutStorageContext";
+import { UserProfileStorageContext } from "@lichtblick/suite-base/context/UserProfileStorageContext";
 import LayoutManager from "@lichtblick/suite-base/services/LayoutManager/LayoutManager";
 import delay from "@lichtblick/suite-base/util/delay";
 
@@ -26,10 +28,18 @@ export default function LayoutManagerProvider({
 }: React.PropsWithChildren): React.JSX.Element {
   const layoutStorage = useLayoutStorage();
   const remoteLayoutStorage = useRemoteLayoutStorage();
+  const userProfileStorage = useContext(UserProfileStorageContext);
+  const remoteLayoutFavoritesStorage = useRemoteLayoutFavoritesStorage();
 
   const layoutManager = useMemo(
-    () => new LayoutManager({ local: layoutStorage, remote: remoteLayoutStorage }),
-    [layoutStorage, remoteLayoutStorage],
+    () =>
+      new LayoutManager({
+        local: layoutStorage,
+        remote: remoteLayoutStorage,
+        userProfile: userProfileStorage,
+        remoteFavorites: remoteLayoutFavoritesStorage,
+      }),
+    [layoutStorage, remoteLayoutStorage, userProfileStorage, remoteLayoutFavoritesStorage],
   );
 
   const { online = false } = useNetworkState();
@@ -37,6 +47,11 @@ export default function LayoutManagerProvider({
   useEffect(() => {
     layoutManager.setOnline({ online });
   }, [layoutManager, online]);
+
+  // Load favorites up front, so they are ready when the layout browser opens.
+  useEffect(() => {
+    void layoutManager.getFavorites();
+  }, [layoutManager]);
 
   // Sync periodically when logged in, online, and the app is not hidden
   const enableSyncing = remoteLayoutStorage != undefined && online && visibilityState === "visible";

@@ -7,7 +7,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { SnackbarProvider, useSnackbar } from "notistack";
 import { useEffect } from "react";
 
@@ -21,7 +21,6 @@ import {
   useCurrentLayoutSelector,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import LayoutManagerContext from "@lichtblick/suite-base/context/LayoutManagerContext";
-import { RemoteLayoutFavoritesStorageContext } from "@lichtblick/suite-base/context/RemoteLayoutFavoritesStorageContext";
 import {
   UserProfileStorage,
   UserProfileStorageContext,
@@ -31,10 +30,10 @@ import CurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayou
 import {
   BUSY_POLLING_INTERVAL_MS,
   BUSY_POLLING_TIMEOUT_MS,
+  FAVORITES_TIMEOUT_MS,
   MAX_SUPPORTED_LAYOUT_VERSION,
 } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
-import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
-import { IRemoteLayoutFavoritesStorage } from "@lichtblick/suite-base/services/IRemoteLayoutFavoritesStorage";
+import { ILayoutManager, LayoutFavorites } from "@lichtblick/suite-base/services/ILayoutManager";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("notistack", () => ({
@@ -61,12 +60,14 @@ function mockThrow(name: string) {
 }
 
 function makeMockLayoutManager() {
+  const favorites: LayoutFavorites = { personal: new Set(), shared: new Set() };
   return {
     supportsSharing: false,
     supportsSyncing: false,
     isBusy: jest.fn().mockReturnValue(false),
     isOnline: false,
     error: undefined,
+    favorites,
     on: jest.fn(),
     off: jest.fn(),
     setError: jest.fn(),
@@ -79,6 +80,9 @@ function makeMockLayoutManager() {
     overwriteLayout: jest.fn().mockImplementation(mockThrow("overwriteLayout")),
     revertLayout: jest.fn().mockImplementation(mockThrow("revertLayout")),
     makePersonalCopy: jest.fn().mockImplementation(mockThrow("makePersonalCopy")),
+    getFavorites: jest.fn().mockResolvedValue(favorites),
+    canFavorite: jest.fn().mockReturnValue(false),
+    setFavorite: jest.fn().mockImplementation(mockThrow("setFavorite")),
   };
 }
 function makeMockUserProfile() {
@@ -92,12 +96,10 @@ function renderTest({
   mockLayoutManager,
   mockUserProfile,
   mockAppParameters = {},
-  mockRemoteLayoutFavorites,
 }: {
   mockLayoutManager: ILayoutManager;
   mockUserProfile: UserProfileStorage;
   mockAppParameters?: Record<string, string>;
-  mockRemoteLayoutFavorites?: IRemoteLayoutFavoritesStorage;
 }) {
   const childMounted = new Condvar();
   const childMountedWait = childMounted.wait();
@@ -126,12 +128,10 @@ function renderTest({
             <SnackbarProvider>
               <LayoutManagerContext.Provider value={mockLayoutManager}>
                 <UserProfileStorageContext.Provider value={mockUserProfile}>
-                  <RemoteLayoutFavoritesStorageContext.Provider value={mockRemoteLayoutFavorites}>
-                    <CurrentLayoutProvider loaders={[]}>
-                      {children}
-                      <CurrentLayoutSyncAdapter />
-                    </CurrentLayoutProvider>
-                  </RemoteLayoutFavoritesStorageContext.Provider>
+                  <CurrentLayoutProvider loaders={[]}>
+                    {children}
+                    <CurrentLayoutSyncAdapter />
+                  </CurrentLayoutProvider>
                 </UserProfileStorageContext.Provider>
               </LayoutManagerContext.Provider>
             </SnackbarProvider>
@@ -151,6 +151,8 @@ describe("CurrentLayoutProvider", () => {
     // Default mocks
     mockLayoutManager.getLayout.mockImplementation(async () => undefined);
     mockLayoutManager.getLayouts.mockImplementation(() => []);
+    mockLayoutManager.getFavorites.mockResolvedValue({ personal: new Set(), shared: new Set() });
+    mockLayoutManager.favorites = { personal: new Set(), shared: new Set() };
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: undefined });
   });
 
@@ -315,7 +317,7 @@ describe("CurrentLayoutProvider", () => {
       ];
     });
 
-    const { result, all } = renderTest({
+    const { result } = renderTest({
       mockLayoutManager,
       mockUserProfile,
     });
@@ -324,11 +326,9 @@ describe("CurrentLayoutProvider", () => {
       await result.current.childMounted;
     });
 
-    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
-      .selectedLayout?.id;
-
-    expect(selectedLayout).toBeDefined();
-    expect(selectedLayout).toBe("layout2");
+    await waitFor(() => {
+      expect(mockLayoutManager.getLayout).toHaveBeenCalledWith("layout2");
+    });
   });
 
   it("selects the first org layout, when current layout is not found", async () => {
@@ -350,7 +350,7 @@ describe("CurrentLayoutProvider", () => {
     });
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "nonexistent" });
 
-    const { result, all } = renderTest({
+    const { result } = renderTest({
       mockLayoutManager,
       mockUserProfile,
     });
@@ -359,11 +359,9 @@ describe("CurrentLayoutProvider", () => {
       await result.current.childMounted;
     });
 
-    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
-      .selectedLayout?.id;
-
-    expect(selectedLayout).toBeDefined();
-    expect(selectedLayout).toBe("layout2");
+    await waitFor(() => {
+      expect(mockLayoutManager.getLayout).toHaveBeenCalledWith("layout2");
+    });
   });
 
   it("selects the first org layout, if any, in alphabetic order, when there is no selected layout", async () => {
@@ -390,7 +388,7 @@ describe("CurrentLayoutProvider", () => {
       ];
     });
 
-    const { result, all } = renderTest({
+    const { result } = renderTest({
       mockLayoutManager,
       mockUserProfile,
     });
@@ -399,11 +397,9 @@ describe("CurrentLayoutProvider", () => {
       await result.current.childMounted;
     });
 
-    const selectedLayout = all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState
-      .selectedLayout?.id;
-
-    expect(selectedLayout).toBeDefined();
-    expect(selectedLayout).toBe("layout3");
+    await waitFor(() => {
+      expect(mockLayoutManager.getLayout).toHaveBeenCalledWith("layout3");
+    });
   });
 
   it("select a layout through app parameters", async () => {
@@ -536,35 +532,26 @@ describe("CurrentLayoutProvider", () => {
       },
     ];
 
-    beforeEach(() => {
-      mockLayoutManager.isOnline = true;
-    });
-
-    afterEach(() => {
-      mockLayoutManager.isOnline = false;
-    });
-
-    function makeMockRemoteLayoutFavorites(ids: string[]) {
-      return {
-        getFavoriteLayoutIds: jest.fn().mockResolvedValue(ids),
-        addFavoriteLayout: jest.fn(),
-        removeFavoriteLayout: jest.fn(),
-      };
+    function mockFavorites({
+      personal = [],
+      shared = [],
+    }: {
+      personal?: string[];
+      shared?: string[];
+    }) {
+      mockLayoutManager.getFavorites.mockResolvedValue({
+        personal: new Set(personal),
+        shared: new Set(shared),
+      });
     }
 
-    async function renderAndGetSelectedLayoutId(
-      mockRemoteLayoutFavorites?: IRemoteLayoutFavoritesStorage,
-    ) {
+    async function renderAndGetSelectedLayoutId() {
       mockLayoutManager.getLayouts.mockResolvedValue(layouts);
       mockLayoutManager.getLayout.mockImplementation(async (id: string) => {
         const layout = layouts.find((item) => item.id === id);
         return layout && { ...layout, baseline: { data: TEST_LAYOUT } };
       });
-      const { result, all } = renderTest({
-        mockLayoutManager,
-        mockUserProfile,
-        mockRemoteLayoutFavorites,
-      });
+      const { result, all } = renderTest({ mockLayoutManager, mockUserProfile });
       await act(async () => {
         await result.current.childMounted;
       });
@@ -574,10 +561,8 @@ describe("CurrentLayoutProvider", () => {
 
     it("selects the favorite personal layout instead of the last selected layout", async () => {
       // Given a last selected layout and a favorite personal layout
-      mockUserProfile.getUserProfile.mockResolvedValue({
-        currentLayoutId: "shared-c",
-        favoriteLayoutIds: ["personal-b"],
-      });
+      mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "shared-c" });
+      mockFavorites({ personal: ["personal-b"] });
 
       // When the app opens
       const selectedLayoutId = await renderAndGetSelectedLayoutId();
@@ -590,11 +575,10 @@ describe("CurrentLayoutProvider", () => {
     it("selects the favorite shared layout", async () => {
       // Given a favorite shared layout
       mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "personal-a" });
+      mockFavorites({ shared: ["remote-d"] });
 
       // When the app opens
-      const selectedLayoutId = await renderAndGetSelectedLayoutId(
-        makeMockRemoteLayoutFavorites(["remote-d"]),
-      );
+      const selectedLayoutId = await renderAndGetSelectedLayoutId();
 
       // Then the favorite shared layout is selected
       expect(selectedLayoutId).toBe("shared-d");
@@ -602,15 +586,10 @@ describe("CurrentLayoutProvider", () => {
 
     it("prefers the favorite shared layout over the favorite personal layout", async () => {
       // Given a favorite personal layout and a favorite shared layout
-      mockUserProfile.getUserProfile.mockResolvedValue({
-        currentLayoutId: undefined,
-        favoriteLayoutIds: ["personal-a"],
-      });
+      mockFavorites({ personal: ["personal-a"], shared: ["remote-d"] });
 
       // When the app opens
-      const selectedLayoutId = await renderAndGetSelectedLayoutId(
-        makeMockRemoteLayoutFavorites(["remote-d"]),
-      );
+      const selectedLayoutId = await renderAndGetSelectedLayoutId();
 
       // Then the favorite shared layout is selected
       expect(selectedLayoutId).toBe("shared-d");
@@ -618,60 +597,18 @@ describe("CurrentLayoutProvider", () => {
 
     it("selects the first favorite in alphabetic order when several exist", async () => {
       // Given several favorite shared layouts
-      mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: undefined });
+      mockFavorites({ shared: ["remote-d", "remote-c"] });
 
       // When the app opens
-      const selectedLayoutId = await renderAndGetSelectedLayoutId(
-        makeMockRemoteLayoutFavorites(["remote-d", "remote-c"]),
-      );
+      const selectedLayoutId = await renderAndGetSelectedLayoutId();
 
       // Then the first one in the layout list is selected
       expect(selectedLayoutId).toBe("shared-c");
     });
 
-    it("does not request remote favorites while offline", async () => {
-      // Given an offline layout manager, a favorite personal layout and a favorite shared layout
-      mockLayoutManager.isOnline = false;
-      mockUserProfile.getUserProfile.mockResolvedValue({
-        currentLayoutId: undefined,
-        favoriteLayoutIds: ["personal-b"],
-      });
-      const mockRemoteLayoutFavorites = makeMockRemoteLayoutFavorites(["remote-d"]);
-
-      // When the app opens
-      const selectedLayoutId = await renderAndGetSelectedLayoutId(mockRemoteLayoutFavorites);
-
-      // Then remote favorites are not requested and the favorite personal layout is selected
-      expect(mockRemoteLayoutFavorites.getFavoriteLayoutIds).not.toHaveBeenCalled();
-      expect(selectedLayoutId).toBe("personal-b");
-    });
-
-    it("falls back to the favorite personal layout when remote favorites cannot be loaded", async () => {
-      // Given remote favorites that fail to load and a favorite personal layout
-      mockUserProfile.getUserProfile.mockResolvedValue({
-        currentLayoutId: undefined,
-        favoriteLayoutIds: ["personal-b"],
-      });
-      const mockRemoteLayoutFavorites = makeMockRemoteLayoutFavorites([]);
-      mockRemoteLayoutFavorites.getFavoriteLayoutIds.mockRejectedValue(new Error("offline"));
-
-      // When the app opens
-      const selectedLayoutId = await renderAndGetSelectedLayoutId(mockRemoteLayoutFavorites);
-
-      // Then the favorite personal layout is selected and the failure is logged
-      expect(selectedLayoutId).toBe("personal-b");
-      expect(console.warn).toHaveBeenCalledWith(
-        "Failed to load favorite shared layouts",
-        expect.any(Error),
-      );
-    });
-
     it("keeps the layout from app parameters over favorites", async () => {
       // Given a favorite layout and a layout requested through app parameters
-      mockUserProfile.getUserProfile.mockResolvedValue({
-        currentLayoutId: undefined,
-        favoriteLayoutIds: ["personal-b"],
-      });
+      mockFavorites({ personal: ["personal-b"] });
       mockLayoutManager.getLayouts.mockResolvedValue(layouts);
       mockLayoutManager.getLayout.mockImplementation(async (id: string) => {
         const layout = layouts.find((item) => item.id === id);
@@ -748,6 +685,45 @@ describe("CurrentLayoutProvider", () => {
       expect(mockLayoutManager.isBusy).toHaveBeenCalledTimes(4);
       expect(console.warn).not.toHaveBeenCalled();
       expect(mockLayoutManager.getLayouts).toHaveBeenCalled();
+    });
+
+    it("should not wait more than the favorites timeout and use the favorites loaded so far", async () => {
+      // Given favorites that never finish loading, and a personal favorite already loaded
+      mockLayoutManager.getFavorites.mockReturnValue(new Promise(() => {}));
+      mockLayoutManager.favorites = { personal: new Set(["layout2"]), shared: new Set() };
+      mockLayoutManager.getLayouts.mockResolvedValue([
+        {
+          id: "layout1",
+          name: "Layout 1",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+        {
+          id: "layout2",
+          name: "Layout 2",
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        },
+      ]);
+      mockLayoutManager.getLayout.mockImplementation(async (id: string) => ({
+        id,
+        name: id,
+        baseline: { data: TEST_LAYOUT },
+      }));
+
+      // When the favorites timeout elapses
+      const { all } = renderTest({ mockLayoutManager, mockUserProfile });
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(FAVORITES_TIMEOUT_MS + 100);
+      });
+
+      // Then the loaded favorite is selected and the delay is logged
+      expect(
+        all.find((item) => item.layoutState.selectedLayout?.id)?.layoutState.selectedLayout?.id,
+      ).toBe("layout2");
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`Favorite layouts took longer than ${FAVORITES_TIMEOUT_MS}ms`),
+      );
     });
 
     it("should timeout after 5 seconds, log warning and continue as normal", async () => {

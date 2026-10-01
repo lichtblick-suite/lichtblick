@@ -5,13 +5,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ILayoutManager } from "@lichtblick/suite-base/services/ILayoutManager";
+import { ILayoutManager, LayoutFavorites } from "@lichtblick/suite-base/services/ILayoutManager";
 
 export default class MockLayoutManager implements ILayoutManager {
   public supportsSharing = false;
   public isBusy = jest.fn().mockReturnValue(false);
   public isOnline = false;
   public error: Error | undefined = undefined;
+  public favorites: LayoutFavorites = { personal: new Set(), shared: new Set() };
 
   public on = jest.fn();
   public off = jest.fn();
@@ -26,4 +27,7 @@ export default class MockLayoutManager implements ILayoutManager {
   public revertLayout = jest.fn();
   public makePersonalCopy = jest.fn();
   public syncWithRemote = jest.fn();
+  public getFavorites = jest.fn(async () => this.favorites);
+  public canFavorite = jest.fn().mockReturnValue(false);
+  public setFavorite = jest.fn().mockResolvedValue(undefined);
 }

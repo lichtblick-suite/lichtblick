@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import { LayoutSelectionState } from "@lichtblick/suite-base/components/LayoutBrowser/types";
@@ -14,10 +14,6 @@ import {
   useCurrentLayoutActions,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@lichtblick/suite-base/context/CurrentUserContext";
-import {
-  LayoutFavorites,
-  LayoutFavoritesContext,
-} from "@lichtblick/suite-base/context/LayoutFavoritesContext";
 import { useLayoutManager } from "@lichtblick/suite-base/context/LayoutManagerContext";
 import { useWorkspaceStore } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
@@ -25,6 +21,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks/useAppCon
 import { useConfirm } from "@lichtblick/suite-base/hooks/useConfirm";
 import { useLayoutNavigation } from "@lichtblick/suite-base/hooks/useLayoutNavigation";
 import { usePrompt } from "@lichtblick/suite-base/hooks/usePrompt";
+import { LayoutFavorites } from "@lichtblick/suite-base/services/ILayoutManager";
 import { Layout } from "@lichtblick/suite-base/services/ILayoutStorage";
 import MockLayoutManager from "@lichtblick/suite-base/services/LayoutManager/MockLayoutManager";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
@@ -454,10 +451,12 @@ describe("LayoutBrowser", () => {
   });
 
   describe("favorites", () => {
-    const makeFavorites = (favoriteIds: string[]): LayoutFavorites => ({
-      canFavorite: jest.fn().mockReturnValue(true),
-      isFavorite: jest.fn((layout: Layout) => favoriteIds.includes(layout.id)),
-      setFavorite: jest.fn().mockResolvedValue(undefined),
+    const setFavorites = (favorites: Partial<LayoutFavorites>) => {
+      mockLayoutManager.favorites = { personal: new Set(), shared: new Set(), ...favorites };
+    };
+
+    afterEach(() => {
+      setFavorites({});
     });
 
     it("lists favorite layouts first in each section, keeping alphabetical order", async () => {
@@ -471,6 +470,10 @@ describe("LayoutBrowser", () => {
       mockLayoutManager.getLayouts = jest
         .fn()
         .mockResolvedValue([personalC, sharedB, personalA, sharedA, personalB]);
+      setFavorites({
+        personal: new Set([personalC.id]),
+        shared: new Set([sharedB.externalId!]),
+      });
 
       const renderedItems: (readonly Layout[] | undefined)[] = [];
       jest.requireMock("./LayoutSection").default = jest
@@ -481,11 +484,7 @@ describe("LayoutBrowser", () => {
         });
 
       // WHEN
-      render(
-        <LayoutFavoritesContext.Provider value={makeFavorites([personalC.id, sharedB.id])}>
-          <LayoutBrowser />
-        </LayoutFavoritesContext.Provider>,
-      );
+      render(<LayoutBrowser />);
 
       // THEN
       await waitFor(() => {
@@ -494,6 +493,42 @@ describe("LayoutBrowser", () => {
         expect(shared?.map((layout) => layout.name)).toEqual(["b", "a"]);
       });
       mockLayoutManager.supportsSharing = false;
+    });
+
+    it("restores alphabetical order when a layout is no longer a favorite", async () => {
+      // GIVEN
+      const layoutA = LayoutBuilder.layout({ name: "a", permission: "CREATOR_WRITE" });
+      const layoutB = LayoutBuilder.layout({ name: "b", permission: "CREATOR_WRITE" });
+      mockLayoutManager.getLayouts = jest.fn().mockResolvedValue([layoutA, layoutB]);
+      setFavorites({ personal: new Set([layoutB.id]) });
+
+      const renderedItems: (readonly Layout[] | undefined)[] = [];
+      jest.requireMock("./LayoutSection").default = jest
+        .fn()
+        .mockImplementation((props: { items: readonly Layout[] | undefined }) => {
+          renderedItems.push(props.items);
+          return <div data-testid="layout-section" />;
+        });
+      const renderedNames = () => renderedItems.at(-1)?.map((layout) => layout.name);
+
+      render(<LayoutBrowser />);
+      await waitFor(() => {
+        expect(renderedNames()).toEqual(["b", "a"]);
+      });
+      const favoritesListener = mockLayoutManager.on.mock.calls.find(
+        ([event]) => event === "favoriteschange",
+      )?.[1] as () => void;
+
+      // WHEN
+      setFavorites({});
+      act(() => {
+        favoritesListener();
+      });
+
+      // THEN
+      await waitFor(() => {
+        expect(renderedNames()).toEqual(["a", "b"]);
+      });
     });
 
     it("keeps a favorite layout as favorite when it is shared", async () => {
@@ -505,7 +540,7 @@ describe("LayoutBrowser", () => {
         undefined,
       ]);
       mockLayoutManager.saveNewLayout = jest.fn().mockResolvedValue(newLayout);
-      const favorites = makeFavorites([layout.id]);
+      setFavorites({ personal: new Set([layout.id]) });
 
       let capturedOnShare: ((item: Layout) => void) | undefined;
       jest.requireMock("./LayoutSection").default = jest
@@ -515,18 +550,14 @@ describe("LayoutBrowser", () => {
           return <div data-testid="layout-section" />;
         });
 
-      render(
-        <LayoutFavoritesContext.Provider value={favorites}>
-          <LayoutBrowser />
-        </LayoutFavoritesContext.Provider>,
-      );
+      render(<LayoutBrowser />);
 
       // WHEN
       capturedOnShare!(layout);
 
       // THEN
       await waitFor(() => {
-        expect(favorites.setFavorite).toHaveBeenCalledWith(newLayout, { favorite: true });
+        expect(mockLayoutManager.setFavorite).toHaveBeenCalledWith(newLayout, { favorite: true });
       });
     });
 
@@ -539,7 +570,6 @@ describe("LayoutBrowser", () => {
         undefined,
       ]);
       mockLayoutManager.saveNewLayout = jest.fn().mockResolvedValue(newLayout);
-      const favorites = makeFavorites([]);
 
       let capturedOnShare: ((item: Layout) => void) | undefined;
       jest.requireMock("./LayoutSection").default = jest
@@ -549,11 +579,7 @@ describe("LayoutBrowser", () => {
           return <div data-testid="layout-section" />;
         });
 
-      render(
-        <LayoutFavoritesContext.Provider value={favorites}>
-          <LayoutBrowser />
-        </LayoutFavoritesContext.Provider>,
-      );
+      render(<LayoutBrowser />);
 
       // WHEN
       capturedOnShare!(layout);
@@ -562,7 +588,7 @@ describe("LayoutBrowser", () => {
       await waitFor(() => {
         expect(mockLayoutManager.saveNewLayout).toHaveBeenCalled();
       });
-      expect(favorites.setFavorite).not.toHaveBeenCalled();
+      expect(mockLayoutManager.setFavorite).not.toHaveBeenCalled();
     });
   });
 });
