@@ -16,7 +16,7 @@ import { isCompressedVideoKeyframe } from "./decodeImage";
 /**
  * Filters the per-frame queue for the `CompressedVideo` subscription.
  *
- * Codecs whose delta frames depend on a preceding GOP (H.264 and H.265) need the entire chain
+ * Codecs whose delta frames depend on a preceding GOP (H.264, H.265, and AV1) need the entire chain
  * from the most recent keyframe through the latest delta preserved — dropping older queued frames
  * leaves the decoder unable to produce a picture for the new latest frame until the next
  * keyframe arrives (which can be several seconds away for typical recordings, and is exactly the
