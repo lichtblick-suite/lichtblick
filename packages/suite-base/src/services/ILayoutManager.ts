@@ -9,11 +9,26 @@ import EventEmitter from "eventemitter3";
 
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
-import { Layout, LayoutPermission } from "@lichtblick/suite-base/services/ILayoutStorage";
+import {
+  Layout,
+  LayoutPermission,
+  layoutIsShared,
+} from "@lichtblick/suite-base/services/ILayoutStorage";
 
 export type LayoutManagerChangeEvent =
   | { type: "delete"; updatedLayout?: undefined; layoutId: LayoutID }
   | { type: "change" | "revert"; updatedLayout: Layout | undefined };
+
+export type LayoutFavorites = {
+  personal: ReadonlySet<string>;
+  shared: ReadonlySet<string>;
+};
+
+export function layoutIsFavorite(favorites: LayoutFavorites, layout: Layout): boolean {
+  return layoutIsShared(layout)
+    ? layout.externalId != undefined && favorites.shared.has(layout.externalId)
+    : favorites.personal.has(layout.id);
+}
 
 export type LayoutManagerEventTypes = {
   /**
@@ -30,6 +45,9 @@ export type LayoutManagerEventTypes = {
 
   /** Called when the error state of the layout manager changes. */
   errorchange: () => void;
+
+  /** Called when the current user's favorite layouts change. */
+  favoriteschange: () => void;
 };
 
 export type SetOnlineProps = {
@@ -50,6 +68,12 @@ export interface ILayoutManager {
 
   /** Indicates the error state of the layout manager, if any. */
   readonly error: undefined | Error;
+
+  /**
+   * The current user's favorite layouts, including changes that are still being saved. Changes
+   * emit "favoriteschange". Use `getFavorites` to wait for favorites that are still loading.
+   */
+  readonly favorites: LayoutFavorites;
 
   /** Indicates whether the layout manager is currently performing an async operation. */
   isBusy: () => boolean;
@@ -101,4 +125,16 @@ export interface ILayoutManager {
 
   /** Transfer a shared layout's working changes into a new personal layout. */
   makePersonalCopy(params: { id: LayoutID; name: string }): Promise<Layout>;
+
+  /** Resolves with the current user's favorite layouts once they finish loading. */
+  getFavorites(): Promise<LayoutFavorites>;
+
+  /** Indicates whether the current user can mark this layout as favorite. */
+  canFavorite(layout: Layout): boolean;
+
+  /**
+   * Mark or unmark a layout as favorite. The change is applied immediately and rolled back if it
+   * cannot be saved.
+   */
+  setFavorite(layout: Layout, params: { favorite: boolean }): Promise<void>;
 }

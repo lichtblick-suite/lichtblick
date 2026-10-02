@@ -44,9 +44,11 @@ import {
   BUSY_POLLING_INTERVAL_MS,
   BUSY_POLLING_TIMEOUT_MS,
   DEFAULT_LAYOUT,
+  FAVORITES_TIMEOUT_MS,
   MAX_SUPPORTED_LAYOUT_VERSION,
   ORG_PERMISSION_PREFIX,
 } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
+import { findFavoriteLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/findFavoriteLayout";
 import useUpdateSharedPanelState from "@lichtblick/suite-base/providers/CurrentLayoutProvider/hooks/useUpdateSharedPanelState";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
 import panelsReducer from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
@@ -333,6 +335,27 @@ export default function CurrentLayoutProvider({
       enqueueSnackbar(t("noDefaultLayoutParameter", { layoutName: appParameters.defaultLayout }), {
         variant: "warning",
       });
+    }
+
+    // Don't let a slow favorites request block opening a layout; use the favorites loaded so far.
+    let clearFavoritesTimeout = () => {};
+    const loadedFavorites = await Promise.race([
+      layoutManager.getFavorites(),
+      new Promise<undefined>((resolve) => {
+        const timeoutId = setTimeout(resolve, FAVORITES_TIMEOUT_MS);
+        clearFavoritesTimeout = () => {
+          clearTimeout(timeoutId);
+        };
+      }),
+    ]);
+    clearFavoritesTimeout();
+    if (!loadedFavorites) {
+      log.warn(`Favorite layouts took longer than ${FAVORITES_TIMEOUT_MS}ms to load, continuing`);
+    }
+    const favoriteLayout = findFavoriteLayout(layouts, loadedFavorites ?? layoutManager.favorites);
+    if (favoriteLayout) {
+      await setSelectedLayoutId(favoriteLayout.id, { saveToProfile: false });
+      return;
     }
 
     // Retrieve the selected layout id from the user's profile. If there's no layout specified

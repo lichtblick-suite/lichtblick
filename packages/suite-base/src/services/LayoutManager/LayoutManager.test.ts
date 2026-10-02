@@ -3,10 +3,16 @@
 
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import {
+  UserProfile,
+  UserProfileStorage,
+} from "@lichtblick/suite-base/context/UserProfileStorageContext";
+import { layoutIsFavorite } from "@lichtblick/suite-base/services/ILayoutManager";
+import {
   ILayoutStorage,
   ISO8601Timestamp,
   LayoutPermission,
 } from "@lichtblick/suite-base/services/ILayoutStorage";
+import { IRemoteLayoutFavoritesStorage } from "@lichtblick/suite-base/services/IRemoteLayoutFavoritesStorage";
 import { IRemoteLayoutStorage } from "@lichtblick/suite-base/services/IRemoteLayoutStorage";
 import LayoutManager from "@lichtblick/suite-base/services/LayoutManager/LayoutManager";
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
@@ -1108,6 +1114,629 @@ describe("LayoutManager", () => {
 
       // Then
       expect(mockListener).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("favorites", () => {
+    function makeUserProfileStorage(initial: UserProfile = {}) {
+      let profile = initial;
+      return {
+        profile: () => profile,
+        getUserProfile: jest.fn(async () => profile),
+        setUserProfile: jest.fn(
+          async (update: UserProfile | ((profile: UserProfile) => UserProfile)) => {
+            profile = typeof update === "function" ? update(profile) : update;
+          },
+        ),
+      };
+    }
+
+    function makeRemoteFavorites(ids: string[] = []): jest.Mocked<IRemoteLayoutFavoritesStorage> {
+      return {
+        getFavoriteLayoutIds: jest.fn().mockResolvedValue(ids),
+        addFavoriteLayout: jest.fn().mockResolvedValue(undefined),
+        removeFavoriteLayout: jest.fn().mockResolvedValue(undefined),
+      };
+    }
+
+    function deferred(): {
+      promise: Promise<void>;
+      resolve: () => void;
+      reject: (e: Error) => void;
+    } {
+      let resolve: () => void = () => {};
+      let reject: (error: Error) => void = () => {};
+      const promise = new Promise<void>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    }
+
+    function makeLayoutManager({
+      userProfile,
+      remoteFavorites,
+      online = true,
+    }: {
+      userProfile?: UserProfileStorage;
+      remoteFavorites?: IRemoteLayoutFavoritesStorage;
+      online?: boolean;
+    }): LayoutManager {
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: undefined,
+        userProfile,
+        remoteFavorites,
+      });
+      layoutManager.setOnline({ online });
+      return layoutManager;
+    }
+
+    const personalLayout = () => LayoutBuilder.layout({ permission: "CREATOR_WRITE" });
+    const sharedLayout = () =>
+      LayoutBuilder.layout({ permission: "ORG_WRITE", externalId: BasicBuilder.string() });
+
+    describe("getFavorites", () => {
+      it("should load personal favorites from the user profile", async () => {
+        // Given
+        const layout = personalLayout();
+        const layoutManager = makeLayoutManager({
+          userProfile: makeUserProfileStorage({ favoriteLayoutIds: [layout.id] }),
+        });
+
+        // When
+        const favorites = await layoutManager.getFavorites();
+
+        // Then
+        expect(layoutIsFavorite(favorites, layout)).toBe(true);
+        expect(layoutIsFavorite(favorites, personalLayout())).toBe(false);
+      });
+
+      it("should load shared favorites when online", async () => {
+        // Given
+        const layout = sharedLayout();
+        const layoutManager = makeLayoutManager({
+          remoteFavorites: makeRemoteFavorites([layout.externalId!]),
+        });
+
+        // When
+        const favorites = await layoutManager.getFavorites();
+
+        // Then
+        expect(layoutIsFavorite(favorites, layout)).toBe(true);
+        expect(layoutIsFavorite(favorites, sharedLayout())).toBe(false);
+      });
+
+      it("should not load shared favorites while offline", async () => {
+        // Given
+        const remoteFavorites = makeRemoteFavorites();
+        const layoutManager = makeLayoutManager({ remoteFavorites, online: false });
+
+        // When
+        await layoutManager.getFavorites();
+
+        // Then
+        expect(remoteFavorites.getFavoriteLayoutIds).not.toHaveBeenCalled();
+      });
+
+      it("should load shared favorites once the layout manager goes online", async () => {
+        // Given
+        const layout = sharedLayout();
+        const layoutManager = makeLayoutManager({
+          remoteFavorites: makeRemoteFavorites([layout.externalId!]),
+          online: false,
+        });
+
+        // When
+        layoutManager.setOnline({ online: true });
+        const favorites = await layoutManager.getFavorites();
+
+        // Then
+        expect(layoutIsFavorite(favorites, layout)).toBe(true);
+      });
+
+      it("should have no shared favorites when they cannot be loaded", async () => {
+        // Given
+        const remoteFavorites = makeRemoteFavorites();
+        remoteFavorites.getFavoriteLayoutIds.mockRejectedValue(new Error("Not Found"));
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+
+        // When
+        const favorites = await layoutManager.getFavorites();
+
+        // Then
+        expect(favorites.shared.size).toBe(0);
+        expect(console.error).toHaveBeenCalledWith(
+          expect.stringContaining("Failed to load remote favorite layouts"),
+          expect.any(Error),
+        );
+        (console.error as jest.Mock).mockClear();
+      });
+
+      it("should emit favoriteschange when favorites are loaded", async () => {
+        // Given
+        const layoutManager = makeLayoutManager({
+          userProfile: makeUserProfileStorage({ favoriteLayoutIds: [personalLayout().id] }),
+        });
+        const listener = jest.fn();
+        layoutManager.on("favoriteschange", listener);
+
+        // When
+        await layoutManager.getFavorites();
+
+        // Then
+        expect(listener).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("canFavorite", () => {
+      it("should allow personal layouts only with a user profile storage", () => {
+        // Given
+        const withProfile = makeLayoutManager({ userProfile: makeUserProfileStorage() });
+        const withoutProfile = makeLayoutManager({});
+
+        // When, Then
+        expect(withProfile.canFavorite(personalLayout())).toBe(true);
+        expect(withoutProfile.canFavorite(personalLayout())).toBe(false);
+      });
+
+      it("should allow shared layouts only with remote favorites storage", () => {
+        // Given
+        const withRemote = makeLayoutManager({ remoteFavorites: makeRemoteFavorites() });
+        const withoutRemote = makeLayoutManager({ userProfile: makeUserProfileStorage() });
+
+        // When, Then
+        expect(withRemote.canFavorite(sharedLayout())).toBe(true);
+        expect(withoutRemote.canFavorite(sharedLayout())).toBe(false);
+      });
+
+      it("should not allow a shared layout without an external id", () => {
+        // Given
+        const layoutManager = makeLayoutManager({ remoteFavorites: makeRemoteFavorites() });
+
+        // When, Then
+        expect(layoutManager.canFavorite({ ...sharedLayout(), externalId: undefined })).toBe(false);
+      });
+    });
+
+    describe("setFavorite for personal layouts", () => {
+      it("should save added and removed favorites in the user profile", async () => {
+        // Given
+        const layout = personalLayout();
+        const userProfile = makeUserProfileStorage();
+        const layoutManager = makeLayoutManager({ userProfile });
+
+        // When
+        await layoutManager.setFavorite(layout, { favorite: true });
+
+        // Then
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(true);
+        expect(userProfile.profile().favoriteLayoutIds).toEqual([layout.id]);
+
+        // When
+        await layoutManager.setFavorite(layout, { favorite: false });
+
+        // Then
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
+        expect(userProfile.profile().favoriteLayoutIds).toEqual([]);
+      });
+
+      it("should apply a change made while loading on top of the stored favorites", async () => {
+        // Given
+        const stored = personalLayout();
+        const layout = personalLayout();
+        const userProfile = makeUserProfileStorage({ favoriteLayoutIds: [stored.id] });
+        const load = deferred();
+        userProfile.getUserProfile.mockImplementationOnce(async () => {
+          await load.promise;
+          return userProfile.profile();
+        });
+        const layoutManager = makeLayoutManager({ userProfile });
+
+        // When
+        const adding = layoutManager.setFavorite(layout, { favorite: true });
+        load.resolve();
+        await adding;
+
+        // Then
+        expect(layoutManager.favorites.personal).toEqual(new Set([stored.id, layout.id]));
+      });
+
+      it("should roll back a change that cannot be saved", async () => {
+        // Given
+        const layout = personalLayout();
+        const userProfile = makeUserProfileStorage();
+        userProfile.setUserProfile.mockRejectedValue(new Error("Quota exceeded"));
+        const layoutManager = makeLayoutManager({ userProfile });
+
+        // When
+        const adding = layoutManager.setFavorite(layout, { favorite: true });
+
+        // Then
+        await expect(adding).rejects.toThrow("Quota exceeded");
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
+      });
+
+      it("should roll back to the previous change when a later one fails", async () => {
+        // Given
+        const layout = personalLayout();
+        const userProfile = makeUserProfileStorage();
+        const layoutManager = makeLayoutManager({ userProfile });
+        await layoutManager.setFavorite(layout, { favorite: true });
+        userProfile.setUserProfile.mockRejectedValueOnce(new Error("Quota exceeded"));
+
+        // When
+        const removing = layoutManager.setFavorite(layout, { favorite: false });
+
+        // Then
+        await expect(removing).rejects.toThrow("Quota exceeded");
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(true);
+      });
+
+      it("should only roll back the layout whose write failed", async () => {
+        // Given a pending write of a first layout
+        const first = personalLayout();
+        const second = personalLayout();
+        const userProfile = makeUserProfileStorage();
+        const firstWrite = deferred();
+        userProfile.setUserProfile.mockReturnValueOnce(firstWrite.promise);
+        const layoutManager = makeLayoutManager({ userProfile });
+        await layoutManager.getFavorites();
+        const addingFirst = layoutManager.setFavorite(first, { favorite: true });
+
+        // When a second layout is saved, and then the first write fails
+        await layoutManager.setFavorite(second, { favorite: true });
+        firstWrite.reject(new Error("Quota exceeded"));
+
+        // Then only the first layout is rolled back
+        await expect(addingFirst).rejects.toThrow("Quota exceeded");
+        expect(layoutIsFavorite(layoutManager.favorites, first)).toBe(false);
+        expect(layoutIsFavorite(layoutManager.favorites, second)).toBe(true);
+      });
+
+      it("should save the writes of a layout in order", async () => {
+        // Given a pending write that adds a layout
+        const layout = personalLayout();
+        const userProfile = makeUserProfileStorage();
+        const addWrite = deferred();
+        userProfile.setUserProfile.mockReturnValueOnce(addWrite.promise);
+        const layoutManager = makeLayoutManager({ userProfile });
+        await layoutManager.getFavorites();
+        const adding = layoutManager.setFavorite(layout, { favorite: true });
+
+        // When removing it before the first write finishes
+        const removing = layoutManager.setFavorite(layout, { favorite: false });
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        // Then the removal waits for the first write
+        expect(userProfile.setUserProfile).toHaveBeenCalledTimes(1);
+        addWrite.resolve();
+        await adding;
+        await removing;
+        expect(userProfile.setUserProfile).toHaveBeenCalledTimes(2);
+        expect(userProfile.profile().favoriteLayoutIds).toEqual([]);
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
+      });
+
+      it("should roll back to the saved state when consecutive writes of a layout fail", async () => {
+        // Given two writes of the same layout
+        const layout = personalLayout();
+        const userProfile = makeUserProfileStorage();
+        const addWrite = deferred();
+        userProfile.setUserProfile
+          .mockReturnValueOnce(addWrite.promise)
+          .mockRejectedValueOnce(new Error("Quota exceeded"));
+        const layoutManager = makeLayoutManager({ userProfile });
+        await layoutManager.getFavorites();
+        const adding = layoutManager.setFavorite(layout, { favorite: true });
+        const removing = layoutManager.setFavorite(layout, { favorite: false });
+
+        // When both writes fail
+        addWrite.reject(new Error("Quota exceeded"));
+        await expect(adding).rejects.toThrow("Quota exceeded");
+        await expect(removing).rejects.toThrow("Quota exceeded");
+
+        // Then the layout keeps its saved state
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
+      });
+
+      it("should not use the remote favorites storage", async () => {
+        // Given
+        const remoteFavorites = makeRemoteFavorites();
+        const layoutManager = makeLayoutManager({
+          userProfile: makeUserProfileStorage(),
+          remoteFavorites,
+        });
+
+        // When
+        await layoutManager.setFavorite(personalLayout(), { favorite: true });
+
+        // Then
+        expect(remoteFavorites.addFavoriteLayout).not.toHaveBeenCalled();
+      });
+
+      it("should throw without a user profile storage", async () => {
+        // Given
+        const layoutManager = makeLayoutManager({ remoteFavorites: makeRemoteFavorites() });
+
+        // When, Then
+        await expect(
+          layoutManager.setFavorite(personalLayout(), { favorite: true }),
+        ).rejects.toThrow("cannot be marked as favorite");
+      });
+
+      it("should not make a shared layout with the same id a favorite", async () => {
+        // Given
+        const id = BasicBuilder.string();
+        const personal = LayoutBuilder.layout({ id: id as LayoutID, permission: "CREATOR_WRITE" });
+        const shared = LayoutBuilder.layout({
+          id: id as LayoutID,
+          permission: "ORG_READ",
+          externalId: id,
+        });
+        const layoutManager = makeLayoutManager({
+          userProfile: makeUserProfileStorage(),
+          remoteFavorites: makeRemoteFavorites(),
+        });
+
+        // When
+        await layoutManager.setFavorite(personal, { favorite: true });
+
+        // Then
+        expect(layoutIsFavorite(layoutManager.favorites, personal)).toBe(true);
+        expect(layoutIsFavorite(layoutManager.favorites, shared)).toBe(false);
+      });
+    });
+
+    describe("setFavorite for shared layouts", () => {
+      it("should add and remove favorites through the remote storage by external id", async () => {
+        // Given
+        const layout = sharedLayout();
+        const remoteFavorites = makeRemoteFavorites();
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+
+        // When
+        await layoutManager.setFavorite(layout, { favorite: true });
+
+        // Then
+        expect(remoteFavorites.addFavoriteLayout).toHaveBeenCalledWith(layout.externalId);
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(true);
+
+        // When
+        await layoutManager.setFavorite(layout, { favorite: false });
+
+        // Then
+        expect(remoteFavorites.removeFavoriteLayout).toHaveBeenCalledWith(layout.externalId);
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
+      });
+
+      it("should emit favoriteschange before the change is saved", () => {
+        // Given
+        const layoutManager = makeLayoutManager({ remoteFavorites: makeRemoteFavorites() });
+        const listener = jest.fn();
+        layoutManager.on("favoriteschange", listener);
+
+        // When
+        void layoutManager.setFavorite(sharedLayout(), { favorite: true });
+
+        // Then
+        expect(listener).toHaveBeenCalledTimes(1);
+      });
+
+      it("should roll back a change that cannot be saved", async () => {
+        // Given
+        const layout = sharedLayout();
+        const remoteFavorites = makeRemoteFavorites();
+        remoteFavorites.addFavoriteLayout.mockRejectedValue(new Error("Forbidden"));
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+
+        // When
+        const adding = layoutManager.setFavorite(layout, { favorite: true });
+
+        // Then
+        await expect(adding).rejects.toThrow("Forbidden");
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
+      });
+
+      it("should send the writes of a layout in order", async () => {
+        // Given
+        const layout = sharedLayout();
+        const remoteFavorites = makeRemoteFavorites();
+        const add = deferred();
+        remoteFavorites.addFavoriteLayout.mockReturnValueOnce(add.promise);
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+        const adding = layoutManager.setFavorite(layout, { favorite: true });
+
+        // When
+        const removing = layoutManager.setFavorite(layout, { favorite: false });
+        await Promise.resolve();
+
+        // Then
+        expect(remoteFavorites.addFavoriteLayout).toHaveBeenCalledWith(layout.externalId);
+        expect(remoteFavorites.removeFavoriteLayout).not.toHaveBeenCalled();
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
+
+        // When
+        add.resolve();
+        await Promise.all([adding, removing]);
+
+        // Then
+        expect(remoteFavorites.removeFavoriteLayout).toHaveBeenCalledWith(layout.externalId);
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
+      });
+
+      it("should not delay the write of another layout", async () => {
+        // Given
+        const first = sharedLayout();
+        const second = sharedLayout();
+        const remoteFavorites = makeRemoteFavorites();
+        const add = deferred();
+        remoteFavorites.addFavoriteLayout.mockReturnValueOnce(add.promise);
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+        const addingFirst = layoutManager.setFavorite(first, { favorite: true });
+
+        // When
+        await layoutManager.setFavorite(second, { favorite: true });
+
+        // Then
+        expect(remoteFavorites.addFavoriteLayout).toHaveBeenCalledWith(second.externalId);
+        expect(layoutIsFavorite(layoutManager.favorites, second)).toBe(true);
+        add.resolve();
+        await addingFirst;
+        expect(layoutIsFavorite(layoutManager.favorites, first)).toBe(true);
+      });
+
+      it("should only roll back the layout whose write failed", async () => {
+        // Given
+        const first = sharedLayout();
+        const second = sharedLayout();
+        const remoteFavorites = makeRemoteFavorites();
+        const add = deferred();
+        remoteFavorites.addFavoriteLayout.mockReturnValueOnce(add.promise);
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+        const addingFirst = layoutManager.setFavorite(first, { favorite: true });
+        await layoutManager.setFavorite(second, { favorite: true });
+
+        // When
+        add.reject(new Error("Forbidden"));
+
+        // Then
+        await expect(addingFirst).rejects.toThrow("Forbidden");
+        expect(layoutIsFavorite(layoutManager.favorites, first)).toBe(false);
+        expect(layoutIsFavorite(layoutManager.favorites, second)).toBe(true);
+      });
+
+      it("should roll back to the saved state when consecutive writes fail", async () => {
+        // Given
+        const layout = sharedLayout();
+        const remoteFavorites = makeRemoteFavorites();
+        remoteFavorites.addFavoriteLayout.mockRejectedValue(new Error("Forbidden"));
+        remoteFavorites.removeFavoriteLayout.mockRejectedValue(new Error("Forbidden"));
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+
+        // When
+        const adding = layoutManager.setFavorite(layout, { favorite: true });
+        const removing = layoutManager.setFavorite(layout, { favorite: false });
+
+        // Then
+        await expect(adding).rejects.toThrow("Forbidden");
+        await expect(removing).rejects.toThrow("Forbidden");
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
+      });
+
+      it("should keep a pending change when shared favorites are reloaded", async () => {
+        // Given
+        const layout = sharedLayout();
+        const remoteFavorites = makeRemoteFavorites();
+        const add = deferred();
+        remoteFavorites.addFavoriteLayout.mockReturnValueOnce(add.promise);
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+        await layoutManager.getFavorites();
+        const adding = layoutManager.setFavorite(layout, { favorite: true });
+
+        // When
+        layoutManager.setOnline({ online: true });
+        await layoutManager.getFavorites();
+
+        // Then
+        expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(true);
+        add.resolve();
+        await adding;
+      });
+
+      describe("when a layout changes while shared favorites load", () => {
+        function deferredIds(): { promise: Promise<string[]>; resolve: (ids: string[]) => void } {
+          let resolve: (ids: string[]) => void = () => {};
+          const promise = new Promise<string[]>((res) => {
+            resolve = res;
+          });
+          return { promise, resolve };
+        }
+
+        const sharedLayoutWithId = (externalId: string) =>
+          LayoutBuilder.layout({ permission: "ORG_WRITE", externalId });
+
+        it("should keep the loaded favorites of the other layouts", async () => {
+          // Given a load in progress of favorites "a" and "b"
+          const remoteFavorites = makeRemoteFavorites();
+          const load = deferredIds();
+          remoteFavorites.getFavoriteLayoutIds.mockReturnValueOnce(load.promise);
+          const layoutManager = makeLayoutManager({ remoteFavorites });
+
+          // When "c" is marked as favorite before the load finishes
+          await layoutManager.setFavorite(sharedLayoutWithId("c"), { favorite: true });
+          load.resolve(["a", "b"]);
+          const favorites = await layoutManager.getFavorites();
+
+          // Then the loaded favorites are kept alongside the change
+          expect([...favorites.shared].sort()).toEqual(["a", "b", "c"]);
+        });
+
+        it("should roll back later failed writes to the loaded favorites", async () => {
+          // Given favorites "a" loaded while "c" was being marked as favorite
+          const remoteFavorites = makeRemoteFavorites();
+          const load = deferredIds();
+          remoteFavorites.getFavoriteLayoutIds.mockReturnValueOnce(load.promise);
+          const layoutManager = makeLayoutManager({ remoteFavorites });
+          await layoutManager.setFavorite(sharedLayoutWithId("c"), { favorite: true });
+          load.resolve(["a"]);
+          await layoutManager.getFavorites();
+
+          // When removing "a" fails
+          remoteFavorites.removeFavoriteLayout.mockRejectedValueOnce(new Error("Forbidden"));
+          await expect(
+            layoutManager.setFavorite(sharedLayoutWithId("a"), { favorite: false }),
+          ).rejects.toThrow("Forbidden");
+
+          // Then "a" is rolled back to the loaded state
+          expect(layoutManager.favorites.shared.has("a")).toBe(true);
+        });
+
+        it("should keep a write saved during the load when the response predates it", async () => {
+          // Given a load whose response was produced before "c" was saved
+          const remoteFavorites = makeRemoteFavorites();
+          const load = deferredIds();
+          remoteFavorites.getFavoriteLayoutIds.mockReturnValueOnce(load.promise);
+          const layoutManager = makeLayoutManager({ remoteFavorites });
+
+          // When "c" is saved as favorite and the load then finishes without it
+          await layoutManager.setFavorite(sharedLayoutWithId("c"), { favorite: true });
+          load.resolve([]);
+          const favorites = await layoutManager.getFavorites();
+
+          // Then "c" stays a favorite
+          expect(favorites.shared.has("c")).toBe(true);
+        });
+
+        it("should follow the loaded favorites for a write that failed during the load", async () => {
+          // Given a load in progress, and the server already has "c" as favorite
+          const remoteFavorites = makeRemoteFavorites();
+          const load = deferredIds();
+          remoteFavorites.getFavoriteLayoutIds.mockReturnValueOnce(load.promise);
+          remoteFavorites.removeFavoriteLayout.mockRejectedValueOnce(new Error("Forbidden"));
+          const layoutManager = makeLayoutManager({ remoteFavorites });
+
+          // When removing "c" fails before the load finishes
+          await expect(
+            layoutManager.setFavorite(sharedLayoutWithId("c"), { favorite: false }),
+          ).rejects.toThrow("Forbidden");
+          load.resolve(["c"]);
+          const favorites = await layoutManager.getFavorites();
+
+          // Then "c" follows the server state
+          expect(favorites.shared.has("c")).toBe(true);
+        });
+      });
+
+      it("should throw without remote favorites storage", async () => {
+        // Given
+        const layoutManager = makeLayoutManager({ userProfile: makeUserProfileStorage() });
+
+        // When, Then
+        await expect(layoutManager.setFavorite(sharedLayout(), { favorite: true })).rejects.toThrow(
+          "cannot be marked as favorite",
+        );
+      });
     });
   });
 });
