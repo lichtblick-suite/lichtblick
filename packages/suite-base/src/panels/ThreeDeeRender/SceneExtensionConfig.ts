@@ -26,6 +26,7 @@ import { VelodyneScans } from "@lichtblick/suite-base/panels/ThreeDeeRender/rend
 
 import { IRenderer } from "./IRenderer";
 import { SceneExtension } from "./SceneExtension";
+import { Maps } from "./renderables/Maps";
 import { MeasurementTool } from "./renderables/MeasurementTool";
 import { PublishClickTool } from "./renderables/PublishClickTool";
 import { InterfaceMode } from "./types";
@@ -80,6 +81,10 @@ export const DEFAULT_SCENE_EXTENSION_CONFIG: SceneExtensionConfig = {
       init: (renderer: IRenderer) =>
         // only show frame axes and labels by default when in 3d mode
         new FrameAxes(renderer, { visible: renderer.interfaceMode === "3d" }),
+    },
+    [Maps.extensionId]: {
+      init: (renderer: IRenderer) => new Maps(renderer),
+      supportedInterfaceModes: ["3d"],
     },
     [Grids.extensionId]: {
       init: (renderer: IRenderer) => new Grids(renderer),

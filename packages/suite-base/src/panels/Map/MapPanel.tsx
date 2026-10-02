@@ -74,8 +74,9 @@ function MapPanel(props: MapPanelProps): React.JSX.Element {
   });
 
   const [tileLayer] = useState(
-    new TileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+    new TileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxNativeZoom: 18,
       maxZoom: 24,
     }),
