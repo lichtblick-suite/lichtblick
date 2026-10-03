@@ -8,6 +8,7 @@
 import { createContext, useContext } from "react";
 
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
+import { AdditionalSourceDescriptor } from "@lichtblick/suite-base/players/IterablePlayer/additionalSources/types";
 import { Player, PlayerMetricsCollectorInterface } from "@lichtblick/suite-base/players/types";
 import { RegisteredIconNames } from "@lichtblick/suite-base/types/Icons";
 
@@ -17,6 +18,7 @@ export type DataSourceFactoryInitializeArgs = {
   files?: File[];
   params?: Record<string, string | undefined>;
   sourceMetadata?: Record<string, unknown>[];
+  additionalSources?: AdditionalSourceDescriptor[];
 };
 
 export type DataSourceFactoryType = "file" | "connection" | "sample";
@@ -93,6 +95,7 @@ type ConnectionDataSourceArgs = {
   type: "connection";
   params?: Record<string, string | undefined>;
   sourceMetadata?: Record<string, unknown>[];
+  additionalSources?: AdditionalSourceDescriptor[];
 };
 
 export type DataSourceArgs = FileDataSourceArgs | ConnectionDataSourceArgs;
