@@ -31,6 +31,7 @@ describe("LayoutManager", () => {
     mockRemoteStorage = {
       workspace: BasicBuilder.string(),
       getLayouts: jest.fn().mockResolvedValue([]),
+      getDefaultLayoutData: jest.fn().mockResolvedValue(undefined),
       getLayout: jest.fn().mockResolvedValue(undefined),
       saveNewLayout: jest.fn(),
       updateLayout: jest.fn(),
@@ -132,6 +133,59 @@ describe("LayoutManager", () => {
       // Then
       expect(layoutManager.error).toBe(undefined);
       expect(mockErrorChangeListener).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("getDefaultLayoutData", () => {
+    it("should return undefined when there is no remote storage", async () => {
+      // Given
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: undefined,
+      });
+
+      // When
+      const result = await layoutManager.getDefaultLayoutData();
+
+      // Then
+      expect(result).toBeUndefined();
+    });
+
+    it("should delegate to remote storage and return its result", async () => {
+      // Given
+      const templateData = {
+        configById: {},
+        globalVariables: { speed: 1 },
+        userNodes: { scriptA: { name: "scriptA", sourceCode: "// hello" } },
+        playbackConfig: { speed: 1 },
+      };
+      mockRemoteStorage.getDefaultLayoutData = jest.fn().mockResolvedValue(templateData);
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+
+      // When
+      const result = await layoutManager.getDefaultLayoutData();
+
+      // Then
+      expect(mockRemoteStorage.getDefaultLayoutData).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(templateData);
+    });
+
+    it("should return undefined when remote storage returns undefined", async () => {
+      // Given
+      mockRemoteStorage.getDefaultLayoutData = jest.fn().mockResolvedValue(undefined);
+      const layoutManager = new LayoutManager({
+        local: mockLocalStorage,
+        remote: mockRemoteStorage,
+      });
+
+      // When
+      const result = await layoutManager.getDefaultLayoutData();
+
+      // Then
+      expect(result).toBeUndefined();
     });
   });
 
