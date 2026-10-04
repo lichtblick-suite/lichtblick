@@ -20,7 +20,8 @@ jobs:
   external-fork-scan:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
+    # Skip on forks that have no SonarCloud server configured; the scan cannot succeed there.
+    if: ${{ vars.SONAR_HOST_URL != '' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
     permissions:
       actions: read
       checks: write
