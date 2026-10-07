@@ -1253,6 +1253,49 @@ describe("LayoutManager", () => {
         (console.error as jest.Mock).mockClear();
       });
 
+      it("should ignore an older load that finishes after a newer one", async () => {
+        // Given two loads in progress
+        const remoteFavorites = makeRemoteFavorites();
+        let resolveOlder: (ids: string[]) => void = () => {};
+        let resolveNewer: (ids: string[]) => void = () => {};
+        remoteFavorites.getFavoriteLayoutIds
+          .mockReturnValueOnce(new Promise((res) => (resolveOlder = res)))
+          .mockReturnValueOnce(new Promise((res) => (resolveNewer = res)));
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+        layoutManager.setOnline({ online: true });
+
+        // When the newer load finishes first
+        resolveNewer(["new"]);
+        await layoutManager.getFavorites();
+        resolveOlder(["old"]);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        // Then the newer favorites are kept
+        expect([...layoutManager.favorites.shared]).toEqual(["new"]);
+      });
+
+      it("should apply an older load when a newer one fails", async () => {
+        // Given two loads in progress
+        const remoteFavorites = makeRemoteFavorites();
+        let resolveOlder: (ids: string[]) => void = () => {};
+        let rejectNewer: (error: Error) => void = () => {};
+        remoteFavorites.getFavoriteLayoutIds
+          .mockReturnValueOnce(new Promise((res) => (resolveOlder = res)))
+          .mockReturnValueOnce(new Promise((_res, rej) => (rejectNewer = rej)));
+        const layoutManager = makeLayoutManager({ remoteFavorites });
+        layoutManager.setOnline({ online: true });
+
+        // When the newer load fails and the older one then finishes
+        rejectNewer(new Error("Not Found"));
+        await layoutManager.getFavorites();
+        resolveOlder(["old"]);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        // Then the older favorites are applied
+        expect([...layoutManager.favorites.shared]).toEqual(["old"]);
+        (console.error as jest.Mock).mockClear();
+      });
+
       it("should emit favoriteschange when favorites are loaded", async () => {
         // Given
         const layoutManager = makeLayoutManager({

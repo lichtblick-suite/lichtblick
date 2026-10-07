@@ -97,6 +97,9 @@ export default class LayoutManager implements ILayoutManager {
   private remoteFavorites: IRemoteLayoutFavoritesStorage | undefined;
   private personalFavoritesLoad?: Promise<void>;
   private sharedFavoritesLoad: Promise<void> = Promise.resolve();
+  /** Generations of the last started and last applied loads of shared favorites. */
+  private sharedFavoritesRequestedGeneration = 0;
+  private sharedFavoritesAppliedGeneration = 0;
   /** Favorites as last loaded from or written to their storage. Failed writes roll back to it. */
   private savedFavorites: LayoutFavorites = { personal: new Set(), shared: new Set() };
   /** The last write per layout. Each write waits for the previous one of its layout. */
@@ -551,10 +554,16 @@ export default class LayoutManager implements ILayoutManager {
   }
 
   private async loadSharedFavorites(remote: IRemoteLayoutFavoritesStorage): Promise<void> {
+    const generation = ++this.sharedFavoritesRequestedGeneration;
     const savedWhileLoading = new Map<string, boolean>();
     this.sharedFavoriteLoads.add(savedWhileLoading);
     try {
-      let saved: ReadonlySet<string> = new Set(await remote.getFavoriteLayoutIds());
+      const ids = await remote.getFavoriteLayoutIds();
+      if (generation < this.sharedFavoritesAppliedGeneration) {
+        return;
+      }
+      this.sharedFavoritesAppliedGeneration = generation;
+      let saved: ReadonlySet<string> = new Set(ids);
       for (const [externalId, favorite] of savedWhileLoading) {
         saved = updateIds(saved, externalId, { included: favorite });
       }
