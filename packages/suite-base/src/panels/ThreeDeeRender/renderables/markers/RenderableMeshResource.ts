@@ -10,12 +10,20 @@ import * as THREE from "three";
 import { EDGE_LINE_SEGMENTS_NAME } from "@lichtblick/suite-base/panels/ThreeDeeRender/ModelCache";
 
 import { RenderableMarker } from "./RenderableMarker";
-import { makeStandardMaterial } from "./materials";
+import {
+  makeStandardMaterial,
+  shouldShowMarkerOutlines,
+  updateStandardMaterialColor,
+} from "./materials";
 import type { IRenderer } from "../../IRenderer";
-import { rgbToThreeColor } from "../../color";
 import { disposeMeshesRecursive } from "../../dispose";
 import { Marker } from "../../ros";
-import { removeLights, replaceMaterials } from "../models";
+import {
+  removeLights,
+  replaceMaterials,
+  setEmbeddedMaterialsOpacity,
+  updateEmbeddedMaterialsOpacity,
+} from "../models";
 
 const MESH_FETCH_FAILED = "MESH_FETCH_FAILED";
 
@@ -58,20 +66,22 @@ export class RenderableMeshResource extends RenderableMarker {
     super.update(newMarker, receiveTime);
     const marker = this.userData.marker;
 
-    const transparent = marker.color.a < 1;
-    if (transparent !== this.#material.transparent) {
-      this.#material.transparent = transparent;
-      this.#material.depthWrite = !transparent;
-      this.#material.needsUpdate = true;
-    }
+    updateStandardMaterialColor(this.#material, marker.color);
 
-    rgbToThreeColor(this.#material.color, marker.color);
-    this.#material.opacity = marker.color.a;
-
-    if (forceLoad === true || marker.mesh_resource !== prevMarker.mesh_resource) {
+    const embeddedMaterialUsageChanged =
+      marker.mesh_use_embedded_materials !== prevMarker.mesh_use_embedded_materials;
+    const opacityChanged = marker.color.a !== prevMarker.color.a;
+    if (
+      forceLoad === true ||
+      marker.mesh_resource !== prevMarker.mesh_resource ||
+      embeddedMaterialUsageChanged
+    ) {
       const curUpdateId = ++this.#updateId;
 
-      const opts = { useEmbeddedMaterials: marker.mesh_use_embedded_materials };
+      const opts = {
+        useEmbeddedMaterials: marker.mesh_use_embedded_materials,
+        opacity: marker.color.a,
+      };
       const errors = this.renderer.settings.errors;
       if (this.#mesh) {
         this.remove(this.#mesh);
@@ -89,6 +99,10 @@ export class RenderableMeshResource extends RenderableMarker {
             return;
           }
           this.#mesh = mesh;
+          // Opacity may have changed while the load was in flight; apply the latest value.
+          if (this.userData.marker.mesh_use_embedded_materials) {
+            updateEmbeddedMaterialsOpacity(mesh, this.userData.marker.color.a);
+          }
           this.add(mesh);
           this.#updateOutlineVisibility();
 
@@ -104,6 +118,9 @@ export class RenderableMeshResource extends RenderableMarker {
             `Unhandled error loading mesh from "${marker.mesh_resource}": ${(err as Error).message}`,
           );
         });
+    } else if (opacityChanged && marker.mesh_use_embedded_materials && this.#mesh != undefined) {
+      // Opacity-only updates must not destroy/recreate GPU resources on the hot path.
+      updateEmbeddedMaterialsOpacity(this.#mesh, marker.color.a);
     }
     this.#updateOutlineVisibility();
 
@@ -111,7 +128,10 @@ export class RenderableMeshResource extends RenderableMarker {
   }
 
   #updateOutlineVisibility(): void {
-    const showOutlines = this.getSettings()?.showOutlines ?? true;
+    const showOutlines = shouldShowMarkerOutlines({
+      showOutlines: this.getSettings()?.showOutlines,
+      alpha: this.userData.marker.color.a,
+    });
     this.traverse((lineSegments) => {
       // Want to avoid picking up the LineSegments from the model itself
       // only update line segments that we've added with the special name
@@ -126,7 +146,7 @@ export class RenderableMeshResource extends RenderableMarker {
 
   async #loadModel(
     url: string,
-    opts: { useEmbeddedMaterials: boolean },
+    opts: { useEmbeddedMaterials: boolean; opacity: number },
   ): Promise<THREE.Group | THREE.Scene | undefined> {
     const cachedModel = await this.renderer.modelCache.load(
       url,
@@ -155,6 +175,8 @@ export class RenderableMeshResource extends RenderableMarker {
     removeLights(mesh);
     if (!opts.useEmbeddedMaterials) {
       replaceMaterials(mesh, this.#material);
+    } else {
+      setEmbeddedMaterialsOpacity(mesh, opts.opacity);
     }
 
     return mesh;
