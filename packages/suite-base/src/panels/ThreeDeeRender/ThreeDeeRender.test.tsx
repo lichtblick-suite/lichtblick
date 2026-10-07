@@ -9,18 +9,27 @@
 
 import "@testing-library/jest-dom";
 import { act, render, waitFor } from "@testing-library/react";
+import { produce } from "immer";
 
 import { Topic } from "@lichtblick/suite";
-import { BuiltinPanelExtensionContext } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
+import {
+  BuiltinPanelExtensionContext,
+  PanelExtensionAdapter,
+} from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import {
   DEFAULT_FOLLOW_MODE,
   MAX_TRANSFORM_MESSAGES,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/constants";
 import type { MessageEvent } from "@lichtblick/suite-base/players/types";
+import * as PanelStateContextProvider from "@lichtblick/suite-base/providers/PanelStateContextProvider";
+import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RenderStateBuilder from "@lichtblick/suite-base/testing/builders/RenderStateBuilder";
+import { SaveConfig } from "@lichtblick/suite-base/types/panels";
 
+import { RendererConfig } from "./IRenderer";
 import { Renderer } from "./Renderer";
 import { ThreeDeeRender } from "./ThreeDeeRender";
 import { DEFAULT_CAMERA_STATE } from "./camera";
@@ -223,6 +232,111 @@ describe("ThreeDeeRender", () => {
 
     // Then
     expect(container).toBeInTheDocument();
+  });
+
+  it("does not reset nested settings after a later save", () => {
+    // GIVEN a panel with a disabled nested setting
+    jest.useFakeTimers();
+    const renderer = {
+      ...createMockRenderer(),
+      updateConfig: (handler: (draft: RendererConfig) => void) => {
+        renderer.config = produce(renderer.config as RendererConfig, handler);
+        renderer.emit("configChange", renderer);
+      },
+    };
+    mockedRenderer.mockImplementationOnce(() => renderer as unknown as Renderer);
+    const initialConfig = { topics: { topic: { child: { enabled: false } } } };
+    let savedConfig: unknown = initialConfig;
+    const saveConfig: SaveConfig<unknown> = (update) => {
+      savedConfig = typeof update === "function" ? update(savedConfig) : update;
+    };
+
+    // AND GIVEN an adapter with a converter that handles nested settings
+    const updateSettingsTree = jest.fn();
+    const settingsTreeSpy = jest
+      .spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate")
+      .mockReturnValue(updateSettingsTree);
+    const initPanel = jest.fn<void, [BuiltinPanelExtensionContext]>();
+    const adapterView = render(
+      <MockPanelContextProvider type="3D">
+        <PanelSetup
+          fixture={{
+            topics: [{ name: "topic", schemaName: "test.Schema" }],
+            messageConverters: [
+              {
+                fromSchemaName: "test.Schema",
+                toSchemaName: "foxglove.SceneUpdate",
+                converter: () => ({}),
+                panelSettings: {
+                  "3D": {
+                    settings: () => ({}),
+                    handler: (action, config) => {
+                      if (action.action === "update") {
+                        (config as { child: { enabled: boolean } }).child.enabled = action.payload
+                          .value as boolean;
+                      }
+                    },
+                  },
+                },
+              },
+            ],
+          }}
+        >
+          <PanelExtensionAdapter
+            config={initialConfig}
+            saveConfig={saveConfig}
+            initPanel={initPanel}
+          />
+        </PanelSetup>
+      </MockPanelContextProvider>,
+    );
+
+    // AND GIVEN a 3D panel using the adapter's settings and save methods
+    const context = initPanel.mock.calls.at(-1)![0];
+    const props = setup(undefined, {
+      initialState: context.initialState,
+      saveState: context.saveState.bind(context),
+      updatePanelSettingsEditor: context.updatePanelSettingsEditor.bind(context),
+    });
+    const view = render(<ThreeDeeRender {...props} />);
+
+    try {
+      // WHEN the nested setting is enabled
+      act(() => {
+        updateSettingsTree.mock.calls.at(-1)![0].actionHandler({
+          action: "update",
+          payload: {
+            path: ["topics", "topic", "child", "enabled"],
+            input: "boolean",
+            value: true,
+          },
+        });
+      });
+
+      // THEN the edit is saved
+      expect(savedConfig).toMatchObject({
+        topics: { topic: { child: { enabled: true } } },
+      });
+
+      // WHEN camera movement triggers a later save
+      act(() => {
+        renderer.getCameraState.mockReturnValue({ ...DEFAULT_CAMERA_STATE, distance: 10 });
+        renderer.emit("cameraMove");
+      });
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+
+      // THEN the saved nested setting remains enabled
+      expect(savedConfig).toMatchObject({
+        topics: { topic: { child: { enabled: true } } },
+      });
+    } finally {
+      view.unmount();
+      adapterView.unmount();
+      settingsTreeSpy.mockRestore();
+      jest.useRealTimers();
+    }
   });
 
   it("renders a canvas element", () => {
