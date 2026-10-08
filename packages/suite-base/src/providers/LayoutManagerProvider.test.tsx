@@ -115,6 +115,6 @@ describe("LayoutManagerProvider", () => {
     expect(jest.mocked(LayoutManager)).toHaveBeenCalledWith(
       expect.objectContaining({ userProfile, remoteFavorites }),
     );
-    expect(mockLayoutManager.getFavorites).toHaveBeenCalled();
+    expect(mockLayoutManager.loadFavorites).toHaveBeenCalled();
   });
 });

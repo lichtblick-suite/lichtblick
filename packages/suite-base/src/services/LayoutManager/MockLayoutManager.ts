@@ -27,7 +27,7 @@ export default class MockLayoutManager implements ILayoutManager {
   public revertLayout = jest.fn();
   public makePersonalCopy = jest.fn();
   public syncWithRemote = jest.fn();
-  public getFavorites = jest.fn(async () => await Promise.resolve(this.favorites));
+  public loadFavorites = jest.fn(async () => await Promise.resolve(this.favorites));
   public canFavorite = jest.fn().mockReturnValue(false);
   public setFavorite = jest.fn().mockResolvedValue(undefined);
 }

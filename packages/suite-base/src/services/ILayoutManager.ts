@@ -71,7 +71,7 @@ export interface ILayoutManager {
 
   /**
    * The current user's favorite layouts, including changes that are still being saved. Changes
-   * emit "favoriteschange". Use `getFavorites` to wait for favorites that are still loading.
+   * emit "favoriteschange". Use `loadFavorites` to wait for favorites that are still loading.
    */
   readonly favorites: LayoutFavorites;
 
@@ -126,8 +126,8 @@ export interface ILayoutManager {
   /** Transfer a shared layout's working changes into a new personal layout. */
   makePersonalCopy(params: { id: LayoutID; name: string }): Promise<Layout>;
 
-  /** Resolves with the current user's favorite layouts once they finish loading. */
-  getFavorites(): Promise<LayoutFavorites>;
+  /** Loads the current user's favorite layouts, if not loaded yet, and resolves with them. */
+  loadFavorites(): Promise<LayoutFavorites>;
 
   /** Indicates whether the current user can mark this layout as favorite. */
   canFavorite(layout: Layout): boolean;

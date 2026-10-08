@@ -504,7 +504,7 @@ export default class LayoutManager implements ILayoutManager {
     return result;
   }
 
-  public async getFavorites(): Promise<LayoutFavorites> {
+  public async loadFavorites(): Promise<LayoutFavorites> {
     await Promise.all([this.loadPersonalFavorites(), this.sharedFavoritesLoad]);
     return this.favorites;
   }

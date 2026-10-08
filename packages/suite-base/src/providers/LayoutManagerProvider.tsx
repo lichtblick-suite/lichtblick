@@ -48,9 +48,8 @@ export default function LayoutManagerProvider({
     layoutManager.setOnline({ online });
   }, [layoutManager, online]);
 
-  // Load favorites up front, so they are ready when the layout browser opens.
   useEffect(() => {
-    void layoutManager.getFavorites();
+    void layoutManager.loadFavorites();
   }, [layoutManager]);
 
   // Sync periodically when logged in, online, and the app is not hidden

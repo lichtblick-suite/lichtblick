@@ -340,7 +340,7 @@ export default function CurrentLayoutProvider({
     // Don't let a slow favorites request block opening a layout; use the favorites loaded so far.
     let clearFavoritesTimeout = () => {};
     const loadedFavorites = await Promise.race([
-      layoutManager.getFavorites(),
+      layoutManager.loadFavorites(),
       new Promise<undefined>((resolve) => {
         const timeoutId = setTimeout(resolve, FAVORITES_TIMEOUT_MS);
         clearFavoritesTimeout = () => {

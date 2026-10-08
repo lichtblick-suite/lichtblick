@@ -80,7 +80,7 @@ function makeMockLayoutManager() {
     overwriteLayout: jest.fn().mockImplementation(mockThrow("overwriteLayout")),
     revertLayout: jest.fn().mockImplementation(mockThrow("revertLayout")),
     makePersonalCopy: jest.fn().mockImplementation(mockThrow("makePersonalCopy")),
-    getFavorites: jest.fn().mockResolvedValue(favorites),
+    loadFavorites: jest.fn().mockResolvedValue(favorites),
     canFavorite: jest.fn().mockReturnValue(false),
     setFavorite: jest.fn().mockImplementation(mockThrow("setFavorite")),
   };
@@ -151,7 +151,7 @@ describe("CurrentLayoutProvider", () => {
     // Default mocks
     mockLayoutManager.getLayout.mockImplementation(async () => undefined);
     mockLayoutManager.getLayouts.mockImplementation(() => []);
-    mockLayoutManager.getFavorites.mockResolvedValue({ personal: new Set(), shared: new Set() });
+    mockLayoutManager.loadFavorites.mockResolvedValue({ personal: new Set(), shared: new Set() });
     mockLayoutManager.favorites = { personal: new Set(), shared: new Set() };
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: undefined });
   });
@@ -539,7 +539,7 @@ describe("CurrentLayoutProvider", () => {
       personal?: string[];
       shared?: string[];
     }) {
-      mockLayoutManager.getFavorites.mockResolvedValue({
+      mockLayoutManager.loadFavorites.mockResolvedValue({
         personal: new Set(personal),
         shared: new Set(shared),
       });
@@ -689,7 +689,7 @@ describe("CurrentLayoutProvider", () => {
 
     it("should not wait more than the favorites timeout and use the favorites loaded so far", async () => {
       // Given favorites that never finish loading, and a personal favorite already loaded
-      mockLayoutManager.getFavorites.mockReturnValue(new Promise(() => {}));
+      mockLayoutManager.loadFavorites.mockReturnValue(new Promise(() => {}));
       mockLayoutManager.favorites = { personal: new Set(["layout2"]), shared: new Set() };
       mockLayoutManager.getLayouts.mockResolvedValue([
         {

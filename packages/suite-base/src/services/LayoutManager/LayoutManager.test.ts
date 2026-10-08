@@ -1176,7 +1176,7 @@ describe("LayoutManager", () => {
     const sharedLayout = () =>
       LayoutBuilder.layout({ permission: "ORG_WRITE", externalId: BasicBuilder.string() });
 
-    describe("getFavorites", () => {
+    describe("loadFavorites", () => {
       it("should load personal favorites from the user profile", async () => {
         // Given
         const layout = personalLayout();
@@ -1185,7 +1185,7 @@ describe("LayoutManager", () => {
         });
 
         // When
-        const favorites = await layoutManager.getFavorites();
+        const favorites = await layoutManager.loadFavorites();
 
         // Then
         expect(layoutIsFavorite(favorites, layout)).toBe(true);
@@ -1200,7 +1200,7 @@ describe("LayoutManager", () => {
         });
 
         // When
-        const favorites = await layoutManager.getFavorites();
+        const favorites = await layoutManager.loadFavorites();
 
         // Then
         expect(layoutIsFavorite(favorites, layout)).toBe(true);
@@ -1213,7 +1213,7 @@ describe("LayoutManager", () => {
         const layoutManager = makeLayoutManager({ remoteFavorites, online: false });
 
         // When
-        await layoutManager.getFavorites();
+        await layoutManager.loadFavorites();
 
         // Then
         expect(remoteFavorites.getFavoriteLayoutIds).not.toHaveBeenCalled();
@@ -1229,7 +1229,7 @@ describe("LayoutManager", () => {
 
         // When
         layoutManager.setOnline({ online: true });
-        const favorites = await layoutManager.getFavorites();
+        const favorites = await layoutManager.loadFavorites();
 
         // Then
         expect(layoutIsFavorite(favorites, layout)).toBe(true);
@@ -1242,7 +1242,7 @@ describe("LayoutManager", () => {
         const layoutManager = makeLayoutManager({ remoteFavorites });
 
         // When
-        const favorites = await layoutManager.getFavorites();
+        const favorites = await layoutManager.loadFavorites();
 
         // Then
         expect(favorites.shared.size).toBe(0);
@@ -1266,7 +1266,7 @@ describe("LayoutManager", () => {
 
         // When the newer load finishes first
         resolveNewer(["new"]);
-        await layoutManager.getFavorites();
+        await layoutManager.loadFavorites();
         resolveOlder(["old"]);
         await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -1287,7 +1287,7 @@ describe("LayoutManager", () => {
 
         // When the newer load fails and the older one then finishes
         rejectNewer(new Error("Not Found"));
-        await layoutManager.getFavorites();
+        await layoutManager.loadFavorites();
         resolveOlder(["old"]);
         await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -1305,7 +1305,7 @@ describe("LayoutManager", () => {
         layoutManager.on("favoriteschange", listener);
 
         // When
-        await layoutManager.getFavorites();
+        await layoutManager.loadFavorites();
 
         // Then
         expect(listener).toHaveBeenCalledTimes(1);
@@ -1424,7 +1424,7 @@ describe("LayoutManager", () => {
         const firstWrite = deferred();
         userProfile.setUserProfile.mockReturnValueOnce(firstWrite.promise);
         const layoutManager = makeLayoutManager({ userProfile });
-        await layoutManager.getFavorites();
+        await layoutManager.loadFavorites();
         const addingFirst = layoutManager.setFavorite(first, { favorite: true });
 
         // When a second layout is saved, and then the first write fails
@@ -1444,7 +1444,7 @@ describe("LayoutManager", () => {
         const addWrite = deferred();
         userProfile.setUserProfile.mockReturnValueOnce(addWrite.promise);
         const layoutManager = makeLayoutManager({ userProfile });
-        await layoutManager.getFavorites();
+        await layoutManager.loadFavorites();
         const adding = layoutManager.setFavorite(layout, { favorite: true });
 
         // When removing it before the first write finishes
@@ -1470,7 +1470,7 @@ describe("LayoutManager", () => {
           .mockReturnValueOnce(addWrite.promise)
           .mockRejectedValueOnce(new Error("Quota exceeded"));
         const layoutManager = makeLayoutManager({ userProfile });
-        await layoutManager.getFavorites();
+        await layoutManager.loadFavorites();
         const adding = layoutManager.setFavorite(layout, { favorite: true });
         const removing = layoutManager.setFavorite(layout, { favorite: false });
 
@@ -1674,12 +1674,12 @@ describe("LayoutManager", () => {
         const add = deferred();
         remoteFavorites.addFavoriteLayout.mockReturnValueOnce(add.promise);
         const layoutManager = makeLayoutManager({ remoteFavorites });
-        await layoutManager.getFavorites();
+        await layoutManager.loadFavorites();
         const adding = layoutManager.setFavorite(layout, { favorite: true });
 
         // When
         layoutManager.setOnline({ online: true });
-        await layoutManager.getFavorites();
+        await layoutManager.loadFavorites();
 
         // Then
         expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(true);
@@ -1709,7 +1709,7 @@ describe("LayoutManager", () => {
           // When "c" is marked as favorite before the load finishes
           await layoutManager.setFavorite(sharedLayoutWithId("c"), { favorite: true });
           load.resolve(["a", "b"]);
-          const favorites = await layoutManager.getFavorites();
+          const favorites = await layoutManager.loadFavorites();
 
           // Then the loaded favorites are kept alongside the change
           expect([...favorites.shared].sort()).toEqual(["a", "b", "c"]);
@@ -1723,7 +1723,7 @@ describe("LayoutManager", () => {
           const layoutManager = makeLayoutManager({ remoteFavorites });
           await layoutManager.setFavorite(sharedLayoutWithId("c"), { favorite: true });
           load.resolve(["a"]);
-          await layoutManager.getFavorites();
+          await layoutManager.loadFavorites();
 
           // When removing "a" fails
           remoteFavorites.removeFavoriteLayout.mockRejectedValueOnce(new Error("Forbidden"));
@@ -1745,7 +1745,7 @@ describe("LayoutManager", () => {
           // When "c" is saved as favorite and the load then finishes without it
           await layoutManager.setFavorite(sharedLayoutWithId("c"), { favorite: true });
           load.resolve([]);
-          const favorites = await layoutManager.getFavorites();
+          const favorites = await layoutManager.loadFavorites();
 
           // Then "c" stays a favorite
           expect(favorites.shared.has("c")).toBe(true);
@@ -1764,7 +1764,7 @@ describe("LayoutManager", () => {
             layoutManager.setFavorite(sharedLayoutWithId("c"), { favorite: false }),
           ).rejects.toThrow("Forbidden");
           load.resolve(["c"]);
-          const favorites = await layoutManager.getFavorites();
+          const favorites = await layoutManager.loadFavorites();
 
           // Then "c" follows the server state
           expect(favorites.shared.has("c")).toBe(true);
