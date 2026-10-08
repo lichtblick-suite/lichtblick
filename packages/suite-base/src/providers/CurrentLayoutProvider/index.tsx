@@ -48,10 +48,10 @@ import {
   MAX_SUPPORTED_LAYOUT_VERSION,
   ORG_PERMISSION_PREFIX,
 } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
-import { findFavoriteLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/findFavoriteLayout";
 import useUpdateSharedPanelState from "@lichtblick/suite-base/providers/CurrentLayoutProvider/hooks/useUpdateSharedPanelState";
 import { loadDefaultLayouts } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/loadDefaultLayouts";
 import panelsReducer from "@lichtblick/suite-base/providers/CurrentLayoutProvider/reducers";
+import { findFavoriteLayout } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/utils";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { LayoutLoader } from "@lichtblick/suite-base/services/ILayoutLoader";
 import { LayoutManagerEventTypes } from "@lichtblick/suite-base/services/ILayoutManager";
