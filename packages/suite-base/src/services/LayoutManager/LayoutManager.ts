@@ -96,10 +96,10 @@ export default class LayoutManager implements ILayoutManager {
   /** Stores the favorites of shared layouts. */
   private remoteFavorites: IRemoteLayoutFavoritesStorage | undefined;
   private personalFavoritesLoad?: Promise<void>;
-  private sharedFavoritesLoad: Promise<void> = Promise.resolve();
-  /** Generations of the last started and last applied loads of shared favorites. */
-  private sharedFavoritesRequestedGeneration = 0;
-  private sharedFavoritesAppliedGeneration = 0;
+  private remoteFavoritesLoad: Promise<void> = Promise.resolve();
+  /** Generations of the last started and last applied loads of remote favorites. */
+  private remoteFavoritesRequestedGeneration = 0;
+  private remoteFavoritesAppliedGeneration = 0;
   /** Favorites as last loaded from or written to their storage. Failed writes roll back to it. */
   private savedFavorites: LayoutFavorites = { personal: new Set(), shared: new Set() };
   /** The last write per layout. Each write waits for the previous one of its layout. */
@@ -108,10 +108,10 @@ export default class LayoutManager implements ILayoutManager {
     shared: new Map(),
   };
   /**
-   * The writes saved while each load of shared favorites is running, by external id. The load's
+   * The writes saved while each load of remote favorites is running, by external id. The load's
    * response may predate them, so they take precedence over it.
    */
-  private sharedFavoriteLoads = new Set<Map<string, boolean>>();
+  private remoteFavoriteLoads = new Set<Map<string, boolean>>();
 
   public constructor({
     local,
@@ -154,7 +154,7 @@ export default class LayoutManager implements ILayoutManager {
     this.isOnline = online;
     this.emitter.emit("onlinechange");
     if (online && this.remoteFavorites) {
-      this.sharedFavoritesLoad = this.loadSharedFavorites(this.remoteFavorites);
+      this.remoteFavoritesLoad = this.loadRemoteFavorites(this.remoteFavorites);
     }
   }
 
@@ -505,7 +505,7 @@ export default class LayoutManager implements ILayoutManager {
   }
 
   public async loadFavorites(): Promise<LayoutFavorites> {
-    await Promise.all([this.loadPersonalFavorites(), this.sharedFavoritesLoad]);
+    await Promise.all([this.loadPersonalFavorites(), this.remoteFavoritesLoad]);
     return this.favorites;
   }
 
@@ -520,7 +520,7 @@ export default class LayoutManager implements ILayoutManager {
     if (!layoutIsShared(layout) && userProfile) {
       await this.setPersonalFavorite(userProfile, layout.id, params);
     } else if (layoutIsShared(layout) && remoteFavorites && layout.externalId != undefined) {
-      await this.setSharedFavorite(remoteFavorites, layout.externalId, params);
+      await this.setRemoteFavorite(remoteFavorites, layout.externalId, params);
     } else {
       throw new Error(`Layout "${layout.name}" cannot be marked as favorite`);
     }
@@ -553,16 +553,16 @@ export default class LayoutManager implements ILayoutManager {
     await this.personalFavoritesLoad;
   }
 
-  private async loadSharedFavorites(remote: IRemoteLayoutFavoritesStorage): Promise<void> {
-    const generation = ++this.sharedFavoritesRequestedGeneration;
+  private async loadRemoteFavorites(remote: IRemoteLayoutFavoritesStorage): Promise<void> {
+    const generation = ++this.remoteFavoritesRequestedGeneration;
     const savedWhileLoading = new Map<string, boolean>();
-    this.sharedFavoriteLoads.add(savedWhileLoading);
+    this.remoteFavoriteLoads.add(savedWhileLoading);
     try {
       const ids = await remote.getFavoriteLayoutIds();
-      if (generation < this.sharedFavoritesAppliedGeneration) {
+      if (generation < this.remoteFavoritesAppliedGeneration) {
         return;
       }
-      this.sharedFavoritesAppliedGeneration = generation;
+      this.remoteFavoritesAppliedGeneration = generation;
       let saved: ReadonlySet<string> = new Set(ids);
       for (const [externalId, favorite] of savedWhileLoading) {
         saved = updateIds(saved, externalId, { included: favorite });
@@ -579,7 +579,7 @@ export default class LayoutManager implements ILayoutManager {
     } catch (error) {
       log.error("Failed to load remote favorite layouts", error);
     } finally {
-      this.sharedFavoriteLoads.delete(savedWhileLoading);
+      this.remoteFavoriteLoads.delete(savedWhileLoading);
     }
   }
 
@@ -599,7 +599,7 @@ export default class LayoutManager implements ILayoutManager {
     });
   }
 
-  private async setSharedFavorite(
+  private async setRemoteFavorite(
     remote: IRemoteLayoutFavoritesStorage,
     externalId: string,
     { favorite }: { favorite: boolean },
@@ -610,7 +610,7 @@ export default class LayoutManager implements ILayoutManager {
       } else {
         await remote.removeFavoriteLayout(externalId);
       }
-      for (const savedWhileLoading of this.sharedFavoriteLoads) {
+      for (const savedWhileLoading of this.remoteFavoriteLoads) {
         savedWhileLoading.set(externalId, favorite);
       }
     });

@@ -1192,7 +1192,7 @@ describe("LayoutManager", () => {
         expect(layoutIsFavorite(favorites, personalLayout())).toBe(false);
       });
 
-      it("should load shared favorites when online", async () => {
+      it("should load remote favorites when online", async () => {
         // Given
         const layout = sharedLayout();
         const layoutManager = makeLayoutManager({
@@ -1207,7 +1207,7 @@ describe("LayoutManager", () => {
         expect(layoutIsFavorite(favorites, sharedLayout())).toBe(false);
       });
 
-      it("should not load shared favorites while offline", async () => {
+      it("should not load remote favorites while offline", async () => {
         // Given
         const remoteFavorites = makeRemoteFavorites();
         const layoutManager = makeLayoutManager({ remoteFavorites, online: false });
@@ -1219,7 +1219,7 @@ describe("LayoutManager", () => {
         expect(remoteFavorites.getFavoriteLayoutIds).not.toHaveBeenCalled();
       });
 
-      it("should load shared favorites once the layout manager goes online", async () => {
+      it("should load remote favorites once the layout manager goes online", async () => {
         // Given
         const layout = sharedLayout();
         const layoutManager = makeLayoutManager({
@@ -1235,7 +1235,7 @@ describe("LayoutManager", () => {
         expect(layoutIsFavorite(favorites, layout)).toBe(true);
       });
 
-      it("should have no shared favorites when they cannot be loaded", async () => {
+      it("should have no remote favorites when they cannot be loaded", async () => {
         // Given
         const remoteFavorites = makeRemoteFavorites();
         remoteFavorites.getFavoriteLayoutIds.mockRejectedValue(new Error("Not Found"));
@@ -1667,7 +1667,7 @@ describe("LayoutManager", () => {
         expect(layoutIsFavorite(layoutManager.favorites, layout)).toBe(false);
       });
 
-      it("should keep a pending change when shared favorites are reloaded", async () => {
+      it("should keep a pending change when remote favorites are reloaded", async () => {
         // Given
         const layout = sharedLayout();
         const remoteFavorites = makeRemoteFavorites();
@@ -1687,7 +1687,7 @@ describe("LayoutManager", () => {
         await adding;
       });
 
-      describe("when a layout changes while shared favorites load", () => {
+      describe("when a layout changes while remote favorites load", () => {
         function deferredIds(): { promise: Promise<string[]>; resolve: (ids: string[]) => void } {
           let resolve: (ids: string[]) => void = () => {};
           const promise = new Promise<string[]>((res) => {
