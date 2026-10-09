@@ -39,6 +39,7 @@ import { layoutIsFavorite } from "@lichtblick/suite-base/services/ILayoutManager
 import { Layout, layoutIsShared } from "@lichtblick/suite-base/services/ILayoutStorage";
 
 import { StyledListItem, StyledMenuItem } from "./LayoutRow.style";
+import { ADD_TO_FAVORITES_LABEL, OFFLINE_LABEL, REMOVE_FROM_FAVORITES_LABEL } from "./constants";
 import { LayoutActionMenuItem } from "./types";
 
 export default React.memo(function LayoutRow({
@@ -93,9 +94,9 @@ export default React.memo(function LayoutRow({
 
   let favoriteTitle: string;
   if (favoriteDisabled) {
-    favoriteTitle = "Offline";
+    favoriteTitle = OFFLINE_LABEL;
   } else {
-    favoriteTitle = favorite ? "Remove from favorites" : "Add to favorites";
+    favoriteTitle = favorite ? REMOVE_FROM_FAVORITES_LABEL : ADD_TO_FAVORITES_LABEL;
   }
 
   useLayoutEffect(() => {
@@ -229,7 +230,7 @@ export default React.memo(function LayoutRow({
       onClick: renameAction,
       "data-testid": "rename-layout",
       disabled: (layoutIsShared(layout) && !isOnline) || multiSelection,
-      secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
+      secondaryText: layoutIsShared(layout) && !isOnline ? OFFLINE_LABEL : undefined,
     },
     // For shared layouts, "Make a personal copy" is always available
     // For personal layouts, "Duplicate" is available if no modifications
@@ -250,7 +251,7 @@ export default React.memo(function LayoutRow({
         text: "Share with team…",
         onClick: shareAction,
         disabled: !isOnline || multiSelection,
-        secondaryText: !isOnline ? "Offline" : undefined,
+        secondaryText: !isOnline ? OFFLINE_LABEL : undefined,
       },
     {
       type: "item",
@@ -278,7 +279,7 @@ export default React.memo(function LayoutRow({
         text: "Save changes",
         onClick: overwriteAction,
         disabled: deletedOnServer || (layoutIsShared(layout) && !isOnline),
-        secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
+        secondaryText: layoutIsShared(layout) && !isOnline ? OFFLINE_LABEL : undefined,
       },
       {
         type: "item",
@@ -346,7 +347,7 @@ export default React.memo(function LayoutRow({
             <IconButton
               className={favorite ? "layout-favorite-active" : undefined}
               data-testid="layout-favorite-toggle"
-              aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
+              aria-label={favorite ? REMOVE_FROM_FAVORITES_LABEL : ADD_TO_FAVORITES_LABEL}
               aria-pressed={favorite}
               title={favoriteTitle}
               disabled={favoriteDisabled}

@@ -14,6 +14,7 @@ import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import LayoutRow from "./LayoutRow";
+import { ADD_TO_FAVORITES_LABEL, REMOVE_FROM_FAVORITES_LABEL } from "./constants";
 
 // Mocks
 jest.mock("@lichtblick/suite-base/context/LayoutManagerContext", () => ({
@@ -347,7 +348,7 @@ describe("LayoutRow favorites", () => {
 
     // THEN
     const toggle = screen.getByTestId("layout-favorite-toggle");
-    expect(toggle).toHaveAttribute("aria-label", "Add to favorites");
+    expect(toggle).toHaveAttribute("aria-label", ADD_TO_FAVORITES_LABEL);
     expect(toggle).toHaveAttribute("aria-pressed", "false");
   });
 
@@ -370,7 +371,7 @@ describe("LayoutRow favorites", () => {
 
     // THEN
     const toggle = screen.getByTestId("layout-favorite-toggle");
-    expect(toggle).toHaveAttribute("aria-label", "Remove from favorites");
+    expect(toggle).toHaveAttribute("aria-label", REMOVE_FROM_FAVORITES_LABEL);
     expect(toggle).toHaveAttribute("aria-pressed", "true");
   });
 
