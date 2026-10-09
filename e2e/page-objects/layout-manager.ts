@@ -53,6 +53,19 @@ export class LayoutManager {
     await this.page.getByTestId("add-tab").click();
   }
 
+  public async toggleFavorite(name: string): Promise<void> {
+    const layoutRow = this.page.getByRole("listitem").filter({ hasText: name });
+    await layoutRow.hover();
+    await layoutRow.getByTestId("layout-favorite-toggle").click();
+  }
+
+  public getFavoriteToggle(name: string): Locator {
+    return this.page
+      .getByRole("listitem")
+      .filter({ hasText: name })
+      .getByTestId("layout-favorite-toggle");
+  }
+
   public getLayoutListItem(): Locator {
     return this.page.getByTestId("layout-list-item");
   }

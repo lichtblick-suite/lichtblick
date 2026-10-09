@@ -564,7 +564,6 @@ describe("HttpService", () => {
         { status: 200, statusText: "OK" },
         { status: 201, statusText: "Created" },
         { status: 202, statusText: "Accepted" },
-        { status: 204, statusText: "No Content" },
       ];
 
       for (const testCase of testCases) {
@@ -605,6 +604,23 @@ describe("HttpService", () => {
 
       const result = await httpService.delete("resource");
       expect(result.data).toBeUndefined();
+    });
+
+    it("should not parse the body of a 204 No Content response", async () => {
+      const json = jest.fn().mockRejectedValueOnce(new SyntaxError("Unexpected end of JSON input"));
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+        statusText: "No Content",
+        headers: { get: jest.fn().mockReturnValue(ReactNull) },
+        json,
+      });
+
+      const result = await httpService.put("resource");
+
+      expect(result.data).toBeUndefined();
+      expect(result.path).toBe("resource");
+      expect(json).not.toHaveBeenCalled();
     });
 
     it("should handle responses with different content types", async () => {
