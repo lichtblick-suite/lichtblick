@@ -98,7 +98,9 @@ export class Renderable<
    */
   // eslint-disable-next-line no-restricted-syntax
   public get topic(): TUserData["topic"] {
-    return this.userData.topic;
+    return this.userData.topic == undefined
+      ? undefined
+      : (this.renderer?.getSourceTopic(this.userData.topic) ?? this.userData.topic);
   }
 
   /**

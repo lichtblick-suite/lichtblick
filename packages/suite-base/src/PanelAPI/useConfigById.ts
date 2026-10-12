@@ -42,6 +42,9 @@ export default function useConfigById<Config extends Record<string, unknown>>(
     }
 
     const panelType = getPanelTypeFromId(panelId);
+    if (panelType === "3D" || panelType === "Image") {
+      return {};
+    }
 
     return _.merge(
       {},

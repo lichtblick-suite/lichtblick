@@ -42,6 +42,11 @@ import {
   TRANSFORM_STAMPED_DATATYPES,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import {
+  renderTopics,
+  resolveOutputConfig,
+  topicOutputKey,
+} from "@lichtblick/suite-base/util/topicOutput";
 
 import type { IRenderer, ImageModeConfig, RendererConfig, RendererSubscription } from "./IRenderer";
 import type { Path } from "./LayerErrors";
@@ -124,6 +129,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       scene: partialConfig?.scene ?? {},
       transforms,
       topics: partialConfig?.topics ?? {},
+      topicOutputs: partialConfig?.topicOutputs as RendererConfig["topicOutputs"],
       layers: partialConfig?.layers ?? {},
       publish,
       // deep partial on config, makes gradient tuple type [string | undefined, string | undefined]
@@ -363,8 +369,36 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       enableFilter: true,
       focusedPath: focusedSettingsPath,
       nodes: settingsTree ?? {},
+      topicOutputs: renderer?.renderTopics.filter((output) =>
+        schemaSubscriptions.has(output.schemaName),
+      ),
     });
-  }, [actionHandler, context, focusedSettingsPath, settingsTree]);
+  }, [actionHandler, context, focusedSettingsPath, settingsTree, renderer, schemaSubscriptions]);
+
+  useEffect(() => {
+    context.unstable_setTopicOutputConfigHandler?.((topic, key, settings) => {
+      if (renderer == undefined) {
+        return;
+      }
+      const output = renderer.renderTopics.find(
+        (entry) => entry.topic === topic && topicOutputKey(entry.topic, entry.output) === key,
+      );
+      if (output == undefined) {
+        return;
+      }
+      renderer.updateConfig((draft) => {
+        renderer.setTopicSettings(
+          draft,
+          output.name,
+          _.merge({}, renderer.getTopicSettings()[output.name], settings),
+        );
+      });
+      for (const extension of renderer.sceneExtensions.values()) {
+        extension.updateSettingsTree();
+      }
+    });
+    return () => context.unstable_setTopicOutputConfigHandler?.(undefined);
+  }, [context, renderer]);
 
   // Update the renderer's reference to `config` when it changes. Note that this does *not*
   // automatically update the settings tree.
@@ -457,6 +491,9 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
         if (currentSub.topic !== filteredSub.topic) {
           return false;
         }
+        if (currentSub.converterId !== filteredSub.converterId) {
+          return false;
+        }
         if (currentSub.convertTo !== filteredSub.convertTo) {
           return false;
         }
@@ -518,6 +555,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
         const unsubscribe = context.unstable_subscribeMessageRange({
           topic: topic.topic,
           convertTo: topic.convertTo,
+          converterId: topic.converterId,
           onNewRangeIterator: async (batchIterator) => {
             for await (const batch of batchIterator) {
               if (batch.length > 0) {
@@ -556,6 +594,8 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     config.scene.transforms?.maxPreloadMessages,
     transformTopicsToPreload,
     reloadPreloadTrigger,
+    config.topics,
+    config.topicOutputs,
   ]);
 
   // Establish a connection to the message pipeline with context.watch and context.onRender
@@ -614,45 +654,43 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
     const newSubscriptions: Subscription[] = [];
 
+    const outputs = renderTopics(topics);
     const addSubscription = (
-      topic: Topic,
-      rendererSubscription: RendererSubscription,
-      convertTo?: string,
+      output: (typeof outputs)[number],
+      subscription: RendererSubscription,
     ) => {
-      let shouldSubscribe = rendererSubscription.shouldSubscribe?.(topic.name);
-      if (shouldSubscribe == undefined) {
-        if (config.topics[topic.name]?.visible === true) {
-          shouldSubscribe = true;
-        } else if (config.imageMode.annotations?.[topic.name]?.visible === true) {
-          shouldSubscribe = true;
-        } else {
-          shouldSubscribe = false;
-        }
+      const outputConfig = resolveOutputConfig(config, output, output.defaultConfig);
+      const annotationConfig =
+        config.imageMode.annotations?.[output.name] ?? config.imageMode.annotations?.[output.topic];
+      const visibility =
+        config.topicOutputs?.[output.topic]?.[topicOutputKey(output.topic, output.output)]
+          ?.visible ??
+        annotationConfig?.visible ??
+        outputConfig.visible;
+      const shouldSubscribe = subscription.shouldSubscribe?.(output.name) ?? visibility === true;
+      if (!shouldSubscribe) {
+        return;
       }
-      if (shouldSubscribe) {
-        const sampling =
-          rendererSubscription.preload === true
+      newSubscriptions.push({
+        topic: output.topic,
+        convertTo: output.output.kind === "converted" ? output.schemaName : undefined,
+        converterId: output.output.kind === "converted" ? output.output.converterId : undefined,
+        preload: subscription.preload,
+        // Mixed source schemas cannot safely share latest-per-topic sampling.
+        sampling:
+          subscription.preload === true ||
+          topics.filter((topic) => topic.name === output.topic).length > 1
             ? undefined
-            : { mode: "latest-per-render-tick" as const };
-        newSubscriptions.push({
-          topic: topic.name,
-          preload: rendererSubscription.preload,
-          convertTo,
-          sampling,
-        });
-      }
+            : { mode: "latest-per-render-tick" },
+      });
     };
-
-    for (const topic of topics) {
-      for (const rendererSubscription of topicSubscriptions.get(topic.name) ?? []) {
-        addSubscription(topic, rendererSubscription);
+    for (const output of outputs) {
+      for (const subscription of schemaSubscriptions.get(output.schemaName) ?? []) {
+        addSubscription(output, subscription);
       }
-      for (const rendererSubscription of schemaSubscriptions.get(topic.schemaName) ?? []) {
-        addSubscription(topic, rendererSubscription);
-      }
-      for (const schemaName of topic.convertibleTo ?? []) {
-        for (const rendererSubscription of schemaSubscriptions.get(schemaName) ?? []) {
-          addSubscription(topic, rendererSubscription, schemaName);
+      if (output.output.kind === "original") {
+        for (const subscription of topicSubscriptions.get(output.topic) ?? []) {
+          addSubscription(output, subscription);
         }
       }
     }
@@ -663,6 +701,8 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   }, [
     topics,
     config.topics,
+    config.topicOutputs,
+    config,
     // Need to update subscriptions when imagemode topics change
     // shouldSubscribe values will be re-evaluated
     config.imageMode.calibrationTopic,

@@ -156,7 +156,7 @@ export class ImageMode
       initialCanvasWidth: canvasSize.width,
       initialCanvasHeight: canvasSize.height,
       initialPixelRatio: renderer.getPixelRatio(),
-      topics: () => renderer.topics ?? [],
+      topics: () => renderer.renderTopics,
       config: () => this.getImageModeSettings(),
       updateConfig: (updateHandler) => {
         renderer.updateConfig((draft) => {
@@ -168,6 +168,11 @@ export class ImageMode
       },
       labelPool: renderer.labelPool,
       messageHandler: this.messageHandler,
+      topicKey: (event) => renderer.getRenderTopic(event),
+      topicLabel: (key) => renderer.getTopicLabel(key),
+      setOutputVisibility: (key, { visible }) => {
+        renderer.saveTopicSetting(["topics", key, "visible"], visible);
+      },
       addSettingsError(path: Path, errorId: string, errorMessage: string) {
         renderer.settings.errors.add(path, errorId, errorMessage);
       },
@@ -211,7 +216,7 @@ export class ImageMode
   }
 
   protected initMessageHandler(config: Immutable<ConfigWithDefaults>): IMessageHandler {
-    return new MessageHandler(config, this.hud);
+    return new MessageHandler(config, this.hud, (event) => this.renderer.getRenderTopic(event));
   }
 
   public hasModifiedView(): boolean {
@@ -367,12 +372,12 @@ export class ImageMode
    * Also auto-select a new calibration topic to match the new image topic.
    */
   #handleTopicsChanged = () => {
-    this.#annotations.handleTopicsChanged(this.renderer.topics);
+    this.#annotations.handleTopicsChanged(this.renderer.renderTopics);
     if (this.getImageModeSettings().imageTopic != undefined) {
       return;
     }
 
-    const imageTopic = this.renderer.topics?.find((topic) =>
+    const imageTopic = this.renderer.renderTopics.find((topic) =>
       topicIsConvertibleToSchema(topic, this.supportedImageSchemas),
     );
 
@@ -411,7 +416,7 @@ export class ImageMode
     if (prefix == undefined) {
       return undefined;
     }
-    return this.renderer.topics?.find(
+    return this.renderer.renderTopics.find(
       (topic) =>
         topicIsConvertibleToSchema(topic, ALL_SUPPORTED_CALIBRATION_SCHEMAS) &&
         topic.name.startsWith(prefix),
@@ -434,20 +439,20 @@ export class ImageMode
       contrast,
     } = settings;
 
-    const imageTopics = filterMap(this.renderer.topics ?? [], (topic) => {
+    const imageTopics = filterMap(this.renderer.renderTopics, (topic) => {
       if (!topicIsConvertibleToSchema(topic, this.supportedImageSchemas)) {
         return;
       }
-      return { label: topic.name, value: topic.name };
+      return { label: this.renderer.getTopicLabel(topic.name), value: topic.name };
     });
 
     const calibrationTopics: { label: string; value: string | undefined }[] = filterMap(
-      this.renderer.topics ?? [],
+      this.renderer.renderTopics,
       (topic) => {
         if (!topicIsConvertibleToSchema(topic, ALL_SUPPORTED_CALIBRATION_SCHEMAS)) {
           return;
         }
-        return { label: topic.name, value: topic.name };
+        return { label: this.renderer.getTopicLabel(topic.name), value: topic.name };
       },
     );
 
@@ -564,7 +569,9 @@ export class ImageMode
     };
 
     const imageTopic =
-      imageTopicName != undefined ? this.renderer.topicsByName?.get(imageTopicName) : undefined;
+      imageTopicName != undefined
+        ? this.renderer.renderTopics.find((topic) => topic.name === imageTopicName)
+        : undefined;
     const isRawImageTopic =
       imageTopic != undefined &&
       topicIsConvertibleToSchema(imageTopic, SUPPORTED_RAW_IMAGE_SCHEMAS);
@@ -588,6 +595,47 @@ export class ImageMode
       Object.assign(fields, colorModeFields);
     }
 
+    const imageOutputNodes: SettingsTreeEntry[] = this.renderer.renderTopics
+      .filter((output) => this.supportedImageSchemas.has(output.schemaName))
+      .map((output) => ({
+        path: ["topics", output.name],
+        node: {
+          label: output.label,
+          visible: imageTopicName === output.name,
+          fields: {},
+          handler: (action: SettingsTreeAction) => {
+            if (action.action !== "update") {
+              return;
+            }
+            this.saveSetting(action.payload.path, action.payload.value);
+            if (action.payload.path[2] === "visible") {
+              if (
+                action.payload.value === true ||
+                this.getImageModeSettings().imageTopic === output.name
+              ) {
+                this.handleSettingsAction({
+                  action: "update",
+                  payload: {
+                    path: ["imageMode", "imageTopic"],
+                    input: "select",
+                    value: action.payload.value === true ? output.name : undefined,
+                  },
+                });
+              }
+              return;
+            }
+            if (this.getImageModeSettings().imageTopic === output.name) {
+              this.handleSettingsAction({
+                ...action,
+                payload: {
+                  ...action.payload,
+                  path: ["imageMode", ...action.payload.path.slice(2)],
+                },
+              });
+            }
+          },
+        },
+      }));
     return [
       {
         path: ["imageMode"],
@@ -598,6 +646,7 @@ export class ImageMode
           fields,
         },
       },
+      ...imageOutputNodes,
       ...this.#annotations.settingsNodes(),
     ];
   }
@@ -616,7 +665,19 @@ export class ImageMode
     }
 
     const prevImageModeConfig = this.getImageModeSettings();
-    this.saveSetting(path, value);
+    const selectedOutput = this.renderer.renderTopics.find(
+      (output) => output.name === prevImageModeConfig.imageTopic,
+    );
+    if (
+      selectedOutput != undefined &&
+      (selectedOutput.output.kind === "converted" ||
+        selectedOutput.name !== selectedOutput.topic) &&
+      !["imageTopic", "calibrationTopic", "synchronize"].includes(path[1] ?? "")
+    ) {
+      this.saveSetting(["topics", selectedOutput.name, ...path.slice(1)], value);
+    } else {
+      this.saveSetting(path, value);
+    }
     const config = this.getImageModeSettings();
 
     const calibrationTopicChanged =
@@ -637,8 +698,13 @@ export class ImageMode
     }
 
     const imageTopicChanged = config.imageTopic !== prevImageModeConfig.imageTopic;
+    if (imageTopicChanged && config.imageTopic == undefined) {
+      this.#removeImageRenderable();
+    }
     if (imageTopicChanged && config.imageTopic != undefined) {
-      const imageTopic = this.renderer.topics?.find((topic) => topic.name === config.imageTopic);
+      const imageTopic = this.renderer.renderTopics.find(
+        (topic) => topic.name === config.imageTopic,
+      );
       if (imageTopic) {
         this.setImageTopic(imageTopic);
       }
@@ -717,6 +783,13 @@ export class ImageMode
     return this.getImageModeSettings().imageTopic === topic;
   };
 
+  public supportsImageModeSchema(schemaName: string): boolean {
+    return (
+      this.supportedImageSchemas.has(schemaName) ||
+      this.#annotations.supportedAnnotationSchemas.has(schemaName)
+    );
+  }
+
   #updateFromMessageState = (
     newState: MessageRenderState,
     oldState: MessageRenderState | undefined,
@@ -741,7 +814,7 @@ export class ImageMode
   };
 
   #handleImageChange = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
     const frameId = "header" in image ? image.header.frame_id : image.frame_id;
 
@@ -886,6 +959,29 @@ export class ImageMode
 
   protected getImageModeSettings(): Immutable<ConfigWithDefaults> {
     const config = { ...this.renderer.config.imageMode };
+    config.imageTopic = this.renderer.resolveTopicOutput(
+      config.imageTopic,
+      this.supportedImageSchemas,
+    );
+    config.calibrationTopic = this.renderer.resolveTopicOutput(
+      config.calibrationTopic,
+      ALL_SUPPORTED_CALIBRATION_SCHEMAS,
+    );
+    const annotations: Record<string, { visible?: boolean } | undefined> = {
+      ...config.annotations,
+    };
+    for (const output of this.renderer.renderTopics) {
+      annotations[output.name] = {
+        ...annotations[output.topic],
+        ...annotations[output.name],
+        ...this.renderer.getTopicSettings()[output.name],
+      };
+    }
+    config.annotations = annotations;
+    const selectedSettings =
+      config.imageTopic == undefined
+        ? undefined
+        : this.renderer.getTopicSettings()[config.imageTopic];
 
     const colorMode =
       config.colorMode === "rgba-fields"
@@ -894,7 +990,7 @@ export class ImageMode
 
     // Ensures that no required fields are left undefined
     // rightmost values are applied last and have the most precedence
-    return _.merge({}, DEFAULT_IMAGE_CONFIG, { colorMode }, config);
+    return _.merge({}, DEFAULT_IMAGE_CONFIG, { colorMode }, config, selectedSettings);
   }
 
   /**

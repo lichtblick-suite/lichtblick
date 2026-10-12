@@ -75,8 +75,20 @@ export function buildContributionPoints(
         `Extension ${extension.qualifiedName} registering message converter from: ${messageConverter.fromSchemaName} to: ${messageConverter.toSchemaName}`,
       );
 
+      const converterId = JSON.stringify([
+        extension.qualifiedName,
+        messageConverter.id ?? [messageConverter.fromSchemaName, messageConverter.toSchemaName],
+      ]);
+      if (messageConverters.some((converter) => converter.converterId === converterId)) {
+        log.error(
+          `Duplicate converter registration ${converterId}; provide distinct registration IDs`,
+        );
+        return;
+      }
       messageConverters.push({
         ...messageConverter,
+        converterId,
+        extensionName: extension.qualifiedName,
         extensionNamespace: extension.namespace,
         extensionId: extension.id,
       } as InstalledMessageConverter);

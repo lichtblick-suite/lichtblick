@@ -413,10 +413,10 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       if (!topicIsConvertibleToSchema(topic, GRID_DATATYPES)) {
         continue;
       }
@@ -464,7 +464,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName];
+      const settings = this.renderer.getTopicSettings()[topicName];
       renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
 
       renderable.updateMaterial(renderable.userData.settings);
@@ -483,13 +483,13 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
   };
 
   #handleFoxgloveGrid = (messageEvent: PartialMessageEvent<Grid>): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const foxgloveGrid = normalizeFoxgloveGrid(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
     let renderable = this.renderables.get(topic);
 
-    if (!this.#validateFoxgloveGrid(foxgloveGrid, messageEvent.topic)) {
+    if (!this.#validateFoxgloveGrid(foxgloveGrid, this.renderer.getRenderTopic(messageEvent))) {
       if (renderable) {
         renderable.visible = false;
       }
@@ -509,7 +509,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
       renderable.visible = true;
     } else {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = (this.renderer.config.topics[topic] ??
+      const userSettings = (this.renderer.getTopicSettings()[topic] ??
         {}) as Partial<LayerSettingsFoxgloveGrid>;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       // only want to autoselect if it's in flatcolor mode (without colorfield) and previously didn't have fields
@@ -524,7 +524,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
           updatedUserSettings.colorField = settings.colorField;
           updatedUserSettings.colorMode = settings.colorMode;
           updatedUserSettings.colorMap = settings.colorMap;
-          draft.topics[topic] = updatedUserSettings;
+          this.renderer.setTopicSettings(draft, topic, updatedUserSettings);
         });
         this.updateSettingsTree();
       }
@@ -545,7 +545,7 @@ export class FoxgloveGrid extends SceneExtension<FoxgloveGridRenderable> {
         messageTime: toNanoSec(foxgloveGrid.timestamp),
         frameId: this.renderer.normalizeFrameId(foxgloveGrid.frame_id),
         pose: foxgloveGrid.pose,
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         settings,
         topic,
         foxgloveGrid,

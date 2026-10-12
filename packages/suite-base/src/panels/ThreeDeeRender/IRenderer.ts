@@ -185,6 +185,7 @@ export type RendererConfig = {
   transforms: Record<string, Partial<LayerSettingsTransform> | undefined>;
   /** topicName -> settings */
   topics: Record<string, Partial<BaseSettings> | undefined>;
+  topicOutputs?: Record<string, Record<string, Partial<BaseSettings>>>;
   /** instanceId -> settings */
   layers: Record<string, Partial<CustomLayerSettings> | undefined>;
 
@@ -252,6 +253,16 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   debugPicking: boolean;
   // [{ name, datatype }]
   topics: ReadonlyArray<Topic> | undefined;
+  readonly renderTopics: readonly import("@lichtblick/suite-base/util/topicOutput").RenderTopic[];
+  getTopicSettings(): Readonly<Record<string, Partial<BaseSettings> | undefined>>;
+  getRenderTopic(event: Pick<MessageEvent, "topic" | "schemaName" | "output">): string;
+  getSourceTopic(key: string): string;
+  resolveTopicOutput(key: string | undefined, schemas: ReadonlySet<string>): string | undefined;
+  getTopicLabel(key: string): string;
+  getSettingsPath(path: readonly string[]): string[];
+  saveTopicSetting(path: readonly string[], value: unknown): void;
+  setTopicSettings(draft: RendererConfig, key: string, settings: Partial<BaseSettings>): void;
+
   // topicName -> { name, datatype }
   topicsByName: ReadonlyMap<string, Topic> | undefined;
   // parameterKey -> parameterValue

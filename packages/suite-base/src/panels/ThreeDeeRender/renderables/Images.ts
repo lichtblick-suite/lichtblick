@@ -183,7 +183,7 @@ export class Images extends SceneExtension<ImageRenderable> {
    */
   #handleTopicsChanged = () => {
     this.#cameraInfoTopics = new Set();
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       if (
         topicIsConvertibleToSchema(topic, CAMERA_INFO_DATATYPES) ||
         topicIsConvertibleToSchema(topic, CAMERA_CALIBRATION_DATATYPES)
@@ -194,10 +194,10 @@ export class Images extends SceneExtension<ImageRenderable> {
   };
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       if (!topicIsConvertibleToSchema(topic, this.supportedImageSchemas)) {
         continue;
       }
@@ -206,7 +206,7 @@ export class Images extends SceneExtension<ImageRenderable> {
 
       // Build a list of all matching CameraInfo topics
       const cameraInfoOptions = Array.from(this.#cameraInfoTopics, (topicName) => ({
-        label: topicName,
+        label: this.renderer.getTopicLabel(topicName),
         value: topicName,
       }));
       cameraInfoOptions.sort();
@@ -217,7 +217,10 @@ export class Images extends SceneExtension<ImageRenderable> {
           label: t("threeDee:cameraInfo"),
           input: "select",
           options: cameraInfoOptions,
-          value: config.cameraInfoTopic,
+          value: this.renderer.resolveTopicOutput(
+            config.cameraInfoTopic,
+            new Set([...CAMERA_INFO_DATATYPES, ...CAMERA_CALIBRATION_DATATYPES]),
+          ),
         },
         distance: {
           label: t("threeDee:distance"),
@@ -261,13 +264,14 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
 
     const imageTopic = path[1]!;
-    const prevSettings = (this.renderer.config.topics[imageTopic] ??
+    const prevSettings = (this.renderer.getTopicSettings()[imageTopic] ??
       {}) as Partial<LayerSettingsImage>;
     const prevCameraInfoTopic = prevSettings.cameraInfoTopic;
 
     this.saveSetting(path, action.payload.value);
 
-    const settings = (this.renderer.config.topics[imageTopic] ?? {}) as Partial<LayerSettingsImage>;
+    const settings = (this.renderer.getTopicSettings()[imageTopic] ??
+      {}) as Partial<LayerSettingsImage>;
     const cameraInfoTopic = settings.cameraInfoTopic;
 
     // Add this camera_info_topic -> image_topic mapping
@@ -311,7 +315,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     // Iterate over each topic config and check if it has a cameraInfoTopic setting that matches
     // the cameraInfoTopic we might want to turn on. If it does and the topic is visible, return
     // true so we know to subscribe.
-    for (const topicConfig of Object.values(this.renderer.config.topics)) {
+    for (const topicConfig of Object.values(this.renderer.getTopicSettings())) {
       const maybeImageConfig = topicConfig as Partial<LayerSettingsImage>;
       if (
         maybeImageConfig.cameraInfoTopic === cameraInfoTopic &&
@@ -345,7 +349,7 @@ export class Images extends SceneExtension<ImageRenderable> {
   };
 
   protected handleImage = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {
-    const imageTopic = messageEvent.topic;
+    const imageTopic = this.renderer.getRenderTopic(messageEvent);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
     const frameId = "header" in image ? image.header.frame_id : image.frame_id;
 
@@ -355,12 +359,16 @@ export class Images extends SceneExtension<ImageRenderable> {
     renderable.setImage(image, DEFAULT_BITMAP_WIDTH);
     // Auto-select settings.cameraInfoTopic if it's not already set
     const settings = renderable.userData.settings;
+    settings.cameraInfoTopic = this.renderer.resolveTopicOutput(
+      settings.cameraInfoTopic,
+      new Set([...CAMERA_INFO_DATATYPES, ...CAMERA_CALIBRATION_DATATYPES]),
+    );
     if (settings.cameraInfoTopic == undefined) {
-      const prefix = getTopicMatchPrefix(imageTopic);
+      const prefix = getTopicMatchPrefix(this.renderer.getSourceTopic(imageTopic));
       const newCameraInfoTopic =
         prefix != undefined
           ? filterMap(this.#cameraInfoTopics, (topic) =>
-              topic.startsWith(prefix) ? topic : undefined,
+              this.renderer.getSourceTopic(topic).startsWith(prefix) ? topic : undefined,
             ).sort()[0]
           : undefined;
       settings.cameraInfoTopic = newCameraInfoTopic;
@@ -385,7 +393,7 @@ export class Images extends SceneExtension<ImageRenderable> {
       this.renderer.updateConfig((draft) => {
         const updatedUserSettings = { ...settings };
         updatedUserSettings.cameraInfoTopic = newCameraInfoTopic;
-        draft.topics[imageTopic] = updatedUserSettings;
+        this.renderer.setTopicSettings(draft, imageTopic, updatedUserSettings);
       });
       this.updateSettingsTree();
     }
@@ -410,11 +418,12 @@ export class Images extends SceneExtension<ImageRenderable> {
     // Store the last camera info on each topic, when processing an image message we'll look up
     // the camera info by the info topic configured for the image
     const cameraInfo = normalizeCameraInfo(messageEvent.message);
-    this.#cameraInfoByTopic.set(messageEvent.topic, cameraInfo);
+    this.#cameraInfoByTopic.set(this.renderer.getRenderTopic(messageEvent), cameraInfo);
 
     // Look up any image topics assigned to our camera info topic and determine if we need to update
     // those renderables since we now have a camera info whereas we may not have previously
-    const imageTopics = this.#cameraInfoToImageTopics.get(messageEvent.topic) ?? [];
+    const imageTopics =
+      this.#cameraInfoToImageTopics.get(this.renderer.getRenderTopic(messageEvent)) ?? [];
     for (const imageTopic of imageTopics) {
       const renderable = this.renderables.get(imageTopic);
       if (!renderable) {
@@ -423,7 +432,10 @@ export class Images extends SceneExtension<ImageRenderable> {
 
       // If there's no camera info topic assigned then we don't need to do update this renderable
       const settings = renderable.userData.settings;
-      if (!settings.cameraInfoTopic || settings.cameraInfoTopic !== messageEvent.topic) {
+      if (
+        !settings.cameraInfoTopic ||
+        settings.cameraInfoTopic !== this.renderer.getRenderTopic(messageEvent)
+      ) {
         continue;
       }
       this.renderer.settings.errors.removeFromTopic(imageTopic, NO_CAMERA_INFO_ERR);
@@ -474,7 +486,7 @@ export class Images extends SceneExtension<ImageRenderable> {
     }
 
     // Look up any existing settings for the image topic to save as user data with the renderable
-    const userSettings = this.renderer.config.topics[imageTopic];
+    const userSettings = this.renderer.getTopicSettings()[imageTopic];
     const messageTime = image
       ? toNanoSec("header" in image ? image.header.stamp : image.timestamp)
       : 0n;
@@ -484,7 +496,7 @@ export class Images extends SceneExtension<ImageRenderable> {
       firstMessageTime: messageTime,
       frameId: this.renderer.normalizeFrameId(frameId),
       pose: makePose(),
-      settingsPath: ["topics", imageTopic],
+      settingsPath: this.renderer.getSettingsPath(["topics", imageTopic]),
       topic: imageTopic,
       settings: { ...IMAGE_RENDERABLE_DEFAULT_SETTINGS, ...userSettings },
       cameraInfo: undefined,

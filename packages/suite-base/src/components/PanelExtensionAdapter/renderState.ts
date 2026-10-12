@@ -31,6 +31,7 @@ import {
 } from "@lichtblick/suite-base/players/types";
 import { HoverValue } from "@lichtblick/suite-base/types/hoverValue";
 import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
+import { getConverterId } from "@lichtblick/suite-base/util/topicOutput";
 
 import {
   collateTopicSchemaConversions,
@@ -45,6 +46,7 @@ const EmptyParameters = new Map<string, ParameterValue>();
 
 export type RenderStateConfig = {
   topics: Record<string, unknown>;
+  topicOutputs?: Record<string, Record<string, unknown>>;
 };
 
 export type BuilderRenderStateInput = Immutable<{
@@ -63,6 +65,7 @@ export type BuilderRenderStateInput = Immutable<{
   watchedFields: Set<string>;
   forceConversion: Set<string>;
   config?: RenderStateConfig | undefined;
+  panelType?: string;
 }>;
 
 type BuildRenderStateFn = (input: BuilderRenderStateInput) => Immutable<RenderState> | undefined;
@@ -78,6 +81,7 @@ type BuildRenderStateFn = (input: BuilderRenderStateInput) => Immutable<RenderSt
  * undefined if there's no update for rendering
  */
 function initRenderStateBuilder(): BuildRenderStateFn {
+  let prevConfig: BuilderRenderStateInput["config"];
   let prevVariables: Immutable<GlobalVariables> = EMPTY_GLOBAL_VARIABLES;
   let prevBlocks: undefined | Immutable<(undefined | MessageBlock)[]>;
   let prevSeekTime: number | undefined;
@@ -128,11 +132,9 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     } = input;
 
     const configTopics = config?.topics ?? {};
-
-    const topicToSchemaNameMap = _.mapValues(
-      _.keyBy(sortedTopics, "name"),
-      ({ schemaName }) => schemaName,
-    );
+    const configChanged =
+      !_.isEqual(config?.topics, prevConfig?.topics) ||
+      !_.isEqual(config?.topicOutputs, prevConfig?.topicOutputs);
 
     // Should render indicates whether any fields of render state are updated
     const shouldRender = { value: false };
@@ -208,17 +210,42 @@ function initRenderStateBuilder(): BuildRenderStateFn {
 
           if (messageConverters) {
             const convertibleTo: string[] = [];
+            const conversionOutputs: {
+              converterId: string;
+              schemaName: string;
+              displayName?: string;
+              defaultConfig?: unknown;
+            }[] = [];
 
             // find any converters that can convert _from_ the schema name of the topic
             // the _to_ names of the converter become additional schema names for the topic entry
-            for (const converter of messageConverters) {
+            for (const converter of _.sortBy(
+              messageConverters,
+              (entry) => entry.extensionNamespace ?? "unknown",
+            )) {
               if (converter.fromSchemaName === topic.schemaName) {
+                conversionOutputs.push({
+                  converterId: getConverterId(converter),
+                  schemaName: converter.toSchemaName,
+                  displayName:
+                    converter.displayName ??
+                    [converter.extensionName, converter.id ?? converter.toSchemaName]
+                      .filter(Boolean)
+                      .join(" / "),
+                  defaultConfig:
+                    input.panelType == undefined
+                      ? undefined
+                      : converter.panelSettings?.[input.panelType]?.defaultConfig,
+                });
                 if (!convertibleTo.includes(converter.toSchemaName)) {
                   convertibleTo.push(converter.toSchemaName);
                 }
               }
             }
 
+            if (conversionOutputs.length > 0) {
+              newTopic.conversionOutputs = conversionOutputs;
+            }
             if (convertibleTo.length > 0) {
               newTopic.convertibleTo = convertibleTo;
             }
@@ -246,17 +273,20 @@ function initRenderStateBuilder(): BuildRenderStateFn {
             postProcessedFrame.push(messageEvent);
           }
 
-          const schemaName = topicToSchemaNameMap[messageEvent.topic];
+          const schemaName = messageEvent.schemaName;
           if (schemaName) {
             convertMessage(
               { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               topicSchemaConverters,
               postProcessedFrame,
               { ...globalVariables } as Readonly<GlobalVariables>,
-              { emitAlert },
+              { emitAlert, config, panelType: input.panelType },
             );
           }
-          lastMessageByTopic.set(messageEvent.topic, messageEvent);
+          lastMessageByTopic.set(
+            JSON.stringify([messageEvent.topic, messageEvent.schemaName])!,
+            messageEvent,
+          );
         }
         renderState.currentFrame = postProcessedFrame;
         shouldRender.value = true;
@@ -265,32 +295,32 @@ function initRenderStateBuilder(): BuildRenderStateFn {
         // only the new conversions on our most recent message on each topic.
         const postProcessedFrame: MessageEvent[] = [];
         for (const messageEvent of lastMessageByTopic.values()) {
-          const schemaName = topicToSchemaNameMap[messageEvent.topic];
+          const schemaName = messageEvent.schemaName;
           if (schemaName) {
             convertMessage(
               { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               newConverters,
               postProcessedFrame,
               { ...globalVariables } as Readonly<GlobalVariables>,
-              { emitAlert },
+              { emitAlert, config, panelType: input.panelType },
             );
           }
         }
         renderState.currentFrame = postProcessedFrame;
         shouldRender.value = true;
-      } else if (variablesChanged) {
+      } else if (variablesChanged || configChanged) {
         // If we don't have a new frame but our variables have changed, run
         // all conversions on our most recent message on each topic.
         const postProcessedFrame: MessageEvent[] = [];
         for (const messageEvent of lastMessageByTopic.values()) {
-          const schemaName = topicToSchemaNameMap[messageEvent.topic];
+          const schemaName = messageEvent.schemaName;
           if (schemaName) {
             convertMessage(
               { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
               topicSchemaConverters,
               postProcessedFrame,
               { ...globalVariables } as Readonly<GlobalVariables>,
-              { emitAlert },
+              { emitAlert, config, panelType: input.panelType },
             );
           }
         }
@@ -309,7 +339,11 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     if (watchedFields.has("allFrames")) {
       // Rebuild allFrames if we have new blocks or if our conversions have changed.
       const newBlocks = playerState?.progress.messageCache?.blocks;
-      if ((newBlocks != undefined && prevBlocks !== newBlocks) || conversionsChanged) {
+      if (
+        (newBlocks != undefined && prevBlocks !== newBlocks) ||
+        conversionsChanged ||
+        configChanged
+      ) {
         shouldRender.value = true;
         const blocksToProcess = newBlocks ?? prevBlocks ?? [];
         const frames: MessageEvent[] = (renderState.allFrames = []);
@@ -341,14 +375,14 @@ function initRenderStateBuilder(): BuildRenderStateFn {
                 frames.push(messageEvent);
               }
 
-              const schemaName = topicToSchemaNameMap[messageEvent.topic];
+              const schemaName = messageEvent.schemaName;
               if (schemaName) {
                 convertMessage(
                   { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
                   topicSchemaConverters,
                   frames,
                   undefined,
-                  { emitAlert },
+                  { emitAlert, config, panelType: input.panelType },
                 );
               }
             },
@@ -397,20 +431,19 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       updateRenderStateField("appSettings", appSettings, renderState.appSettings, shouldRender);
     }
 
-    if (forceConversion.size > 0) {
+    if (forceConversion.size > 0 && !configChanged && !variablesChanged && !conversionsChanged) {
       const postProcessedFrame: MessageEvent[] = [];
 
-      for (const topic of forceConversion) {
-        const messageEvent = lastMessageByTopic.get(topic);
-
-        if (messageEvent == undefined) {
+      for (const messageEvent of lastMessageByTopic.values()) {
+        if (!forceConversion.has(messageEvent.topic)) {
           continue;
         }
-
         convertMessage(
-          { ...messageEvent, topicConfig: configTopics[topic] },
+          { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
           topicSchemaConverters,
           postProcessedFrame,
+          { ...globalVariables } as Readonly<GlobalVariables>,
+          { emitAlert, config, panelType: input.panelType },
         );
       }
 
@@ -423,6 +456,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
     prevMessageConverters = messageConverters;
     prevCollatedConversions = collatedConversions;
     prevVariables = globalVariables;
+    prevConfig = config;
 
     if (!shouldRender.value) {
       return undefined;

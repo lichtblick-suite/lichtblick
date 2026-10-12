@@ -30,6 +30,8 @@ export type UseSubscribeMessageRange = (args: SubscribeMessageRangeArgs) => () =
  */
 export function useSubscribeMessageRange(
   emitAlert?: MessageConverterAlertHandler,
+  config?: import("@lichtblick/suite-base/util/topicOutput").TopicOutputConfig,
+  panelType?: string,
 ): UseSubscribeMessageRange {
   // useMessagePipelineGetter returns a stable getter, so it's safe to call it inside the callback without adding it to dependencies.
   const getMessagePipelineContext = useMessagePipelineGetter();
@@ -43,8 +45,13 @@ export function useSubscribeMessageRange(
   const emitAlertRef = useRef(emitAlert);
   emitAlertRef.current = emitAlert;
 
+  const configRef = useRef(config);
+  configRef.current = config;
+  const panelTypeRef = useRef(panelType);
+  panelTypeRef.current = panelType;
+
   return useCallback(
-    ({ topic, start, end, convertTo, onNewRangeIterator }: SubscribeMessageRangeArgs) => {
+    ({ topic, start, end, convertTo, converterId, onNewRangeIterator }: SubscribeMessageRangeArgs) => {
       if (start != undefined && end != undefined && compare(start, end) > 0) {
         onNewRangeIterator((async function* () {})()).catch((err: unknown) => {
           log.error("Error in useSubscribeMessageRange onNewRangeIterator:", err);
@@ -64,6 +71,9 @@ export function useSubscribeMessageRange(
       const { iterable: messageEventIterable, cancel } = createMessageRangeIterator({
         topic,
         convertTo,
+        converterId,
+        config: configRef.current,
+        panelType: panelTypeRef.current,
         rawBatchIterator,
         sortedTopics,
         messageConverters: messageConvertersRef.current ?? [],

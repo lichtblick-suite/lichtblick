@@ -46,6 +46,9 @@ interface ImageAnnotationsContext {
   initialCanvasHeight: number;
   initialPixelRatio: number;
   topics(): readonly Topic[];
+  topicKey?: (event: Pick<MessageEvent, "topic" | "schemaName" | "output">) => string;
+  topicLabel?: (key: string) => string;
+  setOutputVisibility?: (key: string, options: { visible: boolean }) => void;
   config(): Immutable<ImageModeConfig>;
   updateConfig(updateHandler: (draft: ImageModeConfig) => void): void;
   updateSettingsTree(): void;
@@ -180,7 +183,7 @@ export class ImageAnnotations extends THREE.Object3D {
 
         // Hide any remaining errors for annotations we are able to render
         this.#context.removeSettingsError(
-          ["imageAnnotations", originalMessage.topic],
+          ["imageAnnotations", this.#context.topicKey?.(originalMessage) ?? originalMessage.topic],
           MISSING_SYNCHRONIZED_ANNOTATION,
         );
       }
@@ -208,12 +211,20 @@ export class ImageAnnotations extends THREE.Object3D {
     messageEvent: MessageEvent<FoxgloveImageAnnotations | RosImageMarker | RosImageMarkerArray>,
     annotations: Annotation[],
   ) {
-    let renderable = this.#renderablesByTopic.get(messageEvent.topic as TopicName);
+    let renderable = this.#renderablesByTopic.get(
+      (this.#context.topicKey?.(messageEvent) ?? messageEvent.topic) as TopicName,
+    );
     if (!renderable) {
-      renderable = new RenderableTopicAnnotations(messageEvent.topic, this.#context.labelPool);
+      renderable = new RenderableTopicAnnotations(
+        this.#context.topicKey?.(messageEvent) ?? messageEvent.topic,
+        this.#context.labelPool,
+      );
       renderable.setScale(this.#scale, this.#canvasWidth, this.#canvasHeight, this.#pixelRatio);
       renderable.setCameraModel(this.#cameraModel);
-      this.#renderablesByTopic.set(messageEvent.topic as TopicName, renderable);
+      this.#renderablesByTopic.set(
+        (this.#context.topicKey?.(messageEvent) ?? messageEvent.topic) as TopicName,
+        renderable,
+      );
       this.add(renderable);
     }
 
@@ -242,11 +253,15 @@ export class ImageAnnotations extends THREE.Object3D {
     topic: TopicName,
     visible: boolean, // eslint-disable-line @lichtblick/no-boolean-parameters
   ): void {
-    this.#context.updateConfig((draft) => {
-      draft.annotations ??= {};
-      const settings = (draft.annotations[topic] ??= {});
-      settings.visible = visible;
-    });
+    if (this.#context.setOutputVisibility != undefined) {
+      this.#context.setOutputVisibility(topic, { visible });
+    } else {
+      this.#context.updateConfig((draft) => {
+        draft.annotations ??= {};
+        const settings = (draft.annotations[topic] ??= {});
+        settings.visible = visible;
+      });
+    }
     this.#context.messageHandler.setConfig(this.#context.config());
     const renderable = this.#renderablesByTopic.get(topic);
     if (renderable) {
@@ -281,7 +296,7 @@ export class ImageAnnotations extends THREE.Object3D {
       entries.push({
         path: ["imageAnnotations", topic.name],
         node: {
-          label: topic.name,
+          label: this.#context.topicLabel?.(topic.name) ?? topic.name,
           visible: settings?.visible ?? false,
           handler: this.#handleSettingsAction.bind(this),
         },

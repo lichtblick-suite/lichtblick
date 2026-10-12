@@ -15,6 +15,7 @@ export type BuildSettingsTreeProps = {
   messagePipelineState: () => MessagePipelineContext;
   panelType: string | undefined;
   settingsTree: ImmutableSettingsTree | undefined;
+  messageConverters?: readonly import("@lichtblick/suite-base/types/messageConverters").InstalledMessageConverter[];
 };
 
 export type ActionMenuProps = {

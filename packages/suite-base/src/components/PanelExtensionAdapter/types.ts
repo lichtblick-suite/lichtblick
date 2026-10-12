@@ -64,6 +64,9 @@ export type MessagePathDropConfig = {
  * extensions.
  */
 export type BuiltinPanelExtensionContext = {
+  unstable_setTopicOutputConfigHandler?: (
+    handler: ((topic: string, key: string, config: Record<string, unknown>) => void) | undefined,
+  ) => void;
   /**
    * Fetch an asset from Studio's asset manager.
    *
@@ -106,6 +109,9 @@ export type MessageConverterAlertHandler = (
 export type CreateMessageRangeIteratorParams = {
   topic: string;
   convertTo?: string;
+  converterId?: string;
+  config?: import("@lichtblick/suite-base/util/topicOutput").TopicOutputConfig;
+  panelType?: string;
   rawBatchIterator: AsyncIterableIterator<Readonly<IteratorResult>>;
   sortedTopics: readonly Topic[];
   messageConverters: readonly InstalledMessageConverter[];

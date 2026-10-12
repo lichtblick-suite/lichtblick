@@ -27,6 +27,7 @@ import {
   WAITING_FOR_SYNC_EMPTY_HUD_ITEM,
   WAITING_FOR_SYNC_NOTICE_HUD_ITEM,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ImageMode/MessageHandler";
+import { messageOutputKey } from "@lichtblick/suite-base/util/topicOutput";
 
 import { PartialMessageEvent } from "../../SceneExtension";
 
@@ -46,6 +47,34 @@ function wrapInMessageEvent<T>(
 }
 
 describe("MessageHandler: synchronized = false", () => {
+  it("retains annotations from different converters on the same topic", () => {
+    const handler = new MessageHandler(
+      { synchronize: false },
+      new HUDItemManager(() => {}),
+      messageOutputKey,
+    );
+    const base = wrapInMessageEvent<ImageAnnotations>(
+      "/annotations",
+      "foxglove.ImageAnnotations",
+      0n,
+      createCircleAnnotations([0n]),
+    ) as MessageEvent<ImageAnnotations>;
+    const a = {
+      ...base,
+      output: { kind: "converted" as const, sourceSchemaName: "Objects", converterId: "A" },
+    };
+    const b = {
+      ...base,
+      output: { kind: "converted" as const, sourceSchemaName: "Objects", converterId: "B" },
+    };
+    handler.handleAnnotations(a);
+    handler.handleAnnotations(b);
+    const state = handler.getRenderStateAndUpdateHUD();
+    expect(state.annotationsByTopic?.size).toBe(2);
+    expect(state.annotationsByTopic?.get(messageOutputKey(a))?.originalMessage).toBe(a);
+    expect(state.annotationsByTopic?.get(messageOutputKey(b))?.originalMessage).toBe(b);
+  });
+
   it("should return an empty state if no messages are handled", () => {
     const hud = new HUDItemManager(() => {});
     const initConfig = { synchronize: false };

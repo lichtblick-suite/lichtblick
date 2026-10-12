@@ -7,6 +7,7 @@
 
 import { useTheme } from "@mui/material";
 import { produce } from "immer";
+import * as _ from "lodash-es";
 import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLatest } from "react-use";
 import { v4 as uuid } from "uuid";
@@ -66,6 +67,12 @@ import {
 import { PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { assertNever } from "@lichtblick/suite-base/util/assertNever";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
+import {
+  getConverterId,
+  resolveOutputConfig,
+  topicOutputKey,
+  withSettingsPath,
+} from "@lichtblick/suite-base/util/topicOutput";
 
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
@@ -82,20 +89,27 @@ const log = Logger.getLogger(__filename);
 function getConverterForSubscription(
   sub: Subscription,
   topicToSchemaNameMap: Map<string, string | undefined>,
-  topicSchemaConverters: Map<ConverterKey, { toSchemaName: string }[]>,
+  topicSchemaConverters: Map<
+    ConverterKey,
+    import("@lichtblick/suite-base/types/messageConverters").InstalledMessageConverter[]
+  >,
 ): { toSchemaName: string; supportsLatestPerRenderTick?: boolean } | undefined {
   if (!sub.convertTo) {
     return undefined;
   }
 
   const topicSchemaName = topicToSchemaNameMap.get(sub.topic);
-  if (topicSchemaName && topicSchemaName === sub.convertTo) {
+  if (sub.converterId == undefined && topicSchemaName && topicSchemaName === sub.convertTo) {
     return undefined;
   }
 
-  const key = `${sub.topic}\n${String(topicSchemaName ?? "<no-schema>")}` as ConverterKey;
+  const key = JSON.stringify([sub.topic, topicSchemaName ?? "<no-schema>"]) as ConverterKey;
   const convertersForTopic = topicSchemaConverters.get(key) ?? [];
-  return convertersForTopic.find((conv) => conv.toSchemaName === sub.convertTo);
+  return convertersForTopic.find(
+    (conv) =>
+      conv.toSchemaName === sub.convertTo &&
+      (sub.converterId == undefined || getConverterId(conv) === sub.converterId),
+  );
 }
 
 type VersionedPanelConfig = Record<string, unknown> & { [VERSION_CONFIG_KEY]: number };
@@ -225,16 +239,18 @@ function PanelExtensionAdapter(
   const [sharedPanelState, setSharedPanelState] = useSharedPanelState();
   const emitMessageConverterAlert = useMemo<MessageConverterAlertHandler>(
     () => (converter, alert, alertId) => {
-      const converterTag = `message-converter:${converter.extensionId ?? "unknown"}:${
-        converter.fromSchemaName
-      }->${converter.toSchemaName}`;
+      const converterTag = `message-converter:${getConverterId(converter)}`;
       const tag = alertId ? `${converterTag}:${alertId}` : converterTag;
       setAlert(tag, alert);
     },
     [setAlert],
   );
 
-  const subscribeMessageRange = useSubscribeMessageRange(emitMessageConverterAlert);
+  const subscribeMessageRange = useSubscribeMessageRange(
+    emitMessageConverterAlert,
+    initialState.current,
+    panelName,
+  );
 
   // Register handlers to update the app settings we subscribe to
   useEffect(() => {
@@ -305,6 +321,7 @@ function PanelExtensionAdapter(
       watchedFields,
       forceConversion,
       config: initialState.current,
+      panelType: panelName,
     });
 
     if (!renderState) {
@@ -360,11 +377,17 @@ function PanelExtensionAdapter(
     sortedServices,
     watchedFields,
     initialState,
+    panelName,
     forceConversion,
   ]);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
 
+  const outputConfigHandlerRef = useRef<
+    ((topic: string, key: string, config: Record<string, unknown>) => void) | undefined
+  >();
+  const settingsTreeRef =
+    useRef<import("@lichtblick/suite").Immutable<import("@lichtblick/suite").SettingsTree>>();
   const extensionsSettings = useExtensionCatalog(getExtensionPanelSettings);
 
   type PartialPanelExtensionContext = Omit<BuiltinPanelExtensionContext, "panelElement">;
@@ -401,10 +424,56 @@ function PanelExtensionAdapter(
       } = action;
 
       saveConfig(
-        produce<{ topics: Record<string, unknown> }>((draft) => {
+        produce<{
+          topics: Record<string, unknown>;
+          topicOutputs?: Record<string, Record<string, unknown>>;
+        }>((draft) => {
           const [category, topicName] = path;
 
           if (category === "topics" && topicName != undefined) {
+            if (
+              path[2] != undefined &&
+              settingsTreeRef.current?.topicOutputs?.some(
+                (entry) =>
+                  entry.topic === topicName &&
+                  topicOutputKey(entry.topic, entry.output) === path[2],
+              ) === true
+            ) {
+              const descriptor = settingsTreeRef.current.topicOutputs.find(
+                (entry) =>
+                  entry.topic === topicName &&
+                  topicOutputKey(entry.topic, entry.output) === path[2],
+              );
+              if (descriptor?.output.kind !== "converted") {
+                return;
+              }
+              const converterId = descriptor.output.converterId;
+              const settings = messageConverters?.find(
+                (converter) => getConverterId(converter) === converterId,
+              )?.panelSettings?.[panelName];
+              if (settings == undefined) {
+                return;
+              }
+              const effective = resolveOutputConfig(draft, descriptor, settings.defaultConfig);
+              draft.topicOutputs ??= {};
+              draft.topicOutputs[topicName] ??= {};
+              draft.topicOutputs[topicName][path[2]] = effective;
+              if (action.action === "update") {
+                if (action.payload.value == undefined) {
+                  _.unset(effective, path.slice(3));
+                } else {
+                  _.set(effective, path.slice(3), action.payload.value);
+                }
+              }
+              settings.handler(
+                withSettingsPath(action, ["topics", topicName, ...path.slice(3)]),
+                effective,
+              );
+              outputConfigHandlerRef.current?.(topicName, path[2], _.cloneDeep(effective));
+              setForceConversion(new Set([topicName]));
+              return;
+            }
+
             const topicToSchemaNameMap = getTopicToSchemaNameMap(messagePipelineState());
             const schemaName = topicToSchemaNameMap[topicName];
 
@@ -551,10 +620,13 @@ function PanelExtensionAdapter(
           const topicSchemaName = topicToSchemaNameMap.get(item.topic);
           const isNativePath =
             item.convertTo == undefined ||
-            (topicSchemaName != undefined && topicSchemaName === item.convertTo);
-          const samplingAllowed = isNativePath
-            ? false
-            : converter?.supportsLatestPerRenderTick === true;
+            (item.converterId == undefined &&
+              topicSchemaName != undefined &&
+              topicSchemaName === item.convertTo);
+          const samplingAllowed =
+            sortedTopics.filter((topic) => topic.name === item.topic).length > 1 || isNativePath
+              ? false
+              : converter?.supportsLatestPerRenderTick === true;
 
           return {
             topic: item.topic,
@@ -643,7 +715,11 @@ function PanelExtensionAdapter(
         setSubscribedAppSettings(settings);
       },
 
+      unstable_setTopicOutputConfigHandler: (handler) => {
+        outputConfigHandlerRef.current = handler;
+      },
       updatePanelSettingsEditor: (settings: SettingsTree) => {
+        settingsTreeRef.current = settings;
         if (!isMounted()) {
           return;
         }

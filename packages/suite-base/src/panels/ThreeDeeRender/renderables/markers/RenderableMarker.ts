@@ -65,7 +65,7 @@ export class RenderableMarker extends Renderable<MarkerUserData> {
   }
 
   public getSettings(): LayerSettingsMarker | undefined {
-    return this.renderer.config.topics[this.userData.topic] as LayerSettingsMarker | undefined;
+    return this.renderer.getTopicSettings()[this.userData.topic] as LayerSettingsMarker | undefined;
   }
 
   public override details(): Record<string, RosValue> {

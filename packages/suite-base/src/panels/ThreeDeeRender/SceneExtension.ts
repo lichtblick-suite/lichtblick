@@ -12,6 +12,7 @@ import { DeepPartial, Writable } from "ts-essentials";
 import { MessageEvent, SettingsTreeAction } from "@lichtblick/suite";
 import { PanelContextMenuItem } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+import { messageOutputKey } from "@lichtblick/suite-base/util/topicOutput";
 
 import type { AnyRendererSubscription, IRenderer, RendererConfig } from "./IRenderer";
 import { Path } from "./LayerErrors";
@@ -156,6 +157,11 @@ export class SceneExtension<
    * calls `renderer.updateConfig()` and `updateSettingsTree()`.
    */
   public saveSetting(path: Path, value: unknown): void {
+    if (path[0] === "topics") {
+      this.renderer.saveTopicSetting(path, value);
+      this.updateSettingsTree();
+      return;
+    }
     // Update the configuration
     this.renderer.updateConfig((draft) => {
       if (value == undefined) {
@@ -268,13 +274,10 @@ export function onlyLastByTopicMessage<T>(msgs: MessageEvent<T>[]): MessageEvent
     return [];
   }
   /**
-   * NOTE: We group by topic because renderables are keyed by topic. If a renderable does not represent the current state of a topic,
-   * what we group by will need to change.
-   *
-   * ALSO: for message converters. Both the original message and converted message are in the queue. This depends on the
-   * converted message being after the original message. Which is currently the case.
+   * Keep the latest message for each output. Original and converted messages on
+   * the same topic must not displace one another, even when their schemas match.
    */
-  const msgsByTopic = _.groupBy(msgs, (msg) => msg.topic);
+  const msgsByTopic = _.groupBy(msgs, messageOutputKey);
 
   const list = Object.values(msgsByTopic).map((topicMsgs) => topicMsgs[topicMsgs.length - 1]!);
 

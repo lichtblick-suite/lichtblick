@@ -76,6 +76,13 @@ export type Topic = {
    * of the convertibleTo schemas using the convertTo option.
    */
   convertibleTo?: readonly string[];
+  /** Registered conversion outputs, including converters with identical schema pairs. */
+  conversionOutputs?: readonly {
+    converterId: string;
+    schemaName: string;
+    displayName?: string;
+    defaultConfig?: unknown;
+  }[];
 };
 
 export type Subscription = {
@@ -88,6 +95,8 @@ export type Subscription = {
    * original message event.
    */
   convertTo?: string;
+  /** Select an exact converter registration. An unavailable ID never falls back. */
+  converterId?: string;
 
   /**
    * Setting preload to _true_ hints to the data source that it should attempt to load all available
@@ -129,9 +138,18 @@ export type Metadata = {
   readonly metadata: Record<string, string>;
 };
 
-/**
- * A message event frames message data with the topic and receive time
- */
+/** Identifies an original stream or a registered converter applied to its source schema. */
+export type TopicOutput =
+  | { kind: "original"; sourceSchemaName: string }
+  | { kind: "converted"; sourceSchemaName: string; converterId: string };
+
+export type TopicOutputDescriptor = {
+  topic: string;
+  schemaName: string;
+  output: TopicOutput;
+};
+
+/** A message event frames message data with the topic and receive time. */
 export type MessageEvent<T = unknown> = {
   /** The topic name this message was received on, i.e. "/some/topic" */
   topic: string;
@@ -171,6 +189,8 @@ export type MessageEvent<T = unknown> = {
   originalMessageEvent?: MessageEvent;
 
   topicConfig?: unknown;
+  /** Output identity. Omitted metadata denotes original data. Topic remains the source topic. */
+  output?: TopicOutput;
 };
 
 export interface LayoutActions {
@@ -290,6 +310,8 @@ export type RenderState = {
 };
 
 export type SubscribeMessageRangeArgs = {
+  /** Select an exact registered converter for the requested output schema. */
+  converterId?: string;
   /**
    * Topic to be subscribed to.
    */
@@ -589,12 +611,14 @@ export interface PanelSettings<ExtensionSettings> {
    * @param config value of the custom settings. It's type is the type of the object defined in the *defaultConfig* property
    * @returns
    * a settings tree node defined as it would be defined in an extension.
-   * That node will be merged with the node belonging to the concerned topic (path = ["topics", "__topic_name__"])
+   * Output-aware panels merge this into the corresponding converter output node.
+   * Legacy panels use the topic node at ["topics", "__topic_name__"].
    */
   settings: (config?: ExtensionSettings) => SettingsTreeNode;
   /**
    * Simple settings handler run right after the default handler for settings.
-   * @param config is mutated, modifying it allows the state value to be modified and then sent to the converter
+   * @param config is mutated, modifying it allows the state value to be modified and then sent to the converter.
+   * Output-aware panels supply isolated output config and translate action paths to the legacy topic path.
    */
   handler: (action: SettingsTreeAction, config?: ExtensionSettings) => void;
   defaultConfig?: ExtensionSettings;
@@ -614,6 +638,10 @@ export type MessageConverterContext = {
 };
 
 export type RegisterMessageConverterArgs<Src> = {
+  /** Stable name within this extension. Required to distinguish registrations of the same pair. */
+  id?: string;
+  /** Human-readable label for this converter's output settings. */
+  displayName?: string;
   fromSchemaName: string;
   toSchemaName: string;
   /**
@@ -1106,6 +1134,8 @@ export type SettingsTreeNodes = Record<string, undefined | SettingsTreeNode>;
  * in the tree.
  */
 export type SettingsTree = {
+  /** Opt in to independent output settings under topics/topic/outputKey. */
+  topicOutputs?: readonly TopicOutputDescriptor[];
   /**
    * Handler to process all actions on the settings tree initiated by the UI.
    */

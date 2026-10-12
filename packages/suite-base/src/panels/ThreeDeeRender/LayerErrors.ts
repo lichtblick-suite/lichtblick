@@ -61,8 +61,10 @@ const log = Logger.getLogger(__filename);
 
 export class LayerErrors extends EventEmitter<LayerErrorEvents> {
   public errors = new NodeError([]);
+  public mapPath?: (path: Path) => Path;
 
-  public add(path: Path, errorId: string, errorMessage: string): void {
+  public add(inputPath: Path, errorId: string, errorMessage: string): void {
+    const path = this.mapPath?.(inputPath) ?? inputPath;
     // Get or create the node for the given path
     let node = this.errors;
     for (const segment of path) {
@@ -94,12 +96,14 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     this.add(TOPIC_PATH, errorId, errorMessage);
   }
 
-  public hasError(path: Path, errorId: string): boolean {
+  public hasError(inputPath: Path, errorId: string): boolean {
+    const path = this.mapPath?.(inputPath) ?? inputPath;
     const node = this.#getNode(path);
     return node?.errorsById?.has(errorId) === true;
   }
 
-  public remove(path: Path, errorId: string): void {
+  public remove(inputPath: Path, errorId: string): void {
+    const path = this.mapPath?.(inputPath) ?? inputPath;
     const node = this.#getNode(path);
     if (node?.errorsById?.has(errorId) === true) {
       node.errorsById.delete(errorId);
@@ -128,7 +132,8 @@ export class LayerErrors extends EventEmitter<LayerErrorEvents> {
     }
   }
 
-  public clearPath(path: Path): void {
+  public clearPath(inputPath: Path): void {
+    const path = this.mapPath?.(inputPath) ?? inputPath;
     const node = this.#getNode(path);
     if (!node) {
       return;

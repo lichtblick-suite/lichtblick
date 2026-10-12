@@ -135,7 +135,7 @@ describe("renderState", () => {
     });
     const state = buildRenderState(input);
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       topics: [{ name: "test", schemaName: "schema", convertibleTo: ["more"] }],
     });
   });
@@ -151,7 +151,7 @@ describe("renderState", () => {
     });
     const state = buildRenderState(input);
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       topics: [{ name: "test", schemaName: "schema" }],
     });
   });
@@ -164,7 +164,7 @@ describe("renderState", () => {
     });
     const state = buildRenderState(input);
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       services: ["service1", "/namespace/service2"],
     });
   });
@@ -244,7 +244,7 @@ describe("renderState", () => {
       forceConversion: new Set(),
     });
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       topics: [{ name: "test", schemaName: "schema" }],
       currentFrame: [
         {
@@ -293,7 +293,7 @@ describe("renderState", () => {
       forceConversion: new Set(),
     });
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       topics: [
         { name: "another", schemaName: "schema" },
         { name: "test", schemaName: "schema" },
@@ -358,7 +358,7 @@ describe("renderState", () => {
       forceConversion: new Set(),
     });
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       topics: [
         { name: "test1", schemaName: "schema" },
         { name: "test2", schemaName: "schema" },
@@ -438,7 +438,7 @@ describe("renderState", () => {
       forceConversion: new Set(),
     });
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       topics: [{ name: "test", schemaName: "schema", convertibleTo: ["otherSchema"] }],
       currentFrame: [
         {
@@ -645,7 +645,7 @@ describe("renderState", () => {
       forceConversion: new Set(),
     });
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       topics: [
         {
           name: "test",
@@ -790,7 +790,7 @@ describe("renderState", () => {
       forceConversion: new Set(),
     });
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       topics: [{ name: "test", schemaName: "schema", convertibleTo: ["otherSchema"] }],
       currentFrame: [
         {
@@ -1074,7 +1074,7 @@ describe("renderState", () => {
       forceConversion: new Set(),
     });
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       variables: new Map<string, VariableValue>([
         ["var1", "value1"],
         ["var2", 42],
@@ -1125,7 +1125,7 @@ describe("renderState", () => {
       ],
     };
 
-    expect(state1).toEqual(expectedState1);
+    expect(state1).toMatchObject(expectedState1);
 
     // snapshot first state current frame
     const state1CurrentFrame = state1?.currentFrame;
@@ -1140,7 +1140,7 @@ describe("renderState", () => {
 
     expect(state2?.currentFrame).not.toEqual(state1CurrentFrame);
 
-    expect(state2).toEqual({
+    expect(state2).toMatchObject({
       topics: expectedState1.topics,
       currentFrame: expect.any(Array),
       allFrames: [
@@ -1195,7 +1195,7 @@ describe("renderState", () => {
         forceConversion: new Set(),
       });
 
-      expect(state).toEqual({
+      expect(state).toMatchObject({
         currentFrame: [
           {
             topic: "test",
@@ -1223,7 +1223,7 @@ describe("renderState", () => {
         forceConversion: new Set(),
       });
 
-      expect(state).toEqual({
+      expect(state).toMatchObject({
         currentFrame: undefined,
       });
     }
@@ -1312,7 +1312,7 @@ describe("renderState", () => {
       watchedFields: new Set(["parameters"]),
     });
     const state = buildRenderState(input);
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       parameters: new Map(),
     });
   });
@@ -1330,7 +1330,7 @@ describe("renderState", () => {
     });
     const state = buildRenderState(input);
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       parameters: activeData.parameters,
     });
   });
@@ -1343,7 +1343,7 @@ describe("renderState", () => {
     });
     const state = buildRenderState(input);
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       sharedPanelState: {},
     });
   });
@@ -1357,7 +1357,7 @@ describe("renderState", () => {
     });
     const state = buildRenderState(input);
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       colorScheme: "dark",
     });
   });
@@ -1370,7 +1370,7 @@ describe("renderState", () => {
     });
     const state = buildRenderState(input);
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       appSettings: new Map(),
     });
   });

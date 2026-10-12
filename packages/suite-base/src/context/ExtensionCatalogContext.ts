@@ -104,6 +104,10 @@ export function useExtensionCatalog<T>(selector: (registry: ExtensionCatalog) =>
   return useStore(context, selector);
 }
 
+export const selectInstalledMessageConverters = (
+  reg: ExtensionCatalog,
+): ExtensionCatalog["installedMessageConverters"] => reg.installedMessageConverters;
+
 const EMPTY_PANEL_SETTINGS: ExtensionSettings = {};
 
 export function getExtensionPanelSettings(

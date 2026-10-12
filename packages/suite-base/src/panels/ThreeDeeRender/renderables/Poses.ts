@@ -134,10 +134,10 @@ export class Poses extends SceneExtension<PoseRenderable> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       const isPoseStamped = topicIsConvertibleToSchema(topic, POSE_STAMPED_DATATYPES);
       const isPoseInFrame = topicIsConvertibleToSchema(topic, POSE_IN_FRAME_DATATYPES);
       const isPoseWithCovarianceStamped = isPoseStamped
@@ -206,7 +206,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
       entries.push({
         path: ["topics", topic.name],
         node: {
-          label: topic.name,
+          label: this.renderer.getTopicLabel(topic.name),
           icon: "Flag",
           fields,
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
@@ -230,7 +230,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName];
+      const settings = this.renderer.getTopicSettings()[topicName];
       this.#updatePoseRenderable(
         renderable,
         renderable.userData.poseMessage,
@@ -244,13 +244,23 @@ export class Poses extends SceneExtension<PoseRenderable> {
   #handlePoseStamped = (messageEvent: PartialMessageEvent<PoseStamped>): void => {
     const poseMessage = normalizePoseStamped(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    this.#addPose(messageEvent.topic, poseMessage, messageEvent.message, receiveTime);
+    this.#addPose(
+      this.renderer.getRenderTopic(messageEvent),
+      poseMessage,
+      messageEvent.message,
+      receiveTime,
+    );
   };
 
   #handlePoseInFrame = (messageEvent: PartialMessageEvent<PoseInFrame>): void => {
     const poseMessage = normalizePoseInFrameToPoseStamped(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    this.#addPose(messageEvent.topic, poseMessage, messageEvent.message, receiveTime);
+    this.#addPose(
+      this.renderer.getRenderTopic(messageEvent),
+      poseMessage,
+      messageEvent.message,
+      receiveTime,
+    );
   };
 
   #handlePoseWithCovariance = (
@@ -258,7 +268,12 @@ export class Poses extends SceneExtension<PoseRenderable> {
   ): void => {
     const poseMessage = normalizePoseWithCovarianceStamped(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    this.#addPose(messageEvent.topic, poseMessage, messageEvent.message, receiveTime);
+    this.#addPose(
+      this.renderer.getRenderTopic(messageEvent),
+      poseMessage,
+      messageEvent.message,
+      receiveTime,
+    );
   };
 
   #addPose(
@@ -270,7 +285,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.getTopicSettings()[topic];
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
       renderable = new PoseRenderable(topic, this.renderer, {
@@ -278,7 +293,7 @@ export class Poses extends SceneExtension<PoseRenderable> {
         messageTime: toNanoSec(poseMessage.header.stamp),
         frameId: this.renderer.normalizeFrameId(poseMessage.header.frame_id),
         pose: makePose(),
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         settings,
         topic,
         poseMessage,

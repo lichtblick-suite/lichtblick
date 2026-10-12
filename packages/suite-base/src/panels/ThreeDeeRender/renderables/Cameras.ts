@@ -112,10 +112,10 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       if (
         !(
           topicIsConvertibleToSchema(topic, ROS_CAMERA_INFO_DATATYPES) ||
@@ -181,7 +181,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
     if (renderable) {
       const { cameraInfo, receiveTime, originalMessage } = renderable.userData;
       if (cameraInfo) {
-        const settings = this.renderer.config.topics[topicName];
+        const settings = this.renderer.getTopicSettings()[topicName];
         this.#updateCameraInfoRenderable(
           renderable,
           cameraInfo,
@@ -196,7 +196,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
   #handleCameraInfo = (
     messageEvent: PartialMessageEvent<IncomingCameraInfo | CameraCalibration>,
   ): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const cameraInfo = normalizeCameraInfo(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
@@ -206,7 +206,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
       const frameId = this.renderer.normalizeFrameId(cameraInfo.header.frame_id);
 
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.getTopicSettings()[topic];
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
       renderable = new CameraInfoRenderable(topic, this.renderer, {
@@ -214,7 +214,7 @@ export class Cameras extends SceneExtension<CameraInfoRenderable> {
         messageTime,
         frameId,
         pose: makePose(),
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         settings,
         topic,
         cameraInfo: undefined,

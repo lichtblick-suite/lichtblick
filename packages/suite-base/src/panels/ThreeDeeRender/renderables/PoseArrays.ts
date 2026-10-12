@@ -172,10 +172,10 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       if (
         !(
           topicIsConvertibleToSchema(topic, POSE_ARRAY_DATATYPES) ||
@@ -227,7 +227,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
       entries.push({
         path: ["topics", topic.name],
         node: {
-          label: topic.name,
+          label: this.renderer.getTopicLabel(topic.name),
           icon: topicIsConvertibleToSchema(topic, NAV_PATH_DATATYPES) ? "Timeline" : "Flag",
           fields,
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
@@ -250,8 +250,10 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName];
-      const defaultType = { type: getDefaultType(this.renderer.topicsByName?.get(topicName)) };
+      const settings = this.renderer.getTopicSettings()[topicName];
+      const defaultType = {
+        type: getDefaultType(this.renderer.renderTopics.find((entry) => entry.name === topicName)),
+      };
       this.#updatePoseArrayRenderable(
         renderable,
         renderable.userData.poseArrayMessage,
@@ -265,7 +267,12 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
   #handlePoseArray = (messageEvent: PartialMessageEvent<PoseArray>): void => {
     const poseArrayMessage = normalizePoseArray(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    this.#addPoseArray(messageEvent.topic, poseArrayMessage, messageEvent.message, receiveTime);
+    this.#addPoseArray(
+      this.renderer.getRenderTopic(messageEvent),
+      poseArrayMessage,
+      messageEvent.message,
+      receiveTime,
+    );
   };
 
   #handleNavPath = (messageEvent: PartialMessageEvent<NavPath>): void => {
@@ -275,13 +282,23 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
 
     const poseArrayMessage = normalizeNavPathToPoseArray(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    this.#addPoseArray(messageEvent.topic, poseArrayMessage, messageEvent.message, receiveTime);
+    this.#addPoseArray(
+      this.renderer.getRenderTopic(messageEvent),
+      poseArrayMessage,
+      messageEvent.message,
+      receiveTime,
+    );
   };
 
   #handlePosesInFrame = (messageEvent: PartialMessageEvent<PosesInFrame>): void => {
     const poseArrayMessage = normalizePosesInFrameToPoseArray(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
-    this.#addPoseArray(messageEvent.topic, poseArrayMessage, messageEvent.message, receiveTime);
+    this.#addPoseArray(
+      this.renderer.getRenderTopic(messageEvent),
+      poseArrayMessage,
+      messageEvent.message,
+      receiveTime,
+    );
   };
 
   #addPoseArray(
@@ -293,8 +310,10 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic];
-      const defaultType = { type: getDefaultType(this.renderer.topicsByName?.get(topic)) };
+      const userSettings = this.renderer.getTopicSettings()[topic];
+      const defaultType = {
+        type: getDefaultType(this.renderer.renderTopics.find((entry) => entry.name === topic)),
+      };
       const settings = { ...DEFAULT_SETTINGS, ...defaultType, ...userSettings };
 
       renderable = new PoseArrayRenderable(topic, this.renderer, {
@@ -302,7 +321,7 @@ export class PoseArrays extends SceneExtension<PoseArrayRenderable> {
         messageTime: toNanoSec(poseArrayMessage.header.stamp),
         frameId: this.renderer.normalizeFrameId(poseArrayMessage.header.frame_id),
         pose: makePose(),
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         settings,
         topic,
         poseArrayMessage,

@@ -9,6 +9,7 @@ import * as _ from "lodash-es";
 
 import { canonicalVideoCodec, VideoCodec } from "@lichtblick/den/video";
 import { MessageEvent } from "@lichtblick/suite";
+import { messageOutputKey } from "@lichtblick/suite-base/util/topicOutput";
 
 import { CompressedVideo } from "./ImageTypes";
 import { isCompressedVideoKeyframe } from "./decodeImage";
@@ -37,7 +38,7 @@ export function filterCompressedVideoQueue(
   const originalIndex = new Map<MessageEvent<CompressedVideo>, number>();
   msgs.forEach((msg, index) => originalIndex.set(msg, index));
 
-  const msgsByTopic = _.groupBy(msgs, (msg) => msg.topic);
+  const msgsByTopic = _.groupBy(msgs, messageOutputKey);
   const kept: MessageEvent<CompressedVideo>[] = Object.values(msgsByTopic).flatMap(filterTopic);
 
   kept.sort((a, b) => (originalIndex.get(a) ?? 0) - (originalIndex.get(b) ?? 0));

@@ -27,6 +27,10 @@ import {
   useCurrentLayoutSelector,
   useSelectedPanels,
 } from "@lichtblick/suite-base/context/CurrentLayoutContext";
+import {
+  useExtensionCatalog,
+  selectInstalledMessageConverters,
+} from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { usePanelCatalog } from "@lichtblick/suite-base/context/PanelCatalogContext";
 import {
   PanelStateStore,
@@ -131,6 +135,7 @@ export default function PanelSettings({
     t,
   ]);
 
+  const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
   const [config, , extensionSettings] = useConfigById(selectedPanelId);
   const messagePipelineState = useMessagePipelineGetter();
 
@@ -145,6 +150,7 @@ export default function PanelSettings({
       buildSettingsTree({
         config,
         extensionSettings,
+        messageConverters,
         messagePipelineState,
         panelType,
         settingsTree: storedSettingsTree,
@@ -152,6 +158,7 @@ export default function PanelSettings({
     [
       config,
       extensionSettings,
+      messageConverters,
       messagePipelineState,
       panelType,
       storedSettingsTree,

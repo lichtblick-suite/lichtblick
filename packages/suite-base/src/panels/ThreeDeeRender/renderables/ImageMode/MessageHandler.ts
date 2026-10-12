@@ -171,7 +171,13 @@ export class MessageHandler implements IMessageHandler {
    *
    * @param config - subset of ImageMode settings required for message handling
    */
-  public constructor(config: Immutable<Config>, hud: HUDItemManager) {
+  public constructor(
+    config: Immutable<Config>,
+    hud: HUDItemManager,
+    private readonly topicKey: (
+      event: Pick<MessageEvent, "topic" | "schemaName" | "output">,
+    ) => string = (event) => event.topic,
+  ) {
     this.#config = config;
     this.#hud = hud;
     this.#lastReceivedMessages = {
@@ -250,7 +256,7 @@ export class MessageHandler implements IMessageHandler {
   ): void => {
     const annotations = normalizeAnnotations(messageEvent.message, messageEvent.schemaName);
 
-    const { topic } = messageEvent;
+    const topic = this.topicKey(messageEvent);
     if (this.#config.synchronize !== true) {
       this.#lastReceivedMessages.annotationsByTopic.set(topic, {
         originalMessage: messageEvent,

@@ -752,11 +752,11 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
     if (msgs.length === 0) {
       return msgs;
     }
-    const msgsByTopic = _.groupBy(msgs, (msg) => msg.topic);
+    const msgsByTopic = _.groupBy(msgs, (msg) => this.renderer.getRenderTopic(msg));
     const finalQueue: MessageEvent<T>[] = [];
     for (const topic in msgsByTopic) {
       const topicMsgs = msgsByTopic[topic]!;
-      const userSettings = (this.renderer.config.topics[topic] ??
+      const userSettings = (this.renderer.getTopicSettings()[topic] ??
         {}) as Partial<LayerSettingsPointClouds>;
       // if the topic has a decaytime add all messages to queue for topic
       if ((userSettings.decayTime ?? DEFAULT_SETTINGS.decayTime) > 0) {
@@ -773,10 +773,10 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       const isPointCloud = topicIsConvertibleToSchema(topic, ALL_POINTCLOUD_DATATYPES);
       if (!isPointCloud) {
         continue;
@@ -833,7 +833,7 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const prevSettings = this.renderer.config.topics[topicName];
+      const prevSettings = this.renderer.getTopicSettings()[topicName];
       const settings = { ...DEFAULT_SETTINGS, ...prevSettings };
       renderable.updatePointCloud(
         renderable.userData.latestPointCloud,
@@ -845,7 +845,8 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
   };
 
   #handleFoxglovePointCloud = (messageEvent: PartialMessageEvent<PointCloud>): void => {
-    const { topic, schemaName } = messageEvent;
+    const { schemaName } = messageEvent;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const pointCloud = normalizePointCloud(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
     const messageTime = toNanoSec(pointCloud.timestamp);
@@ -863,7 +864,8 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
   };
 
   #handleRosPointCloud = (messageEvent: PartialMessageEvent<PointCloud2>): void => {
-    const { topic, schemaName } = messageEvent;
+    const { schemaName } = messageEvent;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const pointCloud = normalizePointCloud2(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
     const messageTime = toNanoSec(pointCloud.header.stamp);
@@ -908,7 +910,7 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = (this.renderer.config.topics[topic] ??
+      const userSettings = (this.renderer.getTopicSettings()[topic] ??
         {}) as Partial<LayerSettingsPointClouds>;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
@@ -925,7 +927,7 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
           updatedUserSettings.colorField = settings.colorField;
           updatedUserSettings.colorMode = settings.colorMode;
           updatedUserSettings.colorMap = settings.colorMap;
-          draft.topics[topic] = updatedUserSettings;
+          this.renderer.setTopicSettings(draft, topic, updatedUserSettings);
         });
         this.updateSettingsTree();
       }
@@ -940,7 +942,7 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
         messageTime,
         frameId: this.renderer.normalizeFrameId(frameId),
         pose: makePose(),
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         settings,
         topic,
         latestPointCloud: pointCloud,

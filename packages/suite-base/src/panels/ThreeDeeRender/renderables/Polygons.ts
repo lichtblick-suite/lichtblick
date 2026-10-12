@@ -85,10 +85,10 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       if (!topicIsConvertibleToSchema(topic, POLYGON_STAMPED_DATATYPES)) {
         continue;
       }
@@ -111,7 +111,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
       entries.push({
         path: ["topics", topic.name],
         node: {
-          label: topic.name,
+          label: this.renderer.getTopicLabel(topic.name),
           icon: "Star",
           fields,
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
@@ -134,7 +134,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName];
+      const settings = this.renderer.getTopicSettings()[topicName];
       renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
       this.#updatePolygonRenderable(
         renderable,
@@ -145,14 +145,14 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
   };
 
   #handlePolygon = (messageEvent: PartialMessageEvent<PolygonStamped>): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const polygonStamped = normalizePolygonStamped(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.getTopicSettings()[topic];
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
       renderable = new PolygonRenderable(topic, this.renderer, {
@@ -160,7 +160,7 @@ export class Polygons extends SceneExtension<PolygonRenderable> {
         messageTime: toNanoSec(polygonStamped.header.stamp),
         frameId: this.renderer.normalizeFrameId(polygonStamped.header.frame_id),
         pose: makePose(),
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         settings,
         topic,
         polygonStamped,

@@ -10,6 +10,7 @@ import EventEmitter from "eventemitter3";
 import { quat, vec3 } from "gl-matrix";
 import i18next from "i18next";
 import { produce } from "immer";
+import * as _ from "lodash-es";
 import * as THREE from "three";
 import { DeepPartial, assert } from "ts-essentials";
 import { v4 as uuidv4 } from "uuid";
@@ -43,6 +44,15 @@ import {
 import { LayerErrors } from "@lichtblick/suite-base/panels/ThreeDeeRender/LayerErrors";
 import { ICameraHandler } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/ICameraHandler";
 import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
+import {
+  renderTopics,
+  messageOutputKey,
+  topicOutputKey,
+  outputSettingsPath,
+  resolveOutputConfig,
+  withSettingsPath,
+  RenderTopic,
+} from "@lichtblick/suite-base/util/topicOutput";
 import { palette, fontMonospace } from "@lichtblick/theme";
 import { LabelMaterial, LabelPool } from "@lichtblick/three-text";
 
@@ -99,6 +109,11 @@ import {
   Transform,
 } from "./transforms";
 import { InterfaceMode } from "./types";
+
+/**
+ * An extensible 3D renderer attached to a `HTMLCanvasElement`,
+ * `WebGLRenderingContext`, and `SettingsTree`.
+ */
 
 const log = Logger.getLogger(__filename);
 
@@ -172,10 +187,6 @@ function isStaticTransformTopic(topic: string): boolean {
   return topic.endsWith("tf_static") || topic.endsWith("static_transform");
 }
 
-/**
- * An extensible 3D renderer attached to a `HTMLCanvasElement`,
- * `WebGLRenderingContext`, and `SettingsTree`.
- */
 export class Renderer extends EventEmitter<RendererEvents> implements IRenderer {
   public readonly interfaceMode: InterfaceMode;
   #canvas: HTMLCanvasElement;
@@ -189,6 +200,111 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   public settings: SettingsManager;
   // [{ name, datatype }]
   public topics: ReadonlyArray<Topic> | undefined;
+  public renderTopics: RenderTopic[] = [];
+  #topicSettingsCache:
+    | {
+        config: Immutable<RendererConfig>;
+        topics: RenderTopic[];
+        settings: Record<string, Partial<import("./settings").BaseSettings> | undefined>;
+      }
+    | undefined;
+
+  public getTopicSettings(): Record<
+    string,
+    Partial<import("./settings").BaseSettings> | undefined
+  > {
+    if (
+      this.#topicSettingsCache?.config === this.config &&
+      this.#topicSettingsCache.topics === this.renderTopics
+    ) {
+      return this.#topicSettingsCache.settings;
+    }
+    const settings: Record<string, Partial<import("./settings").BaseSettings> | undefined> = {
+      ...this.config.topics,
+    };
+    for (const output of this.renderTopics) {
+      settings[output.name] = resolveOutputConfig(this.config, output, output.defaultConfig);
+    }
+    this.#topicSettingsCache = { config: this.config, topics: this.renderTopics, settings };
+    return settings;
+  }
+
+  public getRenderTopic(event: Pick<MessageEvent, "topic" | "schemaName" | "output">): string {
+    const key = messageOutputKey(event);
+    return (
+      this.renderTopics.find((entry) => topicOutputKey(entry.topic, entry.output) === key)?.name ??
+      (event.output?.kind === "converted" ? key : event.topic)
+    );
+  }
+
+  public getSourceTopic(key: string): string {
+    return this.renderTopics.find((entry) => entry.name === key)?.topic ?? key;
+  }
+
+  /** Resolve a legacy real-topic selection while keeping explicit output keys exact. */
+  public resolveTopicOutput(
+    key: string | undefined,
+    schemas: ReadonlySet<string>,
+  ): string | undefined {
+    if (key == undefined) {
+      return undefined;
+    }
+    const output =
+      this.renderTopics.find((entry) => entry.name === key && schemas.has(entry.schemaName)) ??
+      this.renderTopics.find((entry) => entry.topic === key && schemas.has(entry.schemaName));
+    return output?.name ?? key;
+  }
+
+  public getTopicLabel(key: string): string {
+    const output = this.renderTopics.find((entry) => entry.name === key);
+    return output == undefined ? key : `${output.topic} - ${output.label}`;
+  }
+
+  public getSettingsPath(path: readonly string[]): string[] {
+    if (
+      path[0] === "topics" &&
+      this.renderTopics.some(
+        (output) =>
+          output.topic === path[1] && topicOutputKey(output.topic, output.output) === path[2],
+      )
+    ) {
+      return [...path];
+    }
+    const output =
+      path[0] === "topics" || path[0] === "imageAnnotations"
+        ? this.renderTopics.find((entry) => entry.name === path[1])
+        : undefined;
+    return output == undefined ? [...path] : [...outputSettingsPath(output), ...path.slice(2)];
+  }
+
+  public setTopicSettings(
+    draft: RendererConfig,
+    key: string,
+    settings: Partial<import("./settings").BaseSettings>,
+  ): void {
+    const output = this.renderTopics.find((entry) => entry.name === key);
+    if (output == undefined || (output.output.kind === "original" && key === output.topic)) {
+      draft.topics[key] = settings;
+      return;
+    }
+    draft.topicOutputs ??= {};
+    draft.topicOutputs[output.topic] ??= {};
+    draft.topicOutputs[output.topic]![topicOutputKey(output.topic, output.output)] = settings;
+  }
+
+  public saveTopicSetting(path: readonly string[], value: unknown): void {
+    const key = path[1]!;
+    this.updateConfig((draft) => {
+      const settings = _.cloneDeep(this.getTopicSettings()[key] ?? {});
+      if (value == undefined) {
+        _.unset(settings, path.slice(2));
+      } else {
+        _.set(settings, path.slice(2), value);
+      }
+      this.setTopicSettings(draft, key, settings);
+    });
+  }
+
   // topicName -> { name, datatype }
   public topicsByName: ReadonlyMap<string, Topic> | undefined;
   // parameterKey -> parameterValue
@@ -295,7 +411,35 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     this.hud = new HUDItemManager(this.#onHUDItemsChange);
 
-    this.settings = new SettingsManager(baseSettingsTree(this.interfaceMode));
+    this.settings = new SettingsManager(baseSettingsTree(this.interfaceMode), (entry) => {
+      const path = this.getSettingsPath(entry.path);
+      if (path.length === entry.path.length) {
+        return entry;
+      }
+      const handler = entry.node.handler;
+      return {
+        path,
+        node: {
+          ...entry.node,
+          label:
+            this.renderTopics.find((output) => output.name === entry.path[1])?.label ??
+            entry.node.label,
+          handler:
+            handler == undefined
+              ? undefined
+              : (action) => {
+                  handler(
+                    withSettingsPath(action, [
+                      entry.path[0]!,
+                      entry.path[1]!,
+                      ...action.payload.path.slice(3),
+                    ]),
+                  );
+                },
+        },
+      };
+    });
+    this.settings.errors.mapPath = (path) => this.getSettingsPath(path);
     this.settings.on("update", () => this.emit("settingsTreeChange", this));
     // Add the top-level nodes first so merging happens in the correct order.
     // Another approach would be to modify SettingsManager to allow merging parent
@@ -875,14 +1019,24 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     const { path, node } = entry;
     const topicName = path[1];
     if (path[0] === "topics" && topicName != undefined) {
+      const output = this.renderTopics.find(
+        (topic) =>
+          topic.topic === topicName && topicOutputKey(topic.topic, topic.output) === path[2],
+      );
+      if (
+        output != undefined &&
+        this.#imageModeExtension?.supportsImageModeSchema(output.schemaName) === true
+      ) {
+        return;
+      }
       if (node.visible === true) {
-        errors.addToTopic(
-          topicName,
+        errors.add(
+          path,
           "IMAGE_ONLY_TOPIC",
           "Camera calibration information is required to display 3D topics",
         );
       } else {
-        errors.removeFromTopic(topicName, "IMAGE_ONLY_TOPIC");
+        errors.remove(path, "IMAGE_ONLY_TOPIC");
       }
     }
   };
@@ -1035,17 +1189,68 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     if (this.topics === topics) {
       return;
     }
+    const previousOutputs = this.renderTopics;
     this.topics = topics;
+    this.renderTopics = renderTopics(topics);
+    const removedKeys = new Set(
+      previousOutputs
+        .filter((output) => !this.renderTopics.some((entry) => entry.name === output.name))
+        .map((output) => output.name),
+    );
+    for (const extension of this.sceneExtensions.values()) {
+      for (const [key, renderable] of extension.renderables) {
+        if (!removedKeys.has(key)) {
+          continue;
+        }
+        renderable.traverse((object) => {
+          if (this.#selectedRenderable?.renderable === object) {
+            this.setSelectedRenderable(undefined);
+          }
+        });
+        renderable.dispose();
+        extension.remove(renderable);
+        extension.renderables.delete(key);
+      }
+    }
+    for (const output of previousOutputs) {
+      if (removedKeys.has(output.name)) {
+        this.settings.errors.clearPath(outputSettingsPath(output));
+      }
+    }
 
     // Rebuild topicsByName
     this.topicsByName = topics ? new Map(topics.map((topic) => [topic.name, topic])) : undefined;
 
     this.emit("topicsChanged", this);
 
+    this.settings.setNodesForKey("topic-output-settings", []);
     // Rebuild the settings nodes for all scene extensions
     for (const extension of this.sceneExtensions.values()) {
       this.settings.setNodesForKey(extension.extensionId, extension.settingsNodes());
     }
+    const emptyOutputNodes: SettingsTreeEntry[] = [];
+    for (const output of this.renderTopics) {
+      if (!this.schemaSubscriptions.has(output.schemaName)) {
+        continue;
+      }
+      const path = outputSettingsPath(output);
+      const node = this.settings.tree().topics?.children?.[output.topic]?.children?.[path[2]!];
+      if (node == undefined) {
+        emptyOutputNodes.push({
+          path: ["topics", output.name],
+          node: {
+            label: output.label,
+            fields: {},
+            handler: (action) => {
+              if (action.action === "update") {
+                this.saveTopicSetting(action.payload.path, action.payload.value);
+              }
+            },
+          },
+        });
+      }
+    }
+    this.settings.setNodesForKey("topic-output-settings", emptyOutputNodes);
   }
 
   public setParameters(parameters: ReadonlyMap<string, ParameterValue> | undefined): void {

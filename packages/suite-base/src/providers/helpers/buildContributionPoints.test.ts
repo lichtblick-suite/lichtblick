@@ -13,6 +13,30 @@ describe("buildContributionPoints", () => {
     jest.clearAllMocks();
   });
 
+  it("keeps same-schema registrations separate and restores their IDs on reload", () => {
+    const info = ExtensionBuilder.extensionInfo();
+    const source = `module.exports = { activate(ctx) {
+      for (const id of ["a", "b", "a"]) {
+        ctx.registerMessageConverter({ id, fromSchemaName: "Objects", toSchemaName: "SceneUpdate", converter: (message) => message,
+          panelSettings: { "3D": { defaultConfig: { label: id }, settings: () => ({}), handler: () => {} } } });
+      }
+    } };`;
+    const initial = buildContributionPoints(info, source);
+    const reloaded = buildContributionPoints(info, source);
+    expect(initial.messageConverters).toHaveLength(2);
+    expect(initial.messageConverters.map((entry) => entry.converterId)).toEqual(
+      reloaded.messageConverters.map((entry) => entry.converterId),
+    );
+    expect(initial.messageConverters[0]?.panelSettings?.["3D"]?.defaultConfig).toEqual({
+      label: "a",
+    });
+    expect(initial.messageConverters[1]?.panelSettings?.["3D"]?.defaultConfig).toEqual({
+      label: "b",
+    });
+    expect(console.error).toHaveBeenCalledTimes(2);
+    (console.error as jest.Mock).mockClear();
+  });
+
   it("should initialize contribution objects", () => {
     const consoleErrorMock = jest.spyOn(console, "error").mockImplementation(() => {});
     const extensionInfo = ExtensionBuilder.extensionInfo();
@@ -116,6 +140,11 @@ describe("buildContributionPoints", () => {
     expect(result.messageConverters).toHaveLength(1);
     expect(result.messageConverters[0]).toEqual({
       ...messageConverter,
+      converterId: JSON.stringify([
+        extensionInfo.qualifiedName,
+        [messageConverter.fromSchemaName, messageConverter.toSchemaName],
+      ]),
+      extensionName: extensionInfo.qualifiedName,
       extensionNamespace: extensionInfo.namespace,
       extensionId: extensionInfo.id,
     });

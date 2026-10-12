@@ -269,9 +269,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     };
 
     // /robot_description topic entry
-    const topic = this.renderer.topicsByName?.get(TOPIC_NAME);
-    if (topic != undefined) {
-      const config = (this.renderer.config.topics[TOPIC_NAME] ?? {}) as Partial<LayerSettingsUrdf>;
+    for (const topic of this.renderer.renderTopics.filter(
+      (output) => output.topic === TOPIC_NAME && URDF_TOPIC_SCHEMAS.has(output.schemaName),
+    )) {
+      const config = (this.renderer.getTopicSettings()[topic.name] ??
+        {}) as Partial<LayerSettingsUrdf>;
       const fields: SettingsTreeFields = {
         displayMode: {
           ...baseDisplayModeField,
@@ -283,15 +285,15 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         },
       };
       entries.push({
-        path: ["topics", TOPIC_NAME],
+        path: ["topics", topic.name],
         node: {
-          label: TOPIC_NAME,
+          label: topic.label,
           icon: "PrecisionManufacturing",
           fields,
           visible: config.visible ?? DEFAULT_SETTINGS.visible,
           handler: this.#handleTopicSettingsAction,
           children: urdfChildren(
-            this.#transformsByInstanceId.get(TOPIC_NAME),
+            this.#transformsByInstanceId.get(topic.name),
             this.renderer.transformTree,
             this.#jointStates,
           ),
@@ -302,7 +304,8 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     // /robot_description parameter entry
     const parameter = this.renderer.parameters?.get(PARAM_NAME);
     if (parameter != undefined) {
-      const config = (this.renderer.config.topics[PARAM_KEY] ?? {}) as Partial<LayerSettingsUrdf>;
+      const config = (this.renderer.getTopicSettings()[PARAM_KEY] ??
+        {}) as Partial<LayerSettingsUrdf>;
 
       const fields: SettingsTreeFields = {
         displayMode: {
@@ -388,7 +391,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
                   label: "Topic",
                   input: "autocomplete",
                   value: config.topic ?? DEFAULT_CUSTOM_SETTINGS.topic,
-                  items: filterMap(this.renderer.topics ?? [], (_topic) =>
+                  items: filterMap(this.renderer.renderTopics, (_topic) =>
                     URDF_TOPIC_SCHEMAS.has(_topic.schemaName) ? _topic.name : undefined,
                   ),
                 }
@@ -654,15 +657,15 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   };
 
   #handleRobotDescription = (messageEvent: PartialMessageEvent<{ data: string }>): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const robotDescription = messageEvent.message.data;
     if (typeof robotDescription !== "string") {
       return;
     }
     this.#urdfsByTopic.set(topic, robotDescription);
 
-    if (topic === TOPIC_NAME) {
-      this.#loadUrdf({ instanceId: TOPIC_NAME, urdf: robotDescription });
+    if (this.renderer.getSourceTopic(topic) === TOPIC_NAME) {
+      this.#loadUrdf({ instanceId: topic, urdf: robotDescription });
     }
 
     // Update custom layer URDFs that subscribe to this topic.
@@ -782,10 +785,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   }
 
   #getCurrentSettings(instanceId: string) {
-    const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
+    const isTopicOrParam =
+      this.renderer.getSourceTopic(instanceId) === TOPIC_NAME || instanceId === PARAM_KEY;
     const baseSettings = isTopicOrParam ? DEFAULT_SETTINGS : DEFAULT_CUSTOM_SETTINGS;
     const userSettings = isTopicOrParam
-      ? this.renderer.config.topics[instanceId]
+      ? this.renderer.getTopicSettings()[instanceId]
       : this.renderer.config.layers[instanceId];
     const settings = { ...baseSettings, ...userSettings, instanceId };
     return settings;
@@ -810,9 +814,12 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     this.#framesByInstanceId.delete(instanceId);
     this.updateSettingsTree();
 
-    const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
+    const isTopicOrParam =
+      this.renderer.getSourceTopic(instanceId) === TOPIC_NAME || instanceId === PARAM_KEY;
     const frameId = this.renderer.fixedFrameId ?? ""; // Unused
-    const settingsPath = isTopicOrParam ? ["topics", instanceId] : ["layers", instanceId];
+    const settingsPath = isTopicOrParam
+      ? this.renderer.getSettingsPath(["topics", instanceId])
+      : ["layers", instanceId];
     const sourceType = (settings as Partial<LayerSettingsCustomUrdf>).sourceType;
     const url = (settings as Partial<LayerSettingsCustomUrdf>).url;
     const filePath = (settings as Partial<LayerSettingsCustomUrdf>).filePath;
@@ -993,8 +1000,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     this.#transformsByInstanceId.set(instanceId, transforms);
 
     // Import all transforms from the URDF into the scene
-    const isTopicOrParam = instanceId === TOPIC_NAME || instanceId === PARAM_KEY;
-    const settingsPath = isTopicOrParam ? ["topics", instanceId] : ["layers", instanceId];
+    const isTopicOrParam =
+      this.renderer.getSourceTopic(instanceId) === TOPIC_NAME || instanceId === PARAM_KEY;
+    const settingsPath = isTopicOrParam
+      ? this.renderer.getSettingsPath(["topics", instanceId])
+      : ["layers", instanceId];
     for (const { parent, child, translation, rotation } of transforms) {
       this.renderer.addTransform(parent, child, 0n, translation, rotation, settingsPath);
     }

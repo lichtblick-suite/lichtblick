@@ -32,7 +32,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
         // Create a fake subscription to get message converters for this topic
         // Include convertTo if specified to get proper conversion setup
         const subscription: Subscription = convertTo
-          ? { topic, preload: true, convertTo }
+          ? { topic, preload: true, convertTo, converterId: params.converterId }
           : { topic, preload: true };
 
         // Import necessary functions for message processing
@@ -72,6 +72,8 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
           if (topicSchemaConverters.size > 0) {
             convertMessage(msgEvent, topicSchemaConverters, batchMessages, undefined, {
               emitAlert,
+              config: params.config,
+              panelType: params.panelType,
             });
           }
 

@@ -9,6 +9,9 @@ import { RegisterMessageConverterArgs } from "@lichtblick/suite";
 import { Namespace } from "@lichtblick/suite-base/types";
 
 export type InstalledMessageConverter = RegisterMessageConverterArgs<unknown> & {
+  /** Assigned during registration; optional for legacy in-process fixtures. */
+  converterId?: string;
+  extensionName?: string;
   extensionNamespace?: Namespace;
   extensionId?: string;
 };

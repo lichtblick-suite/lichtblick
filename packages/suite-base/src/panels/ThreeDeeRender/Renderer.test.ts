@@ -6,7 +6,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { FrameTransform, FrameTransforms } from "@foxglove/schemas";
+import { FrameTransform, FrameTransforms, SceneEntityDeletionType } from "@foxglove/schemas";
 import { setupJestCanvasMock } from "jest-canvas-mock";
 import * as THREE from "three";
 
@@ -231,6 +231,136 @@ describe("3D Renderer", () => {
   });
   afterEach(() => {
     (console.warn as jest.Mock).mockClear();
+  });
+
+  it("isolates settings and scene entities for original and same-schema converted outputs", () => {
+    const renderer = new Renderer({
+      ...defaultRendererProps,
+      canvas,
+      config: { ...defaultRendererConfig, topics: { "/scene": { visible: true } } },
+    });
+    renderer.setTopics([
+      {
+        name: "/scene",
+        schemaName: "foxglove.SceneUpdate",
+        conversionOutputs: [
+          { converterId: "A", schemaName: "foxglove.SceneUpdate" },
+          { converterId: "B", schemaName: "foxglove.SceneUpdate" },
+        ],
+      },
+    ]);
+    const outputs = renderer.renderTopics;
+    expect(outputs).toHaveLength(3);
+    const nodes = renderer.settings.tree().topics?.children?.["/scene"]?.children;
+    expect(Object.keys(nodes ?? {})).toHaveLength(3);
+    const a = outputs[1]!;
+    const b = outputs[2]!;
+    renderer.settings.handleAction({
+      action: "update",
+      payload: {
+        path: [...renderer.getSettingsPath(["topics", a.name]), "visible"],
+        input: "boolean",
+        value: false,
+      },
+    });
+    expect(renderer.getTopicSettings()[a.name]?.visible).toBe(false);
+    expect(renderer.getTopicSettings()[b.name]?.visible).toBe(true);
+    expect(renderer.config.topics["/scene"]?.visible).toBe(true);
+    const extension = renderer.sceneExtensions.get("foxglove.SceneEntities")!;
+    const subscription = renderer.schemaSubscriptions.get("foxglove.SceneUpdate")![0]!;
+    for (const output of outputs) {
+      subscription.handler({
+        topic: "/scene",
+        schemaName: "foxglove.SceneUpdate",
+        output: output.output,
+        message: {
+          entities: [{ id: "same-id", cubes: [{ size: { x: 1, y: 1, z: 1 } }] }],
+          deletions: [],
+        },
+        receiveTime: { sec: 0, nsec: 0 },
+        sizeInBytes: 0,
+      });
+    }
+    expect(extension.renderables.size).toBe(3);
+    expect(extension.renderables.get(a.name)).not.toBe(extension.renderables.get(b.name));
+    expect(extension.renderables.get(a.name)?.topic).toBe("/scene");
+    expect(extension.renderables.get(a.name)?.children).toHaveLength(1);
+    expect(extension.renderables.get(b.name)?.children).toHaveLength(1);
+    subscription.handler({
+      topic: "/scene",
+      schemaName: "foxglove.SceneUpdate",
+      output: a.output,
+      message: {
+        entities: [],
+        deletions: [{ type: SceneEntityDeletionType.MATCHING_ID, id: "same-id" }],
+      },
+      receiveTime: { sec: 1, nsec: 0 },
+      sizeInBytes: 0,
+    });
+    expect(extension.renderables.get(a.name)?.children).toHaveLength(0);
+    expect(extension.renderables.get(b.name)?.children).toHaveLength(1);
+
+    renderer.settings.errors.addToTopic(a.name, "test", "output A error");
+    expect(
+      renderer.settings.errors.errors.errorAtPath(renderer.getSettingsPath(["topics", a.name])),
+    ).toBe("output A error");
+    expect(
+      renderer.settings.errors.errors.errorAtPath(renderer.getSettingsPath(["topics", b.name])),
+    ).toBeUndefined();
+    renderer.setTopics([
+      {
+        name: "/scene",
+        schemaName: "foxglove.SceneUpdate",
+        conversionOutputs: [{ converterId: "B", schemaName: "foxglove.SceneUpdate" }],
+      },
+    ]);
+    expect(extension.renderables.size).toBe(2);
+    expect(extension.renderables.has(a.name)).toBe(false);
+    expect(renderer.config.topicOutputs?.["/scene"]).toHaveProperty([a.name]);
+    expect(extension.renderables.get(b.name)?.children).toHaveLength(1);
+    renderer.dispose();
+  });
+
+  it("restores legacy Image selections and keeps settings separate when changing converter outputs", () => {
+    const renderer = new Renderer({
+      ...defaultRendererProps,
+      canvas,
+      interfaceMode: "image",
+      config: { ...defaultRendererConfig, imageMode: { imageTopic: "/encoded" } },
+    });
+    renderer.setTopics([
+      {
+        name: "/encoded",
+        schemaName: "InputImage",
+        conversionOutputs: [
+          { converterId: "A", schemaName: "foxglove.RawImage" },
+          { converterId: "B", schemaName: "foxglove.RawImage" },
+        ],
+      },
+    ]);
+    const a = renderer.renderTopics[1]!;
+    const b = renderer.renderTopics[2]!;
+    expect(renderer.settings.tree().imageMode?.fields?.imageTopic?.value).toBe(a.name);
+    renderer.settings.handleAction({
+      action: "update",
+      payload: { path: ["imageMode", "brightness"], input: "number", value: 27 },
+    });
+    expect(renderer.config.topicOutputs?.["/encoded"]?.[a.name]).toMatchObject({ brightness: 27 });
+    renderer.settings.handleAction({
+      action: "update",
+      payload: { path: ["imageMode", "imageTopic"], input: "select", value: b.name },
+    });
+    expect(renderer.settings.tree().imageMode?.fields?.brightness?.value).not.toBe(27);
+    renderer.settings.handleAction({
+      action: "update",
+      payload: { path: ["imageMode", "imageTopic"], input: "select", value: a.name },
+    });
+    expect(renderer.settings.tree().imageMode?.fields?.brightness?.value).toBe(27);
+    const unavailable = JSON.stringify(["/encoded", "InputImage", "converted", "missing"]);
+    expect(renderer.resolveTopicOutput(unavailable, new Set(["foxglove.RawImage"]))).toBe(
+      unavailable,
+    );
+    renderer.dispose();
   });
 
   it("constructs a renderer without error", () => {

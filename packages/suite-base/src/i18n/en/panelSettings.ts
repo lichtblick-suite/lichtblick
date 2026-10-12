@@ -13,6 +13,7 @@ export const panelSettings = {
   panelDoesNotHaveSettings: "This panel does not have any settings",
   panelName: "{{title}} panel",
   panelSettings: "Panel settings",
+  originalData: "Original data",
   resetToDefaults: "Reset to defaults",
   selectAPanelToEditItsSettings: "Select a panel to edit its settings.",
   unknown: "Unknown",

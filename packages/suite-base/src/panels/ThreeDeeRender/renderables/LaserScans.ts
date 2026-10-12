@@ -349,11 +349,11 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
     if (msgs.length === 0) {
       return msgs;
     }
-    const msgsByTopic = _.groupBy(msgs, (msg) => msg.topic);
+    const msgsByTopic = _.groupBy(msgs, (msg) => this.renderer.getRenderTopic(msg));
     const finalQueue: MessageEvent<T>[] = [];
     for (const topic in msgsByTopic) {
       const topicMsgs = msgsByTopic[topic]!;
-      const userSettings = (this.renderer.config.topics[topic] ??
+      const userSettings = (this.renderer.getTopicSettings()[topic] ??
         {}) as Partial<LayerSettingsLaserScan>;
       // if the topic has a decaytime add all messages to queue for topic
       if ((userSettings.decayTime ?? DEFAULT_SETTINGS.decayTime) > 0) {
@@ -368,10 +368,10 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
     return finalQueue;
   }
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       const isLaserScan = topicIsConvertibleToSchema(topic, ALL_LASERSCAN_DATATYPES);
       if (!isLaserScan) {
         continue;
@@ -423,7 +423,7 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const prevSettings = this.renderer.config.topics[topicName];
+      const prevSettings = this.renderer.getTopicSettings()[topicName];
       const settings = { ...DEFAULT_SETTINGS, ...prevSettings };
 
       renderable.updateLaserScan(
@@ -438,7 +438,7 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
   #handleLaserScan = (
     messageEvent: PartialMessageEvent<RosLaserScan | FoxgloveLaserScan>,
   ): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const laserScan =
       "header" in messageEvent.message
         ? normalizeRosLaserScan(messageEvent.message)
@@ -448,7 +448,7 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = (this.renderer.config.topics[topic] ??
+      const userSettings = (this.renderer.getTopicSettings()[topic] ??
         {}) as Partial<LayerSettingsLaserScan>;
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
       if (settings.colorField == undefined) {
@@ -462,7 +462,7 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
           updatedUserSettings.colorField = settings.colorField;
           updatedUserSettings.colorMode = settings.colorMode;
           updatedUserSettings.colorMap = settings.colorMap;
-          draft.topics[topic] = updatedUserSettings;
+          this.renderer.setTopicSettings(draft, topic, updatedUserSettings);
         });
       }
 
@@ -472,7 +472,7 @@ export class LaserScans extends SceneExtension<LaserScanHistoryRenderable> {
         messageTime,
         frameId: this.renderer.normalizeFrameId(laserScan.frame_id),
         pose: laserScan.pose,
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         settings,
         topic,
         latestLaserScan: laserScan,

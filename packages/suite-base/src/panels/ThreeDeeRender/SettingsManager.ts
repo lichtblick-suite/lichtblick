@@ -32,7 +32,10 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
 
   #globalSettingsEntryValidators: NodeValidator[] = [];
 
-  public constructor(baseTree: SettingsTreeNodes) {
+  public constructor(
+    baseTree: SettingsTreeNodes,
+    private readonly mapEntry?: (entry: SettingsTreeEntry) => SettingsTreeEntry,
+  ) {
     super();
 
     this.#root = { children: baseTree };
@@ -41,7 +44,8 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
     this.errors.on("clear", this.handleErrorUpdate);
   }
 
-  public setNodesForKey(key: string, nodes: SettingsTreeEntry[]): void {
+  public setNodesForKey(key: string, inputNodes: SettingsTreeEntry[]): void {
+    const nodes = inputNodes.map((entry) => this.mapEntry?.(entry) ?? entry);
     nodes.forEach((entry) => {
       this.#globalSettingsEntryValidators.forEach((validator) => {
         validator(entry, this.errors);
@@ -195,7 +199,7 @@ function addNodeAtPath(root: SettingsTreeNode, path: Path, node: SettingsTreeNod
   for (let i = 0; i < path.length - 1; i++) {
     const segment = path[i]!;
     curNode.children ??= {};
-    curNode.children[segment] ??= {};
+    curNode.children[segment] ??= { label: segment };
     curNode = curNode.children[segment]!;
   }
 

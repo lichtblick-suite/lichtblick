@@ -13,6 +13,11 @@ import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables
 import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
 import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
 import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
+import {
+  getConverterId,
+  resolveOutputConfig,
+  TopicOutputConfig,
+} from "@lichtblick/suite-base/util/topicOutput";
 
 import type { MessageConverterAlertHandler } from "./types";
 
@@ -23,14 +28,15 @@ type TopicSchemaConverterMap = Map<ConverterKey, InstalledMessageConverter[]>;
 
 type ConvertMessageContext = {
   emitAlert?: MessageConverterAlertHandler;
+  config?: TopicOutputConfig;
+  panelType?: string;
 };
 
 // Create a string lookup key from a message event
 //
-// The string key uses a newline delimeter to avoid producting the same key for topic/schema name
-// values that might concatenate to the same string. i.e. "topic" "schema" and "topics" "chema".
+// JSON tuple encoding keeps unrestricted topic and schema strings unambiguous.
 function converterKey(topic: string, schema: string): ConverterKey {
-  return (topic + "\n" + schema) as ConverterKey;
+  return JSON.stringify([topic, schema]) as ConverterKey;
 }
 
 /**
@@ -54,9 +60,24 @@ export function convertMessage(
       emitAlert,
     };
     try {
+      const output = {
+        kind: "converted" as const,
+        sourceSchemaName: messageEvent.schemaName,
+        converterId: getConverterId(converter),
+      };
+      const topicConfig =
+        context?.config == undefined
+          ? messageEvent.topicConfig
+          : resolveOutputConfig(
+              context.config,
+              { topic: messageEvent.topic, schemaName: converter.toSchemaName, output },
+              context.panelType == undefined
+                ? undefined
+                : converter.panelSettings?.[context.panelType]?.defaultConfig,
+            );
       const convertedMessage = converter.converter(
         messageEvent.message,
-        messageEvent,
+        { ...messageEvent, topicConfig },
         globalVariables,
         converterContext,
       );
@@ -71,7 +92,8 @@ export function convertMessage(
         message: convertedMessage,
         originalMessageEvent: messageEvent,
         sizeInBytes: messageEvent.sizeInBytes,
-        topicConfig: messageEvent.topicConfig,
+        topicConfig,
+        output,
       });
     } catch (e) {
       const error =
@@ -147,42 +169,33 @@ export function collateTopicSchemaConversions(
     const noConversion = sortedTopics.find(
       (topic) => topic.name === subscription.topic && topic.schemaName === subscription.convertTo,
     );
-    if (noConversion) {
+    if (noConversion && subscription.converterId == undefined) {
       unconvertedSubscriptionTopics.add(noConversion.name);
       continue;
     }
 
     // Since we don't have an existing topic with out destination schema we need to find
     // a converter that will convert from the topic to the desired schema
-    const subscriberTopic = sortedTopics.find((topic) => topic.name === subscription.topic);
-    if (!subscriberTopic) {
-      continue;
-    }
-
-    const key = converterKey(subscription.topic, subscriberTopic.schemaName ?? "<no-schema>");
-    let existingConverters = topicSchemaConverters.get(key);
-
-    // We've already stored a converter for this topic to convertTo
-    const haveConverter = existingConverters?.find(
-      (conv) => conv.toSchemaName === subscription.convertTo,
-    );
-    if (haveConverter) {
-      continue;
-    }
-
-    // Find a converter that can go from the original topic schema to the target schema
-    const converters = (messageConverters ?? []).filter(
-      (conv) =>
-        conv.fromSchemaName === subscriberTopic.schemaName &&
-        conv.toSchemaName === subscription.convertTo,
-    );
-    // Prefer 'local' converters over 'org' provided ones
-    const converter = _.minBy(converters, (conv) => conv.extensionNamespace ?? "unknown");
-
-    if (converter) {
-      existingConverters ??= [];
-      existingConverters.push(converter);
-      topicSchemaConverters.set(key, existingConverters);
+    for (const subscriberTopic of sortedTopics.filter(
+      (topic) => topic.name === subscription.topic,
+    )) {
+      const key = converterKey(subscription.topic, subscriberTopic.schemaName ?? "<no-schema>");
+      const existingConverters = topicSchemaConverters.get(key) ?? [];
+      const converters = (messageConverters ?? []).filter(
+        (conv) =>
+          conv.fromSchemaName === subscriberTopic.schemaName &&
+          conv.toSchemaName === subscription.convertTo &&
+          (subscription.converterId == undefined ||
+            getConverterId(conv) === subscription.converterId),
+      );
+      const converter = _.minBy(converters, (conv) => conv.extensionNamespace ?? "unknown");
+      if (
+        converter &&
+        !existingConverters.some((conv) => getConverterId(conv) === getConverterId(converter))
+      ) {
+        existingConverters.push(converter);
+        topicSchemaConverters.set(key, existingConverters);
+      }
     }
   }
 

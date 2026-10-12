@@ -107,10 +107,10 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const handler = this.handleSettingsAction;
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       if (!topicIsConvertibleToSchema(topic, OCCUPANCY_GRID_DATATYPES)) {
         continue;
       }
@@ -185,7 +185,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
       entries.push({
         path: ["topics", topic.name],
         node: {
-          label: topic.name,
+          label: this.renderer.getTopicLabel(topic.name),
           icon: "Cells",
           fields,
           visible: configWithDefaults.visible,
@@ -210,7 +210,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
     const renderable = this.renderables.get(topicName);
     if (renderable) {
       const prevTransparent = occupancyGridHasTransparency(renderable.userData.settings);
-      const settings = this.renderer.config.topics[topicName];
+      const settings = this.renderer.getTopicSettings()[topicName];
       renderable.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
 
       // Check if the transparency changed and we need to create a new material
@@ -230,14 +230,14 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
   };
 
   #handleOccupancyGrid = (messageEvent: PartialMessageEvent<OccupancyGrid>): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const occupancyGrid = normalizeOccupancyGrid(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
     let renderable = this.renderables.get(topic);
     if (!renderable) {
       // Set the initial settings from default values merged with any user settings
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.getTopicSettings()[topic];
       const settings = { ...DEFAULT_SETTINGS, ...userSettings };
 
       const texture = createTexture(occupancyGrid);
@@ -255,7 +255,7 @@ export class OccupancyGrids extends SceneExtension<OccupancyGridRenderable> {
         messageTime: toNanoSec(occupancyGrid.header.stamp),
         frameId: this.renderer.normalizeFrameId(occupancyGrid.header.frame_id),
         pose: occupancyGrid.info.origin,
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         settings,
         topic,
         occupancyGrid,

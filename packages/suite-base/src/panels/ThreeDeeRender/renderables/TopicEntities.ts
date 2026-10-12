@@ -92,7 +92,7 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
   public startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
     this.visible = this.userData.settings.visible;
     if (!this.visible) {
-      this.renderer.settings.errors.clearTopic(this.topic);
+      this.renderer.settings.errors.clearTopic(this.userData.topic);
       return;
     }
 
@@ -174,7 +174,7 @@ export class TopicEntities extends Renderable<EntityTopicUserData> {
       default:
         // Unknown action
         this.renderer.settings.errors.addToTopic(
-          this.topic,
+          this.userData.topic,
           INVALID_DELETION_TYPE,
           `Invalid deletion type ${deletion.type}`,
         );

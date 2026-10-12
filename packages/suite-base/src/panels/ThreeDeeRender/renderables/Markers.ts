@@ -58,9 +58,9 @@ export class Markers extends SceneExtension<TopicMarkers> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       if (
         !(
           topicIsConvertibleToSchema(topic, MARKER_ARRAY_DATATYPES) ||
@@ -72,7 +72,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
       const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsMarker>;
 
       const node: SettingsTreeNodeWithActionHandler = {
-        label: topic.name,
+        label: this.renderer.getTopicLabel(topic.name),
         icon: "Shapes",
         order: topic.name.toLocaleLowerCase(),
         fields: {
@@ -142,7 +142,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
     const topicName = path[1]!;
     const topicMarkers = this.renderables.get(topicName);
     if (topicMarkers) {
-      const settings = this.renderer.config.topics[topicName];
+      const settings = this.renderer.getTopicSettings()[topicName];
       topicMarkers.userData.settings = { ...DEFAULT_SETTINGS, ...settings };
       topicMarkers.update();
     }
@@ -171,7 +171,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
     // Update the MarkersNamespace settings
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = (this.renderer.config.topics[topicName] ??
+      const settings = (this.renderer.getTopicSettings()[topicName] ??
         {}) as Partial<LayerSettingsMarker>;
       const ns = renderable.namespaces.get(namespace);
       if (ns) {
@@ -185,7 +185,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
   };
 
   #handleMarkerArray = (messageEvent: PartialMessageEvent<MarkerArray>): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const markerArray = messageEvent.message;
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
@@ -198,7 +198,7 @@ export class Markers extends SceneExtension<TopicMarkers> {
   };
 
   #handleMarker = (messageEvent: PartialMessageEvent<Marker>): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const marker = normalizeMarker(messageEvent.message);
     const receiveTime = toNanoSec(messageEvent.receiveTime);
 
@@ -237,14 +237,14 @@ export class Markers extends SceneExtension<TopicMarkers> {
   #getTopicMarkers(topic: string, marker: Marker, receiveTime: bigint): TopicMarkers {
     let topicMarkers = this.renderables.get(topic);
     if (!topicMarkers) {
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.getTopicSettings()[topic];
 
       topicMarkers = new TopicMarkers(topic, this.renderer, {
         receiveTime,
         messageTime: toNanoSec(marker.header.stamp),
         frameId: this.renderer.normalizeFrameId(marker.header.frame_id),
         pose: makePose(),
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         topic,
         settings: { ...DEFAULT_SETTINGS, ...userSettings },
       });

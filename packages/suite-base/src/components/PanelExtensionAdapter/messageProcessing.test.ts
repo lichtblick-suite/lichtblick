@@ -114,7 +114,7 @@ describe("convertMessage", () => {
     const converter = createMockConverter();
 
     const converters = new Map([
-      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+      [JSON.stringify([mockMessageEvent.topic, mockMessageEvent.schemaName]) as any, [converter]],
     ]);
     const convertedMessages: MessageEvent[] = [];
 
@@ -147,7 +147,7 @@ describe("convertMessage", () => {
       })),
     });
     const converters = new Map([
-      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+      [JSON.stringify([mockMessageEvent.topic, mockMessageEvent.schemaName]) as any, [converter]],
     ]);
     const convertedMessages: MessageEvent[] = [];
 
@@ -176,7 +176,7 @@ describe("convertMessage", () => {
 
     const converters = new Map([
       [
-        `${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any,
+        JSON.stringify([mockMessageEvent.topic, mockMessageEvent.schemaName]) as any,
         [converter1, converter2],
       ],
     ]);
@@ -195,7 +195,7 @@ describe("convertMessage", () => {
     });
 
     const converters = new Map([
-      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+      [JSON.stringify([mockMessageEvent.topic, mockMessageEvent.schemaName]) as any, [converter]],
     ]);
     const convertedMessages: MessageEvent[] = [];
 
@@ -211,7 +211,7 @@ describe("convertMessage", () => {
     });
 
     const converters = new Map([
-      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+      [JSON.stringify([mockMessageEvent.topic, mockMessageEvent.schemaName]) as any, [converter]],
     ]);
     const convertedMessages: MessageEvent[] = [];
 
@@ -226,7 +226,7 @@ describe("convertMessage", () => {
     });
 
     const converters = new Map([
-      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+      [JSON.stringify([mockMessageEvent.topic, mockMessageEvent.schemaName]) as any, [converter]],
     ]);
     const convertedMessages: MessageEvent[] = [];
 
@@ -246,7 +246,7 @@ describe("convertMessage", () => {
     });
 
     const converters = new Map([
-      [`${mockMessageEvent.topic}\n${mockMessageEvent.schemaName}` as any, [converter]],
+      [JSON.stringify([mockMessageEvent.topic, mockMessageEvent.schemaName]) as any, [converter]],
     ]);
     const convertedMessages: MessageEvent[] = [];
 

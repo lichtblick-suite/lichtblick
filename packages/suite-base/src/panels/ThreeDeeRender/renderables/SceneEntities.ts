@@ -68,16 +68,16 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
   }
 
   public override settingsNodes(): SettingsTreeEntry[] {
-    const configTopics = this.renderer.config.topics;
+    const configTopics = this.renderer.getTopicSettings();
     const entries: SettingsTreeEntry[] = [];
-    for (const topic of this.renderer.topics ?? []) {
+    for (const topic of this.renderer.renderTopics) {
       if (!topicIsConvertibleToSchema(topic, SCENE_UPDATE_DATATYPES)) {
         continue;
       }
       const config = (configTopics[topic.name] ?? {}) as Partial<LayerSettingsEntity>;
 
       const node: SettingsTreeNodeWithActionHandler = {
-        label: topic.name,
+        label: this.renderer.getTopicLabel(topic.name),
         icon: "Shapes",
         order: topic.name.toLocaleLowerCase(),
         fields: {
@@ -137,14 +137,14 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
     const topicName = path[1]!;
     const renderable = this.renderables.get(topicName);
     if (renderable) {
-      const settings = this.renderer.config.topics[topicName];
+      const settings = this.renderer.getTopicSettings()[topicName];
       renderable.userData.settings = { ...SCENE_ENTITIES_DEFAULT_SETTINGS, ...settings };
       renderable.updateSettings();
     }
   };
 
   #handleSceneUpdate = (messageEvent: PartialMessageEvent<SceneUpdate>): void => {
-    const topic = messageEvent.topic;
+    const topic = this.renderer.getRenderTopic(messageEvent);
     const sceneUpdates = messageEvent.message;
 
     for (const deletionMsg of sceneUpdates.deletions ?? []) {
@@ -168,14 +168,14 @@ export class FoxgloveSceneEntities extends SceneExtension<TopicEntities> {
   #getTopicEntities(topic: string): TopicEntities {
     let topicEntities = this.renderables.get(topic);
     if (!topicEntities) {
-      const userSettings = this.renderer.config.topics[topic];
+      const userSettings = this.renderer.getTopicSettings()[topic];
 
       topicEntities = new TopicEntities(topic, this.#primitivePool, this.renderer, {
         receiveTime: -1n,
         messageTime: -1n,
         frameId: "",
         pose: makePose(),
-        settingsPath: ["topics", topic],
+        settingsPath: this.renderer.getSettingsPath(["topics", topic]),
         topic,
         settings: { ...SCENE_ENTITIES_DEFAULT_SETTINGS, ...userSettings },
       });

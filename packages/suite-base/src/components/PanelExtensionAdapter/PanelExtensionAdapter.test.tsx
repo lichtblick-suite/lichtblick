@@ -22,6 +22,7 @@ import {
   MessageEvent,
   Immutable,
   Subscription,
+  SettingsTreeAction,
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { AlertsContext, AlertsContextStore } from "@lichtblick/suite-base/context/AlertsContext";
@@ -30,11 +31,117 @@ import { AdvertiseOptions } from "@lichtblick/suite-base/players/types";
 import * as PanelStateContextProvider from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { getConverterId, topicOutputKey } from "@lichtblick/suite-base/util/topicOutput";
 
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
 import { BuiltinPanelExtensionContext } from "./types";
 
 describe("PanelExtensionAdapter", () => {
+  it("dispatches output settings only to their converter and synchronizes handler mutations", async () => {
+    const updateTree = jest.fn();
+    const spy = jest
+      .spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate")
+      .mockReturnValue(updateTree);
+    const order: string[] = [];
+    const notify = jest.fn();
+    const handlerA = jest.fn((_action: SettingsTreeAction, config: unknown) => {
+      order.push("converter");
+      (config as Record<string, unknown>).normalized = true;
+    });
+    const handlerB = jest.fn();
+    const registrations = ["A", "B"].map((id) => ({
+      id,
+      fromSchemaName: "Objects",
+      toSchemaName: "SceneUpdate",
+      converter: () => ({}),
+      panelSettings: {
+        foo: {
+          settings: () => ({}),
+          handler: id === "A" ? handlerA : handlerB,
+          defaultConfig: { size: 1 },
+        },
+      },
+    }));
+    const descriptors = registrations.map((entry) => ({
+      topic: "/objects",
+      schemaName: "SceneUpdate",
+      output: {
+        kind: "converted" as const,
+        sourceSchemaName: "Objects",
+        converterId: getConverterId(entry),
+      },
+    }));
+    const keyA = topicOutputKey("/objects", descriptors[0]!.output);
+    const keyB = topicOutputKey("/objects", descriptors[1]!.output);
+    const initialConfig = {
+      topics: { "/objects": { color: "red" } },
+      topicOutputs: { "/objects": { [keyB]: { size: 2 } } },
+    };
+    const saveConfig = jest.fn();
+    const initPanel = (context: BuiltinPanelExtensionContext) => {
+      context.unstable_setTopicOutputConfigHandler?.(notify);
+      context.updatePanelSettingsEditor({
+        actionHandler: () => order.push("native"),
+        topicOutputs: descriptors,
+        nodes: {},
+      });
+    };
+    render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup
+            fixture={{
+              topics: [{ name: "/objects", schemaName: "Objects" }],
+              messageConverters: registrations,
+            }}
+          >
+            <PanelExtensionAdapter
+              config={initialConfig}
+              saveConfig={saveConfig}
+              initPanel={initPanel}
+            />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+    await act(async () => undefined);
+    await act(async () => {
+      updateTree.mock.calls[0]?.[0]?.actionHandler({
+        action: "update",
+        payload: {
+          path: ["topics", "/objects", keyA, "size"],
+          input: "number",
+          value: 7,
+        },
+      });
+      const update = saveConfig.mock.calls[0]?.[0] as (
+        config: typeof initialConfig,
+      ) => typeof initialConfig;
+      const saved = update(initialConfig);
+      expect(saved.topicOutputs["/objects"][keyA]).toEqual({
+        size: 7,
+        color: "red",
+        normalized: true,
+      });
+      expect(saved.topicOutputs["/objects"][keyB]).toEqual({ size: 2 });
+      expect(saved.topics).toEqual(initialConfig.topics);
+    });
+    expect(order).toEqual(["native", "converter"]);
+    expect(handlerA).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({ path: ["topics", "/objects", "size"] }),
+      }),
+      expect.anything(),
+    );
+    expect(handlerB).not.toHaveBeenCalled();
+    expect(notify).toHaveBeenCalledWith("/objects", keyA, {
+      size: 7,
+      color: "red",
+      normalized: true,
+    });
+    spy.mockRestore();
+  });
+
   it("should call initPanel", async () => {
     expect.assertions(1);
 
