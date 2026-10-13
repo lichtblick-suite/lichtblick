@@ -22,6 +22,8 @@ import {
   decodeRGBA8,
   decodeUYVY,
   decodeYUYV,
+  decodeYUV420,
+  decodeNV12,
 } from "@lichtblick/den/image";
 import {
   H264 as H264Parser,
@@ -182,6 +184,12 @@ export function decodeRawImage(
   const is_bigendian = "is_bigendian" in image ? image.is_bigendian : false;
   const rawData = image.data as Uint8Array;
   switch (encoding) {
+    case "yuv420":
+      decodeYUV420(rawData, width, height, step, output);
+      break;
+    case "nv12":
+      decodeNV12(rawData, width, height, step, output);
+      break;
     case "yuv422":
     case "uyvy":
       decodeUYVY(rawData, width, height, step, output);
