@@ -24,8 +24,6 @@ import parseFuzzyRosTime from "./parseFuzzyRosTime";
 
 // All time functions that require `moment` should live in this file.
 
-// @ts-expect-error suppress Argument of type 'typeof moment' is not assignable to parameter of type 'typeof import ...
-// There is some miss-match between the moment we import and the one the type declarations expect
 momentDurationFormatSetup(moment);
 
 export function format(stamp: Time, timezone?: string): string {
