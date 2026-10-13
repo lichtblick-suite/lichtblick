@@ -42,6 +42,14 @@ describe("formatTime.formatDate", () => {
       "1970-01-13",
     );
   });
+
+  it("rejects negative times", () => {
+    expect(formatTime.formatDate({ sec: -1, nsec: 0 }, "UTC")).toBe("(invalid negative time)");
+    expect(formatTime.formatDate({ sec: 0, nsec: -1 }, "UTC")).toBe("(invalid negative time)");
+    expect(console.error).toHaveBeenCalledTimes(2);
+    expect(console.error).toHaveBeenCalledWith("Times are not allowed to be negative");
+    (console.error as jest.Mock).mockClear();
+  });
 });
 
 describe("formatTime.formatDuration", () => {
@@ -81,6 +89,14 @@ describe("formatTime.formatTime", () => {
     expect(formatTime.formatTime({ sec: 1, nsec: 1000000000 }, "America/Los_Angeles")).toBe(
       "4:00:02.000 PM PST",
     );
+  });
+
+  it("rejects negative times", () => {
+    expect(formatTime.formatTime({ sec: -1, nsec: 0 }, "UTC")).toBe("(invalid negative time)");
+    expect(formatTime.formatTime({ sec: 0, nsec: -1 }, "UTC")).toBe("(invalid negative time)");
+    expect(console.error).toHaveBeenCalledTimes(2);
+    expect(console.error).toHaveBeenCalledWith("Times are not allowed to be negative");
+    (console.error as jest.Mock).mockClear();
   });
 });
 
