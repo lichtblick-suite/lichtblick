@@ -8,6 +8,7 @@ import { topicOutputKey } from "@lichtblick/suite-base/util/topicOutput";
 
 import { collateTopicSchemaConversions, convertMessage } from "./messageProcessing";
 import { createMessageRangeIterator } from "./messageRangeIterator";
+import { initRenderStateBuilder, BuilderRenderStateInput } from "./renderState";
 import { onlyLastByTopicMessage } from "../../panels/ThreeDeeRender/SceneExtension";
 
 const original: MessageEvent = {
@@ -40,6 +41,62 @@ function converter(id: string): InstalledMessageConverter {
 }
 
 describe("independent converter outputs", () => {
+  it("preserves per-panel output settings identity so stateful converters emit deletions", () => {
+    const histories = new WeakMap<object, string[]>();
+    const entry = converter("A");
+    entry.converter = jest.fn((message, event) => {
+      const settings = event.topicConfig as object;
+      const ids = message as string[];
+      const previousIds = histories.get(settings) ?? [];
+      histories.set(settings, ids);
+      return { entities: ids, deletions: previousIds.filter((id) => !ids.includes(id)) };
+    });
+    const input: BuilderRenderStateInput = {
+      appSettings: undefined,
+      colorScheme: undefined,
+      currentFrame: [{ ...original, message: ["vehicle"] }],
+      globalVariables: {},
+      hoverValue: undefined,
+      playerState: undefined,
+      sharedPanelState: undefined,
+      sortedTopics,
+      subscriptions: [{ topic: original.topic, convertTo: "SceneUpdate", converterId: "A" }],
+      messageConverters: [entry, converter("B")],
+      watchedFields: new Set(["currentFrame"]),
+      forceConversion: new Set(),
+      config: { topics: {} },
+      panelType: "3D",
+    };
+    const panel = initRenderStateBuilder();
+    const otherPanel = initRenderStateBuilder();
+    const firstSettings = panel(input)?.currentFrame?.[0]?.topicConfig;
+    expect(otherPanel(input)?.currentFrame?.[0]?.topicConfig).not.toBe(firstSettings);
+    const next = panel({
+      ...input,
+      currentFrame: [{ ...original, message: [] }],
+      config: { topics: {} },
+    });
+    expect(next?.currentFrame?.[0]?.topicConfig).toBe(firstSettings);
+    expect(next?.currentFrame?.[0]?.message).toEqual({ entities: [], deletions: ["vehicle"] });
+    const withBoth = panel({
+      ...input,
+      subscriptions: [
+        ...input.subscriptions,
+        { topic: original.topic, convertTo: "SceneUpdate", converterId: "B" },
+      ],
+      currentFrame: [{ ...original, message: [] }],
+    });
+    expect(withBoth?.currentFrame?.[0]?.topicConfig).toBe(firstSettings);
+    expect(withBoth?.currentFrame?.[1]?.topicConfig).not.toBe(firstSettings);
+    const changed = panel({
+      ...input,
+      currentFrame: [{ ...original, message: [] }],
+      config: { topics: { [original.topic]: { size: 2 } } },
+    });
+    expect(changed?.currentFrame?.[0]?.topicConfig).not.toBe(firstSettings);
+    expect(changed?.currentFrame?.[0]?.topicConfig).toEqual({ size: 2 });
+  });
+
   it("runs two identical schema pairs with distinct configs without mutating the original event", () => {
     const converters = [converter("A"), converter("B")];
     const { topicSchemaConverters } = collateTopicSchemaConversions(

@@ -92,6 +92,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
   let prevCurrentFrame: Immutable<RenderState["currentFrame"]>;
   let prevCollatedConversions: undefined | TopicSchemaConversions;
   const lastMessageByTopic = new Map<string, MessageEvent>();
+  const outputConfigCache = new Map<string, Record<string, unknown>>();
 
   // Pull these memoized versions into the closure so they are scoped to the lifetime of
   // the panel.
@@ -280,7 +281,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               topicSchemaConverters,
               postProcessedFrame,
               { ...globalVariables } as Readonly<GlobalVariables>,
-              { emitAlert, config, panelType: input.panelType },
+              { emitAlert, config, panelType: input.panelType, outputConfigCache },
             );
           }
           lastMessageByTopic.set(
@@ -302,7 +303,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               newConverters,
               postProcessedFrame,
               { ...globalVariables } as Readonly<GlobalVariables>,
-              { emitAlert, config, panelType: input.panelType },
+              { emitAlert, config, panelType: input.panelType, outputConfigCache },
             );
           }
         }
@@ -320,7 +321,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               topicSchemaConverters,
               postProcessedFrame,
               { ...globalVariables } as Readonly<GlobalVariables>,
-              { emitAlert, config, panelType: input.panelType },
+              { emitAlert, config, panelType: input.panelType, outputConfigCache },
             );
           }
         }
@@ -382,7 +383,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
                   topicSchemaConverters,
                   frames,
                   undefined,
-                  { emitAlert, config, panelType: input.panelType },
+                  { emitAlert, config, panelType: input.panelType, outputConfigCache },
                 );
               }
             },
@@ -443,7 +444,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
           topicSchemaConverters,
           postProcessedFrame,
           { ...globalVariables } as Readonly<GlobalVariables>,
-          { emitAlert, config, panelType: input.panelType },
+          { emitAlert, config, panelType: input.panelType, outputConfigCache },
         );
       }
 

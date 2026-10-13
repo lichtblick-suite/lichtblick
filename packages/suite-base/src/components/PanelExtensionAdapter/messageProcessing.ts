@@ -17,6 +17,7 @@ import {
   getConverterId,
   resolveOutputConfig,
   TopicOutputConfig,
+  topicOutputKey,
 } from "@lichtblick/suite-base/util/topicOutput";
 
 import type { MessageConverterAlertHandler } from "./types";
@@ -30,6 +31,7 @@ type ConvertMessageContext = {
   emitAlert?: MessageConverterAlertHandler;
   config?: TopicOutputConfig;
   panelType?: string;
+  outputConfigCache?: Map<string, Record<string, unknown>>;
 };
 
 // Create a string lookup key from a message event
@@ -65,7 +67,7 @@ export function convertMessage(
         sourceSchemaName: messageEvent.schemaName,
         converterId: getConverterId(converter),
       };
-      const topicConfig =
+      let topicConfig =
         context?.config == undefined
           ? messageEvent.topicConfig
           : resolveOutputConfig(
@@ -75,6 +77,17 @@ export function convertMessage(
                 ? undefined
                 : converter.panelSettings?.[context.panelType]?.defaultConfig,
             );
+      if (context?.config != undefined && context.outputConfigCache != undefined) {
+        const outputKey = topicOutputKey(messageEvent.topic, output);
+        const cachedConfig = context.outputConfigCache.get(outputKey);
+        // Stateful converters may use settings identity to track entities between messages.
+        // Keep that identity until this output's effective settings actually change.
+        if (cachedConfig != undefined && _.isEqual(cachedConfig, topicConfig)) {
+          topicConfig = cachedConfig;
+        } else {
+          context.outputConfigCache.set(outputKey, topicConfig as Record<string, unknown>);
+        }
+      }
       const convertedMessage = converter.converter(
         messageEvent.message,
         { ...messageEvent, topicConfig },

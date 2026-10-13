@@ -14,9 +14,14 @@ import { LayerErrors, Path } from "./LayerErrors";
 
 export type ActionHandler = (action: SettingsTreeAction) => void;
 
-export type SettingsTreeNodeWithActionHandler = SettingsTreeNode & { handler?: ActionHandler };
+export type SettingsTreeNodeWithActionHandler = SettingsTreeNode & {
+  handler?: ActionHandler;
+};
 
-export type SettingsTreeEntry = { path: Path; node: SettingsTreeNodeWithActionHandler };
+export type SettingsTreeEntry = {
+  path: Path;
+  node: SettingsTreeNodeWithActionHandler;
+};
 
 export type SettingsManagerEvents = {
   update: () => void;
@@ -35,6 +40,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   public constructor(
     baseTree: SettingsTreeNodes,
     private readonly mapEntry?: (entry: SettingsTreeEntry) => SettingsTreeEntry,
+    private readonly mapTree?: (tree: SettingsTreeNodes) => SettingsTreeNodes,
   ) {
     super();
 
@@ -92,7 +98,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
   }
 
   public tree(): SettingsTreeNodes {
-    return this.#root.children!;
+    return this.mapTree?.(this.#root.children!) ?? this.#root.children!;
   }
 
   public handleAction = (action: SettingsTreeAction): void => {
@@ -100,7 +106,7 @@ export class SettingsManager extends EventEmitter<SettingsManagerEvents> {
 
     // Walk the settings tree down to the end of the path, firing any action
     // handlers along the way
-    let curNode = this.#root;
+    let curNode: SettingsTreeNodeWithActionHandler = { ...this.#root, children: this.tree() };
     curNode.handler?.(action);
     for (const segment of path) {
       const nextNode: SettingsTreeNodeWithActionHandler | undefined = curNode.children?.[segment];

@@ -225,7 +225,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     for (const output of this.renderTopics) {
       settings[output.name] = resolveOutputConfig(this.config, output, output.defaultConfig);
     }
-    this.#topicSettingsCache = { config: this.config, topics: this.renderTopics, settings };
+    this.#topicSettingsCache = {
+      config: this.config,
+      topics: this.renderTopics,
+      settings,
+    };
     return settings;
   }
 
@@ -330,8 +334,12 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   readonly #headLight: THREE.DirectionalLight;
   #hemiLight: THREE.HemisphereLight;
   public input: Input;
-  public readonly outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
-  public readonly instancedOutlineMaterial = new InstancedLineMaterial({ dithering: true });
+  public readonly outlineMaterial = new THREE.LineBasicMaterial({
+    dithering: true,
+  });
+  public readonly instancedOutlineMaterial = new InstancedLineMaterial({
+    dithering: true,
+  });
 
   /** only public for testing - prefer to use `getCameraState` instead */
   public cameraHandler: ICameraHandler;
@@ -411,34 +419,80 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
     this.hud = new HUDItemManager(this.#onHUDItemsChange);
 
-    this.settings = new SettingsManager(baseSettingsTree(this.interfaceMode), (entry) => {
-      const path = this.getSettingsPath(entry.path);
-      if (path.length === entry.path.length) {
-        return entry;
-      }
-      const handler = entry.node.handler;
-      return {
-        path,
-        node: {
-          ...entry.node,
-          label:
-            this.renderTopics.find((output) => output.name === entry.path[1])?.label ??
-            entry.node.label,
-          handler:
-            handler == undefined
-              ? undefined
-              : (action) => {
-                  handler(
-                    withSettingsPath(action, [
-                      entry.path[0]!,
-                      entry.path[1]!,
-                      ...action.payload.path.slice(3),
-                    ]),
-                  );
-                },
-        },
-      };
-    });
+    this.settings = new SettingsManager(
+      baseSettingsTree(this.interfaceMode),
+      (entry) => {
+        const path = this.getSettingsPath(entry.path);
+        if (path.length === entry.path.length) {
+          return entry;
+        }
+        const handler = entry.node.handler;
+        return {
+          path,
+          node: {
+            ...entry.node,
+            label:
+              this.renderTopics.find((output) => output.name === entry.path[1])?.label ??
+              entry.node.label,
+            handler:
+              handler == undefined
+                ? undefined
+                : (action) => {
+                    handler(
+                      withSettingsPath(action, [
+                        entry.path[0]!,
+                        entry.path[1]!,
+                        ...action.payload.path.slice(3),
+                      ]),
+                    );
+                  },
+          },
+        };
+      },
+      (tree) => {
+        const topics = tree.topics;
+        if (topics?.children == undefined) {
+          return tree;
+        }
+        return {
+          ...tree,
+          topics: {
+            ...topics,
+            children: Object.fromEntries(
+              Object.entries(topics.children).map(([topic, node]) => {
+                const outputs = Object.entries(node?.children ?? {}).filter(
+                  ([, child]) => child?.visible != undefined,
+                );
+                if (node == undefined || outputs.length === 0) {
+                  return [topic, node];
+                }
+                return [
+                  topic,
+                  {
+                    ...node,
+                    visible: outputs.some(([, child]) => child?.visible === true),
+                    handler: (action: SettingsTreeAction) => {
+                      if (
+                        action.action === "update" &&
+                        action.payload.path.length === 3 &&
+                        action.payload.path[2] === "visible" &&
+                        action.payload.input === "boolean"
+                      ) {
+                        for (const [key] of outputs) {
+                          this.settings.handleAction(
+                            withSettingsPath(action, ["topics", topic, key, "visible"]),
+                          );
+                        }
+                      }
+                    },
+                  },
+                ];
+              }),
+            ),
+          },
+        };
+      },
+    );
     this.settings.errors.mapPath = (path) => this.getSettingsPath(path);
     this.settings.on("update", () => this.emit("settingsTreeChange", this));
     // Add the top-level nodes first so merging happens in the correct order.
@@ -855,7 +909,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       return false;
     }
 
-    this.#allFramesCursor = { index: cursor, cursorTimeReached, lastReadMessage };
+    this.#allFramesCursor = {
+      index: cursor,
+      cursorTimeReached,
+      lastReadMessage,
+    };
     return true;
   }
 
@@ -1077,8 +1135,16 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         label: i18next.t("threeDee:topics"),
         defaultExpansionState: "expanded",
         actions: [
-          { id: "show-all", type: "action", label: i18next.t("threeDee:showAll") },
-          { id: "hide-all", type: "action", label: i18next.t("threeDee:hideAll") },
+          {
+            id: "show-all",
+            type: "action",
+            label: i18next.t("threeDee:showAll"),
+          },
+          {
+            id: "hide-all",
+            type: "action",
+            label: i18next.t("threeDee:hideAll"),
+          },
         ],
         children: this.settings.tree()["topics"]?.children,
         handler: this.#handleTopicsAction,
@@ -1230,7 +1296,13 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     }
     const emptyOutputNodes: SettingsTreeEntry[] = [];
     for (const output of this.renderTopics) {
-      if (!this.schemaSubscriptions.has(output.schemaName)) {
+      if (
+        !this.schemaSubscriptions.has(output.schemaName) ||
+        FRAME_TRANSFORM_DATATYPES.has(output.schemaName) ||
+        FRAME_TRANSFORMS_DATATYPES.has(output.schemaName) ||
+        TF_DATATYPES.has(output.schemaName) ||
+        TRANSFORM_STAMPED_DATATYPES.has(output.schemaName)
+      ) {
         continue;
       }
       const path = outputSettingsPath(output);
@@ -1827,7 +1899,11 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
           if (node.path[0] === "topics") {
             extension.handleSettingsAction({
               action: "update",
-              payload: { path: [...node.path, "visible"], input: "boolean", value },
+              payload: {
+                path: [...node.path, "visible"],
+                input: "boolean",
+                value,
+              },
             });
           }
         }
@@ -1879,7 +1955,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       cursorCoords.x,
       cursorCoords.y,
       this.cameraHandler.getActiveCamera(),
-      { debug: this.debugPicking, disableSetViewOffset: this.interfaceMode === "image" },
+      {
+        debug: this.debugPicking,
+        disableSetViewOffset: this.interfaceMode === "image",
+      },
     );
     if (objectId === -1) {
       log.debug("Picking did not return an object");
@@ -1915,7 +1994,10 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         cursorCoords.y,
         this.cameraHandler.getActiveCamera(),
         renderable,
-        { debug: this.debugPicking, disableSetViewOffset: this.interfaceMode === "image" },
+        {
+          debug: this.debugPicking,
+          disableSetViewOffset: this.interfaceMode === "image",
+        },
       );
       instanceIndex = instanceIndex === -1 ? undefined : instanceIndex;
       log.debug("Instance picking pass on", renderable, "returned", instanceIndex);
