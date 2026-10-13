@@ -18584,6 +18584,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-monaco-editor@patch:react-monaco-editor@npm:0.59.0#./patches/react-monaco-editor.patch::locator=lichtblick%40workspace%3A.":
+  version: 0.59.0
+  resolution: "react-monaco-editor@patch:react-monaco-editor@npm%3A0.59.0#./patches/react-monaco-editor.patch::version=0.59.0&hash=1ac4bf&locator=lichtblick%40workspace%3A."
+  peerDependencies:
+    monaco-editor: ^0.52.0
+    react: ">=16.8.0 <20.0.0"
+    react-dom: ">=16.8.0 <20.0.0"
+  checksum: 10/7cf2abd13b51d8981f8d76c489ac0f1c397c1d7b634bddca1da8ad0136850006c5e3976597e1da39f927f5f6e7eb4f4ea1af5729c7a783fec7a0da6d106fa587
+  languageName: node
+  linkType: hard
+
 "react-mosaic-component@npm:6.2.0":
   version: 6.2.0
   resolution: "react-mosaic-component@npm:6.2.0"
