@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { AppSetting } from "@lichtblick/suite-base";
+import AnalyticsProvider from "@lichtblick/suite-base/providers/AnalyticsProvider";
 import { Storage } from "@lichtblick/suite-desktop/src/common/types";
 import { main as rendererMain } from "@lichtblick/suite-desktop/src/renderer/index";
 import NativeStorageAppConfiguration from "@lichtblick/suite-desktop/src/renderer/services/NativeStorageAppConfiguration";
@@ -22,7 +23,10 @@ async function main() {
     },
   );
 
-  await rendererMain({ appConfiguration });
+  await rendererMain({
+    appConfiguration,
+    extraProviders: [<AnalyticsProvider key="AnalyticsProvider" />],
+  });
 }
 
 void main();
