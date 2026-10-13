@@ -95,6 +95,7 @@
     "@types/node": "20.10.0",
     "react-use": "patch:react-use@17.4.0#./patches/react-use.patch",
     "react-dnd": "patch:react-dnd@npm:16.0.1#./patches/react-dnd.patch",
+    "react-monaco-editor": "patch:react-monaco-editor@npm:0.59.0#./patches/react-monaco-editor.patch",
     "@types/react": "18.3.12",
     "esbuild": "0.28.1",
     "dompurify": "3.4.11",
