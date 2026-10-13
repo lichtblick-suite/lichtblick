@@ -34,6 +34,7 @@ import { isValidUrl } from "@lichtblick/suite-base/util/isValidURL";
 
 import { RenderableCube } from "./markers/RenderableCube";
 import { RenderableCylinder } from "./markers/RenderableCylinder";
+import { RenderableMarker } from "./markers/RenderableMarker";
 import { RenderableMeshResource } from "./markers/RenderableMeshResource";
 import { RenderableSphere } from "./markers/RenderableSphere";
 import { missingTransformMessage, MISSING_TRANSFORM } from "./transforms";
@@ -88,6 +89,7 @@ export type LayerSettingsUrdf = BaseSettings & {
   displayMode: "auto" | "visual" | "collision";
   label: string;
   fallbackColor?: string;
+  opacity?: number;
 };
 
 export type LayerSettingsCustomUrdf = CustomLayerSettings & {
@@ -100,6 +102,7 @@ export type LayerSettingsCustomUrdf = CustomLayerSettings & {
   framePrefix: string;
   displayMode: "auto" | "visual" | "collision";
   fallbackColor?: string;
+  opacity?: number;
 };
 
 const DEFAULT_SETTINGS: LayerSettingsUrdf = {
@@ -109,6 +112,7 @@ const DEFAULT_SETTINGS: LayerSettingsUrdf = {
   displayMode: "auto",
   label: "URDF",
   fallbackColor: DEFAULT_COLOR_STR,
+  opacity: 1,
 };
 
 const DEFAULT_CUSTOM_SETTINGS: LayerSettingsCustomUrdf = {
@@ -125,6 +129,7 @@ const DEFAULT_CUSTOM_SETTINGS: LayerSettingsCustomUrdf = {
   framePrefix: "",
   displayMode: "auto",
   fallbackColor: DEFAULT_COLOR_STR,
+  opacity: 1,
 };
 const URDF_TOPIC_SCHEMAS = new Set<string>(["std_msgs/String", "std_msgs/msg/String"]);
 
@@ -133,6 +138,9 @@ const tempVec3b = new THREE.Vector3();
 const tempQuaternion1 = new THREE.Quaternion();
 const tempQuaternion2 = new THREE.Quaternion();
 const tempEuler = new THREE.Euler();
+
+/** Intrinsic URDF visual alpha before layer opacity is applied (per child renderable). */
+const urdfBaseColorAByChild = new WeakMap<object, number>();
 
 export type UrdfUserData = BaseUserData & {
   settings: LayerSettingsUrdf | LayerSettingsCustomUrdf;
@@ -190,6 +198,11 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
   #jointStates = new Map<string, JointPosition>();
   #textDecoder = new TextDecoder();
   #urdfsByTopic = new Map<string, string>();
+  // One debounce per URDF instance so rapid multi-layer slider updates don't drop loads.
+  #debouncedLoadUrdfByInstanceId = new Map<
+    string,
+    _.DebouncedFunc<(args: { instanceId: string; urdf?: string; forceReload?: boolean }) => void>
+  >();
 
   public constructor(renderer: IRenderer, name: string = Urdfs.extensionId) {
     super(name, renderer);
@@ -208,6 +221,14 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         this.#loadUrdf({ instanceId, urdf: undefined });
       }
     }
+  }
+
+  public override dispose(): void {
+    for (const debounced of this.#debouncedLoadUrdfByInstanceId.values()) {
+      debounced.cancel();
+    }
+    this.#debouncedLoadUrdfByInstanceId.clear();
+    super.dispose();
   }
 
   public override getSubscriptions(): readonly AnyRendererSubscription[] {
@@ -267,6 +288,15 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       help: "Fallback color used in case a link does not specify any color itself",
       input: "rgb",
     };
+    const baseOpacityField: SettingsTreeField = {
+      label: "Opacity",
+      help: "Overall opacity of this URDF layer. Lower values create a transparent ghost overlay.",
+      input: "number",
+      min: 0,
+      max: 1,
+      step: 0.05,
+      precision: 2,
+    };
 
     // /robot_description topic entry
     const topic = this.renderer.topicsByName?.get(TOPIC_NAME);
@@ -280,6 +310,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         fallbackColor: {
           ...baseFallbackColorField,
           value: config.fallbackColor ?? DEFAULT_SETTINGS.fallbackColor,
+        },
+        opacity: {
+          ...baseOpacityField,
+          value: config.opacity ?? DEFAULT_SETTINGS.opacity,
         },
       };
       entries.push({
@@ -312,6 +346,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         fallbackColor: {
           ...baseFallbackColorField,
           value: config.fallbackColor ?? DEFAULT_SETTINGS.fallbackColor,
+        },
+        opacity: {
+          ...baseOpacityField,
+          value: config.opacity ?? DEFAULT_SETTINGS.opacity,
         },
       };
 
@@ -423,6 +461,10 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
           fallbackColor: {
             ...baseFallbackColorField,
             value: config.fallbackColor ?? DEFAULT_SETTINGS.fallbackColor,
+          },
+          opacity: {
+            ...baseOpacityField,
+            value: config.opacity ?? DEFAULT_CUSTOM_SETTINGS.opacity,
           },
         };
 
@@ -537,6 +579,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
           this.remove(renderable);
           this.renderables.delete(instanceId);
         }
+        this.#cancelDebouncedLoadUrdf(instanceId);
 
         // Remove transforms from the TF tree
         const transforms = this.#transformsByInstanceId.get(instanceId);
@@ -628,6 +671,9 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
       } else if (field === "framePrefix") {
         this.#debouncedLoadUrdf({ instanceId, urdf, forceReload: true });
+      } else if (field === "opacity") {
+        // Opacity is visual-only; update materials in place (no reparse / rebuild).
+        this.#updateUrdfOpacity(instanceId);
       } else if (field === "displayMode" || field === "visible" || field === "fallbackColor") {
         this.#loadUrdf({ instanceId, urdf, forceReload: true });
       } else if (field === "sourceType") {
@@ -921,7 +967,54 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
       });
   }
 
-  #debouncedLoadUrdf = _.debounce(this.#loadUrdf.bind(this), 500);
+  #debouncedLoadUrdf(args: { instanceId: string; urdf?: string; forceReload?: boolean }): void {
+    let debounced = this.#debouncedLoadUrdfByInstanceId.get(args.instanceId);
+    if (!debounced) {
+      debounced = _.debounce(
+        (loadArgs: { instanceId: string; urdf?: string; forceReload?: boolean }) => {
+          this.#loadUrdf(loadArgs);
+        },
+        500,
+      );
+      this.#debouncedLoadUrdfByInstanceId.set(args.instanceId, debounced);
+    }
+    debounced(args);
+  }
+
+  #cancelDebouncedLoadUrdf(instanceId: string): void {
+    const debounced = this.#debouncedLoadUrdfByInstanceId.get(instanceId);
+    debounced?.cancel();
+    this.#debouncedLoadUrdfByInstanceId.delete(instanceId);
+  }
+
+  /**
+   * Apply layer opacity to existing child renderables without reparsing the URDF or disposing
+   * meshes. Relies on RenderableMeshResource's opacity-only update path for embedded materials.
+   */
+  #updateUrdfOpacity(instanceId: string): void {
+    const renderable = this.renderables.get(instanceId);
+    if (!renderable) {
+      return;
+    }
+
+    const settings = this.#getCurrentSettings(instanceId);
+    renderable.userData.settings = settings;
+    const opacity = THREE.MathUtils.clamp(settings.opacity ?? 1, 0, 1);
+
+    for (const child of renderable.userData.renderables.values()) {
+      if (!(child instanceof RenderableMarker)) {
+        continue;
+      }
+      const baseColorA = urdfBaseColorAByChild.get(child) ?? 1;
+      const prevMarker = child.userData.marker;
+      const nextMarker = {
+        ...prevMarker,
+        color: { ...prevMarker.color, a: baseColorA * opacity },
+      };
+      child.update(nextMarker, undefined);
+    }
+    this.renderer.queueAnimationFrame();
+  }
 
   #loadRobot(
     renderable: UrdfRenderable,
@@ -935,6 +1028,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
     const fallbackColor = settings.fallbackColor
       ? stringToRgba(makeRgba(), settings.fallbackColor)
       : undefined;
+    const opacity = THREE.MathUtils.clamp(settings.opacity ?? 1, 0, 1);
 
     this.#loadFrames(instanceId, frames);
     this.#loadTransforms(instanceId, transforms);
@@ -952,6 +1046,7 @@ export class Urdfs extends SceneExtension<UrdfRenderable> {
         renderer,
         baseUrl,
         fallbackColor,
+        opacity,
       });
       // Set the childRenderable settingsPath so errors route to the correct place
       childRenderable.userData.settingsPath = renderable.userData.settingsPath;
@@ -1068,39 +1163,49 @@ function createRenderable(args: {
   renderer: IRenderer;
   baseUrl?: string;
   fallbackColor?: ColorRGBA;
+  opacity: number;
 }): Renderable {
-  const { visual, robot, id, frameId, renderer, baseUrl, fallbackColor } = args;
+  const { visual, robot, id, frameId, renderer, baseUrl, fallbackColor, opacity } = args;
   const name = `${frameId}-${id}-${visual.geometry.geometryType}`;
   const orientation = eulerToQuaternion(visual.origin.rpy);
   const pose = { position: visual.origin.xyz, orientation };
-  const color = getColor(visual, robot) ?? fallbackColor ?? DEFAULT_COLOR;
+  const baseColor = getColor(visual, robot) ?? fallbackColor ?? DEFAULT_COLOR;
+  const color = { ...baseColor, a: baseColor.a * opacity };
   const type = visual.geometry.geometryType;
   switch (type) {
     case "box": {
       const scale = visual.geometry.size;
       const marker = createMarker(frameId, MarkerType.CUBE, pose, scale, color);
-      return new RenderableCube(name, marker, undefined, renderer);
+      const renderable = new RenderableCube(name, marker, undefined, renderer);
+      urdfBaseColorAByChild.set(renderable, baseColor.a);
+      return renderable;
     }
     case "cylinder": {
       const cylinder = visual.geometry;
       const scale = { x: cylinder.radius * 2, y: cylinder.radius * 2, z: cylinder.length };
       const marker = createMarker(frameId, MarkerType.CUBE, pose, scale, color);
-      return new RenderableCylinder(name, marker, undefined, renderer);
+      const renderable = new RenderableCylinder(name, marker, undefined, renderer);
+      urdfBaseColorAByChild.set(renderable, baseColor.a);
+      return renderable;
     }
     case "sphere": {
       const sphere = visual.geometry;
       const scale = { x: sphere.radius * 2, y: sphere.radius * 2, z: sphere.radius * 2 };
       const marker = createMarker(frameId, MarkerType.CUBE, pose, scale, color);
-      return new RenderableSphere(name, marker, undefined, renderer);
+      const renderable = new RenderableSphere(name, marker, undefined, renderer);
+      urdfBaseColorAByChild.set(renderable, baseColor.a);
+      return renderable;
     }
     case "mesh": {
       const isCollada = visual.geometry.filename.toLowerCase().endsWith(".dae");
       // Use embedded materials if the mesh is a Collada file
       const embedded = isCollada ? EmbeddedMaterialUsage.Use : EmbeddedMaterialUsage.Ignore;
       const marker = createMeshMarker(frameId, pose, embedded, visual.geometry, baseUrl, color);
-      return new RenderableMeshResource(name, marker, undefined, renderer, {
+      const renderable = new RenderableMeshResource(name, marker, undefined, renderer, {
         referenceUrl: baseUrl,
       });
+      urdfBaseColorAByChild.set(renderable, baseColor.a);
+      return renderable;
     }
     default:
       throw new Error(`Unrecognized visual geometryType: ${type}`);
