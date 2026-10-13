@@ -34,6 +34,7 @@ export const openDialog = {
   shareLayouts: "Share layouts",
   signIn: "Sign in",
   startCollaborating: "Start collaborating with your Foxglove organization",
+  version: "v{{version}}",
   startCollaboratingDescription:
     "Make the most of your Foxglove account – whether you want to dive deep on your data or share tools with your teammates.",
   uploadToDataPlatform: "Upload to Data Platform",

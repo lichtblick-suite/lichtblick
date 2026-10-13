@@ -7,3 +7,4 @@
 
 export * from "./SyntheticDataSourceFactory";
 export * from "./McapLocalBenchmarkDataSourceFactory";
+export * from "./McapRealPipelineBenchmarkDataSourceFactory";

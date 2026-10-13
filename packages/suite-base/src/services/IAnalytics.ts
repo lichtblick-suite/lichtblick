@@ -50,6 +50,7 @@ enum AppEvent {
   // Panel events
   PANEL_ADD = "Studio: Panel Added",
   PANEL_DELETE = "Studio: Panel Deleted",
+  PANEL_INTERACTION = "Studio: Panel Interaction",
 
   // Variable events
   VARIABLE_ADD = "Studio: Variable Added",

@@ -15,6 +15,7 @@ import { useStyles } from "@lichtblick/suite-base/components/DataSourceDialog/in
 import LichtblickLogoText from "@lichtblick/suite-base/components/LichtblickLogoText";
 import Stack from "@lichtblick/suite-base/components/Stack";
 import TextMiddleTruncate from "@lichtblick/suite-base/components/TextMiddleTruncate";
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { useWorkspaceActions } from "@lichtblick/suite-base/context/Workspace/useWorkspaceActions";
@@ -113,6 +114,9 @@ export default function Start(): React.JSX.Element {
       <Stack gap={4} className={classes.sidebar}>
         <SidebarItems onSelectView={dialogActions.dataSource.open} />
       </Stack>
+      <Typography variant="caption" className={classes.version}>
+        {t("version", { version: APP_CONFIG.version })}
+      </Typography>
     </Stack>
   );
 }
