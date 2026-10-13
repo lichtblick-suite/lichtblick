@@ -157,7 +157,7 @@ const memoizedCellRenderer = memoizeWeak((accessorPath: string, id: string) => {
   };
 });
 
-function Expander(info: CellContext<TableFeatures, CellValue>) {
+function Expander(info: Readonly<CellContext<TableFeatures, CellValue>>) {
   const { classes } = useStyles();
   const { row } = info;
   return (
