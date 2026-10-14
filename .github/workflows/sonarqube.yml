@@ -14,7 +14,8 @@ jobs:
   internal-scan:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    # Skip on forks that have no SonarCloud server configured; the scan cannot succeed there.
+    if: ${{ vars.SONAR_HOST_URL != '' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) }}
     steps:
       - uses: actions/checkout@v7
         with:
