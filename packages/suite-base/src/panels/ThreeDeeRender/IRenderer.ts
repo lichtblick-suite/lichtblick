@@ -317,7 +317,7 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
    * Should be called after `setCurrentTime` as been called
    * @param oldTime used to determine if seeked backwards
    */
-  handleSeek(oldTimeNs: bigint, allFrames?: readonly MessageEvent[]): void;
+  handleSeek(oldTimeNs: bigint): void;
 
   /**
    * Clears:
