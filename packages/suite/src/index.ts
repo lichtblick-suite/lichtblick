@@ -335,6 +335,32 @@ export type SubscribeMessageRangeArgs = {
   onNewRangeIterator: (batchIterator: AsyncIterable<Immutable<MessageEvent[]>>) => Promise<void>;
 };
 
+export type ReadMessagesInRangeOptions = {
+  /**
+   * Inclusive start of the range, in log time. When omitted, reading starts at the beginning of
+   * the data source.
+   */
+  start?: Time;
+
+  /**
+   * Inclusive end of the range, in log time. When omitted, reading continues to the end of the
+   * data source.
+   */
+  end?: Time;
+
+  /**
+   * Convert messages to this schema before delivering them. Behaves like
+   * {@link SubscribeMessageRangeArgs.convertTo}.
+   */
+  convertTo?: string;
+
+  /**
+   * Aborting this signal stops the read. The iterator completes without throwing and no further
+   * batches are delivered.
+   */
+  signal?: AbortSignal;
+};
+
 export type PanelExtensionContext = {
   /**
    * The root element for the panel. Add your panel elements as children under this element.
@@ -515,6 +541,31 @@ export type PanelExtensionContext = {
    * and blocks future invocations of {@link SubscribeMessageRangeArgs.onNewRangeIterator | onNewRangeIterator}.
    */
   unstable_subscribeMessageRange: (args: SubscribeMessageRangeArgs) => () => void;
+
+  /**
+   * Reads messages for `topic` directly from the active data source, optionally
+   * bounded by a `start` and/or `end` time. Only the requested range is read from the source, so
+   * small windows on large recordings are cheap. Omitting both bounds reads the complete topic
+   * history, like {@link PanelExtensionContext.unstable_subscribeMessageRange}.
+   *
+   * Batches and messages are ordered by log time. Reading starts lazily when the returned iterable
+   * is iterated; breaking out of the loop or aborting `options.signal` stops the read.
+   *
+   * ```typescript
+   * for await (const batch of context.readMessagesInRange!("/topic", { start, end })) {
+   *   //...
+   * }
+   * ```
+   *
+   * Limitations:
+   * - Unavailable for real-time data sources (foxglove_bridge, rosbridge, ROS 1 native); for those
+   *   the iterable completes immediately without yielding.
+   * - Topic aliases are not resolved; use the underlying source topic name.
+   */
+  readMessagesInRange?: (
+    topic: string,
+    options?: ReadMessagesInRangeOptions,
+  ) => AsyncIterable<Immutable<MessageEvent[]>>;
 
   /**
    * Reads the most recent message on `topic` at or before `time`, without moving the playback

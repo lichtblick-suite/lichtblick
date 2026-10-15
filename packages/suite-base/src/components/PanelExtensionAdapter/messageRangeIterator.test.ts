@@ -105,6 +105,34 @@ describe("createMessageRangeIterator", () => {
     expect(batches).toHaveLength(1);
   });
 
+  it("should close the raw batch iterator when cancelled", async () => {
+    let closed = false;
+    async function* rawIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
+      try {
+        yield {
+          type: "message-event",
+          msgEvent: MessageEventBuilder.messageEvent({ topic: mockTopic }),
+        };
+      } finally {
+        closed = true;
+      }
+    }
+    const rawBatchIterator = rawIterator();
+    await rawBatchIterator.next();
+
+    const { cancel } = createMessageRangeIterator({
+      topic: mockTopic,
+      rawBatchIterator,
+      sortedTopics: mockSortedTopics,
+      messageConverters: mockMessageConverters,
+    });
+
+    cancel();
+    await Promise.resolve();
+
+    expect(closed).toBe(true);
+  });
+
   it("should handle convertTo parameter", () => {
     const rawBatchIterator = createMockRawBatchIterator([]);
     const convertTo = BasicBuilder.string();

@@ -1376,6 +1376,35 @@ describe("IterablePlayer", () => {
       });
     });
 
+    it("should forward start and end bounds to messageIterator", async () => {
+      const source = new TestSource();
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {});
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      const start = { sec: 1, nsec: 0 };
+      const end = { sec: 2, nsec: 0 };
+      player.getBatchIterator("test_topic", { start, end });
+
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: new Map([["test_topic", { topic: "test_topic" }]]),
+        consumptionType: "full",
+        start,
+        end,
+      });
+    });
+
     it("should handle multiple topics correctly", async () => {
       const source = new TestSource();
 
