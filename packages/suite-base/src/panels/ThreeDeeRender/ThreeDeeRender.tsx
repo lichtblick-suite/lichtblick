@@ -358,13 +358,27 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
   // Rebuild the settings sidebar tree as needed
   useEffect(() => {
-    context.updatePanelSettingsEditor({
-      actionHandler,
-      enableFilter: true,
-      focusedPath: focusedSettingsPath,
-      nodes: settingsTree ?? {},
-    });
-  }, [actionHandler, context, focusedSettingsPath, settingsTree]);
+    context.updatePanelSettingsEditor(
+      {
+        actionHandler,
+        enableFilter: true,
+        focusedPath: focusedSettingsPath,
+        nodes: settingsTree ?? {},
+      },
+      (updateSettings) => {
+        if (!renderer) {
+          return;
+        }
+        // Scene, camera, and layer edits already update the renderer and use the debounced save.
+        // Persist immediately only when a converter handler changes topic settings.
+        const topicsBefore = renderer.config.topics;
+        renderer.updateConfig(updateSettings);
+        if (renderer.config.topics !== topicsBefore) {
+          saveState(renderer.config);
+        }
+      },
+    );
+  }, [actionHandler, context, focusedSettingsPath, settingsTree, renderer, saveState]);
 
   // Update the renderer's reference to `config` when it changes. Note that this does *not*
   // automatically update the settings tree.

@@ -69,7 +69,11 @@ import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
-import { BuiltinPanelExtensionContext, MessageConverterAlertHandler } from "./types";
+import {
+  BuiltinPanelExtensionContext,
+  MessageConverterAlertHandler,
+  TopicSettingsUpdater,
+} from "./types";
 import { useSharedPanelState } from "./useSharedPanelState";
 import { useSubscribeMessageRange } from "./useSubscribeMessageRange";
 
@@ -392,7 +396,12 @@ function PanelExtensionAdapter(
       },
     };
 
-    const extensionSettingsActionHandler = (action: SettingsTreeAction) => {
+    const extensionSettingsActionHandler = (
+      action: SettingsTreeAction,
+      updateTopicSettings: TopicSettingsUpdater = (updateSettings) => {
+        saveConfig(produce(updateSettings));
+      },
+    ) => {
       if (action.action === "reorder-node") {
         return; // Extensions don't support reordering
       }
@@ -400,25 +409,22 @@ function PanelExtensionAdapter(
         payload: { path },
       } = action;
 
-      saveConfig(
-        produce<{ topics: Record<string, unknown> }>((draft) => {
-          const [category, topicName] = path;
+      const [category, topicName] = path;
+      if (category !== "topics" || topicName == undefined) {
+        return;
+      }
+      const schemaName = getTopicToSchemaNameMap(messagePipelineState())[topicName];
+      const settings =
+        schemaName != undefined ? extensionsSettings[panelName]?.[schemaName] : undefined;
+      if (!settings) {
+        return;
+      }
 
-          if (category === "topics" && topicName != undefined) {
-            const topicToSchemaNameMap = getTopicToSchemaNameMap(messagePipelineState());
-            const schemaName = topicToSchemaNameMap[topicName];
-
-            if (schemaName == undefined) {
-              return;
-            }
-
-            extensionsSettings[panelName]?.[schemaName]?.handler(action, draft.topics[topicName]);
-            setForceConversion((_old) => {
-              return new Set([topicName]);
-            });
-          }
-        }),
-      );
+      updateTopicSettings((draft) => {
+        draft.topics[topicName] ??= {};
+        settings.handler(action, draft.topics[topicName]);
+      });
+      setForceConversion(() => new Set([topicName]));
     };
 
     return {
@@ -643,13 +649,16 @@ function PanelExtensionAdapter(
         setSubscribedAppSettings(settings);
       },
 
-      updatePanelSettingsEditor: (settings: SettingsTree) => {
+      updatePanelSettingsEditor: (
+        settings: SettingsTree,
+        updateTopicSettings?: TopicSettingsUpdater,
+      ) => {
         if (!isMounted()) {
           return;
         }
         const actionHandler: typeof settings.actionHandler = (action) => {
           settings.actionHandler(action);
-          extensionSettingsActionHandler(action);
+          extensionSettingsActionHandler(action, updateTopicSettings);
         };
         updatePanelSettingsTree({ ...settings, actionHandler });
       },
