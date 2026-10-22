@@ -104,15 +104,12 @@ export function App(props: AppProps): React.JSX.Element {
     providers.push(<NativeWindowContext.Provider value={nativeWindow} />);
   }
 
-  if (extraProviders) {
-    providers.unshift(...extraProviders);
-  }
-
   // Alerts provider also must come before other, dependent contexts.
   providers.unshift(<AlertsContextProvider />);
   providers.unshift(<CurrentLayoutProvider loaders={layoutLoaders} />);
-  providers.unshift(<UserProfileLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);
+  // The layout manager stores favorites in the user profile, so it is nested inside it.
+  providers.unshift(<UserProfileLocalStorageProvider />);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);
@@ -120,6 +117,12 @@ export function App(props: AppProps): React.JSX.Element {
   // The toast and logs provider comes first so they are available to all downstream providers
   providers.unshift(<StudioToastProvider />);
   providers.unshift(<StudioLogsSettingsProvider />);
+
+  if (extraProviders) {
+    // Providers supplying context consumed by providers above them in this list must stay outermost,
+    // otherwise those consumers silently fall back to the context default (for example analytics).
+    providers.unshift(...extraProviders);
+  }
 
   const MaybeLaunchPreference = enableLaunchPreferenceScreen === true ? LaunchPreference : Fragment;
 
