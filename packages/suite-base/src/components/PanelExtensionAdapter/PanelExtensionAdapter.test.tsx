@@ -22,6 +22,7 @@ import {
   MessageEvent,
   Immutable,
   Subscription,
+  SettingsTreeAction,
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { AlertsContext, AlertsContextStore } from "@lichtblick/suite-base/context/AlertsContext";
@@ -69,6 +70,83 @@ describe("PanelExtensionAdapter", () => {
     // force a re-render to make sure we do not call init panel again
     handle.rerender(<Wrapper />);
     await sig;
+  });
+
+  it("routes nested converter settings through the panel updater", () => {
+    // GIVEN a panel that handles converter settings updates
+    const saveConfig = jest.fn();
+    const updateSettingsTree = jest.fn();
+    const settingsTreeSpy = jest
+      .spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate")
+      .mockReturnValue(updateSettingsTree);
+    const config = { topics: { topic: { child: { enabled: false } } } };
+    const panelActionHandler = jest.fn();
+    const extensionHandler = jest.fn();
+    const updateTopicSettings = jest.fn((updateSettings) => updateSettings(config));
+    const initPanel = (context: BuiltinPanelExtensionContext) => {
+      context.updatePanelSettingsEditor(
+        { actionHandler: panelActionHandler, nodes: {} },
+        updateTopicSettings,
+      );
+    };
+
+    const view = render(
+      <MockPanelContextProvider type="3D">
+        <PanelSetup
+          fixture={{
+            topics: [{ name: "topic", schemaName: "test.Schema" }],
+            messageConverters: [
+              {
+                fromSchemaName: "test.Schema",
+                toSchemaName: "foxglove.SceneUpdate",
+                converter: () => ({}),
+                panelSettings: {
+                  "3D": {
+                    settings: () => ({}),
+                    handler: extensionHandler,
+                  },
+                },
+              },
+            ],
+          }}
+        >
+          <PanelExtensionAdapter config={{}} saveConfig={saveConfig} initPanel={initPanel} />
+        </PanelSetup>
+      </MockPanelContextProvider>,
+    );
+
+    // WHEN a nested setting is enabled
+    const action: SettingsTreeAction = {
+      action: "update",
+      payload: { path: ["topics", "topic", "child", "enabled"], input: "boolean", value: true },
+    };
+    act(() => {
+      updateSettingsTree.mock.calls[0]![0].actionHandler(action);
+    });
+
+    // THEN the panel applies the edit once without a duplicate adapter save
+    expect(updateTopicSettings).toHaveBeenCalledTimes(1);
+    expect(extensionHandler).toHaveBeenCalledWith(action, config.topics.topic);
+    expect(extensionHandler).toHaveBeenCalledTimes(1);
+    expect(saveConfig).not.toHaveBeenCalled();
+
+    // WHEN a normal panel setting is changed
+    const panelAction: SettingsTreeAction = {
+      action: "update",
+      payload: { path: ["scene", "enableStats"], input: "boolean", value: true },
+    };
+    act(() => {
+      updateSettingsTree.mock.calls.at(-1)![0].actionHandler(panelAction);
+    });
+
+    // THEN only the panel handler receives the edit without another converter update or save
+    expect(panelActionHandler).toHaveBeenLastCalledWith(panelAction);
+    expect(panelActionHandler).toHaveBeenCalledTimes(2);
+    expect(updateTopicSettings).toHaveBeenCalledTimes(1);
+    expect(extensionHandler).toHaveBeenCalledTimes(1);
+    expect(saveConfig).not.toHaveBeenCalled();
+    view.unmount();
+    settingsTreeSpy.mockRestore();
   });
 
   it("should expose point-in-time message lookups through the panel context", async () => {
