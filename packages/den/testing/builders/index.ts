@@ -6,3 +6,4 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export { default as H265FrameBuilder } from "./H265FrameBuilder";
+export { default as AV1FrameBuilder } from "./AV1FrameBuilder";
