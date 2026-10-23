@@ -17,4 +17,10 @@ export type MessagePathDragParams = {
    * Whether this item is currently selected.
    */
   selected: boolean;
+  /**
+   * The id of the panel this drag originates from, if any. Used by drop targets to reject drops
+   * onto the same panel that the drag started from (avoids adding a duplicate series to the source
+   * panel). Undefined for drags that do not originate from a panel (e.g. the Topic List).
+   */
+  sourcePanelId?: string;
 };
