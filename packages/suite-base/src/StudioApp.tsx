@@ -10,11 +10,13 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
+import { LayoutFavoritesAPI } from "@lichtblick/suite-base/api/layouts/LayoutFavoritesAPI";
 import { LayoutsAPI } from "@lichtblick/suite-base/api/layouts/LayoutsAPI";
 import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import LayoutStorageContext from "@lichtblick/suite-base/context/LayoutStorageContext";
 import NativeAppMenuContext from "@lichtblick/suite-base/context/NativeAppMenuContext";
 import NativeWindowContext from "@lichtblick/suite-base/context/NativeWindowContext";
+import { RemoteLayoutFavoritesStorageContext } from "@lichtblick/suite-base/context/RemoteLayoutFavoritesStorageContext";
 import { RemoteLayoutStorageContext } from "@lichtblick/suite-base/context/RemoteLayoutStorageContext";
 import { useSharedRootContext } from "@lichtblick/suite-base/context/SharedRootContext";
 import AlertsContextProvider from "@lichtblick/suite-base/providers/AlertsContextProvider";
@@ -88,8 +90,9 @@ export function StudioApp(): React.JSX.Element {
   // Alerts provider also must come before other, dependent contexts.
   providers.unshift(<AlertsContextProvider />);
   providers.unshift(<CurrentLayoutProvider />);
-  providers.unshift(<UserProfileLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);
+  // The layout manager stores favorites in the user profile, so it is nested inside it.
+  providers.unshift(<UserProfileLocalStorageProvider />);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
 
@@ -106,8 +109,19 @@ export function StudioApp(): React.JSX.Element {
     return undefined;
   }, [workspace]);
 
+  const remoteLayoutFavoritesStorage = useMemo(
+    () => (remoteLayoutStorage ? new LayoutFavoritesAPI() : undefined),
+    [remoteLayoutStorage],
+  );
+
   if (remoteLayoutStorage) {
     providers.unshift(<RemoteLayoutStorageContext.Provider value={remoteLayoutStorage} />);
+  }
+
+  if (remoteLayoutFavoritesStorage) {
+    providers.unshift(
+      <RemoteLayoutFavoritesStorageContext.Provider value={remoteLayoutFavoritesStorage} />,
+    );
   }
 
   if (extraProviders) {

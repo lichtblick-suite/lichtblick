@@ -21,6 +21,12 @@ export const useStyles = makeStyles()((theme) => ({
       gridTemplateColumns: `1fr 375px`,
     },
   },
+  version: {
+    position: "absolute",
+    right: theme.spacing(1),
+    bottom: theme.spacing(0.5),
+    color: theme.palette.text.secondary,
+  },
   header: {
     padding: theme.spacing(6),
     gridArea: "header",
