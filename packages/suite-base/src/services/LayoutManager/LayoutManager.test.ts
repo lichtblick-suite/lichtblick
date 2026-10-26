@@ -1374,7 +1374,7 @@ describe("LayoutManager", () => {
           data: originalLayout.working?.data ?? originalLayout.baseline.data,
         }),
       );
-      });
+    });
   });
 
   describe("favorites", () => {
