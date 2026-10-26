@@ -4,7 +4,11 @@
 import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { AuthProvider } from "@lichtblick/suite-base/services/http/AuthProvider";
 import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
-import { HttpRequestOptions, HttpResponse } from "@lichtblick/suite-base/services/http/types";
+import {
+  HttpRequestOptions,
+  HttpResponse,
+  HttpStatus,
+} from "@lichtblick/suite-base/services/http/types";
 
 /**
  * HttpService is a lightweight HTTP client that wraps the Fetch API to provide
@@ -107,6 +111,15 @@ export class HttpService {
       }
 
       throw new HttpError(errorMessage, response.status, response.statusText, response);
+    }
+
+    // A 204 response has no body to parse.
+    if (response.status === HttpStatus.NO_CONTENT) {
+      return {
+        data: undefined as T,
+        timestamp: new Date().toISOString(),
+        path: endpoint,
+      };
     }
 
     try {

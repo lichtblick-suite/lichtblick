@@ -12,6 +12,8 @@ export const BUSY_POLLING_INTERVAL_MS = 100;
 
 export const BUSY_POLLING_TIMEOUT_MS = 5000;
 
+export const FAVORITES_TIMEOUT_MS = 5000;
+
 export const DEFAULT_LAYOUT: SaveNewLayout = {
   name: "Default",
   data: defaultLayout,
