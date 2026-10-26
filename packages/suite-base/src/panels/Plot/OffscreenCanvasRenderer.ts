@@ -14,7 +14,7 @@ import { Bounds } from "@lichtblick/suite-base/types/Bounds";
 
 import { ChartRenderer } from "./ChartRenderer";
 import type { Service } from "./ChartRenderer.worker";
-import { Dataset, HoverElement, Scale, UpdateAction } from "./types";
+import { Dataset, HoverElement, Scale, UpdateAction, YScale } from "./types";
 
 // If the datasets builder is garbage collected we also need to cleanup the worker
 // This registry ensures the worker is cleaned up when the builder is garbage collected
@@ -64,7 +64,7 @@ export class OffscreenCanvasRenderer {
     return await (await this.#remote).getElementsAtPixel(pixel);
   }
 
-  public async updateDatasets(datasets: Dataset[]): Promise<Scale | undefined> {
+  public async updateDatasets(datasets: Dataset[]): Promise<{ x?: Scale; y?: YScale }> {
     return await (await this.#remote).updateDatasets(datasets);
   }
 }

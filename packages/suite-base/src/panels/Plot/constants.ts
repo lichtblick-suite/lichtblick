@@ -57,3 +57,5 @@ export const DEFAULT_PLOT_PATH: PlotPath = Object.freeze({
   value: "",
   enabled: true,
 });
+
+export const DEFAULT_MARKER_COLOR = "#f44336";

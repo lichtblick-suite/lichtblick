@@ -3,6 +3,8 @@
 .DS_Store
 .eslintcache
 .webpack/
+.webpack-desktop/
+benchmark/.artifacts/
 ci/apt/packages
 dist/
 node_modules/
@@ -19,6 +21,8 @@ e2e/reports
 e2e/tests/reports/desktop/*
 e2e/tests/reports/web/*
 e2e/tmp/*
+benchmark/e2e/reports/*
+benchmark/test-results/*
 test-results/*
 
 # Yarn
