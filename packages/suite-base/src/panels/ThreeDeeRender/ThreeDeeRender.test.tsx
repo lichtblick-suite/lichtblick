@@ -1304,13 +1304,12 @@ describe("ThreeDeeRender", () => {
       render(<ThreeDeeRender {...props} />);
 
       // Then
-      const advertise1 = mockContext.advertise as jest.Mock;
       await waitFor(() => {
-        expect(advertise1).toHaveBeenCalledWith(
+        expect((mockContext.advertise as jest.Mock).mock.calls).toContainEqual([
           "/lichtblick/edited_transforms",
           "foxglove_msgs/FrameTransform",
           expect.objectContaining({ datatypes: expect.any(Map) }),
-        );
+        ]);
       });
     });
 
@@ -1323,13 +1322,12 @@ describe("ThreeDeeRender", () => {
       render(<ThreeDeeRender {...props} />);
 
       // Then
-      const advertise = mockContext.advertise as jest.Mock;
       await waitFor(() => {
-        expect(advertise).toHaveBeenCalledWith(
+        expect((mockContext.advertise as jest.Mock).mock.calls).toContainEqual([
           "/lichtblick/edited_transforms",
           "foxglove_msgs/FrameTransform",
           expect.anything(),
-        );
+        ]);
       });
     });
 

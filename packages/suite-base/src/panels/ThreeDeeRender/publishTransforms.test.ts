@@ -294,8 +294,7 @@ describe("collectEditedTransforms", () => {
       // Then: the timestamp matches the renderer's current time, and apply was called with the
       // correct parent frame, child frame, and time arguments
       expect(msg!.timestamp).toEqual(fromNanoSec(nanos));
-      const apply = renderer.transformTree.apply as jest.Mock;
-      expect(apply).toHaveBeenCalledWith(
+      expect((renderer.transformTree.apply as jest.Mock).mock.calls).toContainEqual([
         expect.anything(),
         expect.anything(),
         "base",
@@ -303,7 +302,7 @@ describe("collectEditedTransforms", () => {
         "sensor",
         nanos,
         nanos,
-      );
+      ]);
     });
   });
 });
