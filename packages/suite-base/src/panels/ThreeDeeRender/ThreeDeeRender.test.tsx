@@ -1349,7 +1349,7 @@ describe("ThreeDeeRender", () => {
       expect(advertisedTopics).not.toContain("/lichtblick/edited_transforms");
     });
 
-    it("publishes edited transforms via setVariable when configChange fires with edits", async () => {
+    it("publishes edited transforms on registration and config changes", async () => {
       // Given: a component whose initial config has an edited frame, and a renderer that can
       // resolve it. The component writes renderer.config = config after mount, so we set the edited
       // frame in initialState rather than in the mock renderer's config directly.
@@ -1382,6 +1382,20 @@ describe("ThreeDeeRender", () => {
           expect.any(Function),
         );
       });
+
+      // Then: existing edits are published when the configChange handler is registered
+      await waitFor(() => {
+        expect(mockContext.setVariable).toHaveBeenCalledWith(
+          "edited_transforms",
+          expect.arrayContaining([
+            expect.objectContaining({
+              parent_frame_id: "base",
+              child_frame_id: "sensor",
+            }),
+          ]),
+        );
+      });
+      (mockContext.setVariable as jest.Mock).mockClear();
 
       // When: the renderer fires a configChange event
       act(() => {

@@ -1018,6 +1018,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       }
     };
     renderer.addListener("configChange", publishEditedTransforms);
+    publishEditedTransforms(renderer);
     return () => {
       renderer.removeListener("configChange", publishEditedTransforms);
     };
