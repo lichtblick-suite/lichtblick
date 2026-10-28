@@ -3648,7 +3648,7 @@ __metadata:
     css-loader: "npm:6.8.1"
     cytoscape: "npm:3.31.1"
     cytoscape-dagre: "npm:2.5.0"
-    dompurify: "npm:3.4.16"
+    dompurify: "npm:3.4.17"
     dotenv: "npm:17.2.2"
     esbuild-loader: "npm:4.3.0"
     eventemitter3: "npm:5.0.1"
@@ -3710,7 +3710,7 @@ __metadata:
     recharts: "npm:2.15.3"
     rehype-raw: "npm:7.0.0"
     reselect: "npm:5.1.1"
-    sanitize-html: "npm:2.17.7"
+    sanitize-html: "npm:2.18.1"
     seedrandom: "npm:3.0.5"
     shallowequal: "npm:1.1.0"
     storybook: "npm:10.6.3"
@@ -3763,7 +3763,7 @@ __metadata:
     builder-util: "npm:*"
     clean-webpack-plugin: "npm:4.0.0"
     dotenv: "npm:17.2.2"
-    electron: "npm:44.4.5"
+    electron: "npm:44.9.1"
     electron-builder: "npm:26.15.3"
     electron-devtools-installer: "npm:4.0.0"
     electron-squirrel-startup: "npm:1.0.1"
@@ -8632,7 +8632,7 @@ __metadata:
     "@types/react": "npm:18.3.12"
     "@types/react-dom": "npm:18.3.0"
     clean-webpack-plugin: "npm:4.0.0"
-    electron: "npm:44.4.5"
+    electron: "npm:44.9.1"
     html-webpack-plugin: "npm:5.6.0"
     mathjs: "npm:15.2.0"
     react: "npm:18.3.1"
@@ -10183,10 +10183,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.7":
-  version: 1.11.21
-  resolution: "dayjs@npm:1.11.21"
-  checksum: 10/dd16f9f2706b61b90e3c346a3211ac3afd9e26193136ce0e87f70bf74d1c17a447bceb230a88b175467fc9f5e3243d8c1544b9897092a12d9c80ee44d338dcb6
+"dayjs@npm:^1.11.23":
+  version: 1.11.23
+  resolution: "dayjs@npm:1.11.23"
+  checksum: 10/61d29544ca1553369f75541b5abf9c1bb6a978991498923a2d5721c9df3eca513b2c15ff5534de6930dc553de5d6f2b8f8047149f3528df906b21f51df637463
   languageName: node
   linkType: hard
 
@@ -10963,9 +10963,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:44.4.5":
-  version: 44.4.5
-  resolution: "electron@npm:44.4.5"
+"electron@npm:44.9.1":
+  version: 44.9.1
+  resolution: "electron@npm:44.9.1"
   dependencies:
     "@electron-internal/extract-zip": "npm:^1.0.1"
     "@electron/get": "npm:^5.0.0"
@@ -10973,7 +10973,7 @@ __metadata:
   bin:
     electron: cli.js
     install-electron: install.js
-  checksum: 10/a6c33fafef6bb1e3bee9d6feb7948ebd79ac6f8f333d21bcf589d44a15e1b66f99b877c83c6cf0abcd73a2a4ecc834da99fc52a026100acec8b1891601f1a6f5
+  checksum: 10/776483fb3447c8bef910c88dddcce8e326e88c773c53d562a81b2ada3297d329863955486106066ff4058f843667ae05397fa363f6716b99734fdd623d177e16
   languageName: node
   linkType: hard
 
@@ -14314,10 +14314,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-plain-object@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "is-plain-object@npm:5.0.0"
-  checksum: 10/e32d27061eef62c0847d303125440a38660517e586f2f3db7c9d179ae5b6674ab0f469d519b2e25c147a1a3bc87156d0d5f4d8821e0ce4a9ee7fe1fcf11ce45c
+"is-plain-object@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "is-plain-object@npm:5.1.0"
+  checksum: 10/100adc3c2a7ef53968957346aecd1ee427053e1cfa5a12a0b6e49466dd86703d9f52440772f0aa296539691ac164deadfdff5c24c7cadb8635c6a00a9fcaf7ba
   languageName: node
   linkType: hard
 
@@ -15337,12 +15337,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"launder@npm:^1.7.1":
-  version: 1.7.1
-  resolution: "launder@npm:1.7.1"
+"launder@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "launder@npm:1.7.2"
   dependencies:
-    dayjs: "npm:^1.11.7"
-  checksum: 10/e0fbf7934728c9dd82eea3ccbebc31c021c9ffee225861cf6e2f219bdeb2be0d8585748eb700ec58a41a7dff5529e50ac84500657a7a927305685ec9f1cb3ab3
+    dayjs: "npm:^1.11.23"
+  checksum: 10/25dd40e75debcc19898fed8545dc12e49dda1da75eca12cdcaaab7e02de824205ecea2e73957232bef45b92f720b0fbf756d1ccd552f3dc9d1d2cf789d79ee46
   languageName: node
   linkType: hard
 
@@ -15449,7 +15449,7 @@ __metadata:
     babel-plugin-transform-import-meta: "npm:2.2.1"
     cross-env: "npm:10.0.0"
     depcheck: "npm:1.4.7"
-    electron: "npm:44.4.5"
+    electron: "npm:44.9.1"
     electron-builder: "npm:26.15.3"
     eslint: "npm:9.38.0"
     eslint-config-prettier: "npm:9.1.0"
@@ -16752,6 +16752,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nanoid@npm:^3.3.20":
+  version: 3.3.20
+  resolution: "nanoid@npm:3.3.20"
+  bin:
+    nanoid: bin/nanoid.cjs
+  checksum: 10/b19641487fc25325189175226a4b9fcc8da39989c6a39fd35921802158d6b1725d59d8454a4e30643d2bb4837382cac11ee129417282678a67f8394b31c228d9
+  languageName: node
+  linkType: hard
+
 "napi-postinstall@npm:^0.3.4":
   version: 0.3.4
   resolution: "napi-postinstall@npm:0.3.4"
@@ -17971,7 +17980,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.3.11, postcss@npm:^8.4.21, postcss@npm:^8.4.40, postcss@npm:^8.5.15":
+"postcss@npm:^8.4.21, postcss@npm:^8.4.40, postcss@npm:^8.5.15":
   version: 8.5.24
   resolution: "postcss@npm:8.5.24"
   dependencies:
@@ -17979,6 +17988,17 @@ __metadata:
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
   checksum: 10/4e26169ed6fe8c2a32702d233b16368124d162a9399606381ed7a2f99ba6237360717aab339a0bd0f072280663413ff5115189b282085d1be74ffb2d25bdb562
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.5.27":
+  version: 8.5.32
+  resolution: "postcss@npm:8.5.32"
+  dependencies:
+    nanoid: "npm:^3.3.20"
+    picocolors: "npm:^1.1.1"
+    source-map-js: "npm:^1.2.2"
+  checksum: 10/c86fd279d9f29d34bbec6482e01f54effe00eaf8f4dadbe17f8345d11eac68439da45d642b04bfb5d704886f665d2c31f9a0904f2a3f1b9f8098ee0894f76cea
   languageName: node
   linkType: hard
 
@@ -19564,18 +19584,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sanitize-html@npm:2.17.7":
-  version: 2.17.7
-  resolution: "sanitize-html@npm:2.17.7"
+"sanitize-html@npm:2.18.1":
+  version: 2.18.1
+  resolution: "sanitize-html@npm:2.18.1"
   dependencies:
-    deepmerge: "npm:^4.2.2"
     escape-string-regexp: "npm:^4.0.0"
     htmlparser2: "npm:^12.0.0"
-    is-plain-object: "npm:^5.0.0"
-    launder: "npm:^1.7.1"
+    is-plain-object: "npm:^5.1.0"
+    launder: "npm:^1.7.2"
     parse-srcset: "npm:^1.0.2"
-    postcss: "npm:^8.3.11"
-  checksum: 10/8418fcfdabb4cb50569fa7a8af42cac2b4be0247b90b29bd4d7fff61363e78e41455b40397f2a1d084ef71d810b8d90f683d6b27084d3616b7b349ab98bd0e97
+    postcss: "npm:^8.5.27"
+  checksum: 10/930635fcd66ac043edbe327dcd9379cf55d2cb0f80eda572ffc2bee6770b91429db45a8fdab15d1958c576cb153e978e1a3b53e93212782e4ca5b152fa55064c
   languageName: node
   linkType: hard
 
@@ -19741,9 +19760,9 @@ __metadata:
   linkType: hard
 
 "serialize-javascript@npm:^7.0.3":
-  version: 7.0.7
-  resolution: "serialize-javascript@npm:7.0.7"
-  checksum: 10/da427e5660c88c24020cae037883ac234127248c7f972d7e1eb3cea863d89d1816fa4bcf0ecd39f92082c346347ed312c46e50c8473060dcd723bd1891e98942
+  version: 7.1.4
+  resolution: "serialize-javascript@npm:7.1.4"
+  checksum: 10/d6f5963177cdf6c8684197bd996130c3296c77a5b1d49647f8e96b02d93b9f6fd15f2c4ff8bdc5890cb8c7f731b0c792e34ec512b72b4af2a459b1b6da3e40af
   languageName: node
   linkType: hard
 
