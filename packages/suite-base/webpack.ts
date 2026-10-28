@@ -284,6 +284,7 @@ export function makeConfig(
         API_URL: JSON.stringify(process.env.API_URL),
         DEV_WORKSPACE: JSON.stringify(process.env.DEV_WORKSPACE),
         OTLP_ENDPOINT: JSON.stringify(process.env.OTLP_ENDPOINT),
+        SYNC_LOCAL_LAYOUTS: process.env.SYNC_LOCAL_LAYOUTS === "true",
         ...buildEnvVars(),
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales

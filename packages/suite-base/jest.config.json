@@ -18,7 +18,8 @@
     "LICHTBLICK_SUITE_VERSION": "TEST",
     "API_URL": "/",
     "DEV_WORKSPACE": "",
-    "OTLP_ENDPOINT": null
+    "OTLP_ENDPOINT": null,
+    "SYNC_LOCAL_LAYOUTS": false
   },
   "setupFiles": ["<rootDir>/src/test/setup.ts", "jest-canvas-mock", "fake-indexeddb/auto"],
   "setupFilesAfterEnv": ["<rootDir>/src/test/setupTestFramework.ts"],
