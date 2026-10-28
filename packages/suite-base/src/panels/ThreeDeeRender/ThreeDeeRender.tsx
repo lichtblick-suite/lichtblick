@@ -26,6 +26,7 @@ import {
   Topic,
 } from "@lichtblick/suite";
 import { AppSetting } from "@lichtblick/suite-base/AppSetting";
+import { TopicSettingsUpdater } from "@lichtblick/suite-base/components/PanelExtensionAdapter/types";
 import { useAnalytics } from "@lichtblick/suite-base/context/AnalyticsContext";
 import { DEFAULT_SCENE_EXTENSION_CONFIG } from "@lichtblick/suite-base/panels/ThreeDeeRender/SceneExtensionConfig";
 import {
@@ -132,6 +133,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     };
   });
   const configRef = useLatest(config);
+  const lastSavedConfig = useRef<Immutable<RendererConfig>>();
   const { cameraState } = config;
   const backgroundColor = config.scene.backgroundColor;
 
@@ -358,13 +360,35 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
   // Rebuild the settings sidebar tree as needed
   useEffect(() => {
-    context.updatePanelSettingsEditor({
-      actionHandler,
-      enableFilter: true,
-      focusedPath: focusedSettingsPath,
-      nodes: settingsTree ?? {},
-    });
-  }, [actionHandler, context, focusedSettingsPath, settingsTree]);
+    let topicsBeforeAction = renderer?.config.topics;
+
+    // Detect direct field edits even when the scene handler applies them first.
+    const handleSettingsAction = (action: SettingsTreeAction) => {
+      topicsBeforeAction = renderer?.config.topics;
+      actionHandler(action);
+    };
+
+    // Save immediately so stale editor values cannot overwrite the latest edits.
+    const applyConverterSettings: TopicSettingsUpdater = (updateSettings) => {
+      if (renderer) {
+        renderer.updateConfig(updateSettings);
+        if (renderer.config.topics !== topicsBeforeAction) {
+          saveState(renderer.config);
+          lastSavedConfig.current = renderer.config;
+        }
+      }
+    };
+
+    context.updatePanelSettingsEditor(
+      {
+        actionHandler: handleSettingsAction,
+        enableFilter: true,
+        focusedPath: focusedSettingsPath,
+        nodes: settingsTree ?? {},
+      },
+      applyConverterSettings,
+    );
+  }, [actionHandler, context, focusedSettingsPath, settingsTree, renderer, saveState]);
 
   // Update the renderer's reference to `config` when it changes. Note that this does *not*
   // automatically update the settings tree.
@@ -412,7 +436,11 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   // Save panel settings whenever they change
   const throttledSave = useDebouncedCallback(
     (newConfig: Immutable<RendererConfig>) => {
-      saveState(newConfig);
+      // Immediate converter saves already persist this config.
+      if (newConfig !== lastSavedConfig.current) {
+        saveState(newConfig);
+        lastSavedConfig.current = newConfig;
+      }
     },
     100,
     { leading: false, trailing: true, maxWait: 1000 },
