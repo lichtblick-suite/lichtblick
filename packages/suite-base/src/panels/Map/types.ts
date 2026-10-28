@@ -15,6 +15,15 @@ export type Point = {
   lon: number;
 };
 
+/**
+ * How a position is drawn on the map.
+ *
+ * `dot` is the original fixed-size circle. The oriented styles are rotated to the direction
+ * of travel, derived from preceding fixes, and fall back to `dot` when no heading can be
+ * determined: at the start of a track, or while the platform is stationary.
+ */
+export type MapMarkerStyle = "dot" | "arrow" | "vehicle";
+
 export type Matrix3x3 = [number, number, number, number, number, number, number, number, number];
 
 // https://docs.ros.org/en/api/sensor_msgs/html/msg/NavSatFix.html
@@ -64,4 +73,16 @@ export type FilteredPointLayerArgs = {
   navSatMessageEvents: readonly MessageEvent<NavSatFixMsg>[];
   onHover?: (event: MessageEvent<NavSatFixMsg> | undefined) => void;
   onClick?: (event: MessageEvent<NavSatFixMsg>) => void;
+  /** Marker style to draw. Defaults to `dot`. */
+  markerStyle?: MapMarkerStyle;
+  /**
+   * Body colour for the oriented marker styles. Defaults to `color`, the topic colour.
+   * Kept separate so the shape can be picked out against a track drawn in the same colour.
+   */
+  markerColor?: string;
+  /**
+   * Earlier positions on the same topic, oldest first, used to derive a heading for the
+   * oriented marker styles. Ignored when `markerStyle` is `dot`.
+   */
+  headingTrack?: readonly Point[];
 };
