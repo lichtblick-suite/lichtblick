@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
+import { AuthProvider } from "@lichtblick/suite-base/services/http/AuthProvider";
 import { HttpError } from "@lichtblick/suite-base/services/http/HttpError";
 import {
   HttpRequestOptions,
@@ -25,6 +26,7 @@ export class HttpService {
   private readonly apiVersion = "1.0";
   private readonly baseURL?: string;
   private readonly defaultOptions: RequestInit;
+  private authProvider?: AuthProvider;
 
   public constructor() {
     this.baseURL = APP_CONFIG.apiUrl;
@@ -36,6 +38,10 @@ export class HttpService {
     };
   }
 
+  public setAuthProvider(authProvider: AuthProvider | undefined): void {
+    this.authProvider = authProvider;
+  }
+
   private async request<T>(
     endpoint: string,
     options: HttpRequestOptions = {},
@@ -43,18 +49,21 @@ export class HttpService {
     const { timeout, responseType = "json", ...fetchOptions } = options;
     const url = this.baseURL ? `${this.baseURL}/${endpoint}` : endpoint;
     const shouldUseDefaultHeaders = !(fetchOptions.body instanceof FormData);
+    const authHeaders = await this.authProvider?.getAuthHeaders();
 
     const requestOptions: RequestInit = {
       ...fetchOptions,
-      credentials: "same-origin", // Include cookies in requests
+      credentials: this.authProvider != undefined ? "omit" : "same-origin",
       headers: shouldUseDefaultHeaders
         ? {
             ...(this.defaultOptions.headers as Record<string, string>),
             ...(fetchOptions.headers as Record<string, string>),
+            ...authHeaders,
           }
         : {
             "Api-Version": this.apiVersion,
             ...(fetchOptions.headers as Record<string, string>),
+            ...authHeaders,
           },
     };
 
@@ -86,6 +95,10 @@ export class HttpService {
     }
 
     if (!response.ok) {
+      if (response.status === 401) {
+        await this.authProvider?.handleUnauthorizedResponse?.(response);
+      }
+
       let errorMessage = `HTTP Error: ${response.status} ${response.statusText}`;
 
       try {
