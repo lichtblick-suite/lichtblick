@@ -527,81 +527,20 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   }
 
   /**
-   * Binary search to find the index of the last message with receiveTime <= targetTime
-   * @param messages - sorted array of messages by receiveTime
-   * @param targetTime - time to search for
-   * @returns index of the last message <= targetTime, or -1 if all messages are after targetTime
-   */
-  #binarySearchTimeIndex(messages: readonly MessageEvent[], targetTime: Time): number {
-    let left = 0;
-    let right = messages.length - 1;
-    let result = -1;
-
-    while (left <= right) {
-      const mid = Math.floor((left + right) / 2);
-      const midMessage = messages[mid];
-      if (!midMessage) {
-        break;
-      }
-
-      if (isLessThan(midMessage.receiveTime, targetTime)) {
-        result = mid;
-        left = mid + 1;
-      } else if (isLessThan(targetTime, midMessage.receiveTime)) {
-        right = mid - 1;
-      } else {
-        // Equal times
-        result = mid;
-        break;
-      }
-    }
-
-    return result;
-  }
-
-  /**
    * Updates renderer state according to seek delta. Handles clearing of future state and resetting of allFrames cursor if seeked backwards
    * Should be called after `setCurrentTime` as been called
    * @param oldTime used to determine if seeked backwards
    */
-  public handleSeek(oldTimeNs: bigint, allFrames?: readonly MessageEvent[]): void {
+  public handleSeek(oldTimeNs: bigint): void {
     const movedBack = this.currentTime < oldTimeNs;
 
-    if (movedBack && allFrames && allFrames.length > 0) {
-      // Optimized backward seek: use binary search to find new cursor position
-      const targetTime = fromNanoSec(this.currentTime);
-      const newCursorIndex = this.#binarySearchTimeIndex(allFrames, targetTime);
-
-      // Clear transforms after current time instead of clearing everything
-      this.transformTree.clearAfter(this.currentTime);
+    this.clear({
+      clearTransforms: movedBack,
+      resetAllFramesCursor: movedBack,
+      preserveStaticTransforms: movedBack,
+    });
+    if (movedBack) {
       this.#reapplyStaticTransforms();
-
-      // Update cursor to new position
-      this.#allFramesCursor = {
-        index: newCursorIndex,
-        lastReadMessage: newCursorIndex >= 0 ? allFrames[newCursorIndex] : undefined,
-        cursorTimeReached: targetTime,
-      };
-
-      // Clear subscription queues and renderables but preserve valid transforms
-      this.#clearSubscriptionQueues();
-      this.settings.errors.clear();
-      this.hud.clear();
-
-      for (const extension of this.sceneExtensions.values()) {
-        extension.removeAllRenderables();
-      }
-      this.queueAnimationFrame();
-    } else {
-      // Forward seek or no allFrames available - use original behavior
-      this.clear({
-        clearTransforms: movedBack,
-        resetAllFramesCursor: movedBack,
-        preserveStaticTransforms: movedBack,
-      });
-      if (movedBack) {
-        this.#reapplyStaticTransforms();
-      }
     }
   }
 
