@@ -182,6 +182,26 @@ describe("PlotCoordinator", () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       };
 
+      const wheel: InteractionEvent = {
+        type: "wheel",
+        cancelable: false,
+        deltaX: 0,
+        deltaY: -100,
+        clientX: 250,
+        clientY: 250,
+        boundingClientRect: {
+          x: 0,
+          y: 0,
+          width: 500,
+          height: 500,
+          top: 0,
+          left: 0,
+          right: 500,
+          bottom: 500,
+          toJSON: () => ({}),
+        },
+      };
+
       it("should render the x-axis window ending at the new time when playback advances in follow mode", async () => {
         // GIVEN a timestamp plot following the last 4 s, rendered at the start of the file
         plotCoordinator.handleConfig(
@@ -245,6 +265,49 @@ describe("PlotCoordinator", () => {
         await settle();
 
         // THEN nothing is rendered
+        expect(update).not.toHaveBeenCalled();
+      });
+
+      it("should not render on time changes when the user has zoomed or panned the plot", async () => {
+        // GIVEN a timestamp plot following the last 4 s that the user zoomed to 1 s - 3 s at 5 s
+        plotCoordinator.handleConfig(
+          PlotBuilder.config({ xAxisVal: "timestamp", followingViewWidth: 4, paths: [] }),
+          "light",
+          {},
+        );
+        plotCoordinator.handlePlayerState(at(5));
+        const update = jest.spyOn(renderer, "update");
+        update.mockResolvedValue({ x: { min: 1, max: 3 }, y: { min: 0, max: 1 } });
+        plotCoordinator.addInteractionEvent(wheel);
+        await settle();
+        update.mockClear();
+
+        // WHEN playback reaches 6 s
+        plotCoordinator.handlePlayerState(at(6));
+        await settle();
+
+        // THEN nothing is rendered: the zoomed x-axis does not follow the time
+        expect(update).not.toHaveBeenCalled();
+      });
+
+      it("should not render on time changes when the plot is synced to another plot's x-axis", async () => {
+        // GIVEN a timestamp plot following the last 4 s that another plot synced to 2 s - 6 s
+        plotCoordinator.handleConfig(
+          PlotBuilder.config({ xAxisVal: "timestamp", followingViewWidth: 4, paths: [] }),
+          "light",
+          {},
+        );
+        plotCoordinator.handlePlayerState(at(5));
+        plotCoordinator.setGlobalBounds({ min: 2, max: 6 });
+        await settle();
+        const update = jest.spyOn(renderer, "update");
+        update.mockClear();
+
+        // WHEN playback reaches 6 s
+        plotCoordinator.handlePlayerState(at(6));
+        await settle();
+
+        // THEN nothing is rendered: the synced x-axis does not follow the time
         expect(update).not.toHaveBeenCalled();
       });
     });

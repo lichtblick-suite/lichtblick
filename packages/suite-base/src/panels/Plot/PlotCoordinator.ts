@@ -410,8 +410,9 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     this.currentSeconds = secondsSinceStart;
     // In follow mode the x-axis window ends at the current time. A source with a fixed range
     // (file playback) never changes the dataset range, so nothing else would re-render the axis
-    // and it would stay where the panel was first drawn.
-    if (this.followRange != undefined && moved) {
+    // and it would stay where the panel was first drawn. A zoomed/panned or synced x-axis does not
+    // follow the time, so there is nothing to re-render then.
+    if (this.followRange != undefined && moved && !this.interactionBounds && !this.globalBounds) {
       this.queueDispatchRender();
     }
   }
