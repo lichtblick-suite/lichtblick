@@ -193,6 +193,16 @@ describe("App Component MultiProvider Tests", () => {
     });
   });
 
+  it("nests LayoutManagerProvider inside the user profile provider", () => {
+    setup();
+    const providerTypes: unknown[] = extractProviderTypes();
+
+    // MultiProvider nests later providers inside earlier ones.
+    expect(providerTypes.indexOf(LayoutManagerProvider)).toBeGreaterThan(
+      providerTypes.indexOf(UserProfileLocalStorageProvider),
+    );
+  });
+
   it("verifies that AppParametersProvider is called with correct parameters", () => {
     const appParameters = {
       [BasicBuilder.string()]: BasicBuilder.string(),

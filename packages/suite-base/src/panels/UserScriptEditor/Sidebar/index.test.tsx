@@ -5,7 +5,7 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api.js";
+import * as monacoApi from "monaco-editor/editor/editor.api.js";
 
 import LayoutBuilder from "@lichtblick/suite-base/testing/builders/LayoutBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
@@ -15,7 +15,7 @@ import { Sidebar } from "./index";
 
 const GOTO_UTILS_PATH = "/utils/pointClouds.ts";
 
-jest.mock("monaco-editor/esm/vs/editor/editor.api.js", () => ({
+jest.mock("monaco-editor/editor/editor.api.js", () => ({
   Uri: { parse: jest.fn((value: string) => ({ path: value })) },
   editor: { getModel: jest.fn() },
 }));

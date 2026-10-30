@@ -23,7 +23,20 @@ const log = Log.getLogger(__filename);
  * Subclasses only need to implement `run()` and override whichever methods they actually use.
  */
 abstract class BenchmarkPlayerBase implements Player {
+  /** Marks results from this player as coming from the legacy synthetic pipeline, not the real
+   * production `IterablePlayer`.
+   * */
+  public readonly pipeline = "synthetic" as const;
+
   protected listener?: (state: PlayerState) => Promise<void>;
+
+  /**
+   * Set by `close()` so that subclasses with unbounded `run()` loops (e.g. synthetic players
+   * that produce messages as fast as the message pipeline allows) can exit promptly. Without
+   * this, `run()` keeps calling `listener()` forever, which keeps the renderer's event loop busy
+   * and significantly delays Electron's shutdown once the test/host tears down the player.
+   */
+  protected closed = false;
 
   protected abstract run(): Promise<void>;
 
@@ -40,7 +53,7 @@ abstract class BenchmarkPlayerBase implements Player {
     return undefined;
   }
   public close(): void {
-    // no-op
+    this.closed = true;
   }
   public setSubscriptions(_subscriptions: SubscribePayload[]): void {
     // no-op

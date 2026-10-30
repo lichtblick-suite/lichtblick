@@ -184,14 +184,6 @@ export class CoordinateFrame<ID extends AnyFrameId = UserFrameId> {
     }
   }
 
-  /** Remove all transforms with timestamps greater than the given timestamp. */
-  public removeTransformsAfter(time: Time): void {
-    const removed = this.#transforms.removeAfter(time);
-    for (const [, tf] of removed) {
-      this.#transformPool.release(tf);
-    }
-  }
-
   /** Removes a transform with a specific timestamp */
   public removeTransformAt(time: Time): void {
     const tf = this.#transforms.remove(time);
