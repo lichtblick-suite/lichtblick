@@ -140,6 +140,57 @@ describe("FoxgloveWebSocketPlayer playback control", () => {
     expect(state.alerts).toEqual([]);
   });
 
+  it.each([8n, 22n])("keeps the server range for a playback time of %ss", async (sec) => {
+    ws.receive(
+      playbackStateMessage({ status: 0, timeNs: sec * 1_000_000_000n, speed: 1, didSeek: false }),
+    );
+    await Promise.resolve();
+
+    const state = states.at(-1)!;
+    expect(state.activeData?.startTime).toEqual({ sec: 10, nsec: 0 });
+    expect(state.activeData?.endTime).toEqual({ sec: 20, nsec: 0 });
+  });
+
+  it("ignores server playback bounds where start is after end", async () => {
+    ws.onopen?.({});
+    ws.receive(
+      JSON.stringify({
+        ...serverInfo,
+        dataStartTime: { sec: 20, nsec: 0 },
+        dataEndTime: { sec: 10, nsec: 0 },
+      }),
+    );
+    await Promise.resolve();
+    expect(states.at(-1)!.capabilities).not.toContain(PLAYER_CAPABILITIES.playbackControl);
+  });
+
+  it("ignores negative seek times", () => {
+    player.seekPlayback({ sec: -1, nsec: 0 });
+    expect(ws.send).not.toHaveBeenCalled();
+  });
+
+  it("does not send playback control after the socket closed", () => {
+    jest.spyOn(console, "error").mockImplementation(() => {}); // connection-failed alert
+    ws.onclose?.({});
+    player.pausePlayback();
+    expect(ws.send).not.toHaveBeenCalled();
+    (console.error as jest.Mock).mockRestore();
+  });
+
+  it("drops playback capabilities on reconnect to a server without playbackControl", async () => {
+    ws.onopen?.({});
+    ws.receive(JSON.stringify({ ...serverInfo, capabilities: ["time"] }));
+    ws.receive(
+      playbackStateMessage({ status: 1, timeNs: 12_000_000_000n, speed: 2, didSeek: true }),
+    );
+    await Promise.resolve();
+
+    const state = states.at(-1)!;
+    expect(state.capabilities).not.toContain(PLAYER_CAPABILITIES.playbackControl);
+    expect(state.capabilities).not.toContain(PLAYER_CAPABILITIES.setSpeed);
+    expect(state.activeData?.speed).toBe(1);
+  });
+
   it("round-trips the request id", () => {
     player.pausePlayback();
     const request = ws.send.mock.calls[0]![0] as ArrayBuffer;

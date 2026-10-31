@@ -60,11 +60,17 @@ export function encodePlaybackControlRequest(req: PlaybackControlRequest): Array
   return buffer;
 }
 
+const PLAYBACK_STATE_HEADER_LENGTH = 19;
+
+/** True for a well-formed playback state frame; malformed frames fall through to FoxgloveClient. */
 export function isPlaybackStateMessage(data: unknown): data is ArrayBuffer {
+  if (!(data instanceof ArrayBuffer) || data.byteLength < PLAYBACK_STATE_HEADER_LENGTH) {
+    return false;
+  }
+  const view = new DataView(data);
   return (
-    data instanceof ArrayBuffer &&
-    data.byteLength > 0 &&
-    new DataView(data).getUint8(0) === SERVER_PLAYBACK_STATE_OPCODE
+    view.getUint8(0) === SERVER_PLAYBACK_STATE_OPCODE &&
+    PLAYBACK_STATE_HEADER_LENGTH + view.getUint32(15, true) <= data.byteLength
   );
 }
 
@@ -76,6 +82,6 @@ export function decodePlaybackState(buffer: ArrayBuffer): PlaybackState {
     currentTimeNs: view.getBigUint64(2, true),
     speed: view.getFloat32(10, true),
     didSeek: view.getUint8(14) !== 0,
-    requestId: textDecoder.decode(new Uint8Array(buffer, 19, requestIdLength)),
+    requestId: textDecoder.decode(new Uint8Array(buffer, PLAYBACK_STATE_HEADER_LENGTH, requestIdLength)),
   };
 }

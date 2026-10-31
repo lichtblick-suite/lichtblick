@@ -66,6 +66,11 @@ describe("decodePlaybackState", () => {
   it("does not match other binary or text messages", () => {
     expect(isPlaybackStateMessage(new Uint8Array([0x01, 0x00]).buffer)).toBe(false);
     expect(isPlaybackStateMessage(new ArrayBuffer(0))).toBe(false);
+    expect(isPlaybackStateMessage(new Uint8Array([0x05, 0x00]).buffer)).toBe(false);
+    const badLength = new Uint8Array(19);
+    badLength[0] = 0x05;
+    new DataView(badLength.buffer).setUint32(15, 4, true);
+    expect(isPlaybackStateMessage(badLength.buffer)).toBe(false);
     expect(isPlaybackStateMessage('{"op":"serverInfo"}')).toBe(false);
   });
 });
