@@ -80,6 +80,7 @@ function makeMockLayoutManager() {
     overwriteLayout: jest.fn().mockImplementation(mockThrow("overwriteLayout")),
     revertLayout: jest.fn().mockImplementation(mockThrow("revertLayout")),
     makePersonalCopy: jest.fn().mockImplementation(mockThrow("makePersonalCopy")),
+    getDefaultLayoutData: jest.fn().mockResolvedValue(undefined),
     loadFavorites: jest.fn().mockResolvedValue(favorites),
     canFavorite: jest.fn().mockReturnValue(false),
     setFavorite: jest.fn().mockImplementation(mockThrow("setFavorite")),
