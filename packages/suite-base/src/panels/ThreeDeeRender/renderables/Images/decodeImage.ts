@@ -26,6 +26,7 @@ import {
 import {
   H264 as H264Parser,
   H265 as H265Parser,
+  AV1 as AV1Parser,
   VideoCodec,
   VideoPlayer,
   canonicalVideoCodec,
@@ -64,6 +65,8 @@ export function getVideoDecoderConfig(frameMsg: CompressedVideo): VideoDecoderCo
       return H264Parser.ParseDecoderConfig(frameMsg.data);
     case VideoCodec.H265:
       return H265Parser.ParseDecoderConfig(frameMsg.data);
+    case VideoCodec.AV1:
+      return AV1Parser.ParseDecoderConfig(frameMsg.data);
   }
   return undefined;
 }
@@ -74,49 +77,75 @@ export function prepareVideoFrame(
   resolvedCodec?: VideoCodec,
 ): PreparedVideoFrame {
   switch (resolvedCodec ?? canonicalVideoCodec(frameMsg.format)) {
-    case VideoCodec.H265: {
-      const frameInfo = H265Parser.InspectFrame(frameMsg.data, context?.h265);
-      if (frameInfo.bitstreamFormat === "unknown" || frameInfo.normalizedData == undefined) {
-        return {
-          data: frameMsg.data,
-          status: PreparedVideoFrameStatus.UnsupportedBitstream,
-          diagnostics: "unsupported H.265 bitstream format",
-          type: "delta",
-        };
-      }
-      if (frameInfo.frameType === "B") {
-        return {
-          data: frameInfo.normalizedData,
-          status: PreparedVideoFrameStatus.UnsupportedBFrame,
-          diagnostics: "H.265 B frames are not supported",
-          type: "delta",
-        };
-      }
-
-      const type = frameInfo.isKeyframe ? "key" : "delta";
-      return {
-        data:
-          type === "key"
-            ? frameInfo.normalizedData
-            : (frameInfo.strippedData ?? frameInfo.normalizedData),
-        decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
-        status: PreparedVideoFrameStatus.Ok,
-        type,
-      };
-    }
+    case VideoCodec.H265:
+      return prepareH265VideoFrame(frameMsg.data, context?.h265);
+    case VideoCodec.AV1:
+      return prepareAV1VideoFrame(frameMsg.data);
     case VideoCodec.H264:
-    default: {
-      const frameData = frameMsg.data;
-      const type = H264Parser.IsKeyframe(frameData) ? "key" : "delta";
-      return {
-        data: frameData,
-        // Only keyframes carry an SPS; delta frames have nothing to parse.
-        decoderConfig: type === "key" ? H264Parser.ParseDecoderConfig(frameData) : undefined,
-        status: PreparedVideoFrameStatus.Ok,
-        type,
-      };
-    }
+    default:
+      return prepareH264VideoFrame(frameMsg.data);
   }
+}
+
+function prepareH265VideoFrame(
+  frameData: Uint8Array,
+  context?: PrepareVideoFrameContext["h265"],
+): PreparedVideoFrame {
+  const frameInfo = H265Parser.InspectFrame(frameData, context);
+  if (frameInfo.bitstreamFormat === "unknown" || frameInfo.normalizedData == undefined) {
+    return {
+      data: frameData,
+      status: PreparedVideoFrameStatus.UnsupportedBitstream,
+      diagnostics: "unsupported H.265 bitstream format",
+      type: "delta",
+    };
+  }
+  if (frameInfo.frameType === "B") {
+    return {
+      data: frameInfo.normalizedData,
+      status: PreparedVideoFrameStatus.UnsupportedBFrame,
+      diagnostics: "H.265 B frames are not supported",
+      type: "delta",
+    };
+  }
+
+  const type = frameInfo.isKeyframe ? "key" : "delta";
+  return {
+    data:
+      type === "key"
+        ? frameInfo.normalizedData
+        : (frameInfo.strippedData ?? frameInfo.normalizedData),
+    decoderConfig: H265Parser.ParseDecoderConfig(frameInfo.normalizedData),
+    status: PreparedVideoFrameStatus.Ok,
+    type,
+  };
+}
+
+function prepareAV1VideoFrame(frameData: Uint8Array): PreparedVideoFrame {
+  const type = AV1Parser.IsKeyframe(frameData) ? "key" : "delta";
+  const decoderConfig = type === "key" ? AV1Parser.ParseDecoderConfig(frameData) : undefined;
+  return {
+    data: frameData,
+    decoderConfig,
+    diagnostics:
+      type === "key" && decoderConfig == undefined ? "invalid AV1 sequence header" : undefined,
+    status:
+      type === "key" && decoderConfig == undefined
+        ? PreparedVideoFrameStatus.UnsupportedBitstream
+        : PreparedVideoFrameStatus.Ok,
+    type,
+  };
+}
+
+function prepareH264VideoFrame(frameData: Uint8Array): PreparedVideoFrame {
+  const type = H264Parser.IsKeyframe(frameData) ? "key" : "delta";
+  return {
+    data: frameData,
+    // Only keyframes carry an SPS; delta frames have nothing to parse.
+    decoderConfig: type === "key" ? H264Parser.ParseDecoderConfig(frameData) : undefined,
+    status: PreparedVideoFrameStatus.Ok,
+    type,
+  };
 }
 
 export async function decodeCompressedVideoToBitmap(
