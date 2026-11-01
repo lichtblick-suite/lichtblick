@@ -3680,7 +3680,7 @@ __metadata:
     moment-timezone: "npm:0.6.3"
     monaco-editor: "npm:0.57.0"
     monaco-editor-webpack-plugin: "npm:7.1.1"
-    nanoid: "npm:5.1.16"
+    nanoid: "npm:6.0.2"
     natsort: "npm:2.0.3"
     nearley: "npm:2.20.1"
     nearley-loader: "npm:2.0.0"
@@ -16734,12 +16734,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:5.1.16":
-  version: 5.1.16
-  resolution: "nanoid@npm:5.1.16"
+"nanoid@npm:6.0.2":
+  version: 6.0.2
+  resolution: "nanoid@npm:6.0.2"
   bin:
     nanoid: bin/nanoid.js
-  checksum: 10/b1e702e2b7072e74ac2ae880907d0a291853a36617ec5c3d27d81ab04965ebc0d4d0f707cf9220928cf93d5370b1f561c930efee853dc9c1a3facaefdf1a42ee
+  checksum: 10/c555e99171c0988195d71ba22a7acd96f18c767b4a1db5c2a3d75ebf9c302a269fcda3c22e2d6022f3e5a345dcf7188a36f88c6d5fffc2828c68a1b7f9996daf
   languageName: node
   linkType: hard
 
