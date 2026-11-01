@@ -296,6 +296,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
       this.#client?.close();
       this.#client = undefined;
+      this.#serverControlsPlayback = false;
 
       this.#alerts.addAlert("ws:connection-failed", {
         severity: "error",
@@ -404,6 +405,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
       }
 
       const { dataStartTime, dataEndTime } = event as PlaybackServerInfo;
+      const wasControllingPlayback = this.#serverControlsPlayback;
+      this.#dropPlaybackCapabilities();
       this.#serverControlsPlayback =
         event.capabilities.includes(PLAYBACK_CONTROL_CAPABILITY) &&
         dataStartTime != undefined &&
@@ -416,6 +419,9 @@ export default class FoxgloveWebSocketPlayer implements Player {
           PLAYER_CAPABILITIES.playbackControl,
           PLAYER_CAPABILITIES.setSpeed,
         );
+      } else if (wasControllingPlayback) {
+        this.#startTime = undefined;
+        this.#endTime = undefined;
       }
 
       this.#emitState();
@@ -1298,7 +1304,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #getCurrentTime(): Time {
     // If the server does not publish the time, then we set the clock time to realtime as long as
     // the server is connected. When the server is not connected, time stops.
-    if (!this.#serverPublishesTime) {
+    if (!this.#serverPublishesTime && !this.#serverControlsPlayback) {
       this.#clockTime =
         this.#presence === PlayerPresence.PRESENT ? fromMillis(Date.now()) : this.#clockTime;
     }
@@ -1427,8 +1433,16 @@ export default class FoxgloveWebSocketPlayer implements Player {
     }
     this.#clockTime = fromNanoSec(state.currentTimeNs);
     this.#isPlaying = state.status === PlaybackStatus.Playing;
-    this.#speed = state.speed;
+    if (Number.isFinite(state.speed)) {
+      this.#speed = state.speed;
+    }
     this.#emitState();
+  }
+
+  #dropPlaybackCapabilities(): void {
+    this.#playerCapabilities = this.#playerCapabilities.filter(
+      (cap) => cap !== PLAYER_CAPABILITIES.playbackControl && cap !== PLAYER_CAPABILITIES.setSpeed,
+    );
   }
 
   #resetSessionState(): void {
@@ -1436,9 +1450,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#endTime = undefined;
     this.#clockTime = undefined;
     this.#serverControlsPlayback = false;
-    this.#playerCapabilities = this.#playerCapabilities.filter(
-      (cap) => cap !== PLAYER_CAPABILITIES.playbackControl && cap !== PLAYER_CAPABILITIES.setSpeed,
-    );
+    this.#dropPlaybackCapabilities();
     this.#isPlaying = true;
     this.#speed = 1;
     this.#topicsStats = new Map();

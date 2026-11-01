@@ -164,6 +164,59 @@ describe("FoxgloveWebSocketPlayer playback control", () => {
     expect(states.at(-1)!.capabilities).not.toContain(PLAYER_CAPABILITIES.playbackControl);
   });
 
+  it("does not send playback control to a reconnecting socket that is not open yet", () => {
+    jest.spyOn(console, "error").mockImplementation(() => {}); // connection-failed alert
+    const realSetTimeout = global.setTimeout;
+    let reopen: (() => void) | undefined;
+    global.setTimeout = ((fn: () => void) => {
+      reopen = fn;
+    }) as unknown as typeof setTimeout;
+    const oldWs = ws;
+    try {
+      ws.onclose?.({});
+    } finally {
+      global.setTimeout = realSetTimeout;
+    }
+    reopen!(); // reconnect; the new socket never opens
+    const newWs = MockWebSocket.lastInstance!;
+    expect(newWs).not.toBe(oldWs);
+
+    player.pausePlayback();
+    expect(oldWs.send).not.toHaveBeenCalled();
+    expect(newWs.send).not.toHaveBeenCalled();
+    (console.error as jest.Mock).mockRestore();
+  });
+
+  it("drops playback capabilities when a same-session serverInfo disables playback", async () => {
+    ws.receive(JSON.stringify({ ...serverInfo, sessionId: "s" }));
+    ws.receive(JSON.stringify({ ...serverInfo, sessionId: "s", capabilities: ["time"] }));
+    await Promise.resolve();
+
+    const state = states.at(-1)!;
+    expect(state.capabilities).not.toContain(PLAYER_CAPABILITIES.playbackControl);
+    expect(state.capabilities).not.toContain(PLAYER_CAPABILITIES.setSpeed);
+  });
+
+  it("uses server playback time instead of wall time when the server has no time capability", async () => {
+    ws.onopen?.({});
+    ws.receive(JSON.stringify({ ...serverInfo, capabilities: ["playbackControl"] }));
+    ws.receive(
+      playbackStateMessage({ status: 0, timeNs: 12_000_000_000n, speed: 1, didSeek: false }),
+    );
+    await Promise.resolve();
+
+    expect(states.at(-1)!.activeData?.currentTime).toEqual({ sec: 12, nsec: 0 });
+  });
+
+  it("ignores a non-finite playback speed from the server", async () => {
+    ws.receive(
+      playbackStateMessage({ status: 0, timeNs: 12_000_000_000n, speed: NaN, didSeek: false }),
+    );
+    await Promise.resolve();
+
+    expect(states.at(-1)!.activeData?.speed).toBe(1);
+  });
+
   it("ignores negative seek times", () => {
     player.seekPlayback({ sec: -1, nsec: 0 });
     expect(ws.send).not.toHaveBeenCalled();
