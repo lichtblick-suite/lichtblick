@@ -93,6 +93,8 @@ describe("FoxgloveWebSocketPlayer playback control", () => {
     );
     expect(state.activeData?.startTime).toEqual({ sec: 10, nsec: 0 });
     expect(state.activeData?.endTime).toEqual({ sec: 20, nsec: 0 });
+    // before the first playback state the current time starts at the range start
+    expect(state.activeData?.currentTime).toEqual({ sec: 10, nsec: 0 });
   });
 
   it("sends playback control requests", () => {
@@ -244,7 +246,7 @@ describe("FoxgloveWebSocketPlayer playback control", () => {
     expect(state.activeData?.speed).toBe(1);
   });
 
-  it("round-trips the request id", () => {
+  it("sends a uuid request id and decodes an empty one", () => {
     player.pausePlayback();
     const request = ws.send.mock.calls[0]![0] as ArrayBuffer;
     const requestId = new TextDecoder().decode(new Uint8Array(request, 19));

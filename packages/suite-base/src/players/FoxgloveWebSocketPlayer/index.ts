@@ -415,6 +415,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       if (this.#serverControlsPlayback) {
         this.#startTime = dataStartTime;
         this.#endTime = dataEndTime;
+        this.#clockTime ??= dataStartTime;
         this.#playerCapabilities = this.#playerCapabilities.concat(
           PLAYER_CAPABILITIES.playbackControl,
           PLAYER_CAPABILITIES.setSpeed,
