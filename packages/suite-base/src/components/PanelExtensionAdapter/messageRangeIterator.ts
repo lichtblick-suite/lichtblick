@@ -8,7 +8,7 @@
 import Logger from "@lichtblick/log";
 import { MessageEvent, Subscription } from "@lichtblick/suite";
 import { CreateMessageRangeIteratorParams } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/contants";
+import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/constants";
 
 const log = Logger.getLogger(__filename);
 

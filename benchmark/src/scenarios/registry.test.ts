@@ -93,5 +93,42 @@ describe("scenarios registry", () => {
       // Then
       expect(uniqueIds.size).toBe(ids.length);
     });
+
+    it("should register mcap-multi-ingest on the real pipeline without a hardcoded url", () => {
+      // Given
+      const id = "mcap-multi-ingest";
+
+      // When
+      const scenario = getScenario(id);
+
+      // Then
+      expect(scenario).toEqual({
+        id,
+        layout: "mcapMultiIngest",
+        dataSource: {
+          factoryId: "mcap-real-pipeline",
+          params: { maxHydratedSources: "1" },
+          requiredParams: ["url"],
+        },
+        pipeline: "real",
+        autoStart: true,
+        durationMs: 10_000,
+      });
+      expect(scenario?.dataSource.params?.url).toBeUndefined();
+    });
+
+    it("should not require any params for synthetic scenarios", () => {
+      // Given
+      const synthetic = SCENARIOS.filter((scenario) => scenario.pipeline === "synthetic");
+
+      // When
+      const requiredParams = synthetic.flatMap(
+        (scenario) => scenario.dataSource.requiredParams ?? [],
+      );
+
+      // Then
+      expect(synthetic.length).toBeGreaterThan(0);
+      expect(requiredParams).toEqual([]);
+    });
   });
 });

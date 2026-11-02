@@ -65,6 +65,9 @@ const filterBlockByTopics = memoizeWeak(
 
 const useSubscriptionsForBlocks = (subscriptions: Immutable<SubscribePayload[]>) => {
   const [id] = useState(() => uuidv4());
+  // Intentionally not registered with `usePanelSubscriberTelemetry`: block data is not delivered
+  // per tick, but the pipeline still buckets per-tick messages for this subscriber (ignoring
+  // preloadType), so registering it would double-count the per-tick fallback subscriber.
 
   const setSubscriptions = useMessagePipeline(
     useCallback(

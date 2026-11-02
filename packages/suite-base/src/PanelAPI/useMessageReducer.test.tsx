@@ -21,15 +21,23 @@ import { PropsWithChildren, useState } from "react";
 import { MessagePipelineProvider } from "@lichtblick/suite-base/components/MessagePipeline";
 import FakePlayer from "@lichtblick/suite-base/components/MessagePipeline/FakePlayer";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
+import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
+import {
+  installTestTelemetrySink,
+  publishAndCollect,
+} from "@lichtblick/suite-base/players/IterablePlayer/testing/telemetryTestUtils";
 import {
   Player,
   PlayerStateActiveData,
   Topic,
   MessageEvent,
+  SubscribePayload,
 } from "@lichtblick/suite-base/players/types";
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import { makeMockAppConfiguration } from "@lichtblick/suite-base/util/makeMockAppConfiguration";
+import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
 
 import * as PanelAPI from ".";
 
@@ -557,5 +565,111 @@ describe("useMessageReducer", () => {
     expect(result.current).toEqual(2);
     rerender({ addMessages: jest.fn() });
     expect(restore.mock.calls).toEqual([...initialRestoreCallArguments, [2]]);
+  });
+
+  describe("telemetry", () => {
+    const PANEL_ID = "RawMessages!t3l3m";
+    const PANEL_TITLE = "My raw messages";
+
+    function makePanelWrapper(player: Player) {
+      const PipelineWrapper = makeWrapper(player);
+      return function PanelWrapper({ children }: PropsWithChildren) {
+        return (
+          <PipelineWrapper>
+            <MockPanelContextProvider id={PANEL_ID} type="RawMessages" title={PANEL_TITLE}>
+              {children}
+            </MockPanelContextProvider>
+          </PipelineWrapper>
+        );
+      };
+    }
+
+    async function emitMessages(player: FakePlayer, messages: MessageEvent[]): Promise<void> {
+      let emitted: Promise<void> | undefined;
+      act(() => {
+        emitted = player.emit({
+          activeData: {
+            messages,
+            currentTime: { sec: 0, nsec: 0 },
+            startTime: { sec: 0, nsec: 0 },
+            endTime: { sec: 1, nsec: 0 },
+            isPlaying: true,
+            speed: 1,
+            lastSeekTime: 1,
+            topics: [
+              { name: "/foo", schemaName: "foo" },
+              { name: "/bar", schemaName: "bar" },
+            ],
+            topicStats: new Map(),
+            datatypes: new Map(),
+            totalBytesReceived: messages.reduce((sum, { sizeInBytes }) => sum + sizeInBytes, 0),
+          },
+        });
+      });
+      await act(async () => {
+        await emitted;
+      });
+    }
+
+    afterEach(() => {
+      setTelemetrySink(undefined);
+    });
+
+    it("should count only the reducer's subscribed messages under the layout panel id", async () => {
+      // Given
+      const sink = installTestTelemetrySink();
+      const player = new FakePlayer();
+      renderHook(
+        () =>
+          PanelAPI.useMessageReducer<number>({
+            topics: ["/foo"],
+            restore: () => 0,
+            addMessage: (count) => count + 1,
+          }),
+        { wrapper: makePanelWrapper(player) },
+      );
+      const subscribed = MessageEventBuilder.messageEvent({ topic: "/foo", sizeInBytes: 10 });
+      const other = MessageEventBuilder.messageEvent({ topic: "/bar", sizeInBytes: 5 });
+
+      // When
+      await emitMessages(player, [subscribed, other]);
+
+      // Then
+      const samples = publishAndCollect(sink);
+      const labels = { panelId: PANEL_ID, panelType: "RawMessages" };
+      expect(samples.get("panel.messages.delivered")).toMatchObject({ value: 1, labels });
+      expect(samples.get("panel.messages.deliveredBytes")).toMatchObject({ value: 10, labels });
+      expect(Object.values(samples.get("panel.messages.delivered")?.labels ?? {})).not.toContain(
+        PANEL_TITLE,
+      );
+    });
+
+    it("should count a message once when the panel also has a blocks subscription on the topic", async () => {
+      // Given
+      const sink = installTestTelemetrySink();
+      const player = new FakePlayer();
+      const blockSubscriptions: SubscribePayload[] = [{ topic: "/foo", preloadType: "full" }];
+      renderHook(
+        () => {
+          PanelAPI.useBlocksSubscriptions(blockSubscriptions);
+          return PanelAPI.useMessageReducer<number>({
+            topics: ["/foo"],
+            restore: () => 0,
+            addMessage: (count) => count + 1,
+          });
+        },
+        { wrapper: makePanelWrapper(player) },
+      );
+      const message = MessageEventBuilder.messageEvent({ topic: "/foo", sizeInBytes: 10 });
+
+      // When
+      await emitMessages(player, [message]);
+
+      // Then
+      const samples = publishAndCollect(sink);
+      const labels = { panelId: PANEL_ID, panelType: "RawMessages" };
+      expect(samples.get("panel.messages.delivered")).toMatchObject({ value: 1, labels });
+      expect(samples.get("panel.messages.deliveredBytes")).toMatchObject({ value: 10, labels });
+    });
   });
 });

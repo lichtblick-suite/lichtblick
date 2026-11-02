@@ -13,8 +13,10 @@ import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelecti
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 
 import { getScenarioFromUrl } from "./registry";
+import { LichtblickScenarioControlWindow } from "./scenarioControl";
 import { Scenario } from "./types";
 import { useScenarioBootstrap } from "./useScenarioBootstrap";
+import { CLOSE_DATA_SOURCE_FACTORY_ID } from "../dataSources/constants";
 
 jest.mock("@lichtblick/log", () => ({
   __esModule: true,
@@ -88,6 +90,71 @@ describe("useScenarioBootstrap", () => {
         type: "connection",
         params: scenario.dataSource.params,
       });
+    });
+  });
+
+  describe("ds.<param> URL overrides", () => {
+    afterEach(() => {
+      window.history.replaceState({}, "", "/");
+    });
+
+    it("should merge ?ds.<param>= overrides over the registry params", async () => {
+      // Given
+      const scenario = buildScenario({
+        dataSource: {
+          factoryId: "factory-id",
+          params: { url: "http://registry/a.mcap", maxHydratedSources: "1" },
+          requiredParams: ["url"],
+        },
+      });
+      (getScenarioFromUrl as jest.Mock).mockReturnValue(scenario);
+      window.history.replaceState(
+        {},
+        "",
+        "/?scenario=scenario-id&ds.url=http://127.0.0.1:1234/a.mcap,http://127.0.0.1:1234/b.mcap",
+      );
+
+      // When
+      renderHook(() => {
+        useScenarioBootstrap();
+      });
+
+      // Then
+      await waitFor(() => {
+        expect(selectSource).toHaveBeenCalledWith("factory-id", {
+          type: "connection",
+          params: {
+            url: "http://127.0.0.1:1234/a.mcap,http://127.0.0.1:1234/b.mcap",
+            maxHydratedSources: "1",
+          },
+        });
+      });
+    });
+
+    it("should log an error and not select the data source when a required param is missing", () => {
+      // Given
+      const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+      const scenario = buildScenario({
+        id: "needs-url",
+        dataSource: {
+          factoryId: "factory-id",
+          params: { maxHydratedSources: "1" },
+          requiredParams: ["url"],
+        },
+      });
+      (getScenarioFromUrl as jest.Mock).mockReturnValue(scenario);
+      window.history.replaceState({}, "", "/?scenario=needs-url");
+
+      // When
+      renderHook(() => {
+        useScenarioBootstrap();
+      });
+
+      // Then
+      expect(selectSource).not.toHaveBeenCalled();
+      expect(consoleError).toHaveBeenCalledTimes(1);
+      expect(String(consoleError.mock.calls[0]![0])).toContain('"needs-url" requires');
+      expect(String(consoleError.mock.calls[0]![0])).toContain('"url"');
     });
   });
 
@@ -256,6 +323,58 @@ describe("useScenarioBootstrap", () => {
       expect(pausePlayback).toHaveBeenCalledTimes(1);
 
       jest.useRealTimers();
+    });
+  });
+
+  describe("window.lichtblickScenario control API", () => {
+    function getControl(): LichtblickScenarioControlWindow["lichtblickScenario"] {
+      return (window as LichtblickScenarioControlWindow).lichtblickScenario;
+    }
+
+    it("should not install the API when no scenario is active", () => {
+      // Given
+      (getScenarioFromUrl as jest.Mock).mockReturnValue(undefined);
+
+      // When
+      renderHook(() => {
+        useScenarioBootstrap();
+      });
+
+      // Then
+      expect(getControl()).toBeUndefined();
+    });
+
+    it("should close the data source by selecting the hidden close factory", () => {
+      // Given
+      (getScenarioFromUrl as jest.Mock).mockReturnValue(buildScenario());
+      renderHook(() => {
+        useScenarioBootstrap();
+      });
+      selectSource.mockClear();
+
+      // When
+      getControl()?.closeDataSource();
+
+      // Then
+      expect(selectSource).toHaveBeenCalledWith(CLOSE_DATA_SOURCE_FACTORY_ID, {
+        type: "connection",
+        params: {},
+      });
+    });
+
+    it("should remove the API on unmount", () => {
+      // Given
+      (getScenarioFromUrl as jest.Mock).mockReturnValue(buildScenario());
+      const { unmount } = renderHook(() => {
+        useScenarioBootstrap();
+      });
+      expect(getControl()).toBeDefined();
+
+      // When
+      unmount();
+
+      // Then
+      expect(getControl()).toBeUndefined();
     });
   });
 });

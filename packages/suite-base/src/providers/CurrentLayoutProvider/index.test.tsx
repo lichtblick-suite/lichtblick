@@ -16,6 +16,7 @@ import { CurrentLayoutSyncAdapter } from "@lichtblick/suite-base/components/Curr
 import {
   CurrentLayoutActions,
   LayoutData,
+  LayoutID,
   LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -34,6 +35,9 @@ import {
   MAX_SUPPORTED_LAYOUT_VERSION,
 } from "@lichtblick/suite-base/providers/CurrentLayoutProvider/constants";
 import { ILayoutManager, LayoutFavorites } from "@lichtblick/suite-base/services/ILayoutManager";
+import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
+import { TelemetryMock } from "@lichtblick/suite-base/util/telemetry/builders/types";
+import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry/globalTelemetry";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 jest.mock("notistack", () => ({
@@ -768,6 +772,152 @@ describe("CurrentLayoutProvider", () => {
       expect(localOnlyManager.saveNewLayout).toHaveBeenCalledWith(
         expect.objectContaining({ name: "Default", permission: "CREATOR_WRITE" }),
       );
+    });
+  });
+
+  describe("layout.applied telemetry", () => {
+    function layoutAppliedCalls(telemetry: TelemetryMock) {
+      return telemetry.event.mock.calls.filter(([name]) => name === "layout.applied");
+    }
+
+    beforeEach(() => {
+      const layouts = ["layout1", "layout2"].map((id) => ({
+        id,
+        name: `Layout ${id}`,
+        baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
+      }));
+      mockLayoutManager.isBusy.mockReturnValue(false);
+      mockLayoutManager.getLayouts.mockResolvedValue(
+        layouts.map(({ id, name }) => ({
+          id,
+          name,
+          data: { data: TEST_LAYOUT },
+          permission: "CREATOR_WRITE",
+        })),
+      );
+      mockLayoutManager.getLayout.mockImplementation(async (id: string) =>
+        layouts.find((layout) => layout.id === id),
+      );
+      mockLayoutManager.updateLayout.mockImplementation(async () => layouts[0]);
+      mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "layout1" });
+      mockUserProfile.setUserProfile.mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      setTelemetrySink(undefined);
+    });
+
+    async function renderAndWaitForLayout() {
+      const rendered = renderTest({ mockLayoutManager, mockUserProfile });
+      await waitFor(() => {
+        expect(rendered.result.current.layoutState.selectedLayout?.data).toEqual(TEST_LAYOUT);
+      });
+      return rendered;
+    }
+
+    it("emits exactly one layout.applied when the initial layout is loaded", async () => {
+      // Given an enabled telemetry sink
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      setTelemetrySink(telemetry);
+
+      // When the provider restores the layout from the user profile
+      await renderAndWaitForLayout();
+
+      // Then exactly one layout.applied instant event without labels is emitted
+      expect(layoutAppliedCalls(telemetry)).toEqual([["layout.applied", "instant", "app"]]);
+    });
+
+    it("does not emit layout.applied again on a panel config update", async () => {
+      // Given an enabled telemetry sink and a loaded layout
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      setTelemetrySink(telemetry);
+      const { result } = await renderAndWaitForLayout();
+
+      // When a panel config is saved
+      act(() => {
+        result.current.actions.savePanelConfigs({
+          configs: [{ id: "ExamplePanel!1", config: { foo: "bar" } }],
+        });
+      });
+
+      // Then the layout was edited but no further layout.applied is emitted
+      expect(result.current.layoutState.selectedLayout?.edited).toBe(true);
+      expect(layoutAppliedCalls(telemetry)).toHaveLength(1);
+    });
+
+    it("emits layout.applied again when switching to another layout", async () => {
+      // Given an enabled telemetry sink and a loaded layout
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      setTelemetrySink(telemetry);
+      const { result } = await renderAndWaitForLayout();
+
+      // When another layout is selected
+      act(() => {
+        result.current.actions.setSelectedLayoutId("layout2" as LayoutID);
+      });
+
+      // Then a second layout.applied is emitted once the new layout is applied
+      await waitFor(() => {
+        expect(result.current.layoutState.selectedLayout?.id).toBe("layout2");
+      });
+      expect(layoutAppliedCalls(telemetry)).toHaveLength(2);
+    });
+
+    it("emits nothing when telemetry is disabled", async () => {
+      // Given a disabled telemetry sink
+      const telemetry = TelemetryBuilder.mockTelemetry({ enabled: false });
+      setTelemetrySink(telemetry);
+
+      // When the provider loads the layout
+      await renderAndWaitForLayout();
+
+      // Then no event is recorded
+      expect(telemetry.isEnabled).toHaveBeenCalled();
+      expect(telemetry.event).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      {
+        scenario: "the layout cannot be loaded",
+        mockGetLayout: async () => {
+          throw new Error("load failed");
+        },
+      },
+      {
+        scenario: "the layout does not exist",
+        mockGetLayout: async () => undefined,
+      },
+      {
+        scenario: "the layout version is not supported",
+        mockGetLayout: async (id: string) => ({
+          id,
+          name: `Layout ${id}`,
+          baseline: {
+            data: { ...TEST_LAYOUT, version: MAX_SUPPORTED_LAYOUT_VERSION + 1 },
+            updatedAt: new Date(10).toISOString(),
+          },
+        }),
+      },
+    ])("should not emit layout.applied when the selection fails because $scenario", async ({
+      mockGetLayout,
+    }) => {
+      // Given an enabled telemetry sink and a loaded layout
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      setTelemetrySink(telemetry);
+      const { result } = await renderAndWaitForLayout();
+      mockLayoutManager.getLayout.mockImplementation(mockGetLayout);
+
+      // When another layout is selected and its selection fails
+      act(() => {
+        result.current.actions.setSelectedLayoutId("layout2" as LayoutID);
+      });
+      await waitFor(() => {
+        expect(result.current.layoutState.selectedLayout).toBeUndefined();
+      });
+
+      // Then only the initial layout.applied was emitted
+      expect(layoutAppliedCalls(telemetry)).toHaveLength(1);
+      (console.error as jest.Mock).mockClear();
     });
   });
 });

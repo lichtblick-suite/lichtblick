@@ -200,7 +200,7 @@ class BenchmarkPlayer extends BenchmarkPlayerBase implements Player {
         },
       });
       const endFrame = performance.now();
-      BenchmarkStats.Instance().recordFrameTime(endFrame - startFrame);
+      BenchmarkStats.Instance().recordListenerDispatchDuration(endFrame - startFrame);
     }
 
     performance.mark("message-emit-end");

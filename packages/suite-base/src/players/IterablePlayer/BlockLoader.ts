@@ -23,8 +23,10 @@ import { Immutable, MessageEvent } from "@lichtblick/suite";
 import { IteratorCursor } from "@lichtblick/suite-base/players/IterablePlayer/IteratorCursor";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { MessageBlock, Progress, TopicSelection } from "@lichtblick/suite-base/players/types";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import { IDeserializedIterableSource, MessageIteratorArgs } from "./IIterableSource";
+import { BLOCK_CACHE_METRICS } from "./constants";
 
 const log = Log.getLogger(__filename);
 
@@ -126,6 +128,7 @@ export class BlockLoader {
   #removeUnusedBlockTopics(): number {
     const topics = this.#topics;
     let totalBytesRemoved = 0;
+    let blocksTrimmed = 0;
     for (let i = 0; i < this.#blocks.length; i++) {
       const block = this.#blocks[i];
       if (block) {
@@ -152,7 +155,16 @@ export class BlockLoader {
             sizeInBytes: block.sizeInBytes - blockBytesRemoved,
           };
           totalBytesRemoved += blockBytesRemoved;
+          blocksTrimmed++;
         }
+      }
+    }
+    // One counter call per eviction pass that actually freed data (passes run per message while
+    // over budget, but only the first one after new data arrived can free anything).
+    if (blocksTrimmed > 0) {
+      const telemetry = getTelemetry();
+      if (telemetry.isEnabled()) {
+        telemetry.counter(BLOCK_CACHE_METRICS.evictions, blocksTrimmed, "count", "pipeline");
       }
     }
     return totalBytesRemoved;
@@ -400,6 +412,24 @@ export class BlockLoader {
         };
       }),
     );
+
+    const telemetry = getTelemetry();
+    if (telemetry.isEnabled()) {
+      // Progress is only computed to be reported, so this runs at most once per loaded block.
+      let loadedBlocks = 0;
+      for (const range of fullyLoadedFractionRanges) {
+        loadedBlocks += range.end - range.start;
+      }
+      const blockCount = this.#blocks.length;
+      telemetry.gauge(BLOCK_CACHE_METRICS.bytes, currentCacheSize, "bytes", "pipeline");
+      telemetry.gauge(BLOCK_CACHE_METRICS.maxBytes, this.#maxCacheSize, "bytes", "pipeline");
+      telemetry.gauge(
+        BLOCK_CACHE_METRICS.loadedFraction,
+        blockCount > 0 ? loadedBlocks / blockCount : 0,
+        "ratio",
+        "pipeline",
+      );
+    }
 
     return {
       fullyLoadedFractionRanges: fullyLoadedFractionRanges.map((range) => ({

@@ -58,6 +58,7 @@ import { LayoutManagerEventTypes } from "@lichtblick/suite-base/services/ILayout
 import { PanelConfig, PlaybackConfig, UserScripts } from "@lichtblick/suite-base/types/panels";
 import { windowAppURLState } from "@lichtblick/suite-base/util/appURLState";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import { IncompatibleLayoutVersionAlert } from "./IncompatibleLayoutVersionAlert";
 
@@ -172,6 +173,11 @@ export default function CurrentLayoutProvider({
               name: layout.name,
             },
           });
+          // Selection finished (loading -> loaded); panel edits and reverts don't pass through here.
+          const telemetry = getTelemetry();
+          if (telemetry.isEnabled()) {
+            telemetry.event("layout.applied", "instant", "app");
+          }
           if (saveToProfile) {
             setUserProfile({ currentLayoutId: id }).catch((error: unknown) => {
               console.error(error);

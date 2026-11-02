@@ -15,6 +15,9 @@ import { usePlayerSelection } from "@lichtblick/suite-base/context/PlayerSelecti
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 
 import { getScenarioFromUrl } from "./registry";
+import { LichtblickScenarioControlApi, LichtblickScenarioControlWindow } from "./scenarioControl";
+import { resolveScenarioDataSourceParams } from "./scenarioParams";
+import { CLOSE_DATA_SOURCE_FACTORY_ID } from "../dataSources/constants";
 
 const selectPlayerPresence = (ctx: MessagePipelineContext) => ctx.playerState.presence;
 const selectStartPlayback = (ctx: MessagePipelineContext) => ctx.startPlayback;
@@ -27,9 +30,23 @@ const selectPausePlayback = (ctx: MessagePipelineContext) => ctx.pausePlayback;
  * layout is installed and selected before mount (see `index.tsx` and `Root.tsx`), so this hook
  * doesn't need to handle that. Does nothing when `?scenario=` is absent, so existing `?ds=`-driven
  * benchmarks are unaffected.
+ *
+ * The scenario's data source params can be overridden from the page URL with
+ * `?ds.<param>=<value>` (see `resolveScenarioDataSourceParams`), e.g. to pass fixture URLs served on
+ * a dynamic port. If a required param is still missing, the source is not selected and a clear
+ * error is logged instead.
+ *
+ * While a scenario is active, `window.lichtblickScenario` (see `scenarioControl.ts`) lets the
+ * benchmark runner close the data source in-page to capture its close/cleanup telemetry.
  */
 export function useScenarioBootstrap(): void {
-  const scenario = useMemo(() => getScenarioFromUrl(new URL(window.location.href)), []);
+  const { scenario, params, missingParams } = useMemo(() => {
+    const url = new URL(window.location.href);
+    const found = getScenarioFromUrl(url);
+    return found
+      ? { scenario: found, ...resolveScenarioDataSourceParams(found, url) }
+      : { scenario: undefined, params: undefined, missingParams: [] };
+  }, []);
 
   const { selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
@@ -46,11 +63,22 @@ export function useScenarioBootstrap(): void {
     }
     didSelectSourceRef.current = true;
 
+    if (missingParams.length > 0) {
+      console.error(
+        `Benchmark scenario "${scenario.id}" requires data source param(s) ${missingParams
+          .map((name) => `"${name}"`)
+          .join(", ")}; pass them as ?ds.<param>=<value> (e.g. ?scenario=${scenario.id}&ds.${
+          missingParams[0]
+        }=...). Data source not selected.`,
+      );
+      return;
+    }
+
     selectSource(scenario.dataSource.factoryId, {
       type: "connection",
-      params: scenario.dataSource.params,
+      params,
     });
-  }, [scenario, selectSource]);
+  }, [scenario, params, missingParams, selectSource]);
 
   useEffect(() => {
     // `startPlayback` only becomes a bound function once the pipeline recomputes it for the
@@ -84,6 +112,24 @@ export function useScenarioBootstrap(): void {
 
     return undefined;
   }, [scenario, playerPresence, startPlayback, pausePlayback]);
+
+  useEffect(() => {
+    if (!scenario) {
+      return undefined;
+    }
+    const target = window as LichtblickScenarioControlWindow;
+    const api: LichtblickScenarioControlApi = {
+      closeDataSource: () => {
+        selectSource(CLOSE_DATA_SOURCE_FACTORY_ID, { type: "connection", params: {} });
+      },
+    };
+    target.lichtblickScenario = api;
+    return () => {
+      if (target.lichtblickScenario === api) {
+        delete target.lichtblickScenario;
+      }
+    };
+  }, [scenario, selectSource]);
 
   useEffect(() => {
     return () => {

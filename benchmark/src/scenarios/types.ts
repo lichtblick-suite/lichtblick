@@ -15,7 +15,14 @@ import { LAYOUTS } from "../layouts";
  */
 export type ScenarioDataSource = {
   factoryId: string;
+  /** Defaults; each can be overridden at runtime with a `?ds.<param>=<value>` page URL param. */
   params?: Record<string, string>;
+  /**
+   * Params that must be present after merging URL overrides (e.g. `url` for scenarios whose
+   * fixture URL is only known at runtime). If one is missing the data source is not selected and
+   * an error is logged.
+   */
+  requiredParams?: readonly string[];
 };
 
 export type Scenario = {
@@ -28,4 +35,11 @@ export type Scenario = {
   autoStart?: boolean;
   /** If set alongside `autoStart`, playback is paused this many milliseconds after starting. */
   durationMs?: number;
+};
+
+export type ResolvedScenarioParams = {
+  /** Registry params with URL overrides merged on top; undefined when there are none at all. */
+  params: Record<string, string> | undefined;
+  /** `requiredParams` that are absent (or empty) after merging. */
+  missingParams: string[];
 };

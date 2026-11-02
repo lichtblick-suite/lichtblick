@@ -50,10 +50,31 @@ const SCENARIOS: readonly Scenario[] = [
     // "empty" until a fixture-specific layout is added: the other registered layouts assume
     // synthetic-player topic names that won't match this real MCAP file's topics.
     layout: "empty",
-    dataSource: { factoryId: "mcap-real-pipeline", params: { url: MCAP_INGEST_FIXTURE_URL } },
+    dataSource: {
+      factoryId: "mcap-real-pipeline",
+      params: { url: MCAP_INGEST_FIXTURE_URL },
+      requiredParams: ["url"],
+    },
     pipeline: "real",
     autoStart: true,
     durationMs: 5_000,
+  },
+  {
+    // Multi-file ingest through the real worker pipeline (MultiIterableSource + HydratedSourcePool).
+    // No URL is hardcoded: the runner serves generated, time-overlapping MCAP fixtures (topic
+    // `/benchmark/multi`) on a dynamic port and passes them as
+    // `?scenario=mcap-multi-ingest&ds.url=<url1>,<url2>,...`.
+    id: "mcap-multi-ingest",
+    layout: "mcapMultiIngest",
+    dataSource: {
+      factoryId: "mcap-real-pipeline",
+      // A single hydrated source forces eviction/re-hydration across the overlapping files.
+      params: { maxHydratedSources: "1" },
+      requiredParams: ["url"],
+    },
+    pipeline: "real",
+    autoStart: true,
+    durationMs: 10_000,
   },
 ];
 

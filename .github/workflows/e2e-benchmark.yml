@@ -1,14 +1,27 @@
 name: E2E Benchmark
 
-# Runs the benchmark E2E suite (benchmark/e2e), which drives each registered scenario
-# (benchmark/src/scenarios/registry.ts) in the standalone benchmark Electron shell and collects
-# memory/frame-time samples. Runs on pushes to the long-lived branches - not on a
-# schedule or every PR since it's a long-running, resource-sensitive suite whose results are only
-# meaningful in a stable environment.
+# Runs the benchmark E2E suite (benchmark/e2e), which drives each scenario under test
+# (benchmark/e2e/runner/scenariosUnderTest.ts) on two platforms and collects host process metrics,
+# in-app telemetry (memory, pipeline/pool counters, phase events) and frame-time samples:
+#   - e2e-benchmark:     the standalone benchmark Electron shell (Playwright project "electron")
+#   - e2e-benchmark-web: the benchmark web build in headless Chromium (Playwright project "web")
+# The real-pipeline scenario (mcap-multi-ingest) uses MCAP fixtures generated deterministically at
+# test time into benchmark/.artifacts/fixtures (no binaries are committed). Result JSONs
+# (legacy, benchmark-result.v1 and the report-only telemetry overhead A/B) and the scenario
+# checkpoint screenshots (benchmark/.artifacts/screenshots) are uploaded as artifacts, together
+# with the interim HTML viewer (benchmark/.artifacts/report/index.html).
+# Runs on pushes to the long-lived branches - not on a schedule or every PR since it's a
+# long-running, resource-sensitive suite whose results are only meaningful in a stable environment.
 
 on:
   push:
     branches: [develop, main]
+
+# Least privilege: both jobs only check out the repo. actions/cache and actions/upload-artifact
+# authenticate with the runtime token (not GITHUB_TOKEN) and $GITHUB_STEP_SUMMARY is a runner file,
+# so neither needs an extra permission.
+permissions:
+  contents: read
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -54,12 +67,102 @@ jobs:
         uses: coactions/setup-xvfb@v1
         with:
           working-directory: ./
-          # Call playwright directly with an explicit reporter list instead of relying on
-          # `yarn test:e2e:benchmark:ci`'s config default: `--reporter=json` alone has no syntax
-          # for an output path, so without PLAYWRIGHT_JSON_OUTPUT_NAME below the json reporter
-          # would dump the report to stdout instead of a file.
-          run: yarn test:e2e:benchmark:ci --reporter=list,json
+          # The script sets CI=true and `--reporter=list,json`, and writes the json report to
+          # benchmark/e2e/reports/results-electron.json via PLAYWRIGHT_JSON_OUTPUT_NAME (the json
+          # reporter would otherwise print to stdout).
+          run: yarn test:e2e:benchmark:ci
 
       - name: Generate Benchmark Test Summary
         if: always()
         run: yarn test:e2e:benchmark:summary >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Generate Benchmark HTML Report
+        # Interim offline viewer (benchmark/.artifacts/report/index.html, Chart.js inlined) that
+        # links the screenshots by relative path (../screenshots/), so both are uploaded below.
+        if: always()
+        run: |
+          yarn test:e2e:benchmark:viewer
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "📊 Interactive report: download artifact \`benchmark-results-electron\` and open \`report/index.html\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Benchmark Results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: benchmark-results-electron
+          # Result JSONs, the checkpoint screenshots (end only by default) and the HTML report -
+          # the generated MCAP fixtures are reproducible and not worth uploading.
+          path: |
+            benchmark/.artifacts/**/*.json
+            benchmark/.artifacts/screenshots/**
+            benchmark/.artifacts/report/**
+            !benchmark/.artifacts/fixtures/**
+          if-no-files-found: warn
+
+  e2e-benchmark-web:
+    runs-on: ubuntu-latest
+
+    name: e2e-benchmark-web (ubuntu-latest)
+
+    # Set a fixed timezone to ensure consistent test results.
+    env:
+      TZ: Europe/Lisbon
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: corepack enable yarn
+
+      - name: Restore cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+
+      - run: yarn install --immutable
+
+      - name: Build benchmark web app
+        # Static SPA in benchmark/.webpack, served by the suite's own static server
+        # (benchmark/e2e/server/staticServer.ts) with COOP/COEP headers for cross-origin isolation.
+        run: yarn benchmark:build:prod
+
+      - name: Install Playwright Chromium
+        run: yarn playwright install --with-deps chromium
+
+      - name: Run Benchmark E2E tests (web)
+        # Headless Chromium needs no display server. The script sets CI=true and writes the json
+        # report to benchmark/e2e/reports/results-web.json (distinct from the Electron job's file).
+        run: yarn test:e2e:benchmark:web:ci
+
+      - name: Generate Benchmark Test Summary
+        if: always()
+        run: yarn test:e2e:benchmark:summary >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Generate Benchmark HTML Report
+        # Interim offline viewer (benchmark/.artifacts/report/index.html, Chart.js inlined) that
+        # links the screenshots by relative path (../screenshots/), so both are uploaded below.
+        if: always()
+        run: |
+          yarn test:e2e:benchmark:viewer
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "📊 Interactive report: download artifact \`benchmark-results-web\` and open \`report/index.html\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Benchmark Results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: benchmark-results-web
+          # Result JSONs, the checkpoint screenshots (end only by default) and the HTML report -
+          # the generated MCAP fixtures are reproducible and not worth uploading.
+          path: |
+            benchmark/.artifacts/**/*.json
+            benchmark/.artifacts/screenshots/**
+            benchmark/.artifacts/report/**
+            !benchmark/.artifacts/fixtures/**
+          if-no-files-found: warn

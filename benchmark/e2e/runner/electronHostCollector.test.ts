@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+import { mapElectronMetrics, mapElectronProcessType } from "./electronHostCollector";
+import type { LegacyProcessMetric } from "../types";
+
+function metric(overrides: Partial<LegacyProcessMetric> = {}): LegacyProcessMetric {
+  return {
+    pid: 1,
+    type: "Browser",
+    memory: { workingSetSize: 100, peakWorkingSetSize: 150 },
+    cpu: { percentCPUUsage: 12.5 },
+    ...overrides,
+  };
+}
+
+describe("mapElectronProcessType", () => {
+  it.each([
+    ["Browser", "browser"],
+    ["Tab", "renderer"],
+    ["GPU", "gpu"],
+    ["Utility", "utility"],
+    ["Worker", "utility"],
+    ["Pepper Plugin", "utility"],
+    ["Zygote", "zygote"],
+    ["Sandbox helper", "sandbox-helper"],
+  ])("maps %s to %s", (type, expected) => {
+    // Given an Electron process type / When mapped / Then
+    expect(mapElectronProcessType(type)).toBe(expected);
+  });
+});
+
+describe("mapElectronMetrics", () => {
+  it("converts KB to bytes and keeps pid, type and CPU", () => {
+    // Given a Windows-style metric with privateBytes and a Linux-style one without
+    const metrics = [
+      metric({ memory: { workingSetSize: 100, peakWorkingSetSize: 150, privateBytes: 80 } }),
+      metric({ pid: 2, type: "Tab", cpu: { percentCPUUsage: 3 } }),
+    ];
+
+    // When
+    const samples = mapElectronMetrics(metrics, 1234);
+
+    // Then
+    expect(samples).toEqual([
+      {
+        monotonicTs: 1234,
+        pid: 1,
+        processType: "browser",
+        workingSetBytes: 102_400,
+        peakWorkingSetBytes: 153_600,
+        privateBytes: 81_920,
+        cpuPercent: 12.5,
+      },
+      {
+        monotonicTs: 1234,
+        pid: 2,
+        processType: "renderer",
+        workingSetBytes: 102_400,
+        peakWorkingSetBytes: 153_600,
+        cpuPercent: 3,
+      },
+    ]);
+  });
+});
