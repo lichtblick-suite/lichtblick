@@ -8,4 +8,5 @@
 export * from "./codec";
 export * from "./h264";
 export * from "./h265";
+export * from "./av1";
 export * from "./VideoPlayer";
