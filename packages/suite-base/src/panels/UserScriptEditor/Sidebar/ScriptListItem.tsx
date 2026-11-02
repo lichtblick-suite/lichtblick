@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Delete20Regular, Edit20Regular } from "@fluentui/react-icons";
+import { Delete20Regular, Edit20Regular, LockClosed20Regular } from "@fluentui/react-icons";
 import {
   IconButton,
   InputBase,
@@ -14,6 +14,7 @@ import {
   ListItemText,
   inputBaseClasses,
   listItemSecondaryActionClasses,
+  ListItemIcon,
 } from "@mui/material";
 import { ChangeEventHandler, FocusEventHandler, KeyboardEvent, useCallback, useState } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -45,12 +46,14 @@ export function ScriptListItem({
   onRename,
   title,
   selected,
+  readOnly = false,
 }: {
   onClick: () => void;
   onDelete: () => void;
   onRename: (name: string) => void;
   title: string;
   selected?: boolean;
+  readOnly?: boolean;
 }): React.JSX.Element {
   const { classes } = useStyles();
   const [label, setLabel] = useState(title);
@@ -62,8 +65,10 @@ export function ScriptListItem({
   }, []);
 
   const onDoubleClick = useCallback(() => {
-    setEditMode(true);
-  }, []);
+    if (!readOnly) {
+      setEditMode(true);
+    }
+  }, [readOnly]);
 
   const onFocus: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     event.target.select();
@@ -96,11 +101,23 @@ export function ScriptListItem({
     }
   }, [label, onRename]);
 
-  const onButtonKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === "Enter") {
-      setEditMode(true);
-    }
-  }, []);
+  const onButtonKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Enter" && !readOnly) {
+        setEditMode(true);
+      }
+    },
+    [readOnly],
+  );
+
+  const icon = [];
+  if (readOnly) {
+    icon.push(
+      <ListItemIcon key="lock-icon" data-testid="lock-icon">
+        <LockClosed20Regular />
+      </ListItemIcon>,
+    );
+  }
 
   return (
     <ListItem
@@ -108,10 +125,10 @@ export function ScriptListItem({
       disablePadding
       secondaryAction={
         <>
-          {!editMode && (
+          {!readOnly && !editMode && (
             <IconButton
               size="small"
-              aria-title="rename"
+              aria-label="rename"
               title="Rename"
               onClick={() => {
                 setEditMode(true);
@@ -120,20 +137,23 @@ export function ScriptListItem({
               <Edit20Regular />
             </IconButton>
           )}
-          <IconButton
-            size="small"
-            aria-title="delete"
-            title="Delete"
-            color="error"
-            onClick={onDelete}
-          >
-            <Delete20Regular />
-          </IconButton>
+
+          {!readOnly && (
+            <IconButton
+              size="small"
+              aria-label="delete"
+              title="Delete"
+              color="error"
+              onClick={onDelete}
+            >
+              <Delete20Regular />
+            </IconButton>
+          )}
         </>
       }
     >
       {editMode ? (
-        <ListItemText slotProps={{ primary: { variant: "body2" } }}>
+        <ListItemText disableTypography>
           <InputBase
             autoFocus
             fullWidth
@@ -152,8 +172,10 @@ export function ScriptListItem({
           onKeyDown={onButtonKeyDown}
           onDoubleClick={onDoubleClick}
         >
+          {icon}
           <ListItemText
             primary={title}
+            inset={!readOnly}
             slotProps={{ primary: { variant: "body2", noWrap: true } }}
           />
         </ListItemButton>
