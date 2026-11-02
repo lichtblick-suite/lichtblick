@@ -98,7 +98,7 @@
     "react-monaco-editor": "patch:react-monaco-editor@npm:0.59.0#./patches/react-monaco-editor.patch",
     "@types/react": "18.3.12",
     "esbuild": "0.28.1",
-    "dompurify": "3.4.11",
+    "dompurify": "3.4.17",
     "js-yaml": "4.3.2",
     "js-cookie": "3.0.7",
     "qs": "6.15.2",
