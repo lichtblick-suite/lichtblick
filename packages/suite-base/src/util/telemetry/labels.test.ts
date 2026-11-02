@@ -32,6 +32,17 @@ describe("buildSeriesKey", () => {
     expect(a).toBe(`${metric}{poolId="p",sourceId="s"}`);
   });
 
+  it("orders label keys by code unit, independent of the locale", () => {
+    // Given
+    const metric = TelemetryBuilder.metric();
+
+    // When
+    const key = buildSeriesKey(metric, { b: "1", B: "2", a: "3", _: "4" });
+
+    // Then
+    expect(key).toBe(`${metric}{B="2",_="4",a="3",b="1"}`);
+  });
+
   it("quotes values so distinct label sets never collide", () => {
     // Given
     const metric = TelemetryBuilder.metric();

@@ -23,6 +23,7 @@ import {
   MessageIteratorArgs,
 } from "./IIterableSource";
 import { IterablePlayer } from "./IterablePlayer";
+import * as memoryMetricNameModule from "./memoryMetricName";
 import { installDisabledTelemetry, publishAndCollect } from "./testing/telemetryTestUtils";
 
 const TOPIC = "/telemetry/topic";
@@ -88,13 +89,38 @@ class GatedPreloadSource extends TelemetryTestSource {
   }
 }
 
-function setupSink(): { sink: BufferedTelemetrySink; events: TelemetryEvent[] } {
+// Fails the block loader's ("full") read.
+class FailingPreloadSource extends TelemetryTestSource {
+  public override async *messageIterator(
+    args: MessageIteratorArgs,
+  ): AsyncIterableIterator<Readonly<IteratorResult>> {
+    if (args.consumptionType === "full") {
+      throw new Error("preload read failed");
+    }
+    yield* super.messageIterator(args);
+  }
+}
+
+// Fails to release its resources on close.
+class FailingTerminateSource extends TelemetryTestSource {
+  public async terminate(): Promise<void> {
+    throw new Error("terminate failed");
+  }
+}
+
+function setupSink(onEvent?: (event: TelemetryEvent) => void): {
+  sink: BufferedTelemetrySink;
+  events: TelemetryEvent[];
+} {
   const events: TelemetryEvent[] = [];
   const sink = new BufferedTelemetrySink({
     realm: "renderer",
     setInterval: jest.fn(),
     clearInterval: jest.fn(),
-    onEvent: (event) => events.push(event),
+    onEvent: (event) => {
+      events.push(event);
+      onEvent?.(event);
+    },
   });
   setTelemetrySink(sink);
   return { sink, events };
@@ -127,6 +153,7 @@ async function waitForInitialFrame(
 describe("IterablePlayer telemetry", () => {
   afterEach(() => {
     setTelemetrySink(undefined);
+    jest.restoreAllMocks();
   });
 
   it("emits open → firstMessage → playback/seek → close events in order", async () => {
@@ -292,6 +319,63 @@ describe("IterablePlayer telemetry", () => {
       "preload:end:cancelled",
       "datasource.close:end",
     ]);
+  });
+
+  it("should end preload with reason 'error' when the block loader fails", async () => {
+    // Given: a source whose full (block loader) read rejects
+    const preloadEnded = signal();
+    const { events } = setupSink((event) => {
+      if (event.name === "preload" && event.phase === "end") {
+        preloadEnded.resolve();
+      }
+    });
+    const player = new IterablePlayer({
+      source: new FailingPreloadSource(),
+      enablePreload: true,
+      sourceId: SOURCE_ID,
+    });
+    player.setSubscriptions([{ topic: TOPIC, preloadType: "full" }]);
+
+    // When
+    player.setListener(async () => {});
+    await preloadEnded;
+    player.close();
+    await player.isClosed;
+
+    // Then
+    const preload = summarize(events).filter((entry) => entry.startsWith("preload"));
+    expect(preload).toEqual(["preload:start", "preload:end:error"]);
+    // The failed preload is surfaced as a player error alert (expected here).
+    expect((console.error as jest.Mock).mock.calls.some((call) => call[0] === "Player alert")).toBe(
+      true,
+    );
+    (console.error as jest.Mock).mockClear();
+  });
+
+  it("should end datasource.close with reason 'error' when the source fails to terminate", async () => {
+    // Given
+    const { events } = setupSink();
+    const player = new IterablePlayer({
+      source: new FailingTerminateSource(),
+      enablePreload: false,
+      sourceId: SOURCE_ID,
+    });
+    const errored = signal();
+    await waitForInitialFrame(player, (state) => {
+      if (state.presence === PlayerPresence.ERROR) {
+        errored.resolve();
+      }
+    });
+
+    // When
+    player.close();
+    await errored;
+
+    // Then
+    const close = summarize(events).filter((entry) => entry.startsWith("datasource.close"));
+    expect(close).toEqual(["datasource.close:start", "datasource.close:end:error"]);
+    // The close failure is logged and surfaced as a player error (expected here).
+    (console.error as jest.Mock).mockClear();
   });
 
   it("should label events only with the factory sourceId and bounded reasons, never the display name", async () => {
@@ -485,6 +569,38 @@ describe("IterablePlayer telemetry", () => {
       expect(
         [...samples.keys()].filter((metric) => metric.startsWith("pipeline.memory.")).sort(),
       ).toEqual(["pipeline.memory.bufferedMessages", "pipeline.memory.preloadedMessages"]);
+    });
+
+    it("should skip memoryInfo entries that have no metric name", async () => {
+      // Given: no memoryInfo key maps to a metric name
+      const { sink } = setupSink();
+      const metricNameSpy = jest
+        .spyOn(memoryMetricNameModule, "memoryMetricName")
+        .mockReturnValue(undefined);
+      const player = new IterablePlayer({
+        source: new TelemetryTestSource(),
+        enablePreload: false,
+        sourceId: SOURCE_ID,
+      });
+      const buffered = signal();
+      await waitForInitialFrame(player, (state) => {
+        if (state.progress.memoryInfo?.["Buffered messages"] != undefined) {
+          buffered.resolve();
+        }
+      });
+
+      // When: playback ticks merge the buffered cache size into memoryInfo
+      player.startPlayback();
+      await buffered;
+      const samples = publishAndCollect(sink);
+      player.close();
+      await player.isClosed;
+
+      // Then: the key was looked up but no memory gauge was recorded for it
+      expect(metricNameSpy).toHaveBeenCalledWith("Buffered messages");
+      expect([...samples.keys()].filter((metric) => metric.startsWith("pipeline.memory."))).toEqual(
+        [],
+      );
     });
 
     it("should not record any pipeline metric or event when telemetry is disabled", async () => {

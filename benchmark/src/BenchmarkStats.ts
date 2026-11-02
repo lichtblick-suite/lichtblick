@@ -50,9 +50,10 @@ class BenchmarkStats {
     const total = values.reduce((a, b) => a + b, 0);
     const average = total / values.length;
 
-    const sorted = values.sort((a, b) => a - b);
-    const median = sorted[Math.floor(sorted.length * 0.5)]!;
-    const p90 = sorted[Math.floor(sorted.length * 0.9)]!;
+    // `values` is a local copy (from `map`): sorting it in place does not touch `samples`.
+    values.sort((a, b) => a - b);
+    const median = values[Math.floor(values.length * 0.5)]!;
+    const p90 = values[Math.floor(values.length * 0.9)]!;
     const stddev = std(values);
 
     log.info(

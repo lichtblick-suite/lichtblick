@@ -109,7 +109,8 @@ export function formatRunnerEventsFailure({
       event.exitCode == undefined ? undefined : `exitCode=${event.exitCode}`,
       event.url,
     ].filter((part) => part != undefined);
-    return `  - ${event.type}${details.length > 0 ? ` (${details.join(", ")})` : ""}`;
+    const suffix = details.length > 0 ? ` (${details.join(", ")})` : "";
+    return `  - ${event.type}${suffix}`;
   });
   const noun = events.length === 1 ? "runner event" : "runner events";
   return [

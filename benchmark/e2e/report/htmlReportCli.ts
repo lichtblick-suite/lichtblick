@@ -17,6 +17,8 @@ import { LoadedResult } from "./types";
 import { OVERHEAD_PREFIX, RESULT_V1_SUFFIX } from "../result/constants";
 import { ARTIFACTS_DIR as DEFAULT_ARTIFACTS_DIR } from "../runner/constants";
 import type { OverheadReport } from "../runner/types";
+import { GIT_EXECUTABLE_CANDIDATES } from "../shared/constants";
+import { findExecutable, openFileCommand } from "../shared/executables";
 
 function parseArgs(argv: readonly string[]): CliArgs {
   const args: CliArgs = { all: false, dir: DEFAULT_ARTIFACTS_DIR, open: false };
@@ -42,7 +44,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
 }
 
 function listFiles(dir: string): string[] {
-  return fs.existsSync(dir) ? fs.readdirSync(dir).sort() : [];
+  return fs.existsSync(dir) ? fs.readdirSync(dir).sort((a, b) => a.localeCompare(b)) : [];
 }
 
 /** Chart.js 4's `exports` map hides `dist/chart.umd.js`; resolve the package entry instead. */
@@ -52,9 +54,13 @@ function loadChartJs(): string {
 }
 
 function gitInfo(): { commit?: string; branch?: string } {
+  const git = findExecutable(GIT_EXECUTABLE_CANDIDATES);
   const fromGit = (args: string[]): string | undefined => {
+    if (git == undefined) {
+      return undefined;
+    }
     try {
-      return execFileSync("git", args, {
+      return execFileSync(git, args, {
         encoding: "utf-8",
         stdio: ["ignore", "pipe", "ignore"],
       }).trim();
@@ -74,12 +80,12 @@ function gitInfo(): { commit?: string; branch?: string } {
 }
 
 function openInBrowser(file: string): void {
-  const [command, args] =
-    process.platform === "darwin"
-      ? ["open", [file]]
-      : process.platform === "win32"
-        ? ["cmd", ["/c", "start", "", file]]
-        : ["xdg-open", [file]];
+  const open = openFileCommand(file);
+  if (open == undefined) {
+    console.warn("Could not open the report: no known opener for this platform");
+    return;
+  }
+  const { command, args } = open;
   const child = spawn(command, args, { detached: true, stdio: "ignore" });
   child.on("error", (error) => {
     console.warn(`Could not open the report (${command}): ${error.message}`);

@@ -23,7 +23,9 @@ export class NoopTelemetry implements ITelemetry {
     _unit: TelemetryUnit,
     _scope: TelemetryScope,
     _labels?: TelemetryLabels,
-  ): void {}
+  ): void {
+    // Intentionally empty: telemetry disabled.
+  }
 
   public counter(
     _metric: string,
@@ -31,7 +33,9 @@ export class NoopTelemetry implements ITelemetry {
     _unit: TelemetryUnit,
     _scope: TelemetryScope,
     _labels?: TelemetryLabels,
-  ): void {}
+  ): void {
+    // Intentionally empty: telemetry disabled.
+  }
 
   public observe(
     _metric: string,
@@ -39,16 +43,22 @@ export class NoopTelemetry implements ITelemetry {
     _unit: TelemetryUnit,
     _scope: TelemetryScope,
     _labels?: TelemetryLabels,
-  ): void {}
+  ): void {
+    // Intentionally empty: telemetry disabled.
+  }
 
   public event(
     _name: TelemetryEventName,
     _phase: TelemetryPhase,
     _scope: TelemetryScope,
     _labels?: TelemetryLabels,
-  ): void {}
+  ): void {
+    // Intentionally empty: telemetry disabled.
+  }
 
-  public ingest(_batch: TelemetryBatch): void {}
+  public ingest(_batch: TelemetryBatch): void {
+    // Intentionally empty: telemetry disabled.
+  }
 }
 
 export const NOOP_TELEMETRY: ITelemetry = new NoopTelemetry();

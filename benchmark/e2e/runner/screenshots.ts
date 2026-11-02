@@ -117,16 +117,16 @@ export async function waitUntil(
   deadlineMs: number,
   pollIntervalMs: number,
 ): Promise<boolean> {
-  for (;;) {
-    if (predicate()) {
-      return true;
-    }
-    const remaining = deadlineMs - Date.now();
-    if (remaining <= 0) {
-      return false;
-    }
-    await delay(Math.min(pollIntervalMs, remaining));
+  if (predicate()) {
+    return true;
   }
+  const remaining = deadlineMs - Date.now();
+  if (remaining <= 0) {
+    return false;
+  }
+  await delay(Math.min(pollIntervalMs, remaining));
+  // Polls are strictly sequential (each after the previous delay): recurse instead of looping.
+  return await waitUntil(predicate, deadlineMs, pollIntervalMs);
 }
 
 /** Captures the checkpoint screenshots of one scenario run. No method ever rejects. */

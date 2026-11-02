@@ -191,6 +191,14 @@ export function summarizePanels(
   return result;
 }
 
+/** Keeps the earliest `monotonicTs` per panel id in `target`. */
+function keepEarliest(target: Map<string, number>, panelId: string, monotonicTs: number): void {
+  const existing = target.get(panelId);
+  if (existing == undefined || monotonicTs < existing) {
+    target.set(panelId, monotonicTs);
+  }
+}
+
 /**
  * Builds `panelsReadyMs` / `panelsReadyCoverage` (see `PanelsReadyV1`). Coverage is reported
  * whenever a panel mounted or rendered; `panelsReadyMs` additionally needs an origin.
@@ -206,15 +214,10 @@ export function summarizePanelsReady(
     if (panelId == undefined) {
       continue;
     }
-    const target =
-      event.name === "panel.mount"
-        ? firstMount
-        : event.name === "panel.firstRender"
-          ? firstRender
-          : undefined;
-    const existing = target?.get(panelId);
-    if (target != undefined && (existing == undefined || event.monotonicTs < existing)) {
-      target.set(panelId, event.monotonicTs);
+    if (event.name === "panel.mount") {
+      keepEarliest(firstMount, panelId, event.monotonicTs);
+    } else if (event.name === "panel.firstRender") {
+      keepEarliest(firstRender, panelId, event.monotonicTs);
     }
   }
   if (firstMount.size === 0 && firstRender.size === 0) {

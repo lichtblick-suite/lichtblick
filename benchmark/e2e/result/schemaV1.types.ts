@@ -5,3 +5,6 @@ import type { TelemetrySample } from "../../../packages/suite-base/src/util/tele
 
 /** Full pool metric name (a `POOL_METRICS` value) -> samples (sorted). */
 export type PoolSeries = Map<string, TelemetrySample[]>;
+
+/** The series of one `HydratedSourcePool` instance (`<realm>/<poolId>`). */
+export type PoolGroup = { realm: string; poolId: string; series: PoolSeries };

@@ -5,6 +5,7 @@ import { McapWriter } from "@mcap/core";
 import type { IWritable } from "@mcap/core";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -16,6 +17,7 @@ import {
 } from "./constants";
 import type { FixtureManifest, ResolvedOptions } from "./generateMcapFixtures.types";
 import type { McapFixtureOptions } from "./types";
+import { runSequentially } from "../shared/sequential";
 
 // Deterministic MCAP fixtures for the `mcap-multi-ingest` scenario.
 //
@@ -45,13 +47,16 @@ function buildPayload(fileIndex: number, length: number): string {
   return result;
 }
 
-/** Sequential `IWritable` over a file descriptor. */
+/**
+ * Sequential `IWritable` over an open file handle. `McapWriter` awaits every write before the next
+ * one, so each `writeFile` (which writes the whole buffer at the current file position) appends.
+ */
 class FileWritable implements IWritable {
-  readonly #fd: number;
+  readonly #handle: FileHandle;
   #position = 0n;
 
-  public constructor(fd: number) {
-    this.#fd = fd;
+  public constructor(handle: FileHandle) {
+    this.#handle = handle;
   }
 
   public position(): bigint {
@@ -59,10 +64,7 @@ class FileWritable implements IWritable {
   }
 
   public async write(buffer: Uint8Array): Promise<void> {
-    let offset = 0;
-    while (offset < buffer.byteLength) {
-      offset += fs.writeSync(this.#fd, buffer, offset, buffer.byteLength - offset);
-    }
+    await this.#handle.writeFile(buffer);
     this.#position += BigInt(buffer.byteLength);
   }
 }
@@ -76,10 +78,10 @@ async function writeFixtureFile(
   fileIndex: number,
   options: ResolvedOptions,
 ): Promise<void> {
-  const fd = fs.openSync(filePath, "w");
+  const handle = await fs.promises.open(filePath, "w");
   try {
     const writer = new McapWriter({
-      writable: new FileWritable(fd),
+      writable: new FileWritable(handle),
       useChunks: true,
       useChunkIndex: true,
       useMessageIndex: true,
@@ -104,7 +106,8 @@ async function writeFixtureFile(
     const payload = buildPayload(fileIndex, options.payloadBytes);
     const messageCount = Math.round(options.durationSec * options.rateHz);
     const periodNs = BigInt(Math.round(1e9 / options.rateHz));
-    for (let seq = 0; seq < messageCount; seq++) {
+    // Records must be written in order: one message at a time.
+    await runSequentially(messageCount, async (seq) => {
       const t = seq / options.rateHz;
       const value = Math.sin(t * (1 + fileIndex)) + fileIndex;
       const logTime = MCAP_FIXTURE_START_TIME_NS + BigInt(seq) * periodNs;
@@ -115,10 +118,10 @@ async function writeFixtureFile(
         publishTime: logTime,
         data: encoder.encode(JSON.stringify({ value, seq, payload })),
       });
-    }
+    });
     await writer.end();
   } finally {
-    fs.closeSync(fd);
+    await handle.close();
   }
 }
 
@@ -164,15 +167,17 @@ export async function generateMcapFixtures(
     return existing.files.map((file) => file.name);
   }
 
-  const files: FixtureManifest["files"] = [];
-  for (let fileIndex = 0; fileIndex < options.fileCount; fileIndex++) {
-    const name = getMcapFixtureFileName(fileIndex);
-    const finalPath = path.join(dir, name);
-    const tmpPath = `${finalPath}.tmp-${process.pid}`;
-    await writeFixtureFile(tmpPath, fileIndex, options);
-    fs.renameSync(tmpPath, finalPath);
-    files.push({ name, size: fs.statSync(finalPath).size });
-  }
+  // Files are independent (own handle, own temp name): written concurrently, listed in index order.
+  const files: FixtureManifest["files"] = await Promise.all(
+    Array.from({ length: options.fileCount }, async (_, fileIndex) => {
+      const name = getMcapFixtureFileName(fileIndex);
+      const finalPath = path.join(dir, name);
+      const tmpPath = `${finalPath}.tmp-${process.pid}`;
+      await writeFixtureFile(tmpPath, fileIndex, options);
+      fs.renameSync(tmpPath, finalPath);
+      return { name, size: fs.statSync(finalPath).size };
+    }),
+  );
   const manifest: FixtureManifest = { hash, files };
   fs.writeFileSync(path.join(dir, MCAP_FIXTURE_MANIFEST), JSON.stringify(manifest, undefined, 2));
   return files.map((file) => file.name);

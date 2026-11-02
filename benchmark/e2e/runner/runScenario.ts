@@ -43,6 +43,7 @@ import {
   TelemetryRecord,
   buildResultV1,
 } from "../result/schemaV1";
+import { repeatWhile } from "../shared/sequential";
 import type { BenchmarkArtifact, FrameTimeSample, MemorySample, ScenarioUnderTest } from "../types";
 
 /** Environment fields shared by all platforms (host machine). */
@@ -172,10 +173,14 @@ async function pauseAndCloseDataSource(
     return;
   }
   const deadline = Date.now() + CLOSE_EVENT_TIMEOUT_MS;
-  while (!drainer.hasEvent("datasource.close", "end") && Date.now() < deadline) {
-    await delay(CLOSE_EVENT_POLL_INTERVAL_MS);
-    await drainer.drain();
-  }
+  // Polling: each poll waits, then drains, strictly after the previous one.
+  await repeatWhile(
+    () => !drainer.hasEvent("datasource.close", "end") && Date.now() < deadline,
+    async () => {
+      await delay(CLOSE_EVENT_POLL_INTERVAL_MS);
+      await drainer.drain();
+    },
+  );
   if (!drainer.hasEvent("datasource.close", "end")) {
     console.warn("[runScenario] datasource.close end not observed within timeout");
   }
@@ -318,25 +323,29 @@ export async function runScenario(
       });
     }
 
-    // When: 1 Hz loop - page clock → host metrics → drain.
-    while (Date.now() < windowEnd) {
-      const tickStart = Date.now();
-      const ts = await pageNow(page);
-      const host = await target.collectHostMetrics(ts);
-      hostSamples.push(...host.samples);
-      memorySamples.push({
-        timestampMs: Date.now(),
-        metrics: host.legacyMetrics,
-      });
-      await drainer.drain();
-      const remaining = Math.min(
-        SAMPLE_INTERVAL_MS - (Date.now() - tickStart),
-        windowEnd - Date.now(),
-      );
-      if (remaining > 0) {
-        await delay(remaining);
-      }
-    }
+    // When: 1 Hz loop - page clock → host metrics → drain. Ticks are timed and strictly
+    // sequential (each starts after the previous one's wait).
+    await repeatWhile(
+      () => Date.now() < windowEnd,
+      async () => {
+        const tickStart = Date.now();
+        const ts = await pageNow(page);
+        const host = await target.collectHostMetrics(ts);
+        hostSamples.push(...host.samples);
+        memorySamples.push({
+          timestampMs: Date.now(),
+          metrics: host.legacyMetrics,
+        });
+        await drainer.drain();
+        const remaining = Math.min(
+          SAMPLE_INTERVAL_MS - (Date.now() - tickStart),
+          windowEnd - Date.now(),
+        );
+        if (remaining > 0) {
+          await delay(remaining);
+        }
+      },
+    );
     finishedAtWall = new Date().toISOString();
     // End of the measured window (rates in `summary.pipeline`); teardown below is excluded.
     windowEndMonotonicTs = await pageNow(page);

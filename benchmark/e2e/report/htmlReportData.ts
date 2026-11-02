@@ -242,7 +242,7 @@ export function downsample(points: readonly Point[], maxPoints = MAX_POINTS_PER_
       result.push(inner[Math.min(minIndex, maxIndex)]!, inner[Math.max(minIndex, maxIndex)]!);
     }
   }
-  result.push(points[points.length - 1]!);
+  result.push(points.at(-1)!);
   return result;
 }
 

@@ -13,12 +13,15 @@ import type {
   PsTreeRow,
   WebHostCollectorOptions,
 } from "./types";
+import { PS_EXECUTABLE_CANDIDATES } from "../shared/constants";
+import { findExecutable } from "../shared/executables";
 import type { LegacyProcessMetric } from "../types";
 
 // Host (OS-level) process metrics for the web platform, collected on the
 // Node side of Playwright:
 // - process list + cumulative CPU time: CDP `SystemInfo.getProcessInfo` on a browser session;
-// - resident set size (RSS) per pid: `ps -o pid=,rss= -p <pids>` (Linux/macOS);
+// - resident set size (RSS) per pid: `ps -o pid=,rss= -p <pids>` (Linux/macOS; `ps` is run by
+//   absolute path, see `PS_EXECUTABLE_CANDIDATES`);
 // - fallback when CDP is unavailable: the browser's process tree from `ps -A`, rooted at the
 //   browser process launched with a unique marker flag (`--lichtblick-benchmark-run=<id>`).
 // On Windows (no `ps`) memory is omitted (CPU from CDP still reported) and a warning logged once.
@@ -73,21 +76,69 @@ export function parsePsOutput(stdout: string): Map<number, number> {
   return result;
 }
 
+const DIGITS = /^\d+$/;
+const DECIMAL = /^[\d.]+$/;
+const WHITESPACE = /\s/;
+/** Characters `.` does not match: a line holding one in `args` was rejected by the former regex. */
+const LINE_TERMINATOR = /[\r\n\u2028\u2029]/;
+
+/**
+ * Splits off the first whitespace-delimited token of `text` (leading whitespace skipped). Linear,
+ * no regex backtracking. `rest` starts right after the token (its separator is not consumed).
+ */
+function nextToken(text: string, from: number): { token: string; rest: number } {
+  let start = from;
+  while (start < text.length && WHITESPACE.test(text[start]!)) {
+    start++;
+  }
+  let end = start;
+  while (end < text.length && !WHITESPACE.test(text[end]!)) {
+    end++;
+  }
+  return { token: text.slice(start, end), rest: end };
+}
+
+/** Parses one `pid ppid rss pcpu args…` line, or undefined when malformed. */
+function parsePsTreeLine(line: string): PsTreeRow | undefined {
+  const pid = nextToken(line, 0);
+  const ppid = nextToken(line, pid.rest);
+  const rss = nextToken(line, ppid.rest);
+  const cpu = nextToken(line, rss.rest);
+  if (
+    !DIGITS.test(pid.token) ||
+    !DIGITS.test(ppid.token) ||
+    !DIGITS.test(rss.token) ||
+    !DECIMAL.test(cpu.token) ||
+    !WHITESPACE.test(line.charAt(cpu.rest))
+  ) {
+    return undefined;
+  }
+  // `args` is the rest of the line after the whitespace following pcpu.
+  let argsStart = cpu.rest;
+  while (argsStart < line.length && WHITESPACE.test(line[argsStart]!)) {
+    argsStart++;
+  }
+  const args = line.slice(argsStart);
+  if (LINE_TERMINATOR.test(args)) {
+    return undefined;
+  }
+  return {
+    pid: Number(pid.token),
+    ppid: Number(ppid.token),
+    rssKb: Number(rss.token),
+    cpuPercent: Number(cpu.token),
+    args,
+  };
+}
+
 /** Parses `ps -A -o pid=,ppid=,rss=,pcpu=,args=` output. Malformed lines are ignored. */
 export function parsePsTreeOutput(stdout: string): PsTreeRow[] {
   const rows: PsTreeRow[] = [];
   for (const line of stdout.split("\n")) {
-    const match = /^\s*(\d+)\s+(\d+)\s+(\d+)\s+([\d.]+)\s+(.*)$/.exec(line);
-    if (match == undefined) {
-      continue;
+    const row = parsePsTreeLine(line);
+    if (row != undefined) {
+      rows.push(row);
     }
-    rows.push({
-      pid: Number(match[1]),
-      ppid: Number(match[2]),
-      rssKb: Number(match[3]),
-      cpuPercent: Number(match[4]),
-      args: match[5]!,
-    });
   }
   return rows;
 }
@@ -132,7 +183,8 @@ export function computeCpuPercent(
   currentCpuTimeSec: number,
   elapsedMs: number,
 ): number | undefined {
-  if (previousCpuTimeSec == undefined || !(elapsedMs > 0)) {
+  // `<= 0` alone would let NaN through: `!(elapsedMs > 0)` also rejects it.
+  if (previousCpuTimeSec == undefined || Number.isNaN(elapsedMs) || elapsedMs <= 0) {
     return undefined;
   }
   return Math.max(0, ((currentCpuTimeSec - previousCpuTimeSec) * 1000 * 100) / elapsedMs);
@@ -151,10 +203,16 @@ export function toLegacyProcessMetric(sample: HostProcessSample): LegacyProcessM
   };
 }
 
-/** Runs `ps` without a shell; tolerates a non-zero exit (e.g. a pid exited) when stdout exists. */
-async function runPs(args: readonly string[]): Promise<string> {
+/**
+ * Runs `ps` (absolute path `psPath`, undefined when not found) without a shell; tolerates a
+ * non-zero exit (e.g. a pid exited) when stdout exists.
+ */
+async function runPs(psPath: string | undefined, args: readonly string[]): Promise<string> {
+  if (psPath == undefined) {
+    throw new Error(`ps not found (looked in ${PS_EXECUTABLE_CANDIDATES.join(", ")})`);
+  }
   return await new Promise((resolve, reject) => {
-    execFile("ps", args, { maxBuffer: PS_MAX_BUFFER_BYTES }, (error, stdout) => {
+    execFile(psPath, args, { maxBuffer: PS_MAX_BUFFER_BYTES }, (error, stdout) => {
       if (error != undefined && stdout.length === 0) {
         reject(new Error(`ps ${args.join(" ")} failed: ${error.message}`));
         return;
@@ -168,16 +226,18 @@ export class WebHostCollector {
   readonly #browser: Browser;
   readonly #marker: string;
   readonly #memorySupported = process.platform !== "win32";
+  readonly #psPath: string | undefined;
+  readonly #warned = new Set<string>();
+  readonly #peakRssBytes = new Map<number, number>();
   #session: CDPSession | undefined;
   #cdpUnavailable = false;
-  #warned = new Set<string>();
   #previousCpu = new Map<number, number>();
   #previousAtMs: number | undefined;
-  #peakRssBytes = new Map<number, number>();
 
   public constructor(options: WebHostCollectorOptions) {
     this.#browser = options.browser;
     this.#marker = options.marker;
+    this.#psPath = this.#memorySupported ? findExecutable(PS_EXECUTABLE_CANDIDATES) : undefined;
   }
 
   public async collect(monotonicTs: number): Promise<HostMetricsSnapshot> {
@@ -250,7 +310,12 @@ export class WebHostCollector {
     } else if (processes.length > 0) {
       try {
         rssByPid = parsePsOutput(
-          await runPs(["-o", "pid=,rss=", "-p", processes.map((p) => p.id).join(",")]),
+          await runPs(this.#psPath, [
+            "-o",
+            "pid=,rss=",
+            "-p",
+            processes.map((p) => p.id).join(","),
+          ]),
         );
       } catch (error) {
         this.#warnOnce("ps", `ps failed (${String(error)}); process memory omitted.`);
@@ -288,7 +353,7 @@ export class WebHostCollector {
     let rows: PsTreeRow[];
     try {
       rows = selectProcessTree(
-        parsePsTreeOutput(await runPs(["-A", "-o", "pid=,ppid=,rss=,pcpu=,args="])),
+        parsePsTreeOutput(await runPs(this.#psPath, ["-A", "-o", "pid=,ppid=,rss=,pcpu=,args="])),
         this.#marker,
       );
     } catch (error) {

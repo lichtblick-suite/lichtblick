@@ -5,20 +5,17 @@
 // imported by relative path so no `@lichtblick/suite-base` path alias is needed.
 
 import { PIPELINE_TELEMETRY_METRICS } from "../../../packages/suite-base/src/components/MessagePipeline/constants";
-import { PANEL_TELEMETRY_METRICS } from "../../../packages/suite-base/src/components/PanelExtensionAdapter/constants";
 import {
   BYTES_READ_METRIC,
   READ_REQUESTS_METRIC,
 } from "../../../packages/suite-base/src/players/IterablePlayer/Mcap/constants";
 import {
   BLOCK_CACHE_METRICS,
-  MEMORY_METRIC_PREFIX,
   SOURCE_CACHE_METRICS,
 } from "../../../packages/suite-base/src/players/IterablePlayer/constants";
 import {
   HYDRATED_SOURCE_POOL_COUNTER_METRICS,
   HYDRATED_SOURCE_POOL_GAUGE_METRICS,
-  HYDRATED_SOURCE_POOL_METRIC_PREFIX,
   HYDRATED_SOURCE_POOL_OVER_BUDGET_DURATION_METRIC,
   SOURCES_RELEVANT_METRIC,
   SOURCES_TOTAL_METRIC,
@@ -36,7 +33,7 @@ export const RESULT_V1_SUFFIX = ".benchmark-result.v1.json";
 export const OVERHEAD_PREFIX = "overhead-";
 
 /** Prefix of the `HydratedSourcePool` telemetry series (scope "pipeline", label `poolId`). */
-export const POOL_METRIC_PREFIX = HYDRATED_SOURCE_POOL_METRIC_PREFIX;
+export { HYDRATED_SOURCE_POOL_METRIC_PREFIX as POOL_METRIC_PREFIX } from "../../../packages/suite-base/src/players/IterablePlayer/shared/constants";
 
 /**
  * `HydratedSourcePool` metric names (label `poolId`), taken from the product so a rename there
@@ -77,7 +74,7 @@ export const PHASES_ORIGINS = ["datasource.open", "app.ready"] as const;
  * (published as `.count` / `.sum` / `.max`; see `observationMetrics`); the render metrics are
  * emitted by `PanelExtensionAdapter` panels only.
  */
-export const PANEL_METRICS = PANEL_TELEMETRY_METRICS;
+export { PANEL_TELEMETRY_METRICS as PANEL_METRICS } from "../../../packages/suite-base/src/components/PanelExtensionAdapter/constants";
 
 /**
  * Pipeline metric names (scope "pipeline"), taken from the product so a rename there cannot
@@ -101,4 +98,4 @@ export const PIPELINE_METRICS = {
 } as const;
 
 /** `pipeline.memory.<key>` gauges (bytes, label `sourceId`) from `progress.memoryInfo`. */
-export const PIPELINE_MEMORY_METRIC_PREFIX = MEMORY_METRIC_PREFIX;
+export { MEMORY_METRIC_PREFIX as PIPELINE_MEMORY_METRIC_PREFIX } from "../../../packages/suite-base/src/players/IterablePlayer/constants";

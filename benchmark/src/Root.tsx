@@ -34,7 +34,7 @@ import { BenchmarkAppBar } from "./scenarios";
 import { getScenarioFromUrl } from "./scenarios/registry";
 import { MemoryAppConfiguration } from "./services";
 
-export function Root({ onAppReady }: RootProps): React.JSX.Element {
+export function Root({ onAppReady }: Readonly<RootProps>): React.JSX.Element {
   useEffect(() => {
     onAppReady?.();
   }, [onAppReady]);

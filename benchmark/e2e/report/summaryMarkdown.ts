@@ -116,7 +116,7 @@ function formatRatio(value: number | undefined): string {
 }
 
 function escapeCell(text: string): string {
-  return text.replace(/\|/g, "\\|");
+  return text.replaceAll("|", String.raw`\|`);
 }
 
 /** One-line pipeline digest of a run (`summary.pipeline`). */

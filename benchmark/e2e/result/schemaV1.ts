@@ -25,7 +25,7 @@ import {
   summarizePanelsReady,
 } from "./panelsSummary";
 import { PipelineSummaryV1, summarizePipeline } from "./pipelineSummary";
-import { PoolSeries } from "./schemaV1.types";
+import { PoolGroup, PoolSeries } from "./schemaV1.types";
 import { maxOf, mean, median, percentile } from "./stats";
 import type {
   TelemetryEvent,
@@ -457,11 +457,9 @@ function latestAtOrBefore(samples: readonly TelemetrySample[] | undefined, ts: n
   return value;
 }
 
-/** Summarizes `pipeline.hydratedSourcePool.*` series per `<realm>/<poolId>`. */
-export function summarizePools(
-  pageSamples: readonly TelemetrySample[],
-): Record<string, PoolSummaryV1> | undefined {
-  const pools = new Map<string, { realm: string; poolId: string; series: PoolSeries }>();
+/** Groups the `pipeline.hydratedSourcePool.*` samples per `<realm>/<poolId>`, then per metric. */
+function groupPoolSeries(pageSamples: readonly TelemetrySample[]): Map<string, PoolGroup> {
+  const pools = new Map<string, PoolGroup>();
   for (const sample of pageSamples) {
     const poolId = sample.labels?.poolId;
     if (!sample.metric.startsWith(POOL_METRIC_PREFIX) || poolId == undefined) {
@@ -480,50 +478,63 @@ export function summarizePools(
     }
     list.push(sample);
   }
+  return pools;
+}
+
+/** Whether every `activePins` snapshot equals acquires − releases − terminatedPins at its time. */
+function activePinSnapshotsHold(
+  series: PoolSeries,
+  activePins: readonly TelemetrySample[],
+): boolean {
+  return activePins.every((snapshot) => {
+    const ts = snapshot.monotonicTs;
+    const expected =
+      latestAtOrBefore(series.get(POOL_METRICS.acquires), ts) -
+      latestAtOrBefore(series.get(POOL_METRICS.releases), ts) -
+      latestAtOrBefore(series.get(POOL_METRICS.terminatedPins), ts);
+    return expected === snapshot.value;
+  });
+}
+
+function summarizePool({ realm, poolId, series }: PoolGroup): PoolSummaryV1 {
+  const finalCounter = (metric: string) =>
+    maxOf((series.get(metric) ?? []).map((s) => s.value)) ?? 0;
+  const activePins = series.get(POOL_METRICS.activePins) ?? [];
+  const acquires = finalCounter(POOL_METRICS.acquires);
+  const releases = finalCounter(POOL_METRICS.releases);
+  const terminatedPins = finalCounter(POOL_METRICS.terminatedPins);
+  const activePinsFinal = activePins.at(-1)?.value ?? 0;
+  const invariantHolds =
+    activePinSnapshotsHold(series, activePins) &&
+    acquires - releases - terminatedPins === activePinsFinal;
+  return {
+    realm,
+    poolId,
+    acquires,
+    releases,
+    terminatedPins,
+    activePinsFinal,
+    invariantHolds,
+    overBudgetPeriods: finalCounter(POOL_METRICS.overBudgetPeriods),
+    overBudgetDurationMs: finalCounter(POOL_METRICS.overBudgetDurationMs),
+    evictions: finalCounter(POOL_METRICS.evictions),
+    rehydrations: finalCounter(POOL_METRICS.rehydrations),
+    highWaterResidentCount: finalCounter(POOL_METRICS.highWaterResidentCount),
+    highWaterActivePins: finalCounter(POOL_METRICS.highWaterActivePins),
+  };
+}
+
+/** Summarizes `pipeline.hydratedSourcePool.*` series per `<realm>/<poolId>`. */
+export function summarizePools(
+  pageSamples: readonly TelemetrySample[],
+): Record<string, PoolSummaryV1> | undefined {
+  const pools = groupPoolSeries(pageSamples);
   if (pools.size === 0) {
     return undefined;
   }
-
   const result: Record<string, PoolSummaryV1> = {};
-  for (const [key, { realm, poolId, series }] of [...pools].sort(([a], [b]) =>
-    a.localeCompare(b),
-  )) {
-    const finalCounter = (metric: string) =>
-      maxOf((series.get(metric) ?? []).map((s) => s.value)) ?? 0;
-    const activePins = series.get(POOL_METRICS.activePins) ?? [];
-    let invariantHolds = true;
-    for (const snapshot of activePins) {
-      const ts = snapshot.monotonicTs;
-      const expected =
-        latestAtOrBefore(series.get(POOL_METRICS.acquires), ts) -
-        latestAtOrBefore(series.get(POOL_METRICS.releases), ts) -
-        latestAtOrBefore(series.get(POOL_METRICS.terminatedPins), ts);
-      if (expected !== snapshot.value) {
-        invariantHolds = false;
-      }
-    }
-    const acquires = finalCounter(POOL_METRICS.acquires);
-    const releases = finalCounter(POOL_METRICS.releases);
-    const terminatedPins = finalCounter(POOL_METRICS.terminatedPins);
-    const activePinsFinal = activePins.at(-1)?.value ?? 0;
-    if (acquires - releases - terminatedPins !== activePinsFinal) {
-      invariantHolds = false;
-    }
-    result[key] = {
-      realm,
-      poolId,
-      acquires,
-      releases,
-      terminatedPins,
-      activePinsFinal,
-      invariantHolds,
-      overBudgetPeriods: finalCounter(POOL_METRICS.overBudgetPeriods),
-      overBudgetDurationMs: finalCounter(POOL_METRICS.overBudgetDurationMs),
-      evictions: finalCounter(POOL_METRICS.evictions),
-      rehydrations: finalCounter(POOL_METRICS.rehydrations),
-      highWaterResidentCount: finalCounter(POOL_METRICS.highWaterResidentCount),
-      highWaterActivePins: finalCounter(POOL_METRICS.highWaterActivePins),
-    };
+  for (const [key, pool] of [...pools].sort(([a], [b]) => a.localeCompare(b))) {
+    result[key] = summarizePool(pool);
   }
   return result;
 }
@@ -708,6 +719,27 @@ function checkFields(
   }
 }
 
+/** Validates the fields of one telemetry record (`at` locates it in the error messages). */
+function checkRecord(
+  record: Record<string, unknown>,
+  at: string,
+  kind: "sample" | "event",
+  errors: string[],
+): void {
+  if (record.kind !== kind) {
+    errors.push(`${at}.kind must be "${kind}"`);
+  }
+  checkFields(record, at, { realm: "string", sequence: "number", monotonicTs: "number" }, errors);
+  if (kind === "sample") {
+    checkFields(record, at, { metric: "string", value: "number", unit: "string" }, errors);
+    if (record.metricType !== "gauge" && record.metricType !== "counter") {
+      errors.push(`${at}.metricType must be "gauge" or "counter"`);
+    }
+  } else {
+    checkFields(record, at, { name: "string", phase: "string" }, errors);
+  }
+}
+
 function checkRecords(
   value: unknown,
   where: string,
@@ -727,18 +759,7 @@ function checkRecords(
       errors.push(`${at} must be an object`);
       continue;
     }
-    if (record.kind !== kind) {
-      errors.push(`${at}.kind must be "${kind}"`);
-    }
-    checkFields(record, at, { realm: "string", sequence: "number", monotonicTs: "number" }, errors);
-    if (kind === "sample") {
-      checkFields(record, at, { metric: "string", value: "number", unit: "string" }, errors);
-      if (record.metricType !== "gauge" && record.metricType !== "counter") {
-        errors.push(`${at}.metricType must be "gauge" or "counter"`);
-      }
-    } else {
-      checkFields(record, at, { name: "string", phase: "string" }, errors);
-    }
+    checkRecord(record, at, kind, errors);
     if (typeof record.monotonicTs === "number") {
       sorted &&= record.monotonicTs >= previousTs;
       previousTs = record.monotonicTs;
@@ -784,155 +805,164 @@ function checkRunnerEvents(value: unknown, errors: string[]): void {
   }
 }
 
-/** Structural validation of a parsed `benchmark-result.v1.json`; returns the list of problems. */
-export function validateResultV1(obj: unknown): string[] {
-  const errors: string[] = [];
-  if (!isRecord(obj)) {
-    return ["result must be an object"];
-  }
-  if (obj.schemaVersion !== RESULT_SCHEMA_VERSION) {
-    errors.push(`schemaVersion must be ${RESULT_SCHEMA_VERSION}`);
-  }
-
-  const run = obj.run;
-  if (isRecord(run)) {
-    checkFields(
-      run,
-      "run",
-      {
-        scenarioId: "string",
-        pipeline: "string",
-        platform: "string",
-        telemetryEnabled: "boolean",
-        startedAtWall: "string",
-        finishedAtWall: "string",
-        startMonotonicTs: "number",
-        endMonotonicTs: "number",
-        windowEndMonotonicTs: "number?",
-        sampleIntervalMs: "number",
-      },
-      errors,
-    );
-    if (run.platform !== "electron" && run.platform !== "web") {
-      errors.push(`run.platform must be "electron" or "web"`);
-    }
-    for (const field of ["startedAtWall", "finishedAtWall"] as const) {
-      if (typeof run[field] === "string" && Number.isNaN(Date.parse(run[field]))) {
-        errors.push(`run.${field} must be an ISO date`);
-      }
-    }
-    if (isRecord(run.environment)) {
-      checkFields(
-        run.environment,
-        "run.environment",
-        {
-          os: "string",
-          arch: "string",
-          ci: "boolean",
-          cpuModel: "string",
-          totalMemBytes: "number",
-          userAgent: "string?",
-          electronVersion: "string?",
-          chromiumVersion: "string?",
-        },
-        errors,
-      );
-    } else {
-      errors.push("run.environment must be an object");
-    }
-  } else {
+/** Validates `run` (fields, platform, ISO dates, environment). */
+function checkRun(run: unknown, errors: string[]): void {
+  if (!isRecord(run)) {
     errors.push("run must be an object");
+    return;
   }
-
-  checkRecords(obj.samples, "samples", "sample", errors);
-  checkRecords(obj.events, "events", "event", errors);
-  checkNumberRecord(obj.dropped, "dropped", errors);
-  checkNumberRecord(obj.sequenceGaps, "sequenceGaps", errors);
-  checkRunnerEvents(obj.runnerEvents, errors);
-
-  const summary = obj.summary;
-  if (!isRecord(summary)) {
-    errors.push("summary must be an object");
-    return errors;
+  checkFields(
+    run,
+    "run",
+    {
+      scenarioId: "string",
+      pipeline: "string",
+      platform: "string",
+      telemetryEnabled: "boolean",
+      startedAtWall: "string",
+      finishedAtWall: "string",
+      startMonotonicTs: "number",
+      endMonotonicTs: "number",
+      windowEndMonotonicTs: "number?",
+      sampleIntervalMs: "number",
+    },
+    errors,
+  );
+  if (run.platform !== "electron" && run.platform !== "web") {
+    errors.push(`run.platform must be "electron" or "web"`);
   }
-  if (isRecord(summary.process)) {
-    checkFields(
-      summary.process,
-      "summary.process",
-      {
-        peakTotalWorkingSetBytes: "number",
-        meanTotalWorkingSetBytes: "number",
-        medianTotalCpuPercent: "number",
-      },
-      errors,
-    );
-    if (!isRecord(summary.process.byType)) {
-      errors.push("summary.process.byType must be an object");
+  for (const field of ["startedAtWall", "finishedAtWall"] as const) {
+    if (typeof run[field] === "string" && Number.isNaN(Date.parse(run[field]))) {
+      errors.push(`run.${field} must be an ISO date`);
     }
-  } else {
+  }
+  checkRunEnvironment(run.environment, errors);
+}
+
+function checkRunEnvironment(environment: unknown, errors: string[]): void {
+  if (!isRecord(environment)) {
+    errors.push("run.environment must be an object");
+    return;
+  }
+  checkFields(
+    environment,
+    "run.environment",
+    {
+      os: "string",
+      arch: "string",
+      ci: "boolean",
+      cpuModel: "string",
+      totalMemBytes: "number",
+      userAgent: "string?",
+      electronVersion: "string?",
+      chromiumVersion: "string?",
+    },
+    errors,
+  );
+}
+
+function checkProcessSummary(processSummary: unknown, errors: string[]): void {
+  if (!isRecord(processSummary)) {
     errors.push("summary.process must be an object");
+    return;
   }
-  if (isRecord(summary.renderer)) {
-    checkFields(
-      summary.renderer,
-      "summary.renderer",
-      {
-        peakJsHeapUsedBytes: "number?",
-        lastUaSpecificMemoryBytes: "number?",
-        medianFps: "number?",
-        lateFrames: "number?",
-        longTasks: "number?",
-      },
-      errors,
-    );
-  } else {
+  checkFields(
+    processSummary,
+    "summary.process",
+    {
+      peakTotalWorkingSetBytes: "number",
+      meanTotalWorkingSetBytes: "number",
+      medianTotalCpuPercent: "number",
+    },
+    errors,
+  );
+  if (!isRecord(processSummary.byType)) {
+    errors.push("summary.process.byType must be an object");
+  }
+}
+
+function checkRendererSummary(renderer: unknown, errors: string[]): void {
+  if (!isRecord(renderer)) {
     errors.push("summary.renderer must be an object");
+    return;
   }
-  if (summary.listenerDispatchDurationMs != undefined) {
-    if (isRecord(summary.listenerDispatchDurationMs)) {
-      checkFields(
-        summary.listenerDispatchDurationMs,
-        "summary.listenerDispatchDurationMs",
-        { count: "number", p50: "number", p90: "number", max: "number" },
-        errors,
-      );
-    } else {
-      errors.push("summary.listenerDispatchDurationMs must be an object");
-    }
+  checkFields(
+    renderer,
+    "summary.renderer",
+    {
+      peakJsHeapUsedBytes: "number?",
+      lastUaSpecificMemoryBytes: "number?",
+      medianFps: "number?",
+      lateFrames: "number?",
+      longTasks: "number?",
+    },
+    errors,
+  );
+}
+
+/** Validates the optional `summary.listenerDispatchDurationMs` distribution (absent is valid). */
+function checkListenerDispatch(distribution: unknown, errors: string[]): void {
+  if (distribution == undefined) {
+    return;
   }
-  if (summary.hydratedSourcePool != undefined) {
-    const pools = isRecord(summary.hydratedSourcePool)
-      ? summary.hydratedSourcePool.pools
-      : undefined;
-    if (isRecord(pools)) {
-      for (const [key, pool] of Object.entries(pools)) {
-        if (!isRecord(pool)) {
-          errors.push(`summary.hydratedSourcePool.pools.${key} must be an object`);
-          continue;
-        }
-        if (typeof pool.invariantHolds !== "boolean") {
-          errors.push(`summary.hydratedSourcePool.pools.${key}.invariantHolds must be a boolean`);
-        }
-        checkFields(
-          pool,
-          `summary.hydratedSourcePool.pools.${key}`,
-          {
-            acquires: "number",
-            releases: "number",
-            terminatedPins: "number",
-            activePinsFinal: "number",
-            overBudgetPeriods: "number",
-            overBudgetDurationMs: "number",
-            evictions: "number",
-            rehydrations: "number",
-          },
-          errors,
-        );
-      }
-    } else {
-      errors.push("summary.hydratedSourcePool.pools must be an object");
-    }
+  if (!isRecord(distribution)) {
+    errors.push("summary.listenerDispatchDurationMs must be an object");
+    return;
   }
+  checkFields(
+    distribution,
+    "summary.listenerDispatchDurationMs",
+    { count: "number", p50: "number", p90: "number", max: "number" },
+    errors,
+  );
+}
+
+function checkPool(key: string, pool: unknown, errors: string[]): void {
+  const at = `summary.hydratedSourcePool.pools.${key}`;
+  if (!isRecord(pool)) {
+    errors.push(`${at} must be an object`);
+    return;
+  }
+  if (typeof pool.invariantHolds !== "boolean") {
+    errors.push(`${at}.invariantHolds must be a boolean`);
+  }
+  checkFields(
+    pool,
+    at,
+    {
+      acquires: "number",
+      releases: "number",
+      terminatedPins: "number",
+      activePinsFinal: "number",
+      overBudgetPeriods: "number",
+      overBudgetDurationMs: "number",
+      evictions: "number",
+      rehydrations: "number",
+    },
+    errors,
+  );
+}
+
+/** Validates the optional `summary.hydratedSourcePool` object (absent is valid). */
+function checkHydratedSourcePool(hydratedSourcePool: unknown, errors: string[]): void {
+  if (hydratedSourcePool == undefined) {
+    return;
+  }
+  const pools = isRecord(hydratedSourcePool) ? hydratedSourcePool.pools : undefined;
+  if (!isRecord(pools)) {
+    errors.push("summary.hydratedSourcePool.pools must be an object");
+    return;
+  }
+  for (const [key, pool] of Object.entries(pools)) {
+    checkPool(key, pool, errors);
+  }
+}
+
+function checkSummary(summary: Record<string, unknown>, errors: string[]): void {
+  checkProcessSummary(summary.process, errors);
+  checkRendererSummary(summary.renderer, errors);
+  checkListenerDispatch(summary.listenerDispatchDurationMs, errors);
+  checkHydratedSourcePool(summary.hydratedSourcePool, errors);
   if (isRecord(summary.phases)) {
     checkPhases(summary.phases, errors);
   } else {
@@ -942,6 +972,28 @@ export function validateResultV1(obj: unknown): string[] {
   checkPipeline(summary.pipeline, errors);
   if (summary.runnerEvents != undefined) {
     checkNumberRecord(summary.runnerEvents, "summary.runnerEvents", errors);
+  }
+}
+
+/** Structural validation of a parsed `benchmark-result.v1.json`; returns the list of problems. */
+export function validateResultV1(obj: unknown): string[] {
+  if (!isRecord(obj)) {
+    return ["result must be an object"];
+  }
+  const errors: string[] = [];
+  if (obj.schemaVersion !== RESULT_SCHEMA_VERSION) {
+    errors.push(`schemaVersion must be ${RESULT_SCHEMA_VERSION}`);
+  }
+  checkRun(obj.run, errors);
+  checkRecords(obj.samples, "samples", "sample", errors);
+  checkRecords(obj.events, "events", "event", errors);
+  checkNumberRecord(obj.dropped, "dropped", errors);
+  checkNumberRecord(obj.sequenceGaps, "sequenceGaps", errors);
+  checkRunnerEvents(obj.runnerEvents, errors);
+  if (isRecord(obj.summary)) {
+    checkSummary(obj.summary, errors);
+  } else {
+    errors.push("summary must be an object");
   }
   return errors;
 }

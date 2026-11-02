@@ -8,13 +8,14 @@
 import { maxOf, percentile } from "./stats";
 import { ObservationSummary } from "./types";
 import type { TelemetrySample } from "../../../packages/suite-base/src/util/telemetry/types";
+import { compareCodeUnits } from "../shared/compare";
 
 /** Identity of a published series: realm + metric + labels (sorted by key). */
 export function seriesKey(sample: TelemetrySample): string {
   let key = `${sample.realm}|${sample.metric}`;
   const labels = sample.labels;
   if (labels != undefined) {
-    for (const name of Object.keys(labels).sort()) {
+    for (const name of Object.keys(labels).sort(compareCodeUnits)) {
       key += `|${name}=${labels[name]}`;
     }
   }

@@ -64,7 +64,7 @@ import {
   ISerializedIterableSource,
   IteratorResult,
 } from "./IIterableSource";
-import { FULLY_PRELOADED_EPSILON } from "./constants";
+import { coversFullRange } from "./coversFullRange";
 import { memoryMetricName } from "./memoryMetricName";
 
 const log = Log.getLogger(__filename);
@@ -94,17 +94,6 @@ const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
 
 const EMPTY_ARRAY = Object.freeze([]);
 
-/** True when the fraction ranges reported by the BlockLoader cover the whole [0, 1] range. */
-function coversFullRange(ranges: Progress["fullyLoadedFractionRanges"]): boolean {
-  if (ranges == undefined) {
-    return false;
-  }
-  let covered = 0;
-  for (const range of ranges) {
-    covered += range.end - range.start;
-  }
-  return covered >= 1 - FULLY_PRELOADED_EPSILON;
-}
 /**
  * Hook invoked on a seek to optionally expand the backfill messages before they are emitted, e.g.
  * to replay a video GOP so a P/B-frame is decodable. It receives the raw backfill messages, a

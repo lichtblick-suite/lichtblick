@@ -79,7 +79,7 @@ export function buildFakeLongTaskObserver(supportedEntryTypes: readonly string[]
 
 /** Builder for a fully fake `RendererCollectorsEnv` (Jest fake timers drive the interval). */
 export class RendererCollectorsEnvBuilder {
-  #now = 0;
+  readonly #now = 0;
   #memory: ChromiumPerformanceMemory | undefined;
   #measureUaMemory: (() => Promise<UserAgentSpecificMemoryResult>) | undefined;
   #crossOriginIsolated = false;

@@ -55,8 +55,9 @@ for (const scenario of SCENARIOS_UNDER_TEST) {
           .filter((event) => event.name === "panel.mount")
           .map((event) => event.labels?.panelId),
       );
-      expect(Object.keys(result.summary.panels ?? {}).sort()).toEqual(
-        expect.arrayContaining([...mountedPanelIds].sort()),
+      // Order-insensitive: `arrayContaining` matches the elements in any order.
+      expect(Object.keys(result.summary.panels ?? {})).toEqual(
+        expect.arrayContaining([...mountedPanelIds]),
       );
       expect(result.summary.pipeline).toBeDefined();
       expect(result.summary.pipeline?.listenerDispatchMeanMs).toBeDefined();

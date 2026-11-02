@@ -5,6 +5,17 @@ import { ALLOWED_TELEMETRY_LABEL_KEYS, DEFAULT_MAX_SERIES_PER_METRIC } from "./c
 import { TelemetryLabels, TelemetryRejectReason } from "./types";
 
 /**
+ * Orders strings by UTF-16 code units, like `Array#sort` without a comparator. Locale independent,
+ * so series keys stay byte-stable across environments (unlike `localeCompare`).
+ */
+function compareCodeUnits(a: string, b: string): number {
+  if (a < b) {
+    return -1;
+  }
+  return a > b ? 1 : 0;
+}
+
+/**
  * Builds the identity of a series: the metric (or event) name followed by its labels sorted by
  * key, e.g. `pool.bytes{poolId="a",sourceId="b"}`. Values are JSON-quoted so different label
  * sets can never produce the same key.
@@ -19,7 +30,7 @@ export function buildSeriesKey(metric: string, labels: TelemetryLabels | undefin
   if (keys.length === 0) {
     return metric;
   }
-  keys.sort();
+  keys.sort(compareCodeUnits);
   let key = metric + "{";
   for (let i = 0; i < keys.length; i++) {
     const labelKey = keys[i]!;

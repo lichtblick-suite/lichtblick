@@ -331,18 +331,46 @@ export class HydratedSourcePool {
 
   // Close least-recently-used unpinned entries until within budget, `minResident` is reached, or
   // only pinned entries remain (in which case the pool temporarily exceeds its bounds).
+  //
+  // Victim selection is fully synchronous (see #takeEvictionVictims), so every victim of a pass is
+  // chosen against one consistent snapshot and is already out of the map before any close starts;
+  // the closes of distinct victims are independent and run concurrently. If the pool changed while
+  // they were in flight (e.g. a pin was released), a follow-up pass re-checks the budget, so the
+  // pass converges to the same budget state as a sequential select-close-recheck loop.
   async #evictBeyondCapacity(): Promise<void> {
+    const victims = this.#takeEvictionVictims();
+    if (victims.length === 0) {
+      // Nothing evictable: settle synchronously (callers such as release() rely on the stats being
+      // up to date without awaiting).
+      this.#settle();
+      return;
+    }
+    await Promise.all(
+      victims.map(async (entry) => {
+        await this.#closeEvicted(entry);
+      }),
+    );
+    await this.#evictBeyondCapacity();
+  }
+
+  // Synchronously remove LRU unpinned entries until the pool is within budget, `minResident` is
+  // reached, or only pinned entries remain. Removal (and weight/evicted-token/eviction accounting)
+  // happens before any close is awaited, so concurrent eviction passes never target the same entry
+  // twice and a concurrent acquire() of a victim re-hydrates instead of reusing a closing value.
+  #takeEvictionVictims(): Entry[] {
+    const victims: Entry[] = [];
     while (this.#isOverCapacity()) {
       let evictKey: object | undefined;
+      let evictEntry: Entry | undefined;
       for (const [key, entry] of this.#entries) {
         if (entry.pins === 0) {
           evictKey = key;
+          evictEntry = entry;
           break;
         }
       }
-      if (evictKey == undefined) {
-        this.#settle();
-        return; // All remaining entries are pinned/in-use.
+      if (evictKey == undefined || evictEntry == undefined) {
+        break; // All remaining entries are pinned/in-use.
       }
       if (!this.#overCapacityReported) {
         this.#overCapacityReported = true;
@@ -350,22 +378,26 @@ export class HydratedSourcePool {
           `HydratedSourcePool over capacity: capping resident sources (maxCount=${this.#maxCount}, maxBytes=${this.#maxBytes}) and re-opening others on demand.`,
         );
       }
-      const entry = this.#entries.get(evictKey)!;
-      // Delete before awaiting close so concurrent evictions never target the same entry twice.
       this.#entries.delete(evictKey);
-      this.#totalWeight -= entry.weight;
+      this.#totalWeight -= evictEntry.weight;
       this.#evictedTokens.add(evictKey);
       this.#counts.evictions += 1;
-      try {
-        const value = await entry.value;
-        this.#counts.closes += 1;
-        await entry.hydrator.close(value);
-      } catch (err) {
-        log.error("HydratedSourcePool evict close failed", err);
-      }
-      log.debug(`evicted LRU source; resident=${this.#entries.size}/${this.#maxCount}`);
+      victims.push(evictEntry);
     }
-    this.#settle();
+    return victims;
+  }
+
+  // Close one evicted entry. Failures are logged and never propagate, so one failing close cannot
+  // prevent the other victims of the same pass from being closed.
+  async #closeEvicted(entry: Entry): Promise<void> {
+    try {
+      const value = await entry.value;
+      this.#counts.closes += 1;
+      await entry.hydrator.close(value);
+    } catch (err) {
+      log.error("HydratedSourcePool evict close failed", err);
+    }
+    log.debug(`evicted LRU source; resident=${this.#entries.size}/${this.#maxCount}`);
   }
 
   // A pin was added by acquire() (resident hit or new pending entry).

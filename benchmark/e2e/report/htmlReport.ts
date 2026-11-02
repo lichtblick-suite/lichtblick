@@ -32,24 +32,24 @@ import type { OverheadReport } from "../runner/types";
 
 export function escapeHtml(value: string): string {
   return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 /** JSON for a `<script type="application/json">` block: no `<` can close or open a tag. */
 function jsonForScript(value: unknown): string {
   return JSON.stringify(value)
-    .replace(/</g, "\\u003c")
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029");
+    .replaceAll("<", String.raw`\u003c`)
+    .replaceAll("\u2028", String.raw`\u2028`)
+    .replaceAll("\u2029", String.raw`\u2029`);
 }
 
 /** JavaScript source for an inline `<script>`: neutralizes `</script` and `<!--`. */
 function scriptForInline(source: string): string {
-  return source.replace(/<\/(script)/gi, "<\\/$1").replace(/<!--/g, "<\\!--");
+  return source.replace(/<\/(script)/gi, String.raw`<\/$1`).replaceAll("<!--", String.raw`<\!--`);
 }
 
 /** Encodes a file name for an `href`/`src` (keeps it relative; HTML-escaped by the caller). */
@@ -170,6 +170,23 @@ function overheadMemCell(report: OverheadReport | undefined): Cell {
   });
 }
 
+/** Pool invariant verdict of a run: ✅/❌, or a dash without pool data. */
+function poolInvariantCell(result: BenchmarkResultV1): Cell {
+  const invariant = poolInvariant(result);
+  if (invariant == undefined) {
+    return cell("—");
+  }
+  return cell(invariant ? "✅" : "❌", { tone: invariant ? "good" : "bad" });
+}
+
+/** Runner event count (red when any), or a dash when the run has no runner event summary. */
+function runnerEventsCell(events: number | undefined): Cell {
+  if (events == undefined) {
+    return num("—");
+  }
+  return num(String(events), { tone: events > 0 ? "bad" : "good" });
+}
+
 function runAnchor(index: number): string {
   return `run-${index}`;
 }
@@ -200,7 +217,6 @@ function kpiRow(
   const { phases, process, renderer, pipeline } = summary;
   const hasProcess = process.sampleCount > 0;
   const coverage = phases.panelsReadyCoverage;
-  const invariant = poolInvariant(result);
   const events = runnerEventCount(summary.runnerEvents);
   const overhead = findOverhead(overheads, run.scenarioId, run.platform);
   return [
@@ -223,10 +239,8 @@ function kpiRow(
     num(fmtNumber(pipeline?.messagesPerSec, 0)),
     num(fmtMiB(pipeline?.bytesPerSec, 2)),
     num(fmtRatio(pipeline?.sourceCacheHitRatio)),
-    invariant == undefined
-      ? cell("—")
-      : cell(invariant ? "✅" : "❌", { tone: invariant ? "good" : "bad" }),
-    events == undefined ? num("—") : num(String(events), { tone: events > 0 ? "bad" : "good" }),
+    poolInvariantCell(result),
+    runnerEventsCell(events),
     overheadCpuCell(overhead),
     overheadMemCell(overhead),
   ];

@@ -97,6 +97,37 @@ describe("parsePsTreeOutput / selectProcessTree", () => {
     // Given / When / Then
     expect(selectProcessTree(parsePsTreeOutput(stdout), "--missing")).toEqual([]);
   });
+
+  it("keeps args verbatim after the whitespace following pcpu", () => {
+    // Given
+    const lines = ["7\t1\t10\t0.5\t\t/a  b  ", "8 1 10 0.5    /c", "9 1 10 0.5 "].join("\n");
+
+    // When
+    const rows = parsePsTreeOutput(lines);
+
+    // Then
+    expect(rows.map((row) => row.args)).toEqual(["/a  b  ", "/c", ""]);
+    expect(rows.map((row) => row.pid)).toEqual([7, 8, 9]);
+  });
+
+  it("ignores lines with missing or non-numeric columns", () => {
+    // Given
+    const lines = [
+      "1 0 100 0.0",
+      "1 0 100 x /a",
+      "1 0 1e3 0.0 /a",
+      "-1 0 100 0.0 /a",
+      "1 0 100 0.0/a",
+      "1 0 100 0.0 /a\r",
+      "",
+    ].join("\n");
+
+    // When
+    const rows = parsePsTreeOutput(lines);
+
+    // Then
+    expect(rows).toEqual([]);
+  });
 });
 
 describe("computeCpuPercent", () => {
@@ -111,6 +142,8 @@ describe("computeCpuPercent", () => {
     // Given / When / Then
     expect(computeCpuPercent(undefined, 3, 1000)).toBeUndefined();
     expect(computeCpuPercent(1, 3, 0)).toBeUndefined();
+    expect(computeCpuPercent(1, 3, -5)).toBeUndefined();
+    expect(computeCpuPercent(1, 3, Number.NaN)).toBeUndefined();
     expect(computeCpuPercent(5, 3, 1000)).toBe(0);
   });
 });

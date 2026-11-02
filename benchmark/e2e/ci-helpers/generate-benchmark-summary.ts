@@ -63,7 +63,7 @@ function listReportPaths(): string[] {
   return fs
     .readdirSync(REPORTS_DIR)
     .filter((file) => /^results(-[\w-]+)?\.json$/.test(file))
-    .sort()
+    .sort((a, b) => a.localeCompare(b))
     .map((file) => path.join(REPORTS_DIR, file));
 }
 

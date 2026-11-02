@@ -53,11 +53,14 @@ export const test = base.extend<BenchmarkTestFixtures, BenchmarkWorkerFixtures>(
     };
     // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture `use`, not React hook
     await use(launch);
-    for (const target of launched) {
-      await target.dispose().catch((error: unknown) => {
-        console.warn(`Failed to dispose ${target.platform} target`, error);
-      });
-    }
+    // Targets own separate app instances: dispose them concurrently (each failure only warns).
+    await Promise.all(
+      launched.map(async (target) => {
+        await target.dispose().catch((error: unknown) => {
+          console.warn(`Failed to dispose ${target.platform} target`, error);
+        });
+      }),
+    );
   },
 
   target: async ({ launchTarget }, use) => {
