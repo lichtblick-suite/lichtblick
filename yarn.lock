@@ -3657,7 +3657,7 @@ __metadata:
     fuzzysort: "npm:3.1.0"
     fzf: "npm:0.5.2"
     geojson: "npm:0.5.0"
-    gl-matrix: "npm:3.4.3"
+    gl-matrix: "npm:3.4.4"
     hammerjs: "npm:2.0.8"
     heap-js: "npm:2.7.1"
     i18next: "npm:26.3.1"
@@ -12858,17 +12858,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gl-matrix@npm:*":
+"gl-matrix@npm:*, gl-matrix@npm:3.4.4":
   version: 3.4.4
   resolution: "gl-matrix@npm:3.4.4"
   checksum: 10/0a19a881fbfa2cdcff2b5ece0f62041d17e55665393349653e8742a20e43d4516239c68ac6798baa7c35b0c7bd6c9226e70e7824af162228d471eba358a03090
-  languageName: node
-  linkType: hard
-
-"gl-matrix@npm:3.4.3":
-  version: 3.4.3
-  resolution: "gl-matrix@npm:3.4.3"
-  checksum: 10/25ca2f7c762b7547cf462614ac7e0b98cffb131899f014e60a7e50395f4e9304efbb31dc73921e5af2a355cff663bee984d2710765f6730853e90d1c54d5d8e3
   languageName: node
   linkType: hard
 
