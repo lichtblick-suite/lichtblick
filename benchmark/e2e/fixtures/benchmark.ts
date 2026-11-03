@@ -5,8 +5,11 @@ import { test as base } from "@playwright/test";
 import { launchElectronTarget } from "./benchmark-electron";
 import { launchWebTarget } from "./benchmark-web";
 import { generateMcapFixtures } from "./generateMcapFixtures";
-import type { BenchmarkTestFixtures, BenchmarkWorkerFixtures } from "./types";
+import type { BenchmarkTestFixtures, BenchmarkWorkerFixtures, LaunchTargetOptions } from "./types";
 import { FIXTURES_DIR, WEB_BUILD_DIR } from "../runner/constants";
+import { overheadFixtureSet, overheadToggleFixtureSet } from "../runner/overheadFixtures";
+import type { OverheadFixtureSet } from "../runner/overheadFixtures.types";
+import { parseOverheadConfig, runsToggle } from "../runner/overheadSchedule";
 import type { DisposableBenchmarkTarget } from "../runner/types";
 import { startStaticServer } from "../server/staticServer";
 
@@ -28,6 +31,27 @@ export const test = base.extend<BenchmarkTestFixtures, BenchmarkWorkerFixtures>(
     { scope: "worker" },
   ],
 
+  overheadFixtureUrls: [
+    async ({ benchmarkServer, platform }, use) => {
+      // Long enough for the configured steady window (`BENCHMARK_OVERHEAD_POLLS`) and toggle blocks
+      // (`BENCHMARK_OVERHEAD_TOGGLE_QUARTETS` × 4 × `_BLOCK_MS`); only the sets the method uses.
+      const env = parseOverheadConfig(process.env, platform);
+      const urlsOf = async ({ options, dir, urlPath }: OverheadFixtureSet) => {
+        const files = await generateMcapFixtures(dir, options);
+        return files.map((file) => `${benchmarkServer.origin}${urlPath}/${file}`);
+      };
+      // Warm-up runs use the relaunch set, so it is needed with any method.
+      const relaunch = await urlsOf(overheadFixtureSet(env.polls));
+      const toggle = runsToggle(env.method)
+        ? await urlsOf(
+            overheadToggleFixtureSet(env.toggleQuartets, env.toggleBlockMs, env.profileMs),
+          )
+        : [];
+      await use({ relaunch, toggle });
+    },
+    { scope: "worker" },
+  ],
+
   fixtureUrls: async ({ benchmarkServer }, use) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture `use`, not React hook
     await use(benchmarkServer.fixtureUrls);
@@ -35,10 +59,10 @@ export const test = base.extend<BenchmarkTestFixtures, BenchmarkWorkerFixtures>(
 
   launchTarget: async ({ platform, benchmarkServer }, use) => {
     const launched: DisposableBenchmarkTarget[] = [];
-    const launch = async (): Promise<DisposableBenchmarkTarget> => {
+    const launch = async (options?: LaunchTargetOptions): Promise<DisposableBenchmarkTarget> => {
       const instance =
         platform === "web"
-          ? await launchWebTarget(benchmarkServer.origin)
+          ? await launchWebTarget(benchmarkServer.origin, options)
           : await launchElectronTarget();
       let disposed: Promise<void> | undefined;
       const target: DisposableBenchmarkTarget = {

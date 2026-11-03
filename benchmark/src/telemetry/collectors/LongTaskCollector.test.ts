@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { LongTaskCollector } from "./LongTaskCollector";
+import { SelfCostMeter } from "./SelfCostMeter";
 import {
   buildFakeLongTaskObserver,
   buildMockTelemetry,
+  buildSteppingClock,
+  sumCounter,
 } from "./builders/RendererCollectorsEnvBuilder";
 import { LongTaskObserverConstructor } from "./types";
+import { TELEMETRY_SELF_COST_METRICS } from "../constants";
 
 const mockLogDebug = jest.fn();
 
@@ -65,6 +69,22 @@ describe("LongTaskCollector", () => {
 
     // Then
     expect(telemetry.counter).not.toHaveBeenCalled();
+  });
+
+  it("should accumulate the time spent inside the observer callback into the self-cost meter", () => {
+    // Given: every self-cost clock read advances 0.25 ms
+    const telemetry = buildMockTelemetry();
+    const { Observer, instances } = buildFakeLongTaskObserver();
+    const meter = new SelfCostMeter(buildSteppingClock(0.25));
+    new LongTaskCollector(telemetry, Observer, meter).start();
+
+    // When: one callback with entries, one without
+    instances[0]!.callback({ getEntries: () => [{ duration: 60 }] });
+    instances[0]!.callback({ getEntries: () => [] });
+    meter.publish(telemetry);
+
+    // Then
+    expect(sumCounter(telemetry, TELEMETRY_SELF_COST_METRICS.longTasksMs)).toBe(0.5);
   });
 
   it("should disconnect the observer on dispose", () => {

@@ -15,6 +15,27 @@ import {
 /** `ITelemetry` whose methods are jest mocks. */
 export type MockTelemetry = { [K in keyof ITelemetry]: jest.Mock };
 
+/** Clock advancing by `stepMs` on every read (first read returns `startMs`). */
+export function buildSteppingClock(stepMs: number, startMs = 0): jest.Mock<number, []> {
+  let next = startMs;
+  return jest.fn(() => {
+    const value = next;
+    next += stepMs;
+    return value;
+  });
+}
+
+/** Sum of all `counter(metric, increment, ...)` increments recorded by a mock telemetry. */
+export function sumCounter(telemetry: MockTelemetry, metric: string): number {
+  let total = 0;
+  for (const call of telemetry.counter.mock.calls as Array<[string, number]>) {
+    if (call[0] === metric) {
+      total += call[1];
+    }
+  }
+  return total;
+}
+
 export function buildMockTelemetry(): MockTelemetry {
   return {
     isEnabled: jest.fn(() => true),
@@ -85,6 +106,19 @@ export class RendererCollectorsEnvBuilder {
   #crossOriginIsolated = false;
   #frames: FakeAnimationFrames | undefined = new FakeAnimationFrames();
   #Observer: LongTaskObserverConstructor | undefined;
+  #nowOverride: (() => number) | undefined;
+
+  /** Replaces the mutable `clock` as `env.now` (e.g. with `buildSteppingClock`). */
+  public withNow(now: () => number): this {
+    this.#nowOverride = now;
+    return this;
+  }
+
+  /** Marks the page as not cross-origin isolated (`withUaMemory` sets it isolated). */
+  public withoutCrossOriginIsolation(): this {
+    this.#crossOriginIsolated = false;
+    return this;
+  }
 
   public withMemory(memory: ChromiumPerformanceMemory): this {
     this.#memory = memory;
@@ -118,8 +152,9 @@ export class RendererCollectorsEnvBuilder {
       performance.measureUserAgentSpecificMemory = this.#measureUaMemory;
     }
     const frames = this.#frames;
+    const now = this.#nowOverride ?? (() => clock.now);
     const env: RendererCollectorsEnv = {
-      now: () => clock.now,
+      now,
       setInterval: (handler, intervalMs) => setInterval(handler, intervalMs),
       clearInterval: (handle) => {
         clearInterval(handle as ReturnType<typeof setInterval>);

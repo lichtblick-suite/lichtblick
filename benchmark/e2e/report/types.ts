@@ -3,11 +3,14 @@
 
 // Free of DOM/Playwright/Node runtime imports.
 
-import type { BenchmarkResultV1 } from "../result/schemaV1";
-import type { OverheadReport } from "../runner/types";
+import type { PersistedResultV1 } from "../result/schemaV1";
+import type { OverheadReport } from "../runner/overhead.types";
 
-/** A parsed, valid result and the file it came from. */
-export type LoadedResult = { fileName: string; result: BenchmarkResultV1 };
+/**
+ * A parsed result (leniently validated: older local artifacts may lack `run.scenario` and the render
+ * calibration, see `PersistedResultV1`) and the file it came from.
+ */
+export type LoadedResult = { fileName: string; result: PersistedResultV1 };
 
 export type ParseOutcome<T> = { ok: true; value: T } | { ok: false; reason: string };
 
@@ -69,3 +72,6 @@ export type HtmlReportOptions = {
   /** Returns the Chart.js UMD bundle source (inlined once). */
   loadChartJs: () => string;
 };
+
+/** Unit of a displayed overhead delta: raw value ÷ `divisor`, `digits` decimals, `suffix`. */
+export type DeltaUnit = { divisor: number; digits: number; suffix: string };

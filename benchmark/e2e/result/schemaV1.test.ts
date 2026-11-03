@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { RunInfoBuilder } from "./builders/RunInfoBuilder";
 import { TelemetryRecordBuilder, panelLabels } from "./builders/TelemetryRecordBuilder";
-import { PROCESS_METRICS } from "./constants";
+import { MIN_SLOPE_WINDOW_MS, PROCESS_METRICS } from "./constants";
 import {
   BuildResultV1Input,
   HostProcessSample,
@@ -15,33 +16,25 @@ import {
   computeSequenceGaps,
   median,
   percentile,
+  steadyStateFloorTs,
   summarizePhases,
   summarizePools,
+  summarizeProcess,
+  summarizeRenderer,
   validateResultV1,
 } from "./schemaV1";
+import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 
 const POOL = "pipeline.hydratedSourcePool.";
 
 function makeRun(overrides: Partial<RunInfoV1> = {}): RunInfoV1 {
-  return {
+  return RunInfoBuilder.run({
     scenarioId: "mcap-multi-ingest",
     pipeline: "real",
-    platform: "web",
-    telemetryEnabled: true,
-    startedAtWall: "2026-01-01T00:00:00.000Z",
-    finishedAtWall: "2026-01-01T00:00:10.000Z",
     startMonotonicTs: 1000,
     endMonotonicTs: 11_000,
-    sampleIntervalMs: 1000,
-    environment: {
-      os: "linux",
-      arch: "x64",
-      ci: true,
-      cpuModel: "cpu",
-      totalMemBytes: 1024,
-    },
     ...overrides,
-  };
+  });
 }
 
 function sample(
@@ -400,6 +393,8 @@ describe("buildResultV1", () => {
       peakTotalWorkingSetBytes: 800,
       meanTotalWorkingSetBytes: 600,
       medianTotalCpuPercent: 55,
+      // Polls at 1 s and 2 s: (40% + 70%) / 2 over 1 s. No slope: steady window < 10 s.
+      cpuSeconds: expect.closeTo(0.55, 10),
       byType: {
         browser: { peakWorkingSetBytes: 200, medianCpuPercent: 15 },
         renderer: { peakWorkingSetBytes: 600, medianCpuPercent: 40 },
@@ -714,6 +709,531 @@ describe("validateResultV1", () => {
       "runnerEvents[0].monotonicTs must be a number",
       "runnerEvents[0].exitCode must be a number",
       "runnerEvents[1] must be an object",
+    ]);
+  });
+});
+
+describe("summarizeProcess trends", () => {
+  const MIB = 1024 * 1024;
+
+  /** One process per poll; `ws` in MiB, at `ts`. */
+  function polls(series: Array<[ts: number, wsMiB: number, cpuPercent?: number]>) {
+    return series.map(
+      ([monotonicTs, wsMiB, cpuPercent]): HostProcessSample => ({
+        monotonicTs,
+        pid: 1,
+        processType: "renderer",
+        workingSetBytes: wsMiB * MIB,
+        ...(cpuPercent != undefined && { cpuPercent }),
+      }),
+    );
+  }
+
+  it("should fit the total working-set slope over the steady window only (MiB/min)", () => {
+    // Given: window [0, 60 s]; warm-up (< 12 s) jumps to 500 MiB, then +1 MiB every 6 s (10/min)
+    const hostSamples = polls([
+      [0, 100],
+      [6000, 500],
+      [12_000, 200],
+      [18_000, 201],
+      [24_000, 202],
+      [30_000, 203],
+    ]);
+
+    // When
+    const summary = summarizeProcess(hostSamples, { startTs: 0, endTs: 60_000 });
+
+    // Then
+    expect(summary.totalWorkingSetSlopeMiBPerMin).toBeCloseTo(10, 10);
+  });
+
+  it("should sum the processes of each poll before fitting the slope", () => {
+    // Given: two processes, each +1 MiB per 6 s
+    const hostSamples = [10_000, 16_000, 22_000].flatMap((monotonicTs, index) => [
+      { monotonicTs, pid: 1, processType: "browser", workingSetBytes: (10 + index) * MIB },
+      { monotonicTs, pid: 2, processType: "renderer", workingSetBytes: (20 + index) * MIB },
+    ]);
+
+    // When
+    const summary = summarizeProcess(hostSamples, { startTs: 0, endTs: 30_000 });
+
+    // Then
+    expect(summary.totalWorkingSetSlopeMiBPerMin).toBeCloseTo(20, 10);
+  });
+
+  it("should omit the slope with fewer than 3 steady-state polls", () => {
+    // Given: window [0, 60 s] -> steady from 12 s; only two polls after it
+    const hostSamples = polls([
+      [1000, 100],
+      [13_000, 110],
+      [20_000, 120],
+    ]);
+
+    // When
+    const summary = summarizeProcess(hostSamples, { startTs: 0, endTs: 60_000 });
+
+    // Then
+    expect(summary).not.toHaveProperty("totalWorkingSetSlopeMiBPerMin");
+  });
+
+  it("should omit the slope when the steady window is shorter than MIN_SLOPE_WINDOW_MS", () => {
+    // Given: window [0, 10 s] -> steady window [2 s, 10 s] = 8 s, with 5 polls in it
+    const hostSamples = polls([
+      [2000, 100],
+      [4000, 110],
+      [6000, 120],
+      [8000, 130],
+      [10_000, 140],
+    ]);
+
+    // When
+    const summary = summarizeProcess(hostSamples, { startTs: 0, endTs: 10_000 });
+
+    // Then
+    expect(MIN_SLOPE_WINDOW_MS).toBe(10_000);
+    expect(summary).not.toHaveProperty("totalWorkingSetSlopeMiBPerMin");
+    expect(summary.cpuSeconds).toBeUndefined();
+  });
+
+  it("should start the steady window at the end of startup when it is later than the warm-up", () => {
+    // Given: window [0, 60 s]; startup ramp until 30 s (> 12 s warm-up), then +1 MiB per 6 s
+    const hostSamples = polls([
+      [12_000, 100],
+      [24_000, 400],
+      [30_000, 200],
+      [36_000, 201],
+      [42_000, 202],
+    ]);
+    const measured = { startTs: 0, endTs: 60_000 };
+
+    // When
+    const withFloor = summarizeProcess(hostSamples, measured, 30_000);
+    const withEarlyFloor = summarizeProcess(hostSamples, measured, 5000);
+
+    // Then: the ramp polls are excluded only with the later floor
+    expect(withFloor.totalWorkingSetSlopeMiBPerMin).toBeCloseTo(10, 10);
+    expect(withEarlyFloor.totalWorkingSetSlopeMiBPerMin).not.toBeCloseTo(10, 0);
+  });
+
+  it("should omit the slope when the end of startup leaves less than MIN_SLOPE_WINDOW_MS", () => {
+    // Given: window [0, 30 s]; startup ends at 25 s -> 5 s left
+    const hostSamples = polls([
+      [25_000, 100],
+      [27_000, 101],
+      [29_000, 102],
+    ]);
+
+    // When
+    const summary = summarizeProcess(hostSamples, { startTs: 0, endTs: 30_000 }, 25_000);
+
+    // Then
+    expect(summary).not.toHaveProperty("totalWorkingSetSlopeMiBPerMin");
+  });
+
+  it("should integrate total CPU over the polls of the window in seconds", () => {
+    // Given: 100% for 2 s, then 200% for 1 s (outside-window poll ignored)
+    const hostSamples = polls([
+      [0, 1, 100],
+      [1000, 1, 100],
+      [2000, 1, 100],
+      [3000, 1, 200],
+      [4000, 1, 200],
+      [9000, 1, 900],
+    ]);
+
+    // When
+    const summary = summarizeProcess(hostSamples, { startTs: 0, endTs: 4000 });
+
+    // Then: 1 + 1 + 1.5 + 2
+    expect(summary.cpuSeconds).toBeCloseTo(5.5, 10);
+  });
+
+  it("should omit CPU time with fewer than 2 CPU polls and use the polls without a window", () => {
+    // Given
+    const single = polls([[0, 1, 50]]);
+    const unbounded = polls([
+      [0, 10, 100],
+      [60_000, 20, 100],
+      [120_000, 30, 100],
+      [180_000, 40, 100],
+    ]);
+
+    // When
+    const singleSummary = summarizeProcess(single);
+    const unboundedSummary = summarizeProcess(unbounded);
+
+    // Then: steady window = [36 s, 180 s] -> polls at 60, 120, 180 s
+    expect(singleSummary).not.toHaveProperty("cpuSeconds");
+    expect(unboundedSummary.cpuSeconds).toBeCloseTo(180, 10);
+    expect(unboundedSummary.totalWorkingSetSlopeMiBPerMin).toBeCloseTo(10, 10);
+  });
+});
+
+describe("steadyStateFloorTs", () => {
+  it("should return the later of panels ready and first message on the page clock", () => {
+    // Given / When / Then
+    expect(steadyStateFloorTs({ panelsReadyMs: 800, firstMessageMs: 300 }, 1000)).toBe(1800);
+    expect(steadyStateFloorTs({ firstMessageMs: 300 }, 1000)).toBe(1300);
+  });
+
+  it("should be undefined without an origin or without both phases", () => {
+    // Given / When / Then
+    expect(steadyStateFloorTs({ panelsReadyMs: 800 }, undefined)).toBeUndefined();
+    expect(steadyStateFloorTs({}, 1000)).toBeUndefined();
+  });
+});
+
+describe("summarizeRenderer frame and long-task totals", () => {
+  it("should report the cumulative frame count and long-task duration", () => {
+    // Given
+    const counter = (monotonicTs: number, metric: string, value: number) =>
+      sample({ realm: "renderer", monotonicTs, metric, value, metricType: "counter" });
+    const samples = [
+      counter(1000, "renderer.frames", 60),
+      counter(2000, "renderer.frames", 119),
+      counter(1000, "renderer.longTasks.count", 1),
+      counter(1000, "renderer.longTasks.durationMs", 80),
+      counter(2000, "renderer.longTasks.durationMs", 230),
+    ];
+
+    // When
+    const summary = summarizeRenderer(samples);
+
+    // Then
+    expect(summary).toEqual({ totalFrames: 119, longTasks: 1, longTaskTotalMs: 230 });
+  });
+
+  it("should omit the totals without renderer telemetry", () => {
+    // Given / When / Then
+    expect(summarizeRenderer([])).toEqual({});
+  });
+});
+
+describe("validateResultV1 run.scenario and render calibration", () => {
+  function withRun(run: Record<string, unknown>): unknown {
+    return { ...buildResultV1(makeInput()), run };
+  }
+
+  it("should require run.scenario, logicalCpus and the calibration in strict mode only", () => {
+    // Given an older result without run.scenario, logicalCpus and calibration
+    const { scenario: _scenario, environment, ...run } = makeRun();
+    const {
+      logicalCpus: _cpus,
+      fpsCeiling: _fps,
+      glRenderer: _gl,
+      lateFrameThresholdMs: _late,
+      ...host
+    } = environment;
+    const legacy = withRun({ ...run, environment: host });
+
+    // When
+    const strictErrors = validateResultV1(legacy);
+    const lenientErrors = validateResultV1(legacy, "lenient");
+
+    // Then
+    expect(strictErrors).toEqual([
+      "run.environment.logicalCpus is missing",
+      "run.environment.fpsCeiling is missing",
+      "run.environment.glRenderer is missing",
+      "run.environment.lateFrameThresholdMs is missing",
+      "run.scenario is missing",
+    ]);
+    expect(lenientErrors).toEqual([]);
+  });
+
+  it("should check the shape of run.scenario and the calibration in both modes", () => {
+    // Given
+    const run = makeRun();
+    const broken = withRun({
+      ...run,
+      environment: { ...run.environment, logicalCpus: "8", fpsCeiling: "60", glRenderer: 1 },
+      scenario: {
+        scenarioId: "other",
+        description: "d",
+        group: "rendering",
+        layout: "l",
+        player: 3,
+        dataSource: "sinewave",
+        tags: ["a", 1],
+        params: { url: 5 },
+        panels: [{ id: "Plot!a" }, "3D!b"],
+      },
+    });
+
+    // When
+    const strictErrors = validateResultV1(broken);
+    const lenientErrors = validateResultV1(broken, "lenient");
+
+    // Then
+    const expected = [
+      "run.environment.logicalCpus must be a number",
+      "run.environment.fpsCeiling must be a number",
+      "run.environment.glRenderer must be a string",
+      "run.scenario.player must be a string",
+      "run.scenario.scenarioId must equal run.scenarioId",
+      "run.scenario.group must be one of 3d-rendering, time-series, preloading, real-pipeline-ingest",
+      "run.scenario.dataSource must be an object",
+      "run.scenario.tags must contain only strings",
+      "run.scenario.params.url must be a string",
+      "run.scenario.panels[0].type is missing",
+      "run.scenario.panels[1] must be an object",
+    ];
+    expect(strictErrors).toEqual(expected);
+    expect(lenientErrors).toEqual(expected);
+  });
+
+  it("should reject a non-object run.scenario", () => {
+    // Given
+    const broken = withRun({ ...makeRun(), scenario: "sinewave" });
+
+    // When / Then
+    expect(validateResultV1(broken, "lenient")).toEqual(["run.scenario must be an object"]);
+  });
+
+  it("should accept the new optional summary fields and reject malformed ones", () => {
+    // Given
+    const result = buildResultV1(makeInput());
+    const valid = {
+      ...result,
+      summary: {
+        ...result.summary,
+        process: { ...result.summary.process, totalWorkingSetSlopeMiBPerMin: -1.5, cpuSeconds: 3 },
+        renderer: { totalFrames: 600, longTaskTotalMs: 120 },
+      },
+    };
+    const broken = {
+      ...valid,
+      summary: {
+        ...valid.summary,
+        process: { ...valid.summary.process, cpuSeconds: "3" },
+        renderer: { totalFrames: "600" },
+      },
+    };
+
+    // When / Then
+    expect(validateResultV1(valid)).toEqual([]);
+    expect(validateResultV1(broken)).toEqual([
+      "summary.process.cpuSeconds must be a number",
+      "summary.renderer.totalFrames must be a number",
+    ]);
+  });
+});
+
+describe("summary.kpis", () => {
+  it("should be written by buildResultV1 and pass strict validation", () => {
+    // Given / When
+    const result = buildResultV1(makeInput());
+
+    // Then
+    expect(result.summary.kpis.stability).toEqual({ healthy: true, reasons: [] });
+    expect(result.summary.kpis).not.toHaveProperty("recomputed");
+    expect(validateResultV1(result)).toEqual([]);
+  });
+
+  it("should be required in strict mode only", () => {
+    // Given an older result without summary.kpis
+    const result = buildResultV1(makeInput());
+    const { kpis: _kpis, ...summary } = result.summary;
+    const legacy = { ...result, summary };
+
+    // When / Then
+    expect(validateResultV1(legacy)).toEqual(["summary.kpis is missing"]);
+    expect(validateResultV1(legacy, "lenient")).toEqual([]);
+  });
+
+  it("should reject malformed KPI families in both modes", () => {
+    // Given
+    const result = buildResultV1(makeInput());
+    const broken = {
+      ...result,
+      summary: {
+        ...result.summary,
+        kpis: {
+          ...result.summary.kpis,
+          memory: 3,
+          stability: { healthy: "yes", reasons: [1] },
+          smoothness: {},
+          renderCost: { p90RenderMsByPanelType: { "3D": "slow" } },
+        },
+      },
+    };
+    const expected = [
+      "summary.kpis.memory must be an object",
+      "summary.kpis.stability.healthy must be a boolean",
+      "summary.kpis.stability.reasons must contain only strings",
+      "summary.kpis.smoothness.lowFps is missing",
+      "summary.kpis.renderCost.p90RenderMsByPanelType.3D must be a finite number",
+    ];
+
+    // When / Then
+    expect(validateResultV1(broken)).toEqual(expected);
+    expect(validateResultV1(broken, "lenient")).toEqual(expected);
+  });
+});
+
+describe("validateResultV1 overhead A/B fields", () => {
+  it("should accept the optional steady window, telemetry self-cost and collectors state", () => {
+    // Given a result with the overhead-only fields
+    const result = buildResultV1(makeInput());
+    const withOverhead = {
+      ...result,
+      run: {
+        ...result.run,
+        mode: "overhead",
+        environment: { ...result.run.environment, collectors: { uaMemory: "off" } },
+      },
+      summary: {
+        ...result.summary,
+        steadyWindow: {
+          warmupMs: 3000,
+          requestedPolls: 10,
+          polls: 10,
+          overruns: 0,
+          windowMismatch: false,
+          startMonotonicTs: 1000,
+          endMonotonicTs: 11_000,
+          medianTotalCpuPercent: 40,
+          meanTotalCpuPercent: 41,
+          meanTotalWorkingSetBytes: 1e9,
+          peakTotalWorkingSetBytes: 1.1e9,
+          meanWorkingSetBytesByType: { browser: 1e9 },
+          processSet: { browser: 1 },
+          mainThread: { longTaskBlockedMsPerSec: 2, fps: 60 },
+        },
+        telemetrySelf: {
+          windowSec: 10,
+          msPerSec: { total: 1.5, byComponent: { collectors: 1, drain: 0.5 } },
+          recordsPerSec: 120,
+          uaCalls: 2,
+          uaResolveMsMean: 30,
+          emitCostNs: { gaugeNs: 300, counterNs: 250, eventNs: 900 },
+          meanEmitNs: 320,
+          estimatedEmitMsPerSec: 0.0384,
+          fractionOfCore: 0.0015384,
+        },
+      },
+    };
+
+    // When
+    const errors = validateResultV1(JSON.parse(JSON.stringify(withOverhead)));
+
+    // Then
+    expect(errors).toEqual([]);
+  });
+
+  it("should report malformed overhead fields", () => {
+    // Given
+    const result = buildResultV1(makeInput());
+    const broken = {
+      ...result,
+      run: {
+        ...result.run,
+        environment: { ...result.run.environment, collectors: { uaMemory: "maybe" } },
+      },
+      summary: {
+        ...result.summary,
+        steadyWindow: { polls: "ten", maxPollLatencyMs: "slow" },
+        telemetrySelf: { msPerSec: 3 },
+      },
+    };
+
+    // When
+    const errors = validateResultV1(broken);
+
+    // Then
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        'run.environment.collectors.uaMemory must be "on", "off", "unsupported" or "disabled"',
+        "summary.steadyWindow.polls must be a number",
+        "summary.steadyWindow.maxPollLatencyMs must be a number",
+        "summary.steadyWindow.windowMismatch is missing",
+        "summary.steadyWindow.processSet must be an object",
+        "summary.telemetrySelf.msPerSec must be an object",
+        "summary.telemetrySelf.fractionOfCore is missing",
+      ]),
+    );
+  });
+});
+
+describe("validateResultV1 run.mode and webBrowser", () => {
+  const steadyWindow = OverheadRunBuilder.steady({});
+
+  function withMode(
+    mode: string | undefined,
+    { steady }: { steady: boolean },
+  ): Record<string, unknown> {
+    const result = buildResultV1(makeInput());
+    const { mode: _mode, ...run } = result.run;
+    return {
+      ...result,
+      run: mode == undefined ? run : { ...run, mode },
+      summary: steady ? { ...result.summary, steadyWindow } : result.summary,
+    };
+  }
+
+  it("should accept a scenario run without and an overhead run with a steady window", () => {
+    // Given
+    const scenario = withMode("scenario", { steady: false });
+    const overhead = withMode("overhead", { steady: true });
+
+    // When / Then
+    expect(validateResultV1(scenario)).toEqual([]);
+    expect(validateResultV1(overhead)).toEqual([]);
+  });
+
+  it("should require run.mode in strict mode only", () => {
+    // Given a result written before run.mode
+    const older = withMode(undefined, { steady: false });
+
+    // When
+    const strictErrors = validateResultV1(older);
+    const lenientErrors = validateResultV1(older, "lenient");
+
+    // Then
+    expect(strictErrors).toEqual(["run.mode must be one of scenario, overhead"]);
+    expect(lenientErrors).toEqual([]);
+  });
+
+  it("should reject an unknown run.mode in both modes", () => {
+    // Given
+    const unknown = withMode("benchmark", { steady: false });
+
+    // When / Then
+    expect(validateResultV1(unknown)).toContain("run.mode must be one of scenario, overhead");
+    expect(validateResultV1(unknown, "lenient")).toEqual([
+      "run.mode must be one of scenario, overhead",
+    ]);
+  });
+
+  it("should tie the steady window to the overhead mode in strict mode only", () => {
+    // Given an overhead run without and a scenario run with a steady window
+    const overheadWithout = withMode("overhead", { steady: false });
+    const scenarioWith = withMode("scenario", { steady: true });
+
+    // When / Then
+    expect(validateResultV1(overheadWithout)).toEqual([
+      'summary.steadyWindow is required with run.mode "overhead"',
+    ]);
+    expect(validateResultV1(scenarioWith)).toEqual([
+      'summary.steadyWindow is only allowed with run.mode "overhead"',
+    ]);
+    expect(validateResultV1(overheadWithout, "lenient")).toEqual([]);
+    expect(validateResultV1(scenarioWith, "lenient")).toEqual([]);
+  });
+
+  it("should accept a known run.environment.webBrowser and reject others", () => {
+    // Given
+    const result = buildResultV1(makeInput());
+    const withBrowser = (webBrowser: string) => ({
+      ...result,
+      run: { ...result.run, environment: { ...result.run.environment, webBrowser } },
+    });
+
+    // When / Then
+    expect(validateResultV1(withBrowser("chromium"))).toEqual([]);
+    expect(validateResultV1(withBrowser("chromium-headless-shell"))).toEqual([]);
+    expect(validateResultV1(withBrowser("firefox"), "lenient")).toEqual([
+      "run.environment.webBrowser must be one of chromium-headless-shell, chromium",
     ]);
   });
 });

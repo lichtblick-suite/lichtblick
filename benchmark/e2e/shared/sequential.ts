@@ -23,6 +23,21 @@ export async function runSequentially(
 }
 
 /**
+ * A queue that runs the async tasks passed to `run` one after another (in call order), even when
+ * `run` is called while an earlier task is still pending. A rejected task does not block later ones.
+ */
+export function createSerialQueue(): { run<T>(task: () => Promise<T>): Promise<T> } {
+  let tail: Promise<unknown> = Promise.resolve();
+  return {
+    run: async <T>(task: () => Promise<T>): Promise<T> => {
+      const next = tail.then(task);
+      tail = next.catch(() => undefined);
+      return await next;
+    },
+  };
+}
+
+/**
  * Runs `body` repeatedly while `shouldContinue()` holds, checked before every run (so `body` may
  * never run). Each run starts once the previous one resolved; rejects with the first failure.
  */

@@ -5,15 +5,20 @@
 // the definitive results dashboard (planned as a follow-up) exists. Pure: the CLI
 // (`htmlReportCli.ts`) does the file IO and passes the Chart.js UMD source through `loadChartJs`.
 
-import { KPI_HEADERS, MIB, REGENERATE_COMMAND } from "./constants";
+import {
+  GL_BACKEND_KEYWORDS,
+  KPI_HEADERS,
+  NOT_RECORDED,
+  REGENERATE_COMMAND,
+  SCENARIO_NOT_RECORDED,
+} from "./constants";
 import { REPORT_CSS } from "./htmlReport.style";
-import { Cell, Tone } from "./htmlReport.types";
+import { Cell } from "./htmlReport.types";
 import { REPORT_CLIENT_JS } from "./htmlReportAssets";
 import {
   buildRunChartData,
   findOverhead,
   formatRunTime,
-  latestOverheads,
   matchScreenshots,
   newestFinishedAtMs,
   runStem,
@@ -21,23 +26,41 @@ import {
   staleHours,
 } from "./htmlReportData";
 import {
+  coverageHtml,
+  exercisesCardHtml,
+  filterBarHtml,
+  filterTokens,
+  scenarioChipsHtml,
+} from "./htmlReportExercises";
+import type { ExercisedRun } from "./htmlReportExercises.types";
+import {
+  cell,
+  escapeHtml,
+  fmtMiB,
+  fmtMs,
+  fmtNumber,
+  fmtRatio,
+  keyValueTable,
+  num,
+  renderTable,
+  runAnchor,
+} from "./htmlReportFormat";
+import { overheadCpuCell, overheadMemCell, overheadTable } from "./htmlReportOverhead";
+import { byGroupHtml, scorecardHtml } from "./htmlReportScorecard";
+import {
   HtmlReportInput,
   HtmlReportOptions,
   LoadedResult,
   RunChartData,
   ScreenshotLink,
 } from "./types";
-import type { BenchmarkResultV1, PanelSummaryV1, RunnerEventsSummaryV1 } from "../result/schemaV1";
-import type { OverheadReport } from "../runner/types";
-
-export function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
+import { LOW_FPS_WARNING } from "../result/constants";
+import { exercisedComponents } from "../result/exercised";
+import type { KpiRun } from "../result/kpis.types";
+import { isOverheadRun } from "../result/runMode";
+import type { PanelSummaryV1, PersistedResultV1, RunnerEventsSummaryV1 } from "../result/schemaV1";
+import type { OverheadReport } from "../runner/overhead.types";
+import { compareCodeUnits } from "../shared/compare";
 
 /** JSON for a `<script type="application/json">` block: no `<` can close or open a tag. */
 function jsonForScript(value: unknown): string {
@@ -57,66 +80,6 @@ function hrefFor(prefix: string, fileName: string): string {
   return `${prefix}${encodeURIComponent(fileName)}`;
 }
 
-function fmtNumber(value: number | undefined, digits = 0): string {
-  return value == undefined || !Number.isFinite(value)
-    ? "—"
-    : value.toLocaleString("en-US", {
-        minimumFractionDigits: digits,
-        maximumFractionDigits: digits,
-      });
-}
-
-function fmtMiB(bytes: number | undefined, digits = 1): string {
-  return bytes == undefined ? "—" : fmtNumber(bytes / MIB, digits);
-}
-
-function fmtMs(ms: number | undefined): string {
-  return ms == undefined ? "—" : fmtNumber(ms, 0);
-}
-
-function fmtRatio(ratio: number | undefined): string {
-  return ratio == undefined ? "—" : `${fmtNumber(ratio * 100, 1)} %`;
-}
-
-function cell(text: string, extra: Omit<Cell, "html"> = {}): Cell {
-  return { html: escapeHtml(text), ...extra };
-}
-
-function num(text: string, extra: Omit<Cell, "html" | "numeric"> = {}): Cell {
-  return { html: escapeHtml(text), numeric: true, ...extra };
-}
-
-function renderTable(
-  headers: readonly string[],
-  rows: readonly Cell[][],
-  caption?: string,
-): string {
-  const head = headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("");
-  const body = rows
-    .map((row) => {
-      const cells = row
-        .map((entry) => {
-          const classes = [entry.numeric === true ? "num" : "", entry.tone ?? ""].filter(Boolean);
-          const classAttr = classes.length > 0 ? ` class="${classes.join(" ")}"` : "";
-          const titleAttr = entry.title != undefined ? ` title="${escapeHtml(entry.title)}"` : "";
-          return `<td${classAttr}${titleAttr}>${entry.html}</td>`;
-        })
-        .join("");
-      return `<tr>${cells}</tr>`;
-    })
-    .join("\n");
-  const captionHtml = caption != undefined ? `<h3>${escapeHtml(caption)}</h3>` : "";
-  return `${captionHtml}<div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>\n${body}\n</tbody></table></div>`;
-}
-
-function keyValueTable(caption: string, entries: readonly [string, string][]): string {
-  return renderTable(
-    ["Field", "Value"],
-    entries.map(([key, value]) => [cell(key), cell(value)]),
-    caption,
-  );
-}
-
 function runnerEventCount(summary: RunnerEventsSummaryV1 | undefined): number | undefined {
   return summary == undefined
     ? undefined
@@ -124,54 +87,14 @@ function runnerEventCount(summary: RunnerEventsSummaryV1 | undefined): number | 
 }
 
 /** Every pool's invariant, or undefined when the run has no pool data. */
-function poolInvariant(result: BenchmarkResultV1): boolean | undefined {
+function poolInvariant(result: PersistedResultV1): boolean | undefined {
   const pools = Object.values(result.summary.hydratedSourcePool?.pools ?? {});
   return pools.length === 0 ? undefined : pools.every((pool) => pool.invariantHolds);
 }
 
 /** green: within target with margin; amber: within target but above 80 % of it; red: missed. */
-function targetTone({ value, max, within }: { value: number; max: number; within: boolean }): Tone {
-  if (!within) {
-    return "bad";
-  }
-  return value > max * 0.8 ? "warn" : "good";
-}
-
-function overheadCpuCell(report: OverheadReport | undefined): Cell {
-  if (report == undefined) {
-    return num("—");
-  }
-  const relative = report.deltas.cpuDeltaRelative;
-  const text =
-    relative == undefined
-      ? `${fmtNumber(report.deltas.cpuDeltaPctPoints, 2)} pp`
-      : `${fmtNumber(relative * 100, 2)} %`;
-  return num(text, {
-    tone: targetTone({
-      value: relative ?? 0,
-      max: report.targets.cpuDeltaRelativeMax,
-      within: report.within.cpu,
-    }),
-    title: `target ≤ ${fmtNumber(report.targets.cpuDeltaRelativeMax * 100, 0)} % (relative CPU delta)`,
-  });
-}
-
-function overheadMemCell(report: OverheadReport | undefined): Cell {
-  if (report == undefined) {
-    return num("—");
-  }
-  return num(`${fmtMiB(report.deltas.memDeltaBytes, 1)} MiB`, {
-    tone: targetTone({
-      value: report.deltas.memDeltaBytes,
-      max: report.targets.memDeltaBytesMax,
-      within: report.within.memory,
-    }),
-    title: `target ≤ ${fmtMiB(report.targets.memDeltaBytesMax, 0)} MiB (mean working set delta)`,
-  });
-}
-
 /** Pool invariant verdict of a run: ✅/❌, or a dash without pool data. */
-function poolInvariantCell(result: BenchmarkResultV1): Cell {
+function poolInvariantCell(result: PersistedResultV1): Cell {
   const invariant = poolInvariant(result);
   if (invariant == undefined) {
     return cell("—");
@@ -187,11 +110,7 @@ function runnerEventsCell(events: number | undefined): Cell {
   return num(String(events), { tone: events > 0 ? "bad" : "good" });
 }
 
-function runAnchor(index: number): string {
-  return `run-${index}`;
-}
-
-function runTitle(result: BenchmarkResultV1): string {
+function runTitle(result: PersistedResultV1): string {
   const { scenarioId, platform, telemetryEnabled } = result.run;
   return `${scenarioId} · ${platform}${telemetryEnabled ? "" : " · telemetry off"}`;
 }
@@ -207,12 +126,47 @@ function runTimeHtml(finishedAtWall: string, newestMs: number | undefined): stri
   return `${time} <span class="stale" title="Finished ${age} before the newest run in this report: rerun it for comparable data">stale</span>`;
 }
 
+/** Short GL backend of the GL renderer string (`GL_BACKEND_KEYWORDS`), full string as title. */
+function glBackendCell(glRenderer: string | undefined): Cell {
+  if (glRenderer == undefined || glRenderer === "") {
+    return cell("—");
+  }
+  const lower = glRenderer.toLowerCase();
+  const backend = GL_BACKEND_KEYWORDS.find((keyword) => lower.includes(keyword.toLowerCase()));
+  return cell(backend ?? "other", { title: glRenderer });
+}
+
+/** "median / ceiling" FPS (the median is always shown when frames exist); ⚠ when low. */
+function fpsCell(result: PersistedResultV1): Cell {
+  const { smoothness } = result.summary.kpis;
+  const median = fmtNumber(smoothness.medianFps, 1);
+  const text =
+    smoothness.fpsCeiling == undefined
+      ? median
+      : `${median} / ${fmtNumber(smoothness.fpsCeiling, 0)}`;
+  if (!smoothness.lowFps) {
+    return num(text);
+  }
+  return {
+    html: `<span class="low-fps">⚠</span> ${escapeHtml(text)}`,
+    numeric: true,
+    title: "median FPS below the low-FPS warning (informational)",
+  };
+}
+
+function overviewScenarioCell(loaded: ExercisedRun): Cell {
+  const { run } = loaded.result;
+  return {
+    html: `<a href="#${runAnchor(loaded.index)}">${escapeHtml(run.scenarioId)}</a>${scenarioChipsHtml(loaded.result, loaded.exercised)}`,
+  };
+}
+
 function kpiRow(
-  result: BenchmarkResultV1,
-  index: number,
+  loaded: ExercisedRun,
   overheads: readonly OverheadReport[],
   newestMs: number | undefined,
 ): Cell[] {
+  const { result } = loaded;
   const { summary, run } = result;
   const { phases, process, renderer, pipeline } = summary;
   const hasProcess = process.sampleCount > 0;
@@ -220,7 +174,7 @@ function kpiRow(
   const events = runnerEventCount(summary.runnerEvents);
   const overhead = findOverhead(overheads, run.scenarioId, run.platform);
   return [
-    { html: `<a href="#${runAnchor(index)}">${escapeHtml(run.scenarioId)}</a>` },
+    overviewScenarioCell(loaded),
     cell(run.platform),
     { html: runTimeHtml(run.finishedAtWall, newestMs) },
     num(hasProcess ? fmtMiB(process.peakTotalWorkingSetBytes) : "—"),
@@ -235,7 +189,8 @@ function kpiRow(
           ? undefined
           : `${coverage.firstRendered}/${coverage.mounted} mounted panels emitted panel.firstRender`,
     }),
-    num(fmtNumber(renderer.medianFps, 1)),
+    fpsCell(result),
+    glBackendCell(run.environment.glRenderer),
     num(fmtNumber(pipeline?.messagesPerSec, 0)),
     num(fmtMiB(pipeline?.bytesPerSec, 2)),
     num(fmtRatio(pipeline?.sourceCacheHitRatio)),
@@ -246,43 +201,9 @@ function kpiRow(
   ];
 }
 
-function overheadTable(overheads: readonly OverheadReport[]): string {
-  const latest = latestOverheads(overheads);
-  if (latest.length === 0) {
-    return `<p class="muted">No <code>overhead-*.json</code> found (run the overhead A/B, see the benchmark README).</p>`;
-  }
-  const rows = latest.map((report) => [
-    cell(report.scenarioId),
-    cell(report.platform),
-    cell(report.createdAtWall),
-    num(fmtNumber(report.off.medianTotalCpuPercent, 2)),
-    num(fmtNumber(report.on.medianTotalCpuPercent, 2)),
-    overheadCpuCell(report),
-    num(fmtMiB(report.off.meanTotalWorkingSetBytes)),
-    num(fmtMiB(report.on.meanTotalWorkingSetBytes)),
-    overheadMemCell(report),
-    cell(report.withinTargets ? "✅" : "❌", { tone: report.withinTargets ? "good" : "bad" }),
-  ]);
-  return renderTable(
-    [
-      "Scenario",
-      "Platform",
-      "Created",
-      "CPU off %",
-      "CPU on %",
-      "CPU Δ (rel.)",
-      "Mem off (MiB)",
-      "Mem on (MiB)",
-      "Mem Δ",
-      "Within targets",
-    ],
-    rows,
-  );
-}
-
 function panelRows(panels: Record<string, PanelSummaryV1>): Cell[][] {
   return Object.entries(panels)
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => compareCodeUnits(a, b))
     .map(([panelId, panel]) => [
       cell(panelId),
       cell(panel.panelType),
@@ -301,7 +222,7 @@ function panelRows(panels: Record<string, PanelSummaryV1>): Cell[][] {
     ]);
 }
 
-function panelsTable(result: BenchmarkResultV1): string {
+function panelsTable(result: PersistedResultV1): string {
   const panels = result.summary.panels;
   if (panels == undefined || Object.keys(panels).length === 0) {
     return `<h3>Panels</h3><p class="muted">No panel telemetry.</p>`;
@@ -328,7 +249,7 @@ function panelsTable(result: BenchmarkResultV1): string {
   );
 }
 
-function phasesTable(result: BenchmarkResultV1): string {
+function phasesTable(result: PersistedResultV1): string {
   const { phases } = result.summary;
   const coverage = phases.panelsReadyCoverage;
   return keyValueTable("Phases", [
@@ -348,7 +269,7 @@ function phasesTable(result: BenchmarkResultV1): string {
   ]);
 }
 
-function pipelineTable(result: BenchmarkResultV1): string {
+function pipelineTable(result: PersistedResultV1): string {
   const pipeline = result.summary.pipeline;
   if (pipeline == undefined) {
     return `<h3>Pipeline</h3><p class="muted">No pipeline telemetry.</p>`;
@@ -396,10 +317,10 @@ function pipelineTable(result: BenchmarkResultV1): string {
   );
 }
 
-function processTable(result: BenchmarkResultV1): string {
+function processTable(result: PersistedResultV1): string {
   const { process, renderer } = result.summary;
   const rows: Cell[][] = Object.entries(process.byType)
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => compareCodeUnits(a, b))
     .map(([type, stats]) => [
       cell(type),
       num(fmtMiB(stats.peakWorkingSetBytes)),
@@ -424,7 +345,7 @@ function processTable(result: BenchmarkResultV1): string {
   return table + rendererTable;
 }
 
-function poolTable(result: BenchmarkResultV1): string {
+function poolTable(result: PersistedResultV1): string {
   const pools = Object.entries(result.summary.hydratedSourcePool?.pools ?? {});
   if (pools.length === 0) {
     return "";
@@ -461,7 +382,7 @@ function poolTable(result: BenchmarkResultV1): string {
   );
 }
 
-function runnerEventsTable(result: BenchmarkResultV1): string {
+function runnerEventsTable(result: PersistedResultV1): string {
   const counts = result.summary.runnerEvents;
   const list = result.runnerEvents ?? [];
   const countsHtml =
@@ -493,6 +414,66 @@ function runnerEventsTable(result: BenchmarkResultV1): string {
   return countsHtml + listHtml;
 }
 
+function healthText(result: PersistedResultV1): string {
+  const { healthy, reasons } = result.summary.kpis.stability;
+  return healthy ? "yes" : `no: ${reasons.join("; ")}`;
+}
+
+function worstPanelText(renderCost: PersistedResultV1["summary"]["kpis"]["renderCost"]): string {
+  if (renderCost.worstPanelP90RenderMs == undefined) {
+    return "—";
+  }
+  return `${fmtNumber(renderCost.worstPanelP90RenderMs, 1)} (${renderCost.worstPanelId ?? "?"})`;
+}
+
+/** The run's `summary.kpis`, with a note when the viewer recomputed them (older result). */
+function runKpisTable(result: PersistedResultV1): string {
+  const { kpis } = result.summary;
+  const { memory, cpu, smoothness, startup, throughput } = kpis;
+  const slope =
+    memory.workingSetSlopeMiBPerMin == undefined
+      ? "— (steady window too short)"
+      : fmtNumber(memory.workingSetSlopeMiBPerMin, 2);
+  const table = keyValueTable("KPIs", [
+    ["healthy", healthText(result)],
+    ["peak working set (MiB)", fmtNumber(memory.peakTotalWorkingSetMiB, 0)],
+    ["working-set slope (MiB/min)", slope],
+    ["median CPU %", fmtNumber(cpu.medianCpuPercent, 1)],
+    [
+      "CPU seconds / per MiB ingested",
+      `${fmtNumber(cpu.cpuSeconds, 2)} / ${fmtNumber(cpu.cpuSecondsPerMiB, 3)}`,
+    ],
+    [
+      "median FPS / ceiling",
+      `${fmtNumber(smoothness.medianFps, 1)} / ${fmtNumber(smoothness.fpsCeiling, 1)}`,
+    ],
+    ["FPS % of ceiling", fmtNumber(smoothness.fpsPercentOfCeiling, 0)],
+    ["on-time frames %", fmtNumber(smoothness.onTimeFramePercent, 1)],
+    ["long-task blocked (ms/s)", fmtNumber(smoothness.longTaskBlockedMsPerSec, 1)],
+    [
+      "panels ready / first message (ms)",
+      `${fmtMs(startup.panelsReadyMs)} / ${fmtMs(startup.firstMessageMs)}`,
+    ],
+    [
+      "ingest MiB/s / msg/s / fanout",
+      `${fmtNumber(throughput.ingestMiBPerSec, 2)} / ${fmtNumber(throughput.messagesPerSec, 0)} / ${fmtNumber(throughput.fanout, 2)}`,
+    ],
+    ["worst panel p90 render (ms)", worstPanelText(kpis.renderCost)],
+  ]);
+  const note =
+    kpis.recomputed === true
+      ? `<p class="muted recomputed">recomputed: this result predates <code>summary.kpis</code>; the viewer derived them from its summaries.</p>`
+      : "";
+  return table + note;
+}
+
+/** "<group>: <description>" of `run.scenario`, or a note for results that lack it. */
+function scenarioLabel(scenario: PersistedResultV1["run"]["scenario"]): string {
+  return scenario == undefined
+    ? SCENARIO_NOT_RECORDED
+    : `${scenario.group}: ${scenario.description}`;
+}
+
 function environmentTable(loaded: LoadedResult): string {
   const { run, dropped, sequenceGaps } = loaded.result;
   const env = run.environment;
@@ -500,6 +481,7 @@ function environmentTable(loaded: LoadedResult): string {
     Object.values(record).reduce((sum, value) => sum + value, 0);
   const entries: [string, string][] = [
     ["file", loaded.fileName],
+    ["scenario", scenarioLabel(run.scenario)],
     ["platform", run.platform],
     ["pipeline", run.pipeline],
     ["telemetry", run.telemetryEnabled ? "on" : "off"],
@@ -508,6 +490,7 @@ function environmentTable(loaded: LoadedResult): string {
     ["sample interval (ms)", fmtMs(run.sampleIntervalMs)],
     ["os / arch", `${env.os} / ${env.arch}`],
     ["CPU", env.cpuModel],
+    ["logical CPUs", env.logicalCpus == undefined ? NOT_RECORDED : String(env.logicalCpus)],
     ["memory (GiB)", fmtNumber(env.totalMemBytes / 1024 ** 3, 1)],
     ["CI", env.ci ? "yes" : "no"],
   ];
@@ -523,6 +506,17 @@ function environmentTable(loaded: LoadedResult): string {
   if (env.crossOriginIsolated != undefined) {
     entries.push(["cross-origin isolated", String(env.crossOriginIsolated)]);
   }
+  entries.push(
+    [
+      "fps ceiling (measured)",
+      env.fpsCeiling == undefined ? NOT_RECORDED : fmtNumber(env.fpsCeiling, 1),
+    ],
+    ["GL renderer", env.glRenderer ?? NOT_RECORDED],
+    [
+      "late-frame threshold (ms)",
+      env.lateFrameThresholdMs == undefined ? NOT_RECORDED : fmtNumber(env.lateFrameThresholdMs, 2),
+    ],
+  );
   entries.push(
     [
       "samples / events",
@@ -564,17 +558,21 @@ function markersHtml(chart: RunChartData): string {
 
 function runSection(
   loaded: LoadedResult,
+  run: ExercisedRun,
   chart: RunChartData,
-  index: number,
   input: HtmlReportInput,
   newestMs: number | undefined,
 ): string {
   const { result } = loaded;
+  const { index } = run;
   const shots = matchScreenshots(runStem(loaded.fileName), input.screenshotFiles);
   const events = runnerEventCount(result.summary.runnerEvents) ?? 0;
   const failure = events > 0 ? ` <span class="bad">${events} runner event(s)</span>` : "";
-  return `<details class="run" id="${runAnchor(index)}" data-run="${index}"${index === 0 ? " open" : ""}>
+  const tags = escapeHtml(filterTokens(result).join(" "));
+  return `<details class="run" id="${runAnchor(index)}" data-run="${index}" data-tags="${tags}"${index === 0 ? " open" : ""}>
 <summary>${escapeHtml(runTitle(result))} <span class="sub">— ${runTimeHtml(result.run.finishedAtWall, newestMs)}</span>${failure}</summary>
+${exercisesCardHtml(result, run.exercised)}
+${runKpisTable(result)}
 <div class="charts" id="charts-${index}"></div>
 ${markersHtml(chart)}
 <h3>Screenshots</h3>
@@ -591,10 +589,18 @@ ${environmentTable(loaded)}
 export function buildHtmlReport(input: HtmlReportInput, options: HtmlReportOptions): string {
   const runs = selectRuns(input.results, { all: input.all });
   const newestMs = newestFinishedAtMs(runs);
-  const kpiRuns = runs
-    .map((loaded, index) => ({ loaded, index }))
-    .filter(({ loaded }) => loaded.result.run.telemetryEnabled);
+  const overheadRunFiles = input.results.filter(({ result }) => isOverheadRun(result)).length;
+  const exercisedRuns: ExercisedRun[] = runs.map((loaded, index) => ({
+    index,
+    result: loaded.result,
+    exercised: exercisedComponents(loaded.result),
+  }));
+  const kpiRuns = exercisedRuns.filter(({ result }) => result.run.telemetryEnabled);
   const telemetryOff = runs.length - kpiRuns.length;
+  const scoredRuns: KpiRun[] = kpiRuns.map(({ index, result }) => ({
+    runId: runAnchor(index),
+    result,
+  }));
 
   const meta = [
     `Generated ${input.generatedAtWall}`,
@@ -602,6 +608,9 @@ export function buildHtmlReport(input: HtmlReportInput, options: HtmlReportOptio
     input.git?.commit != undefined ? `commit ${input.git.commit.slice(0, 12)}` : undefined,
     `${runs.length} run(s) shown${input.all ? " (all runs)" : " (latest per scenario × platform × telemetry mode)"}`,
     `${input.results.length} valid result file(s)`,
+    overheadRunFiles > 0
+      ? `${overheadRunFiles} overhead A/B run file(s) (telemetry overhead section only)`
+      : undefined,
     input.skipped.length > 0 ? `${input.skipped.length} invalid file(s) skipped` : undefined,
   ].filter((entry): entry is string => entry != undefined);
 
@@ -620,9 +629,9 @@ export function buildHtmlReport(input: HtmlReportInput, options: HtmlReportOptio
       ? `<p class="muted">No telemetry-on runs found.</p>`
       : renderTable(
           KPI_HEADERS,
-          kpiRuns.map(({ loaded, index }) =>
-            kpiRow(loaded.result, index, input.overheads, newestMs),
-          ),
+          kpiRuns.map((run) => kpiRow(run, input.overheads, newestMs)),
+          undefined,
+          kpiRuns.map(({ result }) => ({ "data-tags": filterTokens(result).join(" ") })),
         );
 
   const charts = runs.map((loaded) => buildRunChartData(loaded.result));
@@ -645,13 +654,22 @@ export function buildHtmlReport(input: HtmlReportInput, options: HtmlReportOptio
 ${skippedHtml}
 </header>
 <main>
-<h2>Overview</h2>
-<p class="muted">Telemetry-on runs; colors only where a target exists (overhead, runner events, pool invariant). Times are ms from the phases origin (<code>datasource.open</code>, else <code>app.ready</code>).${telemetryOff > 0 ? ` ${telemetryOff} telemetry-off run(s) are listed below only.` : ""}</p>
+<h2 id="scorecard">Scorecard</h2>
+<p class="muted">Shown telemetry-on runs per platform (electron and web are never aggregated together). Geometric mean for magnitudes, worst case for slope, smoothness, render cost and overhead; n = runs with a value. Colors only where a target exists (stability, overhead).</p>
+${scorecardHtml(scoredRuns, input.overheads)}
+<h2 id="by-group">By group</h2>
+${byGroupHtml(scoredRuns)}
+<h2 id="overview">Overview</h2>
+${filterBarHtml(runs.map((loaded) => loaded.result))}
+<p class="muted">Telemetry-on runs; colors only where a target exists (overhead, runner events, pool invariant). Times are ms from the phases origin (<code>datasource.open</code>, else <code>app.ready</code>). FPS: median / measured ceiling (⚠ below ${LOW_FPS_WARNING} FPS).${telemetryOff > 0 ? ` ${telemetryOff} telemetry-off run(s) are listed below only.` : ""}</p>
 ${kpiHtml}
-<h2>Telemetry overhead</h2>
+<h2 id="coverage">Coverage</h2>
+${coverageHtml(exercisedRuns)}
+<h2 id="telemetry-overhead">Telemetry overhead</h2>
+<p class="muted">Telemetry on − off. CPU from the in-process toggle A/B when it ran: one launch, telemetry switched off / on in ABBA quartets of blocks (off, on, on, off), one delta per quartet (Σ on / Σ off − 1, which cancels a linear CPU drift). Memory (and CPU with method relaunch) from pairs of fresh app instances (balanced order), steady window only. Median of the quartet / pair deltas with a seeded bootstrap CI95; verdict: <b>within</b> when the CI95 upper bound is ≤ the target, <b>exceeds</b> when the lower bound is above it, else <b>inconclusive</b> (also with fewer than 3 quartets / pairs). Report only unless <code>BENCHMARK_OVERHEAD_GATE=1</code>. Self-cost is the page's own timing of its telemetry (a lower bound: GC and memory pressure are not included).</p>
 ${overheadTable(input.overheads)}
-<h2>Runs</h2>
-${runs.length === 0 ? `<p class="muted">No valid <code>*.benchmark-result.v1.json</code> found.</p>` : runs.map((loaded, index) => runSection(loaded, charts[index]!, index, input, newestMs)).join("\n")}
+<h2 id="runs">Runs</h2>
+${runs.length === 0 ? `<p class="muted">No valid <code>*.benchmark-result.v1.json</code> found.</p>` : runs.map((loaded, index) => runSection(loaded, exercisedRuns[index]!, charts[index]!, input, newestMs)).join("\n")}
 </main>
 <footer>
 <p>Interim viewer for <code>*.benchmark-result.v1.json</code>; the definitive results dashboard is planned as a follow-up.</p>

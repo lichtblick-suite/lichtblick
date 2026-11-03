@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { Browser } from "@playwright/test";
+
 import {
+  WebHostCollector,
   computeCpuPercent,
   mapCdpProcessType,
   mapChromiumTypeSwitch,
@@ -10,6 +13,12 @@ import {
   selectProcessTree,
   toLegacyProcessMetric,
 } from "./webHostCollector";
+
+/** A browser whose CDP session answers `SystemInfo.getProcessInfo` with `send`. */
+function fakeBrowser(send: (method: string) => Promise<unknown>): Browser {
+  const session = { send: jest.fn(send), detach: jest.fn(async () => undefined) };
+  return { newBrowserCDPSession: jest.fn(async () => session) } as unknown as Browser;
+}
 
 describe("mapCdpProcessType", () => {
   it.each([
@@ -172,5 +181,43 @@ describe("toLegacyProcessMetric", () => {
       memory: { workingSetSize: 0, peakWorkingSetSize: 0 },
       cpu: { percentCPUUsage: 0 },
     });
+  });
+});
+
+describe("WebHostCollector.readCumulativeCpu", () => {
+  it("returns CDP's cumulative cpuTime per process with the cross-platform type", async () => {
+    // Given
+    const browser = fakeBrowser(async () => ({
+      processInfo: [
+        { id: 10, type: "browser", cpuTime: 4.5 },
+        { id: 11, type: "renderer", cpuTime: 20.25 },
+      ],
+    }));
+    const collector = new WebHostCollector({ browser, marker: "--bench" });
+
+    // When
+    const readings = await collector.readCumulativeCpu();
+
+    // Then
+    expect(readings).toEqual([
+      { pid: 10, processType: mapCdpProcessType("browser"), cpuTimeSec: 4.5 },
+      { pid: 11, processType: mapCdpProcessType("renderer"), cpuTimeSec: 20.25 },
+    ]);
+  });
+
+  it("rejects without CDP instead of falling back to the decayed ps %cpu", async () => {
+    // Given
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const browser = fakeBrowser(async () => {
+      throw new Error("not supported");
+    });
+    const collector = new WebHostCollector({ browser, marker: "--bench" });
+
+    // When / Then
+    await expect(collector.readCumulativeCpu()).rejects.toThrow(
+      "Cumulative CPU needs CDP SystemInfo.getProcessInfo",
+    );
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
   });
 });

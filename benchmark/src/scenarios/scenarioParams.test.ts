@@ -1,11 +1,24 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { getDataSourceParamOverrides, resolveScenarioDataSourceParams } from "./scenarioParams";
+import {
+  getDataSourceParamOverrides,
+  resolveScenarioDataSourceParams,
+  resolveScenarioDurationMs,
+} from "./scenarioParams";
 import { Scenario } from "./types";
 
 function buildScenario(dataSource: Scenario["dataSource"]): Scenario {
-  return { id: "scenario-id", layout: "empty", dataSource, pipeline: "real" };
+  return {
+    id: "scenario-id",
+    description: "A scenario.",
+    group: "real-pipeline-ingest",
+    tags: ["real-pipeline", "mcap"],
+    player: "IterablePlayer + McapIterableSource (main thread)",
+    layout: "empty",
+    dataSource,
+    pipeline: "real",
+  };
 }
 
 describe("getDataSourceParamOverrides", () => {
@@ -101,5 +114,59 @@ describe("resolveScenarioDataSourceParams", () => {
 
     // Then
     expect(result).toEqual({ params: undefined, missingParams: [] });
+  });
+});
+
+describe("resolveScenarioDurationMs", () => {
+  const withDuration: Scenario = { ...buildScenario({ factoryId: "f" }), durationMs: 10_000 };
+
+  it("should use a positive ?scenario.durationMs= override", () => {
+    // Given
+    const url = new URL("http://localhost/?scenario=x&scenario.durationMs=30000");
+
+    // When
+    const durationMs = resolveScenarioDurationMs(withDuration, url);
+
+    // Then
+    expect(durationMs).toBe(30_000);
+  });
+
+  it("should apply the override to scenarios without a registry duration", () => {
+    // Given
+    const url = new URL("http://localhost/?scenario.durationMs=2500");
+
+    // When
+    const durationMs = resolveScenarioDurationMs(buildScenario({ factoryId: "f" }), url);
+
+    // Then
+    expect(durationMs).toBe(2_500);
+  });
+
+  it.each([
+    "",
+    "0",
+    "-1",
+    "abc",
+    "Infinity",
+  ])("should keep the registry duration for the invalid override %p", (raw) => {
+    // Given
+    const url = new URL(`http://localhost/?scenario.durationMs=${raw}`);
+
+    // When
+    const durationMs = resolveScenarioDurationMs(withDuration, url);
+
+    // Then
+    expect(durationMs).toBe(10_000);
+  });
+
+  it("should return undefined without override nor registry duration", () => {
+    // Given / When
+    const durationMs = resolveScenarioDurationMs(
+      buildScenario({ factoryId: "f" }),
+      new URL("http://localhost/"),
+    );
+
+    // Then
+    expect(durationMs).toBeUndefined();
   });
 });

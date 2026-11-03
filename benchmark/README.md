@@ -37,11 +37,32 @@ yarn test:e2e:benchmark:viewer --open
 To run a single spec or scenario, use the usual Playwright filters. Examples:
 `yarn test:e2e:benchmark:web scenarios -g mcap` and `yarn test:e2e:benchmark overhead`.
 CI variants (`test:e2e:benchmark:ci`, `test:e2e:benchmark:web:ci`) set `CI=true` and write
-`benchmark/e2e/reports/results-<platform>.json`.
+`benchmark/e2e/reports/results-<platform>.json`. They take the same filters; the workflow passes
+`scenarios` (see [CI](#ci)).
 
 The unit tests for the runner's pure logic (static server, fixture generator, schema builder and
 validator, collector parsing, overhead, crash detection, summary, HTML viewer) run under the `benchmark-e2e` Jest project:
 `yarn jest --selectProjects benchmark-e2e`.
+
+## Specs: scenarios vs overhead
+
+The suite has two Playwright specs. Both run on Electron and web through the same `runScenario`,
+but they answer different questions:
+
+|                                   | `scenarios.benchmark.spec.ts`                                                                          | `overhead.benchmark.spec.ts`                                                                                                                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Question                          | How does Lichtblick perform per scenario (telemetry on)?                                               | What does the benchmark telemetry itself cost (off vs on)? Targets ≤ 2 % CPU, ≤ 20 MiB (`OVERHEAD_TARGETS`)                                                                                      |
+| Scenarios                         | All [scenarios under test](#scenarios) (`SCENARIOS_UNDER_TEST`)                                        | `OVERHEAD_SCENARIOS`: `sinewave`, `mcap-multi-ingest`, `pointcloud`                                                                                                                              |
+| How it runs                       | One launch per scenario, 1 Hz sampling for 5 s (`mcap-multi-ingest`: 10 s)                             | CPU: toggle quartets in one launch + direct (JS only) profile; memory: relaunch A/B. Optional UA-off (`BENCHMARK_OVERHEAD_UA_ARM`) and FPS-probe (`BENCHMARK_OVERHEAD_FRAME_PROBE_ARM`) variants |
+| Output                            | `*.benchmark-result.v1.json` + screenshots → Overview, [Scorecard](#kpi-scorecard), By group, Coverage | `overhead-<platform>-<scenario>-<ts>.json` (schema 3) → [Telemetry overhead](#telemetry-overhead-report-only); its runs (`run.mode: "overhead"`) stay out of KPIs and Runs                       |
+| Duration (defaults, one platform) | ≈ 10–15 s per scenario                                                                                 | ≈ 25–30 min (per scenario: ≈ 2.5–3 min toggle + 11 relaunch runs ≈ 5–6 min); `BENCHMARK_OVERHEAD_METHOD=toggle` ≈ 10 min                                                                         |
+| When to run                       | Every change; runs in CI on pushes to `develop`/`main`                                                 | When telemetry, its collectors or the overhead runner change; manual only (not in CI)                                                                                                            |
+| Command                           | `yarn test:e2e:benchmark[:web] scenarios`                                                              | `yarn test:e2e:benchmark[:web] overhead`                                                                                                                                                         |
+
+[CI](#ci) runs only the scenarios spec: the workflow passes the `scenarios` filter to the `:ci`
+scripts. Run the overhead spec manually with the command above. It is report only unless
+`BENCHMARK_OVERHEAD_GATE=1`; methods, variants and env knobs are in
+[Telemetry overhead](#telemetry-overhead-report-only).
 
 ## Scenarios
 
@@ -67,6 +88,25 @@ re-hydrates sources. This is the scenario that demonstrates the pool telemetry.
 A scenario with `durationMs` pauses itself at that deadline. While a scenario is active, the page
 also exposes `window.lichtblickScenario.closeDataSource()`. It closes the player without leaving
 the page, so the `datasource.close` events and the final pool counters can still be drained.
+
+### What each scenario exercises
+
+Each scenario describes itself (`run.scenario` in the result: description, group, tags, layout,
+data source, player, redacted params and declared panels). The pipeline components are **observed**:
+they are derived from the telemetry the run emitted (`result/exercised.ts`).
+
+| Scenario              | Group                  | Tags                                                  | Layout panels           | Player                                            | Observed pipeline components                                                                                                                  |
+| --------------------- | ---------------------- | ----------------------------------------------------- | ----------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sinewave`            | `time-series`          | plot, synthetic                                       | Plot ×1                 | SinewavePlayer                                    | MessagePipeline                                                                                                                               |
+| `pointcloud`          | `3d-rendering`         | 3d, pointcloud, synthetic                             | 3D ×6                   | PointcloudPlayer                                  | MessagePipeline                                                                                                                               |
+| `transform`           | `3d-rendering`         | 3d, tf, synthetic                                     | 3D ×6                   | TransformPlayer                                   | MessagePipeline                                                                                                                               |
+| `transformpreloading` | `preloading`           | 3d, raw-messages, tf, preloading, synthetic           | RawMessages ×1, 3D ×1   | TransformPreloadingPlayer                         | MessagePipeline                                                                                                                               |
+| `mcap-multi-ingest`   | `real-pipeline-ingest` | real-pipeline, mcap, multi-source, raw-messages, plot | RawMessages ×1, Plot ×1 | IterablePlayer + McapIterableSource (worker)      | MessagePipeline, MultiIterableSource, HydratedSourcePool, BlockLoader, CachingIterableSource, RemoteFileReadable, IterablePlayer (memoryInfo) |
+| `mcap-ingest`         | `real-pipeline-ingest` | real-pipeline, mcap                                   | none (`empty`)          | IterablePlayer + McapIterableSource (main thread) | not run by the suite                                                                                                                          |
+
+Only `PanelExtensionAdapter` panels (3D, ...) emit render telemetry. Plot and Raw Messages report
+delivered messages only, so a declared panel without any panel telemetry is flagged
+"⚠ no telemetry" in the viewer.
 
 ### MCAP fixtures (generated, not committed)
 
@@ -128,6 +168,7 @@ TelemetryEvent  = { kind: "event", realm, sequence, monotonicTs, name, phase: "s
   Empty windows emit nothing. The window mean is `sum.delta / count.delta`. Values must be finite
   and `>= 0`; anything else is rejected as `invalidValue`. Label rules and the series cap apply to
   `<metric>` as for gauges and counters. A pending window is flushed when the sink is disposed.
+
 - **Bounded cardinality.** Allowed label keys: `sourceId, poolId, panelId, panelType, processType,
 pid, platform, scenarioId, realm, reason, iteratorId`. There are at most 64 series per metric.
   Records that break these rules are rejected and counted in `telemetry.rejectedRecords{reason}`.
@@ -142,7 +183,7 @@ pid, platform, scenarioId, realm, reason, iteratorId`. There are at most 64 seri
 
 | Layer                    | Source                                                                                                                                                                                                                                         | Metrics / events                                                                                                                                                                                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Host / process           | **Electron**: `app.getAppMetrics()` through `window.lichtblickBenchmark.getMemoryMetrics()`. **Web**: CDP `SystemInfo.getProcessInfo` (process list, CPU time) plus `ps -o pid=,rss=` (RSS). If CDP fails, the browser process tree from `ps`. | `process.workingSetBytes`, `process.peakWorkingSetBytes`, `process.privateBytes` (Electron on Windows only), `process.cpuPercent` (percent of one core), labels `{processType: browser\|renderer\|gpu\|utility\|…, pid}`, realm `runner`, scope `process`                           |
+| Host / process           | **Electron**: `app.getAppMetrics()` through `window.lichtblickBenchmark.getMemoryMetrics()`. **Web**: CDP `SystemInfo.getProcessInfo` (process list, CPU time) plus `ps -o pid=,rss=` (RSS). If CDP fails, the browser process tree from `ps`. | `process.workingSetBytes`, `process.peakWorkingSetBytes`, `process.privateBytes` (Electron on Windows only), `process.cpuPercent` (per-core sum, 100 = one core), labels `{processType: browser\|renderer\|gpu\|utility\|…, pid}`, realm `runner`, scope `process`                  |
 | Renderer (main thread)   | benchmark renderer collectors, 1 Hz                                                                                                                                                                                                            | `renderer.jsHeap.{usedBytes,totalBytes,limitBytes}`, `renderer.fps`, `renderer.lateFrames`, `renderer.longTasks.{count,durationMs}`, `renderer.uaSpecificMemory.bytes` (cross-origin isolated only, at most every 10 s)                                                             |
 | Frame / message dispatch | legacy `window.recordFrameTimes`                                                                                                                                                                                                               | `listenerDispatchDurationMs` (gauge, realm/scope `renderer`)                                                                                                                                                                                                                        |
 | Cross-realm              | worker sinks bridged into the renderer                                                                                                                                                                                                         | everything a worker records, realm `worker:<n>`; `telemetry.*` self-metrics per realm                                                                                                                                                                                               |
@@ -161,8 +202,15 @@ Caveats:
 - Web runs in headless Chromium use **SwiftShader** (software GL). That makes the `gpu` process
   CPU very high (hundreds of percent) and makes CPU noisy. Compare web CPU only to other web
   runs.
-- Host polling and drains run through `page.evaluate`. Under heavy rendering (`pointcloud`,
-  `transform` on web), the 1 Hz loop can get only 3–4 polls in a 5 s window.
+- `process.cpuPercent` is a **per-core sum** on both platforms (100 % = one full core, so a
+  process can exceed 100 %). Electron's `percentCPUUsage` is divided by the number of logical CPUs,
+  so the Electron collector multiplies it by `run.environment.logicalCpus`
+  (`os.availableParallelism()` of the runner, which runs on the same host; see
+  `runner/hostCpus.ts`). Results written before this conversion understate Electron CPU by that
+  factor (they lack `logicalCpus`).
+- In scenario runs, host polling and drains run through `page.evaluate`. Under heavy rendering
+  (`pointcloud`, `transform` on web), the 1 Hz loop can get only 3–4 polls in a 5 s window. The
+  overhead steady window polls without page calls (see "Telemetry overhead").
 - On Windows the web collector cannot read RSS (no `ps`), so only CPU is reported. It logs a
   warning once.
 
@@ -196,7 +244,7 @@ which the benchmark summaries (`e2e/result/`) import.
 benchmark/e2e/
 ├── playwright.config.ts          projects "electron" and "web"
 ├── scenarios.benchmark.spec.ts   one test per scenario under test (+ web crossOriginIsolated check)
-├── overhead.benchmark.spec.ts    telemetry off/on A/B (report only)
+├── overhead.benchmark.spec.ts    telemetry off/on A/B, repeated and order-balanced (report only)
 ├── fixtures/                     Playwright fixtures, Electron/web targets, MCAP generator
 ├── server/staticServer.ts        Node http static server (Range, COOP/COEP/CORP/CORS, SPA fallback)
 ├── runner/                       runScenario, host collectors, artifacts, overhead, crashDetection, scenariosUnderTest
@@ -253,13 +301,13 @@ Electron 44.4.5):
 
 ### Artifacts (`benchmark/.artifacts/`)
 
-| File                                                                        | Content                                                                                                                                                                                                                      |
-| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<scenarioId>-<ts>.json` (Electron), `<scenarioId>-web-<ts>.json` (web)     | Legacy `BenchmarkArtifact` (unchanged shape). On web, `memorySamples[].metrics` are ProcessMetric-like `{pid, type, memory:{workingSetSize, peakWorkingSetSize} (KB), cpu:{percentCPUUsage}}` (memory is 0 when unavailable) |
-| `<scenarioId>-<platform>[-telemetry-off]-<ts>.benchmark-result.v1.json`     | Result schema v1 (below). The overhead spec writes one per run, with `-telemetry-off` for the baseline                                                                                                                       |
-| `overhead-<platform>-<scenarioId>-<ts>.json`                                | Overhead A/B report                                                                                                                                                                                                          |
-| `screenshots/<scenarioId>-<platform>[-telemetry-off]-<ts>-<checkpoint>.png` | Viewport screenshots of the scenarios spec runs, `<checkpoint>` = `end` by default, plus `loaded` and `mid` with `BENCHMARK_SCREENSHOTS=all` (see [Screenshots](#screenshots))                                               |
-| `fixtures/`                                                                 | Generated MCAP fixtures. CI does not upload these                                                                                                                                                                            |
+| File                                                                        | Content                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<scenarioId>-<ts>.json` (Electron), `<scenarioId>-web-<ts>.json` (web)     | Legacy `BenchmarkArtifact` (unchanged shape). On web, `memorySamples[].metrics` are ProcessMetric-like `{pid, type, memory:{workingSetSize, peakWorkingSetSize} (KB), cpu:{percentCPUUsage}}` (memory is 0 when unavailable). `percentCPUUsage` is raw: divided by the logical CPUs on Electron, a per-core sum on web |
+| `<scenarioId>-<platform>[-telemetry-off]-<ts>.benchmark-result.v1.json`     | Result schema v1 (below). The overhead spec writes one per measured run, tagged `-overhead` (`run.mode: "overhead"`): `-telemetry-off-overhead` for the baseline, `-overhead-ua-memory-off` for the UA arm                                                                                                             |
+| `overhead-<platform>-<scenarioId>-<ts>.json`                                | Overhead A/B report, schema 3 (schema-2 files load as method `relaunch`, schema-1 files as "legacy n=1"; see [Telemetry overhead](#telemetry-overhead-report-only))                                                                                                                                                    |
+| `screenshots/<scenarioId>-<platform>[-telemetry-off]-<ts>-<checkpoint>.png` | Viewport screenshots of the scenarios spec runs, `<checkpoint>` = `end` by default, plus `loaded` and `mid` with `BENCHMARK_SCREENSHOTS=all` (see [Screenshots](#screenshots))                                                                                                                                         |
+| `fixtures/`                                                                 | Generated MCAP fixtures. CI does not upload these                                                                                                                                                                                                                                                                      |
 
 `<ts>` is the epoch ms at the start of the run, shared by all files of one run (legacy artifact,
 v1 result and screenshots), so they can be matched up.
@@ -333,11 +381,11 @@ runs for every spec (overhead too), without affecting any metric.
 `runScenario` stops it once measurement is over, which is the start of the runner's own closing,
 and stores what it saw as `runnerEvents` in the v1 result:
 
-| `type`            | Source                                                                                                   |
-| ----------------- | -------------------------------------------------------------------------------------------------------- |
-| `renderer.crash`  | `page.on("crash")` (web and Electron)                                                                    |
+| `type`            | Source                                                                                                                                                                                                                       |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `renderer.crash`  | `page.on("crash")` (web and Electron)                                                                                                                                                                                        |
 | `process.gone`    | Electron only: main-process `app.on("render-process-gone")` (`processType: "renderer"`) and `app.on("child-process-gone")` (`processType` = `details.type`), with `reason` and `exitCode`. `reason: "clean-exit"` is ignored |
-| `renderer.reload` | Main-frame `framenavigated` to a **new document** after the app was ready                                |
+| `renderer.reload` | Main-frame `framenavigated` to a **new document** after the app was ready                                                                                                                                                    |
 
 - The Electron listeners write to a global array in the main process. The runner drains it with
   `electronApp.evaluate` at the end, and also right away after a renderer crash.
@@ -369,8 +417,12 @@ and stores what it saw as `runnerEvents` in the v1 result:
 { schemaVersion: 1,
   run: { scenarioId, pipeline, platform, telemetryEnabled, startedAtWall, finishedAtWall (ISO),
          startMonotonicTs, endMonotonicTs, windowEndMonotonicTs?, sampleIntervalMs,
+         scenario: { scenarioId, description, group, tags, layout, dataSource: { factoryId,
+                     displayName? }, player, params (redacted), durationMs?,
+                     panels: { id, type, title? }[] },
          environment: { os, arch, ci, userAgent?, electronVersion?, chromiumVersion?, cpuModel,
-                        totalMemBytes, crossOriginIsolated? } },
+                        logicalCpus, totalMemBytes, crossOriginIsolated?,
+                        fpsCeiling, glRenderer, lateFrameThresholdMs } },   // render calibration
   samples: TelemetrySample[],   // page + worker + host process + listenerDispatchDurationMs, sorted by monotonicTs
   events: TelemetryEvent[],
   dropped: Record<realm, number>,
@@ -379,8 +431,10 @@ and stores what it saw as `runnerEvents` in the v1 result:
                    reason?, processType?, exitCode?, url? }[],   // see Crash detection; [] = none
   summary: {
     process: { sampleCount, peakTotalWorkingSetBytes, meanTotalWorkingSetBytes, medianTotalCpuPercent,
+               totalWorkingSetSlopeMiBPerMin?, cpuSeconds?,
                byType: Record<processType, { peakWorkingSetBytes, medianCpuPercent }> },
-    renderer: { peakJsHeapUsedBytes?, lastUaSpecificMemoryBytes?, medianFps?, lateFrames?, longTasks? },
+    renderer: { peakJsHeapUsedBytes?, lastUaSpecificMemoryBytes?, medianFps?, totalFrames?,
+                lateFrames?, longTasks?, longTaskTotalMs? },
     listenerDispatchDurationMs?: { count, p50, p90, max },
     hydratedSourcePool?: { pools: Record<"<realm>/<poolId>", { realm, poolId, acquires, releases,
         terminatedPins, activePinsFinal, invariantHolds, overBudgetPeriods, overBudgetDurationMs,
@@ -397,11 +451,12 @@ and stores what it saw as `runnerEvents` in the v1 result:
               blockCacheMaxBytes?, blockCacheEvictions?, sourceCacheHits?, sourceCacheMisses?,
               sourceCacheHitRatio?, sourceCachePeakBytes?, remoteReadRequests?, remoteBytesRead?,
               sourcesTotal?, sourcesRelevant?, memoryPeakBytes?: Record<key, number> },
-    runnerEvents?: { "renderer.crash", "process.gone", "renderer.reload" } } }   // counts
+    runnerEvents?: { "renderer.crash", "process.gone", "renderer.reload" },   // counts
+    kpis: RunKpisV1 } }   // see "KPI scorecard"
 ```
 
 - Process totals are summed per poll, across all processes of that poll. Peak and mean are taken
-  over polls. CPU is percent of one core, so the total can exceed 100. Percentiles use a sorted
+  over polls. CPU is a per-core sum (100 = one core) on both platforms, so the total can exceed 100. Percentiles use a sorted
   nearest rank.
 - `invariantHolds` checks `acquires − releases − terminatedPins === activePins` at every published
   `activePins` snapshot and at the final values. Pools are keyed by realm, because pool ids are
@@ -416,25 +471,456 @@ and stores what it saw as `runnerEvents` in the v1 result:
   durations are `observe()` series (`.count`/`.sum`/`.max` per 1 Hz window): mean = Σsum / Σcount,
   max = max of `.max`, and `*P90WindowMaxMs` = p90 of the per-window `.max` (a spike indicator).
   Fields without data are omitted.
-- `validateResultV1(obj)` returns a list of problems. The scenarios spec asserts the list is empty.
+- **Memory slope** (`totalWorkingSetSlopeMiBPerMin`): least squares over the polls of the steady
+  window only. The window starts at the later of the end of a 20 % warm-up
+  (`STEADY_STATE_WARMUP_FRACTION`) and the end of startup (origin + max(`panelsReadyMs`,
+  `firstMessageMs`)), and ends with the measured window. The slope is reported only when that
+  window is ≥ 10 s (`MIN_SLOPE_WINDOW_MS`) and has ≥ 3 polls; otherwise it is omitted. Short
+  scenarios (5–10 s) therefore report no slope instead of the startup ramp.
+- `cpuSeconds` integrates the total CPU % / 100 over the polls (trapezoid).
+- **Required in v1**: `run.scenario`, `run.environment.logicalCpus`, the render calibration
+  (`run.environment.fpsCeiling`, `glRenderer`, `lateFrameThresholdMs`) and `summary.kpis`. `validateResultV1(obj, "strict")`
+  (what the runner and the scenarios spec use) returns a list of problems; the spec asserts it is
+  empty.
+- **Older artifacts** load in `"lenient"` mode (viewer, CI summary): a missing `run.scenario` is
+  shown as "scenario not recorded" (observed telemetry only), missing `logicalCpus` and
+  calibration as "not recorded", and missing `summary.kpis` are recomputed from the other summaries (`withRunKpis`) and
+  marked "recomputed".
 
 ### Telemetry overhead (report only)
 
-`overhead.benchmark.spec.ts` runs `sinewave` and `mcap-multi-ingest` twice on each platform:
-first with `?telemetry=off`, then with telemetry on. Each run gets a fresh browser or Electron app,
-and the first is closed before the second starts, so the two never compete for CPU.
+`overhead.benchmark.spec.ts` measures what the benchmark telemetry itself costs, per platform, on
+`sinewave`, `mcap-multi-ingest` and `pointcloud` (`OVERHEAD_SCENARIOS`). It writes
+`overhead-<platform>-<scenario>-<ts>.json` (schema 3, `runner/overhead.types.ts`) plus the v1 result
+of every measured relaunch run. Those results carry `run.mode: "overhead"` and a `-overhead` file name tag;
+the viewer's scenario views (Scorecard, By group, Overview, Coverage, Runs) and the CI summary leave
+them out (`result/runMode.ts`, results from before `run.mode` are recognized by
+`summary.steadyWindow`). They are linked from the overhead section only.
 
-From the host samples it computes these values:
+Two A/B methods, chosen with `BENCHMARK_OVERHEAD_METHOD` (`toggle` | `relaunch` | `both`, default
+`both`):
 
-- `cpuDeltaPctPoints = onMedian − offMedian`, using the median per-poll total CPU percent
-- `cpuDeltaRelative = cpuDeltaPctPoints / offMedian`. The target is **≤ 2%** relative to the
-  telemetry-off median.
-- `memDeltaBytes = onMean − offMean`, using the mean per-poll total working set. The target is
-  **≤ 20 MiB**.
+| Method     | CPU verdict from               | Memory verdict from | Launches per scenario        |
+| ---------- | ------------------------------ | ------------------- | ---------------------------- |
+| `toggle`   | toggle A/B                     | not measured        | 1 (+ warm-up runs)           |
+| `relaunch` | relaunch A/B                   | relaunch A/B        | warm-up + repeats × arms     |
+| `both`     | toggle A/B (relaunch CPU info) | relaunch A/B        | warm-up + 1 + repeats × arms |
 
-The report includes `within: {cpu, memory}` and `withinTargets`. **The suite never fails on these
-targets** unless `BENCHMARK_OVERHEAD_GATE=1` is set. Single A/B runs on shared CI runners are noisy,
-especially CPU on web with SwiftShader. Use repeated runs before treating a delta as real.
+**Why the toggle A/B is the primary CPU method.** Telemetry costs ≈ 0.1–1 % CPU, but two fresh
+launches of the same arm differ by ± 2–5 % (JIT, GC timing, GPU process start, background load).
+With 5 relaunch pairs that launch-to-launch variance dominates the deltas and the CI95 spans
+min..max, so the CPU verdict ends up `inconclusive`. The toggle A/B compares short blocks within one
+app instance, so every block shares the same heap, caches, process set and playback, and the
+launch variance cancels out of each quartet. It is also faster: one launch per scenario instead of
+≈ 11.
+
+**Toggle A/B** (`runner/toggleBlocks.ts`, `runner/toggleWindow.ts`, `measurement: { mode: "toggle" }`
+of `runScenario`)
+
+- **One launch**, telemetry installed on. After the page API is ready and a 10 s warm-up
+  (`OVERHEAD_TOGGLE_WARMUP_MS`; longer than the relaunch one, so the start-up CPU ramp ends before
+  the first block), the runner runs `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS` ABBA quartets of 4 blocks
+  of `BENCHMARK_OVERHEAD_TOGGLE_BLOCK_MS` each (off, on, on, off, off, on, on, off, …), on a fixed
+  schedule (`t0 + i × block`). The schedule always consists of complete quartets; quartet `k` =
+  blocks `4k … 4k + 3`. Every quartet has the same orientation, so in each one an arm switch
+  precedes one block of either arm.
+- **The page toggle** (`window.lichtblickTelemetry.setTelemetryActive(active)`,
+  `benchmark/src/telemetry/installBenchmarkTelemetry.ts`). Off: the realm sink is swapped to the
+  no-op (`setTelemetrySink(undefined)`) and the renderer collectors pause: frame recording stopped,
+  long-task observer disconnected, collector tick and sink publish timer stopped, UA memory probe
+  paused. The frame collector's `requestAnimationFrame` loop keeps running in both arms (harness,
+  see "Benchmark FPS probe" below). On: the real sink is restored and all of them resume (the UA probe keeps its global 10 s minimum
+  spacing, so resuming never causes a burst). Records already buffered stay drainable. A few
+  producers keep the instance they got earlier (`HydratedSourcePool` at construction, the Plot
+  range iterator wrapper of `useSubscribeMessageRange`, an in-flight UA memory call), so the sink
+  itself is gated too (`ToggleableTelemetrySink`: every emit/ingest returns at once while off).
+  With telemetry disabled at install time the call is a no-op.
+- **Settle**: the toggle is a page round trip; it is sent at the block start through the same
+  serial queue as the drains (page calls never overlap), and the first `OVERHEAD_TOGGLE_SETTLE_MS` =
+  500 ms of each block are not measured. A toggle that overruns the settle period marks the block
+  `lateStart` (measurement then starts right after it). Toggle latency is recorded per block.
+- **CPU per block from cumulative CPU time**, never from an instantaneous or decayed percentage
+  (macOS `ps %cpu` is a decayed average, Electron's `percentCPUUsage` is "since the last call"):
+  web reads CDP `SystemInfo.getProcessInfo` `cpuTime`, Electron reads `app.getAppMetrics()`
+  `cpu.cumulativeCPUUsage` in the main process (no page call; a version without it fails with a
+  clear error, use `relaunch`). Block CPU = Σ Δ CPU seconds of the processes present at both reads /
+  Δ wall, as a per-core sum (100 % = one core, as `runner/hostCpus.ts`).
+- **Process set**: each block records the types and counts of its processes. A block in which a
+  process appeared or exited, or whose set differs from the run's most frequent (modal) set, is
+  flagged and its quartet excluded.
+- **ABBA quartets** are the statistical unit. Per quartet, each arm's CPU pools its two blocks
+  (Σ Δ CPU seconds / Σ Δ wall, i.e. block CPU weighted by measured wall time):
+  `cpuRelative = Σ on / Σ off − 1` and `cpuPctPoints = on − off` (mean of the arm's blocks). The
+  included quartets feed the same statistics and verdict as the relaunch A/B (below).
+- **Why quartets, not adjacent pairs**: CPU drifts over a run (playback content, JIT, heap growth,
+  thermal state; a web `pointcloud` smoke fell from 36 % to 23 % over 10 blocks). An adjacent
+  off/on pair picks up one block of drift, with the sign alternating between off-first and on-first
+  pairs, so the pair deltas swing (−10 %, +7 %, −15 %, …) and the CI95 spans them. In a quartet
+  (blocks at `t0 … t3`) both arms have the same mean time (`(t0 + t3) / 2 = (t1 + t2) / 2`), so a
+  linear drift `a + b·t` adds the same CPU to both sums and cancels exactly: a constant relative
+  overhead `e` on top of it still gives `Σ on / Σ off − 1 = e`. Only curvature within one quartet
+  (≈ 4 blocks, 12 s) remains. The adjacent-pair deltas stay in the report (`toggle.pairs`) as a
+  diagnostic; they never enter the statistics or the verdict.
+- **Checks** (the spec asserts them): renderer-realm records stamped in off blocks = 0 and > 0 in on
+  blocks, UA calls in off blocks = 0; for the frame-probe variant 0 renderer records and 0 UA calls
+  in both arms. The report records per block the records per realm and the UA
+  calls, and per run the toggle latency maximum, flagged blocks and late starts.
+- **Limitations**:
+  - Steady-state CPU only: the toggle cannot measure retained memory (heap and buffers stay
+    allocated in both arms), so memory comes from the relaunch A/B.
+  - The worker realm (`WorkerSerializedIterableSourceWorker`, `mcap-multi-ingest`) is not
+    toggled: its sink is installed at worker start and keeps recording in both arms. Its batches
+    are dropped on arrival in off blocks, because the renderer ingest is gated. So the toggle
+    measures the renderer realm plus the main-thread ingest. Worker cost shows up in the relaunch
+    A/B and the self-cost.
+  - Telemetry drains keep running in both arms (they read the buffer, not the producers).
+  - Startup cost (collector install, first data source open) is outside the blocks.
+- **Duration**: auto-pause (`?scenario.durationMs`) and MCAP fixture length are derived from
+  warm-up + quartets × 4 × block + profile + 2 s (defaults: 10 s + 10 × 4 × 3 s + 10 s + 2 s =
+  142 s; fixtures `.artifacts/fixtures/overhead/147s/`). A toggle run takes ≈ 2.5–3 min with the
+  defaults, ≈ 1.5 min with 4 quartets.
+- **Minimum quartets**: a toggle verdict (`within` / `exceeds`) needs at least
+  `MIN_QUARTETS_FOR_VERDICT` = 6 included quartets, otherwise it is `inconclusive`. Runs with
+  4 quartets (the minimum `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS`) are smoke tests: with 4 values the
+  bootstrap CI95 of the median is just the range of the middle values and far too narrow for a
+  verdict on a noisy scenario.
+
+**Relaunch A/B**
+
+- **Arms**: `off` (`?telemetry=off`) and `on`. On web, `BENCHMARK_OVERHEAD_UA_ARM=1` adds
+  `on-noUa` (telemetry on, `?telemetry.uaMemory=off`), see below.
+- **Fresh instance per run**: every run launches a new browser or Electron app, and the previous
+  one is closed first, so runs never compete for CPU and share no caches or heap.
+- **Warm-up runs**: `BENCHMARK_OVERHEAD_WARMUP_RUNS` runs (alternating arms) go first and are
+  discarded (cold disk cache, JIT, first-launch work).
+- **Balanced order** (`runner/overheadSchedule.ts`): with two arms each repeat is a pair in ABBA
+  order (even repeats off → on, odd repeats on → off). A drift with run position (thermal state,
+  background load) then has opposite signs in consecutive pairs and cancels in the median. With
+  three arms the order rotates as a Latin square, so every arm takes every position.
+- **Steady window** (`measurement: { mode: "steady" }` of `runScenario`, `runner/steadyWindow.ts`):
+  after the page API is ready the runner takes 1 Hz host polls for `OVERHEAD_WARMUP_MS` = 3 s, a
+  priming poll and then exactly `BENCHMARK_OVERHEAD_POLLS` (default `OVERHEAD_STEADY_POLLS` = 10,
+  min 5) polls on a fixed schedule (`t0 + i × 1 s`, not deadline-driven, so slow polls cannot drop
+  polls). Host CPU is "since the previous poll", so the priming poll keeps startup out of the first
+  steady value. Scenarios that auto-pause get `?scenario.durationMs` = warm-up + polls × interval
+  - 2 s, so the pause never lands in the window. Screenshots are off.
+- **Polls never wait for the page**: a busy renderer (`pointcloud` on web blocks its main thread
+  ≈ 800 ms/s) delays every `page.evaluate`, so a poll does host collection only (web: `ps` + CDP
+  `SystemInfo` on the browser session; Electron: `app.getAppMetrics()` in the main process instead
+  of the renderer's preload bridge).
+  - Poll timestamps come from the Node clock plus a page clock offset measured once before the
+    window (`runner/clockSync.ts`: `CLOCK_SYNC_ROUNDS` = 5 `pageNow` round trips, the one with the
+    smallest round trip wins, NTP style; exact to ± half of `clockSyncRttMs`).
+  - Telemetry is drained by a separate loop every `OVERHEAD_DRAIN_INTERVAL_MS` = 2 s (each drain
+    awaited; ≤ ~60 records/s fill well under 1 % of the 8192-record sink per interval), stopped at
+    the last poll and followed by a full drain. Drains and the main-thread probe reads (window start
+    and end) go through one queue, so page calls never overlap.
+- **Longer MCAP data**: the scenario fixtures span 10 s, which ends before the steady window does
+  (≈ 13 s after the page is ready), so the last polls would measure an idle player. The overhead
+  spec uses its own fixtures (`overheadFixtureUrls`, `runner/overheadFixtures.ts`): the auto-pause
+  plus `OVERHEAD_FIXTURE_DATA_MARGIN_MS` = 5 s for loading, at the same rate and size. They are
+  cached per length in `.artifacts/fixtures/overhead/<seconds>s/`, so another poll count
+  generates its own (10 polls: 3 s + 10 s + 2 s + 5 s = `20s/`; 20 polls: `30s/`).
+- **Browser (web)**: every arm runs in the full Chromium in new headless mode
+  (`OVERHEAD_WEB_BROWSER`, Playwright `channel: "chromium"`, recorded as
+  `run.environment.webBrowser`). Playwright's default `chromium-headless-shell`, used by the scenario
+  runs, rejects every `measureUserAgentSpecificMemory()` call with a `SecurityError`.
+- **Per run** (`summary.steadyWindow` of the v1 result): median and mean total CPU, mean and peak
+  total working set, mean working set per process type, the process set (max count per type),
+  `polls`, `overruns` (a host poll that ended after its next slot), `windowMismatch` (fewer polls
+  than requested or any overrun), `maxPollLatencyMs` (longest host poll) and `clockSyncRttMs`.
+- **Main-thread probe in both arms** (`runner/mainThreadProbe.ts`): the runner injects the same
+  probe into every arm before navigation (`page.addInitScript`): a `longtask` `PerformanceObserver`
+  and a `requestAnimationFrame` counter. Read at the start and end of the steady window it gives
+  `mainThread: { longTaskBlockedMsPerSec, fps }`, so the off arm has main-thread numbers too.
+- **Pairs**: per repeat, `on − off` deltas: `cpuRelative = (on − off) / off` and `cpuPctPoints` of
+  the steady median total CPU, `memBytes` of the steady mean total working set, the main-thread
+  deltas, and `memBytesCommonProcesses` (only the process types both runs had; secondary). A pair
+  where either run has `windowMismatch` is **excluded**; a pair whose process sets differ is
+  **flagged** `processSetMismatch` but kept.
+
+**Statistics** (`result/stats.ts`)
+
+- Each metric: median of the included pair (relaunch) or quartet (toggle) deltas, IQR, and a percentile bootstrap CI95 of the
+  median (`BOOTSTRAP_RESAMPLES` = 10 000, seeded mulberry32 PRNG, so a report is reproducible).
+- **Verdict** against the unchanged targets (`OVERHEAD_TARGETS`: relative CPU ≤ 2 %, working set
+  ≤ 20 MiB): `within` when the CI95 upper bound ≤ target, `exceeds` when the CI95 lower bound >
+  target, otherwise `inconclusive`. Fewer than `MIN_PAIRS_FOR_VERDICT` = 3 included pairs (relaunch)
+  or `MIN_QUARTETS_FOR_VERDICT` = 6 included quartets (toggle) is always `inconclusive`. `verdicts.overall` is the worst of CPU and memory
+  (`exceeds` > `inconclusive` > `within`).
+- **Report only**: the suite never fails on the targets unless `BENCHMARK_OVERHEAD_GATE=1`, and then
+  only on an overall `exceeds` (an `inconclusive` result does not fail).
+
+**UA memory probe arm** (web only). With cross-origin isolation the page telemetry calls
+`performance.measureUserAgentSpecificMemory()`. That is a benchmark probe, not product telemetry,
+and the browser may run a garbage collection to answer it, which can make the telemetry-on working
+set _smaller_ than telemetry off. The `on-noUa` arm isolates that: the report adds
+`withoutUaProbe` (on-noUa vs off, with verdicts) and `uaCost` (on vs on-noUa, no verdict). Electron
+pages are not cross-origin isolated, so the probe never runs there and the arm is skipped. A
+browser that rejects the call with a `SecurityError` (the headless shell) makes the collector report
+`unsupported` and stop calling. Chromium answers lazily (with the next GC, ≈ 10–20 s in headless
+runs), so only about one call per run resolves.
+
+With method `toggle` or `both` the same knob adds a second toggle launch with
+`?telemetry.uaMemory=off` (`overheadSchedule.toggleUaProbeVariants`). The report keeps it as
+`toggleWithoutUaProbe` (same shape and statistics as `toggle`, own verdict, informational: the CPU
+verdict stays the one of `toggle`); the viewer and the CI summary show it as the sub-row
+"toggle without UA probe (informational)". The spec asserts 0 UA calls in its on blocks.
+
+**Measured UA probe cost** (web, full Chromium, M4 Pro; `toggle` vs `toggleWithoutUaProbe`, one
+launch each). The probe runs at most every `UA_MEMORY_MIN_INTERVAL_MS` = 10 s; collectors are
+paused in off blocks, so it fires about once per quartet, in an on block.
+
+| Scenario              | Quartets | UA calls (on blocks) | CPU Δ with probe, median [CI95] | CPU Δ without probe, median [CI95] |
+| --------------------- | -------- | -------------------- | ------------------------------- | ---------------------------------- |
+| `pointcloud` launch 1 | 8        | 7                    | +4.59 % [+1.72, +7.97]          | +5.65 % [−1.69, +16.27]            |
+| `pointcloud` launch 2 | 8        | 7                    | +5.61 % [−1.47, +11.59]         | −3.75 % [−7.79, +3.15]             |
+| `sinewave`            | 4        | 3                    | −0.30 % [−1.50, +1.00]          | −0.79 % [−1.78, +1.62]             |
+| `mcap-multi-ingest`   | 4        | 3                    | +2.42 % [−1.90, +11.53]         | +1.99 % [−4.15, +11.79]            |
+
+CPU per call ≈ (pp with − pp without) × on-block seconds / calls. Pooled over the 24 + 16
+`pointcloud` quartets that is +5 ms [−93, +101] per call (difference of the mean quartet pp deltas,
+bootstrap CI95); `sinewave` and `mcap-multi-ingest` give +85 ms and +11 ms from 4 quartets each.
+All are inside the run-to-run noise: a `pointcloud` quartet's pp delta has a standard deviation of
+≈ 2–3 pp, and a third launch with the probe gave −2.39 % [−8.73, +5.68]. The probe does not explain
+the `pointcloud` results, so `UA_MEMORY_MIN_INTERVAL_MS` stays 10 s (point estimate ≈ 0.05 % of one
+core). These runs paused the frame collector's `requestAnimationFrame` loop in off blocks, so their
+deltas include the frame loop (see "Benchmark FPS probe" below). The 4-quartet runs above are smoke tests (no verdict below
+6 quartets); use the default 10 quartets or more.
+
+**Direct (JS only) CPU attribution** (method `toggle` or `both`, `result/directAttribution.ts`).
+The toggle verdict subtracts host CPU of whole processes, and the block-to-block noise of a busy
+scenario (web `pointcloud`: ≈ 2–3 pp per quartet) is larger than the 2 % target of a ≈ 30 % CPU
+baseline. The direct attribution measures the telemetry's own JS instead:
+
+- **When**: after the last toggle block, the runner turns telemetry back on and profiles
+  `BENCHMARK_OVERHEAD_PROFILE_MS` (default `OVERHEAD_PROFILE_DEFAULT_MS` = 10 s, `0` disables) of
+  the renderer main thread with the CDP `Profiler` (`runner/cpuProfile.ts`, a CDP session on the
+  page; on Electron the same `newCDPSession` on the app window). The period is outside every block,
+  so it never enters the toggle statistics; the drains keep running as in the blocks. Only the
+  launch with the UA probe is profiled (not `toggleWithoutUaProbe`). A session or profiler failure
+  is recorded as `status: "unsupported"` with the reason.
+- **Sampling**: `OVERHEAD_PROFILE_SAMPLING_INTERVAL_US` = 100 µs. Telemetry callbacks are short
+  (µs each, ≈ 0.5–1 ms/s in total), so V8's default 1 ms interval would catch them only a few
+  times per second. With 100 µs the profile gets ≈ 6 500 samples/s (web `pointcloud`, the sampler
+  does not reach the nominal rate). Profiler overhead slows everything it
+  samples alike, so the telemetry _share_ is unaffected.
+- **Source mapping** (`runner/bundleSourceResolver.ts`, `runner/sourceMap.ts`): the production
+  benchmark builds already emit external source maps (`devtool: "source-map"`), so no build
+  config changes. Each sampled frame's script is looked up in the build output
+  (`RENDERER_BUNDLE_LAYOUTS`: web `.webpack/`, Electron `.webpack-desktop/renderer/`), its map is
+  decoded once, and the function start is mapped to the original repo-relative source. The name
+  comes from the original line (`readonly #tick = () =>` → `#tick`), because minified names and the
+  map's names of arrow functions are not useful. Frames of other scripts (Playwright evaluation
+  scripts, native functions) count as resolved, non-telemetry.
+- **Telemetry sources** (`DIRECT_ATTRIBUTION_TELEMETRY_SOURCES`):
+  `packages/suite-base/src/util/telemetry/**` (sinks, labels, clock),
+  `benchmark/src/telemetry/**` (collectors, toggleable sink, drain bridge; the harness frame loop
+  lives in `benchmark/src/frameProbe/` and is not counted, only the frame recording it calls is),
+  and the producer helpers `components/MessagePipeline/pipelineTelemetry.ts`,
+  `components/PanelExtensionAdapter/panelTelemetry.ts` and `hooks/usePanelLifecycleTelemetry.ts`.
+  Not attributable: telemetry calls inlined in product code (`MessagePipeline/index.tsx`,
+  `PanelExtensionAdapter.tsx`, `useSubscribeMessageRange`, `IterablePlayer`, `BlockLoader`,
+  `CachingIterableSource`, `WorkerSerializedIterableSource*`, `HydratedSourcePool`,
+  `MultiIterableSource`, `RemoteFileReadable`, `CurrentLayoutProvider`). Their sink calls still
+  count, because the sink is a telemetry source; only the label and value preparation around the
+  call goes to the caller. `services/telemetry` is the OpenTelemetry analytics, not this telemetry.
+- **Attribution**: per sample, the inclusive time of the outermost telemetry frame on the stack
+  (nested telemetry frames never count twice). `(idle)` and `(program)` samples are not JS;
+  `(garbage collector)` samples are GC (reported as a share, not attributable). Unresolved = a JS
+  sample with no telemetry frame but an unmapped frame that could hide telemetry: a frame of a build
+  script without a map, or an unmapped position in a script whose map lists a telemetry source.
+  Webpack maps a module either fully or not at all, and every telemetry source is first-party
+  TypeScript built with maps. So an unmapped position in a chunk whose map lists no telemetry source
+  (vendor code shipped without maps, such as `react-json-tree` / `lodash` in an async chunk) is
+  resolved non-telemetry.
+- **Metrics** (`directAttribution`, per scenario and platform): `telemetryMsPerSec`,
+  `jsMsPerSec`, `unresolvedMsPerSec` / `resolvedShare`, `gcMsPerSec` / `gcShare`, the top 5
+  telemetry functions (`DIRECT_ATTRIBUTION_TOP_FUNCTIONS`, source:line, ms/s), and
+  `relative = telemetryMsPerSec / offCpuMsPerSec`. `offCpuMsPerSec` = mean CPU of the included toggle
+  off blocks (per-core sum %) × 10. `relativeUpperBound` adds the unresolved time to the
+  telemetry time.
+- **Verdict** (own, label "direct (JS only)"): `exceeds` when `relative` > `cpuDeltaRelativeMax`,
+  `within` when `relativeUpperBound` ≤ it, otherwise `inconclusive` (also without an off
+  baseline). It is **not** merged into `verdicts`: the toggle stays the statistical CPU verdict.
+  The viewer and the CI summary show it as a sub-row right below the main row.
+- **Limits**: JS only, renderer main thread only.
+  - Worker realms are excluded (`mcap-multi-ingest`'s source worker).
+  - Browser-internal work is excluded: observer dispatch, style / layout / compositor work, and
+    frames kept alive by the frame collector's `requestAnimationFrame` loop (harness, runs in both
+    toggle arms; its cost is the frame-probe variant). So is the UA memory probe (heap walk, GC),
+    which the UA-off toggle variant covers.
+  - Terser inlining attributes an inlined telemetry helper to its caller.
+  - `jsMsPerSec` ("JS stacks … (wall)") is sampled wall time with a JS stack, not CPU. Blocking
+    native calls under JS count in full: on web `pointcloud`, 84 % of the profile is WebGL
+    `bufferSubData` under the render loop, so it reads ≈ 960 ms/s while the renderer uses ≈ 300 ms
+    CPU/s. The telemetry frames are short CPU-bound callbacks, so `telemetryMsPerSec` is a fair CPU
+    estimate.
+  - When the direct (JS only) verdict is `within` but the toggle shows a consistent positive delta,
+    the cost is outside the JS (browser-internal or another process) and only the toggle can see
+    it.
+
+**Benchmark FPS probe** (harness, not shipped). The frame collector
+(`benchmark/src/telemetry/collectors/FrameCollector.ts`) counts frames with a
+`requestAnimationFrame` loop (`benchmark/src/frameProbe/FrameLoop.ts`). It exists only in the benchmark app, never in the product. A running
+rAF loop makes the browser produce a frame every vsync even when nothing changes: style, paint,
+compositing and GPU process work. In a mostly static scenario that is extra CPU the product would
+not spend. Measured (M4 Pro, `mcap-multi-ingest`, 10 quartets) while the telemetry toggle still
+paused the loop in off blocks: +7.5 % CPU on both platforms (Electron +7.53 % [−0.34, +15.46];
+web +7.45 % [+3.00, +10.81], +6.87 % without the UA probe), while the direct (JS only) attribution
+was ≈ +0.1 %. The per-process split put it outside the renderer JS: GPU process +0.94 pp
+(Electron) / +0.44 pp (web) and web browser process +0.57 pp, positive in 10/10 quartets.
+
+- **Toggle mode keeps the loop in both arms**: `setTelemetryActive({ active: false })` stops only
+  the frame recording; the loop keeps rendering, so the toggle A/B isolates telemetry recording,
+  collection and publishing. This matches the relaunch A/B, whose main-thread probe runs its own
+  rAF loop in both arms. After the change (Electron `mcap-multi-ingest`, two 6-quartet smokes): the
+  telemetry toggle gave −2.50 % [−6.72, +0.19] and +4.44 % [−4.56, +9.35] (GPU +0.11 / +0.06 pp),
+  the frame-probe variant +9.62 % [+1.38, +12.60] and +11.01 % [−1.33, +16.79] (GPU +1.18 /
+  +1.14 pp in 6/6 quartets, renderer +1.90 / +2.29 pp). The GPU signal moved from the telemetry
+  toggle to the frame probe.
+- **Frame-probe variant** (`BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1`, methods `toggle` / `both`,
+  both platforms, default off because it adds one launch per scenario): a last toggle launch with
+  `?telemetry=off`, whose blocks switch only a bare rAF loop with a no-op callback
+  (`window.lichtblickTelemetry.setFrameProbeActive`, present only with telemetry off). Report
+  `toggleFrameProbe`, same shape and statistics as `toggle`; the viewer and the CI summary show it
+  as the sub-row "benchmark FPS probe (harness, not shipped)" with the per-process deltas
+  (`gpu +0.94 pp (10/10 ↑)`, mean on − off pp of the included quartets, positive quartets) and no
+  verdict. It is never part of `verdicts`.
+- **Scenario runs**: `renderer.fps`, `renderer.frames` and `renderer.lateFrames` (the smoothness
+  KPIs) come from this loop and so include its cost in every run, with telemetry on. Relative
+  comparisons between runs stay valid; absolute CPU of a static scenario is higher than in the
+  product by about the frame-probe delta.
+
+**In-page self-cost** (`summary.telemetrySelf`, telemetry-on runs; report `selfCost` = medians of the
+`on` arm). The page times its own telemetry work in cumulative counters
+(`telemetry.self.timeMs.{collectors,frames,longTasks,sinkPublish,drain,uaMemory}`,
+`telemetry.self.uaMemory.{calls,resolveMs,resolved,failures}`). Over the steady window the runner
+derives ms/s per component and records/s. The UA probe counts are whole-run totals (the calls start
+at collector start and on data source open, before the window): `uaCalls`, `uaResolved`,
+`uaFailures` and `uaResolveMsMean` = resolve time / resolved calls (omitted when none resolved). After the run (after the final drain,
+outside the window) it calls `measureEmitCost()`, a micro-benchmark of `gauge` / `counter` /
+`event` on a throwaway sink, and estimates the emit cost as records/s × mean ns per record
+(weighted by the window's record mix). `fractionOfCore = (self ms/s + estimated emit ms/s) / 1000`.
+This is a **lower bound**: GC and memory pressure caused by the records are not included. Each run
+also records `run.environment.collectors` (`collectorsState()`: whether the UA probe was `on`,
+`off`, `unsupported` or `disabled`).
+
+**Env knobs**
+
+| Variable                             | Default | Effect                                                                     |
+| ------------------------------------ | ------- | -------------------------------------------------------------------------- |
+| `BENCHMARK_OVERHEAD_METHOD`          | `both`  | `toggle`, `relaunch` or `both` (see above; other values fail)              |
+| `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS` | 10      | toggle A/B ABBA quartets of 4 blocks (min 4)                               |
+| `BENCHMARK_OVERHEAD_TOGGLE_BLOCK_MS` | 3000    | toggle block length incl. the 500 ms settle (min 1000)                     |
+| `BENCHMARK_OVERHEAD_REPEATS`         | 5       | relaunch: measured repeats per arm (min 1)                                 |
+| `BENCHMARK_OVERHEAD_WARMUP_RUNS`     | 1       | discarded runs before the measured ones (min 0)                            |
+| `BENCHMARK_OVERHEAD_UA_ARM`          | unset   | `1` adds `on-noUa` (relaunch) and a toggle run without UA probe (web only) |
+| `BENCHMARK_OVERHEAD_GATE`            | unset   | `1` fails the test on an overall `exceeds` verdict                         |
+| `BENCHMARK_OVERHEAD_POLLS`           | 10      | relaunch: steady polls per run (min 5); auto-pause, MCAP length            |
+| `BENCHMARK_OVERHEAD_PROFILE_MS`      | 10000   | toggle: direct (JS only) attribution profile after the blocks (`0` = off)  |
+| `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM` | unset   | toggle: `1` adds a launch toggling only the benchmark FPS probe's rAF loop |
+
+A relaunch run takes about 25–35 s (launch, render calibration, load, 3 s warm-up, 10 polls,
+teardown); each extra poll adds 1 s. With the defaults that is 11 runs per scenario (≈ 5–6 min),
+≈ 15–20 min for the three scenarios on one platform; the UA arm adds 5 runs per scenario. Method
+`toggle` needs the warm-up runs plus one ≈ 2.5–3 min run per scenario (one more each with the UA
+arm and the frame-probe arm). The test timeout scales with
+the run count, the poll count and the toggle length (per run: 60 s setup + the auto-pause). Quick
+smokes: `BENCHMARK_OVERHEAD_METHOD=toggle BENCHMARK_OVERHEAD_TOGGLE_QUARTETS=4 yarn test:e2e:benchmark overhead -g sinewave`
+and `BENCHMARK_OVERHEAD_METHOD=relaunch BENCHMARK_OVERHEAD_REPEATS=1 BENCHMARK_OVERHEAD_WARMUP_RUNS=0 yarn test:e2e:benchmark overhead -g sinewave`
+(one pair: always `inconclusive`).
+
+**Report** (schema 3). The schema-2 fields (`runs`, `pairs`, `n`, `metrics`, …) describe the
+relaunch A/B (`n = 0` for method `toggle`) and `relaunchVerdicts` are its own verdicts. `toggle`
+holds the toggle A/B: config, blocks (arm, measured window, CPU %, CPU % per process type, process
+set, records per realm, UA calls, toggle latency, flags), `quartets` (off / on blocks, pooled arm CPU, deltas, exclusion),
+`n` / `excludedQuartets`, median / IQR / CI95 of the quartets' relative and pp deltas, verdict, the
+adjacent `pairs` (diagnostic only), modal process set, `toggleLatencyMsMax` and the renderer records and UA calls
+per arm. `toggleWithoutUaProbe` (UA arm only) is a second toggle section without the UA probe,
+informational. `toggleFrameProbe` (frame-probe arm only) is the toggle section of the benchmark FPS
+probe, harness, no verdict. `directAttribution` (toggle only) is the direct (JS only) attribution above: config
+(profile ms, sampling interval, telemetry sources) and either `status: "unsupported"` with the
+reason or `status: "measured"` with the metrics, top functions and its own verdict. `verdicts` are the final ones, with `cpuVerdictSource` (`toggle` | `relaunch`) and
+`memVerdictSource` (`relaunch` | `notMeasured`); `overall` is the worst of the measured ones. The
+viewer, the scorecard and the CI summary show the method, the pairs or quartets and the dispersion of the CPU
+verdict's source, `not measured` for memory with method `toggle`, and the relaunch CPU of method
+`both`, the toggle without UA probe, the benchmark FPS probe and the direct (JS only) attribution as
+sub-rows. A malformed `toggleWithoutUaProbe`, `toggleFrameProbe` or `directAttribution` is dropped
+on load; the rest of the report stays valid.
+
+Older reports still load in the viewer and the CI summary. Schema 2 is normalized to schema 3 as
+method `relaunch` (both verdicts from the relaunch A/B). Schema 1 (one off → on pair, from before
+the relaunch A/B) is normalized with `n = 1`, verdict `inconclusive` and `legacy: true`
+("legacy n=1"). A schema-3 toggle section from before the quartets (statistics over adjacent
+pairs, `config.pairs`) is re-summarized from its blocks into quartets, and the CPU and overall
+verdicts are updated when the toggle A/B gave the CPU verdict.
+
+## KPI scorecard
+
+`result/kpis.ts` derives per-run KPIs (`summary.kpis`, written by the runner) and aggregates them
+per platform. Every value is omitted when its inputs are missing.
+
+| Family     | Per-run fields (`summary.kpis`)                                                                                 | Formula                                                                                                                                                    |
+| ---------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| stability  | `healthy`, `reasons[]`                                                                                          | passed ∧ 0 runner events ∧ every pool invariant held (or no pool) ∧ 0 dropped telemetry records (runs that hit an error boundary fail and write no result) |
+| memory     | `peakTotalWorkingSetMiB`, `workingSetSlopeMiBPerMin?`                                                           | peak per-poll total working set; slope over the steady window (see above)                                                                                  |
+| cpu        | `medianCpuPercent`, `cpuSeconds`, `cpuSecondsPerMiB?`                                                           | `cpuSeconds / (pipeline bytesPerSec × measured window s / MiB)`                                                                                            |
+| smoothness | `medianFps`, `fpsCeiling?`, `fpsPercentOfCeiling?`, `onTimeFramePercent?`, `longTaskBlockedMsPerSec?`, `lowFps` | `medianFps / fpsCeiling`; `(1 − lateFrames / totalFrames) × 100`; `longTaskTotalMs / run s`; `lowFps` = median FPS < 10                                    |
+| startup    | `panelsReadyMs?`, `firstMessageMs?`                                                                             | from `summary.phases`                                                                                                                                      |
+| throughput | `ingestMiBPerSec?`, `messagesPerSec?`, `fanout?`                                                                | pipeline received bytes/s in MiB; delivered / received messages                                                                                            |
+| renderCost | `worstPanelP90RenderMs?`, `worstPanelId?`, `worstPanelType?`, `p90RenderMsByPanelType`                          | max `renderP90WindowMaxMs` over the run's panels (adapter panels only)                                                                                     |
+
+`ingestMiBPerSec` is what the player delivered to the pipeline: the pipeline counts received bytes,
+not delivered bytes.
+
+**Aggregation** (`aggregateKpis`, policies in `SCORECARD_POLICIES`): telemetry-on runs of **one
+platform**; electron and web are never aggregated together. Each aggregate reports `n` (runs with a
+usable value) and the worst run, which the viewer links.
+
+| Metric                                                                        | Aggregate                                                       | Why                                      |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------- |
+| stability                                                                     | healthy / total                                                 | target 100 %                             |
+| peak memory, median CPU, CPU s/MiB, panels ready, first message, ingest MiB/s | geometric mean                                                  | magnitudes that differ per scenario      |
+| memory slope, long-task blocked ms/s, p90 render per panel type               | max                                                             | a leak or a stall in one scenario counts |
+| median FPS, % of ceiling, on-time frames                                      | min                                                             | smoothness is as good as its worst run   |
+| telemetry overhead                                                            | worst verdict, worst CI95 upper bound (latest A/B per scenario) | target ≤ 2 % CPU, ≤ 20 MiB               |
+
+The geometric mean ignores missing, zero and negative values. It is scale-invariant (a scenario
+with large values does not dominate) and gives every scenario equal weight for the same relative
+change, which is why SPEC, JetStream and Speedometer use it. Leaks, smoothness, stability and
+overhead are about the worst case, so they use min/max instead.
+
+**By group** (`groupKpis`, `GROUP_KPIS`), per platform:
+
+| Group                  | Primary KPI                                                              | Secondary                                                        |
+| ---------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| `3d-rendering`         | on-time frames % (min)                                                   | 3D p90 render ms (max), peak memory (geomean)                    |
+| `time-series`          | Plot p90 render ms (max); falls back to listener dispatch p90 (labelled) | msg/s, median CPU (geomean)                                      |
+| `preloading`           | `phases.preloadDurationMs` (geomean)                                     | block cache peak MiB, memory slope                               |
+| `real-pipeline-ingest` | CPU s/MiB (geomean)                                                      | ingest MiB/s, pool evictions, rehydrations, invariant violations |
+
+Plot is not a `PanelExtensionAdapter` panel and emits no render telemetry, so `time-series` currently
+always shows the listener-dispatch fallback.
+
+## FPS reference
+
+- **`fpsCeiling`**: before each scenario the runner counts `requestAnimationFrame` callbacks for 2 s
+  on `about:blank` in the same browser / Electron window (rounded to 0.1; 0 = no frames). Median
+  FPS is shown as `median / ceiling`, so a 60 Hz and a 120 Hz display stay comparable.
+- **`glRenderer`**: the unmasked WebGL renderer of that page (`unavailable` without WebGL). The
+  viewer shows the backend (Metal, SwiftShader, ...) next to the FPS.
+- **Late frames**: a frame is late when it takes longer than `lateFrameThresholdMs` =
+  1.5 × 1000 / `fpsCeiling` (e.g. 12.5 ms at 120 Hz). Below a plausible ceiling (< 20) it falls back
+  to 25 ms (1.5 × 60 Hz budget).
+- **`LOW_FPS_WARNING` = 10**: runs below it get a ⚠ (informational, no target). Web FPS is always
+  shown when frames were collected, also when it is low.
+- **GPU path**: web on macOS uses Metal via `--use-angle=metal` (the headless shell otherwise falls
+  back to SwiftShader); Electron on macOS uses ANGLE Metal by default. On Linux and Windows (CI)
+  both use SwiftShader (software rendering), so CI FPS is far below a local GPU.
+- **CPU %** is a per-core sum over all processes on both platforms (100 % = one core). Web is still
+  higher than Electron: its process set differs (headless browser, SwiftShader GPU on CI). This is
+  one more reason the platforms are never aggregated together.
 
 ## Viewing results
 
@@ -451,8 +937,13 @@ yarn test:e2e:benchmark:viewer --open          # also open it (open / xdg-open /
 ```
 
 Files that are not valid `benchmark-result.v1` (old shapes, broken JSON) are skipped with a warning
-and listed in the header.
+and listed in the header. Overhead A/B run results are never shown as runs (also not with `--all`);
+the header counts them and the telemetry overhead section links them.
 
+- **Scorecard** (top): one card per KPI family per platform with the aggregate, `n` and a link to
+  the worst run. Only stability (100 %) and telemetry overhead have targets and colors; low-FPS
+  runs get a ⚠.
+- **By group**: group × platform with the primary and secondary KPIs and the scenarios in the group.
 - **Overview**: the generation time, the branch and commit at generation time (the results don't
   record them), and one KPI row per telemetry-on scenario × platform. The **Run** column shows when
   the run finished, in UTC (`2026-10-30 16:44Z`, in grey). A run that finished more than 24 h before
@@ -460,10 +951,19 @@ and listed in the header.
   remaining columns: peak total memory,
   median CPU, peak JS heap, first message, first useful frame, layout applied, panels ready, median
   FPS, pipeline msg/s and MiB/s, source cache hit ratio, pool invariant, runner events and telemetry
-  overhead. Only the values with a target are colored: overhead (green within target, amber above
-  80 % of it, red over it), runner events (red when > 0) and the pool invariant. The latest overhead
-  A/B per scenario × platform is listed below the KPIs.
+  overhead. Only the values with a target are colored: overhead (by verdict: green `within`, amber
+  `inconclusive`, red `exceeds`), runner events (red when > 0) and the pool invariant. The latest
+  overhead A/B per scenario × platform is listed below the KPIs: pairs or toggle quartets (excluded), CPU Δ median
+  [CI95] and IQR, CPU Δ pp, memory Δ median [CI95], a verdict badge, flags (window-mismatch runs
+  with their reasons, e.g. `r1 on: 2 overrun(s)`, process-set mismatches, the longest host poll), the in-page self-cost, the main-thread Δ and, with the UA arm, the UA
+  probe rows. Chips under each scenario name show its
+  group, tags, panel types (`3D ×6`) and player. Clicking a group or tag chip (or one in the
+  filter bar) filters the overview rows, coverage rows and run sections; "all" resets.
+- **Coverage**: scenario × (panel types ∪ players ∪ pipeline components). ✓ = observed in
+  telemetry, ○ = declared by the scenario only.
 - **Runs**: one collapsible section per run; the first is open and the KPI rows link to the rest.
+  Each starts with an **Exercises** card (description, layout, data source, player, params,
+  declared vs observed panels, observed pipeline components) and the run's `summary.kpis`.
   The charts share an x axis in seconds from the phases origin. Dashed vertical lines mark
   `layout.applied`, open, first message, first useful frame, preload and playback start/end, panels
   ready and runner events. The charts are:
@@ -477,6 +977,7 @@ and listed in the header.
 
   The section then has the screenshots (thumbnails linking to `../screenshots/`), and tables for
   panels, phases, pipeline, processes and renderer, pools, runner events and environment.
+
 - Each dataset is downsampled to ≤ 600 points (per-bucket min/max, so spikes survive).
 
 In CI, both jobs generate the report after the summary (`if: always()`) and upload it in the
@@ -492,8 +993,14 @@ This viewer is a stopgap: the definitive results dashboard is planned as a follo
 - `e2e-benchmark`: Electron under xvfb
 - `e2e-benchmark-web`: headless Chromium
 
-Each job adds `yarn test:e2e:benchmark:summary` to the job summary. That covers the legacy table,
-the v1 results table, the panels and pipeline section, and the overhead table. Each job then
+Both jobs run `yarn test:e2e:benchmark[:web]:ci scenarios`, i.e. the scenarios spec only. The
+telemetry overhead A/B (`overhead.benchmark.spec.ts`) is not run in CI; run it manually (see
+[Specs: scenarios vs overhead](#specs-scenarios-vs-overhead)).
+
+Each job adds `yarn test:e2e:benchmark:summary` to the job summary. It starts with a compact KPI
+scorecard per platform and one "Exercises" line per scenario, then covers the legacy table,
+the v1 results table, the panels and pipeline section, and the overhead table when overhead reports
+are present (in CI it reads "No overhead reports found."). Each job then
 generates the HTML report (see [Viewing results](#viewing-results)) and adds a pointer to it in the
 job summary. Finally it uploads `benchmark/.artifacts/**/*.json`, the checkpoint screenshots in
 `benchmark/.artifacts/screenshots/` and `benchmark/.artifacts/report/`, excluding the fixtures.

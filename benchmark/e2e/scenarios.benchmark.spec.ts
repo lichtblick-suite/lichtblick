@@ -39,11 +39,18 @@ for (const scenario of SCENARIOS_UNDER_TEST) {
     // And: v1 result
     const { result } = run;
     expect(validateResultV1(result)).toEqual([]);
+    expect(result.run.mode).toBe("scenario");
     const hostSamples = result.samples.filter(
       (sample) => sample.scope === "process" && sample.metric === PROCESS_METRICS.workingSetBytes,
     );
     expect(hostSamples.length).toBeGreaterThan(0);
     expect(result.summary.process.peakTotalWorkingSetBytes).toBeGreaterThan(0);
+
+    // And: the page described the scenario it ran, and the render environment was calibrated
+    expect(result.run.scenario.scenarioId).toBe(scenario.scenarioId);
+    expect(result.run.scenario.panels.length).toBeGreaterThan(0);
+    expect(result.run.environment.fpsCeiling).toBeGreaterThan(0);
+    expect(result.run.environment.glRenderer).not.toBe("");
 
     // And: panel, layout and pipeline telemetry (sink installed before the layout/panels mount)
     if (result.run.telemetryEnabled) {

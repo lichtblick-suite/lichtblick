@@ -8,16 +8,27 @@
 // by relative path (type-only) so no `@lichtblick/suite-base` path alias is needed.
 
 import {
+  BYTES_PER_MIB,
   DROPPED_RECORDS_METRIC,
+  MIN_SLOPE_POINTS,
+  MIN_SLOPE_WINDOW_MS,
+  MS_PER_MINUTE,
+  MS_PER_SECOND,
   PHASES_ORIGINS,
   POOL_METRIC_PREFIX,
   POOL_METRICS,
   PROCESS_METRICS,
   RENDERER_REALM,
   RESULT_SCHEMA_VERSION,
+  RUN_MODES,
   RUNNER_EVENT_TYPES,
   RUNNER_REALM,
+  STEADY_STATE_WARMUP_FRACTION,
+  WEB_BROWSERS,
 } from "./constants";
+import { computeRunKpis } from "./kpis";
+import type { RunKpisV1 } from "./kpis.types";
+import { linearRegressionSlope, trapezoidIntegral } from "./numeric";
 import {
   PanelSummaryV1,
   PanelsReadyCoverageV1,
@@ -25,8 +36,18 @@ import {
   summarizePanelsReady,
 } from "./panelsSummary";
 import { PipelineSummaryV1, summarizePipeline } from "./pipelineSummary";
-import { PoolGroup, PoolSeries } from "./schemaV1.types";
+import {
+  PoolGroup,
+  PoolSeries,
+  ProcessTick,
+  ResultValidationMode,
+  RunModeV1,
+  WebBrowserV1,
+} from "./schemaV1.types";
 import { maxOf, mean, median, percentile } from "./stats";
+import type { SteadyWindowSummaryV1 } from "./steadyWindow.types";
+import type { CollectorsStateV1, TelemetrySelfSummaryV1 } from "./telemetrySelf.types";
+import type { PipelineWindow } from "./types";
 import type {
   TelemetryEvent,
   TelemetryLabels,
@@ -34,11 +55,15 @@ import type {
   TelemetrySample,
 } from "../../../packages/suite-base/src/util/telemetry/types";
 import { LISTENER_DISPATCH_DURATION_METRIC } from "../../src/constants";
+import { SCENARIO_GROUPS } from "../../src/scenarios/constants";
+import type { ScenarioDescriptor } from "../../src/scenarios/scenarioControl";
 import { RENDERER_METRICS } from "../../src/telemetry/collectors/constants";
 
 export type { TelemetryBatch } from "../../../packages/suite-base/src/util/telemetry/types";
 export type { TelemetryEvent, TelemetryRecord, TelemetrySample };
-export type { PanelSummaryV1, PanelsReadyCoverageV1, PipelineSummaryV1 };
+export type { PanelSummaryV1, PanelsReadyCoverageV1, PipelineSummaryV1, ResultValidationMode };
+export type { RunKpisV1, RunModeV1, WebBrowserV1 };
+export type { CollectorsStateV1, SteadyWindowSummaryV1, TelemetrySelfSummaryV1 };
 export { mean, median, percentile };
 
 export type BenchmarkPlatform = "electron" | "web";
@@ -51,10 +76,40 @@ export type RunEnvironment = {
   electronVersion?: string;
   chromiumVersion?: string;
   cpuModel: string;
+  /**
+   * Logical CPUs available to processes on the host (see `runner/hostCpus.ts`). Electron's
+   * `percentCPUUsage` is multiplied by it so both platforms report CPU as a per-core sum.
+   */
+  logicalCpus: number;
   totalMemBytes: number;
   /** Whether the scenario page was cross-origin isolated (enables UA-specific memory). */
   crossOriginIsolated?: boolean;
+  /** Web only: which Chromium build ran the page (absent in older results: the headless shell). */
+  webBrowser?: WebBrowserV1;
+  /** Optional page collectors' state (overhead A/B runs with telemetry on). */
+  collectors?: CollectorsStateV1;
 };
+
+/**
+ * Render environment measured by the runner on a blank page before the scenario loads (see
+ * `runner/calibration.ts`).
+ */
+export type RenderCalibrationV1 = {
+  /** Measured `requestAnimationFrame` rate (display refresh ceiling), fps rounded to 0.1. */
+  fpsCeiling: number;
+  /** WebGL `UNMASKED_RENDERER_WEBGL` (or `RENDERER`), `"unavailable"` without WebGL. */
+  glRenderer: string;
+  /** Late-frame threshold the page's frame collector used (`renderer.lateFrames`), ms. */
+  lateFrameThresholdMs: number;
+};
+
+export type RunEnvironmentV1 = RunEnvironment & RenderCalibrationV1;
+
+/**
+ * `run.scenario`: the page's self-description of the scenario
+ * (`window.lichtblickScenario.describe()`, see `benchmark/src/scenarios/scenarioControl.ts`).
+ */
+export type ScenarioDescriptorV1 = ScenarioDescriptor;
 
 /** One OS process observed by a host collector at one poll. */
 export type HostProcessSample = {
@@ -66,7 +121,10 @@ export type HostProcessSample = {
   workingSetBytes?: number;
   peakWorkingSetBytes?: number;
   privateBytes?: number;
-  /** Percent of one core since the previous poll (may exceed 100 on multi-core). */
+  /**
+   * CPU since the previous poll as a per-core sum: 100 = one full core, so it may exceed 100 on
+   * multi-core (Electron's `percentCPUUsage` is converted to this scale, see `runner/hostCpus.ts`).
+   */
   cpuPercent?: number;
 };
 
@@ -113,8 +171,23 @@ export type RunInfoV1 = {
    * results (then `endMonotonicTs` is used).
    */
   windowEndMonotonicTs?: number;
+  /** Scenario run or overhead A/B run (see `RunModeV1`); absent in older results. */
+  mode?: RunModeV1;
   sampleIntervalMs: number;
-  environment: RunEnvironment;
+  environment: RunEnvironmentV1;
+  scenario: ScenarioDescriptorV1;
+};
+
+/**
+ * `run` as found in stored results: older local artifacts lack `scenario`, `logicalCpus` and the
+ * render calibration, and a partial result of a run that failed before the scenario could describe
+ * itself lacks `scenario`. Written by the runner; read leniently by the viewer.
+ */
+export type PersistedRunInfoV1 = Omit<RunInfoV1, "scenario" | "environment"> & {
+  scenario?: ScenarioDescriptorV1;
+  environment: Omit<RunEnvironment, "logicalCpus"> &
+    Partial<Pick<RunEnvironment, "logicalCpus">> &
+    Partial<RenderCalibrationV1>;
 };
 
 export type ProcessTypeSummaryV1 = { peakWorkingSetBytes: number; medianCpuPercent: number };
@@ -125,6 +198,18 @@ export type ProcessSummaryV1 = {
   peakTotalWorkingSetBytes: number;
   meanTotalWorkingSetBytes: number;
   medianTotalCpuPercent: number;
+  /**
+   * Least-squares slope of the total working set (all processes, per poll) over the steady-state
+   * window, MiB/min. The window starts at the later of `STEADY_STATE_WARMUP_FRACTION` of the
+   * measured window and the end of startup (`steadyStateFloorTs`). Absent when that window is
+   * shorter than `MIN_SLOPE_WINDOW_MS` or has fewer than `MIN_SLOPE_POINTS` polls.
+   */
+  totalWorkingSetSlopeMiBPerMin?: number;
+  /**
+   * CPU time of all processes over the measured window: trapezoidal integral of the total CPU% / 100
+   * between the first and last poll, seconds. Absent with fewer than 2 CPU polls.
+   */
+  cpuSeconds?: number;
   byType: Record<string, ProcessTypeSummaryV1>;
 };
 
@@ -133,7 +218,11 @@ export type RendererSummaryV1 = {
   lastUaSpecificMemoryBytes?: number;
   medianFps?: number;
   lateFrames?: number;
+  /** Animation frames observed (`renderer.frames` total). */
+  totalFrames?: number;
   longTasks?: number;
+  /** Summed duration of the long tasks (`renderer.longTasks.durationMs` total), ms. */
+  longTaskTotalMs?: number;
 };
 
 export type DistributionSummaryV1 = { count: number; p50: number; p90: number; max: number };
@@ -195,11 +284,17 @@ export type SummaryV1 = {
   pipeline?: PipelineSummaryV1;
   /** Present when the runner checked for crashes/reloads (`runnerEvents` is set). */
   runnerEvents?: RunnerEventsSummaryV1;
+  /** Per-run KPI families derived from the fields above (`computeRunKpis`). */
+  kpis: RunKpisV1;
+  /** Fixed-schedule steady window statistics; only in telemetry overhead A/B runs. */
+  steadyWindow?: SteadyWindowSummaryV1;
+  /** In-page telemetry self-cost over the steady window; only in overhead runs with telemetry on. */
+  telemetrySelf?: TelemetrySelfSummaryV1;
 };
 
-export type BenchmarkResultV1 = {
+/** Everything of a v1 result but `run`. */
+type ResultBodyV1 = {
   schemaVersion: typeof RESULT_SCHEMA_VERSION;
-  run: RunInfoV1;
   samples: TelemetrySample[];
   events: TelemetryEvent[];
   dropped: Record<string, number>;
@@ -212,8 +307,19 @@ export type BenchmarkResultV1 = {
   summary: SummaryV1;
 };
 
-export type BuildResultV1Input = {
-  run: RunInfoV1;
+/** A complete v1 result, as written by the runner for a run that finished its window. */
+export type BenchmarkResultV1 = ResultBodyV1 & { run: RunInfoV1 };
+
+/** A v1 result as stored (see `PersistedRunInfoV1`), KPIs present or backfilled (`withRunKpis`). */
+export type PersistedResultV1 = ResultBodyV1 & { run: PersistedRunInfoV1 };
+
+/** A v1 result as read from disk: results written before `summary.kpis` existed lack it. */
+export type StoredResultV1 = Omit<PersistedResultV1, "summary"> & {
+  summary: Omit<SummaryV1, "kpis"> & { kpis?: RunKpisV1 };
+};
+
+export type BuildResultV1Input<TRun extends PersistedRunInfoV1 = RunInfoV1> = {
+  run: TRun;
   /** Every record drained from `window.lichtblickTelemetry` (page and bridged worker realms). */
   pageRecords: readonly TelemetryRecord[];
   /** Sum of `TelemetryBatch.dropped` over all drains. */
@@ -341,8 +447,77 @@ export function computeDropped(
   return dropped;
 }
 
-export function summarizeProcess(hostSamples: readonly HostProcessSample[]): ProcessSummaryV1 {
-  type Tick = { ws: number; hasWs: boolean; cpu: number; hasCpu: boolean };
+/**
+ * End of startup on the page clock: the later of panels ready and first message (`phases`,
+ * relative to the phases origin at `originTs`). Undefined without an origin or both phases.
+ */
+export function steadyStateFloorTs(
+  phases: Pick<PhasesSummaryV1, "panelsReadyMs" | "firstMessageMs">,
+  originTs: number | undefined,
+): number | undefined {
+  const readyMs = maxOf(
+    [phases.panelsReadyMs, phases.firstMessageMs].filter((ms): ms is number => ms != undefined),
+  );
+  return originTs == undefined || readyMs == undefined ? undefined : originTs + readyMs;
+}
+
+/** Working-set slope over `[steadyStartTs, endTs]`, or undefined (see `ProcessSummaryV1`). */
+function steadyStateSlope(
+  inWindow: ReadonlyArray<[number, ProcessTick]>,
+  steadyStartTs: number,
+  endTs: number,
+): number | undefined {
+  if (endTs - steadyStartTs < MIN_SLOPE_WINDOW_MS) {
+    return undefined;
+  }
+  const slopePoints = inWindow
+    .filter(([ts, tick]) => tick.hasWs && ts >= steadyStartTs)
+    .map(([ts, tick]) => ({ x: (ts - steadyStartTs) / MS_PER_MINUTE, y: tick.ws / BYTES_PER_MIB }));
+  return slopePoints.length >= MIN_SLOPE_POINTS ? linearRegressionSlope(slopePoints) : undefined;
+}
+
+/** Steady-state working-set slope and CPU time of the per-poll totals (see `ProcessSummaryV1`). */
+function summarizeProcessTrends(
+  ticks: ReadonlyMap<number, ProcessTick>,
+  measuredWindow: PipelineWindow | undefined,
+  startupEndTs: number | undefined,
+): Pick<ProcessSummaryV1, "totalWorkingSetSlopeMiBPerMin" | "cpuSeconds"> {
+  const sorted = [...ticks].sort(([a], [b]) => a - b);
+  if (sorted.length === 0) {
+    return {};
+  }
+  const startTs = measuredWindow?.startTs ?? sorted[0]![0];
+  const endTs = measuredWindow?.endTs ?? sorted.at(-1)![0];
+  const warmupEndTs = startTs + STEADY_STATE_WARMUP_FRACTION * (endTs - startTs);
+  const steadyStartTs = Math.max(warmupEndTs, startupEndTs ?? warmupEndTs);
+  const inWindow = sorted.filter(([ts]) => ts >= startTs && ts <= endTs);
+
+  const cpuPoints = inWindow
+    .filter(([, tick]) => tick.hasCpu)
+    .map(([ts, tick]) => ({ x: (ts - startTs) / MS_PER_SECOND, y: tick.cpu / 100 }));
+
+  const trends: Pick<ProcessSummaryV1, "totalWorkingSetSlopeMiBPerMin" | "cpuSeconds"> = {};
+  const slope = steadyStateSlope(inWindow, steadyStartTs, endTs);
+  if (slope != undefined) {
+    trends.totalWorkingSetSlopeMiBPerMin = slope;
+  }
+  if (cpuPoints.length >= 2) {
+    trends.cpuSeconds = trapezoidIntegral(cpuPoints);
+  }
+  return trends;
+}
+
+/**
+ * Host process summary. `measuredWindow` (`[startMonotonicTs, windowEndMonotonicTs]`)
+ * bounds the working-set slope and CPU time; without it the first and last poll are used.
+ * `startupEndTs` (`steadyStateFloorTs`) delays the start of the slope's steady window.
+ */
+export function summarizeProcess(
+  hostSamples: readonly HostProcessSample[],
+  measuredWindow?: PipelineWindow,
+  startupEndTs?: number,
+): ProcessSummaryV1 {
+  type Tick = ProcessTick;
   const ticks = new Map<number, Tick>();
   const typeTicks = new Map<string, Map<number, Tick>>();
   const addTo = (map: Map<number, Tick>, sample: HostProcessSample) => {
@@ -387,6 +562,7 @@ export function summarizeProcess(hostSamples: readonly HostProcessSample[]): Pro
     peakTotalWorkingSetBytes: maxOf(totals) ?? 0,
     meanTotalWorkingSetBytes: mean(totals) ?? 0,
     medianTotalCpuPercent: median(cpuOf(ticks)) ?? 0,
+    ...summarizeProcessTrends(ticks, measuredWindow, startupEndTs),
     byType,
   };
 }
@@ -413,7 +589,9 @@ export function summarizeRenderer(pageSamples: readonly TelemetrySample[]): Rend
   const fps = median(valuesOf(renderer, RENDERER_METRICS.fps));
   // Counters carry the cumulative total in `value`.
   const lateFrames = maxOf(valuesOf(renderer, RENDERER_METRICS.lateFrames));
+  const totalFrames = maxOf(valuesOf(renderer, RENDERER_METRICS.frames));
   const longTasks = maxOf(valuesOf(renderer, RENDERER_METRICS.longTasksCount));
+  const longTaskTotalMs = maxOf(valuesOf(renderer, RENDERER_METRICS.longTasksDurationMs));
   if (peakHeap != undefined) {
     summary.peakJsHeapUsedBytes = peakHeap;
   }
@@ -426,8 +604,14 @@ export function summarizeRenderer(pageSamples: readonly TelemetrySample[]): Rend
   if (lateFrames != undefined) {
     summary.lateFrames = lateFrames;
   }
+  if (totalFrames != undefined) {
+    summary.totalFrames = totalFrames;
+  }
   if (longTasks != undefined) {
     summary.longTasks = longTasks;
+  }
+  if (longTaskTotalMs != undefined) {
+    summary.longTaskTotalMs = longTaskTotalMs;
   }
   return summary;
 }
@@ -611,8 +795,14 @@ export function summarizeRunnerEvents(events: readonly RunnerEvent[]): RunnerEve
   return counts;
 }
 
-/** Assembles the v1 result: merged/sorted samples & events, loss accounting and summaries. */
-export function buildResultV1(input: BuildResultV1Input): BenchmarkResultV1 {
+/**
+ * Assembles the v1 result: merged/sorted samples & events, loss accounting and summaries. The
+ * result's `run` is `input.run` as given: a complete `RunInfoV1` yields a `BenchmarkResultV1`; the
+ * runner's partial result of a failed run may lack `run.scenario` (`PersistedRunInfoV1`).
+ */
+export function buildResultV1<TRun extends PersistedRunInfoV1 = RunInfoV1>(
+  input: BuildResultV1Input<TRun>,
+): ResultBodyV1 & { run: TRun } {
   const pageSamples: TelemetrySample[] = [];
   const events: TelemetryEvent[] = [];
   for (const record of input.pageRecords) {
@@ -631,10 +821,20 @@ export function buildResultV1(input: BuildResultV1Input): BenchmarkResultV1 {
     ...listenerSamplesToTelemetry(input.listenerDispatchSamples),
   ].sort(compareRecords);
 
-  const summary: SummaryV1 = {
-    process: summarizeProcess(input.hostSamples),
+  const measuredWindow: PipelineWindow = {
+    startTs: input.run.startMonotonicTs,
+    endTs: input.run.windowEndMonotonicTs ?? input.run.endMonotonicTs,
+  };
+  const phases = summarizePhases(events);
+  const originTs = phasesOrigin(events)?.ts;
+  const summary: Omit<SummaryV1, "kpis"> = {
+    process: summarizeProcess(
+      input.hostSamples,
+      measuredWindow,
+      steadyStateFloorTs(phases, originTs),
+    ),
     renderer: summarizeRenderer(pageSamples),
-    phases: summarizePhases(events),
+    phases,
   };
   const listener = summarizeDistribution(input.listenerDispatchSamples.map((s) => s.value));
   if (listener != undefined) {
@@ -644,30 +844,34 @@ export function buildResultV1(input: BuildResultV1Input): BenchmarkResultV1 {
   if (pools != undefined) {
     summary.hydratedSourcePool = { pools };
   }
-  const panels = summarizePanels(pageSamples, events, phasesOrigin(events)?.ts);
+  const panels = summarizePanels(pageSamples, events, originTs);
   if (panels != undefined) {
     summary.panels = panels;
   }
-  const pipeline = summarizePipeline(pageSamples, {
-    startTs: input.run.startMonotonicTs,
-    endTs: input.run.windowEndMonotonicTs ?? input.run.endMonotonicTs,
-  });
+  const pipeline = summarizePipeline(pageSamples, measuredWindow);
   if (pipeline != undefined) {
     summary.pipeline = pipeline;
   }
 
-  const result: BenchmarkResultV1 = {
+  const runnerEvents =
+    input.runnerEvents == undefined
+      ? undefined
+      : [...input.runnerEvents].sort((a, b) => a.monotonicTs - b.monotonicTs);
+  if (runnerEvents != undefined) {
+    summary.runnerEvents = summarizeRunnerEvents(runnerEvents);
+  }
+  const dropped = computeDropped(pageSamples, input.drainedDropped, input.drainRealm);
+  const result: ResultBodyV1 & { run: TRun } = {
     schemaVersion: RESULT_SCHEMA_VERSION,
     run: input.run,
     samples,
     events,
-    dropped: computeDropped(pageSamples, input.drainedDropped, input.drainRealm),
+    dropped,
     sequenceGaps: computeSequenceGaps(input.pageRecords),
-    summary,
+    summary: { ...summary, kpis: computeRunKpis({ run: input.run, dropped, summary }) },
   };
-  if (input.runnerEvents != undefined) {
-    result.runnerEvents = [...input.runnerEvents].sort((a, b) => a.monotonicTs - b.monotonicTs);
-    summary.runnerEvents = summarizeRunnerEvents(result.runnerEvents);
+  if (runnerEvents != undefined) {
+    result.runnerEvents = runnerEvents;
   }
   return result;
 }
@@ -699,7 +903,7 @@ function checkNumberRecord(value: unknown, where: string, errors: string[]): voi
 function checkFields(
   obj: Record<string, unknown>,
   where: string,
-  fields: Record<string, "string" | "number" | "boolean" | "number?" | "string?">,
+  fields: Record<string, "string" | "number" | "boolean" | "number?" | "string?" | "boolean?">,
   errors: string[],
 ): void {
   for (const [field, type] of Object.entries(fields)) {
@@ -805,8 +1009,98 @@ function checkRunnerEvents(value: unknown, errors: string[]): void {
   }
 }
 
-/** Validates `run` (fields, platform, ISO dates, environment). */
-function checkRun(run: unknown, errors: string[]): void {
+function checkStringArray(value: unknown, where: string, errors: string[]): void {
+  if (!Array.isArray(value)) {
+    errors.push(`${where} must be an array`);
+    return;
+  }
+  if (value.some((entry) => typeof entry !== "string")) {
+    errors.push(`${where} must contain only strings`);
+  }
+}
+
+function checkStringRecord(value: unknown, where: string, errors: string[]): void {
+  if (!isRecord(value)) {
+    errors.push(`${where} must be an object`);
+    return;
+  }
+  for (const [key, entry] of Object.entries(value)) {
+    if (typeof entry !== "string") {
+      errors.push(`${where}.${key} must be a string`);
+    }
+  }
+}
+
+function checkScenarioPanels(panels: unknown, errors: string[]): void {
+  if (!Array.isArray(panels)) {
+    errors.push("run.scenario.panels must be an array");
+    return;
+  }
+  for (let index = 0; index < panels.length; index++) {
+    const panel: unknown = panels[index];
+    const at = `run.scenario.panels[${index}]`;
+    if (isRecord(panel)) {
+      checkFields(panel, at, { id: "string", type: "string", title: "string?" }, errors);
+    } else {
+      errors.push(`${at} must be an object`);
+    }
+  }
+}
+
+/** Validates `run.scenario` (`ScenarioDescriptorV1`); required in strict mode only. */
+function checkScenarioDescriptor(
+  run: Record<string, unknown>,
+  mode: ResultValidationMode,
+  errors: string[],
+): void {
+  const scenario = run.scenario;
+  if (scenario == undefined) {
+    if (mode === "strict") {
+      errors.push("run.scenario is missing");
+    }
+    return;
+  }
+  if (!isRecord(scenario)) {
+    errors.push("run.scenario must be an object");
+    return;
+  }
+  checkFields(
+    scenario,
+    "run.scenario",
+    {
+      scenarioId: "string",
+      description: "string",
+      group: "string",
+      layout: "string",
+      player: "string",
+      durationMs: "number?",
+    },
+    errors,
+  );
+  if (typeof run.scenarioId === "string" && scenario.scenarioId !== run.scenarioId) {
+    errors.push("run.scenario.scenarioId must equal run.scenarioId");
+  }
+  const groups: readonly unknown[] = SCENARIO_GROUPS;
+  if (typeof scenario.group === "string" && !groups.includes(scenario.group)) {
+    errors.push(`run.scenario.group must be one of ${SCENARIO_GROUPS.join(", ")}`);
+  }
+  if (isRecord(scenario.dataSource)) {
+    checkFields(
+      scenario.dataSource,
+      "run.scenario.dataSource",
+      { factoryId: "string", displayName: "string?" },
+      errors,
+    );
+  } else {
+    errors.push("run.scenario.dataSource must be an object");
+  }
+  checkStringArray(scenario.tags, "run.scenario.tags", errors);
+  checkStringRecord(scenario.params, "run.scenario.params", errors);
+  checkScenarioPanels(scenario.panels, errors);
+}
+
+/** Validates `run` (fields, platform, ISO dates, environment, scenario). */
+function checkRun(run: unknown, mode: ResultValidationMode, errors: string[]): void {
   if (!isRecord(run)) {
     errors.push("run must be an object");
     return;
@@ -831,15 +1125,24 @@ function checkRun(run: unknown, errors: string[]): void {
   if (run.platform !== "electron" && run.platform !== "web") {
     errors.push(`run.platform must be "electron" or "web"`);
   }
+  // Written by every current run; absent in older stored results.
+  if (run.mode == undefined ? mode === "strict" : !RUN_MODES.includes(run.mode as RunModeV1)) {
+    errors.push(`run.mode must be one of ${RUN_MODES.join(", ")}`);
+  }
   for (const field of ["startedAtWall", "finishedAtWall"] as const) {
     if (typeof run[field] === "string" && Number.isNaN(Date.parse(run[field]))) {
       errors.push(`run.${field} must be an ISO date`);
     }
   }
-  checkRunEnvironment(run.environment, errors);
+  checkRunEnvironment(run.environment, mode, errors);
+  checkScenarioDescriptor(run, mode, errors);
 }
 
-function checkRunEnvironment(environment: unknown, errors: string[]): void {
+function checkRunEnvironment(
+  environment: unknown,
+  mode: ResultValidationMode,
+  errors: string[],
+): void {
   if (!isRecord(environment)) {
     errors.push("run.environment must be an object");
     return;
@@ -856,9 +1159,124 @@ function checkRunEnvironment(environment: unknown, errors: string[]): void {
       userAgent: "string?",
       electronVersion: "string?",
       chromiumVersion: "string?",
+      crossOriginIsolated: "boolean?",
     },
     errors,
   );
+  if (
+    environment.webBrowser != undefined &&
+    !WEB_BROWSERS.includes(environment.webBrowser as WebBrowserV1)
+  ) {
+    errors.push(`run.environment.webBrowser must be one of ${WEB_BROWSERS.join(", ")}`);
+  }
+  // Logical CPU count and render calibration (`RenderCalibrationV1`): absent in older stored results.
+  const strict = mode === "strict";
+  checkFields(
+    environment,
+    "run.environment",
+    {
+      logicalCpus: strict ? "number" : "number?",
+      fpsCeiling: strict ? "number" : "number?",
+      glRenderer: strict ? "string" : "string?",
+      lateFrameThresholdMs: strict ? "number" : "number?",
+    },
+    errors,
+  );
+  checkCollectorsState(environment.collectors, errors);
+}
+
+const COLLECTOR_STATES: ReadonlySet<unknown> = new Set(["on", "off", "unsupported", "disabled"]);
+
+/** Validates the optional `run.environment.collectors` (overhead A/B runs only). */
+function checkCollectorsState(collectors: unknown, errors: string[]): void {
+  if (collectors == undefined) {
+    return;
+  }
+  if (!isRecord(collectors)) {
+    errors.push("run.environment.collectors must be an object");
+  } else if (!COLLECTOR_STATES.has(collectors.uaMemory)) {
+    errors.push(
+      'run.environment.collectors.uaMemory must be "on", "off", "unsupported" or "disabled"',
+    );
+  }
+}
+
+/** Validates the optional `summary.steadyWindow` (overhead A/B runs only). */
+function checkSteadyWindow(steadyWindow: unknown, errors: string[]): void {
+  if (steadyWindow == undefined) {
+    return;
+  }
+  const where = "summary.steadyWindow";
+  if (!isRecord(steadyWindow)) {
+    errors.push(`${where} must be an object`);
+    return;
+  }
+  checkFields(
+    steadyWindow,
+    where,
+    {
+      warmupMs: "number",
+      requestedPolls: "number",
+      polls: "number",
+      overruns: "number",
+      windowMismatch: "boolean",
+      maxPollLatencyMs: "number?",
+      clockSyncRttMs: "number?",
+      startMonotonicTs: "number",
+      endMonotonicTs: "number",
+      medianTotalCpuPercent: "number",
+      meanTotalCpuPercent: "number",
+      meanTotalWorkingSetBytes: "number",
+      peakTotalWorkingSetBytes: "number",
+    },
+    errors,
+  );
+  checkNumberRecord(
+    steadyWindow.meanWorkingSetBytesByType,
+    `${where}.meanWorkingSetBytesByType`,
+    errors,
+  );
+  checkNumberRecord(steadyWindow.processSet, `${where}.processSet`, errors);
+  if (steadyWindow.mainThread != undefined) {
+    checkNumberRecord(steadyWindow.mainThread, `${where}.mainThread`, errors);
+  }
+}
+
+/** Validates the optional `summary.telemetrySelf` (overhead A/B runs with telemetry on only). */
+function checkTelemetrySelf(telemetrySelf: unknown, errors: string[]): void {
+  if (telemetrySelf == undefined) {
+    return;
+  }
+  const where = "summary.telemetrySelf";
+  if (!isRecord(telemetrySelf)) {
+    errors.push(`${where} must be an object`);
+    return;
+  }
+  checkFields(
+    telemetrySelf,
+    where,
+    {
+      windowSec: "number",
+      recordsPerSec: "number",
+      uaCalls: "number",
+      uaResolved: "number?",
+      uaFailures: "number?",
+      uaResolveMsMean: "number?",
+      meanEmitNs: "number?",
+      estimatedEmitMsPerSec: "number?",
+      fractionOfCore: "number",
+    },
+    errors,
+  );
+  if (isRecord(telemetrySelf.msPerSec)) {
+    checkFields(telemetrySelf.msPerSec, `${where}.msPerSec`, { total: "number" }, errors);
+    checkNumberRecord(telemetrySelf.msPerSec.byComponent, `${where}.msPerSec.byComponent`, errors);
+  } else {
+    errors.push(`${where}.msPerSec must be an object`);
+  }
+  if (telemetrySelf.emitCostNs != undefined) {
+    checkNumberRecord(telemetrySelf.emitCostNs, `${where}.emitCostNs`, errors);
+  }
 }
 
 function checkProcessSummary(processSummary: unknown, errors: string[]): void {
@@ -873,6 +1291,8 @@ function checkProcessSummary(processSummary: unknown, errors: string[]): void {
       peakTotalWorkingSetBytes: "number",
       meanTotalWorkingSetBytes: "number",
       medianTotalCpuPercent: "number",
+      totalWorkingSetSlopeMiBPerMin: "number?",
+      cpuSeconds: "number?",
     },
     errors,
   );
@@ -894,7 +1314,9 @@ function checkRendererSummary(renderer: unknown, errors: string[]): void {
       lastUaSpecificMemoryBytes: "number?",
       medianFps: "number?",
       lateFrames: "number?",
+      totalFrames: "number?",
       longTasks: "number?",
+      longTaskTotalMs: "number?",
     },
     errors,
   );
@@ -958,7 +1380,55 @@ function checkHydratedSourcePool(hydratedSourcePool: unknown, errors: string[]):
   }
 }
 
-function checkSummary(summary: Record<string, unknown>, errors: string[]): void {
+const KPI_FAMILIES = [
+  "stability",
+  "memory",
+  "cpu",
+  "smoothness",
+  "startup",
+  "throughput",
+  "renderCost",
+] as const;
+
+/** Validates `summary.kpis` (`RunKpisV1`); required in strict mode only. */
+function checkKpis(kpis: unknown, mode: ResultValidationMode, errors: string[]): void {
+  if (kpis == undefined) {
+    if (mode === "strict") {
+      errors.push("summary.kpis is missing");
+    }
+    return;
+  }
+  if (!isRecord(kpis)) {
+    errors.push("summary.kpis must be an object");
+    return;
+  }
+  for (const family of KPI_FAMILIES) {
+    if (!isRecord(kpis[family])) {
+      errors.push(`summary.kpis.${family} must be an object`);
+    }
+  }
+  if (isRecord(kpis.stability)) {
+    checkFields(kpis.stability, "summary.kpis.stability", { healthy: "boolean" }, errors);
+    checkStringArray(kpis.stability.reasons, "summary.kpis.stability.reasons", errors);
+  }
+  if (isRecord(kpis.smoothness)) {
+    checkFields(kpis.smoothness, "summary.kpis.smoothness", { lowFps: "boolean" }, errors);
+  }
+  if (isRecord(kpis.renderCost)) {
+    checkNumberRecord(
+      kpis.renderCost.p90RenderMsByPanelType,
+      "summary.kpis.renderCost.p90RenderMsByPanelType",
+      errors,
+    );
+  }
+}
+
+function checkSummary(
+  summary: Record<string, unknown>,
+  mode: ResultValidationMode,
+  errors: string[],
+): void {
+  checkKpis(summary.kpis, mode, errors);
   checkProcessSummary(summary.process, errors);
   checkRendererSummary(summary.renderer, errors);
   checkListenerDispatch(summary.listenerDispatchDurationMs, errors);
@@ -973,10 +1443,17 @@ function checkSummary(summary: Record<string, unknown>, errors: string[]): void 
   if (summary.runnerEvents != undefined) {
     checkNumberRecord(summary.runnerEvents, "summary.runnerEvents", errors);
   }
+  checkSteadyWindow(summary.steadyWindow, errors);
+  checkTelemetrySelf(summary.telemetrySelf, errors);
 }
 
-/** Structural validation of a parsed `benchmark-result.v1.json`; returns the list of problems. */
-export function validateResultV1(obj: unknown): string[] {
+/**
+ * Structural validation of a parsed `benchmark-result.v1.json`; returns the list of problems.
+ * `strict` (default) checks a result as the runner writes it; `lenient` accepts stored results
+ * lacking `run.scenario` / the render calibration / `summary.kpis` (see `ResultValidationMode`,
+ * `StoredResultV1`).
+ */
+export function validateResultV1(obj: unknown, mode: ResultValidationMode = "strict"): string[] {
   if (!isRecord(obj)) {
     return ["result must be an object"];
   }
@@ -984,18 +1461,39 @@ export function validateResultV1(obj: unknown): string[] {
   if (obj.schemaVersion !== RESULT_SCHEMA_VERSION) {
     errors.push(`schemaVersion must be ${RESULT_SCHEMA_VERSION}`);
   }
-  checkRun(obj.run, errors);
+  checkRun(obj.run, mode, errors);
   checkRecords(obj.samples, "samples", "sample", errors);
   checkRecords(obj.events, "events", "event", errors);
   checkNumberRecord(obj.dropped, "dropped", errors);
   checkNumberRecord(obj.sequenceGaps, "sequenceGaps", errors);
   checkRunnerEvents(obj.runnerEvents, errors);
   if (isRecord(obj.summary)) {
-    checkSummary(obj.summary, errors);
+    checkSummary(obj.summary, mode, errors);
+    if (mode === "strict" && isRecord(obj.run)) {
+      checkRunMode(obj.run, obj.summary, errors);
+    }
   } else {
     errors.push("summary must be an object");
   }
   return errors;
+}
+
+/**
+ * Strict only: an overhead A/B run has `summary.steadyWindow` and a scenario run has none, so the
+ * scenario views can never pick up an overhead run that lost its marker (or the reverse).
+ */
+function checkRunMode(
+  run: Record<string, unknown>,
+  summary: Record<string, unknown>,
+  errors: string[],
+): void {
+  const overhead = run.mode === "overhead";
+  const steady = summary.steadyWindow != undefined;
+  if (overhead && !steady) {
+    errors.push('summary.steadyWindow is required with run.mode "overhead"');
+  } else if (!overhead && steady) {
+    errors.push('summary.steadyWindow is only allowed with run.mode "overhead"');
+  }
 }
 
 function checkPhases(phases: Record<string, unknown>, errors: string[]): void {

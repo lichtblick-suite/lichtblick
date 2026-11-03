@@ -4,10 +4,24 @@
 import Logger from "@lichtblick/log";
 import type { ITelemetry } from "@lichtblick/suite-base/util/telemetry";
 
-import { RENDERER_METRICS, UA_MEMORY_MIN_INTERVAL_MS } from "./constants";
+import { SelfCostCounter, SelfCostMeter } from "./SelfCostMeter";
+import {
+  RENDERER_METRICS,
+  UA_MEMORY_MIN_INTERVAL_MS,
+  UA_MEMORY_UNAVAILABLE_ERROR_NAME,
+} from "./constants";
 import { UaSpecificMemoryCollectorEnv } from "./types";
 
 const log = Logger.getLogger(__filename);
+
+/** True for the rejection of a browser that does not provide the API (see the constant). */
+function isUnavailableError(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err != undefined &&
+    (err as { name?: unknown }).name === UA_MEMORY_UNAVAILABLE_ERROR_NAME
+  );
+}
 
 /**
  * Measures `performance.measureUserAgentSpecificMemory()` into gauge
@@ -18,30 +32,64 @@ const log = Logger.getLogger(__filename);
  * - periodic measurements (`maybeMeasurePeriodic`) are spaced at least `UA_MEMORY_MIN_INTERVAL_MS`
  *   apart from the previous measurement start.
  * Errors are swallowed (debug log): telemetry must never affect the app.
+ *
+ * A `SecurityError` rejection means the browser does not provide the API although the method exists
+ * (e.g. `chromium-headless-shell`): the collector then reports itself unsupported and stops calling.
+ *
+ * Self cost: `telemetry.self.uaMemory.calls` counts calls, `telemetry.self.timeMs.uaMemory` sums
+ * the synchronous part of each call, `telemetry.self.uaMemory.resolveMs` sums call -> resolve
+ * latency of the calls that resolved, counted by `telemetry.self.uaMemory.resolved` (its
+ * denominator); rejections are counted by `telemetry.self.uaMemory.failures`. Calls still in flight
+ * are in neither.
  */
 export class UaSpecificMemoryCollector {
   readonly #telemetry: ITelemetry;
   readonly #env: UaSpecificMemoryCollectorEnv;
+  readonly #selfCalls: SelfCostCounter;
+  readonly #selfSyncTime: SelfCostCounter;
+  readonly #selfResolveTime: SelfCostCounter;
+  readonly #selfResolved: SelfCostCounter;
+  readonly #selfFailures: SelfCostCounter;
   #inFlight = false;
   #pending = false;
   #disposed = false;
+  #paused = false;
+  /** Set by a `SecurityError` rejection: the browser does not provide the API. */
+  #unavailable = false;
   #lastStartedAtMs: number | undefined;
+  /** `measureUserAgentSpecificMemory()` calls so far (`callCount()`). */
+  #calls = 0;
 
-  public constructor(telemetry: ITelemetry, env: UaSpecificMemoryCollectorEnv) {
+  public constructor(
+    telemetry: ITelemetry,
+    env: UaSpecificMemoryCollectorEnv,
+    selfCost: SelfCostMeter = new SelfCostMeter(env.now),
+  ) {
     this.#telemetry = telemetry;
     this.#env = env;
+    this.#selfCalls = selfCost.counter("uaMemoryCalls");
+    this.#selfSyncTime = selfCost.counter("uaMemoryMs");
+    this.#selfResolveTime = selfCost.counter("uaMemoryResolveMs");
+    this.#selfResolved = selfCost.counter("uaMemoryResolved");
+    this.#selfFailures = selfCost.counter("uaMemoryFailures");
   }
 
   public isSupported(): boolean {
     return (
+      !this.#unavailable &&
       this.#env.crossOriginIsolated === true &&
       typeof this.#env.performance?.measureUserAgentSpecificMemory === "function"
     );
   }
 
-  /** Requests a measurement now (or right after the in-flight one settles). */
+  /** `measureUserAgentSpecificMemory()` calls started so far (cumulative, also across pauses). */
+  public callCount(): number {
+    return this.#calls;
+  }
+
+  /** Requests a measurement now (or right after the in-flight one settles). No-op while paused. */
   public measure(): void {
-    if (this.#disposed || !this.isSupported()) {
+    if (this.#disposed || this.#paused || !this.isSupported()) {
       return;
     }
     if (this.#inFlight) {
@@ -63,6 +111,23 @@ export class UaSpecificMemoryCollector {
     this.measure();
   }
 
+  /**
+   * Stops starting measurements (a coalesced follow-up is dropped) until `resume()`. A call already
+   * in flight still settles. Idempotent.
+   */
+  public pause(): void {
+    this.#paused = true;
+    this.#pending = false;
+  }
+
+  /**
+   * Allows measurements again without starting one: the next periodic measurement still waits
+   * `UA_MEMORY_MIN_INTERVAL_MS` after the previous start, so toggling never causes a burst.
+   */
+  public resume(): void {
+    this.#paused = false;
+  }
+
   public dispose(): void {
     this.#disposed = true;
     this.#pending = false;
@@ -75,9 +140,17 @@ export class UaSpecificMemoryCollector {
     }
     this.#inFlight = true;
     this.#lastStartedAtMs = this.#env.now();
+    this.#calls++;
+    this.#selfCalls.add(1);
+    const callStartMs = this.#selfSyncTime.now();
     try {
-      const result = await performance.measureUserAgentSpecificMemory();
-      if (!this.#disposed) {
+      const pendingResult = performance.measureUserAgentSpecificMemory();
+      this.#selfSyncTime.addSince(callStartMs);
+      const result = await pendingResult;
+      this.#selfResolveTime.addSince(callStartMs);
+      this.#selfResolved.add(1);
+      // A result resolving while paused (telemetry toggled off) is dropped.
+      if (!this.#disposed && !this.#paused) {
         this.#telemetry.gauge(
           RENDERER_METRICS.uaSpecificMemoryBytes,
           result.bytes,
@@ -86,11 +159,15 @@ export class UaSpecificMemoryCollector {
         );
       }
     } catch (err: unknown) {
+      this.#selfFailures.add(1);
+      if (isUnavailableError(err)) {
+        this.#unavailable = true;
+      }
       log.debug("measureUserAgentSpecificMemory failed", err);
     } finally {
       this.#inFlight = false;
     }
-    if (this.#pending && !this.#disposed) {
+    if (this.#pending && !this.#disposed && !this.#paused && !this.#unavailable) {
       this.#pending = false;
       void this.#run();
     }

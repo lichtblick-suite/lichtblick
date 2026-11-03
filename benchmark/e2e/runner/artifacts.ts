@@ -7,7 +7,7 @@ import path from "node:path";
 import { ARTIFACTS_DIR } from "./constants";
 import type { ScenarioRunResult } from "./types";
 import { RESULT_V1_SUFFIX } from "../result/constants";
-import type { BenchmarkPlatform } from "../result/schemaV1";
+import type { BenchmarkPlatform, PersistedResultV1 } from "../result/schemaV1";
 
 /**
  * Legacy artifact file name: unchanged `<scenarioId>-<ts>.json` for Electron (existing consumers),
@@ -23,20 +23,26 @@ export function legacyArtifactFileName(
     : `${scenarioId}-${platform}-${timestamp}.json`;
 }
 
-/** `<scenarioId>-<platform>[-telemetry-off]-<ts>.benchmark-result.v1.json` */
+/**
+ * `<scenarioId>-<platform>[-telemetry-off][-<variant>]-<ts>.benchmark-result.v1.json` (`variant`:
+ * e.g. the overhead `on-noUa` arm, see `OVERHEAD_ARM_FILE_VARIANTS`).
+ */
 export function resultV1FileName({
   scenarioId,
   platform,
   telemetryEnabled,
   timestamp,
+  variant,
 }: {
   scenarioId: string;
   platform: BenchmarkPlatform;
   telemetryEnabled: boolean;
   timestamp: number;
+  variant?: string;
 }): string {
   const off = telemetryEnabled ? "" : "-telemetry-off";
-  return `${scenarioId}-${platform}${off}-${timestamp}${RESULT_V1_SUFFIX}`;
+  const suffix = variant == undefined ? "" : `-${variant}`;
+  return `${scenarioId}-${platform}${off}${suffix}-${timestamp}${RESULT_V1_SUFFIX}`;
 }
 
 /**
@@ -44,7 +50,16 @@ export function resultV1FileName({
  * `runTimestamp`, like its screenshots.
  */
 export function writeResultV1(
-  { result, runTimestamp }: Pick<ScenarioRunResult, "result" | "runTimestamp">,
+  {
+    result,
+    runTimestamp,
+    variant,
+  }: Pick<ScenarioRunResult, "runTimestamp"> & {
+    /** Complete, or the partial result of a failed run (may lack `run.scenario`). */
+    result: PersistedResultV1;
+    /** File name variant (`resultV1FileName`). */
+    variant?: string;
+  },
   dir: string = ARTIFACTS_DIR,
 ): string {
   const { scenarioId, platform, telemetryEnabled } = result.run;
@@ -56,6 +71,7 @@ export function writeResultV1(
       platform,
       telemetryEnabled,
       timestamp: runTimestamp,
+      ...(variant != undefined && { variant }),
     }),
   );
   fs.writeFileSync(resultPath, JSON.stringify(result));

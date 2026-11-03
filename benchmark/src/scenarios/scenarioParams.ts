@@ -1,8 +1,17 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { DS_PARAM_PREFIX } from "./constants";
+import { DS_PARAM_PREFIX, SCENARIO_DURATION_MS_PARAM } from "./constants";
 import { ResolvedScenarioParams, Scenario } from "./types";
+import { parsePositiveNumberParam } from "../urlParams";
+
+/**
+ * Effective auto-pause duration of a scenario: `?scenario.durationMs=<ms>` when it is a positive
+ * finite number, else the registry `durationMs` (possibly undefined: no auto-pause).
+ */
+export function resolveScenarioDurationMs(scenario: Scenario, url: URL): number | undefined {
+  return parsePositiveNumberParam(url, SCENARIO_DURATION_MS_PARAM) ?? scenario.durationMs;
+}
 
 /**
  * Collects `?ds.<param>=<value>` overrides from a page URL, with the same semantics as the app's

@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { RunInfoBuilder } from "../../result/builders/RunInfoBuilder";
 import { TelemetryRecordBuilder, panelLabels } from "../../result/builders/TelemetryRecordBuilder";
 import { PANEL_METRICS, PIPELINE_METRICS } from "../../result/constants";
-import { BenchmarkResultV1, buildResultV1 } from "../../result/schemaV1";
-import type { TelemetryEvent, TelemetryRecord } from "../../result/schemaV1";
+import type { DirectAttributionV3 } from "../../result/directAttribution.types";
+import { BenchmarkResultV1, PersistedResultV1, buildResultV1 } from "../../result/schemaV1";
+import type { RunModeV1, TelemetryEvent, TelemetryRecord } from "../../result/schemaV1";
+import { OverheadRunBuilder } from "../../runner/builders/OverheadRunBuilder";
+import { ToggleBlockBuilder } from "../../runner/builders/ToggleBlockBuilder";
 import { buildOverheadReport } from "../../runner/overhead";
-import type { OverheadReport } from "../../runner/types";
+import type { OverheadMethod, OverheadReport } from "../../runner/overhead.types";
+import type { OverheadToggleSummaryV3 } from "../../runner/toggleBlocks.types";
 import type { LoadedResult } from "../types";
 
 const MIB = 1024 * 1024;
@@ -19,6 +24,8 @@ export type ResultProps = {
   /** Working set of the browser process (overhead A/B inputs). */
   workingSetBytes?: number;
   cpuPercent?: number;
+  /** `overhead`: a run of the overhead A/B (`run.mode` plus a `summary.steadyWindow`). */
+  mode?: RunModeV1;
 };
 
 function event(
@@ -93,8 +100,9 @@ export class BenchmarkResultBuilder {
         { ...panel, unit: "ms" },
       ),
     ];
-    return buildResultV1({
-      run: {
+    const result = buildResultV1({
+      run: RunInfoBuilder.run({
+        mode: props.mode ?? "scenario",
         scenarioId: props.scenarioId ?? "sinewave",
         pipeline: "synthetic",
         platform: props.platform ?? "electron",
@@ -103,15 +111,13 @@ export class BenchmarkResultBuilder {
         finishedAtWall: props.finishedAtWall ?? "2026-01-01T00:00:05.000Z",
         startMonotonicTs: 0,
         endMonotonicTs: 5000,
-        sampleIntervalMs: 1000,
         environment: {
           os: "darwin",
           arch: "arm64",
           ci: false,
-          cpuModel: "cpu",
           totalMemBytes: 8 * 1024 ** 3,
         },
-      },
+      }),
       pageRecords: props.telemetryEnabled === false ? [] : pageRecords,
       drainedDropped: 0,
       drainRealm: "renderer",
@@ -127,42 +133,91 @@ export class BenchmarkResultBuilder {
       ]),
       listenerDispatchSamples: [],
     });
+    return props.mode === "overhead"
+      ? { ...result, summary: { ...result.summary, steadyWindow: OverheadRunBuilder.steady({}) } }
+      : result;
   }
 
-  /** A result as loaded from its artifact file (`<scenario>-<platform>[-telemetry-off]-<ts>`). */
+  /**
+   * A result written before `run.scenario`, `run.mode`, `run.environment.logicalCpus` and the render
+   * calibration existed (only the lenient validation accepts it).
+   */
+  public static legacy(props: ResultProps = {}): PersistedResultV1 {
+    const { run, ...body } = BenchmarkResultBuilder.result(props);
+    const { scenario: _scenario, mode: _mode, environment, ...legacyRun } = run;
+    const {
+      logicalCpus: _logicalCpus,
+      fpsCeiling: _fpsCeiling,
+      glRenderer: _glRenderer,
+      lateFrameThresholdMs: _lateFrameThresholdMs,
+      ...legacyEnvironment
+    } = environment;
+    return { ...body, run: { ...legacyRun, environment: legacyEnvironment } };
+  }
+
+  /**
+   * A result as loaded from its artifact file
+   * (`<scenario>-<platform>[-telemetry-off][-overhead]-<ts>`).
+   */
   public static loaded(props: ResultProps & { ts?: number } = {}): LoadedResult {
     const result = BenchmarkResultBuilder.result(props);
     const off = result.run.telemetryEnabled ? "" : "-telemetry-off";
+    const overhead = props.mode === "overhead" ? "-overhead" : "";
     const { scenarioId, platform } = result.run;
     return {
-      fileName: `${scenarioId}-${platform}${off}-${props.ts ?? 1}.benchmark-result.v1.json`,
+      fileName: `${scenarioId}-${platform}${off}${overhead}-${props.ts ?? 1}.benchmark-result.v1.json`,
       result,
     };
   }
 
-  /** Overhead A/B report of a scenario (telemetry off vs on). */
+  /**
+   * Overhead A/B report of a scenario: `repeats` ABBA pairs (default 5) with constant deltas, so the
+   * CI95 collapses on them (off: 100 % CPU, 500 MiB).
+   */
   public static overhead(
     props: {
       scenarioId?: string;
       platform?: "electron" | "web";
       createdAtWall?: string;
       memDeltaBytes?: number;
+      /** Telemetry-on CPU, percent (off: 100). */
       cpuOn?: number;
+      repeats?: number;
+      telemetrySelf?: boolean;
+      /** Default `relaunch`; `toggle` / `both` add `toggle` (default `ToggleBlockBuilder.summary()`). */
+      method?: OverheadMethod;
+      toggle?: OverheadToggleSummaryV3;
+      /** Toggle A/B without the UA memory probe (methods `toggle` / `both` only). */
+      toggleWithoutUaProbe?: OverheadToggleSummaryV3;
+      /** Frame-probe toggle A/B (methods `toggle` / `both` only). */
+      toggleFrameProbe?: OverheadToggleSummaryV3;
+      /** Direct CPU attribution (methods `toggle` / `both` only). */
+      directAttribution?: DirectAttributionV3;
     } = {},
   ): OverheadReport {
-    const scenarioId = props.scenarioId ?? "sinewave";
-    const platform = props.platform ?? "electron";
+    const method = props.method ?? "relaunch";
+    const repeats = method === "toggle" ? 0 : (props.repeats ?? 5);
+    const on = {
+      cpu: props.cpuOn ?? 101,
+      wsBytes: 500 * MIB + (props.memDeltaBytes ?? 5 * MIB),
+      mainThread: { longTaskBlockedMsPerSec: 2, fps: 59 },
+      collectors: { uaMemory: "unsupported" as const },
+      ...(props.telemetrySelf !== false && { telemetrySelf: OverheadRunBuilder.telemetrySelf() }),
+    };
+    const off = { mainThread: { longTaskBlockedMsPerSec: 1, fps: 60 } };
     return buildOverheadReport({
-      platform,
-      scenarioId,
-      off: BenchmarkResultBuilder.result({ scenarioId, platform, telemetryEnabled: false }),
-      on: BenchmarkResultBuilder.result({
-        scenarioId,
-        platform,
-        workingSetBytes: 100 * MIB + (props.memDeltaBytes ?? 0),
-        cpuPercent: props.cpuOn ?? 10,
-      }),
+      platform: props.platform ?? "electron",
+      scenarioId: props.scenarioId ?? "sinewave",
+      runs: OverheadRunBuilder.abba(Array.from({ length: repeats }, () => ({ off, on }))),
+      config: OverheadRunBuilder.config({ repeats }),
       now: new Date(props.createdAtWall ?? "2026-01-01T00:00:00.000Z"),
+      method,
+      ...(method !== "relaunch" && { toggle: props.toggle ?? ToggleBlockBuilder.summary() }),
+      ...(props.toggleWithoutUaProbe != undefined && {
+        toggleWithoutUaProbe: props.toggleWithoutUaProbe,
+      }),
+      ...(props.toggleFrameProbe != undefined && { toggleFrameProbe: props.toggleFrameProbe }),
+      ...(props.directAttribution != undefined && { directAttribution: props.directAttribution }),
     });
   }
 }

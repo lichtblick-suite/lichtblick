@@ -5,7 +5,13 @@
 // matching and the chart series derived from `benchmark-result.v1.json`. Pure; free of
 // DOM/Playwright/Node imports.
 
-import { CHECKPOINT_ORDER, MAX_POINTS_PER_DATASET, MIB, STALE_AFTER_MS } from "./constants";
+import {
+  CHECKPOINT_ORDER,
+  MAX_POINTS_PER_DATASET,
+  MIB,
+  PLATFORM_ORDER,
+  STALE_AFTER_MS,
+} from "./constants";
 import {
   ChartDataset,
   ChartSpec,
@@ -23,17 +29,25 @@ import {
   PROCESS_METRICS,
   RESULT_V1_SUFFIX,
 } from "../result/constants";
+import { withRunKpis } from "../result/kpis";
+import { normalizeOverheadReport } from "../result/overheadLegacy";
+import { isOverheadRun } from "../result/runMode";
 import {
-  BenchmarkResultV1,
+  PersistedResultV1,
+  StoredResultV1,
   TelemetrySample,
   phasesOrigin,
   validateResultV1,
 } from "../result/schemaV1";
 import { counterTotalAt, observationMetrics, seriesKey } from "../result/series";
 import { maxOf } from "../result/stats";
-import type { OverheadReport } from "../runner/types";
+import type { OverheadReport } from "../runner/overhead.types";
 
-/** Parses and validates one `*.benchmark-result.v1.json` file's contents. */
+/**
+ * Parses and validates one `*.benchmark-result.v1.json` file's contents. Lenient: results written
+ * before `run.scenario` / the render calibration existed still load (shown as "not recorded");
+ * results without `summary.kpis` get them backfilled (`withRunKpis`, marked `recomputed`).
+ */
 export function parseResultFile(fileName: string, text: string): ParseOutcome<LoadedResult> {
   let json: unknown;
   try {
@@ -41,15 +55,21 @@ export function parseResultFile(fileName: string, text: string): ParseOutcome<Lo
   } catch (error) {
     return { ok: false, reason: `invalid JSON (${String(error)})` };
   }
-  const errors = validateResultV1(json);
+  const errors = validateResultV1(json, "lenient");
   if (errors.length > 0) {
     const more = errors.length > 1 ? ` (+${errors.length - 1} more)` : "";
     return { ok: false, reason: `not a valid benchmark-result.v1: ${errors[0]}${more}` };
   }
-  return { ok: true, value: { fileName, result: json as BenchmarkResultV1 } };
+  return {
+    ok: true,
+    value: { fileName, result: withRunKpis(json as StoredResultV1) },
+  };
 }
 
-/** Parses one `overhead-*.json` report (shape-checked on the fields the viewer reads). */
+/**
+ * Parses one `overhead-*.json` report of schema 1 or 2, normalized to schema 2 (schema-1 reports
+ * become `legacy` n = 1 reports with inconclusive verdicts, see `normalizeOverheadReport`).
+ */
 export function parseOverheadFile(text: string): ParseOutcome<OverheadReport> {
   let json: unknown;
   try {
@@ -57,21 +77,14 @@ export function parseOverheadFile(text: string): ParseOutcome<OverheadReport> {
   } catch (error) {
     return { ok: false, reason: `invalid JSON (${String(error)})` };
   }
-  const report = json as Partial<OverheadReport> | undefined;
+  const report = normalizeOverheadReport(json);
   const valid =
     report != undefined &&
-    typeof report === "object" &&
-    report.kind === "overhead" &&
-    report.schemaVersion === 1 &&
-    typeof report.scenarioId === "string" &&
-    (report.platform === "electron" || report.platform === "web") &&
-    typeof report.createdAtWall === "string" &&
-    typeof report.deltas?.memDeltaBytes === "number" &&
-    typeof report.within?.cpu === "boolean" &&
-    typeof report.within.memory === "boolean";
+    (PLATFORM_ORDER as readonly string[]).includes(report.platform) &&
+    typeof report.createdAtWall === "string";
   return valid
-    ? { ok: true, value: report as OverheadReport }
-    : { ok: false, reason: "not an overhead report (schemaVersion 1)" };
+    ? { ok: true, value: report }
+    : { ok: false, reason: "not an overhead report (schemaVersion 1 or 2)" };
 }
 
 /** `<scenarioId>-<platform>[-telemetry-off]-<ts>`: shared by a run's result and screenshots. */
@@ -82,20 +95,23 @@ export function runStem(fileName: string): string {
 }
 
 /**
- * Runs shown by the viewer, sorted by scenario, platform, telemetry on before off, then newest
- * first. By default only the latest run (by `finishedAtWall`) per scenario × platform × telemetry
- * mode; `all` keeps every run.
+ * Scenario runs shown by the viewer, sorted by scenario, platform, telemetry on before off, then
+ * newest first. By default only the latest run (by `finishedAtWall`) per scenario × platform ×
+ * telemetry mode; `all` keeps every scenario run. Overhead A/B runs (`isOverheadRun`: steady
+ * window, other durations, a UA-memory-off arm) are never shown here, also not with `all`; they
+ * are only reachable through the telemetry overhead section.
  */
 export function selectRuns(
   results: readonly LoadedResult[],
   { all }: { all: boolean },
 ): LoadedResult[] {
+  const scenarioRuns = results.filter(({ result }) => !isOverheadRun(result));
   let selected: LoadedResult[];
   if (all) {
-    selected = [...results];
+    selected = scenarioRuns;
   } else {
     const latest = new Map<string, LoadedResult>();
-    for (const loaded of results) {
+    for (const loaded of scenarioRuns) {
       const { scenarioId, platform, telemetryEnabled } = loaded.result.run;
       const key = `${scenarioId}|${platform}|${telemetryEnabled}`;
       const existing = latest.get(key);
@@ -550,7 +566,7 @@ function panelCharts(
 }
 
 /** Phase markers of a run, in seconds from the origin. */
-function phaseMarkers(result: BenchmarkResultV1, originTs: number): PhaseMarker[] {
+function phaseMarkers(result: PersistedResultV1, originTs: number): PhaseMarker[] {
   const markers: PhaseMarker[] = [];
   const seen = new Set<string>();
   const toX = (ts: number) => round((ts - originTs) / 1000);
@@ -585,7 +601,7 @@ function phaseMarkers(result: BenchmarkResultV1, originTs: number): PhaseMarker[
 }
 
 /** Chart series and markers of one run (x: seconds from the phases origin). */
-export function buildRunChartData(result: BenchmarkResultV1): RunChartData {
+export function buildRunChartData(result: PersistedResultV1): RunChartData {
   const origin = phasesOrigin(result.events);
   const originTs = origin?.ts ?? result.run.startMonotonicTs;
   const toX = (ts: number) => (ts - originTs) / 1000;

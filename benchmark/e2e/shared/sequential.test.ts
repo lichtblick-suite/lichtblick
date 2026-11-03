@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { repeatWhile, runSequentially } from "./sequential";
+import { createSerialQueue, repeatWhile, runSequentially } from "./sequential";
 
 /** Resolves on a later macrotask, so overlapping steps would interleave. */
 async function tick(): Promise<void> {
@@ -96,5 +96,41 @@ describe("repeatWhile", () => {
     // Then
     await expect(run).rejects.toThrow("body failed");
     expect(body).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("createSerialQueue", () => {
+  it("runs concurrently submitted tasks one after another in call order", async () => {
+    // Given
+    const queue = createSerialQueue();
+    const log: string[] = [];
+    const task = (name: string) => async () => {
+      log.push(`start ${name}`);
+      await tick();
+      log.push(`end ${name}`);
+      return name;
+    };
+
+    // When
+    const results = await Promise.all([queue.run(task("a")), queue.run(task("b"))]);
+
+    // Then
+    expect(results).toEqual(["a", "b"]);
+    expect(log).toEqual(["start a", "end a", "start b", "end b"]);
+  });
+
+  it("rejects only the failed task and keeps running later ones", async () => {
+    // Given
+    const queue = createSerialQueue();
+
+    // When
+    const failed = queue.run(async () => {
+      throw new Error("task failed");
+    });
+    const later = queue.run(async () => "later");
+
+    // Then
+    await expect(failed).rejects.toThrow("task failed");
+    await expect(later).resolves.toBe("later");
   });
 });

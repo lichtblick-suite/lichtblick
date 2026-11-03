@@ -7,7 +7,10 @@ import fs from "node:fs";
 import { electronLaunchArgs } from "./electronLaunchArgs";
 import type { ElectronBenchmarkTarget } from "./types";
 import { DESKTOP_BUILD_DIR } from "../runner/constants";
-import { collectElectronHostMetrics } from "../runner/electronHostCollector";
+import {
+  collectElectronHostMetrics,
+  readElectronCumulativeCpu,
+} from "../runner/electronHostCollector";
 import { describeHost } from "../runner/runScenario";
 import type { RunEnvironment } from "../runner/types";
 
@@ -15,10 +18,6 @@ import type { RunEnvironment } from "../runner/types";
 // from the production app's `desktop/.webpack` used by `e2e/fixtures/electron.ts`. It has no
 // user-data-dir/extension pre-install concerns since `Root.tsx` uses an in-memory-only
 // `MemoryAppConfiguration` and no extension loaders.
-//
-// The page is loaded from `file://…/renderer/index.html`; scenario URLs append the query to that
-// base URL. MCAP fixtures are fetched cross-origin from the runner's localhost static server
-// (which sends permissive CORS/CORP headers).
 
 /** Launches a fresh benchmark Electron app and wraps it as a `BenchmarkTarget`. */
 export async function launchElectronTarget(): Promise<ElectronBenchmarkTarget> {
@@ -50,6 +49,7 @@ export async function launchElectronTarget(): Promise<ElectronBenchmarkTarget> {
       electronApp,
       scenarioUrl: (params) => `${baseUrl}?${params.toString()}`,
       collectHostMetrics: async (ts) => await collectElectronHostMetrics(page, ts),
+      readCumulativeCpu: async () => await readElectronCumulativeCpu(electronApp),
       describe: () => ({ ...environment }),
       dispose: async () => {
         await electronApp.close();

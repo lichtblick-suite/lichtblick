@@ -19,6 +19,7 @@ import {
 } from "./htmlReportData";
 import { Point } from "./types";
 import { TelemetryRecordBuilder } from "../result/builders/TelemetryRecordBuilder";
+import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 
 const identity = (ts: number) => ts / 1000;
 
@@ -32,6 +33,64 @@ describe("parseResultFile", () => {
 
     // Then
     expect(outcome.ok).toBe(true);
+  });
+
+  it("should accept an older result without run.scenario and render calibration", () => {
+    // Given
+    const legacy = BenchmarkResultBuilder.legacy();
+
+    // When
+    const outcome = parseResultFile("old.benchmark-result.v1.json", JSON.stringify(legacy));
+
+    // Then
+    expect(outcome.ok).toBe(true);
+    expect(outcome.ok ? outcome.value.result.run.scenario : "error").toBeUndefined();
+  });
+
+  it("should keep written summary.kpis as they are", () => {
+    // Given
+    const result = BenchmarkResultBuilder.result();
+
+    // When
+    const outcome = parseResultFile("a.benchmark-result.v1.json", JSON.stringify(result));
+
+    // Then
+    expect(outcome.ok ? outcome.value.result.summary.kpis : "error").toEqual(result.summary.kpis);
+    expect(outcome.ok ? outcome.value.result.summary.kpis.recomputed : "error").toBeUndefined();
+  });
+
+  it("should backfill summary.kpis of an older result and mark them recomputed", () => {
+    // Given a result written before summary.kpis existed
+    const { summary, ...rest } = BenchmarkResultBuilder.legacy();
+    const { kpis: written, ...olderSummary } = summary;
+
+    // When
+    const outcome = parseResultFile(
+      "old.benchmark-result.v1.json",
+      JSON.stringify({ ...rest, summary: olderSummary }),
+    );
+
+    // Then
+    expect(outcome.ok).toBe(true);
+    const kpis = outcome.ok ? outcome.value.result.summary.kpis : undefined;
+    expect(kpis?.recomputed).toBe(true);
+    expect(kpis?.memory).toEqual(written.memory);
+    expect(kpis?.smoothness.medianFps).toBe(written.smoothness.medianFps);
+  });
+
+  it("should reject a result whose run.scenario is malformed", () => {
+    // Given
+    const result = BenchmarkResultBuilder.result();
+    const text = JSON.stringify({
+      ...result,
+      run: { ...result.run, scenario: { panels: 1 } },
+    });
+
+    // When
+    const outcome = parseResultFile("bad.benchmark-result.v1.json", text);
+
+    // Then
+    expect(outcome.ok).toBe(false);
   });
 
   it.each([
@@ -63,6 +122,25 @@ describe("parseOverheadFile", () => {
     expect(valid.ok).toBe(true);
     expect(invalid.ok).toBe(false);
   });
+
+  it("normalizes a schema-1 overhead report to schema 3", () => {
+    // Given
+    const legacy = OverheadRunBuilder.legacyReport();
+
+    // When
+    const outcome = parseOverheadFile(JSON.stringify(legacy));
+
+    // Then
+    expect(outcome.ok && outcome.value).toMatchObject({
+      schemaVersion: 3,
+      method: "relaunch",
+      cpuVerdictSource: "relaunch",
+      memVerdictSource: "relaunch",
+      legacy: true,
+      n: 1,
+      verdicts: { overall: "inconclusive" },
+    });
+  });
 });
 
 describe("selectRuns", () => {
@@ -83,6 +161,30 @@ describe("selectRuns", () => {
       off.fileName,
       web.fileName,
     ]);
+  });
+
+  it("should never select overhead A/B runs, also not with --all", () => {
+    // Given a scenario run and newer overhead runs of the same scenario × platform × mode
+    const overheadOn = BenchmarkResultBuilder.loaded({
+      ts: 5,
+      mode: "overhead",
+      finishedAtWall: "2026-01-03T00:00:00Z",
+    });
+    const overheadOff = BenchmarkResultBuilder.loaded({
+      ts: 6,
+      mode: "overhead",
+      telemetryEnabled: false,
+    });
+    const results = [newer, overheadOn, overheadOff];
+
+    // When
+    const latest = selectRuns(results, { all: false });
+    const all = selectRuns(results, { all: true });
+
+    // Then
+    expect(overheadOn.fileName).toContain("-overhead-");
+    expect(latest.map((loaded) => loaded.fileName)).toEqual([newer.fileName]);
+    expect(all.map((loaded) => loaded.fileName)).toEqual([newer.fileName]);
   });
 
   it("keeps every run with --all, newest first within a key", () => {

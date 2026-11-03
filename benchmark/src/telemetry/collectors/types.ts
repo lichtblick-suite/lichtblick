@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { SelfCostMeter } from "./SelfCostMeter";
+
 /**
  * Chromium-only, non-standard `performance.memory`. Describes the JS heap of the current realm
  * only; it is NOT the total memory of the renderer process.
@@ -54,6 +56,22 @@ export type RendererCollectorsEnv = {
   PerformanceObserver?: LongTaskObserverConstructor;
   crossOriginIsolated?: boolean;
 };
+
+/** Tunables of the renderer collectors. */
+export type RendererCollectorsOptions = {
+  /** Late-frame threshold of the `FrameCollector`; defaults to `LATE_FRAME_THRESHOLD_MS`. */
+  lateFrameThresholdMs?: number;
+  /** False disables the `UaSpecificMemoryCollector` entirely (`?telemetry.uaMemory=off`). Default true. */
+  uaMemoryEnabled?: boolean;
+  /**
+   * Self-cost accumulator shared with the installer (sink publish / drain timing); its counters
+   * are published on the collector tick. Defaults to a private meter on `env.now`.
+   */
+  selfCost?: SelfCostMeter;
+};
+
+/** State of the UA-specific memory collector as configured for this page. */
+export type UaMemoryCollectorState = "on" | "off" | "unsupported";
 
 /** The parts of `RendererCollectorsEnv` the `FrameCollector` reads. */
 export type FrameCollectorEnv = Pick<

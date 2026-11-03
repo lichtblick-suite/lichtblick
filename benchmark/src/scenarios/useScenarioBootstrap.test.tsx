@@ -45,6 +45,10 @@ jest.mock("./registry", () => ({
 function buildScenario(overrides: Partial<Scenario> = {}): Scenario {
   return {
     id: "scenario-id",
+    description: "A scenario.",
+    group: "time-series",
+    tags: ["plot", "synthetic"],
+    player: "TestPlayer",
     layout: "empty",
     dataSource: { factoryId: "factory-id" },
     pipeline: "synthetic",
@@ -324,6 +328,42 @@ describe("useScenarioBootstrap", () => {
 
       jest.useRealTimers();
     });
+
+    it("should pause after the ?scenario.durationMs= override and describe it", async () => {
+      // Given
+      jest.useFakeTimers();
+      (getScenarioFromUrl as jest.Mock).mockReturnValue(
+        buildScenario({ autoStart: true, durationMs: 5_000 }),
+      );
+      window.history.replaceState({}, "", "/?scenario=scenario-id&scenario.durationMs=2000");
+      const startPlayback = jest.fn();
+      const pausePlayback = jest.fn();
+      mockPipeline({ presence: PlayerPresence.PRESENT, startPlayback, pausePlayback });
+
+      // When
+      renderHook(() => {
+        useScenarioBootstrap();
+      });
+      await waitFor(() => {
+        expect(startPlayback).toHaveBeenCalledTimes(1);
+      });
+      jest.advanceTimersByTime(1_999);
+
+      // Then
+      expect(pausePlayback).not.toHaveBeenCalled();
+
+      // When
+      jest.advanceTimersByTime(1);
+
+      // Then
+      expect(pausePlayback).toHaveBeenCalledTimes(1);
+      expect(
+        (window as LichtblickScenarioControlWindow).lichtblickScenario?.describe().durationMs,
+      ).toBe(2_000);
+
+      jest.useRealTimers();
+      window.history.replaceState({}, "", "/");
+    });
   });
 
   describe("window.lichtblickScenario control API", () => {
@@ -359,6 +399,41 @@ describe("useScenarioBootstrap", () => {
       expect(selectSource).toHaveBeenCalledWith(CLOSE_DATA_SOURCE_FACTORY_ID, {
         type: "connection",
         params: {},
+      });
+    });
+
+    it("should describe the active scenario with its redacted effective params and panels", () => {
+      // Given
+      (getScenarioFromUrl as jest.Mock).mockReturnValue(
+        buildScenario({
+          layout: "sinewave",
+          dataSource: {
+            factoryId: "factory-id",
+            displayName: "Factory",
+            params: { url: "https://example.com/a.mcap", rate: "10" },
+          },
+          durationMs: 5_000,
+        }),
+      );
+      renderHook(() => {
+        useScenarioBootstrap();
+      });
+
+      // When
+      const descriptor = getControl()?.describe();
+
+      // Then
+      expect(descriptor).toEqual({
+        scenarioId: "scenario-id",
+        description: "A scenario.",
+        group: "time-series",
+        tags: ["plot", "synthetic"],
+        layout: "sinewave",
+        dataSource: { factoryId: "factory-id", displayName: "Factory" },
+        player: "TestPlayer",
+        params: { url: "<redacted>", rate: "10" },
+        durationMs: 5_000,
+        panels: [{ id: "Plot!a", type: "Plot", title: "10 second window" }],
       });
     });
 

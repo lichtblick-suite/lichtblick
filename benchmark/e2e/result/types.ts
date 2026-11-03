@@ -19,3 +19,6 @@ export type ObservationSummary = {
   /** p90 of the per-window `${metric}.max` gauges (spike indicator: "how bad are bad seconds"). */
   p90WindowMax?: number;
 };
+
+/** A point of a numeric series (see `numeric.ts`). */
+export type NumericPoint = { readonly x: number; readonly y: number };

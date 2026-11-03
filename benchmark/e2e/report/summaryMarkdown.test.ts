@@ -1,16 +1,26 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { BenchmarkResultBuilder } from "./builders/BenchmarkResultBuilder";
 import {
+  buildExercisesLines,
   buildOverheadTable,
   buildPanelsSection,
   buildPanelsTable,
   buildPipelineLine,
   buildResultsTable,
+  buildScorecardTable,
   latestResults,
 } from "./summaryMarkdown";
+import { CpuProfileBuilder } from "../result/builders/CpuProfileBuilder";
+import { RunInfoBuilder } from "../result/builders/RunInfoBuilder";
+import { normalizeOverheadReport } from "../result/overheadLegacy";
 import { BenchmarkResultV1, buildResultV1 } from "../result/schemaV1";
+import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
+import { ToggleBlockBuilder } from "../runner/builders/ToggleBlockBuilder";
 import { buildOverheadReport } from "../runner/overhead";
+import type { OverheadArm } from "../runner/overhead.types";
+import { armOrder } from "../runner/overheadSchedule";
 
 const MIB = 1024 * 1024;
 
@@ -36,18 +46,12 @@ function makeResult(
     labels,
   });
   return buildResultV1({
-    run: {
+    run: RunInfoBuilder.run({
       scenarioId: overrides.scenarioId ?? "sinewave",
-      pipeline: "synthetic",
       platform: overrides.platform ?? "web",
-      telemetryEnabled: true,
-      startedAtWall: "2026-01-01T00:00:00.000Z",
       finishedAtWall: overrides.finishedAtWall ?? "2026-01-01T00:00:05.000Z",
-      startMonotonicTs: 0,
       endMonotonicTs: 5000,
-      sampleIntervalMs: 1000,
-      environment: { os: "linux", arch: "x64", ci: true, cpuModel: "cpu", totalMemBytes: 1 },
-    },
+    }),
     pageRecords:
       overrides.withPool === true
         ? [
@@ -88,6 +92,25 @@ describe("latestResults", () => {
 
     // Then
     expect(latest).toEqual([electron, newer]);
+  });
+
+  it("should drop overhead A/B runs, so they never feed the tables or the scorecard", () => {
+    // Given a scenario run and a newer overhead run of the same scenario × platform × mode
+    const scenarioRun = makeResult({ finishedAtWall: "2026-01-01T00:00:01.000Z" });
+    const overheadRun = BenchmarkResultBuilder.result({
+      platform: "web",
+      mode: "overhead",
+      finishedAtWall: "2026-01-02T00:00:01.000Z",
+    });
+
+    // When
+    const latest = latestResults([scenarioRun, overheadRun]);
+    const scorecard = buildScorecardTable([overheadRun], []);
+
+    // Then
+    expect(latest).toEqual([scenarioRun]);
+    expect(buildResultsTable([overheadRun])).not.toContain("| sinewave |");
+    expect(scorecard).not.toContain("| web |");
   });
 });
 
@@ -258,29 +281,220 @@ describe("buildPanelsSection", () => {
 });
 
 describe("buildOverheadTable", () => {
-  it("renders deltas and the report-only note", () => {
-    // Given
-    const off = makeResult();
-    const on = makeResult();
-    const report = buildOverheadReport({
+  it("renders the pair statistics, verdict, self-cost and the report-only note", () => {
+    // Given 5 pairs with +1 % CPU and +5 MiB
+    const report = BenchmarkResultBuilder.overhead({ platform: "web" });
+
+    // When
+    const markdown = buildOverheadTable([report]);
+
+    // Then
+    expect(markdown).toContain("Report only unless `BENCHMARK_OVERHEAD_GATE=1`");
+    expect(markdown).toContain(
+      "| web | sinewave | relaunch | 5 | +1.00 % [+1.00, +1.00] (+1.0 pp [+1.0, +1.0]) IQR 0.00 % | +5.0 MiB [+5.0, +5.0] | ✅ within | — | 2.00 ms/s (0.20 % core) · 100 rec/s · 200 ns/rec | blocked +1.0 ms/s · -1.0 fps |",
+    );
+  });
+
+  it("marks legacy reports and adds the UA-probe rows", () => {
+    // Given a normalized schema-1 report and a report with the on-noUa arm
+    const legacy = normalizeOverheadReport(OverheadRunBuilder.legacyReport())!;
+    const arms: OverheadArm[] = ["off", "on", "on-noUa"];
+    const memMiB: Record<OverheadArm, number> = { off: 500, on: 510, "on-noUa": 502 };
+    const ua = buildOverheadReport({
       platform: "web",
-      scenarioId: "sinewave",
-      off: { ...off, run: { ...off.run, telemetryEnabled: false } },
-      on,
+      scenarioId: "pointcloud",
+      runs: [0, 1, 2].flatMap((repeat) =>
+        armOrder(arms, repeat).map((arm, order) =>
+          OverheadRunBuilder.input({ arm, repeat, order, wsBytes: memMiB[arm] * MIB }),
+        ),
+      ),
+      config: OverheadRunBuilder.config({ arms }),
+    });
+
+    // When
+    const markdown = buildOverheadTable([legacy, ua]);
+
+    // Then
+    expect(markdown).toContain(
+      "| electron | sinewave | relaunch | 1 (legacy n=1) | +1.00 % (+1.0 pp) | 0.0 MiB | ❔ inconclusive |",
+    );
+    expect(markdown).toContain(
+      "| web | ↳ without UA probe | relaunch | 3 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +2.0 MiB [+2.0, +2.0] | ✅ within |",
+    );
+    expect(markdown).toContain(
+      "| web | ↳ UA probe cost | relaunch | 3 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +8.0 MiB [+8.0, +8.0] | — |",
+    );
+  });
+
+  it("takes CPU from the toggle A/B and adds the relaunch A/B as an informational sub-row", () => {
+    // Given a both-method report: toggle +1.5 %, relaunch +5 % CPU (exceeds) and +5 MiB
+    const toggle = ToggleBlockBuilder.summary(
+      Array.from({ length: 6 }, () => ({ off: 100, on: 101.5 })),
+    );
+    const report = BenchmarkResultBuilder.overhead({ method: "both", toggle, cpuOn: 105 });
+
+    // When
+    const markdown = buildOverheadTable([report]);
+
+    // Then
+    expect(markdown).toContain(
+      "| electron | sinewave | both (CPU toggle · mem relaunch) | 6 quartets | +1.50 % [+1.50, +1.50] (+1.5 pp [+1.5, +1.5]) IQR 0.00 % | +5.0 MiB [+5.0, +5.0] | ✅ within | toggle ≤ 5 ms |",
+    );
+    expect(markdown).toContain(
+      "| electron | ↳ relaunch A/B (CPU informational) | relaunch | 5 | +5.00 % [+5.00, +5.00] (+5.0 pp [+5.0, +5.0]) IQR 0.00 % | +5.0 MiB [+5.0, +5.0] | ❌ exceeds | — |",
+    );
+  });
+
+  it("adds the toggle A/B without the UA probe as an informational sub-row", () => {
+    // Given a web toggle report (+1 %) with a toggle A/B without the UA probe (+0.5 %)
+    const toggleWithoutUaProbe = ToggleBlockBuilder.summary(
+      Array.from({ length: 6 }, () => ({ off: 100, on: 100.5 })),
+    );
+    const report = BenchmarkResultBuilder.overhead({
+      method: "toggle",
+      platform: "web",
+      toggleWithoutUaProbe,
     });
 
     // When
     const markdown = buildOverheadTable([report]);
 
     // Then
-    expect(markdown).toContain("Report only");
     expect(markdown).toContain(
-      "| web | sinewave | 12.5 % | 12.5 % | +0.0 pp / 0.0 % | 100.0 MiB | 100.0 MiB | +0.0 MiB | ✅ (CPU ≤ 2 %, mem ≤ 20.0 MiB) |",
+      "| web | ↳ toggle without UA probe (informational) | toggle | 6 quartets | +0.50 % [+0.50, +0.50] (+0.5 pp [+0.5, +0.5]) IQR 0.00 % | not measured | ✅ within | toggle ≤ 5 ms | | |",
     );
+  });
+
+  it("adds the benchmark FPS probe as a sub-row without a verdict, with the per-process deltas", () => {
+    // Given an Electron toggle report with a frame probe of +7 % (GPU +4 pp, renderer +3 pp)
+    const toggleFrameProbe = ToggleBlockBuilder.summary(
+      Array.from({ length: 6 }, () => ({ off: 100, on: 107 })),
+      ToggleBlockBuilder.processSplit(
+        { off: { renderer: 80, gpu: 20 }, on: { renderer: 83, gpu: 24 } },
+        6,
+      ),
+    );
+    const report = BenchmarkResultBuilder.overhead({ method: "toggle", toggleFrameProbe });
+
+    // When
+    const markdown = buildOverheadTable([report]);
+
+    // Then
+    expect(markdown).toContain(
+      "| electron | ↳ benchmark FPS probe (harness, not shipped) | toggle | 6 quartets | +7.00 % [+7.00, +7.00] (+7.0 pp [+7.0, +7.0]) IQR 0.00 % | not measured | — | toggle ≤ 5 ms · gpu +4.00 pp (6/6 ↑) · renderer +3.00 pp (6/6 ↑) | | |",
+    );
+  });
+
+  it("adds the direct attribution as a sub-row with its own verdict", () => {
+    // Given a toggle report with a direct attribution of 0.2 ms/s (≤ 0.3 ms/s) over 300 ms/s
+    const report = BenchmarkResultBuilder.overhead({
+      method: "toggle",
+      platform: "web",
+      directAttribution: CpuProfileBuilder.measured(),
+    });
+
+    // When
+    const markdown = buildOverheadTable([report]);
+
+    // Then
+    expect(markdown).toContain(
+      "| web | ↳ direct (JS only) | direct | 10 s profile @ 100 µs | +0.07 % (≤ +0.10 %) (+0.02 pp) | not measured | ✅ within | JS stacks 120.0 ms/s (wall) · resolved 99.9 % · GC 5.0 % (not attributable) · top: record (BufferedTelemetrySink.ts:40) 0.15 ms/s; onFrame (FrameCollector.ts:12) 0.05 ms/s | | |",
+    );
+  });
+
+  it("shows an unsupported direct attribution with its reason", () => {
+    // Given
+    const report = BenchmarkResultBuilder.overhead({
+      method: "toggle",
+      directAttribution: CpuProfileBuilder.unsupported("No CDP session"),
+    });
+
+    // When
+    const markdown = buildOverheadTable([report]);
+
+    // Then
+    expect(markdown).toContain(
+      "| electron | ↳ direct (JS only) | direct | 10 s profile @ 100 µs | — | not measured | — | unsupported: No CDP session | | |",
+    );
+  });
+
+  it("marks memory as not measured for method toggle", () => {
+    // Given
+    const report = BenchmarkResultBuilder.overhead({ method: "toggle", platform: "web" });
+
+    // When
+    const markdown = buildOverheadTable([report]);
+
+    // Then
+    expect(markdown).toContain(
+      "| web | sinewave | toggle (mem not measured) | 6 quartets | +1.00 % [+1.00, +1.00] (+1.0 pp [+1.0, +1.0]) IQR 0.00 % | not measured | ✅ within | toggle ≤ 5 ms | — | — |",
+    );
+    expect(markdown).not.toContain("↳ relaunch");
   });
 
   it("reports when there are no overhead reports", () => {
     // Given / When / Then
     expect(buildOverheadTable([])).toContain("No overhead reports found.");
+  });
+});
+
+describe("buildScorecardTable", () => {
+  it("renders one row per platform, electron first, with the overhead of that platform", () => {
+    // Given a web and an electron run, and a web overhead report
+    const web = makeResult({ platform: "web" });
+    const electron = makeResult({ platform: "electron" });
+    const report = BenchmarkResultBuilder.overhead({ platform: "web" });
+
+    // When
+    const rows = buildScorecardTable([web, electron], [report]).trim().split("\n");
+
+    // Then
+    expect(rows).toHaveLength(4);
+    expect(rows[0]).toContain("| Platform | Runs | Healthy | Peak WS (geomean)");
+    expect(rows[2]).toMatch(/^\| electron \| 1 \| ✅ 1\/1 \| 100 MiB \| — \| 12\.5 % \|/);
+    expect(rows[2]).toMatch(/\| — \|$/);
+    expect(rows[3]).toMatch(/^\| web \| 1 \|/);
+    expect(rows[3]).toContain("✅ within CPU ≤ +1.0 % / mem ≤ +5.0 MiB (n ≥ 5)");
+  });
+
+  it("ignores telemetry-off runs and reports when nothing is left", () => {
+    // Given
+    const off = makeResult();
+
+    // When
+    const markdown = buildScorecardTable(
+      [{ ...off, run: { ...off.run, telemetryEnabled: false } }],
+      [],
+    );
+
+    // Then
+    expect(markdown).toContain("No benchmark-result.v1 files with telemetry found.");
+  });
+});
+
+describe("buildExercisesLines", () => {
+  it("renders one line per scenario with its platforms, group, panels and player", () => {
+    // Given sinewave on both platforms and a result without run.scenario
+    const legacy = makeResult({ scenarioId: "old" });
+    const { scenario: _scenario, ...legacyRun } = legacy.run;
+    const results = [
+      makeResult({ platform: "web" }),
+      makeResult({ platform: "electron" }),
+      { ...legacy, run: legacyRun },
+    ];
+
+    // When
+    const lines = buildExercisesLines(results).trim().split("\n");
+
+    // Then
+    expect(lines).toEqual([
+      "- **old** (web): scenario not recorded",
+      "- **sinewave** (electron, web): time-series · Plot ×1 · SinewavePlayer",
+    ]);
+  });
+
+  it("reports when there are no results", () => {
+    // Given / When / Then
+    expect(buildExercisesLines([])).toContain("No benchmark-result.v1 files found.");
   });
 });

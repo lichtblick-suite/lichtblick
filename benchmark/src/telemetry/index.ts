@@ -4,6 +4,10 @@
 export { installBenchmarkTelemetry } from "./installBenchmarkTelemetry";
 export type {
   BenchmarkTelemetryHandle,
+  EmitCostResult,
   LichtblickTelemetryWindow,
   LichtblickTelemetryWindowApi,
+  TelemetryCollectorsState,
+  TelemetryToggleRequest,
+  TelemetryToggleResult,
 } from "./types";

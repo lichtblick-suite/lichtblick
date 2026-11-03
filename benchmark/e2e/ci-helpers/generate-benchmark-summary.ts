@@ -5,13 +5,18 @@ import fs from "node:fs";
 import path from "node:path";
 
 import {
+  buildExercisesLines,
   buildOverheadTable,
   buildPanelsSection,
   buildResultsTable,
+  buildScorecardTable,
 } from "../report/summaryMarkdown";
 import { OVERHEAD_PREFIX, RESULT_V1_SUFFIX } from "../result/constants";
-import type { BenchmarkResultV1 } from "../result/schemaV1";
-import type { OverheadReport } from "../runner/types";
+import { withRunKpis } from "../result/kpis";
+import { normalizeOverheadReport } from "../result/overheadLegacy";
+import { scenarioRunsOnly } from "../result/runMode";
+import type { PersistedResultV1, StoredResultV1 } from "../result/schemaV1";
+import type { OverheadReport } from "../runner/overhead.types";
 import type { BenchmarkArtifact } from "../types";
 
 // Copied rather than imported from `e2e/ci-helpers/types.ts`: kept local since this report only
@@ -169,8 +174,31 @@ function readArtifactJson<T>(predicate: (file: string) => boolean): T[] {
     .map((file) => JSON.parse(fs.readFileSync(path.join(ARTIFACTS_DIR, file), "utf-8")) as T);
 }
 
-function readResultsV1(): BenchmarkResultV1[] {
-  return readArtifactJson<BenchmarkResultV1>((file) => file.endsWith(RESULT_V1_SUFFIX));
+/**
+ * Scenario results as stored (overhead A/B runs dropped: they are summarized by their
+ * `overhead-*.json` reports); older ones without `summary.kpis` get them backfilled (`withRunKpis`).
+ */
+function readResultsV1(): PersistedResultV1[] {
+  return scenarioRunsOnly(
+    readArtifactJson<StoredResultV1>((file) => file.endsWith(RESULT_V1_SUFFIX)),
+  ).map(withRunKpis);
+}
+
+/** Overhead reports of schema 1, 2 or 3, normalized to schema 3 (unreadable ones are skipped). */
+function readOverheadReports(): OverheadReport[] {
+  return readArtifactJson<unknown>(
+    (file) => file.startsWith(OVERHEAD_PREFIX) && file.endsWith(".json"),
+  ).flatMap((json) => {
+    const report = normalizeOverheadReport(json);
+    return report != undefined ? [report] : [];
+  });
+}
+
+function printScorecard(): void {
+  process.stdout.write("\n## KPI Scorecard (per platform, latest telemetry-on run per scenario)\n");
+  process.stdout.write(buildScorecardTable(readResultsV1(), readOverheadReports()));
+  process.stdout.write("\n### Exercises\n");
+  process.stdout.write(buildExercisesLines(readResultsV1()));
 }
 
 function printTelemetryResults(): void {
@@ -185,17 +213,12 @@ function printPanelsAndPipeline(): void {
 
 function printOverheadReports(): void {
   process.stdout.write("\n## Telemetry Overhead (A/B: telemetry off vs on)\n");
-  process.stdout.write(
-    buildOverheadTable(
-      readArtifactJson<OverheadReport>(
-        (file) => file.startsWith(OVERHEAD_PREFIX) && file.endsWith(".json"),
-      ),
-    ),
-  );
+  process.stdout.write(buildOverheadTable(readOverheadReports()));
 }
 
 function main(): void {
   process.stdout.write("# Benchmark E2E Summary\n");
+  printScorecard();
   printTestResults();
   printScenarioMetrics();
   printTelemetryResults();

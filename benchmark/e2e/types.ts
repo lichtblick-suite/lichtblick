@@ -23,12 +23,18 @@ export type FrameTimeSample = { stamp: number; value: number };
  * Process entry of a legacy `MemorySample`. Electron writes its `ProcessMetric`s
  * (`app.getAppMetrics()`) unmodified, which are structurally compatible; the web runner writes this
  * minimal subset built from CDP `SystemInfo.getProcessInfo` + `ps` RSS. Memory values are KB.
+ * `percentCPUUsage` keeps each platform's raw scale: Electron's is divided by the logical CPU count,
+ * web's is a per-core sum (the v1 result's `process.cpuPercent` is a per-core sum on both).
  */
 export type LegacyProcessMetric = {
   pid: number;
   type: string;
   memory: { workingSetSize: number; peakWorkingSetSize: number; privateBytes?: number };
-  cpu: { percentCPUUsage: number };
+  cpu: {
+    percentCPUUsage: number;
+    /** Electron only: CPU seconds since the process started (optional in Electron's typings). */
+    cumulativeCPUUsage?: number;
+  };
 };
 
 export type MemorySample = { timestampMs: number; metrics: LegacyProcessMetric[] };

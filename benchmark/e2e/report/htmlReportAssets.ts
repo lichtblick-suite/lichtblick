@@ -196,5 +196,33 @@ export const REPORT_CLIENT_JS = `
   }
   window.addEventListener("hashchange", openFromHash);
   openFromHash();
+
+  // Group/tag chip filter: hides overview rows and run sections whose data-tags lack the token.
+  var filterStatus = document.querySelector(".filter-status");
+  function applyFilter(token) {
+    var shown = 0;
+    var total = 0;
+    document.querySelectorAll("tr[data-tags], details.run[data-tags]").forEach(function (el) {
+      var tags = (el.getAttribute("data-tags") || "").split(" ");
+      var visible = token === "" || tags.indexOf(token) !== -1;
+      el.classList.toggle("hidden-by-filter", !visible);
+      if (el.tagName === "DETAILS") {
+        total += 1;
+        shown += visible ? 1 : 0;
+      }
+    });
+    document.querySelectorAll("[data-filter]").forEach(function (chip) {
+      chip.classList.toggle("chip-active", chip.getAttribute("data-filter") === token);
+    });
+    if (filterStatus) {
+      filterStatus.textContent = token === "" ? "" : shown + "/" + total + " runs shown";
+    }
+  }
+  document.addEventListener("click", function (event) {
+    var chip = event.target.closest ? event.target.closest("[data-filter]") : null;
+    if (chip) {
+      applyFilter(chip.getAttribute("data-filter") || "");
+    }
+  });
 })();
 `;

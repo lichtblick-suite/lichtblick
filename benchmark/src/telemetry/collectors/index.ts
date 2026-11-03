@@ -2,5 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 export { getDefaultRendererCollectorsEnv, RendererCollectors } from "./RendererCollectors";
+export { SelfCostMeter } from "./SelfCostMeter";
 export { RENDERER_METRICS } from "./constants";
-export type { RendererCollectorsEnv } from "./types";
+export type { RendererCollectorsEnv, UaMemoryCollectorState } from "./types";

@@ -2,13 +2,17 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { FrameCollector } from "./FrameCollector";
+import { SelfCostMeter } from "./SelfCostMeter";
+import { TELEMETRY_SELF_COST_METRICS } from "../constants";
 import {
   buildMockTelemetry,
+  buildSteppingClock,
   FakeAnimationFrames,
   MockTelemetry,
+  sumCounter,
 } from "./builders/RendererCollectorsEnvBuilder";
 
-function setup(): {
+function setup(lateFrameThresholdMs?: number): {
   telemetry: MockTelemetry;
   frames: FakeAnimationFrames;
   clock: { now: number };
@@ -17,11 +21,15 @@ function setup(): {
   const telemetry = buildMockTelemetry();
   const frames = new FakeAnimationFrames();
   const clock = { now: 0 };
-  const collector = new FrameCollector(telemetry, {
-    now: () => clock.now,
-    requestAnimationFrame: frames.requestAnimationFrame,
-    cancelAnimationFrame: frames.cancelAnimationFrame,
-  });
+  const collector = new FrameCollector(
+    telemetry,
+    {
+      now: () => clock.now,
+      requestAnimationFrame: frames.requestAnimationFrame,
+      cancelAnimationFrame: frames.cancelAnimationFrame,
+    },
+    lateFrameThresholdMs,
+  );
   return { telemetry, frames, clock, collector };
 }
 
@@ -41,6 +49,24 @@ describe("FrameCollector", () => {
 
     // Then
     expect(telemetry.gauge).toHaveBeenCalledWith("renderer.fps", 8, "fps", "renderer");
+    expect(telemetry.counter).toHaveBeenCalledWith("renderer.frames", 4, "count", "renderer");
+    expect(telemetry.counter).toHaveBeenCalledWith("renderer.lateFrames", 1, "count", "renderer");
+  });
+
+  it("should count late frames against a runtime threshold when one is given", () => {
+    // Given: a 120 Hz threshold (12.5 ms); deltas 8, 16 (late), 8
+    const { telemetry, frames, clock, collector } = setup(12.5);
+    collector.start();
+    frames.fireFrame(100);
+    frames.fireFrame(108);
+    frames.fireFrame(124);
+    frames.fireFrame(132);
+
+    // When
+    clock.now = 1000;
+    collector.publish();
+
+    // Then
     expect(telemetry.counter).toHaveBeenCalledWith("renderer.lateFrames", 1, "count", "renderer");
   });
 
@@ -62,6 +88,7 @@ describe("FrameCollector", () => {
 
     // Then
     expect(telemetry.gauge).toHaveBeenCalledWith("renderer.fps", 1, "fps", "renderer");
+    expect(telemetry.counter).toHaveBeenCalledWith("renderer.frames", 1, "count", "renderer");
     expect(telemetry.counter).toHaveBeenCalledWith("renderer.lateFrames", 0, "count", "renderer");
   });
 
@@ -121,6 +148,35 @@ describe("FrameCollector", () => {
     );
   });
 
+  it("should keep the RAF loop running without recording while paused", () => {
+    // Given: a frame counted before the pause (dropped with the paused window)
+    const { telemetry, frames, clock, collector } = setup();
+    collector.start();
+    frames.fireFrame(16);
+
+    // When: paused, two frames still fire; then a fresh window after start()
+    collector.pause();
+    frames.fireFrame(32);
+    frames.fireFrame(48);
+    collector.publish();
+    const requestsBeforeRestart = frames.requestAnimationFrame.mock.calls.length;
+    clock.now = 100;
+    collector.start();
+    frames.fireFrame(64);
+    clock.now = 600;
+    collector.publish();
+
+    // Then: the loop never stopped (no extra request on restart) and paused frames were not counted
+    expect(collector.isLoopRunning()).toBe(true);
+    expect(frames.cancelAnimationFrame).not.toHaveBeenCalled();
+    expect(frames.requestAnimationFrame).toHaveBeenCalledTimes(requestsBeforeRestart + 1);
+    expect(telemetry.counter.mock.calls).toEqual([
+      ["renderer.frames", 1, "count", "renderer"],
+      ["renderer.lateFrames", 0, "count", "renderer"],
+    ]);
+    expect(telemetry.gauge).toHaveBeenCalledWith("renderer.fps", 2, "fps", "renderer");
+  });
+
   it("should stop the RAF loop and publishing on dispose", () => {
     // Given
     const { telemetry, frames, collector } = setup();
@@ -134,6 +190,7 @@ describe("FrameCollector", () => {
     // Then
     expect(frames.cancelAnimationFrame).toHaveBeenCalledTimes(1);
     expect(frames.hasPending()).toBe(false);
+    expect(collector.isLoopRunning()).toBe(false);
     expect(telemetry.gauge).not.toHaveBeenCalled();
     expect(telemetry.counter).not.toHaveBeenCalled();
   });
@@ -152,5 +209,34 @@ describe("FrameCollector", () => {
     expect(collector.isSupported()).toBe(false);
     expect(telemetry.gauge).not.toHaveBeenCalled();
     expect(telemetry.event).not.toHaveBeenCalled();
+  });
+
+  it("should accumulate the time spent inside the RAF callback into the self-cost meter", () => {
+    // Given: the self-cost clock advances 0.5 ms per read; the collector's own clock is static
+    const telemetry = buildMockTelemetry();
+    const frames = new FakeAnimationFrames();
+    const meter = new SelfCostMeter(buildSteppingClock(0.5));
+    const collector = new FrameCollector(
+      telemetry,
+      {
+        now: () => 0,
+        requestAnimationFrame: frames.requestAnimationFrame,
+        cancelAnimationFrame: frames.cancelAnimationFrame,
+      },
+      undefined,
+      meter,
+    );
+    collector.start();
+
+    // When: three frames, then one after dispose (not running: not timed)
+    frames.fireFrame(16);
+    frames.fireFrame(32);
+    frames.fireFrame(48);
+    collector.dispose();
+    frames.fireFrame(64);
+    meter.publish(telemetry);
+
+    // Then
+    expect(sumCounter(telemetry, TELEMETRY_SELF_COST_METRICS.framesMs)).toBe(1.5);
   });
 });
