@@ -11,8 +11,6 @@ export type CpuVerdictStats = {
   n: number;
   /** Excluded pairs / quartets. */
   excluded: number;
-  /** Normalized schema-1 report (relaunch, one pair). */
-  legacy?: true;
   cpuRelative: MetricStats;
   cpuPctPoints: MetricStats;
 };

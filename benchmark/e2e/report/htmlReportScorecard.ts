@@ -5,13 +5,7 @@
 // sections of the HTML viewer. Colors only where an explicit target exists (stability 100 %,
 // telemetry overhead); everything else is neutral. Pure; every text is escaped here.
 
-import {
-  CPU_SCALE_NOTE,
-  LEGACY_OVERHEAD_NOTE,
-  MEM_NOT_MEASURED,
-  PLATFORM_ORDER,
-  VERDICT_DISPLAY,
-} from "./constants";
+import { CPU_SCALE_NOTE, MEM_NOT_MEASURED, PLATFORM_ORDER, VERDICT_DISPLAY } from "./constants";
 import type { Tone } from "./htmlReport.types";
 import { cell, escapeHtml, fmtNumber, num, renderTable } from "./htmlReportFormat";
 import { LOW_FPS_WARNING, MIN_SLOPE_WINDOW_MS } from "../result/constants";
@@ -171,8 +165,6 @@ function overheadCard({ overhead }: PlatformScorecardV1): Card {
   }
   const { worstCpuRelative: cpu, worstMemMiB: mem, targets } = overhead;
   const display = VERDICT_DISPLAY[overhead.verdict];
-  const legacy =
-    overhead.legacyReports > 0 ? ` · ${overhead.legacyReports} ${LEGACY_OVERHEAD_NOTE}` : "";
   const { toggle, relaunch } = overhead.cpuVerdictSources;
   const cpuSources = `CPU from toggle ${toggle} / relaunch ${relaunch}`;
   const memNote =
@@ -185,7 +177,7 @@ function overheadCard({ overhead }: PlatformScorecardV1): Card {
     lines: [
       `worst CPU Δ CI95 upper: ${worstOverheadText(cpu, 100, 2, "%")} · target ≤ ${fmtNumber(targets.cpuDeltaRelativeMax * 100, 0)} %`,
       `worst memory Δ CI95 upper: ${worstOverheadText(mem, 1, 1, "MiB")} · target ≤ ${fmtNumber(targets.memDeltaMiBMax, 0)} MiB${escapeHtml(memNote)}`,
-      `<span class="muted">${overhead.reports} scenario(s) · ≥ ${overhead.minPairs} pair(s) / quartet(s) each · ${escapeHtml(cpuSources)}${escapeHtml(legacy)} · <a href="#telemetry-overhead">details</a></span>`,
+      `<span class="muted">${overhead.reports} scenario(s) · ≥ ${overhead.minPairs} pair(s) / quartet(s) each · ${escapeHtml(cpuSources)} · <a href="#telemetry-overhead">details</a></span>`,
     ],
     tone: display.tone,
   };

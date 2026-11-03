@@ -103,9 +103,6 @@ export const VERDICT_DISPLAY: Readonly<
   exceeds: { symbol: "❌", label: "exceeds", tone: "bad" },
 };
 
-/** Note of overhead reports normalized from schema 1 (one off/on pair, no statistics). */
-export const LEGACY_OVERHEAD_NOTE = "legacy n=1";
-
 /** Memory delta / verdict of an overhead report without a relaunch A/B (method `toggle`). */
 export const MEM_NOT_MEASURED = "not measured";
 

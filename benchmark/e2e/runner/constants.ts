@@ -145,9 +145,9 @@ export const CLOCK_SYNC_ROUNDS = 5;
 export const OVERHEAD_DURATION_MARGIN_MS = 2_000;
 
 /**
- * Data beyond the overhead page auto-pause in the overhead MCAP fixtures (`overheadFixtureOptions`):
- * covers the loading time before playback starts, so the player still streams data at the last
- * steady poll instead of idling at the end of the file.
+ * Data beyond the overhead page auto-pause in the overhead MCAP fixtures
+ * (`overheadFixtureOptionsForAutoPause`): covers the loading time before playback starts, so the
+ * player still streams data at the last steady poll instead of idling at the end of the file.
  */
 export const OVERHEAD_FIXTURE_DATA_MARGIN_MS = 5_000;
 

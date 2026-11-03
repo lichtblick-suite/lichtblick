@@ -15,7 +15,6 @@ import {
   toggleFlagsText,
   toggleProcessDeltasText,
 } from "./overheadText";
-import { normalizeOverheadReport } from "../result/overheadLegacy";
 import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 import type { OverheadArmProps } from "../runner/builders/OverheadRunBuilder";
 import { ToggleBlockBuilder } from "../runner/builders/ToggleBlockBuilder";
@@ -162,15 +161,16 @@ describe("cpuVerdictStats", () => {
     expect(stats.cpuPctPoints.median).toBeCloseTo(2, 10);
   });
 
-  it("should read the relaunch A/B otherwise, keeping the legacy marker", () => {
+  it("should read the relaunch A/B otherwise", () => {
     // Given
     const relaunch = BenchmarkResultBuilder.overhead();
-    const legacy = normalizeOverheadReport(OverheadRunBuilder.legacyReport())!;
 
-    // When / Then
-    expect(cpuVerdictStats(relaunch)).toMatchObject({ source: "relaunch", n: 5 });
-    expect(cpuVerdictStats(relaunch).cpuRelative.median).toBeCloseTo(0.01, 10);
-    expect(cpuVerdictStats(legacy)).toMatchObject({ source: "relaunch", n: 1, legacy: true });
+    // When
+    const stats = cpuVerdictStats(relaunch);
+
+    // Then
+    expect(stats).toMatchObject({ source: "relaunch", n: 5 });
+    expect(stats.cpuRelative.median).toBeCloseTo(0.01, 10);
   });
 });
 

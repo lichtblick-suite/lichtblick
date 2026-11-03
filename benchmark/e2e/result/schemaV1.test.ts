@@ -8,14 +8,11 @@ import {
   BuildResultV1Input,
   HostProcessSample,
   RunInfoV1,
-  TelemetryEvent,
   TelemetryRecord,
   TelemetrySample,
   buildResultV1,
   computeDropped,
   computeSequenceGaps,
-  median,
-  percentile,
   steadyStateFloorTs,
   summarizePhases,
   summarizePools,
@@ -23,6 +20,8 @@ import {
   summarizeRenderer,
   validateResultV1,
 } from "./schemaV1";
+import { median, percentile } from "./stats";
+import type { TelemetryEvent } from "../../../packages/suite-base/src/util/telemetry/types";
 import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 
 const POOL = "pipeline.hydratedSourcePool.";

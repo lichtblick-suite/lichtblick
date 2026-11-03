@@ -7,31 +7,26 @@ import {
   interquartileRange,
   median,
   mulberry32,
-  quantile,
   summarizeMetric,
   verdict,
   worstVerdict,
 } from "./stats";
 
-describe("quantile / interquartileRange", () => {
+describe("interquartileRange", () => {
   it("should interpolate linearly between order statistics regardless of input order", () => {
     // Given unsorted values 1..4
     const values = [4, 1, 3, 2];
 
-    // When / Then
-    expect(quantile(values, 0)).toBe(1);
-    expect(quantile(values, 1)).toBe(4);
-    expect(quantile(values, 0.5)).toBe(2.5);
-    expect(quantile(values, 0.25)).toBeCloseTo(1.75);
-    expect(interquartileRange(values)).toBeCloseTo(1.5);
+    // When
+    const iqr = interquartileRange(values);
+
+    // Then q75 = 3.25 and q25 = 1.75
+    expect(iqr).toBeCloseTo(1.5);
   });
 
-  it("should return undefined without values and clamp q to [0, 1]", () => {
+  it("should return undefined without values", () => {
     // Given / When / Then
-    expect(quantile([], 0.5)).toBeUndefined();
     expect(interquartileRange([])).toBeUndefined();
-    expect(quantile([1, 2], 2)).toBe(2);
-    expect(quantile([1, 2], -1)).toBe(1);
   });
 });
 

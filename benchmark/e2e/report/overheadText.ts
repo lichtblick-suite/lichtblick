@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// Plain-text formatting of overhead A/B reports (schema 3; older schemas normalized), shared by the
+// Plain-text formatting of overhead A/B reports (schema 3), shared by the
 // HTML report and the CI markdown summary. Free of DOM/Playwright/Node imports.
 
-import { LEGACY_OVERHEAD_NOTE, MEM_NOT_MEASURED, NONE, VERDICT_DISPLAY } from "./constants";
+import { MEM_NOT_MEASURED, NONE, VERDICT_DISPLAY } from "./constants";
 import type { CpuVerdictStats } from "./overheadText.types";
 import type { DeltaUnit } from "./types";
 import type { DirectAttributionV3 } from "../result/directAttribution.types";
@@ -49,11 +49,8 @@ export function verdictText(verdict: Verdict): string {
   return `${display.symbol} ${display.label}`;
 }
 
-/** Included relaunch pairs, with the excluded count or the legacy note: `5 (1 excl.)`. */
-export function pairsText(report: Pick<OverheadReport, "n" | "excludedPairs" | "legacy">): string {
-  if (report.legacy === true) {
-    return `${report.n} (${LEGACY_OVERHEAD_NOTE})`;
-  }
+/** Included relaunch pairs, with the excluded count: `5 (1 excl.)`. */
+export function pairsText(report: Pick<OverheadReport, "n" | "excludedPairs">): string {
   return report.excludedPairs > 0 ? `${report.n} (${report.excludedPairs} excl.)` : `${report.n}`;
 }
 
@@ -63,7 +60,7 @@ export function pairsText(report: Pick<OverheadReport, "n" | "excludedPairs" | "
  */
 export function cpuSamplesText(cpu: CpuVerdictStats): string {
   if (cpu.source === "relaunch") {
-    return pairsText({ n: cpu.n, excludedPairs: cpu.excluded, legacy: cpu.legacy });
+    return pairsText({ n: cpu.n, excludedPairs: cpu.excluded });
   }
   const quartets = `${cpu.n} quartet${cpu.n === 1 ? "" : "s"}`;
   return cpu.excluded > 0 ? `${quartets} (${cpu.excluded} excl.)` : quartets;
@@ -79,7 +76,6 @@ export function cpuVerdictStats(report: OverheadReport): CpuVerdictStats {
     source: "relaunch",
     n: report.n,
     excluded: report.excludedPairs,
-    ...(report.legacy === true && { legacy: true }),
     cpuRelative: report.metrics.cpuRelative,
     cpuPctPoints: report.metrics.cpuPctPoints,
   };

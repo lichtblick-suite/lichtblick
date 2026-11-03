@@ -2,86 +2,24 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { CpuProfileBuilder } from "./builders/CpuProfileBuilder";
-import {
-  normalizeLegacyOverheadReport,
-  normalizeOverheadReport,
-  normalizeV2OverheadReport,
-} from "./overheadLegacy";
+import { normalizeOverheadReport } from "./overheadReport";
 import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 import { ToggleBlockBuilder } from "../runner/builders/ToggleBlockBuilder";
 import { buildOverheadReport } from "../runner/overhead";
 
-const MIB = 1024 * 1024;
-
-describe("normalizeLegacyOverheadReport", () => {
-  it("should map a schema-1 report to schema 2 with one inconclusive pair", () => {
-    // Given
-    const legacy = OverheadRunBuilder.legacyReport({
-      deltas: { cpuDeltaPctPoints: 1, cpuDeltaRelative: 0.01, memDeltaBytes: 3 * MIB },
-    });
-
-    // When
-    const report = normalizeLegacyOverheadReport(legacy);
-
-    // Then
-    expect(report).toMatchObject({
-      schemaVersion: 2,
-      legacy: true,
-      n: 1,
-      excludedPairs: 0,
-      verdicts: { cpu: "inconclusive", memory: "inconclusive", overall: "inconclusive" },
-      targets: legacy.targets,
-    });
-    expect(report.metrics.cpuRelative).toEqual({
-      n: 1,
-      median: 0.01,
-      iqr: 0,
-      ci95: { lower: 0.01, upper: 0.01 },
-    });
-    expect(report.metrics.memBytes.median).toBe(3 * MIB);
-    expect(report.metrics.fps).toEqual({ n: 0 });
-    expect(report.runs.map((run) => run.arm)).toEqual(["off", "on"]);
-    expect(report.runs[1]!.steady.medianTotalCpuPercent).toBe(101);
-  });
-
-  it("should leave the relative CPU empty when the legacy report had none", () => {
-    // Given
-    const legacy = OverheadRunBuilder.legacyReport({
-      deltas: { cpuDeltaPctPoints: 2, memDeltaBytes: 0 },
-    });
-
-    // When
-    const report = normalizeLegacyOverheadReport(legacy);
-
-    // Then
-    expect(report.metrics.cpuRelative).toEqual({ n: 0 });
-    expect(report.pairs[0]!.deltas).not.toHaveProperty("cpuRelative");
-  });
-});
-
-describe("normalizeV2OverheadReport", () => {
-  it("should map a schema-2 report to a schema-3 relaunch report with both verdicts from it", () => {
-    // Given
-    const v2 = OverheadRunBuilder.reportV2();
-
-    // When
-    const report = normalizeV2OverheadReport(v2);
-
-    // Then
-    expect(report).toMatchObject({
-      schemaVersion: 3,
-      method: "relaunch",
-      config: { ...v2.config, method: "relaunch" },
-      cpuVerdictSource: "relaunch",
-      memVerdictSource: "relaunch",
-      verdicts: v2.verdicts,
-      relaunchVerdicts: v2.verdicts,
-      n: v2.n,
-      metrics: v2.metrics,
-    });
-    expect(report.toggle).toBeUndefined();
-  });
-});
+/** A current (schema-3) relaunch report, as written to disk. */
+function relaunchReportJson(): Record<string, unknown> {
+  return JSON.parse(
+    JSON.stringify(
+      buildOverheadReport({
+        platform: "web",
+        scenarioId: "sinewave",
+        runs: OverheadRunBuilder.abba([{}, {}, {}]),
+        config: OverheadRunBuilder.config(),
+      }),
+    ),
+  ) as Record<string, unknown>;
+}
 
 describe("normalizeOverheadReport", () => {
   it("should pass schema-3 reports through", () => {
@@ -207,67 +145,47 @@ describe("normalizeOverheadReport", () => {
     expect(report).toEqual(v3);
   });
 
-  it("should re-summarize a toggle section from before the quartets from its blocks", () => {
-    // Given a both-method report (toggle +5 %, exceeds) written with pair statistics and verdicts
+  it.each([1, 2, 4])("should skip a report of unsupported schema version %d", (schemaVersion) => {
+    // Given an otherwise complete report with another schema version
+    const json = { ...relaunchReportJson(), schemaVersion };
+
+    // When
+    const report = normalizeOverheadReport(json);
+
+    // Then
+    expect(report).toBeUndefined();
+  });
+
+  it("should skip a schema-3 report with a toggle section from before the quartets", () => {
+    // Given a both-method report whose toggle section has adjacent pairs instead of quartets
     const v3 = buildOverheadReport({
       platform: "web",
       scenarioId: "sinewave",
       runs: OverheadRunBuilder.abba([{}, {}, {}]),
       config: OverheadRunBuilder.config(),
       method: "both",
-      toggle: ToggleBlockBuilder.summary(Array.from({ length: 6 }, () => ({ off: 100, on: 105 }))),
+      toggle: ToggleBlockBuilder.summary(),
     });
-    const { toggle: _toggle, ...config } = v3.config;
     const json = {
       ...v3,
-      config,
-      verdicts: { ...v3.verdicts, cpu: "within", overall: "within" },
       toggle: ToggleBlockBuilder.preQuartetSection(v3.toggle!),
     };
 
     // When
     const report = normalizeOverheadReport(JSON.parse(JSON.stringify(json)));
 
-    // Then: quartets, statistics and the CPU / overall verdicts as written today
-    expect(report).toEqual(v3);
-  });
-
-  it("should normalize schema-2 reports to method relaunch", () => {
-    // Given
-    const v2 = OverheadRunBuilder.reportV2();
-
-    // When
-    const report = normalizeOverheadReport(JSON.parse(JSON.stringify(v2)));
-
     // Then
-    expect(report).toEqual(normalizeV2OverheadReport(v2));
-  });
-
-  it("should normalize schema-1 reports through schema 2", () => {
-    // Given / When
-    const report = normalizeOverheadReport(OverheadRunBuilder.legacyReport());
-
-    // Then
-    expect(report).toMatchObject({
-      schemaVersion: 3,
-      legacy: true,
-      method: "relaunch",
-      cpuVerdictSource: "relaunch",
-      memVerdictSource: "relaunch",
-      verdicts: { overall: "inconclusive" },
-    });
+    expect(report).toBeUndefined();
   });
 
   it.each([
     ["not an object", 42],
-    ["another kind", { kind: "result", schemaVersion: 2, scenarioId: "x" }],
-    ["an unknown schema", { ...OverheadRunBuilder.legacyReport(), schemaVersion: 4 }],
-    ["a schema-2 report without pairs", { kind: "overhead", schemaVersion: 2, scenarioId: "x" }],
+    ["another kind", { ...relaunchReportJson(), kind: "result" }],
+    ["a report without pairs", { ...relaunchReportJson(), pairs: undefined }],
     [
-      "a schema-3 report with an incomplete toggle section",
+      "a report with an incomplete toggle section",
       {
-        ...OverheadRunBuilder.reportV2(),
-        schemaVersion: 3,
+        ...relaunchReportJson(),
         method: "toggle",
         cpuVerdictSource: "toggle",
         memVerdictSource: "notMeasured",
@@ -275,8 +193,12 @@ describe("normalizeOverheadReport", () => {
       },
     ],
     [
-      "a schema-3 report without verdict sources",
-      { ...OverheadRunBuilder.reportV2(), schemaVersion: 3, method: "relaunch" },
+      "a report without verdict sources",
+      {
+        ...relaunchReportJson(),
+        cpuVerdictSource: undefined,
+        memVerdictSource: undefined,
+      },
     ],
   ])("should reject %s", (_label, json) => {
     // Given / When / Then

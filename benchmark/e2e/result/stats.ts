@@ -75,14 +75,9 @@ function medianOfSorted(sorted: ArrayLike<number>): number {
 }
 
 /**
- * Quantile `q` ∈ [0, 1] with linear interpolation between order statistics (R type 7, the
- * spreadsheet/NumPy default); undefined for no values.
+ * Interquartile range `q75 − q25`, quantiles linearly interpolated between order statistics (R type
+ * 7, the spreadsheet/NumPy default); undefined for no values.
  */
-export function quantile(values: readonly number[], q: number): number | undefined {
-  return values.length === 0 ? undefined : quantileOfSorted(sortedNumbers(values), q);
-}
-
-/** Interquartile range `q75 − q25` (see `quantile`); undefined for no values. */
 export function interquartileRange(values: readonly number[]): number | undefined {
   if (values.length === 0) {
     return undefined;

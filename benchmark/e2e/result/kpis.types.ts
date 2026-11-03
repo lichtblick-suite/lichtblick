@@ -125,16 +125,11 @@ export type KpiRun = {
 
 export type KpiRunRef = { scenarioId: string; runId: string };
 
-/**
- * The fields of an overhead A/B report (`runner/overhead.types.ts` `OverheadReportV3`, schema 1/2
- * reports normalized) the scorecard reads.
- */
+/** The fields of an overhead A/B report (`runner/overhead.types.ts` `OverheadReportV3`) the scorecard reads. */
 export type OverheadKpiInput = {
   platform: BenchmarkPlatform;
   scenarioId: string;
   createdAtWall: string;
-  /** Normalized schema-1 report (one pair, verdict inconclusive). */
-  legacy?: true;
   /** Included relaunch `on-vs-off` pairs (0 for method `toggle`). */
   n: number;
   /** Relaunch A/B statistics. */
@@ -173,8 +168,6 @@ export type OverheadAggregateV1 = {
   cpuVerdictSources: { toggle: number; relaunch: number };
   /** Reports without a memory verdict (method `toggle`). */
   memNotMeasuredReports: number;
-  /** Reports normalized from schema 1 (n = 1, no statistics). */
-  legacyReports: number;
   /** Relative CPU delta (fraction) of each report's CPU verdict source. */
   worstCpuRelative?: OverheadWorstV1;
   /** Working-set delta, MiB (relaunch; reports without a memory verdict left out). */

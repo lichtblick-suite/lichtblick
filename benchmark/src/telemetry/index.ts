@@ -2,12 +2,3 @@
 // SPDX-License-Identifier: MPL-2.0
 
 export { installBenchmarkTelemetry } from "./installBenchmarkTelemetry";
-export type {
-  BenchmarkTelemetryHandle,
-  EmitCostResult,
-  LichtblickTelemetryWindow,
-  LichtblickTelemetryWindowApi,
-  TelemetryCollectorsState,
-  TelemetryToggleRequest,
-  TelemetryToggleResult,
-} from "./types";

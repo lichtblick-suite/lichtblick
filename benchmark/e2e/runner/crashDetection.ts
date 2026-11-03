@@ -29,8 +29,6 @@ import { DOCUMENT_MARKER_KEY, PROCESS_GONE_BUFFER_KEY } from "./constants";
 import type { CrashDetection, ProcessGoneRecord } from "./types";
 import type { RunnerEvent } from "../result/schemaV1";
 
-export type { RunnerEvent, RunnerEventType } from "../result/schemaV1";
-
 /** Runner (Node) clock, see the module comment. */
 export function runnerNow(): number {
   return performance.timeOrigin + performance.now();

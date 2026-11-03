@@ -6,7 +6,6 @@ import { EventEmitter } from "node:events";
 
 import { PROCESS_GONE_BUFFER_KEY } from "./constants";
 import {
-  RunnerEvent,
   filterRunnerEvents,
   formatRunnerEventsFailure,
   isUnexpectedReload,
@@ -14,6 +13,7 @@ import {
   startCrashDetection,
 } from "./crashDetection";
 import type { ProcessGoneRecord } from "./types";
+import type { RunnerEvent } from "../result/schemaV1";
 
 class ProcessGoneRecordBuilder {
   #source: ProcessGoneRecord["source"] = "child-process-gone";

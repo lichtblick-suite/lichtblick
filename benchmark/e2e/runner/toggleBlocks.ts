@@ -305,7 +305,7 @@ function sumOver(
  * `cpuDeltaRelativeMax` (`inconclusive` below `MIN_QUARTETS_FOR_VERDICT` included quartets), and
  * the adjacent pairs as a diagnostic.
  */
-export function summarizeToggleBlocks({
+function summarizeToggleBlocks({
   blocks,
   modalProcessSet: modal,
   config,

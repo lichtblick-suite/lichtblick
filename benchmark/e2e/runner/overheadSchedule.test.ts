@@ -153,17 +153,6 @@ describe("parseOverheadConfig", () => {
     expect(config.profileMs).toBe(expected);
   });
 
-  it("should not read a toggle pair count", () => {
-    // Given the knob the quartet count replaced
-    const env = { BENCHMARK_OVERHEAD_TOGGLE_PAIRS: "6" };
-
-    // When
-    const config = parseOverheadConfig(env, "web");
-
-    // Then
-    expect(config.toggleQuartets).toBe(10);
-  });
-
   it("should fall back to the defaults for blank or non-integer values", () => {
     // Given
     const env = {

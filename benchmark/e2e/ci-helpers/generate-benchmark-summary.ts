@@ -13,7 +13,7 @@ import {
 } from "../report/summaryMarkdown";
 import { OVERHEAD_PREFIX, RESULT_V1_SUFFIX } from "../result/constants";
 import { withRunKpis } from "../result/kpis";
-import { normalizeOverheadReport } from "../result/overheadLegacy";
+import { normalizeOverheadReport } from "../result/overheadReport";
 import { scenarioRunsOnly } from "../result/runMode";
 import type { PersistedResultV1, StoredResultV1 } from "../result/schemaV1";
 import type { OverheadReport } from "../runner/overhead.types";
@@ -184,19 +184,30 @@ function readResultsV1(): PersistedResultV1[] {
   ).map(withRunKpis);
 }
 
-/** Overhead reports of schema 1, 2 or 3, normalized to schema 3 (unreadable ones are skipped). */
+/** Overhead reports of the current schema (3); other schemas or unreadable files are skipped. */
 function readOverheadReports(): OverheadReport[] {
-  return readArtifactJson<unknown>(
-    (file) => file.startsWith(OVERHEAD_PREFIX) && file.endsWith(".json"),
-  ).flatMap((json) => {
-    const report = normalizeOverheadReport(json);
-    return report != undefined ? [report] : [];
-  });
+  if (!fs.existsSync(ARTIFACTS_DIR)) {
+    return [];
+  }
+  return fs
+    .readdirSync(ARTIFACTS_DIR)
+    .filter((file) => file.startsWith(OVERHEAD_PREFIX) && file.endsWith(".json"))
+    .flatMap((file) => {
+      const json: unknown = JSON.parse(fs.readFileSync(path.join(ARTIFACTS_DIR, file), "utf-8"));
+      const report = normalizeOverheadReport(json);
+      if (report == undefined) {
+        console.warn(
+          `Skipping ${file}: not a supported overhead report (schemaVersion 3 with toggle quartets)`,
+        );
+        return [];
+      }
+      return [report];
+    });
 }
 
-function printScorecard(): void {
+function printScorecard(overheads: readonly OverheadReport[]): void {
   process.stdout.write("\n## KPI Scorecard (per platform, latest telemetry-on run per scenario)\n");
-  process.stdout.write(buildScorecardTable(readResultsV1(), readOverheadReports()));
+  process.stdout.write(buildScorecardTable(readResultsV1(), overheads));
   process.stdout.write("\n### Exercises\n");
   process.stdout.write(buildExercisesLines(readResultsV1()));
 }
@@ -211,19 +222,20 @@ function printPanelsAndPipeline(): void {
   process.stdout.write(buildPanelsSection(readResultsV1()));
 }
 
-function printOverheadReports(): void {
+function printOverheadReports(overheads: readonly OverheadReport[]): void {
   process.stdout.write("\n## Telemetry Overhead (A/B: telemetry off vs on)\n");
-  process.stdout.write(buildOverheadTable(readOverheadReports()));
+  process.stdout.write(buildOverheadTable(overheads));
 }
 
 function main(): void {
   process.stdout.write("# Benchmark E2E Summary\n");
-  printScorecard();
+  const overheads = readOverheadReports();
+  printScorecard(overheads);
   printTestResults();
   printScenarioMetrics();
   printTelemetryResults();
   printPanelsAndPipeline();
-  printOverheadReports();
+  printOverheadReports(overheads);
 }
 
 main();

@@ -331,7 +331,7 @@ describe("aggregateKpis", () => {
   });
 
   it("should attach the overhead worst case of the platform's latest reports", () => {
-    // Given an older exceeding and a newer within sinewave report, an inconclusive legacy
+    // Given an older exceeding and a newer within sinewave report, an inconclusive single-pair
     // pointcloud report, and a web report
     const overheads = [
       overhead({ createdAtWall: "2026-01-01T00:00:00.000Z", verdicts: { overall: "exceeds" } }),
@@ -339,7 +339,6 @@ describe("aggregateKpis", () => {
       overhead({
         scenarioId: "pointcloud",
         n: 1,
-        legacy: true,
         cpu: [0.025, 0.025, 0.025],
         memMiB: [12, 12, 12],
         verdicts: { overall: "inconclusive" },
@@ -358,8 +357,11 @@ describe("aggregateKpis", () => {
       totalPairs: 6,
       cpuVerdictSources: { toggle: 0, relaunch: 2 },
       memNotMeasuredReports: 0,
-      legacyReports: 1,
-      worstCpuRelative: { scenarioId: "pointcloud", ciUpper: 0.025, median: 0.025 },
+      worstCpuRelative: {
+        scenarioId: "pointcloud",
+        ciUpper: 0.025,
+        median: 0.025,
+      },
       worstMemMiB: { scenarioId: "pointcloud", ciUpper: 12, median: 12 },
       targets: { cpuDeltaRelativeMax: 0.02, memDeltaMiBMax: 20 },
     });

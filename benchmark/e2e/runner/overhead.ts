@@ -12,7 +12,6 @@ import type {
   OverheadPairDeltas,
   OverheadPairFlag,
   OverheadMethod,
-  OverheadReportV2,
   OverheadReportV3,
   OverheadRunInput,
   OverheadRunV2,
@@ -27,7 +26,7 @@ import { median, summarizeMetric, verdict, worstVerdict } from "../result/stats"
 import type { TelemetrySelfSummaryV1 } from "../result/telemetrySelf.types";
 import { compareCodeUnits } from "../shared/compare";
 
-// Telemetry overhead A/B, relaunch method (the schema-2 fields of the schema-3 report): the same
+// Telemetry overhead A/B, relaunch method (the relaunch fields of the schema-3 report): the same
 // scenario in fresh app instances with `?telemetry=off`
 // and with telemetry on (optionally also on without the UA memory probe), `repeats` times in a
 // balanced order (`runner/overheadSchedule.ts`). Each run measures a fixed-schedule steady window
@@ -254,7 +253,7 @@ export function summarizeSelfCost(
 function uaComparisons(
   pairs: readonly OverheadPair[],
   targets: OverheadTargets,
-): Pick<OverheadReportV2, "withoutUaProbe" | "uaCost"> {
+): Pick<OverheadReportV3, "withoutUaProbe" | "uaCost"> {
   if (!pairs.some((pair) => pair.treatmentArm === "on-noUa" || pair.baseArm === "on-noUa")) {
     return {};
   }
@@ -310,7 +309,7 @@ export function overheadFinalVerdicts({
 
 /**
  * The schema-3 overhead report of one scenario on one platform (pure): the relaunch A/B of `runs`
- * (schema-2 fields; none for method `toggle`), the toggle A/B summary (methods `toggle` / `both`)
+ * (relaunch fields; none for method `toggle`), the toggle A/B summary (methods `toggle` / `both`)
  * and the final verdicts (`overheadFinalVerdicts`).
  */
 export function buildOverheadReport(input: BuildOverheadReportInput): OverheadReportV3 {

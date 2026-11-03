@@ -14,7 +14,6 @@ import {
 } from "./summaryMarkdown";
 import { CpuProfileBuilder } from "../result/builders/CpuProfileBuilder";
 import { RunInfoBuilder } from "../result/builders/RunInfoBuilder";
-import { normalizeOverheadReport } from "../result/overheadLegacy";
 import { BenchmarkResultV1, buildResultV1 } from "../result/schemaV1";
 import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 import { ToggleBlockBuilder } from "../runner/builders/ToggleBlockBuilder";
@@ -295,9 +294,9 @@ describe("buildOverheadTable", () => {
     );
   });
 
-  it("marks legacy reports and adds the UA-probe rows", () => {
-    // Given a normalized schema-1 report and a report with the on-noUa arm
-    const legacy = normalizeOverheadReport(OverheadRunBuilder.legacyReport())!;
+  it("marks single-pair reports inconclusive and adds the UA-probe rows", () => {
+    // Given a single-pair report and a report with the on-noUa arm
+    const single = BenchmarkResultBuilder.overhead({ repeats: 1 });
     const arms: OverheadArm[] = ["off", "on", "on-noUa"];
     const memMiB: Record<OverheadArm, number> = { off: 500, on: 510, "on-noUa": 502 };
     const ua = buildOverheadReport({
@@ -312,11 +311,11 @@ describe("buildOverheadTable", () => {
     });
 
     // When
-    const markdown = buildOverheadTable([legacy, ua]);
+    const markdown = buildOverheadTable([single, ua]);
 
     // Then
     expect(markdown).toContain(
-      "| electron | sinewave | relaunch | 1 (legacy n=1) | +1.00 % (+1.0 pp) | 0.0 MiB | ❔ inconclusive |",
+      "| electron | sinewave | relaunch | 1 | +1.00 % (+1.0 pp) | +5.0 MiB | ❔ inconclusive |",
     );
     expect(markdown).toContain(
       "| web | ↳ without UA probe | relaunch | 3 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +2.0 MiB [+2.0, +2.0] | ✅ within |",

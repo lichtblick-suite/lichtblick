@@ -30,7 +30,7 @@ import {
   RESULT_V1_SUFFIX,
 } from "../result/constants";
 import { withRunKpis } from "../result/kpis";
-import { normalizeOverheadReport } from "../result/overheadLegacy";
+import { normalizeOverheadReport } from "../result/overheadReport";
 import { isOverheadRun } from "../result/runMode";
 import {
   PersistedResultV1,
@@ -67,8 +67,8 @@ export function parseResultFile(fileName: string, text: string): ParseOutcome<Lo
 }
 
 /**
- * Parses one `overhead-*.json` report of schema 1 or 2, normalized to schema 2 (schema-1 reports
- * become `legacy` n = 1 reports with inconclusive verdicts, see `normalizeOverheadReport`).
+ * Parses one `overhead-*.json` report of the current schema (3); any other schema version or shape
+ * is rejected with a reason (see `normalizeOverheadReport`).
  */
 export function parseOverheadFile(text: string): ParseOutcome<OverheadReport> {
   let json: unknown;
@@ -84,7 +84,10 @@ export function parseOverheadFile(text: string): ParseOutcome<OverheadReport> {
     typeof report.createdAtWall === "string";
   return valid
     ? { ok: true, value: report }
-    : { ok: false, reason: "not an overhead report (schemaVersion 1 or 2)" };
+    : {
+        ok: false,
+        reason: "not a supported overhead report (schemaVersion 3 with toggle quartets)",
+      };
 }
 
 /** `<scenarioId>-<platform>[-telemetry-off]-<ts>`: shared by a run's result and screenshots. */

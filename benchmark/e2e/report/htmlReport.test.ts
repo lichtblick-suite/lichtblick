@@ -6,8 +6,6 @@ import { buildHtmlReport } from "./htmlReport";
 import { escapeHtml } from "./htmlReportFormat";
 import type { HtmlReportInput, LoadedResult } from "./types";
 import { CpuProfileBuilder } from "../result/builders/CpuProfileBuilder";
-import { normalizeOverheadReport } from "../result/overheadLegacy";
-import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 import { ToggleBlockBuilder } from "../runner/builders/ToggleBlockBuilder";
 
 const MIB = 1024 * 1024;
@@ -164,11 +162,11 @@ describe("buildHtmlReport", () => {
     expect(html).toContain('<span class="badge bad">exceeds</span>');
   });
 
-  it("should render the overhead table with pairs, CI95, flags, self-cost and the legacy note", () => {
-    // Given a 5-pair web report and a normalized schema-1 electron report
+  it("should render the overhead table with pairs, CI95, flags and self-cost", () => {
+    // Given a 5-pair web report and a single-pair electron report
     const overheads = [
       BenchmarkResultBuilder.overhead({ platform: "web" }),
-      normalizeOverheadReport(OverheadRunBuilder.legacyReport())!,
+      BenchmarkResultBuilder.overhead({ repeats: 1 }),
     ];
 
     // When
@@ -179,7 +177,6 @@ describe("buildHtmlReport", () => {
     expect(section).toContain("<td>sinewave</td><td>web</td>");
     expect(section).toContain('<span class="badge good">within</span>');
     expect(section).toContain('<span class="badge warn">inconclusive</span>');
-    expect(section).toContain(">1 (legacy n=1)</td>");
     expect(section).toContain(">+5.0 MiB [+5.0, +5.0]</td>");
     expect(section).toContain("2.00 ms/s (0.20 % core) · 100 rec/s · 200 ns/rec");
     expect(section).toContain("blocked +1.0 ms/s · -1.0 fps");

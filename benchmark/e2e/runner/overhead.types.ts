@@ -178,38 +178,6 @@ export type OverheadConfigV2 = {
   sampleIntervalMs: number;
 };
 
-/**
- * Overhead A/B report, schema 2: repeated, order-balanced runs of telemetry off vs on (and
- * optionally on without the UA memory probe), pair deltas and their bootstrap statistics.
- */
-export type OverheadReportV2 = {
-  schemaVersion: 2;
-  kind: "overhead";
-  platform: BenchmarkPlatform;
-  scenarioId: string;
-  createdAtWall: string;
-  /** Normalized from a schema-1 report (one off/on pair, no statistics, verdicts inconclusive). */
-  legacy?: true;
-  config: OverheadConfigV2;
-  runs: OverheadRunV2[];
-  pairs: OverheadPair[];
-  /** `on-vs-off` statistics (the gated comparison). */
-  n: number;
-  excludedPairs: number;
-  processSetMismatches: number;
-  /** Measured runs with `steady.windowMismatch`. */
-  windowMismatchRuns: number;
-  metrics: OverheadMetrics;
-  verdicts: OverheadVerdicts;
-  /** `onNoUa-vs-off`: telemetry without the UA memory probe (UA arm only). */
-  withoutUaProbe?: OverheadComparisonSummary & { verdicts: OverheadVerdicts };
-  /** `on-vs-onNoUa`: what the UA memory probe alone costs (UA arm only, no verdict). */
-  uaCost?: OverheadComparisonSummary;
-  /** In-page self-cost of the `on` arm (absent for legacy reports / older pages). */
-  selfCost?: OverheadSelfCostSummary;
-  targets: OverheadTargets;
-};
-
 /** The current overhead report schema. */
 export type OverheadReport = OverheadReportV3;
 
@@ -226,16 +194,38 @@ export type OverheadConfigV3 = OverheadConfigV2 & {
 };
 
 /**
- * Overhead report, schema 3: schema 2 plus the in-process toggle A/B (`toggle`) and where each
- * verdict comes from. The schema-2 fields (`runs`, `pairs`, `n`, `metrics`, …) keep describing the
- * relaunch A/B (empty with `n = 0` for method `toggle`); `relaunchVerdicts` are its own verdicts,
- * `verdicts` the final ones (CPU from `cpuVerdictSource`, memory from `memVerdictSource`).
+ * Overhead report, schema 3: the relaunch A/B (repeated, order-balanced runs of telemetry off vs on,
+ * and optionally on without the UA memory probe; their pair deltas and bootstrap statistics), the
+ * in-process toggle A/B (`toggle`) and where each verdict comes from. The relaunch fields (`runs`,
+ * `pairs`, `n`, `metrics`, …) are empty with `n = 0` for method `toggle`; `relaunchVerdicts` are
+ * their own verdicts, `verdicts` the final ones (CPU from `cpuVerdictSource`, memory from
+ * `memVerdictSource`).
  */
-export type OverheadReportV3 = Omit<OverheadReportV2, "schemaVersion" | "config" | "verdicts"> & {
+export type OverheadReportV3 = {
   schemaVersion: 3;
+  kind: "overhead";
+  platform: BenchmarkPlatform;
+  scenarioId: string;
+  createdAtWall: string;
   method: OverheadMethod;
   config: OverheadConfigV3;
+  runs: OverheadRunV2[];
+  pairs: OverheadPair[];
+  /** Relaunch `on-vs-off` statistics (the gated comparison). */
+  n: number;
+  excludedPairs: number;
+  processSetMismatches: number;
+  /** Measured runs with `steady.windowMismatch`. */
+  windowMismatchRuns: number;
+  metrics: OverheadMetrics;
   verdicts: OverheadVerdictsV3;
+  /** `onNoUa-vs-off`: telemetry without the UA memory probe (UA arm only). */
+  withoutUaProbe?: OverheadComparisonSummary & { verdicts: OverheadVerdicts };
+  /** `on-vs-onNoUa`: what the UA memory probe alone costs (UA arm only, no verdict). */
+  uaCost?: OverheadComparisonSummary;
+  /** In-page self-cost of the `on` arm (absent when no `on` run carries `telemetrySelf`). */
+  selfCost?: OverheadSelfCostSummary;
+  targets: OverheadTargets;
   cpuVerdictSource: Exclude<OverheadVerdictSource, "notMeasured">;
   memVerdictSource: Exclude<OverheadVerdictSource, "toggle">;
   /** Verdicts of the relaunch A/B alone (absent for method `toggle`). */
@@ -260,30 +250,6 @@ export type OverheadReportV3 = Omit<OverheadReportV2, "schemaVersion" | "config"
    * `verdicts` (the CPU verdict stays the statistical one of `cpuVerdictSource`).
    */
   directAttribution?: DirectAttributionV3;
-};
-
-/** Schema-1 run stats (one off and one on run, whole-window host statistics). */
-export type OverheadRunStatsV1 = {
-  telemetryEnabled: boolean;
-  hostPolls: number;
-  medianTotalCpuPercent: number;
-  meanTotalWorkingSetBytes: number;
-  peakTotalWorkingSetBytes: number;
-};
-
-/** Schema-1 report (read for old artifacts only; normalized by `normalizeOverheadReport`). */
-export type OverheadReportV1 = {
-  schemaVersion: 1;
-  kind: "overhead";
-  platform: BenchmarkPlatform;
-  scenarioId: string;
-  createdAtWall: string;
-  off: OverheadRunStatsV1;
-  on: OverheadRunStatsV1;
-  deltas: { cpuDeltaPctPoints: number; cpuDeltaRelative?: number; memDeltaBytes: number };
-  targets: OverheadTargets;
-  withinTargets: boolean;
-  within: { cpu: boolean; memory: boolean };
 };
 
 /** Inputs of `buildOverheadReport`. */

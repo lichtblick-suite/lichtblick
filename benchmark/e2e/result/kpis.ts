@@ -385,7 +385,6 @@ export function aggregateOverhead(
     totalPairs: reports.reduce((sum, report) => sum + cpuVerdictStats(report).n, 0),
     cpuVerdictSources: { toggle: toggleSourced, relaunch: reports.length - toggleSourced },
     memNotMeasuredReports: reports.filter((report) => !memMeasured(report)).length,
-    legacyReports: reports.filter((report) => report.legacy === true).length,
     ...(cpu != undefined && { worstCpuRelative: cpu }),
     ...(mem != undefined && { worstMemMiB: mem }),
     targets: {

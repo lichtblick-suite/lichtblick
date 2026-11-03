@@ -7,7 +7,6 @@
 
 export * from "./types";
 export * from "./registry";
-export * from "./scenarioParams";
 export * from "./setupScenarioLayout";
 export * from "./useScenarioBootstrap";
 export * from "./BenchmarkAppBar";

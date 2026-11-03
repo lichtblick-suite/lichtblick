@@ -129,13 +129,12 @@ describe("scorecardHtml", () => {
   });
 
   it("should show an inconclusive overhead in amber with the worst CI95 upper bound", () => {
-    // Given a legacy n=1 report next to a 5-pair report
+    // Given a single-pair report next to a 5-pair report
     const reports = [
       overhead(),
       overhead({
         scenarioId: "pointcloud",
         n: 1,
-        legacy: true,
         metrics: {
           cpuRelative: {
             n: 1,
@@ -166,7 +165,7 @@ describe("scorecardHtml", () => {
       "worst memory Δ CI95 upper: <b>8.0 MiB</b> (median 5.0 MiB, sinewave)",
     );
     expect(electron).toContain(
-      "2 scenario(s) · ≥ 1 pair(s) / quartet(s) each · CPU from toggle 0 / relaunch 2 · 1 legacy n=1",
+      "2 scenario(s) · ≥ 1 pair(s) / quartet(s) each · CPU from toggle 0 / relaunch 2 · <a",
     );
   });
 

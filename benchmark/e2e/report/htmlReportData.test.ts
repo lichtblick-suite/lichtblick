@@ -19,7 +19,6 @@ import {
 } from "./htmlReportData";
 import { Point } from "./types";
 import { TelemetryRecordBuilder } from "../result/builders/TelemetryRecordBuilder";
-import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 
 const identity = (ts: number) => ts / 1000;
 
@@ -123,23 +122,16 @@ describe("parseOverheadFile", () => {
     expect(invalid.ok).toBe(false);
   });
 
-  it("normalizes a schema-1 overhead report to schema 3", () => {
-    // Given
-    const legacy = OverheadRunBuilder.legacyReport();
+  it("skips an overhead report of an unsupported schema version with a reason", () => {
+    // Given an otherwise current report with schema version 2
+    const report = { ...BenchmarkResultBuilder.overhead(), schemaVersion: 2 };
 
     // When
-    const outcome = parseOverheadFile(JSON.stringify(legacy));
+    const outcome = parseOverheadFile(JSON.stringify(report));
 
     // Then
-    expect(outcome.ok && outcome.value).toMatchObject({
-      schemaVersion: 3,
-      method: "relaunch",
-      cpuVerdictSource: "relaunch",
-      memVerdictSource: "relaunch",
-      legacy: true,
-      n: 1,
-      verdicts: { overall: "inconclusive" },
-    });
+    expect(outcome.ok).toBe(false);
+    expect(outcome.ok ? "" : outcome.reason).toContain("not a supported overhead report");
   });
 });
 

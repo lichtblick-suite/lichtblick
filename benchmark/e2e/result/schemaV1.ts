@@ -60,11 +60,8 @@ import type { ScenarioDescriptor } from "../../src/scenarios/scenarioControl";
 import { RENDERER_METRICS } from "../../src/telemetry/collectors/constants";
 
 export type { TelemetryBatch } from "../../../packages/suite-base/src/util/telemetry/types";
-export type { TelemetryEvent, TelemetryRecord, TelemetrySample };
-export type { PanelSummaryV1, PanelsReadyCoverageV1, PipelineSummaryV1, ResultValidationMode };
-export type { RunKpisV1, RunModeV1, WebBrowserV1 };
-export type { CollectorsStateV1, SteadyWindowSummaryV1, TelemetrySelfSummaryV1 };
-export { mean, median, percentile };
+export type { TelemetryRecord, TelemetrySample };
+export type { PanelSummaryV1, WebBrowserV1 };
 
 export type BenchmarkPlatform = "electron" | "web";
 
@@ -880,7 +877,7 @@ export function buildResultV1<TRun extends PersistedRunInfoV1 = RunInfoV1>(
 // Runtime validation (lightweight, structural)
 // ---------------------------------------------------------------------------------------------
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value != undefined && !Array.isArray(value);
 }
 

@@ -1,16 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// Telemetry overhead section of the HTML report (schema-3 reports; schemas 1/2 normalized on load).
+// Telemetry overhead section of the HTML report (schema-3 reports).
 
-import {
-  LEGACY_OVERHEAD_NOTE,
-  MEM_NOT_MEASURED,
-  NONE,
-  OVERHEAD_UNITS,
-  RESULTS_HREF,
-  VERDICT_DISPLAY,
-} from "./constants";
+import { MEM_NOT_MEASURED, NONE, OVERHEAD_UNITS, RESULTS_HREF, VERDICT_DISPLAY } from "./constants";
 import type { Cell } from "./htmlReport.types";
 import { latestOverheads } from "./htmlReportData";
 import { cell, escapeHtml, fmtMiB, fmtNumber, num, renderTable } from "./htmlReportFormat";
@@ -138,9 +131,6 @@ function relaunchConfigTitle(report: OverheadReport): string {
 }
 
 function pairsTitle(report: OverheadReport, cpu: CpuVerdictStats): string {
-  if (cpu.legacy === true) {
-    return `${LEGACY_OVERHEAD_NOTE}: schema-1 report (one off/on pair, no statistics)`;
-  }
   if (cpu.source === "toggle" && report.toggle != undefined) {
     return `toggle: ${toggleConfigText(report.toggle)}, one launch; deltas per quartet (Σ on / Σ off − 1, linear drift cancels)`;
   }

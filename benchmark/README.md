@@ -305,7 +305,7 @@ Electron 44.4.5):
 | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<scenarioId>-<ts>.json` (Electron), `<scenarioId>-web-<ts>.json` (web)     | Legacy `BenchmarkArtifact` (unchanged shape). On web, `memorySamples[].metrics` are ProcessMetric-like `{pid, type, memory:{workingSetSize, peakWorkingSetSize} (KB), cpu:{percentCPUUsage}}` (memory is 0 when unavailable). `percentCPUUsage` is raw: divided by the logical CPUs on Electron, a per-core sum on web |
 | `<scenarioId>-<platform>[-telemetry-off]-<ts>.benchmark-result.v1.json`     | Result schema v1 (below). The overhead spec writes one per measured run, tagged `-overhead` (`run.mode: "overhead"`): `-telemetry-off-overhead` for the baseline, `-overhead-ua-memory-off` for the UA arm                                                                                                             |
-| `overhead-<platform>-<scenarioId>-<ts>.json`                                | Overhead A/B report, schema 3 (schema-2 files load as method `relaunch`, schema-1 files as "legacy n=1"; see [Telemetry overhead](#telemetry-overhead-report-only))                                                                                                                                                    |
+| `overhead-<platform>-<scenarioId>-<ts>.json`                                | Overhead A/B report, schema 3 (other schema versions are skipped with a warning; see [Telemetry overhead](#telemetry-overhead-report-only))                                                                                                                                                                            |
 | `screenshots/<scenarioId>-<platform>[-telemetry-off]-<ts>-<checkpoint>.png` | Viewport screenshots of the scenarios spec runs, `<checkpoint>` = `end` by default, plus `loaded` and `mid` with `BENCHMARK_SCREENSHOTS=all` (see [Screenshots](#screenshots))                                                                                                                                         |
 | `fixtures/`                                                                 | Generated MCAP fixtures. CI does not upload these                                                                                                                                                                                                                                                                      |
 
@@ -831,7 +831,7 @@ smokes: `BENCHMARK_OVERHEAD_METHOD=toggle BENCHMARK_OVERHEAD_TOGGLE_QUARTETS=4 y
 and `BENCHMARK_OVERHEAD_METHOD=relaunch BENCHMARK_OVERHEAD_REPEATS=1 BENCHMARK_OVERHEAD_WARMUP_RUNS=0 yarn test:e2e:benchmark overhead -g sinewave`
 (one pair: always `inconclusive`).
 
-**Report** (schema 3). The schema-2 fields (`runs`, `pairs`, `n`, `metrics`, …) describe the
+**Report** (schema 3). The relaunch fields (`runs`, `pairs`, `n`, `metrics`, …) describe the
 relaunch A/B (`n = 0` for method `toggle`) and `relaunchVerdicts` are its own verdicts. `toggle`
 holds the toggle A/B: config, blocks (arm, measured window, CPU %, CPU % per process type, process
 set, records per realm, UA calls, toggle latency, flags), `quartets` (off / on blocks, pooled arm CPU, deltas, exclusion),
@@ -849,12 +849,9 @@ verdict's source, `not measured` for memory with method `toggle`, and the relaun
 sub-rows. A malformed `toggleWithoutUaProbe`, `toggleFrameProbe` or `directAttribution` is dropped
 on load; the rest of the report stays valid.
 
-Older reports still load in the viewer and the CI summary. Schema 2 is normalized to schema 3 as
-method `relaunch` (both verdicts from the relaunch A/B). Schema 1 (one off → on pair, from before
-the relaunch A/B) is normalized with `n = 1`, verdict `inconclusive` and `legacy: true`
-("legacy n=1"). A schema-3 toggle section from before the quartets (statistics over adjacent
-pairs, `config.pairs`) is re-summarized from its blocks into quartets, and the CPU and overall
-verdicts are updated when the toggle A/B gave the CPU verdict.
+The viewer and the CI summary only read the current schema (3, toggle ABBA quartets). Any other
+schema version or shape (for example a stale local file from an earlier development build) is
+skipped with a warning naming the file.
 
 ## KPI scorecard
 

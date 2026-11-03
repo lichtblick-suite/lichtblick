@@ -3,14 +3,7 @@
 
 import type { MainThreadRatesV1, SteadyWindowSummaryV1 } from "../../result/steadyWindow.types";
 import type { CollectorsStateV1, TelemetrySelfSummaryV1 } from "../../result/telemetrySelf.types";
-import { buildOverheadReport } from "../overhead";
-import type {
-  OverheadArm,
-  OverheadConfigV2,
-  OverheadReportV1,
-  OverheadReportV2,
-  OverheadRunInput,
-} from "../overhead.types";
+import type { OverheadArm, OverheadConfigV2, OverheadRunInput } from "../overhead.types";
 import { armOrder } from "../overheadSchedule";
 
 const MIB = 1024 * 1024;
@@ -132,54 +125,6 @@ export class OverheadRunBuilder {
       meanEmitNs: 200,
       estimatedEmitMsPerSec: 0.02,
       fractionOfCore: 0.00202,
-      ...overrides,
-    };
-  }
-
-  /** A schema-2 report (relaunch A/B of `repeats` identical off/on repeats, as written before). */
-  public static reportV2(repeats = 3): OverheadReportV2 {
-    const v3 = buildOverheadReport({
-      platform: "web",
-      scenarioId: "sinewave",
-      runs: OverheadRunBuilder.abba(Array.from({ length: repeats }, () => ({}))),
-      config: OverheadRunBuilder.config(),
-    });
-    const {
-      method: _method,
-      cpuVerdictSource: _cpuSource,
-      memVerdictSource: _memSource,
-      relaunchVerdicts,
-      toggle: _toggle,
-      verdicts: _verdicts,
-      config: { method: _configMethod, toggle: _configToggle, ...config },
-      ...rest
-    } = v3;
-    if (relaunchVerdicts == undefined) {
-      throw new Error("A relaunch report always has relaunchVerdicts");
-    }
-    return { ...rest, schemaVersion: 2, config, verdicts: relaunchVerdicts };
-  }
-
-  /** A schema-1 report (one off → on pair). */
-  public static legacyReport(overrides: Partial<OverheadReportV1> = {}): OverheadReportV1 {
-    const run = {
-      hostPolls: 5,
-      medianTotalCpuPercent: 100,
-      meanTotalWorkingSetBytes: 500 * MIB,
-      peakTotalWorkingSetBytes: 600 * MIB,
-    };
-    return {
-      schemaVersion: 1,
-      kind: "overhead",
-      platform: "electron",
-      scenarioId: "sinewave",
-      createdAtWall: "2026-01-01T00:00:00.000Z",
-      off: { ...run, telemetryEnabled: false },
-      on: { ...run, telemetryEnabled: true, medianTotalCpuPercent: 101 },
-      deltas: { cpuDeltaPctPoints: 1, cpuDeltaRelative: 0.01, memDeltaBytes: 0 },
-      targets: { cpuDeltaRelativeMax: 0.02, memDeltaBytesMax: 20 * MIB },
-      withinTargets: true,
-      within: { cpu: true, memory: true },
       ...overrides,
     };
   }

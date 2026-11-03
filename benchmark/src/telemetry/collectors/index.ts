@@ -3,5 +3,3 @@
 
 export { getDefaultRendererCollectorsEnv, RendererCollectors } from "./RendererCollectors";
 export { SelfCostMeter } from "./SelfCostMeter";
-export { RENDERER_METRICS } from "./constants";
-export type { RendererCollectorsEnv, UaMemoryCollectorState } from "./types";

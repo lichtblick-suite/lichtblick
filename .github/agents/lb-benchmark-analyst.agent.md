@@ -103,7 +103,7 @@ Not for: changing the harness or product code (route to the owner), or changing 
 - `benchmark/README.md` (main source of truth for the harness)
 - `benchmark/e2e/result/schemaV1.ts`, `benchmark/e2e/result/types.ts` (result schema and summaries)
 - `benchmark/e2e/result/kpis.ts`, `benchmark/e2e/result/constants.ts` (KPIs, scorecard policies, group KPIs)
-- `benchmark/e2e/runner/overhead.ts`, `benchmark/e2e/runner/overhead.types.ts`, `benchmark/e2e/runner/toggleBlocks.ts`, `benchmark/e2e/result/directAttribution.ts`, `benchmark/e2e/result/overheadLegacy.ts` (overhead report)
+- `benchmark/e2e/runner/overhead.ts`, `benchmark/e2e/runner/overhead.types.ts`, `benchmark/e2e/runner/toggleBlocks.ts`, `benchmark/e2e/result/directAttribution.ts`, `benchmark/e2e/result/overheadReport.ts` (overhead report)
 - `benchmark/e2e/runner/constants.ts` (`OVERHEAD_TARGETS`, `OVERHEAD_SCENARIOS`, env knobs)
 - `benchmark/src/scenarios/registry.ts`, `benchmark/e2e/runner/scenariosUnderTest.ts` (scenarios)
 - `benchmark/src/telemetry/**` (renderer collectors, self-cost)

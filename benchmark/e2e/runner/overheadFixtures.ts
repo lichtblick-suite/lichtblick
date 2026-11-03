@@ -62,11 +62,6 @@ export function overheadFixtureOptionsForAutoPause(autoPauseMs: number): McapFix
   };
 }
 
-/** Options of the overhead MCAP fixtures for relaunch runs of `polls` steady polls. */
-export function overheadFixtureOptions(polls: number): McapFixtureOptions {
-  return overheadFixtureOptionsForAutoPause(overheadAutoPauseMs(polls));
-}
-
 /**
  * The overhead fixture set for a page auto-pause of `autoPauseMs`: its options and its own cache
  * directory per duration (`overhead/<seconds>s/`), so a different length never reuses (or

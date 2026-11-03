@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import type { TelemetryEvent } from "../../../../packages/suite-base/src/util/telemetry/types";
 import { RunInfoBuilder } from "../../result/builders/RunInfoBuilder";
 import { TelemetryRecordBuilder, panelLabels } from "../../result/builders/TelemetryRecordBuilder";
 import { PANEL_METRICS, PIPELINE_METRICS } from "../../result/constants";
 import type { DirectAttributionV3 } from "../../result/directAttribution.types";
 import { BenchmarkResultV1, PersistedResultV1, buildResultV1 } from "../../result/schemaV1";
-import type { RunModeV1, TelemetryEvent, TelemetryRecord } from "../../result/schemaV1";
+import type { TelemetryRecord } from "../../result/schemaV1";
+import type { RunModeV1 } from "../../result/schemaV1.types";
 import { OverheadRunBuilder } from "../../runner/builders/OverheadRunBuilder";
 import { ToggleBlockBuilder } from "../../runner/builders/ToggleBlockBuilder";
 import { buildOverheadReport } from "../../runner/overhead";

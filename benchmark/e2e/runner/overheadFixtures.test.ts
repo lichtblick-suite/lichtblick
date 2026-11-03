@@ -15,7 +15,6 @@ import {
 } from "./constants";
 import {
   overheadAutoPauseMs,
-  overheadFixtureOptions,
   overheadFixtureSet,
   overheadToggleAutoPauseMs,
   overheadToggleFixtureSet,
@@ -90,13 +89,13 @@ describe("overheadFixtureSet", () => {
   });
 });
 
-describe("overheadFixtureOptions", () => {
+describe("overheadFixtureSet options", () => {
   it("should outlast the page auto-pause by the data margin (real constants: 20 s ≥ 15 s + 5 s)", () => {
     // Given
     const autoPauseMs = overheadAutoPauseMs(OVERHEAD_STEADY_POLLS);
 
     // When
-    const { durationSec } = overheadFixtureOptions(OVERHEAD_STEADY_POLLS);
+    const { durationSec } = overheadFixtureSet(OVERHEAD_STEADY_POLLS).options;
 
     // Then
     expect(autoPauseMs).toBe(15_000);
@@ -112,7 +111,7 @@ describe("overheadFixtureOptions", () => {
     const scenario = getScenarioUnderTest("mcap-multi-ingest");
 
     // When
-    const overheadFixtureMs = overheadFixtureOptions(OVERHEAD_STEADY_POLLS).durationSec! * 1000;
+    const overheadFixtureMs = overheadFixtureSet(OVERHEAD_STEADY_POLLS).options.durationSec! * 1000;
 
     // Then: 10 s of scenario data end inside the 13 s window; the overhead data reach past it
     expect(scenario.usesMcapFixtures).toBe(true);
@@ -127,7 +126,7 @@ describe("overheadFixtureOptions", () => {
     // Given: the overhead duration at a low rate (fast to write)
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "benchmark-overhead-fixtures-"));
     const options = {
-      ...overheadFixtureOptions(OVERHEAD_STEADY_POLLS),
+      ...overheadFixtureSet(OVERHEAD_STEADY_POLLS).options,
       fileCount: 1,
       rateHz: 10,
       payloadBytes: 8,

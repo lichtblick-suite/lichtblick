@@ -124,8 +124,8 @@ export class ToggleBlockBuilder {
   }
 
   /**
-   * `summary` as written before the ABBA quartets (JSON): no `quartets` / `excludedQuartets`,
-   * statistics over the adjacent pairs, `config.pairs` (two per quartet).
+   * `summary` in the unsupported shape from before the ABBA quartets (JSON): no `quartets` /
+   * `excludedQuartets`, statistics over the adjacent pairs, `config.pairs` (two per quartet).
    */
   public static preQuartetSection(summary: OverheadToggleSummaryV3): Record<string, unknown> {
     const { quartets: _quartets, excludedQuartets, config, ...rest } = summary;
