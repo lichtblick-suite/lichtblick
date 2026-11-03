@@ -73,6 +73,20 @@ jest.mock("@lichtblick/hooks", () => ({
   useContext: jest.fn(),
 }));
 
+jest.mock("@lichtblick/suite-base/panels/shared/useDraggedMessagePath", () => ({
+  useDraggedMessagePath: jest.fn(() => undefined),
+}));
+
+jest.mock("@lichtblick/suite-base/services/messagePathDragging", () => ({
+  useMessagePathDrag: jest.fn(() => ({
+    connectDragSource: jest.fn(),
+    connectDragPreview: jest.fn(),
+    cursor: undefined,
+    isDragging: false,
+    draggedItemCount: 0,
+  })),
+}));
+
 jest.mock("@lichtblick/suite-base/context/CurrentLayoutContext", () => ({
   useCurrentLayoutActions: jest.fn(() => ({
     getCurrentLayoutState: jest.fn(),

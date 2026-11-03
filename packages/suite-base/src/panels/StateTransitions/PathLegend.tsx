@@ -20,15 +20,106 @@ import {
   PathLegendProps,
   StateTransitionPath,
 } from "@lichtblick/suite-base/panels/StateTransitions/types";
+import { useDraggedMessagePath } from "@lichtblick/suite-base/panels/shared/useDraggedMessagePath";
+import { useMessagePathDrag } from "@lichtblick/suite-base/services/messagePathDragging";
 
+type PathLegendRowProps = Readonly<{
+  path: StateTransitionPath;
+  index: number;
+  isPlaceholder: boolean;
+  heightPerTopic: number;
+  onEditTopic: (index: number) => void;
+  onDeletePath: (event: MouseEvent<HTMLButtonElement>, index: number) => void;
+}>;
+
+/**
+ * A single row in the State Transitions legend. Renders the series label (which doubles as a
+ * message-path drag source so the series can be dragged onto another timeseries panel) and a
+ * delete button, or an "add series" placeholder when there are no configured paths.
+ */
+function PathLegendRow({
+  path,
+  index,
+  isPlaceholder,
+  heightPerTopic,
+  onEditTopic,
+  onDeletePath,
+}: PathLegendRowProps): React.JSX.Element {
+  const { t } = useTranslation("stateTransitions");
+  const { id: panelId } = usePanelContext();
+
+  const draggedItem = useDraggedMessagePath(isPlaceholder ? undefined : path.value);
+  const { connectDragSource, connectDragPreview, cursor, isDragging } = useMessagePathDrag({
+    item: draggedItem ?? {
+      path: "",
+      rootSchemaName: undefined,
+      isTopic: false,
+      isLeaf: true,
+      topicName: "",
+    },
+    selected: false,
+    sourcePanelId: panelId,
+  });
+
+  const { classes } = useStyles({
+    heightPerTopic,
+    cursor: draggedItem != undefined ? (cursor ?? "grab") : undefined,
+    isDragging,
+  });
+
+  const dragRef = useCallback(
+    (el: HTMLButtonElement | ReactNull) => {
+      if (draggedItem == undefined) {
+        return;
+      }
+      connectDragSource(el);
+      connectDragPreview(el);
+    },
+    [connectDragSource, connectDragPreview, draggedItem],
+  );
+
+  return (
+    <div data-testid={`row-${index}`} className={classes.row}>
+      <ButtonGroup size="small" color="inherit" variant="contained" className={classes.buttonGroup}>
+        <Button
+          ref={dragRef}
+          data-testid={`edit-topic-button-${index}`}
+          endIcon={isPlaceholder && <Add16Regular />}
+          className={classes.dragLabel}
+          onClick={() => {
+            onEditTopic(index);
+          }}
+        >
+          {isPlaceholder ? t("addSeriesButton") : stateTransitionPathDisplayName(path, index)}
+        </Button>
+        {!isPlaceholder && (
+          <Button
+            data-testid={`delete-topic-button-${index}`}
+            className={classes.dismissIcon}
+            size="small"
+            onClick={(event) => {
+              onDeletePath(event, index);
+            }}
+          >
+            <Dismiss12Regular />
+          </Button>
+        )}
+      </ButtonGroup>
+    </div>
+  );
+}
+
+/**
+ * Legend overlay for the State Transitions panel. Renders one {@link PathLegendRow} per configured
+ * series (or a single placeholder row to add the first series) and wires up editing and deletion.
+ */
 // eslint-disable-next-line @typescript-eslint/no-shadow
 export const PathLegend = React.memo(function PathLegend(props: PathLegendProps) {
-  const { t } = useTranslation("stateTransitions");
   const { paths, heightPerTopic, setFocusedPath, saveConfig } = props;
   const { setSelectedPanelIds } = useSelectedPanels();
   const { id: panelId } = usePanelContext();
   const { openPanelSettings } = useWorkspaceActions();
-  const { classes } = useStyles();
+  const { classes } = useStyles({ heightPerTopic, cursor: undefined, isDragging: false });
 
   const handleDeletePath = useCallback(
     (event: MouseEvent<HTMLButtonElement>, index: number) => {
@@ -56,47 +147,21 @@ export const PathLegend = React.memo(function PathLegend(props: PathLegendProps)
     [openPanelSettings, panelId, setFocusedPath, setSelectedPanelIds],
   );
 
+  const isPlaceholder = paths.length === 0;
+
   return (
     <Stack className={classes.chartOverlay} position="absolute" paddingTop={0.5}>
-      {(paths.length === 0 ? [DEFAULT_STATE_TRANSITION_PATH] : paths).map(
+      {(isPlaceholder ? [DEFAULT_STATE_TRANSITION_PATH] : paths).map(
         (path: StateTransitionPath, index: number) => (
-          <div
-            data-testid={`row-${index}`}
-            className={classes.row}
+          <PathLegendRow
             key={index}
-            style={{ height: heightPerTopic }}
-          >
-            <ButtonGroup
-              size="small"
-              color="inherit"
-              variant="contained"
-              className={classes.buttonGroup}
-            >
-              <Button
-                data-testid={`edit-topic-button-${index}`}
-                endIcon={paths.length === 0 && <Add16Regular />}
-                onClick={() => {
-                  handleEditTopic(index);
-                }}
-              >
-                {paths.length === 0
-                  ? t("addSeriesButton")
-                  : stateTransitionPathDisplayName(path, index)}
-              </Button>
-              {paths.length > 0 && (
-                <Button
-                  data-testid={`delete-topic-button-${index}`}
-                  className={classes.dismissIcon}
-                  size="small"
-                  onClick={(event) => {
-                    handleDeletePath(event, index);
-                  }}
-                >
-                  <Dismiss12Regular />
-                </Button>
-              )}
-            </ButtonGroup>
-          </div>
+            path={path}
+            index={index}
+            isPlaceholder={isPlaceholder}
+            heightPerTopic={heightPerTopic}
+            onEditTopic={handleEditTopic}
+            onDeletePath={handleDeletePath}
+          />
         ),
       )}
     </Stack>
