@@ -5,8 +5,9 @@ performance and memory under repeatable scenarios. It has two parts:
 
 - **The benchmark app** (`benchmark/src`, `benchmark/desktop`): Lichtblick plus synthetic data sources,
   scenario bootstrapping (`?scenario=<id>`) and an in-page telemetry API (`window.lichtblickTelemetry`).
-- **The result library** (`benchmark/e2e/result`): the `benchmark-result.v1` schema, its builder
-  and validator, and the per-run KPIs derived from the page telemetry and host samples.
+- **The benchmark E2E runner** (`benchmark/e2e`): a Playwright suite that drives every scenario on
+  **Electron**. It collects host process metrics, in-app telemetry,
+  phase events and frame times, and writes JSON artifacts plus a markdown summary.
 
 Telemetry exists **only in the benchmark build**. The product app keeps its no-op telemetry sink.
 
@@ -16,16 +17,30 @@ Telemetry exists **only in the benchmark build**. The product app keeps its no-o
 # Manual (old way): open a benchmark URL from benchmarks.txt and read the developer console
 yarn benchmark:serve                                   # dev build on http://localhost:8080
 yarn benchmark:build:prod && npx serve -p 8080 benchmark/.webpack
+
+# Automated: Electron suite
+yarn benchmark:desktop:build:prod
+yarn test:e2e:benchmark                                # Playwright project "electron"
+
+# Markdown summary of benchmark/.artifacts and benchmark/e2e/reports
+yarn test:e2e:benchmark:summary
 ```
 
-The unit tests for the result library (schema builder and validator, summaries, KPIs) run under
-the `benchmark-e2e` Jest project:
+To run a single spec or scenario, use the usual Playwright filters. Examples:
+`yarn test:e2e:benchmark scenarios -g sinewave` and `yarn test:e2e:benchmark scenarios -g transform`.
+The CI variant (`test:e2e:benchmark:ci`) sets `CI=true` and writes
+`benchmark/e2e/reports/results-electron.json`. They take the same filters; the workflow passes
+`scenarios` (see [CI](#ci)).
+
+The unit tests for the runner's pure logic (schema builder and
+validator, collector parsing, crash detection, summary) run under the `benchmark-e2e` Jest project:
 `yarn jest --selectProjects benchmark-e2e`.
 
 ## Scenarios
 
 `?scenario=<id>` selects a layout and a data source and starts playback automatically
-(`benchmark/src/scenarios/registry.ts`).
+(`benchmark/src/scenarios/registry.ts`). The runner's list is in
+`benchmark/e2e/runner/scenariosUnderTest.ts`.
 
 | Scenario              | Pipeline  | Notes                                                                                                                              |
 | --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -33,7 +48,7 @@ the `benchmark-e2e` Jest project:
 | `pointcloud`          | synthetic | Multiple 3D panels with point clouds                                                                                               |
 | `transform`           | synthetic | Multiple 3D panels with transforms                                                                                                 |
 | `transformpreloading` | synthetic | Transform preloading                                                                                                               |
-| `mcap-ingest`         | real      | Remote NuScenes file (network-dependent, large)                                                                                      |
+| `mcap-ingest`         | real      | Remote NuScenes file; **not run by the suite** (network-dependent, large)                                                          |
 
 Real-pipeline scenarios receive their inputs through `?ds.<param>=<value>` overrides. Example:
 `?scenario=mcap-ingest&ds.url=<url>` (a repeated `ds.url` is joined with `,`).
@@ -100,6 +115,7 @@ pid, platform, scenarioId, realm, reason, iteratorId`. There are at most 64 seri
 
 | Layer                    | Source                                                                                                                                                                                                                                         | Metrics / events                                                                                                                                                                                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Host / process           | **Electron**: `app.getAppMetrics()` through `window.lichtblickBenchmark.getMemoryMetrics()`. | `process.workingSetBytes`, `process.peakWorkingSetBytes`, `process.privateBytes` (Electron on Windows only), `process.cpuPercent` (per-core sum, 100 = one core), labels `{processType: browser\|renderer\|gpu\|utility\|…, pid}`, realm `runner`, scope `process`                  |
 | Renderer (main thread)   | benchmark renderer collectors, 1 Hz                                                                                                                                                                                                            | `renderer.jsHeap.{usedBytes,totalBytes,limitBytes}`, `renderer.fps`, `renderer.lateFrames`, `renderer.longTasks.{count,durationMs}`, `renderer.uaSpecificMemory.bytes` (cross-origin isolated only, at most every 10 s)                                                             |
 | Frame / message dispatch | legacy `window.recordFrameTimes`                                                                                                                                                                                                               | `listenerDispatchDurationMs` (gauge, realm/scope `renderer`)                                                                                                                                                                                                                        |
 | Cross-realm              | worker sinks bridged into the renderer                                                                                                                                                                                                         | everything a worker records, realm `worker:<n>`; `telemetry.*` self-metrics per realm                                                                                                                                                                                               |
@@ -109,9 +125,20 @@ pid, platform, scenarioId, realm, reason, iteratorId`. There are at most 64 seri
 Caveats:
 
 - **`performance.memory` (`renderer.jsHeap.*`) covers only the JS heap of the current realm.** It
-  is never total memory. It excludes workers, DOM, GPU and native allocations. Without
-  `--enable-precise-memory-info`, Chromium quantizes the values, and Electron reports a constant
-  31.2 MB.
+  is never total memory. It excludes workers, DOM, GPU and native allocations. The app
+  launches with `--enable-precise-memory-info`. Without it, Chromium quantizes the values, and
+  Electron reports a constant 31.2 MB. Use the
+  host/process metrics for totals.
+- Process working set (RSS) **double-counts shared pages** across processes. Treat the "total" as
+  an upper bound that is good for comparing runs, not as exact memory usage.
+- `process.cpuPercent` is a **per-core sum** (100 % = one full core, so a
+  process can exceed 100 %). Electron's `percentCPUUsage` is divided by the number of logical CPUs,
+  so the Electron collector multiplies it by `run.environment.logicalCpus`
+  (`os.availableParallelism()` of the runner, which runs on the same host; see
+  `runner/hostCpus.ts`). Results written before this conversion understate Electron CPU by that
+  factor (they lack `logicalCpus`).
+- In scenario runs, host polling and drains run through `page.evaluate`. Under heavy rendering
+  (`pointcloud`, `transform`), the 1 Hz loop can get only 3–4 polls in a 5 s window.
 
 #### Panels and pipeline
 
@@ -137,7 +164,161 @@ The panel and MessagePipeline names are defined in `PANEL_TELEMETRY_METRICS`
 `PIPELINE_TELEMETRY_METRICS` (`packages/suite-base/src/components/MessagePipeline/constants.ts`),
 which the benchmark summaries (`e2e/result/`) import.
 
-## `benchmark-result.v1`
+## The E2E runner
+
+```
+benchmark/e2e/
+├── playwright.config.ts          project "electron"
+├── scenarios.benchmark.spec.ts   one test per scenario under test
+├── fixtures/                     Playwright fixtures, Electron target
+├── runner/                       runScenario, host collectors, artifacts, crashDetection, scenariosUnderTest
+├── result/schemaV1.ts            benchmark-result.v1 types, builder and validator
+├── report/summaryMarkdown.ts     markdown tables for the summary
+└── ci-helpers/generate-benchmark-summary.ts
+```
+
+`runScenario(target, scenario, opts)` drives one run:
+
+1. Installs `recordFrameTimes` with `page.exposeFunction`.
+2. Navigates to `?scenario=<id>[&telemetry=off]`.
+3. Waits for the telemetry API.
+4. Runs a 1 Hz loop for the scenario's `durationMs`, or 5 s by default. Each tick reads the page
+   clock, collects host metrics stamped with that clock, and drains page telemetry until it is
+   empty (capped per tick).
+5. With screenshots in mode `all` (`BENCHMARK_SCREENSHOTS=all`, not the default), waits for a
+   `loaded`/`mid` screenshot still in flight (see [Screenshots](#screenshots)). Both are taken in
+   the background during step 4.
+6. **For real pipelines** it waits for the scenario's own auto-pause (the "Play" button appears),
+   then calls `window.lichtblickScenario.closeDataSource()` and polls for `datasource.close` end
+   (up to 10 s). It does not click Pause, because that click would race the auto-pause and
+   restart playback. It clicks "Pause" only as a fallback when no auto-pause shows up.
+7. Waits for one more publish interval and does a final drain.
+8. Builds the results, then (with `screenshots: true`) takes the `end` screenshot.
+9. Fails the run if the renderer crashed, an Electron process died or the page reloaded (see
+   [Crash detection](#crash-detection)). The v1 result is written first.
+10. Fails the run if any panel or the app rendered an error boundary (see
+    [Error-boundary guard](#error-boundary-guard)).
+
+The Electron target launches `benchmark/.webpack-desktop` once per test. Its page is `file://`.
+
+The Electron WebGL switches depend on the host OS (`fixtures/electronLaunchArgs.ts`, verified with
+Electron 44.4.5):
+
+- **Linux (CI, xvfb):** `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`, the
+  same as `e2e/fixtures/electron.ts`. Without them WebGL context creation fails (Mesa llvmpipe).
+- **macOS:** no GL switches. The SwiftShader switches make every WebGL context fail ("Error
+  creating WebGL context." in all 3D panels), so Electron uses ANGLE Metal on the host GPU instead.
+  Local macOS Electron 3D numbers are therefore hardware-GPU numbers and not comparable to CI.
+- Never `--in-process-gpu` / `--single-process`: with the SwiftShader switches on macOS arm64
+  Electron aborts at startup (`EXC_BREAKPOINT` in `Chrome_InProcGpuThread`).
+
+### Artifacts (`benchmark/.artifacts/`)
+
+| File                                                                        | Content                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<scenarioId>-<ts>.json`                                                    | Legacy `BenchmarkArtifact` (unchanged shape). `percentCPUUsage` is raw: divided by the logical CPUs |
+| `<scenarioId>-<platform>[-telemetry-off]-<ts>.benchmark-result.v1.json`     | Result schema v1 (below)                                                                                                                                                                                                                                                                                               |
+| `screenshots/<scenarioId>-<platform>[-telemetry-off]-<ts>-<checkpoint>.png` | Viewport screenshots of the scenarios spec runs, `<checkpoint>` = `end` by default, plus `loaded` and `mid` with `BENCHMARK_SCREENSHOTS=all` (see [Screenshots](#screenshots))                                                                                                                                         |
+
+`<ts>` is the epoch ms at the start of the run, shared by all files of one run (legacy artifact,
+v1 result and screenshots), so they can be matched up.
+
+#### Screenshots
+
+The scenarios spec captures viewport PNGs (`page.screenshot()`, not full page) per scenario and
+platform so a reviewer can check what the app actually showed. By default only `end` is captured,
+on every platform, so no capture happens inside the sampling window:
+
+| Checkpoint | When                                                                                                                                                                                                                          | Default | `all` |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----- |
+| `loaded`   | Once the runner has drained the scenario's "loaded" event (`datasource.firstMessage` for real pipelines, `app.ready` for synthetic ones), or after a 5 s fallback (capped to the window), plus 500 ms for the panels to paint | no      | yes   |
+| `mid`      | Halfway through the sampling window                                                                                                                                                                                           | no      | yes   |
+| `end`      | After all measurement (sampling window, pause/close, final drain) and after the result is built, before the app is closed. For real pipelines it shows the app after the data source was closed                               | yes     | yes   |
+
+`BENCHMARK_SCREENSHOTS` (case-insensitive) selects the mode for the scenarios spec, the same on
+every platform:
+
+| Value                        | Checkpoints                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| unset (or any other value)   | `end` only. Not part of any metric                                                    |
+| `all`                        | `loaded` + `mid` + `end`. For visual debugging only: **distorts metrics** (see below) |
+| `0` / `false` / `off` / `no` | None, e.g. `BENCHMARK_SCREENSHOTS=0 yarn test:e2e:benchmark`                          |
+
+- Why `all` distorts metrics: on heavy 3D scenarios an in-window `page.screenshot()` can take
+  several seconds, because Playwright makes several page round trips per capture, and it blocks
+  the renderer inside the window, which distorts fps and long tasks. This hits the 3D
+  scenarios, e.g. `pointcloud`. Electron 3D numbers vary a lot from run to run, so no figure is
+  given. Other captures take about 0.1 s.
+- `loaded` and `mid` are taken by background tasks next to the 1 Hz sampling loop. The loop keeps
+  its own wall-clock deadline, so the window length doesn't change. A capture can delay one tick's
+  page calls; the next tick then starts sooner. The "loaded" check only looks at records the loop
+  already drained, so its precision is about one tick. Captures are serialized and time out after
+  10 s.
+- A `loaded` or `mid` capture that would **start after the sampling window deadline is skipped**
+  (logged with `console.debug`). A capture already in flight at the deadline finishes, and the
+  runner waits for it before pause/close.
+- `end` is taken after the final drain and after `endMonotonicTs`, the v1 result and the legacy
+  artifact are built, so it is not part of any metric in the artifacts. `loaded` and `mid` fall
+  inside the window and do cost renderer work there. For clean trend numbers, set
+  `BENCHMARK_SCREENSHOTS=0`.
+- A failed screenshot logs a `console.warn` and never fails the test.
+- Each screenshot is also attached to the Playwright report as soon as it is taken (so it's there
+  even if the test fails later). Open the local HTML report with `yarn test:e2e:benchmark:report`.
+  In CI, download the `benchmark-results-electron` artifact, which
+  includes `benchmark/.artifacts/screenshots/`.
+- Playwright's own `screenshot: "only-on-failure"` is set too. It covers the
+  Electron window (a failing test gets `benchmark/test-results/<test>/test-failed-1.png`) and
+  complements the checkpoint screenshots.
+
+#### Error-boundary guard
+
+After measurement (after the `end` screenshot), `runScenario` looks for rendered error
+boundaries: the titles "This panel encountered an unexpected error" (`PanelErrorBoundary`) and
+"The app encountered an unexpected error" (app `ErrorBoundary`), plus the error message shown
+below them (`runner/errorBoundaries.ts`). If there is any, the run **throws**, so the test fails
+with a message like
+`electron/pointcloud: 6 error boundaries rendered, …: 6× This panel encountered an unexpected error: Error creating WebGL context.`
+No JSON artifact is written for that run; screenshots taken so far stay attached. Boundaries stay
+rendered until dismissed, so this one check catches a crash from any point of the run, without
+affecting any metric.
+
+#### Crash detection
+
+`runner/crashDetection.ts` attaches its listeners before the runner's first navigation.
+`runScenario` stops it once measurement is over, which is the start of the runner's own closing,
+and stores what it saw as `runnerEvents` in the v1 result:
+
+| `type`            | Source                                                                                                                                                                                                                       |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `renderer.crash`  | `page.on("crash")` (web and Electron)                                                                                                                                                                                        |
+| `process.gone`    | Electron only: main-process `app.on("render-process-gone")` (`processType: "renderer"`) and `app.on("child-process-gone")` (`processType` = `details.type`), with `reason` and `exitCode`. `reason: "clean-exit"` is ignored |
+| `renderer.reload` | Main-frame `framenavigated` to a **new document** after the app was ready                                                                                                                                                    |
+
+- The Electron listeners write to a global array in the main process. The runner drains it with
+  `electronApp.evaluate` at the end, and also right away after a renderer crash.
+- The runner's own navigations are excluded. Reload detection is armed only after the runner's
+  `page.goto(?scenario=…)` and once `window.lichtblickTelemetry` exists. Arming marks the current
+  document with a per-run token. `framenavigated` also fires for same-document navigations, such
+  as the app's `history.replaceState` URL sync during playback, so each armed main-frame
+  navigation checks the token. If the token is still there, it was the same document and nothing
+  is reported. If it is missing, the page loaded a new document, which counts as a reload.
+- Events from the runner's own shutdown are ignored. `stop()` records when closing starts.
+  Events stamped at or after that time are dropped, and nothing is collected after
+  `stop()`, while the fixture closes the app.
+- `monotonicTs` uses `performance.timeOrigin + performance.now()` of the process that saw the
+  event: the runner (Node) for page events and the Electron main process for `*-process-gone`.
+  The page clock is not available while the page crashes or reloads. These clocks use the same
+  formula and Unix-epoch anchor as the page clock, so they are on the host samples' timeline up
+  to a few ms of skew.
+- Any event fails the run, **after** the v1 result has been written to `benchmark/.artifacts/`
+  as evidence. If the event broke the run early (for example `Target crashed`), the runner waits
+  1 s for racing events. It then writes a partial result with everything sampled so far, and the
+  thrown error keeps the original failure as `cause`. If there are no events, an error is
+  rethrown unchanged.
+- `summary.runnerEvents` counts the events by type. Every type is listed, with 0 if there were
+  none.
+
+#### `benchmark-result.v1`
 
 ```
 { schemaVersion: 1,
@@ -154,7 +335,7 @@ which the benchmark summaries (`e2e/result/`) import.
   dropped: Record<realm, number>,
   sequenceGaps: Record<realm, number>,
   runnerEvents?: { type: "renderer.crash" | "process.gone" | "renderer.reload", monotonicTs,
-                   reason?, processType?, exitCode?, url? }[],   // [] = none
+                   reason?, processType?, exitCode?, url? }[],   // see Crash detection; [] = none
   summary: {
     process: { sampleCount, peakTotalWorkingSetBytes, meanTotalWorkingSetBytes, medianTotalCpuPercent,
                totalWorkingSetSlopeMiBPerMin?, cpuSeconds?,
@@ -206,8 +387,9 @@ which the benchmark summaries (`e2e/result/`) import.
 - `cpuSeconds` integrates the total CPU % / 100 over the polls (trapezoid).
 - **Required in v1**: `run.scenario`, `run.environment.logicalCpus`, the render calibration
   (`run.environment.fpsCeiling`, `glRenderer`, `lateFrameThresholdMs`) and `summary.kpis`. `validateResultV1(obj, "strict")`
-  returns a list of problems.
-- **Older artifacts** load in `"lenient"` mode: a missing `run.scenario`,
+  (what the runner and the scenarios spec use) returns a list of problems; the spec asserts it is
+  empty.
+- **Older artifacts** load in `"lenient"` mode (CI summary): a missing `run.scenario`,
   `logicalCpus` and calibration are accepted, and missing `summary.kpis` are recomputed from the
   other summaries (`withRunKpis`).
 
@@ -256,3 +438,37 @@ about the worst case, so they use min/max instead.
 
 Plot is not a `PanelExtensionAdapter` panel and emits no render telemetry, so `time-series` currently
 always shows the listener-dispatch fallback.
+
+## FPS reference
+
+- **`fpsCeiling`**: before each scenario the runner counts `requestAnimationFrame` callbacks for 2 s
+  on `about:blank` in the same Electron window (rounded to 0.1; 0 = no frames). Median
+  FPS is shown as `median / ceiling`, so a 60 Hz and a 120 Hz display stay comparable.
+- **`glRenderer`**: the unmasked WebGL renderer of that page (`unavailable` without WebGL).
+- **Late frames**: a frame is late when it takes longer than `lateFrameThresholdMs` =
+  1.5 × 1000 / `fpsCeiling` (e.g. 12.5 ms at 120 Hz). Below a plausible ceiling (< 20) it falls back
+  to 25 ms (1.5 × 60 Hz budget).
+- **`LOW_FPS_WARNING` = 10**: runs below it get a ⚠ (informational, no target). FPS is always
+  shown when frames were collected, also when it is low.
+- **GPU path**: Electron on macOS uses ANGLE Metal by default. On Linux and Windows (CI) it uses
+  SwiftShader (software rendering), so CI FPS is far below a local GPU.
+- **CPU %** is a per-core sum over all processes (100 % = one core).
+
+## CI
+
+`.github/workflows/e2e-benchmark.yml` runs on pushes to `develop` and `main`. The
+`e2e-benchmark` job runs `yarn test:e2e:benchmark:ci scenarios` (Electron under xvfb).
+
+The job adds `yarn test:e2e:benchmark:summary` to the job summary. It covers the test results,
+the legacy table, the v1 results table and the panels and pipeline section. Finally it uploads
+`benchmark/.artifacts/**/*.json` and the checkpoint screenshots in
+`benchmark/.artifacts/screenshots/`.
+
+## Deferred
+
+These are out of scope for this work and planned as follow-ups:
+
+- quiescent (idle) memory baselines
+- `panel.ready` and other per-panel phase events
+- deeper Plot/StateTransitions panel instrumentation, network instrumentation and detailed
+  pipeline internals
