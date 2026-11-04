@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import {
+  buildExercisesLines,
   buildPanelsSection,
   buildPanelsTable,
   buildPipelineLine,
   buildResultsTable,
+  buildScorecardTable,
   latestResults,
 } from "./summaryMarkdown";
 import { RunInfoBuilder } from "../result/builders/RunInfoBuilder";
@@ -247,5 +249,63 @@ describe("buildPanelsSection", () => {
       "\nNo benchmark-result.v1 files with telemetry found.\n",
     );
     expect(buildPanelsSection([])).toBe("\nNo benchmark-result.v1 files with telemetry found.\n");
+  });
+});
+
+describe("buildScorecardTable", () => {
+  it("renders one row per platform, electron first", () => {
+    // Given a web and an electron run
+    const web = makeResult({ platform: "web" });
+    const electron = makeResult({ platform: "electron" });
+
+    // When
+    const rows = buildScorecardTable([web, electron]).trim().split("\n");
+
+    // Then
+    expect(rows).toHaveLength(4);
+    expect(rows[0]).toContain("| Platform | Runs | Healthy | Peak WS (geomean)");
+    expect(rows[2]).toMatch(/^\| electron \| 1 \| ✅ 1\/1 \| 100 MiB \| — \| 12\.5 % \|/);
+    expect(rows[2]).toMatch(/\| — \|$/);
+    expect(rows[3]).toMatch(/^\| web \| 1 \|/);
+  });
+
+  it("ignores telemetry-off runs and reports when nothing is left", () => {
+    // Given
+    const off = makeResult();
+
+    // When
+    const markdown = buildScorecardTable([
+      { ...off, run: { ...off.run, telemetryEnabled: false } },
+    ]);
+
+    // Then
+    expect(markdown).toContain("No benchmark-result.v1 files with telemetry found.");
+  });
+});
+
+describe("buildExercisesLines", () => {
+  it("renders one line per scenario with its platforms, group, panels and player", () => {
+    // Given sinewave on both platforms and a result without run.scenario
+    const legacy = makeResult({ scenarioId: "old" });
+    const { scenario: _scenario, ...legacyRun } = legacy.run;
+    const results = [
+      makeResult({ platform: "web" }),
+      makeResult({ platform: "electron" }),
+      { ...legacy, run: legacyRun },
+    ];
+
+    // When
+    const lines = buildExercisesLines(results).trim().split("\n");
+
+    // Then
+    expect(lines).toEqual([
+      "- **old** (web): scenario not recorded",
+      "- **sinewave** (electron, web): time-series · Plot ×1 · SinewavePlayer",
+    ]);
+  });
+
+  it("reports when there are no results", () => {
+    // Given / When / Then
+    expect(buildExercisesLines([])).toContain("No benchmark-result.v1 files found.");
   });
 });

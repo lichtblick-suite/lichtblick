@@ -4,8 +4,12 @@
 // Pure markdown builders for the CI benchmark summary (`ci-helpers/generate-benchmark-summary.ts`).
 // Compiled by the root tsconfig through that script: keep free of DOM/Playwright imports.
 
-import { KIB, MIB, NONE } from "./constants";
-import type { PersistedResultV1 } from "../result/schemaV1";
+import { KIB, MIB, NONE, PLATFORM_ORDER, SCENARIO_NOT_RECORDED } from "./constants";
+import { LOW_FPS_WARNING } from "../result/constants";
+import { aggregateKpis } from "../result/kpis";
+import type { KpiAggregateV1, KpiRun, PlatformScorecardV1 } from "../result/kpis.types";
+import type { PersistedResultV1, ScenarioDescriptorV1 } from "../result/schemaV1";
+import { compareCodeUnits } from "../shared/compare";
 
 function formatMiB(bytes: number | undefined): string {
   return bytes == undefined ? NONE : `${(bytes / MIB).toFixed(1)} MiB`;
@@ -186,4 +190,103 @@ export function buildPanelsSection(results: readonly PersistedResultV1[]): strin
     return lines.join("\n");
   });
   return `\n${blocks.join("\n\n")}\n`;
+}
+
+function formatAggregate(aggregate: KpiAggregateV1, unit: string, digits: number): string {
+  return aggregate.value == undefined ? NONE : `${aggregate.value.toFixed(digits)}${unit}`;
+}
+
+function stabilityCell(card: PlatformScorecardV1): string {
+  const { healthy, total } = card.stability;
+  return `${healthy === total ? "✅" : "❌"} ${healthy}/${total}`;
+}
+
+function fpsCell(card: PlatformScorecardV1): string {
+  const fps = formatAggregate(card.metrics.medianFps, "", 1);
+  const low = card.lowFpsRuns.length;
+  return low === 0 ? fps : `${fps} (⚠ ${low} < ${LOW_FPS_WARNING})`;
+}
+
+function scorecardRow(card: PlatformScorecardV1): string {
+  const { metrics } = card;
+  const cells = [
+    card.platform,
+    String(card.runs),
+    stabilityCell(card),
+    formatAggregate(metrics.peakTotalWorkingSetMiB, " MiB", 0),
+    formatAggregate(metrics.workingSetSlopeMiBPerMin, " MiB/min", 1),
+    formatAggregate(metrics.medianCpuPercent, " %", 1),
+    formatAggregate(metrics.cpuSecondsPerMiB, "", 3),
+    fpsCell(card),
+    formatAggregate(metrics.onTimeFramePercent, " %", 1),
+    formatAggregate(metrics.panelsReadyMs, " ms", 0),
+    formatAggregate(metrics.ingestMiBPerSec, "", 2),
+  ];
+  return `| ${cells.join(" | ")} |`;
+}
+
+/** Latest telemetry-on run per scenario × platform, as aggregated by the scorecard. */
+function scorecardRuns(results: readonly PersistedResultV1[]): KpiRun[] {
+  return latestResults(results)
+    .filter((result) => result.run.telemetryEnabled)
+    .map((result) => ({ runId: `${result.run.scenarioId}-${result.run.platform}`, result }));
+}
+
+/**
+ * Compact KPI scorecard, one row per platform (electron and web are never aggregated together).
+ * Aggregation per column follows `SCORECARD_POLICIES` (geomean, or worst case for slope / FPS /
+ * on-time frames); see the README "KPI scorecard".
+ */
+export function buildScorecardTable(results: readonly PersistedResultV1[]): string {
+  const runs = scorecardRuns(results);
+  const cards = PLATFORM_ORDER.filter((platform) =>
+    runs.some((run) => run.result.run.platform === platform),
+  ).map((platform) => aggregateKpis(runs, platform));
+  if (cards.length === 0) {
+    return "\nNo benchmark-result.v1 files with telemetry found.\n";
+  }
+  const lines = [
+    "| Platform | Runs | Healthy | Peak WS (geomean) | WS slope (max) | CPU (geomean) | CPU s/MiB (geomean) | Median FPS (min) | On-time frames (min) | Panels ready (geomean) | Ingest MiB/s (geomean) |",
+    "|----------|------|---------|-------------------|----------------|---------------|---------------------|------------------|----------------------|------------------------|------------------------|",
+    ...cards.map(scorecardRow),
+  ];
+  return `\n${lines.join("\n")}\n`;
+}
+
+function declaredPanelsText(scenario: ScenarioDescriptorV1): string {
+  const counts = new Map<string, number>();
+  for (const panel of scenario.panels) {
+    counts.set(panel.type, (counts.get(panel.type) ?? 0) + 1);
+  }
+  return [...counts]
+    .sort(([a], [b]) => compareCodeUnits(a, b))
+    .map(([type, count]) => `${type} ×${count}`)
+    .join(", ");
+}
+
+/** `- **<scenario>** (<platforms>): <group> · <panels> · <player>`. */
+function exercisesLine(scenarioId: string, runs: readonly PersistedResultV1[]): string {
+  const platforms = [...new Set(runs.map((result) => result.run.platform))].join(", ");
+  const scenario = runs.find((result) => result.run.scenario != undefined)?.run.scenario;
+  const head = `- **${escapeCell(scenarioId)}** (${platforms}):`;
+  if (scenario == undefined) {
+    return `${head} ${SCENARIO_NOT_RECORDED}`;
+  }
+  const parts = [scenario.group, declaredPanelsText(scenario) || "no panels", scenario.player];
+  return `${head} ${parts.map(escapeCell).join(" · ")}`;
+}
+
+/** One "what it exercises" line per scenario (group, declared panels, player). */
+export function buildExercisesLines(results: readonly PersistedResultV1[]): string {
+  const byScenario = new Map<string, PersistedResultV1[]>();
+  for (const result of latestResults(results)) {
+    const runs = byScenario.get(result.run.scenarioId) ?? [];
+    runs.push(result);
+    byScenario.set(result.run.scenarioId, runs);
+  }
+  if (byScenario.size === 0) {
+    return "\nNo benchmark-result.v1 files found.\n";
+  }
+  const lines = [...byScenario].map(([scenarioId, runs]) => exercisesLine(scenarioId, runs));
+  return `\n${lines.join("\n")}\n`;
 }

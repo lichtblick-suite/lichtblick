@@ -132,6 +132,27 @@ export const BYTES_PER_MIB = 1024 * 1024;
 export const MS_PER_MINUTE = 60_000;
 export const MS_PER_SECOND = 1000;
 
+/**
+ * Pipeline metric prefix -> product component that emits it, for `exercisedComponents`. Several
+ * prefixes may map to one component. A sample whose metric starts with a prefix shows that the
+ * component ran during the scenario.
+ */
+export const EXERCISED_COMPONENT_PREFIXES: readonly (readonly [
+  prefix: string,
+  component: string,
+])[] = [
+  ["pipeline.hydratedSourcePool.", "HydratedSourcePool"],
+  ["pipeline.sources.", "MultiIterableSource"],
+  ["pipeline.blockCache.", "BlockLoader"],
+  ["pipeline.sourceCache.", "CachingIterableSource"],
+  ["pipeline.remote.", "RemoteFileReadable"],
+  ["pipeline.messages.", "MessagePipeline"],
+  ["pipeline.subscribers.", "MessagePipeline"],
+  ["pipeline.subscriptions.", "MessagePipeline"],
+  ["pipeline.listenerDispatchDurationMs", "MessagePipeline"],
+  ["pipeline.memory.", "IterablePlayer (memoryInfo)"],
+];
+
 /** `summary.kpis.smoothness.lowFps`: median FPS below this is flagged (informational, no target). */
 export const LOW_FPS_WARNING = 10;
 

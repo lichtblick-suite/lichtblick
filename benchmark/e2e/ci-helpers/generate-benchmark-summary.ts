@@ -4,7 +4,12 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { buildPanelsSection, buildResultsTable } from "../report/summaryMarkdown";
+import {
+  buildExercisesLines,
+  buildPanelsSection,
+  buildResultsTable,
+  buildScorecardTable,
+} from "../report/summaryMarkdown";
 import { RESULT_V1_SUFFIX } from "../result/constants";
 import { withRunKpis } from "../result/kpis";
 import type { PersistedResultV1, StoredResultV1 } from "../result/schemaV1";
@@ -167,6 +172,13 @@ function readResultsV1(): PersistedResultV1[] {
   );
 }
 
+function printScorecard(): void {
+  process.stdout.write("\n## KPI Scorecard (per platform, latest telemetry-on run per scenario)\n");
+  process.stdout.write(buildScorecardTable(readResultsV1()));
+  process.stdout.write("\n### Exercises\n");
+  process.stdout.write(buildExercisesLines(readResultsV1()));
+}
+
 function printTelemetryResults(): void {
   process.stdout.write("\n## Benchmark Telemetry Results (benchmark-result.v1)\n");
   process.stdout.write(buildResultsTable(readResultsV1()));
@@ -179,6 +191,7 @@ function printPanelsAndPipeline(): void {
 
 function main(): void {
   process.stdout.write("# Benchmark E2E Summary\n");
+  printScorecard();
   printTestResults();
   printScenarioMetrics();
   printTelemetryResults();

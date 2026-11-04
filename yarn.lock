@@ -8714,6 +8714,7 @@ __metadata:
     "@testing-library/react": "npm:16.0.0"
     "@types/react": "npm:18.3.12"
     "@types/react-dom": "npm:18.3.0"
+    chart.js: "npm:4.4.8"
     clean-webpack-plugin: "npm:4.0.0"
     electron: "npm:45.1.0"
     html-webpack-plugin: "npm:5.6.0"

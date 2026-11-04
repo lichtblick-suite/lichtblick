@@ -24,6 +24,9 @@ yarn test:e2e:benchmark                                # Playwright project "ele
 
 # Markdown summary of benchmark/.artifacts and benchmark/e2e/reports
 yarn test:e2e:benchmark:summary
+
+# Interim offline HTML report: benchmark/.artifacts/report/index.html (see "Viewing results")
+yarn test:e2e:benchmark:viewer --open
 ```
 
 To run a single spec or scenario, use the usual Playwright filters. Examples:
@@ -33,7 +36,7 @@ The CI variant (`test:e2e:benchmark:ci`) sets `CI=true` and writes
 `scenarios` (see [CI](#ci)).
 
 The unit tests for the runner's pure logic (schema builder and
-validator, collector parsing, crash detection, summary) run under the `benchmark-e2e` Jest project:
+validator, collector parsing, crash detection, summary, HTML viewer) run under the `benchmark-e2e` Jest project:
 `yarn jest --selectProjects benchmark-e2e`.
 
 ## Scenarios
@@ -56,6 +59,24 @@ Real-pipeline scenarios receive their inputs through `?ds.<param>=<value>` overr
 A scenario with `durationMs` pauses itself at that deadline. While a scenario is active, the page
 also exposes `window.lichtblickScenario.closeDataSource()`. It closes the player without leaving
 the page, so the `datasource.close` events and the final pool counters can still be drained.
+
+### What each scenario exercises
+
+Each scenario describes itself (`run.scenario` in the result: description, group, tags, layout,
+data source, player, redacted params and declared panels). The pipeline components are **observed**:
+they are derived from the telemetry the run emitted (`result/exercised.ts`).
+
+| Scenario              | Group                  | Tags                                                  | Layout panels           | Player                                            | Observed pipeline components                                                                                                                  |
+| --------------------- | ---------------------- | ----------------------------------------------------- | ----------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sinewave`            | `time-series`          | plot, synthetic                                       | Plot ×1                 | SinewavePlayer                                    | MessagePipeline                                                                                                                               |
+| `pointcloud`          | `3d-rendering`         | 3d, pointcloud, synthetic                             | 3D ×6                   | PointcloudPlayer                                  | MessagePipeline                                                                                                                               |
+| `transform`           | `3d-rendering`         | 3d, tf, synthetic                                     | 3D ×6                   | TransformPlayer                                   | MessagePipeline                                                                                                                               |
+| `transformpreloading` | `preloading`           | 3d, raw-messages, tf, preloading, synthetic           | RawMessages ×1, 3D ×1   | TransformPreloadingPlayer                         | MessagePipeline                                                                                                                               |
+| `mcap-ingest`         | `real-pipeline-ingest` | real-pipeline, mcap                                   | none (`empty`)          | IterablePlayer + McapIterableSource (main thread) | not run by the suite                                                                                                                          |
+
+Only `PanelExtensionAdapter` panels (3D, ...) emit render telemetry. Plot and Raw Messages report
+delivered messages only, so a declared panel without any panel telemetry is flagged
+"⚠ no telemetry" in the viewer.
 
 ## Telemetry contract
 
@@ -389,9 +410,10 @@ and stores what it saw as `runnerEvents` in the v1 result:
   (`run.environment.fpsCeiling`, `glRenderer`, `lateFrameThresholdMs`) and `summary.kpis`. `validateResultV1(obj, "strict")`
   (what the runner and the scenarios spec use) returns a list of problems; the spec asserts it is
   empty.
-- **Older artifacts** load in `"lenient"` mode (CI summary): a missing `run.scenario`,
-  `logicalCpus` and calibration are accepted, and missing `summary.kpis` are recomputed from the
-  other summaries (`withRunKpis`).
+- **Older artifacts** load in `"lenient"` mode (viewer, CI summary): a missing `run.scenario` is
+  shown as "scenario not recorded" (observed telemetry only), missing `logicalCpus` and
+  calibration as "not recorded", and missing `summary.kpis` are recomputed from the other summaries (`withRunKpis`) and
+  marked "recomputed".
 
 ## KPI scorecard
 
@@ -413,7 +435,7 @@ not delivered bytes.
 
 **Aggregation** (`aggregateKpis`, policies in `SCORECARD_POLICIES`): telemetry-on runs of **one
 platform**; electron and web are never aggregated together. Each aggregate reports `n` (runs with a
-usable value) and the worst run.
+usable value) and the worst run, which the viewer links.
 
 | Metric                                                                        | Aggregate                                                       | Why                                      |
 | ----------------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------- |
@@ -444,7 +466,8 @@ always shows the listener-dispatch fallback.
 - **`fpsCeiling`**: before each scenario the runner counts `requestAnimationFrame` callbacks for 2 s
   on `about:blank` in the same Electron window (rounded to 0.1; 0 = no frames). Median
   FPS is shown as `median / ceiling`, so a 60 Hz and a 120 Hz display stay comparable.
-- **`glRenderer`**: the unmasked WebGL renderer of that page (`unavailable` without WebGL).
+- **`glRenderer`**: the unmasked WebGL renderer of that page (`unavailable` without WebGL). The
+  viewer shows the backend (Metal, SwiftShader, ...) next to the FPS.
 - **Late frames**: a frame is late when it takes longer than `lateFrameThresholdMs` =
   1.5 × 1000 / `fpsCeiling` (e.g. 12.5 ms at 120 Hz). Below a plausible ceiling (< 20) it falls back
   to 25 ms (1.5 × 60 Hz budget).
@@ -454,15 +477,75 @@ always shows the listener-dispatch fallback.
   SwiftShader (software rendering), so CI FPS is far below a local GPU.
 - **CPU %** is a per-core sum over all processes (100 % = one core).
 
+## Viewing results
+
+`yarn test:e2e:benchmark:viewer` writes an **interim**, self-contained HTML report to
+`benchmark/.artifacts/report/index.html` and prints its absolute path. It reads only the existing
+files: `*.benchmark-result.v1.json` and `screenshots/*.png`. Chart.js 4.4.8 is
+inlined and the report needs no network, so it opens straight from disk.
+
+```sh
+yarn test:e2e:benchmark:viewer                 # latest run per scenario × platform × telemetry on/off
+yarn test:e2e:benchmark:viewer --all           # every run
+yarn test:e2e:benchmark:viewer --dir <path>    # another artifacts folder (e.g. a downloaded CI artifact)
+yarn test:e2e:benchmark:viewer --open          # also open it (open / xdg-open / start)
+```
+
+Files that are not valid `benchmark-result.v1` (old shapes, broken JSON) are skipped with a warning
+and listed in the header.
+
+- **Scorecard** (top): one card per KPI family per platform with the aggregate, `n` and a link to
+  the worst run. Only stability (100 %) has a target and colors; low-FPS runs get a ⚠.
+- **By group**: group × platform with the primary and secondary KPIs and the scenarios in the group.
+- **Overview**: the generation time, the branch and commit at generation time (the results don't
+  record them), and one KPI row per telemetry-on scenario × platform. The **Run** column shows when
+  the run finished, in UTC (`2026-10-30 16:44Z`, in grey). A run that finished more than 24 h before
+  the newest run in the report gets a `stale` hint, because it may predate newer metrics. The
+  remaining columns: peak total memory,
+  median CPU, peak JS heap, first message, first useful frame, layout applied, panels ready, median
+  FPS, pipeline msg/s and MiB/s, source cache hit ratio, pool invariant and runner events. Only the
+  values with a target are colored: runner events (red when > 0) and the pool invariant. Chips
+  under each scenario name show its
+  group, tags, panel types (`3D ×6`) and player. Clicking a group or tag chip (or one in the
+  filter bar) filters the overview rows, coverage rows and run sections; "all" resets.
+- **Coverage**: scenario × (panel types ∪ players ∪ pipeline components). ✓ = observed in
+  telemetry, ○ = declared by the scenario only.
+- **Runs**: one collapsible section per run; the first is open and the KPI rows link to the rest.
+  Each starts with an **Exercises** card (description, layout, data source, player, params,
+  declared vs observed panels, observed pipeline components) and the run's `summary.kpis`.
+  The charts share an x axis in seconds from the phases origin. Dashed vertical lines mark
+  `layout.applied`, open, first message, first useful frame, preload and playback start/end, panels
+  ready and runner events. The charts are:
+  - memory per process type (stacked) with the total;
+  - renderer JS heap used / total / limit;
+  - pipeline received and delivered msg/s, with received MiB/s on the second axis;
+  - block cache and source cache bytes;
+  - HydratedSourcePool resident bytes, count and pins;
+  - per-panel render mean per window (Δsum / Δcount);
+  - per-panel delivered msg/s (current frame + range).
+
+  The section then has the screenshots (thumbnails linking to `../screenshots/`), and tables for
+  panels, phases, pipeline, processes and renderer, pools, runner events and environment.
+
+- Each dataset is downsampled to ≤ 600 points (per-bucket min/max, so spikes survive).
+
+In CI, the job generates the report after the summary (`if: always()`) and uploads it in the
+`benchmark-results-electron` artifact. Download it, unzip it and open
+`report/index.html`; the screenshot links resolve because `screenshots/` sits next to `report/`.
+
+This viewer is a stopgap: the definitive results dashboard is planned as a follow-up.
+
 ## CI
 
 `.github/workflows/e2e-benchmark.yml` runs on pushes to `develop` and `main`. The
 `e2e-benchmark` job runs `yarn test:e2e:benchmark:ci scenarios` (Electron under xvfb).
 
-The job adds `yarn test:e2e:benchmark:summary` to the job summary. It covers the test results,
-the legacy table, the v1 results table and the panels and pipeline section. Finally it uploads
-`benchmark/.artifacts/**/*.json` and the checkpoint screenshots in
-`benchmark/.artifacts/screenshots/`.
+The job adds `yarn test:e2e:benchmark:summary` to the job summary. It starts with a compact KPI
+scorecard per platform and one "Exercises" line per scenario, then covers the legacy table,
+the v1 results table and the panels and pipeline section. The job then
+generates the HTML report (see [Viewing results](#viewing-results)) and adds a pointer to it in the
+job summary. Finally it uploads `benchmark/.artifacts/**/*.json`, the checkpoint screenshots in
+`benchmark/.artifacts/screenshots/` and `benchmark/.artifacts/report/`.
 
 ## Deferred
 
