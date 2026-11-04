@@ -1,0 +1,13 @@
+{
+  "extends": "@lichtblick/tsconfig/base",
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "module": "commonjs",
+    "noEmit": true,
+    "lib": ["dom", "dom.iterable", "es2022", "ESNext.Disposable"],
+    "types": ["node", "jest"],
+    "paths": {
+      "@lichtblick/suite-base/*": ["../../packages/suite-base/src/*"]
+    }
+  }
+}

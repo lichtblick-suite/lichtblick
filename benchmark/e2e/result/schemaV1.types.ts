@@ -1,0 +1,33 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+import type { TelemetrySample } from "../../../packages/suite-base/src/util/telemetry/types";
+
+/** Full pool metric name (a `POOL_METRICS` value) -> samples (sorted). */
+export type PoolSeries = Map<string, TelemetrySample[]>;
+
+/** The series of one `HydratedSourcePool` instance (`<realm>/<poolId>`). */
+export type PoolGroup = { realm: string; poolId: string; series: PoolSeries };
+
+/** Per-poll totals of the host process samples sharing one `monotonicTs`. */
+export type ProcessTick = { ws: number; hasWs: boolean; cpu: number; hasCpu: boolean };
+
+/**
+ * `strict` (default): a result as the current runner must write it. `lenient`: also accepts stored
+ * results lacking fields added during v1 (`run.scenario`, the render calibration of
+ * `run.environment`, `summary.kpis`); present fields are still checked.
+ */
+export type ResultValidationMode = "strict" | "lenient";
+
+/**
+ * `run.mode`: always `scenario` (a normal scenario run). Kept as a required discriminator so other
+ * run kinds can be added without a schema version bump.
+ */
+export type RunModeV1 = "scenario";
+
+/**
+ * `run.environment.webBrowser` (web only): Playwright's default `chromium-headless-shell`, or the
+ * full Chromium build in new headless mode (`chromium`), which provides
+ * `performance.measureUserAgentSpecificMemory()` (the headless shell rejects every call).
+ */
+export type WebBrowserV1 = "chromium-headless-shell" | "chromium";
