@@ -26,7 +26,7 @@ export default defineConfig<object, Pick<BenchmarkWorkerFixtures, "platform">>({
   name: "benchmark",
   // Generous timeout: launching the app, generating/serving the MCAP fixtures, playing the
   // scenario's `durationMs`, sampling host/page telemetry and capturing the data source close all
-  // happen within a single test.
+  // happen within a single test. The overhead spec raises it per test (two runs).
   timeout: 120 * 1000,
   retries: 0,
   workers: 1,

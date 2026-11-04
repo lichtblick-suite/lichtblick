@@ -148,6 +148,35 @@ describe("FrameCollector", () => {
     );
   });
 
+  it("should keep the RAF loop running without recording while paused", () => {
+    // Given: a frame counted before the pause (dropped with the paused window)
+    const { telemetry, frames, clock, collector } = setup();
+    collector.start();
+    frames.fireFrame(16);
+
+    // When: paused, two frames still fire; then a fresh window after start()
+    collector.pause();
+    frames.fireFrame(32);
+    frames.fireFrame(48);
+    collector.publish();
+    const requestsBeforeRestart = frames.requestAnimationFrame.mock.calls.length;
+    clock.now = 100;
+    collector.start();
+    frames.fireFrame(64);
+    clock.now = 600;
+    collector.publish();
+
+    // Then: the loop never stopped (no extra request on restart) and paused frames were not counted
+    expect(collector.isLoopRunning()).toBe(true);
+    expect(frames.cancelAnimationFrame).not.toHaveBeenCalled();
+    expect(frames.requestAnimationFrame).toHaveBeenCalledTimes(requestsBeforeRestart + 1);
+    expect(telemetry.counter.mock.calls).toEqual([
+      ["renderer.frames", 1, "count", "renderer"],
+      ["renderer.lateFrames", 0, "count", "renderer"],
+    ]);
+    expect(telemetry.gauge).toHaveBeenCalledWith("renderer.fps", 2, "fps", "renderer");
+  });
+
   it("should stop the RAF loop and publishing on dispose", () => {
     // Given
     const { telemetry, frames, collector } = setup();

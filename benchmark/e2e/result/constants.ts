@@ -6,6 +6,8 @@
 
 import type { GroupKpiDefs, KpiPolicy, ScorecardMetricKey } from "./kpis.types";
 import type { RunModeV1, WebBrowserV1 } from "./schemaV1.types";
+import type { Verdict } from "./stats.types";
+import type { TelemetrySelfComponent } from "./telemetrySelf.types";
 import { PIPELINE_TELEMETRY_METRICS } from "../../../packages/suite-base/src/components/MessagePipeline/constants";
 import {
   BYTES_READ_METRIC,
@@ -23,6 +25,7 @@ import {
   SOURCES_TOTAL_METRIC,
 } from "../../../packages/suite-base/src/players/IterablePlayer/shared/constants";
 import type { ScenarioGroup } from "../../src/scenarios/scenarioControl";
+import type { OverheadMetricKey } from "../runner/overhead.types";
 
 export const RESULT_SCHEMA_VERSION = 1;
 
@@ -32,8 +35,11 @@ export const RESULT_SCHEMA_VERSION = 1;
  */
 export const RESULT_V1_SUFFIX = ".benchmark-result.v1.json";
 
+/** File name prefix of the overhead A/B reports (`overhead-<platform>-<scenario>-<ts>.json`). */
+export const OVERHEAD_PREFIX = "overhead-";
+
 /** Values of `run.mode` (see `RunModeV1`). */
-export const RUN_MODES: readonly RunModeV1[] = ["scenario"];
+export const RUN_MODES: readonly RunModeV1[] = ["scenario", "overhead"];
 
 /** Values of `run.environment.webBrowser` (see `WebBrowserV1`). */
 export const WEB_BROWSERS: readonly WebBrowserV1[] = ["chromium-headless-shell", "chromium"];
@@ -52,7 +58,7 @@ export const POOL_METRICS = {
   overBudgetDurationMs: HYDRATED_SOURCE_POOL_OVER_BUDGET_DURATION_METRIC,
 } as const;
 
-/** Sink self metric: counter of records dropped, label `realm`. */
+/** Sink self metric: counter of records dropped, label `realm` (see `TELEMETRY_SELF_METRICS`). */
 export const DROPPED_RECORDS_METRIC = "telemetry.droppedRecords";
 
 /** Realm of the runner-produced host process samples. */
@@ -127,6 +133,90 @@ export const MIN_SLOPE_WINDOW_MS = 10_000;
 
 /** Bytes per MiB (working-set slope unit). */
 export const BYTES_PER_MIB = 1024 * 1024;
+
+/** Resamples of the percentile bootstrap (`bootstrapMedianCi95`). */
+export const BOOTSTRAP_RESAMPLES = 10_000;
+
+/** Fixed PRNG seed of the bootstrap: reports are reproducible from their inputs. */
+export const BOOTSTRAP_SEED = 0x5eed_1234;
+
+/** Bootstrap percentiles of the two-sided 95 % confidence interval. */
+export const CI95_LOWER_QUANTILE = 0.025;
+export const CI95_UPPER_QUANTILE = 0.975;
+
+/**
+ * Fewest samples (e.g. A/B pairs) a confidence interval needs before `verdict` returns anything but
+ * `inconclusive`: with fewer, a percentile bootstrap interval is degenerate.
+ */
+export const MIN_PAIRS_FOR_VERDICT = 3;
+
+/**
+ * Fewest included ABBA quartets the toggle A/B needs for `within` / `exceeds` (else
+ * `inconclusive`). A 4-quartet run (`OVERHEAD_TOGGLE_MIN_QUARTETS`) is a smoke test: with so few
+ * quartets the bootstrap CI95 of the median is far too narrow for a noisy scenario (four positive
+ * quartets alone already exclude 0).
+ */
+export const MIN_QUARTETS_FOR_VERDICT = 6;
+
+/**
+ * Original sources (repo-relative; a trailing `/` matches a directory) counted as telemetry by the
+ * direct CPU attribution (`directAttribution.ts`): the product telemetry module, the benchmark
+ * collectors / sink, and the producer helpers that only record telemetry. Telemetry calls inlined
+ * into product logic (pipeline listener, panel adapter, player / source internals) are not
+ * attributable by source and stay in the other JS time.
+ */
+export const DIRECT_ATTRIBUTION_TELEMETRY_SOURCES: readonly string[] = [
+  "packages/suite-base/src/util/telemetry/",
+  "benchmark/src/telemetry/",
+  "packages/suite-base/src/components/MessagePipeline/pipelineTelemetry.ts",
+  "packages/suite-base/src/components/PanelExtensionAdapter/panelTelemetry.ts",
+  "packages/suite-base/src/hooks/usePanelLifecycleTelemetry.ts",
+];
+
+/** Top telemetry functions kept in the direct attribution of the report. */
+export const DIRECT_ATTRIBUTION_TOP_FUNCTIONS = 5;
+
+/** Severity order of verdicts when combining them (`worstVerdict`): the highest wins. */
+export const VERDICT_SEVERITY: Readonly<Record<Verdict, number>> = {
+  within: 0,
+  inconclusive: 1,
+  exceeds: 2,
+};
+
+/** Pair delta metrics summarized per comparison, in report order. */
+export const OVERHEAD_METRIC_KEYS: readonly OverheadMetricKey[] = [
+  "cpuRelative",
+  "cpuPctPoints",
+  "memBytes",
+  "memBytesCommonProcesses",
+  "mainThreadBlockedMsPerSec",
+  "fps",
+];
+
+// The page's `TELEMETRY_SELF_COST_METRICS` (`benchmark/src/telemetry/constants.ts`) duplicated by
+// name: that module imports `@lichtblick/suite-base` types, which the root tsconfig (compiling this
+// file through the CI summary) cannot resolve. `constants.test.ts` keeps both in sync.
+
+/**
+ * Main-thread self-time counters of the page telemetry per component (cumulative ms, scope
+ * "renderer", realm "renderer", no labels).
+ */
+export const TELEMETRY_SELF_TIME_METRICS: Readonly<Record<TelemetrySelfComponent, string>> = {
+  collectors: "telemetry.self.timeMs.collectors",
+  frames: "telemetry.self.timeMs.frames",
+  longTasks: "telemetry.self.timeMs.longTasks",
+  sinkPublish: "telemetry.self.timeMs.sinkPublish",
+  drain: "telemetry.self.timeMs.drain",
+  uaMemory: "telemetry.self.timeMs.uaMemory",
+};
+/**
+ * `measureUserAgentSpecificMemory()` calls, summed call → resolve latency of the resolved calls,
+ * resolved calls (the latency's denominator) and rejected calls (all cumulative).
+ */
+export const TELEMETRY_SELF_UA_CALLS_METRIC = "telemetry.self.uaMemory.calls";
+export const TELEMETRY_SELF_UA_RESOLVE_MS_METRIC = "telemetry.self.uaMemory.resolveMs";
+export const TELEMETRY_SELF_UA_RESOLVED_METRIC = "telemetry.self.uaMemory.resolved";
+export const TELEMETRY_SELF_UA_FAILURES_METRIC = "telemetry.self.uaMemory.failures";
 
 /** Milliseconds per minute / second (slope and CPU integral units). */
 export const MS_PER_MINUTE = 60_000;

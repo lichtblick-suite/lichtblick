@@ -30,7 +30,11 @@ export type LegacyProcessMetric = {
   pid: number;
   type: string;
   memory: { workingSetSize: number; peakWorkingSetSize: number; privateBytes?: number };
-  cpu: { percentCPUUsage: number };
+  cpu: {
+    percentCPUUsage: number;
+    /** Electron only: CPU seconds since the process started (optional in Electron's typings). */
+    cumulativeCPUUsage?: number;
+  };
 };
 
 export type MemorySample = { timestampMs: number; metrics: LegacyProcessMetric[] };

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import type { Browser } from "@playwright/test";
-import { execFile } from "node:child_process";
 
 import {
   WebHostCollector,
@@ -14,22 +13,6 @@ import {
   selectProcessTree,
   toLegacyProcessMetric,
 } from "./webHostCollector";
-
-jest.mock("node:child_process", () => ({ execFile: jest.fn() }));
-
-type ExecFileCallback = (error: Error | null, stdout: string) => void;
-
-/** Makes every `ps` call print `stdout`. */
-function mockPs(stdout: string): void {
-  jest.mocked(execFile).mockImplementation(((
-    _file: string,
-    _args: string[],
-    _options: object,
-    cb: ExecFileCallback,
-  ) => {
-    cb(null, stdout);
-  }) as unknown as typeof execFile);
-}
 
 /** A browser whose CDP session answers `SystemInfo.getProcessInfo` with `send`. */
 function fakeBrowser(send: (method: string) => Promise<unknown>): Browser {
@@ -201,60 +184,39 @@ describe("toLegacyProcessMetric", () => {
   });
 });
 
-describe("WebHostCollector.collect", () => {
-  it("maps CDP processes with RSS from ps and CPU from the second poll on", async () => {
+describe("WebHostCollector.readCumulativeCpu", () => {
+  it("returns CDP's cumulative cpuTime per process with the cross-platform type", async () => {
     // Given
-    mockPs("10 2048\n11 4096\n");
-    let cpuTime = 1;
     const browser = fakeBrowser(async () => ({
       processInfo: [
-        { id: 10, type: "browser", cpuTime },
-        { id: 11, type: "renderer", cpuTime: cpuTime * 2 },
+        { id: 10, type: "browser", cpuTime: 4.5 },
+        { id: 11, type: "renderer", cpuTime: 20.25 },
       ],
     }));
     const collector = new WebHostCollector({ browser, marker: "--bench" });
 
     // When
-    const first = await collector.collect(100);
-    cpuTime = 2;
-    const second = await collector.collect(200);
+    const readings = await collector.readCumulativeCpu();
 
     // Then
-    expect(first.samples.map((sample) => [sample.pid, sample.processType])).toEqual([
-      [10, mapCdpProcessType("browser")],
-      [11, mapCdpProcessType("renderer")],
+    expect(readings).toEqual([
+      { pid: 10, processType: mapCdpProcessType("browser"), cpuTimeSec: 4.5 },
+      { pid: 11, processType: mapCdpProcessType("renderer"), cpuTimeSec: 20.25 },
     ]);
-    expect(first.samples[0]!.cpuPercent).toBeUndefined();
-    expect(second.samples[0]!.cpuPercent).toBeGreaterThan(0);
-    expect(second.legacyMetrics).toHaveLength(2);
-    expect(second.samples[1]!.workingSetBytes).toBe(4096 * 1024);
-    await collector.dispose();
   });
 
-  it("falls back to the marked ps process tree without CDP, warning once", async () => {
+  it("rejects without CDP instead of falling back to the decayed ps %cpu", async () => {
     // Given
     const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
-    mockPs(
-      [
-        "20 1 1000 5.0 /chrome --bench",
-        "21 20 500 2.5 /chrome --type=renderer",
-        "30 1 700 1.0 /other",
-      ].join("\n"),
-    );
     const browser = fakeBrowser(async () => {
       throw new Error("not supported");
     });
     const collector = new WebHostCollector({ browser, marker: "--bench" });
 
-    // When
-    const first = await collector.collect(1);
-    await collector.collect(2);
-
-    // Then
-    expect(first.samples.map((sample) => [sample.pid, sample.cpuPercent])).toEqual([
-      [20, 5],
-      [21, 2.5],
-    ]);
+    // When / Then
+    await expect(collector.readCumulativeCpu()).rejects.toThrow(
+      "Cumulative CPU needs CDP SystemInfo.getProcessInfo",
+    );
     expect(warn).toHaveBeenCalledTimes(1);
     warn.mockRestore();
   });

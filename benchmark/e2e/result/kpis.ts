@@ -25,6 +25,9 @@ import type {
   KpiPolicy,
   KpiRun,
   KpiRunRef,
+  OverheadAggregateV1,
+  OverheadKpiInput,
+  OverheadWorstV1,
   PlatformScorecardV1,
   RunKpisInput,
   RunKpisV1,
@@ -32,6 +35,8 @@ import type {
 } from "./kpis.types";
 import { geometricMean } from "./numeric";
 import type { BenchmarkPlatform, PersistedResultV1, StoredResultV1, SummaryV1 } from "./schemaV1";
+import { worstVerdict } from "./stats";
+import type { MetricStats } from "./stats.types";
 import { SCENARIO_GROUPS } from "../../src/scenarios/constants";
 import { compareCodeUnits } from "../shared/compare";
 
@@ -274,13 +279,129 @@ function renderCostByPanelType(runs: readonly KpiRun[]): Record<string, KpiAggre
   );
 }
 
+/** Latest report per scenario of `platform`, sorted by scenario. */
+function latestOverheadReports(
+  overheads: readonly OverheadKpiInput[],
+  platform: BenchmarkPlatform,
+): OverheadKpiInput[] {
+  const latest = new Map<string, OverheadKpiInput>();
+  for (const report of overheads) {
+    const previous = latest.get(report.scenarioId);
+    const newer =
+      previous == undefined || compareCodeUnits(report.createdAtWall, previous.createdAtWall) > 0;
+    if (report.platform === platform && newer) {
+      latest.set(report.scenarioId, report);
+    }
+  }
+  return [...latest.values()].sort((a, b) => compareCodeUnits(a.scenarioId, b.scenarioId));
+}
+
+/** Scenario with the highest CI95 upper bound of a metric (median when no CI), scaled. */
+function worstOverhead(
+  reports: readonly OverheadKpiInput[],
+  stats: (report: OverheadKpiInput) => MetricStats,
+  scale: number,
+): OverheadWorstV1 | undefined {
+  const candidates = reports.flatMap((report) => {
+    const { ci95, median: metricMedian } = stats(report);
+    const upper = ci95?.upper ?? metricMedian;
+    if (upper == undefined) {
+      return [];
+    }
+    return [
+      {
+        scenarioId: report.scenarioId,
+        value: upper / scale,
+        ...(metricMedian != undefined && { median: metricMedian / scale }),
+      },
+    ];
+  });
+  const worst = pickWorst(candidates, "max");
+  if (worst == undefined) {
+    return undefined;
+  }
+  return {
+    scenarioId: worst.scenarioId,
+    ciUpper: worst.value,
+    ...(worst.median != undefined && { median: worst.median }),
+  };
+}
+
+/** The CPU verdict's source of a report (`relaunch` before schema 3). */
+function cpuSourceOf(report: OverheadKpiInput): "toggle" | "relaunch" {
+  return report.cpuVerdictSource ?? "relaunch";
+}
+
+/** Whether a report has a memory verdict (not with method `toggle`). */
+function memMeasured(report: OverheadKpiInput): boolean {
+  return report.memVerdictSource !== "notMeasured";
+}
+
+/** Relative CPU delta statistics and unit count (toggle quartets / relaunch pairs) behind a report's CPU verdict. */
+function cpuVerdictStats(report: OverheadKpiInput): {
+  n: number;
+  stats: MetricStats;
+} {
+  if (cpuSourceOf(report) === "toggle") {
+    return report.toggle != undefined
+      ? { n: report.toggle.n, stats: report.toggle.metrics.cpuRelative }
+      : { n: 0, stats: { n: 0 } };
+  }
+  return { n: report.n, stats: report.metrics.cpuRelative };
+}
+
+/** Smallest unit count (quartets / pairs) behind a report's verdicts (CPU, and memory when measured). */
+function verdictPairs(report: OverheadKpiInput): number {
+  const cpuPairs = cpuVerdictStats(report).n;
+  return memMeasured(report) ? Math.min(cpuPairs, report.n) : cpuPairs;
+}
+
+/**
+ * Overhead of `platform` from the latest report per scenario: the worst verdict, pair counts and
+ * the scenarios with the highest CPU / memory CI95 upper bound against the targets. CPU comes from
+ * each report's CPU verdict source (toggle or relaunch), memory from the relaunch A/B of the
+ * reports that measured it.
+ */
+export function aggregateOverhead(
+  overheads: readonly OverheadKpiInput[],
+  platform: BenchmarkPlatform,
+): OverheadAggregateV1 | undefined {
+  const reports = latestOverheadReports(overheads, platform);
+  const first = reports[0];
+  if (first == undefined) {
+    return undefined;
+  }
+  const cpu = worstOverhead(reports, (report) => cpuVerdictStats(report).stats, 1);
+  const mem = worstOverhead(
+    reports.filter(memMeasured),
+    (report) => report.metrics.memBytes,
+    BYTES_PER_MIB,
+  );
+  const toggleSourced = reports.filter((report) => cpuSourceOf(report) === "toggle").length;
+  return {
+    reports: reports.length,
+    verdict: worstVerdict(reports.map((report) => report.verdicts.overall)),
+    minPairs: Math.min(...reports.map(verdictPairs)),
+    totalPairs: reports.reduce((sum, report) => sum + cpuVerdictStats(report).n, 0),
+    cpuVerdictSources: { toggle: toggleSourced, relaunch: reports.length - toggleSourced },
+    memNotMeasuredReports: reports.filter((report) => !memMeasured(report)).length,
+    ...(cpu != undefined && { worstCpuRelative: cpu }),
+    ...(mem != undefined && { worstMemMiB: mem }),
+    targets: {
+      cpuDeltaRelativeMax: first.targets.cpuDeltaRelativeMax,
+      memDeltaMiBMax: first.targets.memDeltaBytesMax / BYTES_PER_MIB,
+    },
+  };
+}
+
 /**
  * Scorecard of one platform: every KPI family aggregated over the platform's telemetry-on runs with
- * `SCORECARD_POLICIES`.
+ * `SCORECARD_POLICIES`, plus the overhead worst case (`overheads`: A/B reports, any platform).
  */
 export function aggregateKpis(
   runs: readonly KpiRun[],
   platform: BenchmarkPlatform,
+  overheads: readonly OverheadKpiInput[] = [],
 ): PlatformScorecardV1 {
   const platformRuns = runsOf(runs, platform);
   const metrics = Object.fromEntries(
@@ -297,6 +418,7 @@ export function aggregateKpis(
     const { lowFps, medianFps } = run.result.summary.kpis.smoothness;
     return lowFps && medianFps != undefined ? [{ ...refOf(run), medianFps }] : [];
   });
+  const overhead = aggregateOverhead(overheads, platform);
   return {
     platform,
     runs: platformRuns.length,
@@ -308,6 +430,7 @@ export function aggregateKpis(
     metrics,
     renderCostByPanelType: renderCostByPanelType(platformRuns),
     lowFpsRuns,
+    ...(overhead == undefined ? {} : { overhead }),
   };
 }
 

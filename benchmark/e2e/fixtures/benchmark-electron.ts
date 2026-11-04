@@ -7,7 +7,10 @@ import fs from "node:fs";
 import { electronLaunchArgs } from "./electronLaunchArgs";
 import type { ElectronBenchmarkTarget } from "./types";
 import { DESKTOP_BUILD_DIR } from "../runner/constants";
-import { collectElectronHostMetrics } from "../runner/electronHostCollector";
+import {
+  collectElectronHostMetrics,
+  readElectronCumulativeCpu,
+} from "../runner/electronHostCollector";
 import { describeHost } from "../runner/runScenario";
 import type { RunEnvironment } from "../runner/types";
 
@@ -46,6 +49,7 @@ export async function launchElectronTarget(): Promise<ElectronBenchmarkTarget> {
       electronApp,
       scenarioUrl: (params) => `${baseUrl}?${params.toString()}`,
       collectHostMetrics: async (ts) => await collectElectronHostMetrics(page, ts),
+      readCumulativeCpu: async () => await readElectronCumulativeCpu(electronApp),
       describe: () => ({ ...environment }),
       dispose: async () => {
         await electronApp.close();

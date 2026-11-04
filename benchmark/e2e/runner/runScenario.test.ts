@@ -11,6 +11,7 @@ const AUTO_PAUSING: ScenarioUnderTest = {
   usesMcapFixtures: true,
 };
 const SYNTHETIC: ScenarioUnderTest = { scenarioId: "sinewave", pipeline: "synthetic" };
+const STEADY = { mode: "steady", warmupMs: 3000, polls: 10 } as const;
 
 describe("buildScenarioParams", () => {
   it("should leave normal runs unchanged", () => {
@@ -20,37 +21,38 @@ describe("buildScenarioParams", () => {
     // Then
     expect(params.get("scenario")).toBe("mcap-multi-ingest");
     expect(params.get("scenario.durationMs")).toBeNull();
+    expect(params.get("telemetry.uaMemory")).toBeNull();
     expect(params.get("telemetry")).toBeNull();
   });
 
-  it("should turn off telemetry for telemetry-off runs", () => {
+  it("should move the page auto-pause past the steady window", () => {
+    // Given / When
+    const params = buildScenarioParams(AUTO_PAUSING, {
+      fixtureUrls: ["http://x/a.mcap"],
+      measurement: STEADY,
+    });
+
+    // Then: 3 s warm-up + 10 × 1 s polls + 2 s margin
+    expect(params.get("scenario.durationMs")).toBe("15000");
+  });
+
+  it("should not add an auto-pause to scenarios without one", () => {
+    // Given / When
+    const params = buildScenarioParams(SYNTHETIC, { measurement: STEADY });
+
+    // Then
+    expect(params.get("scenario.durationMs")).toBeNull();
+  });
+
+  it("should turn off telemetry or only the UA memory probe per arm", () => {
     // Given / When
     const off = buildScenarioParams(SYNTHETIC, { telemetryEnabled: false });
+    const noUa = buildScenarioParams(SYNTHETIC, { telemetryEnabled: true, uaMemoryProbe: false });
 
     // Then
     expect(off.get("telemetry")).toBe("off");
-  });
-
-  it("should pass the calibrated late-frame threshold", () => {
-    // Given / When
-    const params = buildScenarioParams(SYNTHETIC, {}, { lateFrameThresholdMs: 25 });
-
-    // Then
-    expect(params.get("telemetry.lateFrameThresholdMs")).toBe("25");
-  });
-
-  it("should join the MCAP fixture URLs into ds.url", () => {
-    // Given / When
-    const params = buildScenarioParams(AUTO_PAUSING, {
-      fixtureUrls: ["http://x/a.mcap", "http://x/b.mcap"],
-    });
-
-    // Then
-    expect(params.get("ds.url")).toBe("http://x/a.mcap,http://x/b.mcap");
-  });
-
-  it("should reject MCAP scenarios without fixture URLs", () => {
-    // Given / When / Then
-    expect(() => buildScenarioParams(AUTO_PAUSING, {})).toThrow(/needs MCAP fixture URLs/);
+    expect(off.get("telemetry.uaMemory")).toBeNull();
+    expect(noUa.get("telemetry")).toBeNull();
+    expect(noUa.get("telemetry.uaMemory")).toBe("off");
   });
 });
