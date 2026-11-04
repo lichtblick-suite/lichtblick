@@ -6,6 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { LAYOUTS } from "../layouts";
+import { SCENARIO_GROUPS, SCENARIO_TAGS } from "./constants";
 import { getScenario, getScenarioFromUrl, SCENARIOS } from "./registry";
 
 describe("scenarios registry", () => {
@@ -92,6 +93,68 @@ describe("scenarios registry", () => {
 
       // Then
       expect(uniqueIds.size).toBe(ids.length);
+    });
+
+    it("should describe every scenario with a sentence, a known group and known tags", () => {
+      // Given
+      const groups: readonly string[] = SCENARIO_GROUPS;
+      const tags: readonly string[] = SCENARIO_TAGS;
+
+      // When
+      const invalid = SCENARIOS.filter(
+        (scenario) =>
+          scenario.description.trim().length === 0 ||
+          scenario.player.trim().length === 0 ||
+          !groups.includes(scenario.group) ||
+          scenario.tags.length === 0 ||
+          scenario.tags.some((tag) => !tags.includes(tag)),
+      );
+
+      // Then
+      expect(invalid.map((scenario) => scenario.id)).toEqual([]);
+    });
+
+    it("should assign the expected group to each scenario", () => {
+      // Given
+      const expected = {
+        sinewave: "time-series",
+        pointcloud: "3d-rendering",
+        transform: "3d-rendering",
+        transformpreloading: "preloading",
+        "mcap-ingest": "real-pipeline-ingest",
+      };
+
+      // When
+      const groups = Object.fromEntries(SCENARIOS.map((scenario) => [scenario.id, scenario.group]));
+
+      // Then
+      expect(groups).toEqual(expected);
+    });
+
+    it("should tag synthetic and real scenarios consistently with their pipeline", () => {
+      // Given / When
+      const mismatched = SCENARIOS.filter(
+        (scenario) =>
+          scenario.tags.includes("synthetic") !== (scenario.pipeline === "synthetic") ||
+          scenario.tags.includes("real-pipeline") !== (scenario.pipeline === "real"),
+      );
+
+      // Then
+      expect(mismatched.map((scenario) => scenario.id)).toEqual([]);
+    });
+
+    it("should not require any params for synthetic scenarios", () => {
+      // Given
+      const synthetic = SCENARIOS.filter((scenario) => scenario.pipeline === "synthetic");
+
+      // When
+      const requiredParams = synthetic.flatMap(
+        (scenario) => scenario.dataSource.requiredParams ?? [],
+      );
+
+      // Then
+      expect(synthetic.length).toBeGreaterThan(0);
+      expect(requiredParams).toEqual([]);
     });
   });
 });

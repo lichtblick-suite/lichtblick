@@ -135,7 +135,7 @@ class TransformPlayer extends BenchmarkPlayerBase implements Player {
       const frameEndMs = performance.now();
       const frameTimeMs = frameEndMs - frameStartMs;
 
-      BenchmarkStats.Instance().recordFrameTime(frameTimeMs);
+      BenchmarkStats.Instance().recordListenerDispatchDuration(frameTimeMs);
     }
   }
 }

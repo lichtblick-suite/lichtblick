@@ -7,6 +7,11 @@
 
 import { Scenario } from "./types";
 
+/** `displayName` of `SyntheticDataSourceFactory`. */
+const SYNTHETIC_DISPLAY_NAME = "Synthetic";
+/** `displayName` of `McapRealPipelineBenchmarkDataSourceFactory`. */
+const REAL_PIPELINE_DISPLAY_NAME = "MCAP (real pipeline)";
+
 /** Small public NuScenes MCAP fixture, also used by the web E2E suite (`e2e/fixtures/urls.ts`). */
 const MCAP_INGEST_FIXTURE_URL =
   "https://mcap-proxy.lichtblick.workers.dev/NuScenes-v1.0-mini-scene-sample.mcap";
@@ -19,38 +24,63 @@ const MCAP_INGEST_FIXTURE_URL =
 const SCENARIOS: readonly Scenario[] = [
   {
     id: "sinewave",
+    description: "One Plot panel charting a synthetic sine wave signal.",
+    group: "time-series",
+    tags: ["plot", "synthetic"],
+    player: "SinewavePlayer",
     layout: "sinewave",
-    dataSource: { factoryId: "sinewave" },
+    dataSource: { factoryId: "sinewave", displayName: SYNTHETIC_DISPLAY_NAME },
     pipeline: "synthetic",
     autoStart: true,
   },
   {
     id: "pointcloud",
+    description: "Six 3D panels rendering synthetic point clouds.",
+    group: "3d-rendering",
+    tags: ["3d", "pointcloud", "synthetic"],
+    player: "PointcloudPlayer",
     layout: "pointCloudMultipleThreeDee",
-    dataSource: { factoryId: "pointcloud" },
+    dataSource: { factoryId: "pointcloud", displayName: SYNTHETIC_DISPLAY_NAME },
     pipeline: "synthetic",
     autoStart: true,
   },
   {
     id: "transform",
+    description: "Six 3D panels following a synthetic transform (tf) stream.",
+    group: "3d-rendering",
+    tags: ["3d", "tf", "synthetic"],
+    player: "TransformPlayer",
     layout: "multipleThreeDee",
-    dataSource: { factoryId: "transform" },
+    dataSource: { factoryId: "transform", displayName: SYNTHETIC_DISPLAY_NAME },
     pipeline: "synthetic",
     autoStart: true,
   },
   {
     id: "transformpreloading",
+    description: "Raw Messages and 3D panels over preloaded (block-loaded) synthetic transforms.",
+    group: "preloading",
+    tags: ["3d", "raw-messages", "tf", "preloading", "synthetic"],
+    player: "TransformPreloadingPlayer",
     layout: "transformPreloading",
-    dataSource: { factoryId: "transformpreloading" },
+    dataSource: { factoryId: "transformpreloading", displayName: SYNTHETIC_DISPLAY_NAME },
     pipeline: "synthetic",
     autoStart: true,
   },
   {
     id: "mcap-ingest",
+    description: "One remote MCAP file ingested through the real player pipeline, without panels.",
+    group: "real-pipeline-ingest",
+    tags: ["real-pipeline", "mcap"],
+    player: "IterablePlayer + McapIterableSource (main thread)",
     // "empty" until a fixture-specific layout is added: the other registered layouts assume
     // synthetic-player topic names that won't match this real MCAP file's topics.
     layout: "empty",
-    dataSource: { factoryId: "mcap-real-pipeline", params: { url: MCAP_INGEST_FIXTURE_URL } },
+    dataSource: {
+      factoryId: "mcap-real-pipeline",
+      displayName: REAL_PIPELINE_DISPLAY_NAME,
+      params: { url: MCAP_INGEST_FIXTURE_URL },
+      requiredParams: ["url"],
+    },
     pipeline: "real",
     autoStart: true,
     durationMs: 5_000,
