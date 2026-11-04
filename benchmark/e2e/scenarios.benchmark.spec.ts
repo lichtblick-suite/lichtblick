@@ -8,7 +8,7 @@ import { writeScenarioArtifacts } from "./runner/artifacts";
 import { runScenario } from "./runner/runScenario";
 import { SCENARIOS_UNDER_TEST } from "./runner/scenariosUnderTest";
 
-// One test per scenario and platform (Playwright project `electron`): runs the scenario
+// One test per scenario and platform (Playwright projects `electron` / `web`): runs the scenario
 // through the shared runner core and writes the legacy artifact plus `benchmark-result.v1.json`
 // to `benchmark/.artifacts`, plus checkpoint screenshots to `benchmark/.artifacts/screenshots`
 // (also attached to the Playwright report): by default only `end`, taken after all measurement so
@@ -75,5 +75,18 @@ for (const scenario of SCENARIOS_UNDER_TEST) {
         }
       }
     }
+
   });
 }
+
+test("web pages are cross-origin isolated", async ({ platform, launchTarget }) => {
+  test.skip(platform !== "web", "COOP/COEP isolation is only asserted for the web platform");
+
+  // Given the static server's COOP/COEP headers
+  const target = await launchTarget();
+  // When the benchmark page is loaded
+  await target.page.goto(target.scenarioUrl(new URLSearchParams()));
+
+  // Then
+  expect(await target.page.evaluate(() => globalThis.crossOriginIsolated)).toBe(true);
+});

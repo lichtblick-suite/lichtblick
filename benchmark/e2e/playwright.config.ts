@@ -24,8 +24,9 @@ export default defineConfig<object, Pick<BenchmarkWorkerFixtures, "platform">>({
   // Only the Playwright benchmark specs: `*.test.ts` files here are Jest unit tests.
   testMatch: "**/*.benchmark.spec.ts",
   name: "benchmark",
-  // Generous timeout: launching the app, playing the scenario's `durationMs`, sampling host/page
-  // telemetry and capturing the data source close all happen within a single test.
+  // Generous timeout: launching the app, serving the web build, playing the
+  // scenario's `durationMs`, sampling host/page telemetry and capturing the data source close all
+  // happen within a single test.
   timeout: 120 * 1000,
   retries: 0,
   workers: 1,
@@ -34,13 +35,16 @@ export default defineConfig<object, Pick<BenchmarkWorkerFixtures, "platform">>({
     ignoreHTTPSErrors: true,
     trace: "retain-on-first-failure",
     video: "retain-on-failure",
-    // Failure screenshots of the Electron window (verified with Playwright 1.60: a failing Electron
-    // test gets a `test-failed-1.png`). Complements the checkpoint screenshots of `runScenario`
+    // Failure screenshots of every page Playwright tracks: the web project's Chromium pages and the
+    // Electron window (verified with Playwright 1.60: a failing Electron test gets a
+    // `test-failed-1.png`). Complements the checkpoint screenshots of `runScenario`
     // (`runner/screenshots.ts`, attached as soon as they are taken).
     screenshot: "only-on-failure",
   },
   projects: [
     // Standalone benchmark Electron shell (`yarn benchmark:desktop:build:prod`).
     { name: "electron", use: { platform: "electron" } },
+    // Static web build (`yarn benchmark:build:prod`) in headless Chromium.
+    { name: "web", use: { platform: "web" } },
   ],
 });

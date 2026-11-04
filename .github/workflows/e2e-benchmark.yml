@@ -1,6 +1,6 @@
 name: E2E Benchmark
 
-# Runs the benchmark E2E suite (benchmark/e2e) on Electron, collecting process metrics,
+# Runs the benchmark E2E suite (benchmark/e2e) on Electron and web, collecting process metrics,
 # in-app telemetry and frame times. Results, screenshots and the HTML report are uploaded as
 # artifacts. Runs only on pushes to long-lived branches: the suite is slow and needs a stable runner.
 
@@ -73,6 +73,65 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: benchmark-results-electron
+          path: |
+            benchmark/.artifacts/**/*.json
+            benchmark/.artifacts/screenshots/**
+            benchmark/.artifacts/report/**
+          if-no-files-found: warn
+
+  e2e-benchmark-web:
+    runs-on: ubuntu-latest
+
+    name: e2e-benchmark-web (ubuntu-latest)
+
+    # Set a fixed timezone to ensure consistent test results.
+    env:
+      TZ: Europe/Lisbon
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: corepack enable yarn
+
+      - name: Restore cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            .yarn/cache
+            **/node_modules
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
+
+      - run: yarn install --immutable
+
+      - name: Build benchmark web app
+        run: yarn benchmark:build:prod
+
+      - name: Install Playwright Chromium
+        run: yarn playwright install --with-deps chromium
+
+      - name: Run Benchmark E2E tests (web)
+        run: yarn test:e2e:benchmark:web:ci scenarios
+
+      - name: Generate Benchmark Test Summary
+        if: always()
+        run: yarn test:e2e:benchmark:summary >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Generate Benchmark HTML Report
+        if: always()
+        run: |
+          yarn test:e2e:benchmark:viewer
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "📊 Interactive report: download artifact \`benchmark-results-web\` and open \`report/index.html\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Benchmark Results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: benchmark-results-web
           path: |
             benchmark/.artifacts/**/*.json
             benchmark/.artifacts/screenshots/**

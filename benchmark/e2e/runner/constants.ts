@@ -54,11 +54,16 @@ export const BENCHMARK_DIR = path.resolve(__dirname, "../..");
 export const ARTIFACTS_DIR = path.join(BENCHMARK_DIR, ".artifacts");
 /** Checkpoint screenshots of scenario runs (`runner/screenshots.ts`). */
 export const SCREENSHOTS_DIR = path.join(ARTIFACTS_DIR, "screenshots");
+/** Output of `yarn benchmark:build:prod` (static web build). */
+export const WEB_BUILD_DIR = path.join(BENCHMARK_DIR, ".webpack");
 /** Output of `yarn benchmark:desktop:build:prod` (standalone Electron shell). */
 export const DESKTOP_BUILD_DIR = path.join(BENCHMARK_DIR, ".webpack-desktop");
 
-/** Bytes per KB (Electron `ProcessMetric` memory is in KB). */
+/** Bytes per KB (Electron `ProcessMetric` and `ps` RSS memory are in KB). */
 export const KB = 1024;
+
+/** `maxBuffer` of the `ps` calls of the web host collector. */
+export const PS_MAX_BUFFER_BYTES = 16 * 1024 * 1024;
 
 /** Name of the env variable that selects the screenshot mode (`BENCHMARK_SCREENSHOTS`). */
 export const SCREENSHOTS_ENV_VAR = "BENCHMARK_SCREENSHOTS";

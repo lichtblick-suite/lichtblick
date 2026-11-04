@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { ElectronApplication, Page } from "@playwright/test";
+import type { Browser, ElectronApplication, Page } from "@playwright/test";
 
 import type {
   BenchmarkPlatform,
@@ -19,7 +19,7 @@ export type HostMetricsSnapshot = {
   samples: HostProcessSample[];
   /**
    * Entries for the legacy artifact's `memorySamples[].metrics`: Electron's raw `ProcessMetric`s
-   * (unchanged).
+   * (unchanged), or for web a minimal ProcessMetric-compatible object (memory in KB).
    */
   legacyMetrics: LegacyProcessMetric[];
 };
@@ -115,6 +115,23 @@ export type ScenarioRunResult = {
   runTimestamp: number;
   /** Screenshots actually written (failed captures are skipped), in capture order. */
   screenshots: readonly ScreenshotArtifact[];
+};
+
+/** One `SystemInfo.getProcessInfo` entry (`cpuTime` = cumulative CPU seconds). */
+export type CdpProcessInfo = { type: string; id: number; cpuTime: number };
+
+export type PsTreeRow = {
+  pid: number;
+  ppid: number;
+  rssKb: number;
+  cpuPercent: number;
+  args: string;
+};
+
+export type WebHostCollectorOptions = {
+  browser: Browser;
+  /** Unique flag passed to the browser at launch; used by the `ps` fallback to find its tree. */
+  marker: string;
 };
 
 /** Serializable record pushed by the Electron main-process listeners. */

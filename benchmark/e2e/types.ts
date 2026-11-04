@@ -18,9 +18,10 @@ export type FrameTimeSample = { stamp: number; value: number };
 
 /**
  * Process entry of a legacy `MemorySample`. Electron writes its `ProcessMetric`s
- * (`app.getAppMetrics()`) unmodified, which are structurally compatible. Memory values are KB.
- * `percentCPUUsage` keeps Electron's raw scale (divided by the logical CPU count; the v1 result's
- * `process.cpuPercent` is a per-core sum).
+ * (`app.getAppMetrics()`) unmodified, which are structurally compatible; the web runner writes this
+ * minimal subset built from CDP `SystemInfo.getProcessInfo` + `ps` RSS. Memory values are KB.
+ * `percentCPUUsage` keeps each platform's raw scale: Electron's is divided by the logical CPU count,
+ * web's is a per-core sum (the v1 result's `process.cpuPercent` is a per-core sum on both).
  */
 export type LegacyProcessMetric = {
   pid: number;
@@ -32,7 +33,8 @@ export type LegacyProcessMetric = {
 export type MemorySample = { timestampMs: number; metrics: LegacyProcessMetric[] };
 
 /**
- * Raw per-run artifact written to `benchmark/.artifacts/<scenario-id>-<timestamp>.json`. Kept flat
+ * Raw per-run artifact written to `benchmark/.artifacts/<scenario-id>-<timestamp>.json` (Electron)
+ * or `<scenario-id>-web-<timestamp>.json` (web). Kept flat
  * and stable: a follow-up report generator (not part of this suite) parses this shape to produce
  * human-readable summaries/trends across runs.
  */

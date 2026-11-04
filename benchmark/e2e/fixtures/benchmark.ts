@@ -3,19 +3,35 @@
 import { test as base } from "@playwright/test";
 
 import { launchElectronTarget } from "./benchmark-electron";
-import type { BenchmarkTestFixtures, BenchmarkWorkerFixtures } from "./types";
+import { launchWebTarget } from "./benchmark-web";
+import type { BenchmarkTestFixtures, BenchmarkWorkerFixtures, LaunchTargetOptions } from "./types";
+import { WEB_BUILD_DIR } from "../runner/constants";
 import type { DisposableBenchmarkTarget } from "../runner/types";
+import { startStaticServer } from "../server/staticServer";
 
 export const test = base.extend<BenchmarkTestFixtures, BenchmarkWorkerFixtures>({
   platform: ["electron", { option: true, scope: "worker" }],
 
-  launchTarget: async ({ platform }, use) => {
-    const launched: DisposableBenchmarkTarget[] = [];
-    const launch = async (): Promise<DisposableBenchmarkTarget> => {
-      if (platform !== "electron") {
-        throw new Error(`Unsupported benchmark platform: ${platform}`);
+  benchmarkServer: [
+    async ({ platform }, use) => {
+      const routes: Record<string, string> = {};
+      if (platform === "web") {
+        routes["/"] = WEB_BUILD_DIR;
       }
-      const instance = await launchElectronTarget();
+      const server = await startStaticServer({ routes });
+      await use({ origin: server.origin });
+      await server.close();
+    },
+    { scope: "worker" },
+  ],
+
+  launchTarget: async ({ platform, benchmarkServer }, use) => {
+    const launched: DisposableBenchmarkTarget[] = [];
+    const launch = async (options?: LaunchTargetOptions): Promise<DisposableBenchmarkTarget> => {
+      const instance =
+        platform === "web"
+          ? await launchWebTarget(benchmarkServer.origin, options)
+          : await launchElectronTarget();
       let disposed: Promise<void> | undefined;
       const target: DisposableBenchmarkTarget = {
         ...instance,
