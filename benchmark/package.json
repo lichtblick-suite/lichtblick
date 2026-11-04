@@ -12,6 +12,7 @@
     "@lichtblick/rostime": "1.0.0",
     "@lichtblick/suite": "workspace:*",
     "@lichtblick/tsconfig": "1.1.2",
+    "@mcap/core": "2.2.0",
     "@playwright/test": "1.60.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
     "@testing-library/react": "16.0.0",

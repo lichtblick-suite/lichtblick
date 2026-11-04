@@ -125,8 +125,8 @@ describe("buildScenarioDescriptor", () => {
 
   it("should redact fixture URLs of the effective params and keep durationMs", () => {
     // Given
-    const scenario = getScenario("mcap-ingest")!;
-    const params = { url: "http://127.0.0.1:1/a.mcap" };
+    const scenario = getScenario("mcap-multi-ingest")!;
+    const params = { maxHydratedSources: "1", url: "http://127.0.0.1:1/a.mcap,http://x/b.mcap" };
 
     // When
     const descriptor = buildScenarioDescriptor({
@@ -136,16 +136,16 @@ describe("buildScenarioDescriptor", () => {
     });
 
     // Then
-    expect(descriptor.params).toEqual({ url: "<redacted>" });
-    expect(descriptor.durationMs).toBe(5_000);
+    expect(descriptor.params).toEqual({ maxHydratedSources: "1", url: "<redacted>" });
+    expect(descriptor.durationMs).toBe(10_000);
     expect(descriptor.group).toBe("real-pipeline-ingest");
-    expect(descriptor.player).toBe("IterablePlayer + McapIterableSource (main thread)");
-    expect(descriptor.panels).toEqual([]);
+    expect(descriptor.player).toBe("IterablePlayer + McapIterableSource (worker)");
+    expect(descriptor.panels.map((panel) => panel.id)).toEqual(["RawMessages!multi", "Plot!multi"]);
   });
 
   it("should report the effective (overridden) durationMs", () => {
     // Given
-    const scenario = getScenario("mcap-ingest")!;
+    const scenario = getScenario("mcap-multi-ingest")!;
 
     // When
     const descriptor = buildScenarioDescriptor({

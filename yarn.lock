@@ -8709,6 +8709,7 @@ __metadata:
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
+    "@mcap/core": "npm:2.2.0"
     "@playwright/test": "npm:1.60.0"
     "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
     "@testing-library/react": "npm:16.0.0"

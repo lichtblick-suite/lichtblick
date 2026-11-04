@@ -13,6 +13,14 @@ export const SCENARIOS_UNDER_TEST: readonly ScenarioUnderTest[] = [
   { scenarioId: "transform", pipeline: "synthetic" },
   { scenarioId: "transformpreloading", pipeline: "synthetic" },
   // { scenarioId: "mcap-ingest", pipeline: "real", durationMs: 5_000 }, // since we don't have a real data source for this scenario in the CI environment, skip it
+  // Real pipeline on runtime-generated, fully overlapping MCAP fixtures (`maxHydratedSources: 1`
+  // forces the HydratedSourcePool over budget: evictions/rehydrations).
+  {
+    scenarioId: "mcap-multi-ingest",
+    pipeline: "real",
+    durationMs: 10_000,
+    usesMcapFixtures: true,
+  },
 ];
 
 export function getScenarioUnderTest(scenarioId: string): ScenarioUnderTest {

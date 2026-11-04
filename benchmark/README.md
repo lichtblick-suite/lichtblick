@@ -35,12 +35,12 @@ yarn test:e2e:benchmark:viewer --open
 ```
 
 To run a single spec or scenario, use the usual Playwright filters. Examples:
-`yarn test:e2e:benchmark scenarios -g sinewave` and `yarn test:e2e:benchmark:web scenarios -g transform`.
+`yarn test:e2e:benchmark scenarios -g sinewave` and `yarn test:e2e:benchmark:web scenarios -g mcap`.
 CI variants (`test:e2e:benchmark:ci`, `test:e2e:benchmark:web:ci`) set `CI=true` and write
 `benchmark/e2e/reports/results-<platform>.json`. They take the same filters; the workflow passes
 `scenarios` (see [CI](#ci)).
 
-The unit tests for the runner's pure logic (static server, schema builder and
+The unit tests for the runner's pure logic (static server, fixture generator, schema builder and
 validator, collector parsing, crash detection, summary, HTML viewer) run under the `benchmark-e2e` Jest project:
 `yarn jest --selectProjects benchmark-e2e`.
 
@@ -56,10 +56,14 @@ validator, collector parsing, crash detection, summary, HTML viewer) run under t
 | `pointcloud`          | synthetic | Multiple 3D panels with point clouds                                                                                               |
 | `transform`           | synthetic | Multiple 3D panels with transforms                                                                                                 |
 | `transformpreloading` | synthetic | Transform preloading                                                                                                               |
+| `mcap-multi-ingest`   | real      | Several time-overlapping MCAP files through the real worker pipeline (MultiIterableSource + HydratedSourcePool), `durationMs` 10 s |
 | `mcap-ingest`         | real      | Remote NuScenes file; **not run by the suite** (network-dependent, large)                                                          |
 
-Real-pipeline scenarios receive their inputs through `?ds.<param>=<value>` overrides. Example:
-`?scenario=mcap-ingest&ds.url=<url>` (a repeated `ds.url` is joined with `,`).
+Real-pipeline scenarios receive their inputs through `?ds.<param>=<value>` overrides. Examples:
+`?scenario=mcap-multi-ingest&ds.url=<url1>,<url2>` (a repeated `ds.url` is joined with `,`).
+`mcap-multi-ingest` sets `maxHydratedSources=1`. With several overlapping files, merged iteration
+pins more sources than the budget allows, so the pool goes **over budget** and evicts and
+re-hydrates sources. This is the scenario that demonstrates the pool telemetry.
 
 A scenario with `durationMs` pauses itself at that deadline. While a scenario is active, the page
 also exposes `window.lichtblickScenario.closeDataSource()`. It closes the player without leaving
@@ -77,11 +81,29 @@ they are derived from the telemetry the run emitted (`result/exercised.ts`).
 | `pointcloud`          | `3d-rendering`         | 3d, pointcloud, synthetic                             | 3D ×6                   | PointcloudPlayer                                  | MessagePipeline                                                                                                                               |
 | `transform`           | `3d-rendering`         | 3d, tf, synthetic                                     | 3D ×6                   | TransformPlayer                                   | MessagePipeline                                                                                                                               |
 | `transformpreloading` | `preloading`           | 3d, raw-messages, tf, preloading, synthetic           | RawMessages ×1, 3D ×1   | TransformPreloadingPlayer                         | MessagePipeline                                                                                                                               |
+| `mcap-multi-ingest`   | `real-pipeline-ingest` | real-pipeline, mcap, multi-source, raw-messages, plot | RawMessages ×1, Plot ×1 | IterablePlayer + McapIterableSource (worker)      | MessagePipeline, MultiIterableSource, HydratedSourcePool, BlockLoader, CachingIterableSource, RemoteFileReadable, IterablePlayer (memoryInfo) |
 | `mcap-ingest`         | `real-pipeline-ingest` | real-pipeline, mcap                                   | none (`empty`)          | IterablePlayer + McapIterableSource (main thread) | not run by the suite                                                                                                                          |
 
 Only `PanelExtensionAdapter` panels (3D, ...) emit render telemetry. Plot and Raw Messages report
 delivered messages only, so a declared panel without any panel telemetry is flagged
 "⚠ no telemetry" in the viewer.
+
+### MCAP fixtures (generated, not committed)
+
+`benchmark/e2e/fixtures/generateMcapFixtures.ts` writes the fixtures for `mcap-multi-ingest`
+**deterministically at test time** into `benchmark/.artifacts/fixtures/` (gitignored):
+
+- 4 indexed, chunked files (`@mcap/core` `McapWriter`), each covering the **same** 10 s range
+- topic `/benchmark/multi`, `jsonschema`/`json` encoding, 200 Hz per file
+- each message is `{ value: sin(t·k) + fileIndex, seq, payload: <1 KiB string> }`, about 2.2 MB per file
+
+The generator is idempotent: it skips work when `manifest.json` matches the options hash. Because
+no binary fixtures are committed, there are no licensing questions. The data is produced by
+MPL-2.0 code in this repository.
+
+The runner serves the fixtures from a local static server at
+`http://127.0.0.1:<port>/fixtures/<file>`. Electron loads them cross-origin from its `file://`
+page, which is why the server sends CORS and CORP headers.
 
 ## Telemetry contract
 
@@ -201,7 +223,7 @@ which the benchmark summaries (`e2e/result/`) import.
 benchmark/e2e/
 ├── playwright.config.ts          projects "electron" and "web"
 ├── scenarios.benchmark.spec.ts   one test per scenario under test (+ web crossOriginIsolated check)
-├── fixtures/                     Playwright fixtures, Electron/web targets
+├── fixtures/                     Playwright fixtures, Electron/web targets, MCAP generator
 ├── server/staticServer.ts        Node http static server (Range, COOP/COEP/CORP/CORS, SPA fallback)
 ├── runner/                       runScenario, host collectors, artifacts, crashDetection, scenariosUnderTest
 ├── result/schemaV1.ts            benchmark-result.v1 types, builder and validator
@@ -212,7 +234,7 @@ benchmark/e2e/
 `runScenario(target, scenario, opts)` does the same thing on both platforms:
 
 1. Installs `recordFrameTimes` with `page.exposeFunction`.
-2. Navigates to `?scenario=<id>[&telemetry=off]`.
+2. Navigates to `?scenario=<id>[&telemetry=off][&ds.url=…]`.
 3. Waits for the telemetry API.
 4. Runs a 1 Hz loop for the scenario's `durationMs`, or 5 s by default. Each tick reads the page
    clock, collects host metrics stamped with that clock, and drains page telemetry until it is
@@ -231,7 +253,7 @@ benchmark/e2e/
 10. Fails the run if any panel or the app rendered an error boundary (see
     [Error-boundary guard](#error-boundary-guard)).
 
-The web target serves `benchmark/.webpack` from the static server. Every response
+The web target serves `benchmark/.webpack` and the fixtures from the static server. Every response
 carries these headers:
 
 - `Cross-Origin-Opener-Policy: same-origin`
@@ -241,7 +263,8 @@ carries these headers:
 
 With these, `crossOriginIsolated === true` in the page and its workers. A web test asserts this.
 
-The Electron target launches `benchmark/.webpack-desktop` once per test. Its page is `file://`.
+The Electron target launches `benchmark/.webpack-desktop` once per test. Its page is `file://`,
+and it fetches the fixtures from the same static server.
 
 The Electron WebGL switches depend on the host OS (`fixtures/electronLaunchArgs.ts`, verified with
 Electron 44.4.5):
@@ -261,6 +284,7 @@ Electron 44.4.5):
 | `<scenarioId>-<ts>.json` (Electron), `<scenarioId>-web-<ts>.json` (web)     | Legacy `BenchmarkArtifact` (unchanged shape). On web, `memorySamples[].metrics` are ProcessMetric-like `{pid, type, memory:{workingSetSize, peakWorkingSetSize} (KB), cpu:{percentCPUUsage}}` (memory is 0 when unavailable). `percentCPUUsage` is raw: divided by the logical CPUs on Electron, a per-core sum on web |
 | `<scenarioId>-<platform>[-telemetry-off]-<ts>.benchmark-result.v1.json`     | Result schema v1 (below)                                                                                                                                                                                                                                                                                               |
 | `screenshots/<scenarioId>-<platform>[-telemetry-off]-<ts>-<checkpoint>.png` | Viewport screenshots of the scenarios spec runs, `<checkpoint>` = `end` by default, plus `loaded` and `mid` with `BENCHMARK_SCREENSHOTS=all` (see [Screenshots](#screenshots))                                                                                                                                         |
+| `fixtures/`                                                                 | Generated MCAP fixtures. CI does not upload these                                                                                                                                                                                                                                                                      |
 
 `<ts>` is the epoch ms at the start of the run, shared by all files of one run (legacy artifact,
 v1 result and screenshots), so they can be matched up.
@@ -575,7 +599,7 @@ scorecard per platform and one "Exercises" line per scenario, then covers the le
 the v1 results table and the panels and pipeline section. Each job then
 generates the HTML report (see [Viewing results](#viewing-results)) and adds a pointer to it in the
 job summary. Finally it uploads `benchmark/.artifacts/**/*.json`, the checkpoint screenshots in
-`benchmark/.artifacts/screenshots/` and `benchmark/.artifacts/report/`.
+`benchmark/.artifacts/screenshots/` and `benchmark/.artifacts/report/`, excluding the fixtures.
 
 ## Deferred
 

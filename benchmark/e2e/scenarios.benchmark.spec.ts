@@ -19,9 +19,11 @@ import { SCENARIOS_UNDER_TEST } from "./runner/scenariosUnderTest";
 for (const scenario of SCENARIOS_UNDER_TEST) {
   test(`should run the ${scenario.scenarioId} ${scenario.pipeline}-pipeline scenario and collect memory/frame-time samples`, async ({
     target,
+    fixtureUrls,
   }, testInfo) => {
     // Given / When
     const run = await runScenario(target, scenario, {
+      fixtureUrls,
       screenshots: true,
       testInfo,
     });
@@ -76,6 +78,18 @@ for (const scenario of SCENARIOS_UNDER_TEST) {
       }
     }
 
+    if (scenario.scenarioId === "mcap-multi-ingest") {
+      const pools = Object.values(result.summary.hydratedSourcePool?.pools ?? {});
+      expect(pools.length).toBeGreaterThan(0);
+      for (const pool of pools) {
+        expect(pool.invariantHolds).toBe(true);
+      }
+      // AC3: with `maxHydratedSources: 1` and fully overlapping sources the pool goes over budget.
+      expect(Math.max(...pools.map((pool) => pool.overBudgetPeriods))).toBeGreaterThanOrEqual(1);
+      const events = result.events.map((event) => `${event.name}:${event.phase}`);
+      expect(events).toContain("datasource.open:end");
+      expect(events).toContain("datasource.firstMessage:instant");
+    }
   });
 }
 

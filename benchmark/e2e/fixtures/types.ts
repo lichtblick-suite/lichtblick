@@ -10,6 +10,25 @@ import type {
   DisposableBenchmarkTarget,
 } from "../runner/types";
 
+/**
+ * Options of `generateMcapFixtures`: deterministic MCAP fixtures for the `mcap-multi-ingest`
+ * scenario (see `generateMcapFixtures.ts`).
+ */
+export type McapFixtureOptions = {
+  /** Number of files. Default 4. */
+  fileCount?: number;
+  /** Time span of every file in seconds. Default 10. */
+  durationSec?: number;
+  /** Messages per second per file. Default 200. */
+  rateHz?: number;
+  /** Length of the `payload` string per message. Default 1024. */
+  payloadBytes?: number;
+  /** Topic name. Default `/benchmark/multi`. */
+  topic?: string;
+  /** Chunk size passed to `McapWriter`. Default 256 KiB. */
+  chunkSize?: number;
+};
+
 /** Options of `launchTarget`. */
 export type LaunchTargetOptions = {
   /** Web only (Electron ignores it): Chromium build. Default `chromium-headless-shell`. */
@@ -20,10 +39,10 @@ export type BenchmarkWorkerFixtures = {
   /** Set per Playwright project (`playwright.config.ts`). */
   platform: BenchmarkPlatform;
   /**
-   * Worker-scoped localhost static server: on web, `/` serves the static benchmark build
-   * (`benchmark/.webpack`).
+   * Worker-scoped localhost static server: `/fixtures/` serves the runtime-generated MCAP fixtures
+   * (both platforms); on web, `/` serves the static benchmark build (`benchmark/.webpack`).
    */
-  benchmarkServer: { origin: string };
+  benchmarkServer: { origin: string; fixtureUrls: readonly string[] };
 };
 
 export type BenchmarkTestFixtures = {
@@ -35,6 +54,8 @@ export type BenchmarkTestFixtures = {
   launchTarget: (options?: LaunchTargetOptions) => Promise<DisposableBenchmarkTarget>;
   /** One app instance for the test (lazily created via `launchTarget`). */
   target: BenchmarkTarget;
+  /** URLs of the scenario MCAP fixtures (`benchmarkServer.fixtureUrls`). */
+  fixtureUrls: readonly string[];
 };
 
 export type ElectronBenchmarkTarget = DisposableBenchmarkTarget & {

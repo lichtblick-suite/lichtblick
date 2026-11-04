@@ -54,6 +54,8 @@ export const BENCHMARK_DIR = path.resolve(__dirname, "../..");
 export const ARTIFACTS_DIR = path.join(BENCHMARK_DIR, ".artifacts");
 /** Checkpoint screenshots of scenario runs (`runner/screenshots.ts`). */
 export const SCREENSHOTS_DIR = path.join(ARTIFACTS_DIR, "screenshots");
+/** Runtime-generated MCAP fixtures (gitignored with the rest of `.artifacts`). */
+export const FIXTURES_DIR = path.join(ARTIFACTS_DIR, "fixtures");
 /** Output of `yarn benchmark:build:prod` (static web build). */
 export const WEB_BUILD_DIR = path.join(BENCHMARK_DIR, ".webpack");
 /** Output of `yarn benchmark:desktop:build:prod` (standalone Electron shell). */

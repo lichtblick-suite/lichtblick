@@ -11,6 +11,9 @@ export type ScenarioUnderTest = {
    * (the page auto-pauses at the same deadline). If unset, the runner samples for
    * `DEFAULT_SAMPLE_DURATION_MS`. */
   durationMs?: number;
+  /** The scenario reads the runtime-generated MCAP fixtures (`fixtures/generateMcapFixtures.ts`),
+   * passed to the page as `?ds.url=<comma-separated fixture URLs>`. */
+  usesMcapFixtures?: boolean;
 };
 
 /** Legacy frame-time sample as written to the artifact (`stamp` = wall-clock seconds). */

@@ -24,7 +24,7 @@ export default defineConfig<object, Pick<BenchmarkWorkerFixtures, "platform">>({
   // Only the Playwright benchmark specs: `*.test.ts` files here are Jest unit tests.
   testMatch: "**/*.benchmark.spec.ts",
   name: "benchmark",
-  // Generous timeout: launching the app, serving the web build, playing the
+  // Generous timeout: launching the app, generating/serving the MCAP fixtures, playing the
   // scenario's `durationMs`, sampling host/page telemetry and capturing the data source close all
   // happen within a single test.
   timeout: 120 * 1000,

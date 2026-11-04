@@ -98,6 +98,8 @@ export type ScenarioScreenshotterOptions = {
 export type RunScenarioOptions = {
   /** Default true; false adds `?telemetry=off`. */
   telemetryEnabled?: boolean;
+  /** Fixture URLs for scenarios with `usesMcapFixtures` (passed as `?ds.url=<a>,<b>,…`). */
+  fixtureUrls?: readonly string[];
   /**
    * Capture viewport screenshots (`runner/screenshots.ts`) into `benchmark/.artifacts/screenshots/`.
    * Default false. Only `end` (after all measurement) by default; `BENCHMARK_SCREENSHOTS=all` adds

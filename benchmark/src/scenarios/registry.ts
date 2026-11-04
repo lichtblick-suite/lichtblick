@@ -85,6 +85,30 @@ const SCENARIOS: readonly Scenario[] = [
     autoStart: true,
     durationMs: 5_000,
   },
+  {
+    // Multi-file ingest through the real worker pipeline (MultiIterableSource + HydratedSourcePool).
+    // No URL is hardcoded: the runner serves generated, time-overlapping MCAP fixtures (topic
+    // `/benchmark/multi`) on a dynamic port and passes them as
+    // `?scenario=mcap-multi-ingest&ds.url=<url1>,<url2>,...`.
+    id: "mcap-multi-ingest",
+    description:
+      "Several time-overlapping MCAP files ingested through the real worker pipeline with one " +
+      "hydrated source at a time, shown in Raw Messages and Plot panels.",
+    group: "real-pipeline-ingest",
+    tags: ["real-pipeline", "mcap", "multi-source", "raw-messages", "plot"],
+    player: "IterablePlayer + McapIterableSource (worker)",
+    layout: "mcapMultiIngest",
+    dataSource: {
+      factoryId: "mcap-real-pipeline",
+      displayName: REAL_PIPELINE_DISPLAY_NAME,
+      // A single hydrated source forces eviction/re-hydration across the overlapping files.
+      params: { maxHydratedSources: "1" },
+      requiredParams: ["url"],
+    },
+    pipeline: "real",
+    autoStart: true,
+    durationMs: 10_000,
+  },
 ];
 
 export function getScenario(id: string): Scenario | undefined {

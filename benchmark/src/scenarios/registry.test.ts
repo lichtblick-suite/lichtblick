@@ -95,6 +95,34 @@ describe("scenarios registry", () => {
       expect(uniqueIds.size).toBe(ids.length);
     });
 
+    it("should register mcap-multi-ingest on the real pipeline without a hardcoded url", () => {
+      // Given
+      const id = "mcap-multi-ingest";
+
+      // When
+      const scenario = getScenario(id);
+
+      // Then
+      expect(scenario).toEqual({
+        id,
+        description: expect.any(String),
+        group: "real-pipeline-ingest",
+        tags: ["real-pipeline", "mcap", "multi-source", "raw-messages", "plot"],
+        player: "IterablePlayer + McapIterableSource (worker)",
+        layout: "mcapMultiIngest",
+        dataSource: {
+          factoryId: "mcap-real-pipeline",
+          displayName: "MCAP (real pipeline)",
+          params: { maxHydratedSources: "1" },
+          requiredParams: ["url"],
+        },
+        pipeline: "real",
+        autoStart: true,
+        durationMs: 10_000,
+      });
+      expect(scenario?.dataSource.params?.url).toBeUndefined();
+    });
+
     it("should describe every scenario with a sentence, a known group and known tags", () => {
       // Given
       const groups: readonly string[] = SCENARIO_GROUPS;
@@ -122,6 +150,7 @@ describe("scenarios registry", () => {
         transform: "3d-rendering",
         transformpreloading: "preloading",
         "mcap-ingest": "real-pipeline-ingest",
+        "mcap-multi-ingest": "real-pipeline-ingest",
       };
 
       // When

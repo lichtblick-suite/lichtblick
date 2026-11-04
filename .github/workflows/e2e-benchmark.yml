@@ -73,10 +73,12 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: benchmark-results-electron
+          # Generated MCAP fixtures are reproducible, so they are not uploaded.
           path: |
             benchmark/.artifacts/**/*.json
             benchmark/.artifacts/screenshots/**
             benchmark/.artifacts/report/**
+            !benchmark/.artifacts/fixtures/**
           if-no-files-found: warn
 
   e2e-benchmark-web:
@@ -132,8 +134,10 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: benchmark-results-web
+          # Generated MCAP fixtures are reproducible, so they are not uploaded.
           path: |
             benchmark/.artifacts/**/*.json
             benchmark/.artifacts/screenshots/**
             benchmark/.artifacts/report/**
+            !benchmark/.artifacts/fixtures/**
           if-no-files-found: warn

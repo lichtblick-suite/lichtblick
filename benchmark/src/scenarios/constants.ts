@@ -33,6 +33,7 @@ export const SCENARIO_TAGS = [
   "preloading",
   "real-pipeline",
   "mcap",
+  "multi-source",
   "synthetic",
 ] as const;
 

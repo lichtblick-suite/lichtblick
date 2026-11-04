@@ -85,6 +85,12 @@ export function buildScenarioParams(
   if (calibration != undefined) {
     params.set(LATE_FRAME_THRESHOLD_QUERY_PARAM, String(calibration.lateFrameThresholdMs));
   }
+  if (scenario.usesMcapFixtures === true) {
+    if (options.fixtureUrls == undefined || options.fixtureUrls.length === 0) {
+      throw new Error(`Scenario ${scenario.scenarioId} needs MCAP fixture URLs`);
+    }
+    params.set("ds.url", options.fixtureUrls.join(","));
+  }
   return params;
 }
 
