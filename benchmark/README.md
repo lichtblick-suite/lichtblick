@@ -983,6 +983,24 @@ In CI, both jobs generate the report after the summary (`if: always()`) and uplo
 
 This viewer is a stopgap: the definitive results dashboard is planned as a follow-up.
 
+### Analyzing results with AI
+
+The read-only `@lb-benchmark-analyst` agent
+([`.github/agents/lb-benchmark-analyst.agent.md`](../.github/agents/lb-benchmark-analyst.agent.md))
+interprets the result and overhead JSON files, correlates metric evidence (file → JSON path) with
+code evidence (`path:line`), compares against an optional baseline directory and proposes ranked
+hypotheses and experiments; it never edits files and routes fixes to the owning agent. Its
+knowledge base is the `benchmark-analysis` skill
+([`.github/skills/benchmark-analysis/SKILL.md`](../.github/skills/benchmark-analysis/SKILL.md)),
+which maps every telemetry metric, event and KPI to its producer. Example:
+
+```
+@lb-benchmark-analyst analyze benchmark/.artifacts against <baseline dir>
+```
+
+A baseline can be a downloaded CI artifact (`benchmark-results-electron` /
+`benchmark-results-web`) or a local run of the base commit.
+
 ## CI
 
 `.github/workflows/e2e-benchmark.yml` runs on pushes to `develop` and `main`:
