@@ -49,6 +49,12 @@ import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/const
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import delay from "@lichtblick/suite-base/util/delay";
+import {
+  getTelemetry,
+  type TelemetryEventName,
+  type TelemetryLabels,
+  type TelemetryPhase,
+} from "@lichtblick/suite-base/util/telemetry";
 
 import { BlockLoader } from "./BlockLoader";
 import { BufferedIterableSource } from "./BufferedIterableSource";
@@ -58,6 +64,8 @@ import {
   ISerializedIterableSource,
   IteratorResult,
 } from "./IIterableSource";
+import { coversFullRange } from "./coversFullRange";
+import { memoryMetricName } from "./memoryMetricName";
 
 const log = Log.getLogger(__filename);
 // Number of bytes that we aim to keep in the cache.
@@ -85,6 +93,7 @@ const SEEK_ON_START_NS = BigInt(99 * 1e6);
 const MEMORY_INFO_BUFFERED_MSGS = "Buffered messages";
 
 const EMPTY_ARRAY = Object.freeze([]);
+
 /**
  * Hook invoked on a seek to optionally expand the backfill messages before they are emitted, e.g.
  * to replay a video GOP so a P/B-frame is decodable. It receives the raw backfill messages, a
@@ -221,6 +230,18 @@ export class IterablePlayer implements Player {
 
   #untilTime?: Time;
 
+  // --- Phase telemetry. Every emit is guarded by getTelemetry().isEnabled().
+  // #firstMessageSeen and #blockLoadingStarted are cheap booleans set unconditionally (no
+  // allocation); only the event emission that reads them is gated. The #telemetryPlaybackActive /
+  // #telemetryCloseActive / #telemetryPreload markers pair start/end events and only leave their
+  // initial value once a start event has been emitted, i.e. while telemetry is enabled. ---
+  #telemetryLabels?: TelemetryLabels;
+  #firstMessageSeen = false;
+  #telemetryPlaybackActive = false;
+  #telemetryCloseActive = false;
+  #telemetryPreload: "pending" | "active" | "done" = "pending";
+  #blockLoadingStarted = false;
+
   /** Promise that resolves when the player is closed. Only used for testing currently */
   public readonly isClosed: Promise<void>;
   #resolveIsClosed: () => void = () => {};
@@ -298,6 +319,7 @@ export class IterablePlayer implements Player {
       this.#untilTime = clampTime(opt.untilTime, this.#start, this.#end);
     }
     this.#isPlaying = true;
+    this.#onPlaybackStarted();
 
     // If we are idling we can start playing, if we have a next state queued we let that state
     // finish and it will see that we should be playing
@@ -315,6 +337,7 @@ export class IterablePlayer implements Player {
     // clear out last tick millis so we don't read a huge chunk when we unpause
     this.#lastTickMillis = undefined;
     this.#isPlaying = false;
+    this.#onPlaybackEnded("pause");
     this.#untilTime = undefined;
     this.#lastRangeMillis = undefined;
     if (this.#state === "play") {
@@ -333,6 +356,8 @@ export class IterablePlayer implements Player {
   }
 
   public seekPlayback(time: Time): void {
+    this.#emitPhase("seek.requested", "instant");
+
     // Wait to perform seek until initialization is complete
     if (this.#state === "preinit" || this.#state === "initialize") {
       log.debug(`Ignoring seek, state=${this.#state}`);
@@ -403,6 +428,7 @@ export class IterablePlayer implements Player {
     this.#preloadTopics = preloadTopics;
 
     this.#blockLoader?.setTopics(this.#preloadTopics);
+    this.#maybeStartPreloadTelemetry();
 
     // If the player is playing, the playing state will detect any subscription changes and adjust
     // iterators accordingly. However if we are idle or already seeking then we need to manually
@@ -463,6 +489,10 @@ export class IterablePlayer implements Player {
   }
 
   public close(): void {
+    if (!this.#telemetryCloseActive && getTelemetry().isEnabled()) {
+      this.#telemetryCloseActive = true;
+      this.#emitPhase("datasource.close", "start");
+    }
     this.#setState("close");
   }
 
@@ -567,12 +597,14 @@ export class IterablePlayer implements Player {
       error,
     });
     this.#isPlaying = false;
+    this.#onPlaybackEnded("error");
   }
 
   // Initialize the source and player members
   async #stateInitialize(): Promise<void> {
     // emit state indicating start of initialization
     this.#queueEmitState();
+    this.#emitPhase("datasource.open", "start");
 
     try {
       const initResult = await this.#bufferedSource.initialize();
@@ -700,7 +732,9 @@ export class IterablePlayer implements Player {
       }
 
       this.#presence = PlayerPresence.PRESENT;
+      this.#emitPhase("datasource.open", "end");
     } catch (error) {
+      this.#emitPhase("datasource.open", "end", "error");
       this.#setError(`Error initializing: ${error.message}`, error);
     }
     this.#queueEmitState();
@@ -972,7 +1006,15 @@ export class IterablePlayer implements Player {
       return;
     }
 
+    this.#publishMemoryInfo();
+
     const messages = this.#messages;
+
+    // First non-empty batch delivered to subscribers since open (once per player).
+    if (!this.#firstMessageSeen && messages.length > 0) {
+      this.#firstMessageSeen = true;
+      this.#emitPhase("datasource.firstMessage", "instant");
+    }
 
     // After we emit the messages we clear the outgoing message array so we do not emit the messages again
     // Use a stable EMPTY_ARRAY so we don't keep emitting a new messages reference as if messages have changed
@@ -1173,6 +1215,10 @@ export class IterablePlayer implements Player {
   async #stateIdle() {
     assert(this.#abort == undefined, "Invariant: some other abort controller exists");
 
+    // Entering idle while still playing means playback reached the end of the data (auto-pause).
+    if (this.#isPlaying) {
+      this.#onPlaybackEnded("end");
+    }
     this.#isPlaying = false;
     this.#presence = PlayerPresence.PRESENT;
 
@@ -1280,19 +1326,50 @@ export class IterablePlayer implements Player {
 
   async #stateClose() {
     this.#isPlaying = false;
+    this.#onPlaybackEnded("close");
 
-    await this.#blockLoader?.stopLoading();
-    await this.#blockLoadingProcess;
-    await this.#bufferImpl.terminate();
-    await this.#playbackIterator?.return?.();
-    this.#playbackIterator = undefined;
-    await this.#iterableSource.terminate?.();
+    try {
+      await this.#blockLoader?.stopLoading();
+      await this.#blockLoadingProcess;
+      await this.#bufferImpl.terminate();
+      await this.#playbackIterator?.return?.();
+      this.#playbackIterator = undefined;
+      await this.#iterableSource.terminate?.();
+    } catch (err: unknown) {
+      this.#onCloseEnded("error");
+      throw err;
+    }
+    this.#onCloseEnded(undefined);
     this.#resolveIsClosed();
   }
 
   async #startBlockLoading() {
-    await this.#blockLoader?.startLoading({
+    const blockLoader = this.#blockLoader;
+    if (!blockLoader) {
+      return;
+    }
+    this.#blockLoadingStarted = true;
+    this.#maybeStartPreloadTelemetry();
+    try {
+      await this.#loadBlocks(blockLoader);
+    } catch (err: unknown) {
+      this.#onPreloadEnded("error");
+      throw err;
+    }
+    // startLoading() only returns once stopped (close) — if the full range was not covered by
+    // then, the preload phase ends as cancelled.
+    this.#onPreloadEnded("cancelled");
+  }
+
+  async #loadBlocks(blockLoader: BlockLoader) {
+    await blockLoader.startLoading({
       progress: async (progress) => {
+        if (
+          this.#telemetryPreload === "active" &&
+          coversFullRange(progress.fullyLoadedFractionRanges)
+        ) {
+          this.#onPreloadEnded(undefined);
+        }
         this.#progress = {
           fullyLoadedFractionRanges: this.#progress.fullyLoadedFractionRanges,
           messageCache: progress.messageCache,
@@ -1309,5 +1386,101 @@ export class IterablePlayer implements Player {
         this.#queueEmitState();
       },
     });
+  }
+  /**
+   * Emit a telemetry lifecycle event (scope "pipeline", labels `{ sourceId[, reason] }`).
+   * No-op (no label allocation) when telemetry is disabled.
+   */
+  #emitPhase(name: TelemetryEventName, phase: TelemetryPhase, reason?: string): void {
+    const telemetry = getTelemetry();
+    if (!telemetry.isEnabled()) {
+      return;
+    }
+    this.#telemetryLabels ??= Object.freeze({ sourceId: this.#sourceId });
+    telemetry.event(
+      name,
+      phase,
+      "pipeline",
+      reason == undefined ? this.#telemetryLabels : { sourceId: this.#sourceId, reason },
+    );
+  }
+
+  /**
+   * Gauges every `progress.memoryInfo` entry as `pipeline.memory.<lowerCamelCaseKey>` (e.g.
+   * "Buffered messages" → `pipeline.memory.bufferedMessages`; bytes, label `{ sourceId }`).
+   * Called from the debounced state emit rather than at the three merge sites: the idle-state
+   * merge runs on every buffered-range change (i.e. per new timestamp while the read-ahead fills),
+   * whereas emits are bounded by the tick / progress cadence and always carry the latest merged
+   * values.
+   */
+  #publishMemoryInfo(): void {
+    const memoryInfo = this.#progress.memoryInfo;
+    if (memoryInfo == undefined) {
+      return;
+    }
+    const telemetry = getTelemetry();
+    if (!telemetry.isEnabled()) {
+      return;
+    }
+    this.#telemetryLabels ??= Object.freeze({ sourceId: this.#sourceId });
+    for (const key in memoryInfo) {
+      const metric = memoryMetricName(key);
+      if (metric != undefined) {
+        telemetry.gauge(metric, memoryInfo[key]!, "bytes", "pipeline", this.#telemetryLabels);
+      }
+    }
+  }
+
+  #onPlaybackStarted(): void {
+    if (this.#telemetryPlaybackActive || !getTelemetry().isEnabled()) {
+      return;
+    }
+    this.#telemetryPlaybackActive = true;
+    this.#emitPhase("playback", "start");
+  }
+
+  /** reason: "pause" | "end" (auto-pause at end of data) | "error" | "close" */
+  #onPlaybackEnded(reason: string): void {
+    if (!this.#telemetryPlaybackActive) {
+      return;
+    }
+    this.#telemetryPlaybackActive = false;
+    this.#emitPhase("playback", "end", reason);
+  }
+
+  #onCloseEnded(reason: string | undefined): void {
+    if (!this.#telemetryCloseActive) {
+      return;
+    }
+    this.#telemetryCloseActive = false;
+    this.#emitPhase("datasource.close", "end", reason);
+  }
+
+  /**
+   * `preload` start: once per player, when block loading is running AND at least one
+   * `preloadType: "full"` subscription exists (otherwise the BlockLoader has nothing to load).
+   * `preload` end: when the BlockLoader progress first covers the full [0, 1] range; if loading
+   * stops first, end is emitted with reason "cancelled" (close) or "error". Later topic changes
+   * do not restart the phase.
+   */
+  #maybeStartPreloadTelemetry(): void {
+    if (
+      this.#telemetryPreload !== "pending" ||
+      !this.#blockLoadingStarted ||
+      this.#preloadTopics.size === 0 ||
+      !getTelemetry().isEnabled()
+    ) {
+      return;
+    }
+    this.#telemetryPreload = "active";
+    this.#emitPhase("preload", "start");
+  }
+
+  #onPreloadEnded(reason: string | undefined): void {
+    if (this.#telemetryPreload !== "active") {
+      return;
+    }
+    this.#telemetryPreload = "done";
+    this.#emitPhase("preload", "end", reason);
   }
 }
