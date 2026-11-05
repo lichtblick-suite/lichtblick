@@ -7,6 +7,7 @@ import {
   DEFAULT_MAX_SERIES_PER_METRIC,
   DEFAULT_TELEMETRY_CAPACITY,
   DEFAULT_TELEMETRY_PUBLISH_INTERVAL_MS,
+  RESERVED_TELEMETRY_METRIC_NAMES,
   TELEMETRY_SELF_METRICS,
 } from "./constants";
 import { buildSeriesKey, TelemetryLabelGuard } from "./labels";
@@ -61,6 +62,9 @@ function defaultClearInterval(handle: unknown): void {
  * the window); then the window is reset. Empty windows publish nothing.
  *
  * Series keep the unit/scope they were created with.
+ *
+ * Self-metrics (`TELEMETRY_SELF_METRICS`) live in their own series, separate from caller series;
+ * their names are reserved, so caller calls using them are rejected (reason "reservedName").
  */
 export class BufferedTelemetrySink implements ITelemetry {
   readonly #realm: string;
@@ -85,6 +89,9 @@ export class BufferedTelemetrySink implements ITelemetry {
 
   readonly #gauges = new Map<string, GaugeSeries>();
   readonly #counters = new Map<string, CounterSeries>();
+  // The sink's own series, kept apart from caller series so callers can never write into them.
+  readonly #selfCounters = new Map<string, CounterSeries>();
+  #seriesCountSeries: GaugeSeries | undefined;
   readonly #observations = new Map<string, ObservationSeries>();
   readonly #metricGuard: TelemetryLabelGuard;
   readonly #eventGuard: TelemetryLabelGuard;
@@ -148,46 +155,17 @@ export class BufferedTelemetrySink implements ITelemetry {
     this.#updateSeriesCount();
 
     for (const series of this.#gauges.values()) {
-      const sample: TelemetrySample = {
-        kind: "sample",
-        realm: this.#realm,
-        sequence: this.#sequence++,
-        monotonicTs,
-        metric: series.metric,
-        value: series.value,
-        unit: series.unit,
-        scope: series.scope,
-        metricType: "gauge",
-      };
-      if (series.labels != undefined) {
-        sample.labels = series.labels;
-      }
-      this.#push(sample);
+      this.#publishGauge(series, monotonicTs);
+    }
+    if (this.#seriesCountSeries != undefined) {
+      this.#publishGauge(this.#seriesCountSeries, monotonicTs);
     }
 
     for (const series of this.#counters.values()) {
-      const delta = series.total - series.lastPublishedTotal;
-      if (series.publishedOnce && delta === 0) {
-        continue;
-      }
-      const sample: TelemetrySample = {
-        kind: "sample",
-        realm: this.#realm,
-        sequence: this.#sequence++,
-        monotonicTs,
-        metric: series.metric,
-        value: series.total,
-        unit: series.unit,
-        scope: series.scope,
-        metricType: "counter",
-        delta,
-      };
-      if (series.labels != undefined) {
-        sample.labels = series.labels;
-      }
-      series.lastPublishedTotal = series.total;
-      series.publishedOnce = true;
-      this.#push(sample);
+      this.#publishCounter(series, monotonicTs);
+    }
+    for (const series of this.#selfCounters.values()) {
+      this.#publishCounter(series, monotonicTs);
     }
 
     for (const series of this.#observations.values()) {
@@ -249,6 +227,10 @@ export class BufferedTelemetrySink implements ITelemetry {
       series.value = value;
       return;
     }
+    if (RESERVED_TELEMETRY_METRIC_NAMES.has(metric)) {
+      this.#reject("reservedName");
+      return;
+    }
     const reason = this.#metricGuard.admit(metric, key, labels);
     if (reason != undefined) {
       this.#reject(reason);
@@ -274,7 +256,16 @@ export class BufferedTelemetrySink implements ITelemetry {
     const key = buildSeriesKey(metric, labels);
     const series = this.#counters.get(key);
     if (series != undefined) {
-      series.total += increment;
+      const total = series.total + increment;
+      if (!Number.isFinite(total)) {
+        this.#reject("invalidValue");
+        return;
+      }
+      series.total = total;
+      return;
+    }
+    if (RESERVED_TELEMETRY_METRIC_NAMES.has(metric)) {
+      this.#reject("reservedName");
       return;
     }
     const reason = this.#metricGuard.admit(metric, key, labels);
@@ -282,7 +273,8 @@ export class BufferedTelemetrySink implements ITelemetry {
       this.#reject(reason);
       return;
     }
-    this.#createCounter(key, metric, unit, scope, copyLabels(labels)).total += increment;
+    this.#createCounter(this.#counters, key, metric, unit, scope, copyLabels(labels)).total +=
+      increment;
   }
 
   public observe(
@@ -302,6 +294,10 @@ export class BufferedTelemetrySink implements ITelemetry {
     const key = buildSeriesKey(metric, labels);
     let series = this.#observations.get(key);
     if (series == undefined) {
+      if (RESERVED_TELEMETRY_METRIC_NAMES.has(metric)) {
+        this.#reject("reservedName");
+        return;
+      }
       const reason = this.#metricGuard.admit(metric, key, labels);
       if (reason != undefined) {
         this.#reject(reason);
@@ -406,7 +402,7 @@ export class BufferedTelemetrySink implements ITelemetry {
     this.#dropped += batch.dropped;
     const labels: TelemetryLabels = { realm: batch.realm };
     const key = buildSeriesKey(TELEMETRY_SELF_METRICS.droppedRecords, labels);
-    let series = this.#counters.get(key);
+    let series = this.#selfCounters.get(key);
     if (series == undefined) {
       const reason = this.#metricGuard.admit(TELEMETRY_SELF_METRICS.droppedRecords, key, labels);
       if (reason != undefined) {
@@ -414,6 +410,7 @@ export class BufferedTelemetrySink implements ITelemetry {
         return;
       }
       series = this.#createCounter(
+        this.#selfCounters,
         key,
         TELEMETRY_SELF_METRICS.droppedRecords,
         "count",
@@ -421,7 +418,12 @@ export class BufferedTelemetrySink implements ITelemetry {
         copyLabels(labels),
       );
     }
-    series.total += batch.dropped;
+    const total = series.total + batch.dropped;
+    if (!Number.isFinite(total)) {
+      this.#reject("invalidValue");
+      return;
+    }
+    series.total = total;
   }
 
   /**
@@ -475,6 +477,8 @@ export class BufferedTelemetrySink implements ITelemetry {
   #clearSeries(): void {
     this.#gauges.clear();
     this.#counters.clear();
+    this.#selfCounters.clear();
+    this.#seriesCountSeries = undefined;
     this.#observations.clear();
     this.#metricGuard.clear();
     this.#eventGuard.clear();
@@ -494,6 +498,7 @@ export class BufferedTelemetrySink implements ITelemetry {
     this.#head = (this.#head + 1) % capacity;
     this.#dropped++;
     this.#ownDroppedSeries ??= this.#createCounter(
+      this.#selfCounters,
       buildSeriesKey(TELEMETRY_SELF_METRICS.droppedRecords, this.#ownRealmLabels),
       TELEMETRY_SELF_METRICS.droppedRecords,
       "count",
@@ -509,6 +514,7 @@ export class BufferedTelemetrySink implements ITelemetry {
     if (series == undefined) {
       const labels: TelemetryLabels = Object.freeze({ reason });
       series = this.#createCounter(
+        this.#selfCounters,
         buildSeriesKey(TELEMETRY_SELF_METRICS.rejectedRecords, labels),
         TELEMETRY_SELF_METRICS.rejectedRecords,
         "count",
@@ -520,15 +526,16 @@ export class BufferedTelemetrySink implements ITelemetry {
     series.total++;
   }
 
-  /** Returns the existing counter series for `key` or creates it (no guard check). */
+  /** Returns the existing counter series for `key` in `counters` or creates it (no guard check). */
   #createCounter(
+    counters: Map<string, CounterSeries>,
     key: string,
     metric: string,
     unit: TelemetryUnit,
     scope: TelemetryScope,
     labels: TelemetryLabels | undefined,
   ): CounterSeries {
-    const existing = this.#counters.get(key);
+    const existing = counters.get(key);
     if (existing != undefined) {
       return existing;
     }
@@ -541,8 +548,52 @@ export class BufferedTelemetrySink implements ITelemetry {
       lastPublishedTotal: 0,
       publishedOnce: false,
     };
-    this.#counters.set(key, series);
+    counters.set(key, series);
     return series;
+  }
+
+  #publishGauge(series: GaugeSeries, monotonicTs: number): void {
+    const sample: TelemetrySample = {
+      kind: "sample",
+      realm: this.#realm,
+      sequence: this.#sequence++,
+      monotonicTs,
+      metric: series.metric,
+      value: series.value,
+      unit: series.unit,
+      scope: series.scope,
+      metricType: "gauge",
+    };
+    if (series.labels != undefined) {
+      sample.labels = series.labels;
+    }
+    this.#push(sample);
+  }
+
+  // Unchanged counters are skipped after their first publish.
+  #publishCounter(series: CounterSeries, monotonicTs: number): void {
+    const delta = series.total - series.lastPublishedTotal;
+    if (series.publishedOnce && delta === 0) {
+      return;
+    }
+    const sample: TelemetrySample = {
+      kind: "sample",
+      realm: this.#realm,
+      sequence: this.#sequence++,
+      monotonicTs,
+      metric: series.metric,
+      value: series.total,
+      unit: series.unit,
+      scope: series.scope,
+      metricType: "counter",
+      delta,
+    };
+    if (series.labels != undefined) {
+      sample.labels = series.labels;
+    }
+    series.lastPublishedTotal = series.total;
+    series.publishedOnce = true;
+    this.#push(sample);
   }
 
   #pushObservationSample(
@@ -574,13 +625,20 @@ export class BufferedTelemetrySink implements ITelemetry {
     this.#push(sample);
   }
 
+  // Counts every live series, including the seriesCount gauge itself and the self counters.
   #updateSeriesCount(): void {
-    const key = TELEMETRY_SELF_METRICS.seriesCount;
-    let series = this.#gauges.get(key);
-    if (series == undefined) {
-      series = { metric: key, unit: "count", scope: "telemetry", labels: undefined, value: 0 };
-      this.#gauges.set(key, series);
-    }
-    series.value = this.#gauges.size + this.#counters.size + this.#observations.size;
+    this.#seriesCountSeries ??= {
+      metric: TELEMETRY_SELF_METRICS.seriesCount,
+      unit: "count",
+      scope: "telemetry",
+      labels: undefined,
+      value: 0,
+    };
+    this.#seriesCountSeries.value =
+      this.#gauges.size +
+      1 +
+      this.#counters.size +
+      this.#selfCounters.size +
+      this.#observations.size;
   }
 }

@@ -67,7 +67,7 @@ export class TelemetryLabelGuard {
     metric: string,
     seriesKey: string,
     labels: TelemetryLabels | undefined,
-  ): Exclude<TelemetryRejectReason, "invalidValue"> | undefined {
+  ): Exclude<TelemetryRejectReason, "invalidValue" | "reservedName"> | undefined {
     const known = this.#seriesByMetric.get(metric);
     if (known?.has(seriesKey) === true) {
       return undefined;

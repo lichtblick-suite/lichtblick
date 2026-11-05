@@ -314,6 +314,32 @@ describe("HydratedSourcePool stats", () => {
     expect(later.overBudgetDurationMs).toBe(250);
   });
 
+  it("should leave the over-budget state as soon as the victim is evicted, before its close settles", async () => {
+    // Given: a count cap of 1, two pinned entries (over budget), and a victim whose close never
+    // resolves
+    const clock = makeClock();
+    const pool = new HydratedSourcePool({ maxCount: 1, now: clock.now });
+    const tokenA = {};
+    const tokenB = {};
+    const slowHydrator = makeHydrator("A");
+    slowHydrator.close.mockReturnValue(new Promise<void>(() => {}));
+    await pool.acquire(tokenA, slowHydrator);
+    await pool.acquire(tokenB, makeHydrator("B"));
+    clock.advance(250);
+
+    // When: the first entry is released and evicted, but its close is still pending
+    pool.release(tokenA);
+    const afterEviction = pool.getStats();
+    clock.advance(1000);
+    await flushMicrotasks();
+    const later = pool.getStats();
+
+    // Then
+    expect(afterEviction).toMatchObject({ overBudget: false, residentCount: 1, evictions: 1 });
+    expect(later.overBudgetDurationMs).toBe(250);
+    expect(slowHydrator.close).toHaveBeenCalledTimes(1);
+  });
+
   it("accumulates over-budget duration across several periods and closes the period on terminate", async () => {
     // Given
     const clock = makeClock();

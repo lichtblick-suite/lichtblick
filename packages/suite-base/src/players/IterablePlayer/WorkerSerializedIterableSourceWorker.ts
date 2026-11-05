@@ -92,9 +92,9 @@ export class WorkerSerializedIterableSourceWorker implements ISerializedIterable
 
   /**
    * Returns and removes all buffered telemetry records, or `undefined` when telemetry was never
-   * enabled. After `terminate()` this is the final drain: the sink is disposed first (final
-   * publish, publish timer stopped) and the realm reverts to the no-op sink, so nothing keeps
-   * running in the worker. If the main thread never performs that final drain, the sink's 1 Hz
+   * enabled. After `terminate()` this is the final drain: the sink is disposed first (the only
+   * final publish, including what late producers recorded after `terminate()`; publish timer
+   * stopped) and the realm reverts to the no-op sink, so nothing keeps running in the worker. If the main thread never performs that final drain, the sink's 1 Hz
    * timer simply dies with the worker when it is disposed.
    */
   public drainTelemetry(): TelemetryBatch | undefined {
@@ -115,11 +115,10 @@ export class WorkerSerializedIterableSourceWorker implements ISerializedIterable
     try {
       await this.#source.terminate?.();
     } finally {
+      // The sink is intentionally NOT disposed (nor published) here: late producers (e.g. pending
+      // closes) may still record until the main thread's final drainTelemetry() call, which
+      // disposes the sink and thereby publishes the final pool gauges/counters.
       this.#terminated = true;
-      // Flush the final pool gauges/counters into the buffer for the main thread's final drain.
-      // The sink is intentionally NOT disposed here: late producers (e.g. pending closes) may
-      // still record until the final drainTelemetry() call disposes it.
-      this.#telemetrySink?.publishNow();
     }
   }
 }

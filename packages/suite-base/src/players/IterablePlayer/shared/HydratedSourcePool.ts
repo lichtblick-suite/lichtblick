@@ -84,9 +84,11 @@ type Entry = {
  * "Over budget" means that after an eviction pass the pool is still above `maxCount` or
  * `maxBytes` (only possible because the remaining entries are pinned or protected by
  * `minResident`). Entering the state starts a period (`overBudgetPeriods`), leaving it adds the
- * elapsed time to `overBudgetDurationMs`. High-water marks for resident count/bytes are sampled
- * after eviction passes (momentary values inside a synchronous insert+evict step are not
- * recorded); the active-pin and pending-entry high-water marks are sampled when pins are added.
+ * elapsed time to `overBudgetDurationMs`. The state is settled as soon as a pass has removed its
+ * victims, before their closes are awaited, so a slow close does not extend an over-budget period.
+ * High-water marks for resident count/bytes are sampled after eviction passes (momentary values
+ * inside a synchronous insert+evict step are not recorded); the active-pin and pending-entry
+ * high-water marks are sampled when pins are added.
  *
  * When the telemetry sink captured at construction is enabled, gauges and counter increments
  * (scope "pipeline", label `{ poolId }`, prefix `pipeline.hydratedSourcePool.`) are pushed after
@@ -339,10 +341,11 @@ export class HydratedSourcePool {
   // pass converges to the same budget state as a sequential select-close-recheck loop.
   async #evictBeyondCapacity(): Promise<void> {
     const victims = this.#takeEvictionVictims();
+    // Victims are already out of the map, so settle synchronously before awaiting their closes: a
+    // slow close must not keep the pool over budget, and callers such as release() rely on the
+    // stats being up to date without awaiting.
+    this.#settle();
     if (victims.length === 0) {
-      // Nothing evictable: settle synchronously (callers such as release() rely on the stats being
-      // up to date without awaiting).
-      this.#settle();
       return;
     }
     await Promise.all(
