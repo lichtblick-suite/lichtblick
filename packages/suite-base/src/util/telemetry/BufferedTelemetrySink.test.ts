@@ -227,6 +227,23 @@ describe("BufferedTelemetrySink", () => {
       expect(rejectedCount(batch, "invalidValue")).toBe(3);
     });
 
+    it("should reject an increment that would overflow the total to Infinity without changing it", () => {
+      // Given
+      const { sink } = setup();
+      const metric = TelemetryBuilder.metric();
+      sink.counter(metric, Number.MAX_VALUE, "count", "pipeline");
+
+      // When
+      sink.counter(metric, Number.MAX_VALUE, "count", "pipeline");
+      sink.publishNow();
+
+      // Then
+      const batch = sink.drain();
+      const [sample] = samplesOf(batch.records, metric);
+      expect(sample?.value).toBe(Number.MAX_VALUE);
+      expect(rejectedCount(batch, "invalidValue")).toBe(1);
+    });
+
     it("never publishes a negative delta", () => {
       // Given
       const { sink } = setup();
@@ -648,6 +665,23 @@ describe("BufferedTelemetrySink", () => {
       expect(dropped).toMatchObject({ value: foreignDropped, labels: { realm } });
     });
 
+    it("should reject foreign drops that would overflow the droppedRecords total to Infinity", () => {
+      // Given
+      const { sink } = setup();
+      const realm = "worker:mcap-1";
+      sink.ingest(TelemetryBuilder.batch({ realm, records: [], dropped: Number.MAX_VALUE }));
+
+      // When
+      sink.ingest(TelemetryBuilder.batch({ realm, records: [], dropped: Number.MAX_VALUE }));
+      sink.publishNow();
+
+      // Then
+      const batch = sink.drain();
+      const [dropped] = samplesOf(batch.records, TELEMETRY_SELF_METRICS.droppedRecords);
+      expect(dropped).toMatchObject({ value: Number.MAX_VALUE, labels: { realm } });
+      expect(rejectedCount(batch, "invalidValue")).toBe(1);
+    });
+
     it("respects the ring bound", () => {
       // Given
       const { sink } = setup({ capacity: 2 });
@@ -845,6 +879,89 @@ describe("BufferedTelemetrySink", () => {
       const batch = sink.drain();
       expect(eventsOf(batch.records).map((e) => e.labels?.sourceId)).toEqual(["a", "b", "a"]);
       expect(rejectedCount(batch, "cardinality")).toBe(1);
+    });
+  });
+
+  describe("reserved self-metric names", () => {
+    it.each(
+      Object.values(TELEMETRY_SELF_METRICS),
+    )("should reject caller gauge, counter and observe calls named %s", (metric) => {
+      // Given
+      const { sink } = setup();
+
+      // When
+      sink.gauge(metric, 1, "count", "app");
+      sink.counter(metric, 1, "count", "app");
+      sink.observe(metric, 1, "count", "app");
+      sink.publishNow();
+
+      // Then
+      expect(rejectedCount(sink.drain(), "reservedName")).toBe(3);
+    });
+
+    it("should not let a caller counter write into the sink's rejectedRecords series", () => {
+      // Given: an existing rejectedRecords{reason="invalidValue"} self series
+      const { sink } = setup();
+      sink.gauge(TelemetryBuilder.metric(), Number.NaN, "count", "app");
+
+      // When: a caller records the same metric name and labels
+      sink.counter(TELEMETRY_SELF_METRICS.rejectedRecords, 100, "count", "telemetry", {
+        reason: "invalidValue",
+      });
+      sink.publishNow();
+
+      // Then: the self series only counts the sink's own rejections
+      const batch = sink.drain();
+      expect(rejectedCount(batch, "invalidValue")).toBe(1);
+      expect(rejectedCount(batch, "reservedName")).toBe(1);
+    });
+
+    it("should not let a caller gauge overwrite the seriesCount self gauge", () => {
+      // Given: the seriesCount gauge exists after a first publish
+      const { sink } = setup();
+      sink.publishNow();
+      sink.drain();
+
+      // When
+      sink.gauge(TELEMETRY_SELF_METRICS.seriesCount, 1000, "count", "telemetry");
+      sink.publishNow();
+
+      // Then: 1 seriesCount gauge + 1 rejectedRecords{reservedName} counter
+      const seriesCounts = samplesOf(sink.drain().records, TELEMETRY_SELF_METRICS.seriesCount);
+      expect(seriesCounts.map((sample) => sample.value)).toEqual([2]);
+    });
+
+    it("should accept other telemetry.* names from callers", () => {
+      // Given
+      const { sink } = setup();
+      const metric = "telemetry.self.timeMs.frames";
+
+      // When
+      sink.counter(metric, 1.5, "ms", "telemetry");
+      sink.publishNow();
+
+      // Then
+      const batch = sink.drain();
+      expect(samplesOf(batch.records, metric)).toEqual([
+        expect.objectContaining({ value: 1.5, metricType: "counter" }),
+      ]);
+      expect(rejectedCount(batch, "reservedName")).toBeUndefined();
+    });
+
+    it("should still forward ingested self-metric records of another realm", () => {
+      // Given
+      const { sink } = setup();
+      const record = TelemetryBuilder.sample({
+        realm: "worker:1",
+        metric: TELEMETRY_SELF_METRICS.rejectedRecords,
+        labels: { reason: "cardinality" },
+      });
+
+      // When
+      sink.ingest(TelemetryBuilder.batch({ realm: "worker:1", records: [record] }));
+
+      // Then
+      expect(sink.drain().records).toEqual([record]);
     });
   });
 

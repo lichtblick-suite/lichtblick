@@ -108,6 +108,19 @@ class FailingTerminateSource extends TelemetryTestSource {
   }
 }
 
+// Counts terminate() calls and signals the second one (a close() after the close completed).
+class CountingTerminateSource extends TelemetryTestSource {
+  public readonly secondTerminate = signal();
+  #terminateCalls = 0;
+
+  public async terminate(): Promise<void> {
+    this.#terminateCalls++;
+    if (this.#terminateCalls === 2) {
+      this.secondTerminate.resolve();
+    }
+  }
+}
+
 function setupSink(onEvent?: (event: TelemetryEvent) => void): {
   sink: BufferedTelemetrySink;
   events: TelemetryEvent[];
@@ -321,6 +334,26 @@ describe("IterablePlayer telemetry", () => {
     ]);
   });
 
+  it("should end preload with reason 'cancelled' when the last full-preload subscription is removed while loading", async () => {
+    // Given: a source whose full (block loader) read is held, so the preload phase stays active
+    const { events } = setupSink();
+    const source = new GatedPreloadSource();
+    const player = new IterablePlayer({ source, enablePreload: true, sourceId: SOURCE_ID });
+    player.setSubscriptions([{ topic: TOPIC, preloadType: "full" }]);
+    player.setListener(async () => {});
+    await source.fullReadStarted;
+
+    // When
+    player.setSubscriptions([{ topic: TOPIC }]);
+    const preloadAfterRemoval = summarize(events).filter((entry) => entry.startsWith("preload"));
+    player.close();
+    source.gate.resolve();
+    await player.isClosed;
+
+    // Then
+    expect(preloadAfterRemoval).toEqual(["preload:start", "preload:end:cancelled"]);
+  });
+
   it("should end preload with reason 'error' when the block loader fails", async () => {
     // Given: a source whose full (block loader) read rejects
     const preloadEnded = signal();
@@ -452,6 +485,25 @@ describe("IterablePlayer telemetry", () => {
     player.close();
     player.close();
     await player.isClosed;
+
+    // Then
+    const close = summarize(events).filter((entry) => entry.startsWith("datasource.close"));
+    expect(close).toEqual(["datasource.close:start", "datasource.close:end"]);
+  });
+
+  it("close() after close completed emits no second close pair", async () => {
+    // Given: a player whose close phase already completed
+    const { events } = setupSink();
+    const source = new CountingTerminateSource();
+    const player = new IterablePlayer({ source, enablePreload: false, sourceId: SOURCE_ID });
+    await waitForInitialFrame(player);
+    player.close();
+    await player.isClosed;
+
+    // When: close() is called again and the close state runs again
+    player.close();
+    await source.secondTerminate;
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Then
     const close = summarize(events).filter((entry) => entry.startsWith("datasource.close"));

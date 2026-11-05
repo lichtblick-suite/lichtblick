@@ -23,7 +23,7 @@ import type {
 } from "./IIterableSource";
 import type { SourceWorkerRemote, TelemetryBridge } from "./WorkerSerializedIterableSource.types";
 import type { WorkerSerializedIterableSourceWorker } from "./WorkerSerializedIterableSourceWorker";
-import { TELEMETRY_DRAIN_INTERVAL_MS } from "./constants";
+import { TELEMETRY_DRAIN_INTERVAL_MS, TELEMETRY_FINAL_DRAIN_TIMEOUT_MS } from "./constants";
 
 Comlink.transferHandlers.set("abortsignal", abortSignalTransferHandler);
 
@@ -63,6 +63,34 @@ async function drainBridge(bridge: TelemetryBridge): Promise<void> {
     bridge.inFlight = undefined;
   });
   await bridge.inFlight;
+}
+
+// Final drain on terminate(): wait for any periodic drain in flight (so batches are ingested in
+// order), then drain once more. Both waits share one deadline because a dead worker never answers
+// and the caller must still dispose it; no drain is started once the deadline has expired.
+async function finalDrainBridge(bridge: TelemetryBridge): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<"expired">((resolve) => {
+    timer = setTimeout(() => {
+      resolve("expired");
+    }, TELEMETRY_FINAL_DRAIN_TIMEOUT_MS);
+  });
+  let outcome: "drained" | "expired" = "drained";
+  try {
+    if (bridge.inFlight != undefined) {
+      outcome = await Promise.race([bridge.inFlight.then(() => "drained" as const), deadline]);
+    }
+    if (outcome === "drained") {
+      outcome = await Promise.race([drainBridge(bridge).then(() => "drained" as const), deadline]);
+    }
+  } finally {
+    clearTimeout(timer);
+  }
+  if (outcome === "expired") {
+    log.debug(
+      `Worker telemetry final drain timed out after ${TELEMETRY_FINAL_DRAIN_TIMEOUT_MS} ms`,
+    );
+  }
 }
 
 function stopBridgeTimer(bridge: TelemetryBridge | undefined): void {
@@ -128,6 +156,9 @@ export class WorkerSerializedIterableSource implements ISerializedIterableSource
       await remote.enableTelemetry(`worker:${++nextWorkerRealmOrdinal}`);
     } catch (err: unknown) {
       log.debug("Failed to enable worker telemetry", err);
+      // Stop polling a worker without telemetry; the bridge stays registered so terminate() still
+      // performs its (bounded) final drain.
+      stopBridgeTimer(bridge);
     }
     if (this.#telemetryBridge !== bridge) {
       // terminate()/re-initialize() replaced this bridge during the await: make sure it stays
@@ -236,10 +267,9 @@ export class WorkerSerializedIterableSource implements ISerializedIterableSource
       try {
         if (telemetryBridge != undefined) {
           // Final drain (after the worker flushed its final pool counters, before the worker is
-          // killed). Wait for any periodic drain in flight so batches are ingested in order.
+          // killed), bounded so a dead worker cannot block the disposal below.
           stopBridgeTimer(telemetryBridge);
-          await telemetryBridge.inFlight;
-          await drainBridge(telemetryBridge);
+          await finalDrainBridge(telemetryBridge);
         }
       } finally {
         // Always dispose the captured worker, even if its graceful terminate() rejected.

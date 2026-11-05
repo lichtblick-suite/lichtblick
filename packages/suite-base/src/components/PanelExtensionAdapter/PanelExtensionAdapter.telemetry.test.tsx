@@ -284,6 +284,44 @@ describe("PanelExtensionAdapter telemetry", () => {
     expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.renderCount)).toHaveLength(0);
   });
 
+  it("should not count a tick without messages as skipped while a render is pending", async () => {
+    // GIVEN - an enabled sink, a pipeline that does not wait for the panel, and a panel watching
+    // frames that never calls done()
+    const telemetry = TelemetryBuilder.mockTelemetry();
+    setTelemetrySink(telemetry);
+    const initPanel = (context: PanelExtensionContext) => {
+      context.watch("currentFrame");
+      context.subscribe([{ topic: "/x" }]);
+      context.onRender = jest.fn();
+    };
+    const handle = render(
+      <Wrapper
+        currentTime={{ sec: 1, nsec: 0 }}
+        frame={{ "/x": [buildMessage(10)] }}
+        initPanel={initPanel}
+        pauseFrame={nonBlockingPauseFrame}
+      />,
+    );
+    await flush();
+    const skippedBefore = counterCalls(telemetry, PANEL_TELEMETRY_METRICS.renderSkipped).length;
+
+    // WHEN - a player-state update carrying no messages for the panel arrives while the render is
+    // still pending
+    handle.rerender(
+      <Wrapper
+        currentTime={{ sec: 2, nsec: 0 }}
+        initPanel={initPanel}
+        pauseFrame={nonBlockingPauseFrame}
+      />,
+    );
+    await flush();
+
+    // THEN - no skipped frame is recorded
+    expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.renderSkipped)).toHaveLength(
+      skippedBefore,
+    );
+  });
+
   it("should not record telemetry from a stale done() called after the panel re-initialised", async () => {
     // GIVEN - a first panel instance whose render is still pending (done() captured, not called)
     const telemetry = TelemetryBuilder.mockTelemetry();

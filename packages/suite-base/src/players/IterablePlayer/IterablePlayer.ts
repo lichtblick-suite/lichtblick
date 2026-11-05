@@ -233,12 +233,13 @@ export class IterablePlayer implements Player {
   // --- Phase telemetry. Every emit is guarded by getTelemetry().isEnabled().
   // #firstMessageSeen and #blockLoadingStarted are cheap booleans set unconditionally (no
   // allocation); only the event emission that reads them is gated. The #telemetryPlaybackActive /
-  // #telemetryCloseActive / #telemetryPreload markers pair start/end events and only leave their
-  // initial value once a start event has been emitted, i.e. while telemetry is enabled. ---
+  // #telemetryClose / #telemetryPreload markers pair start/end events and only leave their
+  // initial value once a start event has been emitted, i.e. while telemetry is enabled. Close and
+  // preload are emitted at most once per player. ---
   #telemetryLabels?: TelemetryLabels;
   #firstMessageSeen = false;
   #telemetryPlaybackActive = false;
-  #telemetryCloseActive = false;
+  #telemetryClose: "pending" | "active" | "done" = "pending";
   #telemetryPreload: "pending" | "active" | "done" = "pending";
   #blockLoadingStarted = false;
 
@@ -428,7 +429,12 @@ export class IterablePlayer implements Player {
     this.#preloadTopics = preloadTopics;
 
     this.#blockLoader?.setTopics(this.#preloadTopics);
-    this.#maybeStartPreloadTelemetry();
+    if (this.#preloadTopics.size === 0) {
+      // The last full-preload subscription is gone: nothing is left to preload.
+      this.#onPreloadEnded("cancelled");
+    } else {
+      this.#maybeStartPreloadTelemetry();
+    }
 
     // If the player is playing, the playing state will detect any subscription changes and adjust
     // iterators accordingly. However if we are idle or already seeking then we need to manually
@@ -489,8 +495,10 @@ export class IterablePlayer implements Player {
   }
 
   public close(): void {
-    if (!this.#telemetryCloseActive && getTelemetry().isEnabled()) {
-      this.#telemetryCloseActive = true;
+    // Telemetry only: a close() after the close phase completed re-runs the close state but does
+    // not emit a second start/end pair.
+    if (this.#telemetryClose === "pending" && getTelemetry().isEnabled()) {
+      this.#telemetryClose = "active";
       this.#emitPhase("datasource.close", "start");
     }
     this.#setState("close");
@@ -1449,10 +1457,10 @@ export class IterablePlayer implements Player {
   }
 
   #onCloseEnded(reason: string | undefined): void {
-    if (!this.#telemetryCloseActive) {
+    if (this.#telemetryClose !== "active") {
       return;
     }
-    this.#telemetryCloseActive = false;
+    this.#telemetryClose = "done";
     this.#emitPhase("datasource.close", "end", reason);
   }
 
@@ -1460,8 +1468,8 @@ export class IterablePlayer implements Player {
    * `preload` start: once per player, when block loading is running AND at least one
    * `preloadType: "full"` subscription exists (otherwise the BlockLoader has nothing to load).
    * `preload` end: when the BlockLoader progress first covers the full [0, 1] range; if loading
-   * stops first, end is emitted with reason "cancelled" (close) or "error". Later topic changes
-   * do not restart the phase.
+   * stops first, end is emitted with reason "cancelled" (close, or the last `preloadType: "full"`
+   * subscription removed while loading) or "error". Later topic changes do not restart the phase.
    */
   #maybeStartPreloadTelemetry(): void {
     if (

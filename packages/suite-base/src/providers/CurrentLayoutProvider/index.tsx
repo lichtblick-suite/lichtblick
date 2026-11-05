@@ -174,8 +174,11 @@ export default function CurrentLayoutProvider({
             },
           });
           // Selection finished (loading -> loaded); panel edits and reverts don't pass through here.
+          // setLayoutState() may still have rejected it (e.g. unsupported working version), so
+          // only count a selection that actually became the current layout.
           const telemetry = getTelemetry();
-          if (telemetry.isEnabled()) {
+          const applied = layoutStateRef.current.selectedLayout;
+          if (telemetry.isEnabled() && applied?.id === layout.id && applied.loading !== true) {
             telemetry.event("layout.applied", "instant", "app");
           }
           if (saveToProfile) {

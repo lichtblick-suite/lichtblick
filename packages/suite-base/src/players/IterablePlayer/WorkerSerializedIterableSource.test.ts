@@ -10,6 +10,7 @@ import {
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
 
 import { WorkerSerializedIterableSource } from "./WorkerSerializedIterableSource";
+import { TELEMETRY_FINAL_DRAIN_TIMEOUT_MS } from "./constants";
 
 jest.mock("@lichtblick/den/worker", () => ({
   ComlinkWrap: jest.fn(),
@@ -326,6 +327,72 @@ describe("WorkerSerializedIterableSource", () => {
       expect(jest.getTimerCount()).toBe(0);
     });
 
+    it("enable failure stops the timer", async () => {
+      // Given
+      setTelemetrySink(mainSink);
+      const remote = makeMockRemote({
+        enableTelemetry: jest.fn().mockRejectedValue(new Error("no telemetry")),
+      });
+      const dispose = mockWorker(remote);
+      const source = makeSource();
+
+      // When
+      await source.initialize();
+      const timersAfterInitialize = jest.getTimerCount();
+      await jest.advanceTimersByTimeAsync(5000);
+      await source.terminate();
+
+      // Then: no periodic drain ran, only terminate()'s final drain, and the worker is disposed.
+      expect(timersAfterInitialize).toBe(0);
+      expect(remote.drainTelemetry).toHaveBeenCalledTimes(1);
+      expect(dispose).toHaveBeenCalledTimes(1);
+    });
+
+    it("should still dispose the worker when a periodic drain in flight never settles", async () => {
+      // Given: a periodic drain that never settles (dead worker)
+      setTelemetrySink(mainSink);
+      const remote = makeMockRemote({
+        drainTelemetry: jest.fn().mockReturnValue(new Promise<never>(() => {})),
+      });
+      const dispose = mockWorker(remote);
+      const source = makeSource();
+      await source.initialize();
+      await jest.advanceTimersByTimeAsync(1000);
+      expect(remote.drainTelemetry).toHaveBeenCalledTimes(1);
+
+      // When
+      const terminating = source.terminate();
+      await jest.advanceTimersByTimeAsync(TELEMETRY_FINAL_DRAIN_TIMEOUT_MS);
+      await terminating;
+
+      // Then: the worker is disposed, no final drain was started after the deadline and no timer
+      // is left running.
+      expect(dispose).toHaveBeenCalledTimes(1);
+      expect(remote.drainTelemetry).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it("should still dispose the worker when the final drain never settles", async () => {
+      // Given: a worker whose drain never settles (dead worker), and no periodic drain in flight
+      setTelemetrySink(mainSink);
+      const remote = makeMockRemote({
+        drainTelemetry: jest.fn().mockReturnValue(new Promise<never>(() => {})),
+      });
+      const dispose = mockWorker(remote);
+      const source = makeSource();
+      await source.initialize();
+
+      // When
+      const terminating = source.terminate();
+      await jest.advanceTimersByTimeAsync(TELEMETRY_FINAL_DRAIN_TIMEOUT_MS);
+      await terminating;
+
+      // Then
+      expect(dispose).toHaveBeenCalledTimes(1);
+      expect(remote.drainTelemetry).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
     it("should ingest an in-flight periodic batch before the final batch on terminate", async () => {
       // Given
       setTelemetrySink(mainSink);
@@ -388,8 +455,10 @@ describe("WorkerSerializedIterableSource", () => {
       await initializing;
       await jest.advanceTimersByTimeAsync(5000);
 
-      // Then: the stale worker is not bridged nor published as the active remote.
+      // Then: the stale worker is not bridged nor published as the active remote; its initialize()
+      // still runs once so the pending initialize() call settles.
       expect(dispose).toHaveBeenCalledTimes(1);
+      expect(remote.initialize).toHaveBeenCalledTimes(1);
       expect(remote.enableTelemetry).not.toHaveBeenCalled();
       expect(remote.drainTelemetry).not.toHaveBeenCalled();
       expect(jest.getTimerCount()).toBe(0);
