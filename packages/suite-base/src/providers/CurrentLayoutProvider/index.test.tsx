@@ -7,7 +7,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, screen, waitFor } from "@testing-library/react";
 import { SnackbarProvider, useSnackbar } from "notistack";
 import { useEffect } from "react";
 
@@ -918,6 +918,32 @@ describe("CurrentLayoutProvider", () => {
       // Then only the initial layout.applied was emitted
       expect(layoutAppliedCalls(telemetry)).toHaveLength(1);
       (console.error as jest.Mock).mockClear();
+    });
+
+    it("should not emit layout.applied when the working layout version is not supported", async () => {
+      // Given an enabled telemetry sink, a loaded layout, and another layout whose baseline is
+      // supported but whose working copy is not
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      setTelemetrySink(telemetry);
+      const { result } = await renderAndWaitForLayout();
+      mockLayoutManager.getLayout.mockImplementation(async (id: string) => ({
+        id,
+        name: `Layout ${id}`,
+        baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
+        working: {
+          data: { ...TEST_LAYOUT, version: MAX_SUPPORTED_LAYOUT_VERSION + 1 },
+          updatedAt: new Date(20).toISOString(),
+        },
+      }));
+
+      // When that layout is selected and rejected as incompatible
+      act(() => {
+        result.current.actions.setSelectedLayoutId("layout2" as LayoutID);
+      });
+      await screen.findByRole("dialog");
+
+      // Then only the initial layout.applied was emitted
+      expect(layoutAppliedCalls(telemetry)).toHaveLength(1);
     });
   });
 });

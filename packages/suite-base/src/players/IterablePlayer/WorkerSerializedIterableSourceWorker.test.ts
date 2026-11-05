@@ -89,7 +89,7 @@ describe("WorkerSerializedIterableSourceWorker telemetry", () => {
     ]);
   });
 
-  it("lets a pool created during initialize() report through the worker sink, flushes on terminate and disposes on the final drain", async () => {
+  it("lets a pool created during initialize() report through the worker sink and publishes and disposes it on the final drain", async () => {
     // Given: telemetry enabled before initialize(), as done by WorkerSerializedIterableSource.
     const worker = new WorkerSerializedIterableSourceWorker(new PoolBackedSource());
     worker.enableTelemetry("worker:1");

@@ -8,6 +8,11 @@ export const FULLY_PRELOADED_EPSILON = 1e-9;
 // default 1 Hz publish cadence).
 export const TELEMETRY_DRAIN_INTERVAL_MS = 1000;
 
+// Upper bound for the final worker telemetry drain on terminate() (waiting for an in-flight
+// periodic drain plus the final drain). A dead worker never answers, and the worker must still be
+// disposed.
+export const TELEMETRY_FINAL_DRAIN_TIMEOUT_MS = 1000;
+
 // Telemetry: prefix of the `pipeline.memory.<lowerCamelCaseKey>` gauges derived from
 // `progress.memoryInfo` keys (see memoryMetricName).
 export const MEMORY_METRIC_PREFIX = "pipeline.memory.";
