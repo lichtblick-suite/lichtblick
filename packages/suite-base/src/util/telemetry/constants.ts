@@ -20,6 +20,15 @@ export const TELEMETRY_SELF_METRICS = {
   seriesCount: "telemetry.seriesCount",
 } as const;
 
+/**
+ * Metric names reserved for the sink's own series (the `TELEMETRY_SELF_METRICS` values). Callers
+ * may not record them through `gauge()` / `counter()` / `observe()`, so caller data can never be
+ * merged into the sink's self-metrics. Other `telemetry.*` names remain available to callers.
+ */
+export const RESERVED_TELEMETRY_METRIC_NAMES: ReadonlySet<string> = new Set(
+  Object.values(TELEMETRY_SELF_METRICS),
+);
+
 /** Label keys that may be attached to telemetry records. Anything else is rejected. */
 export const ALLOWED_TELEMETRY_LABEL_KEYS: ReadonlySet<string> = new Set([
   "sourceId",

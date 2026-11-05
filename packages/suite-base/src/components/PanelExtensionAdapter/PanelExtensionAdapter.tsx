@@ -352,8 +352,13 @@ function PanelExtensionAdapter(
 
     if (renderingRef.current) {
       setSlowRender(true);
-      // Only a new frame input counts as skipped, not a re-run caused by another input.
-      if (telemetryEnabled && messageEvents !== lastAccountedFrameRef.current) {
+      // Only a new, non-empty frame input counts as skipped, not a re-run caused by another input
+      // nor a player-state update that carried no messages for this panel.
+      if (
+        telemetryEnabled &&
+        messageEvents != undefined &&
+        messageEvents !== lastAccountedFrameRef.current
+      ) {
         lastAccountedFrameRef.current = messageEvents;
         recordRenderSkipped(telemetry, telemetryLabels);
       }

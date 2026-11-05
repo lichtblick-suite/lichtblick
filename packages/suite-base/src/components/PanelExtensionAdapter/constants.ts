@@ -41,6 +41,10 @@ export const PANEL_TELEMETRY_METRICS = {
    * `useSubscribeMessageRange` batches or through new entries in `renderState.allFrames`
    */
   rangeMessagesDelivered: "panel.rangeMessages.delivered",
-  /** counter: sum of `sizeInBytes` of those preloaded message events */
+  /**
+   * counter: sum of `sizeInBytes` of those preloaded message events. Approximate for `allFrames`:
+   * when new data is merged into the middle of `allFrames` only the appended tail is summed
+   * (re-summing the whole array on every block update is too expensive). The count is exact.
+   */
   rangeMessagesDeliveredBytes: "panel.rangeMessages.deliveredBytes",
 } as const;

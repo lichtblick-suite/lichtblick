@@ -85,8 +85,23 @@ export type TelemetryBatch = {
 };
 
 /** Reason a record was rejected (reported via the `telemetry.rejectedRecords` self metric). */
-export type TelemetryRejectReason = "unknownLabel" | "cardinality" | "invalidValue";
+export type TelemetryRejectReason =
+  | "unknownLabel"
+  | "cardinality"
+  | "invalidValue"
+  /** a caller used a metric name reserved for the sink's own self-metrics */
+  | "reservedName";
 
+/**
+ * Telemetry recording API.
+ *
+ * Reserved names: `telemetry.droppedRecords`, `telemetry.rejectedRecords` and
+ * `telemetry.seriesCount` (`TELEMETRY_SELF_METRICS`) are the sink's own self-metrics. Recording
+ * them through `gauge()`, `counter()` or `observe()` is rejected and counted in
+ * `telemetry.rejectedRecords{reason="reservedName"}`. Other names, including other `telemetry.*`
+ * names (e.g. `telemetry.self.*`), may be used freely. Records forwarded with `ingest()` are
+ * accepted as-is (they carry the producing realm's own self-metrics).
+ */
 export interface ITelemetry {
   /** Cheap check; call sites must test this before building labels/values. */
   isEnabled(): boolean;
@@ -98,7 +113,10 @@ export interface ITelemetry {
     scope: TelemetryScope,
     labels?: TelemetryLabels,
   ): void;
-  /** monotonically increasing; increment must be >= 0 (negative/NaN increments are rejected and counted) */
+  /**
+   * monotonically increasing; increment must be >= 0 (negative/NaN increments, and increments that
+   * would overflow the total to Infinity, are rejected and counted)
+   */
   counter(
     metric: string,
     increment: number,
