@@ -4,6 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { parseArtifactJson } from "./artifactJson";
 import {
   buildExercisesLines,
   buildPanelsSection,
@@ -155,6 +156,7 @@ function printScenarioMetrics(): void {
   }
 }
 
+/** Unreadable files are warned about and skipped (`parseArtifactJson`). */
 function readArtifactJson<T>(predicate: (file: string) => boolean): T[] {
   if (!fs.existsSync(ARTIFACTS_DIR)) {
     return [];
@@ -162,7 +164,13 @@ function readArtifactJson<T>(predicate: (file: string) => boolean): T[] {
   return fs
     .readdirSync(ARTIFACTS_DIR)
     .filter(predicate)
-    .map((file) => JSON.parse(fs.readFileSync(path.join(ARTIFACTS_DIR, file), "utf-8")) as T);
+    .flatMap((file) => {
+      const parsed = parseArtifactJson<T>(
+        file,
+        fs.readFileSync(path.join(ARTIFACTS_DIR, file), "utf-8"),
+      );
+      return parsed == undefined ? [] : [parsed];
+    });
 }
 
 /** Results as stored; older ones without `summary.kpis` get them backfilled (`withRunKpis`). */
