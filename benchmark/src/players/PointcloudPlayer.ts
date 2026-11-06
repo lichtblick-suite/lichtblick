@@ -13,6 +13,7 @@ import { Player, PlayerPresence, Topic, TopicStats } from "@lichtblick/suite-bas
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
 import { BenchmarkPlayerBase } from "./BenchmarkPlayerBase";
+import { POINTCLOUD_HEADER_BYTES } from "./constants";
 import { BenchmarkStats } from "../BenchmarkStats";
 
 const log = Log.getLogger(__filename);
@@ -192,7 +193,7 @@ class PointcloudPlayer extends BenchmarkPlayerBase implements Player {
           topic: topicName,
           message: pointcloudMsg,
           schemaName: "foxglove.PointCloud",
-          sizeInBytes: 0,
+          sizeInBytes: pointcloudMsg.data.byteLength + POINTCLOUD_HEADER_BYTES,
         });
 
         topicStats.set(topicName, {
@@ -228,7 +229,7 @@ class PointcloudPlayer extends BenchmarkPlayerBase implements Player {
 
       const frameEndMs = performance.now();
       const frameTimeMs = frameEndMs - frameStartMs;
-      BenchmarkStats.Instance().recordFrameTime(frameTimeMs);
+      BenchmarkStats.Instance().recordListenerDispatchDuration(frameTimeMs);
     }
   }
 }

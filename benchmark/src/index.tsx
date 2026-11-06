@@ -11,12 +11,18 @@ import Logger from "@lichtblick/log";
 import { initI18n } from "@lichtblick/suite-base";
 import { IdbLayoutStorage } from "@lichtblick/suite-base/IdbLayoutStorage";
 
+import { installBenchmarkTelemetry } from "./telemetry";
+
 const log = Logger.getLogger(__filename);
 log.debug("initializing");
 
 window.onerror = (...args) => {
   console.error(...args);
 };
+
+// Installed before anything else (and before any player exists) so the realm sink is in place when
+// the app and its data sources start. The desktop renderer entry re-uses this module.
+const telemetry = installBenchmarkTelemetry(new URL(window.location.href));
 
 async function main() {
   const { overwriteFetch, waitForFonts } = await import("@lichtblick/suite-base");
@@ -53,7 +59,7 @@ async function main() {
   }
 
   const root = createRoot(rootEl);
-  root.render(<Root />);
+  root.render(<Root onAppReady={telemetry?.markAppReady} />);
 }
 
 void main();
