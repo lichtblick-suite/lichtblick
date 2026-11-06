@@ -472,6 +472,22 @@ describe("buildScorecardTable", () => {
     );
   });
 
+  it("should name the CPU verdict sources in the overhead cell", () => {
+    // Given a toggle-only platform (electron) and a toggle + relaunch platform (web)
+    const reports = [
+      BenchmarkResultBuilder.overhead({ method: "toggle" }),
+      BenchmarkResultBuilder.overhead({ method: "toggle", platform: "web" }),
+      BenchmarkResultBuilder.overhead({ platform: "web", scenarioId: "pointcloud" }),
+    ];
+
+    // When
+    const rows = buildScorecardTable([], reports).trim().split("\n");
+
+    // Then
+    expect(rows[2]).toMatch(/^\| electron \|.* % \(toggle\) \//);
+    expect(rows[3]).toMatch(/^\| web \|.* % \(toggle\/relaunch\) \//);
+  });
+
   it("should render a row for a platform when it has only an overhead report", () => {
     // Given an electron run and a web overhead report without any web run
     const electron = makeResult({ platform: "electron" });

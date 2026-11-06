@@ -203,13 +203,17 @@ async function runToggleArm({
 
 const ci = (lower?: number, upper?: number) => `[${lower ?? "?"}, ${upper ?? "?"}]`;
 
+/** A relative delta in percent with its sign (2 decimals): `+1.23`, `-0.50`. */
+function signedPercentText(relative: number): string {
+  const sign = relative >= 0 ? "+" : "";
+  return `${sign}${(relative * 100).toFixed(2)}`;
+}
+
 /** Relative deltas in percent (2 decimals), `x` for an excluded unit: `+1.23,-0.50,x`. */
 function deltasText(units: readonly { cpuRelative?: number; excluded: boolean }[]): string {
   return units
     .map(({ cpuRelative, excluded }) =>
-      excluded || cpuRelative == undefined
-        ? "x"
-        : `${cpuRelative >= 0 ? "+" : ""}${(cpuRelative * 100).toFixed(2)}`,
+      excluded || cpuRelative == undefined ? "x" : signedPercentText(cpuRelative),
     )
     .join(",");
 }
@@ -225,11 +229,14 @@ function toggleSummaryParts(
 ): string[] {
   const rel = toggle.metrics.cpuRelative;
   const pp = toggle.metrics.cpuPctPoints;
+  const blockCpu = toggle.blocks
+    .map((block) => `${block.arm}:${block.cpuPercent.toFixed(1)}`)
+    .join(",");
   return [
     `${label} quartets n=${toggle.n} (excluded ${toggle.excludedQuartets})`,
     `${label} quartet cpuRelative % [${deltasText(toggle.quartets)}]`,
     `${label} pair cpuRelative % (diagnostic) [${deltasText(toggle.pairs)}]`,
-    `${label} block cpu % [${toggle.blocks.map((block) => `${block.arm}:${block.cpuPercent.toFixed(1)}`).join(",")}]`,
+    `${label} block cpu % [${blockCpu}]`,
     `${label} run ${((toggle.runDurationMs ?? 0) / 1000).toFixed(1)} s`,
     `${label} cpuRelative median=${rel.median} ci95=${ci(rel.ci95?.lower, rel.ci95?.upper)}`,
     `${label} cpuPp median=${pp.median} ci95=${ci(pp.ci95?.lower, pp.ci95?.upper)}`,
@@ -286,6 +293,56 @@ function reportSummary(report: OverheadReport): string {
   return parts.join(" · ");
 }
 
+/** Timeout budget of the toggle launch(es) (UA probe variants plus the frame probe), if any. */
+function toggleTimeoutBudget(
+  env: OverheadEnvConfig,
+  { uaProbeVariants, frameProbe }: { uaProbeVariants: number; frameProbe: boolean },
+): Parameters<typeof overheadTestTimeoutMs>[2] {
+  if (uaProbeVariants === 0) {
+    return undefined;
+  }
+  return {
+    quartets: env.toggleQuartets,
+    blockMs: env.toggleBlockMs,
+    runs: uaProbeVariants + (frameProbe ? 1 : 0),
+    profileMs: env.profileMs,
+  };
+}
+
+/**
+ * Then: every toggle section has the configured blocks and quartets. Telemetry sections record
+ * nothing in the renderer realm and never call the UA memory API in off blocks; the frame probe
+ * (telemetry off in both arms) records nothing and never calls the UA API at all.
+ */
+function expectToggleSections(
+  sections: readonly OverheadToggleSummaryV3[],
+  frameProbe: OverheadToggleSummaryV3 | undefined,
+  env: OverheadEnvConfig,
+): void {
+  for (const section of [...sections, ...(frameProbe == undefined ? [] : [frameProbe])]) {
+    expect(section.blocks).toHaveLength(env.toggleQuartets * BLOCKS_PER_QUARTET);
+    expect(section.quartets).toHaveLength(env.toggleQuartets);
+  }
+  for (const section of sections) {
+    expect(section.rendererRecords.offBlocks).toBe(0);
+    expect(section.rendererRecords.onBlocks).toBeGreaterThan(0);
+    expect(section.uaCalls.offBlocks).toBe(0);
+  }
+  if (frameProbe != undefined) {
+    expect(frameProbe.rendererRecords).toEqual({ offBlocks: 0, onBlocks: 0 });
+    expect(frameProbe.uaCalls).toEqual({ offBlocks: 0, onBlocks: 0 });
+  }
+}
+
+/** Then: a measured direct attribution has samples and telemetry JS time ≤ all JS time. */
+function expectMeasuredDirectAttribution(section: DirectAttributionV3 | undefined): void {
+  if (section?.status !== "measured") {
+    return;
+  }
+  expect(section.samples).toBeGreaterThan(0);
+  expect(section.telemetryMsPerSec).toBeLessThanOrEqual(section.jsMsPerSec);
+}
+
 for (const scenarioId of OVERHEAD_SCENARIOS) {
   test(`should measure the telemetry overhead of the ${scenarioId} scenario`, async ({
     platform,
@@ -303,14 +360,7 @@ for (const scenarioId of OVERHEAD_SCENARIOS) {
       overheadTestTimeoutMs(
         schedule.length,
         env.polls,
-        toggleVariants.length > 0
-          ? {
-              quartets: env.toggleQuartets,
-              blockMs: env.toggleBlockMs,
-              runs: toggleVariants.length + (frameProbe ? 1 : 0),
-              profileMs: env.profileMs,
-            }
-          : undefined,
+        toggleTimeoutBudget(env, { uaProbeVariants: toggleVariants.length, frameProbe }),
       ),
     );
     const scenario = getScenarioUnderTest(scenarioId);
@@ -420,20 +470,12 @@ for (const scenarioId of OVERHEAD_SCENARIOS) {
       expect(result.events).toHaveLength(0);
     }
     expect(report.runs).toHaveLength(repeats * arms.length);
-    for (const { summary: section } of toggles.values()) {
-      expect(section.blocks).toHaveLength(env.toggleQuartets * BLOCKS_PER_QUARTET);
-      expect(section.quartets).toHaveLength(env.toggleQuartets);
-      // Off blocks record nothing in the renderer realm and never call the UA memory API.
-      expect(section.rendererRecords.offBlocks).toBe(0);
-      expect(section.rendererRecords.onBlocks).toBeGreaterThan(0);
-      expect(section.uaCalls.offBlocks).toBe(0);
-    }
-    // Frame probe: telemetry off in both arms, so nothing is recorded and the UA API is never called.
+    expectToggleSections(
+      [...toggles.values()].map((entry) => entry.summary),
+      toggleFrameProbe,
+      env,
+    );
     if (toggleFrameProbe != undefined) {
-      expect(toggleFrameProbe.blocks).toHaveLength(env.toggleQuartets * BLOCKS_PER_QUARTET);
-      expect(toggleFrameProbe.quartets).toHaveLength(env.toggleQuartets);
-      expect(toggleFrameProbe.rendererRecords).toEqual({ offBlocks: 0, onBlocks: 0 });
-      expect(toggleFrameProbe.uaCalls).toEqual({ offBlocks: 0, onBlocks: 0 });
       expect(report.toggleFrameProbe).toBeDefined();
     }
     // Without the probe the UA memory API is never called.
@@ -442,12 +484,7 @@ for (const scenarioId of OVERHEAD_SCENARIOS) {
     if (toggle != undefined && env.profileMs > 0) {
       expect(report.directAttribution).toBeDefined();
     }
-    if (report.directAttribution?.status === "measured") {
-      expect(report.directAttribution.samples).toBeGreaterThan(0);
-      expect(report.directAttribution.telemetryMsPerSec).toBeLessThanOrEqual(
-        report.directAttribution.jsMsPerSec,
-      );
-    }
+    expectMeasuredDirectAttribution(report.directAttribution);
     if (env.gate) {
       expect(report.verdicts.overall).not.toBe("exceeds");
     }

@@ -38,57 +38,22 @@ export function decodeSourceMap(raw: RawSourceMap): DecodedSourceMap {
   // Relative fields: the column resets per line, the others carry across lines.
   const state = [0, 0, 0, 0, 0];
   const segment: number[] = [];
-  let index = 0;
+  const cursor = { index: 0 };
 
-  const pushSegment = () => {
-    if (segment.length === 0) {
-      return;
-    }
-    state[0]! += segment[0]!;
-    line.push(state[0]!);
-    if (segment.length >= 4) {
-      for (let field = 1; field < 4; field++) {
-        state[field]! += segment[field]!;
-        line.push(state[field]!);
-      }
-      if (segment.length >= 5) {
-        state[4]! += segment[4]!;
-        line.push(state[4]!);
-      } else {
-        line.push(-1);
-      }
-    } else {
-      line.push(-1, 0, 0, -1);
-    }
-    segment.length = 0;
-  };
-
-  while (index <= mappings.length) {
-    const code = index < mappings.length ? mappings.charCodeAt(index) : SEMICOLON;
+  while (cursor.index <= mappings.length) {
+    const code = cursor.index < mappings.length ? mappings.charCodeAt(cursor.index) : SEMICOLON;
     if (code === SEMICOLON || code === COMMA) {
-      pushSegment();
+      appendSegment(segment, state, line);
+      segment.length = 0;
       if (code === SEMICOLON) {
         lines.push(sortedSegments(line));
         line = [];
         state[0] = 0;
       }
-      index++;
+      cursor.index++;
       continue;
     }
-    let value = 0;
-    let shift = 0;
-    let digit: number;
-    do {
-      const char = mappings.charCodeAt(index++);
-      digit = char < 128 ? BASE64_VALUES[char]! : -1;
-      if (digit < 0) {
-        throw new Error(`Invalid source map VLQ character at ${index - 1}`);
-      }
-      value += (digit & VLQ_VALUE_MASK) << shift;
-      shift += VLQ_SHIFT;
-    } while ((digit & VLQ_CONTINUATION_BIT) !== 0);
-    // The lowest bit is the sign.
-    segment.push((value & 1) === 1 ? -(value >>> 1) : value >>> 1);
+    segment.push(readVlq(mappings, cursor));
   }
   // `mappings` ending with ";" adds a last empty line, as the generated file does.
   const sourceRoot = raw.sourceRoot ?? "";
@@ -97,6 +62,50 @@ export function decodeSourceMap(raw: RawSourceMap): DecodedSourceMap {
     names: raw.names ?? [],
     lines,
   };
+}
+
+/**
+ * Appends the decoded `segment` (relative fields) to `line` as `SEGMENT_FIELDS` absolute fields,
+ * updating `state`; −1 for a missing source / name. No-op for an empty segment.
+ */
+function appendSegment(segment: readonly number[], state: number[], line: number[]): void {
+  if (segment.length === 0) {
+    return;
+  }
+  state[0]! += segment[0]!;
+  line.push(state[0]!);
+  if (segment.length < 4) {
+    line.push(-1, 0, 0, -1);
+    return;
+  }
+  for (let field = 1; field < 4; field++) {
+    state[field]! += segment[field]!;
+    line.push(state[field]!);
+  }
+  if (segment.length >= 5) {
+    state[4]! += segment[4]!;
+    line.push(state[4]!);
+  } else {
+    line.push(-1);
+  }
+}
+
+/** Reads one base64 VLQ value at `cursor.index` and advances the cursor past it. */
+function readVlq(mappings: string, cursor: { index: number }): number {
+  let value = 0;
+  let shift = 0;
+  let digit: number;
+  do {
+    const char = mappings.charCodeAt(cursor.index++);
+    digit = char < 128 ? BASE64_VALUES[char]! : -1;
+    if (digit < 0) {
+      throw new Error(`Invalid source map VLQ character at ${cursor.index - 1}`);
+    }
+    value += (digit & VLQ_VALUE_MASK) << shift;
+    shift += VLQ_SHIFT;
+  } while ((digit & VLQ_CONTINUATION_BIT) !== 0);
+  // The lowest bit is the sign.
+  return (value & 1) === 1 ? -(value >>> 1) : value >>> 1;
 }
 
 /** The line's segments as an `Int32Array`, sorted by generated column (stable). */
