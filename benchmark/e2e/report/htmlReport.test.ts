@@ -256,6 +256,21 @@ describe("buildHtmlReport", () => {
       'title="toggle: 4 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), own launch with ?telemetry=off, rAF loop toggled"',
     );
     expect(section).toContain("toggle ≤ 5 ms · gpu +4.00 pp (4/4 ↑)");
+    // And: only the main row carries a verdict badge, the frame-probe row has none
+    const probeRow = section
+      .split("\n")
+      .find((line) => line.includes("↳ benchmark FPS probe (harness, not shipped)"));
+    expect(probeRow).toBeDefined();
+    expect(probeRow).not.toContain('class="badge');
+    expect(section).toContain('<span class="badge good">within</span>');
+  });
+
+  it("should state the minimum quartets and pairs for a verdict in the overhead description", () => {
+    // Given / When
+    const html = render();
+
+    // Then
+    expect(html).toContain("(also with fewer than 6 quartets / 3 pairs)");
   });
 
   it("should show the direct attribution as a sub-row next to the toggle verdict", () => {

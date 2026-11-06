@@ -391,6 +391,23 @@ describe("aggregateKpis", () => {
     expect(result?.worstMemMiB).toEqual({ scenarioId: "sinewave", ciUpper: 18, median: 3 });
   });
 
+  it("should skip a report without a CPU CI95 when picking the worst CPU scenario", () => {
+    // Given a report whose CPU has a median but no CI95, next to one with a lower CI upper bound
+    const noCi = overhead({ scenarioId: "pointcloud" });
+    noCi.metrics.cpuRelative = { n: 1, median: 0.5 };
+    const overheads = [noCi, overhead({ cpu: [0, 0.01, 0.015] })];
+
+    // When
+    const result = aggregateOverhead(overheads, "electron");
+
+    // Then: the median is not used as an upper bound
+    expect(result?.worstCpuRelative).toEqual({
+      scenarioId: "sinewave",
+      ciUpper: 0.015,
+      median: 0.01,
+    });
+  });
+
   it("should take CPU from the toggle A/B and memory only from reports that measured it", () => {
     // Given a toggle-only sinewave report (memory not measured) and a both-method pointcloud
     // report whose relaunch CPU (informational) is worse than its toggle CPU

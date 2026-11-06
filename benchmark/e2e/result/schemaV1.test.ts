@@ -1152,6 +1152,37 @@ describe("validateResultV1 overhead A/B fields", () => {
       ]),
     );
   });
+
+  it.each([
+    [
+      "without fps",
+      { longTaskBlockedMsPerSec: 2 },
+      "summary.steadyWindow.mainThread.fps is missing",
+    ],
+    [
+      "with a non-numeric extra field",
+      { longTaskBlockedMsPerSec: 2, fps: 60, jank: "high" },
+      "summary.steadyWindow.mainThread.jank must be a finite number",
+    ],
+    ["that is not an object", 5, "summary.steadyWindow.mainThread must be an object"],
+  ])("should reject a main-thread reading %s", (_label, mainThread, expected) => {
+    // Given
+    const result = buildResultV1(makeInput());
+    const broken = {
+      ...result,
+      run: { ...result.run, mode: "overhead" },
+      summary: {
+        ...result.summary,
+        steadyWindow: { ...OverheadRunBuilder.steady({}), mainThread },
+      },
+    };
+
+    // When
+    const errors = validateResultV1(broken);
+
+    // Then
+    expect(errors).toEqual([expected]);
+  });
 });
 
 describe("validateResultV1 run.mode and webBrowser", () => {
@@ -1204,7 +1235,7 @@ describe("validateResultV1 run.mode and webBrowser", () => {
     ]);
   });
 
-  it("should tie the steady window to the overhead mode in strict mode only", () => {
+  it("should tie the steady window to the overhead mode in strict mode", () => {
     // Given an overhead run without and a scenario run with a steady window
     const overheadWithout = withMode("overhead", { steady: false });
     const scenarioWith = withMode("scenario", { steady: true });
@@ -1216,8 +1247,28 @@ describe("validateResultV1 run.mode and webBrowser", () => {
     expect(validateResultV1(scenarioWith)).toEqual([
       'summary.steadyWindow is only allowed with run.mode "overhead"',
     ]);
-    expect(validateResultV1(overheadWithout, "lenient")).toEqual([]);
-    expect(validateResultV1(scenarioWith, "lenient")).toEqual([]);
+  });
+
+  it("should accept a partial overhead result without a steady window in lenient mode", () => {
+    // Given a failed overhead run that wrote no steady window
+    const overheadWithout = withMode("overhead", { steady: false });
+
+    // When
+    const errors = validateResultV1(overheadWithout, "lenient");
+
+    // Then
+    expect(errors).toEqual([]);
+  });
+
+  it("should reject a scenario run with a steady window in lenient mode", () => {
+    // Given
+    const scenarioWith = withMode("scenario", { steady: true });
+
+    // When
+    const errors = validateResultV1(scenarioWith, "lenient");
+
+    // Then
+    expect(errors).toEqual(['summary.steadyWindow is only allowed with run.mode "overhead"']);
   });
 
   it("should accept a known run.environment.webBrowser and reject others", () => {

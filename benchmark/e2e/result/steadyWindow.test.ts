@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import type { HostProcessSample } from "./schemaV1";
-import { mainThreadRates, summarizeSteadyWindow } from "./steadyWindow";
+import { hasWorkingSet, mainThreadRates, summarizeSteadyWindow } from "./steadyWindow";
 import type { SteadyWindowInput } from "./steadyWindow.types";
 
 const MIB = 1024 * 1024;
@@ -95,6 +95,47 @@ describe("summarizeSteadyWindow", () => {
     expect(missing.windowMismatch).toBe(true);
     expect(overrun.polls).toBe(2);
     expect(overrun.windowMismatch).toBe(true);
+  });
+
+  it("should flag a window mismatch when a poll has no CPU", () => {
+    // Given two polls whose second one has a working set but no CPU (CPU collection failed)
+    const hostSamples: HostProcessSample[] = [
+      host(2000, "browser", MIB, 1),
+      { monotonicTs: 3000, pid: 1, processType: "browser", workingSetBytes: MIB },
+    ];
+
+    // When
+    const summary = summarizeSteadyWindow(input({ hostSamples, pollTimestamps: [2000, 3000] }));
+
+    // Then
+    expect(summary.windowMismatch).toBe(true);
+  });
+
+  it("should leave memory unmeasured when no poll has a working set", () => {
+    // Given two polls with CPU only (working-set collection failed)
+    const hostSamples: HostProcessSample[] = [
+      { monotonicTs: 2000, pid: 1, processType: "browser", cpuPercent: 10 },
+      { monotonicTs: 3000, pid: 1, processType: "browser", cpuPercent: 20 },
+    ];
+
+    // When
+    const summary = summarizeSteadyWindow(input({ hostSamples, pollTimestamps: [2000, 3000] }));
+
+    // Then
+    expect(hasWorkingSet(summary)).toBe(false);
+    expect(summary.windowMismatch).toBe(false);
+    expect(summary.medianTotalCpuPercent).toBe(15);
+  });
+
+  it("should report memory as measured when a poll has a working set", () => {
+    // Given
+    const hostSamples = [host(2000, "browser", MIB, 1), host(3000, "browser", MIB, 1)];
+
+    // When
+    const summary = summarizeSteadyWindow(input({ hostSamples, pollTimestamps: [2000, 3000] }));
+
+    // Then
+    expect(hasWorkingSet(summary)).toBe(true);
   });
 
   it("should carry the poll latency and clock sync diagnostics when recorded", () => {

@@ -7,7 +7,28 @@
 // (used by the HTML report and the CI summary).
 
 import { isRecord } from "./schemaV1";
+import type { Verdict } from "./stats.types";
 import type { OverheadReportV3 } from "../runner/overhead.types";
+
+const VERDICTS: readonly Verdict[] = ["within", "inconclusive", "exceeds"];
+
+function isVerdict(value: unknown): value is Verdict {
+  return (VERDICTS as readonly unknown[]).includes(value);
+}
+
+function isOptionalVerdict(value: unknown): boolean {
+  return value == undefined || isVerdict(value);
+}
+
+/** Verdicts the renderers look up: `cpu` and `overall` required, `memory` optional. */
+function isVerdictRecord(verdicts: unknown): boolean {
+  return (
+    isRecord(verdicts) &&
+    isVerdict(verdicts.cpu) &&
+    isVerdict(verdicts.overall) &&
+    isOptionalVerdict(verdicts.memory)
+  );
+}
 
 /** Shallow shape check of the relaunch A/B fields the report and scorecard read. */
 function hasRelaunchFields(json: Record<string, unknown>): boolean {
@@ -15,8 +36,13 @@ function hasRelaunchFields(json: Record<string, unknown>): boolean {
     Array.isArray(json.runs) &&
     Array.isArray(json.pairs) &&
     isRecord(json.metrics) &&
-    isRecord(json.verdicts) &&
-    isRecord(json.targets)
+    isVerdictRecord(json.verdicts) &&
+    isRecord(json.targets) &&
+    isRecord(json.config) &&
+    Array.isArray(json.config.arms) &&
+    (json.relaunchVerdicts == undefined || isVerdictRecord(json.relaunchVerdicts)) &&
+    (json.withoutUaProbe == undefined ||
+      (isRecord(json.withoutUaProbe) && isVerdictRecord(json.withoutUaProbe.verdicts)))
   );
 }
 
@@ -37,7 +63,8 @@ function isToggleSection(toggle: unknown): boolean {
     isRecord(toggle) &&
     isRecord(toggle.metrics) &&
     Array.isArray(toggle.blocks) &&
-    Array.isArray(toggle.quartets)
+    Array.isArray(toggle.quartets) &&
+    isOptionalVerdict(toggle.verdict)
   );
 }
 
@@ -58,7 +85,7 @@ function isDirectAttributionSection(section: unknown): boolean {
     section.status === "measured" &&
     typeof section.telemetryMsPerSec === "number" &&
     typeof section.jsMsPerSec === "number" &&
-    typeof section.verdict === "string" &&
+    isVerdict(section.verdict) &&
     Array.isArray(section.topFunctions)
   );
 }

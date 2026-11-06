@@ -193,11 +193,10 @@ function worstOverheadText(
   if (worst == undefined) {
     return "<b>—</b>";
   }
-  const upper = `<b>${escapeHtml(`${fmtNumber(worst.ciUpper * scale, digits)} ${unit}`)}</b>`;
-  const median =
-    worst.median == undefined
-      ? ""
-      : `median ${escapeHtml(`${fmtNumber(worst.median * scale, digits)} ${unit}`)}, `;
+  const scaledText = (value: number): string =>
+    escapeHtml(`${fmtNumber(value * scale, digits)} ${unit}`);
+  const upper = `<b>${scaledText(worst.ciUpper)}</b>`;
+  const median = worst.median == undefined ? "" : `median ${scaledText(worst.median)}, `;
   return `${upper} (${median}${escapeHtml(worst.scenarioId)})`;
 }
 

@@ -100,6 +100,18 @@ describe("computeOverheadDeltas", () => {
     expect(deltas.memBytes).toBe(50 * MIB);
     expect(deltas.memBytesCommonProcesses).toBe(2 * MIB);
   });
+
+  it("should omit the memory deltas when a run measured no working set", () => {
+    // Given the on run's working-set collection failed (no memory poll, totals 0)
+    const off = run({ arm: "off", cpu: 100, wsBytes: 500 * MIB });
+    const on = run({ arm: "on", cpu: 101, wsBytes: 0, byType: {} });
+
+    // When
+    const deltas = computeOverheadDeltas(off, on);
+
+    // Then
+    expect(deltas).toEqual({ cpuRelative: 0.01, cpuPctPoints: 1 });
+  });
 });
 
 describe("overheadRunFromResult", () => {
@@ -191,6 +203,23 @@ describe("buildOverheadReport", () => {
     // Then
     expect(result.n).toBe(2);
     expect(result.verdicts.overall).toBe("inconclusive");
+  });
+
+  it("should report memory as inconclusive with n = 0 when no run measured a working set", () => {
+    // Given 5 repeats whose working-set collection failed in both arms (totals 0, no types)
+    const unmeasured = { wsBytes: 0, byType: {} };
+    const runs = repeats(5, { off: unmeasured, on: { ...unmeasured, cpu: 101 } });
+
+    // When
+    const result = report(runs);
+
+    // Then
+    expect(result.metrics.memBytes).toEqual({ n: 0 });
+    expect(result.verdicts).toEqual({
+      cpu: "within",
+      memory: "inconclusive",
+      overall: "inconclusive",
+    });
   });
 
   it("should exclude pairs with a window mismatch in either run", () => {

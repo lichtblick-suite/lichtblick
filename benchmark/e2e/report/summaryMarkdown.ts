@@ -271,8 +271,9 @@ function overheadSubRows(report: OverheadReport): string[] {
     );
   }
   if (toggleFrameProbe != undefined) {
+    const frameProbeFlags = `${toggleFlagsText(toggleFrameProbe)} · ${toggleProcessDeltasText(toggleFrameProbe)}`;
     rows.push(
-      `| ${report.platform} | ↳ ${TOGGLE_FRAME_PROBE_LABEL} | toggle | ${cpuSamplesText(toggleCpuStats(toggleFrameProbe))} | ${cpuDeltaCell(toggleFrameProbe.metrics)} | ${MEM_NOT_MEASURED} | ${NONE} | ${escapeCell(`${toggleFlagsText(toggleFrameProbe)} · ${toggleProcessDeltasText(toggleFrameProbe)}`)} | | |`,
+      `| ${report.platform} | ↳ ${TOGGLE_FRAME_PROBE_LABEL} | toggle | ${cpuSamplesText(toggleCpuStats(toggleFrameProbe))} | ${cpuDeltaCell(toggleFrameProbe.metrics)} | ${MEM_NOT_MEASURED} | ${NONE} | ${escapeCell(frameProbeFlags)} | | |`,
     );
   }
   if (report.cpuVerdictSource === "toggle" && report.runs.length > 0) {
@@ -361,6 +362,20 @@ function signed(value: number): string {
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}`;
 }
 
+/** Where the CPU verdicts came from: ` (toggle)`, ` (toggle/relaunch)` or nothing (relaunch only). */
+function cpuVerdictSourceSuffix({
+  toggle,
+  relaunch,
+}: {
+  toggle: number;
+  relaunch: number;
+}): string {
+  if (toggle === 0) {
+    return "";
+  }
+  return relaunch === 0 ? " (toggle)" : " (toggle/relaunch)";
+}
+
 function overheadCell(card: PlatformScorecardV1): string {
   const overhead = card.overhead;
   if (overhead == undefined) {
@@ -368,9 +383,7 @@ function overheadCell(card: PlatformScorecardV1): string {
   }
   const cpu = overhead.worstCpuRelative;
   const mem = overhead.worstMemMiB;
-  const { toggle, relaunch } = overhead.cpuVerdictSources;
-  const cpuSource =
-    toggle > 0 && relaunch === 0 ? " (toggle)" : toggle > 0 ? " (toggle/relaunch)" : "";
+  const cpuSource = cpuVerdictSourceSuffix(overhead.cpuVerdictSources);
   const memMissing =
     overhead.memNotMeasuredReports === overhead.reports ? "mem not measured" : "mem n/a";
   const parts = [
@@ -407,7 +420,8 @@ function scorecardRuns(results: readonly PersistedResultV1[]): KpiRun[] {
 }
 
 /**
- * Compact KPI scorecard, one row per platform (electron and web are never aggregated together).
+ * Compact KPI scorecard, one row per platform with telemetry-on runs or overhead reports (electron
+ * and web are never aggregated together).
  * Aggregation per column follows `SCORECARD_POLICIES` (geomean, or worst case for slope / FPS /
  * on-time frames); see the README "KPI scorecard".
  */
@@ -416,11 +430,14 @@ export function buildScorecardTable(
   overheads: readonly OverheadReport[],
 ): string {
   const runs = scorecardRuns(results);
-  const cards = PLATFORM_ORDER.filter((platform) =>
-    runs.some((run) => run.result.run.platform === platform),
+  // Like the HTML scorecard: platforms with telemetry-on runs or overhead reports.
+  const cards = PLATFORM_ORDER.filter(
+    (platform) =>
+      runs.some((run) => run.result.run.platform === platform) ||
+      overheads.some((report) => report.platform === platform),
   ).map((platform) => aggregateKpis(runs, platform, overheads));
   if (cards.length === 0) {
-    return "\nNo benchmark-result.v1 files with telemetry found.\n";
+    return "\nNo benchmark-result.v1 files with telemetry or overhead reports found.\n";
   }
   const lines = [
     "| Platform | Runs | Healthy | Peak WS (geomean) | WS slope (max) | CPU (geomean) | CPU s/MiB (geomean) | Median FPS (min) | On-time frames (min) | Panels ready (geomean) | Ingest MiB/s (geomean) | Telemetry overhead (worst) |",

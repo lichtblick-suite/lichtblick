@@ -71,6 +71,8 @@ describe("scriptFileName", () => {
     { url: "file:///Users/me/benchmark/.webpack-desktop/renderer/main.js", expected: "main.js" },
     { url: "http://127.0.0.1:5000/", expected: undefined },
     { url: "not a url", expected: undefined },
+    { url: "http://127.0.0.1:5000/main%E0%A4%A.js", expected: undefined },
+    { url: "http://127.0.0.1:5000/my%20script.js", expected: "my script.js" },
   ])("should return $expected for $url", ({ url, expected }) => {
     // Given / When / Then
     expect(scriptFileName(url)).toBe(expected);
@@ -123,6 +125,12 @@ describe("functionNameAt", () => {
       column: 11,
       mappedName: "callback",
       expected: undefined,
+    },
+    {
+      line: `${"x".repeat(5000)}; const handler = (`,
+      column: 5018,
+      mappedName: undefined,
+      expected: "handler",
     },
   ])("should name the function at column $column of $line as $expected", (input) => {
     // Given / When

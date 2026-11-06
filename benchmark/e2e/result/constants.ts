@@ -138,7 +138,7 @@ export const BYTES_PER_MIB = 1024 * 1024;
 export const BOOTSTRAP_RESAMPLES = 10_000;
 
 /** Fixed PRNG seed of the bootstrap: reports are reproducible from their inputs. */
-export const BOOTSTRAP_SEED = 0x5eed_1234;
+export const BOOTSTRAP_SEED = 0x5e_ed_12_34;
 
 /** Bootstrap percentiles of the two-sided 95 % confidence interval. */
 export const CI95_LOWER_QUANTILE = 0.025;

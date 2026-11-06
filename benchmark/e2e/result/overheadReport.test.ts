@@ -200,6 +200,28 @@ describe("normalizeOverheadReport", () => {
         memVerdictSource: undefined,
       },
     ],
+    ["a report without config arms", { ...relaunchReportJson(), config: { repeats: 3 } }],
+    [
+      "a report with an unknown CPU verdict",
+      {
+        ...relaunchReportJson(),
+        verdicts: { cpu: "passed", memory: "within", overall: "within" },
+      },
+    ],
+    [
+      "a report with an unknown memory verdict",
+      {
+        ...relaunchReportJson(),
+        verdicts: { cpu: "within", memory: "ok", overall: "within" },
+      },
+    ],
+    [
+      "a report with an unknown relaunch verdict",
+      {
+        ...relaunchReportJson(),
+        relaunchVerdicts: { cpu: "within", memory: "within", overall: "fine" },
+      },
+    ],
   ])("should reject %s", (_label, json) => {
     // Given / When / Then
     expect(normalizeOverheadReport(json)).toBeUndefined();
