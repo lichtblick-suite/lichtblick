@@ -105,34 +105,6 @@ describe("createMessageRangeIterator", () => {
     expect(batches).toHaveLength(1);
   });
 
-  it("should close the raw batch iterator when cancelled", async () => {
-    let closed = false;
-    async function* rawIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
-      try {
-        yield {
-          type: "message-event",
-          msgEvent: MessageEventBuilder.messageEvent({ topic: mockTopic }),
-        };
-      } finally {
-        closed = true;
-      }
-    }
-    const rawBatchIterator = rawIterator();
-    await rawBatchIterator.next();
-
-    const { cancel } = createMessageRangeIterator({
-      topic: mockTopic,
-      rawBatchIterator,
-      sortedTopics: mockSortedTopics,
-      messageConverters: mockMessageConverters,
-    });
-
-    cancel();
-    await Promise.resolve();
-
-    expect(closed).toBe(true);
-  });
-
   it("should handle convertTo parameter", () => {
     const rawBatchIterator = createMockRawBatchIterator([]);
     const convertTo = BasicBuilder.string();
@@ -446,34 +418,6 @@ describe("createMessageRangeIterator", () => {
     );
 
     (console.error as jest.Mock).mockReset();
-  });
-
-  it("should throw source errors to the consumer when rethrowErrors is set", async () => {
-    // Given
-    const error = new Error(BasicBuilder.string());
-    async function* errorIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
-      yield { type: "message-event", msgEvent: MessageEventBuilder.messageEvent() };
-      throw error;
-    }
-    const { iterable } = createMessageRangeIterator({
-      topic: mockTopic,
-      rawBatchIterator: errorIterator(),
-      sortedTopics: mockSortedTopics,
-      messageConverters: mockMessageConverters,
-      rethrowErrors: true,
-    });
-
-    // When
-    const consume = async () => {
-      const batches: MessageEvent[][] = [];
-      for await (const batch of iterable) {
-        batches.push(batch);
-      }
-      return batches;
-    };
-
-    // Then
-    await expect(consume()).rejects.toBe(error);
   });
 
   it("should not yield remaining messages when cancelled", async () => {

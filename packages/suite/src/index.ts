@@ -549,8 +549,7 @@ export type PanelExtensionContext = {
    * history, like {@link PanelExtensionContext.unstable_subscribeMessageRange}.
    *
    * Batches and messages are ordered by log time. Reading starts lazily when the returned iterable
-   * is iterated; breaking out of the loop, aborting `options.signal`, or unmounting the panel stops
-   * the read. Errors raised by the data source while reading are thrown from the iterator.
+   * is iterated; breaking out of the loop or aborting `options.signal` stops the read.
    *
    * ```typescript
    * for await (const batch of context.readMessagesInRange!("/topic", { start, end })) {

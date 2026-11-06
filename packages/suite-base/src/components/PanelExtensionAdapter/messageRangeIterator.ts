@@ -20,15 +20,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
   iterable: AsyncIterable<MessageEvent[]>;
   cancel: () => void;
 } {
-  const {
-    topic,
-    convertTo,
-    rawBatchIterator,
-    sortedTopics,
-    messageConverters,
-    emitAlert,
-    rethrowErrors = false,
-  } = params;
+  const { topic, convertTo, rawBatchIterator, sortedTopics, messageConverters, emitAlert } = params;
 
   // Create a cancellation token
   let cancelled = false;
@@ -87,7 +79,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
             // Yield the batch if it has been more than 16ms since the last yield
             if (batchMessages.length > 0) {
               yield batchMessages;
-              // Start a new array so consumers can keep references to yielded batches.
+              // New array so consumers can keep references to yielded batches.
               batchMessages = [];
               lastBatchTime = performance.now();
             }
@@ -99,13 +91,9 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
           yield batchMessages; // No copy needed - array will be garbage collected
         }
       } catch (err: unknown) {
-        if (cancelled) {
-          return;
+        if (!cancelled) {
+          log.error("Error in createMessageRangeIterator:", err);
         }
-        if (rethrowErrors) {
-          throw err;
-        }
-        log.error("Error in createMessageRangeIterator:", err);
       }
     },
   };
@@ -115,11 +103,6 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
     iterable: messageEventIterable,
     cancel: () => {
       cancelled = true;
-      // Releases the source's reader without waiting for another pull; if a next() is in flight,
-      // closing is deferred until that read resolves.
-      rawBatchIterator.return?.().catch((err: unknown) => {
-        log.debug("Error closing raw batch iterator:", err);
-      });
     },
   };
 }
