@@ -602,8 +602,8 @@ of `runScenario`)
   priming poll and then exactly `BENCHMARK_OVERHEAD_POLLS` (default `OVERHEAD_STEADY_POLLS` = 10,
   min 5) polls on a fixed schedule (`t0 + i × 1 s`, not deadline-driven, so slow polls cannot drop
   polls). Host CPU is "since the previous poll", so the priming poll keeps startup out of the first
-  steady value. Scenarios that auto-pause get `?scenario.durationMs` = warm-up + polls × interval
-  - 2 s, so the pause never lands in the window. Screenshots are off.
+  steady value. Scenarios that auto-pause get `?scenario.durationMs` = warm-up + polls × interval +
+  2 s, so the pause never lands in the window. Screenshots are off.
 - **Polls never wait for the page**: a busy renderer (`pointcloud` on web blocks its main thread
   ≈ 800 ms/s) delays every `page.evaluate`, so a poll does host collection only (web: `ps` + CDP
   `SystemInfo` on the browser session; Electron: `app.getAppMetrics()` in the main process instead
@@ -628,16 +628,19 @@ of `runScenario`)
 - **Per run** (`summary.steadyWindow` of the v1 result): median and mean total CPU, mean and peak
   total working set, mean working set per process type, the process set (max count per type),
   `polls`, `overruns` (a host poll that ended after its next slot), `windowMismatch` (fewer polls
-  than requested or any overrun), `maxPollLatencyMs` (longest host poll) and `clockSyncRttMs`.
+  than requested, a poll without CPU or any overrun), `maxPollLatencyMs` (longest host poll) and
+  `clockSyncRttMs`.
 - **Main-thread probe in both arms** (`runner/mainThreadProbe.ts`): the runner injects the same
   probe into every arm before navigation (`page.addInitScript`): a `longtask` `PerformanceObserver`
   and a `requestAnimationFrame` counter. Read at the start and end of the steady window it gives
-  `mainThread: { longTaskBlockedMsPerSec, fps }`, so the off arm has main-thread numbers too.
+  `mainThread: { longTaskBlockedMsPerSec, fps }`, so the off arm has main-thread numbers too. A
+  failed probe read is warned about and leaves the run without `mainThread`.
 - **Pairs**: per repeat, `on − off` deltas: `cpuRelative = (on − off) / off` and `cpuPctPoints` of
   the steady median total CPU, `memBytes` of the steady mean total working set, the main-thread
   deltas, and `memBytesCommonProcesses` (only the process types both runs had; secondary). A pair
   where either run has `windowMismatch` is **excluded**; a pair whose process sets differ is
-  **flagged** `processSetMismatch` but kept.
+  **flagged** `processSetMismatch` but kept. A pair where either run has no working-set poll gets
+  no memory deltas, so memory has fewer pairs (down to not measured, `inconclusive`).
 
 **Statistics** (`result/stats.ts`)
 
@@ -796,7 +799,8 @@ was ≈ +0.1 %. The per-process split put it outside the renderer JS: GPU proces
 `on` arm). The page times its own telemetry work in cumulative counters
 (`telemetry.self.timeMs.{collectors,frames,longTasks,sinkPublish,drain,uaMemory}`,
 `telemetry.self.uaMemory.{calls,resolveMs,resolved,failures}`). Over the steady window the runner
-derives ms/s per component and records/s. The UA probe counts are whole-run totals (the calls start
+derives ms/s per component and records/s. A component without a publish at the window start is
+measured from its first publish in the window; one without two publishes is left out. The UA probe counts are whole-run totals (the calls start
 at collector start and on data source open, before the window): `uaCalls`, `uaResolved`,
 `uaFailures` and `uaResolveMsMean` = resolve time / resolved calls (omitted when none resolved). After the run (after the final drain,
 outside the window) it calls `measureEmitCost()`, a micro-benchmark of `gauge` / `counter` /
@@ -849,9 +853,10 @@ verdict's source, `not measured` for memory with method `toggle`, and the relaun
 sub-rows. A malformed `toggleWithoutUaProbe`, `toggleFrameProbe` or `directAttribution` is dropped
 on load; the rest of the report stays valid.
 
-The viewer and the CI summary only read the current schema (3, toggle ABBA quartets). Any other
-schema version or shape (for example a stale local file from an earlier development build) is
-skipped with a warning naming the file.
+The viewer and the CI summary only read the current schema (3, toggle ABBA quartets). Unreadable
+JSON and any other schema version or shape (for example a stale local file from an earlier
+development build, a missing `config.arms` or an unknown verdict) is skipped with a warning naming
+the file.
 
 ## KPI scorecard
 
@@ -873,7 +878,9 @@ not delivered bytes.
 
 **Aggregation** (`aggregateKpis`, policies in `SCORECARD_POLICIES`): telemetry-on runs of **one
 platform**; electron and web are never aggregated together. Each aggregate reports `n` (runs with a
-usable value) and the worst run, which the viewer links.
+usable value) and the worst run, which the viewer links. The viewer and the CI summary show a
+platform with telemetry-on runs or overhead reports (a platform with only overhead reports has 0
+runs and its overhead column).
 
 | Metric                                                                        | Aggregate                                                       | Why                                      |
 | ----------------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------- |
