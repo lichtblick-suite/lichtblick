@@ -3,13 +3,16 @@
 
 import type { Browser, ElectronApplication, Page } from "@playwright/test";
 
+import type { CumulativeCpuReading, ToggleArm, ToggleWindowRecording } from "./toggleBlocks.types";
 import type {
   BenchmarkPlatform,
   BenchmarkResultV1,
   HostProcessSample,
   RunEnvironment,
   RunnerEvent,
+  TelemetryRecord,
 } from "../result/schemaV1";
+import type { MainThreadProbeReading } from "../result/steadyWindow.types";
 import type { BenchmarkArtifact, LegacyProcessMetric } from "../types";
 
 export type { BenchmarkPlatform, HostProcessSample, RunEnvironment };
@@ -37,6 +40,12 @@ export interface BenchmarkTarget {
   scenarioUrl(params: URLSearchParams): string;
   /** Polls the host (OS-level) process metrics, stamped with the page monotonic time `tsMonotonic`. */
   collectHostMetrics(tsMonotonic: number): Promise<HostMetricsSnapshot>;
+  /**
+   * Cumulative CPU seconds of every app process, read without a page call (web: CDP
+   * `SystemInfo.getProcessInfo` `cpuTime`; Electron: `app.getAppMetrics()`
+   * `cpu.cumulativeCPUUsage`). Required by the toggle A/B; rejects when unavailable.
+   */
+  readCumulativeCpu?(): Promise<CumulativeCpuReading[]>;
   describe(): RunEnvironment;
 }
 
@@ -95,9 +104,59 @@ export type ScenarioScreenshotterOptions = {
   timings?: Partial<ScreenshotTimings>;
 };
 
+/**
+ * Overhead A/B measurement (`runScenario`): after the page API is ready, `warmupMs` of 1 Hz ticks,
+ * then exactly `polls` host polls on a fixed schedule (see `runner/steadyWindow.ts`), summarized as
+ * `summary.steadyWindow`. Also installs the main-thread probe and overrides a scenario's page
+ * auto-pause so it lands after the window.
+ */
+export type SteadyMeasurement = { mode: "steady"; warmupMs: number; polls: number };
+
+/**
+ * Toggle A/B measurement (`runScenario`, see `runner/toggleWindow.ts`): telemetry installed on,
+ * `warmupMs`, then one block of `blockMs` per entry of `arms` with telemetry switched off / on
+ * in-page, CPU from cumulative process CPU time after `settleMs`. No main-thread probe; the
+ * scenario's page auto-pause moves past the last block. The v1 result is not an overhead steady
+ * result (no `summary.steadyWindow`): the run's output is `ScenarioRunResult.toggle`.
+ */
+export type ToggleMeasurement = {
+  mode: "toggle";
+  warmupMs: number;
+  arms: readonly ToggleArm[];
+  blockMs: number;
+  settleMs: number;
+  /**
+   * Profiled period after the last block with telemetry on (direct CPU attribution, CDP
+   * `Profiler` at `OVERHEAD_PROFILE_SAMPLING_INTERVAL_US`); none when absent or 0.
+   */
+  profileMs?: number;
+  /**
+   * What the blocks switch off / on: `telemetry` (default, `setTelemetryActive`) or `frameProbe`
+   * (`setFrameProbeActive`: only the bare benchmark FPS probe frame loop, in a page installed with
+   * `?telemetry=off`, i.e. `telemetryEnabled: false`).
+   */
+  toggled?: ToggleTarget;
+};
+
+/** Page switch of the toggle blocks (`ToggleMeasurement.toggled`). */
+export type ToggleTarget = "telemetry" | "frameProbe";
+
+/** `window` carrying the runner's main-thread probe (`runner/mainThreadProbe.ts`). */
+export type MainThreadProbeWindow = Record<string, { read(): MainThreadProbeReading } | undefined>;
+
 export type RunScenarioOptions = {
-  /** Default true; false adds `?telemetry=off`. */
+  /** Default true; false adds `?telemetry=off` (overhead A/B baseline). */
   telemetryEnabled?: boolean;
+  /**
+   * Default true; false adds `?telemetry.uaMemory=off` (no `measureUserAgentSpecificMemory()`
+   * probe; overhead A/B `on-noUa` arm).
+   */
+  uaMemoryProbe?: boolean;
+  /**
+   * Overhead A/B steady window (relaunch) or toggle blocks; absent: the normal deadline-driven
+   * scenario window.
+   */
+  measurement?: SteadyMeasurement | ToggleMeasurement;
   /** Fixture URLs for scenarios with `usesMcapFixtures` (passed as `?ds.url=<a>,<b>,…`). */
   fixtureUrls?: readonly string[];
   /**
@@ -117,6 +176,11 @@ export type ScenarioRunResult = {
   runTimestamp: number;
   /** Screenshots actually written (failed captures are skipped), in capture order. */
   screenshots: readonly ScreenshotArtifact[];
+  /** Toggle A/B runs only: the blocks and every drained record (attributed to blocks later). */
+  toggle?: ToggleWindowRecording & {
+    clockSyncRttMs: number;
+    records: readonly TelemetryRecord[];
+  };
 };
 
 /** One `SystemInfo.getProcessInfo` entry (`cpuTime` = cumulative CPU seconds). */

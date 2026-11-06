@@ -43,6 +43,13 @@ export type BenchmarkWorkerFixtures = {
    * (both platforms); on web, `/` serves the static benchmark build (`benchmark/.webpack`).
    */
   benchmarkServer: { origin: string; fixtureUrls: readonly string[] };
+  /**
+   * URLs of the longer overhead A/B MCAP fixtures (`runner/overheadFixtures.ts`), served under
+   * `/fixtures/overhead/<seconds>s/`: `relaunch` sized for the configured steady window
+   * (`BENCHMARK_OVERHEAD_POLLS`), `toggle` for the toggle blocks (empty with method `relaunch`).
+   * Generated on first use per worker (cached on disk per duration).
+   */
+  overheadFixtureUrls: { relaunch: readonly string[]; toggle: readonly string[] };
 };
 
 export type BenchmarkTestFixtures = {

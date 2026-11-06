@@ -5,7 +5,10 @@ import { BenchmarkResultBuilder } from "./builders/BenchmarkResultBuilder";
 import { buildHtmlReport } from "./htmlReport";
 import { escapeHtml } from "./htmlReportFormat";
 import type { HtmlReportInput, LoadedResult } from "./types";
+import { CpuProfileBuilder } from "../result/builders/CpuProfileBuilder";
+import { ToggleBlockBuilder } from "../runner/builders/ToggleBlockBuilder";
 
+const MIB = 1024 * 1024;
 const CHART_JS_STUB = "window.Chart = function () {};";
 
 function input(overrides: Partial<HtmlReportInput> = {}): HtmlReportInput {
@@ -15,6 +18,7 @@ function input(overrides: Partial<HtmlReportInput> = {}): HtmlReportInput {
     results: [],
     all: false,
     skipped: [],
+    overheads: [],
     screenshotFiles: [],
     screenshotsHref: "../screenshots/",
     ...overrides,
@@ -139,6 +143,192 @@ describe("buildHtmlReport", () => {
     expect(html.match(/<\/script>/g)).toHaveLength(3);
   });
 
+  it("fills the overhead KPI cells from the matching report with verdict colors", () => {
+    // Given an electron overhead report over the memory target and none for web
+    const overheads = [BenchmarkResultBuilder.overhead({ memDeltaBytes: 30 * MIB })];
+
+    // When
+    const html = buildHtmlReport(input({ results: [sinewave, web], overheads }), {
+      loadChartJs: () => CHART_JS_STUB,
+    });
+
+    // Then
+    const rows = overviewRows(html);
+    const electronRow = rows.find((row) => row.includes("<td>electron</td>"))!;
+    const webRow = rows.find((row) => row.includes("<td>web</td>"))!;
+    expect(electronRow).toMatch(/class="num good"[^>]*>\+1\.00 % \[\+1\.00, \+1\.00\]</);
+    expect(electronRow).toMatch(/class="num bad"[^>]*>\+30\.0 MiB \[\+30\.0, \+30\.0\]</);
+    expect(webRow).not.toContain("MiB");
+    expect(html).toContain('<span class="badge bad">exceeds</span>');
+  });
+
+  it("should render the overhead table with pairs, CI95, flags and self-cost", () => {
+    // Given a 5-pair web report and a single-pair electron report
+    const overheads = [
+      BenchmarkResultBuilder.overhead({ platform: "web" }),
+      BenchmarkResultBuilder.overhead({ repeats: 1 }),
+    ];
+
+    // When
+    const html = render({ results: [sinewave], overheads });
+
+    // Then
+    const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
+    expect(section).toContain("<td>sinewave</td><td>web</td>");
+    expect(section).toContain('<span class="badge good">within</span>');
+    expect(section).toContain('<span class="badge warn">inconclusive</span>');
+    expect(section).toContain(">+5.0 MiB [+5.0, +5.0]</td>");
+    expect(section).toContain("2.00 ms/s (0.20 % core) · 100 rec/s · 200 ns/rec");
+    expect(section).toContain("blocked +1.0 ms/s · -1.0 fps");
+  });
+
+  it("should show the toggle CPU with the relaunch A/B as an informational sub-row (both)", () => {
+    // Given a both-method electron report (toggle +1.5 %, relaunch +5 % CPU) and a toggle-only
+    // web report
+    const toggle = ToggleBlockBuilder.summary(
+      Array.from({ length: 6 }, () => ({ off: 100, on: 101.5 })),
+    );
+    const overheads = [
+      BenchmarkResultBuilder.overhead({ method: "both", toggle, cpuOn: 105 }),
+      BenchmarkResultBuilder.overhead({ method: "toggle", platform: "web" }),
+    ];
+
+    // When
+    const html = render({ results: [sinewave, web], overheads });
+
+    // Then: the overview KPI cells use the toggle CPU and mark the web memory as not measured
+    const rows = overviewRows(html);
+    const electronRow = rows.find((row) => row.includes("<td>electron</td>"))!;
+    const webRow = rows.find((row) => row.includes("<td>web</td>"))!;
+    expect(electronRow).toMatch(/class="num good"[^>]*>\+1\.50 % \[\+1\.50, \+1\.50\]</);
+    expect(webRow).toContain(">not measured</td>");
+    // And: the overhead section shows the method, the toggle pairs and the relaunch sub-row
+    const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
+    expect(section).toContain("<td>both (CPU toggle · mem relaunch)</td>");
+    expect(section).toContain(
+      'title="toggle: 6 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), one launch; deltas per quartet (Σ on / Σ off − 1, linear drift cancels)"',
+    );
+    expect(section).toContain("↳ relaunch A/B (CPU informational)");
+    expect(section).toContain(">+5.00 % [+5.00, +5.00]</td>");
+    expect(section).toContain('<span class="badge bad">exceeds</span>');
+    expect(section).toContain("<td>toggle (mem not measured)</td>");
+    expect(section).toContain(">not measured</td>");
+    expect(section).toContain("toggle ≤ 5 ms");
+  });
+
+  it("should show the toggle A/B without the UA probe as an informational sub-row", () => {
+    // Given a web toggle report (+1 %) with a toggle A/B without the UA probe (+0.5 %)
+    const toggleWithoutUaProbe = ToggleBlockBuilder.summary(
+      Array.from({ length: 4 }, () => ({ off: 100, on: 100.5 })),
+    );
+    const overheads = [
+      BenchmarkResultBuilder.overhead({ method: "toggle", platform: "web", toggleWithoutUaProbe }),
+    ];
+
+    // When
+    const html = render({ results: [web], overheads });
+
+    // Then
+    const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
+    expect(section).toContain("↳ toggle without UA probe (informational)");
+    expect(section).toContain(">+0.50 % [+0.50, +0.50]</td>");
+    expect(section).toContain(
+      'title="toggle: 4 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), own launch with ?telemetry.uaMemory=off"',
+    );
+  });
+
+  it("should show the benchmark FPS probe as a sub-row without a verdict", () => {
+    // Given an Electron toggle report with a frame probe of +7 % (GPU +4 pp)
+    const toggleFrameProbe = ToggleBlockBuilder.summary(
+      Array.from({ length: 4 }, () => ({ off: 100, on: 107 })),
+      ToggleBlockBuilder.processSplit({ off: { gpu: 20 }, on: { gpu: 24 } }, 4),
+    );
+    const overheads = [BenchmarkResultBuilder.overhead({ method: "toggle", toggleFrameProbe })];
+
+    // When
+    const html = render({ results: [web], overheads });
+
+    // Then
+    const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
+    expect(section).toContain("↳ benchmark FPS probe (harness, not shipped)");
+    expect(section).toContain(">+7.00 % [+7.00, +7.00]</td>");
+    expect(section).toContain(
+      'title="toggle: 4 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), own launch with ?telemetry=off, rAF loop toggled"',
+    );
+    expect(section).toContain("toggle ≤ 5 ms · gpu +4.00 pp (4/4 ↑)");
+    // And: only the main row carries a verdict badge, the frame-probe row has none
+    const probeRow = section
+      .split("\n")
+      .find((line) => line.includes("↳ benchmark FPS probe (harness, not shipped)"));
+    expect(probeRow).toBeDefined();
+    expect(probeRow).not.toContain('class="badge');
+    expect(section).toContain('<span class="badge good">within</span>');
+  });
+
+  it("should state the minimum quartets and pairs for a verdict in the overhead description", () => {
+    // Given / When
+    const html = render();
+
+    // Then
+    expect(html).toContain("(also with fewer than 6 quartets / 3 pairs)");
+  });
+
+  it("should show the direct attribution as a sub-row next to the toggle verdict", () => {
+    // Given a web toggle report with a direct attribution
+    const overheads = [
+      BenchmarkResultBuilder.overhead({
+        method: "toggle",
+        platform: "web",
+        directAttribution: CpuProfileBuilder.measured(),
+      }),
+    ];
+
+    // When
+    const html = render({ results: [web], overheads });
+
+    // Then
+    const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
+    expect(section).toContain("↳ direct (JS only)");
+    expect(section).toContain(">10 s profile @ 100 µs</td>");
+    expect(section).toContain(">+0.07 % (≤ +0.10 %)</td>");
+    expect(section).toContain(
+      'title="telemetry 0.20 ms/s ÷ off CPU 300 ms/s = +0.07 % (≤ +0.10 %)"',
+    );
+    expect(section).toContain("top: record (BufferedTelemetrySink.ts:40) 0.15 ms/s");
+  });
+
+  it("should keep overhead A/B runs out of every scenario view and link their files", () => {
+    // Given a scenario run, two overhead runs (newer) and their report
+    const overheadOn = BenchmarkResultBuilder.loaded({
+      ts: 7,
+      mode: "overhead",
+      finishedAtWall: "2026-01-03T00:00:00.000Z",
+    });
+    const overheadOff = BenchmarkResultBuilder.loaded({
+      ts: 8,
+      mode: "overhead",
+      telemetryEnabled: false,
+    });
+    const report = BenchmarkResultBuilder.overhead({ repeats: 1 });
+
+    // When
+    const html = render({ results: [sinewave, overheadOn, overheadOff], overheads: [report] });
+
+    // Then: only the scenario run is shown (overview, scorecard n, runs, chart data)
+    expect(overviewRows(html)).toHaveLength(1);
+    expect(html.match(/<details class="run"/g)).toHaveLength(1);
+    expect(reportData(html).runs).toHaveLength(1);
+    expect(html).toContain("1 run(s) shown");
+    expect(html).toContain("2 overhead A/B run file(s) (telemetry overhead section only)");
+    expect(html).not.toContain(overheadOn.fileName);
+    // And: the overhead section links its runs' result files (relative to the report folder)
+    const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
+    expect(section).toContain("Run files: sinewave · electron (2)");
+    for (const run of report.runs) {
+      expect(section).toContain(`<a href="../${run.resultFile}">${run.resultFile}</a>`);
+    }
+  });
+
   it("should show the scenario and render calibration in the environment table", () => {
     // Given
     const results: LoadedResult[] = [sinewave];
@@ -171,16 +361,23 @@ describe("buildHtmlReport", () => {
     expect(html.match(/>not recorded</g)).toHaveLength(4);
   });
 
-  it("should order the sections Scorecard, By group, Overview, Coverage, Runs", () => {
+  it("should order the sections Scorecard, By group, Overview, Coverage, overhead, Runs", () => {
     // Given
     const results: LoadedResult[] = [sinewave, web];
 
     // When
-    const html = render({ results });
+    const html = render({ results, overheads: [BenchmarkResultBuilder.overhead()] });
 
     // Then
     const ids = [...html.matchAll(/<h2 id="([^"]+)"/g)].map((match) => match[1]);
-    expect(ids).toEqual(["scorecard", "by-group", "overview", "coverage", "runs"]);
+    expect(ids).toEqual([
+      "scorecard",
+      "by-group",
+      "overview",
+      "coverage",
+      "telemetry-overhead",
+      "runs",
+    ]);
     expect(html).toContain("<h3>electron ");
     expect(html).toContain("<h3>web ");
     expect(html).toContain("<td>time-series</td><td>electron</td>");

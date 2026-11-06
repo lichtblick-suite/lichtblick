@@ -6,6 +6,7 @@ import { execFile } from "node:child_process";
 import { performance } from "node:perf_hooks";
 
 import { KB, PS_MAX_BUFFER_BYTES } from "./constants";
+import type { CumulativeCpuReading } from "./toggleBlocks.types";
 import type {
   CdpProcessInfo,
   HostMetricsSnapshot,
@@ -247,6 +248,25 @@ export class WebHostCollector {
         ? await this.#collectFromCdp(processes, monotonicTs)
         : await this.#collectFromPsTree(monotonicTs);
     return { samples, legacyMetrics: samples.map(toLegacyProcessMetric) };
+  }
+
+  /**
+   * Cumulative CPU seconds per browser process (CDP `SystemInfo.getProcessInfo` `cpuTime`, the
+   * same process set as `collect`). Leaves the `collect` state alone. Rejects when CDP is
+   * unavailable: the `ps` fallback only has decayed `%cpu`, unusable for the toggle A/B.
+   */
+  public async readCumulativeCpu(): Promise<CumulativeCpuReading[]> {
+    const processes = await this.#getCdpProcessInfo();
+    if (processes == undefined) {
+      throw new Error(
+        "Cumulative CPU needs CDP SystemInfo.getProcessInfo, which is unavailable for this browser",
+      );
+    }
+    return processes.map((info) => ({
+      pid: info.id,
+      processType: mapCdpProcessType(info.type),
+      cpuTimeSec: info.cpuTime,
+    }));
   }
 
   public async dispose(): Promise<void> {

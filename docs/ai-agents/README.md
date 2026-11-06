@@ -20,7 +20,7 @@ This document describes the AI agent architecture used in the Lichtblick monorep
 
 ---
 
-## Agents (24)
+## Agents (25)
 
 Located in `.github/agents/`. Each file uses YAML frontmatter with `description` and `tools` fields.
 
@@ -78,41 +78,48 @@ Located in `.github/agents/`. Each file uses YAML frontmatter with `description`
 | `lb-theme`        | Theme system specialist covering the MUI theme configuration, palette definitions, typography, and the dark/light color scheme implementation.                                       |
 | `lb-e2e-test`     | Creates Playwright E2E tests for the Lichtblick desktop (Electron) and web apps. Uses MCP browser for web tests; reads source code to discover selectors for desktop tests.          |
 
+### Analysis
+
+| Agent                  | Description                                                                                                                                                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lb-benchmark-analyst` | Read-only benchmark analyst: interprets benchmark reports, correlates metric evidence with code evidence (`path:line`), triages performance regressions against a baseline, and proposes hypotheses and experiments. |
+
 ---
 
-## Skills (27)
+## Skills (28)
 
 Located in `.github/skills/<name>/SKILL.md`. Each file uses YAML frontmatter with a `description` field. Skills provide deep implementation knowledge that agents load on demand.
 
-| Skill                       | Description                                                                                                                                                                             |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `3d-rendering`              | Deep THREE.js rendering knowledge: WebGL pipeline, buffer management, instanced rendering, shader considerations, and scene optimization techniques.                                    |
-| `caching-internals`         | Caching strategies, memory budgets, block eviction, and buffered reading in the preloading subsystem.                                                                                   |
-| `deserialization`           | Schema parsing and message decoding: parseChannel dispatch, encoding→deserializer mapping, DeserializingIterableSource wrapping, and WASM decompression handlers.                       |
-| `electron-internals`        | Electron implementation: main/renderer process communication, contextBridge patterns, BrowserWindow lifecycle, native menu integration, and security.                                   |
-| `extensions-internals`      | Extension system internals: IExtensionLoader contracts, IndexedDB storage schema, version-compare cache strategy, contribution point registration, extension sandbox, and .foxe format. |
-| `layouts-internals`         | Layout system internals: ILayoutStorage contracts, IndexedDB schema, sync operation computation, mutex-locked LayoutManager, and conflict resolution.                                   |
-| `mcap-format`               | MCAP file format specification: binary structure, record types, indexing strategies, compression options, and best practices for optimizing Lichtblick reading performance.             |
-| `message-path`              | Message-path package: path syntax, parsing grammar, data extraction from nested messages, and React hook integration.                                                                   |
-| `message-pipeline`          | MessagePipeline internals: zustand store, subscription merging/memoization, render-state building, and the MessagePipelineContext contract.                                             |
-| `panel-extension-api`       | Panel framework: PanelExtensionAdapter, incremental RenderState building, PanelExtensionContext, pauseFrame backpressure, and panel lifecycle.                                          |
-| `panel-image`               | Image panel as ThreeDeeRender ImageMode: WorkerImageDecoder pipeline, camera-model projection, and annotation overlays.                                                                 |
-| `panel-log`                 | Log panel: react-window VariableSizeList virtualization, dynamic measured row heights, autoscroll, log normalization, and filtering.                                                    |
-| `panel-map`                 | Map panel: Leaflet lifecycle, NavSatFix/GeoJSON handling, tile layers, and the FilteredPointLayer pixel-deduplication grid.                                                             |
-| `panel-raw-messages`        | RawMessages panels: legacy vs virtual (@tanstack/react-virtual) trees, flattenTreeData, expansion state, and diff mode.                                                                 |
-| `panel-state-transitions`   | StateTransitions panel: TimeBasedChart segments, message-path extraction, 250ms batch flush, and block+currentFrame merge.                                                              |
-| `panel-user-scripts`        | UserScripts panel: Monaco editor, UserScriptPlayer, transformer/runtime Workers, diagnostics, and the script API.                                                                       |
-| `performance`               | Performance optimization: profiling techniques, common bottlenecks, memory management patterns, and strategies for real-time data visualization.                                        |
-| `player-internals`          | IterablePlayer state machine internals, tick loop, and data source iteration patterns.                                                                                                  |
-| `plot-internals`            | Chart.js integration for the Plot panel: Worker-based rendering, dataset management, downsampling strategies, scale handling, and interaction patterns.                                 |
-| `remote-caching`            | HTTP-layer caching for remote file access: CachedFilelike, VirtualLRUBuffer, connection management algorithm, BrowserHttpReader, FetchReader streaming, and RequestQueue concurrency.   |
-| `release-process`           | Release pipeline knowledge: the stable release flow (release.yml -> post-release.yml -> release-sync.yml), the manual pre-release/RC flow (prerelease.yml), branch-naming to version-bump mapping, and NPM/GHCR publishing. |
-| `theme`                     | Theme system: createMuiTheme factory, dark/light palette tokens, typography scale, ThemeProvider application, and tss-react/mui styling.                                                |
-| `unit-testing`              | Unit testing patterns, mock builder usage, and test data construction strategies.                                                                                                       |
-| `web-workers`               | Web Worker patterns: Comlink integration, ComlinkWrap lifecycle, transfer handlers, OffscreenCanvas, SharedWorker isolation, and testing utilities.                                     |
-| `websocket-connection`      | WebSocket data path: FoxgloveWebSocketPlayer, WorkerSocketAdapter postMessage protocol, Foxglove protocol handshake, and RAF-based emission.                                            |
-| `test-conventions`          | Shared test conventions for all testing agents: GWT pattern, core quality rules, and the standard test-writing workflow.                                                                |
-| `e2e-playwright-mcp`        | Playwright MCP-assisted E2E test development: test architecture, fixture reference, selector strategy, page objects, MCP usage, and source instrumentation patterns.                    |
+| Skill                     | Description                                                                                                                                                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `3d-rendering`            | Deep THREE.js rendering knowledge: WebGL pipeline, buffer management, instanced rendering, shader considerations, and scene optimization techniques.                                                                        |
+| `benchmark-analysis`      | Benchmark report interpretation: artifact layout, result/overhead JSON paths, metric-to-code catalog, interpretation pitfalls, baseline comparison rules, analysis workflow, and findings output contract.                  |
+| `caching-internals`       | Caching strategies, memory budgets, block eviction, and buffered reading in the preloading subsystem.                                                                                                                       |
+| `deserialization`         | Schema parsing and message decoding: parseChannel dispatch, encoding→deserializer mapping, DeserializingIterableSource wrapping, and WASM decompression handlers.                                                           |
+| `electron-internals`      | Electron implementation: main/renderer process communication, contextBridge patterns, BrowserWindow lifecycle, native menu integration, and security.                                                                       |
+| `extensions-internals`    | Extension system internals: IExtensionLoader contracts, IndexedDB storage schema, version-compare cache strategy, contribution point registration, extension sandbox, and .foxe format.                                     |
+| `layouts-internals`       | Layout system internals: ILayoutStorage contracts, IndexedDB schema, sync operation computation, mutex-locked LayoutManager, and conflict resolution.                                                                       |
+| `mcap-format`             | MCAP file format specification: binary structure, record types, indexing strategies, compression options, and best practices for optimizing Lichtblick reading performance.                                                 |
+| `message-path`            | Message-path package: path syntax, parsing grammar, data extraction from nested messages, and React hook integration.                                                                                                       |
+| `message-pipeline`        | MessagePipeline internals: zustand store, subscription merging/memoization, render-state building, and the MessagePipelineContext contract.                                                                                 |
+| `panel-extension-api`     | Panel framework: PanelExtensionAdapter, incremental RenderState building, PanelExtensionContext, pauseFrame backpressure, and panel lifecycle.                                                                              |
+| `panel-image`             | Image panel as ThreeDeeRender ImageMode: WorkerImageDecoder pipeline, camera-model projection, and annotation overlays.                                                                                                     |
+| `panel-log`               | Log panel: react-window VariableSizeList virtualization, dynamic measured row heights, autoscroll, log normalization, and filtering.                                                                                        |
+| `panel-map`               | Map panel: Leaflet lifecycle, NavSatFix/GeoJSON handling, tile layers, and the FilteredPointLayer pixel-deduplication grid.                                                                                                 |
+| `panel-raw-messages`      | RawMessages panels: legacy vs virtual (@tanstack/react-virtual) trees, flattenTreeData, expansion state, and diff mode.                                                                                                     |
+| `panel-state-transitions` | StateTransitions panel: TimeBasedChart segments, message-path extraction, 250ms batch flush, and block+currentFrame merge.                                                                                                  |
+| `panel-user-scripts`      | UserScripts panel: Monaco editor, UserScriptPlayer, transformer/runtime Workers, diagnostics, and the script API.                                                                                                           |
+| `performance`             | Performance optimization: profiling techniques, common bottlenecks, memory management patterns, and strategies for real-time data visualization.                                                                            |
+| `player-internals`        | IterablePlayer state machine internals, tick loop, and data source iteration patterns.                                                                                                                                      |
+| `plot-internals`          | Chart.js integration for the Plot panel: Worker-based rendering, dataset management, downsampling strategies, scale handling, and interaction patterns.                                                                     |
+| `remote-caching`          | HTTP-layer caching for remote file access: CachedFilelike, VirtualLRUBuffer, connection management algorithm, BrowserHttpReader, FetchReader streaming, and RequestQueue concurrency.                                       |
+| `release-process`         | Release pipeline knowledge: the stable release flow (release.yml -> post-release.yml -> release-sync.yml), the manual pre-release/RC flow (prerelease.yml), branch-naming to version-bump mapping, and NPM/GHCR publishing. |
+| `theme`                   | Theme system: createMuiTheme factory, dark/light palette tokens, typography scale, ThemeProvider application, and tss-react/mui styling.                                                                                    |
+| `unit-testing`            | Unit testing patterns, mock builder usage, and test data construction strategies.                                                                                                                                           |
+| `web-workers`             | Web Worker patterns: Comlink integration, ComlinkWrap lifecycle, transfer handlers, OffscreenCanvas, SharedWorker isolation, and testing utilities.                                                                         |
+| `websocket-connection`    | WebSocket data path: FoxgloveWebSocketPlayer, WorkerSocketAdapter postMessage protocol, Foxglove protocol handshake, and RAF-based emission.                                                                                |
+| `test-conventions`        | Shared test conventions for all testing agents: GWT pattern, core quality rules, and the standard test-writing workflow.                                                                                                    |
+| `e2e-playwright-mcp`      | Playwright MCP-assisted E2E test development: test architecture, fixture reference, selector strategy, page objects, MCP usage, and source instrumentation patterns.                                                        |
 
 ### Agent → Skill Relationships
 
@@ -158,6 +165,8 @@ graph LR
     lb-panel-user-scripts --> web-workers
     lb-e2e-test --> e2e-playwright-mcp
     lb-e2e-test --> test-conventions
+    lb-benchmark-analyst --> benchmark-analysis
+    lb-benchmark-analyst --> performance
 ```
 
 ---
@@ -177,15 +186,15 @@ Located in `.github/instructions/`. Each file uses YAML frontmatter with an `app
 
 Located in `.github/prompts/`. Prompt files provide reusable workflows for multi-step development and review tasks.
 
-| Prompt                                   | Purpose                                                                                                                 |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `lb-feature-develop.prompt.md`          | Structured feature workflow: Specify -> Plan -> Tasks -> Implement -> Verify.                                           |
-| `lb-bug-fix.prompt.md`                  | Structured bug-fix workflow: Reproduce -> Diagnose -> Plan -> Implement -> Verify.                                      |
-| `lb-upstream-sync.prompt.md` | Evaluate and execute upstream synchronization with compatibility/risk analysis.                                         |
-| `lb-feature-adopt.prompt.md` | Evaluate and adopt a specific upstream feature with an explicit decision matrix.                                        |
-| `lb-open-pr.prompt.md`                      | Create a complete PR description with testing evidence and risk notes. Uses `github` MCP server.                        |
-| `lb-review-pr.prompt.md`                    | Two-phase PR review: structured analysis integrating CodeRabbit, then implement CodeRabbit AI agent prompt suggestions. |
-| `lb-release.prompt.md`                  | Guided runbook to cut a release (major/minor/hotfix) or manual RC/pre-release, and verify the automated publish pipeline (release.yml/post-release.yml/release-sync.yml). |
+| Prompt                         | Purpose                                                                                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lb-feature-develop.prompt.md` | Structured feature workflow: Specify -> Plan -> Tasks -> Implement -> Verify.                                                                                             |
+| `lb-bug-fix.prompt.md`         | Structured bug-fix workflow: Reproduce -> Diagnose -> Plan -> Implement -> Verify.                                                                                        |
+| `lb-upstream-sync.prompt.md`   | Evaluate and execute upstream synchronization with compatibility/risk analysis.                                                                                           |
+| `lb-feature-adopt.prompt.md`   | Evaluate and adopt a specific upstream feature with an explicit decision matrix.                                                                                          |
+| `lb-open-pr.prompt.md`         | Create a complete PR description with testing evidence and risk notes. Uses `github` MCP server.                                                                          |
+| `lb-review-pr.prompt.md`       | Two-phase PR review: structured analysis integrating CodeRabbit, then implement CodeRabbit AI agent prompt suggestions.                                                   |
+| `lb-release.prompt.md`         | Guided runbook to cut a release (major/minor/hotfix) or manual RC/pre-release, and verify the automated publish pipeline (release.yml/post-release.yml/release-sync.yml). |
 
 ---
 
@@ -230,6 +239,8 @@ You are an expert on ...
 
 - For deep X internals: load `x-internals` skill
 ```
+
+Knowledge-only agents (no owned directory, e.g. `lb-preload`, `lb-benchmark-analyst`) use `tools: ["read", "search"]`; `lb-benchmark-analyst` additionally has `execute`, restricted by its rules to read-only commands (`git --no-pager log|blame|show|diff`, `node -e` extraction snippets, `jq`, `ls`). Register every new agent in `.github/agents/lb-orchestrator.agent.md` (frontmatter `agents` list, a routing tier, and either the Write-Ownership table or the knowledge-only list) and update the counts in this document.
 
 ### New Skill
 

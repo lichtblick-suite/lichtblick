@@ -3,11 +3,11 @@
 
 // Free of runtime imports: also read by the Playwright runner (`benchmark/e2e`).
 
-import type { TelemetryUnit } from "@lichtblick/suite-base/util/telemetry";
+import type { TelemetryLabels, TelemetryUnit } from "@lichtblick/suite-base/util/telemetry";
 
 import type { LichtblickTelemetryWindowKey, SelfCostMetricKey } from "./types";
 
-/** `?telemetry=off` disables benchmark telemetry. */
+/** `?telemetry=off` disables benchmark telemetry (used for the telemetry-overhead A/B run). */
 export const TELEMETRY_QUERY_PARAM = "telemetry";
 export const TELEMETRY_OFF_VALUE = "off";
 
@@ -17,6 +17,12 @@ export const TELEMETRY_OFF_VALUE = "off";
  * so "late" means 1.5 real frame intervals on any display.
  */
 export const LATE_FRAME_THRESHOLD_QUERY_PARAM = "telemetry.lateFrameThresholdMs";
+
+/**
+ * `?telemetry.uaMemory=off` disables the `UaSpecificMemoryCollector` entirely (no
+ * `measureUserAgentSpecificMemory()` call at all), to isolate its cost in overhead runs.
+ */
+export const UA_MEMORY_QUERY_PARAM = "telemetry.uaMemory";
 
 /** Realm of the main-thread (renderer) sink. Worker realms are bridged in as `worker:<n>`. */
 export const RENDERER_REALM = "renderer";
@@ -63,3 +69,23 @@ export const TELEMETRY_SELF_COST_UNITS: Readonly<Record<SelfCostMetricKey, Telem
   uaMemoryResolved: "count",
   uaMemoryFailures: "count",
 };
+
+/** Default number of calls per primitive timed by `window.lichtblickTelemetry.measureEmitCost()`. */
+export const EMIT_COST_DEFAULT_ITERATIONS = 20_000;
+
+/** Upper bound for the `measureEmitCost(iterations)` argument (keeps the page responsive). */
+export const EMIT_COST_MAX_ITERATIONS = 1_000_000;
+
+/** Untimed calls per primitive before timing, so the measured loop runs optimized code. */
+export const EMIT_COST_WARMUP_ITERATIONS = 1_000;
+
+/** Realistic labeled gauge used by `measureEmitCost` (an existing pipeline metric). */
+export const EMIT_COST_GAUGE_METRIC = "pipeline.blockCache.bytes";
+
+/** Realistic labeled counter used by `measureEmitCost` (an existing pipeline metric). */
+export const EMIT_COST_COUNTER_METRIC = "pipeline.remote.bytesRead";
+
+/** Labels attached to every `measureEmitCost` call. */
+export const EMIT_COST_LABELS: TelemetryLabels = Object.freeze({ sourceId: "mcap-real-pipeline" });
+
+export const NS_PER_MS = 1_000_000;

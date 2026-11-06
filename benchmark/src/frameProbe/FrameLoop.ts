@@ -7,9 +7,10 @@ import { FrameLoopEnv } from "./FrameLoop.types";
  * A `requestAnimationFrame` loop calling `onFrame(timestamp)` on every frame (one bound closure, no
  * allocation per frame). Benchmark harness: a running loop makes the browser produce a frame every
  * vsync even when nothing changes (style, paint, composite, GPU process), which costs CPU in a
- * mostly static scenario. The `FrameCollector` measures fps with it. Never part of the product.
- * Kept outside `benchmark/src/telemetry/`: the loop is harness (only the `onFrame` recording is
- * telemetry).
+ * mostly static scenario. The `FrameCollector` measures fps with it; the overhead A/B toggles a bare
+ * loop (no-op `onFrame`) to measure that cost (`setFrameProbeActive`). Never part of the product.
+ * Kept outside `benchmark/src/telemetry/` on purpose: the direct CPU attribution counts that
+ * directory as telemetry, and the loop is harness (only the `onFrame` recording is telemetry).
  *
  * The next frame is requested before `onFrame` runs, so a throwing callback does not end the loop.
  */

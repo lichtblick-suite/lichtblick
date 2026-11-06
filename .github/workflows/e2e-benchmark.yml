@@ -3,6 +3,8 @@ name: E2E Benchmark
 # Runs the benchmark E2E suite (benchmark/e2e) on Electron and web, collecting process metrics,
 # in-app telemetry and frame times. Results, screenshots and the HTML report are uploaded as
 # artifacts. Runs only on pushes to long-lived branches: the suite is slow and needs a stable runner.
+# Runs the scenarios spec only; the telemetry overhead A/B (overhead spec) is long-running and is
+# run manually (see benchmark/README.md).
 
 on:
   push:

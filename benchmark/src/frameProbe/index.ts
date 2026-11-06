@@ -2,3 +2,4 @@
 // SPDX-License-Identifier: MPL-2.0
 
 export { FrameLoop } from "./FrameLoop";
+export type { FrameLoopEnv } from "./FrameLoop.types";

@@ -259,3 +259,41 @@ describe("WebHostCollector.collect", () => {
     warn.mockRestore();
   });
 });
+
+describe("WebHostCollector.readCumulativeCpu", () => {
+  it("returns CDP's cumulative cpuTime per process with the cross-platform type", async () => {
+    // Given
+    const browser = fakeBrowser(async () => ({
+      processInfo: [
+        { id: 10, type: "browser", cpuTime: 4.5 },
+        { id: 11, type: "renderer", cpuTime: 20.25 },
+      ],
+    }));
+    const collector = new WebHostCollector({ browser, marker: "--bench" });
+
+    // When
+    const readings = await collector.readCumulativeCpu();
+
+    // Then
+    expect(readings).toEqual([
+      { pid: 10, processType: mapCdpProcessType("browser"), cpuTimeSec: 4.5 },
+      { pid: 11, processType: mapCdpProcessType("renderer"), cpuTimeSec: 20.25 },
+    ]);
+  });
+
+  it("rejects without CDP instead of falling back to the decayed ps %cpu", async () => {
+    // Given
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    const browser = fakeBrowser(async () => {
+      throw new Error("not supported");
+    });
+    const collector = new WebHostCollector({ browser, marker: "--bench" });
+
+    // When / Then
+    await expect(collector.readCumulativeCpu()).rejects.toThrow(
+      "Cumulative CPU needs CDP SystemInfo.getProcessInfo",
+    );
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+});

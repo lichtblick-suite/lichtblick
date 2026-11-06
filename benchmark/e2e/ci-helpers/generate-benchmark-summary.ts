@@ -4,15 +4,19 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { parseOverheadFile } from "../report/htmlReportData";
 import {
   buildExercisesLines,
+  buildOverheadTable,
   buildPanelsSection,
   buildResultsTable,
   buildScorecardTable,
 } from "../report/summaryMarkdown";
-import { RESULT_V1_SUFFIX } from "../result/constants";
+import { OVERHEAD_PREFIX, RESULT_V1_SUFFIX } from "../result/constants";
 import { withRunKpis } from "../result/kpis";
+import { scenarioRunsOnly } from "../result/runMode";
 import type { PersistedResultV1, StoredResultV1 } from "../result/schemaV1";
+import type { OverheadReport } from "../runner/overhead.types";
 import { parseArtifactJson } from "../shared/artifactJson";
 import type { BenchmarkArtifact } from "../types";
 
@@ -114,10 +118,15 @@ function printScenarioMetrics(): void {
     return;
   }
 
-  // Legacy artifacts only: skip v1 results.
+  // Legacy artifacts only: skip v1 results and overhead reports.
   const artifactFiles = fs
     .readdirSync(ARTIFACTS_DIR)
-    .filter((file) => file.endsWith(".json") && !file.endsWith(RESULT_V1_SUFFIX));
+    .filter(
+      (file) =>
+        file.endsWith(".json") &&
+        !file.endsWith(RESULT_V1_SUFFIX) &&
+        !file.startsWith(OVERHEAD_PREFIX),
+    );
   if (artifactFiles.length === 0) {
     process.stdout.write("\nNo benchmark artifacts found.\n");
     return;
@@ -173,16 +182,47 @@ function readArtifactJson<T>(predicate: (file: string) => boolean): T[] {
     });
 }
 
-/** Results as stored; older ones without `summary.kpis` get them backfilled (`withRunKpis`). */
+/**
+ * Scenario results as stored (overhead A/B runs dropped: they are summarized by their
+ * `overhead-*.json` reports); older ones without `summary.kpis` get them backfilled (`withRunKpis`).
+ */
 function readResultsV1(): PersistedResultV1[] {
-  return readArtifactJson<StoredResultV1>((file) => file.endsWith(RESULT_V1_SUFFIX)).map(
-    withRunKpis,
-  );
+  return scenarioRunsOnly(
+    readArtifactJson<StoredResultV1>((file) => file.endsWith(RESULT_V1_SUFFIX)),
+  ).map(withRunKpis);
 }
 
-function printScorecard(): void {
+/**
+ * Overhead reports of the current schema (3); unreadable files, other schemas and malformed reports
+ * are warned about and skipped (`parseOverheadFile`).
+ */
+function readOverheadReports(): OverheadReport[] {
+  if (!fs.existsSync(ARTIFACTS_DIR)) {
+    return [];
+  }
+  return fs
+    .readdirSync(ARTIFACTS_DIR)
+    .filter((file) => file.startsWith(OVERHEAD_PREFIX) && file.endsWith(".json"))
+    .flatMap((file) => {
+      let text: string;
+      try {
+        text = fs.readFileSync(path.join(ARTIFACTS_DIR, file), "utf-8");
+      } catch (error) {
+        console.warn(`Skipping ${file}: ${String(error)}`);
+        return [];
+      }
+      const outcome = parseOverheadFile(text);
+      if (!outcome.ok) {
+        console.warn(`Skipping ${file}: ${outcome.reason}`);
+        return [];
+      }
+      return [outcome.value];
+    });
+}
+
+function printScorecard(overheads: readonly OverheadReport[]): void {
   process.stdout.write("\n## KPI Scorecard (per platform, latest telemetry-on run per scenario)\n");
-  process.stdout.write(buildScorecardTable(readResultsV1()));
+  process.stdout.write(buildScorecardTable(readResultsV1(), overheads));
   process.stdout.write("\n### Exercises\n");
   process.stdout.write(buildExercisesLines(readResultsV1()));
 }
@@ -197,13 +237,20 @@ function printPanelsAndPipeline(): void {
   process.stdout.write(buildPanelsSection(readResultsV1()));
 }
 
+function printOverheadReports(overheads: readonly OverheadReport[]): void {
+  process.stdout.write("\n## Telemetry Overhead (A/B: telemetry off vs on)\n");
+  process.stdout.write(buildOverheadTable(overheads));
+}
+
 function main(): void {
   process.stdout.write("# Benchmark E2E Summary\n");
-  printScorecard();
+  const overheads = readOverheadReports();
+  printScorecard(overheads);
   printTestResults();
   printScenarioMetrics();
   printTelemetryResults();
   printPanelsAndPipeline();
+  printOverheadReports(overheads);
 }
 
 main();

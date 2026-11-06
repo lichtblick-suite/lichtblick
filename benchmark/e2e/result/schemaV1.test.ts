@@ -22,6 +22,7 @@ import {
 } from "./schemaV1";
 import { median, percentile } from "./stats";
 import type { TelemetryEvent } from "../../../packages/suite-base/src/util/telemetry/types";
+import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 
 const POOL = "pipeline.hydratedSourcePool.";
 
@@ -1069,44 +1070,205 @@ describe("summary.kpis", () => {
   });
 });
 
-describe("validateResultV1 run.mode and webBrowser", () => {
-  function withMode(mode: string | undefined): Record<string, unknown> {
+describe("validateResultV1 overhead A/B fields", () => {
+  it("should accept the optional steady window, telemetry self-cost and collectors state", () => {
+    // Given a result with the overhead-only fields
     const result = buildResultV1(makeInput());
-    const { mode: _mode, ...run } = result.run;
-    return { ...result, run: mode == undefined ? run : { ...run, mode } };
-  }
-
-  it("should accept a scenario run", () => {
-    // Given
-    const scenario = withMode("scenario");
+    const withOverhead = {
+      ...result,
+      run: {
+        ...result.run,
+        mode: "overhead",
+        environment: { ...result.run.environment, collectors: { uaMemory: "off" } },
+      },
+      summary: {
+        ...result.summary,
+        steadyWindow: {
+          warmupMs: 3000,
+          requestedPolls: 10,
+          polls: 10,
+          overruns: 0,
+          windowMismatch: false,
+          startMonotonicTs: 1000,
+          endMonotonicTs: 11_000,
+          medianTotalCpuPercent: 40,
+          meanTotalCpuPercent: 41,
+          meanTotalWorkingSetBytes: 1e9,
+          peakTotalWorkingSetBytes: 1.1e9,
+          meanWorkingSetBytesByType: { browser: 1e9 },
+          processSet: { browser: 1 },
+          mainThread: { longTaskBlockedMsPerSec: 2, fps: 60 },
+        },
+        telemetrySelf: {
+          windowSec: 10,
+          msPerSec: { total: 1.5, byComponent: { collectors: 1, drain: 0.5 } },
+          recordsPerSec: 120,
+          uaCalls: 2,
+          uaResolveMsMean: 30,
+          emitCostNs: { gaugeNs: 300, counterNs: 250, eventNs: 900 },
+          meanEmitNs: 320,
+          estimatedEmitMsPerSec: 0.0384,
+          fractionOfCore: 0.0015384,
+        },
+      },
+    };
 
     // When
-    const errors = validateResultV1(scenario);
+    const errors = validateResultV1(JSON.parse(JSON.stringify(withOverhead)));
 
     // Then
     expect(errors).toEqual([]);
   });
 
+  it("should report malformed overhead fields", () => {
+    // Given
+    const result = buildResultV1(makeInput());
+    const broken = {
+      ...result,
+      run: {
+        ...result.run,
+        environment: { ...result.run.environment, collectors: { uaMemory: "maybe" } },
+      },
+      summary: {
+        ...result.summary,
+        steadyWindow: { polls: "ten", maxPollLatencyMs: "slow" },
+        telemetrySelf: { msPerSec: 3 },
+      },
+    };
+
+    // When
+    const errors = validateResultV1(broken);
+
+    // Then
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        'run.environment.collectors.uaMemory must be "on", "off", "unsupported" or "disabled"',
+        "summary.steadyWindow.polls must be a number",
+        "summary.steadyWindow.maxPollLatencyMs must be a number",
+        "summary.steadyWindow.windowMismatch is missing",
+        "summary.steadyWindow.processSet must be an object",
+        "summary.telemetrySelf.msPerSec must be an object",
+        "summary.telemetrySelf.fractionOfCore is missing",
+      ]),
+    );
+  });
+
+  it.each([
+    [
+      "without fps",
+      { longTaskBlockedMsPerSec: 2 },
+      "summary.steadyWindow.mainThread.fps is missing",
+    ],
+    [
+      "with a non-numeric extra field",
+      { longTaskBlockedMsPerSec: 2, fps: 60, jank: "high" },
+      "summary.steadyWindow.mainThread.jank must be a finite number",
+    ],
+    ["that is not an object", 5, "summary.steadyWindow.mainThread must be an object"],
+  ])("should reject a main-thread reading %s", (_label, mainThread, expected) => {
+    // Given
+    const result = buildResultV1(makeInput());
+    const broken = {
+      ...result,
+      run: { ...result.run, mode: "overhead" },
+      summary: {
+        ...result.summary,
+        steadyWindow: { ...OverheadRunBuilder.steady({}), mainThread },
+      },
+    };
+
+    // When
+    const errors = validateResultV1(broken);
+
+    // Then
+    expect(errors).toEqual([expected]);
+  });
+});
+
+describe("validateResultV1 run.mode and webBrowser", () => {
+  const steadyWindow = OverheadRunBuilder.steady({});
+
+  function withMode(
+    mode: string | undefined,
+    { steady }: { steady: boolean },
+  ): Record<string, unknown> {
+    const result = buildResultV1(makeInput());
+    const { mode: _mode, ...run } = result.run;
+    return {
+      ...result,
+      run: mode == undefined ? run : { ...run, mode },
+      summary: steady ? { ...result.summary, steadyWindow } : result.summary,
+    };
+  }
+
+  it("should accept a scenario run without and an overhead run with a steady window", () => {
+    // Given
+    const scenario = withMode("scenario", { steady: false });
+    const overhead = withMode("overhead", { steady: true });
+
+    // When / Then
+    expect(validateResultV1(scenario)).toEqual([]);
+    expect(validateResultV1(overhead)).toEqual([]);
+  });
+
   it("should require run.mode in strict mode only", () => {
     // Given a result written before run.mode
-    const older = withMode(undefined);
+    const older = withMode(undefined, { steady: false });
 
     // When
     const strictErrors = validateResultV1(older);
     const lenientErrors = validateResultV1(older, "lenient");
 
     // Then
-    expect(strictErrors).toEqual(["run.mode must be one of scenario"]);
+    expect(strictErrors).toEqual(["run.mode must be one of scenario, overhead"]);
     expect(lenientErrors).toEqual([]);
   });
 
   it("should reject an unknown run.mode in both modes", () => {
     // Given
-    const unknown = withMode("benchmark");
+    const unknown = withMode("benchmark", { steady: false });
 
     // When / Then
-    expect(validateResultV1(unknown)).toContain("run.mode must be one of scenario");
-    expect(validateResultV1(unknown, "lenient")).toEqual(["run.mode must be one of scenario"]);
+    expect(validateResultV1(unknown)).toContain("run.mode must be one of scenario, overhead");
+    expect(validateResultV1(unknown, "lenient")).toEqual([
+      "run.mode must be one of scenario, overhead",
+    ]);
+  });
+
+  it("should tie the steady window to the overhead mode in strict mode", () => {
+    // Given an overhead run without and a scenario run with a steady window
+    const overheadWithout = withMode("overhead", { steady: false });
+    const scenarioWith = withMode("scenario", { steady: true });
+
+    // When / Then
+    expect(validateResultV1(overheadWithout)).toEqual([
+      'summary.steadyWindow is required with run.mode "overhead"',
+    ]);
+    expect(validateResultV1(scenarioWith)).toEqual([
+      'summary.steadyWindow is only allowed with run.mode "overhead"',
+    ]);
+  });
+
+  it("should accept a partial overhead result without a steady window in lenient mode", () => {
+    // Given a failed overhead run that wrote no steady window
+    const overheadWithout = withMode("overhead", { steady: false });
+
+    // When
+    const errors = validateResultV1(overheadWithout, "lenient");
+
+    // Then
+    expect(errors).toEqual([]);
+  });
+
+  it("should reject a scenario run with a steady window in lenient mode", () => {
+    // Given
+    const scenarioWith = withMode("scenario", { steady: true });
+
+    // When
+    const errors = validateResultV1(scenarioWith, "lenient");
+
+    // Then
+    expect(errors).toEqual(['summary.steadyWindow is only allowed with run.mode "overhead"']);
   });
 
   it("should accept a known run.environment.webBrowser and reject others", () => {

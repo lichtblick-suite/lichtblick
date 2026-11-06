@@ -45,6 +45,8 @@ import {
   WebBrowserV1,
 } from "./schemaV1.types";
 import { maxOf, mean, median, percentile } from "./stats";
+import type { SteadyWindowSummaryV1 } from "./steadyWindow.types";
+import type { CollectorsStateV1, TelemetrySelfSummaryV1 } from "./telemetrySelf.types";
 import type { PipelineWindow } from "./types";
 import type {
   TelemetryEvent,
@@ -81,6 +83,8 @@ export type RunEnvironment = {
   crossOriginIsolated?: boolean;
   /** Web only: which Chromium build ran the page (absent in older results: the headless shell). */
   webBrowser?: WebBrowserV1;
+  /** Optional page collectors' state (overhead A/B runs with telemetry on). */
+  collectors?: CollectorsStateV1;
 };
 
 /**
@@ -164,7 +168,7 @@ export type RunInfoV1 = {
    * results (then `endMonotonicTs` is used).
    */
   windowEndMonotonicTs?: number;
-  /** Run kind (see `RunModeV1`); absent in older results. */
+  /** Scenario run or overhead A/B run (see `RunModeV1`); absent in older results. */
   mode?: RunModeV1;
   sampleIntervalMs: number;
   environment: RunEnvironmentV1;
@@ -279,6 +283,10 @@ export type SummaryV1 = {
   runnerEvents?: RunnerEventsSummaryV1;
   /** Per-run KPI families derived from the fields above (`computeRunKpis`). */
   kpis: RunKpisV1;
+  /** Fixed-schedule steady window statistics; only in telemetry overhead A/B runs. */
+  steadyWindow?: SteadyWindowSummaryV1;
+  /** In-page telemetry self-cost over the steady window; only in overhead runs with telemetry on. */
+  telemetrySelf?: TelemetrySelfSummaryV1;
 };
 
 /** Everything of a v1 result but `run`. */
@@ -1171,6 +1179,114 @@ function checkRunEnvironment(
     },
     errors,
   );
+  checkCollectorsState(environment.collectors, errors);
+}
+
+const COLLECTOR_STATES: ReadonlySet<unknown> = new Set(["on", "off", "unsupported", "disabled"]);
+
+/** Validates the optional `run.environment.collectors` (overhead A/B runs only). */
+function checkCollectorsState(collectors: unknown, errors: string[]): void {
+  if (collectors == undefined) {
+    return;
+  }
+  if (!isRecord(collectors)) {
+    errors.push("run.environment.collectors must be an object");
+  } else if (!COLLECTOR_STATES.has(collectors.uaMemory)) {
+    errors.push(
+      'run.environment.collectors.uaMemory must be "on", "off", "unsupported" or "disabled"',
+    );
+  }
+}
+
+/** Validates the optional `summary.steadyWindow` (overhead A/B runs only). */
+function checkSteadyWindow(steadyWindow: unknown, errors: string[]): void {
+  if (steadyWindow == undefined) {
+    return;
+  }
+  const where = "summary.steadyWindow";
+  if (!isRecord(steadyWindow)) {
+    errors.push(`${where} must be an object`);
+    return;
+  }
+  checkFields(
+    steadyWindow,
+    where,
+    {
+      warmupMs: "number",
+      requestedPolls: "number",
+      polls: "number",
+      overruns: "number",
+      windowMismatch: "boolean",
+      maxPollLatencyMs: "number?",
+      clockSyncRttMs: "number?",
+      startMonotonicTs: "number",
+      endMonotonicTs: "number",
+      medianTotalCpuPercent: "number",
+      meanTotalCpuPercent: "number",
+      meanTotalWorkingSetBytes: "number",
+      peakTotalWorkingSetBytes: "number",
+    },
+    errors,
+  );
+  checkNumberRecord(
+    steadyWindow.meanWorkingSetBytesByType,
+    `${where}.meanWorkingSetBytesByType`,
+    errors,
+  );
+  checkNumberRecord(steadyWindow.processSet, `${where}.processSet`, errors);
+  const { mainThread } = steadyWindow;
+  if (mainThread == undefined) {
+    return;
+  }
+  if (!isRecord(mainThread)) {
+    errors.push(`${where}.mainThread must be an object`);
+    return;
+  }
+  const { longTaskBlockedMsPerSec, fps, ...extra } = mainThread;
+  checkFields(
+    { longTaskBlockedMsPerSec, fps },
+    `${where}.mainThread`,
+    { longTaskBlockedMsPerSec: "number", fps: "number" },
+    errors,
+  );
+  checkNumberRecord(extra, `${where}.mainThread`, errors);
+}
+
+/** Validates the optional `summary.telemetrySelf` (overhead A/B runs with telemetry on only). */
+function checkTelemetrySelf(telemetrySelf: unknown, errors: string[]): void {
+  if (telemetrySelf == undefined) {
+    return;
+  }
+  const where = "summary.telemetrySelf";
+  if (!isRecord(telemetrySelf)) {
+    errors.push(`${where} must be an object`);
+    return;
+  }
+  checkFields(
+    telemetrySelf,
+    where,
+    {
+      windowSec: "number",
+      recordsPerSec: "number",
+      uaCalls: "number",
+      uaResolved: "number?",
+      uaFailures: "number?",
+      uaResolveMsMean: "number?",
+      meanEmitNs: "number?",
+      estimatedEmitMsPerSec: "number?",
+      fractionOfCore: "number",
+    },
+    errors,
+  );
+  if (isRecord(telemetrySelf.msPerSec)) {
+    checkFields(telemetrySelf.msPerSec, `${where}.msPerSec`, { total: "number" }, errors);
+    checkNumberRecord(telemetrySelf.msPerSec.byComponent, `${where}.msPerSec.byComponent`, errors);
+  } else {
+    errors.push(`${where}.msPerSec must be an object`);
+  }
+  if (telemetrySelf.emitCostNs != undefined) {
+    checkNumberRecord(telemetrySelf.emitCostNs, `${where}.emitCostNs`, errors);
+  }
 }
 
 function checkProcessSummary(processSummary: unknown, errors: string[]): void {
@@ -1337,6 +1453,8 @@ function checkSummary(
   if (summary.runnerEvents != undefined) {
     checkNumberRecord(summary.runnerEvents, "summary.runnerEvents", errors);
   }
+  checkSteadyWindow(summary.steadyWindow, errors);
+  checkTelemetrySelf(summary.telemetrySelf, errors);
 }
 
 /**
@@ -1361,10 +1479,41 @@ export function validateResultV1(obj: unknown, mode: ResultValidationMode = "str
   checkRunnerEvents(obj.runnerEvents, errors);
   if (isRecord(obj.summary)) {
     checkSummary(obj.summary, mode, errors);
+    if (isRecord(obj.run)) {
+      checkRunMode(obj.run, obj.summary, mode, errors);
+    }
   } else {
     errors.push("summary must be an object");
   }
   return errors;
+}
+
+/**
+ * Strict: an overhead A/B run has `summary.steadyWindow` and a scenario run has none, so the
+ * scenario views can never pick up an overhead run that lost its marker (or the reverse). Lenient
+ * (older results, partial results of failed overhead runs without a steady window): only an
+ * explicit `run.mode` "scenario" with a steady window is rejected (`isOverheadRun` would treat it
+ * as a scenario run).
+ */
+function checkRunMode(
+  run: Record<string, unknown>,
+  summary: Record<string, unknown>,
+  mode: ResultValidationMode,
+  errors: string[],
+): void {
+  const overhead = run.mode === "overhead";
+  const steady = summary.steadyWindow != undefined;
+  if (mode === "lenient") {
+    if (run.mode === "scenario" && steady) {
+      errors.push('summary.steadyWindow is only allowed with run.mode "overhead"');
+    }
+    return;
+  }
+  if (overhead && !steady) {
+    errors.push('summary.steadyWindow is required with run.mode "overhead"');
+  } else if (!overhead && steady) {
+    errors.push('summary.steadyWindow is only allowed with run.mode "overhead"');
+  }
 }
 
 function checkPhases(phases: Record<string, unknown>, errors: string[]): void {

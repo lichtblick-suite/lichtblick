@@ -3,7 +3,15 @@
 
 import { RunKpisBuilder } from "./builders/RunKpisBuilder";
 import { LOW_FPS_WARNING } from "./constants";
-import { aggregateKpis, aggregateValues, computeRunKpis, groupKpis, withRunKpis } from "./kpis";
+import {
+  aggregateKpis,
+  aggregateOverhead,
+  aggregateValues,
+  computeRunKpis,
+  groupKpis,
+  withRunKpis,
+} from "./kpis";
+import type { OverheadKpiInput } from "./kpis.types";
 import type { PanelSummaryV1, PoolSummaryV1, StoredResultV1 } from "./schemaV1";
 import { BenchmarkResultBuilder } from "../report/builders/BenchmarkResultBuilder";
 
@@ -37,6 +45,34 @@ function pool(overrides: Partial<PoolSummaryV1> = {}): PoolSummaryV1 {
     highWaterResidentCount: 0,
     highWaterActivePins: 0,
     ...overrides,
+  };
+}
+
+/** Overhead report fields with a CPU / memory CI95 around the given medians (n = 5 pairs). */
+function overhead(
+  overrides: Partial<OverheadKpiInput> & {
+    cpu?: [lower: number, median: number, upper: number];
+    memMiB?: [lower: number, median: number, upper: number];
+  } = {},
+): OverheadKpiInput {
+  const { cpu = [0, 0.01, 0.015], memMiB = [2, 5, 8], ...rest } = overrides;
+  return {
+    platform: "electron",
+    scenarioId: "sinewave",
+    createdAtWall: "2026-01-01T00:00:00.000Z",
+    n: 5,
+    metrics: {
+      cpuRelative: { n: 5, median: cpu[1], iqr: 0, ci95: { lower: cpu[0], upper: cpu[2] } },
+      memBytes: {
+        n: 5,
+        median: memMiB[1] * MIB,
+        iqr: 0,
+        ci95: { lower: memMiB[0] * MIB, upper: memMiB[2] * MIB },
+      },
+    },
+    verdicts: { overall: "within" },
+    targets: { cpuDeltaRelativeMax: 0.02, memDeltaBytesMax: 20 * MIB },
+    ...rest,
   };
 }
 
@@ -275,6 +311,7 @@ describe("aggregateKpis", () => {
     expect(scorecard.lowFpsRuns).toEqual([
       { scenarioId: "pointcloud", runId: "run-1", medianFps: 3 },
     ]);
+    expect(scorecard.overhead).toBeUndefined();
   });
 
   it("should never mix platforms", () => {
@@ -291,6 +328,150 @@ describe("aggregateKpis", () => {
     // Then: web FPS is reported even when low
     expect(electron.metrics.medianFps).toMatchObject({ value: 120, n: 1 });
     expect(web.metrics.medianFps).toMatchObject({ value: 2, n: 1, worst: { runId: "w" } });
+  });
+
+  it("should attach the overhead worst case of the platform's latest reports", () => {
+    // Given an older exceeding and a newer within sinewave report, an inconclusive single-pair
+    // pointcloud report, and a web report
+    const overheads = [
+      overhead({ createdAtWall: "2026-01-01T00:00:00.000Z", verdicts: { overall: "exceeds" } }),
+      overhead({ createdAtWall: "2026-01-02T00:00:00.000Z" }),
+      overhead({
+        scenarioId: "pointcloud",
+        n: 1,
+        cpu: [0.025, 0.025, 0.025],
+        memMiB: [12, 12, 12],
+        verdicts: { overall: "inconclusive" },
+      }),
+      overhead({ platform: "web", verdicts: { overall: "exceeds" } }),
+    ];
+
+    // When
+    const result = aggregateKpis([], "electron", overheads).overhead;
+
+    // Then
+    expect(result).toEqual({
+      reports: 2,
+      verdict: "inconclusive",
+      minPairs: 1,
+      totalPairs: 6,
+      cpuVerdictSources: { toggle: 0, relaunch: 2 },
+      memNotMeasuredReports: 0,
+      worstCpuRelative: {
+        scenarioId: "pointcloud",
+        ciUpper: 0.025,
+        median: 0.025,
+      },
+      worstMemMiB: { scenarioId: "pointcloud", ciUpper: 12, median: 12 },
+      targets: { cpuDeltaRelativeMax: 0.02, memDeltaMiBMax: 20 },
+    });
+  });
+
+  it("should rank exceeds as the worst verdict and pick the highest CI upper bound", () => {
+    // Given a within report with a wide memory CI and an exceeding one
+    const overheads = [
+      overhead({ memMiB: [-5, 3, 18] }),
+      overhead({
+        scenarioId: "mcap-multi-ingest",
+        cpu: [0.03, 0.04, 0.05],
+        verdicts: { overall: "exceeds" },
+      }),
+    ];
+
+    // When
+    const result = aggregateOverhead(overheads, "electron");
+
+    // Then
+    expect(result?.verdict).toBe("exceeds");
+    expect(result?.worstCpuRelative).toEqual({
+      scenarioId: "mcap-multi-ingest",
+      ciUpper: 0.05,
+      median: 0.04,
+    });
+    expect(result?.worstMemMiB).toEqual({ scenarioId: "sinewave", ciUpper: 18, median: 3 });
+  });
+
+  it("should skip a report without a CPU CI95 when picking the worst CPU scenario", () => {
+    // Given a report whose CPU has a median but no CI95, next to one with a lower CI upper bound
+    const noCi = overhead({ scenarioId: "pointcloud" });
+    noCi.metrics.cpuRelative = { n: 1, median: 0.5 };
+    const overheads = [noCi, overhead({ cpu: [0, 0.01, 0.015] })];
+
+    // When
+    const result = aggregateOverhead(overheads, "electron");
+
+    // Then: the median is not used as an upper bound
+    expect(result?.worstCpuRelative).toEqual({
+      scenarioId: "sinewave",
+      ciUpper: 0.015,
+      median: 0.01,
+    });
+  });
+
+  it("should take CPU from the toggle A/B and memory only from reports that measured it", () => {
+    // Given a toggle-only sinewave report (memory not measured) and a both-method pointcloud
+    // report whose relaunch CPU (informational) is worse than its toggle CPU
+    const toggleCpu = (upper: number, n: number) => ({
+      n,
+      metrics: {
+        cpuRelative: { n, median: upper / 2, iqr: 0, ci95: { lower: 0, upper } },
+      },
+    });
+    const overheads = [
+      overhead({
+        n: 0,
+        cpu: [0, 0, 0],
+        memMiB: [30, 40, 50],
+        cpuVerdictSource: "toggle",
+        memVerdictSource: "notMeasured",
+        toggle: toggleCpu(0.01, 16),
+      }),
+      overhead({
+        scenarioId: "pointcloud",
+        n: 3,
+        cpu: [0.02, 0.04, 0.06],
+        memMiB: [1, 2, 3],
+        cpuVerdictSource: "toggle",
+        memVerdictSource: "relaunch",
+        toggle: toggleCpu(0.015, 8),
+      }),
+    ];
+
+    // When
+    const result = aggregateOverhead(overheads, "electron");
+
+    // Then: the toggle CPU wins, the toggle-only memory is ignored, pairs come from the sources
+    expect(result).toMatchObject({
+      reports: 2,
+      minPairs: 3,
+      totalPairs: 24,
+      cpuVerdictSources: { toggle: 2, relaunch: 0 },
+      memNotMeasuredReports: 1,
+      worstCpuRelative: { scenarioId: "pointcloud", ciUpper: 0.015, median: 0.0075 },
+      worstMemMiB: { scenarioId: "pointcloud", ciUpper: 3, median: 2 },
+    });
+  });
+
+  it("should leave the memory worst case out when no report measured memory", () => {
+    // Given a toggle-only report
+    const report = overhead({
+      n: 0,
+      cpuVerdictSource: "toggle",
+      memVerdictSource: "notMeasured",
+      toggle: { n: 5, metrics: { cpuRelative: { n: 5, median: 0, ci95: { lower: 0, upper: 0 } } } },
+    });
+
+    // When
+    const result = aggregateOverhead([report], "electron");
+
+    // Then
+    expect(result?.worstMemMiB).toBeUndefined();
+    expect(result?.minPairs).toBe(5);
+  });
+
+  it("should omit the overhead without reports of the platform", () => {
+    // Given / When / Then
+    expect(aggregateOverhead([overhead({ platform: "web" })], "electron")).toBeUndefined();
   });
 });
 
