@@ -115,7 +115,8 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
     iterable: messageEventIterable,
     cancel: () => {
       cancelled = true;
-      // Close the source so it releases its reader even if nobody pulls the next batch.
+      // Releases the source's reader without waiting for another pull; if a next() is in flight,
+      // closing is deferred until that read resolves.
       rawBatchIterator.return?.().catch((err: unknown) => {
         log.debug("Error closing raw batch iterator:", err);
       });
