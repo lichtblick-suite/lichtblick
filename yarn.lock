@@ -15579,7 +15579,7 @@ __metadata:
     jest-environment-jsdom: "npm:30.5.2"
     license-checker: "npm:25.0.1"
     lint-staged: "npm:17.0.8"
-    playwright: "npm:1.60.0"
+    playwright: "npm:1.65.0"
     prettier: "npm:3.9.4"
     react-refresh: "npm:0.18.0"
     react-use: "npm:17.6.0"
@@ -17915,15 +17915,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.60.0":
-  version: 1.60.0
-  resolution: "playwright-core@npm:1.60.0"
-  bin:
-    playwright-core: cli.js
-  checksum: 10/66c0f83d627e673261c848dd6fe1f2856d5b5b6859268acb61a45c00f5bf926e596a351a9c481a3a4e82a45022c7c6b5d99ebc3906fc6876ac582ed6f7e16190
-  languageName: node
-  linkType: hard
-
 "playwright-core@npm:1.62.0-alpha-2026-06-29":
   version: 1.62.0-alpha-2026-06-29
   resolution: "playwright-core@npm:1.62.0-alpha-2026-06-29"
@@ -17939,21 +17930,6 @@ __metadata:
   bin:
     playwright-core: cli.js
   checksum: 10/77c76725d9c60a8fc67439e9fcb1ef075268aaf81dd5edc5321da777eb0f2103e8569f9efa55dd0adbd9c8c41ef97c956dd7263dc91c4233f29388cfa451dee3
-  languageName: node
-  linkType: hard
-
-"playwright@npm:1.60.0":
-  version: 1.60.0
-  resolution: "playwright@npm:1.60.0"
-  dependencies:
-    fsevents: "npm:2.3.2"
-    playwright-core: "npm:1.60.0"
-  dependenciesMeta:
-    fsevents:
-      optional: true
-  bin:
-    playwright: cli.js
-  checksum: 10/8569770637ee35d08cca3b53a5b56c21e9236bd1ac4718456d5988fb8acd51c5b3cc2cf90748363a36199529e870a9b6c68d6fc9e19571261cd867005d6331c1
   languageName: node
   linkType: hard
 
@@ -22073,7 +22049,7 @@ __metadata:
     "@lichtblick/suite-web": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@types/serve-handler": "npm:^6"
-    playwright: "npm:1.60.0"
+    playwright: "npm:1.65.0"
     serve-handler: "npm:6.1.7"
     webpack: "npm:5.108.3"
     webpack-dev-server: "npm:5.2.6"
