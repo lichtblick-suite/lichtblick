@@ -19,7 +19,8 @@ const params: ConfigParams = {
   outputPath: path.resolve(__dirname, ".webpack"),
   contextPath: path.resolve(__dirname, "src"),
   entrypoint: "./entrypoint.tsx",
-  prodSourceMap: "source-map",
+  // Full source maps can OOM on Vercel's build containers for this large bundle.
+  prodSourceMap: process.env.VERCEL === "1" ? false : "source-map",
   version: packageJson.version,
 };
 
