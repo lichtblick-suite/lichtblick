@@ -79,15 +79,32 @@ export function useReadMessagesInRange(
           rethrowErrors: true,
         });
 
+        let stop!: () => void;
+        const stopped = new Promise<IteratorReturnResult<undefined>>((resolve) => {
+          stop = () => {
+            cancel();
+            resolve({ done: true, value: undefined });
+          };
+        });
+        const iterator = iterable[Symbol.asyncIterator]();
+
         const activeReads = activeReadsRef.current;
-        activeReads.add(cancel);
-        signal?.addEventListener("abort", cancel, { once: true });
+        activeReads.add(stop);
+        signal?.addEventListener("abort", stop, { once: true });
         try {
-          yield* iterable;
+          for (;;) {
+            // Racing lets abort/unmount settle the consumer even while a source read is in flight.
+            const result = await Promise.race([iterator.next(), stopped]);
+            if (result.done === true) {
+              return;
+            }
+            yield result.value;
+          }
         } finally {
-          signal?.removeEventListener("abort", cancel);
-          activeReads.delete(cancel);
-          cancel();
+          signal?.removeEventListener("abort", stop);
+          activeReads.delete(stop);
+          stop();
+          void iterator.return?.();
         }
       }
 

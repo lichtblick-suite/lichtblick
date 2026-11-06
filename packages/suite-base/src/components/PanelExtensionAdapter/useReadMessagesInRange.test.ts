@@ -211,6 +211,29 @@ describe("useReadMessagesInRange", () => {
     expect(removeListenerSpy).toHaveBeenCalledWith("abort", expect.any(Function));
   });
 
+  it("settles a pending read when aborted while the source is still reading", async () => {
+    // Given
+    let release!: () => void;
+    const blocked = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    async function* slowSource(): AsyncIterableIterator<Readonly<IteratorResult>> {
+      await blocked;
+      yield { type: "message-event", msgEvent: MessageEventBuilder.messageEvent({ topic }) };
+    }
+    getBatchIterator.mockReturnValue(slowSource());
+    const controller = new AbortController();
+    const iterator = renderRead()(topic, { signal: controller.signal })[Symbol.asyncIterator]();
+
+    // When
+    const pending = iterator.next();
+    controller.abort();
+
+    // Then
+    await expect(pending).resolves.toEqual({ done: true, value: undefined });
+    release();
+  });
+
   it("closes the source when the consumer stops iterating early", async () => {
     // Given
     const source = createSource(buildMessages(3));
