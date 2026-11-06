@@ -4,7 +4,6 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { parseArtifactJson } from "./artifactJson";
 import { parseOverheadFile } from "../report/htmlReportData";
 import {
   buildExercisesLines,
@@ -18,6 +17,7 @@ import { withRunKpis } from "../result/kpis";
 import { scenarioRunsOnly } from "../result/runMode";
 import type { PersistedResultV1, StoredResultV1 } from "../result/schemaV1";
 import type { OverheadReport } from "../runner/overhead.types";
+import { parseArtifactJson } from "../shared/artifactJson";
 import type { BenchmarkArtifact } from "../types";
 
 // Copied rather than imported from `e2e/ci-helpers/types.ts`: kept local since this report only
