@@ -516,8 +516,6 @@ function environmentTable(loaded: LoadedResult): string {
       "late-frame threshold (ms)",
       env.lateFrameThresholdMs == undefined ? NOT_RECORDED : fmtNumber(env.lateFrameThresholdMs, 2),
     ],
-  );
-  entries.push(
     [
       "samples / events",
       `${fmtNumber(loaded.result.samples.length)} / ${fmtNumber(loaded.result.events.length)}`,
