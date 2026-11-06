@@ -20,6 +20,7 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { estimateObjectSize } from "@lichtblick/suite-base/players/messageMemoryEstimation";
 import { SubscribePayload } from "@lichtblick/suite-base/players/types";
+import { messageChannelId, nativeChannelId } from "@lichtblick/suite-base/util/channels";
 
 const log = Logger.getLogger(__filename);
 
@@ -119,14 +120,16 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
     let nextConnectionId = 0;
     for (const {
       name: topic,
+      channelId,
       messageEncoding,
       schemaName,
       schemaData,
       schemaEncoding,
     } of initResult.topics) {
       this.#connectionIdByTopic[topic] = nextConnectionId++;
+      const decoderKey = channelId ?? nativeChannelId(topic, schemaName);
 
-      if (this.#deserializersByTopic[topic] == undefined) {
+      if (this.#deserializersByTopic[decoderKey] == undefined) {
         try {
           if (messageEncoding == undefined) {
             throw new Error(`Unspecified message encoding for topic ${topic}`);
@@ -145,7 +148,7 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
             messageEncoding,
             schema,
           });
-          this.#deserializersByTopic[topic] = deserialize;
+          this.#deserializersByTopic[decoderKey] = deserialize;
         } catch (error) {
           // This should in practice never happen as the underlying source filters out invalid topics
           alerts.push({
@@ -330,9 +333,9 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
 
           // Drop pending sampled message if a newer one is available
           if (samplingTopics.has(iterResult.msgEvent.topic)) {
-            const existing = pendingSampledByTopic.get(iterResult.msgEvent.topic);
+            const existing = pendingSampledByTopic.get(messageChannelId(iterResult.msgEvent));
             if (!existing || compare(existing.receiveTime, iterResult.msgEvent.receiveTime) < 0) {
-              pendingSampledByTopic.set(iterResult.msgEvent.topic, iterResult.msgEvent);
+              pendingSampledByTopic.set(messageChannelId(iterResult.msgEvent), iterResult.msgEvent);
             }
             continue;
           }
@@ -397,7 +400,8 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
   ): MessageEvent {
     const { topic, message } = rawMessageEvent;
 
-    const deserialize = this.#deserializersByTopic[topic];
+    const decoderKey = messageChannelId(rawMessageEvent);
+    const deserialize = this.#deserializersByTopic[decoderKey];
     if (!deserialize) {
       throw new Error(`Failed to find deserializer for topic ${topic}`);
     }
@@ -408,10 +412,11 @@ export class DeserializingIterableSource implements IDeserializedIterableSource 
       : deserializedMessage;
 
     // Lookup the size estimate for this subscription hash or compute it if not found in the cache.
-    let msgSizeEstimate = this.#messageSizeEstimateBySubHash[subscription.subscriptionHash];
+    const sizeKey = JSON.stringify([decoderKey, subscription.subscriptionHash])!;
+    let msgSizeEstimate = this.#messageSizeEstimateBySubHash[sizeKey];
     if (msgSizeEstimate == undefined) {
       msgSizeEstimate = estimateObjectSize(msg);
-      this.#messageSizeEstimateBySubHash[subscription.subscriptionHash] = msgSizeEstimate;
+      this.#messageSizeEstimateBySubHash[sizeKey] = msgSizeEstimate;
     }
 
     // For sliced messages we use the estimated message size whereas for non-sliced messages

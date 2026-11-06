@@ -26,6 +26,7 @@ import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { RendererConfig } from "./IRenderer";
+import { onlyLastByTopicMessage } from "./SceneExtension";
 
 jest.mock("./Picker", () => {
   const actual = jest.requireActual("./Picker");
@@ -262,6 +263,131 @@ describe("3D Renderer", () => {
       }
       expect(renderer.settings.tree().topics?.children?.["/scene"]?.visible).toBe(value);
     }
+    renderer.dispose();
+  });
+
+  it("shows single native settings directly and restores output groups when choices are available", () => {
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    const native = { name: "/scene", schemaName: "foxglove.SceneUpdate" };
+    renderer.setTopics([native]);
+    const original = renderer.renderTopics[0]!;
+    expect(renderer.getSettingsPath(["topics", original.name])).toEqual(["topics", "/scene"]);
+    const single = renderer.settings.tree().topics?.children?.["/scene"];
+    expect(single?.label).toBe("/scene");
+    expect(single?.fields).toBeDefined();
+    expect(single?.visible).toBeDefined();
+    renderer.settings.handleAction({
+      action: "update",
+      payload: { path: ["topics", "/scene", "visible"], input: "boolean", value: true },
+    });
+    expect(renderer.config.topics["/scene"]?.visible).toBe(true);
+    renderer.settings.setNodesForKey("test-native-child", [
+      { path: ["topics", original.name, "nested"], node: { visible: false } },
+    ]);
+    expect(renderer.settings.tree().topics?.children?.["/scene"]?.visible).toBe(true);
+    renderer.settings.setNodesForKey("test-native-child", []);
+    renderer.settings.errors.addToTopic(original.name, "test", "native error");
+    expect(renderer.settings.tree().topics?.children?.["/scene"]?.error).toBe("native error");
+
+    renderer.setTopics([
+      {
+        ...native,
+        conversionOutputs: [{ converterId: "A", schemaName: "foxglove.SceneUpdate" }],
+      },
+    ]);
+    expect(renderer.getSettingsPath(["topics", original.name])).toHaveLength(3);
+    expect(
+      Object.values(renderer.settings.tree().topics?.children?.["/scene"]?.children ?? {}).filter(
+        (node) => node != undefined,
+      ),
+    ).toHaveLength(2);
+
+    renderer.setTopics([native]);
+    expect(renderer.getSettingsPath(["topics", original.name])).toEqual(["topics", "/scene"]);
+    expect(renderer.settings.tree().topics?.children?.["/scene"]?.fields).toBeDefined();
+    renderer.dispose();
+  });
+
+  it("retains output groups for multiple native channels sharing a topic", () => {
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    renderer.setTopics([
+      { name: "/mixed", schemaName: "foxglove.SceneUpdate" },
+      { name: "/mixed", schemaName: "foxglove.PointCloud" },
+    ]);
+    expect(renderer.renderTopics).toHaveLength(2);
+    for (const output of renderer.renderTopics) {
+      expect(renderer.getSettingsPath(["topics", output.name])).toHaveLength(3);
+    }
+    expect(
+      Object.values(renderer.settings.tree().topics?.children?.["/mixed"]?.children ?? {}).filter(
+        (node) => node != undefined,
+      ),
+    ).toHaveLength(2);
+    renderer.dispose();
+  });
+
+  it("labels and routes same-schema native channels separately from converted outputs", () => {
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    renderer.setTopics(
+      ["2", "5"].map((channelId) => ({
+        name: "/scene",
+        schemaName: "foxglove.SceneUpdate",
+        channelId,
+        conversionOutputs: [
+          { converterId: "A", schemaName: "foxglove.SceneUpdate", displayName: "Scene converter" },
+        ],
+      })),
+    );
+    expect(renderer.renderTopics).toHaveLength(4);
+    const nodes = renderer.settings.tree().topics?.children?.["/scene"]?.children;
+    for (const output of renderer.renderTopics) {
+      const path = renderer.getSettingsPath(["topics", output.name]);
+      const node = nodes?.[path[2]!];
+      expect(node?.label).toBe(`foxglove.SceneUpdate · channel ${output.channelId}`);
+      expect(node?.labelBadge).toEqual(
+        output.output.kind === "original"
+          ? undefined
+          : {
+              text: "Converted",
+              tooltip: `Scene converter · channel ${output.channelId}`,
+            },
+      );
+    }
+    const events: MessageEvent[] = ["2", "5"].map((channelId) => ({
+      channelId,
+      topic: "/scene",
+      schemaName: "foxglove.SceneUpdate",
+      message: {},
+      receiveTime: { sec: 0, nsec: 0 },
+      sizeInBytes: 0,
+    }));
+    expect(onlyLastByTopicMessage(events)).toEqual(events);
+    expect(events.map((event) => renderer.getRenderTopic(event))).toEqual([
+      renderer.renderTopics[0]!.name,
+      renderer.renderTopics[2]!.name,
+    ]);
+    const converted = renderer.renderTopics[3]!;
+    expect(
+      renderer.getRenderTopic({
+        ...events[1]!,
+        originalMessageEvent: events[1]!,
+        output: {
+          kind: "converted",
+          sourceSchemaName: "foxglove.SceneUpdate",
+          converterId: "A",
+        },
+      }),
+    ).toBe(converted.name);
+    renderer.settings.handleAction({
+      action: "update",
+      payload: {
+        path: [...renderer.getSettingsPath(["topics", renderer.renderTopics[0]!.name]), "visible"],
+        input: "boolean",
+        value: true,
+      },
+    });
+    expect(renderer.getTopicSettings()[renderer.renderTopics[0]!.name]?.visible).toBe(true);
+    expect(renderer.getTopicSettings()[renderer.renderTopics[2]!.name]?.visible).not.toBe(true);
     renderer.dispose();
   });
 

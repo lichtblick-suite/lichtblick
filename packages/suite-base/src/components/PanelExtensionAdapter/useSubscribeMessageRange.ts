@@ -11,6 +11,7 @@ import {
   ExtensionCatalog,
   useExtensionCatalog,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import { channelCatalog, resolveChannelSubscription } from "@lichtblick/suite-base/util/channels";
 
 import { createMessageRangeIterator } from "./messageRangeIterator";
 import { MessageConverterAlertHandler } from "./types";
@@ -51,7 +52,15 @@ export function useSubscribeMessageRange(
   panelTypeRef.current = panelType;
 
   return useCallback(
-    ({ topic, start, end, convertTo, converterId, onNewRangeIterator }: SubscribeMessageRangeArgs) => {
+    ({
+      topic,
+      start,
+      end,
+      channelId,
+      convertTo,
+      converterId,
+      onNewRangeIterator,
+    }: SubscribeMessageRangeArgs) => {
       if (start != undefined && end != undefined && compare(start, end) > 0) {
         onNewRangeIterator((async function* () {})()).catch((err: unknown) => {
           log.error("Error in useSubscribeMessageRange onNewRangeIterator:", err);
@@ -61,15 +70,26 @@ export function useSubscribeMessageRange(
 
       const { sortedTopics, getBatchIterator } = getMessagePipelineContext();
 
+      const selected = resolveChannelSubscription(
+        { topic, channelId, convertTo, converterId },
+        channelCatalog(sortedTopics, messageConvertersRef.current),
+      );
+      if (selected == undefined) {
+        return () => {};
+      }
       // Unbounded reads pass no range so players can reuse their full-range caches.
       const range = start != undefined || end != undefined ? { start, end } : undefined;
-      const rawBatchIterator = getBatchIterator(topic, range);
+      const rawBatchIterator =
+        selected.channelId == undefined
+          ? getBatchIterator(topic, range)
+          : getBatchIterator(topic, { ...range, channelId: selected.channelId });
       if (!rawBatchIterator) {
         return () => {};
       }
 
       const { iterable: messageEventIterable, cancel } = createMessageRangeIterator({
         topic,
+        channelId,
         convertTo,
         converterId,
         config: configRef.current,

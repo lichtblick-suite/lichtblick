@@ -78,6 +78,15 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
     borderTop: `1px solid ${theme.palette.background.paper}`,
     backgroundColor: theme.palette.action.hover,
   },
+  convertedRow: {
+    paddingInlineStart: theme.spacing(4),
+  },
+  conversionBranch: {
+    position: "absolute",
+    insetInlineStart: theme.spacing(1),
+    top: theme.spacing(1),
+    color: theme.palette.text.secondary,
+  },
   countBadge: {
     marginLeft: theme.spacing(-0.5),
 

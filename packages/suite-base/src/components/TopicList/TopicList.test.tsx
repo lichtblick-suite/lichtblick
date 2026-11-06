@@ -16,6 +16,8 @@ import { TopicList } from "./TopicList";
 import { useMultiSelection } from "./useMultiSelection";
 import { TopicListItem, useTopicListSearch } from "./useTopicListSearch";
 
+jest.mock("@lichtblick/suite-base/hooks/useChannels", () => ({ useChannels: () => [] }));
+
 // Mock dependencies
 jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
   useDataSourceInfo: jest.fn().mockReturnValue({ topics: [], datatypes: {} }),
@@ -121,7 +123,7 @@ describe("TopicList Component", () => {
   it("renders EmptyState with 'no topics' when PRESENT and treeItems is empty", () => {
     (useTopicListSearch as jest.Mock).mockReturnValue([]);
     setup(PlayerPresence.PRESENT);
-    expect(screen.getByText(/No topics available/)).toBeInTheDocument();
+    expect(screen.getByText(/No channels available/)).toBeInTheDocument();
   });
 
   it("renders EmptyState with reconnecting message when RECONNECTING", () => {
@@ -171,7 +173,7 @@ describe("TopicList Component", () => {
 
     // undebouncedFilterText is set immediately; the EmptyState switches to the
     // filter-no-match message before the debounce fires.
-    expect(screen.getByText(/No topics or datatypes matching/)).toBeInTheDocument();
+    expect(screen.getByText(/No channels matching/)).toBeInTheDocument();
   });
 
   it("calls onSelect when a topic row is clicked", () => {

@@ -11,6 +11,15 @@ export const useStyles = makeStyles()((theme) => ({
   actionButton: {
     padding: theme.spacing(0.5),
   },
+  labelBadge: {
+    marginLeft: theme.spacing(0.75),
+    padding: theme.spacing(0.125, 0.5),
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.action.hover,
+    color: theme.palette.text.secondary,
+    fontSize: theme.typography.caption.fontSize,
+    fontWeight: 400,
+  },
   editNameField: {
     font: "inherit",
     gridColumn: "span 2",

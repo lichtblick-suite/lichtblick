@@ -5,7 +5,7 @@ import { IconButtonProps, TooltipProps } from "@mui/material";
 import { CSSProperties, ReactNode } from "react";
 
 import { MessagePath, MessagePathStructureItem } from "@lichtblick/message-path";
-import { Immutable, Topic } from "@lichtblick/suite";
+import { Immutable } from "@lichtblick/suite";
 import { MessagePathDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useMessageDataItem";
 import { Topic as PlayerTopic, MessageEvent } from "@lichtblick/suite-base/players/types";
@@ -18,6 +18,8 @@ export type RawMessagesPanelConfig = {
   expansion?: NodeExpansion;
   showFullMessageForDiff: boolean;
   topicPath: string;
+  channelId?: string;
+  diffChannelId?: string;
   fontSize: number | undefined;
 };
 
@@ -28,6 +30,8 @@ export type RawMessagesVirtualPanelConfig = {
   expansion?: NodeExpansion;
   showFullMessageForDiff: boolean;
   topicPath: string;
+  channelId?: string;
+  diffChannelId?: string;
   fontSize: number | undefined;
 };
 
@@ -105,8 +109,10 @@ export type PropsToolbar = {
   onToggleExpandAll: () => void;
   onTopicPathChange: (path: string) => void;
   saveConfig: SaveConfig<RawMessagesVirtualPanelConfig>;
-  topic?: Topic;
+  topic?: PlayerTopic;
   topicPath: string;
+  channelId?: string;
+  diffChannelId?: string;
 };
 
 export type PropsValue = {
@@ -149,6 +155,8 @@ export type ValueLabels = {
 
 export type SharedConfig = {
   topicPath: string;
+  channelId?: string;
+  diffChannelId?: string;
   diffMethod: "custom" | "previous message";
   diffTopicPath: string;
   diffEnabled: boolean;

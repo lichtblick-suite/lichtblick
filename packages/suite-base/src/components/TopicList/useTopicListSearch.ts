@@ -11,9 +11,9 @@ import { useMemo } from "react";
 
 import { MessageDefinition } from "@lichtblick/message-definition";
 import { Immutable } from "@lichtblick/suite";
-import { Topic } from "@lichtblick/suite-base/players/types";
 
 import { MessagePathSearchItem, getMessagePathSearchItems } from "./getMessagePathSearchItems";
+import { InspectionTopic as Topic, inspectionTopicKey } from "./types";
 
 function topicToFzfResult(item: Topic): FzfResultItem<Topic> {
   return {
@@ -44,7 +44,8 @@ export function useTopicListSearch(params: UseTopicListSearchParams): TopicListI
   const topicsAndSchemaNamesFzf = useMemo(
     () =>
       new Fzf(topics, {
-        selector: (item) => `${item.name}|${item.schemaName}`,
+        selector: (item) =>
+          `${item.name}|${item.schemaName}|${item.channelId ?? ""}|${item.channel?.source.kind ?? ""}|${item.channel?.source.kind === "converted" ? item.channel.source.converterId : ""}`,
       }),
     [topics],
   );
@@ -85,25 +86,27 @@ export function useTopicListSearch(params: UseTopicListSearchParams): TopicListI
   const treeItems = useMemo(() => {
     const results: TopicListItem[] = [];
 
-    const messagePathResultsByTopicName = _.groupBy(
-      messagePathResults,
-      (item) => item.item.topic.name,
+    const messagePathResultsByTopicName = _.groupBy(messagePathResults, (item) =>
+      inspectionTopicKey(item.item.topic),
     );
 
     // Gather all topics that either match or contain a matching message path
     const allTopicsToShowByName = new Map<string, { topic: Topic; maxScore: number }>();
     const matchedTopicsByName = new Map<string, FzfResultItem<Topic>>();
     for (const topic of filteredTopics) {
-      allTopicsToShowByName.set(topic.item.name, { topic: topic.item, maxScore: topic.score });
-      matchedTopicsByName.set(topic.item.name, topic);
+      allTopicsToShowByName.set(inspectionTopicKey(topic.item), {
+        topic: topic.item,
+        maxScore: topic.score,
+      });
+      matchedTopicsByName.set(inspectionTopicKey(topic.item), topic);
     }
     for (const {
       item: { topic },
       score,
     } of messagePathResults) {
-      const existingTopic = allTopicsToShowByName.get(topic.name);
+      const existingTopic = allTopicsToShowByName.get(inspectionTopicKey(topic));
       if (existingTopic == undefined) {
-        allTopicsToShowByName.set(topic.name, { topic, maxScore: score });
+        allTopicsToShowByName.set(inspectionTopicKey(topic), { topic, maxScore: score });
       } else if (score > existingTopic.maxScore) {
         existingTopic.maxScore = score;
       }
@@ -115,21 +118,56 @@ export function useTopicListSearch(params: UseTopicListSearchParams): TopicListI
         return b.maxScore - a.maxScore;
       }
 
-      const aMatched = matchedTopicsByName.has(a.topic.name);
-      const bMatched = matchedTopicsByName.has(b.topic.name);
+      const aMatched = matchedTopicsByName.has(inspectionTopicKey(a.topic));
+      const bMatched = matchedTopicsByName.has(inspectionTopicKey(b.topic));
       if (aMatched !== bMatched) {
         return aMatched ? -1 : 1;
       }
 
-      return a.topic.name.localeCompare(b.topic.name);
+      const byName = a.topic.name.localeCompare(b.topic.name);
+      return byName !== 0
+        ? byName
+        : (a.topic.channelId ?? "").localeCompare(b.topic.channelId ?? "");
     });
 
+    // Keep converter outputs immediately after their exact input channel. Include the input
+    // as context when only an output matches the search, without adding unmatched siblings.
+    const topicsByKey = new Map(topics.map((topic) => [inspectionTopicKey(topic), topic]));
+    const sourceKey = (topic: Topic): string =>
+      topic.channel?.source.kind === "converted"
+        ? inspectionTopicKey({ name: topic.name, channelId: topic.channel.source.inputChannelId })
+        : inspectionTopicKey(topic);
+    const outputsBySource = new Map<string, Topic[]>();
     for (const { topic } of sortedTopics) {
+      if (topic.channel?.source.kind === "converted") {
+        const key = sourceKey(topic);
+        const outputs = outputsBySource.get(key) ?? [];
+        outputs.push(topic);
+        outputsBySource.set(key, outputs);
+      }
+    }
+
+    const groupedTopics: Topic[] = [];
+    const added = new Set<string>();
+    for (const { topic } of sortedTopics) {
+      const key = sourceKey(topic);
+      if (added.has(key)) {
+        continue;
+      }
+      added.add(key);
+      const source = topicsByKey.get(key);
+      if (source != undefined) {
+        groupedTopics.push(source);
+      }
+      groupedTopics.push(...(outputsBySource.get(key) ?? []));
+    }
+
+    for (const topic of groupedTopics) {
       results.push({
         type: "topic",
-        item: matchedTopicsByName.get(topic.name) ?? topicToFzfResult(topic),
+        item: matchedTopicsByName.get(inspectionTopicKey(topic)) ?? topicToFzfResult(topic),
       });
-      const matchedMessagePaths = messagePathResultsByTopicName[topic.name];
+      const matchedMessagePaths = messagePathResultsByTopicName[inspectionTopicKey(topic)];
       if (matchedMessagePaths == undefined) {
         continue;
       }
@@ -138,7 +176,7 @@ export function useTopicListSearch(params: UseTopicListSearchParams): TopicListI
       }
     }
     return results;
-  }, [filteredTopics, messagePathResults]);
+  }, [filteredTopics, messagePathResults, topics]);
 
   return treeItems;
 }

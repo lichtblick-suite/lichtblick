@@ -66,6 +66,7 @@ import {
 } from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import { PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { assertNever } from "@lichtblick/suite-base/util/assertNever";
+import { channelCatalog, resolveChannelSubscription } from "@lichtblick/suite-base/util/channels";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 import {
   getConverterId,
@@ -103,7 +104,11 @@ function getConverterForSubscription(
     return undefined;
   }
 
-  const key = JSON.stringify([sub.topic, topicSchemaName ?? "<no-schema>"]) as ConverterKey;
+  const key = JSON.stringify(
+    sub.channelId == undefined
+      ? [sub.topic, topicSchemaName ?? "<no-schema>"]
+      : [sub.topic, topicSchemaName ?? "<no-schema>", sub.channelId],
+  ) as ConverterKey;
   const convertersForTopic = topicSchemaConverters.get(key) ?? [];
   return convertersForTopic.find(
     (conv) =>
@@ -598,13 +603,19 @@ function PanelExtensionAdapter(
           messageConverters,
         );
 
-        const subscribePayloads = localSubs.map((item): InternalSubscribePayload => {
+        const channels = channelCatalog(sortedTopics, messageConverters);
+        const subscribePayloads = localSubs.flatMap((requested): InternalSubscribePayload[] => {
+          const item = resolveChannelSubscription(requested, channels);
+          if (item == undefined) {
+            return [];
+          }
+          const channelIds = item.channelId == undefined ? undefined : [item.channelId];
           const preloadType = item.preload === true ? "full" : "partial";
 
           // Preload requires full message history, so sampling is never allowed here.
           // Also, if the panel didn't request sampling, default to "needs all".
           if (item.preload === true || item.sampling?.mode !== "latest-per-render-tick") {
-            return { topic: item.topic, preloadType };
+            return [{ topic: item.topic, channelIds, preloadType }];
           }
 
           // Sampling is only allowed if the converter explicitly declares it supports
@@ -628,12 +639,15 @@ function PanelExtensionAdapter(
               ? false
               : converter?.supportsLatestPerRenderTick === true;
 
-          return {
-            topic: item.topic,
-            preloadType,
-            samplingRequest: samplingAllowed ? item.sampling : undefined,
-            samplingAuthorized: samplingAllowed ? true : undefined,
-          };
+          return [
+            {
+              topic: item.topic,
+              channelIds,
+              preloadType,
+              samplingRequest: samplingAllowed ? item.sampling : undefined,
+              samplingAuthorized: samplingAllowed ? true : undefined,
+            },
+          ];
         });
 
         setLocalSubscriptions(localSubs);

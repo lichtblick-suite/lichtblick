@@ -451,6 +451,11 @@ function NodeEditorComponent(props: Readonly<NodeEditorProps>): React.JSX.Elemen
               color={visible ? "text.primary" : "text.disabled"}
             >
               <HighlightedText text={settings.label ?? t("general")} highlight={filter} />
+              {settings.labelBadge != undefined && (
+                <Tooltip title={settings.labelBadge.tooltip ?? ""}>
+                  <span className={classes.labelBadge}>{settings.labelBadge.text}</span>
+                </Tooltip>
+              )}
             </Typography>
           )}
         </div>

@@ -31,14 +31,17 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
       try {
         // Create a fake subscription to get message converters for this topic
         // Include convertTo if specified to get proper conversion setup
-        const subscription: Subscription = convertTo
-          ? { topic, preload: true, convertTo, converterId: params.converterId }
-          : { topic, preload: true };
+        const subscription: Subscription = {
+          topic,
+          preload: true,
+          convertTo,
+          converterId: params.converterId,
+          channelId: params.channelId,
+        };
 
         // Import necessary functions for message processing
-        const { convertMessage, collateTopicSchemaConversions } = await import(
-          "./messageProcessing"
-        );
+        const { convertMessage, collateTopicSchemaConversions, wantsOriginalMessage } =
+          await import("./messageProcessing");
 
         const collatedConversions = collateTopicSchemaConversions(
           [subscription],
@@ -46,9 +49,10 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
           messageConverters,
         );
 
-        const { topicSchemaConverters, unconvertedSubscriptionTopics } = collatedConversions;
+        const { topicSchemaConverters, originalSubscriptions } = collatedConversions;
 
         let batchMessages: MessageEvent[] = [];
+        const outputConfigCache = new Map<string, Record<string, unknown>>();
         let lastBatchTime = performance.now();
 
         for await (const iterResult of rawBatchIterator) {
@@ -65,7 +69,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
           const msgEvent = iterResult.msgEvent;
 
           // If the topic is not in unconvertedSubscriptionTopics, skip conversion
-          if (unconvertedSubscriptionTopics.has(msgEvent.topic)) {
+          if (wantsOriginalMessage(msgEvent, originalSubscriptions)) {
             batchMessages.push(msgEvent);
           }
           // Apply message conversion if converters exist
@@ -74,6 +78,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
               emitAlert,
               config: params.config,
               panelType: params.panelType,
+              outputConfigCache,
             });
           }
 

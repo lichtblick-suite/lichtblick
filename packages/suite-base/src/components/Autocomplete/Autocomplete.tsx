@@ -151,7 +151,11 @@ export const Autocomplete = React.forwardRef(function Autocomplete(
     (_event: SyntheticEvent, selectedValue: ReactNull | string | FzfResultItem): void => {
       if (selectedValue != undefined && typeof selectedValue !== "string") {
         setValue(undefined);
-        onSelectCallback(selectedValue.item, { setSelectionRange, focus, blur });
+        onSelectCallback(selectedValue.item, {
+          setSelectionRange,
+          focus,
+          blur,
+        });
       }
     },
     [onSelectCallback, blur, focus, setSelectionRange],
@@ -181,6 +185,17 @@ export const Autocomplete = React.forwardRef(function Autocomplete(
       renderInput={(params) => (
         <TextField
           {...params}
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              startAdornment: (
+                <>
+                  {props.startAdornment}
+                  {params.InputProps.startAdornment}
+                </>
+              ),
+            },
+          }}
           variant={variant}
           inputRef={inputRef}
           data-testid="autocomplete-textfield"

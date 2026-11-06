@@ -23,6 +23,8 @@ export type Asset = {
 };
 
 export type DraggedMessagePath = {
+  /** Exact native or virtual channel selected by the dragged row. */
+  channelId?: string;
   /** The full message path */
   path: string;
   /** The schema name of the top-level topic being dragged */
@@ -107,6 +109,7 @@ export type MessageConverterAlertHandler = (
 ) => void;
 
 export type CreateMessageRangeIteratorParams = {
+  channelId?: string;
   topic: string;
   convertTo?: string;
   converterId?: string;

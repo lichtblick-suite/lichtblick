@@ -83,7 +83,7 @@ export interface Player {
   // Create a batch iterator for streaming messages. Available for data source players that support message iteration.
   getBatchIterator: (
     topic: string,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; channelId?: string },
   ) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
   // Read the most recent message per topic at or before a given time, independent of the current
   // playback position. Not available for live/real-time data sources.
@@ -219,6 +219,8 @@ export type PlayerStateActiveData = {
 
 // Represents a ROS topic, though the actual data does not need to come from a ROS system.
 export type Topic = {
+  /** Source-local native channel identity. Legacy sources may omit it. */
+  channelId?: string;
   // Of ROS topic format, i.e. "/some/topic". We currently depend on this slashes format a bit in
   // `<MessageHistroy>`, though we could relax this and support arbitrary strings. It's nice to have
   // a consistent representation for topics that people recognize though.
@@ -299,6 +301,8 @@ export type SubscriptionPreloadType =
  * Represents a subscription to a single topic, for use in `setSubscriptions`.
  */
 export type SubscribePayload = {
+  /** Select these native channels. Omitted means every channel on the topic; empty means none. */
+  channelIds?: string[];
   /**
    * The name of the topic to subscribe to.
    */

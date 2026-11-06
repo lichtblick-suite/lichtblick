@@ -21,6 +21,7 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { PlayerAlert, TopicStats } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { matchesChannel } from "@lichtblick/suite-base/util/channels";
 
 const log = Logger.getLogger(__filename);
 
@@ -56,7 +57,7 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
     }
 
     const topicStats = new Map<string, TopicStats>();
-    const topicsByName = new Map<string, TopicWithDecodingInfo>();
+    const channels: TopicWithDecodingInfo[] = [];
     const datatypes: RosDatatypes = new Map();
     const alerts: PlayerAlert[] = [];
     const metadata: Metadata[] = [];
@@ -90,21 +91,19 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
         schemaName: schema?.name,
       });
 
-      let topic = topicsByName.get(channel.topic);
-      if (!topic) {
-        topic = {
-          name: channel.topic,
-          schemaName: schema?.name,
-          messageEncoding: channel.messageEncoding,
-          schemaData: schema?.data,
-          schemaEncoding: schema?.encoding,
-        };
-        topicsByName.set(channel.topic, topic);
-
-        const numMessages = this.#reader.statistics?.channelMessageCounts.get(channel.id);
-        if (numMessages != undefined) {
-          topicStats.set(channel.topic, { numMessages: Number(numMessages) });
-        }
+      channels.push({
+        name: channel.topic,
+        channelId: `mcap:${channel.id}`,
+        schemaName: schema?.name,
+        messageEncoding: channel.messageEncoding,
+        schemaData: schema?.data,
+        schemaEncoding: schema?.encoding,
+      });
+      const numMessages = this.#reader.statistics?.channelMessageCounts.get(channel.id);
+      if (numMessages != undefined) {
+        topicStats.set(channel.topic, {
+          numMessages: (topicStats.get(channel.topic)?.numMessages ?? 0) + Number(numMessages),
+        });
       }
 
       // Track the publisher for this topic. "callerid" is defined in the MCAP ROS 1 Well-known
@@ -140,7 +139,7 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
     return {
       start: this.#start,
       end: this.#end,
-      topics: [...topicsByName.values()],
+      topics: channels,
       datatypes,
       profile: this.#reader.header.profile,
       alerts,
@@ -188,11 +187,24 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
         };
         continue;
       }
+      if (
+        !matchesChannel(
+          {
+            topic: channelInfo.channel.topic,
+            schemaName: channelInfo.schemaName ?? "",
+            channelId: `mcap:${message.channelId}`,
+          },
+          topics.get(channelInfo.channel.topic)!,
+        )
+      ) {
+        continue;
+      }
       try {
         yield {
           type: "message-event",
           msgEvent: {
             topic: channelInfo.channel.topic,
+            channelId: `mcap:${message.channelId}`,
             receiveTime: fromNanoSec(message.logTime),
             publishTime: fromNanoSec(message.publishTime),
             message: message.data,
@@ -220,7 +232,22 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
     const { topics, time } = args;
 
     const messages: MessageEvent<Uint8Array>[] = [];
-    for (const topic of topics.keys()) {
+    for (const [topic, subscription] of topics) {
+      const remaining = new Set(
+        [...this.#channelInfoById.values()]
+          .filter(
+            (info) =>
+              info.channel.topic === topic &&
+              matchesChannel(
+                { topic, schemaName: info.schemaName ?? "", channelId: `mcap:${info.channel.id}` },
+                subscription,
+              ),
+          )
+          .map((info) => `mcap:${info.channel.id}`),
+      );
+      if (remaining.size === 0) {
+        continue;
+      }
       // NOTE: An iterator is made for each topic to get the latest message on that topic.
       // An single iterator for all the topics could result in iterating through many
       // irrelevant messages to get to an older message on a topic.
@@ -236,8 +263,12 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
           continue;
         }
 
+        if (!remaining.delete(`mcap:${message.channelId}`)) {
+          continue;
+        }
         messages.push({
           topic: channelInfo.channel.topic,
+          channelId: `mcap:${message.channelId}`,
           receiveTime: fromNanoSec(message.logTime),
           publishTime: fromNanoSec(message.publishTime),
           message: message.data,
@@ -245,7 +276,9 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
           schemaName: channelInfo.schemaName ?? "",
         });
 
-        break;
+        if (remaining.size === 0) {
+          break;
+        }
       }
     }
     messages.sort((a, b) => compare(a.receiveTime, b.receiveTime));

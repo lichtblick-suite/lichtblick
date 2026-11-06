@@ -42,6 +42,7 @@ import {
   TRANSFORM_STAMPED_DATATYPES,
 } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { convertedChannelId } from "@lichtblick/suite-base/util/channels";
 import {
   renderTopics,
   resolveOutputConfig,
@@ -673,6 +674,12 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       }
       newSubscriptions.push({
         topic: output.topic,
+        channelId:
+          output.channelId == undefined
+            ? undefined
+            : output.output.kind === "converted"
+              ? convertedChannelId(output.channelId, output.output.converterId)
+              : output.channelId,
         convertTo: output.output.kind === "converted" ? output.schemaName : undefined,
         converterId: output.output.kind === "converted" ? output.output.converterId : undefined,
         preload: subscription.preload,

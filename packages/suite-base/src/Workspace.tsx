@@ -391,7 +391,7 @@ function WorkspaceContent(props: WorkspaceProps): React.JSX.Element {
   const leftSidebarItems = useMemo(() => {
     const items = new Map<LeftSidebarItemKey, SidebarItem>([
       ["panel-settings", { title: "Panel", component: PanelSettingsSidebar }],
-      ["topics", { title: "Topics", component: TopicList }],
+      ["topics", { title: "Channels", component: TopicList }],
       [
         "alerts",
         {

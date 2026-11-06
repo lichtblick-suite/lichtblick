@@ -15,3 +15,12 @@ export interface UseTopicMessageNavigationReturn {
   canNavigateNext: boolean;
   canNavigatePrevious: boolean;
 }
+
+/** A channel row keeps topic grouping separate from stream identity. */
+export type InspectionTopic = import("@lichtblick/suite-base/players/types").Topic & {
+  channel?: import("@lichtblick/suite").Channel;
+};
+
+export function inspectionTopicKey(topic: Pick<InspectionTopic, "name" | "channelId">): string {
+  return topic.channelId == undefined ? topic.name : JSON.stringify([topic.name, topic.channelId])!;
+}

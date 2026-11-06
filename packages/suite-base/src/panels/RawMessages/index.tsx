@@ -409,6 +409,9 @@ function RawMessages(props: PropsRawMessages) {
   return (
     <Stack flex="auto" overflow="hidden" position="relative">
       <Toolbar
+        topic={topic}
+        channelId={config.channelId}
+        diffChannelId={config.diffChannelId}
         canExpandAll={canExpandAll}
         diffEnabled={diffEnabled}
         diffMethod={diffMethod}

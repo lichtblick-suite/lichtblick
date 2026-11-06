@@ -65,8 +65,10 @@ export function useTopicMessageNavigation({
   topicName,
   selected,
   isTopicSubscribed,
+  channelId,
 }: {
   topicName: string;
+  channelId?: string;
   selected: boolean;
   isTopicSubscribed: boolean;
 }): UseTopicMessageNavigationReturn {
@@ -92,12 +94,19 @@ export function useTopicMessageNavigation({
   const currentTime = useMessagePipeline(selectCurrentTime);
   const startTime = useMessagePipeline(selectStartTime);
   const endTime = useMessagePipeline(selectEndTime);
-  const topicStats = useMessagePipeline(selectTopicStats);
+  const sourceTopicStats = useMessagePipeline(selectTopicStats);
+  const topicStats = channelId == undefined ? sourceTopicStats : undefined;
   const seekPlayback = useMessagePipeline(selectSeekPlayback);
   const pausePlayback = useMessagePipeline(selectPausePlayback);
-  const getBatchIterator = useMessagePipeline(selectGetBatchIterator);
+  const sourceGetBatchIterator = useMessagePipeline(selectGetBatchIterator);
+  const getBatchIterator = useCallback(
+    (topic: string, options?: { start?: Time; end?: Time }) =>
+      sourceGetBatchIterator(topic, channelId == undefined ? options : { ...options, channelId }),
+    [sourceGetBatchIterator, channelId],
+  );
+  const boundaryKey = channelId == undefined ? topicName : JSON.stringify([topicName, channelId])!;
 
-  const cachedBoundaries = boundariesCache.get(topicName);
+  const cachedBoundaries = boundariesCache.get(boundaryKey);
   const firstMessageTime = cachedBoundaries?.first;
   const lastMessageTime = cachedBoundaries?.last;
 
@@ -112,11 +121,12 @@ export function useTopicMessageNavigation({
   const updateBoundariesCache = useCallback(
     (topic: string, updates: Partial<TopicBoundaries>) => {
       setBoundariesCache((draft) => {
-        const existing = draft.get(topic) ?? {};
-        draft.set(topic, { ...existing, ...updates });
+        const key = channelId == undefined ? topic : JSON.stringify([topic, channelId])!;
+        const existing = draft.get(key) ?? {};
+        draft.set(key, { ...existing, ...updates });
       });
     },
-    [setBoundariesCache],
+    [setBoundariesCache, channelId],
   );
 
   const discoverBoundaries = useCallback(
@@ -148,7 +158,7 @@ export function useTopicMessageNavigation({
   );
 
   useEffect(() => {
-    const alreadyCached = boundariesCache.has(topicName);
+    const alreadyCached = boundariesCache.has(boundaryKey);
     if (!selected || !isTopicSubscribed || alreadyCached) {
       return;
     }
@@ -159,7 +169,7 @@ export function useTopicMessageNavigation({
     return () => {
       abortController.abort();
     };
-  }, [topicName, selected, discoverBoundaries, boundariesCache, isTopicSubscribed]);
+  }, [topicName, boundaryKey, selected, discoverBoundaries, boundariesCache, isTopicSubscribed]);
 
   const canNavigateNext = useMemo(() => {
     if (!currentTime) {

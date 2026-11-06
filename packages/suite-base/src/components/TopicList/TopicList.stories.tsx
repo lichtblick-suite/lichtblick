@@ -15,6 +15,8 @@ import { ros2humble } from "@lichtblick/rosmsg-msgs-common";
 import MockMessagePipelineProvider from "@lichtblick/suite-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { TopicStats } from "@lichtblick/suite-base/players/types";
+import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
+import ExtensionCatalogProvider from "@lichtblick/suite-base/providers/ExtensionCatalogProvider/ExtensionCatalogProvider";
 
 import { TopicList } from "./TopicList";
 
@@ -51,11 +53,15 @@ export default {
     topicStats,
   },
   render: (args) => (
-    <DndProvider backend={HTML5Backend}>
-      <MockMessagePipelineProvider {...args}>
-        <TopicList />
-      </MockMessagePipelineProvider>
-    </DndProvider>
+    <MockCurrentLayoutProvider>
+      <ExtensionCatalogProvider loaders={[]}>
+        <DndProvider backend={HTML5Backend}>
+          <MockMessagePipelineProvider {...args}>
+            <TopicList />
+          </MockMessagePipelineProvider>
+        </DndProvider>
+      </ExtensionCatalogProvider>
+    </MockCurrentLayoutProvider>
   ),
 } as Meta<typeof MockMessagePipelineProvider>;
 

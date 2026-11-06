@@ -7,10 +7,10 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { FzfResultItem } from "fzf";
 
-import { Topic } from "@lichtblick/suite-base/players/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { TopicRow } from "./TopicRow";
+import { InspectionTopic } from "./types";
 import { useTopicMessageNavigation } from "./useTopicMessageNavigation";
 
 const mockUseMessagePipeline = jest.fn();
@@ -29,8 +29,12 @@ jest.mock("@lichtblick/suite-base/services/messagePathDragging", () => ({
 }));
 
 jest.mock("./useTopicMessageNavigation");
+jest.mock("./InspectChannelButton", () => ({
+  InspectChannelButton: () => <button>Inspect</button>,
+}));
 
 interface SetupOptions {
+  channel?: InspectionTopic["channel"];
   topicName?: string;
   isNavigating?: boolean;
   canNavigateNext?: boolean;
@@ -58,8 +62,13 @@ function setup(options: SetupOptions = {}) {
     canNavigatePrevious,
   });
 
-  const topicResult: FzfResultItem<Topic> = {
-    item: { name: topicName, schemaName: "test/Schema" },
+  const topicResult: FzfResultItem<InspectionTopic> = {
+    item: {
+      name: topicName,
+      schemaName: "test/Schema",
+      channel: options.channel,
+      channelId: options.channel?.id,
+    },
     start: 0,
     end: topicName.length,
     score: 1,
@@ -82,6 +91,30 @@ function setup(options: SetupOptions = {}) {
 describe("TopicRow navigation buttons", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("labels converted channels and keeps their source and converter available", () => {
+    setup({
+      topicName: "/source",
+      channel: {
+        id: "output-id",
+        topic: "/source",
+        schemaName: "test/Schema",
+        source: { kind: "converted", inputChannelId: "source-id", converterId: "test-converter" },
+      },
+    });
+    expect(screen.getByText("Converted · test-converter")).toHaveAttribute(
+      "title",
+      "Converted from source-id using test-converter",
+    );
+    expect(screen.getByRole("button", { name: "Inspect" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Next message" })).not.toBeInTheDocument();
+    expect(useTopicMessageNavigation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selected: false,
+        channelId: "output-id",
+      }),
+    );
   });
 
   it("renders navigation buttons", () => {

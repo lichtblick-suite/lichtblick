@@ -27,12 +27,14 @@ import SearchBar from "@lichtblick/suite-base/components/SearchBar/SearchBar";
 import { ContextMenu } from "@lichtblick/suite-base/components/TopicList/ContextMenu";
 import { SKELETON_ITEMS } from "@lichtblick/suite-base/components/TopicList/constants";
 import { getDraggedMessagePath } from "@lichtblick/suite-base/components/TopicList/getDraggedMessagePath";
+import { useChannels } from "@lichtblick/suite-base/hooks/useChannels";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { MessagePathSelectionProvider } from "@lichtblick/suite-base/services/messagePathDragging/MessagePathSelectionProvider";
 
 import { MessagePathRow } from "./MessagePathRow";
 import { useStyles } from "./TopicList.style";
 import { TopicRow } from "./TopicRow";
+import { InspectionTopic } from "./types";
 import { useMultiSelection } from "./useMultiSelection";
 import { useTopicListSearch } from "./useTopicListSearch";
 
@@ -48,7 +50,18 @@ export function TopicList(): React.JSX.Element {
   };
 
   const playerPresence = useMessagePipeline(selectPlayerPresence);
-  const { topics, datatypes } = useDataSourceInfo();
+  const { datatypes } = useDataSourceInfo();
+  const channels = useChannels();
+  const topics = useMemo<InspectionTopic[]>(
+    () =>
+      channels.map((channel) => ({
+        name: channel.topic,
+        schemaName: channel.schemaName,
+        channelId: channel.id,
+        channel,
+      })),
+    [channels],
+  );
 
   const listRef = useRef<ListImperativeAPI>(ReactNull);
 
@@ -211,7 +224,7 @@ export function TopicList(): React.JSX.Element {
                     listRef={listRef}
                     style={{ width, height }}
                     rowCount={treeItems.length}
-                    rowHeight={(index, data) => (data.treeItems[index]?.type === "topic" ? 50 : 28)}
+                    rowHeight={(index, data) => (data.treeItems[index]?.type === "topic" ? 68 : 28)}
                     rowProps={itemData}
                     overscanCount={10}
                     rowComponent={renderRow}

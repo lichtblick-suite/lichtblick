@@ -31,6 +31,7 @@ import {
 } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { PlayerAlert, TopicStats } from "@lichtblick/suite-base/players/types";
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
+import { matchesChannel, messageChannelId } from "@lichtblick/suite-base/util/channels";
 
 const DURATION_YEAR_SEC = 365 * 24 * 60 * 60;
 
@@ -167,6 +168,7 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
           }
           messages.push({
             topic: channelInfo.channel.topic,
+            channelId: `mcap:${channelId}`,
             receiveTime,
             publishTime: fromNanoSec(record.publishTime),
             message: record.data,
@@ -202,6 +204,7 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
     } of channelInfoById.values()) {
       topics.push({
         name: channel.topic,
+        channelId: `mcap:${channel.id}`,
         messageEncoding: channel.messageEncoding,
         schemaName,
         schemaData,
@@ -209,7 +212,9 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
       });
       const numMessages = messagesByChannel.get(channel.id)?.length;
       if (numMessages != undefined) {
-        topicStats.set(channel.topic, { numMessages });
+        topicStats.set(channel.topic, {
+          numMessages: (topicStats.get(channel.topic)?.numMessages ?? 0) + numMessages,
+        });
       }
 
       // Track the publisher for this topic. "callerid" is defined in the MCAP ROS 1 Well-known
@@ -292,7 +297,8 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
       for (const msgEvent of msgEvents) {
         if (
           isTimeInRangeInclusive(msgEvent.receiveTime, start, end) &&
-          topicsMap.has(msgEvent.topic)
+          topicsMap.has(msgEvent.topic) &&
+          matchesChannel(msgEvent, topicsMap.get(msgEvent.topic)!)
         ) {
           resultMessages.push({
             type: "message-event" as const,
@@ -322,14 +328,22 @@ export class McapUnindexedIterableSource implements ISerializedIterableSource {
     const msgEventsByTopic = new Map<string, MessageEvent<Uint8Array>>();
     for (const [, msgEvents] of this.#msgEventsByChannel) {
       for (const msgEvent of msgEvents) {
-        if (compare(msgEvent.receiveTime, args.time) <= 0 && needTopics.has(msgEvent.topic)) {
+        if (
+          compare(msgEvent.receiveTime, args.time) <= 0 &&
+          needTopics.has(msgEvent.topic) &&
+          matchesChannel(msgEvent, needTopics.get(msgEvent.topic)!)
+        ) {
           // We copy the message event here as we are transferring the underlying array buffer
           // to the main thread which invalidates it.
-          msgEventsByTopic.set(msgEvent.topic, structuredClone(msgEvent));
+          const key = messageChannelId(msgEvent);
+          const previous = msgEventsByTopic.get(key);
+          if (previous == undefined || compare(previous.receiveTime, msgEvent.receiveTime) <= 0) {
+            msgEventsByTopic.set(key, structuredClone(msgEvent));
+          }
         }
       }
     }
-    return [...msgEventsByTopic.values()];
+    return [...msgEventsByTopic.values()].sort((a, b) => compare(a.receiveTime, b.receiveTime));
   }
 
   public getStart(): Time | undefined {

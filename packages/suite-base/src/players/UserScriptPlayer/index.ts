@@ -62,6 +62,7 @@ import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 import { UserScript, UserScripts } from "@lichtblick/suite-base/types/panels";
 import Rpc from "@lichtblick/suite-base/util/Rpc";
 import { basicDatatypes } from "@lichtblick/suite-base/util/basicDatatypes";
+import { nativeChannelId } from "@lichtblick/suite-base/util/channels";
 
 import { DIAGNOSTIC_SEVERITY, ERROR_CODES, MAX_GLOBAL_BUFFER_SIZE, SOURCES } from "./constants";
 import { getPreloadTypes, remapVirtualSubscriptions } from "./subscriptions";
@@ -1021,14 +1022,23 @@ export default class UserScriptPlayer implements Player {
 
   public getBatchIterator(
     topic: string,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; channelId?: string },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
     const registration = this.#outputTopicRegistrations.get(topic);
     if (!registration) {
       return this.#player.getBatchIterator(topic, options);
     }
 
-    return this.#getVirtualBatchIterator(registration, options);
+    if (
+      options?.channelId != undefined &&
+      options.channelId !==
+        nativeChannelId(registration.output.name, registration.output.schemaName)
+    ) {
+      return undefined;
+    }
+    const inputOptions =
+      options?.channelId == undefined ? options : { start: options.start, end: options.end };
+    return this.#getVirtualBatchIterator(registration, inputOptions);
   }
 
   // Script-output (virtual) topics aren't supported for point-in-time backfill — that would
@@ -1059,7 +1069,7 @@ export default class UserScriptPlayer implements Player {
 
   #getVirtualBatchIterator(
     registration: ScriptRegistration,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; channelId?: string },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
     const inputTopics = registration.inputs;
     if (inputTopics.length === 0) {

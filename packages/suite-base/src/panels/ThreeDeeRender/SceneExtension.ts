@@ -12,7 +12,7 @@ import { DeepPartial, Writable } from "ts-essentials";
 import { MessageEvent, SettingsTreeAction } from "@lichtblick/suite";
 import { PanelContextMenuItem } from "@lichtblick/suite-base/components/PanelContextMenu";
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
-import { messageOutputKey } from "@lichtblick/suite-base/util/topicOutput";
+import { messageChannelOutputKey } from "@lichtblick/suite-base/util/topicOutput";
 
 import type { AnyRendererSubscription, IRenderer, RendererConfig } from "./IRenderer";
 import { Path } from "./LayerErrors";
@@ -277,7 +277,7 @@ export function onlyLastByTopicMessage<T>(msgs: MessageEvent<T>[]): MessageEvent
    * Keep the latest message for each output. Original and converted messages on
    * the same topic must not displace one another, even when their schemas match.
    */
-  const msgsByTopic = _.groupBy(msgs, messageOutputKey);
+  const msgsByTopic = _.groupBy(msgs, messageChannelOutputKey);
 
   const list = Object.values(msgsByTopic).map((topicMsgs) => topicMsgs[topicMsgs.length - 1]!);
 

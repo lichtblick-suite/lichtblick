@@ -36,6 +36,7 @@ import {
   ISerializedIterableSource,
 } from "../IIterableSource";
 import { HydratedSourcePool } from "./HydratedSourcePool";
+import { namespaceChannels } from "./channelNamespace";
 
 const log = Logger.getLogger(__filename);
 
@@ -166,8 +167,18 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     );
   }
 
+  #channelSources = new Map<IIterableSource<Uint8Array>, IIterableSource<Uint8Array>>();
+
   public async initialize(): Promise<Initialization> {
     const initializations: Initialization[] = await this.loadMultipleSources();
+    for (const [index, initialization] of initializations.entries()) {
+      const source = this.sourceImpl[index]!;
+      if (initialization.topics.some((topic) => topic.channelId != undefined)) {
+        const namespaced = namespaceChannels(source, initialization, index);
+        this.#channelSources.set(source, namespaced.source);
+        initializations[index] = namespaced.initialization;
+      }
+    }
 
     const resultInit: Initialization = this.mergeInitializations(initializations);
 
@@ -208,13 +219,26 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
 
     // Start later iterators only when playback reaches their start time, avoiding concurrent
     // byte-range requests to all remote MCAP files.
-    yield* mergeSequentialIterators(relevantSources, opt);
+    yield* mergeSequentialIterators(
+      relevantSources.map((source) => this.#channelSources.get(source) ?? source),
+      opt,
+    );
   }
   public async getBackfillMessages(
     args: GetBackfillMessagesArgs,
   ): Promise<MessageEvent<Uint8Array>[]> {
     // Only consider sources that could contain messages at or before the backfill time.
     const relevantSources = filterSourcesForBackfill(this.sourceImpl, args.time);
+
+    if (this.#channelSources.size > 0) {
+      const messages: MessageEvent<Uint8Array>[] = [];
+      for (const source of relevantSources) {
+        messages.push(
+          ...(await (this.#channelSources.get(source) ?? source).getBackfillMessages(args)),
+        );
+      }
+      return messages.sort((a, b) => compare(a.receiveTime, b.receiveTime));
+    }
 
     // Iterate newest-first so we start near the seek target and stop once every topic has a value,
     // avoiding redundant reads from earlier sources.

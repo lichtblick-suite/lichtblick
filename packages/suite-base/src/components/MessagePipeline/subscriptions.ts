@@ -52,6 +52,10 @@ function mergeSubscription(
 
   return {
     ...a,
+    channelIds:
+      a.channelIds == undefined || b.channelIds == undefined
+        ? undefined
+        : [...new Set([...a.channelIds, ...b.channelIds])],
     fields: fields.length > 0 && !isAllFields ? fields : undefined,
     samplingRequest,
     samplingAuthorized,

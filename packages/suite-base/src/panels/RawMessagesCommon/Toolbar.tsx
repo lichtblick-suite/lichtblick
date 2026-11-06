@@ -11,15 +11,18 @@ import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { IconButton, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 
+import { parseMessagePath } from "@lichtblick/message-path";
 import MessagePathInput from "@lichtblick/suite-base/components/MessagePathSyntax/MessagePathInput";
 import PanelToolbar from "@lichtblick/suite-base/components/PanelToolbar";
 import Stack from "@lichtblick/suite-base/components/Stack";
+import { useChannels } from "@lichtblick/suite-base/hooks/useChannels";
 import { useStylesToolbar } from "@lichtblick/suite-base/panels/RawMessagesCommon/index.style";
 import {
   PropsToolbar,
   RawMessagesVirtualPanelConfig,
 } from "@lichtblick/suite-base/panels/RawMessagesCommon/types";
 
+import { ChannelPicker } from "./ChannelPicker";
 import { PREV_MSG_METHOD, CUSTOM_METHOD } from "./constants";
 
 function ToolbarComponent(props: PropsToolbar): React.JSX.Element {
@@ -35,9 +38,16 @@ function ToolbarComponent(props: PropsToolbar): React.JSX.Element {
     saveConfig,
     topic,
     topicPath,
+    channelId,
+    diffChannelId,
   } = props;
 
   const { classes, cx } = useStylesToolbar();
+  const channels = useChannels();
+  const comparisonSchemaName = channels.find(
+    (channel) =>
+      channel.id === diffChannelId && channel.topic === parseMessagePath(diffTopicPath)?.topicName,
+  )?.schemaName;
 
   return (
     <>
@@ -64,7 +74,25 @@ function ToolbarComponent(props: PropsToolbar): React.JSX.Element {
           <MessagePathInput
             index={0}
             path={topicPath}
+            schemaName={topic?.schemaName}
             onChange={onTopicPathChange}
+            channelSelection={{
+              channels,
+              channelId,
+              onChange: (path, id) => {
+                onTopicPathChange(path);
+                saveConfig({ topicPath: path, channelId: id });
+              },
+            }}
+            startAdornment={
+              <ChannelPicker
+                topic={parseMessagePath(topicPath)?.topicName}
+                channelId={channelId}
+                onChange={(channel) => {
+                  saveConfig({ channelId: channel.id });
+                }}
+              />
+            }
             inputStyle={{ height: 20 }}
           />
         </Stack>
@@ -90,7 +118,25 @@ function ToolbarComponent(props: PropsToolbar): React.JSX.Element {
             <MessagePathInput
               index={1}
               path={diffTopicPath}
+              schemaName={comparisonSchemaName}
               onChange={onDiffTopicPathChange}
+              channelSelection={{
+                channels,
+                channelId: diffChannelId,
+                onChange: (path, id) => {
+                  saveConfig({ diffTopicPath: path, diffChannelId: id });
+                },
+              }}
+              startAdornment={
+                <ChannelPicker
+                  label="Comparison channel"
+                  topic={parseMessagePath(diffTopicPath)?.topicName}
+                  channelId={diffChannelId}
+                  onChange={(channel) => {
+                    saveConfig({ diffChannelId: channel.id });
+                  }}
+                />
+              }
               {...(topic ? { prioritizedDatatype: topic.schemaName } : {})}
             />
           )}

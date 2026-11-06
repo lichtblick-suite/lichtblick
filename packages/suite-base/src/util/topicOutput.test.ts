@@ -6,6 +6,7 @@ import { MessageEvent, TopicOutputDescriptor } from "@lichtblick/suite";
 import {
   getConverterId,
   messageOutputKey,
+  messageChannelOutputKey,
   renderTopics,
   resolveOutputConfig,
   topicOutputKey,
@@ -18,6 +19,78 @@ const output: TopicOutputDescriptor = {
 };
 
 describe("topic output identity and saved settings", () => {
+  it("labels native schemas directly and keeps converter names secondary unless needed", () => {
+    const outputs = renderTopics([
+      {
+        name: "/mixed",
+        schemaName: "foxglove.SceneUpdate",
+        conversionOutputs: [
+          { converterId: "A", schemaName: "foxglove.PointCloud", displayName: "Cloud converter" },
+        ],
+      },
+      { name: "/mixed", schemaName: "foxglove.PointCloud" },
+    ]);
+    expect(outputs.map((entry) => entry.label)).toEqual([
+      "foxglove.SceneUpdate",
+      "foxglove.PointCloud",
+      "foxglove.PointCloud",
+    ]);
+    expect(outputs[1]?.converterLabel).toBe("Cloud converter");
+    expect(outputs[0]?.converterLabel).toBeUndefined();
+  });
+
+  it("distinguishes repeated native schemas and conversions by their input channels", () => {
+    const outputs = renderTopics(
+      ["2", "5"].map((channelId) => ({
+        name: "/cloud",
+        schemaName: "foxglove.PointCloud",
+        channelId,
+        conversionOutputs: [{ converterId: "A", schemaName: "foxglove.SceneUpdate" }],
+      })),
+    );
+    expect(outputs).toHaveLength(4);
+    expect(new Set(outputs.map((entry) => entry.name)).size).toBe(4);
+    expect(outputs.map((entry) => entry.label)).toEqual([
+      "foxglove.PointCloud · channel 2",
+      "foxglove.SceneUpdate · channel 2",
+      "foxglove.PointCloud · channel 5",
+      "foxglove.SceneUpdate · channel 5",
+    ]);
+    expect(
+      messageChannelOutputKey({
+        topic: "/cloud",
+        schemaName: "foxglove.PointCloud",
+        channelId: "5",
+      }),
+    ).toBe(topicOutputKey("/cloud", outputs[2]!.output));
+  });
+
+  it("names converters when they produce the same schema", () => {
+    const outputs = renderTopics([
+      {
+        name: "/input",
+        schemaName: "Input",
+        conversionOutputs: [
+          { converterId: "A", schemaName: "Output", displayName: "First" },
+          { converterId: "B", schemaName: "Output", displayName: "Second" },
+        ],
+      },
+    ]);
+    expect(outputs.slice(1).map((entry) => entry.label)).toEqual([
+      "Output · First",
+      "Output · Second",
+    ]);
+  });
+
+  it("inherits saved converter settings until a channel-specific override is saved", () => {
+    const config = {
+      topicOutputs: {
+        [output.topic]: { [topicOutputKey(output.topic, output.output)]: { size: 7 } },
+      },
+    };
+    const selected = { ...output, output: { ...output.output, sourceChannelId: "2" } };
+    expect(resolveOutputConfig(config, selected)).toEqual({ size: 7 });
+  });
   it("retains stable registration identity across reloads and distinguishes same-schema registrations", () => {
     const registration = {
       extensionId: "extension",

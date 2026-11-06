@@ -38,6 +38,7 @@ type MessagePipelineMockData = {
 };
 
 type SetupOptions = {
+  channelId?: string;
   topicName?: string;
   selected?: boolean;
   isTopicSubscribed?: boolean;
@@ -98,6 +99,7 @@ function createThrowingIterator(
 
 function setup(options: SetupOptions = {}) {
   const {
+    channelId,
     topicName = `/${BasicBuilder.string()}`,
     selected = true,
     isTopicSubscribed = true,
@@ -141,6 +143,7 @@ function setup(options: SetupOptions = {}) {
   );
 
   const props = {
+    channelId,
     topicName,
     selected,
     isTopicSubscribed,
@@ -158,6 +161,32 @@ function setup(options: SetupOptions = {}) {
 }
 
 describe("useTopicMessageNavigation", () => {
+  it("uses the selected channel for boundary discovery and next-message reads", async () => {
+    const { result, getBatchIterator, seekPlayback } = setup({
+      topicName: "/shared",
+      channelId: "second",
+      pipelineData: {
+        currentTime: { sec: 1, nsec: 0 },
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 5, nsec: 0 },
+        messages: [
+          { sec: 0, nsec: 0 },
+          { sec: 3, nsec: 0 },
+        ],
+      },
+    });
+    await waitFor(() => {
+      expect(getBatchIterator).toHaveBeenCalled();
+    });
+    await act(async () => {
+      await result.current.handleNextMessage();
+    });
+    expect(seekPlayback).toHaveBeenCalledWith({ sec: 3, nsec: 0 });
+    for (const call of getBatchIterator.mock.calls) {
+      expect(call[1]).toMatchObject({ channelId: "second" });
+    }
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });

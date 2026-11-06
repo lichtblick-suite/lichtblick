@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import * as _ from "lodash-es";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { filterMap } from "@lichtblick/den/collection";
 import {
@@ -37,6 +37,7 @@ import useGlobalVariables, {
   GlobalVariables,
 } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 
+import { channelLabel } from "./channelLabel";
 import {
   traverseStructure,
   messagePathStructures,
@@ -107,6 +108,11 @@ function getExamplePrimitive(primitiveType: PrimitiveType) {
   }
 }
 
+function hasTopicPrefix(path: string, topic: string): boolean {
+  const prefix = quoteTopicNameIfNeeded(topic);
+  return path === prefix || [".", "[", "{"].some((separator) => path.startsWith(prefix + separator));
+}
+
 /**
  * To show an input field with an autocomplete so the user can enter message paths, use:
  *
@@ -129,7 +135,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   props: MessagePathInputBaseProps,
 ) {
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
-  const { datatypes, topics } = PanelAPI.useDataSourceInfo();
+  const { datatypes, topics: sourceTopics } = PanelAPI.useDataSourceInfo();
 
   const {
     supportsMathModifiers,
@@ -144,11 +150,61 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   } = props;
   const { classes } = useStyles();
 
+  const channelSelection = props.channelSelection;
+  const selectedTopicName = useMemo(
+    () => parseMessagePath(path)?.topicName ?? channelSelection?.channels.find(
+      (channel) => channel.id === channelSelection.channelId && hasTopicPrefix(path, channel.topic),
+    )?.topic,
+    [path, channelSelection],
+  );
+  const selectedChannel = channelSelection?.channels.find(
+    (channel) => channel.topic === selectedTopicName && channel.id === channelSelection.channelId,
+  );
+  const needsChannel = channelSelection != undefined && selectedChannel == undefined;
+  const effectiveSchemaName = selectedChannel?.schemaName ?? props.schemaName;
+  const channelOptions = useMemo(
+    () =>
+      new Map(
+        channelSelection?.channels.map((channel) => [
+          `${quoteTopicNameIfNeeded(channel.topic)} · ${channelLabel(channel)}`,
+          channel,
+        ]),
+      ),
+    [channelSelection?.channels],
+  );
+  useEffect(() => {
+    if (channelSelection == undefined || channelSelection.channelId != undefined) {
+      return;
+    }
+    const candidates = channelSelection.channels.filter(
+      (channel) => channel.topic === selectedTopicName,
+    );
+    if (candidates.length === 1) {
+      channelSelection.onChange(path, candidates[0]!.id);
+    }
+  }, [channelSelection, selectedTopicName, path]);
+  const topicsOverride = useMemo(
+    () =>
+      effectiveSchemaName == undefined || selectedTopicName == undefined
+        ? undefined
+        : _.uniqBy(
+            sourceTopics.map((topic) =>
+              topic.name === selectedTopicName
+                ? { ...topic, schemaName: effectiveSchemaName }
+                : topic,
+            ),
+            (topic) => topic.name,
+          ),
+    [sourceTopics, effectiveSchemaName, selectedTopicName],
+  );
+  const topics = topicsOverride ?? sourceTopics;
+
   const structures = useMemo(() => messagePathStructures(datatypes), [datatypes]);
 
   const structureItemsByPath = useStructuredItemsByPath({
     noMultiSlices,
     validTypes,
+    topicsOverride,
   });
 
   const onChangeProp = props.onChange;
@@ -168,9 +224,26 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         });
       }
 
-      onChangeProp(value, propsIndex);
+      if (channelSelection != undefined) {
+        const nextTopic = parseMessagePath(value)?.topicName ??
+          (selectedTopicName != undefined && hasTopicPrefix(value, selectedTopicName)
+            ? selectedTopicName : undefined);
+        const candidates = channelSelection.channels.filter(
+          (channel) => channel.topic === nextTopic,
+        );
+        channelSelection.onChange(
+          value,
+          nextTopic === selectedTopicName
+            ? channelSelection.channelId
+            : candidates.length === 1
+              ? candidates[0]!.id
+              : undefined,
+        );
+      } else {
+        onChangeProp(value, propsIndex);
+      }
     },
-    [onChangeProp, propsIndex],
+    [onChangeProp, propsIndex, channelSelection, selectedTopicName],
   );
 
   const onSelect = useCallback(
@@ -180,6 +253,19 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined,
       autocompleteRange: { start: number; end: number },
     ) => {
+      const channel = channelOptions.get(rawValue);
+      if (channel != undefined && channelSelection != undefined) {
+        const suffix =
+          channel.topic === selectedTopicName
+            ? path.slice(parseMessagePath(path)?.topicNameRepr.length ?? path.length)
+            : "";
+        const nextPath = quoteTopicNameIfNeeded(channel.topic) + suffix;
+        channelSelection.onChange(nextPath, channel.id);
+        setImmediate(() => {
+          autocomplete.setSelectionRange(nextPath.length, nextPath.length);
+        });
+        return;
+      }
       const completeStart = path.slice(0, autocompleteRange.start);
       const completeEnd = path.slice(autocompleteRange.end);
 
@@ -210,7 +296,15 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         autocomplete.blur();
       }
     },
-    [path, structureItemsByPath, validTypes, onChangeProp],
+    [
+      path,
+      structureItemsByPath,
+      validTypes,
+      onChangeProp,
+      channelOptions,
+      channelSelection,
+      selectedTopicName,
+    ],
   );
 
   const rosPath = useMemo(() => parseMessagePath(path), [path]);
@@ -257,7 +351,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   }, [globalVariables, rosPath, setGlobalVariables]);
 
   const topicNamesAutocompleteItems = useMemo(
-    () => topics.map(({ name }) => quoteTopicNameIfNeeded(name)),
+    () => _.uniq(topics.map(({ name }) => quoteTopicNameIfNeeded(name))),
     [topics],
   );
 
@@ -278,7 +372,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
   }, [structureItemsByPath, topicNamesAutocompleteItems]);
 
   const autocompleteType = useMemo(() => {
-    if (!rosPath) {
+    if (needsChannel || !rosPath) {
       return "topicName";
     } else if (!topic) {
       return "topicName";
@@ -294,7 +388,14 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     }
 
     return undefined;
-  }, [invalidGlobalVariablesVariable, structureTraversalResult, validTypes, rosPath, topic]);
+  }, [
+    invalidGlobalVariablesVariable,
+    structureTraversalResult,
+    validTypes,
+    rosPath,
+    topic,
+    needsChannel,
+  ]);
 
   const { autocompleteItems, autocompleteFilterText, autocompleteRange } = useMemo(() => {
     if (disableAutocomplete) {
@@ -307,10 +408,14 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       // If the path is empty, return topic names only to show the full list of topics. Otherwise,
       // use the full set of topic names and field paths to autocomplete
       return {
-        autocompleteItems: path
-          ? topicNamesAndFieldsAutocompleteItems
-          : topicNamesAutocompleteItems,
-        autocompleteFilterText: path,
+        autocompleteItems:
+          channelSelection != undefined
+            ? [...channelOptions.keys()]
+            : path
+              ? topicNamesAndFieldsAutocompleteItems
+              : topicNamesAutocompleteItems,
+        autocompleteFilterText:
+          channelSelection != undefined ? (rosPath?.topicNameRepr ?? path) : path,
         autocompleteRange: { start: 0, end: Infinity },
       };
     } else if (autocompleteType === "messagePath" && topic && rosPath) {
@@ -413,6 +518,8 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     validTypes,
     noMultiSlices,
     globalVariables,
+    channelSelection,
+    channelOptions,
   ]);
 
   const orderedAutocompleteItems = useMemo(() => {
@@ -454,6 +561,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
         placeholder != undefined && placeholder !== "" ? placeholder : "/some/topic.msgs[0].field"
       }
       inputStyle={inputStyle} // Disable autoselect since people often construct complex queries, and it's very annoying
+      startAdornment={props.startAdornment}
       // to have the entire input selected whenever you want to make a change to a part it.
       disableAutoSelect
     />

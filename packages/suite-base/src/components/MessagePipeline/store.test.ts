@@ -7,10 +7,87 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import FakePlayer from "@lichtblick/suite-base/components/MessagePipeline/FakePlayer";
+import { PlayerState } from "@lichtblick/suite-base/players/types";
 
-import { createMessagePipelineStore } from "./store";
+import { createMessagePipelineStore, defaultPlayerState } from "./store";
 
 describe("createMessagePipelineStore", () => {
+  it("routes channels independently and replays a channel switch within one topic", () => {
+    const store = createMessagePipelineStore({
+      promisesToWaitForRef: { current: [] },
+      initialPlayer: undefined,
+    });
+    const state = store.getState();
+    state.public.setSubscriptions("all", [{ topic: "/shared" }]);
+    state.public.setSubscriptions("one", [{ topic: "/shared", channelIds: ["first"] }]);
+    const messages = ["first", "second"].map((channelId) => ({
+      topic: "/shared",
+      channelId,
+      schemaName: "schema",
+      message: channelId,
+      receiveTime: { sec: 1, nsec: 0 },
+      sizeInBytes: 1,
+    }));
+    const playerState: PlayerState = {
+      ...defaultPlayerState(),
+      activeData: {
+        messages,
+        topics: [],
+        topicStats: new Map(),
+        datatypes: new Map(),
+        currentTime: { sec: 1, nsec: 0 },
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 2, nsec: 0 },
+        isPlaying: false,
+        speed: 1,
+        totalBytesReceived: 0,
+        lastSeekTime: 1,
+      },
+    };
+    state.dispatch({ type: "update-player-state", playerState });
+    expect(store.getState().public.messageEventsBySubscriberId.get("one")).toEqual([messages[0]]);
+    expect(store.getState().public.messageEventsBySubscriberId.get("all")).toEqual(messages);
+    state.public.setSubscriptions("one", [{ topic: "/shared", channelIds: ["second"] }]);
+    expect(store.getState().public.messageEventsBySubscriberId.get("one")).toEqual([messages[1]]);
+    state.public.setSubscriptions("both", [{ topic: "/shared" }]);
+    expect(store.getState().public.messageEventsBySubscriberId.get("both")).toEqual(messages);
+
+    // A seek invalidates every cached channel, including channels absent from the next frame.
+    state.dispatch({
+      type: "update-player-state",
+      playerState: {
+        ...playerState,
+        activeData: { ...playerState.activeData!, lastSeekTime: 2, messages: [] },
+      },
+    });
+    state.public.setSubscriptions("after-seek", [{ topic: "/shared" }]);
+    expect(store.getState().public.messageEventsBySubscriberId.get("after-seek")).toBeUndefined();
+  });
+
+  it("passes channel selection to point-in-time reads and rejects another channel", async () => {
+    const player = new FakePlayer() as FakePlayer & { getBackfillMessages: jest.Mock };
+    player.getBackfillMessages = jest.fn().mockResolvedValue([
+      {
+        topic: "/shared",
+        channelId: "other",
+        schemaName: "schema",
+        message: {},
+        receiveTime: { sec: 1, nsec: 0 },
+        sizeInBytes: 1,
+      },
+    ]);
+    const store = createMessagePipelineStore({
+      promisesToWaitForRef: { current: [] },
+      initialPlayer: player,
+    });
+    expect(
+      await store.getState().public.getMessageAtTime("/shared", { sec: 1, nsec: 0 }, "selected"),
+    ).toBeUndefined();
+    expect(player.getBackfillMessages).toHaveBeenCalledWith({
+      topics: new Map([["/shared", { topic: "/shared", channelIds: ["selected"] }]]),
+      time: { sec: 1, nsec: 0 },
+    });
+  });
   it("should return undefined when the player does not support backfill lookups", async () => {
     // GIVEN - a store backed by a player that cannot answer backfill lookups
     const store = createMessagePipelineStore({

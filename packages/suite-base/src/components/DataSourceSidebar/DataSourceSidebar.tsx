@@ -116,7 +116,7 @@ export default function DataSourceSidebar(props: Props): React.JSX.Element {
                     }}
                     textColor="inherit"
                   >
-                    <Tab className={classes.tab} disableRipple label="Topics" value="topics" />
+                    <Tab className={classes.tab} disableRipple label="Channels" value="topics" />
                     {showEventsTab && (
                       <Tab className={classes.tab} disableRipple label="Events" value="events" />
                     )}

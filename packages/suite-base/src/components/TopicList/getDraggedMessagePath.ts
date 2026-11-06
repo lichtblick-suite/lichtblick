@@ -14,6 +14,7 @@ export function getDraggedMessagePath(treeItem: TopicListItem): DraggedMessagePa
         isTopic: true,
         isLeaf: false,
         topicName: treeItem.item.item.name,
+        channelId: treeItem.item.item.channelId,
       };
     case "schema":
       return {
@@ -22,6 +23,7 @@ export function getDraggedMessagePath(treeItem: TopicListItem): DraggedMessagePa
         isTopic: false,
         isLeaf: treeItem.item.item.suffix.isLeaf,
         topicName: treeItem.item.item.topic.name,
+        channelId: treeItem.item.item.topic.channelId,
       };
   }
 }

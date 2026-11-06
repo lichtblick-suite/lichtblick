@@ -7,10 +7,12 @@ import { MessagePathStructureItem } from "@lichtblick/message-path";
 import * as PanelAPI from "@lichtblick/suite-base/PanelAPI";
 import { messagePathStructures } from "@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype";
 import { structureAllItemsByPath } from "@lichtblick/suite-base/components/MessagePathSyntax/structureAllItemsByPath";
+import { Topic } from "@lichtblick/suite-base/players/types";
 
 import { useStructureItemsByPathStore } from "./useStructureItemsByPathStore";
 
 type UseStructuredItemsByPathProps = {
+  topicsOverride?: readonly Topic[];
   noMultiSlices?: boolean;
   validTypes?: readonly string[];
 };
@@ -33,10 +35,12 @@ type UseStructuredItemsByPathProps = {
 export function useStructuredItemsByPath({
   noMultiSlices,
   validTypes,
+  topicsOverride,
 }: UseStructuredItemsByPathProps): Map<string, MessagePathStructureItem> {
   const structureItemsByPath = useStructureItemsByPathStore((state) => state.structureItemsByPath);
 
-  const { datatypes, topics } = PanelAPI.useDataSourceInfo();
+  const { datatypes, topics: sourceTopics } = PanelAPI.useDataSourceInfo();
+  const topics = topicsOverride ?? sourceTopics;
 
   const messagePathStructuresForDataype = useMemo(
     () => messagePathStructures(datatypes),
@@ -48,7 +52,7 @@ export function useStructuredItemsByPath({
   const validTypesKey = JSON.stringify(validTypes);
 
   const computedItemsByPath = useMemo(() => {
-    if (!validTypes && noMultiSlices == undefined) {
+    if (!validTypes && noMultiSlices == undefined && topicsOverride == undefined) {
       return undefined;
     }
     return structureAllItemsByPath({
@@ -60,7 +64,7 @@ export function useStructuredItemsByPath({
     // `validTypes` is intentionally tracked via the content-based `validTypesKey`
     // to avoid invalidating the memo on unstable array references.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messagePathStructuresForDataype, noMultiSlices, topics, validTypesKey]);
+  }, [messagePathStructuresForDataype, noMultiSlices, topics, validTypesKey, topicsOverride]);
 
   return computedItemsByPath ?? structureItemsByPath;
 }

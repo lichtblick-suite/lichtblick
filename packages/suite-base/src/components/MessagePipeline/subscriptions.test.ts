@@ -9,6 +9,30 @@ import { mergeSubscriptions } from "@lichtblick/suite-base/components/MessagePip
 import { InternalSubscribePayload } from "@lichtblick/suite-base/players/types";
 
 describe("mergeSubscriptions", () => {
+  it("unions selected channels while preserving a topic-wide subscription", () => {
+    expect(
+      mergeSubscriptions([
+        { topic: "a", channelIds: ["first"] },
+        { topic: "a", channelIds: ["second", "first"] },
+      ])[0]?.channelIds,
+    ).toEqual(["first", "second"]);
+    expect(
+      mergeSubscriptions([{ topic: "a", channelIds: ["first"] }, { topic: "a" }])[0]?.channelIds,
+    ).toBeUndefined();
+    expect(mergeSubscriptions([{ topic: "a", channelIds: [] }])[0]?.channelIds).toEqual([]);
+  });
+
+  it("keeps preload channel selection separate from current-frame selection", () => {
+    const subscriptions = mergeSubscriptions([
+      { topic: "a", channelIds: ["first"], preloadType: "full" },
+      { topic: "a", channelIds: ["second"], preloadType: "partial" },
+    ]);
+    expect(subscriptions.find((sub) => sub.preloadType === "full")?.channelIds).toEqual(["first"]);
+    expect(subscriptions.find((sub) => sub.preloadType === "partial")?.channelIds).toEqual([
+      "first",
+      "second",
+    ]);
+  });
   it("combines full and partial subscriptions", () => {
     const subs: InternalSubscribePayload[] = [
       { topic: "a", preloadType: "full" },

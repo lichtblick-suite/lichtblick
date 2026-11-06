@@ -46,8 +46,9 @@ export function MessagePathRow({
       isTopic: false,
       isLeaf,
       topicName: topic.name,
+      channelId: topic.channelId,
     }),
-    [fullPath, isLeaf, topic.name, topic.schemaName],
+    [fullPath, isLeaf, topic.name, topic.schemaName, topic.channelId],
   );
 
   const { connectDragSource, connectDragPreview, cursor, isDragging, draggedItemCount } =
@@ -70,6 +71,7 @@ export function MessagePathRow({
       className={cx(classes.row, classes.fieldRow, {
         [classes.isDragging]: isDragging,
         [classes.selected]: selected,
+        [classes.convertedRow]: topic.channel?.source.kind === "converted",
       })}
       style={{ ...style, cursor }}
       onClick={onClick}

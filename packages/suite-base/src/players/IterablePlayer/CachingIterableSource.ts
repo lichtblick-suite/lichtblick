@@ -403,6 +403,15 @@ class CachingIterableSource<MessageType = unknown>
       throw new Error("Invariant: uninitialized");
     }
 
+    // Topic-level cache completeness cannot establish per-channel backfill completeness.
+    // Use the source until the backfill cache tracks channel coverage explicitly.
+    if (
+      this.#initResult.topics.some((topic) => topic.channelId != undefined) ||
+      [...args.topics.values()].some((subscription) => subscription.channelIds != undefined)
+    ) {
+      return await this.#source.getBackfillMessages(args);
+    }
+
     // Find a block that contains args.time. We must find a block that contains args.time rather
     // than one that occurs anytime before args.time to correctly get the last message before
     // args.time rather than any message that occurs before args.time.

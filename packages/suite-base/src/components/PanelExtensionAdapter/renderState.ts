@@ -31,6 +31,7 @@ import {
 } from "@lichtblick/suite-base/players/types";
 import { HoverValue } from "@lichtblick/suite-base/types/hoverValue";
 import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
+import { channelCatalog, messageChannelId } from "@lichtblick/suite-base/util/channels";
 import { getConverterId } from "@lichtblick/suite-base/util/topicOutput";
 
 import {
@@ -39,6 +40,7 @@ import {
   forEachSortedArrays,
   mapDifference,
   TopicSchemaConversions,
+  wantsOriginalMessage,
 } from "./messageProcessing";
 import type { MessageConverterAlertHandler } from "./types";
 
@@ -91,6 +93,8 @@ function initRenderStateBuilder(): BuildRenderStateFn {
   let prevSharedPanelState: BuilderRenderStateInput["sharedPanelState"];
   let prevCurrentFrame: Immutable<RenderState["currentFrame"]>;
   let prevCollatedConversions: undefined | TopicSchemaConversions;
+  let prevChannelTopics: BuilderRenderStateInput["sortedTopics"] | undefined;
+  let prevChannelConverters: BuilderRenderStateInput["messageConverters"];
   const lastMessageByTopic = new Map<string, MessageEvent>();
   const outputConfigCache = new Map<string, Record<string, unknown>>();
 
@@ -151,7 +155,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       sortedTopics,
       messageConverters,
     );
-    const { unconvertedSubscriptionTopics, topicSchemaConverters } = collatedConversions;
+    const { originalSubscriptions, topicSchemaConverters } = collatedConversions;
     const conversionsChanged = prevCollatedConversions !== collatedConversions;
     const newConverters = memoMapDifference(
       topicSchemaConverters,
@@ -199,6 +203,19 @@ function initRenderStateBuilder(): BuildRenderStateFn {
       }
     }
 
+    if (watchedFields.has("channels")) {
+      if (
+        sortedTopics !== prevChannelTopics ||
+        prevChannelConverters !== messageConverters ||
+        renderState.channels == undefined
+      ) {
+        renderState.channels = channelCatalog(sortedTopics, messageConverters);
+        prevChannelTopics = sortedTopics;
+        prevChannelConverters = messageConverters;
+        shouldRender.value = true;
+      }
+    }
+
     if (watchedFields.has("topics")) {
       if (sortedTopics !== prevSortedTopics || prevMessageConverters !== messageConverters) {
         shouldRender.value = true;
@@ -206,6 +223,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
         const topics = sortedTopics.map((topic): Topic => {
           const newTopic: Topic = {
             name: topic.name,
+            channelId: topic.channelId,
             schemaName: topic.schemaName ?? "",
           };
 
@@ -270,7 +288,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
         // Unconverted messages are only processed on a new frame.
         const postProcessedFrame: MessageEvent[] = [];
         for (const messageEvent of currentFrame) {
-          if (unconvertedSubscriptionTopics.has(messageEvent.topic)) {
+          if (wantsOriginalMessage(messageEvent, originalSubscriptions)) {
             postProcessedFrame.push(messageEvent);
           }
 
@@ -285,7 +303,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
             );
           }
           lastMessageByTopic.set(
-            JSON.stringify([messageEvent.topic, messageEvent.schemaName])!,
+            JSON.stringify([messageEvent.topic, messageChannelId(messageEvent)])!,
             messageEvent,
           );
         }
@@ -348,6 +366,18 @@ function initRenderStateBuilder(): BuildRenderStateFn {
         shouldRender.value = true;
         const blocksToProcess = newBlocks ?? prevBlocks ?? [];
         const frames: MessageEvent[] = (renderState.allFrames = []);
+        const preloadConversions = memoCollateTopicSchemaConversions(
+          subscriptions.filter(
+            (subscription) =>
+              subscription.preload === true ||
+              (subscription.channelId == undefined &&
+                subscriptions.some(
+                  (other) => other.topic === subscription.topic && other.preload === true,
+                )),
+          ),
+          sortedTopics,
+          messageConverters,
+        );
         // only populate allFrames with topics that the panel wants to preload
         const topicsToPreloadForPanel = Array.from(
           new Set<string>(
@@ -372,7 +402,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               // allFrames to be a complete set of messages for all subscribed topics so
               // we include all unconverted and converted messages, unlike in
               // currentFrame.
-              if (unconvertedSubscriptionTopics.has(messageEvent.topic)) {
+              if (wantsOriginalMessage(messageEvent, preloadConversions.originalSubscriptions)) {
                 frames.push(messageEvent);
               }
 
@@ -380,7 +410,7 @@ function initRenderStateBuilder(): BuildRenderStateFn {
               if (schemaName) {
                 convertMessage(
                   { ...messageEvent, topicConfig: configTopics[messageEvent.topic] },
-                  topicSchemaConverters,
+                  preloadConversions.topicSchemaConverters,
                   frames,
                   undefined,
                   { emitAlert, config, panelType: input.panelType, outputConfigCache },

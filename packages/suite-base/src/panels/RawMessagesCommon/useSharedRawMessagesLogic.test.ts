@@ -4,19 +4,22 @@
 
 import { renderHook, act } from "@testing-library/react";
 
+import { MessagePathDropConfig } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+
 import type { SharedConfig, UseSharedRawMessagesLogicProps } from "./types";
 import { useSharedRawMessagesLogic } from "./useSharedRawMessagesLogic";
+
+const mockSetMessagePathDropConfig = jest.fn<void, [MessagePathDropConfig]>();
 
 // Minimal mocks for deps the hook uses
 jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
   useDataSourceInfo: () => ({ topics: [], datatypes: new Map() }),
 }));
 jest.mock("@lichtblick/suite-base/components/PanelContext", () => ({
-  usePanelContext: () => ({ setMessagePathDropConfig: jest.fn() }),
+  usePanelContext: () => ({ setMessagePathDropConfig: mockSetMessagePathDropConfig }),
 }));
-jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/useMessageDataItem", () => ({
-  useMessageDataItem: () => [],
-}));
+jest.mock("./useChannelMessages", () => ({ useChannelMessages: () => [] }));
+jest.mock("@lichtblick/suite-base/hooks/useChannels", () => ({ useChannels: () => [] }));
 
 const setup = (inputOverride?: {
   config?: Partial<SharedConfig>;
@@ -44,6 +47,24 @@ const setup = (inputOverride?: {
   };
 };
 describe("given useSharedRawMessagesLogic", () => {
+  it("preserves a dragged channel's identity when saving the selected path", () => {
+    const { saveConfig } = setup();
+    const dropConfig = mockSetMessagePathDropConfig.mock.lastCall![0];
+    act(() => {
+      dropConfig.handleDrop([
+        {
+          path: "/shared.value",
+          topicName: "/shared",
+          channelId: "second",
+          rootSchemaName: "Message",
+          isTopic: false,
+          isLeaf: true,
+        },
+      ]);
+    });
+    expect(saveConfig).toHaveBeenCalledWith({ topicPath: "/shared.value", channelId: "second" });
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });

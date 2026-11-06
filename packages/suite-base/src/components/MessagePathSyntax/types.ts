@@ -9,6 +9,7 @@ import {
   MessagePathStructureItem,
   MessagePathStructureItemMessage,
 } from "@lichtblick/message-path/src/types";
+import { Channel } from "@lichtblick/suite";
 import { MessageEvent, SubscribePayload, Topic } from "@lichtblick/suite-base/players/types";
 
 import { MessageAndData } from "./useCachedGetMessagePathDataItems";
@@ -41,6 +42,14 @@ export type MessagePathsForStructure = {
 }[];
 
 export type MessagePathInputBaseProps = {
+  channelSelection?: {
+    channels: readonly Channel[];
+    channelId?: string;
+    onChange: (path: string, channelId: string | undefined) => void;
+  };
+  startAdornment?: React.ReactNode;
+  /** Effective schema of an explicitly selected channel. */
+  schemaName?: string;
   supportsMathModifiers?: boolean;
   path: string; // A path of the form `/topic.some_field[:]{id==42}.x`
   index?: number; // Optional index field which gets passed to `onChange` (so you don't have to create anonymous functions)

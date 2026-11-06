@@ -58,6 +58,7 @@ import {
 } from "@lichtblick/suite-base/players/types";
 import { HIGH_FREQUENCY_ALERT } from "@lichtblick/suite-base/players/utils/constants";
 import { isTopicHighFrequency } from "@lichtblick/suite-base/players/utils/isTopicHighFrequency";
+import { matchesChannel } from "@lichtblick/suite-base/util/channels";
 import rosDatatypesToMessageDefinition from "@lichtblick/suite-base/util/rosDatatypesToMessageDefinition";
 
 import { JsonMessageWriter } from "./JsonMessageWriter";
@@ -120,10 +121,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
   /* Flag indicating if the server publishes time messages */
   #serverPublishesTime = false;
 
-  #unresolvedSubscriptions = new Set<string>();
-  #resolvedSubscriptionsByTopic = new Map<string, SubscriptionId>();
+  #subscriptions: SubscribePayload[] = [];
   #resolvedSubscriptionsById = new Map<SubscriptionId, ResolvedChannel>();
-  #channelsByTopic = new Map<string, ResolvedChannel>();
   #channelsById = new Map<ChannelId, ResolvedChannel>();
   #unsupportedChannelIds = new Set<ChannelId>();
   #recentlyCanceledSubscriptions = new Set<SubscriptionId>();
@@ -207,15 +206,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this.#resetSessionState();
       this.#alerts.clear();
       this.#channelsById.clear();
-      this.#channelsByTopic.clear();
       this.#servicesByName.clear();
       this.#serviceResponseCbs.clear();
       this.#publicationsByTopic.clear();
-      for (const topic of this.#resolvedSubscriptionsByTopic.keys()) {
-        this.#unresolvedSubscriptions.add(topic);
-      }
       this.#resolvedSubscriptionsById.clear();
-      this.#resolvedSubscriptionsByTopic.clear();
 
       // Re-assign members that are emitted as player state
       this.#profile = undefined;
@@ -462,18 +456,8 @@ export default class FoxgloveWebSocketPlayer implements Player {
           this.#emitState();
           continue;
         }
-        const existingChannel = this.#channelsByTopic.get(channel.topic);
-        if (existingChannel && !_.isEqual(channel, existingChannel.channel)) {
-          this.#alerts.addAlert(`duplicate-topic:${channel.topic}`, {
-            severity: "error",
-            message: `Multiple channels advertise the same topic: ${channel.topic} (${existingChannel.channel.id} and ${channel.id})`,
-          });
-          this.#emitState();
-          continue;
-        }
         const resolvedChannel = { channel, parsedChannel };
         this.#channelsById.set(channel.id, resolvedChannel);
-        this.#channelsByTopic.set(channel.topic, resolvedChannel);
       }
       this.#updateTopicsAndDatatypes();
       this.#emitState();
@@ -496,13 +480,10 @@ export default class FoxgloveWebSocketPlayer implements Player {
         for (const [subId, { channel }] of this.#resolvedSubscriptionsById) {
           if (channel.id === id) {
             this.#resolvedSubscriptionsById.delete(subId);
-            this.#resolvedSubscriptionsByTopic.delete(channel.topic);
             this.#client?.unsubscribe(subId);
-            this.#unresolvedSubscriptions.add(channel.topic);
           }
         }
         this.#channelsById.delete(id);
-        this.#channelsByTopic.delete(chanInfo.channel.topic);
       }
       this.#updateTopicsAndDatatypes();
       this.#emitState();
@@ -538,6 +519,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         const sizeInBytes = Math.max(data.byteLength, msgSizeEstimate);
         this.#parsedMessages.push({
           topic,
+          channelId: `websocket:${chanInfo.channel.id}`,
           receiveTime,
           message: deserializedMessage,
           sizeInBytes,
@@ -864,6 +846,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
     // Build a new topics array from this._channelsById
     const topics: Topic[] = Array.from(this.#channelsById.values(), (chanInfo) => ({
       name: chanInfo.channel.topic,
+      channelId: `websocket:${chanInfo.channel.id}`,
       schemaName: chanInfo.channel.schemaName,
     }));
 
@@ -968,63 +951,52 @@ export default class FoxgloveWebSocketPlayer implements Player {
   }
 
   public setSubscriptions(subscriptions: SubscribePayload[]): void {
-    const newTopics = new Set(subscriptions.map(({ topic }) => topic));
-
-    if (!this.#client || this.#closed) {
-      // Remember requested subscriptions so we can retry subscribing when
-      // the client is available.
-      this.#unresolvedSubscriptions = newTopics;
-      return;
-    }
-
-    for (const topic of newTopics) {
-      if (!this.#resolvedSubscriptionsByTopic.has(topic)) {
-        this.#unresolvedSubscriptions.add(topic);
-      }
-    }
-
-    const topicStats = new Map(this.#topicsStats);
-    for (const [topic, subId] of this.#resolvedSubscriptionsByTopic) {
-      if (!newTopics.has(topic)) {
-        this.#client.unsubscribe(subId);
-        this.#resolvedSubscriptionsByTopic.delete(topic);
-        this.#resolvedSubscriptionsById.delete(subId);
-        this.#recentlyCanceledSubscriptions.add(subId);
-
-        // Reset the message count for this topic
-        topicStats.delete(topic);
-
-        setTimeout(
-          () => this.#recentlyCanceledSubscriptions.delete(subId),
-          SUBSCRIPTION_WARNING_SUPPRESSION_MS,
-        );
-      }
-    }
-    this.#topicsStats = topicStats;
-
-    for (const topic of this.#unresolvedSubscriptions) {
-      if (!newTopics.has(topic)) {
-        this.#unresolvedSubscriptions.delete(topic);
-      }
-    }
-
+    this.#subscriptions = subscriptions;
     this.#processUnresolvedSubscriptions();
   }
 
   #processUnresolvedSubscriptions() {
-    if (!this.#client) {
+    if (!this.#client || this.#closed) {
       return;
     }
-
-    for (const topic of this.#unresolvedSubscriptions) {
-      const chanInfo = this.#channelsByTopic.get(topic);
-      if (chanInfo) {
-        const subId = this.#client.subscribe(chanInfo.channel.id);
-        this.#unresolvedSubscriptions.delete(topic);
-        this.#resolvedSubscriptionsByTopic.set(topic, subId);
-        this.#resolvedSubscriptionsById.set(subId, chanInfo);
+    const wanted = new Map(
+      [...this.#channelsById].filter(([, info]) =>
+        this.#subscriptions.some((subscription) =>
+          matchesChannel(
+            {
+              topic: info.channel.topic,
+              schemaName: info.channel.schemaName,
+              channelId: `websocket:${info.channel.id}`,
+            },
+            subscription,
+          ),
+        ),
+      ),
+    );
+    for (const [subId, info] of this.#resolvedSubscriptionsById) {
+      if (wanted.has(info.channel.id)) {
+        wanted.delete(info.channel.id);
+        continue;
       }
+      this.#client.unsubscribe(subId);
+      this.#resolvedSubscriptionsById.delete(subId);
+      this.#recentlyCanceledSubscriptions.add(subId);
+      setTimeout(
+        () => this.#recentlyCanceledSubscriptions.delete(subId),
+        SUBSCRIPTION_WARNING_SUPPRESSION_MS,
+      );
     }
+    for (const info of wanted.values()) {
+      const subId = this.#client.subscribe(info.channel.id);
+      this.#resolvedSubscriptionsById.set(subId, info);
+    }
+    // Statistics remain topic aggregates, with counters reset once the last channel is unsubscribed.
+    const activeTopics = new Set(
+      [...this.#resolvedSubscriptionsById.values()].map((info) => info.channel.topic),
+    );
+    this.#topicsStats = new Map(
+      [...this.#topicsStats].filter(([topic]) => activeTopics.has(topic)),
+    );
   }
 
   public setPublishers(publishers: AdvertiseOptions[]): void {

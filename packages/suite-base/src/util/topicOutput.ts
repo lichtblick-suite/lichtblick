@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { t } from "i18next";
 import * as _ from "lodash-es";
 
 import {
@@ -20,38 +19,65 @@ export type TopicOutputConfig = {
 };
 
 export type RenderTopic = Topic &
-  TopicOutputDescriptor & { label: string; defaultConfig?: unknown };
+  TopicOutputDescriptor & { label: string; converterLabel?: string; defaultConfig?: unknown };
 
 /** Renderer-local keys; transport topics and message event topic names stay unchanged. */
 export function renderTopics(topics: readonly Topic[] | undefined): RenderTopic[] {
   const outputs: RenderTopic[] = [];
   for (const topic of topics ?? []) {
-    const original: TopicOutput = { kind: "original", sourceSchemaName: topic.schemaName };
+    const sameSchema = topics?.filter(
+      (entry) => entry.name === topic.name && entry.schemaName === topic.schemaName,
+    );
+    const sourceChannelId = (sameSchema?.length ?? 0) > 1 ? topic.channelId : undefined;
+    const channelIdentity = sourceChannelId == undefined ? {} : { sourceChannelId };
+    const original: TopicOutput = {
+      kind: "original",
+      sourceSchemaName: topic.schemaName,
+      ...channelIdentity,
+    };
     const multipleSchemas =
       new Set(topics?.filter((entry) => entry.name === topic.name).map((entry) => entry.schemaName))
         .size > 1;
     outputs.push({
-      name: multipleSchemas ? topicOutputKey(topic.name, original) : topic.name,
+      name:
+        multipleSchemas || sourceChannelId != undefined
+          ? topicOutputKey(topic.name, original)
+          : topic.name,
+      channelId: topic.channelId,
       topic: topic.name,
       schemaName: topic.schemaName,
       output: original,
       convertibleTo: topic.conversionOutputs == undefined ? topic.convertibleTo : undefined,
-      label: multipleSchemas
-        ? `${t("panelSettings:originalData")} (${topic.schemaName})`
-        : t("panelSettings:originalData"),
+      label:
+        sourceChannelId == undefined
+          ? topic.schemaName
+          : `${topic.schemaName} · channel ${sourceChannelId}`,
     });
     for (const conversion of topic.conversionOutputs ?? []) {
       const output: TopicOutput = {
         kind: "converted",
         sourceSchemaName: topic.schemaName,
         converterId: conversion.converterId,
+        ...channelIdentity,
       };
+      const converterName = conversion.displayName ?? conversion.converterId;
+      const matchingConverters = new Set(
+        topics
+          ?.filter((entry) => entry.name === topic.name)
+          .flatMap((entry) => entry.conversionOutputs ?? [])
+          .filter((entry) => entry.schemaName === conversion.schemaName)
+          .map((entry) => entry.converterId),
+      );
+      const converterSuffix = matchingConverters.size > 1 ? ` · ${converterName}` : "";
+      const channelSuffix = sourceChannelId == undefined ? "" : ` · channel ${sourceChannelId}`;
       outputs.push({
         name: topicOutputKey(topic.name, output),
+        channelId: topic.channelId,
         topic: topic.name,
         schemaName: conversion.schemaName,
         output,
-        label: conversion.displayName ?? conversion.schemaName,
+        label: `${conversion.schemaName}${converterSuffix}${channelSuffix}`,
+        converterLabel: `${converterName}${channelSuffix}`,
         defaultConfig: conversion.defaultConfig,
       });
     }
@@ -75,6 +101,7 @@ export function topicOutputKey(topic: string, output: Immutable<TopicOutput>): s
     output.sourceSchemaName,
     output.kind,
     output.kind === "converted" ? output.converterId : "",
+    ...(output.sourceChannelId == undefined ? [] : [output.sourceChannelId]),
   ])!;
 }
 
@@ -102,6 +129,20 @@ export function messageOutputKey(
   );
 }
 
+/** Preserve source channel identity when routing and sampling renderer messages. */
+export function messageChannelOutputKey(
+  event: Pick<
+    MessageEvent,
+    "topic" | "schemaName" | "output" | "channelId" | "originalMessageEvent"
+  >,
+): string {
+  const sourceChannelId = event.originalMessageEvent?.channelId ?? event.channelId;
+  return topicOutputKey(event.topic, {
+    ...(event.output ?? { kind: "original", sourceSchemaName: event.schemaName }),
+    ...(sourceChannelId == undefined ? {} : { sourceChannelId }),
+  });
+}
+
 export function outputSettingsPath(descriptor: Immutable<TopicOutputDescriptor>): string[] {
   return ["topics", descriptor.topic, topicOutputKey(descriptor.topic, descriptor.output)];
 }
@@ -114,7 +155,12 @@ export function resolveOutputConfig(
   panelDefaults?: unknown,
 ): Record<string, unknown> {
   const override =
-    config?.topicOutputs?.[descriptor.topic]?.[topicOutputKey(descriptor.topic, descriptor.output)];
+    config?.topicOutputs?.[descriptor.topic]?.[
+      topicOutputKey(descriptor.topic, descriptor.output)
+    ] ??
+    config?.topicOutputs?.[descriptor.topic]?.[
+      topicOutputKey(descriptor.topic, { ...descriptor.output, sourceChannelId: undefined })
+    ];
   return _.merge(
     {},
     panelDefaults,

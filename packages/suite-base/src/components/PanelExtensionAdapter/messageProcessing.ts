@@ -12,6 +12,13 @@ import { Immutable, MessageEvent, MessageConverterContext, Subscription } from "
 import { GlobalVariables } from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import { Topic as PlayerTopic } from "@lichtblick/suite-base/players/types";
 import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
+import {
+  channelCatalog,
+  convertedChannelId,
+  messageChannelId,
+  nativeChannelId,
+  resolveChannelSubscription,
+} from "@lichtblick/suite-base/util/channels";
 import { formatTimeRaw } from "@lichtblick/suite-base/util/time";
 import {
   getConverterId,
@@ -37,8 +44,10 @@ type ConvertMessageContext = {
 // Create a string lookup key from a message event
 //
 // JSON tuple encoding keeps unrestricted topic and schema strings unambiguous.
-function converterKey(topic: string, schema: string): ConverterKey {
-  return JSON.stringify([topic, schema]) as ConverterKey;
+function converterKey(topic: string, schema: string, channelId?: string): ConverterKey {
+  return JSON.stringify(
+    channelId == undefined ? [topic, schema] : [topic, schema, channelId],
+  ) as ConverterKey;
 }
 
 /**
@@ -53,8 +62,16 @@ export function convertMessage(
   context?: ConvertMessageContext,
 ): void {
   const key = converterKey(messageEvent.topic, messageEvent.schemaName);
-  const matchedConverters = converters.get(key);
-  for (const converter of matchedConverters ?? []) {
+  const matchedConverters = _.uniqBy(
+    [
+      ...(converters.get(key) ?? []),
+      ...(converters.get(
+        converterKey(messageEvent.topic, messageEvent.schemaName, messageChannelId(messageEvent)),
+      ) ?? []),
+    ],
+    getConverterId,
+  );
+  for (const converter of matchedConverters) {
     const emitAlert: MessageConverterContext["emitAlert"] = (alert, alertId) => {
       context?.emitAlert?.(converter, alert, alertId);
     };
@@ -67,18 +84,32 @@ export function convertMessage(
         sourceSchemaName: messageEvent.schemaName,
         converterId: getConverterId(converter),
       };
+      const channelOutput = { ...output, sourceChannelId: messageChannelId(messageEvent) };
+      const configuredOutput =
+        context?.config?.topicOutputs?.[messageEvent.topic]?.[
+          topicOutputKey(messageEvent.topic, channelOutput)
+        ] == undefined
+          ? output
+          : channelOutput;
       let topicConfig =
         context?.config == undefined
           ? messageEvent.topicConfig
           : resolveOutputConfig(
               context.config,
-              { topic: messageEvent.topic, schemaName: converter.toSchemaName, output },
+              {
+                topic: messageEvent.topic,
+                schemaName: converter.toSchemaName,
+                output: configuredOutput,
+              },
               context.panelType == undefined
                 ? undefined
                 : converter.panelSettings?.[context.panelType]?.defaultConfig,
             );
       if (context?.config != undefined && context.outputConfigCache != undefined) {
-        const outputKey = topicOutputKey(messageEvent.topic, output);
+        const outputKey = JSON.stringify([
+          messageChannelId(messageEvent),
+          topicOutputKey(messageEvent.topic, output),
+        ])!;
         const cachedConfig = context.outputConfigCache.get(outputKey);
         // Stateful converters may use settings identity to track entities between messages.
         // Keep that identity until this output's effective settings actually change.
@@ -100,6 +131,7 @@ export function convertMessage(
       }
       convertedMessages.push({
         topic: messageEvent.topic,
+        channelId: convertedChannelId(messageChannelId(messageEvent), getConverterId(converter)),
         schemaName: converter.toSchemaName,
         receiveTime: messageEvent.receiveTime,
         message: convertedMessage,
@@ -141,6 +173,7 @@ export type TopicSchemaConversions = {
   // Topics which we are subscribed without a conversion, these are topics we
   // want to receive the original message.
   unconvertedSubscriptionTopics: Set<string>;
+  originalSubscriptions: Subscription[];
 
   // When a subscription with a convertTo exists, we use this map to lookup a
   // converter which can produce the desired output message schema. The keys for
@@ -166,33 +199,54 @@ export function collateTopicSchemaConversions(
 ): TopicSchemaConversions {
   const topicSchemaConverters: TopicSchemaConverterMap = new Map();
   const unconvertedSubscriptionTopics = new Set<string>();
+  const originalSubscriptions: Subscription[] = [];
+  const channels = channelCatalog(sortedTopics, messageConverters);
 
   // Bin the subscriptions into two sets: those which want a conversion and those that do not.
   //
   // For the subscriptions that want a conversion, if the topic schemaName matches the requested
   // convertTo, then we don't need to do a conversion.
-  for (const subscription of subscriptions) {
+  for (const requested of subscriptions) {
+    const subscription = resolveChannelSubscription(requested, channels);
+    if (subscription == undefined) {
+      continue;
+    }
     if (!subscription.convertTo) {
       unconvertedSubscriptionTopics.add(subscription.topic);
+      originalSubscriptions.push(subscription);
       continue;
     }
 
     // If the convertTo is the same as the original schema for the topic then we don't need to
     // perform a conversion.
     const noConversion = sortedTopics.find(
-      (topic) => topic.name === subscription.topic && topic.schemaName === subscription.convertTo,
+      (topic) =>
+        topic.name === subscription.topic &&
+        topic.schemaName === subscription.convertTo &&
+        (subscription.channelId == undefined ||
+          subscription.channelId ===
+            (topic.channelId ?? nativeChannelId(topic.name, topic.schemaName))),
     );
     if (noConversion && subscription.converterId == undefined) {
       unconvertedSubscriptionTopics.add(noConversion.name);
+      originalSubscriptions.push(subscription);
       continue;
     }
 
     // Since we don't have an existing topic with out destination schema we need to find
     // a converter that will convert from the topic to the desired schema
     for (const subscriberTopic of sortedTopics.filter(
-      (topic) => topic.name === subscription.topic,
+      (topic) =>
+        topic.name === subscription.topic &&
+        (subscription.channelId == undefined ||
+          subscription.channelId ===
+            (topic.channelId ?? nativeChannelId(topic.name, topic.schemaName))),
     )) {
-      const key = converterKey(subscription.topic, subscriberTopic.schemaName ?? "<no-schema>");
+      const key = converterKey(
+        subscription.topic,
+        subscriberTopic.schemaName ?? "<no-schema>",
+        subscription.channelId,
+      );
       const existingConverters = topicSchemaConverters.get(key) ?? [];
       const converters = (messageConverters ?? []).filter(
         (conv) =>
@@ -212,7 +266,7 @@ export function collateTopicSchemaConversions(
     }
   }
 
-  return { unconvertedSubscriptionTopics, topicSchemaConverters };
+  return { unconvertedSubscriptionTopics, originalSubscriptions, topicSchemaConverters };
 }
 
 /**
@@ -262,4 +316,16 @@ export function forEachSortedArrays<Item>(
       break;
     }
   }
+}
+
+/** Native delivery uses the same exact channel selection in current frames and history. */
+export function wantsOriginalMessage(
+  event: Immutable<MessageEvent>,
+  subscriptions: readonly Subscription[],
+): boolean {
+  return subscriptions.some(
+    (subscription) =>
+      subscription.topic === event.topic &&
+      (subscription.channelId == undefined || subscription.channelId === messageChannelId(event)),
+  );
 }

@@ -9,8 +9,8 @@ import {
   messagePathStructures,
   traverseStructure,
 } from "@lichtblick/suite-base/components/MessagePathSyntax/messagePathsForDatatype";
-import { useMessageDataItem } from "@lichtblick/suite-base/components/MessagePathSyntax/useMessageDataItem";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
+import { useChannels } from "@lichtblick/suite-base/hooks/useChannels";
 import { Topic } from "@lichtblick/suite-base/players/types";
 
 import { PATH_NAME_AGGREGATOR, PREV_MSG_METHOD } from "./constants";
@@ -20,11 +20,8 @@ import type {
   SharedConfig,
   UseSharedRawMessagesLogicResult,
 } from "./types";
+import { useChannelMessages } from "./useChannelMessages";
 import { dataWithoutWrappingArray, generateDeepKeyPaths, toggleExpansion } from "./utils";
-
-const LATEST_PER_RENDER_TICK_SAMPLING = Object.freeze({
-  mode: "latest-per-render-tick" as const,
-});
 
 /**
  * Shared hook that contains all the common logic for both RawMessages and RawMessagesVirtual panels.
@@ -34,7 +31,8 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
   config,
   saveConfig,
 }: UseSharedRawMessagesLogicProps<T>): UseSharedRawMessagesLogicResult {
-  const { topicPath, diffMethod, diffTopicPath, diffEnabled } = config;
+  const { topicPath, channelId, diffChannelId, diffMethod, diffTopicPath, diffEnabled } = config;
+  const channels = useChannels();
   const { topics, datatypes } = useDataSourceInfo();
   const { setMessagePathDropConfig } = usePanelContext();
 
@@ -49,7 +47,7 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
       handleDrop(paths) {
         const path = paths[0];
         if (path) {
-          saveConfig({ topicPath: path.path } as Partial<T>);
+          saveConfig({ topicPath: path.path, channelId: path.channelId } as Partial<T>);
           setExpansion("none");
         }
       },
@@ -61,10 +59,20 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
     [topicPath],
   );
 
-  const topic: Topic | undefined = useMemo(
-    () => topicRosPath && topics.find(({ name }) => name === topicRosPath.topicName),
-    [topicRosPath, topics],
-  );
+  const topic: Topic | undefined = useMemo(() => {
+    if (topicRosPath == undefined) {
+      return undefined;
+    }
+    if (channelId != undefined) {
+      const channel = channels.find(
+        (entry) => entry.topic === topicRosPath.topicName && entry.id === channelId,
+      );
+      return channel == undefined
+        ? undefined
+        : { name: channel.topic, schemaName: channel.schemaName, channelId: channel.id };
+    }
+    return topics.find(({ name }) => name === topicRosPath.topicName);
+  }, [topicRosPath, topics, channels, channelId]);
 
   const structures = useMemo(() => messagePathStructures(datatypes), [datatypes]);
 
@@ -77,12 +85,8 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
 
   const [expansion, setExpansion] = useState(config.expansion);
 
-  const samplingRequest = LATEST_PER_RENDER_TICK_SAMPLING;
-  const matchedMessages = useMessageDataItem(topic ? topicPath : "", {
-    historySize: 2,
-    samplingRequest,
-  });
-  const diffMessages = useMessageDataItem(diffEnabled ? diffTopicPath : "", { samplingRequest });
+  const matchedMessages = useChannelMessages(topic ? topicPath : "", channelId, 2);
+  const diffMessages = useChannelMessages(diffEnabled ? diffTopicPath : "", diffChannelId);
 
   const diffTopicObj = diffMessages[0];
   const currTickObj = matchedMessages[matchedMessages.length - 1];
@@ -114,16 +118,27 @@ export function useSharedRawMessagesLogic<T extends SharedConfig>({
   const onTopicPathChange = useCallback(
     (newTopicPath: string) => {
       setExpansion("none");
-      saveConfig({ topicPath: newTopicPath } as Partial<T>);
+      saveConfig({
+        topicPath: newTopicPath,
+        ...(parseMessagePath(newTopicPath)?.topicName === topicRosPath?.topicName
+          ? {}
+          : { channelId: undefined }),
+      } as Partial<T>);
     },
-    [saveConfig],
+    [saveConfig, topicRosPath],
   );
 
   const onDiffTopicPathChange = useCallback(
     (newDiffTopicPath: string) => {
-      saveConfig({ diffTopicPath: newDiffTopicPath } as Partial<T>);
+      saveConfig({
+        diffTopicPath: newDiffTopicPath,
+        ...(parseMessagePath(newDiffTopicPath)?.topicName ===
+        parseMessagePath(diffTopicPath)?.topicName
+          ? {}
+          : { diffChannelId: undefined }),
+      } as Partial<T>);
     },
-    [saveConfig],
+    [saveConfig, diffTopicPath],
   );
 
   const onToggleDiff = useCallback(() => {

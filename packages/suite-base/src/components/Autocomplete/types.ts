@@ -11,6 +11,7 @@ export type AutocompleteProps = {
   filterText?: string;
   hasError?: boolean;
   inputStyle?: CSSProperties;
+  startAdornment?: React.ReactNode;
   items: readonly string[];
   menuStyle?: CSSProperties;
   minWidth?: number;

@@ -104,7 +104,7 @@ describe("needsGopBackfill", () => {
 });
 
 describe("messageKey", () => {
-  it("encodes topic and receive time", () => {
+  it("identifies a frame consistently and distinguishes timestamps", () => {
     // Given
     const message = MessageEventBuilder.messageEvent({
       topic: "/cam",
@@ -118,11 +118,49 @@ describe("messageKey", () => {
     const key = messageKey(message);
 
     // Then
-    expect(key).toBe("/cam:5:123");
+    expect(key).toBe(messageKey({ ...message }));
+    expect(key).not.toBe(messageKey({ ...message, receiveTime: { sec: 5, nsec: 124 } }));
+  });
+
+  it("distinguishes channels and legacy schema variants at the same topic and timestamp", () => {
+    const event = MessageEventBuilder.messageEvent({ topic: "/shared", schemaName: "A" });
+    expect(messageKey({ ...event, channelId: "first" })).not.toBe(
+      messageKey({ ...event, channelId: "second" }),
+    );
+    expect(messageKey(event)).not.toBe(messageKey({ ...event, schemaName: "B" }));
   });
 });
 
 describe("readVideoGopForSeekTarget", () => {
+  it("requests the target channel and ignores candidates from other channels on the same topic", async () => {
+    const target = MessageEventBuilder.messageEvent({
+      topic: "video",
+      channelId: "first",
+      schemaName: "foxglove.CompressedVideo",
+      receiveTime: { sec: 0, nsec: 30 },
+      message: { format: "h265", data: new Uint8Array([0x01]) },
+    });
+    const keyframe = {
+      ...target,
+      receiveTime: { sec: 0, nsec: 10 },
+      message: { format: "h265", data: new Uint8Array([0x03]) },
+    };
+    const unrelated = { ...keyframe, channelId: "second" };
+    const getBackfillMessages = jest
+      .fn(async (_args: GetBackfillMessagesArgs): Promise<MessageEvent[]> => [])
+      .mockResolvedValueOnce([unrelated, target])
+      .mockResolvedValueOnce([unrelated, keyframe]);
+    jest
+      .spyOn(H265, "IsKeyframe")
+      .mockImplementation((data: Uint8Array) => data === keyframe.message.data);
+    expect(await readVideoGopForSeekTarget(target, getBackfillMessages, () => undefined)).toEqual([
+      keyframe,
+      target,
+    ]);
+    expect(getBackfillMessages.mock.calls[0]?.[0].topics.get("video")?.channelIds).toEqual([
+      "first",
+    ]);
+  });
   it("returns the GOP from the closest preceding keyframe to the target, in order", async () => {
     // Given
     const target = MessageEventBuilder.messageEvent({
@@ -324,6 +362,48 @@ describe("readVideoGopForSeekTarget", () => {
 });
 
 describe("expandVideoSeekBackfill", () => {
+  it("preserves synchronized non-video channels sharing a topic, regardless of input order", async () => {
+    const scene = MessageEventBuilder.messageEvent({
+      topic: "/mixed_geometry",
+      channelId: "mcap:1",
+      schemaName: "foxglove.SceneUpdate",
+      receiveTime: { sec: 5, nsec: 0 },
+      message: { entities: [] },
+    });
+    const cloud = MessageEventBuilder.messageEvent({
+      ...scene,
+      channelId: "mcap:2",
+      schemaName: "foxglove.PointCloud",
+      message: { point_stride: 16 },
+    });
+    const getBackfillMessages = jest.fn(async () => []);
+    for (const messages of [
+      [cloud, scene],
+      [scene, cloud],
+    ]) {
+      expect(await expandVideoSeekBackfill(messages, getBackfillMessages, () => undefined)).toEqual(
+        messages,
+      );
+    }
+    expect(getBackfillMessages).not.toHaveBeenCalled();
+  });
+
+  it("does not deduplicate distinct non-video events on the same channel and timestamp", async () => {
+    const first = MessageEventBuilder.messageEvent({
+      topic: "/scene",
+      channelId: "mcap:1",
+      schemaName: "foxglove.SceneUpdate",
+      message: { entities: [1] },
+    });
+    const second = { ...first, message: { entities: [2] } };
+    expect(
+      await expandVideoSeekBackfill(
+        [first, second],
+        async () => [],
+        () => undefined,
+      ),
+    ).toEqual([first, second]);
+  });
   it("passes through unrecognized formats and keyframes unchanged", async () => {
     // Given
     const otherFormat = MessageEventBuilder.messageEvent({

@@ -133,6 +133,113 @@ describe("MessagePathInput Component", () => {
     jest.clearAllMocks();
   });
 
+  const channels = [
+    {
+      id: "first",
+      topic: "/shared",
+      schemaName: "First",
+      source: { kind: "native" as const },
+    },
+    {
+      id: "second",
+      topic: "/shared",
+      schemaName: "Second",
+      source: { kind: "native" as const },
+    },
+    {
+      id: "virtual",
+      topic: "/shared",
+      schemaName: "Output",
+      source: {
+        kind: "converted" as const,
+        inputChannelId: "first",
+        converterId: "converter",
+      },
+    },
+  ];
+
+  it("chooses an exact channel from topic autocomplete and preserves the field suffix", async () => {
+    mockTopics = [{ name: "/shared", schemaName: "First" }];
+    mockDatatypes = new Map();
+    const onChange = jest.fn();
+    renderComponent({
+      path: "/shared.value",
+      channelSelection: { channels, onChange },
+    });
+    const input = screen.getByRole("combobox");
+    fireEvent.focus(input);
+    const options = await screen.findAllByRole("option");
+    expect(options).toHaveLength(3);
+    expect(new Set(options.map((option) => option.textContent)).size).toBe(3);
+    fireEvent.click(options[2]!);
+    expect(onChange).toHaveBeenLastCalledWith("/shared.value", "virtual");
+    expect(mockOnChange).not.toHaveBeenCalled();
+  });
+
+  it("automatically selects a topic's only channel", () => {
+    const onChange = jest.fn();
+    renderComponent({
+      path: "/shared.value",
+      channelSelection: { channels: channels.slice(0, 1), onChange },
+    });
+    expect(onChange).toHaveBeenCalledWith("/shared.value", "first");
+  });
+
+  it("does not automatically select an ambiguous or unavailable channel", () => {
+    const onChange = jest.fn();
+    const { rerender } = renderComponent({
+      path: "/shared",
+      channelSelection: { channels, onChange },
+    });
+    expect(onChange).not.toHaveBeenCalled();
+    rerender(
+      <MessagePathInput
+        path="/shared"
+        onChange={mockOnChange}
+        channelSelection={{
+          channels: channels.slice(0, 1),
+          channelId: "missing",
+          onChange,
+        }}
+      />,
+    );
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("keeps the selected channel while editing fields and clears it for another topic", () => {
+    const onChange = jest.fn();
+    renderComponent({
+      path: "/shared.value",
+      channelSelection: { channels, channelId: "second", onChange },
+    });
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "/shared.other" },
+    });
+    expect(onChange).toHaveBeenLastCalledWith("/shared.other", "second");
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "/shared.value[" } });
+    expect(onChange).toHaveBeenLastCalledWith("/shared.value[", "second");
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "/another" },
+    });
+    expect(onChange).toHaveBeenLastCalledWith("/another", undefined);
+  });
+
+  it("completes fields from the selected channel schema", async () => {
+    mockTopics = [{ name: "/shared", schemaName: "First" }];
+    mockDatatypes = new Map([
+      ["First", { definitions: [{ name: "first", type: "int32" }] }],
+      ["Second", { definitions: [{ name: "second", type: "string" }] }],
+    ]);
+    renderComponent({
+      path: "/shared.",
+      channelSelection: { channels, channelId: "second", onChange: jest.fn() },
+    });
+    fireEvent.focus(screen.getByRole("combobox"));
+    expect((await screen.findAllByRole("option")).map((option) => option.textContent)).toEqual([
+      ".second",
+    ]);
+  });
+
   it("should update value when onChange is called", async () => {
     renderComponent();
 
@@ -162,8 +269,14 @@ describe("MessagePathInput Component", () => {
 
     it("should resolve to 'topicName' when path is empty (rosPath is null)", async () => {
       // Given
-      const topic1 = { name: `/${BasicBuilder.string()}`, schemaName: "std_msgs/String" };
-      const topic2 = { name: `/${BasicBuilder.number()}`, schemaName: "std_msgs/Int32" };
+      const topic1 = {
+        name: `/${BasicBuilder.string()}`,
+        schemaName: "std_msgs/String",
+      };
+      const topic2 = {
+        name: `/${BasicBuilder.number()}`,
+        schemaName: "std_msgs/Int32",
+      };
       mockTopics = [topic1, topic2];
       mockDatatypes = new Map();
 
@@ -182,8 +295,14 @@ describe("MessagePathInput Component", () => {
     });
 
     it("should resolve to 'topicName' when typing partial topic name", async () => {
-      const topic1 = { name: `/camera/${BasicBuilder.string()}`, schemaName: "std_msgs/String" };
-      const topic2 = { name: `/camera/${BasicBuilder.string()}`, schemaName: "std_msgs/String" };
+      const topic1 = {
+        name: `/camera/${BasicBuilder.string()}`,
+        schemaName: "std_msgs/String",
+      };
+      const topic2 = {
+        name: `/camera/${BasicBuilder.string()}`,
+        schemaName: "std_msgs/String",
+      };
       mockTopics = [topic1, topic2];
       mockDatatypes = new Map();
 
@@ -200,6 +319,23 @@ describe("MessagePathInput Component", () => {
       expect(options[1]!.textContent).toBe(topic2.name);
     });
 
+    it("uses the selected channel schema for field autocomplete on a shared topic", async () => {
+      mockTopics = [
+        { name: "/shared", schemaName: "First" },
+        { name: "/shared", schemaName: "Second" },
+      ];
+      mockDatatypes = new Map([
+        ["First", { definitions: [{ name: "first", type: "int32" }] }],
+        ["Second", { definitions: [{ name: "second", type: "string" }] }],
+      ]);
+      renderComponent({ path: "/shared.", schemaName: "First" });
+      const input = screen.getByRole("combobox");
+      fireEvent.click(input);
+      fireEvent.focus(input);
+      const options = await screen.findAllByRole("option");
+      expect(options.map((option) => option.textContent)).toEqual([".first"]);
+    });
+
     it("should show field options after selecting a topic from autocomplete", async () => {
       // Given
       mockTopics = [{ name: `/topic1`, schemaName: "custom/Type" }];
@@ -208,8 +344,18 @@ describe("MessagePathInput Component", () => {
           "custom/Type",
           {
             definitions: [
-              { name: "value1", type: "float64", isArray: false, isComplex: false },
-              { name: "value2", type: "string", isArray: false, isComplex: false },
+              {
+                name: "value1",
+                type: "float64",
+                isArray: false,
+                isComplex: false,
+              },
+              {
+                name: "value2",
+                type: "string",
+                isArray: false,
+                isComplex: false,
+              },
             ],
           },
         ],

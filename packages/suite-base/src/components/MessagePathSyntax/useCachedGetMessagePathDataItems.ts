@@ -55,6 +55,7 @@ export type MessagePathDataItem = {
 // reference, as long as topics/datatypes/global variables haven't changed in the meantime.
 export function useCachedGetMessagePathDataItems(
   paths: readonly string[],
+  schemaOverride?: { topicName: string; schemaName: string },
 ): (path: string, message: MessageEvent) => MessagePathDataItem[] | undefined {
   const { topics: providerTopics, datatypes } = PanelAPI.useDataSourceInfo();
   const { globalVariables } = useGlobalVariables();
@@ -78,7 +79,16 @@ export function useCachedGetMessagePathDataItems(
   }, [globalVariables, parsedPaths]);
   const memoizedFilledInPaths = useDeepMemo(unmemoizedFilledInPaths);
 
-  const topicsByName = useMemo(() => _.keyBy(providerTopics, ({ name }) => name), [providerTopics]);
+  const topicsByName = useMemo(() => {
+    const result = _.keyBy(providerTopics, ({ name }) => name);
+    if (schemaOverride != undefined) {
+      result[schemaOverride.topicName] = {
+        name: schemaOverride.topicName,
+        schemaName: schemaOverride.schemaName,
+      };
+    }
+    return result;
+  }, [providerTopics, schemaOverride]);
 
   // Filter down topics and datatypes to only the ones we need to process the requested paths, so
   // our result can be dependent on the relevant topics only. Without this, adding topics/datatypes
@@ -152,10 +162,11 @@ export function useCachedGetMessagePathDataItems(
         topicsByName,
         structures,
         enumValues,
+        { allowUnstructured: schemaOverride != undefined },
       );
       return messagePathDataItems;
     },
-    [memoizedPaths, memoizedFilledInPaths, topicsByName, structures, enumValues],
+    [memoizedPaths, memoizedFilledInPaths, topicsByName, structures, enumValues, schemaOverride],
   );
 }
 
@@ -203,6 +214,7 @@ export function getMessagePathDataItems(
   topicsByName: Record<string, Topic>,
   structures: Record<string, MessagePathStructureItemMessage>,
   enumValues: ReturnType<typeof enumValuesByDatatypeAndField>,
+  options?: { allowUnstructured?: boolean },
 ): MessagePathDataItem[] | undefined {
   const topic = topicsByName[filledInPath.topicName];
 
@@ -325,7 +337,10 @@ export function getMessagePathDataItems(
     // If the topic has no schema, we can at least allow accessing the root message
     topic.schemaName == undefined
       ? { structureType: "message", datatype: "", nextByName: {} }
-      : structures[topic.schemaName];
+      : (structures[topic.schemaName] ??
+        (options?.allowUnstructured === true
+          ? { structureType: "message", datatype: topic.schemaName, nextByName: {} }
+          : undefined));
   if (structure) {
     traverse(message.message, 0, quoteTopicNameIfNeeded(filledInPath.topicName), structure);
   }

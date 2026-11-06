@@ -56,7 +56,17 @@ export interface Time {
 /**
  * A topic is a namespace for specific types of messages
  */
+export type Channel = {
+  /** Opaque identity within the current data source. Do not derive it from a display label. */
+  id: string;
+  topic: string;
+  schemaName: string;
+  source: { kind: "native" } | { kind: "converted"; inputChannelId: string; converterId: string };
+};
+
 export type Topic = {
+  /** Native channel identity, when the data source exposes individual channels. */
+  channelId?: string;
   /**
    * topic name i.e. "/some/topic"
    */
@@ -87,6 +97,8 @@ export type Topic = {
 
 export type Subscription = {
   topic: string;
+  /** Select one advertised channel, including virtual converter outputs. Unknown IDs deliver nothing. */
+  channelId?: string;
 
   /**
    * If a topic has additional schema names, specifying a schema name will convert messages on that
@@ -140,8 +152,8 @@ export type Metadata = {
 
 /** Identifies an original stream or a registered converter applied to its source schema. */
 export type TopicOutput =
-  | { kind: "original"; sourceSchemaName: string }
-  | { kind: "converted"; sourceSchemaName: string; converterId: string };
+  | { kind: "original"; sourceSchemaName: string; sourceChannelId?: string }
+  | { kind: "converted"; sourceSchemaName: string; converterId: string; sourceChannelId?: string };
 
 export type TopicOutputDescriptor = {
   topic: string;
@@ -151,6 +163,8 @@ export type TopicOutputDescriptor = {
 
 /** A message event frames message data with the topic and receive time. */
 export type MessageEvent<T = unknown> = {
+  /** Identity of the native or virtual channel carrying this message. */
+  channelId?: string;
   /** The topic name this message was received on, i.e. "/some/topic" */
   topic: string;
   /**
@@ -267,6 +281,8 @@ export type RenderState = {
    * List of available topics. This list includes subscribed and unsubscribed topics.
    */
   topics?: Topic[];
+  /** Native and virtual channels available for exact stream selection. */
+  channels?: Channel[];
 
   /**
    * List of available services. This list includes all services provided by the data source.
@@ -310,6 +326,8 @@ export type RenderState = {
 };
 
 export type SubscribeMessageRangeArgs = {
+  /** Select one advertised native or virtual channel. */
+  channelId?: string;
   /** Select an exact registered converter for the requested output schema. */
   converterId?: string;
   /**
@@ -1026,6 +1044,9 @@ export type SettingsTreeNode = {
    * An optional label shown at the top of this node.
    */
   label?: string;
+
+  /** Optional annotation beside the node label, with additional detail on hover. */
+  labelBadge?: { text: string; tooltip?: string };
 
   /**
    * True if the node label can be edited by the user.

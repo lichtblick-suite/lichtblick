@@ -47,6 +47,7 @@ import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import {
   renderTopics,
   messageOutputKey,
+  messageChannelOutputKey,
   topicOutputKey,
   outputSettingsPath,
   resolveOutputConfig,
@@ -233,11 +234,16 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     return settings;
   }
 
-  public getRenderTopic(event: Pick<MessageEvent, "topic" | "schemaName" | "output">): string {
-    const key = messageOutputKey(event);
+  public getRenderTopic(
+    event: Pick<MessageEvent, "topic" | "schemaName" | "output" | "channelId" | "originalMessageEvent">,
+  ): string {
+    const key = messageChannelOutputKey(event);
+    const unqualifiedKey = messageOutputKey(event);
     return (
       this.renderTopics.find((entry) => topicOutputKey(entry.topic, entry.output) === key)?.name ??
-      (event.output?.kind === "converted" ? key : event.topic)
+      this.renderTopics.find((entry) => topicOutputKey(entry.topic, entry.output) === unqualifiedKey)
+        ?.name ??
+      (event.output?.kind === "converted" ? unqualifiedKey : event.topic)
     );
   }
 
@@ -261,24 +267,37 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
 
   public getTopicLabel(key: string): string {
     const output = this.renderTopics.find((entry) => entry.name === key);
-    return output == undefined ? key : `${output.topic} - ${output.label}`;
+    if (output == undefined) {
+      return key;
+    }
+    return this.getSettingsPath(["topics", key]).length === 2
+      ? output.topic
+      : `${output.topic} - ${output.label}`;
   }
 
   public getSettingsPath(path: readonly string[]): string[] {
-    if (
-      path[0] === "topics" &&
-      this.renderTopics.some(
-        (output) =>
-          output.topic === path[1] && topicOutputKey(output.topic, output.output) === path[2],
-      )
-    ) {
+    const explicitOutput =
+      path[0] === "topics"
+        ? this.renderTopics.find(
+            (entry) =>
+              entry.topic === path[1] && topicOutputKey(entry.topic, entry.output) === path[2],
+          )
+        : undefined;
+    const output =
+      explicitOutput ??
+      (path[0] === "topics" || path[0] === "imageAnnotations"
+        ? this.renderTopics.find((entry) => entry.name === path[1])
+        : undefined);
+    if (output == undefined) {
       return [...path];
     }
-    const output =
-      path[0] === "topics" || path[0] === "imageAnnotations"
-        ? this.renderTopics.find((entry) => entry.name === path[1])
-        : undefined;
-    return output == undefined ? [...path] : [...outputSettingsPath(output), ...path.slice(2)];
+    const singleNative =
+      path[0] === "topics" &&
+      output.output.kind === "original" &&
+      this.topics?.filter((entry) => entry.name === output.topic).length === 1 &&
+      this.renderTopics.filter((entry) => entry.topic === output.topic).length === 1;
+    const basePath = singleNative ? ["topics", output.topic] : outputSettingsPath(output);
+    return [...basePath, ...path.slice(explicitOutput == undefined ? 2 : 3)];
   }
 
   public setTopicSettings(
@@ -427,13 +446,16 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
           return entry;
         }
         const handler = entry.node.handler;
+        const output = this.renderTopics.find((item) => item.name === entry.path[1]);
         return {
           path,
           node: {
             ...entry.node,
-            label:
-              this.renderTopics.find((output) => output.name === entry.path[1])?.label ??
-              entry.node.label,
+            label: output?.label ?? entry.node.label,
+            labelBadge:
+              output?.output.kind === "converted"
+                ? { text: i18next.t("panelSettings:converted"), tooltip: output.converterLabel }
+                : undefined,
             handler:
               handler == undefined
                 ? undefined
@@ -461,7 +483,12 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
             children: Object.fromEntries(
               Object.entries(topics.children).map(([topic, node]) => {
                 const outputs = Object.entries(node?.children ?? {}).filter(
-                  ([, child]) => child?.visible != undefined,
+                  ([key, child]) =>
+                    child?.visible != undefined &&
+                    this.renderTopics.some(
+                      (output) =>
+                        output.topic === topic && topicOutputKey(topic, output.output) === key,
+                    ),
                 );
                 if (node == undefined || outputs.length === 0) {
                   return [topic, node];
@@ -1305,13 +1332,18 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       ) {
         continue;
       }
-      const path = outputSettingsPath(output);
-      const node = this.settings.tree().topics?.children?.[output.topic]?.children?.[path[2]!];
+      const path = this.getSettingsPath(["topics", output.name]);
+      const topicNode = this.settings.tree().topics?.children?.[output.topic];
+      const node = path.length === 2 ? topicNode : topicNode?.children?.[path[2]!];
       if (node == undefined) {
         emptyOutputNodes.push({
           path: ["topics", output.name],
           node: {
             label: output.label,
+            labelBadge:
+              output.output.kind === "converted"
+                ? { text: i18next.t("panelSettings:converted"), tooltip: output.converterLabel }
+                : undefined,
             fields: {},
             handler: (action) => {
               if (action.action === "update") {

@@ -11,7 +11,7 @@ import shallowequal from "shallowequal";
 import { createStore, StoreApi } from "zustand";
 
 import { Condvar } from "@lichtblick/den/async";
-import { Time } from "@lichtblick/rostime";
+import { Time, compare } from "@lichtblick/rostime";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 import {
   makeSubscriptionMemoizer,
@@ -25,6 +25,7 @@ import {
   PlayerState,
   SubscribePayload,
 } from "@lichtblick/suite-base/players/types";
+import { matchesChannel } from "@lichtblick/suite-base/util/channels";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import { FramePromise } from "./pauseFrameForPromise";
@@ -67,7 +68,7 @@ export type MessagePipelineInternalState = {
    * for dispatching messages needs to iterate over the array of IDs.
    */
   subscriberIdsByTopic: Map<string, string[]>;
-  /** This holds the last message emitted by the player on each topic. Attempt to use this before falling back to player backfill.
+  /** Last message per native channel, or per topic for legacy sources without channel IDs.
    */
   lastMessageEventByTopic: Map<string, MessageEvent>;
   /** Function to call when react render has completed with the latest state */
@@ -216,20 +217,38 @@ export function createMessagePipelineStore({
         const player = get().player;
         return player?.getMetadata?.() ?? Object.freeze([]);
       },
-      getBatchIterator(topic: string, options?: { start?: Time; end?: Time }) {
+      getBatchIterator(topic: string, options?: { start?: Time; end?: Time; channelId?: string }) {
         const player = get().player;
-        return player?.getBatchIterator(topic, options);
+        const iterator = player?.getBatchIterator(topic, options);
+        if (iterator == undefined || options?.channelId == undefined) {
+          return iterator;
+        }
+        const selection = { topic, channelIds: [options.channelId] };
+        return (async function* () {
+          for await (const result of iterator) {
+            if (result.type !== "message-event" || matchesChannel(result.msgEvent, selection)) {
+              yield result;
+            }
+          }
+        })();
       },
-      async getMessageAtTime(topic: string, time: Time) {
+      async getMessageAtTime(topic: string, time: Time, channelId?: string) {
         const player = get().player;
         if (player?.getBackfillMessages == undefined) {
           return undefined;
         }
         const messages = await player.getBackfillMessages({
-          topics: new Map([[topic, { topic }]]),
+          topics: new Map([
+            [topic, { topic, channelIds: channelId == undefined ? undefined : [channelId] }],
+          ]),
           time,
         });
-        return messages.find((msg) => msg.topic === topic);
+        return messages.find((msg) =>
+          matchesChannel(msg, {
+            topic,
+            channelIds: channelId == undefined ? undefined : [channelId],
+          }),
+        );
       },
       startPlayback: undefined,
       playUntil: undefined,
@@ -281,37 +300,26 @@ function updateSubscriberAction(
     }
   }
 
-  // Record any _new_ topics for this subscriber so that we can emit last messages on these topics
-  const newTopicsForId = new Set<string>();
-
-  const prevSubsForId = previousSubscriptionsById.get(action.id);
-  const prevTopics = new Set(prevSubsForId?.map((sub) => sub.topic) ?? []);
-  for (const { topic: newTopic } of action.payloads) {
-    if (!prevTopics.has(newTopic)) {
-      newTopicsForId.add(newTopic);
-    }
-  }
-
+  const previousSubscriptions = previousSubscriptionsById.get(action.id) ?? [];
   const lastMessageEventByTopic = new Map(prevState.lastMessageEventByTopic);
-
-  for (const topic of prevTopics) {
-    // if this topic has no other subscribers, we want to remove it from the lastMessageEventByTopic.
-    // This fixes the case where if a panel unsubscribes, triggers playback, and then resubscribes,
-    // they won't get this old stale message when they resubscribe again before getting the message
-    // at the current time frome seek-backfill.
-    if (!subscriberIdsByTopic.has(topic)) {
-      lastMessageEventByTopic.delete(topic);
+  for (const [key, event] of lastMessageEventByTopic) {
+    if (
+      ![...subscriptionsById.values()].some((subs) =>
+        subs.some((sub) => matchesChannel(event, sub)),
+      )
+    ) {
+      lastMessageEventByTopic.delete(key);
     }
   }
 
-  // Inject the last message on new topics for this subscriber
-  const messagesForSubscriber = [];
-  for (const topic of newTopicsForId) {
-    const msgEvent = lastMessageEventByTopic.get(topic);
-    if (msgEvent) {
-      messagesForSubscriber.push(msgEvent);
-    }
-  }
+  // Replay every newly selected channel, including a channel switch within the same topic.
+  const messagesForSubscriber = [...lastMessageEventByTopic.values()]
+    .filter(
+      (event) =>
+        action.payloads.some((sub) => matchesChannel(event, sub)) &&
+        !previousSubscriptions.some((sub) => matchesChannel(event, sub)),
+    )
+    .sort((a, b) => compare(a.receiveTime, b.receiveTime));
 
   let newMessagesBySubscriberId;
 
@@ -349,30 +357,44 @@ function updatePlayerStateAction(
 ): MessagePipelineInternalState {
   const messages = action.playerState.activeData?.messages;
 
-  const seenTopics = new Set<string>();
-
   // We need a new set of message arrays for each subscriber since downstream users rely
   // on object instance reference checks to determine if there are new messages
   const messagesBySubscriberId = new Map<string, MessageEvent[]>();
 
   const subscriberIdsByTopic = prevState.subscriberIdsByTopic;
 
-  const lastMessageEventByTopic = prevState.lastMessageEventByTopic;
+  const previousData = prevState.public.playerState.activeData;
+  const nextData = action.playerState.activeData;
+  const lastMessageEventByTopic =
+    previousData?.lastSeekTime !== nextData?.lastSeekTime ||
+    prevState.public.playerState.playerId !== action.playerState.playerId
+      ? new Map<string, MessageEvent>()
+      : new Map(prevState.lastMessageEventByTopic);
 
   // Put messages into per-subscriber queues
   if (messages && messages !== prevState.public.playerState.activeData?.messages) {
     for (const messageEvent of messages) {
       // Save the last message on every topic to send the last message
       // to newly subscribed panels.
-      lastMessageEventByTopic.set(messageEvent.topic, messageEvent);
+      lastMessageEventByTopic.set(
+        messageEvent.channelId == undefined
+          ? messageEvent.topic
+          : JSON.stringify([messageEvent.topic, messageEvent.channelId])!,
+        messageEvent,
+      );
 
-      seenTopics.add(messageEvent.topic);
       const ids = subscriberIdsByTopic.get(messageEvent.topic);
       if (!ids) {
         continue;
       }
 
       for (const id of ids) {
+        if (
+          prevState.subscriptionsById.get(id)?.some((sub) => matchesChannel(messageEvent, sub)) !==
+          true
+        ) {
+          continue;
+        }
         const subscriberMessageEvents = messagesBySubscriberId.get(id);
         if (!subscriberMessageEvents) {
           messagesBySubscriberId.set(id, [messageEvent]);

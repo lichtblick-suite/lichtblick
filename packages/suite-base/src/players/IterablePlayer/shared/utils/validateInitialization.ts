@@ -47,7 +47,9 @@ export const validateAndAddNewTopics = (
   current: Initialization,
 ): void => {
   for (const topic of current.topics) {
-    const existingTopic = accumulated.topics.find((t) => t.name === topic.name);
+    const existingTopic = accumulated.topics.find((t) =>
+      topic.channelId == undefined ? t.name === topic.name : t.channelId === topic.channelId,
+    );
 
     if (!existingTopic) {
       accumulated.topics.push(topic);

@@ -431,9 +431,14 @@ export class IterablePlayer implements Player {
 
   public getBatchIterator(
     topic: string,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; channelId?: string },
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
-    const topicSelection = new Map([[topic, { topic }]]);
+    const topicSelection: TopicSelection = new Map([
+      [
+        topic,
+        { topic, channelIds: options?.channelId == undefined ? undefined : [options.channelId] },
+      ],
+    ]);
 
     return this.#messageRangeSource?.messageIterator({
       topics: topicSelection,
@@ -618,7 +623,8 @@ export class IterablePlayer implements Player {
       let hasHighFrequencyTopic = false;
 
       for (const topic of topics) {
-        const existingTopic = uniqueTopics.get(topic.name);
+        const topicKey = topic.channelId ?? topic.name;
+        const existingTopic = uniqueTopics.get(topicKey);
         if (existingTopic) {
           alerts.push({
             severity: "warn",
@@ -627,7 +633,7 @@ export class IterablePlayer implements Player {
           });
           continue;
         }
-        uniqueTopics.set(topic.name, topic);
+        uniqueTopics.set(topicKey, topic);
 
         if (!hasHighFrequencyTopic) {
           hasHighFrequencyTopic = isTopicHighFrequency({

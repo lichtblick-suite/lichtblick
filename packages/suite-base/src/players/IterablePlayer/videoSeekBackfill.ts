@@ -12,6 +12,7 @@ import {
 } from "@lichtblick/den/video";
 import { compare, fromNanoSec, toNanoSec } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite";
+import { messageChannelId } from "@lichtblick/suite-base/util/channels";
 import { COMPRESSED_VIDEO_DATATYPES } from "@lichtblick/suite-base/util/foxgloveSchemas";
 
 import { GetBackfillMessagesArgs } from "./IIterableSource";
@@ -46,13 +47,17 @@ export function needsGopBackfill(message: MessageEvent): boolean {
 
 /**
  * Identity used to merge the fetched GOP back into the backfill set, deduplicating the seek-target
- * frame that legitimately appears in both. Keyed on topic + receive time: within a single video
- * topic, compressed-video frames are emitted at strictly increasing, distinct receive times, so two
- * entries sharing this key are necessarily the same logical frame. (A genuine topic + exact-time
- * collision with differing content would imply a malformed stream and is not a case we support.)
+ * frame that legitimately appears in both. Video frames have distinct receive times within one
+ * channel; different channels can share both a topic and a timestamp. Legacy events without channel
+ * IDs use their topic and schema as the stream identity.
  */
 export function messageKey(message: MessageEvent): string {
-  return `${message.topic}:${message.receiveTime.sec}:${message.receiveTime.nsec}`;
+  return JSON.stringify([
+    message.topic,
+    messageChannelId(message),
+    message.receiveTime.sec,
+    message.receiveTime.nsec,
+  ])!;
 }
 
 /**
@@ -68,17 +73,30 @@ export async function readVideoGopForSeekTarget(
   getBackfillMessages: GetBackfillMessages,
   getAbortSignal: () => AbortSignal | undefined,
 ): Promise<MessageEvent[]> {
-  const topicSelection = new Map([[targetMessage.topic, { topic: targetMessage.topic }]]);
+  const topicSelection = new Map([
+    [
+      targetMessage.topic,
+      {
+        topic: targetMessage.topic,
+        channelIds: targetMessage.channelId == undefined ? undefined : [targetMessage.channelId],
+      },
+    ],
+  ]);
   const reversedGop: MessageEvent[] = [];
   const seenKeys = new Set<string>();
   let searchTime = targetMessage.receiveTime;
 
   for (let step = 0; step < MAX_SEEK_BACKFILL_VIDEO_GOP_MESSAGES; step++) {
-    const [candidate] = await getBackfillMessages({
+    const candidates = await getBackfillMessages({
       topics: topicSelection,
       time: searchTime,
       abortSignal: getAbortSignal(),
     });
+    const candidate = candidates.find(
+      (message) =>
+        message.topic === targetMessage.topic &&
+        messageChannelId(message) === messageChannelId(targetMessage),
+    );
     if (candidate == undefined || !needsGopBackfill(candidate)) {
       return [];
     }
@@ -116,7 +134,10 @@ export async function expandVideoSeekBackfill(
   getBackfillMessages: GetBackfillMessages,
   getAbortSignal: () => AbortSignal | undefined,
 ): Promise<MessageEvent[]> {
-  const expandedMessages = new Map(messages.map((message) => [messageKey(message), message]));
+  // Keep every original event, including non-video events with matching topics and timestamps.
+  // Only fetched GOP frames need deduplication against the original backfill and each other.
+  const expandedMessages = [...messages];
+  const seenKeys = new Set(messages.map(messageKey));
 
   for (const message of messages) {
     if (!needsGopBackfill(message)) {
@@ -133,11 +154,13 @@ export async function expandVideoSeekBackfill(
       getAbortSignal,
     );
     for (const gopMessage of gopMessages) {
-      expandedMessages.set(messageKey(gopMessage), gopMessage);
+      const key = messageKey(gopMessage);
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
+        expandedMessages.push(gopMessage);
+      }
     }
   }
 
-  return Array.from(expandedMessages.values()).sort((a, b) =>
-    compare(a.receiveTime, b.receiveTime),
-  );
+  return expandedMessages.sort((a, b) => compare(a.receiveTime, b.receiveTime));
 }

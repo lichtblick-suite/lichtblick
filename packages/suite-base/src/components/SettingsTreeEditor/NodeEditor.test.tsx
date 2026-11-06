@@ -73,6 +73,18 @@ function setupFn(propsOverride: Partial<NodeEditorProps> = {}) {
 }
 
 describe("handleDropNode", () => {
+  it("shows optional node badges with their details on hover", async () => {
+    setupFn({
+      path: ["topics", "/scene", "converted"],
+      settings: {
+        label: "SceneUpdate",
+        labelBadge: { text: "Converted", tooltip: "My converter" },
+      },
+    });
+    expect(screen.getByText("SceneUpdate")).toBeInTheDocument();
+    await userEvent.hover(screen.getByText("Converted"));
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("My converter");
+  });
   it("calls actionHandler with reorder-node action", () => {
     // Given: A drop item and action handler
     const actionHandler = jest.fn();
