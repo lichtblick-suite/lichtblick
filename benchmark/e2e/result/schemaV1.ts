@@ -1234,9 +1234,22 @@ function checkSteadyWindow(steadyWindow: unknown, errors: string[]): void {
     errors,
   );
   checkNumberRecord(steadyWindow.processSet, `${where}.processSet`, errors);
-  if (steadyWindow.mainThread != undefined) {
-    checkNumberRecord(steadyWindow.mainThread, `${where}.mainThread`, errors);
+  const { mainThread } = steadyWindow;
+  if (mainThread == undefined) {
+    return;
   }
+  if (!isRecord(mainThread)) {
+    errors.push(`${where}.mainThread must be an object`);
+    return;
+  }
+  const { longTaskBlockedMsPerSec, fps, ...extra } = mainThread;
+  checkFields(
+    { longTaskBlockedMsPerSec, fps },
+    `${where}.mainThread`,
+    { longTaskBlockedMsPerSec: "number", fps: "number" },
+    errors,
+  );
+  checkNumberRecord(extra, `${where}.mainThread`, errors);
 }
 
 /** Validates the optional `summary.telemetrySelf` (overhead A/B runs with telemetry on only). */
@@ -1466,8 +1479,8 @@ export function validateResultV1(obj: unknown, mode: ResultValidationMode = "str
   checkRunnerEvents(obj.runnerEvents, errors);
   if (isRecord(obj.summary)) {
     checkSummary(obj.summary, mode, errors);
-    if (mode === "strict" && isRecord(obj.run)) {
-      checkRunMode(obj.run, obj.summary, errors);
+    if (isRecord(obj.run)) {
+      checkRunMode(obj.run, obj.summary, mode, errors);
     }
   } else {
     errors.push("summary must be an object");
@@ -1476,16 +1489,26 @@ export function validateResultV1(obj: unknown, mode: ResultValidationMode = "str
 }
 
 /**
- * Strict only: an overhead A/B run has `summary.steadyWindow` and a scenario run has none, so the
- * scenario views can never pick up an overhead run that lost its marker (or the reverse).
+ * Strict: an overhead A/B run has `summary.steadyWindow` and a scenario run has none, so the
+ * scenario views can never pick up an overhead run that lost its marker (or the reverse). Lenient
+ * (older results, partial results of failed overhead runs without a steady window): only an
+ * explicit `run.mode` "scenario" with a steady window is rejected (`isOverheadRun` would treat it
+ * as a scenario run).
  */
 function checkRunMode(
   run: Record<string, unknown>,
   summary: Record<string, unknown>,
+  mode: ResultValidationMode,
   errors: string[],
 ): void {
   const overhead = run.mode === "overhead";
   const steady = summary.steadyWindow != undefined;
+  if (mode === "lenient") {
+    if (run.mode === "scenario" && steady) {
+      errors.push('summary.steadyWindow is only allowed with run.mode "overhead"');
+    }
+    return;
+  }
   if (overhead && !steady) {
     errors.push('summary.steadyWindow is required with run.mode "overhead"');
   } else if (!overhead && steady) {

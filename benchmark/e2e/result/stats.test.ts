@@ -89,6 +89,16 @@ describe("bootstrapMedianCi95", () => {
   });
 });
 
+describe("bootstrapMedianCi95 resamples", () => {
+  it.each([0, -1, 2.5, Number.NaN])("should throw for %p resamples", (resamples) => {
+    // Given
+    const values = [1, 2, 3];
+
+    // When / Then
+    expect(() => bootstrapMedianCi95(values, { resamples })).toThrow("positive integer");
+  });
+});
+
 describe("summarizeMetric", () => {
   it("should summarize the finite values only", () => {
     // Given values with an undefined and a NaN

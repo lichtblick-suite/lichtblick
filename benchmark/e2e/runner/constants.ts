@@ -294,3 +294,9 @@ export const GL_RENDERER_UNAVAILABLE = "unavailable";
 
 /** How long to wait for the page's `window.lichtblickScenario` (scenario bootstrap) to describe it. */
 export const SCENARIO_DESCRIBE_TIMEOUT_MS = 10_000;
+
+/**
+ * Characters before a function start searched for its binding (`functionNameAt`): far more than
+ * any realistic `name: Type = (` prefix, and bounds the regex work on long minified lines.
+ */
+export const BINDING_LOOKBEHIND_CHARS = 256;

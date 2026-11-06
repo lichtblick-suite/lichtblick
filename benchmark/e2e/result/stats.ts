@@ -104,18 +104,22 @@ export function mulberry32(seed: number): () => number {
 /**
  * Percentile bootstrap 95 % confidence interval of the median: `resamples` resamples of `values`
  * with replacement (seeded, so deterministic), the median of each, then the 2.5th and 97.5th
- * percentiles of those medians. One value yields `[value, value]`; no values, undefined. Buffers
- * are allocated once (no allocation per resample).
+ * percentiles of those medians. One value yields `[value, value]`; no values, undefined. Throws
+ * for `resamples` that is not a positive integer. Buffers are allocated once (no allocation per
+ * resample).
  */
 export function bootstrapMedianCi95(
   values: readonly number[],
   { resamples = BOOTSTRAP_RESAMPLES, seed = BOOTSTRAP_SEED }: BootstrapOptions = {},
 ): ConfidenceInterval | undefined {
+  if (!Number.isInteger(resamples) || resamples < 1) {
+    throw new Error(`Bootstrap resamples must be a positive integer (got ${resamples})`);
+  }
   const n = values.length;
   if (n === 0) {
     return undefined;
   }
-  if (n === 1 || resamples < 1) {
+  if (n === 1) {
     const only = medianOfSorted(sortedNumbers(values));
     return { lower: only, upper: only };
   }

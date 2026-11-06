@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { parseArtifactJson } from "./artifactJson";
+import { parseOverheadFile } from "../report/htmlReportData";
 import {
   buildExercisesLines,
   buildOverheadTable,
@@ -14,7 +15,6 @@ import {
 } from "../report/summaryMarkdown";
 import { OVERHEAD_PREFIX, RESULT_V1_SUFFIX } from "../result/constants";
 import { withRunKpis } from "../result/kpis";
-import { normalizeOverheadReport } from "../result/overheadReport";
 import { scenarioRunsOnly } from "../result/runMode";
 import type { PersistedResultV1, StoredResultV1 } from "../result/schemaV1";
 import type { OverheadReport } from "../runner/overhead.types";
@@ -192,7 +192,10 @@ function readResultsV1(): PersistedResultV1[] {
   ).map(withRunKpis);
 }
 
-/** Overhead reports of the current schema (3); other schemas or unreadable files are skipped. */
+/**
+ * Overhead reports of the current schema (3); unreadable files, other schemas and malformed reports
+ * are warned about and skipped (`parseOverheadFile`).
+ */
 function readOverheadReports(): OverheadReport[] {
   if (!fs.existsSync(ARTIFACTS_DIR)) {
     return [];
@@ -201,15 +204,19 @@ function readOverheadReports(): OverheadReport[] {
     .readdirSync(ARTIFACTS_DIR)
     .filter((file) => file.startsWith(OVERHEAD_PREFIX) && file.endsWith(".json"))
     .flatMap((file) => {
-      const json: unknown = JSON.parse(fs.readFileSync(path.join(ARTIFACTS_DIR, file), "utf-8"));
-      const report = normalizeOverheadReport(json);
-      if (report == undefined) {
-        console.warn(
-          `Skipping ${file}: not a supported overhead report (schemaVersion 3 with toggle quartets)`,
-        );
+      let text: string;
+      try {
+        text = fs.readFileSync(path.join(ARTIFACTS_DIR, file), "utf-8");
+      } catch (error) {
+        console.warn(`Skipping ${file}: ${String(error)}`);
         return [];
       }
-      return [report];
+      const outcome = parseOverheadFile(text);
+      if (!outcome.ok) {
+        console.warn(`Skipping ${file}: ${outcome.reason}`);
+        return [];
+      }
+      return [outcome.value];
     });
 }
 

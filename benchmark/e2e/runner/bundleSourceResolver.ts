@@ -10,6 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { BundleFileSystem, BundleLayout } from "./bundleSourceResolver.types";
+import { BINDING_LOOKBEHIND_CHARS } from "./constants";
 import { decodeSourceMap, originalPositionFor } from "./sourceMap";
 import type { DecodedSourceMap, OriginalPosition, RawSourceMap } from "./sourceMap.types";
 import type {
@@ -63,10 +64,15 @@ export function functionNameAt(
   ) {
     return mappedName;
   }
-  return BINDING_BEFORE_FUNCTION.exec(line.slice(0, column))?.[1];
+  return BINDING_BEFORE_FUNCTION.exec(
+    line.slice(Math.max(0, column - BINDING_LOOKBEHIND_CHARS), column),
+  )?.[1];
 }
 
-/** File name of a script URL (`http://host/main.abc.js?x` / `file:///…/main.js` → `main.js`). */
+/**
+ * File name of a script URL (`http://host/main.abc.js?x` / `file:///…/main.js` → `main.js`);
+ * undefined for an unparsable URL, a malformed percent escape or no file name.
+ */
 export function scriptFileName(url: string): string | undefined {
   let pathname: string;
   try {
@@ -74,7 +80,13 @@ export function scriptFileName(url: string): string | undefined {
   } catch {
     return undefined;
   }
-  const name = decodeURIComponent(pathname.slice(pathname.lastIndexOf("/") + 1));
+  let name: string;
+  try {
+    name = decodeURIComponent(pathname.slice(pathname.lastIndexOf("/") + 1));
+  } catch {
+    // Malformed percent escape: not a script of the build.
+    return undefined;
+  }
   return name === "" ? undefined : name;
 }
 
@@ -84,7 +96,9 @@ export function scriptFileName(url: string): string | undefined {
  * stripped entry as-is when it lies outside the repository.
  */
 export function normalizeMapSource(source: string, layout: BundleLayout): string {
-  const stripped = source.replace(WEBPACK_SOURCE_PREFIX, "").replace(/\?.*$/, "");
+  const withoutPrefix = source.replace(WEBPACK_SOURCE_PREFIX, "");
+  const queryStart = withoutPrefix.indexOf("?");
+  const stripped = queryStart === -1 ? withoutPrefix : withoutPrefix.slice(0, queryStart);
   const absolute = path.resolve(layout.contextDir, stripped);
   const relative = path.relative(layout.repoRoot, absolute);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {

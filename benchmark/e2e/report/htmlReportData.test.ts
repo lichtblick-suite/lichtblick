@@ -133,6 +133,29 @@ describe("parseOverheadFile", () => {
     expect(outcome.ok).toBe(false);
     expect(outcome.ok ? "" : outcome.reason).toContain("not a supported overhead report");
   });
+
+  it("should reject a truncated overhead report as invalid JSON", () => {
+    // Given
+    const text = "{";
+
+    // When
+    const outcome = parseOverheadFile(text);
+
+    // Then
+    expect(outcome.ok ? "" : outcome.reason).toMatch(/^invalid JSON/);
+  });
+
+  it("should reject an overhead report with an unknown verdict", () => {
+    // Given
+    const report = BenchmarkResultBuilder.overhead();
+    const malformed = { ...report, verdicts: { ...report.verdicts, cpu: "unknown" } };
+
+    // When
+    const outcome = parseOverheadFile(JSON.stringify(malformed));
+
+    // Then
+    expect(outcome.ok).toBe(false);
+  });
 });
 
 describe("selectRuns", () => {
