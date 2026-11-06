@@ -21,10 +21,6 @@ export type UseReadMessagesInRange = (
   options?: ReadMessagesInRangeOptions,
 ) => AsyncIterable<Immutable<MessageEvent[]>>;
 
-/**
- * Returns a stable callback backing `readMessagesInRange`. Reading from the data source starts
- * when the returned iterable is first iterated.
- */
 export function useReadMessagesInRange(
   emitAlert?: MessageConverterAlertHandler,
 ): UseReadMessagesInRange {

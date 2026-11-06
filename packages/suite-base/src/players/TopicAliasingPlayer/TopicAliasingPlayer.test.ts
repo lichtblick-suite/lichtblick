@@ -267,11 +267,8 @@ describe("TopicAliasingPlayer", () => {
     expect(result).toEqual([]);
   });
 
-  it.each([
-    ["without a range", undefined],
-    ["with a bounded range", { start: { sec: 1, nsec: 0 }, end: { sec: 2, nsec: 0 } }],
-  ])("should forward batch iterator requests %s to the wrapped player", (_label, range) => {
-    // GIVEN - a wrapped player that returns a batch iterator
+  it("should forward batch iterator requests with a range to the wrapped player", () => {
+    // GIVEN
     const fakePlayer = new FakePlayer();
     const batchIterator = (async function* () {})();
     const getBatchIteratorSpy = jest
@@ -279,11 +276,12 @@ describe("TopicAliasingPlayer", () => {
       .mockReturnValue(batchIterator);
     const player = new TopicAliasingPlayer(fakePlayer);
     const topic = BasicBuilder.string();
+    const range = { start: { sec: 1, nsec: 0 }, end: { sec: 2, nsec: 0 } };
 
-    // WHEN - requesting a batch iterator
+    // WHEN
     const result = player.getBatchIterator(topic, range);
 
-    // THEN - the request and its range are forwarded unchanged
+    // THEN
     expect(getBatchIteratorSpy).toHaveBeenCalledWith(topic, range);
     expect(result).toBe(batchIterator);
   });

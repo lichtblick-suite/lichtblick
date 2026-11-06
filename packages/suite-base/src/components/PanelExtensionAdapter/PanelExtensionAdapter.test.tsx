@@ -1076,7 +1076,7 @@ describe("PanelExtensionAdapter", () => {
   });
 
   it("should expose readMessagesInRange and stop reading after unmount", async () => {
-    // GIVEN - a panel that captures its extension context
+    // GIVEN
     let panelContext: PanelExtensionContext | undefined;
     const initPanel = (context: PanelExtensionContext) => {
       panelContext = context;
@@ -1104,11 +1104,11 @@ describe("PanelExtensionAdapter", () => {
       return batches;
     };
 
-    // WHEN / THEN - reading while mounted completes (the mock data source has no range support)
+    // WHEN / THEN - the mock data source has no range support
     expect(panelContext!.readMessagesInRange).toBeDefined();
     await expect(readBatches()).resolves.toEqual([]);
 
-    // WHEN / THEN - reading after unmount completes immediately
+    // WHEN / THEN
     handle.unmount();
     await expect(readBatches()).resolves.toEqual([]);
   });
