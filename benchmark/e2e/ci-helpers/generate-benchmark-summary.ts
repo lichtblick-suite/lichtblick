@@ -4,7 +4,6 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { parseArtifactJson } from "./artifactJson";
 import {
   buildExercisesLines,
   buildPanelsSection,
@@ -14,6 +13,7 @@ import {
 import { RESULT_V1_SUFFIX } from "../result/constants";
 import { withRunKpis } from "../result/kpis";
 import type { PersistedResultV1, StoredResultV1 } from "../result/schemaV1";
+import { parseArtifactJson } from "../shared/artifactJson";
 import type { BenchmarkArtifact } from "../types";
 
 // Copied rather than imported from `e2e/ci-helpers/types.ts`: kept local since this report only
