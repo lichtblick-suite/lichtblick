@@ -44,6 +44,42 @@ describe("summarizeTelemetrySelf", () => {
     expect(self.uaResolveMsMean).toBeUndefined();
   });
 
+  it("should take the first in-window publish as the baseline without a publish at the start", () => {
+    // Given a counter whose first publish (at 2000, already 50 ms of pre-window time) is after the
+    // window start 1000
+    const pageRecords = TelemetryRecordBuilder.counterSeries(TELEMETRY_SELF_TIME_METRICS.frames, [
+      [2000, 50],
+      [4000, 54],
+    ]);
+
+    // When
+    const self = summarizeTelemetrySelf({
+      pageRecords,
+      startMonotonicTs: 1000,
+      endMonotonicTs: 4000,
+    });
+
+    // Then
+    expect(self.msPerSec.byComponent).toEqual({ frames: 2 });
+  });
+
+  it("should leave a component out when it has a single publish in the window only", () => {
+    // Given one frames publish inside the window and none before it
+    const pageRecords = TelemetryRecordBuilder.counterSeries(TELEMETRY_SELF_TIME_METRICS.frames, [
+      [4000, 50],
+    ]);
+
+    // When
+    const self = summarizeTelemetrySelf({
+      pageRecords,
+      startMonotonicTs: 1000,
+      endMonotonicTs: 4000,
+    });
+
+    // Then
+    expect(self.msPerSec).toEqual({ total: 0, byComponent: {} });
+  });
+
   it("should ignore self-cost counters of other realms", () => {
     // Given the same metric published by a worker realm
     const pageRecords = TelemetryRecordBuilder.counterSeries(

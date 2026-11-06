@@ -413,7 +413,9 @@ export function toggleProcessTypeDeltas(
     return [];
   }
   const processTypes = new Set(
-    toggle.blocks.flatMap((block) => Object.keys(block.cpuPercentByProcessType ?? {})),
+    arms.flatMap(({ off, on }) =>
+      [...off, ...on].flatMap((block) => Object.keys(block.cpuPercentByProcessType ?? {})),
+    ),
   );
   const deltas = [...processTypes].map((processType) => {
     const perQuartet = arms.map(

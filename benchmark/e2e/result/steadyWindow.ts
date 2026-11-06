@@ -16,6 +16,13 @@ import type {
 } from "./steadyWindow.types";
 import { compareCodeUnits } from "../shared/compare";
 
+/** Whether a steady window measured memory (at least one poll with a working set). */
+export function hasWorkingSet(
+  steady: Pick<SteadyWindowSummaryV1, "meanWorkingSetBytesByType">,
+): boolean {
+  return Object.keys(steady.meanWorkingSetBytesByType).length > 0;
+}
+
 /** Long-task ms/s and FPS between two probe readings; undefined for a non-positive interval. */
 export function mainThreadRates(
   start: MainThreadProbeReading | undefined,
@@ -100,7 +107,9 @@ function processSetOf(polls: readonly PollTotals[]): Record<string, number> {
 
 /**
  * Host process statistics over the steady polls (`input.pollTimestamps`) of an overhead A/B run.
- * A window with fewer polls than requested or any overrun is a `windowMismatch`.
+ * A window with fewer polls than requested, a poll without CPU or any overrun is a
+ * `windowMismatch`. Without any working-set poll the memory totals are 0 and
+ * `meanWorkingSetBytesByType` is empty: memory not measured (see `hasWorkingSet`).
  */
 export function summarizeSteadyWindow(input: SteadyWindowInput): SteadyWindowSummaryV1 {
   const polls = pollTotals(input.hostSamples, input.pollTimestamps);
@@ -112,7 +121,8 @@ export function summarizeSteadyWindow(input: SteadyWindowInput): SteadyWindowSum
     requestedPolls: input.requestedPolls,
     polls: polls.length,
     overruns: input.overruns,
-    windowMismatch: polls.length < input.requestedPolls || input.overruns > 0,
+    windowMismatch:
+      polls.length < input.requestedPolls || cpu.length < polls.length || input.overruns > 0,
     ...(input.maxPollLatencyMs != undefined && { maxPollLatencyMs: input.maxPollLatencyMs }),
     ...(input.clockSyncRttMs != undefined && { clockSyncRttMs: input.clockSyncRttMs }),
     startMonotonicTs: input.startMonotonicTs,

@@ -677,6 +677,24 @@ describe("toggleProcessTypeDeltas", () => {
     });
   });
 
+  it("should ignore a process type seen only in excluded quartets", () => {
+    // Given: a utility process only in the last quartet's blocks, which is excluded
+    const summary = summaryWithSplit(
+      (_arm, quartet): Record<string, number> =>
+        quartet === 2 ? { renderer: 50, utility: 2 } : { renderer: 50 },
+    );
+    const toggle = {
+      ...summary,
+      quartets: summary.quartets.map((quartet) => ({ ...quartet, excluded: quartet.index === 2 })),
+    };
+
+    // When
+    const deltas = toggleProcessTypeDeltas(toggle);
+
+    // Then
+    expect(deltas.map((delta) => delta.processType)).toEqual(["renderer"]);
+  });
+
   it("should be empty for blocks without the per-type split or without an included quartet", () => {
     // Given
     const summary = summaryWithSplit(() => ({ renderer: 50 }));

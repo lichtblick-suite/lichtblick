@@ -104,10 +104,13 @@ export type OverheadPairDeltas = {
   cpuRelative?: number;
   /** Treatment − base steady median total CPU, percentage points (100 = one core). */
   cpuPctPoints: number;
-  /** Treatment − base steady mean total working set, bytes. */
-  memBytes: number;
+  /**
+   * Treatment − base steady mean total working set, bytes; absent when either run measured no
+   * working set (memory not measured).
+   */
+  memBytes?: number;
   /** As `memBytes`, over the process types both runs had (secondary, see `processSetMismatch`). */
-  memBytesCommonProcesses: number;
+  memBytesCommonProcesses?: number;
   /** Main-thread probe deltas (absent when a run lacks the probe reading). */
   mainThreadBlockedMsPerSec?: number;
   fps?: number;

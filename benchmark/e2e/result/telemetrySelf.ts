@@ -51,22 +51,47 @@ function selfSamplesByMetric(records: readonly TelemetryRecord[]): Map<string, T
   return byMetric;
 }
 
+/** Timestamp of the earliest publish inside `(startTs, endTs]`; undefined without one. */
+function firstPublishInWindow(
+  samples: readonly TelemetrySample[],
+  startTs: number,
+  endTs: number,
+): number | undefined {
+  let first: number | undefined;
+  for (const sample of samples) {
+    const ts = sample.monotonicTs;
+    if (ts > startTs && ts <= endTs && (first == undefined || ts < first)) {
+      first = ts;
+    }
+  }
+  return first;
+}
+
 /**
  * Increase of a cumulative counter between the publishes at or before `startTs` and `endTs`, per
  * second of `[startTs, endTs]` (both ends are quantized to the 1 Hz publish, so the errors largely
- * cancel). 0 without publishes.
+ * cancel). Without a publish at or before `startTs`, the first publish inside the window is the
+ * baseline and the rate is taken over `[that publish, endTs]` instead (its pre-window total must
+ * not count as window time). Undefined (not measured) without two such points.
  */
 function counterRatePerSec(
-  samples: readonly TelemetrySample[] | undefined,
+  samples: readonly TelemetrySample[],
   startTs: number,
   endTs: number,
-): number {
-  const seconds = (endTs - startTs) / MS_PER_SECOND;
-  if (!(seconds > 0)) {
-    return 0;
+): number | undefined {
+  const baselineTs =
+    counterTotalAt(samples, startTs) != undefined
+      ? startTs
+      : firstPublishInWindow(samples, startTs, endTs);
+  if (baselineTs == undefined) {
+    return undefined;
   }
-  const end = counterTotalAt(samples, endTs) ?? 0;
-  const start = counterTotalAt(samples, startTs) ?? 0;
+  const seconds = (endTs - baselineTs) / MS_PER_SECOND;
+  if (!(seconds > 0)) {
+    return undefined;
+  }
+  const start = counterTotalAt(samples, baselineTs)!;
+  const end = counterTotalAt(samples, endTs)!;
   return Math.max(0, end - start) / seconds;
 }
 
@@ -145,7 +170,8 @@ function uaProbeCounts(
 
 /**
  * Self-cost of the page telemetry over the steady window: main-thread ms/s per component (from the
- * cumulative `telemetry.self.timeMs.*` counters), records/s, UA memory probe calls / outcomes and
+ * cumulative `telemetry.self.timeMs.*` counters; a component without two usable publishes is left
+ * out as not measured), records/s, UA memory probe calls / outcomes and
  * mean resolve latency (whole run, see `uaProbeCounts`), and the emit cost estimate from the page's
  * micro-benchmark.
  */
@@ -162,6 +188,9 @@ export function summarizeTelemetrySelf(input: TelemetrySelfInput): TelemetrySelf
       continue;
     }
     const rate = counterRatePerSec(samples, startTs, endTs);
+    if (rate == undefined) {
+      continue;
+    }
     byComponent[component as TelemetrySelfComponent] = rate;
     total += rate;
   }

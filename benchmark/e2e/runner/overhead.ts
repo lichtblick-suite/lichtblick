@@ -23,6 +23,7 @@ import type { OverheadToggleSummaryV3 } from "./toggleBlocks.types";
 import { OVERHEAD_METRIC_KEYS, OVERHEAD_PREFIX } from "../result/constants";
 import type { BenchmarkPlatform } from "../result/schemaV1";
 import { median, summarizeMetric, verdict, worstVerdict } from "../result/stats";
+import { hasWorkingSet } from "../result/steadyWindow";
 import type { TelemetrySelfSummaryV1 } from "../result/telemetrySelf.types";
 import { compareCodeUnits } from "../shared/compare";
 
@@ -34,7 +35,8 @@ import { compareCodeUnits } from "../shared/compare";
 //
 // - CPU: `cpuRelative = (on − off) / off` of the steady median per-poll total CPU (per-core sum),
 //   `cpuPctPoints = on − off`; target `cpuRelative ≤ 0.02`.
-// - Memory: `memBytes = on − off` of the steady mean per-poll total working set; target ≤ 20 MiB.
+// - Memory: `memBytes = on − off` of the steady mean per-poll total working set; target ≤ 20 MiB
+//   (absent for a pair whose runs measured no working set, so memory is then not measured).
 //   `memBytesCommonProcesses` restricts it to the process types both runs had.
 // - Main thread (runner probe, both arms): long-task blocked ms/s and fps deltas.
 //
@@ -106,7 +108,11 @@ function relativeDelta(base: number, treatment: number): number | undefined {
   return treatment <= 0 ? 0 : undefined;
 }
 
-/** Deltas of one pair (treatment − base), see the module comment. */
+/**
+ * Deltas of one pair (treatment − base), see the module comment. The memory deltas are absent when
+ * either run has no working-set poll (memory not measured, e.g. `ps` failed), so they drop out of
+ * the memory statistics instead of counting as a 0 delta.
+ */
 export function computeOverheadDeltas(
   base: OverheadRunV2,
   treatment: OverheadRunV2,
@@ -117,8 +123,11 @@ export function computeOverheadDeltas(
   const deltas: OverheadPairDeltas = {
     ...(cpuRelative != undefined && { cpuRelative }),
     cpuPctPoints: treatmentCpu - baseCpu,
-    memBytes: treatment.steady.meanTotalWorkingSetBytes - base.steady.meanTotalWorkingSetBytes,
-    memBytesCommonProcesses: commonProcessMemDelta(base, treatment),
+    ...(hasWorkingSet(base.steady) &&
+      hasWorkingSet(treatment.steady) && {
+        memBytes: treatment.steady.meanTotalWorkingSetBytes - base.steady.meanTotalWorkingSetBytes,
+        memBytesCommonProcesses: commonProcessMemDelta(base, treatment),
+      }),
   };
   if (base.mainThread != undefined && treatment.mainThread != undefined) {
     deltas.mainThreadBlockedMsPerSec =
