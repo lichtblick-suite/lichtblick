@@ -267,6 +267,25 @@ describe("TopicAliasingPlayer", () => {
     expect(result).toEqual([]);
   });
 
+  it("should forward batch iterator requests with a range to the wrapped player", () => {
+    // GIVEN
+    const fakePlayer = new FakePlayer();
+    const batchIterator = (async function* () {})();
+    const getBatchIteratorSpy = jest
+      .spyOn(fakePlayer, "getBatchIterator")
+      .mockReturnValue(batchIterator);
+    const player = new TopicAliasingPlayer(fakePlayer);
+    const topic = BasicBuilder.string();
+    const range = { start: { sec: 1, nsec: 0 }, end: { sec: 2, nsec: 0 } };
+
+    // WHEN
+    const result = player.getBatchIterator(topic, range);
+
+    // THEN
+    expect(getBatchIteratorSpy).toHaveBeenCalledWith(topic, range);
+    expect(result).toBe(batchIterator);
+  });
+
   it("provides global variables on startup", async () => {
     const fakePlayer = new FakePlayer();
     const mappers: TopicAliasFunctions = [
