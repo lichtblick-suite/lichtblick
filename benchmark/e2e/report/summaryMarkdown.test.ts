@@ -467,7 +467,24 @@ describe("buildScorecardTable", () => {
     );
 
     // Then
-    expect(markdown).toContain("No benchmark-result.v1 files with telemetry found.");
+    expect(markdown).toContain(
+      "No benchmark-result.v1 files with telemetry or overhead reports found.",
+    );
+  });
+
+  it("should render a row for a platform when it has only an overhead report", () => {
+    // Given an electron run and a web overhead report without any web run
+    const electron = makeResult({ platform: "electron" });
+    const report = BenchmarkResultBuilder.overhead({ platform: "web" });
+
+    // When
+    const rows = buildScorecardTable([electron], [report]).trim().split("\n");
+
+    // Then: like the HTML scorecard, web is shown with no runs and its overhead verdict
+    expect(rows).toHaveLength(4);
+    expect(rows[2]).toMatch(/^\| electron \| 1 \|/);
+    expect(rows[3]).toMatch(/^\| web \| 0 \|/);
+    expect(rows[3]).toContain("✅ within CPU ≤ +1.0 % / mem ≤ +5.0 MiB (n ≥ 5)");
   });
 });
 

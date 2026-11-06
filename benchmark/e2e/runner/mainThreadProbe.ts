@@ -46,12 +46,18 @@ export async function installMainThreadProbe(page: Page): Promise<void> {
   await page.addInitScript(installProbeInPage, MAIN_THREAD_PROBE_KEY);
 }
 
-/** Reads the probe; undefined when it is not installed or the page call fails. */
+/**
+ * Reads the probe; undefined when it is not installed or the page call fails (warned: the run then
+ * has no main-thread rates and its pair no FPS / long-task deltas).
+ */
 export async function readMainThreadProbe(page: Page): Promise<MainThreadProbeReading | undefined> {
   return await page
     .evaluate(
       (key) => (window as unknown as MainThreadProbeWindow)[key]?.read(),
       MAIN_THREAD_PROBE_KEY,
     )
-    .catch(() => undefined);
+    .catch((error: unknown) => {
+      console.warn(`Main-thread probe read failed: ${String(error)}`);
+      return undefined;
+    });
 }

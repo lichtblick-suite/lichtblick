@@ -382,6 +382,92 @@ async function pauseAndCloseDataSource(
 }
 
 /**
+ * When: the 1 Hz loop of a run - deadline-driven (until `windowEnd`, wall clock) for normal runs,
+ * else the overhead A/B's fixed-schedule steady window or toggle blocks.
+ */
+async function recordMeasurementWindow({
+  target,
+  measurement,
+  drainer,
+  windowEnd,
+  onHostSnapshot,
+}: {
+  target: BenchmarkTarget;
+  measurement: RunScenarioOptions["measurement"];
+  drainer: TelemetryDrainer;
+  windowEnd: number;
+  onHostSnapshot: (host: HostMetricsSnapshot) => void;
+}): Promise<{
+  steadyRecording?: SteadyWindowRecording;
+  toggleRecording?: ToggleWindowRecording & { clockSyncRttMs: number };
+}> {
+  if (measurement == undefined) {
+    /** One sampling tick: page clock → host metrics → drain. */
+    const tick = async (): Promise<void> => {
+      const ts = await pageNow(target.page);
+      onHostSnapshot(await target.collectHostMetrics(ts));
+      await drainer.drain();
+    };
+    await sampleDeadlineWindow(tick, windowEnd);
+    return {};
+  }
+  if (measurement.mode === "toggle") {
+    return { toggleRecording: await recordToggleWindow({ target, measurement, drainer }) };
+  }
+  return {
+    steadyRecording: await recordSteadyWindow({ target, measurement, drainer, onHostSnapshot }),
+  };
+}
+
+/**
+ * The run's screenshotter (none in mode `none`); in mode `all` its `loaded`/`mid` window
+ * checkpoints are started.
+ */
+function startScreenshotter({
+  mode,
+  target,
+  scenario,
+  telemetryEnabled,
+  runTimestamp,
+  attacher,
+  drainer,
+  windowStartMs,
+  durationMs,
+}: {
+  mode: ReturnType<typeof resolveScreenshotMode>;
+  target: BenchmarkTarget;
+  scenario: ScenarioUnderTest;
+  telemetryEnabled: boolean;
+  runTimestamp: number;
+  attacher: RunScenarioOptions["testInfo"];
+  drainer: TelemetryDrainer;
+  windowStartMs: number;
+  durationMs: number;
+}): ScenarioScreenshotter | undefined {
+  if (mode === "none") {
+    return undefined;
+  }
+  const screenshotter = new ScenarioScreenshotter({
+    page: target.page,
+    dir: SCREENSHOTS_DIR,
+    scenarioId: scenario.scenarioId,
+    platform: target.platform,
+    telemetryEnabled,
+    timestamp: runTimestamp,
+    attacher,
+  });
+  if (mode === "all") {
+    const loadedEvent = loadedEventName(scenario.pipeline);
+    screenshotter.startWindowCheckpoints({
+      windowStartMs,
+      durationMs,
+      isLoaded: () => drainer.hasEvent(loadedEvent, "instant"),
+    });
+  }
+  return screenshotter;
+}
+
+/**
  * Runs one scenario on `target` (platform agnostic): navigates to `?scenario=<id>`, samples host
  * process metrics and drains page telemetry at 1 Hz for the scenario window, captures teardown
  * telemetry, then builds the legacy artifact and the `benchmark-result.v1` document.
@@ -462,10 +548,6 @@ export async function runScenario(
   );
   // Before the runner's own navigation: crashes are caught from the start, reloads once armed.
   const crashDetection = await startCrashDetection({ page, electronApp: target.electronApp });
-  // Overhead A/B: same probe in every arm, installed before the scenario page loads.
-  if (measurement?.mode === "steady") {
-    await installMainThreadProbe(page);
-  }
   const drainer = new TelemetryDrainer(page);
   const durationMs = scenario.durationMs ?? DEFAULT_SAMPLE_DURATION_MS;
   // Steady (overhead A/B) runs never take screenshots: a capture costs CPU and memory in one arm.
@@ -528,6 +610,10 @@ export async function runScenario(
   let crossOriginIsolated: boolean;
   let scenarioDescriptor: ScenarioDescriptor;
   try {
+    // Overhead A/B: same probe in every arm, installed before the scenario page loads.
+    if (measurement?.mode === "steady") {
+      await installMainThreadProbe(page);
+    }
     await page.goto(target.scenarioUrl(buildScenarioParams(scenario, options, calibration)));
     await page.waitForFunction(
       () => (window as LichtblickTelemetryWindow).lichtblickTelemetry != undefined,
@@ -539,51 +625,30 @@ export async function runScenario(
     const windowStart = Date.now();
     const windowEnd = windowStart + durationMs;
 
-    screenshotter =
-      screenshotMode === "none"
-        ? undefined
-        : new ScenarioScreenshotter({
-            page,
-            dir: SCREENSHOTS_DIR,
-            scenarioId: scenario.scenarioId,
-            platform: target.platform,
-            telemetryEnabled,
-            timestamp: runTimestamp,
-            attacher: options.testInfo,
-          });
-    if (screenshotMode === "all") {
-      const loadedEvent = loadedEventName(scenario.pipeline);
-      screenshotter?.startWindowCheckpoints({
-        windowStartMs: windowStart,
-        durationMs,
-        isLoaded: () => drainer.hasEvent(loadedEvent, "instant"),
-      });
-    }
+    screenshotter = startScreenshotter({
+      mode: screenshotMode,
+      target,
+      scenario,
+      telemetryEnabled,
+      runTimestamp,
+      attacher: options.testInfo,
+      drainer,
+      windowStartMs: windowStart,
+      durationMs,
+    });
 
     const recordHost = (host: HostMetricsSnapshot): void => {
       hostSamples.push(...host.samples);
       memorySamples.push({ timestampMs: Date.now(), metrics: host.legacyMetrics });
     };
 
-    // When: 1 Hz loop - deadline-driven, or the overhead A/B's fixed-schedule steady window.
-    if (measurement == undefined) {
-      /** One sampling tick: page clock → host metrics → drain. */
-      const tick = async (): Promise<void> => {
-        const ts = await pageNow(page);
-        recordHost(await target.collectHostMetrics(ts));
-        await drainer.drain();
-      };
-      await sampleDeadlineWindow(tick, windowEnd);
-    } else if (measurement.mode === "toggle") {
-      toggleRecording = await recordToggleWindow({ target, measurement, drainer });
-    } else {
-      steadyRecording = await recordSteadyWindow({
-        target,
-        measurement,
-        drainer,
-        onHostSnapshot: recordHost,
-      });
-    }
+    ({ steadyRecording, toggleRecording } = await recordMeasurementWindow({
+      target,
+      measurement,
+      drainer,
+      windowEnd,
+      onHostSnapshot: recordHost,
+    }));
     finishedAtWall = new Date().toISOString();
     // End of the measured window (rates in `summary.pipeline`); teardown below is excluded.
     windowEndMonotonicTs =

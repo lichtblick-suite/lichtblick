@@ -407,7 +407,8 @@ function scorecardRuns(results: readonly PersistedResultV1[]): KpiRun[] {
 }
 
 /**
- * Compact KPI scorecard, one row per platform (electron and web are never aggregated together).
+ * Compact KPI scorecard, one row per platform with telemetry-on runs or overhead reports (electron
+ * and web are never aggregated together).
  * Aggregation per column follows `SCORECARD_POLICIES` (geomean, or worst case for slope / FPS /
  * on-time frames); see the README "KPI scorecard".
  */
@@ -416,11 +417,14 @@ export function buildScorecardTable(
   overheads: readonly OverheadReport[],
 ): string {
   const runs = scorecardRuns(results);
-  const cards = PLATFORM_ORDER.filter((platform) =>
-    runs.some((run) => run.result.run.platform === platform),
+  // Like the HTML scorecard: platforms with telemetry-on runs or overhead reports.
+  const cards = PLATFORM_ORDER.filter(
+    (platform) =>
+      runs.some((run) => run.result.run.platform === platform) ||
+      overheads.some((report) => report.platform === platform),
   ).map((platform) => aggregateKpis(runs, platform, overheads));
   if (cards.length === 0) {
-    return "\nNo benchmark-result.v1 files with telemetry found.\n";
+    return "\nNo benchmark-result.v1 files with telemetry or overhead reports found.\n";
   }
   const lines = [
     "| Platform | Runs | Healthy | Peak WS (geomean) | WS slope (max) | CPU (geomean) | CPU s/MiB (geomean) | Median FPS (min) | On-time frames (min) | Panels ready (geomean) | Ingest MiB/s (geomean) | Telemetry overhead (worst) |",

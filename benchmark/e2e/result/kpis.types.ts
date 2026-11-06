@@ -143,7 +143,7 @@ export type OverheadKpiInput = {
   targets: { cpuDeltaRelativeMax: number; memDeltaBytesMax: number };
 };
 
-/** Worst scenario of an overhead metric: highest CI95 upper bound (the median when no CI). */
+/** Worst scenario of an overhead metric (highest CI95 upper bound; reports without a CI skipped). */
 export type OverheadWorstV1 = { scenarioId: string; ciUpper: number; median?: number };
 
 /** One aggregated metric: `n` runs had a usable value; `worst` is the run to look at first. */

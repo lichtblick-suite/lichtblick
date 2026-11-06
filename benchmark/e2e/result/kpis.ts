@@ -296,7 +296,10 @@ function latestOverheadReports(
   return [...latest.values()].sort((a, b) => compareCodeUnits(a.scenarioId, b.scenarioId));
 }
 
-/** Scenario with the highest CI95 upper bound of a metric (median when no CI), scaled. */
+/**
+ * Scenario with the highest CI95 upper bound of a metric, scaled; reports without a CI95 (no
+ * samples) are not candidates.
+ */
 function worstOverhead(
   reports: readonly OverheadKpiInput[],
   stats: (report: OverheadKpiInput) => MetricStats,
@@ -304,7 +307,7 @@ function worstOverhead(
 ): OverheadWorstV1 | undefined {
   const candidates = reports.flatMap((report) => {
     const { ci95, median: metricMedian } = stats(report);
-    const upper = ci95?.upper ?? metricMedian;
+    const upper = ci95?.upper;
     if (upper == undefined) {
       return [];
     }
