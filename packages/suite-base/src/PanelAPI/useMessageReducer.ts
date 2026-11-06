@@ -23,6 +23,7 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
+import { usePanelSubscriberTelemetry } from "@lichtblick/suite-base/components/MessagePipeline/pipelineTelemetry";
 import useShouldNotChangeOften from "@lichtblick/suite-base/hooks/useShouldNotChangeOften";
 import {
   MessageEvent,
@@ -73,6 +74,7 @@ function selectSetSubscriptions(ctx: MessagePipelineContext) {
 
 export function useMessageReducer<T>(props: Params<T>): T {
   const [id] = useState(() => uuidv4());
+  usePanelSubscriberTelemetry(id);
   const { restore, addMessage, addMessages, preloadType = "partial" } = props;
 
   // only one of the add message callbacks should be provided
