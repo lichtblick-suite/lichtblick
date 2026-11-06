@@ -62,6 +62,7 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useInteractionCapture } from "@lichtblick/suite-base/hooks/useInteractionCapture";
 import usePanelDrag from "@lichtblick/suite-base/hooks/usePanelDrag";
+import { usePanelLifecycleTelemetry } from "@lichtblick/suite-base/hooks/usePanelLifecycleTelemetry";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { useMessagePathDrop } from "@lichtblick/suite-base/services/messagePathDragging";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
@@ -143,6 +144,9 @@ export default function Panel<
     const parentPanelContext = useContext(PanelContext);
 
     const type = PanelComponent.panelType;
+    // Telemetry: label with the raw layout id (not the storybook fallback, never the title).
+    usePanelLifecycleTelemetry(props.childId, type);
+
     const title = useMemo(
       () => panelCatalog.getPanelByType(type)?.title ?? "",
       [panelCatalog, type],

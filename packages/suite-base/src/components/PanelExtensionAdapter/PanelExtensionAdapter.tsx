@@ -18,6 +18,7 @@ import {
   AppSettingValue,
   ExtensionPanelRegistration,
   Immutable,
+  MessageEvent,
   PanelExtensionContext,
   ParameterValue,
   RenderState,
@@ -66,8 +67,19 @@ import {
 import { PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { assertNever } from "@lichtblick/suite-base/util/assertNever";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
+import {
+  buildPanelTelemetryLabels,
+  createAllFramesDeliveryTracker,
+  recordAllFramesDelivered,
+  recordFirstRender,
+  recordMessagesDelivered,
+  recordRenderDone,
+  recordRenderSkipped,
+  resetAllFramesDeliveryTracker,
+} from "./panelTelemetry";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext, MessageConverterAlertHandler } from "./types";
 import { useSharedPanelState } from "./useSharedPanelState";
@@ -167,8 +179,32 @@ function PanelExtensionAdapter(
 
   const { capabilities, profile: dataSourceProfile, presence: playerPresence } = playerState;
 
-  const { openSiblingPanel, setMessagePathDropConfig, type: panelName } = usePanelContext();
+  const {
+    openSiblingPanel,
+    setMessagePathDropConfig,
+    type: panelName,
+    id: layoutPanelId,
+  } = usePanelContext();
 
+  // Telemetry labels identify the panel by its layout id (e.g. `Plot!3x9a`), not by the internal
+  // subscriber uuid below. Memoized so no allocation happens per frame.
+  const telemetryLabels = useMemo(
+    () => buildPanelTelemetryLabels(layoutPanelId, panelName),
+    [layoutPanelId, panelName],
+  );
+  // Set on the first `done()` of this adapter mount (drives the `panel.firstRender` event).
+  const firstRenderDoneRef = useRef(false);
+  // Last messageEvents array (frame input) accounted for, either as delivered or as skipped. Effect
+  // re-runs triggered by other inputs (hover, variables, theme, ...) keep the same array, so they
+  // neither count the same frame twice as delivered nor count as a skipped frame.
+  const lastAccountedFrameRef = useRef<readonly MessageEvent[] | undefined>(undefined);
+  // Bumped on each panel (re-)initialisation. A `done()` from a render started under an older
+  // generation is stale: its telemetry is ignored.
+  const renderGenerationRef = useRef(0);
+  // Tracks which `allFrames` entries were already counted as delivered preloaded messages.
+  const [allFramesDeliveryTracker] = useState(createAllFramesDeliveryTracker);
+
+  // Internal subscriber id for the MessagePipeline (not the layout panel id).
   const [panelId] = useState(() => uuid());
   const isMounted = useSynchronousMountedState();
   const [error, setError] = useState<Error | undefined>();
@@ -311,8 +347,21 @@ function PanelExtensionAdapter(
       return;
     }
 
+    const telemetry = getTelemetry();
+    const telemetryEnabled = telemetry.isEnabled();
+
     if (renderingRef.current) {
       setSlowRender(true);
+      // Only a new, non-empty frame input counts as skipped, not a re-run caused by another input
+      // nor a player-state update that carried no messages for this panel.
+      if (
+        telemetryEnabled &&
+        messageEvents != undefined &&
+        messageEvents !== lastAccountedFrameRef.current
+      ) {
+        lastAccountedFrameRef.current = messageEvents;
+        recordRenderSkipped(telemetry, telemetryLabels);
+      }
       return;
     }
 
@@ -321,6 +370,25 @@ function PanelExtensionAdapter(
 
     setSlowRender(false);
     const resumeFrame = pauseFrame(panelId);
+
+    // A frame already accounted for as skipped is not counted as delivered when rendered later.
+    if (telemetryEnabled && messageEvents !== lastAccountedFrameRef.current) {
+      lastAccountedFrameRef.current = messageEvents;
+      if (watchedFields.has("currentFrame")) {
+        recordMessagesDelivered(telemetry, messageEvents, telemetryLabels);
+      }
+    }
+    // Preloaded messages delivered via allFrames (e.g. 3D); only new entries are counted.
+    if (telemetryEnabled && watchedFields.has("allFrames")) {
+      recordAllFramesDelivered(
+        telemetry,
+        allFramesDeliveryTracker,
+        renderState.allFrames,
+        telemetryLabels,
+      );
+    }
+    const renderStartMs = telemetryEnabled ? performance.now() : 0;
+    const renderGeneration = renderGenerationRef.current;
 
     // tell the panel to render and lockout future renders until rendering is complete
     renderingRef.current = true;
@@ -336,6 +404,15 @@ function PanelExtensionAdapter(
         doneCalled = true;
         resumeFrame();
         renderingRef.current = false;
+
+        // Telemetry only: ignore a late done() from a render started before the last re-init.
+        if (telemetryEnabled && renderGeneration === renderGenerationRef.current) {
+          recordRenderDone(telemetry, performance.now() - renderStartMs, telemetryLabels);
+          if (!firstRenderDoneRef.current) {
+            firstRenderDoneRef.current = true;
+            recordFirstRender(telemetry, telemetryLabels);
+          }
+        }
       });
     } catch (e: unknown) {
       const err = e as Error;
@@ -361,6 +438,8 @@ function PanelExtensionAdapter(
     watchedFields,
     initialState,
     forceConversion,
+    telemetryLabels,
+    allFramesDeliveryTracker,
   ]);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
@@ -802,6 +881,11 @@ function PanelExtensionAdapter(
     // Reset local state when the panel element is mounted or changes
     setRenderFn(undefined);
     renderingRef.current = false;
+    // The fresh render state builder re-delivers the current frame, so count it again.
+    lastAccountedFrameRef.current = undefined;
+    // Renders started before this point belong to the previous panel instance.
+    renderGenerationRef.current++;
+    resetAllFramesDeliveryTracker(allFramesDeliveryTracker);
     setSlowRender(false);
 
     setBuildRenderState(() => initRenderStateBuilder());
@@ -841,6 +925,7 @@ function PanelExtensionAdapter(
     configTooNew,
     playerIsInitializing,
     clearAlert,
+    allFramesDeliveryTracker,
   ]);
 
   // Clear this panel's alerts on unmount.

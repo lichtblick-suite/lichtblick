@@ -1,87 +1,106 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import fs from "node:fs";
-import path from "node:path";
+import { test, expect } from "./fixtures/benchmark";
+import { PROCESS_METRICS } from "./result/constants";
+import { validateResultV1 } from "./result/schemaV1";
+import { writeScenarioArtifacts } from "./runner/artifacts";
+import { runScenario } from "./runner/runScenario";
+import { SCENARIOS_UNDER_TEST } from "./runner/scenariosUnderTest";
 
-import { test, expect } from "./fixtures/benchmark-electron";
-import type { ScenarioUnderTest, FrameTimeSample, MemorySample, BenchmarkArtifact } from "./types";
-import { BenchmarkMemoryMetric } from "../desktop/common/types";
-
-const SAMPLE_DURATION_MS = 5_000;
-const MEMORY_SAMPLE_INTERVAL_MS = 500;
-const ARTIFACTS_DIR = path.resolve(__dirname, "../.artifacts");
-
-// One entry per registered scenario (`benchmark/src/scenarios/registry.ts`), copied rather than
-// imported per this suite's raw-artifact contract (see `BenchmarkArtifact` doc below): this file
-// deliberately doesn't reflect on the registry, so a scenario/registry change can't silently
-// change what CI benchmarks without a corresponding change here.
-const SCENARIOS_UNDER_TEST: readonly ScenarioUnderTest[] = [
-  { scenarioId: "sinewave", pipeline: "synthetic" },
-  { scenarioId: "pointcloud", pipeline: "synthetic" },
-  { scenarioId: "transform", pipeline: "synthetic" },
-  { scenarioId: "transformpreloading", pipeline: "synthetic" },
-  // { scenarioId: "mcap-ingest", pipeline: "real", durationMs: SAMPLE_DURATION_MS }, // since we don't have a real data source for this scenario in the CI environment, skip it
-];
+// One test per scenario and platform (Playwright projects `electron` / `web`): runs the scenario
+// through the shared runner core and writes the legacy artifact plus `benchmark-result.v1.json`
+// to `benchmark/.artifacts`, plus checkpoint screenshots to `benchmark/.artifacts/screenshots`
+// (also attached to the Playwright report): by default only `end`, taken after all measurement so
+// no metric is affected; `BENCHMARK_SCREENSHOTS=all` adds `loaded`/`mid` (visual debugging,
+// distorts metrics), `=0` disables. Screenshot failures never fail a test; a panel error boundary
+// does (`runner/errorBoundaries.ts`).
 
 for (const scenario of SCENARIOS_UNDER_TEST) {
   test(`should run the ${scenario.scenarioId} ${scenario.pipeline}-pipeline scenario and collect memory/frame-time samples`, async ({
-    mainWindow,
-  }) => {
-    const frameTimeSamples: FrameTimeSample[] = [];
-
-    // Given
-    await mainWindow.exposeFunction("recordFrameTimes", (samples: FrameTimeSample[]) => {
-      frameTimeSamples.push(...samples);
+    target,
+    fixtureUrls,
+  }, testInfo) => {
+    // Given / When
+    const run = await runScenario(target, scenario, {
+      fixtureUrls,
+      screenshots: true,
+      testInfo,
     });
-
-    const startedAt = new Date().toISOString();
-    console.log(`Starting scenario: ${scenario.scenarioId}`, startedAt);
-    const scenarioUrl = `${mainWindow.url()}?scenario=${scenario.scenarioId}`;
-    await mainWindow.goto(scenarioUrl);
-
-    const memorySamples: MemorySample[] = [];
-    const samplingState = { active: true };
-    const samplingLoop = (async () => {
-      while (samplingState.active) {
-        const metrics = await mainWindow.evaluate(async () => {
-          const bridge = (
-            window as unknown as {
-              lichtblickBenchmark: { getMemoryMetrics: () => Promise<BenchmarkMemoryMetric[]> };
-            }
-          ).lichtblickBenchmark;
-          return await bridge.getMemoryMetrics();
-        });
-        memorySamples.push({ timestampMs: Date.now(), metrics });
-        await mainWindow.waitForTimeout(MEMORY_SAMPLE_INTERVAL_MS);
-      }
-    })();
-
-    // When
-    await mainWindow.waitForTimeout(SAMPLE_DURATION_MS);
-    samplingState.active = false;
-    await samplingLoop;
-
-    const finishedAt = new Date().toISOString();
-
-    if (scenario.pipeline === "real") {
-      await mainWindow.getByRole("button", { name: "Pause", exact: true }).click();
+    const paths = writeScenarioArtifacts(run);
+    console.debug(`Wrote ${paths.legacyPath} and ${paths.resultPath}`);
+    for (const screenshot of run.screenshots) {
+      console.debug(`Wrote ${screenshot.checkpoint} screenshot ${screenshot.path}`);
     }
 
-    // Then
-    expect(memorySamples.length).toBeGreaterThan(0);
+    // Then: legacy artifact
+    expect(run.legacy.memorySamples.length).toBeGreaterThan(0);
 
-    const artifact: BenchmarkArtifact = {
-      scenarioId: scenario.scenarioId,
-      pipeline: scenario.pipeline,
-      startedAt,
-      finishedAt,
-      memorySamples,
-      frameTimeSamples,
-    };
+    // And: v1 result
+    const { result } = run;
+    expect(validateResultV1(result)).toEqual([]);
+    expect(result.run.mode).toBe("scenario");
+    const hostSamples = result.samples.filter(
+      (sample) => sample.scope === "process" && sample.metric === PROCESS_METRICS.workingSetBytes,
+    );
+    expect(hostSamples.length).toBeGreaterThan(0);
+    expect(result.summary.process.peakTotalWorkingSetBytes).toBeGreaterThan(0);
 
-    fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
-    const artifactPath = path.join(ARTIFACTS_DIR, `${scenario.scenarioId}-${Date.now()}.json`);
-    fs.writeFileSync(artifactPath, JSON.stringify(artifact, undefined, 2));
+    // And: the page described the scenario it ran, and the render environment was calibrated
+    expect(result.run.scenario.scenarioId).toBe(scenario.scenarioId);
+    expect(result.run.scenario.panels.length).toBeGreaterThan(0);
+    expect(result.run.environment.fpsCeiling).toBeGreaterThan(0);
+    expect(result.run.environment.glRenderer).not.toBe("");
+
+    // And: panel, layout and pipeline telemetry (sink installed before the layout/panels mount)
+    if (result.run.telemetryEnabled) {
+      const eventNames = new Set(result.events.map((event) => event.name));
+      expect(eventNames).toContain("layout.applied");
+      expect(eventNames).toContain("panel.mount");
+      const mountedPanelIds = new Set(
+        result.events
+          .filter((event) => event.name === "panel.mount")
+          .map((event) => event.labels?.panelId),
+      );
+      // Order-insensitive: `arrayContaining` matches the elements in any order.
+      expect(Object.keys(result.summary.panels ?? {})).toEqual(
+        expect.arrayContaining([...mountedPanelIds]),
+      );
+      expect(result.summary.pipeline).toBeDefined();
+      expect(result.summary.pipeline?.listenerDispatchMeanMs).toBeDefined();
+      expect(result.summary.phases.panelsReadyMs).toBeDefined();
+      // Adapter panels (those emitting `panel.firstRender`) publish render observations.
+      for (const panel of Object.values(result.summary.panels ?? {})) {
+        if (panel.firstRenderMs != undefined) {
+          expect(panel.renderMeanMs).toBeDefined();
+          expect(panel.renderMaxMs).toBeDefined();
+        }
+      }
+    }
+
+    if (scenario.scenarioId === "mcap-multi-ingest") {
+      const pools = Object.values(result.summary.hydratedSourcePool?.pools ?? {});
+      expect(pools.length).toBeGreaterThan(0);
+      for (const pool of pools) {
+        expect(pool.invariantHolds).toBe(true);
+      }
+      // AC3: with `maxHydratedSources: 1` and fully overlapping sources the pool goes over budget.
+      expect(Math.max(...pools.map((pool) => pool.overBudgetPeriods))).toBeGreaterThanOrEqual(1);
+      const events = result.events.map((event) => `${event.name}:${event.phase}`);
+      expect(events).toContain("datasource.open:end");
+      expect(events).toContain("datasource.firstMessage:instant");
+    }
   });
 }
+
+test("web pages are cross-origin isolated", async ({ platform, launchTarget }) => {
+  test.skip(platform !== "web", "COOP/COEP isolation is only asserted for the web platform");
+
+  // Given the static server's COOP/COEP headers
+  const target = await launchTarget();
+  // When the benchmark page is loaded
+  await target.page.goto(target.scenarioUrl(new URLSearchParams()));
+
+  // Then
+  expect(await target.page.evaluate(() => globalThis.crossOriginIsolated)).toBe(true);
+});

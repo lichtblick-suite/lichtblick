@@ -8,7 +8,9 @@
 import * as Comlink from "@lichtblick/comlink";
 import { abortSignalTransferHandler } from "@lichtblick/comlink-transfer-handlers";
 import { ComlinkWrap } from "@lichtblick/den/worker";
+import Log from "@lichtblick/log";
 import { Immutable, MessageEvent, Time } from "@lichtblick/suite";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import type {
   GetBackfillMessagesArgs,
@@ -19,20 +21,92 @@ import type {
   ISerializedIterableSource,
   Initialization,
 } from "./IIterableSource";
+import type { SourceWorkerRemote, TelemetryBridge } from "./WorkerSerializedIterableSource.types";
 import type { WorkerSerializedIterableSourceWorker } from "./WorkerSerializedIterableSourceWorker";
+import { TELEMETRY_DRAIN_INTERVAL_MS, TELEMETRY_FINAL_DRAIN_TIMEOUT_MS } from "./constants";
 
 Comlink.transferHandlers.set("abortsignal", abortSignalTransferHandler);
+
+const log = Log.getLogger(__filename);
 
 type ConstructorArgs = {
   initWorker: () => Worker;
   initArgs: IterableSourceInitializeArgs;
 };
 
+// Ordinal for worker telemetry realms (`worker:<n>`). Only advanced when telemetry is enabled, so
+// realm cardinality is one per worker instance launched while telemetry is on.
+// It is intentionally monotonic (never reused/reset): each worker instance gets a unique realm in
+// the telemetry timeline, so records from a re-initialised source are never conflated with its
+// predecessor's. The number of distinct realms is bounded by the source re-initialisations in one
+// benchmark run; telemetry is benchmark-only (the product installs the Noop sink, which never
+// enables the bridge). Where `realm` is used as a label (e.g. the sink's dropped-records counter),
+// the TelemetryLabelGuard additionally caps distinct label sets per metric
+// (DEFAULT_MAX_SERIES_PER_METRIC).
+let nextWorkerRealmOrdinal = 0;
+
+async function drainBridgeOnce(remote: SourceWorkerRemote): Promise<void> {
+  try {
+    const batch = await remote.drainTelemetry();
+    if (batch != undefined) {
+      getTelemetry().ingest(batch);
+    }
+  } catch (err: unknown) {
+    // The worker may already be gone; telemetry must never affect playback.
+    log.debug("Worker telemetry drain failed", err);
+  }
+}
+
+// Drain the bridge unless a drain is already in flight (in which case that drain is returned).
+async function drainBridge(bridge: TelemetryBridge): Promise<void> {
+  bridge.inFlight ??= drainBridgeOnce(bridge.remote).finally(() => {
+    bridge.inFlight = undefined;
+  });
+  await bridge.inFlight;
+}
+
+// Final drain on terminate(): wait for any periodic drain in flight (so batches are ingested in
+// order), then drain once more. Both waits share one deadline because a dead worker never answers
+// and the caller must still dispose it; no drain is started once the deadline has expired.
+async function finalDrainBridge(bridge: TelemetryBridge): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<"expired">((resolve) => {
+    timer = setTimeout(() => {
+      resolve("expired");
+    }, TELEMETRY_FINAL_DRAIN_TIMEOUT_MS);
+  });
+  let outcome: "drained" | "expired" = "drained";
+  try {
+    if (bridge.inFlight != undefined) {
+      outcome = await Promise.race([bridge.inFlight.then(() => "drained" as const), deadline]);
+    }
+    if (outcome === "drained") {
+      outcome = await Promise.race([drainBridge(bridge).then(() => "drained" as const), deadline]);
+    }
+  } finally {
+    clearTimeout(timer);
+  }
+  if (outcome === "expired") {
+    log.debug(
+      `Worker telemetry final drain timed out after ${TELEMETRY_FINAL_DRAIN_TIMEOUT_MS} ms`,
+    );
+  }
+}
+
+function stopBridgeTimer(bridge: TelemetryBridge | undefined): void {
+  if (bridge?.timer != undefined) {
+    clearInterval(bridge.timer);
+    bridge.timer = undefined;
+  }
+}
+
 export class WorkerSerializedIterableSource implements ISerializedIterableSource {
   readonly #args: ConstructorArgs;
 
-  #sourceWorkerRemote?: Comlink.Remote<WorkerSerializedIterableSourceWorker>;
+  #sourceWorkerRemote?: SourceWorkerRemote;
   #disposeRemote?: () => void;
+  // Only set while main-thread telemetry is enabled (see #startTelemetryBridge).
+  #telemetryBridge?: TelemetryBridge;
   public readonly sourceType = "serialized";
 
   public constructor(args: ConstructorArgs) {
@@ -40,6 +114,9 @@ export class WorkerSerializedIterableSource implements ISerializedIterableSource
   }
 
   public async initialize(): Promise<Initialization> {
+    // Re-init path: the previous worker is disposed below, so stop pulling from it.
+    stopBridgeTimer(this.#telemetryBridge);
+    this.#telemetryBridge = undefined;
     this.#disposeRemote?.();
 
     // Note: this launches the worker.
@@ -51,8 +128,43 @@ export class WorkerSerializedIterableSource implements ISerializedIterableSource
       >(worker);
 
     this.#disposeRemote = dispose;
-    this.#sourceWorkerRemote = await initializeWorker(this.#args.initArgs);
-    return await this.#sourceWorkerRemote.initialize();
+    const remote = await initializeWorker(this.#args.initArgs);
+    if (this.#disposeRemote !== dispose) {
+      // terminate() or a newer initialize() ran during the await: this endpoint is stale (already
+      // disposed or superseded). Don't publish it or start a bridge whose timer nobody would stop.
+      return await remote.initialize();
+    }
+    this.#sourceWorkerRemote = remote;
+    // Telemetry must be enabled in the worker BEFORE remote.initialize(): worker-side producers
+    // (e.g. MultiIterableSource's HydratedSourcePool) capture the realm sink at construction.
+    if (getTelemetry().isEnabled()) {
+      await this.#startTelemetryBridge(remote);
+    }
+    return await remote.initialize();
+  }
+
+  // Enable the worker-realm sink and start pulling its records. The bridge (incl. its timer) is
+  // registered synchronously, before any await, so a concurrent terminate() always sees and stops
+  // it. Failures are logged and ignored: telemetry never breaks data loading.
+  async #startTelemetryBridge(remote: SourceWorkerRemote): Promise<void> {
+    const bridge: TelemetryBridge = { remote, timer: undefined, inFlight: undefined };
+    bridge.timer = setInterval(() => {
+      void drainBridge(bridge);
+    }, TELEMETRY_DRAIN_INTERVAL_MS);
+    this.#telemetryBridge = bridge;
+    try {
+      await remote.enableTelemetry(`worker:${++nextWorkerRealmOrdinal}`);
+    } catch (err: unknown) {
+      log.debug("Failed to enable worker telemetry", err);
+      // Stop polling a worker without telemetry; the bridge stays registered so terminate() still
+      // performs its (bounded) final drain.
+      stopBridgeTimer(bridge);
+    }
+    if (this.#telemetryBridge !== bridge) {
+      // terminate()/re-initialize() replaced this bridge during the await: make sure it stays
+      // stopped.
+      stopBridgeTimer(bridge);
+    }
   }
 
   public async *messageIterator(
@@ -142,16 +254,27 @@ export class WorkerSerializedIterableSource implements ISerializedIterableSource
     // still awaiting below, and that newer worker must not be touched or disposed by this call.
     const remote = this.#sourceWorkerRemote;
     const disposeRemote = this.#disposeRemote;
+    const telemetryBridge = this.#telemetryBridge;
     this.#sourceWorkerRemote = undefined;
     this.#disposeRemote = undefined;
+    this.#telemetryBridge = undefined;
 
     try {
       // Give the worker-side source (e.g. MultiIterableSource's pool) a chance to release pooled
       // readers/streams gracefully before the worker is hard-killed below.
       await remote?.terminate();
     } finally {
-      // Always dispose the captured worker, even if its graceful terminate() rejected.
-      disposeRemote?.();
+      try {
+        if (telemetryBridge != undefined) {
+          // Final drain (after the worker flushed its final pool counters, before the worker is
+          // killed), bounded so a dead worker cannot block the disposal below.
+          stopBridgeTimer(telemetryBridge);
+          await finalDrainBridge(telemetryBridge);
+        }
+      } finally {
+        // Always dispose the captured worker, even if its graceful terminate() rejected.
+        disposeRemote?.();
+      }
     }
   }
 }
