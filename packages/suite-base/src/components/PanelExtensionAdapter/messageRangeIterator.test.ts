@@ -448,6 +448,34 @@ describe("createMessageRangeIterator", () => {
     (console.error as jest.Mock).mockReset();
   });
 
+  it("should throw source errors to the consumer when rethrowErrors is set", async () => {
+    // Given
+    const error = new Error(BasicBuilder.string());
+    async function* errorIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
+      yield { type: "message-event", msgEvent: MessageEventBuilder.messageEvent() };
+      throw error;
+    }
+    const { iterable } = createMessageRangeIterator({
+      topic: mockTopic,
+      rawBatchIterator: errorIterator(),
+      sortedTopics: mockSortedTopics,
+      messageConverters: mockMessageConverters,
+      rethrowErrors: true,
+    });
+
+    // When
+    const consume = async () => {
+      const batches: MessageEvent[][] = [];
+      for await (const batch of iterable) {
+        batches.push(batch);
+      }
+      return batches;
+    };
+
+    // Then
+    await expect(consume()).rejects.toBe(error);
+  });
+
   it("should not yield remaining messages when cancelled", async () => {
     const mockMessages: MessageEvent[] = MessageEventBuilder.messageEvents();
 

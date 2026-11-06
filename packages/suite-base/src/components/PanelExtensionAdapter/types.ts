@@ -110,4 +110,6 @@ export type CreateMessageRangeIteratorParams = {
   sortedTopics: readonly Topic[];
   messageConverters: readonly InstalledMessageConverter[];
   emitAlert?: MessageConverterAlertHandler;
+  /** Throw source errors to the consumer instead of logging them and completing early. */
+  rethrowErrors?: boolean;
 };

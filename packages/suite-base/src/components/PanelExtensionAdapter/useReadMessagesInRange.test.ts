@@ -244,4 +244,51 @@ describe("useReadMessagesInRange", () => {
     expect(first).toEqual(messages);
     expect(second).toEqual(messages);
   });
+
+  it("throws data source errors to the consumer", async () => {
+    // Given
+    const error = new Error(BasicBuilder.string());
+    async function* failingSource(): AsyncIterableIterator<Readonly<IteratorResult>> {
+      yield { type: "message-event", msgEvent: MessageEventBuilder.messageEvent({ topic }) };
+      throw error;
+    }
+    getBatchIterator.mockReturnValue(failingSource());
+    const read = renderRead();
+
+    // When / Then
+    await expect(collect(read(topic))).rejects.toBe(error);
+  });
+
+  it("stops in-flight reads and closes the source on unmount", async () => {
+    // Given
+    const messages = buildMessages(3);
+    const source = createSource(messages);
+    getBatchIterator.mockReturnValue(source.iterator);
+    const { result, unmount } = renderHook(() => useReadMessagesInRange());
+    const iterator = result.current(topic)[Symbol.asyncIterator]();
+    const first = await iterator.next();
+
+    // When
+    unmount();
+    const second = await iterator.next();
+
+    // Then
+    expect(first).toEqual({ done: false, value: [messages[0]] });
+    expect(second.done).toBe(true);
+    expect(source.isClosed()).toBe(true);
+  });
+
+  it("does not read after unmount", async () => {
+    // Given
+    const { result, unmount } = renderHook(() => useReadMessagesInRange());
+    const iterable = result.current(topic);
+
+    // When
+    unmount();
+    const messages = await collect(iterable);
+
+    // Then
+    expect(getBatchIterator).not.toHaveBeenCalled();
+    expect(messages).toEqual([]);
+  });
 });

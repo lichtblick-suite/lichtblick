@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { Immutable, MessageEvent, ReadMessagesInRangeOptions } from "@lichtblick/suite";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
@@ -37,12 +37,27 @@ export function useReadMessagesInRange(
   const emitAlertRef = useRef(emitAlert);
   emitAlertRef.current = emitAlert;
 
+  // In-flight reads are cancelled on unmount so abandoned reads don't keep the source busy.
+  const activeReadsRef = useRef(new Set<() => void>());
+  const unmountedRef = useRef(false);
+  useEffect(() => {
+    unmountedRef.current = false;
+    const activeReads = activeReadsRef.current;
+    return () => {
+      unmountedRef.current = true;
+      for (const cancel of activeReads) {
+        cancel();
+      }
+      activeReads.clear();
+    };
+  }, []);
+
   return useCallback(
     (topic: string, options: ReadMessagesInRangeOptions = {}) => {
       const { start, end, convertTo, signal } = options;
 
       async function* read(): AsyncGenerator<Immutable<MessageEvent[]>> {
-        if (signal?.aborted === true) {
+        if (signal?.aborted === true || unmountedRef.current) {
           return;
         }
 
@@ -61,13 +76,17 @@ export function useReadMessagesInRange(
           sortedTopics,
           messageConverters: messageConvertersRef.current ?? [],
           emitAlert: emitAlertRef.current,
+          rethrowErrors: true,
         });
 
+        const activeReads = activeReadsRef.current;
+        activeReads.add(cancel);
         signal?.addEventListener("abort", cancel, { once: true });
         try {
           yield* iterable;
         } finally {
           signal?.removeEventListener("abort", cancel);
+          activeReads.delete(cancel);
           cancel();
         }
       }
