@@ -9,6 +9,7 @@ import { ReactNode } from "react";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
@@ -222,6 +223,30 @@ describe("useSubscribeMessageRange telemetry", () => {
     expect(lastOnBatch()).toBeUndefined();
     expect(onNewRangeIterator).toHaveBeenCalledWith(pipeline.getSource().iterable);
     expect(cancel).toBe(mockCancel);
+    expect(telemetry.counter.mock.calls).toHaveLength(0);
+  });
+
+  it("should install no batch callback for a panel rendered outside a layout", () => {
+    // GIVEN - an enabled sink and a panel context whose id is the fallback (no layout child id)
+    const telemetry = TelemetryBuilder.mockTelemetry();
+    setTelemetrySink(telemetry);
+    setupPipeline([[buildMessage(10)]]);
+    const onNewRangeIterator = jest.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() => useSubscribeMessageRange(), {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <MockPanelContextProvider id={FALLBACK_PANEL_ID} type={PANEL_TYPE} title="Visible title">
+          {children}
+        </MockPanelContextProvider>
+      ),
+    });
+
+    // WHEN
+    act(() => {
+      result.current({ topic: BasicBuilder.string(), onNewRangeIterator });
+    });
+
+    // THEN
+    expect(lastOnBatch()).toBeUndefined();
     expect(telemetry.counter.mock.calls).toHaveLength(0);
   });
 

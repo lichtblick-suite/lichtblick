@@ -14,6 +14,7 @@ import {
   Time,
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
@@ -57,15 +58,23 @@ type WrapperProps = {
    * panel calls done(); a non-blocking one emulates the real pipeline's pauseFrame timeout.
    */
   pauseFrame?: PauseFrame;
+  /** Layout panel id put in the PanelContext (defaults to LAYOUT_PANEL_ID). */
+  panelId?: string;
 };
 
 // Never holds back the pipeline, like the real pauseFrame once its timeout has elapsed.
 const nonBlockingPauseFrame: PauseFrame = () => () => {};
 
-function Wrapper({ currentTime, frame, initPanel, pauseFrame }: WrapperProps): React.JSX.Element {
+function Wrapper({
+  currentTime,
+  frame,
+  initPanel,
+  pauseFrame,
+  panelId = LAYOUT_PANEL_ID,
+}: WrapperProps): React.JSX.Element {
   return (
     <ThemeProvider isDark>
-      <MockPanelContextProvider id={LAYOUT_PANEL_ID} type={PANEL_TYPE} title="Visible title">
+      <MockPanelContextProvider id={panelId} type={PANEL_TYPE} title="Visible title">
         <PanelSetup
           fixture={{ activeData: { currentTime }, frame, topics: TOPICS }}
           pauseFrame={pauseFrame}
@@ -494,6 +503,49 @@ describe("PanelExtensionAdapter telemetry", () => {
 
     // THEN - the frame is skipped exactly as with telemetry enabled, and nothing is recorded
     expect(onRender).toHaveBeenCalledTimes(1);
+    expect(telemetry.counter.mock.calls).toHaveLength(0);
+    expect(telemetry.gauge.mock.calls).toHaveLength(0);
+    expect(telemetry.observe.mock.calls).toHaveLength(0);
+    expect(telemetry.event.mock.calls).toHaveLength(0);
+  });
+
+  it("should record no panel telemetry for a panel rendered outside a layout", async () => {
+    // GIVEN - an enabled sink and a panel whose context id is the fallback (no layout child id)
+    const telemetry = TelemetryBuilder.mockTelemetry();
+    setTelemetrySink(telemetry);
+    const frame = { "/x": [buildMessage(10)] };
+    const onRender = jest.fn((_renderState: Immutable<RenderState>, done: () => void) => {
+      done();
+    });
+    const initPanel = (context: PanelExtensionContext) => {
+      context.watch("currentFrame");
+      context.watch("currentTime");
+      context.subscribe([{ topic: "/x" }]);
+      context.onRender = onRender;
+    };
+
+    // WHEN - the panel renders several frames
+    const handle = render(
+      <Wrapper
+        currentTime={{ sec: 1, nsec: 0 }}
+        frame={frame}
+        initPanel={initPanel}
+        panelId={FALLBACK_PANEL_ID}
+      />,
+    );
+    await flush();
+    handle.rerender(
+      <Wrapper
+        currentTime={{ sec: 2, nsec: 0 }}
+        frame={frame}
+        initPanel={initPanel}
+        panelId={FALLBACK_PANEL_ID}
+      />,
+    );
+    await flush();
+
+    // THEN - the panel rendered but no panel metric or event was recorded, like panel.mount
+    expect(onRender).toHaveBeenCalled();
     expect(telemetry.counter.mock.calls).toHaveLength(0);
     expect(telemetry.gauge.mock.calls).toHaveLength(0);
     expect(telemetry.observe.mock.calls).toHaveLength(0);

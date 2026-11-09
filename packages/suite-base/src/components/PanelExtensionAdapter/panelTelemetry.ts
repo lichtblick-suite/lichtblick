@@ -2,17 +2,26 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Immutable, MessageEvent } from "@lichtblick/suite";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import { ITelemetry, TelemetryLabels } from "@lichtblick/suite-base/util/telemetry";
 
 import { PANEL_TELEMETRY_METRICS } from "./constants";
 import { AllFramesDeliveryTracker } from "./panelTelemetry.types";
 
 /**
- * Builds the label set identifying a panel. `panelId` is the layout panel id (e.g. `Plot!3x9a`),
- * not the adapter's internal subscriber uuid nor the visible title.
+ * Builds the (frozen) label set identifying a panel. `panelId` is the layout panel id (e.g.
+ * `Plot!3x9a`), not the adapter's internal subscriber uuid nor the visible title. Returns undefined
+ * for `FALLBACK_PANEL_ID` (panel rendered outside a layout): such panels emit no panel telemetry,
+ * like the `panel.mount` event.
  */
-export function buildPanelTelemetryLabels(panelId: string, panelType: string): TelemetryLabels {
-  return { panelId, panelType };
+export function buildPanelTelemetryLabels(
+  panelId: string,
+  panelType: string,
+): TelemetryLabels | undefined {
+  if (panelId === FALLBACK_PANEL_ID) {
+    return undefined;
+  }
+  return Object.freeze({ panelId, panelType });
 }
 
 /**

@@ -8,6 +8,7 @@ import { PropsWithChildren, useCallback, useState } from "react";
 
 import { MessageEvent } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
 import { PlayerStateActiveData } from "@lichtblick/suite-base/players/types";
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
@@ -410,6 +411,21 @@ describe("usePanelSubscriberTelemetry", () => {
     // Given an enabled sink and the hook rendered outside any panel
     const telemetry = installMockTelemetry({ enabled: true });
     renderSubscriberTelemetryHook(SUBSCRIBER_ID);
+    const state = makeTickState(
+      new Map([[SUBSCRIBER_ID, [MessageEventBuilder.messageEvent({ sizeInBytes: 7 })]]]),
+    );
+
+    // When a tick is recorded
+    recordPipelineTickTelemetry(getTelemetry(), state, undefined);
+
+    // Then no per-panel counters are emitted
+    expect(panelCounterCalls(telemetry)).toEqual([]);
+  });
+
+  it("should not register a panel rendered outside a layout", () => {
+    // Given an enabled sink and a panel whose context id is the fallback (no layout child id)
+    const telemetry = installMockTelemetry({ enabled: true });
+    renderSubscriberTelemetryHook(SUBSCRIBER_ID, { id: FALLBACK_PANEL_ID, type: "Plot" });
     const state = makeTickState(
       new Map([[SUBSCRIBER_ID, [MessageEventBuilder.messageEvent({ sizeInBytes: 7 })]]]),
     );

@@ -5,6 +5,7 @@ import { useContext, useEffect } from "react";
 
 import { MessageEvent } from "@lichtblick/suite";
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import { getTelemetry, ITelemetry, TelemetryLabels } from "@lichtblick/suite-base/util/telemetry";
 
 import { PIPELINE_TELEMETRY_METRICS } from "./constants";
@@ -28,8 +29,9 @@ export function unregisterSubscriberPanelLabels(subscriberId: string): void {
 
 /**
  * Attributes the messages the pipeline delivers to `subscriberId` to the enclosing panel, so
- * every panel gets `panel.messages.delivered[Bytes]` counters. No-op outside a panel or when
- * telemetry is disabled (checked when the effect runs).
+ * every panel gets `panel.messages.delivered[Bytes]` counters. No-op outside a panel, for a panel
+ * rendered outside a layout (`FALLBACK_PANEL_ID`), or when telemetry is disabled. The enabled
+ * check runs when the effect runs, so the sink must be installed before the panel mounts.
  */
 export function usePanelSubscriberTelemetry(subscriberId: string): void {
   // Optional on purpose: usePanelContext() throws outside a panel.
@@ -38,7 +40,12 @@ export function usePanelSubscriberTelemetry(subscriberId: string): void {
   const panelType = panelContext?.type;
 
   useEffect(() => {
-    if (panelId == undefined || panelType == undefined || !getTelemetry().isEnabled()) {
+    if (
+      panelId == undefined ||
+      panelId === FALLBACK_PANEL_ID ||
+      panelType == undefined ||
+      !getTelemetry().isEnabled()
+    ) {
       return;
     }
     registerSubscriberPanelLabels(subscriberId, Object.freeze({ panelId, panelType }));

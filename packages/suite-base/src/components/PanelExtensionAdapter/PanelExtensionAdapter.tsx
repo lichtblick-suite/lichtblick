@@ -33,8 +33,8 @@ import {
   useMessagePipeline,
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
-import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 import { usePanelSubscriberTelemetry } from "@lichtblick/suite-base/components/MessagePipeline/pipelineTelemetry";
+import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import {
   collateTopicSchemaConversions,
@@ -188,7 +188,7 @@ function PanelExtensionAdapter(
   } = usePanelContext();
 
   // Telemetry labels identify the panel by its layout id (e.g. `Plot!3x9a`), not by the internal
-  // subscriber uuid below. Memoized so no allocation happens per frame.
+  // subscriber uuid below. Memoized so no allocation happens per frame. Undefined outside a layout.
   const telemetryLabels = useMemo(
     () => buildPanelTelemetryLabels(layoutPanelId, panelName),
     [layoutPanelId, panelName],
@@ -355,7 +355,8 @@ function PanelExtensionAdapter(
     }
 
     const telemetry = getTelemetry();
-    const telemetryEnabled = telemetry.isEnabled();
+    // No labels: panel rendered outside a layout (FALLBACK_PANEL_ID), no panel telemetry.
+    const telemetryEnabled = telemetryLabels != undefined && telemetry.isEnabled();
 
     if (renderingRef.current) {
       setSlowRender(true);

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { MessageEvent } from "@lichtblick/suite";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
 
 import { PANEL_TELEMETRY_METRICS } from "./constants";
@@ -24,7 +25,7 @@ function buildMessage(sizeInBytes: number): MessageEvent {
   };
 }
 
-const LABELS = buildPanelTelemetryLabels("Plot!3x9a", "Plot");
+const LABELS = buildPanelTelemetryLabels("Plot!3x9a", "Plot")!;
 
 describe("panelTelemetry", () => {
   it("builds labels from the layout panel id and panel type", () => {
@@ -33,6 +34,15 @@ describe("panelTelemetry", () => {
 
     // THEN
     expect(labels).toEqual({ panelId: "Plot!3x9a", panelType: "Plot" });
+    expect(Object.isFrozen(labels)).toBe(true);
+  });
+
+  it("should build no labels for a panel rendered outside a layout", () => {
+    // GIVEN / WHEN
+    const labels = buildPanelTelemetryLabels(FALLBACK_PANEL_ID, "Plot");
+
+    // THEN
+    expect(labels).toBeUndefined();
   });
 
   it("records message count and summed bytes for a frame", () => {
