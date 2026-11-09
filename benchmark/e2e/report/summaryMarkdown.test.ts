@@ -195,6 +195,8 @@ describe("buildPanelsTable", () => {
           messageBytes: 2048,
           rangeMessages: 0,
           rangeBytes: 0,
+          renderedMessages: 90,
+          renderedBytes: 1536,
           renders: 30,
           renderMeanMs: 4,
           renderMaxMs: 8.25,
@@ -218,10 +220,10 @@ describe("buildPanelsTable", () => {
 
     // Then
     expect(table.split("\n")).toEqual([
-      "| Panel | Type | Messages | Bytes | Range msgs | Render mean / max | First render |",
-      "|-------|------|----------|-------|------------|-------------------|--------------|",
-      "| 3D!a | 3D | 120 | 2.0 KiB | 0 | 4.00 / 8.25 ms (30) | 1234 ms |",
-      "| Plot!a | Plot | 600 | 0 B | 5000 | — | — |",
+      "| Panel | Type | Messages | Bytes | Range msgs | Rendered msgs | Render mean / max | First render |",
+      "|-------|------|----------|-------|------------|---------------|-------------------|--------------|",
+      "| 3D!a | 3D | 120 | 2.0 KiB | 0 | 90 | 4.00 / 8.25 ms (30) | 1234 ms |",
+      "| Plot!a | Plot | 600 | 0 B | 5000 | — | — | — |",
     ]);
   });
 

@@ -32,7 +32,10 @@ export type PanelSummaryV1 = {
   firstRenderMs?: number;
   /** Number of `panel.mount` events (> 1: the panel was remounted during the run). */
   mounts: number;
-  /** Final `panel.messages.delivered` total (0 if never published). */
+  /**
+   * Final `panel.messages.delivered` total (0 if never published): messages the pipeline
+   * delivered to the panel's subscribers, for every panel type.
+   */
   messages: number;
   /** Final `panel.messages.deliveredBytes` total (0 if never published). */
   messageBytes: number;
@@ -40,6 +43,13 @@ export type PanelSummaryV1 = {
   rangeMessages: number;
   /** Final `panel.rangeMessages.deliveredBytes` total (0 if never published). */
   rangeBytes: number;
+  /**
+   * Final `panel.messages.rendered` total: messages of the frames an adapter panel actually
+   * rendered (adapter panels only; absent in older artifacts).
+   */
+  renderedMessages?: number;
+  /** Final `panel.messages.renderedBytes` total (adapter panels only; absent in older artifacts). */
+  renderedBytes?: number;
   /** Final `panel.render.count` total, else `panel.render.durationMs.count` (adapter panels only). */
   renders?: number;
   /** `panel.render.durationMs`: Σsum / Σcount over the run. */
@@ -145,6 +155,15 @@ function summarizePanel(panel: PanelAccumulator, originTs: number | undefined): 
   }
   if (firstRenderMs != undefined) {
     summary.firstRenderMs = firstRenderMs;
+  }
+
+  const renderedMessages = counterTotal(metrics.get(PANEL_METRICS.messagesRendered));
+  if (renderedMessages != undefined) {
+    summary.renderedMessages = renderedMessages;
+  }
+  const renderedBytes = counterTotal(metrics.get(PANEL_METRICS.messagesRenderedBytes));
+  if (renderedBytes != undefined) {
+    summary.renderedBytes = renderedBytes;
   }
 
   const durations = summarizeObservation(metrics, PANEL_METRICS.renderDurationMs);

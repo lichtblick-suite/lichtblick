@@ -219,6 +219,8 @@ function panelRows(panels: Record<string, PanelSummaryV1>): Cell[][] {
       num(fmtMiB(panel.messageBytes, 2)),
       num(fmtNumber(panel.rangeMessages)),
       num(fmtMiB(panel.rangeBytes, 2)),
+      num(fmtNumber(panel.renderedMessages)),
+      num(fmtMiB(panel.renderedBytes, 2)),
       num(fmtNumber(panel.renders)),
       num(fmtNumber(panel.renderMeanMs, 2)),
       num(fmtNumber(panel.renderMaxMs, 2)),
@@ -243,6 +245,8 @@ function panelsTable(result: PersistedResultV1): string {
       "MiB",
       "Range msgs",
       "Range MiB",
+      "Rendered msgs",
+      "Rendered MiB",
       "Renders",
       "Render mean (ms)",
       "Render max (ms)",
@@ -263,7 +267,12 @@ function phasesTable(result: PersistedResultV1): string {
     ["open duration (ms)", fmtMs(phases.openDurationMs)],
     ["first message (ms)", fmtMs(phases.firstMessageMs)],
     ["first useful frame (ms)", fmtMs(phases.firstUsefulFrameMs)],
-    ["preload duration (ms)", fmtMs(phases.preloadDurationMs)],
+    [
+      "preload duration (ms)",
+      phases.preloadEndReason == undefined
+        ? fmtMs(phases.preloadDurationMs)
+        : `— (${phases.preloadEndReason})`,
+    ],
     ["panels ready (ms)", fmtMs(phases.panelsReadyMs)],
     [
       "panels ready coverage",

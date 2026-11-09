@@ -23,7 +23,11 @@ import type {
 } from "./IIterableSource";
 import type { SourceWorkerRemote, TelemetryBridge } from "./WorkerSerializedIterableSource.types";
 import type { WorkerSerializedIterableSourceWorker } from "./WorkerSerializedIterableSourceWorker";
-import { TELEMETRY_DRAIN_INTERVAL_MS, TELEMETRY_FINAL_DRAIN_TIMEOUT_MS } from "./constants";
+import {
+  SUPERSEDED_INITIALIZE_ERROR_MESSAGE,
+  TELEMETRY_DRAIN_INTERVAL_MS,
+  TELEMETRY_FINAL_DRAIN_TIMEOUT_MS,
+} from "./constants";
 
 Comlink.transferHandlers.set("abortsignal", abortSignalTransferHandler);
 
@@ -130,9 +134,10 @@ export class WorkerSerializedIterableSource implements ISerializedIterableSource
     this.#disposeRemote = dispose;
     const remote = await initializeWorker(this.#args.initArgs);
     if (this.#disposeRemote !== dispose) {
-      // terminate() or a newer initialize() ran during the await: this endpoint is stale (already
-      // disposed or superseded). Don't publish it or start a bridge whose timer nobody would stop.
-      return await remote.initialize();
+      // terminate() or a newer initialize() ran during the await: this endpoint is stale (its
+      // worker is already disposed or superseded). Calling into it could hang, so reject instead
+      // of publishing it or starting a bridge whose timer nobody would stop.
+      throw new Error(SUPERSEDED_INITIALIZE_ERROR_MESSAGE);
     }
     this.#sourceWorkerRemote = remote;
     // Telemetry must be enabled in the worker BEFORE remote.initialize(): worker-side producers

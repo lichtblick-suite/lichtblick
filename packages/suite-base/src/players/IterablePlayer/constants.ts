@@ -13,6 +13,11 @@ export const TELEMETRY_DRAIN_INTERVAL_MS = 1000;
 // disposed.
 export const TELEMETRY_FINAL_DRAIN_TIMEOUT_MS = 1000;
 
+// Rejection message of a WorkerSerializedIterableSource.initialize() call that lost the race with
+// terminate() or a newer initialize().
+export const SUPERSEDED_INITIALIZE_ERROR_MESSAGE =
+  "WorkerSerializedIterableSource initialize() was superseded by terminate() or a newer initialize()";
+
 // Telemetry: prefix of the `pipeline.memory.<lowerCamelCaseKey>` gauges derived from
 // `progress.memoryInfo` keys (see memoryMetricName).
 export const MEMORY_METRIC_PREFIX = "pipeline.memory.";

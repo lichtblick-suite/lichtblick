@@ -80,6 +80,8 @@ describe("summarizePanels", () => {
       ...panelObservations(PANEL_METRICS.renderDurationMs, THREE_D, windows),
       ...panelCounter(PANEL_METRICS.renderSkipped, THREE_D, [[3000, 3]]),
       ...panelCounter(PANEL_METRICS.messagesDelivered, THREE_D, [[2000, 30]]),
+      ...panelCounter(PANEL_METRICS.messagesRendered, THREE_D, [[2000, 12]]),
+      ...panelCounter(PANEL_METRICS.messagesRenderedBytes, THREE_D, [[2000, 960]]),
     ];
     const events = [
       TelemetryRecordBuilder.panelEvent("panel.mount", THREE_D, 1200),
@@ -89,7 +91,8 @@ describe("summarizePanels", () => {
     // When
     const panel = summarizePanels(samples, events, ORIGIN)?.[THREE_D];
 
-    // Then mean = Σsum / Σcount = 165 / 30, max = 10, nearest-rank p90 of the maxima 1..10 = 9
+    // Then delivered (pipeline) and rendered (frames handed to onRender) stay separate;
+    // mean = Σsum / Σcount = 165 / 30, max = 10, nearest-rank p90 of the maxima 1..10 = 9
     expect(panel).toEqual({
       panelType: "3D",
       mountedAtMs: 200,
@@ -99,6 +102,8 @@ describe("summarizePanels", () => {
       messageBytes: 0,
       rangeMessages: 0,
       rangeBytes: 0,
+      renderedMessages: 12,
+      renderedBytes: 960,
       renders: 30,
       renderMeanMs: 5.5,
       renderMaxMs: 10,

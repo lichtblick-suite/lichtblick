@@ -74,6 +74,7 @@ export class BufferedTelemetrySink implements ITelemetry {
   readonly #setInterval: (handler: () => void, intervalMs: number) => unknown;
   readonly #clearInterval: (handle: unknown) => void;
   readonly #onEvent: ((event: TelemetryEvent) => void) | undefined;
+  #onEventFailureLogged = false;
 
   // Ring buffer: fixed-size array, `#head` = index of the oldest record.
   readonly #ring: Array<TelemetryRecord | undefined>;
@@ -353,18 +354,27 @@ export class BufferedTelemetrySink implements ITelemetry {
       event.labels = ownLabels;
     }
     this.#push(event);
-    this.#onEvent?.(event);
+    this.#notifyOnEvent(event);
   }
 
   /**
-   * Appends records produced by another realm as-is (subject to the ring bound) and accounts for
-   * the records that realm dropped. Ingested events are also forwarded to `onEvent`.
+   * Appends records produced by another realm, keeping their realm, sequence and timestamps
+   * (subject to the ring bound), and accounts for the records that realm dropped. Ingested events
+   * are also forwarded to `onEvent`.
    *
    * Every ingested record passes the same label guard as the direct API (key allow-list and
    * per-metric / per-event-name cardinality cap, shared with this sink's own series): rejected
    * records are discarded and counted in `telemetry.rejectedRecords{reason}`, exactly like a
    * rejected `gauge()` / `event()` call. They are not counted in `dropped`, so the foreign
-   * realm's sequence numbers may show a gap for them.
+   * realm's sequence numbers may show a gap for them. The reserved-name check is not applied:
+   * ingested records carry the producing realm's own self-metrics.
+   *
+   * `batch.dropped` is added to this sink's `telemetry.droppedRecords{realm=<batch.realm>}`
+   * counter (record realm = this sink's realm). The producing realm also publishes its own
+   * cumulative `telemetry.droppedRecords{realm=<its realm>}`, which is ingested like any other
+   * sample, so the same `labels.realm` can appear in two series that converge on the same total.
+   * The ingesting counter is the fallback when the producer's own sample is lost (worker killed,
+   * or the sample itself dropped). Consumers must take the max per `labels.realm`, not the sum.
    */
   public ingest(batch: TelemetryBatch): void {
     if (!this.#enabled) {
@@ -389,7 +399,7 @@ export class BufferedTelemetrySink implements ITelemetry {
       }
       this.#push(record);
       if (record.kind === "event") {
-        this.#onEvent?.(record);
+        this.#notifyOnEvent(record);
       }
     }
     if (batch.dropped === 0) {
@@ -484,6 +494,26 @@ export class BufferedTelemetrySink implements ITelemetry {
     this.#eventGuard.clear();
     this.#rejectedSeries.clear();
     this.#ownDroppedSeries = undefined;
+  }
+
+  // Forwards an event to the `onEvent` observer. The observer must never break the producer: an
+  // exception is caught (the record stays buffered) and only the first one is logged.
+  #notifyOnEvent(event: TelemetryEvent): void {
+    const onEvent = this.#onEvent;
+    if (onEvent == undefined) {
+      return;
+    }
+    try {
+      onEvent(event);
+    } catch (err) {
+      if (!this.#onEventFailureLogged) {
+        this.#onEventFailureLogged = true;
+        console.warn(
+          "BufferedTelemetrySink onEvent observer failed; further failures are not logged",
+          err,
+        );
+      }
+    }
   }
 
   #push(record: TelemetryRecord): void {

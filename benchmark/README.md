@@ -175,7 +175,8 @@ pid, platform, scenarioId, realm, reason, iteratorId`. There are at most 64 seri
   Records that break these rules are rejected and counted in `telemetry.rejectedRecords{reason}`.
 - **Buffer and drops.** Each sink is a ring buffer with 8192 records. On overflow the oldest
   records are dropped and counted in `telemetry.droppedRecords{realm}` and in
-  `TelemetryBatch.dropped`. These counts end up in the result's `dropped`.
+  `TelemetryBatch.dropped`. These counts end up in the result's `dropped`, taking the max
+  per realm: a worker realm can be reported both by its own sink and by the renderer's ingest.
 - **Activation.** Telemetry is installed only by the benchmark app. `?telemetry=off` disables it,
   which is used as the baseline in the overhead A/B. The legacy frame-time hook
   (`window.recordFrameTimes`) works with telemetry on or off.
@@ -200,6 +201,13 @@ Caveats:
   host/process metrics for totals.
 - Process working set (RSS) **double-counts shared pages** across processes. Treat the "total" as
   an upper bound that is good for comparing runs, not as exact memory usage.
+- `pipeline.hydratedSourcePool.closes` counts **completed** closes only: a `close()` that throws
+  is logged and not counted (there is no separate close-failure counter).
+- `seek.requested` is emitted when a seek is requested. The seek may be deferred until
+  initialization completes or be a no-op (already at, or already seeking to, that time).
+- There is **one `preload` phase per player**. An end with a `reason` label (`cancelled`, `error`)
+  is final and is not restarted by a later full subscription. `phases.preloadDurationMs` is
+  reported only for a completed end; otherwise `phases.preloadEndReason` holds the reason.
 - **`app.ready` is not "app usable".** It fires once on the first commit of the benchmark root
   (`benchmark/src/Root.tsx`): providers and `StudioApp` are mounted, but the layout is not applied,
   no data source is open and no panel has rendered yet. It is the earliest point all scenarios
@@ -231,17 +239,19 @@ Caveats:
 
 | Layer                       | Source                                                                                                                                                             | Metrics / events                                                                                                                                                                                                                                                                                                                                                  |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Panels                      | `Panel` (all panels), `PanelExtensionAdapter`, MessagePipeline subscribers; labels `{panelId, panelType}` (`panelId` = layout id, e.g. `Plot!3x9a`), scope `panel` | Events: `panel.mount`, `panel.unmount`, `panel.firstRender` (adapter panels only); `layout.applied` (scope `app`). Counters: `panel.messages.{delivered,deliveredBytes}`, `panel.rangeMessages.{delivered,deliveredBytes}`, `panel.render.{count,skipped}`. Observation: `panel.render.durationMs` (→ `.count`/`.sum`/`.max`)                                     |
+| Panels                      | `Panel` (all panels), `PanelExtensionAdapter`, MessagePipeline subscribers; labels `{panelId, panelType}` (`panelId` = layout id, e.g. `Plot!3x9a`), scope `panel` | Events: `panel.mount`, `panel.unmount`, `panel.firstRender` (adapter panels only); `layout.applied` (scope `app`). Counters: `panel.messages.{delivered,deliveredBytes,rendered,renderedBytes}`, `panel.rangeMessages.{delivered,deliveredBytes}`, `panel.render.{count,skipped}`. Observation: `panel.render.durationMs` (→ `.count`/`.sum`/`.max`)              |
 | Pipeline (MessagePipeline)  | `MessagePipeline` (renderer), scope `pipeline`                                                                                                                     | Counters: `pipeline.messages.{received,receivedBytes,delivered,deliveredBytes}`. Gauges: `pipeline.subscribers.count`, `pipeline.subscriptions.count`. Observation: `pipeline.listenerDispatchDurationMs` (→ `.count`/`.sum`/`.max`)                                                                                                                              |
 | Pipeline (player / sources) | `BlockLoader`, `MultiIterableSource`, `CachingIterableSource`, `RemoteFileReadable`, `IterablePlayer`; scope `pipeline`                                            | Gauges: `pipeline.blockCache.{bytes,maxBytes,loadedFraction}`, `pipeline.sources.{total,relevant}`, `pipeline.sourceCache.bytes`, `pipeline.memory.<key>` (bytes, label `{sourceId}`, one per `progress.memoryInfo` entry). Counters: `pipeline.blockCache.evictions`, `pipeline.sourceCache.{hits,misses,evictions}`, `pipeline.remote.{readRequests,bytesRead}` |
 
 What the panel counters mean:
 
-- `panel.messages.delivered[Bytes]`: for **built-in panels** (PanelAPI hooks), the messages the
-  MessagePipeline buckets for the panel on each tick, summed across the panel's subscribers,
-  whether or not the panel rendered them. For **extension-API panels** (`PanelExtensionAdapter`),
-  only the messages of rendered frames; skipped frames are excluded (counted in
-  `panel.render.skipped` instead).
+- `panel.messages.delivered[Bytes]`: for **every panel**, the messages the MessagePipeline
+  buckets for the panel on each tick, summed across the panel's subscribers, whether or not the
+  panel rendered them.
+- `panel.messages.rendered[Bytes]`: **extension-API panels** (`PanelExtensionAdapter`) only, the
+  messages of the frames actually handed to `onRender`. A skipped frame is counted in
+  `panel.render.skipped`, and its messages are counted as rendered only if a later render hands
+  the same frame over. `delivered - rendered` is the work the panel never rendered.
 - `panel.rangeMessages.delivered[Bytes]`: preloaded (range) deliveries, i.e. the
   `useSubscribeMessageRange` batches plus the new tail of `renderState.allFrames`.
 - `panel.render.*` and `panel.firstRender` exist only for extension-API (adapter) panels.
@@ -454,11 +464,12 @@ and stores what it saw as `runnerEvents` in the v1 result:
         terminatedPins, activePinsFinal, invariantHolds, overBudgetPeriods, overBudgetDurationMs,
         evictions, rehydrations, highWaterResidentCount, highWaterActivePins }> },
     phases: { origin?: "datasource.open" | "app.ready", firstMessageMs?, firstUsefulFrameMs?,
-              openDurationMs?, preloadDurationMs?, layoutAppliedMs?, panelsReadyMs?,
-              panelsReadyCoverage?: { mounted, firstRendered } },
+              openDurationMs?, preloadDurationMs?, preloadEndReason?, layoutAppliedMs?,
+              panelsReadyMs?, panelsReadyCoverage?: { mounted, firstRendered } },
     panels?: Record<panelId, { panelType, mountedAtMs?, unmountedAtMs?, firstRenderMs?, mounts,
-              messages, messageBytes, rangeMessages, rangeBytes, renders?, renderMeanMs?,
-              renderMaxMs?, renderP90WindowMaxMs?, skipped? }>,
+              messages, messageBytes, rangeMessages, rangeBytes, renderedMessages?,
+              renderedBytes?, renders?, renderMeanMs?, renderMaxMs?, renderP90WindowMaxMs?,
+              skipped? }>,
     pipeline?: { messagesReceived?, bytesReceived?, rateWindowMs?, messagesPerSec?, bytesPerSec?,
               deliveredFanout?, subscribersMax?, subscriptionsMax?, listenerDispatchMeanMs?,
               listenerDispatchMaxMs?, listenerDispatchP90WindowMaxMs?, blockCachePeakBytes?,

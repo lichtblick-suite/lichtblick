@@ -54,6 +54,56 @@ describe("buildSeriesKey", () => {
     // Then
     expect(a).not.toBe(b);
   });
+
+  describe("series key cache", () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should build the key of a frozen labels object once per metric", () => {
+      // Given
+      const metric = TelemetryBuilder.metric();
+      const labels = Object.freeze({ sourceId: "s", poolId: "p" });
+      const keysSpy = jest.spyOn(Object, "keys");
+
+      // When
+      const first = buildSeriesKey(metric, labels);
+      const second = buildSeriesKey(metric, labels);
+
+      // Then
+      expect(second).toBe(first);
+      expect(keysSpy.mock.calls.filter(([arg]) => arg === labels)).toHaveLength(1);
+    });
+
+    it("should keep separate keys per metric for the same frozen labels object", () => {
+      // Given
+      const [metricA, metricB] = [TelemetryBuilder.metric(), TelemetryBuilder.metric()];
+      const labels = Object.freeze({ poolId: "p" });
+
+      // When
+      const keyA = buildSeriesKey(metricA, labels);
+      const keyB = buildSeriesKey(metricB, labels);
+
+      // Then
+      expect(keyA).toBe(`${metricA}{poolId="p"}`);
+      expect(keyB).toBe(`${metricB}{poolId="p"}`);
+    });
+
+    it("should rebuild the key of unfrozen labels so a mutation is never served stale", () => {
+      // Given
+      const metric = TelemetryBuilder.metric();
+      const labels: Record<string, string> = { poolId: "p" };
+      const before = buildSeriesKey(metric, labels);
+
+      // When
+      labels.poolId = "q";
+      const after = buildSeriesKey(metric, labels);
+
+      // Then
+      expect(before).toBe(`${metric}{poolId="p"}`);
+      expect(after).toBe(`${metric}{poolId="q"}`);
+    });
+  });
 });
 
 describe("TelemetryLabelGuard", () => {

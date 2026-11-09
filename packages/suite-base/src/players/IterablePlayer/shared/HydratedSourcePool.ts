@@ -84,8 +84,10 @@ type Entry = {
  * "Over budget" means that after an eviction pass the pool is still above `maxCount` or
  * `maxBytes` (only possible because the remaining entries are pinned or protected by
  * `minResident`). Entering the state starts a period (`overBudgetPeriods`), leaving it adds the
- * elapsed time to `overBudgetDurationMs`. The state is settled as soon as a pass has removed its
- * victims, before their closes are awaited, so a slow close does not extend an over-budget period.
+ * elapsed time to `overBudgetDurationMs`. Victims are closed one at a time; the state is settled
+ * as soon as a pass has removed its last victim, before that close is awaited, so a slow close
+ * does not extend an over-budget period. `closes` counts completed `hydrator.close()` calls only
+ * (failed closes are logged, not counted).
  * High-water marks for resident count/bytes are sampled after eviction passes (momentary values
  * inside a synchronous insert+evict step are not recorded); the active-pin and pending-entry
  * high-water marks are sampled when pins are added.
@@ -93,7 +95,8 @@ type Entry = {
  * When the telemetry sink captured at construction is enabled, gauges and counter increments
  * (scope "pipeline", label `{ poolId }`, prefix `pipeline.hydratedSourcePool.`) are pushed after
  * each state change; the sink keeps the last value and publishes at its own cadence. With the
- * default no-op sink nothing beyond the numeric bookkeeping happens.
+ * default no-op sink nothing beyond the numeric bookkeeping happens. The sink is read once, so it
+ * must be installed before players are created: a pool constructed earlier is never instrumented.
  */
 export class HydratedSourcePool {
   readonly #maxBytes: number;
@@ -188,9 +191,9 @@ export class HydratedSourcePool {
   public async admit<T>(token: object, hydrator: SourceHydrator<T>, value: T): Promise<void> {
     if (this.#terminated) {
       // Pool is torn down: never retain new values.
+      await hydrator.close(value);
       this.#counts.closes += 1;
       this.#publish();
-      await hydrator.close(value);
       return;
     }
     const existing = this.#entries.get(token);
@@ -198,9 +201,9 @@ export class HydratedSourcePool {
       // Refresh recency; keep the existing (possibly in-use) value and drop the new one.
       this.#entries.delete(token);
       this.#entries.set(token, existing);
+      await hydrator.close(value);
       this.#counts.closes += 1;
       this.#publish();
-      await hydrator.close(value);
       return;
     }
     const weight = Math.max(0, hydrator.weigh?.(value) ?? 1);
@@ -312,9 +315,8 @@ export class HydratedSourcePool {
     await Promise.all(
       entries.map(async ([, entry]) => {
         try {
-          const value = await entry.value;
+          await entry.hydrator.close(await entry.value);
           this.#counts.closes += 1;
-          await entry.hydrator.close(value);
         } catch (err) {
           log.error("HydratedSourcePool terminate close failed", err);
         }
@@ -331,49 +333,49 @@ export class HydratedSourcePool {
     return this.#entries.size > this.#maxCount || this.#totalWeight > this.#maxBytes;
   }
 
-  // Close least-recently-used unpinned entries until within budget, `minResident` is reached, or
-  // only pinned entries remain (in which case the pool temporarily exceeds its bounds).
-  //
-  // Victim selection is fully synchronous (see #takeEvictionVictims), so every victim of a pass is
-  // chosen against one consistent snapshot and is already out of the map before any close starts;
-  // the closes of distinct victims are independent and run concurrently. If the pool changed while
-  // they were in flight (e.g. a pin was released), a follow-up pass re-checks the budget, so the
-  // pass converges to the same budget state as a sequential select-close-recheck loop.
+  // Close least-recently-used unpinned entries one at a time until within budget, `minResident` is
+  // reached, or only pinned entries remain (in which case the pool temporarily exceeds its bounds).
+  // Each victim is removed before its close is awaited, so concurrent passes never target the same
+  // entry twice, and the budget is re-checked after every close.
   async #evictBeyondCapacity(): Promise<void> {
-    const victims = this.#takeEvictionVictims();
-    // Victims are already out of the map, so settle synchronously before awaiting their closes: a
-    // slow close must not keep the pool over budget, and callers such as release() rely on the
-    // stats being up to date without awaiting.
-    this.#settle();
-    if (victims.length === 0) {
-      return;
+    for (;;) {
+      const victim = this.#takeEvictionVictim();
+      if (victim == undefined) {
+        this.#settle();
+        return;
+      }
+      // When this removal ends the pass, settle before awaiting the close: a slow close must not
+      // extend an over-budget period, and release() callers read the stats without awaiting.
+      if (!this.#hasEvictionCandidate()) {
+        this.#settle();
+      }
+      await this.#closeEvicted(victim);
     }
-    await Promise.all(
-      victims.map(async (entry) => {
-        await this.#closeEvicted(entry);
-      }),
-    );
-    await this.#evictBeyondCapacity();
   }
 
-  // Synchronously remove LRU unpinned entries until the pool is within budget, `minResident` is
-  // reached, or only pinned entries remain. Removal (and weight/evicted-token/eviction accounting)
-  // happens before any close is awaited, so concurrent eviction passes never target the same entry
-  // twice and a concurrent acquire() of a victim re-hydrates instead of reusing a closing value.
-  #takeEvictionVictims(): Entry[] {
-    const victims: Entry[] = [];
-    while (this.#isOverCapacity()) {
-      let evictKey: object | undefined;
-      let evictEntry: Entry | undefined;
-      for (const [key, entry] of this.#entries) {
-        if (entry.pins === 0) {
-          evictKey = key;
-          evictEntry = entry;
-          break;
-        }
+  // True when the pool is over capacity and has an unpinned entry it could evict.
+  #hasEvictionCandidate(): boolean {
+    if (!this.#isOverCapacity()) {
+      return false;
+    }
+    for (const entry of this.#entries.values()) {
+      if (entry.pins === 0) {
+        return true;
       }
-      if (evictKey == undefined || evictEntry == undefined) {
-        break; // All remaining entries are pinned/in-use.
+    }
+    return false;
+  }
+
+  // Synchronously remove the least-recently-used unpinned entry when the pool is over capacity.
+  // Removal (and weight/evicted-token/eviction accounting) happens before its close is awaited, so
+  // a concurrent acquire() of the victim re-hydrates instead of reusing a closing value.
+  #takeEvictionVictim(): Entry | undefined {
+    if (!this.#isOverCapacity()) {
+      return undefined;
+    }
+    for (const [key, entry] of this.#entries) {
+      if (entry.pins !== 0) {
+        continue;
       }
       if (!this.#overCapacityReported) {
         this.#overCapacityReported = true;
@@ -381,22 +383,22 @@ export class HydratedSourcePool {
           `HydratedSourcePool over capacity: capping resident sources (maxCount=${this.#maxCount}, maxBytes=${this.#maxBytes}) and re-opening others on demand.`,
         );
       }
-      this.#entries.delete(evictKey);
-      this.#totalWeight -= evictEntry.weight;
-      this.#evictedTokens.add(evictKey);
+      this.#entries.delete(key);
+      this.#totalWeight -= entry.weight;
+      this.#evictedTokens.add(key);
       this.#counts.evictions += 1;
-      victims.push(evictEntry);
+      return entry;
     }
-    return victims;
+    return undefined; // All remaining entries are pinned/in-use.
   }
 
-  // Close one evicted entry. Failures are logged and never propagate, so one failing close cannot
-  // prevent the other victims of the same pass from being closed.
+  // Close one evicted entry. `closes` counts completed closes only; failures are logged and never
+  // propagate, so one failing close cannot stop the pass from evicting the next victim.
   async #closeEvicted(entry: Entry): Promise<void> {
     try {
-      const value = await entry.value;
+      await entry.hydrator.close(await entry.value);
       this.#counts.closes += 1;
-      await entry.hydrator.close(value);
+      this.#publish();
     } catch (err) {
       log.error("HydratedSourcePool evict close failed", err);
     }

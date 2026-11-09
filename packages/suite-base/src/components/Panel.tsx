@@ -68,10 +68,8 @@ import { useMessagePathDrop } from "@lichtblick/suite-base/services/messagePathD
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 
+import { FALLBACK_PANEL_ID } from "./constants";
 import { TAB_PANEL_TYPE } from "../util/constants";
-
-/** Used in storybook when panels are renered outside of a <PanelLayout/> */
-const FALLBACK_PANEL_ID = "$unknown_id";
 
 // HOC that wraps panel in an error boundary and flex box.
 // Gives panel a `config` and `saveConfig`.
