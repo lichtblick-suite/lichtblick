@@ -20,6 +20,11 @@ export function getTelemetry(): ITelemetry {
  *
  * Today only the benchmark app (`benchmark/src`) installs a sink; product code always sees the
  * no-op. A future product-level activation flag could call this as well.
+ *
+ * Install the sink before the app renders and before players are created. Some instrumentation
+ * reads `isEnabled()` only once: panel subscriber registration (`usePanelSubscriberTelemetry`)
+ * when its effect runs, and `HydratedSourcePool` at construction. Those created earlier are never
+ * instrumented. Toggling `isEnabled()` later is fine; call sites on hot paths re-check it.
  */
 export function setTelemetrySink(sink: ITelemetry | undefined): void {
   currentSink = sink ?? NOOP_TELEMETRY;

@@ -163,6 +163,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
 
   public async initialize(): Promise<Initialization> {
     const initializations: Initialization[] = await this.loadMultipleSources();
+    // Publish sources.total once all sources are loaded; no relevant subset exists before a read.
     this.#publishSourceCounts(undefined);
 
     const resultInit: Initialization = this.mergeInitializations(initializations);
