@@ -9,6 +9,7 @@ import * as _ from "lodash-es";
 
 import { filterMap } from "@lichtblick/den/collection";
 import { SettingsTreeFields, SettingsTreeNodes, Topic } from "@lichtblick/suite";
+import { MapMarkerStyle } from "@lichtblick/suite-base/panels/Map/types";
 
 // Persisted panel state
 export type Config = {
@@ -20,6 +21,9 @@ export type Config = {
   topicColors: Record<string, string>;
   zoomLevel?: number;
   maxNativeZoom?: number;
+  markerStyle?: MapMarkerStyle;
+  markerColor?: string;
+  rotateWithHeading?: boolean;
 };
 
 export function validateCustomUrl(url: string): Error | undefined {
@@ -128,12 +132,58 @@ export function buildSettingsTree(
     };
   }
 
+  generalSettings.markerStyle = {
+    label: "Position marker",
+    input: "select",
+    value: config.markerStyle ?? "dot",
+    options: [
+      { label: "Dot", value: "dot" },
+      { label: "Arrow", value: "arrow" },
+      { label: "Vehicle", value: "vehicle" },
+    ],
+    help: "Shape drawn at the current position. The oriented styles point along the direction of travel, derived from preceding fixes, and fall back to a dot while stationary.",
+  };
+
+  // Only offered for the oriented styles. A dot is drawn in the topic colour, and a colour
+  // field that silently did nothing would be worse than no field at all.
+  if (config.markerStyle != undefined && config.markerStyle !== "dot") {
+    generalSettings.markerColoring = {
+      label: "Marker coloring",
+      input: "select",
+      value: config.markerColor == undefined ? "Automatic" : "Custom",
+      options: [
+        { label: "Automatic", value: "Automatic" },
+        { label: "Custom", value: "Custom" },
+      ],
+      help: "Automatic draws the marker in the same colour as its track.",
+    };
+
+    if (config.markerColor != undefined) {
+      generalSettings.markerColor = {
+        label: "Marker color",
+        input: "rgb",
+        value: config.markerColor,
+      };
+    }
+  }
+
   generalSettings.followTopic = {
     label: "Follow topic",
     input: "select",
     value: config.followTopic,
     options: followTopicOptions,
   };
+
+  // Only offered once a topic is being followed. Rotation needs a fix to take its bearing
+  // from, so without one the toggle would do nothing.
+  if (config.followTopic !== "") {
+    generalSettings.rotateWithHeading = {
+      label: "Rotate with heading",
+      input: "boolean",
+      value: config.rotateWithHeading ?? false,
+      help: "Turn the map so the followed topic's direction of travel points up. North is shown by the compass.",
+    };
+  }
 
   const settings: SettingsTreeNodes = {
     general: {
