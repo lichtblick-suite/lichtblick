@@ -90,7 +90,7 @@ export function runsToggleFrameProbe({
 
 /**
  * Overhead env knobs: `BENCHMARK_OVERHEAD_METHOD` (see `parseOverheadMethod`),
- * `BENCHMARK_OVERHEAD_REPEATS` (default 5, min 1),
+ * `BENCHMARK_OVERHEAD_REPEATS` (default 8, min 1; a verdict needs `MIN_PAIRS_FOR_VERDICT` = 6),
  * `BENCHMARK_OVERHEAD_WARMUP_RUNS` (default 1, min 0), `BENCHMARK_OVERHEAD_POLLS` (steady polls per
  * run, default `OVERHEAD_STEADY_POLLS` = 10, min `OVERHEAD_MIN_STEADY_POLLS` = 5),
  * `BENCHMARK_OVERHEAD_UA_ARM=1` (web only, where the UA-specific memory probe runs; ignored on

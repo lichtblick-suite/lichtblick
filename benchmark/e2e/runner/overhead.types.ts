@@ -140,7 +140,7 @@ export type OverheadPair = {
 
 export type OverheadMetricKey = keyof Required<OverheadPairDeltas>;
 
-/** Median, IQR and bootstrap CI95 of each delta over the included pairs. */
+/** Median, IQR and exact order-statistic CI95 of each delta over the included pairs. */
 export type OverheadMetrics = Record<OverheadMetricKey, MetricStats>;
 
 /** Tri-state checks of the CI95 against the targets; `overall` = the worst of cpu and memory. */
@@ -198,7 +198,7 @@ export type OverheadConfigV3 = OverheadConfigV2 & {
 
 /**
  * Overhead report, schema 3: the relaunch A/B (repeated, order-balanced runs of telemetry off vs on,
- * and optionally on without the UA memory probe; their pair deltas and bootstrap statistics), the
+ * and optionally on without the UA memory probe; their pair deltas and statistics), the
  * in-process toggle A/B (`toggle`) and where each verdict comes from. The relaunch fields (`runs`,
  * `pairs`, `n`, `metrics`, …) are empty with `n = 0` for method `toggle`; `relaunchVerdicts` are
  * their own verdicts, `verdicts` the final ones (CPU from `cpuVerdictSource`, memory from

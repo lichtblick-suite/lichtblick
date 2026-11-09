@@ -15,6 +15,7 @@ import {
   toggleFlagsText,
   toggleProcessDeltasText,
 } from "./overheadText";
+import { MIN_PAIRS_FOR_VERDICT } from "../result/constants";
 import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
 import type { OverheadArmProps } from "../runner/builders/OverheadRunBuilder";
 import { ToggleBlockBuilder } from "../runner/builders/ToggleBlockBuilder";
@@ -169,7 +170,7 @@ describe("cpuVerdictStats", () => {
     const stats = cpuVerdictStats(relaunch);
 
     // Then
-    expect(stats).toMatchObject({ source: "relaunch", n: 5 });
+    expect(stats).toMatchObject({ source: "relaunch", n: MIN_PAIRS_FOR_VERDICT });
     expect(stats.cpuRelative.median).toBeCloseTo(0.01, 10);
   });
 });
@@ -194,7 +195,9 @@ describe("cpuSamplesText", () => {
 
   it("should count relaunch pairs without a unit", () => {
     // Given / When / Then
-    expect(cpuSamplesText(cpuVerdictStats(BenchmarkResultBuilder.overhead()))).toBe("5");
+    expect(cpuSamplesText(cpuVerdictStats(BenchmarkResultBuilder.overhead()))).toBe(
+      String(MIN_PAIRS_FOR_VERDICT),
+    );
   });
 });
 

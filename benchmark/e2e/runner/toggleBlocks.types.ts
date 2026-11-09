@@ -149,7 +149,7 @@ export type OverheadToggleSummaryV3 = {
   n: number;
   /** Quartets with a flagged block. */
   excludedQuartets: number;
-  /** Median / IQR / bootstrap CI95 of the included quartets' deltas. */
+  /** Median / IQR / exact order-statistic CI95 of the included quartets' deltas. */
   metrics: { cpuRelative: MetricStats; cpuPctPoints: MetricStats };
   /** `cpuRelative` CI95 against `cpuDeltaRelativeMax`. */
   verdict: Verdict;

@@ -56,14 +56,14 @@ describe("runsToggle / runsRelaunch", () => {
 });
 
 describe("parseOverheadConfig", () => {
-  it("should default to both methods, 5 repeats, 1 warm-up run, 16 × 3 s toggle pairs", () => {
+  it("should default to both methods, 8 repeats, 1 warm-up run, 10 × 4 × 3 s toggle blocks", () => {
     // Given / When
     const config = parseOverheadConfig({}, "web");
 
     // Then
     expect(config).toEqual({
       method: "both",
-      repeats: 5,
+      repeats: 8,
       warmupRuns: 1,
       polls: 10,
       uaArm: false,
@@ -165,7 +165,7 @@ describe("parseOverheadConfig", () => {
     const config = parseOverheadConfig(env, "electron");
 
     // Then
-    expect(config.repeats).toBe(5);
+    expect(config.repeats).toBe(8);
     expect(config.warmupRuns).toBe(1);
     expect(config.polls).toBe(10);
   });

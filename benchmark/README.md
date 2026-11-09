@@ -55,7 +55,7 @@ but they answer different questions:
 | Scenarios                         | All [scenarios under test](#scenarios) (`SCENARIOS_UNDER_TEST`)                                        | `OVERHEAD_SCENARIOS`: `sinewave`, `mcap-multi-ingest`, `pointcloud`                                                                                                                              |
 | How it runs                       | One launch per scenario, 1 Hz sampling for 5 s (`mcap-multi-ingest`: 10 s)                             | CPU: toggle quartets in one launch + direct (JS only) profile; memory: relaunch A/B. Optional UA-off (`BENCHMARK_OVERHEAD_UA_ARM`) and FPS-probe (`BENCHMARK_OVERHEAD_FRAME_PROBE_ARM`) variants |
 | Output                            | `*.benchmark-result.v1.json` + screenshots → Overview, [Scorecard](#kpi-scorecard), By group, Coverage | `overhead-<platform>-<scenario>-<ts>.json` (schema 3) → [Telemetry overhead](#telemetry-overhead-report-only); its runs (`run.mode: "overhead"`) stay out of KPIs and Runs                       |
-| Duration (defaults, one platform) | ≈ 10–15 s per scenario                                                                                 | ≈ 25–30 min (per scenario: ≈ 2.5–3 min toggle + 11 relaunch runs ≈ 5–6 min); `BENCHMARK_OVERHEAD_METHOD=toggle` ≈ 10 min                                                                         |
+| Duration (defaults, one platform) | ≈ 10–15 s per scenario                                                                                 | ≈ 35–40 min (per scenario: ≈ 2.5–3 min toggle + 17 relaunch runs ≈ 8–10 min); `BENCHMARK_OVERHEAD_METHOD=toggle` ≈ 10 min                                                                        |
 | When to run                       | Every change; runs in CI on pushes to `develop`/`main`                                                 | When telemetry, its collectors or the overhead runner change; manual only (not in CI)                                                                                                            |
 | Command                           | `yarn test:e2e:benchmark[:web] scenarios`                                                              | `yarn test:e2e:benchmark[:web] overhead`                                                                                                                                                         |
 
@@ -508,11 +508,11 @@ Two A/B methods, chosen with `BENCHMARK_OVERHEAD_METHOD` (`toggle` | `relaunch` 
 
 **Why the toggle A/B is the primary CPU method.** Telemetry costs ≈ 0.1–1 % CPU, but two fresh
 launches of the same arm differ by ± 2–5 % (JIT, GC timing, GPU process start, background load).
-With 5 relaunch pairs that launch-to-launch variance dominates the deltas and the CI95 spans
+With 6–8 relaunch pairs that launch-to-launch variance dominates the deltas and the CI95 spans
 min..max, so the CPU verdict ends up `inconclusive`. The toggle A/B compares short blocks within one
 app instance, so every block shares the same heap, caches, process set and playback, and the
 launch variance cancels out of each quartet. It is also faster: one launch per scenario instead of
-≈ 11.
+≈ 17.
 
 **Toggle A/B** (`runner/toggleBlocks.ts`, `runner/toggleWindow.ts`, `measurement: { mode: "toggle" }`
 of `runScenario`)
@@ -581,9 +581,9 @@ of `runScenario`)
   defaults, ≈ 1.5 min with 4 quartets.
 - **Minimum quartets**: a toggle verdict (`within` / `exceeds`) needs at least
   `MIN_QUARTETS_FOR_VERDICT` = 6 included quartets, otherwise it is `inconclusive`. Runs with
-  4 quartets (the minimum `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS`) are smoke tests: with 4 values the
-  bootstrap CI95 of the median is just the range of the middle values and far too narrow for a
-  verdict on a noisy scenario.
+  4 quartets (the minimum `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS`) are smoke tests: with fewer than 6
+  values no pair of order statistics covers the median with 95 % confidence, so they report the
+  median without a CI95.
 
 **Relaunch A/B**
 
@@ -644,13 +644,26 @@ of `runScenario`)
 
 **Statistics** (`result/stats.ts`)
 
-- Each metric: median of the included pair (relaunch) or quartet (toggle) deltas, IQR, and a percentile bootstrap CI95 of the
-  median (`BOOTSTRAP_RESAMPLES` = 10 000, seeded mulberry32 PRNG, so a report is reproducible).
+- Each metric: median of the included pair (relaunch) or quartet (toggle) deltas, IQR, and an
+  exact, distribution-free CI95 of the median from order statistics (`medianCiRanks`): with the
+  deltas sorted, `[x(k), x(n−k+1)]` covers the true median with probability
+  `1 − 2·P(B ≤ k − 1)`, `B ~ Binomial(n, ½)`; `k` is the largest rank with a coverage ≥ 95 %
+  (`MEDIAN_CI_CONFIDENCE`). It assumes only independent deltas, no distribution shape, and is
+  deterministic. Examples: n = 6–8 → [min, max] (96.9 %, 98.4 %, 99.2 %), n = 9 → ranks 2..8
+  (96.1 %), n = 10 → ranks 2..9 (97.9 %).
+- **Why not a bootstrap.** Earlier reports used a percentile bootstrap of the median. Its interval
+  can never be wider than [min, max], which covers the median with only 75 % (n = 3) to 93.75 %
+  (n = 5) probability, and at larger n it tends to pick ranks below the nominal 95 %; a verdict
+  could then pass on noise. The order-statistic interval has guaranteed coverage at every n.
+- **Minimum n.** Below n = 6 even [min, max] covers the median with less than 95 % (n = 5:
+  93.75 %), so there is no CI95 (the report shows the median alone).
 - **Verdict** against the unchanged targets (`OVERHEAD_TARGETS`: relative CPU ≤ 2 %, working set
   ≤ 20 MiB): `within` when the CI95 upper bound ≤ target, `exceeds` when the CI95 lower bound >
-  target, otherwise `inconclusive`. Fewer than `MIN_PAIRS_FOR_VERDICT` = 3 included pairs (relaunch)
-  or `MIN_QUARTETS_FOR_VERDICT` = 6 included quartets (toggle) is always `inconclusive`. `verdicts.overall` is the worst of CPU and memory
-  (`exceeds` > `inconclusive` > `within`).
+  target, otherwise `inconclusive`. Fewer than `MIN_PAIRS_FOR_VERDICT` = 6 included pairs (relaunch)
+  or `MIN_QUARTETS_FOR_VERDICT` = 6 included quartets (toggle) is always `inconclusive`. The
+  default `BENCHMARK_OVERHEAD_REPEATS` = 8 leaves a relaunch verdict with up to 2 excluded pairs
+  (previously 5 repeats with a minimum of 3); it costs 6 more launches per scenario (≈ 3–4 min).
+  `verdicts.overall` is the worst of CPU and memory (`exceeds` > `inconclusive` > `within`).
 - **Report only**: the suite never fails on the targets unless `BENCHMARK_OVERHEAD_GATE=1`, and then
   only on an overall `exceeds` (an `inconclusive` result does not fail).
 
@@ -671,7 +684,7 @@ verdict stays the one of `toggle`); the viewer and the CI summary show it as the
 "toggle without UA probe (informational)". The spec asserts 0 UA calls in its on blocks.
 
 **Measured UA probe cost** (web, full Chromium, M4 Pro; `toggle` vs `toggleWithoutUaProbe`, one
-launch each). The probe runs at most every `UA_MEMORY_MIN_INTERVAL_MS` = 10 s; collectors are
+launch each; CIs from the earlier percentile bootstrap, so the 4-quartet rows would have none now). The probe runs at most every `UA_MEMORY_MIN_INTERVAL_MS` = 10 s; collectors are
 paused in off blocks, so it fires about once per quartet, in an on block.
 
 | Scenario              | Quartets | UA calls (on blocks) | CPU Δ with probe, median [CI95] | CPU Δ without probe, median [CI95] |
@@ -817,7 +830,7 @@ also records `run.environment.collectors` (`collectorsState()`: whether the UA p
 | `BENCHMARK_OVERHEAD_METHOD`          | `both`  | `toggle`, `relaunch` or `both` (see above; other values fail)              |
 | `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS` | 10      | toggle A/B ABBA quartets of 4 blocks (min 4)                               |
 | `BENCHMARK_OVERHEAD_TOGGLE_BLOCK_MS` | 3000    | toggle block length incl. the 500 ms settle (min 1000)                     |
-| `BENCHMARK_OVERHEAD_REPEATS`         | 5       | relaunch: measured repeats per arm (min 1)                                 |
+| `BENCHMARK_OVERHEAD_REPEATS`         | 8       | relaunch: measured repeats per arm (min 1; a verdict needs 6 pairs)        |
 | `BENCHMARK_OVERHEAD_WARMUP_RUNS`     | 1       | discarded runs before the measured ones (min 0)                            |
 | `BENCHMARK_OVERHEAD_UA_ARM`          | unset   | `1` adds `on-noUa` (relaunch) and a toggle run without UA probe (web only) |
 | `BENCHMARK_OVERHEAD_GATE`            | unset   | `1` fails the test on an overall `exceeds` verdict                         |
@@ -826,8 +839,8 @@ also records `run.environment.collectors` (`collectorsState()`: whether the UA p
 | `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM` | unset   | toggle: `1` adds a launch toggling only the benchmark FPS probe's rAF loop |
 
 A relaunch run takes about 25–35 s (launch, render calibration, load, 3 s warm-up, 10 polls,
-teardown); each extra poll adds 1 s. With the defaults that is 11 runs per scenario (≈ 5–6 min),
-≈ 15–20 min for the three scenarios on one platform; the UA arm adds 5 runs per scenario. Method
+teardown); each extra poll adds 1 s. With the defaults that is 17 runs per scenario (≈ 8–10 min),
+≈ 25–30 min for the three scenarios on one platform; the UA arm adds 8 runs per scenario. Method
 `toggle` needs the warm-up runs plus one ≈ 2.5–3 min run per scenario (one more each with the UA
 arm and the frame-probe arm). The test timeout scales with
 the run count, the poll count and the toggle length (per run: 60 s setup + the auto-pause). Quick

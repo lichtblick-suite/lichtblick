@@ -23,7 +23,10 @@ export function signedText(value: number, digits: number): string {
   return value > 0 && Number(text) !== 0 ? `+${text}` : text;
 }
 
-/** Median with its CI95 (from 2 pairs on): `+1.00 % [+0.50, +1.50]`; `—` without a median. */
+/**
+ * Median with its CI95 when the stats carry one (`summarizeMetric`: from `MIN_PAIRS_FOR_VERDICT`
+ * samples on): `+1.00 % [+0.50, +1.50]`; the median alone otherwise; `—` without a median.
+ */
 export function deltaText(stats: MetricStats | undefined, unit: DeltaUnit): string {
   if (stats?.median == undefined) {
     return NONE;

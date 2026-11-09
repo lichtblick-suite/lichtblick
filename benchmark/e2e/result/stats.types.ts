@@ -16,20 +16,22 @@ export type Verdict = "within" | "exceeds" | "inconclusive";
 
 /**
  * Distribution summary of repeated measurements (e.g. A/B pair deltas). `n` counts the finite
- * values; every other field is omitted without values. For `n = 1` the interval is `[value, value]`.
+ * values; every other field is omitted without values, and `ci95` also with fewer than 6 values
+ * (no distribution-free 95 % interval of the median exists below that).
  */
 export type MetricStats = {
   n: number;
   median?: number;
   /** Interquartile range (`q75 − q25`, linear interpolation). */
   iqr?: number;
-  /** Percentile bootstrap 95 % confidence interval of the median. */
+  /** Exact distribution-free (order-statistic) 95 % confidence interval of the median. */
   ci95?: ConfidenceInterval;
 };
 
-export type BootstrapOptions = {
-  /** Bootstrap resamples (default `BOOTSTRAP_RESAMPLES`). */
-  resamples?: number;
-  /** PRNG seed (default `BOOTSTRAP_SEED`): the same input always yields the same interval. */
-  seed?: number;
+/** 1-based ranks of the order statistics bounding a median confidence interval (`medianCiRanks`). */
+export type MedianCiRanks = {
+  lower: number;
+  upper: number;
+  /** Exact coverage probability of `[x(lower), x(upper)]` for the population median. */
+  coverage: number;
 };

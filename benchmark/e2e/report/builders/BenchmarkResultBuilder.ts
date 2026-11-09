@@ -4,7 +4,7 @@
 import type { TelemetryEvent } from "../../../../packages/suite-base/src/util/telemetry/types";
 import { RunInfoBuilder } from "../../result/builders/RunInfoBuilder";
 import { TelemetryRecordBuilder, panelLabels } from "../../result/builders/TelemetryRecordBuilder";
-import { PANEL_METRICS, PIPELINE_METRICS } from "../../result/constants";
+import { MIN_PAIRS_FOR_VERDICT, PANEL_METRICS, PIPELINE_METRICS } from "../../result/constants";
 import type { DirectAttributionV3 } from "../../result/directAttribution.types";
 import { BenchmarkResultV1, PersistedResultV1, buildResultV1 } from "../../result/schemaV1";
 import type { TelemetryRecord } from "../../result/schemaV1";
@@ -173,7 +173,7 @@ export class BenchmarkResultBuilder {
   }
 
   /**
-   * Overhead A/B report of a scenario: `repeats` ABBA pairs (default 5) with constant deltas, so the
+   * Overhead A/B report of a scenario: `repeats` ABBA pairs (default `MIN_PAIRS_FOR_VERDICT`) with constant deltas, so the
    * CI95 collapses on them (off: 100 % CPU, 500 MiB).
    */
   public static overhead(
@@ -198,7 +198,7 @@ export class BenchmarkResultBuilder {
     } = {},
   ): OverheadReport {
     const method = props.method ?? "relaunch";
-    const repeats = method === "toggle" ? 0 : (props.repeats ?? 5);
+    const repeats = method === "toggle" ? 0 : (props.repeats ?? MIN_PAIRS_FOR_VERDICT);
     const on = {
       cpu: props.cpuOn ?? 101,
       wsBytes: 500 * MIB + (props.memDeltaBytes ?? 5 * MIB),

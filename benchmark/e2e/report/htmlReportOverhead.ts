@@ -68,7 +68,7 @@ export function verdictBadge(verdict: Verdict | undefined): string {
 }
 
 function ciTitle(stats: MetricStats, target: string, unit: string = "pairs"): string {
-  return `${target}; n = ${stats.n} ${unit} (median [bootstrap CI95])`;
+  return `${target}; n = ${stats.n} ${unit} (median [exact order-statistic CI95])`;
 }
 
 /**

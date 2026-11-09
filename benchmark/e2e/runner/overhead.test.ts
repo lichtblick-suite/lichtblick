@@ -13,6 +13,7 @@ import {
 import type { OverheadArm, OverheadRunInput } from "./overhead.types";
 import { armOrder } from "./overheadSchedule";
 import { CpuProfileBuilder } from "../result/builders/CpuProfileBuilder";
+import { MIN_PAIRS_FOR_VERDICT } from "../result/constants";
 
 const MIB = 1024 * 1024;
 const NOW = new Date("2026-01-02T03:04:05.000Z");
@@ -127,8 +128,8 @@ describe("overheadRunFromResult", () => {
 
 describe("buildOverheadReport", () => {
   it("should report a within verdict when the CI95 is under both targets", () => {
-    // Given 5 repeats with +1 % CPU and +5 MiB
-    const runs = repeats(5, { on: { cpu: 101, wsBytes: 505 * MIB } });
+    // Given 6 repeats with +1 % CPU and +5 MiB
+    const runs = repeats(6, { on: { cpu: 101, wsBytes: 505 * MIB } });
 
     // When
     const result = report(runs);
@@ -141,23 +142,24 @@ describe("buildOverheadReport", () => {
       memVerdictSource: "relaunch",
       kind: "overhead",
       createdAtWall: NOW.toISOString(),
-      n: 5,
+      n: 6,
       excludedPairs: 0,
       windowMismatchRuns: 0,
       verdicts: { cpu: "within", memory: "within", overall: "within" },
       targets: { cpuDeltaRelativeMax: 0.02, memDeltaBytesMax: 20 * MIB },
     });
-    expect(result.runs).toHaveLength(10);
+    expect(result.runs).toHaveLength(12);
     expect(result.pairs.map((pair) => pair.order)).toEqual([
       "off-first",
       "on-first",
       "off-first",
       "on-first",
       "off-first",
+      "on-first",
     ]);
     expect(result.metrics.cpuRelative.median).toBeCloseTo(0.01);
     expect(result.metrics.memBytes).toEqual({
-      n: 5,
+      n: 6,
       median: 5 * MIB,
       iqr: 0,
       ci95: { lower: 5 * MIB, upper: 5 * MIB },
@@ -168,7 +170,7 @@ describe("buildOverheadReport", () => {
 
   it("should report exceeds when the memory CI95 lies above the target", () => {
     // Given
-    const runs = repeats(5, { on: { wsBytes: 530 * MIB } });
+    const runs = repeats(6, { on: { wsBytes: 530 * MIB } });
 
     // When
     const result = report(runs);
@@ -180,7 +182,7 @@ describe("buildOverheadReport", () => {
   it("should report inconclusive when the CI95 straddles the target", () => {
     // Given memory deltas spread around the 20 MiB target
     const runs = OverheadRunBuilder.abba(
-      [5, 35, 10, 30, 15].map((deltaMiB) => ({ on: { wsBytes: (500 + deltaMiB) * MIB } })),
+      [5, 35, 10, 30, 15, 25].map((deltaMiB) => ({ on: { wsBytes: (500 + deltaMiB) * MIB } })),
     );
 
     // When
@@ -193,22 +195,22 @@ describe("buildOverheadReport", () => {
     expect(result.metrics.memBytes.ci95!.upper).toBeGreaterThan(20 * MIB);
   });
 
-  it("should report inconclusive with fewer than 3 included pairs", () => {
+  it("should report inconclusive with fewer than MIN_PAIRS_FOR_VERDICT included pairs", () => {
     // Given
-    const runs = repeats(2, {});
+    const runs = repeats(MIN_PAIRS_FOR_VERDICT - 1, {});
 
     // When
     const result = report(runs);
 
     // Then
-    expect(result.n).toBe(2);
+    expect(result.n).toBe(MIN_PAIRS_FOR_VERDICT - 1);
     expect(result.verdicts.overall).toBe("inconclusive");
   });
 
   it("should report memory as inconclusive with n = 0 when no run measured a working set", () => {
-    // Given 5 repeats whose working-set collection failed in both arms (totals 0, no types)
+    // Given 6 repeats whose working-set collection failed in both arms (totals 0, no types)
     const unmeasured = { wsBytes: 0, byType: {} };
-    const runs = repeats(5, { off: unmeasured, on: { ...unmeasured, cpu: 101 } });
+    const runs = repeats(6, { off: unmeasured, on: { ...unmeasured, cpu: 101 } });
 
     // When
     const result = report(runs);
@@ -297,7 +299,7 @@ describe("buildOverheadReport", () => {
     // Given off, on (+10 MiB) and on-noUa (+2 MiB) in a rotating order
     const arms: OverheadArm[] = ["off", "on", "on-noUa"];
     const memMiB: Record<OverheadArm, number> = { off: 500, on: 510, "on-noUa": 502 };
-    const runs = [0, 1, 2].flatMap((repeat) =>
+    const runs = [0, 1, 2, 3, 4, 5].flatMap((repeat) =>
       armOrder(arms, repeat).map((arm, order) =>
         OverheadRunBuilder.input({ arm, repeat, order, wsBytes: memMiB[arm] * MIB }),
       ),
@@ -307,13 +309,13 @@ describe("buildOverheadReport", () => {
     const result = report(runs, arms);
 
     // Then
-    expect(result.n).toBe(3);
+    expect(result.n).toBe(6);
     expect(result.metrics.memBytes.median).toBe(10 * MIB);
     expect(result.withoutUaProbe?.metrics.memBytes.median).toBe(2 * MIB);
     expect(result.withoutUaProbe?.verdicts.overall).toBe("within");
     expect(result.uaCost?.metrics.memBytes.median).toBe(8 * MIB);
     expect(result.uaCost).not.toHaveProperty("verdicts");
-    expect(result.pairs.filter((pair) => pair.comparison === "on-vs-onNoUa")).toHaveLength(3);
+    expect(result.pairs.filter((pair) => pair.comparison === "on-vs-onNoUa")).toHaveLength(6);
   });
 
   it("should summarize the on arm's self-cost and keep collectors states", () => {
@@ -357,7 +359,7 @@ describe("buildOverheadReport", () => {
 describe("buildOverheadReport methods", () => {
   it("should take the CPU verdict from the toggle A/B and memory from the relaunch A/B (both)", () => {
     // Given relaunch runs exceeding the CPU target (+5 %) and a toggle A/B within it (+1 %)
-    const runs = repeats(5, { on: { cpu: 105 } });
+    const runs = repeats(6, { on: { cpu: 105 } });
     const toggle = ToggleBlockBuilder.summary();
 
     // When
@@ -379,7 +381,7 @@ describe("buildOverheadReport methods", () => {
       memVerdictSource: "relaunch",
       verdicts: { cpu: "within", memory: "within", overall: "within" },
       relaunchVerdicts: { cpu: "exceeds", memory: "within", overall: "exceeds" },
-      n: 5,
+      n: 6,
     });
     expect(result.config.toggle).toEqual(toggle.config);
     expect(result.toggle).toBe(toggle);

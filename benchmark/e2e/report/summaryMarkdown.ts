@@ -38,7 +38,11 @@ import {
   verdictText,
 } from "./overheadText";
 import type { CpuVerdictStats } from "./overheadText.types";
-import { LOW_FPS_WARNING } from "../result/constants";
+import {
+  LOW_FPS_WARNING,
+  MIN_PAIRS_FOR_VERDICT,
+  MIN_QUARTETS_FOR_VERDICT,
+} from "../result/constants";
 import { aggregateKpis } from "../result/kpis";
 import type { KpiAggregateV1, KpiRun, PlatformScorecardV1 } from "../result/kpis.types";
 import { scenarioRunsOnly } from "../result/runMode";
@@ -313,7 +317,7 @@ function overheadRow(report: OverheadReport): string {
 
 /**
  * Telemetry overhead A/B table from `overhead-*.json` (latest per platform × scenario): method,
- * median of the quartet / pair deltas with the bootstrap CI95 and IQR, and the tri-state verdict.
+ * median of the quartet / pair deltas with the exact order-statistic CI95 and IQR, and the tri-state verdict.
  * CPU comes from the toggle A/B (ABBA quartets) when it ran (relaunch CPU as an informational
  * sub-row), memory from the relaunch A/B.
  */
@@ -334,7 +338,7 @@ export function buildOverheadTable(reports: readonly OverheadReport[]): string {
   );
   const targets = sorted[0]!.targets;
   const lines = [
-    `_Report only unless \`BENCHMARK_OVERHEAD_GATE=1\` (fails on \`exceeds\` only). Median of on − off deltas [bootstrap CI95]; within = CI95 upper ≤ target (CPU ≤ ${(targets.cpuDeltaRelativeMax * 100).toFixed(0)} %, mem ≤ ${formatMiB(targets.memDeltaBytesMax)}), exceeds = CI95 lower > target, else inconclusive. CPU from the in-process toggle A/B when it ran (one delta per ABBA quartet of blocks, Σ on / Σ off − 1, which cancels a linear drift), memory from the relaunch A/B (one delta per pair of fresh launches)._`,
+    `_Report only unless \`BENCHMARK_OVERHEAD_GATE=1\` (fails on \`exceeds\` only). Median of on − off deltas [exact order-statistic CI95, from ${MIN_PAIRS_FOR_VERDICT} samples]; within = CI95 upper ≤ target (CPU ≤ ${(targets.cpuDeltaRelativeMax * 100).toFixed(0)} %, mem ≤ ${formatMiB(targets.memDeltaBytesMax)}), exceeds = CI95 lower > target, else inconclusive (also below ${MIN_QUARTETS_FOR_VERDICT} quartets / ${MIN_PAIRS_FOR_VERDICT} pairs). CPU from the in-process toggle A/B when it ran (one delta per ABBA quartet of blocks, Σ on / Σ off − 1, which cancels a linear drift), memory from the relaunch A/B (one delta per pair of fresh launches)._`,
     "",
     "| Platform | Scenario | Method | Pairs / quartets | ΔCPU rel. (pp) IQR | ΔWS | Verdict | Flags | Self-cost | Main thread Δ |",
     "|----------|----------|--------|------------------|--------------------|-----|---------|-------|-----------|---------------|",
