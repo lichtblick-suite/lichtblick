@@ -56,7 +56,7 @@ export async function launchWebTarget(
       scenarioUrl: (params) => `${origin}/?${params.toString()}`,
       collectHostMetrics: async (ts) => await collector.collect(ts),
       readCumulativeCpu: async () => await collector.readCumulativeCpu(),
-      describe: () => ({ ...environment }),
+      describe: () => ({ ...environment, hostCpuSource: collector.cpuSource() }),
       dispose: async () => {
         await collector.dispose();
         await browser.close();

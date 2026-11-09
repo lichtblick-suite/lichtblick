@@ -10,6 +10,7 @@
 import {
   BYTES_PER_MIB,
   DROPPED_RECORDS_METRIC,
+  HOST_CPU_SOURCES,
   MIN_SLOPE_POINTS,
   MIN_SLOPE_WINDOW_MS,
   MS_PER_MINUTE,
@@ -37,6 +38,7 @@ import {
 } from "./panelsSummary";
 import { PipelineSummaryV1, summarizePipeline } from "./pipelineSummary";
 import {
+  HostCpuSourceV1,
   PoolGroup,
   PoolSeries,
   ProcessTick,
@@ -61,7 +63,7 @@ import { RENDERER_METRICS } from "../../src/telemetry/collectors/constants";
 
 export type { TelemetryBatch } from "../../../packages/suite-base/src/util/telemetry/types";
 export type { TelemetryRecord, TelemetrySample };
-export type { PanelSummaryV1, WebBrowserV1 };
+export type { HostCpuSourceV1, PanelSummaryV1, WebBrowserV1 };
 
 export type BenchmarkPlatform = "electron" | "web";
 
@@ -85,6 +87,11 @@ export type RunEnvironment = {
   webBrowser?: WebBrowserV1;
   /** Optional page collectors' state (overhead A/B runs with telemetry on). */
   collectors?: CollectorsStateV1;
+  /**
+   * Where the host collector read process CPU (absent in older results). With `ps` the CPU
+   * summary (`summary.process` CPU fields) and `kpis.cpu` are empty, see `HostCpuSourceV1`.
+   */
+  hostCpuSource?: HostCpuSourceV1;
 };
 
 /**
@@ -187,14 +194,16 @@ export type PersistedRunInfoV1 = Omit<RunInfoV1, "scenario" | "environment"> & {
     Partial<RenderCalibrationV1>;
 };
 
-export type ProcessTypeSummaryV1 = { peakWorkingSetBytes: number; medianCpuPercent: number };
+/** `medianCpuPercent` is absent without CPU readings (e.g. `hostCpuSource` `ps`). */
+export type ProcessTypeSummaryV1 = { peakWorkingSetBytes: number; medianCpuPercent?: number };
 
 export type ProcessSummaryV1 = {
   /** Number of host polls that reported memory. */
   sampleCount: number;
   peakTotalWorkingSetBytes: number;
   meanTotalWorkingSetBytes: number;
-  medianTotalCpuPercent: number;
+  /** Median of the per-poll CPU totals; absent without CPU readings (e.g. `hostCpuSource` `ps`). */
+  medianTotalCpuPercent?: number;
   /**
    * Least-squares slope of the total working set (all processes, per poll) over the steady-state
    * window, MiB/min. The window starts at the later of `STEADY_STATE_WARMUP_FRACTION` of the
@@ -549,19 +558,40 @@ export function summarizeProcess(
   const totals = wsOf(ticks);
   const byType: Record<string, ProcessTypeSummaryV1> = {};
   for (const [processType, perType] of [...typeTicks].sort(([a], [b]) => a.localeCompare(b))) {
-    byType[processType] = {
-      peakWorkingSetBytes: maxOf(wsOf(perType)) ?? 0,
-      medianCpuPercent: median(cpuOf(perType)) ?? 0,
-    };
+    const typeSummary: ProcessTypeSummaryV1 = { peakWorkingSetBytes: maxOf(wsOf(perType)) ?? 0 };
+    const typeCpu = median(cpuOf(perType));
+    if (typeCpu != undefined) {
+      typeSummary.medianCpuPercent = typeCpu;
+    }
+    byType[processType] = typeSummary;
   }
-  return {
+  const summary: ProcessSummaryV1 = {
     sampleCount: totals.length,
     peakTotalWorkingSetBytes: maxOf(totals) ?? 0,
     meanTotalWorkingSetBytes: mean(totals) ?? 0,
-    medianTotalCpuPercent: median(cpuOf(ticks)) ?? 0,
     ...summarizeProcessTrends(ticks, measuredWindow, startupEndTs),
     byType,
   };
+  const totalCpu = median(cpuOf(ticks));
+  if (totalCpu != undefined) {
+    summary.medianTotalCpuPercent = totalCpu;
+  }
+  return summary;
+}
+
+/**
+ * Host samples the process summary is computed from: without CPU when the collector fell back to
+ * `ps` (`hostCpuSource` `ps`), so interval CPU from polls before the fallback is not summarized as
+ * if it covered the whole run.
+ */
+function summarizedHostSamples(
+  hostSamples: readonly HostProcessSample[],
+  hostCpuSource: HostCpuSourceV1 | undefined,
+): readonly HostProcessSample[] {
+  if (hostCpuSource !== "ps") {
+    return hostSamples;
+  }
+  return hostSamples.map(({ cpuPercent: _cpuPercent, ...sample }) => sample);
 }
 
 function valuesOf(samples: readonly TelemetrySample[], metric: string): number[] {
@@ -826,7 +856,7 @@ export function buildResultV1<TRun extends PersistedRunInfoV1 = RunInfoV1>(
   const originTs = phasesOrigin(events)?.ts;
   const summary: Omit<SummaryV1, "kpis"> = {
     process: summarizeProcess(
-      input.hostSamples,
+      summarizedHostSamples(input.hostSamples, input.run.environment.hostCpuSource),
       measuredWindow,
       steadyStateFloorTs(phases, originTs),
     ),
@@ -1096,7 +1126,33 @@ function checkScenarioDescriptor(
   checkScenarioPanels(scenario.panels, errors);
 }
 
-/** Validates `run` (fields, platform, ISO dates, environment, scenario). */
+/**
+ * Order of the run's monotonic window: `start <= windowEnd <= end`. Complete runs (strict) also
+ * need `end > start`; a partial result of a run that failed before the page was ready has
+ * `start == end` (both from the runner clock).
+ */
+function checkRunWindow(
+  run: Record<string, unknown>,
+  mode: ResultValidationMode,
+  errors: string[],
+): void {
+  const { startMonotonicTs: start, endMonotonicTs: end, windowEndMonotonicTs: windowEnd } = run;
+  if (!isFiniteNumber(start) || !isFiniteNumber(end)) {
+    return;
+  }
+  if (end < start) {
+    errors.push("run.endMonotonicTs must not be before run.startMonotonicTs");
+  } else if (end === start && mode === "strict") {
+    errors.push("run.endMonotonicTs must be after run.startMonotonicTs");
+  }
+  if (isFiniteNumber(windowEnd) && (windowEnd < start || windowEnd > end)) {
+    errors.push(
+      "run.windowEndMonotonicTs must lie within [run.startMonotonicTs, run.endMonotonicTs]",
+    );
+  }
+}
+
+/** Validates `run` (fields, window order, platform, ISO dates, environment, scenario). */
 function checkRun(run: unknown, mode: ResultValidationMode, errors: string[]): void {
   if (!isRecord(run)) {
     errors.push("run must be an object");
@@ -1119,6 +1175,7 @@ function checkRun(run: unknown, mode: ResultValidationMode, errors: string[]): v
     },
     errors,
   );
+  checkRunWindow(run, mode, errors);
   if (run.platform !== "electron" && run.platform !== "web") {
     errors.push(`run.platform must be "electron" or "web"`);
   }
@@ -1165,6 +1222,13 @@ function checkRunEnvironment(
     !WEB_BROWSERS.includes(environment.webBrowser as WebBrowserV1)
   ) {
     errors.push(`run.environment.webBrowser must be one of ${WEB_BROWSERS.join(", ")}`);
+  }
+  // Absent in older stored results.
+  if (
+    environment.hostCpuSource != undefined &&
+    !HOST_CPU_SOURCES.includes(environment.hostCpuSource as HostCpuSourceV1)
+  ) {
+    errors.push(`run.environment.hostCpuSource must be one of ${HOST_CPU_SOURCES.join(", ")}`);
   }
   // Logical CPU count and render calibration (`RenderCalibrationV1`): absent in older stored results.
   const strict = mode === "strict";
@@ -1228,6 +1292,11 @@ function checkSteadyWindow(steadyWindow: unknown, errors: string[]): void {
     },
     errors,
   );
+  // `start == end` is valid: a window without steady polls ends at its priming poll.
+  const { startMonotonicTs: start, endMonotonicTs: end } = steadyWindow;
+  if (isFiniteNumber(start) && isFiniteNumber(end) && end < start) {
+    errors.push(`${where}.endMonotonicTs must not be before ${where}.startMonotonicTs`);
+  }
   checkNumberRecord(
     steadyWindow.meanWorkingSetBytesByType,
     `${where}.meanWorkingSetBytesByType`,
@@ -1298,14 +1367,19 @@ function checkProcessSummary(processSummary: unknown, errors: string[]): void {
     processSummary,
     "summary.process",
     {
+      sampleCount: "number",
       peakTotalWorkingSetBytes: "number",
       meanTotalWorkingSetBytes: "number",
-      medianTotalCpuPercent: "number",
+      medianTotalCpuPercent: "number?",
       totalWorkingSetSlopeMiBPerMin: "number?",
       cpuSeconds: "number?",
     },
     errors,
   );
+  const { sampleCount } = processSummary;
+  if (isFiniteNumber(sampleCount) && (!Number.isInteger(sampleCount) || sampleCount < 0)) {
+    errors.push("summary.process.sampleCount must be a non-negative integer");
+  }
   if (!isRecord(processSummary.byType)) {
     errors.push("summary.process.byType must be an object");
   }

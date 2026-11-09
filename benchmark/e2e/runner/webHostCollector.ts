@@ -14,6 +14,7 @@ import type {
   PsTreeRow,
   WebHostCollectorOptions,
 } from "./types";
+import type { HostCpuSourceV1 } from "../result/schemaV1";
 import { PS_EXECUTABLE_CANDIDATES } from "../shared/constants";
 import { findExecutable } from "../shared/executables";
 import type { LegacyProcessMetric } from "../types";
@@ -24,7 +25,8 @@ import type { LegacyProcessMetric } from "../types";
 // - resident set size (RSS) per pid: `ps -o pid=,rss= -p <pids>` (Linux/macOS; `ps` is run by
 //   absolute path, see `PS_EXECUTABLE_CANDIDATES`);
 // - fallback when CDP is unavailable: the browser's process tree from `ps -A`, rooted at the
-//   browser process launched with a unique marker flag (`--lichtblick-benchmark-run=<id>`).
+//   browser process launched with a unique marker flag (`--lichtblick-benchmark-run=<id>`). Only
+//   memory is recorded then: `pcpu` is not CPU over the poll interval (see `HostCpuSourceV1`).
 // On Windows (no `ps`) memory is omitted (CPU from CDP still reported) and a warning logged once.
 
 /** Normalizes CDP process types: `GPU` → gpu, service processes (network, storage, audio…) → utility. */
@@ -269,6 +271,11 @@ export class WebHostCollector {
     }));
   }
 
+  /** CPU source so far (`run.environment.hostCpuSource`): `ps` once CDP failed. */
+  public cpuSource(): HostCpuSourceV1 {
+    return this.#cdpUnavailable ? "ps" : "cdp";
+  }
+
   public async dispose(): Promise<void> {
     const session = this.#session;
     this.#session = undefined;
@@ -380,15 +387,11 @@ export class WebHostCollector {
       this.#warnOnce("ps-tree", `ps failed (${String(error)}); no host process metrics.`);
       return [];
     }
-    // `pcpu` is ps' own average (lifetime on Linux, decaying on macOS): coarser than CDP deltas.
+    // No `cpuPercent`: `pcpu` is ps' own average (lifetime on Linux, decaying on macOS), not CPU
+    // over the poll interval like the CDP deltas.
     return rows.map((row) =>
       this.#withMemory(
-        {
-          monotonicTs,
-          pid: row.pid,
-          processType: mapChromiumTypeSwitch(row.args),
-          cpuPercent: row.cpuPercent,
-        },
+        { monotonicTs, pid: row.pid, processType: mapChromiumTypeSwitch(row.args) },
         row.rssKb,
       ),
     );

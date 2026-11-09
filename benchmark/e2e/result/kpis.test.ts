@@ -198,6 +198,22 @@ describe("computeRunKpis", () => {
     expect(kpis.renderCost).toMatchObject({ p90RenderMsByPanelType: {} });
     expect(kpis.renderCost.worstPanelId).toBeUndefined();
   });
+
+  it("should leave the CPU KPIs empty when memory polls have no CPU reading", () => {
+    // Given memory polls without CPU (`hostCpuSource` `ps`: no medianTotalCpuPercent / cpuSeconds)
+    const { medianTotalCpuPercent: _cpu, ...process } = RunKpisBuilder.summary().process;
+    const input = RunKpisBuilder.input({ summary: { process } });
+
+    // When
+    const kpis = computeRunKpis(input);
+
+    // Then
+    expect(kpis.cpu).toEqual({
+      medianCpuPercent: undefined,
+      cpuSeconds: undefined,
+      cpuSecondsPerMiB: undefined,
+    });
+  });
 });
 
 describe("withRunKpis", () => {
