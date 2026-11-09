@@ -13,9 +13,7 @@ import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import { BatchingReadable } from "./BatchingReadable";
 import type { RemoteFileReadableOptions } from "./RemoteFileReadable.types";
-import { BYTES_READ_METRIC, READ_REQUESTS_METRIC } from "./constants";
-
-const DEFAULT_CACHE_SIZE_BYTES = 1024 * 1024 * 500; // 500MiB
+import { BYTES_READ_METRIC, DEFAULT_CACHE_SIZE_BYTES, READ_REQUESTS_METRIC } from "./constants";
 
 export class RemoteFileReadable {
   readonly #remoteReader: CachedFilelike;
