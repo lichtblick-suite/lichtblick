@@ -124,7 +124,7 @@ Use these agents in Copilot Chat for specialized tasks. For the full catalog see
 | `@lb-panels-general` | PanelExtensionAdapter, renderState, panel lifecycle, pauseFrame |
 | `@lb-frontend-dev` | React/TypeScript components, hooks, state management, styling |
 | `@lb-unit-test` | Unit test creation, mocking patterns, builder usage |
-| `@lb-benchmark-analyst` | Read-only: interpret benchmark reports, correlate metrics with code, triage perf regressions |
+| `@lb-benchmark-analyst` | Analysis-only (never edits files): interpret benchmark reports, correlate metrics with code, triage perf regressions |
 
 Agents are defined in `.github/agents/`.
 Skills are defined in `.github/skills/`.

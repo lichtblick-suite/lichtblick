@@ -1009,7 +1009,7 @@ This viewer is a stopgap: the definitive results dashboard is planned as a follo
 
 ### Analyzing results with AI
 
-The read-only `@lb-benchmark-analyst` agent
+The analysis-only `@lb-benchmark-analyst` agent
 ([`.github/agents/lb-benchmark-analyst.agent.md`](../.github/agents/lb-benchmark-analyst.agent.md))
 interprets the result and overhead JSON files, correlates metric evidence (file → JSON path) with
 code evidence (`path:line`), compares against an optional baseline directory and proposes ranked
