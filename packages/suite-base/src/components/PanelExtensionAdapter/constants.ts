@@ -6,23 +6,30 @@ export const BATCH_INTERVAL_MS = 16;
 
 /**
  * Per-panel telemetry metric names. Names are stable: downstream benchmark reports key
- * on them. Re-exported from `./panelTelemetry`, which is the import path for consumers.
+ * on them. Kept in this dependency-free module so the MessagePipeline and the benchmark harness can
+ * import them without pulling in adapter code.
  *
- * What `panel.messages.delivered` counts depends on the panel kind:
- * - Extension-API panels (PanelExtensionAdapter): messages in the frames actually rendered, i.e.
- *   the `currentFrame` handed to `onRender`. Frames skipped because the previous render was still
- *   pending are not counted (they are counted in `panel.render.skipped` instead).
- * - Built-in panels (PanelAPI hooks): counted by the MessagePipeline, as the messages bucketed
- *   for the panel's subscriber on each tick.
+ * `panel.messages.delivered` has one meaning for every panel: the messages the MessagePipeline
+ * bucketed for the panel's subscribers on each tick, whether or not the panel rendered them.
+ * `panel.messages.rendered` is only emitted by extension-API panels (PanelExtensionAdapter): the
+ * messages in the `currentFrame` actually handed to `onRender`. `delivered - rendered` is the
+ * number of messages the panel could not keep up with.
  *
  * `panel.rangeMessages.*` counts preloaded (range) deliveries: the batches yielded by
  * `useSubscribeMessageRange`, plus the new tail of `renderState.allFrames`.
  */
 export const PANEL_TELEMETRY_METRICS = {
-  /** counter: message events delivered to the panel, aggregated per frame (see above) */
+  /** counter: message events bucketed by the pipeline for the panel's subscribers (see above) */
   messagesDelivered: "panel.messages.delivered",
   /** counter: sum of `sizeInBytes` of the message events counted in `messagesDelivered` */
   messagesDeliveredBytes: "panel.messages.deliveredBytes",
+  /**
+   * counter: message events in the frames handed to an extension panel's `onRender` (see above),
+   * counted once per frame, including a skipped frame that is rendered later
+   */
+  messagesRendered: "panel.messages.rendered",
+  /** counter: sum of `sizeInBytes` of the message events counted in `messagesRendered` */
+  messagesRenderedBytes: "panel.messages.renderedBytes",
   /** counter: completed renders (panel called `done()`) */
   renderCount: "panel.render.count",
   /**

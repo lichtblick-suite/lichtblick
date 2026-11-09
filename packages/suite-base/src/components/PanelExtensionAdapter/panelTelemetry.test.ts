@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { MessageEvent } from "@lichtblick/suite";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
 
+import { PANEL_TELEMETRY_METRICS } from "./constants";
 import {
   buildPanelTelemetryLabels,
-  PANEL_TELEMETRY_METRICS,
   recordFirstRender,
-  recordMessagesDelivered,
+  recordMessagesRendered,
+  recordRangeMessagesDelivered,
   recordRenderDone,
   recordRenderSkipped,
 } from "./panelTelemetry";
@@ -23,7 +25,7 @@ function buildMessage(sizeInBytes: number): MessageEvent {
   };
 }
 
-const LABELS = buildPanelTelemetryLabels("Plot!3x9a", "Plot");
+const LABELS = buildPanelTelemetryLabels("Plot!3x9a", "Plot")!;
 
 describe("panelTelemetry", () => {
   it("builds labels from the layout panel id and panel type", () => {
@@ -32,6 +34,15 @@ describe("panelTelemetry", () => {
 
     // THEN
     expect(labels).toEqual({ panelId: "Plot!3x9a", panelType: "Plot" });
+    expect(Object.isFrozen(labels)).toBe(true);
+  });
+
+  it("should build no labels for a panel rendered outside a layout", () => {
+    // GIVEN / WHEN
+    const labels = buildPanelTelemetryLabels(FALLBACK_PANEL_ID, "Plot");
+
+    // THEN
+    expect(labels).toBeUndefined();
   });
 
   it("records message count and summed bytes for a frame", () => {
@@ -39,12 +50,12 @@ describe("panelTelemetry", () => {
     const telemetry = TelemetryBuilder.mockTelemetry();
 
     // WHEN
-    recordMessagesDelivered(telemetry, [buildMessage(5), buildMessage(7)], LABELS);
+    recordMessagesRendered(telemetry, [buildMessage(5), buildMessage(7)], LABELS);
 
     // THEN
     expect(telemetry.counter.mock.calls).toEqual([
-      [PANEL_TELEMETRY_METRICS.messagesDelivered, 2, "count", "panel", LABELS],
-      [PANEL_TELEMETRY_METRICS.messagesDeliveredBytes, 12, "bytes", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.messagesRendered, 2, "count", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.messagesRenderedBytes, 12, "bytes", "panel", LABELS],
     ]);
   });
 
@@ -53,7 +64,7 @@ describe("panelTelemetry", () => {
     const telemetry = TelemetryBuilder.mockTelemetry();
 
     // WHEN
-    recordMessagesDelivered(telemetry, messageEvents, LABELS);
+    recordMessagesRendered(telemetry, messageEvents, LABELS);
 
     // THEN
     expect(telemetry.counter.mock.calls).toHaveLength(0);
@@ -64,11 +75,28 @@ describe("panelTelemetry", () => {
     const telemetry = TelemetryBuilder.mockTelemetry();
 
     // WHEN
-    recordMessagesDelivered(telemetry, [buildMessage(0)], LABELS);
+    recordMessagesRendered(telemetry, [buildMessage(0)], LABELS);
 
     // THEN
     expect(telemetry.counter.mock.calls).toEqual([
-      [PANEL_TELEMETRY_METRICS.messagesDelivered, 1, "count", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.messagesRendered, 1, "count", "panel", LABELS],
+    ]);
+  });
+
+  it("records range message count and summed bytes for a batch", () => {
+    // GIVEN
+    const telemetry = TelemetryBuilder.mockTelemetry();
+
+    // WHEN
+    recordRangeMessagesDelivered(telemetry, [buildMessage(5), buildMessage(7)], LABELS);
+    recordRangeMessagesDelivered(telemetry, [], LABELS);
+    recordRangeMessagesDelivered(telemetry, [buildMessage(0)], LABELS);
+
+    // THEN - empty batches and zero byte totals are not recorded
+    expect(telemetry.counter.mock.calls).toEqual([
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDelivered, 2, "count", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes, 12, "bytes", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDelivered, 1, "count", "panel", LABELS],
     ]);
   });
 

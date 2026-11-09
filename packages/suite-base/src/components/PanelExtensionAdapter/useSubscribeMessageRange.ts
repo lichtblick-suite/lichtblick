@@ -4,17 +4,17 @@
 import { useCallback, useContext, useMemo, useRef } from "react";
 
 import Logger from "@lichtblick/log";
-import { Immutable, MessageEvent, SubscribeMessageRangeArgs } from "@lichtblick/suite";
+import { MessageEvent, SubscribeMessageRangeArgs } from "@lichtblick/suite";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import {
   ExtensionCatalog,
   useExtensionCatalog,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
-import { getTelemetry, ITelemetry, TelemetryLabels } from "@lichtblick/suite-base/util/telemetry";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import { createMessageRangeIterator } from "./messageRangeIterator";
-import { buildPanelTelemetryLabels, PANEL_TELEMETRY_METRICS } from "./panelTelemetry";
+import { buildPanelTelemetryLabels, recordRangeMessagesDelivered } from "./panelTelemetry";
 import { MessageConverterAlertHandler } from "./types";
 
 const log = Logger.getLogger(__filename);
@@ -23,49 +23,6 @@ const selectInstalledMessageConverters = (state: ExtensionCatalog) =>
   state.installedMessageConverters;
 
 export type UseSubscribeMessageRange = (args: SubscribeMessageRangeArgs) => () => void;
-
-/**
- * Wraps a range iterable so that each yielded batch is counted (messages and bytes) under
- * `panel.rangeMessages.*`, aggregated per yielded batch. Batches are
- * forwarded unchanged; early termination by the consumer propagates to the source iterator.
- * Only used when telemetry is enabled.
- */
-function withRangeTelemetry(
-  source: AsyncIterable<Immutable<MessageEvent[]>>,
-  telemetry: ITelemetry,
-  labels: TelemetryLabels,
-): AsyncIterable<Immutable<MessageEvent[]>> {
-  return {
-    async *[Symbol.asyncIterator]() {
-      for await (const batch of source) {
-        const count = batch.length;
-        if (count > 0) {
-          let bytes = 0;
-          for (let i = 0; i < count; i++) {
-            bytes += batch[i]!.sizeInBytes;
-          }
-          telemetry.counter(
-            PANEL_TELEMETRY_METRICS.rangeMessagesDelivered,
-            count,
-            "count",
-            "panel",
-            labels,
-          );
-          if (bytes > 0) {
-            telemetry.counter(
-              PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes,
-              bytes,
-              "bytes",
-              "panel",
-              labels,
-            );
-          }
-        }
-        yield batch;
-      }
-    },
-  };
-}
 
 /**
  * Returns a stable callback that can be used to subscribe to a message range for a topic.
@@ -112,22 +69,25 @@ export function useSubscribeMessageRange(
         return () => {};
       }
 
-      const { iterable: messageEventIterable, cancel } = createMessageRangeIterator({
+      // When telemetry is disabled no batch callback is installed.
+      const telemetry = getTelemetry();
+      const labels = telemetryLabelsRef.current;
+      const onBatch =
+        labels != undefined && telemetry.isEnabled()
+          ? (batch: readonly MessageEvent[]) => {
+              recordRangeMessagesDelivered(telemetry, batch, labels);
+            }
+          : undefined;
+
+      const { iterable, cancel } = createMessageRangeIterator({
         topic,
         convertTo,
         rawBatchIterator,
         sortedTopics,
         messageConverters: messageConvertersRef.current ?? [],
         emitAlert: emitAlertRef.current,
+        onBatch,
       });
-
-      // When telemetry is disabled the original iterable is passed through untouched.
-      const telemetry = getTelemetry();
-      const labels = telemetryLabelsRef.current;
-      const iterable =
-        labels != undefined && telemetry.isEnabled()
-          ? withRangeTelemetry(messageEventIterable, telemetry, labels)
-          : messageEventIterable;
 
       onNewRangeIterator(iterable).catch((err: unknown) => {
         log.error("Error in useSubscribeMessageRange onNewRangeIterator:", err);

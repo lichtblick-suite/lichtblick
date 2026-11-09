@@ -2,31 +2,34 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Immutable, MessageEvent } from "@lichtblick/suite";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import { ITelemetry, TelemetryLabels } from "@lichtblick/suite-base/util/telemetry";
 
 import { PANEL_TELEMETRY_METRICS } from "./constants";
 import { AllFramesDeliveryTracker } from "./panelTelemetry.types";
 
 /**
- * Per-panel telemetry metric names. Defined in `./constants`; this module is the public
- * import path. See the definition for what `panel.messages.delivered` and `panel.rangeMessages.*`
- * count for extension-API vs built-in panels.
+ * Builds the (frozen) label set identifying a panel. `panelId` is the layout panel id (e.g.
+ * `Plot!3x9a`), not the adapter's internal subscriber uuid nor the visible title. Returns undefined
+ * for `FALLBACK_PANEL_ID` (panel rendered outside a layout): such panels emit no panel telemetry,
+ * like the `panel.mount` event.
  */
-export { PANEL_TELEMETRY_METRICS };
-
-/**
- * Builds the label set identifying a panel. `panelId` is the layout panel id (e.g. `Plot!3x9a`),
- * not the adapter's internal subscriber uuid nor the visible title.
- */
-export function buildPanelTelemetryLabels(panelId: string, panelType: string): TelemetryLabels {
-  return { panelId, panelType };
+export function buildPanelTelemetryLabels(
+  panelId: string,
+  panelType: string,
+): TelemetryLabels | undefined {
+  if (panelId === FALLBACK_PANEL_ID) {
+    return undefined;
+  }
+  return Object.freeze({ panelId, panelType });
 }
 
 /**
- * Records the number and total size of the message events delivered to the panel in one frame.
- * Callers must have checked `telemetry.isEnabled()`. Zero values are not recorded.
+ * Records the number and total size of the message events in a frame handed to the panel's
+ * `onRender` (`panel.messages.rendered[Bytes]`). Callers must have checked `telemetry.isEnabled()`.
+ * Zero values are not recorded.
  */
-export function recordMessagesDelivered(
+export function recordMessagesRendered(
   telemetry: ITelemetry,
   messageEvents: Immutable<readonly MessageEvent[]> | undefined,
   labels: TelemetryLabels,
@@ -39,10 +42,46 @@ export function recordMessagesDelivered(
   for (let i = 0; i < count; i++) {
     bytes += messageEvents[i]!.sizeInBytes;
   }
-  telemetry.counter(PANEL_TELEMETRY_METRICS.messagesDelivered, count, "count", "panel", labels);
+  telemetry.counter(PANEL_TELEMETRY_METRICS.messagesRendered, count, "count", "panel", labels);
   if (bytes > 0) {
     telemetry.counter(
-      PANEL_TELEMETRY_METRICS.messagesDeliveredBytes,
+      PANEL_TELEMETRY_METRICS.messagesRenderedBytes,
+      bytes,
+      "bytes",
+      "panel",
+      labels,
+    );
+  }
+}
+
+/**
+ * Records one batch of preloaded (range) messages delivered to the panel through
+ * `useSubscribeMessageRange` (`panel.rangeMessages.*`). Callers must have checked
+ * `telemetry.isEnabled()`. Empty batches are not recorded.
+ */
+export function recordRangeMessagesDelivered(
+  telemetry: ITelemetry,
+  batch: readonly MessageEvent[],
+  labels: TelemetryLabels,
+): void {
+  const count = batch.length;
+  if (count === 0) {
+    return;
+  }
+  let bytes = 0;
+  for (let i = 0; i < count; i++) {
+    bytes += batch[i]!.sizeInBytes;
+  }
+  telemetry.counter(
+    PANEL_TELEMETRY_METRICS.rangeMessagesDelivered,
+    count,
+    "count",
+    "panel",
+    labels,
+  );
+  if (bytes > 0) {
+    telemetry.counter(
+      PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes,
       bytes,
       "bytes",
       "panel",

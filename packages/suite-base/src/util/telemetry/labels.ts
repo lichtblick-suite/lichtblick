@@ -15,17 +15,12 @@ function compareCodeUnits(a: string, b: string): number {
   return a > b ? 1 : 0;
 }
 
-/**
- * Builds the identity of a series: the metric (or event) name followed by its labels sorted by
- * key, e.g. `pool.bytes{poolId="a",sourceId="b"}`. Values are JSON-quoted so different label
- * sets can never produce the same key.
- *
- * The no-label case (undefined or `{}`) returns `metric` itself without building a string.
- */
-export function buildSeriesKey(metric: string, labels: TelemetryLabels | undefined): string {
-  if (labels == undefined) {
-    return metric;
-  }
+// Series keys of frozen label objects, per metric. Callers reuse frozen labels (pool, panel and
+// player labels), so the sort + stringify below runs once per (labels, metric) pair instead of on
+// every call. Entries are released together with the label objects.
+const seriesKeysByFrozenLabels = new WeakMap<TelemetryLabels, Map<string, string>>();
+
+function computeSeriesKey(metric: string, labels: TelemetryLabels): string {
   const keys = Object.keys(labels);
   if (keys.length === 0) {
     return metric;
@@ -40,6 +35,36 @@ export function buildSeriesKey(metric: string, labels: TelemetryLabels | undefin
     key += `${labelKey}=${JSON.stringify(labels[labelKey])}`;
   }
   return key + "}";
+}
+
+/**
+ * Builds the identity of a series: the metric (or event) name followed by its labels sorted by
+ * key, e.g. `pool.bytes{poolId="a",sourceId="b"}`. Values are JSON-quoted so different label
+ * sets can never produce the same key.
+ *
+ * The no-label case (undefined or `{}`) returns `metric` itself without building a string. Keys of
+ * frozen label objects are cached per metric; unfrozen labels are rebuilt on every call, so a
+ * caller mutating its labels object can never get a stale key.
+ */
+export function buildSeriesKey(metric: string, labels: TelemetryLabels | undefined): string {
+  if (labels == undefined) {
+    return metric;
+  }
+  if (!Object.isFrozen(labels)) {
+    return computeSeriesKey(metric, labels);
+  }
+  let keysByMetric = seriesKeysByFrozenLabels.get(labels);
+  const cached = keysByMetric?.get(metric);
+  if (cached != undefined) {
+    return cached;
+  }
+  const key = computeSeriesKey(metric, labels);
+  if (keysByMetric == undefined) {
+    keysByMetric = new Map();
+    seriesKeysByFrozenLabels.set(labels, keysByMetric);
+  }
+  keysByMetric.set(metric, key);
+  return key;
 }
 
 /**

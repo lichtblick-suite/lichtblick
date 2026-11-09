@@ -357,6 +357,7 @@ export class IterablePlayer implements Player {
   }
 
   public seekPlayback(time: Time): void {
+    // Records the request: the seek may still be deferred until initialization or be a no-op.
     this.#emitPhase("seek.requested", "instant");
 
     // Wait to perform seek until initialization is complete
@@ -1469,7 +1470,9 @@ export class IterablePlayer implements Player {
    * `preloadType: "full"` subscription exists (otherwise the BlockLoader has nothing to load).
    * `preload` end: when the BlockLoader progress first covers the full [0, 1] range; if loading
    * stops first, end is emitted with reason "cancelled" (close, or the last `preloadType: "full"`
-   * subscription removed while loading) or "error". Later topic changes do not restart the phase.
+   * subscription removed while loading) or "error". There is one preload phase per player: an end
+   * with a reason is final, and a later `preloadType: "full"` subscription (e.g. after a layout
+   * switch) does not restart it, so the phase always measures the first preload attempt.
    */
   #maybeStartPreloadTelemetry(): void {
     if (
