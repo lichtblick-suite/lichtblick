@@ -486,6 +486,25 @@ describe("summarizePhases", () => {
     });
     expect(summarizePhases([])).toEqual({});
   });
+
+  it("should report no preload duration for a cancelled preload end", () => {
+    // Given a preload that was cancelled before covering the whole range
+    const events = [
+      TelemetryRecordBuilder.event({ name: "preload", phase: "start", monotonicTs: 700 }),
+      TelemetryRecordBuilder.event({
+        name: "preload",
+        phase: "end",
+        monotonicTs: 750,
+        labels: { reason: "cancelled" },
+      }),
+    ];
+
+    // When
+    const phases = summarizePhases(events);
+
+    // Then the end reason is reported instead of a misleading duration
+    expect(phases).toEqual({ preloadEndReason: "cancelled" });
+  });
 });
 
 describe("buildResultV1 panels and pipeline", () => {

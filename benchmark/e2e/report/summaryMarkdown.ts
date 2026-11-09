@@ -145,8 +145,8 @@ export function buildPanelsTable(result: PersistedResultV1): string {
     return "No panel telemetry.";
   }
   const lines = [
-    "| Panel | Type | Messages | Bytes | Range msgs | Render mean / max | First render |",
-    "|-------|------|----------|-------|------------|-------------------|--------------|",
+    "| Panel | Type | Messages | Bytes | Range msgs | Rendered msgs | Render mean / max | First render |",
+    "|-------|------|----------|-------|------------|---------------|-------------------|--------------|",
   ];
   for (const [panelId, panel] of panels) {
     const renders =
@@ -159,6 +159,7 @@ export function buildPanelsTable(result: PersistedResultV1): string {
       String(panel.messages),
       formatBytes(panel.messageBytes),
       String(panel.rangeMessages),
+      panel.renderedMessages == undefined ? NONE : String(panel.renderedMessages),
       renders,
       formatMs(panel.firstRenderMs),
     ];

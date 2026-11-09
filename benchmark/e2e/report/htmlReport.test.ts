@@ -278,6 +278,41 @@ describe("buildHtmlReport", () => {
     expect(html).toContain("<th>GL backend</th>");
   });
 
+  it("should show rendered panel messages and a cancelled preload without a duration", () => {
+    // Given a run whose preload was cancelled and whose adapter panel reports rendered messages
+    const base = sinewave.result;
+    const results: LoadedResult[] = [
+      {
+        fileName: sinewave.fileName,
+        result: {
+          ...base,
+          summary: {
+            ...base.summary,
+            phases: { ...base.summary.phases, preloadEndReason: "cancelled" },
+            panels: {
+              "3D!a": {
+                panelType: "3D",
+                mounts: 1,
+                messages: 24,
+                messageBytes: 0,
+                rangeMessages: 0,
+                rangeBytes: 0,
+                renderedMessages: 8,
+              },
+            },
+          },
+        },
+      },
+    ];
+
+    // When
+    const html = render({ results });
+
+    // Then
+    expect(html).toContain("<th>Rendered msgs</th>");
+    expect(html).toContain("— (cancelled)");
+  });
+
   it("renders an empty report without runs", () => {
     // Given / When
     const html = buildHtmlReport(input(), { loadChartJs: () => CHART_JS_STUB });
