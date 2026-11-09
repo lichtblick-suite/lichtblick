@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { BenchmarkResultBuilder } from "./builders/BenchmarkResultBuilder";
+import { TOGGLE_UNTOGGLED_REALMS_NOTE } from "./constants";
 import { buildHtmlReport } from "./htmlReport";
 import { escapeHtml } from "./htmlReportFormat";
 import type { HtmlReportInput, LoadedResult } from "./types";
@@ -181,6 +182,38 @@ describe("buildHtmlReport", () => {
     expect(section).toContain(">+5.0 MiB [+5.0, +5.0]</td>");
     expect(section).toContain("2.00 ms/s (0.20 % core) · 100 rec/s · 200 ns/rec");
     expect(section).toContain("blocked +1.0 ms/s · -1.0 fps");
+  });
+
+  it("should note next to the toggle verdict that the worker realm was not toggled", () => {
+    // Given a both-method report whose toggle on blocks hold worker records
+    const overheads = [
+      BenchmarkResultBuilder.overhead({
+        method: "both",
+        toggle: ToggleBlockBuilder.withWorkerRealm(),
+      }),
+    ];
+
+    // When
+    const html = render({ results: [sinewave], overheads });
+
+    // Then: the overview CPU cell title and the overhead row's flags (after the verdict) carry it
+    const electronRow = overviewRows(html).find((row) => row.includes("<td>electron</td>"))!;
+    expect(electronRow).toContain(`; ${TOGGLE_UNTOGGLED_REALMS_NOTE}"`);
+    const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
+    expect(section).toContain(
+      `<span class="badge good">within</span></td><td>${TOGGLE_UNTOGGLED_REALMS_NOTE}; toggle ≤ 5 ms</td>`,
+    );
+  });
+
+  it("should not add the worker note when the toggle covered every realm", () => {
+    // Given / When
+    const html = render({
+      results: [sinewave],
+      overheads: [BenchmarkResultBuilder.overhead({ method: "both" })],
+    });
+
+    // Then
+    expect(html).not.toContain(TOGGLE_UNTOGGLED_REALMS_NOTE);
   });
 
   it("should show the toggle CPU with the relaunch A/B as an informational sub-row (both)", () => {

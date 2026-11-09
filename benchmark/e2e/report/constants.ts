@@ -106,6 +106,13 @@ export const VERDICT_DISPLAY: Readonly<
 /** Memory delta / verdict of an overhead report without a relaunch A/B (method `toggle`). */
 export const MEM_NOT_MEASURED = "not measured";
 
+/**
+ * Note next to a toggle CPU verdict whose run had telemetry realms the toggle does not switch (the
+ * worker sinks of `mcap-multi-ingest` record in both arms; see `toggleUntoggledRealms`).
+ */
+export const TOGGLE_UNTOGGLED_REALMS_NOTE =
+  "toggle covers main-thread telemetry only (worker not toggled; relaunch A/B covers all)";
+
 /** Display units of the overhead deltas (`report/overheadText.ts`). */
 export const OVERHEAD_UNITS: Readonly<Record<"cpuRelative" | "cpuPp" | "memMiB", DeltaUnit>> = {
   /** Fraction → percent. */

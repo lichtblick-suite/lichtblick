@@ -67,6 +67,10 @@ const MALFORMED_TOGGLE_SECTIONS: [string, Record<string, unknown>][] = [
   ["an unknown verdict", toggleSectionJson({ verdict: "passed" })],
   ["a quartet without block indices", toggleSectionJson({ quartets: [{ excluded: false }] })],
   ["a block that is not an object", toggleSectionJson({ blocks: [42] })],
+  [
+    "a block without records per realm",
+    toggleSectionJson({ blocks: [{ index: 0, measuredMs: 3000 }] }),
+  ],
 ];
 
 describe("normalizeOverheadReport", () => {

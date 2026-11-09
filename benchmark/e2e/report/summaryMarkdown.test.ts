@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { BenchmarkResultBuilder } from "./builders/BenchmarkResultBuilder";
+import { TOGGLE_UNTOGGLED_REALMS_NOTE } from "./constants";
 import {
   buildExercisesLines,
   buildOverheadTable,
@@ -323,6 +324,21 @@ describe("buildOverheadTable", () => {
     expect(markdown).toContain(
       "| web | ↳ UA probe cost | relaunch | 6 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +8.0 MiB [+8.0, +8.0] | — |",
     );
+  });
+
+  it("notes next to the toggle verdict that the worker realm was not toggled", () => {
+    // Given a toggle report whose on blocks hold worker records (mcap-multi-ingest)
+    const report = BenchmarkResultBuilder.overhead({
+      method: "toggle",
+      scenarioId: "mcap-multi-ingest",
+      toggle: ToggleBlockBuilder.withWorkerRealm(),
+    });
+
+    // When
+    const markdown = buildOverheadTable([report]);
+
+    // Then
+    expect(markdown).toContain(`| ✅ within | ${TOGGLE_UNTOGGLED_REALMS_NOTE}; toggle ≤ 5 ms |`);
   });
 
   it("takes CPU from the toggle A/B and adds the relaunch A/B as an informational sub-row", () => {

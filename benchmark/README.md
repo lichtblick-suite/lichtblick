@@ -572,7 +572,9 @@ of `runScenario`)
     toggled: its sink is installed at worker start and keeps recording in both arms. Its batches
     are dropped on arrival in off blocks, because the renderer ingest is gated. So the toggle
     measures the renderer realm plus the main-thread ingest. Worker cost shows up in the relaunch
-    A/B and the self-cost.
+    A/B and the self-cost. When a block holds records of a realm other than renderer or runner
+    (`toggleUntoggledRealms`), the viewer and the CI summary put a note next to the toggle verdict
+    (flags column, and the title of the overview CPU cell).
   - Telemetry drains keep running in both arms (they read the buffer, not the producers).
   - Startup cost (collector install, first data source open) is outside the blocks.
 - **Duration**: auto-pause (`?scenario.durationMs`) and MCAP fixture length are derived from

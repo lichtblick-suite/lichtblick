@@ -167,11 +167,13 @@ function hasV3Fields(json: Record<string, unknown>): boolean {
   );
 }
 
-/** A toggle block as `toggleProcessTypeDeltas` reads it. */
+/** A toggle block as `toggleProcessTypeDeltas` and `toggleUntoggledRealms` read it. */
 function isToggleBlock(block: unknown): boolean {
   return (
     isRecord(block) &&
     hasNumbers(block, ["index", "measuredMs"]) &&
+    isRecord(block.recordsByRealm) &&
+    Object.values(block.recordsByRealm).every(isNumber) &&
     (block.cpuPercentByProcessType == undefined ||
       (isRecord(block.cpuPercentByProcessType) &&
         Object.values(block.cpuPercentByProcessType).every(isNumber)))

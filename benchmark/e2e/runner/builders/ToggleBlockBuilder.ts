@@ -164,4 +164,19 @@ export class ToggleBlockBuilder {
       cpuDeltaRelativeMax: OVERHEAD_TARGETS.cpuDeltaRelativeMax,
     });
   }
+
+  /**
+   * `toggle` with renderer and worker records stamped into its on blocks, as the untoggled worker
+   * sink of `mcap-multi-ingest` leaves them (its off-block batches are dropped on arrival).
+   */
+  public static withWorkerRealm(
+    toggle: OverheadToggleSummaryV3 = ToggleBlockBuilder.summary(),
+  ): OverheadToggleSummaryV3 {
+    return {
+      ...toggle,
+      blocks: toggle.blocks.map((block) =>
+        block.arm === "on" ? { ...block, recordsByRealm: { renderer: 50, "worker:1": 30 } } : block,
+      ),
+    };
+  }
 }

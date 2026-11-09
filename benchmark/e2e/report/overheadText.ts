@@ -4,9 +4,10 @@
 // Plain-text formatting of overhead A/B reports (schema 3), shared by the
 // HTML report and the CI markdown summary. Free of DOM/Playwright/Node imports.
 
-import { MEM_NOT_MEASURED, NONE, VERDICT_DISPLAY } from "./constants";
+import { MEM_NOT_MEASURED, NONE, TOGGLE_UNTOGGLED_REALMS_NOTE, VERDICT_DISPLAY } from "./constants";
 import type { CpuVerdictStats } from "./overheadText.types";
 import type { DeltaUnit } from "./types";
+import { RENDERER_REALM, RUNNER_REALM } from "../result/constants";
 import type { DirectAttributionV3 } from "../result/directAttribution.types";
 import type { MetricStats, Verdict } from "../result/stats.types";
 import type {
@@ -82,6 +83,36 @@ export function cpuVerdictStats(report: OverheadReport): CpuVerdictStats {
     cpuRelative: report.metrics.cpuRelative,
     cpuPctPoints: report.metrics.cpuPctPoints,
   };
+}
+
+/**
+ * Telemetry realms the toggle does not switch, sorted: every realm other than the renderer (whose
+ * collectors the toggle pauses) and the runner that stamped records into a block. Worker sinks
+ * (`worker:<n>`) are installed at worker start and record in both arms; their batches are dropped
+ * in off blocks, so they show up in on blocks only.
+ */
+export function toggleUntoggledRealms(toggle: Pick<OverheadToggleSummaryV3, "blocks">): string[] {
+  const realms = new Set<string>();
+  for (const block of toggle.blocks) {
+    for (const realm of Object.keys(block.recordsByRealm)) {
+      if (realm !== RENDERER_REALM && realm !== RUNNER_REALM) {
+        realms.add(realm);
+      }
+    }
+  }
+  return [...realms].sort();
+}
+
+/**
+ * The note next to a report's CPU verdict when it comes from a toggle A/B that left realms
+ * untoggled (`TOGGLE_UNTOGGLED_REALMS_NOTE`), else `undefined`.
+ */
+export function toggleCoverageNote(report: OverheadReport): string | undefined {
+  const { toggle } = report;
+  if (report.cpuVerdictSource !== "toggle" || toggle == undefined) {
+    return undefined;
+  }
+  return toggleUntoggledRealms(toggle).length > 0 ? TOGGLE_UNTOGGLED_REALMS_NOTE : undefined;
 }
 
 /** The method and, when mixed, the verdict sources: `both (CPU toggle · mem relaunch)`. */
@@ -247,9 +278,13 @@ export function toggleCpuStats(toggle: OverheadToggleSummaryV3): CpuVerdictStats
   return { source: "toggle", n: toggle.n, excluded: toggle.excludedQuartets, ...toggle.metrics };
 }
 
-/** Toggle flags (when it ran) and the relaunch runs' flags (when they ran); `—` for none. */
+/**
+ * The toggle coverage note (`toggleCoverageNote`), the toggle flags (when it ran) and the relaunch
+ * runs' flags (when they ran); `—` for none.
+ */
 export function reportFlagsText(report: OverheadReport): string {
   const flags = [
+    toggleCoverageNote(report) ?? NONE,
     report.toggle == undefined ? NONE : toggleFlagsText(report.toggle),
     report.runs.length === 0 ? NONE : overheadFlagsText(report),
   ].filter((flag) => flag !== NONE);

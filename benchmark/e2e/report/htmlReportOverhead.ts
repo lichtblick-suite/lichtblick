@@ -28,6 +28,7 @@ import {
   TOGGLE_FRAME_PROBE_LABEL,
   TOGGLE_WITHOUT_UA_PROBE_LABEL,
   toggleConfigText,
+  toggleCoverageNote,
   toggleCpuStats,
   toggleFlagsText,
   toggleProcessDeltasText,
@@ -81,9 +82,11 @@ export function overheadCpuCell(report: OverheadReport | undefined): Cell {
   }
   const { cpuRelative: stats, source } = cpuVerdictStats(report);
   const target = `target ≤ ${fmtNumber(report.targets.cpuDeltaRelativeMax * 100, 0)} % (relative CPU delta, ${source} A/B)`;
+  const title = ciTitle(stats, target, source === "toggle" ? "ABBA quartets" : "pairs");
+  const note = toggleCoverageNote(report);
   return num(deltaText(stats, OVERHEAD_UNITS.cpuRelative), {
     tone: VERDICT_DISPLAY[report.verdicts.cpu].tone,
-    title: ciTitle(stats, target, source === "toggle" ? "ABBA quartets" : "pairs"),
+    title: note == undefined ? title : `${title}; ${note}`,
   });
 }
 

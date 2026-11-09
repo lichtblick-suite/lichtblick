@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { BenchmarkResultBuilder } from "./builders/BenchmarkResultBuilder";
-import { MEM_NOT_MEASURED, NONE, OVERHEAD_UNITS } from "./constants";
+import { MEM_NOT_MEASURED, NONE, OVERHEAD_UNITS, TOGGLE_UNTOGGLED_REALMS_NOTE } from "./constants";
 import {
   cpuSamplesText,
   cpuVerdictStats,
@@ -12,8 +12,10 @@ import {
   reportFlagsText,
   selfCostText,
   toggleConfigText,
+  toggleCoverageNote,
   toggleFlagsText,
   toggleProcessDeltasText,
+  toggleUntoggledRealms,
 } from "./overheadText";
 import { MIN_PAIRS_FOR_VERDICT } from "../result/constants";
 import { OverheadRunBuilder } from "../runner/builders/OverheadRunBuilder";
@@ -306,5 +308,61 @@ describe("reportFlagsText", () => {
       "toggle ≤ 5 ms",
     );
     expect(reportFlagsText(BenchmarkResultBuilder.overhead())).toBe(NONE);
+  });
+
+  it("should lead with the coverage note when the toggle left the worker realm untoggled", () => {
+    // Given a toggle report whose on blocks hold worker records
+    const report = BenchmarkResultBuilder.overhead({
+      method: "toggle",
+      toggle: ToggleBlockBuilder.withWorkerRealm(),
+    });
+
+    // When / Then
+    expect(reportFlagsText(report)).toBe(`${TOGGLE_UNTOGGLED_REALMS_NOTE}; toggle ≤ 5 ms`);
+  });
+});
+
+describe("toggleUntoggledRealms / toggleCoverageNote", () => {
+  it("should list the realms other than renderer and runner found in any block", () => {
+    // Given
+    const toggle = ToggleBlockBuilder.withWorkerRealm();
+    toggle.blocks[0]!.recordsByRealm = { runner: 3, "worker:2": 1 };
+
+    // When / Then
+    expect(toggleUntoggledRealms(toggle)).toEqual(["worker:1", "worker:2"]);
+  });
+
+  it("should find no untoggled realm with renderer records only", () => {
+    // Given
+    const toggle = ToggleBlockBuilder.summary();
+    toggle.blocks[1]!.recordsByRealm = { renderer: 40 };
+
+    // When / Then
+    expect(toggleUntoggledRealms(toggle)).toEqual([]);
+    expect(
+      toggleCoverageNote(BenchmarkResultBuilder.overhead({ method: "toggle", toggle })),
+    ).toBeUndefined();
+  });
+
+  it.each([
+    "toggle",
+    "both",
+  ] as const)("should note the main-thread-only coverage when the CPU verdict comes from the toggle (%s)", (method) => {
+    // Given
+    const report = BenchmarkResultBuilder.overhead({
+      method,
+      toggle: ToggleBlockBuilder.withWorkerRealm(),
+    });
+
+    // When / Then
+    expect(toggleCoverageNote(report)).toBe(TOGGLE_UNTOGGLED_REALMS_NOTE);
+  });
+
+  it("should not note the coverage when the CPU verdict comes from the relaunch A/B", () => {
+    // Given a relaunch report (all realms run in both arms' launches)
+    const report = BenchmarkResultBuilder.overhead();
+
+    // When / Then
+    expect(toggleCoverageNote(report)).toBeUndefined();
   });
 });
