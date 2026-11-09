@@ -163,7 +163,7 @@ pid, platform, scenarioId, realm, reason, iteratorId`. There are at most 64 seri
 
 | Layer                    | Source                                                                                                                                                                                                                                         | Metrics / events                                                                                                                                                                                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Host / process           | **Electron**: `app.getAppMetrics()` through `window.lichtblickBenchmark.getMemoryMetrics()`. **Web**: CDP `SystemInfo.getProcessInfo` (process list, CPU time) plus `ps -o pid=,rss=` (RSS). If CDP fails, the browser process tree from `ps`. | `process.workingSetBytes`, `process.peakWorkingSetBytes`, `process.privateBytes` (Electron on Windows only), `process.cpuPercent` (per-core sum, 100 = one core), labels `{processType: browser\|renderer\|gpu\|utility\|…, pid}`, realm `runner`, scope `process`                  |
+| Host / process           | **Electron**: `app.getAppMetrics()` through `window.lichtblickBenchmark.getMemoryMetrics()`. **Web**: CDP `SystemInfo.getProcessInfo` (process list, CPU time) plus `ps -o pid=,rss=` (RSS). If CDP fails, the browser process tree from `ps` (memory only). | `process.workingSetBytes`, `process.peakWorkingSetBytes`, `process.privateBytes` (Electron on Windows only), `process.cpuPercent` (per-core sum, 100 = one core), labels `{processType: browser\|renderer\|gpu\|utility\|…, pid}`, realm `runner`, scope `process`                  |
 | Renderer (main thread)   | benchmark renderer collectors, 1 Hz                                                                                                                                                                                                            | `renderer.jsHeap.{usedBytes,totalBytes,limitBytes}`, `renderer.fps`, `renderer.lateFrames`, `renderer.longTasks.{count,durationMs}`, `renderer.uaSpecificMemory.bytes` (cross-origin isolated only, at most every 10 s)                                                             |
 | Frame / message dispatch | legacy `window.recordFrameTimes`                                                                                                                                                                                                               | `listenerDispatchDurationMs` (gauge, realm/scope `renderer`)                                                                                                                                                                                                                        |
 | Cross-realm              | worker sinks bridged into the renderer                                                                                                                                                                                                         | everything a worker records, realm `worker:<n>`; `telemetry.*` self-metrics per realm                                                                                                                                                                                               |
@@ -179,6 +179,12 @@ Caveats:
   host/process metrics for totals.
 - Process working set (RSS) **double-counts shared pages** across processes. Treat the "total" as
   an upper bound that is good for comparing runs, not as exact memory usage.
+- `run.environment.hostCpuSource` says where process CPU came from: `cdp` (web, CPU time between
+  polls), `app-metrics` (Electron, CPU since the previous poll) or `ps` (web, CDP failed). With
+  `ps` the run has **no CPU**: `pcpu` is ps' own lifetime (Linux) or decaying (macOS) average, not
+  CPU per poll, so it is not recorded, and `summary.process.medianTotalCpuPercent`, `cpuSeconds`,
+  `byType.*.medianCpuPercent` and `kpis.cpu` stay empty instead of mixing it with interval CPU.
+  Older results lack the field.
 - Web runs in headless Chromium use **SwiftShader** (software GL). That makes the `gpu` process
   CPU very high (hundreds of percent) and makes CPU noisy. Compare web CPU only to other web
   runs.
@@ -396,7 +402,8 @@ and stores what it saw as `runnerEvents` in the v1 result:
                      displayName? }, player, params (redacted), durationMs?,
                      panels: { id, type, title? }[] },
          environment: { os, arch, ci, userAgent?, electronVersion?, chromiumVersion?, cpuModel,
-                        logicalCpus, totalMemBytes, crossOriginIsolated?,
+                        logicalCpus, totalMemBytes, crossOriginIsolated?, webBrowser?,
+                        hostCpuSource?: "cdp" | "app-metrics" | "ps",
                         fpsCeiling, glRenderer, lateFrameThresholdMs } },   // render calibration
   samples: TelemetrySample[],   // page + worker + host process + listenerDispatchDurationMs, sorted by monotonicTs
   events: TelemetryEvent[],
@@ -405,9 +412,9 @@ and stores what it saw as `runnerEvents` in the v1 result:
   runnerEvents?: { type: "renderer.crash" | "process.gone" | "renderer.reload", monotonicTs,
                    reason?, processType?, exitCode?, url? }[],   // see Crash detection; [] = none
   summary: {
-    process: { sampleCount, peakTotalWorkingSetBytes, meanTotalWorkingSetBytes, medianTotalCpuPercent,
+    process: { sampleCount, peakTotalWorkingSetBytes, meanTotalWorkingSetBytes, medianTotalCpuPercent?,
                totalWorkingSetSlopeMiBPerMin?, cpuSeconds?,
-               byType: Record<processType, { peakWorkingSetBytes, medianCpuPercent }> },
+               byType: Record<processType, { peakWorkingSetBytes, medianCpuPercent? }> },
     renderer: { peakJsHeapUsedBytes?, lastUaSpecificMemoryBytes?, medianFps?, totalFrames?,
                 lateFrames?, longTasks?, longTaskTotalMs? },
     listenerDispatchDurationMs?: { count, p50, p90, max },

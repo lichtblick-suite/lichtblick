@@ -251,11 +251,63 @@ describe("WebHostCollector.collect", () => {
     await collector.collect(2);
 
     // Then
-    expect(first.samples.map((sample) => [sample.pid, sample.cpuPercent])).toEqual([
-      [20, 5],
-      [21, 2.5],
+    expect(first.samples.map((sample) => [sample.pid, sample.workingSetBytes])).toEqual([
+      [20, 1000 * 1024],
+      [21, 500 * 1024],
     ]);
     expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it("should omit the lifetime ps pcpu from the samples when falling back to ps", async () => {
+    // Given
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    mockPs("20 1 1000 5.0 /chrome --bench\n21 20 500 2.5 /chrome --type=renderer");
+    const browser = fakeBrowser(async () => {
+      throw new Error("not supported");
+    });
+    const collector = new WebHostCollector({ browser, marker: "--bench" });
+
+    // When
+    const snapshot = await collector.collect(1);
+
+    // Then
+    expect(snapshot.samples.map((sample) => sample.cpuPercent)).toEqual([undefined, undefined]);
+    warn.mockRestore();
+  });
+});
+
+describe("WebHostCollector.cpuSource", () => {
+  it("should report cdp when CDP answers", async () => {
+    // Given
+    mockPs("10 2048\n");
+    const browser = fakeBrowser(async () => ({
+      processInfo: [{ id: 10, type: "browser", cpuTime: 1 }],
+    }));
+    const collector = new WebHostCollector({ browser, marker: "--bench" });
+
+    // When
+    await collector.collect(1);
+
+    // Then
+    expect(collector.cpuSource()).toBe("cdp");
+    await collector.dispose();
+  });
+
+  it("should report ps after falling back to the ps process tree", async () => {
+    // Given
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+    mockPs("20 1 1000 5.0 /chrome --bench");
+    const browser = fakeBrowser(async () => {
+      throw new Error("not supported");
+    });
+    const collector = new WebHostCollector({ browser, marker: "--bench" });
+
+    // When
+    await collector.collect(1);
+
+    // Then
+    expect(collector.cpuSource()).toBe("ps");
     warn.mockRestore();
   });
 });

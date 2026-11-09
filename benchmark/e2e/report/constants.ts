@@ -4,6 +4,8 @@
 // Free of DOM/Playwright/Node imports (compiled by the root tsconfig too, through
 // `summaryMarkdown.ts`).
 
+import type { HostCpuSourceV1 } from "../result/schemaV1.types";
+
 export const KIB = 1024;
 export const MIB = 1024 * 1024;
 
@@ -13,6 +15,13 @@ export const NONE = "—";
 /** Shown for fields that results written by older runners lack (lenient loading). */
 export const NOT_RECORDED = "not recorded";
 export const SCENARIO_NOT_RECORDED = "scenario not recorded";
+
+/** Environment-table text of `run.environment.hostCpuSource` (see `HostCpuSourceV1`). */
+export const HOST_CPU_SOURCE_LABELS: Record<HostCpuSourceV1, string> = {
+  cdp: "CDP cpuTime (per poll)",
+  "app-metrics": "Electron app metrics (per poll)",
+  ps: "ps fallback (CPU not measured)",
+};
 
 export const REGENERATE_COMMAND = "yarn test:e2e:benchmark:viewer";
 

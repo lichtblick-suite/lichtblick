@@ -154,6 +154,27 @@ describe("buildHtmlReport", () => {
     expect(html).not.toContain("not recorded");
   });
 
+  it("should show the host CPU source in the environment table when recorded", () => {
+    // Given a web run whose collector fell back to ps
+    const loaded = BenchmarkResultBuilder.loaded({ ts: 4, platform: "web" });
+    const run = loaded.result.run;
+    const results: LoadedResult[] = [
+      {
+        ...loaded,
+        result: {
+          ...loaded.result,
+          run: { ...run, environment: { ...run.environment, hostCpuSource: "ps" } },
+        },
+      },
+    ];
+
+    // When
+    const html = buildHtmlReport(input({ results }), { loadChartJs: () => CHART_JS_STUB });
+
+    // Then
+    expect(html).toContain("<td>ps fallback (CPU not measured)</td>");
+  });
+
   it("should mark the scenario and render calibration of an older result as not recorded", () => {
     // Given
     const results: LoadedResult[] = [

@@ -5,7 +5,7 @@
 // imported by relative path so no `@lichtblick/suite-base` path alias is needed.
 
 import type { GroupKpiDefs, KpiPolicy, ScorecardMetricKey } from "./kpis.types";
-import type { RunModeV1, WebBrowserV1 } from "./schemaV1.types";
+import type { HostCpuSourceV1, RunModeV1, WebBrowserV1 } from "./schemaV1.types";
 import { PIPELINE_TELEMETRY_METRICS } from "../../../packages/suite-base/src/components/MessagePipeline/constants";
 import {
   BYTES_READ_METRIC,
@@ -37,6 +37,9 @@ export const RUN_MODES: readonly RunModeV1[] = ["scenario"];
 
 /** Values of `run.environment.webBrowser` (see `WebBrowserV1`). */
 export const WEB_BROWSERS: readonly WebBrowserV1[] = ["chromium-headless-shell", "chromium"];
+
+/** Values of `run.environment.hostCpuSource` (see `HostCpuSourceV1`). */
+export const HOST_CPU_SOURCES: readonly HostCpuSourceV1[] = ["cdp", "app-metrics", "ps"];
 
 /** Prefix of the `HydratedSourcePool` telemetry series (scope "pipeline", label `poolId`). */
 export { HYDRATED_SOURCE_POOL_METRIC_PREFIX as POOL_METRIC_PREFIX } from "../../../packages/suite-base/src/players/IterablePlayer/shared/constants";

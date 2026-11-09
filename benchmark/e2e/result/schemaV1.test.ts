@@ -6,6 +6,7 @@ import { TelemetryRecordBuilder, panelLabels } from "./builders/TelemetryRecordB
 import { MIN_SLOPE_WINDOW_MS, PROCESS_METRICS } from "./constants";
 import {
   BuildResultV1Input,
+  HostCpuSourceV1,
   HostProcessSample,
   RunInfoV1,
   TelemetryRecord,
@@ -1122,6 +1123,92 @@ describe("validateResultV1 run.mode and webBrowser", () => {
     expect(validateResultV1(withBrowser("chromium-headless-shell"))).toEqual([]);
     expect(validateResultV1(withBrowser("firefox"), "lenient")).toEqual([
       "run.environment.webBrowser must be one of chromium-headless-shell, chromium",
+    ]);
+  });
+});
+
+describe("host CPU source", () => {
+  const hostSamples: HostProcessSample[] = [
+    { monotonicTs: 1000, pid: 1, processType: "browser", workingSetBytes: 100, cpuPercent: 10 },
+    { monotonicTs: 2000, pid: 1, processType: "browser", workingSetBytes: 200, cpuPercent: 30 },
+    { monotonicTs: 3000, pid: 1, processType: "browser", workingSetBytes: 300 },
+  ];
+
+  function runWithSource(hostCpuSource: HostCpuSourceV1 | undefined): RunInfoV1 {
+    const run = makeRun();
+    return { ...run, environment: { ...run.environment, hostCpuSource } };
+  }
+
+  it("should summarize the interval CPU when the source is cdp", () => {
+    // Given
+    const input = makeInput({ run: runWithSource("cdp"), hostSamples });
+
+    // When
+    const result = buildResultV1(input);
+
+    // Then
+    expect(result.summary.process.medianTotalCpuPercent).toBe(20);
+  });
+
+  it("should leave the CPU summary and KPIs empty when the collector fell back to ps", () => {
+    // Given interval CPU from polls before the fallback, then memory-only ps polls
+    const input = makeInput({ run: runWithSource("ps"), hostSamples });
+
+    // When
+    const result = buildResultV1(input);
+
+    // Then
+    expect({
+      median: result.summary.process.medianTotalCpuPercent,
+      browser: result.summary.process.byType.browser?.medianCpuPercent,
+      cpuSeconds: result.summary.process.cpuSeconds,
+      kpi: result.summary.kpis.cpu.medianCpuPercent,
+      sampleCount: result.summary.process.sampleCount,
+    }).toEqual({
+      median: undefined,
+      browser: undefined,
+      cpuSeconds: undefined,
+      kpi: undefined,
+      sampleCount: 3,
+    });
+  });
+
+  it("should omit medianTotalCpuPercent instead of reporting 0 without CPU readings", () => {
+    // Given memory-only polls
+    const memoryOnly = hostSamples.map(({ cpuPercent: _cpuPercent, ...rest }) => rest);
+
+    // When
+    const summary = summarizeProcess(memoryOnly);
+
+    // Then
+    expect(summary.medianTotalCpuPercent).toBeUndefined();
+  });
+
+  it("should accept a result without CPU summary built from the ps fallback", () => {
+    // Given
+    const result = buildResultV1(makeInput({ run: runWithSource("ps"), hostSamples }));
+
+    // When
+    const errors = validateResultV1(JSON.parse(JSON.stringify(result)));
+
+    // Then
+    expect(errors).toEqual([]);
+  });
+
+  it("should reject an unknown run.environment.hostCpuSource in both modes", () => {
+    // Given
+    const result = buildResultV1(makeInput());
+    const unknown = {
+      ...result,
+      run: { ...result.run, environment: { ...result.run.environment, hostCpuSource: "top" } },
+    };
+
+    // When
+    const lenientErrors = validateResultV1(unknown, "lenient");
+
+    // Then
+    expect(lenientErrors).toEqual([
+      "run.environment.hostCpuSource must be one of cdp, app-metrics, ps",
     ]);
   });
 });

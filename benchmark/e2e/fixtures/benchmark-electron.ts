@@ -39,6 +39,7 @@ export async function launchElectronTarget(): Promise<ElectronBenchmarkTarget> {
       userAgent,
       electronVersion: versions.electron,
       chromiumVersion: versions.chrome,
+      hostCpuSource: "app-metrics",
     };
     return {
       platform: "electron",
