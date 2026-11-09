@@ -17,6 +17,7 @@ import { createNewWindow } from "./createNewWindow";
 import { isFileToOpen } from "./fileUtils";
 import getDevModeIcon from "./getDevModeIcon";
 import { getFilesToOpen } from "./getFilesToOpen";
+import { getOpenStreetMapHeaders } from "./getOpenStreetMapHeaders";
 import injectFilesToOpen from "./injectFilesToOpen";
 import installChromeExtensions from "./installChromeExtensions";
 import { parseCLIFlags } from "./parseCLIFlags";
@@ -288,6 +289,21 @@ export async function main(): Promise<void> {
     const cspHeader = Object.entries(contentSecurityPolicy)
       .map(([key, val]) => `${key} ${val}`)
       .join("; ");
+
+    // Native apps have no HTTP referrer. Identify OSM tile requests as Lichtblick
+    // instead of a browser, as required by https://operations.osmfoundation.org/policies/tiles/.
+    session.defaultSession.webRequest.onBeforeSendHeaders(
+      { urls: ["https://tile.openstreetmap.org/*", "https://*.tile.openstreetmap.org/*"] },
+      (details, callback) => {
+        callback({
+          requestHeaders: getOpenStreetMapHeaders(details.requestHeaders, {
+            name: LICHTBLICK_PRODUCT_NAME,
+            version: LICHTBLICK_PRODUCT_VERSION,
+            homepage: LICHTBLICK_PRODUCT_HOMEPAGE,
+          }),
+        });
+      },
+    );
 
     // Set default http headers
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
