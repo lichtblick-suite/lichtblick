@@ -38,7 +38,7 @@ To run a single spec or scenario, use the usual Playwright filters. Examples:
 `yarn test:e2e:benchmark:web scenarios -g mcap` and `yarn test:e2e:benchmark overhead`.
 CI variants (`test:e2e:benchmark:ci`, `test:e2e:benchmark:web:ci`) set `CI=true` and write
 `benchmark/e2e/reports/results-<platform>.json`. They take the same filters; the workflow passes
-`scenarios` (see [CI](#ci)).
+`scenarios` on push and the chosen spec on manual runs (see [CI](#ci)).
 
 The unit tests for the runner's pure logic (static server, fixture generator, schema builder and
 validator, collector parsing, overhead, crash detection, summary, HTML viewer) run under the `benchmark-e2e` Jest project:
@@ -56,11 +56,12 @@ but they answer different questions:
 | How it runs                       | One launch per scenario, 1 Hz sampling for 5 s (`mcap-multi-ingest`: 10 s)                             | CPU: toggle quartets in one launch + direct (JS only) profile; memory: relaunch A/B. Optional UA-off (`BENCHMARK_OVERHEAD_UA_ARM`) and FPS-probe (`BENCHMARK_OVERHEAD_FRAME_PROBE_ARM`) variants |
 | Output                            | `*.benchmark-result.v1.json` + screenshots → Overview, [Scorecard](#kpi-scorecard), By group, Coverage | `overhead-<platform>-<scenario>-<ts>.json` (schema 3) → [Telemetry overhead](#telemetry-overhead-report-only); its runs (`run.mode: "overhead"`) stay out of KPIs and Runs                       |
 | Duration (defaults, one platform) | ≈ 10–15 s per scenario                                                                                 | ≈ 35–40 min (per scenario: ≈ 2.5–3 min toggle + 17 relaunch runs ≈ 8–10 min); `BENCHMARK_OVERHEAD_METHOD=toggle` ≈ 10 min                                                                        |
-| When to run                       | Every change; runs in CI on pushes to `develop`/`main`                                                 | When telemetry, its collectors or the overhead runner change; manual only (not in CI)                                                                                                            |
+| When to run                       | Every change; runs in CI on pushes to `develop`/`main`                                                 | When telemetry, its collectors or the overhead runner change; manual only (locally or a manual CI run)                                                                                           |
 | Command                           | `yarn test:e2e:benchmark[:web] scenarios`                                                              | `yarn test:e2e:benchmark[:web] overhead`                                                                                                                                                         |
 
-[CI](#ci) runs only the scenarios spec: the workflow passes the `scenarios` filter to the `:ci`
-scripts. Run the overhead spec manually with the command above. It is report only unless
+On push, [CI](#ci) runs only the scenarios spec: the workflow passes the `scenarios` filter to the
+`:ci` scripts. Run the overhead spec manually with the command above, or as a manual CI run
+(`suite: overhead`). It is report only unless
 `BENCHMARK_OVERHEAD_GATE=1`; methods, variants and env knobs are in
 [Telemetry overhead](#telemetry-overhead-report-only).
 
@@ -1026,19 +1027,34 @@ A baseline can be a downloaded CI artifact (`benchmark-results-electron` /
 
 ## CI
 
-`.github/workflows/e2e-benchmark.yml` runs on pushes to `develop` and `main`:
+`.github/workflows/e2e-benchmark.yml` runs on pushes to `develop` and `main`, and on manual
+dispatch (`workflow_dispatch`, "Run workflow" in the Actions tab):
 
 - `e2e-benchmark`: Electron under xvfb
 - `e2e-benchmark-web`: headless Chromium
 
-Both jobs run `yarn test:e2e:benchmark[:web]:ci scenarios`, i.e. the scenarios spec only. The
-telemetry overhead A/B (`overhead.benchmark.spec.ts`) is not run in CI; run it manually (see
-[Specs: scenarios vs overhead](#specs-scenarios-vs-overhead)).
+On push both jobs run `yarn test:e2e:benchmark[:web]:ci scenarios`, i.e. the scenarios spec only.
+A manual run takes these inputs:
+
+| Input      | Default     | Effect                                                                                     |
+| ---------- | ----------- | ------------------------------------------------------------------------------------------ |
+| `suite`    | `scenarios` | `scenarios` or `overhead` (the telemetry overhead A/B, `overhead.benchmark.spec.ts`)       |
+| `platform` | `both`      | `both`, `electron` or `web` (skips the other job)                                          |
+| `method`   | `both`      | overhead only: `BENCHMARK_OVERHEAD_METHOD` (`toggle`, `relaunch` or `both`)                |
+| `quartets` | blank       | overhead only: `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS` (blank: default 10)                    |
+| `repeats`  | blank       | overhead only: `BENCHMARK_OVERHEAD_REPEATS` (blank: default 8; a relaunch verdict needs 6) |
+
+The overhead suite takes ≈ 35–40 min per platform locally with the defaults (see
+[Specs: scenarios vs overhead](#specs-scenarios-vs-overhead)) and likely longer on the CI runner
+(software rendering), so its jobs time out after 240 min; `method: toggle` is much shorter. It
+gives overhead evidence on CI hardware: the overhead reports are uploaded with the other artifacts
+and shown in the job summary and the HTML report. Like the local run, it is report only (no gate).
+A manual run is only available once the workflow file is on the default branch.
 
 Each job adds `yarn test:e2e:benchmark:summary` to the job summary. It starts with a compact KPI
 scorecard per platform and one "Exercises" line per scenario, then covers the legacy table,
 the v1 results table, the panels and pipeline section, and the overhead table when overhead reports
-are present (in CI it reads "No overhead reports found."). Each job then
+are present (push runs read "No overhead reports found."). Each job then
 generates the HTML report (see [Viewing results](#viewing-results)) and adds a pointer to it in the
 job summary. Finally it uploads `benchmark/.artifacts/**/*.json`, the checkpoint screenshots in
 `benchmark/.artifacts/screenshots/` and `benchmark/.artifacts/report/`, excluding the fixtures.
