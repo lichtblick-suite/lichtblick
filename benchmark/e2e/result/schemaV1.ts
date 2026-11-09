@@ -1118,7 +1118,33 @@ function checkScenarioDescriptor(
   checkScenarioPanels(scenario.panels, errors);
 }
 
-/** Validates `run` (fields, platform, ISO dates, environment, scenario). */
+/**
+ * Order of the run's monotonic window: `start <= windowEnd <= end`. Complete runs (strict) also
+ * need `end > start`; a partial result of a run that failed before the page was ready has
+ * `start == end` (both from the runner clock).
+ */
+function checkRunWindow(
+  run: Record<string, unknown>,
+  mode: ResultValidationMode,
+  errors: string[],
+): void {
+  const { startMonotonicTs: start, endMonotonicTs: end, windowEndMonotonicTs: windowEnd } = run;
+  if (!isFiniteNumber(start) || !isFiniteNumber(end)) {
+    return;
+  }
+  if (end < start) {
+    errors.push("run.endMonotonicTs must not be before run.startMonotonicTs");
+  } else if (end === start && mode === "strict") {
+    errors.push("run.endMonotonicTs must be after run.startMonotonicTs");
+  }
+  if (isFiniteNumber(windowEnd) && (windowEnd < start || windowEnd > end)) {
+    errors.push(
+      "run.windowEndMonotonicTs must lie within [run.startMonotonicTs, run.endMonotonicTs]",
+    );
+  }
+}
+
+/** Validates `run` (fields, window order, platform, ISO dates, environment, scenario). */
 function checkRun(run: unknown, mode: ResultValidationMode, errors: string[]): void {
   if (!isRecord(run)) {
     errors.push("run must be an object");
@@ -1141,6 +1167,7 @@ function checkRun(run: unknown, mode: ResultValidationMode, errors: string[]): v
     },
     errors,
   );
+  checkRunWindow(run, mode, errors);
   if (run.platform !== "electron" && run.platform !== "web") {
     errors.push(`run.platform must be "electron" or "web"`);
   }
@@ -1219,6 +1246,7 @@ function checkProcessSummary(processSummary: unknown, errors: string[]): void {
     processSummary,
     "summary.process",
     {
+      sampleCount: "number",
       peakTotalWorkingSetBytes: "number",
       meanTotalWorkingSetBytes: "number",
       medianTotalCpuPercent: "number?",
@@ -1227,6 +1255,10 @@ function checkProcessSummary(processSummary: unknown, errors: string[]): void {
     },
     errors,
   );
+  const { sampleCount } = processSummary;
+  if (isFiniteNumber(sampleCount) && (!Number.isInteger(sampleCount) || sampleCount < 0)) {
+    errors.push("summary.process.sampleCount must be a non-negative integer");
+  }
   if (!isRecord(processSummary.byType)) {
     errors.push("summary.process.byType must be an object");
   }

@@ -1212,3 +1212,123 @@ describe("host CPU source", () => {
     ]);
   });
 });
+
+describe("validateResultV1 summary.process.sampleCount", () => {
+  function withSampleCount(sampleCount: unknown): Record<string, unknown> {
+    const result = buildResultV1(makeInput());
+    const process: Record<string, unknown> = { ...result.summary.process, sampleCount };
+    if (sampleCount == undefined) {
+      delete process.sampleCount;
+    }
+    return { ...result, summary: { ...result.summary, process } };
+  }
+
+  it("should report a missing sampleCount in lenient mode", () => {
+    // Given
+    const missing = withSampleCount(undefined);
+
+    // When
+    const errors = validateResultV1(missing, "lenient");
+
+    // Then
+    expect(errors).toEqual(["summary.process.sampleCount is missing"]);
+  });
+
+  it("should reject a sampleCount that is not a number", () => {
+    // Given
+    const text = withSampleCount("3");
+
+    // When
+    const errors = validateResultV1(text);
+
+    // Then
+    expect(errors).toEqual(["summary.process.sampleCount must be a number"]);
+  });
+
+  it.each([-1, 1.5])("should reject the sampleCount %p", (sampleCount) => {
+    // Given
+    const invalid = withSampleCount(sampleCount);
+
+    // When
+    const errors = validateResultV1(invalid);
+
+    // Then
+    expect(errors).toEqual(["summary.process.sampleCount must be a non-negative integer"]);
+  });
+});
+
+describe("validateResultV1 run window order", () => {
+  function withWindow(runWindow: {
+    startMonotonicTs: number;
+    endMonotonicTs: number;
+    windowEndMonotonicTs?: number;
+  }): Record<string, unknown> {
+    const result = buildResultV1(makeInput());
+    return { ...result, run: { ...result.run, ...runWindow } };
+  }
+
+  it("should accept a window end inside the run", () => {
+    // Given
+    const ordered = withWindow({
+      startMonotonicTs: 1000,
+      endMonotonicTs: 11_000,
+      windowEndMonotonicTs: 9000,
+    });
+
+    // When
+    const errors = validateResultV1(ordered);
+
+    // Then
+    expect(errors).toEqual([]);
+  });
+
+  it("should reject a run ending before it starts in both modes", () => {
+    // Given
+    const reversed = withWindow({ startMonotonicTs: 11_000, endMonotonicTs: 1000 });
+
+    // When
+    const lenientErrors = validateResultV1(reversed, "lenient");
+
+    // Then
+    expect(lenientErrors).toEqual(["run.endMonotonicTs must not be before run.startMonotonicTs"]);
+  });
+
+  it("should reject an empty window in strict mode", () => {
+    // Given
+    const empty = withWindow({ startMonotonicTs: 1000, endMonotonicTs: 1000 });
+
+    // When
+    const errors = validateResultV1(empty);
+
+    // Then
+    expect(errors).toEqual(["run.endMonotonicTs must be after run.startMonotonicTs"]);
+  });
+
+  it("should accept an empty window in lenient mode (partial result before the page was ready)", () => {
+    // Given
+    const partial = withWindow({ startMonotonicTs: 1000, endMonotonicTs: 1000 });
+
+    // When
+    const errors = validateResultV1(partial, "lenient");
+
+    // Then
+    expect(errors).toEqual([]);
+  });
+
+  it.each([500, 12_000])("should reject the window end %p outside [1000, 11000]", (windowEnd) => {
+    // Given
+    const outside = withWindow({
+      startMonotonicTs: 1000,
+      endMonotonicTs: 11_000,
+      windowEndMonotonicTs: windowEnd,
+    });
+
+    // When
+    const errors = validateResultV1(outside, "lenient");
+
+    // Then
+    expect(errors).toEqual([
+      "run.windowEndMonotonicTs must lie within [run.startMonotonicTs, run.endMonotonicTs]",
+    ]);
+  });
+});

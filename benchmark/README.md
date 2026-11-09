@@ -464,6 +464,11 @@ and stores what it saw as `runnerEvents` in the v1 result:
   (`run.environment.fpsCeiling`, `glRenderer`, `lateFrameThresholdMs`) and `summary.kpis`. `validateResultV1(obj, "strict")`
   (what the runner and the scenarios spec use) returns a list of problems; the spec asserts it is
   empty.
+- The validator also checks the window order in both modes: `startMonotonicTs ≤
+  windowEndMonotonicTs ≤ endMonotonicTs`. Strict mode also needs `endMonotonicTs >
+  startMonotonicTs`; lenient mode accepts `start == end`, which is what a partial result of a
+  run that failed before the page was ready has. `summary.process.sampleCount` must be a
+  non-negative integer.
 - **Older artifacts** load in `"lenient"` mode (viewer, CI summary): a missing `run.scenario` is
   shown as "scenario not recorded" (observed telemetry only), missing `logicalCpus` and
   calibration as "not recorded", and missing `summary.kpis` are recomputed from the other summaries (`withRunKpis`) and
