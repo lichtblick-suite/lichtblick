@@ -41,7 +41,11 @@ export type LichtblickTelemetryWindow = {
 /** Returned by `installBenchmarkTelemetry` when telemetry is enabled. */
 export interface BenchmarkTelemetryHandle {
   // Function-typed properties (not methods): safe to pass around unbound, e.g. as a React prop.
-  /** Emits the `app.ready` instant event (scope "app"). Only the first call has an effect. */
+  /**
+   * Emits the `app.ready` instant event (scope "app"). Only the first call has an effect. It marks
+   * the benchmark root's first commit (the earliest common origin of synthetic runs), not a usable
+   * app: `layout.applied`, `panel.firstRender` and `datasource.firstMessage` come later.
+   */
   readonly markAppReady: () => void;
   /** Stops all renderer collectors and disposes the sink (records remain drainable). Idempotent. */
   readonly dispose: () => void;

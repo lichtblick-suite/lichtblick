@@ -35,6 +35,8 @@ import { getScenarioFromUrl } from "./scenarios/registry";
 import { MemoryAppConfiguration } from "./services";
 
 export function Root({ onAppReady }: Readonly<RootProps>): React.JSX.Element {
+  // `app.ready` = first commit of the root, before layout, data source and panels are ready. Kept
+  // here on purpose: it is the phases origin of synthetic runs (see benchmark/README.md).
   useEffect(() => {
     onAppReady?.();
   }, [onAppReady]);

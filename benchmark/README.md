@@ -179,6 +179,12 @@ Caveats:
   host/process metrics for totals.
 - Process working set (RSS) **double-counts shared pages** across processes. Treat the "total" as
   an upper bound that is good for comparing runs, not as exact memory usage.
+- **`app.ready` is not "app usable".** It fires once on the first commit of the benchmark root
+  (`benchmark/src/Root.tsx`): providers and `StudioApp` are mounted, but the layout is not applied,
+  no data source is open and no panel has rendered yet. It is the earliest point all scenarios
+  share, which is why synthetic runs measure their phases from it. For "usable", use
+  `layout.applied` (`phases.layoutAppliedMs`), `panel.firstRender` / `panel.mount`
+  (`phases.panelsReadyMs`) or `datasource.firstMessage` (`phases.firstMessageMs`).
 - `run.environment.hostCpuSource` says where process CPU came from: `cdp` (web, CPU time between
   polls), `app-metrics` (Electron, CPU since the previous poll) or `ps` (web, CDP failed). With
   `ps` the run has **no CPU**: `pcpu` is ps' own lifetime (Linux) or decaying (macOS) average, not
@@ -445,6 +451,9 @@ and stores what it saw as `runnerEvents` in the v1 result:
   only unique within a worker.
 - `phases` and the panel times are measured in ms from `datasource.open` start, or from
   `app.ready` when the run has no `datasource.open` (synthetic players). `phases.origin` says which.
+  `app.ready` is the root's first commit, not a usable app (see the caveats under "What is
+  collected"), so a synthetic run's `layoutAppliedMs` and `panelsReadyMs` include the app's own
+  startup after mount.
 - `panelsReadyMs` is the latest `panel.firstRender` among the panels that emitted one, else the
   latest `panel.mount`. Only `PanelExtensionAdapter` panels emit `panel.firstRender`, so check
   `panelsReadyCoverage`.
