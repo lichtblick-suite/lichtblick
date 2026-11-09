@@ -80,7 +80,7 @@ export function blockCpu(
   end: readonly CumulativeCpuReading[],
   wallMs: number,
 ): BlockCpu {
-  if (!(wallMs > 0)) {
+  if (Number.isNaN(wallMs) || wallMs <= 0) {
     throw new Error(`Toggle block wall time must be positive (got ${wallMs} ms)`);
   }
   const startByPid = new Map(start.map((reading) => [reading.pid, reading]));

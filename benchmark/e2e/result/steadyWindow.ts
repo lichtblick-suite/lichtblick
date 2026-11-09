@@ -32,7 +32,7 @@ export function mainThreadRates(
     return undefined;
   }
   const seconds = (end.nowMs - start.nowMs) / MS_PER_SECOND;
-  if (!(seconds > 0)) {
+  if (Number.isNaN(seconds) || seconds <= 0) {
     return undefined;
   }
   return {

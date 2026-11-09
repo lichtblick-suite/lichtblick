@@ -50,6 +50,8 @@ describe("mainThreadRates", () => {
     // When / Then
     expect(mainThreadRates(undefined, reading)).toBeUndefined();
     expect(mainThreadRates(reading, reading)).toBeUndefined();
+    expect(mainThreadRates(reading, { ...reading, nowMs: 500 })).toBeUndefined();
+    expect(mainThreadRates(reading, { ...reading, nowMs: Number.NaN })).toBeUndefined();
   });
 });
 
