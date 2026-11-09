@@ -9,13 +9,15 @@ import { ReactNode } from "react";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
+import { PANEL_TELEMETRY_METRICS } from "./constants";
 import { createMessageRangeIterator } from "./messageRangeIterator";
-import { PANEL_TELEMETRY_METRICS } from "./panelTelemetry";
+import { CreateMessageRangeIteratorParams } from "./types";
 import { useSubscribeMessageRange } from "./useSubscribeMessageRange";
 
 jest.mock("@lichtblick/suite-base/components/MessagePipeline", () => ({
@@ -50,8 +52,16 @@ function buildMessage(sizeInBytes: number): MessageEvent {
   };
 }
 
-/** Source iterable that records whether it was closed (finally block ran). */
-function createSourceIterable(batches: MessageEvent[][]): {
+type OnBatch = CreateMessageRangeIteratorParams["onBatch"];
+
+/**
+ * Stand-in for the iterable built by createMessageRangeIterator: calls `onBatch` right before
+ * each yield (like the real iterator) and records whether it was closed (finally block ran).
+ */
+function createSourceIterable(
+  batches: MessageEvent[][],
+  onBatch?: OnBatch,
+): {
   iterable: RangeIterable;
   wasClosed: () => boolean;
 } {
@@ -61,6 +71,7 @@ function createSourceIterable(batches: MessageEvent[][]): {
       async *[Symbol.asyncIterator]() {
         try {
           for (const batch of batches) {
+            onBatch?.(batch);
             yield batch;
           }
         } finally {
@@ -80,14 +91,37 @@ function PanelWrapper({ children }: { children: ReactNode }): React.JSX.Element 
   );
 }
 
-function setupPipeline(source: RangeIterable, cancel: () => void = jest.fn()): void {
-  mockCreateMessageRangeIterator.mockReturnValue({ iterable: source, cancel });
+/** Makes createMessageRangeIterator return an iterable over `batches` wired to the given onBatch. */
+function setupPipeline(
+  batches: MessageEvent[][],
+  cancel: () => void = jest.fn(),
+): { getSource: () => ReturnType<typeof createSourceIterable> } {
+  let source: ReturnType<typeof createSourceIterable> | undefined;
+  mockCreateMessageRangeIterator.mockImplementation((params: CreateMessageRangeIteratorParams) => {
+    source = createSourceIterable(batches, params.onBatch);
+    return { iterable: source.iterable, cancel };
+  });
   mockUseMessagePipelineGetter.mockReturnValue(
     jest.fn().mockReturnValue({
       sortedTopics: [],
       getBatchIterator: jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() }),
     }),
   );
+  return {
+    getSource: () => {
+      if (source == undefined) {
+        throw new Error("createMessageRangeIterator was not called");
+      }
+      return source;
+    },
+  };
+}
+
+function lastOnBatch(): OnBatch {
+  const params = mockCreateMessageRangeIterator.mock.calls.at(-1)?.[0] as
+    | CreateMessageRangeIteratorParams
+    | undefined;
+  return params?.onBatch;
 }
 
 describe("useSubscribeMessageRange telemetry", () => {
@@ -105,8 +139,7 @@ describe("useSubscribeMessageRange telemetry", () => {
     const telemetry = TelemetryBuilder.mockTelemetry();
     setTelemetrySink(telemetry);
     const batches = [[buildMessage(10), buildMessage(5)], [], [buildMessage(0)]];
-    const source = createSourceIterable(batches);
-    setupPipeline(source.iterable);
+    const pipeline = setupPipeline(batches);
     const received: Immutable<MessageEvent[]>[] = [];
     let handedIterable: RangeIterable | undefined;
     const onNewRangeIterator = jest.fn(async (iterable: RangeIterable) => {
@@ -123,8 +156,9 @@ describe("useSubscribeMessageRange telemetry", () => {
       await onNewRangeIterator.mock.results[0]!.value;
     });
 
-    // THEN - batches are forwarded unchanged through a wrapper
-    expect(handedIterable).not.toBe(source.iterable);
+    // THEN - the iterator's own iterable is handed over (no wrapper) and batches are unchanged
+    expect(lastOnBatch()).toEqual(expect.any(Function));
+    expect(handedIterable).toBe(pipeline.getSource().iterable);
     expect(received).toHaveLength(3);
     for (let i = 0; i < batches.length; i++) {
       expect(received[i]).toBe(batches[i]);
@@ -141,12 +175,11 @@ describe("useSubscribeMessageRange telemetry", () => {
     expect(telemetry.event.mock.calls).toHaveLength(0);
   });
 
-  it("propagates early termination by the consumer to the source iterator", async () => {
+  it("counts only the batches the consumer pulled when it stops early", async () => {
     // GIVEN - an enabled sink and a consumer that stops after the first batch
     const telemetry = TelemetryBuilder.mockTelemetry();
     setTelemetrySink(telemetry);
-    const source = createSourceIterable([[buildMessage(1)], [buildMessage(2)]]);
-    setupPipeline(source.iterable);
+    const pipeline = setupPipeline([[buildMessage(1)], [buildMessage(2)]]);
     const received: Immutable<MessageEvent[]>[] = [];
     const onNewRangeIterator = jest.fn(async (iterable: RangeIterable) => {
       for await (const batch of iterable) {
@@ -164,20 +197,19 @@ describe("useSubscribeMessageRange telemetry", () => {
 
     // THEN - the source was closed and only the first batch was counted
     expect(received).toHaveLength(1);
-    expect(source.wasClosed()).toBe(true);
+    expect(pipeline.getSource().wasClosed()).toBe(true);
     expect(telemetry.counter.mock.calls).toEqual([
       [PANEL_TELEMETRY_METRICS.rangeMessagesDelivered, 1, "count", "panel", EXPECTED_LABELS],
       [PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes, 1, "bytes", "panel", EXPECTED_LABELS],
     ]);
   });
 
-  it("passes the original iterable and cancel through by identity when telemetry is disabled", () => {
+  it("installs no batch callback and passes iterable and cancel through when telemetry is disabled", () => {
     // GIVEN - a disabled sink inside a panel context
     const telemetry = TelemetryBuilder.mockTelemetry({ enabled: false });
     setTelemetrySink(telemetry);
-    const source = createSourceIterable([[buildMessage(10)]]);
     const mockCancel = jest.fn();
-    setupPipeline(source.iterable, mockCancel);
+    const pipeline = setupPipeline([[buildMessage(10)]], mockCancel);
     const onNewRangeIterator = jest.fn().mockResolvedValue(undefined);
     const { result } = renderHook(() => useSubscribeMessageRange(), { wrapper: PanelWrapper });
     let cancel!: () => void;
@@ -188,8 +220,33 @@ describe("useSubscribeMessageRange telemetry", () => {
     });
 
     // THEN
-    expect(onNewRangeIterator).toHaveBeenCalledWith(source.iterable);
+    expect(lastOnBatch()).toBeUndefined();
+    expect(onNewRangeIterator).toHaveBeenCalledWith(pipeline.getSource().iterable);
     expect(cancel).toBe(mockCancel);
+    expect(telemetry.counter.mock.calls).toHaveLength(0);
+  });
+
+  it("should install no batch callback for a panel rendered outside a layout", () => {
+    // GIVEN - an enabled sink and a panel context whose id is the fallback (no layout child id)
+    const telemetry = TelemetryBuilder.mockTelemetry();
+    setTelemetrySink(telemetry);
+    setupPipeline([[buildMessage(10)]]);
+    const onNewRangeIterator = jest.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() => useSubscribeMessageRange(), {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <MockPanelContextProvider id={FALLBACK_PANEL_ID} type={PANEL_TYPE} title="Visible title">
+          {children}
+        </MockPanelContextProvider>
+      ),
+    });
+
+    // WHEN
+    act(() => {
+      result.current({ topic: BasicBuilder.string(), onNewRangeIterator });
+    });
+
+    // THEN
+    expect(lastOnBatch()).toBeUndefined();
     expect(telemetry.counter.mock.calls).toHaveLength(0);
   });
 
@@ -197,8 +254,7 @@ describe("useSubscribeMessageRange telemetry", () => {
     // GIVEN - an enabled sink but no PanelContext provider
     const telemetry = TelemetryBuilder.mockTelemetry();
     setTelemetrySink(telemetry);
-    const source = createSourceIterable([[buildMessage(10)]]);
-    setupPipeline(source.iterable);
+    const pipeline = setupPipeline([[buildMessage(10)]]);
     const received: Immutable<MessageEvent[]>[] = [];
     const onNewRangeIterator = jest.fn(async (iterable: RangeIterable) => {
       for await (const batch of iterable) {
@@ -213,8 +269,9 @@ describe("useSubscribeMessageRange telemetry", () => {
       await onNewRangeIterator.mock.results[0]!.value;
     });
 
-    // THEN - the original iterable is passed through and nothing is recorded
-    expect(onNewRangeIterator).toHaveBeenCalledWith(source.iterable);
+    // THEN - no batch callback is installed and nothing is recorded
+    expect(lastOnBatch()).toBeUndefined();
+    expect(onNewRangeIterator).toHaveBeenCalledWith(pipeline.getSource().iterable);
     expect(received).toHaveLength(1);
     expect(telemetry.counter.mock.calls).toHaveLength(0);
   });

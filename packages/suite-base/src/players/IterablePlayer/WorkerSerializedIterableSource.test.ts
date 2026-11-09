@@ -10,7 +10,7 @@ import {
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
 
 import { WorkerSerializedIterableSource } from "./WorkerSerializedIterableSource";
-import { TELEMETRY_FINAL_DRAIN_TIMEOUT_MS } from "./constants";
+import { SUPERSEDED_INITIALIZE_ERROR_MESSAGE, TELEMETRY_FINAL_DRAIN_TIMEOUT_MS } from "./constants";
 
 jest.mock("@lichtblick/den/worker", () => ({
   ComlinkWrap: jest.fn(),
@@ -69,6 +69,35 @@ describe("WorkerSerializedIterableSource", () => {
 
     // ...but the worker is still disposed.
     expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it("should reject a superseded initialize() and keep the newer worker", async () => {
+    // GIVEN: a first initialize() whose worker creation is left pending
+    const staleRemote = makeMockRemote();
+    const staleDispose = jest.fn();
+    let resolveStaleWorker: (value: typeof staleRemote) => void = () => {};
+    mockComlinkWrap.mockReturnValueOnce({
+      remote: jest.fn().mockReturnValue(
+        new Promise<typeof staleRemote>((resolve) => {
+          resolveStaleWorker = resolve;
+        }),
+      ) as any,
+      dispose: staleDispose,
+    });
+    const freshRemote = makeMockRemote();
+    mockWorker(freshRemote);
+    const source = makeSource();
+    const staleInit = source.initialize();
+
+    // WHEN: a newer initialize() completes before the first worker is created
+    await expect(source.initialize()).resolves.toEqual({ topics: [] });
+    resolveStaleWorker(staleRemote);
+
+    // THEN: the first call rejects as superseded without calling into its (disposed) worker
+    await expect(staleInit).rejects.toThrow(SUPERSEDED_INITIALIZE_ERROR_MESSAGE);
+    expect(staleDispose).toHaveBeenCalledTimes(1);
+    expect(staleRemote.initialize).not.toHaveBeenCalled();
+    expect(freshRemote.initialize).toHaveBeenCalledTimes(1);
   });
 
   it("does not let a concurrent initialize() worker get disposed or cleared by an in-flight terminate()", async () => {
@@ -432,7 +461,7 @@ describe("WorkerSerializedIterableSource", () => {
       expect(jest.getTimerCount()).toBe(0);
     });
 
-    it("should not start the bridge when terminate() runs while the worker is being created", async () => {
+    it("should reject as superseded and not start the bridge when terminate() runs while the worker is being created", async () => {
       // Given: a worker whose initializeWorker() call is left pending.
       setTelemetrySink(mainSink);
       const remote = makeMockRemote();
@@ -452,13 +481,13 @@ describe("WorkerSerializedIterableSource", () => {
       // When: terminate() completes before initializeWorker() resolves.
       await source.terminate();
       resolveInitializeWorker(remote);
-      await initializing;
-      await jest.advanceTimersByTimeAsync(5000);
 
-      // Then: the stale worker is not bridged nor published as the active remote; its initialize()
-      // still runs once so the pending initialize() call settles.
+      // Then: the pending initialize() rejects as superseded without calling into the stale
+      // worker, which is neither bridged nor published as the active remote.
+      await expect(initializing).rejects.toThrow(SUPERSEDED_INITIALIZE_ERROR_MESSAGE);
+      await jest.advanceTimersByTimeAsync(5000);
       expect(dispose).toHaveBeenCalledTimes(1);
-      expect(remote.initialize).toHaveBeenCalledTimes(1);
+      expect(remote.initialize).not.toHaveBeenCalled();
       expect(remote.enableTelemetry).not.toHaveBeenCalled();
       expect(remote.drainTelemetry).not.toHaveBeenCalled();
       expect(jest.getTimerCount()).toBe(0);

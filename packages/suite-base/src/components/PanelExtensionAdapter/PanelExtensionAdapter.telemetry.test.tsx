@@ -14,6 +14,7 @@ import {
   Time,
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
@@ -22,7 +23,7 @@ import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders
 import { TelemetryMock } from "@lichtblick/suite-base/util/telemetry/builders/types";
 
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
-import { PANEL_TELEMETRY_METRICS } from "./panelTelemetry";
+import { PANEL_TELEMETRY_METRICS } from "./constants";
 
 const LAYOUT_PANEL_ID = "Plot!3x9a";
 const PANEL_TYPE = "Plot";
@@ -57,15 +58,23 @@ type WrapperProps = {
    * panel calls done(); a non-blocking one emulates the real pipeline's pauseFrame timeout.
    */
   pauseFrame?: PauseFrame;
+  /** Layout panel id put in the PanelContext (defaults to LAYOUT_PANEL_ID). */
+  panelId?: string;
 };
 
 // Never holds back the pipeline, like the real pauseFrame once its timeout has elapsed.
 const nonBlockingPauseFrame: PauseFrame = () => () => {};
 
-function Wrapper({ currentTime, frame, initPanel, pauseFrame }: WrapperProps): React.JSX.Element {
+function Wrapper({
+  currentTime,
+  frame,
+  initPanel,
+  pauseFrame,
+  panelId = LAYOUT_PANEL_ID,
+}: WrapperProps): React.JSX.Element {
   return (
     <ThemeProvider isDark>
-      <MockPanelContextProvider id={LAYOUT_PANEL_ID} type={PANEL_TYPE} title="Visible title">
+      <MockPanelContextProvider id={panelId} type={PANEL_TYPE} title="Visible title">
         <PanelSetup
           fixture={{ activeData: { currentTime }, frame, topics: TOPICS }}
           pauseFrame={pauseFrame}
@@ -104,7 +113,7 @@ describe("PanelExtensionAdapter telemetry", () => {
     mockRAF.mockRestore();
   });
 
-  it("emits delivered messages/bytes, render count/duration and a single firstRender with the layout panel id", async () => {
+  it("emits rendered messages/bytes, render count/duration and a single firstRender with the layout panel id", async () => {
     // GIVEN - an enabled telemetry sink and a panel subscribed to /x that always calls done()
     const telemetry = TelemetryBuilder.mockTelemetry();
     setTelemetrySink(telemetry);
@@ -134,29 +143,32 @@ describe("PanelExtensionAdapter telemetry", () => {
     );
     await flush();
 
-    // THEN - message counters are aggregated per frame and labelled with the layout id
-    const delivered = counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesDelivered);
-    expect(delivered.length).toBeGreaterThan(0);
-    for (const call of delivered) {
+    // THEN - rendered message counters are aggregated per frame and labelled with the layout id
+    const rendered = counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRendered);
+    expect(rendered.length).toBeGreaterThan(0);
+    for (const call of rendered) {
       expect(call).toEqual([
-        PANEL_TELEMETRY_METRICS.messagesDelivered,
+        PANEL_TELEMETRY_METRICS.messagesRendered,
         2,
         "count",
         "panel",
         EXPECTED_LABELS,
       ]);
     }
-    const deliveredBytes = counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesDeliveredBytes);
-    expect(deliveredBytes).toHaveLength(delivered.length);
-    for (const call of deliveredBytes) {
+    const renderedBytes = counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRenderedBytes);
+    expect(renderedBytes).toHaveLength(rendered.length);
+    for (const call of renderedBytes) {
       expect(call).toEqual([
-        PANEL_TELEMETRY_METRICS.messagesDeliveredBytes,
+        PANEL_TELEMETRY_METRICS.messagesRenderedBytes,
         42,
         "bytes",
         "panel",
         EXPECTED_LABELS,
       ]);
     }
+
+    // THEN - delivered counters come from the MessagePipeline (mocked here), not from the adapter
+    expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesDelivered)).toHaveLength(0);
 
     // THEN - one render count + duration per completed render
     expect(renderCalls).toBeGreaterThan(1);
@@ -261,7 +273,7 @@ describe("PanelExtensionAdapter telemetry", () => {
     );
     await flush();
 
-    // THEN - exactly one more skipped frame is recorded, and its messages are not counted as delivered
+    // THEN - exactly one more skipped frame is recorded, and its messages are not counted as rendered
     expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.renderSkipped)).toHaveLength(
       skippedBefore + 1,
     );
@@ -273,15 +285,83 @@ describe("PanelExtensionAdapter telemetry", () => {
       EXPECTED_LABELS,
     ]);
     expect(
-      counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesDeliveredBytes),
+      counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRenderedBytes),
     ).not.toContainEqual([
-      PANEL_TELEMETRY_METRICS.messagesDeliveredBytes,
+      PANEL_TELEMETRY_METRICS.messagesRenderedBytes,
       20,
       "bytes",
       "panel",
       EXPECTED_LABELS,
     ]);
     expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.renderCount)).toHaveLength(0);
+  });
+
+  it("should count a skipped frame as rendered when it is handed to onRender later", async () => {
+    // GIVEN - an enabled sink, a non-blocking pipeline and a panel whose first render is pending
+    const telemetry = TelemetryBuilder.mockTelemetry();
+    setTelemetrySink(telemetry);
+    let panelContext: PanelExtensionContext | undefined;
+    let pendingDone: (() => void) | undefined;
+    const onRender = jest.fn((_renderState: Immutable<RenderState>, done: () => void) => {
+      pendingDone = done;
+    });
+    const initPanel = (context: PanelExtensionContext) => {
+      panelContext = context;
+      context.watch("currentFrame");
+      context.watch("variables");
+      context.subscribe([{ topic: "/x" }]);
+      context.onRender = onRender;
+    };
+    const handle = render(
+      <Wrapper
+        currentTime={{ sec: 1, nsec: 0 }}
+        frame={{ "/x": [buildMessage(10)] }}
+        initPanel={initPanel}
+        pauseFrame={nonBlockingPauseFrame}
+      />,
+    );
+    await flush();
+    handle.rerender(
+      <Wrapper
+        currentTime={{ sec: 2, nsec: 0 }}
+        frame={{ "/x": [buildMessage(20)] }}
+        initPanel={initPanel}
+        pauseFrame={nonBlockingPauseFrame}
+      />,
+    );
+    await flush();
+    expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.renderSkipped).length).toBeGreaterThan(
+      0,
+    );
+    expect(
+      counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRenderedBytes),
+    ).not.toContainEqual([
+      PANEL_TELEMETRY_METRICS.messagesRenderedBytes,
+      20,
+      "bytes",
+      "panel",
+      EXPECTED_LABELS,
+    ]);
+    const rendersBefore = onRender.mock.calls.length;
+
+    // WHEN - the pending render completes and another input re-runs the render with that frame
+    act(() => {
+      pendingDone?.();
+    });
+    act(() => {
+      panelContext!.setVariable("foo", 1);
+    });
+    await flush();
+
+    // THEN - the skipped frame is counted as rendered once it reached onRender
+    expect(onRender.mock.calls.length).toBeGreaterThan(rendersBefore);
+    expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRenderedBytes)).toContainEqual([
+      PANEL_TELEMETRY_METRICS.messagesRenderedBytes,
+      20,
+      "bytes",
+      "panel",
+      EXPECTED_LABELS,
+    ]);
   });
 
   it("should not count a tick without messages as skipped while a render is pending", async () => {
@@ -385,7 +465,7 @@ describe("PanelExtensionAdapter telemetry", () => {
     };
     render(<Wrapper currentTime={{ sec: 1, nsec: 0 }} frame={frame} initPanel={initPanel} />);
     await flush();
-    const deliveredBefore = counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesDelivered);
+    const renderedBefore = counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRendered);
     const rendersBefore = onRender.mock.calls.length;
 
     // WHEN - a variable change triggers another render without a new frame
@@ -394,10 +474,10 @@ describe("PanelExtensionAdapter telemetry", () => {
     });
     await flush();
 
-    // THEN - the panel rendered again but the delivered messages were counted only once
-    expect(deliveredBefore).toHaveLength(1);
+    // THEN - the panel rendered again but the rendered messages were counted only once
+    expect(renderedBefore).toHaveLength(1);
     expect(onRender.mock.calls.length).toBeGreaterThan(rendersBefore);
-    expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesDelivered)).toHaveLength(1);
+    expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRendered)).toHaveLength(1);
   });
 
   it("should keep skipping frames but record nothing when telemetry is disabled", async () => {
@@ -423,6 +503,49 @@ describe("PanelExtensionAdapter telemetry", () => {
 
     // THEN - the frame is skipped exactly as with telemetry enabled, and nothing is recorded
     expect(onRender).toHaveBeenCalledTimes(1);
+    expect(telemetry.counter.mock.calls).toHaveLength(0);
+    expect(telemetry.gauge.mock.calls).toHaveLength(0);
+    expect(telemetry.observe.mock.calls).toHaveLength(0);
+    expect(telemetry.event.mock.calls).toHaveLength(0);
+  });
+
+  it("should record no panel telemetry for a panel rendered outside a layout", async () => {
+    // GIVEN - an enabled sink and a panel whose context id is the fallback (no layout child id)
+    const telemetry = TelemetryBuilder.mockTelemetry();
+    setTelemetrySink(telemetry);
+    const frame = { "/x": [buildMessage(10)] };
+    const onRender = jest.fn((_renderState: Immutable<RenderState>, done: () => void) => {
+      done();
+    });
+    const initPanel = (context: PanelExtensionContext) => {
+      context.watch("currentFrame");
+      context.watch("currentTime");
+      context.subscribe([{ topic: "/x" }]);
+      context.onRender = onRender;
+    };
+
+    // WHEN - the panel renders several frames
+    const handle = render(
+      <Wrapper
+        currentTime={{ sec: 1, nsec: 0 }}
+        frame={frame}
+        initPanel={initPanel}
+        panelId={FALLBACK_PANEL_ID}
+      />,
+    );
+    await flush();
+    handle.rerender(
+      <Wrapper
+        currentTime={{ sec: 2, nsec: 0 }}
+        frame={frame}
+        initPanel={initPanel}
+        panelId={FALLBACK_PANEL_ID}
+      />,
+    );
+    await flush();
+
+    // THEN - the panel rendered but no panel metric or event was recorded, like panel.mount
+    expect(onRender).toHaveBeenCalled();
     expect(telemetry.counter.mock.calls).toHaveLength(0);
     expect(telemetry.gauge.mock.calls).toHaveLength(0);
     expect(telemetry.observe.mock.calls).toHaveLength(0);

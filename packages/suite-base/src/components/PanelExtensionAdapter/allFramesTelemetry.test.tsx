@@ -14,17 +14,17 @@ import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
 
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
+import { PANEL_TELEMETRY_METRICS } from "./constants";
 import {
   buildPanelTelemetryLabels,
   createAllFramesDeliveryTracker,
-  PANEL_TELEMETRY_METRICS,
   recordAllFramesDelivered,
   resetAllFramesDeliveryTracker,
 } from "./panelTelemetry";
 
 const LAYOUT_PANEL_ID = "3D!1a2b";
 const PANEL_TYPE = "3D";
-const LABELS = buildPanelTelemetryLabels(LAYOUT_PANEL_ID, PANEL_TYPE);
+const LABELS = buildPanelTelemetryLabels(LAYOUT_PANEL_ID, PANEL_TYPE)!;
 const DELIVERED = PANEL_TELEMETRY_METRICS.rangeMessagesDelivered;
 const DELIVERED_BYTES = PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes;
 

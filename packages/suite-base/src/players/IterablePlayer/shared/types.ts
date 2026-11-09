@@ -72,7 +72,8 @@ export type HydratedSourcePoolStats = {
   rehydrations: number;
   // admit() calls that inserted a new entry (duplicates / post-terminate admits are not counted).
   admits: number;
-  // hydrator.close() calls issued by the pool (eviction, terminate, duplicate/late admit).
+  // Completed hydrator.close() calls (eviction, terminate, duplicate/late admit). A close that
+  // rejects is logged and not counted.
   closes: number;
   // Entries evicted by the LRU budget.
   evictions: number;

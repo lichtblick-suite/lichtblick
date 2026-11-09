@@ -24,9 +24,11 @@ export type TelemetryPhase = "start" | "end" | "instant";
  * - `datasource.open`: start = open requested, end = initialized
  * - `datasource.firstMessage`: instant
  * - `frame.firstUseful`: instant
- * - `preload`: start / end
+ * - `preload`: start / end, at most one phase per player: an end with a `reason` label
+ *   (`cancelled` / `error`) is final and a later full subscription does not restart it
  * - `playback`: start / end
- * - `seek.requested`: instant
+ * - `seek.requested`: instant, emitted when a seek is requested; the seek may be deferred until
+ *   initialization completes or be a no-op (already at / already seeking to that time)
  * - `datasource.close`: start = close requested, end = cleanup complete
  * - `layout.applied`: instant, the current layout finished loading/applying
  * - `panel.mount`: instant, labels `{ panelId, panelType }`
@@ -99,8 +101,10 @@ export type TelemetryRejectReason =
  * `telemetry.seriesCount` (`TELEMETRY_SELF_METRICS`) are the sink's own self-metrics. Recording
  * them through `gauge()`, `counter()` or `observe()` is rejected and counted in
  * `telemetry.rejectedRecords{reason="reservedName"}`. Other names, including other `telemetry.*`
- * names (e.g. `telemetry.self.*`), may be used freely. Records forwarded with `ingest()` are
- * accepted as-is (they carry the producing realm's own self-metrics).
+ * names (e.g. `telemetry.self.*`), may be used freely. Records forwarded with `ingest()` keep
+ * their realm, sequence and timestamps and skip the reserved-name check (they carry the producing
+ * realm's own self-metrics), but pass the same label guard as direct calls and can be rejected
+ * (counted in `telemetry.rejectedRecords`).
  */
 export interface ITelemetry {
   /** Cheap check; call sites must test this before building labels/values. */
@@ -145,7 +149,11 @@ export interface ITelemetry {
     scope: TelemetryScope,
     labels?: TelemetryLabels,
   ): void;
-  /** accept a batch produced by another realm (e.g. a worker); records keep their realm/sequence/ts */
+  /**
+   * Accept a batch produced by another realm (e.g. a worker). Records keep their
+   * realm/sequence/timestamps and pass the label guard (rejections are counted in
+   * `telemetry.rejectedRecords`).
+   */
   ingest(batch: TelemetryBatch): void;
 }
 

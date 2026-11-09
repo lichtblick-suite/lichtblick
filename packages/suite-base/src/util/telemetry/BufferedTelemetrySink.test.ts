@@ -506,6 +506,26 @@ describe("BufferedTelemetrySink", () => {
       expect(onEvent).toHaveBeenCalledWith(expected);
     });
 
+    it("should keep the event and log only the first failure when onEvent throws", () => {
+      // Given
+      const onEvent = jest.fn(() => {
+        throw new Error("observer failed");
+      });
+      const { sink } = setup({ onEvent });
+
+      // When
+      sink.event("app.ready", "instant", "app");
+      sink.event("layout.applied", "instant", "app");
+
+      // Then
+      expect(eventsOf(sink.drain().records).map((event) => event.name)).toEqual([
+        "app.ready",
+        "layout.applied",
+      ]);
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      (console.warn as jest.Mock).mockClear();
+    });
+
     it("omits labels when none are given", () => {
       // Given
       const { sink } = setup();
@@ -646,6 +666,24 @@ describe("BufferedTelemetrySink", () => {
       // Then
       expect(onEvent).toHaveBeenCalledTimes(1);
       expect(onEvent).toHaveBeenCalledWith(event);
+    });
+
+    it("should keep ingesting and forwarding later events when onEvent throws", () => {
+      // Given
+      const onEvent = jest.fn(() => {
+        throw new Error("observer failed");
+      });
+      const { sink } = setup({ onEvent });
+      const events = [TelemetryBuilder.event(), TelemetryBuilder.event()];
+
+      // When
+      sink.ingest(TelemetryBuilder.batch({ records: events }));
+
+      // Then
+      expect(onEvent).toHaveBeenCalledTimes(2);
+      expect(eventsOf(sink.drain().records)).toEqual(events);
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      (console.warn as jest.Mock).mockClear();
     });
 
     it("accumulates foreign drops into drain().dropped and the droppedRecords self counter", () => {

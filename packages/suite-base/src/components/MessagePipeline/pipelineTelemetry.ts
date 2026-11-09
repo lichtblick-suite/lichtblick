@@ -5,17 +5,17 @@ import { useContext, useEffect } from "react";
 
 import { MessageEvent } from "@lichtblick/suite";
 import PanelContext from "@lichtblick/suite-base/components/PanelContext";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import { getTelemetry, ITelemetry, TelemetryLabels } from "@lichtblick/suite-base/util/telemetry";
 
 import { PIPELINE_TELEMETRY_METRICS } from "./constants";
 import { MessagePipelineInternalState } from "./store";
-import { PANEL_TELEMETRY_METRICS } from "../PanelExtensionAdapter/panelTelemetry";
+import { PANEL_TELEMETRY_METRICS } from "../PanelExtensionAdapter/constants";
 
 /**
  * Panel labels (`panelId` = layout id, `panelType`) of pipeline subscribers that live inside a
- * built-in React panel. Only populated while telemetry is enabled (see
- * `usePanelSubscriberTelemetry`). Extension panels are counted by `PanelExtensionAdapter` and do
- * not register here.
+ * panel (built-in PanelAPI hooks and PanelExtensionAdapter). Only populated while telemetry is
+ * enabled (see `usePanelSubscriberTelemetry`).
  */
 const panelLabelsBySubscriberId = new Map<string, TelemetryLabels>();
 
@@ -29,8 +29,9 @@ export function unregisterSubscriberPanelLabels(subscriberId: string): void {
 
 /**
  * Attributes the messages the pipeline delivers to `subscriberId` to the enclosing panel, so
- * built-in panels get `panel.messages.delivered[Bytes]` counters. No-op outside a panel or when
- * telemetry is disabled (checked when the effect runs).
+ * every panel gets `panel.messages.delivered[Bytes]` counters. No-op outside a panel, for a panel
+ * rendered outside a layout (`FALLBACK_PANEL_ID`), or when telemetry is disabled. The enabled
+ * check runs when the effect runs, so the sink must be installed before the panel mounts.
  */
 export function usePanelSubscriberTelemetry(subscriberId: string): void {
   // Optional on purpose: usePanelContext() throws outside a panel.
@@ -39,7 +40,12 @@ export function usePanelSubscriberTelemetry(subscriberId: string): void {
   const panelType = panelContext?.type;
 
   useEffect(() => {
-    if (panelId == undefined || panelType == undefined || !getTelemetry().isEnabled()) {
+    if (
+      panelId == undefined ||
+      panelId === FALLBACK_PANEL_ID ||
+      panelType == undefined ||
+      !getTelemetry().isEnabled()
+    ) {
       return;
     }
     registerSubscriberPanelLabels(subscriberId, Object.freeze({ panelId, panelType }));
@@ -132,11 +138,9 @@ function recordMessageCounters(
     const panelLabels = panelLabelsBySubscriberId.get(subscriberId);
     if (panelLabels != undefined) {
       /*
-       * `panel.messages.delivered[Bytes]` for built-in panels (subscribers registered through
-       * `usePanelSubscriberTelemetry`): the messages bucketed to the panel's subscribers in this
-       * pipeline tick, emitted once per subscriber id (so the panel total is the sum across its
-       * subscriber ids), whether or not the panel rendered them. Extension-API panels emit the
-       * same metric from PanelExtensionAdapter, but only for frames they actually rendered.
+       * `panel.messages.delivered[Bytes]`: the messages bucketed to the panel's subscribers in
+       * this pipeline tick, emitted once per subscriber id (the panel total is the sum across its
+       * subscriber ids), whether or not the panel rendered them.
        */
       telemetry.counter(
         PANEL_TELEMETRY_METRICS.messagesDelivered,

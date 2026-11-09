@@ -264,7 +264,13 @@ export type PhasesSummaryV1 = {
   firstUsefulFrameMs?: number;
   /** `datasource.open` end - start (only with a `datasource.open` start). */
   openDurationMs?: number;
+  /**
+   * First `preload` end - start, only when that end completed (no `reason` label). A player has a
+   * single preload phase, so a cancelled or failed end has no duration (see `preloadEndReason`).
+   */
   preloadDurationMs?: number;
+  /** `reason` label of the first `preload` end (`cancelled` / `error`); absent when it completed. */
+  preloadEndReason?: string;
   /** First `layout.applied` (may be negative: the layout can apply before the source opens). */
   layoutAppliedMs?: number;
   /**
@@ -426,7 +432,9 @@ export function computeSequenceGaps(records: readonly TelemetryRecord[]): Record
 }
 
 /**
- * Drops per realm: the last `telemetry.droppedRecords{realm}` counter value per realm; drained drop
+ * Drops per realm: the max `telemetry.droppedRecords{realm}` value per realm. The counters are
+ * cumulative, and a worker realm can be reported both by the worker's own sink and by the
+ * renderer's `ingest()`, so the max per realm (not the sum) avoids double counting. Drained drop
  * counts not covered by those counters (e.g. drops after the last publish) are attributed to the
  * drained sink's realm.
  */
@@ -773,9 +781,12 @@ export function phasesOrigin(
 export function summarizePhases(events: readonly TelemetryEvent[]): PhasesSummaryV1 {
   const phases: PhasesSummaryV1 = {};
   const preloadStart = firstEventTs(events, "preload", "start");
-  const preloadEnd = firstEventTs(events, "preload", "end");
-  if (preloadStart != undefined && preloadEnd != undefined) {
-    phases.preloadDurationMs = preloadEnd - preloadStart;
+  const preloadEnd = events.find((event) => event.name === "preload" && event.phase === "end");
+  const preloadEndReason = preloadEnd?.labels?.reason;
+  if (preloadEndReason != undefined) {
+    phases.preloadEndReason = preloadEndReason;
+  } else if (preloadStart != undefined && preloadEnd != undefined) {
+    phases.preloadDurationMs = preloadEnd.monotonicTs - preloadStart;
   }
   const origin = phasesOrigin(events);
   const ready = summarizePanelsReady(events, origin?.ts);
@@ -1600,6 +1611,7 @@ function checkPhases(phases: Record<string, unknown>, errors: string[]): void {
       firstUsefulFrameMs: "number?",
       openDurationMs: "number?",
       preloadDurationMs: "number?",
+      preloadEndReason: "string?",
       layoutAppliedMs: "number?",
       panelsReadyMs: "number?",
     },
@@ -1653,6 +1665,8 @@ function checkPanels(panels: unknown, errors: string[]): void {
         messageBytes: "number",
         rangeMessages: "number",
         rangeBytes: "number",
+        renderedMessages: "number?",
+        renderedBytes: "number?",
         renders: "number?",
         renderMeanMs: "number?",
         renderMaxMs: "number?",
