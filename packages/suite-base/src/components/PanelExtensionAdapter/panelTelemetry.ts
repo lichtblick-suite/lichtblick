@@ -16,10 +16,11 @@ export function buildPanelTelemetryLabels(panelId: string, panelType: string): T
 }
 
 /**
- * Records the number and total size of the message events delivered to the panel in one frame.
- * Callers must have checked `telemetry.isEnabled()`. Zero values are not recorded.
+ * Records the number and total size of the message events in a frame handed to the panel's
+ * `onRender` (`panel.messages.rendered[Bytes]`). Callers must have checked `telemetry.isEnabled()`.
+ * Zero values are not recorded.
  */
-export function recordMessagesDelivered(
+export function recordMessagesRendered(
   telemetry: ITelemetry,
   messageEvents: Immutable<readonly MessageEvent[]> | undefined,
   labels: TelemetryLabels,
@@ -32,10 +33,10 @@ export function recordMessagesDelivered(
   for (let i = 0; i < count; i++) {
     bytes += messageEvents[i]!.sizeInBytes;
   }
-  telemetry.counter(PANEL_TELEMETRY_METRICS.messagesDelivered, count, "count", "panel", labels);
+  telemetry.counter(PANEL_TELEMETRY_METRICS.messagesRendered, count, "count", "panel", labels);
   if (bytes > 0) {
     telemetry.counter(
-      PANEL_TELEMETRY_METRICS.messagesDeliveredBytes,
+      PANEL_TELEMETRY_METRICS.messagesRenderedBytes,
       bytes,
       "bytes",
       "panel",

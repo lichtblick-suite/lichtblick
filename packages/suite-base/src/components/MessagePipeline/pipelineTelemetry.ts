@@ -13,9 +13,8 @@ import { PANEL_TELEMETRY_METRICS } from "../PanelExtensionAdapter/constants";
 
 /**
  * Panel labels (`panelId` = layout id, `panelType`) of pipeline subscribers that live inside a
- * built-in React panel. Only populated while telemetry is enabled (see
- * `usePanelSubscriberTelemetry`). Extension panels are counted by `PanelExtensionAdapter` and do
- * not register here.
+ * panel (built-in PanelAPI hooks and PanelExtensionAdapter). Only populated while telemetry is
+ * enabled (see `usePanelSubscriberTelemetry`).
  */
 const panelLabelsBySubscriberId = new Map<string, TelemetryLabels>();
 
@@ -29,7 +28,7 @@ export function unregisterSubscriberPanelLabels(subscriberId: string): void {
 
 /**
  * Attributes the messages the pipeline delivers to `subscriberId` to the enclosing panel, so
- * built-in panels get `panel.messages.delivered[Bytes]` counters. No-op outside a panel or when
+ * every panel gets `panel.messages.delivered[Bytes]` counters. No-op outside a panel or when
  * telemetry is disabled (checked when the effect runs).
  */
 export function usePanelSubscriberTelemetry(subscriberId: string): void {
@@ -132,11 +131,9 @@ function recordMessageCounters(
     const panelLabels = panelLabelsBySubscriberId.get(subscriberId);
     if (panelLabels != undefined) {
       /*
-       * `panel.messages.delivered[Bytes]` for built-in panels (subscribers registered through
-       * `usePanelSubscriberTelemetry`): the messages bucketed to the panel's subscribers in this
-       * pipeline tick, emitted once per subscriber id (so the panel total is the sum across its
-       * subscriber ids), whether or not the panel rendered them. Extension-API panels emit the
-       * same metric from PanelExtensionAdapter, but only for frames they actually rendered.
+       * `panel.messages.delivered[Bytes]`: the messages bucketed to the panel's subscribers in
+       * this pipeline tick, emitted once per subscriber id (the panel total is the sum across its
+       * subscriber ids), whether or not the panel rendered them.
        */
       telemetry.counter(
         PANEL_TELEMETRY_METRICS.messagesDelivered,

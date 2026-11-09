@@ -34,6 +34,7 @@ import {
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
 import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
+import { usePanelSubscriberTelemetry } from "@lichtblick/suite-base/components/MessagePipeline/pipelineTelemetry";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import {
   collateTopicSchemaConversions,
@@ -75,7 +76,7 @@ import {
   createAllFramesDeliveryTracker,
   recordAllFramesDelivered,
   recordFirstRender,
-  recordMessagesDelivered,
+  recordMessagesRendered,
   recordRenderDone,
   recordRenderSkipped,
   resetAllFramesDeliveryTracker,
@@ -194,10 +195,13 @@ function PanelExtensionAdapter(
   );
   // Set on the first `done()` of this adapter mount (drives the `panel.firstRender` event).
   const firstRenderDoneRef = useRef(false);
-  // Last messageEvents array (frame input) accounted for, either as delivered or as skipped. Effect
+  // Last messageEvents array (frame input) accounted for, either as rendered or as skipped. Effect
   // re-runs triggered by other inputs (hover, variables, theme, ...) keep the same array, so they
-  // neither count the same frame twice as delivered nor count as a skipped frame.
+  // do not count as a skipped frame.
   const lastAccountedFrameRef = useRef<readonly MessageEvent[] | undefined>(undefined);
+  // Last messageEvents array handed to onRender, so a re-run with the same frame is not counted
+  // twice as rendered. A skipped frame that is rendered later is still counted.
+  const lastRenderedFrameRef = useRef<readonly MessageEvent[] | undefined>(undefined);
   // Bumped on each panel (re-)initialisation. A `done()` from a render started under an older
   // generation is stale: its telemetry is ignored.
   const renderGenerationRef = useRef(0);
@@ -206,6 +210,9 @@ function PanelExtensionAdapter(
 
   // Internal subscriber id for the MessagePipeline (not the layout panel id).
   const [panelId] = useState(() => uuid());
+  // The pipeline attributes the messages bucketed for this subscriber to the panel
+  // (`panel.messages.delivered`), like for built-in panels.
+  usePanelSubscriberTelemetry(panelId);
   const isMounted = useSynchronousMountedState();
   const [error, setError] = useState<Error | undefined>();
   const [forceConversion, setForceConversion] = useState(new Set<string>());
@@ -371,11 +378,13 @@ function PanelExtensionAdapter(
     setSlowRender(false);
     const resumeFrame = pauseFrame(panelId);
 
-    // A frame already accounted for as skipped is not counted as delivered when rendered later.
-    if (telemetryEnabled && messageEvents !== lastAccountedFrameRef.current) {
+    if (telemetryEnabled) {
       lastAccountedFrameRef.current = messageEvents;
-      if (watchedFields.has("currentFrame")) {
-        recordMessagesDelivered(telemetry, messageEvents, telemetryLabels);
+      if (messageEvents !== lastRenderedFrameRef.current) {
+        lastRenderedFrameRef.current = messageEvents;
+        if (watchedFields.has("currentFrame")) {
+          recordMessagesRendered(telemetry, messageEvents, telemetryLabels);
+        }
       }
     }
     // Preloaded messages delivered via allFrames (e.g. 3D); only new entries are counted.
@@ -883,6 +892,7 @@ function PanelExtensionAdapter(
     renderingRef.current = false;
     // The fresh render state builder re-delivers the current frame, so count it again.
     lastAccountedFrameRef.current = undefined;
+    lastRenderedFrameRef.current = undefined;
     // Renders started before this point belong to the previous panel instance.
     renderGenerationRef.current++;
     resetAllFramesDeliveryTracker(allFramesDeliveryTracker);

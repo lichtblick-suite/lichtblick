@@ -8,7 +8,7 @@ import { PANEL_TELEMETRY_METRICS } from "./constants";
 import {
   buildPanelTelemetryLabels,
   recordFirstRender,
-  recordMessagesDelivered,
+  recordMessagesRendered,
   recordRangeMessagesDelivered,
   recordRenderDone,
   recordRenderSkipped,
@@ -40,12 +40,12 @@ describe("panelTelemetry", () => {
     const telemetry = TelemetryBuilder.mockTelemetry();
 
     // WHEN
-    recordMessagesDelivered(telemetry, [buildMessage(5), buildMessage(7)], LABELS);
+    recordMessagesRendered(telemetry, [buildMessage(5), buildMessage(7)], LABELS);
 
     // THEN
     expect(telemetry.counter.mock.calls).toEqual([
-      [PANEL_TELEMETRY_METRICS.messagesDelivered, 2, "count", "panel", LABELS],
-      [PANEL_TELEMETRY_METRICS.messagesDeliveredBytes, 12, "bytes", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.messagesRendered, 2, "count", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.messagesRenderedBytes, 12, "bytes", "panel", LABELS],
     ]);
   });
 
@@ -54,7 +54,7 @@ describe("panelTelemetry", () => {
     const telemetry = TelemetryBuilder.mockTelemetry();
 
     // WHEN
-    recordMessagesDelivered(telemetry, messageEvents, LABELS);
+    recordMessagesRendered(telemetry, messageEvents, LABELS);
 
     // THEN
     expect(telemetry.counter.mock.calls).toHaveLength(0);
@@ -65,11 +65,11 @@ describe("panelTelemetry", () => {
     const telemetry = TelemetryBuilder.mockTelemetry();
 
     // WHEN
-    recordMessagesDelivered(telemetry, [buildMessage(0)], LABELS);
+    recordMessagesRendered(telemetry, [buildMessage(0)], LABELS);
 
     // THEN
     expect(telemetry.counter.mock.calls).toEqual([
-      [PANEL_TELEMETRY_METRICS.messagesDelivered, 1, "count", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.messagesRendered, 1, "count", "panel", LABELS],
     ]);
   });
 
