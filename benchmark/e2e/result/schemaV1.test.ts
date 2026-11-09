@@ -1184,6 +1184,40 @@ describe("validateResultV1 overhead A/B fields", () => {
     // Then
     expect(errors).toEqual([expected]);
   });
+
+  function withSteadyWindowEnd(endMonotonicTs: number): Record<string, unknown> {
+    const result = buildResultV1(makeInput());
+    const steadyWindow = { ...OverheadRunBuilder.steady({}), endMonotonicTs };
+    return {
+      ...result,
+      run: { ...result.run, mode: "overhead" },
+      summary: { ...result.summary, steadyWindow },
+    };
+  }
+
+  it("should reject a steady window ending before it starts", () => {
+    // Given a steady window starting at 1000
+    const reversed = withSteadyWindowEnd(500);
+
+    // When
+    const errors = validateResultV1(reversed, "lenient");
+
+    // Then
+    expect(errors).toEqual([
+      "summary.steadyWindow.endMonotonicTs must not be before summary.steadyWindow.startMonotonicTs",
+    ]);
+  });
+
+  it("should accept a steady window without steady polls ending at its priming poll", () => {
+    // Given a steady window starting at 1000
+    const empty = withSteadyWindowEnd(1000);
+
+    // When
+    const errors = validateResultV1(empty);
+
+    // Then
+    expect(errors).toEqual([]);
+  });
 });
 
 describe("validateResultV1 run.mode and webBrowser", () => {

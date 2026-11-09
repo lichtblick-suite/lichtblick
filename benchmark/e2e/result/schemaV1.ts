@@ -1292,6 +1292,11 @@ function checkSteadyWindow(steadyWindow: unknown, errors: string[]): void {
     },
     errors,
   );
+  // `start == end` is valid: a window without steady polls ends at its priming poll.
+  const { startMonotonicTs: start, endMonotonicTs: end } = steadyWindow;
+  if (isFiniteNumber(start) && isFiniteNumber(end) && end < start) {
+    errors.push(`${where}.endMonotonicTs must not be before ${where}.startMonotonicTs`);
+  }
   checkNumberRecord(
     steadyWindow.meanWorkingSetBytesByType,
     `${where}.meanWorkingSetBytesByType`,

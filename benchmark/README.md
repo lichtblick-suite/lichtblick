@@ -503,7 +503,8 @@ and stores what it saw as `runnerEvents` in the v1 result:
   windowEndMonotonicTs ≤ endMonotonicTs`. Strict mode also needs `endMonotonicTs >
   startMonotonicTs`; lenient mode accepts `start == end`, which is what a partial result of a
   run that failed before the page was ready has. `summary.process.sampleCount` must be a
-  non-negative integer.
+  non-negative integer. An overhead `summary.steadyWindow` must not end before it starts
+  (`start == end` is a window without steady polls, ending at its priming poll).
 - **Older artifacts** load in `"lenient"` mode (viewer, CI summary): a missing `run.scenario` is
   shown as "scenario not recorded" (observed telemetry only), missing `logicalCpus` and
   calibration as "not recorded", and missing `summary.kpis` are recomputed from the other summaries (`withRunKpis`) and
