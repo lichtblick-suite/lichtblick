@@ -7,16 +7,12 @@ import { setTimeout as delay } from "node:timers/promises";
 
 import { writeResultV1 } from "./artifacts";
 import { calibrateRendering } from "./calibration";
-import { nodeMonotonicNow, syncPageClock, toPageClock } from "./clockSync";
 import {
-  CLOCK_SYNC_ROUNDS,
   CLOSE_EVENT_POLL_INTERVAL_MS,
   CLOSE_EVENT_TIMEOUT_MS,
   DEFAULT_SAMPLE_DURATION_MS,
   AUTO_PAUSE_TIMEOUT_MS,
-  OVERHEAD_DRAIN_INTERVAL_MS,
   OVERHEAD_DURATION_MARGIN_MS,
-  OVERHEAD_PROFILE_SAMPLING_INTERVAL_US,
   PAUSE_CLICK_TIMEOUT_MS,
   PUBLISH_SETTLE_MS,
   RUNNER_EVENT_GRACE_MS,
@@ -25,22 +21,22 @@ import {
   SCREENSHOTS_DIR,
   ERROR_BOUNDARY_TITLES,
 } from "./constants";
-import { captureMainThreadProfile } from "./cpuProfile";
 import { formatRunnerEventsFailure, runnerNow, startCrashDetection } from "./crashDetection";
-import { collectElectronMainProcessMetrics } from "./electronHostCollector";
 import { collectErrorBoundaryHits, formatErrorBoundaryFailure } from "./errorBoundaries";
 import { logicalCpuCount } from "./hostCpus";
-import { installMainThreadProbe, readMainThreadProbe } from "./mainThreadProbe";
-import { readOverheadPageState, withOverheadFields } from "./overheadPage";
+import {
+  measurementAutoPauseMs,
+  overheadWindowEndMonotonicTs,
+  prepareOverheadPage,
+  readOverheadState,
+  recordOverheadWindow,
+  withOverheadResult,
+} from "./overheadMeasurement";
+import type { OverheadWindowRecording } from "./overheadMeasurement.types";
 import type { OverheadPageState } from "./overheadPage.types";
 import type { RecordedFrameTime } from "./runScenario.types";
 import { ScenarioScreenshotter, loadedEventName, resolveScreenshotMode } from "./screenshots";
-import { SYSTEM_CLOCK, sampleSteadyWindow, steadyScenarioDurationMs } from "./steadyWindow";
-import type { SteadyWindowRecording } from "./steadyWindow.types";
 import { TelemetryDrainer, drainUntilEmpty, pageNow } from "./telemetryDrainer";
-import { toggleScenarioDurationMs } from "./toggleBlocks";
-import type { ToggleWindowRecording } from "./toggleBlocks.types";
-import { sampleToggleWindow } from "./toggleWindow";
 import type {
   BenchmarkTarget,
   HostMetricsSnapshot,
@@ -48,8 +44,6 @@ import type {
   RunEnvironment,
   RunScenarioOptions,
   ScenarioRunResult,
-  SteadyMeasurement,
-  ToggleMeasurement,
 } from "./types";
 import { SCENARIO_DURATION_MS_PARAM } from "../../src/scenarios/constants";
 import type {
@@ -62,7 +56,7 @@ import {
   TELEMETRY_QUERY_PARAM,
   UA_MEMORY_QUERY_PARAM,
 } from "../../src/telemetry/constants";
-import type { FrameProbeToggleRequest, LichtblickTelemetryWindow } from "../../src/telemetry/types";
+import type { LichtblickTelemetryWindow } from "../../src/telemetry/types";
 import {
   BenchmarkResultV1,
   ListenerDispatchSample,
@@ -86,34 +80,6 @@ export function describeHost(): RunEnvironment {
     logicalCpus: logicalCpuCount(),
     totalMemBytes: os.totalmem(),
   };
-}
-
-/**
- * Page auto-pause duration of an overhead A/B run (steady window or toggle blocks) plus
- * `OVERHEAD_DURATION_MARGIN_MS`. Undefined for normal runs and scenarios without auto-pause.
- */
-function measurementAutoPauseMs(
-  scenario: ScenarioUnderTest,
-  measurement: RunScenarioOptions["measurement"],
-): number | undefined {
-  if (measurement == undefined || scenario.durationMs == undefined) {
-    return undefined;
-  }
-  if (measurement.mode === "toggle") {
-    return toggleScenarioDurationMs({
-      warmupMs: measurement.warmupMs,
-      blocks: measurement.arms.length,
-      blockMs: measurement.blockMs,
-      profileMs: measurement.profileMs ?? 0,
-      marginMs: OVERHEAD_DURATION_MARGIN_MS,
-    });
-  }
-  return steadyScenarioDurationMs({
-    warmupMs: measurement.warmupMs,
-    polls: measurement.polls,
-    intervalMs: SAMPLE_INTERVAL_MS,
-    marginMs: OVERHEAD_DURATION_MARGIN_MS,
-  });
 }
 
 /**
@@ -185,146 +151,6 @@ async function sampleDeadlineWindow(tick: () => Promise<void>, windowEnd: number
 }
 
 /**
- * Host collection of a steady window that never waits for the page. Electron: `app.getAppMetrics()`
- * in the main process (the target's own collector goes through the renderer's preload bridge, i.e.
- * a page call). Web: the target's collector (CDP `SystemInfo` on the browser session + `ps`).
- */
-function steadyHostCollector(
-  target: BenchmarkTarget,
-): (monotonicTs: number) => Promise<HostMetricsSnapshot> {
-  const { electronApp } = target;
-  if (electronApp != undefined) {
-    return async (monotonicTs) => await collectElectronMainProcessMetrics(electronApp, monotonicTs);
-  }
-  return async (monotonicTs) => await target.collectHostMetrics(monotonicTs);
-}
-
-/**
- * Overhead A/B steady window (`runner/steadyWindow.ts`) of a ready page: syncs the Node → page
- * clock once (smallest of `CLOCK_SYNC_ROUNDS` round trips), then samples with host polls stamped
- * from the Node clock, telemetry drains in their own loop every `OVERHEAD_DRAIN_INTERVAL_MS`, and
- * ends with a full drain.
- */
-async function recordSteadyWindow({
-  target,
-  measurement,
-  drainer,
-  onHostSnapshot,
-}: {
-  target: BenchmarkTarget;
-  measurement: SteadyMeasurement;
-  drainer: TelemetryDrainer;
-  onHostSnapshot: (host: HostMetricsSnapshot) => void;
-}): Promise<SteadyWindowRecording> {
-  const { page } = target;
-  const clockOffset = await syncPageClock({
-    readPageNow: async () => await pageNow(page),
-    nodeNow: nodeMonotonicNow,
-    rounds: CLOCK_SYNC_ROUNDS,
-  });
-  const collectHost = steadyHostCollector(target);
-  const recording = await sampleSteadyWindow({
-    stamp: () => toPageClock(nodeMonotonicNow(), clockOffset),
-    poll: async (monotonicTs) => {
-      onHostSnapshot(await collectHost(monotonicTs));
-    },
-    drain: async () => {
-      await drainer.drain();
-    },
-    readProbe: async () => await readMainThreadProbe(page),
-    warmupMs: measurement.warmupMs,
-    polls: measurement.polls,
-    intervalMs: SAMPLE_INTERVAL_MS,
-    drainIntervalMs: OVERHEAD_DRAIN_INTERVAL_MS,
-    clock: SYSTEM_CLOCK,
-  });
-  // Final drain right after the window (the drain loop stopped at the last poll).
-  await drainUntilEmpty(drainer);
-  return { ...recording, clockSyncRttMs: clockOffset.rttMs };
-}
-
-/**
- * Switches the bare frame loop of a `?telemetry=off` page (`setFrameProbeActive`); never calls the
- * UA memory API (`uaCalls` 0). Throws if the page API lacks the switch (telemetry installed on).
- */
-async function setFrameProbeActive(
-  page: Page,
-  request: FrameProbeToggleRequest,
-): Promise<{ uaCalls: number }> {
-  const result = await page.evaluate((pageRequest) => {
-    const api = (window as LichtblickTelemetryWindow).lichtblickTelemetry!;
-    return api.setFrameProbeActive?.(pageRequest);
-  }, request);
-  if (result == undefined) {
-    throw new Error("Frame-probe toggle needs a page with ?telemetry=off (setFrameProbeActive)");
-  }
-  return { uaCalls: 0 };
-}
-
-/**
- * Toggle A/B blocks (`runner/toggleWindow.ts`) of a ready page: syncs the Node → page clock once,
- * then switches telemetry off / on per block (`window.lichtblickTelemetry.setTelemetryActive`; with
- * `measurement.toggled = "frameProbe"` only the frame loop via `setFrameProbeActive`) and
- * reads the target's cumulative process CPU (no page call) after each settle period and at each
- * block end; drains run in their own loop. With `measurement.profileMs`, profiles the main thread
- * after the blocks (`runner/cpuProfile.ts`). Ends with telemetry on and a full drain.
- */
-async function recordToggleWindow({
-  target,
-  measurement,
-  drainer,
-}: {
-  target: BenchmarkTarget;
-  measurement: ToggleMeasurement;
-  drainer: TelemetryDrainer;
-}): Promise<ToggleWindowRecording & { clockSyncRttMs: number }> {
-  const { page } = target;
-  const readCpu = target.readCumulativeCpu?.bind(target);
-  if (readCpu == undefined) {
-    throw new Error(`${target.platform} target cannot read cumulative CPU (toggle A/B)`);
-  }
-  const clockOffset = await syncPageClock({
-    readPageNow: async () => await pageNow(page),
-    nodeNow: nodeMonotonicNow,
-    rounds: CLOCK_SYNC_ROUNDS,
-  });
-  const recording = await sampleToggleWindow({
-    stamp: () => toPageClock(nodeMonotonicNow(), clockOffset),
-    setActive: async (arm) =>
-      measurement.toggled === "frameProbe"
-        ? await setFrameProbeActive(page, { active: arm === "on" })
-        : await page.evaluate(
-            (request) =>
-              (window as LichtblickTelemetryWindow).lichtblickTelemetry!.setTelemetryActive(
-                request,
-              ),
-            { active: arm === "on" },
-          ),
-    readCpu,
-    drain: async () => {
-      await drainer.drain();
-    },
-    arms: measurement.arms,
-    warmupMs: measurement.warmupMs,
-    blockMs: measurement.blockMs,
-    settleMs: measurement.settleMs,
-    drainIntervalMs: OVERHEAD_DRAIN_INTERVAL_MS,
-    clock: SYSTEM_CLOCK,
-    ...(measurement.profileMs != undefined &&
-      measurement.profileMs > 0 && {
-        profile: async () =>
-          await captureMainThreadProfile(page, {
-            durationMs: measurement.profileMs!,
-            samplingIntervalUs: OVERHEAD_PROFILE_SAMPLING_INTERVAL_US,
-            clock: SYSTEM_CLOCK,
-          }),
-      }),
-  });
-  await drainUntilEmpty(drainer);
-  return { ...recording, clockSyncRttMs: clockOffset.rttMs };
-}
-
-/**
  * Real-pipeline teardown: makes sure playback is paused, then closes the data source in-page via
  * `window.lichtblickScenario.closeDataSource()` and waits for the `datasource.close` end event, so
  * close/cleanup events and final pool counters are captured. Bounded: if the event never arrives
@@ -383,7 +209,7 @@ async function pauseAndCloseDataSource(
 
 /**
  * When: the 1 Hz loop of a run - deadline-driven (until `windowEnd`, wall clock) for normal runs,
- * else the overhead A/B's fixed-schedule steady window or toggle blocks.
+ * else the overhead A/B's fixed-schedule window (`runner/overheadMeasurement.ts`).
  */
 async function recordMeasurementWindow({
   target,
@@ -397,26 +223,18 @@ async function recordMeasurementWindow({
   drainer: TelemetryDrainer;
   windowEnd: number;
   onHostSnapshot: (host: HostMetricsSnapshot) => void;
-}): Promise<{
-  steadyRecording?: SteadyWindowRecording;
-  toggleRecording?: ToggleWindowRecording & { clockSyncRttMs: number };
-}> {
-  if (measurement == undefined) {
-    /** One sampling tick: page clock → host metrics → drain. */
-    const tick = async (): Promise<void> => {
-      const ts = await pageNow(target.page);
-      onHostSnapshot(await target.collectHostMetrics(ts));
-      await drainer.drain();
-    };
-    await sampleDeadlineWindow(tick, windowEnd);
-    return {};
+}): Promise<OverheadWindowRecording> {
+  if (measurement != undefined) {
+    return await recordOverheadWindow({ target, measurement, drainer, onHostSnapshot });
   }
-  if (measurement.mode === "toggle") {
-    return { toggleRecording: await recordToggleWindow({ target, measurement, drainer }) };
-  }
-  return {
-    steadyRecording: await recordSteadyWindow({ target, measurement, drainer, onHostSnapshot }),
+  /** One sampling tick: page clock → host metrics → drain. */
+  const tick = async (): Promise<void> => {
+    const ts = await pageNow(target.page);
+    onHostSnapshot(await target.collectHostMetrics(ts));
+    await drainer.drain();
   };
+  await sampleDeadlineWindow(tick, windowEnd);
+  return {};
 }
 
 /**
@@ -495,22 +313,8 @@ function startScreenshotter({
  * writing that result** (`writeResultV1`) so the evidence is kept. If such an event made the run
  * fail early (e.g. "Target crashed"), a partial result (whatever was sampled so far) is written.
  *
- * Overhead A/B steady mode (`options.measurement`, see `runner/steadyWindow.ts`): instead of the
- * deadline-driven window, `warmupMs` of 1 Hz host polls then a priming poll and exactly `polls`
- * polls on a fixed schedule. Those polls make no page call (stamped from the Node clock with a
- * once-measured page clock offset; Electron host metrics read in the main process); telemetry is
- * drained by a separate sequential loop and the main-thread probe (`runner/mainThreadProbe.ts`,
- * installed before navigation) is read before and after the window, so a busy renderer cannot
- * delay a poll. A scenario's page auto-pause is moved past the window; no screenshots. The
- * result gets `summary.steadyWindow`, `run.environment.collectors` and, with telemetry on,
- * `summary.telemetrySelf` (`runner/overheadPage.ts`). Normal runs are unchanged.
- *
- * Toggle A/B mode (`measurement.mode = "toggle"`, see `runner/toggleWindow.ts`): telemetry is
- * installed on and switched off / on in-page per block (or, with `toggled: "frameProbe"` and
- * telemetry off, only the bare frame loop); CPU comes from the target's cumulative
- * process CPU time (`readCumulativeCpu`). No probe, no screenshots, auto-pause moved past the last
- * block. The blocks and the drained records are returned as `toggle`; the v1 result (`run.mode`
- * "overhead", no steady window) is not meant to be written.
+ * Overhead A/B runs (`options.measurement`): the window, the page preparation and the extra result
+ * fields come from `runner/overheadMeasurement.ts`; no screenshots. Normal runs are unchanged.
  *
  * Throws if any panel (or the app) rendered an error boundary by the end of the run.
  */
@@ -554,8 +358,7 @@ export async function runScenario(
   const screenshotMode =
     measurement == undefined ? resolveScreenshotMode({ requested: options.screenshots }) : "none";
   let screenshotter: ScenarioScreenshotter | undefined;
-  let steadyRecording: SteadyWindowRecording | undefined;
-  let toggleRecording: (ToggleWindowRecording & { clockSyncRttMs: number }) | undefined;
+  let overheadRecording: OverheadWindowRecording = {};
   let overheadPageState: OverheadPageState = {};
   let startMonotonicTs: number | undefined;
   let windowEndMonotonicTs: number | undefined;
@@ -610,9 +413,8 @@ export async function runScenario(
   let crossOriginIsolated: boolean;
   let scenarioDescriptor: ScenarioDescriptor;
   try {
-    // Overhead A/B: same probe in every arm, installed before the scenario page loads.
-    if (measurement?.mode === "steady") {
-      await installMainThreadProbe(page);
+    if (measurement != undefined) {
+      await prepareOverheadPage(page, measurement);
     }
     await page.goto(target.scenarioUrl(buildScenarioParams(scenario, options, calibration)));
     await page.waitForFunction(
@@ -642,19 +444,16 @@ export async function runScenario(
       memorySamples.push({ timestampMs: Date.now(), metrics: host.legacyMetrics });
     };
 
-    ({ steadyRecording, toggleRecording } = await recordMeasurementWindow({
+    overheadRecording = await recordMeasurementWindow({
       target,
       measurement,
       drainer,
       windowEnd,
       onHostSnapshot: recordHost,
-    }));
+    });
     finishedAtWall = new Date().toISOString();
     // End of the measured window (rates in `summary.pipeline`); teardown below is excluded.
-    windowEndMonotonicTs =
-      steadyRecording?.endMonotonicTs ??
-      toggleRecording?.blocks.at(-1)?.endMonotonicTs ??
-      (await pageNow(page));
+    windowEndMonotonicTs = overheadWindowEndMonotonicTs(overheadRecording) ?? (await pageNow(page));
 
     // A `loaded`/`mid` capture still in flight at the deadline finishes before teardown, so its page
     // round trips don't interleave with pause/close.
@@ -674,8 +473,8 @@ export async function runScenario(
     await drainUntilEmpty(drainer);
     endMonotonicTs = await pageNow(page);
     crossOriginIsolated = await page.evaluate(() => globalThis.crossOriginIsolated);
-    if (measurement?.mode === "steady") {
-      overheadPageState = await readOverheadPageState(page, { telemetryEnabled });
+    if (measurement != undefined) {
+      overheadPageState = await readOverheadState(page, measurement, { telemetryEnabled });
     }
     // After all measurement: a pure read of the page's scenario metadata.
     scenarioDescriptor = await describeScenario(page);
@@ -704,15 +503,15 @@ export async function runScenario(
     runnerEvents,
   );
   const result =
-    measurement?.mode === "steady" && steadyRecording != undefined
-      ? withOverheadFields(builtResult, {
-          recording: steadyRecording,
+    measurement == undefined
+      ? builtResult
+      : withOverheadResult(builtResult, {
           measurement,
+          recording: overheadRecording,
           pageState: overheadPageState,
           hostSamples,
           pageRecords: drainer.records,
-        })
-      : builtResult;
+        });
 
   const legacy: BenchmarkArtifact = {
     scenarioId: scenario.scenarioId,
@@ -750,6 +549,7 @@ export async function runScenario(
   console.debug(
     `[runScenario] ${label} done: ${memorySamples.length} host polls, ${drainer.records.length} telemetry records`,
   );
+  const { toggleRecording } = overheadRecording;
   return {
     legacy,
     result,

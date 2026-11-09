@@ -38,6 +38,3 @@ test-results/*
 .scannerwork
 eslint-report.json
 blob-report/*
-
-# AI tool output
-.copilot-output/

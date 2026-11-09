@@ -2,19 +2,12 @@
 // SPDX-License-Identifier: MPL-2.0
 
 // Pure statistics helpers shared by the v1 result builders (numeric sort, nearest-rank
-// percentiles) and the telemetry overhead A/B (interpolated quantiles, IQR, seeded percentile
-// bootstrap of the median, tri-state verdicts). Free of DOM/Playwright/Node imports (compiled by
-// the root tsconfig too).
+// percentiles) and the telemetry overhead A/B (interpolated quantiles, IQR, exact order-statistic
+// confidence interval of the median, tri-state verdicts). Free of DOM/Playwright/Node imports
+// (compiled by the root tsconfig too).
 
-import {
-  BOOTSTRAP_RESAMPLES,
-  BOOTSTRAP_SEED,
-  CI95_LOWER_QUANTILE,
-  CI95_UPPER_QUANTILE,
-  MIN_PAIRS_FOR_VERDICT,
-  VERDICT_SEVERITY,
-} from "./constants";
-import type { BootstrapOptions, ConfidenceInterval, MetricStats, Verdict } from "./stats.types";
+import { MEDIAN_CI_CONFIDENCE, MIN_PAIRS_FOR_VERDICT, VERDICT_SEVERITY } from "./constants";
+import type { ConfidenceInterval, MedianCiRanks, MetricStats, Verdict } from "./stats.types";
 
 function sortedNumbers(values: readonly number[]): number[] {
   return [...values].sort((a, b) => a - b);
@@ -68,12 +61,6 @@ function quantileOfSorted(sorted: ArrayLike<number>, q: number): number {
   return lower + (position - lowerIndex) * (sorted[upperIndex]! - lower);
 }
 
-/** Median of ascending `sorted` (non-empty). */
-function medianOfSorted(sorted: ArrayLike<number>): number {
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 1 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
-}
-
 /**
  * Interquartile range `q75 − q25`, quantiles linearly interpolated between order statistics (R type
  * 7, the spreadsheet/NumPy default); undefined for no values.
@@ -87,73 +74,75 @@ export function interquartileRange(values: readonly number[]): number | undefine
 }
 
 /**
- * Mulberry32: a small, fast 32-bit seeded PRNG returning floats in [0, 1). Deterministic per seed,
- * which keeps bootstrap intervals reproducible (not for cryptographic use).
+ * `P(B ≤ k)` for `B ~ Binomial(n, 1/2)` (0 for `k < 0`, 1 for `k ≥ n`). The probabilities are
+ * summed in log space, so large `n` does not underflow.
  */
-export function mulberry32(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = state;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4_294_967_296;
-  };
+export function binomialHalfCdf(k: number, n: number): number {
+  if (k < 0) {
+    return 0;
+  }
+  if (k >= n) {
+    return 1;
+  }
+  let logPmf = n * Math.log(0.5);
+  let cdf = Math.exp(logPmf);
+  for (let i = 0; i < k; i++) {
+    logPmf += Math.log((n - i) / (i + 1));
+    cdf += Math.exp(logPmf);
+  }
+  return Math.min(cdf, 1);
 }
 
 /**
- * Percentile bootstrap 95 % confidence interval of the median: `resamples` resamples of `values`
- * with replacement (seeded, so deterministic), the median of each, then the 2.5th and 97.5th
- * percentiles of those medians. One value yields `[value, value]`; no values, undefined. Throws
- * for `resamples` that is not a positive integer. Buffers are allocated once (no allocation per
- * resample).
+ * Ranks of the exact distribution-free confidence interval of the median of `n` values: the order
+ * statistics `[x(k), x(n − k + 1)]` (1-based) contain the population median with probability
+ * `1 − 2·P(B ≤ k − 1)`, `B ~ Binomial(n, 1/2)`, for any continuous distribution. The narrowest such
+ * interval (largest `k`) whose coverage is at least `confidence`; undefined when even `[min, max]`
+ * falls short (for 95 %: n < 6, as `[min, max]` covers `1 − 2^(1 − n)`, 93.75 % for n = 5).
  */
-export function bootstrapMedianCi95(
-  values: readonly number[],
-  { resamples = BOOTSTRAP_RESAMPLES, seed = BOOTSTRAP_SEED }: BootstrapOptions = {},
-): ConfidenceInterval | undefined {
-  if (!Number.isInteger(resamples) || resamples < 1) {
-    throw new Error(`Bootstrap resamples must be a positive integer (got ${resamples})`);
-  }
-  const n = values.length;
-  if (n === 0) {
+export function medianCiRanks(
+  n: number,
+  confidence: number = MEDIAN_CI_CONFIDENCE,
+): MedianCiRanks | undefined {
+  const coverage = (k: number) => 1 - 2 * binomialHalfCdf(k - 1, n);
+  if (n < 1 || coverage(1) < confidence) {
     return undefined;
   }
-  if (n === 1) {
-    const only = medianOfSorted(sortedNumbers(values));
-    return { lower: only, upper: only };
+  let k = 1;
+  while (k + 1 <= n - k && coverage(k + 1) >= confidence) {
+    k += 1;
   }
-  const random = mulberry32(seed);
-  const resample = new Float64Array(n);
-  const medians = new Float64Array(resamples);
-  for (let b = 0; b < resamples; b++) {
-    for (let i = 0; i < n; i++) {
-      resample[i] = values[Math.floor(random() * n)]!;
-    }
-    resample.sort();
-    medians[b] = medianOfSorted(resample);
-  }
-  medians.sort();
-  return {
-    lower: quantileOfSorted(medians, CI95_LOWER_QUANTILE),
-    upper: quantileOfSorted(medians, CI95_UPPER_QUANTILE),
-  };
+  return { lower: k, upper: n - k + 1, coverage: coverage(k) };
 }
 
-/** Median, IQR and bootstrap CI95 of the finite `values` (non-finite ones are ignored). */
-export function summarizeMetric(
-  values: ReadonlyArray<number | undefined>,
-  options: BootstrapOptions = {},
-): MetricStats {
+/**
+ * Exact distribution-free 95 % confidence interval of the median (order statistics, see
+ * `medianCiRanks`); undefined without enough values to reach 95 % (fewer than 6).
+ */
+export function medianCi95(values: readonly number[]): ConfidenceInterval | undefined {
+  const ranks = medianCiRanks(values.length);
+  if (ranks == undefined) {
+    return undefined;
+  }
+  const sorted = sortedNumbers(values);
+  return { lower: sorted[ranks.lower - 1]!, upper: sorted[ranks.upper - 1]! };
+}
+
+/**
+ * Median, IQR and exact CI95 of the median (`medianCi95`, omitted below 6 values) of the finite
+ * `values` (non-finite ones are ignored).
+ */
+export function summarizeMetric(values: ReadonlyArray<number | undefined>): MetricStats {
   const finite = values.filter((value): value is number => Number.isFinite(value));
   if (finite.length === 0) {
     return { n: 0 };
   }
+  const ci95 = medianCi95(finite);
   return {
     n: finite.length,
     median: median(finite),
     iqr: interquartileRange(finite),
-    ci95: bootstrapMedianCi95(finite, options),
+    ...(ci95 != undefined && { ci95 }),
   };
 }
 

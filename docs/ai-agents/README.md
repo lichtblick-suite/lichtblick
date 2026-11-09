@@ -80,9 +80,9 @@ Located in `.github/agents/`. Each file uses YAML frontmatter with `description`
 
 ### Analysis
 
-| Agent                  | Description                                                                                                                                                                                                          |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lb-benchmark-analyst` | Read-only benchmark analyst: interprets benchmark reports, correlates metric evidence with code evidence (`path:line`), triages performance regressions against a baseline, and proposes hypotheses and experiments. |
+| Agent                  | Description                                                                                                                                                                                                                                  |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lb-benchmark-analyst` | Analysis-only benchmark analyst (never edits files): interprets benchmark reports, correlates metric evidence with code evidence (`path:line`), triages performance regressions against a baseline, and proposes hypotheses and experiments. |
 
 ---
 
@@ -240,7 +240,7 @@ You are an expert on ...
 - For deep X internals: load `x-internals` skill
 ```
 
-Knowledge-only agents (no owned directory, e.g. `lb-preload`, `lb-benchmark-analyst`) use `tools: ["read", "search"]`; `lb-benchmark-analyst` additionally has `execute`, restricted by its rules to read-only commands (`git --no-pager log|blame|show|diff`, `node -e` extraction snippets, `jq`, `ls`). Register every new agent in `.github/agents/lb-orchestrator.agent.md` (frontmatter `agents` list, a routing tier, and either the Write-Ownership table or the knowledge-only list) and update the counts in this document.
+Knowledge-only agents (no owned directory, e.g. `lb-preload`, `lb-benchmark-analyst`) use `tools: ["read", "search"]`; `lb-benchmark-analyst` additionally has `execute` because git history and JSON extraction need a shell; the tool itself is unrestricted, so its rules limit it to read-only commands (`git --no-pager log|blame|show|diff`, `node -e` extraction snippets, `jq`, `ls`). Register every new agent in `.github/agents/lb-orchestrator.agent.md` (frontmatter `agents` list, a routing tier, and either the Write-Ownership table or the knowledge-only list) and update the counts in this document.
 
 ### New Skill
 

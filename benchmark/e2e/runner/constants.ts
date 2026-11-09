@@ -158,8 +158,12 @@ export const OVERHEAD_FIXTURE_DATA_MARGIN_MS = 5_000;
  * arms use it, so the A/B stays within one build; scenario runs keep the headless shell.
  */
 export const OVERHEAD_WEB_BROWSER: WebBrowserV1 = "chromium";
-/** Defaults of the overhead env knobs (`parseOverheadConfig`). */
-export const OVERHEAD_DEFAULT_REPEATS = 5;
+/**
+ * Defaults of the overhead env knobs (`parseOverheadConfig`). A relaunch verdict needs
+ * `MIN_PAIRS_FOR_VERDICT` = 6 included pairs (the smallest n with an exact 95 % median interval);
+ * 8 repeats leave a verdict with up to 2 excluded pairs.
+ */
+export const OVERHEAD_DEFAULT_REPEATS = 8;
 export const OVERHEAD_DEFAULT_WARMUP_RUNS = 1;
 
 /**

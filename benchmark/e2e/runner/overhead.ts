@@ -41,8 +41,8 @@ import { compareCodeUnits } from "../shared/compare";
 // - Main thread (runner probe, both arms): long-task blocked ms/s and fps deltas.
 //
 // Pairs with a window mismatch in either run are excluded; a process-set mismatch is flagged. Each
-// metric is summarized as median, IQR and seeded bootstrap CI95 of the median over the included
-// pairs, and CPU/memory get a tri-state verdict (`within` / `exceeds` / `inconclusive`, see
+// metric is summarized as median, IQR and exact order-statistic CI95 of the median over the included
+// pairs (`summarizeMetric`), and CPU/memory get a tri-state verdict (`within` / `exceeds` / `inconclusive`, see
 // `verdict`). Report only, unless `BENCHMARK_OVERHEAD_GATE=1` (then an overall `exceeds` fails).
 //
 // Schema 3 adds the in-process toggle A/B (`runner/toggleBlocks.ts`, one launch, ABBA blocks of

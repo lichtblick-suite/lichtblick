@@ -12,7 +12,7 @@ const BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345
 const BASE64_VALUES = (() => {
   const values = new Int8Array(128).fill(-1);
   for (let index = 0; index < BASE64_CHARS.length; index++) {
-    values[BASE64_CHARS.charCodeAt(index)] = index;
+    values[BASE64_CHARS.codePointAt(index)!] = index;
   }
   return values;
 })();
@@ -21,8 +21,8 @@ const VLQ_VALUE_MASK = 0b01_1111;
 const VLQ_SHIFT = 5;
 /** Fields per decoded segment (see `DecodedSourceMap.lines`). */
 const SEGMENT_FIELDS = 5;
-const COMMA = ",".charCodeAt(0);
-const SEMICOLON = ";".charCodeAt(0);
+const COMMA = ",".codePointAt(0)!;
+const SEMICOLON = ";".codePointAt(0)!;
 
 /**
  * Decodes `raw.mappings` into per-line segment arrays. Throws on a version other than 3 or an
@@ -41,7 +41,8 @@ export function decodeSourceMap(raw: RawSourceMap): DecodedSourceMap {
   const cursor = { index: 0 };
 
   while (cursor.index <= mappings.length) {
-    const code = cursor.index < mappings.length ? mappings.charCodeAt(cursor.index) : SEMICOLON;
+    // Past the end: a final ";" closes the last line.
+    const code = mappings.codePointAt(cursor.index) ?? SEMICOLON;
     if (code === SEMICOLON || code === COMMA) {
       appendSegment(segment, state, line);
       segment.length = 0;
@@ -96,7 +97,8 @@ function readVlq(mappings: string, cursor: { index: number }): number {
   let shift = 0;
   let digit: number;
   do {
-    const char = mappings.charCodeAt(cursor.index++);
+    // Past the end (truncated VLQ): NaN, rejected like any non-base64 char.
+    const char = mappings.codePointAt(cursor.index++) ?? Number.NaN;
     digit = char < 128 ? BASE64_VALUES[char]! : -1;
     if (digit < 0) {
       throw new Error(`Invalid source map VLQ character at ${cursor.index - 1}`);

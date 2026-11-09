@@ -80,6 +80,40 @@ describe("summarizeTelemetrySelf", () => {
     expect(self.msPerSec).toEqual({ total: 0, byComponent: {} });
   });
 
+  it("should leave a component out when its single in-window publish is before the window end", () => {
+    // Given one frames publish at 2000 inside the window [1000, 4000] and none before or after it
+    const pageRecords = TelemetryRecordBuilder.counterSeries(TELEMETRY_SELF_TIME_METRICS.frames, [
+      [2000, 50],
+    ]);
+
+    // When
+    const self = summarizeTelemetrySelf({
+      pageRecords,
+      startMonotonicTs: 1000,
+      endMonotonicTs: 4000,
+    });
+
+    // Then
+    expect(self.msPerSec).toEqual({ total: 0, byComponent: {} });
+  });
+
+  it("should leave a component out when its only publish is before the window", () => {
+    // Given one frames publish at 500, before the window [1000, 4000], and none inside it
+    const pageRecords = TelemetryRecordBuilder.counterSeries(TELEMETRY_SELF_TIME_METRICS.frames, [
+      [500, 50],
+    ]);
+
+    // When
+    const self = summarizeTelemetrySelf({
+      pageRecords,
+      startMonotonicTs: 1000,
+      endMonotonicTs: 4000,
+    });
+
+    // Then
+    expect(self.msPerSec).toEqual({ total: 0, byComponent: {} });
+  });
+
   it("should ignore self-cost counters of other realms", () => {
     // Given the same metric published by a worker realm
     const pageRecords = TelemetryRecordBuilder.counterSeries(

@@ -474,11 +474,12 @@ describe("summarizeToggle", () => {
       cpuDeltaRelativeMax: TARGET,
     });
 
-    // Then: 5 included quartets, all far within the target, are still no verdict
+    // Then: 5 included quartets, all far within the target, have no 95 % interval and no verdict
     expect(summary.n).toBe(MIN_QUARTETS_FOR_VERDICT - 1);
     expect(summary.excludedQuartets).toBe(3);
     expect(summary.flaggedBlocks).toBe(3);
-    expect(summary.metrics.cpuRelative.ci95!.upper).toBeLessThan(TARGET);
+    expect(summary.metrics.cpuRelative.median).toBeLessThan(TARGET);
+    expect(summary.metrics.cpuRelative.ci95).toBeUndefined();
     expect(summary.verdict).toBe("inconclusive");
   });
 

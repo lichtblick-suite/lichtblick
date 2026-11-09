@@ -134,27 +134,24 @@ export const MIN_SLOPE_WINDOW_MS = 10_000;
 /** Bytes per MiB (working-set slope unit). */
 export const BYTES_PER_MIB = 1024 * 1024;
 
-/** Resamples of the percentile bootstrap (`bootstrapMedianCi95`). */
-export const BOOTSTRAP_RESAMPLES = 10_000;
-
-/** Fixed PRNG seed of the bootstrap: reports are reproducible from their inputs. */
-export const BOOTSTRAP_SEED = 0x5e_ed_12_34;
-
-/** Bootstrap percentiles of the two-sided 95 % confidence interval. */
-export const CI95_LOWER_QUANTILE = 0.025;
-export const CI95_UPPER_QUANTILE = 0.975;
+/**
+ * Confidence level of the median interval (`medianCiRanks` / `medianCi95`): the exact
+ * distribution-free order-statistic interval with at least this coverage.
+ */
+export const MEDIAN_CI_CONFIDENCE = 0.95;
 
 /**
  * Fewest samples (e.g. A/B pairs) a confidence interval needs before `verdict` returns anything but
- * `inconclusive`: with fewer, a percentile bootstrap interval is degenerate.
+ * `inconclusive`: the smallest n with a distribution-free 95 % interval of the median (n = 6:
+ * `[min, max]`, coverage 96.9 %; n = 5 reaches only 93.75 %).
  */
-export const MIN_PAIRS_FOR_VERDICT = 3;
+export const MIN_PAIRS_FOR_VERDICT = 6;
 
 /**
  * Fewest included ABBA quartets the toggle A/B needs for `within` / `exceeds` (else
- * `inconclusive`). A 4-quartet run (`OVERHEAD_TOGGLE_MIN_QUARTETS`) is a smoke test: with so few
- * quartets the bootstrap CI95 of the median is far too narrow for a noisy scenario (four positive
- * quartets alone already exclude 0).
+ * `inconclusive`), the same minimum as `MIN_PAIRS_FOR_VERDICT`. A 4-quartet run
+ * (`OVERHEAD_TOGGLE_MIN_QUARTETS`) is a smoke test: no distribution-free 95 % interval of the median
+ * exists for so few quartets.
  */
 export const MIN_QUARTETS_FOR_VERDICT = 6;
 

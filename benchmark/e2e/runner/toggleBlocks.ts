@@ -12,7 +12,8 @@
 // a growing heap) cancels out of `Σ on / Σ off − 1`, where adjacent off/on pairs would each pick it
 // up with alternating sign. Quartets with a block whose process set changed or differs from the
 // run's modal set are excluded. The included quartets feed the same statistics (median, IQR,
-// bootstrap CI95) and verdict as the relaunch A/B; adjacent-pair deltas are kept as a diagnostic.
+// exact order-statistic CI95) and verdict as the relaunch A/B; adjacent-pair deltas are kept as a
+// diagnostic.
 
 import type {
   BlockCpu,
@@ -79,7 +80,7 @@ export function blockCpu(
   end: readonly CumulativeCpuReading[],
   wallMs: number,
 ): BlockCpu {
-  if (!(wallMs > 0)) {
+  if (Number.isNaN(wallMs) || wallMs <= 0) {
     throw new Error(`Toggle block wall time must be positive (got ${wallMs} ms)`);
   }
   const startByPid = new Map(start.map((reading) => [reading.pid, reading]));
@@ -301,7 +302,7 @@ function sumOver(
 
 /**
  * The toggle section of the overhead report from its report blocks (`buildToggleBlocks`): quartets,
- * median / IQR / bootstrap CI95 of the included quartets' deltas, the CPU verdict against
+ * median / IQR / exact order-statistic CI95 of the included quartets' deltas, the CPU verdict against
  * `cpuDeltaRelativeMax` (`inconclusive` below `MIN_QUARTETS_FOR_VERDICT` included quartets), and
  * the adjacent pairs as a diagnostic.
  */

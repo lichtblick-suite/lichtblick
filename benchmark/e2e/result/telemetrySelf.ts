@@ -67,27 +67,46 @@ function firstPublishInWindow(
   return first;
 }
 
+/** Timestamp of the latest publish at or before `ts`; undefined without one. */
+function lastPublishAtOrBefore(
+  samples: readonly TelemetrySample[],
+  ts: number,
+): number | undefined {
+  let last: number | undefined;
+  for (const sample of samples) {
+    const sampleTs = sample.monotonicTs;
+    if (sampleTs <= ts && (last == undefined || sampleTs > last)) {
+      last = sampleTs;
+    }
+  }
+  return last;
+}
+
 /**
  * Increase of a cumulative counter between the publishes at or before `startTs` and `endTs`, per
  * second of `[startTs, endTs]` (both ends are quantized to the 1 Hz publish, so the errors largely
  * cancel). Without a publish at or before `startTs`, the first publish inside the window is the
  * baseline and the rate is taken over `[that publish, endTs]` instead (its pre-window total must
- * not count as window time). Undefined (not measured) without two such points.
+ * not count as window time). Undefined (not measured) unless the latest publish at or before
+ * `endTs` is strictly later than the baseline publish (a single usable publish is not a rate of 0).
  */
 function counterRatePerSec(
   samples: readonly TelemetrySample[],
   startTs: number,
   endTs: number,
 ): number | undefined {
-  const baselineTs =
-    counterTotalAt(samples, startTs) != undefined
-      ? startTs
-      : firstPublishInWindow(samples, startTs, endTs);
-  if (baselineTs == undefined) {
+  const publishAtStart = lastPublishAtOrBefore(samples, startTs);
+  const baselinePublishTs = publishAtStart ?? firstPublishInWindow(samples, startTs, endTs);
+  if (baselinePublishTs == undefined) {
     return undefined;
   }
+  const endPublishTs = lastPublishAtOrBefore(samples, endTs);
+  if (endPublishTs == undefined || endPublishTs <= baselinePublishTs) {
+    return undefined;
+  }
+  const baselineTs = publishAtStart != undefined ? startTs : baselinePublishTs;
   const seconds = (endTs - baselineTs) / MS_PER_SECOND;
-  if (!(seconds > 0)) {
+  if (Number.isNaN(seconds) || seconds <= 0) {
     return undefined;
   }
   const start = counterTotalAt(samples, baselineTs)!;

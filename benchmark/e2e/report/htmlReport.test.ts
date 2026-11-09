@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { BenchmarkResultBuilder } from "./builders/BenchmarkResultBuilder";
+import { TOGGLE_UNTOGGLED_REALMS_NOTE } from "./constants";
 import { buildHtmlReport } from "./htmlReport";
 import { escapeHtml } from "./htmlReportFormat";
 import type { HtmlReportInput, LoadedResult } from "./types";
 import { CpuProfileBuilder } from "../result/builders/CpuProfileBuilder";
+import { MIN_PAIRS_FOR_VERDICT, MIN_QUARTETS_FOR_VERDICT } from "../result/constants";
 import { ToggleBlockBuilder } from "../runner/builders/ToggleBlockBuilder";
 
 const MIB = 1024 * 1024;
@@ -182,6 +184,38 @@ describe("buildHtmlReport", () => {
     expect(section).toContain("blocked +1.0 ms/s · -1.0 fps");
   });
 
+  it("should note next to the toggle verdict that the worker realm was not toggled", () => {
+    // Given a both-method report whose toggle on blocks hold worker records
+    const overheads = [
+      BenchmarkResultBuilder.overhead({
+        method: "both",
+        toggle: ToggleBlockBuilder.withWorkerRealm(),
+      }),
+    ];
+
+    // When
+    const html = render({ results: [sinewave], overheads });
+
+    // Then: the overview CPU cell title and the overhead row's flags (after the verdict) carry it
+    const electronRow = overviewRows(html).find((row) => row.includes("<td>electron</td>"))!;
+    expect(electronRow).toContain(`; ${TOGGLE_UNTOGGLED_REALMS_NOTE}"`);
+    const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
+    expect(section).toContain(
+      `<span class="badge good">within</span></td><td>${TOGGLE_UNTOGGLED_REALMS_NOTE}; toggle ≤ 5 ms</td>`,
+    );
+  });
+
+  it("should not add the worker note when the toggle covered every realm", () => {
+    // Given / When
+    const html = render({
+      results: [sinewave],
+      overheads: [BenchmarkResultBuilder.overhead({ method: "both" })],
+    });
+
+    // Then
+    expect(html).not.toContain(TOGGLE_UNTOGGLED_REALMS_NOTE);
+  });
+
   it("should show the toggle CPU with the relaunch A/B as an informational sub-row (both)", () => {
     // Given a both-method electron report (toggle +1.5 %, relaunch +5 % CPU) and a toggle-only
     // web report
@@ -219,7 +253,7 @@ describe("buildHtmlReport", () => {
   it("should show the toggle A/B without the UA probe as an informational sub-row", () => {
     // Given a web toggle report (+1 %) with a toggle A/B without the UA probe (+0.5 %)
     const toggleWithoutUaProbe = ToggleBlockBuilder.summary(
-      Array.from({ length: 4 }, () => ({ off: 100, on: 100.5 })),
+      Array.from({ length: 6 }, () => ({ off: 100, on: 100.5 })),
     );
     const overheads = [
       BenchmarkResultBuilder.overhead({ method: "toggle", platform: "web", toggleWithoutUaProbe }),
@@ -233,15 +267,15 @@ describe("buildHtmlReport", () => {
     expect(section).toContain("↳ toggle without UA probe (informational)");
     expect(section).toContain(">+0.50 % [+0.50, +0.50]</td>");
     expect(section).toContain(
-      'title="toggle: 4 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), own launch with ?telemetry.uaMemory=off"',
+      'title="toggle: 6 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), own launch with ?telemetry.uaMemory=off"',
     );
   });
 
   it("should show the benchmark FPS probe as a sub-row without a verdict", () => {
     // Given an Electron toggle report with a frame probe of +7 % (GPU +4 pp)
     const toggleFrameProbe = ToggleBlockBuilder.summary(
-      Array.from({ length: 4 }, () => ({ off: 100, on: 107 })),
-      ToggleBlockBuilder.processSplit({ off: { gpu: 20 }, on: { gpu: 24 } }, 4),
+      Array.from({ length: 6 }, () => ({ off: 100, on: 107 })),
+      ToggleBlockBuilder.processSplit({ off: { gpu: 20 }, on: { gpu: 24 } }, 6),
     );
     const overheads = [BenchmarkResultBuilder.overhead({ method: "toggle", toggleFrameProbe })];
 
@@ -253,9 +287,9 @@ describe("buildHtmlReport", () => {
     expect(section).toContain("↳ benchmark FPS probe (harness, not shipped)");
     expect(section).toContain(">+7.00 % [+7.00, +7.00]</td>");
     expect(section).toContain(
-      'title="toggle: 4 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), own launch with ?telemetry=off, rAF loop toggled"',
+      'title="toggle: 6 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), own launch with ?telemetry=off, rAF loop toggled"',
     );
-    expect(section).toContain("toggle ≤ 5 ms · gpu +4.00 pp (4/4 ↑)");
+    expect(section).toContain("toggle ≤ 5 ms · gpu +4.00 pp (6/6 ↑)");
     // And: only the main row carries a verdict badge, the frame-probe row has none
     const probeRow = section
       .split("\n")
@@ -270,7 +304,9 @@ describe("buildHtmlReport", () => {
     const html = render();
 
     // Then
-    expect(html).toContain("(also with fewer than 6 quartets / 3 pairs)");
+    expect(html).toContain(
+      `(also with fewer than ${MIN_QUARTETS_FOR_VERDICT} quartets / ${MIN_PAIRS_FOR_VERDICT} pairs)`,
+    );
   });
 
   it("should show the direct attribution as a sub-row next to the toggle verdict", () => {

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { BenchmarkResultBuilder } from "./builders/BenchmarkResultBuilder";
+import { TOGGLE_UNTOGGLED_REALMS_NOTE } from "./constants";
 import {
   buildExercisesLines,
   buildOverheadTable,
@@ -281,7 +282,7 @@ describe("buildPanelsSection", () => {
 
 describe("buildOverheadTable", () => {
   it("renders the pair statistics, verdict, self-cost and the report-only note", () => {
-    // Given 5 pairs with +1 % CPU and +5 MiB
+    // Given 6 pairs with +1 % CPU and +5 MiB
     const report = BenchmarkResultBuilder.overhead({ platform: "web" });
 
     // When
@@ -290,7 +291,7 @@ describe("buildOverheadTable", () => {
     // Then
     expect(markdown).toContain("Report only unless `BENCHMARK_OVERHEAD_GATE=1`");
     expect(markdown).toContain(
-      "| web | sinewave | relaunch | 5 | +1.00 % [+1.00, +1.00] (+1.0 pp [+1.0, +1.0]) IQR 0.00 % | +5.0 MiB [+5.0, +5.0] | ✅ within | — | 2.00 ms/s (0.20 % core) · 100 rec/s · 200 ns/rec | blocked +1.0 ms/s · -1.0 fps |",
+      "| web | sinewave | relaunch | 6 | +1.00 % [+1.00, +1.00] (+1.0 pp [+1.0, +1.0]) IQR 0.00 % | +5.0 MiB [+5.0, +5.0] | ✅ within | — | 2.00 ms/s (0.20 % core) · 100 rec/s · 200 ns/rec | blocked +1.0 ms/s · -1.0 fps |",
     );
   });
 
@@ -302,7 +303,7 @@ describe("buildOverheadTable", () => {
     const ua = buildOverheadReport({
       platform: "web",
       scenarioId: "pointcloud",
-      runs: [0, 1, 2].flatMap((repeat) =>
+      runs: [0, 1, 2, 3, 4, 5].flatMap((repeat) =>
         armOrder(arms, repeat).map((arm, order) =>
           OverheadRunBuilder.input({ arm, repeat, order, wsBytes: memMiB[arm] * MIB }),
         ),
@@ -318,11 +319,26 @@ describe("buildOverheadTable", () => {
       "| electron | sinewave | relaunch | 1 | +1.00 % (+1.0 pp) | +5.0 MiB | ❔ inconclusive |",
     );
     expect(markdown).toContain(
-      "| web | ↳ without UA probe | relaunch | 3 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +2.0 MiB [+2.0, +2.0] | ✅ within |",
+      "| web | ↳ without UA probe | relaunch | 6 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +2.0 MiB [+2.0, +2.0] | ✅ within |",
     );
     expect(markdown).toContain(
-      "| web | ↳ UA probe cost | relaunch | 3 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +8.0 MiB [+8.0, +8.0] | — |",
+      "| web | ↳ UA probe cost | relaunch | 6 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +8.0 MiB [+8.0, +8.0] | — |",
     );
+  });
+
+  it("notes next to the toggle verdict that the worker realm was not toggled", () => {
+    // Given a toggle report whose on blocks hold worker records (mcap-multi-ingest)
+    const report = BenchmarkResultBuilder.overhead({
+      method: "toggle",
+      scenarioId: "mcap-multi-ingest",
+      toggle: ToggleBlockBuilder.withWorkerRealm(),
+    });
+
+    // When
+    const markdown = buildOverheadTable([report]);
+
+    // Then
+    expect(markdown).toContain(`| ✅ within | ${TOGGLE_UNTOGGLED_REALMS_NOTE}; toggle ≤ 5 ms |`);
   });
 
   it("takes CPU from the toggle A/B and adds the relaunch A/B as an informational sub-row", () => {
@@ -340,7 +356,7 @@ describe("buildOverheadTable", () => {
       "| electron | sinewave | both (CPU toggle · mem relaunch) | 6 quartets | +1.50 % [+1.50, +1.50] (+1.5 pp [+1.5, +1.5]) IQR 0.00 % | +5.0 MiB [+5.0, +5.0] | ✅ within | toggle ≤ 5 ms |",
     );
     expect(markdown).toContain(
-      "| electron | ↳ relaunch A/B (CPU informational) | relaunch | 5 | +5.00 % [+5.00, +5.00] (+5.0 pp [+5.0, +5.0]) IQR 0.00 % | +5.0 MiB [+5.0, +5.0] | ❌ exceeds | — |",
+      "| electron | ↳ relaunch A/B (CPU informational) | relaunch | 6 | +5.00 % [+5.00, +5.00] (+5.0 pp [+5.0, +5.0]) IQR 0.00 % | +5.0 MiB [+5.0, +5.0] | ❌ exceeds | — |",
     );
   });
 
@@ -453,7 +469,7 @@ describe("buildScorecardTable", () => {
     expect(rows[2]).toMatch(/^\| electron \| 1 \| ✅ 1\/1 \| 100 MiB \| — \| 12\.5 % \|/);
     expect(rows[2]).toMatch(/\| — \|$/);
     expect(rows[3]).toMatch(/^\| web \| 1 \|/);
-    expect(rows[3]).toContain("✅ within CPU ≤ +1.0 % / mem ≤ +5.0 MiB (n ≥ 5)");
+    expect(rows[3]).toContain("✅ within CPU ≤ +1.0 % / mem ≤ +5.0 MiB (n ≥ 6)");
   });
 
   it("ignores telemetry-off runs and reports when nothing is left", () => {
@@ -500,7 +516,7 @@ describe("buildScorecardTable", () => {
     expect(rows).toHaveLength(4);
     expect(rows[2]).toMatch(/^\| electron \| 1 \|/);
     expect(rows[3]).toMatch(/^\| web \| 0 \|/);
-    expect(rows[3]).toContain("✅ within CPU ≤ +1.0 % / mem ≤ +5.0 MiB (n ≥ 5)");
+    expect(rows[3]).toContain("✅ within CPU ≤ +1.0 % / mem ≤ +5.0 MiB (n ≥ 6)");
   });
 });
 

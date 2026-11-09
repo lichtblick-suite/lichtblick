@@ -42,6 +42,27 @@ describe("decodeSourceMap", () => {
     expect(() => decodeSourceMap({ ...RAW, mappings: "AA!A" })).toThrow("VLQ character");
   });
 
+  it("should reject a truncated VLQ value and non-ASCII characters", () => {
+    // Given "g" (continuation bit set) at the end, an astral and a non-ASCII BMP character
+    const truncated = { ...RAW, mappings: "AAAg" };
+    const astral = { ...RAW, mappings: "A\u{1F600}A" };
+    const latin = { ...RAW, mappings: "A\u00E9A" };
+
+    // When / Then
+    expect(() => decodeSourceMap(truncated)).toThrow("VLQ character at 4");
+    expect(() => decodeSourceMap(astral)).toThrow("VLQ character at 1");
+    expect(() => decodeSourceMap(latin)).toThrow("VLQ character at 1");
+  });
+
+  it("should close the last line at the end of the mappings", () => {
+    // Given / When
+    const map = decodeSourceMap({ version: 3, sources: ["a.ts"], mappings: "AAAA;CAAC" });
+
+    // Then
+    expect(map.lines).toHaveLength(2);
+    expect(Array.from(map.lines[1]!)).toEqual([1, 0, 0, 1, -1]);
+  });
+
   it("should decode multi-digit and negative values", () => {
     // Given column 16 ("gB"), then source 0, line 1000 ("w+B"), column −1 ("D")
     const raw = { version: 3, sources: ["a.ts"], mappings: "gBAw+BD" };

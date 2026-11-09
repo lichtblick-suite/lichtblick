@@ -21,6 +21,58 @@ function relaunchReportJson(): Record<string, unknown> {
   ) as Record<string, unknown>;
 }
 
+/** A current (schema-3) toggle-method report, as written to disk. */
+function toggleReportJson(): Record<string, unknown> {
+  return JSON.parse(
+    JSON.stringify(
+      buildOverheadReport({
+        platform: "electron",
+        scenarioId: "sinewave",
+        runs: [],
+        config: OverheadRunBuilder.config({ repeats: 0 }),
+        method: "toggle",
+        toggle: ToggleBlockBuilder.summary(),
+      }),
+    ),
+  ) as Record<string, unknown>;
+}
+
+/** A complete toggle section as written to disk, with `patch` applied on top. */
+function toggleSectionJson(patch: Record<string, unknown>): Record<string, unknown> {
+  const section = JSON.parse(JSON.stringify(ToggleBlockBuilder.summary())) as Record<
+    string,
+    unknown
+  >;
+  return { ...section, ...patch };
+}
+
+/** Toggle sections that pass a bare `metrics` / `blocks` / `quartets` check but cannot render. */
+const MALFORMED_TOGGLE_SECTIONS: [string, Record<string, unknown>][] = [
+  ["only metrics, blocks and quartets", { metrics: {}, blocks: [], quartets: [] }],
+  ["no config", toggleSectionJson({ config: undefined })],
+  ["a config without block length", toggleSectionJson({ config: { quartets: 10 } })],
+  ["no toggle latency", toggleSectionJson({ toggleLatencyMsMax: undefined })],
+  ["no UA call counts", toggleSectionJson({ uaCalls: undefined })],
+  ["no renderer record counts", toggleSectionJson({ rendererRecords: { onBlocks: 5 } })],
+  ["no relative CPU statistics", toggleSectionJson({ metrics: { cpuPctPoints: { n: 0 } } })],
+  [
+    "a non-numeric CI bound",
+    toggleSectionJson({
+      metrics: {
+        cpuRelative: { n: 6, median: 0.01, ci95: { lower: "0", upper: 0.02 } },
+        cpuPctPoints: { n: 6 },
+      },
+    }),
+  ],
+  ["an unknown verdict", toggleSectionJson({ verdict: "passed" })],
+  ["a quartet without block indices", toggleSectionJson({ quartets: [{ excluded: false }] })],
+  ["a block that is not an object", toggleSectionJson({ blocks: [42] })],
+  [
+    "a block without records per realm",
+    toggleSectionJson({ blocks: [{ index: 0, measuredMs: 3000 }] }),
+  ],
+];
+
 describe("normalizeOverheadReport", () => {
   it("should pass schema-3 reports through", () => {
     // Given a both-method report with a toggle section
@@ -225,5 +277,61 @@ describe("normalizeOverheadReport", () => {
   ])("should reject %s", (_label, json) => {
     // Given / When / Then
     expect(normalizeOverheadReport(json)).toBeUndefined();
+  });
+  it.each(
+    MALFORMED_TOGGLE_SECTIONS,
+  )("should reject a report whose toggle section has %s", (_label, toggle) => {
+    // Given a toggle-method report with a malformed main toggle section
+    const json = { ...toggleReportJson(), toggle };
+
+    // When
+    const report = normalizeOverheadReport(json);
+
+    // Then
+    expect(report).toBeUndefined();
+  });
+
+  it.each(
+    MALFORMED_TOGGLE_SECTIONS,
+  )("should drop a frame-probe toggle section with %s", (_label, toggleFrameProbe) => {
+    // Given a valid toggle-method report with a malformed frame-probe section
+    const valid = toggleReportJson();
+
+    // When
+    const report = normalizeOverheadReport({ ...valid, toggleFrameProbe });
+
+    // Then
+    expect(report).toEqual(valid);
+  });
+
+  it("should drop a toggle section without the UA probe that has no verdict", () => {
+    // Given a valid toggle-method report whose section without the UA probe has no verdict
+    const valid = toggleReportJson();
+    const toggleWithoutUaProbe = toggleSectionJson({ verdict: undefined });
+
+    // When
+    const report = normalizeOverheadReport({ ...valid, toggleWithoutUaProbe });
+
+    // Then
+    expect(report).toEqual(valid);
+  });
+
+  it.each([
+    ["config arms that are not strings", { config: { repeats: 3, warmupRuns: 1, arms: [1, 2] } }],
+    ["a config without warm-up runs", { config: { repeats: 3, arms: ["off", "on"] } }],
+    ["no targets", { targets: { cpuDeltaRelativeMax: 0.02 } }],
+    ["relaunch metrics without fps", { metrics: { cpuRelative: { n: 0 } } }],
+    ["a run without steady window", { runs: [{ repeat: 0, arm: "on" }] }],
+    ["a self-cost without rates", { selfCost: { n: 3 } }],
+    ["a UA cost without metrics", { uaCost: { n: 3, excludedPairs: 0, processSetMismatches: 0 } }],
+  ])("should reject a report with %s", (_label, patch) => {
+    // Given an otherwise valid relaunch report with a malformed field the renderers dereference
+    const json = { ...relaunchReportJson(), ...patch };
+
+    // When
+    const report = normalizeOverheadReport(json);
+
+    // Then
+    expect(report).toBeUndefined();
   });
 });
