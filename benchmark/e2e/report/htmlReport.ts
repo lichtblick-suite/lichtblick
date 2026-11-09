@@ -7,6 +7,7 @@
 
 import {
   GL_BACKEND_KEYWORDS,
+  HOST_CPU_SOURCE_LABELS,
   KPI_HEADERS,
   NOT_RECORDED,
   REGENERATE_COMMAND,
@@ -498,6 +499,9 @@ function environmentTable(loaded: LoadedResult): string {
     ["memory (GiB)", fmtNumber(env.totalMemBytes / 1024 ** 3, 1)],
     ["CI", env.ci ? "yes" : "no"],
   ];
+  if (env.hostCpuSource != undefined) {
+    entries.push(["host CPU source", HOST_CPU_SOURCE_LABELS[env.hostCpuSource]]);
+  }
   if (env.electronVersion != undefined) {
     entries.push(["Electron", env.electronVersion]);
   }

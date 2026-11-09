@@ -6,6 +6,7 @@ import { TelemetryRecordBuilder, panelLabels } from "./builders/TelemetryRecordB
 import { MIN_SLOPE_WINDOW_MS, PROCESS_METRICS } from "./constants";
 import {
   BuildResultV1Input,
+  HostCpuSourceV1,
   HostProcessSample,
   RunInfoV1,
   TelemetryRecord,
@@ -1284,6 +1285,212 @@ describe("validateResultV1 run.mode and webBrowser", () => {
     expect(validateResultV1(withBrowser("chromium-headless-shell"))).toEqual([]);
     expect(validateResultV1(withBrowser("firefox"), "lenient")).toEqual([
       "run.environment.webBrowser must be one of chromium-headless-shell, chromium",
+    ]);
+  });
+});
+
+describe("host CPU source", () => {
+  const hostSamples: HostProcessSample[] = [
+    { monotonicTs: 1000, pid: 1, processType: "browser", workingSetBytes: 100, cpuPercent: 10 },
+    { monotonicTs: 2000, pid: 1, processType: "browser", workingSetBytes: 200, cpuPercent: 30 },
+    { monotonicTs: 3000, pid: 1, processType: "browser", workingSetBytes: 300 },
+  ];
+
+  function runWithSource(hostCpuSource: HostCpuSourceV1 | undefined): RunInfoV1 {
+    const run = makeRun();
+    return { ...run, environment: { ...run.environment, hostCpuSource } };
+  }
+
+  it("should summarize the interval CPU when the source is cdp", () => {
+    // Given
+    const input = makeInput({ run: runWithSource("cdp"), hostSamples });
+
+    // When
+    const result = buildResultV1(input);
+
+    // Then
+    expect(result.summary.process.medianTotalCpuPercent).toBe(20);
+  });
+
+  it("should leave the CPU summary and KPIs empty when the collector fell back to ps", () => {
+    // Given interval CPU from polls before the fallback, then memory-only ps polls
+    const input = makeInput({ run: runWithSource("ps"), hostSamples });
+
+    // When
+    const result = buildResultV1(input);
+
+    // Then
+    expect({
+      median: result.summary.process.medianTotalCpuPercent,
+      browser: result.summary.process.byType.browser?.medianCpuPercent,
+      cpuSeconds: result.summary.process.cpuSeconds,
+      kpi: result.summary.kpis.cpu.medianCpuPercent,
+      sampleCount: result.summary.process.sampleCount,
+    }).toEqual({
+      median: undefined,
+      browser: undefined,
+      cpuSeconds: undefined,
+      kpi: undefined,
+      sampleCount: 3,
+    });
+  });
+
+  it("should omit medianTotalCpuPercent instead of reporting 0 without CPU readings", () => {
+    // Given memory-only polls
+    const memoryOnly = hostSamples.map(({ cpuPercent: _cpuPercent, ...rest }) => rest);
+
+    // When
+    const summary = summarizeProcess(memoryOnly);
+
+    // Then
+    expect(summary.medianTotalCpuPercent).toBeUndefined();
+  });
+
+  it("should accept a result without CPU summary built from the ps fallback", () => {
+    // Given
+    const result = buildResultV1(makeInput({ run: runWithSource("ps"), hostSamples }));
+
+    // When
+    const errors = validateResultV1(JSON.parse(JSON.stringify(result)));
+
+    // Then
+    expect(errors).toEqual([]);
+  });
+
+  it("should reject an unknown run.environment.hostCpuSource in both modes", () => {
+    // Given
+    const result = buildResultV1(makeInput());
+    const unknown = {
+      ...result,
+      run: { ...result.run, environment: { ...result.run.environment, hostCpuSource: "top" } },
+    };
+
+    // When
+    const lenientErrors = validateResultV1(unknown, "lenient");
+
+    // Then
+    expect(lenientErrors).toEqual([
+      "run.environment.hostCpuSource must be one of cdp, app-metrics, ps",
+    ]);
+  });
+});
+
+describe("validateResultV1 summary.process.sampleCount", () => {
+  function withSampleCount(sampleCount: unknown): Record<string, unknown> {
+    const result = buildResultV1(makeInput());
+    const process: Record<string, unknown> = { ...result.summary.process, sampleCount };
+    if (sampleCount == undefined) {
+      delete process.sampleCount;
+    }
+    return { ...result, summary: { ...result.summary, process } };
+  }
+
+  it("should report a missing sampleCount in lenient mode", () => {
+    // Given
+    const missing = withSampleCount(undefined);
+
+    // When
+    const errors = validateResultV1(missing, "lenient");
+
+    // Then
+    expect(errors).toEqual(["summary.process.sampleCount is missing"]);
+  });
+
+  it("should reject a sampleCount that is not a number", () => {
+    // Given
+    const text = withSampleCount("3");
+
+    // When
+    const errors = validateResultV1(text);
+
+    // Then
+    expect(errors).toEqual(["summary.process.sampleCount must be a number"]);
+  });
+
+  it.each([-1, 1.5])("should reject the sampleCount %p", (sampleCount) => {
+    // Given
+    const invalid = withSampleCount(sampleCount);
+
+    // When
+    const errors = validateResultV1(invalid);
+
+    // Then
+    expect(errors).toEqual(["summary.process.sampleCount must be a non-negative integer"]);
+  });
+});
+
+describe("validateResultV1 run window order", () => {
+  function withWindow(runWindow: {
+    startMonotonicTs: number;
+    endMonotonicTs: number;
+    windowEndMonotonicTs?: number;
+  }): Record<string, unknown> {
+    const result = buildResultV1(makeInput());
+    return { ...result, run: { ...result.run, ...runWindow } };
+  }
+
+  it("should accept a window end inside the run", () => {
+    // Given
+    const ordered = withWindow({
+      startMonotonicTs: 1000,
+      endMonotonicTs: 11_000,
+      windowEndMonotonicTs: 9000,
+    });
+
+    // When
+    const errors = validateResultV1(ordered);
+
+    // Then
+    expect(errors).toEqual([]);
+  });
+
+  it("should reject a run ending before it starts in both modes", () => {
+    // Given
+    const reversed = withWindow({ startMonotonicTs: 11_000, endMonotonicTs: 1000 });
+
+    // When
+    const lenientErrors = validateResultV1(reversed, "lenient");
+
+    // Then
+    expect(lenientErrors).toEqual(["run.endMonotonicTs must not be before run.startMonotonicTs"]);
+  });
+
+  it("should reject an empty window in strict mode", () => {
+    // Given
+    const empty = withWindow({ startMonotonicTs: 1000, endMonotonicTs: 1000 });
+
+    // When
+    const errors = validateResultV1(empty);
+
+    // Then
+    expect(errors).toEqual(["run.endMonotonicTs must be after run.startMonotonicTs"]);
+  });
+
+  it("should accept an empty window in lenient mode (partial result before the page was ready)", () => {
+    // Given
+    const partial = withWindow({ startMonotonicTs: 1000, endMonotonicTs: 1000 });
+
+    // When
+    const errors = validateResultV1(partial, "lenient");
+
+    // Then
+    expect(errors).toEqual([]);
+  });
+
+  it.each([500, 12_000])("should reject the window end %p outside [1000, 11000]", (windowEnd) => {
+    // Given
+    const outside = withWindow({
+      startMonotonicTs: 1000,
+      endMonotonicTs: 11_000,
+      windowEndMonotonicTs: windowEnd,
+    });
+
+    // When
+    const errors = validateResultV1(outside, "lenient");
+
+    // Then
+    expect(errors).toEqual([
+      "run.windowEndMonotonicTs must lie within [run.startMonotonicTs, run.endMonotonicTs]",
     ]);
   });
 });

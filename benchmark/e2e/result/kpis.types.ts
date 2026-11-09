@@ -39,7 +39,7 @@ export type RunKpisV1 = {
     workingSetSlopeMiBPerMin?: number;
   };
   cpu: {
-    /** `summary.process.medianTotalCpuPercent` (omitted without host polls). */
+    /** `summary.process.medianTotalCpuPercent` (omitted without host polls or CPU readings). */
     medianCpuPercent?: number;
     /** `summary.process.cpuSeconds`. */
     cpuSeconds?: number;

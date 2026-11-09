@@ -57,11 +57,19 @@ export class TelemetryDrainer {
   }
 }
 
-/** Drains until no record is returned (bounded). */
+/**
+ * Drains until no record is returned, at most `MAX_TELEMETRY_DRAIN_ITERATIONS` times. Warns when
+ * that bound is hit: records may remain in the page buffer and the result may be incomplete.
+ */
 export async function drainUntilEmpty(drainer: TelemetryDrainer): Promise<void> {
   for (let i = 0; i < MAX_TELEMETRY_DRAIN_ITERATIONS; i++) {
     if ((await drainer.drain()) === 0) {
       return;
     }
   }
+  console.warn(
+    `[TelemetryDrainer] drainUntilEmpty stopped after ${MAX_TELEMETRY_DRAIN_ITERATIONS} ` +
+      "iterations without an empty drain; records may remain in the page buffer and the " +
+      "result may be incomplete.",
+  );
 }
