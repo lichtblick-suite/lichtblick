@@ -8,13 +8,6 @@ import { PANEL_TELEMETRY_METRICS } from "./constants";
 import { AllFramesDeliveryTracker } from "./panelTelemetry.types";
 
 /**
- * Per-panel telemetry metric names. Defined in `./constants`; this module is the public
- * import path. See the definition for what `panel.messages.delivered` and `panel.rangeMessages.*`
- * count for extension-API vs built-in panels.
- */
-export { PANEL_TELEMETRY_METRICS };
-
-/**
  * Builds the label set identifying a panel. `panelId` is the layout panel id (e.g. `Plot!3x9a`),
  * not the adapter's internal subscriber uuid nor the visible title.
  */
@@ -43,6 +36,42 @@ export function recordMessagesDelivered(
   if (bytes > 0) {
     telemetry.counter(
       PANEL_TELEMETRY_METRICS.messagesDeliveredBytes,
+      bytes,
+      "bytes",
+      "panel",
+      labels,
+    );
+  }
+}
+
+/**
+ * Records one batch of preloaded (range) messages delivered to the panel through
+ * `useSubscribeMessageRange` (`panel.rangeMessages.*`). Callers must have checked
+ * `telemetry.isEnabled()`. Empty batches are not recorded.
+ */
+export function recordRangeMessagesDelivered(
+  telemetry: ITelemetry,
+  batch: readonly MessageEvent[],
+  labels: TelemetryLabels,
+): void {
+  const count = batch.length;
+  if (count === 0) {
+    return;
+  }
+  let bytes = 0;
+  for (let i = 0; i < count; i++) {
+    bytes += batch[i]!.sizeInBytes;
+  }
+  telemetry.counter(
+    PANEL_TELEMETRY_METRICS.rangeMessagesDelivered,
+    count,
+    "count",
+    "panel",
+    labels,
+  );
+  if (bytes > 0) {
+    telemetry.counter(
+      PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes,
       bytes,
       "bytes",
       "panel",

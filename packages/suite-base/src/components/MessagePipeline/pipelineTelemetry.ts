@@ -9,7 +9,7 @@ import { getTelemetry, ITelemetry, TelemetryLabels } from "@lichtblick/suite-bas
 
 import { PIPELINE_TELEMETRY_METRICS } from "./constants";
 import { MessagePipelineInternalState } from "./store";
-import { PANEL_TELEMETRY_METRICS } from "../PanelExtensionAdapter/panelTelemetry";
+import { PANEL_TELEMETRY_METRICS } from "../PanelExtensionAdapter/constants";
 
 /**
  * Panel labels (`panelId` = layout id, `panelType`) of pipeline subscribers that live inside a

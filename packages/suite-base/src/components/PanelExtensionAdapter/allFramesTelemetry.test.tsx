@@ -14,10 +14,10 @@ import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
 
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
+import { PANEL_TELEMETRY_METRICS } from "./constants";
 import {
   buildPanelTelemetryLabels,
   createAllFramesDeliveryTracker,
-  PANEL_TELEMETRY_METRICS,
   recordAllFramesDelivered,
   resetAllFramesDeliveryTracker,
 } from "./panelTelemetry";

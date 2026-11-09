@@ -4,11 +4,12 @@
 import { MessageEvent } from "@lichtblick/suite";
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
 
+import { PANEL_TELEMETRY_METRICS } from "./constants";
 import {
   buildPanelTelemetryLabels,
-  PANEL_TELEMETRY_METRICS,
   recordFirstRender,
   recordMessagesDelivered,
+  recordRangeMessagesDelivered,
   recordRenderDone,
   recordRenderSkipped,
 } from "./panelTelemetry";
@@ -69,6 +70,23 @@ describe("panelTelemetry", () => {
     // THEN
     expect(telemetry.counter.mock.calls).toEqual([
       [PANEL_TELEMETRY_METRICS.messagesDelivered, 1, "count", "panel", LABELS],
+    ]);
+  });
+
+  it("records range message count and summed bytes for a batch", () => {
+    // GIVEN
+    const telemetry = TelemetryBuilder.mockTelemetry();
+
+    // WHEN
+    recordRangeMessagesDelivered(telemetry, [buildMessage(5), buildMessage(7)], LABELS);
+    recordRangeMessagesDelivered(telemetry, [], LABELS);
+    recordRangeMessagesDelivered(telemetry, [buildMessage(0)], LABELS);
+
+    // THEN - empty batches and zero byte totals are not recorded
+    expect(telemetry.counter.mock.calls).toEqual([
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDelivered, 2, "count", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes, 12, "bytes", "panel", LABELS],
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDelivered, 1, "count", "panel", LABELS],
     ]);
   });
 

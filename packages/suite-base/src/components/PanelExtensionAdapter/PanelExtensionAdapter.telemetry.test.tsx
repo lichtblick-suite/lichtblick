@@ -22,7 +22,7 @@ import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders
 import { TelemetryMock } from "@lichtblick/suite-base/util/telemetry/builders/types";
 
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
-import { PANEL_TELEMETRY_METRICS } from "./panelTelemetry";
+import { PANEL_TELEMETRY_METRICS } from "./constants";
 
 const LAYOUT_PANEL_ID = "Plot!3x9a";
 const PANEL_TYPE = "Plot";

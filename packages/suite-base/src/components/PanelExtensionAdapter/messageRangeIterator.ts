@@ -20,7 +20,15 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
   iterable: AsyncIterable<MessageEvent[]>;
   cancel: () => void;
 } {
-  const { topic, convertTo, rawBatchIterator, sortedTopics, messageConverters, emitAlert } = params;
+  const {
+    topic,
+    convertTo,
+    rawBatchIterator,
+    sortedTopics,
+    messageConverters,
+    emitAlert,
+    onBatch,
+  } = params;
 
   // Create a cancellation token
   let cancelled = false;
@@ -78,6 +86,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
           if (performance.now() - lastBatchTime > BATCH_INTERVAL_MS) {
             // Yield the batch if it has been more than 16ms since the last yield
             if (batchMessages.length > 0) {
+              onBatch?.(batchMessages);
               yield batchMessages; // No copy needed - we clear it immediately after
               batchMessages.length = 0; // Clear the batch
               lastBatchTime = performance.now();
@@ -87,6 +96,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
 
         // Yield any remaining messages if not cancelled
         if (!cancelled && batchMessages.length > 0) {
+          onBatch?.(batchMessages);
           yield batchMessages; // No copy needed - array will be garbage collected
         }
       } catch (err: unknown) {

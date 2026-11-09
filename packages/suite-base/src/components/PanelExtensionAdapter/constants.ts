@@ -6,7 +6,8 @@ export const BATCH_INTERVAL_MS = 16;
 
 /**
  * Per-panel telemetry metric names. Names are stable: downstream benchmark reports key
- * on them. Re-exported from `./panelTelemetry`, which is the import path for consumers.
+ * on them. Kept in this dependency-free module so the MessagePipeline and the benchmark harness can
+ * import them without pulling in adapter code.
  *
  * What `panel.messages.delivered` counts depends on the panel kind:
  * - Extension-API panels (PanelExtensionAdapter): messages in the frames actually rendered, i.e.
