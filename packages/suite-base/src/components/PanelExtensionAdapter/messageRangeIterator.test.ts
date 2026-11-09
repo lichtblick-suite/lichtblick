@@ -518,11 +518,13 @@ describe("createMessageRangeIterator", () => {
       cancel();
 
       // When it is consumed
-      for await (const _batch of iterable) {
-        // no-op
+      const batches = [];
+      for await (const batch of iterable) {
+        batches.push(batch);
       }
 
-      // Then the callback never ran
+      // Then nothing was yielded and the callback never ran
+      expect(batches).toHaveLength(0);
       expect(onBatch).not.toHaveBeenCalled();
     });
   });

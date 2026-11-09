@@ -7,13 +7,13 @@ import { act, render, renderHook } from "@testing-library/react";
 import { PropsWithChildren, useState } from "react";
 
 import { Immutable, MessageEvent, PanelExtensionContext, RenderState } from "@lichtblick/suite";
+import { useMessagesByTopic } from "@lichtblick/suite-base/PanelAPI";
 import { MessagePipelineProvider } from "@lichtblick/suite-base/components/MessagePipeline";
 import FakePlayer from "@lichtblick/suite-base/components/MessagePipeline/FakePlayer";
 import { recordPipelineTickTelemetry } from "@lichtblick/suite-base/components/MessagePipeline/pipelineTelemetry";
 import { createMessagePipelineStore } from "@lichtblick/suite-base/components/MessagePipeline/store";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import AppConfigurationContext from "@lichtblick/suite-base/context/AppConfigurationContext";
-import { useMessagesByTopic } from "@lichtblick/suite-base/PanelAPI";
 import { SubscribePayload } from "@lichtblick/suite-base/players/types";
 import MockCurrentLayoutProvider from "@lichtblick/suite-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
