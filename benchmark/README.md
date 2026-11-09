@@ -247,7 +247,7 @@ benchmark/e2e/
 ├── overhead.benchmark.spec.ts    telemetry off/on A/B, repeated and order-balanced (report only)
 ├── fixtures/                     Playwright fixtures, Electron/web targets, MCAP generator
 ├── server/staticServer.ts        Node http static server (Range, COOP/COEP/CORP/CORS, SPA fallback)
-├── runner/                       runScenario, host collectors, artifacts, overhead, crashDetection, scenariosUnderTest
+├── runner/                       runScenario, overheadMeasurement, host collectors, artifacts, overhead, crashDetection, scenariosUnderTest
 ├── result/schemaV1.ts            benchmark-result.v1 types, builder and validator
 ├── report/summaryMarkdown.ts     markdown tables for the summary
 └── ci-helpers/generate-benchmark-summary.ts
@@ -515,7 +515,7 @@ launch variance cancels out of each quartet. It is also faster: one launch per s
 ≈ 17.
 
 **Toggle A/B** (`runner/toggleBlocks.ts`, `runner/toggleWindow.ts`, `measurement: { mode: "toggle" }`
-of `runScenario`)
+of `runScenario`, recorded by `runner/overheadMeasurement.ts`)
 
 - **One launch**, telemetry installed on. After the page API is ready and a 10 s warm-up
   (`OVERHEAD_TOGGLE_WARMUP_MS`; longer than the relaunch one, so the start-up CPU ramp ends before
@@ -599,7 +599,8 @@ of `runScenario`)
   order (even repeats off → on, odd repeats on → off). A drift with run position (thermal state,
   background load) then has opposite signs in consecutive pairs and cancels in the median. With
   three arms the order rotates as a Latin square, so every arm takes every position.
-- **Steady window** (`measurement: { mode: "steady" }` of `runScenario`, `runner/steadyWindow.ts`):
+- **Steady window** (`measurement: { mode: "steady" }` of `runScenario`, recorded by
+  `runner/overheadMeasurement.ts` with `runner/steadyWindow.ts`):
   after the page API is ready the runner takes 1 Hz host polls for `OVERHEAD_WARMUP_MS` = 3 s, a
   priming poll and then exactly `BENCHMARK_OVERHEAD_POLLS` (default `OVERHEAD_STEADY_POLLS` = 10,
   min 5) polls on a fixed schedule (`t0 + i × 1 s`, not deadline-driven, so slow polls cannot drop
