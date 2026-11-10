@@ -36,7 +36,8 @@ export class FooterPrefetchingReadable implements McapTypes.IReadable {
   // e.g. to confirm connection pooling/reuse decisions made against the *unwrapped* instance still
   // apply correctly across this transparent wrapper.
   public readonly inner: McapTypes.IReadable;
-  #footerPrefetch?: Promise<{ offset: bigint; length: bigint; data: Uint8Array }>;
+  #footerOffset?: bigint;
+  #footerPrefetch?: Promise<Uint8Array>;
 
   public constructor(inner: McapTypes.IReadable) {
     this.inner = inner;
@@ -45,18 +46,16 @@ export class FooterPrefetchingReadable implements McapTypes.IReadable {
   public async size(): Promise<bigint> {
     const size = await this.inner.size();
     if (!this.#footerPrefetch) {
-      const length = FOOTER_AND_MAGIC_READ_LENGTH;
-      const offset = size - length;
+      const offset = size - FOOTER_AND_MAGIC_READ_LENGTH;
       if (offset >= 0n) {
-        const prefetch = this.inner
-          .read(offset, length)
-          .then((data) => ({ offset, length, data }));
+        const prefetch = this.inner.read(offset, FOOTER_AND_MAGIC_READ_LENGTH);
         // Swallow here to avoid an "unhandled rejection" warning if Initialize() never actually
         // requests this exact range (e.g. it errors out earlier for an unrelated reason) -- the
         // real rejection still surfaces normally through read() below if it IS awaited there.
         prefetch.catch(() => {
           // Intentionally empty: see comment above.
         });
+        this.#footerOffset = offset;
         this.#footerPrefetch = prefetch;
       }
     }
@@ -64,11 +63,12 @@ export class FooterPrefetchingReadable implements McapTypes.IReadable {
   }
 
   public async read(offset: bigint, length: bigint): Promise<Uint8Array> {
-    if (this.#footerPrefetch) {
-      const prefetch = await this.#footerPrefetch;
-      if (prefetch.offset === offset && prefetch.length === length) {
-        return prefetch.data;
-      }
+    if (
+      this.#footerPrefetch &&
+      offset === this.#footerOffset &&
+      length === FOOTER_AND_MAGIC_READ_LENGTH
+    ) {
+      return await this.#footerPrefetch;
     }
     return await this.inner.read(offset, length);
   }

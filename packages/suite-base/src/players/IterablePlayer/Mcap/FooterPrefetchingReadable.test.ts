@@ -132,6 +132,44 @@ describe("FooterPrefetchingReadable", () => {
       );
     });
 
+    it("does not wait for the in-flight footer prefetch before reading other ranges", async () => {
+      // Given: a footer prefetch that never resolves on its own.
+      const headerData = new Uint8Array([1, 2, 3]);
+      const read = jest
+        .fn()
+        .mockReturnValueOnce(new Promise<Uint8Array>(() => {}))
+        .mockResolvedValueOnce(headerData);
+      const inner: McapTypes.IReadable = { size: jest.fn().mockResolvedValue(1000n), read };
+      const readable = new FooterPrefetchingReadable(inner);
+      await readable.size();
+
+      // When
+      const result = await readable.read(0n, 20n);
+
+      // Then: the header read was issued and resolved while the footer prefetch is still pending.
+      expect(result).toBe(headerData);
+      expect(read).toHaveBeenCalledTimes(2);
+      expect(read).toHaveBeenLastCalledWith(0n, 20n);
+    });
+
+    it("does not fail other reads when the footer prefetch fails", async () => {
+      // Given
+      const headerData = new Uint8Array([1, 2, 3]);
+      const read = jest
+        .fn()
+        .mockRejectedValueOnce(new Error("footer failed"))
+        .mockResolvedValueOnce(headerData);
+      const inner: McapTypes.IReadable = { size: jest.fn().mockResolvedValue(1000n), read };
+      const readable = new FooterPrefetchingReadable(inner);
+      await readable.size();
+
+      // When
+      const result = await readable.read(0n, 20n);
+
+      // Then
+      expect(result).toBe(headerData);
+    });
+
     it("still works correctly if read() is called before size() (no prefetch in flight)", async () => {
       // Given: no speculative prefetch has been started yet.
       const data = new Uint8Array([9, 9, 9]);
