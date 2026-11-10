@@ -1075,44 +1075,6 @@ describe("PanelExtensionAdapter", () => {
     expect(cleanupCalled).toBe(true);
   });
 
-  it("should expose readMessagesInRange and stop reading after unmount", async () => {
-    // GIVEN
-    let panelContext: PanelExtensionContext | undefined;
-    const initPanel = (context: PanelExtensionContext) => {
-      panelContext = context;
-    };
-
-    const handle = render(
-      <ThemeProvider isDark>
-        <MockPanelContextProvider>
-          <PanelSetup>
-            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
-          </PanelSetup>
-        </MockPanelContextProvider>
-      </ThemeProvider>,
-    );
-    await act(async () => undefined);
-
-    const readBatches = async () => {
-      const batches: unknown[] = [];
-      for await (const batch of panelContext!.readMessagesInRange!("/topic", {
-        start: { sec: 1, nsec: 0 },
-        end: { sec: 2, nsec: 0 },
-      })) {
-        batches.push(batch);
-      }
-      return batches;
-    };
-
-    // WHEN / THEN - the mock data source has no range support
-    expect(panelContext!.readMessagesInRange).toBeDefined();
-    await expect(readBatches()).resolves.toEqual([]);
-
-    // WHEN / THEN
-    handle.unmount();
-    await expect(readBatches()).resolves.toEqual([]);
-  });
-
   describe("extensionSettingsActionHandler - reorder-node branch", () => {
     it("should return early for reorder-node actions without saving config", async () => {
       // Given: A mock updatePanelSettingsTree to capture the wrapped actionHandler

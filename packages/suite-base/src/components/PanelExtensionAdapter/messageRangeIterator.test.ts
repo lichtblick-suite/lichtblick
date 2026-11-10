@@ -289,6 +289,40 @@ describe("createMessageRangeIterator", () => {
     }
   });
 
+  it("should keep previously yielded batches intact", async () => {
+    const mockMessages: MessageEvent[] = Array.from({ length: 4 }, () =>
+      MessageEventBuilder.messageEvent({ topic: mockTopic }),
+    );
+    let mockTime = 0;
+    const performanceNowSpy = jest.spyOn(performance, "now").mockImplementation(() => mockTime);
+
+    async function* timedIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
+      for (const msgEvent of mockMessages) {
+        mockTime += BATCH_INTERVAL_MS + 1;
+        yield { type: "message-event", msgEvent };
+      }
+    }
+
+    try {
+      const { iterable } = createMessageRangeIterator({
+        topic: mockTopic,
+        rawBatchIterator: timedIterator(),
+        sortedTopics: mockSortedTopics,
+        messageConverters: mockMessageConverters,
+      });
+
+      const batches: MessageEvent[][] = [];
+      for await (const batch of iterable) {
+        batches.push(batch);
+      }
+
+      expect(batches.length).toBeGreaterThan(1);
+      expect(batches.flat()).toEqual(mockMessages);
+    } finally {
+      performanceNowSpy.mockRestore();
+    }
+  });
+
   it("should handle message conversion when converters are available", async () => {
     const mockMessage: MessageEvent = MessageEventBuilder.messageEvent({ topic: mockTopic });
 

@@ -5,7 +5,7 @@
 
 import { renderHook, act } from "@testing-library/react";
 
-import { MessageEvent } from "@lichtblick/suite";
+import { MessageEvent, Time } from "@lichtblick/suite";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
 import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -100,7 +100,7 @@ describe("useSubscribeMessageRange", () => {
     });
 
     // Then
-    expect(mockGetBatchIterator).toHaveBeenCalledWith(topic);
+    expect(mockGetBatchIterator).toHaveBeenCalledWith(topic, undefined);
     expect(onNewRangeIterator).toHaveBeenCalledWith(mockIterable);
     expect(cancel).toBe(mockCancel);
     expect(mockCreateMessageRangeIterator).toHaveBeenCalledWith(
@@ -111,4 +111,34 @@ describe("useSubscribeMessageRange", () => {
       }),
     );
   });
+
+  const rangeCases: { name: string; start?: Time; end?: Time }[] = [
+    { name: "start and end", start: { sec: 1, nsec: 0 }, end: { sec: 2, nsec: 0 } },
+    { name: "only start", start: { sec: 1, nsec: 0 } },
+    { name: "only end", end: { sec: 2, nsec: 0 } },
+  ];
+  for (const { name, start, end } of rangeCases) {
+    it(`forwards the range to the data source when given ${name}`, () => {
+      // Given
+      const topic = BasicBuilder.string();
+      mockCreateMessageRangeIterator.mockReturnValue({
+        iterable: { [Symbol.asyncIterator]: jest.fn() },
+        cancel: jest.fn(),
+      });
+      const mockGetBatchIterator = jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() });
+      mockUseMessagePipelineGetter.mockReturnValue(
+        jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator: mockGetBatchIterator }),
+      );
+      const onNewRangeIterator = jest.fn().mockResolvedValue(undefined);
+      const { result } = renderHook(() => useSubscribeMessageRange());
+
+      // When
+      act(() => {
+        result.current({ topic, start, end, onNewRangeIterator });
+      });
+
+      // Then
+      expect(mockGetBatchIterator).toHaveBeenCalledWith(topic, { start, end });
+    });
+  }
 });

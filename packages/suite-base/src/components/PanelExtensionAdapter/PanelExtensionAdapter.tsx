@@ -70,7 +70,6 @@ import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext, MessageConverterAlertHandler } from "./types";
-import { useReadMessagesInRange } from "./useReadMessagesInRange";
 import { useSharedPanelState } from "./useSharedPanelState";
 import { useSubscribeMessageRange } from "./useSubscribeMessageRange";
 
@@ -236,7 +235,6 @@ function PanelExtensionAdapter(
   );
 
   const subscribeMessageRange = useSubscribeMessageRange(emitMessageConverterAlert);
-  const readMessagesInRange = useReadMessagesInRange(emitMessageConverterAlert);
 
   // Register handlers to update the app settings we subscribe to
   useEffect(() => {
@@ -698,13 +696,6 @@ function PanelExtensionAdapter(
         return subscribeMessageRange(args);
       },
 
-      readMessagesInRange(topic, options) {
-        if (!isMounted()) {
-          return (async function* () {})();
-        }
-        return readMessagesInRange(topic, options);
-      },
-
       async getMessageAtTime(topic: string, time: Time) {
         if (!isMounted()) {
           return undefined;
@@ -769,7 +760,6 @@ function PanelExtensionAdapter(
     setDefaultPanelTitle,
     setMessagePathDropConfig,
     subscribeMessageRange,
-    readMessagesInRange,
     setAlert,
     clearAlert,
   ]);
