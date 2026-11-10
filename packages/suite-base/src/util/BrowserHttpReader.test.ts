@@ -108,14 +108,12 @@ describe("BrowserHttpReader", () => {
     });
 
     it("falls back when the 206 response has no Content-Range header", async () => {
-      mockFetch
-        .mockResolvedValueOnce(rangedResponse({ headers: {} }))
-        .mockResolvedValueOnce(
-          new Response(null, {
-            status: 200,
-            headers: { "accept-ranges": "bytes", "content-length": "500" },
-          }),
-        );
+      mockFetch.mockResolvedValueOnce(rangedResponse({ headers: {} })).mockResolvedValueOnce(
+        new Response(null, {
+          status: 200,
+          headers: { "accept-ranges": "bytes", "content-length": "500" },
+        }),
+      );
 
       const result = await new BrowserHttpReader(url).open();
 
@@ -138,14 +136,12 @@ describe("BrowserHttpReader", () => {
     });
 
     it("falls back when the ranged probe request throws", async () => {
-      mockFetch
-        .mockRejectedValueOnce(new Error("network down"))
-        .mockResolvedValueOnce(
-          new Response(null, {
-            status: 200,
-            headers: { "accept-ranges": "bytes", "content-length": "500" },
-          }),
-        );
+      mockFetch.mockRejectedValueOnce(new Error("network down")).mockResolvedValueOnce(
+        new Response(null, {
+          status: 200,
+          headers: { "accept-ranges": "bytes", "content-length": "500" },
+        }),
+      );
 
       const result = await new BrowserHttpReader(url).open();
 
@@ -162,7 +158,9 @@ describe("BrowserHttpReader", () => {
     it("throws when the fallback fetch itself fails", async () => {
       mockFetch.mockRejectedValueOnce(new Error("boom"));
 
-      await expect(new BrowserHttpReader(url).open()).rejects.toThrow("Fetching remote file failed");
+      await expect(new BrowserHttpReader(url).open()).rejects.toThrow(
+        "Fetching remote file failed",
+      );
     });
 
     it("includes a CORS hint in the browser (non-desktop) error message", async () => {
