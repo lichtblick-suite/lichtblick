@@ -23,16 +23,12 @@ const READ_AHEAD_BUFFER_SIZE = 50 * 1024 * 1024; // 50 MB
 // not. It can be used for any type of ranges, be it bytes, timestamps, or something else.
 export function getNewConnection(options: {
   currentRemainingRange?: Range; // The remaining range that the current connection (if any) is going to download.
-  // Remaining ranges for any additional concurrent connections beyond the primary one (see
-  // `maxConcurrentConnections` on `CachedFilelike`). Empty/omitted preserves the original
-  // single-connection behavior exactly. A new connection is only started when NONE of
-  // `currentRemainingRange` or `additionalRemainingRanges` already covers (or is close enough to
-  // reach) the pending read -- see `getNewConnectionWithExistingReadRequest`.
-  additionalRemainingRanges?: Range[];
+  additionalRemainingRanges?: Range[]; // Remaining ranges of any other concurrent connections.
+
   readRequestRange?: Range; // The range of the read request that we're trying to satisfy.
   downloadedRanges: Range[]; // Array of ranges that have been downloaded already.
   lastResolvedCallbackEnd?: number; // The range.end of the last read request that we resolved. Useful for reading ahead a bit.
-  maxRequestSize: number; // The cache size. If equal to or larger than `fileSize` we will attempt to download the whole file.
+  maxRequestSize: number; // The cache size.
   fileSize: number; // Size of the file.
   continueDownloadingThreshold: number; // Amount we're willing to wait downloading before opening a new connection.
   // When false, only the exact requested byte ranges are downloaded and no speculative
@@ -108,11 +104,7 @@ function getNewConnectionWithExistingReadRequest({
     );
   }
 
-  // A new connection is unnecessary if at least one existing connection both overlaps the missing
-  // range AND will reach it soon enough (i.e. is "good enough" on its own). With a single
-  // connection (the common case) this is exactly the original single-connection check; with
-  // `maxConcurrentConnections > 1` on `CachedFilelike`, this lets a second, genuinely-disjoint
-  // in-flight connection avoid being torn down just because a new (different) request arrived.
+  // Skip a new connection if any existing one overlaps the missing range and will reach it soon.
   const hasGoodEnoughConnection = allRemainingRanges.some(
     (remainingRange) =>
       isOverlapping(notDownloadedRanges, [remainingRange]) &&
@@ -122,18 +114,11 @@ function getNewConnectionWithExistingReadRequest({
   if (hasGoodEnoughConnection) {
     return;
   }
-  // When read-ahead is disabled, only download exactly the missing portion of the requested
-  // range. This skips both the legacy "download the whole file" path (maxRequestSize >= fileSize)
-  // and the 50 MiB look-ahead extension below, keeping multi-file remote sessions lazy.
+  // When read-ahead is disabled, only download exactly the missing portion of the requested range.
   if (!readAheadEnabled) {
     return notDownloadedRanges[0];
   }
-  // Note: there is deliberately no special case here for `maxRequestSize >= fileSize` ("the cache
-  // could hold the whole file"). Requesting the whole remaining file in one connection makes any
-  // proxy/CDN in front of the storage backend start streaming a (potentially multi-hundred-MB)
-  // GetObject that gets aborted as soon as the next read arrives -- real, wasted server-side work
-  // for every file smaller than the cache. The read-ahead extension below already bounds itself to
-  // `readAheadBufferBytes`, which is exactly the behavior we want here too.
+  // No whole-file request even if the cache fits it: proxies would stream it all before the abort.
   if (notDownloadedRanges[0].end === readRequestRange.end) {
     // If we're downloading to the end of our range, do some reading ahead while we're at it.
     // Note that we might have already downloaded parts of this range, but we don't know when
@@ -170,11 +155,7 @@ function getNewConnectionWithoutExistingConnection({
   // reading ahead as much data as we can!
   let readAheadRange: Range | undefined;
   if (maxRequestSize >= fileSize) {
-    // The cache could hold the whole file, but we still cap the speculative read-ahead at
-    // `readAheadBufferBytes` instead of requesting the entire remaining file in one connection --
-    // see the comment in `getNewConnectionWithExistingReadRequest` for why "the cache can hold it"
-    // is not the same as "we should ask the backend for all of it at once". We still prefer
-    // downloading first near where the last request happened.
+    // Cap at readAheadBufferBytes (see above), preferring data near the last request.
     const start = lastResolvedCallbackEnd ?? 0;
     const potentialRange = { start, end: Math.min(start + readAheadBufferBytes, fileSize) };
     if (!isRangeCoveredByRanges(potentialRange, downloadedRanges)) {

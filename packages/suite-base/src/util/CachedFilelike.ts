@@ -26,18 +26,14 @@ import { Range } from "./ranges";
 
 // CachedFilelike is a streamed Filelike backed by a VirtualLRUBuffer.
 // It serves requested byte ranges from an in-memory LRU cache, keeps at most
-// `maxConcurrentConnections` underlying fetches active (1 by default, matching the original
-// behavior; remote MCAP sessions may opt into 2 -- see `RemoteFileReadable`), and optionally uses
-// bounded read-ahead/reconnect behavior for remote readers.
+// `maxConcurrentConnections` underlying fetches active, and optionally uses bounded
+// read-ahead/reconnect behavior for remote readers.
 
 const LOGGING_INTERVAL_IN_BYTES = 1024 * 1024 * 300; // Log every 300MiB to avoid cluttering the logs too much.
 const CACHE_BLOCK_SIZE = 1024 * 1024 * 10; // 10MiB blocks.
 // Don't start a new connection if we're 5MiB away from downloading the requested byte.
 const CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION = 1024 * 1024 * 5;
-// Default number of concurrent underlying fetches. 1 preserves the original, exclusively-tested
-// single-connection behavior; remote MCAP sessions opt into 2 (see `RemoteFileReadable`) so that a
-// genuinely disjoint read (e.g. a seek/scrub jump) doesn't have to tear down an in-flight
-// read-ahead connection that a *different*, still-pending read is relying on.
+// Multi-file remote sessions opt into 2 (see MultiIterableSource).
 const DEFAULT_MAX_CONCURRENT_CONNECTIONS = 1;
 
 const log = Logger.getLogger(__filename);
@@ -57,9 +53,7 @@ export default class CachedFilelike implements Filelike {
   // eslint-disable-next-line @lichtblick/no-boolean-parameters
   #keepReconnectingCallback?: (reconnecting: boolean) => void;
 
-  // Active connections, in insertion order (oldest first). `remainingRange.start` gets updated
-  // whenever we receive new data, so it truly is the remaining range each one is going to
-  // download. Bounded at `#maxConcurrentConnections` entries -- see `#setConnection`.
+  // Active connections, oldest first. `remainingRange.start` advances as data arrives.
   #connections: { stream: FileStream; remainingRange: Range }[] = [];
 
   // A list of read requests and associated ranges for all read requests, in order.
@@ -301,8 +295,7 @@ export default class CachedFilelike implements Filelike {
     };
 
     if (this.#readRequests.length === 0) {
-      // Idle path (no pending read request): only speculate if we have no connections at all --
-      // unchanged from the original single-connection behavior.
+      // Only read ahead speculatively when no connection is open.
       if (this.#connections.length === 0) {
         const newConnection = getNewConnection({
           currentRemainingRange: undefined,
@@ -316,15 +309,7 @@ export default class CachedFilelike implements Filelike {
       return;
     }
 
-    // Walk pending read requests in priority order (oldest/first is highest priority, matching
-    // resolution order). For each one not already covered by an existing (or about-to-exist)
-    // connection, try to give it a connection:
-    // - If there's spare capacity, just add one.
-    // - Otherwise, evict the farthest existing connection (see #setConnection) -- but ONLY if
-    //   that eviction wouldn't take away the connection serving a higher-priority (earlier still
-    //   pending) request. This exactly reproduces the original single-connection semantics when
-    //   `maxConcurrentConnections` is 1 (the sole existing connection is always eligible), while
-    //   preventing a lower-priority request from starving a higher-priority one under contention.
+    // Oldest request has priority; later requests may not evict connections serving earlier ones.
     for (const [index, request] of this.#readRequests.entries()) {
       const newConnection = getNewConnection({
         currentRemainingRange: this.#connections[0]?.remainingRange,
@@ -341,18 +326,11 @@ export default class CachedFilelike implements Filelike {
       }
       const higherPriorityRanges = this.#readRequests.slice(0, index).map((r) => r.range);
       this.#setConnection(newConnection, { protectedRanges: higherPriorityRanges });
-      // If every existing connection was protected, #setConnection is a no-op for this request;
-      // it'll be reconsidered the next time #updateState() runs.
     }
   }
 
-  // Add a new connection spanning `range`, evicting the least useful existing one first if we're
-  // already at `#maxConcurrentConnections`. With the default of 1, this always evicts the (only)
-  // existing connection, exactly matching the original single-connection behavior.
-  // `protectedRanges` (used when a lower-priority request is trying to open a connection under
-  // contention -- see #updateState) excludes any connection that overlaps one of them from
-  // eviction; if every existing connection is protected, this is a no-op (the caller's request
-  // stays pending until capacity frees up naturally).
+  // Open a connection for `range`, evicting one first when at capacity. Connections overlapping
+  // `protectedRanges` are never evicted; if all are protected, this is a no-op.
   #setConnection(range: Range, options?: { protectedRanges?: Range[] }): void {
     if (range.end <= range.start) {
       // Prevent an invalid/inverted HTTP Range header (for example "bytes=100-99") and the 416
@@ -374,15 +352,10 @@ export default class CachedFilelike implements Filelike {
             ),
         );
       if (evictableIndexes.length === 0) {
-        // Every existing connection is protected (needed by a higher-priority pending request);
-        // leave this request pending rather than starve a more important one.
         return;
       }
 
-      // Evict whichever eligible connection's remaining range starts farthest from the new one --
-      // an LRU-ish heuristic since we don't track true recency per connection. With
-      // maxConcurrentConnections=1 (no protected ranges ever apply) there is only ever one
-      // candidate, so this is unambiguous.
+      // Evict the connection farthest from the new range.
       let evictIndex = evictableIndexes[0]!;
       let maxDistance = -1;
       for (const i of evictableIndexes) {

@@ -7,34 +7,14 @@
 
 import { McapTypes } from "@mcap/core";
 
-// The MCAP footer record is fixed-size by the file FORMAT SPEC itself (not just this @mcap/core
-// version), so this constant is stable across @mcap/core releases:
-//   Opcode(1) + record content length(8) + summaryStart(8) + summaryOffsetStart(8) + crc(4) = 29
-// bytes, plus the 8-byte trailing magic = 37 bytes. `McapIndexedReader.Initialize()` computes and
-// reads this exact same length/offset from the end of the file; see its `footerAndMagicReadLength`
-// in @mcap/core's source.
+// Footer (29 bytes) + trailing magic (8), fixed by the MCAP spec; matches `footerAndMagicReadLength`
+// in @mcap/core's McapIndexedReader.
 const FOOTER_AND_MAGIC_READ_LENGTH = 37n;
 
-/**
- * Wraps an `IReadable` so that, as soon as `size()` resolves, it speculatively starts fetching the
- * MCAP footer region (fixed-size, see above) *in parallel* -- before the caller
- * (`McapIndexedReader.Initialize()`, from the external `@mcap/core` package) even finishes reading
- * the file header. `Initialize()` reads the header and then the footer sequentially even though
- * the footer's location only depends on `size()` (already known, not on anything parsed from the
- * header) -- so those two reads are independent and this removes one full network round-trip's
- * worth of latency from the file-open critical path, without needing to modify `@mcap/core` itself
- * (an external dependency we can't patch -- see ORIONINIT-211029 backlog item #10).
- *
- * Purely additive and safe: if the caller ever requests a different range than the one prefetched
- * (e.g. a different/older @mcap/core version computes the footer length differently, or the file
- * is too small to have a footer at all), this transparently falls back to a normal `read()` call --
- * it never changes *what* bytes are returned, only *when* the underlying fetch for the footer
- * region is started.
- */
+// Starts fetching the MCAP footer as soon as size() resolves, so it runs in parallel with the
+// header reads that McapIndexedReader.Initialize() performs first. Any other range passes through.
 export class FooterPrefetchingReadable implements McapTypes.IReadable {
-  // Kept public (not `#inner`) so callers/tests can identify the underlying readable this wraps,
-  // e.g. to confirm connection pooling/reuse decisions made against the *unwrapped* instance still
-  // apply correctly across this transparent wrapper.
+  // Public so tests can match Initialize() calls to the wrapped readable.
   public readonly inner: McapTypes.IReadable;
   #footerOffset?: bigint;
   #footerPrefetch?: Promise<Uint8Array>;
@@ -49,12 +29,8 @@ export class FooterPrefetchingReadable implements McapTypes.IReadable {
       const offset = size - FOOTER_AND_MAGIC_READ_LENGTH;
       if (offset >= 0n) {
         const prefetch = this.inner.read(offset, FOOTER_AND_MAGIC_READ_LENGTH);
-        // Swallow here to avoid an "unhandled rejection" warning if Initialize() never actually
-        // requests this exact range (e.g. it errors out earlier for an unrelated reason) -- the
-        // real rejection still surfaces normally through read() below if it IS awaited there.
-        prefetch.catch(() => {
-          // Intentionally empty: see comment above.
-        });
+        // Avoid an unhandled rejection if the footer is never read; read() still surfaces it.
+        prefetch.catch(() => undefined);
         this.#footerOffset = offset;
         this.#footerPrefetch = prefetch;
       }
