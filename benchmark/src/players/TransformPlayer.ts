@@ -62,7 +62,7 @@ class TransformPlayer extends BenchmarkPlayerBase implements Player {
 
     let numMessages = 0;
     let startTime: Time | undefined;
-    for (;;) {
+    while (!this.closed) {
       const topicStats = new Map<string, TopicStats>();
       const messages: MessageEvent<FrameTransform>[] = [];
       const timestamp = now();

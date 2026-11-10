@@ -1,0 +1,15 @@
+{
+  "extends": "@lichtblick/tsconfig/base",
+  "include": ["./**/*", "../common/**/*", "../../package.json"],
+  "compilerOptions": {
+    "rootDir": "../../../",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "useUnknownInCatchVariables": false,
+    "lib": ["dom", "dom.iterable", "es2022", "webworker"],
+    "paths": {
+      "@lichtblick/suite-base/*": ["../../../packages/suite-base/src/*"]
+    }
+  }
+}

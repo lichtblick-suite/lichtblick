@@ -22,6 +22,9 @@ export type UserProfile = {
    */
   firstSeenTimeIsFirstLoad?: boolean;
 
+  /** Ids of the personal (local) layouts the user marked as favorite. */
+  favoriteLayoutIds?: LayoutID[];
+
   /** Onboarding flow status */
   onboarding?: {
     /** List of panel types for which the settings tooltip has been shown */

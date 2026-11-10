@@ -17,3 +17,5 @@ export const PLOTABLE_ROS_TYPES = [
   "uint64",
   "uint8",
 ];
+
+export const MISSING_VALUE_PLACEHOLDER = "—";

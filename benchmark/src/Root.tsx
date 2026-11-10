@@ -14,8 +14,13 @@ import {
   LaunchPreferenceValue,
   StudioApp,
 } from "@lichtblick/suite-base";
+import { AppParametersInput } from "@lichtblick/suite-base/context/AppParametersContext";
 
-import { McapLocalBenchmarkDataSourceFactory, SyntheticDataSourceFactory } from "./dataSources";
+import {
+  McapLocalBenchmarkDataSourceFactory,
+  McapRealPipelineBenchmarkDataSourceFactory,
+  SyntheticDataSourceFactory,
+} from "./dataSources";
 import { LAYOUTS } from "./layouts";
 import {
   PointcloudPlayer,
@@ -23,6 +28,8 @@ import {
   TransformPlayer,
   TransformPreloadingPlayer,
 } from "./players";
+import { BenchmarkAppBar } from "./scenarios";
+import { getScenarioFromUrl } from "./scenarios/registry";
 import { MemoryAppConfiguration } from "./services";
 
 export function Root(): React.JSX.Element {
@@ -32,6 +39,7 @@ export function Root(): React.JSX.Element {
         defaults: {
           [AppSetting.LAUNCH_PREFERENCE]: LaunchPreferenceValue.WEB,
           [AppSetting.MESSAGE_RATE]: 240,
+          [AppSetting.SHOW_OPEN_DIALOG_ON_STARTUP]: false,
         },
       }),
   );
@@ -39,6 +47,7 @@ export function Root(): React.JSX.Element {
   const dataSources: IDataSourceFactory[] = useMemo(() => {
     const sources = [
       new McapLocalBenchmarkDataSourceFactory(),
+      new McapRealPipelineBenchmarkDataSourceFactory(),
       new SyntheticDataSourceFactory(
         "pointcloud",
         PointcloudPlayer,
@@ -59,13 +68,24 @@ export function Root(): React.JSX.Element {
   const [extensionLoaders] = useState(() => []);
   const url = new URL(window.location.href);
 
+  // `useScenarioBootstrap` installs and selects this same `scenario:<id>` layout, but only once
+  // its own (async) install effect resolves. Passing it here too lets `CurrentLayoutProvider`
+  // select it deterministically on mount (see its `appParameters.defaultLayout` handling),
+  // instead of racing that effect against its own mount-time "restore last layout" logic.
+  const [appParameters] = useState<AppParametersInput>(() => {
+    const scenario = getScenarioFromUrl(url);
+    return scenario ? { defaultLayout: `scenario:${scenario.id}` } : { defaultLayout: "Default" };
+  });
+
   return (
     <SharedRoot
       enableLaunchPreferenceScreen={false}
       deepLinks={[url.href]}
+      appParameters={appParameters}
       dataSources={dataSources}
       appConfiguration={appConfiguration}
       extensionLoaders={extensionLoaders}
+      AppBarComponent={BenchmarkAppBar}
       enableGlobalCss
     >
       <StudioApp />

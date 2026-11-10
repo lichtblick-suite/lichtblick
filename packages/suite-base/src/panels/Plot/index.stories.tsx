@@ -15,7 +15,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { StoryObj } from "@storybook/react-webpack5";
-import { screen, userEvent } from "@storybook/testing-library";
+import { fireEvent, screen, userEvent } from "@storybook/testing-library";
 import { produce } from "immer";
 import { useEffect, useState } from "react";
 import { makeStyles } from "tss-react/mui";
@@ -33,7 +33,11 @@ const withEndTime = (testFixture: Fixture, endTime: any) => ({
 });
 
 const paths: PlotConfig["paths"] = [
-  { value: "/some_topic/location.pose.velocity", enabled: true, timestampMethod: "receiveTime" },
+  {
+    value: "/some_topic/location.pose.velocity",
+    enabled: true,
+    timestampMethod: "receiveTime",
+  },
   {
     value: "/some_topic/location.pose.acceleration",
     enabled: true,
@@ -44,9 +48,21 @@ const paths: PlotConfig["paths"] = [
     enabled: true,
     timestampMethod: "receiveTime",
   },
-  { value: "/boolean_topic.data", enabled: true, timestampMethod: "receiveTime" },
-  { value: "/some_topic/state.items[0].speed", enabled: true, timestampMethod: "receiveTime" },
-  { value: "/some_topic/location.header.stamp", enabled: true, timestampMethod: "receiveTime" },
+  {
+    value: "/boolean_topic.data",
+    enabled: true,
+    timestampMethod: "receiveTime",
+  },
+  {
+    value: "/some_topic/state.items[0].speed",
+    enabled: true,
+    timestampMethod: "receiveTime",
+  },
+  {
+    value: "/some_topic/location.header.stamp",
+    enabled: true,
+    timestampMethod: "receiveTime",
+  },
 ];
 
 const exampleConfig: PlotConfig = {
@@ -300,6 +316,50 @@ export const LineGraphAfterZoom: StoryObj = {
   },
 };
 
+export const DeltaMeasureMode: StoryObj = {
+  render: function Story() {
+    // A single series keeps the demo predictable: clicks reliably snap to this one line instead
+    // of whichever of several overlapping series happens to be nearest.
+    return <PlotWrapper config={{ ...exampleConfig, paths: [exampleConfig.paths[0]!] }} />;
+  },
+
+  name: "delta measure mode",
+
+  parameters: {
+    colorScheme: "light",
+  },
+
+  play: async () => {
+    await delay(200);
+
+    const toggle = await screen.findByTestId("plot-measure-mode-toggle");
+    await userEvent.click(toggle);
+
+    const canvasEl = document.querySelector("canvas");
+    const target = canvasEl?.parentElement;
+    if (!target) {
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+
+    // The single series rises steeply near the start of the timeline - click there, comfortably
+    // inside the visible x range, so both markers land on the line.
+    fireEvent.click(target, {
+      clientX: rect.left + rect.width * 0.08,
+      clientY: rect.top + rect.height * 0.6,
+    });
+    await delay(200);
+
+    fireEvent.click(target, {
+      clientX: rect.left + rect.width * 0.14,
+      clientY: rect.top + rect.height * 0.5,
+    });
+    await delay(200);
+
+    await screen.findByTestId("delta-overlay");
+  },
+};
+
 export const TimestampMethodHeaderStamp: StoryObj = {
   render: function Story() {
     return (
@@ -312,7 +372,11 @@ export const TimestampMethodHeaderStamp: StoryObj = {
               enabled: true,
               timestampMethod: "headerStamp",
             },
-            { value: "/boolean_topic.data", enabled: true, timestampMethod: "headerStamp" },
+            {
+              value: "/boolean_topic.data",
+              enabled: true,
+              timestampMethod: "headerStamp",
+            },
           ],
         }}
       />
@@ -612,7 +676,11 @@ export const IndexBasedXAxisForArray: StoryObj = {
               enabled: true,
               timestampMethod: "receiveTime",
             }, // Should show up only in the legend: For now index plots always use playback data, and ignore preloaded data.
-            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            {
+              value: "/preloaded_topic.data",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
           ],
         }}
       />
@@ -694,7 +762,10 @@ export const CustomXAxisTopic: StoryObj = {
               timestampMethod: "receiveTime",
             },
           ],
-          xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
+          xAxisPath: {
+            value: "/some_topic/location.pose.velocity",
+            enabled: true,
+          },
         }}
       />
     );
@@ -723,7 +794,10 @@ export const CustomXAxisTopicWithXLimits: StoryObj = {
               timestampMethod: "receiveTime",
             },
           ],
-          xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
+          xAxisPath: {
+            value: "/some_topic/location.pose.velocity",
+            enabled: true,
+          },
         }}
       />
     );
@@ -751,7 +825,10 @@ export const CurrentCustomXAxisTopic: StoryObj = {
               timestampMethod: "receiveTime",
             },
           ],
-          xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
+          xAxisPath: {
+            value: "/some_topic/location.pose.velocity",
+            enabled: true,
+          },
         }}
       />
     );
@@ -789,7 +866,10 @@ export const CustomXAxisTopicWithMismatchedDataLengths: StoryObj = {
               timestampMethod: "receiveTime",
             },
           ],
-          xAxisPath: { value: "/some_topic/location_subset.pose.velocity", enabled: true },
+          xAxisPath: {
+            value: "/some_topic/location_subset.pose.velocity",
+            enabled: true,
+          },
         }}
       />
     );
@@ -842,7 +922,13 @@ export const SuperCloseValues: StoryObj = {
         }}
         config={{
           ...exampleConfig,
-          paths: [{ value: "/some_number.data", enabled: true, timestampMethod: "receiveTime" }],
+          paths: [
+            {
+              value: "/some_number.data",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
         }}
       />
     );
@@ -869,7 +955,10 @@ export const TimeValues: StoryObj = {
               timestampMethod: "receiveTime",
             },
           ],
-          xAxisPath: { value: "/some_topic/location.header.stamp", enabled: true },
+          xAxisPath: {
+            value: "/some_topic/location.header.stamp",
+            enabled: true,
+          },
         }}
       />
     );
@@ -890,8 +979,16 @@ export const PreloadedDataInBinaryBlocks: StoryObj = {
         config={{
           ...exampleConfig,
           paths: [
-            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "headerStamp" },
+            {
+              value: "/preloaded_topic.data",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+            {
+              value: "/preloaded_topic.data",
+              enabled: true,
+              timestampMethod: "headerStamp",
+            },
           ],
         }}
       />
@@ -918,7 +1015,11 @@ export const MixedStreamedAndPreloadedData: StoryObj = {
               enabled: true,
               timestampMethod: "receiveTime",
             },
-            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            {
+              value: "/preloaded_topic.data",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
           ],
         }}
       />
@@ -940,7 +1041,11 @@ export const PreloadedDataAndItsDerivative: StoryObj = {
         config={{
           ...exampleConfig,
           paths: [
-            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            {
+              value: "/preloaded_topic.data",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
             {
               value: "/preloaded_topic.data.@derivative",
               enabled: true,
@@ -967,7 +1072,11 @@ export const PreloadedDataAndItsNegative: StoryObj = {
         config={{
           ...exampleConfig,
           paths: [
-            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            {
+              value: "/preloaded_topic.data",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
             {
               value: "/preloaded_topic.data.@negative",
               enabled: true,

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { act, render, waitFor } from "@testing-library/react";
-import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api.js";
+import * as monacoApi from "monaco-editor/editor/editor.api.js";
 
 import { DEFAULT_STUDIO_SCRIPT_PREFIX } from "@lichtblick/suite-base/util/constants";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -51,7 +51,7 @@ type MockModel = {
   updateOptions: jest.Mock<void, [Record<string, unknown>]>;
   getFullModelRange: jest.Mock<Record<string, never>, []>;
 };
-jest.mock("monaco-editor/esm/vs/editor/editor.api", () => {
+jest.mock("monaco-editor/editor/editor.api.js", () => {
   const models = new Map<string, MockModel>();
 
   const createModel = (
@@ -105,11 +105,11 @@ jest.mock("monaco-editor/esm/vs/editor/editor.api", () => {
   };
 });
 
-jest.mock("monaco-editor/esm/vs/editor/browser/services/codeEditorService", () => ({
+jest.mock("monaco-editor/editor/browser/services/codeEditorService", () => ({
   ICodeEditorService: Symbol("ICodeEditorService"),
 }));
 
-jest.mock("monaco-editor/esm/vs/editor/standalone/browser/standaloneServices", () => ({
+jest.mock("monaco-editor/editor/standalone/browser/standaloneServices", () => ({
   StandaloneServices: {
     get: jest.fn(() => ({
       registerCodeEditorOpenHandler: jest.fn((handler) => {
@@ -152,7 +152,7 @@ jest.mock("react-monaco-editor", () => {
     editorDidMount?: (editor: unknown, monaco: unknown) => void;
     onChange?: (code: string) => void;
   }) {
-    const mockMonacoApi = jest.requireMock("monaco-editor/esm/vs/editor/editor.api");
+    const mockMonacoApi = jest.requireMock("monaco-editor/editor/editor.api.js");
     mockOnChange = props.onChange;
     mockEditor = createMockEditor();
     props.editorWillMount?.(mockMonacoApi);

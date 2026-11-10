@@ -20,7 +20,7 @@ import { Row } from "@tanstack/react-table";
 import { PropsWithChildren } from "react";
 import { makeStyles } from "tss-react/mui";
 
-import { CellValue } from "@lichtblick/suite-base/panels/Table/types";
+import { CellValue, TableFeatures } from "@lichtblick/suite-base/panels/Table/types";
 
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
 
@@ -40,7 +40,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 type TableCellProps = {
-  row: Row<CellValue>;
+  row: Row<TableFeatures, CellValue>;
   accessorPath: string;
 };
 

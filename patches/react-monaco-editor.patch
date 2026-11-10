@@ -1,0 +1,56 @@
+diff --git a/lib/diff.js b/lib/diff.js
+index 709679669ebdc99f605b2349501dd139fcb2ed00..787b0e25fd15a52a36f0233ce7c85d09a70923b1 100644
+--- a/lib/diff.js
++++ b/lib/diff.js
+@@ -9,7 +9,7 @@ var __assign = (this && this.__assign) || function () {
+     };
+     return __assign.apply(this, arguments);
+ };
+-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
++import * as monaco from "monaco-editor/editor/editor.api.js";
+ import * as React from "react";
+ import { useEffect, useMemo, useRef } from "react";
+ import { noop, processSize } from "./utils";
+diff --git a/lib/editor.js b/lib/editor.js
+index 4c84e78f3ad68ae6cde44824b73b69c8ab2f5d6a..c0e145029973157a959fde138ab8ff11e41c8b72 100644
+--- a/lib/editor.js
++++ b/lib/editor.js
+@@ -20,7 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
+         }
+     return t;
+ };
+-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
++import * as monaco from "monaco-editor/editor/editor.api.js";
+ import * as React from "react";
+ import { useEffect, useMemo, useRef } from "react";
+ import { noop, processSize } from "./utils";
+diff --git a/lib/index.d.ts b/lib/index.d.ts
+index 47473e5c2d2176aa8395796c651aa72e91dddf7d..03ae12aadf05780d8677219f19965305d81cf7c2 100644
+--- a/lib/index.d.ts
++++ b/lib/index.d.ts
+@@ -1,4 +1,4 @@
+-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
++import * as monaco from "monaco-editor/editor/editor.api.js";
+ import MonacoDiffEditor from "./diff";
+ import MonacoEditor from "./editor";
+ export * from "./types";
+diff --git a/lib/index.js b/lib/index.js
+index 32b811f3ce063d5c78cc51ab1569c3ac6d5a8c9b..70627c00fc2f9731fa2f87f8eb92295b912b49c3 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -1,4 +1,4 @@
+-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
++import * as monaco from "monaco-editor/editor/editor.api.js";
+ import MonacoDiffEditor from "./diff";
+ import MonacoEditor from "./editor";
+ export * from "./types";
+diff --git a/lib/types.d.ts b/lib/types.d.ts
+index 0ff9c57b625aedb2d2e92facfee138af1227e4f8..e8e747a624478443ce0e9556708d982c421ee56a 100644
+--- a/lib/types.d.ts
++++ b/lib/types.d.ts
+@@ -1,4 +1,4 @@
+-import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
++import * as monacoEditor from "monaco-editor/editor/editor.api.js";
+ /**
+  * @remarks
+  * This will be `IStandaloneEditorConstructionOptions` in newer versions of monaco-editor, or

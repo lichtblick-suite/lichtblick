@@ -107,8 +107,9 @@ export function App(props: AppProps): React.JSX.Element {
   // Alerts provider also must come before other, dependent contexts.
   providers.unshift(<AlertsContextProvider />);
   providers.unshift(<CurrentLayoutProvider loaders={layoutLoaders} />);
-  providers.unshift(<UserProfileLocalStorageProvider />);
   providers.unshift(<LayoutManagerProvider />);
+  // The layout manager stores favorites in the user profile, so it is nested inside it.
+  providers.unshift(<UserProfileLocalStorageProvider />);
 
   const layoutStorage = useMemo(() => new IdbLayoutStorage(), []);
   providers.unshift(<LayoutStorageContext.Provider value={layoutStorage} />);

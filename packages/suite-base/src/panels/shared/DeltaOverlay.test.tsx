@@ -1,0 +1,290 @@
+/** @jest-environment jsdom */
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+import { act, fireEvent, render, screen } from "@testing-library/react";
+
+import { DeltaOverlay, DeltaOverlayProps } from "./DeltaOverlay";
+import "@testing-library/jest-dom";
+
+describe("DeltaOverlay", () => {
+  function buildProps(overrides: Partial<DeltaOverlayProps> = {}): DeltaOverlayProps {
+    return {
+      deltaRowLabel: "Delta",
+      xColumnLabel: "X-axis",
+      yColumnLabel: "Y-axis",
+      markerALabel: "P1",
+      markerBLabel: "P2",
+      xValueA: 1,
+      xValueB: 2,
+      yValueA: 10,
+      yValueB: 20,
+      deltaX: 1,
+      deltaY: 10,
+      onRemoveMarkerA: jest.fn(),
+      onRemoveMarkerB: jest.fn(),
+      ...overrides,
+    };
+  }
+
+  it("should render the delta row label and the two marker labels", () => {
+    // Given
+    const props = buildProps();
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getByText(props.deltaRowLabel)).toBeInTheDocument();
+    expect(screen.getByText(props.markerALabel)).toBeInTheDocument();
+    expect(screen.getByText(props.markerBLabel)).toBeInTheDocument();
+  });
+
+  it("should render the column headers for X-axis and Y-axis", () => {
+    // Given
+    const props = buildProps();
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getByText(props.xColumnLabel)).toBeInTheDocument();
+    expect(screen.getByText(props.yColumnLabel)).toBeInTheDocument();
+  });
+
+  it("should render colored marker dots when marker colors are provided", () => {
+    // Given
+    const props = buildProps({
+      markerAColor: "#EF833A",
+      markerBColor: "#FFC107",
+    });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getByTestId("delta-overlay-dot-a")).toBeInTheDocument();
+    expect(screen.getByTestId("delta-overlay-dot-b")).toBeInTheDocument();
+  });
+
+  it("should label the marker removal buttons distinctly", () => {
+    // Given
+    const props = buildProps();
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getByTestId("delta-overlay-remove-marker-a")).toHaveAccessibleName(
+      "Remove marker A",
+    );
+    expect(screen.getByTestId("delta-overlay-remove-marker-a")).toHaveAttribute(
+      "title",
+      "Remove marker A",
+    );
+    expect(screen.getByTestId("delta-overlay-remove-marker-b")).toHaveAccessibleName(
+      "Remove marker B",
+    );
+    expect(screen.getByTestId("delta-overlay-remove-marker-b")).toHaveAttribute(
+      "title",
+      "Remove marker B",
+    );
+  });
+
+  it("should render placeholders when values are undefined", () => {
+    // Given
+    const props = buildProps({
+      xValueA: undefined,
+      xValueB: undefined,
+      yValueA: undefined,
+      yValueB: undefined,
+      deltaX: undefined,
+      deltaY: undefined,
+    });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getAllByText("—")).toHaveLength(6);
+  });
+
+  it("should call onRemoveMarkerA when the marker A remove button is clicked", () => {
+    // Given
+    const onRemoveMarkerA = jest.fn();
+    const props = buildProps({ onRemoveMarkerA });
+    render(<DeltaOverlay {...props} />);
+
+    // When
+    fireEvent.click(screen.getByTestId("delta-overlay-remove-marker-a"));
+
+    // Then
+    expect(onRemoveMarkerA).toHaveBeenCalledTimes(1);
+  });
+
+  it("should call onRemoveMarkerB when the marker B remove button is clicked", () => {
+    // Given
+    const onRemoveMarkerB = jest.fn();
+    const props = buildProps({ onRemoveMarkerB });
+    render(<DeltaOverlay {...props} />);
+
+    // When
+    fireEvent.click(screen.getByTestId("delta-overlay-remove-marker-b"));
+
+    // Then
+    expect(onRemoveMarkerB).toHaveBeenCalledTimes(1);
+  });
+
+  it("should drag the overlay within its panel container", () => {
+    // Given
+    const { container } = render(<DeltaOverlay {...buildProps()} />);
+    const overlay = screen.getByTestId("delta-overlay");
+    const overlayParent = overlay.parentElement!;
+    const setPointerCapture = jest.fn();
+    const releasePointerCapture = jest.fn();
+    const panel = document.createElement("div");
+    panel.getBoundingClientRect = jest.fn(() => new DOMRect(0, 0, 300, 200));
+    overlay.getBoundingClientRect = jest.fn(() => new DOMRect(0, 0, 100, 50));
+    Object.defineProperty(overlayParent, "offsetParent", { value: panel });
+    overlay.setPointerCapture = setPointerCapture;
+    overlay.releasePointerCapture = releasePointerCapture;
+
+    // When
+    const dispatchPointerEvent = (type: string, clientX: number, clientY: number): void => {
+      const event = new Event(type, { bubbles: true });
+      Object.defineProperties(event, {
+        pointerId: { value: 1 },
+        clientX: { value: clientX },
+        clientY: { value: clientY },
+      });
+      overlay.dispatchEvent(event);
+    };
+    act(() => {
+      dispatchPointerEvent("pointerdown", 10, 10);
+      dispatchPointerEvent("pointermove", 260, 180);
+      dispatchPointerEvent("pointerup", 260, 180);
+    });
+
+    // Then
+    expect(setPointerCapture).toHaveBeenCalledWith(1);
+    expect(releasePointerCapture).toHaveBeenCalledWith(1);
+    expect(overlay).toHaveStyle({ transform: "translate(200px, 150px)" });
+    expect(container).toContainElement(overlay);
+  });
+
+  it("should stay pinned to the edge across multiple moves in the same drag gesture", () => {
+    // Given
+    render(<DeltaOverlay {...buildProps()} />);
+    const overlay = screen.getByTestId("delta-overlay");
+    const overlayParent = overlay.parentElement!;
+    const panel = document.createElement("div");
+    panel.getBoundingClientRect = jest.fn(() => new DOMRect(0, 0, 300, 200));
+    // A real browser's getBoundingClientRect reflects the currently applied transform - mimic that
+    // here so this test can catch clamp bounds drifting across moves within the same gesture.
+    overlay.getBoundingClientRect = jest.fn(() => {
+      const match = /translate\((-?[\d.]+)px, (-?[\d.]+)px\)/.exec(overlay.style.transform);
+      const [translateX, translateY] = match ? [Number(match[1]), Number(match[2])] : [0, 0];
+      return new DOMRect(translateX, translateY, 100, 50);
+    });
+    Object.defineProperty(overlayParent, "offsetParent", { value: panel });
+    overlay.setPointerCapture = jest.fn();
+    overlay.releasePointerCapture = jest.fn();
+
+    const dispatchPointerEvent = (type: string, clientX: number, clientY: number): void => {
+      const event = new Event(type, { bubbles: true });
+      Object.defineProperties(event, {
+        pointerId: { value: 1 },
+        clientX: { value: clientX },
+        clientY: { value: clientY },
+      });
+      overlay.dispatchEvent(event);
+    };
+
+    // When: drag far past the right/bottom edge, then ease off slightly while still past it.
+    act(() => {
+      dispatchPointerEvent("pointerdown", 10, 10);
+      dispatchPointerEvent("pointermove", 400, 300);
+    });
+    act(() => {
+      dispatchPointerEvent("pointermove", 380, 280);
+    });
+
+    // Then: still well past the clamp threshold, so the overlay must remain pinned to the edge.
+    expect(overlay).toHaveStyle({ transform: "translate(200px, 150px)" });
+  });
+
+  it("should not render a marker's remove button before that marker is placed", () => {
+    // Given
+    const props = buildProps({ xValueA: undefined, xValueB: undefined });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.queryByTestId("delta-overlay-remove-marker-a")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("delta-overlay-remove-marker-b")).not.toBeInTheDocument();
+  });
+
+  it("should render placeholders for xValueA, xValueB and deltaX before both markers are placed", () => {
+    // Given
+    const props = buildProps({
+      xValueA: undefined,
+      xValueB: undefined,
+      yValueA: undefined,
+      yValueB: undefined,
+      deltaX: undefined,
+      deltaY: undefined,
+    });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getAllByText("—")).toHaveLength(6);
+  });
+
+  it("should render marker A's value once placed while marker B is still a placeholder", () => {
+    // Given
+    const props = buildProps({
+      xValueA: 4.5,
+      xValueB: undefined,
+      yValueA: 10.2,
+      yValueB: undefined,
+      deltaX: undefined,
+      deltaY: undefined,
+      formatXValue: (value) => `${value.toFixed(1)}s`,
+      formatYValue: (value) => `${value.toFixed(1)}s`,
+    });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getByText("4.5s")).toBeInTheDocument();
+    expect(screen.getByText("10.2s")).toBeInTheDocument();
+    expect(screen.getAllByText("—")).toHaveLength(4);
+  });
+
+  it("should format x values and y values with 6 decimal places by default", () => {
+    // Given
+    const props = buildProps({
+      xValueA: 4.6,
+      xValueB: 6.0,
+      yValueA: 93.688286,
+      yValueB: 13.924775,
+      deltaX: 1.4,
+      deltaY: 79.763511,
+    });
+
+    // When
+    render(<DeltaOverlay {...props} />);
+
+    // Then
+    expect(screen.getByText("4.600000")).toBeInTheDocument();
+    expect(screen.getByText("6.000000")).toBeInTheDocument();
+    expect(screen.getByText("1.400000")).toBeInTheDocument();
+    expect(screen.getByText("93.688286")).toBeInTheDocument();
+    expect(screen.getByText("13.924775")).toBeInTheDocument();
+    expect(screen.getByText("79.763511")).toBeInTheDocument();
+  });
+});

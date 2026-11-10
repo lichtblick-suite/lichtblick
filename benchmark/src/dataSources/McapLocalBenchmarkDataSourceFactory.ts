@@ -14,8 +14,17 @@ import { McapIterableSource } from "@lichtblick/suite-base/players/IterablePlaye
 import { Player } from "@lichtblick/suite-base/players/types";
 
 import { BenchmarkPlayer } from "../players";
+import { BenchmarkPipelineKind } from "./types";
 
+/**
+ * Legacy/local-only microbenchmark path: loads a file picked from disk and drives it through the
+ * synthetic-instrumented `BenchmarkPlayer` wrapper rather than the real production player. Kept
+ * for existing local microbenchmarks; use `McapRealPipelineBenchmarkDataSourceFactory` for
+ * real-pipeline CI gates.
+ */
 class McapLocalBenchmarkDataSourceFactory implements IDataSourceFactory {
+  public readonly pipeline: BenchmarkPipelineKind = "synthetic";
+
   public id = "mcap-local-file";
   public type: IDataSourceFactory["type"] = "file";
   public displayName = "MCAP";

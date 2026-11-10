@@ -105,6 +105,14 @@ export type WorkspaceLayoutResponse = {
   layout: LayoutApiData;
 };
 
+/**
+ * Response listing the current user's favorite layouts
+ */
+export type FavoriteLayoutsResponse = {
+  /** Server-side ids of the favorite layouts */
+  favoriteLayouts: string[];
+};
+
 // =============================================================================
 // Service Layer Types
 // =============================================================================

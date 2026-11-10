@@ -20,7 +20,9 @@ import Plot from "./Plot";
 
 const mockSetMessagePathDropConfig = jest.fn();
 jest.mock("@lichtblick/suite-base/components/PanelContext", () => ({
-  usePanelContext: () => ({ setMessagePathDropConfig: mockSetMessagePathDropConfig }),
+  usePanelContext: () => ({
+    setMessagePathDropConfig: mockSetMessagePathDropConfig,
+  }),
 }));
 
 const mockGetMessagePipelineState = jest.fn();
@@ -53,6 +55,10 @@ jest.mock("@lichtblick/suite-base/panels/Plot/PlotLegend", () => ({
 
 jest.mock("@lichtblick/suite-base/panels/Plot/VerticalBars", () => ({
   VerticalBars: jest.fn(() => <div data-testid="vertical-bars" />),
+}));
+
+jest.mock("@lichtblick/suite-base/panels/Plot/DeltaMarkerBars", () => ({
+  DeltaMarkerBars: jest.fn(() => <div data-testid="delta-marker-bars" />),
 }));
 
 jest.mock("@lichtblick/suite-base/hooks/useGlobalVariables");
@@ -103,7 +109,10 @@ const datasetsBuilderStub = { id: "datasets-builder" } as any;
 let mockSetCanReset: (({ canReset }: { canReset: boolean }) => void) | undefined;
 
 class PlotConfigBuilder {
-  private config = { ...DEFAULT_PLOT_CONFIG, paths: [...DEFAULT_PLOT_CONFIG.paths] };
+  private config = {
+    ...DEFAULT_PLOT_CONFIG,
+    paths: [...DEFAULT_PLOT_CONFIG.paths],
+  };
 
   public withPaths(paths: PlotConfig["paths"]): this {
     this.config = { ...this.config, paths };
@@ -166,7 +175,9 @@ describe("Plot Component", () => {
     mockGetMessagePipelineState.mockReset();
     mockSubscribeMessagePipeline.mockReset();
     mockSetCanReset = undefined;
-    mockGetMessagePipelineState.mockReturnValue({ playerState: { source: "getter" } });
+    mockGetMessagePipelineState.mockReturnValue({
+      playerState: { source: "getter" },
+    });
     mockSubscribeMessagePipeline.mockImplementation((callback) => {
       callback({ playerState: { source: "subscriber" } });
       return jest.fn();
@@ -336,8 +347,12 @@ describe("Plot Component", () => {
     expect(mockCoordinatorInstance.handlePlayerState).toHaveBeenCalledWith({
       source: "subscriber",
     });
-    expect(mockCoordinatorInstance.handlePlayerState).toHaveBeenCalledWith({ source: "getter" });
-    expect(mockCoordinatorInstance.setShouldSync).toHaveBeenCalledWith({ shouldSync: true });
+    expect(mockCoordinatorInstance.handlePlayerState).toHaveBeenCalledWith({
+      source: "getter",
+    });
+    expect(mockCoordinatorInstance.setShouldSync).toHaveBeenCalledWith({
+      shouldSync: true,
+    });
     expect(mockCoordinatorInstance.destroy).toHaveBeenCalled();
   });
 });

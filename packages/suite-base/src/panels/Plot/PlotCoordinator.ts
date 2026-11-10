@@ -38,6 +38,7 @@ import {
   PlotCoordinatorEventTypes,
   Scale,
   UpdateAction,
+  YScale,
 } from "./types";
 import { isReferenceLinePlotPathType, PlotConfig } from "./utils/config";
 import { pathToSubscribePayload } from "./utils/subscription";
@@ -72,6 +73,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     bounds: { x: undefined, y: undefined },
   };
   private latestXScale?: Scale;
+  private latestYScale?: YScale;
   private queueDispatchRender = debouncePromise(this.dispatchRender.bind(this));
   private queueDispatchDownsample = debouncePromise(this.dispatchDownsample.bind(this));
   private queueDatasetsRender = debouncePromise(this.dispatchDatasetsRender.bind(this));
@@ -80,7 +82,11 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
   private readonly subscribeMessageRange: UseSubscribeMessageRange;
   private readonly rangeSubscriptionCancels = new Map<
     string,
-    { cancel: () => void; seriesKeys: ReadonlySet<SeriesConfigKey>; active: boolean }
+    {
+      cancel: () => void;
+      seriesKeys: ReadonlySet<SeriesConfigKey>;
+      active: boolean;
+    }
   >();
   private startTime: Immutable<Time> | undefined;
   private seriesKeysByTopic = new Map<string, Set<SeriesConfigKey>>();
@@ -153,8 +159,7 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     this.subscribeTopicRanges(this.seriesKeysByTopic);
 
     if (this.isTimeseriesPlot) {
-      const secondsSinceStart = toSec(subtractTime(currentTime, startTime));
-      this.currentSeconds = secondsSinceStart;
+      this.updateCurrentSeconds(toSec(subtractTime(currentTime, startTime)));
     }
 
     if (lastSeekTime !== this.lastSeekTime) {
@@ -399,6 +404,19 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
     return await this.datasetsBuilder.getCsvData();
   }
 
+  private updateCurrentSeconds(secondsSinceStart: number): void {
+    const moved = secondsSinceStart !== this.currentSeconds;
+    // Set the time first: queueDispatchRender may start rendering right away and reads it.
+    this.currentSeconds = secondsSinceStart;
+    // In follow mode the x-axis window ends at the current time. A source with a fixed range
+    // (file playback) never changes the dataset range, so nothing else would re-render the axis
+    // and it would stay where the panel was first drawn. A zoomed/panned or synced x-axis does not
+    // follow the time, so there is nothing to re-render then.
+    if (this.followRange != undefined && moved && !this.interactionBounds && !this.globalBounds) {
+      this.queueDispatchRender();
+    }
+  }
+
   private canReset(): boolean {
     if (this.interactionBounds) {
       return true;
@@ -503,11 +521,14 @@ export class PlotCoordinator extends EventEmitter<PlotCoordinatorEventTypes> {
       return;
     }
 
-    this.latestXScale = await this.renderer.updateDatasets(datasets);
+    const scales = await this.renderer.updateDatasets(datasets);
     if (this.isDestroyed()) {
       return;
     }
+    this.latestXScale = scales.x;
+    this.latestYScale = scales.y;
     this.emit("xScaleChanged", this.latestXScale);
+    this.emit("yScaleChanged", this.latestYScale);
   }
 
   private cancelTopicSubscription(topic: string): void {

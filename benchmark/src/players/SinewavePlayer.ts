@@ -57,7 +57,7 @@ class SinewavePlayer extends BenchmarkPlayerBase implements Player {
       },
     });
 
-    const sinewaveCount = 100;
+    const sinewaveCount = 10;
 
     const topics: Topic[] = [];
 
@@ -69,7 +69,7 @@ class SinewavePlayer extends BenchmarkPlayerBase implements Player {
     }
 
     let messageCount = 0;
-    for (;;) {
+    while (!this.closed) {
       messageCount += 1;
 
       const topicStats = new Map<string, TopicStats>();

@@ -712,10 +712,10 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
 
     renderer.setCurrentTime(newTimeNs);
     if (didSeek) {
-      renderer.handleSeek(oldTimeNs, allFrames);
+      renderer.handleSeek(oldTimeNs);
       setDidSeek(false);
     }
-  }, [currentTime, renderer, didSeek, allFrames]);
+  }, [currentTime, renderer, didSeek]);
 
   // Keep the renderer colorScheme and backgroundColor up to date
   useEffect(() => {

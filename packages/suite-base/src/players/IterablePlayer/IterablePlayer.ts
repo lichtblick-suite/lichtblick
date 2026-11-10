@@ -852,7 +852,9 @@ export class IterablePlayer implements Player {
     this.#messages = messageEvents;
     this.#presence = PlayerPresence.PRESENT;
     this.#queueEmitState();
-    this.#setState("idle");
+    // `startPlayback()` may have been called while still in "initialize"/"start-play" setting `#isPlaying` before we ever reach "idle". Honor it
+    // here instead of always going idle
+    this.#setState(this.#isPlaying ? "play" : "idle");
   }
 
   // Process a seek request. The seek is performed by requesting a getBackfillMessages from the source.

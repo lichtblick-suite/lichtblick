@@ -183,12 +183,6 @@ export class TransformTree {
     this.#frames.clear();
   }
 
-  public clearAfter(time: Time): void {
-    for (const frame of this.#frames.values()) {
-      frame.removeTransformsAfter(time);
-    }
-  }
-
   public hasFrame(id: AnyFrameId): boolean {
     if (id === CoordinateFrame.FALLBACK_FRAME_ID) {
       return true;

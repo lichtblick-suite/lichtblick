@@ -26,10 +26,7 @@ import {
   PaginationState,
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getSortedRowModel,
-  useReactTable,
+  useTable,
   CellContext,
 } from "@tanstack/react-table";
 import memoizeWeak from "memoize-weak";
@@ -40,7 +37,7 @@ import Stack from "@lichtblick/suite-base/components/Stack";
 
 import TableCell from "./TableCell";
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
-import { CellValue, MergedColumnsType } from "./types";
+import { CellValue, MergedColumnsType, TableFeatures, tableFeatureSet } from "./types";
 
 type TypedArray =
   | Int8Array
@@ -137,10 +134,10 @@ const useStyles = makeStyles<void, "tableData" | "tableHeader">()((theme, _param
   },
 }));
 
-const columnHelper = createColumnHelper<CellValue>();
+const columnHelper = createColumnHelper<TableFeatures, CellValue>();
 
 const memoizedCellRenderer = memoizeWeak((accessorPath: string, id: string) => {
-  return function ValueCell(info: CellContext<CellValue, unknown>) {
+  return function ValueCell(info: CellContext<TableFeatures, CellValue>) {
     const value = info.getValue();
     const row = info.row;
     if (Array.isArray(value) && typeof value[0] !== "object") {
@@ -160,7 +157,7 @@ const memoizedCellRenderer = memoizeWeak((accessorPath: string, id: string) => {
   };
 });
 
-function Expander(info: CellContext<CellValue, unknown>) {
+function Expander(info: Readonly<CellContext<TableFeatures, CellValue>>) {
   const { classes } = useStyles();
   const { row } = info;
   return (
@@ -180,7 +177,7 @@ function Expander(info: CellContext<CellValue, unknown>) {
 function getColumnsFromObject(val: CellValue, accessorPath: string) {
   if (isTypedArray(val)) {
     return [
-      columnHelper.accessor((row) => row, {
+      columnHelper.accessor((row): unknown => row, {
         id: "typedArray",
         header: "",
         cell: (info) => info.getValue(),
@@ -258,13 +255,12 @@ export default function Table({
 
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
-  const table = useReactTable({
+  const table = useTable({
+    features: tableFeatureSet,
     autoResetExpanded: false,
+    getRowCanExpand: () => true,
     columns,
     data: data.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize),
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     initialState: { pagination },
     onExpandedChange: setExpanded,
     manualPagination: true,
@@ -320,7 +316,7 @@ export default function Table({
           {table.getRowModel().rows.map((row) => {
             return (
               <tr className={classes.tableRow} key={row.id}>
-                {row.getVisibleCells().map((cell) => {
+                {row.getAllCells().map((cell) => {
                   return (
                     <td className={classes.tableData} key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -361,7 +357,7 @@ export default function Table({
             <Typography flex="auto" variant="inherit" align="center" noWrap>
               Page{" "}
               <strong>
-                {table.getState().pagination.pageIndex + 1} of {table.getPageOptions().length}
+                {table.state.pagination.pageIndex + 1} of {table.getPageOptions().length}
               </strong>
             </Typography>
             <IconButton

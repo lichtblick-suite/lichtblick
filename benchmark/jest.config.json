@@ -2,6 +2,7 @@
   "transform": {
     "\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]
   },
+  "testPathIgnorePatterns": ["<rootDir>/e2e/"],
   "moduleNameMapper": {
     "@lichtblick/suite-base/(.*)": "<rootDir>/../packages/suite-base/src/$1"
   },

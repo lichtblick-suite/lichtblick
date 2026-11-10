@@ -21,6 +21,7 @@ import { HOVER_PICK_THROTTLE_MS } from "@lichtblick/suite-base/panels/ThreeDeeRe
 import { CameraStateSettings } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/CameraStateSettings";
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
 import { TFMessage, TransformStamped } from "@lichtblick/suite-base/panels/ThreeDeeRender/ros";
+import { makePose } from "@lichtblick/suite-base/panels/ThreeDeeRender/transforms";
 import IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
@@ -2157,34 +2158,6 @@ describe("Renderer backward seek behavior", () => {
     (console.warn as jest.Mock).mockClear();
   });
 
-  it("uses binary search when seeking backward with preload enabled", () => {
-    // Given: A renderer with preload enabled
-    const renderer = new Renderer({
-      ...rendererArgs,
-      config: {
-        ...defaultRendererConfig,
-        scene: { transforms: { enablePreloading: true } },
-      },
-    });
-    const allFrames = [];
-    for (let i = 0; i < 100; i++) {
-      allFrames.push(createTFMessageEvent("parent", "child", BigInt(i * 1000), [BigInt(i * 1000)]));
-    }
-
-    // When: Processing messages up to current time
-    renderer.setCurrentTime(99000n);
-    const hasMessages = renderer.handleAllFramesMessages(allFrames);
-
-    // Then: Messages should be processed
-    expect(hasMessages).toBeTruthy();
-
-    // When: Seeking backward with allFrames
-    renderer.handleSeek(99000n, allFrames);
-
-    // Then: Should not throw and process correctly
-    expect(renderer.currentTime).toBe(99000n);
-  });
-
   it("clears transforms correctly when seeking backward without preload", () => {
     // Given: A renderer without preload
     const renderer = new Renderer({
@@ -2243,7 +2216,7 @@ describe("Renderer backward seek behavior", () => {
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
   });
 
-  it("preserves static transforms when seeking backward with allFrames", () => {
+  it("preserves static transforms when seeking backward with preloading enabled", () => {
     // Given: A renderer with preload enabled
     const renderer = new Renderer({
       ...rendererArgs,
@@ -2257,7 +2230,6 @@ describe("Renderer backward seek behavior", () => {
     renderer.setCurrentTime(100n);
     const regularMsg = createTFMessageEvent("parent", "child_regular", 50n, [50n]);
     const staticMsg = createTFMessageEvent("parent", "child_static", 10n, [10n], "/tf_static");
-    const allFrames = [staticMsg, regularMsg];
 
     renderer.addMessageEvent(regularMsg);
     renderer.addMessageEvent(staticMsg);
@@ -2267,14 +2239,140 @@ describe("Renderer backward seek behavior", () => {
     expect(renderer.transformTree.frame("child_regular")?.transformsSize()).toBe(1);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
 
-    // When: Seeking backward and providing allFrames
+    // When: Seeking backward
     renderer.setCurrentTime(20n);
-    renderer.handleSeek(100n, allFrames);
+    renderer.handleSeek(100n);
 
     // Then: Regular transform (at 50n) should be cleared, static transform preserved
     const regularFrame = renderer.transformTree.frame("child_regular");
     expect(regularFrame == undefined || regularFrame.transformsSize() === 0).toBe(true);
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
+  });
+
+  describe("with preloaded transforms whose header stamps and receive times use different clocks", () => {
+    type ClockScenario = { name: string; receiveBase: bigint; stampBase: bigint };
+
+    const equalClocks: ClockScenario = {
+      name: "stamps equal receive time",
+      receiveBase: 1_000n,
+      stampBase: 1_000n,
+    };
+    const laggingStamps: ClockScenario = {
+      name: "stamps lag receive time",
+      receiveBase: 1_000_000n,
+      stampBase: 500_000n,
+    };
+    const leadingStamps: ClockScenario = {
+      name: "stamps lead receive time",
+      receiveBase: 1_000n,
+      stampBase: 5_000n,
+    };
+    const bootRelativeStamps: ClockScenario = {
+      name: "stamps are boot-relative and receive time is wall-clock",
+      receiveBase: 1_765_000_000_000_000_000n,
+      stampBase: 0n,
+    };
+    const clockScenarios = [equalClocks, laggingStamps, leadingStamps, bootRelativeStamps];
+    // Lookups clamp to the earliest entry when stamps lead the query time, so the pose is ambiguous
+    const poseScenarios = [equalClocks, laggingStamps, bootRelativeStamps];
+
+    const MESSAGE_COUNT = 10;
+    const SPACING_NS = 10n;
+    const SEEK_INDEX = 3;
+
+    const lastReceiveTime = ({ receiveBase }: ClockScenario): bigint =>
+      receiveBase + BigInt(MESSAGE_COUNT - 1) * SPACING_NS;
+    const seekReceiveTime = ({ receiveBase }: ClockScenario): bigint =>
+      receiveBase + BigInt(SEEK_INDEX) * SPACING_NS;
+
+    // Message i moves "ego" to x = i so the pose identifies which message was applied last
+    const createEgoTransformEvents = ({ receiveBase, stampBase }: ClockScenario) =>
+      Array.from({ length: MESSAGE_COUNT }, (_, i) => {
+        const offset = BigInt(i) * SPACING_NS;
+        const event = createTFMessageEvent("root", "ego", receiveBase + offset, [
+          stampBase + offset,
+        ]);
+        event.message.transforms[0]!.transform.translation.x = i;
+        return event;
+      });
+
+    const createPreloadingRenderer = (): Renderer =>
+      new Renderer({
+        ...rendererArgs,
+        config: {
+          ...defaultRendererConfig,
+          scene: { transforms: { enablePreloading: true } },
+        },
+      });
+
+    const playTo = (renderer: Renderer, allFrames: readonly MessageEvent[], timeNs: bigint) => {
+      renderer.setCurrentTime(timeNs);
+      renderer.handleAllFramesMessages(allFrames);
+      renderer.animationFrame();
+    };
+
+    // Mirrors the seek flow in ThreeDeeRender: handleSeek first, then the preloaded frames effect
+    const seekBackTo = (renderer: Renderer, allFrames: readonly MessageEvent[], timeNs: bigint) => {
+      const oldTimeNs = renderer.currentTime;
+      renderer.setCurrentTime(timeNs);
+      renderer.handleSeek(oldTimeNs);
+      renderer.handleAllFramesMessages(allFrames);
+      renderer.animationFrame();
+    };
+
+    const egoPositionX = (renderer: Renderer): number | undefined =>
+      renderer.transformTree.apply(
+        makePose(),
+        makePose(),
+        "root",
+        undefined,
+        "ego",
+        renderer.currentTime,
+        renderer.currentTime,
+      )?.position.x;
+
+    it.each(
+      clockScenarios,
+    )("keeps only the transforms received up to the seek time when $name", (scenario) => {
+      // Given: Preloaded transforms played to the end
+      const allFrames = createEgoTransformEvents(scenario);
+      const renderer = createPreloadingRenderer();
+      playTo(renderer, allFrames, lastReceiveTime(scenario));
+
+      // When: Seeking backward to the receive time of the 4th message
+      seekBackTo(renderer, allFrames, seekReceiveTime(scenario));
+
+      // Then: Exactly the first four messages are in the history
+      expect(renderer.transformTree.frame("ego")?.transformsSize()).toBe(SEEK_INDEX + 1);
+    });
+
+    it.each(
+      poseScenarios,
+    )("places the frame at its pose at the seek time when $name", (scenario) => {
+      // Given: Preloaded transforms played to the end
+      const allFrames = createEgoTransformEvents(scenario);
+      const renderer = createPreloadingRenderer();
+      playTo(renderer, allFrames, lastReceiveTime(scenario));
+
+      // When: Seeking backward to the receive time of the 4th message
+      seekBackTo(renderer, allFrames, seekReceiveTime(scenario));
+
+      // Then: The frame is at the 4th message's pose, not the latest one
+      expect(egoPositionX(renderer)).toBeCloseTo(SEEK_INDEX);
+    });
+
+    it("removes every dynamic transform when seeking before the first message and stamps are boot-relative", () => {
+      // Given: Preloaded transforms played to the end
+      const allFrames = createEgoTransformEvents(bootRelativeStamps);
+      const renderer = createPreloadingRenderer();
+      playTo(renderer, allFrames, lastReceiveTime(bootRelativeStamps));
+
+      // When: Seeking backward to before the first message was received
+      seekBackTo(renderer, allFrames, bootRelativeStamps.receiveBase - 1n);
+
+      // Then: No history from the future is left in the tree
+      expect(renderer.transformTree.frame("ego")).toBeUndefined();
+    });
   });
 });
 
@@ -2431,7 +2529,7 @@ describe("Renderer static transform caching across message types", () => {
     renderer.dispose();
   });
 
-  it("preserves static transforms when preloading is enabled but allFrames is empty", () => {
+  it("preserves static transforms when preloading is enabled and seeking backward", () => {
     // Given: A renderer with preloading enabled, which subscribes #onResetAllFramesCursor to
     // the resetAllFramesCursor event, and which has received a static transform
     const renderer = new Renderer({
@@ -2448,10 +2546,9 @@ describe("Renderer static transform caching across message types", () => {
     renderer.animationFrame();
     expect(renderer.transformTree.frame("child_static")?.transformsSize()).toBe(1);
 
-    // When: Seeking backward while the preload buffer is still empty, which takes the
-    // clear()-based path and emits resetAllFramesCursor
+    // When: Seeking backward, which clears the tree and emits resetAllFramesCursor
     renderer.setCurrentTime(20n);
-    renderer.handleSeek(100n, []);
+    renderer.handleSeek(100n);
 
     // Then: The static transform is still restored. The resetAllFramesCursor handler must not
     // wipe the static cache, otherwise #reapplyStaticTransforms has nothing left to reapply.
@@ -2534,107 +2631,6 @@ describe("Renderer batch message processing", () => {
   });
 });
 
-describe("Renderer binary search optimization", () => {
-  let canvas = document.createElement("canvas");
-  let parent = document.createElement("div");
-  let rendererArgs: ConstructorParameters<typeof Renderer>[0] = {
-    ...defaultRendererProps,
-    canvas,
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    setupJestCanvasMock();
-    parent = document.createElement("div");
-    canvas = document.createElement("canvas");
-    parent.appendChild(canvas);
-    rendererArgs = { ...defaultRendererProps, canvas };
-  });
-
-  afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
-  });
-
-  it("finds correct cutoff index when seeking backward", () => {
-    // Given: Renderer with preload enabled and sorted messages
-    const renderer = new Renderer({
-      ...rendererArgs,
-      config: {
-        ...defaultRendererConfig,
-        scene: { transforms: { enablePreloading: true } },
-      },
-    });
-    const allFrames = [
-      createTFMessageEvent("parent", "child", 10n, [10n]),
-      createTFMessageEvent("parent", "child", 20n, [20n]),
-      createTFMessageEvent("parent", "child", 30n, [30n]),
-      createTFMessageEvent("parent", "child", 40n, [40n]),
-      createTFMessageEvent("parent", "child", 50n, [50n]),
-    ];
-
-    // When: Seeking backward from 50n to 25n
-    renderer.setCurrentTime(50n);
-    renderer.handleAllFramesMessages(allFrames);
-    renderer.setCurrentTime(25n);
-    renderer.handleSeek(50n, allFrames);
-
-    // Then: Should clear transforms after 25n
-    renderer.animationFrame();
-    expect(renderer.currentTime).toBe(25n);
-  });
-
-  it("handles seek to exact message timestamp", () => {
-    // Given: Renderer with messages at specific timestamps
-    const renderer = new Renderer({
-      ...rendererArgs,
-      config: {
-        ...defaultRendererConfig,
-        scene: { transforms: { enablePreloading: true } },
-      },
-    });
-    const allFrames = [
-      createTFMessageEvent("parent", "child", 10n, [10n]),
-      createTFMessageEvent("parent", "child", 20n, [20n]),
-      createTFMessageEvent("parent", "child", 30n, [30n]),
-    ];
-
-    // When: Seeking to exact timestamp of a message
-    renderer.setCurrentTime(50n);
-    renderer.handleAllFramesMessages(allFrames);
-    renderer.setCurrentTime(20n);
-    renderer.handleSeek(50n, allFrames);
-
-    // Then: Should include message at that timestamp
-    renderer.animationFrame();
-    expect(renderer.currentTime).toBe(20n);
-  });
-
-  it("handles seek to before first message", () => {
-    // Given: Renderer with messages starting from 10n
-    const renderer = new Renderer({
-      ...rendererArgs,
-      config: {
-        ...defaultRendererConfig,
-        scene: { transforms: { enablePreloading: true } },
-      },
-    });
-    const allFrames = [
-      createTFMessageEvent("parent", "child", 10n, [10n]),
-      createTFMessageEvent("parent", "child", 20n, [20n]),
-    ];
-
-    // When: Seeking to before first message
-    renderer.setCurrentTime(50n);
-    renderer.handleAllFramesMessages(allFrames);
-    renderer.setCurrentTime(5n);
-    renderer.handleSeek(50n, allFrames);
-
-    // Then: Should clear all transforms
-    renderer.animationFrame();
-    expect(renderer.currentTime).toBe(5n);
-  });
-});
-
 describe("Renderer maxPreloadMessages configuration", () => {
   let canvas = document.createElement("canvas");
   let parent = document.createElement("div");
@@ -2713,54 +2709,7 @@ describe("Renderer resetAllFramesCursor event handling", () => {
     (console.warn as jest.Mock).mockClear();
   });
 
-  it("emits resetAllFramesCursor when seeking backward without allFrames", () => {
-    // Given: Renderer with preload enabled but no allFrames
-    const renderer = new Renderer({
-      ...rendererArgs,
-      config: {
-        ...defaultRendererConfig,
-        scene: { transforms: { enablePreloading: true } },
-      },
-    });
-    const resetListener = jest.fn();
-    renderer.addListener("resetAllFramesCursor", resetListener);
-
-    // When: Seeking backward without providing allFrames
-    renderer.setCurrentTime(50n);
-    renderer.setCurrentTime(5n);
-    renderer.handleSeek(50n); // No allFrames parameter
-
-    // Then: Event should be emitted (falls back to clear with resetAllFramesCursor=true)
-    expect(resetListener).toHaveBeenCalled();
-  });
-
-  it("does not emit resetAllFramesCursor when seeking backward with allFrames", () => {
-    // Given: Renderer with preload enabled and allFrames
-    const renderer = new Renderer({
-      ...rendererArgs,
-      config: {
-        ...defaultRendererConfig,
-        scene: { transforms: { enablePreloading: true } },
-      },
-    });
-    const resetListener = jest.fn();
-    renderer.addListener("resetAllFramesCursor", resetListener);
-
-    const allFrames = [
-      createTFMessageEvent("parent", "child", 10n, [10n]),
-      createTFMessageEvent("parent", "child", 20n, [20n]),
-    ];
-
-    // When: Seeking backward with allFrames (uses optimized path)
-    renderer.setCurrentTime(50n);
-    renderer.setCurrentTime(5n);
-    renderer.handleSeek(50n, allFrames);
-
-    // Then: Event should not be emitted (optimized path doesn't call clear)
-    expect(resetListener).not.toHaveBeenCalled();
-  });
-
-  it("emits resetAllFramesCursor when seeking forward", () => {
+  it("emits resetAllFramesCursor when seeking backward", () => {
     // Given: Renderer with preload enabled
     const renderer = new Renderer({
       ...rendererArgs,
@@ -2772,15 +2721,31 @@ describe("Renderer resetAllFramesCursor event handling", () => {
     const resetListener = jest.fn();
     renderer.addListener("resetAllFramesCursor", resetListener);
 
-    const allFrames = [
-      createTFMessageEvent("parent", "child", 10n, [10n]),
-      createTFMessageEvent("parent", "child", 20n, [20n]),
-    ];
+    // When: Seeking backward
+    renderer.setCurrentTime(50n);
+    renderer.setCurrentTime(5n);
+    renderer.handleSeek(50n);
+
+    // Then: Event should be emitted so preloaded transforms are re-read from the start
+    expect(resetListener).toHaveBeenCalled();
+  });
+
+  it("does not emit resetAllFramesCursor when seeking forward", () => {
+    // Given: Renderer with preload enabled
+    const renderer = new Renderer({
+      ...rendererArgs,
+      config: {
+        ...defaultRendererConfig,
+        scene: { transforms: { enablePreloading: true } },
+      },
+    });
+    const resetListener = jest.fn();
+    renderer.addListener("resetAllFramesCursor", resetListener);
 
     // When: Seeking forward (calls clear with resetAllFramesCursor=false)
     renderer.setCurrentTime(5n);
     renderer.setCurrentTime(50n);
-    renderer.handleSeek(5n, allFrames);
+    renderer.handleSeek(5n);
 
     // Then: Event should not be emitted for forward seek
     expect(resetListener).not.toHaveBeenCalled();
