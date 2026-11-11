@@ -438,6 +438,8 @@ export default class CachedFilelike implements Filelike {
         this.#connections[index] = {
           ...connection,
           remainingRange: { start: range.start + bytesRead, end: range.end },
+          // Progress means a later failure is a new interruption, not a repeated one.
+          retryOfErrorAt: undefined,
         };
       }
 

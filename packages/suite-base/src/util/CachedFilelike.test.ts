@@ -486,6 +486,54 @@ describe("CachedFilelike", () => {
         dateNow.mockRestore();
       }
     });
+
+    it("retries again when a retry made progress before failing within the fatal window", async () => {
+      // GIVEN: a read whose retry receives some data and then fails quickly.
+      const fileReader = new InMemoryFileReader(new Uint8Array([0, 1, 2, 3]));
+      const streams: Array<{ data?: (_: Uint8Array) => void; error?: (_: Error) => void }> = [];
+      const fetch = jest.spyOn(fileReader, "fetch").mockImplementation(() => {
+        const stream: { data?: (_: Uint8Array) => void; error?: (_: Error) => void } = {};
+        streams.push(stream);
+        return {
+          on: (
+            type: "data" | "error" | "end",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
+          ) => {
+            if (type === "data") {
+              stream.data = callback;
+            }
+            if (type === "error") {
+              stream.error = callback;
+            }
+          },
+          destroy: () => {},
+        };
+      });
+      let now = 1_000;
+      const dateNow = jest.spyOn(Date, "now").mockImplementation(() => now);
+      const cachedFileReader = new CachedFilelike({ fileReader, readAheadEnabled: false, log });
+
+      try {
+        const readPromise = cachedFileReader.read(0, 4);
+        await delay(10);
+        now = 1_010;
+        streams[0]!.error?.(new Error("transient"));
+        await delay(10);
+
+        // WHEN: the retry delivers data and then fails within 100ms of the first error.
+        streams[1]!.data?.(new Uint8Array([0, 1]));
+        now = 1_050;
+        streams[1]!.error?.(new Error("transient again"));
+        await delay(10);
+        streams[2]!.data?.(new Uint8Array([2, 3]));
+
+        // THEN: the progress counted, so a third attempt was made and the read resolves.
+        await expect(readPromise).resolves.toEqual(new Uint8Array([0, 1, 2, 3]));
+        expect(fetch).toHaveBeenCalledTimes(3);
+      } finally {
+        dateNow.mockRestore();
+      }
+    });
   });
 
   describe("multi-connection support (maxConcurrentConnections)", () => {
