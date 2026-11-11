@@ -336,9 +336,14 @@ export class PointCloudHistoryRenderable extends Renderable<PointCloudHistoryUse
 
   public startFrame(currentTime: bigint, renderFrameId: string, fixedFrameId: string): void {
     this.#pointsHistory.updateHistoryFromCurrentTime(currentTime);
-    this.#pointsHistory.updatePoses(currentTime, renderFrameId, fixedFrameId);
     if (this.userData.settings.stixelsEnabled) {
       this.#stixelsHistory.updateHistoryFromCurrentTime(currentTime);
+    }
+    if (!this.visible) {
+      return;
+    }
+    this.#pointsHistory.updatePoses(currentTime, renderFrameId, fixedFrameId);
+    if (this.userData.settings.stixelsEnabled) {
       this.#stixelsHistory.updatePoses(currentTime, renderFrameId, fixedFrameId);
     }
   }
@@ -810,12 +815,11 @@ export class PointClouds extends SceneExtension<PointCloudHistoryRenderable> {
     // update the pose of each THREE.Points object in the pointsHistory of each
     // renderable
 
-    for (const [topic, renderable] of this.renderables) {
-      if (!renderable.userData.settings.visible) {
-        renderable.removeFromParent();
-        renderable.dispose();
-        this.renderables.delete(topic);
-        continue;
+    for (const renderable of this.renderables.values()) {
+      // Retain the latest cloud so showing it while paused does not require another message.
+      renderable.visible = renderable.userData.settings.visible;
+      if (!renderable.visible) {
+        this.renderer.settings.errors.clearPath(renderable.userData.settingsPath);
       }
       renderable.startFrame(currentTime, renderFrameId, fixedFrameId);
     }

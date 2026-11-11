@@ -326,6 +326,90 @@ describe("3D Renderer", () => {
     renderer.dispose();
   });
 
+  it("restores a hidden point cloud on a shared topic without another message", () => {
+    const renderer = new Renderer({ ...defaultRendererProps, canvas });
+    renderer.setTopics([
+      { name: "/mixed", schemaName: "foxglove.SceneUpdate", channelId: "mcap:1" },
+      { name: "/mixed", schemaName: "foxglove.PointCloud", channelId: "mcap:2" },
+    ]);
+    const cloudOutput = renderer.renderTopics.find(
+      (output) => output.schemaName === "foxglove.PointCloud",
+    )!;
+    const toggle = ({ visible }: { visible: boolean }) => {
+      renderer.settings.handleAction({
+        action: "update",
+        payload: {
+          path: [...renderer.getSettingsPath(["topics", cloudOutput.name]), "visible"],
+          input: "boolean",
+          value: visible,
+        },
+      });
+    };
+    renderer.settings.handleAction({
+      action: "update",
+      payload: { path: ["topics", "/mixed", "visible"], input: "boolean", value: true },
+    });
+    renderer.setCurrentTime(0n);
+    renderer.addMessageEvent({
+      topic: "/mixed",
+      channelId: "mcap:1",
+      schemaName: "foxglove.SceneUpdate",
+      receiveTime: { sec: 0, nsec: 0 },
+      sizeInBytes: 0,
+      message: {
+        entities: [{ id: "cube", frame_id: "map", cubes: [{ size: { x: 1, y: 1, z: 1 } }] }],
+        deletions: [],
+      },
+    });
+    renderer.addMessageEvent({
+      topic: "/mixed",
+      channelId: "mcap:2",
+      schemaName: "foxglove.PointCloud",
+      receiveTime: { sec: 0, nsec: 0 },
+      sizeInBytes: 12,
+      message: {
+        timestamp: { sec: 0, nsec: 0 },
+        frame_id: "map",
+        point_stride: 12,
+        fields: [
+          { name: "x", offset: 0, type: 7 },
+          { name: "y", offset: 4, type: 7 },
+          { name: "z", offset: 8, type: 7 },
+        ],
+        data: new Uint8Array(new Float32Array([1, 2, 3]).buffer),
+      },
+    });
+    renderer.animationFrame();
+    const clouds = renderer.sceneExtensions.get("foxglove.PointClouds")!;
+    const cloud = clouds.renderables.get(cloudOutput.name)!;
+    expect(cloud).toBeDefined();
+    expect(cloud.visible).toBe(true);
+    const sceneOutput = renderer.renderTopics.find(
+      (output) => output.schemaName === "foxglove.SceneUpdate",
+    )!;
+    const scene = renderer.sceneExtensions
+      .get("foxglove.SceneEntities")!
+      .renderables.get(sceneOutput.name)!;
+    expect(scene.children).toHaveLength(1);
+    const dispose = jest.spyOn(cloud, "dispose");
+
+    for (let i = 0; i < 2; i++) {
+      toggle({ visible: false });
+      renderer.animationFrame();
+      expect(cloud.visible).toBe(false);
+      expect(scene.visible).toBe(true);
+      expect(dispose).not.toHaveBeenCalled();
+
+      toggle({ visible: true });
+      renderer.animationFrame();
+      expect(clouds.renderables.get(cloudOutput.name)).toBe(cloud);
+      expect(cloud.parent).toBe(clouds);
+      expect(cloud.visible).toBe(true);
+    }
+    renderer.dispose();
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
   it("labels and routes same-schema native channels separately from converted outputs", () => {
     const renderer = new Renderer({ ...defaultRendererProps, canvas });
     renderer.setTopics(
