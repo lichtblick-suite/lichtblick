@@ -48,6 +48,7 @@ export default class CachedFilelike implements Filelike {
   #cacheSizeInBytes: number = Infinity;
   readonly #readAheadEnabled: boolean = true;
   #readAheadBufferBytes: number | undefined;
+  #idleReadAheadPaused = false;
   readonly #maxConcurrentConnections: number;
   #fileSize?: number;
   #virtualBuffer: VirtualLRUBuffer;
@@ -142,6 +143,15 @@ export default class CachedFilelike implements Filelike {
   // Applies to connections opened from now on; undefined restores getNewConnection's default.
   public setReadAheadBufferBytes(bytes: number | undefined): void {
     this.#readAheadBufferBytes = bytes;
+  }
+
+  // While paused, no speculative download starts when there are no pending reads.
+  public pauseIdleReadAhead(): void {
+    this.#idleReadAheadPaused = true;
+  }
+
+  public resumeIdleReadAhead(): void {
+    this.#idleReadAheadPaused = false;
   }
 
   // Potentially performance-sensitive; await can be expensive
@@ -331,7 +341,7 @@ export default class CachedFilelike implements Filelike {
 
   // Only read ahead speculatively when no connection is open.
   #readAheadWhenIdle(commonOptions: CommonConnectionOptions): void {
-    if (this.#connections.length > 0) {
+    if (this.#connections.length > 0 || this.#idleReadAheadPaused) {
       return;
     }
     const newConnection = getNewConnection({

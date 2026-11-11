@@ -113,6 +113,27 @@ describe("CachedFilelike", () => {
       ]);
     });
 
+    it("does not start an idle speculative download while idle read-ahead is paused", async () => {
+      // GIVEN: a reader that would normally read ahead after a request resolves.
+      const fileReader = new InMemoryFileReader(new Uint8Array(20 * MEBIBYTE));
+      const fetch = jest.spyOn(fileReader, "fetch");
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 4 * MEBIBYTE,
+        readAheadBufferBytes: 1000,
+        log,
+      });
+      cachedFileReader.pauseIdleReadAhead();
+
+      // WHEN: a small read completes and the reader becomes idle.
+      await cachedFileReader.read(0, 10);
+      await delay(5);
+
+      // THEN: only the request's own connection was opened.
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(0, 1000);
+    });
+
     it("serves ranges prefetched by open() without fetching", async () => {
       // GIVEN: a reader whose open() already returned the file's tail.
       const fetch = jest.fn();

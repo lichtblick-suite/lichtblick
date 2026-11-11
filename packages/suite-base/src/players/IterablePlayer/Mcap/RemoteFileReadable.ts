@@ -64,9 +64,11 @@ export class RemoteFileReadable {
     this.#remoteReader.setReadAheadBufferBytes(
       Math.min(STARTUP_READ_AHEAD_BUFFER_BYTES, this.#readAheadBufferBytes ?? Infinity),
     );
+    this.#remoteReader.pauseIdleReadAhead();
   }
 
   public restoreReadAhead(): void {
     this.#remoteReader.setReadAheadBufferBytes(this.#readAheadBufferBytes);
+    this.#remoteReader.resumeIdleReadAhead();
   }
 }
