@@ -14,13 +14,17 @@ import { BatchingReadable } from "./BatchingReadable";
 import type { RemoteFileReadableOptions } from "./RemoteFileReadable.types";
 
 const DEFAULT_CACHE_SIZE_BYTES = 1024 * 1024 * 500; // 500MiB
+// Enough for the MCAP header; keeps speculative chunk data from competing with summary downloads.
+const STARTUP_READ_AHEAD_BUFFER_BYTES = 64 * 1024;
 
 export class RemoteFileReadable {
   readonly #remoteReader: CachedFilelike;
   readonly #batchingReadable: BatchingReadable;
+  readonly #readAheadBufferBytes: number | undefined;
 
   public constructor(url: string, options?: RemoteFileReadableOptions) {
     const fileReader = new BrowserHttpReader(url);
+    this.#readAheadBufferBytes = options?.readAheadBufferBytes;
     this.#remoteReader = new CachedFilelike({
       fileReader,
       cacheSizeInBytes: options?.cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
@@ -54,5 +58,15 @@ export class RemoteFileReadable {
 
   public close(): void {
     this.#remoteReader.close();
+  }
+
+  public limitReadAheadForStartup(): void {
+    this.#remoteReader.setReadAheadBufferBytes(
+      Math.min(STARTUP_READ_AHEAD_BUFFER_BYTES, this.#readAheadBufferBytes ?? Infinity),
+    );
+  }
+
+  public restoreReadAhead(): void {
+    this.#remoteReader.setReadAheadBufferBytes(this.#readAheadBufferBytes);
   }
 }

@@ -660,6 +660,30 @@ describe("CachedFilelike", () => {
       await expect(secondReadPromise).resolves.toEqual(new Uint8Array(100));
     });
 
+    it("uses an updated read-ahead buffer size for connections opened afterwards", async () => {
+      // GIVEN: a reader configured with a 2000-byte read-ahead, then lowered to 100 bytes.
+      const fetchMock = jest.fn((): FileStream => ({ on: () => {}, destroy: jest.fn() }));
+      const fileReader: FileReader = {
+        open: async () => ({ size: 20 * MEBIBYTE }),
+        fetch: fetchMock,
+      };
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 4 * MEBIBYTE,
+        readAheadBufferBytes: 2000,
+        log,
+      });
+      cachedFileReader.setReadAheadBufferBytes(100);
+
+      // WHEN: a small read starts a new connection.
+      cachedFileReader.read(0, 10).catch(() => {});
+      await delay(5);
+
+      // THEN: the connection only extends to the updated read-ahead size.
+      expect(fetchMock).toHaveBeenCalledWith(0, 100);
+      cachedFileReader.close();
+    });
+
     it("destroys every active connection on close() when more than one is open", async () => {
       // GIVEN: 2 concurrent, never-resolving connections.
       const fetchMock = jest.fn((): FileStream => ({ on: () => {}, destroy: jest.fn() }));

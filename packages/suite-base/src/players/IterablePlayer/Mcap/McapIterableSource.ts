@@ -166,7 +166,13 @@ export class McapIterableSource implements ISerializedIterableSource {
       await readable.open();
       this.#persistentReadable = readable;
     }
-    const result = await tryCreateIndexedReader(readable, decompressHandlers);
+    readable.limitReadAheadForStartup();
+    let result: IndexedReaderResult;
+    try {
+      result = await tryCreateIndexedReader(readable, decompressHandlers);
+    } finally {
+      readable.restoreReadAhead();
+    }
     if (result.status === "failed") {
       // A real initialization failure (not "unindexed") must not be masked by re-fetching the
       // whole file via the eager, unbounded streaming fallback — surface the actual error.

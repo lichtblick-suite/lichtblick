@@ -42,7 +42,7 @@ export default class CachedFilelike implements Filelike {
   #fileReader: FileReader;
   #cacheSizeInBytes: number = Infinity;
   readonly #readAheadEnabled: boolean = true;
-  readonly #readAheadBufferBytes: number | undefined;
+  #readAheadBufferBytes: number | undefined;
   readonly #maxConcurrentConnections: number;
   #fileSize?: number;
   #virtualBuffer: VirtualLRUBuffer;
@@ -120,6 +120,11 @@ export default class CachedFilelike implements Filelike {
       throw new Error("CachedFilelike has not been opened");
     }
     return this.#fileSize;
+  }
+
+  // Applies to connections opened from now on; undefined restores getNewConnection's default.
+  public setReadAheadBufferBytes(bytes: number | undefined): void {
+    this.#readAheadBufferBytes = bytes;
   }
 
   // Potentially performance-sensitive; await can be expensive
