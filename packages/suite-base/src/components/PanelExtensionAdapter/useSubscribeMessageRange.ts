@@ -4,6 +4,7 @@
 import { useCallback, useRef } from "react";
 
 import Logger from "@lichtblick/log";
+import { compare } from "@lichtblick/rostime";
 import { SubscribeMessageRangeArgs } from "@lichtblick/suite";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
 import {
@@ -43,10 +44,19 @@ export function useSubscribeMessageRange(
   emitAlertRef.current = emitAlert;
 
   return useCallback(
-    ({ topic, convertTo, onNewRangeIterator }: SubscribeMessageRangeArgs) => {
+    ({ topic, start, end, convertTo, onNewRangeIterator }: SubscribeMessageRangeArgs) => {
+      if (start != undefined && end != undefined && compare(start, end) > 0) {
+        onNewRangeIterator((async function* () {})()).catch((err: unknown) => {
+          log.error("Error in useSubscribeMessageRange onNewRangeIterator:", err);
+        });
+        return () => {};
+      }
+
       const { sortedTopics, getBatchIterator } = getMessagePipelineContext();
 
-      const rawBatchIterator = getBatchIterator(topic);
+      // Unbounded reads pass no range so players can reuse their full-range caches.
+      const range = start != undefined || end != undefined ? { start, end } : undefined;
+      const rawBatchIterator = getBatchIterator(topic, range);
       if (!rawBatchIterator) {
         return () => {};
       }

@@ -296,6 +296,18 @@ export type SubscribeMessageRangeArgs = {
   topic: string;
 
   /**
+   * Inclusive start of the range, in log time. When omitted, reading starts at the beginning of
+   * the data source.
+   */
+  start?: Time;
+
+  /**
+   * Inclusive end of the range, in log time. When omitted, reading continues to the end of the
+   * data source. If `end` is before `start`, the range is empty and no messages are delivered.
+   */
+  end?: Time;
+
+  /**
    * Convert messages to this schema before delivering to the subscriber.
    *
    * MessageEvents for the subscription will contain the converted message and an
@@ -503,7 +515,9 @@ export type PanelExtensionContext = {
   setDefaultPanelTitle(defaultTitle: string | undefined): void;
 
   /**
-   * Enables subscription to retrieve complete message history for a specified topic from the active data source.
+   * Enables subscription to retrieve message history for a specified topic from the active data source.
+   * By default the complete history is read; set {@link SubscribeMessageRangeArgs.start | start} and/or
+   * {@link SubscribeMessageRangeArgs.end | end} to read only that window.
    *
    * See {@link SubscribeMessageRangeArgs} for more information on behavior.
    *
