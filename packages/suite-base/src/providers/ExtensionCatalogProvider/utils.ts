@@ -48,6 +48,13 @@ async function tryLoadFromCache(
     );
     return undefined;
   }
+  const isSameArtifact = cachedExtension.externalId === extension.externalId;
+  if (!isSameArtifact) {
+    log.debug(
+      `Cached artifact differs from remote for extension ${extension.id} (cached: ${cachedExtension.externalId}, remote: ${extension.externalId}), using remote version.`,
+    );
+    return undefined;
+  }
   log.debug(
     `Using cached version of extension ${extension.id} (version ${cachedExtension.version})`,
   );
@@ -69,9 +76,11 @@ export async function loadSingleExtension(
     if (cachedSource == undefined) {
       const { raw, buffer } = await loader.loadExtension(extension.externalId);
       if (buffer && orgCacheLoader) {
-        await orgCacheLoader.installExtension({ foxeFileData: buffer }).catch((err: unknown) => {
-          log.warn(`Failed to cache extension ${extension.id}`, err);
-        });
+        await orgCacheLoader
+          .installExtension({ foxeFileData: buffer, externalId: extension.externalId })
+          .catch((err: unknown) => {
+            log.warn(`Failed to cache extension ${extension.id}`, err);
+          });
       }
       return raw;
     }
