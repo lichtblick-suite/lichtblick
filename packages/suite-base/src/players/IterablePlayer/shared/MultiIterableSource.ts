@@ -55,7 +55,7 @@ const DEFAULT_MAX_CONCURRENT_CONNECTIONS = 2;
 
 // Defaults for the optional MultiSourceHydrationOptions overrides (see shared/types.ts for the
 // rationale behind each knob). Heuristic; tune against real datasets.
-const DEFAULT_INIT_CONCURRENCY = 4;
+const DEFAULT_INIT_CONCURRENCY = 8;
 // Raising the resident-reader budget made multi-file OOMs worse because evicted sources must fully
 // rebuild their reader, cache, and parsed channels on re-hydration.
 // Keep the smaller defaults until eviction can preserve the cheap per-source connection/cache
