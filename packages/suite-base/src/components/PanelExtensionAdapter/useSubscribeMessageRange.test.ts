@@ -112,33 +112,63 @@ describe("useSubscribeMessageRange", () => {
     );
   });
 
-  const rangeCases: { name: string; start?: Time; end?: Time }[] = [
+  it.each<{ name: string; start?: Time; end?: Time }>([
     { name: "start and end", start: { sec: 1, nsec: 0 }, end: { sec: 2, nsec: 0 } },
     { name: "only start", start: { sec: 1, nsec: 0 } },
     { name: "only end", end: { sec: 2, nsec: 0 } },
-  ];
-  for (const { name, start, end } of rangeCases) {
-    it(`forwards the range to the data source when given ${name}`, () => {
-      // Given
-      const topic = BasicBuilder.string();
-      mockCreateMessageRangeIterator.mockReturnValue({
-        iterable: { [Symbol.asyncIterator]: jest.fn() },
-        cancel: jest.fn(),
-      });
-      const mockGetBatchIterator = jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() });
-      mockUseMessagePipelineGetter.mockReturnValue(
-        jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator: mockGetBatchIterator }),
-      );
-      const onNewRangeIterator = jest.fn().mockResolvedValue(undefined);
-      const { result } = renderHook(() => useSubscribeMessageRange());
-
-      // When
-      act(() => {
-        result.current({ topic, start, end, onNewRangeIterator });
-      });
-
-      // Then
-      expect(mockGetBatchIterator).toHaveBeenCalledWith(topic, { start, end });
+    { name: "equal start and end", start: { sec: 1, nsec: 0 }, end: { sec: 1, nsec: 0 } },
+  ])("forwards the range to the data source when given $name", ({ start, end }) => {
+    // Given
+    const topic = BasicBuilder.string();
+    mockCreateMessageRangeIterator.mockReturnValue({
+      iterable: { [Symbol.asyncIterator]: jest.fn() },
+      cancel: jest.fn(),
     });
-  }
+    const mockGetBatchIterator = jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() });
+    mockUseMessagePipelineGetter.mockReturnValue(
+      jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator: mockGetBatchIterator }),
+    );
+    const onNewRangeIterator = jest.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() => useSubscribeMessageRange());
+
+    // When
+    act(() => {
+      result.current({ topic, start, end, onNewRangeIterator });
+    });
+
+    // Then
+    expect(mockGetBatchIterator).toHaveBeenCalledWith(topic, { start, end });
+  });
+
+  it("delivers an empty iterable without reading the data source when start is after end", async () => {
+    // Given
+    const mockGetBatchIterator = jest.fn();
+    mockUseMessagePipelineGetter.mockReturnValue(
+      jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator: mockGetBatchIterator }),
+    );
+    const batches: unknown[] = [];
+    const onNewRangeIterator = jest.fn(async (iterable: AsyncIterable<unknown>) => {
+      for await (const batch of iterable) {
+        batches.push(batch);
+      }
+    });
+    const { result } = renderHook(() => useSubscribeMessageRange());
+
+    // When
+    act(() => {
+      result.current({
+        topic: BasicBuilder.string(),
+        start: { sec: 2, nsec: 0 },
+        end: { sec: 1, nsec: 0 },
+        onNewRangeIterator,
+      });
+    });
+    await act(async () => undefined);
+
+    // Then
+    expect(mockGetBatchIterator).not.toHaveBeenCalled();
+    expect(mockCreateMessageRangeIterator).not.toHaveBeenCalled();
+    expect(onNewRangeIterator).toHaveBeenCalledTimes(1);
+    expect(batches).toEqual([]);
+  });
 });

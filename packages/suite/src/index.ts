@@ -303,7 +303,7 @@ export type SubscribeMessageRangeArgs = {
 
   /**
    * Inclusive end of the range, in log time. When omitted, reading continues to the end of the
-   * data source.
+   * data source. If `end` is before `start`, the range is empty and no messages are delivered.
    */
   end?: Time;
 

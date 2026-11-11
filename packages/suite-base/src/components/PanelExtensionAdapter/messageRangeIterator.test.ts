@@ -316,8 +316,7 @@ describe("createMessageRangeIterator", () => {
         batches.push(batch);
       }
 
-      expect(batches.length).toBeGreaterThan(1);
-      expect(batches.flat()).toEqual(mockMessages);
+      expect(batches).toEqual(mockMessages.map((msg) => [msg]));
     } finally {
       performanceNowSpy.mockRestore();
     }
