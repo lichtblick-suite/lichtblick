@@ -9,6 +9,8 @@ const mockSize = jest.fn().mockReturnValue(1024);
 const mockRead = jest.fn().mockResolvedValue(new Uint8Array([1, 2, 3]));
 const mockClose = jest.fn();
 const mockSetReadAheadBufferBytes = jest.fn();
+const mockPauseIdleReadAhead = jest.fn();
+const mockResumeIdleReadAhead = jest.fn();
 
 jest.mock("@lichtblick/suite-base/util/CachedFilelike", () => {
   return jest.fn().mockImplementation(() => ({
@@ -17,6 +19,8 @@ jest.mock("@lichtblick/suite-base/util/CachedFilelike", () => {
     read: mockRead,
     close: mockClose,
     setReadAheadBufferBytes: mockSetReadAheadBufferBytes,
+    pauseIdleReadAhead: mockPauseIdleReadAhead,
+    resumeIdleReadAhead: mockResumeIdleReadAhead,
   }));
 });
 
@@ -149,6 +153,8 @@ describe("RemoteFileReadable", () => {
 
       // Then the startup limit is applied first, then the configured value
       expect(mockSetReadAheadBufferBytes.mock.calls).toEqual([[64 * 1024], [readAheadBufferBytes]]);
+      expect(mockPauseIdleReadAhead).toHaveBeenCalledTimes(1);
+      expect(mockResumeIdleReadAhead).toHaveBeenCalledTimes(1);
     });
 
     it("keeps a configured read-ahead smaller than the startup limit", () => {
