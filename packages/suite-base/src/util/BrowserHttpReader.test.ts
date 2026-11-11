@@ -76,15 +76,139 @@ describe("BrowserHttpReader", () => {
       expect(result).toEqual({ size: 999, identifier: "Mon, 01 Jan 2026" });
     });
 
-    it("releases the response body on a successful ranged probe", async () => {
-      const cancelSpy = jest.fn().mockResolvedValue(undefined);
-      mockFetch.mockResolvedValue(
-        rangedResponse({ headers: { "content-range": "bytes 0-0/12345" }, cancelSpy }),
-      );
+    it("consumes the one-byte body of a successful ranged probe", async () => {
+      const response = rangedResponse({ headers: { "content-range": "bytes 0-0/12345" } });
+      mockFetch.mockResolvedValue(response);
 
       await new BrowserHttpReader(url).open();
 
-      expect(cancelSpy).toHaveBeenCalledTimes(1);
+      expect(response.bodyUsed).toBe(true);
+    });
+  });
+
+  describe("open() same-origin edge ranges", () => {
+    const size = 200;
+    const tailBytes = new Uint8Array(100).fill(2);
+    const headBytes = new Uint8Array(100).fill(1);
+
+    function edgeResponse(
+      data: Uint8Array<ArrayBuffer>,
+      contentRange: string,
+      etag = "abc",
+    ): Response {
+      return new Response(data, {
+        status: 206,
+        headers: { "content-range": contentRange, etag },
+      });
+    }
+
+    beforeEach(() => {
+      Object.defineProperty(globalThis, "location", {
+        value: { origin: "https://example.com" },
+        configurable: true,
+      });
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(globalThis, "location");
+    });
+
+    it("returns the size and prefetched head and tail from two parallel ranged requests", async () => {
+      // Given a same-origin server answering the tail and head ranges
+      mockFetch
+        .mockResolvedValueOnce(edgeResponse(tailBytes, `bytes 100-199/${size}`))
+        .mockResolvedValueOnce(edgeResponse(headBytes, `bytes 0-99/${size}`));
+
+      // When opening
+      const result = await new BrowserHttpReader(url).open();
+
+      // Then the size and both ranges come back without any other request
+      expect(result).toEqual({
+        size,
+        identifier: "abc",
+        prefetched: [
+          { offset: 100, data: tailBytes },
+          { offset: 0, data: headBytes },
+        ],
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        1,
+        url,
+        expect.objectContaining({ headers: { range: "bytes=-65536" } }),
+      );
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        2,
+        url,
+        expect.objectContaining({ headers: { range: "bytes=0-65535" } }),
+      );
+    });
+
+    it("drops the head when its identifier differs from the tail", async () => {
+      // Given a head response from a different file version
+      mockFetch
+        .mockResolvedValueOnce(edgeResponse(tailBytes, `bytes 100-199/${size}`, "v1"))
+        .mockResolvedValueOnce(edgeResponse(headBytes, `bytes 0-99/${size}`, "v2"));
+
+      // When opening
+      const result = await new BrowserHttpReader(url).open();
+
+      // Then only the tail is prefetched
+      expect(result.prefetched).toEqual([{ offset: 100, data: tailBytes }]);
+    });
+
+    it("falls back to the one-byte probe when the tail request is not a 206", async () => {
+      // Given a server that ignores the suffix range
+      mockFetch
+        .mockResolvedValueOnce(rangedResponse({ status: 200 }))
+        .mockResolvedValueOnce(edgeResponse(headBytes, `bytes 0-99/${size}`))
+        .mockResolvedValueOnce(
+          rangedResponse({ headers: { "content-range": `bytes 0-0/${size}` } }),
+        );
+
+      // When opening
+      const result = await new BrowserHttpReader(url).open();
+
+      // Then the size comes from the one-byte probe, with nothing prefetched
+      expect(result).toEqual({ size, identifier: undefined });
+      expect(mockFetch).toHaveBeenLastCalledWith(
+        url,
+        expect.objectContaining({ headers: { range: "bytes=0-0" } }),
+      );
+    });
+
+    it("falls back when the tail body is shorter than its Content-Range", async () => {
+      // Given a truncated tail response
+      mockFetch
+        .mockResolvedValueOnce(edgeResponse(new Uint8Array(10), `bytes 100-199/${size}`))
+        .mockResolvedValueOnce(edgeResponse(headBytes, `bytes 0-99/${size}`))
+        .mockResolvedValueOnce(
+          rangedResponse({ headers: { "content-range": `bytes 0-0/${size}` } }),
+        );
+
+      // When opening
+      const result = await new BrowserHttpReader(url).open();
+
+      // Then the incomplete data is not used
+      expect(result.prefetched).toBeUndefined();
+      expect(result.size).toBe(size);
+    });
+
+    it("uses only the one-byte probe for cross-origin URLs", async () => {
+      // Given a URL on another origin
+      mockFetch.mockResolvedValueOnce(
+        rangedResponse({ headers: { "content-range": `bytes 0-0/${size}` } }),
+      );
+
+      // When opening
+      await new BrowserHttpReader("https://other.example.org/data.mcap").open();
+
+      // Then no suffix range is requested
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://other.example.org/data.mcap",
+        expect.objectContaining({ headers: { range: "bytes=0-0" } }),
+      );
     });
   });
 

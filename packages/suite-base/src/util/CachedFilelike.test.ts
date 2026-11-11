@@ -88,6 +88,54 @@ describe("CachedFilelike", () => {
       await expect(cachedFileReader.read(2, 2)).resolves.toEqual(new Uint8Array([2, 3]));
     });
 
+    it("serves ranges prefetched by open() without fetching", async () => {
+      // GIVEN: a reader whose open() already returned the file's tail.
+      const fetch = jest.fn();
+      const tail = new Uint8Array([7, 8, 9, 10]);
+      const fileReader: FileReader = {
+        open: async () => ({ size: 100, prefetched: [{ offset: 96, data: tail }] }),
+        fetch,
+      };
+      const cachedFileReader = new CachedFilelike({ fileReader, readAheadEnabled: false, log });
+
+      // WHEN: reading within the prefetched range.
+      const result = await cachedFileReader.read(97, 3);
+
+      // THEN: the data comes from the cache.
+      expect(result).toEqual(new Uint8Array([8, 9, 10]));
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it("ignores prefetched ranges that fall outside the file", async () => {
+      // GIVEN: a prefetched range extending past the reported size.
+      const fetch = jest.fn(
+        (_offset: number, length: number): FileStream => ({
+          on: (
+            type: "data" | "error" | "end",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
+          ) => {
+            if (type === "data") {
+              setTimeout(() => {
+                callback(new Uint8Array(length));
+              }, 0);
+            }
+          },
+          destroy: () => {},
+        }),
+      );
+      const fileReader: FileReader = {
+        open: async () => ({ size: 10, prefetched: [{ offset: 8, data: new Uint8Array(5) }] }),
+        fetch,
+      };
+      const cachedFileReader = new CachedFilelike({ fileReader, readAheadEnabled: false, log });
+
+      // WHEN: reading the end of the file.
+      await expect(cachedFileReader.read(8, 2)).resolves.toEqual(new Uint8Array(2));
+
+      // THEN: the invalid range was not cached, so a real fetch happened.
+      expect(fetch).toHaveBeenCalledWith(8, 2);
+    });
+
     it("requests only the exact range when read-ahead is disabled", async () => {
       // GIVEN: a file that fits entirely in the cache.
       const fileReader = new InMemoryFileReader(new Uint8Array(100));
