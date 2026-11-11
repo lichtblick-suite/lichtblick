@@ -118,7 +118,7 @@ describe("FooterPrefetchingReadable", () => {
       expect(read).toHaveBeenLastCalledWith(0n, 20n);
     });
 
-    it("propagates a real error from the prefetched footer read when the caller does request that range", async () => {
+    it("propagates the error when both the prefetch and the on-demand retry fail", async () => {
       // Given
       const error = new Error("range fetch failed");
       const read = jest.fn().mockRejectedValue(error);
@@ -126,10 +126,30 @@ describe("FooterPrefetchingReadable", () => {
       const readable = new FooterPrefetchingReadable(inner);
       await readable.size();
 
-      // When/Then: requesting the exact prefetched range surfaces the real error.
+      // When/Then: requesting the exact prefetched range retries once, then surfaces the error.
       await expect(readable.read(1000n - FOOTER_LENGTH, FOOTER_LENGTH)).rejects.toThrow(
         "range fetch failed",
       );
+      expect(read).toHaveBeenCalledTimes(2);
+    });
+
+    it("retries the footer on demand when the prefetch failed", async () => {
+      // Given a prefetch that fails, followed by a successful read
+      const footerData = new Uint8Array(Number(FOOTER_LENGTH)).fill(3);
+      const read = jest
+        .fn()
+        .mockRejectedValueOnce(new Error("transient"))
+        .mockResolvedValueOnce(footerData);
+      const inner: McapTypes.IReadable = { size: jest.fn().mockResolvedValue(1000n), read };
+      const readable = new FooterPrefetchingReadable(inner);
+      await readable.size();
+
+      // When
+      const result = await readable.read(1000n - FOOTER_LENGTH, FOOTER_LENGTH);
+
+      // Then the retried read is returned
+      expect(result).toBe(footerData);
+      expect(read).toHaveBeenLastCalledWith(1000n - FOOTER_LENGTH, FOOTER_LENGTH);
     });
 
     it("does not wait for the in-flight footer prefetch before reading other ranges", async () => {

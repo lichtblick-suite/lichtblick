@@ -270,7 +270,28 @@ describe("McapIterableSource", () => {
       expect(MockRemoteFileReadable).toHaveBeenCalledWith(urlIndexedMcap, {
         cacheSizeInBytes,
         readAheadEnabled,
+        maxConcurrentConnections: 2,
       });
+    });
+
+    it("should keep an explicitly configured connection limit", async () => {
+      // Given a URL source limited to a single connection
+      const mcapData = await buildIndexedMcap([{ logTime: 1_000_000_000n }]);
+      mockRemoteFileReadableWith(mcapData);
+      const source = new McapIterableSource({
+        type: "url",
+        url: urlIndexedMcap,
+        maxConcurrentConnections: 1,
+      });
+
+      // When initializing
+      await source.initialize();
+
+      // Then the configured limit is passed through
+      expect(MockRemoteFileReadable).toHaveBeenCalledWith(
+        urlIndexedMcap,
+        expect.objectContaining({ maxConcurrentConnections: 1 }),
+      );
     });
 
     it("should limit read-ahead only while initializing the indexed reader", async () => {

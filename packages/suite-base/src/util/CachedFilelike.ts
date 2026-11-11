@@ -87,6 +87,11 @@ export default class CachedFilelike implements Filelike {
     this.#readAheadBufferBytes = options.readAheadBufferBytes;
     this.#maxConcurrentConnections =
       options.maxConcurrentConnections ?? DEFAULT_MAX_CONCURRENT_CONNECTIONS;
+    if (!Number.isInteger(this.#maxConcurrentConnections) || this.#maxConcurrentConnections < 1) {
+      throw new Error(
+        `maxConcurrentConnections must be a positive integer, got ${this.#maxConcurrentConnections}`,
+      );
+    }
     this.#keepReconnectingCallback = options.keepReconnectingCallback;
     this.#log = options.log ?? log;
     this.#virtualBuffer = new VirtualLRUBuffer({ size: 0 });

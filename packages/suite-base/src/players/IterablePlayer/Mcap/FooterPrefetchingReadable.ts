@@ -44,7 +44,8 @@ export class FooterPrefetchingReadable implements McapTypes.IReadable {
       offset === this.#footerOffset &&
       length === FOOTER_AND_MAGIC_READ_LENGTH
     ) {
-      return await this.#footerPrefetch;
+      // A failed prefetch is retried once on demand.
+      return await this.#footerPrefetch.catch(async () => await this.inner.read(offset, length));
     }
     return await this.inner.read(offset, length);
   }

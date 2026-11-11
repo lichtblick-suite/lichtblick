@@ -513,6 +513,19 @@ describe("CachedFilelike", () => {
       return { fetch, streams };
     }
 
+    it.each([
+      0,
+      -1,
+      1.5,
+      Number.NaN,
+    ])("rejects an invalid maxConcurrentConnections of %p", (maxConcurrentConnections) => {
+      // GIVEN / WHEN / THEN: construction fails instead of producing a reader that never fetches.
+      const fileReader = new InMemoryFileReader(new Uint8Array(4));
+      expect(() => new CachedFilelike({ fileReader, maxConcurrentConnections, log })).toThrow(
+        "maxConcurrentConnections must be a positive integer",
+      );
+    });
+
     it("keeps a genuinely disjoint read's connection alive instead of tearing it down for a second one", async () => {
       // GIVEN: a large file, room for 2 concurrent connections, and a slow first fetch that is
       // still in flight when a second, disjoint read arrives.

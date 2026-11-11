@@ -35,6 +35,9 @@ import { HydratedSourcePool, SourceHydrator } from "../shared/HydratedSourcePool
 
 const log = Log.getLogger(__filename);
 
+// With one slot, the footer prefetch would delay the header read instead of overlapping it.
+const DEFAULT_URL_MAX_CONCURRENT_CONNECTIONS = 2;
+
 /**
  * Create a McapIndexedReader if it will be possible to do an indexed read. Distinguishes a
  * genuinely unindexed/empty file (safe, expected fallback to streaming read) from an operational
@@ -159,9 +162,8 @@ export class McapIterableSource implements ISerializedIterableSource {
         ...(source.readAheadBufferBytes != undefined
           ? { readAheadBufferBytes: source.readAheadBufferBytes }
           : {}),
-        ...(source.maxConcurrentConnections != undefined
-          ? { maxConcurrentConnections: source.maxConcurrentConnections }
-          : {}),
+        maxConcurrentConnections:
+          source.maxConcurrentConnections ?? DEFAULT_URL_MAX_CONCURRENT_CONNECTIONS,
       });
       await readable.open();
       this.#persistentReadable = readable;
