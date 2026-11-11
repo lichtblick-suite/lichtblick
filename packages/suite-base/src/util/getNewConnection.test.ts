@@ -705,7 +705,7 @@ describe("getNewConnection", () => {
       });
 
       // THEN: no new connection is needed -- the second connection will serve it.
-      expect(newConnection).toEqual(undefined);
+      expect(newConnection).toBeUndefined();
     });
 
     it("starts a new connection when neither the primary nor any additional connection covers the request", () => {
@@ -730,7 +730,7 @@ describe("getNewConnection", () => {
         readRequestRange: { start: 42, end: 48 },
       });
 
-      expect(newConnection).toEqual(undefined);
+      expect(newConnection).toBeUndefined();
     });
 
     it("still requires an additional connection to be close enough, not just overlapping", () => {
@@ -760,7 +760,7 @@ describe("getNewConnection", () => {
 
       // THEN: idle read-ahead is skipped -- there's already an active connection (just not the
       // primary one), so `getNewConnectionWithoutExistingConnection` must not run.
-      expect(newConnection).toEqual(undefined);
+      expect(newConnection).toBeUndefined();
     });
 
     it("defaults additionalRemainingRanges to empty, preserving single-connection behavior exactly", () => {

@@ -108,7 +108,7 @@ function getNewConnectionWithExistingReadRequest({
   const hasGoodEnoughConnection = allRemainingRanges.some(
     (remainingRange) =>
       isOverlapping(notDownloadedRanges, [remainingRange]) &&
-      !(remainingRange.start + continueDownloadingThreshold < notDownloadedRanges[0]!.start),
+      remainingRange.start + continueDownloadingThreshold >= notDownloadedRanges[0]!.start,
   );
 
   if (hasGoodEnoughConnection) {

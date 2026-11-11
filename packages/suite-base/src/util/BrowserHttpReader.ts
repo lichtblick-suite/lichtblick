@@ -145,6 +145,6 @@ function parseTotalSizeFromContentRange(contentRange: string | null): number | u
   if (!match) {
     return undefined;
   }
-  const size = parseInt(match[1]!, 10);
+  const size = Number.parseInt(match[1]!, 10);
   return Number.isFinite(size) ? size : undefined;
 }
