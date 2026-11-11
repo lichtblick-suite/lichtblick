@@ -89,6 +89,35 @@ describe("BrowserHttpReader", () => {
   });
 
   describe("open() fallback to full-GET-then-abort probe", () => {
+    it("returns the probed size when cancelling the probe body fails", async () => {
+      const cancelSpy = jest.fn().mockRejectedValue(new Error("stream errored"));
+      mockFetch.mockResolvedValue(
+        rangedResponse({ headers: { "content-range": "bytes 0-0/12345" }, cancelSpy }),
+      );
+
+      const result = await new BrowserHttpReader(url).open();
+
+      expect(result.size).toBe(12345);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("still falls back when cancelling an unusable probe body fails", async () => {
+      const cancelSpy = jest.fn().mockRejectedValue(new Error("stream errored"));
+      mockFetch
+        .mockResolvedValueOnce(rangedResponse({ status: 200, cancelSpy }))
+        .mockResolvedValueOnce(
+          new Response(null, {
+            status: 200,
+            headers: { "accept-ranges": "bytes", "content-length": "500" },
+          }),
+        );
+
+      const result = await new BrowserHttpReader(url).open();
+
+      expect(result.size).toBe(500);
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
     it("falls back when the server ignores the Range header (status 200)", async () => {
       const cancelSpy = jest.fn().mockResolvedValue(undefined);
       mockFetch

@@ -109,22 +109,31 @@ export default class BrowserHttpReader implements FileReader {
     }
 
     if (response.status !== 206) {
-      await response.body?.cancel();
+      await cancelBody(response);
       return undefined;
     }
 
     const size = parseTotalSizeFromContentRange(response.headers.get("content-range"));
     if (size == undefined) {
-      await response.body?.cancel();
+      await cancelBody(response);
       return undefined;
     }
 
-    await response.body?.cancel();
+    await cancelBody(response);
     return {
       size,
       identifier:
         response.headers.get("etag") ?? response.headers.get("last-modified") ?? undefined,
     };
+  }
+}
+
+// Best-effort cleanup: an errored body rejects cancel(), which must not block the fallback.
+async function cancelBody(response: Response): Promise<void> {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // Ignored, see above.
   }
 }
 

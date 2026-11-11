@@ -54,7 +54,8 @@ export default class CachedFilelike implements Filelike {
   #keepReconnectingCallback?: (reconnecting: boolean) => void;
 
   // Active connections, oldest first. `remainingRange.start` advances as data arrives.
-  #connections: { stream: FileStream; remainingRange: Range }[] = [];
+  // `retryOfErrorAt` is the interruption time this connection was opened after, if any.
+  #connections: { stream: FileStream; remainingRange: Range; retryOfErrorAt?: number }[] = [];
 
   // A list of read requests and associated ranges for all read requests, in order.
   #readRequests: {
@@ -378,7 +379,7 @@ export default class CachedFilelike implements Filelike {
     }
 
     const stream = this.#fileReader.fetch(range.start, range.end - range.start);
-    this.#connections.push({ stream, remainingRange: range });
+    this.#connections.push({ stream, remainingRange: range, retryOfErrorAt: this.#lastErrorTime });
 
     stream.on("error", (error: Error) => {
       this.#handleConnectionInterrupted({
@@ -430,7 +431,7 @@ export default class CachedFilelike implements Filelike {
         this.#connections.splice(index, 1);
       } else {
         this.#connections[index] = {
-          stream,
+          ...connection,
           remainingRange: { start: range.start + bytesRead, end: range.end },
         };
       }
@@ -484,10 +485,11 @@ export default class CachedFilelike implements Filelike {
         this.#keepReconnectingCallback(true);
       }
     } else {
-      // Otherwise, if we get two interruptions in a short timespan (100ms) then there is
-      // probably a serious error, we resolve all remaining callbacks with errors and close out.
-      const lastErrorTime = this.#lastErrorTime;
-      if (lastErrorTime != undefined && Date.now() - lastErrorTime < 100) {
+      // Otherwise, if a retry is interrupted again within 100ms of the error that caused it, there
+      // is probably a serious error, so we reject all remaining callbacks and close out.
+      // Concurrent connections failing together are not retries of each other.
+      const retryOfErrorAt = this.#connections[index]!.retryOfErrorAt;
+      if (retryOfErrorAt != undefined && Date.now() - retryOfErrorAt < 100) {
         this.#log.error(
           `Connection @ ${rangeToString(range)} ${reason} again; closing: ${error.toString()}`,
         );

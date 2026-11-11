@@ -684,6 +684,51 @@ describe("CachedFilelike", () => {
       cachedFileReader.close();
     });
 
+    it("retries both connections when they fail at the same time instead of closing", async () => {
+      // GIVEN: two concurrent connections whose first attempts fail together, then succeed.
+      const errorCallbacks: Array<(_: Error) => void> = [];
+      const fetch = jest.fn((_offset: number, length: number): FileStream => {
+        const isFirstAttempt = fetch.mock.calls.length <= 2;
+        return {
+          on: (
+            type: "data" | "error" | "end",
+            callback: ((_: Uint8Array) => void) & ((_: Error) => void) & (() => void),
+          ) => {
+            if (type === "error" && isFirstAttempt) {
+              errorCallbacks.push(callback);
+            }
+            if (type === "data" && !isFirstAttempt) {
+              setTimeout(() => {
+                callback(new Uint8Array(length));
+              }, 0);
+            }
+          },
+          destroy: () => {},
+        };
+      });
+      const fileReader: FileReader = { open: async () => ({ size: 20 * MEBIBYTE }), fetch };
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 4 * MEBIBYTE,
+        readAheadEnabled: false,
+        maxConcurrentConnections: 2,
+        log,
+      });
+      const firstRead = cachedFileReader.read(0, 10);
+      const secondRead = cachedFileReader.read(10 * MEBIBYTE, 10);
+      await delay(5);
+      expect(errorCallbacks).toHaveLength(2);
+
+      // WHEN: both connections error back-to-back.
+      errorCallbacks[0]!(new Error("network blip"));
+      errorCallbacks[1]!(new Error("network blip"));
+
+      // THEN: each read is retried and resolves.
+      await expect(firstRead).resolves.toEqual(new Uint8Array(10));
+      await expect(secondRead).resolves.toEqual(new Uint8Array(10));
+      expect(fetch).toHaveBeenCalledTimes(4);
+    });
+
     it("destroys every active connection on close() when more than one is open", async () => {
       // GIVEN: 2 concurrent, never-resolving connections.
       const fetchMock = jest.fn((): FileStream => ({ on: () => {}, destroy: jest.fn() }));
