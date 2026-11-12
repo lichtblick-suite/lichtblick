@@ -14,6 +14,12 @@
 // run's modal set are excluded. The included quartets feed the same statistics (median, IQR,
 // exact order-statistic CI95) and verdict as the relaunch A/B; adjacent-pair deltas are kept as a
 // diagnostic.
+//
+// Caveat: all quartets of a run share one process, so GC, cache and thermal state carry over and
+// they may not be fully independent. The CI assumes independent quartets and is optimistic under
+// positive autocorrelation, so read a borderline `within` with care. In the 10-quartet evidence
+// runs the lag-1 autocorrelation of the quartet deltas was −0.33 … +0.46 (no clear dependence,
+// little power at that n); the relaunch A/B (a fresh launch per run) is the independent check.
 
 import type {
   BlockCpu,

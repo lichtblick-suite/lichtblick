@@ -50,9 +50,11 @@ import { compareCodeUnits } from "../shared/compare";
 // CPU verdict comes from toggle (methods `toggle`, `both`) or relaunch, the memory verdict only
 // from relaunch (toggling cannot measure retained memory; `notMeasured` for method `toggle`). On
 // web with `BENCHMARK_OVERHEAD_UA_ARM=1`, a second toggle launch without the UA memory probe
-// (`toggleWithoutUaProbe`, informational) isolates the probe's share of the toggle CPU delta. With
+// (`toggleWithoutUaProbe`) isolates the probe's share of the toggle CPU delta. With
 // `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1`, a launch with telemetry off toggles only the benchmark FPS
-// probe's frame loop (`toggleFrameProbe`, harness, not shipped; informational). The
+// probe's frame loop (`toggleFrameProbe`, harness, not shipped). Both arms, like the `on-noUa`
+// relaunch sections and the adjacent-pair deltas, are diagnostic: optional (off by default) and
+// never part of a verdict. The
 // toggle launch ends with a profiled period (`directAttribution`, `result/directAttribution.ts`):
 // renderer main-thread JS time in telemetry sources, with its own "direct (JS only)" verdict that
 // is never merged into `verdicts`.

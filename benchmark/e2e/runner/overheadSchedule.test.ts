@@ -79,14 +79,14 @@ describe("parseOverheadConfig", () => {
     // Given
     const env = {
       BENCHMARK_OVERHEAD_REPEATS: "0",
-      BENCHMARK_OVERHEAD_WARMUP_RUNS: "-2",
+      BENCHMARK_OVERHEAD_WARMUP_RUNS: "0",
       BENCHMARK_OVERHEAD_POLLS: "3",
       BENCHMARK_OVERHEAD_UA_ARM: "1",
       BENCHMARK_OVERHEAD_GATE: "1",
       BENCHMARK_OVERHEAD_METHOD: "toggle",
       BENCHMARK_OVERHEAD_TOGGLE_QUARTETS: "2",
       BENCHMARK_OVERHEAD_TOGGLE_BLOCK_MS: "200",
-      BENCHMARK_OVERHEAD_PROFILE_MS: "-5",
+      BENCHMARK_OVERHEAD_PROFILE_MS: "0",
       BENCHMARK_OVERHEAD_FRAME_PROBE_ARM: "1",
     };
 
@@ -126,22 +126,38 @@ describe("parseOverheadConfig", () => {
   it.each([
     "4.5",
     "ten",
-    " ",
-  ])("should fall back to 10 toggle quartets for %p", (toggleQuartets) => {
+    "1o",
+    "-3",
+    "1e1",
+    "0x10",
+  ])("should throw for the toggle quartets %p, naming the variable", (toggleQuartets) => {
     // Given
     const env = { BENCHMARK_OVERHEAD_TOGGLE_QUARTETS: toggleQuartets };
+
+    // When
+    const parse = () => parseOverheadConfig(env, "web");
+
+    // Then
+    expect(parse).toThrow(
+      `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS=${toggleQuartets} is not a non-negative integer`,
+    );
+  });
+
+  it("should accept a count with surrounding whitespace", () => {
+    // Given
+    const env = { BENCHMARK_OVERHEAD_TOGGLE_QUARTETS: " 6 " };
 
     // When
     const config = parseOverheadConfig(env, "web");
 
     // Then
-    expect(config.toggleQuartets).toBe(10);
+    expect(config.toggleQuartets).toBe(6);
   });
 
   it.each([
     { value: "0", expected: 0 },
     { value: "5000", expected: 5000 },
-    { value: "1.5", expected: 10_000 },
+    { value: "", expected: 10_000 },
   ])("should read the profiled period $value as $expected ms", ({ value, expected }) => {
     // Given
     const env = { BENCHMARK_OVERHEAD_PROFILE_MS: value };
@@ -153,12 +169,14 @@ describe("parseOverheadConfig", () => {
     expect(config.profileMs).toBe(expected);
   });
 
-  it("should fall back to the defaults for blank or non-integer values", () => {
+  it("should fall back to the defaults for blank values", () => {
     // Given
     const env = {
-      BENCHMARK_OVERHEAD_REPEATS: "2.5",
+      BENCHMARK_OVERHEAD_REPEATS: "",
       BENCHMARK_OVERHEAD_WARMUP_RUNS: " ",
-      BENCHMARK_OVERHEAD_POLLS: "many",
+      BENCHMARK_OVERHEAD_POLLS: "\t",
+      BENCHMARK_OVERHEAD_TOGGLE_QUARTETS: " ",
+      BENCHMARK_OVERHEAD_TOGGLE_BLOCK_MS: "",
     };
 
     // When
@@ -168,6 +186,25 @@ describe("parseOverheadConfig", () => {
     expect(config.repeats).toBe(8);
     expect(config.warmupRuns).toBe(1);
     expect(config.polls).toBe(10);
+    expect(config.toggleQuartets).toBe(10);
+    expect(config.toggleBlockMs).toBe(3000);
+  });
+
+  it.each([
+    { name: "BENCHMARK_OVERHEAD_REPEATS", value: "2.5" },
+    { name: "BENCHMARK_OVERHEAD_WARMUP_RUNS", value: "-2" },
+    { name: "BENCHMARK_OVERHEAD_POLLS", value: "many" },
+    { name: "BENCHMARK_OVERHEAD_TOGGLE_BLOCK_MS", value: "3s" },
+    { name: "BENCHMARK_OVERHEAD_PROFILE_MS", value: "1.5" },
+  ])("should throw for $name=$value instead of using the default", ({ name, value }) => {
+    // Given
+    const env = { [name]: value };
+
+    // When
+    const parse = () => parseOverheadConfig(env, "electron");
+
+    // Then
+    expect(parse).toThrow(`${name}=${value} is not a non-negative integer`);
   });
 
   it("should read the steady poll count", () => {

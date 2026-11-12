@@ -59,6 +59,10 @@ but they answer different questions:
 | When to run                       | Every change; runs in CI on pushes to `develop`/`main`                                                 | When telemetry, its collectors or the overhead runner change; manual only (locally or a manual CI run)                                                                                           |
 | Command                           | `yarn test:e2e:benchmark[:web] scenarios`                                                              | `yarn test:e2e:benchmark[:web] overhead`                                                                                                                                                         |
 
+The UA-off and FPS-probe variants and the adjacent-pair deltas of the overhead spec are
+**diagnostic**: optional (the variants are off by default), never part of a verdict, and they may
+change or be removed. The verdicts come only from the core toggle + relaunch A/B.
+
 On push, [CI](#ci) runs only the scenarios spec: the workflow passes the `scenarios` filter to the
 `:ci` scripts. Run the overhead spec manually with the command above, or as a manual CI run
 (`suite: overhead`). It is report only unless
@@ -688,6 +692,12 @@ of `runScenario`, recorded by `runner/overheadMeasurement.ts`)
   (`MEDIAN_CI_CONFIDENCE`). It assumes only independent deltas, no distribution shape, and is
   deterministic. Examples: n = 6–8 → [min, max] (96.9 %, 98.4 %, 99.2 %), n = 9 → ranks 2..8
   (96.1 %), n = 10 → ranks 2..9 (97.9 %).
+- **Independence caveat (toggle).** All quartets of a toggle run share one process, so GC, cache
+  and thermal state carry over and the quartets may not be fully independent. With positive
+  autocorrelation the CI is optimistic, so read a borderline `within` with care. In the 10-quartet
+  evidence runs the lag-1 autocorrelation of the quartet deltas was −0.33 … +0.46 (no clear
+  dependence, though the check has little power at n = 10). Relaunch pairs use a fresh launch per
+  run, so the relaunch A/B is the independent cross-check.
 - **Why not a bootstrap.** Earlier reports used a percentile bootstrap of the median. Its interval
   can never be wider than [min, max], which covers the median with only 75 % (n = 3) to 93.75 %
   (n = 5) probability, and at larger n it tends to pick ranks below the nominal 95 %; a verdict
@@ -704,7 +714,8 @@ of `runScenario`, recorded by `runner/overheadMeasurement.ts`)
 - **Report only**: the suite never fails on the targets unless `BENCHMARK_OVERHEAD_GATE=1`, and then
   only on an overall `exceeds` (an `inconclusive` result does not fail).
 
-**UA memory probe arm** (web only). With cross-origin isolation the page telemetry calls
+**UA memory probe arm** (web only; diagnostic: optional, off by default, never part of a verdict).
+With cross-origin isolation the page telemetry calls
 `performance.measureUserAgentSpecificMemory()`. That is a benchmark probe, not product telemetry,
 and the browser may run a garbage collection to answer it, which can make the telemetry-on working
 set _smaller_ than telemetry off. The `on-noUa` arm isolates that: the report adds
@@ -716,9 +727,11 @@ runs), so only about one call per run resolves.
 
 With method `toggle` or `both` the same knob adds a second toggle launch with
 `?telemetry.uaMemory=off` (`overheadSchedule.toggleUaProbeVariants`). The report keeps it as
-`toggleWithoutUaProbe` (same shape and statistics as `toggle`, own verdict, informational: the CPU
-verdict stays the one of `toggle`); the viewer and the CI summary show it as the sub-row
-"toggle without UA probe (informational)". The spec asserts 0 UA calls in its on blocks.
+`toggleWithoutUaProbe` (same shape and statistics as `toggle`, own verdict, diagnostic: never part
+of the report's verdicts, the CPU verdict stays the one of `toggle`); the viewer and the CI summary
+show it as the sub-row "toggle without UA probe (diagnostic, optional, never part of a verdict)",
+and the relaunch comparisons as "without UA probe (on-noUa vs off; …)" and "UA probe cost (on vs
+on-noUa; …)" with the same tag. The spec asserts 0 UA calls in its on blocks.
 
 **Measured UA probe cost** (web, full Chromium, M4 Pro; `toggle` vs `toggleWithoutUaProbe`, one
 launch each; CIs from the earlier percentile bootstrap, so the 4-quartet rows would have none now). The probe runs at most every `UA_MEMORY_MIN_INTERVAL_MS` = 10 s; collectors are
@@ -833,11 +846,12 @@ was ≈ +0.1 %. The per-process split put it outside the renderer JS: GPU proces
   +1.14 pp in 6/6 quartets, renderer +1.90 / +2.29 pp). The GPU signal moved from the telemetry
   toggle to the frame probe.
 - **Frame-probe variant** (`BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1`, methods `toggle` / `both`,
-  both platforms, default off because it adds one launch per scenario): a last toggle launch with
+  both platforms; diagnostic, default off because it adds one launch per scenario): a last toggle launch with
   `?telemetry=off`, whose blocks switch only a bare rAF loop with a no-op callback
   (`window.lichtblickTelemetry.setFrameProbeActive`, present only with telemetry off). Report
   `toggleFrameProbe`, same shape and statistics as `toggle`; the viewer and the CI summary show it
-  as the sub-row "benchmark FPS probe (harness, not shipped)" with the per-process deltas
+  as the sub-row "benchmark FPS probe (harness, not shipped; diagnostic, optional, never part of a
+  verdict)" with the per-process deltas
   (`gpu +0.94 pp (10/10 ↑)`, mean on − off pp of the included quartets, positive quartets) and no
   verdict. It is never part of `verdicts`.
 - **Scenario runs**: `renderer.fps`, `renderer.frames` and `renderer.lateFrames` (the smoothness
@@ -875,6 +889,13 @@ also records `run.environment.collectors` (`collectorsState()`: whether the UA p
 | `BENCHMARK_OVERHEAD_PROFILE_MS`      | 10000   | toggle: direct (JS only) attribution profile after the blocks (`0` = off)  |
 | `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM` | unset   | toggle: `1` adds a launch toggling only the benchmark FPS probe's rAF loop |
 
+The count knobs (quartets, block length, repeats, warm-up runs, polls, profile length) take a
+non-negative integer: unset or blank keeps the default, a value below the minimum is clamped to it,
+and any other value (for example `1o`, `2.5`, `-3` or `1e1`) fails the spec before the first launch
+with an error naming the variable, like an unknown `BENCHMARK_OVERHEAD_METHOD`.
+`BENCHMARK_OVERHEAD_UA_ARM` and `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM` enable diagnostic arms: optional,
+never part of a verdict, and they may change or be removed.
+
 A relaunch run takes about 25–35 s (launch, render calibration, load, 3 s warm-up, 10 polls,
 teardown); each extra poll adds 1 s. With the defaults that is 17 runs per scenario (≈ 8–10 min),
 ≈ 25–30 min for the three scenarios on one platform; the UA arm adds 8 runs per scenario. Method
@@ -892,8 +913,8 @@ set, records per realm, UA calls, toggle latency, flags), `quartets` (off / on b
 `n` / `excludedQuartets`, median / IQR / CI95 of the quartets' relative and pp deltas, verdict, the
 adjacent `pairs` (diagnostic only), modal process set, `toggleLatencyMsMax` and the renderer records and UA calls
 per arm. `toggleWithoutUaProbe` (UA arm only) is a second toggle section without the UA probe,
-informational. `toggleFrameProbe` (frame-probe arm only) is the toggle section of the benchmark FPS
-probe, harness, no verdict. `directAttribution` (toggle only) is the direct (JS only) attribution above: config
+diagnostic (never part of a verdict). `toggleFrameProbe` (frame-probe arm only) is the toggle
+section of the benchmark FPS probe, harness, diagnostic, no verdict. `directAttribution` (toggle only) is the direct (JS only) attribution above: config
 (profile ms, sampling interval, telemetry sources) and either `status: "unsupported"` with the
 reason or `status: "measured"` with the metrics, top functions and its own verdict. `verdicts` are the final ones, with `cpuVerdictSource` (`toggle` | `relaunch`) and
 `memVerdictSource` (`relaunch` | `notMeasured`); `overall` is the worst of the measured ones. The
@@ -1076,6 +1097,10 @@ A manual run takes these inputs:
 | `method`   | `both`      | overhead only: `BENCHMARK_OVERHEAD_METHOD` (`toggle`, `relaunch` or `both`)                |
 | `quartets` | blank       | overhead only: `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS` (blank: default 10)                    |
 | `repeats`  | blank       | overhead only: `BENCHMARK_OVERHEAD_REPEATS` (blank: default 8; a relaunch verdict needs 6) |
+
+`quartets` and `repeats` are free text so custom values stay possible (for example 4 for a smoke
+run). A value that is not a non-negative integer fails the overhead spec before the first launch
+(see "Env knobs" above), so a typo costs the install and build, not a full default run.
 
 The overhead suite takes ≈ 35–40 min per platform locally with the defaults (see
 [Specs: scenarios vs overhead](#specs-scenarios-vs-overhead)) and likely longer on the CI runner

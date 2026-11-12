@@ -297,7 +297,7 @@ describe("buildOverheadTable", () => {
     );
   });
 
-  it("marks single-pair reports inconclusive and adds the UA-probe rows", () => {
+  it("marks single-pair reports inconclusive and adds the diagnostic UA-probe rows", () => {
     // Given a single-pair report and a report with the on-noUa arm
     const single = BenchmarkResultBuilder.overhead({ repeats: 1 });
     const arms: OverheadArm[] = ["off", "on", "on-noUa"];
@@ -321,10 +321,10 @@ describe("buildOverheadTable", () => {
       "| electron | sinewave | relaunch | 1 | +1.00 % (+1.0 pp) | +5.0 MiB | ❔ inconclusive |",
     );
     expect(markdown).toContain(
-      "| web | ↳ without UA probe | relaunch | 6 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +2.0 MiB [+2.0, +2.0] | ✅ within |",
+      "| web | ↳ without UA probe (on-noUa vs off; diagnostic, optional, never part of a verdict) | relaunch | 6 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +2.0 MiB [+2.0, +2.0] | ✅ within |",
     );
     expect(markdown).toContain(
-      "| web | ↳ UA probe cost | relaunch | 6 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +8.0 MiB [+8.0, +8.0] | — |",
+      "| web | ↳ UA probe cost (on vs on-noUa; diagnostic, optional, never part of a verdict) | relaunch | 6 | 0.00 % [0.00, 0.00] (0.0 pp [0.0, 0.0]) IQR 0.00 % | +8.0 MiB [+8.0, +8.0] | — |",
     );
   });
 
@@ -362,7 +362,7 @@ describe("buildOverheadTable", () => {
     );
   });
 
-  it("adds the toggle A/B without the UA probe as an informational sub-row", () => {
+  it("adds the toggle A/B without the UA probe as a diagnostic sub-row", () => {
     // Given a web toggle report (+1 %) with a toggle A/B without the UA probe (+0.5 %)
     const toggleWithoutUaProbe = ToggleBlockBuilder.summary(
       Array.from({ length: 6 }, () => ({ off: 100, on: 100.5 })),
@@ -378,11 +378,11 @@ describe("buildOverheadTable", () => {
 
     // Then
     expect(markdown).toContain(
-      "| web | ↳ toggle without UA probe (informational) | toggle | 6 quartets | +0.50 % [+0.50, +0.50] (+0.5 pp [+0.5, +0.5]) IQR 0.00 % | not measured | ✅ within | toggle ≤ 5 ms | | |",
+      "| web | ↳ toggle without UA probe (diagnostic, optional, never part of a verdict) | toggle | 6 quartets | +0.50 % [+0.50, +0.50] (+0.5 pp [+0.5, +0.5]) IQR 0.00 % | not measured | ✅ within | toggle ≤ 5 ms | | |",
     );
   });
 
-  it("adds the benchmark FPS probe as a sub-row without a verdict, with the per-process deltas", () => {
+  it("adds the benchmark FPS probe as a diagnostic sub-row without a verdict, with the per-process deltas", () => {
     // Given an Electron toggle report with a frame probe of +7 % (GPU +4 pp, renderer +3 pp)
     const toggleFrameProbe = ToggleBlockBuilder.summary(
       Array.from({ length: 6 }, () => ({ off: 100, on: 107 })),
@@ -398,7 +398,7 @@ describe("buildOverheadTable", () => {
 
     // Then
     expect(markdown).toContain(
-      "| electron | ↳ benchmark FPS probe (harness, not shipped) | toggle | 6 quartets | +7.00 % [+7.00, +7.00] (+7.0 pp [+7.0, +7.0]) IQR 0.00 % | not measured | — | toggle ≤ 5 ms · gpu +4.00 pp (6/6 ↑) · renderer +3.00 pp (6/6 ↑) | | |",
+      "| electron | ↳ benchmark FPS probe (harness, not shipped; diagnostic, optional, never part of a verdict) | toggle | 6 quartets | +7.00 % [+7.00, +7.00] (+7.0 pp [+7.0, +7.0]) IQR 0.00 % | not measured | — | toggle ≤ 5 ms · gpu +4.00 pp (6/6 ↑) · renderer +3.00 pp (6/6 ↑) | | |",
     );
   });
 

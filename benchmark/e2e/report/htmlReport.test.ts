@@ -250,7 +250,7 @@ describe("buildHtmlReport", () => {
     expect(section).toContain("toggle ≤ 5 ms");
   });
 
-  it("should show the toggle A/B without the UA probe as an informational sub-row", () => {
+  it("should show the toggle A/B without the UA probe as a diagnostic sub-row", () => {
     // Given a web toggle report (+1 %) with a toggle A/B without the UA probe (+0.5 %)
     const toggleWithoutUaProbe = ToggleBlockBuilder.summary(
       Array.from({ length: 6 }, () => ({ off: 100, on: 100.5 })),
@@ -264,14 +264,16 @@ describe("buildHtmlReport", () => {
 
     // Then
     const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
-    expect(section).toContain("↳ toggle without UA probe (informational)");
+    expect(section).toContain(
+      "↳ toggle without UA probe (diagnostic, optional, never part of a verdict)",
+    );
     expect(section).toContain(">+0.50 % [+0.50, +0.50]</td>");
     expect(section).toContain(
       'title="toggle: 6 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), own launch with ?telemetry.uaMemory=off"',
     );
   });
 
-  it("should show the benchmark FPS probe as a sub-row without a verdict", () => {
+  it("should show the benchmark FPS probe as a diagnostic sub-row without a verdict", () => {
     // Given an Electron toggle report with a frame probe of +7 % (GPU +4 pp)
     const toggleFrameProbe = ToggleBlockBuilder.summary(
       Array.from({ length: 6 }, () => ({ off: 100, on: 107 })),
@@ -284,7 +286,9 @@ describe("buildHtmlReport", () => {
 
     // Then
     const section = html.slice(html.indexOf('id="telemetry-overhead"'), html.indexOf('id="runs"'));
-    expect(section).toContain("↳ benchmark FPS probe (harness, not shipped)");
+    expect(section).toContain(
+      "↳ benchmark FPS probe (harness, not shipped; diagnostic, optional, never part of a verdict)",
+    );
     expect(section).toContain(">+7.00 % [+7.00, +7.00]</td>");
     expect(section).toContain(
       'title="toggle: 6 ABBA quartets × 4 × 3000 ms blocks (500 ms settle), own launch with ?telemetry=off, rAF loop toggled"',
@@ -293,7 +297,11 @@ describe("buildHtmlReport", () => {
     // And: only the main row carries a verdict badge, the frame-probe row has none
     const probeRow = section
       .split("\n")
-      .find((line) => line.includes("↳ benchmark FPS probe (harness, not shipped)"));
+      .find((line) =>
+        line.includes(
+          "↳ benchmark FPS probe (harness, not shipped; diagnostic, optional, never part of a verdict)",
+        ),
+      );
     expect(probeRow).toBeDefined();
     expect(probeRow).not.toContain('class="badge');
     expect(section).toContain('<span class="badge good">within</span>');

@@ -27,6 +27,8 @@ import {
   selfCostText,
   TOGGLE_FRAME_PROBE_LABEL,
   TOGGLE_WITHOUT_UA_PROBE_LABEL,
+  UA_PROBE_COST_LABEL,
+  WITHOUT_UA_PROBE_LABEL,
   toggleConfigText,
   toggleCoverageNote,
   toggleCpuStats,
@@ -177,7 +179,7 @@ function relaunchRow(report: OverheadReport): Cell[] {
   ];
 }
 
-/** Sub-row of a UA-probe comparison (`on-noUa` arm, web). */
+/** Sub-row of a UA-probe comparison (`on-noUa` arm, web; diagnostic, never part of a verdict). */
 function uaRow(
   report: OverheadReport,
   label: string,
@@ -198,8 +200,8 @@ function uaRow(
 }
 
 /**
- * Sub-row of the toggle A/B without the UA memory probe (second launch, web): its CPU delta and
- * verdict are informational (the probe's share is `toggle` − this).
+ * Sub-row of the toggle A/B without the UA memory probe (second launch, web): diagnostic, its CPU
+ * delta and own verdict never enter the report's verdicts (the probe's share is `toggle` − this).
  */
 function toggleWithoutUaRow(report: OverheadReport, toggle: OverheadToggleSummaryV3): Cell[] {
   return [
@@ -221,7 +223,7 @@ function toggleWithoutUaRow(report: OverheadReport, toggle: OverheadToggleSummar
 
 /**
  * Sub-row of the benchmark FPS probe (own launch, telemetry off, only the rAF frame loop toggled):
- * harness cost, so no verdict; the flags show where the CPU lands per process type.
+ * harness cost and diagnostic, so no verdict; the flags show where the CPU lands per process type.
  */
 function toggleFrameProbeRow(report: OverheadReport, toggle: OverheadToggleSummaryV3): Cell[] {
   return [
@@ -284,10 +286,10 @@ function reportRows(report: OverheadReport): Cell[][] {
   }
   if (report.withoutUaProbe != undefined) {
     const { verdicts, ...summary } = report.withoutUaProbe;
-    rows.push(uaRow(report, "without UA probe (on-noUa vs off)", summary, verdicts.overall));
+    rows.push(uaRow(report, WITHOUT_UA_PROBE_LABEL, summary, verdicts.overall));
   }
   if (report.uaCost != undefined) {
-    rows.push(uaRow(report, "UA probe cost (on vs on-noUa)", report.uaCost, undefined));
+    rows.push(uaRow(report, UA_PROBE_COST_LABEL, report.uaCost, undefined));
   }
   return rows;
 }
