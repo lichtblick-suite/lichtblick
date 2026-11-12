@@ -101,6 +101,8 @@ export interface ILayoutManager {
 
   getLayout(id: LayoutID): Promise<Layout | undefined>;
 
+  getDefaultLayoutData(): Promise<Partial<LayoutData> | undefined>;
+
   saveNewLayout(params: {
     name: string;
     data: LayoutData;
