@@ -58,23 +58,18 @@ jobs:
           git commit -m '[dependabot skip] Fix yarn.lock' --allow-empty
           git push
 
-      - uses: octokit/request-action@v3.0.0
-        if: contains(fromJSON('["opened", "reopened"]'), github.event.action)
-        env:
-          GITHUB_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
-        with:
-          route: POST /repos/{owner_and_repo}/pulls/{pull_number}/reviews
-          owner_and_repo: ${{ github.repository }}
-          pull_number: ${{ github.event.pull_request.number }}
-          event: "APPROVE"
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
 
-      - uses: octokit/request-action@v3.0.0
-        if: contains(fromJSON('["opened", "reopened"]'), github.event.action)
+      # Native auto-merge: GitHub merges only once all required status checks pass.
+      - name: Approve and enable auto-merge
+        if: >-
+          contains(fromJSON('["opened", "reopened"]'), github.event.action) &&
+          contains(fromJSON('["version-update:semver-patch", "version-update:semver-minor"]'), steps.metadata.outputs.update-type)
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr merge --auto --squash "$PR_URL"
         env:
-          GITHUB_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
-        with:
-          route: POST /repos/{owner_and_repo}/issues/{pull_number}/comments
-          owner_and_repo: ${{ github.repository }}
-          pull_number: ${{ github.event.pull_request.number }}
-          # two quotes are needed to avoid a syntax error when running the action
-          body: "'@dependabot squash and merge'"
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
