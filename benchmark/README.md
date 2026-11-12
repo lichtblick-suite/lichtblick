@@ -875,6 +875,11 @@ also records `run.environment.collectors` (`collectorsState()`: whether the UA p
 | `BENCHMARK_OVERHEAD_PROFILE_MS`      | 10000   | toggle: direct (JS only) attribution profile after the blocks (`0` = off)  |
 | `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM` | unset   | toggle: `1` adds a launch toggling only the benchmark FPS probe's rAF loop |
 
+The count knobs (quartets, block length, repeats, warm-up runs, polls, profile length) take a
+non-negative integer: unset or blank keeps the default, a value below the minimum is clamped to it,
+and any other value (for example `1o`, `2.5`, `-3` or `1e1`) fails the spec before the first launch
+with an error naming the variable, like an unknown `BENCHMARK_OVERHEAD_METHOD`.
+
 A relaunch run takes about 25–35 s (launch, render calibration, load, 3 s warm-up, 10 polls,
 teardown); each extra poll adds 1 s. With the defaults that is 17 runs per scenario (≈ 8–10 min),
 ≈ 25–30 min for the three scenarios on one platform; the UA arm adds 8 runs per scenario. Method
@@ -1076,6 +1081,10 @@ A manual run takes these inputs:
 | `method`   | `both`      | overhead only: `BENCHMARK_OVERHEAD_METHOD` (`toggle`, `relaunch` or `both`)                |
 | `quartets` | blank       | overhead only: `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS` (blank: default 10)                    |
 | `repeats`  | blank       | overhead only: `BENCHMARK_OVERHEAD_REPEATS` (blank: default 8; a relaunch verdict needs 6) |
+
+`quartets` and `repeats` are free text so custom values stay possible (for example 4 for a smoke
+run). A value that is not a non-negative integer fails the overhead spec before the first launch
+(see "Env knobs" above), so a typo costs the install and build, not a full default run.
 
 The overhead suite takes ≈ 35–40 min per platform locally with the defaults (see
 [Specs: scenarios vs overhead](#specs-scenarios-vs-overhead)) and likely longer on the CI runner

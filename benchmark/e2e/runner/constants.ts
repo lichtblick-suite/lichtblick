@@ -225,6 +225,11 @@ export const OVERHEAD_ENV = {
   profileMs: "BENCHMARK_OVERHEAD_PROFILE_MS",
   frameProbeArm: "BENCHMARK_OVERHEAD_FRAME_PROBE_ARM",
 } as const;
+/**
+ * Accepted form of a count env knob (`parseOverheadConfig`): decimal digits only, so `1o`, `2.5`,
+ * `-3`, `1e1` or `0x10` fail instead of silently running the default.
+ */
+export const OVERHEAD_COUNT_PATTERN = /^\d+$/;
 
 /**
  * Test timeout of one overhead scenario: a fixed base plus, per run, a setup budget (app launch,

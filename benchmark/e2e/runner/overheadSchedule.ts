@@ -4,6 +4,7 @@
 // Overhead A/B run plan: env knobs, arms and their run order. Pure (no Playwright).
 
 import {
+  OVERHEAD_COUNT_PATTERN,
   OVERHEAD_DEFAULT_METHOD,
   OVERHEAD_DEFAULT_REPEATS,
   OVERHEAD_DEFAULT_WARMUP_RUNS,
@@ -28,16 +29,25 @@ import type {
 import { overheadAutoPauseMs, overheadToggleAutoPauseMs } from "./overheadFixtures";
 import type { BenchmarkPlatform, RunScenarioOptions } from "./types";
 
-/** Non-negative integer env value ≥ `min`, else `fallback` (unset, blank or not an integer). */
-function parseCount(value: string | undefined, fallback: number, min: number): number {
-  if (value == undefined || value.trim() === "") {
+/**
+ * Count env knob `name`: `fallback` when unset or blank, else the non-negative integer clamped to
+ * `min`. Throws for any other value (like `parseOverheadMethod`), so a typo never silently runs the
+ * slow default.
+ */
+function parseCount(
+  name: string,
+  value: string | undefined,
+  fallback: number,
+  min: number,
+): number {
+  const trimmed = value?.trim() ?? "";
+  if (trimmed === "") {
     return fallback;
   }
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed)) {
-    return fallback;
+  if (!OVERHEAD_COUNT_PATTERN.test(trimmed)) {
+    throw new Error(`${name}=${value} is not a non-negative integer`);
   }
-  return Math.max(min, parsed);
+  return Math.max(min, Number(trimmed));
 }
 
 /**
@@ -98,7 +108,9 @@ export function runsToggleFrameProbe({
  * `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS` (ABBA quartets of 4 blocks, default 10, min 4) and
  * `BENCHMARK_OVERHEAD_TOGGLE_BLOCK_MS` (default 3000, min 1000), and `BENCHMARK_OVERHEAD_PROFILE_MS`
  * (profiled period of the direct CPU attribution after the toggle blocks, default 10000, 0 off),
- * `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1` (the frame-probe toggle launch, default off).
+ * `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1` (the frame-probe toggle launch, default off). A count
+ * knob that is set but not a non-negative integer throws (see `parseCount`); unset or blank keeps
+ * the default, and a value below the minimum is clamped to it.
  */
 export function parseOverheadConfig(
   env: NodeJS.ProcessEnv,
@@ -106,22 +118,44 @@ export function parseOverheadConfig(
 ): OverheadEnvConfig {
   return {
     method: parseOverheadMethod(env[OVERHEAD_ENV.method]),
-    repeats: parseCount(env[OVERHEAD_ENV.repeats], OVERHEAD_DEFAULT_REPEATS, 1),
-    warmupRuns: parseCount(env[OVERHEAD_ENV.warmupRuns], OVERHEAD_DEFAULT_WARMUP_RUNS, 0),
-    polls: parseCount(env[OVERHEAD_ENV.polls], OVERHEAD_STEADY_POLLS, OVERHEAD_MIN_STEADY_POLLS),
+    repeats: parseCount(
+      OVERHEAD_ENV.repeats,
+      env[OVERHEAD_ENV.repeats],
+      OVERHEAD_DEFAULT_REPEATS,
+      1,
+    ),
+    warmupRuns: parseCount(
+      OVERHEAD_ENV.warmupRuns,
+      env[OVERHEAD_ENV.warmupRuns],
+      OVERHEAD_DEFAULT_WARMUP_RUNS,
+      0,
+    ),
+    polls: parseCount(
+      OVERHEAD_ENV.polls,
+      env[OVERHEAD_ENV.polls],
+      OVERHEAD_STEADY_POLLS,
+      OVERHEAD_MIN_STEADY_POLLS,
+    ),
     uaArm: platform === "web" && env[OVERHEAD_ENV.uaArm] === "1",
     gate: env[OVERHEAD_ENV.gate] === "1",
     toggleQuartets: parseCount(
+      OVERHEAD_ENV.toggleQuartets,
       env[OVERHEAD_ENV.toggleQuartets],
       OVERHEAD_TOGGLE_DEFAULT_QUARTETS,
       OVERHEAD_TOGGLE_MIN_QUARTETS,
     ),
     toggleBlockMs: parseCount(
+      OVERHEAD_ENV.toggleBlockMs,
       env[OVERHEAD_ENV.toggleBlockMs],
       OVERHEAD_TOGGLE_DEFAULT_BLOCK_MS,
       OVERHEAD_TOGGLE_MIN_BLOCK_MS,
     ),
-    profileMs: parseCount(env[OVERHEAD_ENV.profileMs], OVERHEAD_PROFILE_DEFAULT_MS, 0),
+    profileMs: parseCount(
+      OVERHEAD_ENV.profileMs,
+      env[OVERHEAD_ENV.profileMs],
+      OVERHEAD_PROFILE_DEFAULT_MS,
+      0,
+    ),
     frameProbeArm: env[OVERHEAD_ENV.frameProbeArm] === "1",
   };
 }
