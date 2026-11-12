@@ -5,7 +5,7 @@ updates:
     schedule:
       # We found daily updates to be too noisy. They consumed too much CI time and engineer review
       # time relative to the benefit of being on such a bleeding edge.
-      interval: monthly
+      interval: weekly
     open-pull-requests-limit: 20
     labels: [dependabot]
     target-branch: "develop"
