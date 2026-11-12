@@ -15,7 +15,7 @@
     "@lichtblick/suite-base": "workspace:*",
     "@lichtblick/theme": "workspace:*",
     "@lichtblick/tsconfig": "1.1.2",
-    "@mcap/core": "2.2.0",
+    "@mcap/core": "2.4.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
     "@storybook/react-webpack5": "10.6.5",
     "@types/mock-fs": "4.13.4",

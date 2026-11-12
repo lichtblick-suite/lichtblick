@@ -3385,7 +3385,7 @@ __metadata:
     "@lichtblick/wasm-bz2": "npm:1.0.0"
     "@lichtblick/wasm-lz4": "npm:1.0.0"
     "@lichtblick/wasm-zstd": "npm:1.0.0"
-    "@mcap/core": "npm:2.2.0"
+    "@mcap/core": "npm:2.4.0"
     "@protobufjs/base64": "npm:1.1.2"
     flatbuffers: "npm:25.9.23"
     flatbuffers_reflection: "npm:1.3.0"
@@ -3586,7 +3586,7 @@ __metadata:
     "@lichtblick/wasm-bz2": "npm:1.0.0"
     "@lichtblick/wasm-lz4": "npm:1.0.0"
     "@lichtblick/xmlrpc": "npm:1.0.0"
-    "@mcap/core": "npm:2.2.0"
+    "@mcap/core": "npm:2.4.0"
     "@mui/icons-material": "npm:7.3.8"
     "@mui/material": "npm:7.2.0"
     "@mui/x-data-grid": "npm:7.24.1"
@@ -3749,7 +3749,7 @@ __metadata:
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
-    "@mcap/core": "npm:2.2.0"
+    "@mcap/core": "npm:2.4.0"
     "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
     "@storybook/react-webpack5": "npm:10.6.5"
     "@types/mock-fs": "npm:4.13.4"
@@ -3959,14 +3959,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mcap/core@npm:2.2.0":
-  version: 2.2.0
-  resolution: "@mcap/core@npm:2.2.0"
+"@mcap/core@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@mcap/core@npm:2.4.0"
   dependencies:
     "@foxglove/crc": "npm:^0.0.3"
-    heap-js: "npm:^2.2.0"
-    tslib: "npm:^2.5.0"
-  checksum: 10/f5afefe316e52f9db264a75d26bd93405ea7488e86f590219bae121124fa4e057ed1491ff13339e022716a91cb44c634fd1ea76a65fd6e201c19acc1db21e28d
+    heap-js: "npm:^2.7.1"
+    tslib: "npm:^2.8.1"
+  checksum: 10/226fcd78913ae23bcfb1a540be8d415513198d8a3fafe8112989c33e48ff2ccca4cdfe24670f3879d0c598332d31d3e5b99956092a7fa3bbbb3b9c4c75d9a9fa
   languageName: node
   linkType: hard
 
@@ -13469,7 +13469,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"heap-js@npm:2.7.1, heap-js@npm:^2.2.0":
+"heap-js@npm:2.7.1, heap-js@npm:^2.7.1":
   version: 2.7.1
   resolution: "heap-js@npm:2.7.1"
   checksum: 10/da26838c82e849a94ba8d61ec255bcb517d0bac0d8452cbe7ac6b8eadbcbec2e7f4e60de498838293998e758363930276f328685794b2220f3b469e265991253
@@ -21268,7 +21268,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.8.1, tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.5.0, tslib@npm:^2.8.1":
+"tslib@npm:2.8.1, tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7
