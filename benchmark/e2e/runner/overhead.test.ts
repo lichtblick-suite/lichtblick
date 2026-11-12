@@ -416,7 +416,7 @@ describe("buildOverheadReport methods", () => {
     expect(result.relaunchVerdicts).toBeUndefined();
   });
 
-  it("should add the toggle A/B without the UA probe as informational, keeping the toggle CPU verdict", () => {
+  it("should add the toggle A/B without the UA probe as a diagnostic, keeping the toggle CPU verdict", () => {
     // Given a toggle A/B over the target (+5 %) and one without the UA probe within it (+1 %)
     const toggle = ToggleBlockBuilder.summary(
       Array.from({ length: 6 }, () => ({ off: 100, on: 105 })),
@@ -440,7 +440,7 @@ describe("buildOverheadReport methods", () => {
     expect(result.verdicts).toEqual({ cpu: "exceeds", overall: "exceeds" });
   });
 
-  it("should add the frame-probe toggle A/B as informational, keeping the toggle CPU verdict", () => {
+  it("should add the frame-probe toggle A/B as a diagnostic, keeping the toggle CPU verdict", () => {
     // Given a toggle A/B within the target (+1 %) and a frame probe far over it (+7 %)
     const toggleFrameProbe = ToggleBlockBuilder.summary(
       Array.from({ length: 6 }, () => ({ off: 100, on: 107 })),

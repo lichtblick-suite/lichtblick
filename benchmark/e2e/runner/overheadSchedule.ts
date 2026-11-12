@@ -108,7 +108,8 @@ export function runsToggleFrameProbe({
  * `BENCHMARK_OVERHEAD_TOGGLE_QUARTETS` (ABBA quartets of 4 blocks, default 10, min 4) and
  * `BENCHMARK_OVERHEAD_TOGGLE_BLOCK_MS` (default 3000, min 1000), and `BENCHMARK_OVERHEAD_PROFILE_MS`
  * (profiled period of the direct CPU attribution after the toggle blocks, default 10000, 0 off),
- * `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1` (the frame-probe toggle launch, default off). A count
+ * `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1` (the frame-probe toggle launch, default off). The UA and
+ * frame-probe arms are diagnostic: optional, off by default and never part of a verdict. A count
  * knob that is set but not a non-negative integer throws (see `parseCount`); unset or blank keeps
  * the default, and a value below the minimum is clamped to it.
  */

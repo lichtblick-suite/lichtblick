@@ -59,6 +59,10 @@ but they answer different questions:
 | When to run                       | Every change; runs in CI on pushes to `develop`/`main`                                                 | When telemetry, its collectors or the overhead runner change; manual only (locally or a manual CI run)                                                                                           |
 | Command                           | `yarn test:e2e:benchmark[:web] scenarios`                                                              | `yarn test:e2e:benchmark[:web] overhead`                                                                                                                                                         |
 
+The UA-off and FPS-probe variants and the adjacent-pair deltas of the overhead spec are
+**diagnostic**: optional (the variants are off by default), never part of a verdict, and they may
+change or be removed. The verdicts come only from the core toggle + relaunch A/B.
+
 On push, [CI](#ci) runs only the scenarios spec: the workflow passes the `scenarios` filter to the
 `:ci` scripts. Run the overhead spec manually with the command above, or as a manual CI run
 (`suite: overhead`). It is report only unless
@@ -710,7 +714,8 @@ of `runScenario`, recorded by `runner/overheadMeasurement.ts`)
 - **Report only**: the suite never fails on the targets unless `BENCHMARK_OVERHEAD_GATE=1`, and then
   only on an overall `exceeds` (an `inconclusive` result does not fail).
 
-**UA memory probe arm** (web only). With cross-origin isolation the page telemetry calls
+**UA memory probe arm** (web only; diagnostic: optional, off by default, never part of a verdict).
+With cross-origin isolation the page telemetry calls
 `performance.measureUserAgentSpecificMemory()`. That is a benchmark probe, not product telemetry,
 and the browser may run a garbage collection to answer it, which can make the telemetry-on working
 set _smaller_ than telemetry off. The `on-noUa` arm isolates that: the report adds
@@ -722,9 +727,11 @@ runs), so only about one call per run resolves.
 
 With method `toggle` or `both` the same knob adds a second toggle launch with
 `?telemetry.uaMemory=off` (`overheadSchedule.toggleUaProbeVariants`). The report keeps it as
-`toggleWithoutUaProbe` (same shape and statistics as `toggle`, own verdict, informational: the CPU
-verdict stays the one of `toggle`); the viewer and the CI summary show it as the sub-row
-"toggle without UA probe (informational)". The spec asserts 0 UA calls in its on blocks.
+`toggleWithoutUaProbe` (same shape and statistics as `toggle`, own verdict, diagnostic: never part
+of the report's verdicts, the CPU verdict stays the one of `toggle`); the viewer and the CI summary
+show it as the sub-row "toggle without UA probe (diagnostic, optional, never part of a verdict)",
+and the relaunch comparisons as "without UA probe (on-noUa vs off; …)" and "UA probe cost (on vs
+on-noUa; …)" with the same tag. The spec asserts 0 UA calls in its on blocks.
 
 **Measured UA probe cost** (web, full Chromium, M4 Pro; `toggle` vs `toggleWithoutUaProbe`, one
 launch each; CIs from the earlier percentile bootstrap, so the 4-quartet rows would have none now). The probe runs at most every `UA_MEMORY_MIN_INTERVAL_MS` = 10 s; collectors are
@@ -839,11 +846,12 @@ was ≈ +0.1 %. The per-process split put it outside the renderer JS: GPU proces
   +1.14 pp in 6/6 quartets, renderer +1.90 / +2.29 pp). The GPU signal moved from the telemetry
   toggle to the frame probe.
 - **Frame-probe variant** (`BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1`, methods `toggle` / `both`,
-  both platforms, default off because it adds one launch per scenario): a last toggle launch with
+  both platforms; diagnostic, default off because it adds one launch per scenario): a last toggle launch with
   `?telemetry=off`, whose blocks switch only a bare rAF loop with a no-op callback
   (`window.lichtblickTelemetry.setFrameProbeActive`, present only with telemetry off). Report
   `toggleFrameProbe`, same shape and statistics as `toggle`; the viewer and the CI summary show it
-  as the sub-row "benchmark FPS probe (harness, not shipped)" with the per-process deltas
+  as the sub-row "benchmark FPS probe (harness, not shipped; diagnostic, optional, never part of a
+  verdict)" with the per-process deltas
   (`gpu +0.94 pp (10/10 ↑)`, mean on − off pp of the included quartets, positive quartets) and no
   verdict. It is never part of `verdicts`.
 - **Scenario runs**: `renderer.fps`, `renderer.frames` and `renderer.lateFrames` (the smoothness
@@ -885,6 +893,8 @@ The count knobs (quartets, block length, repeats, warm-up runs, polls, profile l
 non-negative integer: unset or blank keeps the default, a value below the minimum is clamped to it,
 and any other value (for example `1o`, `2.5`, `-3` or `1e1`) fails the spec before the first launch
 with an error naming the variable, like an unknown `BENCHMARK_OVERHEAD_METHOD`.
+`BENCHMARK_OVERHEAD_UA_ARM` and `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM` enable diagnostic arms: optional,
+never part of a verdict, and they may change or be removed.
 
 A relaunch run takes about 25–35 s (launch, render calibration, load, 3 s warm-up, 10 polls,
 teardown); each extra poll adds 1 s. With the defaults that is 17 runs per scenario (≈ 8–10 min),
@@ -903,8 +913,8 @@ set, records per realm, UA calls, toggle latency, flags), `quartets` (off / on b
 `n` / `excludedQuartets`, median / IQR / CI95 of the quartets' relative and pp deltas, verdict, the
 adjacent `pairs` (diagnostic only), modal process set, `toggleLatencyMsMax` and the renderer records and UA calls
 per arm. `toggleWithoutUaProbe` (UA arm only) is a second toggle section without the UA probe,
-informational. `toggleFrameProbe` (frame-probe arm only) is the toggle section of the benchmark FPS
-probe, harness, no verdict. `directAttribution` (toggle only) is the direct (JS only) attribution above: config
+diagnostic (never part of a verdict). `toggleFrameProbe` (frame-probe arm only) is the toggle
+section of the benchmark FPS probe, harness, diagnostic, no verdict. `directAttribution` (toggle only) is the direct (JS only) attribution above: config
 (profile ms, sampling interval, telemetry sources) and either `status: "unsupported"` with the
 reason or `status: "measured"` with the metrics, top functions and its own verdict. `verdicts` are the final ones, with `cpuVerdictSource` (`toggle` | `relaunch`) and
 `memVerdictSource` (`relaunch` | `notMeasured`); `overall` is the worst of the measured ones. The

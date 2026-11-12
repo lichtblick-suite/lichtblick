@@ -44,7 +44,8 @@ export type OverheadEnvConfig = {
   polls: number;
   /**
    * `BENCHMARK_OVERHEAD_UA_ARM=1` (web only): adds the relaunch `on-noUa` arm and, with the toggle
-   * A/B, a second toggle launch without the UA memory probe (`toggleWithoutUaProbe`).
+   * A/B, a second toggle launch without the UA memory probe (`toggleWithoutUaProbe`). Diagnostic:
+   * optional, off by default, never part of a verdict.
    */
   uaArm: boolean;
   /** Fails the test on an overall `exceeds` verdict (`BENCHMARK_OVERHEAD_GATE=1`). */
@@ -61,7 +62,7 @@ export type OverheadEnvConfig = {
   /**
    * `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1`, with the toggle A/B only: one more toggle launch with
    * telemetry off that toggles only the benchmark FPS probe's frame loop (`toggleFrameProbe`,
-   * informational: harness, not shipped).
+   * harness, not shipped). Diagnostic: optional, off by default, never part of a verdict.
    */
   frameProbeArm: boolean;
 };
@@ -222,9 +223,12 @@ export type OverheadReportV3 = {
   windowMismatchRuns: number;
   metrics: OverheadMetrics;
   verdicts: OverheadVerdictsV3;
-  /** `onNoUa-vs-off`: telemetry without the UA memory probe (UA arm only). */
+  /**
+   * `onNoUa-vs-off`: telemetry without the UA memory probe (UA arm only). Diagnostic: its own
+   * verdicts never enter `verdicts`.
+   */
   withoutUaProbe?: OverheadComparisonSummary & { verdicts: OverheadVerdicts };
-  /** `on-vs-onNoUa`: what the UA memory probe alone costs (UA arm only, no verdict). */
+  /** `on-vs-onNoUa`: what the UA memory probe alone costs (UA arm only; diagnostic, no verdict). */
   uaCost?: OverheadComparisonSummary;
   /** In-page self-cost of the `on` arm (absent when no `on` run carries `telemetrySelf`). */
   selfCost?: OverheadSelfCostSummary;
@@ -237,14 +241,15 @@ export type OverheadReportV3 = {
   toggle?: OverheadToggleSummaryV3;
   /**
    * The toggle A/B of a second launch with the UA memory probe off (`?telemetry.uaMemory=off`; web,
-   * `BENCHMARK_OVERHEAD_UA_ARM=1`, methods `toggle` / `both`). Informational: isolates the probe's
-   * share of `toggle`; the CPU verdict stays the one of `toggle`.
+   * `BENCHMARK_OVERHEAD_UA_ARM=1`, methods `toggle` / `both`). Diagnostic (optional, never part of
+   * a verdict): isolates the probe's share of `toggle`; the CPU verdict stays the one of `toggle`.
    */
   toggleWithoutUaProbe?: OverheadToggleSummaryV3;
   /**
    * Benchmark FPS probe (harness, not shipped): a launch with telemetry off in both arms whose
    * blocks toggle only the bare rAF frame loop (`BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1`, methods
-   * `toggle` / `both`). Informational: what the frame loop alone costs; never part of `verdicts`.
+   * `toggle` / `both`). Diagnostic (optional): what the frame loop alone costs; never part of
+   * `verdicts`.
    */
   toggleFrameProbe?: OverheadToggleSummaryV3;
   /**

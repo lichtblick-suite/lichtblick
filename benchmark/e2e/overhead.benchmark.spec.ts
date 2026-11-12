@@ -72,12 +72,14 @@ import type { ScenarioUnderTest } from "./types";
 // verdict from relaunch (relaunch CPU reported as secondary). Order: the warm-up runs, the toggle
 // run(s), then the measured relaunch runs. On web with `BENCHMARK_OVERHEAD_UA_ARM=1` a second toggle
 // launch runs without the UA memory probe (`?telemetry.uaMemory=off`, report
-// `toggleWithoutUaProbe`, informational), isolating the probe's share of the toggle CPU delta. The
+// `toggleWithoutUaProbe`), isolating the probe's share of the toggle CPU delta. The
 // first toggle launch ends with a profiled period (`BENCHMARK_OVERHEAD_PROFILE_MS`, default 10 s,
 // telemetry on): the direct (JS only) CPU attribution of the report (`directAttribution`). The
 // benchmark FPS probe's rAF frame loop runs in both arms of the telemetry toggle (harness, like the
 // relaunch main-thread probe); `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM=1` adds a last toggle launch with
-// telemetry off that toggles only that frame loop (`toggleFrameProbe`, its cost; informational).
+// telemetry off that toggles only that frame loop (`toggleFrameProbe`, its cost). Both extra
+// launches, the `on-noUa` relaunch arm and the adjacent-pair deltas are diagnostic: optional (off by
+// default) and never part of a verdict; the verdicts come from the core toggle + relaunch A/B only.
 //
 // Relaunch: per scenario, `BENCHMARK_OVERHEAD_WARMUP_RUNS` discarded runs, then
 // `BENCHMARK_OVERHEAD_REPEATS`
@@ -235,7 +237,7 @@ function toggleSummaryParts(
   return [
     `${label} quartets n=${toggle.n} (excluded ${toggle.excludedQuartets})`,
     `${label} quartet cpuRelative % [${deltasText(toggle.quartets)}]`,
-    `${label} pair cpuRelative % (diagnostic) [${deltasText(toggle.pairs)}]`,
+    `${label} pair cpuRelative % (diagnostic, never part of a verdict) [${deltasText(toggle.pairs)}]`,
     `${label} block cpu % [${blockCpu}]`,
     `${label} run ${((toggle.runDurationMs ?? 0) / 1000).toFixed(1)} s`,
     `${label} cpuRelative median=${rel.median} ci95=${ci(rel.ci95?.lower, rel.ci95?.upper)}`,
@@ -394,7 +396,8 @@ for (const scenarioId of OVERHEAD_SCENARIOS) {
     };
 
     // Given / When: warm-up runs, the toggle run(s) (UA probe on, then off, then the frame probe),
-    // then the measured relaunch runs
+    // then the measured relaunch runs. The launches without the UA probe and with the frame probe
+    // are diagnostic (optional, never part of a verdict).
     await runSequentially(warmups.length, async (index) => {
       await runRelaunch(warmups[index]!);
     });

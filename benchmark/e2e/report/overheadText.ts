@@ -166,14 +166,26 @@ export function toggleFlagsText(toggle: OverheadToggleSummaryV3): string {
   return flags.join(" · ");
 }
 
+/**
+ * Tag of the diagnostic arms (`BENCHMARK_OVERHEAD_UA_ARM`, `BENCHMARK_OVERHEAD_FRAME_PROBE_ARM`):
+ * optional (off by default) and never part of the overall verdict, whatever their own row shows.
+ */
+export const DIAGNOSTIC_ARM_TAG = "diagnostic, optional, never part of a verdict";
+
 /** Label of the toggle sub-row without the UA memory probe (`toggleWithoutUaProbe`). */
-export const TOGGLE_WITHOUT_UA_PROBE_LABEL = "toggle without UA probe (informational)";
+export const TOGGLE_WITHOUT_UA_PROBE_LABEL = `toggle without UA probe (${DIAGNOSTIC_ARM_TAG})`;
 
 /**
  * Label of the frame-probe toggle sub-row (`toggleFrameProbe`): telemetry off in both arms, only the
  * benchmark's rAF frame loop toggled. Harness cost, no telemetry verdict.
  */
-export const TOGGLE_FRAME_PROBE_LABEL = "benchmark FPS probe (harness, not shipped)";
+export const TOGGLE_FRAME_PROBE_LABEL = `benchmark FPS probe (harness, not shipped; ${DIAGNOSTIC_ARM_TAG})`;
+
+/** Label of the relaunch sub-row of the `on-noUa` arm against off (`withoutUaProbe`). */
+export const WITHOUT_UA_PROBE_LABEL = `without UA probe (on-noUa vs off; ${DIAGNOSTIC_ARM_TAG})`;
+
+/** Label of the relaunch sub-row of the UA probe's own cost, on vs `on-noUa` (`uaCost`). */
+export const UA_PROBE_COST_LABEL = `UA probe cost (on vs on-noUa; ${DIAGNOSTIC_ARM_TAG})`;
 
 /** Per-process-type deltas shown (largest |mean| first). */
 const PROCESS_DELTAS_SHOWN = 3;

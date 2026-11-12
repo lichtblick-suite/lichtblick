@@ -32,6 +32,8 @@ import {
   selfCostText,
   TOGGLE_FRAME_PROBE_LABEL,
   TOGGLE_WITHOUT_UA_PROBE_LABEL,
+  UA_PROBE_COST_LABEL,
+  WITHOUT_UA_PROBE_LABEL,
   toggleCpuStats,
   toggleFlagsText,
   toggleProcessDeltasText,
@@ -246,9 +248,10 @@ function cpuDeltaCell(stats: Pick<CpuVerdictStats, "cpuRelative" | "cpuPctPoints
 
 /**
  * Sub-rows of an overhead report: the direct (JS only) CPU attribution (own verdict), the toggle A/B
- * without the UA memory probe (web, informational), the benchmark FPS probe (harness, no verdict),
- * the relaunch A/B when the toggle A/B gave the CPU verdict (method `both`, CPU informational) and
- * the UA-probe comparisons (`on-noUa` arm, web).
+ * without the UA memory probe (web, diagnostic), the benchmark FPS probe (harness, diagnostic, no
+ * verdict), the relaunch A/B when the toggle A/B gave the CPU verdict (method `both`, CPU
+ * informational) and the UA-probe comparisons (`on-noUa` arm, web, diagnostic). Diagnostic rows are
+ * optional and never part of a verdict.
  */
 function overheadSubRows(report: OverheadReport): string[] {
   const rows: string[] = [];
@@ -290,10 +293,10 @@ function overheadSubRows(report: OverheadReport): string[] {
   }
   if (report.withoutUaProbe != undefined) {
     const { verdicts, ...summary } = report.withoutUaProbe;
-    rows.push(row("without UA probe", summary, verdictText(verdicts.overall)));
+    rows.push(row(WITHOUT_UA_PROBE_LABEL, summary, verdictText(verdicts.overall)));
   }
   if (report.uaCost != undefined) {
-    rows.push(row("UA probe cost", report.uaCost, NONE));
+    rows.push(row(UA_PROBE_COST_LABEL, report.uaCost, NONE));
   }
   return rows;
 }
