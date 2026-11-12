@@ -18,6 +18,7 @@ import delay from "@lichtblick/suite-base/util/delay";
 
 import CachedFilelike from "./CachedFilelike";
 import type { FileReader, FileStream } from "./CachedFilelike.types";
+import * as getNewConnectionModule from "./getNewConnection";
 
 const MEBIBYTE = 1024 * 1024;
 
@@ -86,6 +87,30 @@ describe("CachedFilelike", () => {
       const cachedFileReader = new CachedFilelike({ fileReader, log });
       await expect(cachedFileReader.read(1, 2)).resolves.toEqual(new Uint8Array([1, 2]));
       await expect(cachedFileReader.read(2, 2)).resolves.toEqual(new Uint8Array([2, 3]));
+    });
+
+    it("keeps filling the cache in bounded windows when the whole file fits in it", async () => {
+      // GIVEN: a cache that holds the whole file and a 50-byte read-ahead window.
+      const fileReader = new InMemoryFileReader(new Uint8Array(200));
+      const fetch = jest.spyOn(fileReader, "fetch");
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 200,
+        readAheadBufferBytes: 50,
+        log,
+      });
+
+      // WHEN: one small read resolves and the reader becomes idle.
+      await cachedFileReader.read(0, 10);
+      await delay(50);
+
+      // THEN: the rest of the file is fetched window by window, then it stops.
+      expect(fetch.mock.calls).toEqual([
+        [0, 50],
+        [50, 50],
+        [100, 50],
+        [150, 50],
+      ]);
     });
 
     it("requests only the exact range when read-ahead is disabled", async () => {
@@ -788,6 +813,32 @@ describe("CachedFilelike", () => {
       await expect(firstRead).resolves.toEqual(new Uint8Array(10));
       await expect(secondRead).resolves.toEqual(new Uint8Array(10));
       expect(fetch).toHaveBeenCalledTimes(4);
+    });
+
+    it("stops evaluating lower-priority reads once every connection serves an earlier read", async () => {
+      // GIVEN: one connection that never delivers data, and many disjoint pending reads.
+      const fetch = jest.fn((): FileStream => ({ on: () => {}, destroy: jest.fn() }));
+      const fileReader: FileReader = { open: async () => ({ size: 100 * MEBIBYTE }), fetch };
+      const getNewConnectionSpy = jest.spyOn(getNewConnectionModule, "getNewConnection");
+      const cachedFileReader = new CachedFilelike({
+        fileReader,
+        cacheSizeInBytes: 4 * MEBIBYTE,
+        readAheadEnabled: false,
+        log,
+      });
+      const readCount = 50;
+
+      // WHEN: the reads are queued.
+      for (let i = 0; i < readCount; i++) {
+        cachedFileReader.read(i * 2 * MEBIBYTE, 1024).catch(() => {});
+      }
+      await delay(10);
+
+      // THEN: each state update only evaluates the first read, so the work grows linearly with
+      // the queue instead of quadratically (1 + 2 + ... + 50 calls).
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(getNewConnectionSpy.mock.calls.length).toBeLessThanOrEqual(readCount * 2);
+      cachedFileReader.close();
     });
 
     it("destroys every active connection on close() when more than one is open", async () => {

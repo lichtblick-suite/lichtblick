@@ -408,6 +408,47 @@ describe("getNewConnection", () => {
         // THEN: capped at lastEnd + READ_AHEAD_BUFFER_SIZE, not the remaining ~70 MB of the file.
         expect(newConnection).toEqual({ start: lastEnd, end: lastEnd + READ_AHEAD_BUFFER_SIZE });
       });
+
+      it("continues with the next bounded window once the previous one is downloaded", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          readAheadBufferBytes: 30,
+          downloadedRanges: [{ start: 0, end: 30 }],
+        });
+
+        expect(newConnection).toEqual({ start: 30, end: 60 });
+      });
+
+      it("requests a shorter last window up to the end of the file", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          readAheadBufferBytes: 30,
+          downloadedRanges: [{ start: 0, end: 90 }],
+        });
+
+        expect(newConnection).toEqual({ start: 90, end: 100 });
+      });
+
+      it("backfills earlier gaps in bounded windows once everything after the last request is downloaded", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          readAheadBufferBytes: 30,
+          lastResolvedCallbackEnd: 50,
+          downloadedRanges: [{ start: 50, end: 100 }],
+        });
+
+        expect(newConnection).toEqual({ start: 0, end: 30 });
+      });
+
+      it("stops once the whole file is downloaded", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          readAheadBufferBytes: 30,
+          downloadedRanges: [{ start: 0, end: 100 }],
+        });
+
+        expect(newConnection).toBeUndefined();
+      });
     });
   });
 

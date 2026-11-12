@@ -155,14 +155,12 @@ function getNewConnectionWithoutExistingConnection({
   // reading ahead as much data as we can!
   let readAheadRange: Range | undefined;
   if (maxRequestSize >= fileSize) {
-    // Cap at readAheadBufferBytes (see above), preferring data near the last request.
-    const start = lastResolvedCallbackEnd ?? 0;
-    const potentialRange = { start, end: Math.min(start + readAheadBufferBytes, fileSize) };
-    if (!isRangeCoveredByRanges(potentialRange, downloadedRanges)) {
-      readAheadRange = potentialRange;
-    } else {
-      readAheadRange = { start: 0, end: Math.min(readAheadBufferBytes, fileSize) };
-    }
+    // The cache holds the whole file, so keep filling it: nearest to the last request first, then
+    // earlier gaps. Each connection is bounded by readAheadBufferBytes (see below).
+    const toEnd = { start: lastResolvedCallbackEnd ?? 0, end: fileSize };
+    readAheadRange = isRangeCoveredByRanges(toEnd, downloadedRanges)
+      ? { start: 0, end: fileSize }
+      : toEnd;
   } else if (lastResolvedCallbackEnd != undefined) {
     if (lastResolvedCallbackEnd >= fileSize) {
       return undefined;
@@ -177,8 +175,15 @@ function getNewConnectionWithoutExistingConnection({
   }
   if (readAheadRange) {
     // If we have a range that we want to read ahead, then create a new connection for the range
-    // within it that has not already been downloaded.
-    return missingRanges(readAheadRange, downloadedRanges)[0];
+    // within it that has not already been downloaded. Once it finishes and the reader is idle
+    // again, the next window is requested.
+    const missing = missingRanges(readAheadRange, downloadedRanges)[0];
+    return (
+      missing && {
+        start: missing.start,
+        end: Math.min(missing.end, missing.start + readAheadBufferBytes),
+      }
+    );
   }
   return undefined;
 }

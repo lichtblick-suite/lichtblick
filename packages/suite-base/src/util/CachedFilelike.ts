@@ -321,22 +321,35 @@ export default class CachedFilelike implements Filelike {
     }
 
     // Oldest request has priority; later requests may not evict connections serving earlier ones.
-    for (const [index, request] of this.#readRequests.entries()) {
+    const higherPriorityRanges: Range[] = [];
+    const servingStreams = new Set<FileStream>();
+    for (const request of this.#readRequests) {
       const newConnection = getNewConnection({
         currentRemainingRange: this.#connections[0]?.remainingRange,
         additionalRemainingRanges: this.#connections.slice(1).map((c) => c.remainingRange),
         readRequestRange: request.range,
         ...commonOptions,
       });
-      if (!newConnection) {
-        continue;
+      if (newConnection) {
+        const hasFreeSlot = this.#connections.length < this.#maxConcurrentConnections;
+        this.#setConnection(
+          newConnection,
+          hasFreeSlot ? undefined : { protectedRanges: higherPriorityRanges },
+        );
       }
-      if (this.#connections.length < this.#maxConcurrentConnections) {
-        this.#setConnection(newConnection);
-        continue;
+      higherPriorityRanges.push(request.range);
+      for (const connection of this.#connections) {
+        if (isOverlapping([connection.remainingRange], [request.range])) {
+          servingStreams.add(connection.stream);
+        }
       }
-      const higherPriorityRanges = this.#readRequests.slice(0, index).map((r) => r.range);
-      this.#setConnection(newConnection, { protectedRanges: higherPriorityRanges });
+      // Later requests can't get a connection once every slot serves an earlier request.
+      if (
+        this.#connections.length >= this.#maxConcurrentConnections &&
+        this.#connections.every((c) => servingStreams.has(c.stream))
+      ) {
+        break;
+      }
     }
   }
 
