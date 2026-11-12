@@ -26,6 +26,7 @@ import { useAppConfigurationValue } from "@lichtblick/suite-base/hooks";
 import useAlertCount from "@lichtblick/suite-base/hooks/useAlertCount";
 import { useHandleFiles } from "@lichtblick/suite-base/hooks/useHandleFiles";
 import { useLayoutTransfer } from "@lichtblick/suite-base/hooks/useLayoutTransfer";
+import { AdditionalSourceDescriptor } from "@lichtblick/suite-base/players/IterablePlayer/additionalSources";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { parseAppURLState } from "@lichtblick/suite-base/util/appURLState";
 
@@ -53,10 +54,25 @@ jest.mock("notistack", () => ({
 }));
 
 // ── api ───────────────────────────────────────────────────────────────────────
-const mockGetMcapBundle = jest.fn();
-jest.mock("@lichtblick/suite-base/api/mcapBundle/McapBundleAPI", () => ({
+// ── config ───────────────────────────────────────────────────────────────────
+// jest.mock is hoisted before variable declarations, so the factory must be self-contained.
+// We retrieve a mutable reference afterwards via jest.requireMock.
+jest.mock("@lichtblick/suite-base/constants/config", () => ({
+  APP_CONFIG: {
+    apiUrl: "/",
+    version: "TEST",
+    devWorkspace: "",
+    syncLocalLayouts: false,
+  },
+}));
+const mockAppConfig = jest.requireMock("@lichtblick/suite-base/constants/config").APP_CONFIG as {
+  apiUrl: string | undefined;
+};
+
+const mockGetSourceBundle = jest.fn();
+jest.mock("@lichtblick/suite-base/api/sourceBundle/SourceBundleAPI", () => ({
   __esModule: true,
-  default: { getMcapBundle: (...args: unknown[]) => mockGetMcapBundle(...args) },
+  default: { getSourceBundle: (...args: unknown[]) => mockGetSourceBundle(...args) },
 }));
 
 // ── components (rendered as null — Sidebars is the exception below) ────────────
@@ -376,6 +392,7 @@ describe("Workspace - session-based MCAP resolution", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAppConfig.apiUrl = "/";
 
     (useMessagePipeline as jest.Mock).mockImplementation(
       (selector: (ctx: typeof mockPipelineContext) => unknown) => selector(mockPipelineContext),
@@ -412,42 +429,56 @@ describe("Workspace - session-based MCAP resolution", () => {
 
   it("should fetch session and call selectSource with resolved URLs and metadata", async () => {
     // Given
-    const mcapBundleId = "test-session-123";
+    const sourceBundleId = "test-session-123";
     const mockMcaps = [
       { url: "https://example.com/file1.mcap", metadata: { robot: "r1" } },
       { url: "https://example.com/file2.mcap", metadata: { robot: "r2" } },
     ];
-    mockGetMcapBundle.mockResolvedValue(mockMcaps);
-    (parseAppURLState as jest.Mock).mockReturnValue({ mcapBundleId });
+    const additionalSources: AdditionalSourceDescriptor[] = [
+      {
+        id: "additionalSourcesId",
+        topics: [{ name: "testTopic", messageEncoding: "json", schemaName: "testSchema" }],
+        messages: [
+          {
+            topic: "testTopic",
+            data: "eyJrZXkiOiJ2YWx1ZSJ9",
+            receiveTime: { sec: 123, nsec: 123456789 },
+          },
+        ],
+      },
+    ];
+    mockGetSourceBundle.mockResolvedValue({ mcaps: mockMcaps, additionalSources });
+    (parseAppURLState as jest.Mock).mockReturnValue({ sourceBundleId });
 
     // When
-    render(<Workspace deepLinks={["https://app.example.com/?mcap-bundle=test-session-123"]} />);
+    render(<Workspace deepLinks={["https://app.example.com/?source-bundle=test-session-123"]} />);
 
     // Then
     await waitFor(() => {
-      expect(mockGetMcapBundle).toHaveBeenCalledWith(mcapBundleId, expect.any(AbortSignal));
+      expect(mockGetSourceBundle).toHaveBeenCalledWith(sourceBundleId, expect.any(AbortSignal));
     });
     await waitFor(() => {
       expect(mockSelectSource).toHaveBeenCalledWith("remote-file", {
         type: "connection",
         params: { url: "https://example.com/file1.mcap,https://example.com/file2.mcap" },
         sourceMetadata: [{ robot: "r1" }, { robot: "r2" }],
+        additionalSources,
       });
     });
   });
 
   it("should show error snackbar when session fetch fails", async () => {
     // Given
-    const mcapBundleId = "failing-session";
-    mockGetMcapBundle.mockRejectedValue(new Error("Network error"));
-    (parseAppURLState as jest.Mock).mockReturnValue({ mcapBundleId });
+    const sourceBundleId = "failing-session";
+    mockGetSourceBundle.mockRejectedValue(new Error("Network error"));
+    (parseAppURLState as jest.Mock).mockReturnValue({ sourceBundleId });
 
     // When
-    render(<Workspace deepLinks={["https://app.example.com/?mcap-bundle=failing-session"]} />);
+    render(<Workspace deepLinks={["https://app.example.com/?source-bundle=failing-session"]} />);
 
     // Then
     await waitFor(() => {
-      expect(mockGetMcapBundle).toHaveBeenCalledWith(mcapBundleId, expect.any(AbortSignal));
+      expect(mockGetSourceBundle).toHaveBeenCalledWith(sourceBundleId, expect.any(AbortSignal));
     });
     await waitFor(() => {
       expect(mockEnqueueSnackbar).toHaveBeenCalledWith("Failed to load session data sources", {
@@ -456,7 +487,7 @@ describe("Workspace - session-based MCAP resolution", () => {
     });
   });
 
-  it("should not fetch session when mcapBundleId is not present", () => {
+  it("should not fetch session when sourceBundleId is not present", () => {
     // Given
     (parseAppURLState as jest.Mock).mockReturnValue({
       ds: "remote-file",
@@ -467,7 +498,22 @@ describe("Workspace - session-based MCAP resolution", () => {
     render(<Workspace deepLinks={["https://app.example.com/?ds=remote-file"]} />);
 
     // Then
-    expect(mockGetMcapBundle).not.toHaveBeenCalled();
+    expect(mockGetSourceBundle).not.toHaveBeenCalled();
+  });
+
+  it("should not call SourceBundleAPI when apiUrl is not configured", () => {
+    // Given
+    const sourceBundleId = "test-session-no-api-url";
+    mockAppConfig.apiUrl = undefined;
+    (parseAppURLState as jest.Mock).mockReturnValue({ sourceBundleId });
+
+    // When
+    render(
+      <Workspace deepLinks={["https://app.example.com/?source-bundle=test-session-no-api-url"]} />,
+    );
+
+    // Then
+    expect(mockGetSourceBundle).not.toHaveBeenCalled();
   });
 });
 
