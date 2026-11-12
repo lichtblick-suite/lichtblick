@@ -472,6 +472,11 @@ at `benchmark/e2e/result/constants.ts` (`PHASES_ORIGINS`).
    percentile bootstrap (narrower, below-nominal coverage at small n); their verdicts with 3–5
    pairs are not comparable. Default quartets:
    `benchmark/e2e/runner/constants.ts` (`OVERHEAD_TOGGLE_DEFAULT_QUARTETS`) (10).
+   Toggle quartets come from one process (`benchmark/e2e/runner/toggleBlocks.ts`, file header),
+   so they may be autocorrelated (GC, caches, thermal state carry over); the CI assumes
+   independence and is then optimistic. Treat a toggle `within` whose upper bound is close to the
+   target as borderline and cross-check the relaunch CPU (independent launches). Measured lag-1
+   autocorrelation in the 10-quartet evidence runs: −0.33 … +0.46 (no clear dependence).
 8. **Peak working set is multi-modal locally.** Repeated runs of pc, sw, tf and mmi cluster about
    150–250 MiB apart. Require ≥ 3 runs per side before calling a memory change; report the
    spread you observed.
