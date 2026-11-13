@@ -8,12 +8,53 @@
 import * as THREE from "three";
 
 import { LineMaterialWithAlphaVertex } from "../../LineMaterialWithAlphaVertex";
+import { rgbToThreeColor } from "../../color";
 import { ColorRGBA, Marker, MarkerType } from "../../ros";
 
 export type LineOptions = {
   resolution: THREE.Vector2;
   worldUnits?: boolean;
 };
+
+/** Outlines are hidden when the marker is translucent so edges don't poke through. */
+export function shouldShowMarkerOutlines(options: {
+  showOutlines: boolean | undefined;
+  alpha: number;
+}): boolean {
+  return (options.showOutlines ?? true) && options.alpha >= 1;
+}
+
+/** Sync MeshStandardMaterial color/opacity and transparency flags from a ColorRGBA. */
+export function updateStandardMaterialColor(
+  material: THREE.MeshStandardMaterial,
+  color: ColorRGBA,
+): void {
+  const transparent = color.a < 1;
+  if (transparent !== material.transparent) {
+    material.transparent = transparent;
+    material.depthWrite = !transparent;
+    material.needsUpdate = true;
+  }
+
+  rgbToThreeColor(material.color, color);
+  material.opacity = color.a;
+}
+
+/** Update a standard mesh marker's material, outline visibility, and scale from a Marker. */
+export function updateStandardMeshMarker(
+  target: THREE.Object3D,
+  mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>,
+  outline: THREE.Object3D,
+  settings: { showOutlines?: boolean } | undefined,
+  marker: Marker,
+): void {
+  updateStandardMaterialColor(mesh.material, marker.color);
+  outline.visible = shouldShowMarkerOutlines({
+    showOutlines: settings?.showOutlines,
+    alpha: marker.color.a,
+  });
+  target.scale.set(marker.scale.x, marker.scale.y, marker.scale.z);
+}
 
 export function markerHasTransparency(marker: Marker): boolean {
   switch (marker.type) {
