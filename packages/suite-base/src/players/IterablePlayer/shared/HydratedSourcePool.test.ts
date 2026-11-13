@@ -181,6 +181,51 @@ describe("HydratedSourcePool", () => {
     expect(pool.size).toBe(0);
   });
 
+  it("should not count a close that rejects during terminate()", async () => {
+    // GIVEN: a pool with two resident entries where B's close() rejects.
+    const pool = new HydratedSourcePool({ maxCount: 4 });
+    const hydratorA = makeHydrator("A");
+    const hydratorB = makeHydrator("B");
+    hydratorB.close.mockRejectedValue(new Error("close failed"));
+    await pool.admit({}, hydratorA, "A");
+    await pool.admit({}, hydratorB, "B");
+
+    // WHEN: terminating the pool.
+    await pool.terminate();
+
+    // THEN: both closes were attempted but only the completed one is counted, and the failure is
+    // logged.
+    expect(hydratorB.close).toHaveBeenCalledTimes(1);
+    expect(pool.getStats()).toMatchObject({ closes: 1, residentCount: 0 });
+    expect((console.error as jest.Mock).mock.calls[0]?.[0]).toBe(
+      "HydratedSourcePool terminate close failed",
+    );
+    (console.error as jest.Mock).mockClear();
+  });
+
+  it("should not account the weight of a hydration that resolves after terminate()", async () => {
+    // GIVEN: a weighted pool with a hydration still pending.
+    const pool = new HydratedSourcePool({ maxBytes: 100 });
+    const token = {};
+    const hydrator = makeHydrator("A", 40);
+    let finishOpen: ((value: unknown) => void) | undefined;
+    hydrator.open.mockReturnValue(
+      new Promise((resolve) => {
+        finishOpen = resolve;
+      }),
+    );
+    const acquiring = pool.acquire(token, hydrator);
+
+    // WHEN: the pool is terminated before the hydration resolves.
+    const terminating = pool.terminate();
+    finishOpen!("A");
+    await acquiring;
+    await terminating;
+
+    // THEN: the late value's weight is not added to the emptied pool.
+    expect(pool.getStats()).toMatchObject({ residentCount: 0, residentBytes: 0 });
+  });
+
   it("rejects acquire() after terminate() and does not re-hydrate", async () => {
     // GIVEN: a terminated pool.
     const pool = new HydratedSourcePool({ maxCount: 2 });
@@ -192,6 +237,24 @@ describe("HydratedSourcePool", () => {
     await expect(pool.acquire(token, hydrator)).rejects.toThrow();
     expect(hydrator.open).not.toHaveBeenCalled();
     expect(pool.size).toBe(0);
+  });
+
+  it("closes a value admitted after terminate() without retaining it", async () => {
+    // GIVEN: a terminated pool.
+    const pool = new HydratedSourcePool({ maxCount: 2 });
+    const token = {};
+    const hydrator = makeHydrator("A");
+    await pool.terminate();
+
+    // WHEN: a late admit() arrives (e.g. an initialize() that finished after teardown).
+    await pool.admit(token, hydrator, "late");
+
+    // THEN: the value is closed and counted as a close, never admitted or re-opened.
+    expect(hydrator.close).toHaveBeenCalledTimes(1);
+    expect(hydrator.close).toHaveBeenCalledWith("late");
+    expect(hydrator.open).not.toHaveBeenCalled();
+    expect(pool.size).toBe(0);
+    expect(pool.getStats()).toMatchObject({ admits: 0, closes: 1, evictions: 0 });
   });
 
   it("closes a duplicate admitted value without re-opening", async () => {
@@ -327,6 +390,201 @@ describe("HydratedSourcePool", () => {
       // THEN: the default minResident floor keeps it resident.
       expect(pool.size).toBe(1);
       expect(hydrator.close).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("eviction pass", () => {
+    // Resolves after enough microtask turns for an eviction pass to reach hydrator.close().
+    async function flushMicrotasks(): Promise<void> {
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
+    }
+
+    // Admit four 10-byte entries (A..D, LRU → MRU) into a 40-byte pool so it is exactly full.
+    async function makeFullPool(): Promise<{
+      pool: HydratedSourcePool;
+      tokens: object[];
+      hydrators: ReturnType<typeof makeHydrator>[];
+    }> {
+      const pool = new HydratedSourcePool({ maxBytes: 40 });
+      const tokens = [{}, {}, {}, {}];
+      const values = ["A", "B", "C", "D"];
+      const hydrators = values.map((value) => makeHydrator(value, 10));
+      for (const [index, token] of tokens.entries()) {
+        await pool.admit(token, hydrators[index]!, values[index]);
+      }
+      return { pool, tokens, hydrators };
+    }
+
+    it("evicts several LRU victims in one pass and closes them one at a time", async () => {
+      // GIVEN: a full 40-byte pool (A, B, C, D at 10 bytes each) whose LRU entry A has a close()
+      // that does not finish until the test allows it.
+      const { pool, hydrators } = await makeFullPool();
+      const [hydratorA, hydratorB, hydratorC, hydratorD] = hydrators;
+      let finishCloseA: (() => void) | undefined;
+      hydratorA!.close.mockImplementation(async () => {
+        await new Promise<void>((resolve) => {
+          finishCloseA = resolve;
+        });
+      });
+      const tokenE = {};
+      const hydratorE = makeHydrator("E", 25);
+
+      // WHEN: admitting a 25-byte entry pushes the pool to 65 bytes (25 over budget).
+      const admitting = pool.admit(tokenE, hydratorE, "E");
+      await flushMicrotasks();
+
+      // THEN: only A is closing; B is not closed until A's close() finishes.
+      expect(hydratorA!.close).toHaveBeenCalledWith("A");
+      expect(hydratorB!.close).not.toHaveBeenCalled();
+      expect(hydratorC!.close).not.toHaveBeenCalled();
+      expect(pool.getStats()).toMatchObject({
+        residentCount: 4,
+        residentBytes: 55,
+        evictions: 1,
+        closes: 0,
+      });
+
+      // WHEN: A's close() finishes.
+      finishCloseA!();
+      await admitting;
+
+      // THEN: the pass evicted B and C next, settles within budget and closes each victim once.
+      for (const hydrator of [hydratorA, hydratorB, hydratorC]) {
+        expect(hydrator!.close).toHaveBeenCalledTimes(1);
+      }
+      expect(hydratorD!.close).not.toHaveBeenCalled();
+      expect(hydratorE.close).not.toHaveBeenCalled();
+      expect(pool.getStats()).toMatchObject({
+        residentCount: 2,
+        residentBytes: 35,
+        admits: 5,
+        evictions: 3,
+        closes: 3,
+        overBudget: false,
+        overBudgetPeriods: 0,
+        highWaterResidentBytes: 40,
+      });
+    });
+
+    it("closes the next victim and counts only completed closes when one victim's close() rejects", async () => {
+      // GIVEN: a full 40-byte pool whose second-oldest entry (B) fails to close.
+      const { pool, tokens, hydrators } = await makeFullPool();
+      const [hydratorA, hydratorB, hydratorC, hydratorD] = hydrators;
+      hydratorB!.close.mockRejectedValue(new Error("close failed"));
+      const tokenE = {};
+      const hydratorE = makeHydrator("E", 25);
+
+      // WHEN: admitting a 25-byte entry forces three evictions in one pass.
+      await pool.admit(tokenE, hydratorE, "E");
+
+      // THEN: admit() does not reject, A and C are still closed, and the failure is only logged.
+      expect(hydratorA!.close).toHaveBeenCalledTimes(1);
+      expect(hydratorB!.close).toHaveBeenCalledTimes(1);
+      expect(hydratorC!.close).toHaveBeenCalledTimes(1);
+      expect(hydratorD!.close).not.toHaveBeenCalled();
+      expect(pool.getStats()).toMatchObject({
+        residentCount: 2,
+        residentBytes: 35,
+        evictions: 3,
+        closes: 2,
+        failures: 0,
+        overBudget: false,
+      });
+      const errorCalls = (console.error as jest.Mock).mock.calls;
+      expect(errorCalls).toHaveLength(1);
+      expect(errorCalls[0]?.[0]).toBe("HydratedSourcePool evict close failed");
+      (console.error as jest.Mock).mockClear();
+
+      // THEN: the evicted (failed-close) token is re-hydrated on demand like any other victim.
+      const value = await pool.acquire(tokens[1]!, hydratorB!);
+      expect(value).toBe("B");
+      expect(pool.getStats()).toMatchObject({ opens: 1, rehydrations: 1 });
+      pool.release(tokens[1]!);
+    });
+
+    it("re-checks the budget after each close so a change made while it was in flight is still applied", async () => {
+      // GIVEN: a count-capped pool (A, B, C) where evicting A has a close() held open.
+      const pool = new HydratedSourcePool({ maxCount: 3 });
+      const [tokenA, tokenB, tokenC, tokenD, tokenX] = [{}, {}, {}, {}, {}];
+      const hydratorA = makeHydrator("A");
+      const hydratorB = makeHydrator("B");
+      let finishCloseA: (() => void) | undefined;
+      hydratorA.close.mockImplementation(async () => {
+        await new Promise<void>((resolve) => {
+          finishCloseA = resolve;
+        });
+      });
+      await pool.admit(tokenA, hydratorA, "A");
+      await pool.admit(tokenB, hydratorB, "B");
+      await pool.admit(tokenC, makeHydrator("C"), "C");
+      const admittingD = pool.admit(tokenD, makeHydrator("D"), "D");
+      await flushMicrotasks();
+      expect(hydratorA.close).toHaveBeenCalledTimes(1);
+
+      // WHEN: while A is closing, a hydration for X starts (pinned, pending → over the count cap
+      // again) and A's close then finishes before X's open() resolves.
+      let finishOpenX: ((value: unknown) => void) | undefined;
+      const hydratorX = makeHydrator("X");
+      hydratorX.open.mockReturnValue(
+        new Promise((resolve) => {
+          finishOpenX = resolve;
+        }),
+      );
+      const acquiringX = pool.acquire(tokenX, hydratorX);
+      expect(pool.size).toBe(4);
+      finishCloseA!();
+      await admittingD;
+
+      // THEN: the same pass evicted the next LRU entry (B) instead of leaving the pool over budget
+      // until X's own pass runs.
+      expect(hydratorB.close).toHaveBeenCalledTimes(1);
+      expect(pool.getStats()).toMatchObject({ residentCount: 3, evictions: 2, closes: 2 });
+
+      finishOpenX!("X");
+      await acquiringX;
+      pool.release(tokenX);
+      expect(pool.getStats()).toMatchObject({ residentCount: 3, evictions: 2, closes: 2 });
+    });
+
+    it("settles synchronously in release() when nothing is evictable", async () => {
+      // GIVEN: a count-1 pool where A holds two pins and a hydration for X is still pending, so
+      // the pool is over its count cap but the over-budget state has not been re-evaluated yet.
+      const pool = new HydratedSourcePool({ maxCount: 1 });
+      const tokenA = {};
+      const tokenX = {};
+      const hydratorA = makeHydrator("A");
+      await pool.acquire(tokenA, hydratorA);
+      await pool.acquire(tokenA, hydratorA);
+      let finishOpenX: ((value: unknown) => void) | undefined;
+      const hydratorX = makeHydrator("X");
+      hydratorX.open.mockReturnValue(
+        new Promise((resolve) => {
+          finishOpenX = resolve;
+        }),
+      );
+      const acquiringX = pool.acquire(tokenX, hydratorX);
+      expect(pool.getStats()).toMatchObject({ residentCount: 2, overBudget: false });
+
+      // WHEN: one of A's pins is released (A stays pinned, so there is no eviction victim).
+      pool.release(tokenA);
+
+      // THEN: the eviction pass settled before release() returned, without evicting anything.
+      expect(pool.getStats()).toMatchObject({
+        residentCount: 2,
+        overBudget: true,
+        overBudgetPeriods: 1,
+        evictions: 0,
+        closes: 0,
+      });
+
+      finishOpenX!("X");
+      await acquiringX;
+      pool.release(tokenX);
+      pool.release(tokenA);
+      await flushMicrotasks();
+      expect(pool.getStats()).toMatchObject({ residentCount: 1, evictions: 1, closes: 1 });
     });
   });
 

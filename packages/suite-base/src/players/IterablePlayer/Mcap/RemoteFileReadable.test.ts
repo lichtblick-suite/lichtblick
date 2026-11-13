@@ -1,7 +1,14 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
+
 import { RemoteFileReadable } from "./RemoteFileReadable";
+import {
+  installDisabledTelemetry,
+  installTestTelemetrySink,
+  publishAndCollect,
+} from "../testing/telemetryTestUtils";
 
 // Mock BrowserHttpReader and CachedFilelike so we never make real HTTP requests
 const mockOpen = jest.fn().mockResolvedValue(undefined);
@@ -132,6 +139,78 @@ describe("RemoteFileReadable", () => {
 
       // Then it should delegate to the internal CachedFilelike
       expect(mockClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("telemetry", () => {
+    afterEach(() => {
+      setTelemetrySink(undefined);
+    });
+
+    it("should count one request and its returned bytes per read issued to the remote reader", async () => {
+      // Given: the remote reader returns 3 bytes per read
+      const sink = installTestTelemetrySink("worker:1");
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When: two reads in separate ticks
+      await reader.read(BigInt(0), BigInt(3));
+      await reader.read(BigInt(1000), BigInt(3));
+
+      // Then
+      const samples = publishAndCollect(sink);
+      expect(samples.get("pipeline.remote.readRequests")).toMatchObject({
+        value: 2,
+        unit: "count",
+        scope: "pipeline",
+        metricType: "counter",
+        realm: "worker:1",
+      });
+      expect(samples.get("pipeline.remote.bytesRead")).toMatchObject({ value: 6, unit: "bytes" });
+      expect(samples.get("pipeline.remote.readRequests")?.labels).toBeUndefined();
+    });
+
+    it("should count reads coalesced within one tick as a single request", async () => {
+      // Given
+      const sink = installTestTelemetrySink();
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When: two adjacent reads are issued in the same tick
+      await Promise.all([reader.read(BigInt(0), BigInt(1)), reader.read(BigInt(1), BigInt(2))]);
+
+      // Then
+      expect(mockRead).toHaveBeenCalledTimes(1);
+      const samples = publishAndCollect(sink);
+      expect(samples.get("pipeline.remote.readRequests")?.value).toBe(1);
+      expect(samples.get("pipeline.remote.bytesRead")?.value).toBe(3);
+    });
+
+    it("should count the request but no bytes when the remote read fails", async () => {
+      // Given
+      const sink = installTestTelemetrySink();
+      const reader = new RemoteFileReadable(testUrl);
+      mockRead.mockRejectedValueOnce(new Error("network down"));
+
+      // When
+      await expect(reader.read(BigInt(0), BigInt(3))).rejects.toThrow("network down");
+
+      // Then
+      const samples = publishAndCollect(sink);
+      expect(samples.get("pipeline.remote.readRequests")?.value).toBe(1);
+      expect(samples.has("pipeline.remote.bytesRead")).toBe(false);
+    });
+
+    it("should not record anything when telemetry is disabled", async () => {
+      // Given
+      const telemetry = installDisabledTelemetry();
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When
+      const result = await reader.read(BigInt(0), BigInt(3));
+
+      // Then
+      expect(result).toEqual(new Uint8Array([1, 2, 3]));
+      expect(telemetry.counter).not.toHaveBeenCalled();
+      expect(telemetry.gauge).not.toHaveBeenCalled();
     });
   });
 });

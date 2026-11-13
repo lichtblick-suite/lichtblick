@@ -1,0 +1,241 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+import { Immutable, MessageEvent } from "@lichtblick/suite";
+import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
+import { ITelemetry, TelemetryLabels } from "@lichtblick/suite-base/util/telemetry";
+
+import { PANEL_TELEMETRY_METRICS } from "./constants";
+import { AllFramesDeliveryTracker, PanelFrameTelemetryState } from "./panelTelemetry.types";
+
+/**
+ * Builds the (frozen) label set identifying a panel. `panelId` is the layout panel id (e.g.
+ * `Plot!3x9a`), not the adapter's internal subscriber uuid nor the visible title. Returns undefined
+ * for `FALLBACK_PANEL_ID` (panel rendered outside a layout): such panels emit no panel telemetry,
+ * like the `panel.mount` event.
+ */
+export function buildPanelTelemetryLabels(
+  panelId: string,
+  panelType: string,
+): TelemetryLabels | undefined {
+  if (panelId === FALLBACK_PANEL_ID) {
+    return undefined;
+  }
+  return Object.freeze({ panelId, panelType });
+}
+
+/**
+ * Records the number and total size of the message events in a frame handed to the panel's
+ * `onRender` (`panel.messages.rendered[Bytes]`). Callers must have checked `telemetry.isEnabled()`.
+ * Zero values are not recorded.
+ */
+export function recordMessagesRendered(
+  telemetry: ITelemetry,
+  messageEvents: Immutable<readonly MessageEvent[]> | undefined,
+  labels: TelemetryLabels,
+): void {
+  const count = messageEvents?.length ?? 0;
+  if (messageEvents == undefined || count === 0) {
+    return;
+  }
+  let bytes = 0;
+  for (let i = 0; i < count; i++) {
+    bytes += messageEvents[i]!.sizeInBytes;
+  }
+  telemetry.counter(PANEL_TELEMETRY_METRICS.messagesRendered, count, "count", "panel", labels);
+  if (bytes > 0) {
+    telemetry.counter(
+      PANEL_TELEMETRY_METRICS.messagesRenderedBytes,
+      bytes,
+      "bytes",
+      "panel",
+      labels,
+    );
+  }
+}
+
+/**
+ * Records one batch of preloaded (range) messages delivered to the panel through
+ * `useSubscribeMessageRange` (`panel.rangeMessages.*`). Callers must have checked
+ * `telemetry.isEnabled()`. Empty batches are not recorded.
+ */
+export function recordRangeMessagesDelivered(
+  telemetry: ITelemetry,
+  batch: readonly MessageEvent[],
+  labels: TelemetryLabels,
+): void {
+  const count = batch.length;
+  if (count === 0) {
+    return;
+  }
+  let bytes = 0;
+  for (let i = 0; i < count; i++) {
+    bytes += batch[i]!.sizeInBytes;
+  }
+  telemetry.counter(
+    PANEL_TELEMETRY_METRICS.rangeMessagesDelivered,
+    count,
+    "count",
+    "panel",
+    labels,
+  );
+  if (bytes > 0) {
+    telemetry.counter(
+      PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes,
+      bytes,
+      "bytes",
+      "panel",
+      labels,
+    );
+  }
+}
+
+/** Records a completed panel render. Callers must have checked `telemetry.isEnabled()`. */
+export function recordRenderDone(
+  telemetry: ITelemetry,
+  durationMs: number,
+  labels: TelemetryLabels,
+): void {
+  telemetry.counter(PANEL_TELEMETRY_METRICS.renderCount, 1, "count", "panel", labels);
+  telemetry.observe(PANEL_TELEMETRY_METRICS.renderDurationMs, durationMs, "ms", "panel", labels);
+}
+
+/** Records the first completed render of an adapter mount. */
+export function recordFirstRender(telemetry: ITelemetry, labels: TelemetryLabels): void {
+  telemetry.event("panel.firstRender", "instant", "panel", labels);
+}
+
+/** Records a frame dropped because the previous render had not called `done()` yet. */
+export function recordRenderSkipped(telemetry: ITelemetry, labels: TelemetryLabels): void {
+  telemetry.counter(PANEL_TELEMETRY_METRICS.renderSkipped, 1, "count", "panel", labels);
+}
+
+export function createAllFramesDeliveryTracker(): AllFramesDeliveryTracker {
+  return { lastAllFrames: undefined, countedLength: 0 };
+}
+
+/** Forget what was counted, e.g. when the adapter re-initialises its render state builder. */
+export function resetAllFramesDeliveryTracker(tracker: AllFramesDeliveryTracker): void {
+  tracker.lastAllFrames = undefined;
+  tracker.countedLength = 0;
+}
+
+/**
+ * Counts the preloaded messages delivered to the panel via `renderState.allFrames`
+ * (`panel.rangeMessages.*`). Callers must have checked `telemetry.isEnabled()`.
+ *
+ * - Work is only done when the `allFrames` reference changes (the render state builder keeps
+ *   the same array until blocks or conversions change).
+ * - The builder rebuilds `allFrames` from all blocks on each block update. During the normal
+ *   in-order block load this is append-only, so the new messages are the tail beyond the previously
+ *   counted length; only that tail is summed. If new data is merged into the middle (e.g. a newly
+ *   preloaded topic), the count is still the exact growth but the bytes are those of the tail
+ *   entries, an approximation.
+ * - If `allFrames` shrinks or keeps its length (eviction, topic removal, conversion change), the
+ *   baseline is reset to the new length and nothing is counted (never negative). Data loaded again
+ *   afterwards, or a full rebuild after re-initialisation, is counted again: that is real
+ *   re-delivery to the panel.
+ */
+export function recordAllFramesDelivered(
+  telemetry: ITelemetry,
+  tracker: AllFramesDeliveryTracker,
+  allFrames: Immutable<readonly MessageEvent[]> | undefined,
+  labels: TelemetryLabels,
+): void {
+  if (allFrames === tracker.lastAllFrames) {
+    return;
+  }
+  tracker.lastAllFrames = allFrames;
+  const previousLength = tracker.countedLength;
+  const length = allFrames?.length ?? 0;
+  tracker.countedLength = length;
+  if (allFrames == undefined || length <= previousLength) {
+    return;
+  }
+  let bytes = 0;
+  for (let i = previousLength; i < length; i++) {
+    bytes += allFrames[i]!.sizeInBytes;
+  }
+  telemetry.counter(
+    PANEL_TELEMETRY_METRICS.rangeMessagesDelivered,
+    length - previousLength,
+    "count",
+    "panel",
+    labels,
+  );
+  if (bytes > 0) {
+    telemetry.counter(
+      PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes,
+      bytes,
+      "bytes",
+      "panel",
+      labels,
+    );
+  }
+}
+
+export function createPanelFrameTelemetryState(): PanelFrameTelemetryState {
+  return {
+    lastAccountedFrame: undefined,
+    lastRenderedFrame: undefined,
+    allFrames: createAllFramesDeliveryTracker(),
+  };
+}
+
+/**
+ * Forget what was accounted, e.g. when the adapter re-initialises its render state builder (the
+ * fresh builder re-delivers the current frame, so it is counted again).
+ */
+export function resetPanelFrameTelemetryState(state: PanelFrameTelemetryState): void {
+  state.lastAccountedFrame = undefined;
+  state.lastRenderedFrame = undefined;
+  resetAllFramesDeliveryTracker(state.allFrames);
+}
+
+/**
+ * Accounts a frame input that arrived while the previous render had not called `done()` yet
+ * (`panel.renderSkipped`). Only a new, non-empty frame counts, not a re-run caused by another input
+ * nor a player-state update that carried no messages for this panel. Callers must have checked
+ * `telemetry.isEnabled()`.
+ */
+export function recordFrameSkipped(
+  telemetry: ITelemetry,
+  state: PanelFrameTelemetryState,
+  frame: Immutable<readonly MessageEvent[]> | undefined,
+  labels: TelemetryLabels,
+): void {
+  if (frame == undefined || frame === state.lastAccountedFrame) {
+    return;
+  }
+  state.lastAccountedFrame = frame;
+  recordRenderSkipped(telemetry, labels);
+}
+
+/**
+ * Accounts the inputs of a render that is about to be handed to the panel. Callers must have
+ * checked `telemetry.isEnabled()`.
+ *
+ * - `panel.messages.rendered[Bytes]`: the frame, once per frame array, only while `currentFrame`
+ *   is watched. The rendered marker only moves while it is watched, like the render state
+ *   builder's previous frame: a frame first rendered through another watched field and later
+ *   handed to `onRender` as `currentFrame` (after `watch("currentFrame")`) is still counted once.
+ * - `panel.rangeMessages.*`: new `allFrames` entries while `allFrames` is watched.
+ */
+export function recordFrameRendering(
+  telemetry: ITelemetry,
+  state: PanelFrameTelemetryState,
+  frame: Immutable<readonly MessageEvent[]> | undefined,
+  allFrames: Immutable<readonly MessageEvent[]> | undefined,
+  watchedFields: ReadonlySet<string>,
+  labels: TelemetryLabels,
+): void {
+  state.lastAccountedFrame = frame;
+  if (watchedFields.has("currentFrame") && frame !== state.lastRenderedFrame) {
+    state.lastRenderedFrame = frame;
+    recordMessagesRendered(telemetry, frame, labels);
+  }
+  // Preloaded messages delivered via allFrames (e.g. 3D); only new entries are counted.
+  if (watchedFields.has("allFrames")) {
+    recordAllFramesDelivered(telemetry, state.allFrames, allFrames, labels);
+  }
+}

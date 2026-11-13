@@ -14,6 +14,7 @@ import { add, compare, subtract, toNanoSec } from "@lichtblick/rostime";
 import { MessageEvent, Time } from "@lichtblick/suite";
 import { TopicSelection } from "@lichtblick/suite-base/players/types";
 import { Range } from "@lichtblick/suite-base/util/ranges";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import {
   GetBackfillMessagesArgs,
@@ -22,8 +23,16 @@ import {
   IteratorResult,
   MessageIteratorArgs,
 } from "./IIterableSource";
+import { SOURCE_CACHE_METRICS } from "./constants";
 
 const log = Log.getLogger(__filename);
+
+function countTelemetry(metric: string): void {
+  const telemetry = getTelemetry();
+  if (telemetry.isEnabled()) {
+    telemetry.counter(metric, 1, "count", "pipeline");
+  }
+}
 
 // An individual cache item represents a continuous range of CacheIteratorItems
 type CacheBlock<MessageType> = {
@@ -119,6 +128,11 @@ class CachingIterableSource<MessageType = unknown>
   public async terminate(): Promise<void> {
     this.#cache.length = 0;
     this.#cachedTopics.clear();
+    // The cached blocks are released (the internal size counter is intentionally left untouched).
+    const telemetry = getTelemetry();
+    if (telemetry.isEnabled()) {
+      telemetry.gauge(SOURCE_CACHE_METRICS.bytes, 0, "bytes", "pipeline");
+    }
   }
 
   public loadedRanges(): Range[] {
@@ -148,6 +162,7 @@ class CachingIterableSource<MessageType = unknown>
       this.#cache.length = 0;
       this.#totalSizeBytes = 0;
       this.#recomputeLoadedRangeCache();
+      this.#publishCacheBytes();
     }
 
     // Where we want to read messages from. As we move through blocks and messages, the read head
@@ -188,6 +203,7 @@ class CachingIterableSource<MessageType = unknown>
 
       // We've found a block containing our readHead, try reading items from the block
       if (block) {
+        countTelemetry(SOURCE_CACHE_METRICS.hits);
         const cacheIndex = CachingIterableSource.#FindStartCacheItemIndex(
           block.items,
           toNanoSec(readHead),
@@ -225,6 +241,7 @@ class CachingIterableSource<MessageType = unknown>
 
       // The block (and source) will start at the read head
       const sourceReadStart = readHead;
+      countTelemetry(SOURCE_CACHE_METRICS.misses);
 
       // Look for the block that comes after our read head
       const nextBlockIndex = this.#cache.findIndex(findAfterPredicate);
@@ -322,6 +339,7 @@ class CachingIterableSource<MessageType = unknown>
 
           // Will force creation of a new block on the next loop
           block = undefined;
+          this.#publishCacheBytes();
         }
 
         const sizeInBytes =
@@ -389,6 +407,8 @@ class CachingIterableSource<MessageType = unknown>
 
         this.#recomputeLoadedRangeCache();
       }
+
+      this.#publishCacheBytes();
 
       // We've read everything there was to read for this source, so our next read will be after
       // the end of this source
@@ -657,10 +677,22 @@ class CachingIterableSource<MessageType = unknown>
       }
       this.#totalSizeBytes -= block.size;
       this.#cache.splice(idx, 1);
+      const telemetry = getTelemetry();
+      if (telemetry.isEnabled()) {
+        telemetry.counter(SOURCE_CACHE_METRICS.evictions, 1, "count", "pipeline");
+        telemetry.gauge(SOURCE_CACHE_METRICS.bytes, this.#totalSizeBytes, "bytes", "pipeline");
+      }
       return true;
     }
 
     return false;
+  }
+
+  #publishCacheBytes(): void {
+    const telemetry = getTelemetry();
+    if (telemetry.isEnabled()) {
+      telemetry.gauge(SOURCE_CACHE_METRICS.bytes, this.#totalSizeBytes, "bytes", "pipeline");
+    }
   }
 
   static #FindStartCacheItemIndex(items: [bigint, IteratorResult][], key: bigint) {

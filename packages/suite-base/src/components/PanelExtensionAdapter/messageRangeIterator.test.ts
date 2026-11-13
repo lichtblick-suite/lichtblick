@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { MessageEvent } from "@lichtblick/suite";
-import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/contants";
+import { BATCH_INTERVAL_MS } from "@lichtblick/suite-base/components/PanelExtensionAdapter/constants";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
@@ -482,5 +482,83 @@ describe("createMessageRangeIterator", () => {
 
     // Should not yield any batches since it was cancelled before starting
     expect(batches).toHaveLength(0);
+  });
+
+  describe("onBatch", () => {
+    it("should call onBatch with each batch right before it is yielded", async () => {
+      // Given messages split into a time-based batch and a final batch
+      const mockMessages: MessageEvent[] = Array.from({ length: 4 }, (_, i) =>
+        MessageEventBuilder.messageEvent({
+          topic: mockTopic,
+          receiveTime: { sec: 1, nsec: i },
+          sizeInBytes: 10,
+        }),
+      );
+      let mockTime = 0;
+      const performanceNowSpy = jest.spyOn(performance, "now").mockImplementation(() => mockTime);
+      async function* timedIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
+        for (let i = 0; i < mockMessages.length; i++) {
+          if (i === 1) {
+            mockTime += BATCH_INTERVAL_MS + 1;
+          }
+          yield { type: "message-event", msgEvent: mockMessages[i]! };
+        }
+      }
+      const seenByCallback: MessageEvent[][] = [];
+      const onBatch = jest.fn((batch: readonly MessageEvent[]) => {
+        seenByCallback.push([...batch]);
+      });
+
+      try {
+        // When the iterable is consumed
+        const { iterable } = createMessageRangeIterator({
+          topic: mockTopic,
+          rawBatchIterator: timedIterator(),
+          sortedTopics: mockSortedTopics,
+          messageConverters: mockMessageConverters,
+          onBatch,
+        });
+        const yielded: MessageEvent[][] = [];
+        for await (const batch of iterable) {
+          expect(onBatch).toHaveBeenCalledTimes(yielded.length + 1);
+          yielded.push([...batch]);
+        }
+
+        // Then onBatch saw exactly the yielded batches, in order
+        expect(yielded.length).toBeGreaterThan(1);
+        expect(seenByCallback).toEqual(yielded);
+        expect(seenByCallback.flat()).toHaveLength(mockMessages.length);
+      } finally {
+        performanceNowSpy.mockRestore();
+      }
+    });
+
+    it("should not call onBatch when cancelled before iteration", async () => {
+      // Given an iterator cancelled before it is consumed
+      const onBatch = jest.fn();
+      const { iterable, cancel } = createMessageRangeIterator({
+        topic: mockTopic,
+        rawBatchIterator: createMockRawBatchIterator(
+          MessageEventBuilder.messageEvents().map((msgEvent) => ({
+            type: "message-event" as const,
+            msgEvent,
+          })),
+        ),
+        sortedTopics: mockSortedTopics,
+        messageConverters: mockMessageConverters,
+        onBatch,
+      });
+      cancel();
+
+      // When it is consumed
+      const batches = [];
+      for await (const batch of iterable) {
+        batches.push(batch);
+      }
+
+      // Then nothing was yielded and the callback never ran
+      expect(batches).toHaveLength(0);
+      expect(onBatch).not.toHaveBeenCalled();
+    });
   });
 });

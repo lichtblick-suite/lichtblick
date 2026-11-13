@@ -1,18 +1,21 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import { useCallback, useRef } from "react";
+import { useCallback, useContext, useMemo, useRef } from "react";
 
 import Logger from "@lichtblick/log";
 import { compare } from "@lichtblick/rostime";
-import { SubscribeMessageRangeArgs } from "@lichtblick/suite";
+import { MessageEvent, SubscribeMessageRangeArgs } from "@lichtblick/suite";
 import { useMessagePipelineGetter } from "@lichtblick/suite-base/components/MessagePipeline";
+import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import {
   ExtensionCatalog,
   useExtensionCatalog,
 } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import { createMessageRangeIterator } from "./messageRangeIterator";
+import { buildPanelTelemetryLabels, recordRangeMessagesDelivered } from "./panelTelemetry";
 import { MessageConverterAlertHandler } from "./types";
 
 const log = Logger.getLogger(__filename);
@@ -43,6 +46,21 @@ export function useSubscribeMessageRange(
   const emitAlertRef = useRef(emitAlert);
   emitAlertRef.current = emitAlert;
 
+  // The panel context is optional: this hook may be used outside a panel (no telemetry labels).
+  // Labels use the layout panel id (e.g. `Plot!3x9a`) and are kept in a ref so the callback stays stable.
+  const panelContext = useContext(PanelContext);
+  const layoutPanelId = panelContext?.id;
+  const panelType = panelContext?.type;
+  const telemetryLabels = useMemo(
+    () =>
+      layoutPanelId != undefined && panelType != undefined
+        ? buildPanelTelemetryLabels(layoutPanelId, panelType)
+        : undefined,
+    [layoutPanelId, panelType],
+  );
+  const telemetryLabelsRef = useRef(telemetryLabels);
+  telemetryLabelsRef.current = telemetryLabels;
+
   return useCallback(
     ({ topic, start, end, convertTo, onNewRangeIterator }: SubscribeMessageRangeArgs) => {
       if (start != undefined && end != undefined && compare(start, end) > 0) {
@@ -61,16 +79,27 @@ export function useSubscribeMessageRange(
         return () => {};
       }
 
-      const { iterable: messageEventIterable, cancel } = createMessageRangeIterator({
+      // When telemetry is disabled no batch callback is installed.
+      const telemetry = getTelemetry();
+      const labels = telemetryLabelsRef.current;
+      const onBatch =
+        labels != undefined && telemetry.isEnabled()
+          ? (batch: readonly MessageEvent[]) => {
+              recordRangeMessagesDelivered(telemetry, batch, labels);
+            }
+          : undefined;
+
+      const { iterable, cancel } = createMessageRangeIterator({
         topic,
         convertTo,
         rawBatchIterator,
         sortedTopics,
         messageConverters: messageConvertersRef.current ?? [],
         emitAlert: emitAlertRef.current,
+        onBatch,
       });
 
-      onNewRangeIterator(messageEventIterable).catch((err: unknown) => {
+      onNewRangeIterator(iterable).catch((err: unknown) => {
         log.error("Error in useSubscribeMessageRange onNewRangeIterator:", err);
       });
 

@@ -13,6 +13,7 @@ import { Player, PlayerPresence, Topic, TopicStats } from "@lichtblick/suite-bas
 import { RosDatatypes } from "@lichtblick/suite-base/types/RosDatatypes";
 
 import { BenchmarkPlayerBase } from "./BenchmarkPlayerBase";
+import { SINEWAVE_MESSAGE_BYTES } from "./constants";
 import { BenchmarkStats } from "../BenchmarkStats";
 
 const log = Log.getLogger(__filename);
@@ -86,7 +87,7 @@ class SinewavePlayer extends BenchmarkPlayerBase implements Player {
           topic: topicName,
           schemaName: "Sinewave",
           message: { value: value + i * 0.1 },
-          sizeInBytes: 0,
+          sizeInBytes: SINEWAVE_MESSAGE_BYTES,
         });
 
         topicStats.set(topicName, {
@@ -123,7 +124,7 @@ class SinewavePlayer extends BenchmarkPlayerBase implements Player {
       const frameEndMs = performance.now();
       const frameTimeMs = frameEndMs - frameStartMs;
 
-      BenchmarkStats.Instance().recordFrameTime(frameTimeMs);
+      BenchmarkStats.Instance().recordListenerDispatchDuration(frameTimeMs);
     }
   }
 }
