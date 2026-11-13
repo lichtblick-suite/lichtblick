@@ -3,7 +3,7 @@
   "private": true,
   "dependencies": {
     "@lichtblick/suite-base": "workspace:*",
-    "react-mosaic-component": "6.2.0"
+    "react-mosaic-component": "7.2.1"
   },
   "devDependencies": {
     "@foxglove/schemas": "1.13.0",
