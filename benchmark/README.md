@@ -7,7 +7,7 @@ performance and memory under repeatable scenarios. It has two parts:
   scenario bootstrapping (`?scenario=<id>`) and an in-page telemetry API (`window.lichtblickTelemetry`).
 - **The benchmark E2E runner** (`benchmark/e2e`): a Playwright suite that drives every scenario on
   **Electron** and **web (headless Chromium)**. It collects host process metrics, in-app telemetry,
-  phase events and frame times, and writes JSON artifacts plus a markdown summary.
+  phase events and listener dispatch durations, and writes JSON artifacts plus a markdown summary.
 
 Telemetry exists **only in the benchmark build**. The product app keeps its no-op telemetry sink.
 
@@ -627,10 +627,12 @@ This viewer is a stopgap: the definitive results dashboard is planned as a follo
 Both jobs run `yarn test:e2e:benchmark[:web]:ci scenarios`.
 
 Each job adds `yarn test:e2e:benchmark:summary` to the job summary. It starts with a compact KPI
-scorecard per platform and one "Exercises" line per scenario, then covers the legacy table,
-the v1 results table and the panels and pipeline section. Each job then
-generates the HTML report (see [Viewing results](#viewing-results)) and adds a pointer to it in the
-job summary. Finally it uploads `benchmark/.artifacts/**/*.json`, the checkpoint screenshots in
+scorecard per platform and one "Exercises" line per scenario, then covers the legacy table
+(average and peak memory, and the average listener dispatch duration of the legacy
+`frameTimeSamples`, which are not rendered-frame times), the v1 results table and the panels and
+pipeline section. Each job then generates the HTML report (see
+[Viewing results](#viewing-results)) and adds a pointer to it in the job summary. Finally it
+uploads `benchmark/.artifacts/**/*.json`, the checkpoint screenshots in
 `benchmark/.artifacts/screenshots/` and `benchmark/.artifacts/report/`, excluding the fixtures.
 
 ## Deferred
