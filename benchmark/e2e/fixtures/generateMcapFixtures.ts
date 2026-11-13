@@ -49,7 +49,8 @@ function buildPayload(fileIndex: number, length: number): string {
 
 /**
  * Sequential `IWritable` over an open file handle. `McapWriter` awaits every write before the next
- * one, so each `writeFile` (which writes the whole buffer at the current file position) appends.
+ * one; each write appends the whole buffer at the tracked `position()` with positional
+ * `handle.write` calls, looping because a single call may write only part of the buffer.
  */
 class FileWritable implements IWritable {
   readonly #handle: FileHandle;
@@ -64,7 +65,19 @@ class FileWritable implements IWritable {
   }
 
   public async write(buffer: Uint8Array): Promise<void> {
-    await this.#handle.writeFile(buffer);
+    let offset = 0;
+    while (offset < buffer.byteLength) {
+      const { bytesWritten } = await this.#handle.write(
+        buffer,
+        offset,
+        buffer.byteLength - offset,
+        Number(this.#position) + offset,
+      );
+      if (bytesWritten === 0) {
+        throw new Error(`No bytes written at position ${this.#position + BigInt(offset)}`);
+      }
+      offset += bytesWritten;
+    }
     this.#position += BigInt(buffer.byteLength);
   }
 }
