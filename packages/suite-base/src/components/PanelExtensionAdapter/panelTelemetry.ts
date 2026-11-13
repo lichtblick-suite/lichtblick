@@ -6,7 +6,7 @@ import { FALLBACK_PANEL_ID } from "@lichtblick/suite-base/components/constants";
 import { ITelemetry, TelemetryLabels } from "@lichtblick/suite-base/util/telemetry";
 
 import { PANEL_TELEMETRY_METRICS } from "./constants";
-import { AllFramesDeliveryTracker } from "./panelTelemetry.types";
+import { AllFramesDeliveryTracker, PanelFrameTelemetryState } from "./panelTelemetry.types";
 
 /**
  * Builds the (frozen) label set identifying a panel. `panelId` is the layout panel id (e.g.
@@ -171,5 +171,71 @@ export function recordAllFramesDelivered(
       "panel",
       labels,
     );
+  }
+}
+
+export function createPanelFrameTelemetryState(): PanelFrameTelemetryState {
+  return {
+    lastAccountedFrame: undefined,
+    lastRenderedFrame: undefined,
+    allFrames: createAllFramesDeliveryTracker(),
+  };
+}
+
+/**
+ * Forget what was accounted, e.g. when the adapter re-initialises its render state builder (the
+ * fresh builder re-delivers the current frame, so it is counted again).
+ */
+export function resetPanelFrameTelemetryState(state: PanelFrameTelemetryState): void {
+  state.lastAccountedFrame = undefined;
+  state.lastRenderedFrame = undefined;
+  resetAllFramesDeliveryTracker(state.allFrames);
+}
+
+/**
+ * Accounts a frame input that arrived while the previous render had not called `done()` yet
+ * (`panel.renderSkipped`). Only a new, non-empty frame counts, not a re-run caused by another input
+ * nor a player-state update that carried no messages for this panel. Callers must have checked
+ * `telemetry.isEnabled()`.
+ */
+export function recordFrameSkipped(
+  telemetry: ITelemetry,
+  state: PanelFrameTelemetryState,
+  frame: Immutable<readonly MessageEvent[]> | undefined,
+  labels: TelemetryLabels,
+): void {
+  if (frame == undefined || frame === state.lastAccountedFrame) {
+    return;
+  }
+  state.lastAccountedFrame = frame;
+  recordRenderSkipped(telemetry, labels);
+}
+
+/**
+ * Accounts the inputs of a render that is about to be handed to the panel. Callers must have
+ * checked `telemetry.isEnabled()`.
+ *
+ * - `panel.messages.rendered[Bytes]`: the frame, once per frame array, only while `currentFrame`
+ *   is watched. The rendered marker only moves while it is watched, like the render state
+ *   builder's previous frame: a frame first rendered through another watched field and later
+ *   handed to `onRender` as `currentFrame` (after `watch("currentFrame")`) is still counted once.
+ * - `panel.rangeMessages.*`: new `allFrames` entries while `allFrames` is watched.
+ */
+export function recordFrameRendering(
+  telemetry: ITelemetry,
+  state: PanelFrameTelemetryState,
+  frame: Immutable<readonly MessageEvent[]> | undefined,
+  allFrames: Immutable<readonly MessageEvent[]> | undefined,
+  watchedFields: ReadonlySet<string>,
+  labels: TelemetryLabels,
+): void {
+  state.lastAccountedFrame = frame;
+  if (watchedFields.has("currentFrame") && frame !== state.lastRenderedFrame) {
+    state.lastRenderedFrame = frame;
+    recordMessagesRendered(telemetry, frame, labels);
+  }
+  // Preloaded messages delivered via allFrames (e.g. 3D); only new entries are counted.
+  if (watchedFields.has("allFrames")) {
+    recordAllFramesDelivered(telemetry, state.allFrames, allFrames, labels);
   }
 }

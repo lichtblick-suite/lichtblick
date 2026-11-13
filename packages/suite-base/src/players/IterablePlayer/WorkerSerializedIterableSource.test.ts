@@ -5,6 +5,7 @@ import { ComlinkWrap } from "@lichtblick/den/worker";
 import {
   BufferedTelemetrySink,
   setTelemetrySink,
+  TELEMETRY_SELF_METRICS,
   type TelemetryBatch,
 } from "@lichtblick/suite-base/util/telemetry";
 import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
@@ -525,7 +526,7 @@ describe("WorkerSerializedIterableSource", () => {
       expect(jest.getTimerCount()).toBe(0);
     });
 
-    it("should account worker drops reported in bridged batches on the main sink", async () => {
+    it("should report worker drops of bridged batches in the main sink's ingestedDroppedRecords", async () => {
       // Given
       setTelemetrySink(mainSink);
       const realm = TelemetryBuilder.realm();
@@ -543,9 +544,19 @@ describe("WorkerSerializedIterableSource", () => {
       await jest.advanceTimersByTimeAsync(2000);
       await source.terminate();
 
-      // Then
+      // Then: the main sink's own drop count is unaffected
       expect(remote.drainTelemetry).toHaveBeenCalledTimes(3);
-      expect(mainSink.drain().dropped).toBe(dropped * 3);
+      expect(mainSink.drain().dropped).toBe(0);
+      mainSink.publishNow();
+      const records = mainSink.drain().records;
+      const ingested = records.filter(
+        (record) =>
+          record.kind === "sample" &&
+          record.metric === TELEMETRY_SELF_METRICS.ingestedDroppedRecords,
+      );
+      expect(ingested).toEqual([
+        expect.objectContaining({ value: dropped * 3, labels: { realm } }),
+      ]);
     });
   });
 });

@@ -12,8 +12,18 @@ export const DEFAULT_MAX_SERIES_PER_METRIC = 64;
 
 /** Names of the metrics the sink reports about itself (scope "telemetry"). */
 export const TELEMETRY_SELF_METRICS = {
-  /** counter, label `realm`: records lost to ring-buffer overflow (own and foreign realms) */
+  /**
+   * counter, label `realm` (= the record's realm): records this sink lost to its own ring-buffer
+   * overflow. One series per realm, so it can be summed across realms.
+   */
   droppedRecords: "telemetry.droppedRecords",
+  /**
+   * counter, label `realm` (= the producing realm): drops reported by batches this sink ingested
+   * from that realm. The same drops as that realm's own `droppedRecords`, seen by the receiver:
+   * a fallback for when the producer's final sample is lost, not an additional count (take the
+   * max per realm with `droppedRecords`, never the sum).
+   */
+  ingestedDroppedRecords: "telemetry.ingestedDroppedRecords",
   /** counter, label `reason`: records rejected by validation / the label guard */
   rejectedRecords: "telemetry.rejectedRecords",
   /** gauge: number of live gauge + counter + observation series in this sink */

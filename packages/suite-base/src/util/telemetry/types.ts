@@ -82,7 +82,11 @@ export type TelemetryRecord = TelemetrySample | TelemetryEvent;
 export type TelemetryBatch = {
   realm: string;
   records: TelemetryRecord[];
-  /** Number of records dropped by the producer since its previous batch. */
+  /**
+   * Number of records the producing sink dropped to its own ring overflow since its previous
+   * batch. Drops of batches that sink ingested from other realms are not included: they are
+   * reported in its `telemetry.ingestedDroppedRecords{realm}` self-metric.
+   */
   dropped: number;
 };
 
@@ -97,14 +101,14 @@ export type TelemetryRejectReason =
 /**
  * Telemetry recording API.
  *
- * Reserved names: `telemetry.droppedRecords`, `telemetry.rejectedRecords` and
- * `telemetry.seriesCount` (`TELEMETRY_SELF_METRICS`) are the sink's own self-metrics. Recording
- * them through `gauge()`, `counter()` or `observe()` is rejected and counted in
- * `telemetry.rejectedRecords{reason="reservedName"}`. Other names, including other `telemetry.*`
- * names (e.g. `telemetry.self.*`), may be used freely. Records forwarded with `ingest()` keep
- * their realm, sequence and timestamps and skip the reserved-name check (they carry the producing
- * realm's own self-metrics), but pass the same label guard as direct calls and can be rejected
- * (counted in `telemetry.rejectedRecords`).
+ * Reserved names: `telemetry.droppedRecords`, `telemetry.ingestedDroppedRecords`,
+ * `telemetry.rejectedRecords` and `telemetry.seriesCount` (`TELEMETRY_SELF_METRICS`) are the
+ * sink's own self-metrics. Recording them through `gauge()`, `counter()` or `observe()` is
+ * rejected and counted in `telemetry.rejectedRecords{reason="reservedName"}`. Other names,
+ * including other `telemetry.*` names (e.g. `telemetry.self.*`), may be used freely. Records
+ * forwarded with `ingest()` keep their realm, sequence and timestamps and skip the reserved-name
+ * check (they carry the producing realm's own self-metrics), but pass the same label guard as
+ * direct calls and can be rejected (counted in `telemetry.rejectedRecords`).
  */
 export interface ITelemetry {
   /** Cheap check; call sites must test this before building labels/values. */

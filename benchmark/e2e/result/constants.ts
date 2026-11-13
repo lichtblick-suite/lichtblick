@@ -61,8 +61,17 @@ export const POOL_METRICS = {
   overBudgetDurationMs: HYDRATED_SOURCE_POOL_OVER_BUDGET_DURATION_METRIC,
 } as const;
 
-/** Sink self metric: counter of records dropped, label `realm` (see `TELEMETRY_SELF_METRICS`). */
+/**
+ * Sink self metric: counter of records a sink dropped to its own ring overflow, label `realm` (see
+ * `TELEMETRY_SELF_METRICS`).
+ */
 export const DROPPED_RECORDS_METRIC = "telemetry.droppedRecords";
+/**
+ * Sink self metric: counter of the drops reported by batches a sink ingested, label `realm` (the
+ * producing realm). The same drops as that realm's own `DROPPED_RECORDS_METRIC`, seen by the
+ * receiver, so it is combined with it by max, not sum.
+ */
+export const INGESTED_DROPPED_RECORDS_METRIC = "telemetry.ingestedDroppedRecords";
 
 /** Realm of the runner-produced host process samples. */
 export const RUNNER_REALM = "runner";
