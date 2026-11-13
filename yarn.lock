@@ -3674,7 +3674,7 @@ __metadata:
     mathjs: "npm:15.2.0"
     memoize-weak: "npm:1.0.2"
     meshoptimizer: "npm:0.19.0"
-    moize: "npm:6.1.6"
+    moize: "npm:6.1.7"
     moment: "npm:2.31.0"
     moment-duration-format: "npm:2.3.2"
     moment-timezone: "npm:0.6.3"
@@ -16713,13 +16713,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moize@npm:6.1.6":
-  version: 6.1.6
-  resolution: "moize@npm:6.1.6"
+"moize@npm:6.1.7":
+  version: 6.1.7
+  resolution: "moize@npm:6.1.7"
   dependencies:
     fast-equals: "npm:^3.0.1"
     micro-memoize: "npm:^4.1.2"
-  checksum: 10/3d86b850d4b2dc5c1ae7b89cf99f97a9f3aa86a0af6ab4075c113d45babec6aec8630b95e295121bfb5ffcda1ff7a6b8c4d00fb36977b3a90da1b07ddf6f19b7
+  checksum: 10/f59af26da51fd42235519492e895f4caa0b8e6e1c1970423c64bfa1d4af9b953e500bbf37d80b30bdc26fe172091cf502d9cddaeb75738cfe7f4b523f9075921
   languageName: node
   linkType: hard
 
