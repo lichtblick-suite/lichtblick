@@ -6,12 +6,18 @@ import InitializationSourceBuilder from "@lichtblick/suite-base/testing/builders
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import delay from "@lichtblick/suite-base/util/delay";
+import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { IIterableSource, Initialization, ISerializedIterableSource } from "../IIterableSource";
 import { HydratedSourcePool, SourceHydrator } from "./HydratedSourcePool";
 import { MultiIterableSource } from "./MultiIterableSource";
 import { MultiSource } from "./types";
+import {
+  installDisabledTelemetry,
+  installTestTelemetrySink,
+  publishAndCollect,
+} from "../testing/telemetryTestUtils";
 
 const DEFAULT_READ_AHEAD_BUFFER_BYTES = 1024 * 1024 * 2;
 
@@ -843,5 +849,117 @@ describe("MultiIterableSource", () => {
         poolTerminateSpy.mock.invocationCallOrder[0]!,
       );
     });
+  });
+});
+
+describe("MultiIterableSource telemetry", () => {
+  // Three sources covering [0, 10], [20, 30] and [40, 50] seconds.
+  const RANGES: [number, number][] = [
+    [0, 10],
+    [20, 30],
+    [40, 50],
+  ];
+
+  function makeMultiSource(): MultiIterableSource<ISerializedIterableSource, unknown> {
+    let index = 0;
+    const SourceConstructor = jest.fn().mockImplementation(() => {
+      const [startSec, endSec] = RANGES[index++]!;
+      return {
+        initialize: jest.fn().mockResolvedValue(InitializationSourceBuilder.initialization()),
+        messageIterator: jest.fn().mockImplementation(async function* () {}),
+        getBackfillMessages: jest.fn().mockResolvedValue([]),
+        getStart: jest.fn().mockReturnValue({ sec: startSec, nsec: 0 }),
+        getEnd: jest.fn().mockReturnValue({ sec: endSec, nsec: 0 }),
+      } as jest.Mocked<IIterableSource>;
+    });
+    return new MultiIterableSource(
+      { type: "files", files: RANGES.map(() => new Blob()) },
+      SourceConstructor,
+    );
+  }
+
+  async function drainIterator(
+    source: MultiIterableSource<ISerializedIterableSource, unknown>,
+    startSec: number,
+    endSec: number,
+  ): Promise<void> {
+    const iterator = source.messageIterator({
+      topics: new Map(),
+      start: { sec: startSec, nsec: 0 },
+      end: { sec: endSec, nsec: 0 },
+    });
+    let result = await iterator.next();
+    while (result.done !== true) {
+      result = await iterator.next();
+    }
+  }
+
+  afterEach(() => {
+    setTelemetrySink(undefined);
+  });
+
+  it("should gauge the total source count on initialize, without a relevant count yet", async () => {
+    // Given
+    const sink = installTestTelemetrySink("worker:1");
+    const multiSource = makeMultiSource();
+
+    // When
+    await multiSource.initialize();
+
+    // Then
+    const samples = publishAndCollect(sink);
+    expect(samples.get("pipeline.sources.total")).toMatchObject({
+      value: 3,
+      unit: "count",
+      scope: "pipeline",
+      metricType: "gauge",
+      realm: "worker:1",
+    });
+    expect(samples.get("pipeline.sources.total")?.labels).toBeUndefined();
+    expect(samples.has("pipeline.sources.relevant")).toBe(false);
+  });
+
+  it("should gauge the relevant source count whenever a message iterator computes it", async () => {
+    // Given
+    const sink = installTestTelemetrySink();
+    const multiSource = makeMultiSource();
+    await multiSource.initialize();
+
+    // When: the range [5, 25] s overlaps the first two sources
+    await drainIterator(multiSource, 5, 25);
+
+    // Then
+    const samples = publishAndCollect(sink);
+    expect(samples.get("pipeline.sources.relevant")).toMatchObject({ value: 2, unit: "count" });
+    expect(samples.get("pipeline.sources.total")?.value).toBe(3);
+  });
+
+  it("should gauge the relevant source count when a backfill computes it", async () => {
+    // Given
+    const sink = installTestTelemetrySink();
+    const multiSource = makeMultiSource();
+    await multiSource.initialize();
+    await drainIterator(multiSource, 0, 50);
+
+    // When: only the first source starts at or before 5 s
+    await multiSource.getBackfillMessages({ topics: new Map(), time: { sec: 5, nsec: 0 } });
+
+    // Then: last value wins
+    expect(publishAndCollect(sink).get("pipeline.sources.relevant")?.value).toBe(1);
+  });
+
+  it("should not record source counts when telemetry is disabled", async () => {
+    // Given
+    const telemetry = installDisabledTelemetry();
+    const multiSource = makeMultiSource();
+
+    // When
+    await multiSource.initialize();
+    await drainIterator(multiSource, 0, 50);
+    await multiSource.getBackfillMessages({ topics: new Map(), time: { sec: 5, nsec: 0 } });
+
+    // Then
+    expect(telemetry.gauge).not.toHaveBeenCalled();
+    expect(telemetry.counter).not.toHaveBeenCalled();
   });
 });

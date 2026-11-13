@@ -26,6 +26,7 @@ import {
   validateAndAddNewDatatypes,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/validateInitialization";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import {
   IIterableSource,
@@ -36,6 +37,7 @@ import {
   ISerializedIterableSource,
 } from "../IIterableSource";
 import { HydratedSourcePool } from "./HydratedSourcePool";
+import { SOURCES_RELEVANT_METRIC, SOURCES_TOTAL_METRIC } from "./constants";
 
 const log = Logger.getLogger(__filename);
 
@@ -161,6 +163,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
 
   public async initialize(): Promise<Initialization> {
     const initializations: Initialization[] = await this.loadMultipleSources();
+    // Publish sources.total once all sources are loaded; no relevant subset exists before a read.
+    this.#publishSourceCounts(undefined);
 
     const resultInit: Initialization = this.mergeInitializations(initializations);
 
@@ -198,6 +202,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     // Restrict iteration to sources overlapping the requested time range to avoid irrelevant
     // remote reads during block loading.
     const relevantSources = filterSourcesByTimeRange(this.sourceImpl, opt.start, opt.end);
+    this.#publishSourceCounts(relevantSources.length);
 
     // Start later iterators only when playback reaches their start time, avoiding concurrent
     // byte-range requests to all remote MCAP files.
@@ -208,6 +213,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   ): Promise<MessageEvent<Uint8Array>[]> {
     // Only consider sources that could contain messages at or before the backfill time.
     const relevantSources = filterSourcesForBackfill(this.sourceImpl, args.time);
+    this.#publishSourceCounts(relevantSources.length);
 
     // Iterate newest-first so we start near the seek target and stop once every topic has a value,
     // avoiding redundant reads from earlier sources.
@@ -235,6 +241,20 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     }
 
     return backfillMessages;
+  }
+
+  // Gauges the number of sources and, when a relevant set was just computed (once per iterator /
+  // backfill request, never per message), its size. The realm sink is resolved per call because
+  // the worker installs its sink after this instance was constructed.
+  #publishSourceCounts(relevantCount: number | undefined): void {
+    const telemetry = getTelemetry();
+    if (!telemetry.isEnabled()) {
+      return;
+    }
+    telemetry.gauge(SOURCES_TOTAL_METRIC, this.sourceImpl.length, "count", "pipeline");
+    if (relevantCount != undefined) {
+      telemetry.gauge(SOURCES_RELEVANT_METRIC, relevantCount, "count", "pipeline");
+    }
   }
 
   public async terminate(): Promise<void> {

@@ -8,6 +8,12 @@
 import * as Comlink from "@lichtblick/comlink";
 import { abortSignalTransferHandler } from "@lichtblick/comlink-transfer-handlers";
 import { Immutable, MessageEvent } from "@lichtblick/suite";
+import {
+  BufferedTelemetrySink,
+  getTelemetry,
+  setTelemetrySink,
+  type TelemetryBatch,
+} from "@lichtblick/suite-base/util/telemetry";
 
 import { ComlinkTransferIteratorCursor } from "./ComlinkTransferIteratorCursor";
 import type {
@@ -24,6 +30,9 @@ const pickTransferableBuffer = (msg: MessageEvent<Uint8Array>) => msg.message.bu
 
 export class WorkerSerializedIterableSourceWorker implements ISerializedIterableSource {
   #source: ISerializedIterableSource;
+  // Worker-realm telemetry sink; only created when the main thread enables the bridge.
+  #telemetrySink: BufferedTelemetrySink | undefined;
+  #terminated = false;
 
   public constructor(source: ISerializedIterableSource) {
     this.#source = source;
@@ -63,8 +72,54 @@ export class WorkerSerializedIterableSourceWorker implements ISerializedIterable
     return Comlink.proxy(cursor);
   }
 
+  /**
+   * Installs a buffered telemetry sink in this worker realm so worker-side producers (e.g. the
+   * HydratedSourcePool created by MultiIterableSource) record into it. The main thread pulls the
+   * records with `drainTelemetry()`. Must be called before `initialize()` so pools constructed
+   * during initialization pick up the sink. Idempotent.
+   *
+   * @param realm bounded realm id stamped on every record (e.g. `worker:1`).
+   */
+  public enableTelemetry(realm: string): void {
+    if (this.#telemetrySink != undefined || this.#terminated) {
+      return;
+    }
+    const sink = new BufferedTelemetrySink({ realm });
+    sink.start();
+    setTelemetrySink(sink);
+    this.#telemetrySink = sink;
+  }
+
+  /**
+   * Returns and removes all buffered telemetry records, or `undefined` when telemetry was never
+   * enabled. After `terminate()` this is the final drain: the sink is disposed first (the only
+   * final publish, including what late producers recorded after `terminate()`; publish timer
+   * stopped) and the realm reverts to the no-op sink, so nothing keeps running in the worker. If the main thread never performs that final drain, the sink's 1 Hz
+   * timer simply dies with the worker when it is disposed.
+   */
+  public drainTelemetry(): TelemetryBatch | undefined {
+    const sink = this.#telemetrySink;
+    if (sink == undefined) {
+      return undefined;
+    }
+    if (this.#terminated) {
+      sink.dispose();
+      if (getTelemetry() === sink) {
+        setTelemetrySink(undefined);
+      }
+    }
+    return sink.drain();
+  }
+
   public async terminate(): Promise<void> {
-    await this.#source.terminate?.();
+    try {
+      await this.#source.terminate?.();
+    } finally {
+      // The sink is intentionally NOT disposed (nor published) here: late producers (e.g. pending
+      // closes) may still record until the main thread's final drainTelemetry() call, which
+      // disposes the sink and thereby publishes the final pool gauges/counters.
+      this.#terminated = true;
+    }
   }
 }
 

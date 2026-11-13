@@ -9,11 +9,11 @@ import { McapTypes } from "@mcap/core";
 
 import BrowserHttpReader from "@lichtblick/suite-base/util/BrowserHttpReader";
 import CachedFilelike from "@lichtblick/suite-base/util/CachedFilelike";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import { BatchingReadable } from "./BatchingReadable";
 import type { RemoteFileReadableOptions } from "./RemoteFileReadable.types";
-
-const DEFAULT_CACHE_SIZE_BYTES = 1024 * 1024 * 500; // 500MiB
+import { BYTES_READ_METRIC, DEFAULT_CACHE_SIZE_BYTES, READ_REQUESTS_METRIC } from "./constants";
 
 export class RemoteFileReadable {
   readonly #remoteReader: CachedFilelike;
@@ -34,7 +34,15 @@ export class RemoteFileReadable {
         if (offset + size > BigInt(Number.MAX_SAFE_INTEGER)) {
           throw new Error(`Read too large: offset ${offset}, size ${size}`);
         }
-        return await this.#remoteReader.read(Number(offset), Number(size));
+        // Resolved per call: in the source worker the realm sink is installed after construction.
+        const telemetry = getTelemetry();
+        if (!telemetry.isEnabled()) {
+          return await this.#remoteReader.read(Number(offset), Number(size));
+        }
+        telemetry.counter(READ_REQUESTS_METRIC, 1, "count", "pipeline");
+        const data = await this.#remoteReader.read(Number(offset), Number(size));
+        telemetry.counter(BYTES_READ_METRIC, data.byteLength, "bytes", "pipeline");
+        return data;
       },
     };
     this.#batchingReadable = new BatchingReadable(inner);

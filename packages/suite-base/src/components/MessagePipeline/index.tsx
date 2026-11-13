@@ -32,9 +32,12 @@ import {
   PlayerState,
   SubscribePayload,
 } from "@lichtblick/suite-base/players/types";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import MessageOrderTracker from "./MessageOrderTracker";
+import { PIPELINE_TELEMETRY_METRICS } from "./constants";
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
+import { recordPipelineTickTelemetry } from "./pipelineTelemetry";
 import {
   MessagePipelineInternalState,
   createMessagePipelineStore,
@@ -286,6 +289,11 @@ function createPlayerListener(args: {
       throw new Error("New playerState was emitted before last playerState was rendered.");
     }
 
+    // Telemetry is checked once per tick; when disabled nothing below computes or allocates for it.
+    const telemetry = getTelemetry();
+    const telemetryEnabled = telemetry.isEnabled();
+    const telemetryStart = telemetryEnabled ? performance.now() : 0;
+
     // check for any out-of-order or out-of-sync messages
     const alerts = messageOrderTracker.update(listenerPlayerState);
     const newPlayerState = concatAlerts(listenerPlayerState, alerts);
@@ -339,13 +347,37 @@ function createPlayerListener(args: {
     }
     prevPlayerId = listenerPlayerState.playerId;
 
+    // The reducer only buckets messages when the array reference differs from the one it holds;
+    // capture that reference (after any reset) so telemetry skips re-emitted arrays the same way.
+    const previousMessages = telemetryEnabled
+      ? store.getState().public.playerState.activeData?.messages
+      : undefined;
+
     updateState({
       type: "update-player-state",
       playerState: newPlayerState,
       renderDone,
     });
 
+    if (telemetryEnabled) {
+      recordPipelineTickTelemetry(
+        telemetry,
+        store.getState(),
+        listenerPlayerState.activeData?.messages,
+        previousMessages,
+      );
+    }
+
     await promise;
+
+    if (telemetryEnabled) {
+      telemetry.observe(
+        PIPELINE_TELEMETRY_METRICS.listenerDispatchDurationMs,
+        performance.now() - telemetryStart,
+        "ms",
+        "pipeline",
+      );
+    }
   };
   return {
     listener,
