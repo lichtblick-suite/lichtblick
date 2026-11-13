@@ -234,6 +234,26 @@ describe("VideoPlayer", () => {
     await expect(decodePromise).resolves.toEqual({ type: "timeout" });
   });
 
+  it("should use the extended target-frame timeout for AV1", async () => {
+    // Given an AV1-configured player with a no-op decoder
+    const { player } = setup();
+    await player.init({ codec: "av01.0.05M.08" });
+    let settled = false;
+
+    // When the default timeout elapses without output
+    const decodePromise = player
+      .decodeFrames([{ data: new Uint8Array([1]), timestampMicros: 0, type: "key" }])
+      .finally(() => {
+        settled = true;
+      });
+    await jest.advanceTimersByTimeAsync(10);
+
+    // Then AV1 remains pending until the extended buffered-codec deadline
+    expect(settled).toBe(false);
+    await jest.advanceTimersByTimeAsync(1990);
+    await expect(decodePromise).resolves.toEqual({ type: "timeout" });
+  });
+
   it("should return aborted on resetForSeek", async () => {
     // Given an HEVC-configured player with an in-flight decode
     const { player } = setup();
