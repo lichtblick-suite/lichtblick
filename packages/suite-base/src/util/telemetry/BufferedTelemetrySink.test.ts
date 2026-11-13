@@ -686,7 +686,7 @@ describe("BufferedTelemetrySink", () => {
       (console.warn as jest.Mock).mockClear();
     });
 
-    it("accumulates foreign drops into drain().dropped and the droppedRecords self counter", () => {
+    it("should report foreign drops in the ingestedDroppedRecords self counter, not in drain().dropped", () => {
       // Given
       const { sink } = setup();
       const realm = "worker:mcap-1";
@@ -697,13 +697,22 @@ describe("BufferedTelemetrySink", () => {
       const afterIngest = sink.drain();
       sink.publishNow();
 
-      // Then
-      expect(afterIngest.dropped).toBe(foreignDropped);
-      const [dropped] = samplesOf(sink.drain().records, TELEMETRY_SELF_METRICS.droppedRecords);
-      expect(dropped).toMatchObject({ value: foreignDropped, labels: { realm } });
+      // Then: drain().dropped only counts this sink's own drops
+      expect(afterIngest.dropped).toBe(0);
+      const records = sink.drain().records;
+      const [ingested] = samplesOf(records, TELEMETRY_SELF_METRICS.ingestedDroppedRecords);
+      expect(ingested).toMatchObject({
+        metricType: "counter",
+        value: foreignDropped,
+        unit: "count",
+        scope: "telemetry",
+        realm: REALM,
+        labels: { realm },
+      });
+      expect(samplesOf(records, TELEMETRY_SELF_METRICS.droppedRecords)).toEqual([]);
     });
 
-    it("should reject foreign drops that would overflow the droppedRecords total to Infinity", () => {
+    it("should reject foreign drops that would overflow the ingestedDroppedRecords total to Infinity", () => {
       // Given
       const { sink } = setup();
       const realm = "worker:mcap-1";
@@ -715,7 +724,7 @@ describe("BufferedTelemetrySink", () => {
 
       // Then
       const batch = sink.drain();
-      const [dropped] = samplesOf(batch.records, TELEMETRY_SELF_METRICS.droppedRecords);
+      const [dropped] = samplesOf(batch.records, TELEMETRY_SELF_METRICS.ingestedDroppedRecords);
       expect(dropped).toMatchObject({ value: Number.MAX_VALUE, labels: { realm } });
       expect(rejectedCount(batch, "invalidValue")).toBe(1);
     });
@@ -1148,7 +1157,7 @@ describe("BufferedTelemetrySink", () => {
       expect(drained + reportedDropped).toBe(produced);
     });
 
-    it("should add up the drops of repeated foreign batches from one realm in a single droppedRecords series", () => {
+    it("should add up the drops of repeated foreign batches from one realm in a single ingestedDroppedRecords series", () => {
       // Given
       const { sink } = setup();
       const realm = TelemetryBuilder.realm();
@@ -1162,14 +1171,17 @@ describe("BufferedTelemetrySink", () => {
       sink.publishNow();
 
       // Then
-      const droppedSeries = samplesOf(sink.drain().records, TELEMETRY_SELF_METRICS.droppedRecords);
-      expect(afterIngest.dropped).toBe(12);
+      const droppedSeries = samplesOf(
+        sink.drain().records,
+        TELEMETRY_SELF_METRICS.ingestedDroppedRecords,
+      );
+      expect(afterIngest.dropped).toBe(0);
       expect(droppedSeries).toEqual([
         expect.objectContaining({ value: 12, delta: 12, labels: { realm } }),
       ]);
     });
 
-    it("should merge own overflow drops into the droppedRecords series an ingested batch created for the own realm", () => {
+    it("should keep own overflow drops apart from ingested drops reported for the own realm", () => {
       // Given
       const { sink } = setup({ capacity: 2 });
       sink.ingest(TelemetryBuilder.batch({ realm: REALM, records: [], dropped: 2 }));
@@ -1182,10 +1194,13 @@ describe("BufferedTelemetrySink", () => {
       sink.publishNow();
 
       // Then
-      const droppedSeries = samplesOf(sink.drain().records, TELEMETRY_SELF_METRICS.droppedRecords);
-      expect(afterOverflow.dropped).toBe(3);
-      expect(droppedSeries).toEqual([
-        expect.objectContaining({ value: 3, labels: { realm: REALM } }),
+      const records = sink.drain().records;
+      expect(afterOverflow.dropped).toBe(1);
+      expect(samplesOf(records, TELEMETRY_SELF_METRICS.droppedRecords)).toEqual([
+        expect.objectContaining({ value: 1, labels: { realm: REALM } }),
+      ]);
+      expect(samplesOf(records, TELEMETRY_SELF_METRICS.ingestedDroppedRecords)).toEqual([
+        expect.objectContaining({ value: 2, labels: { realm: REALM } }),
       ]);
     });
   });
@@ -1412,7 +1427,7 @@ describe("BufferedTelemetrySink", () => {
       expect(rejectedCount(batch, "cardinality")).toBeUndefined();
     });
 
-    it("should cap the per-realm droppedRecords series created by foreign batches", () => {
+    it("should cap the per-realm ingestedDroppedRecords series created by foreign batches", () => {
       // Given
       const maxSeriesPerMetric = 3;
       const { sink } = setup({ maxSeriesPerMetric });
@@ -1425,10 +1440,10 @@ describe("BufferedTelemetrySink", () => {
       const afterIngest = sink.drain();
       sink.publishNow();
 
-      // Then: every foreign drop is still accounted, but only the first realms get a series
+      // Then: only the first realms get a series, the others are rejected and counted
       const batch = sink.drain();
-      expect(afterIngest.dropped).toBe(realms.length * 2);
-      const droppedSeries = samplesOf(batch.records, TELEMETRY_SELF_METRICS.droppedRecords);
+      expect(afterIngest.dropped).toBe(0);
+      const droppedSeries = samplesOf(batch.records, TELEMETRY_SELF_METRICS.ingestedDroppedRecords);
       expect(droppedSeries.map((sample) => sample.labels?.realm)).toEqual(
         realms.slice(0, maxSeriesPerMetric),
       );
