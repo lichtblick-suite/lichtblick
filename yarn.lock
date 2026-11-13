@@ -1658,6 +1658,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dual-bundle/import-meta-resolve@npm:^4.2.1":
+  version: 4.2.1
+  resolution: "@dual-bundle/import-meta-resolve@npm:4.2.1"
+  checksum: 10/c93f600fe0af015fdf1d6e58cd2823b8282d02e44eb6207eb5fc17e95f6c76bf67c018b12bd6ea71017b214269b59791dad2f3d560131be2df4e995400063258
+  languageName: node
+  linkType: hard
+
 "@electron-internal/extract-zip@npm:^1.0.1":
   version: 1.0.4
   resolution: "@electron-internal/extract-zip@npm:1.0.4"
@@ -3291,7 +3298,7 @@ __metadata:
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@types/dom-webcodecs": "npm:0.1.14"
     async-mutex: "npm:0.5.0"
-    eventemitter3: "npm:5.0.1"
+    eventemitter3: "npm:5.0.4"
     xacro-parser: "npm:0.3.11"
   languageName: unknown
   linkType: soft
@@ -3385,7 +3392,7 @@ __metadata:
     "@lichtblick/wasm-bz2": "npm:1.0.0"
     "@lichtblick/wasm-lz4": "npm:1.0.0"
     "@lichtblick/wasm-zstd": "npm:1.0.0"
-    "@mcap/core": "npm:2.2.0"
+    "@mcap/core": "npm:2.4.0"
     "@protobufjs/base64": "npm:1.1.2"
     flatbuffers: "npm:25.9.23"
     flatbuffers_reflection: "npm:1.3.0"
@@ -3586,7 +3593,7 @@ __metadata:
     "@lichtblick/wasm-bz2": "npm:1.0.0"
     "@lichtblick/wasm-lz4": "npm:1.0.0"
     "@lichtblick/xmlrpc": "npm:1.0.0"
-    "@mcap/core": "npm:2.2.0"
+    "@mcap/core": "npm:2.4.0"
     "@mui/icons-material": "npm:7.3.8"
     "@mui/material": "npm:7.2.0"
     "@mui/x-data-grid": "npm:7.24.1"
@@ -3595,13 +3602,13 @@ __metadata:
     "@opentelemetry/exporter-logs-otlp-http": "npm:0.221.0"
     "@opentelemetry/exporter-trace-otlp-http": "npm:0.221.0"
     "@opentelemetry/resources": "npm:2.10.0"
-    "@opentelemetry/sdk-logs": "npm:0.221.0"
+    "@opentelemetry/sdk-logs": "npm:0.223.0"
     "@opentelemetry/sdk-trace-web": "npm:2.10.0"
     "@opentelemetry/semantic-conventions": "npm:1.43.0"
     "@popperjs/core": "npm:^2.11.8"
     "@protobufjs/base64": "npm:1.1.2"
     "@storybook/jest": "npm:0.2.3"
-    "@storybook/react-webpack5": "npm:10.6.5"
+    "@storybook/react-webpack5": "npm:10.6.6"
     "@storybook/testing-library": "npm:0.2.2"
     "@svgr/webpack": "npm:8.1.0"
     "@tanstack/react-table": "npm:9.2.4"
@@ -3643,7 +3650,7 @@ __metadata:
     chart.js: "npm:4.4.8"
     chartjs-plugin-annotation: "npm:3.0.1"
     chartjs-plugin-datalabels: "npm:2.2.0"
-    chromatic: "npm:11.5.6"
+    chromatic: "npm:18.12.1"
     crypto-browserify: "npm:3.12.0"
     css-loader: "npm:6.8.1"
     cytoscape: "npm:3.31.1"
@@ -3651,7 +3658,7 @@ __metadata:
     dompurify: "npm:3.4.17"
     dotenv: "npm:17.2.2"
     esbuild-loader: "npm:4.3.0"
-    eventemitter3: "npm:5.0.1"
+    eventemitter3: "npm:5.0.4"
     fake-indexeddb: "npm:4.0.2"
     fork-ts-checker-webpack-plugin: "npm:9.0.2"
     fuzzysort: "npm:3.1.0"
@@ -3660,7 +3667,7 @@ __metadata:
     gl-matrix: "npm:3.4.4"
     hammerjs: "npm:2.0.8"
     heap-js: "npm:2.7.1"
-    i18next: "npm:26.3.1"
+    i18next: "npm:26.7.2"
     i18next-browser-languagedetector: "npm:8.2.0"
     idb: "npm:7.1.1"
     idb-keyval: "npm:6.2.1"
@@ -3674,7 +3681,7 @@ __metadata:
     mathjs: "npm:15.2.0"
     memoize-weak: "npm:1.0.2"
     meshoptimizer: "npm:0.19.0"
-    moize: "npm:6.1.6"
+    moize: "npm:6.1.7"
     moment: "npm:2.31.0"
     moment-duration-format: "npm:2.3.2"
     moment-timezone: "npm:0.6.3"
@@ -3699,21 +3706,21 @@ __metadata:
     react-markdown: "npm:9.0.1"
     react-monaco-editor: "npm:0.59.0"
     react-mosaic-component: "npm:6.2.0"
-    react-refresh-typescript: "npm:2.0.10"
+    react-refresh-typescript: "npm:2.0.12"
     react-resizable-panels: "npm:2.1.6"
     react-resize-detector: "npm:12.3.0"
     react-transition-group: "npm:4.4.5"
     react-use: "npm:17.6.0"
     react-virtualized-auto-sizer: "npm:1.0.26"
     react-window: "npm:2.2.7"
-    readable-stream: "npm:4.7.0"
+    readable-stream: "npm:4.8.0"
     recharts: "npm:2.15.3"
     rehype-raw: "npm:7.0.0"
     reselect: "npm:5.1.1"
     sanitize-html: "npm:2.18.1"
     seedrandom: "npm:3.0.5"
     shallowequal: "npm:1.1.0"
-    storybook: "npm:10.6.5"
+    storybook: "npm:10.6.6"
     string-hash: "npm:1.1.3"
     string-replace-loader: "npm:3.1.0"
     style-loader: "npm:4.0.0"
@@ -3749,9 +3756,9 @@ __metadata:
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
-    "@mcap/core": "npm:2.2.0"
-    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
-    "@storybook/react-webpack5": "npm:10.6.5"
+    "@mcap/core": "npm:2.4.0"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.3"
+    "@storybook/react-webpack5": "npm:10.6.6"
     "@types/mock-fs": "npm:4.13.4"
     "@types/plist": "npm:^3.0.3"
     "@types/pngjs": "npm:^6.0.2"
@@ -3763,13 +3770,13 @@ __metadata:
     builder-util: "npm:*"
     clean-webpack-plugin: "npm:4.0.0"
     dotenv: "npm:17.2.2"
-    electron: "npm:45.1.0"
+    electron: "npm:45.2.3"
     electron-builder: "npm:26.18.0"
     electron-devtools-installer: "npm:4.0.0"
     electron-squirrel-startup: "npm:1.0.1"
     electron-updater: "npm:6.8.11"
     esbuild-loader: "npm:4.3.0"
-    eventemitter3: "npm:5.0.1"
+    eventemitter3: "npm:5.0.4"
     fork-ts-checker-webpack-plugin: "npm:9.0.2"
     html-webpack-plugin: "npm:5.5.3"
     jszip: "npm:3.10.1"
@@ -3781,7 +3788,7 @@ __metadata:
     randomstring: "npm:1.3.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-refresh-typescript: "npm:2.0.10"
+    react-refresh-typescript: "npm:2.0.12"
     react-use: "npm:17.6.0"
     tinycolor2: "npm:1.6.0"
     tss-react: "npm:4.9.19"
@@ -3802,8 +3809,8 @@ __metadata:
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@mui/material": "npm:7.2.0"
-    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
-    "@storybook/react-webpack5": "npm:10.6.5"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.3"
+    "@storybook/react-webpack5": "npm:10.6.6"
     "@testing-library/react": "npm:16.0.0"
     clean-webpack-plugin: "npm:4.0.0"
     copy-webpack-plugin: "npm:14.0.0"
@@ -3849,7 +3856,7 @@ __metadata:
     "@mui/lab": "npm:5.0.0-alpha.177"
     "@mui/material": "npm:7.2.0"
     "@mui/x-data-grid": "npm:6.18.7"
-    "@storybook/react-webpack5": "npm:10.6.5"
+    "@storybook/react-webpack5": "npm:10.6.6"
     "@types/react": "npm:18.3.12"
     react: "npm:18.3.1"
   languageName: unknown
@@ -3959,14 +3966,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mcap/core@npm:2.2.0":
-  version: 2.2.0
-  resolution: "@mcap/core@npm:2.2.0"
+"@mcap/core@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@mcap/core@npm:2.4.0"
   dependencies:
     "@foxglove/crc": "npm:^0.0.3"
-    heap-js: "npm:^2.2.0"
-    tslib: "npm:^2.5.0"
-  checksum: 10/f5afefe316e52f9db264a75d26bd93405ea7488e86f590219bae121124fa4e057ed1491ff13339e022716a91cb44c634fd1ea76a65fd6e201c19acc1db21e28d
+    heap-js: "npm:^2.7.1"
+    tslib: "npm:^2.8.1"
+  checksum: 10/226fcd78913ae23bcfb1a540be8d415513198d8a3fafe8112989c33e48ff2ccca4cdfe24670f3879d0c598332d31d3e5b99956092a7fa3bbbb3b9c4c75d9a9fa
   languageName: node
   linkType: hard
 
@@ -4554,6 +4561,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/api-logs@npm:0.223.0":
+  version: 0.223.0
+  resolution: "@opentelemetry/api-logs@npm:0.223.0"
+  dependencies:
+    "@opentelemetry/api": "npm:^1.3.0"
+  checksum: 10/2647721d0bc04fc6ec8fc70622ef764276fc2ed4163e9570308cde18d077d6a5ed81f7771d30b3846f236e7f6c9b56610df3c4423a3315051081823026b0e6c7
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/api@npm:1.9.1, @opentelemetry/api@npm:^1.3.0":
   version: 1.9.1
   resolution: "@opentelemetry/api@npm:1.9.1"
@@ -4569,6 +4585,17 @@ __metadata:
   peerDependencies:
     "@opentelemetry/api": ">=1.0.0 <1.10.0"
   checksum: 10/b95d912461d878a23e092317a98eb593b2316e0e63bb0618f351aba8fcb92253553ba8d4ceac3f575b4152325a85da2cf39f4e68123088ef47429f7328c971e5
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/core@npm:2.12.0":
+  version: 2.12.0
+  resolution: "@opentelemetry/core@npm:2.12.0"
+  dependencies:
+    "@opentelemetry/semantic-conventions": "npm:^1.29.0"
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.10.0"
+  checksum: 10/2bbc02ad2e131d23061d24826fdd061b5f5527c16f482d05906dfa345373165c2ad6f90089593f30abfd3029d7488b618f029c831155225151b74dec71bf1746
   languageName: node
   linkType: hard
 
@@ -4638,6 +4665,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/resources@npm:2.12.0":
+  version: 2.12.0
+  resolution: "@opentelemetry/resources@npm:2.12.0"
+  dependencies:
+    "@opentelemetry/core": "npm:2.12.0"
+    "@opentelemetry/semantic-conventions": "npm:^1.29.0"
+  peerDependencies:
+    "@opentelemetry/api": ">=1.3.0 <1.10.0"
+  checksum: 10/ffc5c19db118bca7f64f6e7501c0aa17be2f9c7b1e158bae18a7b72e43c18ff177491784629a1b93180b2b787098b3a8cba33573656391dd538cebdedcfae54d
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/sdk-logs@npm:0.221.0":
   version: 0.221.0
   resolution: "@opentelemetry/sdk-logs@npm:0.221.0"
@@ -4649,6 +4688,20 @@ __metadata:
   peerDependencies:
     "@opentelemetry/api": ">=1.4.0 <1.10.0"
   checksum: 10/68ecc97d3a4fabbb2ad046f159de228f71407bd284a6fb42aab9e1a04a794f08f98ad8153aaeb053dca53b46da0695c07eb40fa7c3c28dcc1d9f23d3dfb63c5d
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/sdk-logs@npm:0.223.0":
+  version: 0.223.0
+  resolution: "@opentelemetry/sdk-logs@npm:0.223.0"
+  dependencies:
+    "@opentelemetry/api-logs": "npm:0.223.0"
+    "@opentelemetry/core": "npm:2.12.0"
+    "@opentelemetry/resources": "npm:2.12.0"
+    "@opentelemetry/semantic-conventions": "npm:^1.29.0"
+  peerDependencies:
+    "@opentelemetry/api": ">=1.4.0 <1.10.0"
+  checksum: 10/d8b03c19850b4cecb4545129d2cff52d6c2ba6925d74b3c35fa2edc391029e8804ce92b26ad8bc4beab5d899af483e4e627f5ce037589523d38925951d633002
   languageName: node
   linkType: hard
 
@@ -5345,9 +5398,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pmmmwh/react-refresh-webpack-plugin@npm:0.6.2":
-  version: 0.6.2
-  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.6.2"
+"@pmmmwh/react-refresh-webpack-plugin@npm:0.6.3":
+  version: 0.6.3
+  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.6.3"
   dependencies:
     anser: "npm:^2.1.1"
     core-js-pure: "npm:^3.23.3"
@@ -5361,7 +5414,7 @@ __metadata:
     sockjs-client: ^1.4.0
     type-fest: ">=0.17.0 <6.0.0"
     webpack: ^5.0.0
-    webpack-dev-server: ^4.8.0 || 5.x
+    webpack-dev-server: ^4.8.0 || 5.x || 6.x
     webpack-hot-middleware: 2.x
     webpack-plugin-serve: 1.x
   peerDependenciesMeta:
@@ -5377,7 +5430,7 @@ __metadata:
       optional: true
     webpack-plugin-serve:
       optional: true
-  checksum: 10/157a20464b0bdca39b31e09450f6ce1d91cbe32bcce882a02df797482b0226247d13e5a2c750a3fb2e2758bffc25d49a468b33b66d8364aa4e1ed785596453c8
+  checksum: 10/fc357103a822c22312d5521f601ab88606b6207ff40f3d748a2e74c1e58841b467ceb20120f57cba6385325559d99db0311ee179ffc70a463bf4ce45511c3321
   languageName: node
   linkType: hard
 
@@ -5462,11 +5515,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/builder-webpack5@npm:10.6.5":
-  version: 10.6.5
-  resolution: "@storybook/builder-webpack5@npm:10.6.5"
+"@storybook/builder-webpack5@npm:10.6.6":
+  version: 10.6.6
+  resolution: "@storybook/builder-webpack5@npm:10.6.6"
   dependencies:
-    "@storybook/core-webpack": "npm:10.6.5"
+    "@storybook/core-webpack": "npm:10.6.6"
     case-sensitive-paths-webpack-plugin: "npm:^2.4.0"
     cjs-module-lexer: "npm:^1.2.3"
     css-loader: "npm:^7.1.2"
@@ -5483,22 +5536,22 @@ __metadata:
     webpack-hot-middleware: "npm:^2.25.1"
     webpack-virtual-modules: "npm:^0.6.0"
   peerDependencies:
-    storybook: ^10.6.5
+    storybook: ^10.6.6
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/eb8ac3a7319b59f58bf02583ba2f19e1b0b6d9bbf8134622ae42474b8d4e579bfc727b82a422be5a4ebb50b32670eb49158cc16a29588f65d1b539eb127eaf00
+  checksum: 10/72be19246d53df3ddf4713e87ea20e7b81bb7fdd7628574cad33318d5a8035068fd33005798a4cf57833b05afdd3519531a20310e265c2ae9b4154b635410baf
   languageName: node
   linkType: hard
 
-"@storybook/core-webpack@npm:10.6.5":
-  version: 10.6.5
-  resolution: "@storybook/core-webpack@npm:10.6.5"
+"@storybook/core-webpack@npm:10.6.6":
+  version: 10.6.6
+  resolution: "@storybook/core-webpack@npm:10.6.6"
   dependencies:
     ts-dedent: "npm:^2.0.0"
   peerDependencies:
-    storybook: ^10.6.5
-  checksum: 10/9d896d31769425b416774dc8e617ac10c6eb229d51c821274ceef4029ce80ae521f6aad5bde84008c8cbba752aec2f85cdf4704c54f09ce54ce3e3240a513f40
+    storybook: ^10.6.6
+  checksum: 10/262bb02fe1e08229a812fda2c0245992f003ba3071a525abc51a6ab2aa7809dfdd21827aeb1450222e139e0860a2cef1f01a71967764d4163aa25ed2ac488bef
   languageName: node
   linkType: hard
 
@@ -5539,11 +5592,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/preset-react-webpack@npm:10.6.5":
-  version: 10.6.5
-  resolution: "@storybook/preset-react-webpack@npm:10.6.5"
+"@storybook/preset-react-webpack@npm:10.6.6":
+  version: 10.6.6
+  resolution: "@storybook/preset-react-webpack@npm:10.6.6"
   dependencies:
-    "@storybook/core-webpack": "npm:10.6.5"
+    "@storybook/core-webpack": "npm:10.6.6"
     "@storybook/react-docgen-typescript-plugin": "npm:1.0.6--canary.9.0c3f3b7.0"
     "@types/semver": "npm:^7.7.1"
     magic-string: "npm:^1.1.0"
@@ -5555,11 +5608,11 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-    storybook: ^10.6.5
+    storybook: ^10.6.6
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/345d7b4439803120e2d76a2004934000c22b5e0b6e908130f1106a5a20853267fa10d5d93f2e1db2d5a842bac09a71d21d4f3347225e2034ec9e30ccfdd63fa5
+  checksum: 10/18b884d09845083ca64b103810305b21b4b5171141be6c8e4977ab4feb6b152523fa3069621234cb6243c08597b45991109f4821fbdc1153c0e2d46edc9a8a73
   languageName: node
   linkType: hard
 
@@ -5581,49 +5634,49 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/react-dom-shim@npm:10.6.5":
-  version: 10.6.5
-  resolution: "@storybook/react-dom-shim@npm:10.6.5"
+"@storybook/react-dom-shim@npm:10.6.6":
+  version: 10.6.6
+  resolution: "@storybook/react-dom-shim@npm:10.6.6"
   peerDependencies:
     "@types/react": ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     "@types/react-dom": ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-    storybook: ^10.6.5
+    storybook: ^10.6.6
   peerDependenciesMeta:
     "@types/react":
       optional: true
     "@types/react-dom":
       optional: true
-  checksum: 10/8cc57d9abd662addb416358de884be4a722308c8fc6db1623bd9303ea783740d3910c2d4dac965b221f20d2a6c6f0fdb7bcb4ed17ea61b6c7a08176526e0121f
+  checksum: 10/1f17229de441960da1f79b3cb0e0d12e6ba5ad0eb6c93687ffff30f70b6a9be8002d13e4a5308854631551aceb44fbefc9bf58776bd610403dcc603df5bd964f
   languageName: node
   linkType: hard
 
-"@storybook/react-webpack5@npm:10.6.5":
-  version: 10.6.5
-  resolution: "@storybook/react-webpack5@npm:10.6.5"
+"@storybook/react-webpack5@npm:10.6.6":
+  version: 10.6.6
+  resolution: "@storybook/react-webpack5@npm:10.6.6"
   dependencies:
-    "@storybook/builder-webpack5": "npm:10.6.5"
-    "@storybook/preset-react-webpack": "npm:10.6.5"
-    "@storybook/react": "npm:10.6.5"
+    "@storybook/builder-webpack5": "npm:10.6.6"
+    "@storybook/preset-react-webpack": "npm:10.6.6"
+    "@storybook/react": "npm:10.6.6"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-    storybook: ^10.6.5
+    storybook: ^10.6.6
     typescript: ">= 4.9.x"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/ac5df12e943a5049494a25ab40872290d70de63a2453e73a9200ee633ccb78efe384ef80adba28ae1d227d630ec6cb67ea5bf09894e3f6b7f41c08604616136a
+  checksum: 10/429dfbb242c71794b615e06336fdf9771533329e2907d67b4ef46560a4bbcb467c0f3bb634e5ad4a1e539c801870d5f62afb0c85aa39ae4ddee0062306b1e671
   languageName: node
   linkType: hard
 
-"@storybook/react@npm:10.6.5":
-  version: 10.6.5
-  resolution: "@storybook/react@npm:10.6.5"
+"@storybook/react@npm:10.6.6":
+  version: 10.6.6
+  resolution: "@storybook/react@npm:10.6.6"
   dependencies:
     "@storybook/global": "npm:^5.0.0"
-    "@storybook/react-dom-shim": "npm:10.6.5"
+    "@storybook/react-dom-shim": "npm:10.6.6"
     react-docgen: "npm:^8.0.2"
     react-docgen-typescript: "npm:^2.2.2"
   peerDependencies:
@@ -5631,7 +5684,7 @@ __metadata:
     "@types/react-dom": ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-    storybook: ^10.6.5
+    storybook: ^10.6.6
     typescript: ">= 4.9.x"
   peerDependenciesMeta:
     "@types/react":
@@ -5640,7 +5693,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10/4987f20043c6bcfb372334a616cb18fa567d24ab4391c54100ca9f926ebbf9e278cc55acd09363fdae68b4ee57c82d7bec0da068b56c19ba055389afeb13bdb7
+  checksum: 10/b73ce8862ec467fd8e5a15b6ef895ed6ccdde05bdb5e984a41f9934ea92b868569b89e9b0a2c92f2f12a2ec23a9e4874af5f5336d1d2c736768c531ce29b334c
   languageName: node
   linkType: hard
 
@@ -8709,15 +8762,15 @@ __metadata:
     "@lichtblick/suite": "workspace:*"
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
-    "@mcap/core": "npm:2.2.0"
+    "@mcap/core": "npm:2.4.0"
     "@playwright/test": "npm:1.65.0"
-    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.3"
     "@testing-library/react": "npm:16.0.0"
     "@types/react": "npm:18.3.12"
     "@types/react-dom": "npm:18.3.0"
     chart.js: "npm:4.4.8"
     clean-webpack-plugin: "npm:4.0.0"
-    electron: "npm:45.1.0"
+    electron: "npm:45.2.3"
     html-webpack-plugin: "npm:5.6.0"
     mathjs: "npm:15.2.0"
     react: "npm:18.3.1"
@@ -9363,22 +9416,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:11.5.6":
-  version: 11.5.6
-  resolution: "chromatic@npm:11.5.6"
+"chromatic@npm:18.12.1":
+  version: 18.12.1
+  resolution: "chromatic@npm:18.12.1"
+  dependencies:
+    semver: "npm:^7.3.5"
   peerDependencies:
     "@chromatic-com/cypress": ^0.*.* || ^1.0.0
     "@chromatic-com/playwright": ^0.*.* || ^1.0.0
+    "@chromatic-com/vitest": ^0.*.* || ^1.0.0
+  dependenciesMeta:
+    "@sentry/cli":
+      built: true
+    esbuild:
+      built: true
   peerDependenciesMeta:
     "@chromatic-com/cypress":
       optional: true
     "@chromatic-com/playwright":
       optional: true
+    "@chromatic-com/vitest":
+      optional: true
   bin:
-    chroma: dist/bin.js
-    chromatic: dist/bin.js
-    chromatic-cli: dist/bin.js
-  checksum: 10/7ca4c0ff3bcba5f721c0cde4f68283709e1d91e63b621df35757ca7d9cbd25823c5a6ef043335508778d56f82b9b649bfbf07b8aebb4a09a35b098ab47943fae
+    chroma: dist/bin.cjs
+    chromatic: dist/bin.cjs
+    chromatic-cli: dist/bin.cjs
+  checksum: 10/80aac15d79fd3bb49cee359fed3e3fa8f5eda46bd889c00aaa30c34f5aa28929434ecb3374be31d552f8b857394287c8e6912eff04d8cbe227a57ce1cc780fd7
   languageName: node
   linkType: hard
 
@@ -11080,9 +11143,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:45.1.0":
-  version: 45.1.0
-  resolution: "electron@npm:45.1.0"
+"electron@npm:45.2.3":
+  version: 45.2.3
+  resolution: "electron@npm:45.2.3"
   dependencies:
     "@electron-internal/extract-zip": "npm:^1.0.1"
     "@electron/get": "npm:^5.0.0"
@@ -11090,7 +11153,7 @@ __metadata:
   bin:
     electron: cli.js
     install-electron: install.js
-  checksum: 10/6bf24bdb34bf8919c496782ebef09b916dc1b50bc7dac1f08be07c64364998a64d716c35b56d6f789994de371bf8f9d5d3364b2b67db877aa2f326eeb940bf4d
+  checksum: 10/1440c2fb77b5a8ca8e24b27ad422839ae8c297e589bcd7e2da2dfed44031d90d208d32c90af314eeaa78233c34ab5594d178d63cdda904d3b68fd2e20a56b5bb
   languageName: node
   linkType: hard
 
@@ -11872,32 +11935,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-prettier@npm:5.5.4":
-  version: 5.5.4
-  resolution: "eslint-plugin-prettier@npm:5.5.4"
-  dependencies:
-    prettier-linter-helpers: "npm:^1.0.0"
-    synckit: "npm:^0.11.7"
-  peerDependencies:
-    "@types/eslint": ">=8.0.0"
-    eslint: ">=8.0.0"
-    eslint-config-prettier: ">= 7.0.0 <10.0.0 || >=10.1.0"
-    prettier: ">=3.0.0"
-  peerDependenciesMeta:
-    "@types/eslint":
-      optional: true
-    eslint-config-prettier:
-      optional: true
-  checksum: 10/5e39e3b7046d4ba0e1111cc2048630ee9d0aa5d5bb00d6230bef56893fdae37cbe2261babfb26db350cc2ad517c81d283b3f8b04cfee4e5aef7cd4bee72f90de
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-prettier@npm:^5":
-  version: 5.5.6
-  resolution: "eslint-plugin-prettier@npm:5.5.6"
+"eslint-plugin-prettier@npm:5.5.7, eslint-plugin-prettier@npm:^5":
+  version: 5.5.7
+  resolution: "eslint-plugin-prettier@npm:5.5.7"
   dependencies:
     prettier-linter-helpers: "npm:^1.0.1"
-    synckit: "npm:^0.11.13"
+    synckit: "npm:^0.12.3"
   peerDependencies:
     "@types/eslint": ">=8.0.0"
     eslint: ">=8.0.0"
@@ -11908,7 +11951,7 @@ __metadata:
       optional: true
     eslint-config-prettier:
       optional: true
-  checksum: 10/18a0189e084dd5f1e4e3944a8ff89f20d69c14f100965033a94edd8de16fb7abdcbf226fbc40f27b7ac6cfdb779065272dd8a9e6ca34ed86a59d895e630bd48b
+  checksum: 10/c75f9cc10d41a76c29ba28b7cd660cec151929abcb256894b4a5816d38541379d80daf32c7c922803f46fb17d6e0d53e27f661f0c6899c0ecfc6e54b98f46fa3
   languageName: node
   linkType: hard
 
@@ -12180,10 +12223,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:5.0.1":
-  version: 5.0.1
-  resolution: "eventemitter3@npm:5.0.1"
-  checksum: 10/ac6423ec31124629c84c7077eed1e6987f6d66c31cf43c6fcbf6c87791d56317ce808d9ead483652436df171b526fc7220eccdc9f3225df334e81582c3cf7dd5
+"eventemitter3@npm:5.0.4, eventemitter3@npm:^5.0.0, eventemitter3@npm:^5.0.1, eventemitter3@npm:^5.0.4":
+  version: 5.0.4
+  resolution: "eventemitter3@npm:5.0.4"
+  checksum: 10/54f5c8c543650d65f92d03dbef1bb73a682a920490c44699ad8f863a6b19bbca42fb7409aa09ca09cb98a44149d9a7bc1dffd55ca88a740bd928c7be0ad666a0
   languageName: node
   linkType: hard
 
@@ -12191,13 +12234,6 @@ __metadata:
   version: 4.0.7
   resolution: "eventemitter3@npm:4.0.7"
   checksum: 10/8030029382404942c01d0037079f1b1bc8fed524b5849c237b80549b01e2fc49709e1d0c557fa65ca4498fc9e24cff1475ef7b855121fcc15f9d61f93e282346
-  languageName: node
-  linkType: hard
-
-"eventemitter3@npm:^5.0.0, eventemitter3@npm:^5.0.1, eventemitter3@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "eventemitter3@npm:5.0.4"
-  checksum: 10/54f5c8c543650d65f92d03dbef1bb73a682a920490c44699ad8f863a6b19bbca42fb7409aa09ca09cb98a44149d9a7bc1dffd55ca88a740bd928c7be0ad666a0
   languageName: node
   linkType: hard
 
@@ -13471,7 +13507,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"heap-js@npm:2.7.1, heap-js@npm:^2.2.0":
+"heap-js@npm:2.7.1, heap-js@npm:^2.7.1":
   version: 2.7.1
   resolution: "heap-js@npm:2.7.1"
   checksum: 10/da26838c82e849a94ba8d61ec255bcb517d0bac0d8452cbe7ac6b8eadbcbec2e7f4e60de498838293998e758363930276f328685794b2220f3b469e265991253
@@ -13843,15 +13879,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:26.3.1":
-  version: 26.3.1
-  resolution: "i18next@npm:26.3.1"
+"i18next@npm:26.7.2":
+  version: 26.7.2
+  resolution: "i18next@npm:26.7.2"
   peerDependencies:
-    typescript: ^5 || ^6
+    typescript: ^5 || ^6 || ^7
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/d0d86873f3d63b2c4983963944b154cbcfda13d6f26a77193c8893307bde97c7032605238b98115a41b20e4b37cee342bb662eab0f02a0532a8c65b0fbb2e02a
+  checksum: 10/43bc0c79b4590108c81887dcf0cf583107bf6052fb7d658281fdabb5a8e7304a1869031acab7dd3cfeb267bb445dfa6f967643a39098666fcfdfcb1d9a494b82
   languageName: node
   linkType: hard
 
@@ -15542,7 +15578,7 @@ __metadata:
     "@octokit/rest": "npm:22.0.1"
     "@playwright/mcp": "npm:0.0.77"
     "@playwright/test": "npm:1.65.0"
-    "@storybook/react-webpack5": "npm:10.6.5"
+    "@storybook/react-webpack5": "npm:10.6.6"
     "@types/babel__core": "npm:^7.20.3"
     "@types/babel__preset-env": "npm:^7.10.0"
     "@types/case-sensitive-paths-webpack-plugin": "npm:2.1.9"
@@ -15559,7 +15595,7 @@ __metadata:
     babel-plugin-transform-import-meta: "npm:2.2.1"
     cross-env: "npm:10.0.0"
     depcheck: "npm:1.4.7"
-    electron: "npm:45.1.0"
+    electron: "npm:45.2.3"
     electron-builder: "npm:26.18.0"
     eslint: "npm:9.38.0"
     eslint-config-prettier: "npm:9.1.0"
@@ -15570,7 +15606,7 @@ __metadata:
     eslint-plugin-filenames: "npm:1.3.2"
     eslint-plugin-import: "npm:2.31.0"
     eslint-plugin-jest: "npm:29.0.1"
-    eslint-plugin-prettier: "npm:5.5.4"
+    eslint-plugin-prettier: "npm:5.5.7"
     eslint-plugin-react: "npm:7.37.5"
     eslint-plugin-react-hooks: "npm:4.6.0"
     eslint-plugin-storybook: "npm:10.6.5"
@@ -15588,7 +15624,7 @@ __metadata:
     rehype-raw: "npm:7.0.0"
     rimraf: "npm:6.0.1"
     semver: "npm:7.7.2"
-    storybook: "npm:10.6.5"
+    storybook: "npm:10.6.6"
     ts-loader: "npm:9.5.4"
     ts-node: "npm:10.9.2"
     ts-unused-exports: "npm:11.0.1"
@@ -16715,13 +16751,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moize@npm:6.1.6":
-  version: 6.1.6
-  resolution: "moize@npm:6.1.6"
+"moize@npm:6.1.7":
+  version: 6.1.7
+  resolution: "moize@npm:6.1.7"
   dependencies:
     fast-equals: "npm:^3.0.1"
     micro-memoize: "npm:^4.1.2"
-  checksum: 10/3d86b850d4b2dc5c1ae7b89cf99f97a9f3aa86a0af6ab4075c113d45babec6aec8630b95e295121bfb5ffcda1ff7a6b8c4d00fb36977b3a90da1b07ddf6f19b7
+  checksum: 10/f59af26da51fd42235519492e895f4caa0b8e6e1c1970423c64bfa1d4af9b953e500bbf37d80b30bdc26fe172091cf502d9cddaeb75738cfe7f4b523f9075921
   languageName: node
   linkType: hard
 
@@ -18095,7 +18131,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier-linter-helpers@npm:^1.0.0, prettier-linter-helpers@npm:^1.0.1":
+"prettier-linter-helpers@npm:^1.0.1":
   version: 1.0.1
   resolution: "prettier-linter-helpers@npm:1.0.1"
   dependencies:
@@ -18744,13 +18780,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-refresh-typescript@npm:2.0.10":
-  version: 2.0.10
-  resolution: "react-refresh-typescript@npm:2.0.10"
+"react-refresh-typescript@npm:2.0.12":
+  version: 2.0.12
+  resolution: "react-refresh-typescript@npm:2.0.12"
   peerDependencies:
-    react-refresh: 0.10.x || 0.11.x || 0.12.x || 0.13.x || 0.14.x || 0.15.x || 0.16.x || 0.17.x
-    typescript: ^4.8 || ^5.0
-  checksum: 10/051feb99c7be74e189272ab8ac52827dcb482dae1852d35eb4c7dfa688c14f796cacd8b482a45dee3954bb660805da47f1411af1f3b5e695587a71d5c2718a82
+    react-refresh: 0.10.x || 0.11.x || 0.12.x || 0.13.x || 0.14.x || 0.15.x || 0.16.x || 0.17.x || 0.18.x || 0.19.x
+    typescript: ^4.8 || ^5.0 || ^6.0
+  checksum: 10/b94fbce78c45045a46ff5ec1e30af0d7085228da4bf6717aeb91bf2eee1dcb45d04559d7c54976538208fe0cc8dc4a1d0fed454c4da7618ae0d4311bb7ddafdf
   languageName: node
   linkType: hard
 
@@ -18941,16 +18977,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:4.7.0":
-  version: 4.7.0
-  resolution: "readable-stream@npm:4.7.0"
+"readable-stream@npm:4.8.0":
+  version: 4.8.0
+  resolution: "readable-stream@npm:4.8.0"
   dependencies:
     abort-controller: "npm:^3.0.0"
     buffer: "npm:^6.0.3"
     events: "npm:^3.3.0"
     process: "npm:^0.11.10"
     string_decoder: "npm:^1.3.0"
-  checksum: 10/bdf096c8ff59452ce5d08f13da9597f9fcfe400b4facfaa88e74ec057e5ad1fdfa140ffe28e5ed806cf4d2055f0b812806e962bca91dce31bc4cef08e53be3a4
+  checksum: 10/f576d061e4600db2f214451dc079d06ce64b71a9aeb7c8c1c70aa2c798888b1791f7c3012817bbca7c19bc081b933ce5b0ee8076bac95d83e18cac3cdb3d69a6
   languageName: node
   linkType: hard
 
@@ -20379,9 +20415,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"storybook@npm:10.6.5":
-  version: 10.6.5
-  resolution: "storybook@npm:10.6.5"
+"storybook@npm:10.6.6":
+  version: 10.6.6
+  resolution: "storybook@npm:10.6.6"
   dependencies:
     "@storybook/global": "npm:^5.0.0"
     "@storybook/icons": "npm:^2.0.2"
@@ -20413,7 +20449,7 @@ __metadata:
       optional: true
   bin:
     storybook: ./dist/bin/dispatcher.js
-  checksum: 10/2e3b35d2bca646b0a765d9fb8ca8f21a63b9c7abd47d72d2c57f00a50cd7e97fc2b2769a32e5d1c145fd4f91c92421bdec4d9f4efef8ca2fbc60e65b3a453afd
+  checksum: 10/6c963f087c99593074340ec8e2554fce874c58131f1c83829059bdbc95893427f4c4d644bbceb5c3ef271ffa30722d9661efb3266366d906b8a90c045fafa192
   languageName: node
   linkType: hard
 
@@ -20771,12 +20807,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"synckit@npm:^0.11.13, synckit@npm:^0.11.7, synckit@npm:^0.11.8":
+"synckit@npm:^0.11.8":
   version: 0.11.13
   resolution: "synckit@npm:0.11.13"
   dependencies:
     "@pkgr/core": "npm:^0.3.6"
   checksum: 10/188544a829dbd38abd144281960835c1f8027aaa495b7c40d39ebf0c1c63a4a41c0edc42818b7ada9b5c0c15fba2f625b472220d128798fe98f9181fed84e6a2
+  languageName: node
+  linkType: hard
+
+"synckit@npm:^0.12.3":
+  version: 0.12.3
+  resolution: "synckit@npm:0.12.3"
+  dependencies:
+    "@dual-bundle/import-meta-resolve": "npm:^4.2.1"
+    "@pkgr/core": "npm:^0.3.6"
+  checksum: 10/0421a933e0dee17ab6c39520401343cda97c4bb1630a3bb6850fddc0a8339510fa647c58ba0049bfe2177b215b01b1f52441356e4a76643c24beadc2f4564ad9
   languageName: node
   linkType: hard
 
@@ -21270,7 +21316,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.8.1, tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.5.0, tslib@npm:^2.8.1":
+"tslib@npm:2.8.1, tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.4.0, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7
