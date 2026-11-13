@@ -55,7 +55,7 @@
     "@lichtblick/wasm-lz4": "1.0.0",
     "@lichtblick/xmlrpc": "1.0.0",
     "@mcap/core": "2.4.0",
-    "@mui/icons-material": "7.3.8",
+    "@mui/icons-material": "9.5.0",
     "@mui/material": "7.2.0",
     "@mui/x-data-grid": "7.24.1",
     "@opentelemetry/api": "1.9.1",
