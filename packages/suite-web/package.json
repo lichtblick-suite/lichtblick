@@ -13,7 +13,7 @@
     "@lichtblick/theme": "workspace:*",
     "@lichtblick/tsconfig": "1.1.2",
     "@mui/material": "7.2.0",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.6.3",
     "@storybook/react-webpack5": "10.6.6",
     "@testing-library/react": "16.0.0",
     "clean-webpack-plugin": "4.0.0",

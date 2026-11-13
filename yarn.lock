@@ -3750,7 +3750,7 @@ __metadata:
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@mcap/core": "npm:2.4.0"
-    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.3"
     "@storybook/react-webpack5": "npm:10.6.6"
     "@types/mock-fs": "npm:4.13.4"
     "@types/plist": "npm:^3.0.3"
@@ -3802,7 +3802,7 @@ __metadata:
     "@lichtblick/theme": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@mui/material": "npm:7.2.0"
-    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.3"
     "@storybook/react-webpack5": "npm:10.6.6"
     "@testing-library/react": "npm:16.0.0"
     clean-webpack-plugin: "npm:4.0.0"
@@ -5345,9 +5345,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pmmmwh/react-refresh-webpack-plugin@npm:0.6.2":
-  version: 0.6.2
-  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.6.2"
+"@pmmmwh/react-refresh-webpack-plugin@npm:0.6.3":
+  version: 0.6.3
+  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.6.3"
   dependencies:
     anser: "npm:^2.1.1"
     core-js-pure: "npm:^3.23.3"
@@ -5361,7 +5361,7 @@ __metadata:
     sockjs-client: ^1.4.0
     type-fest: ">=0.17.0 <6.0.0"
     webpack: ^5.0.0
-    webpack-dev-server: ^4.8.0 || 5.x
+    webpack-dev-server: ^4.8.0 || 5.x || 6.x
     webpack-hot-middleware: 2.x
     webpack-plugin-serve: 1.x
   peerDependenciesMeta:
@@ -5377,7 +5377,7 @@ __metadata:
       optional: true
     webpack-plugin-serve:
       optional: true
-  checksum: 10/157a20464b0bdca39b31e09450f6ce1d91cbe32bcce882a02df797482b0226247d13e5a2c750a3fb2e2758bffc25d49a468b33b66d8364aa4e1ed785596453c8
+  checksum: 10/fc357103a822c22312d5521f601ab88606b6207ff40f3d748a2e74c1e58841b467ceb20120f57cba6385325559d99db0311ee179ffc70a463bf4ce45511c3321
   languageName: node
   linkType: hard
 
@@ -8710,7 +8710,7 @@ __metadata:
     "@lichtblick/suite-base": "workspace:*"
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@playwright/test": "npm:1.65.0"
-    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.2"
+    "@pmmmwh/react-refresh-webpack-plugin": "npm:0.6.3"
     "@testing-library/react": "npm:16.0.0"
     "@types/react": "npm:18.3.12"
     "@types/react-dom": "npm:18.3.0"
