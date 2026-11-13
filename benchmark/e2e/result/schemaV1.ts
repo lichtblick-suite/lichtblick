@@ -10,6 +10,7 @@
 import {
   BYTES_PER_MIB,
   DROPPED_RECORDS_METRIC,
+  INGESTED_DROPPED_RECORDS_METRIC,
   HOST_CPU_SOURCES,
   MIN_SLOPE_POINTS,
   MIN_SLOPE_WINDOW_MS,
@@ -326,7 +327,7 @@ export type BuildResultV1Input<TRun extends PersistedRunInfoV1 = RunInfoV1> = {
   run: TRun;
   /** Every record drained from `window.lichtblickTelemetry` (page and bridged worker realms). */
   pageRecords: readonly TelemetryRecord[];
-  /** Sum of `TelemetryBatch.dropped` over all drains. */
+  /** Sum of `TelemetryBatch.dropped` over all drains: the drained sink's own drops. */
   drainedDropped: number;
   /** `TelemetryBatch.realm` of the drained sink. */
   drainRealm: string;
@@ -424,11 +425,13 @@ export function computeSequenceGaps(records: readonly TelemetryRecord[]): Record
 }
 
 /**
- * Drops per realm: the max `telemetry.droppedRecords{realm}` value per realm. The counters are
- * cumulative, and a worker realm can be reported both by the worker's own sink and by the
- * renderer's `ingest()`, so the max per realm (not the sum) avoids double counting. Drained drop
- * counts not covered by those counters (e.g. drops after the last publish) are attributed to the
- * drained sink's realm.
+ * Drops per realm (label `realm`): the max of that realm's own cumulative
+ * `telemetry.droppedRecords` and the `telemetry.ingestedDroppedRecords` the receiving sink counted
+ * for it. Both count the same drops (the second is the fallback when the producer's last own
+ * sample is lost), so they are combined by max, not sum. The drained sink's own drop count
+ * (`drainedDropped`, the sum of `TelemetryBatch.dropped`, which never includes ingested drops)
+ * covers its own drops after its last publish: it raises the drained realm's entry when larger.
+ * The total is the sum over realms.
  */
 export function computeDropped(
   samples: readonly TelemetrySample[],
@@ -438,17 +441,15 @@ export function computeDropped(
   const dropped: Record<string, number> = {};
   for (const sample of samples) {
     const realm = sample.labels?.realm;
-    if (sample.metric !== DROPPED_RECORDS_METRIC || realm == undefined) {
+    const isDropCounter =
+      sample.metric === DROPPED_RECORDS_METRIC || sample.metric === INGESTED_DROPPED_RECORDS_METRIC;
+    if (!isDropCounter || realm == undefined) {
       continue;
     }
     dropped[realm] = Math.max(dropped[realm] ?? 0, sample.value);
   }
-  let counted = 0;
-  for (const value of Object.values(dropped)) {
-    counted += value;
-  }
-  if (drainedDropped > counted) {
-    dropped[drainRealm] = (dropped[drainRealm] ?? 0) + drainedDropped - counted;
+  if (drainedDropped > (dropped[drainRealm] ?? 0)) {
+    dropped[drainRealm] = drainedDropped;
   }
   return dropped;
 }

@@ -154,8 +154,11 @@ pid, platform, scenarioId, realm, reason, iteratorId`. There are at most 64 seri
   Records that break these rules are rejected and counted in `telemetry.rejectedRecords{reason}`.
 - **Buffer and drops.** Each sink is a ring buffer with 8192 records. On overflow the oldest
   records are dropped and counted in `telemetry.droppedRecords{realm}` and in
-  `TelemetryBatch.dropped`. These counts end up in the result's `dropped`, taking the max
-  per realm: a worker realm can be reported both by its own sink and by the renderer's ingest.
+  `TelemetryBatch.dropped`, which count only that sink's own drops. Drops reported by batches the
+  renderer ingests from a worker go to `telemetry.ingestedDroppedRecords{realm=<worker realm>}`
+  instead. The result's `dropped` takes, per realm, the max of the two counters (they count the
+  same drops), raises the renderer's entry to its drained own-drop total when larger, and sums
+  over realms.
 - **Activation.** Telemetry is installed only by the benchmark app. `?telemetry=off` disables it
   (telemetry-off runs). The legacy frame-time hook
   (`window.recordFrameTimes`) works with telemetry on or off.

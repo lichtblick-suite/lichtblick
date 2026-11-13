@@ -186,35 +186,64 @@ describe("computeSequenceGaps", () => {
 });
 
 describe("computeDropped", () => {
-  it("uses the droppedRecords counters per realm and attributes the remainder to the drained realm", () => {
-    // Given a worker drop counter of 3 and 5 total drained drops
+  it("should use the last droppedRecords value per realm and add the drained sink's own drops", () => {
+    // Given a worker drop counter of 3 and 2 own drops of the drained renderer sink
     const samples = [
       sample({ metric: "telemetry.droppedRecords", value: 1, labels: { realm: "worker:1" } }),
       sample({ metric: "telemetry.droppedRecords", value: 3, labels: { realm: "worker:1" } }),
     ];
 
     // When
-    const dropped = computeDropped(samples, 5, "renderer");
+    const dropped = computeDropped(samples, 2, "renderer");
 
     // Then
     expect(dropped).toEqual({ "worker:1": 3, renderer: 2 });
   });
 
-  it("should not double count worker drops reported by the worker sink and the renderer ingest counter", () => {
-    // Given the worker's own droppedRecords counter (realm worker:1) and the renderer's ingest
-    // counter for the same realm; the renderer's drained drop total already includes them
+  it("should take the max of a realm's own drop counter and the renderer's ingested drop counter", () => {
+    // Given the worker's own droppedRecords counter (realm worker:1), the renderer's
+    // ingestedDroppedRecords for the same realm (larger: the worker's last sample was lost) and
+    // 1 own drop of the renderer, which is all drainedDropped counts
     const labels = { realm: "worker:1" };
     const samples = [
       sample({ realm: "worker:1", metric: "telemetry.droppedRecords", value: 4, labels }),
-      sample({ realm: "renderer", metric: "telemetry.droppedRecords", value: 6, labels }),
+      sample({ realm: "renderer", metric: "telemetry.ingestedDroppedRecords", value: 6, labels }),
       sample({ metric: "telemetry.droppedRecords", value: 1, labels: { realm: "renderer" } }),
     ];
 
     // When
-    const dropped = computeDropped(samples, 7, "renderer");
+    const dropped = computeDropped(samples, 1, "renderer");
 
     // Then
     expect(dropped).toEqual({ "worker:1": 6, renderer: 1 });
+  });
+
+  it("should not double count a worker realm whose own and ingested drop counters agree", () => {
+    // Given
+    const labels = { realm: "worker:1" };
+    const samples = [
+      sample({ realm: "worker:1", metric: "telemetry.droppedRecords", value: 5, labels }),
+      sample({ realm: "renderer", metric: "telemetry.ingestedDroppedRecords", value: 5, labels }),
+    ];
+
+    // When
+    const dropped = computeDropped(samples, 0, "renderer");
+
+    // Then
+    expect(dropped).toEqual({ "worker:1": 5 });
+  });
+
+  it("should raise the drained realm to the drained drop count when it exceeds its last counter", () => {
+    // Given the renderer published 2 own drops and dropped 3 more after its last publish
+    const samples = [
+      sample({ metric: "telemetry.droppedRecords", value: 2, labels: { realm: "renderer" } }),
+    ];
+
+    // When
+    const dropped = computeDropped(samples, 5, "renderer");
+
+    // Then
+    expect(dropped).toEqual({ renderer: 5 });
   });
 
   it("should ignore droppedRecords samples without a realm label and report nothing without drops", () => {
