@@ -49,9 +49,13 @@ const MIN_CACHE_PER_SOURCE_BYTES = 1024 * 1024 * 10; // 10 MiB
 // the per-source cache budget.
 const DEFAULT_READ_AHEAD_BUFFER_BYTES = 1024 * 1024 * 2; // 2 MiB
 
+// Allow a genuinely disjoint seek/scrub read to open its own connection instead of tearing down
+// an in-flight (possibly still-useful) read-ahead connection -- see CachedFilelike.ts.
+const DEFAULT_MAX_CONCURRENT_CONNECTIONS = 2;
+
 // Defaults for the optional MultiSourceHydrationOptions overrides (see shared/types.ts for the
 // rationale behind each knob). Heuristic; tune against real datasets.
-const DEFAULT_INIT_CONCURRENCY = 4;
+const DEFAULT_INIT_CONCURRENCY = 8;
 // Raising the resident-reader budget made multi-file OOMs worse because evicted sources must fully
 // rebuild their reader, cache, and parsed channels on re-hydration.
 // Keep the smaller defaults until eviction can preserve the cheap per-source connection/cache
@@ -119,6 +123,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
         (numSources > 1
           ? Math.min(DEFAULT_READ_AHEAD_BUFFER_BYTES, Math.floor(perSourceCache / 4))
           : undefined);
+      const maxConcurrentConnections: number =
+        this.dataSource.maxConcurrentConnections ?? DEFAULT_MAX_CONCURRENT_CONNECTIONS;
 
       sources = this.dataSource.urls.map(
         (url) =>
@@ -128,6 +134,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
             cacheSizeInBytes: perSourceCache,
             readAheadEnabled,
             readAheadBufferBytes,
+            maxConcurrentConnections,
             pool: this.#pool,
           } as P),
       );

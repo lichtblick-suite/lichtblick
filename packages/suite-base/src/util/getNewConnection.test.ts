@@ -295,6 +295,28 @@ describe("getNewConnection", () => {
           });
           expect(newConnection).toEqual({ start: 50, end: 100 });
         });
+
+        it("caps the read-ahead at READ_AHEAD_BUFFER_SIZE instead of downloading the whole remote file, when the file is bigger than the buffer", () => {
+          // GIVEN: a cache large enough to hold the whole (large) file -- the "unlimited cache"
+          // scenario that a single remote MCAP file smaller than the default 500 MiB cache hits in
+          // practice.
+          const largeFileSize = 170 * 1024 * 1024; // 170 MB, e.g. a real MCAP file
+          // WHEN: a read request arrives whose missing range reaches the end of what was asked.
+          const newConnection = getNewConnection({
+            currentRemainingRange: undefined,
+            readRequestRange: { start: 0, end: 1024 },
+            downloadedRanges: [],
+            lastResolvedCallbackEnd: undefined,
+            maxRequestSize: 500 * 1024 * 1024, // >= fileSize
+            fileSize: largeFileSize,
+            continueDownloadingThreshold: 5,
+          });
+          // THEN: the connection is capped at READ_AHEAD_BUFFER_SIZE (50 MB), not the whole file --
+          // opening a connection for the entire remaining ~170 MB (and then aborting it as soon as
+          // the next small index/footer read arrives) would make S3 start streaming the whole
+          // object for nothing.
+          expect(newConnection).toEqual({ start: 0, end: READ_AHEAD_BUFFER_SIZE });
+        });
       });
     });
 
@@ -352,6 +374,81 @@ describe("getNewConnection", () => {
 
         expect(newConnection).toBeUndefined();
       });
+
+      it("caps the idle read-ahead at READ_AHEAD_BUFFER_SIZE instead of downloading the whole remote file, when the file is bigger than the buffer", () => {
+        // GIVEN: no active connection or read request yet (e.g. right after `open()` resolves the
+        // file size, before the player has asked for the footer/index), and a cache large enough
+        // to hold the whole (large) file.
+        const largeFileSize = 170 * 1024 * 1024; // 170 MB, e.g. a real MCAP file
+        const newConnection = getNewConnection({
+          currentRemainingRange: undefined,
+          readRequestRange: undefined,
+          downloadedRanges: [],
+          lastResolvedCallbackEnd: undefined,
+          maxRequestSize: 500 * 1024 * 1024, // >= fileSize
+          fileSize: largeFileSize,
+          continueDownloadingThreshold: 5,
+        });
+        // THEN: still capped at READ_AHEAD_BUFFER_SIZE, not the whole ~170 MB file.
+        expect(newConnection).toEqual({ start: 0, end: READ_AHEAD_BUFFER_SIZE });
+      });
+
+      it("caps the idle read-ahead from lastResolvedCallbackEnd at READ_AHEAD_BUFFER_SIZE on a large file with an unlimited cache", () => {
+        const largeFileSize = 170 * 1024 * 1024;
+        const lastEnd = 100 * 1024 * 1024;
+        const newConnection = getNewConnection({
+          currentRemainingRange: undefined,
+          readRequestRange: undefined,
+          downloadedRanges: [],
+          lastResolvedCallbackEnd: lastEnd,
+          maxRequestSize: 500 * 1024 * 1024,
+          fileSize: largeFileSize,
+          continueDownloadingThreshold: 5,
+        });
+        // THEN: capped at lastEnd + READ_AHEAD_BUFFER_SIZE, not the remaining ~70 MB of the file.
+        expect(newConnection).toEqual({ start: lastEnd, end: lastEnd + READ_AHEAD_BUFFER_SIZE });
+      });
+
+      it("continues with the next bounded window once the previous one is downloaded", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          readAheadBufferBytes: 30,
+          downloadedRanges: [{ start: 0, end: 30 }],
+        });
+
+        expect(newConnection).toEqual({ start: 30, end: 60 });
+      });
+
+      it("requests a shorter last window up to the end of the file", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          readAheadBufferBytes: 30,
+          downloadedRanges: [{ start: 0, end: 90 }],
+        });
+
+        expect(newConnection).toEqual({ start: 90, end: 100 });
+      });
+
+      it("backfills earlier gaps in bounded windows once everything after the last request is downloaded", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          readAheadBufferBytes: 30,
+          lastResolvedCallbackEnd: 50,
+          downloadedRanges: [{ start: 50, end: 100 }],
+        });
+
+        expect(newConnection).toEqual({ start: 0, end: 30 });
+      });
+
+      it("stops once the whole file is downloaded", () => {
+        const newConnection = getNewConnection({
+          ...defaults,
+          readAheadBufferBytes: 30,
+          downloadedRanges: [{ start: 0, end: 100 }],
+        });
+
+        expect(newConnection).toBeUndefined();
+      });
     });
   });
 
@@ -374,21 +471,23 @@ describe("getNewConnection", () => {
       expect(result).toEqual({ start: 10, end: 20 });
     });
 
-    it("keeps legacy whole-file read-ahead when readAheadEnabled is true", () => {
-      // GIVEN: the same inputs as the lazy-loading case above.
+    it("reads ahead to end of file when readAheadEnabled is true and the file fits within READ_AHEAD_BUFFER_SIZE", () => {
+      // GIVEN: the same inputs as the lazy-loading case above, with a file much smaller than
+      // READ_AHEAD_BUFFER_SIZE (50 MB) -- unlike the large-file cases in the "unlimited cache"
+      // describe block above, capping doesn't change anything observable here.
       // WHEN: read-ahead is enabled.
       const result = getNewConnection({
         currentRemainingRange: undefined,
         readRequestRange: { start: 10, end: 20 },
         downloadedRanges: [],
         lastResolvedCallbackEnd: undefined,
-        maxRequestSize: 100, // >= fileSize -> download to the end of the file
+        maxRequestSize: 100, // >= fileSize -> capped read-ahead reaches end of file anyway
         fileSize: 100,
         continueDownloadingThreshold: 5,
         readAheadEnabled: true,
       });
 
-      // THEN: the legacy whole-file read-ahead range is returned.
+      // THEN: read-ahead reaches the end of the (tiny) file.
       expect(result).toEqual({ start: 10, end: 100 });
     });
 
@@ -623,6 +722,96 @@ describe("getNewConnection", () => {
         start: lastResolvedCallbackEnd,
         end: lastResolvedCallbackEnd + readAheadBufferBytes,
       });
+    });
+  });
+
+  // Tests specific to `additionalRemainingRanges` (multi-connection support, item #9).
+  describe("additionalRemainingRanges (multi-connection)", () => {
+    const defaults = {
+      downloadedRanges: [],
+      lastResolvedCallbackEnd: undefined,
+      maxRequestSize: 10,
+      fileSize: 1000,
+      continueDownloadingThreshold: 5,
+    };
+
+    it("does not start a new connection when an additional connection (not the primary) already covers the request", () => {
+      // GIVEN: the primary connection is far from the request, but a second connection already
+      // overlaps it and is close enough.
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: { start: 900, end: 910 },
+        additionalRemainingRanges: [{ start: 40, end: 60 }],
+        readRequestRange: { start: 40, end: 50 },
+      });
+
+      // THEN: no new connection is needed -- the second connection will serve it.
+      expect(newConnection).toBeUndefined();
+    });
+
+    it("starts a new connection when neither the primary nor any additional connection covers the request", () => {
+      // GIVEN: two existing connections, both far from and non-overlapping with the request.
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: { start: 900, end: 910 },
+        additionalRemainingRanges: [{ start: 800, end: 810 }],
+        readRequestRange: { start: 40, end: 50 },
+      });
+
+      // THEN: a new connection is started for the uncovered range, read-ahead-extended to the
+      // end of the (small, 1000-byte) file since the default 50 MiB read-ahead buffer exceeds it.
+      expect(newConnection).toEqual({ start: 40, end: 1000 });
+    });
+
+    it("does not start a new connection when an additional connection overlaps but the primary does not", () => {
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: undefined,
+        additionalRemainingRanges: [{ start: 40, end: 50 }],
+        readRequestRange: { start: 42, end: 48 },
+      });
+
+      expect(newConnection).toBeUndefined();
+    });
+
+    it("still requires an additional connection to be close enough, not just overlapping", () => {
+      // GIVEN: an additional connection overlaps the missing range, but its start is too far
+      // behind (further than continueDownloadingThreshold) to be considered "good enough".
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: undefined,
+        additionalRemainingRanges: [{ start: 10, end: 100 }],
+        readRequestRange: { start: 40, end: 50 },
+        continueDownloadingThreshold: 5,
+      });
+
+      // THEN: a new connection is still started (10 + 5 < 40), again read-ahead-extended to EOF.
+      expect(newConnection).toEqual({ start: 40, end: 1000 });
+    });
+
+    it("does not trigger idle read-ahead when only an additional connection (no primary) is active", () => {
+      // GIVEN: no read request, no primary connection, but one additional connection is active.
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: undefined,
+        additionalRemainingRanges: [{ start: 100, end: 200 }],
+        readRequestRange: undefined,
+        lastResolvedCallbackEnd: 300,
+      });
+
+      // THEN: idle read-ahead is skipped -- there's already an active connection (just not the
+      // primary one), so `getNewConnectionWithoutExistingConnection` must not run.
+      expect(newConnection).toBeUndefined();
+    });
+
+    it("defaults additionalRemainingRanges to empty, preserving single-connection behavior exactly", () => {
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: { start: 900, end: 910 },
+        readRequestRange: { start: 40, end: 50 },
+      });
+
+      expect(newConnection).toEqual({ start: 40, end: 1000 });
     });
   });
 });

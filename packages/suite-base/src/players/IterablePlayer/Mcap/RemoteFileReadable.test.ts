@@ -8,6 +8,9 @@ const mockOpen = jest.fn().mockResolvedValue(undefined);
 const mockSize = jest.fn().mockReturnValue(1024);
 const mockRead = jest.fn().mockResolvedValue(new Uint8Array([1, 2, 3]));
 const mockClose = jest.fn();
+const mockSetReadAheadBufferBytes = jest.fn();
+const mockPauseIdleReadAhead = jest.fn();
+const mockResumeIdleReadAhead = jest.fn();
 
 jest.mock("@lichtblick/suite-base/util/CachedFilelike", () => {
   return jest.fn().mockImplementation(() => ({
@@ -15,6 +18,9 @@ jest.mock("@lichtblick/suite-base/util/CachedFilelike", () => {
     size: mockSize,
     read: mockRead,
     close: mockClose,
+    setReadAheadBufferBytes: mockSetReadAheadBufferBytes,
+    pauseIdleReadAhead: mockPauseIdleReadAhead,
+    resumeIdleReadAhead: mockResumeIdleReadAhead,
   }));
 });
 
@@ -132,6 +138,45 @@ describe("RemoteFileReadable", () => {
 
       // Then it should delegate to the internal CachedFilelike
       expect(mockClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("startup read-ahead", () => {
+    it("limits read-ahead to 64 KiB and restores the configured value", () => {
+      // Given a reader configured with a 2 MiB read-ahead
+      const readAheadBufferBytes = 2 * 1024 * 1024;
+      const reader = new RemoteFileReadable(testUrl, { readAheadBufferBytes });
+
+      // When limiting for startup and then restoring
+      reader.limitReadAheadForStartup();
+      reader.restoreReadAhead();
+
+      // Then the startup limit is applied first, then the configured value
+      expect(mockSetReadAheadBufferBytes.mock.calls).toEqual([[64 * 1024], [readAheadBufferBytes]]);
+      expect(mockPauseIdleReadAhead).toHaveBeenCalledTimes(1);
+      expect(mockResumeIdleReadAhead).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps a configured read-ahead smaller than the startup limit", () => {
+      // Given a reader configured with a read-ahead below 64 KiB
+      const reader = new RemoteFileReadable(testUrl, { readAheadBufferBytes: 1024 });
+
+      // When limiting for startup
+      reader.limitReadAheadForStartup();
+
+      // Then the smaller configured value is kept
+      expect(mockSetReadAheadBufferBytes).toHaveBeenCalledWith(1024);
+    });
+
+    it("restores the default read-ahead when none was configured", () => {
+      // Given a reader without a configured read-ahead
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When restoring after startup
+      reader.restoreReadAhead();
+
+      // Then CachedFilelike falls back to its own default
+      expect(mockSetReadAheadBufferBytes).toHaveBeenCalledWith(undefined);
     });
   });
 });
