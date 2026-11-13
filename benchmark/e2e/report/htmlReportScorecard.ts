@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 // "Scorecard" (one card per KPI family per platform, `aggregateKpis`) and "By group" (`groupKpis`)
-// sections of the HTML viewer. Colors only where an explicit target exists (stability 100 %);
-// everything else is neutral. Pure; every text is escaped here.
+// sections of the HTML viewer. Colors only where an explicit target exists (stability 100 %,
+// telemetry overhead); everything else is neutral. Pure; every text is escaped here.
 
-import { CPU_SCALE_NOTE, PLATFORM_ORDER } from "./constants";
+import { CPU_SCALE_NOTE, MEM_NOT_MEASURED, PLATFORM_ORDER, VERDICT_DISPLAY } from "./constants";
 import type { Tone } from "./htmlReport.types";
 import { cell, escapeHtml, fmtNumber, num, renderTable } from "./htmlReportFormat";
 import { LOW_FPS_WARNING, MIN_SLOPE_WINDOW_MS } from "../result/constants";
@@ -15,6 +15,8 @@ import type {
   KpiAggregateV1,
   KpiRun,
   KpiRunRef,
+  OverheadKpiInput,
+  OverheadWorstV1,
   PlatformScorecardV1,
 } from "../result/kpis.types";
 import type { BenchmarkPlatform } from "../result/schemaV1";
@@ -153,6 +155,51 @@ function renderCostCard({ renderCostByPanelType }: PlatformScorecardV1): Card {
   };
 }
 
+function overheadCard({ overhead }: PlatformScorecardV1): Card {
+  if (overhead == undefined) {
+    return {
+      title: "Telemetry overhead",
+      headline: "—",
+      lines: [`<span class="muted">no overhead A/B report for this platform</span>`],
+    };
+  }
+  const { worstCpuRelative: cpu, worstMemMiB: mem, targets } = overhead;
+  const display = VERDICT_DISPLAY[overhead.verdict];
+  const { toggle, relaunch } = overhead.cpuVerdictSources;
+  const cpuSources = `CPU from toggle ${toggle} / relaunch ${relaunch}`;
+  const memNote =
+    overhead.memNotMeasuredReports > 0
+      ? ` · ${overhead.memNotMeasuredReports} ${MEM_NOT_MEASURED} (method toggle)`
+      : "";
+  return {
+    title: "Telemetry overhead",
+    headline: escapeHtml(display.label),
+    lines: [
+      `worst CPU Δ CI95 upper: ${worstOverheadText(cpu, 100, 2, "%")} · target ≤ ${fmtNumber(targets.cpuDeltaRelativeMax * 100, 0)} %`,
+      `worst memory Δ CI95 upper: ${worstOverheadText(mem, 1, 1, "MiB")} · target ≤ ${fmtNumber(targets.memDeltaMiBMax, 0)} MiB${escapeHtml(memNote)}`,
+      `<span class="muted">${overhead.reports} scenario(s) · ≥ ${overhead.minPairs} pair(s) / quartet(s) each · ${escapeHtml(cpuSources)} · <a href="#telemetry-overhead">details</a></span>`,
+    ],
+    tone: display.tone,
+  };
+}
+
+/** `<b>+1.50 %</b> (median +1.00 %, scenario)` of the worst overhead scenario. */
+function worstOverheadText(
+  worst: OverheadWorstV1 | undefined,
+  scale: number,
+  digits: number,
+  unit: string,
+): string {
+  if (worst == undefined) {
+    return "<b>—</b>";
+  }
+  const scaledText = (value: number): string =>
+    escapeHtml(`${fmtNumber(value * scale, digits)} ${unit}`);
+  const upper = `<b>${scaledText(worst.ciUpper)}</b>`;
+  const median = worst.median == undefined ? "" : `median ${scaledText(worst.median)}, `;
+  return `${upper} (${median}${escapeHtml(worst.scenarioId)})`;
+}
+
 const CARDS: ReadonlyArray<(scorecard: PlatformScorecardV1) => Card> = [
   stabilityCard,
   memoryCard,
@@ -161,12 +208,18 @@ const CARDS: ReadonlyArray<(scorecard: PlatformScorecardV1) => Card> = [
   startupCard,
   throughputCard,
   renderCostCard,
+  overheadCard,
 ];
 
-/** Platforms with telemetry-on runs, electron first. */
-function shownPlatforms(runs: readonly KpiRun[]): BenchmarkPlatform[] {
-  return PLATFORM_ORDER.filter((platform) =>
-    runs.some((run) => run.result.run.platform === platform && run.result.run.telemetryEnabled),
+/** Platforms with telemetry-on runs or overhead reports, electron first. */
+function shownPlatforms(
+  runs: readonly KpiRun[],
+  overheads: readonly OverheadKpiInput[],
+): BenchmarkPlatform[] {
+  return PLATFORM_ORDER.filter(
+    (platform) =>
+      runs.some((run) => run.result.run.platform === platform && run.result.run.telemetryEnabled) ||
+      overheads.some((report) => report.platform === platform),
   );
 }
 
@@ -174,14 +227,17 @@ function shownPlatforms(runs: readonly KpiRun[]): BenchmarkPlatform[] {
  * "Scorecard": per platform (never mixed), one card per KPI family with the aggregate over the
  * shown telemetry-on runs, n and a link to the worst run. `runs[].runId` is the run's anchor.
  */
-export function scorecardHtml(runs: readonly KpiRun[]): string {
-  const platforms = shownPlatforms(runs);
+export function scorecardHtml(
+  runs: readonly KpiRun[],
+  overheads: readonly OverheadKpiInput[],
+): string {
+  const platforms = shownPlatforms(runs, overheads);
   if (platforms.length === 0) {
     return `<p class="muted">No telemetry-on runs found.</p>`;
   }
   return platforms
     .map((platform) => {
-      const scorecard = aggregateKpis(runs, platform);
+      const scorecard = aggregateKpis(runs, platform, overheads);
       const cards = CARDS.map((build) => cardHtml(build(scorecard))).join("");
       return `<h3>${escapeHtml(platform)} <span class="muted">· ${scorecard.runs} run(s)</span></h3><div class="cards">${cards}</div>`;
     })

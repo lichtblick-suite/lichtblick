@@ -4,7 +4,10 @@
 // Free of DOM/Playwright/Node imports (compiled by the root tsconfig too, through
 // `summaryMarkdown.ts`).
 
+import type { Tone } from "./htmlReport.types";
+import type { DeltaUnit } from "./types";
 import type { HostCpuSourceV1 } from "../result/schemaV1.types";
+import type { Verdict } from "../result/stats.types";
 
 export const KIB = 1024;
 export const MIB = 1024 * 1024;
@@ -38,6 +41,12 @@ export const CHECKPOINT_ORDER = ["loaded", "mid", "end"];
 export const SCREENSHOTS_DIR_NAME = "screenshots";
 export const REPORT_DIR_NAME = "report";
 
+/**
+ * The artifacts folder (results, `overhead-*.json`), relative to the HTML file in
+ * `<dir>/${REPORT_DIR_NAME}/`: links to the overhead A/B run files, which the scenario views omit.
+ */
+export const RESULTS_HREF = "../";
+
 export const KPI_HEADERS = [
   "Scenario",
   "Platform",
@@ -56,6 +65,8 @@ export const KPI_HEADERS = [
   "Source cache hit ratio",
   "Pool invariant",
   "Runner events",
+  "Overhead CPU (≤ 2 %)",
+  "Overhead memory (≤ 20 MiB)",
 ];
 
 /** Coverage matrix column groups, in display order (`htmlReportExercises.ts`). */
@@ -90,3 +101,30 @@ export const CPU_SCALE_NOTE =
  * string is in the cell title). SwiftShader = software rendering.
  */
 export const GL_BACKEND_KEYWORDS = ["SwiftShader", "Metal", "Vulkan", "D3D11", "D3D9", "OpenGL"];
+
+/** Display of an overhead verdict (HTML badge tone, markdown symbol). */
+export const VERDICT_DISPLAY: Readonly<
+  Record<Verdict, { readonly symbol: string; readonly label: string; readonly tone: Tone }>
+> = {
+  within: { symbol: "✅", label: "within", tone: "good" },
+  inconclusive: { symbol: "❔", label: "inconclusive", tone: "warn" },
+  exceeds: { symbol: "❌", label: "exceeds", tone: "bad" },
+};
+
+/** Memory delta / verdict of an overhead report without a relaunch A/B (method `toggle`). */
+export const MEM_NOT_MEASURED = "not measured";
+
+/**
+ * Note next to a toggle CPU verdict whose run had telemetry realms the toggle does not switch (the
+ * worker sinks of `mcap-multi-ingest` record in both arms; see `toggleUntoggledRealms`).
+ */
+export const TOGGLE_UNTOGGLED_REALMS_NOTE =
+  "toggle covers main-thread telemetry only (worker not toggled; relaunch A/B covers all)";
+
+/** Display units of the overhead deltas (`report/overheadText.ts`). */
+export const OVERHEAD_UNITS: Readonly<Record<"cpuRelative" | "cpuPp" | "memMiB", DeltaUnit>> = {
+  /** Fraction → percent. */
+  cpuRelative: { divisor: 0.01, digits: 2, suffix: " %" },
+  cpuPp: { divisor: 1, digits: 1, suffix: " pp" },
+  memMiB: { divisor: MIB, digits: 1, suffix: " MiB" },
+};

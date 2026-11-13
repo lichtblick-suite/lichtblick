@@ -24,6 +24,11 @@ import { FrameLoop } from "../../frameProbe";
  *
  * The time spent inside the RAF callback is accumulated into `telemetry.self.timeMs.frames`
  * (two clock reads per frame, no allocation).
+ *
+ * `pause()` (telemetry toggled off) stops recording but keeps the frame loop running: the loop is
+ * benchmark harness (it makes the browser render every vsync, see `FrameLoop`), not telemetry, so
+ * the toggle A/B runs it in both arms and isolates the telemetry recording. Only `dispose()` stops
+ * the loop.
  */
 export class FrameCollector {
   readonly #telemetry: ITelemetry;
@@ -33,7 +38,7 @@ export class FrameCollector {
   readonly #selfTime: SelfCostCounter;
 
   readonly #loop: FrameLoop;
-  /** Counting frames and publishing (between `start()` and `dispose()`). */
+  /** Counting frames and publishing (between `start()` and `pause()` / `dispose()`). */
   #recording = false;
   #frameCount = 0;
   #lateFrameCount = 0;
@@ -83,14 +88,14 @@ export class FrameCollector {
     return this.#loop.isSupported();
   }
 
-  /** Whether the RAF loop runs. */
+  /** Whether the RAF loop runs (also while paused). */
   public isLoopRunning(): boolean {
     return this.#loop.isRunning();
   }
 
   /**
-   * Starts recording with a new fps window and the RAF loop (also after `dispose()`). Idempotent;
-   * no-op without RAF.
+   * Starts recording with a new fps window, and the RAF loop unless it still runs from before a
+   * `pause()` (also after `dispose()`). Idempotent; no-op without RAF.
    */
   public start(): void {
     if (this.#recording || !this.isSupported()) {
@@ -138,10 +143,22 @@ export class FrameCollector {
     this.#firstUsefulLabels = labels;
   }
 
-  /** Stops recording and the RAF loop (no frame callbacks until `start()`). */
-  public dispose(): void {
+  /**
+   * Stops recording (no counting, no telemetry) while the RAF loop keeps running, so the page
+   * renders the same frames as while recording; an armed `frame.firstUseful` stays armed. The gap is
+   * not a late frame: the next `start()` begins a fresh window. Idempotent.
+   */
+  public pause(): void {
+    if (!this.#recording) {
+      return;
+    }
     this.#recording = false;
     this.#lastFrameTs = -1;
+  }
+
+  /** Stops recording and the RAF loop (no frame callbacks until `start()`). */
+  public dispose(): void {
+    this.pause();
     this.#loop.stop();
     this.#firstUsefulPending = false;
     this.#firstUsefulLabels = undefined;

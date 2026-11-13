@@ -12,6 +12,7 @@ import {
   CLOSE_EVENT_TIMEOUT_MS,
   DEFAULT_SAMPLE_DURATION_MS,
   AUTO_PAUSE_TIMEOUT_MS,
+  OVERHEAD_DURATION_MARGIN_MS,
   PAUSE_CLICK_TIMEOUT_MS,
   PUBLISH_SETTLE_MS,
   RUNNER_EVENT_GRACE_MS,
@@ -23,6 +24,16 @@ import {
 import { formatRunnerEventsFailure, runnerNow, startCrashDetection } from "./crashDetection";
 import { collectErrorBoundaryHits, formatErrorBoundaryFailure } from "./errorBoundaries";
 import { logicalCpuCount } from "./hostCpus";
+import {
+  measurementAutoPauseMs,
+  overheadWindowEndMonotonicTs,
+  prepareOverheadPage,
+  readOverheadState,
+  recordOverheadWindow,
+  withOverheadResult,
+} from "./overheadMeasurement";
+import type { OverheadWindowRecording } from "./overheadMeasurement.types";
+import type { OverheadPageState } from "./overheadPage.types";
 import type { RecordedFrameTime } from "./runScenario.types";
 import { ScenarioScreenshotter, loadedEventName, resolveScreenshotMode } from "./screenshots";
 import { TelemetryDrainer, drainUntilEmpty, pageNow } from "./telemetryDrainer";
@@ -34,6 +45,7 @@ import type {
   RunScenarioOptions,
   ScenarioRunResult,
 } from "./types";
+import { SCENARIO_DURATION_MS_PARAM } from "../../src/scenarios/constants";
 import type {
   LichtblickScenarioControlWindow,
   ScenarioDescriptor,
@@ -42,6 +54,7 @@ import {
   LATE_FRAME_THRESHOLD_QUERY_PARAM,
   TELEMETRY_OFF_VALUE,
   TELEMETRY_QUERY_PARAM,
+  UA_MEMORY_QUERY_PARAM,
 } from "../../src/telemetry/constants";
 import type { LichtblickTelemetryWindow } from "../../src/telemetry/types";
 import {
@@ -71,7 +84,9 @@ export function describeHost(): RunEnvironment {
 
 /**
  * Page URL query of a scenario run. `calibration.lateFrameThresholdMs` (measured refresh ceiling,
- * see `runner/calibration.ts`) is passed as `?telemetry.lateFrameThresholdMs=`.
+ * see `runner/calibration.ts`) is passed as `?telemetry.lateFrameThresholdMs=`. Overhead A/B runs
+ * may add `?telemetry.uaMemory=off` (`uaMemoryProbe: false`) and, in steady / toggle mode for
+ * scenarios with a page auto-pause, `?scenario.durationMs=` so the pause lands after the window.
  */
 export function buildScenarioParams(
   scenario: ScenarioUnderTest,
@@ -81,6 +96,13 @@ export function buildScenarioParams(
   const params = new URLSearchParams({ scenario: scenario.scenarioId });
   if (options.telemetryEnabled === false) {
     params.set(TELEMETRY_QUERY_PARAM, TELEMETRY_OFF_VALUE);
+  }
+  if (options.uaMemoryProbe === false) {
+    params.set(UA_MEMORY_QUERY_PARAM, TELEMETRY_OFF_VALUE);
+  }
+  const autoPauseMs = measurementAutoPauseMs(scenario, options.measurement);
+  if (autoPauseMs != undefined) {
+    params.set(SCENARIO_DURATION_MS_PARAM, String(autoPauseMs));
   }
   if (calibration != undefined) {
     params.set(LATE_FRAME_THRESHOLD_QUERY_PARAM, String(calibration.lateFrameThresholdMs));
@@ -109,7 +131,7 @@ async function describeScenario(page: Page): Promise<ScenarioDescriptor> {
   );
 }
 
-/** Scenario window: 1 Hz ticks until the wall-clock `windowEnd` (deadline-driven). */
+/** Default (non-overhead) window: 1 Hz ticks until the wall-clock `windowEnd` (deadline-driven). */
 async function sampleDeadlineWindow(tick: () => Promise<void>, windowEnd: number): Promise<void> {
   // Ticks are timed and strictly sequential (each starts after the previous one's wait).
   await repeatWhile(
@@ -143,13 +165,16 @@ async function pauseAndCloseDataSource(
   page: Page,
   scenario: ScenarioUnderTest,
   drainer: TelemetryDrainer,
-  { waitForCloseEvent }: { waitForCloseEvent: boolean },
+  {
+    waitForCloseEvent,
+    autoPauseTimeoutMs = AUTO_PAUSE_TIMEOUT_MS,
+  }: { waitForCloseEvent: boolean; autoPauseTimeoutMs?: number },
 ): Promise<void> {
   const autoPaused =
     scenario.durationMs != undefined &&
     (await page
       .getByRole("button", { name: "Play", exact: true })
-      .waitFor({ state: "visible", timeout: AUTO_PAUSE_TIMEOUT_MS })
+      .waitFor({ state: "visible", timeout: autoPauseTimeoutMs })
       .then(
         () => true,
         () => false,
@@ -183,6 +208,84 @@ async function pauseAndCloseDataSource(
 }
 
 /**
+ * When: the 1 Hz loop of a run - deadline-driven (until `windowEnd`, wall clock) for normal runs,
+ * else the overhead A/B's fixed-schedule window (`runner/overheadMeasurement.ts`).
+ */
+async function recordMeasurementWindow({
+  target,
+  measurement,
+  drainer,
+  windowEnd,
+  onHostSnapshot,
+}: {
+  target: BenchmarkTarget;
+  measurement: RunScenarioOptions["measurement"];
+  drainer: TelemetryDrainer;
+  windowEnd: number;
+  onHostSnapshot: (host: HostMetricsSnapshot) => void;
+}): Promise<OverheadWindowRecording> {
+  if (measurement != undefined) {
+    return await recordOverheadWindow({ target, measurement, drainer, onHostSnapshot });
+  }
+  /** One sampling tick: page clock → host metrics → drain. */
+  const tick = async (): Promise<void> => {
+    const ts = await pageNow(target.page);
+    onHostSnapshot(await target.collectHostMetrics(ts));
+    await drainer.drain();
+  };
+  await sampleDeadlineWindow(tick, windowEnd);
+  return {};
+}
+
+/**
+ * The run's screenshotter (none in mode `none`); in mode `all` its `loaded`/`mid` window
+ * checkpoints are started.
+ */
+function startScreenshotter({
+  mode,
+  target,
+  scenario,
+  telemetryEnabled,
+  runTimestamp,
+  attacher,
+  drainer,
+  windowStartMs,
+  durationMs,
+}: {
+  mode: ReturnType<typeof resolveScreenshotMode>;
+  target: BenchmarkTarget;
+  scenario: ScenarioUnderTest;
+  telemetryEnabled: boolean;
+  runTimestamp: number;
+  attacher: RunScenarioOptions["testInfo"];
+  drainer: TelemetryDrainer;
+  windowStartMs: number;
+  durationMs: number;
+}): ScenarioScreenshotter | undefined {
+  if (mode === "none") {
+    return undefined;
+  }
+  const screenshotter = new ScenarioScreenshotter({
+    page: target.page,
+    dir: SCREENSHOTS_DIR,
+    scenarioId: scenario.scenarioId,
+    platform: target.platform,
+    telemetryEnabled,
+    timestamp: runTimestamp,
+    attacher,
+  });
+  if (mode === "all") {
+    const loadedEvent = loadedEventName(scenario.pipeline);
+    screenshotter.startWindowCheckpoints({
+      windowStartMs,
+      durationMs,
+      isLoaded: () => drainer.hasEvent(loadedEvent, "instant"),
+    });
+  }
+  return screenshotter;
+}
+
+/**
  * Runs one scenario on `target` (platform agnostic): navigates to `?scenario=<id>`, samples host
  * process metrics and drains page telemetry at 1 Hz for the scenario window, captures teardown
  * telemetry, then builds the legacy artifact and the `benchmark-result.v1` document.
@@ -210,6 +313,9 @@ async function pauseAndCloseDataSource(
  * writing that result** (`writeResultV1`) so the evidence is kept. If such an event made the run
  * fail early (e.g. "Target crashed"), a partial result (whatever was sampled so far) is written.
  *
+ * Overhead A/B runs (`options.measurement`): the window, the page preparation and the extra result
+ * fields come from `runner/overheadMeasurement.ts`; no screenshots. Normal runs are unchanged.
+ *
  * Throws if any panel (or the app) rendered an error boundary by the end of the run.
  */
 export async function runScenario(
@@ -220,6 +326,7 @@ export async function runScenario(
   const { page } = target;
   const label = `${target.platform}/${scenario.scenarioId}`;
   const telemetryEnabled = options.telemetryEnabled !== false;
+  const { measurement } = options;
   const runTimestamp = Date.now();
   const frameTimeSamples: FrameTimeSample[] = [];
   const listenerDispatchSamples: ListenerDispatchSample[] = [];
@@ -247,8 +354,12 @@ export async function runScenario(
   const crashDetection = await startCrashDetection({ page, electronApp: target.electronApp });
   const drainer = new TelemetryDrainer(page);
   const durationMs = scenario.durationMs ?? DEFAULT_SAMPLE_DURATION_MS;
-  const screenshotMode = resolveScreenshotMode({ requested: options.screenshots });
+  // Steady (overhead A/B) runs never take screenshots: a capture costs CPU and memory in one arm.
+  const screenshotMode =
+    measurement == undefined ? resolveScreenshotMode({ requested: options.screenshots }) : "none";
   let screenshotter: ScenarioScreenshotter | undefined;
+  let overheadRecording: OverheadWindowRecording = {};
+  let overheadPageState: OverheadPageState = {};
   let startMonotonicTs: number | undefined;
   let windowEndMonotonicTs: number | undefined;
   let finishedAtWall: string | undefined;
@@ -268,7 +379,8 @@ export async function runScenario(
     startMonotonicTs: startMonotonicTs ?? end.endMonotonicTs,
     endMonotonicTs: end.endMonotonicTs,
     ...(windowEndMonotonicTs != undefined && { windowEndMonotonicTs }),
-    mode: "scenario",
+    // Lets the viewer and the CI summary keep overhead A/B runs out of the scenario views.
+    mode: measurement == undefined ? "scenario" : "overhead",
     sampleIntervalMs: SAMPLE_INTERVAL_MS,
     environment: { ...end.environment, ...calibration },
   });
@@ -301,6 +413,9 @@ export async function runScenario(
   let crossOriginIsolated: boolean;
   let scenarioDescriptor: ScenarioDescriptor;
   try {
+    if (measurement != undefined) {
+      await prepareOverheadPage(page, measurement);
+    }
     await page.goto(target.scenarioUrl(buildScenarioParams(scenario, options, calibration)));
     await page.waitForFunction(
       () => (window as LichtblickTelemetryWindow).lichtblickTelemetry != undefined,
@@ -312,43 +427,33 @@ export async function runScenario(
     const windowStart = Date.now();
     const windowEnd = windowStart + durationMs;
 
-    screenshotter =
-      screenshotMode === "none"
-        ? undefined
-        : new ScenarioScreenshotter({
-            page,
-            dir: SCREENSHOTS_DIR,
-            scenarioId: scenario.scenarioId,
-            platform: target.platform,
-            telemetryEnabled,
-            timestamp: runTimestamp,
-            attacher: options.testInfo,
-          });
-    if (screenshotMode === "all") {
-      const loadedEvent = loadedEventName(scenario.pipeline);
-      screenshotter?.startWindowCheckpoints({
-        windowStartMs: windowStart,
-        durationMs,
-        isLoaded: () => drainer.hasEvent(loadedEvent, "instant"),
-      });
-    }
+    screenshotter = startScreenshotter({
+      mode: screenshotMode,
+      target,
+      scenario,
+      telemetryEnabled,
+      runTimestamp,
+      attacher: options.testInfo,
+      drainer,
+      windowStartMs: windowStart,
+      durationMs,
+    });
 
     const recordHost = (host: HostMetricsSnapshot): void => {
       hostSamples.push(...host.samples);
       memorySamples.push({ timestampMs: Date.now(), metrics: host.legacyMetrics });
     };
 
-    // When: deadline-driven 1 Hz loop.
-    /** One sampling tick: page clock → host metrics → drain. */
-    const tick = async (): Promise<void> => {
-      const ts = await pageNow(page);
-      recordHost(await target.collectHostMetrics(ts));
-      await drainer.drain();
-    };
-    await sampleDeadlineWindow(tick, windowEnd);
+    overheadRecording = await recordMeasurementWindow({
+      target,
+      measurement,
+      drainer,
+      windowEnd,
+      onHostSnapshot: recordHost,
+    });
     finishedAtWall = new Date().toISOString();
     // End of the measured window (rates in `summary.pipeline`); teardown below is excluded.
-    windowEndMonotonicTs = await pageNow(page);
+    windowEndMonotonicTs = overheadWindowEndMonotonicTs(overheadRecording) ?? (await pageNow(page));
 
     // A `loaded`/`mid` capture still in flight at the deadline finishes before teardown, so its page
     // round trips don't interleave with pause/close.
@@ -357,6 +462,10 @@ export async function runScenario(
     if (scenario.pipeline === "real") {
       await pauseAndCloseDataSource(page, scenario, drainer, {
         waitForCloseEvent: telemetryEnabled,
+        // Steady runs move the page auto-pause past the window (by up to the margin).
+        ...(measurement != undefined && {
+          autoPauseTimeoutMs: OVERHEAD_DURATION_MARGIN_MS + AUTO_PAUSE_TIMEOUT_MS,
+        }),
       });
     }
     // Let the next 1 Hz publish land (final gauges/counters), then drain everything.
@@ -364,6 +473,9 @@ export async function runScenario(
     await drainUntilEmpty(drainer);
     endMonotonicTs = await pageNow(page);
     crossOriginIsolated = await page.evaluate(() => globalThis.crossOriginIsolated);
+    if (measurement != undefined) {
+      overheadPageState = await readOverheadState(page, measurement, { telemetryEnabled });
+    }
     // After all measurement: a pure read of the page's scenario metadata.
     scenarioDescriptor = await describeScenario(page);
   } catch (error) {
@@ -380,7 +492,7 @@ export async function runScenario(
 
   // Measurement is over: the runner starts closing (later crash/process events are its own).
   const runnerEvents = await crashDetection.stop();
-  const result: BenchmarkResultV1 = buildResult(
+  const builtResult: BenchmarkResultV1 = buildResult(
     {
       ...buildRun({
         endMonotonicTs,
@@ -390,6 +502,16 @@ export async function runScenario(
     },
     runnerEvents,
   );
+  const result =
+    measurement == undefined
+      ? builtResult
+      : withOverheadResult(builtResult, {
+          measurement,
+          recording: overheadRecording,
+          pageState: overheadPageState,
+          hostSamples,
+          pageRecords: drainer.records,
+        });
 
   const legacy: BenchmarkArtifact = {
     scenarioId: scenario.scenarioId,
@@ -427,10 +549,14 @@ export async function runScenario(
   console.debug(
     `[runScenario] ${label} done: ${memorySamples.length} host polls, ${drainer.records.length} telemetry records`,
   );
+  const { toggleRecording } = overheadRecording;
   return {
     legacy,
     result,
     runTimestamp,
     screenshots: screenshotter?.captured() ?? [],
+    ...(toggleRecording != undefined && {
+      toggle: { ...toggleRecording, records: drainer.records },
+    }),
   };
 }

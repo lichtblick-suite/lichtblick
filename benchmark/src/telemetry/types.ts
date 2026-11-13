@@ -4,19 +4,82 @@
 // Type-only module: shared between the benchmark page (which installs the API) and the Playwright
 // runner (`benchmark/e2e`, which calls it through `page.evaluate`). Keep it free of runtime imports.
 
-import type { TelemetryBatch } from "@lichtblick/suite-base/util/telemetry";
+import type {
+  BufferedTelemetrySinkOptions,
+  TelemetryBatch,
+} from "@lichtblick/suite-base/util/telemetry";
 
-import type { RendererCollectorsEnv } from "./collectors/types";
+import type { RendererCollectorsEnv, UaMemoryCollectorState } from "./collectors/types";
 import type { TELEMETRY_SELF_COST_METRICS } from "./constants";
 
 /** Key of a self-cost counter (see `TELEMETRY_SELF_COST_METRICS`). */
 export type SelfCostMetricKey = keyof typeof TELEMETRY_SELF_COST_METRICS;
 
+/** Which optional renderer collectors run (`collectorsState()`). */
+export type TelemetryCollectorsState = {
+  /**
+   * `disabled`: telemetry is off (`?telemetry=off`); `off`: disabled with `?telemetry.uaMemory=off`;
+   * `unsupported`: page not cross-origin isolated, API missing, or the browser rejected a call with
+   * `SecurityError` (API not provided, e.g. `chromium-headless-shell`); `on`: measuring.
+   */
+  readonly uaMemory: UaMemoryCollectorState | "disabled";
+};
+
+/** Mean cost per call (ns) of the sink's recording primitives (`measureEmitCost()`). */
+export type EmitCostResult = {
+  readonly gaugeNs: number;
+  readonly counterNs: number;
+  readonly eventNs: number;
+};
+
+/** Argument of `setTelemetryActive()`. */
+export type TelemetryToggleRequest = {
+  /** True records (telemetry on), false pauses recording (telemetry off). */
+  readonly active: boolean;
+};
+
+/** Result of `setTelemetryActive()`. */
+export type TelemetryToggleResult = {
+  /** Whether renderer telemetry records after the call (always false when installed off). */
+  readonly active: boolean;
+  /** Page `monotonicNow()` right after the switch (epoch ms, same clock as `now()`). */
+  readonly atMs: number;
+  /**
+   * `measureUserAgentSpecificMemory()` calls so far (cumulative; 0 when the collector is off or
+   * telemetry is installed off). The difference between two results counts the calls in between.
+   */
+  readonly uaCalls: number;
+};
+
+/** Argument of `setFrameProbeActive()`. */
+export type FrameProbeToggleRequest = {
+  /** True runs the bare frame loop, false stops it. */
+  readonly active: boolean;
+};
+
+/** Result of `setFrameProbeActive()`. */
+export type FrameProbeToggleResult = {
+  /** Whether the frame loop runs after the call (false without `requestAnimationFrame`). */
+  readonly active: boolean;
+  /** Page `monotonicNow()` right after the switch (epoch ms, same clock as `now()`). */
+  readonly atMs: number;
+};
+
+export type MeasureEmitCostOptions = {
+  /** Options of the throwaway sink (same as the live sink, without `onEvent`/timers). */
+  readonly sinkOptions: BufferedTelemetrySinkOptions;
+  /** Clock timing the loops (ms). */
+  readonly now: () => number;
+  /** Timed calls per primitive; invalid / absent -> `EMIT_COST_DEFAULT_ITERATIONS`. */
+  readonly iterations?: number;
+};
+
 /**
  * Telemetry API the benchmark page exposes as `window.lichtblickTelemetry` for the runner.
  *
  * Always installed by the benchmark entry point, also when telemetry is turned off with
- * `?telemetry=off`; in that case `isEnabled()` is false and `drain()` returns an empty batch.
+ * `?telemetry=off` (overhead A/B runs); in that case `isEnabled()` is false and `drain()` returns
+ * an empty batch.
  */
 export interface LichtblickTelemetryWindowApi {
   /** True while the renderer telemetry sink records (false when off or after page teardown). */
@@ -29,6 +92,35 @@ export interface LichtblickTelemetryWindowApi {
    * previous drain (worker drops are reported in `telemetry.ingestedDroppedRecords{realm}`).
    */
   drain(maxRecords?: number): TelemetryBatch;
+  /** Which optional renderer collectors run; `uaMemory: "disabled"` when telemetry is off. */
+  collectorsState(): TelemetryCollectorsState;
+  /**
+   * Micro-benchmark of `gauge` / `counter` / `event` on a throwaway sink configured like the live
+   * one (the live sink is untouched): mean ns per call over `iterations` calls each (default
+   * `EMIT_COST_DEFAULT_ITERATIONS`). Blocks the main thread while it runs; call it after the
+   * measured window. All zeros when telemetry is off.
+   */
+  measureEmitCost(iterations?: number): EmitCostResult;
+  /**
+   * In-process overhead A/B switch (only meaningful when installed enabled; otherwise a no-op that
+   * returns `active: false`). Idempotent.
+   * - `{ active: false }`: pauses the renderer collectors (tick, frame recording, long-task observer,
+   *   UA-memory probe) after publishing their partial window; the frame collector's RAF loop keeps
+   *   running (benchmark harness, in both arms), flushes the sink, gates the sink (cached references
+   *   become no-ops), stops its publish timer and resets the realm sink to the no-op.
+   * - `{ active: true }`: reinstalls the sink as the realm sink, ungates it, restarts its publish timer and
+   *   resumes the collectors.
+   * Buffered records stay drainable in both states. Worker-realm sinks are not switched: bridged
+   * worker batches are discarded while off.
+   */
+  setTelemetryActive(request: TelemetryToggleRequest): TelemetryToggleResult;
+  /**
+   * Benchmark FPS probe A/B (installed with `?telemetry=off` only; absent otherwise): starts or
+   * stops a bare `requestAnimationFrame` loop (`FrameLoop` with a no-op callback, the frame
+   * collector's loop without the collector). Measures the harness cost of the frame loop with
+   * telemetry off in both arms. The loop is stopped until the first `{ active: true }`. Idempotent.
+   */
+  setFrameProbeActive?(request: FrameProbeToggleRequest): FrameProbeToggleResult;
 }
 
 /** Property name of the API on `window`. */
