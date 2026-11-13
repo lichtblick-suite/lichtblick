@@ -9,6 +9,10 @@ updates:
     open-pull-requests-limit: 20
     labels: [dependabot]
     target-branch: "develop"
+    # Compromised releases are usually yanked within days; security updates skip the cooldown.
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
 
     # Define groups of dependencies to be updated together
     # https://github.blog/changelog/2023-06-30-grouped-version-updates-for-dependabot-public-beta/
@@ -54,3 +58,5 @@ updates:
     schedule:
       interval: "daily"
     labels: [dependabot]
+    cooldown:
+      default-days: 7

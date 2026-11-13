@@ -1,0 +1,20 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      # Fails the PR if it adds dependencies with known vulnerabilities or malware advisories.
+      - uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          fail-on-severity: high
