@@ -480,6 +480,59 @@ describe("PanelExtensionAdapter telemetry", () => {
     expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRendered)).toHaveLength(1);
   });
 
+  it("should count a frame once when it reaches onRender after the panel starts watching currentFrame", async () => {
+    // GIVEN - an enabled sink and a panel subscribed to /x that only watches currentTime, so the
+    // frame is first rendered without being handed to onRender as currentFrame
+    const telemetry = TelemetryBuilder.mockTelemetry();
+    setTelemetrySink(telemetry);
+    let panelContext: PanelExtensionContext | undefined;
+    const onRender = jest.fn((_renderState: Immutable<RenderState>, done: () => void) => {
+      done();
+    });
+    const initPanel = (context: PanelExtensionContext) => {
+      panelContext = context;
+      context.watch("currentTime");
+      context.subscribe([{ topic: "/x" }]);
+      context.onRender = onRender;
+    };
+    const handle = render(
+      <Wrapper
+        currentTime={{ sec: 1, nsec: 0 }}
+        frame={{ "/x": [buildMessage(10)] }}
+        initPanel={initPanel}
+      />,
+    );
+    await flush();
+    // A new frame arrives together with a new currentTime, so the panel renders with it
+    handle.rerender(
+      <Wrapper
+        currentTime={{ sec: 2, nsec: 0 }}
+        frame={{ "/x": [buildMessage(20)] }}
+        initPanel={initPanel}
+      />,
+    );
+    await flush();
+    const rendersBefore = onRender.mock.calls.length;
+    expect(onRender.mock.calls.at(-1)?.[0].currentTime).toEqual({ sec: 2, nsec: 0 });
+    expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRendered)).toHaveLength(0);
+
+    // WHEN - the panel starts watching currentFrame and the same frame is handed to onRender
+    act(() => {
+      panelContext!.watch("currentFrame");
+    });
+    await flush();
+
+    // THEN - the frame reached onRender as currentFrame and is counted exactly once
+    expect(onRender.mock.calls.length).toBeGreaterThan(rendersBefore);
+    expect(onRender.mock.calls.at(-1)?.[0].currentFrame).toHaveLength(1);
+    expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRendered)).toEqual([
+      [PANEL_TELEMETRY_METRICS.messagesRendered, 1, "count", "panel", EXPECTED_LABELS],
+    ]);
+    expect(counterCalls(telemetry, PANEL_TELEMETRY_METRICS.messagesRenderedBytes)).toEqual([
+      [PANEL_TELEMETRY_METRICS.messagesRenderedBytes, 20, "bytes", "panel", EXPECTED_LABELS],
+    ]);
+  });
+
   it("should keep skipping frames but record nothing when telemetry is disabled", async () => {
     // GIVEN - a disabled sink and a panel that never calls done()
     const telemetry = TelemetryBuilder.mockTelemetry({ enabled: false });

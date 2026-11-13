@@ -18,7 +18,6 @@ import {
   AppSettingValue,
   ExtensionPanelRegistration,
   Immutable,
-  MessageEvent,
   PanelExtensionContext,
   ParameterValue,
   RenderState,
@@ -73,13 +72,12 @@ import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
 import {
   buildPanelTelemetryLabels,
-  createAllFramesDeliveryTracker,
-  recordAllFramesDelivered,
+  createPanelFrameTelemetryState,
   recordFirstRender,
-  recordMessagesRendered,
+  recordFrameRendering,
+  recordFrameSkipped,
   recordRenderDone,
-  recordRenderSkipped,
-  resetAllFramesDeliveryTracker,
+  resetPanelFrameTelemetryState,
 } from "./panelTelemetry";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext, MessageConverterAlertHandler } from "./types";
@@ -195,18 +193,11 @@ function PanelExtensionAdapter(
   );
   // Set on the first `done()` of this adapter mount (drives the `panel.firstRender` event).
   const firstRenderDoneRef = useRef(false);
-  // Last messageEvents array (frame input) accounted for, either as rendered or as skipped. Effect
-  // re-runs triggered by other inputs (hover, variables, theme, ...) keep the same array, so they
-  // do not count as a skipped frame.
-  const lastAccountedFrameRef = useRef<readonly MessageEvent[] | undefined>(undefined);
-  // Last messageEvents array handed to onRender, so a re-run with the same frame is not counted
-  // twice as rendered. A skipped frame that is rendered later is still counted.
-  const lastRenderedFrameRef = useRef<readonly MessageEvent[] | undefined>(undefined);
+  // Frames already accounted as rendered or skipped, and `allFrames` entries already counted.
+  const [frameTelemetryState] = useState(createPanelFrameTelemetryState);
   // Bumped on each panel (re-)initialisation. A `done()` from a render started under an older
   // generation is stale: its telemetry is ignored.
   const renderGenerationRef = useRef(0);
-  // Tracks which `allFrames` entries were already counted as delivered preloaded messages.
-  const [allFramesDeliveryTracker] = useState(createAllFramesDeliveryTracker);
 
   // Internal subscriber id for the MessagePipeline (not the layout panel id).
   const [panelId] = useState(() => uuid());
@@ -360,15 +351,8 @@ function PanelExtensionAdapter(
 
     if (renderingRef.current) {
       setSlowRender(true);
-      // Only a new, non-empty frame input counts as skipped, not a re-run caused by another input
-      // nor a player-state update that carried no messages for this panel.
-      if (
-        telemetryEnabled &&
-        messageEvents != undefined &&
-        messageEvents !== lastAccountedFrameRef.current
-      ) {
-        lastAccountedFrameRef.current = messageEvents;
-        recordRenderSkipped(telemetry, telemetryLabels);
+      if (telemetryEnabled) {
+        recordFrameSkipped(telemetry, frameTelemetryState, messageEvents, telemetryLabels);
       }
       return;
     }
@@ -380,20 +364,12 @@ function PanelExtensionAdapter(
     const resumeFrame = pauseFrame(panelId);
 
     if (telemetryEnabled) {
-      lastAccountedFrameRef.current = messageEvents;
-      if (messageEvents !== lastRenderedFrameRef.current) {
-        lastRenderedFrameRef.current = messageEvents;
-        if (watchedFields.has("currentFrame")) {
-          recordMessagesRendered(telemetry, messageEvents, telemetryLabels);
-        }
-      }
-    }
-    // Preloaded messages delivered via allFrames (e.g. 3D); only new entries are counted.
-    if (telemetryEnabled && watchedFields.has("allFrames")) {
-      recordAllFramesDelivered(
+      recordFrameRendering(
         telemetry,
-        allFramesDeliveryTracker,
+        frameTelemetryState,
+        messageEvents,
         renderState.allFrames,
+        watchedFields,
         telemetryLabels,
       );
     }
@@ -449,7 +425,7 @@ function PanelExtensionAdapter(
     initialState,
     forceConversion,
     telemetryLabels,
-    allFramesDeliveryTracker,
+    frameTelemetryState,
   ]);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
@@ -892,11 +868,9 @@ function PanelExtensionAdapter(
     setRenderFn(undefined);
     renderingRef.current = false;
     // The fresh render state builder re-delivers the current frame, so count it again.
-    lastAccountedFrameRef.current = undefined;
-    lastRenderedFrameRef.current = undefined;
+    resetPanelFrameTelemetryState(frameTelemetryState);
     // Renders started before this point belong to the previous panel instance.
     renderGenerationRef.current++;
-    resetAllFramesDeliveryTracker(allFramesDeliveryTracker);
     setSlowRender(false);
 
     setBuildRenderState(() => initRenderStateBuilder());
@@ -936,7 +910,7 @@ function PanelExtensionAdapter(
     configTooNew,
     playerIsInitializing,
     clearAlert,
-    allFramesDeliveryTracker,
+    frameTelemetryState,
   ]);
 
   // Clear this panel's alerts on unmount.

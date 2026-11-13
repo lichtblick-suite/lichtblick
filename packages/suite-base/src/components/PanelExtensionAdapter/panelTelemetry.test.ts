@@ -8,11 +8,15 @@ import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders
 import { PANEL_TELEMETRY_METRICS } from "./constants";
 import {
   buildPanelTelemetryLabels,
+  createPanelFrameTelemetryState,
   recordFirstRender,
+  recordFrameRendering,
+  recordFrameSkipped,
   recordMessagesRendered,
   recordRangeMessagesDelivered,
   recordRenderDone,
   recordRenderSkipped,
+  resetPanelFrameTelemetryState,
 } from "./panelTelemetry";
 
 function buildMessage(sizeInBytes: number): MessageEvent {
@@ -26,6 +30,13 @@ function buildMessage(sizeInBytes: number): MessageEvent {
 }
 
 const LABELS = buildPanelTelemetryLabels("Plot!3x9a", "Plot")!;
+
+function counterValues(
+  telemetry: ReturnType<typeof TelemetryBuilder.mockTelemetry>,
+  metric: string,
+): unknown[] {
+  return telemetry.counter.mock.calls.filter(([name]) => name === metric).map(([, value]) => value);
+}
 
 describe("panelTelemetry", () => {
   it("builds labels from the layout panel id and panel type", () => {
@@ -143,5 +154,116 @@ describe("panelTelemetry", () => {
     expect(telemetry.counter.mock.calls).toEqual([
       [PANEL_TELEMETRY_METRICS.renderSkipped, 1, "count", "panel", LABELS],
     ]);
+  });
+
+  describe("frame accounting", () => {
+    const CURRENT_FRAME = new Set(["currentFrame"]);
+    const ALL_FRAMES = new Set(["allFrames"]);
+    const NOTHING_WATCHED = new Set<string>();
+
+    it("should count a new frame as skipped once and ignore an empty or already accounted frame", () => {
+      // GIVEN
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      const state = createPanelFrameTelemetryState();
+      const frame = [buildMessage(5)];
+
+      // WHEN
+      recordFrameSkipped(telemetry, state, frame, LABELS);
+      recordFrameSkipped(telemetry, state, frame, LABELS);
+      recordFrameSkipped(telemetry, state, undefined, LABELS);
+
+      // THEN
+      expect(telemetry.counter.mock.calls).toEqual([
+        [PANEL_TELEMETRY_METRICS.renderSkipped, 1, "count", "panel", LABELS],
+      ]);
+      expect(state.lastAccountedFrame).toBe(frame);
+    });
+
+    it("should not count a frame accounted by a render as skipped afterwards", () => {
+      // GIVEN
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      const state = createPanelFrameTelemetryState();
+      const frame = [buildMessage(5)];
+      recordFrameRendering(telemetry, state, frame, undefined, NOTHING_WATCHED, LABELS);
+
+      // WHEN
+      recordFrameSkipped(telemetry, state, frame, LABELS);
+
+      // THEN
+      expect(telemetry.counter).not.toHaveBeenCalled();
+    });
+
+    it("should count a rendered frame once while currentFrame is watched", () => {
+      // GIVEN
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      const state = createPanelFrameTelemetryState();
+      const frame = [buildMessage(5), buildMessage(7)];
+
+      // WHEN
+      recordFrameRendering(telemetry, state, frame, undefined, CURRENT_FRAME, LABELS);
+      recordFrameRendering(telemetry, state, frame, undefined, CURRENT_FRAME, LABELS);
+
+      // THEN
+      expect(telemetry.counter.mock.calls).toEqual([
+        [PANEL_TELEMETRY_METRICS.messagesRendered, 2, "count", "panel", LABELS],
+        [PANEL_TELEMETRY_METRICS.messagesRenderedBytes, 12, "bytes", "panel", LABELS],
+      ]);
+    });
+
+    it("should count a frame rendered while currentFrame was unwatched once it is watched", () => {
+      // GIVEN - a frame first rendered while currentFrame is not watched
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      const state = createPanelFrameTelemetryState();
+      const frame = [buildMessage(5)];
+      recordFrameRendering(telemetry, state, frame, undefined, NOTHING_WATCHED, LABELS);
+      expect(telemetry.counter).not.toHaveBeenCalled();
+
+      // WHEN - the same frame is rendered after the panel starts watching currentFrame
+      recordFrameRendering(telemetry, state, frame, undefined, CURRENT_FRAME, LABELS);
+
+      // THEN
+      expect(telemetry.counter.mock.calls).toEqual([
+        [PANEL_TELEMETRY_METRICS.messagesRendered, 1, "count", "panel", LABELS],
+        [PANEL_TELEMETRY_METRICS.messagesRenderedBytes, 5, "bytes", "panel", LABELS],
+      ]);
+      expect(state.lastRenderedFrame).toBe(frame);
+    });
+
+    it("should count new allFrames entries only while allFrames is watched", () => {
+      // GIVEN
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      const state = createPanelFrameTelemetryState();
+      const allFrames = [buildMessage(3), buildMessage(4)];
+
+      // WHEN
+      recordFrameRendering(telemetry, state, undefined, allFrames, NOTHING_WATCHED, LABELS);
+      recordFrameRendering(telemetry, state, undefined, allFrames, ALL_FRAMES, LABELS);
+
+      // THEN
+      expect(telemetry.counter.mock.calls).toEqual([
+        [PANEL_TELEMETRY_METRICS.rangeMessagesDelivered, 2, "count", "panel", LABELS],
+        [PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes, 7, "bytes", "panel", LABELS],
+      ]);
+    });
+
+    it("should count the same frame again after a reset", () => {
+      // GIVEN
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      const state = createPanelFrameTelemetryState();
+      const frame = [buildMessage(5)];
+      const allFrames = [buildMessage(3)];
+      const watched = new Set(["currentFrame", "allFrames"]);
+      recordFrameRendering(telemetry, state, frame, allFrames, watched, LABELS);
+
+      // WHEN
+      resetPanelFrameTelemetryState(state);
+      recordFrameRendering(telemetry, state, frame, allFrames, watched, LABELS);
+
+      // THEN
+      expect(counterValues(telemetry, PANEL_TELEMETRY_METRICS.messagesRendered)).toEqual([1, 1]);
+      expect(counterValues(telemetry, PANEL_TELEMETRY_METRICS.rangeMessagesDelivered)).toEqual([
+        1, 1,
+      ]);
+    });
   });
 });
