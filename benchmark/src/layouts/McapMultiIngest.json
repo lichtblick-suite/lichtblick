@@ -1,0 +1,39 @@
+{
+  "configById": {
+    "RawMessages!multi": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "/benchmark/multi"
+    },
+    "Plot!multi": {
+      "title": "/benchmark/multi.value",
+      "paths": [
+        {
+          "value": "/benchmark/multi.value",
+          "enabled": true,
+          "timestampMethod": "receiveTime"
+        }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": false,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "first": "RawMessages!multi",
+    "second": "Plot!multi",
+    "direction": "row"
+  }
+}

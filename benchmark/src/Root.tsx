@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   SharedRoot,
@@ -16,7 +16,9 @@ import {
 } from "@lichtblick/suite-base";
 import { AppParametersInput } from "@lichtblick/suite-base/context/AppParametersContext";
 
+import type { RootProps } from "./Root.types";
 import {
+  CloseDataSourceFactory,
   McapLocalBenchmarkDataSourceFactory,
   McapRealPipelineBenchmarkDataSourceFactory,
   SyntheticDataSourceFactory,
@@ -32,7 +34,13 @@ import { BenchmarkAppBar } from "./scenarios";
 import { getScenarioFromUrl } from "./scenarios/registry";
 import { MemoryAppConfiguration } from "./services";
 
-export function Root(): React.JSX.Element {
+export function Root({ onAppReady }: Readonly<RootProps>): React.JSX.Element {
+  // `app.ready` = first commit of the root, before layout, data source and panels are ready. Kept
+  // here on purpose: it is the phases origin of synthetic runs (see benchmark/README.md).
+  useEffect(() => {
+    onAppReady?.();
+  }, [onAppReady]);
+
   const [appConfiguration] = useState(
     () =>
       new MemoryAppConfiguration({
@@ -60,6 +68,8 @@ export function Root(): React.JSX.Element {
         TransformPreloadingPlayer,
         LAYOUTS.transformPreloading,
       ),
+      // Hidden; selected by `window.lichtblickScenario.closeDataSource()` (scenario runs only).
+      new CloseDataSourceFactory(),
     ];
 
     return sources;

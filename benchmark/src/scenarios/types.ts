@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { ScenarioGroup, ScenarioTag } from "./scenarioControl";
 import { BenchmarkPipelineKind } from "../dataSources/types";
 import { LAYOUTS } from "../layouts";
 
@@ -15,17 +16,44 @@ import { LAYOUTS } from "../layouts";
  */
 export type ScenarioDataSource = {
   factoryId: string;
+  /** `displayName` of the factory (reported in `ScenarioDescriptor.dataSource`). */
+  displayName?: string;
+  /** Defaults; each can be overridden at runtime with a `?ds.<param>=<value>` page URL param. */
   params?: Record<string, string>;
+  /**
+   * Params that must be present after merging URL overrides (e.g. `url` for scenarios whose
+   * fixture URL is only known at runtime). If one is missing the data source is not selected and
+   * an error is logged.
+   */
+  requiredParams?: readonly string[];
 };
 
 export type Scenario = {
   id: string;
+  /** Short human sentence describing what the scenario exercises. */
+  description: string;
+  /** What the scenario mainly stresses; reports group and compare scenarios by it. */
+  group: ScenarioGroup;
+  /** Tags from the registry vocabulary (`SCENARIO_TAGS`). */
+  tags: readonly ScenarioTag[];
+  /** Player (and source) the data source factory creates, e.g. "SinewavePlayer". */
+  player: string;
   /** Key into `LAYOUTS` selecting the layout to install and select automatically. */
   layout: keyof typeof LAYOUTS;
   dataSource: ScenarioDataSource;
   pipeline: BenchmarkPipelineKind;
   /** Start playback automatically once the data source becomes present. */
   autoStart?: boolean;
-  /** If set alongside `autoStart`, playback is paused this many milliseconds after starting. */
+  /**
+   * If set alongside `autoStart`, playback is paused this many milliseconds after starting.
+   * Overridable with `?scenario.durationMs=<ms>`.
+   */
   durationMs?: number;
+};
+
+export type ResolvedScenarioParams = {
+  /** Registry params with URL overrides merged on top; undefined when there are none at all. */
+  params: Record<string, string> | undefined;
+  /** `requiredParams` that are absent (or empty) after merging. */
+  missingParams: string[];
 };

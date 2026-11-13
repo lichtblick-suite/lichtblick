@@ -1,25 +1,48 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-import type { BenchmarkMemoryMetric } from "../desktop/common/types";
-
 export type ScenarioUnderTest = {
   scenarioId: string;
   /** Synthetic scenarios run on `BenchmarkPlayerBase` subclasses, which never implement
    * `startPlayback`/`pausePlayback` and so never expose a Play/Pause control to assert on: the
-   * test just samples for a fixed `SAMPLE_DURATION_MS` window instead. */
+   * runner just samples for a fixed `DEFAULT_SAMPLE_DURATION_MS` window instead. */
   pipeline: "synthetic" | "real";
-  /** Must match the scenario's own `durationMs` (registry.ts): the test waits for auto-pause. Only
-   * meaningful for `pipeline: "real"`; if unset, the test samples for `SAMPLE_DURATION_MS` and
-   * pauses manually via the Play/Pause toggle button. */
+  /** Must match the scenario's own `durationMs` (registry.ts): the runner samples for this long
+   * (the page auto-pauses at the same deadline). If unset, the runner samples for
+   * `DEFAULT_SAMPLE_DURATION_MS`. */
   durationMs?: number;
+  /** The scenario reads the runtime-generated MCAP fixtures (`fixtures/generateMcapFixtures.ts`),
+   * passed to the page as `?ds.url=<comma-separated fixture URLs>`. */
+  usesMcapFixtures?: boolean;
+  /** The scenario spec asserts a `HydratedSourcePool` summary whose pools all keep
+   * `invariantHolds` and that went over budget at least once (`overBudgetPeriods >= 1`), e.g.
+   * `maxHydratedSources: 1` with overlapping sources. Declared here so the spec never checks
+   * scenario ids. */
+  expectsHydratedPoolOverBudget?: boolean;
 };
 
+/** Legacy frame-time sample as written to the artifact (`stamp` = wall-clock seconds). */
 export type FrameTimeSample = { stamp: number; value: number };
-export type MemorySample = { timestampMs: number; metrics: BenchmarkMemoryMetric[] };
 
 /**
- * Raw per-run artifact written to `benchmark/.artifacts/<scenario-id>-<timestamp>.json`. Kept flat
+ * Process entry of a legacy `MemorySample`. Electron writes its `ProcessMetric`s
+ * (`app.getAppMetrics()`) unmodified, which are structurally compatible; the web runner writes this
+ * minimal subset built from CDP `SystemInfo.getProcessInfo` + `ps` RSS. Memory values are KB.
+ * `percentCPUUsage` keeps each platform's raw scale: Electron's is divided by the logical CPU count,
+ * web's is a per-core sum (the v1 result's `process.cpuPercent` is a per-core sum on both).
+ */
+export type LegacyProcessMetric = {
+  pid: number;
+  type: string;
+  memory: { workingSetSize: number; peakWorkingSetSize: number; privateBytes?: number };
+  cpu: { percentCPUUsage: number };
+};
+
+export type MemorySample = { timestampMs: number; metrics: LegacyProcessMetric[] };
+
+/**
+ * Raw per-run artifact written to `benchmark/.artifacts/<scenario-id>-<timestamp>.json` (Electron)
+ * or `<scenario-id>-web-<timestamp>.json` (web). Kept flat
  * and stable: a follow-up report generator (not part of this suite) parses this shape to produce
  * human-readable summaries/trends across runs.
  */
