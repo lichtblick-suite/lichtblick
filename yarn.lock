@@ -3669,7 +3669,7 @@ __metadata:
     heap-js: "npm:2.7.1"
     i18next: "npm:26.7.2"
     i18next-browser-languagedetector: "npm:8.2.0"
-    idb: "npm:7.1.1"
+    idb: "npm:8.0.4"
     idb-keyval: "npm:6.2.1"
     immer: "npm:10.1.1"
     intervals-fn: "npm:3.0.3"
@@ -13913,10 +13913,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"idb@npm:7.1.1":
-  version: 7.1.1
-  resolution: "idb@npm:7.1.1"
-  checksum: 10/8e33eaebf21055129864acb89932e0739b8c96788e559df24c253ce114d8c6deb977a3b30ea47a9bb8a2ae8a55964861c3df65f360d95745e341cee40d5c17f4
+"idb@npm:8.0.4":
+  version: 8.0.4
+  resolution: "idb@npm:8.0.4"
+  checksum: 10/c7bc0fbfe2cb20a884f5415ff7e51b25c1b6acdf744d24a291bb43282477a04496a2fd471918083e5247271ead58653a8797a830b09b0ddda1b6aea9485870d5
   languageName: node
   linkType: hard
 
