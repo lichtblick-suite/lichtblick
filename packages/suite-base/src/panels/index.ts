@@ -10,6 +10,7 @@ import { TFunction } from "i18next";
 import { PanelInfo } from "@lichtblick/suite-base/context/PanelCatalogContext";
 
 import { TAB_PANEL_TYPE } from "../util/constants";
+import audioThumbnail from "./Audio/thumbnail.png";
 import dataSourceInfoThumbnail from "./DataSourceInfo/thumbnail.png";
 import diagnosticStatusThumbnail from "./DiagnosticStatus/assets/diagnostic-status.png";
 import diagnosticSummaryThumbnail from "./DiagnosticSummary/assets/diagnostic-summary.png";
@@ -33,6 +34,13 @@ import userScriptEditorThumbnail from "./UserScriptEditor/thumbnail.png";
 import variableSliderThumbnail from "./VariableSlider/thumbnail.png";
 
 export const getBuiltin: (t: TFunction<"panels">) => PanelInfo[] = (t) => [
+  {
+    title: t("audio"),
+    type: "Audio",
+    description: t("audioDescription"),
+    thumbnail: audioThumbnail,
+    module: async () => await import("./Audio"),
+  },
   {
     title: t("3D"),
     type: "3D",
