@@ -95,19 +95,18 @@ function PanelWrapper({ children }: { children: ReactNode }): React.JSX.Element 
 function setupPipeline(
   batches: MessageEvent[][],
   cancel: () => void = jest.fn(),
-): { getSource: () => ReturnType<typeof createSourceIterable> } {
+): { getSource: () => ReturnType<typeof createSourceIterable>; getBatchIterator: jest.Mock } {
   let source: ReturnType<typeof createSourceIterable> | undefined;
   mockCreateMessageRangeIterator.mockImplementation((params: CreateMessageRangeIteratorParams) => {
     source = createSourceIterable(batches, params.onBatch);
     return { iterable: source.iterable, cancel };
   });
+  const getBatchIterator = jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() });
   mockUseMessagePipelineGetter.mockReturnValue(
-    jest.fn().mockReturnValue({
-      sortedTopics: [],
-      getBatchIterator: jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() }),
-    }),
+    jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator }),
   );
   return {
+    getBatchIterator,
     getSource: () => {
       if (source == undefined) {
         throw new Error("createMessageRangeIterator was not called");
@@ -173,6 +172,40 @@ describe("useSubscribeMessageRange telemetry", () => {
     expect(telemetry.gauge.mock.calls).toHaveLength(0);
     expect(telemetry.observe.mock.calls).toHaveLength(0);
     expect(telemetry.event.mock.calls).toHaveLength(0);
+  });
+
+  it("should count the batches of a bounded range (start/end)", async () => {
+    // GIVEN - an enabled sink and a source yielding the batches of a bounded range
+    const telemetry = TelemetryBuilder.mockTelemetry();
+    setTelemetrySink(telemetry);
+    const pipeline = setupPipeline([[buildMessage(4)], [buildMessage(6), buildMessage(2)]]);
+    const topic = BasicBuilder.string();
+    const start = { sec: 1, nsec: 0 };
+    const end = { sec: 2, nsec: 0 };
+    const received: Immutable<MessageEvent[]>[] = [];
+    const onNewRangeIterator = jest.fn(async (iterable: RangeIterable) => {
+      for await (const batch of iterable) {
+        received.push(batch);
+      }
+    });
+    const { result } = renderHook(() => useSubscribeMessageRange(), { wrapper: PanelWrapper });
+
+    // WHEN - the panel subscribes to the bounded range and consumes it
+    await act(async () => {
+      result.current({ topic, start, end, onNewRangeIterator });
+      await onNewRangeIterator.mock.results[0]!.value;
+    });
+
+    // THEN - the range reaches the pipeline and every bounded batch is counted
+    expect(pipeline.getBatchIterator).toHaveBeenCalledWith(topic, { start, end });
+    expect(lastOnBatch()).toEqual(expect.any(Function));
+    expect(received).toHaveLength(2);
+    expect(telemetry.counter.mock.calls).toEqual([
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDelivered, 1, "count", "panel", EXPECTED_LABELS],
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes, 4, "bytes", "panel", EXPECTED_LABELS],
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDelivered, 2, "count", "panel", EXPECTED_LABELS],
+      [PANEL_TELEMETRY_METRICS.rangeMessagesDeliveredBytes, 8, "bytes", "panel", EXPECTED_LABELS],
+    ]);
   });
 
   it("counts only the batches the consumer pulled when it stops early", async () => {

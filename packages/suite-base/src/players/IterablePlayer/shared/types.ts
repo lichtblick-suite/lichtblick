@@ -41,6 +41,7 @@ export type HydratedSourcePoolOptions = {
 
 /**
  * Point-in-time snapshot of HydratedSourcePool bookkeeping (see `HydratedSourcePool.getStats()`).
+ * Diagnostics and tests only, not a stable API.
  *
  * Gauges (current values): `residentCount`, `residentBytes`, `pinnedEntries`, `activePins`,
  * `overBudget`. Cumulative counters since construction: `acquires`, `releases`, `terminatedPins`,
@@ -73,7 +74,8 @@ export type HydratedSourcePoolStats = {
   // admit() calls that inserted a new entry (duplicates / post-terminate admits are not counted).
   admits: number;
   // Completed hydrator.close() calls (eviction, terminate, duplicate/late admit). A close that
-  // rejects is logged and not counted.
+  // rejects is not counted: eviction and terminate failures are logged, while admit() propagates
+  // the rejection to its caller.
   closes: number;
   // Entries evicted by the LRU budget.
   evictions: number;

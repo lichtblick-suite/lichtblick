@@ -24,3 +24,7 @@ For a full list of the package's exports, reference its [`index.ts` file](https:
 [`useInteractionCapture`](src/hooks/useInteractionCapture.ts) hook for wiring new UI click
 sources into it without hand-writing a `logEvent()` call at every handler. See the root
 repository README's Telemetry section for the user-facing opt-in model and privacy details.
+
+Separately, [`util/telemetry/`](src/util/telemetry) is a local, benchmark-only metrics API: it
+never sends data over the network, is not part of `IAnalytics`, and is a no-op unless the
+benchmark app installs a sink. See its [README](src/util/telemetry/README.md).

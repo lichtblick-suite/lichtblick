@@ -19,8 +19,10 @@ export const PIPELINE_TELEMETRY_METRICS = {
   /** gauge: number of subscription payloads across all subscribers */
   subscriptionsCount: "pipeline.subscriptions.count",
   /**
-   * observation: time from receiving a player state until the pipeline releases the player
-   * (dispatch + render + pause-frame promises). The sink publishes `.count`, `.sum` and `.max`.
+   * observation: duration of the player listener callback (the one registered with
+   * `player.setListener()`), from receiving a player state until the promise the player awaits
+   * resolves (dispatch + render + pause-frame promises). It is not the time to dispatch to
+   * subscribers alone. The sink publishes `.count`, `.sum` and `.max`.
    */
   listenerDispatchDurationMs: "pipeline.listenerDispatchDurationMs",
 } as const;
