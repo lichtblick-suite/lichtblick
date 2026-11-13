@@ -86,8 +86,9 @@ type Entry = {
  * `minResident`). Entering the state starts a period (`overBudgetPeriods`), leaving it adds the
  * elapsed time to `overBudgetDurationMs`. Victims are closed one at a time; the state is settled
  * as soon as a pass has removed its last victim, before that close is awaited, so a slow close
- * does not extend an over-budget period. `closes` counts completed `hydrator.close()` calls only
- * (failed closes are logged, not counted).
+ * does not extend an over-budget period. `closes` counts completed `hydrator.close()` calls only:
+ * a failed close is not counted; eviction and terminate failures are logged, while `admit()`
+ * propagates the rejection to its caller.
  * High-water marks for resident count/bytes are sampled after eviction passes (momentary values
  * inside a synchronous insert+evict step are not recorded); the active-pin and pending-entry
  * high-water marks are sampled when pins are added.
@@ -152,7 +153,12 @@ export class HydratedSourcePool {
     }
   }
 
-  /** Snapshot of the pool's bookkeeping. See `HydratedSourcePoolStats` for semantics. */
+  /**
+   * Snapshot of the pool's bookkeeping. See `HydratedSourcePoolStats` for semantics.
+   *
+   * @internal Diagnostics and tests only, not a stable API: product code should not depend on it.
+   * The benchmark reads the pool through its telemetry gauges and counters instead.
+   */
   public getStats(): HydratedSourcePoolStats {
     const counts = this.#counts;
     return {
