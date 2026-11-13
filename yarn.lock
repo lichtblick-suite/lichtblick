@@ -3643,7 +3643,7 @@ __metadata:
     chart.js: "npm:4.4.8"
     chartjs-plugin-annotation: "npm:3.0.1"
     chartjs-plugin-datalabels: "npm:2.2.0"
-    chromatic: "npm:11.5.6"
+    chromatic: "npm:18.12.1"
     crypto-browserify: "npm:3.12.0"
     css-loader: "npm:6.8.1"
     cytoscape: "npm:3.31.1"
@@ -9361,22 +9361,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:11.5.6":
-  version: 11.5.6
-  resolution: "chromatic@npm:11.5.6"
+"chromatic@npm:18.12.1":
+  version: 18.12.1
+  resolution: "chromatic@npm:18.12.1"
+  dependencies:
+    semver: "npm:^7.3.5"
   peerDependencies:
     "@chromatic-com/cypress": ^0.*.* || ^1.0.0
     "@chromatic-com/playwright": ^0.*.* || ^1.0.0
+    "@chromatic-com/vitest": ^0.*.* || ^1.0.0
+  dependenciesMeta:
+    "@sentry/cli":
+      built: true
+    esbuild:
+      built: true
   peerDependenciesMeta:
     "@chromatic-com/cypress":
       optional: true
     "@chromatic-com/playwright":
       optional: true
+    "@chromatic-com/vitest":
+      optional: true
   bin:
-    chroma: dist/bin.js
-    chromatic: dist/bin.js
-    chromatic-cli: dist/bin.js
-  checksum: 10/7ca4c0ff3bcba5f721c0cde4f68283709e1d91e63b621df35757ca7d9cbd25823c5a6ef043335508778d56f82b9b649bfbf07b8aebb4a09a35b098ab47943fae
+    chroma: dist/bin.cjs
+    chromatic: dist/bin.cjs
+    chromatic-cli: dist/bin.cjs
+  checksum: 10/80aac15d79fd3bb49cee359fed3e3fa8f5eda46bd889c00aaa30c34f5aa28929434ecb3374be31d552f8b857394287c8e6912eff04d8cbe227a57ce1cc780fd7
   languageName: node
   linkType: hard
 
