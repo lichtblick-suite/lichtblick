@@ -10,4 +10,6 @@ export type RemoteFileReadableOptions = {
   readAheadEnabled?: boolean;
   readAheadBufferBytes?: number;
   maxConcurrentConnections?: number;
+  // Start background download as soon as initialization finishes (single-file sources).
+  startReadAheadAfterInit?: boolean;
 };

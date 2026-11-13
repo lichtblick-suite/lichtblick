@@ -758,9 +758,9 @@ describe("getNewConnection", () => {
         readRequestRange: { start: 40, end: 50 },
       });
 
-      // THEN: a new connection is started for the uncovered range, read-ahead-extended to the
-      // end of the (small, 1000-byte) file since the default 50 MiB read-ahead buffer exceeds it.
-      expect(newConnection).toEqual({ start: 40, end: 1000 });
+      // THEN: a new connection is started for the uncovered range, read-ahead-extended only up to
+      // the nearest in-flight connection ahead of it (800), so no bytes are downloaded twice.
+      expect(newConnection).toEqual({ start: 40, end: 800 });
     });
 
     it("does not start a new connection when an additional connection overlaps but the primary does not", () => {
@@ -811,7 +811,62 @@ describe("getNewConnection", () => {
         readRequestRange: { start: 40, end: 50 },
       });
 
-      expect(newConnection).toEqual({ start: 40, end: 1000 });
+      expect(newConnection).toEqual({ start: 40, end: 900 });
+    });
+  });
+
+  describe("read-ahead extension does not re-download bytes", () => {
+    const defaults = {
+      currentRemainingRange: undefined,
+      lastResolvedCallbackEnd: undefined,
+      maxRequestSize: 500 * MEBIBYTE,
+      fileSize: 400 * MEBIBYTE,
+      continueDownloadingThreshold: 5 * MEBIBYTE,
+    };
+
+    it("stops at an in-flight connection that starts just after a seek read", () => {
+      // GIVEN: a connection is already downloading from 95 MiB, and a seek read lands slightly
+      // before it (the pattern seen after seeks in the benchmark logs).
+      const newConnection = getNewConnection({
+        ...defaults,
+        currentRemainingRange: { start: 95 * MEBIBYTE, end: 145 * MEBIBYTE },
+        downloadedRanges: [],
+        readRequestRange: { start: 94 * MEBIBYTE, end: 94 * MEBIBYTE + 1024 },
+      });
+
+      // THEN: the new connection ends where the in-flight one starts, instead of both
+      // downloading 95-144 MiB.
+      expect(newConnection).toEqual({ start: 94 * MEBIBYTE, end: 95 * MEBIBYTE });
+    });
+
+    it("stops at a cached range ahead of the read", () => {
+      // GIVEN: the last 64 KiB of the file are already cached (edge prefetch) and a summary read
+      // ends just before them.
+      const tailStart = 400 * MEBIBYTE - 64 * 1024;
+      const newConnection = getNewConnection({
+        ...defaults,
+        downloadedRanges: [{ start: tailStart, end: 400 * MEBIBYTE }],
+        readRequestRange: { start: tailStart - 2048, end: tailStart - 1024 },
+      });
+
+      // THEN: the read-ahead stops at the cached tail instead of fetching it again.
+      expect(newConnection).toEqual({ start: tailStart - 2048, end: tailStart });
+    });
+
+    it("keeps the normal read-ahead size when the next boundary is farther away", () => {
+      // GIVEN: an in-flight connection far beyond the 50 MiB read-ahead window.
+      const newConnection = getNewConnection({
+        ...defaults,
+        additionalRemainingRanges: [{ start: 300 * MEBIBYTE, end: 350 * MEBIBYTE }],
+        downloadedRanges: [],
+        readRequestRange: { start: 10 * MEBIBYTE, end: 10 * MEBIBYTE + 1024 },
+      });
+
+      // THEN: the connection reads ahead the usual 50 MiB from the read start.
+      expect(newConnection).toEqual({
+        start: 10 * MEBIBYTE,
+        end: 10 * MEBIBYTE + READ_AHEAD_BUFFER_SIZE,
+      });
     });
   });
 });

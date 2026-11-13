@@ -164,6 +164,9 @@ export class McapIterableSource implements ISerializedIterableSource {
           : {}),
         maxConcurrentConnections:
           source.maxConcurrentConnections ?? DEFAULT_URL_MAX_CONCURRENT_CONNECTIONS,
+        ...(source.startReadAheadAfterInit != undefined
+          ? { startReadAheadAfterInit: source.startReadAheadAfterInit }
+          : {}),
       });
       await readable.open();
       this.#persistentReadable = readable;

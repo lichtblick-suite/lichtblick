@@ -28,7 +28,12 @@ export function initialize(
     const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   } else if (args.url) {
-    const source = new McapIterableSource({ type: "url", url: args.url });
+    // A single remote file streams in the background right after init; bundles stay quiet.
+    const source = new McapIterableSource({
+      type: "url",
+      url: args.url,
+      startReadAheadAfterInit: true,
+    });
     const wrapped = new WorkerSerializedIterableSourceWorker(source);
     return Comlink.proxy(wrapped);
   } else if (args.urls) {
