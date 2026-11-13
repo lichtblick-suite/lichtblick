@@ -3699,7 +3699,7 @@ __metadata:
     react-markdown: "npm:9.0.1"
     react-monaco-editor: "npm:0.59.0"
     react-mosaic-component: "npm:6.2.0"
-    react-refresh-typescript: "npm:2.0.10"
+    react-refresh-typescript: "npm:2.0.12"
     react-resizable-panels: "npm:2.1.6"
     react-resize-detector: "npm:12.3.0"
     react-transition-group: "npm:4.4.5"
@@ -3781,7 +3781,7 @@ __metadata:
     randomstring: "npm:1.3.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-refresh-typescript: "npm:2.0.10"
+    react-refresh-typescript: "npm:2.0.12"
     react-use: "npm:17.6.0"
     tinycolor2: "npm:1.6.0"
     tss-react: "npm:4.9.19"
@@ -18742,13 +18742,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-refresh-typescript@npm:2.0.10":
-  version: 2.0.10
-  resolution: "react-refresh-typescript@npm:2.0.10"
+"react-refresh-typescript@npm:2.0.12":
+  version: 2.0.12
+  resolution: "react-refresh-typescript@npm:2.0.12"
   peerDependencies:
-    react-refresh: 0.10.x || 0.11.x || 0.12.x || 0.13.x || 0.14.x || 0.15.x || 0.16.x || 0.17.x
-    typescript: ^4.8 || ^5.0
-  checksum: 10/051feb99c7be74e189272ab8ac52827dcb482dae1852d35eb4c7dfa688c14f796cacd8b482a45dee3954bb660805da47f1411af1f3b5e695587a71d5c2718a82
+    react-refresh: 0.10.x || 0.11.x || 0.12.x || 0.13.x || 0.14.x || 0.15.x || 0.16.x || 0.17.x || 0.18.x || 0.19.x
+    typescript: ^4.8 || ^5.0 || ^6.0
+  checksum: 10/b94fbce78c45045a46ff5ec1e30af0d7085228da4bf6717aeb91bf2eee1dcb45d04559d7c54976538208fe0cc8dc4a1d0fed454c4da7618ae0d4311bb7ddafdf
   languageName: node
   linkType: hard
 
