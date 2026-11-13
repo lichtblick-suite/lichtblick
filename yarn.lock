@@ -3711,7 +3711,7 @@ __metadata:
     react-resize-detector: "npm:12.3.0"
     react-transition-group: "npm:4.4.5"
     react-use: "npm:17.6.0"
-    react-virtualized-auto-sizer: "npm:1.0.26"
+    react-virtualized-auto-sizer: "npm:2.0.3"
     react-window: "npm:2.2.7"
     readable-stream: "npm:4.8.0"
     recharts: "npm:2.15.3"
@@ -18895,13 +18895,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-virtualized-auto-sizer@npm:1.0.26":
-  version: 1.0.26
-  resolution: "react-virtualized-auto-sizer@npm:1.0.26"
+"react-virtualized-auto-sizer@npm:2.0.3":
+  version: 2.0.3
+  resolution: "react-virtualized-auto-sizer@npm:2.0.3"
   peerDependencies:
-    react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
-    react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/8f8127369fb3ae1a49987a1e7d2d136f379b71d1b031a4c169389274946eca0248e3fb9130aa8a7ebe82f4ca8aaab58c37252398f8f6220a6eafaa78b8464b6b
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10/85054963d8b418915ffbd73c528ca580f63e3a73e8a2946ad761a94b86986ba9fd1b89e84a99f9b08b04d6d24fabba318a42d3622d1228092c0da8647fba81ea
   languageName: node
   linkType: hard
 
