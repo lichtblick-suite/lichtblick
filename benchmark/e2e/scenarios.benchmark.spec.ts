@@ -78,14 +78,17 @@ for (const scenario of SCENARIOS_UNDER_TEST) {
       }
     }
 
-    if (scenario.scenarioId === "mcap-multi-ingest") {
+    // And: expectations declared on the scenario under test (no scenario-id checks here)
+    if (scenario.expectsHydratedPoolOverBudget === true) {
       const pools = Object.values(result.summary.hydratedSourcePool?.pools ?? {});
       expect(pools.length).toBeGreaterThan(0);
       for (const pool of pools) {
         expect(pool.invariantHolds).toBe(true);
       }
-      // AC3: with `maxHydratedSources: 1` and fully overlapping sources the pool goes over budget.
+      // e.g. `maxHydratedSources: 1` with fully overlapping sources: the pool goes over budget.
       expect(Math.max(...pools.map((pool) => pool.overBudgetPeriods))).toBeGreaterThanOrEqual(1);
+    }
+    if (scenario.pipeline === "real") {
       const events = result.events.map((event) => `${event.name}:${event.phase}`);
       expect(events).toContain("datasource.open:end");
       expect(events).toContain("datasource.firstMessage:instant");

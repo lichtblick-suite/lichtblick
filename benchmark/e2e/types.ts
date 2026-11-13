@@ -14,6 +14,11 @@ export type ScenarioUnderTest = {
   /** The scenario reads the runtime-generated MCAP fixtures (`fixtures/generateMcapFixtures.ts`),
    * passed to the page as `?ds.url=<comma-separated fixture URLs>`. */
   usesMcapFixtures?: boolean;
+  /** The scenario spec asserts a `HydratedSourcePool` summary whose pools all keep
+   * `invariantHolds` and that went over budget at least once (`overBudgetPeriods >= 1`), e.g.
+   * `maxHydratedSources: 1` with overlapping sources. Declared here so the spec never checks
+   * scenario ids. */
+  expectsHydratedPoolOverBudget?: boolean;
 };
 
 /** Legacy frame-time sample as written to the artifact (`stamp` = wall-clock seconds). */
