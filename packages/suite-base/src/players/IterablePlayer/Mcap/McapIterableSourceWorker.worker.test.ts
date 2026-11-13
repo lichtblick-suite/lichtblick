@@ -82,11 +82,7 @@ describe("initialize", () => {
 
     const result = initialize({ url });
 
-    expect(McapIterableSource).toHaveBeenCalledWith({
-      type: "url",
-      url,
-      startReadAheadAfterInit: true,
-    });
+    expect(McapIterableSource).toHaveBeenCalledWith({ type: "url", url });
     expect(WorkerSerializedIterableSourceWorker).toHaveBeenCalled();
     expect(Comlink.proxy).toHaveBeenCalled();
     expect(result).toBeInstanceOf(WorkerSerializedIterableSourceWorker);
