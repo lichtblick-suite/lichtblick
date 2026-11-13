@@ -80,6 +80,7 @@ jobs:
             benchmark/.artifacts/report/**
             !benchmark/.artifacts/fixtures/**
           if-no-files-found: warn
+          include-hidden-files: true
 
   e2e-benchmark-web:
     runs-on: ubuntu-latest
@@ -141,3 +142,4 @@ jobs:
             benchmark/.artifacts/report/**
             !benchmark/.artifacts/fixtures/**
           if-no-files-found: warn
+          include-hidden-files: true
