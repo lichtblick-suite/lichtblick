@@ -38,6 +38,11 @@ const DEFAULT_MAX_CONCURRENT_CONNECTIONS = 1;
 
 const log = Logger.getLogger(__filename);
 
+type CommonConnectionOptions = Omit<
+  Parameters<typeof getNewConnection>[0],
+  "currentRemainingRange" | "additionalRemainingRanges" | "readRequestRange"
+>;
+
 export default class CachedFilelike implements Filelike {
   #fileReader: FileReader;
   #cacheSizeInBytes: number = Infinity;
@@ -282,6 +287,17 @@ export default class CachedFilelike implements Filelike {
       return;
     }
 
+    this.#resolveSatisfiedReadRequests();
+
+    const commonOptions = this.#getConnectionOptions();
+    if (this.#readRequests.length === 0) {
+      this.#readAheadWhenIdle(commonOptions);
+    } else {
+      this.#openConnectionsForReadRequests(commonOptions);
+    }
+  }
+
+  #resolveSatisfiedReadRequests(): void {
     this.#readRequests = this.#readRequests.filter(({ range, resolve }) => {
       if (!this.#virtualBuffer.hasData(range.start, range.end)) {
         return true;
@@ -293,34 +309,37 @@ export default class CachedFilelike implements Filelike {
       resolve(buffer);
       return false;
     });
+  }
 
-    const size = this.size();
-    const commonOptions = {
+  #getConnectionOptions(): CommonConnectionOptions {
+    return {
       downloadedRanges: this.#virtualBuffer.getRangesWithData(),
       lastResolvedCallbackEnd: this.#lastResolvedCallbackEnd,
       maxRequestSize: this.#cacheSizeInBytes,
-      fileSize: size,
+      fileSize: this.size(),
       continueDownloadingThreshold: CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION,
       readAheadEnabled: this.#readAheadEnabled,
       readAheadBufferBytes: this.#readAheadBufferBytes,
     };
+  }
 
-    if (this.#readRequests.length === 0) {
-      // Only read ahead speculatively when no connection is open.
-      if (this.#connections.length === 0) {
-        const newConnection = getNewConnection({
-          currentRemainingRange: undefined,
-          readRequestRange: undefined,
-          ...commonOptions,
-        });
-        if (newConnection) {
-          this.#setConnection(newConnection);
-        }
-      }
+  // Only read ahead speculatively when no connection is open.
+  #readAheadWhenIdle(commonOptions: CommonConnectionOptions): void {
+    if (this.#connections.length > 0) {
       return;
     }
+    const newConnection = getNewConnection({
+      currentRemainingRange: undefined,
+      readRequestRange: undefined,
+      ...commonOptions,
+    });
+    if (newConnection) {
+      this.#setConnection(newConnection);
+    }
+  }
 
-    // Oldest request has priority; later requests may not evict connections serving earlier ones.
+  // Oldest request has priority; later requests may not evict connections serving earlier ones.
+  #openConnectionsForReadRequests(commonOptions: CommonConnectionOptions): void {
     const higherPriorityRanges: Range[] = [];
     const servingStreams = new Set<FileStream>();
     for (const request of this.#readRequests) {
@@ -338,19 +357,27 @@ export default class CachedFilelike implements Filelike {
         );
       }
       higherPriorityRanges.push(request.range);
-      for (const connection of this.#connections) {
-        if (isOverlapping([connection.remainingRange], [request.range])) {
-          servingStreams.add(connection.stream);
-        }
-      }
+      this.#collectServingStreams(request.range, servingStreams);
       // Later requests can't get a connection once every slot serves an earlier request.
-      if (
-        this.#connections.length >= this.#maxConcurrentConnections &&
-        this.#connections.every((c) => servingStreams.has(c.stream))
-      ) {
+      if (this.#everySlotServes(servingStreams)) {
         break;
       }
     }
+  }
+
+  #collectServingStreams(range: Range, servingStreams: Set<FileStream>): void {
+    for (const connection of this.#connections) {
+      if (isOverlapping([connection.remainingRange], [range])) {
+        servingStreams.add(connection.stream);
+      }
+    }
+  }
+
+  #everySlotServes(servingStreams: Set<FileStream>): boolean {
+    return (
+      this.#connections.length >= this.#maxConcurrentConnections &&
+      this.#connections.every((c) => servingStreams.has(c.stream))
+    );
   }
 
   // Open a connection for `range`, evicting one first when at capacity. Connections overlapping
