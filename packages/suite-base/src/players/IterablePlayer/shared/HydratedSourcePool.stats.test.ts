@@ -761,6 +761,38 @@ describe("HydratedSourcePool stats", () => {
       expect(counter("overBudgetDurationMs")).toMatchObject({ value: 0, unit: "ms" });
     });
 
+    it("should publish each removal while an earlier victim's close is still pending", async () => {
+      // Given: two unpinned entries, the first with a close that stays pending until resolved
+      const sink = makeSink();
+      const pool = new HydratedSourcePool({ maxBytes: 100, telemetry: sink, poolId: "multi" });
+      const slowClose = deferred<void>();
+      const slowHydrator = makeHydrator("A", 10);
+      slowHydrator.close.mockReturnValue(slowClose.promise);
+      await pool.admit({}, slowHydrator, "A");
+      await pool.admit({}, makeHydrator("B", 10), "B");
+      sink.publishNow();
+      sink.drain();
+
+      // When: a heavy hydration needs two evictions and the first close is still pending
+      const acquired = pool.acquire({}, makeHydrator("C", 200));
+      await flushMicrotasks();
+      sink.publishNow();
+      const duringClose = poolSamples(sink.drain().records);
+      slowClose.resolve();
+      await acquired;
+      sink.publishNow();
+      const afterPass = poolSamples(sink.drain().records);
+
+      // Then
+      expect(slowHydrator.close).toHaveBeenCalledTimes(1);
+      expect(duringClose.get("residentBytes")?.at(-1)).toMatchObject({ value: 210 });
+      expect(duringClose.get("residentCount")?.at(-1)).toMatchObject({ value: 2 });
+      expect(duringClose.get("evictions")?.at(-1)).toMatchObject({ value: 1 });
+      expect(afterPass.get("residentBytes")?.at(-1)).toMatchObject({ value: 200 });
+      expect(afterPass.get("evictions")?.at(-1)).toMatchObject({ value: 2 });
+      expect(afterPass.get("closes")?.at(-1)).toMatchObject({ value: 2 });
+    });
+
     it("publishes over-budget duration increments while the period is open", async () => {
       // Given
       const sink = makeSink();

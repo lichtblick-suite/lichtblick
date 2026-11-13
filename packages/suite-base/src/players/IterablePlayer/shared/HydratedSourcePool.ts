@@ -352,8 +352,11 @@ export class HydratedSourcePool {
       }
       // When this removal ends the pass, settle before awaiting the close: a slow close must not
       // extend an over-budget period, and release() callers read the stats without awaiting.
+      // Otherwise publish the removal, so a slow close does not leave stale gauges in the sink.
       if (!this.#hasEvictionCandidate()) {
         this.#settle();
+      } else {
+        this.#publish();
       }
       await this.#closeEvicted(victim);
     }
