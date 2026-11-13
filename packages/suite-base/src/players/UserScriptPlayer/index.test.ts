@@ -2060,6 +2060,22 @@ describe("UserScriptPlayer", () => {
       expect(result).toBe(mockIterator);
     });
 
+    it("forwards range options to underlying player for non-script topics", () => {
+      const fakePlayer = new FakePlayer();
+      const mockIterator = (async function* () {})();
+      const getBatchIteratorSpy = jest
+        .spyOn(fakePlayer, "getBatchIterator")
+        .mockReturnValue(mockIterator);
+      const range = { start: { sec: 1, nsec: 0 }, end: { sec: 2, nsec: 0 } };
+
+      const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
+      void setListenerHelper(userScriptPlayer);
+
+      const result = userScriptPlayer.getBatchIterator("/np_input", range);
+      expect(getBatchIteratorSpy).toHaveBeenCalledWith("/np_input", range);
+      expect(result).toBe(mockIterator);
+    });
+
     it("returns undefined for unknown topics when underlying player returns undefined", () => {
       const fakePlayer = new FakePlayer();
       const userScriptPlayer = new UserScriptPlayer(fakePlayer, defaultUserScriptActions);
