@@ -12,13 +12,19 @@ name: Dependabot
 on:
   - pull_request_target
 
+# All writes go through LICHTBLICK_GITHUB_TOKEN, scoped to the steps that need it.
+permissions:
+  contents: read
+  pull-requests: read
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   fix:
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    # triggering_actor blocks manual re-runs, which keep the original actor but check out the current head.
+    if: github.actor == 'dependabot[bot]' && github.triggering_actor == 'dependabot[bot]'
 
     # IMPORTANT: setting YARN_ENABLE_SCRIPTS=false is critical to ensure that untrusted
     # PRs can't add an npm package and then use that to execute untrusted code in
@@ -28,15 +34,13 @@ jobs:
       YARN_ENABLE_SCRIPTS: false
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Using a Personal Access Token here is required to trigger workflows on our new commit.
-          # The default GitHub token doesn't trigger any workflows.
-          # See: https://github.community/t/push-from-action-does-not-trigger-subsequent-action/16854/2
-          token: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.ref }}
+          # Keep credentials out of .git/config while dependencies are installed.
+          persist-credentials: false
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
 
@@ -56,25 +60,25 @@ jobs:
           git config user.email "49699333+dependabot[bot]@users.noreply.github.com"
           git add -u
           git commit -m '[dependabot skip] Fix yarn.lock' --allow-empty
-          git push
-
-      - uses: octokit/request-action@v3.0.0
-        if: contains(fromJSON('["opened", "reopened"]'), github.event.action)
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/${HEAD_REF}"
         env:
-          GITHUB_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
-        with:
-          route: POST /repos/{owner_and_repo}/pulls/{pull_number}/reviews
-          owner_and_repo: ${{ github.repository }}
-          pull_number: ${{ github.event.pull_request.number }}
-          event: "APPROVE"
+          # A PAT is required so the push triggers workflows; GITHUB_TOKEN pushes don't.
+          GH_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
 
-      - uses: octokit/request-action@v3.0.0
-        if: contains(fromJSON('["opened", "reopened"]'), github.event.action)
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2.5.0
+
+      # Native auto-merge: GitHub merges only once all required status checks pass.
+      - name: Approve and enable auto-merge
+        if: >-
+          contains(fromJSON('["opened", "reopened", "synchronize"]'), github.event.action) &&
+          contains(fromJSON('["version-update:semver-patch", "version-update:semver-minor"]'), steps.metadata.outputs.update-type)
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr merge --auto --merge "$PR_URL"
         env:
-          GITHUB_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
-        with:
-          route: POST /repos/{owner_and_repo}/issues/{pull_number}/comments
-          owner_and_repo: ${{ github.repository }}
-          pull_number: ${{ github.event.pull_request.number }}
-          # two quotes are needed to avoid a syntax error when running the action
-          body: "'@dependabot squash and merge'"
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.LICHTBLICK_GITHUB_TOKEN }}
