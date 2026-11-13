@@ -1462,6 +1462,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.29.7 || ^8.0.5":
+  version: 8.1.0
+  resolution: "@babel/runtime@npm:8.1.0"
+  checksum: 10/b14d2bb7844460af0a8e71fab226156bebd68aad9ebec35bd0b57260e2c007ae4b5d2e3d8a0d6256ee07e183652b2de3c252b0727c9fe25a4aa923f7dc88d5ea
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.29.7, @babel/template@npm:^7.4.4":
   version: 7.29.7
   resolution: "@babel/template@npm:7.29.7"
@@ -3587,7 +3594,7 @@ __metadata:
     "@lichtblick/wasm-lz4": "npm:1.0.0"
     "@lichtblick/xmlrpc": "npm:1.0.0"
     "@mcap/core": "npm:2.4.0"
-    "@mui/icons-material": "npm:7.3.8"
+    "@mui/icons-material": "npm:9.5.0"
     "@mui/material": "npm:7.2.0"
     "@mui/x-data-grid": "npm:7.24.1"
     "@opentelemetry/api": "npm:1.9.1"
@@ -3845,7 +3852,7 @@ __metadata:
     "@emotion/styled": "npm:11.14.1"
     "@fluentui/react-icons": "npm:2.0.308"
     "@lichtblick/tsconfig": "npm:1.1.2"
-    "@mui/icons-material": "npm:7.3.8"
+    "@mui/icons-material": "npm:9.5.0"
     "@mui/lab": "npm:5.0.0-alpha.177"
     "@mui/material": "npm:7.2.0"
     "@mui/x-data-grid": "npm:6.18.7"
@@ -3999,19 +4006,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:7.3.8":
-  version: 7.3.8
-  resolution: "@mui/icons-material@npm:7.3.8"
+"@mui/icons-material@npm:9.5.0":
+  version: 9.5.0
+  resolution: "@mui/icons-material@npm:9.5.0"
   dependencies:
-    "@babel/runtime": "npm:^7.28.6"
+    "@babel/runtime": "npm:^7.29.7 || ^8.0.5"
   peerDependencies:
-    "@mui/material": ^7.3.8
+    "@mui/material": ^9.5.0
     "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/0a26f81a7d4104dfd475444ea45e7db5945ec21507288ce40c763de9566e65ae2f33944d44bac451a1e4a04e4b71223cc51e36e8db113bb8e092a1da4ad62ea0
+  checksum: 10/d58a410f5628da5e55b99f995e5f680edb3fffbc42ec4c1fd4fa7cde13821cfaaf4c160c787842502948cf1027325f97dc2e05e97a9a1b9fb72077a933700514
   languageName: node
   linkType: hard
 
