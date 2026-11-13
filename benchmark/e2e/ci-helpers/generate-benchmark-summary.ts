@@ -142,11 +142,13 @@ function printScenarioMetrics(): void {
     })
     .sort((a, b) => a.label.localeCompare(b.label));
 
+  // `frameTimeSamples` (legacy `window.recordFrameTimes`) hold listener dispatch durations, not
+  // rendered-frame times.
   process.stdout.write(
-    "| Scenario | Pipeline | Avg Memory | Peak Memory | Avg Frame Time | Frame Samples |\n",
+    "| Scenario | Pipeline | Avg Memory | Peak Memory | Avg Listener Dispatch | Dispatch Samples |\n",
   );
   process.stdout.write(
-    "|----------|----------|------------|-------------|-----------------|----------------|\n",
+    "|----------|----------|------------|-------------|-----------------------|------------------|\n",
   );
 
   for (const { artifact, label } of artifacts) {
@@ -156,11 +158,11 @@ function printScenarioMetrics(): void {
     const avgMemoryKb = average(memoryTotalsKb);
     const peakMemoryKb = memoryTotalsKb.length > 0 ? Math.max(...memoryTotalsKb) : 0;
 
-    const frameTimes = artifact.frameTimeSamples.map((sample) => sample.value);
-    const avgFrameTime = frameTimes.length > 0 ? `${average(frameTimes).toFixed(2)}ms` : "n/a";
+    const dispatchMs = artifact.frameTimeSamples.map((sample) => sample.value);
+    const avgDispatch = dispatchMs.length > 0 ? `${average(dispatchMs).toFixed(2)}ms` : "n/a";
 
     process.stdout.write(
-      `| ${label} | ${artifact.pipeline} | ${formatMemoryKb(avgMemoryKb)} | ${formatMemoryKb(peakMemoryKb)} | ${avgFrameTime} | ${frameTimes.length} |\n`,
+      `| ${label} | ${artifact.pipeline} | ${formatMemoryKb(avgMemoryKb)} | ${formatMemoryKb(peakMemoryKb)} | ${avgDispatch} | ${dispatchMs.length} |\n`,
     );
   }
 }
@@ -220,21 +222,24 @@ function readOverheadReports(): OverheadReport[] {
     });
 }
 
-function printScorecard(overheads: readonly OverheadReport[]): void {
+function printScorecard(
+  results: readonly PersistedResultV1[],
+  overheads: readonly OverheadReport[],
+): void {
   process.stdout.write("\n## KPI Scorecard (per platform, latest telemetry-on run per scenario)\n");
-  process.stdout.write(buildScorecardTable(readResultsV1(), overheads));
+  process.stdout.write(buildScorecardTable(results, overheads));
   process.stdout.write("\n### Exercises\n");
-  process.stdout.write(buildExercisesLines(readResultsV1()));
+  process.stdout.write(buildExercisesLines(results));
 }
 
-function printTelemetryResults(): void {
+function printTelemetryResults(results: readonly PersistedResultV1[]): void {
   process.stdout.write("\n## Benchmark Telemetry Results (benchmark-result.v1)\n");
-  process.stdout.write(buildResultsTable(readResultsV1()));
+  process.stdout.write(buildResultsTable(results));
 }
 
-function printPanelsAndPipeline(): void {
+function printPanelsAndPipeline(results: readonly PersistedResultV1[]): void {
   process.stdout.write("\n## Panels and Pipeline (benchmark-result.v1)\n");
-  process.stdout.write(buildPanelsSection(readResultsV1()));
+  process.stdout.write(buildPanelsSection(results));
 }
 
 function printOverheadReports(overheads: readonly OverheadReport[]): void {
@@ -244,12 +249,14 @@ function printOverheadReports(overheads: readonly OverheadReport[]): void {
 
 function main(): void {
   process.stdout.write("# Benchmark E2E Summary\n");
+  // Read once: every section sees the same snapshot of the v1 results.
+  const results = readResultsV1();
   const overheads = readOverheadReports();
-  printScorecard(overheads);
+  printScorecard(results, overheads);
   printTestResults();
   printScenarioMetrics();
-  printTelemetryResults();
-  printPanelsAndPipeline();
+  printTelemetryResults(results);
+  printPanelsAndPipeline(results);
   printOverheadReports(overheads);
 }
 

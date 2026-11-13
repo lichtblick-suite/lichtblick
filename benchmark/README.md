@@ -7,7 +7,7 @@ performance and memory under repeatable scenarios. It has two parts:
   scenario bootstrapping (`?scenario=<id>`) and an in-page telemetry API (`window.lichtblickTelemetry`).
 - **The benchmark E2E runner** (`benchmark/e2e`): a Playwright suite that drives every scenario on
   **Electron** and **web (headless Chromium)**. It collects host process metrics, in-app telemetry,
-  phase events and frame times, and writes JSON artifacts plus a markdown summary.
+  phase events and listener dispatch durations, and writes JSON artifacts plus a markdown summary.
 
 Telemetry exists **only in the benchmark build**. The product app keeps its no-op telemetry sink.
 
@@ -219,11 +219,24 @@ Caveats:
   `layout.applied` (`phases.layoutAppliedMs`), `panel.firstRender` / `panel.mount`
   (`phases.panelsReadyMs`) or `datasource.firstMessage` (`phases.firstMessageMs`).
 - `run.environment.hostCpuSource` says where process CPU came from: `cdp` (web, CPU time between
-  polls), `app-metrics` (Electron, CPU since the previous poll) or `ps` (web, CDP failed). With
-  `ps` the run has **no CPU**: `pcpu` is ps' own lifetime (Linux) or decaying (macOS) average, not
-  CPU per poll, so it is not recorded, and `summary.process.medianTotalCpuPercent`, `cpuSeconds`,
-  `byType.*.medianCpuPercent` and `kpis.cpu` stay empty instead of mixing it with interval CPU.
-  Older results lack the field.
+  polls), `app-metrics` (Electron, CPU since the previous poll) or `ps` (web, CDP failed at some
+  point during the run; the collector stays on `ps` from then on). With `ps` the run has **no CPU
+  summary**: `pcpu` is ps' own lifetime (Linux) or decaying (macOS) average, not CPU per poll, so it
+  is not recorded, and `summary.process.medianTotalCpuPercent`, `cpuSeconds`,
+  `byType.*.medianCpuPercent` and `kpis.cpu` stay empty for the whole run instead of mixing it with
+  interval CPU. Per-poll `process.cpuPercent` samples taken through CDP before the fallback remain
+  in `samples`. Older results lack the field.
+- `renderer.uaSpecificMemory.bytes` (`summary.renderer.lastUaSpecificMemoryBytes`) needs a
+  cross-origin isolated page **and** the full Chromium build. The scenario runs have it on neither
+  platform, also in CI: web uses Playwright's default `chromium-headless-shell`, which rejects every
+  `performance.measureUserAgentSpecificMemory()` call with a `SecurityError`, and the Electron page
+  is `file://`, which is not cross-origin isolated. Only a web launch with
+  `launchTarget({ webBrowser: "chromium" })` (full Chromium in new headless mode) collects it: the
+  overhead spec does this for every web arm (see "Browser (web)" under
+  [Telemetry overhead](#telemetry-overhead-report-only)). `run.environment.webBrowser` and
+  `crossOriginIsolated` record both conditions. Choosing the browser for scenario runs (e.g. a
+  `BENCHMARK_WEB_BROWSER` env var) is a possible follow-up; it would change the web process set and
+  so the CPU/memory baseline.
 - Web runs in headless Chromium use **SwiftShader** (software GL). That makes the `gpu` process
   CPU very high (hundreds of percent) and makes CPU noisy. Compare web CPU only to other web
   runs.
@@ -1110,11 +1123,13 @@ and shown in the job summary and the HTML report. Like the local run, it is repo
 A manual run is only available once the workflow file is on the default branch.
 
 Each job adds `yarn test:e2e:benchmark:summary` to the job summary. It starts with a compact KPI
-scorecard per platform and one "Exercises" line per scenario, then covers the legacy table,
-the v1 results table, the panels and pipeline section, and the overhead table when overhead reports
-are present (push runs read "No overhead reports found."). Each job then
-generates the HTML report (see [Viewing results](#viewing-results)) and adds a pointer to it in the
-job summary. Finally it uploads `benchmark/.artifacts/**/*.json`, the checkpoint screenshots in
+scorecard per platform and one "Exercises" line per scenario, then covers the legacy table
+(average and peak memory, and the average listener dispatch duration of the legacy
+`frameTimeSamples`, which are not rendered-frame times), the v1 results table, the panels and
+pipeline section, and the overhead table when overhead reports are present (push runs read "No
+overhead reports found."). Each job then generates the HTML report (see
+[Viewing results](#viewing-results)) and adds a pointer to it in the job summary. Finally it
+uploads `benchmark/.artifacts/**/*.json`, the checkpoint screenshots in
 `benchmark/.artifacts/screenshots/` and `benchmark/.artifacts/report/`, excluding the fixtures.
 
 ## Deferred

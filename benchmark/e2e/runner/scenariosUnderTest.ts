@@ -20,6 +20,7 @@ export const SCENARIOS_UNDER_TEST: readonly ScenarioUnderTest[] = [
     pipeline: "real",
     durationMs: 10_000,
     usesMcapFixtures: true,
+    expectsHydratedPoolOverBudget: true,
   },
 ];
 

@@ -271,7 +271,13 @@ export class WebHostCollector {
     }));
   }
 
-  /** CPU source so far (`run.environment.hostCpuSource`): `ps` once CDP failed. */
+  /**
+   * CPU source of the run so far (`run.environment.hostCpuSource`, read when the result is built):
+   * `ps` as soon as CDP failed once, also if earlier polls got `cpuPercent` from CDP deltas. `ps`
+   * means "fell back during the run", not "every sample came from ps": the result then drops CPU
+   * from the summary and KPIs for the whole run, while the earlier per-poll CDP samples stay in
+   * `samples` (see `HostCpuSourceV1`).
+   */
   public cpuSource(): HostCpuSourceV1 {
     return this.#cdpUnavailable ? "ps" : "cdp";
   }
