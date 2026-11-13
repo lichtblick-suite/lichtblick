@@ -194,11 +194,22 @@ Caveats:
   `layout.applied` (`phases.layoutAppliedMs`), `panel.firstRender` / `panel.mount`
   (`phases.panelsReadyMs`) or `datasource.firstMessage` (`phases.firstMessageMs`).
 - `run.environment.hostCpuSource` says where process CPU came from: `cdp` (web, CPU time between
-  polls), `app-metrics` (Electron, CPU since the previous poll) or `ps` (web, CDP failed). With
-  `ps` the run has **no CPU**: `pcpu` is ps' own lifetime (Linux) or decaying (macOS) average, not
-  CPU per poll, so it is not recorded, and `summary.process.medianTotalCpuPercent`, `cpuSeconds`,
-  `byType.*.medianCpuPercent` and `kpis.cpu` stay empty instead of mixing it with interval CPU.
-  Older results lack the field.
+  polls), `app-metrics` (Electron, CPU since the previous poll) or `ps` (web, CDP failed at some
+  point during the run; the collector stays on `ps` from then on). With `ps` the run has **no CPU
+  summary**: `pcpu` is ps' own lifetime (Linux) or decaying (macOS) average, not CPU per poll, so it
+  is not recorded, and `summary.process.medianTotalCpuPercent`, `cpuSeconds`,
+  `byType.*.medianCpuPercent` and `kpis.cpu` stay empty for the whole run instead of mixing it with
+  interval CPU. Per-poll `process.cpuPercent` samples taken through CDP before the fallback remain
+  in `samples`. Older results lack the field.
+- `renderer.uaSpecificMemory.bytes` (`summary.renderer.lastUaSpecificMemoryBytes`) needs a
+  cross-origin isolated page **and** the full Chromium build. The scenario runs have it on neither
+  platform, also in CI: web uses Playwright's default `chromium-headless-shell`, which rejects every
+  `performance.measureUserAgentSpecificMemory()` call with a `SecurityError`, and the Electron page
+  is `file://`, which is not cross-origin isolated. Only a web launch with
+  `launchTarget({ webBrowser: "chromium" })` (full Chromium in new headless mode) collects it.
+  `run.environment.webBrowser` and `crossOriginIsolated` record both conditions. Choosing the
+  browser for scenario runs (e.g. a `BENCHMARK_WEB_BROWSER` env var) is a possible follow-up; it
+  would change the web process set and so the CPU/memory baseline.
 - Web runs in headless Chromium use **SwiftShader** (software GL). That makes the `gpu` process
   CPU very high (hundreds of percent) and makes CPU noisy. Compare web CPU only to other web
   runs.

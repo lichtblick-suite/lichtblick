@@ -36,8 +36,10 @@ export type WebBrowserV1 = "chromium-headless-shell" | "chromium";
  * `run.environment.hostCpuSource`: where the host collector read process CPU.
  * - `cdp`: CDP `SystemInfo.getProcessInfo` cumulative CPU time, as deltas between polls (web);
  * - `app-metrics`: Electron `app.getAppMetrics()` `percentCPUUsage` since the previous poll;
- * - `ps`: the web collector fell back to the `ps` process tree. `pcpu` is ps' own average (lifetime
- *   on Linux, decaying on macOS), not CPU over the poll interval, so it is not recorded and the
- *   run's CPU summary and KPIs are left empty.
+ * - `ps`: the web collector fell back to the `ps` process tree at some point during the run (it
+ *   stays there once CDP failed). `pcpu` is ps' own average (lifetime on Linux, decaying on macOS),
+ *   not CPU over the poll interval, so it is not recorded and the run's CPU summary and KPIs are
+ *   left empty, also for the polls before the fallback, so CDP deltas and ps values never mix.
+ *   Per-poll `process.cpuPercent` samples taken through CDP before the fallback remain in `samples`.
  */
 export type HostCpuSourceV1 = "cdp" | "app-metrics" | "ps";
