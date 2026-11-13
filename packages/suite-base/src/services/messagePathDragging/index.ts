@@ -30,6 +30,19 @@ const log = Logger.getLogger(__filename);
 const MESSAGE_PATH_DRAG_TYPE = Symbol("MESSAGE_PATH_DRAG_TYPE");
 
 /**
+ * Returns true when a drag originating from `sourcePanelId` should be blocked from dropping onto a
+ * target owned by `ownerPanelId`. This prevents a series being dropped back onto the same panel it
+ * was dragged from (which would create a duplicate series). Drags without a source panel (e.g. from
+ * the Topic List) are never blocked.
+ */
+export function isSelfDrop(
+  sourcePanelId: string | undefined,
+  ownerPanelId: string | undefined,
+): boolean {
+  return sourcePanelId != undefined && sourcePanelId === ownerPanelId;
+}
+
+/**
  * Internal type used for message path drag & drop support (this can differ from the type exposed to the panel API).
  */
 type MessagePathDragObject = {
@@ -50,13 +63,19 @@ type MessagePathDragObject = {
    * drag has left the last target.
    */
   overDropTargets: Set<string | symbol>;
+
+  /**
+   * The id of the panel this drag originates from, if any. Drop targets use this to reject drops
+   * onto the same panel the drag started from. Undefined for drags not originating from a panel.
+   */
+  sourcePanelId?: string;
 };
 
 /**
  * Use this to create a drag source for message paths that can be dropped onto target components
  * that use `useMessagePathDrop()`.
  */
-export function useMessagePathDrag({ item, selected }: MessagePathDragParams): {
+export function useMessagePathDrag({ item, selected, sourcePanelId }: MessagePathDragParams): {
   connectDragSource: ConnectDragSource;
   connectDragPreview: ConnectDragPreview;
   cursor?: CSSProperties["cursor"];
@@ -84,6 +103,7 @@ export function useMessagePathDrag({ item, selected }: MessagePathDragParams): {
         items,
         setDropStatus,
         overDropTargets: overDropTargets.current,
+        sourcePanelId,
       };
     },
     options: {
@@ -150,7 +170,7 @@ export function useMessagePathDrag({ item, selected }: MessagePathDragParams): {
  * Use this to create a drop target accepting message paths dragged from components that use
  * `useMessagePathDrag()`.
  */
-export function useMessagePathDrop(): {
+export function useMessagePathDrop(params?: { ownerPanelId?: string }): {
   /** True if the target supports dragging (a config is set) and a drag has started */
   isDragging: boolean;
   isOver: boolean;
@@ -163,10 +183,17 @@ export function useMessagePathDrop(): {
     MessagePathDropConfig | undefined
   >();
 
+  const ownerPanelId = params?.ownerPanelId;
+
   const [{ isDragging, isOver, isValidTarget, message }, connectDropTarget] = useDrop({
     accept: MESSAGE_PATH_DRAG_TYPE,
     canDrop(dragObject: MessagePathDragObject, _monitor) {
       if (!messagePathDropConfig) {
+        return false;
+      }
+      // Reject drops onto the same panel the drag originated from, to avoid adding a duplicate
+      // series to the source panel.
+      if (isSelfDrop(dragObject.sourcePanelId, ownerPanelId)) {
         return false;
       }
       if (messagePathDropConfig.getDropStatus(dragObject.items).canDrop) {
@@ -188,6 +215,11 @@ export function useMessagePathDrop(): {
           isOver: false,
           isValidTarget: false,
         };
+      }
+      // When the drag originates from this same panel, behave as if there were no drag at all so
+      // the source panel doesn't show a drop overlay or register as a drop target.
+      if (isSelfDrop(dragObject.sourcePanelId, ownerPanelId)) {
+        return { isDragging: false, isOver: false, isValidTarget: false };
       }
       const monitorIsOver = monitor.isOver({ shallow: true });
       const dropStatus = messagePathDropConfig?.getDropStatus(dragObject.items) ?? {

@@ -4,7 +4,13 @@ import { buttonClasses } from "@mui/material";
 import tinycolor from "tinycolor2";
 import { makeStyles } from "tss-react/mui";
 
-export default makeStyles()((theme) => ({
+export type PathLegendStyleParams = {
+  heightPerTopic: number;
+  cursor: string | undefined;
+  isDragging: boolean;
+};
+
+export default makeStyles<PathLegendStyleParams>()((theme, params) => ({
   chartOverlay: {
     top: 0,
     left: 0,
@@ -12,8 +18,13 @@ export default makeStyles()((theme) => ({
     pointerEvents: "none",
   },
   row: {
+    height: params.heightPerTopic,
     paddingInline: theme.spacing(1, 0.5),
     pointerEvents: "none",
+  },
+  dragLabel: {
+    cursor: params.cursor,
+    opacity: params.isDragging ? 0.5 : undefined,
   },
   dismissIcon: {
     paddingInline: theme.spacing(0.5),
