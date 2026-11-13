@@ -18,6 +18,7 @@ export async function pageNow(page: Page): Promise<number> {
 /** Collects the page's telemetry records through `window.lichtblickTelemetry.drain()`. */
 export class TelemetryDrainer {
   public readonly records: TelemetryRecord[] = [];
+  /** Sum of `TelemetryBatch.dropped`: the renderer sink's own drops, not the ingested ones. */
   public dropped = 0;
   public realm = "renderer";
   readonly #page: Page;

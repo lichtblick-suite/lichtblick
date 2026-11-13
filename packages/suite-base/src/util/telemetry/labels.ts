@@ -70,6 +70,11 @@ export function buildSeriesKey(metric: string, labels: TelemetryLabels | undefin
 /**
  * Bounded-cardinality guard: enforces the label key allow-list and caps the number of distinct
  * label sets per metric (or event name) to `maxSeriesPerMetric`.
+ *
+ * The cap is per metric name, not per realm: a sink's guard is shared with the records it ingests
+ * from other realms, and monotonic label values (`poolId`, `realm`) count towards it. A series
+ * beyond the cap is rejected (reason "cardinality") rather than evicting an existing one, so the
+ * total stays bounded however many realms report.
  */
 export class TelemetryLabelGuard {
   readonly #maxSeriesPerMetric: number;

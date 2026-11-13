@@ -80,7 +80,10 @@ export class BufferedTelemetrySink implements ITelemetry {
   readonly #ring: Array<TelemetryRecord | undefined>;
   #head = 0;
   #size = 0;
-  /** Dropped records (own overflow + foreign batch drops) since the previous drain. */
+  /**
+   * Records this sink dropped to its own ring overflow since the previous drain. Drops reported by
+   * ingested foreign batches are not included (see `ingest()`).
+   */
   #dropped = 0;
   #sequence = 0;
 
@@ -369,12 +372,21 @@ export class BufferedTelemetrySink implements ITelemetry {
    * realm's sequence numbers may show a gap for them. The reserved-name check is not applied:
    * ingested records carry the producing realm's own self-metrics.
    *
-   * `batch.dropped` is added to this sink's `telemetry.droppedRecords{realm=<batch.realm>}`
-   * counter (record realm = this sink's realm). The producing realm also publishes its own
-   * cumulative `telemetry.droppedRecords{realm=<its realm>}`, which is ingested like any other
-   * sample, so the same `labels.realm` can appear in two series that converge on the same total.
-   * The ingesting counter is the fallback when the producer's own sample is lost (worker killed,
-   * or the sample itself dropped). Consumers must take the max per `labels.realm`, not the sum.
+   * `batch.dropped` is not added to this sink's own drop count (`drain().dropped` stays this
+   * sink's own ring overflow, as documented on `TelemetryBatch.dropped`). It is accumulated in
+   * `telemetry.ingestedDroppedRecords{realm=<batch.realm>}` (record realm = this sink's realm): the
+   * receiving sink's view of drops the producer also counts in its own
+   * `telemetry.droppedRecords{realm=<its realm>}`, which is ingested like any other sample. So
+   * `telemetry.droppedRecords` has one series per realm and can be summed across realms, while
+   * `telemetry.ingestedDroppedRecords` is a fallback for when the producer's own final sample is
+   * lost (worker killed, or the sample itself dropped): it is not an additional count. Consumers
+   * that need a loss-proof figure take, per realm, the max of the two.
+   *
+   * Cardinality: the per-metric cap of the label guard is shared between this sink's series and
+   * every ingested realm. Monotonic label values (a new `poolId` per source initialization, a new
+   * `realm` per worker that reported drops) count towards it, so a run with more than
+   * `maxSeriesPerMetric` pools or workers reaches it; the excess series are rejected and counted
+   * in `telemetry.rejectedRecords{reason="cardinality"}`.
    */
   public ingest(batch: TelemetryBatch): void {
     if (!this.#enabled) {
@@ -409,12 +421,15 @@ export class BufferedTelemetrySink implements ITelemetry {
       this.#reject("invalidValue");
       return;
     }
-    this.#dropped += batch.dropped;
     const labels: TelemetryLabels = { realm: batch.realm };
-    const key = buildSeriesKey(TELEMETRY_SELF_METRICS.droppedRecords, labels);
+    const key = buildSeriesKey(TELEMETRY_SELF_METRICS.ingestedDroppedRecords, labels);
     let series = this.#selfCounters.get(key);
     if (series == undefined) {
-      const reason = this.#metricGuard.admit(TELEMETRY_SELF_METRICS.droppedRecords, key, labels);
+      const reason = this.#metricGuard.admit(
+        TELEMETRY_SELF_METRICS.ingestedDroppedRecords,
+        key,
+        labels,
+      );
       if (reason != undefined) {
         this.#reject(reason);
         return;
@@ -422,7 +437,7 @@ export class BufferedTelemetrySink implements ITelemetry {
       series = this.#createCounter(
         this.#selfCounters,
         key,
-        TELEMETRY_SELF_METRICS.droppedRecords,
+        TELEMETRY_SELF_METRICS.ingestedDroppedRecords,
         "count",
         "telemetry",
         copyLabels(labels),

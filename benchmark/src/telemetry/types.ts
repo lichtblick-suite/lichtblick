@@ -88,7 +88,8 @@ export interface LichtblickTelemetryWindowApi {
   now(): number;
   /**
    * Removes and returns up to `maxRecords` of the oldest buffered records (all realms ingested into
-   * the renderer sink, including workers) plus the drop count since the previous drain.
+   * the renderer sink, including workers) plus the renderer sink's own drop count since the
+   * previous drain (worker drops are reported in `telemetry.ingestedDroppedRecords{realm}`).
    */
   drain(maxRecords?: number): TelemetryBatch;
   /** Which optional renderer collectors run; `uaMemory: "disabled"` when telemetry is off. */
