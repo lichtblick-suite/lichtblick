@@ -150,12 +150,8 @@ export default class CachedFilelike implements Filelike {
     this.#idleReadAheadPaused = true;
   }
 
-  // `startNow` begins idle read-ahead immediately instead of waiting for the next read.
-  public resumeIdleReadAhead({ startNow = false }: { startNow?: boolean } = {}): void {
+  public resumeIdleReadAhead(): void {
     this.#idleReadAheadPaused = false;
-    if (startNow && this.#fileSize != undefined) {
-      this.#updateState();
-    }
   }
 
   // Potentially performance-sensitive; await can be expensive

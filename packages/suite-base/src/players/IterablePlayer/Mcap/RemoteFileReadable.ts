@@ -21,12 +21,10 @@ export class RemoteFileReadable {
   readonly #remoteReader: CachedFilelike;
   readonly #batchingReadable: BatchingReadable;
   readonly #readAheadBufferBytes: number | undefined;
-  readonly #startReadAheadAfterInit: boolean;
 
   public constructor(url: string, options?: RemoteFileReadableOptions) {
     const fileReader = new BrowserHttpReader(url);
     this.#readAheadBufferBytes = options?.readAheadBufferBytes;
-    this.#startReadAheadAfterInit = options?.startReadAheadAfterInit ?? false;
     this.#remoteReader = new CachedFilelike({
       fileReader,
       cacheSizeInBytes: options?.cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
@@ -71,6 +69,6 @@ export class RemoteFileReadable {
 
   public restoreReadAhead(): void {
     this.#remoteReader.setReadAheadBufferBytes(this.#readAheadBufferBytes);
-    this.#remoteReader.resumeIdleReadAhead({ startNow: this.#startReadAheadAfterInit });
+    this.#remoteReader.resumeIdleReadAhead();
   }
 }

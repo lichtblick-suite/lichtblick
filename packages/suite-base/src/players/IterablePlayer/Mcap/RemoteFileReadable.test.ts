@@ -178,22 +178,5 @@ describe("RemoteFileReadable", () => {
       // Then CachedFilelike falls back to its own default
       expect(mockSetReadAheadBufferBytes).toHaveBeenCalledWith(undefined);
     });
-
-    it.each([
-      { startReadAheadAfterInit: true, startNow: true },
-      { startReadAheadAfterInit: undefined, startNow: false },
-    ])(
-      "resumes idle read-ahead with startNow=$startNow when startReadAheadAfterInit=$startReadAheadAfterInit",
-      ({ startReadAheadAfterInit, startNow }) => {
-        // Given a reader with or without the start-after-init option
-        const reader = new RemoteFileReadable(testUrl, { startReadAheadAfterInit });
-
-        // When restoring after startup
-        reader.restoreReadAhead();
-
-        // Then background download starts immediately only when the option is set
-        expect(mockResumeIdleReadAhead).toHaveBeenCalledWith({ startNow });
-      },
-    );
   });
 });

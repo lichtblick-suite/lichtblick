@@ -20,8 +20,6 @@ export type McapSource =
       readAheadEnabled?: boolean;
       readAheadBufferBytes?: number;
       maxConcurrentConnections?: number;
-      // Start background download as soon as initialization finishes (single-file sources).
-      startReadAheadAfterInit?: boolean;
       pool?: HydratedSourcePool;
     };
 
