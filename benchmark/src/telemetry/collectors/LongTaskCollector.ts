@@ -16,7 +16,7 @@ function performanceNow(): number {
 
 /**
  * Counts main-thread long tasks (Long Tasks API, Chromium) into `renderer.longTasks.count` and
- * `renderer.longTasks.durationMs`. Uses `buffered: true` so long tasks that happened
+ * `renderer.longTasks.durationMs`. Uses `buffered: true` by default so long tasks that happened
  * before the observer started (e.g. during bootstrap) are counted too. No-op where unsupported. The time spent
  * inside the observer callback is accumulated into `telemetry.self.timeMs.longTasks`.
  */
@@ -55,14 +55,17 @@ export class LongTaskCollector {
     return this.#Observer?.supportedEntryTypes?.includes(LONG_TASK_ENTRY_TYPE) === true;
   }
 
-  /** Starts observing (also after `dispose()`). Idempotent; no-op if unsupported. */
-  public start(): void {
+  /**
+   * Starts observing (also after `dispose()`). Idempotent; no-op if unsupported. `buffered: false`
+   * skips long tasks that ended before this call (resume after a pause).
+   */
+  public start({ buffered = true }: { buffered?: boolean } = {}): void {
     if (this.#observer != undefined || !this.isSupported() || this.#Observer == undefined) {
       return;
     }
     try {
       const observer = new this.#Observer(this.#onEntries);
-      observer.observe({ type: LONG_TASK_ENTRY_TYPE, buffered: true });
+      observer.observe({ type: LONG_TASK_ENTRY_TYPE, buffered });
       this.#observer = observer;
     } catch (err: unknown) {
       log.debug("Long task observer unavailable", err);

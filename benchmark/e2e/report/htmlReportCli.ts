@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 // CLI of the interim HTML viewer: `yarn test:e2e:benchmark:viewer [--all] [--dir <path>] [--open]`.
-// Reads `<dir>/*.benchmark-result.v1.json` and `<dir>/screenshots/*.png`, writes
-// `<dir>/report/index.html` and prints its absolute path.
+// Reads `<dir>/*.benchmark-result.v1.json`, `<dir>/overhead-*.json` and `<dir>/screenshots/*.png`,
+// writes `<dir>/report/index.html` and prints its absolute path.
 
 import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
@@ -12,10 +12,11 @@ import path from "node:path";
 import { REPORT_DIR_NAME, SCREENSHOTS_DIR_NAME } from "./constants";
 import { buildHtmlReport } from "./htmlReport";
 import { CliArgs } from "./htmlReportCli.types";
-import { parseResultFile } from "./htmlReportData";
+import { parseOverheadFile, parseResultFile } from "./htmlReportData";
 import { LoadedResult } from "./types";
-import { RESULT_V1_SUFFIX } from "../result/constants";
+import { OVERHEAD_PREFIX, RESULT_V1_SUFFIX } from "../result/constants";
 import { ARTIFACTS_DIR as DEFAULT_ARTIFACTS_DIR } from "../runner/constants";
+import type { OverheadReport } from "../runner/overhead.types";
 import { GIT_EXECUTABLE_CANDIDATES } from "../shared/constants";
 import { findExecutable, openFileCommand } from "../shared/executables";
 
@@ -111,6 +112,18 @@ function main(): void {
     }
   }
 
+  const overheads: OverheadReport[] = [];
+  for (const fileName of files.filter(
+    (file) => file.startsWith(OVERHEAD_PREFIX) && file.endsWith(".json"),
+  )) {
+    const outcome = parseOverheadFile(fs.readFileSync(path.join(args.dir, fileName), "utf-8"));
+    if (outcome.ok) {
+      overheads.push(outcome.value);
+    } else {
+      console.warn(`Skipping ${fileName}: ${outcome.reason}`);
+    }
+  }
+
   const html = buildHtmlReport(
     {
       generatedAtWall: new Date().toISOString(),
@@ -118,6 +131,7 @@ function main(): void {
       results,
       all: args.all,
       skipped,
+      overheads,
       screenshotFiles: listFiles(path.join(args.dir, SCREENSHOTS_DIR_NAME)),
       // The report lives in `<dir>/report/`: screenshots resolve as long as both folders are kept
       // together (also in the CI artifact, rooted at `.artifacts/`).

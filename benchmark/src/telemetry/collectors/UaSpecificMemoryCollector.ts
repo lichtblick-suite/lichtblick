@@ -53,9 +53,12 @@ export class UaSpecificMemoryCollector {
   #inFlight = false;
   #pending = false;
   #disposed = false;
+  #paused = false;
   /** Set by a `SecurityError` rejection: the browser does not provide the API. */
   #unavailable = false;
   #lastStartedAtMs: number | undefined;
+  /** `measureUserAgentSpecificMemory()` calls so far (`callCount()`). */
+  #calls = 0;
 
   public constructor(
     telemetry: ITelemetry,
@@ -79,9 +82,14 @@ export class UaSpecificMemoryCollector {
     );
   }
 
-  /** Requests a measurement now (or right after the in-flight one settles). */
+  /** `measureUserAgentSpecificMemory()` calls started so far (cumulative, also across pauses). */
+  public callCount(): number {
+    return this.#calls;
+  }
+
+  /** Requests a measurement now (or right after the in-flight one settles). No-op while paused. */
   public measure(): void {
-    if (this.#disposed || !this.isSupported()) {
+    if (this.#disposed || this.#paused || !this.isSupported()) {
       return;
     }
     if (this.#inFlight) {
@@ -103,6 +111,23 @@ export class UaSpecificMemoryCollector {
     this.measure();
   }
 
+  /**
+   * Stops starting measurements (a coalesced follow-up is dropped) until `resume()`. A call already
+   * in flight still settles. Idempotent.
+   */
+  public pause(): void {
+    this.#paused = true;
+    this.#pending = false;
+  }
+
+  /**
+   * Allows measurements again without starting one: the next periodic measurement still waits
+   * `UA_MEMORY_MIN_INTERVAL_MS` after the previous start, so toggling never causes a burst.
+   */
+  public resume(): void {
+    this.#paused = false;
+  }
+
   public dispose(): void {
     this.#disposed = true;
     this.#pending = false;
@@ -115,6 +140,7 @@ export class UaSpecificMemoryCollector {
     }
     this.#inFlight = true;
     this.#lastStartedAtMs = this.#env.now();
+    this.#calls++;
     this.#selfCalls.add(1);
     const callStartMs = this.#selfSyncTime.now();
     try {
@@ -123,7 +149,8 @@ export class UaSpecificMemoryCollector {
       const result = await pendingResult;
       this.#selfResolveTime.addSince(callStartMs);
       this.#selfResolved.add(1);
-      if (!this.#disposed) {
+      // A result resolving while paused (telemetry toggled off) is dropped.
+      if (!this.#disposed && !this.#paused) {
         this.#telemetry.gauge(
           RENDERER_METRICS.uaSpecificMemoryBytes,
           result.bytes,
@@ -140,7 +167,7 @@ export class UaSpecificMemoryCollector {
     } finally {
       this.#inFlight = false;
     }
-    if (this.#pending && !this.#disposed && !this.#unavailable) {
+    if (this.#pending && !this.#disposed && !this.#paused && !this.#unavailable) {
       this.#pending = false;
       void this.#run();
     }

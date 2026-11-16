@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// Interim, self-contained HTML viewer of `*.benchmark-result.v1.json` until the definitive results
-// dashboard (planned as a follow-up) exists. Pure: the CLI (`htmlReportCli.ts`) does the file IO
-// and passes the Chart.js UMD source through `loadChartJs`.
+// Interim, self-contained HTML viewer of `*.benchmark-result.v1.json` (+ `overhead-*.json`) until
+// the definitive results dashboard (planned as a follow-up) exists. Pure: the CLI
+// (`htmlReportCli.ts`) does the file IO and passes the Chart.js UMD source through `loadChartJs`.
 
 import {
   GL_BACKEND_KEYWORDS,
@@ -18,6 +18,7 @@ import { Cell } from "./htmlReport.types";
 import { REPORT_CLIENT_JS } from "./htmlReportAssets";
 import {
   buildRunChartData,
+  findOverhead,
   formatRunTime,
   matchScreenshots,
   newestFinishedAtMs,
@@ -45,6 +46,7 @@ import {
   renderTable,
   runAnchor,
 } from "./htmlReportFormat";
+import { overheadCpuCell, overheadMemCell, overheadTable } from "./htmlReportOverhead";
 import { byGroupHtml, scorecardHtml } from "./htmlReportScorecard";
 import {
   HtmlReportInput,
@@ -53,10 +55,16 @@ import {
   RunChartData,
   ScreenshotLink,
 } from "./types";
-import { LOW_FPS_WARNING } from "../result/constants";
+import {
+  LOW_FPS_WARNING,
+  MIN_PAIRS_FOR_VERDICT,
+  MIN_QUARTETS_FOR_VERDICT,
+} from "../result/constants";
 import { exercisedComponents } from "../result/exercised";
 import type { KpiRun } from "../result/kpis.types";
+import { isOverheadRun } from "../result/runMode";
 import type { PanelSummaryV1, PersistedResultV1, RunnerEventsSummaryV1 } from "../result/schemaV1";
+import type { OverheadReport } from "../runner/overhead.types";
 import { compareCodeUnits } from "../shared/compare";
 
 /** JSON for a `<script type="application/json">` block: no `<` can close or open a tag. */
@@ -158,13 +166,18 @@ function overviewScenarioCell(loaded: ExercisedRun): Cell {
   };
 }
 
-function kpiRow(loaded: ExercisedRun, newestMs: number | undefined): Cell[] {
+function kpiRow(
+  loaded: ExercisedRun,
+  overheads: readonly OverheadReport[],
+  newestMs: number | undefined,
+): Cell[] {
   const { result } = loaded;
   const { summary, run } = result;
   const { phases, process, renderer, pipeline } = summary;
   const hasProcess = process.sampleCount > 0;
   const coverage = phases.panelsReadyCoverage;
   const events = runnerEventCount(summary.runnerEvents);
+  const overhead = findOverhead(overheads, run.scenarioId, run.platform);
   return [
     overviewScenarioCell(loaded),
     cell(run.platform),
@@ -188,6 +201,8 @@ function kpiRow(loaded: ExercisedRun, newestMs: number | undefined): Cell[] {
     num(fmtRatio(pipeline?.sourceCacheHitRatio)),
     poolInvariantCell(result),
     runnerEventsCell(events),
+    overheadCpuCell(overhead),
+    overheadMemCell(overhead),
   ];
 }
 
@@ -589,6 +604,7 @@ ${environmentTable(loaded)}
 export function buildHtmlReport(input: HtmlReportInput, options: HtmlReportOptions): string {
   const runs = selectRuns(input.results, { all: input.all });
   const newestMs = newestFinishedAtMs(runs);
+  const overheadRunFiles = input.results.filter(({ result }) => isOverheadRun(result)).length;
   const exercisedRuns: ExercisedRun[] = runs.map((loaded, index) => ({
     index,
     result: loaded.result,
@@ -607,6 +623,9 @@ export function buildHtmlReport(input: HtmlReportInput, options: HtmlReportOptio
     input.git?.commit != undefined ? `commit ${input.git.commit.slice(0, 12)}` : undefined,
     `${runs.length} run(s) shown${input.all ? " (all runs)" : " (latest per scenario × platform × telemetry mode)"}`,
     `${input.results.length} valid result file(s)`,
+    overheadRunFiles > 0
+      ? `${overheadRunFiles} overhead A/B run file(s) (telemetry overhead section only)`
+      : undefined,
     input.skipped.length > 0 ? `${input.skipped.length} invalid file(s) skipped` : undefined,
   ].filter((entry): entry is string => entry != undefined);
 
@@ -625,7 +644,7 @@ export function buildHtmlReport(input: HtmlReportInput, options: HtmlReportOptio
       ? `<p class="muted">No telemetry-on runs found.</p>`
       : renderTable(
           KPI_HEADERS,
-          kpiRuns.map((run) => kpiRow(run, newestMs)),
+          kpiRuns.map((run) => kpiRow(run, input.overheads, newestMs)),
           undefined,
           kpiRuns.map(({ result }) => ({ "data-tags": filterTokens(result).join(" ") })),
         );
@@ -651,16 +670,19 @@ ${skippedHtml}
 </header>
 <main>
 <h2 id="scorecard">Scorecard</h2>
-<p class="muted">Shown telemetry-on runs per platform (electron and web are never aggregated together). Geometric mean for magnitudes, worst case for slope, smoothness and render cost; n = runs with a value. Colors only where a target exists (stability).</p>
-${scorecardHtml(scoredRuns)}
+<p class="muted">Shown telemetry-on runs per platform (electron and web are never aggregated together). Geometric mean for magnitudes, worst case for slope, smoothness, render cost and overhead; n = runs with a value. Colors only where a target exists (stability, overhead).</p>
+${scorecardHtml(scoredRuns, input.overheads)}
 <h2 id="by-group">By group</h2>
 ${byGroupHtml(scoredRuns)}
 <h2 id="overview">Overview</h2>
 ${filterBarHtml(runs.map((loaded) => loaded.result))}
-<p class="muted">Telemetry-on runs; colors only where a target exists (runner events, pool invariant). Times are ms from the phases origin (<code>datasource.open</code>, else <code>app.ready</code>). FPS: median / measured ceiling (⚠ below ${LOW_FPS_WARNING} FPS).${telemetryOff > 0 ? ` ${telemetryOff} telemetry-off run(s) are listed below only.` : ""}</p>
+<p class="muted">Telemetry-on runs; colors only where a target exists (overhead, runner events, pool invariant). Times are ms from the phases origin (<code>datasource.open</code>, else <code>app.ready</code>). FPS: median / measured ceiling (⚠ below ${LOW_FPS_WARNING} FPS).${telemetryOff > 0 ? ` ${telemetryOff} telemetry-off run(s) are listed below only.` : ""}</p>
 ${kpiHtml}
 <h2 id="coverage">Coverage</h2>
 ${coverageHtml(exercisedRuns)}
+<h2 id="telemetry-overhead">Telemetry overhead</h2>
+<p class="muted">Telemetry on − off. CPU from the in-process toggle A/B when it ran: one launch, telemetry switched off / on in ABBA quartets of blocks (off, on, on, off), one delta per quartet (Σ on / Σ off − 1, which cancels a linear CPU drift). Memory (and CPU with method relaunch) from pairs of fresh app instances (balanced order), steady window only. Median of the quartet / pair deltas with an exact, distribution-free order-statistic CI95 (binomial ranks; none below ${MIN_PAIRS_FOR_VERDICT} samples); verdict: <b>within</b> when the CI95 upper bound is ≤ the target, <b>exceeds</b> when the lower bound is above it, else <b>inconclusive</b> (also with fewer than ${MIN_QUARTETS_FOR_VERDICT} quartets / ${MIN_PAIRS_FOR_VERDICT} pairs). Report only unless <code>BENCHMARK_OVERHEAD_GATE=1</code>. Self-cost is the page's own timing of its telemetry (a lower bound: GC and memory pressure are not included).</p>
+${overheadTable(input.overheads)}
 <h2 id="runs">Runs</h2>
 ${runs.length === 0 ? `<p class="muted">No valid <code>*.benchmark-result.v1.json</code> found.</p>` : runs.map((loaded, index) => runSection(loaded, exercisedRuns[index]!, charts[index]!, input, newestMs)).join("\n")}
 </main>

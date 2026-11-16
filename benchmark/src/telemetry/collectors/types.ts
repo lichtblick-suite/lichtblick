@@ -61,12 +61,17 @@ export type RendererCollectorsEnv = {
 export type RendererCollectorsOptions = {
   /** Late-frame threshold of the `FrameCollector`; defaults to `LATE_FRAME_THRESHOLD_MS`. */
   lateFrameThresholdMs?: number;
+  /** False disables the `UaSpecificMemoryCollector` entirely (`?telemetry.uaMemory=off`). Default true. */
+  uaMemoryEnabled?: boolean;
   /**
    * Self-cost accumulator shared with the installer (sink publish / drain timing); its counters
    * are published on the collector tick. Defaults to a private meter on `env.now`.
    */
   selfCost?: SelfCostMeter;
 };
+
+/** State of the UA-specific memory collector as configured for this page. */
+export type UaMemoryCollectorState = "on" | "off" | "unsupported";
 
 /** The parts of `RendererCollectorsEnv` the `FrameCollector` reads. */
 export type FrameCollectorEnv = Pick<

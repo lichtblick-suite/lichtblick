@@ -1,7 +1,7 @@
 ---
 description: "Top-level orchestrator that routes tasks to specialized sub-agents based on domain expertise. Use this agent when unsure which specialist to invoke, or for tasks spanning multiple subsystems."
 tools: ["agent", "read", "search"]
-agents: ["lb-frontend-dev", "lb-unit-test", "lb-e2e-test", "lb-player", "lb-message-pipeline", "lb-preload", "lb-deserialization", "lb-remote-connection", "lb-websocket-connection", "lb-panel-3d", "lb-panel-image", "lb-panel-plot", "lb-panel-raw-messages", "lb-panel-user-scripts", "lb-panel-state-transitions", "lb-panel-map", "lb-panel-log", "lb-panels-general", "lb-desktop", "lb-web", "lb-extensions", "lb-layouts", "lb-theme"]
+agents: ["lb-frontend-dev", "lb-unit-test", "lb-e2e-test", "lb-player", "lb-message-pipeline", "lb-preload", "lb-deserialization", "lb-remote-connection", "lb-websocket-connection", "lb-panel-3d", "lb-panel-image", "lb-panel-plot", "lb-panel-raw-messages", "lb-panel-user-scripts", "lb-panel-state-transitions", "lb-panel-map", "lb-panel-log", "lb-panels-general", "lb-desktop", "lb-web", "lb-extensions", "lb-layouts", "lb-theme", "lb-benchmark-analyst"]
 ---
 
 # Orchestrator
@@ -37,7 +37,7 @@ You are the top-level routing agent for the Lichtblick monorepo. Your job is to 
 | `@lb-unit-test` | `**/*.test.ts`, `**/*.test.tsx`, `packages/*/src/testing/**` |
 | `@lb-e2e-test` | `e2e/**` |
 
-**Knowledge-only agents** (`@lb-preload`, `@lb-deserialization`, `@lb-remote-connection`) provide deep cross-cutting expertise but do not own a distinct directory — their subject matter lives inside paths owned by `@lb-player`. They advise; they never edit.
+**Knowledge-only agents** (`@lb-preload`, `@lb-deserialization`, `@lb-remote-connection`, `@lb-benchmark-analyst`) provide deep cross-cutting expertise but do not own a distinct directory. The subject matter of `@lb-preload`, `@lb-deserialization` and `@lb-remote-connection` lives inside paths owned by `@lb-player`; the subject matter of `@lb-benchmark-analyst` (benchmark reports and the telemetry producers they measure) spans paths owned by many writers. They advise; they never edit.
 
 ## Parallelism Model
 
@@ -97,6 +97,11 @@ Release-cutting requests (creating a release branch, triggering a release, or ve
 | `@lb-layouts` | Layout storage, remote sync, permissions, namespace migration |
 | `@lb-theme` | MUI theme, palette, typography, tss-react styling |
 
+### Tier 5: Analysis (knowledge-only)
+
+| Agent | Delegate when... |
+|-------|-----------------|
+| `@lb-benchmark-analyst` | Interpreting benchmark results/reports, correlating benchmark metrics with code, perf regression triage against a baseline, improvement hypotheses and experiments |
 
 ## Decision Process
 
@@ -105,7 +110,7 @@ Release-cutting requests (creating a release branch, triggering a release, or ve
 3. If the request spans multiple domains, delegate to the most relevant specialist and mention related agents
 4. If the request is purely about code structure/patterns without domain specificity, use `@lb-frontend-dev`
 5. If the request involves creating or fixing **unit tests**, use `@lb-unit-test`; if it involves **E2E / Playwright tests**, use `@lb-e2e-test`
-6. For performance issues, identify which subsystem is involved first, then delegate to that domain agent
+6. For performance issues, identify which subsystem is involved first, then delegate to that domain agent; for benchmark report interpretation, start with `@lb-benchmark-analyst`, then route any fix to the owner of the implicated path
 
 ## When NOT to Delegate
 

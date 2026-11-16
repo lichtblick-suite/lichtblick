@@ -5,6 +5,35 @@ import { CPU_SCALE_NOTE } from "./constants";
 import { escapeHtml } from "./htmlReportFormat";
 import { byGroupHtml, scorecardHtml } from "./htmlReportScorecard";
 import { RunKpisBuilder } from "../result/builders/RunKpisBuilder";
+import type { OverheadKpiInput } from "../result/kpis.types";
+
+const MIB = 1024 * 1024;
+
+function overhead(overrides: Partial<OverheadKpiInput> = {}): OverheadKpiInput {
+  return {
+    platform: "electron",
+    scenarioId: "sinewave",
+    createdAtWall: "2026-01-01T00:00:00.000Z",
+    n: 5,
+    metrics: {
+      cpuRelative: {
+        n: 5,
+        median: 0.01,
+        iqr: 0,
+        ci95: { lower: 0.005, upper: 0.015 },
+      },
+      memBytes: {
+        n: 5,
+        median: 5 * MIB,
+        iqr: 0,
+        ci95: { lower: 2 * MIB, upper: 8 * MIB },
+      },
+    },
+    verdicts: { overall: "within" },
+    targets: { cpuDeltaRelativeMax: 0.02, memDeltaBytesMax: 20 * MIB },
+    ...overrides,
+  };
+}
 
 /** The scorecard cards of one platform heading. */
 function cardsOf(html: string, platform: string): string {
@@ -34,7 +63,7 @@ describe("scorecardHtml", () => {
     const runs = [lowFpsWeb, healthy];
 
     // When
-    const html = scorecardHtml(runs);
+    const html = scorecardHtml(runs, [overhead()]);
 
     // Then
     expect(html.indexOf("<h3>electron ")).toBeLessThan(html.indexOf("<h3>web "));
@@ -47,12 +76,15 @@ describe("scorecardHtml", () => {
       "Startup",
       "Throughput",
       "Render cost",
+      "Telemetry overhead",
     ]) {
       expect(electron).toContain(`<h4>${title}</h4>`);
     }
     expect(electron).toContain('<div class="card kpi-card good"><h4>Stability</h4>');
     expect(electron).toContain("1/1 healthy (100 %)");
     expect(electron).toContain('<div class="kpi-value">400 MiB</div>');
+    expect(electron).toContain('<div class="card kpi-card good"><h4>Telemetry overhead</h4>');
+    expect(electron).toContain('<a href="#telemetry-overhead">details</a>');
     expect(electron).toContain(escapeHtml(CPU_SCALE_NOTE));
   });
 
@@ -61,7 +93,7 @@ describe("scorecardHtml", () => {
     const runs = [healthy, lowFpsWeb];
 
     // When
-    const web = cardsOf(scorecardHtml(runs), "web");
+    const web = cardsOf(scorecardHtml(runs, []), "web");
 
     // Then
     expect(web).toContain(
@@ -69,6 +101,7 @@ describe("scorecardHtml", () => {
     );
     expect(web).toContain("⚠ 1 run(s) below 10 FPS");
     expect(web).toContain('<a href="#run-1">pointcloud</a> (2.4)');
+    expect(web).toContain("no overhead A/B report for this platform");
     expect(web).toContain(escapeHtml(CPU_SCALE_NOTE));
   });
 
@@ -81,12 +114,93 @@ describe("scorecardHtml", () => {
     });
 
     // When
-    const electron = cardsOf(scorecardHtml([healthy, crashed]), "electron");
+    const electron = cardsOf(
+      scorecardHtml([healthy, crashed], [overhead({ verdicts: { overall: "exceeds" } })]),
+      "electron",
+    );
 
     // Then
     expect(electron).toContain('<div class="card kpi-card bad"><h4>Stability</h4>');
     expect(electron).toContain("1/2 healthy (50 %)");
     expect(electron).toContain('unhealthy: <a href="#run-2">transform</a>');
+    expect(electron).toContain(
+      '<div class="card kpi-card bad"><h4>Telemetry overhead</h4><div class="kpi-value">exceeds</div>',
+    );
+  });
+
+  it("should show an inconclusive overhead in amber with the worst CI95 upper bound", () => {
+    // Given a single-pair report next to a 5-pair report
+    const reports = [
+      overhead(),
+      overhead({
+        scenarioId: "pointcloud",
+        n: 1,
+        metrics: {
+          cpuRelative: {
+            n: 1,
+            median: 0.03,
+            iqr: 0,
+            ci95: { lower: 0.03, upper: 0.03 },
+          },
+          memBytes: {
+            n: 1,
+            median: MIB,
+            iqr: 0,
+            ci95: { lower: MIB, upper: MIB },
+          },
+        },
+        verdicts: { overall: "inconclusive" },
+      }),
+    ];
+
+    // When
+    const electron = cardsOf(scorecardHtml([healthy], reports), "electron");
+
+    // Then
+    expect(electron).toContain(
+      '<div class="card kpi-card warn"><h4>Telemetry overhead</h4><div class="kpi-value">inconclusive</div>',
+    );
+    expect(electron).toContain("worst CPU Δ CI95 upper: <b>3.00 %</b> (median 3.00 %, pointcloud)");
+    expect(electron).toContain(
+      "worst memory Δ CI95 upper: <b>8.0 MiB</b> (median 5.0 MiB, sinewave)",
+    );
+    expect(electron).toContain(
+      "2 scenario(s) · ≥ 1 pair(s) / quartet(s) each · CPU from toggle 0 / relaunch 2 · <a",
+    );
+  });
+
+  it("should take CPU from the toggle A/B and mark memory as not measured for method toggle", () => {
+    // Given a toggle-only report (no relaunch pairs) with a +1.2 % CPU CI95 upper bound
+    const reports = [
+      overhead({
+        n: 0,
+        metrics: { cpuRelative: { n: 0 }, memBytes: { n: 0 } },
+        cpuVerdictSource: "toggle",
+        memVerdictSource: "notMeasured",
+        toggle: {
+          n: 10,
+          metrics: {
+            cpuRelative: {
+              n: 10,
+              median: 0.004,
+              iqr: 0.01,
+              ci95: { lower: -0.002, upper: 0.012 },
+            },
+          },
+        },
+      }),
+    ];
+
+    // When
+    const electron = cardsOf(scorecardHtml([healthy], reports), "electron");
+
+    // Then
+    expect(electron).toContain("worst CPU Δ CI95 upper: <b>1.20 %</b> (median 0.40 %, sinewave)");
+    expect(electron).toContain("worst memory Δ CI95 upper: <b>—</b>");
+    expect(electron).toContain("1 not measured (method toggle)");
+    expect(electron).toContain(
+      "1 scenario(s) · ≥ 10 pair(s) / quartet(s) each · CPU from toggle 1 / relaunch 0",
+    );
   });
 
   it("should explain a missing slope and escape scenario ids", () => {
@@ -98,7 +212,7 @@ describe("scorecardHtml", () => {
     });
 
     // When
-    const html = scorecardHtml([evil]);
+    const html = scorecardHtml([evil], []);
 
     // Then
     expect(html).toContain("needs a steady window ≥ 10 s");
@@ -108,7 +222,7 @@ describe("scorecardHtml", () => {
 
   it("should say so without runs", () => {
     // Given / When / Then
-    expect(scorecardHtml([])).toContain("No telemetry-on runs found.");
+    expect(scorecardHtml([], [])).toContain("No telemetry-on runs found.");
   });
 });
 

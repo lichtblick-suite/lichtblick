@@ -20,10 +20,12 @@ export type ProcessTick = { ws: number; hasWs: boolean; cpu: number; hasCpu: boo
 export type ResultValidationMode = "strict" | "lenient";
 
 /**
- * `run.mode`: always `scenario` (a normal scenario run). Kept as a required discriminator so other
- * run kinds can be added without a schema version bump.
+ * `run.mode`: a normal scenario run (`scenario`) or a run of the telemetry overhead A/B
+ * (`overhead`: steady window, no screenshots, `summary.steadyWindow`). Overhead runs are only
+ * reachable through their `overhead-*.json` report; the scenario views (scorecard, overview, …)
+ * exclude them (see `isOverheadRun`).
  */
-export type RunModeV1 = "scenario";
+export type RunModeV1 = "scenario" | "overhead";
 
 /**
  * `run.environment.webBrowser` (web only): Playwright's default `chromium-headless-shell`, or the

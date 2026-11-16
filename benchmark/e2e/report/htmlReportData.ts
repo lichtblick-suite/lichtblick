@@ -1,11 +1,17 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
-// Data side of the interim HTML viewer (`htmlReport.ts`): run selection, screenshot matching and
-// the chart series derived from `benchmark-result.v1.json`. Pure; free of DOM/Playwright/Node
-// imports.
+// Data side of the interim HTML viewer (`htmlReport.ts`): run selection, screenshot/overhead
+// matching and the chart series derived from `benchmark-result.v1.json`. Pure; free of
+// DOM/Playwright/Node imports.
 
-import { CHECKPOINT_ORDER, MAX_POINTS_PER_DATASET, MIB, STALE_AFTER_MS } from "./constants";
+import {
+  CHECKPOINT_ORDER,
+  MAX_POINTS_PER_DATASET,
+  MIB,
+  PLATFORM_ORDER,
+  STALE_AFTER_MS,
+} from "./constants";
 import {
   ChartDataset,
   ChartSpec,
@@ -24,6 +30,8 @@ import {
   RESULT_V1_SUFFIX,
 } from "../result/constants";
 import { withRunKpis } from "../result/kpis";
+import { normalizeOverheadReport } from "../result/overheadReport";
+import { isOverheadRun } from "../result/runMode";
 import {
   PersistedResultV1,
   StoredResultV1,
@@ -33,6 +41,7 @@ import {
 } from "../result/schemaV1";
 import { counterTotalAt, observationMetrics, seriesKey } from "../result/series";
 import { maxOf } from "../result/stats";
+import type { OverheadReport } from "../runner/overhead.types";
 
 /**
  * Parses and validates one `*.benchmark-result.v1.json` file's contents. Lenient: results written
@@ -57,6 +66,30 @@ export function parseResultFile(fileName: string, text: string): ParseOutcome<Lo
   };
 }
 
+/**
+ * Parses one `overhead-*.json` report of the current schema (3); any other schema version or shape
+ * is rejected with a reason (see `normalizeOverheadReport`).
+ */
+export function parseOverheadFile(text: string): ParseOutcome<OverheadReport> {
+  let json: unknown;
+  try {
+    json = JSON.parse(text);
+  } catch (error) {
+    return { ok: false, reason: `invalid JSON (${String(error)})` };
+  }
+  const report = normalizeOverheadReport(json);
+  const valid =
+    report != undefined &&
+    (PLATFORM_ORDER as readonly string[]).includes(report.platform) &&
+    typeof report.createdAtWall === "string";
+  return valid
+    ? { ok: true, value: report }
+    : {
+        ok: false,
+        reason: "not a supported overhead report (schemaVersion 3 with toggle quartets)",
+      };
+}
+
 /** `<scenarioId>-<platform>[-telemetry-off]-<ts>`: shared by a run's result and screenshots. */
 export function runStem(fileName: string): string {
   return fileName.endsWith(RESULT_V1_SUFFIX)
@@ -67,18 +100,21 @@ export function runStem(fileName: string): string {
 /**
  * Scenario runs shown by the viewer, sorted by scenario, platform, telemetry on before off, then
  * newest first. By default only the latest run (by `finishedAtWall`) per scenario × platform ×
- * telemetry mode; `all` keeps every run.
+ * telemetry mode; `all` keeps every scenario run. Overhead A/B runs (`isOverheadRun`: steady
+ * window, other durations, a UA-memory-off arm) are never shown here, also not with `all`; they
+ * are only reachable through the telemetry overhead section.
  */
 export function selectRuns(
   results: readonly LoadedResult[],
   { all }: { all: boolean },
 ): LoadedResult[] {
+  const scenarioRuns = results.filter(({ result }) => !isOverheadRun(result));
   let selected: LoadedResult[];
   if (all) {
-    selected = [...results];
+    selected = scenarioRuns;
   } else {
     const latest = new Map<string, LoadedResult>();
-    for (const loaded of results) {
+    for (const loaded of scenarioRuns) {
       const { scenarioId, platform, telemetryEnabled } = loaded.result.run;
       const key = `${scenarioId}|${platform}|${telemetryEnabled}`;
       const existing = latest.get(key);
@@ -136,6 +172,35 @@ export function staleHours(
     return undefined;
   }
   return (newestMs - ms) / (60 * 60 * 1000);
+}
+
+/** Latest overhead report (by `createdAtWall`) of a scenario on a platform. */
+export function findOverhead(
+  reports: readonly OverheadReport[],
+  scenarioId: string,
+  platform: string,
+): OverheadReport | undefined {
+  let latest: OverheadReport | undefined;
+  for (const report of reports) {
+    if (report.scenarioId !== scenarioId || report.platform !== platform) {
+      continue;
+    }
+    if (latest == undefined || latest.createdAtWall < report.createdAtWall) {
+      latest = report;
+    }
+  }
+  return latest;
+}
+
+/** Latest overhead report per platform × scenario, sorted. */
+export function latestOverheads(reports: readonly OverheadReport[]): OverheadReport[] {
+  const keys = new Set(reports.map((report) => `${report.scenarioId}|${report.platform}`));
+  return [...keys]
+    .sort((a, b) => a.localeCompare(b))
+    .map((key) => {
+      const [scenarioId, platform] = key.split("|") as [string, string];
+      return findOverhead(reports, scenarioId, platform)!;
+    });
 }
 
 /** Screenshots of one run: `<stem>-<checkpoint>.png`, ordered loaded → mid → end. */
