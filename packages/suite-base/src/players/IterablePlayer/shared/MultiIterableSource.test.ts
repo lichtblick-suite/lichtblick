@@ -129,6 +129,7 @@ describe("MultiIterableSource", () => {
         cacheSizeInBytes: expect.any(Number),
         readAheadEnabled: true,
         readAheadBufferBytes: DEFAULT_READ_AHEAD_BUFFER_BYTES,
+        maxConcurrentConnections: 2,
         pool: expect.any(HydratedSourcePool),
       });
       expect(mockSourceConstructor).toHaveBeenNthCalledWith(2, {
@@ -137,6 +138,7 @@ describe("MultiIterableSource", () => {
         cacheSizeInBytes: expect.any(Number),
         readAheadEnabled: true,
         readAheadBufferBytes: DEFAULT_READ_AHEAD_BUFFER_BYTES,
+        maxConcurrentConnections: 2,
         pool: expect.any(HydratedSourcePool),
       });
       expect(initializations).toHaveLength(2);
@@ -280,7 +282,7 @@ describe("MultiIterableSource", () => {
     });
     it("should bound default initialization concurrency for url sources", async () => {
       // GIVEN: more URL sources than the default remote initialization concurrency.
-      const urls = Array.from({ length: 8 }, () => BasicBuilder.string());
+      const urls = Array.from({ length: 16 }, () => BasicBuilder.string());
       const { implementation, getMaxInFlight } = trackInitConcurrency();
       mockSourceConstructor.mockImplementation(implementation);
       const multiSource = new MultiIterableSource(
@@ -294,14 +296,14 @@ describe("MultiIterableSource", () => {
       // WHEN: initializing all remote sources.
       await multiSource["loadMultipleSources"]();
 
-      // THEN: initialization runs concurrently but no more than four at a time.
+      // THEN: initialization runs concurrently but no more than eight at a time.
       expect(getMaxInFlight()).toBeGreaterThan(1);
-      expect(getMaxInFlight()).toBeLessThanOrEqual(4);
+      expect(getMaxInFlight()).toBeLessThanOrEqual(8);
       expect(mockSourceConstructor).toHaveBeenCalledTimes(urls.length);
     });
     it("should bound default initialization concurrency for file sources", async () => {
       // GIVEN: more file sources than the default initialization concurrency.
-      const files = Array.from({ length: 8 }, () => new Blob([BasicBuilder.string()]));
+      const files = Array.from({ length: 16 }, () => new Blob([BasicBuilder.string()]));
       const { implementation, getMaxInFlight } = trackInitConcurrency();
       mockSourceConstructor.mockImplementation(implementation);
       const multiSource = new MultiIterableSource(
@@ -315,9 +317,9 @@ describe("MultiIterableSource", () => {
       // WHEN: initializing all file sources.
       await multiSource["loadMultipleSources"]();
 
-      // THEN: initialization runs concurrently but no more than the default of four at a time.
+      // THEN: initialization runs concurrently but no more than the default of eight at a time.
       expect(getMaxInFlight()).toBeGreaterThan(1);
-      expect(getMaxInFlight()).toBeLessThanOrEqual(4);
+      expect(getMaxInFlight()).toBeLessThanOrEqual(8);
       expect(mockSourceConstructor).toHaveBeenCalledTimes(files.length);
     });
     it("should respect explicit initialization concurrency for url sources", async () => {

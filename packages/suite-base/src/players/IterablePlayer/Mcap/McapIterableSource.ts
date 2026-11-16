@@ -13,6 +13,7 @@ import { Time } from "@lichtblick/rostime";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
 
 import { BlobReadable } from "./BlobReadable";
+import { FooterPrefetchingReadable } from "./FooterPrefetchingReadable";
 import { McapIndexedIterableSource } from "./McapIndexedIterableSource";
 import type {
   HydratedInner,
@@ -34,6 +35,9 @@ import { HydratedSourcePool, SourceHydrator } from "../shared/HydratedSourcePool
 
 const log = Log.getLogger(__filename);
 
+// With one slot, the footer prefetch would delay the header read instead of overlapping it.
+const DEFAULT_URL_MAX_CONCURRENT_CONNECTIONS = 2;
+
 /**
  * Create a McapIndexedReader if it will be possible to do an indexed read. Distinguishes a
  * genuinely unindexed/empty file (safe, expected fallback to streaming read) from an operational
@@ -48,8 +52,13 @@ async function tryCreateIndexedReader(
 ): Promise<IndexedReaderResult> {
   let reader: McapIndexedReader;
   try {
+    // McapIndexedReader.Initialize() (external @mcap/core package) reads the file header and then
+    // the footer sequentially, even though the footer's location only depends on the already-known
+    // file size, not on anything parsed from the header -- see FooterPrefetchingReadable for the
+    // full rationale. Wrapping here (rather than inside RemoteFileReadable) applies to every
+    // McapSource uniformly and keeps this optimization isolated to exactly where it's used.
     reader = await McapIndexedReader.Initialize({
-      readable,
+      readable: new FooterPrefetchingReadable(readable),
       decompressHandlers,
     });
   } catch (err: unknown) {
@@ -153,11 +162,19 @@ export class McapIterableSource implements ISerializedIterableSource {
         ...(source.readAheadBufferBytes != undefined
           ? { readAheadBufferBytes: source.readAheadBufferBytes }
           : {}),
+        maxConcurrentConnections:
+          source.maxConcurrentConnections ?? DEFAULT_URL_MAX_CONCURRENT_CONNECTIONS,
       });
       await readable.open();
       this.#persistentReadable = readable;
     }
-    const result = await tryCreateIndexedReader(readable, decompressHandlers);
+    readable.limitReadAheadForStartup();
+    let result: IndexedReaderResult;
+    try {
+      result = await tryCreateIndexedReader(readable, decompressHandlers);
+    } finally {
+      readable.restoreReadAhead();
+    }
     if (result.status === "failed") {
       // A real initialization failure (not "unindexed") must not be masked by re-fetching the
       // whole file via the eager, unbounded streaming fallback — surface the actual error.

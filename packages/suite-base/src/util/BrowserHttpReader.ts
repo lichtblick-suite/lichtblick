@@ -14,9 +14,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import type { FileReader, FileStream } from "@lichtblick/suite-base/util/CachedFilelike.types";
+import type {
+  FileReader,
+  FileStream,
+  PrefetchedRange,
+} from "@lichtblick/suite-base/util/CachedFilelike.types";
 import FetchReader from "@lichtblick/suite-base/util/FetchReader";
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
+
+const CONTENT_RANGE_PATTERN = /^bytes (\d+)-(\d+)\/(\d+)$/;
+// Covers the MCAP header, footer and small summaries in one round trip each.
+const EDGE_PREFETCH_BYTES = 64 * 1024;
+
+type OpenResult = { size: number; identifier?: string; prefetched?: PrefetchedRange[] };
+type RangeResult = { size: number; identifier?: string; chunk: PrefetchedRange };
 
 // A file reader that reads from a remote HTTP URL, for usage in the browser (not for node.js).
 export default class BrowserHttpReader implements FileReader {
@@ -26,7 +37,23 @@ export default class BrowserHttpReader implements FileReader {
     this.#url = url;
   }
 
-  public async open(): Promise<{ size: number; identifier?: string }> {
+  public async open(): Promise<OpenResult> {
+    // Suffix ranges (`bytes=-N`) aren't CORS-safelisted; use them only when no preflight applies.
+    if (isSameOrigin(this.#url)) {
+      const edgeResult = await this.#tryOpenViaEdgeRanges();
+      if (edgeResult) {
+        return edgeResult;
+      }
+    }
+
+    // A `bytes=0-0` probe avoids the server streaming the whole file, but needs `Content-Range`
+    // exposed via CORS. When it isn't (or on any error, e.g. 403/404), we fall back to the full
+    // GET below, costing one extra round trip.
+    const probe = await this.#fetchRange("bytes=0-0");
+    if (probe) {
+      return { size: probe.size, identifier: probe.identifier };
+    }
+
     let response: Response;
     try {
       // Make a GET request and then immediately cancel it. This is more robust than a HEAD request,
@@ -83,5 +110,81 @@ export default class BrowserHttpReader implements FileReader {
     const reader = new FetchReader(this.#url, { headers });
     reader.read();
     return reader;
+  }
+
+  // Fetches the file's tail (size, MCAP footer and small summaries) and head in parallel.
+  async #tryOpenViaEdgeRanges(): Promise<OpenResult | undefined> {
+    const [tail, head] = await Promise.all([
+      this.#fetchRange(`bytes=-${EDGE_PREFETCH_BYTES}`),
+      this.#fetchRange(`bytes=0-${EDGE_PREFETCH_BYTES - 1}`),
+    ]);
+    if (!tail) {
+      return undefined;
+    }
+    const prefetched = [tail.chunk];
+    if (head?.size === tail.size && head.identifier === tail.identifier) {
+      prefetched.push(head.chunk);
+    }
+    return { size: tail.size, identifier: tail.identifier, prefetched };
+  }
+
+  // Never throws; returns undefined unless the server answers with a complete, parsable 206.
+  async #fetchRange(range: string): Promise<RangeResult | undefined> {
+    let response: Response;
+    try {
+      response = await fetch(this.#url, { headers: { range }, cache: "no-store" });
+    } catch {
+      return undefined;
+    }
+
+    const match =
+      response.status === 206
+        ? CONTENT_RANGE_PATTERN.exec(response.headers.get("content-range") ?? "")
+        : null;
+    if (!match) {
+      await cancelBody(response);
+      return undefined;
+    }
+
+    let data: Uint8Array;
+    try {
+      data = new Uint8Array(await response.arrayBuffer());
+    } catch {
+      return undefined;
+    }
+    const start = Number.parseInt(match[1]!, 10);
+    const end = Number.parseInt(match[2]!, 10);
+    const size = Number.parseInt(match[3]!, 10);
+    if (data.byteLength !== end - start + 1 || end >= size) {
+      return undefined;
+    }
+    return {
+      size,
+      identifier:
+        response.headers.get("etag") ?? response.headers.get("last-modified") ?? undefined,
+      chunk: { offset: start, data },
+    };
+  }
+}
+
+// Best-effort cleanup: an errored body rejects cancel(), which must not block the fallback.
+async function cancelBody(response: Response): Promise<void> {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // Ignored, see above.
+  }
+}
+
+function isSameOrigin(url: string): boolean {
+  // `location` is undefined outside browsers/workers (e.g. in node).
+  const origin = (globalThis as { location?: Location }).location?.origin;
+  if (origin == undefined || origin === "null") {
+    return false;
+  }
+  try {
+    return new URL(url, origin).origin === origin;
+  } catch {
+    return false;
   }
 }

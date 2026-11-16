@@ -14,6 +14,10 @@ import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { PlayerState } from "@lichtblick/suite-base/players/types";
 
 describe("useTopicPublishFrequencies", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("calculates frequences for a static source", () => {
     const activeData: Partial<PlayerState["activeData"]> = {
       currentTime: { sec: 2, nsec: 0 },
@@ -54,6 +58,8 @@ describe("useTopicPublishFrequencies", () => {
   });
 
   it("updates frequences for a live source", () => {
+    // The hook samples Date.now(); identical timestamps would yield a zero time delta.
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
     let activeData: Partial<PlayerState["activeData"]> = {
       currentTime: { sec: 2, nsec: 0 },
       endTime: { sec: 10, nsec: 0 },
@@ -83,6 +89,7 @@ describe("useTopicPublishFrequencies", () => {
         ["topic_b", { numMessages: 40 }],
       ]),
     };
+    nowSpy.mockReturnValue(2_000);
     rerender();
 
     expect(result.current["topic_a"]).toBeGreaterThan(0);

@@ -13,6 +13,7 @@ import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
+import type { FooterPrefetchingReadable } from "./FooterPrefetchingReadable";
 import { McapIterableSource } from "./McapIterableSource";
 import { RemoteFileReadable } from "./RemoteFileReadable";
 import { HydratedSourcePool } from "../shared/HydratedSourcePool";
@@ -157,6 +158,8 @@ describe("McapIterableSource", () => {
       close: jest.Mock<void, []>;
       size: jest.Mock<Promise<bigint>, []>;
       read: jest.Mock<Promise<Uint8Array>, [bigint, bigint]>;
+      limitReadAheadForStartup: jest.Mock<void, []>;
+      restoreReadAhead: jest.Mock<void, []>;
     };
 
     function mockRemoteFileReadableWith(
@@ -177,6 +180,8 @@ describe("McapIterableSource", () => {
               Number(size),
             );
           }),
+          limitReadAheadForStartup: jest.fn(),
+          restoreReadAhead: jest.fn(),
         };
         const instances = instancesByUrl.get(url) ?? [];
         instances.push(instance);
@@ -265,7 +270,66 @@ describe("McapIterableSource", () => {
       expect(MockRemoteFileReadable).toHaveBeenCalledWith(urlIndexedMcap, {
         cacheSizeInBytes,
         readAheadEnabled,
+        maxConcurrentConnections: 2,
       });
+    });
+
+    it("should keep an explicitly configured connection limit", async () => {
+      // Given a URL source limited to a single connection
+      const mcapData = await buildIndexedMcap([{ logTime: 1_000_000_000n }]);
+      mockRemoteFileReadableWith(mcapData);
+      const source = new McapIterableSource({
+        type: "url",
+        url: urlIndexedMcap,
+        maxConcurrentConnections: 1,
+      });
+
+      // When initializing
+      await source.initialize();
+
+      // Then the configured limit is passed through
+      expect(MockRemoteFileReadable).toHaveBeenCalledWith(
+        urlIndexedMcap,
+        expect.objectContaining({ maxConcurrentConnections: 1 }),
+      );
+    });
+
+    it("should limit read-ahead only while initializing the indexed reader", async () => {
+      // Given an indexed MCAP served via URL
+      const mcapData = await buildIndexedMcap([{ logTime: 1_000_000_000n }]);
+      const instancesByUrl = mockRemoteFileReadableWith(mcapData);
+      const source = new McapIterableSource({ type: "url", url: urlIndexedMcap });
+
+      // When initializing the source
+      await source.initialize();
+
+      // Then read-ahead is limited before the first read and restored afterwards
+      const readable = instancesByUrl.get(urlIndexedMcap)![0]!;
+      expect(readable.limitReadAheadForStartup).toHaveBeenCalledTimes(1);
+      expect(readable.restoreReadAhead).toHaveBeenCalledTimes(1);
+      expect(readable.limitReadAheadForStartup.mock.invocationCallOrder[0]).toBeLessThan(
+        readable.read.mock.invocationCallOrder[0]!,
+      );
+      expect(readable.restoreReadAhead.mock.invocationCallOrder[0]).toBeGreaterThan(
+        readable.read.mock.invocationCallOrder.at(-1)!,
+      );
+    });
+
+    it("should restore read-ahead when indexed initialization fails", async () => {
+      // Given a URL whose reads fail during indexed initialization
+      const mcapData = await buildIndexedMcap([{ logTime: 1_000_000_000n }]);
+      const instancesByUrl = mockRemoteFileReadableWith(mcapData);
+      jest
+        .spyOn(McapIndexedReader, "Initialize")
+        .mockRejectedValueOnce(new Error("network failure"));
+      const source = new McapIterableSource({ type: "url", url: urlIndexedMcap });
+
+      // When initialization fails
+      await expect(source.initialize()).rejects.toThrow("network failure");
+
+      // Then read-ahead was still restored
+      const readable = instancesByUrl.get(urlIndexedMcap)![0]!;
+      expect(readable.restoreReadAhead).toHaveBeenCalledTimes(1);
     });
 
     it("should forward readAheadBufferBytes to RemoteFileReadable when provided", async () => {
@@ -435,7 +499,9 @@ describe("McapIterableSource", () => {
         expect(sourceAReadable).toBeDefined();
         expect(sourceAReadable?.open).toHaveBeenCalledTimes(1);
         expect(
-          readerInitializeSpy.mock.calls.filter(([arg]) => arg.readable === sourceAReadable),
+          readerInitializeSpy.mock.calls.filter(
+            ([arg]) => (arg.readable as FooterPrefetchingReadable).inner === sourceAReadable,
+          ),
         ).toHaveLength(1);
 
         // When B initializes, A is evicted, and A is iterated again after eviction
@@ -456,7 +522,9 @@ describe("McapIterableSource", () => {
         expect(MockRemoteFileReadable.mock.calls).toHaveLength(constructorCallsAfterEviction);
         expect(sourceAReadable?.open).toHaveBeenCalledTimes(1);
         expect(
-          readerInitializeSpy.mock.calls.filter(([arg]) => arg.readable === sourceAReadable),
+          readerInitializeSpy.mock.calls.filter(
+            ([arg]) => (arg.readable as FooterPrefetchingReadable).inner === sourceAReadable,
+          ),
         ).toHaveLength(2);
       });
 
@@ -477,7 +545,7 @@ describe("McapIterableSource", () => {
         let failRehydrateForReadable: MockRemoteReadable | undefined;
         const fatalError = new Error("fatal indexed init");
         jest.spyOn(McapIndexedReader, "Initialize").mockImplementation(async (args) => {
-          if (args.readable === failRehydrateForReadable) {
+          if ((args.readable as FooterPrefetchingReadable).inner === failRehydrateForReadable) {
             failRehydrateForReadable = undefined;
             throw fatalError;
           }

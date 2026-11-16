@@ -13,19 +13,27 @@ import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import { BatchingReadable } from "./BatchingReadable";
 import type { RemoteFileReadableOptions } from "./RemoteFileReadable.types";
-import { BYTES_READ_METRIC, DEFAULT_CACHE_SIZE_BYTES, READ_REQUESTS_METRIC } from "./constants";
+import {
+  BYTES_READ_METRIC,
+  DEFAULT_CACHE_SIZE_BYTES,
+  READ_REQUESTS_METRIC,
+  STARTUP_READ_AHEAD_BUFFER_BYTES,
+} from "./constants";
 
 export class RemoteFileReadable {
   readonly #remoteReader: CachedFilelike;
   readonly #batchingReadable: BatchingReadable;
+  readonly #readAheadBufferBytes: number | undefined;
 
   public constructor(url: string, options?: RemoteFileReadableOptions) {
     const fileReader = new BrowserHttpReader(url);
+    this.#readAheadBufferBytes = options?.readAheadBufferBytes;
     this.#remoteReader = new CachedFilelike({
       fileReader,
       cacheSizeInBytes: options?.cacheSizeInBytes ?? DEFAULT_CACHE_SIZE_BYTES,
       readAheadEnabled: options?.readAheadEnabled,
       readAheadBufferBytes: options?.readAheadBufferBytes,
+      maxConcurrentConnections: options?.maxConcurrentConnections,
     });
 
     const inner: McapTypes.IReadable = {
@@ -61,5 +69,17 @@ export class RemoteFileReadable {
 
   public close(): void {
     this.#remoteReader.close();
+  }
+
+  public limitReadAheadForStartup(): void {
+    this.#remoteReader.setReadAheadBufferBytes(
+      Math.min(STARTUP_READ_AHEAD_BUFFER_BYTES, this.#readAheadBufferBytes ?? Infinity),
+    );
+    this.#remoteReader.pauseIdleReadAhead();
+  }
+
+  public restoreReadAhead(): void {
+    this.#remoteReader.setReadAheadBufferBytes(this.#readAheadBufferBytes);
+    this.#remoteReader.resumeIdleReadAhead();
   }
 }
