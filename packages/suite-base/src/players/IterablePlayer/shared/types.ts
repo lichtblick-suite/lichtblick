@@ -62,6 +62,11 @@ export type MultiSource =
       // cache budget, while single-file sessions keep the legacy 50 MiB default from
       // getNewConnection.ts.
       readAheadBufferBytes?: number;
+      // Maximum number of concurrent underlying HTTP range-request connections per remote file.
+      // Defaults to 2: lets a genuinely disjoint seek/scrub read open its own connection instead
+      // of tearing down an in-flight (possibly still-useful) read-ahead connection. Set to 1 to
+      // restore the original single-connection behavior.
+      maxConcurrentConnections?: number;
     } & MultiSourceHydrationOptions);
 
 export type IterableSourceConstructor<T extends IIterableSource, P> = new (args: P) => T;
