@@ -2,7 +2,7 @@
   "//": "Native find is slow because it does not exclude files: https://github.com/facebook/jest/pull/11264#issuecomment-825377579",
   "testMatch": ["<rootDir>/src/**/*.test.ts(x)?"],
   "transform": {
-    "\\.jsx?$": [
+    "\\.m?jsx?$": [
       "babel-jest",
       {
         "rootMode": "upward"
