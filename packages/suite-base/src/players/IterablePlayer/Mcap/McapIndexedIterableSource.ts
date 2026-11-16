@@ -161,11 +161,18 @@ export class McapIndexedIterableSource implements ISerializedIterableSource {
       return;
     }
 
+    const startTime = toNanoSec(start);
+    const endTime = toNanoSec(end);
+    // @mcap/core >= 2.4 throws when start is more than 1ns after end
+    if (startTime > endTime + 1n) {
+      return;
+    }
+
     const topicNames = Array.from(topics.keys());
 
     for await (const message of this.#reader.readMessages({
-      startTime: toNanoSec(start),
-      endTime: toNanoSec(end),
+      startTime,
+      endTime,
       topics: topicNames,
       validateCrcs: false,
     })) {

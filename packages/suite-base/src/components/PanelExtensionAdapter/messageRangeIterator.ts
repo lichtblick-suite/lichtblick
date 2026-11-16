@@ -48,7 +48,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
 
         const { topicSchemaConverters, unconvertedSubscriptionTopics } = collatedConversions;
 
-        const batchMessages: MessageEvent[] = [];
+        let batchMessages: MessageEvent[] = [];
         let lastBatchTime = performance.now();
 
         for await (const iterResult of rawBatchIterator) {
@@ -78,8 +78,9 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
           if (performance.now() - lastBatchTime > BATCH_INTERVAL_MS) {
             // Yield the batch if it has been more than 16ms since the last yield
             if (batchMessages.length > 0) {
-              yield batchMessages; // No copy needed - we clear it immediately after
-              batchMessages.length = 0; // Clear the batch
+              yield batchMessages;
+              // New array so consumers can keep references to yielded batches.
+              batchMessages = [];
               lastBatchTime = performance.now();
             }
           }
