@@ -7,7 +7,15 @@
 
 import { useTheme } from "@mui/material";
 import { produce } from "immer";
-import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useLatest } from "react-use";
 import { v4 as uuid } from "uuid";
 
@@ -70,6 +78,7 @@ import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext, MessageConverterAlertHandler } from "./types";
+import { UndeliveredMessages } from "./undeliveredMessages";
 import { useSharedPanelState } from "./useSharedPanelState";
 import { useSubscribeMessageRange } from "./useSubscribeMessageRange";
 
@@ -277,7 +286,32 @@ function PanelExtensionAdapter(
   // slowRenderState to indicate that the panel could not keep up with rendering relative to
   // updates.
   const renderingRef = useRef<boolean>(false);
+
+  // On a live source, a panel keeps the last message of a newly subscribed topic until a rendered
+  // frame has delivered it (see UndeliveredMessages).
+  const [undelivered] = useState(() => new UndeliveredMessages());
+  // Messages are held on any live source: like the local subscriptions, the watched fields are
+  // React state, so the injected frame can arrive before a watch of currentFrame takes effect. They
+  // are handed to the panel once it watches currentFrame.
+  const keepUndelivered = !capabilities.includes(PLAYER_CAPABILITIES.playbackControl);
+  const deliverHeld = keepUndelivered && watchedFields.has("currentFrame");
+  // The render-done callback belongs to the render that started it; read the current gate, since
+  // the panel may start watching currentFrame while that render is in progress.
+  const deliverHeldRef = useLatest(deliverHeld);
+  // Re-runs the render effect when the panel finishes a render while messages are still held, so
+  // they are delivered even if no new frame follows (e.g. a static scene).
+  const [heldRetry, setHeldRetry] = useState(0);
+  const retryIfHeld = useCallback(() => {
+    if (deliverHeldRef.current && undelivered.hasHeld()) {
+      setHeldRetry((n) => n + 1);
+    }
+  }, [deliverHeldRef, undelivered]);
+
   useLayoutEffect(() => {
+    if (keepUndelivered) {
+      undelivered.hold(messageEvents);
+    }
+
     /**
      * We need to check that the panel has been initialized because the renderFn function is being
      * called between the initPanel's useLayoutEffect cleanup and initPanel being called
@@ -289,10 +323,15 @@ function PanelExtensionAdapter(
       return;
     }
 
+    const subscribedTopics = new Set(localSubscriptions.map((sub) => sub.topic));
+    const currentFrame = deliverHeld
+      ? undelivered.frameFor(messageEvents, subscribedTopics)
+      : messageEvents;
+
     const renderState = buildRenderState({
       appSettings,
       colorScheme,
-      currentFrame: messageEvents,
+      currentFrame,
       emitAlert: emitMessageConverterAlert,
       globalVariables,
       hoverValue,
@@ -322,6 +361,10 @@ function PanelExtensionAdapter(
     setSlowRender(false);
     const resumeFrame = pauseFrame(panelId);
 
+    if (deliverHeld) {
+      undelivered.markDelivered(currentFrame, subscribedTopics);
+    }
+
     // tell the panel to render and lockout future renders until rendering is complete
     renderingRef.current = true;
     try {
@@ -336,6 +379,7 @@ function PanelExtensionAdapter(
         doneCalled = true;
         resumeFrame();
         renderingRef.current = false;
+        retryIfHeld();
       });
     } catch (e: unknown) {
       const err = e as Error;
@@ -345,9 +389,12 @@ function PanelExtensionAdapter(
     appSettings,
     buildRenderState,
     colorScheme,
+    deliverHeld,
     emitMessageConverterAlert,
     globalVariables,
+    heldRetry,
     hoverValue,
+    keepUndelivered,
     localSubscriptions,
     messageConverters,
     messageEvents,
@@ -355,9 +402,11 @@ function PanelExtensionAdapter(
     pauseFrame,
     playerState,
     renderFn,
+    retryIfHeld,
     sharedPanelState,
     sortedTopics,
     sortedServices,
+    undelivered,
     watchedFields,
     initialState,
     forceConversion,
@@ -564,6 +613,7 @@ function PanelExtensionAdapter(
           };
         });
 
+        undelivered.setRequestedTopics(new Set(localSubs.map((sub) => sub.topic)));
         setLocalSubscriptions(localSubs);
         setSubscriptions(panelId, subscribePayloads);
       },
@@ -632,6 +682,7 @@ function PanelExtensionAdapter(
         if (!isMounted()) {
           return;
         }
+        undelivered.setRequestedTopics(new Set());
         setLocalSubscriptions([]);
         setSubscriptions(panelId, []);
       },
@@ -755,6 +806,7 @@ function PanelExtensionAdapter(
     clearHoverValue,
     setHoverValue,
     setSubscriptions,
+    undelivered,
     panelId,
     updatePanelSettingsTree,
     setDefaultPanelTitle,
@@ -802,6 +854,7 @@ function PanelExtensionAdapter(
     // Reset local state when the panel element is mounted or changes
     setRenderFn(undefined);
     renderingRef.current = false;
+    undelivered.reset();
     setSlowRender(false);
 
     setBuildRenderState(() => initRenderStateBuilder());
@@ -841,6 +894,7 @@ function PanelExtensionAdapter(
     configTooNew,
     playerIsInitializing,
     clearAlert,
+    undelivered,
   ]);
 
   // Clear this panel's alerts on unmount.

@@ -398,6 +398,83 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     ]);
   });
 
+  describe("last message when a topic's last subscriber leaves", () => {
+    const latched = {
+      topic: "/tf_static",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { transforms: [] },
+      schemaName: "tf2_msgs/TFMessage",
+      sizeInBytes: 0,
+    };
+    async function emitLatched(player: FakePlayer) {
+      await player.emit({
+        activeData: {
+          messages: [latched],
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 1, nsec: 0 },
+          isPlaying: true,
+          speed: 1,
+          lastSeekTime: 1,
+          topics: [{ name: "/tf_static", schemaName: "tf2_msgs/TFMessage" }],
+          topicStats: new Map<string, TopicStats>([["/tf_static", { numMessages: 1 }]]),
+          datatypes: new Map(Object.entries({ "tf2_msgs/TFMessage": { definitions: [] } })),
+          totalBytesReceived: 0,
+        },
+      });
+    }
+
+    // Switching tabs unmounts the panels of the old tab before the new tab's panels subscribe.
+    // A live source (no playbackControl) never re-sends a latched message such as /tf_static,
+    // so the cached last message is the only way the new panel can get it.
+    it("keeps it for a live player and injects it into the next subscriber", async () => {
+      // Given a player that delivered a latched message to a panel
+      const player = new FakePlayer();
+      const { Hook, Wrapper } = makeTestHook({ player });
+      const { result } = renderHook(Hook, { wrapper: Wrapper });
+      await doubleAct(async () => {
+        await emitLatched(player);
+      });
+      act(() => {
+        result.current.setSubscriptions("tab-a-panel", [{ topic: "/tf_static" }]);
+      });
+
+      // When that panel leaves and another panel subscribes to the topic
+      act(() => {
+        result.current.setSubscriptions("tab-a-panel", []);
+        result.current.setSubscriptions("tab-b-panel", [{ topic: "/tf_static" }]);
+      });
+
+      // Then the new panel gets the cached message
+      expect(result.current.messageEventsBySubscriberId.get("tab-b-panel")).toEqual([latched]);
+    });
+
+    // With playback the new subscriber gets the message at the current time from seek-backfill,
+    // so a stale cached message must not be injected.
+    it("drops it for a player with playback control", async () => {
+      // Given a player that delivered a latched message to a panel
+      const player = new FakePlayer();
+      player.setCapabilities([PLAYER_CAPABILITIES.playbackControl]);
+      const { Hook, Wrapper } = makeTestHook({ player });
+      const { result } = renderHook(Hook, { wrapper: Wrapper });
+      await doubleAct(async () => {
+        await emitLatched(player);
+      });
+      act(() => {
+        result.current.setSubscriptions("tab-a-panel", [{ topic: "/tf_static" }]);
+      });
+
+      // When that panel leaves and another panel subscribes to the topic
+      act(() => {
+        result.current.setSubscriptions("tab-a-panel", []);
+        result.current.setSubscriptions("tab-b-panel", [{ topic: "/tf_static" }]);
+      });
+
+      // Then nothing stale is injected
+      expect(result.current.messageEventsBySubscriberId.get("tab-b-panel")).toBeUndefined();
+    });
+  });
+
   it("does not duplicate messages if a panel subscribes to a topic twice", async () => {
     const player = new FakePlayer();
     const { Hook, Wrapper } = makeTestHook({ player });
