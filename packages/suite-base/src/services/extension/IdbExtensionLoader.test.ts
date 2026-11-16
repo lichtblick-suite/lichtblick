@@ -6,7 +6,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import fs from "fs";
-import { openDB } from "idb/with-async-ittr";
+import { openDB } from "idb";
 import JSZip from "jszip";
 
 import { StoredExtension } from "@lichtblick/suite-base/services/IExtensionStorage";
@@ -20,7 +20,7 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import { IdbExtensionLoader } from "./IdbExtensionLoader";
 
-jest.mock("idb/with-async-ittr", () => ({
+jest.mock("idb", () => ({
   openDB: jest.fn(),
 }));
 
