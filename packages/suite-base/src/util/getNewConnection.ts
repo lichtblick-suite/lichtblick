@@ -121,17 +121,17 @@ function getNewConnectionWithExistingReadRequest({
   // No whole-file request even if the cache fits it: proxies would stream it all before the abort.
   if (notDownloadedRanges[0].end === readRequestRange.end) {
     // If we're downloading to the end of our range, do some reading ahead while we're at it.
-    // Note that we might have already downloaded parts of this range, but we don't know when
-    // they get evicted, so for now we just the entire range again.
-    // Use the configured read-ahead buffer to avoid downloading too much data that may not be needed,
-    // but never shrink below the actual missing tail of the pending read request.
-    return {
-      ...notDownloadedRanges[0],
-      end: Math.max(
-        notDownloadedRanges[0].end,
-        Math.min(readRequestRange.start + readAheadBufferBytes, fileSize),
-      ),
-    };
+    // Stop the read-ahead at the next cached range or in-flight connection so we don't download
+    // the same bytes twice; if a cached range is evicted later, a new connection fills the gap.
+    // Never shrink below the actual missing tail of the pending read request.
+    const { start, end: missingEnd } = notDownloadedRanges[0];
+    const readAheadEnd = Math.min(readRequestRange.start + readAheadBufferBytes, fileSize);
+    const nextBoundary = Math.min(
+      ...[...allRemainingRanges, ...downloadedRanges]
+        .map((range) => range.start)
+        .filter((rangeStart) => rangeStart > start),
+    );
+    return { start, end: Math.max(missingEnd, Math.min(readAheadEnd, nextBoundary)) };
   }
 
   // Otherwise, start reading from the first non-downloaded range.
