@@ -3696,7 +3696,7 @@ __metadata:
     prettier: "npm:3.9.4"
     ramda: "npm:0.32.0"
     react: "npm:18.3.1"
-    react-colorful: "npm:5.6.1"
+    react-colorful: "npm:5.8.1"
     react-dnd: "npm:16.0.1"
     react-dnd-html5-backend: "npm:16.0.1"
     react-dom: "npm:18.3.1"
@@ -18488,13 +18488,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-colorful@npm:5.6.1":
-  version: 5.6.1
-  resolution: "react-colorful@npm:5.6.1"
+"react-colorful@npm:5.8.1":
+  version: 5.8.1
+  resolution: "react-colorful@npm:5.8.1"
   peerDependencies:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: 10/3e02ba013454818d0c323949bd961fb2c19ac18130dfc67a4032aa5b03787c5ffe7ff159c4b97dc3475072d576828ca0c4b8e8ce85b55eaf484180596cdf0403
+  checksum: 10/4b896fc53c052c2a6bfde4cbc0cc59e6fe907782f0d7f08fc7336b37aa4daf4b3a32cbca53b39031829a07f98417a4ea7eee68a2e2dd67f42918b90acd1d611e
   languageName: node
   linkType: hard
 
