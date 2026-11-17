@@ -15617,7 +15617,7 @@ __metadata:
     lint-staged: "npm:17.0.8"
     playwright: "npm:1.65.0"
     prettier: "npm:3.9.4"
-    react-refresh: "npm:0.18.0"
+    react-refresh: "npm:0.19.0"
     react-use: "npm:17.6.0"
     rehype-raw: "npm:7.0.0"
     rimraf: "npm:6.0.1"
@@ -18788,10 +18788,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-refresh@npm:0.18.0":
-  version: 0.18.0
-  resolution: "react-refresh@npm:0.18.0"
-  checksum: 10/504c331c19776bf8320c23bad7f80b3a28de03301ed7523b0dd21d3f02bf2b53bbdd5aa52469b187bc90f358614b2ba303c088a0765c95f4f0a68c43a7d67b1d
+"react-refresh@npm:0.19.0":
+  version: 0.19.0
+  resolution: "react-refresh@npm:0.19.0"
+  checksum: 10/ec21ca69561017d555a9a1d194f1372e83b82ed0fb33180f2a082501b64c016a43453b1dde2c04bcacdef5c61133339395b79f072a490d90af48fb86b0cc2913
   languageName: node
   linkType: hard
 
