@@ -6,7 +6,10 @@
 import { act, renderHook } from "@testing-library/react";
 
 import { MessageEvent, SubscribeMessageRangeArgs } from "@lichtblick/suite";
-import { useDecodeMessagePathsForMessagesByTopic } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import {
+  MessageDataItemsByPath,
+  useDecodeMessagePathsForMessagesByTopic,
+} from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import PlayerBuilder from "@lichtblick/suite-base/testing/builders/PlayerBuilder";
@@ -15,6 +18,24 @@ import { useDecodedMessageRange } from "./useDecodedMessageRange";
 
 jest.mock("@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems");
 jest.mock("@lichtblick/suite-base/components/PanelExtensionAdapter");
+
+// Maps every message of a topic to an item of the `<topic>.field` path, like the real decoder.
+function fakeDecode(
+  messagesByTopic: Record<string, readonly MessageEvent[]>,
+): MessageDataItemsByPath {
+  const out: Record<string, { messageEvent: MessageEvent; queriedData: [] }[]> = {};
+  for (const [topic, messages] of Object.entries(messagesByTopic)) {
+    out[`${topic}.field`] = messages.map((messageEvent) => ({ messageEvent, queriedData: [] }));
+  }
+  return out;
+}
+
+function decodedMessagesOf(
+  decoded: MessageDataItemsByPath[],
+  path: string,
+): MessageEvent[] | undefined {
+  return decoded[0]?.[path]?.map(({ messageEvent }) => messageEvent);
+}
 
 describe("useDecodedMessageRange", () => {
   let mockSubscribeMessageRange: jest.Mock;
@@ -27,7 +48,7 @@ describe("useDecodedMessageRange", () => {
 
     mockCancel = jest.fn();
     mockSubscribeMessageRange = jest.fn().mockReturnValue(mockCancel);
-    mockDecodeMessagePathsForMessagesByTopic = jest.fn().mockReturnValue({});
+    mockDecodeMessagePathsForMessagesByTopic = jest.fn(fakeDecode);
 
     (useSubscribeMessageRange as jest.Mock).mockReturnValue(mockSubscribeMessageRange);
     (useDecodeMessagePathsForMessagesByTopic as jest.Mock).mockReturnValue(
@@ -103,7 +124,7 @@ describe("useDecodedMessageRange", () => {
         [topic]: expect.arrayContaining(msgs),
       }),
     );
-    expect(result.current).toEqual([{}]);
+    expect(decodedMessagesOf(result.current, `${topic}.field`)).toEqual(msgs);
   });
 
   it("should handle empty topics", () => {
@@ -156,7 +177,7 @@ describe("useDecodedMessageRange", () => {
       const initialTopics = [topicA];
       const initialPaths = [`${topicA}.field`];
 
-      const { rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ topics, paths }) => useDecodedMessageRange(topics, paths),
         { initialProps: { topics: initialTopics, paths: initialPaths } },
       );
@@ -192,12 +213,8 @@ describe("useDecodedMessageRange", () => {
         await simulateBatches(topicB, [msgsB]);
       });
 
-      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          [topicA]: expect.arrayContaining(msgsA),
-          [topicB]: expect.arrayContaining(msgsB),
-        }),
-      );
+      expect(decodedMessagesOf(result.current, `${topicA}.field`)).toEqual(msgsA);
+      expect(decodedMessagesOf(result.current, `${topicB}.field`)).toEqual(msgsB);
     });
 
     it("should only cancel the removed topic and preserve remaining topic data", async () => {
@@ -208,7 +225,7 @@ describe("useDecodedMessageRange", () => {
       const cancelB = jest.fn();
       mockSubscribeMessageRange.mockReturnValueOnce(cancelA).mockReturnValueOnce(cancelB);
 
-      const { rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ topics, paths }) => useDecodedMessageRange(topics, paths),
         {
           initialProps: {
@@ -234,16 +251,8 @@ describe("useDecodedMessageRange", () => {
       expect(cancelA).not.toHaveBeenCalled();
       expect(cancelB).toHaveBeenCalledTimes(1);
 
-      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          [topicA]: expect.arrayContaining(msgsA),
-        }),
-      );
-      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenLastCalledWith(
-        expect.not.objectContaining({
-          [topicB]: expect.anything(),
-        }),
-      );
+      expect(decodedMessagesOf(result.current, `${topicA}.field`)).toEqual(msgsA);
+      expect(result.current[0]).not.toHaveProperty([`${topicB}.field`]);
     });
 
     it("should not resubscribe to topics that remain unchanged", async () => {
@@ -308,6 +317,96 @@ describe("useDecodedMessageRange", () => {
           [topicA]: expect.arrayContaining(msgsA),
         }),
       );
+    });
+  });
+
+  describe("incremental decoding", () => {
+    function subscriptionArgs(topic: string): SubscribeMessageRangeArgs {
+      const call = mockSubscribeMessageRange.mock.calls.find(
+        ([args]: [SubscribeMessageRangeArgs]) => args.topic === topic,
+      ) as [SubscribeMessageRangeArgs];
+      return call[0];
+    }
+
+    it("should only decode messages that arrived since the previous flush", async () => {
+      // Given
+      const topic = PlayerBuilder.topic().name;
+      const { result } = renderHook(() => useDecodedMessageRange([topic], [`${topic}.field`]));
+      const first = [MessageEventBuilder.messageEvent({ topic })];
+      const second = [
+        MessageEventBuilder.messageEvent({ topic }),
+        MessageEventBuilder.messageEvent({ topic }),
+      ];
+      let releaseSecond: () => void = () => {};
+      const secondReady = new Promise<void>((resolve) => {
+        releaseSecond = resolve;
+      });
+      const iterator = (async function* () {
+        yield first;
+        await secondReady;
+        yield second;
+      })();
+      let done: Promise<void> = Promise.resolve();
+      await act(async () => {
+        done = subscriptionArgs(topic).onNewRangeIterator(iterator);
+        await jest.advanceTimersByTimeAsync(250);
+      });
+      mockDecodeMessagePathsForMessagesByTopic.mockClear();
+
+      // When
+      await act(async () => {
+        releaseSecond();
+        await done;
+      });
+
+      // Then
+      expect(mockDecodeMessagePathsForMessagesByTopic).toHaveBeenCalledWith({ [topic]: second });
+      expect(mockDecodeMessagePathsForMessagesByTopic).not.toHaveBeenCalledWith(
+        expect.objectContaining({ [topic]: expect.arrayContaining(first) }),
+      );
+      expect(decodedMessagesOf(result.current, `${topic}.field`)).toEqual([...first, ...second]);
+    });
+
+    it("should decode everything again when the decoder changes", async () => {
+      // Given
+      const topic = PlayerBuilder.topic().name;
+      const { result, rerender } = renderHook(() =>
+        useDecodedMessageRange([topic], [`${topic}.field`]),
+      );
+      const msgs = [
+        MessageEventBuilder.messageEvent({ topic }),
+        MessageEventBuilder.messageEvent({ topic }),
+      ];
+      await act(async () => {
+        await simulateBatches(topic, [msgs]);
+      });
+      const newDecode = jest.fn(fakeDecode);
+      (useDecodeMessagePathsForMessagesByTopic as jest.Mock).mockReturnValue(newDecode);
+
+      // When
+      rerender();
+
+      // Then
+      expect(newDecode).toHaveBeenCalledWith({ [topic]: msgs });
+      expect(decodedMessagesOf(result.current, `${topic}.field`)).toEqual(msgs);
+    });
+
+    it("should return the same result when re-rendered without new data", async () => {
+      // Given
+      const topic = PlayerBuilder.topic().name;
+      const { result, rerender } = renderHook(() =>
+        useDecodedMessageRange([topic], [`${topic}.field`]),
+      );
+      await act(async () => {
+        await simulateBatches(topic, [[MessageEventBuilder.messageEvent({ topic })]]);
+      });
+      const before = result.current;
+
+      // When
+      rerender();
+
+      // Then
+      expect(result.current).toBe(before);
     });
   });
 

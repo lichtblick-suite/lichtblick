@@ -26,31 +26,51 @@ const baseColorsLength = Object.values(baseColors).length;
  * dataset with different labels and colors applied per-point.
  */
 export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
-  const { path, startTime, y, blocks, showPoints } = args;
-
-  const dataset: ChartDataset = {
-    borderWidth: 10,
-    data: [],
-    label: path.label ?? path.value,
-    pointBackgroundColor: "rgba(0, 0, 0, 0.4)",
-    pointBorderColor: "transparent",
-    pointHoverRadius: 3,
-    pointRadius: showPoints ? 1.25 : 0,
-    pointStyle: "circle",
-    showLine: true,
-  };
-
-  let lastValue: string | number | bigint | boolean | undefined = undefined;
-  let lastDatum: ChartDataset["data"][0] | undefined = undefined;
-  let segmentColor = "";
-
-  for (const messages of blocks) {
-    if (!messages) {
-      continue;
+  const builder = new StateTransitionDatasetBuilder(args);
+  for (const messages of args.blocks) {
+    if (messages) {
+      builder.append(messages);
     }
+  }
+  return builder.dataset();
+}
 
-    for (const itemByPath of messages) {
-      const timestamp = getTimestampForMessageEvent(itemByPath.messageEvent, path.timestampMethod);
+type Datum = ChartDataset["data"][0];
+
+/**
+ * Builds the same dataset as messagesToDataset, but messages can be appended in several calls so
+ * that data arriving in batches is only processed once.
+ */
+export class StateTransitionDatasetBuilder {
+  readonly #path: MessageDatasetArgs["path"];
+  readonly #startTime: MessageDatasetArgs["startTime"];
+  readonly #y: number;
+  readonly #showPoints: boolean;
+  readonly #data: Datum[] = [];
+  #lastValue: ValidQueriedDataValue | undefined = undefined;
+  // Last datum of the current segment, only added to the output once the segment ends.
+  #lastDatum: Datum | undefined = undefined;
+  #segmentColor = "";
+
+  public constructor({
+    path,
+    startTime,
+    y,
+    showPoints,
+  }: Pick<MessageDatasetArgs, "path" | "startTime" | "y" | "showPoints">) {
+    this.#path = path;
+    this.#startTime = startTime;
+    this.#y = y;
+    this.#showPoints = showPoints;
+  }
+
+  /** Processes `messages` starting at index `from`. */
+  public append(messages: readonly MessageAndData[], from = 0): void {
+    const { timestampMethod } = this.#path;
+    const startTime = this.#startTime;
+    for (let i = from; i < messages.length; i++) {
+      const itemByPath = messages[i]!;
+      const timestamp = getTimestampForMessageEvent(itemByPath.messageEvent, timestampMethod);
       if (!timestamp) {
         continue;
       }
@@ -67,12 +87,12 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
       // A null value marks a gap: break the line here and start a fresh segment once data resumes.
       // eslint-disable-next-line @lichtblick/strict-equality
       if (value === null) {
-        if (lastDatum != undefined) {
-          dataset.data.push(lastDatum);
+        if (this.#lastDatum != undefined) {
+          this.#data.push(this.#lastDatum);
         }
-        dataset.data.push({ x, y: Number.NaN });
-        lastValue = undefined;
-        lastDatum = undefined;
+        this.#data.push({ x, y: Number.NaN });
+        this.#lastValue = undefined;
+        this.#lastDatum = undefined;
         continue;
       }
 
@@ -80,37 +100,50 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
         continue;
       }
 
-      const isNewSegment = lastValue !== value;
+      const isNewSegment = this.#lastValue !== value;
       if (isNewSegment) {
-        segmentColor = getColor(value);
+        this.#segmentColor = getColor(value);
       }
 
-      lastValue = value;
-      lastDatum = {
+      this.#lastValue = value;
+      this.#lastDatum = {
         x,
-        y,
+        y: this.#y,
         label: isNewSegment ? createLabel(constantName, value) : undefined,
-        labelColor: segmentColor,
+        labelColor: this.#segmentColor,
         value,
         constantName,
       };
 
-      if (isNewSegment || showPoints) {
-        dataset.data.push(lastDatum);
+      if (isNewSegment || this.#showPoints) {
+        this.#data.push(this.#lastDatum);
 
         // after we add a datum we clear the last datum so we don't try to add it again at the end
-        lastDatum = undefined;
+        this.#lastDatum = undefined;
       }
     }
   }
 
-  // If we never added the last datum (maybe because it was the same state as before), we add
-  // it to the data so the user sees the state going until this point.
-  if (lastDatum != undefined) {
-    dataset.data.push(lastDatum);
+  /** Returns a new dataset with everything appended so far. */
+  public dataset(): ChartDataset {
+    const data = this.#data.slice();
+    // If we never added the last datum (maybe because it was the same state as before), we add
+    // it to the data so the user sees the state going until this point.
+    if (this.#lastDatum != undefined) {
+      data.push(this.#lastDatum);
+    }
+    return {
+      borderWidth: 10,
+      data,
+      label: this.#path.label ?? this.#path.value,
+      pointBackgroundColor: "rgba(0, 0, 0, 0.4)",
+      pointBorderColor: "transparent",
+      pointHoverRadius: 3,
+      pointRadius: this.#showPoints ? 1.25 : 0,
+      pointStyle: "circle",
+      showLine: true,
+    };
   }
-
-  return dataset;
 }
 
 export function extractQueriedData(itemByPath: MessageAndData): MessagePathDataItem | undefined {
