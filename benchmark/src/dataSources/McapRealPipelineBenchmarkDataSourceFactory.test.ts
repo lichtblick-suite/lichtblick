@@ -7,8 +7,7 @@
 
 import { DataSourceFactoryInitializeArgs } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
-import { DeserializingIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/DeserializingIterableSource";
-import { McapIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/Mcap/McapIterableSource";
+import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 import { PlayerMetricsCollectorInterface } from "@lichtblick/suite-base/players/types";
 
 import { McapRealPipelineBenchmarkDataSourceFactory } from "./McapRealPipelineBenchmarkDataSourceFactory";
@@ -17,12 +16,8 @@ jest.mock("@lichtblick/suite-base/players/IterablePlayer", () => ({
   IterablePlayer: jest.fn(),
 }));
 
-jest.mock("@lichtblick/suite-base/players/IterablePlayer/DeserializingIterableSource", () => ({
-  DeserializingIterableSource: jest.fn(),
-}));
-
-jest.mock("@lichtblick/suite-base/players/IterablePlayer/Mcap/McapIterableSource", () => ({
-  McapIterableSource: jest.fn(),
+jest.mock("@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource", () => ({
+  WorkerSerializedIterableSource: jest.fn(),
 }));
 
 function setupArgs(params?: Record<string, string | undefined>): DataSourceFactoryInitializeArgs {
@@ -35,14 +30,12 @@ function setupArgs(params?: Record<string, string | undefined>): DataSourceFacto
 describe("McapRealPipelineBenchmarkDataSourceFactory", () => {
   let factory: McapRealPipelineBenchmarkDataSourceFactory;
 
-  const mockMcapSource = { mock: "mcapSource" };
-  const mockDeserializingSource = { mock: "deserializingSource" };
+  const mockWorkerSource = { mock: "workerSource" };
   const mockPlayer = { mock: "playerInstance" };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (McapIterableSource as jest.Mock).mockImplementation(() => mockMcapSource);
-    (DeserializingIterableSource as jest.Mock).mockImplementation(() => mockDeserializingSource);
+    (WorkerSerializedIterableSource as jest.Mock).mockImplementation(() => mockWorkerSource);
     (IterablePlayer as jest.Mock).mockImplementation(() => mockPlayer);
     factory = new McapRealPipelineBenchmarkDataSourceFactory();
   });
@@ -67,7 +60,7 @@ describe("McapRealPipelineBenchmarkDataSourceFactory", () => {
     expect(IterablePlayer).not.toHaveBeenCalled();
   });
 
-  it("should build a real IterablePlayer over McapIterableSource/DeserializingIterableSource for a url", () => {
+  it("should build a real IterablePlayer over the MCAP worker source for a url", () => {
     // Given
     const args = setupArgs({ url: "https://example.com/test.mcap" });
 
@@ -75,13 +68,12 @@ describe("McapRealPipelineBenchmarkDataSourceFactory", () => {
     const result = factory.initialize(args);
 
     // Then
-    expect(McapIterableSource).toHaveBeenCalledWith({
-      type: "url",
-      url: "https://example.com/test.mcap",
+    expect(WorkerSerializedIterableSource).toHaveBeenCalledWith({
+      initWorker: expect.any(Function),
+      initArgs: { url: "https://example.com/test.mcap" },
     });
-    expect(DeserializingIterableSource).toHaveBeenCalledWith(mockMcapSource);
     expect(IterablePlayer).toHaveBeenCalledWith({
-      source: mockDeserializingSource,
+      source: mockWorkerSource,
       name: "https://example.com/test.mcap",
       sourceId: "mcap-real-pipeline",
       metricsCollector: args.metricsCollector,

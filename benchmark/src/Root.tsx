@@ -30,7 +30,11 @@ import {
 } from "./players";
 import { BenchmarkAppBar } from "./scenarios";
 import { getScenarioFromUrl } from "./scenarios/registry";
-import { MemoryAppConfiguration } from "./services";
+import {
+  MemoryAppConfiguration,
+  PERF_HUD_EXTENSION_INFO,
+  UrlScriptExtensionLoader,
+} from "./services";
 
 export function Root(): React.JSX.Element {
   const [appConfiguration] = useState(
@@ -65,8 +69,13 @@ export function Root(): React.JSX.Element {
     return sources;
   }, []);
 
-  const [extensionLoaders] = useState(() => []);
   const url = new URL(window.location.href);
+  const [extensionLoaders] = useState(() => {
+    const perfHudUrl = url.searchParams.get("perfHudUrl");
+    return perfHudUrl != undefined
+      ? [new UrlScriptExtensionLoader(perfHudUrl, PERF_HUD_EXTENSION_INFO)]
+      : [];
+  });
 
   // `useScenarioBootstrap` installs and selects this same `scenario:<id>` layout, but only once
   // its own (async) install effect resolves. Passing it here too lets `CurrentLayoutProvider`

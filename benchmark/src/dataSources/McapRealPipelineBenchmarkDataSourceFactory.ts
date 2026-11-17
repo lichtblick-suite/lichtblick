@@ -10,17 +10,16 @@ import {
   DataSourceFactoryInitializeArgs,
 } from "@lichtblick/suite-base/context/PlayerSelectionContext";
 import { IterablePlayer } from "@lichtblick/suite-base/players/IterablePlayer";
-import { DeserializingIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/DeserializingIterableSource";
-import { McapIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/Mcap/McapIterableSource";
+import { WorkerSerializedIterableSource } from "@lichtblick/suite-base/players/IterablePlayer/WorkerSerializedIterableSource";
 import { Player } from "@lichtblick/suite-base/players/types";
 
 import { BenchmarkPipelineKind } from "./types";
 
 /**
- * Loads an MCAP file by URL through the real production pipeline: `IterablePlayer` driving
- * `McapIterableSource` -> `DeserializingIterableSource` directly, with no `BenchmarkPlayer`
- * synthetic instrumentation wrapper. URL-based (rather than file-picker based) so CI can fetch a
- * fixture and drive this via `?ds.url=`.
+ * Loads an MCAP file by URL through the same pipeline as the production MCAP data sources: reading
+ * and decompression in `McapIterableSourceWorker`, deserialization by `IterablePlayer` on the main
+ * thread. No `BenchmarkPlayer` synthetic instrumentation wrapper. URL-based (rather than file-picker
+ * based) so CI can fetch a fixture and drive this via `?ds.url=`.
  */
 class McapRealPipelineBenchmarkDataSourceFactory implements IDataSourceFactory {
   public readonly pipeline: BenchmarkPipelineKind = "real";
@@ -50,8 +49,18 @@ class McapRealPipelineBenchmarkDataSourceFactory implements IDataSourceFactory {
       return undefined;
     }
 
-    const mcapSource = new McapIterableSource({ type: "url", url });
-    const source = new DeserializingIterableSource(mcapSource);
+    const source = new WorkerSerializedIterableSource({
+      initWorker: () => {
+        return new Worker(
+          // foxglove-depcheck-used: babel-plugin-transform-import-meta
+          new URL(
+            "@lichtblick/suite-base/players/IterablePlayer/Mcap/McapIterableSourceWorker.worker",
+            import.meta.url,
+          ),
+        );
+      },
+      initArgs: { url },
+    });
 
     return new IterablePlayer({
       source,

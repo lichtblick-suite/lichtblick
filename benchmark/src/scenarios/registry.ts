@@ -11,6 +11,9 @@ import { Scenario } from "./types";
 const MCAP_INGEST_FIXTURE_URL =
   "https://mcap-proxy.lichtblick.workers.dev/NuScenes-v1.0-mini-scene-sample.mcap";
 
+/** Default location of a file from the lichtblick-stress generator's `mixed` preset, served locally. */
+const STRESS_MIXED_DEFAULT_URL = "http://127.0.0.1:8090/stress-mixed.mcap";
+
 /**
  * Scenarios mirror the existing `benchmarks.txt` entries (`?ds=<factoryId>`) so the same synthetic
  * sources can be driven either by manual layout selection (old way) or by `?scenario=<id>` (new,
@@ -55,6 +58,13 @@ const SCENARIOS: readonly Scenario[] = [
     autoStart: true,
     durationMs: 5_000,
   },
+  {
+    id: "stress-mixed",
+    layout: "stressMixed",
+    dataSource: { factoryId: "mcap-real-pipeline", params: { url: STRESS_MIXED_DEFAULT_URL } },
+    pipeline: "real",
+    autoStart: true,
+  },
 ];
 
 export function getScenario(id: string): Scenario | undefined {
@@ -62,11 +72,23 @@ export function getScenario(id: string): Scenario | undefined {
 }
 
 /**
- * Looks up the scenario named by a `?scenario=<id>` query param on the given URL, if present.
+ * Looks up the scenario named by a `?scenario=<id>` query param on the given URL, if present. For
+ * real-pipeline scenarios, `?mcapUrl=<url>` replaces the scenario's default file URL.
  */
 export function getScenarioFromUrl(url: URL): Scenario | undefined {
   const scenarioId = url.searchParams.get("scenario");
-  return scenarioId != undefined ? getScenario(scenarioId) : undefined;
+  const scenario = scenarioId != undefined ? getScenario(scenarioId) : undefined;
+  const mcapUrl = url.searchParams.get("mcapUrl");
+  if (scenario?.pipeline !== "real" || mcapUrl == undefined) {
+    return scenario;
+  }
+  return {
+    ...scenario,
+    dataSource: {
+      ...scenario.dataSource,
+      params: { ...scenario.dataSource.params, url: mcapUrl },
+    },
+  };
 }
 
 export { SCENARIOS };

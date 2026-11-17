@@ -67,6 +67,34 @@ describe("scenarios registry", () => {
       // Then
       expect(result).toBeUndefined();
     });
+
+    it("should replace the data source url when ?mcapUrl= is set on a real-pipeline scenario", () => {
+      // Given
+      const mcapUrl = "http://127.0.0.1:8090/custom.mcap";
+      const url = new URL(
+        `http://localhost:8080/?scenario=stress-mixed&mcapUrl=${encodeURIComponent(mcapUrl)}`,
+      );
+
+      // When
+      const result = getScenarioFromUrl(url);
+
+      // Then
+      expect(result?.dataSource.params?.url).toBe(mcapUrl);
+      expect(getScenario("stress-mixed")?.dataSource.params?.url).not.toBe(mcapUrl);
+    });
+
+    it("should ignore ?mcapUrl= for synthetic scenarios", () => {
+      // Given
+      const url = new URL(
+        "http://localhost:8080/?scenario=sinewave&mcapUrl=http://example.com/x.mcap",
+      );
+
+      // When
+      const result = getScenarioFromUrl(url);
+
+      // Then
+      expect(result).toEqual(getScenario("sinewave"));
+    });
   });
 
   describe("SCENARIOS", () => {

@@ -14,6 +14,7 @@ import Empty from "./layouts/Empty.json";
 import PointcloudMultipleThreeDee from "./layouts/PointcloudMultipleThreeDee.json";
 import PointcloudRawMessageAnd3d from "./layouts/PointcloudRawMessageAnd3d.json";
 import SinewaveSinglePlot from "./layouts/SinewaveSinglePlot.json";
+import StressMixed from "./layouts/StressMixed.json";
 import TransformPreloading from "./layouts/TransformPreloading.json";
 
 // The layout JSON files are full LayoutData exports (they include a top-level Mosaic `layout`
@@ -39,6 +40,7 @@ const LAYOUTS: Record<string, LayoutData> = {
   pointCloudRawMessage: makeLayoutData(PointcloudRawMessageAnd3d),
   pointCloudMultipleThreeDee: makeLayoutData(PointcloudMultipleThreeDee),
   transformPreloading: makeLayoutData(TransformPreloading),
+  stressMixed: makeLayoutData(StressMixed),
 };
 
 export { LAYOUTS };

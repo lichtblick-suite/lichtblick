@@ -1,0 +1,88 @@
+{
+  "configById": {
+    "3D!stress": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 30,
+        "phi": 55,
+        "thetaOffset": 45,
+        "targetOffset": [0, 0, 0],
+        "target": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "fovy": 45,
+        "near": 0.01,
+        "far": 5000
+      },
+      "scene": {},
+      "transforms": {},
+      "topics": {
+        "/lidar": {
+          "visible": true,
+          "colorField": "intensity",
+          "colorMode": "colormap",
+          "colorMap": "turbo"
+        },
+        "/markers": {
+          "visible": true
+        }
+      },
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "followTf": "base_link"
+    },
+    "Plot!stress": {
+      "paths": [
+        { "value": "/signal_1.data", "enabled": true, "timestampMethod": "receiveTime" },
+        { "value": "/signal_2.data", "enabled": true, "timestampMethod": "receiveTime" },
+        { "value": "/signal_3.data", "enabled": true, "timestampMethod": "receiveTime" },
+        { "value": "/signal_4.data", "enabled": true, "timestampMethod": "receiveTime" },
+        { "value": "/signal_5.data", "enabled": true, "timestampMethod": "receiveTime" },
+        { "value": "/signal_6.data", "enabled": true, "timestampMethod": "receiveTime" }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": false,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240
+    },
+    "Image!stress": {
+      "imageMode": {
+        "imageTopic": "/camera"
+      }
+    },
+    "lichtblick-perf-hud.perf-hud!stress": {
+      "measure": "none",
+      "topics": ""
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "first": {
+      "first": "3D!stress",
+      "second": "lichtblick-perf-hud.perf-hud!stress",
+      "direction": "column",
+      "splitPercentage": 75
+    },
+    "second": {
+      "first": "Plot!stress",
+      "second": "Image!stress",
+      "direction": "column"
+    },
+    "direction": "row"
+  }
+}

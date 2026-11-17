@@ -112,6 +112,8 @@ const preloadConfig = (_env: unknown, argv: WebpackArgv): Configuration => {
 
 const rendererConfig = (env: unknown, argv: WebpackArgv): Configuration => {
   const isDev = argv.mode === "development";
+  // Per-component render timings (react-dom/profiling) and readable component names (no minify).
+  const reactProfiling = process.env.LICHTBLICK_BENCHMARK_REACT_PROFILING === "1";
 
   const appWebpackConfig = makeConfig(env, argv, {
     allowUnusedVariables: isDev,
@@ -122,6 +124,16 @@ const rendererConfig = (env: unknown, argv: WebpackArgv): Configuration => {
     name: "renderer",
     ...appWebpackConfig,
     dependencies: ["root"],
+    ...(reactProfiling && {
+      resolve: {
+        ...appWebpackConfig.resolve,
+        alias: {
+          ...(appWebpackConfig.resolve?.alias as Record<string, string>),
+          "react-dom$": "react-dom/profiling",
+        },
+      },
+      optimization: { ...appWebpackConfig.optimization, minimize: false },
+    }),
 
     // force web target instead of electron-renderer
     // Fixes "require is not defined" errors since nodeIntegration is off
