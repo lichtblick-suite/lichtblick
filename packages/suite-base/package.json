@@ -191,7 +191,7 @@
     "ts-essentials": "9.4.0",
     "ts-key-enum": "3.0.13",
     "ts-loader": "9.5.4",
-    "tss-react": "4.9.19",
+    "tss-react": "4.9.21",
     "typescript": "6.0.3",
     "use-debounce": "10.0.0",
     "use-immer": "0.11.0",
