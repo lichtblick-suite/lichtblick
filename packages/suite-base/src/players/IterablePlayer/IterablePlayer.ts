@@ -58,6 +58,7 @@ import {
   ISerializedIterableSource,
   IteratorResult,
 } from "./IIterableSource";
+import { SharedRangeReader } from "./SharedRangeReader";
 
 const log = Log.getLogger(__filename);
 // Number of bytes that we aim to keep in the cache.
@@ -211,6 +212,7 @@ export class IterablePlayer implements Player {
   #blockLoadingProcess?: Promise<void>;
 
   #messageRangeSource?: IDeserializedIterableSource;
+  #sharedRangeReader?: SharedRangeReader;
   #samplingEnabled: boolean = false;
 
   #queueEmitState: ReturnType<typeof debouncePromise>;
@@ -433,13 +435,18 @@ export class IterablePlayer implements Player {
     topic: string,
     options?: { start?: Time; end?: Time },
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
+    // Full-range reads of different topics share one pass over the source.
+    if (options == undefined) {
+      return this.#sharedRangeReader?.iterator(topic);
+    }
+
     const topicSelection = new Map([[topic, { topic }]]);
 
     return this.#messageRangeSource?.messageIterator({
       topics: topicSelection,
       consumptionType: "full",
-      start: options?.start,
-      end: options?.end,
+      start: options.start,
+      end: options.end,
     });
   }
 
@@ -662,6 +669,7 @@ export class IterablePlayer implements Player {
           initResult,
         );
       }
+      this.#sharedRangeReader = new SharedRangeReader(this.#messageRangeSource);
 
       if (this.#enablePreload) {
         // --- setup block loader which loads messages for _full_ subscriptions in the "background"
