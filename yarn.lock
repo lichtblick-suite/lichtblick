@@ -3648,7 +3648,7 @@ __metadata:
     babel-plugin-transform-import-meta: "npm:2.2.1"
     browserify-zlib: "npm:0.2.0"
     chart.js: "npm:4.4.8"
-    chartjs-plugin-annotation: "npm:3.0.1"
+    chartjs-plugin-annotation: "npm:3.1.0"
     chartjs-plugin-datalabels: "npm:2.2.0"
     chromatic: "npm:18.12.1"
     crypto-browserify: "npm:3.12.0"
@@ -9354,12 +9354,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chartjs-plugin-annotation@npm:3.0.1":
-  version: 3.0.1
-  resolution: "chartjs-plugin-annotation@npm:3.0.1"
+"chartjs-plugin-annotation@npm:3.1.0":
+  version: 3.1.0
+  resolution: "chartjs-plugin-annotation@npm:3.1.0"
   peerDependencies:
     chart.js: ">=4.0.0"
-  checksum: 10/638550f92c6cc948205822f8b8fcfde20769d923a9bff26edd07f58ccfc6f48a456d8307f8cb837f16a7fe86a9c3646914649c77144337ea12d70e99916c9248
+  checksum: 10/0b0889e665f1aefd2a7b24998013df72c7e022836427b799f219f2f9d838a89ec0a5531d233cfe440c3798bf85646d8435151967b678ab3ffc63c6266edfbf2c
   languageName: node
   linkType: hard
 
