@@ -3325,9 +3325,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lichtblick/eslint-plugin@npm:2.0.7":
-  version: 2.0.7
-  resolution: "@lichtblick/eslint-plugin@npm:2.0.7"
+"@lichtblick/eslint-plugin@npm:2.0.8":
+  version: 2.0.8
+  resolution: "@lichtblick/eslint-plugin@npm:2.0.8"
   dependencies:
     "@eslint/compat": "npm:^1"
     eslint-config-prettier: "npm:^9"
@@ -3346,7 +3346,7 @@ __metadata:
     eslint-config-prettier: ^8 || ^9
     prettier: ^3
     typescript: ^4 || ^5
-  checksum: 10/c66e078dabae5f1bc51aef36da1ba2e6d3b75c21438cff0d2859725d974436242958d68d846bab3b5fc8c8f2e9cc3e40ded4f0cd6e7f69461e62bfd014186ea8
+  checksum: 10/9966ed3df45f73604b9844cd2b8feda53dbac4ca9c22f4c124a3a79eda1f4b8d1ab8e5ec0b4ee47f4e2bb388f353d632d82fa4ccbd0b626d4a0e81cf356b386e
   languageName: node
   linkType: hard
 
@@ -15563,7 +15563,7 @@ __metadata:
     "@babel/preset-typescript": "npm:7.29.7"
     "@biomejs/biome": "npm:2.5.2"
     "@eslint/compat": "npm:2.1.0"
-    "@lichtblick/eslint-plugin": "npm:2.0.7"
+    "@lichtblick/eslint-plugin": "npm:2.0.8"
     "@lichtblick/eslint-plugin-suite": "workspace:*"
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
