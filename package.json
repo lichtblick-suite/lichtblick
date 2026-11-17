@@ -207,7 +207,7 @@
     "@lichtblick/omgidl-serialization": "1.0.0",
     "@lichtblick/ros2idl-parser": "1.0.0",
     "@lichtblick/suite": "workspace:*",
-    "react-use": "17.6.0",
+    "react-use": "17.6.1",
     "rehype-raw": "7.0.0",
     "vm-browserify": "1.1.2"
   }
