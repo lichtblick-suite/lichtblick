@@ -7,7 +7,6 @@
 
 import stringHash from "string-hash";
 
-import { subtract as subtractTimes, toSec } from "@lichtblick/rostime";
 import {
   MessageAndData,
   MessagePathDataItem,
@@ -43,6 +42,7 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
 
   let lastValue: string | number | bigint | boolean | undefined = undefined;
   let lastDatum: ChartDataset["data"][0] | undefined = undefined;
+  let segmentColor = "";
 
   for (const messages of blocks) {
     if (!messages) {
@@ -61,7 +61,8 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
       }
 
       const { constantName, value } = queriedData;
-      const x = toSec(subtractTimes(timestamp, startTime));
+      // Same as toSec(subtract(timestamp, startTime)) without allocating a Time per message.
+      const x = timestamp.sec - startTime.sec + (timestamp.nsec - startTime.nsec) * 1e-9;
 
       // A null value marks a gap: break the line here and start a fresh segment once data resumes.
       // eslint-disable-next-line @lichtblick/strict-equality
@@ -79,17 +80,17 @@ export function messagesToDataset(args: MessageDatasetArgs): ChartDataset {
         continue;
       }
 
-      const color = getColor(value);
-      const label = createLabel(constantName, value);
-
       const isNewSegment = lastValue !== value;
+      if (isNewSegment) {
+        segmentColor = getColor(value);
+      }
 
       lastValue = value;
       lastDatum = {
         x,
         y,
-        label: isNewSegment ? label : undefined,
-        labelColor: color,
+        label: isNewSegment ? createLabel(constantName, value) : undefined,
+        labelColor: segmentColor,
         value,
         constantName,
       };

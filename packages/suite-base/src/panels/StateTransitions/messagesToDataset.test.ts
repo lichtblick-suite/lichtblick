@@ -541,4 +541,51 @@ describe("messagesToDataset", () => {
       { x: expect.any(Number), y: NaN },
     ]);
   });
+
+  it("should compute x as seconds since start, also when nanoseconds wrap", () => {
+    // Given
+    const startTime = { sec: 100, nsec: 900_000_000 };
+    const at = (sec: number, nsec: number) => ({
+      messageEvent: { ...messageEvent, receiveTime: { sec, nsec } },
+      queriedData: [{ value: BasicBuilder.number(), path: queriedDataPath }],
+    });
+
+    // When
+    const result = messagesToDataset({
+      ...args,
+      startTime,
+      blocks: [[at(100, 900_000_000), at(101, 100_000_000), at(103, 950_000_000)]],
+      path: { ...args.path, timestampMethod: "receiveTime" },
+      showPoints: true,
+    });
+
+    // Then
+    expect(result.data.map((datum) => datum?.x)).toEqual([
+      0,
+      expect.closeTo(0.2, 9),
+      expect.closeTo(3.05, 9),
+    ]);
+  });
+
+  it("should keep the segment color on the closing datum of a segment", () => {
+    // Given
+    const value = BasicBuilder.number();
+    const messageAndData = {
+      messageEvent,
+      queriedData: [{ value, path: queriedDataPath }],
+    };
+
+    // When
+    const result = messagesToDataset({
+      ...args,
+      blocks: [[messageAndData, messageAndData, messageAndData]],
+      path: { ...args.path, timestampMethod: "receiveTime" },
+    });
+
+    // Then
+    expect(result.data.map((datum) => datum?.labelColor)).toEqual([
+      getColor(value),
+      getColor(value),
+    ]);
+  });
 });
