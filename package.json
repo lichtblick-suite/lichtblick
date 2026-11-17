@@ -186,7 +186,7 @@
     "lint-staged": "17.0.8",
     "playwright": "1.65.0",
     "prettier": "3.9.4",
-    "react-refresh": "0.18.0",
+    "react-refresh": "0.19.0",
     "rimraf": "6.0.1",
     "semver": "7.7.2",
     "storybook": "10.6.6",
