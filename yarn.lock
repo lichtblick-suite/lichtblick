@@ -3684,7 +3684,7 @@ __metadata:
     moize: "npm:6.1.7"
     moment: "npm:2.31.0"
     moment-duration-format: "npm:2.3.2"
-    moment-timezone: "npm:0.6.3"
+    moment-timezone: "npm:0.6.6"
     monaco-editor: "npm:0.57.0"
     monaco-editor-webpack-plugin: "npm:7.1.1"
     nanoid: "npm:6.0.2"
@@ -16766,12 +16766,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment-timezone@npm:0.6.3":
-  version: 0.6.3
-  resolution: "moment-timezone@npm:0.6.3"
+"moment-timezone@npm:0.6.6":
+  version: 0.6.6
+  resolution: "moment-timezone@npm:0.6.6"
   dependencies:
     moment: "npm:^2.29.4"
-  checksum: 10/55ae516386b87fc2207d7911ef61ecef240ba4b21aece36d0b9f33802e1457db0c21b197ae4fde3b6d819d4bde3d835da0ba3c08de740b158e067c874d16082a
+  checksum: 10/ae1407f23e54c7a2177c0ee58185000de965e758be027deebed3de2e62ff8e73692acb44aa9078449e61f06f814767c24de7bb5dfb0cea4108e991b1169b64ae
   languageName: node
   linkType: hard
 
