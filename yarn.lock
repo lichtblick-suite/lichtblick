@@ -3703,7 +3703,7 @@ __metadata:
     react-hover-observer: "npm:2.1.1"
     react-i18next: "npm:17.0.8"
     react-json-tree: "patch:react-json-tree@0.15.1#../../patches/react-json-tree.patch"
-    react-markdown: "npm:9.0.1"
+    react-markdown: "npm:10.1.0"
     react-monaco-editor: "npm:0.59.0"
     react-mosaic-component: "npm:6.2.0"
     react-refresh-typescript: "npm:2.0.12"
@@ -18715,11 +18715,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-markdown@npm:9.0.1":
-  version: 9.0.1
-  resolution: "react-markdown@npm:9.0.1"
+"react-markdown@npm:10.1.0":
+  version: 10.1.0
+  resolution: "react-markdown@npm:10.1.0"
   dependencies:
     "@types/hast": "npm:^3.0.0"
+    "@types/mdast": "npm:^4.0.0"
     devlop: "npm:^1.0.0"
     hast-util-to-jsx-runtime: "npm:^2.0.0"
     html-url-attributes: "npm:^3.0.0"
@@ -18732,7 +18733,7 @@ __metadata:
   peerDependencies:
     "@types/react": ">=18"
     react: ">=18"
-  checksum: 10/71ce31f200982f641d363888a26e8fb52a199a589124f20295e9be870fa3aed26fcfa14d1dc766d83df666a15cb82359291bfda207bd55d5728ff376d217e079
+  checksum: 10/886c037d18266e94750abbc00c6096435bccd4da5f2d1727984bcbdf83e9f2a5cc9a6b0eecfe6c30456dc26546fee41c7f6aecbf176e6d7453963df4abefd7df
   languageName: node
   linkType: hard
 
