@@ -15,6 +15,7 @@ import { BasicBuilder } from "@lichtblick/test-builders";
 
 import type { PlotCoordinator } from "./PlotCoordinator";
 import { PlotLegend } from "./PlotLegend";
+import type { PlotPath } from "./utils/config";
 
 const defaultProps = {
   showLegend: true,
@@ -153,9 +154,9 @@ describe("PlotLegend", () => {
 });
 
 describe("PlotLegend re-renders", () => {
-  const paths = [
-    { value: BasicBuilder.string(), enabled: true },
-    { value: BasicBuilder.string(), enabled: true },
+  const paths: PlotPath[] = [
+    { value: BasicBuilder.string(), enabled: true, timestampMethod: "receiveTime" },
+    { value: BasicBuilder.string(), enabled: true, timestampMethod: "receiveTime" },
   ];
   const onClickPath = jest.fn();
   const saveConfig = jest.fn();
