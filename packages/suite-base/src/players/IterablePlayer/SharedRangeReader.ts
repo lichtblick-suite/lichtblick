@@ -107,8 +107,7 @@ class ReadGroup {
   readonly #source: Source;
   readonly #options: SharedRangeReaderOptions;
   readonly #onStart: () => void;
-  readonly #readersByTopic = new Map<string, Set<TopicReader>>();
-  #readerCount = 0;
+  readonly #readerByTopic = new Map<string, TopicReader>();
   #quietTimer: ReturnType<typeof setTimeout> | undefined;
   #maxWaitTimer: ReturnType<typeof setTimeout> | undefined;
   #started = false;
@@ -124,7 +123,7 @@ class ReadGroup {
   }
 
   public hasTopic(topic: string): boolean {
-    return this.#readersByTopic.has(topic);
+    return this.#readerByTopic.has(topic);
   }
 
   /** Prevents the shared pass from starting. */
@@ -139,13 +138,7 @@ class ReadGroup {
       this.#removeReader(reader);
       onClose();
     });
-    let readers = this.#readersByTopic.get(topic);
-    if (readers == undefined) {
-      readers = new Set();
-      this.#readersByTopic.set(topic, readers);
-    }
-    readers.add(reader);
-    this.#readerCount++;
+    this.#readerByTopic.set(topic, reader);
 
     clearTimeout(this.#quietTimer);
     this.#quietTimer = setTimeout(() => {
@@ -156,15 +149,11 @@ class ReadGroup {
 
   /** Removes the reader from the group; returns false if it wasn't a member. */
   #removeReader(reader: TopicReader): boolean {
-    const readers = this.#readersByTopic.get(reader.topic);
-    if (readers?.delete(reader) !== true) {
+    if (this.#readerByTopic.get(reader.topic) !== reader) {
       return false;
     }
-    this.#readerCount--;
-    if (readers.size === 0) {
-      this.#readersByTopic.delete(reader.topic);
-    }
-    if (this.#readerCount === 0 && this.#started) {
+    this.#readerByTopic.delete(reader.topic);
+    if (this.#readerByTopic.size === 0 && this.#started) {
       stopSourceIterator(this.#sourceIterator);
     }
     return true;
@@ -178,47 +167,54 @@ class ReadGroup {
     clearTimeout(this.#quietTimer);
     clearTimeout(this.#maxWaitTimer);
     this.#onStart();
-    if (this.#readerCount === 0) {
+    if (this.#readerByTopic.size === 0) {
       return;
     }
-    const topics = new Map([...this.#readersByTopic.keys()].map((topic) => [topic, { topic }]));
+    const topics = new Map([...this.#readerByTopic.keys()].map((topic) => [topic, { topic }]));
     this.#sourceIterator = this.#source.messageIterator({ topics, consumptionType: "full" });
     void this.#read(this.#sourceIterator);
   }
 
   async #read(sourceIterator: AsyncIterator<Result>): Promise<void> {
     try {
-      while (this.#readerCount > 0) {
+      while (this.#readerByTopic.size > 0) {
         const next = await sourceIterator.next();
         if (next.done === true) {
           break;
         }
         this.#deliver(next.value);
       }
-      for (const reader of this.#readers()) {
+      for (const reader of this.#readerByTopic.values()) {
         reader.finish();
       }
     } catch (error: unknown) {
-      for (const reader of this.#readers()) {
+      for (const reader of this.#readerByTopic.values()) {
         reader.fail(error);
       }
     }
   }
 
   #deliver(result: Result): void {
-    // Alerts and stamps aren't tied to one topic, so every reader gets them as before.
-    const receivers =
-      result.type === "message-event"
-        ? [...(this.#readersByTopic.get(result.msgEvent.topic) ?? [])]
-        : this.#readers();
-    for (const reader of receivers) {
-      reader.push(result);
-      if (
-        reader.queuedCount() >= this.#options.maxQueuedResults ||
-        reader.queuedBytes() >= this.#options.maxQueuedBytes
-      ) {
-        this.#detach(reader);
+    if (result.type === "message-event") {
+      const reader = this.#readerByTopic.get(result.msgEvent.topic);
+      if (reader != undefined) {
+        this.#push(reader, result);
       }
+      return;
+    }
+    // Alerts and stamps aren't tied to one topic, so every reader gets them as before.
+    for (const reader of this.#readerByTopic.values()) {
+      this.#push(reader, result);
+    }
+  }
+
+  #push(reader: TopicReader, result: Result): void {
+    reader.push(result);
+    if (
+      reader.queuedCount() >= this.#options.maxQueuedResults ||
+      reader.queuedBytes() >= this.#options.maxQueuedBytes
+    ) {
+      this.#detach(reader);
     }
   }
 
@@ -226,14 +222,6 @@ class ReadGroup {
     if (this.#removeReader(reader)) {
       reader.continueAlone(this.#source);
     }
-  }
-
-  #readers(): TopicReader[] {
-    const all: TopicReader[] = [];
-    for (const readers of this.#readersByTopic.values()) {
-      all.push(...readers);
-    }
-    return all;
   }
 }
 
