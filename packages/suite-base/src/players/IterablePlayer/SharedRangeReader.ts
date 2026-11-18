@@ -28,6 +28,9 @@ const DEFAULT_OPTIONS: SharedRangeReaderOptions = {
   maxQueuedBytes: 64 * 1024 * 1024,
 };
 
+// A queue that never fully drains is compacted once this many consumed slots pile up.
+const COMPACT_AFTER = 1024;
+
 /**
  * Serves full-range reads of single topics from one shared source iterator per group of requests.
  *
@@ -195,7 +198,8 @@ class TopicReader {
   public readonly topic: string;
   public readonly iterator: AsyncIterableIterator<Result>;
   readonly #onClose: () => void;
-  #queue: Result[] = [];
+  // Consumed slots are cleared so handed-out messages can be garbage collected.
+  #queue: (Result | undefined)[] = [];
   #head = 0;
   #queuedBytes = 0;
   #finished = false;
@@ -283,6 +287,7 @@ class TopicReader {
       }
       if (this.#head < this.#queue.length) {
         const value = this.#queue[this.#head]!;
+        this.#queue[this.#head] = undefined;
         this.#head++;
         if (value.type === "message-event") {
           this.#queuedBytes -= value.msgEvent.sizeInBytes;
@@ -290,6 +295,9 @@ class TopicReader {
         }
         if (this.#head === this.#queue.length) {
           this.#queue = [];
+          this.#head = 0;
+        } else if (this.#head >= COMPACT_AFTER && this.#head * 2 >= this.#queue.length) {
+          this.#queue = this.#queue.slice(this.#head);
           this.#head = 0;
         }
         return { done: false, value };

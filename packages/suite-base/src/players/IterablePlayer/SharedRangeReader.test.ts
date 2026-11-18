@@ -461,6 +461,20 @@ describe("SharedRangeReader", () => {
     expect(returnSpy).toHaveBeenCalledTimes(2);
   });
 
+  it("should deliver everything in order when a queue that never drains is compacted", async () => {
+    // Given: the whole stream is queued before the reader pulls, so the queue never empties
+    const stream = Array.from({ length: 3000 }, (_, sec) => messageResult("/a", sec));
+    const reader = new SharedRangeReader(createSource(stream), FAST);
+    const a = reader.iterator("/a");
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // When
+    const received = await collect(a);
+
+    // Then
+    expect(received).toEqual(stream);
+  });
+
   it("should pass a source error to every reader", async () => {
     // Given
     const source = {
