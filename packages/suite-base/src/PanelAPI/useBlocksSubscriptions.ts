@@ -65,6 +65,7 @@ const filterBlockByTopics = memoizeWeak(
 
 const useSubscriptionsForBlocks = (subscriptions: Immutable<SubscribePayload[]>) => {
   const [id] = useState(() => uuidv4());
+  // Not registered with usePanelSubscriberTelemetry: it would double-count the per-tick subscriber.
 
   const setSubscriptions = useMessagePipeline(
     useCallback(

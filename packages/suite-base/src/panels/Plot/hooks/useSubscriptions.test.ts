@@ -4,10 +4,17 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { renderHook } from "@testing-library/react";
+import { ComponentProps, createElement, PropsWithChildren } from "react";
 
 import { parseMessagePath } from "@lichtblick/message-path";
 import { fillInGlobalVariablesInPath } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
+import { recordPipelineTickTelemetry } from "@lichtblick/suite-base/components/MessagePipeline/pipelineTelemetry";
+import {
+  createMessagePipelineStore,
+  MessagePipelineInternalState,
+} from "@lichtblick/suite-base/components/MessagePipeline/store";
+import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import {
   PlotConfig,
@@ -15,7 +22,11 @@ import {
   isReferenceLinePlotPathType,
 } from "@lichtblick/suite-base/panels/Plot/utils/config";
 import GlobalVariableBuilder from "@lichtblick/suite-base/testing/builders/GlobalVariableBuilder";
+import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import PlotBuilder from "@lichtblick/suite-base/testing/builders/PlotBuilder";
+import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
+import { TelemetryBuilder } from "@lichtblick/suite-base/util/telemetry/builders/TelemetryBuilder";
+import { TelemetryMock } from "@lichtblick/suite-base/util/telemetry/builders/types";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 import useSubscriptions from "./useSubscriptions";
@@ -257,6 +268,87 @@ describe("useSubscriptions", () => {
       expect(fillInGlobalVariablesInPath).not.toHaveBeenCalled();
       expect(pathToSubscribePayload).not.toHaveBeenCalled();
       expect(setSubscriptions).toHaveBeenCalledWith(subscriberId, expect.any(Array));
+    });
+  });
+
+  describe("Telemetry", () => {
+    const PANEL_ID = "Plot!t3l3m";
+
+    function installEnabledTelemetry(): TelemetryMock {
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      setTelemetrySink(telemetry);
+      return telemetry;
+    }
+
+    function tickState(subscriberId: string, sizeInBytes: number): MessagePipelineInternalState {
+      const state = createMessagePipelineStore({
+        promisesToWaitForRef: { current: [] },
+        initialPlayer: undefined,
+      }).getState();
+      const messageEventsBySubscriberId = new Map([
+        [subscriberId, [MessageEventBuilder.messageEvent({ sizeInBytes })]],
+      ]);
+      return { ...state, public: { ...state.public, messageEventsBySubscriberId } };
+    }
+
+    function renderInPanel(config: PlotConfig, subscriberId: string, panelTitle: string) {
+      return renderHook(
+        () => {
+          useSubscriptions(config, subscriberId);
+        },
+        {
+          wrapper: ({ children }: PropsWithChildren) =>
+            createElement(
+              MockPanelContextProvider,
+              // `children` is required by the props type but is supplied by the third argument.
+              { id: PANEL_ID, type: "Plot", title: panelTitle } as ComponentProps<
+                typeof MockPanelContextProvider
+              >,
+              children,
+            ),
+        },
+      );
+    }
+
+    afterEach(() => {
+      setTelemetrySink(undefined);
+    });
+
+    it("should attribute the plot subscriber's deliveries to the layout panel id when telemetry is enabled", () => {
+      // Given
+      const telemetry = installEnabledTelemetry();
+      const subscriberId = BasicBuilder.string();
+      const panelTitle = BasicBuilder.string();
+      renderInPanel(PlotBuilder.config(), subscriberId, panelTitle);
+
+      // When
+      recordPipelineTickTelemetry(telemetry, tickState(subscriberId, 24), undefined);
+
+      // Then
+      const labels = { panelId: PANEL_ID, panelType: "Plot" };
+      expect(
+        telemetry.counter.mock.calls.filter(([metric]) => metric.startsWith("panel.")),
+      ).toEqual([
+        ["panel.messages.delivered", 1, "count", "panel", labels],
+        ["panel.messages.deliveredBytes", 24, "bytes", "panel", labels],
+      ]);
+      expect(JSON.stringify(telemetry.counter.mock.calls)).not.toContain(panelTitle);
+    });
+
+    it("should stop attributing deliveries to the panel after the plot unmounts", () => {
+      // Given
+      const telemetry = installEnabledTelemetry();
+      const subscriberId = BasicBuilder.string();
+      const { unmount } = renderInPanel(PlotBuilder.config(), subscriberId, "Plot title");
+
+      // When
+      unmount();
+      recordPipelineTickTelemetry(telemetry, tickState(subscriberId, 24), undefined);
+
+      // Then
+      expect(
+        telemetry.counter.mock.calls.filter(([metric]) => metric.startsWith("panel.")),
+      ).toEqual([]);
     });
   });
 });
