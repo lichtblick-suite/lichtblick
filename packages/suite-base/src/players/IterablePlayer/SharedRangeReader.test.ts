@@ -289,6 +289,27 @@ describe("SharedRangeReader", () => {
     );
   });
 
+  it("should hand over every reader whose queue fills up, and still deliver everything", async () => {
+    // Given: three readers that don't pull until all queues are long full
+    const topics = ["/a", "/b", "/c"];
+    const stream = Array.from({ length: 90 }, (_, t) => messageResult(topics[t % 3]!, t));
+    const source = createSource(stream);
+    const reader = new SharedRangeReader(source, { ...FAST, maxQueuedResults: 5 });
+    const iterators = topics.map((topic) => reader.iterator(topic));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // When
+    const outcome = await Promise.race([Promise.all(iterators.map(collect)), timeout(1000)]);
+
+    // Then: one shared pass plus one own read per reader, and every message exactly once
+    expect(source.messageIterator).toHaveBeenCalledTimes(1 + topics.length);
+    expect(outcome).toEqual(
+      topics.map((topic) =>
+        stream.filter((r) => r.type === "message-event" && r.msgEvent.topic === topic),
+      ),
+    );
+  });
+
   it("should hand over a reader once its queued messages reach maxQueuedBytes", async () => {
     // Given
     let yielded = 0;
