@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { compare, Time } from "@lichtblick/rostime";
+
 import { IDeserializedIterableSource, IteratorResult } from "./IIterableSource";
 
 type Source = Pick<IDeserializedIterableSource, "messageIterator">;
@@ -11,8 +13,10 @@ export type SharedRangeReaderOptions = {
   quietMs: number;
   /** Start reading at the latest this long after the first request of a group. */
   maxWaitMs: number;
-  /** Pause reading while any reader has this many results waiting. */
+  /** A reader with this many results waiting leaves the group and reads on its own. */
   maxQueuedResults: number;
+  /** A reader with this many message bytes waiting leaves the group and reads on its own. */
+  maxQueuedBytes: number;
 };
 
 // Measured on a 3D + 2 Plot + State Transitions layout: Plot requested its topics at +0 ms and
@@ -21,6 +25,7 @@ const DEFAULT_OPTIONS: SharedRangeReaderOptions = {
   quietMs: 60,
   maxWaitMs: 250,
   maxQueuedResults: 10_000,
+  maxQueuedBytes: 64 * 1024 * 1024,
 };
 
 /**
@@ -29,6 +34,9 @@ const DEFAULT_OPTIONS: SharedRangeReaderOptions = {
  * Reading one topic of a file still decompresses every chunk that contains it, and in recordings
  * with many topics that is every chunk. Requests that arrive close together are therefore grouped
  * and read in a single pass, and each reader gets only the results for its own topic.
+ *
+ * The shared pass never waits for a single reader: a reader that falls too far behind (or is never
+ * read) leaves the group and continues with its own source iterator, like an unshared read would.
  */
 export class SharedRangeReader {
   readonly #source: Source;
@@ -63,7 +71,6 @@ class ReadGroup {
   #maxWaitTimer: ReturnType<typeof setTimeout> | undefined;
   #started = false;
   #sourceIterator: AsyncIterator<Result> | undefined;
-  #resumeReading: (() => void) | undefined;
 
   public constructor(source: Source, options: SharedRangeReaderOptions, onStart: () => void) {
     this.#source = source;
@@ -75,15 +82,9 @@ class ReadGroup {
   }
 
   public addReader(topic: string): AsyncIterableIterator<Result> {
-    const reader = new TopicReader(
-      topic,
-      () => {
-        this.#resumeReading?.();
-      },
-      () => {
-        this.#removeReader(reader);
-      },
-    );
+    const reader = new TopicReader(topic, () => {
+      this.#removeReader(reader);
+    });
     let readers = this.#readersByTopic.get(topic);
     if (readers == undefined) {
       readers = new Set();
@@ -99,10 +100,11 @@ class ReadGroup {
     return reader.iterator;
   }
 
-  #removeReader(reader: TopicReader): void {
+  /** Removes the reader from the group; returns false if it wasn't a member. */
+  #removeReader(reader: TopicReader): boolean {
     const readers = this.#readersByTopic.get(reader.topic);
     if (readers?.delete(reader) !== true) {
-      return;
+      return false;
     }
     this.#readerCount--;
     if (readers.size === 0) {
@@ -111,8 +113,7 @@ class ReadGroup {
     if (this.#readerCount === 0 && this.#started) {
       void this.#sourceIterator?.return?.();
     }
-    // A closed reader may have been the one that paused reading.
-    this.#resumeReading?.();
+    return true;
   }
 
   #start(): void {
@@ -134,77 +135,75 @@ class ReadGroup {
   async #read(sourceIterator: AsyncIterator<Result>): Promise<void> {
     try {
       while (this.#readerCount > 0) {
-        if (this.#isAnyReaderFull()) {
-          await new Promise<void>((resolve) => {
-            this.#resumeReading = resolve;
-          });
-          this.#resumeReading = undefined;
-          continue;
-        }
         const next = await sourceIterator.next();
         if (next.done === true) {
           break;
         }
         this.#deliver(next.value);
       }
-      this.#forEachReader((reader) => {
+      for (const reader of this.#readers()) {
         reader.finish();
-      });
+      }
     } catch (error: unknown) {
-      this.#forEachReader((reader) => {
+      for (const reader of this.#readers()) {
         reader.fail(error);
-      });
+      }
     }
   }
 
   #deliver(result: Result): void {
-    if (result.type === "message-event") {
-      for (const reader of this.#readersByTopic.get(result.msgEvent.topic) ?? []) {
-        reader.push(result);
-      }
-      return;
-    }
     // Alerts and stamps aren't tied to one topic, so every reader gets them as before.
-    this.#forEachReader((reader) => {
+    const receivers =
+      result.type === "message-event"
+        ? [...(this.#readersByTopic.get(result.msgEvent.topic) ?? [])]
+        : this.#readers();
+    for (const reader of receivers) {
       reader.push(result);
-    });
+      if (
+        reader.queuedCount() >= this.#options.maxQueuedResults ||
+        reader.queuedBytes() >= this.#options.maxQueuedBytes
+      ) {
+        this.#detach(reader);
+      }
+    }
   }
 
-  #isAnyReaderFull(): boolean {
+  #detach(reader: TopicReader): void {
+    if (this.#removeReader(reader)) {
+      reader.continueAlone(this.#source);
+    }
+  }
+
+  #readers(): TopicReader[] {
+    const all: TopicReader[] = [];
     for (const readers of this.#readersByTopic.values()) {
-      for (const reader of readers) {
-        if (reader.queuedCount() >= this.#options.maxQueuedResults) {
-          return true;
-        }
-      }
+      all.push(...readers);
     }
-    return false;
-  }
-
-  #forEachReader(fn: (reader: TopicReader) => void): void {
-    for (const readers of [...this.#readersByTopic.values()]) {
-      for (const reader of [...readers]) {
-        fn(reader);
-      }
-    }
+    return all;
   }
 }
 
 class TopicReader {
   public readonly topic: string;
   public readonly iterator: AsyncIterableIterator<Result>;
-  readonly #onPull: () => void;
   readonly #onClose: () => void;
   #queue: Result[] = [];
   #head = 0;
+  #queuedBytes = 0;
   #finished = false;
   #error: { value: unknown } | undefined;
   #closed = false;
   #wake: (() => void) | undefined;
+  // Receive time of the last message queued, and how many queued messages share it.
+  #lastTime: Time | undefined;
+  #countAtLastTime = 0;
+  // Set once the reader has left its group and reads on its own.
+  #ownIterator: AsyncIterator<Result> | undefined;
+  #skipTime: Time | undefined;
+  #skipCount = 0;
 
-  public constructor(topic: string, onPull: () => void, onClose: () => void) {
+  public constructor(topic: string, onClose: () => void) {
     this.topic = topic;
-    this.#onPull = onPull;
     this.#onClose = onClose;
     this.iterator = {
       next: async () => await this.#next(),
@@ -222,11 +221,25 @@ class TopicReader {
     return this.#queue.length - this.#head;
   }
 
+  public queuedBytes(): number {
+    return this.#queuedBytes;
+  }
+
   public push(result: Result): void {
     if (this.#closed) {
       return;
     }
     this.#queue.push(result);
+    if (result.type === "message-event") {
+      this.#queuedBytes += result.msgEvent.sizeInBytes;
+      const time = result.msgEvent.receiveTime;
+      if (this.#lastTime != undefined && compare(time, this.#lastTime) === 0) {
+        this.#countAtLastTime++;
+      } else {
+        this.#lastTime = time;
+        this.#countAtLastTime = 1;
+      }
+    }
     this.#wakeUp();
   }
 
@@ -240,6 +253,24 @@ class TopicReader {
     this.#wakeUp();
   }
 
+  /**
+   * Continues after the last queued message with a separate source iterator. Messages that share
+   * the last queued receive time are re-read from the source and skipped.
+   */
+  public continueAlone(source: Source): void {
+    if (this.#closed) {
+      return;
+    }
+    this.#ownIterator = source.messageIterator({
+      topics: new Map([[this.topic, { topic: this.topic }]]),
+      consumptionType: "full",
+      start: this.#lastTime,
+    });
+    this.#skipTime = this.#lastTime;
+    this.#skipCount = this.#lastTime != undefined ? this.#countAtLastTime : 0;
+    this.#wakeUp();
+  }
+
   async #next(): Promise<IteratorReturnResult<undefined> | IteratorYieldResult<Result>> {
     for (;;) {
       if (this.#closed) {
@@ -248,12 +279,17 @@ class TopicReader {
       if (this.#head < this.#queue.length) {
         const value = this.#queue[this.#head]!;
         this.#head++;
+        if (value.type === "message-event") {
+          this.#queuedBytes -= value.msgEvent.sizeInBytes;
+        }
         if (this.#head === this.#queue.length) {
           this.#queue = [];
           this.#head = 0;
         }
-        this.#onPull();
         return { done: false, value };
+      }
+      if (this.#ownIterator != undefined) {
+        return await this.#nextOwn(this.#ownIterator);
       }
       if (this.#error != undefined) {
         this.#close();
@@ -266,6 +302,36 @@ class TopicReader {
       await new Promise<void>((resolve) => {
         this.#wake = resolve;
       });
+    }
+  }
+
+  async #nextOwn(
+    ownIterator: AsyncIterator<Result>,
+  ): Promise<IteratorReturnResult<undefined> | IteratorYieldResult<Result>> {
+    for (;;) {
+      let next: Awaited<ReturnType<AsyncIterator<Result>["next"]>>;
+      try {
+        next = await ownIterator.next();
+      } catch (error: unknown) {
+        this.#close();
+        throw error;
+      }
+      if (this.#closed) {
+        return { done: true, value: undefined };
+      }
+      if (next.done === true) {
+        this.#close();
+        return { done: true, value: undefined };
+      }
+      const value = next.value;
+      if (this.#skipCount > 0 && value.type === "message-event") {
+        if (compare(value.msgEvent.receiveTime, this.#skipTime!) === 0) {
+          this.#skipCount--;
+          continue;
+        }
+        this.#skipCount = 0;
+      }
+      return { done: false, value };
     }
   }
 
@@ -282,6 +348,8 @@ class TopicReader {
     this.#closed = true;
     this.#queue = [];
     this.#head = 0;
+    this.#queuedBytes = 0;
+    void this.#ownIterator?.return?.();
     this.#onClose();
     this.#wakeUp();
   }

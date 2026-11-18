@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { compare } from "@lichtblick/rostime";
 import { Immutable } from "@lichtblick/suite";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 
@@ -9,10 +10,14 @@ import { SharedRangeReader } from "./SharedRangeReader";
 
 const FAST = { quietMs: 1, maxWaitMs: 5 };
 
-function messageResult(topic: string, sec: number): IteratorResult {
+function messageResult(topic: string, sec: number, sizeInBytes = 1): IteratorResult {
   return {
     type: "message-event",
-    msgEvent: MessageEventBuilder.messageEvent({ topic, receiveTime: { sec, nsec: 0 } }),
+    msgEvent: MessageEventBuilder.messageEvent({
+      topic,
+      receiveTime: { sec, nsec: 0 },
+      sizeInBytes,
+    }),
   };
 }
 
@@ -20,8 +25,13 @@ function messageResult(topic: string, sec: number): IteratorResult {
 function createSource(results: IteratorResult[], onYield?: () => void) {
   const messageIterator = jest.fn(async function* (args: Immutable<MessageIteratorArgs>) {
     for (const result of results) {
-      if (result.type === "message-event" && !args.topics.has(result.msgEvent.topic)) {
-        continue;
+      if (result.type === "message-event") {
+        if (!args.topics.has(result.msgEvent.topic)) {
+          continue;
+        }
+        if (args.start != undefined && compare(result.msgEvent.receiveTime, args.start) < 0) {
+          continue;
+        }
       }
       onYield?.();
       yield result;
@@ -29,6 +39,13 @@ function createSource(results: IteratorResult[], onYield?: () => void) {
   });
   return { messageIterator };
 }
+
+const timeout = async (ms: number) =>
+  await new Promise<"timeout">((resolve) => {
+    setTimeout(() => {
+      resolve("timeout");
+    }, ms);
+  });
 
 async function collect(iterator: AsyncIterableIterator<Readonly<IteratorResult>>) {
   const out: Readonly<IteratorResult>[] = [];
@@ -208,7 +225,7 @@ describe("SharedRangeReader", () => {
     expect(b).toHaveLength(2);
   });
 
-  it("should not read far ahead of a reader that is not pulling", async () => {
+  it("should hand a reader that stops pulling over to its own read without reading far ahead", async () => {
     // Given
     let yielded = 0;
     const many = Array.from({ length: 100 }, (_, sec) => messageResult("/a", sec));
@@ -226,7 +243,127 @@ describe("SharedRangeReader", () => {
 
     // Then
     expect(yielded).toBeLessThanOrEqual(5);
-    expect(await collect(a)).toHaveLength(99);
+    expect(await collect(a)).toEqual(many.slice(1));
+  });
+
+  it("should not hang when a time-ordered merge waits on a rare topic", async () => {
+    // Given: /rare at t=0 and t=100, with 99 /frequent messages in between. This is how
+    // UserScriptPlayer merges its inputs: it only pulls from the input with the earliest head.
+    const stream = [messageResult("/rare", 0)];
+    for (let t = 1; t < 100; t++) {
+      stream.push(messageResult("/frequent", t));
+    }
+    stream.push(messageResult("/rare", 100));
+    const reader = new SharedRangeReader(createSource(stream), {
+      ...FAST,
+      maxQueuedResults: 10,
+    });
+    const rare = reader.iterator("/rare");
+    const frequent = reader.iterator("/frequent");
+    await rare.next();
+    await frequent.next();
+
+    // When
+    const outcome = await Promise.race([rare.next(), timeout(1000)]);
+
+    // Then
+    expect(outcome).toEqual({ done: false, value: stream.at(-1) });
+    expect(await collect(frequent)).toEqual(stream.slice(2, -1));
+  });
+
+  it("should not let a reader that is never read block the others", async () => {
+    // Given
+    const stream = Array.from({ length: 100 }, (_, t) =>
+      messageResult(t % 2 === 0 ? "/a" : "/b", t),
+    );
+    const reader = new SharedRangeReader(createSource(stream), { ...FAST, maxQueuedResults: 10 });
+    reader.iterator("/a");
+    const b = reader.iterator("/b");
+
+    // When
+    const outcome = await Promise.race([collect(b), timeout(1000)]);
+
+    // Then
+    expect(outcome).toEqual(
+      stream.filter((r) => r.type === "message-event" && r.msgEvent.topic === "/b"),
+    );
+  });
+
+  it("should hand over a reader once its queued messages reach maxQueuedBytes", async () => {
+    // Given
+    let yielded = 0;
+    const big = Array.from({ length: 50 }, (_, sec) => messageResult("/images", sec, 1000));
+    const reader = new SharedRangeReader(
+      createSource(big, () => {
+        yielded++;
+      }),
+      { ...FAST, maxQueuedBytes: 3000 },
+    );
+    const images = reader.iterator("/images");
+
+    // When
+    await images.next();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // Then
+    expect(yielded).toBeLessThanOrEqual(5);
+    expect(await collect(images)).toEqual(big.slice(1));
+  });
+
+  it("should deliver every message exactly once when the hand-over happens between equal timestamps", async () => {
+    // Given: several messages share the receive time at the hand-over point
+    const sameTime = [
+      messageResult("/a", 1),
+      messageResult("/a", 2),
+      messageResult("/a", 2),
+      messageResult("/a", 2),
+      messageResult("/a", 3),
+    ];
+    const source = createSource(sameTime);
+    const reader = new SharedRangeReader(source, { ...FAST, maxQueuedResults: 3 });
+    const a = reader.iterator("/a");
+    // Let the shared pass queue 3 messages (1, 2, 2) and hand the reader over.
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // When
+    const received = await collect(a);
+
+    // Then
+    expect(source.messageIterator).toHaveBeenCalledTimes(2);
+    expect(received).toEqual(sameTime);
+  });
+
+  it("should stop a handed-over reader's own read when it is returned", async () => {
+    // Given
+    const returnSpy = jest.fn();
+    const source = {
+      messageIterator: jest.fn(() => {
+        const iterator = (async function* () {
+          for (let sec = 0; ; sec++) {
+            yield messageResult("/a", sec);
+          }
+        })();
+        const originalReturn = iterator.return.bind(iterator);
+        iterator.return = async (value) => {
+          returnSpy();
+          return await originalReturn(value);
+        };
+        return iterator;
+      }),
+    };
+    const reader = new SharedRangeReader(source, { ...FAST, maxQueuedResults: 3 });
+    const a = reader.iterator("/a");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    for (let i = 0; i < 6; i++) {
+      await a.next();
+    }
+
+    // When
+    await a.return!();
+
+    // Then
+    expect(source.messageIterator).toHaveBeenCalledTimes(2);
+    expect(returnSpy).toHaveBeenCalledTimes(2);
   });
 
   it("should pass a source error to every reader", async () => {
