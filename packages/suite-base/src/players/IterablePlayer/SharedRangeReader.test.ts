@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { promiseTimeout } from "@lichtblick/den/async";
 import { compare } from "@lichtblick/rostime";
 import { Immutable } from "@lichtblick/suite";
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
@@ -9,6 +10,13 @@ import { IteratorResult, MessageIteratorArgs } from "./IIterableSource";
 import { SharedRangeReader } from "./SharedRangeReader";
 
 const FAST = { quietMs: 1, maxWaitMs: 5 };
+
+function payload(result: Readonly<IteratorResult> | undefined): Record<string, unknown> {
+  if (result?.type !== "message-event") {
+    throw new Error("expected a message event");
+  }
+  return result.msgEvent.message as Record<string, unknown>;
+}
 
 function messageResult(topic: string, sec: number, sizeInBytes = 1): IteratorResult {
   return {
@@ -39,13 +47,6 @@ function createSource(results: IteratorResult[], onYield?: () => void) {
   });
   return { messageIterator };
 }
-
-const timeout = async (ms: number) =>
-  await new Promise<"timeout">((resolve) => {
-    setTimeout(() => {
-      resolve("timeout");
-    }, ms);
-  });
 
 async function collect(iterator: AsyncIterableIterator<Readonly<IteratorResult>>) {
   const out: Readonly<IteratorResult>[] = [];
@@ -112,7 +113,10 @@ describe("SharedRangeReader", () => {
       messageIterator: jest.fn(async function* (args: Immutable<MessageIteratorArgs>) {
         for (const result of results) {
           if (result.type === "message-event" && args.topics.has(result.msgEvent.topic)) {
-            yield { ...result, msgEvent: { ...result.msgEvent } };
+            yield {
+              ...result,
+              msgEvent: { ...result.msgEvent, message: { ...payload(result) } },
+            };
           }
         }
       }),
@@ -130,6 +134,8 @@ describe("SharedRangeReader", () => {
     expect(first).toHaveLength(2);
     expect(second).toEqual(first);
     expect(second[0]).not.toBe(first[0]);
+    payload(first[0]).changedByConsumer = true;
+    expect(payload(second[0])).not.toHaveProperty("changedByConsumer");
   });
 
   it("should read all duplicate topics together in one extra pass", async () => {
@@ -290,7 +296,7 @@ describe("SharedRangeReader", () => {
     await frequent.next();
 
     // When
-    const outcome = await Promise.race([rare.next(), timeout(1000)]);
+    const outcome = await promiseTimeout(rare.next(), 1000);
 
     // Then
     expect(outcome).toEqual({ done: false, value: stream.at(-1) });
@@ -307,7 +313,7 @@ describe("SharedRangeReader", () => {
     const b = reader.iterator("/b");
 
     // When
-    const outcome = await Promise.race([collect(b), timeout(1000)]);
+    const outcome = await promiseTimeout(collect(b), 1000);
 
     // Then
     expect(outcome).toEqual(
@@ -325,7 +331,7 @@ describe("SharedRangeReader", () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
 
     // When
-    const outcome = await Promise.race([Promise.all(iterators.map(collect)), timeout(1000)]);
+    const outcome = await promiseTimeout(Promise.all(iterators.map(collect)), 1000);
 
     // Then: one shared pass plus one own read per reader, and every message exactly once
     expect(source.messageIterator).toHaveBeenCalledTimes(1 + topics.length);
@@ -441,26 +447,31 @@ describe("SharedRangeReader", () => {
   });
 
   it("should deliver every message exactly once when the hand-over happens between equal timestamps", async () => {
-    // Given: several messages share the receive time at the hand-over point
+    // Given: several distinct messages share the receive time at the hand-over point
     const sameTime = [
       messageResult("/a", 1),
+      messageResult("/a", 2),
       messageResult("/a", 2),
       messageResult("/a", 2),
       messageResult("/a", 2),
       messageResult("/a", 3),
     ];
     const source = createSource(sameTime);
-    const reader = new SharedRangeReader(source, { ...FAST, maxQueuedResults: 3 });
+    const reader = new SharedRangeReader(source, { ...FAST, maxQueuedResults: 2 });
     const a = reader.iterator("/a");
-    // Let the shared pass queue 3 messages (1, 2, 2) and hand the reader over.
+    const handedOut = [await a.next(), await a.next(), await a.next()].map((r) => r.value);
+    // Two messages at t=2 are handed out; let the queue fill so the reader is handed over.
     await new Promise((resolve) => setTimeout(resolve, 20));
 
     // When
-    const received = await collect(a);
+    const rest = await collect(a);
 
-    // Then
+    // Then: the own read starts at t=2 and skips exactly the two handed-out ones
     expect(source.messageIterator).toHaveBeenCalledTimes(2);
-    expect(received).toEqual(sameTime);
+    expect(source.messageIterator).toHaveBeenLastCalledWith(
+      expect.objectContaining({ start: { sec: 2, nsec: 0 } }),
+    );
+    expect([...handedOut, ...rest]).toEqual(sameTime);
   });
 
   it("should stop a handed-over reader's own read when it is returned", async () => {
