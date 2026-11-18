@@ -555,6 +555,38 @@ describe("SharedRangeReader", () => {
     expect(await a.next()).toEqual({ done: true, value: undefined });
   });
 
+  it("should answer every pull made before results arrive, in order", async () => {
+    // Given
+    const reader = new SharedRangeReader(createSource(results), FAST);
+    const a = reader.iterator("/a");
+
+    // When
+    const pulls = await Promise.all([a.next(), a.next(), a.next()]);
+
+    // Then
+    expect(pulls).toEqual([
+      { done: false, value: results[0] },
+      { done: false, value: results[3] },
+      { done: true, value: undefined },
+    ]);
+  });
+
+  it("should end every waiting pull when the reader is returned", async () => {
+    // Given
+    const reader = new SharedRangeReader(createSource(results), FAST);
+    const a = reader.iterator("/a");
+    const pulls = Promise.all([a.next(), a.next()]);
+
+    // When
+    await a.return!();
+
+    // Then
+    expect(await pulls).toEqual([
+      { done: true, value: undefined },
+      { done: true, value: undefined },
+    ]);
+  });
+
   it("should pass a source error to every reader", async () => {
     // Given
     const source = {

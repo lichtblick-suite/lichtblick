@@ -249,6 +249,8 @@ class TopicReader {
   #error: { value: unknown } | undefined;
   #closed = false;
   #wake: (() => void) | undefined;
+  // Pulls run one after another, so only one can wait on #wake at a time.
+  #lastPull: Promise<void> | undefined;
   // Receive time of the last message handed out, and how many handed-out messages share it.
   #lastTime: Time | undefined;
   #countAtLastTime = 0;
@@ -261,7 +263,21 @@ class TopicReader {
     this.topic = topic;
     this.#onClose = onClose;
     this.iterator = {
-      next: async () => await this.#next(),
+      next: async () => {
+        const previous = this.#lastPull;
+        const pull = previous ? previous.then(async () => await this.#next()) : this.#next();
+        const settled = pull.then(
+          () => undefined,
+          () => undefined,
+        );
+        this.#lastPull = settled;
+        void settled.then(() => {
+          if (this.#lastPull === settled) {
+            this.#lastPull = undefined;
+          }
+        });
+        return await pull;
+      },
       return: async () => {
         this.close();
         return { done: true, value: undefined };
