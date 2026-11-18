@@ -135,6 +135,11 @@ export class WorkerIterableSource implements IDeserializedIterableSource {
     return cursor;
   }
 
+  // Note: unlike WorkerSerializedIterableSource, this path has no worker → main
+  // telemetry bridge. It only hosts single-file deserialized sources (ulog) with no
+  // HydratedSourcePool, and terminate() hard-kills the worker without a graceful remote
+  // terminate() that a final drain could follow. Add enableTelemetry/drainTelemetry to
+  // WorkerIterableSourceWorker if worker-side metrics are ever produced here.
   public async terminate(): Promise<void> {
     this.#disposeRemote?.();
     // shouldn't normally have to do this, but if `initialize` is called after again we don't want
