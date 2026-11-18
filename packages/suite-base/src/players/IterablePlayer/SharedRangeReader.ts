@@ -38,11 +38,14 @@ const DEFAULT_OPTIONS: SharedRangeReaderOptions = {
  * The shared pass never waits for a single reader: a reader that falls too far behind (or is never
  * read) leaves the group, drops its queue and continues after the last message it handed out with
  * its own source iterator, like an unshared read would.
+ *
+ * A group holds at most one reader per topic, so readers never receive the same message objects.
+ * Converters and extensions may modify the messages they get, and unshared reads allowed that.
  */
 export class SharedRangeReader {
   readonly #source: Source;
   readonly #options: SharedRangeReaderOptions;
-  #collecting: ReadGroup | undefined;
+  #collecting: ReadGroup[] = [];
 
   public constructor(source: Source, options: Partial<SharedRangeReaderOptions> = {}) {
     this.#source = source;
@@ -50,15 +53,15 @@ export class SharedRangeReader {
   }
 
   public iterator(topic: string): AsyncIterableIterator<Result> {
-    if (this.#collecting == undefined) {
-      const group = new ReadGroup(this.#source, this.#options, () => {
-        if (this.#collecting === group) {
-          this.#collecting = undefined;
-        }
+    let group = this.#collecting.find((candidate) => !candidate.hasTopic(topic));
+    if (group == undefined) {
+      const newGroup = new ReadGroup(this.#source, this.#options, () => {
+        this.#collecting = this.#collecting.filter((candidate) => candidate !== newGroup);
       });
-      this.#collecting = group;
+      this.#collecting.push(newGroup);
+      group = newGroup;
     }
-    return this.#collecting.addReader(topic);
+    return group.addReader(topic);
   }
 }
 
@@ -80,6 +83,10 @@ class ReadGroup {
     this.#maxWaitTimer = setTimeout(() => {
       this.#start();
     }, options.maxWaitMs);
+  }
+
+  public hasTopic(topic: string): boolean {
+    return this.#readersByTopic.has(topic);
   }
 
   public addReader(topic: string): AsyncIterableIterator<Result> {

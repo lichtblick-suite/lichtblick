@@ -106,9 +106,17 @@ describe("SharedRangeReader", () => {
     }
   });
 
-  it("should give the full stream to every reader of the same topic", async () => {
-    // Given
-    const source = createSource(results);
+  it("should give every reader of the same topic its own read and its own message objects", async () => {
+    // Given: like a real source, every read creates new message objects
+    const source = {
+      messageIterator: jest.fn(async function* (args: Immutable<MessageIteratorArgs>) {
+        for (const result of results) {
+          if (result.type === "message-event" && args.topics.has(result.msgEvent.topic)) {
+            yield { ...result, msgEvent: { ...result.msgEvent } };
+          }
+        }
+      }),
+    };
     const reader = new SharedRangeReader(source, FAST);
 
     // When
@@ -118,9 +126,27 @@ describe("SharedRangeReader", () => {
     ]);
 
     // Then
-    expect(source.messageIterator).toHaveBeenCalledTimes(1);
+    expect(source.messageIterator).toHaveBeenCalledTimes(2);
     expect(first).toHaveLength(2);
     expect(second).toEqual(first);
+    expect(second[0]).not.toBe(first[0]);
+  });
+
+  it("should read all duplicate topics together in one extra pass", async () => {
+    // Given
+    const source = createSource(results);
+    const reader = new SharedRangeReader(source, FAST);
+
+    // When
+    await Promise.all(
+      ["/a", "/b", "/a", "/b"].map(async (topic) => await collect(reader.iterator(topic))),
+    );
+
+    // Then
+    expect(source.messageIterator).toHaveBeenCalledTimes(2);
+    for (const [args] of source.messageIterator.mock.calls) {
+      expect([...args.topics.keys()]).toEqual(["/a", "/b"]);
+    }
   });
 
   it("should forward alerts and stamps to every reader", async () => {
