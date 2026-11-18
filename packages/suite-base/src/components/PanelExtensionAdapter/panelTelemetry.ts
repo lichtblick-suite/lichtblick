@@ -90,6 +90,24 @@ export function recordRangeMessagesDelivered(
   }
 }
 
+/**
+ * Records how long a cancelled range subscription took to fully release its upstream iterator
+ * chain. Callers must have checked `telemetry.isEnabled()`.
+ */
+export function recordRangeCancelQuiescence(
+  telemetry: ITelemetry,
+  durationMs: number,
+  labels: TelemetryLabels,
+): void {
+  telemetry.observe(
+    PANEL_TELEMETRY_METRICS.rangeCancelQuiescenceMs,
+    durationMs,
+    "ms",
+    "panel",
+    labels,
+  );
+}
+
 /** Records a completed panel render. Callers must have checked `telemetry.isEnabled()`. */
 export function recordRenderDone(
   telemetry: ITelemetry,

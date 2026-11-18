@@ -120,4 +120,14 @@ export type CreateMessageRangeIteratorParams = {
    * it must not be retained). Used for telemetry; omit it to leave the iterator untouched.
    */
   onBatch?: (batch: readonly MessageEvent[]) => void;
+  /**
+   * Controller whose signal was also passed to `getBatchIterator`, so `cancel()` aborts the whole
+   * chain (including an in-flight worker read). A private controller is created when omitted.
+   */
+  abortController?: AbortController;
+  /**
+   * Called once after `cancel()` when the upstream iterator chain has fully closed, with the time
+   * elapsed since `cancel()` (time to quiescence).
+   */
+  onQuiescent?: (durationMs: number) => void;
 };

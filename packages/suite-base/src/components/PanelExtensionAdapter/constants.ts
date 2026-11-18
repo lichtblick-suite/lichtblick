@@ -54,4 +54,10 @@ export const PANEL_TELEMETRY_METRICS = {
    * (re-summing the whole array on every block update is too expensive). The count is exact.
    */
   rangeMessagesDeliveredBytes: "panel.rangeMessages.deliveredBytes",
+  /**
+   * observation: time from cancelling a `useSubscribeMessageRange` subscription (seek, source
+   * close, layout switch, unmount) until its upstream iterator chain has fully closed (worker
+   * cursor ended, pooled readers unpinned). The sink publishes `.count`, `.sum` and `.max`.
+   */
+  rangeCancelQuiescenceMs: "panel.rangeSubscription.cancelQuiescenceMs",
 } as const;

@@ -1021,7 +1021,7 @@ export default class UserScriptPlayer implements Player {
 
   public getBatchIterator(
     topic: string,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; abort?: AbortSignal },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
     const registration = this.#outputTopicRegistrations.get(topic);
     if (!registration) {
@@ -1045,7 +1045,7 @@ export default class UserScriptPlayer implements Player {
 
   #collectInputIterators(
     inputTopics: readonly string[],
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; abort?: AbortSignal },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] | undefined {
     const iterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] = [];
     for (const inputTopic of inputTopics) {
@@ -1059,16 +1059,17 @@ export default class UserScriptPlayer implements Player {
 
   #getVirtualBatchIterator(
     registration: ScriptRegistration,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; abort?: AbortSignal },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
     const inputTopics = registration.inputs;
     if (inputTopics.length === 0) {
       return undefined;
     }
 
-    // For full-range (no options), use shared cache so multiple panels
-    // subscribing to the same virtual topic only process messages once.
-    if (!options) {
+    // For full-range (no start/end), use shared cache so multiple panels
+    // subscribing to the same virtual topic only process messages once. The shared consumer
+    // outlives any single subscriber, so a subscriber's abort signal is not forwarded to it.
+    if (options?.start == undefined && options?.end == undefined) {
       const topic = registration.output.name;
       const existingCache = this.#batchIteratorCache.get(topic);
       if (existingCache) {

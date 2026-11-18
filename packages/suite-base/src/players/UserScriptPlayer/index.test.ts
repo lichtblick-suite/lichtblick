@@ -2208,6 +2208,33 @@ describe("UserScriptPlayer", () => {
       expect(result).toBeUndefined();
     });
 
+    it("reuses the shared cache when only an abort signal is passed", async () => {
+      // Given a script player whose input topic counts upstream iterator creations
+      let callCount = 0;
+      const { userScriptPlayer } = await setupScriptPlayer((topic) => {
+        if (topic === "/np_input") {
+          callCount++;
+          return (async function* () {
+            yield { type: "message-event" as const, msgEvent: upstreamFirst };
+          })();
+        }
+        return undefined;
+      });
+
+      // When two full-range subscribers each pass their own abort signal
+      const iter1 = userScriptPlayer.getBatchIterator(outputTopic, {
+        abort: new AbortController().signal,
+      });
+      const iter2 = userScriptPlayer.getBatchIterator(outputTopic, {
+        abort: new AbortController().signal,
+      });
+
+      // Then both share a single upstream consumer
+      expect(iter1).toBeDefined();
+      expect(iter2).toBeDefined();
+      expect(callCount).toBe(1);
+    });
+
     it("reuses the shared cache when getBatchIterator is called twice without options", async () => {
       let callCount = 0;
 
