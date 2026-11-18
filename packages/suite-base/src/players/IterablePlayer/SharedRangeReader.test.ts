@@ -310,6 +310,54 @@ describe("SharedRangeReader", () => {
     );
   });
 
+  it("should drop the queue at hand-over and resume after the last handed-out message", async () => {
+    // Given
+    const stream = [
+      messageResult("/a", 1),
+      messageResult("/a", 2),
+      messageResult("/a", 2),
+      messageResult("/a", 2),
+      messageResult("/a", 3),
+      messageResult("/a", 4),
+    ];
+    const source = createSource(stream);
+    const reader = new SharedRangeReader(source, { ...FAST, maxQueuedResults: 2 });
+    const a = reader.iterator("/a");
+    const first = await a.next();
+    const second = await a.next();
+    // Let the queue fill up so the reader is handed over.
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // When
+    const rest = await collect(a);
+
+    // Then: the own read starts at the last handed-out time, not after the dropped queue
+    expect(source.messageIterator).toHaveBeenCalledTimes(2);
+    expect(source.messageIterator).toHaveBeenLastCalledWith(
+      expect.objectContaining({ start: { sec: 2, nsec: 0 } }),
+    );
+    expect([first.value, second.value, ...rest]).toEqual(stream);
+  });
+
+  it("should restart a reader that never read from the beginning, holding no messages", async () => {
+    // Given
+    const stream = Array.from({ length: 20 }, (_, sec) => messageResult("/a", sec));
+    const source = createSource(stream);
+    const reader = new SharedRangeReader(source, { ...FAST, maxQueuedResults: 5 });
+    const a = reader.iterator("/a");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // When
+    const received = await collect(a);
+
+    // Then
+    expect(source.messageIterator).toHaveBeenCalledTimes(2);
+    expect(source.messageIterator).toHaveBeenLastCalledWith(
+      expect.objectContaining({ start: undefined }),
+    );
+    expect(received).toEqual(stream);
+  });
+
   it("should hand over a reader once its queued messages reach maxQueuedBytes", async () => {
     // Given
     let yielded = 0;

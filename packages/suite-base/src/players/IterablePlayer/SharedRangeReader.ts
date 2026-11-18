@@ -36,7 +36,8 @@ const DEFAULT_OPTIONS: SharedRangeReaderOptions = {
  * and read in a single pass, and each reader gets only the results for its own topic.
  *
  * The shared pass never waits for a single reader: a reader that falls too far behind (or is never
- * read) leaves the group and continues with its own source iterator, like an unshared read would.
+ * read) leaves the group, drops its queue and continues after the last message it handed out with
+ * its own source iterator, like an unshared read would.
  */
 export class SharedRangeReader {
   readonly #source: Source;
@@ -194,7 +195,7 @@ class TopicReader {
   #error: { value: unknown } | undefined;
   #closed = false;
   #wake: (() => void) | undefined;
-  // Receive time of the last message queued, and how many queued messages share it.
+  // Receive time of the last message handed out, and how many handed-out messages share it.
   #lastTime: Time | undefined;
   #countAtLastTime = 0;
   // Set once the reader has left its group and reads on its own.
@@ -232,13 +233,6 @@ class TopicReader {
     this.#queue.push(result);
     if (result.type === "message-event") {
       this.#queuedBytes += result.msgEvent.sizeInBytes;
-      const time = result.msgEvent.receiveTime;
-      if (this.#lastTime != undefined && compare(time, this.#lastTime) === 0) {
-        this.#countAtLastTime++;
-      } else {
-        this.#lastTime = time;
-        this.#countAtLastTime = 1;
-      }
     }
     this.#wakeUp();
   }
@@ -254,13 +248,17 @@ class TopicReader {
   }
 
   /**
-   * Continues after the last queued message with a separate source iterator. Messages that share
-   * the last queued receive time are re-read from the source and skipped.
+   * Drops the queue and continues after the last handed-out message with a separate source
+   * iterator, so a reader that isn't reading holds no messages. Messages that share the last
+   * handed-out receive time are re-read from the source and skipped.
    */
   public continueAlone(source: Source): void {
     if (this.#closed) {
       return;
     }
+    this.#queue = [];
+    this.#head = 0;
+    this.#queuedBytes = 0;
     this.#ownIterator = source.messageIterator({
       topics: new Map([[this.topic, { topic: this.topic }]]),
       consumptionType: "full",
@@ -281,6 +279,7 @@ class TopicReader {
         this.#head++;
         if (value.type === "message-event") {
           this.#queuedBytes -= value.msgEvent.sizeInBytes;
+          this.#recordHandedOut(value.msgEvent.receiveTime);
         }
         if (this.#head === this.#queue.length) {
           this.#queue = [];
@@ -332,6 +331,15 @@ class TopicReader {
         this.#skipCount = 0;
       }
       return { done: false, value };
+    }
+  }
+
+  #recordHandedOut(time: Time): void {
+    if (this.#lastTime != undefined && compare(time, this.#lastTime) === 0) {
+      this.#countAtLastTime++;
+    } else {
+      this.#lastTime = time;
+      this.#countAtLastTime = 1;
     }
   }
 
