@@ -24,9 +24,15 @@ import PanelContext from "@lichtblick/suite-base/components/PanelContext";
 import AnalyticsContext from "@lichtblick/suite-base/context/AnalyticsContext";
 import { useCurrentLayoutActions } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { PanelsActions } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
+import { installTestTelemetrySink } from "@lichtblick/suite-base/players/IterablePlayer/testing/telemetryTestUtils";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import type IAnalytics from "@lichtblick/suite-base/services/IAnalytics";
 import PanelSetup from "@lichtblick/suite-base/stories/PanelSetup";
+import {
+  BufferedTelemetrySink,
+  setTelemetrySink,
+  TelemetryEvent,
+} from "@lichtblick/suite-base/util/telemetry";
 import { BasicBuilder } from "@lichtblick/test-builders";
 
 type DummyConfig = { someString: string };
@@ -1086,6 +1092,63 @@ describe("Panel", () => {
 
       // Then
       expect(renderFn).toHaveBeenCalled();
+    });
+  });
+
+  describe("lifecycle telemetry", () => {
+    afterEach(() => {
+      setTelemetrySink(undefined);
+    });
+
+    function panelLifecycleEvents(sink: BufferedTelemetrySink): TelemetryEvent[] {
+      return sink
+        .drain()
+        .records.filter(
+          (record): record is TelemetryEvent =>
+            record.kind === "event" && record.name.startsWith("panel."),
+        );
+    }
+
+    it("should label balanced panel.mount and panel.unmount events with the layout childId and panel type", () => {
+      // Given
+      const sink = installTestTelemetrySink();
+      const DummyPanel = getDummyPanel(jest.fn());
+      const childId = `Dummy!${BasicBuilder.string()}`;
+      const { unmount } = render(
+        <PanelSetup>
+          <DummyPanel childId={childId} />
+        </PanelSetup>,
+      );
+
+      // When
+      unmount();
+
+      // Then
+      const events = panelLifecycleEvents(sink);
+      const mounts = events.filter((event) => event.name === "panel.mount");
+      const unmounts = events.filter((event) => event.name === "panel.unmount");
+      expect(mounts.length).toBeGreaterThan(0);
+      expect(unmounts).toHaveLength(mounts.length);
+      for (const event of events) {
+        expect(event.labels).toEqual({ panelId: childId, panelType: "Dummy" });
+      }
+    });
+
+    it("should not emit lifecycle events for the fallback id when the panel has no layout childId", () => {
+      // Given
+      const sink = installTestTelemetrySink();
+      const DummyPanel = getDummyPanel(jest.fn());
+      const { unmount } = render(
+        <PanelSetup>
+          <DummyPanel />
+        </PanelSetup>,
+      );
+
+      // When
+      unmount();
+
+      // Then
+      expect(panelLifecycleEvents(sink)).toEqual([]);
     });
   });
 });

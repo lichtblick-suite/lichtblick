@@ -5,7 +5,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Immutable, MessageConverterAlert, PanelExtensionContext } from "@lichtblick/suite";
+import {
+  Immutable,
+  MessageConverterAlert,
+  MessageEvent,
+  PanelExtensionContext,
+} from "@lichtblick/suite";
 import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { PlayerAlert, Topic } from "@lichtblick/suite-base/players/types";
 import { InstalledMessageConverter } from "@lichtblick/suite-base/types/messageConverters";
@@ -110,4 +115,9 @@ export type CreateMessageRangeIteratorParams = {
   sortedTopics: readonly Topic[];
   messageConverters: readonly InstalledMessageConverter[];
   emitAlert?: MessageConverterAlertHandler;
+  /**
+   * Called with each batch right before it is yielded (the batch array is reused afterwards, so
+   * it must not be retained). Used for telemetry; omit it to leave the iterator untouched.
+   */
+  onBatch?: (batch: readonly MessageEvent[]) => void;
 };

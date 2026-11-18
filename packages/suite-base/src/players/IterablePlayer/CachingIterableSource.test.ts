@@ -7,6 +7,7 @@
 
 import { MessageEvent } from "@lichtblick/suite";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
+import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
 
 import { CachingIterableSource } from "./CachingIterableSource";
 import {
@@ -16,6 +17,11 @@ import {
   IteratorResult,
   MessageIteratorArgs,
 } from "./IIterableSource";
+import {
+  installDisabledTelemetry,
+  installTestTelemetrySink,
+  publishAndCollect,
+} from "./testing/telemetryTestUtils";
 
 class TestSource implements IIterableSource {
   public async initialize(): Promise<Initialization> {
@@ -984,5 +990,137 @@ describe("CachingIterableSource", () => {
         schemaName: "foo",
       },
     ]);
+  });
+});
+
+describe("CachingIterableSource telemetry", () => {
+  // `count` messages on topic "a", one per second starting at 0 s, each `sizeInBytes` large.
+  function makeSource(count: number, sizeInBytes: number): TestSource {
+    const source = new TestSource();
+    source.messageIterator = async function* messageIterator(
+      args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      for (let sec = 0; sec < count; ++sec) {
+        if (args.start != undefined && sec < args.start.sec) {
+          continue;
+        }
+        yield {
+          type: "message-event",
+          msgEvent: {
+            topic: "a",
+            receiveTime: { sec, nsec: 0 },
+            message: undefined,
+            sizeInBytes,
+            schemaName: "foo",
+          },
+        };
+      }
+    };
+    return source;
+  }
+
+  async function readAll(cachingSource: CachingIterableSource): Promise<number> {
+    let messages = 0;
+    for await (const result of cachingSource.messageIterator({ topics: mockTopicSelection("a") })) {
+      if (result.type === "message-event") {
+        messages++;
+        // Lets the cache know which blocks are behind the read head and therefore evictable.
+        cachingSource.setCurrentReadHead(result.msgEvent.receiveTime);
+      }
+    }
+    return messages;
+  }
+
+  afterEach(() => {
+    setTelemetrySink(undefined);
+  });
+
+  it("should count one miss for a source read and one hit for a cached re-read, per block lookup", async () => {
+    // Given: 8 messages of 10 bytes that fit in a single cache block
+    const sink = installTestTelemetrySink();
+    const cachingSource = new CachingIterableSource(makeSource(8, 10));
+    await cachingSource.initialize();
+
+    // When: the range is read twice
+    const firstRead = await readAll(cachingSource);
+    const secondRead = await readAll(cachingSource);
+
+    // Then: counts are per block lookup, not per message
+    expect(firstRead).toBe(8);
+    expect(secondRead).toBe(8);
+    const samples = publishAndCollect(sink);
+    expect(samples.get("pipeline.sourceCache.misses")).toMatchObject({
+      value: 1,
+      unit: "count",
+      scope: "pipeline",
+      metricType: "counter",
+    });
+    expect(samples.get("pipeline.sourceCache.hits")).toMatchObject({ value: 1, unit: "count" });
+    expect(samples.get("pipeline.sourceCache.bytes")).toMatchObject({
+      value: 80,
+      unit: "bytes",
+      metricType: "gauge",
+    });
+    expect(samples.has("pipeline.sourceCache.evictions")).toBe(false);
+  });
+
+  it("should count evicted blocks and gauge the remaining cache bytes", async () => {
+    // Given: a cache that holds at most two 101-byte messages, one per block
+    const sink = installTestTelemetrySink();
+    const cachingSource = new CachingIterableSource(makeSource(8, 101), {
+      maxBlockSize: 102,
+      maxTotalSize: 202,
+    });
+    await cachingSource.initialize();
+
+    // When
+    await readAll(cachingSource);
+
+    // Then: blocks [0, 2), [2, 4) and [4, 6) s were evicted; [6, 10] s remains
+    expect(cachingSource.loadedRanges()).toEqual([{ start: 0.6, end: 1 }]);
+    const samples = publishAndCollect(sink);
+    expect(samples.get("pipeline.sourceCache.evictions")).toMatchObject({
+      value: 3,
+      unit: "count",
+      metricType: "counter",
+    });
+    expect(samples.get("pipeline.sourceCache.bytes")?.value).toBe(cachingSource.getCacheSize());
+    expect(cachingSource.getCacheSize()).toBeLessThanOrEqual(202);
+  });
+
+  it("should gauge zero bytes after terminate releases the cache", async () => {
+    // Given
+    const sink = installTestTelemetrySink();
+    const cachingSource = new CachingIterableSource(makeSource(4, 10));
+    await cachingSource.initialize();
+    await readAll(cachingSource);
+
+    // When
+    await cachingSource.terminate();
+
+    // Then
+    expect(publishAndCollect(sink).get("pipeline.sourceCache.bytes")?.value).toBe(0);
+  });
+
+  it("should not record anything when telemetry is disabled", async () => {
+    // Given
+    const telemetry = installDisabledTelemetry();
+    const cachedSource = new CachingIterableSource(makeSource(8, 10));
+    const evictingSource = new CachingIterableSource(makeSource(8, 101), {
+      maxBlockSize: 102,
+      maxTotalSize: 202,
+    });
+    await cachedSource.initialize();
+    await evictingSource.initialize();
+
+    // When: a miss, a hit, evictions, block finalization and terminate
+    await readAll(cachedSource);
+    await readAll(cachedSource);
+    await readAll(evictingSource);
+    await cachedSource.terminate();
+
+    // Then
+    expect(telemetry.gauge).not.toHaveBeenCalled();
+    expect(telemetry.counter).not.toHaveBeenCalled();
   });
 });

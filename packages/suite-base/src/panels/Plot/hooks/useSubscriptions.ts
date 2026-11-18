@@ -10,6 +10,7 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@lichtblick/suite-base/components/MessagePipeline";
+import { usePanelSubscriberTelemetry } from "@lichtblick/suite-base/components/MessagePipeline/pipelineTelemetry";
 import useGlobalVariables from "@lichtblick/suite-base/hooks/useGlobalVariables";
 import {
   PlotConfig,
@@ -22,6 +23,10 @@ import { pathToSubscribePayload } from "../utils/subscription";
 const useSubscriptions = (config: PlotConfig, subscriberId: string): void => {
   const { paths, xAxisVal } = config;
   const { globalVariables } = useGlobalVariables();
+
+  // Attribute MessagePipeline deliveries for this subscriber to the panel (no-op unless benchmark
+  // telemetry is enabled).
+  usePanelSubscriberTelemetry(subscriberId);
 
   const setSubscriptions = useMessagePipeline(
     useCallback(
