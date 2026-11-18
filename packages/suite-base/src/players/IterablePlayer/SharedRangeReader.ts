@@ -1,12 +1,26 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import Log from "@lichtblick/log";
 import { compare, Time } from "@lichtblick/rostime";
 
 import { IDeserializedIterableSource, IteratorResult } from "./IIterableSource";
 
+const log = Log.getLogger(__filename);
+
 type Source = Pick<IDeserializedIterableSource, "messageIterator">;
 type Result = Readonly<IteratorResult>;
+
+// A failed cleanup must not stop the caller's own cleanup, hand-over or wake-up.
+function stopSourceIterator(iterator: AsyncIterator<Result> | undefined): void {
+  try {
+    iterator?.return?.().catch((error: unknown) => {
+      log.debug("Error closing source iterator:", error);
+    });
+  } catch (error: unknown) {
+    log.debug("Error closing source iterator:", error);
+  }
+}
 
 export type SharedRangeReaderOptions = {
   /** Start reading once no new topic was requested for this long. */
@@ -151,7 +165,7 @@ class ReadGroup {
       this.#readersByTopic.delete(reader.topic);
     }
     if (this.#readerCount === 0 && this.#started) {
-      void this.#sourceIterator?.return?.();
+      stopSourceIterator(this.#sourceIterator);
     }
     return true;
   }
@@ -401,7 +415,7 @@ class TopicReader {
     this.#queue = [];
     this.#head = 0;
     this.#queuedBytes = 0;
-    void this.#ownIterator?.return?.();
+    stopSourceIterator(this.#ownIterator);
     this.#onClose();
     this.#wakeUp();
   }

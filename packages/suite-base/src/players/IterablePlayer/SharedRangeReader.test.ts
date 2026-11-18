@@ -522,6 +522,39 @@ describe("SharedRangeReader", () => {
     expect(source.messageIterator).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [
+      "throws",
+      () => {
+        throw new Error("cleanup failed");
+      },
+    ],
+    ["rejects", async () => await Promise.reject(new Error("cleanup failed"))],
+  ])("should still close a reader when the source return() %s", async (_, failingReturn) => {
+    // Given
+    const source = {
+      messageIterator: jest.fn(() => {
+        const iterator = (async function* () {
+          for (let sec = 0; ; sec++) {
+            yield messageResult("/a", sec);
+          }
+        })();
+        iterator.return = failingReturn;
+        return iterator;
+      }),
+    };
+    const reader = new SharedRangeReader(source, FAST);
+    const a = reader.iterator("/a");
+    await a.next();
+
+    // When
+    const closed = await a.return!();
+
+    // Then
+    expect(closed).toEqual({ done: true, value: undefined });
+    expect(await a.next()).toEqual({ done: true, value: undefined });
+  });
+
   it("should pass a source error to every reader", async () => {
     // Given
     const source = {
