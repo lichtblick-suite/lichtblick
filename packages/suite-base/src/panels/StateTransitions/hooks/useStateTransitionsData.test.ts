@@ -18,7 +18,7 @@ import { StateTransitionPath } from "@lichtblick/suite-base/panels/StateTransiti
 import MessageEventBuilder from "@lichtblick/suite-base/testing/builders/MessageEventBuilder";
 import RosTimeBuilder from "@lichtblick/suite-base/testing/builders/RosTimeBuilder";
 
-import useStateTransitionsData from "./useStateTransitionsData";
+import useStateTransitionsData, { DATASET_PATH_FIELDS } from "./useStateTransitionsData";
 
 const PATH: StateTransitionPath = { value: "/topic.state", timestampMethod: "receiveTime" };
 const START: Time = { sec: 100, nsec: 0 };
@@ -212,6 +212,78 @@ describe("useStateTransitionsData", () => {
 
     // Then
     expect(result.current.data.datasets[0]).toEqual(fullDataset(block, { showPoints: true }));
+  });
+
+  it("should list every path field the dataset builder reads in DATASET_PATH_FIELDS", () => {
+    // Given
+    const readFields = new Set<string>();
+    const recordingPath = (label: string | undefined) =>
+      new Proxy(
+        { ...PATH, label },
+        {
+          get(target, property, receiver) {
+            if (typeof property === "string") {
+              readFields.add(property);
+            }
+            return Reflect.get(target, property, receiver) as unknown;
+          },
+        },
+      );
+    const items = buildItems([1, 1, null, 2, 3]);
+
+    // When: cover the builder's branches (with and without label, with and without points)
+    for (const label of [undefined, "Label"]) {
+      for (const showPoints of [false, true]) {
+        messagesToDataset({
+          path: recordingPath(label),
+          startTime: START,
+          y: Y,
+          pathIndex: 0,
+          blocks: [items],
+          showPoints,
+        });
+      }
+    }
+
+    // Then
+    expect(readFields.size).toBeGreaterThan(0);
+    for (const field of readFields) {
+      expect(DATASET_PATH_FIELDS).toContain(field);
+    }
+  });
+
+  it.each([
+    { field: "label", changed: { ...PATH, label: "New label" } },
+    { field: "timestampMethod", changed: { ...PATH, timestampMethod: "headerStamp" as const } },
+  ])("should rebuild when the path's $field changes", ({ changed }) => {
+    // Given
+    const block = buildItems([1, 1, 2]);
+    const { result, rerender } = renderData({
+      paths: [PATH],
+      startTime: START,
+      blocks: [{ [PATH.value]: block }],
+      showPoints: false,
+    });
+
+    // When
+    rerender({
+      paths: [changed],
+      startTime: START,
+      blocks: [{ [PATH.value]: block }],
+      showPoints: false,
+    });
+
+    // Then
+    expect(result.current.data.datasets[0]).toEqual(
+      messagesToDataset({
+        path: changed,
+        startTime: START,
+        y: Y,
+        pathIndex: 0,
+        blocks: [block],
+        showPoints: false,
+      }),
+    );
   });
 
   it("should rebuild when an earlier block grows while a later block already has data", () => {

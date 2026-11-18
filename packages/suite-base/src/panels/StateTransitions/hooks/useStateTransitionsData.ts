@@ -26,6 +26,9 @@ import {
 
 type Blocks = readonly (readonly MessageAndData[] | undefined)[];
 
+// Every path field the dataset builder reads must be listed, or editing it won't rebuild the chart.
+export const DATASET_PATH_FIELDS = ["value", "label", "timestampMethod"] as const;
+
 type BlockDatasetCache = {
   key: string;
   blocks: Blocks;
@@ -88,9 +91,7 @@ function useStateTransitionsData(
 
       const key =
         JSON.stringify([
-          path.value,
-          path.label,
-          path.timestampMethod,
+          ...DATASET_PATH_FIELDS.map((field) => path[field]),
           y,
           showPoints,
           startTime.sec,
