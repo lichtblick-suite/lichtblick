@@ -1413,6 +1413,32 @@ describe("IterablePlayer", () => {
       });
     });
 
+    it("should end full-range reads and not start new ones when the player closes", async () => {
+      // Given
+      const source = new TestSource();
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {});
+      source.messageIterator = mockMessageIterator;
+      const player = new IterablePlayer({ source, enablePreload: false, sourceId: "test" });
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+      const waiting = player.getBatchIterator("test_topic")!;
+
+      // When
+      player.close();
+      await player.isClosed;
+      const late = player.getBatchIterator("other_topic")!;
+
+      // Then
+      expect(await waiting.next()).toEqual({ done: true, value: undefined });
+      expect(await late.next()).toEqual({ done: true, value: undefined });
+      expect(mockMessageIterator).not.toHaveBeenCalledWith(
+        expect.objectContaining({ consumptionType: "full" }),
+      );
+    });
+
     it("should forward start and end bounds to messageIterator", async () => {
       const source = new TestSource();
       const mockMessageIterator = jest.fn().mockImplementation(async function* () {});

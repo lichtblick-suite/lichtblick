@@ -475,6 +475,53 @@ describe("SharedRangeReader", () => {
     expect(received).toEqual(stream);
   });
 
+  it("should stop running reads and end every reader when closed", async () => {
+    // Given
+    const returnSpy = jest.fn();
+    const source = {
+      messageIterator: jest.fn(() => {
+        const iterator = (async function* () {
+          for (let sec = 0; ; sec++) {
+            yield messageResult("/a", sec);
+          }
+        })();
+        const originalReturn = iterator.return.bind(iterator);
+        iterator.return = async (value) => {
+          returnSpy();
+          return await originalReturn(value);
+        };
+        return iterator;
+      }),
+    };
+    const reader = new SharedRangeReader(source, FAST);
+    const a = reader.iterator("/a");
+    await a.next();
+
+    // When
+    reader.close();
+
+    // Then
+    expect(returnSpy).toHaveBeenCalledTimes(1);
+    expect(await a.next()).toEqual({ done: true, value: undefined });
+  });
+
+  it("should not read the source for waiting or new requests after close", async () => {
+    // Given
+    const source = createSource(results);
+    const reader = new SharedRangeReader(source, FAST);
+    const waiting = reader.iterator("/a");
+
+    // When
+    reader.close();
+    const late = reader.iterator("/b");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // Then
+    expect(await waiting.next()).toEqual({ done: true, value: undefined });
+    expect(await late.next()).toEqual({ done: true, value: undefined });
+    expect(source.messageIterator).not.toHaveBeenCalled();
+  });
+
   it("should pass a source error to every reader", async () => {
     // Given
     const source = {

@@ -49,6 +49,8 @@ export class SharedRangeReader {
   readonly #source: Source;
   readonly #options: SharedRangeReaderOptions;
   #collecting: ReadGroup[] = [];
+  readonly #readers = new Set<TopicReader>();
+  #closed = false;
 
   public constructor(source: Source, options: Partial<SharedRangeReaderOptions> = {}) {
     this.#source = source;
@@ -56,6 +58,9 @@ export class SharedRangeReader {
   }
 
   public iterator(topic: string): AsyncIterableIterator<Result> {
+    if (this.#closed) {
+      return (async function* () {})();
+    }
     let group = this.#collecting.find((candidate) => !candidate.hasTopic(topic));
     if (group == undefined) {
       const newGroup = new ReadGroup(this.#source, this.#options, () => {
@@ -64,7 +69,23 @@ export class SharedRangeReader {
       this.#collecting.push(newGroup);
       group = newGroup;
     }
-    return group.addReader(topic);
+    const reader = group.addReader(topic, () => {
+      this.#readers.delete(reader);
+    });
+    this.#readers.add(reader);
+    return reader.iterator;
+  }
+
+  /** Stops every read. Later requests end right away without reading the source. */
+  public close(): void {
+    this.#closed = true;
+    for (const group of this.#collecting) {
+      group.cancelStart();
+    }
+    this.#collecting = [];
+    for (const reader of [...this.#readers]) {
+      reader.close();
+    }
   }
 }
 
@@ -92,9 +113,17 @@ class ReadGroup {
     return this.#readersByTopic.has(topic);
   }
 
-  public addReader(topic: string): AsyncIterableIterator<Result> {
+  /** Prevents the shared pass from starting. */
+  public cancelStart(): void {
+    this.#started = true;
+    clearTimeout(this.#quietTimer);
+    clearTimeout(this.#maxWaitTimer);
+  }
+
+  public addReader(topic: string, onClose: () => void): TopicReader {
     const reader = new TopicReader(topic, () => {
       this.#removeReader(reader);
+      onClose();
     });
     let readers = this.#readersByTopic.get(topic);
     if (readers == undefined) {
@@ -108,7 +137,7 @@ class ReadGroup {
     this.#quietTimer = setTimeout(() => {
       this.#start();
     }, this.#options.quietMs);
-    return reader.iterator;
+    return reader;
   }
 
   /** Removes the reader from the group; returns false if it wasn't a member. */
@@ -220,7 +249,7 @@ class TopicReader {
     this.iterator = {
       next: async () => await this.#next(),
       return: async () => {
-        this.#close();
+        this.close();
         return { done: true, value: undefined };
       },
       [Symbol.asyncIterator]() {
@@ -306,11 +335,11 @@ class TopicReader {
         return await this.#nextOwn(this.#ownIterator);
       }
       if (this.#error != undefined) {
-        this.#close();
+        this.close();
         throw this.#error.value;
       }
       if (this.#finished) {
-        this.#close();
+        this.close();
         return { done: true, value: undefined };
       }
       await new Promise<void>((resolve) => {
@@ -327,14 +356,14 @@ class TopicReader {
       try {
         next = await ownIterator.next();
       } catch (error: unknown) {
-        this.#close();
+        this.close();
         throw error;
       }
       if (this.#closed) {
         return { done: true, value: undefined };
       }
       if (next.done === true) {
-        this.#close();
+        this.close();
         return { done: true, value: undefined };
       }
       const value = next.value;
@@ -364,7 +393,7 @@ class TopicReader {
     wake?.();
   }
 
-  #close(): void {
+  public close(): void {
     if (this.#closed) {
       return;
     }

@@ -1346,6 +1346,7 @@ export class IterablePlayer implements Player {
     this.#onPlaybackEnded("close");
 
     try {
+      this.#sharedRangeReader?.close();
       await this.#blockLoader?.stopLoading();
       await this.#blockLoadingProcess;
       await this.#bufferImpl.terminate();
