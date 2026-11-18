@@ -310,12 +310,30 @@ export default class FoxgloveWebSocketPlayer implements Player {
         const isRos1 = ["melodic", "noetic"].includes(rosDistro);
         this.#profile = isRos1 ? "ros1" : "ros2";
 
-        // Add common ROS message definitions
-        const rosDataTypes = isRos1
-          ? CommonRosTypes.ros1
-          : ["foxy", "galactic"].includes(rosDistro)
-            ? CommonRosTypes.ros2galactic
-            : CommonRosTypes.ros2humble;
+        const rosDataTypes = (() => {
+          switch (rosDistro) {
+            case "melodic":
+              return CommonRosTypes.ros1;
+            case "noetic":
+              return CommonRosTypes.ros1;
+            case "foxy":
+              return CommonRosTypes.ros2galactic
+            case "galactic":
+              return CommonRosTypes.ros2galactic
+            case "humble":
+              return CommonRosTypes.ros2humble
+            case "iron":
+              return CommonRosTypes.ros2iron
+            case "jazzy":
+              return CommonRosTypes.ros2jazzy
+            case "kilted":
+              return CommonRosTypes.ros2kilted
+            case "lyrical":
+              return CommonRosTypes.ros2lyrical
+            default:
+              return CommonRosTypes.ros2lyrical
+          }
+        })();
 
         const dataTypes: MessageDefinitionMap = new Map();
         for (const dataType in rosDataTypes) {
