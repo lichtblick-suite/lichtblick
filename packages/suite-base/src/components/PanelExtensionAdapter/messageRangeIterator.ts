@@ -103,6 +103,10 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
     iterable: messageEventIterable,
     cancel: () => {
       cancelled = true;
+      // Also stops the source read when the consumer never started iterating.
+      rawBatchIterator.return?.().catch((err: unknown) => {
+        log.debug("Error closing message range iterator:", err);
+      });
     },
   };
 }
