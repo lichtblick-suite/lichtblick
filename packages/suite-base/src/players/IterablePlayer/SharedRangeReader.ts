@@ -400,7 +400,8 @@ class TopicReader {
     if (this.#lastTime != undefined && compare(time, this.#lastTime) === 0) {
       this.#countAtLastTime++;
     } else {
-      this.#lastTime = time;
+      // A copy: the consumer may modify the message it was handed.
+      this.#lastTime = { sec: time.sec, nsec: time.nsec };
       this.#countAtLastTime = 1;
     }
   }

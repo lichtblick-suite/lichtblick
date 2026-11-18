@@ -365,6 +365,41 @@ describe("SharedRangeReader", () => {
     expect([first.value, second.value, ...rest]).toEqual(stream);
   });
 
+  it("should resume at the handed-out time even if the consumer changes the message", async () => {
+    // Given: like a real source, every read creates new message objects
+    const stream = [1, 2, 3, 4, 5, 6].map((sec) => messageResult("/a", sec));
+    const fresh = (result: IteratorResult): IteratorResult =>
+      result.type === "message-event"
+        ? {
+            ...result,
+            msgEvent: { ...result.msgEvent, receiveTime: { ...result.msgEvent.receiveTime } },
+          }
+        : result;
+    const source = createSource(stream);
+    const freshSource = {
+      messageIterator: jest.fn(async function* (args: Immutable<MessageIteratorArgs>) {
+        for await (const result of source.messageIterator(args)) {
+          yield fresh(result);
+        }
+      }),
+    };
+    const reader = new SharedRangeReader(freshSource, { ...FAST, maxQueuedResults: 2 });
+    const a = reader.iterator("/a");
+    await a.next();
+    const second = await a.next();
+    (second.value as { msgEvent: { receiveTime: { sec: number } } }).msgEvent.receiveTime.sec = 20;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // When
+    const rest = await collect(a);
+
+    // Then
+    expect(freshSource.messageIterator).toHaveBeenLastCalledWith(
+      expect.objectContaining({ start: { sec: 2, nsec: 0 } }),
+    );
+    expect(rest).toEqual(stream.slice(2));
+  });
+
   it("should restart a reader that never read from the beginning, holding no messages", async () => {
     // Given
     const stream = Array.from({ length: 20 }, (_, sec) => messageResult("/a", sec));
