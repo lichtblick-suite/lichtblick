@@ -361,6 +361,8 @@ describe("decodeRawImage", () => {
   }
 
   it.each([
+    ["yuv420", 2],
+    ["nv12", 2],
     ["yuv422", 10],
     ["uyvy", 10],
     ["yuv422_yuy2", 10],
@@ -407,6 +409,8 @@ describe("decodeRawImage", () => {
   });
 
   it.each([
+    ["yuv420", 2],
+    ["nv12", 2],
     ["yuv422", 10],
     ["uyvy", 10],
     ["yuv422_yuy2", 10],
