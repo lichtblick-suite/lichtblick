@@ -3,6 +3,7 @@
 
 import { CameraInfo, ICameraModel, Vector3 } from "@lichtblick/suite";
 
+import { KannalaBrandtCameraModel } from "./KannalaBrandtCameraModel";
 import { PinholeCameraModel } from "./PinholeCameraModel";
 import { selectCameraModel } from "./selectCameraModel";
 
@@ -67,5 +68,24 @@ describe("selectCameraModel", () => {
     const result = selectCameraModel(mockCameraInfo, mockCameraModels);
 
     expect(result).toBeInstanceOf(PinholeCameraModel);
+  });
+
+  it("should use the built-in Kannala-Brandt model for distortion_model kannala_brandt", () => {
+    const info = createCameraInfo({
+      distortion_model: "kannala_brandt",
+      D: [0.1, 0.01, 0, 0],
+      K: [500, 0, 320, 0, 500, 240, 0, 0, 1],
+    });
+
+    expect(selectCameraModel(info, new Map())).toBeInstanceOf(KannalaBrandtCameraModel);
+  });
+
+  it("should let an extension override the built-in kannala_brandt model", () => {
+    const info = createCameraInfo({ distortion_model: "kannala_brandt" });
+    const models = new Map([
+      ["kannala_brandt", { extensionId: "", modelBuilder: () => new MockCameraModel() }],
+    ]);
+
+    expect(selectCameraModel(info, models)).toBeInstanceOf(MockCameraModel);
   });
 });

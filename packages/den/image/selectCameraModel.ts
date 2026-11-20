@@ -7,6 +7,7 @@
 
 import { CameraInfo, ICameraModel } from "@lichtblick/suite";
 
+import { KANNALA_BRANDT_MODEL_NAME, KannalaBrandtCameraModel } from "./KannalaBrandtCameraModel";
 import { PinholeCameraModel } from "./PinholeCameraModel";
 import { CameraModelsMap } from "./types";
 
@@ -17,6 +18,10 @@ export const selectCameraModel = (
   const cameraModel = cameraModels.get(cameraInfo.distortion_model);
   if (cameraModel) {
     return cameraModel.modelBuilder(cameraInfo);
+  }
+  // built-in fisheye model; an extension registering the same name takes precedence (above)
+  if (cameraInfo.distortion_model === KANNALA_BRANDT_MODEL_NAME) {
+    return new KannalaBrandtCameraModel(cameraInfo);
   }
   return new PinholeCameraModel(cameraInfo);
 };
