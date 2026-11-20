@@ -121,6 +121,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       cameraState,
       followMode: partialConfig?.followMode ?? DEFAULT_FOLLOW_MODE,
       followTf: partialConfig?.followTf,
+      cameraTf: partialConfig?.cameraTf,
       scene: partialConfig?.scene ?? {},
       transforms,
       topics: partialConfig?.topics ?? {},
@@ -259,6 +260,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             cameraState: newCameraState,
             followMode: config.followMode,
             followTf: renderer.followFrameId,
+            cameraTf: renderer.config.cameraTf,
           });
         }
       }
@@ -280,6 +282,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             cameraState: updatedCameraState,
             followMode: config.followMode,
             followTf: renderer.followFrameId,
+            cameraTf: renderer.config.cameraTf,
           });
         }
       }
@@ -773,6 +776,12 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
       renderer.setCameraSyncError(
         `Display frame must be ${sharedPanelState.followTf} to sync camera.`,
       );
+    } else if (sharedPanelState.cameraTf !== config.cameraTf) {
+      // cameraState is relative to the sender's camera target frame, so applying it with a
+      // different target frame would silently produce a different view.
+      renderer.setCameraSyncError(
+        `Camera target frame must be ${sharedPanelState.cameraTf ?? "None"} to sync camera.`,
+      );
     } else {
       const newCameraState = sharedPanelState.cameraState;
       renderer.setCameraState(newCameraState);
@@ -786,6 +795,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   }, [
     config.scene.syncCamera,
     config.followMode,
+    config.cameraTf,
     renderer,
     renderer?.followFrameId,
     sharedPanelState,
