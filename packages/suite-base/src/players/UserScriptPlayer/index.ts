@@ -1255,15 +1255,47 @@ export default class UserScriptPlayer implements Player {
     return cache;
   }
 
-  #createReplayIterator(cache: BatchIteratorCacheEntry) {
+  #createReplayIterator(
+    cache: BatchIteratorCacheEntry,
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> {
     const consumer: CacheConsumerHandle = { index: cache.pruneOffset };
     cache.consumers.add(consumer);
-    return this.#replayIteratorImpl(cache, consumer);
+
+    let released = false;
+    const release = () => {
+      if (released) {
+        return;
+      }
+      released = true;
+      cache.consumers.delete(consumer);
+      if (cache.consumers.size === 0 && !cache.done) {
+        this.#stopUnusedSharedConsumer(cache);
+      }
+    };
+
+    const gen = this.#replayIteratorImpl(cache, consumer, release);
+    // An async generator closed before its first next() never runs its body (or its finally),
+    // so the consumer is also released here.
+    return {
+      next: async () => await gen.next(),
+      return: async (value?: unknown) => {
+        release();
+        return await gen.return(value);
+      },
+      throw: async (err?: unknown) => {
+        release();
+        return await gen.throw(err);
+      },
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+    };
   }
 
   async *#replayIteratorImpl(
     cache: BatchIteratorCacheEntry,
     consumer: CacheConsumerHandle,
+    release: () => void,
   ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -1290,10 +1322,7 @@ export default class UserScriptPlayer implements Player {
         }
       }
     } finally {
-      cache.consumers.delete(consumer);
-      if (cache.consumers.size === 0 && !cache.done) {
-        this.#stopUnusedSharedConsumer(cache);
-      }
+      release();
     }
   }
 

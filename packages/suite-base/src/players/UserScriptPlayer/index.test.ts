@@ -2302,6 +2302,23 @@ describe("UserScriptPlayer", () => {
         userScriptPlayer.getBatchIterator(outputTopic);
         expect(upstream.calls).toBe(1);
       });
+
+      it("stops the producer when an unstarted and a started subscriber both leave", async () => {
+        // Given one unstarted and one started subscriber of the same shared producer
+        const { upstream, closed, getBatchIterator } = blockingUpstream();
+        const { userScriptPlayer } = await setupScriptPlayer(getBatchIterator);
+        const unstarted = userScriptPlayer.getBatchIterator(outputTopic)!;
+        const started = userScriptPlayer.getBatchIterator(outputTopic)!;
+        await started.next();
+
+        // When both are closed
+        await unstarted.return?.(undefined);
+        await started.return?.(undefined);
+
+        // Then the producer's input reads are aborted and closed
+        expect(upstream.signals[0]?.aborted).toBe(true);
+        await closed;
+      });
     });
 
     it("reuses the shared cache when getBatchIterator is called twice without options", async () => {
