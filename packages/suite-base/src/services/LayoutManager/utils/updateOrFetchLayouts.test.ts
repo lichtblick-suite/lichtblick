@@ -31,6 +31,7 @@ describe("updateOrFetchLayout", () => {
       saveNewLayout: jest.fn(),
       updateLayout: jest.fn(),
       deleteLayout: jest.fn(),
+      getDefaultLayoutData: jest.fn(),
     };
 
     updateParams = {
