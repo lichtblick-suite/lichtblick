@@ -105,6 +105,24 @@ describe("createMessageRangeIterator", () => {
     expect(batches).toHaveLength(1);
   });
 
+  it("should close the source read when cancelled before iteration starts", () => {
+    // Given
+    const rawBatchIterator = createMockRawBatchIterator([]);
+    const returnSpy = jest.spyOn(rawBatchIterator, "return");
+    const { cancel } = createMessageRangeIterator({
+      topic: mockTopic,
+      rawBatchIterator,
+      sortedTopics: mockSortedTopics,
+      messageConverters: mockMessageConverters,
+    });
+
+    // When
+    cancel();
+
+    // Then
+    expect(returnSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("should handle convertTo parameter", () => {
     const rawBatchIterator = createMockRawBatchIterator([]);
     const convertTo = BasicBuilder.string();
