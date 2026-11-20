@@ -5,7 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Fragment, Suspense, useEffect, useMemo } from "react";
+import { Fragment, Suspense, useEffect, useLayoutEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -25,6 +25,8 @@ import LayoutManagerProvider from "@lichtblick/suite-base/providers/LayoutManage
 import { StudioLogsSettingsProvider } from "@lichtblick/suite-base/providers/StudioLogsSettingsProvider";
 import TimelineInteractionStateProvider from "@lichtblick/suite-base/providers/TimelineInteractionStateProvider";
 import UserProfileLocalStorageProvider from "@lichtblick/suite-base/providers/UserProfileLocalStorageProvider";
+import HttpService from "@lichtblick/suite-base/services/http/HttpService";
+import { PostMessageAuthProvider } from "@lichtblick/suite-base/services/http/PostMessageAuthProvider";
 
 import Workspace from "./Workspace";
 import DocumentTitleAdapter from "./components/DocumentTitleAdapter";
@@ -49,6 +51,18 @@ function contextMenuHandler(event: MouseEvent) {
   return false;
 }
 
+function getParentOriginFromReferrer(): string | undefined {
+  if (document.referrer === "") {
+    return undefined;
+  }
+
+  try {
+    return new URL(document.referrer).origin;
+  } catch {
+    return undefined;
+  }
+}
+
 export function StudioApp(): React.JSX.Element {
   const {
     dataSources,
@@ -62,6 +76,7 @@ export function StudioApp(): React.JSX.Element {
     customWindowControlProps,
     onAppBarDoubleClick,
     AppBarComponent,
+    authProvider,
   } = useSharedRootContext();
 
   const providers = [
@@ -101,6 +116,7 @@ export function StudioApp(): React.JSX.Element {
 
   const url = new URL(window.location.href);
   const workspace = url.searchParams.get("workspace");
+  const sourceBundleId = url.searchParams.get("source-bundle");
 
   const remoteLayoutStorage = useMemo(() => {
     if (workspace && APP_CONFIG.apiUrl) {
@@ -108,6 +124,28 @@ export function StudioApp(): React.JSX.Element {
     }
     return undefined;
   }, [workspace]);
+
+  const defaultAuthProvider = useMemo(() => {
+    if (!(workspace || sourceBundleId) || authProvider != undefined) {
+      return undefined;
+    }
+
+    if (window.parent === window) {
+      return undefined;
+    }
+
+    const parentOrigin = getParentOriginFromReferrer();
+    if (parentOrigin == undefined) {
+      return undefined;
+    }
+
+    return new PostMessageAuthProvider({
+      allowedOrigins: [parentOrigin],
+      sourceWindow: window.parent,
+    });
+  }, [workspace, sourceBundleId, authProvider]);
+
+  const activeAuthProvider = authProvider ?? defaultAuthProvider;
 
   const remoteLayoutFavoritesStorage = useMemo(
     () => (remoteLayoutStorage ? new LayoutFavoritesAPI() : undefined),
@@ -129,6 +167,18 @@ export function StudioApp(): React.JSX.Element {
     // otherwise those consumers silently fall back to the context default (for example analytics).
     providers.unshift(...extraProviders);
   }
+
+  useLayoutEffect(() => {
+    if (!activeAuthProvider) {
+      return;
+    }
+
+    HttpService.setAuthProvider(activeAuthProvider);
+    return () => {
+      HttpService.setAuthProvider(undefined);
+      defaultAuthProvider?.dispose();
+    };
+  }, [activeAuthProvider, defaultAuthProvider]);
 
   useEffect(() => {
     document.addEventListener("contextmenu", contextMenuHandler);
