@@ -94,4 +94,31 @@ describe("datasetContainsArray", () => {
     const dataset: ImmutableDataset = [[createMessageAndData(2)], [createMessageAndData(1)]];
     expect(datasetContainsArray(dataset)).toBe(false);
   });
+
+  it("should return false when a message has no queried data", () => {
+    // Given
+    const dataset: ImmutableDataset = [[createMessageAndData(3), createMessageAndData(0)]];
+
+    // When
+    const result = datasetContainsArray(dataset);
+
+    // Then
+    expect(result).toBe(false);
+  });
+
+  it("should stop reading messages after the first one that is not an array", () => {
+    // Given
+    const later = createMessageAndData(2);
+    const laterData = later.queriedData;
+    const queriedDataGetter = jest.fn(() => laterData);
+    Object.defineProperty(later, "queriedData", { get: queriedDataGetter });
+    const dataset: ImmutableDataset = [[createMessageAndData(1)], [later]];
+
+    // When
+    const result = datasetContainsArray(dataset);
+
+    // Then
+    expect(result).toBe(false);
+    expect(queriedDataGetter).not.toHaveBeenCalled();
+  });
 });
