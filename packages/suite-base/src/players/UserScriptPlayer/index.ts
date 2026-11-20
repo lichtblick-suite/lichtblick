@@ -115,6 +115,9 @@ type BatchIteratorCacheEntry = {
   processor: { terminate: () => void };
   consumers: Set<CacheConsumerHandle>;
   pruneOffset: number;
+  topic: string;
+  /** Aborts the producer's input reads. */
+  abortController: AbortController;
 };
 
 export default class UserScriptPlayer implements Player {
@@ -601,6 +604,7 @@ export default class UserScriptPlayer implements Player {
     for (const cache of this.#batchIteratorCache.values()) {
       this.#totalCachedResults -= cache.results.length;
       cache.done = true;
+      cache.abortController.abort();
       cache.resolve();
       cache.processor.terminate();
     }
@@ -1021,7 +1025,7 @@ export default class UserScriptPlayer implements Player {
 
   public getBatchIterator(
     topic: string,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; abort?: AbortSignal },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
     const registration = this.#outputTopicRegistrations.get(topic);
     if (!registration) {
@@ -1045,7 +1049,7 @@ export default class UserScriptPlayer implements Player {
 
   #collectInputIterators(
     inputTopics: readonly string[],
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; abort?: AbortSignal },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] | undefined {
     const iterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[] = [];
     for (const inputTopic of inputTopics) {
@@ -1059,27 +1063,32 @@ export default class UserScriptPlayer implements Player {
 
   #getVirtualBatchIterator(
     registration: ScriptRegistration,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; abort?: AbortSignal },
   ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> | undefined {
     const inputTopics = registration.inputs;
     if (inputTopics.length === 0) {
       return undefined;
     }
 
-    // For full-range (no options), use shared cache so multiple panels
-    // subscribing to the same virtual topic only process messages once.
-    if (!options) {
+    // For full-range (no start/end), use shared cache so multiple panels
+    // subscribing to the same virtual topic only process messages once. The shared producer
+    // outlives any single subscriber, so it has its own abort signal instead of a subscriber's;
+    // it is stopped when its last subscriber leaves before it finished.
+    if (options?.start == undefined && options?.end == undefined) {
       const topic = registration.output.name;
       const existingCache = this.#batchIteratorCache.get(topic);
       if (existingCache) {
         return this.#createReplayIterator(existingCache);
       }
 
-      const inputIterators = this.#collectInputIterators(inputTopics);
+      const abortController = new AbortController();
+      const inputIterators = this.#collectInputIterators(inputTopics, {
+        abort: abortController.signal,
+      });
       if (!inputIterators) {
         return undefined;
       }
-      const cache = this.#startSharedConsumer(registration, inputIterators);
+      const cache = this.#startSharedConsumer(registration, inputIterators, abortController);
       this.#batchIteratorCache.set(topic, cache);
       return this.#createReplayIterator(cache);
     }
@@ -1188,6 +1197,7 @@ export default class UserScriptPlayer implements Player {
   #startSharedConsumer(
     registration: ScriptRegistration,
     inputIterators: AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>>[],
+    abortController: AbortController,
   ) {
     const processor = registration.buildMessageProcessor();
     const globalVariables = this.#globalVariables;
@@ -1204,6 +1214,8 @@ export default class UserScriptPlayer implements Player {
       processor,
       consumers: new Set(),
       pruneOffset: 0,
+      topic: registration.output.name,
+      abortController,
     };
 
     // The executor runs synchronously, so `resolve` is now set.
@@ -1243,15 +1255,47 @@ export default class UserScriptPlayer implements Player {
     return cache;
   }
 
-  #createReplayIterator(cache: BatchIteratorCacheEntry) {
+  #createReplayIterator(
+    cache: BatchIteratorCacheEntry,
+  ): AsyncIterableIterator<Readonly<IIterableSourceIteratorResult>> {
     const consumer: CacheConsumerHandle = { index: cache.pruneOffset };
     cache.consumers.add(consumer);
-    return this.#replayIteratorImpl(cache, consumer);
+
+    let released = false;
+    const release = () => {
+      if (released) {
+        return;
+      }
+      released = true;
+      cache.consumers.delete(consumer);
+      if (cache.consumers.size === 0 && !cache.done) {
+        this.#stopUnusedSharedConsumer(cache);
+      }
+    };
+
+    const gen = this.#replayIteratorImpl(cache, consumer, release);
+    // An async generator closed before its first next() never runs its body (or its finally),
+    // so the consumer is also released here.
+    return {
+      next: async () => await gen.next(),
+      return: async (value?: unknown) => {
+        release();
+        return await gen.return(value);
+      },
+      throw: async (err?: unknown) => {
+        release();
+        return await gen.throw(err);
+      },
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+    };
   }
 
   async *#replayIteratorImpl(
     cache: BatchIteratorCacheEntry,
     consumer: CacheConsumerHandle,
+    release: () => void,
   ): AsyncGenerator<Readonly<IIterableSourceIteratorResult>> {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -1278,8 +1322,24 @@ export default class UserScriptPlayer implements Player {
         }
       }
     } finally {
-      cache.consumers.delete(consumer);
+      release();
     }
+  }
+
+  /**
+   * Stops a producer nobody listens to anymore and drops its partial results. A finished cache is
+   * kept for later subscribers, but an unfinished one would keep reading the whole input range.
+   */
+  #stopUnusedSharedConsumer(cache: BatchIteratorCacheEntry) {
+    if (this.#batchIteratorCache.get(cache.topic) === cache) {
+      this.#batchIteratorCache.delete(cache.topic);
+    }
+    this.#totalCachedResults -= cache.results.length;
+    cache.results = [];
+    // The producer loop exits on its next result, closing the input iterators and the processor.
+    cache.done = true;
+    cache.abortController.abort();
+    cache.resolve();
   }
 
   #pruneCache(cache: BatchIteratorCacheEntry) {
