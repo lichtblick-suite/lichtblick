@@ -10,6 +10,7 @@ import {
   MessageConverterAlert,
   MessageEvent,
   PanelExtensionContext,
+  SettingsTree,
 } from "@lichtblick/suite";
 import { IteratorResult } from "@lichtblick/suite-base/players/IterablePlayer/IIterableSource";
 import { PlayerAlert, Topic } from "@lichtblick/suite-base/players/types";
@@ -69,6 +70,12 @@ export type MessagePathDropConfig = {
  * extensions.
  */
 export type BuiltinPanelExtensionContext = {
+  /** Apply converter settings to the panel's current config before saving. */
+  updatePanelSettingsEditor: (
+    settings: SettingsTree,
+    updateTopicSettings?: TopicSettingsUpdater,
+  ) => void;
+
   /**
    * Fetch an asset from Studio's asset manager.
    *
@@ -100,7 +107,11 @@ export type BuiltinPanelExtensionContext = {
    * clears the alert with the given `alertId`.
    */
   unstable_setAlert?: (alertId: string, alert: Immutable<PlayerAlert> | undefined) => void;
-} & PanelExtensionContext;
+} & Omit<PanelExtensionContext, "updatePanelSettingsEditor">;
+
+export type TopicSettingsUpdater = (
+  updateSettings: (config: { topics: Record<string, unknown> }) => void,
+) => void;
 
 export type MessageConverterAlertHandler = (
   converter: InstalledMessageConverter,
