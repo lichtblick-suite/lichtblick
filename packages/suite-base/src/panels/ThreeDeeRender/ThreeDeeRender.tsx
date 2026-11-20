@@ -60,7 +60,7 @@ import {
   makePoseMessage,
 } from "./publish";
 import type { LayerSettingsTransform } from "./renderables/FrameAxes";
-import { PublishClickEventMap } from "./renderables/PublishClickTool";
+import { PublishClickEventMap, PublishClickType } from "./renderables/PublishClickTool";
 import { DEFAULT_PUBLISH_SETTINGS } from "./renderables/PublishSettings";
 import { Shared3DPanelState, ThreeDeeRenderProps } from "./types";
 
@@ -973,6 +973,14 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
     }
   }, [publishActive, renderer]);
 
+  const onChangePublishClickType = useCallback(
+    (type: PublishClickType) => {
+      renderer?.publishClickTool.setPublishClickType(type);
+      renderer?.publishClickTool.start();
+    },
+    [renderer],
+  );
+
   const onTogglePerspective = useCallback(() => {
     const currentState = renderer?.getCameraState()?.perspective ?? false;
     actionHandler({
@@ -1037,10 +1045,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
             onClickPublish={onClickPublish}
             onShowTopicSettings={onShowTopicSettings}
             publishClickType={renderer?.publishClickTool.publishClickType ?? "point"}
-            onChangePublishClickType={(type) => {
-              renderer?.publishClickTool.setPublishClickType(type);
-              renderer?.publishClickTool.start();
-            }}
+            onChangePublishClickType={onChangePublishClickType}
             timezone={timezone}
           />
         </RendererContext.Provider>

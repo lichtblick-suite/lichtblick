@@ -12,12 +12,14 @@ import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
 import { RendererOverlay } from "./RendererOverlay";
 
 let mockLastHoverTooltipProps: any = undefined;
+let mockHoverTooltipRenderCount = 0;
 
 jest.mock("./Interactions/HoverTooltip", () => {
   return {
     __esModule: true,
     HoverTooltip: (props: any) => {
       mockLastHoverTooltipProps = props;
+      mockHoverTooltipRenderCount++;
       return undefined;
     },
   };
@@ -60,7 +62,7 @@ jest.mock("./Stats", () => {
 });
 
 const mockRendererEventCallbacks = new Map<string, (...args: any[]) => void>();
-const mockRenderer = {
+const mockRenderer: { fixedFrameId: string | undefined } & Record<string, unknown> = {
   setPickingEnabled: jest.fn(),
   setSelectedRenderable: jest.fn(),
   canResetView: jest.fn(() => false),
@@ -317,5 +319,72 @@ describe("<RendererOverlay /> hover wiring", () => {
       expect(mockLastHoverTooltipProps).toBeDefined();
       expect(mockLastHoverTooltipProps.entities).toEqual([]);
     });
+  });
+});
+
+describe("<RendererOverlay /> per-frame re-renders", () => {
+  const baseProps = {
+    addPanel: jest.fn() as any,
+    canPublish: true,
+    canvas: ReactNull,
+    enableStats: false,
+    interfaceMode: "3d" as const,
+    measureActive: false,
+    onChangePublishClickType: jest.fn(),
+    onClickMeasure: jest.fn(),
+    onClickPublish: jest.fn(),
+    onShowTopicSettings: jest.fn(),
+    onTogglePerspective: jest.fn(),
+    perspective: false,
+    publishActive: false,
+    publishClickType: "point" as const,
+    timezone: undefined,
+  };
+
+  beforeEach(() => {
+    mockRendererEventCallbacks.clear();
+    mockHoverTooltipRenderCount = 0;
+    mockRenderer.fixedFrameId = undefined;
+  });
+
+  it("should not re-render when the parent re-renders with unchanged props", () => {
+    // Given
+    const view = render(
+      <ThemeProvider isDark={false}>
+        <RendererOverlay {...baseProps} />
+      </ThemeProvider>,
+    );
+    const rendersAfterMount = mockHoverTooltipRenderCount;
+
+    // When
+    for (let i = 0; i < 3; i++) {
+      view.rerender(
+        <ThemeProvider isDark={false}>
+          <RendererOverlay {...baseProps} />
+        </ThemeProvider>,
+      );
+    }
+
+    // Then
+    expect(mockHoverTooltipRenderCount).toBe(rendersAfterMount);
+  });
+
+  it("should show the publish control once a frame reports a fixed frame", () => {
+    // Given
+    const view = render(
+      <ThemeProvider isDark={false}>
+        <RendererOverlay {...baseProps} />
+      </ThemeProvider>,
+    );
+    expect(view.queryByLabelText("Click to publish")).toBeNull();
+
+    // When
+    mockRenderer.fixedFrameId = "map";
+    act(() => {
+      mockRendererEventCallbacks.get("startFrame")?.(0n, mockRenderer);
+    });
+
+    // Then
+    expect(view.getByLabelText("Click to publish")).toBeInTheDocument();
   });
 });
