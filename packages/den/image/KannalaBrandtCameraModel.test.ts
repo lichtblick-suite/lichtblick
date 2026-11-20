@@ -27,12 +27,30 @@ function cameraInfo(overrides: Partial<CameraInfo> = {}): CameraInfo {
 }
 
 const REFERENCE: [[number, number], [number, number, number]][] = [
-  [[999.1, 770.2], [0, 0, 1]],
-  [[1500, 900], [0.525976448654, 0.136649735342, 0.839449596636]],
-  [[200, 150], [-0.755034684109, -0.587511496354, 0.291123457392]],
-  [[1900, 1400], [0.812657299339, 0.569576871267, 0.123167778045]],
-  [[1024, 50], [0.02547357664, -0.738690531647, 0.673563208131]],
-  [[30, 770], [-0.931690031573, -0.000192775433, 0.363254246919]],
+  [
+    [999.1, 770.2],
+    [0, 0, 1],
+  ],
+  [
+    [1500, 900],
+    [0.525976448654, 0.136649735342, 0.839449596636],
+  ],
+  [
+    [200, 150],
+    [-0.755034684109, -0.587511496354, 0.291123457392],
+  ],
+  [
+    [1900, 1400],
+    [0.812657299339, 0.569576871267, 0.123167778045],
+  ],
+  [
+    [1024, 50],
+    [0.02547357664, -0.738690531647, 0.673563208131],
+  ],
+  [
+    [30, 770],
+    [-0.931690031573, -0.000192775433, 0.363254246919],
+  ],
 ];
 
 describe("KannalaBrandtCameraModel", () => {
@@ -73,14 +91,16 @@ describe("KannalaBrandtCameraModel", () => {
   });
 
   it("rejects other distortion models and malformed messages", () => {
-    expect(() => new KannalaBrandtCameraModel(cameraInfo({ distortion_model: "plumb_bob" }))).toThrow(
-      'Unrecognized distortion_model "plumb_bob"',
+    expect(
+      () => new KannalaBrandtCameraModel(cameraInfo({ distortion_model: "plumb_bob" })),
+    ).toThrow('Unrecognized distortion_model "plumb_bob"');
+    expect(() => new KannalaBrandtCameraModel(cameraInfo({ width: 0 }))).toThrow(
+      "Invalid image size",
     );
-    expect(() => new KannalaBrandtCameraModel(cameraInfo({ width: 0 }))).toThrow("Invalid image size");
     expect(() => new KannalaBrandtCameraModel(cameraInfo({ D: [0.1] }))).toThrow("D.length");
-    expect(() => new KannalaBrandtCameraModel(cameraInfo({ K: [0, 0, 1, 0, 0, 1, 0, 0, 1] }))).toThrow(
-      "Invalid focal length",
-    );
+    expect(
+      () => new KannalaBrandtCameraModel(cameraInfo({ K: [0, 0, 1, 0, 0, 1, 0, 0, 1] })),
+    ).toThrow("Invalid focal length");
     expect(() => new KannalaBrandtCameraModel(cameraInfo({ distortion_model: "" }))).not.toThrow();
   });
 });
