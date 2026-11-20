@@ -118,6 +118,7 @@ describe("createCommonWebpackConfig", () => {
     process.env.API_URL = "https://api.example.com";
     (process.env as any).DEV_WORKSPACE = "workspace-1";
     process.env.OTLP_ENDPOINT = "http://localhost:4318";
+    (process.env as any).SYNC_LOCAL_LAYOUTS = true;
     const params = createTestParams();
 
     // When
@@ -128,6 +129,7 @@ describe("createCommonWebpackConfig", () => {
     expect(definePlugin.definitions.API_URL).toBe(JSON.stringify("https://api.example.com"));
     expect(definePlugin.definitions.DEV_WORKSPACE).toBe(JSON.stringify("workspace-1"));
     expect(definePlugin.definitions.OTLP_ENDPOINT).toBe(JSON.stringify("http://localhost:4318"));
+    expect(definePlugin.definitions.SYNC_LOCAL_LAYOUTS).toBe(true);
   });
 
   it("should leave API_URL, DEV_WORKSPACE and OTLP_ENDPOINT undefined if not set", () => {
@@ -135,6 +137,7 @@ describe("createCommonWebpackConfig", () => {
     delete process.env.API_URL;
     delete (process.env as any).DEV_WORKSPACE;
     delete process.env.OTLP_ENDPOINT;
+    delete (process.env as any).SYNC_LOCAL_LAYOUTS;
     const params = createTestParams();
 
     // When
@@ -145,5 +148,6 @@ describe("createCommonWebpackConfig", () => {
     expect(definePlugin.definitions.API_URL).toBeUndefined();
     expect(definePlugin.definitions.DEV_WORKSPACE).toBeUndefined();
     expect(definePlugin.definitions.OTLP_ENDPOINT).toBeUndefined();
+    expect(definePlugin.definitions.SYNC_LOCAL_LAYOUTS).toBeUndefined();
   });
 });

@@ -15,3 +15,5 @@ declare const LICHTBLICK_SUITE_VERSION: string | undefined;
 declare const DEV_WORKSPACE: string | undefined;
 
 declare const OTLP_ENDPOINT: string | undefined;
+
+declare const SYNC_LOCAL_LAYOUTS: boolean | undefined;
