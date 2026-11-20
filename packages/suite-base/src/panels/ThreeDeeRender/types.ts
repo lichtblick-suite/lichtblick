@@ -21,6 +21,8 @@ export type Shared3DPanelState = {
   cameraState: CameraState;
   followMode: FollowMode;
   followTf: undefined | string;
+  /** Camera target frame of the sending panel; cameraState is relative to it when set */
+  cameraTf?: string;
 };
 
 export type ThreeDeeRenderProps = {

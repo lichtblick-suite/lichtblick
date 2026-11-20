@@ -1286,4 +1286,105 @@ describe("ThreeDeeRender", () => {
       }).not.toThrow();
     });
   });
+
+  describe("camera sync with camera target frame", () => {
+    const syncedCameraState = { ...DEFAULT_CAMERA_STATE, distance: 42 };
+
+    const renderSynced = async (cameraTf: string | undefined) => {
+      const customRendererInstance = createMockRenderer({ config: { cameraTf } });
+      jest.mocked(Renderer).mockImplementationOnce(() => customRendererInstance as any);
+      const mockContext = createMockContext({
+        initialState: { cameraTf, scene: { syncCamera: true } },
+      });
+      render(<ThreeDeeRender {...setup({}, mockContext)} />);
+      await waitFor(() => {
+        expect(mockContext.onRender).toBeDefined();
+      });
+      return { customRendererInstance, mockContext };
+    };
+
+    const receiveSharedState = (
+      mockContext: BuiltinPanelExtensionContext,
+      cameraTf: string | undefined,
+    ) => {
+      act(() => {
+        mockContext.onRender!(
+          {
+            sharedPanelState: {
+              cameraState: syncedCameraState,
+              followMode: DEFAULT_FOLLOW_MODE,
+              followTf: "base_link",
+              cameraTf,
+            },
+          },
+          jest.fn(),
+        );
+      });
+    };
+
+    it("reports a sync error when the sender's camera target frame differs", async () => {
+      // Given
+      const { customRendererInstance, mockContext } = await renderSynced(undefined);
+
+      // When
+      receiveSharedState(mockContext, "odom");
+
+      // Then
+      await waitFor(() => {
+        expect(customRendererInstance.setCameraSyncError).toHaveBeenCalledWith(
+          "Camera target frame must be odom to sync camera.",
+        );
+      });
+      expect(customRendererInstance.setCameraState).not.toHaveBeenCalledWith(syncedCameraState);
+    });
+
+    it("reports a sync error when the sender has no camera target frame but the receiver does", async () => {
+      // Given
+      const { customRendererInstance, mockContext } = await renderSynced("odom");
+
+      // When
+      receiveSharedState(mockContext, undefined);
+
+      // Then
+      await waitFor(() => {
+        expect(customRendererInstance.setCameraSyncError).toHaveBeenCalledWith(
+          "Camera target frame must be None to sync camera.",
+        );
+      });
+      expect(customRendererInstance.setCameraState).not.toHaveBeenCalledWith(syncedCameraState);
+    });
+
+    it("applies the shared camera state when camera target frames match", async () => {
+      // Given
+      const { customRendererInstance, mockContext } = await renderSynced("odom");
+
+      // When
+      receiveSharedState(mockContext, "odom");
+
+      // Then
+      await waitFor(() => {
+        expect(customRendererInstance.setCameraState).toHaveBeenCalledWith(syncedCameraState);
+      });
+      expect(customRendererInstance.setCameraSyncError).toHaveBeenLastCalledWith(undefined);
+    });
+
+    it("includes the camera target frame when broadcasting camera moves", async () => {
+      // Given
+      const { customRendererInstance, mockContext } = await renderSynced("odom");
+      customRendererInstance.getCameraState.mockReturnValue(syncedCameraState);
+
+      // When
+      act(() => {
+        customRendererInstance.emit("cameraMove");
+      });
+
+      // Then
+      expect(mockContext.setSharedPanelState).toHaveBeenCalledWith({
+        cameraState: syncedCameraState,
+        followMode: DEFAULT_FOLLOW_MODE,
+        followTf: "base_link",
+        cameraTf: "odom",
+      });
+    });
+  });
 });
