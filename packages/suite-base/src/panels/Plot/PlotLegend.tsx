@@ -222,7 +222,10 @@ function PlotLegendComponent(props: Props): React.JSX.Element {
       return;
     }
     const handler = (newPaths: readonly string[]) => {
-      setPathsWithMismatchedDataLengths(newPaths.slice());
+      // Emitted after every downsample; keep the previous array so unchanged lists don't re-render.
+      setPathsWithMismatchedDataLengths((prev) =>
+        _.isEqual(prev, newPaths) ? prev : newPaths.slice(),
+      );
     };
     coordinator.on("pathsWithMismatchedDataLengthsChanged", handler);
     return () => {
@@ -281,9 +284,7 @@ function PlotLegendComponent(props: Props): React.JSX.Element {
               hasMismatchedDataLength={pathsWithMismatchedDataLengths.includes(path.value)}
               index={index}
               key={index}
-              onClickPath={() => {
-                onClickPath(index);
-              }}
+              onClickPath={onClickPath}
               path={path}
               paths={paths}
               savePaths={savePaths}
