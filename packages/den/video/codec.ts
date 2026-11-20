@@ -5,17 +5,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AV1 as AV1Parser } from "./av1";
 import { H265_CODEC_FORMAT_STRINGS } from "./constants";
 import { H264 as H264Parser } from "./h264";
 import { H265 as H265Parser } from "./h265";
 
 /**
- * Canonical codec identifier used internally so callers do not need to know that some recordings
- * tag H.265 streams as "hevc" while others tag them as "h265".
+ * Canonical codec identifier used internally so callers do not need to handle external aliases.
  */
 export enum VideoCodec {
   H264 = "h264",
   H265 = "h265",
+  AV1 = "av1",
 }
 
 /**
@@ -23,6 +24,10 @@ export enum VideoCodec {
  * undefined if the format is not a recognized video codec.
  */
 export function canonicalVideoCodec(format: string): VideoCodec | undefined {
+  if (format === "av1") {
+    return VideoCodec.AV1;
+  }
+
   if (H265_CODEC_FORMAT_STRINGS.some((substr) => format.startsWith(substr))) {
     return VideoCodec.H265;
   }
@@ -49,6 +54,8 @@ export function isVideoKeyframe(
       return H264Parser.IsKeyframe(data);
     case VideoCodec.H265:
       return H265Parser.IsKeyframe(data);
+    case VideoCodec.AV1:
+      return AV1Parser.IsKeyframe(data);
   }
   return false;
 }
@@ -57,23 +64,18 @@ export function isVideoKeyframe(
  * Codecs whose non-keyframes can only be decoded by replaying the full GOP (the most recent
  * keyframe plus every frame after it). For these we cannot decode from the latest frame alone.
  *
- * This gates the in-renderable queue + drain serialization. H.265 needs it because the decoder
- * holds many submitted chunks in its pipeline before emitting the target frame, so the renderable
- * must drive submission in order. H.264, by contrast, emits a decoded VideoFrame within ~2 ms and
- * can run its `#startDecode` calls in parallel — serializing it through the drain queue adds
- * per-frame latency that surfaces as 30 fps jank. Use {@link videoCodecNeedsSeekBackfill} (not
- * this predicate) when deciding whether a seek target needs its preceding GOP attached: both
- * H.264 and H.265 P-frames require the GOP for a correct seek, but only H.265 needs the
- * renderable's queue to drive submission order during normal playback.
+ * This gates the in-renderable GOP history used to replay a dependency chain after decoder resets.
+ * AV1 and H.265 may buffer several submitted chunks before emitting the target frame. H.264 emits
+ * promptly and only needs source-side seek backfill, not an additional in-renderable history.
  */
 export function videoCodecNeedsKeyframeReplay(codec: VideoCodec | undefined): boolean {
-  return codec === VideoCodec.H265;
+  return codec === VideoCodec.H265 || codec === VideoCodec.AV1;
 }
 
 /**
  * Codecs whose seek target may be a P-frame that cannot be decoded without first replaying the
- * preceding GOP (most recent keyframe → target). Both H.264 and H.265 have inter-frame
- * dependencies, so for either codec a seek that lands on a non-keyframe needs the keyframe and
+ * preceding GOP (most recent keyframe → target). AV1, H.264, and H.265 have inter-frame
+ * dependencies, so a seek that lands on a non-keyframe needs the keyframe and
  * every intervening P-frame attached. Without this, a forward seek to a P-frame produces garbled
  * decoder output (stale reference state) and a backward seek waits seconds for the next IDR
  * before any picture appears.
@@ -83,5 +85,5 @@ export function videoCodecNeedsKeyframeReplay(codec: VideoCodec | undefined): bo
  * codec-specific performance trade-off inside the renderable.
  */
 export function videoCodecNeedsSeekBackfill(codec: VideoCodec | undefined): boolean {
-  return codec === VideoCodec.H264 || codec === VideoCodec.H265;
+  return codec === VideoCodec.H264 || codec === VideoCodec.H265 || codec === VideoCodec.AV1;
 }

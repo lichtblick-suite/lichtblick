@@ -13,10 +13,9 @@ import { H265_TARGET_FRAME_WAIT_MS } from "./h265/constants";
 // foxglove-depcheck-used: @types/dom-webcodecs
 
 // H.264 typically emits a decoded VideoFrame within a couple of milliseconds of submitting an
-// EncodedVideoChunk, so a tight 30 ms ceiling lets us return quickly when decoding is healthy and
-// fail fast when the decoder is stuck. The H.265 budgets live in `./h265/constants.ts` and are
-// much larger because HEVC decoders may need to consume an entire GOP before emitting the target
-// frame.
+// EncodedVideoChunk, so a tight 10 ms ceiling lets us return quickly when decoding is healthy and
+// fail fast when the decoder is stuck. H.265 and AV1 can buffer an entire GOP before emitting the
+// target frame, so they share the larger budget from `./h265/constants.ts`.
 const DEFAULT_TARGET_FRAME_WAIT_MS = 10;
 
 /** A single chunk of encoded video bitstream representing one frame. */
@@ -269,10 +268,13 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
           return;
         }
 
-        const isH265 =
+        const needsExtendedFrameWait =
           this.#decoderConfig?.codec.startsWith("hev1") === true ||
-          this.#decoderConfig?.codec.startsWith("hvc1") === true;
-        const targetFrameWaitMs = isH265 ? H265_TARGET_FRAME_WAIT_MS : DEFAULT_TARGET_FRAME_WAIT_MS;
+          this.#decoderConfig?.codec.startsWith("hvc1") === true ||
+          this.#decoderConfig?.codec.startsWith("av01") === true;
+        const targetFrameWaitMs = needsExtendedFrameWait
+          ? H265_TARGET_FRAME_WAIT_MS
+          : DEFAULT_TARGET_FRAME_WAIT_MS;
 
         // Register the target waiter BEFORE submitting so the output callback always finds it,
         // even if the decoder delivers the frame synchronously during decode(). Reference

@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { AV1 } from "./av1";
 import {
   VideoCodec,
   canonicalVideoCodec,
@@ -20,6 +21,13 @@ afterEach(() => {
 });
 
 describe("canonicalVideoCodec", () => {
+  it("maps 'av1' to AV1", () => {
+    // GIVEN the AV1 format string
+    // WHEN canonicalVideoCodec normalizes it
+    // THEN it maps to the AV1 canonical codec
+    expect(canonicalVideoCodec("av1")).toBe(VideoCodec.AV1);
+  });
+
   it("maps H.265 codec-string prefixes to H265", () => {
     // GIVEN codec strings that start with known H.265 identifiers
     // WHEN canonicalVideoCodec normalizes them
@@ -77,12 +85,21 @@ describe("isVideoKeyframe", () => {
     expect(spy).toHaveBeenCalledWith(data);
   });
 
+  it("dispatches to the AV1 parser for av1", () => {
+    const spy = jest.spyOn(AV1, "IsKeyframe").mockReturnValue(true);
+    const data = new Uint8Array([0x0a]);
+    expect(isVideoKeyframe("av1", data)).toBe(true);
+    expect(spy).toHaveBeenCalledWith(data);
+  });
+
   it("returns false for unrecognized formats without consulting any parser", () => {
     const h264Spy = jest.spyOn(H264, "IsKeyframe");
     const h265Spy = jest.spyOn(H265, "IsKeyframe");
+    const av1Spy = jest.spyOn(AV1, "IsKeyframe");
     expect(isVideoKeyframe("vp9", new Uint8Array([0x01]))).toBe(false);
     expect(h264Spy).not.toHaveBeenCalled();
     expect(h265Spy).not.toHaveBeenCalled();
+    expect(av1Spy).not.toHaveBeenCalled();
   });
 });
 
@@ -90,6 +107,7 @@ describe("videoCodecNeedsKeyframeReplay", () => {
   it("is true only for codecs that cannot decode a delta frame in isolation", () => {
     expect(videoCodecNeedsKeyframeReplay(VideoCodec.H265)).toBe(true);
     expect(videoCodecNeedsKeyframeReplay(VideoCodec.H264)).toBe(false);
+    expect(videoCodecNeedsKeyframeReplay(VideoCodec.AV1)).toBe(true);
     expect(videoCodecNeedsKeyframeReplay(undefined)).toBe(false);
   });
 });
@@ -101,6 +119,7 @@ describe("videoCodecNeedsSeekBackfill", () => {
     // picture, so backfill is required at the player/source boundary.
     expect(videoCodecNeedsSeekBackfill(VideoCodec.H264)).toBe(true);
     expect(videoCodecNeedsSeekBackfill(VideoCodec.H265)).toBe(true);
+    expect(videoCodecNeedsSeekBackfill(VideoCodec.AV1)).toBe(true);
     expect(videoCodecNeedsSeekBackfill(undefined)).toBe(false);
   });
 });
