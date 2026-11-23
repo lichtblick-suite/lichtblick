@@ -118,7 +118,8 @@ export function useSubscribeMessageRange(
         generation.playerId = playerId;
       }
 
-      // The signal reaches the worker cursor, so cancel() also stops an in-flight read there.
+      // The signal reaches the worker cursor, so no further reads start after cancel(). A read
+      // already in flight (e.g. an MCAP chunk) still runs to completion.
       // Without start/end, players can still reuse their full-range caches.
       const abortController = new AbortController();
       const rawBatchIterator = getBatchIterator(topic, {

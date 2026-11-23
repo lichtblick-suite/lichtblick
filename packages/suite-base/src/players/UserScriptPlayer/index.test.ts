@@ -2238,7 +2238,7 @@ describe("UserScriptPlayer", () => {
     describe("shared producer lifetime", () => {
       // Upstream that yields one message, then blocks until its abort signal fires.
       function blockingUpstream() {
-        const upstream = { calls: 0, signals: [] as (AbortSignal | undefined)[] };
+        const upstream = { calls: 0, signals: [] as (AbortSignal | undefined)[], closed: false };
         let markClosed = () => {};
         const closed = new Promise<void>((resolve) => {
           markClosed = resolve;
@@ -2259,6 +2259,7 @@ describe("UserScriptPlayer", () => {
               });
               yield { type: "message-event" as const, msgEvent: upstreamSecond };
             } finally {
+              upstream.closed = true;
               markClosed();
             }
           })();
@@ -2268,7 +2269,7 @@ describe("UserScriptPlayer", () => {
 
       it("stops the producer and drops its cache when the last subscriber leaves early", async () => {
         // Given one subscriber that read the first message while the producer is still running
-        const { upstream, closed, getBatchIterator } = blockingUpstream();
+        const { upstream, getBatchIterator } = blockingUpstream();
         const { userScriptPlayer } = await setupScriptPlayer(getBatchIterator);
         const iter = userScriptPlayer.getBatchIterator(outputTopic)!;
         await iter.next();
@@ -2276,9 +2277,9 @@ describe("UserScriptPlayer", () => {
         // When that subscriber leaves
         await iter.return?.(undefined);
 
-        // Then the producer's input reads are aborted and closed
+        // Then the producer's input reads are aborted and already closed when return() resolves
         expect(upstream.signals[0]?.aborted).toBe(true);
-        await closed;
+        expect(upstream.closed).toBe(true);
 
         // And a new subscriber starts a fresh producer instead of the unfinished cache
         userScriptPlayer.getBatchIterator(outputTopic);

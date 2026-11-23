@@ -118,6 +118,8 @@ type BatchIteratorCacheEntry = {
   topic: string;
   /** Aborts the producer's input reads. */
   abortController: AbortController;
+  /** Settles once the producer has closed its input iterators and processor. */
+  producerDone?: Promise<void>;
 };
 
 export default class UserScriptPlayer implements Player {
@@ -1229,7 +1231,7 @@ export default class UserScriptPlayer implements Player {
     };
 
     // Source consumer — processes messages once, populates shared results
-    void (async () => {
+    cache.producerDone = (async () => {
       try {
         const source = UserScriptPlayer.#mergeAndTransformIterators(
           inputIterators,
@@ -1262,6 +1264,7 @@ export default class UserScriptPlayer implements Player {
     cache.consumers.add(consumer);
 
     let released = false;
+    let stoppedProducer = false;
     const release = () => {
       if (released) {
         return;
@@ -1269,6 +1272,7 @@ export default class UserScriptPlayer implements Player {
       released = true;
       cache.consumers.delete(consumer);
       if (cache.consumers.size === 0 && !cache.done) {
+        stoppedProducer = true;
         this.#stopUnusedSharedConsumer(cache);
       }
     };
@@ -1280,7 +1284,12 @@ export default class UserScriptPlayer implements Player {
       next: async () => await gen.next(),
       return: async (value?: unknown) => {
         release();
-        return await gen.return(value);
+        const result = await gen.return(value);
+        // The last subscriber waits for the source chain to close, so quiescence is accurate.
+        if (stoppedProducer) {
+          await cache.producerDone;
+        }
+        return result;
       },
       throw: async (err?: unknown) => {
         release();

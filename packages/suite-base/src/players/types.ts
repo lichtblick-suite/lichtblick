@@ -81,7 +81,7 @@ export interface Player {
   setGlobalVariables(globalVariables: GlobalVariables): void;
   getMetadata?: () => ReadonlyArray<Readonly<Metadata>>;
   // Create a batch iterator for streaming messages. Available for data source players that support message iteration.
-  // `abort` cancels the iterator immediately, including an in-flight read in a worker.
+  // `abort` stops the iterator from starting further reads; a read already in flight completes.
   getBatchIterator: (
     topic: string,
     options?: { start?: Time; end?: Time; abort?: AbortSignal },

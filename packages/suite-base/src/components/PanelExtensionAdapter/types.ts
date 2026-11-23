@@ -122,7 +122,8 @@ export type CreateMessageRangeIteratorParams = {
   onBatch?: (batch: readonly MessageEvent[]) => void;
   /**
    * Controller whose signal was also passed to `getBatchIterator`, so `cancel()` aborts the whole
-   * chain (including an in-flight worker read). A private controller is created when omitted.
+   * chain (no new worker reads start; one already in flight completes first). A private controller
+   * is created when omitted.
    */
   abortController?: AbortController;
   /**
