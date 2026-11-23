@@ -3325,9 +3325,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lichtblick/eslint-plugin@npm:2.0.7":
-  version: 2.0.7
-  resolution: "@lichtblick/eslint-plugin@npm:2.0.7"
+"@lichtblick/eslint-plugin@npm:2.0.8":
+  version: 2.0.8
+  resolution: "@lichtblick/eslint-plugin@npm:2.0.8"
   dependencies:
     "@eslint/compat": "npm:^1"
     eslint-config-prettier: "npm:^9"
@@ -3346,7 +3346,7 @@ __metadata:
     eslint-config-prettier: ^8 || ^9
     prettier: ^3
     typescript: ^4 || ^5
-  checksum: 10/c66e078dabae5f1bc51aef36da1ba2e6d3b75c21438cff0d2859725d974436242958d68d846bab3b5fc8c8f2e9cc3e40ded4f0cd6e7f69461e62bfd014186ea8
+  checksum: 10/9966ed3df45f73604b9844cd2b8feda53dbac4ca9c22f4c124a3a79eda1f4b8d1ab8e5ec0b4ee47f4e2bb388f353d632d82fa4ccbd0b626d4a0e81cf356b386e
   languageName: node
   linkType: hard
 
@@ -3612,7 +3612,7 @@ __metadata:
     "@storybook/testing-library": "npm:0.2.2"
     "@svgr/webpack": "npm:8.1.0"
     "@tanstack/react-table": "npm:9.2.4"
-    "@tanstack/react-virtual": "npm:3.13.18"
+    "@tanstack/react-virtual": "npm:3.14.26"
     "@testing-library/jest-dom": "npm:6.6.2"
     "@testing-library/react": "npm:16.0.0"
     "@testing-library/user-event": "npm:14.5.2"
@@ -3648,7 +3648,7 @@ __metadata:
     babel-plugin-transform-import-meta: "npm:2.2.1"
     browserify-zlib: "npm:0.2.0"
     chart.js: "npm:4.4.8"
-    chartjs-plugin-annotation: "npm:3.0.1"
+    chartjs-plugin-annotation: "npm:3.1.0"
     chartjs-plugin-datalabels: "npm:2.2.0"
     chromatic: "npm:18.12.1"
     crypto-browserify: "npm:3.12.0"
@@ -3684,7 +3684,7 @@ __metadata:
     moize: "npm:6.1.7"
     moment: "npm:2.31.0"
     moment-duration-format: "npm:2.3.2"
-    moment-timezone: "npm:0.6.3"
+    moment-timezone: "npm:0.6.6"
     monaco-editor: "npm:0.57.0"
     monaco-editor-webpack-plugin: "npm:7.1.1"
     nanoid: "npm:6.0.2"
@@ -3693,24 +3693,24 @@ __metadata:
     nearley-loader: "npm:2.0.0"
     notistack: "npm:3.0.2"
     path-browserify: "npm:1.0.1"
-    prettier: "npm:3.9.4"
+    prettier: "npm:3.9.10"
     ramda: "npm:0.32.0"
     react: "npm:18.3.1"
-    react-colorful: "npm:5.6.1"
+    react-colorful: "npm:5.8.1"
     react-dnd: "npm:16.0.1"
     react-dnd-html5-backend: "npm:16.0.1"
     react-dom: "npm:18.3.1"
     react-hover-observer: "npm:2.1.1"
     react-i18next: "npm:17.0.8"
     react-json-tree: "patch:react-json-tree@0.15.1#../../patches/react-json-tree.patch"
-    react-markdown: "npm:9.0.1"
+    react-markdown: "npm:10.1.0"
     react-monaco-editor: "npm:0.59.0"
     react-mosaic-component: "npm:6.2.0"
     react-refresh-typescript: "npm:2.0.12"
     react-resizable-panels: "npm:2.1.6"
     react-resize-detector: "npm:12.3.0"
     react-transition-group: "npm:4.4.5"
-    react-use: "npm:17.6.0"
+    react-use: "npm:17.6.1"
     react-virtualized-auto-sizer: "npm:1.0.26"
     react-window: "npm:2.2.7"
     readable-stream: "npm:4.8.0"
@@ -3730,7 +3730,7 @@ __metadata:
     ts-essentials: "npm:9.4.0"
     ts-key-enum: "npm:3.0.13"
     ts-loader: "npm:9.5.4"
-    tss-react: "npm:4.9.19"
+    tss-react: "npm:4.9.21"
     typescript: "npm:6.0.3"
     use-debounce: "npm:10.0.0"
     use-immer: "npm:0.11.0"
@@ -3789,9 +3789,9 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-refresh-typescript: "npm:2.0.12"
-    react-use: "npm:17.6.0"
+    react-use: "npm:17.6.1"
     tinycolor2: "npm:1.6.0"
-    tss-react: "npm:4.9.19"
+    tss-react: "npm:4.9.21"
     utif: "npm:3.1.0"
     webpack: "npm:5.108.3"
     webpack-dev-server: "npm:5.2.6"
@@ -3817,7 +3817,7 @@ __metadata:
     html-webpack-plugin: "npm:5.6.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    tss-react: "npm:4.9.19"
+    tss-react: "npm:4.9.21"
     webpack: "npm:5.108.3"
     webpack-dev-server: "npm:5.2.6"
   languageName: unknown
@@ -5375,15 +5375,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/mcp@npm:0.0.77":
-  version: 0.0.77
-  resolution: "@playwright/mcp@npm:0.0.77"
+"@playwright/mcp@npm:0.0.85":
+  version: 0.0.85
+  resolution: "@playwright/mcp@npm:0.0.85"
   dependencies:
-    playwright: "npm:1.62.0-alpha-2026-06-29"
-    playwright-core: "npm:1.62.0-alpha-2026-06-29"
+    playwright: "npm:1.66.0-alpha-2026-11-09"
+    playwright-core: "npm:1.66.0-alpha-2026-11-09"
   bin:
     playwright-mcp: cli.js
-  checksum: 10/cf4ab2f40ec421ee63ad3d288f185f6d1c5458f72cf95b0af87a3b57989da8a958d8261b32463264d902b178612c0d4fb3b0df36a0993ec495e99a2cbd3d0c7b
+  checksum: 10/d331eae2916410dfe4d9a047799252ad0e4d4eba89792e5197b6322a5446d7eef1edcd3312bb85a8416d544ca490bfd9d2f7f1e2d89a8d04e450ba0ec239a551
   languageName: node
   linkType: hard
 
@@ -5898,15 +5898,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-virtual@npm:3.13.18":
-  version: 3.13.18
-  resolution: "@tanstack/react-virtual@npm:3.13.18"
+"@tanstack/react-virtual@npm:3.14.26":
+  version: 3.14.26
+  resolution: "@tanstack/react-virtual@npm:3.14.26"
   dependencies:
-    "@tanstack/virtual-core": "npm:3.13.18"
+    "@tanstack/virtual-core": "npm:3.19.11"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/73dcfd5681db1c07834c9d286a7d2194ebded84f09466b37072c630bad1ec9d546c0b58981e8a4cf855b0bd6a5c53c64834c6428022fe12096ff3a905da2a4a4
+  checksum: 10/2e849986e4e06e2ac0aa43ed2343077ce956ddae3caf82f936d87846e8e6499fb421137c7dcce433072a3c3d9b33e138d4fdaac29cef5a946927c3a4dd244ac8
   languageName: node
   linkType: hard
 
@@ -5926,10 +5926,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/virtual-core@npm:3.13.18":
-  version: 3.13.18
-  resolution: "@tanstack/virtual-core@npm:3.13.18"
-  checksum: 10/b891eac7bfa1bc20a353f65e12d6863c1ff8f91ad763f5ebbd624887c286f4b3ec5664b0c1426270463765802e514792d6864b95076e4087735b28d7db0461f0
+"@tanstack/virtual-core@npm:3.19.11":
+  version: 3.19.11
+  resolution: "@tanstack/virtual-core@npm:3.19.11"
+  checksum: 10/10047d9bca6e97c5562e96dcca92eaeb80ee895a50641ce88c6ce596faf532901f48d5ee03806e452ee9e5e068f94d99f50531f7637a533c32585a7cc23db10c
   languageName: node
   linkType: hard
 
@@ -9356,12 +9356,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chartjs-plugin-annotation@npm:3.0.1":
-  version: 3.0.1
-  resolution: "chartjs-plugin-annotation@npm:3.0.1"
+"chartjs-plugin-annotation@npm:3.1.0":
+  version: 3.1.0
+  resolution: "chartjs-plugin-annotation@npm:3.1.0"
   peerDependencies:
     chart.js: ">=4.0.0"
-  checksum: 10/638550f92c6cc948205822f8b8fcfde20769d923a9bff26edd07f58ccfc6f48a456d8307f8cb837f16a7fe86a9c3646914649c77144337ea12d70e99916c9248
+  checksum: 10/0b0889e665f1aefd2a7b24998013df72c7e022836427b799f219f2f9d838a89ec0a5531d233cfe440c3798bf85646d8435151967b678ab3ffc63c6266edfbf2c
   languageName: node
   linkType: hard
 
@@ -12819,31 +12819,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fsevents@npm:2.3.2":
-  version: 2.3.2
-  resolution: "fsevents@npm:2.3.2"
-  dependencies:
-    node-gyp: "npm:latest"
-  checksum: 10/6b5b6f5692372446ff81cf9501c76e3e0459a4852b3b5f1fc72c103198c125a6b8c72f5f166bdd76ffb2fca261e7f6ee5565daf80dca6e571e55bcc589cc1256
-  conditions: os=darwin
-  languageName: node
-  linkType: hard
-
 "fsevents@npm:~2.3.2":
   version: 2.3.3
   resolution: "fsevents@npm:2.3.3"
   dependencies:
     node-gyp: "npm:latest"
   checksum: 10/4c1ade961ded57cdbfbb5cac5106ec17bc8bccd62e16343c569a0ceeca83b9dfef87550b4dc5cbb89642da412b20c5071f304c8c464b80415446e8e155a038c0
-  conditions: os=darwin
-  languageName: node
-  linkType: hard
-
-"fsevents@patch:fsevents@npm%3A2.3.2#optional!builtin<compat/fsevents>":
-  version: 2.3.2
-  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#optional!builtin<compat/fsevents>::version=2.3.2&hash=df0bf1"
-  dependencies:
-    node-gyp: "npm:latest"
   conditions: os=darwin
   languageName: node
   linkType: hard
@@ -13140,10 +13121,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:16.3.0":
-  version: 16.3.0
-  resolution: "globals@npm:16.3.0"
-  checksum: 10/accb0939d993a1c461df8d961ce9911a9a96120929e0a61057ae8e75b7df0a8bf8089da0f4e3a476db0211156416fbd26e222a56f74b389a140b34481c0a72b0
+"globals@npm:17.13.0":
+  version: 17.13.0
+  resolution: "globals@npm:17.13.0"
+  checksum: 10/f723714cfb07bcf3163d44661d63b2a6076d93fd2f3724622b22084c62bcbbdb3ea3c601ec39635f1430d5cdf60bbf6fd7e458f12b5381ed422ed355c699537b
   languageName: node
   linkType: hard
 
@@ -15565,7 +15546,7 @@ __metadata:
     "@babel/preset-typescript": "npm:7.29.7"
     "@biomejs/biome": "npm:2.5.2"
     "@eslint/compat": "npm:2.1.0"
-    "@lichtblick/eslint-plugin": "npm:2.0.7"
+    "@lichtblick/eslint-plugin": "npm:2.0.8"
     "@lichtblick/eslint-plugin-suite": "workspace:*"
     "@lichtblick/hooks": "workspace:*"
     "@lichtblick/log": "workspace:*"
@@ -15576,7 +15557,7 @@ __metadata:
     "@lichtblick/tsconfig": "npm:1.1.2"
     "@mui/material": "npm:7.2.0"
     "@octokit/rest": "npm:22.0.1"
-    "@playwright/mcp": "npm:0.0.77"
+    "@playwright/mcp": "npm:0.0.85"
     "@playwright/test": "npm:1.65.0"
     "@storybook/react-webpack5": "npm:10.6.6"
     "@types/babel__core": "npm:^7.20.3"
@@ -15611,16 +15592,16 @@ __metadata:
     eslint-plugin-react-hooks: "npm:4.6.0"
     eslint-plugin-storybook: "npm:10.6.5"
     eslint-plugin-tss-unused-classes: "npm:1.0.3"
-    globals: "npm:16.3.0"
+    globals: "npm:17.13.0"
     husky: "npm:9.1.7"
     jest: "npm:30.5.2"
     jest-environment-jsdom: "npm:30.5.2"
     license-checker: "npm:25.0.1"
     lint-staged: "npm:17.0.8"
     playwright: "npm:1.65.0"
-    prettier: "npm:3.9.4"
-    react-refresh: "npm:0.18.0"
-    react-use: "npm:17.6.0"
+    prettier: "npm:3.9.10"
+    react-refresh: "npm:0.19.0"
+    react-use: "npm:17.6.1"
     rehype-raw: "npm:7.0.0"
     rimraf: "npm:6.0.1"
     semver: "npm:7.7.2"
@@ -16768,12 +16749,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment-timezone@npm:0.6.3":
-  version: 0.6.3
-  resolution: "moment-timezone@npm:0.6.3"
+"moment-timezone@npm:0.6.6":
+  version: 0.6.6
+  resolution: "moment-timezone@npm:0.6.6"
   dependencies:
     moment: "npm:^2.29.4"
-  checksum: 10/55ae516386b87fc2207d7911ef61ecef240ba4b21aece36d0b9f33802e1457db0c21b197ae4fde3b6d819d4bde3d835da0ba3c08de740b158e067c874d16082a
+  checksum: 10/ae1407f23e54c7a2177c0ee58185000de965e758be027deebed3de2e62ff8e73692acb44aa9078449e61f06f814767c24de7bb5dfb0cea4108e991b1169b64ae
   languageName: node
   linkType: hard
 
@@ -17953,15 +17934,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.62.0-alpha-2026-06-29":
-  version: 1.62.0-alpha-2026-06-29
-  resolution: "playwright-core@npm:1.62.0-alpha-2026-06-29"
-  bin:
-    playwright-core: cli.js
-  checksum: 10/474cc325cbb08a41de55cb0a6404ebe6a7e0e1dcd09071378d68dadd1ddb0fe34b744fe435c8ce978d611b4eb80f2b36461bd3f76a4eb79bc8a5490e57cc1887
-  languageName: node
-  linkType: hard
-
 "playwright-core@npm:1.65.0":
   version: 1.65.0
   resolution: "playwright-core@npm:1.65.0"
@@ -17971,18 +17943,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright@npm:1.62.0-alpha-2026-06-29":
-  version: 1.62.0-alpha-2026-06-29
-  resolution: "playwright@npm:1.62.0-alpha-2026-06-29"
-  dependencies:
-    fsevents: "npm:2.3.2"
-    playwright-core: "npm:1.62.0-alpha-2026-06-29"
-  dependenciesMeta:
-    fsevents:
-      optional: true
+"playwright-core@npm:1.66.0-alpha-2026-11-09":
+  version: 1.66.0-alpha-2026-11-09
+  resolution: "playwright-core@npm:1.66.0-alpha-2026-11-09"
   bin:
-    playwright: cli.js
-  checksum: 10/858331c5652f755ee9806348b6ddb69e1e9e10419e8d9eb8cc50ff6958a253eb7e19491f2e5fa86d809ad4719b4e03ad797a701dbd58472b2b6b8fc6f96ce6e6
+    playwright-core: cli.js
+  checksum: 10/966c1ca48217eb61ec2d12ed5faec15e2068147d23c177559b04a74c8ec56867823b0fbef1bbe723c2b91bf2a706bdedcfb09cf89f20c91200ee7850c0ff5f73
   languageName: node
   linkType: hard
 
@@ -17994,6 +17960,17 @@ __metadata:
   bin:
     playwright: cli.js
   checksum: 10/bda489bad0809f61a874407244f0de7c38cefb8864148c6094f0f9dc2f808bbcbf4a8074cf7366d90890ff7e88786fc93965614dd63de3ab4594e5a6b0a39abd
+  languageName: node
+  linkType: hard
+
+"playwright@npm:1.66.0-alpha-2026-11-09":
+  version: 1.66.0-alpha-2026-11-09
+  resolution: "playwright@npm:1.66.0-alpha-2026-11-09"
+  dependencies:
+    playwright-core: "npm:1.66.0-alpha-2026-11-09"
+  bin:
+    playwright: cli.js
+  checksum: 10/4f17c5bf585651876cb74374fd9472eef5ac229f80ce3ac8eed7045266abadb75d844ad7950cebecd3ce1b1fa3e0759b2e20166a86e1924d4a0698f9b93cfdcb
   languageName: node
   linkType: hard
 
@@ -18140,12 +18117,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:3.9.4":
-  version: 3.9.4
-  resolution: "prettier@npm:3.9.4"
+"prettier@npm:3.9.10":
+  version: 3.9.10
+  resolution: "prettier@npm:3.9.10"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10/4a0dc4389d442f5aca0beb12778c90b6ceb9831940b01a1df5eba9150b5ce96fa52eda9074a10a370e732adc03e2f645597dfd8b7e3f1e94dee28df01004a0fd
+  checksum: 10/5d0118add4b44eb9d50c114f5c525451cc92be9da300ad0552787472535a3f23884baed3223d9b577bb7d1152eb58aeccfcc2b4541c0cf2274c0b4d328e36834
   languageName: node
   linkType: hard
 
@@ -18490,13 +18467,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-colorful@npm:5.6.1":
-  version: 5.6.1
-  resolution: "react-colorful@npm:5.6.1"
+"react-colorful@npm:5.8.1":
+  version: 5.8.1
+  resolution: "react-colorful@npm:5.8.1"
   peerDependencies:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: 10/3e02ba013454818d0c323949bd961fb2c19ac18130dfc67a4032aa5b03787c5ffe7ff159c4b97dc3475072d576828ca0c4b8e8ce85b55eaf484180596cdf0403
+  checksum: 10/4b896fc53c052c2a6bfde4cbc0cc59e6fe907782f0d7f08fc7336b37aa4daf4b3a32cbca53b39031829a07f98417a4ea7eee68a2e2dd67f42918b90acd1d611e
   languageName: node
   linkType: hard
 
@@ -18717,11 +18694,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-markdown@npm:9.0.1":
-  version: 9.0.1
-  resolution: "react-markdown@npm:9.0.1"
+"react-markdown@npm:10.1.0":
+  version: 10.1.0
+  resolution: "react-markdown@npm:10.1.0"
   dependencies:
     "@types/hast": "npm:^3.0.0"
+    "@types/mdast": "npm:^4.0.0"
     devlop: "npm:^1.0.0"
     hast-util-to-jsx-runtime: "npm:^2.0.0"
     html-url-attributes: "npm:^3.0.0"
@@ -18734,7 +18712,7 @@ __metadata:
   peerDependencies:
     "@types/react": ">=18"
     react: ">=18"
-  checksum: 10/71ce31f200982f641d363888a26e8fb52a199a589124f20295e9be870fa3aed26fcfa14d1dc766d83df666a15cb82359291bfda207bd55d5728ff376d217e079
+  checksum: 10/886c037d18266e94750abbc00c6096435bccd4da5f2d1727984bcbdf83e9f2a5cc9a6b0eecfe6c30456dc26546fee41c7f6aecbf176e6d7453963df4abefd7df
   languageName: node
   linkType: hard
 
@@ -18790,10 +18768,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-refresh@npm:0.18.0":
-  version: 0.18.0
-  resolution: "react-refresh@npm:0.18.0"
-  checksum: 10/504c331c19776bf8320c23bad7f80b3a28de03301ed7523b0dd21d3f02bf2b53bbdd5aa52469b187bc90f358614b2ba303c088a0765c95f4f0a68c43a7d67b1d
+"react-refresh@npm:0.19.0":
+  version: 0.19.0
+  resolution: "react-refresh@npm:0.19.0"
+  checksum: 10/ec21ca69561017d555a9a1d194f1372e83b82ed0fb33180f2a082501b64c016a43453b1dde2c04bcacdef5c61133339395b79f072a490d90af48fb86b0cc2913
   languageName: node
   linkType: hard
 
@@ -21330,9 +21308,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tss-react@npm:4.9.19":
-  version: 4.9.19
-  resolution: "tss-react@npm:4.9.19"
+"tss-react@npm:4.9.21":
+  version: 4.9.21
+  resolution: "tss-react@npm:4.9.21"
   dependencies:
     "@emotion/cache": "npm:*"
     "@emotion/serialize": "npm:*"
@@ -21340,7 +21318,7 @@ __metadata:
   peerDependencies:
     "@emotion/react": ^11.4.1
     "@emotion/server": ^11.4.0
-    "@mui/material": ^5.0.0 || ^6.0.0 || ^7.0.0
+    "@mui/material": ^5.0.0 || ^6.0.0 || ^7.0.0 || ^9.0.0
     "@types/react": ^16.8.0 || ^17.0.2 || ^18.0.0 || ^19.0.0
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
@@ -21348,7 +21326,7 @@ __metadata:
       optional: true
     "@mui/material":
       optional: true
-  checksum: 10/a2e346bcf7443485ae545ffa7c171632fb591587e8b616ba553bcb321e269bfcdf8524a9252219d30fdfc2062ec47d9a51315f4bd9ad714effea02866b582893
+  checksum: 10/69f86e93db6338e5166e6d738d16af1ee961897a7349436caa62b971e2716b99eb93e19e14df8a30f2e789832369479484a2179055fb11f69dfcd43de51bee12
   languageName: node
   linkType: hard
 
