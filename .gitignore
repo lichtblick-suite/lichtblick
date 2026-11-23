@@ -23,6 +23,7 @@ e2e/tests/reports/web/*
 e2e/tmp/*
 benchmark/e2e/reports/*
 benchmark/test-results/*
+benchmark/e2e/test-results/
 test-results/*
 
 # Yarn
