@@ -110,6 +110,7 @@ export type Props = {
   width: number;
   height: number;
   zoom: boolean;
+  disableShiftWheelZoom?: ChartComponentProps["disableShiftWheelZoom"];
   data?: ChartComponentProps["data"];
   provider?: ObjectDataProvider;
   typedData?: ChartComponentProps["typedData"];
@@ -759,6 +760,7 @@ export default function TimeBasedChart(props: Props): React.JSX.Element {
     type,
     width,
     height,
+    disableShiftWheelZoom: props.disableShiftWheelZoom,
     isBoundsReset: globalBounds == undefined,
     options,
     data: provided?.data,
