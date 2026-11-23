@@ -172,5 +172,24 @@ describe("useChartScalesAndBounds", () => {
       expect(event.defaultPrevented).toBe(true);
       expect(scrollTop).toBe(expectedScrollTop);
     });
+
+    it.each([
+      { name: "plain wheel", shiftKey: false, reachesAncestors: true },
+      { name: "Shift+wheel", shiftKey: true, reachesAncestors: false },
+    ])("should only stop propagation for Shift+wheel ($name)", ({ shiftKey, reachesAncestors }) => {
+      // Given the hook is mounted and an ancestor (where React listens) observes wheel events
+      renderHook(() => useChartScalesAndBounds(undefined, undefined, undefined, config));
+      const ancestorListener = jest.fn();
+      mockScrollContainer.addEventListener("wheel", ancestorListener);
+
+      // When a bubbling wheel event is dispatched on the wrapper
+      mockWrapper.dispatchEvent(
+        new WheelEvent("wheel", { bubbles: true, cancelable: true, shiftKey, deltaY: 100 }),
+      );
+
+      // Then only Shift+wheel is kept from reaching the chart's zoom handler
+      expect(ancestorListener).toHaveBeenCalledTimes(reachesAncestors ? 1 : 0);
+      mockScrollContainer.removeEventListener("wheel", ancestorListener);
+    });
   });
 });

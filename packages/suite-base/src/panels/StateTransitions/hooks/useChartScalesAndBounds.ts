@@ -114,6 +114,8 @@ const useChartScalesAndBounds = (
       if (!event.shiftKey || !element?.parentElement) {
         return;
       }
+      // Stops the event before React's root listener so the chart's onWheel doesn't zoom.
+      event.stopPropagation();
       element.parentElement.scrollTop += event.deltaY !== 0 ? event.deltaY : event.deltaX;
     };
 

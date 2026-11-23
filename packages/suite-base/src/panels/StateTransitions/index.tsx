@@ -245,7 +245,6 @@ function StateTransitions(props: StateTransitionPanelProps) {
         <div className={classes.chartWrapper} ref={sizeRef}>
           <TimeBasedChart
             zoom
-            enableShiftWheelScroll
             isSynced={config.isSynced}
             showXAxisLabels
             width={width ?? 0}
