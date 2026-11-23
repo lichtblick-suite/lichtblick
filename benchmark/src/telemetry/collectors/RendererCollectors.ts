@@ -1,0 +1,143 @@
+// SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
+// SPDX-License-Identifier: MPL-2.0
+
+import type { ITelemetry, TelemetryEvent } from "@lichtblick/suite-base/util/telemetry";
+
+import { FrameCollector } from "./FrameCollector";
+import { JsHeapCollector } from "./JsHeapCollector";
+import { LongTaskCollector } from "./LongTaskCollector";
+import { SelfCostCounter, SelfCostMeter } from "./SelfCostMeter";
+import { UaSpecificMemoryCollector } from "./UaSpecificMemoryCollector";
+import { COLLECTOR_TICK_INTERVAL_MS } from "./constants";
+import {
+  CollectorPerformance,
+  LongTaskObserverConstructor,
+  RendererCollectorsEnv,
+  RendererCollectorsOptions,
+} from "./types";
+
+/** Builds the collector environment from the current (window) realm. */
+export function getDefaultRendererCollectorsEnv(): RendererCollectorsEnv {
+  const realm = globalThis as typeof globalThis & {
+    PerformanceObserver?: LongTaskObserverConstructor;
+  };
+  const performance = realm.performance as Performance & CollectorPerformance;
+  return {
+    now: () => performance.now(),
+    setInterval: (handler, intervalMs) => realm.setInterval(handler, intervalMs),
+    clearInterval: (handle) => {
+      realm.clearInterval(handle as ReturnType<typeof setInterval>);
+    },
+    requestAnimationFrame:
+      typeof realm.requestAnimationFrame === "function"
+        ? (callback) => realm.requestAnimationFrame(callback)
+        : undefined,
+    cancelAnimationFrame:
+      typeof realm.cancelAnimationFrame === "function"
+        ? (handle) => {
+            realm.cancelAnimationFrame(handle);
+          }
+        : undefined,
+    performance,
+    PerformanceObserver: realm.PerformanceObserver,
+    crossOriginIsolated: realm.crossOriginIsolated,
+  };
+}
+
+/**
+ * Owns all renderer-side collectors and their 1 Hz tick (a plain interval, never driven from the
+ * RAF loop). Event-driven collection is fed through `handleEvent`, which the installer wires to the
+ * sink's `onEvent` (own and ingested events):
+ * - `datasource.firstMessage` arms `frame.firstUseful` for the next animation frame
+ * - `datasource.open`/`datasource.close` end events trigger a UA-specific memory measurement
+ *
+ * The tick also times itself (`telemetry.self.timeMs.collectors`: heap sample + fps publish + UA
+ * scheduling) and then publishes all self-cost counters of the shared `SelfCostMeter`.
+ */
+export class RendererCollectors {
+  readonly #telemetry: ITelemetry;
+  readonly #env: RendererCollectorsEnv;
+  readonly #heap: JsHeapCollector;
+  readonly #longTasks: LongTaskCollector;
+  readonly #frames: FrameCollector;
+  readonly #uaMemory: UaSpecificMemoryCollector;
+  readonly #selfCost: SelfCostMeter;
+  readonly #selfTime: SelfCostCounter;
+  #timerHandle: unknown;
+  #state: "idle" | "running" | "disposed" = "idle";
+
+  readonly #tick = (): void => {
+    const selfStartMs = this.#selfTime.now();
+    this.#heap.sample();
+    this.#frames.publish();
+    this.#uaMemory.maybeMeasurePeriodic();
+    this.#selfTime.addSince(selfStartMs);
+    this.#selfCost.publish(this.#telemetry);
+  };
+
+  public constructor(
+    telemetry: ITelemetry,
+    env: RendererCollectorsEnv,
+    options: RendererCollectorsOptions = {},
+  ) {
+    this.#telemetry = telemetry;
+    this.#env = env;
+    this.#selfCost = options.selfCost ?? new SelfCostMeter(env.now);
+    this.#selfTime = this.#selfCost.counter("collectorsMs");
+    this.#heap = new JsHeapCollector(telemetry, env.performance);
+    this.#longTasks = new LongTaskCollector(telemetry, env.PerformanceObserver, this.#selfCost);
+    this.#frames = new FrameCollector(telemetry, env, options.lateFrameThresholdMs, this.#selfCost);
+    this.#uaMemory = new UaSpecificMemoryCollector(telemetry, env, this.#selfCost);
+  }
+
+  /** Starts all collectors. Only the first call has an effect; never restarts after dispose. */
+  public start(): void {
+    if (this.#state !== "idle") {
+      return;
+    }
+    this.#state = "running";
+    this.#heap.sample();
+    this.#longTasks.start();
+    this.#frames.start();
+    this.#uaMemory.measure();
+    this.#timerHandle = this.#env.setInterval(this.#tick, COLLECTOR_TICK_INTERVAL_MS);
+  }
+
+  public handleEvent(event: TelemetryEvent): void {
+    if (this.#state !== "running") {
+      return;
+    }
+    switch (event.name) {
+      case "datasource.firstMessage":
+        this.#frames.markFirstMessage(event.labels);
+        break;
+      case "datasource.open":
+      case "datasource.close":
+        if (event.phase === "end") {
+          this.#uaMemory.measure();
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Records a final sample of the current window and publishes the pending self-cost counters,
+   * then stops timers, frame recording and RAF loop, and observer.
+   */
+  public dispose(): void {
+    if (this.#state === "running") {
+      // Final partial window; no UA-memory measurement at teardown.
+      this.#heap.sample();
+      this.#frames.publish();
+      this.#selfCost.publish(this.#telemetry);
+      this.#env.clearInterval(this.#timerHandle);
+      this.#timerHandle = undefined;
+    }
+    this.#state = "disposed";
+    this.#frames.dispose();
+    this.#longTasks.dispose();
+    this.#uaMemory.dispose();
+  }
+}

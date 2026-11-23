@@ -7,48 +7,61 @@
 import { std } from "mathjs";
 
 import Log from "@lichtblick/log";
+import { monotonicNow } from "@lichtblick/suite-base/util/telemetry";
+
+import type { BenchmarkStatsGlobal } from "./BenchmarkStats.types";
+import { FLUSH_SAMPLE_COUNT, LISTENER_DISPATCH_DURATION_METRIC } from "./constants";
+import type { ListenerDispatchDurationSample } from "./types";
 
 const log = Log.getLogger(__filename);
-
-type Sample = {
-  stamp: number;
-  value: number;
-};
-
-type RecordFrameTimesFn = (frameTimes: Sample[]) => void;
 
 class BenchmarkStats {
   static #instance: BenchmarkStats | undefined;
 
-  #frameTimesMs: Sample[] = [];
+  #samples: ListenerDispatchDurationSample[] = [];
 
   private constructor() {}
 
-  public recordFrameTime(durationMs: number): void {
-    this.#frameTimesMs.push({
+  /**
+   * Records how long it took to dispatch one player state to the message pipeline listener
+   * (`await listener(playerState)`), in milliseconds.
+   *
+   * This is NOT a rendered-frame time: panels may render later (or not at all) and the browser may
+   * paint independently of the listener resolving. Use the renderer telemetry (`renderer.fps`,
+   * `renderer.lateFrames`) for frame pacing.
+   */
+  public recordListenerDispatchDuration(durationMs: number): void {
+    this.#samples.push({
       stamp: Date.now() / 1_000,
       value: durationMs,
+      monotonicTs: monotonicNow(),
     });
 
-    if (this.#frameTimesMs.length >= 100) {
-      const values = this.#frameTimesMs.map((sample) => sample.value);
-      const totalFrameMs = values.reduce((a, b) => a + b, 0);
-      const avgFrameMs = totalFrameMs / values.length;
-
-      const sortedFrameMs = values.sort();
-      const medianFrameMs = sortedFrameMs[Math.floor(sortedFrameMs.length * 0.5)]!;
-      const p90FrameMs = sortedFrameMs[Math.floor(sortedFrameMs.length * 0.9)]!;
-      const stddev = std(values);
-
-      log.info(
-        `Frame time (filtered) average: ${String(avgFrameMs)}, median: ${String(medianFrameMs)}, P90: ${String(p90FrameMs)}, stddev: ${String(stddev.values)}`,
-      );
-
-      const record = (window as { recordFrameTimes?: RecordFrameTimesFn }).recordFrameTimes;
-      record?.(this.#frameTimesMs);
-
-      this.#frameTimesMs.length = 0;
+    if (this.#samples.length < FLUSH_SAMPLE_COUNT) {
+      return;
     }
+
+    const samples = this.#samples;
+    // Hand the full batch to the runner and start a new buffer instead of truncating in place, so
+    // a consumer that holds on to the array never sees it emptied underneath it.
+    this.#samples = [];
+
+    const values = samples.map((sample) => sample.value);
+    const total = values.reduce((a, b) => a + b, 0);
+    const average = total / values.length;
+
+    // `values` is a local copy (from `map`): sorting it in place does not touch `samples`.
+    values.sort((a, b) => a - b);
+    const median = values[Math.floor(values.length * 0.5)]!;
+    const p90 = values[Math.floor(values.length * 0.9)]!;
+    const stddev = std(values);
+
+    log.info(
+      `Listener dispatch duration (${LISTENER_DISPATCH_DURATION_METRIC}) average: ${String(average)}, median: ${String(median)}, P90: ${String(p90)}, stddev: ${String(stddev.values)}`,
+    );
+
+    const record = (globalThis as BenchmarkStatsGlobal).recordFrameTimes;
+    record?.(samples);
   }
 
   /** Return an instance of BenchmarkStats */

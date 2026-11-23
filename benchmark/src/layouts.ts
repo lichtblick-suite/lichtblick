@@ -11,6 +11,7 @@ import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/
 
 import DefaultMultipleThreeDee from "./layouts/DefaultMultipleThreeDee.json";
 import Empty from "./layouts/Empty.json";
+import McapMultiIngest from "./layouts/McapMultiIngest.json";
 import PointcloudMultipleThreeDee from "./layouts/PointcloudMultipleThreeDee.json";
 import PointcloudRawMessageAnd3d from "./layouts/PointcloudRawMessageAnd3d.json";
 import SinewaveSinglePlot from "./layouts/SinewaveSinglePlot.json";
@@ -39,6 +40,8 @@ const LAYOUTS: Record<string, LayoutData> = {
   pointCloudRawMessage: makeLayoutData(PointcloudRawMessageAnd3d),
   pointCloudMultipleThreeDee: makeLayoutData(PointcloudMultipleThreeDee),
   transformPreloading: makeLayoutData(TransformPreloading),
+  // Raw Messages + Plot on the generated multi-file fixture topic (`/benchmark/multi`).
+  mcapMultiIngest: makeLayoutData(McapMultiIngest),
 };
 
 export { LAYOUTS };
