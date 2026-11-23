@@ -712,8 +712,9 @@ of `runScenario`, recorded by `runner/overheadMeasurement.ts`)
   and thermal state carry over and the quartets may not be fully independent. With positive
   autocorrelation the CI is optimistic, so read a borderline `within` with care. In the 10-quartet
   evidence runs the lag-1 autocorrelation of the quartet deltas was −0.33 … +0.46 (no clear
-  dependence, though the check has little power at n = 10). Relaunch pairs use a fresh launch per
-  run, so the relaunch A/B is the independent cross-check.
+  dependence, though the check has little power at n = 10). The relaunch A/B (a fresh launch per
+  run) is a separate cross-check, not a guarantee of independence: a fresh process does not reset
+  host thermal or load state, so successive relaunch pairs can be correlated too.
 - **Why not a bootstrap.** Earlier reports used a percentile bootstrap of the median. Its interval
   can never be wider than [min, max], which covers the median with only 75 % (n = 3) to 93.75 %
   (n = 5) probability, and at larger n it tends to pick ranks below the nominal 95 %; a verdict

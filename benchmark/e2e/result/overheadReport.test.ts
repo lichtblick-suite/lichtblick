@@ -245,6 +245,10 @@ describe("normalizeOverheadReport", () => {
       },
     ],
     [
+      "a toggle-sourced CPU verdict without a toggle section",
+      { ...toggleReportJson(), toggle: undefined },
+    ],
+    [
       "a report without verdict sources",
       {
         ...relaunchReportJson(),

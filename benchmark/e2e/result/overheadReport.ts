@@ -223,9 +223,18 @@ function isToggleSectionWithVerdict(toggle: unknown): boolean {
   return isToggleSection(toggle) && isVerdict(toggle.verdict);
 }
 
-/** Shape check of a schema-3 report (a toggle section, when present, must be complete). */
+/**
+ * Shape check of a schema-3 report. A toggle section is required when the CPU verdict comes from
+ * it; otherwise it may be absent, and when present it must be complete.
+ */
 function isReportV3(json: Record<string, unknown>): boolean {
-  return hasV3Fields(json) && (json.toggle == undefined || isToggleSection(json.toggle));
+  if (!hasV3Fields(json)) {
+    return false;
+  }
+  if (json.cpuVerdictSource === "toggle") {
+    return isToggleSection(json.toggle);
+  }
+  return json.toggle == undefined || isToggleSection(json.toggle);
 }
 
 /** A top telemetry function of a measured direct attribution. */
