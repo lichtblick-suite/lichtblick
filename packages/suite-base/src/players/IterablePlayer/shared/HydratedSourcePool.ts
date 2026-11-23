@@ -344,22 +344,22 @@ export class HydratedSourcePool {
   // Each victim is removed before its close is awaited, so concurrent passes never target the same
   // entry twice, and the budget is re-checked after every close.
   async #evictBeyondCapacity(): Promise<void> {
-    for (;;) {
-      const victim = this.#takeEvictionVictim();
-      if (victim == undefined) {
-        this.#settle();
-        return;
-      }
-      // When this removal ends the pass, settle before awaiting the close: a slow close must not
-      // extend an over-budget period, and release() callers read the stats without awaiting.
-      // Otherwise publish the removal, so a slow close does not leave stale gauges in the sink.
-      if (!this.#hasEvictionCandidate()) {
-        this.#settle();
-      } else {
-        this.#publish();
-      }
-      await this.#closeEvicted(victim);
+    const victim = this.#takeEvictionVictim();
+    if (victim == undefined) {
+      this.#settle();
+      return;
     }
+    // When this removal ends the pass, settle before awaiting the close: a slow close must not
+    // extend an over-budget period, and release() callers read the stats without awaiting.
+    // Otherwise publish the removal, so a slow close does not leave stale gauges in the sink.
+    if (!this.#hasEvictionCandidate()) {
+      this.#settle();
+    } else {
+      this.#publish();
+    }
+    await this.#closeEvicted(victim);
+    // Recurse (not loop): closes must stay sequential, and the budget is re-checked after each one.
+    await this.#evictBeyondCapacity();
   }
 
   // True when the pool is over capacity and has an unpinned entry it could evict.

@@ -17,7 +17,7 @@ import {
 } from "./constants";
 import type { FixtureManifest, ResolvedOptions } from "./generateMcapFixtures.types";
 import type { McapFixtureOptions } from "./types";
-import { runSequentially } from "../shared/sequential";
+import { repeatWhile, runSequentially } from "../shared/sequential";
 
 // Deterministic MCAP fixtures for the `mcap-multi-ingest` scenario.
 //
@@ -66,18 +66,21 @@ class FileWritable implements IWritable {
 
   public async write(buffer: Uint8Array): Promise<void> {
     let offset = 0;
-    while (offset < buffer.byteLength) {
-      const { bytesWritten } = await this.#handle.write(
-        buffer,
-        offset,
-        buffer.byteLength - offset,
-        Number(this.#position) + offset,
-      );
-      if (bytesWritten === 0) {
-        throw new Error(`No bytes written at position ${this.#position + BigInt(offset)}`);
-      }
-      offset += bytesWritten;
-    }
+    await repeatWhile(
+      () => offset < buffer.byteLength,
+      async () => {
+        const { bytesWritten } = await this.#handle.write(
+          buffer,
+          offset,
+          buffer.byteLength - offset,
+          Number(this.#position) + offset,
+        );
+        if (bytesWritten === 0) {
+          throw new Error(`No bytes written at position ${this.#position + BigInt(offset)}`);
+        }
+        offset += bytesWritten;
+      },
+    );
     this.#position += BigInt(buffer.byteLength);
   }
 }
