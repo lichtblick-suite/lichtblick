@@ -55,7 +55,7 @@ type Props = {
   type: "scatter";
   height: number;
   width: number;
-  disableShiftWheelZoom?: boolean;
+  enableShiftWheelScroll?: boolean;
   onClick?: (params: OnClickArg) => void;
 
   // called when the chart scales have updated (happens for zoom/pan/reset)
@@ -126,7 +126,7 @@ function Chart(props: Props): React.JSX.Element {
     options,
     width,
     height,
-    disableShiftWheelZoom = false,
+    enableShiftWheelScroll = false,
     onStartRender,
     onFinishRender,
   } = props;
@@ -455,7 +455,7 @@ function Chart(props: Props): React.JSX.Element {
       if (!zoomEnabled || !rpcSendRef.current) {
         return;
       }
-      if (disableShiftWheelZoom && event.shiftKey) {
+      if (enableShiftWheelScroll && event.shiftKey) {
         return;
       }
 
@@ -474,7 +474,7 @@ function Chart(props: Props): React.JSX.Element {
       });
       maybeUpdateScales(scales, { userInteraction: true });
     },
-    [zoomEnabled, disableShiftWheelZoom, maybeUpdateScales],
+    [zoomEnabled, enableShiftWheelScroll, maybeUpdateScales],
   );
 
   const onMouseDown = useCallback(
