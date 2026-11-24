@@ -451,6 +451,58 @@ describe("CameraStateSettings", () => {
 
       expect(mockOrbitControls.target.toArray()).toEqual(DEFAULT_CAMERA_STATE.targetOffset);
     });
+
+    it("applies the tracked frame when rebuilding a perspective camera state", () => {
+      // Given
+      renderer.addTransform(
+        "map",
+        "base_link",
+        0n,
+        { x: 5, y: 7, z: 9 },
+        { x: 0, y: 0, z: 0, w: 1 },
+      );
+      renderer.setFollowFrameId("map");
+      renderer.fixedFrameId = "map";
+      renderer.setCurrentTime(0n);
+      renderer.updateConfig((draft) => {
+        draft.cameraTf = "base_link";
+      });
+      const cameraStateSettings = new CameraStateSettings(renderer, canvas, 16 / 9);
+
+      // When
+      cameraStateSettings.setCameraState({ ...DEFAULT_CAMERA_STATE, perspective: true });
+
+      // Then
+      const camera = cameraStateSettings.getActiveCamera();
+      expect(camera.type).toBe("PerspectiveCamera");
+      expect(mockOrbitControls.target.toArray()).toEqual([5, 7, 9]);
+      expect(camera.position.distanceTo(mockOrbitControls.target)).toBeCloseTo(
+        DEFAULT_CAMERA_STATE.distance,
+      );
+      expect(cameraStateSettings.getCameraState().targetOffset).toEqual(
+        DEFAULT_CAMERA_STATE.targetOffset,
+      );
+    });
+
+    it("leaves the camera target frame untouched when another camera setting changes", () => {
+      // Given
+      renderer.updateConfig((draft) => {
+        draft.cameraTf = "base_link";
+        draft.cameraState.targetOffset = [1, 2, 3];
+      });
+      const cameraStateSettings = new CameraStateSettings(renderer, canvas, 16 / 9);
+
+      // When
+      cameraStateSettings.handleSettingsAction({
+        action: "update",
+        payload: { path: ["cameraState", "distance"], input: "number", value: 42 },
+      });
+
+      // Then
+      expect(renderer.config.cameraState.distance).toBe(42);
+      expect(renderer.config.cameraTf).toBe("base_link");
+      expect(renderer.config.cameraState.targetOffset).toEqual([1, 2, 3]);
+    });
   });
 
   describe("screen space panning", () => {
