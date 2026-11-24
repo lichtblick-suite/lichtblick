@@ -6,6 +6,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const panels = {
+  audio: "Audio",
+  audioDescription: "Play audio data from a topic.",
   "3D": "3D",
   "3DPanelDescription": "Display markers, camera images, meshes, URDFs, and more in a 3D scene.",
   callService: "Service Call",
