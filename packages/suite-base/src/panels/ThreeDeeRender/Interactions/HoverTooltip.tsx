@@ -247,6 +247,19 @@ export function HoverTooltip({
     };
   }, [mode]);
 
+  useEffect(() => {
+    return () => {
+      clearTimeout(graceTimer.current);
+      clearTimeout(dwellTimer.current);
+      clearTimeout(leaveTimer.current);
+    };
+  }, []);
+
+  // Return before measuring: layout reads force a synchronous reflow on every render.
+  if (mode === "hidden" || visibleEntities.length === 0) {
+    return ReactNull;
+  }
+
   // ---------------------------------------------------------------------------
   // Smart positioning: keep tooltip inside the 3D panel (or viewport)
   // ---------------------------------------------------------------------------
@@ -276,19 +289,6 @@ export function HoverTooltip({
     bounds.bottom,
     HOVER_TOOLTIP_OFFSET_PX,
   );
-
-  // Cleanup timers on unmount.
-  useEffect(() => {
-    return () => {
-      clearTimeout(graceTimer.current);
-      clearTimeout(dwellTimer.current);
-      clearTimeout(leaveTimer.current);
-    };
-  }, []);
-
-  if (mode === "hidden" || visibleEntities.length === 0) {
-    return ReactNull;
-  }
 
   const interactive = mode !== "following";
 
