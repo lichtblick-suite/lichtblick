@@ -17,7 +17,7 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLongPress } from "react-use";
 import tc from "tinycolor2";
@@ -160,8 +160,11 @@ function extractHoverMetadata(
 
 /**
  * Provides DOM overlay elements on top of the 3D scene (e.g. stats, debug GUI).
+ * Memoized because the parent panel re-renders on every frame.
  */
-export function RendererOverlay(props: Readonly<Props>): React.JSX.Element {
+export const RendererOverlay = memo(function RendererOverlayComponent(
+  props: Readonly<Props>,
+): React.JSX.Element {
   const { t } = useTranslation("threeDee");
   const { classes } = useStyles();
   const [clickedPosition, setClickedPosition] = useState<{ clientX: number; clientY: number }>({
@@ -346,9 +349,21 @@ export function RendererOverlay(props: Readonly<Props>): React.JSX.Element {
 
   const theme = useTheme();
 
+  const [hasFixedFrame, setHasFixedFrame] = useState(renderer?.fixedFrameId != undefined);
+  const [fixedFrameRenderer, setFixedFrameRenderer] = useState(renderer);
+  if (fixedFrameRenderer !== renderer) {
+    setFixedFrameRenderer(renderer);
+    setHasFixedFrame(renderer?.fixedFrameId != undefined);
+  }
+  useRendererEvent(
+    "startFrame",
+    useCallback((_currentTime, frameRenderer) => {
+      setHasFixedFrame(frameRenderer.fixedFrameId != undefined);
+    }, []),
+  );
+
   // Publish control is only available if the canPublish prop is true and we have a fixed frame in the renderer
-  const showPublishControl =
-    props.interfaceMode === "3d" && props.canPublish && renderer?.fixedFrameId != undefined;
+  const showPublishControl = props.interfaceMode === "3d" && props.canPublish && hasFixedFrame;
   const publishControls = showPublishControl && (
     <>
       <Tooltip
@@ -526,4 +541,4 @@ export function RendererOverlay(props: Readonly<Props>): React.JSX.Element {
       {resetViewButton}
     </>
   );
-}
+});
