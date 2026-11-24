@@ -220,6 +220,51 @@ describe("UaSpecificMemoryCollector", () => {
     expect(telemetry.gauge).not.toHaveBeenCalled();
   });
 
+  describe("pause and resume", () => {
+    it("should drop the coalesced follow-up and the late result while paused", async () => {
+      // Given
+      const { telemetry, measure, pending, collector } = setup();
+      collector.measure();
+      collector.measure();
+
+      // When
+      collector.pause();
+      pending[0]!.resolve({ bytes: 1 });
+      await flushPromises();
+      collector.measure();
+      collector.maybeMeasurePeriodic();
+
+      // Then
+      expect(measure).toHaveBeenCalledTimes(1);
+      expect(telemetry.gauge).not.toHaveBeenCalled();
+      expect(collector.callCount()).toBe(1);
+    });
+
+    it("should not measure on resume and keep the global spacing of periodic measurements", async () => {
+      // Given: a measurement started at t = 0 and resolved
+      const { measure, pending, clock, collector } = setup();
+      collector.measure();
+      pending[0]!.resolve({ bytes: 1 });
+      await flushPromises();
+      collector.pause();
+      clock.now = 4000;
+
+      // When: resumed 4 s later, then periodic requests at 4 s and 10 s
+      collector.resume();
+      const callsAtResume = measure.mock.calls.length;
+      collector.maybeMeasurePeriodic();
+      const callsBeforeInterval = measure.mock.calls.length;
+      clock.now = 10_000;
+      collector.maybeMeasurePeriodic();
+
+      // Then
+      expect(callsAtResume).toBe(1);
+      expect(callsBeforeInterval).toBe(1);
+      expect(measure).toHaveBeenCalledTimes(2);
+      expect(collector.callCount()).toBe(2);
+    });
+  });
+
   describe("self cost", () => {
     function setupWithMeter(): {
       telemetry: MockTelemetry;

@@ -1,5 +1,5 @@
 {
-  "//": "Unit tests for the Node-side benchmark runner (static server, fixture generator, result schema, host collectors, summary). Playwright specs (*.benchmark.spec.ts) are excluded: they run via `yarn test:e2e:benchmark*`.",
+  "//": "Unit tests for the Node-side benchmark runner (static server, fixture generator, result schema, host collectors, overhead, summary). Playwright specs (*.benchmark.spec.ts) are excluded: they run via `yarn test:e2e:benchmark*`.",
   "displayName": "benchmark-e2e",
   "testEnvironment": "node",
   "testMatch": ["<rootDir>/**/*.test.ts"],

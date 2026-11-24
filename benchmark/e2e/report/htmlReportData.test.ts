@@ -6,10 +6,12 @@ import {
   buildRunChartData,
   counterRatePoints,
   downsample,
+  findOverhead,
   formatRunTime,
   matchScreenshots,
   newestFinishedAtMs,
   observationMeanPoints,
+  parseOverheadFile,
   parseResultFile,
   runStem,
   selectRuns,
@@ -106,6 +108,56 @@ describe("parseResultFile", () => {
   });
 });
 
+describe("parseOverheadFile", () => {
+  it("accepts an overhead report and rejects other JSON", () => {
+    // Given
+    const report = BenchmarkResultBuilder.overhead();
+
+    // When
+    const valid = parseOverheadFile(JSON.stringify(report));
+    const invalid = parseOverheadFile(JSON.stringify({ kind: "something-else" }));
+
+    // Then
+    expect(valid.ok).toBe(true);
+    expect(invalid.ok).toBe(false);
+  });
+
+  it("skips an overhead report of an unsupported schema version with a reason", () => {
+    // Given an otherwise current report with schema version 2
+    const report = { ...BenchmarkResultBuilder.overhead(), schemaVersion: 2 };
+
+    // When
+    const outcome = parseOverheadFile(JSON.stringify(report));
+
+    // Then
+    expect(outcome.ok).toBe(false);
+    expect(outcome.ok ? "" : outcome.reason).toContain("not a supported overhead report");
+  });
+
+  it("should reject a truncated overhead report as invalid JSON", () => {
+    // Given
+    const text = "{";
+
+    // When
+    const outcome = parseOverheadFile(text);
+
+    // Then
+    expect(outcome.ok ? "" : outcome.reason).toMatch(/^invalid JSON/);
+  });
+
+  it("should reject an overhead report with an unknown verdict", () => {
+    // Given
+    const report = BenchmarkResultBuilder.overhead();
+    const malformed = { ...report, verdicts: { ...report.verdicts, cpu: "unknown" } };
+
+    // When
+    const outcome = parseOverheadFile(JSON.stringify(malformed));
+
+    // Then
+    expect(outcome.ok).toBe(false);
+  });
+});
+
 describe("selectRuns", () => {
   const older = BenchmarkResultBuilder.loaded({ ts: 1, finishedAtWall: "2026-01-01T00:00:00Z" });
   const newer = BenchmarkResultBuilder.loaded({ ts: 2, finishedAtWall: "2026-01-02T00:00:00Z" });
@@ -124,6 +176,30 @@ describe("selectRuns", () => {
       off.fileName,
       web.fileName,
     ]);
+  });
+
+  it("should never select overhead A/B runs, also not with --all", () => {
+    // Given a scenario run and newer overhead runs of the same scenario × platform × mode
+    const overheadOn = BenchmarkResultBuilder.loaded({
+      ts: 5,
+      mode: "overhead",
+      finishedAtWall: "2026-01-03T00:00:00Z",
+    });
+    const overheadOff = BenchmarkResultBuilder.loaded({
+      ts: 6,
+      mode: "overhead",
+      telemetryEnabled: false,
+    });
+    const results = [newer, overheadOn, overheadOff];
+
+    // When
+    const latest = selectRuns(results, { all: false });
+    const all = selectRuns(results, { all: true });
+
+    // Then
+    expect(overheadOn.fileName).toContain("-overhead-");
+    expect(latest.map((loaded) => loaded.fileName)).toEqual([newer.fileName]);
+    expect(all.map((loaded) => loaded.fileName)).toEqual([newer.fileName]);
   });
 
   it("keeps every run with --all, newest first within a key", () => {
@@ -181,6 +257,26 @@ describe("staleHours", () => {
 
     // Then
     expect(hours).toBe(expected);
+  });
+});
+
+describe("findOverhead", () => {
+  it("returns the latest report of the scenario on the platform", () => {
+    // Given
+    const old = BenchmarkResultBuilder.overhead({ createdAtWall: "2026-01-01T00:00:00Z" });
+    const latest = BenchmarkResultBuilder.overhead({ createdAtWall: "2026-01-03T00:00:00Z" });
+    const web = BenchmarkResultBuilder.overhead({
+      platform: "web",
+      createdAtWall: "2026-01-09T00:00:00Z",
+    });
+
+    // When
+    const found = findOverhead([old, web, latest], "sinewave", "electron");
+    const missing = findOverhead([old, web, latest], "pointcloud", "electron");
+
+    // Then
+    expect(found).toBe(latest);
+    expect(missing).toBeUndefined();
   });
 });
 

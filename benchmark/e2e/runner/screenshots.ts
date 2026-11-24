@@ -47,8 +47,8 @@ import type { ScenarioUnderTest } from "../types";
 
 /**
  * Screenshots are opt-in per run (`requested === true`); the env cannot enable them for a run
- * that opted out. For an opted-in run, `BENCHMARK_SCREENSHOTS` (case-insensitive, trimmed)
- * selects, the same on every platform:
+ * that opted out (e.g. the overhead A/B). For an opted-in run, `BENCHMARK_SCREENSHOTS`
+ * (case-insensitive, trimmed) selects, the same on every platform:
  * - unset or any other value → `end`: no capture inside the sampling window, so no metric is
  *   affected;
  * - `all` → `loaded` + `mid` + `end`, for visual debugging only. It distorts metrics: a capture

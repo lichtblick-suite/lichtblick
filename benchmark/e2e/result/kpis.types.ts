@@ -9,6 +9,7 @@ import type {
   RenderCalibrationV1,
   SummaryV1,
 } from "./schemaV1";
+import type { MetricStats, Verdict } from "./stats.types";
 import type { ScenarioGroup } from "../../src/scenarios/scenarioControl";
 
 /**
@@ -124,11 +125,54 @@ export type KpiRun = {
 
 export type KpiRunRef = { scenarioId: string; runId: string };
 
+/** The fields of an overhead A/B report (`runner/overhead.types.ts` `OverheadReportV3`) the scorecard reads. */
+export type OverheadKpiInput = {
+  platform: BenchmarkPlatform;
+  scenarioId: string;
+  createdAtWall: string;
+  /** Included relaunch `on-vs-off` pairs (0 for method `toggle`). */
+  n: number;
+  /** Relaunch A/B statistics. */
+  metrics: { cpuRelative: MetricStats; memBytes: MetricStats };
+  verdicts: { overall: Verdict };
+  /** Where the CPU / memory verdicts come from (absent: `relaunch`, as before schema 3). */
+  cpuVerdictSource?: "toggle" | "relaunch";
+  memVerdictSource?: "relaunch" | "notMeasured";
+  /** Toggle A/B (included ABBA quartets and the relative CPU delta). */
+  toggle?: { n: number; metrics: { cpuRelative: MetricStats } };
+  targets: { cpuDeltaRelativeMax: number; memDeltaBytesMax: number };
+};
+
+/** Worst scenario of an overhead metric (highest CI95 upper bound; reports without a CI skipped). */
+export type OverheadWorstV1 = { scenarioId: string; ciUpper: number; median?: number };
+
 /** One aggregated metric: `n` runs had a usable value; `worst` is the run to look at first. */
 export type KpiAggregateV1 = {
   value?: number;
   n: number;
   worst?: KpiRunRef & { value: number };
+};
+
+export type OverheadAggregateV1 = {
+  /** Latest overhead report per scenario of the platform. */
+  reports: number;
+  /** Worst verdict over those reports (`exceeds` > `inconclusive` > `within`). */
+  verdict: Verdict;
+  /**
+   * Smallest included unit count (relaunch pairs or toggle quartets) behind any of those reports'
+   * verdicts (CPU and, when measured, memory) and the summed units behind their CPU verdicts.
+   */
+  minPairs: number;
+  totalPairs: number;
+  /** Reports whose CPU verdict comes from the toggle / relaunch A/B. */
+  cpuVerdictSources: { toggle: number; relaunch: number };
+  /** Reports without a memory verdict (method `toggle`). */
+  memNotMeasuredReports: number;
+  /** Relative CPU delta (fraction) of each report's CPU verdict source. */
+  worstCpuRelative?: OverheadWorstV1;
+  /** Working-set delta, MiB (relaunch; reports without a memory verdict left out). */
+  worstMemMiB?: OverheadWorstV1;
+  targets: { cpuDeltaRelativeMax: number; memDeltaMiBMax: number };
 };
 
 /** Scorecard of one platform (`aggregateKpis`); electron and web are never mixed. */
@@ -141,6 +185,8 @@ export type PlatformScorecardV1 = {
   /** Highest p90 render ms per panel type over the runs. */
   renderCostByPanelType: Record<string, KpiAggregateV1>;
   lowFpsRuns: Array<KpiRunRef & { medianFps: number }>;
+  /** Absent without overhead reports of the platform. */
+  overhead?: OverheadAggregateV1;
 };
 
 /** Group KPI metrics (see `GROUP_KPIS`). */
