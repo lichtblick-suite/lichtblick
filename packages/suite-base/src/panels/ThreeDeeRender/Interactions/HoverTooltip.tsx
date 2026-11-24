@@ -247,7 +247,6 @@ export function HoverTooltip({
     };
   }, [mode]);
 
-  // Cleanup timers on unmount.
   useEffect(() => {
     return () => {
       clearTimeout(graceTimer.current);
