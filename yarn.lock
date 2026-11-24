@@ -3650,7 +3650,7 @@ __metadata:
     chart.js: "npm:4.4.8"
     chartjs-plugin-annotation: "npm:3.1.0"
     chartjs-plugin-datalabels: "npm:2.2.0"
-    chromatic: "npm:18.12.1"
+    chromatic: "npm:18.14.5"
     crypto-browserify: "npm:3.12.0"
     css-loader: "npm:6.8.1"
     cytoscape: "npm:3.31.1"
@@ -9416,9 +9416,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:18.12.1":
-  version: 18.12.1
-  resolution: "chromatic@npm:18.12.1"
+"chromatic@npm:18.14.5":
+  version: 18.14.5
+  resolution: "chromatic@npm:18.14.5"
   dependencies:
     semver: "npm:^7.3.5"
   peerDependencies:
@@ -9441,7 +9441,7 @@ __metadata:
     chroma: dist/bin.cjs
     chromatic: dist/bin.cjs
     chromatic-cli: dist/bin.cjs
-  checksum: 10/80aac15d79fd3bb49cee359fed3e3fa8f5eda46bd889c00aaa30c34f5aa28929434ecb3374be31d552f8b857394287c8e6912eff04d8cbe227a57ce1cc780fd7
+  checksum: 10/1c80d140cdf537ed2762eee831446181628ab61f9dd8d4d0795d5e6195f1af18b35f0692e4e6fe71685e11a2d41fe8c194084b1d413fc6a27bad0067c533c7c4
   languageName: node
   linkType: hard
 
