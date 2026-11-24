@@ -20,7 +20,9 @@ declare module "leaflet" {
 
     public getTilt(): number;
 
-    public getRadius(): Radii;
+    // Asymmetric on purpose, matching the plugin: setRadius takes the [x, y] pair the
+    // constructor takes, while getRadius hands back `new L.point(mRadiusX, mRadiusY)`.
+    public getRadius(): Point;
     public setRadius(radius: Radii): Ellipse;
   }
 
