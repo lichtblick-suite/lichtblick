@@ -205,7 +205,7 @@ describe("PlotLegend re-renders", () => {
     view.rerender(legend({ sidebarDimension: 200 }));
 
     // Then
-    expect((useWorkspaceActions as jest.Mock).mock.calls.length).toBe(rowRendersAfterMount);
+    expect((useWorkspaceActions as jest.Mock).mock.calls).toHaveLength(rowRendersAfterMount);
   });
 
   it("should not commit when the coordinator reports an unchanged mismatch list", () => {
@@ -230,7 +230,7 @@ describe("PlotLegend re-renders", () => {
     });
 
     // Then
-    expect(onCommit.mock.calls.length).toBe(commitsAfterChange);
+    expect(onCommit.mock.calls).toHaveLength(commitsAfterChange);
   });
 
   it("should re-render when the mismatch list content changes", () => {
