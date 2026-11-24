@@ -22,9 +22,11 @@ import {
   decodeCompressedVideoToBitmap,
   decodeRawImage,
   emptyVideoFrame,
+  IMAGE_DEFAULT_COLOR_MODE_SETTINGS,
 } from "./decodeImage";
 import { PreparedVideoFrameStatus } from "./types";
 import { Image as RosImage } from "../../ros";
+import * as ColorMode from "../colorMode";
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -382,6 +384,7 @@ describe("decodeRawImage", () => {
     // When
     decodeRawImage(image, { colorMode: "colormap", colorMap: "turbo", maxValue: 5 }, pixels);
     // Then
+    expect(new Set(pixels.subarray(0, 3)).size).toBeGreaterThan(1);
     expect(pixels.subarray(0, 4)).not.toEqual(pixels.subarray(4, 8));
   });
 
@@ -397,13 +400,28 @@ describe("decodeRawImage", () => {
     );
   });
 
-  it("should keep the default 0 to 1 grayscale when color options are empty", () => {
+  it("should apply a custom gradient with the default float bounds", () => {
+    const image = createFloatImage([0.5]);
+    const pixels = new Uint8ClampedArray(image.width * 4);
+    decodeRawImage(image, { colorMode: "gradient", gradient: ["#000000", "#ff0000"] }, pixels);
+    expect(pixels).toEqual(new Uint8ClampedArray([128, 0, 0, 255]));
+  });
+
+  it.each([
+    { name: "omitted color options", options: {} },
+    {
+      name: "explicit Image panel defaults",
+      options: { ...IMAGE_DEFAULT_COLOR_MODE_SETTINGS, minValue: 0, maxValue: 1 },
+    },
+  ])("should decode default grayscale directly with $name", ({ options }) => {
     // Given
     const image = createFloatImage([0, 0.5, 2]);
     const pixels = new Uint8ClampedArray(image.width * 4);
+    const getColorConverter = jest.spyOn(ColorMode, "getColorConverter");
     // When
-    decodeRawImage(image, {}, pixels);
+    decodeRawImage(image, options, pixels);
     // Then
+    expect(getColorConverter).not.toHaveBeenCalled();
     expect(pixels).toEqual(
       new Uint8ClampedArray([0, 0, 0, 255, 128, 128, 128, 255, 255, 255, 255, 255]),
     );

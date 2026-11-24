@@ -165,25 +165,33 @@ export const IMAGE_DEFAULT_COLOR_MODE_SETTINGS: Required<
   colorMap: "turbo",
   explicitAlpha: 0,
 };
+const MIN_MAX_16_BIT = { minValue: 0, maxValue: 65535 };
+
 export type RawImageOptions = ColorModeSettings;
 
-function scalarColorConverter(
-  encoding: "32FC1" | "mono16" | "16UC1",
-  options: Partial<RawImageOptions>,
-) {
-  const settings = _.merge(
-    {},
-    IMAGE_DEFAULT_COLOR_MODE_SETTINGS,
-    { minValue: 0, maxValue: encoding === "32FC1" ? 1 : 65535 },
-    options,
-  );
-  const { colorMode, minValue, maxValue } = settings;
-  if (encoding === "32FC1" && colorMode !== "colormap" && colorMode !== "gradient") {
+function floatColorConverter(options: Partial<RawImageOptions>) {
+  const defaults = IMAGE_DEFAULT_COLOR_MODE_SETTINGS;
+  const {
+    colorMode = defaults.colorMode,
+    gradient = defaults.gradient,
+    minValue = 0,
+    maxValue = 1,
+  } = options;
+  if (colorMode !== "colormap" && colorMode !== "gradient") {
     return undefined;
   }
-  if (colorMode === "rgba-fields" || colorMode === "flat") {
-    throw Error(`${colorMode} color mode is not supported for mono16 images`);
+  // The default black-to-white gradient over 0–1 is already handled by decodeFloat1c.
+  if (
+    colorMode === "gradient" &&
+    minValue === 0 &&
+    maxValue === 1 &&
+    gradient[0] === defaults.gradient[0] &&
+    gradient[1] === defaults.gradient[1]
+  ) {
+    return undefined;
   }
+
+  const settings = _.merge({}, defaults, options);
   const color = { r: 0, g: 0, b: 0, a: 0 };
   const convert = getColorConverter({ ...settings, colorMode }, minValue, maxValue);
   return (value: number) => {
@@ -234,7 +242,7 @@ export function decodeRawImage(
         step,
         is_bigendian,
         output,
-        scalarColorConverter(encoding, options),
+        floatColorConverter(options),
       );
       break;
     case "bayer_rggb8":
@@ -254,11 +262,33 @@ export function decodeRawImage(
       decodeMono8(rawData, width, height, step, output);
       break;
     case "mono16":
-    case "16UC1":
+    case "16UC1": {
+      // combine options with defaults. lodash merge makes sure undefined values in options are replaced with defaults
+      // whereas a normal spread would allow undefined values to overwrite defaults
+      const settings = _.merge({}, IMAGE_DEFAULT_COLOR_MODE_SETTINGS, MIN_MAX_16_BIT, options);
+      if (settings.colorMode === "rgba-fields" || settings.colorMode === "flat") {
+        throw Error(`${settings.colorMode} color mode is not supported for mono16 images`);
+      }
+      const min = settings.minValue;
+      const max = settings.maxValue;
+      const tempColor = { r: 0, g: 0, b: 0, a: 0 };
+      const converter = getColorConverter(
+        settings as ColorModeSettings & {
+          colorMode: typeof settings.colorMode;
+        },
+        min,
+        max,
+      );
       decodeMono16(rawData, width, height, step, is_bigendian, output, {
-        colorConverter: scalarColorConverter(encoding, options),
+        minValue: options.minValue,
+        maxValue: options.maxValue,
+        colorConverter: (value: number) => {
+          converter(tempColor, value);
+          return tempColor;
+        },
       });
       break;
+    }
     default:
       throw new Error(`Unsupported encoding ${encoding}`);
   }

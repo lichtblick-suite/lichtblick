@@ -207,12 +207,6 @@ export function decodeBGR8(
   }
 }
 
-type ScalarColorConverter = (value: number) => {
-  r: number;
-  g: number;
-  b: number;
-};
-
 export function decodeFloat1c(
   gray: Uint8Array,
   width: number,
@@ -221,7 +215,7 @@ export function decodeFloat1c(
   // eslint-disable-next-line @lichtblick/no-boolean-parameters
   is_bigendian: boolean,
   output: Uint8ClampedArray,
-  colorConverter?: ScalarColorConverter,
+  colorConverter?: (value: number) => { r: number; g: number; b: number },
 ): void {
   if (step < width * 4) {
     throw new Error(`Float image row step (${step}) must be at least 4*width (${width * 4})`);
@@ -229,21 +223,34 @@ export function decodeFloat1c(
   const view = new DataView(gray.buffer, gray.byteOffset);
 
   let outIdx = 0;
+  if (colorConverter != undefined) {
+    for (let row = 0; row < height; row++) {
+      const rowStart = row * step;
+      for (let col = 0; col < width; col++) {
+        const value = view.getFloat32(rowStart + col * 4, !is_bigendian);
+        if (Number.isNaN(value)) {
+          output[outIdx++] = 0;
+          output[outIdx++] = 0;
+          output[outIdx++] = 0;
+        } else {
+          const { r, g, b } = colorConverter(value);
+          output[outIdx++] = r * 255;
+          output[outIdx++] = g * 255;
+          output[outIdx++] = b * 255;
+        }
+        output[outIdx++] = 255;
+      }
+    }
+    return;
+  }
+
   for (let row = 0; row < height; row++) {
     const rowStart = row * step;
     for (let col = 0; col < width; col++) {
-      const value = view.getFloat32(rowStart + col * 4, !is_bigendian);
-      if (colorConverter && !Number.isNaN(value)) {
-        const { r, g, b } = colorConverter(value);
-        output[outIdx++] = r * 255;
-        output[outIdx++] = g * 255;
-        output[outIdx++] = b * 255;
-      } else {
-        const grayValue = value * 255;
-        output[outIdx++] = grayValue;
-        output[outIdx++] = grayValue;
-        output[outIdx++] = grayValue;
-      }
+      const val = view.getFloat32(rowStart + col * 4, !is_bigendian) * 255;
+      output[outIdx++] = val;
+      output[outIdx++] = val;
+      output[outIdx++] = val;
       output[outIdx++] = 255;
     }
   }
@@ -284,7 +291,7 @@ export function decodeMono16(
   options?: {
     minValue?: number;
     maxValue?: number;
-    colorConverter?: ScalarColorConverter;
+    colorConverter?: (value: number) => { r: number; g: number; b: number; a: number };
   },
 ): void {
   if (step < width * 2) {
