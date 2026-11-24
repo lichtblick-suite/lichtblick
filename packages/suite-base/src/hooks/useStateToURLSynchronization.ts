@@ -26,7 +26,13 @@ const selectSelectedEventId = (store: EventsStore) => store.selectedEventId;
 
 function updateUrl(newState: AppURLState) {
   const newStateUrl = updateAppURLState(new URL(window.location.href), newState);
-  window.history.replaceState(undefined, "", decodeURIComponent(newStateUrl.href));
+  // Write the URL as built, not decodeURIComponent'd. Decoding the whole href unescapes the
+  // percent-encoding inside ds.url, so a data-source URL that carries its own query string
+  // spills into the page's query string: a GCS signed URL's &X-Goog-Signature= and friends
+  // become top-level parameters, ds.url is left truncated at its first &, and reloading the
+  // tab reopens a URL that no longer authenticates. The decode only ever bought a prettier
+  // address bar for URLs with no query of their own.
+  window.history.replaceState(undefined, "", newStateUrl.href);
 }
 
 /**
