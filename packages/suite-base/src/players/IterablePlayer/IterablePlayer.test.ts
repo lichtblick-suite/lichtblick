@@ -1413,6 +1413,32 @@ describe("IterablePlayer", () => {
       });
     });
 
+    it("should end full-range reads and not start new ones when the player closes", async () => {
+      // Given
+      const source = new TestSource();
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {});
+      source.messageIterator = mockMessageIterator;
+      const player = new IterablePlayer({ source, enablePreload: false, sourceId: "test" });
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+      const waiting = player.getBatchIterator("test_topic")!;
+
+      // When
+      player.close();
+      await player.isClosed;
+      const late = player.getBatchIterator("other_topic")!;
+
+      // Then
+      expect(await waiting.next()).toEqual({ done: true, value: undefined });
+      expect(await late.next()).toEqual({ done: true, value: undefined });
+      expect(mockMessageIterator).not.toHaveBeenCalledWith(
+        expect.objectContaining({ consumptionType: "full" }),
+      );
+    });
+
     it("should forward start and end bounds to messageIterator", async () => {
       const source = new TestSource();
       const mockMessageIterator = jest.fn().mockImplementation(async function* () {});
@@ -1491,16 +1517,19 @@ describe("IterablePlayer", () => {
       const iterator2 = player.getBatchIterator("topic2");
       expect(iterator2).toBeDefined();
 
-      // Verify calls with different topics
-      expect(mockMessageIterator).toHaveBeenCalledWith({
-        topics: new Map([["topic1", { topic: "topic1" }]]),
-        consumptionType: "full",
-      });
+      const [first1, first2] = await Promise.all([iterator1!.next(), iterator2!.next()]);
 
+      // Both topics are read in one pass, and each iterator only gets its own topic
+      expect(mockMessageIterator).toHaveBeenCalledTimes(1);
       expect(mockMessageIterator).toHaveBeenCalledWith({
-        topics: new Map([["topic2", { topic: "topic2" }]]),
+        topics: new Map([
+          ["topic1", { topic: "topic1" }],
+          ["topic2", { topic: "topic2" }],
+        ]),
         consumptionType: "full",
       });
+      expect((first1.value as { msgEvent: { topic: string } }).msgEvent.topic).toBe("topic1");
+      expect((first2.value as { msgEvent: { topic: string } }).msgEvent.topic).toBe("topic2");
     });
 
     it("should handle iterator that yields different result types", async () => {
@@ -1661,7 +1690,8 @@ describe("IterablePlayer", () => {
       });
       await store.done;
 
-      player.getBatchIterator("test_topic");
+      const iterator = player.getBatchIterator("test_topic");
+      await iterator!.next();
 
       // Verify that consumptionType is "full"
       expect(mockMessageIterator).toHaveBeenCalledWith({
