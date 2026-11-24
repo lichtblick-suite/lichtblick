@@ -21,8 +21,11 @@ import {
 import { DEFAULT_PUBLISH_SETTINGS } from "@lichtblick/suite-base/panels/ThreeDeeRender/renderables/PublishSettings";
 
 import { RendererConfig } from "../IRenderer";
+import { Renderable } from "../Renderable";
 import { LayerSettingsCustomUrdf, LayerSettingsUrdf, UrdfRenderable, Urdfs } from "./Urdfs";
+import { RenderableCube } from "./markers/RenderableCube";
 import { MarkerUserData } from "./markers/RenderableMarker";
+import { RenderableMeshResource } from "./markers/RenderableMeshResource";
 
 let mockOrbitControls!: {
   screenSpacePanning: boolean;
@@ -565,5 +568,216 @@ describe("Urdfs opacity", () => {
 
     expect(alphas).toEqual([0.4, 0.5]);
     renderer.dispose();
+  });
+
+  describe("opacity edge cases", () => {
+    const TOPIC = "/robot_description";
+
+    const UNCOLORED_URDF = `<?xml version="1.0"?>
+<robot name="uncolored-test">
+  <link name="box">
+    <visual>
+      <geometry><box size="1 1 1"/></geometry>
+    </visual>
+  </link>
+</robot>`;
+
+    const MESH_URDF = `<?xml version="1.0"?>
+<robot name="mesh-test">
+  <link name="part">
+    <visual>
+      <geometry><mesh filename="package://robot/meshes/part.stl"/></geometry>
+      <material><color rgba="0 0 1 0.8"/></material>
+    </visual>
+  </link>
+</robot>`;
+
+    /** Load a URDF over the robot_description topic and wait for its child renderables. */
+    async function loadTopicUrdf(
+      topicSettings: Partial<LayerSettingsUrdf>,
+      urdf: string,
+      beforeLoad?: (renderer: Renderer) => void,
+    ) {
+      const renderer = makeRenderer(makeConfig({ topics: { [TOPIC]: topicSettings } }));
+      beforeLoad?.(renderer);
+      renderer.setTopics([{ name: TOPIC, schemaName: "std_msgs/String" }]);
+      const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
+      const topicSubscription = urdfs.getSubscriptions()[0];
+      if (topicSubscription?.type !== "topic") {
+        throw new Error("Expected /robot_description topic subscription");
+      }
+      topicSubscription.subscription.handler({
+        topic: TOPIC,
+        schemaName: "std_msgs/String",
+        receiveTime: { sec: 0, nsec: 0 },
+        message: { data: urdf },
+        sizeInBytes: urdf.length,
+      });
+      await waitFor(() => {
+        expect(urdfs.renderables.get(TOPIC)?.userData.renderables.size).toBeGreaterThan(0);
+      });
+      const robot = urdfs.renderables.get(TOPIC)!;
+      const updateField = (field: string, value: unknown) => {
+        urdfs
+          .settingsNodes()
+          .find((entry) => entry.path[1] === TOPIC)
+          ?.node.handler?.({
+            action: "update",
+            payload: { path: ["topics", TOPIC, field], input: "string", value } as never,
+          });
+      };
+      const firstChild = () => robot.userData.renderables.values().next().value;
+      return { renderer, urdfs, robot, updateField, firstChild };
+    }
+
+    it("rebuilds child renderables when a non-opacity field changes", async () => {
+      // Given
+      const { renderer, updateField, firstChild } = await loadTopicUrdf({ visible: true }, URDF);
+      const childBefore = firstChild();
+
+      // When
+      updateField("displayMode", "visual");
+
+      // Then
+      await waitFor(() => {
+        expect(firstChild()).toBeDefined();
+        expect(firstChild()).not.toBe(childBefore);
+      });
+      renderer.dispose();
+    });
+
+    it("coalesces rapid edits into a single debounced reload", () => {
+      jest.useFakeTimers();
+      const removeChildren = jest.spyOn(UrdfRenderable.prototype, "removeChildren");
+      try {
+        // Given
+        const renderer = makeRenderer(makeConfig({ topics: { [TOPIC]: { visible: true } } }));
+        renderer.setTopics([{ name: TOPIC, schemaName: "std_msgs/String" }]);
+        const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
+        const handler = urdfs.settingsNodes().find((entry) => entry.path[1] === TOPIC)
+          ?.node.handler;
+        const callsBefore = removeChildren.mock.calls.length;
+
+        // When
+        for (const value of ["a_", "ab_"]) {
+          handler?.({
+            action: "update",
+            payload: { path: ["topics", TOPIC, "framePrefix"], input: "string", value },
+          });
+        }
+        jest.advanceTimersByTime(500);
+
+        // Then
+        expect(removeChildren.mock.calls).toHaveLength(callsBefore + 1);
+        renderer.dispose();
+      } finally {
+        removeChildren.mockRestore();
+        jest.useRealTimers();
+      }
+    });
+
+    it("saves opacity without error before the URDF has loaded", () => {
+      // Given
+      const renderer = makeRenderer(makeConfig({ topics: { [TOPIC]: { visible: true } } }));
+      renderer.setTopics([{ name: TOPIC, schemaName: "std_msgs/String" }]);
+      const urdfs = renderer.sceneExtensions.get(Urdfs.extensionId) as Urdfs;
+      expect(urdfs.renderables.has(TOPIC)).toBe(false);
+
+      // When
+      urdfs
+        .settingsNodes()
+        .find((entry) => entry.path[1] === TOPIC)
+        ?.node.handler?.({
+          action: "update",
+          payload: { path: ["topics", TOPIC, "opacity"], input: "number", value: 0.5 },
+        });
+
+      // Then
+      expect((renderer.config.topics[TOPIC] as Partial<LayerSettingsUrdf>).opacity).toBe(0.5);
+      expect(urdfs.renderables.has(TOPIC)).toBe(false);
+      renderer.dispose();
+    });
+
+    it("treats a cleared opacity as fully opaque", async () => {
+      // Given
+      const { renderer, updateField, firstChild } = await loadTopicUrdf(
+        { visible: true, opacity: 0.25 },
+        URDF,
+      );
+      expect((firstChild()?.userData as MarkerUserData).marker.color.a).toBeCloseTo(0.2);
+
+      // When
+      updateField("opacity", undefined);
+
+      // Then
+      expect((firstChild()?.userData as MarkerUserData).marker.color.a).toBeCloseTo(0.8);
+      renderer.dispose();
+    });
+
+    it("skips non-marker children and treats untracked markers as opaque", async () => {
+      // Given
+      const { renderer, robot, updateField, firstChild } = await loadTopicUrdf(
+        { visible: true },
+        URDF,
+      );
+      const trackedMarker = (firstChild()?.userData as MarkerUserData).marker;
+      const untracked = new RenderableCube("untracked", { ...trackedMarker }, undefined, renderer);
+      const nonMarker = Object.assign(new THREE.Object3D(), { dispose: jest.fn() });
+      robot.userData.renderables.set("untracked", untracked);
+      robot.userData.renderables.set("non-marker", nonMarker as unknown as Renderable);
+
+      // When
+      updateField("opacity", 0.5);
+
+      // Then
+      expect(untracked.userData.marker.color.a).toBeCloseTo(0.5);
+      expect((firstChild()?.userData as MarkerUserData).marker.color.a).toBeCloseTo(0.4);
+      robot.userData.renderables.delete("non-marker");
+      renderer.dispose();
+    });
+
+    it.each([
+      { fallbackColor: "#00ff00", expected: { r: 0, g: 1, b: 0 } },
+      { fallbackColor: "", expected: { r: 1, g: 1, b: 1 } },
+    ])("colors uncolored visuals with fallback '$fallbackColor' and applies opacity", async ({
+      fallbackColor,
+      expected,
+    }) => {
+      // When
+      const { renderer, firstChild } = await loadTopicUrdf(
+        { visible: true, opacity: 0.5, fallbackColor },
+        UNCOLORED_URDF,
+      );
+
+      // Then
+      const color = (firstChild()?.userData as MarkerUserData).marker.color;
+      expect(color).toMatchObject(expected);
+      expect(color.a).toBeCloseTo(0.5);
+      renderer.dispose();
+    });
+
+    it("applies and updates layer opacity on mesh visuals", async () => {
+      // Given a mesh whose model never finishes loading (marker color is set regardless)
+      const { renderer, updateField, firstChild } = await loadTopicUrdf(
+        { visible: true, opacity: 0.5 },
+        MESH_URDF,
+        (newRenderer) => {
+          jest.spyOn(newRenderer.modelCache, "load").mockReturnValue(new Promise(() => {}));
+        },
+      );
+      const child = firstChild();
+
+      // Then
+      expect(child).toBeInstanceOf(RenderableMeshResource);
+      expect((child?.userData as MarkerUserData).marker.color.a).toBeCloseTo(0.4);
+
+      // When
+      updateField("opacity", 1);
+
+      // Then
+      expect(firstChild()).toBe(child);
+      expect((child?.userData as MarkerUserData).marker.color.a).toBeCloseTo(0.8);
+      renderer.dispose();
+    });
   });
 });
