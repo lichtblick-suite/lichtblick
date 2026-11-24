@@ -207,6 +207,12 @@ export function decodeBGR8(
   }
 }
 
+type ScalarColorConverter = (value: number) => {
+  r: number;
+  g: number;
+  b: number;
+};
+
 export function decodeFloat1c(
   gray: Uint8Array,
   width: number,
@@ -215,6 +221,7 @@ export function decodeFloat1c(
   // eslint-disable-next-line @lichtblick/no-boolean-parameters
   is_bigendian: boolean,
   output: Uint8ClampedArray,
+  colorConverter?: ScalarColorConverter,
 ): void {
   if (step < width * 4) {
     throw new Error(`Float image row step (${step}) must be at least 4*width (${width * 4})`);
@@ -225,10 +232,18 @@ export function decodeFloat1c(
   for (let row = 0; row < height; row++) {
     const rowStart = row * step;
     for (let col = 0; col < width; col++) {
-      const val = view.getFloat32(rowStart + col * 4, !is_bigendian) * 255;
-      output[outIdx++] = val;
-      output[outIdx++] = val;
-      output[outIdx++] = val;
+      const value = view.getFloat32(rowStart + col * 4, !is_bigendian);
+      if (colorConverter && !Number.isNaN(value)) {
+        const { r, g, b } = colorConverter(value);
+        output[outIdx++] = r * 255;
+        output[outIdx++] = g * 255;
+        output[outIdx++] = b * 255;
+      } else {
+        const grayValue = value * 255;
+        output[outIdx++] = grayValue;
+        output[outIdx++] = grayValue;
+        output[outIdx++] = grayValue;
+      }
       output[outIdx++] = 255;
     }
   }
@@ -269,7 +284,7 @@ export function decodeMono16(
   options?: {
     minValue?: number;
     maxValue?: number;
-    colorConverter?: (value: number) => { r: number; g: number; b: number; a: number };
+    colorConverter?: ScalarColorConverter;
   },
 ): void {
   if (step < width * 2) {

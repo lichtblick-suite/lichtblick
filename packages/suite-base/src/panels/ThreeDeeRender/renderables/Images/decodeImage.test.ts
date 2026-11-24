@@ -360,6 +360,65 @@ describe("decodeRawImage", () => {
     };
   }
 
+  function createFloatImage(values: number[]): RosImage {
+    const data = new Uint8Array(values.length * 4);
+    const view = new DataView(data.buffer);
+    values.forEach((value, index) => {
+      view.setFloat32(index * 4, value, true);
+    });
+    return createMockROSImage({
+      encoding: "32FC1",
+      width: values.length,
+      height: 1,
+      step: data.length,
+      data,
+    });
+  }
+
+  it("should apply distinct Turbo colors to depths inside the configured range", () => {
+    // Given
+    const image = createFloatImage([2, 4]);
+    const pixels = new Uint8ClampedArray(image.width * 4);
+    // When
+    decodeRawImage(image, { colorMode: "colormap", colorMap: "turbo", maxValue: 5 }, pixels);
+    // Then
+    expect(pixels.subarray(0, 4)).not.toEqual(pixels.subarray(4, 8));
+  });
+
+  it("should use both configured gradient bounds for float images", () => {
+    // Given
+    const image = createFloatImage([0.5, 3, 6]);
+    const pixels = new Uint8ClampedArray(image.width * 4);
+    // When
+    decodeRawImage(image, { colorMode: "gradient", minValue: 1, maxValue: 5 }, pixels);
+    // Then
+    expect(pixels).toEqual(
+      new Uint8ClampedArray([0, 0, 0, 255, 128, 128, 128, 255, 255, 255, 255, 255]),
+    );
+  });
+
+  it("should keep the default 0 to 1 grayscale when color options are empty", () => {
+    // Given
+    const image = createFloatImage([0, 0.5, 2]);
+    const pixels = new Uint8ClampedArray(image.width * 4);
+    // When
+    decodeRawImage(image, {}, pixels);
+    // Then
+    expect(pixels).toEqual(
+      new Uint8ClampedArray([0, 0, 0, 255, 128, 128, 128, 255, 255, 255, 255, 255]),
+    );
+  });
+
+  it("should keep NaN pixels black when a color map is selected", () => {
+    // Given
+    const image = createFloatImage([NaN]);
+    const pixels = new Uint8ClampedArray(image.width * 4);
+    // When
+    decodeRawImage(image, { colorMode: "colormap", colorMap: "rainbow" }, pixels);
+    // Then
+    expect(pixels).toEqual(new Uint8ClampedArray([0, 0, 0, 255]));
+  });
+
   it.each([
     ["yuv422", 10],
     ["uyvy", 10],
