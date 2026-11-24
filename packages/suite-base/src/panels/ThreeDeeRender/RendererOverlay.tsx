@@ -349,8 +349,12 @@ export const RendererOverlay = memo(function RendererOverlayComponent(
 
   const theme = useTheme();
 
-  // fixedFrameId changes in the render loop without an event; mirror it (unchanged values don't re-render).
   const [hasFixedFrame, setHasFixedFrame] = useState(renderer?.fixedFrameId != undefined);
+  const [fixedFrameRenderer, setFixedFrameRenderer] = useState(renderer);
+  if (fixedFrameRenderer !== renderer) {
+    setFixedFrameRenderer(renderer);
+    setHasFixedFrame(renderer?.fixedFrameId != undefined);
+  }
   useRendererEvent(
     "startFrame",
     useCallback((_currentTime, frameRenderer) => {

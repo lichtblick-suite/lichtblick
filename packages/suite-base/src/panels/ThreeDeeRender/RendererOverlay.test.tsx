@@ -62,18 +62,23 @@ jest.mock("./Stats", () => {
 });
 
 const mockRendererEventCallbacks = new Map<string, (...args: any[]) => void>();
-const mockRenderer: { fixedFrameId: string | undefined } & Record<string, unknown> = {
-  setPickingEnabled: jest.fn(),
-  setSelectedRenderable: jest.fn(),
-  canResetView: jest.fn(() => false),
-  getContextMenuItems: jest.fn(() => []),
-  fixedFrameId: undefined,
-};
+type MockRenderer = { fixedFrameId: string | undefined } & Record<string, unknown>;
+function createMockRenderer(fixedFrameId?: string): MockRenderer {
+  return {
+    setPickingEnabled: jest.fn(),
+    setSelectedRenderable: jest.fn(),
+    canResetView: jest.fn(() => false),
+    getContextMenuItems: jest.fn(() => []),
+    fixedFrameId,
+  };
+}
+const mockRenderer = createMockRenderer();
+let mockCurrentRenderer: MockRenderer | undefined = mockRenderer;
 
 jest.mock("./RendererContext", () => {
   return {
     __esModule: true,
-    useRenderer: () => mockRenderer,
+    useRenderer: () => mockCurrentRenderer,
     useRendererEvent: (eventName: string, cb: (...args: any[]) => void) => {
       mockRendererEventCallbacks.set(eventName, cb);
     },
@@ -345,6 +350,7 @@ describe("<RendererOverlay /> per-frame re-renders", () => {
     mockRendererEventCallbacks.clear();
     mockHoverTooltipRenderCount = 0;
     mockRenderer.fixedFrameId = undefined;
+    mockCurrentRenderer = mockRenderer;
   });
 
   it("should not re-render when the parent re-renders with unchanged props", () => {
@@ -382,6 +388,57 @@ describe("<RendererOverlay /> per-frame re-renders", () => {
     mockRenderer.fixedFrameId = "map";
     act(() => {
       mockRendererEventCallbacks.get("startFrame")?.(0n, mockRenderer);
+    });
+
+    // Then
+    expect(view.getByLabelText("Click to publish")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["a renderer with a fixed frame", undefined, createMockRenderer("map"), true],
+    ["a renderer without a fixed frame", "map", createMockRenderer(), false],
+    ["no renderer", "map", undefined, false],
+  ])("should update the publish control right away when the renderer is replaced by %s", (_, initialFixedFrame, replacement, expectShown) => {
+    // Given
+    mockRenderer.fixedFrameId = initialFixedFrame;
+    const view = render(
+      <ThemeProvider isDark={false}>
+        <RendererOverlay {...baseProps} />
+      </ThemeProvider>,
+    );
+    expect(view.queryByLabelText("Click to publish") != undefined).toBe(!expectShown);
+
+    // When: no startFrame from the replacement yet
+    mockCurrentRenderer = replacement;
+    view.rerender(
+      <ThemeProvider isDark={false}>
+        <RendererOverlay {...baseProps} perspective />
+      </ThemeProvider>,
+    );
+
+    // Then
+    expect(view.queryByLabelText("Click to publish") != undefined).toBe(expectShown);
+  });
+
+  it("should keep following startFrame after the renderer is replaced", () => {
+    // Given
+    const view = render(
+      <ThemeProvider isDark={false}>
+        <RendererOverlay {...baseProps} />
+      </ThemeProvider>,
+    );
+    const replacement = createMockRenderer();
+    mockCurrentRenderer = replacement;
+    view.rerender(
+      <ThemeProvider isDark={false}>
+        <RendererOverlay {...baseProps} perspective />
+      </ThemeProvider>,
+    );
+
+    // When
+    replacement.fixedFrameId = "map";
+    act(() => {
+      mockRendererEventCallbacks.get("startFrame")?.(0n, replacement);
     });
 
     // Then
