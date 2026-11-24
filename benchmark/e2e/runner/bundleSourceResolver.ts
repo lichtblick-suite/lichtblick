@@ -40,7 +40,8 @@ type ScriptEntry =
   | { kind: "external" };
 
 /** Binding right before a function start: `readonly #tick = `, `#onFrame = (`, `now: `. */
-const BINDING_BEFORE_FUNCTION = /([#\w$]+)\s*(?::\s*[^=:]+)?[=:]\s*(?:async\s*)?\(?\s*$/;
+const BINDING_BEFORE_FUNCTION =
+  /(?:^|[^#\w$])([#\w$]+)\s*(?::[^=:]+)?[=:]\s*(?:async\s*)?(?:\(\s*)?$/;
 
 /** Start of a (generic) parameter list after a function name. */
 const PARAMETER_LIST_START = /^\s*[(<]/;

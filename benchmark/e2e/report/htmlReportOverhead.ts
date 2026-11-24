@@ -40,7 +40,7 @@ import type { DirectAttributionV3 } from "../result/directAttribution.types";
 import type { MetricStats, Verdict } from "../result/stats.types";
 import type {
   OverheadComparisonSummary,
-  OverheadReport,
+  OverheadReportV3,
   OverheadRunV2,
 } from "../runner/overhead.types";
 import type { OverheadToggleSummaryV3 } from "../runner/toggleBlocks.types";
@@ -78,7 +78,7 @@ function ciTitle(stats: MetricStats, target: string, unit: string = "pairs"): st
  * Per-run KPI table: CPU Δ of the scenario's latest overhead report (from its CPU verdict source,
  * toggle or relaunch), toned by the CPU verdict.
  */
-export function overheadCpuCell(report: OverheadReport | undefined): Cell {
+export function overheadCpuCell(report: OverheadReportV3 | undefined): Cell {
   if (report == undefined) {
     return num("—");
   }
@@ -96,7 +96,7 @@ export function overheadCpuCell(report: OverheadReport | undefined): Cell {
  * Per-run KPI table: memory Δ of the scenario's latest overhead report (relaunch A/B), toned by the
  * memory verdict; `not measured` for method `toggle`.
  */
-export function overheadMemCell(report: OverheadReport | undefined): Cell {
+export function overheadMemCell(report: OverheadReportV3 | undefined): Cell {
   if (report == undefined) {
     return num("—");
   }
@@ -131,11 +131,11 @@ function statsCells(summary: OverheadComparisonSummary, verdict: Verdict | undef
   ];
 }
 
-function relaunchConfigTitle(report: OverheadReport): string {
+function relaunchConfigTitle(report: OverheadReportV3): string {
   return `relaunch: ${report.config.repeats} repeat(s), ${report.config.warmupRuns} warm-up run(s), arms ${report.config.arms.join(" / ")}`;
 }
 
-function pairsTitle(report: OverheadReport, cpu: CpuVerdictStats): string {
+function pairsTitle(report: OverheadReportV3, cpu: CpuVerdictStats): string {
   if (cpu.source === "toggle" && report.toggle != undefined) {
     return `toggle: ${toggleConfigText(report.toggle)}, one launch; deltas per quartet (Σ on / Σ off − 1, linear drift cancels)`;
   }
@@ -143,7 +143,7 @@ function pairsTitle(report: OverheadReport, cpu: CpuVerdictStats): string {
 }
 
 /** Final verdicts: CPU from the CPU verdict source, memory from the relaunch A/B (if it ran). */
-function mainRow(report: OverheadReport): Cell[] {
+function mainRow(report: OverheadReportV3): Cell[] {
   const cpu = cpuVerdictStats(report);
   return [
     cell(report.scenarioId),
@@ -164,7 +164,7 @@ function mainRow(report: OverheadReport): Cell[] {
  * Sub-row of the relaunch A/B when the toggle A/B gave the CPU verdict (method `both`): its CPU
  * delta is informational, its memory delta and verdict are the memory verdict's.
  */
-function relaunchRow(report: OverheadReport): Cell[] {
+function relaunchRow(report: OverheadReportV3): Cell[] {
   const verdict = report.relaunchVerdicts?.overall;
   return [
     cell("↳ relaunch A/B (CPU informational)", { title: report.scenarioId }),
@@ -181,7 +181,7 @@ function relaunchRow(report: OverheadReport): Cell[] {
 
 /** Sub-row of a UA-probe comparison (`on-noUa` arm, web; diagnostic, never part of a verdict). */
 function uaRow(
-  report: OverheadReport,
+  report: OverheadReportV3,
   label: string,
   summary: OverheadComparisonSummary,
   verdict: Verdict | undefined,
@@ -203,7 +203,7 @@ function uaRow(
  * Sub-row of the toggle A/B without the UA memory probe (second launch, web): diagnostic, its CPU
  * delta and own verdict never enter the report's verdicts (the probe's share is `toggle` − this).
  */
-function toggleWithoutUaRow(report: OverheadReport, toggle: OverheadToggleSummaryV3): Cell[] {
+function toggleWithoutUaRow(report: OverheadReportV3, toggle: OverheadToggleSummaryV3): Cell[] {
   return [
     cell(`↳ ${TOGGLE_WITHOUT_UA_PROBE_LABEL}`, { title: report.scenarioId }),
     cell(report.platform),
@@ -225,7 +225,7 @@ function toggleWithoutUaRow(report: OverheadReport, toggle: OverheadToggleSummar
  * Sub-row of the benchmark FPS probe (own launch, telemetry off, only the rAF frame loop toggled):
  * harness cost and diagnostic, so no verdict; the flags show where the CPU lands per process type.
  */
-function toggleFrameProbeRow(report: OverheadReport, toggle: OverheadToggleSummaryV3): Cell[] {
+function toggleFrameProbeRow(report: OverheadReportV3, toggle: OverheadToggleSummaryV3): Cell[] {
   return [
     cell(`↳ ${TOGGLE_FRAME_PROBE_LABEL}`, { title: report.scenarioId }),
     cell(report.platform),
@@ -247,7 +247,7 @@ function toggleFrameProbeRow(report: OverheadReport, toggle: OverheadToggleSumma
  * Sub-row of the direct (JS only) CPU attribution: telemetry JS time of a profiled period relative
  * to the toggle off blocks' CPU, with its own verdict (never merged into the CPU verdict).
  */
-function directAttributionRow(report: OverheadReport, section: DirectAttributionV3): Cell[] {
+function directAttributionRow(report: OverheadReportV3, section: DirectAttributionV3): Cell[] {
   const measured = section.status === "measured" ? section : undefined;
   return [
     cell(`↳ ${DIRECT_ATTRIBUTION_LABEL}`, { title: report.scenarioId }),
@@ -270,7 +270,7 @@ function directAttributionRow(report: OverheadReport, section: DirectAttribution
   ];
 }
 
-function reportRows(report: OverheadReport): Cell[][] {
+function reportRows(report: OverheadReportV3): Cell[][] {
   const rows = [mainRow(report)];
   if (report.directAttribution != undefined) {
     rows.push(directAttributionRow(report, report.directAttribution));
@@ -307,7 +307,7 @@ function runFileItem(run: OverheadRunV2): string {
  * Per report, the measured runs' result files: overhead A/B runs are left out of every scenario
  * view (scorecard, overview, runs, …), so this is their only entry point.
  */
-function runFilesHtml(reports: readonly OverheadReport[]): string {
+function runFilesHtml(reports: readonly OverheadReportV3[]): string {
   return reports
     .filter((report) => report.runs.length > 0)
     .map(
@@ -321,7 +321,7 @@ function runFilesHtml(reports: readonly OverheadReport[]): string {
  * Latest report per scenario × platform, with the UA-probe rows when that arm ran, followed by
  * links to the measured runs' result files.
  */
-export function overheadTable(overheads: readonly OverheadReport[]): string {
+export function overheadTable(overheads: readonly OverheadReportV3[]): string {
   const latest = latestOverheads(overheads);
   if (latest.length === 0) {
     return `<p class="muted">No <code>overhead-*.json</code> found (run the overhead A/B, see the benchmark README).</p>`;

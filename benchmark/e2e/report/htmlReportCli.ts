@@ -16,7 +16,7 @@ import { parseOverheadFile, parseResultFile } from "./htmlReportData";
 import { LoadedResult } from "./types";
 import { OVERHEAD_PREFIX, RESULT_V1_SUFFIX } from "../result/constants";
 import { ARTIFACTS_DIR as DEFAULT_ARTIFACTS_DIR } from "../runner/constants";
-import type { OverheadReport } from "../runner/overhead.types";
+import type { OverheadReportV3 } from "../runner/overhead.types";
 import { GIT_EXECUTABLE_CANDIDATES } from "../shared/constants";
 import { findExecutable, openFileCommand } from "../shared/executables";
 
@@ -112,7 +112,7 @@ function main(): void {
     }
   }
 
-  const overheads: OverheadReport[] = [];
+  const overheads: OverheadReportV3[] = [];
   for (const fileName of files.filter(
     (file) => file.startsWith(OVERHEAD_PREFIX) && file.endsWith(".json"),
   )) {

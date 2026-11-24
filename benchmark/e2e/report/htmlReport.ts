@@ -64,7 +64,7 @@ import { exercisedComponents } from "../result/exercised";
 import type { KpiRun } from "../result/kpis.types";
 import { isOverheadRun } from "../result/runMode";
 import type { PanelSummaryV1, PersistedResultV1, RunnerEventsSummaryV1 } from "../result/schemaV1";
-import type { OverheadReport } from "../runner/overhead.types";
+import type { OverheadReportV3 } from "../runner/overhead.types";
 import { compareCodeUnits } from "../shared/compare";
 
 /** JSON for a `<script type="application/json">` block: no `<` can close or open a tag. */
@@ -168,7 +168,7 @@ function overviewScenarioCell(loaded: ExercisedRun): Cell {
 
 function kpiRow(
   loaded: ExercisedRun,
-  overheads: readonly OverheadReport[],
+  overheads: readonly OverheadReportV3[],
   newestMs: number | undefined,
 ): Cell[] {
   const { result } = loaded;

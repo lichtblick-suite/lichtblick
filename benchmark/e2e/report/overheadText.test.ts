@@ -23,7 +23,7 @@ import type { OverheadArmProps } from "../runner/builders/OverheadRunBuilder";
 import { ToggleBlockBuilder } from "../runner/builders/ToggleBlockBuilder";
 import { buildOverheadReport } from "../runner/overhead";
 import type {
-  OverheadReport,
+  OverheadReportV3,
   OverheadRunInput,
   OverheadSelfCostSummary,
 } from "../runner/overhead.types";
@@ -84,7 +84,7 @@ describe("selfCostText", () => {
   });
 });
 
-function reportOf(runs: OverheadRunInput[]): OverheadReport {
+function reportOf(runs: OverheadRunInput[]): OverheadReportV3 {
   return buildOverheadReport({
     platform: "web",
     scenarioId: "pointcloud",
@@ -133,7 +133,7 @@ describe("overheadFlagsText", () => {
 
   it("should join mismatches, process-set mismatches and the poll latency", () => {
     // Given a report with every kind of flag
-    const report: OverheadReport = {
+    const report: OverheadReportV3 = {
       ...reportOf(
         OverheadRunBuilder.abba([{ on: { windowMismatch: true, maxPollLatencyMs: 1200 } }]),
       ),
@@ -290,7 +290,7 @@ describe("reportFlagsText", () => {
   it("should join the toggle flags with the relaunch runs' flags", () => {
     // Given a both-method report whose relaunch runs report a max poll
     const report = BenchmarkResultBuilder.overhead({ method: "both" });
-    const withPoll: OverheadReport = {
+    const withPoll: OverheadReportV3 = {
       ...report,
       runs: report.runs.map((run) => ({
         ...run,

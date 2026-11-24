@@ -182,9 +182,6 @@ export type OverheadConfigV2 = {
   sampleIntervalMs: number;
 };
 
-/** The current overhead report schema. */
-export type OverheadReport = OverheadReportV3;
-
 /**
  * Final verdicts of a schema-3 report: `cpu` from `cpuVerdictSource`, `memory` from the relaunch
  * A/B (absent when `memVerdictSource` is `notMeasured`), `overall` = the worst measured one.

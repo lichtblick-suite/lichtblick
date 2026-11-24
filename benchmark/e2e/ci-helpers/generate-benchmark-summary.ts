@@ -16,7 +16,7 @@ import { OVERHEAD_PREFIX, RESULT_V1_SUFFIX } from "../result/constants";
 import { withRunKpis } from "../result/kpis";
 import { scenarioRunsOnly } from "../result/runMode";
 import type { PersistedResultV1, StoredResultV1 } from "../result/schemaV1";
-import type { OverheadReport } from "../runner/overhead.types";
+import type { OverheadReportV3 } from "../runner/overhead.types";
 import { parseArtifactJson } from "../shared/artifactJson";
 import type { BenchmarkArtifact } from "../types";
 
@@ -198,7 +198,7 @@ function readResultsV1(): PersistedResultV1[] {
  * Overhead reports of the current schema (3); unreadable files, other schemas and malformed reports
  * are warned about and skipped (`parseOverheadFile`).
  */
-function readOverheadReports(): OverheadReport[] {
+function readOverheadReports(): OverheadReportV3[] {
   if (!fs.existsSync(ARTIFACTS_DIR)) {
     return [];
   }
@@ -224,7 +224,7 @@ function readOverheadReports(): OverheadReport[] {
 
 function printScorecard(
   results: readonly PersistedResultV1[],
-  overheads: readonly OverheadReport[],
+  overheads: readonly OverheadReportV3[],
 ): void {
   process.stdout.write("\n## KPI Scorecard (per platform, latest telemetry-on run per scenario)\n");
   process.stdout.write(buildScorecardTable(results, overheads));
@@ -242,7 +242,7 @@ function printPanelsAndPipeline(results: readonly PersistedResultV1[]): void {
   process.stdout.write(buildPanelsSection(results));
 }
 
-function printOverheadReports(overheads: readonly OverheadReport[]): void {
+function printOverheadReports(overheads: readonly OverheadReportV3[]): void {
   process.stdout.write("\n## Telemetry Overhead (A/B: telemetry off vs on)\n");
   process.stdout.write(buildOverheadTable(overheads));
 }

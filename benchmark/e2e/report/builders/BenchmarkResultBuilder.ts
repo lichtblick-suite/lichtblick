@@ -12,7 +12,7 @@ import type { RunModeV1 } from "../../result/schemaV1.types";
 import { OverheadRunBuilder } from "../../runner/builders/OverheadRunBuilder";
 import { ToggleBlockBuilder } from "../../runner/builders/ToggleBlockBuilder";
 import { buildOverheadReport } from "../../runner/overhead";
-import type { OverheadMethod, OverheadReport } from "../../runner/overhead.types";
+import type { OverheadMethod, OverheadReportV3 } from "../../runner/overhead.types";
 import type { OverheadToggleSummaryV3 } from "../../runner/toggleBlocks.types";
 import type { LoadedResult } from "../types";
 
@@ -196,7 +196,7 @@ export class BenchmarkResultBuilder {
       /** Direct CPU attribution (methods `toggle` / `both` only). */
       directAttribution?: DirectAttributionV3;
     } = {},
-  ): OverheadReport {
+  ): OverheadReportV3 {
     const method = props.method ?? "relaunch";
     const repeats = method === "toggle" ? 0 : (props.repeats ?? MIN_PAIRS_FOR_VERDICT);
     const on = {

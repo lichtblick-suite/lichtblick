@@ -38,7 +38,7 @@ import {
 import { buildOverheadReport, overheadFileName } from "./runner/overhead";
 import type {
   OverheadEnvConfig,
-  OverheadReport,
+  OverheadReportV3,
   OverheadRunInput,
   ScheduledOverheadRun,
 } from "./runner/overhead.types";
@@ -264,7 +264,7 @@ function directAttributionSummaryParts(section: DirectAttributionV3): string[] {
 }
 
 /** One-line console summary of a report. */
-function reportSummary(report: OverheadReport): string {
+function reportSummary(report: OverheadReportV3): string {
   const { cpuRelative, memBytes } = report.metrics;
   const parts = [
     `method=${report.method} cpu from ${report.cpuVerdictSource}, mem from ${report.memVerdictSource}`,

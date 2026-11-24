@@ -12,7 +12,7 @@ import type { DirectAttributionV3 } from "../result/directAttribution.types";
 import type { MetricStats, Verdict } from "../result/stats.types";
 import type {
   OverheadComparisonSummary,
-  OverheadReport,
+  OverheadReportV3,
   OverheadSelfCostSummary,
 } from "../runner/overhead.types";
 import { toggleProcessTypeDeltas } from "../runner/toggleBlocks";
@@ -54,7 +54,7 @@ export function verdictText(verdict: Verdict): string {
 }
 
 /** Included relaunch pairs, with the excluded count: `5 (1 excl.)`. */
-export function pairsText(report: Pick<OverheadReport, "n" | "excludedPairs">): string {
+export function pairsText(report: Pick<OverheadReportV3, "n" | "excludedPairs">): string {
   return report.excludedPairs > 0 ? `${report.n} (${report.excludedPairs} excl.)` : `${report.n}`;
 }
 
@@ -71,7 +71,7 @@ export function cpuSamplesText(cpu: CpuVerdictStats): string {
 }
 
 /** The statistics behind a report's CPU verdict: the toggle A/B, else the relaunch A/B. */
-export function cpuVerdictStats(report: OverheadReport): CpuVerdictStats {
+export function cpuVerdictStats(report: OverheadReportV3): CpuVerdictStats {
   const { toggle } = report;
   if (report.cpuVerdictSource === "toggle" && toggle != undefined) {
     return toggleCpuStats(toggle);
@@ -100,14 +100,14 @@ export function toggleUntoggledRealms(toggle: Pick<OverheadToggleSummaryV3, "blo
       }
     }
   }
-  return [...realms].sort();
+  return [...realms].sort((a, b) => a.localeCompare(b));
 }
 
 /**
  * The note next to a report's CPU verdict when it comes from a toggle A/B that left realms
  * untoggled (`TOGGLE_UNTOGGLED_REALMS_NOTE`), else `undefined`.
  */
-export function toggleCoverageNote(report: OverheadReport): string | undefined {
+export function toggleCoverageNote(report: OverheadReportV3): string | undefined {
   const { toggle } = report;
   if (report.cpuVerdictSource !== "toggle" || toggle == undefined) {
     return undefined;
@@ -117,7 +117,7 @@ export function toggleCoverageNote(report: OverheadReport): string | undefined {
 
 /** The method and, when mixed, the verdict sources: `both (CPU toggle · mem relaunch)`. */
 export function methodText(
-  report: Pick<OverheadReport, "method" | "cpuVerdictSource" | "memVerdictSource">,
+  report: Pick<OverheadReportV3, "method" | "cpuVerdictSource" | "memVerdictSource">,
 ): string {
   switch (report.method) {
     case "relaunch":
@@ -130,7 +130,7 @@ export function methodText(
 }
 
 /** Memory delta of the relaunch A/B, or `not measured` (method `toggle`). */
-export function memDeltaText(report: OverheadReport, unit: DeltaUnit): string {
+export function memDeltaText(report: OverheadReportV3, unit: DeltaUnit): string {
   return report.memVerdictSource === "notMeasured"
     ? MEM_NOT_MEASURED
     : deltaText(report.metrics.memBytes, unit);
@@ -294,7 +294,7 @@ export function toggleCpuStats(toggle: OverheadToggleSummaryV3): CpuVerdictStats
  * The toggle coverage note (`toggleCoverageNote`), the toggle flags (when it ran) and the relaunch
  * runs' flags (when they ran); `—` for none.
  */
-export function reportFlagsText(report: OverheadReport): string {
+export function reportFlagsText(report: OverheadReportV3): string {
   const flags = [
     toggleCoverageNote(report) ?? NONE,
     report.toggle == undefined ? NONE : toggleFlagsText(report.toggle),
@@ -304,7 +304,7 @@ export function reportFlagsText(report: OverheadReport): string {
 }
 
 /** Why a run's steady window mismatched: `r1 on: 9/10 polls, 2 overruns`. */
-function windowMismatchReason(run: OverheadReport["runs"][number]): string {
+function windowMismatchReason(run: OverheadReportV3["runs"][number]): string {
   const { polls, requestedPolls, overruns } = run.steady;
   const reasons = [
     polls < requestedPolls ? `${polls}/${requestedPolls} polls` : "",
@@ -314,7 +314,7 @@ function windowMismatchReason(run: OverheadReport["runs"][number]): string {
 }
 
 /** Longest host poll over the runs that report it (`undefined` for older results). */
-function maxPollLatencyMs(runs: OverheadReport["runs"]): number | undefined {
+function maxPollLatencyMs(runs: OverheadReportV3["runs"]): number | undefined {
   let max: number | undefined;
   for (const run of runs) {
     const latency = run.steady.maxPollLatencyMs;
@@ -331,7 +331,7 @@ function maxPollLatencyMs(runs: OverheadReport["runs"]): number | undefined {
  * to report.
  */
 export function overheadFlagsText(
-  report: Pick<OverheadReport, "windowMismatchRuns" | "processSetMismatches" | "runs">,
+  report: Pick<OverheadReportV3, "windowMismatchRuns" | "processSetMismatches" | "runs">,
 ): string {
   const mismatchReasons = report.runs
     .filter((run) => run.steady.windowMismatch)

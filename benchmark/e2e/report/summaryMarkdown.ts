@@ -49,7 +49,7 @@ import { aggregateKpis } from "../result/kpis";
 import type { KpiAggregateV1, KpiRun, PlatformScorecardV1 } from "../result/kpis.types";
 import { scenarioRunsOnly } from "../result/runMode";
 import type { PersistedResultV1, ScenarioDescriptorV1 } from "../result/schemaV1";
-import type { OverheadComparisonSummary, OverheadReport } from "../runner/overhead.types";
+import type { OverheadComparisonSummary, OverheadReportV3 } from "../runner/overhead.types";
 import { compareCodeUnits } from "../shared/compare";
 
 function formatMiB(bytes: number | undefined): string {
@@ -253,7 +253,7 @@ function cpuDeltaCell(stats: Pick<CpuVerdictStats, "cpuRelative" | "cpuPctPoints
  * informational) and the UA-probe comparisons (`on-noUa` arm, web, diagnostic). Diagnostic rows are
  * optional and never part of a verdict.
  */
-function overheadSubRows(report: OverheadReport): string[] {
+function overheadSubRows(report: OverheadReportV3): string[] {
   const rows: string[] = [];
   const row = (
     label: string,
@@ -302,7 +302,7 @@ function overheadSubRows(report: OverheadReport): string[] {
 }
 
 /** Final verdicts: CPU from the CPU verdict source, memory from the relaunch A/B (if it ran). */
-function overheadRow(report: OverheadReport): string {
+function overheadRow(report: OverheadReportV3): string {
   const cpu = cpuVerdictStats(report);
   const cells = [
     report.platform,
@@ -325,11 +325,11 @@ function overheadRow(report: OverheadReport): string {
  * CPU comes from the toggle A/B (ABBA quartets) when it ran (relaunch CPU as an informational
  * sub-row), memory from the relaunch A/B.
  */
-export function buildOverheadTable(reports: readonly OverheadReport[]): string {
+export function buildOverheadTable(reports: readonly OverheadReportV3[]): string {
   if (reports.length === 0) {
     return "\nNo overhead reports found.\n";
   }
-  const latest = new Map<string, OverheadReport>();
+  const latest = new Map<string, OverheadReportV3>();
   for (const report of reports) {
     const key = `${report.platform}|${report.scenarioId}`;
     const existing = latest.get(key);
@@ -435,7 +435,7 @@ function scorecardRuns(results: readonly PersistedResultV1[]): KpiRun[] {
  */
 export function buildScorecardTable(
   results: readonly PersistedResultV1[],
-  overheads: readonly OverheadReport[],
+  overheads: readonly OverheadReportV3[],
 ): string {
   const runs = scorecardRuns(results);
   // Like the HTML scorecard: platforms with telemetry-on runs or overhead reports.

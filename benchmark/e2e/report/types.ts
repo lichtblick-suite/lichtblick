@@ -4,7 +4,7 @@
 // Free of DOM/Playwright/Node runtime imports.
 
 import type { PersistedResultV1 } from "../result/schemaV1";
-import type { OverheadReport } from "../runner/overhead.types";
+import type { OverheadReportV3 } from "../runner/overhead.types";
 
 /**
  * A parsed result (leniently validated: older local artifacts may lack `run.scenario` and the render
@@ -61,7 +61,7 @@ export type HtmlReportInput = {
   all: boolean;
   /** Files skipped as invalid (shown in the header). */
   skipped: readonly { fileName: string; reason: string }[];
-  overheads: readonly OverheadReport[];
+  overheads: readonly OverheadReportV3[];
   /** File names in the screenshots folder. */
   screenshotFiles: readonly string[];
   /** Screenshots folder, relative to the HTML file (e.g. `../screenshots/`). */

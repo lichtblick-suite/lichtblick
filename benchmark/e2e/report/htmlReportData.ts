@@ -41,7 +41,7 @@ import {
 } from "../result/schemaV1";
 import { counterTotalAt, observationMetrics, seriesKey } from "../result/series";
 import { maxOf } from "../result/stats";
-import type { OverheadReport } from "../runner/overhead.types";
+import type { OverheadReportV3 } from "../runner/overhead.types";
 
 /**
  * Parses and validates one `*.benchmark-result.v1.json` file's contents. Lenient: results written
@@ -70,7 +70,7 @@ export function parseResultFile(fileName: string, text: string): ParseOutcome<Lo
  * Parses one `overhead-*.json` report of the current schema (3); any other schema version or shape
  * is rejected with a reason (see `normalizeOverheadReport`).
  */
-export function parseOverheadFile(text: string): ParseOutcome<OverheadReport> {
+export function parseOverheadFile(text: string): ParseOutcome<OverheadReportV3> {
   let json: unknown;
   try {
     json = JSON.parse(text);
@@ -176,11 +176,11 @@ export function staleHours(
 
 /** Latest overhead report (by `createdAtWall`) of a scenario on a platform. */
 export function findOverhead(
-  reports: readonly OverheadReport[],
+  reports: readonly OverheadReportV3[],
   scenarioId: string,
   platform: string,
-): OverheadReport | undefined {
-  let latest: OverheadReport | undefined;
+): OverheadReportV3 | undefined {
+  let latest: OverheadReportV3 | undefined;
   for (const report of reports) {
     if (report.scenarioId !== scenarioId || report.platform !== platform) {
       continue;
@@ -193,7 +193,7 @@ export function findOverhead(
 }
 
 /** Latest overhead report per platform × scenario, sorted. */
-export function latestOverheads(reports: readonly OverheadReport[]): OverheadReport[] {
+export function latestOverheads(reports: readonly OverheadReportV3[]): OverheadReportV3[] {
   const keys = new Set(reports.map((report) => `${report.scenarioId}|${report.platform}`));
   return [...keys]
     .sort((a, b) => a.localeCompare(b))
