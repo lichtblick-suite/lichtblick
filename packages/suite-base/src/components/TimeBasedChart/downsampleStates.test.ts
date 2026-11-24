@@ -96,4 +96,42 @@ describe("downsampleStates", () => {
       { x: 100, index: 4 },
     ]);
   });
+
+  it("preserves the first segment after a gap when pre/post states are equal", () => {
+    // in:  --A gap A-- (all within one interval around x=50)
+    // out: --A gap A-- (post-gap A must not be merged away)
+    const gapData: Datum[] = [
+      { x: 50, y: 0, label: A },
+      { x: 50.1, y: Number.NaN },
+      { x: 50.2, y: 0, label: A },
+      { x: 100, y: 0, label: A },
+    ];
+
+    const result = downsampleStates(iterateObjects(gapData), bounds, numPoints);
+
+    expect(result).toEqual([
+      { x: 50, index: 0 },
+      { x: 50.1, index: 1 },
+      { x: 50.2, index: 2 },
+      { x: 100, index: 3 },
+    ]);
+  });
+
+  it("clamps synthetic endpoint when a multi-state interval is followed by a gap in the same pixel", () => {
+    // in:  A-B-gap (all within one pixel interval around x=50)
+    // out: first point + synthetic endpoint clamped to gap + gap point
+    const gapData: Datum[] = [
+      { x: 50, y: 0, label: A },
+      { x: 50.02, y: 0, label: B },
+      { x: 50.04, y: Number.NaN },
+    ];
+
+    const result = downsampleStates(iterateObjects(gapData), bounds, numPoints);
+
+    expect(result).toEqual([
+      { x: 50, index: undefined, states: [A, B] },
+      { x: 50.04, index: 1 },
+      { x: 50.04, index: 2 },
+    ]);
+  });
 });
