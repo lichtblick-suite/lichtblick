@@ -3670,7 +3670,7 @@ __metadata:
     i18next: "npm:26.7.2"
     i18next-browser-languagedetector: "npm:8.2.0"
     idb: "npm:8.0.4"
-    idb-keyval: "npm:6.2.1"
+    idb-keyval: "npm:6.3.0"
     immer: "npm:10.1.1"
     intervals-fn: "npm:3.0.3"
     jest-canvas-mock: "npm:2.5.8"
@@ -13897,10 +13897,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"idb-keyval@npm:6.2.1":
-  version: 6.2.1
-  resolution: "idb-keyval@npm:6.2.1"
-  checksum: 10/9a1416ff5e2ceff3832f5645518f438833a5ff6ee316fe3ec111d580db120425991d64d8098a847be7541bbbb7cc941984b4d0d62d541c39f7a0f415594837c2
+"idb-keyval@npm:6.3.0":
+  version: 6.3.0
+  resolution: "idb-keyval@npm:6.3.0"
+  checksum: 10/e89299183e067de3faff54449905dde82df30b2936079ca565e778e0d71bbffaef514ac1339be76b835cddd3679815f8c8728f29c9eed6844e61d66fd486e042
   languageName: node
   linkType: hard
 
