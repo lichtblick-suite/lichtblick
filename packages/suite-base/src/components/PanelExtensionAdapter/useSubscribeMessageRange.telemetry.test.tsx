@@ -103,7 +103,11 @@ function setupPipeline(
   });
   const getBatchIterator = jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() });
   mockUseMessagePipelineGetter.mockReturnValue(
-    jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator }),
+    jest.fn().mockReturnValue({
+      sortedTopics: [],
+      playerState: { playerId: "player-1" },
+      getBatchIterator,
+    }),
   );
   return {
     getBatchIterator,
@@ -197,7 +201,11 @@ describe("useSubscribeMessageRange telemetry", () => {
     });
 
     // THEN - the range reaches the pipeline and every bounded batch is counted
-    expect(pipeline.getBatchIterator).toHaveBeenCalledWith(topic, { start, end });
+    expect(pipeline.getBatchIterator).toHaveBeenCalledWith(topic, {
+      start,
+      end,
+      abort: expect.any(AbortSignal),
+    });
     expect(lastOnBatch()).toEqual(expect.any(Function));
     expect(received).toHaveLength(2);
     expect(telemetry.counter.mock.calls).toEqual([
@@ -237,7 +245,7 @@ describe("useSubscribeMessageRange telemetry", () => {
     ]);
   });
 
-  it("installs no batch callback and passes iterable and cancel through when telemetry is disabled", () => {
+  it("installs no batch callback and passes the iterable through and forwards cancel when telemetry is disabled", () => {
     // GIVEN - a disabled sink inside a panel context
     const telemetry = TelemetryBuilder.mockTelemetry({ enabled: false });
     setTelemetrySink(telemetry);
@@ -255,7 +263,8 @@ describe("useSubscribeMessageRange telemetry", () => {
     // THEN
     expect(lastOnBatch()).toBeUndefined();
     expect(onNewRangeIterator).toHaveBeenCalledWith(pipeline.getSource().iterable);
-    expect(cancel).toBe(mockCancel);
+    cancel();
+    expect(mockCancel).toHaveBeenCalledTimes(1);
     expect(telemetry.counter.mock.calls).toHaveLength(0);
   });
 

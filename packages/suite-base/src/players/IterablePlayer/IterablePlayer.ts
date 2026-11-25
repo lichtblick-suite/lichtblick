@@ -464,7 +464,7 @@ export class IterablePlayer implements Player {
 
   public getBatchIterator(
     topic: string,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; abort?: AbortSignal },
   ): AsyncIterableIterator<Readonly<IteratorResult>> | undefined {
     const topicSelection = new Map([[topic, { topic }]]);
 
@@ -473,6 +473,7 @@ export class IterablePlayer implements Player {
       consumptionType: "full",
       start: options?.start,
       end: options?.end,
+      abort: options?.abort,
     });
   }
 

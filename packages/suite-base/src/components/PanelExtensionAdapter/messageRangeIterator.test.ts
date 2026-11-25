@@ -484,6 +484,91 @@ describe("createMessageRangeIterator", () => {
     expect(batches).toHaveLength(0);
   });
 
+  describe("immediate cancellation", () => {
+    it("should release a consumer blocked on a pending read and drop the stale result", async () => {
+      // Given a raw iterator whose second read stays pending until released
+      const firstMessage = MessageEventBuilder.messageEvent({ topic: mockTopic });
+      const staleMessage = MessageEventBuilder.messageEvent({ topic: mockTopic });
+      let releaseRead = () => {};
+      const readReleased = new Promise<void>((resolve) => {
+        releaseRead = resolve;
+      });
+      let rawClosed = false;
+      async function* blockingIterator(): AsyncIterableIterator<Readonly<IteratorResult>> {
+        try {
+          yield { type: "message-event", msgEvent: firstMessage };
+          await readReleased;
+          yield { type: "message-event", msgEvent: staleMessage };
+        } finally {
+          rawClosed = true;
+        }
+      }
+      const onBatch = jest.fn();
+      const onQuiescent = jest.fn();
+      const { iterable, cancel } = createMessageRangeIterator({
+        topic: mockTopic,
+        rawBatchIterator: blockingIterator(),
+        sortedTopics: mockSortedTopics,
+        messageConverters: mockMessageConverters,
+        onBatch,
+        onQuiescent,
+      });
+      const batches: MessageEvent[][] = [];
+      const consumed = (async () => {
+        for await (const batch of iterable) {
+          batches.push(batch);
+        }
+      })();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // When cancelled while the read is still pending
+      cancel();
+
+      // Then the consumer finishes without waiting for the read and nothing is delivered
+      await consumed;
+      expect(batches).toEqual([]);
+      expect(onBatch).not.toHaveBeenCalled();
+      expect(rawClosed).toBe(false);
+      expect(onQuiescent).not.toHaveBeenCalled();
+
+      // When the pending read settles
+      releaseRead();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Then its result is discarded, the raw chain is closed and quiescence is reported once
+      expect(batches).toEqual([]);
+      expect(rawClosed).toBe(true);
+      expect(onQuiescent).toHaveBeenCalledTimes(1);
+      expect(onQuiescent).toHaveBeenCalledWith(expect.any(Number));
+    });
+
+    it("should abort the provided controller and close the raw iterator on cancel", async () => {
+      // Given an iterator that was never consumed
+      const abortController = new AbortController();
+      const rawBatchIterator = createMockRawBatchIterator([]);
+      const returnSpy = jest.spyOn(rawBatchIterator, "return");
+      const onQuiescent = jest.fn();
+      const { cancel } = createMessageRangeIterator({
+        topic: mockTopic,
+        rawBatchIterator,
+        sortedTopics: mockSortedTopics,
+        messageConverters: mockMessageConverters,
+        abortController,
+        onQuiescent,
+      });
+
+      // When cancelled twice
+      cancel();
+      cancel();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Then the signal is aborted and the raw chain is closed exactly once
+      expect(abortController.signal.aborted).toBe(true);
+      expect(returnSpy).toHaveBeenCalledTimes(1);
+      expect(onQuiescent).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("onBatch", () => {
     it("should call onBatch with each batch right before it is yielded", async () => {
       // Given messages split into a time-based batch and a final batch

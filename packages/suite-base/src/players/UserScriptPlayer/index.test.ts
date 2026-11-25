@@ -2208,6 +2208,120 @@ describe("UserScriptPlayer", () => {
       expect(result).toBeUndefined();
     });
 
+    it("reuses the shared cache when only an abort signal is passed", async () => {
+      // Given a script player whose input topic counts upstream iterator creations
+      let callCount = 0;
+      const { userScriptPlayer } = await setupScriptPlayer((topic) => {
+        if (topic === "/np_input") {
+          callCount++;
+          return (async function* () {
+            yield { type: "message-event" as const, msgEvent: upstreamFirst };
+          })();
+        }
+        return undefined;
+      });
+
+      // When two full-range subscribers each pass their own abort signal
+      const iter1 = userScriptPlayer.getBatchIterator(outputTopic, {
+        abort: new AbortController().signal,
+      });
+      const iter2 = userScriptPlayer.getBatchIterator(outputTopic, {
+        abort: new AbortController().signal,
+      });
+
+      // Then both share a single upstream consumer
+      expect(iter1).toBeDefined();
+      expect(iter2).toBeDefined();
+      expect(callCount).toBe(1);
+    });
+
+    describe("shared producer lifetime", () => {
+      // Upstream that yields one message, then blocks until its abort signal fires.
+      function blockingUpstream() {
+        const upstream = { calls: 0, signals: [] as (AbortSignal | undefined)[], closed: false };
+        let markClosed = () => {};
+        const closed = new Promise<void>((resolve) => {
+          markClosed = resolve;
+        });
+        const getBatchIterator = (topic: string, options?: { abort?: AbortSignal }) => {
+          if (topic !== "/np_input") {
+            return undefined;
+          }
+          upstream.calls++;
+          upstream.signals.push(options?.abort);
+          return (async function* () {
+            try {
+              yield { type: "message-event" as const, msgEvent: upstreamFirst };
+              await new Promise<void>((resolve) => {
+                options?.abort?.addEventListener("abort", () => {
+                  resolve();
+                });
+              });
+              yield { type: "message-event" as const, msgEvent: upstreamSecond };
+            } finally {
+              upstream.closed = true;
+              markClosed();
+            }
+          })();
+        };
+        return { upstream, closed, getBatchIterator };
+      }
+
+      it("stops the producer and drops its cache when the last subscriber leaves early", async () => {
+        // Given one subscriber that read the first message while the producer is still running
+        const { upstream, getBatchIterator } = blockingUpstream();
+        const { userScriptPlayer } = await setupScriptPlayer(getBatchIterator);
+        const iter = userScriptPlayer.getBatchIterator(outputTopic)!;
+        await iter.next();
+
+        // When that subscriber leaves
+        await iter.return?.(undefined);
+
+        // Then the producer's input reads are aborted and already closed when return() resolves
+        expect(upstream.signals[0]?.aborted).toBe(true);
+        expect(upstream.closed).toBe(true);
+
+        // And a new subscriber starts a fresh producer instead of the unfinished cache
+        userScriptPlayer.getBatchIterator(outputTopic);
+        expect(upstream.calls).toBe(2);
+      });
+
+      it("keeps the producer running while another subscriber remains", async () => {
+        // Given two subscribers of the same shared producer
+        const { upstream, getBatchIterator } = blockingUpstream();
+        const { userScriptPlayer } = await setupScriptPlayer(getBatchIterator);
+        const leaving = userScriptPlayer.getBatchIterator(outputTopic)!;
+        const staying = userScriptPlayer.getBatchIterator(outputTopic)!;
+        await leaving.next();
+        await staying.next();
+
+        // When only one of them leaves
+        await leaving.return?.(undefined);
+
+        // Then the producer is not aborted and the cache is still shared
+        expect(upstream.signals[0]?.aborted).toBe(false);
+        userScriptPlayer.getBatchIterator(outputTopic);
+        expect(upstream.calls).toBe(1);
+      });
+
+      it("stops the producer when an unstarted and a started subscriber both leave", async () => {
+        // Given one unstarted and one started subscriber of the same shared producer
+        const { upstream, closed, getBatchIterator } = blockingUpstream();
+        const { userScriptPlayer } = await setupScriptPlayer(getBatchIterator);
+        const unstarted = userScriptPlayer.getBatchIterator(outputTopic)!;
+        const started = userScriptPlayer.getBatchIterator(outputTopic)!;
+        await started.next();
+
+        // When both are closed
+        await unstarted.return?.(undefined);
+        await started.return?.(undefined);
+
+        // Then the producer's input reads are aborted and closed
+        expect(upstream.signals[0]?.aborted).toBe(true);
+        await closed;
+      });
+    });
+
     it("reuses the shared cache when getBatchIterator is called twice without options", async () => {
       let callCount = 0;
 

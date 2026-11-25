@@ -40,6 +40,7 @@ describe("useSubscribeMessageRange", () => {
     mockUseMessagePipelineGetter.mockReturnValue(
       jest.fn().mockReturnValue({
         sortedTopics: [],
+        playerState: { playerId: "player-1" },
         getBatchIterator: jest.fn().mockReturnValue(undefined),
       }),
     );
@@ -60,6 +61,7 @@ describe("useSubscribeMessageRange", () => {
     mockUseMessagePipelineGetter.mockReturnValue(
       jest.fn().mockReturnValue({
         sortedTopics: [],
+        playerState: { playerId: "player-1" },
         getBatchIterator: jest.fn().mockReturnValue(undefined),
       }),
     );
@@ -89,7 +91,11 @@ describe("useSubscribeMessageRange", () => {
     mockCreateMessageRangeIterator.mockReturnValue({ iterable: mockIterable, cancel: mockCancel });
     const mockGetBatchIterator = jest.fn().mockReturnValue(mockBatchIterator);
     mockUseMessagePipelineGetter.mockReturnValue(
-      jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator: mockGetBatchIterator }),
+      jest.fn().mockReturnValue({
+        sortedTopics: [],
+        playerState: { playerId: "player-1" },
+        getBatchIterator: mockGetBatchIterator,
+      }),
     );
 
     const { result } = renderHook(() => useSubscribeMessageRange());
@@ -100,16 +106,23 @@ describe("useSubscribeMessageRange", () => {
     });
 
     // Then
-    expect(mockGetBatchIterator).toHaveBeenCalledWith(topic, undefined);
+    expect(mockGetBatchIterator).toHaveBeenCalledWith(topic, {
+      abort: expect.any(AbortSignal),
+    });
     expect(onNewRangeIterator).toHaveBeenCalledWith(mockIterable);
-    expect(cancel).toBe(mockCancel);
+    cancel();
+    expect(mockCancel).toHaveBeenCalledTimes(1);
     expect(mockCreateMessageRangeIterator).toHaveBeenCalledWith(
       expect.objectContaining({
         topic,
         rawBatchIterator: mockBatchIterator,
         sortedTopics: [],
+        abortController: expect.any(AbortController),
       }),
     );
+    // The signal handed to the data source belongs to the controller that cancel() aborts.
+    const { abortController } = mockCreateMessageRangeIterator.mock.calls[0]![0];
+    expect(mockGetBatchIterator.mock.calls[0]![1].abort).toBe(abortController.signal);
   });
 
   it.each<{ name: string; start?: Time; end?: Time }>([
@@ -126,7 +139,11 @@ describe("useSubscribeMessageRange", () => {
     });
     const mockGetBatchIterator = jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() });
     mockUseMessagePipelineGetter.mockReturnValue(
-      jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator: mockGetBatchIterator }),
+      jest.fn().mockReturnValue({
+        sortedTopics: [],
+        playerState: { playerId: "player-1" },
+        getBatchIterator: mockGetBatchIterator,
+      }),
     );
     const onNewRangeIterator = jest.fn().mockResolvedValue(undefined);
     const { result } = renderHook(() => useSubscribeMessageRange());
@@ -137,14 +154,22 @@ describe("useSubscribeMessageRange", () => {
     });
 
     // Then
-    expect(mockGetBatchIterator).toHaveBeenCalledWith(topic, { start, end });
+    expect(mockGetBatchIterator).toHaveBeenCalledWith(topic, {
+      start,
+      end,
+      abort: expect.any(AbortSignal),
+    });
   });
 
   it("delivers an empty iterable without reading the data source when start is after end", async () => {
     // Given
     const mockGetBatchIterator = jest.fn();
     mockUseMessagePipelineGetter.mockReturnValue(
-      jest.fn().mockReturnValue({ sortedTopics: [], getBatchIterator: mockGetBatchIterator }),
+      jest.fn().mockReturnValue({
+        sortedTopics: [],
+        playerState: { playerId: "player-1" },
+        getBatchIterator: mockGetBatchIterator,
+      }),
     );
     const batches: unknown[] = [];
     const onNewRangeIterator = jest.fn(async (iterable: AsyncIterable<unknown>) => {
@@ -170,5 +195,76 @@ describe("useSubscribeMessageRange", () => {
     expect(mockCreateMessageRangeIterator).not.toHaveBeenCalled();
     expect(onNewRangeIterator).toHaveBeenCalledTimes(1);
     expect(batches).toEqual([]);
+  });
+  describe("stale generations", () => {
+    function setup(playerIds: string[]) {
+      const cancels: jest.Mock[] = [];
+      mockCreateMessageRangeIterator.mockImplementation(() => {
+        const cancel = jest.fn();
+        cancels.push(cancel);
+        return { iterable: { [Symbol.asyncIterator]: jest.fn() }, cancel };
+      });
+      const getContext = jest.fn();
+      for (const playerId of playerIds) {
+        getContext.mockReturnValueOnce({
+          sortedTopics: [],
+          playerState: { playerId },
+          getBatchIterator: jest.fn().mockReturnValue({ [Symbol.asyncIterator]: jest.fn() }),
+        });
+      }
+      mockUseMessagePipelineGetter.mockReturnValue(getContext);
+      const hook = renderHook(() => useSubscribeMessageRange());
+      const subscribe = () =>
+        hook.result.current({
+          topic: BasicBuilder.string(),
+          onNewRangeIterator: jest.fn(async () => {
+            await new Promise<void>(() => {});
+          }),
+        });
+      return { hook, subscribe, cancels };
+    }
+
+    it("cancels the open subscriptions of the previous data source", () => {
+      // Given
+      const { subscribe, cancels } = setup(["player-1", "player-1", "player-2"]);
+      subscribe();
+      subscribe();
+
+      // When
+      subscribe();
+
+      // Then
+      expect(cancels[0]).toHaveBeenCalledTimes(1);
+      expect(cancels[1]).toHaveBeenCalledTimes(1);
+      expect(cancels[2]).not.toHaveBeenCalled();
+    });
+
+    it("keeps subscriptions opened while the player was initializing", () => {
+      // Given
+      const { subscribe, cancels } = setup(["", "player-1"]);
+      subscribe();
+
+      // When
+      subscribe();
+
+      // Then
+      expect(cancels[0]).not.toHaveBeenCalled();
+      expect(cancels[1]).not.toHaveBeenCalled();
+    });
+
+    it("cancels open subscriptions on unmount, but not ones already cancelled", () => {
+      // Given
+      const { hook, subscribe, cancels } = setup(["player-1", "player-1"]);
+      const unsubscribeFirst = subscribe();
+      subscribe();
+      unsubscribeFirst();
+
+      // When
+      hook.unmount();
+
+      // Then
+      expect(cancels[0]).toHaveBeenCalledTimes(1);
+      expect(cancels[1]).toHaveBeenCalledTimes(1);
+    });
   });
 });
