@@ -296,7 +296,6 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this.#serverCapabilities = Array.isArray(event.capabilities) ? event.capabilities : [];
       this.#serverPublishesTime = this.#serverCapabilities.includes(ServerCapability.time);
       this.#supportedEncodings = event.supportedEncodings;
-      this.#datatypes = new Map();
 
       // If the server publishes the time we clear any existing clockTime we might have and let the
       // server override
@@ -357,6 +356,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         );
 
         // Periodically request all available parameters.
+        clearInterval(this.#getParameterInterval);
         this.#getParameterInterval = setInterval(() => {
           this.#client?.getParameters([], GET_ALL_PARAMS_REQUEST_ID);
         }, GET_ALL_PARAMS_PERIOD_MS);
