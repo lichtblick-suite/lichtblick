@@ -419,7 +419,7 @@ export function ThreeDeeRender(props: Readonly<ThreeDeeRenderProps>): React.JSX.
   }, [topics, renderer]);
 
   const hasTransformTopics = useMemo(
-    () => topics?.some((topic) => TRANSFORM_TOPIC_SCHEMAS.has(topic.schemaName)) ?? false,
+    () => renderTopics(topics).some((topic) => TRANSFORM_TOPIC_SCHEMAS.has(topic.schemaName)),
     [topics],
   );
   const isPreloadingEnabled = config.scene.transforms?.enablePreloading === true;

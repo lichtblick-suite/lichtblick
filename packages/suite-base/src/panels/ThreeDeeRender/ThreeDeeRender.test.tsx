@@ -44,6 +44,7 @@ const createMockRenderer = (overrides?: Record<string, any>) => {
   const defaultRenderer = {
     dispose: jest.fn(),
     config: {},
+    renderTopics: [],
     setTopics: jest.fn(),
     setParameters: jest.fn(),
     setCurrentTime: jest.fn(),
@@ -1212,6 +1213,50 @@ describe("ThreeDeeRender", () => {
       });
     });
 
+    it.each([
+      { interfaceMode: "3d", enablePreloading: false },
+      { interfaceMode: "image", enablePreloading: false },
+      { interfaceMode: "3d", enablePreloading: true },
+      { interfaceMode: "image", enablePreloading: true },
+    ] as const)(
+      "detects converted transforms in $interfaceMode with preloading $enablePreloading",
+      async ({ interfaceMode, enablePreloading }) => {
+        const topic = RenderStateBuilder.topic({
+          name: "/custom-transforms",
+          schemaName: "custom.Transforms",
+          conversionOutputs: [
+            { converterId: "transform-converter", schemaName: "foxglove.FrameTransform" },
+          ],
+        });
+        const mockContext = createMockContext({
+          initialState: { scene: { transforms: { enablePreloading } } },
+        });
+        render(<ThreeDeeRender {...setup({ interfaceMode }, mockContext)} />);
+        await waitFor(() => {
+          expect(mockContext.onRender).toBeDefined();
+        });
+
+        act(() => {
+          mockContext.onRender!({ topics: [topic] }, jest.fn());
+        });
+
+        const expectedAlert = expect.objectContaining({ severity: "info", tip: expect.any(String) });
+        await waitFor(() => {
+          expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toEqual(
+            enablePreloading ? undefined : expectedAlert,
+          );
+        });
+
+        // Removing the conversion output removes the reason to recommend preloading.
+        act(() => {
+          mockContext.onRender!({ topics: [{ ...topic, conversionOutputs: [] }] }, jest.fn());
+        });
+        await waitFor(() => {
+          expect(lastAlertFor(mockContext, TRANSFORM_ALERT_ID)).toBeUndefined();
+        });
+      },
+    );
+
     it("clears the alert when a transform topic exists but preloading is enabled", async () => {
       // Given
       const topics = [RenderStateBuilder.topic({ name: "/tf", schemaName: "tf2_msgs/TFMessage" })];
@@ -1246,7 +1291,13 @@ describe("ThreeDeeRender", () => {
 
     it("does not show the alert when no transform topic exists", async () => {
       // Given
-      const topics = [RenderStateBuilder.topic({ name: "/other", schemaName: "std_msgs/String" })];
+      const topics = [
+        RenderStateBuilder.topic({
+          name: "/other",
+          schemaName: "std_msgs/String",
+          conversionOutputs: [{ converterId: "image-converter", schemaName: "foxglove.Image" }],
+        }),
+      ];
       const mockContext = createMockContext();
       const props = setup({}, mockContext);
 
