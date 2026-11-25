@@ -194,6 +194,9 @@ function PanelExtensionAdapter(
   const [forceConversion, setForceConversion] = useState(new Set<string>());
   const [watchedFields, setWatchedFields] = useState(new Set<keyof RenderState>());
   const messageConverters = useExtensionCatalog(selectInstalledMessageConverters);
+  // The extension context stays stable while live sources discover channels and extensions load.
+  const subscriptionInputs = useLatest({ sortedTopics, messageConverters });
+  const resolvedSubscriptionInputs = useRef(subscriptionInputs.current);
 
   const [localSubscriptions, setLocalSubscriptions] = useState<Subscription[]>([]);
 
@@ -581,6 +584,9 @@ function PanelExtensionAdapter(
         if (!isMounted()) {
           return;
         }
+        const inputs = subscriptionInputs.current;
+        resolvedSubscriptionInputs.current = inputs;
+        const { sortedTopics: currentTopics, messageConverters: currentConverters } = inputs;
         // ExtensionPanel-Facing subscription type
         const localSubs = topics.map((item): Subscription => {
           if (typeof item === "string") {
@@ -593,17 +599,17 @@ function PanelExtensionAdapter(
         // Resolve topic -> schemaName for converter lookup. If we don't know the schema yet,
         // we default to no sampling (safe "needs all" behavior).
         const topicToSchemaNameMap = new Map(
-          sortedTopics.map((topic) => [topic.name, topic.schemaName]),
+          currentTopics.map((topic) => [topic.name, topic.schemaName]),
         );
 
         // Use the same conversion resolution as renderState to identify converters that apply.
         const { topicSchemaConverters } = collateTopicSchemaConversions(
           localSubs,
-          sortedTopics,
-          messageConverters,
+          currentTopics,
+          currentConverters,
         );
 
-        const channels = channelCatalog(sortedTopics, messageConverters);
+        const channels = channelCatalog(currentTopics, currentConverters);
         const subscribePayloads = localSubs.flatMap((requested): InternalSubscribePayload[] => {
           const item = resolveChannelSubscription(requested, channels);
           if (item == undefined) {
@@ -635,7 +641,7 @@ function PanelExtensionAdapter(
               topicSchemaName != undefined &&
               topicSchemaName === item.convertTo);
           const samplingAllowed =
-            sortedTopics.filter((topic) => topic.name === item.topic).length > 1 || isNativePath
+            currentTopics.filter((topic) => topic.name === item.topic).length > 1 || isNativePath
               ? false
               : converter?.supportsLatestPerRenderTick === true;
 
@@ -852,7 +858,20 @@ function PanelExtensionAdapter(
     subscribeMessageRange,
     setAlert,
     clearAlert,
+    subscriptionInputs,
   ]);
+
+  useEffect(() => {
+    const previous = resolvedSubscriptionInputs.current;
+    if (
+      !_.isEqual(previous.sortedTopics, sortedTopics) ||
+      !_.isEqual(previous.messageConverters, messageConverters)
+    ) {
+      // Retry pending selections and remove channels that are no longer advertised, even when
+      // the panel's requested subscriptions haven't changed.
+      partialExtensionContext.subscribe(localSubscriptions);
+    }
+  }, [localSubscriptions, messageConverters, partialExtensionContext, sortedTopics]);
 
   const panelContainerRef = useRef<HTMLDivElement>(ReactNull);
 

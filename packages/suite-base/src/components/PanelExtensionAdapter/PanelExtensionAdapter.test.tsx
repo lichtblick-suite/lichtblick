@@ -10,7 +10,7 @@
 /* eslint-disable jest/no-done-callback */
 
 import { render } from "@testing-library/react";
-import { act } from "react";
+import { act, useContext } from "react";
 import { createStore } from "zustand";
 
 import { Condvar, signal } from "@lichtblick/den/async";
@@ -26,17 +26,174 @@ import {
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { AlertsContext, AlertsContextStore } from "@lichtblick/suite-base/context/AlertsContext";
+import { ExtensionCatalogContext } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AdvertiseOptions } from "@lichtblick/suite-base/players/types";
 import * as PanelStateContextProvider from "@lichtblick/suite-base/providers/PanelStateContextProvider";
 import PanelSetup, { Fixture } from "@lichtblick/suite-base/stories/PanelSetup";
 import ThemeProvider from "@lichtblick/suite-base/theme/ThemeProvider";
+import { convertedChannelId } from "@lichtblick/suite-base/util/channels";
 import { getConverterId, topicOutputKey } from "@lichtblick/suite-base/util/topicOutput";
 
 import PanelExtensionAdapter from "./PanelExtensionAdapter";
 import { BuiltinPanelExtensionContext } from "./types";
 
 describe("PanelExtensionAdapter", () => {
+  it.each([
+    "native",
+    "converted",
+  ])("resolves %s WebSocket selections as channels are advertised without reinitializing the panel", async (kind) => {
+    let context: PanelExtensionContext | undefined;
+    const initPanel = jest.fn((value: PanelExtensionContext) => {
+      context = value;
+    });
+    const converter = {
+      fromSchemaName: "Message",
+      toSchemaName: "ConvertedMessage",
+      supportsLatestPerRenderTick: true,
+      converter: () => ({}),
+    };
+    const converters = [converter];
+    const channelId =
+      kind === "native"
+        ? "websocket:1"
+        : convertedChannelId("websocket:1", getConverterId(converter));
+    const selection: Subscription = {
+      topic: "/live",
+      channelId,
+      sampling: { mode: "latest-per-render-tick" },
+    };
+    const setSubscriptions = jest.fn();
+    const config = {};
+    const saveConfig = () => {};
+    const Wrapper = ({ topics }: Pick<Fixture, "topics">) => (
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup fixture={{ topics, setSubscriptions, messageConverters: converters }}>
+            <PanelExtensionAdapter config={config} saveConfig={saveConfig} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>
+    );
+    const handle = render(<Wrapper topics={[]} />);
+    await act(async () => undefined);
+    const initialContext = context;
+
+    // Keep an unavailable selection pending until its channel is advertised.
+    await act(async () => {
+      context!.subscribe([selection]);
+    });
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), []);
+    const topics = [{ name: "/live", schemaName: "Message", channelId: "websocket:1" }];
+    handle.rerender(<Wrapper topics={topics} />);
+    await act(async () => undefined);
+    const expected = [
+      {
+        topic: "/live",
+        channelIds: ["websocket:1"],
+        preloadType: "partial",
+        samplingRequest: kind === "converted" ? selection.sampling : undefined,
+        samplingAuthorized: kind === "converted" ? true : undefined,
+      },
+    ];
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), expected);
+
+    // Calls through the original context also use the newly advertised catalog.
+    setSubscriptions.mockClear();
+    await act(async () => {
+      initialContext!.subscribe([selection]);
+    });
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), expected);
+
+    // Removing a selected channel must not fall back to another channel on its topic.
+    handle.rerender(<Wrapper topics={[{ ...topics[0]!, channelId: "websocket:2" }]} />);
+    await act(async () => undefined);
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), []);
+    handle.rerender(<Wrapper topics={topics} />);
+    await act(async () => undefined);
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), expected);
+    expect(context).toBe(initialContext);
+    expect(initPanel).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      context!.unsubscribeAll();
+    });
+    handle.rerender(<Wrapper topics={[]} />);
+    await act(async () => undefined);
+    handle.rerender(<Wrapper topics={topics} />);
+    await act(async () => undefined);
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), []);
+  });
+
+  it("resolves pending converter channels when extensions load after panel initialization", async () => {
+    let context: PanelExtensionContext | undefined;
+    const initPanel = jest.fn((value: PanelExtensionContext) => {
+      context = value;
+    });
+    let updateConverters: ((converters: Fixture["messageConverters"]) => void) | undefined;
+    const ConverterControl = () => {
+      const store = useContext(ExtensionCatalogContext);
+      updateConverters = (converters) => {
+        store!.setState({ installedMessageConverters: converters });
+      };
+      return <></>;
+    };
+    const converter = {
+      fromSchemaName: "Message",
+      toSchemaName: "ConvertedMessage",
+      supportsLatestPerRenderTick: true,
+      converter: () => ({}),
+    };
+    const setSubscriptions = jest.fn();
+    render(
+      <ThemeProvider isDark>
+        <MockPanelContextProvider>
+          <PanelSetup
+            fixture={{
+              topics: [{ name: "/live", schemaName: "Message", channelId: "websocket:1" }],
+              setSubscriptions,
+            }}
+          >
+            <ConverterControl />
+            <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+          </PanelSetup>
+        </MockPanelContextProvider>
+      </ThemeProvider>,
+    );
+    await act(async () => undefined);
+    const selection: Subscription = {
+      topic: "/live",
+      channelId: convertedChannelId("websocket:1", getConverterId(converter)),
+      sampling: { mode: "latest-per-render-tick" },
+    };
+    await act(async () => {
+      context!.subscribe([selection]);
+    });
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), []);
+    await act(async () => {
+      updateConverters!([converter]);
+    });
+    const expected = [
+      {
+        topic: "/live",
+        channelIds: ["websocket:1"],
+        preloadType: "partial",
+        samplingRequest: selection.sampling,
+        samplingAuthorized: true,
+      },
+    ];
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), expected);
+    await act(async () => {
+      context!.subscribe([selection]);
+    });
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), expected);
+    await act(async () => {
+      updateConverters!([]);
+    });
+    expect(setSubscriptions).toHaveBeenLastCalledWith(expect.any(String), []);
+    expect(initPanel).toHaveBeenCalledTimes(1);
+  });
+
   it("dispatches output settings only to their converter and synchronizes handler mutations", async () => {
     const updateTree = jest.fn();
     const spy = jest
