@@ -45,7 +45,7 @@ export function useTopicListSearch(params: UseTopicListSearchParams): TopicListI
     () =>
       new Fzf(topics, {
         selector: (item) =>
-          `${item.name}|${item.schemaName}|${item.channelId ?? ""}|${item.channel?.source.kind ?? ""}|${item.channel?.source.kind === "converted" ? item.channel.source.converterId : ""}`,
+          `${item.name}|${item.schemaName}|${item.channelId ?? ""}|${item.channel?.source.kind ?? ""}|${item.channel?.source.kind === "converted" ? item.channel.source.converterId : ""}|${item.converterDisplayName ?? ""}`,
       }),
     [topics],
   );

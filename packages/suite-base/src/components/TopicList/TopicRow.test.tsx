@@ -29,11 +29,9 @@ jest.mock("@lichtblick/suite-base/services/messagePathDragging", () => ({
 }));
 
 jest.mock("./useTopicMessageNavigation");
-jest.mock("./InspectChannelButton", () => ({
-  InspectChannelButton: () => <button>Inspect</button>,
-}));
 
 interface SetupOptions {
+  converterDisplayName?: string;
   channel?: InspectionTopic["channel"];
   topicName?: string;
   isNavigating?: boolean;
@@ -68,6 +66,7 @@ function setup(options: SetupOptions = {}) {
       schemaName: "test/Schema",
       channel: options.channel,
       channelId: options.channel?.id,
+      converterDisplayName: options.converterDisplayName,
     },
     start: 0,
     end: topicName.length,
@@ -93,8 +92,12 @@ describe("TopicRow navigation buttons", () => {
     jest.clearAllMocks();
   });
 
-  it("labels converted channels and keeps their source and converter available", () => {
+  it.each([
+    undefined,
+    "Scene converter",
+  ])("shows the converter display name %s with an ID fallback", (converterDisplayName) => {
     setup({
+      converterDisplayName,
       topicName: "/source",
       channel: {
         id: "output-id",
@@ -103,11 +106,19 @@ describe("TopicRow navigation buttons", () => {
         source: { kind: "converted", inputChannelId: "source-id", converterId: "test-converter" },
       },
     });
-    expect(screen.getByText("Converted · test-converter")).toHaveAttribute(
+    expect(screen.getByText("Converted")).toHaveAttribute(
       "title",
-      "Converted from source-id using test-converter",
+      `output-id\nConverted from source-id using ${converterDisplayName ?? "test-converter"}`,
     );
-    expect(screen.getByRole("button", { name: "Inspect" })).toBeInTheDocument();
+    expect(screen.queryByText("output-id")).not.toBeInTheDocument();
+    expect(screen.getByText("Converter").nextElementSibling).toHaveTextContent(
+      converterDisplayName ?? "test-converter",
+    );
+    expect(screen.getByText("Converter").nextElementSibling).toHaveAttribute(
+      "title",
+      "test-converter",
+    );
+    expect(screen.queryByRole("button", { name: "Inspect" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Next message" })).not.toBeInTheDocument();
     expect(useTopicMessageNavigation).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -115,6 +126,28 @@ describe("TopicRow navigation buttons", () => {
         channelId: "output-id",
       }),
     );
+  });
+
+  it("distinguishes topic, schema and native channel identity with labels", () => {
+    setup({
+      topicName: "/source",
+      channel: {
+        id: "source-id",
+        topic: "/source",
+        schemaName: "test/Schema",
+        source: { kind: "native" },
+      },
+    });
+
+    expect(screen.getByText("Topic").nextElementSibling).toHaveTextContent("/source");
+    expect(screen.getByText("Schema").nextElementSibling).toHaveTextContent("test/Schema");
+    expect(screen.getByText("Topic").nextElementSibling).toHaveTextContent("Native");
+    expect(screen.queryByText("Channel")).not.toBeInTheDocument();
+    expect(screen.getByText("Native")).toHaveAttribute("title", "source-id");
+    expect(screen.queryByText("source-id")).not.toBeInTheDocument();
+    expect(screen.getByTitle("/source")).toHaveTextContent("/source");
+    expect(screen.getByTitle("test/Schema")).toHaveTextContent("test/Schema");
+    expect(screen.queryByRole("button", { name: "Inspect" })).not.toBeInTheDocument();
   });
 
   it("renders navigation buttons", () => {

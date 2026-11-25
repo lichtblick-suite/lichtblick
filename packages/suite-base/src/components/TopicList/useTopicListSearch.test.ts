@@ -82,6 +82,27 @@ describe("useTopicListSearch", () => {
     ]);
   });
 
+  it("finds converters by display name and internal ID", () => {
+    const converted = {
+      ...convertedTopic("z", "internal-key"),
+      converterDisplayName: "Scene converter",
+    };
+    const topics = [nativeTopic("z"), converted, convertedTopic("z", "other")];
+    const { result, rerender } = renderHook(
+      ({ filterText }) => useTopicListSearch({ topics, datatypes: new Map(), filterText }),
+      { initialProps: { filterText: "Scene converter" } },
+    );
+    expect(result.current.map((row) => row.type === "topic" && row.item.item.channelId)).toEqual([
+      "z",
+      converted.channelId,
+    ]);
+    rerender({ filterText: "internal-key" });
+    expect(result.current.map((row) => row.type === "topic" && row.item.item.channelId)).toEqual([
+      "z",
+      converted.channelId,
+    ]);
+  });
+
   it("keeps converted fields beneath their producer and includes the source context", () => {
     const topics = [nativeTopic("z"), convertedTopic("z", "first")];
     const datatypes = new Map([["Output", { definitions: [{ name: "value", type: "int32" }] }]]);

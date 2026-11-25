@@ -24,7 +24,6 @@ import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExten
 import Stack from "@lichtblick/suite-base/components/Stack";
 import { useMessagePathDrag } from "@lichtblick/suite-base/services/messagePathDragging";
 
-import { InspectChannelButton } from "./InspectChannelButton";
 import { TopicStatsChip } from "./TopicStatsChip";
 import { InspectionTopic as Topic } from "./types";
 import { useTopicListStyles } from "./useTopicListStyles";
@@ -158,52 +157,89 @@ export function TopicRow({
       {draggedItemCount > 1 && (
         <Badge color="primary" className={classes.countBadge} badgeContent={draggedItemCount} />
       )}
-      {/* Extra Stack wrapper to enable growing without the  */}
-      <Stack flex="auto" alignItems="flex-start" overflow="hidden">
-        <Typography variant="body2" noWrap className={classes.textContent}>
-          <HighlightChars str={topic.name} indices={topicResult.positions} />
-          {topic.aliasedFromName != undefined && (
-            <Typography variant="caption" className={classes.aliasedTopicName}>
-              from {topic.aliasedFromName}
+      <div className={classes.channelDetails}>
+        <Typography component="span" variant="caption" className={classes.detailLabel}>
+          {t("topic")}
+        </Typography>
+        <Stack direction="row" alignItems="center" gap={0.75} overflow="hidden">
+          <Typography variant="body2" noWrap className={classes.topicName} title={topic.name}>
+            <HighlightChars str={topic.name} indices={topicResult.positions} />
+            {topic.aliasedFromName != undefined && (
+              <Typography variant="caption" className={classes.aliasedTopicName}>
+                from {topic.aliasedFromName}
+              </Typography>
+            )}
+          </Typography>
+          {topic.channel != undefined && (
+            <Typography
+              component="span"
+              variant="caption"
+              className={classes.sourceBadge}
+              title={
+                convertedSource == undefined
+                  ? topic.channel.id
+                  : `${topic.channel.id}\n${t("convertedFrom", {
+                      channelId: convertedSource.inputChannelId,
+                      converterId: topic.converterDisplayName ?? convertedSource.converterId,
+                    })}`
+              }
+            >
+              {convertedSource == undefined ? t("native") : t("converted")}
             </Typography>
           )}
-        </Typography>
+        </Stack>
         {topic.schemaName != undefined && (
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            noWrap
-            className={classes.textContent}
-          >
-            <HighlightChars
-              str={topic.schemaName}
-              indices={topicResult.positions}
-              offset={topic.name.length + 1}
-            />
-          </Typography>
+          <>
+            <Typography component="span" variant="caption" className={classes.detailLabel}>
+              {t("schema")}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              noWrap
+              className={classes.textContent}
+              title={topic.schemaName}
+            >
+              <HighlightChars
+                str={topic.schemaName}
+                indices={topicResult.positions}
+                offset={topic.name.length + 1}
+              />
+            </Typography>
+          </>
         )}
-        {topic.channel != undefined && (
-          <Typography
-            variant="caption"
-            color={convertedSource == undefined ? "text.secondary" : "primary"}
-            noWrap
-            className={classes.textContent}
-            title={
-              convertedSource == undefined
-                ? topic.channel.id
-                : t("convertedFrom", {
-                    channelId: convertedSource.inputChannelId,
-                    converterId: convertedSource.converterId,
-                  })
-            }
-          >
-            {convertedSource == undefined
-              ? `Native - ${topic.channel.id}`
-              : `${t("converted")} · ${convertedSource.converterId}`}
-          </Typography>
+        {convertedSource != undefined && (
+          <>
+            <Typography component="span" variant="caption" className={classes.detailLabel}>
+              {t("converter")}
+            </Typography>
+            <Typography
+              variant="caption"
+              noWrap
+              color="text.secondary"
+              title={convertedSource.converterId}
+            >
+              <HighlightChars
+                str={topic.converterDisplayName ?? convertedSource.converterId}
+                indices={topicResult.positions}
+                offset={
+                  topic.name.length +
+                  1 +
+                  (topic.schemaName?.length ?? 0) +
+                  1 +
+                  (topic.channelId?.length ?? 0) +
+                  1 +
+                  convertedSource.kind.length +
+                  1 +
+                  (topic.converterDisplayName == undefined
+                    ? 0
+                    : convertedSource.converterId.length + 1)
+                }
+              />
+            </Typography>
+          </>
         )}
-      </Stack>
-      {topic.channel != undefined && <InspectChannelButton channel={topic.channel} />}
+      </div>
       {topic.channel?.source.kind !== "converted" && (
         <Stack direction="column" alignItems="flex-end" gap={0.5}>
           {topic.channel == undefined && (

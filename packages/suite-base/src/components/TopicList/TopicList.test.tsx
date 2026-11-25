@@ -9,6 +9,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { useMessagePipeline } from "@lichtblick/suite-base/components/MessagePipeline";
 import { DraggedMessagePath } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
 import { getDraggedMessagePath } from "@lichtblick/suite-base/components/TopicList/getDraggedMessagePath";
+import { useExtensionCatalog } from "@lichtblick/suite-base/context/ExtensionCatalogContext";
+import { useChannels } from "@lichtblick/suite-base/hooks/useChannels";
 import { PlayerPresence } from "@lichtblick/suite-base/players/types";
 import { MessagePathSelectionProvider } from "@lichtblick/suite-base/services/messagePathDragging/MessagePathSelectionProvider";
 
@@ -16,7 +18,10 @@ import { TopicList } from "./TopicList";
 import { useMultiSelection } from "./useMultiSelection";
 import { TopicListItem, useTopicListSearch } from "./useTopicListSearch";
 
-jest.mock("@lichtblick/suite-base/hooks/useChannels", () => ({ useChannels: () => [] }));
+jest.mock("@lichtblick/suite-base/hooks/useChannels", () => ({ useChannels: jest.fn(() => []) }));
+jest.mock("@lichtblick/suite-base/context/ExtensionCatalogContext", () => ({
+  useExtensionCatalog: jest.fn(() => []),
+}));
 
 // Mock dependencies
 jest.mock("@lichtblick/suite-base/PanelAPI", () => ({
@@ -102,6 +107,43 @@ const setup = (playerPresence: PlayerPresence) => {
 describe("TopicList Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("renders while the converter catalog is loading", () => {
+    (useExtensionCatalog as jest.Mock).mockReturnValueOnce(undefined);
+    (useTopicListSearch as jest.Mock).mockReturnValue([]);
+
+    setup(PlayerPresence.PRESENT);
+
+    expect(screen.getByText(/No channels available/)).toBeInTheDocument();
+  });
+
+  it("resolves converter display names using their internal IDs", () => {
+    (useChannels as jest.Mock).mockReturnValueOnce([
+      {
+        id: "output-id",
+        topic: "/source",
+        schemaName: "Output",
+        source: { kind: "converted", inputChannelId: "source-id", converterId: "converter-key" },
+      },
+    ]);
+    (useExtensionCatalog as jest.Mock).mockReturnValueOnce([
+      { converterId: "converter-key", displayName: "Scene converter" },
+    ]);
+    (useTopicListSearch as jest.Mock).mockReturnValue([]);
+
+    setup(PlayerPresence.PRESENT);
+
+    expect(useTopicListSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        topics: [
+          expect.objectContaining({
+            channelId: "output-id",
+            converterDisplayName: "Scene converter",
+          }),
+        ],
+      }),
+    );
   });
 
   it("renders EmptyState when playerPresence is NOT_PRESENT", () => {

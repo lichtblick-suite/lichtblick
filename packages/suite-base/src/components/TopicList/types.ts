@@ -19,6 +19,7 @@ export interface UseTopicMessageNavigationReturn {
 /** A channel row keeps topic grouping separate from stream identity. */
 export type InspectionTopic = import("@lichtblick/suite-base/players/types").Topic & {
   channel?: import("@lichtblick/suite").Channel;
+  converterDisplayName?: string;
 };
 
 export function inspectionTopicKey(topic: Pick<InspectionTopic, "name" | "channelId">): string {

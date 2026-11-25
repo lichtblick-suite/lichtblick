@@ -98,6 +98,29 @@ export const useTopicListStyles = makeStyles<void, TreeClasses>()((theme, _, cla
   textContent: {
     maxWidth: "100%",
   },
+  channelDetails: {
+    display: "grid",
+    gridTemplateColumns: "max-content minmax(0, 1fr)",
+    alignItems: "center",
+    columnGap: theme.spacing(1),
+    flex: "1 1 0%",
+    minWidth: 0,
+  },
+  detailLabel: {
+    color: theme.palette.text.secondary,
+  },
+  topicName: {
+    fontWeight: theme.typography.fontWeightMedium,
+    minWidth: 0,
+  },
+  sourceBadge: {
+    flexShrink: 0,
+    paddingInline: theme.spacing(0.5),
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.action.hover,
+    color: theme.palette.text.secondary,
+    lineHeight: "16px",
+  },
   aliasedTopicName: {
     color: theme.palette.primary.main,
     display: "block",
