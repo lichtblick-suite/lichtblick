@@ -5,10 +5,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { MessageEvent } from "@lichtblick/suite";
 import {
+  MessageAndData,
   MessageDataItemsByPath,
   useDecodeMessagePathsForMessagesByTopic,
 } from "@lichtblick/suite-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useSubscribeMessageRange } from "@lichtblick/suite-base/components/PanelExtensionAdapter";
+
+type TopicDecodeCache = {
+  source: readonly MessageEvent[];
+  decodedCount: number;
+  itemsByPath: Record<string, MessageAndData[]>;
+};
+
+type DecodeCache = {
+  decode: ReturnType<typeof useDecodeMessagePathsForMessagesByTopic>;
+  topics: Map<string, TopicDecodeCache>;
+};
 
 export function useDecodedMessageRange(
   topics: string[],
@@ -99,10 +111,54 @@ export function useDecodedMessageRange(
     };
   }, []);
 
-  const decoded = useMemo(
-    () => decodeMessagePathsForMessagesByTopic(messagesByTopic),
-    [messagesByTopic, decodeMessagePathsForMessagesByTopic],
-  );
+  const decodeCacheRef = useRef<DecodeCache | undefined>(undefined);
 
-  return [decoded];
+  // Accumulated arrays only grow until a new range iterator replaces them, so only messages added
+  // since the last render need decoding. The per-path arrays are appended to in place.
+  const decoded = useMemo((): MessageDataItemsByPath => {
+    let cache = decodeCacheRef.current;
+    if (cache?.decode !== decodeMessagePathsForMessagesByTopic) {
+      cache = { decode: decodeMessagePathsForMessagesByTopic, topics: new Map() };
+      decodeCacheRef.current = cache;
+    }
+
+    for (const topic of cache.topics.keys()) {
+      if (messagesByTopic[topic] == undefined) {
+        cache.topics.delete(topic);
+      }
+    }
+
+    // Invalid paths get an empty entry even without messages.
+    const out: Record<string, readonly MessageAndData[]> = {
+      ...decodeMessagePathsForMessagesByTopic({}),
+    };
+    for (const [topic, messages] of Object.entries(messagesByTopic)) {
+      let topicCache = cache.topics.get(topic);
+      const isNew = topicCache?.source !== messages || messages.length < topicCache.decodedCount;
+      if (isNew || topicCache == undefined) {
+        topicCache = { source: messages, decodedCount: 0, itemsByPath: {} };
+        cache.topics.set(topic, topicCache);
+      }
+      if (isNew || messages.length > topicCache.decodedCount) {
+        const newItemsByPath = decodeMessagePathsForMessagesByTopic({
+          [topic]: messages.slice(topicCache.decodedCount),
+        });
+        topicCache.decodedCount = messages.length;
+        for (const [path, items] of Object.entries(newItemsByPath)) {
+          const existing = topicCache.itemsByPath[path];
+          if (existing == undefined) {
+            topicCache.itemsByPath[path] = [...items];
+          } else {
+            for (const item of items) {
+              existing.push(item);
+            }
+          }
+        }
+      }
+      Object.assign(out, topicCache.itemsByPath);
+    }
+    return out;
+  }, [messagesByTopic, decodeMessagePathsForMessagesByTopic]);
+
+  return useMemo(() => [decoded], [decoded]);
 }
