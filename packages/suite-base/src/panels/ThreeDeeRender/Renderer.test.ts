@@ -933,7 +933,6 @@ describe("3D Renderer", () => {
 
     // Then: Should update topics and emit event
     expect(renderer.topics).toBe(topics);
-    expect(renderer.topicsByName?.get("/test")).toEqual(topics[0]);
     expect(emitSpy).toHaveBeenCalledWith("topicsChanged", renderer);
 
     renderer.dispose();

@@ -328,8 +328,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
     });
   }
 
-  // topicName -> { name, datatype }
-  public topicsByName: ReadonlyMap<string, Topic> | undefined;
   // parameterKey -> parameterValue
   public parameters: ReadonlyMap<string, ParameterValue> | undefined;
   // variableName -> variableValue
@@ -1310,9 +1308,6 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         this.settings.errors.clearPath(outputSettingsPath(output));
       }
     }
-
-    // Rebuild topicsByName
-    this.topicsByName = topics ? new Map(topics.map((topic) => [topic.name, topic])) : undefined;
 
     this.emit("topicsChanged", this);
 

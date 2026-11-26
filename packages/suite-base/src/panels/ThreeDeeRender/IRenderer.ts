@@ -263,8 +263,6 @@ export interface IRenderer extends EventEmitter<RendererEvents> {
   saveTopicSetting(path: readonly string[], value: unknown): void;
   setTopicSettings(draft: RendererConfig, key: string, settings: Partial<BaseSettings>): void;
 
-  // topicName -> { name, datatype }
-  topicsByName: ReadonlyMap<string, Topic> | undefined;
   // parameterKey -> parameterValue
   parameters: ReadonlyMap<string, ParameterValue> | undefined;
   // variableName -> variableValue

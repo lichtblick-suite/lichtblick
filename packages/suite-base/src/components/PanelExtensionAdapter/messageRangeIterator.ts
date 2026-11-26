@@ -68,7 +68,7 @@ export function createMessageRangeIterator(params: CreateMessageRangeIteratorPar
 
           const msgEvent = iterResult.msgEvent;
 
-          // If the topic is not in unconvertedSubscriptionTopics, skip conversion
+          // Deliver native messages only when they match an original subscription.
           if (wantsOriginalMessage(msgEvent, originalSubscriptions)) {
             batchMessages.push(msgEvent);
           }

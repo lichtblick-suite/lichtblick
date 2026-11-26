@@ -397,9 +397,8 @@ function initRenderStateBuilder(): BuildRenderStateFn {
             (a, b) => compare(a.receiveTime, b.receiveTime),
             (messageEvent) => {
               // Message blocks may contain topics that we are not subscribed to so we
-              // need to filter those out. We use unconvertedSubscriptionTopics to
-              // determine if we should include the message event. Clients expect
-              // allFrames to be a complete set of messages for all subscribed topics so
+              // need to filter those out using the panel's native channel subscriptions.
+              // Clients expect allFrames to contain the complete subscribed history, so
               // we include all unconverted and converted messages, unlike in
               // currentFrame.
               if (wantsOriginalMessage(messageEvent, preloadConversions.originalSubscriptions)) {

@@ -170,9 +170,7 @@ export function mapDifference<K, V>(a: Map<K, V[]>, b: undefined | Map<K, V[]>):
 }
 
 export type TopicSchemaConversions = {
-  // Topics which we are subscribed without a conversion, these are topics we
-  // want to receive the original message.
-  unconvertedSubscriptionTopics: Set<string>;
+  // Native subscriptions retain channel selectors for exact message delivery.
   originalSubscriptions: Subscription[];
 
   // When a subscription with a convertTo exists, we use this map to lookup a
@@ -187,8 +185,8 @@ export type TopicSchemaConversions = {
 };
 
 /**
- * Builds a set of topics we can render without conversion and a map of
- * converterKey -> converter arguments we use to produce converted messages.
+ * Resolves native subscriptions and a map of converterKey -> converter arguments
+ * used to produce converted messages.
  *
  * This will be memoized for performance so the inputs should be stable.
  */
@@ -198,11 +196,10 @@ export function collateTopicSchemaConversions(
   messageConverters: undefined | readonly InstalledMessageConverter[],
 ): TopicSchemaConversions {
   const topicSchemaConverters: TopicSchemaConverterMap = new Map();
-  const unconvertedSubscriptionTopics = new Set<string>();
   const originalSubscriptions: Subscription[] = [];
   const channels = channelCatalog(sortedTopics, messageConverters);
 
-  // Bin the subscriptions into two sets: those which want a conversion and those that do not.
+  // Separate subscriptions that need conversion from those requesting native messages.
   //
   // For the subscriptions that want a conversion, if the topic schemaName matches the requested
   // convertTo, then we don't need to do a conversion.
@@ -212,7 +209,6 @@ export function collateTopicSchemaConversions(
       continue;
     }
     if (!subscription.convertTo) {
-      unconvertedSubscriptionTopics.add(subscription.topic);
       originalSubscriptions.push(subscription);
       continue;
     }
@@ -228,7 +224,6 @@ export function collateTopicSchemaConversions(
             (topic.channelId ?? nativeChannelId(topic.name, topic.schemaName))),
     );
     if (noConversion && subscription.converterId == undefined) {
-      unconvertedSubscriptionTopics.add(noConversion.name);
       originalSubscriptions.push(subscription);
       continue;
     }
@@ -266,7 +261,7 @@ export function collateTopicSchemaConversions(
     }
   }
 
-  return { unconvertedSubscriptionTopics, originalSubscriptions, topicSchemaConverters };
+  return { originalSubscriptions, topicSchemaConverters };
 }
 
 /**

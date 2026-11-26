@@ -20,7 +20,6 @@ jest.mock("./messageProcessing", () => ({
   convertMessage: jest.fn(),
   collateTopicSchemaConversions: jest.fn().mockReturnValue({
     topicSchemaConverters: new Map(),
-    unconvertedSubscriptionTopics: new Set(),
     originalSubscriptions: [],
   }),
 }));
@@ -32,11 +31,10 @@ describe("createMessageRangeIterator", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Update the mock to include our test topic in unconvertedSubscriptionTopics
+    // Include a native subscription for the test topic.
     const { collateTopicSchemaConversions } = jest.requireMock("./messageProcessing");
     collateTopicSchemaConversions.mockReturnValue({
       topicSchemaConverters: new Map(),
-      unconvertedSubscriptionTopics: new Set([mockTopic]),
       originalSubscriptions: [{ topic: mockTopic }],
     });
   });
@@ -334,7 +332,6 @@ describe("createMessageRangeIterator", () => {
     // Mock to include topic schema converters
     collateTopicSchemaConversions.mockReturnValue({
       topicSchemaConverters: new Map([["test_key", jest.fn()]]),
-      unconvertedSubscriptionTopics: new Set(),
       originalSubscriptions: [],
     });
 

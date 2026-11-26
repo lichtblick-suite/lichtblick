@@ -147,7 +147,7 @@ describe("independent converter outputs", () => {
       [entry],
     );
     expect(unavailable.topicSchemaConverters.size).toBe(0);
-    expect(unavailable.unconvertedSubscriptionTopics.size).toBe(0);
+    expect(unavailable.originalSubscriptions).toHaveLength(0);
     expect(
       collateTopicSchemaConversions(
         [{ topic: original.topic, convertTo: "Objects", converterId: "A" }],
