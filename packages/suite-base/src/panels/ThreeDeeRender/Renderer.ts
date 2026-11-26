@@ -351,12 +351,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
   readonly #headLight: THREE.DirectionalLight;
   #hemiLight: THREE.HemisphereLight;
   public input: Input;
-  public readonly outlineMaterial = new THREE.LineBasicMaterial({
-    dithering: true,
-  });
-  public readonly instancedOutlineMaterial = new InstancedLineMaterial({
-    dithering: true,
-  });
+  public readonly outlineMaterial = new THREE.LineBasicMaterial({ dithering: true });
+  public readonly instancedOutlineMaterial = new InstancedLineMaterial({ dithering: true });
 
   /** only public for testing - prefer to use `getCameraState` instead */
   public cameraHandler: ICameraHandler;
@@ -934,11 +930,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       return false;
     }
 
-    this.#allFramesCursor = {
-      index: cursor,
-      cursorTimeReached,
-      lastReadMessage,
-    };
+    this.#allFramesCursor = { index: cursor, cursorTimeReached, lastReadMessage };
     return true;
   }
 
@@ -1160,16 +1152,8 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         label: i18next.t("threeDee:topics"),
         defaultExpansionState: "expanded",
         actions: [
-          {
-            id: "show-all",
-            type: "action",
-            label: i18next.t("threeDee:showAll"),
-          },
-          {
-            id: "hide-all",
-            type: "action",
-            label: i18next.t("threeDee:hideAll"),
-          },
+          { id: "show-all", type: "action", label: i18next.t("threeDee:showAll") },
+          { id: "hide-all", type: "action", label: i18next.t("threeDee:hideAll") },
         ],
         children: this.settings.tree()["topics"]?.children,
         handler: this.#handleTopicsAction,
@@ -1926,11 +1910,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
           if (node.path[0] === "topics") {
             extension.handleSettingsAction({
               action: "update",
-              payload: {
-                path: [...node.path, "visible"],
-                input: "boolean",
-                value,
-              },
+              payload: { path: [...node.path, "visible"], input: "boolean", value },
             });
           }
         }
@@ -1982,10 +1962,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
       cursorCoords.x,
       cursorCoords.y,
       this.cameraHandler.getActiveCamera(),
-      {
-        debug: this.debugPicking,
-        disableSetViewOffset: this.interfaceMode === "image",
-      },
+      { debug: this.debugPicking, disableSetViewOffset: this.interfaceMode === "image" },
     );
     if (objectId === -1) {
       log.debug("Picking did not return an object");
@@ -2021,10 +1998,7 @@ export class Renderer extends EventEmitter<RendererEvents> implements IRenderer 
         cursorCoords.y,
         this.cameraHandler.getActiveCamera(),
         renderable,
-        {
-          debug: this.debugPicking,
-          disableSetViewOffset: this.interfaceMode === "image",
-        },
+        { debug: this.debugPicking, disableSetViewOffset: this.interfaceMode === "image" },
       );
       instanceIndex = instanceIndex === -1 ? undefined : instanceIndex;
       log.debug("Instance picking pass on", renderable, "returned", instanceIndex);

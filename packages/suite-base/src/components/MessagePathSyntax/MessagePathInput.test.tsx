@@ -344,18 +344,8 @@ describe("MessagePathInput Component", () => {
           "custom/Type",
           {
             definitions: [
-              {
-                name: "value1",
-                type: "float64",
-                isArray: false,
-                isComplex: false,
-              },
-              {
-                name: "value2",
-                type: "string",
-                isArray: false,
-                isComplex: false,
-              },
+              { name: "value1", type: "float64", isArray: false, isComplex: false },
+              { name: "value2", type: "string", isArray: false, isComplex: false },
             ],
           },
         ],
