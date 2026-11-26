@@ -62,6 +62,9 @@ export function createCommonWebpackConfig(
         OTLP_ENDPOINT: process.env.OTLP_ENDPOINT
           ? JSON.stringify(process.env.OTLP_ENDPOINT)
           : undefined,
+        SYNC_LOCAL_LAYOUTS: process.env.SYNC_LOCAL_LAYOUTS
+          ? process.env.SYNC_LOCAL_LAYOUTS === "true"
+          : undefined,
       }),
       new ForkTsCheckerWebpackPlugin(),
     ],

@@ -370,7 +370,7 @@ describe("ExtensionsHandler", () => {
       expect(result).toMatchObject({
         id: extensionId,
         packageJson: mockPackageJson,
-        directory: `${rootDir}/${extensionName}`,
+        directory: join(rootDir, extensionName),
         readme: mockReadmeContent,
         changelog: mockChangelogContent,
       });
@@ -402,7 +402,7 @@ describe("ExtensionsHandler", () => {
       expect(result).toMatchObject({
         id: extensionId,
         packageJson: mockPackageJson,
-        directory: `${rootDir}/${extensionName}`,
+        directory: join(rootDir, extensionName),
         readme: "",
         changelog: "",
       });
@@ -478,14 +478,14 @@ describe("ExtensionsHandler", () => {
       expect(result[0]).toMatchObject({
         id: `${mockPackageJson.publisher}.${mockPackageJson.name}`,
         packageJson: mockPackageJson,
-        directory: `${rootDir}/extension1`,
+        directory: join(rootDir, "extension1"),
         readme: "",
         changelog: "",
       });
       expect(result[1]).toMatchObject({
         id: `${mockPackageJson.publisher}.${mockPackageJson.name}`,
         packageJson: mockPackageJson,
-        directory: `${rootDir}/extension2`,
+        directory: join(rootDir, "extension2"),
         readme: "",
         changelog: "",
       });
@@ -529,7 +529,7 @@ describe("ExtensionsHandler", () => {
       expect(result[0]).toMatchObject({
         id: `${mockPackageJson.publisher}.${mockPackageJson.name}`,
         packageJson: mockPackageJson,
-        directory: `${rootDir}/extension2`,
+        directory: join(rootDir, "extension2"),
         readme: mockReadmeContent,
         changelog: mockChangelogContent,
       });

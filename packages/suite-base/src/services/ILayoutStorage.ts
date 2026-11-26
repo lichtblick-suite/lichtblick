@@ -5,6 +5,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { APP_CONFIG } from "@lichtblick/suite-base/constants/config";
 import { LayoutID } from "@lichtblick/suite-base/context/CurrentLayoutContext";
 import { LayoutData } from "@lichtblick/suite-base/context/CurrentLayoutContext/actions";
 
@@ -33,7 +34,7 @@ export type LayoutSyncInfo = {
 
 export type Layout = {
   id: LayoutID;
-  externalId?: string; // Only for remote
+  externalId?: string; // Only for remote layouts or for local layouts that have been synced to remote storage when syncLocalLayouts is enabled.
   name: string;
   from?: string;
   permission: LayoutPermission;
@@ -83,6 +84,27 @@ export function layoutIsShared(
   layout: Layout,
 ): layout is Layout & { permission: Exclude<LayoutPermission, "CREATOR_WRITE"> } {
   return layoutPermissionIsShared(layout.permission);
+}
+
+/**
+ * Global switch to sync personal (CREATOR_WRITE) layouts in addition to shared layouts.
+ */
+export function shouldSyncPersonalLayouts(): boolean {
+  return APP_CONFIG.syncLocalLayouts;
+}
+
+/**
+ * Returns whether a layout with the given permission should be synchronized remotely regarding the syncLocalLayouts setting.
+ */
+export function shouldSyncLayoutPermission(permission: LayoutPermission): boolean {
+  return shouldSyncPersonalLayouts() || layoutPermissionIsShared(permission);
+}
+
+/**
+ * Returns whether this specific layout should be synchronized remotely regarding the syncLocalLayouts setting.
+ */
+export function shouldSyncLayout(layout: Layout): boolean {
+  return layoutIsShared(layout) || (shouldSyncPersonalLayouts() && layout.externalId != undefined);
 }
 
 export function layoutAppearsDeleted(layout: Layout): boolean {
