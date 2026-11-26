@@ -169,6 +169,37 @@ const MIN_MAX_16_BIT = { minValue: 0, maxValue: 65535 };
 
 export type RawImageOptions = ColorModeSettings;
 
+function floatColorConverter(options: Partial<RawImageOptions>) {
+  const defaults = IMAGE_DEFAULT_COLOR_MODE_SETTINGS;
+  const {
+    colorMode = defaults.colorMode,
+    gradient = defaults.gradient,
+    minValue = 0,
+    maxValue = 1,
+  } = options;
+  if (colorMode !== "colormap" && colorMode !== "gradient") {
+    return undefined;
+  }
+  // The default black-to-white gradient over 0–1 is already handled by decodeFloat1c.
+  if (
+    colorMode === "gradient" &&
+    minValue === 0 &&
+    maxValue === 1 &&
+    gradient[0] === defaults.gradient[0] &&
+    gradient[1] === defaults.gradient[1]
+  ) {
+    return undefined;
+  }
+
+  const settings = _.merge({}, defaults, options);
+  const color = { r: 0, g: 0, b: 0, a: 0 };
+  const convert = getColorConverter({ ...settings, colorMode }, minValue, maxValue);
+  return (value: number) => {
+    convert(color, value);
+    return color;
+  };
+}
+
 /**
  * See also:
  * https://github.com/ros2/common_interfaces/blob/366eea24ffce6c87f8860cbcd27f4863f46ad822/sensor_msgs/include/sensor_msgs/image_encodings.hpp
@@ -204,7 +235,15 @@ export function decodeRawImage(
       decodeBGR8(rawData, width, height, step, output);
       break;
     case "32FC1":
-      decodeFloat1c(rawData, width, height, step, is_bigendian, output);
+      decodeFloat1c(
+        rawData,
+        width,
+        height,
+        step,
+        is_bigendian,
+        output,
+        floatColorConverter(options),
+      );
       break;
     case "bayer_rggb8":
       decodeBayerRGGB8(rawData, width, height, step, output);

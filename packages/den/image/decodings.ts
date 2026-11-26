@@ -215,6 +215,7 @@ export function decodeFloat1c(
   // eslint-disable-next-line @lichtblick/no-boolean-parameters
   is_bigendian: boolean,
   output: Uint8ClampedArray,
+  colorConverter?: (value: number) => { r: number; g: number; b: number },
 ): void {
   if (step < width * 4) {
     throw new Error(`Float image row step (${step}) must be at least 4*width (${width * 4})`);
@@ -222,6 +223,27 @@ export function decodeFloat1c(
   const view = new DataView(gray.buffer, gray.byteOffset);
 
   let outIdx = 0;
+  if (colorConverter != undefined) {
+    for (let row = 0; row < height; row++) {
+      const rowStart = row * step;
+      for (let col = 0; col < width; col++) {
+        const value = view.getFloat32(rowStart + col * 4, !is_bigendian);
+        if (Number.isNaN(value)) {
+          output[outIdx++] = 0;
+          output[outIdx++] = 0;
+          output[outIdx++] = 0;
+        } else {
+          const { r, g, b } = colorConverter(value);
+          output[outIdx++] = r * 255;
+          output[outIdx++] = g * 255;
+          output[outIdx++] = b * 255;
+        }
+        output[outIdx++] = 255;
+      }
+    }
+    return;
+  }
+
   for (let row = 0; row < height; row++) {
     const rowStart = row * step;
     for (let col = 0; col < width; col++) {
