@@ -25,6 +25,7 @@ import {
 } from "@lichtblick/suite";
 import MockPanelContextProvider from "@lichtblick/suite-base/components/MockPanelContextProvider";
 import { AlertsContext, AlertsContextStore } from "@lichtblick/suite-base/context/AlertsContext";
+import * as ExtensionCatalogContext from "@lichtblick/suite-base/context/ExtensionCatalogContext";
 import { PLAYER_CAPABILITIES } from "@lichtblick/suite-base/players/constants";
 import { AdvertiseOptions } from "@lichtblick/suite-base/players/types";
 import * as PanelStateContextProvider from "@lichtblick/suite-base/providers/PanelStateContextProvider";
@@ -867,7 +868,13 @@ describe("PanelExtensionAdapter", () => {
       schemaName: "foo",
     });
 
-    function setup({ watchCurrentFrame = true }: { watchCurrentFrame?: boolean } = {}) {
+    function setup({
+      watchCurrentFrame = true,
+      saveConfig = () => {},
+    }: {
+      watchCurrentFrame?: boolean;
+      saveConfig?: (config: unknown) => void;
+    } = {}) {
       const renderStates: Immutable<RenderState>[] = [];
       const held: (() => void)[] = [];
       const panel: { context?: PanelExtensionContext; hold: boolean } = { hold: false };
@@ -907,7 +914,7 @@ describe("PanelExtensionAdapter", () => {
               // updates, so don't register render promises with it.
               pauseFrame={() => () => {}}
             >
-              <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+              <PanelExtensionAdapter config={{}} saveConfig={saveConfig} initPanel={initPanel} />
             </PanelSetup>
           </MockPanelContextProvider>
         </ThemeProvider>
@@ -982,6 +989,64 @@ describe("PanelExtensionAdapter", () => {
       await settle();
 
       // Then the latched message is delivered exactly once more
+      expect(delivered().filter((d) => d === "latched@2")).toHaveLength(2);
+    });
+
+    // A topic settings edit makes the next render hand the panel only that topic's converted
+    // message. A message held for another topic is not in that frame, so it must stay held.
+    it("should deliver a held message after a render that showed only an edited topic", async () => {
+      // GIVEN - a panel with extension settings for the "fast" topic, busy rendering, that
+      // subscribed to the latched topic while busy
+      const originalUseExtensionCatalog = ExtensionCatalogContext.useExtensionCatalog;
+      const panelSettings = { foo: { foo: { handler: () => {}, settings: () => ({}) } } };
+      jest
+        .spyOn(ExtensionCatalogContext, "useExtensionCatalog")
+        .mockImplementation((selector: Parameters<typeof originalUseExtensionCatalog>[0]) =>
+          selector === ExtensionCatalogContext.getExtensionPanelSettings
+            ? panelSettings
+            : originalUseExtensionCatalog(selector),
+        );
+      const updatePanelSettingsTree = jest.fn();
+      jest
+        .spyOn(PanelStateContextProvider, "usePanelSettingsTreeUpdate")
+        .mockReturnValue(updatePanelSettingsTree);
+      const { Wrapper, panel, held, delivered, subscribe } = setup({
+        saveConfig: (config) => {
+          if (typeof config === "function") {
+            config({ topics: {} });
+          }
+        },
+      });
+      render(<Wrapper frame={{ fast: [msg("fast", 1)], latched: [msg("latched", 2)] }} />);
+      await settle();
+      act(() => {
+        panel.context!.updatePanelSettingsEditor({ actionHandler: () => {}, nodes: {} });
+      });
+      panel.hold = true;
+      subscribe(["fast"]);
+      await settle();
+      subscribe(["fast", "latched"]);
+      await settle();
+      expect(delivered().filter((d) => d === "latched@2")).toHaveLength(1);
+
+      // WHEN - the user edits the settings of the "fast" topic, then the panel finishes rendering
+      const actionHandler = updatePanelSettingsTree.mock.calls.at(-1)?.[0]?.actionHandler;
+      act(() => {
+        actionHandler?.({
+          action: "update",
+          payload: { path: ["topics", "fast", "visible"], input: "boolean", value: true },
+        });
+      });
+      await settle();
+      panel.hold = false;
+      act(() => {
+        held.splice(0).forEach((done) => {
+          done();
+        });
+      });
+      await settle();
+
+      // THEN - the latched message is still delivered
       expect(delivered().filter((d) => d === "latched@2")).toHaveLength(2);
     });
 

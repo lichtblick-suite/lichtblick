@@ -396,13 +396,16 @@ function PanelExtensionAdapter(
       return;
     }
 
+    // A forced conversion (topic settings edit) replaced the frame with that topic's converted
+    // message, so held messages did not reach the panel in this render; keep them held.
+    const frameReplaced = forceConversion.size > 0;
     // Clear any conversions that were forced.
     forceConversion.clear();
 
     setSlowRender(false);
     const resumeFrame = pauseFrame(panelId);
 
-    if (deliverHeld) {
+    if (deliverHeld && !frameReplaced) {
       undelivered.markDelivered(currentFrame, subscribedTopics);
     }
     if (telemetryEnabled) {
