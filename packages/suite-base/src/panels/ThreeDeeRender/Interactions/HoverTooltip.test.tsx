@@ -578,4 +578,32 @@ describe("<HoverTooltip />", () => {
     expect(paper.style.left).toBe("84px");
     expect(paper.style.top).toBe("84px");
   });
+
+  it("does not measure layout while hidden", () => {
+    // Given
+    const canvas = makeCanvas();
+    const measureSpy = jest.spyOn(canvas, "getBoundingClientRect");
+    const view = renderHoverTooltip({
+      entities: [],
+      position: { clientX: 100, clientY: 100 },
+      canvas,
+    });
+
+    // When
+    for (let i = 0; i < 5; i++) {
+      view.rerender(
+        <ThemeProvider isDark={false}>
+          <HoverTooltip
+            entities={[]}
+            position={{ clientX: 100 + i, clientY: 100 }}
+            canvas={canvas}
+          />
+        </ThemeProvider>,
+      );
+    }
+
+    // Then
+    expect(view.container.querySelector(".MuiPaper-root")).toBeNull();
+    expect(measureSpy).not.toHaveBeenCalled();
+  });
 });

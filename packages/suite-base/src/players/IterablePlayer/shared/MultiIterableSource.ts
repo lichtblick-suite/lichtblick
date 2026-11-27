@@ -26,6 +26,7 @@ import {
   validateAndAddNewDatatypes,
 } from "@lichtblick/suite-base/players/IterablePlayer/shared/utils/validateInitialization";
 import { MessageEvent } from "@lichtblick/suite-base/players/types";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import {
   IIterableSource,
@@ -36,6 +37,7 @@ import {
   ISerializedIterableSource,
 } from "../IIterableSource";
 import { HydratedSourcePool } from "./HydratedSourcePool";
+import { SOURCES_RELEVANT_METRIC, SOURCES_TOTAL_METRIC } from "./constants";
 
 const log = Logger.getLogger(__filename);
 
@@ -49,9 +51,13 @@ const MIN_CACHE_PER_SOURCE_BYTES = 1024 * 1024 * 10; // 10 MiB
 // the per-source cache budget.
 const DEFAULT_READ_AHEAD_BUFFER_BYTES = 1024 * 1024 * 2; // 2 MiB
 
+// Allow a genuinely disjoint seek/scrub read to open its own connection instead of tearing down
+// an in-flight (possibly still-useful) read-ahead connection -- see CachedFilelike.ts.
+const DEFAULT_MAX_CONCURRENT_CONNECTIONS = 2;
+
 // Defaults for the optional MultiSourceHydrationOptions overrides (see shared/types.ts for the
 // rationale behind each knob). Heuristic; tune against real datasets.
-const DEFAULT_INIT_CONCURRENCY = 4;
+const DEFAULT_INIT_CONCURRENCY = 8;
 // Raising the resident-reader budget made multi-file OOMs worse because evicted sources must fully
 // rebuild their reader, cache, and parsed channels on re-hydration.
 // Keep the smaller defaults until eviction can preserve the cheap per-source connection/cache
@@ -119,6 +125,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
         (numSources > 1
           ? Math.min(DEFAULT_READ_AHEAD_BUFFER_BYTES, Math.floor(perSourceCache / 4))
           : undefined);
+      const maxConcurrentConnections: number =
+        this.dataSource.maxConcurrentConnections ?? DEFAULT_MAX_CONCURRENT_CONNECTIONS;
 
       sources = this.dataSource.urls.map(
         (url) =>
@@ -128,6 +136,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
             cacheSizeInBytes: perSourceCache,
             readAheadEnabled,
             readAheadBufferBytes,
+            maxConcurrentConnections,
             pool: this.#pool,
           } as P),
       );
@@ -161,6 +170,8 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
 
   public async initialize(): Promise<Initialization> {
     const initializations: Initialization[] = await this.loadMultipleSources();
+    // Publish sources.total once all sources are loaded; no relevant subset exists before a read.
+    this.#publishSourceCounts(undefined);
 
     const resultInit: Initialization = this.mergeInitializations(initializations);
 
@@ -198,6 +209,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     // Restrict iteration to sources overlapping the requested time range to avoid irrelevant
     // remote reads during block loading.
     const relevantSources = filterSourcesByTimeRange(this.sourceImpl, opt.start, opt.end);
+    this.#publishSourceCounts(relevantSources.length);
 
     // Start later iterators only when playback reaches their start time, avoiding concurrent
     // byte-range requests to all remote MCAP files.
@@ -208,6 +220,7 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
   ): Promise<MessageEvent<Uint8Array>[]> {
     // Only consider sources that could contain messages at or before the backfill time.
     const relevantSources = filterSourcesForBackfill(this.sourceImpl, args.time);
+    this.#publishSourceCounts(relevantSources.length);
 
     // Iterate newest-first so we start near the seek target and stop once every topic has a value,
     // avoiding redundant reads from earlier sources.
@@ -235,6 +248,20 @@ export class MultiIterableSource<T extends ISerializedIterableSource, P>
     }
 
     return backfillMessages;
+  }
+
+  // Gauges the number of sources and, when a relevant set was just computed (once per iterator /
+  // backfill request, never per message), its size. The realm sink is resolved per call because
+  // the worker installs its sink after this instance was constructed.
+  #publishSourceCounts(relevantCount: number | undefined): void {
+    const telemetry = getTelemetry();
+    if (!telemetry.isEnabled()) {
+      return;
+    }
+    telemetry.gauge(SOURCES_TOTAL_METRIC, this.sourceImpl.length, "count", "pipeline");
+    if (relevantCount != undefined) {
+      telemetry.gauge(SOURCES_RELEVANT_METRIC, relevantCount, "count", "pipeline");
+    }
   }
 
   public async terminate(): Promise<void> {

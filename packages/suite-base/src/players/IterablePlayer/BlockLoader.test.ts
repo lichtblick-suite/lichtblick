@@ -9,6 +9,7 @@ import { Immutable, MessageEvent } from "@lichtblick/suite";
 import PlayerAlertManager from "@lichtblick/suite-base/players/PlayerAlertManager";
 import { MessageBlock } from "@lichtblick/suite-base/players/types";
 import { mockTopicSelection } from "@lichtblick/suite-base/test/mocks/mockTopicSelection";
+import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
 
 import { BlockLoader, MEMORY_INFO_PRELOADED_MSGS } from "./BlockLoader";
 import {
@@ -18,6 +19,11 @@ import {
   IteratorResult,
   MessageIteratorArgs,
 } from "./IIterableSource";
+import {
+  installDisabledTelemetry,
+  installTestTelemetrySink,
+  publishAndCollect,
+} from "./testing/telemetryTestUtils";
 
 class TestSource implements IDeserializedIterableSource {
   public readonly sourceType = "deserialized";
@@ -675,5 +681,137 @@ describe("BlockLoader", () => {
     // arrays should be unchanged.
     expect(firstBlockLoad?.[0]?.messagesByTopic["a"]).toBe(lastBlocks?.[0]?.messagesByTopic["a"]);
     expect(firstBlockLoad?.[1]?.messagesByTopic["a"]).toBe(lastBlocks?.[1]?.messagesByTopic["a"]);
+  });
+});
+
+describe("BlockLoader telemetry", () => {
+  // Messages of size 1 on topics "a" and "b" at 0, 3, 6 and 9 s. With 2 blocks over [0, 9] s, each
+  // block holds two messages per topic.
+  function makeTopicFilteringSource(): TestSource {
+    const source = new TestSource();
+    source.messageIterator = async function* messageIterator(
+      args: MessageIteratorArgs,
+    ): AsyncIterableIterator<Readonly<IteratorResult>> {
+      for (let sec = 0; sec < 10; sec += 3) {
+        for (const topic of ["a", "b"]) {
+          if (!args.topics.has(topic)) {
+            continue;
+          }
+          yield {
+            type: "message-event",
+            msgEvent: {
+              topic,
+              receiveTime: { sec, nsec: 0 },
+              message: undefined,
+              sizeInBytes: 1,
+              schemaName: "foo",
+            },
+          };
+        }
+      }
+    };
+    return source;
+  }
+
+  function makeLoader(source: TestSource, cacheSizeBytes: number): BlockLoader {
+    return new BlockLoader({
+      maxBlocks: 2,
+      cacheSizeBytes,
+      minBlockDurationNs: 1,
+      source,
+      start: { sec: 0, nsec: 0 },
+      end: { sec: 9, nsec: 0 },
+      alertManager: new PlayerAlertManager(),
+    });
+  }
+
+  // Loads topic "a" into both blocks, then switches to topic "b": with a 5 byte budget the fifth
+  // byte triggers an eviction pass that trims the stale "a" data from both blocks.
+  async function loadThenSwitchTopics(loader: BlockLoader): Promise<void> {
+    loader.setTopics(mockTopicSelection("a"));
+    let progressCount = 0;
+    await loader.startLoading({
+      progress: async () => {
+        progressCount++;
+        if (progressCount === 2) {
+          loader.setTopics(mockTopicSelection("b"));
+        } else if (progressCount === 4) {
+          await loader.stopLoading();
+        }
+      },
+    });
+  }
+
+  afterEach(() => {
+    setTelemetrySink(undefined);
+  });
+
+  it("should gauge cache bytes, budget and loaded fraction when progress is reported", async () => {
+    // Given
+    const sink = installTestTelemetrySink();
+    const loader = makeLoader(makeTopicFilteringSource(), 100);
+    loader.setTopics(mockTopicSelection("a"));
+    let progressCount = 0;
+
+    // When: the first of two blocks is loaded
+    await loader.startLoading({
+      progress: async () => {
+        if (++progressCount === 1) {
+          await loader.stopLoading();
+        }
+      },
+    });
+
+    // Then
+    const samples = publishAndCollect(sink);
+    expect(samples.get("pipeline.blockCache.bytes")).toMatchObject({
+      value: 2,
+      unit: "bytes",
+      scope: "pipeline",
+      metricType: "gauge",
+    });
+    expect(samples.get("pipeline.blockCache.maxBytes")).toMatchObject({
+      value: 100,
+      unit: "bytes",
+    });
+    expect(samples.get("pipeline.blockCache.loadedFraction")).toMatchObject({
+      value: 0.5,
+      unit: "ratio",
+    });
+    expect(samples.get("pipeline.blockCache.bytes")?.labels).toBeUndefined();
+  });
+
+  it("should count trimmed blocks as evictions and gauge the final state", async () => {
+    // Given
+    const sink = installTestTelemetrySink();
+    const loader = makeLoader(makeTopicFilteringSource(), 5);
+
+    // When
+    await loadThenSwitchTopics(loader);
+
+    // Then: one eviction pass trimmed "a" from both blocks; "b" is now fully loaded.
+    const samples = publishAndCollect(sink);
+    expect(samples.get("pipeline.blockCache.evictions")).toMatchObject({
+      value: 2,
+      unit: "count",
+      scope: "pipeline",
+      metricType: "counter",
+    });
+    expect(samples.get("pipeline.blockCache.bytes")?.value).toBe(4);
+    expect(samples.get("pipeline.blockCache.maxBytes")?.value).toBe(5);
+    expect(samples.get("pipeline.blockCache.loadedFraction")?.value).toBe(1);
+  });
+
+  it("should not record anything when telemetry is disabled", async () => {
+    // Given
+    const telemetry = installDisabledTelemetry();
+    const loader = makeLoader(makeTopicFilteringSource(), 5);
+
+    // When
+    await loadThenSwitchTopics(loader);
+
+    // Then
+    expect(telemetry.gauge).not.toHaveBeenCalled();
+    expect(telemetry.counter).not.toHaveBeenCalled();
   });
 });

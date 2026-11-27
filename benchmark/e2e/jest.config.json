@@ -1,0 +1,12 @@
+{
+  "//": "Unit tests for the Node-side benchmark runner (static server, fixture generator, result schema, host collectors, overhead, summary). Playwright specs (*.benchmark.spec.ts) are excluded: they run via `yarn test:e2e:benchmark*`.",
+  "displayName": "benchmark-e2e",
+  "testEnvironment": "node",
+  "testMatch": ["<rootDir>/**/*.test.ts"],
+  "transform": {
+    "\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]
+  },
+  "//": "Native find is slow because it does not exclude files: https://github.com/facebook/jest/pull/11264#issuecomment-825377579",
+  "haste": { "forceNodeFilesystemAPI": true },
+  "restoreMocks": true
+}

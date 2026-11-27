@@ -13,7 +13,7 @@ import {
   Square12Regular,
 } from "@fluentui/react-icons";
 import { ButtonBase, Checkbox, Tooltip, Typography, buttonBaseClasses } from "@mui/material";
-import { MouseEventHandler } from "react";
+import { MouseEventHandler, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { makeStyles } from "tss-react/mui";
 
@@ -30,7 +30,7 @@ import { PlotPath, plotPathDisplayName } from "./utils/config";
 type PlotLegendRowProps = Immutable<{
   hasMismatchedDataLength: boolean;
   index: number;
-  onClickPath: () => void;
+  onClickPath: (index: number) => void;
   path: PlotPath;
   paths: PlotPath[];
   value?: unknown;
@@ -148,7 +148,8 @@ function renderValue(value: unknown): string | number | undefined {
   }
 }
 
-export function PlotLegendRow({
+// Memoized: the legend re-renders on plot updates, and rows only change with their own props.
+export const PlotLegendRow = memo(function PlotLegendRowComponent({
   hasMismatchedDataLength,
   index,
   onClickPath,
@@ -191,7 +192,7 @@ export function PlotLegendRow({
       onClick={() => {
         setSelectedPanelIds([panelId]);
         openPanelSettings();
-        onClickPath();
+        onClickPath(index);
       }}
     >
       <div className={classes.listIcon}>
@@ -255,7 +256,9 @@ export function PlotLegendRow({
           <ButtonBase
             title="Add series"
             aria-label="Add series"
-            onClick={onClickPath}
+            onClick={() => {
+              onClickPath(index);
+            }}
             data-testid="add-series"
           >
             <Add12Regular />
@@ -273,4 +276,4 @@ export function PlotLegendRow({
       </div>
     </div>
   );
-}
+});

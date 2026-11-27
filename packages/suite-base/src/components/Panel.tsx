@@ -62,15 +62,14 @@ import {
 } from "@lichtblick/suite-base/context/Workspace/WorkspaceContext";
 import { useInteractionCapture } from "@lichtblick/suite-base/hooks/useInteractionCapture";
 import usePanelDrag from "@lichtblick/suite-base/hooks/usePanelDrag";
+import { usePanelLifecycleTelemetry } from "@lichtblick/suite-base/hooks/usePanelLifecycleTelemetry";
 import { AppEvent } from "@lichtblick/suite-base/services/IAnalytics";
 import { useMessagePathDrop } from "@lichtblick/suite-base/services/messagePathDragging";
 import { OpenSiblingPanel, PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { getPanelTypeFromId } from "@lichtblick/suite-base/util/layout";
 
+import { FALLBACK_PANEL_ID } from "./constants";
 import { TAB_PANEL_TYPE } from "../util/constants";
-
-/** Used in storybook when panels are renered outside of a <PanelLayout/> */
-const FALLBACK_PANEL_ID = "$unknown_id";
 
 // HOC that wraps panel in an error boundary and flex box.
 // Gives panel a `config` and `saveConfig`.
@@ -143,6 +142,9 @@ export default function Panel<
     const parentPanelContext = useContext(PanelContext);
 
     const type = PanelComponent.panelType;
+    // Telemetry: label with the raw layout id (not the storybook fallback, never the title).
+    usePanelLifecycleTelemetry(props.childId, type);
+
     const title = useMemo(
       () => panelCatalog.getPanelByType(type)?.title ?? "",
       [panelCatalog, type],

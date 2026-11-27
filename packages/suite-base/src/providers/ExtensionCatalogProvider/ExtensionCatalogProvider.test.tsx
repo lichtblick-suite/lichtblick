@@ -692,6 +692,11 @@ describe("ExtensionCatalogProvider", () => {
       loaderType,
       namespace,
       useExternalId,
+    }: {
+      isDesktop: boolean;
+      loaderType: IExtensionLoader["type"];
+      namespace: Namespace;
+      useExternalId: boolean;
     }) => {
       (isDesktopApp as jest.Mock).mockReturnValue(isDesktop);
 
@@ -1232,7 +1237,7 @@ describe("ExtensionCatalogProvider", () => {
         expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
       });
       await waitFor(() => {
-        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer, externalId });
       });
       expect(loadCachedMock).not.toHaveBeenCalled();
       // When versions differ, use remote version regardless of which is newer
@@ -1264,7 +1269,7 @@ describe("ExtensionCatalogProvider", () => {
         expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
       });
       await waitFor(() => {
-        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer, externalId });
       });
       expect(loadCachedMock).not.toHaveBeenCalled();
       expect(result.current.installedExtensions).toEqual([remoteExtension]);
@@ -1294,8 +1299,53 @@ describe("ExtensionCatalogProvider", () => {
         expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
       });
       await waitFor(() => {
-        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer });
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer, externalId });
       });
+      expect(result.current.installedExtensions).toEqual([remoteExtension]);
+    });
+
+    it.each([
+      { scenario: "a different externalId", cachedExternalId: BasicBuilder.string() },
+      { scenario: "no externalId (legacy cache entry)", cachedExternalId: undefined },
+    ])("should load from remote and update cache when cache has same version but $scenario", async ({
+      cachedExternalId,
+    }) => {
+      // Given
+      const version = "1.2.3";
+      const buffer = new Uint8Array([BasicBuilder.number()]);
+      const extensionId = BasicBuilder.string();
+      const cachedExtension = ExtensionBuilder.extensionInfo({
+        namespace: "org",
+        id: extensionId,
+        version,
+        externalId: cachedExternalId,
+      });
+      const {
+        loadCachedMock,
+        cacheInstallMock,
+        remoteExtension,
+        loadRemoteMock,
+        externalId,
+        cacheLoader,
+        serverLoader,
+      } = setupLoaders({
+        extensionId,
+        remoteVersion: version,
+        cachedExtension,
+        buffer,
+      });
+
+      // When
+      const { result } = await setup({ loadersOverride: [cacheLoader, serverLoader] });
+
+      // Then
+      await waitFor(() => {
+        expect(loadRemoteMock).toHaveBeenCalledWith(externalId);
+      });
+      await waitFor(() => {
+        expect(cacheInstallMock).toHaveBeenCalledWith({ foxeFileData: buffer, externalId });
+      });
+      expect(loadCachedMock).not.toHaveBeenCalled();
       expect(result.current.installedExtensions).toEqual([remoteExtension]);
     });
   });

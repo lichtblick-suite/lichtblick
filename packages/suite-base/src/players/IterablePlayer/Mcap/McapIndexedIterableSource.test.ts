@@ -233,4 +233,77 @@ describe("McapIndexedIterableSource", () => {
       expect(source.getEnd()).toEqual({ sec: 10, nsec: 0 });
     });
   });
+
+  describe("messageIterator", () => {
+    async function makeSource(): Promise<McapIndexedIterableSource> {
+      const tempBuffer = new TempBuffer();
+      const writer = new McapWriter({ writable: tempBuffer, startChannelId: 1 });
+      await writer.start({ library: "", profile: "" });
+      await writer.registerSchema({
+        data: new TextEncoder().encode("string data"),
+        encoding: "ros1msg",
+        name: "std_msgs/String",
+      });
+      await writer.registerChannel({
+        messageEncoding: "ros1",
+        schemaId: 1,
+        metadata: new Map(),
+        topic: "test",
+      });
+      for (const [sequence, logTime] of [2_000_000_000n, 5_000_000_000n].entries()) {
+        await writer.addMessage({
+          channelId: 1,
+          data: new Uint8Array(),
+          logTime,
+          publishTime: 0n,
+          sequence,
+        });
+      }
+      await writer.end();
+
+      const readable = new BlobReadable(new Blob([tempBuffer.get()]) as unknown as globalThis.Blob);
+      const decompressHandlers = await loadDecompressHandlers();
+      const reader = await McapIndexedReader.Initialize({ readable, decompressHandlers });
+      const source = new McapIndexedIterableSource(reader);
+      await source.initialize();
+      return source;
+    }
+
+    it("should yield nothing when start is after end", async () => {
+      // Given an initialized source
+      const source = await makeSource();
+
+      // When iterating with an inverted range
+      const results = [];
+      for await (const result of source.messageIterator({
+        topics: new Map([["test", { topic: "test" }]]),
+        start: { sec: 5, nsec: 0 },
+        end: { sec: 2, nsec: 0 },
+      })) {
+        results.push(result);
+      }
+
+      // Then no results are yielded and no error is thrown
+      expect(results).toEqual([]);
+    });
+
+    it("should yield messages within a valid range", async () => {
+      // Given an initialized source
+      const source = await makeSource();
+
+      // When iterating with a valid range covering both messages
+      const results = [];
+      for await (const result of source.messageIterator({
+        topics: new Map([["test", { topic: "test" }]]),
+        start: { sec: 2, nsec: 0 },
+        end: { sec: 5, nsec: 0 },
+      })) {
+        results.push(result);
+      }
+
+      // Then both messages are yielded
+      expect(results).toHaveLength(2);
+      expect(results.every((r) => r.type === "message-event")).toBe(true);
+    });
+  });
 });

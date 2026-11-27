@@ -10,6 +10,16 @@ import { StateTransitionConfig } from "@lichtblick/suite-base/panels/StateTransi
 
 import useChartScalesAndBounds from "./useChartScalesAndBounds";
 
+const mockScrollContainer = document.createElement("div");
+const mockWrapper = document.createElement("div");
+mockScrollContainer.appendChild(mockWrapper);
+jest.mock("react-resize-detector", () => ({
+  useResizeDetector: () => ({
+    width: undefined,
+    ref: Object.assign(() => {}, { current: mockWrapper }),
+  }),
+}));
+
 describe("useChartScalesAndBounds", () => {
   const config: StateTransitionConfig = {
     xAxisMinValue: undefined,
@@ -123,5 +133,63 @@ describe("useChartScalesAndBounds", () => {
     );
     expect(result.current.width).toBeUndefined();
     expect(result.current.sizeRef).toBeDefined();
+  });
+
+  describe("wheel handling", () => {
+    let scrollTop: number;
+
+    beforeEach(() => {
+      scrollTop = 0;
+      Object.defineProperty(mockScrollContainer, "scrollTop", {
+        configurable: true,
+        get: () => scrollTop,
+        set: (value: number) => {
+          scrollTop = value;
+        },
+      });
+    });
+
+    it.each([
+      { name: "plain wheel", init: { deltaY: 100 }, expectedScrollTop: 0 },
+      {
+        name: "Shift+wheel (deltaY)",
+        init: { shiftKey: true, deltaY: 100 },
+        expectedScrollTop: 100,
+      },
+      { name: "Shift+wheel (deltaX)", init: { shiftKey: true, deltaX: 50 }, expectedScrollTop: 50 },
+    ])("should block native scrolling and only scroll the panel on Shift ($name)", ({
+      init,
+      expectedScrollTop,
+    }) => {
+      // Given the hook is mounted on the chart wrapper
+      renderHook(() => useChartScalesAndBounds(undefined, undefined, undefined, config));
+      const event = new WheelEvent("wheel", { cancelable: true, ...init });
+
+      // When a wheel event is dispatched on the wrapper
+      mockWrapper.dispatchEvent(event);
+
+      // Then native scrolling is blocked and the panel scrolls only with Shift held
+      expect(event.defaultPrevented).toBe(true);
+      expect(scrollTop).toBe(expectedScrollTop);
+    });
+
+    it.each([
+      { name: "plain wheel", shiftKey: false, reachesAncestors: true },
+      { name: "Shift+wheel", shiftKey: true, reachesAncestors: false },
+    ])("should only stop propagation for Shift+wheel ($name)", ({ shiftKey, reachesAncestors }) => {
+      // Given the hook is mounted and an ancestor (where React listens) observes wheel events
+      renderHook(() => useChartScalesAndBounds(undefined, undefined, undefined, config));
+      const ancestorListener = jest.fn();
+      mockScrollContainer.addEventListener("wheel", ancestorListener);
+
+      // When a bubbling wheel event is dispatched on the wrapper
+      mockWrapper.dispatchEvent(
+        new WheelEvent("wheel", { bubbles: true, cancelable: true, shiftKey, deltaY: 100 }),
+      );
+
+      // Then only Shift+wheel is kept from reaching the chart's zoom handler
+      expect(ancestorListener).toHaveBeenCalledTimes(reachesAncestors ? 1 : 0);
+      mockScrollContainer.removeEventListener("wheel", ancestorListener);
+    });
   });
 });

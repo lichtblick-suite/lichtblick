@@ -911,6 +911,43 @@ describe("IterablePlayer", () => {
     await player.isClosed;
   });
 
+  it("should not raise an error alert when closed while the source is still initializing", async () => {
+    // Given - a source whose initialize() stays pending until released
+    const source = new TestSource();
+    const initializeStarted = signal();
+    const releaseInitialize = signal();
+    const initialize = source.initialize.bind(source);
+    source.initialize = async () => {
+      initializeStarted.resolve();
+      await releaseInitialize;
+      return await initialize();
+    };
+    const terminate = jest.fn(async () => {});
+    (source as IDeserializedIterableSource).terminate = terminate;
+    const player = new IterablePlayer({ source, enablePreload: false, sourceId: "test" });
+    const states: PlayerState[] = [];
+    player.setListener(async (state) => {
+      states.push(state);
+    });
+    await initializeStarted;
+
+    // When - the player is closed while initialize() is pending, then initialize() completes
+    player.close();
+    await Promise.resolve();
+    const terminateCallsWhileInitializing = terminate.mock.calls.length;
+    releaseInitialize.resolve();
+    await player.isClosed;
+
+    // Then - the source is terminated only after initialize() returned, and no error is raised
+    expect(terminateCallsWhileInitializing).toBe(0);
+    expect(terminate).toHaveBeenCalledTimes(1);
+    expect(states.length).toBeGreaterThan(0);
+    const errorAlerts = states.flatMap((state) =>
+      (state.alerts ?? []).filter((alert) => alert.severity === "error"),
+    );
+    expect(errorAlerts).toEqual([]);
+  });
+
   it("should detect high frequency topics during initialization", async () => {
     class HighFrequencyTopicSource implements IDeserializedIterableSource {
       public readonly sourceType = "deserialized";
@@ -1373,6 +1410,35 @@ describe("IterablePlayer", () => {
       expect(mockMessageIterator).toHaveBeenCalledWith({
         topics: new Map([["test_topic", { topic: "test_topic" }]]),
         consumptionType: "full",
+      });
+    });
+
+    it("should forward start and end bounds to messageIterator", async () => {
+      const source = new TestSource();
+      const mockMessageIterator = jest.fn().mockImplementation(async function* () {});
+      source.messageIterator = mockMessageIterator;
+
+      const player = new IterablePlayer({
+        source,
+        enablePreload: false,
+        sourceId: "test",
+      });
+
+      const store = new PlayerStateStore(4);
+      player.setListener(async (state) => {
+        await store.add(state);
+      });
+      await store.done;
+
+      const start = { sec: 1, nsec: 0 };
+      const end = { sec: 2, nsec: 0 };
+      player.getBatchIterator("test_topic", { start, end });
+
+      expect(mockMessageIterator).toHaveBeenCalledWith({
+        topics: new Map([["test_topic", { topic: "test_topic" }]]),
+        consumptionType: "full",
+        start,
+        end,
       });
     });
 

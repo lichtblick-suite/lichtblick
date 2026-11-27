@@ -40,6 +40,7 @@ import {
   useMessagePipeline,
   useMessagePipelineGetter,
 } from "@lichtblick/suite-base/components/MessagePipeline";
+import { usePanelSubscriberTelemetry } from "@lichtblick/suite-base/components/MessagePipeline/pipelineTelemetry";
 import { getTopicToSchemaNameMap } from "@lichtblick/suite-base/components/MessagePipeline/selectors";
 import { usePanelContext } from "@lichtblick/suite-base/components/PanelContext";
 import {
@@ -74,8 +75,18 @@ import {
 import { PanelConfig, SaveConfig } from "@lichtblick/suite-base/types/panels";
 import { assertNever } from "@lichtblick/suite-base/util/assertNever";
 import { maybeCast } from "@lichtblick/suite-base/util/maybeCast";
+import { getTelemetry } from "@lichtblick/suite-base/util/telemetry";
 
 import { PanelConfigVersionError } from "./PanelConfigVersionError";
+import {
+  buildPanelTelemetryLabels,
+  createPanelFrameTelemetryState,
+  recordFirstRender,
+  recordFrameRendering,
+  recordFrameSkipped,
+  recordRenderDone,
+  resetPanelFrameTelemetryState,
+} from "./panelTelemetry";
 import { RenderStateConfig, initRenderStateBuilder } from "./renderState";
 import { BuiltinPanelExtensionContext, MessageConverterAlertHandler } from "./types";
 import { UndeliveredMessages } from "./undeliveredMessages";
@@ -176,9 +187,32 @@ function PanelExtensionAdapter(
 
   const { capabilities, profile: dataSourceProfile, presence: playerPresence } = playerState;
 
-  const { openSiblingPanel, setMessagePathDropConfig, type: panelName } = usePanelContext();
+  const {
+    openSiblingPanel,
+    setMessagePathDropConfig,
+    type: panelName,
+    id: layoutPanelId,
+  } = usePanelContext();
 
+  // Telemetry labels identify the panel by its layout id (e.g. `Plot!3x9a`), not by the internal
+  // subscriber uuid below. Memoized so no allocation happens per frame. Undefined outside a layout.
+  const telemetryLabels = useMemo(
+    () => buildPanelTelemetryLabels(layoutPanelId, panelName),
+    [layoutPanelId, panelName],
+  );
+  // Set on the first `done()` of this adapter mount (drives the `panel.firstRender` event).
+  const firstRenderDoneRef = useRef(false);
+  // Frames already accounted as rendered or skipped, and `allFrames` entries already counted.
+  const [frameTelemetryState] = useState(createPanelFrameTelemetryState);
+  // Bumped on each panel (re-)initialisation. A `done()` from a render started under an older
+  // generation is stale: its telemetry is ignored.
+  const renderGenerationRef = useRef(0);
+
+  // Internal subscriber id for the MessagePipeline (not the layout panel id).
   const [panelId] = useState(() => uuid());
+  // The pipeline attributes the messages bucketed for this subscriber to the panel
+  // (`panel.messages.delivered`), like for built-in panels.
+  usePanelSubscriberTelemetry(panelId);
   const isMounted = useSynchronousMountedState();
   const [error, setError] = useState<Error | undefined>();
   const [forceConversion, setForceConversion] = useState(new Set<string>());
@@ -350,8 +384,15 @@ function PanelExtensionAdapter(
       return;
     }
 
+    const telemetry = getTelemetry();
+    // No labels: panel rendered outside a layout (FALLBACK_PANEL_ID), no panel telemetry.
+    const telemetryEnabled = telemetryLabels != undefined && telemetry.isEnabled();
+
     if (renderingRef.current) {
       setSlowRender(true);
+      if (telemetryEnabled) {
+        recordFrameSkipped(telemetry, frameTelemetryState, messageEvents, telemetryLabels);
+      }
       return;
     }
 
@@ -364,6 +405,18 @@ function PanelExtensionAdapter(
     if (deliverHeld) {
       undelivered.markDelivered(currentFrame, subscribedTopics);
     }
+    if (telemetryEnabled) {
+      recordFrameRendering(
+        telemetry,
+        frameTelemetryState,
+        messageEvents,
+        renderState.allFrames,
+        watchedFields,
+        telemetryLabels,
+      );
+    }
+    const renderStartMs = telemetryEnabled ? performance.now() : 0;
+    const renderGeneration = renderGenerationRef.current;
 
     // tell the panel to render and lockout future renders until rendering is complete
     renderingRef.current = true;
@@ -379,6 +432,15 @@ function PanelExtensionAdapter(
         doneCalled = true;
         resumeFrame();
         renderingRef.current = false;
+
+        // Telemetry only: ignore a late done() from a render started before the last re-init.
+        if (telemetryEnabled && renderGeneration === renderGenerationRef.current) {
+          recordRenderDone(telemetry, performance.now() - renderStartMs, telemetryLabels);
+          if (!firstRenderDoneRef.current) {
+            firstRenderDoneRef.current = true;
+            recordFirstRender(telemetry, telemetryLabels);
+          }
+        }
         retryIfHeld();
       });
     } catch (e: unknown) {
@@ -410,6 +472,8 @@ function PanelExtensionAdapter(
     watchedFields,
     initialState,
     forceConversion,
+    telemetryLabels,
+    frameTelemetryState,
   ]);
 
   const updatePanelSettingsTree = usePanelSettingsTreeUpdate();
@@ -855,6 +919,10 @@ function PanelExtensionAdapter(
     setRenderFn(undefined);
     renderingRef.current = false;
     undelivered.reset();
+    // The fresh render state builder re-delivers the current frame, so count it again.
+    resetPanelFrameTelemetryState(frameTelemetryState);
+    // Renders started before this point belong to the previous panel instance.
+    renderGenerationRef.current++;
     setSlowRender(false);
 
     setBuildRenderState(() => initRenderStateBuilder());
@@ -895,6 +963,7 @@ function PanelExtensionAdapter(
     playerIsInitializing,
     clearAlert,
     undelivered,
+    frameTelemetryState,
   ]);
 
   // Clear this panel's alerts on unmount.

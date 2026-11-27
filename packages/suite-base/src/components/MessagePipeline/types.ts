@@ -42,7 +42,7 @@ export type MessagePipelineContext = Immutable<{
   pauseFrame: (name: string) => ResumeFrame;
   getBatchIterator: (
     topic: string,
-    options?: { start?: Time; end?: Time },
+    options?: { start?: Time; end?: Time; abort?: AbortSignal },
   ) => AsyncIterableIterator<Readonly<IteratorResult>> | undefined;
   // Read the most recent message on `topic` at or before `time`, independent of the current
   // playback position. Resolves to `undefined` if unsupported (e.g. live data sources) or if no

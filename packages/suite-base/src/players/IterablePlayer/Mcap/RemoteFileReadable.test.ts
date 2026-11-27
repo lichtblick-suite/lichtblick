@@ -1,13 +1,23 @@
 // SPDX-FileCopyrightText: Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)<lichtblick@bmwgroup.com>
 // SPDX-License-Identifier: MPL-2.0
 
+import { setTelemetrySink } from "@lichtblick/suite-base/util/telemetry";
+
 import { RemoteFileReadable } from "./RemoteFileReadable";
+import {
+  installDisabledTelemetry,
+  installTestTelemetrySink,
+  publishAndCollect,
+} from "../testing/telemetryTestUtils";
 
 // Mock BrowserHttpReader and CachedFilelike so we never make real HTTP requests
 const mockOpen = jest.fn().mockResolvedValue(undefined);
 const mockSize = jest.fn().mockReturnValue(1024);
 const mockRead = jest.fn().mockResolvedValue(new Uint8Array([1, 2, 3]));
 const mockClose = jest.fn();
+const mockSetReadAheadBufferBytes = jest.fn();
+const mockPauseIdleReadAhead = jest.fn();
+const mockResumeIdleReadAhead = jest.fn();
 
 jest.mock("@lichtblick/suite-base/util/CachedFilelike", () => {
   return jest.fn().mockImplementation(() => ({
@@ -15,6 +25,9 @@ jest.mock("@lichtblick/suite-base/util/CachedFilelike", () => {
     size: mockSize,
     read: mockRead,
     close: mockClose,
+    setReadAheadBufferBytes: mockSetReadAheadBufferBytes,
+    pauseIdleReadAhead: mockPauseIdleReadAhead,
+    resumeIdleReadAhead: mockResumeIdleReadAhead,
   }));
 });
 
@@ -132,6 +145,117 @@ describe("RemoteFileReadable", () => {
 
       // Then it should delegate to the internal CachedFilelike
       expect(mockClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("telemetry", () => {
+    afterEach(() => {
+      setTelemetrySink(undefined);
+    });
+
+    it("should count one request and its returned bytes per read issued to the remote reader", async () => {
+      // Given: the remote reader returns 3 bytes per read
+      const sink = installTestTelemetrySink("worker:1");
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When: two reads in separate ticks
+      await reader.read(BigInt(0), BigInt(3));
+      await reader.read(BigInt(1000), BigInt(3));
+
+      // Then
+      const samples = publishAndCollect(sink);
+      expect(samples.get("pipeline.remote.readRequests")).toMatchObject({
+        value: 2,
+        unit: "count",
+        scope: "pipeline",
+        metricType: "counter",
+        realm: "worker:1",
+      });
+      expect(samples.get("pipeline.remote.bytesRead")).toMatchObject({ value: 6, unit: "bytes" });
+      expect(samples.get("pipeline.remote.readRequests")?.labels).toBeUndefined();
+    });
+
+    it("should count reads coalesced within one tick as a single request", async () => {
+      // Given
+      const sink = installTestTelemetrySink();
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When: two adjacent reads are issued in the same tick
+      await Promise.all([reader.read(BigInt(0), BigInt(1)), reader.read(BigInt(1), BigInt(2))]);
+
+      // Then
+      expect(mockRead).toHaveBeenCalledTimes(1);
+      const samples = publishAndCollect(sink);
+      expect(samples.get("pipeline.remote.readRequests")?.value).toBe(1);
+      expect(samples.get("pipeline.remote.bytesRead")?.value).toBe(3);
+    });
+
+    it("should count the request but no bytes when the remote read fails", async () => {
+      // Given
+      const sink = installTestTelemetrySink();
+      const reader = new RemoteFileReadable(testUrl);
+      mockRead.mockRejectedValueOnce(new Error("network down"));
+
+      // When
+      await expect(reader.read(BigInt(0), BigInt(3))).rejects.toThrow("network down");
+
+      // Then
+      const samples = publishAndCollect(sink);
+      expect(samples.get("pipeline.remote.readRequests")?.value).toBe(1);
+      expect(samples.has("pipeline.remote.bytesRead")).toBe(false);
+    });
+
+    it("should not record anything when telemetry is disabled", async () => {
+      // Given
+      const telemetry = installDisabledTelemetry();
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When
+      const result = await reader.read(BigInt(0), BigInt(3));
+
+      // Then
+      expect(result).toEqual(new Uint8Array([1, 2, 3]));
+      expect(telemetry.counter).not.toHaveBeenCalled();
+      expect(telemetry.gauge).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("startup read-ahead", () => {
+    it("limits read-ahead to 64 KiB and restores the configured value", () => {
+      // Given a reader configured with a 2 MiB read-ahead
+      const readAheadBufferBytes = 2 * 1024 * 1024;
+      const reader = new RemoteFileReadable(testUrl, { readAheadBufferBytes });
+
+      // When limiting for startup and then restoring
+      reader.limitReadAheadForStartup();
+      reader.restoreReadAhead();
+
+      // Then the startup limit is applied first, then the configured value
+      expect(mockSetReadAheadBufferBytes.mock.calls).toEqual([[64 * 1024], [readAheadBufferBytes]]);
+      expect(mockPauseIdleReadAhead).toHaveBeenCalledTimes(1);
+      expect(mockResumeIdleReadAhead).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps a configured read-ahead smaller than the startup limit", () => {
+      // Given a reader configured with a read-ahead below 64 KiB
+      const reader = new RemoteFileReadable(testUrl, { readAheadBufferBytes: 1024 });
+
+      // When limiting for startup
+      reader.limitReadAheadForStartup();
+
+      // Then the smaller configured value is kept
+      expect(mockSetReadAheadBufferBytes).toHaveBeenCalledWith(1024);
+    });
+
+    it("restores the default read-ahead when none was configured", () => {
+      // Given a reader without a configured read-ahead
+      const reader = new RemoteFileReadable(testUrl);
+
+      // When restoring after startup
+      reader.restoreReadAhead();
+
+      // Then CachedFilelike falls back to its own default
+      expect(mockSetReadAheadBufferBytes).toHaveBeenCalledWith(undefined);
     });
   });
 });

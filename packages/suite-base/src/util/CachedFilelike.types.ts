@@ -12,8 +12,11 @@ export type FileStream = {
   destroy: () => void;
 };
 
+export type PrefetchedRange = { offset: number; data: Uint8Array };
+
 export interface FileReader {
-  open(): Promise<{ size: number }>;
+  // `prefetched` ranges, if any, are seeded into the cache so reads of them need no request.
+  open(): Promise<{ size: number; prefetched?: PrefetchedRange[] }>;
   fetch(offset: number, length: number): FileStream;
 }
 

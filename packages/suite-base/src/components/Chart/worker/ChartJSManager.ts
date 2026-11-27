@@ -166,6 +166,9 @@ export default class ChartJSManager {
       // responsive mode does not work properly with offscreen canvases and retina device pixel ratios
       // it results in a run-away canvas that keeps doubling in size!
       responsive: false,
+      // we force autoPadding off since data updates arrive as new datasets whose fresh controllers
+      // ignore the line border while reused ones include it, so the plot area jumps
+      layout: { ...options.layout, autoPadding: false },
     };
 
     const chartInstance = new Chart(node, {

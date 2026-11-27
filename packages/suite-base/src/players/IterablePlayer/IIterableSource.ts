@@ -67,6 +67,13 @@ export type MessageIteratorArgs = {
    * `partial` indicates that the caller plans to read the iterator but may not read all the messages
    */
   consumptionType?: "full" | "partial";
+
+  /**
+   * Optional signal to stop the iterator early. Worker-backed sources forward it to the worker
+   * cursor (it is never structured-cloned), so a pending batch read stops at the next message
+   * instead of filling the whole batch. Sources that cannot honor it may ignore it.
+   */
+  abort?: AbortSignal;
 };
 
 /**

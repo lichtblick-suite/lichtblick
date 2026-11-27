@@ -216,7 +216,7 @@ export function createMessagePipelineStore({
         const player = get().player;
         return player?.getMetadata?.() ?? Object.freeze([]);
       },
-      getBatchIterator(topic: string, options?: { start?: Time; end?: Time }) {
+      getBatchIterator(topic: string, options?: { start?: Time; end?: Time; abort?: AbortSignal }) {
         const player = get().player;
         return player?.getBatchIterator(topic, options);
       },

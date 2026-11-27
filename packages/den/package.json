@@ -15,7 +15,7 @@
   "dependencies": {
     "@lichtblick/comlink": "1.0.3",
     "async-mutex": "0.5.0",
-    "eventemitter3": "5.0.1",
+    "eventemitter3": "5.0.4",
     "xacro-parser": "0.3.11"
   },
   "devDependencies": {
