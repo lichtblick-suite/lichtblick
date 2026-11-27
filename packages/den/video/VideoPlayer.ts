@@ -13,11 +13,15 @@ import { H265_TARGET_FRAME_WAIT_MS } from "./h265/constants";
 // foxglove-depcheck-used: @types/dom-webcodecs
 
 // H.264 typically emits a decoded VideoFrame within a couple of milliseconds of submitting an
-// EncodedVideoChunk, so a tight 30 ms ceiling lets us return quickly when decoding is healthy and
-// fail fast when the decoder is stuck. The H.265 budgets live in `./h265/constants.ts` and are
-// much larger because HEVC decoders may need to consume an entire GOP before emitting the target
-// frame.
+// EncodedVideoChunk, so a tight 10 ms ceiling lets us return quickly when decoding is healthy and
+// fail fast when the decoder is stuck. A decoder that holds frames longer (see
+// `#lateTargetTimestamps`) is served with late frames instead of a longer wait. The H.265 budgets
+// live in `./h265/constants.ts` and are much larger because HEVC decoders may need to consume an
+// entire GOP before emitting the target frame.
 const DEFAULT_TARGET_FRAME_WAIT_MS = 10;
+
+// Upper bound on remembered late targets, so frames a decoder never outputs do not accumulate.
+const MAX_LATE_TARGETS = 64;
 
 /** A single chunk of encoded video bitstream representing one frame. */
 export type EncodedVideoFrame = {
@@ -68,6 +72,14 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
   #decoderConfig: VideoDecoderConfig | undefined;
   readonly #mutex = new Mutex();
   readonly #frameWaiters = new Map<number, FrameWaiter>();
+  /**
+   * Timestamps of target frames whose decode call ended before the frame came out (it timed out,
+   * or got an earlier frame as `intermediate`). Hardware decoders may hold a frame until several
+   * later chunks are submitted: Chromium's H.264 decoder keeps a whole DPB when the SPS has no
+   * `bitstream_restriction`, about 200 ms at 30 fps. Such a frame is handed to the next waiting
+   * decode call as `intermediate`, so the video plays with the decoder's latency instead of never.
+   */
+  readonly #lateTargetTimestamps = new Set<number>();
   #lastSubmittedTimestampMicros: number | undefined;
   #currentDecodeTimestampMicros: number | undefined;
   #codedSize: { width: number; height: number } | undefined;
@@ -89,9 +101,16 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
 
         const waiter = this.#frameWaiters.get(timestampMicros);
         if (!waiter) {
-          // No awaiter for this timestamp: either a reference (non-target) frame from a
-          // GOP chain, or a late frame that arrived after its timeout/seek. Nobody will
-          // claim it, so close it now to avoid the "VideoFrame GC without close" stall.
+          // A late target frame goes to a newer decode call that is still waiting.
+          if (
+            this.#lateTargetTimestamps.delete(timestampMicros) &&
+            this.#resolveNewerWaiter(videoFrame)
+          ) {
+            return;
+          }
+          // Otherwise nobody will claim it: a reference (non-target) frame from a GOP chain, or a
+          // late frame with no newer decode waiting. Close it now to avoid the "VideoFrame GC
+          // without close" stall.
           videoFrame.close();
           return;
         }
@@ -118,6 +137,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
           waiter.resolve({ type: "aborted" });
         }
         this.#frameWaiters.clear();
+        this.#lateTargetTimestamps.clear();
 
         this.emit("error", decodeError);
       },
@@ -310,10 +330,47 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
 
     const timeoutId = setTimeout(() => {
       this.#frameWaiters.delete(timestampMicros);
+      this.#markLateTarget(timestampMicros);
       resolve({ type: "timeout" });
     }, timeoutMs);
 
     return { promise, resolve, timeoutId };
+  }
+
+  #markLateTarget(timestampMicros: number): void {
+    this.#lateTargetTimestamps.add(timestampMicros);
+    if (this.#lateTargetTimestamps.size > MAX_LATE_TARGETS) {
+      const oldest = this.#lateTargetTimestamps.values().next().value;
+      if (oldest != undefined) {
+        this.#lateTargetTimestamps.delete(oldest);
+      }
+    }
+  }
+
+  /**
+   * Hands a late target frame to the oldest decode call still waiting for a newer frame, as an
+   * `intermediate` result. That call's own frame becomes a late target in turn. Returns false when
+   * no newer call is waiting.
+   */
+  #resolveNewerWaiter(videoFrame: VideoFrame): boolean {
+    let newer: [number, FrameWaiter] | undefined;
+    for (const entry of this.#frameWaiters) {
+      if (entry[0] > videoFrame.timestamp && (newer == undefined || entry[0] < newer[0])) {
+        newer = entry;
+      }
+    }
+    if (newer == undefined) {
+      return false;
+    }
+    const [timestampMicros, waiter] = newer;
+    clearTimeout(waiter.timeoutId);
+    this.#frameWaiters.delete(timestampMicros);
+    this.#markLateTarget(timestampMicros);
+    this.#cacheDisplayFrame(videoFrame);
+    // The caller closes the frame, as for a target frame.
+    waiter.resolve({ type: "intermediate", frame: videoFrame });
+    this.emit("frame", videoFrame);
+    return true;
   }
 
   #cacheDisplayFrame(videoFrame: VideoFrame): void {
@@ -401,6 +458,7 @@ export class VideoPlayer extends EventEmitter<VideoPlayerEventTypes> {
       waiter.resolve({ type: "aborted" });
     }
     this.#frameWaiters.clear();
+    this.#lateTargetTimestamps.clear();
 
     this.#lastSubmittedTimestampMicros = undefined;
     this.#currentDecodeTimestampMicros = undefined;

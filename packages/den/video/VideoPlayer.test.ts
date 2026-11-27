@@ -188,6 +188,86 @@ describe("VideoPlayer", () => {
     await expect(decodePromise).resolves.toEqual<DecodeFramesResult>({ type: "timeout" });
   });
 
+  describe("when the decoder holds frames past the deadline", () => {
+    // Hardware H.264 decoders (e.g. VideoToolbox on macOS) may output a frame only after several
+    // later chunks were submitted, long after the decode call for it timed out.
+
+    it("should return the late target frame as intermediate for the next decode when it arrives", async () => {
+      // Given an H.264 player whose first decode timed out without output
+      const { player, outputFrames } = setup({ trackDecodes: true });
+      await player.init({ codec: "avc1.42C01F" });
+      const firstDecode = player.decodeFrames([
+        { data: new Uint8Array([1]), timestampMicros: 0, type: "key" },
+      ]);
+      await jest.advanceTimersByTimeAsync(10);
+      await expect(firstDecode).resolves.toEqual<DecodeFramesResult>({ type: "timeout" });
+
+      // When the next chunk is submitted and the decoder then outputs the first frame
+      const secondDecode = player.decodeFrames([
+        { data: new Uint8Array([2]), timestampMicros: 33333, type: "delta" },
+      ]);
+      await Promise.resolve();
+      const lateFrame = createFrame(0);
+      const closeLateFrame = jest.spyOn(lateFrame, "close");
+      outputFrames.get(0)?.(lateFrame);
+
+      // Then the next decode resolves with the late frame instead of timing out
+      await expect(secondDecode).resolves.toEqual<DecodeFramesResult>({
+        type: "intermediate",
+        frame: lateFrame,
+      });
+      expect(closeLateFrame).not.toHaveBeenCalled();
+    });
+
+    it("should keep returning the previous frame when the decoder stays one frame behind", async () => {
+      // Given an H.264 player whose second decode got the first frame as intermediate
+      const { player, outputFrames } = setup({ trackDecodes: true });
+      await player.init({ codec: "avc1.42C01F" });
+      void player.decodeFrames([{ data: new Uint8Array([1]), timestampMicros: 0, type: "key" }]);
+      await jest.advanceTimersByTimeAsync(10);
+      const secondDecode = player.decodeFrames([
+        { data: new Uint8Array([2]), timestampMicros: 33333, type: "delta" },
+      ]);
+      await Promise.resolve();
+      outputFrames.get(0)?.(createFrame(0));
+      await secondDecode;
+
+      // When a third chunk is submitted and the decoder outputs the second frame
+      const thirdDecode = player.decodeFrames([
+        { data: new Uint8Array([3]), timestampMicros: 66666, type: "delta" },
+      ]);
+      await Promise.resolve();
+      const secondFrame = createFrame(33333);
+      outputFrames.get(33333)?.(secondFrame);
+
+      // Then the third decode resolves with the second frame
+      await expect(thirdDecode).resolves.toEqual<DecodeFramesResult>({
+        type: "intermediate",
+        frame: secondFrame,
+      });
+    });
+
+    it("should close a late target frame when no newer decode is waiting", async () => {
+      // Given an H.264 player whose only decode timed out
+      const { player, outputFrames } = setup({ trackDecodes: true });
+      await player.init({ codec: "avc1.42C01F" });
+      const decodePromise = player.decodeFrames([
+        { data: new Uint8Array([1]), timestampMicros: 0, type: "key" },
+      ]);
+      await jest.advanceTimersByTimeAsync(10);
+      await decodePromise;
+
+      // When the decoder outputs that frame later
+      const lateFrame = createFrame(0);
+      const closeLateFrame = jest.spyOn(lateFrame, "close");
+      outputFrames.get(0)?.(lateFrame);
+
+      // Then nobody takes it and it is closed
+      expect(closeLateFrame).toHaveBeenCalled();
+      expect(player.lastVideoFrame).toBeUndefined();
+    });
+  });
+
   it("should not return an intermediate HEVC frame before decode queue drain", async () => {
     // Given an HEVC-configured player with a tracking decoder
     const { player, outputFrames } = setup({ trackDecodes: true });
