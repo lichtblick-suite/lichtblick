@@ -238,6 +238,10 @@ export function recordFrameSkipped(
  *   builder's previous frame: a frame first rendered through another watched field and later
  *   handed to `onRender` as `currentFrame` (after `watch("currentFrame")`) is still counted once.
  * - `panel.rangeMessages.*`: new `allFrames` entries while `allFrames` is watched.
+ *
+ * `pipelineFrame` is the player frame this render answers, which `recordFrameSkipped` compares
+ * against. It defaults to `frame`; it differs when the adapter hands the panel messages it held
+ * from earlier frames.
  */
 export function recordFrameRendering(
   telemetry: ITelemetry,
@@ -246,8 +250,9 @@ export function recordFrameRendering(
   allFrames: Immutable<readonly MessageEvent[]> | undefined,
   watchedFields: ReadonlySet<string>,
   labels: TelemetryLabels,
+  pipelineFrame: Immutable<readonly MessageEvent[]> | undefined = frame,
 ): void {
-  state.lastAccountedFrame = frame;
+  state.lastAccountedFrame = pipelineFrame;
   if (watchedFields.has("currentFrame") && frame !== state.lastRenderedFrame) {
     state.lastRenderedFrame = frame;
     recordMessagesRendered(telemetry, frame, labels);

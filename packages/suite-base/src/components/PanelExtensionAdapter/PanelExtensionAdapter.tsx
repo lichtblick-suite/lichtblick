@@ -409,10 +409,11 @@ function PanelExtensionAdapter(
       recordFrameRendering(
         telemetry,
         frameTelemetryState,
-        messageEvents,
+        currentFrame,
         renderState.allFrames,
         watchedFields,
         telemetryLabels,
+        messageEvents,
       );
     }
     const renderStartMs = telemetryEnabled ? performance.now() : 0;
