@@ -135,9 +135,13 @@ export default class FoxgloveWebSocketPlayer implements Player {
   #publicationsByTopic = new Map<string, Publication>();
   #serviceCallEncoding?: string;
   #servicesByName = new Map<string, ResolvedService>();
-  #serviceResponseCbs = new Map<
+  #pendingServiceCalls = new Map<
     ServiceCallRequest["callId"],
-    (response: ServiceCallResponse) => void
+    {
+      serviceName: string;
+      resolve: (response: ServiceCallResponse) => void;
+      reject: (error: Error) => void;
+    }
   >();
   #publishedTopics?: Map<string, Set<string>>;
   #subscribedTopics?: Map<string, Set<string>>;
@@ -209,7 +213,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
       this.#channelsById.clear();
       this.#channelsByTopic.clear();
       this.#servicesByName.clear();
-      this.#serviceResponseCbs.clear();
+      this.#rejectPendingServiceCalls("the connection was reset");
       this.#publicationsByTopic.clear();
       for (const topic of this.#resolvedSubscriptionsByTopic.keys()) {
         this.#unresolvedSubscriptions.add(topic);
@@ -265,6 +269,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
 
       this.#client?.close();
       this.#client = undefined;
+      this.#rejectPendingServiceCalls("the connection closed");
 
       this.#alerts.addAlert("ws:connection-failed", {
         severity: "error",
@@ -807,16 +812,27 @@ export default class FoxgloveWebSocketPlayer implements Player {
     });
 
     this.#client.on("serviceCallResponse", (response) => {
-      const responseCallback = this.#serviceResponseCbs.get(response.callId);
-      if (!responseCallback) {
+      const pendingCall = this.#pendingServiceCalls.get(response.callId);
+      if (!pendingCall) {
         this.#alerts.addAlert(`callService:${response.callId}`, {
           severity: "error",
           message: `Received a response for a service for which no callback was registered`,
         });
         return;
       }
-      responseCallback(response);
-      this.#serviceResponseCbs.delete(response.callId);
+      this.#pendingServiceCalls.delete(response.callId);
+      pendingCall.resolve(response);
+    });
+
+    this.#client.on("serviceCallFailure", (failure) => {
+      const pendingCall = this.#pendingServiceCalls.get(failure.callId);
+      if (!pendingCall) {
+        return;
+      }
+      this.#pendingServiceCalls.delete(failure.callId);
+      pendingCall.reject(
+        new Error(`Service call to ${pendingCall.serviceName} failed: ${failure.message}`),
+      );
     });
 
     this.#client.on("connectionGraphUpdate", (event) => {
@@ -856,7 +872,7 @@ export default class FoxgloveWebSocketPlayer implements Player {
         );
       }
       responseCallback(response);
-      this.#serviceResponseCbs.delete(response.requestId);
+      this.#fetchAssetRequests.delete(response.requestId);
     });
   };
 
@@ -1158,13 +1174,17 @@ export default class FoxgloveWebSocketPlayer implements Player {
     this.#client.sendServiceCallRequest(serviceCallRequest);
 
     return await new Promise<Record<string, unknown>>((resolve, reject) => {
-      this.#serviceResponseCbs.set(serviceCallRequest.callId, (response: ServiceCallResponse) => {
-        try {
-          const data = parsedResponse.deserialize(response.data);
-          resolve(data as Record<string, unknown>);
-        } catch (error: unknown) {
-          reject(error instanceof Error ? error : new Error(String(error)));
-        }
+      this.#pendingServiceCalls.set(serviceCallRequest.callId, {
+        serviceName,
+        resolve: (response: ServiceCallResponse) => {
+          try {
+            const data = parsedResponse.deserialize(response.data);
+            resolve(data as Record<string, unknown>);
+          } catch (error: unknown) {
+            reject(error instanceof Error ? error : new Error(String(error)));
+          }
+        },
+        reject,
       });
     });
   }
@@ -1331,6 +1351,15 @@ export default class FoxgloveWebSocketPlayer implements Player {
         this.#alerts.removeAlert(alertId);
       }
     }
+  }
+
+  #rejectPendingServiceCalls(reason: string): void {
+    for (const pendingCall of this.#pendingServiceCalls.values()) {
+      pendingCall.reject(
+        new Error(`Service call to ${pendingCall.serviceName} failed: ${reason} before a response`),
+      );
+    }
+    this.#pendingServiceCalls.clear();
   }
 
   #resetSessionState(): void {
