@@ -193,6 +193,32 @@ describe("panelTelemetry", () => {
       expect(telemetry.counter).not.toHaveBeenCalled();
     });
 
+    it("should not count the pipeline frame of a render as skipped when the panel was handed another frame", () => {
+      // GIVEN - a render that handed the panel a frame built from the pipeline frame plus a held message
+      const telemetry = TelemetryBuilder.mockTelemetry();
+      const state = createPanelFrameTelemetryState();
+      const pipelineFrame = [buildMessage(5)];
+      const handedFrame = [buildMessage(7), ...pipelineFrame];
+      recordFrameRendering(
+        telemetry,
+        state,
+        handedFrame,
+        undefined,
+        CURRENT_FRAME,
+        LABELS,
+        pipelineFrame,
+      );
+
+      // WHEN - the same pipeline frame comes back while that render is pending
+      recordFrameSkipped(telemetry, state, pipelineFrame, LABELS);
+
+      // THEN - only the handed frame is counted, as rendered
+      expect(telemetry.counter.mock.calls).toEqual([
+        [PANEL_TELEMETRY_METRICS.messagesRendered, 2, "count", "panel", LABELS],
+        [PANEL_TELEMETRY_METRICS.messagesRenderedBytes, 12, "bytes", "panel", LABELS],
+      ]);
+    });
+
     it("should count a rendered frame once while currentFrame is watched", () => {
       // GIVEN
       const telemetry = TelemetryBuilder.mockTelemetry();
