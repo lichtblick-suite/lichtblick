@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 import { Immutable, MessageEvent } from "@lichtblick/suite";
+import {
+  isStaticTransformTopic,
+  mergeStaticTransforms,
+} from "@lichtblick/suite-base/components/MessagePipeline/staticTransforms";
 
 /**
  * Messages a panel requested on a live source but has not received in a rendered frame yet.
@@ -43,11 +47,20 @@ export class UndeliveredMessages {
     this.#lastBuilt = { pipelineFrame: undefined, frame: undefined };
   }
 
-  /** Keep the latest message of each requested topic that no rendered frame has delivered yet. */
+  /**
+   * Keep the latest message of each requested topic that no rendered frame has delivered yet. For a
+   * static transform topic the held message gathers the frames of every message, newest winning.
+   */
   public hold(pipelineFrame: readonly MessageEvent[] | undefined): void {
     for (const messageEvent of pipelineFrame ?? []) {
       if (this.#isWaitingFor(messageEvent.topic)) {
-        this.#heldByTopic.set(messageEvent.topic, messageEvent);
+        // Static transforms from several publishers come in separate messages; keep all frames.
+        this.#heldByTopic.set(
+          messageEvent.topic,
+          isStaticTransformTopic(messageEvent.topic)
+            ? mergeStaticTransforms(this.#heldByTopic.get(messageEvent.topic), messageEvent)
+            : messageEvent,
+        );
       }
     }
   }

@@ -29,6 +29,30 @@ describe("UndeliveredMessages", () => {
     expect(undelivered.hasHeld()).toBe(false);
   });
 
+  it("should hold the frames of every publisher when static transform messages from two publishers miss the panel", () => {
+    // GIVEN - a panel that requested /tf_static
+    const undelivered = new UndeliveredMessages();
+    undelivered.setRequestedTopics(new Set(["/tf_static"]));
+    const tf = (child: string) =>
+      MessageEventBuilder.messageEvent({
+        topic: "/tf_static",
+        message: { transforms: [{ header: { frame_id: "base" }, child_frame_id: child }] },
+      });
+
+    // WHEN - one frame carries the jig tree and the next one the iToF frame, both missing the panel
+    undelivered.hold([tf("jig")]);
+    undelivered.hold([tf("itof_optical")]);
+
+    // THEN - the held message carries both frames
+    const frame = undelivered.frameFor(undefined, new Set(["/tf_static"]));
+    const children = (frame ?? []).flatMap((ev) =>
+      (ev.message as { transforms: { child_frame_id: string }[] }).transforms.map(
+        (t) => t.child_frame_id,
+      ),
+    );
+    expect(children.sort()).toEqual(["itof_optical", "jig"]);
+  });
+
   it("does not hold topics that are not requested or already delivered", () => {
     // Given a panel that requested /tf_static and already rendered a frame with it
     const undelivered = new UndeliveredMessages();
