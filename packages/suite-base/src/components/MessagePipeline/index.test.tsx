@@ -398,6 +398,101 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     ]);
   });
 
+  describe("static transforms from several publishers (live source)", () => {
+    function tfStatic(child: string, nsec: number) {
+      return {
+        topic: "/tf_static",
+        // Close to the player's current time (0 s), so the order tracker does not warn.
+        receiveTime: { sec: 0, nsec },
+        message: {
+          transforms: [
+            {
+              header: { stamp: { sec: 0, nsec: 0 }, frame_id: "base" },
+              child_frame_id: child,
+              transform: {
+                translation: { x: 0, y: 0, z: 0 },
+                rotation: { x: 0, y: 0, z: 0, w: 1 },
+              },
+            },
+          ],
+        },
+        schemaName: "tf2_msgs/msg/TFMessage",
+        sizeInBytes: 10,
+      };
+    }
+    async function emit(player: FakePlayer, messages: ReturnType<typeof tfStatic>[]) {
+      await player.emit({
+        activeData: {
+          messages,
+          currentTime: { sec: 0, nsec: 0 },
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 1, nsec: 0 },
+          isPlaying: true,
+          speed: 1,
+          lastSeekTime: 1,
+          topics: [{ name: "/tf_static", schemaName: "tf2_msgs/msg/TFMessage" }],
+          topicStats: new Map<string, TopicStats>([["/tf_static", { numMessages: 2 }]]),
+          datatypes: new Map(Object.entries({ "tf2_msgs/msg/TFMessage": { definitions: [] } })),
+          totalBytesReceived: 0,
+        },
+      });
+    }
+    function childFrames(events: readonly { message: unknown }[] | undefined): string[] {
+      return (events ?? []).flatMap((ev) =>
+        (ev.message as { transforms: { child_frame_id: string }[] }).transforms.map(
+          (t) => t.child_frame_id,
+        ),
+      );
+    }
+
+    it("should give a new subscriber the frames of every publisher when each sent its own message", async () => {
+      // GIVEN - a live player that delivered /tf_static from two publishers, one after the other
+      const player = new FakePlayer();
+      const { Hook, Wrapper } = makeTestHook({ player });
+      const { result } = renderHook(Hook, { wrapper: Wrapper });
+      await doubleAct(async () => {
+        await emit(player, [tfStatic("jig", 1)]);
+      });
+      await doubleAct(async () => {
+        await emit(player, [tfStatic("itof_optical", 2)]);
+      });
+
+      // WHEN - a panel subscribes to /tf_static
+      act(() => {
+        result.current.setSubscriptions("new-panel", [{ topic: "/tf_static" }]);
+      });
+
+      // THEN - it gets both publishers' frames
+      expect(
+        childFrames(result.current.messageEventsBySubscriberId.get("new-panel")).sort(),
+      ).toEqual(["itof_optical", "jig"]);
+    });
+
+    it("should give a new subscriber only the last message when the player has playback control", async () => {
+      // GIVEN - a player with playback control that delivered /tf_static twice
+      const player = new FakePlayer();
+      player.setCapabilities([PLAYER_CAPABILITIES.playbackControl]);
+      const { Hook, Wrapper } = makeTestHook({ player });
+      const { result } = renderHook(Hook, { wrapper: Wrapper });
+      await doubleAct(async () => {
+        await emit(player, [tfStatic("jig", 1)]);
+      });
+      await doubleAct(async () => {
+        await emit(player, [tfStatic("itof_optical", 2)]);
+      });
+
+      // WHEN - a panel subscribes to /tf_static
+      act(() => {
+        result.current.setSubscriptions("new-panel", [{ topic: "/tf_static" }]);
+      });
+
+      // THEN - it gets the last message only, as before
+      expect(childFrames(result.current.messageEventsBySubscriberId.get("new-panel"))).toEqual([
+        "itof_optical",
+      ]);
+    });
+  });
+
   it("does not duplicate messages if a panel subscribes to a topic twice", async () => {
     const player = new FakePlayer();
     const { Hook, Wrapper } = makeTestHook({ player });

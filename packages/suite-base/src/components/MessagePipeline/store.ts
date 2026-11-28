@@ -28,6 +28,7 @@ import {
 import isDesktopApp from "@lichtblick/suite-base/util/isDesktopApp";
 
 import { FramePromise } from "./pauseFrameForPromise";
+import { isStaticTransformTopic, mergeStaticTransforms } from "./staticTransforms";
 import { MessagePipelineContext } from "./types";
 
 export function defaultPlayerState(player?: Player): PlayerState {
@@ -358,13 +359,23 @@ function updatePlayerStateAction(
   const subscriberIdsByTopic = prevState.subscriberIdsByTopic;
 
   const lastMessageEventByTopic = prevState.lastMessageEventByTopic;
+  // A live source sends each /tf_static publisher's latched message once; keep every publisher's
+  // frames for newly subscribed panels. With playback, seek-backfill provides them instead.
+  const mergeStatic = !action.playerState.capabilities.includes(
+    PLAYER_CAPABILITIES.playbackControl,
+  );
 
   // Put messages into per-subscriber queues
   if (messages && messages !== prevState.public.playerState.activeData?.messages) {
     for (const messageEvent of messages) {
       // Save the last message on every topic to send the last message
       // to newly subscribed panels.
-      lastMessageEventByTopic.set(messageEvent.topic, messageEvent);
+      lastMessageEventByTopic.set(
+        messageEvent.topic,
+        mergeStatic && isStaticTransformTopic(messageEvent.topic)
+          ? mergeStaticTransforms(lastMessageEventByTopic.get(messageEvent.topic), messageEvent)
+          : messageEvent,
+      );
 
       seenTopics.add(messageEvent.topic);
       const ids = subscriberIdsByTopic.get(messageEvent.topic);
